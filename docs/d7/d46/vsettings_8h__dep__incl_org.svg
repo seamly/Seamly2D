@@ -49,18 +49,18 @@
 <path fill="none" stroke="midnightblue" d="M5879.17,-194.32C5867.39,-183.02 5851.94,-168.19 5842.37,-159.01"/>
 <polygon fill="midnightblue" stroke="midnightblue" points="5876.98,-197.08 5886.62,-201.48 5881.83,-192.03 5876.98,-197.08"/>
 </g>
-<!-- Node62 -->
+<!-- Node61 -->
 <g id="node49" class="node">
-<title>Node62</title>
+<title>Node61</title>
 <g id="a_node49"><a xlink:href="../../d2/d31/vmaingraphicsview_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="black" points="7340.5,-73 7340.5,-92 7556.5,-92 7556.5,-73 7340.5,-73"/>
 <text text-anchor="middle" x="7448.5" y="-80" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vwidgets/vmaingraphicsview.cpp</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node62 -->
+<!-- Node1&#45;&gt;Node61 -->
 <g id="edge51" class="edge">
-<title>Node1&#45;&gt;Node62</title>
+<title>Node1&#45;&gt;Node61</title>
 <path fill="none" stroke="midnightblue" d="M5911.1,-194.4C5932.56,-173.14 5969.46,-137.28 5977.5,-134 6116.87,-77.2 7181.42,-109.27 7331.5,-98 7350.18,-96.6 7370.45,-94.35 7388.79,-92.03"/>
 <polygon fill="midnightblue" stroke="midnightblue" points="5908.6,-191.96 5903.98,-201.49 5913.54,-196.92 5908.6,-191.96"/>
 </g>
@@ -789,9 +789,9 @@
 <path fill="none" stroke="midnightblue" d="M5900.1,-138.69C5914.7,-136.85 5930.1,-135.15 5944.5,-134 6491.44,-90.41 6633,-156.95 7178.5,-98 7181.75,-97.65 7185.06,-97.24 7188.4,-96.78"/>
 <polygon fill="midnightblue" stroke="midnightblue" points="5899.6,-135.23 5890.14,-139.98 5900.5,-142.17 5899.6,-135.23"/>
 </g>
-<!-- Node26&#45;&gt;Node62 -->
+<!-- Node26&#45;&gt;Node61 -->
 <g id="edge49" class="edge">
-<title>Node26&#45;&gt;Node62</title>
+<title>Node26&#45;&gt;Node61</title>
 <path fill="none" stroke="midnightblue" d="M5899.86,-138.69C5914.53,-136.84 5930.02,-135.13 5944.5,-134 6559.28,-86 6716.56,-143.98 7331.5,-98 7350.18,-96.6 7370.45,-94.35 7388.79,-92.04"/>
 <polygon fill="midnightblue" stroke="midnightblue" points="5899.32,-135.23 5889.85,-139.99 5900.22,-142.17 5899.32,-135.23"/>
 </g>
