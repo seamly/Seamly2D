@@ -228,34 +228,34 @@ var sectionId = 'dynsection-1';
 <!-- Node12 -->
 <g id="node12" class="node">
 <title>Node12</title>
-<g id="a_node12"><a xlink:href="../../dd/d22/vlinecolorproperty_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="black" points="1673,-67.5 1673,-97.5 1839,-97.5 1839,-67.5 1673,-67.5"/>
+<g id="a_node12"><a xlink:href="../../d5/d66/vobjectproperty_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="black" points="1673,-67.5 1673,-97.5 1827,-97.5 1827,-67.5 1673,-67.5"/>
 <text text-anchor="start" x="1681" y="-85.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vpropertyexplorer</text>
-<text text-anchor="middle" x="1756" y="-74.5" font-family="Helvetica,sans-Serif" font-size="10.00">/plugins/vlinecolorproperty.cpp</text>
+<text text-anchor="middle" x="1750" y="-74.5" font-family="Helvetica,sans-Serif" font-size="10.00">/plugins/vobjectproperty.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node12 -->
 <g id="edge11" class="edge">
 <title>Node1&#45;&gt;Node12</title>
-<path fill="none" stroke="midnightblue" d="M1551.8,-132.12C1596.47,-121.48 1654.1,-107.76 1696.73,-97.61"/>
-<polygon fill="midnightblue" stroke="midnightblue" points="1550.82,-128.75 1541.9,-134.48 1552.44,-135.56 1550.82,-128.75"/>
+<path fill="none" stroke="midnightblue" d="M1550.57,-132.05C1594.22,-121.43 1650.42,-107.74 1692.04,-97.61"/>
+<polygon fill="midnightblue" stroke="midnightblue" points="1549.49,-128.71 1540.61,-134.48 1551.15,-135.51 1549.49,-128.71"/>
 </g>
 <!-- Node13 -->
 <g id="node13" class="node">
 <title>Node13</title>
-<g id="a_node13"><a xlink:href="../../d5/d66/vobjectproperty_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="black" points="1857,-67.5 1857,-97.5 2011,-97.5 2011,-67.5 1857,-67.5"/>
-<text text-anchor="start" x="1865" y="-85.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vpropertyexplorer</text>
-<text text-anchor="middle" x="1934" y="-74.5" font-family="Helvetica,sans-Serif" font-size="10.00">/plugins/vobjectproperty.cpp</text>
+<g id="a_node13"><a xlink:href="../../dd/d22/vlinecolorproperty_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="black" points="1845,-67.5 1845,-97.5 2011,-97.5 2011,-67.5 1845,-67.5"/>
+<text text-anchor="start" x="1853" y="-85.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vpropertyexplorer</text>
+<text text-anchor="middle" x="1928" y="-74.5" font-family="Helvetica,sans-Serif" font-size="10.00">/plugins/vlinecolorproperty.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node13 -->
 <g id="edge12" class="edge">
 <title>Node1&#45;&gt;Node13</title>
-<path fill="none" stroke="midnightblue" d="M1564.27,-137.96C1638.31,-128.18 1750.62,-112.94 1848,-98 1850.84,-97.56 1853.74,-97.11 1856.66,-96.65"/>
-<polygon fill="midnightblue" stroke="midnightblue" points="1563.54,-134.52 1554.09,-139.3 1564.46,-141.46 1563.54,-134.52"/>
+<path fill="none" stroke="midnightblue" d="M1564.33,-137.2C1635.91,-127.17 1742.93,-111.99 1836,-98 1838.88,-97.57 1841.81,-97.12 1844.76,-96.67"/>
+<polygon fill="midnightblue" stroke="midnightblue" points="1563.46,-133.79 1554.04,-138.64 1564.43,-140.72 1563.46,-133.79"/>
 </g>
 <!-- Node14 -->
 <g id="node14" class="node">

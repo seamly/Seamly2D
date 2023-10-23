@@ -1,9 +1,9 @@
 <map id="src/libs/vpatterndb/variables/vmeasurement.h" name="src/libs/vpatterndb/variables/vmeasurement.h">
 <area shape="rect" id="node1" title=" " alt="" coords="5079,5,5281,47"/>
 <area shape="rect" id="node2" href="$de/db3/vmeasurements_8cpp.html" title=" " alt="" coords="5,370,267,397"/>
-<area shape="rect" id="node3" href="$dd/d62/vmeasurement_8cpp.html" title=" " alt="" coords="7705,363,7921,404"/>
+<area shape="rect" id="node3" href="$dd/d62/vmeasurement_8cpp.html" title=" " alt="" coords="7704,363,7920,404"/>
 <area shape="rect" id="node4" href="$de/dca/variables_8h.html" title=" " alt="" coords="3366,95,3509,136"/>
-<area shape="rect" id="node31" href="$d6/d46/vcontainer_8cpp.html" title=" " alt="" coords="7538,363,7681,404"/>
+<area shape="rect" id="node31" href="$d6/d46/vcontainer_8cpp.html" title=" " alt="" coords="7537,363,7679,404"/>
 <area shape="rect" id="node5" href="$d3/df7/vcontainer_8h.html" title=" " alt="" coords="1986,184,2129,225"/>
 <area shape="rect" id="node6" href="$d4/dd6/vmeasurements_8h.html" title=" " alt="" coords="663,281,910,307"/>
 <area shape="rect" id="node7" href="$d6/de0/vlayoutpiece_8h.html" title=" " alt="" coords="997,281,1219,307"/>
@@ -31,20 +31,20 @@
 <area shape="rect" id="node20" href="$da/d75/vabstractarc__p_8h.html" title=" " alt="" coords="4407,363,4550,404"/>
 <area shape="rect" id="node21" href="$dc/da3/varc__p_8h.html" title=" " alt="" coords="4574,363,4717,404"/>
 <area shape="rect" id="node22" href="$d5/d8e/vcubicbezier__p_8h.html" title=" " alt="" coords="4741,363,4883,404"/>
-<area shape="rect" id="node23" href="$d6/dfb/vellipticalarc_8cpp.html" title=" " alt="" coords="5714,452,5857,493"/>
-<area shape="rect" id="node24" href="$df/dde/vellipticalarc__p_8h.html" title=" " alt="" coords="6413,363,6555,404"/>
+<area shape="rect" id="node23" href="$df/dde/vellipticalarc__p_8h.html" title=" " alt="" coords="6411,363,6554,404"/>
+<area shape="rect" id="node24" href="$d6/dfb/vellipticalarc_8cpp.html" title=" " alt="" coords="5714,452,5857,493"/>
 <area shape="rect" id="node25" href="$d1/d76/vspline__p_8h.html" title=" " alt="" coords="5126,363,5269,404"/>
 <area shape="rect" id="node26" href="$d9/d15/vabstractpiece_8cpp.html" title=" " alt="" coords="5293,370,5541,397"/>
-<area shape="rect" id="node27" href="$db/d65/dialogexporttocsv_8cpp.html" title=" " alt="" coords="5566,363,5735,404"/>
-<area shape="rect" id="node28" href="$d6/d0b/def_8cpp.html" title=" " alt="" coords="5760,370,5923,397"/>
-<area shape="rect" id="node29" href="$d0/df6/vabstractapplication_8cpp.html" title=" " alt="" coords="5947,370,6221,397"/>
-<area shape="rect" id="node30" href="$d4/d4f/pmsystems_8cpp.html" title=" " alt="" coords="6246,363,6389,404"/>
+<area shape="rect" id="node27" href="$d6/d0b/def_8cpp.html" title=" " alt="" coords="5565,370,5728,397"/>
+<area shape="rect" id="node28" href="$d0/df6/vabstractapplication_8cpp.html" title=" " alt="" coords="5752,370,6027,397"/>
+<area shape="rect" id="node29" href="$db/d65/dialogexporttocsv_8cpp.html" title=" " alt="" coords="6051,363,6221,404"/>
+<area shape="rect" id="node30" href="$d4/d4f/pmsystems_8cpp.html" title=" " alt="" coords="6245,363,6387,404"/>
 <area shape="rect" id="node34" href="$df/dba/vpiecenode__p_8h.html" title=" " alt="" coords="4907,363,5050,404"/>
-<area shape="rect" id="node36" href="$de/d3e/vtranslatevars_8cpp.html" title=" " alt="" coords="6580,363,6727,404"/>
-<area shape="rect" id="node37" href="$df/d40/export__format__combobox_8cpp.html" title=" " alt="" coords="6751,363,6929,404"/>
-<area shape="rect" id="node38" href="$d3/d4f/mouse__coordinates_8cpp.html" title=" " alt="" coords="6953,363,7132,404"/>
-<area shape="rect" id="node39" href="$d7/d1b/pen__toolbar_8cpp.html" title=" " alt="" coords="7157,363,7315,404"/>
-<area shape="rect" id="node40" href="$d8/d76/scene__rect_8cpp.html" title=" " alt="" coords="7340,363,7513,404"/>
+<area shape="rect" id="node36" href="$de/d3e/vtranslatevars_8cpp.html" title=" " alt="" coords="6579,363,6725,404"/>
+<area shape="rect" id="node37" href="$df/d40/export__format__combobox_8cpp.html" title=" " alt="" coords="6750,363,6927,404"/>
+<area shape="rect" id="node38" href="$d3/d4f/mouse__coordinates_8cpp.html" title=" " alt="" coords="6952,363,7131,404"/>
+<area shape="rect" id="node39" href="$d7/d1b/pen__toolbar_8cpp.html" title=" " alt="" coords="7155,363,7314,404"/>
+<area shape="rect" id="node40" href="$d8/d76/scene__rect_8cpp.html" title=" " alt="" coords="7339,363,7512,404"/>
 <area shape="rect" id="node41" href="$dd/df6/vabstractmainwindow_8cpp.html" title=" " alt="" coords="2703,370,3009,397"/>
 <area shape="rect" id="node42" href="$de/d45/vcontrolpointspline_8cpp.html" title=" " alt="" coords="3033,370,3319,397"/>
 <area shape="rect" id="node43" href="$d1/d90/vgrainlineitem_8cpp.html" title=" " alt="" coords="3343,370,3601,397"/>
