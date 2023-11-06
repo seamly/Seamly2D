@@ -828,32 +828,32 @@ var sectionId = 'dynsection-1';
 <!-- Node45 -->
 <g id="node40" class="node">
 <title>Node45</title>
-<g id="a_node40"><a xlink:href="../../de/d45/vcontrolpointspline_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="black" points="4654.5,-73 4654.5,-92 4869.5,-92 4869.5,-73 4654.5,-73"/>
-<text text-anchor="middle" x="4762" y="-80" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vwidgets/vcontrolpointspline.cpp</text>
+<g id="a_node40"><a xlink:href="../../d1/d90/vgrainlineitem_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="black" points="4654.5,-73 4654.5,-92 4847.5,-92 4847.5,-73 4654.5,-73"/>
+<text text-anchor="middle" x="4751" y="-80" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vwidgets/vgrainlineitem.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node16&#45;&gt;Node45 -->
 <g id="edge45" class="edge">
 <title>Node16&#45;&gt;Node45</title>
-<path fill="none" stroke="midnightblue" d="M3661.6,-146.27C3857.52,-141.59 4285.43,-128.56 4645,-98 4663.05,-96.47 4682.6,-94.26 4700.46,-92.03"/>
-<polygon fill="midnightblue" stroke="midnightblue" points="3661.51,-142.77 3651.59,-146.5 3661.67,-149.77 3661.51,-142.77"/>
+<path fill="none" stroke="midnightblue" d="M3661.64,-146.72C3857.62,-142.76 4285.63,-130.83 4645,-98 4661.55,-96.49 4679.49,-94.26 4695.82,-92"/>
+<polygon fill="midnightblue" stroke="midnightblue" points="3661.56,-143.22 3651.63,-146.92 3661.7,-150.22 3661.56,-143.22"/>
 </g>
 <!-- Node46 -->
 <g id="node41" class="node">
 <title>Node46</title>
-<g id="a_node41"><a xlink:href="../../d1/d90/vgrainlineitem_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="black" points="4887.5,-73 4887.5,-92 5080.5,-92 5080.5,-73 4887.5,-73"/>
-<text text-anchor="middle" x="4984" y="-80" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vwidgets/vgrainlineitem.cpp</text>
+<g id="a_node41"><a xlink:href="../../de/d45/vcontrolpointspline_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="black" points="4865.5,-73 4865.5,-92 5080.5,-92 5080.5,-73 4865.5,-73"/>
+<text text-anchor="middle" x="4973" y="-80" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vwidgets/vcontrolpointspline.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node16&#45;&gt;Node46 -->
 <g id="edge46" class="edge">
 <title>Node16&#45;&gt;Node46</title>
-<path fill="none" stroke="midnightblue" d="M3661.99,-147.95C3888.05,-146.03 4427.47,-137.31 4878,-98 4894.75,-96.54 4912.9,-94.3 4929.37,-92.01"/>
-<polygon fill="midnightblue" stroke="midnightblue" points="3661.76,-144.46 3651.79,-148.04 3661.82,-151.46 3661.76,-144.46"/>
+<path fill="none" stroke="midnightblue" d="M3661.83,-147.4C3885.04,-144.44 4413.83,-133.91 4856,-98 4874.36,-96.51 4894.27,-94.27 4912.37,-92"/>
+<polygon fill="midnightblue" stroke="midnightblue" points="3661.71,-143.9 3651.76,-147.53 3661.8,-150.9 3661.71,-143.9"/>
 </g>
 <!-- Node47 -->
 <g id="node42" class="node">
