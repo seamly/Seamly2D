@@ -5,10 +5,10 @@
  -->
 <!-- Title: src/libs/vwidgets/global.h Pages: 1 -->
 <svg width="2288pt" height="95pt"
- viewBox="0.00 0.00 2288.00 95.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ viewBox="0.00 0.00 2287.50 95.00" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
 <g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(4 91)">
 <title>src/libs/vwidgets/global.h</title>
-<polygon fill="white" stroke="transparent" points="-4,4 -4,-91 2284,-91 2284,4 -4,4"/>
+<polygon fill="white" stroke="transparent" points="-4,4 -4,-91 2283.5,-91 2283.5,4 -4,4"/>
 <!-- Node1 -->
 <g id="node1" class="node">
 <title>Node1</title>
@@ -157,32 +157,32 @@
 <!-- Node11 -->
 <g id="node11" class="node">
 <title>Node11</title>
-<g id="a_node11"><a xlink:href="../../de/d22/vsimplecurve_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="black" points="1888.5,-6 1888.5,-25 2076.5,-25 2076.5,-6 1888.5,-6"/>
-<text text-anchor="middle" x="1982.5" y="-13" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vwidgets/vsimplecurve.cpp</text>
+<g id="a_node11"><a xlink:href="../../df/d38/vsimplepoint_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="black" points="1888,-6 1888,-25 2073,-25 2073,-6 1888,-6"/>
+<text text-anchor="middle" x="1980.5" y="-13" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vwidgets/vsimplepoint.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node11 -->
 <g id="edge10" class="edge">
 <title>Node1&#45;&gt;Node11</title>
-<path fill="none" stroke="midnightblue" d="M1155.69,-73.74C1300.51,-69.17 1615.23,-56.95 1879.5,-31 1895.32,-29.45 1912.43,-27.25 1928.08,-25.03"/>
-<polygon fill="midnightblue" stroke="midnightblue" points="1155.44,-70.25 1145.56,-74.06 1155.66,-77.24 1155.44,-70.25"/>
+<path fill="none" stroke="midnightblue" d="M1155.69,-73.81C1300.53,-69.35 1615.27,-57.31 1879.5,-31 1895.1,-29.45 1911.98,-27.23 1927.4,-25"/>
+<polygon fill="midnightblue" stroke="midnightblue" points="1155.45,-70.32 1145.56,-74.12 1155.66,-77.32 1155.45,-70.32"/>
 </g>
 <!-- Node12 -->
 <g id="node12" class="node">
 <title>Node12</title>
-<g id="a_node12"><a xlink:href="../../df/d38/vsimplepoint_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="black" points="2095,-6 2095,-25 2280,-25 2280,-6 2095,-6"/>
-<text text-anchor="middle" x="2187.5" y="-13" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vwidgets/vsimplepoint.cpp</text>
+<g id="a_node12"><a xlink:href="../../de/d22/vsimplecurve_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="black" points="2091.5,-6 2091.5,-25 2279.5,-25 2279.5,-6 2091.5,-6"/>
+<text text-anchor="middle" x="2185.5" y="-13" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vwidgets/vsimplecurve.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node12 -->
 <g id="edge11" class="edge">
 <title>Node1&#45;&gt;Node12</title>
-<path fill="none" stroke="midnightblue" d="M1155.95,-75.05C1327.27,-72.46 1740.61,-63.12 2085.5,-31 2101.53,-29.51 2118.89,-27.27 2134.67,-25"/>
-<polygon fill="midnightblue" stroke="midnightblue" points="1155.71,-71.56 1145.76,-75.2 1155.81,-78.56 1155.71,-71.56"/>
+<path fill="none" stroke="midnightblue" d="M1155.71,-75.01C1326.51,-72.32 1738.62,-62.82 2082.5,-31 2098.59,-29.51 2116.02,-27.29 2131.89,-25.03"/>
+<polygon fill="midnightblue" stroke="midnightblue" points="1155.5,-71.51 1145.55,-75.16 1155.6,-78.51 1155.5,-71.51"/>
 </g>
 </g>
 </svg>
