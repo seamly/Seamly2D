@@ -114,19 +114,19 @@
 <path fill="none" stroke="midnightblue" d="M874.1,-546.46C944.15,-540.69 1050.71,-527.56 1079.5,-500 1106.37,-474.28 1098.5,-455.69 1098.5,-418.5 1098.5,-418.5 1098.5,-418.5 1098.5,-215.5 1098.5,-165.55 1054.53,-119.9 1029.11,-97.69"/>
 <polygon fill="midnightblue" stroke="midnightblue" points="873.73,-542.98 864.04,-547.26 874.29,-549.96 873.73,-542.98"/>
 </g>
-<!-- Node17 -->
-<g id="node17" class="node">
-<title>Node17</title>
-<g id="a_node17"><a xlink:href="../../db/d11/vformula_8cpp.html" target="_top" xlink:title=" ">
+<!-- Node16 -->
+<g id="node16" class="node">
+<title>Node16</title>
+<g id="a_node16"><a xlink:href="../../db/d11/vformula_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="black" points="1083,-67.5 1083,-97.5 1190,-97.5 1190,-67.5 1083,-67.5"/>
 <text text-anchor="start" x="1091" y="-85.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vpatterndb</text>
 <text text-anchor="middle" x="1136.5" y="-74.5" font-family="Helvetica,sans-Serif" font-size="10.00">/vformula.cpp</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node17 -->
+<!-- Node1&#45;&gt;Node16 -->
 <g id="edge41" class="edge">
-<title>Node1&#45;&gt;Node17</title>
+<title>Node1&#45;&gt;Node16</title>
 <path fill="none" stroke="midnightblue" d="M874.38,-546.56C949.44,-540.74 1068.12,-527.43 1102.5,-500 1133.18,-475.52 1136.5,-457.75 1136.5,-418.5 1136.5,-418.5 1136.5,-418.5 1136.5,-215.5 1136.5,-172.65 1136.5,-121.97 1136.5,-97.76"/>
 <polygon fill="midnightblue" stroke="midnightblue" points="873.8,-543.1 864.09,-547.34 874.32,-550.08 873.8,-543.1"/>
 </g>
@@ -439,27 +439,27 @@
 <path fill="none" stroke="midnightblue" d="M785.91,-133.92C859.91,-117.35 879.71,-113.82 949.5,-98 952.2,-97.39 954.96,-96.76 957.74,-96.12"/>
 <polygon fill="midnightblue" stroke="midnightblue" points="785.1,-130.52 776.11,-136.12 786.63,-137.35 785.1,-130.52"/>
 </g>
-<!-- Node16 -->
-<g id="node16" class="node">
-<title>Node16</title>
-<g id="a_node16"><a xlink:href="../../d8/dba/vpiecenode_8cpp.html" target="_top" xlink:title=" ">
+<!-- Node13&#45;&gt;Node16 -->
+<g id="edge17" class="edge">
+<title>Node13&#45;&gt;Node16</title>
+<path fill="none" stroke="midnightblue" d="M786.27,-134C914.75,-111.91 950.32,-120.19 1074.5,-98 1077.22,-97.51 1080,-96.98 1082.8,-96.42"/>
+<polygon fill="midnightblue" stroke="midnightblue" points="785.29,-130.61 776.04,-135.78 786.49,-137.51 785.29,-130.61"/>
+</g>
+<!-- Node17 -->
+<g id="node17" class="node">
+<title>Node17</title>
+<g id="a_node17"><a xlink:href="../../d8/dba/vpiecenode_8cpp.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="black" points="638,-67.5 638,-97.5 745,-97.5 745,-67.5 638,-67.5"/>
 <text text-anchor="start" x="646" y="-85.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vpatterndb</text>
 <text text-anchor="middle" x="691.5" y="-74.5" font-family="Helvetica,sans-Serif" font-size="10.00">/vpiecenode.cpp</text>
 </a>
 </g>
 </g>
-<!-- Node13&#45;&gt;Node16 -->
-<g id="edge17" class="edge">
-<title>Node13&#45;&gt;Node16</title>
-<path fill="none" stroke="midnightblue" d="M711.43,-125.28C707.01,-116.02 702.07,-105.66 698.21,-97.58"/>
-<polygon fill="midnightblue" stroke="midnightblue" points="708.31,-126.88 715.77,-134.4 714.63,-123.86 708.31,-126.88"/>
-</g>
 <!-- Node13&#45;&gt;Node17 -->
 <g id="edge18" class="edge">
 <title>Node13&#45;&gt;Node17</title>
-<path fill="none" stroke="midnightblue" d="M786.27,-134C914.75,-111.91 950.32,-120.19 1074.5,-98 1077.22,-97.51 1080,-96.98 1082.8,-96.42"/>
-<polygon fill="midnightblue" stroke="midnightblue" points="785.29,-130.61 776.04,-135.78 786.49,-137.51 785.29,-130.61"/>
+<path fill="none" stroke="midnightblue" d="M711.43,-125.28C707.01,-116.02 702.07,-105.66 698.21,-97.58"/>
+<polygon fill="midnightblue" stroke="midnightblue" points="708.31,-126.88 715.77,-134.4 714.63,-123.86 708.31,-126.88"/>
 </g>
 <!-- Node18&#45;&gt;Node19 -->
 <g id="edge21" class="edge">
