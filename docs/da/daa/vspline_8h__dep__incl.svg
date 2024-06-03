@@ -68,50 +68,50 @@ var sectionId = 'dynsection-1';
 <!-- Node2 -->
 <g id="node2" class="node">
 <title>Node2</title>
-<g id="a_node2"><a xlink:href="../../db/d0a/vabstractcubicbezierpath_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="black" points="0,-123.5 0,-153.5 163,-153.5 163,-123.5 0,-123.5"/>
+<g id="a_node2"><a xlink:href="../../d5/ded/varc_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="black" points="0,-123.5 0,-153.5 107,-153.5 107,-123.5 0,-123.5"/>
 <text text-anchor="start" x="8" y="-141.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vgeometry</text>
-<text text-anchor="middle" x="81.5" y="-130.5" font-family="Helvetica,sans-Serif" font-size="10.00">/vabstractcubicbezierpath.cpp</text>
+<text text-anchor="middle" x="53.5" y="-130.5" font-family="Helvetica,sans-Serif" font-size="10.00">/varc.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node2 -->
 <g id="edge1" class="edge">
 <title>Node1&#45;&gt;Node2</title>
-<path fill="none" stroke="midnightblue" d="M498.91,-196.91C421.47,-187.52 286.73,-170.72 171.5,-154 168.84,-153.61 166.13,-153.21 163.4,-152.81"/>
-<polygon fill="midnightblue" stroke="midnightblue" points="498.64,-200.4 508.99,-198.13 499.48,-193.45 498.64,-200.4"/>
+<path fill="none" stroke="midnightblue" d="M498.91,-199.68C411.92,-192.54 251.15,-177.44 115.5,-154 112.78,-153.53 109.99,-153.01 107.19,-152.46"/>
+<polygon fill="midnightblue" stroke="midnightblue" points="498.64,-203.17 508.89,-200.49 499.2,-196.19 498.64,-203.17"/>
 </g>
 <!-- Node3 -->
 <g id="node3" class="node">
 <title>Node3</title>
-<g id="a_node3"><a xlink:href="../../d5/ded/varc_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="black" points="181,-123.5 181,-153.5 288,-153.5 288,-123.5 181,-123.5"/>
-<text text-anchor="start" x="189" y="-141.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vgeometry</text>
-<text text-anchor="middle" x="234.5" y="-130.5" font-family="Helvetica,sans-Serif" font-size="10.00">/varc.cpp</text>
+<g id="a_node3"><a xlink:href="../../de/df0/vcubicbezierpath_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="black" points="125,-123.5 125,-153.5 248,-153.5 248,-123.5 125,-123.5"/>
+<text text-anchor="start" x="133" y="-141.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vgeometry</text>
+<text text-anchor="middle" x="186.5" y="-130.5" font-family="Helvetica,sans-Serif" font-size="10.00">/vcubicbezierpath.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node3 -->
 <g id="edge2" class="edge">
 <title>Node1&#45;&gt;Node3</title>
-<path fill="none" stroke="midnightblue" d="M498.76,-193.18C444.78,-183.4 365.41,-168.59 296.5,-154 293.8,-153.43 291.03,-152.83 288.24,-152.21"/>
-<polygon fill="midnightblue" stroke="midnightblue" points="498.41,-196.67 508.87,-195 499.65,-189.78 498.41,-196.67"/>
+<path fill="none" stroke="midnightblue" d="M498.74,-194.75C436.75,-185.09 339.99,-169.53 256.5,-154 253.82,-153.5 251.08,-152.98 248.31,-152.45"/>
+<polygon fill="midnightblue" stroke="midnightblue" points="498.35,-198.23 508.77,-196.31 499.42,-191.32 498.35,-198.23"/>
 </g>
 <!-- Node4 -->
 <g id="node4" class="node">
 <title>Node4</title>
-<g id="a_node4"><a xlink:href="../../de/df0/vcubicbezierpath_8cpp.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="black" points="306,-123.5 306,-153.5 429,-153.5 429,-123.5 306,-123.5"/>
-<text text-anchor="start" x="314" y="-141.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vgeometry</text>
-<text text-anchor="middle" x="367.5" y="-130.5" font-family="Helvetica,sans-Serif" font-size="10.00">/vcubicbezierpath.cpp</text>
+<g id="a_node4"><a xlink:href="../../db/d0a/vabstractcubicbezierpath_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="black" points="266,-123.5 266,-153.5 429,-153.5 429,-123.5 266,-123.5"/>
+<text text-anchor="start" x="274" y="-141.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vgeometry</text>
+<text text-anchor="middle" x="347.5" y="-130.5" font-family="Helvetica,sans-Serif" font-size="10.00">/vabstractcubicbezierpath.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node4 -->
 <g id="edge3" class="edge">
 <title>Node1&#45;&gt;Node4</title>
-<path fill="none" stroke="midnightblue" d="M510.68,-187.23C479.14,-176.71 439.35,-163.45 409.73,-153.58"/>
-<polygon fill="midnightblue" stroke="midnightblue" points="509.59,-190.55 520.19,-190.4 511.81,-183.91 509.59,-190.55"/>
+<path fill="none" stroke="midnightblue" d="M506.53,-187.58C471.61,-177.02 427.19,-163.59 394.17,-153.61"/>
+<polygon fill="midnightblue" stroke="midnightblue" points="505.53,-190.93 516.11,-190.48 507.55,-184.23 505.53,-190.93"/>
 </g>
 <!-- Node5 -->
 <g id="node5" class="node">
