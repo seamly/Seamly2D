@@ -59,9 +59,9 @@ var sectionId = 'dynsection-1';
 <g id="node1" class="node">
 <title>Node1</title>
 <g id="a_node1"><a xlink:title="This file contains the class definition of the qmuparser engine.">
-<polygon fill="#bfbfbf" stroke="black" points="802,-335.5 802,-365.5 909,-365.5 909,-335.5 802,-335.5"/>
-<text text-anchor="start" x="810" y="-353.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/qmuparser</text>
-<text text-anchor="middle" x="855.5" y="-342.5" font-family="Helvetica,sans-Serif" font-size="10.00">/qmuparserbase.h</text>
+<polygon fill="#bfbfbf" stroke="black" points="785,-335.5 785,-365.5 892,-365.5 892,-335.5 785,-335.5"/>
+<text text-anchor="start" x="793" y="-353.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/qmuparser</text>
+<text text-anchor="middle" x="838.5" y="-342.5" font-family="Helvetica,sans-Serif" font-size="10.00">/qmuparserbase.h</text>
 </a>
 </g>
 </g>
@@ -78,40 +78,40 @@ var sectionId = 'dynsection-1';
 <!-- Node1&#45;&gt;Node2 -->
 <g id="edge1" class="edge">
 <title>Node1&#45;&gt;Node2</title>
-<path fill="none" stroke="midnightblue" d="M814.27,-331.27C790.86,-320.92 761.99,-308.15 740.33,-298.58"/>
-<polygon fill="midnightblue" stroke="midnightblue" points="813.04,-334.55 823.6,-335.4 815.87,-328.15 813.04,-334.55"/>
+<path fill="none" stroke="midnightblue" d="M801.21,-330.85C780.65,-320.58 755.55,-308.03 736.65,-298.58"/>
+<polygon fill="midnightblue" stroke="midnightblue" points="799.78,-334.05 810.29,-335.4 802.91,-327.79 799.78,-334.05"/>
 </g>
 <!-- Node19 -->
 <g id="node19" class="node">
 <title>Node19</title>
-<g id="a_node19"><a xlink:href="../../df/d10/qmuparsertokenreader_8cpp.html" target="_top" xlink:title="This file contains the parser token reader implementation.">
-<polygon fill="white" stroke="black" points="780.5,-268.5 780.5,-298.5 930.5,-298.5 930.5,-268.5 780.5,-268.5"/>
+<g id="a_node19"><a xlink:href="../../d0/d70/qmuparserbase_8cpp.html" target="_top" xlink:title="This file contains the basic implementation of the muparser engine.">
+<polygon fill="white" stroke="black" points="780.5,-268.5 780.5,-298.5 896.5,-298.5 896.5,-268.5 780.5,-268.5"/>
 <text text-anchor="start" x="788.5" y="-286.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/qmuparser</text>
-<text text-anchor="middle" x="855.5" y="-275.5" font-family="Helvetica,sans-Serif" font-size="10.00">/qmuparsertokenreader.cpp</text>
+<text text-anchor="middle" x="838.5" y="-275.5" font-family="Helvetica,sans-Serif" font-size="10.00">/qmuparserbase.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node19 -->
 <g id="edge21" class="edge">
 <title>Node1&#45;&gt;Node19</title>
-<path fill="none" stroke="midnightblue" d="M855.5,-325.11C855.5,-316.15 855.5,-306.32 855.5,-298.58"/>
-<polygon fill="midnightblue" stroke="midnightblue" points="852,-325.4 855.5,-335.4 859,-325.4 852,-325.4"/>
+<path fill="none" stroke="midnightblue" d="M838.5,-325.11C838.5,-316.15 838.5,-306.32 838.5,-298.58"/>
+<polygon fill="midnightblue" stroke="midnightblue" points="835,-325.4 838.5,-335.4 842,-325.4 835,-325.4"/>
 </g>
 <!-- Node20 -->
 <g id="node20" class="node">
 <title>Node20</title>
-<g id="a_node20"><a xlink:href="../../d0/d70/qmuparserbase_8cpp.html" target="_top" xlink:title="This file contains the basic implementation of the muparser engine.">
-<polygon fill="white" stroke="black" points="948.5,-268.5 948.5,-298.5 1064.5,-298.5 1064.5,-268.5 948.5,-268.5"/>
-<text text-anchor="start" x="956.5" y="-286.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/qmuparser</text>
-<text text-anchor="middle" x="1006.5" y="-275.5" font-family="Helvetica,sans-Serif" font-size="10.00">/qmuparserbase.cpp</text>
+<g id="a_node20"><a xlink:href="../../df/d10/qmuparsertokenreader_8cpp.html" target="_top" xlink:title="This file contains the parser token reader implementation.">
+<polygon fill="white" stroke="black" points="914.5,-268.5 914.5,-298.5 1064.5,-298.5 1064.5,-268.5 914.5,-268.5"/>
+<text text-anchor="start" x="922.5" y="-286.5" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/qmuparser</text>
+<text text-anchor="middle" x="989.5" y="-275.5" font-family="Helvetica,sans-Serif" font-size="10.00">/qmuparsertokenreader.cpp</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node20 -->
 <g id="edge22" class="edge">
 <title>Node1&#45;&gt;Node20</title>
-<path fill="none" stroke="midnightblue" d="M897.53,-331.41C921.64,-321.03 951.45,-308.2 973.8,-298.58"/>
-<polygon fill="midnightblue" stroke="midnightblue" points="896.07,-328.23 888.26,-335.4 898.83,-334.66 896.07,-328.23"/>
+<path fill="none" stroke="midnightblue" d="M880.53,-331.41C904.64,-321.03 934.45,-308.2 956.8,-298.58"/>
+<polygon fill="midnightblue" stroke="midnightblue" points="879.07,-328.23 871.26,-335.4 881.83,-334.66 879.07,-328.23"/>
 </g>
 <!-- Node3 -->
 <g id="node3" class="node">

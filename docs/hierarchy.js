@@ -6,6 +6,7 @@ var hierarchy =
     [ "delaunay2d_t", "d6/da5/structdelaunay2d__t.html", null ],
     [ "delaunay_s", "de/d32/structdelaunay__s.html", null ],
     [ "DestinationItem", "de/d14/structDestinationItem.html", null ],
+    [ "DraftImage", "d3/df8/structDraftImage.html", null ],
     [ "DRW_Block", null, [
       [ "dx_ifaceBlock", "df/d01/classdx__ifaceBlock.html", null ]
     ] ],
@@ -52,13 +53,13 @@ var hierarchy =
       [ "PieceFillComboBox", "d8/d5b/classPieceFillComboBox.html", null ]
     ] ],
     [ "QDialog", null, [
+      [ "About2DAppDialog", "df/d22/classAbout2DAppDialog.html", null ],
       [ "AbstractLayoutDialog", "df/dc3/classAbstractLayoutDialog.html", [
         [ "ExportLayoutDialog", "de/dbd/classExportLayoutDialog.html", null ],
         [ "LayoutSettingsDialog", "db/d32/classLayoutSettingsDialog.html", null ]
       ] ],
       [ "CalculatorDialog", "dc/d3d/classCalculatorDialog.html", null ],
       [ "DecimalChartDialog", "db/dda/classDecimalChartDialog.html", null ],
-      [ "DialogAboutApp", "de/d06/classDialogAboutApp.html", null ],
       [ "DialogAboutSeamlyMe", "d7/d3a/classDialogAboutSeamlyMe.html", null ],
       [ "DialogDateTimeFormats", "da/d06/classDialogDateTimeFormats.html", null ],
       [ "DialogExportToCSV", "dc/d09/classDialogExportToCSV.html", null ],
@@ -116,6 +117,7 @@ var hierarchy =
       ] ],
       [ "DialogUndo", "de/d7f/classDialogUndo.html", null ],
       [ "EditLabelTemplateDialog", "d7/df1/classEditLabelTemplateDialog.html", null ],
+      [ "ImageDialog", "d3/db4/classImageDialog.html", null ],
       [ "MeShortcutsDialog", "dd/d67/classMeShortcutsDialog.html", null ],
       [ "MeasurementDatabaseDialog", "d3/d63/classMeasurementDatabaseDialog.html", null ],
       [ "NewMeasurementsDialog", "dc/da3/classNewMeasurementsDialog.html", null ],
@@ -198,6 +200,10 @@ var hierarchy =
           [ "VToolTriangle", "dd/df1/classVToolTriangle.html", null ]
         ] ]
       ] ]
+    ] ],
+    [ "QGraphicsItem", null, [
+      [ "ImageItem", "d6/da8/classImageItem.html", null ],
+      [ "ResizeHandlesItem", "d0/de9/classResizeHandlesItem.html", null ]
     ] ],
     [ "QGraphicsLineItem", null, [
       [ "ArrowedLineItem", "d6/d43/classArrowedLineItem.html", null ],
@@ -284,6 +290,7 @@ var hierarchy =
       [ "VToolInternalPath", "db/d7b/classVToolInternalPath.html", null ]
     ] ],
     [ "QGraphicsRectItem", null, [
+      [ "ResizeHandlesItem::HandleItem", "d0/dc5/classResizeHandlesItem_1_1HandleItem.html", null ],
       [ "SceneRect", "d3/db3/classSceneRect.html", [
         [ "VControlPointSpline", "dd/dcb/classVControlPointSpline.html", null ]
       ] ]
@@ -321,6 +328,7 @@ var hierarchy =
     [ "QList< QSharedPointer< QTableWidget > >", "d1/d4a/classQList.html", null ],
     [ "QList< QStringList >", "d1/d4a/classQList.html", null ],
     [ "QList< QTableWidgetItem * >", "d1/d4a/classQList.html", null ],
+    [ "QList< ResizeHandlesItem::HandleItem * >", "d1/d4a/classQList.html", null ],
     [ "QList< TextLine >", "d1/d4a/classQList.html", null ],
     [ "QList< VPE::VProperty * >", "d1/d4a/classQList.html", null ],
     [ "QList< VPE::VPropertyFormWidgetPrivate::SEditorWidget >", "d1/d4a/classQList.html", null ],
@@ -339,6 +347,7 @@ var hierarchy =
     [ "QMap< int, qmu::QmuTranslation >", "d0/d4c/classQMap.html", null ],
     [ "QMap< int, QString >", "d0/d4c/classQMap.html", null ],
     [ "QMap< QCheckBox *, int >", "d0/d4c/classQMap.html", null ],
+    [ "QMap< qint32, ImageItem * >", "d0/d4c/classQMap.html", null ],
     [ "QMap< QString, int >", "d0/d4c/classQMap.html", null ],
     [ "QMap< QString, qmu::QmuTranslation >", "d0/d4c/classQMap.html", null ],
     [ "QMap< QString, QPair< QString, QString > >", "d0/d4c/classQMap.html", null ],
@@ -382,6 +391,9 @@ var hierarchy =
       ] ],
       [ "FvUpdater", "d5/d23/classFvUpdater.html", null ],
       [ "GraphicsViewZoom", "da/d19/classGraphicsViewZoom.html", null ],
+      [ "ImageItem", "d6/da8/classImageItem.html", null ],
+      [ "ImageTool", "df/d5b/classImageTool.html", null ],
+      [ "ResizeHandlesItem", "d0/de9/classResizeHandlesItem.html", null ],
       [ "TST_FindPoint", "d6/d30/classTST__FindPoint.html", null ],
       [ "TST_Measurements", "da/d3b/classTST__Measurements.html", null ],
       [ "TST_Misc", "d5/d79/classTST__Misc.html", null ],
@@ -521,6 +533,7 @@ var hierarchy =
       ] ]
     ] ],
     [ "QSharedData", null, [
+      [ "CustomVariableData", "dc/d49/classCustomVariableData.html", null ],
       [ "MeasurementVariableData", "d3/d99/classMeasurementVariableData.html", null ],
       [ "VAbstractArcData", "db/dd7/classVAbstractArcData.html", null ],
       [ "VAbstractCurveData", "d5/db0/classVAbstractCurveData.html", null ],
@@ -537,7 +550,6 @@ var hierarchy =
       [ "VFSplinePointData", "dd/dda/classVFSplinePointData.html", null ],
       [ "VGObjectData", "df/dd9/classVGObjectData.html", null ],
       [ "VGrainlineDataPrivate", "d5/de8/classVGrainlineDataPrivate.html", null ],
-      [ "VIncrementData", "d3/d87/classVIncrementData.html", null ],
       [ "VInternalVariableData", "d4/da3/classVInternalVariableData.html", null ],
       [ "VLayoutPaperData", "d2/d52/classVLayoutPaperData.html", null ],
       [ "VLayoutPieceData", "d7/dcf/classVLayoutPieceData.html", null ],
@@ -699,8 +711,8 @@ var hierarchy =
       [ "VLengthLine", "d6/d57/classVLengthLine.html", null ],
       [ "VLineAngle", "d1/d88/classVLineAngle.html", null ],
       [ "VVariable", "da/d49/classVVariable.html", [
-        [ "MeasurementVariable", "d5/d38/classMeasurementVariable.html", null ],
-        [ "VIncrement", "dd/d0c/classVIncrement.html", null ]
+        [ "CustomVariable", "d2/d16/classCustomVariable.html", null ],
+        [ "MeasurementVariable", "d5/d38/classMeasurementVariable.html", null ]
       ] ]
     ] ],
     [ "VLabelTemplateLine", "dc/daa/structVLabelTemplateLine.html", null ],
