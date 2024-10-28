@@ -321,6 +321,7 @@ var hierarchy =
     ] ],
     [ "QList< T >", "d1/d4a/classQList.html", null ],
     [ "QList< QCommandLineOption * >", "d1/d4a/classQList.html", null ],
+    [ "QList< QDomDocument >", "d1/d4a/classQList.html", null ],
     [ "QList< QGraphicsItem * >", "d1/d4a/classQList.html", null ],
     [ "QList< QGraphicsScene * >", "d1/d4a/classQList.html", null ],
     [ "QList< QList< QGraphicsItem * > >", "d1/d4a/classQList.html", null ],
@@ -446,6 +447,7 @@ var hierarchy =
       [ "VLayoutGenerator", "d8/d8a/classVLayoutGenerator.html", null ],
       [ "VPE::VProperty", "db/df9/classVPE_1_1VProperty.html", [
         [ "VFormulaProperty", "df/d53/classVFormulaProperty.html", null ],
+        [ "VPE::DirectionProperty", "df/d74/classVPE_1_1DirectionProperty.html", null ],
         [ "VPE::LineTypeProperty", "d5/daa/classVPE_1_1LineTypeProperty.html", null ],
         [ "VPE::LineWeightProperty", "d8/ddf/classVPE_1_1LineWeightProperty.html", null ],
         [ "VPE::PlainTextProperty", "d6/d0b/classVPE_1_1PlainTextProperty.html", null ],
@@ -475,6 +477,7 @@ var hierarchy =
         [ "AddDraftBlock", "d2/d4d/classAddDraftBlock.html", null ],
         [ "AddGroup", "d2/d67/classAddGroup.html", null ],
         [ "AddGroupItem", "da/d3a/classAddGroupItem.html", null ],
+        [ "AddImage", "df/d11/classAddImage.html", null ],
         [ "AddPiece", "dc/d9d/classAddPiece.html", null ],
         [ "AddToCalc", "d6/db3/classAddToCalc.html", null ],
         [ "DelGroup", "d5/dbd/classDelGroup.html", null ],
@@ -658,6 +661,7 @@ var hierarchy =
     [ "VPE::VPropertyFormWidgetPrivate::SEditorWidget", "d9/d9b/structVPE_1_1VPropertyFormWidgetPrivate_1_1SEditorWidget.html", null ],
     [ "SourceItem", "d9/d96/structSourceItem.html", null ],
     [ "qmu::SToken", "dc/d14/structqmu_1_1SToken.html", null ],
+    [ "SvgGenerator", "d3/d0b/classSvgGenerator.html", null ],
     [ "TextLine", "d8/de6/structTextLine.html", null ],
     [ "UnionToolInitData", "d9/d2d/structUnionToolInitData.html", null ],
     [ "VAbstractFloatItemData", "d4/dc0/classVAbstractFloatItemData.html", [

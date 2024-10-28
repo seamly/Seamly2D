@@ -83,7 +83,7 @@
 <text text-anchor="start" x="73" y="-1155.5" font-family="Helvetica,sans-Serif" font-size="10.00"># spinBoxAngle</text>
 <text text-anchor="start" x="73" y="-1144.5" font-family="Helvetica,sans-Serif" font-size="10.00"># plainTextEditFormula</text>
 <text text-anchor="start" x="73" y="-1133.5" font-family="Helvetica,sans-Serif" font-size="10.00"># labelResultCalculation</text>
-<text text-anchor="start" x="73" y="-1122.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 9 more...</text>
+<text text-anchor="start" x="73" y="-1122.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 10 more...</text>
 <polyline fill="none" stroke="black" points="65,-1115.5 235,-1115.5 "/>
 <text text-anchor="start" x="73" y="-1103.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ DialogTool()</text>
 <text text-anchor="start" x="73" y="-1092.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ ~DialogTool()</text>
@@ -114,13 +114,13 @@
 <text text-anchor="start" x="73" y="-817.5" font-family="Helvetica,sans-Serif" font-size="10.00"># closeEvent()</text>
 <text text-anchor="start" x="73" y="-806.5" font-family="Helvetica,sans-Serif" font-size="10.00"># showEvent()</text>
 <text text-anchor="start" x="73" y="-795.5" font-family="Helvetica,sans-Serif" font-size="10.00"># FillComboBoxPiecesList()</text>
-<text text-anchor="start" x="73" y="-784.5" font-family="Helvetica,sans-Serif" font-size="10.00"># FillComboBoxPoints()</text>
+<text text-anchor="start" x="73" y="-784.5" font-family="Helvetica,sans-Serif" font-size="10.00"># fillComboBoxPoints()</text>
 <text text-anchor="start" x="73" y="-773.5" font-family="Helvetica,sans-Serif" font-size="10.00"># FillComboBoxArcs()</text>
 <text text-anchor="start" x="73" y="-762.5" font-family="Helvetica,sans-Serif" font-size="10.00"># FillComboBoxSplines()</text>
 <text text-anchor="start" x="73" y="-751.5" font-family="Helvetica,sans-Serif" font-size="10.00"># FillComboBoxSplinesPath()</text>
 <text text-anchor="start" x="73" y="-740.5" font-family="Helvetica,sans-Serif" font-size="10.00"># FillComboBoxCurves()</text>
 <text text-anchor="start" x="73" y="-729.5" font-family="Helvetica,sans-Serif" font-size="10.00"># FillComboBoxTypeLine()</text>
-<text text-anchor="start" x="73" y="-718.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 34 more...</text>
+<text text-anchor="start" x="73" y="-718.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 35 more...</text>
 <text text-anchor="start" x="73" y="-707.5" font-family="Helvetica,sans-Serif" font-size="10.00"># FindNotExcludedNodeDown()</text>
 <text text-anchor="start" x="73" y="-696.5" font-family="Helvetica,sans-Serif" font-size="10.00"># FindNotExcludedNodeUp()</text>
 <text text-anchor="start" x="73" y="-685.5" font-family="Helvetica,sans-Serif" font-size="10.00"># isFirstPointSameAsLast()</text>
@@ -282,7 +282,7 @@
 <text text-anchor="start" x="612" y="-2542.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ TagNotes</text>
 <text text-anchor="start" x="612" y="-2531.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ TagMeasurements</text>
 <text text-anchor="start" x="612" y="-2520.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ TagVariables</text>
-<text text-anchor="start" x="612" y="-2509.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 142 more...</text>
+<text text-anchor="start" x="612" y="-2509.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 147 more...</text>
 <text text-anchor="start" x="612" y="-2498.5" font-family="Helvetica,sans-Serif" font-size="10.00"># activeDraftBlock</text>
 <text text-anchor="start" x="612" y="-2487.5" font-family="Helvetica,sans-Serif" font-size="10.00"># m_DefaultLineColor</text>
 <text text-anchor="start" x="612" y="-2476.5" font-family="Helvetica,sans-Serif" font-size="10.00"># m_DefaultLineWeight</text>
@@ -304,7 +304,7 @@
 <text text-anchor="start" x="612" y="-2303.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getActiveDraftBlockName()</text>
 <text text-anchor="start" x="612" y="-2292.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ draftBlockNameExists()</text>
 <text text-anchor="start" x="612" y="-2281.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ draftBlockCount()</text>
-<text text-anchor="start" x="612" y="-2270.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 96 more...</text>
+<text text-anchor="start" x="612" y="-2270.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 97 more...</text>
 <text text-anchor="start" x="612" y="-2259.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getTool()</text>
 <text text-anchor="start" x="612" y="-2248.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ AddTool()</text>
 <text text-anchor="start" x="612" y="-2237.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ RemoveTool()</text>

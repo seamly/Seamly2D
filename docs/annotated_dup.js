@@ -22,6 +22,7 @@ var annotated_dup =
       [ "CheckableMessageBox", "dd/dc4/classUtils_1_1CheckableMessageBox.html", "dd/dc4/classUtils_1_1CheckableMessageBox" ]
     ] ],
     [ "VPE", "de/d21/namespaceVPE.html", [
+      [ "DirectionProperty", "df/d74/classVPE_1_1DirectionProperty.html", "df/d74/classVPE_1_1DirectionProperty" ],
       [ "LineWeightProperty", "d8/ddf/classVPE_1_1LineWeightProperty.html", "d8/ddf/classVPE_1_1LineWeightProperty" ],
       [ "PlainTextProperty", "d6/d0b/classVPE_1_1PlainTextProperty.html", "d6/d0b/classVPE_1_1PlainTextProperty" ],
       [ "VBoolProperty", "df/d02/classVPE_1_1VBoolProperty.html", "df/d02/classVPE_1_1VBoolProperty" ],
@@ -74,6 +75,7 @@ var annotated_dup =
     [ "AddDraftBlock", "d2/d4d/classAddDraftBlock.html", "d2/d4d/classAddDraftBlock" ],
     [ "AddGroup", "d2/d67/classAddGroup.html", "d2/d67/classAddGroup" ],
     [ "AddGroupItem", "da/d3a/classAddGroupItem.html", "da/d3a/classAddGroupItem" ],
+    [ "AddImage", "df/d11/classAddImage.html", "df/d11/classAddImage" ],
     [ "AddPiece", "dc/d9d/classAddPiece.html", "dc/d9d/classAddPiece" ],
     [ "AddToCalc", "d6/db3/classAddToCalc.html", "d6/db3/classAddToCalc" ],
     [ "AddToGroupDialog", "d1/dde/classAddToGroupDialog.html", "d1/dde/classAddToGroupDialog" ],
@@ -249,6 +251,7 @@ var annotated_dup =
     [ "ShowOperationPointName", "dc/d9b/classShowOperationPointName.html", "dc/d9b/classShowOperationPointName" ],
     [ "ShowPointName", "d8/d2c/classShowPointName.html", "d8/d2c/classShowPointName" ],
     [ "SourceItem", "d9/d96/structSourceItem.html", "d9/d96/structSourceItem" ],
+    [ "SvgGenerator", "d3/d0b/classSvgGenerator.html", "d3/d0b/classSvgGenerator" ],
     [ "TestApplication2D", "d8/dd6/classTestApplication2D.html", "d8/dd6/classTestApplication2D" ],
     [ "TextLine", "d8/de6/structTextLine.html", "d8/de6/structTextLine" ],
     [ "TMainWindow", "d8/d61/classTMainWindow.html", "d8/d61/classTMainWindow" ],
