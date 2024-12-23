@@ -1,9 +1,15 @@
 <map id="VPosition" name="VPosition">
-<area shape="rect" id="node1" title=" " alt="" coords="308,1137,487,1669"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,829,99,906"/>
-<area shape="rect" id="node3" href="$d3/dd7/classVBestSquare.html" title=" " alt="" coords="123,689,263,1045"/>
-<area shape="rect" id="node4" href="$df/de5/classVLayoutPiece.html" title=" " alt="" coords="288,660,507,1075"/>
-<area shape="rect" id="node5" href="$dd/dfe/classVAbstractPiece.html" title=" " alt="" coords="291,5,504,611"/>
-<area shape="rect" id="node6" href="$d5/dc2/classQVector.html" title=" " alt="" coords="531,829,722,906"/>
-<area shape="rect" id="node7" href="$de/dad/classVContour.html" title=" " alt="" coords="747,748,877,987"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="248,1428,424,2113"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,1070,91,1135"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="56,1148,73,1249,87,1307,105,1364,137,1438,173,1510,250,1640,246,1643,168,1512,132,1440,100,1366,82,1309,67,1250,50,1149"/>
+<area shape="rect" id="Node000003" href="$d3/dd7/classVBestSquare.html" title=" " alt="" coords="115,880,247,1325"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="235,1325,255,1411,250,1412,230,1326"/>
+<area shape="rect" id="Node000004" href="$de/dad/classVContour.html" title=" " alt="" coords="271,960,401,1245"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="339,1246,339,1412,333,1412,333,1246"/>
+<area shape="rect" id="Node000005" href="$df/de5/classVLayoutPiece.html" title=" " alt="" coords="425,840,636,1365"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="457,1366,431,1453,426,1452,452,1365"/>
+<area shape="rect" id="Node000006" href="$dd/dfe/classVAbstractPiece.html" title=" " alt="" coords="425,5,636,791"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="533,804,533,840,528,840,528,804"/>
+<area shape="rect" id="Node000007" href="$d5/dc2/classQVector.html" title=" " alt="" coords="661,1070,843,1135"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="745,1136,709,1241,682,1305,650,1367,601,1447,546,1525,437,1661,433,1658,541,1521,596,1444,646,1364,677,1302,704,1239,740,1135"/>
 </map>
