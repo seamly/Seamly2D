@@ -25,9 +25,9 @@
 <text text-anchor="start" x="78.5" y="-337" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="91.5" y="-337" font-family="Helvetica,sans-Serif" font-size="10.00">VBank()</text>
 <text text-anchor="start" x="78.5" y="-322" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="91.5" y="-322" font-family="Helvetica,sans-Serif" font-size="10.00">GetLayoutWidth()</text>
+<text text-anchor="start" x="91.5" y="-322" font-family="Helvetica,sans-Serif" font-size="10.00">getLayoutGap()</text>
 <text text-anchor="start" x="78.5" y="-307" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="91.5" y="-307" font-family="Helvetica,sans-Serif" font-size="10.00">SetLayoutWidth()</text>
+<text text-anchor="start" x="91.5" y="-307" font-family="Helvetica,sans-Serif" font-size="10.00">setLayoutGap()</text>
 <text text-anchor="start" x="78.5" y="-292" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="91.5" y="-292" font-family="Helvetica,sans-Serif" font-size="10.00">setPieces()</text>
 <text text-anchor="start" x="78.5" y="-277" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
@@ -43,7 +43,7 @@
 <text text-anchor="start" x="78.5" y="-202" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="91.5" y="-202" font-family="Helvetica,sans-Serif" font-size="10.00">Reset()</text>
 <text text-anchor="start" x="78.5" y="-187" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="91.5" y="-187" font-family="Helvetica,sans-Serif" font-size="10.00">SetCaseType()</text>
+<text text-anchor="start" x="91.5" y="-187" font-family="Helvetica,sans-Serif" font-size="10.00">setCaseType()</text>
 <text text-anchor="start" x="78.5" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="91.5" y="-172" font-family="Helvetica,sans-Serif" font-size="10.00">allPieceCount()</text>
 <text text-anchor="start" x="78.5" y="-157" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>

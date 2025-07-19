@@ -94,7 +94,7 @@ var sectionId = 'dynsection-0';
 <text text-anchor="start" x="9.5" y="-501.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="22.5" y="-501.5" font-family="Helvetica,sans-Serif" font-size="10.00">SetBaseMSize()</text>
 <text text-anchor="start" x="9.5" y="-486.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="22.5" y="-486.5" font-family="Helvetica,sans-Serif" font-size="10.00">SetPUnit()</text>
+<text text-anchor="start" x="22.5" y="-486.5" font-family="Helvetica,sans-Serif" font-size="10.00">setPUnit()</text>
 <text text-anchor="start" x="9.5" y="-471.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="22.5" y="-471.5" font-family="Helvetica,sans-Serif" font-size="10.00">LoadFile()</text>
 <text text-anchor="start" x="9.5" y="-456.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
@@ -126,16 +126,16 @@ var sectionId = 'dynsection-0';
 <text text-anchor="start" x="12" y="-261.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
 <text text-anchor="start" x="22.5" y="-261.5" font-family="Helvetica,sans-Serif" font-size="10.00">initUnits()</text>
 <text text-anchor="start" x="12" y="-246.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="22.5" y="-246.5" font-family="Helvetica,sans-Serif" font-size="10.00">InitComboBoxUnits()</text>
+<text text-anchor="start" x="22.5" y="-246.5" font-family="Helvetica,sans-Serif" font-size="10.00">setCurrentPatternUnits()</text>
 <text text-anchor="start" x="12" y="-231.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="22.5" y="-231.5" font-family="Helvetica,sans-Serif" font-size="10.00">InitGender()</text>
+<text text-anchor="start" x="22.5" y="-231.5" font-family="Helvetica,sans-Serif" font-size="10.00">InitComboBoxUnits()</text>
 <text text-anchor="start" x="12" y="-216.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="22.5" y="-216.5" font-family="Helvetica,sans-Serif" font-size="10.00">ShowNewMData()</text>
+<text text-anchor="start" x="22.5" y="-216.5" font-family="Helvetica,sans-Serif" font-size="10.00">InitGender()</text>
 <text text-anchor="start" x="12" y="-201.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="22.5" y="-201.5" font-family="Helvetica,sans-Serif" font-size="10.00">ShowUnits()</text>
+<text text-anchor="start" x="22.5" y="-201.5" font-family="Helvetica,sans-Serif" font-size="10.00">ShowNewMData()</text>
 <text text-anchor="start" x="12" y="-186.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="22.5" y="-186.5" font-family="Helvetica,sans-Serif" font-size="10.00">ShowHeaderUnits()</text>
-<text text-anchor="start" x="22.5" y="-171.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 31 more...</text>
+<text text-anchor="start" x="22.5" y="-186.5" font-family="Helvetica,sans-Serif" font-size="10.00">ShowUnits()</text>
+<text text-anchor="start" x="22.5" y="-171.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 32 more...</text>
 <text text-anchor="start" x="12" y="-156.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
 <text text-anchor="start" x="22.5" y="-156.5" font-family="Helvetica,sans-Serif" font-size="10.00">FileNew()</text>
 <text text-anchor="start" x="12" y="-141.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
@@ -151,7 +151,7 @@ var sectionId = 'dynsection-0';
 <text text-anchor="start" x="12" y="-66.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
 <text text-anchor="start" x="22.5" y="-66.5" font-family="Helvetica,sans-Serif" font-size="10.00">Preferences()</text>
 <text text-anchor="start" x="12" y="-51.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="22.5" y="-51.5" font-family="Helvetica,sans-Serif" font-size="10.00">ToolBarStyles()</text>
+<text text-anchor="start" x="22.5" y="-51.5" font-family="Helvetica,sans-Serif" font-size="10.00">initToolBarStyles()</text>
 <text text-anchor="start" x="12" y="-36.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
 <text text-anchor="start" x="22.5" y="-36.5" font-family="Helvetica,sans-Serif" font-size="10.00">print()</text>
 <text text-anchor="start" x="12" y="-21.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
@@ -187,11 +187,11 @@ var sectionId = 'dynsection-0';
 <text text-anchor="start" x="4.5" y="-871.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
 <text text-anchor="start" x="17.5" y="-871.5" font-family="Helvetica,sans-Serif" font-size="10.00">ContinueFormatRewrite()</text>
 <text text-anchor="start" x="4.5" y="-856.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="17.5" y="-856.5" font-family="Helvetica,sans-Serif" font-size="10.00">ToolBarStyle()</text>
+<text text-anchor="start" x="17.5" y="-856.5" font-family="Helvetica,sans-Serif" font-size="10.00">initToolBarStyle()</text>
 <text text-anchor="start" x="4.5" y="-841.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
 <text text-anchor="start" x="17.5" y="-841.5" font-family="Helvetica,sans-Serif" font-size="10.00">exportToCSVData()</text>
 <text text-anchor="start" x="4.5" y="-826.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="17.5" y="-826.5" font-family="Helvetica,sans-Serif" font-size="10.00">WindowsLocale()</text>
+<text text-anchor="start" x="17.5" y="-826.5" font-family="Helvetica,sans-Serif" font-size="10.00">setWindowsLocale()</text>
 <text text-anchor="start" x="4.5" y="-811.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
 <text text-anchor="start" x="17.5" y="-811.5" font-family="Helvetica,sans-Serif" font-size="10.00">exportToCSV()</text>
 <polygon fill="#666666" stroke="#666666" points="0.5,-986.5 0.5,-986.5 153.5,-986.5 153.5,-986.5 0.5,-986.5"/>

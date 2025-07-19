@@ -15,25 +15,25 @@
 <polygon fill="#999999" stroke="transparent" points="200,-469 74,-469 74,0 200,0 200,-469"/>
 <text text-anchor="start" x="92.5" y="-456.5" font-family="Helvetica,sans-Serif" font-size="10.00">VLayoutGenerator</text>
 <text text-anchor="start" x="80.5" y="-441.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="91" y="-441.5" font-family="Helvetica,sans-Serif" font-size="10.00">paperHeight</text>
+<text text-anchor="start" x="91" y="-441.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_paperHeight</text>
 <text text-anchor="start" x="80.5" y="-426.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="91" y="-426.5" font-family="Helvetica,sans-Serif" font-size="10.00">paperWidth</text>
+<text text-anchor="start" x="91" y="-426.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_paperWidth</text>
 <text text-anchor="start" x="80.5" y="-411.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="91" y="-411.5" font-family="Helvetica,sans-Serif" font-size="10.00">margins</text>
+<text text-anchor="start" x="91" y="-411.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_margins</text>
 <text text-anchor="start" x="80.5" y="-396.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="91" y="-396.5" font-family="Helvetica,sans-Serif" font-size="10.00">usePrinterFields</text>
+<text text-anchor="start" x="91" y="-396.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_usePrinterFields</text>
 <text text-anchor="start" x="80.5" y="-381.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="91" y="-381.5" font-family="Helvetica,sans-Serif" font-size="10.00">stopGeneration</text>
+<text text-anchor="start" x="91" y="-381.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_stopGeneration</text>
 <text text-anchor="start" x="80.5" y="-366.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="91" y="-366.5" font-family="Helvetica,sans-Serif" font-size="10.00">state</text>
+<text text-anchor="start" x="91" y="-366.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_state</text>
 <text text-anchor="start" x="80.5" y="-351.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="91" y="-351.5" font-family="Helvetica,sans-Serif" font-size="10.00">shift</text>
+<text text-anchor="start" x="91" y="-351.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_shift</text>
 <text text-anchor="start" x="80.5" y="-336.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="91" y="-336.5" font-family="Helvetica,sans-Serif" font-size="10.00">rotate</text>
+<text text-anchor="start" x="91" y="-336.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_rotate</text>
 <text text-anchor="start" x="80.5" y="-321.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="91" y="-321.5" font-family="Helvetica,sans-Serif" font-size="10.00">rotationIncrease</text>
+<text text-anchor="start" x="91" y="-321.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_rotationIncrement</text>
 <text text-anchor="start" x="80.5" y="-306.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="91" y="-306.5" font-family="Helvetica,sans-Serif" font-size="10.00">autoCrop</text>
+<text text-anchor="start" x="91" y="-306.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_autoCrop</text>
 <text text-anchor="start" x="91" y="-291.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 6 more...</text>
 <text text-anchor="start" x="78" y="-276.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="91" y="-276.5" font-family="Helvetica,sans-Serif" font-size="10.00">VLayoutGenerator()</text>
@@ -42,9 +42,9 @@
 <text text-anchor="start" x="78" y="-246.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="91" y="-246.5" font-family="Helvetica,sans-Serif" font-size="10.00">setPieces()</text>
 <text text-anchor="start" x="78" y="-231.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="91" y="-231.5" font-family="Helvetica,sans-Serif" font-size="10.00">SetLayoutWidth()</text>
+<text text-anchor="start" x="91" y="-231.5" font-family="Helvetica,sans-Serif" font-size="10.00">setLayoutGap()</text>
 <text text-anchor="start" x="78" y="-216.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="91" y="-216.5" font-family="Helvetica,sans-Serif" font-size="10.00">SetCaseType()</text>
+<text text-anchor="start" x="91" y="-216.5" font-family="Helvetica,sans-Serif" font-size="10.00">setCaseType()</text>
 <text text-anchor="start" x="78" y="-201.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="91" y="-201.5" font-family="Helvetica,sans-Serif" font-size="10.00">PieceCount()</text>
 <text text-anchor="start" x="78" y="-186.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
@@ -59,17 +59,17 @@
 <text text-anchor="start" x="78" y="-111.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="91" y="-111.5" font-family="Helvetica,sans-Serif" font-size="10.00">Abort()</text>
 <text text-anchor="start" x="80.5" y="-96.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="91" y="-96.5" font-family="Helvetica,sans-Serif" font-size="10.00">PageHeight()</text>
+<text text-anchor="start" x="91" y="-96.5" font-family="Helvetica,sans-Serif" font-size="10.00">pageHeight()</text>
 <text text-anchor="start" x="80.5" y="-81.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="91" y="-81.5" font-family="Helvetica,sans-Serif" font-size="10.00">PageWidth()</text>
+<text text-anchor="start" x="91" y="-81.5" font-family="Helvetica,sans-Serif" font-size="10.00">pageWidth()</text>
 <text text-anchor="start" x="80.5" y="-66.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="91" y="-66.5" font-family="Helvetica,sans-Serif" font-size="10.00">GatherPages()</text>
+<text text-anchor="start" x="91" y="-66.5" font-family="Helvetica,sans-Serif" font-size="10.00">gatherPages()</text>
 <text text-anchor="start" x="80.5" y="-51.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="91" y="-51.5" font-family="Helvetica,sans-Serif" font-size="10.00">UnitePages()</text>
+<text text-anchor="start" x="91" y="-51.5" font-family="Helvetica,sans-Serif" font-size="10.00">unitePages()</text>
 <text text-anchor="start" x="80.5" y="-36.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
 <text text-anchor="start" x="91" y="-36.5" font-family="Helvetica,sans-Serif" font-size="10.00">unitePieces()</text>
 <text text-anchor="start" x="80.5" y="-21.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="91" y="-21.5" font-family="Helvetica,sans-Serif" font-size="10.00">UnitePapers()</text>
+<text text-anchor="start" x="91" y="-21.5" font-family="Helvetica,sans-Serif" font-size="10.00">unitePapers()</text>
 <text text-anchor="start" x="80.5" y="-6.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
 <text text-anchor="start" x="91" y="-6.5" font-family="Helvetica,sans-Serif" font-size="10.00">movePieces()</text>
 <polygon fill="#666666" stroke="#666666" points="74,-451.5 74,-451.5 200,-451.5 200,-451.5 74,-451.5"/>
@@ -124,7 +124,7 @@
 <polygon fill="none" stroke="#63b8ff" points="137,-481.13 133,-475.13 137,-469.13 141,-475.13 137,-481.13"/>
 </a>
 </g>
-<text text-anchor="middle" x="157" y="-490" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &#45;papers</text>
+<text text-anchor="middle" x="164.5" y="-490" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &#45;m_papers</text>
 </g>
 <!-- Node4 -->
 <g id="Node000004" class="node">
@@ -143,9 +143,9 @@
 <text text-anchor="start" x="228" y="-853" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="241" y="-853" font-family="Helvetica,sans-Serif" font-size="10.00">VBank()</text>
 <text text-anchor="start" x="228" y="-838" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="241" y="-838" font-family="Helvetica,sans-Serif" font-size="10.00">GetLayoutWidth()</text>
+<text text-anchor="start" x="241" y="-838" font-family="Helvetica,sans-Serif" font-size="10.00">getLayoutGap()</text>
 <text text-anchor="start" x="228" y="-823" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="241" y="-823" font-family="Helvetica,sans-Serif" font-size="10.00">SetLayoutWidth()</text>
+<text text-anchor="start" x="241" y="-823" font-family="Helvetica,sans-Serif" font-size="10.00">setLayoutGap()</text>
 <text text-anchor="start" x="228" y="-808" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="241" y="-808" font-family="Helvetica,sans-Serif" font-size="10.00">setPieces()</text>
 <text text-anchor="start" x="228" y="-793" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
@@ -161,7 +161,7 @@
 <text text-anchor="start" x="228" y="-718" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="241" y="-718" font-family="Helvetica,sans-Serif" font-size="10.00">Reset()</text>
 <text text-anchor="start" x="228" y="-703" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="241" y="-703" font-family="Helvetica,sans-Serif" font-size="10.00">SetCaseType()</text>
+<text text-anchor="start" x="241" y="-703" font-family="Helvetica,sans-Serif" font-size="10.00">setCaseType()</text>
 <text text-anchor="start" x="228" y="-688" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="241" y="-688" font-family="Helvetica,sans-Serif" font-size="10.00">allPieceCount()</text>
 <text text-anchor="start" x="228" y="-673" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
@@ -201,7 +201,7 @@
 <polygon fill="none" stroke="#63b8ff" points="203.62,-449.51 198.02,-444.97 200.05,-438.05 205.65,-442.59 203.62,-449.51"/>
 </a>
 </g>
-<text text-anchor="middle" x="233.5" y="-490" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &#45;bank</text>
+<text text-anchor="middle" x="241" y="-490" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &#45;m_bank</text>
 </g>
 <!-- Node5 -->
 <g id="Node000005" class="node">

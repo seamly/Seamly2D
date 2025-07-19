@@ -220,20 +220,20 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="9" y="-895" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
 <text text-anchor="start" x="22" y="-895" font-family="Helvetica,sans-Serif" font-size="10.00">showEvent()</text>
 <text text-anchor="start" x="9" y="-880" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="22" y="-880" font-family="Helvetica,sans-Serif" font-size="10.00">FillComboBoxPiecesList()</text>
+<text text-anchor="start" x="22" y="-880" font-family="Helvetica,sans-Serif" font-size="10.00">fillComboBoxPiecesList()</text>
 <text text-anchor="start" x="9" y="-865" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
 <text text-anchor="start" x="22" y="-865" font-family="Helvetica,sans-Serif" font-size="10.00">fillComboBoxPoints()</text>
 <text text-anchor="start" x="9" y="-850" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="22" y="-850" font-family="Helvetica,sans-Serif" font-size="10.00">FillComboBoxArcs()</text>
+<text text-anchor="start" x="22" y="-850" font-family="Helvetica,sans-Serif" font-size="10.00">fillComboBoxArcs()</text>
 <text text-anchor="start" x="9" y="-835" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="22" y="-835" font-family="Helvetica,sans-Serif" font-size="10.00">FillComboBoxSplines()</text>
+<text text-anchor="start" x="22" y="-835" font-family="Helvetica,sans-Serif" font-size="10.00">fillComboBoxSplines()</text>
 <text text-anchor="start" x="9" y="-820" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="22" y="-820" font-family="Helvetica,sans-Serif" font-size="10.00">FillComboBoxSplinesPath()</text>
+<text text-anchor="start" x="22" y="-820" font-family="Helvetica,sans-Serif" font-size="10.00">fillComboBoxSplinesPath()</text>
 <text text-anchor="start" x="9" y="-805" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="22" y="-805" font-family="Helvetica,sans-Serif" font-size="10.00">FillComboBoxCurves()</text>
+<text text-anchor="start" x="22" y="-805" font-family="Helvetica,sans-Serif" font-size="10.00">fillComboBoxCurves()</text>
 <text text-anchor="start" x="9" y="-790" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="22" y="-790" font-family="Helvetica,sans-Serif" font-size="10.00">FillComboBoxTypeLine()</text>
-<text text-anchor="start" x="22" y="-775" font-family="Helvetica,sans-Serif" font-size="10.00">and 35 more...</text>
+<text text-anchor="start" x="22" y="-790" font-family="Helvetica,sans-Serif" font-size="10.00">fillComboBoxLineType()</text>
+<text text-anchor="start" x="22" y="-775" font-family="Helvetica,sans-Serif" font-size="10.00">and 36 more...</text>
 <text text-anchor="start" x="9" y="-760" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
 <text text-anchor="start" x="22" y="-760" font-family="Helvetica,sans-Serif" font-size="10.00">FindNotExcludedNodeDown()</text>
 <text text-anchor="start" x="9" y="-745" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
@@ -330,10 +330,10 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="4" y="-3710" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="17" y="-3710" font-family="Helvetica,sans-Serif" font-size="10.00">GetPiece()</text>
 <text text-anchor="start" x="4" y="-3695" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="17" y="-3695" font-family="Helvetica,sans-Serif" font-size="10.00">GetPiecePath()</text>
+<text text-anchor="start" x="17" y="-3695" font-family="Helvetica,sans-Serif" font-size="10.00">getPiecePath()</text>
 <text text-anchor="start" x="4" y="-3680" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="17" y="-3680" font-family="Helvetica,sans-Serif" font-size="10.00">getVariable()</text>
-<text text-anchor="start" x="17" y="-3665" font-family="Helvetica,sans-Serif" font-size="10.00">and 34 more...</text>
+<text text-anchor="start" x="17" y="-3680" font-family="Helvetica,sans-Serif" font-size="10.00">pieceIdOfPath()</text>
+<text text-anchor="start" x="17" y="-3665" font-family="Helvetica,sans-Serif" font-size="10.00">and 35 more...</text>
 <text text-anchor="start" x="4" y="-3650" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="17" y="-3650" font-family="Helvetica,sans-Serif" font-size="10.00">GetFakeGObject()</text>
 <text text-anchor="start" x="4" y="-3635" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
@@ -483,9 +483,9 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="131" y="-1831" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="144" y="-1831" font-family="Helvetica,sans-Serif" font-size="10.00">AddRecord()</text>
 <text text-anchor="start" x="131" y="-1816" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="144" y="-1816" font-family="Helvetica,sans-Serif" font-size="10.00">AddNodes()</text>
+<text text-anchor="start" x="144" y="-1816" font-family="Helvetica,sans-Serif" font-size="10.00">addNodes()</text>
 <text text-anchor="start" x="131" y="-1801" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="144" y="-1801" font-family="Helvetica,sans-Serif" font-size="10.00">AddNodes()</text>
+<text text-anchor="start" x="144" y="-1801" font-family="Helvetica,sans-Serif" font-size="10.00">addNodes()</text>
 <text text-anchor="start" x="131" y="-1786" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="144" y="-1786" font-family="Helvetica,sans-Serif" font-size="10.00">CreateNode()</text>
 <text text-anchor="start" x="131" y="-1771" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
@@ -597,7 +597,7 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="495" y="-3126.5" font-family="Helvetica,sans-Serif" font-size="10.00">TagVariables</text>
 <text text-anchor="start" x="495" y="-3111.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 147 more...</text>
 <text text-anchor="start" x="482" y="-3096.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="495" y="-3096.5" font-family="Helvetica,sans-Serif" font-size="10.00">activeDraftBlock</text>
+<text text-anchor="start" x="495" y="-3096.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_activeDraftBlock</text>
 <text text-anchor="start" x="482" y="-3081.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
 <text text-anchor="start" x="495" y="-3081.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_DefaultLineColor</text>
 <text text-anchor="start" x="482" y="-3066.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>

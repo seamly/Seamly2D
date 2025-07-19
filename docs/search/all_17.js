@@ -36,8 +36,8 @@ var searchData=
   ['widthmainline_33',['widthmainline',['../db/d7d/global_8cpp.html#a0488081c01f6c5d5f05bbed5af47d22c',1,'widthMainLine:&#160;global.cpp'],['../d2/d49/global_8h.html#a0488081c01f6c5d5f05bbed5af47d22c',1,'widthMainLine:&#160;global.cpp']]],
   ['widthshoulder_5fm_34',['widthshoulder_m',['../dd/de9/measurements__def_8cpp.html#acf9e42d06ba04759807ef8e63f85687c',1,'widthShoulder_M:&#160;measurements_def.cpp'],['../d0/d91/measurements__def_8h.html#acf9e42d06ba04759807ef8e63f85687c',1,'widthShoulder_M:&#160;measurements_def.cpp']]],
   ['widthwaist_5fm_35',['widthwaist_m',['../d0/d91/measurements__def_8h.html#a8ebf7048b963d77d74a9cd8b241d83d1',1,'widthWaist_M:&#160;measurements_def.cpp'],['../dd/de9/measurements__def_8cpp.html#a8ebf7048b963d77d74a9cd8b241d83d1',1,'widthWaist_M:&#160;measurements_def.cpp']]],
-  ['windowslocale_36',['WindowsLocale',['../dc/d59/classVAbstractMainWindow.html#a3432cc05ebf6a5a358de02f55178156d',1,'VAbstractMainWindow']]],
-  ['withheader_37',['WithHeader',['../dc/d09/classDialogExportToCSV.html#afe7620570110ab11903349578b59c482',1,'DialogExportToCSV']]],
+  ['withheader_36',['WithHeader',['../dc/d09/classDialogExportToCSV.html#afe7620570110ab11903349578b59c482',1,'DialogExportToCSV']]],
+  ['wordtoggled_37',['wordToggled',['../d1/d42/classHistoryDialog.html#a1809af202ebc7c760840ae90057da408',1,'HistoryDialog']]],
   ['writeappid_38',['writeAppId',['../de/d1b/classdx__iface.html#a1b731ad982e0e73bc536e59751912df9',1,'dx_iface']]],
   ['writeblockrecords_39',['writeBlockRecords',['../de/d1b/classdx__iface.html#ae6caacacc471215206723ae72480e434',1,'dx_iface']]],
   ['writeblocks_40',['writeBlocks',['../de/d1b/classdx__iface.html#af068a4cb9a5c1e3022e1ed93a3c33141',1,'dx_iface']]],
@@ -47,7 +47,7 @@ var searchData=
   ['writeheader_44',['writeHeader',['../de/d1b/classdx__iface.html#a8e10a45367b00cb49ba4e094d57c5152',1,'dx_iface']]],
   ['writelayers_45',['writeLayers',['../de/d1b/classdx__iface.html#aa330d25140d54ead7795d1f5cd64b5a0',1,'dx_iface']]],
   ['writeltypes_46',['writeLTypes',['../de/d1b/classdx__iface.html#a7ff81808f71c727aafa6c573ceabff51',1,'dx_iface']]],
-  ['writesettings_47',['writesettings',['../db/d32/classLayoutSettingsDialog.html#a03acf3f62d4d53bfa2be58274b68baac',1,'LayoutSettingsDialog::WriteSettings()'],['../d6/d1a/classMainWindow.html#a56a5e4d5e0a022e8c1ecf350d2916ade',1,'MainWindow::WriteSettings()'],['../d8/d61/classTMainWindow.html#a5b4ea54c3a4cb7c61263aadd10398714',1,'TMainWindow::WriteSettings()'],['../de/dbd/classExportLayoutDialog.html#acddbbe1458589ca2c1fdb96ce369b225',1,'ExportLayoutDialog::writeSettings()'],['../d3/d63/classMeasurementDatabaseDialog.html#a0eb90e4d703a64d58f6a3243a99c87d1',1,'MeasurementDatabaseDialog::writeSettings()']]],
+  ['writesettings_47',['writesettings',['../de/dbd/classExportLayoutDialog.html#acddbbe1458589ca2c1fdb96ce369b225',1,'ExportLayoutDialog::writeSettings()'],['../d3/d63/classMeasurementDatabaseDialog.html#a0eb90e4d703a64d58f6a3243a99c87d1',1,'MeasurementDatabaseDialog::writeSettings()'],['../db/d32/classLayoutSettingsDialog.html#a03acf3f62d4d53bfa2be58274b68baac',1,'LayoutSettingsDialog::WriteSettings()'],['../d6/d1a/classMainWindow.html#a56a5e4d5e0a022e8c1ecf350d2916ade',1,'MainWindow::WriteSettings()'],['../d8/d61/classTMainWindow.html#a5b4ea54c3a4cb7c61263aadd10398714',1,'TMainWindow::WriteSettings()']]],
   ['writetextstyles_48',['writeTextstyles',['../de/d1b/classdx__iface.html#af4fc28ddd12ba1554f747e0a78463f84',1,'dx_iface']]],
   ['writevports_49',['writeVports',['../de/d1b/classdx__iface.html#a5062fc90dc97c5172e0fe8945eaa970b',1,'dx_iface']]]
 ];

@@ -306,9 +306,9 @@
 <text text-anchor="start" x="917.5" y="-2107" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="930.5" y="-2107" font-family="Helvetica,sans-Serif" font-size="10.00">AddRecord()</text>
 <text text-anchor="start" x="917.5" y="-2092" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="930.5" y="-2092" font-family="Helvetica,sans-Serif" font-size="10.00">AddNodes()</text>
+<text text-anchor="start" x="930.5" y="-2092" font-family="Helvetica,sans-Serif" font-size="10.00">addNodes()</text>
 <text text-anchor="start" x="917.5" y="-2077" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="930.5" y="-2077" font-family="Helvetica,sans-Serif" font-size="10.00">AddNodes()</text>
+<text text-anchor="start" x="930.5" y="-2077" font-family="Helvetica,sans-Serif" font-size="10.00">addNodes()</text>
 <text text-anchor="start" x="917.5" y="-2062" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="930.5" y="-2062" font-family="Helvetica,sans-Serif" font-size="10.00">CreateNode()</text>
 <text text-anchor="start" x="917.5" y="-2047" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
@@ -450,7 +450,7 @@
 <text text-anchor="start" x="589.5" y="-3530.5" font-family="Helvetica,sans-Serif" font-size="10.00">TagVariables</text>
 <text text-anchor="start" x="589.5" y="-3515.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 147 more...</text>
 <text text-anchor="start" x="576.5" y="-3500.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="589.5" y="-3500.5" font-family="Helvetica,sans-Serif" font-size="10.00">activeDraftBlock</text>
+<text text-anchor="start" x="589.5" y="-3500.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_activeDraftBlock</text>
 <text text-anchor="start" x="576.5" y="-3485.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
 <text text-anchor="start" x="589.5" y="-3485.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_DefaultLineColor</text>
 <text text-anchor="start" x="576.5" y="-3470.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
@@ -735,10 +735,10 @@
 <text text-anchor="start" x="1020.5" y="-4114" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="1033.5" y="-4114" font-family="Helvetica,sans-Serif" font-size="10.00">GetPiece()</text>
 <text text-anchor="start" x="1020.5" y="-4099" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="1033.5" y="-4099" font-family="Helvetica,sans-Serif" font-size="10.00">GetPiecePath()</text>
+<text text-anchor="start" x="1033.5" y="-4099" font-family="Helvetica,sans-Serif" font-size="10.00">getPiecePath()</text>
 <text text-anchor="start" x="1020.5" y="-4084" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="1033.5" y="-4084" font-family="Helvetica,sans-Serif" font-size="10.00">getVariable()</text>
-<text text-anchor="start" x="1033.5" y="-4069" font-family="Helvetica,sans-Serif" font-size="10.00">and 34 more...</text>
+<text text-anchor="start" x="1033.5" y="-4084" font-family="Helvetica,sans-Serif" font-size="10.00">pieceIdOfPath()</text>
+<text text-anchor="start" x="1033.5" y="-4069" font-family="Helvetica,sans-Serif" font-size="10.00">and 35 more...</text>
 <text text-anchor="start" x="1020.5" y="-4054" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="1033.5" y="-4054" font-family="Helvetica,sans-Serif" font-size="10.00">GetFakeGObject()</text>
 <text text-anchor="start" x="1020.5" y="-4039" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>

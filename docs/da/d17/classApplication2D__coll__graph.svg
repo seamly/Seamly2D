@@ -239,7 +239,7 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="195" y="-1464.5" font-family="Helvetica,sans-Serif" font-size="10.00">setTemplatePath()</text>
 <text text-anchor="start" x="182" y="-1449.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="195" y="-1449.5" font-family="Helvetica,sans-Serif" font-size="10.00">getLabelTemplatePath()</text>
-<text text-anchor="start" x="195" y="-1434.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 277 more...</text>
+<text text-anchor="start" x="195" y="-1434.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 283 more...</text>
 <text text-anchor="start" x="182" y="-1419.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="195" y="-1419.5" font-family="Helvetica,sans-Serif" font-size="10.00">SharePath()</text>
 <text text-anchor="start" x="182" y="-1404.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
@@ -340,7 +340,7 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="375.5" y="-1518.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
 <text text-anchor="start" x="386" y="-1518.5" font-family="Helvetica,sans-Serif" font-size="10.00">endPoint</text>
 <text text-anchor="start" x="375.5" y="-1503.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="386" y="-1503.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_ptStartPos</text>
+<text text-anchor="start" x="386" y="-1503.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_startPos</text>
 <text text-anchor="start" x="375.5" y="-1488.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
 <text text-anchor="start" x="386" y="-1488.5" font-family="Helvetica,sans-Serif" font-size="10.00">cursorPos</text>
 <text text-anchor="start" x="373" y="-1473.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
@@ -580,7 +580,7 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="769" y="-1788.5" font-family="Helvetica,sans-Serif" font-size="10.00">TagVariables</text>
 <text text-anchor="start" x="769" y="-1773.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 147 more...</text>
 <text text-anchor="start" x="756" y="-1758.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="769" y="-1758.5" font-family="Helvetica,sans-Serif" font-size="10.00">activeDraftBlock</text>
+<text text-anchor="start" x="769" y="-1758.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_activeDraftBlock</text>
 <text text-anchor="start" x="756" y="-1743.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
 <text text-anchor="start" x="769" y="-1743.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_DefaultLineColor</text>
 <text text-anchor="start" x="756" y="-1728.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
@@ -1021,10 +1021,10 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="930" y="-1488.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="943" y="-1488.5" font-family="Helvetica,sans-Serif" font-size="10.00">GetPiece()</text>
 <text text-anchor="start" x="930" y="-1473.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="943" y="-1473.5" font-family="Helvetica,sans-Serif" font-size="10.00">GetPiecePath()</text>
+<text text-anchor="start" x="943" y="-1473.5" font-family="Helvetica,sans-Serif" font-size="10.00">getPiecePath()</text>
 <text text-anchor="start" x="930" y="-1458.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="943" y="-1458.5" font-family="Helvetica,sans-Serif" font-size="10.00">getVariable()</text>
-<text text-anchor="start" x="943" y="-1443.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 34 more...</text>
+<text text-anchor="start" x="943" y="-1458.5" font-family="Helvetica,sans-Serif" font-size="10.00">pieceIdOfPath()</text>
+<text text-anchor="start" x="943" y="-1443.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 35 more...</text>
 <text text-anchor="start" x="930" y="-1428.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="943" y="-1428.5" font-family="Helvetica,sans-Serif" font-size="10.00">GetFakeGObject()</text>
 <text text-anchor="start" x="930" y="-1413.5" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>

@@ -6,6 +6,5 @@ var searchData=
   ['obj_3',['OBJ',['../d4/da4/def_8h.html#a1f9b518e0e2d2c25a541f09e2e49a9d8af34d534adfb78a9e6432be4621a93eec',1,'def.h']]],
   ['offset_4',['Offset',['../d1/d30/dialogtool_8h.html#abc68dcea697b89a6ed3d87e93bf65e77adfd0a82c4bf37b1e90b690a22a20692e',1,'dialogtool.h']]],
   ['opencontour_5',['OpenContour',['../d7/d5b/options_8h.html#a8947ef2200ae72a7a9769cb27d8a5dd3a71b962d4cda2ca5b334f2f17ad2666d4',1,'options.h']]],
-  ['operation_6',['Operation',['../d4/da4/def_8h.html#a474a10f771dff4181411f5ff47029582a2a78ed76450c3cb42320882b3e055b31',1,'def.h']]],
-  ['outside_7',['Outside',['../d9/d3d/classVPosition.html#a0e4742abd3fb33c3c712dbf88ff74dc6a76fbf0ccd7fcd64879c2ff2119dc15a4',1,'VPosition']]]
+  ['operation_6',['Operation',['../d4/da4/def_8h.html#a474a10f771dff4181411f5ff47029582a2a78ed76450c3cb42320882b3e055b31',1,'def.h']]]
 ];

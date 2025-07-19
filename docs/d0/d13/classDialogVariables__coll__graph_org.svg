@@ -173,20 +173,20 @@
 <text text-anchor="start" x="115" y="-898" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
 <text text-anchor="start" x="128" y="-898" font-family="Helvetica,sans-Serif" font-size="10.00">showEvent()</text>
 <text text-anchor="start" x="115" y="-883" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="128" y="-883" font-family="Helvetica,sans-Serif" font-size="10.00">FillComboBoxPiecesList()</text>
+<text text-anchor="start" x="128" y="-883" font-family="Helvetica,sans-Serif" font-size="10.00">fillComboBoxPiecesList()</text>
 <text text-anchor="start" x="115" y="-868" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
 <text text-anchor="start" x="128" y="-868" font-family="Helvetica,sans-Serif" font-size="10.00">fillComboBoxPoints()</text>
 <text text-anchor="start" x="115" y="-853" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="128" y="-853" font-family="Helvetica,sans-Serif" font-size="10.00">FillComboBoxArcs()</text>
+<text text-anchor="start" x="128" y="-853" font-family="Helvetica,sans-Serif" font-size="10.00">fillComboBoxArcs()</text>
 <text text-anchor="start" x="115" y="-838" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="128" y="-838" font-family="Helvetica,sans-Serif" font-size="10.00">FillComboBoxSplines()</text>
+<text text-anchor="start" x="128" y="-838" font-family="Helvetica,sans-Serif" font-size="10.00">fillComboBoxSplines()</text>
 <text text-anchor="start" x="115" y="-823" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="128" y="-823" font-family="Helvetica,sans-Serif" font-size="10.00">FillComboBoxSplinesPath()</text>
+<text text-anchor="start" x="128" y="-823" font-family="Helvetica,sans-Serif" font-size="10.00">fillComboBoxSplinesPath()</text>
 <text text-anchor="start" x="115" y="-808" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="128" y="-808" font-family="Helvetica,sans-Serif" font-size="10.00">FillComboBoxCurves()</text>
+<text text-anchor="start" x="128" y="-808" font-family="Helvetica,sans-Serif" font-size="10.00">fillComboBoxCurves()</text>
 <text text-anchor="start" x="115" y="-793" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="128" y="-793" font-family="Helvetica,sans-Serif" font-size="10.00">FillComboBoxTypeLine()</text>
-<text text-anchor="start" x="128" y="-778" font-family="Helvetica,sans-Serif" font-size="10.00">and 35 more...</text>
+<text text-anchor="start" x="128" y="-793" font-family="Helvetica,sans-Serif" font-size="10.00">fillComboBoxLineType()</text>
+<text text-anchor="start" x="128" y="-778" font-family="Helvetica,sans-Serif" font-size="10.00">and 36 more...</text>
 <text text-anchor="start" x="115" y="-763" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
 <text text-anchor="start" x="128" y="-763" font-family="Helvetica,sans-Serif" font-size="10.00">FindNotExcludedNodeDown()</text>
 <text text-anchor="start" x="115" y="-748" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
@@ -283,10 +283,10 @@
 <text text-anchor="start" x="4" y="-3724" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="17" y="-3724" font-family="Helvetica,sans-Serif" font-size="10.00">GetPiece()</text>
 <text text-anchor="start" x="4" y="-3709" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="17" y="-3709" font-family="Helvetica,sans-Serif" font-size="10.00">GetPiecePath()</text>
+<text text-anchor="start" x="17" y="-3709" font-family="Helvetica,sans-Serif" font-size="10.00">getPiecePath()</text>
 <text text-anchor="start" x="4" y="-3694" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="17" y="-3694" font-family="Helvetica,sans-Serif" font-size="10.00">getVariable()</text>
-<text text-anchor="start" x="17" y="-3679" font-family="Helvetica,sans-Serif" font-size="10.00">and 34 more...</text>
+<text text-anchor="start" x="17" y="-3694" font-family="Helvetica,sans-Serif" font-size="10.00">pieceIdOfPath()</text>
+<text text-anchor="start" x="17" y="-3679" font-family="Helvetica,sans-Serif" font-size="10.00">and 35 more...</text>
 <text text-anchor="start" x="4" y="-3664" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="17" y="-3664" font-family="Helvetica,sans-Serif" font-size="10.00">GetFakeGObject()</text>
 <text text-anchor="start" x="4" y="-3649" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
@@ -404,7 +404,7 @@
 <text text-anchor="start" x="357" y="-2036" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="370" y="-2036" font-family="Helvetica,sans-Serif" font-size="10.00">AttrReadOnly</text>
 <text text-anchor="start" x="359.5" y="-2021" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="370" y="-2021" font-family="Helvetica,sans-Serif" font-size="10.00">mode</text>
+<text text-anchor="start" x="370" y="-2021" font-family="Helvetica,sans-Serif" font-size="10.00">m_stage</text>
 <text text-anchor="start" x="357" y="-2006" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="370" y="-2006" font-family="Helvetica,sans-Serif" font-size="10.00">VPattern()</text>
 <text text-anchor="start" x="357" y="-1991" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
@@ -422,10 +422,10 @@
 <text text-anchor="start" x="357" y="-1901" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="370" y="-1901" font-family="Helvetica,sans-Serif" font-size="10.00">getActiveBasePoint()</text>
 <text text-anchor="start" x="357" y="-1886" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="370" y="-1886" font-family="Helvetica,sans-Serif" font-size="10.00">getActivePatternPieces()</text>
+<text text-anchor="start" x="370" y="-1886" font-family="Helvetica,sans-Serif" font-size="10.00">getDraftStage()</text>
 <text text-anchor="start" x="357" y="-1871" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="370" y="-1871" font-family="Helvetica,sans-Serif" font-size="10.00">setXMLContent()</text>
-<text text-anchor="start" x="370" y="-1856" font-family="Helvetica,sans-Serif" font-size="10.00">and 24 more...</text>
+<text text-anchor="start" x="370" y="-1871" font-family="Helvetica,sans-Serif" font-size="10.00">setDraftStage()</text>
+<text text-anchor="start" x="370" y="-1856" font-family="Helvetica,sans-Serif" font-size="10.00">and 26 more...</text>
 <text text-anchor="start" x="357" y="-1841" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="370" y="-1841" font-family="Helvetica,sans-Serif" font-size="10.00">LiteParseTree()</text>
 <text text-anchor="start" x="357" y="-1826" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
@@ -435,7 +435,7 @@
 <text text-anchor="start" x="359.5" y="-1796" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
 <text text-anchor="start" x="370" y="-1796" font-family="Helvetica,sans-Serif" font-size="10.00">parseDraftBlockElement()</text>
 <text text-anchor="start" x="359.5" y="-1781" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
-<text text-anchor="start" x="370" y="-1781" font-family="Helvetica,sans-Serif" font-size="10.00">ParseDrawMode()</text>
+<text text-anchor="start" x="370" y="-1781" font-family="Helvetica,sans-Serif" font-size="10.00">ParseDraftStage()</text>
 <text text-anchor="start" x="359.5" y="-1766" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
 <text text-anchor="start" x="370" y="-1766" font-family="Helvetica,sans-Serif" font-size="10.00">parseDraftImages()</text>
 <text text-anchor="start" x="359.5" y="-1751" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
@@ -450,7 +450,7 @@
 <text text-anchor="start" x="370" y="-1691" font-family="Helvetica,sans-Serif" font-size="10.00">ParsePiecePatternInfo()</text>
 <text text-anchor="start" x="359.5" y="-1676" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;</text>
 <text text-anchor="start" x="370" y="-1676" font-family="Helvetica,sans-Serif" font-size="10.00">ParsePieceGrainline()</text>
-<text text-anchor="start" x="370" y="-1661" font-family="Helvetica,sans-Serif" font-size="10.00">and 66 more...</text>
+<text text-anchor="start" x="370" y="-1661" font-family="Helvetica,sans-Serif" font-size="10.00">and 67 more...</text>
 <polygon fill="#666666" stroke="#666666" points="353,-2046 353,-2046 501,-2046 501,-2046 353,-2046"/>
 <polygon fill="#666666" stroke="#666666" points="353,-2016 353,-2016 368,-2016 368,-2016 353,-2016"/>
 <polygon fill="#666666" stroke="#666666" points="368,-2016 368,-2016 501,-2016 501,-2016 368,-2016"/>
@@ -519,9 +519,9 @@
 <text text-anchor="start" x="114" y="-1834" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="127" y="-1834" font-family="Helvetica,sans-Serif" font-size="10.00">AddRecord()</text>
 <text text-anchor="start" x="114" y="-1819" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="127" y="-1819" font-family="Helvetica,sans-Serif" font-size="10.00">AddNodes()</text>
+<text text-anchor="start" x="127" y="-1819" font-family="Helvetica,sans-Serif" font-size="10.00">addNodes()</text>
 <text text-anchor="start" x="114" y="-1804" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
-<text text-anchor="start" x="127" y="-1804" font-family="Helvetica,sans-Serif" font-size="10.00">AddNodes()</text>
+<text text-anchor="start" x="127" y="-1804" font-family="Helvetica,sans-Serif" font-size="10.00">addNodes()</text>
 <text text-anchor="start" x="114" y="-1789" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
 <text text-anchor="start" x="127" y="-1789" font-family="Helvetica,sans-Serif" font-size="10.00">CreateNode()</text>
 <text text-anchor="start" x="114" y="-1774" font-family="Helvetica,sans-Serif" font-size="10.00">+</text>
@@ -633,7 +633,7 @@
 <text text-anchor="start" x="400" y="-3140.5" font-family="Helvetica,sans-Serif" font-size="10.00">TagVariables</text>
 <text text-anchor="start" x="400" y="-3125.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 147 more...</text>
 <text text-anchor="start" x="387" y="-3110.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
-<text text-anchor="start" x="400" y="-3110.5" font-family="Helvetica,sans-Serif" font-size="10.00">activeDraftBlock</text>
+<text text-anchor="start" x="400" y="-3110.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_activeDraftBlock</text>
 <text text-anchor="start" x="387" y="-3095.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>
 <text text-anchor="start" x="400" y="-3095.5" font-family="Helvetica,sans-Serif" font-size="10.00">m_DefaultLineColor</text>
 <text text-anchor="start" x="387" y="-3080.5" font-family="Helvetica,sans-Serif" font-size="10.00">#</text>

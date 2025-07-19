@@ -56,7 +56,7 @@ var searchData=
   ['lineweightproperty_53',['LineWeightProperty',['../d8/ddf/classVPE_1_1LineWeightProperty.html#a1055ccc04b0242746a031b1abdbd3fe2',1,'VPE::LineWeightProperty']]],
   ['listall_54',['ListAll',['../d9/d6d/classMeasurementDoc.html#a7d9be652311d803aa96104ab37efd304',1,'MeasurementDoc']]],
   ['listarcexpressions_55',['ListArcExpressions',['../d8/dba/classVAbstractPattern.html#a13377df721d4b0303eca50e23fbd98e3',1,'VAbstractPattern']]],
-  ['listchanged_56',['ListChanged',['../d4/d7f/classDialogInternalPath.html#a5e90934d638077ffaae5a684bf8453bc',1,'DialogInternalPath']]],
+  ['listchanged_56',['listChanged',['../d9/d71/classInternalPathDialog.html#a43917a06ece7d8b7434716beb723aed8',1,'InternalPathDialog']]],
   ['listelarcexpressions_57',['ListElArcExpressions',['../d8/dba/classVAbstractPattern.html#a9d37fec24748662337d80ccad34871ef',1,'VAbstractPattern']]],
   ['listexpressions_58',['ListExpressions',['../d8/dba/classVAbstractPattern.html#ace38e9782ed82518017a02180d12c39d',1,'VAbstractPattern']]],
   ['listgrainlineexpressions_59',['ListGrainlineExpressions',['../d8/dba/classVAbstractPattern.html#a91837df8ac9899d6cf846e4bf360f958',1,'VAbstractPattern']]],
