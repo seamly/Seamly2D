@@ -1,5 +1,8 @@
 var namespaces_dup =
 [
+    [ "anonymous_namespace{dialogexporttocsv.cpp}", "d2/d4e/namespaceanonymous__namespace_02dialogexporttocsv_8cpp_03.html", [
+      [ "encodingName", "d2/d4e/namespaceanonymous__namespace_02dialogexporttocsv_8cpp_03.html#a6f7c62063135531346d419500b1f7894", null ]
+    ] ],
     [ "anonymous_namespace{dialogtool.cpp}", "d3/d7d/namespaceanonymous__namespace_02dialogtool_8cpp_03.html", [
       [ "RowId", "d3/d7d/namespaceanonymous__namespace_02dialogtool_8cpp_03.html#ac2e003f541cb5afc14468f3b6945ef46", null ]
     ] ],
@@ -185,7 +188,7 @@ var namespaces_dup =
     [ "anonymous_namespace{vlayoutpiece.cpp}", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html", [
       [ "ConvertInternalPaths", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#aee188e904012b2c56f9a99b8a90b554b", null ],
       [ "CorrectPosition", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a26982c628e932aec0813e1c375387df4", null ],
-      [ "findGrainlineGeometry", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a51f890cf890f9a7d83130b9bb733b5ba", null ],
+      [ "findGrainlineGeometry", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a7127c03c02e6cd087bc720219e7d9556", null ],
       [ "findLabelGeometry", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a04f05a7019f2d0feb9fc0abc773ad54e", null ],
       [ "IsItemContained", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a4867ae9889201fd1784404a9a1fe75ea", null ],
       [ "PieceLabelText", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a9d5be9c5672d55404b37efffeccaa53f", null ],

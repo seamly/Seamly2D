@@ -1,7 +1,7 @@
 var classVAbstractApplication =
 [
     [ "VAbstractApplication", "db/dda/classVAbstractApplication.html#af7726df174e0447e9922c0cb8f3455fd", null ],
-    [ "~VAbstractApplication", "db/dda/classVAbstractApplication.html#a3323dd8b7f70a78e93587e5c441b05b5", null ],
+    [ "~VAbstractApplication", "db/dda/classVAbstractApplication.html#ac1af9dbece2a90fc6d47b9c4285be109", null ],
     [ "ClearTranslation", "db/dda/classVAbstractApplication.html#a62efee28a6929615e17eb77f79d57caa", null ],
     [ "fromPixel", "db/dda/classVAbstractApplication.html#a50d149897aa4a87d01a071420d86c6c5", null ],
     [ "getCurrentData", "db/dda/classVAbstractApplication.html#a66802fa332e70eed60f483f1a725bef1", null ],
@@ -39,6 +39,7 @@ var classVAbstractApplication =
     [ "currentScene", "db/dda/classVAbstractApplication.html#a52285ac28a06f9adb5420456333fbdf1", null ],
     [ "data", "db/dda/classVAbstractApplication.html#a226cf6b25116f6408e94fe87d53e09d7", null ],
     [ "doc", "db/dda/classVAbstractApplication.html#a83712518dcd81978d3f54ef8cb77bf7f", null ],
+    [ "m_settings", "db/dda/classVAbstractApplication.html#a7f5bcec59e4fe14e4ddd7266744e0122", null ],
     [ "mainWindow", "db/dda/classVAbstractApplication.html#a09295c357a27ac2abbc72bceb293d8f4", null ],
     [ "openingPattern", "db/dda/classVAbstractApplication.html#a0d83297b63dae585ae44f452a4752ef4", null ],
     [ "patternFilePath", "db/dda/classVAbstractApplication.html#ae40bd06508a5f0b1e485637b59cd3c8d", null ],
@@ -47,6 +48,5 @@ var classVAbstractApplication =
     [ "qtTranslator", "db/dda/classVAbstractApplication.html#a788c21e17e61da37d8640b8b528c144d", null ],
     [ "qtxmlTranslator", "db/dda/classVAbstractApplication.html#a8284d973270795306e00c450aaca6700", null ],
     [ "sceneView", "db/dda/classVAbstractApplication.html#a21845de2391914691b5978a4f3a3cf35", null ],
-    [ "settings", "db/dda/classVAbstractApplication.html#a50de82036e454190206354a81bd24589", null ],
     [ "undoStack", "db/dda/classVAbstractApplication.html#aa76510ae070b475c90495d3606ecf1c6", null ]
 ];
