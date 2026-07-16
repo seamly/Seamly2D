@@ -37,6 +37,7 @@ var namespaces_dup =
       [ "pointNameSize", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a7136b7a2ed9ead08f0f849054160457b", null ],
       [ "settingBackupPath", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a33d50aa96456f560a5ac1845a77a682c", null ],
       [ "settingConfigurationAddress", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a7308b7a66e0e6d69b9b7aab47d4253d3", null ],
+      [ "settingConfigurationAppTheme", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#acaad9fa4b240d692d418f29f99cb9ead", null ],
       [ "settingConfigurationAutosaveState", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a7daef37ab258f5781330620fd1c881f0", null ],
       [ "settingConfigurationAutosaveTime", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a3a9b2311b6fa39fad1eb5a4c529d641d", null ],
       [ "settingConfigurationCity", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#aad6035303a156424a369fa4f57eecc09", null ],
@@ -189,14 +190,14 @@ var namespaces_dup =
       [ "SaveNodeCanonically", "d6/db9/namespaceanonymous__namespace_02vdomdocument_8cpp_03.html#a48dca2f0db8a0c3d00d69eff6118f8bf", null ]
     ] ],
     [ "anonymous_namespace{vlayoutpiece.cpp}", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html", [
-      [ "ConvertInternalPaths", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#aee188e904012b2c56f9a99b8a90b554b", null ],
-      [ "CorrectPosition", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a26982c628e932aec0813e1c375387df4", null ],
+      [ "convertInternalPaths", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a5e2795caa03fd4edf984846671f95daa", null ],
+      [ "correctPosition", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a000c655a2dfc2f7c09419b0a643ed9bc", null ],
       [ "findGrainlineGeometry", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a7127c03c02e6cd087bc720219e7d9556", null ],
       [ "findLabelGeometry", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a04f05a7019f2d0feb9fc0abc773ad54e", null ],
-      [ "IsItemContained", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a4867ae9889201fd1784404a9a1fe75ea", null ],
-      [ "PieceLabelText", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a9d5be9c5672d55404b37efffeccaa53f", null ],
-      [ "PrepareAllowance", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a52a0730adfd50a44e6904c7028709d88", null ],
-      [ "RotatePoint", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#ac9b8474c898648af470a9dde3441a5e8", null ]
+      [ "getLabelText", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a9bda5a4945f75b8a9ba0278df977eb14", null ],
+      [ "isItemContained", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#aafadb68390e27769bbae08816fae07c5", null ],
+      [ "prepareAllowance", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#aa81bfa3d30caf5623bb2b64bad5e7ec6", null ],
+      [ "rotatePoint", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#abe938cdf3c612c15f09105c6214a6dc2", null ]
     ] ],
     [ "anonymous_namespace{vnodedetail.cpp}", "d9/d83/namespaceanonymous__namespace_02vnodedetail_8cpp_03.html", [
       [ "ConvertAfter", "d9/d83/namespaceanonymous__namespace_02vnodedetail_8cpp_03.html#a6333f8827e9243cf90c85518487730c6", null ],
@@ -259,7 +260,7 @@ var namespaces_dup =
       [ "settingTiledPDFPaperWidth", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#abeda08ed7a84bd924f68223ffba2e656", null ]
     ] ],
     [ "anonymous_namespace{vtextgraphicsitem.cpp}", "d4/d16/namespaceanonymous__namespace_02vtextgraphicsitem_8cpp_03.html", [
-      [ "GetBoundingRect", "d4/d16/namespaceanonymous__namespace_02vtextgraphicsitem_8cpp_03.html#aa45b98c164dcad8b951baf9d6bb2f745", null ]
+      [ "getBoundingRect", "d4/d16/namespaceanonymous__namespace_02vtextgraphicsitem_8cpp_03.html#ac6b26a0ea6e45c81110d6b48f997eee2", null ]
     ] ],
     [ "anonymous_namespace{vtextmanager.cpp}", "db/dc8/namespaceanonymous__namespace_02vtextmanager_8cpp_03.html", [
       [ "InitPiecePlaceholders", "db/dc8/namespaceanonymous__namespace_02vtextmanager_8cpp_03.html#a4ba47a191ccd57fb49539a3fd571206b", null ],
