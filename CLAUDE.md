@@ -35,6 +35,14 @@ Two toolchains are in use — do not treat the difference as an error:
 - `origin` = `seamly/Seamly2D` — the work repo; ALL pushes and pull requests go here
 - `upstream` = `FashionFreedom/Seamly2D` — the public parent project; **NEVER push to it or open PRs against it** (fetch only; its push URL is set to `DISABLED_NEVER_PUSH` in the local clone to enforce this)
 
+### Branch strategy and endgame (decided 2026-07-18)
+
+- `seamly/Seamly2D` deliberately remains a GitHub **fork** of `FashionFreedom/Seamly2D` — do NOT detach / "Leave fork network"; the fork link is required for the final upstream PR
+- `develop` on origin is a **pristine mirror of upstream develop**: update it only by syncing from upstream; never merge project work into it before the endgame
+- All project work accumulates on `run-seamlyLayout`; keep it current by merging `develop` into it (that direction only)
+- **Endgame:** when the project is finished, ONE pull request `seamly:run-seamlyLayout` → `FashionFreedom:develop` — the single sanctioned upstream PR, created by the user (not by Claude); after upstream merges it, sync origin `develop` from upstream and retire `run-seamlyLayout`
+- GitHub's green "Compare & pull request" banner on the fork defaults to FashionFreedom as base and cannot be disabled — never use it; create PRs via `gh` (default repo pinned to origin) or from the fork's own branch pages
+
 ## Task Tracking
 
 - `PROJECT_PLAN.md` — the current approved implementation plan
