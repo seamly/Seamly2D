@@ -19,6 +19,7 @@ var classApplication2D =
     [ "openSettings", "da/db1/classApplication2D.html#a1da39c4875a2498a0d323e3089fffef8", null ],
     [ "pointNameLanguages", "da/db1/classApplication2D.html#ab9747f73b57ae84a4563fdc86019035f", null ],
     [ "Seamly2DSettings", "da/db1/classApplication2D.html#a978f62b6565ede1bc1b0d920370bfeb0", null ],
+    [ "seamlyLayoutFilePath", "da/db1/classApplication2D.html#a111f477268b69695ba22d256119c0f1a", null ],
     [ "seamlyMeFilePath", "da/db1/classApplication2D.html#ab9a0e0ccc40693db35ca00669322cad8", null ],
     [ "setAutoSaveTimer", "da/db1/classApplication2D.html#a40f49fc9e5e7e0862e9f994985959644", null ],
     [ "setTheme", "da/db1/classApplication2D.html#a81284062d0a0ef844a100898eee712c1", null ],

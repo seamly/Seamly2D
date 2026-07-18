@@ -25,9 +25,9 @@
 <text text-anchor="start" x="8" y="-216.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ SetPathPattern()</text>
 <text text-anchor="start" x="8" y="-205.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getLayoutPath()</text>
 <text text-anchor="start" x="8" y="-194.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ SetPathLayout()</text>
-<text text-anchor="start" x="8" y="-183.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ GetGraphicalOutput()</text>
-<text text-anchor="start" x="8" y="-172.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ SetGraphicalOutput()</text>
-<text text-anchor="start" x="8" y="-161.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 58 more...</text>
+<text text-anchor="start" x="8" y="-183.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getSeamlyLayoutAppPath()</text>
+<text text-anchor="start" x="8" y="-172.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setSeamlyLayoutAppPath()</text>
+<text text-anchor="start" x="8" y="-161.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 60 more...</text>
 <text text-anchor="start" x="8" y="-150.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getDefaultPatternPath()</text>
 <text text-anchor="start" x="8" y="-139.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getDefaultLayoutPath()</text>
 <text text-anchor="start" x="8" y="-128.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ GetDefLayoutShift()</text>

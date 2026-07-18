@@ -1,8 +1,8 @@
 var searchData=
 [
   ['label_0',['Label',['../de/d21/namespaceVPE.html#a46160b96cc9be71599e98b85a4093acaab021df6aac4654c454f46c77646e745f',1,'VPE']]],
-  ['labeldatachanged_1',['labelDataChanged',['../d4/d15/classDialogPatternProperties.html#a00eabb2f7c5d48118847d5189cd2b16c',1,'DialogPatternProperties']]],
-  ['labeldatachanged_2',['LabelDataChanged',['../d4/d15/classDialogPatternProperties.html#a219cd8f095c101e32be55b60ce12bddc',1,'DialogPatternProperties']]],
+  ['labeldatachanged_1',['LabelDataChanged',['../d4/d15/classDialogPatternProperties.html#a219cd8f095c101e32be55b60ce12bddc',1,'DialogPatternProperties']]],
+  ['labeldatachanged_2',['labelDataChanged',['../d4/d15/classDialogPatternProperties.html#a00eabb2f7c5d48118847d5189cd2b16c',1,'DialogPatternProperties']]],
   ['labeleditformula_3',['labelEditFormula',['../d2/d7b/classDialogTool.html#a8842d70341f4aa1f27b6787ce83f433a',1,'DialogTool']]],
   ['labeleditnamepoint_4',['labelEditNamePoint',['../d2/d7b/classDialogTool.html#a83828f6965c85a1d6a2b2503fad08cb6',1,'DialogTool']]],
   ['labelgradationheights_5',['labelGradationHeights',['../d8/d61/classTMainWindow.html#af7a4bb3195161c9d90b103915b2d50ab',1,'TMainWindow']]],
@@ -80,8 +80,8 @@ var searchData=
   ['length_77',['length',['../d3/d55/classTranscodeFromStr.html#a90566d6476f6447c93b4d69710ebafdf',1,'TranscodeFromStr']]],
   ['length_78',['Length',['../d3/d84/classDialogArcWithLength.html#a882ba12af15b1c1c0e21383bd04ea815',1,'DialogArcWithLength']]],
   ['length_79',['length',['../da/d35/structRowData.html#a334516022c6d8fca21f8b8992762425c',1,'RowData::length()'],['../d3/d84/classDialogArcWithLength.html#af6f050822ae291e3d4c39e64969b12f1',1,'DialogArcWithLength::length()'],['../dd/d50/classVisToolMove.html#ae5b7e92296e4f2575a30f13925ed5a46',1,'VisToolMove::length()'],['../de/d5b/classVisToolAlongLine.html#ab8591c0dcbdbfeb6b721aff2d43ee2d9',1,'VisToolAlongLine::length()'],['../dd/d3b/classVisToolBisector.html#a8f57657fc78e5741d895199e001462f8',1,'VisToolBisector::length()'],['../d2/d21/classVisToolEndLine.html#a76ea1bf08ffab54a420e6d6e254d7b60',1,'VisToolEndLine::length()'],['../de/d5c/classVisToolNormal.html#afef80adeaf3a7372562dc987aa8954af',1,'VisToolNormal::length()'],['../d7/df0/classVisToolShoulderPoint.html#aa762f1f237606d77e325bf4cea539bed',1,'VisToolShoulderPoint::length()'],['../db/d33/classVisToolArcWithLength.html#aa73054af30c72e1fd8f08e1a9996ee14',1,'VisToolArcWithLength::length()'],['../d4/d21/classRefArrayOf.html#ab1bdece7cf01307bee4e5ba369fea01f',1,'RefArrayOf::length()'],['../d8/dad/classTranscodeToStr.html#a04fd62931ea51a6642af0ff5913679ff',1,'TranscodeToStr::length()']]],
-  ['length1_80',['length1',['../db/d0a/classVSplinePointData.html#a1d2a03a54d13e679ef5c7bd177af2867',1,'VSplinePointData']]],
-  ['length1_81',['Length1',['../df/d03/classVSplinePoint.html#adba83a07289ab1ded68f29a907453051',1,'VSplinePoint']]],
+  ['length1_80',['Length1',['../df/d03/classVSplinePoint.html#adba83a07289ab1ded68f29a907453051',1,'VSplinePoint']]],
+  ['length1_81',['length1',['../db/d0a/classVSplinePointData.html#a1d2a03a54d13e679ef5c7bd177af2867',1,'VSplinePointData']]],
   ['length1changed_82',['Length1Changed',['../de/d10/classDialogSpline.html#ab8a756d7dbf5af47c0d930b4225c0d86',1,'DialogSpline::Length1Changed()'],['../df/d5e/classDialogSplinePath.html#ac440173e2f303cea2bf5e1baf4d04097',1,'DialogSplinePath::Length1Changed()']]],
   ['length1f_83',['length1F',['../db/d0a/classVSplinePointData.html#ae17af60ba283aef070322e3e89eada98',1,'VSplinePointData']]],
   ['length1formula_84',['Length1Formula',['../df/d03/classVSplinePoint.html#a03c217f2f3d234b9f3df11fea30949d7',1,'VSplinePoint']]],
