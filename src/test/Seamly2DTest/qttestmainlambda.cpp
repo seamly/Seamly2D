@@ -147,16 +147,57 @@ void TestApplication2D::initTranslateVariables()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Run every registered test suite in one process and OR their exit codes.
+ *
+ * Each suite is executed through QTest::qExec() by the ASSERT_TEST lambda; the
+ * combined status (0 only when every suite passed) is the process exit code.
+ *
+ * Per-suite log capture: when the environment variable SEAMLY_TEST_LOG_DIR is
+ * set to a directory, each suite additionally writes a plain-text QTest log to
+ * "<dir>/<SuiteClassName>.txt" via an injected "-o file,txt" argument. Without
+ * it, a single "-o" on the command line is overwritten by every subsequent
+ * qExec() call, and on Windows the console/stdout output of the suite can be
+ * lost entirely when redirected — so this hook is what makes local per-suite
+ * results capturable at all (used by scripts/st.ps1; see Task 23).
+ *
+ * @param argc argument count, forwarded to every QTest::qExec() call
+ * @param argv argument values, forwarded to every QTest::qExec() call
+ * @return OR-ed QTest failure status across all suites (0 = all passed)
+ */
 int main(int argc, char** argv)
 {
     Q_INIT_RESOURCE(schema);
 
     TestApplication2D app( argc, argv );// For QPrinter
 
+    // Optional directory for per-suite plain-text QTest logs (empty = disabled).
+    const QString logDir = qEnvironmentVariable("SEAMLY_TEST_LOG_DIR");
+
     int status = 0;
-    auto ASSERT_TEST = [&status, argc, argv](QObject* obj)
+    auto ASSERT_TEST = [&status, &logDir, argc, argv](QObject* obj)
     {
-        status |= QTest::qExec(obj, argc, argv);
+        if (logDir.isEmpty())
+        {
+            // Default behavior: forward the process arguments unchanged.
+            status |= QTest::qExec(obj, argc, argv);
+        }
+        else
+        {
+            // Rebuild the argument list and append a per-suite file logger so
+            // each suite's output survives in its own file instead of every
+            // qExec() overwriting one shared "-o" target.
+            QStringList args;
+            args.reserve(argc + 2);
+            for (int i = 0; i < argc; ++i)
+            {
+                args << QString::fromLocal8Bit(argv[i]);
+            }
+            const QString suiteName = QString::fromLatin1(obj->metaObject()->className());
+            args << QStringLiteral("-o")
+                 << QStringLiteral("%1/%2.txt,txt").arg(logDir, suiteName);
+            status |= QTest::qExec(obj, args);
+        }
         delete obj;
     };
 

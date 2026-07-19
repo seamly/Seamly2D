@@ -2,6 +2,18 @@
 
 Tasks moved here from `TODO.md` when all their subtasks are complete.
 
+## Task 23 — Fix the Seamly2DTests suite hanging at startup on Windows (local runs) (2026-07-18)
+
+The debug-built `Seamly2DTests.exe` appeared to hang at startup with no QTest output. **Root cause:** not a deadlock — Qt looks for the platform plugin (`platforms\qwindowsd.dll`) next to the *executable*, and windeployqt only deployed it next to `seamly2d.exe`; the resulting "no Qt platform plugin could be initialized" `qFatal` pops a hidden modal dialog in a debug-CRT build, which blocks forever with zero output.
+
+- [x] Reproduce and locate the block — root cause found 2026-07-18: missing platform plugin next to the test exe → modal `qFatal` dialog from `qguiapplication.cpp`; workaround `QT_PLUGIN_PATH` confirmed
+- [x] Fix it properly so the suite runs without manual env setup: `Seamly2DTest.pro` now post-links `windeployqt` on the test target plus the `copyToDestdir` xerces-c copy (mirroring `seamly2d.pro`), so the Qt runtime, `platforms\` plugin dir, and `xerces-c_3_3.dll` all land beside `Seamly2DTests.exe` — verified in both the debug (`seamly2d-build-debug\`) and release (`build\`) trees
+- [x] Identify and fix the 2 pre-existing local test failures — both in `TST_VPoster` (`BigPoster` 36≠12 pages, `SmallPoster` 4≠1): the tests sized their page grid from the *system default printer* (`setPageSize(pageLayout().pageSize())` is a no-op), and this machine's default printer uses a 5×7 in page (480×672 px at 96 DPI, allowance 38 px → exactly 6×6 and 2×2 grids). Fixed machine-independently by forcing `QPrinter::PdfFormat` + explicit A4 — the same configuration CI effectively runs with (no printers installed → PDF/A4 fallback), so CI behavior is unchanged
+- [x] Make the suite easy to run: `scripts/st.ps1` ("seamly2d tests", GPLv3 header + `.SYNOPSIS`, `sd.ps1` style) sets `PATH`/`QT_PLUGIN_PATH` as a fallback for old build trees, runs `Seamly2DTests.exe`, and works around the lost-stdout issue via `SEAMLY_TEST_LOG_DIR` — honored by `qttestmainlambda.cpp`, which appends a per-suite `-o <dir>/<Suite>.txt,txt` file logger (a single `-o` is overwritten by every `qExec`); the script aggregates the logs into a pass/fail table with full `FAIL!` details and exits with the suite's exit code; `-Release` runs the `build\` tree
+- [x] Verify: full suite passes locally in both trees — debug and release each 31,443 passed / 0 failed across 23 suites (exit code 0), including `TST_SvgTextItem` (Task 10) and `TST_SvgComponentTags` (Task 11); Windows test-run procedure documented in `.github/README-BUILDS.md`
+
+Note: if the release `build\` tree has stale per-subdir Makefiles (new sources missing → LNK2019), delete `build\src\**\Makefile*` and rebuild so qmake regenerates them.
+
 ## Task 10 — Export label text as real SVG text (not paths or path outlines) (2026-07-18)
 
 Labels exported as glyph outlines even with "text as paths" off: `QGraphicsSimpleTextItem` with a pen set paints text through a `QTextLayout` outline format, so `QSvgGenerator` never received a text draw call (0 `<text>` in the baseline).
