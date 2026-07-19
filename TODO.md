@@ -147,30 +147,6 @@ Current label text handling (all outline-font based, and staying available): the
 - [ ] Verify: canvas single-stroke labels legible at typical zooms with correct placement, mirroring, and rotation; outline-font behavior unchanged everywhere; tagged pieces SVG / `.pieces.svg` / `--text2paths` / DXF / PDF / PNG correct in both font modes
 - [ ] Doxygen briefs + inline comments on all touched functions; document the font architecture in the repo docs
 
-## Task 23 — Fix the Seamly2DTests suite hanging at startup on Windows (local runs)
-
-The full unit-test suite cannot be run locally on this Windows machine: the debug-built `Seamly2DTests.exe` (from `scripts/sd.ps1`, exe at `seamly2d-build-debug/src/test/Seamly2DTest/bin/`) hangs at startup — no QTest output at all (not even the first `********* Start testing` banner), near-zero CPU after 10+ minutes, so it is blocked waiting on something, not computing. CI is unaffected (the `linux-test` job runs the suite under xvfb on Ubuntu), so the new-test gate currently relies entirely on CI.
-
-Known observations (2026-07-18, while verifying Task 10):
-
-- The exe needs DLLs that are not on `PATH` by default: the **debug** Qt DLLs (`Qt6Cored.dll` etc.) and `xerces-c_3_3.dll`, both deployed next to `seamly2d.exe` in `seamly2d-build-debug/src/app/seamly2d/bin/` — without them it dies instantly with `0xC0000135` (that part is understood, not the bug)
-- With that directory on `PATH` the process starts but blocks before any test output; stdout redirection shows nothing even after minutes
-- The hang is before or during `TestApplication2D` startup in `qttestmainlambda.cpp` (`VAbstractApplication` → `QApplication` init, `openSettings()`) or in the first test class init — exact point unknown
-- The release-built `Seamly2DTests.exe` in `build/` exited within seconds but silently with no output when probed (likely the missing-`xerces` DLL case, needs a re-probe with proper `PATH`)
-- The debug `seamly2d.exe` GUI app itself starts fine on this machine, so plain `QApplication` init is not the blocker
-
-**Root cause found (2026-07-18, while verifying Task 11):** the "hang" is a hidden modal error dialog, not a deadlock. `Seamly2DTests.exe` finds the Qt debug DLLs via `PATH` but Qt looks for the **platform plugin** (`platforms\qwindowsd.dll`) next to the *executable* — windeployqt deployed the plugin directories next to `seamly2d.exe` only, so `QGuiApplication` startup hits the "no Qt platform plugin could be initialized" `qFatal` in `qguiapplication.cpp`, which in a debug-CRT build pops a modal dialog and blocks (the popup was observed on screen while the suite "hung"). With `QT_PLUGIN_PATH` set to `seamly2d-build-debug\src\app\seamly2d\bin` (in addition to `PATH`), the suite runs to completion in seconds. Remaining loose ends for this task:
-
-- The suite currently exits with status 2 (QTest failure count OR-ed across suites) — some pre-existing suite has 2 local failures on Windows; identify and fix (the per-suite `-o file,txt` logger is overwritten by each `qExec`, so per-suite output capture needs the runner script or a logger tweak)
-- QTest output to **stdout** is lost when redirected (console and `cmd` redirection both yield 0 bytes; the `-o <file>,txt` file logger works fine) — investigate/route around in the `st.ps1` runner
-- New suites verified locally via the file logger: `TST_SvgComponentTags` (Task 11) all pass
-
-- [x] Reproduce and locate the block — root cause found 2026-07-18: missing platform plugin next to the test exe → modal `qFatal` dialog from `qguiapplication.cpp` (see above); workaround `QT_PLUGIN_PATH` confirmed
-- [ ] Fix it properly so the suite runs without manual env setup: deploy the Qt plugins next to `Seamly2DTests.exe` (windeployqt post-link step on the test target, mirroring `seamly2d.pro`) or set the plugin path in the runner script; both debug and release builds
-- [ ] Identify and fix the 2 pre-existing local test failures (suite exit status 2; suite unknown — per-suite output capture needed, see stdout loose end above)
-- [ ] Make the suite easy to run: a small script (e.g. `scripts/st.ps1`, "seamly2d tests", s-prefix rule) that sets `PATH` to the deployed DLL directory (debug Qt DLLs + xerces) plus `QT_PLUGIN_PATH`, runs `Seamly2DTests.exe`, and works around the lost-stdout issue (file logger), mirroring the `sd.ps1` style, with the GPLv3 header and `.SYNOPSIS`
-- [ ] Verify: full suite passes locally (including `TST_SvgTextItem` from Task 10); document the Windows test-run procedure in `.github/README-BUILDS.md`
-
 ## Task 24 — CLI: run seamly2d from the command line through to a finished seamlyLayout layout
 
 Extend the existing console export mode (`--basename` in `src/app/seamly2d/core/vcmdexport.cpp`) so a single seamly2d command line produces the final layout: seamly2d generates the tagged `.pieces.svg` (the Layout Mode handoff, `exportPiecesToSeamlyLayout()` in `src/app/seamly2d/mainwindow.cpp`) and then runs seamlyLayout on it to produce the layout output, using the new seamlyLayout export options (the Task 21 SVG text modes and the other export formats).

@@ -72,6 +72,16 @@ Per-platform targets:
   - Both paths must survive upgrade-in-place (MSI upgrade codes).
 - Code signing: see `.github/workflows/CODE_SIGNING.md` and `.github/workflows/signing/`.
 
+#### Running the unit tests locally (Windows)
+
+- Build the debug tree first (`scripts\sd.ps1`), then run the suite with **`scripts\st.ps1`** ("seamly2d tests"; add `-Release` for the release `build\` tree, and any extra arguments are forwarded to the test exe as QTest options). The script prints a per-suite pass/fail table plus full `FAIL!` details, and exits with the suite's exit code.
+- Why a runner script is needed (Task 23 findings, 2026-07):
+  - `Seamly2DTests.exe` needs the (debug) Qt DLLs, `xerces-c_3_3.dll`, **and the Qt platform plugin** (`platforms\qwindows[d].dll`). Qt looks for the platform plugin **relative to the executable only** — if it is missing, `QGuiApplication` startup hits a `qFatal` that in a debug-CRT build pops a *hidden modal dialog*, so the suite looks like it hangs at startup with no output. `Seamly2DTest.pro` now post-links `windeployqt` (plus the xerces copy) so everything is deployed beside the test exe; `st.ps1` also sets `QT_PLUGIN_PATH`/`PATH` as a fallback for older build trees.
+  - QTest **stdout is lost** when the suite's console output is redirected on Windows, and a single `-o file,txt` logger is overwritten by every suite in turn. `st.ps1` therefore sets `SEAMLY_TEST_LOG_DIR`, which `qttestmainlambda.cpp` honors by writing one text log per suite to `<build>\test-logs\<Suite>.txt`; the script aggregates those.
+  - Unit tests must not depend on the **system default printer**: `QPrinter` defaults to the machine's default printer and page size (a 5×7 in photo printer broke `TST_VPoster` locally while CI, with no printers, fell back to PDF/A4). Tests that touch `QPrinter` should force `QPrinter::PdfFormat` and an explicit page size.
+- Stale-tree trap: qmake subdir Makefiles in an old `build\` tree do not always regenerate when a `.pro` gains new source files, which surfaces as `LNK2019` unresolved externals for the new classes. Delete `build\src\**\Makefile*` and rebuild so qmake regenerates them.
+- CI is unaffected by any of this: the `linux-test` job runs the suite under xvfb on Ubuntu.
+
 ### macOS
 
 - Settings unification is Task 16: land in `~/Library/Application Support/Seamly`, migrate legacy `Seamly2D` / `Seamly Systems` Application Support dirs and preferences plists on first run, keep packaged defaults read-only inside the app bundle resources.
