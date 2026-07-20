@@ -204,3 +204,12 @@ Left over from the Task 19 move (2026-07-20): `src/app/seamlylayout/qt_frontend/
 - [ ] Decide: keep the trims (commit them as a tiny whitespace cleanup on `run-seamlyLayout`) or drop them (`git checkout -- src/app/seamlylayout/qt_frontend/src/PreferencesModel.*`)
 - [ ] Either way, end with a clean `git status` on `run-seamlyLayout`
 - [ ] If the editor's trim-on-save keeps re-dirtying seamlylayout files, consider a one-off whitespace-normalization commit for the subtree (or align editor settings) so future diffs stay noise-free
+
+## Task 29 — Dependabot: update the `time` crate in seamlylayout (GHSA-r6v5-fh4h-64xc)
+
+GitHub Dependabot alert #1 (moderate/medium, open): the `time` Rust crate pinned in `src/app/seamlylayout/Cargo.lock` falls in the vulnerable range `>= 0.3.6, < 0.3.47` — stack-exhaustion denial-of-service ([GHSA-r6v5-fh4h-64xc](https://github.com/advisories/GHSA-r6v5-fh4h-64xc), first patched version 0.3.47). The alert appeared when the Task 19 merge brought the seamlylayout `Cargo.lock` into this repo: https://github.com/seamly/Seamly2D/security/dependabot/1
+
+- [ ] Identify which workspace crate(s) pull in `time` (`cargo tree -i time` in `src/app/seamlylayout`) — likely a transitive dependency
+- [ ] Update the lockfile to `time >= 0.3.47` (`cargo update -p time` should suffice since it's a semver-compatible patch; bump the intermediate dependency if not)
+- [ ] Rebuild and run the seamlylayout tests (`cargo test --workspace`, frontend ctest suites) to confirm nothing breaks
+- [ ] Commit the updated `Cargo.lock`, push via the normal task-branch/PR flow, and verify the Dependabot alert auto-resolves on GitHub
