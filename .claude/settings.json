@@ -3,6 +3,10 @@
     "allow": [
       "PowerShell(Copy-Item *)",
       "PowerShell(Copy-Item)",
+      "PowerShell(Move-Item *)",
+      "PowerShell(Rename-Item *)",
+      "PowerShell(Remove-Item *)",
+      "PowerShell(Get-Item *)",
       "PowerShell(Test-Path *)",
       "Bash(Test-Path *)",
       "PowerShell(Get-ChildItem *)",

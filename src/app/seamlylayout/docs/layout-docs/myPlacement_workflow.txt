@@ -1,0 +1,68 @@
+What do you think about this piece arrangment flow? Does it implement the skyline algorithm? 
+
+# set vars
+- set gap=10
+
+# functions
+- fn random_color():
+-- <generate random color string in HEX format beginning with #>
+-- return // random_color()
+
+- fn create_rectangle_element(id, x, y, width, height, fill, stroke, opacity):
+-- <use existing xml & svg manipulation functions to implement this function>
+-- return // create_rectangle_element()
+
+- fn add_element_to_dom(child_el, parent_tag, parent_id, dom):
+-- <use existing xml & svg manipulation functions to implement this function>
+-- return // add_element_to_dom()
+ 
+- fn create_segment(SD, Slist):
+-- rectangle=create_rectangle_element(id=SD.Sid; x=SD.SminX,y=SminY,width=SD.Sw,height=SD.Sh, fill=random_color(), stroke="none", opacity="0.1")
+-- add_element_to_dom(child_el=rectangle, parent_tag="svg", parent_id="", dom=layout_dom)
+-- Slist.append(SD) // or append key, value pairs
+-- return // create_segment_in_layout()
+
+# create lists for pieces and segments
+- Plist = dictionary of pattern pieces from flat_dom that contains Pid, PminX, PminY, Pw, Ph, PmaxX, PmaxY, Parea, and placed_flag -- list is sorted by Parea in descending order, and all placed_flag values are set to false. 
+- Slist = empty dictionary of segments containing Sid, Sminx, Sminy, Sw, Sh, SmaxX, SmaxY, Sarea, and used_flag. 
+--
+# initialize SD and PD dictionaries
+- get contentRect's x,y,width,height as Cx,Cy,Cw,Ch
+- Snum=1, Sid=S<Snum>, SminX=Cx, SminY=Cy, Sw=Cw, Sh=Ch, SmaxX=SminX+Sw, SmaxY=SminY+Sh, Sarea=Sw*Sh, used_flag=false
+- SD dictionary contains Sid, SminX, SminY, Sw, Sh, SmaxX, SmaxY, Sarea, used_flag // SegmentData
+- Pid="", PminX=0, PminY=0, Pw=0, Ph=0, PmaxX=PminX+Pw, PmaxY=PminY+Ph, Parea=Pw*Ph, placed_flag=false
+- PD dictionary contains Pid, PminX, PminY, Pw, Ph, PmaxX, PmaxY, Parea, placed_flag // pieceData
+--
+# create first segment & add to Slist
+- create_segment(SD, Slist)
+--
+# place pattern pieces
+- For piece P in Plist:
+-- get PD 
+-- if PD.placed_flag==true then continue
+-- For segment S in Slist:
+--- get SD
+--- if SD.used_flag==true then continue
+--- if (PD.area <= SD.area) and (PD.Pw <= SD.Sw) and (PD.Ph <= SD.Sh):
+---- # update PD
+---- PD.placed_flag=true, PD.PminX=SD.SminX, PminY=SD.SminY, PmaxX=PminX+Pw, PmaxY=PminY+Ph 
+---- # create next segment to the right of placed piece P (remaining width of segment, full height of segment)
+
+---- Snum += 1
+---- SD1 = SD // clone SD
+---- SD1.Sid = S<Snum>
+---- SD1.SminX = SD.SminX + PD.Pw + gap // adjust segment minX
+---- SD1.Sw = SD1.SmaxX - SD1.SminX // adjust segment width
+---- SD1.Sarea = SD1.Sw * SD1.Sh
+---- SD1.used_flag=false
+---- create_segment(SD1, Slist)
+
+---- # create next segment below the placed piece P (full width of segment, remaining height of segment)
+---- Snum += 1
+---- SD2 = SD // Clone SD
+---- SD2.Sid = S<Snum>
+---- SD2.SminY = SD.SminY + PD.Ph + gap // adjust segment minY
+---- SD2.Sh = SD2.SmaxY - SD2.SminY // adjust segment height
+---- SD2.Sarea = SD2.Sw * SD2.Sh
+---- SD2.used_flag=false
+---- create_segment_in_layout(SD2, Slist) 

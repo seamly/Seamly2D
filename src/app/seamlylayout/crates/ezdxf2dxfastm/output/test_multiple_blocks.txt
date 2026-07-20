@@ -1,0 +1,118 @@
+// DXF-ASTM Teaching Version with Inline Comments
+// Generated automatically from: test_multiple_blocks.dxf
+// This file contains the DXF content with explanatory comments for each line.
+// Comments are positioned two tabs to the right of the DXF data.
+//
+
+0		// Group code 0: Start of entity or section marker
+SECTION		// Entity type: SECTION (marks the beginning of a section)
+2		// Group code 2: Section/table/block name, or entity name follows
+HEADER		// Section name: HEADER (contains drawing variables)
+0		// Group code 0: Start of entity or section marker
+ENDSEC		// Entity type: ENDSEC (marks the end of a section)
+0		// Group code 0: Start of entity or section marker
+SECTION		// Entity type: SECTION (marks the beginning of a section)
+2		// Group code 2: Section/table/block name, or entity name follows
+BLOCKS		// Section name: BLOCKS (contains block definitions for pattern pieces)
+0		// Group code 0: Start of entity or section marker
+BLOCK		// Entity type: BLOCK (defines a reusable block/pattern piece)
+2		// Group code 2: Section/table/block name, or entity name follows
+Piece1		// Name: Piece1 (section/table/block name)
+8		// Group code 8: Layer name follows
+Piece boundary		// Layer name: Piece boundary (layer for this entity)
+10		// Group code 10: X coordinate, insertion point X, or start point X follows
+0.000000		// Value: X = 0.000000 (X coordinate in 1/1000th inch units, divide by 1000 for inches)
+20		// Group code 20: Y coordinate, insertion point Y, or start point Y follows
+0.000000		// Value: Y = 0.000000 (Y coordinate in 1/1000th inch units, divide by 1000 for inches)
+2		// Group code 2: Section/table/block name, or entity name follows
+Piece1		// Name: Piece1 (section/table/block name)
+70		// Group code 70: Flags, counts, or integer value follows
+0		// Value: 0 (flags or count - 0 = normal, 1 = closed/other flags)
+0		// Group code 0: End marker (end of entity or section)
+LINE		// Entity type: LINE (line entity)
+8		// Group code 8: Layer name follows
+Piece boundary		// Layer name: Piece boundary (layer for this entity)
+10		// Group code 10: X coordinate, insertion point X, or start point X follows
+0.000000		// Value: X = 0.000000 (X coordinate in 1/1000th inch units, divide by 1000 for inches)
+20		// Group code 20: Y coordinate, insertion point Y, or start point Y follows
+0.000000		// Value: Y = 0.000000 (Y coordinate in 1/1000th inch units, divide by 1000 for inches)
+11		// Group code 11: End point X coordinate follows
+10.000000		// Value: X = 10.000000 (end point X coordinate)
+21		// Group code 21: End point Y coordinate follows
+0.000000		// Value: Y = 0.000000 (end point Y coordinate)
+0		// Group code 0: Start of entity or section marker
+ENDBLK		// Entity type: ENDBLK (marks the end of the BLOCK definition)
+8		// Group code 8: Layer name follows
+Piece boundary		// Layer name: Piece boundary (layer for this entity)
+0		// Group code 0: Start of entity or section marker
+BLOCK		// Entity type: BLOCK (defines a reusable block/pattern piece)
+2		// Group code 2: Section/table/block name, or entity name follows
+Piece2		// Name: Piece2 (section/table/block name)
+8		// Group code 8: Layer name follows
+Piece boundary		// Layer name: Piece boundary (layer for this entity)
+10		// Group code 10: X coordinate, insertion point X, or start point X follows
+0.000000		// Value: X = 0.000000 (X coordinate in 1/1000th inch units, divide by 1000 for inches)
+20		// Group code 20: Y coordinate, insertion point Y, or start point Y follows
+0.000000		// Value: Y = 0.000000 (Y coordinate in 1/1000th inch units, divide by 1000 for inches)
+2		// Group code 2: Section/table/block name, or entity name follows
+Piece2		// Name: Piece2 (section/table/block name)
+70		// Group code 70: Flags, counts, or integer value follows
+0		// Value: 0 (flags or count - 0 = normal, 1 = closed/other flags)
+0		// Group code 0: End marker (end of entity or section)
+LINE		// Entity type: LINE (line entity)
+8		// Group code 8: Layer name follows
+Piece boundary		// Layer name: Piece boundary (layer for this entity)
+10		// Group code 10: X coordinate, insertion point X, or start point X follows
+0.000000		// Value: X = 0.000000 (X coordinate in 1/1000th inch units, divide by 1000 for inches)
+20		// Group code 20: Y coordinate, insertion point Y, or start point Y follows
+0.000000		// Value: Y = 0.000000 (Y coordinate in 1/1000th inch units, divide by 1000 for inches)
+11		// Group code 11: End point X coordinate follows
+20.000000		// Value: X = 20.000000 (end point X coordinate)
+21		// Group code 21: End point Y coordinate follows
+0.000000		// Value: Y = 0.000000 (end point Y coordinate)
+0		// Group code 0: Start of entity or section marker
+ENDBLK		// Entity type: ENDBLK (marks the end of the BLOCK definition)
+8		// Group code 8: Layer name follows
+Piece boundary		// Layer name: Piece boundary (layer for this entity)
+0		// Group code 0: Start of entity or section marker
+ENDSEC		// Entity type: ENDSEC (marks the end of a section)
+0		// Group code 0: Start of entity or section marker
+SECTION		// Entity type: SECTION (marks the beginning of a section)
+2		// Group code 2: Section/table/block name, or entity name follows
+ENTITIES		// Section name: ENTITIES (contains modelspace entities)
+0		// Group code 0: Start of entity or section marker
+INSERT		// Entity type: INSERT (inserts a block into modelspace)
+8		// Group code 8: Layer name follows
+Piece boundary		// Layer name: Piece boundary (layer for this entity)
+2		// Group code 2: Section/table/block name, or entity name follows
+Piece1		// Name: Piece1 (section/table/block name)
+10		// Group code 10: X coordinate, insertion point X, or start point X follows
+0.000000		// Value: X = 0.000000 (X coordinate in 1/1000th inch units, divide by 1000 for inches)
+20		// Group code 20: Y coordinate, insertion point Y, or start point Y follows
+0.000000		// Value: Y = 0.000000 (Y coordinate in 1/1000th inch units, divide by 1000 for inches)
+41		// Group code 41: X scale factor follows
+1.000000		// Value: 1.000000 (X scale factor for INSERT entity)
+42		// Group code 42: Y scale factor follows
+1.000000		// Value: 1.000000 (Y scale factor for INSERT entity)
+50		// Group code 50: Rotation angle in degrees follows
+0.000000		// Value: 0.000000 (rotation angle in degrees)
+0		// Group code 0: Start of entity or section marker
+INSERT		// Entity type: INSERT (inserts a block into modelspace)
+8		// Group code 8: Layer name follows
+Piece boundary		// Layer name: Piece boundary (layer for this entity)
+2		// Group code 2: Section/table/block name, or entity name follows
+Piece2		// Name: Piece2 (section/table/block name)
+10		// Group code 10: X coordinate, insertion point X, or start point X follows
+0.000000		// Value: X = 0.000000 (X coordinate in 1/1000th inch units, divide by 1000 for inches)
+20		// Group code 20: Y coordinate, insertion point Y, or start point Y follows
+0.000000		// Value: Y = 0.000000 (Y coordinate in 1/1000th inch units, divide by 1000 for inches)
+41		// Group code 41: X scale factor follows
+1.000000		// Value: 1.000000 (X scale factor for INSERT entity)
+42		// Group code 42: Y scale factor follows
+1.000000		// Value: 1.000000 (Y scale factor for INSERT entity)
+50		// Group code 50: Rotation angle in degrees follows
+0.000000		// Value: 0.000000 (rotation angle in degrees)
+0		// Group code 0: Start of entity or section marker
+ENDSEC		// Entity type: ENDSEC (marks the end of a section)
+0		// Group code 0: Start of entity or section marker
+EOF		// End of File marker (marks the end of the DXF file)

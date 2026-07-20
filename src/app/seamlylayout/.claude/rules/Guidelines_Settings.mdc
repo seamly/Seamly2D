@@ -1,0 +1,52 @@
+# Settings Guidelines
+
+## Reference
+
+See full documentation in [`docs/settings-docs/SETTINGS_WORKFLOW.md`](../../docs/settings-docs/SETTINGS_WORKFLOW.md)
+
+## Default Units
+
+| Unit | Margin Default |
+|------|----------------|
+| `in` | 0.25 |
+| `cm` | 1 |
+| `mm` | 10 |
+
+## Media Types
+
+| Media | Sub-type | Default |
+|-------|----------|---------|
+| `paper` | `sheet` | Arch E (36×48 in) |
+| `paper` | `roll` | 36 in width |
+| `paper` | `tiled` | Letter (8.5×11 in) |
+| `fabric` | — | User-defined dimensions |
+
+## Key Constraints
+
+- Settings file extension: `.settings`
+- Settings directory: `/settings`
+- Paper sizes source: `/assets/paperSizes/paper_sizes`
+- Preferences file: `preferences.json`
+
+## Piece Arrangement Options
+
+`layoutMode` (radio group) — all modes preprocess the piece so the grainline points up.
+
+| Mode | Description | Trial set |
+|------|-------------|-----------|
+| `alongGrainline` | Default. Grain-up baseline; allows head-up or head-down. | `{0°, 180°}` |
+| `withNap` | Strict no-flip — every piece points the same direction (napped or directional fabric). | `{rotationStep°}` (singleton) |
+| `rotate` | Free rotation in fixed steps; uses `rotationStep`. | `{0°, k·rotationStep mod 360°}` |
+
+`rotationStep` semantics depend on `layoutMode`:
+
+| Mode | Sub-radio label | Allowed `rotationStep` | Default |
+|------|----------------|------------------------|---------|
+| `alongGrainline` | _(no sub-radio)_ | unused | — |
+| `withNap` | **Nap Direction** — Pieces point Up / Pieces point Down | `{ 0, 180 }` | `0` (head-up) |
+| `rotate` | **Rotation Step** — 10° / 22.5° / 45° / 90° | `{ 10, 22.5, 45, 90 }` | `22.5` |
+
+## Viewer Preferences
+
+- DXF/PDF viewers: Use OS default if path empty
+- 3D viewer: Default URL is `https://3mfviewer.com/`

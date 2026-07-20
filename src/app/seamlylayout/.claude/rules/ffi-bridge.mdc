@@ -1,0 +1,203 @@
+# FFI Bridge Guidelines
+
+Applies to all `extern "C"` Rust code under `crates/*/src/ffi.rs` and the
+`crates/ffi_bridge/` crate. See [TODO.md](../../docs/status-docs/TODO.md) Phase 2.
+
+## Purpose
+
+The FFI bridge exposes Rust core crates to the Qt C++ frontend via a stable C ABI.
+A single `libseamly_core.dll` / `libseamly_core.so` (the `ffi_bridge` crate) re-exports
+all symbols so Qt links against one library.
+
+## Rust FFI File Conventions
+
+- Each crate that exports C symbols has a `src/ffi.rs` module
+- `ffi.rs` is declared in `lib.rs` as `pub mod ffi;`
+- All exported functions use `#[no_mangle] pub unsafe extern "C"`
+- All exported structs that cross the boundary use `#[repr(C)]`
+
+### File Header
+
+```rust
+// project: SeamlyLayout
+// author: slspencer, copyright 2026
+// MIT License: https://opensource.org/licenses/MIT
+/// FFI bridge for the <crate_name> crate.
+/// Exposes a stable C ABI for use from the Qt 6.10 frontend.
+```
+
+## Opaque Handle Pattern
+
+Use opaque `*mut T` handles for Rust structs that Qt should not inspect.
+Qt holds the pointer; Rust owns the allocation.
+
+```rust
+/// @brief Creates a new SvgDocument from an XML string.
+/// @param xml_cstr Null-terminated UTF-8 XML string. Must not be null.
+/// @return Opaque pointer to SvgDocument, or null on parse error.
+///         Caller must free with svg_dom_free().
+#[no_mangle]
+pub unsafe extern "C" fn svg_dom_parse(xml_cstr: *const c_char) -> *mut Document {
+    // xml_cstr must not be null
+    if xml_cstr.is_null() {
+        return std::ptr::null_mut();
+    } // if xml_cstr.is_null()
+    let xml = match CStr::from_ptr(xml_cstr).to_str() {
+        Ok(s) => s,
+        Err(_) => return std::ptr::null_mut(),
+    };
+    match Document::parse(xml) {
+        Ok(doc) => Box::into_raw(Box::new(doc)),
+        Err(_) => std::ptr::null_mut(),
+    } // match Document::parse
+}
+
+/// @brief Frees an SvgDocument created by svg_dom_parse().
+/// @param doc Opaque pointer returned by svg_dom_parse(). May be null (no-op).
+#[no_mangle]
+pub unsafe extern "C" fn svg_dom_free(doc: *mut Document) {
+    // doc may be null — no-op in that case
+    if !doc.is_null() {
+        drop(Box::from_raw(doc));
+    } // if !doc.is_null()
+}
+```
+
+## String Ownership Rules
+
+| Direction | Rule |
+|-----------|------|
+| Qt → Rust | Qt passes `const char*`; Rust copies immediately via `CStr::to_str()` or `CString::from_raw` — never hold the pointer |
+| Rust → Qt | Rust allocates a `CString`, returns `*mut c_char`; Qt **must** call the matching `_free` function |
+| Qt must never | Call `free()` or `delete` on a Rust-allocated string — always use the Rust-provided `*_string_free()` |
+
+```rust
+/// @brief Serializes an SvgDocument to a null-terminated UTF-8 string.
+/// @param doc Opaque pointer. Must not be null.
+/// @return Heap-allocated C string. Caller must free with seamly_string_free().
+#[no_mangle]
+pub unsafe extern "C" fn svg_dom_to_string(doc: *const Document) -> *mut c_char {
+    // doc must not be null
+    assert!(!doc.is_null());
+    let s = (*doc).to_string();
+    CString::new(s).unwrap_or_default().into_raw()
+}
+
+/// @brief Frees a string returned by any seamly_* function.
+/// @param s Pointer returned by a seamly_* string function. May be null (no-op).
+#[no_mangle]
+pub unsafe extern "C" fn seamly_string_free(s: *mut c_char) {
+    // s may be null — no-op in that case
+    if !s.is_null() {
+        drop(CString::from_raw(s));
+    } // if !s.is_null()
+}
+```
+
+## Error Return Conventions
+
+| Return type | Success | Failure |
+|-------------|---------|---------|
+| `*mut T` (opaque handle) | Non-null pointer | `null` |
+| `c_int` (status code) | `0` | Non-zero (see error codes below) |
+| `*mut c_char` (string) | Non-null C string | `null` |
+
+### Error Codes
+
+```c
+#define SEAMLY_OK            0
+#define SEAMLY_ERR_NULL_ARG  1   /* null pointer passed where not allowed */
+#define SEAMLY_ERR_PARSE     2   /* XML / SVG parse error */
+#define SEAMLY_ERR_IO        3   /* file read/write error */
+#define SEAMLY_ERR_PACK      4   /* layout bin-packing failed (pieces too large) */
+#define SEAMLY_ERR_CONVERT   5   /* SVG → DXF conversion error */
+#define SEAMLY_ERR_EXPORT    6   /* DXF ASTM export error */
+#define SEAMLY_ERR_INVALID   7   /* invalid argument value */
+```
+
+Define these in the generated `crates/ffi_bridge/include/seamly_core.h`.
+
+## Progress Callback Convention
+
+For long-running operations (layout, DXF export), accept a C function pointer:
+
+```rust
+/// Progress callback type. Called with percent 0–100.
+/// @param percent Current progress (0–100).
+/// @param user_data Opaque pointer passed through unchanged. May be null.
+pub type ProgressFn = unsafe extern "C" fn(percent: c_int, user_data: *mut c_void);
+
+#[no_mangle]
+pub unsafe extern "C" fn dxfastm_export(
+    drawing: *const Drawing,
+    options_json: *const c_char,
+    out_path: *const c_char,
+    progress_cb: Option<ProgressFn>,  // may be null
+    user_data: *mut c_void,
+) -> c_int {
+    // ...
+}
+```
+
+On the Qt side, pass a static C function or a lambda-wrapped thunk that posts
+progress to `AppController` via `QMetaObject::invokeMethod(..., Qt::QueuedConnection)`.
+
+## cbindgen Configuration
+
+Each FFI crate uses `cbindgen` to auto-generate its C header. Place config at
+`crates/<crate>/cbindgen.toml`:
+
+```toml
+language = "C"
+include_guard = "SEAMLY_<CRATE>_H"
+autogen_warning = "/* DO NOT EDIT — generated by cbindgen */"
+documentation_style = "doxy"
+```
+
+Run via `build.rs`:
+
+```rust
+fn main() {
+    let crate_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
+    cbindgen::Builder::new()
+        .with_crate(crate_dir)
+        .with_config(cbindgen::Config::from_file("cbindgen.toml").unwrap())
+        .generate()
+        .expect("cbindgen failed")
+        .write_to_file("include/<crate_name>.h");
+}
+```
+
+## Qt C++ Usage Pattern
+
+```cpp
+#include "seamly_core.h"  // generated by cbindgen
+
+// Load SVG
+SvgDocument* doc = svg_dom_parse(xmlUtf8.constData());
+if (!doc) {
+    emit errorOccurred("Failed to parse SVG");
+    return;
+}
+
+// Use doc...
+char* svgStr = svg_dom_to_string(doc);
+QString result = QString::fromUtf8(svgStr);
+seamly_string_free(svgStr);   // always free Rust-allocated strings
+svg_dom_free(doc);            // always free Rust-allocated handles
+```
+
+## Do Not
+
+- Call `delete` or `free()` on any pointer returned by a `seamly_*` function
+- Hold a `*const c_char` from Qt across an `await` / thread boundary — copy it first
+- Pass Rust-internal pointers (e.g., `&self`) as `user_data` across thread boundaries without `Arc`/`Mutex`
+- Expose Rust enum variants directly across FFI — use `c_int` error codes instead
+- Return Rust `Result`, `Option`, `String`, `Vec` across FFI — wrap in C-compatible types
+
+## Always
+
+- Null-check every incoming pointer at the top of every FFI function
+- Document ownership in Doxygen `@param` / `@return` comments on every FFI function
+- Pair every allocation with a matching `_free` function
+- Test each FFI function from a C harness in `crates/<crate>/tests/ffi_test.c` before wiring into Qt

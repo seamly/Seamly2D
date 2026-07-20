@@ -1,0 +1,17 @@
+Sort pattern piece in order of area
+for P in sorted pieces :
+- if P.placed==true continue
+- for R in rectangles:
+-- if R.used==true continue
+-- Check if P fits in R
+-- if fits==false continue // get next R
+-- P.placed=true
+-- R.used=true
+-- copy P into layout_dom translated to R's upper left coordinate
+-- create Right rectangle & append to rectangles
+-- create Bottom rectangle & append to rectangles 
+-- create Left rectangle & append to rectangles
+-- create Top rectangle & append to rectangles
+- if P.placed==false generate log and debug messages
+
+

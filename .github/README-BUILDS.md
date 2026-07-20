@@ -6,7 +6,7 @@ Apps covered:
 
 - **seamly2d** — pattern drafting (parent app), `src/app/seamly2d`, Qt 6 / C++ / qmake
 - **seamlyme** — measurements, `src/app/seamlyme`, Qt 6 / C++ / qmake
-- **seamlyLayout** — daughter layout app, `seamlyLayout/`, Rust + Qt 6.10/QML, own build (`seamlyLayout/qt_frontend/qd.ps1`), deliberately outside the Seamly2D qmake build
+- **seamlyLayout** — daughter layout app, `src/app/seamlylayout/`, Rust + Qt 6.10/QML, own build (`src/app/seamlylayout/qd.ps1`), deliberately outside the Seamly2D qmake build
 
 ## The apps are a family, not standalone programs
 
@@ -28,7 +28,7 @@ Two toolchains are in use — the difference is intentional, not an error:
 | **Local** | Developer PC | 6.10.1 `msvc2022_64` | VS 18 Community (`vcvars64.bat`) | qmake + jom; release shadow-build in `build/` (gitignored) |
 
 - Local debug build: `scripts/sd.ps1` — auto-detects the newest Qt 6.10.x msvc2022_64 kit under `C:\Qt` and the VS 18 MSVC environment, shadow-builds `CONFIG+=debug` into `seamly2d-build-debug/` (gitignored); debug exe at `seamly2d-build-debug/src/app/seamly2d/bin/seamly2d.exe`, Qt debug DLLs deployed by windeployqt; `-Run` launches after build.
-- seamlyLayout builds separately with `seamlyLayout/qt_frontend/qd.ps1` and must stay out of the qmake build.
+- seamlyLayout builds separately with `src/app/seamlylayout/qd.ps1` and must stay out of the qmake build.
 
 ## Settings / preferences storage
 
@@ -37,8 +37,8 @@ Two toolchains are in use — the difference is intentional, not an error:
 | App | Windows location | Source of the name |
 |---|---|---|
 | seamly2d, seamlyme | `C:\Users\<user>\AppData\Local\Seamly2D` | org name from `VER_COMPANYNAME_STR` (`src/libs/vmisc/projectversion.h`), applied in `src/app/seamly2d/core/application_2d.cpp` and `src/app/seamlyme/application_me.cpp` |
-| seamlyLayout | `C:\Users\<user>\AppData\Local\Seamly Systems` | hard-coded `app.setOrganizationName("Seamly Systems")` in `seamlyLayout/qt_frontend/main.cpp` |
-| seamlyLayout (packaged defaults) | `<exeDir>\settings\` (relative to `seamlyLayout.exe`) | Inno Setup installs `default_settings.json` and paper/roll presets there (`seamlyLayout/packaging/windows/SeamlyLayout.iss`) |
+| seamlyLayout | `C:\Users\<user>\AppData\Local\Seamly Systems` | hard-coded `app.setOrganizationName("Seamly Systems")` in `src/app/seamlylayout/qt_frontend/main.cpp` |
+| seamlyLayout (packaged defaults) | `<exeDir>\settings\` (relative to `seamlyLayout.exe`) | Inno Setup installs `default_settings.json` and paper/roll presets there (`src/app/seamlylayout/packaging/windows/SeamlyLayout.iss`) |
 
 ### Planned: one unified `Seamly` organization folder (TODO Tasks 15–18)
 
@@ -64,7 +64,7 @@ Per-platform targets:
 
 ### Windows
 
-- **Current:** CI builds via GitHub workflows (Qt 6.8.3 + MSVC 2022). seamlyLayout has its own Inno Setup installer (`seamlyLayout/packaging/windows/SeamlyLayout.iss`, `build_installer.ps1`) with legacy-settings migration logic.
+- **Current:** CI builds via GitHub workflows (Qt 6.8.3 + MSVC 2022). seamlyLayout has its own Inno Setup installer (`src/app/seamlylayout/packaging/windows/SeamlyLayout.iss`, `build_installer.ps1`) with legacy-settings migration logic.
 - **Planned (Task 13):** a Windows **.msi** installer covering all three apps, x64 **and** arm64. Prerequisite: seamlyLayout launchable from seamly2d and passing unit/functional tests. Tooling decision pending (e.g. WiX).
 - **Planned (Task 14):** the installer prompts for two paths instead of hard-coding them:
   1. **Executable install path** — default `C:\Program Files (x86)\Seamly2D`, any drive allowed (use case: `D:\Program Files (x86)\Seamly2D`); the chosen directory is added to the system `PATH` automatically and removed on uninstall.
@@ -104,4 +104,4 @@ Per-platform targets:
 - `TODO.md` — Tasks 13–18 hold the current actionable subtasks for everything marked "planned" above; completed tasks move to `COMPLETED.md`.
 - `PROJECT_PLAN.md` — the approved implementation plan.
 - `.github/workflows/README_WORKFLOWS.md` — CI workflow details.
-- `seamlyLayout/CHANGELOG.md` — history of seamlyLayout's settings-directory moves (e.g. `<exeDir>/settings/` → AppConfigLocation).
+- `src/app/seamlylayout/CHANGELOG.md` — history of seamlyLayout's settings-directory moves (e.g. `<exeDir>/settings/` → AppConfigLocation).

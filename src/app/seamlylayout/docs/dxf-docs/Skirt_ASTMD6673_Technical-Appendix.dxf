@@ -1,0 +1,113 @@
+ASTM D6673 Apparel DXF Compliance – Technical Appendix
+Project Summary
+
+This appendix documents how the skirt and waistband patterns comply with ASTM D6673 (DXF-ASTM) requirements for apparel exchange, including geometry conventions, layer semantics, tuck representation, notching, grading, and interoperability expectations with Gerber and Lectra systems.
+
+Pattern Pieces
+
+Skirt – Front (Cut 3)
+
+Skirt – Back (Cut 3)
+
+Waistband (Cut 2)
+
+Units & DXF Profile
+
+Units: Inches
+
+DXF: ASCII, AutoCAD R13-compatible
+
+Entities: LINE, TEXT only (no proprietary objects)
+
+Layer Semantics (ASTM-Style)
+
+CUT: Final cut edge (includes seam allowance and hem allowance)
+
+SEAM: Stitching/seam lines
+
+FOLD: Fold lines (tucks, hem fold)
+
+STITCH: Tuck stitch lines
+
+NOTCH: Notches
+
+GRAIN: Grainline
+
+TEXT: Construction notes
+
+Tuck Specification
+
+Total tucks per piece: 10
+
+Center inverted box tuck: 1 (counts as 2 tucks)
+
+Stitch on CF/CB
+
+Fold lines at ±1.8"
+
+Knife tucks: 8
+
+Centers every 1.9"
+
+Fold offset 1.8"
+
+Tuck length: 6.0"
+
+Press direction:
+
+Front: Knife tucks pressed toward CF; box tuck pressed inward
+
+Back: Knife tucks pressed toward CB; box tuck pressed inward
+
+Notching Scheme
+
+Double notch at CF/CB for center box tuck
+
+Single notch at each knife tuck stitch location
+
+Hip alignment notch on side seams
+
+Center hem reference notch
+
+Seam Allowances & Hem
+
+Seam allowance: 0.5"
+
+Hem allowance: 2.0"
+
+Hem fold line: 0.5" above hem
+
+Grading (ASTM Style)
+
+Base size: as drafted
+
+Linear grade applied at waist, hip, and hem
+
+Tucks retain depth (1.8"); spacing adjusts proportionally
+
+Grade increments documented separately (see Grading Table)
+
+Interoperability Expectations
+Gerber AccuMark
+
+Reads R13 ASCII DXF
+
+Honors layer-based semantics
+
+Tucks interpreted from FOLD/STITCH geometry
+
+Lectra Modaris
+
+Accepts ASTM DXF with explicit geometry
+
+Notches imported as cut symbols
+
+Text imported as annotations
+
+Compliance Statement
+
+This pattern adheres to ASTM D6673 requirements by using explicit, non-proprietary DXF entities, standardized layer usage, and redundant physical indicators (folds, stitches, notches, and text). The file is suitable for exchange, review, and production in major apparel CAD systems.
+
+Prepared for Grant Submission
+
+This appendix may be included verbatim as a technical compliance exhibit accompanying funding or program proposals.

@@ -1,0 +1,28 @@
+# Rust Style Guidelines
+
+## File Headers
+
+All Rust source files must start with:
+
+```rust
+// project: SeamlyLayout
+// author: slspencer, copyright 2026
+// MIT License: https://opensource.org/licenses/MIT
+```
+
+## Comments
+
+- Use Doxygen-style comments (`//`) for file, crate, module, functions, methods, structs, etc.
+- Use inline comments for code
+- `if`, `else`, `while`, `for`, `match` statements must have:
+  - Comments following the closing brace that repeat the conditional phrase
+  - Internal comments for each case
+
+## Editing Guidelines
+
+- Prefer minimal, focused diffs
+- Preserve or update existing comments
+- Avoid non-ASCII unless already present
+- Run targeted tests: `cargo test -p <crate>`
+- **Remove unused variables entirely**—do not prefix with underscore
+- Do not create unnecessary wrappers that add no additional value

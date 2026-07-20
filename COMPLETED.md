@@ -2,6 +2,21 @@
 
 Tasks moved here from `TODO.md` when all their subtasks are complete.
 
+## Task 19 — Move seamlyLayout code from `/seamlyLayout` to `/src/app/seamlylayout` (2026-07-19)
+
+Relocated the daughter layout app into the standard app tree alongside `src/app/seamly2d` and `src/app/seamlyme`. It keeps its own build (Rust + Qt 6.10/QML) and stays out of the Seamly2D qmake build.
+
+**Decision:** seamlylayout is treated the same as seamlyme — its source is tracked directly in this repo as ordinary files (no submodule). The nested repo was absorbed, not `git mv`'d.
+
+- [x] Absorb the nested repo: archived `seamlyLayout/.git` to `C:\Users\susan\Projects\seamlyLayout-dotgit-archive` (it held a unique stash; `main` was fully pushed to `seamly/seamlyLayout`, which keeps the standalone history), moved the tree to `src/app/seamlylayout`, and added 309 curated files (the nested repo's tracked set minus `.vs\` IDE binaries, a stray `docs\status-docs\image\TODO\*.exe`, and `.vscode\extensions.json`)
+- [x] `.gitignore` coverage: the moved subtree keeps its own `src/app/seamlylayout/.gitignore` (still functional for `/target`, `/input`, `/output`, `/logs`, `qt_frontend/build/` etc.); the root `.gitignore` additionally lists the build outputs explicitly and re-includes `src/app/seamlylayout/docs/` past the global `docs/` ignore
+- [x] Updated all old-location references: root `CLAUDE.md`, `TODO.md`/`PROJECT_PLAN.md` task text, `COMPLETED.md`/`SESSION_HANDOVER.md`, `.github/README-BUILDS.md`, and the moved tree's own `.clangd` (clangd compile DB path), `qt_frontend/settings/preferences.json` (absolute input/layout/settings paths), `qt_frontend/build_debug.bat`, and its `CLAUDE.md` (the `~/seamlyLayout/` home-data paths in packaging/docs are user-data locations, untouched — Task 15 territory)
+- [x] seamly2d-side references: updated the development-fallback path in `Application2D::seamlyLayoutFilePath()` (`src/app/seamly2d/core/application_2d.cpp`); the `paths/seamlyLayoutApp` setting is a user-configured value with no baked-in repo path, no change needed
+- [x] Confirmed qmake exclusion: `src/app/app.pro` SUBDIRS lists only `seamlyme` and `seamly2d`
+- [x] Verified the seamlyLayout build from the new location: build script is `src/app/seamlylayout/qd.ps1` (app root, not `qt_frontend/`); CMake configure + debug build + all 4 Qt frontend ctest suites pass (AdjustScene, AdjustController, PreferencesModel, SettingsModel); Rust workspace tests 244 passed / 7 failed — the 7 failures (3 `layout_tiling`, 4 `polygon_pack`) are pre-existing on the nested repo's `main` (crates byte-identical before/after the move), tracked as follow-up work, not caused by the relocation
+- [x] Verified a full Seamly2D build (`scripts/sd.ps1`) is unaffected — Debug build OK
+- [x] Updated `.github/README-BUILDS.md` and the seamlyLayout `CLAUDE.md` for the new paths
+
 ## Task 23 — Fix the Seamly2DTests suite hanging at startup on Windows (local runs) (2026-07-18)
 
 The debug-built `Seamly2DTests.exe` appeared to hang at startup with no QTest output. **Root cause:** not a deadlock — Qt looks for the platform plugin (`platforms\qwindowsd.dll`) next to the *executable*, and windeployqt only deployed it next to `seamly2d.exe`; the resulting "no Qt platform plugin could be initialized" `qFatal` pops a hidden modal dialog in a debug-CRT build, which blocks forever with zero output.
@@ -23,7 +38,7 @@ Labels exported as glyph outlines even with "text as paths" off: `QGraphicsSimpl
 - [x] Keep the `textAsPaths == true` branch unchanged (explicit vector outlines remain available)
 - [x] Verify `PrepareTextForDXF` / `RestoreTextAfterDXF` (`collectTextItems()`) still find and convert the new item type — `SvgTextItem` shares `QGraphicsSimpleTextItem::Type`; DXF flat export of the richmond pattern emits 64 TEXT entities with the label strings and no `%&?_?&%` placeholder leak
 - [x] Verify exports (richmond pattern, CLI `--exportOnlyDetails`): SVG has 64 `<text>` inside the 23 correctly `data-*`-tagged `piece_label`/`pattern_label` groups (0 paths in label groups; font-family/size/fill carried); `--text2paths` yields 0 `<text>` / 63 outline paths in the same groups; DXF/PDF/PNG all valid; Layout Mode `.pieces.svg` shares the same render path (`arrangePieceItemsFlat(textAsPaths=false)` → `SvgGenerator`)
-- [x] Update the label bullet of the `data-*` contract in `status-docs/svg-data-attributes.md` and the mirror in `seamlyLayout/docs/status-docs/svg-data-attributes.md`
+- [x] Update the label bullet of the `data-*` contract in `status-docs/svg-data-attributes.md` and the mirror in `src/app/seamlylayout/docs/status-docs/svg-data-attributes.md`
 - [x] Doxygen briefs + inline comments on all touched functions; unit tests `tst_svgtextitem.cpp` added to `Seamly2DTest` (`<text>` emission, font styling, multi-line, DXF-discovery cast) — run in CI (`linux-test`); the local Windows debug suite hangs at startup (pre-existing, unrelated)
 
 Note: the `textAsPaths == true` branch emits filled glyph *outlines*, which remains the behavior for outline fonts; an optional single-stroke (Hershey) alternative is tracked separately in Task 22.
@@ -33,7 +48,7 @@ Note: the `textAsPaths == true` branch emits filled glyph *outlines*, which rema
 A cut path is a closed internal path that is cut out of the piece and can have its own seam allowance. The data model already separated them (`VLayoutPiecePath::isCutPath()`; stored as `m_cutoutPaths` on `VLayoutPiece`), but `createCutoutPathItem()` (`src/libs/vlayout/vlayoutpiece.cpp`) tagged them `internal_path` as a placeholder because the SVG spec defined no dedicated type.
 
 - [x] Tag `createCutoutPathItem()` items with `data-type="cut_path"` instead of `"internal_path"` (placeholder comment removed); cut paths get their own per-piece counter and `piece-<n>-cut_path-<m>` ids automatically via `addComponentGroups()` (also updated the `ItemType` doc comment in `vlayoutdef.h`)
-- [x] Add `cut_path` to the type list in `status-docs/new-attributes.csv` and document its semantics (closed, cut out, may carry a seam allowance) in `status-docs/svg-data-attributes.md` and the mirror in `seamlyLayout/docs/status-docs/svg-data-attributes.md`
+- [x] Add `cut_path` to the type list in `status-docs/new-attributes.csv` and document its semantics (closed, cut out, may carry a seam allowance) in `status-docs/svg-data-attributes.md` and the mirror in `src/app/seamlylayout/docs/status-docs/svg-data-attributes.md`
 - [x] Verify export with a pattern containing a cutout internal path (richmond has none — verified with a copy of the richmond pattern with the "Left Cut" internal path of piece "Front" flipped to `cut="true"`, CLI `--format 0 --exportOnlyDetails`): the cutout appears as `piece-1-cut_path-1` (`data-type="cut_path"`, own counter starting at 1, `data-parent="piece-1"`), the piece's 4 plain internal paths keep `data-type="internal_path"` with their own counter, all other pieces unaffected
 - [x] Regression: tagged SVG inspection passes (all 12 pieces, ids/counters/parents correct); the CLI export writes the same `*_pieces.svg` the Layout Mode handoff uses (same `GetItem()` → `SvgGenerator` path), so `.pieces.svg` carries the new type; PDF and PNG exports of the cutout pattern succeed, and DXF/PDF/PNG never read `PieceItemData::ItemType`, so they are unaffected by the tag change
 - [x] Doxygen briefs + inline comments on all touched functions; unit tests `tst_svgcomponenttags.cpp` added to `Seamly2DTest` (item-tree tagging: 1× internal_path + 2× cut_path; end-to-end `SvgGenerator` export: ids, per-type counters, `data-parent`) — all pass locally (run with `QT_PLUGIN_PATH` set per the Task 23 root-cause finding; verified via the QTest file logger) and run in CI (`linux-test`)
@@ -86,7 +101,7 @@ A cut path is a closed internal path that is cut out of the piece and can have i
 
 ## Task 9 — Launch SeamlyLayout development build from Layout Mode (branch `run-seamlyLayout`)
 
-- [x] Layout Mode buttons run `C:\Users\susan\Projects\Seamly2D-private\seamlyLayout\qt_frontend\build\Debug\SeamlyLayout.exe`: added the development-build location as a lookup fallback in `Application2D::seamlyLayoutFilePath()` (after the settings override and the install-directory check)
+- [x] Layout Mode buttons run `C:\Users\susan\Projects\Seamly2D-private\src\app\seamlylayout\qt_frontend\build\Debug\SeamlyLayout.exe`: added the development-build location as a lookup fallback in `Application2D::seamlyLayoutFilePath()` (after the settings override and the install-directory check)
 - [x] Doxygen brief + inline comments updated on the touched function
 
 ## Task 8 — Verification (2026-07-17)
@@ -97,7 +112,7 @@ A cut path is a closed internal path that is cut out of the piece and can have i
 - [x] SVG inspection — script-verified: every group under `pattern-1` has `data-type`/`data-type-number`/`data-parent`, pattern/piece groups carry `data-name`, per-type counters and structured ids correct, all ids unique, no empty groups, no `M0,0`/empty-`d` paths
 - [x] Visual diff vs baseline (`status-docs/baseline/richmond-shirt-baseline_pieces.svg`) — canvas/viewBox identical; all 53 geometry paths (seamlines, cutlines, internal paths, grainlines) byte-identical; stroke colors/line weights identical; only the 64 label glyph-outline paths differ (font outline rendering of the older installed baseline build), same count/colors/placement
 - [x] DXF / PDF / PNG export regression — flat DXF (AC1027) has 2305 polylines including label outlines (validates the recursive text traversal of Task 3), AAMA DXF keeps 34 TEXT label entities, PDF valid (%PDF-1.4, proper EOF), PNG valid 7318×3423
-- [x] `data-*` contract documented in `status-docs/svg-data-attributes.md` and mirrored to `seamlyLayout/docs/status-docs/svg-data-attributes.md`
+- [x] `data-*` contract documented in `status-docs/svg-data-attributes.md` and mirrored to `src/app/seamlylayout/docs/status-docs/svg-data-attributes.md`
 
 ## Task 12 — Local debug-build script for seamly2d (Qt 6.10.x + VS 18 Community) (2026-07-17)
 
