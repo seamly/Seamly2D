@@ -23,6 +23,15 @@ var namespaces_dup =
     [ "anonymous_namespace{preferencespatternpage.cpp}", "d1/dbe/namespaceanonymous__namespace_02preferencespatternpage_8cpp_03.html", [
       [ "initAllStringsComboBox", "d1/dbe/namespaceanonymous__namespace_02preferencespatternpage_8cpp_03.html#a97383a8b46e2afedbc957a5c56b7522f", null ]
     ] ],
+    [ "anonymous_namespace{tst_svgcomponenttags.cpp}", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html", [
+      [ "groupsOfType", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#a2d7b69f1bd0c5ecc33e37213be6dcc55", null ],
+      [ "makePath", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#aad667cd3fa73c258b622b363cfdb6489", null ],
+      [ "makeTestPiece", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#adc538687a0a778fba80e6b4d386e3165", null ],
+      [ "squarePoints", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#a887dc0def7310a2058744fccc20a44fc", null ]
+    ] ],
+    [ "anonymous_namespace{tst_svgtextitem.cpp}", "db/da3/namespaceanonymous__namespace_02tst__svgtextitem_8cpp_03.html", [
+      [ "renderItemToSvg", "db/da3/namespaceanonymous__namespace_02tst__svgtextitem_8cpp_03.html#aa3743175c7e5de4200845ac240a757c5", null ]
+    ] ],
     [ "anonymous_namespace{vabstractpattern.cpp}", "d0/d42/namespaceanonymous__namespace_02vabstractpattern_8cpp_03.html", [
       [ "ReadExpressionAttribute", "d0/d42/namespaceanonymous__namespace_02vabstractpattern_8cpp_03.html#a03b1fb578fba1ecb51300ab233820199", null ]
     ] ],

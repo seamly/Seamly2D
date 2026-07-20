@@ -49,5 +49,6 @@ var searchData=
   ['stringop_46',['StringOp',['../d9/ddc/classStringOp.html',1,'']]],
   ['stringtoken_47',['StringToken',['../d2/dc2/classStringToken.html',1,'']]],
   ['substitutiongroupcomparator_48',['SubstitutionGroupComparator',['../d7/d29/classSubstitutionGroupComparator.html',1,'']]],
-  ['svggenerator_49',['SvgGenerator',['../d3/d0b/classSvgGenerator.html',1,'']]]
+  ['svggenerator_49',['SvgGenerator',['../d3/d0b/classSvgGenerator.html',1,'']]],
+  ['svgtextitem_50',['SvgTextItem',['../d5/d2f/classSvgTextItem.html',1,'']]]
 ];

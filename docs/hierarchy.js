@@ -559,6 +559,7 @@ var hierarchy =
       [ "VMainGraphicsScene", "d7/df5/classVMainGraphicsScene.html", null ]
     ] ],
     [ "QGraphicsSimpleTextItem", null, [
+      [ "SvgTextItem", "d5/d2f/classSvgTextItem.html", null ],
       [ "VGraphicsSimpleTextItem", "de/dbc/classVGraphicsSimpleTextItem.html", null ]
     ] ],
     [ "QGraphicsView", null, [
@@ -661,6 +662,8 @@ var hierarchy =
       [ "TST_NameRegExp", "d3/d4d/classTST__NameRegExp.html", null ],
       [ "TST_QmuTokenParser", "d3/df0/classTST__QmuTokenParser.html", null ],
       [ "TST_ReadVal", "dc/d3d/classTST__ReadVal.html", null ],
+      [ "TST_SvgComponentTags", "db/dc1/classTST__SvgComponentTags.html", null ],
+      [ "TST_SvgTextItem", "df/de1/classTST__SvgTextItem.html", null ],
       [ "TST_TSTranslation", "d9/dd4/classTST__TSTranslation.html", null ],
       [ "TST_VArc", "df/daf/classTST__VArc.html", null ],
       [ "TST_VCommandLine", "d0/dcb/classTST__VCommandLine.html", null ],
