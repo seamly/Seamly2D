@@ -2,6 +2,14 @@
 
 Tasks moved here from `TODO.md` when all their subtasks are complete.
 
+## Task 28 — Resolve the uncommitted whitespace-only changes to PreferencesModel.cpp/.h (2026-07-20)
+
+Left over from the Task 19 move: `src/app/seamlylayout/qt_frontend/src/PreferencesModel.cpp` and `.h` sat modified in the working tree with whitespace-only changes (trailing-space trims on a handful of comment lines — `git diff -w` showed no difference), most likely an editor trim-on-save when the files moved on disk.
+
+- [x] Decide: **kept the trims** — committed as a tiny whitespace cleanup on the task branch (removing trailing whitespace is strictly an improvement, and discarding would just let the editor re-trim them on the next save)
+- [x] Clean `git status` after the commit
+- [x] Re-dirtying risk checked: a trailing-whitespace scan of all `.cpp/.h/.rs/.qml` files under `src/app/seamlylayout` found zero remaining occurrences, so the subtree is already fully normalized — no follow-up normalization commit needed; future trim-on-save cannot re-dirty anything
+
 ## Task 19 — Move seamlyLayout code from `/seamlyLayout` to `/src/app/seamlylayout` (2026-07-19)
 
 Relocated the daughter layout app into the standard app tree alongside `src/app/seamly2d` and `src/app/seamlyme`. It keeps its own build (Rust + Qt 6.10/QML) and stays out of the Seamly2D qmake build.

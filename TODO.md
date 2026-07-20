@@ -197,14 +197,6 @@ Add layout export for multisize patterns — `.sm2d` patterns opened with a `.sm
 - [ ] Run `cargo test --workspace` clean (251/251) and record the outcome; make sure the Task 20 CI workflow (when it lands) runs these tests so drift is caught on push
 - [ ] Doxygen-style briefs + inline comments on all touched functions per the seamlylayout rules
 
-## Task 28 — Resolve the uncommitted whitespace-only changes to PreferencesModel.cpp/.h
-
-Left over from the Task 19 move (2026-07-20): `src/app/seamlylayout/qt_frontend/src/PreferencesModel.cpp` and `.h` sit modified in the working tree with whitespace-only changes (trailing-space trims on a handful of comment lines — verified with `git diff -w`, which shows no difference). Most likely an open editor re-saved them when the files moved on disk. They were deliberately left uncommitted rather than silently committed or discarded.
-
-- [ ] Decide: keep the trims (commit them as a tiny whitespace cleanup on `run-seamlyLayout`) or drop them (`git checkout -- src/app/seamlylayout/qt_frontend/src/PreferencesModel.*`)
-- [ ] Either way, end with a clean `git status` on `run-seamlyLayout`
-- [ ] If the editor's trim-on-save keeps re-dirtying seamlylayout files, consider a one-off whitespace-normalization commit for the subtree (or align editor settings) so future diffs stay noise-free
-
 ## Task 29 — Dependabot: update the `time` crate in seamlylayout (GHSA-r6v5-fh4h-64xc)
 
 GitHub Dependabot alert #1 (moderate/medium, open): the `time` Rust crate pinned in `src/app/seamlylayout/Cargo.lock` falls in the vulnerable range `>= 0.3.6, < 0.3.47` — stack-exhaustion denial-of-service ([GHSA-r6v5-fh4h-64xc](https://github.com/advisories/GHSA-r6v5-fh4h-64xc), first patched version 0.3.47). The alert appeared when the Task 19 merge brought the seamlylayout `Cargo.lock` into this repo: https://github.com/seamly/Seamly2D/security/dependabot/1
