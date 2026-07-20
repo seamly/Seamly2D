@@ -896,8 +896,8 @@ mod tests {
         assert!(h.starts_with("3072"), "root height: {h}");
     } // tiled_svg_root_dimensions
 
-    // @brief create_initial_tiled_layout_dom: one <path> per row (not <use> per tile).
-    // @returns
+    // @brief create_initial_tiled_layout_dom: one <path> per row plus the single
+    // tile-marker path in <defs> (not <use> per tile).
     #[test]
     fn tiled_svg_path_count() {
         let td = TileDimensions {
@@ -910,10 +910,12 @@ mod tests {
         };
         let doc = create_initial_tiled_layout_dom(&td);
         let svg_str = doc.to_string();
-        // 3 rows → 3 <path> elements; no <use> elements
+        // 3 rows → 3 row <path> elements, plus <path id="tileMarkerPath"> inside
+        // the <marker> in <defs> = 4 total; no <use> elements (the marker fires
+        // at each path vertex instead of per-tile <use> references).
         let path_count = svg_str.matches("<path").count();
         let use_count  = svg_str.matches("<use").count();
-        assert_eq!(path_count, 3, "path element count: {path_count}");
+        assert_eq!(path_count, 4, "path element count: {path_count}");
         assert_eq!(use_count,  0, "unexpected use elements: {use_count}");
     } // tiled_svg_path_count
 
@@ -1045,11 +1047,12 @@ mod tests {
             margin_top_px: 24,  margin_bottom_px: 24,
         };
         let doc = create_initial_tiled_layout_dom(&td);
-        // row_2 d attribute must start with "M 24.0000," (minX=24), not "M 524.0000,".
+        // row_2 d attribute must start with "M 24," (minX=24), not "M 524," —
+        // coordinates are integer pixels (u32), so no decimal places appear.
         let d_val = doc.get_attr_by_id("row_2", "d")
             .expect("row_2 path not found in DOM");
         assert!(
-            d_val.starts_with("M 24.0000,"),
+            d_val.starts_with("M 24,"),
             "row_2 d should start at minX=24, got: {d_val}"
         );
     } // tiled_svg_col_resets_per_row

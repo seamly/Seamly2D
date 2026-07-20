@@ -2,6 +2,37 @@
 
 Tasks moved here from `TODO.md` when all their subtasks are complete.
 
+## Task 27 — Fix the 7 pre-existing seamlylayout Rust test failures (layout_tiling, polygon_pack) (2026-07-20)
+
+All 7 failures (3 `layout_tiling`, 4 `polygon_pack`) diagnosed and fixed; `cargo test --workspace` now passes 251/251 (the suite gained one test).
+
+- [x] Dated the drift via the archived nested-repo history (`C:\Users\susan\Projects\seamlyLayout-dotgit-archive`): all 7 tests have failed since the day both crates were *introduced* — commit `9339c94` "added Rotate - Medium quality option" (2026-05-21), carried onto `main` by the `565357a` qt-snapshot overwrite (2026-05-23). They never passed in any committed state (verified by checking out `9339c94` in a scratch worktree and running the tests), so the code/test drift happened inside that one bulk commit, not as a later regression
+- [x] `layout_tiling` — all 3 were **test drift**; behavior was correct:
+  - `selvedge_deduction`: settled the selvedge-for-paper question — selvedge is fabric-only, and for `mediaType == "fabric"` the C++ `SettingsModel::syncFabricMarginsFromSelvedge()` already bakes it into all four margins before the JSON reaches Rust, so a separate deduction in `effective_bin_px()` would double-deduct (the deliberately commented-out step from `bd2203a` was right). Replaced the test with `selvedge_baked_into_margins_for_fabric` (fabric fixture, margins = selvedge, asserts single deduction) and `selvedge_ignored_for_paper`; updated the field/step comments and `docs/layout-docs/PROCESS LAYOUT WORKFLOW.md`
+  - `tiled_svg_path_count`: the DOM correctly contains 4 `<path>` elements — 3 row paths plus `tileMarkerPath` inside the `<defs>` `<marker>` (the marker-based design the function documents); the test forgot the marker path — now expects 4
+  - `tiled_svg_col_resets_per_row`: row 2's `d` does start at minX=24; the test expected the old f64 `"M 24.0000,"` formatting but coordinates are integer pixels (`u32`) — now expects `"M 24,"`
+- [x] `polygon_pack` — all 4 shared one **code regression** in `placer.rs`: the OBB fast path accepted the *first* SAT-clear anchor among only the four IFP corner vertices, slamming every piece after the first into the bin's top-RIGHT corner (x=90/95/88 in the failures) instead of packing flush, and letting a 45° corner anchor spuriously beat 0°. Fixed: the fast path now accepts only the IFP's UL-lex-min corner (provably optimal for the orientation when SAT-clear) and otherwise falls through to the exact NFP path; the complexity-guardrail branches got a degraded corner-fallback so complex garments still place when the exact path is bypassed; anchor scoring is unified in a `consider_anchor` helper
+- [x] Verified with the richmond test pattern via a scratch harness driving `svg_extract` → `pack_polygons` on `input/richmond-shirt_this_one.svg`: the 5 small pieces (placket/pocket/cuff/flap, ≤11 verts) pack flush left-to-right with exact 5 px gaps and no overlaps. Known Stage-1 limitation surfaced (pre-existing, unchanged): exact NFP pair computation costs ~1 s/pair on 25+-vertex outlines, so the full 11-piece garment exceeds the placer's 4 s budget → `SearchLimit`. Not user-facing: `packing::pack_pieces`/`pack_polygons` route every trial set the app can produce ({0}, {180}, {0,180}, and even non-orthogonal sets) to the MaxRects packers — the NFP placer is unwired Stage-1 code for future rotation work
+- [x] `cargo test --workspace` clean: 251 passed / 0 failed; all 4 Qt frontend ctest suites pass after rebuild. The Task 20 CI workflow's checklist already includes running the Rust workspace tests, which will catch future drift on push
+- [x] Doxygen-style briefs + inline comments on all touched functions per the seamlylayout rules
+
+## Task 29 — Dependabot: update the `time` crate in seamlylayout (GHSA-r6v5-fh4h-64xc) (2026-07-20)
+
+GitHub Dependabot alert #1 (moderate): `time` 0.3.46 in `src/app/seamlylayout/Cargo.lock` fell in the vulnerable range `>= 0.3.6, < 0.3.47` (stack-exhaustion DoS, [GHSA-r6v5-fh4h-64xc](https://github.com/advisories/GHSA-r6v5-fh4h-64xc)).
+
+- [x] Identified the dependency chain with `cargo tree -i time`: `time` is pulled in transitively via `lopdf v0.32.0` ← `cxxqt_bridge` (workspace crate)
+- [x] `cargo update -p time` updated the lockfile: `time` 0.3.46 → 0.3.53 (≥ 0.3.47 patched), plus its own transitive companions `time-core` 0.1.8→0.1.9, `time-macros` 0.2.26→0.2.31, `deranged` 0.5.5→0.5.8, `num-conv` 0.2.0→0.2.2 — all semver-compatible lockfile-only bumps, no `Cargo.toml` changes
+- [x] Rebuilt and ran the tests: `cargo test --workspace --no-fail-fast` — 243 passed, 7 failed, and the 7 are exactly the pre-existing Task 27 set (3 `layout_tiling`, 4 `polygon_pack`), nothing new; Qt frontend Debug build (CMake/Ninja, links the updated Rust bridge) + all 4 ctest suites pass (AdjustScene, AdjustController, PreferencesModel, SettingsModel)
+- [x] Committed the updated `Cargo.lock` on the task branch (pushed via the combined Task 28/29/27 PR); Dependabot [alert #1](https://github.com/seamly/Seamly2D/security/dependabot/1) to be confirmed auto-resolved after the merge
+
+## Task 28 — Resolve the uncommitted whitespace-only changes to PreferencesModel.cpp/.h (2026-07-20)
+
+Left over from the Task 19 move: `src/app/seamlylayout/qt_frontend/src/PreferencesModel.cpp` and `.h` sat modified in the working tree with whitespace-only changes (trailing-space trims on a handful of comment lines — `git diff -w` showed no difference), most likely an editor trim-on-save when the files moved on disk.
+
+- [x] Decide: **kept the trims** — committed as a tiny whitespace cleanup on the task branch (removing trailing whitespace is strictly an improvement, and discarding would just let the editor re-trim them on the next save)
+- [x] Clean `git status` after the commit
+- [x] Re-dirtying risk checked: a trailing-whitespace scan of all `.cpp/.h/.rs/.qml` files under `src/app/seamlylayout` found zero remaining occurrences, so the subtree is already fully normalized — no follow-up normalization commit needed; future trim-on-save cannot re-dirty anything
+
 ## Task 19 — Move seamlyLayout code from `/seamlyLayout` to `/src/app/seamlylayout` (2026-07-19)
 
 Relocated the daughter layout app into the standard app tree alongside `src/app/seamly2d` and `src/app/seamlyme`. It keeps its own build (Rust + Qt 6.10/QML) and stays out of the Seamly2D qmake build.
