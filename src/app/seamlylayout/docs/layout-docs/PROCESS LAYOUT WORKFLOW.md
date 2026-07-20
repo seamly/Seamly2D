@@ -20,7 +20,7 @@ See full documentation in [`docs/layout-docs/PROCESS LAYOUT WORKFLOW.md`](../../
 | Step | Function | Purpose |
 |------|----------|---------|
 | 1 | `LayoutSettings::from_json()` | Parse settings JSON from SettingsModel |
-| 2 | `LayoutSettings::effective_bin_px()` | Compute bin dimensions in pixels (margins, selvedge, fold, unit conversion) |
+| 2 | `LayoutSettings::effective_bin_px()` | Compute bin dimensions in pixels (margins, fold, unit conversion; fabric selvedge is already baked into the margins by `SettingsModel::syncFabricMarginsFromSelvedge()`) |
 | 3 | `extract_piece_rects(&flat_dom_3)` | Extract bounding boxes from fully pre-processed DOM; sort by area descending |
 | 4 | `pack_maxrects(bin_w, bin_h, GAP_PX, &rects)` | MaxRects bin packing — top-left fit selection, 4-way split, containment pruning; returns `(Vec<Placed>, Vec<FreeRect>)` |
 | 5 | `assemble_layout_svg(...)` | Build output SVG; includes debug overlay groups (see below) |

@@ -279,87 +279,112 @@ pub(crate) fn place_upper_left_fill(
             } // if no IFP
             any_orient_fits = true;
 
-            // Hybrid fast path (Phase 1+2): try OBB broad-phase anchors first.
-            // Candidate anchors are IFP vertices in UL-lexicographic order.
-            // If any anchor is SAT-clear against all placed OBBs, we can score
-            // and accept this orientation without paying NFP/overlay cost.
+            // AABB of the rotated piece — shared by the fast path, the
+            // guardrail fallback, and the exact path's anchor scoring below.
+            // The placed-AABB frame (anchor + AABB min corner) is the
+            // cross-orientation comparator: anchors at different orientations
+            // live in different polygon frames, so scoring must happen on the
+            // user-perceived placed top-left, not the raw anchor.
+            let (min_x, min_y, max_x, max_y) = aabb(&oriented);
+
+            // @brief Score `anchor` against the best-so-far candidate and
+            // record it when it wins the UL-Fill comparator (lowest placed y,
+            // ties broken by lowest placed x).  Used by every acceptance site
+            // in this orientation loop so the comparator stays in one place.
+            let consider_anchor = |best: &mut Option<BestCandidate>, anchor: IntPoint| {
+                let placed_x = anchor.x + min_x;
+                let placed_y = anchor.y + min_y;
+                let beats = match best {
+                    None => true,
+                    Some(b) => placed_y < b.placed_y
+                        || (placed_y == b.placed_y && placed_x < b.placed_x),
+                };
+                if beats {
+                    *best = Some(BestCandidate {
+                        orient,
+                        anchor_x: anchor.x,
+                        anchor_y: anchor.y,
+                        placed_x,
+                        placed_y,
+                        placed_w: max_x - min_x,
+                        placed_h: max_y - min_y,
+                    });
+                } // if beats
+            }; // consider_anchor
+
+            // @brief OBB broad-phase feasibility: true when the piece anchored
+            // at `anchor` has no oriented-bounding-box overlap with any placed
+            // piece.  Sound for acceptance (OBB separation implies polygon
+            // separation) but conservative — it can reject anchors the exact
+            // NFP path would accept, so a `false` here never rules a spot out.
+            let sat_clear = |anchor: IntPoint| -> bool {
+                // Pixel-space AABB of the candidate placement, for the
+                // spatial-bin neighborhood lookup (avoids testing every
+                // placed piece when many are far away).
+                let cand_min_x_px = from_int(anchor.x + min_x).round() as i32;
+                let cand_min_y_px = from_int(anchor.y + min_y).round() as i32;
+                let cand_max_x_px = from_int(anchor.x + max_x).round() as i32;
+                let cand_max_y_px = from_int(anchor.y + max_y).round() as i32;
+
+                let bx0 = cand_min_x_px.div_euclid(SPATIAL_BIN_PX);
+                let by0 = cand_min_y_px.div_euclid(SPATIAL_BIN_PX);
+                let bx1 = cand_max_x_px.div_euclid(SPATIAL_BIN_PX);
+                let by1 = cand_max_y_px.div_euclid(SPATIAL_BIN_PX);
+                let mut neighbor_ids: HashSet<usize> = HashSet::new();
+                for bx in bx0..=bx1 {
+                    for by in by0..=by1 {
+                        if let Some(ids) = spatial_bins.get(&(bx, by)) {
+                            for &nid in ids {
+                                neighbor_ids.insert(nid);
+                            } // for nid
+                        } // if bin occupied
+                    } // for by
+                } // for bx
+
+                let cand = obb_for_piece(&polygons[id], orient, anchor.x, anchor.y);
+                !neighbor_ids.iter().any(|nid| obb_overlap(&cand, &placed_obbs[*nid]))
+            }; // sat_clear
+
+            // Candidate corner anchors: the IFP's vertices in UL-lexicographic
+            // order.  Shared by the optimal-head fast path just below and by
+            // the guardrail fallback further down.
+            let mut quick_vertices = ifp.clone();
+            quick_vertices.sort_by(|a, b| {
+                if a.y == b.y { a.x.cmp(&b.x) } else { a.y.cmp(&b.y) }
+            });
+            quick_vertices.dedup_by(|a, b| a.x == b.x && a.y == b.y);
+
+            // Hybrid fast path (Phase 1+2): OBB broad-phase acceptance of the
+            // provably-optimal anchor only.  `quick_vertices[0]` is the IFP's
+            // lex-min corner — a lower bound on the UL-Fill comparator for
+            // this orientation: every feasible anchor has y ≥ its y, and at
+            // equal y, x ≥ its x.  If that corner is SAT-clear it IS this
+            // orientation's optimum, so we accept it without paying the
+            // NFP/overlay cost.  Any OTHER corner being clear proves nothing —
+            // the exact NFP search can still find a better flush placement
+            // along a placed piece's boundary — so we fall through to the
+            // exact path instead of accepting it.  (Accepting the first
+            // SAT-clear corner regardless of rank was a regression that
+            // slammed every piece after the first against the bin's top-RIGHT
+            // corner, since the top-left corner is usually occupied.)
             if !placed_obbs.is_empty() {
-                let mut quick_vertices = ifp.clone();
-                quick_vertices.sort_by(|a, b| {
-                    if a.y == b.y { a.x.cmp(&b.x) } else { a.y.cmp(&b.y) }
-                });
-                quick_vertices.dedup_by(|a, b| a.x == b.x && a.y == b.y);
-                let quick_test_count = quick_vertices.len();
-
-                let mut quick_anchor: Option<IntPoint> = None;
-                for &anchor in &quick_vertices {
-                    let (min_x, min_y, max_x, max_y) = aabb(&oriented);
-                    let cand_min_x_px = from_int(anchor.x + min_x).round() as i32;
-                    let cand_min_y_px = from_int(anchor.y + min_y).round() as i32;
-                    let cand_max_x_px = from_int(anchor.x + max_x).round() as i32;
-                    let cand_max_y_px = from_int(anchor.y + max_y).round() as i32;
-
-                    let bx0 = cand_min_x_px.div_euclid(SPATIAL_BIN_PX);
-                    let by0 = cand_min_y_px.div_euclid(SPATIAL_BIN_PX);
-                    let bx1 = cand_max_x_px.div_euclid(SPATIAL_BIN_PX);
-                    let by1 = cand_max_y_px.div_euclid(SPATIAL_BIN_PX);
-                    let mut neighbor_ids: HashSet<usize> = HashSet::new();
-                    for bx in bx0..=bx1 {
-                        for by in by0..=by1 {
-                            if let Some(ids) = spatial_bins.get(&(bx, by)) {
-                                for &nid in ids {
-                                    neighbor_ids.insert(nid);
-                                }
-                            }
-                        }
-                    }
-
-                    let cand = obb_for_piece(&polygons[id], orient, anchor.x, anchor.y);
-                    let overlaps = neighbor_ids.iter().any(|nid| obb_overlap(&cand, &placed_obbs[*nid]));
-                    if !overlaps {
-                        quick_anchor = Some(anchor);
-                        break;
-                    }
-                }
-
-                if let Some(anchor) = quick_anchor {
-                    let (min_x, min_y, max_x, max_y) = aabb(&oriented);
-                    let placed_x = anchor.x + min_x;
-                    let placed_y = anchor.y + min_y;
-
-                    let beats = match &best {
-                        None => true,
-                        Some(b) => placed_y < b.placed_y
-                            || (placed_y == b.placed_y && placed_x < b.placed_x),
-                    };
-                    if beats {
-                        best = Some(BestCandidate {
-                            orient,
-                            anchor_x: anchor.x,
-                            anchor_y: anchor.y,
-                            placed_x,
-                            placed_y,
-                            placed_w: max_x - min_x,
-                            placed_h: max_y - min_y,
-                        });
-                    }
-
-                    log::debug!(
-                        "[placer] piece_id={} orient={}° fast-path accepted via OBB SAT at anchor=({}, {}), tested={} corners",
-                        id,
-                        deg,
-                        anchor.x,
-                        anchor.y,
-                        quick_test_count,
-                    );
-                    continue;
-                }
-
+                if let Some(&head) = quick_vertices.first() {
+                    if sat_clear(head) {
+                        consider_anchor(&mut best, head);
+                        log::debug!(
+                            "[placer] piece_id={} orient={}° fast-path accepted lex-min IFP corner=({}, {}) via OBB SAT",
+                            id,
+                            deg,
+                            head.x,
+                            head.y,
+                        );
+                        continue;
+                    } // if head clear
+                } // if head exists
                 log::debug!(
-                    "[placer] piece_id={} orient={}° fast-path rejected (tested={} IFP corners, all OBB-overlap); falling back to exact NFP",
+                    "[placer] piece_id={} orient={}° fast-path lex-min IFP corner blocked; falling back to exact NFP",
                     id,
                     deg,
-                    quick_test_count,
                 );
             }
 
@@ -393,6 +418,18 @@ pub(crate) fn place_upper_left_fill(
                         pair_prod,
                         MAX_EXACT_PAIR_VERT_PRODUCT,
                     );
+                    // Degraded fallback: the exact path is bypassed for this
+                    // orientation, so accept the best (UL-lex-first) SAT-clear
+                    // IFP corner if one exists rather than dropping the
+                    // orientation entirely — a coarse corner placement beats a
+                    // false NoSpace/SearchLimit on complex garments.
+                    if let Some(&fb) = quick_vertices.iter().find(|&&a| sat_clear(a)) {
+                        consider_anchor(&mut best, fb);
+                        log::debug!(
+                            "[placer] piece_id={} orient={}° guardrail fallback accepted IFP corner=({}, {})",
+                            id, deg, fb.x, fb.y,
+                        );
+                    } // if fallback corner found
                     continue;
                 }
 
@@ -405,6 +442,14 @@ pub(crate) fn place_upper_left_fill(
                         total_vert_product,
                         MAX_EXACT_TOTAL_VERT_PRODUCT,
                     );
+                    // Same degraded fallback as the pair-cap branch above.
+                    if let Some(&fb) = quick_vertices.iter().find(|&&a| sat_clear(a)) {
+                        consider_anchor(&mut best, fb);
+                        log::debug!(
+                            "[placer] piece_id={} orient={}° guardrail fallback accepted IFP corner=({}, {})",
+                            id, deg, fb.x, fb.y,
+                        );
+                    } // if fallback corner found
                     continue;
                 }
             }
@@ -511,31 +556,11 @@ pub(crate) fn place_upper_left_fill(
                 continue; // no feasible anchor at this orientation
             }; // let-else lex_min
 
-            // Score on placed-AABB top-left, not raw anchor.  Anchors at
-            // different orientations live in different polygon frames
-            // (each polygon's reference origin); the user-perceived
+            // Score on placed-AABB top-left, not raw anchor (see the
+            // `consider_anchor` helper above): the user-perceived
             // "upper-left" is the placed AABB corner, which translates by
             // the rotated polygon's `min` AABB corner.
-            let (min_x, min_y, max_x, max_y) = aabb(&oriented);
-            let placed_x = anchor.x + min_x;
-            let placed_y = anchor.y + min_y;
-
-            let beats = match &best {
-                None => true,
-                Some(b) => placed_y < b.placed_y
-                    || (placed_y == b.placed_y && placed_x < b.placed_x),
-            };
-            if beats {
-                best = Some(BestCandidate {
-                    orient,
-                    anchor_x: anchor.x,
-                    anchor_y: anchor.y,
-                    placed_x,
-                    placed_y,
-                    placed_w: max_x - min_x,
-                    placed_h: max_y - min_y,
-                });
-            } // if beats
+            consider_anchor(&mut best, anchor);
         } // for orient
 
         let Some(b) = best else {

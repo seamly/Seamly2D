@@ -2,6 +2,20 @@
 
 Tasks moved here from `TODO.md` when all their subtasks are complete.
 
+## Task 27 — Fix the 7 pre-existing seamlylayout Rust test failures (layout_tiling, polygon_pack) (2026-07-20)
+
+All 7 failures (3 `layout_tiling`, 4 `polygon_pack`) diagnosed and fixed; `cargo test --workspace` now passes 251/251 (the suite gained one test).
+
+- [x] Dated the drift via the archived nested-repo history (`C:\Users\susan\Projects\seamlyLayout-dotgit-archive`): all 7 tests have failed since the day both crates were *introduced* — commit `9339c94` "added Rotate - Medium quality option" (2026-05-21), carried onto `main` by the `565357a` qt-snapshot overwrite (2026-05-23). They never passed in any committed state (verified by checking out `9339c94` in a scratch worktree and running the tests), so the code/test drift happened inside that one bulk commit, not as a later regression
+- [x] `layout_tiling` — all 3 were **test drift**; behavior was correct:
+  - `selvedge_deduction`: settled the selvedge-for-paper question — selvedge is fabric-only, and for `mediaType == "fabric"` the C++ `SettingsModel::syncFabricMarginsFromSelvedge()` already bakes it into all four margins before the JSON reaches Rust, so a separate deduction in `effective_bin_px()` would double-deduct (the deliberately commented-out step from `bd2203a` was right). Replaced the test with `selvedge_baked_into_margins_for_fabric` (fabric fixture, margins = selvedge, asserts single deduction) and `selvedge_ignored_for_paper`; updated the field/step comments and `docs/layout-docs/PROCESS LAYOUT WORKFLOW.md`
+  - `tiled_svg_path_count`: the DOM correctly contains 4 `<path>` elements — 3 row paths plus `tileMarkerPath` inside the `<defs>` `<marker>` (the marker-based design the function documents); the test forgot the marker path — now expects 4
+  - `tiled_svg_col_resets_per_row`: row 2's `d` does start at minX=24; the test expected the old f64 `"M 24.0000,"` formatting but coordinates are integer pixels (`u32`) — now expects `"M 24,"`
+- [x] `polygon_pack` — all 4 shared one **code regression** in `placer.rs`: the OBB fast path accepted the *first* SAT-clear anchor among only the four IFP corner vertices, slamming every piece after the first into the bin's top-RIGHT corner (x=90/95/88 in the failures) instead of packing flush, and letting a 45° corner anchor spuriously beat 0°. Fixed: the fast path now accepts only the IFP's UL-lex-min corner (provably optimal for the orientation when SAT-clear) and otherwise falls through to the exact NFP path; the complexity-guardrail branches got a degraded corner-fallback so complex garments still place when the exact path is bypassed; anchor scoring is unified in a `consider_anchor` helper
+- [x] Verified with the richmond test pattern via a scratch harness driving `svg_extract` → `pack_polygons` on `input/richmond-shirt_this_one.svg`: the 5 small pieces (placket/pocket/cuff/flap, ≤11 verts) pack flush left-to-right with exact 5 px gaps and no overlaps. Known Stage-1 limitation surfaced (pre-existing, unchanged): exact NFP pair computation costs ~1 s/pair on 25+-vertex outlines, so the full 11-piece garment exceeds the placer's 4 s budget → `SearchLimit`. Not user-facing: `packing::pack_pieces`/`pack_polygons` route every trial set the app can produce ({0}, {180}, {0,180}, and even non-orthogonal sets) to the MaxRects packers — the NFP placer is unwired Stage-1 code for future rotation work
+- [x] `cargo test --workspace` clean: 251 passed / 0 failed; all 4 Qt frontend ctest suites pass after rebuild. The Task 20 CI workflow's checklist already includes running the Rust workspace tests, which will catch future drift on push
+- [x] Doxygen-style briefs + inline comments on all touched functions per the seamlylayout rules
+
 ## Task 29 — Dependabot: update the `time` crate in seamlylayout (GHSA-r6v5-fh4h-64xc) (2026-07-20)
 
 GitHub Dependabot alert #1 (moderate): `time` 0.3.46 in `src/app/seamlylayout/Cargo.lock` fell in the vulnerable range `>= 0.3.6, < 0.3.47` (stack-exhaustion DoS, [GHSA-r6v5-fh4h-64xc](https://github.com/advisories/GHSA-r6v5-fh4h-64xc)).

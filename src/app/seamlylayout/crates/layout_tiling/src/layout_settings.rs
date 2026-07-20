@@ -70,8 +70,12 @@ pub struct LayoutSettings {
     #[serde(default = "default_margin")]
     pub margin_right: f64,
 
-    // Selvedge width in active units; deducted from each side of the fabric width.
-    // For paper/roll, selvedge is an additional lateral margin on both sides.
+    // Selvedge width in active units.  Selvedge is a fabric concept (the
+    // woven edge of the cloth) and does not apply to paper/roll media.
+    // For media_type == "fabric" the C++ side already folds it into the four
+    // margins (`SettingsModel::syncFabricMarginsFromSelvedge()`), so this
+    // field is informational here — `effective_bin_px()` must NOT deduct it
+    // again or the selvedge would be subtracted twice.
     #[serde(default)]
     pub selvedge_width: f64,
 
@@ -242,10 +246,12 @@ impl LayoutSettings {
     //      - media_type=="paper" (sheet or tiled)     → pageW × pageH
     //   2. Override base with `fabric_width` / `fabric_height` when > 0.
     //   3. Halve width if `fabric_folded` (pieces are placed on the folded half).
-    //   4. Subtract all four margins.
-    //   5. Subtract `2 × selvedge_width` from the width.
-    //   6. Clamp each dimension to `MIN_BIN_PX` to prevent zero-size bins.
-    //   7. Convert from inches to pixels at `LAYOUT_PPI` (96 px/in).
+    //   4. Subtract all four margins.  For media_type == "fabric" the margins
+    //      already carry the selvedge (SettingsModel::syncFabricMarginsFromSelvedge()
+    //      sets each margin to selvedgeWidth), so no separate selvedge step
+    //      exists here — see the `selvedge_width` field comment.
+    //   5. Clamp each dimension to `MIN_BIN_PX` to prevent zero-size bins.
+    //   6. Convert from inches to pixels at `LAYOUT_PPI` (96 px/in).
     //
     // NOTE: `layout_mode` and `rotation_step` are NOT applied here — piece
     // arrangement (alongGrainline / withNap) and rotation step are
@@ -305,21 +311,19 @@ impl LayoutSettings {
         let w_in = base_w_in - (ml + mr);
         let h_in = base_h_in - (mt + mb);
 
-        // --- step 5: subtract selvedge from both lateral edges of fabric ---
-        // TODO: selvedge is margin left and margin right for media_type='fabric',
-        //       does not apply to media_type='paper'
-        //       Selvedge is NOT an additional margin on top of margin_left and margin_right for paper
-        //       Execute this step when media_type='fabric', which is when selvedge matters.
-        //       For now, selvedge is ignored for paper media.
-        //let sv = Self::to_inches(self.selvedge_width, u);
-        //let w_in = w_in - 2.0 * sv;
+        // NOTE: no separate selvedge step.  Selvedge is a fabric-only concept;
+        // for media_type == "fabric" the C++ SettingsModel maps selvedgeWidth
+        // into all four margins before the JSON reaches this crate
+        // (syncFabricMarginsFromSelvedge()), so step 4 above already accounts
+        // for it.  Deducting `selvedge_width` here as well would subtract the
+        // selvedge twice; for paper/roll media it never applies at all.
 
-        // --- step 6: clamp to minimum ---
+        // --- step 5: clamp to minimum ---
         // Prevent zero-size bins on bad settings (e.g., margins larger than page).
         let w_in = w_in.max(MIN_BIN_PX as f64 / LAYOUT_PPI);
         let h_in = h_in.max(MIN_BIN_PX as f64 / LAYOUT_PPI);
 
-        // --- step 7: convert to pixels at 96 px/in (u32, no decimals for pixels) ---
+        // --- step 6: convert to pixels at 96 px/in (u32, no decimals for pixels) ---
         let w_px = (w_in * LAYOUT_PPI).round() as u32;
         let h_px = (h_in * LAYOUT_PPI).round() as u32;
 
@@ -472,9 +476,50 @@ mod tests {
         assert_eq!(h, 48000);
     } // roll_media_bin
 
-    // @brief Selvedge is deducted from both sides.
+    // @brief Fabric selvedge arrives baked into the margins (SettingsModel::
+    // syncFabricMarginsFromSelvedge() sets every margin to selvedgeWidth), so
+    // effective_bin_px() must apply the margins once and NOT deduct
+    // selvedge_width a second time.
     #[test]
-    fn selvedge_deduction() {
+    fn selvedge_baked_into_margins_for_fabric() {
+        let s = LayoutSettings {
+            unit:          "in".to_string(),
+            media_type:    "fabric".to_string(),
+            paper_type:    "sheet".to_string(),
+            page_width:    36.0,
+            page_height:   48.0,
+            roll_width:    36.0,
+            // Margins mirror what syncFabricMarginsFromSelvedge() produces
+            // for selvedgeWidth = 0.5: every margin equals the selvedge.
+            margin_top:    0.5,
+            margin_bottom: 0.5,
+            margin_left:   0.5,
+            margin_right:  0.5,
+            selvedge_width: 0.5,
+            piece_gap:      0.05,
+            fabric_folded:  false,
+            fabric_width:   0.0,
+            fabric_height:  0.0,
+            layout_mode:    "alongGrainline".to_string(),
+            rotation_step:  0.0,
+            sheet_name:     "ARCH E".to_string(),
+            roll_size:      "36 in".to_string(),
+            tile_size:      "Letter".to_string(),
+            tile_orientation: "landscape".to_string(),
+            output_format:  "svg".to_string(),
+        };
+        let (w, h) = s.effective_bin_px();
+        // Width: (36 - 0.5 - 0.5) * 96 = 3360 — the selvedge is deducted once,
+        // via the margins.  A double deduction would give (36 - 2.0) * 96 = 3264.
+        assert_eq!(w, 3360);
+        // Height: (48 - 0.5 - 0.5) * 96 = 4512.
+        assert_eq!(h, 4512);
+    } // selvedge_baked_into_margins_for_fabric
+
+    // @brief Selvedge is a fabric concept and never applies to paper media:
+    // a stray selvedge_width value must not shrink a paper bin.
+    #[test]
+    fn selvedge_ignored_for_paper() {
         let s = LayoutSettings {
             unit:          "in".to_string(),
             media_type:    "paper".to_string(),
@@ -500,9 +545,9 @@ mod tests {
             output_format:  "svg".to_string(),
         };
         let (w, _) = s.effective_bin_px();
-        // (36 - 1.0) * 96 = 3360
-        assert_eq!(w, 3360);
-    } // selvedge_deduction
+        // Full 36 in width: 36 * 96 = 3456 — selvedge_width is ignored for paper.
+        assert_eq!(w, 3456);
+    } // selvedge_ignored_for_paper
 
     // @brief Fabric folded halves the effective width.
     #[test]
