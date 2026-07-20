@@ -48,11 +48,29 @@ Two toolchains are in use — the difference is intentional, not an error:
 - seamly2d/seamlyme: `VAbstractApplication::MigrateSeamlySettingsLocation()` (`src/libs/vmisc/vabstractapplication.h/.cpp`) copies from the old shared `"Seamly2DTeam"` organization folder; a one-time `NotifySeamlySettingsMigrated()` dialog tells the user, shown only in confirmed GUI mode (never during a headless CLI export or an automated test) after command-line parsing has run.
 - seamlyLayout: `appConfigRootPath()` (`PreferencesModel.cpp`) and `defaultSettingsFilePath()` (`SettingsModel.cpp`) each recursively copy the whole legacy `"Seamly Systems"` AppConfigLocation tree forward; the Inno Setup installer's upgrade-guard dialog (`SeamlyLayout.iss`) also mentions the org-folder rename.
 
-**Not yet unified (Tasks 16–18):**
+### macOS (as of Task 16, 2026-07)
+
+All three apps use the same `QStandardPaths::AppConfigLocation` / `QSettings::IniFormat` code paths as Windows (Task 15) — no OS-specific branching was needed there, since `QStandardPaths` resolves the platform location generically from `organizationName`/`applicationName`. `QSettings::NativeFormat`/CFPreferences plists are **not** used by any Seamly app, so `CFBundleIdentifier` does not factor into settings resolution.
+
+| App | macOS location |
+|---|---|
+| seamly2d | `~/Library/Application Support/Seamly/Seamly2D/qt6_seamly2d.ini` |
+| seamlyme | `~/Library/Application Support/Seamly/SeamlyMe/qt6_seamlyme.ini` |
+| seamly2d + seamlyme shared "common" settings | `~/Library/Preferences/Seamly/qt6_common.ini` (Qt's native per-organization `IniFormat`/`UserScope` resolution on macOS) |
+| seamlyLayout | `~/Library/Application Support/Seamly/SeamlyLayout/{settings,preferences,input,output}/` |
+
+**First-run migration** uses the same generic `MigrateSeamlySettingsLocation()` / `migrateLegacyOrganizationTree()` logic as Windows (see above) — both reconstruct the legacy path by temporarily swapping `organizationName` and re-querying `AppConfigLocation`, so no macOS-specific path literals were needed.
+
+**Bundle-relative writable paths removed (Task 16):** seamlyLayout's default input/output folders and its debug log directory previously fell back to `<exeDir>/input`, `<exeDir>/output` when unconfigured — inside a signed, notarized `.app` bundle `Contents/MacOS/` is read-only, so those `mkpath()` calls would silently fail. `PreferencesModel::defaultInputFolderUrl()`/`resolvedInputDirectory()`/`resolvedLayoutDirectory()` and `Logger::init()` now branch on `Q_OS_MACOS` to use the writable `AppConfigLocation` root instead; Windows/Linux behavior is unchanged. Packaged defaults in `Contents/Resources/settings/` remain read-only, copied in only as a legacy-migration source (never written to at runtime).
+
+**Bundle identifier:** seamlyLayout's CMake build previously set no `MACOSX_BUNDLE_GUI_IDENTIFIER` at all (an auto-generated placeholder); Task 16 added `io.seamly.SeamlyLayout` (`src/app/seamlylayout/qt_frontend/CMakeLists.txt`) so the bundle is well-formed for signing/notarization. This is unrelated to settings storage (see above) — seamly2d/seamlyme's existing `org.seamly2dproject.@EXECUTABLE@` identifiers (`dist/macx/*/Info.plist`) were left as-is for the same reason.
+
+**Not yet verified:** Task 16's code changes were made and build-verified on Windows (seamlyLayout is cross-platform Qt/CMake — the `Q_OS_MACOS` branches compile out on other platforms) but have not been exercised on real macOS hardware or the `macos-15` CI runner (no Mac available in this environment). Fresh-install and upgrade-with-legacy-data verification remains an open item — see `TODO.md` Task 16.
+
+**Not yet unified (Tasks 17–18):**
 
 | Platform | Unified location | Task |
 |---|---|---|
-| macOS | `~/Library/Application Support/Seamly` (+ Preferences plists) | Task 16 |
 | Linux AppImage | `~/.config/Seamly`, `~/.local/share/Seamly` (XDG) | Task 17 |
 | Linux Flatpak | `~/.var/app/<app-id>/config/Seamly` inside the **single shared** sandbox | Task 18 |
 

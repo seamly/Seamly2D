@@ -520,9 +520,18 @@ QString PreferencesModel::localFileToUrl(const QString &path)
 // Uses QCoreApplication::applicationDirPath() so the path is absolute regardless
 // of the process working directory.  The returned URL is suitable for
 // FileDialog.currentFolder.
+//
+// Task 16: on macOS a signed, notarized .app bundle is read-only, so the exe-relative
+// default used on Windows/Linux would fail to create — fall back to the writable
+// AppConfigLocation root there instead (the same "Seamly/SeamlyLayout" tree the settings
+// and preferences files already live under).
 QString PreferencesModel::defaultInputFolderUrl()
 {
+#if defined(Q_OS_MACOS)
+    QString dir = appConfigRootPath() + QStringLiteral("/input");
+#else
     QString dir = QCoreApplication::applicationDirPath() + QStringLiteral("/input");
+#endif
     return QUrl::fromLocalFile(dir).toString();
 } // defaultInputFolderUrl
 
@@ -612,7 +621,7 @@ QString PreferencesModel::resolvedSettingsDirectory() const
 // @brief Return resolved input directory for import file dialogs.
 // Priority:
 //   1. preferences inputDirectory — if non-empty.
-//   2. <exeDir>/input — fallback default.
+//   2. <exeDir>/input — fallback default (AppConfigLocation root on macOS; see Task 16).
 // Relative configured paths are resolved against <exeDir>.
 // Ensures the directory exists before returning.
 QString PreferencesModel::resolvedInputDirectory() const
@@ -621,7 +630,13 @@ QString PreferencesModel::resolvedInputDirectory() const
     const QString appConfigRoot = appConfigRootPath();
 
     if (dir.isEmpty()) {
+#if defined(Q_OS_MACOS)
+        // Task 16: a signed .app bundle is read-only — use the writable AppConfigLocation
+        // root instead of the bundle-relative path used on Windows/Linux.
+        dir = appConfigRoot + QStringLiteral("/input");
+#else
         dir = QCoreApplication::applicationDirPath() + QStringLiteral("/input");
+#endif
     } else {
         const QFileInfo fi(dir);
         if (!fi.isAbsolute()) {
@@ -698,7 +713,7 @@ QString PreferencesModel::preferencesFilePath() const
 // @brief Return resolved output directory for export file dialogs.
 // Priority:
 //   1. preferences layoutDirectory — if non-empty.
-//   2. <exeDir>/output — fallback default.
+//   2. <exeDir>/output — fallback default (AppConfigLocation root on macOS; see Task 16).
 // Ensures the directory exists before returning.
 QString PreferencesModel::resolvedLayoutDirectory() const
 {
@@ -709,7 +724,13 @@ QString PreferencesModel::resolvedLayoutDirectory() const
     const QString appConfigRoot = appConfigRootPath();
 
     if (dir.isEmpty()) {
+#if defined(Q_OS_MACOS)
+        // Task 16: a signed .app bundle is read-only — use the writable AppConfigLocation
+        // root instead of the bundle-relative path used on Windows/Linux.
+        dir = appConfigRoot + QStringLiteral("/output");
+#else
         dir = QCoreApplication::applicationDirPath() + QStringLiteral("/output");
+#endif
     } else {
         // Resolve configured relative paths against AppConfig root so runtime behavior
         // is independent of the process current working directory.

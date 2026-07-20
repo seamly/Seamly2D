@@ -130,7 +130,9 @@ public:
     Q_INVOKABLE static QString localFileToUrl(const QString &path);
 
     // @brief Return the file:// URL of the default input directory.
-    // Falls back to <exeDir>/input when no Input SVG Directory is set in Preferences.
+    // Falls back to <exeDir>/input when no Input SVG Directory is set in Preferences
+    // (Task 16: on macOS this falls back to the writable AppConfigLocation root instead,
+    // since a signed .app bundle is read-only).
     // Uses QCoreApplication::applicationDirPath() for a reliable absolute path.
     Q_INVOKABLE static QString defaultInputFolderUrl();
 

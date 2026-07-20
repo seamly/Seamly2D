@@ -12,14 +12,24 @@
 #   • create-dmg (brew install create-dmg)
 #   • A signed Release build:  cmake --build --preset release
 #
-# Runtime folders (created by the app at first launch, not by this script):
-#   ~/seamlyLayout/settings/     — layout settings JSON files
-#   ~/seamlyLayout/preferences/  — user preferences JSON
+# Runtime folders (created by the app at first launch, not by this script — all resolved
+# via Qt's QStandardPaths::AppConfigLocation under the shared "Seamly" organization name,
+# see Task 15/Task 16):
+#   ~/Library/Application Support/Seamly/SeamlyLayout/settings/      — layout settings JSON
+#   ~/Library/Application Support/Seamly/SeamlyLayout/preferences/   — user preferences JSON
+#   ~/Library/Application Support/Seamly/SeamlyLayout/input/         — default import folder
+#   ~/Library/Application Support/Seamly/SeamlyLayout/output/        — default export/log folder
+# The app bundle itself (Contents/Resources/settings/, copied below) is read-only after
+# signing/notarizing and is never written to at runtime.
 #
 # Legacy migration (automatic at first launch):
-#   If layout-settings/ or layout-preferences/ exist under
-#   ~/Library/Application Support/SeamlyLayout/ from a pre-0.1.0 install,
-#   the app copies them to the canonical folder names on first run.
+#   - layout-settings/ / layout-preferences/ found under the current "Seamly/SeamlyLayout"
+#     AppConfigLocation root are copied to the canonical settings/preferences folder names
+#   - the entire pre-Task-15 "Seamly Systems/SeamlyLayout" AppConfigLocation tree
+#     (~/Library/Application Support/Seamly Systems/SeamlyLayout/) is copied forward into
+#     the new "Seamly/SeamlyLayout" root the first time it resolves empty
+# Both migrations are copy-if-missing and non-destructive; see PreferencesModel.cpp /
+# SettingsModel.cpp (appConfigRootPath() / migrateLegacyOrganizationTree()).
 
 set -euo pipefail
 
