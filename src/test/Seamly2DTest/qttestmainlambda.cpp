@@ -50,6 +50,7 @@
 //  along with Valentina.  If not, see <http://www.gnu.org/licenses/>.
 //-----------------------------------------------------------------------------
 
+#include <QDir>
 #include <QtTest>
 
 #include "tst_vposter.h"
@@ -110,27 +111,46 @@ const VTranslateVars *TestApplication2D::translateVariables()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+// Task 15: mirrors Application2D::openSettings() so the test suite resolves settings the
+// same way the real app does. No migration notice is ever shown here — tests must never
+// block on a modal dialog — so MigrateSeamlySettingsLocation() is called with a null
+// out-parameter, which the shared helper treats as "caller doesn't need to know".
 void TestApplication2D::openSettings()
 {
     QSettings settings(QSettings::IniFormat, QSettings::UserScope,
                        QCoreApplication::organizationName(),
                        QCoreApplication::applicationName());
 
-    const QString qt5Settings = settings.fileName();
-    const QString dir = QFileInfo(qt5Settings).absolutePath();
+    const QString dir = QFileInfo(settings.fileName()).absolutePath();
     const QString qt5Common   = dir + "/common.ini";
-    const QString qt6Settings = dir + "/qt6_seamly2d.ini";
     const QString qt6Common   = dir + "/qt6_common.ini";
+
+    // QFile::copy() never creates missing parent directories, and the "Seamly" organization
+    // folder does not exist yet the very first time any app runs under the renamed
+    // organization.
+    QDir().mkpath(dir);
+
+    static const QString kLegacyOrganizationName = QStringLiteral("Seamly2DTeam");
+    const QSettings legacyCommonProbe(QSettings::IniFormat, QSettings::UserScope,
+                                      kLegacyOrganizationName, QCoreApplication::applicationName());
+    const QString legacyDir = QFileInfo(legacyCommonProbe.fileName()).absolutePath();
+    if (!QFileInfo::exists(qt6Common) && QFileInfo::exists(legacyDir + "/qt6_common.ini"))
+    {
+        QFile::copy(legacyDir + "/qt6_common.ini", qt6Common);
+    }
+    else if (!QFileInfo::exists(qt5Common) && QFileInfo::exists(legacyDir + "/common.ini"))
+    {
+        QFile::copy(legacyDir + "/common.ini", qt5Common);
+    }
 
     if (!QFileInfo::exists(qt6Common) && QFileInfo::exists(qt5Common))
     {
         QFile::copy(qt5Common, qt6Common);
     }
 
-    if (!QFileInfo::exists(qt6Settings) && QFileInfo::exists(qt5Settings))
-    {
-        QFile::copy(qt5Settings, qt6Settings);
-    }
+    const QString qt6Settings = MigrateSeamlySettingsLocation(
+        QStringLiteral("qt6_seamly2d.ini"),
+        { QStringLiteral("qt6_seamly2d.ini"), QStringLiteral("Seamly2D.ini") });
 
     m_settings = new VSettings(qt6Settings, QSettings::IniFormat, this);
 }

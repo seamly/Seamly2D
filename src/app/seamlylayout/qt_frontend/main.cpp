@@ -134,7 +134,13 @@ int main(int argc, char *argv[])
     qInstallMessageHandler(Logger::messageHandler);
 
     // Application metadata — used by QSettings, About dialogs, OS task managers
-    app.setOrganizationName("Seamly Systems");
+    //
+    // Task 15: organization renamed from "Seamly Systems" to "Seamly" so
+    // QStandardPaths::AppConfigLocation resolves under the same shared "Seamly"
+    // organization folder as seamly2d/seamlyme (AppData/Local/Seamly/SeamlyLayout
+    // on Windows). PreferencesModel::appConfigRootPath()'s first-run migration
+    // bridges data forward from the old "Seamly Systems" folder automatically.
+    app.setOrganizationName("Seamly");
     app.setOrganizationDomain("seamly.io");
     app.setApplicationName("SeamlyLayout");
     app.setApplicationVersion("0.1.0");

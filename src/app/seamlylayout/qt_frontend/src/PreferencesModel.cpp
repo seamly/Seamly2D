@@ -36,16 +36,71 @@ constexpr auto kSettingsFolderName = "settings";
 constexpr auto kLegacySettingsFolderName = "layout-settings";
 constexpr auto kPreferencesFolderName = "preferences";
 constexpr auto kLegacyPreferencesFolderName = "layout-preferences";
+constexpr auto kLegacyOrganizationName = "Seamly Systems";
+
+// Forward declaration — defined further down; migrateLegacyOrganizationTree() (added for
+// Task 15) needs it before its definition appears in this file.
+bool copyIfMissing(const QString &sourcePath, const QString &destPath);
+
+// @brief Recursively copy every entry from a legacy organization directory tree into the
+// new one, skipping anything the destination already has.
+//
+// Task 15: seamlyLayout's organization name changed from "Seamly Systems" to the shared
+// "Seamly" (see main.cpp), so QStandardPaths::AppConfigLocation now resolves to a brand
+// new, empty directory. This bridges every settings/preferences file forward from the old
+// organization folder the first time the new one is resolved. Safe to call unconditionally
+// on every appConfigRootPath() call — once everything has been copied across it is a cheap
+// no-op (copyIfMissing never overwrites an existing destination file).
+void migrateLegacyOrganizationTree(const QString &legacyRoot, const QString &newRoot)
+{
+    const QDir legacyDir(legacyRoot);
+    if (!legacyDir.exists()) {
+        return;
+    } // if nothing to migrate
+
+    const QFileInfoList entries = legacyDir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const QFileInfo &entry : entries) {
+        const QString destPath = QDir(newRoot).filePath(entry.fileName());
+        if (entry.isDir()) {
+            QDir().mkpath(destPath);
+            migrateLegacyOrganizationTree(entry.absoluteFilePath(), destPath);
+        } else {
+            copyIfMissing(entry.absoluteFilePath(), destPath);
+        } // if directory vs file
+    } // for each legacy entry
+} // migrateLegacyOrganizationTree
 
 // @brief Return the writable app-config root path.
 // Falls back to <exeDir> only if Qt cannot provide AppConfigLocation.
+//
+// Task 15: also bridges data forward from the pre-unification "Seamly Systems"
+// organization folder into the new shared "Seamly" one on first use. The legacy root is
+// computed by asking QStandardPaths for AppConfigLocation under the old organization name
+// (temporarily swapped in), which reconstructs the exact platform-specific legacy path
+// (Windows/macOS/Linux each resolve AppConfigLocation differently) without hard-coding any
+// of that platform logic here.
 QString appConfigRootPath()
 {
     QString root = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     if (root.isEmpty()) {
         root = QCoreApplication::applicationDirPath();
     } // if AppConfigLocation unavailable
-    return QDir(root).absolutePath();
+    root = QDir(root).absolutePath();
+    QDir().mkpath(root);
+
+    const QString currentOrganization = QCoreApplication::organizationName();
+    if (currentOrganization != QString::fromUtf8(kLegacyOrganizationName)) {
+        QCoreApplication::setOrganizationName(QString::fromUtf8(kLegacyOrganizationName));
+        const QString legacyRoot = QDir(
+            QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)).absolutePath();
+        QCoreApplication::setOrganizationName(currentOrganization);
+
+        if (legacyRoot != root) {
+            migrateLegacyOrganizationTree(legacyRoot, root);
+        } // if legacy root resolves to a different directory
+    } // if not already running under the legacy organization name
+
+    return root;
 } // appConfigRootPath
 
 // @brief Return the platform key used in default_preferences.json.

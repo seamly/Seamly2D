@@ -33,18 +33,6 @@ In the updated Windows installation process (Task 13 installer), prompt the user
 - [ ] Verify use case #2: user data root set to `G:\My Drive\seamly2d`, apps read/write pattern and measurement data there, path registered automatically, uninstall/upgrade behave correctly
 - [ ] Document both prompts and the silent-install property equivalents in the installer docs89
 
-## Task 15 — Unify app settings/preferences directories under one `Seamly` folder (Windows)
-
-On Windows the apps currently scatter settings across three locations: seamly2d/seamlyme write under `C:\Users\<user>\AppData\Local\Seamly2D` (organization set from `VER_COMPANYNAME_STR` in `src/libs/vmisc/projectversion.h`, applied in `src/app/seamly2d/core/application_2d.cpp` and `src/app/seamlyme/application_me.cpp`), while seamlyLayout writes under `C:\Users\<user>\AppData\Local\Seamly Systems` (`app.setOrganizationName("Seamly Systems")` in `src/app/seamlylayout/qt_frontend/main.cpp`) and also keeps a `settings\` subdirectory relative to `seamlyLayout.exe`. Combine all of these as `C:\Users\<user>\AppData\Local\Seamly`.
-
-- [ ] Change the organization name to `Seamly` consistently: `VER_COMPANYNAME_STR` (seamly2d, seamlyme, tests) and the hard-coded `"Seamly Systems"` in `src/app/seamlylayout/qt_frontend/main.cpp`, so `QSettings`/`QStandardPaths` (AppConfigLocation, AppDataLocation, AppLocalDataLocation) all resolve under `AppData\Local\Seamly\<app>`
-- [ ] Migrate existing user data on first run: copy/move settings from `AppData\Local\Seamly2D` and `AppData\Local\Seamly Systems` into `AppData\Local\Seamly`, without clobbering anything already migrated; follow the existing seamlyLayout migration pattern (`PreferencesModel` legacy-directory rewrites and the Inno Setup migration in `src/app/seamlylayout/packaging/windows/SeamlyLayout.iss`)
-- [ ] Eliminate seamlyLayout's exe-relative `settings\` directory as a writable location: packaged defaults (`default_settings.json`, paper/roll presets) stay read-only next to the exe or move into the installer payload, but all user-writable settings/preferences live under `AppData\Local\Seamly`
-- [ ] Update the installers/packaging that reference the old paths (`src/app/seamlylayout/packaging/windows/SeamlyLayout.iss`, `build_installer.ps1`, and the Task 13 MSI work) including uninstall cleanup of the new `Seamly` directory
-- [ ] Update tests that assert the old locations (e.g. `src/app/seamlylayout/qt_frontend/tests/preferences/PreferencesModelTests.cpp`, `src/test/Seamly2DTest`)
-- [ ] Verify on Windows: fresh install writes only under `AppData\Local\Seamly`; upgrade from an install with data in both legacy directories migrates settings and the apps keep their preferences
-- [ ] Doxygen briefs + inline comments on all touched functions; document the new layout in the repo docs
-
 ## Task 16 — Unify settings directories: macOS build
 
 Apply the Task 15 consolidation to the macOS build, where the organization name maps to `~/Library/Application Support/<org>` and `~/Library/Preferences` plist domains instead of `AppData\Local`.

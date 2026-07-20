@@ -13,13 +13,17 @@
 # Output: packaging\windows\Output\SeamlyLayout-0.1.0-win64.exe
 #
 # Runtime folders (written by the app at first launch, not by this script):
-#   %USERPROFILE%\seamlyLayout\settings\      -- layout settings JSON files
-#   %USERPROFILE%\seamlyLayout\preferences\   -- user preferences JSON file
+#   %LOCALAPPDATA%\Seamly\SeamlyLayout\settings\      -- layout settings JSON files
+#   %LOCALAPPDATA%\Seamly\SeamlyLayout\preferences\   -- user preferences JSON file
 #
 # Legacy migration note:
-#   Upgrading from a pre-0.1.0 build: the first launch automatically copies
-#   any files found in "layout-settings" or "layout-preferences" folders under
-#   %APPDATA%\SeamlyLayout\ to the new canonical folder names.
+#   Task 15 (2026-07): the organization name changed from "Seamly Systems" to the
+#   shared "Seamly" (matching seamly2d/seamlyme); the first launch after upgrading
+#   copies every settings/preferences file forward from
+#   %LOCALAPPDATA%\Seamly Systems\SeamlyLayout\ into the new location automatically.
+#   Upgrading from a pre-0.1.0 build: the first launch also copies any files found
+#   in "layout-settings" or "layout-preferences" folders to the new canonical
+#   folder names.
 
 param(
     [switch]$SkipBuild,   # Skip the cmake/cargo build step (exe already built)

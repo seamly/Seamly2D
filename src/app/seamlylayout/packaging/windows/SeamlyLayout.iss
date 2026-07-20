@@ -19,14 +19,19 @@
 ;   The installer is written to packaging\windows\Output\SeamlyLayout-0.1.0-win64.exe
 ;
 ; Runtime folders (written by the app on first run, not by the installer):
-;   %USERPROFILE%\seamlyLayout\settings\      — layout settings JSON files
-;   %USERPROFILE%\seamlyLayout\preferences\   — user preferences JSON file
+;   %LOCALAPPDATA%\Seamly\SeamlyLayout\settings\      — layout settings JSON files
+;   %LOCALAPPDATA%\Seamly\SeamlyLayout\preferences\   — user preferences JSON file
 ;
 ; Legacy migration (performed automatically at first launch):
-;   If layout-settings\ or layout-preferences\ files exist under AppConfigLocation
-;   (typically %APPDATA%\SeamlyLayout\) from a pre-0.1.0 install, they are
-;   copied to the new canonical folder names and the old folders are left in
-;   place so the upgrade is non-destructive.
+;   1. Task 15 (2026-07): the organization name changed from "Seamly Systems" to the
+;      shared "Seamly" (matching seamly2d/seamlyme), so the AppConfigLocation folder
+;      moved from %LOCALAPPDATA%\Seamly Systems\SeamlyLayout\ to
+;      %LOCALAPPDATA%\Seamly\SeamlyLayout\. PreferencesModel::appConfigRootPath()
+;      copies every file across from the old organization folder the first time the
+;      new one is resolved, leaving the old folder in place (non-destructive).
+;   2. If layout-settings\ or layout-preferences\ files exist under AppConfigLocation
+;      from a pre-0.1.0 install, they are copied to the new canonical folder names and
+;      the old folders are left in place so the upgrade is non-destructive.
 ;
 ; LGPL-3.0 compliance:
 ;   Qt 6.10 is dynamically linked under LGPL-3.0.  The installer creates a
@@ -119,13 +124,19 @@ Filename: "{app}\{#AppExeName}"; Description: "{cm:LaunchProgram,{#AppName}}"; F
 // <exeDir>\settings and preferences under <exeDir>\layout-preferences.
 // The application migrates these automatically at first run; we just surface
 // a friendly note here.
+//
+// Task 15 (2026-07): also detect the pre-org-rename "Seamly Systems" AppConfigLocation
+// folder so upgraders are told their settings are moving to the new shared "Seamly"
+// organization folder alongside seamly2d/seamlyme, not just to a new folder name.
 // ---------------------------------------------------------------------------
 procedure CurPageChanged(CurPageID: Integer);
 var
   LegacyPrefsPath: String;
+  LegacyOrganizationPath: String;
 begin
   if CurPageID = wpSelectDir then begin
     LegacyPrefsPath := ExpandConstant('{app}') + '\layout-preferences';
+    LegacyOrganizationPath := ExpandConstant('{localappdata}') + '\Seamly Systems\SeamlyLayout';
     if DirExists(LegacyPrefsPath) then begin
       MsgBox(
         'A previous SeamlyLayout installation was found.' + #13#10 +
@@ -134,6 +145,16 @@ begin
         'launch the updated application.' + #13#10#13#10 +
         'No data will be lost.',
         mbInformation, MB_OK);
-    end; // if LegacyPrefsPath exists
+    end // if LegacyPrefsPath exists
+    else if DirExists(LegacyOrganizationPath) then begin
+      MsgBox(
+        'A previous SeamlyLayout installation was found.' + #13#10 +
+        'Your settings and preferences have moved to a new shared location ' +
+        '(the "Seamly" folder, alongside Seamly2D and SeamlyMe) and will be ' +
+        'migrated automatically when you first launch the updated application.' +
+        #13#10#13#10 +
+        'No data will be lost.',
+        mbInformation, MB_OK);
+    end; // if LegacyPrefsPath / LegacyOrganizationPath exists
   end; // if wpSelectDir
 end; // CurPageChanged

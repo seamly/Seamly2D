@@ -60,6 +60,7 @@
 #include <QObject>
 #include <QPointer>
 #include <QString>
+#include <QStringList>
 #include <QtGlobal>
 
 #include "../vmisc/def.h"
@@ -103,6 +104,12 @@ public:
 
     virtual void     openSettings()=0;
     VCommonSettings *Settings();
+
+    // Task 15: settings/preferences unification under one "Seamly" organization.
+    QString          MigrateSeamlySettingsLocation(const QString &appIniFileName,
+                                                    const QStringList &legacyAppIniFileNames,
+                                                    bool *migrated = nullptr);
+    void             NotifySeamlySettingsMigrated(const QString &appDisplayName);
 
     template <typename T>
     QString          LocaleToString(const T &value);

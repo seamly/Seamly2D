@@ -699,6 +699,14 @@ void Application2D::initOptions()
     QDir().mkpath(settings->getDefaultTemplatePath());
     QDir().mkpath(settings->getDefaultLabelTemplatePath());
     QDir().mkpath(settings->getDefaultBackupFilePath());
+
+    // Task 15: only tell the user their settings moved once command-line parsing (done in
+    // the constructor, before initOptions() runs) has determined real GUI-vs-console mode —
+    // showing a modal dialog during a headless/CLI export would hang a scripted caller.
+    if (m_settingsMigrated && Application2D::isGUIMode())
+    {
+        NotifySeamlySettingsMigrated(QStringLiteral("Seamly2D"));
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -787,27 +795,58 @@ bool Application2D::event(QEvent *event)
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief openSettings get access to application settings.
 /// Because we can create object in constructor we open file separately.
+///
+/// Task 15: seamly2d's own settings now live in their own directory nested under the
+/// shared "Seamly" organization (AppData/Local/Seamly/Seamly2D on Windows) instead of a
+/// flat .ini file sharing a folder with SeamlyMe's. The "common" settings (shared across
+/// Seamly apps, see VCommonSettings) still use Qt's native per-organization resolution and
+/// are bridged forward from the pre-unification "Seamly2DTeam" folder the same way they
+/// always bridged qt5 -> qt6 formats.
 void Application2D::openSettings()
 {
     QSettings settings(QSettings::IniFormat, QSettings::UserScope,
                        QCoreApplication::organizationName(),
                        QCoreApplication::applicationName());
 
-    const QString qt5Settings = settings.fileName();
-    const QString dir = QFileInfo(qt5Settings).absolutePath();
+    const QString dir = QFileInfo(settings.fileName()).absolutePath();
     const QString qt5Common   = dir + "/common.ini";
-    const QString qt6Settings = dir + "/qt6_seamly2d.ini";
     const QString qt6Common   = dir + "/qt6_common.ini";
+
+    // QFile::copy() never creates missing parent directories, and the "Seamly" organization
+    // folder does not exist yet the very first time any app runs under the renamed
+    // organization — unlike the qt5 -> qt6 bridge below, which only ever runs against an
+    // organization folder some earlier build already created.
+    QDir().mkpath(dir);
+
+    // Bridge the shared "common" settings forward from the pre-Task-15 organization
+    // folder ("Seamly2DTeam") into the current one ("Seamly"), same non-destructive
+    // copy-if-missing pattern as the existing qt5 -> qt6 bridge below.
+    static const QString kLegacyOrganizationName = QStringLiteral("Seamly2DTeam");
+    const QSettings legacyCommonProbe(QSettings::IniFormat, QSettings::UserScope,
+                                      kLegacyOrganizationName, QCoreApplication::applicationName());
+    const QString legacyDir = QFileInfo(legacyCommonProbe.fileName()).absolutePath();
+    if (!QFileInfo::exists(qt6Common) && QFileInfo::exists(legacyDir + "/qt6_common.ini"))
+    {
+        QFile::copy(legacyDir + "/qt6_common.ini", qt6Common);
+    }
+    else if (!QFileInfo::exists(qt5Common) && QFileInfo::exists(legacyDir + "/common.ini"))
+    {
+        QFile::copy(legacyDir + "/common.ini", qt5Common);
+    }
 
     if (!QFileInfo::exists(qt6Common) && QFileInfo::exists(qt5Common))
     {
         QFile::copy(qt5Common, qt6Common);
     }
 
-    if (!QFileInfo::exists(qt6Settings) && QFileInfo::exists(qt5Settings))
-    {
-        QFile::copy(qt5Settings, qt6Settings);
-    }
+    // seamly2d's own settings: new per-app directory under "Seamly", migrated forward
+    // from the legacy shared organization folder on first run after an upgrade.
+    bool migratedThisCall = false;
+    const QString qt6Settings = MigrateSeamlySettingsLocation(
+        QStringLiteral("qt6_seamly2d.ini"),
+        { QStringLiteral("qt6_seamly2d.ini"), QStringLiteral("Seamly2D.ini") },
+        &migratedThisCall);
+    m_settingsMigrated = m_settingsMigrated || migratedThisCall;
 
     m_settings = new VSettings(qt6Settings, QSettings::IniFormat, this);
 }

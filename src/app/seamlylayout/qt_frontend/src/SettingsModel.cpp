@@ -85,6 +85,70 @@ static const SizeEntry TILE_SIZES[] = {
 static const int TILE_SIZES_COUNT =
     static_cast<int>(sizeof(TILE_SIZES) / sizeof(TILE_SIZES[0]));
 
+// @brief Copy a file if the destination does not already exist.
+// Task 15 helper — mirrors PreferencesModel.cpp's copyIfMissing() (kept local to this file
+// rather than shared, matching this codebase's existing per-file helper convention).
+bool copyIfMissing(const QString &sourcePath, const QString &destPath)
+{
+    if (QFileInfo::exists(destPath) || !QFileInfo::exists(sourcePath)) {
+        return false;
+    } // if no copy needed/possible
+
+    QDir destDir = QFileInfo(destPath).absoluteDir();
+    if (!destDir.exists()) {
+        destDir.mkpath(QStringLiteral("."));
+    } // if dest dir missing
+
+    return QFile::copy(sourcePath, destPath);
+} // copyIfMissing
+
+// @brief Recursively copy every entry from a legacy organization directory tree into the
+// new one, skipping anything the destination already has.
+//
+// Task 15: seamlyLayout's organization name changed from "Seamly Systems" to the shared
+// "Seamly" (see main.cpp), so QStandardPaths::AppConfigLocation resolves to a brand new,
+// empty directory. This bridges the settings file(s) forward from the old organization
+// folder the first time the new one is resolved. Safe to call unconditionally — once
+// everything has been copied across it is a cheap no-op.
+void migrateLegacyOrganizationTree(const QString &legacyRoot, const QString &newRoot)
+{
+    const QDir legacyDir(legacyRoot);
+    if (!legacyDir.exists()) {
+        return;
+    } // if nothing to migrate
+
+    const QFileInfoList entries = legacyDir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const QFileInfo &entry : entries) {
+        const QString destPath = QDir(newRoot).filePath(entry.fileName());
+        if (entry.isDir()) {
+            QDir().mkpath(destPath);
+            migrateLegacyOrganizationTree(entry.absoluteFilePath(), destPath);
+        } else {
+            copyIfMissing(entry.absoluteFilePath(), destPath);
+        } // if directory vs file
+    } // for each legacy entry
+} // migrateLegacyOrganizationTree
+
+// @brief Bridge appConfigRoot forward from the pre-Task-15 "Seamly Systems" organization
+// folder into the new shared "Seamly" one, the first time appConfigRoot is resolved.
+void migrateLegacyOrganization(const QString &newRoot)
+{
+    const QString currentOrganization = QCoreApplication::organizationName();
+    static const QString kLegacyOrganizationName = QStringLiteral("Seamly Systems");
+    if (currentOrganization == kLegacyOrganizationName) {
+        return; // already running under the legacy name — nothing to bridge
+    } // if already legacy
+
+    QCoreApplication::setOrganizationName(kLegacyOrganizationName);
+    const QString legacyRoot = QDir(
+        QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)).absolutePath();
+    QCoreApplication::setOrganizationName(currentOrganization);
+
+    if (legacyRoot != newRoot) {
+        migrateLegacyOrganizationTree(legacyRoot, newRoot);
+    } // if legacy root resolves to a different directory
+} // migrateLegacyOrganization
+
 } // anonymous namespace
 
 // ---------------------------------------------------------------------------
@@ -467,12 +531,20 @@ QString SettingsModel::localFileToUrl(const QString &path)
 } // localFileToUrl()
 
 // @brief Return the absolute default settings file path in AppConfigLocation.
+//
+// Task 15: also bridges appConfigRoot forward from the pre-unification "Seamly Systems"
+// organization folder into the new shared "Seamly" one on first use (mirrors
+// PreferencesModel::appConfigRootPath() — this file cannot assume that one already ran,
+// since QML may resolve either model first).
 QString SettingsModel::defaultSettingsFilePath()
 {
     QString appConfigRoot = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     if (appConfigRoot.isEmpty()) {
         appConfigRoot = QCoreApplication::applicationDirPath();
     } // if AppConfigLocation unavailable
+    appConfigRoot = QDir(appConfigRoot).absolutePath();
+    QDir().mkpath(appConfigRoot);
+    migrateLegacyOrganization(appConfigRoot);
 
     const QString settingsDir = QDir(appConfigRoot).filePath(QStringLiteral("settings"));
     QDir dir(settingsDir);
