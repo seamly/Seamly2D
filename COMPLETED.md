@@ -2,6 +2,15 @@
 
 Tasks moved here from `TODO.md` when all their subtasks are complete.
 
+## Task 29 — Dependabot: update the `time` crate in seamlylayout (GHSA-r6v5-fh4h-64xc) (2026-07-20)
+
+GitHub Dependabot alert #1 (moderate): `time` 0.3.46 in `src/app/seamlylayout/Cargo.lock` fell in the vulnerable range `>= 0.3.6, < 0.3.47` (stack-exhaustion DoS, [GHSA-r6v5-fh4h-64xc](https://github.com/advisories/GHSA-r6v5-fh4h-64xc)).
+
+- [x] Identified the dependency chain with `cargo tree -i time`: `time` is pulled in transitively via `lopdf v0.32.0` ← `cxxqt_bridge` (workspace crate)
+- [x] `cargo update -p time` updated the lockfile: `time` 0.3.46 → 0.3.53 (≥ 0.3.47 patched), plus its own transitive companions `time-core` 0.1.8→0.1.9, `time-macros` 0.2.26→0.2.31, `deranged` 0.5.5→0.5.8, `num-conv` 0.2.0→0.2.2 — all semver-compatible lockfile-only bumps, no `Cargo.toml` changes
+- [x] Rebuilt and ran the tests: `cargo test --workspace --no-fail-fast` — 243 passed, 7 failed, and the 7 are exactly the pre-existing Task 27 set (3 `layout_tiling`, 4 `polygon_pack`), nothing new; Qt frontend Debug build (CMake/Ninja, links the updated Rust bridge) + all 4 ctest suites pass (AdjustScene, AdjustController, PreferencesModel, SettingsModel)
+- [x] Committed the updated `Cargo.lock` on the task branch (pushed via the combined Task 28/29/27 PR); Dependabot [alert #1](https://github.com/seamly/Seamly2D/security/dependabot/1) to be confirmed auto-resolved after the merge
+
 ## Task 28 — Resolve the uncommitted whitespace-only changes to PreferencesModel.cpp/.h (2026-07-20)
 
 Left over from the Task 19 move: `src/app/seamlylayout/qt_frontend/src/PreferencesModel.cpp` and `.h` sat modified in the working tree with whitespace-only changes (trailing-space trims on a handful of comment lines — `git diff -w` showed no difference), most likely an editor trim-on-save when the files moved on disk.
