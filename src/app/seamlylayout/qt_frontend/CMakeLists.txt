@@ -135,9 +135,17 @@ elseif(APPLE)
     set_source_files_properties("${SEAMLY_ICON_ICNS}" PROPERTIES
         MACOSX_PACKAGE_LOCATION "Resources"
     )
+    # Task 16: give the bundle a stable identifier (previously unset, so CMake fell back
+    # to an auto-generated placeholder). This does not affect settings storage — Qt's
+    # QStandardPaths::AppConfigLocation resolution is driven by organizationName/
+    # applicationName (see main.cpp), not CFBundleIdentifier — but a real identifier is
+    # still required for a well-formed, signable/notarizable bundle.
     set_target_properties(SeamlyLayout PROPERTIES
         MACOSX_BUNDLE TRUE
         MACOSX_BUNDLE_ICON_FILE "seamly-layout.icns"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "io.seamly.SeamlyLayout"
+        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
     )
 endif()
 

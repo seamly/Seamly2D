@@ -11,6 +11,8 @@
 // The log file is opened once by Logger::init() and kept open for the
 // duration of the process.  All writes go to a file named:
 //   {appDir}/output/log_{YYMMDDHHMM}.txt
+// (on macOS, {appDir} is the writable AppConfigLocation root instead of the read-only
+// .app bundle path — see Task 16)
 
 #include "Logger.h"
 
@@ -18,6 +20,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
+#include <QStandardPaths>
 
 // ---------------------------------------------------------------------------
 // Static member definitions
@@ -54,9 +57,21 @@ void Logger::init()
 {
     if (!debugEnabled) return; // logging disabled — do not create files
 
+#if defined(Q_OS_MACOS)
+    // Task 16: a signed, notarized .app bundle is read-only on macOS, so the exe-relative
+    // output/ directory used on Windows/Linux can't be created there — write logs under
+    // the writable AppConfigLocation root instead (same "Seamly/SeamlyLayout" tree the
+    // settings and preferences files already live under).
+    QString logsDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    if (logsDir.isEmpty()) {
+        logsDir = QCoreApplication::applicationDirPath();
+    } // if AppConfigLocation unavailable
+    logsDir += QStringLiteral("/output");
+#else
     // Write log files to the output/ directory next to the executable
     const QString logsDir =
         QCoreApplication::applicationDirPath() + QStringLiteral("/output");
+#endif
     QDir().mkpath(logsDir);
     clearOutputDirectory(logsDir);
 
