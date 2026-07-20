@@ -1,0 +1,26 @@
+// DXF-ASTM Teaching Version with Inline Comments
+// Generated automatically from: test_structure.dxf
+// This file contains the DXF content with explanatory comments for each line.
+// Comments are positioned two tabs to the right of the DXF data.
+//
+
+0		// Group code 0: Start of entity or section marker
+SECTION		// Entity type: SECTION (marks the beginning of a section)
+2		// Group code 2: Section/table/block name, or entity name follows
+HEADER		// Section name: HEADER (contains drawing variables)
+0		// Group code 0: Start of entity or section marker
+ENDSEC		// Entity type: ENDSEC (marks the end of a section)
+0		// Group code 0: Start of entity or section marker
+SECTION		// Entity type: SECTION (marks the beginning of a section)
+2		// Group code 2: Section/table/block name, or entity name follows
+BLOCKS		// Section name: BLOCKS (contains block definitions for pattern pieces)
+0		// Group code 0: Start of entity or section marker
+ENDSEC		// Entity type: ENDSEC (marks the end of a section)
+0		// Group code 0: Start of entity or section marker
+SECTION		// Entity type: SECTION (marks the beginning of a section)
+2		// Group code 2: Section/table/block name, or entity name follows
+ENTITIES		// Section name: ENTITIES (contains modelspace entities)
+0		// Group code 0: Start of entity or section marker
+ENDSEC		// Entity type: ENDSEC (marks the end of a section)
+0		// Group code 0: Start of entity or section marker
+EOF		// End of File marker (marks the end of the DXF file)

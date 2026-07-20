@@ -13,7 +13,7 @@ Pattern drafting application — parent app of the Seamly family.
 - Qt 6 / C++ (QtWidgets), built with qmake (two toolchains — see Build Notes)
 - Apps: `src/app/seamly2d` (pattern drafting), `src/app/seamlyme` (measurements)
 - Shared libraries under `src/libs/` (`vlayout`, `vformat`, `vpatterndb`, `ifc`, ...)
-- `seamlyLayout/` — daughter layout app (Rust + Qt 6.10/QML), present for reference only; it has its own build (`seamlyLayout/qt_frontend/qd.ps1`) and must stay out of the Seamly2D qmake build. It has its own CLAUDE.md and rules.
+- `src/app/seamlylayout/` — daughter layout app (Rust + Qt 6.10/QML), tracked directly in this repo like seamlyme; it has its own build (`src/app/seamlylayout/qd.ps1`) and must stay out of the Seamly2D qmake build. It has its own CLAUDE.md and rules.
 
 ## Build Notes
 
@@ -63,5 +63,5 @@ Two toolchains are in use — do not treat the difference as an error:
 ## Key References
 
 - `status-docs/new-attributes.csv` — SVG `data-*` attribute spec for the SeamlyLayout handoff
-- Test pattern: `seamlyLayout/input/richmond-shirt_v1_v061-test.sm2d`
+- Test pattern: `src/app/seamlylayout/input/richmond-shirt_v1_v061-test.sm2d`
 - `.github/README-BUILDS.md` — build knowledge base (toolchains, per-platform packaging, settings/data locations, packaging decisions); keep it updated when build knowledge changes

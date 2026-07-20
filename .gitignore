@@ -182,3 +182,21 @@ target_wrapper.sh
 
 # documents
 docs/
+
+# seamlylayout daughter app (absorbed from the former nested seamlyLayout repo).
+# Its docs tree stays tracked despite the global docs/ rule above.
+!src/app/seamlylayout/docs/
+# Build outputs and local state (also covered by src/app/seamlylayout/.gitignore,
+# kept from the nested repo; duplicated here so the root ignore file is complete).
+src/app/seamlylayout/target/
+src/app/seamlylayout/output/
+src/app/seamlylayout/input/
+src/app/seamlylayout/logs/
+src/app/seamlylayout/.vs/
+src/app/seamlylayout/.claude/
+src/app/seamlylayout/qt_frontend/build/
+src/app/seamlylayout/qt_frontend/CMakeFiles/
+src/app/seamlylayout/qt_frontend/CMakeCache.txt
+src/app/seamlylayout/qt_frontend/.cmake/
+src/app/seamlylayout/qt_frontend/.qt/
+src/app/seamlylayout/qt_frontend/*.user

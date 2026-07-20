@@ -1,0 +1,24 @@
+# project: SeamlyLayout
+# author: slspencer, copyright 2026
+# MIT License: https://opensource.org/licenses/MIT
+#
+# pack_types — shared bin-packing data types.
+#
+# Leaf crate that holds the primitive types every packer (rectangle, polygon,
+# future variants) and the dispatcher all agree on: `Rect`, `Placed`,
+# `PackError`, `PackResult`, `FreeRect`.  Lives below `layout_engine` and
+# `polygon_pack` so the dispatcher in `packing` can depend on both packers
+# without forming a cycle.
+#
+# Qt-free, MIT-licensed, de-linkable from the Qt frontend.
+
+[package]
+name = "pack_types"
+version = "0.1.0"
+edition = "2021"
+authors = ["slspencer"]
+license = "MIT"
+description = "Shared bin-packing data types for SeamlyLayout (Qt-free, MIT)"
+
+[dependencies]
+thiserror = "1.0"

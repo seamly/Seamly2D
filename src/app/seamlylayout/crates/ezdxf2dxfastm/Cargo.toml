@@ -1,0 +1,14 @@
+# MIT License: https://opensource.org/licenses/MIT
+[package]
+name = "ezdxf2dxfastm"
+version = "0.1.0"
+edition = "2021"
+authors = ["slspencer"]
+license = "MIT"
+description = "Convert ezdxf intermediate representation to DXF-ASTM format"
+
+[dependencies]
+seamly_svg2ezdxf = { path = "../seamly_svg2ezdxf" }
+thiserror = "1.0"
+
+[dev-dependencies]

@@ -502,7 +502,7 @@ QString Application2D::seamlyLayoutFilePath()
     // the source tree. Lets a locally built Seamly2D hand off to the locally
     // built SeamlyLayout when neither a setting nor an installed copy exists.
     const QFileInfo devBuildFile(QStringLiteral(
-        "C:/Users/susan/Projects/Seamly2D-private/seamlyLayout/qt_frontend/build/Debug/SeamlyLayout.exe"));
+        "C:/Users/susan/Projects/Seamly2D-private/src/app/seamlylayout/qt_frontend/build/Debug/SeamlyLayout.exe"));
     if (devBuildFile.exists())
     {
         return devBuildFile.absoluteFilePath();

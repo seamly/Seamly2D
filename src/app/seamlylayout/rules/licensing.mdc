@@ -1,0 +1,21 @@
+# Licensing Rules
+
+Author: slspencer
+Copyright: 2026
+
+## Scope
+
+Applies to licensing expectations by file type and subsystem.
+
+## Rules
+
+- Rust sources (`.rs`) follow MIT expectations.
+- Qt frontend sources (`.qml`, `.cpp`, `.h`) follow LGPL expectations.
+- Keep license boundaries clear across Rust, bridge, and frontend.
+- Do not copy third-party code without compatible licensing.
+- Preserve attribution headers where required.
+
+## Repository Context
+
+- Frontend and core are intentionally separable for compliance.
+- Keep docs and comments consistent with the dual-license model.

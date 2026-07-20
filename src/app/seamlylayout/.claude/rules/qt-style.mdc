@@ -1,0 +1,166 @@
+# Qt / QML Style Guidelines
+
+Applies to all files under `qt_frontend/`.
+See [TODO.md](../../docs/status-docs/TODO.md) Phase 3 and onwards.
+
+## C++ File Headers
+
+All `.cpp` and `.h` files must start with:
+
+```cpp
+// project: SeamlyLayout
+// author: slspencer, copyright 2026
+// MIT License: https://opensource.org/licenses/MIT
+```
+
+## QML File Headers
+
+All `.qml` files must start with:
+
+```qml
+// project: SeamlyLayout
+// author: slspencer, copyright 2026
+// MIT License: https://opensource.org/licenses/MIT
+```
+
+## C++ Naming Conventions
+
+| Item | Convention | Example |
+|------|-----------|---------|
+| Classes | `PascalCase` | `AppController`, `SettingsModel` |
+| Methods / slots | `camelCase` | `importSvg()`, `processLayout()` |
+| Signals | `camelCase`, past tense or noun | `importFinished()`, `errorOccurred()` |
+| Properties | `camelCase` | `importedSvgPath`, `isLayoutReady` |
+| Member variables | `m_camelCase` | `m_importedSvgPath`, `m_layoutReady` |
+| Constants | `ALL_CAPS` | `MAX_ZOOM_LEVEL` |
+| Local variables | `camelCase` | `svgPath`, `placedCount` |
+| Files | `PascalCase` | `AppController.h`, `SettingsModel.cpp` |
+
+## QML Naming Conventions
+
+| Item | Convention | Example |
+|------|-----------|---------|
+| Component files | `PascalCase.qml` | `SvgCanvas.qml`, `SeamlyButton.qml` |
+| Component IDs | `camelCase` | `id: leftCanvas`, `id: settingsDialog` |
+| Properties | `camelCase` | `property string svgSource` |
+| Signals | `camelCase` | `signal importRequested(string path)` |
+| Signal handlers | `on` + PascalCase | `onImportFinished:`, `onClicked:` |
+| Singleton files | `PascalCase.qml` with `pragma Singleton` | `Theme.qml` |
+
+## C++ Comments
+
+- Use Doxygen-style `///` for all public class members, methods, and signals
+- Use `//` for inline implementation comments
+- `if`, `else`, `for`, `while`, `switch` closing braces must have a comment repeating the conditional
+
+```cpp
+/// @brief Loads an SVG file and exposes it to QML via importedSvgPath.
+/// @param path Absolute file path to the SVG file.
+void AppController::importSvg(const QString &path)
+{
+    if (path.isEmpty()) {
+        // path is empty — emit error and return
+        emit errorOccurred(QStringLiteral("No file path provided"));
+        return;
+    } // if path.isEmpty()
+    // ...
+} // AppController::importSvg
+```
+
+## QML Comments
+
+- Use `//` for all inline comments
+- Add a `// ComponentName.qml — brief description` comment on the first line after the header
+
+## Signal / Slot Patterns
+
+- Declare all signals in `.h` under `signals:` section
+- Connect Qt signals to QML via `Q_PROPERTY` with `NOTIFY` or direct `QML_ELEMENT` exposure
+- Use **queued connections** for cross-thread signals (worker → AppController → QML)
+- Never block the main thread: all Rust FFI calls that may be slow go on a `QThread` worker
+
+```cpp
+// Worker thread emits result via queued connection
+connect(worker, &LayoutWorker::layoutComplete,
+        this,   &AppController::onLayoutComplete,
+        Qt::QueuedConnection);
+```
+
+## Property Declaration Pattern
+
+```cpp
+class AppController : public QObject
+{
+    Q_OBJECT
+    QML_ELEMENT
+
+    /// @brief Path to the imported SVG file, empty if no file is loaded.
+    Q_PROPERTY(QString importedSvgPath READ importedSvgPath NOTIFY importedSvgPathChanged)
+
+public:
+    /// @brief Returns the current imported SVG file path.
+    QString importedSvgPath() const { return m_importedSvgPath; }
+
+signals:
+    void importedSvgPathChanged();
+    void importFinished();
+    void errorOccurred(QString message);
+
+private:
+    QString m_importedSvgPath;
+};
+```
+
+## QML Component Pattern
+
+```qml
+// project: SeamlyLayout
+// author: slspencer, copyright 2026
+// MIT License: https://opensource.org/licenses/MIT
+// SeamlyButton.qml — Branded button matching the violet/gray palette
+
+import QtQuick 6.10
+import QtQuick.Controls 6.10
+
+Button {
+    id: root
+
+    // Expose palette via Theme singleton
+    background: Rectangle {
+        color: root.hovered ? Theme.violet : Theme.violetMedium
+        border.color: root.hovered ? Theme.grayLight : Theme.violetDark
+        radius: 4
+    }
+
+    contentItem: Text {
+        text: root.text
+        color: Theme.grayLight
+        font.pixelSize: 14
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+    }
+}
+```
+
+## CMakeLists.txt Conventions
+
+- Use `qt_add_qml_module` for QML modules
+- Use `qt_add_executable` for the application binary
+- Use `target_link_libraries` with `PRIVATE` visibility for all Qt modules
+- Place generated files in `${CMAKE_BINARY_DIR}/generated/`
+- Include Rust FFI headers via `target_include_directories(app PRIVATE ${CMAKE_SOURCE_DIR}/../crates/ffi_bridge/include)`
+
+## Do Not
+
+- Use `QWidgets` for new UI — all UI must be QML-based
+- Use Qt `staticlib` linking for Qt modules (violates LGPLv3)
+- Call Rust FFI functions directly from QML — always go through a `QObject` C++ bridge
+- Use `QString` raw pointers across the FFI boundary — convert to `const char*` at the C ABI layer
+- Use GPL-only Qt modules (Qt Charts, Qt Data Visualization)
+
+## Always
+
+- Register C++ types with QML via `QML_ELEMENT` or `qmlRegisterType`
+- Use `Q_INVOKABLE` for methods callable from QML
+- Use `QVariantMap` for passing structured data between QML and C++
+- Use the `output/` directory for Qt debug/intermediate files, matching Rust conventions

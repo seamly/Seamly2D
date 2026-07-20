@@ -1,0 +1,20 @@
+# Testing Guidelines
+
+## Test Organization
+
+- Create test directories, files, modules, and suites for each crate
+- Place tests in `tests/` or as inline module tests
+
+## Test Commands
+
+| Command | Purpose |
+|---------|---------|
+| `cargo test` | Unit tests |
+| `cargo test --doc` | Documentation tests |
+| `cargo test --bench` | Performance benchmarks |
+| `cargo test --test` | Integration tests |
+
+## Testing Frameworks
+
+- Use **insta** (1.0) for snapshot testing
+- Use **criterion** (0.5) for performance benchmarking

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Schema describing the structure observed in patterns/input_absolute_plain.svg.
+    Focuses on the DOM conventions used by SeamlyLayout pattern pieces:
+    - root <svg> element with optional named view/defs blocks
+    - top-level <g> pattern pieces with nested groups for cutlines, seamlines, markings, labels, grainlines
+    - <path> geometry elements and <text>/<tspan> labels
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://www.w3.org/2000/svg"
+           xmlns="http://www.w3.org/2000/svg"
+           xmlns:svg="http://www.w3.org/2000/svg"
+           xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+           xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+           xmlns:xml="http://www.w3.org/XML/1998/namespace"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+
+    <xs:import namespace="http://www.w3.org/XML/1998/namespace"
+               schemaLocation="http://www.w3.org/2001/xml.xsd"/>
+
+    <!-- Root svg element -->
+    <xs:element name="svg" type="SvgDocumentType"/>
+
+    <xs:complexType name="SvgDocumentType">
+        <xs:sequence>
+            <!-- Optional Inkscape metadata blocks -->
+            <xs:any namespace="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+                    minOccurs="0"
+                    maxOccurs="unbounded"
+                    processContents="lax"/>
+            <xs:any namespace="http://www.inkscape.org/namespaces/inkscape"
+                    minOccurs="0"
+                    maxOccurs="unbounded"
+                    processContents="lax"/>
+            <!-- Optional definitions -->
+            <xs:element name="defs" type="DefsType" minOccurs="0"/>
+            <!-- Pattern piece groups -->
+            <xs:element name="g" type="PatternPieceType" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:NCName" use="optional"/>
+        <xs:attribute name="version" type="xs:string" use="required"/>
+        <xs:attribute name="width" type="xs:decimal" use="required"/>
+        <xs:attribute name="height" type="xs:decimal" use="required"/>
+        <xs:attribute name="viewBox" type="xs:string" use="required"/>
+        <xs:attribute name="stroke" type="xs:string" use="optional"/>
+        <xs:attribute name="stroke-width" type="xs:string" use="optional"/>
+        <xs:attribute name="fill" type="xs:string" use="optional"/>
+        <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+
+    <!-- Definitions block (rect references used by Inkscape) -->
+    <xs:complexType name="DefsType">
+        <xs:sequence>
+            <xs:element name="rect" type="RectType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:any namespace="##other" processContents="lax" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+
+    <xs:complexType name="RectType">
+        <xs:attribute name="id" type="xs:NCName" use="required"/>
+        <xs:attribute name="x" type="xs:decimal" use="required"/>
+        <xs:attribute name="y" type="xs:decimal" use="required"/>
+        <xs:attribute name="width" type="xs:decimal" use="required"/>
+        <xs:attribute name="height" type="xs:decimal" use="required"/>
+        <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+
+    <!-- Pattern piece group -->
+    <xs:complexType name="PatternPieceType">
+        <xs:complexContent>
+            <xs:extension base="GroupType">
+                <xs:attribute name="id" type="xs:NCName" use="required"/>
+            </xs:extension>
+        </xs:complexContent>
+    </xs:complexType>
+
+    <!-- Generic group used for sub-elements such as cutline_, seamline_, notch_, grainline_ -->
+    <xs:complexType name="GroupType">
+        <xs:sequence>
+            <xs:element name="g" type="GroupType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="path" type="PathType" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="text" type="TextType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attributeGroup ref="CoreStyleAttributes"/>
+        <xs:attribute name="id" type="xs:NCName" use="optional"/>
+        <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+
+    <xs:complexType name="PathType">
+        <xs:attribute name="id" type="xs:NCName" use="required"/>
+        <xs:attribute name="d" type="xs:string" use="required"/>
+        <xs:attributeGroup ref="CoreStyleAttributes"/>
+        <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+
+    <xs:complexType name="TextType" mixed="true">
+        <xs:sequence>
+            <xs:element name="tspan" type="TspanType" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:NCName" use="required"/>
+        <xs:attribute name="x" type="xs:string" use="optional"/>
+        <xs:attribute name="y" type="xs:string" use="optional"/>
+        <xs:attribute name="dy" type="xs:string" use="optional"/>
+        <xs:attribute name="font-family" type="xs:string" use="optional"/>
+        <xs:attribute name="font-size" type="xs:string" use="optional"/>
+        <xs:attribute name="text-anchor" type="xs:string" use="optional"/>
+        <xs:attributeGroup ref="CoreStyleAttributes"/>
+        <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+
+    <xs:complexType name="TspanType" mixed="true">
+        <xs:attribute name="id" type="xs:NCName" use="optional"/>
+        <xs:attribute name="x" type="xs:string" use="optional"/>
+        <xs:attribute name="dy" type="xs:string" use="optional"/>
+        <xs:anyAttribute namespace="##other" processContents="lax"/>
+    </xs:complexType>
+
+    <xs:attributeGroup name="CoreStyleAttributes">
+        <xs:attribute name="fill" type="xs:string" use="optional"/>
+        <xs:attribute name="stroke" type="xs:string" use="optional"/>
+        <xs:attribute name="stroke-width" type="xs:string" use="optional"/>
+        <xs:attribute name="stroke-dasharray" type="xs:string" use="optional"/>
+        <xs:attribute name="stroke-linecap" type="xs:string" use="optional"/>
+        <xs:attribute name="stroke-linejoin" type="xs:string" use="optional"/>
+        <xs:attribute name="stroke-opacity" type="xs:string" use="optional"/>
+        <xs:attribute name="transform" type="xs:string" use="optional"/>
+        <xs:attribute name="style" type="xs:string" use="optional"/>
+    </xs:attributeGroup>
+
+</xs:schema>
+

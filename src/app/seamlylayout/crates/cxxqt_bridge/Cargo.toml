@@ -1,0 +1,42 @@
+# project: SeamlyLayout
+# author: slspencer, copyright 2026
+# MIT License: https://opensource.org/licenses/MIT
+#
+# cxxqt_bridge — CXX-Qt bridge crate.
+# Exposes Rust core crates as QObject types for the Qt 6.10 frontend.
+# Phase 2a: infrastructure scaffold (Phase 2b adds #[cxx_qt::bridge] QObjects).
+
+[package]
+name = "cxxqt_bridge"
+version = "0.1.0"
+edition = "2021"
+authors = ["slspencer"]
+license = "MIT"
+description = "CXX-Qt bridge — exposes SeamlyLayout Rust core as QObject types"
+
+[lib]
+# staticlib: the Qt CMake build links this into SeamlyLayout via cxxqt_import_crate
+crate-type = ["staticlib"]
+
+[dependencies]
+cxx = "1.0"
+cxx-qt = "=0.7.3"
+cxx-qt-lib = "=0.7.3"
+app_core      = { path = "../app_core" }
+svg_dom       = { path = "../svg_dom"  }
+packing       = { path = "../packing" }
+polygon_pack  = { path = "../polygon_pack" }
+layout_tiling = { path = "../layout_tiling" }
+geometry      = { path = "../geometry" }
+log           = "0.4"
+xmltree       = "0.10"
+serde              = { version = "1", features = ["derive"] }
+serde_json         = { version = "1" }
+seamly_svg2ezdxf   = { path = "../seamly_svg2ezdxf" }
+ezdxf2dxfastm      = { path = "../ezdxf2dxfastm" }
+usvg               = "0.42"
+svg2pdf            = "0.11"
+lopdf = "0.32"
+
+[build-dependencies]
+cxx-qt-build = "=0.7.3"
