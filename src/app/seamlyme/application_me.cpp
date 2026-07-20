@@ -550,20 +550,53 @@ bool ApplicationME::event(QEvent *event)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/// @brief openSettings get access to application settings.
+///
+/// Task 15: SeamlyMe's own settings now live in their own directory nested under the
+/// shared "Seamly" organization (AppData/Local/Seamly/SeamlyMe on Windows) instead of a
+/// flat .ini file sharing a folder with Seamly2D's. The "common" settings (shared across
+/// Seamly apps via VCommonSettings) still use Qt's native per-organization resolution and
+/// are bridged forward from the pre-unification "Seamly2DTeam" folder here too, since a
+/// user might run SeamlyMe before ever launching Seamly2D after an upgrade.
 void ApplicationME::openSettings()
 {
     QSettings settings(QSettings::IniFormat, QSettings::UserScope,
                        QCoreApplication::organizationName(),
                        QCoreApplication::applicationName());
 
-    const QString qt5Settings = settings.fileName();
-    const QString dir = QFileInfo(qt5Settings).absolutePath();
-    const QString qt6Settings = dir + "/qt6_seamlyme.ini";
+    const QString dir = QFileInfo(settings.fileName()).absolutePath();
+    const QString qt5Common = dir + "/common.ini";
+    const QString qt6Common = dir + "/qt6_common.ini";
 
-    if (!QFileInfo::exists(qt6Settings) && QFileInfo::exists(qt5Settings))
+    // QFile::copy() never creates missing parent directories, and the "Seamly" organization
+    // folder does not exist yet the very first time any app runs under the renamed
+    // organization.
+    QDir().mkpath(dir);
+
+    static const QString kLegacyOrganizationName = QStringLiteral("Seamly2DTeam");
+    const QSettings legacyCommonProbe(QSettings::IniFormat, QSettings::UserScope,
+                                      kLegacyOrganizationName, QCoreApplication::applicationName());
+    const QString legacyDir = QFileInfo(legacyCommonProbe.fileName()).absolutePath();
+    if (!QFileInfo::exists(qt6Common) && QFileInfo::exists(legacyDir + "/qt6_common.ini"))
     {
-        QFile::copy(qt5Settings, qt6Settings);
+        QFile::copy(legacyDir + "/qt6_common.ini", qt6Common);
     }
+    else if (!QFileInfo::exists(qt5Common) && QFileInfo::exists(legacyDir + "/common.ini"))
+    {
+        QFile::copy(legacyDir + "/common.ini", qt5Common);
+    }
+
+    if (!QFileInfo::exists(qt6Common) && QFileInfo::exists(qt5Common))
+    {
+        QFile::copy(qt5Common, qt6Common);
+    }
+
+    bool migratedThisCall = false;
+    const QString qt6Settings = MigrateSeamlySettingsLocation(
+        QStringLiteral("qt6_seamlyme.ini"),
+        { QStringLiteral("qt6_seamlyme.ini"), QStringLiteral("SeamlyMe.ini") },
+        &migratedThisCall);
+    m_settingsMigrated = m_settingsMigrated || migratedThisCall;
 
     m_settings = new VSeamlyMeSettings(qt6Settings, QSettings::IniFormat, this);
 }

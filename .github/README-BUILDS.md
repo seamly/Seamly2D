@@ -32,25 +32,26 @@ Two toolchains are in use — the difference is intentional, not an error:
 
 ## Settings / preferences storage
 
-### Current state (as of 2026-07)
+### Windows (as of Task 15, 2026-07)
 
-| App | Windows location | Source of the name |
+`VER_COMPANYNAME_STR` (`src/libs/vmisc/projectversion.h`) and seamlyLayout's `app.setOrganizationName(...)` (`src/app/seamlylayout/qt_frontend/main.cpp`) are both `"Seamly"`, so every app gets its own directory nested under one shared organization folder:
+
+| App | Windows location | How it gets there |
 |---|---|---|
-| seamly2d, seamlyme | `C:\Users\<user>\AppData\Local\Seamly2D` | org name from `VER_COMPANYNAME_STR` (`src/libs/vmisc/projectversion.h`), applied in `src/app/seamly2d/core/application_2d.cpp` and `src/app/seamlyme/application_me.cpp` |
-| seamlyLayout | `C:\Users\<user>\AppData\Local\Seamly Systems` | hard-coded `app.setOrganizationName("Seamly Systems")` in `src/app/seamlylayout/qt_frontend/main.cpp` |
-| seamlyLayout (packaged defaults) | `<exeDir>\settings\` (relative to `seamlyLayout.exe`) | Inno Setup installs `default_settings.json` and paper/roll presets there (`src/app/seamlylayout/packaging/windows/SeamlyLayout.iss`) |
+| seamly2d | `C:\Users\<user>\AppData\Local\Seamly\Seamly2D\qt6_seamly2d.ini` | `Application2D::openSettings()` resolves `QStandardPaths::AppConfigLocation` explicitly (previously it used Qt's native `QSettings(IniFormat, UserScope, org, app)` resolution, which put a flat `Seamly2D.ini` in `%APPDATA%\Roaming\<org>\` alongside SeamlyMe's) |
+| seamlyme | `C:\Users\<user>\AppData\Local\Seamly\SeamlyMe\qt6_seamlyme.ini` | same mechanism, `ApplicationME::openSettings()` |
+| seamly2d + seamlyme shared "common" settings (`VCommonSettings`, e.g. individual/multisize table paths) | `%APPDATA%\Roaming\Seamly\qt6_common.ini` | unchanged mechanism — Qt's native per-organization `QSettings(IniFormat, UserScope, org, "qt6_common")` resolution, just under the renamed org folder |
+| seamlyLayout | `C:\Users\<user>\AppData\Local\Seamly\SeamlyLayout\` | `QStandardPaths::AppConfigLocation` (already used before Task 15 — only the org name changed) |
+| seamlyLayout (packaged defaults) | `<exeDir>\settings\` (relative to `seamlyLayout.exe`) | Inno Setup installs `default_settings.json` and paper/roll presets there; read-only legacy-migration source only, never written to at runtime |
 
-### Planned: one unified `Seamly` organization folder (TODO Tasks 15–18)
+**First-run migration (non-destructive, copy-if-missing, left in place):** each app bridges its own settings forward from its pre-Task-15 location the first time the new location is resolved:
+- seamly2d/seamlyme: `VAbstractApplication::MigrateSeamlySettingsLocation()` (`src/libs/vmisc/vabstractapplication.h/.cpp`) copies from the old shared `"Seamly2DTeam"` organization folder; a one-time `NotifySeamlySettingsMigrated()` dialog tells the user, shown only in confirmed GUI mode (never during a headless CLI export or an automated test) after command-line parsing has run.
+- seamlyLayout: `appConfigRootPath()` (`PreferencesModel.cpp`) and `defaultSettingsFilePath()` (`SettingsModel.cpp`) each recursively copy the whole legacy `"Seamly Systems"` AppConfigLocation tree forward; the Inno Setup installer's upgrade-guard dialog (`SeamlyLayout.iss`) also mentions the org-folder rename.
 
-**Why:** three scattered locations are confusing to users and support, and complicate backup/migration. The fix is a single organization name, `Seamly`, so Qt's `QSettings`/`QStandardPaths` resolve every app under one parent folder.
-
-**What:** change the org name everywhere (`VER_COMPANYNAME_STR` + the seamlyLayout hard-coded string), migrate legacy data in-app on first run (must not rely on installer logic — Flatpak has no installer), and make seamlyLayout's exe-relative `settings\` strictly read-only packaged defaults.
-
-Per-platform targets:
+**Not yet unified (Tasks 16–18):**
 
 | Platform | Unified location | Task |
 |---|---|---|
-| Windows | `C:\Users\<user>\AppData\Local\Seamly` | Task 15 |
 | macOS | `~/Library/Application Support/Seamly` (+ Preferences plists) | Task 16 |
 | Linux AppImage | `~/.config/Seamly`, `~/.local/share/Seamly` (XDG) | Task 17 |
 | Linux Flatpak | `~/.var/app/<app-id>/config/Seamly` inside the **single shared** sandbox | Task 18 |
