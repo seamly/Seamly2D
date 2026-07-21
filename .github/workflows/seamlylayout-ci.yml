@@ -88,11 +88,14 @@ jobs:
           version: ${{ env.QT_VERSION }}
           cache: true
           # qtwebengine is required by qt_frontend (SvgCanvas.qml's WebEngineView
-          # and main.cpp's QtWebEngineQuick::initialize()); aqtinstall pulls its
-          # dependencies (qtwebchannel, qtpositioning) automatically. Quick,
+          # and main.cpp's QtWebEngineQuick::initialize()). aqtinstall does NOT
+          # auto-resolve a module's Qt dependencies, so qtwebengine's own deps
+          # must be listed explicitly: Qt6WebEngineCore requires Qt6WebChannel
+          # (qtwebchannel) and Qt6Positioning (qtpositioning) at configure time —
+          # omitting them makes find_package(Qt6 ... WebEngineQuick) fail. Quick,
           # QuickControls2 and QuickDialogs2 ship inside the default qtdeclarative
           # archive, so they need not be listed here.
-          modules: qtwebengine
+          modules: qtwebengine qtwebchannel qtpositioning
 
       - name: Install build tools
         # Ninja drives the CMake presets (qt_frontend/CMakePresets.json).
