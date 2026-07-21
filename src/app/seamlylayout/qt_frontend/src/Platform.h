@@ -94,6 +94,33 @@ public:
         return qEnvironmentVariableIsSet("APPIMAGE");
     } // isAppImage
 
+    // @brief Detect whether this process is running inside a Flatpak sandbox.
+    //
+    // Task 18: a Flatpak mounts the application payload at the /app prefix read-only (the
+    // executable lives at /app/bin/...), so any exe-relative writable path (settings,
+    // input/output folders, debug logs) that works for a normal Linux install fails silently
+    // inside one — the same problem Task 16 found for a signed, notarized macOS .app bundle
+    // and Task 17 for a FUSE-mounted AppImage. Like the AppImage case, this cannot be told
+    // apart from a native Linux install at compile time and must be detected at runtime.
+    //
+    // Every Flatpak sandbox has the /.flatpak-info file bind-mounted in and exports the
+    // FLATPAK_ID environment variable to the app process
+    // (see https://docs.flatpak.org/en/latest/flatpak-command-reference.html and the
+    // freedesktop app-sandbox conventions), so checking either is enough to recognise the
+    // sandbox. The file check is the robust production signal (present regardless of how the
+    // process was spawned); the environment-variable check additionally lets unit tests
+    // exercise the Flatpak fallback on any host by setting FLATPAK_ID directly, exactly as the
+    // AppImage tests set APPIMAGE.
+    //
+    // The check uses no OS-specific API, so it is safe to call on every platform — it is simply
+    // always false on Windows/macOS and on a non-Flatpak Linux install, where neither the
+    // variable nor the file is present.
+    static bool isFlatpak()
+    {
+        return qEnvironmentVariableIsSet("FLATPAK_ID")
+            || QFileInfo::exists(QStringLiteral("/.flatpak-info"));
+    } // isFlatpak
+
 private:
     // Non-instantiable — all members are static.
     Platform() = delete;

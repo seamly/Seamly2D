@@ -13,7 +13,8 @@
 //   {appDir}/output/log_{YYMMDDHHMM}.txt
 // (on macOS, {appDir} is the writable AppConfigLocation root instead of the read-only
 // .app bundle path — see Task 16; the same substitution happens at runtime inside a
-// mounted Linux AppImage, detected via Platform::isAppImage() — see Task 17)
+// mounted Linux AppImage, detected via Platform::isAppImage() — see Task 17, and inside a
+// Flatpak sandbox whose /app prefix is read-only, detected via Platform::isFlatpak() — Task 18)
 
 #include "Logger.h"
 
@@ -75,8 +76,10 @@ void Logger::init()
     // — detect it at runtime (Platform::isAppImage(), since unlike macOS this can't be known
     // at compile time) and fall back to the same writable AppConfigLocation root. A normal
     // (non-AppImage) Linux install, and Windows, keep writing logs next to the executable.
+    // Task 18: a Flatpak's /app prefix is read-only in the same way, so Platform::isFlatpak()
+    // (also runtime-only) is treated identically and writes logs under AppConfigLocation too.
     QString logsDir;
-    if (Platform::isAppImage()) {
+    if (Platform::isAppImage() || Platform::isFlatpak()) {
         logsDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
         if (logsDir.isEmpty()) {
             logsDir = QCoreApplication::applicationDirPath();

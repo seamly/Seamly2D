@@ -2,6 +2,6 @@
 
 Add tasks in TODO.md -->
 
-1.
-
 Add rules to CLAUDE.md -->
+
+Ask Claude -->

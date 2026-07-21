@@ -86,11 +86,26 @@ All three apps use the same generic `QStandardPaths::AppConfigLocation` / `QSett
 
 **Not yet verified — seamlyLayout is not currently packaged into the Linux AppImage at all:** `ci.yml`'s `linux` job builds only seamly2d's AppImage (`dist/seamly2d.desktop`); Task 20 (still open in `TODO.md`) adds a separate CI job that *builds and tests* seamlyLayout on Linux/Qt 6.10 but does not add it to the AppImage. The `Platform::isAppImage()` code path above is therefore verified by unit test (`PreferencesModelTests`, which sets the `APPIMAGE` environment variable directly since the check itself is a plain env-var read) and by Windows build/test, but not yet exercised by a real packaged Linux AppImage — mirroring how Task 16's macOS code changes were verified without real macOS hardware.
 
-**Not yet unified (Task 18):**
+### Linux — Flatpak (as of Task 18, 2026-07)
 
-| Platform | Unified location | Task |
-|---|---|---|
-| Linux Flatpak | `~/.var/app/<app-id>/config/Seamly` inside the **single shared** sandbox | Task 18 |
+A Flatpak sandbox exports `XDG_CONFIG_HOME=~/.var/app/<app-id>/config` and `XDG_DATA_HOME=~/.var/app/<app-id>/data` into the app process, so the same generic `QStandardPaths::AppConfigLocation` resolution used everywhere else (Task 15/16/17) lands under the sandbox automatically — no Flatpak-specific code was needed for the base directory move, matching the macOS and AppImage findings.
+
+| App | Flatpak (in-sandbox XDG) location |
+|---|---|
+| seamly2d | `~/.var/app/<app-id>/config/Seamly/Seamly2D/qt6_seamly2d.ini` |
+| seamlyme | `~/.var/app/<app-id>/config/Seamly/SeamlyMe/qt6_seamlyme.ini` |
+| seamly2d + seamlyme shared "common" settings | `~/.var/app/<app-id>/config/Seamly/qt6_common.ini` |
+| seamlyLayout | `~/.var/app/<app-id>/config/Seamly/SeamlyLayout/{settings,preferences,input,output}/` |
+
+**One shared physical directory:** because all three apps ship inside the **single existing Flatpak app id** (the apps launch each other via `QProcess::startDetached` and share files/variables, which does not work across sandboxes), the `~/.var/app/<app-id>/config/Seamly/` folder above is **one physical directory shared by all three** — not per-app copies. This is what makes the cross-app settings sharing, the `.pieces.svg` handoff, and shared measurement files work inside the sandbox.
+
+**In-sandbox app launches:** seamly2d resolves seamlyme and seamlyLayout via `QCoreApplication::applicationDirPath()` (`Application2D::seamlyMeFilePath()` / `seamlyLayoutFilePath()`), which inside the sandbox is `/app/bin`, so both resolve to `/app/bin/seamlyme` and `/app/bin/SeamlyLayout` — executables inside the same read-only `/app` prefix, never host paths. The `paths/seamlyLayoutApp` setting default is empty, which falls through to exactly that `/app/bin/SeamlyLayout` lookup, so no host-specific configuration is required in the sandbox.
+
+**First-run migration** reuses the same generic `MigrateSeamlySettingsLocation()` / `migrateLegacyOrganizationTree()` logic as Windows/macOS/AppImage — it reconstructs the legacy path by temporarily swapping `organizationName` to the pre-Task-15 value (`"Seamly2DTeam"`, `"Seamly Systems"`) and re-querying `AppConfigLocation`, which resolves the legacy org folder **inside the sandbox** (`~/.var/app/<app-id>/config/Seamly2DTeam`, etc.). Crucially this runs in-app, not from installer logic — Flatpak has no installer step to hook — so it works on the first launch of a newer Flatpak over an older sandbox.
+
+**Read-only `/app` prefix (Task 18):** a Flatpak mounts the app payload at `/app` read-only, the same problem Task 16 found for a macOS `.app` bundle and Task 17 for an AppImage mount. seamlyLayout's default input/output folders and its debug log directory fall back to `<exeDir>/input`, `<exeDir>/output` when unconfigured — inside the sandbox `<exeDir>` is `/app/bin`, which is read-only, so those `mkpath()` calls would silently fail. `Platform::isFlatpak()` (`src/app/seamlylayout/qt_frontend/src/Platform.h`) detects the sandbox at runtime (the `FLATPAK_ID` environment variable and the bind-mounted `/.flatpak-info` file), and `PreferencesModel::defaultInputFolderUrl()`/`resolvedInputDirectory()`/`resolvedLayoutDirectory()` and `Logger::init()` branch on it — alongside the existing `Platform::isAppImage()` check — to use the writable `AppConfigLocation` root (which Flatpak maps into `~/.var/app/<app-id>/config/Seamly/SeamlyLayout`) instead. Packaged defaults are compiled-in Qt resources (`:/defaults/default_preferences.json`, inherently read-only) or ship inside the read-only `/app` prefix, so "packaged defaults are read-only" is enforced structurally.
+
+**Not yet verified — seamlyLayout is not currently part of the Flathub package, and the build is not done here:** the Flatpak is produced from the Flathub manifest repo (see the packaging section below), not this repo's CI, so end-to-end fresh-install / upgrade-over-legacy-sandbox verification and the seamly2d→seamlyLayout in-sandbox handoff remain open until seamlyLayout is added to that manifest. The `Platform::isFlatpak()` code path is verified by unit test (`PreferencesModelTests` sets `FLATPAK_ID` directly, since the check is a plain env-var read) and by a local Windows build/test pass — the same verification posture Task 16 (macOS) and Task 17 (AppImage) left in place without the real target platform.
 
 ## User data files (patterns, measurements)
 
@@ -135,7 +150,12 @@ All three apps use the same generic `QStandardPaths::AppConfigLocation` / `QSett
 - **Where/when:** the Flatpak is built from the Flathub manifest repo, not this repo's CI. Releases reach Flathub via a version bump in that manifest — coordinate timing separately from GitHub releases.
 - **Decision (2026-07): do NOT change the Flatpak way of building.** Keep the existing Flathub package structure and single app id.
 - **Why one sandbox:** the apps share files and variables and launch each other via `QProcess::startDetached`; cross-sandbox process launches and file handoffs do not work in Flatpak. So all apps ship inside the one existing Flatpak app id, and the unified `Seamly` folder (`~/.var/app/<app-id>/config/Seamly/`) is **one shared physical directory** inside that sandbox — not per-app copies.
-- Consequences (Task 18): seamlyLayout must be added to the existing Flathub package if not yet included; in-sandbox launches must resolve to `/app/bin` executables (not host paths), including the `paths/seamlyLayoutApp` setting default; legacy-settings migration must be in-app (no installer exists); packaged defaults are read from the read-only `/app/...` prefix.
+- Consequences (Task 18) — the app-source side is now done (see the "Linux — Flatpak" settings-storage section above for the full breakdown):
+  - The unified `Seamly` org folder lands under the sandbox's `~/.var/app/<app-id>/config/Seamly/` automatically via `QStandardPaths` — no Flatpak-specific code for the move.
+  - In-sandbox launches resolve to `/app/bin/seamlyme` and `/app/bin/SeamlyLayout` via `applicationDirPath()`, never host paths; the empty `paths/seamlyLayoutApp` default falls through to that same `/app/bin/SeamlyLayout` lookup.
+  - Legacy-settings migration runs in-app (the generic `MigrateSeamlySettingsLocation()` / `migrateLegacyOrganizationTree()` logic), so it works with no installer step.
+  - seamlyLayout's read-only-`/app` writable-path fallbacks now detect the sandbox at runtime via `Platform::isFlatpak()` (alongside `Platform::isAppImage()`), writing to the sandbox `Seamly` paths instead of `/app/bin`; packaged defaults are read-only Qt resources / `/app` files.
+  - **Remaining, in the Flathub manifest repo (not this repo):** add seamlyLayout to the existing single-app-id package so it ships in the same sandbox for the handoff, fix any stale references to the old dir names, and bump to the new source release. No build restructuring.
 
 ## Related records
 

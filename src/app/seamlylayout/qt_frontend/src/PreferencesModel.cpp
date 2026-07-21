@@ -529,12 +529,14 @@ QString PreferencesModel::localFileToUrl(const QString &path)
 // fails there for the same reason — detected at runtime via Platform::isAppImage() (the
 // distinction is only known at runtime, unlike macOS's compile-time bundle case), falling
 // back the same way. A normal (non-AppImage) Linux install keeps the exe-relative default.
+// Task 18: a Flatpak sandbox mounts the /app prefix read-only in exactly the same way, so
+// Platform::isFlatpak() (also a runtime check) is treated identically to the AppImage case.
 QString PreferencesModel::defaultInputFolderUrl()
 {
 #if defined(Q_OS_MACOS)
     QString dir = appConfigRootPath() + QStringLiteral("/input");
 #else
-    QString dir = Platform::isAppImage()
+    QString dir = (Platform::isAppImage() || Platform::isFlatpak())
         ? appConfigRootPath() + QStringLiteral("/input")
         : QCoreApplication::applicationDirPath() + QStringLiteral("/input");
 #endif
@@ -627,8 +629,8 @@ QString PreferencesModel::resolvedSettingsDirectory() const
 // @brief Return resolved input directory for import file dialogs.
 // Priority:
 //   1. preferences inputDirectory — if non-empty.
-//   2. <exeDir>/input — fallback default (AppConfigLocation root on macOS, or inside a
-//      Linux AppImage; see Task 16 / Task 17).
+//   2. <exeDir>/input — fallback default (AppConfigLocation root on macOS, or at runtime
+//      inside a read-only Linux AppImage mount or Flatpak /app prefix; see Task 16 / 17 / 18).
 // Relative configured paths are resolved against <exeDir>.
 // Ensures the directory exists before returning.
 QString PreferencesModel::resolvedInputDirectory() const
@@ -645,7 +647,9 @@ QString PreferencesModel::resolvedInputDirectory() const
         // Task 17: a mounted Linux AppImage is read-only for the same reason a macOS bundle
         // is — detect it at runtime (Platform::isAppImage()) and fall back the same way. A
         // normal (non-AppImage) Linux install, and Windows, keep the exe-relative default.
-        dir = Platform::isAppImage()
+        // Task 18: a Flatpak's /app prefix is read-only in the same way, so Platform::
+        // isFlatpak() (also runtime-only) triggers the identical AppConfigLocation fallback.
+        dir = (Platform::isAppImage() || Platform::isFlatpak())
             ? appConfigRoot + QStringLiteral("/input")
             : QCoreApplication::applicationDirPath() + QStringLiteral("/input");
 #endif
@@ -725,8 +729,8 @@ QString PreferencesModel::preferencesFilePath() const
 // @brief Return resolved output directory for export file dialogs.
 // Priority:
 //   1. preferences layoutDirectory — if non-empty.
-//   2. <exeDir>/output — fallback default (AppConfigLocation root on macOS, or inside a
-//      Linux AppImage; see Task 16 / Task 17).
+//   2. <exeDir>/output — fallback default (AppConfigLocation root on macOS, or at runtime
+//      inside a read-only Linux AppImage mount or Flatpak /app prefix; see Task 16 / 17 / 18).
 // Ensures the directory exists before returning.
 QString PreferencesModel::resolvedLayoutDirectory() const
 {
@@ -745,7 +749,9 @@ QString PreferencesModel::resolvedLayoutDirectory() const
         // Task 17: a mounted Linux AppImage is read-only for the same reason a macOS bundle
         // is — detect it at runtime (Platform::isAppImage()) and fall back the same way. A
         // normal (non-AppImage) Linux install, and Windows, keep the exe-relative default.
-        dir = Platform::isAppImage()
+        // Task 18: a Flatpak's /app prefix is read-only in the same way, so Platform::
+        // isFlatpak() (also runtime-only) triggers the identical AppConfigLocation fallback.
+        dir = (Platform::isAppImage() || Platform::isFlatpak())
             ? appConfigRoot + QStringLiteral("/output")
             : QCoreApplication::applicationDirPath() + QStringLiteral("/output");
 #endif

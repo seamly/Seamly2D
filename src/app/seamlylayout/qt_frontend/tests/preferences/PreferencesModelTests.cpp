@@ -8,8 +8,9 @@
 // Covers URL-vs-file detection and command-line parsing for openInViewer,
 // the Projector use case (launcher-only viewer with optional arguments),
 // legacy folder-name migration (layout-settings → settings, layout-preferences
-// → preferences) performed by PreferencesModel::load(), and (Task 17) the
-// AppImage-aware fallback for the default input/output directories.
+// → preferences) performed by PreferencesModel::load(), (Task 17) the
+// AppImage-aware fallback for the default input/output directories, and (Task 18)
+// the matching Flatpak-aware fallback.
 
 #include "PreferencesModel.h"
 #include "Platform.h"
@@ -131,6 +132,19 @@ private slots:
     void appImage_resolvedInputDirectory_fallsBackToAppConfigLocation();
     void appImage_resolvedLayoutDirectory_fallsBackToAppConfigLocation();
     void appImage_defaultInputFolderUrl_fallsBackToAppConfigLocation();
+
+    // -----------------------------------------------------------------------
+    // Task 18 — Platform::isFlatpak() and its Flatpak-aware directory fallbacks.
+    // A Flatpak sandbox mounts the /app prefix read-only, just like a mounted
+    // AppImage (Task 17) or a signed macOS .app bundle (Task 16), so the default
+    // input/output directories must fall back to the writable AppConfigLocation
+    // root (which Flatpak maps into the sandbox) instead of <exeDir>/input or /output.
+    // -----------------------------------------------------------------------
+    void platform_isFlatpak_falseWithoutEnvVar();
+    void platform_isFlatpak_trueWithEnvVarSet();
+    void flatpak_resolvedInputDirectory_fallsBackToAppConfigLocation();
+    void flatpak_resolvedLayoutDirectory_fallsBackToAppConfigLocation();
+    void flatpak_defaultInputFolderUrl_fallsBackToAppConfigLocation();
 }; // class PreferencesModelTests
 
 void PreferencesModelTests::isViewerUrl_detectsHttp()
@@ -873,6 +887,88 @@ void PreferencesModelTests::appImage_defaultInputFolderUrl_fallsBackToAppConfigL
     const QString expectedDir = QDir(appConfigRoot).filePath(QStringLiteral("input"));
 
     ScopedEnvVar appImageEnv("APPIMAGE", "/tmp/.mount_SeamlyXXXXXX/SeamlyLayout.AppImage");
+
+    const QString resolvedDir = QUrl(PreferencesModel::defaultInputFolderUrl()).toLocalFile();
+
+    QCOMPARE(QFileInfo(resolvedDir).absoluteFilePath(), QFileInfo(expectedDir).absoluteFilePath());
+}
+
+// ---------------------------------------------------------------------------
+// Task 18 — Platform::isFlatpak()
+// ---------------------------------------------------------------------------
+
+// @brief Without FLATPAK_ID set (and no /.flatpak-info on the host), isFlatpak() must report
+// false — the state for a normal Windows/macOS run and for a non-Flatpak Linux install.
+void PreferencesModelTests::platform_isFlatpak_falseWithoutEnvVar()
+{
+    qunsetenv("FLATPAK_ID"); // guard against a value leaked from another process/test run
+    // The test binary is never itself run inside a Flatpak sandbox, so /.flatpak-info is
+    // absent and the detection reduces to the (now-unset) environment variable.
+    QVERIFY(!Platform::isFlatpak());
+}
+
+// @brief With FLATPAK_ID set — as the Flatpak runtime exports it to the app process —
+// isFlatpak() must report true.
+void PreferencesModelTests::platform_isFlatpak_trueWithEnvVarSet()
+{
+    ScopedEnvVar flatpakEnv("FLATPAK_ID", "io.seamly.SeamlyLayout");
+    QVERIFY(Platform::isFlatpak());
+}
+
+// ---------------------------------------------------------------------------
+// Task 18 — Flatpak-aware directory fallbacks
+//
+// Mirrors the Task 17 AppImage tests: each test independently reconstructs the
+// writable AppConfigLocation root the production code falls back to, then simulates
+// a Flatpak sandbox by setting FLATPAK_ID and verifies the default input/output
+// directories resolve under that root rather than the read-only <exeDir>.
+// ---------------------------------------------------------------------------
+
+// @brief resolvedInputDirectory() with no configured inputDirectory normally falls back to
+// <exeDir>/input; inside a (simulated) Flatpak sandbox it must fall back to the writable
+// AppConfigLocation root instead, since the sandbox's /app prefix (the exeDir) is read-only.
+void PreferencesModelTests::flatpak_resolvedInputDirectory_fallsBackToAppConfigLocation()
+{
+    const QString appConfigRoot = QDir(
+        QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)).absolutePath();
+    const QString expected = QDir(appConfigRoot).filePath(QStringLiteral("input"));
+
+    ScopedEnvVar flatpakEnv("FLATPAK_ID", "io.seamly.SeamlyLayout");
+
+    PreferencesModel m; // m_inputDirectory defaults to empty — the fallback branch runs
+    const QString resolved = m.resolvedInputDirectory();
+
+    QCOMPARE(QFileInfo(resolved).absoluteFilePath(), QFileInfo(expected).absoluteFilePath());
+    QVERIFY(!resolved.startsWith(QCoreApplication::applicationDirPath()));
+}
+
+// @brief resolvedLayoutDirectory() with no configured layoutDirectory must likewise fall
+// back to the AppConfigLocation root (not <exeDir>/output) inside a Flatpak sandbox.
+void PreferencesModelTests::flatpak_resolvedLayoutDirectory_fallsBackToAppConfigLocation()
+{
+    const QString appConfigRoot = QDir(
+        QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)).absolutePath();
+    const QString expected = QDir(appConfigRoot).filePath(QStringLiteral("output"));
+
+    ScopedEnvVar flatpakEnv("FLATPAK_ID", "io.seamly.SeamlyLayout");
+
+    PreferencesModel m; // m_layoutDirectory defaults to empty — the fallback branch runs
+    const QString resolved = m.resolvedLayoutDirectory();
+
+    QCOMPARE(QFileInfo(resolved).absoluteFilePath(), QFileInfo(expected).absoluteFilePath());
+    QVERIFY(!resolved.startsWith(QCoreApplication::applicationDirPath()));
+}
+
+// @brief defaultInputFolderUrl() (the FileDialog default before any input directory has
+// ever been configured) must also resolve under the AppConfigLocation root rather than
+// <exeDir>/input when running inside a Flatpak sandbox.
+void PreferencesModelTests::flatpak_defaultInputFolderUrl_fallsBackToAppConfigLocation()
+{
+    const QString appConfigRoot = QDir(
+        QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)).absolutePath();
+    const QString expectedDir = QDir(appConfigRoot).filePath(QStringLiteral("input"));
+
+    ScopedEnvVar flatpakEnv("FLATPAK_ID", "io.seamly.SeamlyLayout");
 
     const QString resolvedDir = QUrl(PreferencesModel::defaultInputFolderUrl()).toLocalFile();
 
