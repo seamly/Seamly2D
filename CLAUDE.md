@@ -59,6 +59,7 @@ Two toolchains are in use — do not treat the difference as an error:
   4. push the task branch to origin and create a pull request targeting `run-seamlyLayout` — always in origin `seamly/Seamly2D` (the gh default repo is set to it), NEVER in the public upstream `FashionFreedom/Seamly2D`
   5. watch the PR's CI checks (`gh pr checks <pr> --watch`); when all checks pass, merge the PR; if any check fails, do NOT merge
   6. notify the user of the outcome either way — merged (with PR URL) or not merged (with the failing checks) — then, after a merge, update local `run-seamlyLayout` from origin and delete the local task branch (origin deletes the remote branch automatically on merge)
+- **Docs-only exception:** when a commit changes only `.md`, `.txt`, and/or `.svg` files (no code), skip the local build/test verification and the push/PR/CI cycle above entirely — stage and commit locally only; do not push to origin
 
 ## Key References
 
