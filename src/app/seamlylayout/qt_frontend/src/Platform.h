@@ -15,6 +15,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QString>
+#include <QtGlobal>
 
 #ifdef Q_OS_WIN
 #include <windows.h>
@@ -73,6 +74,25 @@ public:
         return false; // non-Windows — no Store apps
 #endif
     } // isStoreApp
+
+    // @brief Detect whether this process is running from within a mounted AppImage.
+    //
+    // Task 17: an AppImage mounts its payload read-only (a FUSE-mounted squashfs), so any
+    // exe-relative writable path (settings, input/output folders, debug logs) that works for
+    // a normal Linux install fails silently inside one — the same problem Task 16 found for
+    // a signed, notarized macOS .app bundle. The AppImage runtime sets the APPIMAGE
+    // environment variable (absolute path to the .AppImage file) in every process it execs
+    // (see https://docs.appimage.org/packaging-guide/environment-variables.html), so checking
+    // for it is enough to tell the two cases apart.
+    //
+    // The check itself is a plain environment-variable read with no OS-specific API, so it is
+    // safe to call on every platform — it is simply always false on Windows/macOS, where the
+    // variable is never set. This also lets unit tests exercise the AppImage fallback path on
+    // any host by setting the variable directly, unlike the compile-time Q_OS_MACOS branches.
+    static bool isAppImage()
+    {
+        return qEnvironmentVariableIsSet("APPIMAGE");
+    } // isAppImage
 
 private:
     // Non-instantiable — all members are static.

@@ -525,12 +525,18 @@ QString PreferencesModel::localFileToUrl(const QString &path)
 // default used on Windows/Linux would fail to create — fall back to the writable
 // AppConfigLocation root there instead (the same "Seamly/SeamlyLayout" tree the settings
 // and preferences files already live under).
+// Task 17: a Linux AppImage mounts its payload read-only too, so the exe-relative default
+// fails there for the same reason — detected at runtime via Platform::isAppImage() (the
+// distinction is only known at runtime, unlike macOS's compile-time bundle case), falling
+// back the same way. A normal (non-AppImage) Linux install keeps the exe-relative default.
 QString PreferencesModel::defaultInputFolderUrl()
 {
 #if defined(Q_OS_MACOS)
     QString dir = appConfigRootPath() + QStringLiteral("/input");
 #else
-    QString dir = QCoreApplication::applicationDirPath() + QStringLiteral("/input");
+    QString dir = Platform::isAppImage()
+        ? appConfigRootPath() + QStringLiteral("/input")
+        : QCoreApplication::applicationDirPath() + QStringLiteral("/input");
 #endif
     return QUrl::fromLocalFile(dir).toString();
 } // defaultInputFolderUrl
@@ -621,7 +627,8 @@ QString PreferencesModel::resolvedSettingsDirectory() const
 // @brief Return resolved input directory for import file dialogs.
 // Priority:
 //   1. preferences inputDirectory — if non-empty.
-//   2. <exeDir>/input — fallback default (AppConfigLocation root on macOS; see Task 16).
+//   2. <exeDir>/input — fallback default (AppConfigLocation root on macOS, or inside a
+//      Linux AppImage; see Task 16 / Task 17).
 // Relative configured paths are resolved against <exeDir>.
 // Ensures the directory exists before returning.
 QString PreferencesModel::resolvedInputDirectory() const
@@ -635,7 +642,12 @@ QString PreferencesModel::resolvedInputDirectory() const
         // root instead of the bundle-relative path used on Windows/Linux.
         dir = appConfigRoot + QStringLiteral("/input");
 #else
-        dir = QCoreApplication::applicationDirPath() + QStringLiteral("/input");
+        // Task 17: a mounted Linux AppImage is read-only for the same reason a macOS bundle
+        // is — detect it at runtime (Platform::isAppImage()) and fall back the same way. A
+        // normal (non-AppImage) Linux install, and Windows, keep the exe-relative default.
+        dir = Platform::isAppImage()
+            ? appConfigRoot + QStringLiteral("/input")
+            : QCoreApplication::applicationDirPath() + QStringLiteral("/input");
 #endif
     } else {
         const QFileInfo fi(dir);
@@ -713,7 +725,8 @@ QString PreferencesModel::preferencesFilePath() const
 // @brief Return resolved output directory for export file dialogs.
 // Priority:
 //   1. preferences layoutDirectory — if non-empty.
-//   2. <exeDir>/output — fallback default (AppConfigLocation root on macOS; see Task 16).
+//   2. <exeDir>/output — fallback default (AppConfigLocation root on macOS, or inside a
+//      Linux AppImage; see Task 16 / Task 17).
 // Ensures the directory exists before returning.
 QString PreferencesModel::resolvedLayoutDirectory() const
 {
@@ -729,7 +742,12 @@ QString PreferencesModel::resolvedLayoutDirectory() const
         // root instead of the bundle-relative path used on Windows/Linux.
         dir = appConfigRoot + QStringLiteral("/output");
 #else
-        dir = QCoreApplication::applicationDirPath() + QStringLiteral("/output");
+        // Task 17: a mounted Linux AppImage is read-only for the same reason a macOS bundle
+        // is — detect it at runtime (Platform::isAppImage()) and fall back the same way. A
+        // normal (non-AppImage) Linux install, and Windows, keep the exe-relative default.
+        dir = Platform::isAppImage()
+            ? appConfigRoot + QStringLiteral("/output")
+            : QCoreApplication::applicationDirPath() + QStringLiteral("/output");
 #endif
     } else {
         // Resolve configured relative paths against AppConfig root so runtime behavior
