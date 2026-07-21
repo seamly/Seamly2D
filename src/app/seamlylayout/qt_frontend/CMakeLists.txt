@@ -186,9 +186,21 @@ set_source_files_properties(qml/Theme.qml PROPERTIES
     QT_QML_SINGLETON_TYPE TRUE
 )
 
+# OUTPUT_DIRECTORY: the QML module URI ("SeamlyLayout") equals the executable
+# target name. By default Qt materialises the module (qmldir, .qmltypes, cached
+# qml) in a directory named after the URI directly under the binary dir —
+# i.e. <build>/SeamlyLayout/. On Windows the executable is SeamlyLayout.exe, so
+# that directory and the binary never clash; but on Linux/macOS the executable
+# is just "SeamlyLayout", which collides with the module directory and makes the
+# final link fail with "cannot open output file SeamlyLayout: Is a directory".
+# Redirecting the module under its own qml_modules/ parent keeps the leaf name
+# "SeamlyLayout" (so `import SeamlyLayout` still resolves via the added import
+# path) while moving it clear of the executable. Runtime QML still loads from the
+# compiled-in resources, so this only affects on-disk build layout.
 qt_add_qml_module(SeamlyLayout
     URI SeamlyLayout
     VERSION 1.0
+    OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/qml_modules/SeamlyLayout"
     QML_FILES
         qml/Main.qml
         qml/Theme.qml
