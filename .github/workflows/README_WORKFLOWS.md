@@ -17,6 +17,21 @@
 
 **Builds**: Linux AppImage, Windows 64-bit/32-bit installers (.exe/.zip), macOS (.dmg/.zip)
 
+### [SeamlyLayout CI](seamlylayout-ci.yml) - SeamlyLayout build + test (Qt 6.10)
+
+**Triggers**: pushes to `develop` / `run-seamlyLayout` that touch `src/app/seamlylayout/**` (or the workflow file), pull requests touching the same paths, and manual dispatch. Path filters keep it from running on unrelated changes.
+
+**Purpose**: builds and unit-tests the SeamlyLayout daughter app (Rust core + Qt 6.10 QML frontend) on `ubuntu-latest`, mirroring what `src/app/seamlylayout/qd.ps1` / `build.ps1` do locally.
+
+**Why it is separate from [CI](ci.yml)**: the main CI pins **Qt 6.8.3** (matching the seamly2d/seamlyme qmake release toolchain), but SeamlyLayout requires **Qt 6.10.1** plus a Rust + CMake/Ninja toolchain. Keeping it in its own workflow makes the two fully independent — a SeamlyLayout failure never blocks the seamly2d/seamlyme jobs, and vice versa.
+
+**What it does**:
+1. Installs Rust (stable) and Qt 6.10 (`jurplel/install-qt-action`, with the `qtwebengine` module the frontend needs), with cargo and Qt caching.
+2. Configures + builds `qt_frontend` via its CMake `debug` preset; the same build drives Corrosion / cxx-qt-cmake, which compiles the `cxxqt_bridge` Rust crate — so one step builds both the Rust bridge and the C++/QML app.
+3. Runs the Qt frontend unit tests (`ctest`, under `xvfb`) and the Rust workspace tests (`cargo test --workspace`).
+
+**Future consolidation**: when seamly2d/seamlyme move to Qt 6.10, merge this job back into `ci.yml` so the whole family shares one Qt toolchain (noted in the workflow's header comment).
+
 ## Code Signing Workflow
 
 ### Integrated Signing Process

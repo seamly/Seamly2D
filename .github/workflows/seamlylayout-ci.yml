@@ -1,0 +1,134 @@
+name: SeamlyLayout CI
+
+# ---------------------------------------------------------------------------
+# Task 20 — push-triggered CI that builds and tests the SeamlyLayout daughter
+# app (Rust core + Qt 6.10 QML frontend), mirroring what `src/app/seamlylayout/
+# qd.ps1` / `build.ps1` do locally, adapted to Linux/CI.
+#
+# WHY A SEPARATE WORKFLOW FROM ci.yml:
+#   The main CI (`ci.yml`) pins Qt 6.8.3 (its `QT_VERSION`) to match what the
+#   GitHub release runners provide for seamly2d/seamlyme (qmake toolchain).
+#   SeamlyLayout requires Qt 6.10.1 (see qt_frontend/CMakeLists.txt:
+#   `find_package(Qt6 6.10.1 REQUIRED ...)`) and a Rust + CMake/Ninja toolchain,
+#   so it cannot share ci.yml's job matrix yet. Keeping it in its own workflow
+#   file guarantees the two are fully independent: a SeamlyLayout failure never
+#   blocks the seamly2d/seamlyme jobs, and vice versa.
+#
+# FUTURE CONSOLIDATION:
+#   When seamly2d and seamlyme move to Qt 6.10 as well, merge this job back into
+#   ci.yml so the whole family shares one Qt toolchain and one workflow. Until
+#   then this file is the single place that carries the Qt 6.10 pin.
+# ---------------------------------------------------------------------------
+
+on:
+  # Primary trigger: run whenever SeamlyLayout sources land on the integration
+  # branches. Push is restricted to those branches (task branches are covered by
+  # the pull_request trigger below) so a same-repo PR does not build twice.
+  push:
+    branches:
+      - develop
+      - run-seamlyLayout
+    paths:
+      - 'src/app/seamlylayout/**'
+      - '.github/workflows/seamlylayout-ci.yml'
+  # Every task branch reaches run-seamlyLayout via a pull request, so this trigger
+  # gives task-branch pushes their build/test coverage without duplicate runs.
+  pull_request:
+    paths:
+      - 'src/app/seamlylayout/**'
+      - '.github/workflows/seamlylayout-ci.yml'
+  workflow_dispatch:
+
+# Only the newest run per ref matters; cancel superseded in-progress runs.
+concurrency:
+  group: seamlylayout-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # SeamlyLayout's required Qt. Deliberately different from ci.yml's 6.8.3 pin
+  # (see the header comment) — do not "align" the two until the whole family
+  # moves to 6.10.
+  QT_VERSION: '6.10.1'
+
+jobs:
+
+  build-and-test:
+    name: 'Linux: Build & test SeamlyLayout (Qt 6.10)'
+    runs-on: ubuntu-latest
+    # Run every step from the SeamlyLayout app root — this is the Cargo workspace
+    # root and the parent of qt_frontend, matching how qd.ps1 is invoked locally.
+    defaults:
+      run:
+        working-directory: src/app/seamlylayout
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      # -------------------------------------------------------------------
+      # Toolchain: Rust (stable) for the core crates + CXX-Qt bridge, and
+      # Qt 6.10 with the QML/Quick + WebEngine modules the frontend needs.
+      # -------------------------------------------------------------------
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo build
+        # Caches the Cargo registry and the workspace target dir, keyed on
+        # Cargo.lock, to keep incremental CI builds fast.
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src/app/seamlylayout
+
+      - name: Install Qt 6.10
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          cache: true
+          # qtwebengine is required by qt_frontend (SvgCanvas.qml's WebEngineView
+          # and main.cpp's QtWebEngineQuick::initialize()); aqtinstall pulls its
+          # dependencies (qtwebchannel, qtpositioning) automatically. Quick,
+          # QuickControls2 and QuickDialogs2 ship inside the default qtdeclarative
+          # archive, so they need not be listed here.
+          modules: qtwebengine
+
+      - name: Install build tools
+        # Ninja drives the CMake presets (qt_frontend/CMakePresets.json).
+        # xvfb provides a virtual display for the Qt GUI unit tests.
+        # The libnss3/xkbcommon/gbm libs satisfy Qt WebEngine's link-time
+        # dependencies; the remaining X/GL deps come from the runner image and
+        # install-qt-action's install-deps.
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build xvfb libnss3 libxkbcommon0 libgbm1
+
+      # -------------------------------------------------------------------
+      # Build the Qt 6.10 QML frontend. The CMake build also drives Corrosion /
+      # cxx-qt-cmake, which runs `cargo build` for the cxxqt_bridge crate — so
+      # this single step builds both the Rust bridge and the C++/QML app, the
+      # same way build.ps1 does on Windows.
+      # -------------------------------------------------------------------
+      - name: Configure and build (Qt frontend + Rust bridge)
+        working-directory: src/app/seamlylayout/qt_frontend
+        run: |
+          cmake --preset debug -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+          cmake --build --preset debug
+
+      # -------------------------------------------------------------------
+      # Run the two unit-test suites Task 20 calls for.
+      # -------------------------------------------------------------------
+      - name: Run Qt frontend tests (ctest)
+        working-directory: src/app/seamlylayout/qt_frontend
+        # The AdjustScene/AdjustController suites force QT_QPA_PLATFORM=offscreen
+        # via CMake; PreferencesModel/SettingsModel link Qt Widgets and want a
+        # display, so run the whole suite under xvfb to cover both.
+        run: xvfb-run -a ctest --preset debug --output-on-failure
+
+      - name: Run Rust workspace tests (cargo)
+        # cxx-qt-build locates Qt through qmake, which install-qt-action put on
+        # PATH; QMAKE is exported as a belt-and-braces fallback.
+        env:
+          QMAKE: qmake
+        run: cargo test --workspace
