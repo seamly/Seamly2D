@@ -67,11 +67,29 @@ All three apps use the same `QStandardPaths::AppConfigLocation` / `QSettings::In
 
 **Not yet verified:** Task 16's code changes were made and build-verified on Windows (seamlyLayout is cross-platform Qt/CMake — the `Q_OS_MACOS` branches compile out on other platforms) but have not been exercised on real macOS hardware or the `macos-15` CI runner (no Mac available in this environment). Fresh-install and upgrade-with-legacy-data verification remains an open item — see `TODO.md` Task 16.
 
-**Not yet unified (Tasks 17–18):**
+### Linux — AppImage (as of Task 17, 2026-07)
+
+All three apps use the same generic `QStandardPaths::AppConfigLocation` / `QSettings::IniFormat` resolution as Windows (Task 15) and macOS (Task 16) — Linux resolves `AppConfigLocation` as `$XDG_CONFIG_HOME/<organizationName>/<applicationName>` (typically `~/.config/<org>/<app>`), so no Linux-specific branching was needed for the base directory move either.
+
+| App | Linux (XDG) location |
+|---|---|
+| seamly2d | `~/.config/Seamly/Seamly2D/qt6_seamly2d.ini` |
+| seamlyme | `~/.config/Seamly/SeamlyMe/qt6_seamlyme.ini` |
+| seamly2d + seamlyme shared "common" settings | `~/.config/Seamly/qt6_common.ini` (Qt's native per-organization `IniFormat`/`UserScope` resolution on Linux) |
+| seamlyLayout | `~/.config/Seamly/SeamlyLayout/{settings,preferences,input,output}/` |
+
+**First-run migration** reuses the same generic `MigrateSeamlySettingsLocation()` / `migrateLegacyOrganizationTree()` logic as Windows/macOS (see above): the legacy path is reconstructed by temporarily swapping `organizationName` to the pre-Task-15 value (`"Seamly2DTeam"` for seamly2d/seamlyme, `"Seamly Systems"` for seamlyLayout) and re-querying `AppConfigLocation`, so it resolves the real legacy XDG folder (`~/.config/Seamly2DTeam`, `~/.config/Seamly Systems`) with no Linux-specific path literals.
+
+**AppImage-specific overrides checked and found not to matter:** the AppImage runtime does not override `$HOME`, `$XDG_CONFIG_HOME`, or `$XDG_DATA_HOME` in the processes it execs, so `QStandardPaths` resolves the same real user-profile location whether the app is installed natively or run from an AppImage. No code in the tree reads `$APPDIR` or implements a "portable mode" that would need reconciling with the above.
+
+**Bundle-relative writable paths (Task 17):** an AppImage mounts its payload read-only (a FUSE-mounted squashfs), the same problem Task 16 found for a signed macOS `.app` bundle. seamlyLayout's default input/output folders and its debug log directory previously fell back to `<exeDir>/input`, `<exeDir>/output` when unconfigured — unlike the macOS case this can't be told apart at compile time, so `Platform::isAppImage()` (`src/app/seamlylayout/qt_frontend/src/Platform.h`) checks for the `APPIMAGE` environment variable the AppImage runtime sets in every process it execs. `PreferencesModel::defaultInputFolderUrl()`/`resolvedInputDirectory()`/`resolvedLayoutDirectory()` and `Logger::init()` now branch on it at runtime to use the writable `AppConfigLocation` root instead; a normal (non-AppImage) Linux install, and Windows, are unaffected. Packaged defaults would ship inside the AppImage's read-only squashfs mount, so — as already noted below — that mount enforces read-only bundled defaults on its own, with no code change needed.
+
+**Not yet verified — seamlyLayout is not currently packaged into the Linux AppImage at all:** `ci.yml`'s `linux` job builds only seamly2d's AppImage (`dist/seamly2d.desktop`); Task 20 (still open in `TODO.md`) adds a separate CI job that *builds and tests* seamlyLayout on Linux/Qt 6.10 but does not add it to the AppImage. The `Platform::isAppImage()` code path above is therefore verified by unit test (`PreferencesModelTests`, which sets the `APPIMAGE` environment variable directly since the check itself is a plain env-var read) and by Windows build/test, but not yet exercised by a real packaged Linux AppImage — mirroring how Task 16's macOS code changes were verified without real macOS hardware.
+
+**Not yet unified (Task 18):**
 
 | Platform | Unified location | Task |
 |---|---|---|
-| Linux AppImage | `~/.config/Seamly`, `~/.local/share/Seamly` (XDG) | Task 17 |
 | Linux Flatpak | `~/.var/app/<app-id>/config/Seamly` inside the **single shared** sandbox | Task 18 |
 
 ## User data files (patterns, measurements)
@@ -108,8 +126,9 @@ All three apps use the same `QStandardPaths::AppConfigLocation` / `QSettings::In
 
 ### Linux — AppImage
 
-- Built in GitHub CI. Settings follow XDG paths; unification is Task 17 (`~/.config/Seamly`, `~/.local/share/Seamly`, first-run migration).
-- AppImage mounts are read-only, which naturally enforces "bundled defaults are read-only"; all writes go to the XDG `Seamly` paths.
+- Built in GitHub CI (`ci.yml`'s `linux` job, `linuxdeploy` + `linuxdeploy-plugin-qt`) — **seamly2d only** today; seamlyLayout is not yet part of that AppImage (Task 20 adds a separate CI job that builds/tests seamlyLayout on Linux/Qt 6.10, but does not package it into the AppImage).
+- Settings unification is Task 16 for seamly2d/seamlyme (built here) and, forward-looking for seamlyLayout, Task 17: XDG paths (`~/.config/Seamly/...`), generic first-run migration from the pre-Task-15 org folders — see the settings-storage section above for the full breakdown.
+- AppImage mounts are read-only, which naturally enforces "bundled defaults are read-only"; all writes go to the XDG `Seamly` paths. seamlyLayout's exe-relative input/output/log fallbacks additionally detect the read-only mount at runtime via `Platform::isAppImage()` (Task 17) rather than relying on the mount alone, since those particular fallbacks create new directories under `<exeDir>` rather than just reading packaged files.
 
 ### Linux — Flatpak (built at Flathub, **not** on GitHub)
 

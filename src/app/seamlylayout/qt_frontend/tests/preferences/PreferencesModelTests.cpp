@@ -6,17 +6,20 @@
 // @brief Qt tests for PreferencesModel viewer-launch helpers and legacy migration.
 //
 // Covers URL-vs-file detection and command-line parsing for openInViewer,
-// the Projector use case (launcher-only viewer with optional arguments), and
+// the Projector use case (launcher-only viewer with optional arguments),
 // legacy folder-name migration (layout-settings → settings, layout-preferences
-// → preferences) performed by PreferencesModel::load().
+// → preferences) performed by PreferencesModel::load(), and (Task 17) the
+// AppImage-aware fallback for the default input/output directories.
 
 #include "PreferencesModel.h"
+#include "Platform.h"
 
 #include <QCoreApplication>
 #include <QDesktopServices>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSignalSpy>
+#include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QUrl>
 #include <QtTest/QtTest>
@@ -30,6 +33,26 @@ public:
 public slots:
     void handle(const QUrl &url) { captured.append(url); }
 };
+
+// @brief RAII helper that sets an environment variable for the scope of a test and
+// guarantees it is unset again when the test function returns.
+//
+// Task 17: PreferencesModelTests exercises Platform::isAppImage() (checks the APPIMAGE
+// environment variable the AppImage runtime sets) by setting the variable directly. A
+// failed QVERIFY/QCOMPARE inside the test body simply `return`s the enclosing function —
+// it does not throw — so a stack-allocated guard's destructor still runs and the variable
+// never leaks into whichever test runs next in the same process.
+class ScopedEnvVar
+{
+public:
+    ScopedEnvVar(const QByteArray &name, const QByteArray &value) : m_name(name)
+    {
+        qputenv(m_name.constData(), value);
+    } // ScopedEnvVar
+    ~ScopedEnvVar() { qunsetenv(m_name.constData()); } // ~ScopedEnvVar
+private:
+    QByteArray m_name;
+}; // class ScopedEnvVar
 
 class PreferencesModelTests : public QObject
 {
@@ -96,6 +119,18 @@ private slots:
     void v2_dxfTeachingFilePath_handlesMultipleDots();
     void v2_dxfTeachingFilePath_emptyInputReturnsEmpty();
     void v2_fileExists_trueForActualTeachingFile();
+
+    // -----------------------------------------------------------------------
+    // Task 17 — Platform::isAppImage() and its AppImage-aware directory fallbacks.
+    // A mounted Linux AppImage is read-only, just like a signed macOS .app bundle
+    // (Task 16), so the default input/output directories must also fall back to the
+    // writable AppConfigLocation root there instead of <exeDir>/input or /output.
+    // -----------------------------------------------------------------------
+    void platform_isAppImage_falseWithoutEnvVar();
+    void platform_isAppImage_trueWithEnvVarSet();
+    void appImage_resolvedInputDirectory_fallsBackToAppConfigLocation();
+    void appImage_resolvedLayoutDirectory_fallsBackToAppConfigLocation();
+    void appImage_defaultInputFolderUrl_fallsBackToAppConfigLocation();
 }; // class PreferencesModelTests
 
 void PreferencesModelTests::isViewerUrl_detectsHttp()
@@ -761,6 +796,87 @@ void PreferencesModelTests::v2_fileExists_trueForActualTeachingFile()
 
     // fileExists must return true — prompt will be shown.
     QVERIFY(PreferencesModel::fileExists(derived));
+}
+
+// ---------------------------------------------------------------------------
+// Task 17 — Platform::isAppImage()
+// ---------------------------------------------------------------------------
+
+// @brief Without APPIMAGE set, isAppImage() must report false — the state for a normal
+// Windows/macOS run and for a non-AppImage Linux install.
+void PreferencesModelTests::platform_isAppImage_falseWithoutEnvVar()
+{
+    qunsetenv("APPIMAGE"); // guard against a value leaked from another process/test run
+    QVERIFY(!Platform::isAppImage());
+}
+
+// @brief With APPIMAGE set — as the AppImage runtime sets it in every process it execs —
+// isAppImage() must report true.
+void PreferencesModelTests::platform_isAppImage_trueWithEnvVarSet()
+{
+    ScopedEnvVar appImageEnv("APPIMAGE", "/tmp/.mount_SeamlyXXXXXX/SeamlyLayout.AppImage");
+    QVERIFY(Platform::isAppImage());
+}
+
+// ---------------------------------------------------------------------------
+// Task 17 — AppImage-aware directory fallbacks
+//
+// Each test independently reconstructs the writable AppConfigLocation root the
+// production code falls back to. appConfigRootPath() is a private implementation
+// detail of PreferencesModel.cpp, but with no legacy "Seamly Systems" data present for
+// this test binary's organization/application name, it reduces to exactly
+// QDir(QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)).absolutePath().
+// ---------------------------------------------------------------------------
+
+// @brief resolvedInputDirectory() with no configured inputDirectory normally falls back to
+// <exeDir>/input; inside a (simulated) mounted AppImage it must fall back to the writable
+// AppConfigLocation root instead, since the AppImage's exeDir is read-only.
+void PreferencesModelTests::appImage_resolvedInputDirectory_fallsBackToAppConfigLocation()
+{
+    const QString appConfigRoot = QDir(
+        QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)).absolutePath();
+    const QString expected = QDir(appConfigRoot).filePath(QStringLiteral("input"));
+
+    ScopedEnvVar appImageEnv("APPIMAGE", "/tmp/.mount_SeamlyXXXXXX/SeamlyLayout.AppImage");
+
+    PreferencesModel m; // m_inputDirectory defaults to empty — the fallback branch runs
+    const QString resolved = m.resolvedInputDirectory();
+
+    QCOMPARE(QFileInfo(resolved).absoluteFilePath(), QFileInfo(expected).absoluteFilePath());
+    QVERIFY(!resolved.startsWith(QCoreApplication::applicationDirPath()));
+}
+
+// @brief resolvedLayoutDirectory() with no configured layoutDirectory must likewise fall
+// back to the AppConfigLocation root (not <exeDir>/output) inside a mounted AppImage.
+void PreferencesModelTests::appImage_resolvedLayoutDirectory_fallsBackToAppConfigLocation()
+{
+    const QString appConfigRoot = QDir(
+        QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)).absolutePath();
+    const QString expected = QDir(appConfigRoot).filePath(QStringLiteral("output"));
+
+    ScopedEnvVar appImageEnv("APPIMAGE", "/tmp/.mount_SeamlyXXXXXX/SeamlyLayout.AppImage");
+
+    PreferencesModel m; // m_layoutDirectory defaults to empty — the fallback branch runs
+    const QString resolved = m.resolvedLayoutDirectory();
+
+    QCOMPARE(QFileInfo(resolved).absoluteFilePath(), QFileInfo(expected).absoluteFilePath());
+    QVERIFY(!resolved.startsWith(QCoreApplication::applicationDirPath()));
+}
+
+// @brief defaultInputFolderUrl() (the FileDialog default before any input directory has
+// ever been configured) must also resolve under the AppConfigLocation root rather than
+// <exeDir>/input when running inside a mounted AppImage.
+void PreferencesModelTests::appImage_defaultInputFolderUrl_fallsBackToAppConfigLocation()
+{
+    const QString appConfigRoot = QDir(
+        QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)).absolutePath();
+    const QString expectedDir = QDir(appConfigRoot).filePath(QStringLiteral("input"));
+
+    ScopedEnvVar appImageEnv("APPIMAGE", "/tmp/.mount_SeamlyXXXXXX/SeamlyLayout.AppImage");
+
+    const QString resolvedDir = QUrl(PreferencesModel::defaultInputFolderUrl()).toLocalFile();
+
+    QCOMPARE(QFileInfo(resolvedDir).absoluteFilePath(), QFileInfo(expectedDir).absoluteFilePath());
 }
 
 QTEST_MAIN(PreferencesModelTests)

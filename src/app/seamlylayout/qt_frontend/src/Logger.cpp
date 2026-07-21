@@ -12,9 +12,12 @@
 // duration of the process.  All writes go to a file named:
 //   {appDir}/output/log_{YYMMDDHHMM}.txt
 // (on macOS, {appDir} is the writable AppConfigLocation root instead of the read-only
-// .app bundle path — see Task 16)
+// .app bundle path — see Task 16; the same substitution happens at runtime inside a
+// mounted Linux AppImage, detected via Platform::isAppImage() — see Task 17)
 
 #include "Logger.h"
+
+#include "Platform.h"
 
 #include <QCoreApplication>
 #include <QDateTime>
@@ -68,9 +71,21 @@ void Logger::init()
     } // if AppConfigLocation unavailable
     logsDir += QStringLiteral("/output");
 #else
-    // Write log files to the output/ directory next to the executable
-    const QString logsDir =
-        QCoreApplication::applicationDirPath() + QStringLiteral("/output");
+    // Task 17: a mounted Linux AppImage is read-only for the same reason a macOS bundle is
+    // — detect it at runtime (Platform::isAppImage(), since unlike macOS this can't be known
+    // at compile time) and fall back to the same writable AppConfigLocation root. A normal
+    // (non-AppImage) Linux install, and Windows, keep writing logs next to the executable.
+    QString logsDir;
+    if (Platform::isAppImage()) {
+        logsDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+        if (logsDir.isEmpty()) {
+            logsDir = QCoreApplication::applicationDirPath();
+        } // if AppConfigLocation unavailable
+        logsDir += QStringLiteral("/output");
+    } else {
+        // Write log files to the output/ directory next to the executable
+        logsDir = QCoreApplication::applicationDirPath() + QStringLiteral("/output");
+    } // if running from a mounted AppImage
 #endif
     QDir().mkpath(logsDir);
     clearOutputDirectory(logsDir);
