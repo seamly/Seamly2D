@@ -133,7 +133,8 @@ public:
     // Falls back to <exeDir>/input when no Input SVG Directory is set in Preferences
     // (Task 16: on macOS this falls back to the writable AppConfigLocation root instead,
     // since a signed .app bundle is read-only; Task 17: same fallback applies at runtime
-    // inside a mounted Linux AppImage, detected via Platform::isAppImage()).
+    // inside a mounted Linux AppImage, detected via Platform::isAppImage(); Task 18: and inside
+    // a Flatpak sandbox whose /app prefix is read-only, detected via Platform::isFlatpak()).
     // Uses QCoreApplication::applicationDirPath() for a reliable absolute path.
     Q_INVOKABLE static QString defaultInputFolderUrl();
 
@@ -165,16 +166,17 @@ public:
 
     // @brief Return the resolved input SVG directory path.
     // Uses `input_directory` when configured; otherwise falls back to
-    // <exeDir>/input (AppConfigLocation root on macOS, or at runtime inside a Linux
-    // AppImage — see Task 16 / Task 17). Relative configured paths are resolved against
-    // AppConfigLocation (never process working directory). Ensures the directory
-    // exists before returning.
+    // <exeDir>/input (AppConfigLocation root on macOS, or at runtime inside a read-only Linux
+    // AppImage mount or Flatpak /app prefix — see Task 16 / 17 / 18). Relative configured paths
+    // are resolved against AppConfigLocation (never process working directory). Ensures the
+    // directory exists before returning.
     Q_INVOKABLE QString resolvedInputDirectory() const;
 
     // @brief Return the resolved layout output directory path.
     // Uses the directory configured in preferences.json (`layout_directory`) when set.
     // Falls back to <exeDir>/output when the configured value is empty (AppConfigLocation
-    // root on macOS, or at runtime inside a Linux AppImage — see Task 16 / Task 17).
+    // root on macOS, or at runtime inside a read-only Linux AppImage mount or Flatpak /app
+    // prefix — see Task 16 / 17 / 18).
     // Relative configured paths are resolved against AppConfigLocation.
     // Ensures the returned directory exists by creating it if needed.
     Q_INVOKABLE QString resolvedLayoutDirectory() const;
