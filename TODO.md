@@ -169,3 +169,52 @@ Add layout export for multisize patterns — `.sm2d` patterns opened with a `.sm
   - [ ] Export the set to a single multi-page PDF, or to individual files of any export type
 - [ ] Tests with a multisize test pattern (need a `.sm2d` + `.smms` fixture); verify grouping/grainline orientation in the exported SVG/PDF
 - [ ] Doxygen briefs + inline comments on all touched functions; document the three products in the repo docs
+
+## Task 30 — Evolve tool-created object serialization: nest created objects as `<item>` children (first tool: trueDarts)
+
+Seamly2D tools that create more than one object today **flatten** every created object into suffix-numbered attributes on the single tool element. The `trueDarts` point is the first tool to convert to a structure where each created object is its own nested `<item>` child element, so tool-created objects become first-class and can be processed uniformly. This is intended as the template for the other multi-object tools later (the general "evolve processing of objects created by tools" goal); do trueDarts first, then generalize.
+
+**Current shape (verified):** the `<point type="trueDarts">` element is the tool; it creates two child `VPointF` geometric objects that live in the `VContainer` but have **no** `<point>` element of their own — they exist only as flattened attributes on the tool element:
+
+```xml
+<point id="115" baseLineP1="113" baseLineP2="114" dartP1="111" dartP2="109" dartP3="112"
+       point1="116" name1="B9"  mx1="0.132292"  my1="0.264583"  showPointName1="true"
+       point2="117" name2="B10" mx2="-1.65728"  my2="0.237873"  showPointName2="true"
+       type="trueDarts"/>
+```
+
+**Target shape (well-formed):**
+
+```xml
+<point id="115" baseLineP1="113" baseLineP2="114" dartP1="111" dartP2="109" dartP3="112" type="trueDarts">
+    <item idobj="116" objtag="point" name="B9"  mx="0.132292" my="0.264583" showPointName="true"/>
+    <item idobj="117" objtag="point" name="B10" mx="-1.65728" my="0.237873" showPointName="true"/>
+</point>
+```
+
+**Evaluation of the change request (2026-07-21) — implementable, with corrections to the draft:**
+
+- **Feasible, but it is a file-format-breaking schema change.** It touches the XSD, the tool's write path, the pattern parser, and — because old files use the flat form — it requires a `VPatternConverter` upgrade step and a schema-version bump (`src/libs/ifc/xml/vpatternconverter.cpp`: `PatternMaxVerStr`/`CurrentSchema`, currently `0.7.4` → new `0.7.5`, plus a new `src/libs/ifc/schema/pattern/v0.7.5.xsd`). Not a one-liner; scope it as a full task.
+- **Fix the malformed XML in the draft:** the draft wrote `<item>idobj="116" ...</item>` (attributes in element *text*). Attributes must live in the tag: `<item idobj="116" .../>` (self-closing), as shown above.
+- **Drop the per-object numeric suffixes inside `<item>`:** since each object is now its own element, use un-suffixed `name`, `mx`, `my`, `showPointName` on each `<item>` (the draft kept `mx1/my1` vs `mx2/my2`, and put `showPointName1` on **both** items — a copy/paste bug).
+- **Keep child ids in the global id-space (most important correctness constraint):** the parser must still register `116`/`117` in the `VContainer` under those ids, because other tools, groups, and history reference the created points (B9/B10) as inputs. `idobj` just relabels the child-of-tool id attribute; it must not move the points out of the shared id space or they stop being referenceable.
+- **`objtag` is a good forward-looking discriminator** for the created object's kind (point/arc/curve/…), which is what lets this generalize to other tools; keep it distinct from the tool's own `type` attribute (hence `objtag`, not `type`).
+- **Delete behavior is already correct** and must be preserved: `VToolDoublePoint` renders each child as a `VSimplePoint` whose right-click → Delete deletes the **whole** tool element with both children; individual children cannot be deleted alone today. The request's "delete 115 via right-clicking 116 or 117" already works — verify it still does after the restructure.
+
+**Key code map (verified):**
+
+- Write: `VToolDoublePoint::SaveOptions` (`src/libs/vtools/tools/drawTools/toolpoint/tooldoublepoint/vtooldoublepoint.cpp:382`) writes `point1/point2` + per-point `name/mx/my/showPointName`; `VToolTrueDarts::SaveOptions` (`.../vtooltruedarts.cpp:416`) adds `baseLineP1/P2`, `dartP1/P2/P3`, `type`.
+- Read: `VPattern::ParseToolTrueDarts` (`src/app/seamly2d/xml/vpattern.cpp:2340`).
+- Per-child save paths that also write these attributes: label move (`MoveDoubleLabel`) and show-name (`ShowDoublePointName`) undo commands invoke `SaveOptions` with the child obj (the `p1id`/`p2id` branches) — they must target the matching `<item>` element after the change.
+- Attribute-name constants: `src/libs/ifc/ifcdef.*` (`AttrName1`, `AttrMx1`, `AttrPoint1`, …) — add `AttrIdObj`, `AttrObjTag`.
+- Other consumers of the flat attrs to review: history dialog (`src/app/seamly2d/dialogs/history_dialog.cpp`), groups widget (`groups_widget.cpp`), tool-options property browser (`core/vtooloptionspropertybrowser.cpp`), and `src/test/Seamly2DTest/tst_findpoint.*`.
+
+- [ ] Decide/record the schema: nested `<item idobj objtag name mx my showPointName/>` under the tool element; well-formed attributes; un-suffixed per-item names; children stay in the global id-space and remain referenceable
+- [ ] Add `AttrIdObj` / `AttrObjTag` attribute constants in `src/libs/ifc/ifcdef.*`
+- [ ] Update the write path (`VToolDoublePoint::SaveOptions` + `VToolTrueDarts::SaveOptions`) to emit one `<item>` per created object; update the per-child save paths (`MoveDoubleLabel`, `ShowDoublePointName`) to write into the correct `<item>`
+- [ ] Update the read path (`VPattern::ParseToolTrueDarts`) to read the `<item>` children, registering each under its `idobj` in the `VContainer`
+- [ ] Add `v0.7.5.xsd` allowing `<item>` children under the trueDarts point; add a `VPatternConverter` step that rewrites old flat trueDarts elements into the nested form; bump `PatternMaxVerStr`/`CurrentSchema` (0.7.4 → 0.7.5)
+- [ ] Preserve delete behavior: right-click either created object deletes the whole tool element with its children; children not individually deletable (confirm `VToolDoublePoint` path unchanged)
+- [ ] Update other consumers of the flat attributes: history dialog, groups widget, tool-options property browser, `tst_findpoint`
+- [ ] Tests: round-trip save/load of a trueDarts pattern in the new form; a converter test upgrading a real ≤0.7.4 fixture (e.g. `src/test/CollectionTest/share/seamtest/seamtest1.sm2d`) to 0.7.5; verify the created points remain referenceable by other tools after load
+- [ ] Doxygen briefs + inline comments on all touched functions; document the new tool-object `<item>` convention in the repo docs and note it is the template for the other multi-object tools
