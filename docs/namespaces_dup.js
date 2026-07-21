@@ -23,15 +23,6 @@ var namespaces_dup =
     [ "anonymous_namespace{preferencespatternpage.cpp}", "d1/dbe/namespaceanonymous__namespace_02preferencespatternpage_8cpp_03.html", [
       [ "initAllStringsComboBox", "d1/dbe/namespaceanonymous__namespace_02preferencespatternpage_8cpp_03.html#a97383a8b46e2afedbc957a5c56b7522f", null ]
     ] ],
-    [ "anonymous_namespace{tst_svgcomponenttags.cpp}", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html", [
-      [ "groupsOfType", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#a2d7b69f1bd0c5ecc33e37213be6dcc55", null ],
-      [ "makePath", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#aad667cd3fa73c258b622b363cfdb6489", null ],
-      [ "makeTestPiece", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#adc538687a0a778fba80e6b4d386e3165", null ],
-      [ "squarePoints", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#a887dc0def7310a2058744fccc20a44fc", null ]
-    ] ],
-    [ "anonymous_namespace{tst_svgtextitem.cpp}", "db/da3/namespaceanonymous__namespace_02tst__svgtextitem_8cpp_03.html", [
-      [ "renderItemToSvg", "db/da3/namespaceanonymous__namespace_02tst__svgtextitem_8cpp_03.html#aa3743175c7e5de4200845ac240a757c5", null ]
-    ] ],
     [ "anonymous_namespace{vabstractpattern.cpp}", "d0/d42/namespaceanonymous__namespace_02vabstractpattern_8cpp_03.html", [
       [ "ReadExpressionAttribute", "d0/d42/namespaceanonymous__namespace_02vabstractpattern_8cpp_03.html#a03b1fb578fba1ecb51300ab233820199", null ]
     ] ],
@@ -260,7 +251,6 @@ var namespaces_dup =
       [ "settingMultiplier", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#a438399a0cf9605103f6b11d324b91f2b", null ],
       [ "settingPathsLayout", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#aeeae12a9e716a36285066894137cee19", null ],
       [ "settingPathsPattern", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#abd078475c23bc1ef0d914344990ee54e", null ],
-      [ "settingPathsSeamlyLayoutApp", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#af5d4d7f733ae18fa76ed7f61f1744551", null ],
       [ "settingPatternGraphicalOutput", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#ad09214ea81d66f68b5137cc6c98545aa", null ],
       [ "settingStripOptimization", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#a0aab5ed79c0e768799ffca56521c62a6", null ],
       [ "settingTextAsPaths", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#a05f57745d9f819090b29f07e2569fd9e", null ],
@@ -280,13 +270,6 @@ var namespaces_dup =
     ] ],
     [ "anonymous_namespace{vtoolmove.cpp}", "dd/dbe/namespaceanonymous__namespace_02vtoolmove_8cpp_03.html", [
       [ "findRotationOrigin", "dd/dbe/namespaceanonymous__namespace_02vtoolmove_8cpp_03.html#a2f7cb2fa85efab3c7cc6db3569f5bd15", null ]
-    ] ],
-    [ "PieceItemData", "dd/d2f/namespacePieceItemData.html", [
-      [ "Key", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52a", [
-        [ "ObjectName", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52aa7941596f64d95ae0eb0ce7799abfc1fa", null ],
-        [ "ItemType", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52aa789d47dbe06374b0c99c1513bc151cdb", null ],
-        [ "PieceLetter", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52aa3cc1357d3e7fb46ec8eaac232f6e6364", null ]
-      ] ]
     ] ],
     [ "qmu", "da/d92/namespaceqmu.html", "da/d92/namespaceqmu" ],
     [ "QT_WARNING_POP", "dd/db0/namespaceQT__WARNING__POP.html", [

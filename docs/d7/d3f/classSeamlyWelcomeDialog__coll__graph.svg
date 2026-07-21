@@ -110,9 +110,9 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="117" y="-398.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ SetPathPattern()</text>
 <text text-anchor="start" x="117" y="-387.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getLayoutPath()</text>
 <text text-anchor="start" x="117" y="-376.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ SetPathLayout()</text>
-<text text-anchor="start" x="117" y="-365.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getSeamlyLayoutAppPath()</text>
-<text text-anchor="start" x="117" y="-354.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setSeamlyLayoutAppPath()</text>
-<text text-anchor="start" x="117" y="-343.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 60 more...</text>
+<text text-anchor="start" x="117" y="-365.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ GetGraphicalOutput()</text>
+<text text-anchor="start" x="117" y="-354.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ SetGraphicalOutput()</text>
+<text text-anchor="start" x="117" y="-343.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 58 more...</text>
 <text text-anchor="start" x="117" y="-332.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getDefaultPatternPath()</text>
 <text text-anchor="start" x="117" y="-321.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getDefaultLayoutPath()</text>
 <text text-anchor="start" x="117" y="-310.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ GetDefLayoutShift()</text>
