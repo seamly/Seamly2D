@@ -1,13 +1,22 @@
+Here's the status at the end of the previous session:
 
-Here's what happened this session (2026-07-17):
+## Task 20 — COMPLETE ✅ (merged 2026-07-21)
 
-**Task 8 — Verification is complete; the Tagged SVG Handoff plan is fully done.** `TODO.md` is empty and all tasks live in `COMPLETED.md`.
+PR [#15](https://github.com/seamly/Seamly2D/pull/15) merged into `run-seamlyLayout` (merge commit `1b18a76a7`). The new **SeamlyLayout CI** workflow is live and verified by its own green run.
 
-**What was done:**
+**What shipped:**
 
-1. **Build** — `vlayout`, `vformat`, `seamly2d` (plus everything else) built clean on branch `run-seamlyLayout` with qmake + jom in `build/` (gitignored). Toolchain actually on this machine: Qt **6.10.1** msvc2022_64 (`C:\Qt\6.10.1`) and MSVC from **VS 18 Community** (`vcvars64.bat`) — not the Qt 6.8.3 / VS 2022 named in CLAUDE.md; neither of those is installed.
-2. **Layout Mode handoff verified in the real GUI** — launched the built `seamly2d.exe` with the richmond test pattern, sent Shift+L: `<basename>.pieces.svg` was written beside the pattern and SeamlyLayout (dev build at `src\app\seamlylayout\qt_frontend\build\Debug\SeamlyLayout.exe`) launched detached with the SVG path argument.
-3. **Exports verified via CLI** (`--exportOnlyDetails --mfile C:\Users\susan\seamlyLayout\input\2025-06-08-Sue.smis`): tagged SVG with/without `--text2paths`, PDF, PNG, DXF flat + AAMA — all pass structural checks; geometry is byte-identical to the pre-change baseline (only label glyph outlines differ, a font-rendering artifact of the older installed baseline build).
-4. **Contract documented** — `status-docs/svg-data-attributes.md`, mirrored to `src/app/seamlylayout/docs/status-docs/svg-data-attributes.md`.
+* **New workflow** `.github/workflows/seamlylayout-ci.yml` — a standalone, path-filtered GitHub Actions workflow that builds seamlyLayout (Rust core + Qt 6.10 QML frontend) and runs its tests on `ubuntu-latest` (Rust toolchain + `install-qt-action` Qt 6.10.1, `cmake --preset debug`, `ctest` under `xvfb`, `cargo test --workspace`). Kept **separate from `ci.yml`** (Qt 6.8.3) so the two toolchains stay independent.
+* **Docs** — "Continuous integration (CI)" section in `README-BUILDS.md`, "SeamlyLayout CI" subsection in `README_WORKFLOWS.md`.
+* **Task tracking** — Task 20 moved from `TODO_MIGRATE.md` to `COMPLETED.md`.
 
-**Next steps:** none pending from the plan. Possible follow-ons noted in the plan: per-notch group splitting, physical removal of the built-in layout UI once SeamlyLayout is fully adopted.
+**Two cross-platform build bugs the new CI caught and fixed** (latent because the app had only ever been built on Windows):
+
+1. **WebEngine deps** — `install-qt-action` was given only `qtwebengine`; aqtinstall does **not** auto-resolve a module's Qt deps, so `find_package(Qt6 … WebEngineQuick)` failed at configure (`Qt6WebChannel` missing). Fix: `modules: qtwebengine qtwebchannel qtpositioning`.
+2. **QML module ↔ executable name collision** — the `qt_add_qml_module` URI equals the executable target name (`SeamlyLayout`), so Qt creates a `SeamlyLayout/` directory next to the binary. Windows dodges it via the `.exe` suffix; on Linux/macOS the binary is plain `SeamlyLayout`, so the final link failed with *"cannot open output file SeamlyLayout: Is a directory."* Fix: gave the module a distinct `OUTPUT_DIRECTORY` (`qml_modules/SeamlyLayout`) in `qt_frontend/CMakeLists.txt`, keeping the leaf name so `import SeamlyLayout` still resolves; runtime QML still loads from compiled-in resources. Verified with a local Windows debug build.
+
+**CI result:** all PR checks green — SeamlyLayout CI (build + ctest + cargo test), plus the full `ci.yml` matrix (Windows/macOS/Linux builds, unit tests, AppImage, CodeQL). One transient `apt-get` flake in the AppImage job cleared on retry.
+
+**Repo state:** local `run-seamlyLayout` synced to origin (`1b18a76a7`); local + remote `task20-seamlylayout-ci` branches deleted.
+
+**Heads-up for future cross-platform CI work:** when macOS CI is added for seamlyLayout, the QML-module-dir collision (#2 above) would bite there too — it's already fixed in `CMakeLists.txt`, but keep it in mind if the module/target naming ever changes. Same for any Qt-module dep additions: list transitive deps explicitly for `install-qt-action`.
