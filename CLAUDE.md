@@ -46,15 +46,19 @@ Two toolchains are in use — do not treat the difference as an error:
 ## Task Tracking
 
 - `PROJECT_PLAN.md` — the current approved implementation plan
-- `TODO.md` — tasks with checkbox subtasks; check off subtasks as they are accomplished
-- `COMPLETED.md` — when all subtasks of a task are complete, move the task here from `TODO.md`
-- **Pre-task branch setup:** before implementing a task from `TODO.md`, always:
+- Task lists are split by area — pick the file matching the task:
+  - `TODO_MIGRATE.md` — migrating the SeamlyLayout app into the Seamly2D structure (SeamlyMe and SeamlyLayout callable from within Seamly2D; all three apps distributed together for installation)
+  - `TODO_SEAMLY2D.md` — tasks that add features to the Seamly2D app
+  - `TODO_SEAMLYLAYOUT.md` — tasks that add features to the SeamlyLayout app
+- Each `TODO_*.md` file holds tasks with checkbox subtasks; check off subtasks as they are accomplished
+- `COMPLETED.md` — when all subtasks of a task are complete, move the task here from its `TODO_*.md` file
+- **Pre-task branch setup:** before implementing a task from any `TODO_*.md` file, always:
   1. update local `develop` from `origin` (`git fetch origin` + fast-forward `develop`)
   2. update local `run-seamlyLayout` from local `develop` (merge/fast-forward `develop` into it)
   3. create a new branch from `run-seamlyLayout` for the task, and do the work there
-- **Post-task workflow:** after implementing a task from `TODO.md`:
+- **Post-task workflow:** after implementing a task from a `TODO_*.md` file:
   1. write unit tests where the task adds or changes code, and run them; run a local check build (`scripts/sd.ps1`) and verify the change works
-  2. update task tracking in the same change: check off subtasks in `TODO.md`; move fully completed tasks to `COMPLETED.md`
+  2. update task tracking in the same change: check off subtasks in the task's `TODO_*.md` file; move fully completed tasks to `COMPLETED.md`
   3. stage and commit on the task branch
   4. push the task branch to origin and create a pull request targeting `run-seamlyLayout` — always in origin `seamly/Seamly2D` (the gh default repo is set to it), NEVER in the public upstream `FashionFreedom/Seamly2D`
   5. watch the PR's CI checks (`gh pr checks <pr> --watch`); when all checks pass, merge the PR; if any check fails, do NOT merge

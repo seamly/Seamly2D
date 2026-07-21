@@ -8,9 +8,9 @@ Attributes: `data-type` (`pattern | piece | seamline | cutline | internal_path |
 
 ## Task tracking
 
-- `TODO.md` at the repo root holds one task per step (Steps 1–7 plus setup/verification), each with checkbox subtasks.
-- Each subtask is checked off in `TODO.md` as it is accomplished.
-- When all subtasks of a task are complete, the task moves from `TODO.md` to `COMPLETED.md` at the repo root.
+- The repo-root task lists are split by area — `TODO_MIGRATE.md` (migrating SeamlyLayout into the Seamly2D structure), `TODO_SEAMLY2D.md` (Seamly2D app features), and `TODO_SEAMLYLAYOUT.md` (SeamlyLayout app features) — each holding tasks with checkbox subtasks.
+- Each subtask is checked off in its `TODO_*.md` file as it is accomplished.
+- When all subtasks of a task are complete, the task moves from its `TODO_*.md` file to `COMPLETED.md` at the repo root.
 
 ## Project rules (apply to all work in this plan)
 

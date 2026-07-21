@@ -1,6 +1,6 @@
 # COMPLETED — Tagged SVG Handoff to SeamlyLayout
 
-Tasks moved here from `TODO.md` when all their subtasks are complete.
+Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
 ## Task 15 — Unify app settings/preferences directories under one `Seamly` folder (Windows) (2026-07-20)
 

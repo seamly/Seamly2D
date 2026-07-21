@@ -1,6 +1,6 @@
 # Seamly Builds — Knowledge Base
 
-Pertinent knowledge about the Seamly family builds: why decisions were made, what is built, where things install and store data, and when/where each build runs. Update this file whenever build knowledge changes — it is the durable record behind the task entries in `TODO.md` / `COMPLETED.md`.
+Pertinent knowledge about the Seamly family builds: why decisions were made, what is built, where things install and store data, and when/where each build runs. Update this file whenever build knowledge changes — it is the durable record behind the task entries in the `TODO_*.md` files / `COMPLETED.md`.
 
 Apps covered:
 
@@ -65,7 +65,7 @@ All three apps use the same `QStandardPaths::AppConfigLocation` / `QSettings::In
 
 **Bundle identifier:** seamlyLayout's CMake build previously set no `MACOSX_BUNDLE_GUI_IDENTIFIER` at all (an auto-generated placeholder); Task 16 added `io.seamly.SeamlyLayout` (`src/app/seamlylayout/qt_frontend/CMakeLists.txt`) so the bundle is well-formed for signing/notarization. This is unrelated to settings storage (see above) — seamly2d/seamlyme's existing `org.seamly2dproject.@EXECUTABLE@` identifiers (`dist/macx/*/Info.plist`) were left as-is for the same reason.
 
-**Not yet verified:** Task 16's code changes were made and build-verified on Windows (seamlyLayout is cross-platform Qt/CMake — the `Q_OS_MACOS` branches compile out on other platforms) but have not been exercised on real macOS hardware or the `macos-15` CI runner (no Mac available in this environment). Fresh-install and upgrade-with-legacy-data verification remains an open item — see `TODO.md` Task 16.
+**Not yet verified:** Task 16's code changes were made and build-verified on Windows (seamlyLayout is cross-platform Qt/CMake — the `Q_OS_MACOS` branches compile out on other platforms) but have not been exercised on real macOS hardware or the `macos-15` CI runner (no Mac available in this environment). Fresh-install and upgrade-with-legacy-data verification remains an open item — see `TODO_MIGRATE.md` Task 16.
 
 ### Linux — AppImage (as of Task 17, 2026-07)
 
@@ -84,7 +84,7 @@ All three apps use the same generic `QStandardPaths::AppConfigLocation` / `QSett
 
 **Bundle-relative writable paths (Task 17):** an AppImage mounts its payload read-only (a FUSE-mounted squashfs), the same problem Task 16 found for a signed macOS `.app` bundle. seamlyLayout's default input/output folders and its debug log directory previously fell back to `<exeDir>/input`, `<exeDir>/output` when unconfigured — unlike the macOS case this can't be told apart at compile time, so `Platform::isAppImage()` (`src/app/seamlylayout/qt_frontend/src/Platform.h`) checks for the `APPIMAGE` environment variable the AppImage runtime sets in every process it execs. `PreferencesModel::defaultInputFolderUrl()`/`resolvedInputDirectory()`/`resolvedLayoutDirectory()` and `Logger::init()` now branch on it at runtime to use the writable `AppConfigLocation` root instead; a normal (non-AppImage) Linux install, and Windows, are unaffected. Packaged defaults would ship inside the AppImage's read-only squashfs mount, so — as already noted below — that mount enforces read-only bundled defaults on its own, with no code change needed.
 
-**Not yet verified — seamlyLayout is not currently packaged into the Linux AppImage at all:** `ci.yml`'s `linux` job builds only seamly2d's AppImage (`dist/seamly2d.desktop`); Task 20 (still open in `TODO.md`) adds a separate CI job that *builds and tests* seamlyLayout on Linux/Qt 6.10 but does not add it to the AppImage. The `Platform::isAppImage()` code path above is therefore verified by unit test (`PreferencesModelTests`, which sets the `APPIMAGE` environment variable directly since the check itself is a plain env-var read) and by Windows build/test, but not yet exercised by a real packaged Linux AppImage — mirroring how Task 16's macOS code changes were verified without real macOS hardware.
+**Not yet verified — seamlyLayout is not currently packaged into the Linux AppImage at all:** `ci.yml`'s `linux` job builds only seamly2d's AppImage (`dist/seamly2d.desktop`); Task 20 (still open in `TODO_MIGRATE.md`) adds a separate CI job that *builds and tests* seamlyLayout on Linux/Qt 6.10 but does not add it to the AppImage. The `Platform::isAppImage()` code path above is therefore verified by unit test (`PreferencesModelTests`, which sets the `APPIMAGE` environment variable directly since the check itself is a plain env-var read) and by Windows build/test, but not yet exercised by a real packaged Linux AppImage — mirroring how Task 16's macOS code changes were verified without real macOS hardware.
 
 ### Linux — Flatpak (as of Task 18, 2026-07)
 
@@ -159,7 +159,7 @@ A Flatpak sandbox exports `XDG_CONFIG_HOME=~/.var/app/<app-id>/config` and `XDG_
 
 ## Related records
 
-- `TODO.md` — Tasks 13–18 hold the current actionable subtasks for everything marked "planned" above; completed tasks move to `COMPLETED.md`.
+- `TODO_MIGRATE.md` — Tasks 13–18 hold the current actionable subtasks for everything marked "planned" above; completed tasks move to `COMPLETED.md`.
 - `PROJECT_PLAN.md` — the approved implementation plan.
 - `.github/workflows/README_WORKFLOWS.md` — CI workflow details.
 - `src/app/seamlylayout/CHANGELOG.md` — history of seamlyLayout's settings-directory moves (e.g. `<exeDir>/settings/` → AppConfigLocation).
