@@ -61,6 +61,7 @@
 #include "../ifc/exception/vexceptionwrongid.h"
 #include "../vmisc/def.h"
 #include "../vmisc/logging.h"
+#include "../vmisc/seamly_family_paths.h"
 #include "../vmisc/vmath.h"
 #include "../qmuparser/qmuparsererror.h"
 #include "../vwidgets/vmaingraphicsview.h"
@@ -470,10 +471,15 @@ bool Application2D::notify(QObject *receiver, QEvent *event)
  * @brief seamlyLayoutFilePath locates the SeamlyLayout executable.
  *
  * Lookup order: (1) the user-configured path from the application settings,
- * (2) the application directory — the standard install location, mirroring
- * how the SeamlyMe executable is found — and (3) the SeamlyLayout development
- * build inside the source tree (Debug build of the Qt frontend), so that
- * Layout Mode works during development without any configuration.
+ * (2) the install-directory lookup via SeamlyFamilyPaths::locateSeamlyLayout()
+ * — the executable directly beside seamly2d (the flat layout used where all
+ * apps share one Qt runtime, e.g. the Linux Flatpak's /app/bin) or in the
+ * "SeamlyLayout" subdirectory the Windows MSI installer uses (Task 13; there
+ * SeamlyLayout carries its own Qt runtime, which cannot share a flat directory
+ * with the parent apps' differently-versioned Qt DLLs) — and (3) the
+ * SeamlyLayout development build inside the source tree (Debug build of the
+ * Qt frontend), so that Layout Mode works during development without any
+ * configuration.
  *
  * @return absolute path of the SeamlyLayout executable, or an empty string when it cannot be found.
  */
@@ -486,16 +492,13 @@ QString Application2D::seamlyLayoutFilePath()
         return QFileInfo(configuredPath).absoluteFilePath();
     }
 
-    // Default: the SeamlyLayout executable installed next to the Seamly2D executable.
-    const QString seamlyLayout = QStringLiteral("SeamlyLayout");
-#ifdef Q_OS_WIN
-    const QFileInfo appFile(QCoreApplication::applicationDirPath() + "/" + seamlyLayout + ".exe");
-#else
-    const QFileInfo appFile(QCoreApplication::applicationDirPath() + "/" + seamlyLayout);
-#endif
-    if (appFile.exists())
+    // Default: the standard install locations relative to the Seamly2D
+    // executable — flat beside it, or in the MSI's "SeamlyLayout" subdirectory.
+    const QString installedPath =
+        SeamlyFamilyPaths::locateSeamlyLayout(QCoreApplication::applicationDirPath());
+    if (!installedPath.isEmpty())
     {
-        return appFile.absoluteFilePath();
+        return installedPath;
     }
 
     // Development fallback: the Debug build of the SeamlyLayout Qt frontend in
