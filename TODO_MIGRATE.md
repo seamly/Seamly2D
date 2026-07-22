@@ -88,3 +88,19 @@ Extend the existing console export mode (`--basename` in `src/app/seamly2d/core/
 - [ ] Make the seamly2d invocation wait for seamlyLayout (unlike the GUI's `QProcess::startDetached`), propagate its exit status and stderr so scripted callers see failures
 - [ ] Tests: seamly2d CLI option parsing (extend `tst_vcommandline`), seamlyLayout headless-export tests (Rust/Qt side), and an end-to-end check with the richmond test pattern
 - [ ] Document the workflow (command-line examples) in the repo docs / `--help` output
+
+## Task 30 — Upgrade SeamlyLayout to build with Qt 6.11 (match the Seamly2D parent apps)
+
+SeamlyLayout currently builds against **Qt 6.10.1** while seamly2d/seamlyme build against **Qt 6.11.1** (the parent Qt was bumped to 6.11.1 to match `ci.yml`; see Task 13). Move SeamlyLayout to the same **Qt 6.11.1 `msvc2022_64`** release so the whole family shares one Qt version. This unblocks a real simplification: Task 13's MSI ships **two** separate Qt runtimes today — a shared one for the parents in `…\Seamly2D\` and SeamlyLayout's own copy in `…\Seamly2D\SeamlyLayout\` — precisely because the two Qt releases have identical DLL names that can't co-exist in a flat directory (`packaging/windows/seamly-family.wxs`). Unifying on 6.11.1 lets all three apps share a single Qt runtime.
+
+**Prerequisite / dependency check:** confirm the CXX-Qt bridge (`crates/cxxqt_bridge`) and the QtWebEngine-based canvas support Qt 6.11.1 before committing to the bump.
+
+- [ ] Verify toolchain compatibility: confirm CXX-Qt / cxx-qt-build and the Corrosion CMake integration support Qt 6.11.1, and that QtWebEngine 6.11 is available in the installed kit (the `SvgCanvas.qml` WebEngine dependency)
+- [ ] Bump the Qt pin in `src/app/seamlylayout/qt_frontend/CMakeLists.txt` (`find_package(Qt6 6.10.1 REQUIRED ...)` → `6.11.1`) and any CMake preset `CMAKE_PREFIX_PATH` (`qt_frontend/build_debug.bat`, presets)
+- [ ] Update the build scripts to point at the Qt 6.11.1 `msvc2022_64` kit: `src/app/seamlylayout/qd.ps1`, `build.ps1` (`$QtPath = C:/Qt/6.10.1/...`), and the debug batch build
+- [ ] Bump the versioned QML imports across `src/app/seamlylayout/qt_frontend/qml/*.qml` (`import QtQuick 6.10`, `QtQuick.Controls`, `QtQuick.Dialogs`, `QtQuick.Layouts`, `import QtWebEngine 6.10`) to the 6.11 module versions
+- [ ] Update the packaging scripts for the new Qt path/version: `packaging/windows/build_installer.ps1` (`$QtBin`), `packaging/windows/SeamlyLayout.iss`, `packaging/macos/build_dmg.sh` (`QT_BIN`), and `docs/packaging-docs/INSTALLER_NOTES.md`
+- [ ] Update SeamlyLayout's CI: bump `.github/workflows/seamlylayout-ci.yml` `QT_VERSION` to `6.11.1`, and evaluate merging that job back into `ci.yml` now that the Qt pin matches the parents (the standalone job's header notes it exists only to carry the 6.10 pin)
+- [ ] Update the Windows MSI to ship a single shared Qt 6.11.1 runtime for all three apps: install one Qt kit in `windows-msi.yml` instead of two, collapse the separate `…\SeamlyLayout\` Qt deployment in `packaging/windows/seamly-family.wxs`, adjust `smsi.ps1`, and re-check `SeamlyFamilyPaths::locateSeamlyLayout()` (the subfolder split may no longer be required)
+- [ ] Update docs referencing "Qt 6.10": `src/app/seamlylayout/CLAUDE.md`, `README.md`, `.github/copilot-instructions.md`, `rules/architecture.mdc`, `docs/cxxqt-docs/CXXQT_BRIDGE.md`, and `.github/README-BUILDS.md`; note the root `CLAUDE.md` build-notes section if the local layout kit changes
+- [ ] Verify: build and run SeamlyLayout on Qt 6.11.1 locally; run the Qt frontend ctest suites and `cargo test --workspace`; confirm the seamly2d → seamlyLayout handoff still launches and renders; rebuild the MSI and confirm the single-shared-runtime layout installs and all three apps launch
