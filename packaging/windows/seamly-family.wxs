@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ ******************************************************************************
+ **  @file   seamly-family.wxs
+ **  @author slspencer
+ **  @date   July 22, 2026
+ **
+ **  @brief
+ **  WiX (v5/v6) authoring for the Windows MSI installer of the Seamly app
+ **  family: seamly2d (pattern drafting), seamlyme (measurements) and
+ **  SeamlyLayout (pattern layout) — Task 13.
+ **
+ **  Build with scripts\smsi.ps1 (locally) or .github\workflows\windows-msi.yml
+ **  (CI). One MSI is produced per architecture: `wix build -arch x64` and
+ **  `wix build -arch arm64`, from this same source.
+ **
+ **  INSTALL LAYOUT
+ **    [ProgramFiles64Folder]\Seamly2D\          seamly2d.exe, seamlyme.exe and
+ **                                              their shared Qt runtime
+ **                                              (windeployqt output + MSVC CRT)
+ **    [ProgramFiles64Folder]\Seamly2D\SeamlyLayout\
+ **                                              SeamlyLayout.exe with its OWN
+ **                                              Qt runtime. SeamlyLayout is
+ **                                              built against a different Qt
+ **                                              release than the parent apps,
+ **                                              and the Qt DLL file names are
+ **                                              identical across releases, so
+ **                                              the runtimes must not share a
+ **                                              directory. seamly2d finds the
+ **                                              subdirectory executable via
+ **                                              SeamlyFamilyPaths::locateSeamlyLayout()
+ **                                              (src/libs/vmisc/seamly_family_paths.cpp).
+ **
+ **  USER DATA IS NEVER TOUCHED
+ **    Per-user settings live under %LOCALAPPDATA%\Seamly\<app>
+ **    (AppData\Local\Seamly\Seamly2D, ...\SeamlyMe, ...\SeamlyLayout — the
+ **    Task 15 unified locations) plus the shared
+ **    %APPDATA%\Seamly\qt6_common.ini; pattern/measurement user data defaults
+ **    to C:\Users\<user>\seamly2d. The installer neither creates nor removes
+ **    any of these: the apps create them on first run (including the
+ **    legacy-location migration), and uninstall leaves them in place, so an
+ **    uninstall/reinstall or upgrade never loses user data.
+ **
+ **  PREPROCESSOR VARIABLES (passed by smsi.ps1 via -d)
+ **    ProductVersion       numeric MSI version x.y.z (see smsi.ps1 for the
+ **                         mapping from the project version — MSI limits the
+ **                         major field to 255, so the YYYY.M.D.HHMM project
+ **                         scheme cannot be used directly)
+ **    DisplayVersion       full project version string (YYYY.M.D.HHMM)
+ **    RepoRoot             absolute path of the repository root
+ **    ParentStagingDir     staged seamly2d+seamlyme runtime tree (no exes)
+ **    ExeStagingDir        staged directory holding the app executables
+ **    IncludeSeamlyLayout  defined (=1) when SeamlyLayout is part of this MSI;
+ **                         undefined for the arm64 package until SeamlyLayout
+ **                         has an arm64 build (see .github/README-BUILDS.md)
+ **    LayoutStagingDir     staged SeamlyLayout runtime tree (no exe); only
+ **                         required when IncludeSeamlyLayout is defined
+ **
+ **  UPGRADES
+ **    The UpgradeCode below is FIXED for the lifetime of the product family
+ **    and shared by the x64 and arm64 packages: MajorUpgrade removes any older
+ **    install (either architecture) before the new one lands, so newer
+ **    versions upgrade in place. Never change the UpgradeCode; the per-build
+ **    ProductCode is auto-generated on every build.
+ **
+ **  @copyright
+ **  This source code is part of the Seamly2D project, a pattern making
+ **  program, whose allow create and modeling patterns of clothing.
+ **  Copyright (C) 2026 Seamly2D Project
+ **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
+ **
+ **  Seamly2D is free software: you can redistribute it and/or modify
+ **  it under the terms of the GNU General Public License as published by
+ **  the Free Software Foundation, either version 3 of the License, or
+ **  (at your option) any later version.
+ **
+ **  Seamly2D is distributed in the hope that it will be useful,
+ **  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ **  GNU General Public License for more details.
+ **
+ **  You should have received a copy of the GNU General Public License
+ **  along with Seamly2D.  If not, see <http://www.gnu.org/licenses/>.
+ ******************************************************************************
+-->
+
+<!-- Fail fast with a clear message when the build script forgot a define. -->
+<?ifndef var.ProductVersion ?>
+  <?error ProductVersion is not defined - build via scripts\smsi.ps1, which passes -d ProductVersion=x.y.z ?>
+<?endif?>
+<?ifndef var.DisplayVersion ?>
+  <?error DisplayVersion is not defined - build via scripts\smsi.ps1, which passes -d DisplayVersion=YYYY.M.D.HHMM ?>
+<?endif?>
+<?ifndef var.RepoRoot ?>
+  <?error RepoRoot is not defined - build via scripts\smsi.ps1, which passes -d RepoRoot=<repo root> ?>
+<?endif?>
+<?ifndef var.ParentStagingDir ?>
+  <?error ParentStagingDir is not defined - build via scripts\smsi.ps1 ?>
+<?endif?>
+<?ifndef var.ExeStagingDir ?>
+  <?error ExeStagingDir is not defined - build via scripts\smsi.ps1 ?>
+<?endif?>
+
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <Package Name="Seamly2D"
+           Manufacturer="Seamly2D Project"
+           Version="$(var.ProductVersion)"
+           UpgradeCode="cbf4b5f1-c32c-4dbb-b385-3ee4a7b30658"
+           Language="1033"
+           Compressed="yes"
+           Scope="perMachine">
+
+    <SummaryInformation Description="Seamly2D $(var.DisplayVersion) - pattern drafting, measurements and layout" />
+
+    <!-- Newer versions upgrade in place: the old product (any architecture,
+         same UpgradeCode) is removed before the new files are installed.
+         AllowSameVersionUpgrades keeps rolling same-minute rebuilds working. -->
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="A newer version of [ProductName] is already installed. Uninstall it first to install this older version." />
+
+    <!-- Single embedded cab: one self-contained .msi file. -->
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <!-- Icons for shortcuts and Apps &amp; Features. MSI requires Icon table
+         ids used by advertised shortcuts to carry the matching extension. -->
+    <Icon Id="seamly2d.ico" SourceFile="$(var.RepoRoot)\dist\win\seamly2d.ico" />
+    <Icon Id="seamlyme.ico" SourceFile="$(var.RepoRoot)\dist\win\seamlyme.ico" />
+    <?ifdef var.IncludeSeamlyLayout ?>
+    <Icon Id="seamlylayout.ico" SourceFile="$(var.RepoRoot)\src\app\seamlylayout\qt_frontend\assets\images\seamly-layout.ico" />
+    <?endif?>
+
+    <Property Id="ARPPRODUCTICON" Value="seamly2d.ico" />
+    <Property Id="ARPHELPLINK" Value="https://seamly.io" />
+    <Property Id="ARPURLINFOABOUT" Value="https://seamly.io" />
+
+    <!-- Directory-chooser UI (Task 14 extends this with the user-data path
+         prompt). The license page shows packaging\windows\license.rtf. -->
+    <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(var.RepoRoot)\packaging\windows\license.rtf" />
+
+    <!-- ================= directory tree + harvested runtimes ============= -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="Seamly2D">
+        <!-- seamly2d + seamlyme shared runtime (Qt DLLs, plugins, MSVC CRT,
+             xerces-c, ...) harvested recursively from the staging tree; the
+             executables themselves are authored explicitly below so shortcuts
+             and file associations can reference them. -->
+        <Files Include="$(var.ParentStagingDir)\**" />
+        <?ifdef var.IncludeSeamlyLayout ?>
+        <Directory Id="SEAMLYLAYOUTFOLDER" Name="SeamlyLayout">
+          <!-- SeamlyLayout's private runtime: its own Qt release (windeployqt6
+               output incl. QML modules and QtWebEngineProcess.exe), packaged
+               default settings\ and licenses\. -->
+          <Files Include="$(var.LayoutStagingDir)\**" />
+        </Directory>
+        <?endif?>
+      </Directory>
+    </StandardDirectory>
+
+    <!-- ================= executables, shortcuts, associations ============ -->
+    <ComponentGroup Id="FamilyExecutables" Directory="INSTALLFOLDER">
+
+      <!-- seamly2d: Start Menu shortcut + .sm2d pattern association -->
+      <Component Id="Seamly2DExeComponent">
+        <File Id="Seamly2DExe" Source="$(var.ExeStagingDir)\seamly2d.exe" KeyPath="yes">
+          <Shortcut Id="Seamly2DShortcut"
+                    Directory="ProgramMenuFolder"
+                    Name="Seamly2D"
+                    Description="Seamly2D pattern drafting"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="seamly2d.ico"
+                    Advertise="yes" />
+        </File>
+        <ProgId Id="Seamly2D.Pattern" Description="Seamly2D pattern">
+          <Extension Id="sm2d" ContentType="application/x-seamly2d">
+            <Verb Id="open" Command="Open" TargetFile="Seamly2DExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <!-- Explorer icon for .sm2d documents: the icon embedded in the exe. -->
+        <RegistryValue Root="HKLM"
+                       Key="Software\Classes\Seamly2D.Pattern\DefaultIcon"
+                       Value="[INSTALLFOLDER]seamly2d.exe,0"
+                       Type="string" />
+      </Component>
+
+      <!-- seamlyme: Start Menu shortcut + measurement file associations
+           (.smis individual, .smms multisize) -->
+      <Component Id="SeamlyMeExeComponent">
+        <File Id="SeamlyMeExe" Source="$(var.ExeStagingDir)\seamlyme.exe" KeyPath="yes">
+          <Shortcut Id="SeamlyMeShortcut"
+                    Directory="ProgramMenuFolder"
+                    Name="SeamlyMe"
+                    Description="SeamlyMe measurements"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="seamlyme.ico"
+                    Advertise="yes" />
+        </File>
+        <ProgId Id="SeamlyMe.IndividualMeasurements" Description="SeamlyMe individual measurements">
+          <Extension Id="smis" ContentType="application/x-seamlyme-individual">
+            <Verb Id="open" Command="Open" TargetFile="SeamlyMeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="SeamlyMe.MultisizeMeasurements" Description="SeamlyMe multisize measurements">
+          <Extension Id="smms" ContentType="application/x-seamlyme-multisize">
+            <Verb Id="open" Command="Open" TargetFile="SeamlyMeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <RegistryValue Root="HKLM"
+                       Key="Software\Classes\SeamlyMe.IndividualMeasurements\DefaultIcon"
+                       Value="[INSTALLFOLDER]seamlyme.exe,0"
+                       Type="string" />
+        <RegistryValue Root="HKLM"
+                       Key="Software\Classes\SeamlyMe.MultisizeMeasurements\DefaultIcon"
+                       Value="[INSTALLFOLDER]seamlyme.exe,0"
+                       Type="string" />
+      </Component>
+
+      <?ifdef var.IncludeSeamlyLayout ?>
+      <!-- SeamlyLayout: Start Menu shortcut. No file association - its input
+           is the .pieces.svg handoff written by seamly2d's Layout Mode, and a
+           double ".pieces.svg" extension cannot be registered distinctly from
+           plain .svg (which must stay with the user's SVG viewer). -->
+      <Component Id="SeamlyLayoutExeComponent" Directory="SEAMLYLAYOUTFOLDER">
+        <File Id="SeamlyLayoutExe" Source="$(var.ExeStagingDir)\SeamlyLayout.exe" KeyPath="yes">
+          <Shortcut Id="SeamlyLayoutShortcut"
+                    Directory="ProgramMenuFolder"
+                    Name="SeamlyLayout"
+                    Description="SeamlyLayout pattern layout"
+                    WorkingDirectory="SEAMLYLAYOUTFOLDER"
+                    Icon="seamlylayout.ico"
+                    Advertise="yes" />
+        </File>
+      </Component>
+      <?endif?>
+
+      <!-- Install breadcrumbs: read by upgrades and by the Task 14 installer
+           prompts; removed on uninstall automatically (component rules). -->
+      <Component Id="InstallInfoRegistry">
+        <RegistryKey Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D">
+          <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
+          <RegistryValue Name="DisplayVersion" Type="string" Value="$(var.DisplayVersion)" />
+        </RegistryKey>
+      </Component>
+
+    </ComponentGroup>
+
+  </Package>
+</Wix>

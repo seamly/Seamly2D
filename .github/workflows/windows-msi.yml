@@ -1,0 +1,237 @@
+name: Windows MSI
+
+# ---------------------------------------------------------------------------
+# Task 13 — build the Windows MSI installer that ships the whole Seamly app
+# family: seamly2d + seamlyme (qmake, ci.yml's Qt) and SeamlyLayout (Rust +
+# Qt 6.10 CMake build), packaged per architecture (x64 and arm64) with the
+# WiX toolset from packaging/windows/seamly-family.wxs via scripts/smsi.ps1.
+#
+# WHY A SEPARATE WORKFLOW FROM ci.yml:
+#   Same reasoning as seamlylayout-ci.yml (Task 20): the MSI needs BOTH
+#   toolchains in one job — ci.yml's Qt for the qmake-built parent apps plus
+#   Qt 6.10.1 + Rust + CMake/Ninja for SeamlyLayout — and it should not slow
+#   down or destabilize every ci.yml run. ci.yml's NSIS installer remains the
+#   released Windows installer until the MSI replaces it; at that point fold
+#   these steps into ci.yml's windows job and wire the .msi into the publish
+#   job's release files.
+#
+# ARM64:
+#   seamly2d/seamlyme cross-compile for arm64 exactly as in ci.yml's windows
+#   matrix. SeamlyLayout has no arm64 build yet (its Rust + cxx-qt + Qt 6.10
+#   cross story is documented in .github/README-BUILDS.md), so the arm64 MSI
+#   ships the two parent apps only (-NoSeamlyLayout) until that lands.
+# ---------------------------------------------------------------------------
+
+on:
+  # The MSI only needs rebuilding when the packaging inputs change; app-code
+  # coverage stays with ci.yml / seamlylayout-ci.yml. workflow_dispatch covers
+  # on-demand builds (e.g. producing an installer for manual testing).
+  push:
+    branches:
+      - develop
+      - run-seamlyLayout
+    paths:
+      - 'packaging/windows/**'
+      - 'scripts/smsi.ps1'
+      - '.github/workflows/windows-msi.yml'
+  pull_request:
+    paths:
+      - 'packaging/windows/**'
+      - 'scripts/smsi.ps1'
+      - '.github/workflows/windows-msi.yml'
+  workflow_dispatch:
+
+# Only the newest run per ref matters; cancel superseded in-progress runs.
+concurrency:
+  group: windows-msi-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Qt for seamly2d/seamlyme — keep in sync with ci.yml's QT_VERSION.
+  QT_PARENT_VERSION: '6.11.1'
+  # Qt for SeamlyLayout — keep in sync with seamlylayout-ci.yml's QT_VERSION.
+  QT_LAYOUT_VERSION: '6.10.1'
+
+jobs:
+
+  msi:
+    name: 'Windows: Build MSI (${{ matrix.arch }})'
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            msvc-arch: x64
+            qt-arch: win64_msvc2022_64
+            qmake: qmake
+          - arch: arm64
+            msvc-arch: amd64_arm64
+            qt-arch: win64_msvc2022_arm64_cross_compiled
+            qmake: host-qmake
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # Same rolling-release version scheme as ci.yml's version job.
+      - name: create version number
+        shell: bash
+        run: echo "VERSION_NUMBER=$(date +%Y.%-m.%-d.%-H%M)" >> $GITHUB_ENV
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.msvc-arch }}
+
+      # SeamlyLayout's Qt is installed FIRST so that the parent Qt installed
+      # below ends up earlier on PATH — the bare `qmake`/`nmake` build of the
+      # parent apps must resolve to the parent Qt. The 6.10 location is saved
+      # before the second install overwrites QT_ROOT_DIR.
+      - name: Install Qt ${{ env.QT_LAYOUT_VERSION }} for SeamlyLayout (x64 only)
+        if: matrix.arch == 'x64'
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_LAYOUT_VERSION }}
+          arch: win64_msvc2022_64
+          cache: true
+          # Same module list and reasoning as seamlylayout-ci.yml: qtwebengine
+          # for WebEngineQuick, plus its deps qtwebchannel/qtpositioning which
+          # aqtinstall does not auto-resolve.
+          modules: qtwebengine qtwebchannel qtpositioning
+
+      - name: Remember the SeamlyLayout Qt location (x64 only)
+        if: matrix.arch == 'x64'
+        shell: pwsh
+        run: echo "QT_LAYOUT_DIR=$env:QT_ROOT_DIR" >> $env:GITHUB_ENV
+
+      - name: Install Qt ${{ env.QT_PARENT_VERSION }} for seamly2d/seamlyme
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_PARENT_VERSION }}
+          arch: ${{ matrix.qt-arch }}
+          cache: true
+          modules: qtmultimedia
+          aqtsource: git+https://github.com/miurahr/aqtinstall.git  # same pin as ci.yml — remove once aqtinstall 3.4.0 is released
+
+      - name: update version
+        shell: bash
+        run: ./scripts/version.sh ${VERSION_NUMBER}
+
+      # Identical to ci.yml's windows job build step; the .pro post-link runs
+      # windeployqt, so each app's bin\ ends up install-ready.
+      - name: make seamly2d.exe and seamlyme.exe
+        run: |
+          ${{ matrix.qmake }} Seamly2D.pro -config release CONFIG+=noTests
+          nmake
+
+      # ------------------- SeamlyLayout (x64 only) -------------------------
+      - name: Install Rust toolchain (x64 only)
+        if: matrix.arch == 'x64'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo build (x64 only)
+        if: matrix.arch == 'x64'
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src/app/seamlylayout
+
+      - name: Install Ninja (x64 only)
+        if: matrix.arch == 'x64'
+        run: choco install ninja -y
+
+      # Mirrors seamlylayout-ci.yml's build step (and the local release build):
+      # one CMake build produces the Rust bridge (Corrosion/cxx-qt) and the
+      # C++/QML app. The MSVC environment comes from msvc-dev-cmd above.
+      - name: Build SeamlyLayout release (x64 only)
+        if: matrix.arch == 'x64'
+        working-directory: src/app/seamlylayout/qt_frontend
+        shell: pwsh
+        run: |
+          cmake --preset release -DCMAKE_PREFIX_PATH="$env:QT_LAYOUT_DIR"
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmake --build --preset release
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      # ------------------- package ------------------------------------------
+      # Pinned to WiX v6: v7 (July 2026) refuses to run until an Open Source
+      # Maintenance Fee (OSMF) EULA is accepted (error WIX7015), which is a
+      # policy decision this project has not made — v6 is the newest line
+      # without that gate. The UI extension version must match the core tool.
+      - name: Install WiX toolset (v6)
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version '6.*'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $wixVer = (wix --version).ToString().Split('+')[0]
+          wix extension add --global WixToolset.UI.wixext/$wixVer
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Build MSI (x64 - all three apps)
+        if: matrix.arch == 'x64'
+        shell: pwsh
+        run: |
+          .\scripts\smsi.ps1 -Arch x64 -Version $env:VERSION_NUMBER `
+            -Seamly2DBin src\app\seamly2d\bin `
+            -SeamlyMeBin src\app\seamlyme\bin `
+            -WinDeployQt6 "$env:QT_LAYOUT_DIR\bin\windeployqt6.exe"
+
+      - name: Build MSI (arm64 - seamly2d and seamlyme)
+        if: matrix.arch == 'arm64'
+        shell: pwsh
+        run: |
+          .\scripts\smsi.ps1 -Arch arm64 -Version $env:VERSION_NUMBER `
+            -Seamly2DBin src\app\seamly2d\bin `
+            -SeamlyMeBin src\app\seamlyme\bin `
+            -NoSeamlyLayout
+
+      # ------------------- sign (main builds only) --------------------------
+      - name: Authenticate to Google Cloud (for signing)
+        uses: google-github-actions/auth@v3
+        env:
+          SEAMLY_SIGNING_PROJECT_ID: ${{ secrets.SEAMLY_SIGNING_PROJECT_ID }}
+        # run signing part if secrets are available (main builds), otherwise (3rd party PRs etc) skip
+        if: ${{ env.SEAMLY_SIGNING_PROJECT_ID }}
+        with:
+          credentials_json: ${{ secrets.SEAMLY_SIGNING_SA_KEY }}
+          project_id: ${{ secrets.SEAMLY_SIGNING_PROJECT_ID }}
+
+      - name: Setup Google Cloud CLI (for signing)
+        uses: google-github-actions/setup-gcloud@v3
+        env:
+          SEAMLY_SIGNING_PROJECT_ID: ${{ secrets.SEAMLY_SIGNING_PROJECT_ID }}
+        # run signing part if secrets are available (main builds), otherwise (3rd party PRs etc) skip
+        if: ${{ env.SEAMLY_SIGNING_PROJECT_ID }}
+
+      - name: Set up Java (for signing)
+        env:
+          SEAMLY_SIGNING_PROJECT_ID: ${{ secrets.SEAMLY_SIGNING_PROJECT_ID }}
+        if: ${{ env.SEAMLY_SIGNING_PROJECT_ID }}
+        uses: actions/setup-java@v5
+        with:
+          java-version: 17
+          distribution: 'temurin'
+
+      # jsign signs MSI files the same way it signs the NSIS exe in ci.yml.
+      - name: Sign the MSI
+        env:
+          SEAMLY_SIGNING_PROJECT_ID: ${{ secrets.SEAMLY_SIGNING_PROJECT_ID }}
+        # run signing part if secrets are available (main builds), otherwise (3rd party PRs etc) skip
+        if: ${{ env.SEAMLY_SIGNING_PROJECT_ID }}
+        shell: bash
+        run: |
+          java -jar .github/workflows/signing/jsign.jar \
+          --storetype GOOGLECLOUD \
+          --storepass "$(gcloud auth print-access-token)" \
+          --keystore "projects/${{ secrets.SEAMLY_SIGNING_PROJECT_ID }}/locations/${{ secrets.SEAMLY_SIGNING_LOCATION }}/keyRings/${{ secrets.SEAMLY_SIGNING_KEYRING_NAME }}" \
+          --alias "${{ secrets.SEAMLY_SIGNING_KEY_NAME }}" \
+          --certfile .github/workflows/signing/codesign-chain.pem \
+          --tsaurl http://timestamp.sectigo.com \
+          seamly-build-msi/${{ matrix.arch }}/Seamly2D-${{ matrix.arch }}.msi
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: Seamly2D-${{ matrix.arch }}.msi
+          path: seamly-build-msi/${{ matrix.arch }}/Seamly2D-${{ matrix.arch }}.msi
+          if-no-files-found: error

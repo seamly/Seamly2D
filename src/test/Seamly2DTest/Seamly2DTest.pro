@@ -52,7 +52,8 @@ SOURCES += \
     tst_vtranslatevars.cpp \
     tst_vabstractpiece.cpp \
     tst_svgtextitem.cpp \
-    tst_svgcomponenttags.cpp
+    tst_svgcomponenttags.cpp \
+    tst_seamlyfamilypaths.cpp
 
 *msvc*:SOURCES += stable.cpp
 
@@ -80,7 +81,8 @@ HEADERS += \
     tst_vtranslatevars.h \
     tst_vabstractpiece.h \
     tst_svgtextitem.h \
-    tst_svgcomponenttags.h
+    tst_svgcomponenttags.h \
+    tst_seamlyfamilypaths.h
 
 include(warnings.pri)
 
