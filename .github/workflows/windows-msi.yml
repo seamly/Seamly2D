@@ -85,10 +85,41 @@ jobs:
         with:
           arch: ${{ matrix.msvc-arch }}
 
-      # SeamlyLayout's Qt is installed FIRST so that the parent Qt installed
-      # below ends up earlier on PATH — the bare `qmake`/`nmake` build of the
-      # parent apps must resolve to the parent Qt. The 6.10 location is saved
-      # before the second install overwrites QT_ROOT_DIR.
+      # The parent apps (seamly2d/seamlyme) are built FIRST, while ONLY their
+      # own Qt is installed, so the bare `qmake`/`nmake` build unambiguously
+      # binds to it — exactly the single-Qt environment ci.yml's windows job
+      # builds in. SeamlyLayout's Qt (a different release whose qmake/DLL names
+      # are identical) is installed only AFTERWARDS: installing both up front
+      # let the parent `qmake` resolve to the wrong kit, which lacks the
+      # qtmultimedia module the parents require ("Unknown module(s) in QT:
+      # multimedia"). SeamlyLayout's own build and the MSI staging reference
+      # their Qt by explicit path (QT_LAYOUT_DIR), so PATH order is irrelevant
+      # to them once the parent build is done.
+      - name: Install Qt ${{ env.QT_PARENT_VERSION }} for seamly2d/seamlyme
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_PARENT_VERSION }}
+          arch: ${{ matrix.qt-arch }}
+          cache: true
+          modules: qtmultimedia
+          aqtsource: git+https://github.com/miurahr/aqtinstall.git  # same pin as ci.yml — remove once aqtinstall 3.4.0 is released
+
+      - name: update version
+        shell: bash
+        run: ./scripts/version.sh ${VERSION_NUMBER}
+
+      # Identical to ci.yml's windows job build step; the .pro post-link runs
+      # windeployqt, so each app's bin\ ends up install-ready. Only the parent
+      # Qt is on PATH here, so bare `qmake`/`windeployqt` resolve to it.
+      - name: make seamly2d.exe and seamlyme.exe
+        run: |
+          ${{ matrix.qmake }} Seamly2D.pro -config release CONFIG+=noTests
+          nmake
+
+      # ------------------- SeamlyLayout (x64 only) -------------------------
+      # SeamlyLayout's Qt is installed only NOW, after the parent build, so it
+      # can never shadow the parent Qt. Its location is saved for the explicit
+      # -DCMAKE_PREFIX_PATH / -WinDeployQt6 references below.
       - name: Install Qt ${{ env.QT_LAYOUT_VERSION }} for SeamlyLayout (x64 only)
         if: matrix.arch == 'x64'
         uses: jurplel/install-qt-action@v4
@@ -106,27 +137,6 @@ jobs:
         shell: pwsh
         run: echo "QT_LAYOUT_DIR=$env:QT_ROOT_DIR" >> $env:GITHUB_ENV
 
-      - name: Install Qt ${{ env.QT_PARENT_VERSION }} for seamly2d/seamlyme
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: ${{ env.QT_PARENT_VERSION }}
-          arch: ${{ matrix.qt-arch }}
-          cache: true
-          modules: qtmultimedia
-          aqtsource: git+https://github.com/miurahr/aqtinstall.git  # same pin as ci.yml — remove once aqtinstall 3.4.0 is released
-
-      - name: update version
-        shell: bash
-        run: ./scripts/version.sh ${VERSION_NUMBER}
-
-      # Identical to ci.yml's windows job build step; the .pro post-link runs
-      # windeployqt, so each app's bin\ ends up install-ready.
-      - name: make seamly2d.exe and seamlyme.exe
-        run: |
-          ${{ matrix.qmake }} Seamly2D.pro -config release CONFIG+=noTests
-          nmake
-
-      # ------------------- SeamlyLayout (x64 only) -------------------------
       - name: Install Rust toolchain (x64 only)
         if: matrix.arch == 'x64'
         uses: dtolnay/rust-toolchain@stable

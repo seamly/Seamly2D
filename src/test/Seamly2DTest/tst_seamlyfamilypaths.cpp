@@ -134,9 +134,25 @@ void TST_SeamlyFamilyPaths::FindsSubdirectoryExecutable() const
  * @brief FlatLayoutTakesPrecedence verifies that when both layouts are
  * present the flat executable wins — it is the one sharing the caller's
  * runtime, so it must shadow a leftover subdirectory install.
+ *
+ * This scenario is only physically constructible on Windows: there the flat
+ * executable carries the ".exe" suffix (`SeamlyLayout.exe`) that distinguishes
+ * it from the MSI subdirectory (`SeamlyLayout\`), so a flat exe file and a
+ * `SeamlyLayout` subdirectory can share one parent. On every other platform
+ * the executable name has no suffix, so the flat candidate (`SeamlyLayout`, a
+ * file) and the subdirectory (`SeamlyLayout`, a directory) have identical names
+ * and cannot coexist in one directory — the two layouts are mutually exclusive,
+ * so precedence never arises. That mutually-exclusive non-Windows case is
+ * covered instead by DirectoryNamedLikeExecutableIsIgnored().
  */
 void TST_SeamlyFamilyPaths::FlatLayoutTakesPrecedence() const
 {
+#ifndef Q_OS_WIN
+    QSKIP("Both layouts can coexist only on Windows (the flat exe's \".exe\" "
+          "suffix distinguishes it from the \"SeamlyLayout\" subdirectory); "
+          "elsewhere they are mutually exclusive — see "
+          "DirectoryNamedLikeExecutableIsIgnored().");
+#else
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
 
@@ -149,6 +165,7 @@ void TST_SeamlyFamilyPaths::FlatLayoutTakesPrecedence() const
 
     const QString found = SeamlyFamilyPaths::locateSeamlyLayout(dir.path());
     QCOMPARE(found, QFileInfo(flatExe).absoluteFilePath());
+#endif
 }
 
 //---------------------------------------------------------------------------------------------------------------------
