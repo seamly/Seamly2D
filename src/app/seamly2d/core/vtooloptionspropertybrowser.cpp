@@ -1743,12 +1743,6 @@ void VToolOptionsPropertyBrowser::changeDataToolPointOfIntersectionArcs(VPE::VPr
             setCirclesCrossPoint<VToolPointOfIntersectionArcs>(value);
             break;
         }
-        case 47: // AttrFirstArc
-            tool->SetFirstArcId(value.toInt());
-            break;
-        case 48: // AttrSecondArc
-            tool->SetSecondArcId(value.toInt());
-            break;
         default:
             qWarning() << "Unknown property type. id = "<<id;
             break;
@@ -2798,8 +2792,8 @@ void VToolOptionsPropertyBrowser::showOptionsToolPointOfIntersectionArcs(QGraphi
 
     addPropertyLabel(tr("Selection"), AttrName);
     addPropertyObjectName(tool, tr("Name:"));
-    addObjectProperty(tool, tool->FirstArcName(), tr("First arc:"), AttrFirstArc, GOType::Arc);
-    addObjectProperty(tool, tool->SecondArcName(), tr("Second arc:"), AttrSecondArc, GOType::Arc);
+    addPropertyParentPointName(tool->FirstArcName(), tr("First arc:"), AttrFirstArc);
+    addPropertyParentPointName(tool->SecondArcName(), tr("Second arc:"), AttrSecondArc);
     addPropertyCrossPoint(tool, tr("Take:"));
 }
 
@@ -3707,18 +3701,8 @@ void VToolOptionsPropertyBrowser::updateOptionsToolPointOfIntersectionArcs()
 
     idToProperty[AttrName]->setValue(tool->name());
     idToProperty[AttrCrossPoint]->setValue(static_cast<int>(tool->GetCrossCirclesPoint())-1);
-
-    {
-        const qint32 index = VPE::VObjectProperty::indexOfObject(getObjectList(tool, GOType::Arc),
-                                                                               tool->FirstArcName());
-        idToProperty[AttrFirstArc]->setValue(index);
-    }
-
-    {
-        const qint32 index = VPE::VObjectProperty::indexOfObject(getObjectList(tool, GOType::Arc),
-                                                                               tool->SecondArcName());
-        idToProperty[AttrSecondArc]->setValue(index);
-    }
+    idToProperty[AttrFirstArc]->setValue(tool->FirstArcName());
+    idToProperty[AttrSecondArc]->setValue(tool->SecondArcName());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
