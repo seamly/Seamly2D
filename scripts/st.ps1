@@ -37,8 +37,8 @@
 
 .DESCRIPTION
     Runs the debug-built Seamly2DTests.exe from the sd.ps1 shadow build
-    (<repo-root>\seamly2d-build-debug\), or the release build\ tree with
-    -Release. Build first with scripts\sd.ps1 — this script only runs.
+    (<repo-root>\scripts\seamly2d-build-debug\), or the release build\ tree
+    with -Release. Build first with scripts\sd.ps1 — this script only runs.
 
     Two Windows-specific traps are handled (Task 23):
 
@@ -64,7 +64,7 @@
 
 .PARAMETER Release
     Run the release-built suite from build\ instead of the debug suite from
-    seamly2d-build-debug\.
+    scripts\seamly2d-build-debug\.
 
 .PARAMETER TestArgs
     Any remaining arguments are forwarded to Seamly2DTests.exe (standard
@@ -83,7 +83,7 @@
 #>
 
 param(
-    # When set, use the release build\ tree instead of seamly2d-build-debug\.
+    # When set, use the release build\ tree instead of scripts\seamly2d-build-debug\.
     [switch]$Release,
 
     # Extra arguments forwarded verbatim to Seamly2DTests.exe.
@@ -99,7 +99,7 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 if ($Release) {
     $buildDir = Join-Path $repoRoot 'build'
 } else {
-    $buildDir = Join-Path $repoRoot 'seamly2d-build-debug'
+    $buildDir = Join-Path $PSScriptRoot 'seamly2d-build-debug'
 }
 
 $testBin = Join-Path $buildDir 'src\test\Seamly2DTest\bin'

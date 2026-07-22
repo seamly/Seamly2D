@@ -6,7 +6,8 @@
 # **  @brief
 # **  "seamly msi" — stage the built Seamly app family (seamly2d, seamlyme,
 # **  SeamlyLayout) and build the Windows MSI installer from
-# **  packaging\windows\seamly-family.wxs with the WiX toolset (Task 13).
+# **  scripts\packaging\windows\seamly-family.wxs with the WiX toolset
+# **  (Task 13).
 # **  Used both locally (against the release build trees) and by the
 # **  .github\workflows\windows-msi.yml CI workflow (against the in-source
 # **  CI build output), following the scripts\sd.ps1 precedent.
@@ -37,9 +38,9 @@
     Build the Windows MSI installer for the Seamly app family (Task 13).
 
 .DESCRIPTION
-    Stages the already-built apps into <repo>\seamly-build-msi\<arch>\ and runs
-    `wix build` on packaging\windows\seamly-family.wxs to produce
-    seamly-build-msi\<arch>\Seamly2D-<arch>.msi.
+    Stages the already-built apps into <repo>\scripts\seamly-build-msi\<arch>\
+    and runs `wix build` on scripts\packaging\windows\seamly-family.wxs to
+    produce scripts\seamly-build-msi\<arch>\Seamly2D-<arch>.msi.
 
     Staging layout (mirrors what the MSI installs):
       parent\  seamly2d + seamlyme windeployqt trees merged (Qt runtime,
@@ -108,8 +109,8 @@
 
 .NOTES
     "smsi" = seamly msi, following sd.ps1 ("seamly2d debug") / st.ps1
-    ("seamly2d tests"). Output and staging live in seamly-build-msi\, which the
-    *-build-* .gitignore pattern keeps out of the repository.
+    ("seamly2d tests"). Output and staging live in scripts\seamly-build-msi\,
+    which the *-build-* .gitignore pattern keeps out of the repository.
 #>
 
 param(
@@ -244,7 +245,8 @@ function Find-WinDeployQt6 {
 # Visual Studio install's VC\Redist\MSVC is used. The returned directory is
 # the Microsoft.VC*.CRT folder holding msvcp140.dll, vcruntime140.dll, etc.,
 # which the script copies app-locally (decision recorded in
-# packaging\windows\README.md: no merge modules, no vc_redist.exe chaining).
+# scripts\packaging\windows\README.md: no merge modules, no vc_redist.exe
+# chaining).
 #
 # @param  Architecture  'x64' or 'arm64'
 # @return Full path of the CRT DLL directory.
@@ -325,9 +327,10 @@ if ($includeLayout) {
 Write-Host "msvc crt    : $crtDir"
 
 # --- Stage ---------------------------------------------------------------------
-# Fresh staging tree per run: <repo>\seamly-build-msi\<arch>\{parent,layout,exes}
+# Fresh staging tree per run:
+# <repo>\scripts\seamly-build-msi\<arch>\{parent,layout,exes}
 # (the *-build-* .gitignore pattern keeps all of it untracked).
-$stageRoot = Join-Path $repoRoot "seamly-build-msi\$Arch"
+$stageRoot = Join-Path $PSScriptRoot "seamly-build-msi\$Arch"
 if (Test-Path $stageRoot) {
     Remove-Item $stageRoot -Recurse -Force
 }
@@ -390,7 +393,7 @@ if ($includeLayout) {
 }
 
 # --- Build the MSI -------------------------------------------------------------
-$wxs = Join-Path $repoRoot 'packaging\windows\seamly-family.wxs'
+$wxs = Join-Path $PSScriptRoot 'packaging\windows\seamly-family.wxs'
 $msi = Join-Path $stageRoot "Seamly2D-$Arch.msi"
 
 $wixArguments = @(

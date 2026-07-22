@@ -4,7 +4,8 @@ name: Windows MSI
 # Task 13 — build the Windows MSI installer that ships the whole Seamly app
 # family: seamly2d + seamlyme (qmake, ci.yml's Qt) and SeamlyLayout (Rust +
 # Qt 6.10 CMake build), packaged per architecture (x64 and arm64) with the
-# WiX toolset from packaging/windows/seamly-family.wxs via scripts/smsi.ps1.
+# WiX toolset from scripts/packaging/windows/seamly-family.wxs via
+# scripts/smsi.ps1.
 #
 # WHY A SEPARATE WORKFLOW FROM ci.yml:
 #   Same reasoning as seamlylayout-ci.yml (Task 20): the MSI needs BOTH
@@ -31,12 +32,12 @@ on:
       - develop
       - run-seamlyLayout
     paths:
-      - 'packaging/windows/**'
+      - 'scripts/packaging/windows/**'
       - 'scripts/smsi.ps1'
       - '.github/workflows/windows-msi.yml'
   pull_request:
     paths:
-      - 'packaging/windows/**'
+      - 'scripts/packaging/windows/**'
       - 'scripts/smsi.ps1'
       - '.github/workflows/windows-msi.yml'
   workflow_dispatch:
@@ -238,10 +239,10 @@ jobs:
           --alias "${{ secrets.SEAMLY_SIGNING_KEY_NAME }}" \
           --certfile .github/workflows/signing/codesign-chain.pem \
           --tsaurl http://timestamp.sectigo.com \
-          seamly-build-msi/${{ matrix.arch }}/Seamly2D-${{ matrix.arch }}.msi
+          scripts/seamly-build-msi/${{ matrix.arch }}/Seamly2D-${{ matrix.arch }}.msi
 
       - uses: actions/upload-artifact@v7
         with:
           name: Seamly2D-${{ matrix.arch }}.msi
-          path: seamly-build-msi/${{ matrix.arch }}/Seamly2D-${{ matrix.arch }}.msi
+          path: scripts/seamly-build-msi/${{ matrix.arch }}/Seamly2D-${{ matrix.arch }}.msi
           if-no-files-found: error

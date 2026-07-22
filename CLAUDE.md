@@ -21,7 +21,7 @@ Two toolchains are in use — do not treat the difference as an error:
 
 - **CI toolchain (GitHub runner):** Qt 6.8.3 + MSVC 2022 — a selection of tools available on GitHub's hosted runners; used by the release/CI workflows
 - **Local toolchain (developer PC, check builds of current work):** Qt 6.10.1 `msvc2022_64` + VS 18 Community MSVC (`vcvars64.bat`), qmake + jom; release shadow-build in `build/` (gitignored)
-- Local debug build: `scripts/sd.ps1` ("seamly2d debug") — auto-detects the newest Qt 6.10.x msvc2022_64 kit under `C:\Qt` and the VS 18 Community MSVC environment, then shadow-builds `CONFIG+=debug` into `seamly2d-build-debug/` (gitignored); the debug exe lands at `seamly2d-build-debug/src/app/seamly2d/bin/seamly2d.exe` with Qt debug DLLs deployed by windeployqt. `-Run` launches it after the build; see the script's `.SYNOPSIS` for details.
+- Local debug build: `scripts/sd.ps1` ("seamly2d debug") — auto-detects the newest Qt 6.10.x msvc2022_64 kit under `C:\Qt` and the VS 18 Community MSVC environment, then shadow-builds `CONFIG+=debug` into `scripts/seamly2d-build-debug/` (gitignored); the debug exe lands at `scripts/seamly2d-build-debug/src/app/seamly2d/bin/seamly2d.exe` with Qt debug DLLs deployed by windeployqt. `-Run` launches it after the build; see the script's `.SYNOPSIS` for details.
 
 ## Coding Rules
 

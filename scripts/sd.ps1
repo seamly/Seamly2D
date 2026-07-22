@@ -8,7 +8,7 @@
 # **  seamlyLayout's qd.ps1 precedent. Auto-locates the newest Qt 6.10.x
 # **  msvc2022_64 kit under C:\Qt and the VS 18 Community MSVC environment,
 # **  then shadow-builds Seamly2D.pro with CONFIG+=debug into
-# **  seamly2d-build-debug\ at the repo root (kept separate from the
+# **  scripts\seamly2d-build-debug\ (kept separate from the
 # **  release build\ tree).
 # **
 # **  @copyright
@@ -38,8 +38,8 @@
 
 .DESCRIPTION
     Shadow-builds the whole Seamly2D qmake project with CONFIG+=debug into
-    <repo-root>\seamly2d-build-debug\ (gitignored via the *-build-* pattern),
-    keeping it separate from the release build\ tree.
+    <repo-root>\scripts\seamly2d-build-debug\ (gitignored via the *-build-*
+    pattern), keeping it separate from the release build\ tree.
 
     Toolchain is auto-detected and the script fails early with a clear
     message naming whatever is missing:
@@ -51,7 +51,7 @@
 
     The seamly2d.pro post-link step runs windeployqt, so the Qt debug DLLs
     are deployed beside the executable automatically. The debug binary lands
-    at seamly2d-build-debug\src\app\seamly2d\bin\seamly2d.exe.
+    at scripts\seamly2d-build-debug\src\app\seamly2d\bin\seamly2d.exe.
 
 .PARAMETER Run
     Launch the freshly built debug seamly2d.exe after a successful build.
@@ -146,9 +146,10 @@ if (-not (Test-Path $proFile)) {
     throw "Seamly2D.pro not found at '$proFile' - is the script still in <repo-root>\scripts\?"
 }
 
-# Dedicated shadow-build dir, separate from the release build\ tree.
-# The name matches the *-build-* .gitignore pattern, so it is never committed.
-$buildDir = Join-Path $repoRoot 'seamly2d-build-debug'
+# Dedicated shadow-build dir under scripts\, separate from the release build\
+# tree. The name matches the *-build-* .gitignore pattern, so it is never
+# committed.
+$buildDir = Join-Path $PSScriptRoot 'seamly2d-build-debug'
 if (-not (Test-Path $buildDir)) {
     New-Item -ItemType Directory -Path $buildDir | Out-Null
 }
