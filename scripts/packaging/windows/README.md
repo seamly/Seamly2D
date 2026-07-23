@@ -39,7 +39,7 @@ Then:
 .\scripts\packaging\windows\smsi.ps1 -Arch arm64 -NoSeamlyLayout   # arm64 (needs arm64 build trees)
 ```
 
-Output: `scripts\seamly-build-msi\<arch>\Seamly2D-<arch>.msi` (gitignored). The script runs `wix msi validate` (ICE checks) automatically; the only expected warning is ICE61, a known consequence of `AllowSameVersionUpgrades`.
+Output: `scripts\seamly-build-msi\<arch>\Seamly2D-<arch>.msi` (gitignored). Only the `.msi` is produced — the `.wixpdb` symbol database is suppressed via `wix build -pdbtype none` (it is only used for `wix` patch/melt diffing, not by the shipped installer); to keep it for inspection, remove that flag from `$wixArguments` in `smsi.ps1`. The script runs `wix msi validate` (ICE checks) automatically; the only expected warning is ICE61, a known consequence of `AllowSameVersionUpgrades`.
 
 ## Installing / testing
 

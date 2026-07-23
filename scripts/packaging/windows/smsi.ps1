@@ -40,7 +40,9 @@
 .DESCRIPTION
     Stages the already-built apps into <repo>\scripts\seamly-build-msi\<arch>\
     and runs `wix build` on scripts\packaging\windows\seamly-family.wxs to
-    produce scripts\seamly-build-msi\<arch>\Seamly2D-<arch>.msi.
+    produce scripts\seamly-build-msi\<arch>\Seamly2D-<arch>.msi. Only the .msi
+    is written — the .wixpdb symbol database is suppressed with `-pdbtype none`
+    (it is used only for wix patch/melt diffing, not by the installer).
 
     Staging layout (mirrors what the MSI installs):
       parent\  seamly2d + seamlyme windeployqt trees merged (Qt runtime,
@@ -402,6 +404,10 @@ $msi = Join-Path $stageRoot "Seamly2D-$Arch.msi"
 $wixArguments = @(
     'build', $wxs,
     '-arch', $Arch,
+    # Suppress the .wixpdb symbol database: it is only used for wix patch/melt
+    # diffing and post-build inspection, not by the shipped installer, so we keep
+    # the build output to just the .msi. WiX v6 equivalent of light.exe -spdb.
+    '-pdbtype', 'none',
     '-ext', 'WixToolset.UI.wixext',
     '-d', "ProductVersion=$msiVersion",
     '-d', "DisplayVersion=$Version",
