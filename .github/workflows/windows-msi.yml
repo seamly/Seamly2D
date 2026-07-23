@@ -5,7 +5,7 @@ name: Windows MSI
 # family: seamly2d + seamlyme (qmake, ci.yml's Qt) and SeamlyLayout (Rust +
 # Qt 6.10 CMake build), packaged per architecture (x64 and arm64) with the
 # WiX toolset from scripts/packaging/windows/seamly-family.wxs via
-# scripts/smsi.ps1.
+# scripts/packaging/windows/smsi.ps1.
 #
 # WHY A SEPARATE WORKFLOW FROM ci.yml:
 #   Same reasoning as seamlylayout-ci.yml (Task 20): the MSI needs BOTH
@@ -33,12 +33,10 @@ on:
       - run-seamlyLayout
     paths:
       - 'scripts/packaging/windows/**'
-      - 'scripts/smsi.ps1'
       - '.github/workflows/windows-msi.yml'
   pull_request:
     paths:
       - 'scripts/packaging/windows/**'
-      - 'scripts/smsi.ps1'
       - '.github/workflows/windows-msi.yml'
   workflow_dispatch:
 
@@ -183,7 +181,7 @@ jobs:
         if: matrix.arch == 'x64'
         shell: pwsh
         run: |
-          .\scripts\smsi.ps1 -Arch x64 -Version $env:VERSION_NUMBER `
+          .\scripts\packaging\windows\smsi.ps1 -Arch x64 -Version $env:VERSION_NUMBER `
             -Seamly2DBin src\app\seamly2d\bin `
             -SeamlyMeBin src\app\seamlyme\bin `
             -WinDeployQt6 "$env:QT_LAYOUT_DIR\bin\windeployqt6.exe"
@@ -192,7 +190,7 @@ jobs:
         if: matrix.arch == 'arm64'
         shell: pwsh
         run: |
-          .\scripts\smsi.ps1 -Arch arm64 -Version $env:VERSION_NUMBER `
+          .\scripts\packaging\windows\smsi.ps1 -Arch arm64 -Version $env:VERSION_NUMBER `
             -Seamly2DBin src\app\seamly2d\bin `
             -SeamlyMeBin src\app\seamlyme\bin `
             -NoSeamlyLayout

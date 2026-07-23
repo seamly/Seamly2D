@@ -10,7 +10,7 @@
  **  family: seamly2d (pattern drafting), seamlyme (measurements) and
  **  SeamlyLayout (pattern layout) — Task 13.
  **
- **  Build with scripts\smsi.ps1 (locally) or .github\workflows\windows-msi.yml
+ **  Build with scripts\packaging\windows\smsi.ps1 (locally) or .github\workflows\windows-msi.yml
  **  (CI). One MSI is produced per architecture: `wix build -arch x64` and
  **  `wix build -arch arm64`, from this same source.
  **
@@ -86,19 +86,19 @@
 
 <!-- Fail fast with a clear message when the build script forgot a define. -->
 <?ifndef var.ProductVersion ?>
-  <?error ProductVersion is not defined - build via scripts\smsi.ps1, which passes -d ProductVersion=x.y.z ?>
+  <?error ProductVersion is not defined - build via scripts\packaging\windows\smsi.ps1, which passes -d ProductVersion=x.y.z ?>
 <?endif?>
 <?ifndef var.DisplayVersion ?>
-  <?error DisplayVersion is not defined - build via scripts\smsi.ps1, which passes -d DisplayVersion=YYYY.M.D.HHMM ?>
+  <?error DisplayVersion is not defined - build via scripts\packaging\windows\smsi.ps1, which passes -d DisplayVersion=YYYY.M.D.HHMM ?>
 <?endif?>
 <?ifndef var.RepoRoot ?>
-  <?error RepoRoot is not defined - build via scripts\smsi.ps1, which passes -d RepoRoot=<repo root> ?>
+  <?error RepoRoot is not defined - build via scripts\packaging\windows\smsi.ps1, which passes -d RepoRoot=<repo root> ?>
 <?endif?>
 <?ifndef var.ParentStagingDir ?>
-  <?error ParentStagingDir is not defined - build via scripts\smsi.ps1 ?>
+  <?error ParentStagingDir is not defined - build via scripts\packaging\windows\smsi.ps1 ?>
 <?endif?>
 <?ifndef var.ExeStagingDir ?>
-  <?error ExeStagingDir is not defined - build via scripts\smsi.ps1 ?>
+  <?error ExeStagingDir is not defined - build via scripts\packaging\windows\smsi.ps1 ?>
 <?endif?>
 
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
@@ -136,9 +136,11 @@
     <Property Id="ARPURLINFOABOUT" Value="https://seamly.io" />
 
     <!-- Directory-chooser UI (Task 14 extends this with the user-data path
-         prompt). The license page shows packaging\windows\license.rtf. -->
+         prompt). The license page shows license.rtf, which sits beside this
+         .wxs; $(sys.SOURCEFILEDIR) is the folder of this source file (with a
+         trailing backslash), so the reference survives relocating the tree. -->
     <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
-    <WixVariable Id="WixUILicenseRtf" Value="$(var.RepoRoot)\packaging\windows\license.rtf" />
+    <WixVariable Id="WixUILicenseRtf" Value="$(sys.SOURCEFILEDIR)license.rtf" />
 
     <!-- ================= directory tree + harvested runtimes ============= -->
     <StandardDirectory Id="ProgramFiles64Folder">

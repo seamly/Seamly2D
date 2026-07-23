@@ -100,11 +100,11 @@
     Skip the `wix msi validate` (ICE) pass after the build.
 
 .EXAMPLE
-    .\scripts\smsi.ps1
+    .\scripts\packaging\windows\smsi.ps1
     Stage from the local release trees and build the x64 MSI.
 
 .EXAMPLE
-    .\scripts\smsi.ps1 -Arch arm64 -NoSeamlyLayout
+    .\scripts\packaging\windows\smsi.ps1 -Arch arm64 -NoSeamlyLayout
     Build the arm64 MSI (seamly2d + seamlyme only) from arm64 build trees.
 
 .NOTES
@@ -140,8 +140,9 @@ param(
 # exit codes after each call.
 $ErrorActionPreference = 'Stop'
 
-# The script lives in <repo-root>\scripts\, so the repo root is its parent.
-$repoRoot = Split-Path -Parent $PSScriptRoot
+# The script lives in <repo-root>\scripts\packaging\windows\, so the repo root
+# is three directories up.
+$repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
 
 #------------------------------------------------------------------------------
 # @brief  Run a native tool and fail the script if its exit code is nonzero.
@@ -329,8 +330,10 @@ Write-Host "msvc crt    : $crtDir"
 # --- Stage ---------------------------------------------------------------------
 # Fresh staging tree per run:
 # <repo>\scripts\seamly-build-msi\<arch>\{parent,layout,exes}
-# (the *-build-* .gitignore pattern keeps all of it untracked).
-$stageRoot = Join-Path $PSScriptRoot "seamly-build-msi\$Arch"
+# (the *-build-* .gitignore pattern keeps all of it untracked). The output lives
+# at the scripts\ root — a sibling of scripts\seamly2d-build-debug\ from sd.ps1 —
+# not beside this script, so it is anchored to $repoRoot.
+$stageRoot = Join-Path $repoRoot "scripts\seamly-build-msi\$Arch"
 if (Test-Path $stageRoot) {
     Remove-Item $stageRoot -Recurse -Force
 }
@@ -393,7 +396,7 @@ if ($includeLayout) {
 }
 
 # --- Build the MSI -------------------------------------------------------------
-$wxs = Join-Path $PSScriptRoot 'packaging\windows\seamly-family.wxs'
+$wxs = Join-Path $PSScriptRoot 'seamly-family.wxs'
 $msi = Join-Path $stageRoot "Seamly2D-$Arch.msi"
 
 $wixArguments = @(

@@ -34,16 +34,16 @@
 
 ### [Windows MSI](windows-msi.yml) - Bundled WiX `.msi` installer (Task 13)
 
-**Triggers**: pushes to `develop` / `run-seamlyLayout` that touch `scripts/packaging/windows/**`, `scripts/smsi.ps1`, or the workflow file; pull requests touching the same paths; and manual dispatch. Path filters keep it from running on unrelated changes.
+**Triggers**: pushes to `develop` / `run-seamlyLayout` that touch `scripts/packaging/windows/**` (the WiX source, `license.rtf`, and the `smsi.ps1` driver all live here) or the workflow file; pull requests touching the same paths; and manual dispatch. Path filters keep it from running on unrelated changes.
 
-**Purpose**: builds the Windows **MSI installer** that ships the whole Seamly app family — `seamly2d`, `seamlyme`, and `SeamlyLayout` — in one bundled package **per architecture** (x64 and arm64), using the WiX toolset from [`seamly-family.wxs`](../../scripts/packaging/windows/seamly-family.wxs) via [`scripts/smsi.ps1`](../../scripts/smsi.ps1). The hands-on build/test reference is [`scripts/packaging/windows/README.md`](../../scripts/packaging/windows/README.md).
+**Purpose**: builds the Windows **MSI installer** that ships the whole Seamly app family — `seamly2d`, `seamlyme`, and `SeamlyLayout` — in one bundled package **per architecture** (x64 and arm64), using the WiX toolset from [`seamly-family.wxs`](../../scripts/packaging/windows/seamly-family.wxs) via [`scripts/packaging/windows/smsi.ps1`](../../scripts/packaging/windows/smsi.ps1). The hands-on build/test reference is [`scripts/packaging/windows/README.md`](../../scripts/packaging/windows/README.md).
 
 **Why it is separate from [CI](ci.yml)**: same reasoning as SeamlyLayout CI, but inverted — the MSI needs **both** toolchains in one job (Qt 6.11 for the qmake-built parent apps *and* Qt 6.10.1 + Rust + CMake/Ninja for SeamlyLayout) to build all three apps and bundle them. Folding that into `ci.yml` would slow and destabilize every push, so it lives on its own and only runs when the packaging inputs change. `ci.yml`'s NSIS installer remains the released Windows installer until the MSI replaces it.
 
 **What it does** (matrix: `x64`, `arm64`):
 1. Installs both Qt kits (6.10.1 for SeamlyLayout first, then 6.11.1 for the parents so the bare `qmake`/`nmake` build resolves to the parent Qt) plus MSVC (`ilammy/msvc-dev-cmd`), and for x64 also Rust + Ninja.
 2. Builds `seamly2d.exe` + `seamlyme.exe` (qmake/nmake, cross-compiled for arm64) and, on x64 only, `SeamlyLayout.exe` (CMake release preset).
-3. Runs `scripts/smsi.ps1` to stage the runtimes and build the MSI with WiX **v6** (v7 is gated behind an OSMF EULA, error `WIX7015`) — **x64 = all three apps, arm64 = the two parents only** (`-NoSeamlyLayout`, since SeamlyLayout has no arm64 build yet).
+3. Runs `scripts/packaging/windows/smsi.ps1` to stage the runtimes and build the MSI with WiX **v6** (v7 is gated behind an OSMF EULA, error `WIX7015`) — **x64 = all three apps, arm64 = the two parents only** (`-NoSeamlyLayout`, since SeamlyLayout has no arm64 build yet).
 4. Signs the `.msi` with `jsign` (Google Cloud KMS, same as the NSIS exe), guarded on the `SEAMLY_SIGNING_PROJECT_ID` secret so untrusted PR runs skip it, and uploads the MSI as a build artifact.
 
 **Future consolidation**: when the MSI replaces the NSIS installer, fold these steps into `ci.yml`'s windows job and wire the `.msi` into the release/publish job (noted in the workflow's header comment).

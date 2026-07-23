@@ -8,7 +8,7 @@ WiX authoring and build instructions for the Windows `.msi` installer that ships
 |---|---|
 | `seamly-family.wxs` | WiX (v6) source: install layout, shortcuts, file associations, upgrade logic |
 | `license.rtf` | License summary shown by the installer UI (GPL-3.0-or-later for seamly2d/seamlyme, LGPL-3.0 + MIT for SeamlyLayout, LGPL-3.0 for Qt) |
-| `../../smsi.ps1` | Staging + `wix build` driver, used locally and by CI |
+| `smsi.ps1` | Staging + `wix build` driver, used locally and by CI |
 | `../../../.github/workflows/windows-msi.yml` | CI workflow producing `Seamly2D-x64.msi` / `Seamly2D-arm64.msi` artifacts |
 
 ## Key decisions
@@ -35,8 +35,8 @@ Prerequisites (each is checked with a clear error message):
 Then:
 
 ```powershell
-.\scripts\smsi.ps1                      # x64, all three apps
-.\scripts\smsi.ps1 -Arch arm64 -NoSeamlyLayout   # arm64 (needs arm64 build trees)
+.\scripts\packaging\windows\smsi.ps1                    # x64, all three apps
+.\scripts\packaging\windows\smsi.ps1 -Arch arm64 -NoSeamlyLayout   # arm64 (needs arm64 build trees)
 ```
 
 Output: `scripts\seamly-build-msi\<arch>\Seamly2D-<arch>.msi` (gitignored). The script runs `wix msi validate` (ICE checks) automatically; the only expected warning is ICE61, a known consequence of `AllowSameVersionUpgrades`.
