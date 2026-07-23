@@ -1,0 +1,180 @@
+# Building the Windows MSI — walkthrough (Seamly2D app family)
+
+A hands-on, reproduce-it record of building the Windows `.msi` installer with
+[`smsi.ps1`](smsi.ps1), including the problems hit on a real run and how they
+were worked around. For the *design* decisions (why WiX v6, why one MSI per
+arch, install layout, upgrade codes, signing) see [`README.md`](README.md);
+for the durable build knowledge base see
+[`.github/README-BUILDS.md`](../../../.github/README-BUILDS.md).
+
+The MSI bundles all three apps — **seamly2d**, **seamlyme**, and
+**SeamlyLayout** — into one per-architecture installer
+(`Seamly2D-x64.msi` / `Seamly2D-arm64.msi`).
+
+---
+
+## 1. Prerequisites
+
+`smsi.ps1` fails early with a clear message naming whatever is missing. You
+need all of:
+
+| Requirement | This machine (2026-07-23) | Check |
+|---|---|---|
+| Release build of **seamly2d** with windeployqt output | `build\src\app\seamly2d\bin\seamly2d.exe` + `platforms\` | present |
+| Release build of **seamlyme** with windeployqt output | `build\src\app\seamlyme\bin\seamlyme.exe` | present |
+| Release build of **SeamlyLayout** | `src\app\seamlylayout\qt_frontend\build\Release\SeamlyLayout.exe` | present (see caveat §4) |
+| **WiX v6** CLI + UI extension | `wix 6.0.2`, `WixToolset.UI.wixext 6.0.2` | present |
+| **windeployqt6** from SeamlyLayout's Qt kit | Qt **6.11.1** (`C:\Qt\6.11.1\msvc2022_64\bin\windeployqt6.exe`) | present — **but the script looks for 6.10.x, see §3** |
+| **MSVC CRT redistributable** | VS 18 Community (`…\VC\Redist\MSVC\14.50.35710\x64\Microsoft.VC145.CRT`) | present (found by fallback scan) |
+
+Install the pieces that are missing:
+
+```powershell
+# WiX v6 (pinned — v7 is gated behind the OSMF EULA, error WIX7015)
+dotnet tool install --global wix --version '6.*'
+wix extension add --global WixToolset.UI.wixext/6.0.2
+
+# Release builds (parents): qmake release shadow-build into build\ (same toolchain as scripts/sd.ps1)
+# Release build (SeamlyLayout): from src/app/seamlylayout/qt_frontend
+#   cmake --preset release -DCMAKE_PREFIX_PATH=C:/Qt/<ver>/msvc2022_64
+#   cmake --build --preset release
+```
+
+The MSVC CRT does **not** require running from a VS developer prompt —
+`smsi.ps1` scans installed Visual Studios for the redist folder when
+`VCToolsRedistDir` is unset (which it was on this run). windeployqt6 will print
+`Cannot find Visual Studio installation directory, VCINSTALLDIR is not set` in
+that case; it is harmless because the script deploys the CRT app-locally itself.
+
+---
+
+## 2. The command that produced the MSI
+
+Because of the Qt-version mismatch described in §3, the plain default did **not**
+work on this machine. The invocation that succeeded:
+
+```powershell
+.\scripts\packaging\windows\smsi.ps1 -WinDeployQt6 'C:\Qt\6.11.1\msvc2022_64\bin\windeployqt6.exe'
+```
+
+Result:
+
+```
+MSI OK: …\scripts\seamly-build-msi\x64\Seamly2D-x64.msi (186.8 MB)
+```
+
+Verified with the Windows Installer COM API:
+
+| Property | Value |
+|---|---|
+| Platform (summary template) | `x64;1033` |
+| ProductName | `Seamly2D` |
+| ProductVersion | `26.7.31987` (derived from project version `2026.7.23.0507`) |
+| UpgradeCode | `{CBF4B5F1-C32C-4DBB-B385-3EE4A7B30658}` (fixed, shared by both arches) |
+| File rows | 1691 |
+
+`wix msi validate` (run automatically by the script) passed with only the
+expected **ICE61** warning — a benign consequence of `AllowSameVersionUpgrades`.
+
+### What the script does
+
+1. **Stages** a fresh tree under `scripts\seamly-build-msi\x64\`:
+   - `parent\` — seamly2d + seamlyme windeployqt trees merged (shared Qt runtime, plugins, xerces-c…) + MSVC CRT DLLs, exes removed
+   - `layout\` — `SeamlyLayout.exe` with its own Qt runtime deployed by `windeployqt6 --qmldir …\qml --release`, packaged default `settings\`, LGPL `licenses\`, + MSVC CRT DLLs, exe removed
+   - `exes\` — the three executables (authored explicitly in the `.wxs` so shortcuts/associations can reference them)
+2. Derives the MSI `ProductVersion` from `YYYY.M.D.HHMM` as `(YYYY−2000).M.((D−1)·1440 + HH·60 + MM)` (MSI caps the major field at 255), stores the full project version as `DisplayVersion`.
+3. Runs `wix build seamly-family.wxs -arch x64 -ext WixToolset.UI.wixext …` → `Seamly2D-x64.msi`.
+4. Runs `wix msi validate` (skip with `-SkipValidation`).
+
+Output and staging live in `scripts\seamly-build-msi\` (kept out of git by the
+`*-build-*` .gitignore pattern).
+
+---
+
+## 3. Problems encountered on this run
+
+These were logged as **Task 31** in [`TODO_MIGRATE.md`](../../../TODO_MIGRATE.md);
+they all stem from the family's in-progress Qt 6.10 → 6.11 migration
+(**Task 30**).
+
+### 3.1 `smsi.ps1` default invocation fails — Qt kit hard-pinned to 6.10.x  *(blocker, worked around)*
+
+`Find-WinDeployQt6` only matches `^6\.10\.\d+$` under `C:\Qt`. This machine has
+moved to Qt **6.11.1** and removed 6.10.x, so the documented default
+`.\scripts\packaging\windows\smsi.ps1` throws:
+
+```
+windeployqt6 not found under 'C:\Qt\6.10.x\msvc2022_64\bin' - install Qt 6.10.x or pass -WinDeployQt6.
+```
+
+**Workaround:** pass the tool explicitly with `-WinDeployQt6` (see §2).
+**Proper fix (Task 31):** have the script detect SeamlyLayout's *actual* Qt kit
+(e.g. read `CMAKE_PREFIX_PATH` from the build's `CMakeCache.txt`) or
+widen/parameterize the version match.
+
+### 3.2 SeamlyLayout.exe is a stale 6.10 build wrapped in a 6.11 runtime  *(functional caveat)*
+
+`src\app\seamlylayout\qt_frontend\build\Release\SeamlyLayout.exe` was compiled
+against **Qt 6.10.1** (per its `CMakeCache.txt`), which is no longer installed.
+The MSI therefore ships that 6.10-linked exe with a **6.11.1** Qt runtime
+deployed around it. It runs only by Qt's within-6.x forward binary
+compatibility — it is **not** a clean, version-matched build.
+**Proper fix (Task 30/31):** rebuild SeamlyLayout on Qt 6.11.1, then rebuild the
+MSI so the exe and its runtime match.
+
+### 3.3 MSI is ~187 MB — two full Qt runtimes shipped  *(size)*
+
+Because the parents (6.11.1) and SeamlyLayout (built on 6.10, deployed with
+6.11) are treated as different Qt releases, the MSI ships **two** runtimes: the
+shared parent runtime in `…\Seamly2D\` and SeamlyLayout's own copy in
+`…\Seamly2D\SeamlyLayout\`. Once SeamlyLayout is on 6.11.1, these collapse to a
+single shared runtime (a Task 30 subtask) and the MSI shrinks.
+
+### Benign warnings (no action needed)
+
+- `Cannot determine dependencies of …\qtposition_nmea.dll: … Qt6SerialPort.dll` — optional dependency of the NMEA positioning plugin; not used.
+- `Cannot find any version of the dxcompiler.dll and dxil.dll` — only needed for Direct3D 12 features.
+- `Cannot find Visual Studio installation directory, VCINSTALLDIR is not set` — CRT is deployed app-locally by the script instead.
+- `warning WIX1076: ICE61: … Maximum version is not less than the current product` — expected result of `AllowSameVersionUpgrades`.
+
+---
+
+## 4. Installing / testing the MSI
+
+```powershell
+cd scripts\seamly-build-msi\x64
+msiexec /i Seamly2D-x64.msi                       # interactive (license + directory page)
+msiexec /i Seamly2D-x64.msi /qn                   # silent, defaults (needs elevation)
+msiexec /i Seamly2D-x64.msi /qn INSTALLFOLDER=D:\Seamly2D   # silent, custom dir
+msiexec /x Seamly2D-x64.msi /qn                   # silent uninstall
+msiexec /a Seamly2D-x64.msi /qn TARGETDIR=C:\extract        # extract without installing
+```
+
+Manual verification checklist (clean machine — **not yet run**, see Task 13):
+
+- [ ] All three apps launch from the Start Menu shortcuts
+- [ ] seamly2d Layout Mode finds `SeamlyLayout\SeamlyLayout.exe` without configuring `paths/seamlyLayoutApp`
+- [ ] `.sm2d` opens seamly2d; `.smis`/`.smms` open SeamlyMe
+- [ ] Installing a newer MSI over an older one upgrades in place, settings retained
+- [ ] Uninstall removes `Program Files\Seamly2D` + shortcuts/associations, leaves `%LOCALAPPDATA%\Seamly` and the user's pattern data untouched
+
+---
+
+## 5. arm64
+
+```powershell
+.\scripts\packaging\windows\smsi.ps1 -Arch arm64 -NoSeamlyLayout   # needs arm64 build trees
+```
+
+seamly2d/seamlyme cross-compile for arm64 in CI (`windows-msi.yml`); SeamlyLayout
+has no arm64 build yet, so the arm64 MSI ships the two parent apps only
+(`-NoSeamlyLayout`). Not built on this machine (no arm64 build trees present).
+
+---
+
+## 6. CI equivalent
+
+`.github/workflows/windows-msi.yml` runs the same `smsi.ps1` against its
+in-source CI build output (matrix x64/arm64), installs the required Qt kits,
+signs the MSI with `jsign`/Google Cloud KMS when the `SEAMLY_SIGNING_*` secrets
+are present (unsigned otherwise), and uploads the MSI artifact.
