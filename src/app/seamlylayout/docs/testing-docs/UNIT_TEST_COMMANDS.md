@@ -3,6 +3,27 @@
 
 This document contains unit test commands for testing the SeamlyLayout workspace crates.
 
+## Prerequisite: point `QMAKE` at the real Qt kit
+
+Any workspace-wide `cargo` command builds `cxxqt_bridge`, whose `cxx-qt-build`
+build script finds Qt via the **`QMAKE`** environment variable and otherwise
+falls back to the first bare `qmake` on `PATH`. Export it before running the
+commands below:
+
+```powershell
+$env:QMAKE = "C:\Qt\6.11.1\msvc2022_64\bin\qmake.exe"
+```
+
+```bash
+export QMAKE=/path/to/Qt/6.11.1/gcc_64/bin/qmake
+```
+
+Skipping this on a machine with **Qt Design Studio** installed picks up its
+stripped `qt6_design_studio_reduced_version` Qt, which has no `mkspecs`
+directory, and the build fails naming that path. Builds driven through
+`build.ps1` set `QMAKE` themselves and are unaffected; CI sets it in
+`.github/workflows/seamlylayout-ci.yml`.
+
 ## General Test Commands
 
 ### Run Build Validation Suite (includes 3MF validation)

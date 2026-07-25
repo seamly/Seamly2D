@@ -293,3 +293,28 @@ Error: dependent 'C:\Qt\6.10.1\msvc2022_64\lib\Qt6Cored.lib' does not exist.
 - [ ] Better: detect the mismatch automatically — record the qmake path used (or read it back from the generated top-level Makefile) and wipe/regenerate the tree when the detected kit differs, so a Qt upgrade never produces the misleading error above
 - [ ] Note the same hazard for the release `build/` tree in `.github/README-BUILDS.md` (and mention the wipe in `sd.ps1`'s `.SYNOPSIS`/`.DESCRIPTION`)
 - [ ] Check whether `scripts/st.ps1` (unit tests) shares the same stale-Makefile behaviour and fix it the same way if so
+
+## Task 47 — Bare `qmake` on PATH resolves to Qt Design Studio's reduced Qt (no `mkspecs`) (found doing Task 30, 2026-07-25)
+
+On the developer PC the `qmake` first on `PATH` is **not** the build kit:
+
+```text
+qmake on PATH : C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version\bin\qmake.exe
+  qmake -query QT_INSTALL_PREFIX -> C:/Qt/Tools/QtDesignStudio/qt6_design_studio_reduced_version
+  that prefix has NO mkspecs directory
+real build kit : C:\Qt\6.11.1\msvc2022_64\bin\qmake.exe   (mkspecs at C:\Qt\6.11.1\msvc2022_64\mkspecs)
+```
+
+Qt Design Studio ships a stripped Qt with no `mkspecs/`, so anything invoking a bare `qmake` gets a Qt that cannot supply a spec, and the build fails pointing at the Design Studio path instead of `C:\Qt\6.11.1\msvc2022_64\mkspecs`.
+
+What is and is not affected:
+
+- **`scripts/sd.ps1` — safe.** `Find-QtQmake` resolves an absolute path and the generated batch calls that, never a bare `qmake`.
+- **`cargo` builds of SeamlyLayout — exposed.** `cxx-qt-build` locates Qt via the `QMAKE` environment variable, falling back to `qmake` on `PATH`. `src/app/seamlylayout/build.ps1` selects a kit for CMake (`CMAKE_PREFIX_PATH`) but does **not** export `QMAKE` or put the kit's `bin\` first on `PATH`, so a direct `cargo build`/`cargo test --workspace` in that workspace picks up the Design Studio Qt. (Working around this by hand — `$env:QMAKE = 'C:\Qt\6.11.1\msvc2022_64\bin\qmake.exe'` — was required to run the Task 30 verification.)
+- **Qt Creator — kit configuration.** If Creator builds against the reduced Qt, its kit's Qt version is pointing there; set it to `C:\Qt\6.11.1\msvc2022_64\bin\qmake.exe`.
+- **CI — unaffected.** `install-qt-action` puts the correct Qt first on `PATH`, and `seamlylayout-ci.yml` already exports `QMAKE: qmake` as a belt-and-braces fallback.
+
+- [X] Make `src/app/seamlylayout/build.ps1` export `QMAKE` (and prepend `<kit>\bin` to `PATH`) for the kit it already selects, so Corrosion/cxx-qt-build can never fall back to the Design Studio Qt — done: after the kit is chosen the script resolves `<kit>\bin\qmake.exe`, sets `$env:QMAKE` and prepends `<kit>\bin` to `$env:PATH`, and prints the pinned qmake. Both settings are inherited by the `cmd.exe` the script spawns for cmake/cargo (verified: `where qmake` inside that child lists the 6.11.1 kit first and `%QMAKE%` is set)
+- [X] Do the same for any documented bare `cargo build` / `cargo test --workspace` invocation in the SeamlyLayout docs (`README.md`, `.claude/rules/testing.mdc`), or note the required `QMAKE` export there — documented in `README.md` (the "Rust-only checks" section, which also wrongly claimed "no Qt required" — `cxxqt_bridge` does need it) and `docs/testing-docs/UNIT_TEST_COMMANDS.md` (new prerequisite section), both with the PowerShell and bash export forms and the Design Studio explanation. `.claude/rules/testing.mdc` documents no bare workspace `cargo` invocation, so it needed no change
+- [X] Consider a guard: if the resolved `qmake -query QT_INSTALL_PREFIX` has no `mkspecs\` directory, fail early naming the real kit instead of letting the build produce a confusing spec error — added to `build.ps1`: it queries `QT_INSTALL_PREFIX` from the selected qmake and aborts with a message naming the offending prefix when that prefix has no `mkspecs\`. Verified the guard accepts `C:\Qt\6.11.1\msvc2022_64` and rejects `C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version`
+- [ ] Optional developer-environment cleanup: reorder `PATH` so the real kit's `bin\` precedes `C:\Qt\Tools\QtDesignStudio\...\bin`, or drop the Design Studio entry from `PATH` entirely — left to the developer; the script-level pinning above makes it unnecessary for repo builds, but it would also fix Qt Creator kit auto-detection and any ad-hoc `qmake` use

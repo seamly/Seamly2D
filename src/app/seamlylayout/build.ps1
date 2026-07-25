@@ -73,6 +73,40 @@ if (-not $QtPath) {
 $QtPath = $QtPath -replace '\\', '/'
 Write-Host "  Qt kit: $QtPath"
 
+# ---------------------------------------------------------------------------
+# Task 47: pin the Qt that Cargo/cxx-qt-build sees to the kit selected above.
+#
+# CMake is told which Qt to use via -DCMAKE_PREFIX_PATH, but the Rust half of
+# the build is not: cxx-qt-build locates Qt through the QMAKE environment
+# variable, falling back to whatever bare `qmake` is first on PATH. On a
+# machine with Qt Design Studio installed that fallback is
+# C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version\bin\qmake.exe —
+# a stripped Qt with NO mkspecs directory — so the build fails naming that path
+# instead of the real kit's mkspecs. Exporting QMAKE and putting the kit's bin\
+# first on PATH makes the fallback unreachable, for this script and for any
+# `cargo build` / `cargo test` run in the shell it spawns.
+# ---------------------------------------------------------------------------
+$QtBin   = (Join-Path ($QtPath -replace '/', '\') "bin")
+$QtQmake = Join-Path $QtBin "qmake.exe"
+
+if (-not (Test-Path $QtQmake)) {
+    Write-Error "qmake.exe not found in the selected kit: $QtQmake"
+    exit 1
+}
+
+# Guard against a Qt whose prefix ships no mkspecs (the Design Studio reduced
+# Qt is exactly this). Failing here names the real problem; letting the build
+# proceed produces a confusing "could not find qmake spec" pointing elsewhere.
+$QtPrefix = (& $QtQmake -query QT_INSTALL_PREFIX) -replace '/', '\'
+if (-not (Test-Path (Join-Path $QtPrefix "mkspecs"))) {
+    Write-Error "Qt kit at '$QtPrefix' has no mkspecs directory - it is not a full Qt installation (a Qt Design Studio reduced Qt looks like this). Install/select a full msvc2022_64 kit."
+    exit 1
+}
+
+$env:QMAKE = $QtQmake
+$env:PATH  = "$QtBin;$env:PATH"
+Write-Host "  qmake : $QtQmake (QMAKE exported, kit bin prepended to PATH)"
+
 if (-not (Test-Path $VcVarsAll)) {
     Write-Error "VS 2025 vcvars64.bat not found at: $VcVarsAll"
     exit 1

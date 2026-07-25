@@ -54,11 +54,34 @@ From [qt_frontend/](qt_frontend/) (any platform):
 ./run_debug.ps1          # run the debug binary
 ```
 
-Rust-only checks (no Qt required):
+Rust-only checks:
 
 - `cargo build` — build all workspace crates.
 - `cargo test` — run Rust tests (most coverage is in `geometry`).
 - `cargo fmt && cargo clippy -- -D warnings` — format and lint.
+
+Most crates need no Qt, but the workspace also contains `cxxqt_bridge`, whose
+build script (`cxx-qt-build`) locates Qt through the **`QMAKE`** environment
+variable, falling back to whatever bare `qmake` is first on `PATH`. Point it at
+the same kit `build.ps1` uses before running a workspace-wide `cargo` command:
+
+```powershell
+$env:QMAKE = "C:\Qt\6.11.1\msvc2022_64\bin\qmake.exe"
+cargo test --workspace
+```
+
+```bash
+export QMAKE=/path/to/Qt/6.11.1/gcc_64/bin/qmake
+cargo test --workspace
+```
+
+This matters on machines with **Qt Design Studio** installed: its bundled
+`C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version\bin\qmake.exe`
+often comes first on `PATH` and is a stripped Qt with **no `mkspecs`
+directory**, so the build fails naming that path instead of the real kit.
+`build.ps1` exports `QMAKE` and prepends its selected kit's `bin\` to `PATH`
+(and refuses a Qt with no `mkspecs`), so builds driven through it are immune —
+only bare `cargo` invocations in a plain shell need the export above.
 
 ## CLI
 
