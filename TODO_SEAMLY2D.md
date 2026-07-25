@@ -34,3 +34,15 @@ Go through every command-line option seamly2d advertises (defined in `src/libs/v
 - [ ] Consider case-insensitive or consistently lowercase option aliases (keeping the existing names working for compatibility)
 - [ ] Unit tests: extend `tst_vcommandline` to cover every option and the failure modes found
 - [ ] Update `--help` text and repo docs with the verified behavior
+
+## Task 42 — Seamly2D: default the Open dialog to the user measurements/individual directory
+
+Today Seamly2D's **Open** dialog starts in the last-opened file's folder, or `QDir::homePath()` when there is no recent file (`src/app/seamly2d/mainwindow.cpp:4357-4372`). The request is to have its file picker open to `<seamly_user_directory>\measurements\individual` — the individual-measurements folder, which SeamlyMe already derives from `VCommonSettings::getIndividualSizePath()` (default `<dataRoot>/measurements/individual`, `src/libs/vmisc/vcommonsettings.cpp:429`). `<seamly_user_directory>` = the shared relocatable data root (Task 34).
+
+**Flag — confirm the intended dialog first:** Seamly2D's `Open` loads `.sm2d`/`.val` **pattern** files, which are *not* stored under `measurements/individual`; pointing the pattern picker there would show an empty/filtered list. The semantically matching dialogs are Seamly2D's **Load Individual / Load Multisize measurements** (`MainWindow::LoadIndividual()` ~line 2047, `LoadMultisize()` ~line 2088), which parallel SeamlyMe's Open* (Task 43). Decide whether this targets (a) the pattern `Open` dialog literally, or (b) the measurement-load dialogs, before implementing.
+
+- [ ] Confirm the target dialog (pattern `Open` vs `Load Individual`/`Load Multisize`) per the flag above
+- [ ] Point the chosen dialog's initial directory at `getIndividualSizePath()` (creating the folder if absent, as SeamlyMe's `OpenIndividual()` does) instead of `homePath()`/last-file-dir
+- [ ] Derive the path from the shared relocatable data root (Task 34) so it tracks a user-configured/renamed `<seamly_user_directory>`, not the hardcoded `~/seamly2d`
+- [ ] Verify the picker opens at the correct folder both with and without an existing `measurements/individual` directory
+- [ ] Doxygen briefs + inline comments on the touched function(s)

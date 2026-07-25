@@ -1,13 +1,13 @@
 # Future TODO's
 
-Add tasks in TODO.md -->
+Add task in TODO_MIGRATE.md -->
 
-1.
+Add task in TODO_SEAMLY2D.md -->
 
-Add rules to CLAUDE.md -->
+Add task in TODO_SEAMLYME.md -->
+
+Add rule to CLAUDE.md -->
 
 1.
 
 Ask Claude -->
-
-1.
