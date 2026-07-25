@@ -1,7 +1,7 @@
 // project: SeamlyLayout
 // author: slspencer, copyright 2026
 // LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
-// Main.qml — Root ApplicationWindow for SeamlyLayout Qt 6.10 frontend.
+// Main.qml — Root ApplicationWindow for SeamlyLayout Qt 6.11 frontend.
 //
 // Note on startup console messages:
 //   QQmlApplicationEngine creates an internal QQuickWindow when loading this
@@ -24,10 +24,10 @@
 //   │  [Adjust action bar — hidden when inactive]  │
 //   └─────────────────────────────────────────────┘
 
-import QtQuick 6.10
-import QtQuick.Controls 6.10
-import QtQuick.Dialogs 6.10
-import QtQuick.Layouts 6.10
+import QtQuick 6.11
+import QtQuick.Controls 6.11
+import QtQuick.Dialogs 6.11
+import QtQuick.Layouts 6.11
 import SeamlyLayout
 
 ApplicationWindow {

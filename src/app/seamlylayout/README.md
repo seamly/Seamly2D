@@ -1,14 +1,14 @@
 <!-- Qt frontend: LGPL-3.0 (https://www.gnu.org/licenses/lgpl-3.0.html) | Rust core: MIT (https://opensource.org/licenses/MIT) -->
 # SeamlyLayout
 
-A pattern layout application — daughter app to Seamly2D. SeamlyLayout is a **Qt 6 / C++ / Rust** hybrid: a Qt 6.10 QML + QtWidgets frontend bound to a Rust workspace core through the CXX-Qt bridge.
+A pattern layout application — daughter app to Seamly2D. SeamlyLayout is a **Qt 6 / C++ / Rust** hybrid: a Qt 6.11 QML + QtWidgets frontend bound to a Rust workspace core through the CXX-Qt bridge.
 
 - **Author:** slspencer
 - **Copyright:** 2026
 
 ## Architecture
 
-- **Frontend:** Qt 6.10 + QML + QtWidgets (C++), licensed LGPL-3.0. Lives in [qt_frontend/](qt_frontend/).
+- **Frontend:** Qt 6.11 + QML + QtWidgets (C++), licensed LGPL-3.0. Lives in [qt_frontend/](qt_frontend/).
 - **Core:** Rust crates under [crates/](crates/), licensed MIT.
 - **Bridge:** [CXX-Qt](https://github.com/KDAB/cxx-qt) 0.7 generates C++ glue from Rust in [crates/cxxqt_bridge/](crates/cxxqt_bridge/).
 - **Dual license:** the Qt frontend (LGPL-3.0) and Rust core (MIT) are de-linkable.
@@ -30,7 +30,7 @@ A pattern layout application — daughter app to Seamly2D. SeamlyLayout is a **Q
 ## Prerequisites
 
 - **Rust** (stable, 2024 edition ready): `rustup install stable && rustup default stable`.
-- **Qt 6.10** with QML, QtWidgets, and Qt Quick modules.
+- **Qt 6.11** with QML, QtWidgets, and Qt Quick modules.
 - **CMake** ≥ 3.21 and a C++17 toolchain (MSVC on Windows, Clang/GCC on Linux/macOS).
 - See [.claude/rules/dependencies.mdc](.claude/rules/dependencies.mdc) for the exact Qt module list and crate versions.
 

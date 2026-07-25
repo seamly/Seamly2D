@@ -11,7 +11,7 @@ param(
 )
 
 Write-Host "Starting build process for SeamlyLayout..."
-Write-Host "Requires Rust 2021, Qt 6.10.1, and Visual Studio 2025 Community Edition with C++ workload installed..."
+Write-Host "Requires Rust 2021, Qt 6.11.1, and Visual Studio 2025 Community Edition with C++ workload installed..."
 Write-Host "Ignore warnings about missing WrapVulkanHeaders..."
 Write-Host "Ignore warnings about missing pthreads..."
 
@@ -35,16 +35,43 @@ if ((Test-Path (Join-Path $ScriptDir "CMakeLists.txt")) -and (Test-Path (Join-Pa
     exit 1
 }
 
-$QtPath = "C:/Qt/6.10.1/msvc2022_64"
+# Qt kit (Task 30): SeamlyLayout builds against the same Qt release as the
+# seamly2d/seamlyme parent apps — Qt 6.11.1 msvc2022_64 or newer. Rather than
+# pinning one patch release (which broke the moment 6.10.1 was uninstalled),
+# scan C:\Qt for msvc2022_64 kits and take the newest one that meets the
+# minimum required by qt_frontend/CMakeLists.txt's find_package(Qt6 6.11.1).
+$QtMinimumVersion = [version]"6.11.1"
+$QtRoot = "C:\Qt"
+$QtPath = $null
+
+if (Test-Path $QtRoot) {
+    # Version-sort the kit directories so 6.11.10 beats 6.11.9 (string sort would not),
+    # keep only those that actually ship an msvc2022_64 kit, and take the newest.
+    $QtPath = Get-ChildItem -LiteralPath $QtRoot -Directory -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            $parsed = $null
+            if ([version]::TryParse($_.Name, [ref]$parsed)) {
+                [pscustomobject]@{ Version = $parsed; Path = (Join-Path $_.FullName "msvc2022_64") }
+            }
+        } |
+        Where-Object { $_.Version -ge $QtMinimumVersion -and (Test-Path $_.Path) } |
+        Sort-Object Version -Descending |
+        Select-Object -First 1 -ExpandProperty Path
+}
+
 $VsPath = "C:\Program Files\Microsoft Visual Studio\18\Community"
 $VcVarsAll = "$VsPath\VC\Auxiliary\Build\vcvars64.bat"
 
 Write-Host "2 Verifying prerequisites..."
 # Verify prerequisites
-if (-not (Test-Path $QtPath)) {
-    Write-Error "Qt not found at: $QtPath"
+if (-not $QtPath) {
+    Write-Error "No Qt $QtMinimumVersion+ msvc2022_64 kit found under '$QtRoot' - install Qt 6.11.1 (msvc2022_64) first."
     exit 1
 }
+
+# CMake wants forward slashes in CMAKE_PREFIX_PATH
+$QtPath = $QtPath -replace '\\', '/'
+Write-Host "  Qt kit: $QtPath"
 
 if (-not (Test-Path $VcVarsAll)) {
     Write-Error "VS 2025 vcvars64.bat not found at: $VcVarsAll"

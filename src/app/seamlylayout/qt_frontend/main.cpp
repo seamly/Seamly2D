@@ -3,7 +3,7 @@
 // LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
 
 // @file main.cpp
-// @brief Application entry point for the SeamlyLayout Qt 6.10 + QML frontend.
+// @brief Application entry point for the SeamlyLayout Qt 6.11 + QML frontend.
 //
 // Initialises QApplication (supports both QML and QtWidgets windows),
 // sets application metadata and icon, configures the Quick Controls 2 style,

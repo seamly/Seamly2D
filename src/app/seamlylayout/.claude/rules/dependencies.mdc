@@ -35,12 +35,12 @@ All crates live under `crates/` and are versioned together via the workspace `Ca
 
 ## Qt Frontend (Active — see TODO.md)
 
-The Qt 6.10.1 + QML frontend lives under `qt_frontend/` (Phase 1 and Phase 2a–2f complete).
+The Qt 6.11.1 + QML frontend lives under `qt_frontend/` (Phase 1 and Phase 2a–2f complete).
 It replaces `ui_desktop` and calls Rust core crates via the `cxxqt_bridge` CXX-Qt bridge.
 
 | Tool | Version | Purpose |
 |------|---------|---------|
-| Qt | 6.10.1 | UI framework (LGPLv3); installed at `C:/Qt/6.10.1/msvc2022_64/` |
+| Qt | 6.11.1 | UI framework (LGPLv3); installed at `C:/Qt/6.11.1/msvc2022_64/` |
 | CMake | ≥ 3.28 | Qt build system |
 | Ninja | any | Build backend (via cmake preset) |
 | Qt Modules | Core, Gui, Quick, QuickControls2, QuickDialogs2, Svg, PrintSupport, WebEngineQuick | Required (all LGPLv3 — no GPL modules) |

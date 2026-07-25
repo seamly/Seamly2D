@@ -45,14 +45,22 @@
     (it is used only for wix patch/melt diffing, not by the installer).
 
     Staging layout (mirrors what the MSI installs):
-      parent\  seamly2d + seamlyme windeployqt trees merged (Qt runtime,
-               plugins, xerces-c, ...) plus the MSVC CRT DLLs, minus the exes
-      layout\  SeamlyLayout Qt runtime — windeployqt6 is run here against the
-               staged exe — plus packaged default settings\ and licenses\ and
-               the MSVC CRT DLLs, minus the exe
+      parent\  the ONE Qt runtime every app in the package shares: seamly2d +
+               seamlyme windeployqt trees merged with SeamlyLayout's
+               windeployqt6 output (Qt DLLs, plugins, QML modules,
+               QtWebEngineProcess.exe, xerces-c, ...) plus SeamlyLayout's
+               packaged settings\ and licenses\ and the MSVC CRT DLLs,
+               minus the exes
       exes\    seamly2d.exe, seamlyme.exe, SeamlyLayout.exe (authored
                explicitly in the .wxs so shortcuts/associations can reference
-               them; kept out of the wildcard-harvested trees above)
+               them; kept out of the wildcard-harvested tree above)
+
+    Task 30 merged what used to be a separate layout\ staging tree (installed
+    into a ...\Seamly2D\SeamlyLayout\ subdirectory with its own private Qt
+    copy) into parent\. That split existed only because SeamlyLayout was built
+    against a different Qt release than the parent apps and Qt's DLL file names
+    are identical across releases; all three now build against Qt 6.11.1, so
+    one runtime serves them all and the MSI is correspondingly smaller.
 
     PREREQUISITES (the script fails early naming whatever is missing):
       * release builds of seamly2d/seamlyme with windeployqt output in their
@@ -94,9 +102,13 @@
     SeamlyLayout has an arm64 build (see .github\README-BUILDS.md).
 
 .PARAMETER WinDeployQt6
-    Full path of windeployqt6.exe from SeamlyLayout's Qt kit. Default: the
-    newest C:\Qt\6.10.x\msvc2022_64\bin\windeployqt6.exe (CI passes the
-    installed Qt explicitly).
+    Full path of windeployqt6.exe from SeamlyLayout's Qt kit. Default: the kit
+    SeamlyLayout was actually built against, read from CMAKE_PREFIX_PATH in its
+    build directory's CMakeCache.txt, falling back to the newest
+    C:\Qt\<version>\msvc2022_64 kit. (CI passes the installed Qt explicitly.)
+    Deliberately NOT pinned to a hard-coded Qt version — Task 31: the old
+    ^6\.10\.\d+$ pin made the documented default invocation fail outright once
+    the 6.10 kit was uninstalled.
 
 .PARAMETER SkipValidation
     Skip the `wix msi validate` (ICE) pass after the build.
@@ -216,28 +228,64 @@ function ConvertTo-MsiVersion {
 }
 
 #------------------------------------------------------------------------------
-# @brief  Locate windeployqt6.exe from the newest Qt 6.10.x msvc2022_64 kit.
+# @brief  Locate the windeployqt6.exe belonging to SeamlyLayout's Qt kit.
 #
-# Mirrors sd.ps1's Find-QtQmake: scans C:\Qt for 6.10.<patch> version dirs,
-# newest first, and returns the first kit that ships the deploy tool
-# (falling back to the unsuffixed windeployqt.exe name).
+# Task 31: this used to be hard-pinned to '^6\.10\.\d+$', so the documented
+# default invocation threw as soon as the 6.10 kit was uninstalled, and it could
+# silently deploy a runtime from a different Qt release than the exe was linked
+# against. It now follows the build instead of a fixed version:
 #
+#   1. Read CMAKE_PREFIX_PATH out of SeamlyLayout's CMakeCache.txt — that is
+#      literally the kit the staged SeamlyLayout.exe was compiled and linked
+#      against, so its deploy tool always matches the binary.
+#   2. Fall back to the newest C:\Qt\<version>\msvc2022_64 kit (any 6.x), so a
+#      clean tree with no build cache still resolves.
+#
+# Either way the unsuffixed windeployqt.exe is accepted as an alternate name.
+#
+# @param  BuildDir  SeamlyLayout's release build directory (holds CMakeCache.txt)
 # @return Full path of the deploy tool.
 #------------------------------------------------------------------------------
 function Find-WinDeployQt6 {
+    param([string]$BuildDir)
+
+    #--- 1. the kit recorded in SeamlyLayout's own CMake cache ----------------
+    $cache = Join-Path $BuildDir 'CMakeCache.txt'
+    if (Test-Path $cache) {
+        # CMAKE_PREFIX_PATH:PATH=C:/Qt/6.11.1/msvc2022_64 (forward slashes, and
+        # possibly a ';'-separated list — the Qt kit is the entry that has the
+        # deploy tool under bin\).
+        $entry = Select-String -LiteralPath $cache -Pattern '^CMAKE_PREFIX_PATH:[A-Z]+=(.+)$' |
+            Select-Object -First 1
+        if ($entry) {
+            foreach ($prefix in $entry.Matches[0].Groups[1].Value.Split(';')) {
+                foreach ($name in @('windeployqt6.exe', 'windeployqt.exe')) {
+                    $tool = Join-Path $prefix.Trim() "bin\$name"
+                    if ($prefix.Trim() -and (Test-Path $tool)) { return (Resolve-Path $tool).Path }
+                }
+            }
+        }
+    }
+
+    #--- 2. newest installed msvc2022_64 kit, whatever its version -----------
     $qtRoot = 'C:\Qt'
     if (Test-Path $qtRoot) {
-        $kits = Get-ChildItem $qtRoot -Directory |
-            Where-Object { $_.Name -match '^6\.10\.\d+$' } |
-            Sort-Object { [version]$_.Name } -Descending
+        $kits = Get-ChildItem $qtRoot -Directory -ErrorAction SilentlyContinue |
+            ForEach-Object {
+                $parsed = $null
+                if ([version]::TryParse($_.Name, [ref]$parsed)) {
+                    [pscustomobject]@{ Version = $parsed; Dir = $_.FullName }
+                }
+            } |
+            Sort-Object Version -Descending
         foreach ($kit in $kits) {
             foreach ($name in @('windeployqt6.exe', 'windeployqt.exe')) {
-                $tool = Join-Path $kit.FullName "msvc2022_64\bin\$name"
+                $tool = Join-Path $kit.Dir "msvc2022_64\bin\$name"
                 if (Test-Path $tool) { return $tool }
             }
         }
     }
-    throw "windeployqt6 not found under '$qtRoot\6.10.x\msvc2022_64\bin' - install Qt 6.10.x or pass -WinDeployQt6."
+    throw "windeployqt6 not found - no CMAKE_PREFIX_PATH kit in '$cache' and no msvc2022_64 kit under '$qtRoot'. Install Qt (msvc2022_64) or pass -WinDeployQt6."
 }
 
 #------------------------------------------------------------------------------
@@ -313,7 +361,7 @@ if (-not $uiExtensionInstalled) {
     throw "The WiX UI extension is missing - run: wix extension add --global WixToolset.UI.wixext/<wix version, e.g. 6.0.2>"
 }
 
-if ($includeLayout -and -not $WinDeployQt6) { $WinDeployQt6 = Find-WinDeployQt6 }
+if ($includeLayout -and -not $WinDeployQt6) { $WinDeployQt6 = Find-WinDeployQt6 -BuildDir $SeamlyLayoutBuildDir }
 $crtDir = Find-CrtDirectory -Architecture $Arch
 $msiVersion = ConvertTo-MsiVersion -ProjectVersion $Version
 
@@ -331,16 +379,18 @@ Write-Host "msvc crt    : $crtDir"
 
 # --- Stage ---------------------------------------------------------------------
 # Fresh staging tree per run:
-# <repo>\scripts\seamly-build-msi\<arch>\{parent,layout,exes}
+# <repo>\scripts\seamly-build-msi\<arch>\{parent,exes}
 # (the *-build-* .gitignore pattern keeps all of it untracked). The output lives
 # at the scripts\ root — a sibling of scripts\seamly2d-build-debug\ from sd.ps1 —
 # not beside this script, so it is anchored to $repoRoot.
+#
+# 'parent' is now the ONE shared runtime tree for every app in the package
+# (Task 30); the separate 'layout' tree it used to sit beside is gone.
 $stageRoot = Join-Path $repoRoot "scripts\seamly-build-msi\$Arch"
 if (Test-Path $stageRoot) {
     Remove-Item $stageRoot -Recurse -Force
 }
 $parentDir = Join-Path $stageRoot 'parent'
-$layoutDir = Join-Path $stageRoot 'layout'
 $exesDir   = Join-Path $stageRoot 'exes'
 New-Item -ItemType Directory -Force -Path $parentDir, $exesDir | Out-Null
 
@@ -357,22 +407,27 @@ Move-Item -Path (Join-Path $parentDir 'seamly2d.exe') -Destination $exesDir
 Move-Item -Path (Join-Path $parentDir 'seamlyme.exe') -Destination $exesDir
 
 if ($includeLayout) {
-    Write-Host "staging SeamlyLayout runtime (windeployqt6)..."
-    New-Item -ItemType Directory -Force -Path $layoutDir | Out-Null
+    Write-Host "staging SeamlyLayout runtime (windeployqt6) into the shared tree..."
 
-    # Deploy the Qt 6.10 runtime against a staged copy of the exe so the build
-    # tree stays pristine; --qmldir points windeployqt6 at the QML sources so
-    # it can resolve the app's QML module imports.
-    Copy-Item -Path (Join-Path $SeamlyLayoutBuildDir 'SeamlyLayout.exe') -Destination $layoutDir
+    # Task 30: deploy SeamlyLayout's Qt runtime into the SAME tree as the parent
+    # apps'. All three are built against Qt 6.11.1, so wherever the two
+    # windeployqt runs produce the same DLL it is the same file — what
+    # SeamlyLayout adds on top is the QML module tree, Qt Quick/WebEngine DLLs
+    # and QtWebEngineProcess.exe. Deploying against a staged copy of the exe
+    # keeps the build tree pristine; --qmldir points windeployqt6 at the QML
+    # sources so it can resolve the app's QML module imports.
+    Copy-Item -Path (Join-Path $SeamlyLayoutBuildDir 'SeamlyLayout.exe') -Destination $parentDir
     $qmlDir = Join-Path $repoRoot 'src\app\seamlylayout\qt_frontend\qml'
     Invoke-Tool -Description 'windeployqt6' -Exe $WinDeployQt6 -Arguments @(
-        '--qmldir', $qmlDir, '--release', (Join-Path $layoutDir 'SeamlyLayout.exe'))
+        '--qmldir', $qmlDir, '--release', (Join-Path $parentDir 'SeamlyLayout.exe'))
 
     # Packaged default settings (read-only legacy-migration source / first-run
-    # seed). preferences.json is deliberately excluded: it contains per-user
-    # paths (same exclusion as the Inno Setup script SeamlyLayout.iss).
+    # seed), read by SeamlyLayout from <exeDir>\settings\. preferences.json is
+    # deliberately excluded: it contains per-user paths (same exclusion as the
+    # Inno Setup script SeamlyLayout.iss). The parent apps ship no settings\
+    # directory, so nothing collides in the now-shared tree.
     $settingsSrc = Join-Path $repoRoot 'src\app\seamlylayout\qt_frontend\settings'
-    $settingsDst = Join-Path $layoutDir 'settings'
+    $settingsDst = Join-Path $parentDir 'settings'
     New-Item -ItemType Directory -Force -Path $settingsDst | Out-Null
     foreach ($file in @('default_settings.json', 'B0.json', 'roll_36in.json', 'roll_48in.json')) {
         Copy-Item -Path (Join-Path $settingsSrc $file) -Destination $settingsDst
@@ -381,21 +436,19 @@ if ($includeLayout) {
     # LGPL compliance notices for the bundled Qt runtime.
     $licensesSrc = Join-Path $repoRoot 'src\app\seamlylayout\packaging\licenses'
     if (Test-Path $licensesSrc) {
-        $licensesDst = Join-Path $layoutDir 'licenses'
+        $licensesDst = Join-Path $parentDir 'licenses'
         New-Item -ItemType Directory -Force -Path $licensesDst | Out-Null
         Copy-Item -Path (Join-Path $licensesSrc '*.txt') -Destination $licensesDst
     }
 
-    Move-Item -Path (Join-Path $layoutDir 'SeamlyLayout.exe') -Destination $exesDir
+    Move-Item -Path (Join-Path $parentDir 'SeamlyLayout.exe') -Destination $exesDir
 }
 
-# MSVC CRT app-local deployment: every directory containing an exe gets the
-# runtime DLLs, since PATH-independent DLL resolution is per-directory.
+# MSVC CRT app-local deployment: the directory holding the exes gets the runtime
+# DLLs, since PATH-independent DLL resolution is per-directory. With one shared
+# install directory that is a single copy for all three apps.
 Write-Host "staging MSVC CRT runtime..."
 Copy-Item -Path (Join-Path $crtDir '*.dll') -Destination $parentDir -Force
-if ($includeLayout) {
-    Copy-Item -Path (Join-Path $crtDir '*.dll') -Destination $layoutDir -Force
-}
 
 # --- Build the MSI -------------------------------------------------------------
 $wxs = Join-Path $PSScriptRoot 'seamly-family.wxs'
@@ -417,7 +470,9 @@ $wixArguments = @(
     '-o', $msi
 )
 if ($includeLayout) {
-    $wixArguments += @('-d', 'IncludeSeamlyLayout=1', '-d', "LayoutStagingDir=$layoutDir")
+    # No LayoutStagingDir any more — SeamlyLayout's runtime is merged into
+    # ParentStagingDir (Task 30), so the .wxs harvests one tree.
+    $wixArguments += @('-d', 'IncludeSeamlyLayout=1')
 }
 
 Write-Host "running wix build..."

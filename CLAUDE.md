@@ -13,15 +13,16 @@ Pattern drafting application — parent app of the Seamly family.
 - Qt 6 / C++ (QtWidgets), built with qmake (two toolchains — see Build Notes)
 - Apps: `src/app/seamly2d` (pattern drafting), `src/app/seamlyme` (measurements)
 - Shared libraries under `src/libs/` (`vlayout`, `vformat`, `vpatterndb`, `ifc`, ...)
-- `src/app/seamlylayout/` — daughter layout app (Rust + Qt 6.10/QML), tracked directly in this repo like seamlyme; it has its own build (`src/app/seamlylayout/qd.ps1`) and must stay out of the Seamly2D qmake build. It has its own CLAUDE.md and rules.
+- `src/app/seamlylayout/` — daughter layout app (Rust + Qt 6.11/QML), tracked directly in this repo like seamlyme; it has its own build (`src/app/seamlylayout/qd.ps1`) and must stay out of the Seamly2D qmake build. It has its own CLAUDE.md and rules.
 
 ## Build Notes
 
-Two toolchains are in use — do not treat the difference as an error:
+Since **Task 30** all three apps — seamly2d, seamlyme and seamlyLayout — build against the **same Qt release, 6.11.1**; there is no longer a separate Qt for the daughter app:
 
-- **CI toolchain (GitHub runner):** Qt 6.8.3 + MSVC 2022 — a selection of tools available on GitHub's hosted runners; used by the release/CI workflows
-- **Local toolchain (developer PC, check builds of current work):** Qt 6.10.1 `msvc2022_64` + VS 18 Community MSVC (`vcvars64.bat`), qmake + jom; release shadow-build in `build/` (gitignored)
-- Local debug build: `scripts/sd.ps1` ("seamly2d debug") — auto-detects the newest Qt 6.10.x msvc2022_64 kit under `C:\Qt` and the VS 18 Community MSVC environment, then shadow-builds `CONFIG+=debug` into `scripts/seamly2d-build-debug/` (gitignored); the debug exe lands at `scripts/seamly2d-build-debug/src/app/seamly2d/bin/seamly2d.exe` with Qt debug DLLs deployed by windeployqt. `-Run` launches it after the build; see the script's `.SYNOPSIS` for details.
+- **CI toolchain (GitHub runner):** Qt 6.11.1 + MSVC 2022 — `QT_VERSION` in `ci.yml`, `seamlylayout-ci.yml` and `windows-msi.yml` must all name this one release
+- **Local toolchain (developer PC, check builds of current work):** Qt 6.11.1 `msvc2022_64` + VS 18 Community MSVC (`vcvars64.bat`), qmake + jom for the parents / CMake + Ninja + Cargo for seamlyLayout; release shadow-build in `build/` (gitignored)
+- Local debug build: `scripts/sd.ps1` ("seamly2d debug") — auto-detects the newest Qt msvc2022_64 kit (6.11.1 or newer) under `C:\Qt` and the VS 18 Community MSVC environment, then shadow-builds `CONFIG+=debug` into `scripts/seamly2d-build-debug/` (gitignored); the debug exe lands at `scripts/seamly2d-build-debug/src/app/seamly2d/bin/seamly2d.exe` with Qt debug DLLs deployed by windeployqt. `-Run` launches it after the build; see the script's `.SYNOPSIS` for details.
+- **Local Qt kit must include** `qtwebengine` **plus** `qtwebchannel` **and** `qtpositioning` — seamlyLayout's `SvgCanvas.qml` uses `WebEngineView`, and Qt6WebEngineCore's CMake config requires the other two, so a kit without them fails `find_package(Qt6 ... WebEngineQuick)` at configure time. The Qt online installer does not pull them in automatically when you tick Qt WebEngine.
 
 ## Coding Rules
 

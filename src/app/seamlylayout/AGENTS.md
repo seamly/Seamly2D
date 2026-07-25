@@ -12,7 +12,7 @@ Copyright: 2026
 
 ## Architecture Context
 
-- Frontend: Qt 6.10 + QML/QtWidgets (`qt_frontend/`) under LGPL-3.0.
+- Frontend: Qt 6.11 + QML/QtWidgets (`qt_frontend/`) under LGPL-3.0.
 - Core logic: Rust crates (`crates/`) under MIT.
 - Bridge: CXX-Qt (`crates/cxxqt_bridge/`) connecting Rust and Qt.
 - For UI tasks, always inspect both `qt_frontend/qml/` and `crates/cxxqt_bridge/`.

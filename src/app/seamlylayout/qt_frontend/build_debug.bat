@@ -10,7 +10,7 @@ cd /d c:\Users\susan\Projects\Seamly2D-private\src\app\seamlylayout\qt_frontend
 
 echo.
 echo === Configuring CMake (debug) ===
-cmake --preset debug -DCMAKE_PREFIX_PATH="C:/Qt/6.10.1/msvc2022_64"
+cmake --preset debug -DCMAKE_PREFIX_PATH="C:/Qt/6.11.1/msvc2022_64"
 if errorlevel 1 (
     echo CMake configure failed
     exit /b 1

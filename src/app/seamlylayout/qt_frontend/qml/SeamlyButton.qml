@@ -15,8 +15,8 @@
 //   enabled  — false renders the button in the disabled (gray) state
 //   width    — override; defaults to implicitWidth
 
-import QtQuick 6.10
-import QtQuick.Controls 6.10
+import QtQuick 6.11
+import QtQuick.Controls 6.11
 import SeamlyLayout
 
 Button {

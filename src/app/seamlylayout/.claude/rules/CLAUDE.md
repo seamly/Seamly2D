@@ -51,7 +51,7 @@ The following Bash and PowerShell commands are pre-allowed in `.claude/settings.
 ## Style Rules
 
 - [Branding](branding.mdc) — Color palette and UI styling
-- [Dependencies](dependencies.mdc) — Crate versions, workspace structure, Qt 6.10 modules for SeamlyLayout, Qt 6.5.3 for Seamly2D
+- [Dependencies](dependencies.mdc) — Crate versions, workspace structure, Qt 6.11 modules for SeamlyLayout, Qt 6.5.3 for Seamly2D
 - [Licensing](licensing.mdc) — License requirements: SeamlyLayout - Qt, Cpp, & Rust = MIT; Seamly2D - Qt, Cpp = GPL-3.0
 - [Rust Style](rust-style.mdc) — Rust coding conventions and file headers
 - [Qt Style](qt-style.mdc) — C++/QML coding conventions and file headers

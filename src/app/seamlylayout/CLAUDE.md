@@ -8,7 +8,7 @@ A pattern layout application — daughter app to Seamly2D. Lives at `src/app/sea
 
 ## Architecture
 
-- **Frontend:** Qt 6.10 + QML and QtWidgets (LGPL-3.0)
+- **Frontend:** Qt 6.11 + QML and QtWidgets (LGPL-3.0)
 - **Core:** Rust crates under `crates/` (MIT)
 - **Bridge:** CXX-Qt 0.7.3 — generates C++ glue from Rust
 - **Dual license:** Qt frontend LGPL-3.0, Rust core MIT (de-linkable)

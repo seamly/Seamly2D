@@ -13,7 +13,7 @@
 
 #include <QObject>
 
-// Full include required — Qt 6.10 moc needs the complete type definition
+// Full include required — Qt 6.11 moc needs the complete type definition
 // for Q_PROPERTY pointer types (PreferencesModel*).
 #include "PreferencesModel.h"
 

@@ -16,9 +16,9 @@
 //       onPreferencesClicked:    preferencesPanel.visible = !preferencesPanel.visible
 //   }
 
-import QtQuick 6.10
-import QtQuick.Controls 6.10
-import QtQuick.Layouts 6.10
+import QtQuick 6.11
+import QtQuick.Controls 6.11
+import QtQuick.Layouts 6.11
 import SeamlyLayout
 
 ToolBar {

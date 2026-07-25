@@ -60,14 +60,18 @@ QString seamlyLayoutExeName()
  *
  * Lookup order:
  *  1. Flat: `<directory>/SeamlyLayout(.exe)` — the layout used when every app
- *     shares one Qt runtime (e.g. the Linux Flatpak's `/app/bin`, or a local
- *     development tree where all apps are built against the same Qt).
+ *     shares one Qt runtime. Since Task 30 that is every supported install:
+ *     the Windows MSI, the Linux Flatpak's `/app/bin`, and a local development
+ *     tree, because all three apps now build against the same Qt release.
  *  2. Subdirectory: `<directory>/SeamlyLayout/SeamlyLayout(.exe)` — the layout
- *     the Windows MSI installer uses (Task 13). SeamlyLayout is built against
- *     a different Qt release than seamly2d/seamlyme, so its Qt runtime DLLs
- *     cannot share a flat directory with the parent apps' DLLs (identical file
- *     names, different versions); the installer therefore gives it its own
- *     subdirectory carrying its own Qt runtime.
+ *     the Windows MSI used before Task 30 (Task 13). Back then SeamlyLayout was
+ *     built against a different Qt release than seamly2d/seamlyme, so its Qt
+ *     runtime DLLs could not share a flat directory with the parent apps'
+ *     (identical file names, different versions) and the installer gave it its
+ *     own subdirectory with its own Qt runtime. No current installer produces
+ *     this layout; the branch is kept so a seamly2d upgraded in place over such
+ *     an install — or any future packaging that isolates the daughter app —
+ *     still finds the executable.
  *
  * Both candidates must be existing regular files — a *directory* that happens
  * to be named like the executable (e.g. the "SeamlyLayout" subdirectory itself

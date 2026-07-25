@@ -8,7 +8,7 @@
 # Prerequisites:
 #   • macOS 13+ (Ventura) or later
 #   • Xcode command-line tools (xcode-select --install)
-#   • Qt 6.10.1 installed at /usr/local/Qt/6.10.1/macos
+#   • Qt 6.11.1 installed at /usr/local/Qt/6.11.1/macos
 #   • create-dmg (brew install create-dmg)
 #   • A signed Release build:  cmake --build --preset release
 #
@@ -49,7 +49,7 @@ if [ ! -d "${APP_BUNDLE}" ]; then
 fi
 
 echo "=== Running macdeployqt ==="
-QT_BIN="/usr/local/Qt/6.10.1/macos/bin"
+QT_BIN="/usr/local/Qt/6.11.1/macos/bin"
 "${QT_BIN}/macdeployqt" "${APP_BUNDLE}" \
     -qmldir="${REPO_ROOT}/qt_frontend/qml" \
     -always-overwrite

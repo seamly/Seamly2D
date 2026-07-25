@@ -13,9 +13,9 @@
 | `assets/paperSizes/` | Proprietary | Unless licensed explicitly |
 | `assets/Schemas/` | Proprietary | Unless licensed explicitly |
 
-## Qt 6.10 License
+## Qt 6.11 License
 
-The Qt frontend uses Qt 6.10 under **LGPLv3** (Lesser General Public License v3).
+The Qt frontend uses Qt 6.11 under **LGPLv3** (Lesser General Public License v3).
 The Rust core crates remain **MIT**.
 
 ### LGPLv3 Compliance Requirements

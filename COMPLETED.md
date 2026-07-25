@@ -179,7 +179,7 @@ A cut path is a closed internal path that is cut out of the piece and can have i
 
 - [x] Create `scripts/sd.ps1` (s-prefix naming rule; "seamly2d debug", mirroring seamlyLayout's `qd.ps1`) with the project's GPLv3-or-later header (2026 Seamly2D Project, slspencer) and inline comments
 - [x] Auto-locate the newest Qt `6.10.x\msvc2022_64` kit under `C:\Qt` and the VS 18 Community `vcvars64.bat`; fail early with a clear message naming what is missing (vcvars output — including the harmless vswhere warning — is suppressed; failure still caught via exit code)
-- [x] Shadow-build into `seamly2d-build-debug/` at the repo root (covered by the `*-build-*` gitignore pattern), separate from the release `build/` tree: `qmake Seamly2D.pro CONFIG+=debug` then jom (falls back to nmake if jom is absent)
+- [x] Shadow-build into `seamly2d-build-debug/` at the repo root (covered by the `*-build-*` gitignore pattern), separate from the release `build/` tree: `qmake Seamly.pro CONFIG+=debug` then jom (falls back to nmake if jom is absent)
 - [x] Verified end-to-end on this machine: debug `seamly2d.exe` (29.7 MB, `-MDd`) lands in `seamly2d-build-debug\src\app\seamly2d\bin\` with the Qt debug DLLs (Qt6Cored.dll, Qt6Guid.dll, Qt6Widgetsd.dll, ...) deployed by the windeployqt post-link step, and the executable launches to its main window
 - [x] Usage documented: `.SYNOPSIS`/`.DESCRIPTION`/`.EXAMPLE` comment-based help in the script (incl. optional `-Run` switch to launch after build); `CLAUDE.md` gained a "Build Notes" section mentioning the script
 

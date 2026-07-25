@@ -5,9 +5,9 @@
 # **
 # **  @brief
 # **  "seamly2d debug" — local debug-build script for seamly2d, mirroring
-# **  seamlyLayout's qd.ps1 precedent. Auto-locates the newest Qt 6.10.x
-# **  msvc2022_64 kit under C:\Qt and the VS 18 Community MSVC environment,
-# **  then shadow-builds Seamly2D.pro with CONFIG+=debug into
+# **  seamlyLayout's qd.ps1 precedent. Auto-locates the newest Qt
+# **  msvc2022_64 kit under C:\Qt (6.11.1 or newer) and the VS 18 Community MSVC environment,
+# **  then shadow-builds Seamly.pro with CONFIG+=debug into
 # **  scripts\seamly2d-build-debug\ (kept separate from the
 # **  release build\ tree).
 # **
@@ -34,7 +34,7 @@
 
 <#
 .SYNOPSIS
-    Build a debug seamly2d.exe locally (Qt 6.10.x + VS 18 Community).
+    Build a debug seamly2d.exe locally (Qt 6.11.1+ + VS 18 Community).
 
 .DESCRIPTION
     Shadow-builds the whole Seamly2D qmake project with CONFIG+=debug into
@@ -43,7 +43,7 @@
 
     Toolchain is auto-detected and the script fails early with a clear
     message naming whatever is missing:
-      * qmake  — newest C:\Qt\6.10.x\msvc2022_64 kit
+      * qmake  — newest C:\Qt\<version>\msvc2022_64 kit (6.11.1 or newer)
       * MSVC   — VS 18 Community vcvars64.bat (its vswhere warning is
                  harmless; the script suppresses vcvars output entirely)
       * make   — C:\Qt\Tools\QtCreator\bin\jom\jom.exe (parallel), falling
@@ -78,32 +78,46 @@ param(
 $ErrorActionPreference = 'Stop'
 
 #------------------------------------------------------------------------------
-# @brief  Locate qmake.exe from the newest Qt 6.10.x msvc2022_64 kit.
+# @brief  Locate qmake.exe from the newest installed Qt msvc2022_64 kit.
 #
-# Scans C:\Qt for version directories matching 6.10.<patch>, sorts them as
-# versions (so 6.10.10 beats 6.10.9), and returns the qmake.exe of the newest
-# kit that actually contains msvc2022_64\bin\qmake.exe.
+# Scans C:\Qt for version directories, sorts them as versions (so 6.11.10 beats
+# 6.11.9, and 6.11.x beats 6.10.x), and returns the qmake.exe of the newest kit
+# that actually contains msvc2022_64\bin\qmake.exe.
+#
+# Task 30/31: this used to be pinned to '^6\.10\.\d+$' and threw outright once
+# the machine moved to Qt 6.11.1 and the 6.10 kit was uninstalled. The version
+# is deliberately not hard-coded — the script follows whatever msvc2022_64 kit
+# is installed, so a Qt upgrade does not require editing the build scripts.
+# $MinimumQtVersion below is the floor the family currently builds against
+# (see src/app/seamlylayout/qt_frontend/CMakeLists.txt and ci.yml's QT_VERSION).
 #
 # @return Full path to qmake.exe.
 #------------------------------------------------------------------------------
 function Find-QtQmake {
     $qtRoot = 'C:\Qt'
+    $minimumQtVersion = [version]'6.11.1'
     if (-not (Test-Path $qtRoot)) {
-        throw "Qt root '$qtRoot' not found - install Qt 6.10.x (msvc2022_64) first."
+        throw "Qt root '$qtRoot' not found - install Qt $minimumQtVersion or newer (msvc2022_64) first."
     }
 
-    # Collect 6.10.x kit dirs that ship the MSVC 2022 64-bit qmake,
-    # newest patch version first.
-    $kits = Get-ChildItem $qtRoot -Directory |
-        Where-Object { $_.Name -match '^6\.10\.\d+$' } |
-        Sort-Object { [version]$_.Name } -Descending
+    # Collect kit dirs whose name parses as a version and that ship the MSVC
+    # 2022 64-bit qmake, newest version first.
+    $kits = Get-ChildItem $qtRoot -Directory -ErrorAction SilentlyContinue |
+        ForEach-Object {
+            $parsed = $null
+            if ([version]::TryParse($_.Name, [ref]$parsed)) {
+                [pscustomobject]@{ Version = $parsed; Dir = $_.FullName }
+            }
+        } |
+        Where-Object { $_.Version -ge $minimumQtVersion } |
+        Sort-Object Version -Descending
 
     foreach ($kit in $kits) {
-        $qmake = Join-Path $kit.FullName 'msvc2022_64\bin\qmake.exe'
+        $qmake = Join-Path $kit.Dir 'msvc2022_64\bin\qmake.exe'
         if (Test-Path $qmake) { return $qmake }
     }
 
-    throw "No Qt 6.10.x kit with msvc2022_64\bin\qmake.exe found under '$qtRoot'."
+    throw "No Qt $minimumQtVersion+ kit with msvc2022_64\bin\qmake.exe found under '$qtRoot'."
 }
 
 #------------------------------------------------------------------------------
@@ -141,9 +155,9 @@ $makeTool = Find-MakeTool
 
 # The script lives in <repo-root>\scripts\, so the repo root is its parent.
 $repoRoot = Split-Path -Parent $PSScriptRoot
-$proFile  = Join-Path $repoRoot 'Seamly2D.pro'
+$proFile  = Join-Path $repoRoot 'Seamly.pro'
 if (-not (Test-Path $proFile)) {
-    throw "Seamly2D.pro not found at '$proFile' - is the script still in <repo-root>\scripts\?"
+    throw "Seamly.pro not found at '$proFile' - is the script still in <repo-root>\scripts\?"
 }
 
 # Dedicated shadow-build dir under scripts\, separate from the release build\

@@ -10,7 +10,7 @@
 ;      Output: qt_frontend\build\Release\SeamlyLayout.exe
 ;   2. Run windeployqt6 to gather Qt runtime DLLs:
 ;        cd qt_frontend\build\Release
-;        C:\Qt\6.10.1\msvc2022_64\bin\windeployqt6.exe ^
+;        C:\Qt\6.11.1\msvc2022_64\bin\windeployqt6.exe ^
 ;            --qmldir ..\..\qml --release SeamlyLayout.exe
 ;      This deposits all required DLLs and QML plugins into
 ;        qt_frontend\build\Release\
@@ -34,7 +34,7 @@
 ;      the old folders are left in place so the upgrade is non-destructive.
 ;
 ; LGPL-3.0 compliance:
-;   Qt 6.10 is dynamically linked under LGPL-3.0.  The installer creates a
+;   Qt 6.11 is dynamically linked under LGPL-3.0.  The installer creates a
 ;   "Licenses" sub-folder with the LGPL-3.0 text and a notice directing users
 ;   to https://download.qt.io for Qt source code.
 

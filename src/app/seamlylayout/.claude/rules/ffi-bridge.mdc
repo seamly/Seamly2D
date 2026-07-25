@@ -23,7 +23,7 @@ all symbols so Qt links against one library.
 // author: slspencer, copyright 2026
 // MIT License: https://opensource.org/licenses/MIT
 /// FFI bridge for the <crate_name> crate.
-/// Exposes a stable C ABI for use from the Qt 6.10 frontend.
+/// Exposes a stable C ABI for use from the Qt 6.11 frontend.
 ```
 
 ## Opaque Handle Pattern

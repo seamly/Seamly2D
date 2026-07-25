@@ -12,7 +12,7 @@
 ## Overview
 
 The `cxxqt_bridge` crate (at `crates/cxxqt_bridge/`) is the boundary between the
-Qt 6.10 + QML frontend (LGPL-3.0) and the Rust core crates (MIT).
+Qt 6.11 + QML frontend (LGPL-3.0) and the Rust core crates (MIT).
 
 CXX-Qt automatically generates C++ glue code from Rust macros — no manual
 `extern "C"` declarations or cbindgen needed.

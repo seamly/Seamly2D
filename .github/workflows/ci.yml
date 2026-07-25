@@ -53,7 +53,7 @@ jobs:
 
       - name: build Seamly2D & SeamlyMe for tests
         run: |
-          qmake Seamly2D.pro
+          qmake Seamly.pro
           make -j$(nproc)
 
       - name: install test dependencies
@@ -176,9 +176,9 @@ jobs:
           echo killing XProtect...; sudo pkill -9 XProtect >/dev/null || true;
           # run signing part if secrets are available (main builds), otherwise (3rd party PRs etc) skip
           if [ -n "$APPLE_SIGN_IDENTITY" ] ; then
-            qmake Seamly2D.pro -config release CONFIG+=noTests CONFIG+=macSign
+            qmake Seamly.pro -config release CONFIG+=noTests CONFIG+=macSign
           else
-            qmake Seamly2D.pro -config release CONFIG+=noTests
+            qmake Seamly.pro -config release CONFIG+=noTests
           fi
           make -j$(sysctl -n hw.logicalcpu)
 
@@ -229,7 +229,7 @@ jobs:
 
       - name: make seamly2d.exe and seamlyme.exe
         run: |
-          ${{ matrix.qmake }} Seamly2D.pro -config release CONFIG+=noTests
+          ${{ matrix.qmake }} Seamly.pro -config release CONFIG+=noTests
           nmake
 
       - name: install NSIS

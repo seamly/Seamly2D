@@ -5,7 +5,8 @@
  **
  **  @brief
  **  Unit tests for the SeamlyFamilyPaths install-directory lookup helpers
- **  (flat layout vs the Windows MSI "SeamlyLayout" subdirectory layout).
+ **  (the flat layout every current installer produces, vs the legacy
+ **  "SeamlyLayout" subdirectory layout the pre-Task-30 Windows MSI used).
  **
  **  @copyright
  **  This source code is part of the Seamly2D project, a pattern making
@@ -112,9 +113,11 @@ void TST_SeamlyFamilyPaths::FindsFlatExecutable() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief FindsSubdirectoryExecutable verifies the Windows MSI layout is
- * found: the executable inside a "SeamlyLayout" subdirectory of the install
- * directory (where it carries its own Qt runtime, Task 13).
+ * @brief FindsSubdirectoryExecutable verifies the legacy pre-Task-30 Windows
+ * MSI layout is still found: the executable inside a "SeamlyLayout"
+ * subdirectory of the install directory, where it carried its own Qt runtime
+ * (Task 13). No current installer produces this layout, but an install made by
+ * an older MSI can still be on disk, so the fallback must keep working.
  */
 void TST_SeamlyFamilyPaths::FindsSubdirectoryExecutable() const
 {

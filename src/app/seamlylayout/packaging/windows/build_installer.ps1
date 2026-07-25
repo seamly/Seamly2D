@@ -36,7 +36,7 @@ $ScriptDir  = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoRoot   = (Resolve-Path (Join-Path $ScriptDir "..\..\..")).Path
 $BuildDir   = Join-Path $RepoRoot "qt_frontend\build\Release"
 $ExePath    = Join-Path $BuildDir "SeamlyLayout.exe"
-$QtBin      = "C:\Qt\6.10.1\msvc2022_64\bin"
+$QtBin      = "C:\Qt\6.11.1\msvc2022_64\bin"
 $IsccPath   = "C:\Program Files (x86)\Inno Setup 6\iscc.exe"
 $IssScript  = Join-Path $ScriptDir "SeamlyLayout.iss"
 $LgplFile   = Join-Path $ScriptDir "..\licenses\LGPL-3.0.txt"
@@ -47,7 +47,7 @@ $LgplFile   = Join-Path $ScriptDir "..\licenses\LGPL-3.0.txt"
 Write-Host "1 Verifying prerequisites..."
 
 if (-not (Test-Path $QtBin)) {
-    Write-Error "Qt 6.10.1 msvc2022_64 not found at: $QtBin"
+    Write-Error "Qt 6.11.1 msvc2022_64 not found at: $QtBin"
     exit 1
 }
 

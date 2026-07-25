@@ -26,9 +26,9 @@
 // Functions:
 //   reloadSvg(content) — embed SVG content inline and reload the canvas
 
-import QtQuick 6.10
-import QtQuick.Controls 6.10
-import QtWebEngine 6.10
+import QtQuick 6.11
+import QtQuick.Controls 6.11
+import QtWebEngine 6.11
 import SeamlyLayout
 
 Item {

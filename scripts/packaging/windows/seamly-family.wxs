@@ -15,21 +15,37 @@
  **  `wix build -arch arm64`, from this same source.
  **
  **  INSTALL LAYOUT
- **    [ProgramFiles64Folder]\Seamly2D\          seamly2d.exe, seamlyme.exe and
- **                                              their shared Qt runtime
- **                                              (windeployqt output + MSVC CRT)
- **    [ProgramFiles64Folder]\Seamly2D\SeamlyLayout\
- **                                              SeamlyLayout.exe with its OWN
- **                                              Qt runtime. SeamlyLayout is
- **                                              built against a different Qt
- **                                              release than the parent apps,
- **                                              and the Qt DLL file names are
- **                                              identical across releases, so
- **                                              the runtimes must not share a
- **                                              directory. seamly2d finds the
- **                                              subdirectory executable via
+ **    [ProgramFiles64Folder]\Seamly2D\          seamly2d.exe, seamlyme.exe,
+ **                                              SeamlyLayout.exe and the ONE
+ **                                              Qt runtime all three share
+ **                                              (merged windeployqt +
+ **                                              windeployqt6 output, incl. the
+ **                                              QML modules and
+ **                                              QtWebEngineProcess.exe
+ **                                              SeamlyLayout needs, plus the
+ **                                              MSVC CRT).
+ **
+ **                                              Task 30 collapsed the former
+ **                                              ...\Seamly2D\SeamlyLayout\
+ **                                              subdirectory. It existed only
+ **                                              because SeamlyLayout was built
+ **                                              against a different Qt release
+ **                                              than the parent apps, and Qt's
+ **                                              DLL file names are identical
+ **                                              across releases, so the two
+ **                                              runtimes could not share a flat
+ **                                              directory. All three apps now
+ **                                              build against Qt 6.11.1, so one
+ **                                              runtime serves them all.
+ **                                              seamly2d still resolves the exe
+ **                                              through
  **                                              SeamlyFamilyPaths::locateSeamlyLayout()
- **                                              (src/libs/vmisc/seamly_family_paths.cpp).
+ **                                              (src/libs/vmisc/seamly_family_paths.cpp),
+ **                                              which checks the flat layout
+ **                                              first and keeps the old
+ **                                              subdirectory layout as a
+ **                                              fallback for installs made by
+ **                                              an earlier MSI.
  **
  **  USER DATA IS NEVER TOUCHED
  **    Per-user settings live under %LOCALAPPDATA%\Seamly\<app>
@@ -48,13 +64,14 @@
  **                         scheme cannot be used directly)
  **    DisplayVersion       full project version string (YYYY.M.D.HHMM)
  **    RepoRoot             absolute path of the repository root
- **    ParentStagingDir     staged seamly2d+seamlyme runtime tree (no exes)
+ **    ParentStagingDir     staged shared runtime tree for every app in the
+ **                         package (no exes) — seamly2d/seamlyme windeployqt
+ **                         output merged with SeamlyLayout's windeployqt6
+ **                         output when IncludeSeamlyLayout is defined
  **    ExeStagingDir        staged directory holding the app executables
  **    IncludeSeamlyLayout  defined (=1) when SeamlyLayout is part of this MSI;
  **                         undefined for the arm64 package until SeamlyLayout
  **                         has an arm64 build (see .github/README-BUILDS.md)
- **    LayoutStagingDir     staged SeamlyLayout runtime tree (no exe); only
- **                         required when IncludeSeamlyLayout is defined
  **
  **  UPGRADES
  **    The UpgradeCode below is FIXED for the lifetime of the product family
@@ -145,19 +162,13 @@
     <!-- ================= directory tree + harvested runtimes ============= -->
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLFOLDER" Name="Seamly2D">
-        <!-- seamly2d + seamlyme shared runtime (Qt DLLs, plugins, MSVC CRT,
-             xerces-c, ...) harvested recursively from the staging tree; the
-             executables themselves are authored explicitly below so shortcuts
-             and file associations can reference them. -->
+        <!-- The single Qt runtime shared by all apps in this package (Qt DLLs,
+             plugins, QML modules, QtWebEngineProcess.exe, MSVC CRT, xerces-c,
+             SeamlyLayout's packaged settings\ and licenses\, ...), harvested
+             recursively from the one staging tree smsi.ps1 merges everything
+             into. The executables themselves are authored explicitly below so
+             shortcuts and file associations can reference them. -->
         <Files Include="$(var.ParentStagingDir)\**" />
-        <?ifdef var.IncludeSeamlyLayout ?>
-        <Directory Id="SEAMLYLAYOUTFOLDER" Name="SeamlyLayout">
-          <!-- SeamlyLayout's private runtime: its own Qt release (windeployqt6
-               output incl. QML modules and QtWebEngineProcess.exe), packaged
-               default settings\ and licenses\. -->
-          <Files Include="$(var.LayoutStagingDir)\**" />
-        </Directory>
-        <?endif?>
       </Directory>
     </StandardDirectory>
 
@@ -223,14 +234,17 @@
       <!-- SeamlyLayout: Start Menu shortcut. No file association - its input
            is the .pieces.svg handoff written by seamly2d's Layout Mode, and a
            double ".pieces.svg" extension cannot be registered distinctly from
-           plain .svg (which must stay with the user's SVG viewer). -->
-      <Component Id="SeamlyLayoutExeComponent" Directory="SEAMLYLAYOUTFOLDER">
+           plain .svg (which must stay with the user's SVG viewer).
+           Task 30: installed into INSTALLFOLDER beside the parent apps now
+           that all three share one Qt runtime (it used to live in its own
+           SeamlyLayout\ subdirectory with a second, private Qt copy). -->
+      <Component Id="SeamlyLayoutExeComponent">
         <File Id="SeamlyLayoutExe" Source="$(var.ExeStagingDir)\SeamlyLayout.exe" KeyPath="yes">
           <Shortcut Id="SeamlyLayoutShortcut"
                     Directory="ProgramMenuFolder"
                     Name="SeamlyLayout"
                     Description="SeamlyLayout pattern layout"
-                    WorkingDirectory="SEAMLYLAYOUTFOLDER"
+                    WorkingDirectory="INSTALLFOLDER"
                     Icon="seamlylayout.ico"
                     Advertise="yes" />
         </File>

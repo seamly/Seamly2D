@@ -17,20 +17,20 @@
 
 **Builds**: Linux AppImage, Windows 64-bit/32-bit installers (.exe/.zip), macOS (.dmg/.zip)
 
-### [SeamlyLayout CI](seamlylayout-ci.yml) - SeamlyLayout build + test (Qt 6.10)
+### [SeamlyLayout CI](seamlylayout-ci.yml) - SeamlyLayout build + test (Qt 6.11)
 
 **Triggers**: pushes to `develop` / `run-seamlyLayout` that touch `src/app/seamlylayout/**` (or the workflow file), pull requests touching the same paths, and manual dispatch. Path filters keep it from running on unrelated changes.
 
-**Purpose**: builds and unit-tests the SeamlyLayout daughter app (Rust core + Qt 6.10 QML frontend) on `ubuntu-latest`, mirroring what `src/app/seamlylayout/qd.ps1` / `build.ps1` do locally.
+**Purpose**: builds and unit-tests the SeamlyLayout daughter app (Rust core + Qt 6.11 QML frontend) on `ubuntu-latest`, mirroring what `src/app/seamlylayout/qd.ps1` / `build.ps1` do locally.
 
-**Why it is separate from [CI](ci.yml)**: the main CI pins **Qt 6.11.1** (matching the seamly2d/seamlyme qmake release toolchain), but SeamlyLayout requires **Qt 6.10.1** plus a Rust + CMake/Ninja toolchain. Keeping it in its own workflow makes the two fully independent — a SeamlyLayout failure never blocks the seamly2d/seamlyme jobs, and vice versa.
+**Why it is separate from [CI](ci.yml)**: **not** the Qt version — since Task 30 this workflow and `ci.yml` both pin **Qt 6.11.1**, and the two `QT_VERSION` values must be kept in step. What keeps them apart is the build system: SeamlyLayout is CMake/Ninja + Cargo/Corrosion with its own toolchain steps (Rust, cargo cache, the WebEngine module set), while `ci.yml`'s parent-app jobs are qmake. Separate workflows also keep the triggers path-filtered and the failures independent — a SeamlyLayout failure never blocks the seamly2d/seamlyme jobs, and vice versa.
 
 **What it does**:
-1. Installs Rust (stable) and Qt 6.10 (`jurplel/install-qt-action`, with the `qtwebengine` module the frontend needs), with cargo and Qt caching.
+1. Installs Rust (stable) and Qt 6.11 (`jurplel/install-qt-action`, with the `qtwebengine` module the frontend needs plus its own `qtwebchannel`/`qtpositioning` dependencies, which `aqtinstall` does not auto-resolve), with cargo and Qt caching.
 2. Configures + builds `qt_frontend` via its CMake `debug` preset; the same build drives Corrosion / cxx-qt-cmake, which compiles the `cxxqt_bridge` Rust crate — so one step builds both the Rust bridge and the C++/QML app.
 3. Runs the Qt frontend unit tests (`ctest`, under `xvfb`) and the Rust workspace tests (`cargo test --workspace`).
 
-**Future consolidation**: when seamly2d/seamlyme move to Qt 6.10, merge this job back into `ci.yml` so the whole family shares one Qt toolchain (noted in the workflow's header comment).
+**Consolidation, re-evaluated (Task 30)**: the differing Qt pins used to be the blocker for merging this job into `ci.yml`. That is resolved, but the merge was **deliberately not made** — different build systems and different path filters mean folding them together would rebuild the parent apps on every layout-only change for no benefit. Revisit only if the parent apps also move to CMake.
 
 ### [Windows MSI](windows-msi.yml) - Bundled WiX `.msi` installer (Task 13)
 
@@ -38,12 +38,13 @@
 
 **Purpose**: builds the Windows **MSI installer** that ships the whole Seamly app family — `seamly2d`, `seamlyme`, and `SeamlyLayout` — in one bundled package **per architecture** (x64 and arm64), using the WiX toolset from [`seamly-family.wxs`](../../scripts/packaging/windows/seamly-family.wxs) via [`scripts/packaging/windows/smsi.ps1`](../../scripts/packaging/windows/smsi.ps1). The hands-on build/test reference is [`scripts/packaging/windows/README.md`](../../scripts/packaging/windows/README.md).
 
-**Why it is separate from [CI](ci.yml)**: same reasoning as SeamlyLayout CI, but inverted — the MSI needs **both** toolchains in one job (Qt 6.11 for the qmake-built parent apps *and* Qt 6.10.1 + Rust + CMake/Ninja for SeamlyLayout) to build all three apps and bundle them. Folding that into `ci.yml` would slow and destabilize every push, so it lives on its own and only runs when the packaging inputs change. `ci.yml`'s NSIS installer remains the released Windows installer until the MSI replaces it.
+**Why it is separate from [CI](ci.yml)**: same reasoning as SeamlyLayout CI, but inverted — the MSI needs **both build systems** in one job (qmake for the parent apps *and* Rust + CMake/Ninja for SeamlyLayout) to build all three apps and bundle them. Folding that into `ci.yml` would slow and destabilize every push, so it lives on its own and only runs when the packaging inputs change. `ci.yml`'s NSIS installer remains the released Windows installer until the MSI replaces it.
 
 **What it does** (matrix: `x64`, `arm64`):
-1. Installs both Qt kits (6.10.1 for SeamlyLayout first, then 6.11.1 for the parents so the bare `qmake`/`nmake` build resolves to the parent Qt) plus MSVC (`ilammy/msvc-dev-cmd`), and for x64 also Rust + Ninja.
+
+1. Installs **one** Qt 6.11.1 kit for all three apps (Task 30 — it used to install two kits in a carefully ordered dance so the parent `qmake` would not bind to SeamlyLayout's Qt) plus MSVC (`ilammy/msvc-dev-cmd`), and for x64 also Rust + Ninja. The x64 leg adds the `qtwebengine qtwebchannel qtpositioning` modules SeamlyLayout needs; arm64 takes `qtmultimedia` only.
 2. Builds `seamly2d.exe` + `seamlyme.exe` (qmake/nmake, cross-compiled for arm64) and, on x64 only, `SeamlyLayout.exe` (CMake release preset).
-3. Runs `scripts/packaging/windows/smsi.ps1` to stage the runtimes and build the MSI with WiX **v6** (v7 is gated behind an OSMF EULA, error `WIX7015`) — **x64 = all three apps, arm64 = the two parents only** (`-NoSeamlyLayout`, since SeamlyLayout has no arm64 build yet).
+3. Runs `scripts/packaging/windows/smsi.ps1` to stage the **single shared Qt runtime** and build the MSI with WiX **v6** (v7 is gated behind an OSMF EULA, error `WIX7015`) — **x64 = all three apps, arm64 = the two parents only** (`-NoSeamlyLayout`, since SeamlyLayout has no arm64 build yet).
 4. Signs the `.msi` with `jsign` (Google Cloud KMS, same as the NSIS exe), guarded on the `SEAMLY_SIGNING_PROJECT_ID` secret so untrusted PR runs skip it, and uploads the MSI as a build artifact.
 
 **Future consolidation**: when the MSI replaces the NSIS installer, fold these steps into `ci.yml`'s windows job and wire the `.msi` into the release/publish job (noted in the workflow's header comment).

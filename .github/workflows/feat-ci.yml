@@ -49,7 +49,7 @@ jobs:
 
       - name: linux-test - build Seamly2D & SeamlyMe for tests
         run: |
-          qmake Seamly2D.pro
+          qmake Seamly.pro
           make -j$(nproc)
 
       - name: linux-test - install test dependencies
@@ -151,7 +151,7 @@ jobs:
       - name: macOS - build Seamly2D.app and SeamlyMe.app
         run: |
           echo killing XProtect...; sudo pkill -9 XProtect >/dev/null || true;
-          qmake Seamly2D.pro -config release CONFIG+=noTests
+          qmake Seamly.pro -config release CONFIG+=noTests
           make -j$(sysctl -n hw.logicalcpu)
 
       - name: macOS - create .dmg installer
@@ -204,7 +204,7 @@ jobs:
 
       - name: windows - build seamly2d.exe and seamlyme.exe
         run: |
-          qmake Seamly2D.pro -spec ${{ matrix.qmake-spec }} -config release CONFIG+=noTests
+          qmake Seamly.pro -spec ${{ matrix.qmake-spec }} -config release CONFIG+=noTests
           nmake
 
       - name: install NSIS

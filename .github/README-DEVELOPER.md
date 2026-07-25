@@ -144,7 +144,7 @@ sudo make install
 
 * Create your compiler kit.  Read more about adding compilers [on the Qt website](https://doc.qt.io/qtcreator/creator-tool-chains.html).
 * Complete your build settings.  Read more about [build settings](https://doc.qt.io/qtcreator/creator-build-settings.html).
-* Open the Seamly2D project with `File > Open File or Project`. * Navigate to the 'seamly2d/src' directory and select `Seamly2D.pro`.
+* Open the Seamly2D project with `File > Open File or Project`. * Navigate to the 'seamly2d/src' directory and select `Seamly.pro`.
 * Open the Configure Project tab and select your compiler kit. [Read more](https://doc.qt.io/qtcreator/creator-project-opening.html).
 * Build with the `Build and Run Kit Selector` icon, or use `Build` and `Run` from the Tools menu. [Read more](https://doc.qt.io/qtcreator/creator-building-targets.html).
 
@@ -155,7 +155,7 @@ sudo make install
 
 ```bash
 cd $SOURCE_DIRECTORY\build
-qmake ..\Seamly2D.pro
+qmake ..\Seamly.pro
 nmake      # (or use jom and assign multiple CPUs to speed up compilation time but don't use all - leave at least one CPU for your OS.)
 ```
 
@@ -164,5 +164,5 @@ nmake      # (or use jom and assign multiple CPUs to speed up compilation time b
 * Enable signing and notarizing at qmake step
 
 ```bash
-qmake Seamly2D.pro CONFIG+=macSign
+qmake Seamly.pro CONFIG+=macSign
 ```

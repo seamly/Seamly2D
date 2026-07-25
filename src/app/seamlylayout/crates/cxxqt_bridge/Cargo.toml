@@ -3,7 +3,7 @@
 # MIT License: https://opensource.org/licenses/MIT
 #
 # cxxqt_bridge — CXX-Qt bridge crate.
-# Exposes Rust core crates as QObject types for the Qt 6.10 frontend.
+# Exposes Rust core crates as QObject types for the Qt 6.11 frontend.
 # Phase 2a: infrastructure scaffold (Phase 2b adds #[cxx_qt::bridge] QObjects).
 
 [package]

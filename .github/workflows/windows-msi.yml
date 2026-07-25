@@ -2,25 +2,33 @@ name: Windows MSI
 
 # ---------------------------------------------------------------------------
 # Task 13 — build the Windows MSI installer that ships the whole Seamly app
-# family: seamly2d + seamlyme (qmake, ci.yml's Qt) and SeamlyLayout (Rust +
-# Qt 6.10 CMake build), packaged per architecture (x64 and arm64) with the
+# family: seamly2d + seamlyme (qmake) and SeamlyLayout (Rust + CMake), all
+# against ONE Qt release, packaged per architecture (x64 and arm64) with the
 # WiX toolset from scripts/packaging/windows/seamly-family.wxs via
 # scripts/packaging/windows/smsi.ps1.
 #
+# ONE Qt FOR THE WHOLE FAMILY (Task 30):
+#   This job used to install two Qt kits — ci.yml's for the parent apps and a
+#   separate Qt 6.10.1 for SeamlyLayout — in a carefully ordered dance, because
+#   Qt's DLL and tool names are identical across releases and a second kit on
+#   PATH made the parent `qmake` bind to the wrong one. SeamlyLayout now builds
+#   against the same Qt 6.11.1 as the parents, so there is a single install
+#   step, no ordering hazard, and the MSI ships one shared Qt runtime instead
+#   of two side-by-side copies.
+#
 # WHY A SEPARATE WORKFLOW FROM ci.yml:
-#   Same reasoning as seamlylayout-ci.yml (Task 20): the MSI needs BOTH
-#   toolchains in one job — ci.yml's Qt for the qmake-built parent apps plus
-#   Qt 6.10.1 + Rust + CMake/Ninja for SeamlyLayout — and it should not slow
-#   down or destabilize every ci.yml run. ci.yml's NSIS installer remains the
-#   released Windows installer until the MSI replaces it; at that point fold
-#   these steps into ci.yml's windows job and wire the .msi into the publish
-#   job's release files.
+#   Same reasoning as seamlylayout-ci.yml (Task 20): the MSI needs BOTH build
+#   systems in one job — qmake for the parent apps plus Rust + CMake/Ninja for
+#   SeamlyLayout — and it should not slow down or destabilize every ci.yml run.
+#   ci.yml's NSIS installer remains the released Windows installer until the
+#   MSI replaces it; at that point fold these steps into ci.yml's windows job
+#   and wire the .msi into the publish job's release files.
 #
 # ARM64:
 #   seamly2d/seamlyme cross-compile for arm64 exactly as in ci.yml's windows
-#   matrix. SeamlyLayout has no arm64 build yet (its Rust + cxx-qt + Qt 6.10
-#   cross story is documented in .github/README-BUILDS.md), so the arm64 MSI
-#   ships the two parent apps only (-NoSeamlyLayout) until that lands.
+#   matrix. SeamlyLayout has no arm64 build yet (its Rust + cxx-qt cross story
+#   is documented in .github/README-BUILDS.md), so the arm64 MSI ships the two
+#   parent apps only (-NoSeamlyLayout) until that lands.
 # ---------------------------------------------------------------------------
 
 on:
@@ -49,10 +57,10 @@ permissions:
   contents: read
 
 env:
-  # Qt for seamly2d/seamlyme — keep in sync with ci.yml's QT_VERSION.
-  QT_PARENT_VERSION: '6.11.1'
-  # Qt for SeamlyLayout — keep in sync with seamlylayout-ci.yml's QT_VERSION.
-  QT_LAYOUT_VERSION: '6.10.1'
+  # The one Qt release the whole family builds against (Task 30) — keep in sync
+  # with ci.yml's and seamlylayout-ci.yml's QT_VERSION, and with
+  # src/app/seamlylayout/qt_frontend/CMakeLists.txt's find_package(Qt6 ...).
+  QT_VERSION: '6.11.1'
 
 jobs:
 
@@ -63,14 +71,24 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          # qt-modules: qtmultimedia is required by the parent apps on every
+          # arch. The x64 leg also builds SeamlyLayout, which needs qtwebengine
+          # (SvgCanvas.qml's WebEngineView) plus its own dependencies
+          # qtwebchannel/qtpositioning — aqtinstall does not auto-resolve a
+          # module's Qt dependencies, and without them find_package(Qt6 ...
+          # WebEngineQuick) fails at configure time. The arm64 leg omits them:
+          # it builds no SeamlyLayout (-NoSeamlyLayout) and Qt ships no
+          # cross-compiled arm64 WebEngine.
           - arch: x64
             msvc-arch: x64
             qt-arch: win64_msvc2022_64
             qmake: qmake
+            qt-modules: qtmultimedia qtwebengine qtwebchannel qtpositioning
           - arch: arm64
             msvc-arch: amd64_arm64
             qt-arch: win64_msvc2022_arm64_cross_compiled
             qmake: host-qmake
+            qt-modules: qtmultimedia
 
     steps:
       - uses: actions/checkout@v7
@@ -84,23 +102,20 @@ jobs:
         with:
           arch: ${{ matrix.msvc-arch }}
 
-      # The parent apps (seamly2d/seamlyme) are built FIRST, while ONLY their
-      # own Qt is installed, so the bare `qmake`/`nmake` build unambiguously
-      # binds to it — exactly the single-Qt environment ci.yml's windows job
-      # builds in. SeamlyLayout's Qt (a different release whose qmake/DLL names
-      # are identical) is installed only AFTERWARDS: installing both up front
-      # let the parent `qmake` resolve to the wrong kit, which lacks the
-      # qtmultimedia module the parents require ("Unknown module(s) in QT:
-      # multimedia"). SeamlyLayout's own build and the MSI staging reference
-      # their Qt by explicit path (QT_LAYOUT_DIR), so PATH order is irrelevant
-      # to them once the parent build is done.
-      - name: Install Qt ${{ env.QT_PARENT_VERSION }} for seamly2d/seamlyme
+      # ONE Qt install for every app in the package (Task 30). Before the whole
+      # family shared a Qt release this step installed only the parents' kit and
+      # a second install-qt-action step added SeamlyLayout's afterwards, in that
+      # order — installing both up front let the parent `qmake` resolve to the
+      # wrong kit ("Unknown module(s) in QT: multimedia"). With a single kit
+      # that hazard is gone: bare `qmake`/`nmake`/`windeployqt` and the explicit
+      # $env:QT_ROOT_DIR references below all name the same Qt.
+      - name: Install Qt ${{ env.QT_VERSION }}
         uses: jurplel/install-qt-action@v4
         with:
-          version: ${{ env.QT_PARENT_VERSION }}
+          version: ${{ env.QT_VERSION }}
           arch: ${{ matrix.qt-arch }}
           cache: true
-          modules: qtmultimedia
+          modules: ${{ matrix.qt-modules }}
           aqtsource: git+https://github.com/miurahr/aqtinstall.git  # same pin as ci.yml — remove once aqtinstall 3.4.0 is released
 
       - name: update version
@@ -112,30 +127,12 @@ jobs:
       # Qt is on PATH here, so bare `qmake`/`windeployqt` resolve to it.
       - name: make seamly2d.exe and seamlyme.exe
         run: |
-          ${{ matrix.qmake }} Seamly2D.pro -config release CONFIG+=noTests
+          ${{ matrix.qmake }} Seamly.pro -config release CONFIG+=noTests
           nmake
 
       # ------------------- SeamlyLayout (x64 only) -------------------------
-      # SeamlyLayout's Qt is installed only NOW, after the parent build, so it
-      # can never shadow the parent Qt. Its location is saved for the explicit
-      # -DCMAKE_PREFIX_PATH / -WinDeployQt6 references below.
-      - name: Install Qt ${{ env.QT_LAYOUT_VERSION }} for SeamlyLayout (x64 only)
-        if: matrix.arch == 'x64'
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: ${{ env.QT_LAYOUT_VERSION }}
-          arch: win64_msvc2022_64
-          cache: true
-          # Same module list and reasoning as seamlylayout-ci.yml: qtwebengine
-          # for WebEngineQuick, plus its deps qtwebchannel/qtpositioning which
-          # aqtinstall does not auto-resolve.
-          modules: qtwebengine qtwebchannel qtpositioning
-
-      - name: Remember the SeamlyLayout Qt location (x64 only)
-        if: matrix.arch == 'x64'
-        shell: pwsh
-        run: echo "QT_LAYOUT_DIR=$env:QT_ROOT_DIR" >> $env:GITHUB_ENV
-
+      # No second Qt install here any more (Task 30) — SeamlyLayout builds
+      # against the same $env:QT_ROOT_DIR kit installed above.
       - name: Install Rust toolchain (x64 only)
         if: matrix.arch == 'x64'
         uses: dtolnay/rust-toolchain@stable
@@ -158,7 +155,7 @@ jobs:
         working-directory: src/app/seamlylayout/qt_frontend
         shell: pwsh
         run: |
-          cmake --preset release -DCMAKE_PREFIX_PATH="$env:QT_LAYOUT_DIR"
+          cmake --preset release -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cmake --build --preset release
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
@@ -184,7 +181,7 @@ jobs:
           .\scripts\packaging\windows\smsi.ps1 -Arch x64 -Version $env:VERSION_NUMBER `
             -Seamly2DBin src\app\seamly2d\bin `
             -SeamlyMeBin src\app\seamlyme\bin `
-            -WinDeployQt6 "$env:QT_LAYOUT_DIR\bin\windeployqt6.exe"
+            -WinDeployQt6 "$env:QT_ROOT_DIR\bin\windeployqt6.exe"
 
       - name: Build MSI (arm64 - seamly2d and seamlyme)
         if: matrix.arch == 'arm64'

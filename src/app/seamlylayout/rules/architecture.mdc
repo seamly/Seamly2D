@@ -17,6 +17,6 @@ Applies to architecture-level decisions and cross-module design.
 
 ## Repository-Specific Notes
 
-- Frontend: Qt 6.10 + QML/QtWidgets (LGPL-3.0).
+- Frontend: Qt 6.11 + QML/QtWidgets (LGPL-3.0).
 - Core: Rust crates (MIT).
 - Bridge: CXX-Qt.

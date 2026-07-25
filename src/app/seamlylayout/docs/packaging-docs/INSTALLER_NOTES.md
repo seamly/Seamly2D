@@ -120,7 +120,7 @@ will happen at first launch.  No files are moved by the installer itself.
 ```
 
 Prerequisites:
-- Qt 6.10.1 msvc2022_64 at `C:\Qt\6.10.1\msvc2022_64`
+- Qt 6.11.1 msvc2022_64 at `C:\Qt\6.11.1\msvc2022_64`
 - Inno Setup 6 at `C:\Program Files (x86)\Inno Setup 6\iscc.exe`
 - `packaging/licenses/LGPL-3.0.txt` (download from gnu.org, not committed)
 
@@ -147,7 +147,7 @@ bash packaging/macos/build_dmg.sh
 ```
 
 Prerequisites:
-- Qt 6.10.1 macOS at `/usr/local/Qt/6.10.1/macos`
+- Qt 6.11.1 macOS at `/usr/local/Qt/6.11.1/macos`
 - `create-dmg` (`brew install create-dmg`)
 
 Output: `packaging/macos/Output/SeamlyLayout-0.1.0-macOS.dmg`
@@ -156,7 +156,7 @@ Output: `packaging/macos/Output/SeamlyLayout-0.1.0-macOS.dmg`
 
 ## LGPL-3.0 Compliance
 
-Qt 6.10 is dynamically linked under LGPL-3.0.  Every installer must:
+Qt 6.11 is dynamically linked under LGPL-3.0.  Every installer must:
 
 1. Include `packaging/licenses/LGPL-3.0.txt` alongside the application.
 2. Include `packaging/licenses/qt-source-notice.txt` directing users to

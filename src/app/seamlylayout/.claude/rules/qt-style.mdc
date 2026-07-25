@@ -119,8 +119,8 @@ private:
 // MIT License: https://opensource.org/licenses/MIT
 // SeamlyButton.qml — Branded button matching the violet/gray palette
 
-import QtQuick 6.10
-import QtQuick.Controls 6.10
+import QtQuick 6.11
+import QtQuick.Controls 6.11
 
 Button {
     id: root

@@ -24,8 +24,8 @@
 //   // To show: viewDxfTeachingDialog.teachingFilePath = path
 //   //          viewDxfTeachingDialog.open()
 
-import QtQuick 6.10
-import QtQuick.Controls 6.10
+import QtQuick 6.11
+import QtQuick.Controls 6.11
 import SeamlyLayout
 
 Dialog {

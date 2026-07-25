@@ -2,22 +2,30 @@ name: SeamlyLayout CI
 
 # ---------------------------------------------------------------------------
 # Task 20 — push-triggered CI that builds and tests the SeamlyLayout daughter
-# app (Rust core + Qt 6.10 QML frontend), mirroring what `src/app/seamlylayout/
+# app (Rust core + Qt 6.11 QML frontend), mirroring what `src/app/seamlylayout/
 # qd.ps1` / `build.ps1` do locally, adapted to Linux/CI.
 #
 # WHY A SEPARATE WORKFLOW FROM ci.yml:
-#   The main CI (`ci.yml`) pins Qt 6.8.3 (its `QT_VERSION`) to match what the
-#   GitHub release runners provide for seamly2d/seamlyme (qmake toolchain).
-#   SeamlyLayout requires Qt 6.10.1 (see qt_frontend/CMakeLists.txt:
-#   `find_package(Qt6 6.10.1 REQUIRED ...)`) and a Rust + CMake/Ninja toolchain,
-#   so it cannot share ci.yml's job matrix yet. Keeping it in its own workflow
-#   file guarantees the two are fully independent: a SeamlyLayout failure never
-#   blocks the seamly2d/seamlyme jobs, and vice versa.
+#   Task 30 removed the original reason — the Qt pin. This job used to carry a
+#   Qt 6.10.1 pin while `ci.yml` built seamly2d/seamlyme on a different release;
+#   both are now Qt 6.11.1, so the two `QT_VERSION` values must simply be kept
+#   in step. The workflow stays separate for the reasons that remain true:
+#     * Different build system — SeamlyLayout is CMake/Ninja + Cargo/Corrosion,
+#       while ci.yml's parent-app jobs are qmake, and it needs extra toolchain
+#       steps (Rust, the cargo cache, the qtwebengine/qtwebchannel/qtpositioning
+#       module set) that no parent-app job wants.
+#     * Independent triggers — this file is path-filtered to
+#       `src/app/seamlylayout/**`, so layout-only changes do not rebuild the
+#       parent apps on every platform, and parent-only changes do not rebuild
+#       the Rust workspace.
+#     * Independent failure — a SeamlyLayout failure never blocks the
+#       seamly2d/seamlyme jobs, and vice versa.
+#   Merging is therefore a "could", not a "should"; revisit it only if the
+#   parent apps also move to CMake.
 #
-# FUTURE CONSOLIDATION:
-#   When seamly2d and seamlyme move to Qt 6.10 as well, merge this job back into
-#   ci.yml so the whole family shares one Qt toolchain and one workflow. Until
-#   then this file is the single place that carries the Qt 6.10 pin.
+# KEEP IN SYNC: `QT_VERSION` below, `ci.yml`'s `QT_VERSION`, and
+# `windows-msi.yml`'s `QT_VERSION` must all name the same Qt release — the
+# family now ships one shared Qt runtime (Task 30).
 # ---------------------------------------------------------------------------
 
 on:
@@ -48,15 +56,16 @@ permissions:
   contents: read
 
 env:
-  # SeamlyLayout's required Qt. Deliberately different from ci.yml's 6.8.3 pin
-  # (see the header comment) — do not "align" the two until the whole family
-  # moves to 6.10.
-  QT_VERSION: '6.10.1'
+  # SeamlyLayout's required Qt — must match qt_frontend/CMakeLists.txt's
+  # `find_package(Qt6 6.11.1 ...)` and stay in sync with ci.yml's QT_VERSION
+  # and windows-msi.yml's QT_VERSION (Task 30: one Qt for the whole family).
+  # Quoted, or the YAML parser reads it as a float.
+  QT_VERSION: '6.11.1'
 
 jobs:
 
   build-and-test:
-    name: 'Linux: Build & test SeamlyLayout (Qt 6.10)'
+    name: 'Linux: Build & test SeamlyLayout (Qt 6.11)'
     runs-on: ubuntu-latest
     # Run every step from the SeamlyLayout app root — this is the Cargo workspace
     # root and the parent of qt_frontend, matching how qd.ps1 is invoked locally.
@@ -70,7 +79,7 @@ jobs:
 
       # -------------------------------------------------------------------
       # Toolchain: Rust (stable) for the core crates + CXX-Qt bridge, and
-      # Qt 6.10 with the QML/Quick + WebEngine modules the frontend needs.
+      # Qt 6.11 with the QML/Quick + WebEngine modules the frontend needs.
       # -------------------------------------------------------------------
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
@@ -82,7 +91,7 @@ jobs:
         with:
           workspaces: src/app/seamlylayout
 
-      - name: Install Qt 6.10
+      - name: Install Qt 6.11
         uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
@@ -108,7 +117,7 @@ jobs:
           sudo apt-get install -y ninja-build xvfb libnss3 libxkbcommon0 libgbm1
 
       # -------------------------------------------------------------------
-      # Build the Qt 6.10 QML frontend. The CMake build also drives Corrosion /
+      # Build the Qt 6.11 QML frontend. The CMake build also drives Corrosion /
       # cxx-qt-cmake, which runs `cargo build` for the cxxqt_bridge crate — so
       # this single step builds both the Rust bridge and the C++/QML app, the
       # same way build.ps1 does on Windows.

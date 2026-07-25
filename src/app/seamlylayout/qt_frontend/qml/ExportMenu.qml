@@ -18,8 +18,8 @@
 //   PNG       — Phase 11
 //   SVG       — Phase 11
 
-import QtQuick 6.10
-import QtQuick.Controls 6.10
+import QtQuick 6.11
+import QtQuick.Controls 6.11
 
 Menu {
     id: root

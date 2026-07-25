@@ -2,7 +2,7 @@
 # author: slspencer, copyright 2026
 # LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
 #
-# CMakeLists.txt — Qt 6.10 + QML frontend for SeamlyLayout.
+# CMakeLists.txt — Qt 6.11 + QML frontend for SeamlyLayout.
 # Links against libseamly_core (Rust FFI bridge) once Phase 2g is complete.
 # See docs/status-docs/TODO.md for the full migration plan.
 
@@ -31,9 +31,14 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif() # MSVC
 
 # ---------------------------------------------------------------------------
-# Qt 6.10 — require minimum 6.10.1; all modules must be LGPLv3 (no GPL modules)
+# Qt 6.11 — require minimum 6.11.1; all modules must be LGPLv3 (no GPL modules)
+#
+# Task 30: bumped from 6.10.1 so SeamlyLayout shares the same Qt release as the
+# seamly2d/seamlyme parent apps (Qt 6.11.1 msvc2022_64, matching ci.yml). One Qt
+# version across the family lets the Windows MSI ship a single shared Qt runtime
+# instead of two side-by-side copies with colliding DLL names.
 # ---------------------------------------------------------------------------
-find_package(Qt6 6.10.1 REQUIRED COMPONENTS
+find_package(Qt6 6.11.1 REQUIRED COMPONENTS
     Core
     Gui
     Quick
@@ -49,7 +54,7 @@ find_package(Qt6 6.10.1 REQUIRED COMPONENTS
 )
 
 # Enables AUTOMOC, AUTORCC, AUTOUIC and sets standard Qt project defaults
-qt_standard_project_setup(REQUIRES 6.10.1)
+qt_standard_project_setup(REQUIRES 6.11.1)
 
 # ---------------------------------------------------------------------------
 # Windows/MSVC: map Qt imported targets' Debug config to Release.
