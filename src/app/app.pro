@@ -43,6 +43,6 @@ SUBDIRS = \
 # Sharing a Qt version does not mean sharing a build system.
 # ---------------------------------------------------------------------------
 
-macx{# For making app bundle seamlyme must exist before seamly2d.app will be created
+macx{# For qmake app bundle, seamlyme must exist before seamly2d.app will be created
     seamly2d.depends = seamlyme
 }
