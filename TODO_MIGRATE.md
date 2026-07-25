@@ -283,8 +283,8 @@ Harmless (a non-matching allowlist entry just means an extra prompt), but they a
 
 ```text
 qmake : C:\Qt\6.11.1\msvc2022_64\bin\qmake.exe          <- sd.ps1 detected 6.11.1 correctly
-        cd libs\ && ( if not exist Makefile C:\Qt\6.10.1\msvc2022_64\bin\qmake.exe ... )   <- stale sub-Makefile
-Error: dependent 'C:\Qt\6.10.1\msvc2022_64\lib\Qt6Cored.lib' does not exist.
+        cd libs\ && ( if not exist Makefile C:\Qt\6.11.1\msvc2022_64\bin\qmake.exe ... )   <- stale sub-Makefile
+Error: dependent 'C:\Qt\6.11.1\msvc2022_64\lib\Qt6Cored.lib' does not exist.
 ```
 
 **Workaround used:** delete `scripts/seamly2d-build-debug/` and re-run `sd.ps1`. The failure mode is confusing because the script's own banner reports the *correct* Qt while the error names the *old* one, and nothing in the script or docs says a toolchain change requires wiping the tree. The same hazard applies to the release shadow-build in `build/`, and `src/app/seamlylayout/build.ps1` already solves the analogous problem for CMake (it compares `CMAKE_HOME_DIRECTORY` in `CMakeCache.txt` and recreates the directory on mismatch).
@@ -318,3 +318,46 @@ What is and is not affected:
 - [X] Do the same for any documented bare `cargo build` / `cargo test --workspace` invocation in the SeamlyLayout docs (`README.md`, `.claude/rules/testing.mdc`), or note the required `QMAKE` export there — documented in `README.md` (the "Rust-only checks" section, which also wrongly claimed "no Qt required" — `cxxqt_bridge` does need it) and `docs/testing-docs/UNIT_TEST_COMMANDS.md` (new prerequisite section), both with the PowerShell and bash export forms and the Design Studio explanation. `.claude/rules/testing.mdc` documents no bare workspace `cargo` invocation, so it needed no change
 - [X] Consider a guard: if the resolved `qmake -query QT_INSTALL_PREFIX` has no `mkspecs\` directory, fail early naming the real kit instead of letting the build produce a confusing spec error — added to `build.ps1`: it queries `QT_INSTALL_PREFIX` from the selected qmake and aborts with a message naming the offending prefix when that prefix has no `mkspecs\`. Verified the guard accepts `C:\Qt\6.11.1\msvc2022_64` and rejects `C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version`
 - [ ] Optional developer-environment cleanup: reorder `PATH` so the real kit's `bin\` precedes `C:\Qt\Tools\QtDesignStudio\...\bin`, or drop the Design Studio entry from `PATH` entirely — left to the developer; the script-level pinning above makes it unnecessary for repo builds, but it would also fix Qt Creator kit auto-detection and any ad-hoc `qmake` use
+
+## Task 48 — qmake post-link runs a bare `windeployqt`, deploying the WRONG Qt runtime beside the exes (found doing Task 30, 2026-07-25)
+
+**Severity: produces a broken build tree that would be packaged into the MSI.**
+
+The `win32-msvc` post-link step in three `.pro` files invokes `windeployqt` with no path, so it is resolved from `PATH`:
+
+```qmake
+# src/app/seamly2d/seamly2d.pro:371, src/app/seamlyme/seamlyme.pro:252,
+# src/test/Seamly2DTest/Seamly2DTest.pro:212
+win32-msvc{
+    QMAKE_POST_LINK += windeployqt $$shell_path($$DESTDIR/$${TARGET}.exe)
+}
+```
+
+On this machine both `windeployqt` and `windeployqt6` on `PATH` resolve to Qt Design Studio's reduced kit (see **Task 47**), which is **Qt 6.8.7**:
+
+```text
+windeployqt  -> C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version\bin\windeployqt.exe
+windeployqt6 -> C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version\bin\windeployqt6.exe
+   that kit's Qt6Core.dll -> 6.8.7.0
+```
+
+So a release build compiled and linked against **Qt 6.11.1** gets **Qt 6.8.7** DLLs deployed beside it. Verified after a clean `scripts/sb.ps1 -SkipLayout` run: `build/src/app/seamly2d/bin/Qt6Core.dll` and `build/src/app/seamlyme/bin/Qt6Core.dll` both report FileVersion `6.8.7.0`, next to exes built entirely from `C:\Qt\6.11.1\msvc2022_64` includes and libs. Qt's binary compatibility runs forward only — an older binary on newer libraries — so a 6.11.1-linked exe against 6.8.7 DLLs is **not** a supported configuration and will fail to load or crash on missing entry points.
+
+**The fix already exists in the same files.** The `win32-arm64-msvc` branch, three lines below, does it correctly:
+
+```qmake
+win32-arm64-msvc{
+    qtPrepareTool(WINDEPLOYQT, windeployqt)   # resolves from $$[QT_INSTALL_BINS], not PATH
+    QMAKE_POST_LINK += $$WINDEPLOYQT --qtpaths ... $$shell_path($$DESTDIR/$${TARGET}.exe)
+}
+```
+
+`qtPrepareTool` resolves the tool out of the Qt that qmake itself belongs to, which is exactly the guarantee wanted here. The x64 branch simply never got the same treatment.
+
+**Scope:** CI is unaffected — the runners have no Qt Design Studio and `install-qt-action` puts the correct Qt first on `PATH` — so this only bites local developer builds. But it does so *silently*, and `smsi.ps1` packages `build/src/app/<app>/bin` verbatim, so a locally built MSI would ship the mismatched runtime. This also casts doubt on the Qt runtime actually shipped in the locally built MSI recorded in `scripts/packaging/windows/README_WINDOWS_BUILD.md` (2026-07-23).
+
+- [ ] Change the `win32-msvc` branch in `src/app/seamly2d/seamly2d.pro`, `src/app/seamlyme/seamlyme.pro` and `src/test/Seamly2DTest/Seamly2DTest.pro` to use `qtPrepareTool(WINDEPLOYQT, windeployqt)` + `$$WINDEPLOYQT`, matching the `win32-arm64-msvc` branch, so the deploy tool always comes from the Qt that qmake belongs to rather than from `PATH`
+- [ ] Rebuild the parents and confirm the deployed `Qt6Core.dll` matches the kit that compiled them (expect `6.11.1.0`), and that `seamly2d.exe` and `seamlyme.exe` actually start from `build/src/app/<app>/bin`
+- [ ] Add a guard to `scripts/sb.ps1` (and consider `scripts/sd.ps1`): after the build, compare the deployed `Qt6Core.dll` FileVersion against the selected kit's and fail loudly on a mismatch — this bug was invisible until the DLL version was checked by hand
+- [ ] Re-verify the Windows MSI once the parents deploy a matching runtime, and correct any claim in `scripts/packaging/windows/README_WINDOWS_BUILD.md` about which Qt the 2026-07-23 MSI actually shipped
+- [ ] Check whether the macOS `macdeployqt` post-link (`seamly2d.pro`, around line 363) has the same PATH-resolution exposure — it uses `$$[QT_INSTALL_BINS]/macdeployqt`, which looks correct, but confirm

@@ -4,10 +4,15 @@
 #
 # build.ps1 — Build script for SeamlyLayout Qt frontend
 # Sets up VS 2025 x64 environment, runs CMake configure + build, then launches the app
+# (unless -NoRun is given).
 param(
     [ValidateSet("debug", "release")]
     [string]$Preset = "debug",
-    [switch]$Clean
+    [switch]$Clean,
+    # Build only; do not launch the freshly built executable. Required by any
+    # non-interactive caller (scripts\sb.ps1, CI), since launching a GUI app
+    # blocks the script until the user closes the window.
+    [switch]$NoRun
 )
 
 Write-Host "Starting build process for SeamlyLayout..."
@@ -203,14 +208,17 @@ try {
         exit $ExitCode
     }
 
-    # Always run after successful build
+    # Verify the executable landed, then launch it unless the caller opted out.
     $Exe = "$BuildDir\SeamlyLayout.exe"
-    if (Test-Path $Exe) {
-        Write-Host "`nLaunching SeamlyLayout..." -ForegroundColor Green
-        & $Exe
-    } else {
+    if (-not (Test-Path $Exe)) {
         Write-Error "Executable not found: $Exe"
         exit 1
+    }
+    if ($NoRun) {
+        Write-Host "`nBuild OK (not launching, -NoRun): $Exe" -ForegroundColor Green
+    } else {
+        Write-Host "`nLaunching SeamlyLayout..." -ForegroundColor Green
+        & $Exe
     }
 } catch {
     Write-Error "An error occurred during the build process: $_"
