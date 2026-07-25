@@ -108,6 +108,33 @@ if (-not (Test-Path (Join-Path $QtPrefix "mkspecs"))) {
     exit 1
 }
 
+# Guard against a kit that has Qt WebEngine but not the two modules WebEngine
+# itself depends on. Neither the Qt online installer nor aqtinstall pulls
+# qtwebchannel/qtpositioning in when you select Qt WebEngine, and CMake reports
+# the omission indirectly - "Qt6WebEngineQuick could not be found because
+# dependency Qt6WebEngineCore could not be found" - which sends you looking at
+# WebEngine, that is installed. Name the actual missing modules instead.
+$MissingQtModules = @('Qt6WebEngine', 'Qt6WebChannel', 'Qt6Positioning') |
+    Where-Object { -not (Test-Path (Join-Path $QtPrefix "lib\cmake\$_")) }
+if ($MissingQtModules) {
+    Write-Error @"
+Qt kit at '$QtPrefix' is missing required module(s): $($MissingQtModules -join ', ').
+SeamlyLayout links Qt6::WebEngineQuick, and Qt6WebEngineCore additionally
+requires Qt6WebChannel and Qt6Positioning - selecting Qt WebEngine in the
+installer does NOT pull those two in.
+
+Install them with the Qt Maintenance Tool (Add or remove components -> Qt
+<version> -> Additional Libraries), or from the command line:
+
+  C:\Qt\MaintenanceTool.exe install qt.qt6.<ver>.addons.qtwebchannel qt.qt6.<ver>.addons.qtpositioning --accept-licenses --accept-obligations --confirm-command --default-answer
+
+where <ver> is the kit version without dots (6.11.1 -> 6111). Name the parent
+packages, not their .win64_msvc2022_64 children - those are virtual and the
+tool refuses them.
+"@
+    exit 1
+}
+
 $env:QMAKE = $QtQmake
 $env:PATH  = "$QtBin;$env:PATH"
 Write-Host "  qmake : $QtQmake (QMAKE exported, kit bin prepended to PATH)"
