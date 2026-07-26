@@ -73,6 +73,9 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started on GitFlow, Issues, Branc
         * Qt WebEngine / Qt 6.11.1
         * MSVC 2022 x64
         * Debug Information Files
+      * Additional Libraries -- **required by Qt WebEngine, and NOT installed with it:**
+        * Qt WebChannel / Qt 6.11.1
+        * Qt Positioning / Qt 6.11.1
       * Build Tools
         * CMake 3.30.5
         * Ninja 1.12.1
@@ -80,6 +83,8 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started on GitFlow, Issues, Branc
     * *Qt Design Studio* -- it is based on Qt 6.8.3
     * *MinGW* -- we use MSVC 2022
     * *Sources* -- it will fill your harddrive
+
+> **Why WebChannel and Positioning matter.** SeamlyLayout's `SvgCanvas.qml` uses `WebEngineView`, and `Qt6WebEngineCore`'s CMake config requires **Qt WebChannel** and **Qt Positioning**. The Qt installer does *not* pull them in when you tick Qt WebEngine, and a kit missing either one fails at configure time with a `find_package(Qt6 ... WebEngineQuick)` error that names WebEngine — not the module actually missing. If your kit is already installed, re-run the **Maintenance Tool** and add them (component ids `qtwebengine`, `qtwebchannel`, `qtpositioning` — the same three CI installs).
 
 ### 2. Install platform-specific files
 

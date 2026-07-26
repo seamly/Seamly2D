@@ -44,26 +44,31 @@ Add layout export for multisize patterns — `.sm2d` patterns opened with a `.sm
 - [ ] Tests with a multisize test pattern (need a `.sm2d` + `.smms` fixture); verify grouping/grainline orientation in the exported SVG/PDF
 - [ ] Doxygen briefs + inline comments on all touched functions; document the three products in the repo docs
 
-## Task 57 — Rename `app_core`'s crate root `lib.rs` → `lib_seamlylayout.rs`
+## Task 57 — Give every Rust crate root a unique file name (11 crates all named `lib.rs`)
 
-Rename `src/app/seamlylayout/crates/app_core/src/lib.rs` to `lib_seamlylayout.rs` and update the code to match.
+**Goal (from `.github/README-CODE-STYLES.md`, File Names):** "*Unique names: a search for the \<filename.extension> should return only one file.*" Under the seamlylayout workspace, **11 crate roots are all named `lib.rs`** — `app_core`, `cxxqt_bridge`, `ezdxf2dxfastm`, `geometry`, `layout_engine`, `layout_tiling`, `pack_types`, `packing`, `polygon_pack`, `seamly_svg2ezdxf`, `svg_dom` — plus `error.rs` twice (`ezdxf2dxfastm`, `seamly_svg2ezdxf`). Opening "lib.rs" in any editor picker is a guess between 11 files.
 
-**What the rename actually requires:** Cargo defaults a library target's root to `src/lib.rs`, so moving the file makes the crate fail to build (`can't find library app_core`) until `crates/app_core/Cargo.toml` declares the path explicitly:
+**Rename, don't split.** Splitting `app_core`'s root into named modules does *not* meet the goal: Cargo still requires a crate root, so `lib.rs` survives as the file holding the `mod` declarations, and there are still 11 of them. Splitting also *adds* names that must then be kept unique — `error.rs` ×2 is that drift already happening. The root is ~215 lines (8 public functions over one cohesive load → convert → render pipeline, plus a 4-case test module), which does not need breaking up; revisit that on its own merits if it grows.
+
+**Name each root after its crate, not after the app.** `lib_seamlylayout.rs` names the *application*, so applying it across the workspace would produce 12 files wanting the same name — the collision the rule forbids. `crates/<crate>/src/<crate>.rs` (`app_core.rs`, `svg_dom.rs`, `geometry.rs`, …) is unique **by construction**, because Cargo already forbids duplicate crate names in a workspace, and it matches Rust's own `mod foo` ↔ `foo.rs` convention.
+
+**What each rename requires:** Cargo defaults a library target's root to `src/lib.rs`, so the crate stops building (`can't find library …`) until its `Cargo.toml` says otherwise:
 
 ```toml
 [lib]
 name = "app_core"
-path = "src/lib_seamlylayout.rs"
+path = "src/app_core.rs"
 ```
 
-The crate name (`app_core`) is unaffected — a crate's identity comes from `[package] name`, not the file name — so **no `use app_core::…` line changes**. Dependents checked 2026-07-26: `crates/cli` (`Cargo.toml:10`, `src/main.rs:8`) and `crates/cxxqt_bridge` (`Cargo.toml:25`, `src/lib.rs`, `src/exports.rs`); none names the file. Nothing in `build.ps1`, `qd.ps1`, `qt_frontend/CMakeLists.txt`/Corrosion or the cxx-qt build names it either — only two docs do.
+Crate names and every `use app_core::…` are unaffected — a crate's identity is `[package] name`, not the file name. Verified 2026-07-26: nothing outside the crates names any root file — not `build.ps1`, `qd.ps1`, `qt_frontend/CMakeLists.txt`/Corrosion, the cxx-qt build, or `seamlylayout-ci.yml` (they all reference crate *directories*). Only two docs do.
 
-**Flag — confirm the intent before renaming.** `app_core` is 1 of 12 workspace crates, and every other library crate uses the conventional `src/lib.rs` (`svg_dom`, `geometry`, `pack_types`, `layout_engine`, `polygon_pack`, `packing`, `layout_tiling`, `seamly_svg2ezdxf`, `ezdxf2dxfastm`, `cxxqt_bridge`; `cli` uses `src/main.rs`). Renaming this one alone breaks the convention every Rust reader and tool expects, for a file whose name is invisible to `use` statements. Decide which is meant: (a) `app_core` only, (b) all crate roots renamed the same way, or (c) the underlying goal is really "`lib.rs` is a meaningless name for an 8 KB grab-bag" — in which case splitting it into named modules (`load.rs`, `render.rs`, `convert.rs`) achieves that with the convention intact.
-
-- [ ] Confirm the intent per the flag above; record the decision (and, if it is a convention change, where new crates learn it)
-- [ ] `git mv crates/app_core/src/lib.rs crates/app_core/src/lib_seamlylayout.rs` so history follows the file
-- [ ] Add the `[lib]` section (`name` + `path`) to `crates/app_core/Cargo.toml` — without it the build breaks immediately
-- [ ] Update the two docs that name the path: `src/app/seamlylayout/docs/dxf-docs/DXF_EXPORT_ARCHITECTURE.md:420` and `docs/dxf-docs/DXF_EXPORT_PLAN.md:298` (both `// In app_core/src/lib.rs`); check `docs/CODEBASE_INDEX.md`'s crate list while there
-- [ ] Rebuild and test: `src/app/seamlylayout/build.ps1` plus `cargo test --workspace` with `$env:QMAKE` pinned to the 6.11.1 kit (Task 47) — and confirm the `#[cfg(test)] mod tests` at the bottom of the renamed root (`lib.rs:177`) still runs, since its 4 round-trip/render tests move with the file
-- [ ] Confirm `seamlylayout-ci.yml` stays green — it builds the workspace from `Cargo.toml`, which points at the crate directory, not the file
-- [ ] If the decision is "all crates", do them in one commit and record the convention in `src/app/seamlylayout/.claude/rules/rust-style.mdc` (it states no file-naming rule today) so new crates follow it instead of drifting back to `lib.rs`
+- [ ] Confirm the naming scheme (`<crate>.rs`) and that it applies to all 11 library crates, not just `app_core`
+- [ ] `git mv` each `crates/<crate>/src/lib.rs` → `crates/<crate>/src/<crate>.rs` so history follows the files
+- [ ] Add `[lib] name` + `path` to each of the 11 `Cargo.toml`s in the same commit — a rename without it breaks the build immediately
+- [ ] Decide `cli`'s binary root: `src/main.rs` is currently unique repo-wide (only `main.cpp` collides, ×5, and that is a different extension), so it can stay — or rename to `src/cli.rs` via `[[bin]] name`/`path` for consistency. Record which and why
+- [ ] Resolve the `error.rs` collision at the same time (`crates/ezdxf2dxfastm/src/error.rs`, `crates/seamly_svg2ezdxf/src/error.rs`) — these are plain modules, so renaming them means updating their `mod`/`use` lines, nothing more
+- [ ] Update the docs that name a root path: `docs/dxf-docs/DXF_EXPORT_ARCHITECTURE.md:420` and `docs/dxf-docs/DXF_EXPORT_PLAN.md:298` (both `// In app_core/src/lib.rs`); check `docs/CODEBASE_INDEX.md`'s crate list while there
+- [ ] Record the convention in `src/app/seamlylayout/.claude/rules/rust-style.mdc` (it states no file-naming rule today) so new crates do not drift back to `lib.rs`
+- [ ] Rebuild and test: `src/app/seamlylayout/build.ps1` plus `cargo test --workspace` with `$env:QMAKE` pinned to the 6.11.1 kit (Task 47); confirm each moved `#[cfg(test)] mod tests` still runs (they travel with their file — `app_core`'s 4 cases at `lib.rs:177` among them)
+- [ ] Confirm `seamlylayout-ci.yml` stays green
+- [ ] Note for the wider rule (out of scope here, worth its own task): the C++ tree violates the same uniqueness rule far more heavily — `stable.h`, `stable.cpp` and `warnings.pri` ×21 each, `main.cpp` ×5, `qttestmainlambda.cpp` ×3, `calculator.{h,cpp}` / `version.h` / `xml.pri` / `dialogs.pri` / `tools.pri` ×2 — while `Cargo.toml` ×13 is mandated by Cargo and the vendored `src/libs/xerces-c/{macx,mingw,msvc,msvc-arm64}` copies account for 443 duplicate basenames on their own. Any repo-wide version of this rule needs explicit carve-outs for tool-mandated names and vendored third-party code

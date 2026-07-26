@@ -349,28 +349,35 @@ Affected keys: `paths/pattern`, `paths/layout`, `paths/seamlyLayoutApp`, `patter
 - [ ] Add a regression test that no Seamly settings resolve to an `"Unknown Organization"` path, so a future accessor cannot reintroduce this
 - [ ] Update the settings-storage tables in `.github/README-BUILDS.md` once the location changes
 
-## Task 54 — Rename the three `vmisc` settings files to `settings_*`
+## Task 54 — Rename the three `vmisc` settings files **and their classes** to `settings_*` / `Settings*`
 
-Rename the settings sources in `src/libs/vmisc/` so each file name says which app it configures, and so they follow `CLAUDE.md`'s naming rule (new files start with `s`, not `v`):
+Rename the settings sources in `src/libs/vmisc/` so each name says which app it configures, and rename the classes with them so the pair complies with `.github/README-CODE-STYLES.md`: **file names** snake_case with a meaningful prefix (`settings_*` is one of the listed prefixes) and unique repo-wide; **class names** UpperCamelCase (the project's deliberate deviation from JSF-AV, which would demand `Settingscommon`); and "**Match Classes Exactly** — if a file primarily defines one class, give it the same name as the class", which the `v`-prefixed names have never done.
 
-| Current | New |
-| --- | --- |
-| `vcommonsettings.cpp` / `vcommonsettings.h` | `settings_common.cpp` / `settings_common.h` |
-| `vseamlymesettings.cpp` / `vseamlymesettings.h` | `settings_seamlyme.cpp` / `settings_seamlyme.h` |
-| `vsettings.cpp` / `vsettings.h` | `settings_seamly2d.cpp` / `settings_seamly2d.h` |
+| Current file | New file | Current class | New class |
+| --- | --- | --- | --- |
+| `vcommonsettings.cpp` / `.h` | `settings_common.cpp` / `.h` | `VCommonSettings` | `SettingsCommon` |
+| `vseamlymesettings.cpp` / `.h` | `settings_seamlyme.cpp` / `.h` | `VSeamlyMeSettings` | `SettingsSeamlyMe` |
+| `vsettings.cpp` / `.h` | `settings_seamly2d.cpp` / `.h` | `VSettings` | `SettingsSeamly2D` |
+
+Two naming calls to confirm before the sweep, since they set the pattern for every later rename: the brand casing `SettingsSeamlyMe` / `SettingsSeamly2D` is kept (matching the existing `VSeamlyMeSettings`) rather than the literal file-name transliteration `SettingsSeamlyme` / `SettingsSeamly2d`; and `VSettings` — the *Seamly2D* settings, despite the generic name — becomes `SettingsSeamly2D`, which is the whole point of the rename.
+
+**Class-rename scope measured 2026-07-26:** `VCommonSettings` **447 occurrences in 17 files**, `VSettings` **147 in 18 files**, `VSeamlyMeSettings` **25 in 9 files** (`src/`, all extensions). Plus the translations: `tr()` contexts are keyed on the class name, so all **22 `share/translations/seamly2d_*.ts`** files carry a `<name>VCommonSettings</name>` context (8 messages) and a `<name>VSettings</name>` context (2) — **~220 already-translated strings** that go obsolete unless the contexts are renamed with the classes. `VSeamlyMeSettings` has no translation context.
 
 **Scope measured 2026-07-26:** **101 files under `src/`** `#include` one of the three headers, in two forms — the in-directory `#include "vcommonsettings.h"` and the sibling-library `#include "../vmisc/vsettings.h"` form, which resolves only because every `.pro` adds `INCLUDEPATH += $$PWD/../../libs/vmisc`. `src/libs/vmisc/vmisc.pri` is the **only** build file naming them (SOURCES lines 5/8/9, HEADERS lines 24/27/28) — no other `.pro`/`.pri`/workflow lists these sources, so the build wiring is a six-line change.
 
-**Class names are NOT part of this task.** `VCommonSettings`, `VSettings` and `VSeamlyMeSettings` keep their names: `CLAUDE.md`'s rule is about file names, and the 22 `share/translations/seamly2d_*.ts` files key their translation contexts on the *class* name (`<name>VCommonSettings</name>`, `<name>VSettings</name>`) with no `<location filename=…>` entries at all — so a file rename leaves every translation file untouched, while a class rename would churn all 22. If a class rename is also wanted, raise it as a separate task with that cost stated.
+**Do files and classes in one commit, not two.** Splitting them means a middle state where `settings_common.h` declares `VCommonSettings` — exactly the file/class mismatch the style rule exists to prevent — and it doubles the churn through the same ~600 call sites.
 
+- [ ] Confirm the two naming calls above (brand casing; `VSettings` → `SettingsSeamly2D`)
 - [ ] Rename all six files with `git mv` (not delete + add) so history and `git blame` follow the rename
 - [ ] Update the six entries in `src/libs/vmisc/vmisc.pri` (SOURCES 5/8/9, HEADERS 24/27/28)
 - [ ] Update every `#include` across the 101 files — both the in-directory and the `../vmisc/…` form — then confirm with a repo-wide grep that no `vcommonsettings.h` / `vsettings.h` / `vseamlymesettings.h` include remains anywhere under `src/`
 - [ ] Include the test suite in that sweep: `src/test/Seamly2DTest/tst_dataroot.{h,cpp}` is the only test that includes these headers (and uses `VCommonSettings` heavily), so a missed include there fails only the test build, not the app build
 - [ ] Rename the include guards to match the new file names — `VCOMMONSETTINGS_H` → `SETTINGS_COMMON_H`, `VSETTINGS_H` → `SETTINGS_SEAMLY2D_H`, `VSEAMLYMESETTINGS_H` → `SETTINGS_SEAMLYME_H` (each at lines 53-54 of its header)
-- [ ] Update the `@file` line in each of the six license-header blocks (e.g. `//  @file   vcommonsettings.h`), leaving the existing `@author`/`@date`/copyright lines as they are
-- [ ] Update the docs that name these paths — `.github/README-BUILDS.md:17` and `:77` at minimum — and decide whether historical entries (`COMPLETED.md`, `SESSION_HANDOVER.md`, `TODO_SEAMLY2D.md` Task 42, `TODO_SEAMLYME.md` Task 43) get rewritten or left as the record of what the files were called at the time; record the decision either way
-- [ ] Amend Task 52 above, which points at "the eight `vsettings.cpp` accessors", so whoever picks it up looks for `settings_seamly2d.cpp`
+- [ ] Rename the three classes at every occurrence (~620 across 25 distinct files): the `class X : public Y` declarations, constructors/destructors, every forward declaration (`class VSettings;`), member and pointer types (`VSettings *Seamly2DSettings()`, `VCommonSettings *settings`), and every static/qualified call (`VCommonSettings::…`). `VSettings` is a whole-word match — nothing else contains it — so use word-boundary, case-**sensitive** replacement and never touch the lowercase `settings` identifiers that surround them
+- [ ] Rename the `tr()` contexts in all 22 `share/translations/seamly2d_*.ts` files (`<name>VCommonSettings</name>` → `SettingsCommon`, `<name>VSettings</name>` → `SettingsSeamly2D`) in the same commit, or the ~220 existing translated strings in those contexts go obsolete. Verify afterwards by running `lupdate` and confirming it reports no newly-obsolete messages in these contexts
+- [ ] Update the `@file` line in each of the six license-header blocks (e.g. `//  @file   vcommonsettings.h`), and the `@brief`/`@class` text of anything that names the old class, leaving the existing `@author`/`@date`/copyright lines as they are
+- [ ] Update the docs that name these paths **or classes** — `.github/README-BUILDS.md:17` (`VSettings`, `src/libs/vmisc/vsettings.cpp`) and `:77` (`VCommonSettings::dataRoot()` and the rest of that API row) at minimum — and decide whether historical entries (`COMPLETED.md`, `SESSION_HANDOVER.md`, `TODO_SEAMLY2D.md` Task 42, `TODO_SEAMLYME.md` Task 43) get rewritten or left as the record of what things were called at the time; record the decision either way
+- [ ] Amend Task 52 above — it points at "the eight `vsettings.cpp` accessors" and at `VCommonSettings::mergeStrayCommonSettings()` / `getLabelTemplatePath()` — so whoever picks it up looks for `settings_seamly2d.cpp` and `SettingsCommon`
 - [ ] Build and test locally: `scripts/sd.ps1` plus the test binaries (`scripts/st.ps1` runs only one of the four that CI runs via `make check` — run the others too). Wipe the shadow-build tree first; a stale `Makefile`/object tree can link an old object and mask a missed include (Task 46)
 - [ ] Confirm CI stays green on all three workflows that compile these sources (`ci.yml`, `windows-msi.yml`, and `seamlylayout-ci.yml` only if it pulls the parent libs)
 
@@ -381,7 +388,7 @@ Rewrite the **"Recommended installation for development on all platforms (Linux,
 **Defects found reading the current text (2026-07-26):**
 
 - **Lines 54-55 contradict themselves and the project**: "MS Visual Code Community Edition 18 (for the IDE)" + "MS Visual Studio 2022 (for the compiler)". `CLAUDE.md` says the local toolchain is Qt 6.11.1 `msvc2022_64` + **VS 18 Community** MSVC (`vcvars64.bat`) while CI uses MSVC 2022 — settle what is required versus what is merely known-good, and say it once
-- **The Qt module list (lines 59-78) omits `qtwebchannel` and `qtpositioning`.** It names Qt WebEngine, but the online installer does not pull the other two in automatically, and without them `find_package(Qt6 … WebEngineQuick)` fails at configure time — the single most common local-setup failure on this project (Task 44, `CLAUDE.md` build notes)
+- ~~**The Qt module list omits `qtwebchannel` and `qtpositioning`.**~~ **Fixed 2026-07-26** — the module list now has an "Additional Libraries" group for Qt WebChannel + Qt Positioning, plus a note explaining that ticking Qt WebEngine does not install them and that the resulting `find_package(Qt6 … WebEngineQuick)` failure names WebEngine rather than the missing module (Task 44, `CLAUDE.md` build notes). This was the single most common local-setup failure on the project, so it was fixed ahead of the rest of the rewrite
 - **No Rust toolchain prerequisite** (rustup/cargo) even though seamlyLayout is half Rust and CMake 3.30.5 + Ninja 1.12.1 are already listed
 - **None of the scripts that people actually run are mentioned**: `scripts/sd.ps1` (debug build/run), `scripts/st.ps1` (tests), `src/app/seamlylayout/build.ps1` and `qd.ps1` (the daughter app's own build), `scripts/packaging/windows/smsi.ps1` (MSI)
 - **The Windows build block (lines 131-137)** is fenced ```` ```bash ```` for `cd …\build`, `qmake ..\Seamly.pro`, `nmake`; it does not say the shell must be a VS developer environment (`vcvars64.bat`), does not mention jom (the toolchain of record), and does not warn that a bare `qmake` on a machine with Qt Design Studio resolves to its reduced Qt with no `mkspecs/` (Task 47)
@@ -390,7 +397,8 @@ Rewrite the **"Recommended installation for development on all platforms (Linux,
 - **Lines 139-157 (Linux, MacOS)** give bare `qmake`/`make`/`sudo make install` with no statement of which Qt or compiler is supported, or how to get Qt 6.11.1 on those platforms; macOS covers only `CONFIG+=macSign`
 - **Line 80** ("*Don't select Qt Design Studio -- it is based on Qt 6.8.3*") needs re-verification against the current installer, and should carry the *reason* from Task 47 (its stripped Qt on `PATH` breaks builds), not just the version
 
-- [ ] Rewrite the "Install on all platforms" list: one clear IDE/compiler statement, Qt 6.11.1 with the **complete** required module set (incl. `qtwebengine`, `qtwebchannel`, `qtpositioning`), CMake/Ninja, and rustup/cargo for seamlyLayout
+- [X] Add the missing `qtwebchannel` / `qtpositioning` modules to the Qt component list, with the reason and the recovery path via the Maintenance Tool — done 2026-07-26, ahead of the rest of this task
+- [ ] Rewrite the rest of the "Install on all platforms" list: one clear IDE/compiler statement, CMake/Ninja, and rustup/cargo for seamlyLayout
 - [ ] Rewrite the three platform-specific install subsections (Linux, MacOSX, Windows) — current package/tool lists, Qt 6.11.1 acquisition per platform, and the pdftops/Xpdf step stated once under the right heading
 - [ ] Rewrite "Building Seamly" to cover all three apps: the qmake/jom parent build (seamly2d + seamlyme from `src/Seamly.pro`), the seamlyLayout CMake + Cargo build, and which script drives each on Windows
 - [ ] State the Windows shell requirement explicitly (VS developer environment / `vcvars64.bat`), use a PowerShell-appropriate fence instead of ```` ```bash ````, and add the Design Studio `qmake`/`QMAKE` caveat from Task 47
