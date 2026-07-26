@@ -846,6 +846,14 @@ void Application2D::openSettings()
     // an existing ~/seamly2d tree in place when upgrading. Non-destructive and re-entrant.
     VCommonSettings::initializeDataRoot();
 
+    // Task 53: clear away the empty ~/seamly2d skeleton the rename leaves behind. Kept here
+    // in the application rather than inside initializeDataRoot() on purpose — this is the
+    // only place the real home directory is fed to it, so the unit tests, which do call
+    // initializeDataRoot(), can never reach outside their temporary directories. It is a
+    // no-op unless ~/seamly2d exists, is not the configured root, and holds no files at all.
+    VCommonSettings::pruneEmptyLegacyDataRoot(VCommonSettings::getLegacyDataRoot(),
+                                              VCommonSettings::dataRoot());
+
     // seamly2d's own settings: new per-app directory under "Seamly", migrated forward
     // from the legacy shared organization folder on first run after an upgrade.
     bool migratedThisCall = false;
