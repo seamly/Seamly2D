@@ -416,10 +416,15 @@ void TST_DataRoot::RebaseMovesPathsInsideTheOldRoot() const
              newRoot + QStringLiteral("/measurements/individual"));
     // The root itself follows the move.
     QCOMPARE(VCommonSettings::rebaseOntoDataRoot(oldRoot, oldRoot, newRoot), newRoot);
-    // Native separators on the way in still match.
+
+#ifdef Q_OS_WIN
+    // Native separators on the way in still match — Windows only: QDir::fromNativeSeparators()
+    // rewrites backslashes only there, because on POSIX a backslash is a legal filename
+    // character, so such a path genuinely is not inside the old root.
     QCOMPARE(VCommonSettings::rebaseOntoDataRoot(QStringLiteral("C:\\Users\\tester\\seamly2d\\images"),
                                                  oldRoot, newRoot),
              newRoot + QStringLiteral("/images"));
+#endif
 }
 
 //---------------------------------------------------------------------------------------------------------------------
