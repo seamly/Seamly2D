@@ -17,6 +17,7 @@ Refer to `TODO_MIGRATE.md` for the tasks still open.
 | **Task 14** | **Extended, not implemented.** The user asked whether the installer could check-then-move an existing data tree before anything is removed; it cannot today, so nine subtasks were folded into Task 14 under an "Update (2026-07-26) — moving an existing data tree" note |
 | **Task 52** | **Extended.** Gained a new *first* subtask: stop `CollectionTest` writing into the real user settings **before** repointing the `vsettings.cpp` accessors |
 | **Developer machine** | **Migrated and verified** — see the table below. This is state *outside* the repo; nothing in git records it |
+| **Tasks 54-57** | **Filed, not started.** Four items moved out of `future-todos.md` into the task lists (docs-only commit): **54** rename the three `vmisc` settings files to `settings_*` and **55** refresh `.github/README-DEVELOPER.md` (both `TODO_MIGRATE.md`); **56** clear the `BUILD_PROBLEMS.txt` errors (`TODO_SEAMLY2D.md`); **57** rename `app_core`'s `lib.rs` (`TODO_SEAMLYLAYOUT.md`). Each carries the scope measurement and the flag found while writing it — 56 in particular: those 45 entries are **clangd with no include paths**, not a broken build, and the file is tracked source carrying `/c:/Users/susan/…` paths toward the upstream PR |
 
 ### Files changed (Task 53, commit `a89801e4f4`)
 
@@ -78,7 +79,7 @@ The `PreCompact` / `PostCompact` hooks in `.claude/settings.json` were emitting 
 
 ## Uncommitted work in the tree (not mine — left alone)
 
-`.github/CODEOWNERS_README.md` deleted; `.github/README-DEVELOPER.md` and `future-todos.md` modified; untracked `.github/README-CODE-STYLES.md`, `.github/README_CODEOWNERS.md`, `.github/image/`, `src/app/seamly2d/core/BUILD_PROBLEMS.txt`. These are the user's own in-flight edits — do not stage or revert them without asking.
+Those earlier edits all landed in the user's own commit `1806fad484` (`.github/README-DEVELOPER.md`, `.github/README-CODE-STYLES.md`, `.github/README_CODEOWNERS.md`, `.github/image/`, `src/app/seamly2d/core/BUILD_PROBLEMS.txt` — the last two now matter to Tasks 55 and 56). Still modified and **not mine**: `future-todos.md`, the user's own inbox file — do not stage or revert it without asking.
 
 ## Gotchas
 

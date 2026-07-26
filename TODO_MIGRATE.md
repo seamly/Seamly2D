@@ -348,3 +348,54 @@ Affected keys: `paths/pattern`, `paths/layout`, `paths/seamlyLayoutApp`, `patter
 - [ ] **Stop `CollectionTest` writing into the real user settings first.** `%APPDATA%\Unknown Organization.ini` on the developer machine holds `layout=…\CollectionTest\bin\tst_seamly2d_tmp` — the suite launches the real `seamly2d.exe`, which persists a layout path through these very accessors. Today the defect is what contains the damage (the write lands in the stray file); the moment the accessors point at `this`, the same test run scribbles on `%LOCALAPPDATA%\Seamly\Seamly2D\qt6_seamly2d.ini`. Give the test-launched apps their own settings location (distinct organization/application name, or `QSettings::setPath()`) **before** repointing the accessors
 - [ ] Add a regression test that no Seamly settings resolve to an `"Unknown Organization"` path, so a future accessor cannot reintroduce this
 - [ ] Update the settings-storage tables in `.github/README-BUILDS.md` once the location changes
+
+## Task 54 — Rename the three `vmisc` settings files to `settings_*`
+
+Rename the settings sources in `src/libs/vmisc/` so each file name says which app it configures, and so they follow `CLAUDE.md`'s naming rule (new files start with `s`, not `v`):
+
+| Current | New |
+| --- | --- |
+| `vcommonsettings.cpp` / `vcommonsettings.h` | `settings_common.cpp` / `settings_common.h` |
+| `vseamlymesettings.cpp` / `vseamlymesettings.h` | `settings_seamlyme.cpp` / `settings_seamlyme.h` |
+| `vsettings.cpp` / `vsettings.h` | `settings_seamly2d.cpp` / `settings_seamly2d.h` |
+
+**Scope measured 2026-07-26:** **101 files under `src/`** `#include` one of the three headers, in two forms — the in-directory `#include "vcommonsettings.h"` and the sibling-library `#include "../vmisc/vsettings.h"` form, which resolves only because every `.pro` adds `INCLUDEPATH += $$PWD/../../libs/vmisc`. `src/libs/vmisc/vmisc.pri` is the **only** build file naming them (SOURCES lines 5/8/9, HEADERS lines 24/27/28) — no other `.pro`/`.pri`/workflow lists these sources, so the build wiring is a six-line change.
+
+**Class names are NOT part of this task.** `VCommonSettings`, `VSettings` and `VSeamlyMeSettings` keep their names: `CLAUDE.md`'s rule is about file names, and the 22 `share/translations/seamly2d_*.ts` files key their translation contexts on the *class* name (`<name>VCommonSettings</name>`, `<name>VSettings</name>`) with no `<location filename=…>` entries at all — so a file rename leaves every translation file untouched, while a class rename would churn all 22. If a class rename is also wanted, raise it as a separate task with that cost stated.
+
+- [ ] Rename all six files with `git mv` (not delete + add) so history and `git blame` follow the rename
+- [ ] Update the six entries in `src/libs/vmisc/vmisc.pri` (SOURCES 5/8/9, HEADERS 24/27/28)
+- [ ] Update every `#include` across the 101 files — both the in-directory and the `../vmisc/…` form — then confirm with a repo-wide grep that no `vcommonsettings.h` / `vsettings.h` / `vseamlymesettings.h` include remains anywhere under `src/`
+- [ ] Include the test suite in that sweep: `src/test/Seamly2DTest/tst_dataroot.{h,cpp}` is the only test that includes these headers (and uses `VCommonSettings` heavily), so a missed include there fails only the test build, not the app build
+- [ ] Rename the include guards to match the new file names — `VCOMMONSETTINGS_H` → `SETTINGS_COMMON_H`, `VSETTINGS_H` → `SETTINGS_SEAMLY2D_H`, `VSEAMLYMESETTINGS_H` → `SETTINGS_SEAMLYME_H` (each at lines 53-54 of its header)
+- [ ] Update the `@file` line in each of the six license-header blocks (e.g. `//  @file   vcommonsettings.h`), leaving the existing `@author`/`@date`/copyright lines as they are
+- [ ] Update the docs that name these paths — `.github/README-BUILDS.md:17` and `:77` at minimum — and decide whether historical entries (`COMPLETED.md`, `SESSION_HANDOVER.md`, `TODO_SEAMLY2D.md` Task 42, `TODO_SEAMLYME.md` Task 43) get rewritten or left as the record of what the files were called at the time; record the decision either way
+- [ ] Amend Task 52 above, which points at "the eight `vsettings.cpp` accessors", so whoever picks it up looks for `settings_seamly2d.cpp`
+- [ ] Build and test locally: `scripts/sd.ps1` plus the test binaries (`scripts/st.ps1` runs only one of the four that CI runs via `make check` — run the others too). Wipe the shadow-build tree first; a stale `Makefile`/object tree can link an old object and mask a missed include (Task 46)
+- [ ] Confirm CI stays green on all three workflows that compile these sources (`ci.yml`, `windows-msi.yml`, and `seamlylayout-ci.yml` only if it pulls the parent libs)
+
+## Task 55 — Refresh the developer install and build instructions in `.github/README-DEVELOPER.md`
+
+Rewrite the **"Recommended installation for development on all platforms (Linux, MacOSX, Windows)"** section (line 50) and the **"Building Seamly"** section (line 116) of `.github/README-DEVELOPER.md` so they describe how Seamly is actually built today on a local PC. (Filename note: the request says `README_DEVELOPER.md`; the file in the tree is `.github/README-DEVELOPER.md`, with hyphens.) `.github/README-BUILDS.md` is the maintained build knowledge base — the developer README should give the short, correct path for each platform and link there for depth rather than duplicating it.
+
+**Defects found reading the current text (2026-07-26):**
+
+- **Lines 54-55 contradict themselves and the project**: "MS Visual Code Community Edition 18 (for the IDE)" + "MS Visual Studio 2022 (for the compiler)". `CLAUDE.md` says the local toolchain is Qt 6.11.1 `msvc2022_64` + **VS 18 Community** MSVC (`vcvars64.bat`) while CI uses MSVC 2022 — settle what is required versus what is merely known-good, and say it once
+- **The Qt module list (lines 59-78) omits `qtwebchannel` and `qtpositioning`.** It names Qt WebEngine, but the online installer does not pull the other two in automatically, and without them `find_package(Qt6 … WebEngineQuick)` fails at configure time — the single most common local-setup failure on this project (Task 44, `CLAUDE.md` build notes)
+- **No Rust toolchain prerequisite** (rustup/cargo) even though seamlyLayout is half Rust and CMake 3.30.5 + Ninja 1.12.1 are already listed
+- **None of the scripts that people actually run are mentioned**: `scripts/sd.ps1` (debug build/run), `scripts/st.ps1` (tests), `src/app/seamlylayout/build.ps1` and `qd.ps1` (the daughter app's own build), `scripts/packaging/windows/smsi.ps1` (MSI)
+- **The Windows build block (lines 131-137)** is fenced ```` ```bash ```` for `cd …\build`, `qmake ..\Seamly.pro`, `nmake`; it does not say the shell must be a VS developer environment (`vcvars64.bat`), does not mention jom (the toolchain of record), and does not warn that a bare `qmake` on a machine with Qt Design Studio resolves to its reduced Qt with no `mkspecs/` (Task 47)
+- **Line 108 links Qt 5 documentation** (`doc.qt.io/qt-5/windows.html`) for a Qt 6 project
+- **The Xpdf/pdftops instructions are duplicated and misfiled** — line 104 (under *MacOSX*) and line 112 (under *Windows*) both give the same Windows-and-MacOS sentence
+- **Lines 139-157 (Linux, MacOS)** give bare `qmake`/`make`/`sudo make install` with no statement of which Qt or compiler is supported, or how to get Qt 6.11.1 on those platforms; macOS covers only `CONFIG+=macSign`
+- **Line 80** ("*Don't select Qt Design Studio -- it is based on Qt 6.8.3*") needs re-verification against the current installer, and should carry the *reason* from Task 47 (its stripped Qt on `PATH` breaks builds), not just the version
+
+- [ ] Rewrite the "Install on all platforms" list: one clear IDE/compiler statement, Qt 6.11.1 with the **complete** required module set (incl. `qtwebengine`, `qtwebchannel`, `qtpositioning`), CMake/Ninja, and rustup/cargo for seamlyLayout
+- [ ] Rewrite the three platform-specific install subsections (Linux, MacOSX, Windows) — current package/tool lists, Qt 6.11.1 acquisition per platform, and the pdftops/Xpdf step stated once under the right heading
+- [ ] Rewrite "Building Seamly" to cover all three apps: the qmake/jom parent build (seamly2d + seamlyme from `src/Seamly.pro`), the seamlyLayout CMake + Cargo build, and which script drives each on Windows
+- [ ] State the Windows shell requirement explicitly (VS developer environment / `vcvars64.bat`), use a PowerShell-appropriate fence instead of ```` ```bash ````, and add the Design Studio `qmake`/`QMAKE` caveat from Task 47
+- [ ] Refresh the Linux and macOS build blocks: supported Qt/compiler, the `qmake6` note (already present, line 149) kept, macOS signing/notarizing kept and cross-referenced to the packaging docs
+- [ ] Add a short "how to run the tests" pointer (`scripts/st.ps1` and the full `make check` set CI runs) so a new contributor can verify a build
+- [ ] Fix the stale link on line 108 (Qt 5 → Qt 6) and sweep the section for any other Qt 5-era links
+- [ ] Cross-link `.github/README-BUILDS.md` (toolchains, packaging, settings/data locations) and `.github/workflows/README_WORKFLOWS.md` instead of restating them; keep CI's Qt version named in exactly one place
+- [ ] Verify the instructions by following them literally on this Windows PC (and, where they can only be reviewed, say so) — a doc that has not been walked through is the reason for this task
