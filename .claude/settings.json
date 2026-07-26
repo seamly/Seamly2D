@@ -164,7 +164,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreCompact\",\"additionalContext\":\"IMPORTANT: session memory is nearly full. Preserve in the summary everything needed for a session handover: the current task and its exact progress, the state of TODO.md/COMPLETED.md, key decisions made, files modified, and the concrete next steps. Also note that SESSION_HANDOVER.md at the repository root must be updated with this state.\"}}'",
+            "command": "echo '{\"systemMessage\":\"Session memory is nearly full. Preserve everything needed for a session handover: the current task and its exact progress, the state of the TODO_*.md and COMPLETED.md files, key decisions made, files modified, and the concrete next steps. SESSION_HANDOVER.md at the repository root must be brought up to date with this state.\"}'",
             "statusMessage": "Preserving session-handoff state"
           }
         ]
@@ -175,7 +175,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PostCompact\",\"additionalContext\":\"The session memory was just compacted. Before continuing any task, write or update SESSION_HANDOVER.md at the repository root with the state information needed for the next chat session: current task and progress, state of TODO.md/COMPLETED.md, key decisions, files modified so far, and concrete next steps. Then continue the task.\"}}'",
+            "command": "echo '{\"systemMessage\":\"Session memory was just compacted. Before continuing any task, write or update SESSION_HANDOVER.md at the repository root with the state the next chat session needs: current task and progress, state of the TODO_*.md and COMPLETED.md files, key decisions, files modified so far, and concrete next steps. Then continue the task.\"}'",
             "statusMessage": "Updating SESSION_HANDOVER.md"
           }
         ]

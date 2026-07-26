@@ -65,6 +65,7 @@ Since **Task 30** all three apps — seamly2d, seamlyme and seamlyLayout — bui
   5. watch the PR's CI checks (`gh pr checks <pr> --watch`); when all checks pass, merge the PR; if any check fails, do NOT merge
   6. notify the user of the outcome either way — merged (with PR URL) or not merged (with the failing checks) — then, after a merge, update local `run-seamlyLayout` from origin and delete the local task branch (origin deletes the remote branch automatically on merge)
 - **Docs-only exception:** when a commit changes only `.md`, `.txt`, and/or `.svg` files (no code), skip the local build/test verification and the push/PR/CI cycle above entirely — stage and commit locally only; do not push to origin
+- **`SESSION_HANDOVER.md`** (repo root) — keep it current with the session's state: update it before compaction and when finishing a task. It is the next chat session's starting point, so it must carry what git does not — the current task and its exact progress, which `TODO_*.md` / `COMPLETED.md` entries moved, key decisions and the reasoning behind them, files changed, concrete next steps, and any machine state changed outside the repo. The `PreCompact` / `PostCompact` hooks in `.claude/settings.json` only surface a reminder; keeping the file current is required regardless of whether that reminder appears
 
 ## Key References
 
