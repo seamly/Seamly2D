@@ -2,9 +2,9 @@
 
 ## Current state: Tasks 34 and 53 are DONE and moved to `COMPLETED.md`
 
-**Date:** 2026-07-26. **Branch:** `run-seamlyLayout`. The last **code** commit is PR #19's merge; everything after it is docs-only and **unpushed**. Task 53 landed via **PR [#19](https://github.com/seamly/Seamly2D/pull/19)** (`task-53-seamlydata-root` → `run-seamlyLayout`) — **all 11 CI checks green** (Windows x64 27m4s, Windows arm64 cross-compile 26m28s, macOS 16m51s, Linux AppImage 9m3s, Linux unit tests 9m55s, CodeQL, CodeSee, Analyze actions/python/rust, version) — **merged**, task branch deleted locally and on origin. Task 34 landed earlier the same day.
+**Date:** 2026-07-26. **Branch:** `run-seamlyLayout` at **`1d74f7e18a`** ("merge develop"), **pushed — local and `origin/run-seamlyLayout` are identical, working tree clean.** Task 53 landed via **PR [#19](https://github.com/seamly/Seamly2D/pull/19)** (`task-53-seamlydata-root` → `run-seamlyLayout`) — **all 11 CI checks green** (Windows x64 27m4s, Windows arm64 cross-compile 26m28s, macOS 16m51s, Linux AppImage 9m3s, Linux unit tests 9m55s, CodeQL, CodeSee, Analyze actions/python/rust, version) — **merged**, task branch deleted locally and on origin. Task 34 landed earlier the same day.
 
-Since that merge, three **docs-only** commits on `run-seamlyLayout` (`da1ac2d1be`, `09da7801e0`, `ac65b9ee0b`) — committed locally and **not pushed**, per the docs-only exception in `CLAUDE.md`. No code has changed since PR #19.
+**`develop` was merged into `run-seamlyLayout`** (`1d74f7e18a`, the sanctioned direction — never the reverse). Local `develop` = `origin/develop` = `057e95bfca`. It brought in real upstream **code**, so "nothing has changed since PR #19" is no longer true: formula-reference guards (`vabstractpattern`, `vdrawtool`, `vtoolline`, `savetooloptions` — issues #1364/#1521), the pointname combobox colour fix (#1636), Finnish translations (#1637), and a CI consolidation that **deleted `.github/workflows/feat-ci.yml`** and folded feature-branch builds into `ci.yml`. **These changes have not been built or tested locally in this session.**
 
 Refer to `TODO_MIGRATE.md`, `TODO_SEAMLY2D.md` and `TODO_SEAMLYLAYOUT.md` for the tasks still open.
 
@@ -21,17 +21,22 @@ Refer to `TODO_MIGRATE.md`, `TODO_SEAMLY2D.md` and `TODO_SEAMLYLAYOUT.md` for th
 | **Developer machine** | **Migrated and verified** — see the table below. This is state *outside* the repo; nothing in git records it |
 | **Tasks 54, 55, 57** | **Filed, not started**, moved out of `future-todos.md` (docs-only commits). **54** (`TODO_MIGRATE.md`) renames the three `vmisc` settings **files *and* classes** — `settings_common`/`SettingsCommon`, `settings_seamlyme`/`SettingsSeamlyMe`, `settings_seamly2d`/`SettingsSeamly2D` — per `.github/README-CODE-STYLES.md`; ~620 class occurrences plus 22 `.ts` `tr()` contexts (~220 translated strings) that go obsolete if not renamed with the classes. **55** (`TODO_MIGRATE.md`) refreshes `.github/README-DEVELOPER.md`; its first subtask is **already done** (see below). **57** (`TODO_SEAMLYLAYOUT.md`) was rewritten from "rename `app_core`'s `lib.rs`" to "give every crate root a unique name" — 11 crates all use `lib.rs`; splitting the root does **not** meet the uniqueness rule because Cargo still requires a root file, so the answer is `[lib] path = "src/<crate>.rs"` across all 11 |
 | **Task 56** | **Filed, then removed at the user's request** — the `BUILD_PROBLEMS.txt` clangd noise is not being tracked as a task. (The finding stands if it comes back: 45 entries, all cascading from two `pp_file_not_found` roots because the repo has no compile database; qmake+MSVC builds those files clean.) |
-| **`README-DEVELOPER.md` Qt modules** | **Fixed in place** (not just filed): the Qt component list now includes **Qt WebChannel + Qt Positioning** under "Additional Libraries", with a note that ticking Qt WebEngine does not install them and that the resulting `find_package(Qt6 … WebEngineQuick)` error names WebEngine rather than the missing module. This was the Task 44 setup failure |
+| **`README-DEVELOPER.md` Qt modules** | **Fixed in `09da7801e0`, then LOST in the `develop` merge.** The fix added Qt WebChannel + Qt Positioning with a note that ticking Qt WebEngine does not install them. `develop` carried four independent rewrites of the same file (`ad38f96e4e`, `d2aba7efb9`, `fbff2de94c`, `8d83757332`) and the merge resolution took their version of that section. **The current file lists neither — nor Qt WebEngine itself**, so the seamlyLayout prerequisites are now entirely undocumented and the Task 44 setup failure is fully reintroduced. Its Task 55 subtask has been un-checked |
+| **`develop` merge** | Brought 11 upstream commits (code + docs, above), and left a stray **`.github/README-DEVELOPER-NEW.md`** — a 149-line near-duplicate of `README-DEVELOPER.md` (6 insertions / 5 deletions apart) that exists on **neither** `develop` nor any earlier commit. It was introduced by the merge commit itself, so it is almost certainly a conflict-resolution artefact rather than an intended file |
 | **Naming rules** | **`CLAUDE.md` corrected.** It required new files to begin with `s`; `.github/README-CODE-STYLES.md` says *"don't start filenames with 's'!"* and gives meaningful prefixes instead. The user chose the **style guide as authoritative**, so `CLAUDE.md` now names it and carries the rules that come up constantly — snake_case, the prefix list, unique repo-wide, UpperCamelCase classes, file-matches-class. Only the "not `v`" half of the old rule survives |
 | **Style guide revised by the user** (`df5d90bb14`) | **Two new exceptions that supersede parts of the tasks filed minutes earlier.** (1) *"Match Class names exactly for file names that define a class … in UpperCamelCase"* — a file primarily defining one class is now an **exception to snake_case**, which reopens Task 54's file names (`SettingsCommon.h` vs `settings_common.h`; note the repo has no UpperCamelCase `.cpp`/`.h` today outside vendored xerces-c). (2) *"Crate files in SeamlyLayout require multiple `lib.rs` files distinguishable by their paths"* — **voids Task 57's premise**. Both are recorded in the tasks and mirrored into `CLAUDE.md`; both still need a user decision (see next steps) |
 
-### Files changed — docs-only commits after PR #19
+### Commits after PR #19 (all on origin)
 
-| Commit | Files | Change |
-| --- | --- | --- |
-| `da1ac2d1be` | `TODO_MIGRATE.md`, `TODO_SEAMLY2D.md`, `TODO_SEAMLYLAYOUT.md`, `SESSION_HANDOVER.md` | Tasks 54-57 written up from `future-todos.md`, each with its scope measured in the tree |
-| `09da7801e0` | same three `TODO_*.md` + `SESSION_HANDOVER.md` + `.github/README-DEVELOPER.md` | Task 54 extended to the class renames; Task 55's Qt-module subtask fixed in the doc and checked off; **Task 56 deleted**; Task 57 rewritten around the uniqueness rule |
-| `ac65b9ee0b` | `CLAUDE.md` | Coding Rules point at `.github/README-CODE-STYLES.md`; `s`-prefix rule dropped; class-naming and file-matches-class rules added |
+| Commit | Author | Files | Change |
+| --- | --- | --- | --- |
+| `da1ac2d1be` | Claude | 3 × `TODO_*.md`, `SESSION_HANDOVER.md` | Tasks 54-57 written up from `future-todos.md`, each with its scope measured in the tree |
+| `09da7801e0` | Claude | same + `.github/README-DEVELOPER.md` | Task 54 extended to the class renames; Qt-module fix applied to the doc; **Task 56 deleted**; Task 57 rewritten around the uniqueness rule |
+| `ac65b9ee0b` | Claude | `CLAUDE.md` | Coding Rules point at `.github/README-CODE-STYLES.md`; `s`-prefix rule dropped; class-naming and file-matches-class rules added |
+| `df5d90bb14` | user | `.github/README-CODE-STYLES.md`, `future-todos.md` | The two naming **exceptions** (class-match file names; multiple `lib.rs` allowed) |
+| `5abe181d7a`, `f6dcaded15` | Claude | `SESSION_HANDOVER.md`, `CLAUDE.md`, `TODO_MIGRATE.md`, `TODO_SEAMLYLAYOUT.md` | Handover brought current; Tasks 54/57 reconciled with those exceptions |
+| `b3634b4002` | user | `.github/README-CODE-STYLES.md` | Further style-guide edits |
+| `1d74f7e18a` | user | merge of `develop` (17 files) | Upstream code + doc rewrites; **dropped the Qt-module fix**; added the stray `README-DEVELOPER-NEW.md` |
 
 ### Files changed (Task 53, commit `a89801e4f4`)
 
@@ -95,22 +100,25 @@ The `PreCompact` / `PostCompact` hooks in `.claude/settings.json` were emitting 
 Newly filed, none started, no priority assigned by the user yet:
 
 - **Task 54** — rename the three `vmisc` settings files **and** their classes. Mechanical but wide: ~620 class occurrences over 25 files, 101 files including the headers, and the 22 `.ts` `tr()` contexts must move in the **same commit** or ~220 translated strings go obsolete. Do files and classes together — a split leaves the new file declaring the old class. **Blocked on one decision:** the file-name form, see below.
-- **Task 55** — the rest of the `.github/README-DEVELOPER.md` refresh (the Qt-module subtask is already done). Defects are enumerated in the task; the IDE/compiler line contradicts itself and needs the user's call on VS 18 Community vs MSVC 2022.
+- **Task 55** — the `.github/README-DEVELOPER.md` refresh. **Re-read the file before starting:** the `develop` merge rewrote it, so the task's line references are stale, its Qt-module subtask is un-checked again, and the target file itself is in question (decision 3 below). Defects that survive the rewrite: the self-contradicting IDE/compiler lines (VS Code vs Visual Studio 2022 vs `CLAUDE.md`'s VS 18 Community), the Qt 5 Windows link, the ```` ```bash ```` fence over Windows `nmake` commands with no `vcvars64.bat` requirement, the duplicated pdftops paragraph, and **no mention of Rust/cargo, the build scripts, or the WebEngine modules**. The Qt Design Studio "don't select" warning (Task 47's hazard) was also dropped in the rewrite.
 - **Task 57** — **premise superseded**, see below; decide whether to delete it (as Task 56 was) or keep only the `error.rs` ×2 collision. The user had already answered "no plan yet" before the exception was written.
 
-## Two decisions the user still owes (both block work already written up)
+## Four decisions the user still owes
 
-1. **Task 54's file-name form** — `SettingsCommon.h` (the new class-match exception) or `settings_common.h` (snake_case + the `settings_*` prefix, as originally requested). Six file names and every future class-file rename hang on it; the task's first subtask is exactly this.
+1. **Task 54's file-name form** — `SettingsCommon.h` (the class-match exception) or `settings_common.h` (snake_case + the `settings_*` prefix, as originally requested). Six file names and every future class-file rename hang on it; the task's first subtask is exactly this.
 2. **Task 57's fate** — delete it like Task 56, or keep only the `error.rs` ×2 collision, now that multiple `lib.rs` files are explicitly allowed.
+3. **`.github/README-DEVELOPER-NEW.md`** — delete it, or fold it into `README-DEVELOPER.md` and delete the original. Two near-identical developer READMEs is worse than either alone, and a `-NEW` suffix ages badly. Whichever survives is Task 55's target.
+4. **Re-apply the Qt WebChannel / Qt Positioning documentation?** The merge left the developer README with no WebEngine-family modules at all. Until it is restored, a new contributor cannot build seamlyLayout and the error they get names the wrong module. `CLAUDE.md` still carries the rule, so nothing is lost — but the doc a newcomer reads does not.
 
-## Uncommitted work in the tree (not mine — left alone)
+## Uncommitted work in the tree
 
-The user is actively editing `.github/README-CODE-STYLES.md` (their `df5d90bb14` revision, possibly more) and `future-todos.md`. **Do not stage or revert either** — check `git status` before assuming a dirty file is yours. Their earlier round of doc edits landed in `1806fad484` (`.github/README-DEVELOPER.md`, `.github/README-CODE-STYLES.md`, `.github/README_CODEOWNERS.md`, `.github/image/`, `src/app/seamly2d/core/BUILD_PROBLEMS.txt`).
+**None — the tree is clean** and local `run-seamlyLayout` equals `origin/run-seamlyLayout`. The user has been editing docs directly and committing them (`df5d90bb14`, `b3634b4002`, and the merge), so re-check `git status` before assuming a dirty file is yours.
 
 ## Gotchas
 
 ### New this session
 
+- **A `develop` merge can silently drop doc edits made on this branch.** `.github/README-DEVELOPER.md` was edited on `run-seamlyLayout` and, in the same window, four times on `develop`; the merge resolution took develop's side and the branch edit vanished with no conflict marker left behind. After merging `develop`, `git log -S "<a phrase you added>" -- <file>` is the cheapest way to confirm your change survived. The same merge also deposited a stray `README-DEVELOPER-NEW.md` that exists in no parent commit.
 - **`QSettings(fileName, format, parent)` records neither an organization nor an application name** — both come back empty, and QSettings substitutes the literal `"Unknown Organization"`. Root cause of the stray files in Tasks 34 and 52. `QSettings::setPath(format, scope, dir)` *does* redirect settings files, but has **no getter** — recover the base from a probe instance.
 - **`QDir::fromNativeSeparators()` rewrites backslashes only on Windows** (a backslash is a legal POSIX filename character), and Windows path comparison must be `Qt::CaseInsensitive` — both matter when comparing a configured root against a legacy one.
 - **`QDir::rmdir()` over `removeRecursively()`, deliberately.** `rmdir()` cannot delete a file and refuses a non-empty directory, so it cannot run away. `removeRecursively()` also bypasses the Recycle Bin — that is how `C:\Users\susan\seamly2d` was permanently destroyed in the previous session.
