@@ -1,9 +1,19 @@
+# Ignore temporary files
 *~
+
+# Ignore Mercurial .orig files
+*.orig
+
+# Ignore Git merge-related files
+*.rej
 
 # Seamly2D lock files
 *.locked
 
-# Seamly2D and SeamlyMe makes reserve copy of each pattern file before conversion to higher version.
+# test key files
+*seamly-signing-key.json
+
+# Previous backup file formats
 *(v*).val*
 *(v*).vit*
 *(v*).vst*
@@ -87,9 +97,13 @@ cov-int/
 # Qt-es
 /.qmake.cache
 /.qmake.stash
-*.pro.user
-*.pro.user.*
-*.qbs.user
+
+# track qtCreator files for testing
+!*.pro.user
+!*.pro.user.*
+!*.qbs.user
+
+# Qt compiled files
 *.moc
 moc_*.cpp
 qrc_*.cpp
@@ -97,20 +111,20 @@ ui_*.h
 Makefile*
 *-build-*
 
-# Ignore Qt translation file
+# Qt translation file
 *.qm
 
 # QtCreator
 *.autosave
 
-# Ignore Mercurial .orig files
-*.orig
-
-*.rej
-
 # QtCtreator Qml
 *.qmlproject.user
 *.qmlproject.user.*
+
+# QT creator files
+.qtc_clangd/
+.vscode/
+.qmake.stash
 
 # Xcode project
 *.xcodeproj
@@ -167,18 +181,13 @@ $RECYCLE.BIN/
 target_wrapper.sh
 *.bak
 
-# test key files
-*seamly-signing-key.json
 # Allow xerces lib
 !xerces-c_3D.lib
 !xerces-c_3_2D.dll
-# QT creator files
-.qtc_clangd/
-.vscode/
-.qmake.stash
 
 # Claude Code personal overrides (shared settings.json is committed)
 .claude/settings.local.json
+
 
 # documents
 docs/
@@ -186,17 +195,19 @@ docs/
 # seamlylayout daughter app (absorbed from the former nested seamlyLayout repo).
 # Its docs tree stays tracked despite the global docs/ rule above.
 !src/app/seamlylayout/docs/
-# Build outputs and local state (also covered by src/app/seamlylayout/.gitignore,
-# kept from the nested repo; duplicated here so the root ignore file is complete).
-src/app/seamlylayout/target/
+# track seamlylayout .claude & .vs files for testing
+!src/app/seamlylayout/.claude/
+!src/app/seamlylayout/.vs/
+# track seamlylayout input * output files for testing
+!src/app/seamlylayout/input/
 src/app/seamlylayout/output/
-src/app/seamlylayout/input/
+# Ignore build outputs and local state (also covered by src/app/seamlylayout/.gitignore,
+src/app/seamlylayout/target/
 src/app/seamlylayout/logs/
-src/app/seamlylayout/.vs/
-src/app/seamlylayout/.claude/
 src/app/seamlylayout/qt_frontend/build/
-src/app/seamlylayout/qt_frontend/CMakeFiles/
-src/app/seamlylayout/qt_frontend/CMakeCache.txt
-src/app/seamlylayout/qt_frontend/.cmake/
-src/app/seamlylayout/qt_frontend/.qt/
-src/app/seamlylayout/qt_frontend/*.user
+# track seamlylayout local build files for testing
+!src/app/seamlylayout/qt_frontend/CMakeFiles/
+!src/app/seamlylayout/qt_frontend/CMakeCache.txt
+!src/app/seamlylayout/qt_frontend/.cmake/
+!src/app/seamlylayout/qt_frontend/.qt/
+!src/app/seamlylayout/qt_frontend/*.user
