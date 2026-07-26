@@ -2,11 +2,13 @@
 
 ## Current state: Tasks 34 and 53 are DONE and moved to `COMPLETED.md`
 
-**Date:** 2026-07-26. **Branch:** `run-seamlyLayout`, now at **`977e4353ae`**. Task 53 landed via **PR [#19](https://github.com/seamly/Seamly2D/pull/19)** (`task-53-seamlydata-root` → `run-seamlyLayout`) — **all 11 CI checks green** (Windows x64 27m4s, Windows arm64 cross-compile 26m28s, macOS 16m51s, Linux AppImage 9m3s, Linux unit tests 9m55s, CodeQL, CodeSee, Analyze actions/python/rust, version) — **merged**, task branch deleted locally and on origin. Task 34 landed earlier the same day.
+**Date:** 2026-07-26. **Branch:** `run-seamlyLayout`, now at **`ac65b9ee0b`**. Task 53 landed via **PR [#19](https://github.com/seamly/Seamly2D/pull/19)** (`task-53-seamlydata-root` → `run-seamlyLayout`) — **all 11 CI checks green** (Windows x64 27m4s, Windows arm64 cross-compile 26m28s, macOS 16m51s, Linux AppImage 9m3s, Linux unit tests 9m55s, CodeQL, CodeSee, Analyze actions/python/rust, version) — **merged**, task branch deleted locally and on origin. Task 34 landed earlier the same day.
 
-Refer to `TODO_MIGRATE.md` for the tasks still open.
+Since that merge, three **docs-only** commits on `run-seamlyLayout` (`da1ac2d1be`, `09da7801e0`, `ac65b9ee0b`) — committed locally and **not pushed**, per the docs-only exception in `CLAUDE.md`. No code has changed since PR #19.
 
-**Theme of this session:** the user-data root. Task 34 renamed and generalized it; Task 53 renamed it again (to `seamlyData`), made the settings migration self-cleaning, and fixed up the developer's own machine.
+Refer to `TODO_MIGRATE.md`, `TODO_SEAMLY2D.md` and `TODO_SEAMLYLAYOUT.md` for the tasks still open.
+
+**Theme of this session:** the user-data root, then naming. Task 34 renamed and generalized the data root; Task 53 renamed it again (to `seamlyData`), made the settings migration self-cleaning, and fixed up the developer's own machine. The tail of the session moved four items out of `future-todos.md` into the task lists and settled which document owns the naming rules.
 
 ### What was done this session
 
@@ -20,6 +22,15 @@ Refer to `TODO_MIGRATE.md` for the tasks still open.
 | **Tasks 54, 55, 57** | **Filed, not started**, moved out of `future-todos.md` (docs-only commits). **54** (`TODO_MIGRATE.md`) renames the three `vmisc` settings **files *and* classes** — `settings_common`/`SettingsCommon`, `settings_seamlyme`/`SettingsSeamlyMe`, `settings_seamly2d`/`SettingsSeamly2D` — per `.github/README-CODE-STYLES.md`; ~620 class occurrences plus 22 `.ts` `tr()` contexts (~220 translated strings) that go obsolete if not renamed with the classes. **55** (`TODO_MIGRATE.md`) refreshes `.github/README-DEVELOPER.md`; its first subtask is **already done** (see below). **57** (`TODO_SEAMLYLAYOUT.md`) was rewritten from "rename `app_core`'s `lib.rs`" to "give every crate root a unique name" — 11 crates all use `lib.rs`; splitting the root does **not** meet the uniqueness rule because Cargo still requires a root file, so the answer is `[lib] path = "src/<crate>.rs"` across all 11 |
 | **Task 56** | **Filed, then removed at the user's request** — the `BUILD_PROBLEMS.txt` clangd noise is not being tracked as a task. (The finding stands if it comes back: 45 entries, all cascading from two `pp_file_not_found` roots because the repo has no compile database; qmake+MSVC builds those files clean.) |
 | **`README-DEVELOPER.md` Qt modules** | **Fixed in place** (not just filed): the Qt component list now includes **Qt WebChannel + Qt Positioning** under "Additional Libraries", with a note that ticking Qt WebEngine does not install them and that the resulting `find_package(Qt6 … WebEngineQuick)` error names WebEngine rather than the missing module. This was the Task 44 setup failure |
+| **Naming rules** | **`CLAUDE.md` corrected.** It required new files to begin with `s`; `.github/README-CODE-STYLES.md` says *"don't start filenames with 's'!"* and gives meaningful prefixes instead. The user chose the **style guide as authoritative**, so `CLAUDE.md` now names it and carries the rules that come up constantly — snake_case, the prefix list, unique repo-wide, UpperCamelCase classes, file-matches-class. Only the "not `v`" half of the old rule survives |
+
+### Files changed — docs-only commits after PR #19
+
+| Commit | Files | Change |
+| --- | --- | --- |
+| `da1ac2d1be` | `TODO_MIGRATE.md`, `TODO_SEAMLY2D.md`, `TODO_SEAMLYLAYOUT.md`, `SESSION_HANDOVER.md` | Tasks 54-57 written up from `future-todos.md`, each with its scope measured in the tree |
+| `09da7801e0` | same three `TODO_*.md` + `SESSION_HANDOVER.md` + `.github/README-DEVELOPER.md` | Task 54 extended to the class renames; Task 55's Qt-module subtask fixed in the doc and checked off; **Task 56 deleted**; Task 57 rewritten around the uniqueness rule |
+| `ac65b9ee0b` | `CLAUDE.md` | Coding Rules point at `.github/README-CODE-STYLES.md`; `s`-prefix rule dropped; class-naming and file-matches-class rules added |
 
 ### Files changed (Task 53, commit `a89801e4f4`)
 
@@ -36,6 +47,7 @@ Refer to `TODO_MIGRATE.md` for the tasks still open.
 
 1. **Any function that deletes is called with real home paths only from `Application2D::openSettings()` / `ApplicationME::openSettings()`** — never from a shared init function the test harness also calls. `TestApplication2D`'s constructor runs *before any* `initTestCase()`, so anything it reaches executes against the developer's real settings and real home directory no matter how carefully individual tests redirect. A test run must not mutate the machine it runs on.
 2. **`pruneEmptyLegacyDataRoot()` is parameterized on purpose** so tests can point it at a `QTemporaryDir`. `QDir::homePath()` cannot be redirected on Windows. Same reason Task 34 split `chooseFirstRunDataRoot(defaultRoot, legacyRoot)` out of `initializeDataRoot()`.
+3. **`.github/README-CODE-STYLES.md` is the naming authority — do not reinstate the `s` prefix.** New files are snake_case with a meaningful prefix from that guide's list (`settings_*`, `dialog_<toolgroup>_<toolname>`, `tool_*`, `model_*`, `options_*`, `test_*`, `application_<appname>`), **unique repo-wide**, and a file defining one class is named after it (UpperCamelCase). The old "begin new files with `s`" line in `CLAUDE.md` was removed deliberately on 2026-07-26; the "must not begin with `v`" half was kept.
 
 ### Why `seamlyData` and not `seamly`
 
@@ -79,6 +91,12 @@ The `PreCompact` / `PostCompact` hooks in `.claude/settings.json` were emitting 
 5. **Task 50** — remove the hard-coded developer path in `application_2d.cpp:507-512` before the upstream PR.
 6. **Tasks 46 / 45** — port `sb.ps1`'s `.seamly-qmake-kit` marker to `sd.ps1`; clean the stale `C:\Qt\6.10.1` paths from the Claude settings allowlists.
 
+Newly filed, none started, no priority assigned by the user yet:
+
+7. **Task 54** — rename the three `vmisc` settings files **and** their classes. Mechanical but wide: ~620 class occurrences over 25 files, 101 files including the headers, and the 22 `.ts` `tr()` contexts must move in the **same commit** or ~220 translated strings go obsolete. Do files and classes together — a split leaves `settings_common.h` declaring `VCommonSettings`.
+8. **Task 55** — the rest of the `.github/README-DEVELOPER.md` refresh (the Qt-module subtask is already done). Defects are enumerated in the task; the IDE/compiler line contradicts itself and needs the user's call on VS 18 Community vs MSVC 2022.
+9. **Task 57** — unique crate-root names across the 11 seamlylayout crates. The user was asked whether to plan it and chose **not yet**, so leave it filed; the task already records the scheme (`[lib] path = "src/<crate>.rs"`) and why splitting `app_core` does not satisfy the rule.
+
 ## Uncommitted work in the tree (not mine — left alone)
 
 Those earlier edits all landed in the user's own commit `1806fad484` (`.github/README-DEVELOPER.md`, `.github/README-CODE-STYLES.md`, `.github/README_CODEOWNERS.md`, `.github/image/`, `src/app/seamly2d/core/BUILD_PROBLEMS.txt` — the last two now matter to Tasks 55 and 56). Still modified and **not mine**: `future-todos.md`, the user's own inbox file — do not stage or revert it without asking.
@@ -93,7 +111,7 @@ Those earlier edits all landed in the user's own commit `1806fad484` (`.github/R
 - **`scripts\st.ps1` runs only `Seamly2DTests.exe`.** CI's `make check` runs four binaries — `Seamly2DTest`, `CollectionTest`, `ParserTest`, `TranslationsTest`. Run the other three by hand before pushing.
 - **`gh` is not on this agent shell's `PATH`** — invoke it as `& "C:\Program Files\GitHub CLI\gh.exe"`.
 - **The sandbox blocks a command that contains both a `Remove-Item` and a `G:` path**, even when they are unrelated. Split into separate calls.
-- **clangd diagnostics in this repo are noise** (`'QByteArray' file not found`, `QT_WARNING_DISABLE_INTEL(1418)` "Expected ';'") — Qt include-path artefacts. The qmake build is the authority.
+- **clangd diagnostics in this repo are noise, and here is why** — the tree has **no** `compile_commands.json`, `.clangd`, `.vscode/c_cpp_properties.json` or `compile_flags.txt`, so the editor parses each file with zero include paths. The `#include "../vmisc/vabstractapplication.h"` form is valid only because every `.pro` adds `INCLUDEPATH += $$PWD/../../libs/<lib>`, which clangd never sees; one unresolved include then cascades into dozens of `Unknown type name 'QString'` / `undeclared identifier 'QStringLiteral'` entries. `src/app/seamly2d/core/BUILD_PROBLEMS.txt` is a tracked 45-entry dump of exactly this (two `pp_file_not_found` roots + 43 cascade). **The qmake build is the authority** — those same files compile clean. Filing this as a task was considered and declined; if it is ever fixed, the dump should go with it (it carries absolute `/c:/Users/susan/…` paths into source headed for the upstream PR).
 
 ### Carried forward (still true)
 
