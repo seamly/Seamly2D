@@ -150,10 +150,20 @@ void TestApplication2D::openSettings()
         QFile::copy(qt5Common, qt6Common);
     }
 
-    // Task 34: mirrors Application2D::openSettings(). Left in so the suite resolves data
-    // paths the way the real app does; TST_DataRoot redirects QSettings at its own
-    // temporary directory, so no developer's real data root is read or written by tests.
-    VCommonSettings::initializeDataRoot();
+    // Task 34 called VCommonSettings::initializeDataRoot() here to mirror
+    // Application2D::openSettings(). Task 53 removed it, along with the matching
+    // pruneEmptyLegacyDataRoot() call the real application makes after it.
+    //
+    // This constructor runs before any test's initTestCase(), so whatever it calls executes
+    // against the developer's REAL settings and home directory, not a QTemporaryDir. That was
+    // tolerable while those functions only copied values forward. It stopped being tolerable
+    // once they delete: merging now removes the emptied "Unknown Organization" folder, and
+    // pruning removes an empty ~/seamly2d. Running the test suite must not mutate the machine
+    // it runs on.
+    //
+    // Nothing is lost by leaving them out — TST_DataRoot calls both directly, with QSettings
+    // redirected at a temporary directory and throwaway roots passed as arguments. Do not
+    // "restore" these calls for symmetry with the application.
 
     const QString qt6Settings = MigrateSeamlySettingsLocation(
         QStringLiteral("qt6_seamly2d.ini"),

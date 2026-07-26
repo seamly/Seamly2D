@@ -2,7 +2,23 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task 53 — Rename the default data root to `~/seamlyData`; delete the merged settings stray and the empty legacy tree (completed 2026-07-26)
+
+Follow-on to Task 34, raised by the user after inspecting the result on their own machine. Three changes, all in the same area:
+
+- [X] **Default data root `~/seamly` → `~/seamlyData`** (`VCommonSettings::getDefaultDataRoot()`). Task 34's `seamly` proved too generic a name to claim: on the developer's machine `G:\My Drive\seamly` was already a 73 GB business folder (Finances, Team, Security, …), so pointing a data root there would have scattered the nine app subfolders through it — discovered before any such write happened. `seamlyData` says what the folder holds. The legacy `~/seamly2d` name is unchanged and still adopted on first run
+- [X] **`mergeStrayCommonSettings()` now deletes the stray** it has merged, and removes the `Unknown Organization` folder with it. Gated on re-reading the destination and confirming every stray key arrived there — a key held with a *different* value counts as accounted for, since that means the user changed it after the stray was written. Removal uses `QDir::rmdir()`, never `removeRecursively()`, so anything else living in that folder keeps it alive and is untouched; if verification fails the stray survives for the next run
+- [X] **`pruneEmptyLegacyDataRoot(legacyRoot, configuredRoot)`** removes the empty `~/seamly2d` skeleton the rename leaves behind (`ensureDataRootTree()` stocks whatever root is configured, so what remains after a move looks like data but is not). Two gates: the legacy root must not be the configured root — Task 34 *adopts* an existing `~/seamly2d`, which makes it an upgrading user's live tree — and the tree must hold no file at any depth. Only empty directories are removed, deepest first
+- [X] Unit tests: `TST_DataRoot` 16 → 22 cases, covering the rename, all four prune refusals (populated, configured, nested-configured, missing/not-a-directory) and the merge-then-delete path. Local suite 32119 passed / 0 failed
+- [X] Docs: `.github/README-BUILDS.md` data-root section rewritten (rename rationale, prune rules, stray deletion, the call-site placement rule); `~/seamly` references across `TODO_MIGRATE.md` Tasks 14/35/36/37/38 updated to `~/seamlyData`
+
+**Call-site placement rule established here.** `pruneEmptyLegacyDataRoot()` is called with real home paths *only* from `Application2D::openSettings()` and `ApplicationME::openSettings()` — never from `initializeDataRoot()`, because the test harness calls that. Task 34's harness mirroring of `initializeDataRoot()` was removed from `qttestmainlambda.cpp` for the same reason: that constructor runs before any `initTestCase()`, so it executes against the developer's real settings, and a test run proved it by deleting the real `%APPDATA%\Unknown Organization` folder (verified redundant first, so nothing was lost — but the suite must not mutate the machine it runs on). See [[qt-homepath-not-fakeable-windows]] for the related hazard.
+
+**Not done here:** nothing moves files. Repointing the root still leaves the old tree where it is — the check-and-move flow is folded into **Task 14**. The same empty-organization defect still affects `VSettings`' eight accessors (`%APPDATA%\Unknown Organization.ini`) — that is **Task 52**.
+
 ## Task 34 — Rename the default user-data root `~/seamly2d` → `~/seamly` and make it a single, relocatable "data root" (shared, all platforms) (completed 2026-07-26)
+
+> **Superseded in part by Task 53 (above):** the default root is now `~/seamlyData`, not `~/seamly`. The subtask text below records what Task 34 itself did and is left unedited.
 
 Today each app hard-codes its user-data subfolders under `QDir::homePath() + "/seamly2d/"` — the `GetDef*Path()` family in `src/libs/vmisc/vcommonsettings.cpp` builds `~/seamly2d/<subdir>` independently for individual and multisize **measurements**, **templates**, **bodyscans**, **label templates**, **images**, and **backups** (lines ~431-551). There is no single "data root" the user can point elsewhere, so relocating the tree to another drive or a cloud folder (e.g. `G:\My Drive\seamly`) requires moving files by hand — the exact pain point this work removes. This task is the **shared, cross-platform foundation** the per-platform choosers build on: the Windows installer prompt (Task 14) and the macOS / AppImage / Flatpak first-run choosers (Tasks 35-37) all set and honor this one setting.
 

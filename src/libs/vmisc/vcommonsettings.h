@@ -93,6 +93,9 @@ public:
                                                 bool *adoptedLegacyTree = nullptr);
     static bool          ensureDataRootTree(const QString &root = QString());
     static QString       rebaseOntoDataRoot(const QString &path, const QString &oldRoot, const QString &newRoot);
+    // Task 53: takes both roots as arguments so it can be tested against throwaway
+    // directories — never a path under QDir::homePath(), which cannot be faked on Windows.
+    static bool          pruneEmptyLegacyDataRoot(const QString &legacyRoot, const QString &configuredRoot);
     QString              getDataRoot() const;
     void                 setDataRoot(const QString &value);
 
@@ -564,6 +567,7 @@ private:
 
     QString              commonSettingsOrganization() const;
     static void          mergeStrayCommonSettings();
+    static void          removeStrayCommonSettings(const QString &strayFileName);
 };
 
 #endif // VCOMMONSETTINGS_H

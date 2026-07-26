@@ -56,6 +56,8 @@
 #include <QCoreApplication>
 #include <QDate>
 #include <QDir>
+#include <QDirIterator>
+#include <QFile>
 #include <QFileInfo>
 #include <QFont>
 #include <QtGlobal>
@@ -65,6 +67,8 @@
 #include <QStringConverter>
 #include <QVariant>
 #include <QtDebug>
+
+#include <algorithm>
 
 #include "../ifc/ifcdef.h"
 #include "../vmisc/def.h"
@@ -476,15 +480,18 @@ QString VCommonSettings::commonSettingsOrganization() const
 /**
  * @brief getDefaultDataRoot returns the built-in default root of the user's data tree.
  *
- * Task 34 renamed this from ~/seamly2d to ~/seamly, matching the "Seamly" family umbrella
- * the settings directories already use. QDir::homePath() resolves it natively on every
- * platform, so no per-platform variant is needed.
+ * Task 34 renamed this from ~/seamly2d, and Task 53 settled on "seamlyData" rather than the
+ * bare "seamly" Task 34 first used: "seamly" is too generic to claim as a folder name — on
+ * the developer's own machine G:/My Drive/seamly was already a large unrelated business
+ * folder, so pointing a data root at it would have scattered nine app subfolders through it.
+ * "seamlyData" says what the folder holds and is unlikely to collide. QDir::homePath()
+ * resolves it natively on every platform, so no per-platform variant is needed.
  *
- * @return absolute path of the default user-data root, e.g. C:/Users/<user>/seamly.
+ * @return absolute path of the default user-data root, e.g. C:/Users/<user>/seamlyData.
  */
 QString VCommonSettings::getDefaultDataRoot()
 {
-    return QDir::homePath() + QLatin1String("/seamly");
+    return QDir::homePath() + QLatin1String("/seamlyData");
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -542,9 +549,9 @@ QString VCommonSettings::getDataRoot() const
  * @brief setDataRoot stores a new root for the user's data tree and creates its folders.
  *
  * The root may be any drive, volume or path the user can write to — an external disk or a
- * cloud-synced folder such as G:/My Drive/seamly — so the whole data tree can be relocated
- * without moving files by hand. Existing files at the new location are never touched; only
- * missing folders are created.
+ * cloud-synced folder such as G:/My Drive/seamlyData — so the whole data tree can be
+ * relocated without moving files by hand. Existing files at the new location are never
+ * touched; only missing folders are created.
  *
  * @param value new user-data root, in either native or '/' separator form.
  */
@@ -659,11 +666,11 @@ QString VCommonSettings::rebaseOntoDataRoot(const QString &path, const QString &
  *  1. A root is already configured — honour it untouched (this includes a root the Windows
  *     installer or a previous run wrote).
  *  2. Nothing configured and a populated legacy ~/seamly2d tree exists while the new
- *     ~/seamly does not — adopt the legacy tree *in place* as the root. Adoption rather than
+ *     ~/seamlyData does not — adopt the legacy tree *in place* as the root. Adoption rather than
  *     copying is deliberate: an upgrading user's patterns and measurements can be many
  *     gigabytes and may sit on a cloud-synced drive, so nothing is moved, copied or deleted
  *     and the data keeps working from the moment the app starts.
- *  3. Otherwise — a fresh install — use the ~/seamly default.
+ *  3. Otherwise — a fresh install — use the ~/seamlyData default.
  *
  * The resolved root is written back so later runs take case 1 and the value is visible to
  * the other applications and to Preferences → Paths.
@@ -710,7 +717,7 @@ QString VCommonSettings::initializeDataRoot(bool *adoptedLegacyTree)
  * home directory of its own. Nothing here creates, moves or deletes anything — the choice
  * is a settings value, and an adopted legacy tree stays exactly where it is.
  *
- * @param defaultRoot the built-in default root, normally ~/seamly.
+ * @param defaultRoot the built-in default root, normally ~/seamlyData.
  * @param legacyRoot the pre-Task-34 root, normally ~/seamly2d.
  * @param adoptedLegacyTree optional out-parameter, set to true when the legacy tree was
  * adopted; pass null when the caller does not care.
@@ -740,14 +747,110 @@ QString VCommonSettings::chooseFirstRunDataRoot(const QString &defaultRoot, cons
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief pruneEmptyLegacyDataRoot removes the abandoned legacy data root when it holds no files.
+ *
+ * Renaming the default root leaves the old ~/seamly2d behind, and ensureDataRootTree() will
+ * have stocked it with the nine standard subfolders, so what remains after the move is an
+ * empty skeleton that looks like data but is not. This deletes that skeleton.
+ *
+ * Deliberately *not* part of mergeStrayCommonSettings(): that function reconciles settings
+ * files, this one deletes a directory tree, and the two want very different amounts of
+ * caution. Two conditions gate it, and both matter:
+ *
+ *  - the legacy root must not be the configured root. Task 34's first-run rule *adopts* an
+ *    existing ~/seamly2d in place, so for an upgrading user that directory is the live data
+ *    tree. Deleting it there would destroy exactly the patterns adoption set out to preserve.
+ *  - the tree must contain no files at any depth. One stray file and nothing is removed.
+ *
+ * Only empty directories are then removed, deepest first, via QDir::rmdir() — which cannot
+ * delete a file and refuses a non-empty directory. removeRecursively() is never used: this
+ * function must not be capable of deleting anything it has not counted.
+ *
+ * @param legacyRoot the legacy root to prune, normally getLegacyDataRoot().
+ * @param configuredRoot the data root actually in use; pruning is skipped when they match.
+ * @return true when the legacy root was removed, false when it was kept for any reason.
+ */
+bool VCommonSettings::pruneEmptyLegacyDataRoot(const QString &legacyRoot, const QString &configuredRoot)
+{
+    // Windows path comparison is case-insensitive; POSIX filesystems are not.
+#ifdef Q_OS_WIN
+    const Qt::CaseSensitivity caseSensitivity = Qt::CaseInsensitive;
+#else
+    const Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive;
+#endif
+
+    const QString legacy     = QDir::cleanPath(QDir::fromNativeSeparators(legacyRoot.trimmed()));
+    const QString configured = QDir::cleanPath(QDir::fromNativeSeparators(configuredRoot.trimmed()));
+
+    if (legacy.isEmpty() || !QFileInfo(legacy).isDir())
+    {
+        return false;
+    }
+
+    // The live data tree of an upgrading user — never touch it.
+    if (legacy.compare(configured, caseSensitivity) == 0)
+    {
+        return false;
+    }
+
+    // A configured root *inside* the legacy root (e.g. ~/seamly2d/patterns) would be taken
+    // down with its parent, so treat that as occupied too.
+    if (configured.startsWith(legacy + QLatin1Char('/'), caseSensitivity))
+    {
+        return false;
+    }
+
+    QDirIterator files(legacy, QDir::Files | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot,
+                       QDirIterator::Subdirectories);
+    if (files.hasNext())
+    {
+        return false;
+    }
+
+    // Deepest first, so each rmdir() sees an already-emptied directory.
+    QStringList directories;
+    QDirIterator subdirectories(legacy, QDir::Dirs | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot,
+                                QDirIterator::Subdirectories);
+    while (subdirectories.hasNext())
+    {
+        directories.append(subdirectories.next());
+    }
+
+    std::sort(directories.begin(), directories.end(),
+              [](const QString &first, const QString &second) { return first.length() > second.length(); });
+
+    for (const QString &directory : qAsConst(directories))
+    {
+        QDir().rmdir(directory);
+    }
+
+    if (!QDir().rmdir(legacy))
+    {
+        qWarning() << "Could not remove the empty legacy data root" << QDir::toNativeSeparators(legacy);
+        return false;
+    }
+
+    return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief mergeStrayCommonSettings recovers shared settings written to the wrong folder.
  *
  * Builds between Task 15 and Task 34 opened the shared common settings file with an empty
  * organization name (see commonSettingsOrganization()), so QSettings stored the shared
  * paths/* values under an "Unknown Organization" folder. This copies any such value forward
  * into the correctly located file, but only where that file has no value of its own, so a
- * setting the user has since changed always wins. The stray file is never modified or
- * deleted — nothing is lost if this runs against an already-merged installation.
+ * setting the user has since changed always wins.
+ *
+ * Task 53: once every stray key is accounted for, the stray file is deleted and its
+ * "Unknown Organization" folder removed if that leaves it empty, so the misplaced folder
+ * does not linger in %APPDATA% forever. The deletion is strictly conditional — each key must
+ * be present in the destination *and* compare equal to the stray's value, which is exactly
+ * the state "the merge already brought this forward". A key the destination holds with a
+ * different value is a value the user changed after the stray was written, so it is treated
+ * as accounted for too. If any key cannot be verified, or the destination file cannot be
+ * written, nothing is deleted and the stray survives for the next run to retry.
  */
 void VCommonSettings::mergeStrayCommonSettings()
 {
@@ -759,7 +862,8 @@ void VCommonSettings::mergeStrayCommonSettings()
 
     const QSettings straySettings(QSettings::IniFormat, QSettings::UserScope,
                                   unknownOrganizationName, commonIniFilename);
-    if (!QFileInfo::exists(straySettings.fileName()))
+    const QString strayFileName = straySettings.fileName();
+    if (!QFileInfo::exists(strayFileName))
     {
         return;
     }
@@ -780,6 +884,62 @@ void VCommonSettings::mergeStrayCommonSettings()
     if (recovered)
     {
         settings.sync();
+    }
+
+    // Re-read rather than trusting the writes above: sync() can fail (read-only location,
+    // full disk), and deleting the only remaining copy of these values on the strength of an
+    // unverified write is precisely the mistake worth not making.
+    if (settings.status() != QSettings::NoError)
+    {
+        qWarning() << "Kept the stray common settings file" << QDir::toNativeSeparators(strayFileName)
+                   << "because the merge destination reported an error";
+        return;
+    }
+
+    for (const QString &key : strayKeys)
+    {
+        if (!settings.contains(key))
+        {
+            qWarning() << "Kept the stray common settings file" << QDir::toNativeSeparators(strayFileName)
+                       << "because key" << key << "was not carried forward";
+            return;
+        }
+    }
+
+    removeStrayCommonSettings(strayFileName);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief removeStrayCommonSettings deletes a fully merged stray settings file and its folder.
+ *
+ * Split out of mergeStrayCommonSettings() so the "is it safe to delete" decision and the
+ * deletion itself stay separately readable and separately testable. Only ever called once
+ * every key in the stray file has been verified present in the correctly located file.
+ *
+ * The parent directory is removed with QDir::rmdir(), which fails harmlessly on a non-empty
+ * directory — so anything else that happens to live under "Unknown Organization" (another
+ * application's settings, say) keeps the folder alive and is left strictly alone. Never
+ * removeRecursively(): this function must not be capable of deleting a tree it did not
+ * inspect.
+ *
+ * @param strayFileName absolute path of the verified-redundant stray settings file.
+ */
+void VCommonSettings::removeStrayCommonSettings(const QString &strayFileName)
+{
+    if (!QFile::remove(strayFileName))
+    {
+        qWarning() << "Could not delete the stray common settings file"
+                   << QDir::toNativeSeparators(strayFileName);
+        return;
+    }
+
+    // Only the "Unknown Organization" folder QSettings invented is a candidate for removal;
+    // a stray written straight into %APPDATA% has no folder of its own to clean up.
+    const QDir strayDirectory = QFileInfo(strayFileName).absoluteDir();
+    if (strayDirectory.dirName() == unknownOrganizationName)
+    {
+        QDir().rmdir(strayDirectory.absolutePath());
     }
 }
 

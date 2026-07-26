@@ -150,13 +150,15 @@ void TST_DataRoot::clearDataRoot() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief DefaultDataRootIsSeamlyUnderHome checks the Task 34 rename of the built-in
- * default from ~/seamly2d to ~/seamly.
+ * @brief DefaultDataRootIsSeamlyUnderHome checks the built-in default: renamed from
+ * ~/seamly2d by Task 34, and from the too-generic ~/seamly to ~/seamlyData by Task 53.
  */
 void TST_DataRoot::DefaultDataRootIsSeamlyUnderHome() const
 {
-    QCOMPARE(VCommonSettings::getDefaultDataRoot(), QDir::homePath() + QStringLiteral("/seamly"));
+    QCOMPARE(VCommonSettings::getDefaultDataRoot(), QDir::homePath() + QStringLiteral("/seamlyData"));
     QVERIFY(!VCommonSettings::getDefaultDataRoot().endsWith(QStringLiteral("seamly2d")));
+    // "seamly" alone collides too easily with an unrelated user folder of the same name.
+    QVERIFY(!VCommonSettings::getDefaultDataRoot().endsWith(QStringLiteral("/seamly")));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -447,4 +449,155 @@ void TST_DataRoot::RebaseLeavesPathsOutsideTheOldRootAlone() const
              oldRoot + QStringLiteral("/images"));
     QCOMPARE(VCommonSettings::rebaseOntoDataRoot(outside, QString(), newRoot), outside);
     QCOMPARE(VCommonSettings::rebaseOntoDataRoot(outside, oldRoot, QString()), outside);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PruneRemovesAnEmptyLegacyTree checks the Task 53 cleanup of the skeleton left
+ * behind by the rename — the nine subfolders ensureDataRootTree() created, holding nothing.
+ */
+void TST_DataRoot::PruneRemovesAnEmptyLegacyTree() const
+{
+    const QString legacy     = scratchPath(QStringLiteral("prune-empty/seamly2d"));
+    const QString configured = scratchPath(QStringLiteral("prune-empty/seamlyData"));
+
+    QVERIFY(VCommonSettings::ensureDataRootTree(legacy));
+    QVERIFY(QFileInfo(legacy + QStringLiteral("/patterns")).isDir());
+
+    QVERIFY(VCommonSettings::pruneEmptyLegacyDataRoot(legacy, configured));
+    QVERIFY(!QFileInfo::exists(legacy));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PruneKeepsALegacyTreeHoldingFiles checks the condition that matters most: one file
+ * anywhere in the tree, at any depth, and nothing is removed.
+ */
+void TST_DataRoot::PruneKeepsALegacyTreeHoldingFiles() const
+{
+    const QString legacy     = scratchPath(QStringLiteral("prune-populated/seamly2d"));
+    const QString configured = scratchPath(QStringLiteral("prune-populated/seamlyData"));
+
+    QVERIFY(VCommonSettings::ensureDataRootTree(legacy));
+
+    // Buried as deep as the real tree goes, so a shallow existence check cannot pass this.
+    const QString pattern = legacy + QStringLiteral("/measurements/individual/keiko.smis");
+    QFile file(pattern);
+    QVERIFY(file.open(QIODevice::WriteOnly));
+    file.write("<measurements/>");
+    file.close();
+
+    QVERIFY(!VCommonSettings::pruneEmptyLegacyDataRoot(legacy, configured));
+    QVERIFY(QFileInfo::exists(pattern));
+    QVERIFY(QFileInfo(legacy + QStringLiteral("/patterns")).isDir());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PruneNeverRemovesTheConfiguredRoot checks the upgrading user's case: Task 34 adopts
+ * an existing ~/seamly2d in place, which makes it the live data tree, not a leftover.
+ */
+void TST_DataRoot::PruneNeverRemovesTheConfiguredRoot() const
+{
+    const QString legacy = scratchPath(QStringLiteral("prune-adopted/seamly2d"));
+    QVERIFY(VCommonSettings::ensureDataRootTree(legacy));
+
+    QVERIFY(!VCommonSettings::pruneEmptyLegacyDataRoot(legacy, legacy));
+    QVERIFY(QFileInfo(legacy).isDir());
+
+    // Same path, native separators and a trailing slash — still the same directory.
+    QVERIFY(!VCommonSettings::pruneEmptyLegacyDataRoot(legacy, legacy + QLatin1Char('/')));
+    QVERIFY(QFileInfo(legacy).isDir());
+#ifdef Q_OS_WIN
+    QVERIFY(!VCommonSettings::pruneEmptyLegacyDataRoot(legacy, QDir::toNativeSeparators(legacy)));
+    QVERIFY(QFileInfo(legacy).isDir());
+    // Windows path comparison is case-insensitive, so a differently cased spelling of the
+    // configured root still names the live tree.
+    QVERIFY(!VCommonSettings::pruneEmptyLegacyDataRoot(legacy, legacy.toUpper()));
+    QVERIFY(QFileInfo(legacy).isDir());
+#endif
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PruneKeepsALegacyRootHoldingTheConfiguredRoot checks that a root nested inside the
+ * legacy tree is not taken down along with its parent.
+ */
+void TST_DataRoot::PruneKeepsALegacyRootHoldingTheConfiguredRoot() const
+{
+    const QString legacy     = scratchPath(QStringLiteral("prune-nested/seamly2d"));
+    const QString configured = legacy + QStringLiteral("/current");
+
+    QVERIFY(QDir().mkpath(configured));
+
+    QVERIFY(!VCommonSettings::pruneEmptyLegacyDataRoot(legacy, configured));
+    QVERIFY(QFileInfo(configured).isDir());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PruneIgnoresAMissingLegacyRoot checks the ordinary case for a fresh install, where
+ * there is no legacy tree at all, plus the empty-argument guards.
+ */
+void TST_DataRoot::PruneIgnoresAMissingLegacyRoot() const
+{
+    const QString missing    = scratchPath(QStringLiteral("prune-missing/seamly2d"));
+    const QString configured = scratchPath(QStringLiteral("prune-missing/seamlyData"));
+
+    QVERIFY(!QFileInfo::exists(missing));
+    QVERIFY(!VCommonSettings::pruneEmptyLegacyDataRoot(missing, configured));
+    QVERIFY(!VCommonSettings::pruneEmptyLegacyDataRoot(QString(), configured));
+
+    // A file where the legacy root would be is not a directory, and must not be deleted.
+    const QString file = scratchPath(QStringLiteral("prune-missing/notadirectory"));
+    QVERIFY(QDir().mkpath(scratchPath(QStringLiteral("prune-missing"))));
+    QFile decoy(file);
+    QVERIFY(decoy.open(QIODevice::WriteOnly));
+    decoy.write("x");
+    decoy.close();
+
+    QVERIFY(!VCommonSettings::pruneEmptyLegacyDataRoot(file, configured));
+    QVERIFY(QFileInfo::exists(file));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief StrayCommonSettingsAreMergedThenDeleted checks the Task 53 half of the
+ * "Unknown Organization" recovery: values are carried forward, a value the user has since
+ * changed still wins, and only then is the stray file and its folder removed.
+ *
+ * Safe because initTestCase() has pointed QSettings' IniFormat/UserScope base at a temporary
+ * directory, so both the stray and the destination live inside it.
+ */
+void TST_DataRoot::StrayCommonSettingsAreMergedThenDeleted() const
+{
+    static const QString strayOrganization = QStringLiteral("Unknown Organization");
+
+    // A value only the stray has, and one the destination already holds differently.
+    QSettings stray(QSettings::IniFormat, QSettings::UserScope, strayOrganization, commonIniName);
+    stray.setValue(QStringLiteral("paths/bodyscans"), QStringLiteral("G:/My Drive/seamlyData/bodyscans"));
+    stray.setValue(QStringLiteral("paths/templates"), QStringLiteral("C:/stale/templates"));
+    stray.sync();
+    const QString strayFileName = stray.fileName();
+    QVERIFY(QFileInfo::exists(strayFileName));
+
+    QSettings destination(QSettings::IniFormat, QSettings::UserScope,
+                          QCoreApplication::organizationName(), commonIniName);
+    destination.setValue(QStringLiteral("paths/templates"), QStringLiteral("G:/My Drive/seamlyData/templates"));
+    destination.sync();
+
+    // mergeStrayCommonSettings() is private; initializeDataRoot() is its only caller.
+    VCommonSettings::initializeDataRoot();
+
+    QSettings merged(QSettings::IniFormat, QSettings::UserScope,
+                     QCoreApplication::organizationName(), commonIniName);
+    QCOMPARE(merged.value(QStringLiteral("paths/bodyscans")).toString(),
+             QStringLiteral("G:/My Drive/seamlyData/bodyscans"));
+    // The user's own value survives the merge — copy-if-missing, never overwrite.
+    QCOMPARE(merged.value(QStringLiteral("paths/templates")).toString(),
+             QStringLiteral("G:/My Drive/seamlyData/templates"));
+
+    QVERIFY2(!QFileInfo::exists(strayFileName), "The merged stray settings file should have been deleted");
+    QVERIFY2(!QFileInfo(QFileInfo(strayFileName).absolutePath()).isDir(),
+             "The emptied 'Unknown Organization' folder should have been removed");
 }

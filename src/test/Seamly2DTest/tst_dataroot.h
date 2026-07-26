@@ -83,6 +83,13 @@ private slots:
     void RebaseMovesPathsInsideTheOldRoot() const;
     void RebaseLeavesPathsOutsideTheOldRootAlone() const;
 
+    void PruneRemovesAnEmptyLegacyTree() const;
+    void PruneKeepsALegacyTreeHoldingFiles() const;
+    void PruneNeverRemovesTheConfiguredRoot() const;
+    void PruneKeepsALegacyRootHoldingTheConfiguredRoot() const;
+    void PruneIgnoresAMissingLegacyRoot() const;
+    void StrayCommonSettingsAreMergedThenDeleted() const;
+
 private:
     /** Scratch directory holding every root, tree and file the suite creates. */
     QScopedPointer<QTemporaryDir> m_scratch;
