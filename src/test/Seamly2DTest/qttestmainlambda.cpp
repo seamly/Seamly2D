@@ -77,6 +77,7 @@
 #include "tst_svgtextitem.h"
 #include "tst_svgcomponenttags.h"
 #include "tst_seamlyfamilypaths.h"
+#include "tst_dataroot.h"
 
 #include "../vmisc/def.h"
 #include "../qmuparser/qmudef.h"
@@ -148,6 +149,11 @@ void TestApplication2D::openSettings()
     {
         QFile::copy(qt5Common, qt6Common);
     }
+
+    // Task 34: mirrors Application2D::openSettings(). Left in so the suite resolves data
+    // paths the way the real app does; TST_DataRoot redirects QSettings at its own
+    // temporary directory, so no developer's real data root is read or written by tests.
+    VCommonSettings::initializeDataRoot();
 
     const QString qt6Settings = MigrateSeamlySettingsLocation(
         QStringLiteral("qt6_seamly2d.ini"),
@@ -246,6 +252,7 @@ int main(int argc, char** argv)
     ASSERT_TEST(new TST_SvgTextItem());
     ASSERT_TEST(new TST_SvgComponentTags());
     ASSERT_TEST(new TST_SeamlyFamilyPaths());
+    ASSERT_TEST(new TST_DataRoot());
 
     return status;
 }

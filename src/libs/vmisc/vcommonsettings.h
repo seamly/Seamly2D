@@ -80,6 +80,22 @@ public:
     static QString       PrepareStandardTemplates(const QString &currentPath);
     static QString       prepareMultisizeTables(const QString &currentPath);
 
+    // Task 34: the single, relocatable root of the user's data tree. Every default data
+    // path below is derived from it, so pointing it at another drive or a cloud-synced
+    // folder relocates patterns, measurements, templates, bodyscans, label templates,
+    // images and backups together.
+    static QString       getDefaultDataRoot();
+    static QString       getLegacyDataRoot();
+    static QString       dataRoot();
+    static QString       dataSubdirPath(const QString &subdirectory);
+    static QString       initializeDataRoot(bool *adoptedLegacyTree = nullptr);
+    static QString       chooseFirstRunDataRoot(const QString &defaultRoot, const QString &legacyRoot,
+                                                bool *adoptedLegacyTree = nullptr);
+    static bool          ensureDataRootTree(const QString &root = QString());
+    static QString       rebaseOntoDataRoot(const QString &path, const QString &oldRoot, const QString &newRoot);
+    QString              getDataRoot() const;
+    void                 setDataRoot(const QString &value);
+
     static QString       getDefaultIndividualSizePath();
     QString              getIndividualSizePath() const;
     void                 setIndividualSizePath(const QString &value);
@@ -545,6 +561,9 @@ public:
 
 private:
     Q_DISABLE_COPY(VCommonSettings)
+
+    QString              commonSettingsOrganization() const;
+    static void          mergeStrayCommonSettings();
 };
 
 #endif // VCOMMONSETTINGS_H

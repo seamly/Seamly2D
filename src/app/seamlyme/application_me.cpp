@@ -591,6 +591,10 @@ void ApplicationME::openSettings()
         QFile::copy(qt5Common, qt6Common);
     }
 
+    // Task 34: settle the one shared user-data root before any data path is read, adopting
+    // an existing ~/seamly2d tree in place when upgrading. Non-destructive and re-entrant.
+    VCommonSettings::initializeDataRoot();
+
     bool migratedThisCall = false;
     const QString qt6Settings = MigrateSeamlySettingsLocation(
         QStringLiteral("qt6_seamlyme.ini"),

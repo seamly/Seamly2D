@@ -842,6 +842,10 @@ void Application2D::openSettings()
         QFile::copy(qt5Common, qt6Common);
     }
 
+    // Task 34: settle the one shared user-data root before any data path is read, adopting
+    // an existing ~/seamly2d tree in place when upgrading. Non-destructive and re-entrant.
+    VCommonSettings::initializeDataRoot();
+
     // seamly2d's own settings: new per-app directory under "Seamly", migrated forward
     // from the legacy shared organization folder on first run after an upgrade.
     bool migratedThisCall = false;

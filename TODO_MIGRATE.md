@@ -120,17 +120,6 @@ The project already holds an **EV** code-signing certificate for **Seamly System
 - [ ] Update the docs: `.github/workflows/CODE_SIGNING.md`, `scripts/packaging/windows/README.md` (Code signing section) and `README_WINDOWS_BUILD.md` §6 to state that the exes/DLLs *and* the `.msi` are signed, how the signing is guarded on the secrets, and how it is verified
 - [ ] Verify on a clean Windows machine: the installer UAC prompt shows "Verified publisher: Seamly Systems, Inc.", no SmartScreen "unrecognized app" prompt appears, and each installed app reports a `Valid`, timestamped Authenticode signature (`Get-AuthenticodeSignature`)
 
-## Task 34 — Rename the default user-data root `~/seamly2d` → `~/seamly` and make it a single, relocatable "data root" (shared, all platforms)
-
-Today each app hard-codes its user-data subfolders under `QDir::homePath() + "/seamly2d/"` — the `GetDef*Path()` family in `src/libs/vmisc/vcommonsettings.cpp` builds `~/seamly2d/<subdir>` independently for individual and multisize **measurements**, **templates**, **bodyscans**, **label templates**, **images**, and **backups** (lines ~431-551). There is no single "data root" the user can point elsewhere, so relocating the tree to another drive or a cloud folder (e.g. `G:\My Drive\seamly`) requires moving files by hand — the exact pain point this work removes. This task is the **shared, cross-platform foundation** the per-platform choosers build on: the Windows installer prompt (Task 14) and the macOS / AppImage / Flatpak first-run choosers (Tasks 35-37) all set and honor this one setting.
-
-- [ ] Introduce one settings-backed **data root** (e.g. `paths/dataRoot` in the existing `QSettings`) that every `GetDef*Path()` derives its subfolder from, replacing the seven independent `QDir::homePath() + "/seamly2d/…"` literals in `src/libs/vmisc/vcommonsettings.cpp` with `<dataRoot>/<subdir>`
-- [ ] Change the built-in default data root from `~/seamly2d` to `~/seamly` (`QDir::homePath() + "/seamly"`) — resolved natively on every platform via `homePath()`
-- [ ] Allow the data root to be any drive/volume/path, including external and cloud-synced locations (`G:\My Drive\seamly`, `/Volumes/<drive>/seamly`, a mounted Linux drive); create/validate the subfolder tree at that location on first use
-- [ ] Migrate an existing `~/seamly2d` tree to the new root on first run (or adopt it in place as the root) so upgrading users keep patterns/measurements without hand-moving files; never delete the old tree automatically
-- [ ] Keep the data root editable after install in **Preferences → Paths** (`src/app/seamly2d/dialogs/configpages/preferencespathpage.cpp`, and the SeamlyMe equivalent) so it can be changed on any platform, not only at install/first-run time
-- [ ] Update docs (`.github/README-BUILDS.md` settings/data-location sections) and any remaining `~/seamly2d` references; add unit tests for the data-root default, override, and `~/seamly2d`→`~/seamly` migration
-- [ ] This is the base for **Task 14** (Windows installer prompt), **Task 35** (macOS), **Task 36** (Linux AppImage), and **Task 37** (Linux Flatpak) — land it first
 
 ## Task 35 — macOS: let the user choose the `seamly` user-data directory (default `~/seamly`)
 
@@ -320,3 +309,30 @@ Related: **Task 13** authored the shortcuts/associations/upgrade behaviour and i
 - [ ] Decide what to do about a detected **NSIS** install specifically: leave it alone (two Seamly2D entries in ARP, confusing), offer to run its `uninstall.exe` first, or document that users should uninstall it manually — and say so in the dialog above
 - [ ] **Run the full elevated cycle** on a clean Windows x64 machine or VM: `msiexec /i` → check every item above → upgrade-over-install with a newer build → uninstall → confirm no leftover files, shortcuts, registry rows or ARP entry, and that the user data root is still intact afterwards. This also closes **Task 13**'s outstanding verify subtask
 - [ ] Update `scripts/packaging/windows/README.md` and `README_WINDOWS_BUILD.md` with the resulting install-time UX (which prompts appear, in what order, what each one does) and with the verification checklist above, so the next person can re-run it
+
+## Task 52 — `VSettings`' own path settings also land in an "Unknown Organization" stray file (found doing Task 34, 2026-07-26)
+
+Task 34 fixed this defect for the **shared** common settings file (`VCommonSettings::commonSettingsOrganization()` + `mergeStrayCommonSettings()`), but the same root cause is still live in `src/libs/vmisc/vsettings.cpp`. Eight accessors build a throwaway `QSettings` from the *instance's* organization and application names:
+
+```cpp
+QSettings settings(this->format(), this->scope(), this->organizationName(), this->applicationName());
+```
+
+Since Task 15 the apps construct their settings object from an explicit settings **file path** (`VSettings(qt6Settings, QSettings::IniFormat, this)` in `Application2D::openSettings()`), and `QSettings` records neither an organization nor an application name for that constructor — both come back empty. QSettings then substitutes the literal `"Unknown Organization"` and, with an empty application name, writes an organization-level file. Confirmed on the developer machine:
+
+```text
+%APPDATA%\Unknown Organization.ini
+  [paths]
+  layout=G:/My Drive/seamly2d/layouts
+  pattern=G:/My Drive/seamly2d
+  [pattern]
+  graphicalOutput=true
+```
+
+Affected keys: `paths/pattern`, `paths/layout`, `paths/seamlyLayoutApp`, `pattern/graphicalOutput` (`getPatternPath`/`SetPathPattern`, `getLayoutPath`/`SetPathLayout`, `getSeamlyLayoutAppPath`/`setSeamlyLayoutAppPath`, `GetGraphicalOutput`/`SetGraphicalOutput`). Nothing is broken for the user *today* — the same wrong file is both written and read, so the values round-trip — but they sit outside the unified `Seamly` folder Task 15 established, are shared between apps rather than per-app, and are missed by the settings migration and by the uninstall/packaging documentation. Deliberately left out of Task 34 to keep that change scoped: unlike the common file (which had to be correct for the data root and the Task 14 installer), these keys are self-consistent where they are.
+
+- [ ] Point the eight `vsettings.cpp` accessors at the app's own settings file — they intend "this application's settings", which post-Task-15 is `this`, so plain `value()`/`setValue()` as `VCommonSettings::getLabelTemplatePath()` already does; check `VSeamlyMeSettings` for the same pattern
+- [ ] Bring existing values forward from `%APPDATA%\Unknown Organization.ini` (and the platform equivalents) on first run, non-destructively — copy-if-missing, never delete the stray file — mirroring `VCommonSettings::mergeStrayCommonSettings()`
+- [ ] Decide whether `paths/pattern` and `paths/layout` belong in the app file or in the shared common file alongside the other seven `paths/*` keys, and record why
+- [ ] Add a regression test that no Seamly settings resolve to an `"Unknown Organization"` path, so a future accessor cannot reintroduce this
+- [ ] Update the settings-storage tables in `.github/README-BUILDS.md` once the location changes

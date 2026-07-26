@@ -65,6 +65,29 @@ Three independent GitHub Actions workflows, split by build system / purpose (see
 - seamly2d/seamlyme: `VAbstractApplication::MigrateSeamlySettingsLocation()` (`src/libs/vmisc/vabstractapplication.h/.cpp`) copies from the old shared `"Seamly2DTeam"` organization folder; a one-time `NotifySeamlySettingsMigrated()` dialog tells the user, shown only in confirmed GUI mode (never during a headless CLI export or an automated test) after command-line parsing has run.
 - seamlyLayout: `appConfigRootPath()` (`PreferencesModel.cpp`) and `defaultSettingsFilePath()` (`SettingsModel.cpp`) each recursively copy the whole legacy `"Seamly Systems"` AppConfigLocation tree forward; the Inno Setup installer's upgrade-guard dialog (`SeamlyLayout.iss`) also mentions the org-folder rename.
 
+## User data tree — the relocatable data root (Task 34, 2026-07)
+
+Settings (above) are separate from the **user data tree**: patterns, measurements, templates, bodyscans, label templates, images, backups and layouts. Task 34 replaced the nine independent `QDir::homePath() + "/seamly2d/<subdir>"` literals with a single settings-backed **data root**:
+
+| Aspect | Value |
+|---|---|
+| Setting | `paths/dataRoot`, in the shared common settings file (`%APPDATA%\Seamly\qt6_common.ini` on Windows; the platform equivalents above elsewhere) |
+| Built-in default | `<home>/seamly` — renamed from `<home>/seamly2d`; `QDir::homePath()` resolves it natively per platform |
+| Derived subfolders | `<dataRoot>/{measurements/individual, measurements/multisize, templates, bodyscans, label templates, images, backups, patterns, layouts}` — the subfolder names are translated (`tr()`) |
+| API | `VCommonSettings::dataRoot()` / `dataSubdirPath()` / `getDataRoot()` / `setDataRoot()` / `ensureDataRootTree()` (`src/libs/vmisc/vcommonsettings.h`); the two layout/pattern paths live in `VSettings` but derive from the same root |
+| Any drive or path | The root may be any volume the user can write to — an external disk or a cloud-synced folder such as `G:\My Drive\seamly` — so the whole tree relocates without moving files by hand |
+| Edited after install | **Preferences → Paths**, first row ("My Seamly Data") in both seamly2d and seamlyme. Because the dialog writes every row back as an absolute override, `VCommonSettings::rebaseOntoDataRoot()` moves the rows that still live inside the old root; a folder deliberately parked outside the root is left alone |
+
+**First-run resolution** (`VCommonSettings::initializeDataRoot()`, called from each app's `openSettings()`), non-destructive and re-entrant:
+
+1. A root already configured — by an earlier run, the user, or a Windows installer prompt (Task 14) — is honoured untouched.
+2. Nothing configured, an existing `<home>/seamly2d` tree and no `<home>/seamly` — the legacy tree is **adopted in place** as the root. Adoption, not copying: an upgrading user's data can be many gigabytes and may sit on a cloud-synced drive, so nothing is moved, copied or deleted. The decision itself is `chooseFirstRunDataRoot()`, split out so it can be unit-tested against throwaway directories.
+3. Otherwise — a fresh install — the `<home>/seamly` default.
+
+**Shared-settings resolution fix (same task).** The apps build their `VCommonSettings` from an explicit settings *file path*, and `QSettings` records no organization for that constructor. `organizationName()` was therefore empty at the `paths/*` accessors, and QSettings substitutes the literal `"Unknown Organization"` for an empty organization — so those shared values were being read and written under `%APPDATA%\Unknown Organization\qt6_common.ini` instead of `%APPDATA%\Seamly\`. `commonSettingsOrganization()` now falls back to the application-wide organization name, and `mergeStrayCommonSettings()` copies any value stranded in the old stray file forward on first run (only where the correctly located file has none, so a newer setting always wins; the stray file is never modified or deleted).
+
+> **Testing note.** `QDir::homePath()` **cannot be redirected on Windows** — `QFileSystemEngine::homePath()` asks the OS through `GetUserProfileDirectory()` and only falls back to `USERPROFILE`/`HOME` if that fails. A test that creates or removes `~/seamly` or `~/seamly2d` is therefore operating on the real user's data tree, whatever the environment says. `TST_DataRoot` (`src/test/Seamly2DTest/tst_dataroot.cpp`) works exclusively inside a `QTemporaryDir`, and exercises first-run resolution through `chooseFirstRunDataRoot()`, which takes both candidate roots as arguments.
+
 ### macOS (as of Task 16, 2026-07)
 
 All three apps use the same `QStandardPaths::AppConfigLocation` / `QSettings::IniFormat` code paths as Windows (Task 15) — no OS-specific branching was needed there, since `QStandardPaths` resolves the platform location generically from `organizationName`/`applicationName`. `QSettings::NativeFormat`/CFPreferences plists are **not** used by any Seamly app, so `CFBundleIdentifier` does not factor into settings resolution.
@@ -126,8 +149,8 @@ A Flatpak sandbox exports `XDG_CONFIG_HOME=~/.var/app/<app-id>/config` and `XDG_
 
 ## User data files (patterns, measurements)
 
-- Default user data tree on Windows: `C:\Users\<user>\seamly2d`.
-- Users legitimately relocate it — e.g. to a cloud-synced drive (`G:\My Drive\seamly2d`) for access while travelling. Installers and apps must treat the location as configurable, not fixed (see the Task 14 installer prompts).
+- Default user data tree on Windows: `C:\Users\<user>\seamly` (renamed from `seamly2d` by Task 34; an existing `seamly2d` tree is adopted in place on first run — see "User data tree — the relocatable data root" above).
+- Users legitimately relocate it — e.g. to a cloud-synced drive (`G:\My Drive\seamly`) for access while travelling. Since Task 34 the location is one setting, `paths/dataRoot`, that every data subfolder derives from; installers and apps must treat it as configurable, not fixed (see the Task 14 installer prompts).
 
 ## Per-platform build & packaging
 
@@ -143,7 +166,7 @@ A Flatpak sandbox exports `XDG_CONFIG_HOME=~/.var/app/<app-id>/config` and `XDG_
   - **Standard installer concerns.** Three advertised Start Menu shortcuts; file associations `.sm2d` → seamly2d and `.smis`/`.smms` → seamlyme (SeamlyLayout has none — its input is the `.pieces.svg` handoff, and a double `.pieces.svg` extension can't be registered distinctly from plain `.svg`); `MajorUpgrade` with `AllowSameVersionUpgrades` so newer versions upgrade in place and uninstall is clean. The **UpgradeCode `cbf4b5f1-c32c-4dbb-b385-3ee4a7b30658` is fixed forever** and shared by both architectures; never change it. The per-build ProductCode is auto-generated.
   - **Version mapping.** MSI caps the ProductVersion major field at 255, so the project's `YYYY.M.D.HHMM` scheme can't be used directly. `smsi.ps1` derives a strictly-increasing numeric version `(YYYY−2000).M.((D−1)·1440 + HH·60 + MM)` (third field = minutes-of-month, max 44639 < 65535) so `MajorUpgrade` always sees newer builds as newer, and stores the real `YYYY.M.D.HHMM` string as `DisplayVersion` in `HKLM\SOFTWARE\Seamly\Seamly2D` (an install breadcrumb also read by the Task 14 prompts).
   - **arm64.** seamly2d/seamlyme cross-compile for arm64 exactly as in `ci.yml`'s windows matrix. **SeamlyLayout has no arm64 build yet** (its Rust + cxx-qt cross story is unresolved, and Qt ships no cross-compiled arm64 WebEngine), so the arm64 MSI ships the two parent apps only — `smsi.ps1 -NoSeamlyLayout`, and the arm64 matrix leg installs only the `qtmultimedia` module. When SeamlyLayout gains an arm64 build, drop that flag and add the WebEngine modules.
-  - **User data is never touched.** The installer neither creates nor removes `%LOCALAPPDATA%\Seamly\<app>`, `%APPDATA%\Seamly\qt6_common.ini`, or the `C:\Users\<user>\seamly2d` data tree — the apps create those on first run (including legacy-location migration) and uninstall/upgrade leave them in place, so user data survives an uninstall/reinstall or upgrade.
+  - **User data is never touched.** The installer neither creates nor removes `%LOCALAPPDATA%\Seamly\<app>`, `%APPDATA%\Seamly\qt6_common.ini`, or the user data tree (`C:\Users\<user>\seamly` since Task 34, `seamly2d` before it) — the apps create those on first run (including legacy-location migration) and uninstall/upgrade leave them in place, so user data survives an uninstall/reinstall or upgrade.
   - **Signing.** `windows-msi.yml` signs the `.msi` with `jsign` (Google Cloud KMS) exactly as `ci.yml` signs the NSIS exe, guarded on the `SEAMLY_SIGNING_PROJECT_ID` secret so 3rd-party PR runs skip it. Code signing can otherwise be a follow-up.
   - **Verification status (2026-07-22).** Built and validated locally: the x64 MSI builds, `wix msi validate` passes (only the expected **ICE61** warning, a benign consequence of `AllowSameVersionUpgrades`), and the MSI contents were confirmed by Windows Installer COM inspection (platform, UpgradeCode, exe placement, three shortcuts, associations, HKLM rows, ~1644 files with runtime spot-checks). **Not yet exercised:** a clean-machine install/uninstall/upgrade cycle and any arm64 run (no arm64 hardware/VM in this environment).
 - **Planned (Task 14):** the installer prompts for two paths instead of hard-coding them:
