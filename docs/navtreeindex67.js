@@ -1,5 +1,6 @@
 var NAVTREEINDEX67 =
 {
+"d4/d11/vcommonsettings_8cpp.html#a20fd896ed8426c8c9750e716e05f2611":[4,0,0,1,8,17,44],
 "d4/d11/vcommonsettings_8cpp.html#a2474fcf7a475730787f7dcc8c7789a6f":[4,0,0,1,8,17,74],
 "d4/d11/vcommonsettings_8cpp.html#a2637561a27c415fd5d43d96cc585ba2e":[4,0,0,1,8,17,132],
 "d4/d11/vcommonsettings_8cpp.html#a26cf87afb2f980c1ec7cd2fd63e9f02d":[4,0,0,1,8,17,123],
@@ -210,8 +211,8 @@ var NAVTREEINDEX67 =
 "d4/d15/classDialogPatternProperties.html#afafd38ff1d20d1026e23ba0f6f2353c8":[3,0,121,43],
 "d4/d16/msvc_2include_2xercesc_2util_2XMLDateTime_8hpp.html":[4,0,0,1,15,2,0,0,6,94],
 "d4/d16/msvc_2include_2xercesc_2util_2XMLDateTime_8hpp_source.html":[4,0,0,1,15,2,0,0,6,94],
-"d4/d16/namespaceanonymous__namespace_02vtextgraphicsitem_8cpp_03.html":[2,0,18],
-"d4/d16/namespaceanonymous__namespace_02vtextgraphicsitem_8cpp_03.html#ac6b26a0ea6e45c81110d6b48f997eee2":[2,0,18,0],
+"d4/d16/namespaceanonymous__namespace_02vtextgraphicsitem_8cpp_03.html":[2,0,19],
+"d4/d16/namespaceanonymous__namespace_02vtextgraphicsitem_8cpp_03.html#ac6b26a0ea6e45c81110d6b48f997eee2":[2,0,19,0],
 "d4/d17/structWFElemStack_1_1StackElem.html":[3,0,777,0],
 "d4/d17/structWFElemStack_1_1StackElem.html#a384bfa62d0c155208bd39269887f06e5":[3,0,777,0,3],
 "d4/d17/structWFElemStack_1_1StackElem.html#a8b2afdb46d96421172fa31c69c20cb3f":[3,0,777,0,4],
@@ -248,6 +249,5 @@ var NAVTREEINDEX67 =
 "d4/d1a/classDialogCubicBezier.html#a87d151b534f1af6648c6cafd7e9a93af":[3,0,101,20],
 "d4/d1a/classDialogCubicBezier.html#a89dd2842cf7e073e61952a66fcef529b":[3,0,101,22],
 "d4/d1a/classDialogCubicBezier.html#abcc3543322fb1e89702d76f116c8a350":[3,0,101,6],
-"d4/d1a/classDialogCubicBezier.html#ac307242f53bc1e38b59e9b6c88033724":[3,0,101,18],
-"d4/d1a/classDialogCubicBezier.html#ad2b01ab4ce8b73b38ec366056e94c11b":[3,0,101,29]
+"d4/d1a/classDialogCubicBezier.html#ac307242f53bc1e38b59e9b6c88033724":[3,0,101,18]
 };

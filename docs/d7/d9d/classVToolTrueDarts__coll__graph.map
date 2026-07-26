@@ -1,11 +1,11 @@
 <map id="VToolTrueDarts" name="VToolTrueDarts">
-<area shape="rect" id="node1" title=" " alt="" coords="980,4815,1151,5259"/>
-<area shape="rect" id="node2" href="$d0/dcf/classVToolDoublePoint.html" title=" " alt="" coords="952,4204,1179,4765"/>
-<area shape="rect" id="node3" href="$da/da4/classVAbstractPoint.html" title=" " alt="" coords="752,3960,968,4155"/>
-<area shape="rect" id="node4" href="$d2/df2/classVDrawTool.html" title="The VDrawTool abstract class for all draw tool." alt="" coords="749,3351,971,3883"/>
+<area shape="rect" id="node1" title=" " alt="" coords="980,4829,1151,5273"/>
+<area shape="rect" id="node2" href="$d0/dcf/classVToolDoublePoint.html" title=" " alt="" coords="952,4219,1179,4780"/>
+<area shape="rect" id="node3" href="$da/da4/classVAbstractPoint.html" title=" " alt="" coords="752,3975,968,4169"/>
+<area shape="rect" id="node4" href="$d2/df2/classVDrawTool.html" title="The VDrawTool abstract class for all draw tool." alt="" coords="749,3351,971,3897"/>
 <area shape="rect" id="node5" href="$d4/d36/classVInteractiveTool.html" title=" " alt="" coords="755,3004,965,3169"/>
 <area shape="rect" id="node6" href="$d4/d36/classVAbstractTool.html" title="The VAbstractTool abstract class for all tools." alt="" coords="609,2160,812,2809"/>
-<area shape="rect" id="node7" href="$d5/d68/classVDataTool.html" title="The VDataTool class need for getting access to data container of tool." alt="" coords="763,1297,938,1477"/>
+<area shape="rect" id="node7" href="$d5/d68/classVDataTool.html" title="The VDataTool class need for getting access to data container of tool." alt="" coords="763,1290,938,1485"/>
 <area shape="rect" id="node8" title=" " alt="" coords="987,417,1061,494"/>
 <area shape="rect" id="node10" href="$d8/dba/classVAbstractPattern.html" title=" " alt="" coords="501,828,717,1947"/>
 <area shape="rect" id="node19" href="$dc/de5/classVAbstractSimple.html" title=" " alt="" coords="993,1971,1159,2136"/>
@@ -17,7 +17,7 @@
 <area shape="rect" id="node14" href="$d0/d4c/classQMap.html" title=" " alt="" coords="5,417,227,494"/>
 <area shape="rect" id="node15" href="$da/da1/classQHash.html" title=" " alt="" coords="251,417,480,494"/>
 <area shape="rect" id="node16" href="$dd/daa/classQSharedPointer.html" title=" " alt="" coords="836,2446,1057,2523"/>
-<area shape="rect" id="node17" title=" " alt="" coords="992,4019,1139,4096"/>
+<area shape="rect" id="node17" title=" " alt="" coords="992,4033,1139,4111"/>
 <area shape="rect" id="node18" href="$d1/d6b/classVSimplePoint.html" title=" " alt="" coords="1063,2872,1289,3301"/>
 <area shape="rect" id="node20" href="$dc/d3b/classVScenePoint.html" title=" " alt="" coords="1226,2343,1417,2626"/>
 <area shape="rect" id="node21" title=" " alt="" coords="1312,1349,1475,1426"/>
