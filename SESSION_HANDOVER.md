@@ -2,7 +2,7 @@
 
 ## Current state: Tasks 30, 31, 44 and 48 are DONE and moved to `COMPLETED.md`
 
-**Date:** 2026-07-25. **Branch:** `task-48-windeployqt-kit`, cut from `run-seamlyLayout`.
+**Date:** 2026-07-25. **Branch:** `run-seamlyLayout`. The work landed via **PR [#17](https://github.com/seamly/Seamly2D/pull/17)** (`task-48-windeployqt-kit` → `run-seamlyLayout`) — **all 12 CI checks green** (both MSI legs, both Windows builds, Linux unit tests, AppImage, macOS, SeamlyLayout Qt 6.11, CodeQL) — **merged**, task branch deleted locally and on origin.
 
 Refer to `TODO_MIGRATE.md` for the tasks still open.
 
@@ -41,7 +41,7 @@ Refer to `TODO_MIGRATE.md` for the tasks still open.
 
 ### What is NOT verified
 
-- **A real elevated `msiexec /i` system install was not performed** — the verification above used an administrative extraction (`msiexec /a`) plus launching all three exes from the expanded tree. That covers the file layout, the shared runtime and app startup, but not shortcuts, registry entries, file associations or the ARP entry. A real install needs a UAC prompt. Note there is already an **NSIS**-installed Seamly2D on this machine (`C:\Program Files (x86)\Seamly2D`, `uninstall.exe`); the MSI is a separate product code and would install alongside it, not over it.
+- **A real elevated `msiexec /i` system install was not performed** — the verification above used an administrative extraction (`msiexec /a`) plus launching all three exes from the expanded tree. That covers the file layout, the shared runtime and app startup, but not shortcuts, registry entries, file associations or the ARP entry. A real install needs a UAC prompt. Note there is already an **NSIS**-installed Seamly2D on this machine (`C:\Program Files (x86)\Seamly2D`, `uninstall.exe`); the MSI is a separate product code and would install alongside it, not over it. **All of this is now tracked as Task 51**, together with the install-time options and warnings the installer should be offering.
 - **`msiexec /a` needs a short target path.** Extracting under a long path fails at `InstallFinalize` with 1603 (MAX_PATH). Not a package defect.
 
 ## New tasks logged in `TODO_MIGRATE.md`
@@ -50,13 +50,14 @@ Refer to `TODO_MIGRATE.md` for the tasks still open.
 | --- | --- | --- |
 | **49** | open, **important** | **SeamlyLayout ignores the SVG path seamly2d hands it.** `MainWindow::exportPiecesToSeamlyLayout()` writes `<pattern>.pieces.svg` and calls `QProcess::startDetached(exe, {svgPath}, wd)`, but `qt_frontend/main.cpp` never reads its command line — no `QCoreApplication::arguments()`, no `QCommandLineParser`, nothing. Verified on the fresh 6.11.1 build: the window comes up with both panes empty. **Pre-existing, not a Qt-bump regression** — `git log -S "arguments()"` finds no commit that ever added argument handling |
 | **50** | open | A developer's absolute home path is hard-coded in `src/app/seamly2d/core/application_2d.cpp:507-512` (`C:/Users/susan/Projects/Seamly2D-private/…/build/Debug/SeamlyLayout.exe`) as the Layout Mode dev fallback. Harmless elsewhere, but it is a personal path in a GPL source file headed for the upstream PR, and on that one machine it silently prefers a possibly stale Debug build |
+| **51** | open | **Windows MSI install-time experience.** Everything Windows Installer does *around* the files, which the extraction-based verification deliberately did not cover: Start Menu shortcuts, the `HKLM\SOFTWARE\Seamly\Seamly2D` registry rows, the Add/Remove Programs entry, `.sm2d`/`.smis`/`.smms` associations end to end, **optional desktop / taskbar shortcuts** offered at install time, a proper **UAC** elevation prompt, and a dialog warning that an existing installation will be replaced **while the user's data stays intact** in the `seamly` user directory. Also folds in the clean-machine install/upgrade/uninstall cycle that Task 13's last subtask still wants |
 
 Still open from before, untouched this session: **45** (stale `C:\Qt\6.10.1` paths in the `.claude` settings allowlists), **46** (`sd.ps1` reuses stale qmake sub-Makefiles after a Qt change — `sb.ps1` already has the `.seamly-qmake-kit` marker fix to port), **47** subtask 4 (optional developer `PATH` cleanup so the real kit precedes Qt Design Studio).
 
 ## Concrete next steps (resume here)
 
-1. **Decide on the elevated MSI install** — run `msiexec /i scripts\seamly-build-msi\x64\Seamly2D-x64.msi` from an elevated prompt and confirm shortcuts, the ARP entry and first launch of each app, then uninstall. This is the only part of Task 30's verify item that was exercised by extraction rather than a real install.
-2. **Task 49** — make SeamlyLayout consume its positional argument, so Layout Mode actually opens the pattern instead of an empty canvas. This is the highest-value open item: the handoff is the whole point of the daughter app.
+1. **Task 49** — make SeamlyLayout consume its positional argument, so Layout Mode actually opens the pattern instead of an empty canvas. Highest-value open item: the handoff is the whole point of the daughter app.
+2. **Task 51** — the MSI install-time experience (shortcuts, registry, ARP, associations, desktop/taskbar options, UAC, the "your data is safe" upgrade warning) plus the clean-machine install/upgrade/uninstall cycle. The elevated `msiexec /i` run lives here now; it was deliberately not performed this session.
 3. **Task 50** — remove the hard-coded developer path before the upstream PR.
 4. **Task 46** — port `sb.ps1`'s `.seamly-qmake-kit` marker to `sd.ps1` so a Qt change wipes the debug tree automatically.
 5. **Task 45** — the two-line settings-allowlist cleanup.
