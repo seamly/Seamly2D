@@ -18,25 +18,27 @@ For more information, read full [JSF-AV standard](http://www2.research.att.com/~
 - Pointers: `int* correct_pointer` (bind the asterisk to the type, not to the name)
 - Namespaces: Everything in namespaces, but not more than two levels deep
 - File Names:
-  -- Match Classes Exactly: If a file primary defines one class, give it the same name as the class.
-  -- No Abbreviations: Never use confusing or ambiguous shortcuts (e.g., use `ordered_matrix_reader.cpp` instead of `ord_mtx_rdr.cpp`).
-  -- Avoid Generic Names: Steer clear of naming files `util.h` or `helpers.cpp` to prevent name clashes and messy organizational patterns.
-  -- Separate Platform Code: Append platform-specific tags to files handling low-level code (e.g., `file_system_win.cpp` vs `file_system_linux.cpp`).
-  -- Snake_case for new files: All lowercase with underscores. `application_my_new_app.cpp` is easy to type and read.
-  -- Name files for what they do. And don't start filenames with 's'!
-  -- Unique names: A seach for the \<filename.extension> should return only one file.
-  -- Use prefixes where possible:
-  --- application_\<appname>
-  --- dialog_\<toolgroup>\_\<toolname>
-  --- tool_\<toolgroup>\_\<toolname>
-  --- settings_*
-  --- options_*
-  --- exception_*
-  --- event_*
-  --- model_*
-  --- search_*
-  --- test_*
-  --- installation_instructions_\<platform>
+  - Snake_case for new files: All lowercase with underscores. `application_my_new_app.cpp` is easy to type and read.
+    - Exception: Match Class names exactly for file names that define a class. If a file primarily defines one class, give it the same name as the class, in UpperCamelCase.
+  - No Abbreviations: Never use confusing or ambiguous shortcuts (e.g., use ordered_matrix_reader.cpp instead of ord_mtx_rdr.cpp).
+  - Avoid Generic Names: Steer clear of naming files util.h or helpers.cpp to prevent name clashes and messy organizational patterns.
+  - Separate Platform Code: Append platform-specific tags to files handling low-level code (e.g., win_file_system.cpp vs linux_file_system.cpp).
+  - Name files for what they do. And don't start filenames with 's'!
+  - Unique names: A seach for the \<filename.extension> should return only one file,
+    - Exception: Crate files in SeamlyLayout require multiple `lib.rs` files distinguishable by their paths.
+  - Use prefixes where applicable:
+    - application_\<appname>
+    - dialog_\<toolgroup>\_\<toolname>
+    - tool_\<toolgroup>\_\<toolname>
+    - settings_*
+    - options_*
+    - exception_*
+    - event_*
+    - model_*
+    - search_*
+    - test_*
+    - \<platform>_*
+      - Examples: winx64_installation_instructions.pdf, winarm64_installation_instructions.pdf, linuxappimage_installation_instructions.pdf, macos_installation_instructions.pdf
 - Indents: spaces, no tabs, for uniformity in rendering
 - Braces: always on a new line, can't be omitted even from if/while/else/etc statements
 - Line limit: 120 chars max
