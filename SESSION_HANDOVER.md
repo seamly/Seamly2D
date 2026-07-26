@@ -57,9 +57,15 @@ The user first asked for `dataRoot=G:/My Drive/seamly`. That folder already exis
 - **The suite no longer mutates the machine** — `C:\Users\susan\seamly2d`, `C:\Users\susan\seamlyData` and `%APPDATA%\Unknown Organization` were byte-identical before and after a full run.
 - **CI** — all 11 checks on PR #19.
 
-### Open question for the user (asked, not yet answered)
+### Crossed `labels` / `images` — found and fixed
 
-`%APPDATA%\Seamly\qt6_common.ini` has **`labels` and `images` crossed**: `labels=G:/My Drive/seamlyData/images` and `images=G:/My Drive/seamlyData/label templates`. Verified this is *pre-existing stored data*, not a code bug — `preferencespathpage.cpp` maps rows 0–9 consistently between `Apply()` and `initializeTable()` (row 6 ↔ label templates, row 7 ↔ images), so the Task 34 row renumbering did not cause it. Flagged rather than silently changed; the user has not said whether to swap them.
+`%LOCALAPPDATA%\Seamly\Seamly2D\qt6_seamly2d.ini` had **`labels` and `images` crossed**: `labels=…/seamlyData/images`, `images=…/seamlyData/label templates`. This was *pre-existing stored data*, not a code bug — `preferencespathpage.cpp` maps rows 0–9 consistently between `Apply()` and `initializeTable()`, and `vcommonsettings.cpp` confirms `paths/labels` is the label-template path (`settingPathsLabelTemplate`) while `paths/images` is `settingImagesPath`. **Un-crossed at the user's instruction** and verified against the filesystem: `label templates` (34 files) and `images` (3 files) both resolve. Backup at `qt6_seamly2d.ini.bak-uncross`. Nothing in the repo changed — this was stored user state only.
+
+### `/compact` hooks fixed, and the handover rule is now in `CLAUDE.md`
+
+The `PreCompact` / `PostCompact` hooks in `.claude/settings.json` were emitting `hookSpecificOutput.additionalContext`, which the hook schema accepts **only** for `UserPromptSubmit`, `PostToolUse`, `PostToolBatch` and `Stop`. Both failed validation on every compaction, so the SESSION_HANDOVER.md instruction never reached the model. Both now emit top-level **`systemMessage`** — the only text-carrying key the compact events accept.
+
+**Know the limitation:** `systemMessage` is *displayed*, not injected as instruction context. The hooks are a visible nudge, not a guarantee, and `PreCompact` can no longer shape the summary at all. That is why the requirement was also added to `CLAUDE.md` under Task Tracking, which *is* loaded every session — that line is the actual mechanism; the hooks are the reminder.
 
 ## Concrete next steps (resume here)
 
