@@ -351,15 +351,19 @@ Affected keys: `paths/pattern`, `paths/layout`, `paths/seamlyLayoutApp`, `patter
 
 ## Task 54 — Rename the three `vmisc` settings files **and their classes** to `settings_*` / `Settings*`
 
-Rename the settings sources in `src/libs/vmisc/` so each name says which app it configures, and rename the classes with them so the pair complies with `.github/README-CODE-STYLES.md`: **file names** snake_case with a meaningful prefix (`settings_*` is one of the listed prefixes) and unique repo-wide; **class names** UpperCamelCase (the project's deliberate deviation from JSF-AV, which would demand `Settingscommon`); and "**Match Classes Exactly** — if a file primarily defines one class, give it the same name as the class", which the `v`-prefixed names have never done.
+Rename the settings sources in `src/libs/vmisc/` so each name says which app it configures, and rename the classes with them so the pair complies with `.github/README-CODE-STYLES.md`: **class names** UpperCamelCase (the project's deliberate deviation from JSF-AV, which would demand `Settingscommon`), file names unique repo-wide, and no `v` prefix.
 
-| Current file | New file | Current class | New class |
-| --- | --- | --- | --- |
-| `vcommonsettings.cpp` / `.h` | `settings_common.cpp` / `.h` | `VCommonSettings` | `SettingsCommon` |
-| `vseamlymesettings.cpp` / `.h` | `settings_seamlyme.cpp` / `.h` | `VSeamlyMeSettings` | `SettingsSeamlyMe` |
-| `vsettings.cpp` / `.h` | `settings_seamly2d.cpp` / `.h` | `VSettings` | `SettingsSeamly2D` |
+**Open decision — which file-name form (settle this first, it sets the pattern for every later rename).** The style guide revision of 2026-07-26 (`df5d90bb14`) made class-defining files an **exception to snake_case**: *"Match Class names exactly for file names that define a class. If a file primarily defines one class, give it the same name as the class, in UpperCamelCase."* All three of these files primarily define one class, so the exception points at column **A** — while the original request and the guide's own `settings_*` prefix point at column **B**:
 
-Two naming calls to confirm before the sweep, since they set the pattern for every later rename: the brand casing `SettingsSeamlyMe` / `SettingsSeamly2D` is kept (matching the existing `VSeamlyMeSettings`) rather than the literal file-name transliteration `SettingsSeamlyme` / `SettingsSeamly2d`; and `VSettings` — the *Seamly2D* settings, despite the generic name — becomes `SettingsSeamly2D`, which is the whole point of the rename.
+| Current file | A — class-match (style-guide exception) | B — snake_case `settings_*` (as originally requested) | Current class | New class |
+| --- | --- | --- | --- | --- |
+| `vcommonsettings.cpp` / `.h` | `SettingsCommon.cpp` / `.h` | `settings_common.cpp` / `.h` | `VCommonSettings` | `SettingsCommon` |
+| `vseamlymesettings.cpp` / `.h` | `SettingsSeamlyMe.cpp` / `.h` | `settings_seamlyme.cpp` / `.h` | `VSeamlyMeSettings` | `SettingsSeamlyMe` |
+| `vsettings.cpp` / `.h` | `SettingsSeamly2D.cpp` / `.h` | `settings_seamly2d.cpp` / `.h` | `VSettings` | `SettingsSeamly2D` |
+
+Whichever wins, note that the repo has **no** UpperCamelCase `.cpp`/`.h` files today outside vendored `xerces-c` — form A would be the first, so it is a convention decision beyond these six files. The include-guard and `@file` subtasks below follow from the choice.
+
+Two smaller naming calls, same decision point: the brand casing `SettingsSeamlyMe` / `SettingsSeamly2D` is kept (matching the existing `VSeamlyMeSettings`) rather than the literal transliteration `SettingsSeamlyme` / `SettingsSeamly2d`; and `VSettings` — the *Seamly2D* settings, despite the generic name — becomes `SettingsSeamly2D`, which is the whole point of the rename.
 
 **Class-rename scope measured 2026-07-26:** `VCommonSettings` **447 occurrences in 17 files**, `VSettings` **147 in 18 files**, `VSeamlyMeSettings` **25 in 9 files** (`src/`, all extensions). Plus the translations: `tr()` contexts are keyed on the class name, so all **22 `share/translations/seamly2d_*.ts`** files carry a `<name>VCommonSettings</name>` context (8 messages) and a `<name>VSettings</name>` context (2) — **~220 already-translated strings** that go obsolete unless the contexts are renamed with the classes. `VSeamlyMeSettings` has no translation context.
 
@@ -367,7 +371,7 @@ Two naming calls to confirm before the sweep, since they set the pattern for eve
 
 **Do files and classes in one commit, not two.** Splitting them means a middle state where `settings_common.h` declares `VCommonSettings` — exactly the file/class mismatch the style rule exists to prevent — and it doubles the churn through the same ~600 call sites.
 
-- [ ] Confirm the two naming calls above (brand casing; `VSettings` → `SettingsSeamly2D`)
+- [ ] **Settle the file-name form first** (A class-match `SettingsCommon.h` vs B snake_case `settings_common.h`), plus the two smaller calls above (brand casing; `VSettings` → `SettingsSeamly2D`); record the decision in `.github/README-CODE-STYLES.md` if it needs sharpening, since every future rename follows it
 - [ ] Rename all six files with `git mv` (not delete + add) so history and `git blame` follow the rename
 - [ ] Update the six entries in `src/libs/vmisc/vmisc.pri` (SOURCES 5/8/9, HEADERS 24/27/28)
 - [ ] Update every `#include` across the 101 files — both the in-directory and the `../vmisc/…` form — then confirm with a repo-wide grep that no `vcommonsettings.h` / `vsettings.h` / `vseamlymesettings.h` include remains anywhere under `src/`
