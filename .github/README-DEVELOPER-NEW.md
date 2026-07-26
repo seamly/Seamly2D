@@ -61,15 +61,14 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started on GitFlow, Issues, Branc
   * Select:
     * Qt -- Minimize your options, otherwise your download size could be in Gs
       * Qt 6.11.1
-        * MSVC 2022
-        * Additional Librairies
-          * Qt Multimedia
-          * Qt Image Formats
-    * Build Tools
+      * MSVC 2022
+      * Qt Debug Information Files
+      * Developer and Designer Tools
       * Qt Creator
       * Qt Creator CDB Debugger Support
       * Debugging Tools for Windows
-      * (Qt Maintenance Tool is always installed with Developer & Designer Tools - this will be highlighted)
+      * Qt Creator Debug Symbols
+        (Qt Maintenance Tool is always installed with Developer & Designer Tools - this will be highlighted)
 
 ### ... on Linux
 
