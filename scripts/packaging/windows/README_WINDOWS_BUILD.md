@@ -145,6 +145,39 @@ install directory are one — `smsi.ps1` deploys both windeployqt runs into the
 same folder and the `.wxs` harvests a single tree, so the subdirectory and the
 duplicate runtime are gone.
 
+### 3.4 Parent exes were deployed with the WRONG Qt runtime — bare `windeployqt` on `PATH`  *(RESOLVED, Task 48)*
+
+The `win32-msvc` post-link step in `src\app\seamly2d\seamly2d.pro`,
+`src\app\seamlyme\seamlyme.pro` and `src\test\Seamly2DTest\Seamly2DTest.pro`
+invoked `windeployqt` with **no path**, so the shell resolved it. On a developer
+PC with Qt Design Studio installed, the first `windeployqt` (and `windeployqt6`)
+on `PATH` belongs to its reduced **Qt 6.8.7** kit, not the build kit — so a clean
+`sb.ps1` run produced `build\src\app\<app>\bin\Qt6Core.dll` reporting
+`6.8.7.0` next to exes compiled and linked entirely against Qt 6.11.1. Qt's
+binary compatibility runs forward only, so those exes cannot start, and
+`smsi.ps1` stages `build\src\app\<app>\bin` verbatim into the MSI.
+
+**Fixed (Task 48):** all three `win32-msvc` branches now use
+`qtPrepareTool(WINDEPLOYQT, windeployqt)` + `$$WINDEPLOYQT`, matching what the
+`win32-arm64-msvc` branches already did — `qtPrepareTool` resolves the tool from
+`$$[QT_INSTALL_BINS]`, the Qt that qmake itself belongs to, so the deployed
+runtime can only ever be the kit that compiled the exe. `scripts\sb.ps1` and
+`scripts\sd.ps1` now also compare the deployed `Qt6Core.dll` / `Qt6Cored.dll`
+FileVersion against that kit and fail loudly on a mismatch, because the bug was
+invisible until someone read the DLL version by hand. The macOS post-link steps
+already used `$$[QT_INSTALL_BINS]/macdeployqt` and were never exposed; CI is
+unaffected (the runners have no Design Studio, and `install-qt-action` puts the
+correct Qt first on `PATH`).
+
+**Bearing on the 2026-07-23 MSI recorded above:** its parent runtime came from
+that bare, `PATH`-resolved `windeployqt`, so which Qt it actually shipped is not
+determined by the build and cannot be reconstructed after the fact — the
+`build\` tree it was staged from has since been wiped and rebuilt. Treat the
+186.8 MB figure and its file counts as a record of the two-runtime layout only,
+not as evidence about the parent Qt version. The numbers under §2 for the
+single-runtime MSI were produced after this fix, with the deployed runtime
+verified to match the compiling kit.
+
 ### Benign warnings (no action needed)
 
 - `Cannot determine dependencies of …\qtposition_nmea.dll: … Qt6SerialPort.dll` — optional dependency of the NMEA positioning plugin; not used.

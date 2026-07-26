@@ -208,8 +208,15 @@ win32 {
 # with the "no Qt platform plugin could be initialized" qFatal, which in a
 # debug-CRT build pops a hidden modal dialog and looks like a startup hang
 # (Task 23). Mirrors the seamly2d.pro post-link step.
+#
+# qtPrepareTool() resolves windeployqt out of $$[QT_INSTALL_BINS] — the Qt that
+# *this* qmake belongs to — rather than the first windeployqt on PATH, so the
+# deployed runtime always matches the kit the tests were linked against. A
+# stray older Qt on PATH (e.g. Qt Design Studio's reduced 6.8.x kit) would
+# otherwise deploy DLLs the test exe cannot load.
 win32-msvc{
-    QMAKE_POST_LINK += windeployqt $$shell_path($$DESTDIR/$${TARGET}.exe)
+    qtPrepareTool(WINDEPLOYQT, windeployqt)
+    QMAKE_POST_LINK += $$WINDEPLOYQT $$shell_path($$DESTDIR/$${TARGET}.exe)
 }
 win32-arm64-msvc{
     qtPrepareTool(WINDEPLOYQT, windeployqt)

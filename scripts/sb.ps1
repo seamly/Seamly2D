@@ -66,6 +66,12 @@
     records the qmake it used in build\.seamly-qmake-kit and wipes the tree
     automatically when the detected kit differs.
 
+    DEPLOYED RUNTIME CHECK (Task 48): after the parent build the script compares
+    the FileVersion of the deployed build\src\app\<app>\bin\Qt6Core.dll against
+    the kit that compiled the exes, and fails if they differ. That mismatch used
+    to happen silently whenever a stray windeployqt (Qt Design Studio's reduced
+    kit) was first on PATH, and smsi.ps1 would package the broken tree.
+
 .PARAMETER Clean
     Wipe both build trees before building (the qmake build\ tree and
     SeamlyLayout's CMake preset directory).
@@ -175,6 +181,56 @@ function Find-VcVars64 {
         throw "VS 18 Community vcvars64.bat not found at '$vcvars' - install Visual Studio 18 Community with the C++ workload."
     }
     return $vcvars
+}
+
+#------------------------------------------------------------------------------
+# @brief  Verify the Qt runtime deployed beside an exe matches the build kit.
+#
+# Task 48: the .pro post-link step runs windeployqt, and until that step was
+# changed to qtPrepareTool() it resolved the tool from PATH - which on a
+# developer PC with Qt Design Studio installed is a *different*, older Qt. The
+# result was a tree whose exes were linked against 6.11.1 but sat next to 6.8.7
+# DLLs: silently broken, and packaged verbatim into the MSI by smsi.ps1. The
+# bug was invisible until someone read the DLL's FileVersion by hand, so check
+# it here on every build.
+#
+# Compares only major.minor.patch: Qt DLLs carry a fourth "0" field that
+# qmake -query QT_VERSION does not report.
+#
+# @param  QmakePath  qmake.exe of the kit that compiled the exes
+# @param  BinDirs    directories holding a deployed Qt6Core.dll
+# @param  CoreDll    name of the core DLL to inspect (Qt6Core.dll / Qt6Cored.dll)
+#------------------------------------------------------------------------------
+function Assert-DeployedQtVersion {
+    param(
+        [string]$QmakePath,
+        [string[]]$BinDirs,
+        [string]$CoreDll = 'Qt6Core.dll'
+    )
+
+    $kitVersion = [version]((& $QmakePath -query QT_VERSION) | Select-Object -First 1).Trim()
+
+    foreach ($dir in $BinDirs) {
+        $corePath = Join-Path $dir $CoreDll
+        if (-not (Test-Path $corePath)) {
+            throw "windeployqt did not deploy '$CoreDll' into '$dir' - the post-link deploy step failed."
+        }
+
+        $info     = (Get-Item -LiteralPath $corePath).VersionInfo
+        $deployed = [version]"$($info.FileMajorPart).$($info.FileMinorPart).$($info.FileBuildPart)"
+
+        if ($deployed -ne $kitVersion) {
+            throw @"
+Deployed Qt runtime does not match the build kit (TODO_MIGRATE.md Task 48).
+  exes linked against : Qt $kitVersion  ($QmakePath)
+  DLLs deployed       : Qt $deployed  ('$corePath')
+Qt's binary compatibility is forward-only, so these exes will not run and must
+not be packaged. A stray windeployqt on PATH - typically Qt Design Studio's
+reduced kit under C:\Qt\Tools\QtDesignStudio\ - is the usual cause. Wipe the
+build tree (-Clean) and rebuild.
+"@
+        }
+    }
 }
 
 #------------------------------------------------------------------------------
@@ -296,6 +352,12 @@ if errorlevel 1 exit /b 1
             throw "Build reported success but $($check.What) is missing: '$($check.Path)'."
         }
     }
+
+    # ...and the runtime windeployqt put there must be the kit's own (Task 48).
+    Assert-DeployedQtVersion -QmakePath $qmake -BinDirs @(
+        (Join-Path $buildDir 'src\app\seamly2d\bin'),
+        (Join-Path $buildDir 'src\app\seamlyme\bin'))
+
     Write-Host '  seamly2d + seamlyme OK'
 }
 
@@ -316,11 +378,12 @@ if ($SkipLayout) {
         throw "SeamlyLayout build script not found at '$layoutBuild'."
     }
 
-    # Build the argument list explicitly and splat it: `@(if (...) {...})` is an
-    # array literal, not splatting, so it would be passed as one positional
-    # argument instead of a switch.
-    $layoutArgs = @('-Preset', 'release', '-NoRun')
-    if ($Clean) { $layoutArgs += '-Clean' }
+    # Splat a HASHTABLE, not an array. Splatting an array passes its elements
+    # positionally, so @('-Preset','release',...) hands build.ps1 the literal
+    # string "-Preset" as the value of its first positional parameter and dies
+    # on its ValidateSet. A hashtable is what binds names to values.
+    $layoutArgs = @{ Preset = 'release'; NoRun = $true }
+    if ($Clean) { $layoutArgs['Clean'] = $true }
 
     $global:LASTEXITCODE = 0
     & $layoutBuild @layoutArgs

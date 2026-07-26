@@ -1,90 +1,72 @@
 # Session handover
 
-## Current task: Task 30 — upgrade SeamlyLayout to Qt 6.11.1 (match the parent apps)
+## Current state: Tasks 30, 31, 44 and 48 are DONE and moved to `COMPLETED.md`
 
-**Date:** 2026-07-25. **Branch:** `run-seamlyLayout`, **1 commit ahead of origin** (`e769a55e10` local vs `86685265b2` on origin).
+**Date:** 2026-07-25. **Branch:** `task-48-windeployqt-kit`, cut from `run-seamlyLayout`.
 
-**Status:** Task 30's implementation is **complete and merged**; its final *verify* subtask is **blocked** on a machine-setup gap (Task 44). Two follow-up tasks were implemented and landed along the way; three more were logged but not fixed.
+Refer to `TODO_MIGRATE.md` for the tasks still open.
 
-### Commits made this session
+**Status:** every item in the previous handover's *Concrete next steps* list was carried out. The Qt-module blocker (Task 44) is cleared, the `windeployqt` bug (Task 48) is fixed and verified, SeamlyLayout builds and runs on Qt 6.11.1, and the single-shared-runtime MSI was rebuilt and exercised. One new defect was found while verifying and logged rather than fixed (**Task 49**), plus one incidental finding (**Task 50**).
 
-| Commit | On origin? | What |
-|---|---|---|
-| `5d448014c9` | **yes** | Task 30 — Qt 6.11.1 across the family, MSI collapsed to one shared Qt runtime. Also carries the `Seamly2D.pro` → `Seamly.pro` rename made in parallel. |
-| `86685265b2` | **yes** | Task 47 — pin the Qt kit for Cargo so `cxx-qt-build` cannot pick Design Studio's Qt. |
-| `e769a55e10` | **no — local only** | `scripts/sb.ps1` (build the whole family), `build.ps1 -NoRun`, the `app.pro` SUBDIRS comment, TODO updates incl. Task 48. |
+### What was done this session
 
-Working tree: `src/app/app.pro` is modified (wording edits made after the commit). Nothing else pending.
+| Step | Outcome |
+| --- | --- |
+| **Task 44** — install the missing Qt modules | **Done.** `MaintenanceTool.exe install qt.qt6.6111.addons.qtwebchannel qt.qt6.6111.addons.qtpositioning --accept-licenses --accept-obligations --confirm-command --default-answer`. All eight CMake config packages now present in the 6.11.1 kit |
+| **gh CLI** | **Already installed** — `gh` 2.96.0 at `C:\Program Files\GitHub CLI\gh.exe`, authenticated as `slspencer`, default repo pinned to `seamly/Seamly2D`. It is on the *machine* `PATH` but not in this agent shell's inherited environment; a new terminal picks it up |
+| **Task 48** — bare `windeployqt` | **Fixed and verified.** All three `win32-msvc` post-link branches now use `qtPrepareTool(WINDEPLOYQT, windeployqt)` |
+| **Task 30** — final verify subtask | **Closed**, with one carve-out (Task 49) |
+| **Task 31** — rebuild + MSI size subtasks | **Closed**, size measured |
+| **Task 30 → `COMPLETED.md`** | **Moved**, along with 31, 44 and 48. `COMPLETED.md`'s newest entries are now these four |
 
-### What Task 30 changed
+### Files changed
 
-- **Qt pin** — `qt_frontend/CMakeLists.txt` `find_package(Qt6 6.11.1 …)` + `qt_standard_project_setup(REQUIRES 6.11.1)`; versioned QML imports bumped to `6.11` across all 10 `.qml` files.
-- **One shared Qt runtime in the MSI** — `seamly-family.wxs` drops `SEAMLYLAYOUTFOLDER` and installs all three exes in `INSTALLFOLDER`; `smsi.ps1` deploys `windeployqt6` output into the parents' staging tree and drops the `layout\` tree and the `LayoutStagingDir` define; `windows-msi.yml` installs **one** Qt kit instead of two (the ordering dance and `QT_LAYOUT_DIR` are gone; `qt-modules` is now a matrix field).
-- **No hard-coded Qt patch versions in build scripts** — `build.ps1` and `sd.ps1` pick the newest `msvc2022_64` kit meeting the 6.11.1 minimum; `smsi.ps1`'s `Find-WinDeployQt6` reads `CMAKE_PREFIX_PATH` from SeamlyLayout's `CMakeCache.txt` so the deployed runtime always matches the exe. (Closes two Task 31 subtasks.)
-- **`locateSeamlyLayout()` unchanged** — it already checks the flat layout first. Its subdirectory branch is kept as a fallback for installs made by a pre-Task-30 MSI; only doc comments and test comments were reworded.
-- **CI** — `seamlylayout-ci.yml` `QT_VERSION: '6.11.1'`. Merging it into `ci.yml` was **evaluated and deliberately declined**: the Qt pin was the original reason for the split, but the differing build systems (CMake/Ninja + Cargo vs qmake) and path filters still justify it. Rationale recorded in the workflow header, `README_WORKFLOWS.md` and `.github/README-BUILDS.md`.
+| File | Change |
+| --- | --- |
+| `src/app/seamly2d/seamly2d.pro`, `src/app/seamlyme/seamlyme.pro`, `src/test/Seamly2DTest/Seamly2DTest.pro` | `win32-msvc` post-link: bare `windeployqt` → `qtPrepareTool(WINDEPLOYQT, windeployqt)` + `$$WINDEPLOYQT`, each with a comment on why the bare name is unsafe |
+| `scripts/sb.ps1` | New `Assert-DeployedQtVersion` guard over both parent `bin` dirs; **bug fix** — the SeamlyLayout step splatted an *array* into `build.ps1`, which binds positionally, so it always died on `ValidateSet`; now a hashtable splat |
+| `scripts/sd.ps1` | Same guard for the debug tree's `Qt6Cored.dll` |
+| `src/app/seamlylayout/build.ps1` | Fail-fast check for `Qt6WebEngine` / `Qt6WebChannel` / `Qt6Positioning` in the selected kit, with both install routes in the error text (Task 44's last subtask) |
+| `.github/README-BUILDS.md` | New toolchain bullet: never invoke a Qt tool by bare name on a developer PC; lists every call site and how each is pinned |
+| `scripts/packaging/windows/README_WINDOWS_BUILD.md` | New **§3.4** documenting the bug, the fix, and what the 2026-07-23 MSI's Qt version can and cannot be claimed to have been |
+| `TODO_MIGRATE.md`, `COMPLETED.md` | Subtasks checked off; Tasks 30/31/44/48 moved; Tasks 49 and 50 added |
 
-### What is verified (on Qt 6.11.1)
+### What is verified
 
-- `cargo test --workspace` — **251 passed**, 0 failed.
-- All four Qt frontend ctest suites — **107 passed**, 0 failed, 1 skipped (AdjustScene 26, AdjustController 7, PreferencesModel 48, SettingsModel 26).
-- `cargo clean -p cxxqt_bridge` + rebuild — **CXX-Qt 0.7.3 / cxx-qt-build compile clean against Qt 6.11.1**; a CMake configure reports `CXX-Qt Found crate(s): cxxqt_bridge` and `Using Corrosion as a subdirectory`, so the Corrosion integration is fine too.
-- `scripts/sd.ps1` — parent debug build, exit 0, against the auto-detected 6.11.1 kit.
-- `scripts/sb.ps1 -SkipLayout` — parent release build, exit 0.
+- **Parents** — clean `scripts\sb.ps1 -Clean` rebuild. `build\src\app\{seamly2d,seamlyme}\bin\Qt6Core.dll` now report **`6.11.1.0`** (they reported `6.8.7.0` before the Task 48 fix), and both exes launch from their `bin` directories and stay up.
+- **Unit tests** — clean debug rebuild via `scripts\sd.ps1` (so the changed `Seamly2DTest.pro` post-link actually re-ran), then `scripts\st.ps1`: **32097 passed, 0 failed across 24 suites**, exit 0.
+- **SeamlyLayout** — `scripts\sb.ps1 -SkipParents` configures and builds clean on Qt 6.11.1: `find_package(Qt6 6.11.1 … WebEngineQuick)` succeeds, Corrosion rebuilds `cxxqt_bridge`, `[86/86] Linking CXX executable SeamlyLayout.exe`. The running process loads **`Qt6Core.dll`, `Qt6WebEngineQuick.dll` and `Qt6WebEngineCore.dll`, all `6.11.1.0`** — the bumped `import QtWebEngine 6.11` and the QML/WebEngine load path are genuinely exercised, and the UI renders.
+- **MSI** — `smsi.ps1` with its plain default invocation (no `-WinDeployQt6`): **165.3 MB, down from 186.8 MB** (−21.5 MB / −11.5 %). `wix msi validate` clean apart from the expected ICE61. ProductVersion `26.7.34941`, UpgradeCode unchanged. Staging has **no `layout\` tree** and exactly **one** `Qt6Core.dll`. Expanded with `msiexec /a` (1623 files): flat `Seamly2D\` directory, no `SeamlyLayout\` subdirectory, and **all three exes launch from it, each loading the same single `Qt6Core.dll 6.11.1.0`**.
+  - The saving is smaller than "two runtimes → one" suggests because the surviving runtime still carries Qt WebEngine, whose `.pak` locales and `QtWebEngineProcess.exe` dominate the payload. What the collapse removes is the duplicated Qt core/GUI/QML DLL set.
 
-> The ctest suites were built in a throwaway directory from a **temporary** local edit that dropped only the `WebEngineQuick` component (none of the four suites links WebEngine). The edit was reverted; `git diff` on `CMakeLists.txt` showed only the intended Task 30 changes before commit.
+### What is NOT verified
 
-### What is NOT verified — and why
-
-Task 30's last subtask is still `[ ]`. **Blocked on Task 44.** Not yet exercised: the full `SeamlyLayout.exe` build, running the app, the QML/WebEngine load path (incl. the bumped `import QtWebEngine 6.11`), the seamly2d → seamlyLayout handoff, and the MSI rebuild + single-shared-runtime install check.
-
-## Blockers — read these before resuming
-
-### Task 44 — local Qt kit is missing `qtwebchannel` + `qtpositioning`
-
-`C:\Qt\6.11.1\msvc2022_64` has Qt WebEngine but **not** the two modules `Qt6WebEngineCore` depends on, so configuring SeamlyLayout fails before anything compiles:
-
-```text
-Qt6WebEngineQuick could not be found because dependency Qt6WebEngineCore could not be found.
-CMake Error at CMakeLists.txt:41 (find_package): Failed to find required Qt component "WebEngineQuick".
-```
-
-Fix: Qt Maintenance Tool → add **Qt WebChannel** and **Qt Positioning** to the 6.11.1 `msvc2022_64` kit. This is a machine-setup gap, **not** a Qt 6.11 incompatibility — CI already installs all three modules explicitly. There is currently **no SeamlyLayout release build on disk** (the stale Qt 6.10.1 one was deleted).
-
-### Task 48 — the parent release tree in `build/` is currently BROKEN
-
-`win32-msvc` post-link in `seamly2d.pro:371`, `seamlyme.pro:252` and `Seamly2DTest.pro:212` runs a **bare `windeployqt`**, resolved from `PATH`. On this machine that is Qt Design Studio's reduced kit, which is **Qt 6.8.7**. So after a clean `sb.ps1` run the exes are linked against 6.11.1 but `build/src/app/*/bin/Qt6Core.dll` reports **6.8.7.0**. Qt's binary compatibility is forward-only, so those exes will not run, and `smsi.ps1` would package the mismatch into the MSI.
-
-The fix already exists in the same files: the `win32-arm64-msvc` branch uses `qtPrepareTool(WINDEPLOYQT, windeployqt)`, which resolves from `$$[QT_INSTALL_BINS]` rather than `PATH`. The x64 branch never got it. **Not fixed** — it touches core `.pro` files that drive release CI, so it was left for an explicit decision. CI is unaffected (runners have no Design Studio).
-
-**Consequence:** rebuild `build/` after fixing Task 48 before trusting any locally built MSI.
+- **A real elevated `msiexec /i` system install was not performed** — the verification above used an administrative extraction (`msiexec /a`) plus launching all three exes from the expanded tree. That covers the file layout, the shared runtime and app startup, but not shortcuts, registry entries, file associations or the ARP entry. A real install needs a UAC prompt. Note there is already an **NSIS**-installed Seamly2D on this machine (`C:\Program Files (x86)\Seamly2D`, `uninstall.exe`); the MSI is a separate product code and would install alongside it, not over it.
+- **`msiexec /a` needs a short target path.** Extracting under a long path fails at `InstallFinalize` with 1603 (MAX_PATH). Not a package defect.
 
 ## New tasks logged in `TODO_MIGRATE.md`
 
 | Task | Status | Summary |
-|---|---|---|
-| **44** | open, **blocking** | Install `qtwebchannel` + `qtpositioning`; then close Task 30's verify subtask and Task 31's rebuild subtasks. |
-| **45** | open, cosmetic | Stale `C:\Qt\6.10.1` paths in `.claude/settings.json` and `settings.local.json` allowlists. |
-| **46** | open | `sd.ps1` silently reuses stale qmake sub-Makefiles after a Qt change (`if not exist Makefile` guard), producing a misleading `Qt6Cored.lib does not exist` against the uninstalled kit. `sb.ps1` already implements the fix via a `build\.seamly-qmake-kit` marker; port it to `sd.ps1`. |
-| **47** | 3 of 4 done | Bare `qmake` on `PATH` resolves to Design Studio's reduced Qt (no `mkspecs`). `build.ps1` now exports `QMAKE`, prepends the kit's `bin\`, and rejects a Qt without `mkspecs`; docs updated. Remaining: optional developer `PATH` cleanup. |
-| **48** | open, **important** | The bare-`windeployqt` bug above. |
+| --- | --- | --- |
+| **49** | open, **important** | **SeamlyLayout ignores the SVG path seamly2d hands it.** `MainWindow::exportPiecesToSeamlyLayout()` writes `<pattern>.pieces.svg` and calls `QProcess::startDetached(exe, {svgPath}, wd)`, but `qt_frontend/main.cpp` never reads its command line — no `QCoreApplication::arguments()`, no `QCommandLineParser`, nothing. Verified on the fresh 6.11.1 build: the window comes up with both panes empty. **Pre-existing, not a Qt-bump regression** — `git log -S "arguments()"` finds no commit that ever added argument handling |
+| **50** | open | A developer's absolute home path is hard-coded in `src/app/seamly2d/core/application_2d.cpp:507-512` (`C:/Users/susan/Projects/Seamly2D-private/…/build/Debug/SeamlyLayout.exe`) as the Layout Mode dev fallback. Harmless elsewhere, but it is a personal path in a GPL source file headed for the upstream PR, and on that one machine it silently prefers a possibly stale Debug build |
 
-Task 31's subtasks 1 and 4 are now `[X]`; 2 and 3 remain blocked on Task 44.
+Still open from before, untouched this session: **45** (stale `C:\Qt\6.10.1` paths in the `.claude` settings allowlists), **46** (`sd.ps1` reuses stale qmake sub-Makefiles after a Qt change — `sb.ps1` already has the `.seamly-qmake-kit` marker fix to port), **47** subtask 4 (optional developer `PATH` cleanup so the real kit precedes Qt Design Studio).
 
 ## Concrete next steps (resume here)
 
-1. **Install the two Qt modules** (Task 44) — everything else downstream depends on it.
-2. **Fix Task 48** — swap the three bare `windeployqt` calls for `qtPrepareTool`, rebuild via `scripts/sb.ps1`, and confirm the deployed `Qt6Core.dll` reports `6.11.1.0` and that `seamly2d.exe`/`seamlyme.exe` actually start from `build/src/app/<app>/bin`.
-3. **Close Task 30's verify subtask** — build SeamlyLayout on 6.11.1, run it, check the seamly2d → seamlyLayout handoff renders, then `scripts/packaging/windows/smsi.ps1` and confirm the single-runtime MSI installs and all three apps launch. Expect a **substantially smaller MSI** than the previous ~187 MB two-runtime build; record the new size.
-4. **Push `e769a55e10`** to origin when ready (it is local-only right now), and commit the pending `app.pro` edit.
-5. Consider moving **Task 30** to `COMPLETED.md` once step 3 passes. `COMPLETED.md`'s newest entry is still **Task 20**.
+1. **Decide on the elevated MSI install** — run `msiexec /i scripts\seamly-build-msi\x64\Seamly2D-x64.msi` from an elevated prompt and confirm shortcuts, the ARP entry and first launch of each app, then uninstall. This is the only part of Task 30's verify item that was exercised by extraction rather than a real install.
+2. **Task 49** — make SeamlyLayout consume its positional argument, so Layout Mode actually opens the pattern instead of an empty canvas. This is the highest-value open item: the handoff is the whole point of the daughter app.
+3. **Task 50** — remove the hard-coded developer path before the upstream PR.
+4. **Task 46** — port `sb.ps1`'s `.seamly-qmake-kit` marker to `sd.ps1` so a Qt change wipes the debug tree automatically.
+5. **Task 45** — the two-line settings-allowlist cleanup.
 
 ## Gotchas seen this session
 
-- **`gh` CLI is NOT installed on this machine.** The documented post-task flow (push → PR → `gh pr checks --watch` → merge) is unavailable. Both merges this session were done **locally** (`git merge --ff-only` + `git push origin run-seamlyLayout`) at the user's explicit direction, skipping the green-CI-before-merge gate. Pushing to `run-seamlyLayout` does trigger `seamlylayout-ci.yml` and `windows-msi.yml`, but *after* the merge — check [the Actions tab](https://github.com/seamly/Seamly2D/actions).
-- **Qt Design Studio poisons `PATH`.** Bare `qmake`, `windeployqt` **and** `windeployqt6` all resolve to `C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version\bin\` — a Qt **6.8.7** kit with **no `mkspecs`**. Root cause of both Task 47 and Task 48. Never call these tools bare; use an absolute path, `qtPrepareTool`, or pin `QMAKE`/`PATH`.
-- **PowerShell 5.1 + `$ErrorActionPreference='Stop'`:** piping a native command through `2>&1 | …` turns its stderr into a terminating `NativeCommandError` even on exit 0. This produced two spurious "build failed" reports before the cause was spotted. Redirect to a file at the `cmd` level instead, or use `smsi.ps1`'s `Invoke-Tool` pattern (relax to `Continue`, judge by exit code).
-- **`$proFile` collides with PowerShell's automatic `$PROFILE`** (names are case-insensitive). `sb.ps1` uses `$proPath`; **`sd.ps1` still has the collision** — harmless in practice, worth cleaning up.
-- **Qt frontend test exes are GUI-subsystem binaries**, so they print nothing to a captured stdout and `ctest` can appear to hang. Run them with `-o <file>,txt` and read the `Totals:` line, with `QT_QPA_PLATFORM=offscreen`.
-- **`build.ps1` used to always launch the app** after a successful build, blocking any non-interactive caller. It now takes `-NoRun`; `sb.ps1` passes it.
-- **Historical 6.10 references in `COMPLETED.md` and `PROJECT_PLAN.md` were left alone** deliberately — they are a record of what was true at the time, not stale config.
+- **Qt Design Studio poisons `PATH`.** Bare `qmake`, `windeployqt` and `windeployqt6` all resolve to `C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version\bin\` — a Qt **6.8.7** kit with **no `mkspecs`**. Root cause of Tasks 47 and 48. Never call these bare; use `qtPrepareTool`, `$$[QT_INSTALL_BINS]/…`, or pin `QMAKE`/`PATH`. Every repo call site is now pinned and both build scripts verify the deployed DLL version afterwards.
+- **Qt `MaintenanceTool` CLI: name the parent package, not the arch child.** `qt.qt6.6111.addons.qtwebchannel.win64_msvc2022_64` is rejected with *"Component is virtual"*; `qt.qt6.6111.addons.qtwebchannel` installs the right child for the installed kit. The tool logs in with the stored Qt Account and runs unattended with `--accept-licenses --accept-obligations --confirm-command --default-answer`.
+- **PowerShell splatting: `@array` is positional, `@hashtable` is by name.** `sb.ps1`'s `@('-Preset','release','-NoRun')` passed the literal string `-Preset` as the *value* of `-Preset`. The old comment in that file explicitly (and wrongly) claimed the array form worked.
+- **PowerShell 5.1 + `$ErrorActionPreference='Stop'`:** piping a native command through `2>&1 | …` turns its stderr into a terminating `NativeCommandError` even on exit 0. Redirect at the `cmd` level instead. Long builds in this session were run as detached `cmd` scripts writing a log plus an exit-code sentinel file, which sidesteps this entirely and is not bounded by any tool timeout.
+- **`$proFile` collides with PowerShell's automatic `$PROFILE`** (case-insensitive). `sb.ps1` uses `$proPath`; **`sd.ps1` still has the collision** — harmless, worth cleaning up.
+- **Qt frontend test exes are GUI-subsystem binaries**, so they print nothing to a captured stdout and `ctest` can appear to hang. Run with `-o <file>,txt` and `QT_QPA_PLATFORM=offscreen`.
+- **Historical 6.10 references in `COMPLETED.md` and `PROJECT_PLAN.md` were left alone** deliberately — they record what was true at the time.

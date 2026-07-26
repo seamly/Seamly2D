@@ -93,34 +93,6 @@ Extend the existing console export mode (`--basename` in `src/app/seamly2d/core/
 - [ ] Tests: seamly2d CLI option parsing (extend `tst_vcommandline`), seamlyLayout headless-export tests (Rust/Qt side), and an end-to-end check with the richmond test pattern
 - [ ] Document the workflow (command-line examples) in the repo docs / `--help` output
 
-## Task 30 — Upgrade SeamlyLayout to build with Qt 6.11 (match the Seamly2D parent apps)
-
-SeamlyLayout currently builds against **Qt 6.10.1** while seamly2d/seamlyme build against **Qt 6.11.1** (the parent Qt was bumped to 6.11.1 to match `ci.yml`; see Task 13). Move SeamlyLayout to the same **Qt 6.11.1 `msvc2022_64`** release so the whole family shares one Qt version. This unblocks a real simplification: Task 13's MSI ships **two** separate Qt runtimes today — a shared one for the parents in `…\Seamly2D\` and SeamlyLayout's own copy in `…\Seamly2D\SeamlyLayout\` — precisely because the two Qt releases have identical DLL names that can't co-exist in a flat directory (`scripts/packaging/windows/seamly-family.wxs`). Unifying on 6.11.1 lets all three apps share a single Qt runtime.
-
-**Prerequisite / dependency check:** confirm the CXX-Qt bridge (`crates/cxxqt_bridge`) and the QtWebEngine-based canvas support Qt 6.11.1 before committing to the bump.
-
-- [X] Verify toolchain compatibility: confirm CXX-Qt / cxx-qt-build and the Corrosion CMake integration support Qt 6.11.1, and that QtWebEngine 6.11 is available in the installed kit (the `SvgCanvas.qml` WebEngine dependency) — **CXX-Qt and Corrosion confirmed compatible** (2026-07-25): `cargo clean -p cxxqt_bridge` + `cargo build -p cxxqt_bridge` recompiles the bridge from scratch against Qt 6.11.1 (cxx-qt/cxx-qt-build/cxx-qt-lib `=0.7.3`, Qt found via qmake) with only the pre-existing `build_tiled_pdf_tile_doc` dead-code warning, and a CMake configure against `C:/Qt/6.11.1/msvc2022_64` completes with `-- CXX-Qt Found crate(s): cxxqt_bridge` and `-- Using Corrosion as a subdirectory`. **QtWebEngine 6.11 is present but the local kit is incomplete**: `Qt6WebEngineCore`/`Qt6WebEngineQuick` DLLs and CMake config packages exist, yet `Qt6WebEngineCoreDependencies.cmake` also requires `Qt6WebChannel` and `Qt6Positioning`, neither of which is installed — so `find_package(Qt6 6.11.1 REQUIRED ... WebEngineQuick)` fails with *"Qt6WebEngineQuick could not be found because dependency Qt6WebEngineCore could not be found"*. That is a **machine-setup gap, not a Qt 6.11 incompatibility** (CI already installs all three modules explicitly) — tracked as **Task 44**; it blocks the full-app build in the verify item below
-- [X] Bump the Qt pin in `src/app/seamlylayout/qt_frontend/CMakeLists.txt` (`find_package(Qt6 6.10.1 REQUIRED ...)` → `6.11.1`) and any CMake preset `CMAKE_PREFIX_PATH` (`qt_frontend/build_debug.bat`, presets) — `find_package(Qt6 6.11.1 ...)` and `qt_standard_project_setup(REQUIRES 6.11.1)`; `build_debug.bat` now passes `C:/Qt/6.11.1/msvc2022_64`. `CMakePresets.json` carries no `CMAKE_PREFIX_PATH` (it is supplied on the command line), so no preset change was needed
-- [X] Update the build scripts to point at the Qt 6.11.1 `msvc2022_64` kit: `src/app/seamlylayout/qd.ps1`, `build.ps1` (`$QtPath = C:/Qt/6.10.1/...`), and the debug batch build — `build.ps1` no longer hard-codes a patch release at all: it scans `C:\Qt` for `msvc2022_64` kits, version-sorts them and takes the newest that meets the 6.11.1 minimum, failing with a clear message otherwise (the same fix pattern as `smsi.ps1`/`sd.ps1` below, so a future Qt bump needs no script edits). `qd.ps1` needed no change — it delegates to `run_debug.ps1` → `build.ps1`
-- [X] Bump the versioned QML imports across `src/app/seamlylayout/qt_frontend/qml/*.qml` (`import QtQuick 6.10`, `QtQuick.Controls`, `QtQuick.Dialogs`, `QtQuick.Layouts`, `import QtWebEngine 6.10`) to the 6.11 module versions — all 10 QML files updated (27 import lines); `.claude/rules/qt-style.mdc`'s example imports bumped to match
-- [X] Update the packaging scripts for the new Qt path/version: `packaging/windows/build_installer.ps1` (`$QtBin`), `packaging/windows/SeamlyLayout.iss`, `packaging/macos/build_dmg.sh` (`QT_BIN`), and `docs/packaging-docs/INSTALLER_NOTES.md` — all four updated, plus `packaging/licenses/qt-source-notice.txt` (the LGPL source notice named Qt 6.10)
-- [X] Update SeamlyLayout's CI: bump `.github/workflows/seamlylayout-ci.yml` `QT_VERSION` to `6.11.1`, and evaluate merging that job back into `ci.yml` now that the Qt pin matches the parents (the standalone job's header notes it exists only to carry the 6.10 pin) — `QT_VERSION: '6.11.1'`. **Merge evaluated and deliberately declined:** the Qt pin was the original reason for the split, but the two jobs still use different build systems (CMake/Ninja + Cargo/Corrosion vs. qmake), need different toolchain steps (Rust, cargo cache, the WebEngine module set), and are path-filtered so a layout-only change does not rebuild the parent apps on every platform. Reasoning recorded in the workflow header, `README_WORKFLOWS.md` and `.github/README-BUILDS.md`; revisit only if the parents also move to CMake
-- [X] Update the Windows MSI to ship a single shared Qt 6.11.1 runtime for all three apps: install one Qt kit in `windows-msi.yml` instead of two, collapse the separate `…\SeamlyLayout\` Qt deployment in `scripts/packaging/windows/seamly-family.wxs`, adjust `smsi.ps1`, and re-check `SeamlyFamilyPaths::locateSeamlyLayout()` (the subfolder split may no longer be required) — `windows-msi.yml` installs **one** Qt kit (the two-kit ordering dance and `QT_LAYOUT_DIR` are gone; `qt-modules` is now a matrix field so x64 gets `qtwebengine qtwebchannel qtpositioning` and arm64 just `qtmultimedia`); `smsi.ps1` deploys `windeployqt6`'s output into the same staging tree as the parents' and drops the `layout\` tree and the `LayoutStagingDir` define; `seamly-family.wxs` drops `SEAMLYLAYOUTFOLDER` and installs `SeamlyLayout.exe` into `INSTALLFOLDER`. **`locateSeamlyLayout()` needs no code change** — it already checks the flat layout first; its subdirectory branch is kept (and its doc comment/tests reworded) as a fallback so a seamly2d upgraded in place over a pre-Task-30 MSI install still resolves. MSI rebuild/size verification is part of the verify item below
-- [X] Update docs referencing "Qt 6.10": `src/app/seamlylayout/CLAUDE.md`, `README.md`, `.github/copilot-instructions.md`, `rules/architecture.mdc`, `docs/cxxqt-docs/CXXQT_BRIDGE.md`, and `.github/README-BUILDS.md`; note the root `CLAUDE.md` build-notes section if the local layout kit changes — all of those plus `AGENTS.md`, `.claude/rules/{CLAUDE,dependencies,ffi-bridge,licensing,qt-style}.mdc`, `crates/cxxqt_bridge/Cargo.toml`, `qt_frontend/main.cpp`, `qt_frontend/src/PreferencesController.h`, `qml/Main.qml`, `.github/workflows/README_WORKFLOWS.md`, `scripts/packaging/windows/README.md` and `README_WINDOWS_BUILD.md`. The root `CLAUDE.md` build-notes section is rewritten: there is no longer a "two toolchains" split — CI and the developer PC are both Qt 6.11.1 — plus an explicit note that the local kit must include `qtwebengine`+`qtwebchannel`+`qtpositioning`. `COMPLETED.md` and `PROJECT_PLAN.md` mentions of 6.10 are left as historical record
-- [ ] Verify: build and run SeamlyLayout on Qt 6.11.1 locally; run the Qt frontend ctest suites and `cargo test --workspace`; confirm the seamly2d → seamlyLayout handoff still launches and renders; rebuild the MSI and confirm the single-shared-runtime layout installs and all three apps launch — **partly verified (2026-07-25); the rest is BLOCKED on Task 44.**
-  - **Verified on Qt 6.11.1:** `cargo test --workspace` — **251 tests pass**, 0 failures. All four Qt frontend ctest suites build and pass — **AdjustSceneTests 26 passed / 1 skipped, AdjustControllerTests 7, PreferencesModelTests 48, SettingsModelTests 26 = 107 passed, 0 failed**. Every non-WebEngine C++ source in `qt_frontend/src/` compiles clean under MSVC 19.50 against Qt 6.11.1. (The ctest suites were built in a throwaway build directory from a temporary local edit that dropped only the `WebEngineQuick` component — none of the four suites links WebEngine; the edit was reverted and `git diff` on `CMakeLists.txt` shows only the intended Task 30 changes.)
-  - **Not verified — needs Task 44 first:** the full `SeamlyLayout.exe` build (it links `Qt6::WebEngineQuick` and `main.cpp` calls `QtWebEngineQuick::initialize()`), running the app, the QML load path including the bumped `import QtWebEngine 6.11`, the seamly2d → seamlyLayout handoff, and the MSI rebuild + single-shared-runtime install check (there is currently no SeamlyLayout release build on disk — the stale Qt 6.10 one was deleted). Install the missing Qt modules, then run this item end to end
-  - **Also required before the MSI check:** the **parent** release tree in `build/` is still a Qt **6.10.1** build — `build/src/app/seamly2d/bin/Qt6Core.dll` reports FileVersion `6.10.1.0` — so an MSI staged from it today would ship a 6.10 parent runtime and the "one shared 6.11.1 runtime" claim would be untested. Rebuild `build/` with the 6.11.1 kit (wiping it first, per **Task 46**) as well as SeamlyLayout, then rebuild the MSI
-
-## Task 31 — Fix `smsi.ps1` Qt-kit detection and the stale SeamlyLayout runtime (found building the MSI 2026-07-23)
-
-Problems hit while building the Windows MSI locally on 2026-07-23 with `scripts/packaging/windows/smsi.ps1`, on a machine that has moved to Qt 6.11.1 (Qt 6.10.x uninstalled). A valid MSI was still produced (`scripts/seamly-build-msi/x64/Seamly2D-x64.msi`, x64;1033, 187 MB, fixed UpgradeCode, 1691 files, `wix msi validate` clean apart from the expected ICE61) by forcing `-WinDeployQt6` to the 6.11.1 tool — but the documented default invocation fails, and SeamlyLayout's payload is a stale/mismatched build. These overlap with **Task 30** (the Qt 6.10 → 6.11 unification); track and close them together.
-
-- [X] `Find-WinDeployQt6` in `smsi.ps1` is hard-pinned to `^6\.10\.\d+$` and throws `windeployqt6 not found under 'C:\Qt\6.10.x\msvc2022_64\bin'` on a 6.11-only machine, so the documented default `.\scripts\packaging\windows\smsi.ps1` fails outright — had to pass `-WinDeployQt6 'C:\Qt\6.11.1\msvc2022_64\bin\windeployqt6.exe'` by hand. Fix: detect SeamlyLayout's actual Qt kit (e.g. read `CMAKE_PREFIX_PATH` from `src/app/seamlylayout/qt_frontend/build/Release/CMakeCache.txt`) or widen/parameterize the version match so it follows whatever Qt SeamlyLayout was built against, not a fixed 6.10 — done both ways: `Find-WinDeployQt6` now takes the build directory, reads `CMAKE_PREFIX_PATH` from its `CMakeCache.txt` (so the deployed runtime always matches the exe's own kit) and falls back to the newest installed `msvc2022_64` kit of **any** version. No Qt version is hard-coded anywhere in the function; `-WinDeployQt6` still overrides
-- [ ] The prebuilt `src/app/seamlylayout/qt_frontend/build/Release/SeamlyLayout.exe` was compiled against **Qt 6.10.1** (per its `CMakeCache.txt`), which is no longer installed; the MSI therefore ships that 6.10-linked exe wrapped in a **6.11.1** Qt runtime deployed by 6.11's `windeployqt6`. It only runs by virtue of Qt's within-6.x forward binary compatibility — not a clean matched build. Fix: rebuild SeamlyLayout on Qt 6.11.1 (Task 30), then rebuild the MSI so the exe and its deployed runtime are the same Qt version, and re-verify SeamlyLayout launches from the installed tree — **the source change is done** (Task 30 pins 6.11.1) but the rebuild is **blocked on Task 44**: the stale 6.10 `build/Release` tree was deleted and a 6.11.1 reconfigure fails because the local kit lacks `qtwebchannel`/`qtpositioning`. There is currently **no** SeamlyLayout release build on disk, so no MSI can be built with it
-- [ ] The MSI is ~187 MB because it still ships two full Qt runtimes (the shared parent 6.11.1 runtime in `…\Seamly2D\` plus SeamlyLayout's own copy in `…\Seamly2D\SeamlyLayout\`). Once SeamlyLayout is on 6.11.1, collapse to one shared runtime and drop the subfolder split (already a Task 30 subtask — verify the MSI size drops and `SeamlyFamilyPaths::locateSeamlyLayout()` still resolves) — **the collapse is implemented** (`smsi.ps1` merges the staging trees, `seamly-family.wxs` drops the subfolder, `locateSeamlyLayout()` resolves the flat layout first and is unit-tested for both); the size drop is unmeasured because the MSI cannot be rebuilt until Task 44 unblocks a SeamlyLayout build
-- [X] Update the `smsi.ps1` docstring, `scripts/packaging/windows/README.md`, and `scripts/packaging/windows/README_WINDOWS_BUILD.md` once the Qt-kit detection is fixed, so the "install Qt 6.10.x or pass `-WinDeployQt6`" guidance no longer points at the retired 6.10 kit — all three updated: the `smsi.ps1` `.PARAMETER WinDeployQt6` block and staging-layout docstring describe the CMakeCache-based detection and the single merged runtime; `README.md`'s prerequisites now say Qt 6.11.1 (and that the kit needs the WebEngine dependency modules); `README_WINDOWS_BUILD.md` §3.1–3.3 are marked **RESOLVED** with what replaced them, and §2 documents that the plain default invocation now works
-
 ## Task 32 — Suppress generation of the `.wixpdb` file when building the MSI
 
 The Windows MSI build (`scripts/packaging/windows/smsi.ps1` → `wix build`) emits a `.wixpdb` alongside `Seamly2D-<arch>.msi`. The `.wixpdb` is a WiX linker debug/symbol database only needed for `wix` patch/melt diffing and post-build inspection; it is not part of the shipped installer, so suppress its creation to keep the build output clean (both locally and in `.github/workflows/windows-msi.yml`, which runs the same script).
@@ -242,29 +214,6 @@ A **local bootstrap for Task 33** (which signs the exes + the `.msi` in GitHub A
 - [ ] Once proven locally, promote the working configuration into `.github/workflows/windows-msi.yml` (inner-exe + MSI signing), guarded on the `SEAMLY_SIGNING_*` secrets so CI and local share one recipe — at which point this task folds into Task 33
 - [ ] Document the local signing steps (and that this is a temporary bootstrap for the CI signing) in `scripts/packaging/windows/README.md` / `README_WINDOWS_BUILD.md`
 
-## Task 44 — Local Qt 6.11.1 kit is missing `qtwebchannel` + `qtpositioning`, blocking any SeamlyLayout build (found doing Task 30, 2026-07-25)
-
-The developer PC has Qt **6.11.1** `msvc2022_64` with **Qt WebEngine** installed, but **not** the two modules Qt WebEngine itself depends on. `C:\Qt\6.11.1\msvc2022_64\lib\cmake\Qt6WebEngineCore\Qt6WebEngineCoreDependencies.cmake` declares:
-
-```cmake
-set(__qt_WebEngineCore_target_deps "Qt6Core\;6.11.1;Qt6Gui\;6.11.1;Qt6Network\;6.11.1;Qt6Quick\;6.11.1;Qt6WebChannel\;6.11.1;Qt6Positioning\;6.11.1")
-```
-
-and there is no `Qt6WebChannel.dll` / `Qt6Positioning.dll` in the kit's `bin\` and no CMake config package for either. Consequence: `cmake --preset release -DCMAKE_PREFIX_PATH=C:/Qt/6.11.1/msvc2022_64` in `src/app/seamlylayout/qt_frontend` **fails at configure time**, before anything compiles:
-
-```text
-Qt6WebEngineQuick could not be found because dependency Qt6WebEngineCore could not be found.
-CMake Error at CMakeLists.txt:41 (find_package): Failed to find required Qt component "WebEngineQuick".
-```
-
-This is a **machine-setup gap, not a Qt 6.11 problem** — the same requirement is already handled in CI (`seamlylayout-ci.yml` and `windows-msi.yml` both pass `modules: qtwebengine qtwebchannel qtpositioning`, because `aqtinstall` does not auto-resolve a module's Qt dependencies either). The Qt online installer has the same behaviour: ticking **Qt WebEngine** does not pull in **Qt WebChannel** or **Qt Positioning**. It blocks the final verification subtask of **Task 30** and the rebuild subtasks of **Task 31**.
-
-- [ ] Install **Qt WebChannel** and **Qt Positioning** for the Qt 6.11.1 `msvc2022_64` kit (Qt Maintenance Tool → Add or remove components → Qt 6.11.1 → MSVC 2022 64-bit → Additional Libraries, or `MaintenanceTool` CLI with a Qt Account), then confirm `C:\Qt\6.11.1\msvc2022_64\lib\cmake\Qt6WebChannel\` and `...\Qt6Positioning\` exist
-- [ ] Re-run the SeamlyLayout release build (`cmake --preset release -DCMAKE_PREFIX_PATH=C:/Qt/6.11.1/msvc2022_64` + `cmake --build --preset release`) and confirm `find_package(Qt6 6.11.1 ... WebEngineQuick)` now succeeds and `SeamlyLayout.exe` links
-- [ ] Close out the blocked items: **Task 30**'s final verify subtask (run the app, QML/WebEngine load path, seamly2d → seamlyLayout handoff, MSI rebuild + single-shared-runtime install check) and **Task 31**'s rebuild/size subtasks
-- [X] Record the module requirement so it is not rediscovered: added to the root `CLAUDE.md` build-notes section and the `.github/README-BUILDS.md` toolchain section (with the exact `find_package` error text), and to `scripts/packaging/windows/README.md`'s prerequisites
-- [ ] Consider making the requirement fail fast and legibly: have `src/app/seamlylayout/build.ps1` check for `lib\cmake\Qt6WebChannel` / `Qt6Positioning` in the kit it selects and error with the install instructions, instead of letting CMake emit the indirect "dependency Qt6WebEngineCore could not be found" message
-
 ## Task 45 — Stale `C:\Qt\6.10.1` paths remain in the Claude settings allowlists (found doing Task 30, 2026-07-25)
 
 Two permission allowlist entries still name the retired Qt 6.10.1 kit, so they no longer match the commands actually run and silently stop pre-approving them:
@@ -319,45 +268,38 @@ What is and is not affected:
 - [X] Consider a guard: if the resolved `qmake -query QT_INSTALL_PREFIX` has no `mkspecs\` directory, fail early naming the real kit instead of letting the build produce a confusing spec error — added to `build.ps1`: it queries `QT_INSTALL_PREFIX` from the selected qmake and aborts with a message naming the offending prefix when that prefix has no `mkspecs\`. Verified the guard accepts `C:\Qt\6.11.1\msvc2022_64` and rejects `C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version`
 - [ ] Optional developer-environment cleanup: reorder `PATH` so the real kit's `bin\` precedes `C:\Qt\Tools\QtDesignStudio\...\bin`, or drop the Design Studio entry from `PATH` entirely — left to the developer; the script-level pinning above makes it unnecessary for repo builds, but it would also fix Qt Creator kit auto-detection and any ad-hoc `qmake` use
 
-## Task 48 — qmake post-link runs a bare `windeployqt`, deploying the WRONG Qt runtime beside the exes (found doing Task 30, 2026-07-25)
+## Task 49 — SeamlyLayout ignores the SVG path seamly2d passes it, so the handoff opens an empty app (found doing Task 30, 2026-07-25)
 
-**Severity: produces a broken build tree that would be packaged into the MSI.**
+**Severity: the Layout Mode handoff does not actually hand anything off.**
 
-The `win32-msvc` post-link step in three `.pro` files invokes `windeployqt` with no path, so it is resolved from `PATH`:
+`MainWindow::exportPiecesToSeamlyLayout()` (`src/app/seamly2d/mainwindow.cpp:4104-4145`) writes the tagged `<pattern>.pieces.svg` beside the pattern file and then launches the daughter app with it as its argument — the behaviour its own Doxygen comment describes:
 
-```qmake
-# src/app/seamly2d/seamly2d.pro:371, src/app/seamlyme/seamlyme.pro:252,
-# src/test/Seamly2DTest/Seamly2DTest.pro:212
-win32-msvc{
-    QMAKE_POST_LINK += windeployqt $$shell_path($$DESTDIR/$${TARGET}.exe)
-}
+```cpp
+// Launch SeamlyLayout as a detached process, the same way SeamlyMe is launched.
+return QProcess::startDetached(seamlyLayout, QStringList(svgPath), workingDirectory);
 ```
 
-On this machine both `windeployqt` and `windeployqt6` on `PATH` resolve to Qt Design Studio's reduced kit (see **Task 47**), which is **Qt 6.8.7**:
+But `src/app/seamlylayout/qt_frontend/main.cpp` never looks at its command line. It passes `argc`/`argv` to `QApplication` and stops there — there is no `QCoreApplication::arguments()`, no `QCommandLineParser`, and no `std::env::args` anywhere under `src/app/seamlylayout/`. Verified on the freshly built Qt 6.11.1 release exe: launching `SeamlyLayout.exe <some>.svg` brings up the window with both panes empty — *"Import an SVG pattern to begin"* / *"Apply settings to generate layout"* — exactly as if it had been started with no argument. The user has to click **Import SVG** and navigate to the file seamly2d just wrote.
 
-```text
-windeployqt  -> C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version\bin\windeployqt.exe
-windeployqt6 -> C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version\bin\windeployqt6.exe
-   that kit's Qt6Core.dll -> 6.8.7.0
+This is **pre-existing and unrelated to the Qt bump**: `git log -S "arguments()" -- src/app/seamlylayout/qt_frontend/main.cpp` finds no commit that ever added argument handling. Task 30's verify subtask can therefore confirm that seamly2d *locates and launches* SeamlyLayout, but not that the pattern *renders*.
+
+- [ ] Consume the positional argument in `src/app/seamlylayout/qt_frontend/main.cpp`: read `QCoreApplication::arguments()` (or a `QCommandLineParser` with a documented `<svg-file>` positional) and load that file through the same path the **Import SVG** button uses, so the handoff opens the pattern
+- [ ] Handle the failure modes explicitly — missing file, unreadable file, an SVG without the `data-*` piece tagging — with a visible message rather than a silently empty canvas
+- [ ] Decide and document the contract between the two apps (accepted argument forms, exit codes, what happens when SeamlyLayout is already running); record it in `src/app/seamlylayout/CLAUDE.md` and `status-docs/new-attributes.csv`'s companion notes
+- [ ] Add coverage: a Qt frontend test that the argument is parsed and dispatched, and extend `tst_seamlyfamilypaths` / a seamly2d-side test so the launch contract (`startDetached(exe, {svgPath}, workingDir)`) cannot drift from what the daughter app accepts
+- [ ] End-to-end verify: open a pattern in seamly2d, enter Layout Mode, and confirm SeamlyLayout comes up with the pieces already loaded — this is the check Task 30's verify subtask could not complete
+
+## Task 50 — A developer's absolute home path is hard-coded in `application_2d.cpp` (found doing Task 30, 2026-07-25)
+
+`Application2D::seamlyLayoutFilePath()`'s development fallback (`src/app/seamly2d/core/application_2d.cpp:507-512`) embeds one machine's checkout path in shipped source:
+
+```cpp
+const QFileInfo devBuildFile(QStringLiteral(
+    "C:/Users/susan/Projects/Seamly2D-private/src/app/seamlylayout/qt_frontend/build/Debug/SeamlyLayout.exe"));
 ```
 
-So a release build compiled and linked against **Qt 6.11.1** gets **Qt 6.8.7** DLLs deployed beside it. Verified after a clean `scripts/sb.ps1 -SkipLayout` run: `build/src/app/seamly2d/bin/Qt6Core.dll` and `build/src/app/seamlyme/bin/Qt6Core.dll` both report FileVersion `6.8.7.0`, next to exes built entirely from `C:\Qt\6.11.1\msvc2022_64` includes and libs. Qt's binary compatibility runs forward only — an older binary on newer libraries — so a 6.11.1-linked exe against 6.8.7 DLLs is **not** a supported configuration and will fail to load or crash on missing entry points.
+It is harmless on any other machine (the path simply does not exist, so the function falls through to returning empty) but it is a personal filesystem path in a GPL source file headed for an upstream PR, it names the *private* repo directory, and it only ever helps one developer — on that machine it silently prefers a possibly stale **Debug** build over anything else the lookup would have found.
 
-**The fix already exists in the same files.** The `win32-arm64-msvc` branch, three lines below, does it correctly:
-
-```qmake
-win32-arm64-msvc{
-    qtPrepareTool(WINDEPLOYQT, windeployqt)   # resolves from $$[QT_INSTALL_BINS], not PATH
-    QMAKE_POST_LINK += $$WINDEPLOYQT --qtpaths ... $$shell_path($$DESTDIR/$${TARGET}.exe)
-}
-```
-
-`qtPrepareTool` resolves the tool out of the Qt that qmake itself belongs to, which is exactly the guarantee wanted here. The x64 branch simply never got the same treatment.
-
-**Scope:** CI is unaffected — the runners have no Qt Design Studio and `install-qt-action` puts the correct Qt first on `PATH` — so this only bites local developer builds. But it does so *silently*, and `smsi.ps1` packages `build/src/app/<app>/bin` verbatim, so a locally built MSI would ship the mismatched runtime. This also casts doubt on the Qt runtime actually shipped in the locally built MSI recorded in `scripts/packaging/windows/README_WINDOWS_BUILD.md` (2026-07-23).
-
-- [ ] Change the `win32-msvc` branch in `src/app/seamly2d/seamly2d.pro`, `src/app/seamlyme/seamlyme.pro` and `src/test/Seamly2DTest/Seamly2DTest.pro` to use `qtPrepareTool(WINDEPLOYQT, windeployqt)` + `$$WINDEPLOYQT`, matching the `win32-arm64-msvc` branch, so the deploy tool always comes from the Qt that qmake belongs to rather than from `PATH`
-- [ ] Rebuild the parents and confirm the deployed `Qt6Core.dll` matches the kit that compiled them (expect `6.11.1.0`), and that `seamly2d.exe` and `seamlyme.exe` actually start from `build/src/app/<app>/bin`
-- [ ] Add a guard to `scripts/sb.ps1` (and consider `scripts/sd.ps1`): after the build, compare the deployed `Qt6Core.dll` FileVersion against the selected kit's and fail loudly on a mismatch — this bug was invisible until the DLL version was checked by hand
-- [ ] Re-verify the Windows MSI once the parents deploy a matching runtime, and correct any claim in `scripts/packaging/windows/README_WINDOWS_BUILD.md` about which Qt the 2026-07-23 MSI actually shipped
-- [ ] Check whether the macOS `macdeployqt` post-link (`seamly2d.pro`, around line 363) has the same PATH-resolution exposure — it uses `$$[QT_INSTALL_BINS]/macdeployqt`, which looks correct, but confirm
+- [ ] Replace the hard-coded path with something machine-independent — derive the source-tree location relative to the running executable, or read an environment variable / existing setting (`getSeamlyLayoutAppPath()` already covers the "point me at a build" case)
+- [ ] If a development fallback is kept at all, prefer the Release build and guard it so it never outranks an installed copy on a normal user's machine
+- [ ] Add a repo-wide check (or a note in the coding rules) against committing absolute `C:/Users/...`, `/home/...` or `/Users/...` paths, so this cannot recur before the upstream PR

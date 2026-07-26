@@ -215,6 +215,25 @@ if (-not (Test-Path $coreDll)) {
     throw "Qt debug DLLs were not deployed beside '$exe' (Qt6Cored.dll missing) - check the windeployqt post-link step output."
 }
 
+# ...and they must come from the kit that compiled the exe (Task 48). The .pro
+# post-link step used to run a bare `windeployqt`, resolved from PATH, which on
+# a PC with Qt Design Studio installed is a different, older Qt - producing a
+# tree that cannot start. Compare only major.minor.patch: Qt DLLs carry a
+# fourth "0" field that qmake -query QT_VERSION does not report.
+$kitQtVersion = [version]((& $qmake -query QT_VERSION) | Select-Object -First 1).Trim()
+$dllInfo      = (Get-Item -LiteralPath $coreDll).VersionInfo
+$deployedQt   = [version]"$($dllInfo.FileMajorPart).$($dllInfo.FileMinorPart).$($dllInfo.FileBuildPart)"
+if ($deployedQt -ne $kitQtVersion) {
+    throw @"
+Deployed Qt runtime does not match the build kit (TODO_MIGRATE.md Task 48).
+  exe linked against : Qt $kitQtVersion  ($qmake)
+  DLLs deployed      : Qt $deployedQt  ('$coreDll')
+Qt's binary compatibility is forward-only, so this exe will not run. A stray
+windeployqt on PATH - typically Qt Design Studio's reduced kit under
+C:\Qt\Tools\QtDesignStudio\ - is the usual cause. Delete '$buildDir' and rerun.
+"@
+}
+
 Write-Host ''
 Write-Host "Debug build OK: $exe"
 
