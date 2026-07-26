@@ -53,8 +53,10 @@
 #include "vcommonsettings.h"
 
 #include <QApplication>
+#include <QCoreApplication>
 #include <QDate>
 #include <QDir>
+#include <QFileInfo>
 #include <QFont>
 #include <QtGlobal>
 #include <QLocale>
@@ -71,6 +73,7 @@
 
 namespace
 {
+const QString settingPathsDataRoot                       = QStringLiteral("paths/dataRoot");
 const QString settingImagesPath                          = QStringLiteral("paths/images");
 const QString settingPathsIndividualMeasurements         = QStringLiteral("paths/individual_size_measurements");
 const QString settingPathsMultisizeMeasurements          = QStringLiteral("paths/multi_size_measurements");
@@ -425,23 +428,378 @@ QString VCommonSettings::prepareMultisizeTables(const QString &currentPath)
     return PrepareStandardFiles(currentPath, MultisizeTablesPath(), getDefaultMultisizePath());
 }
 
+namespace
+{
+/** Organization name QSettings substitutes when it is handed an empty one. */
+const QString unknownOrganizationName = QStringLiteral("Unknown Organization");
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief readDataRoot reads the configured user-data root out of the shared "common"
+ * settings file, falling back to the built-in default when nothing has been configured.
+ *
+ * @param organization organization name identifying the shared settings file to read.
+ * @return absolute path of the user-data root, in Qt's '/' separator form; never empty.
+ */
+QString readDataRoot(const QString &organization)
+{
+    const QSettings settings(QSettings::IniFormat, QSettings::UserScope, organization, commonIniFilename);
+    const QString configured = settings.value(settingPathsDataRoot).toString().trimmed();
+
+    return configured.isEmpty() ? VCommonSettings::getDefaultDataRoot()
+                                : QDir::cleanPath(QDir::fromNativeSeparators(configured));
+}
+} // anonymous namespace
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief commonSettingsOrganization returns the organization name to use when opening the
+ * shared, cross-application "common" settings file.
+ *
+ * Since Task 15 the applications build their VCommonSettings from an explicit settings
+ * *file path* (the VCommonSettings(fileName, format, parent) constructor). QSettings records
+ * no organization for that constructor, so organizationName() is empty on those instances,
+ * and QSettings silently substitutes the literal "Unknown Organization" for an empty
+ * organization. The shared paths/* values were therefore being read and written under
+ * %APPDATA%/Unknown Organization instead of the real %APPDATA%/Seamly folder. Falling back
+ * to the application-wide organization name keeps every app on the one shared file.
+ *
+ * @return organization name for the shared common settings file.
+ */
+QString VCommonSettings::commonSettingsOrganization() const
+{
+    const QString organization = organizationName();
+    return organization.isEmpty() ? QCoreApplication::organizationName() : organization;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getDefaultDataRoot returns the built-in default root of the user's data tree.
+ *
+ * Task 34 renamed this from ~/seamly2d to ~/seamly, matching the "Seamly" family umbrella
+ * the settings directories already use. QDir::homePath() resolves it natively on every
+ * platform, so no per-platform variant is needed.
+ *
+ * @return absolute path of the default user-data root, e.g. C:/Users/<user>/seamly.
+ */
+QString VCommonSettings::getDefaultDataRoot()
+{
+    return QDir::homePath() + QLatin1String("/seamly");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getLegacyDataRoot returns the pre-Task-34 default root of the user's data tree.
+ *
+ * Kept so first-run resolution can spot an existing installation's data and adopt it
+ * instead of stranding the user's patterns and measurements at the old location.
+ *
+ * @return absolute path of the legacy user-data root, e.g. C:/Users/<user>/seamly2d.
+ */
+QString VCommonSettings::getLegacyDataRoot()
+{
+    return QDir::homePath() + QLatin1String("/seamly2d");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief dataRoot returns the currently configured root of the user's data tree.
+ *
+ * Static so the getDefault*Path() family — which is static and called from contexts with no
+ * settings object to hand — can derive from it. The value lives in the shared common
+ * settings file, so seamly2d, seamlyme and the installer all agree on one root.
+ *
+ * @return absolute path of the user-data root; the built-in default when unconfigured.
+ */
+QString VCommonSettings::dataRoot()
+{
+    return readDataRoot(QCoreApplication::organizationName());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief dataSubdirPath builds the path of one subfolder of the user's data tree.
+ * @param subdirectory subfolder name relative to the data root, e.g. tr("templates").
+ * @return absolute path of that subfolder underneath the configured data root.
+ */
+QString VCommonSettings::dataSubdirPath(const QString &subdirectory)
+{
+    return dataRoot() + QLatin1String("/") + subdirectory;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getDataRoot returns the configured user-data root for this settings object.
+ * @return absolute path of the user-data root; the built-in default when unconfigured.
+ */
+QString VCommonSettings::getDataRoot() const
+{
+    return readDataRoot(commonSettingsOrganization());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setDataRoot stores a new root for the user's data tree and creates its folders.
+ *
+ * The root may be any drive, volume or path the user can write to — an external disk or a
+ * cloud-synced folder such as G:/My Drive/seamly — so the whole data tree can be relocated
+ * without moving files by hand. Existing files at the new location are never touched; only
+ * missing folders are created.
+ *
+ * @param value new user-data root, in either native or '/' separator form.
+ */
+void VCommonSettings::setDataRoot(const QString &value)
+{
+    const QString root = QDir::cleanPath(QDir::fromNativeSeparators(value.trimmed()));
+
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    settings.setValue(settingPathsDataRoot, root);
+    settings.sync();
+
+    ensureDataRootTree(root);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ensureDataRootTree creates the data root and its standard subfolders if missing.
+ *
+ * Purely additive: QDir::mkpath() leaves any directory that already exists alone, so an
+ * existing data tree — including one adopted from the legacy ~/seamly2d location — keeps
+ * every file it holds. A root on a disconnected or read-only volume simply fails to be
+ * created; the caller carries on, exactly as the app already does for a missing folder.
+ *
+ * @param root data root to populate; the configured root when empty.
+ * @return true if the root directory exists (or was created) afterwards.
+ */
+bool VCommonSettings::ensureDataRootTree(const QString &root)
+{
+    const QString target = root.isEmpty() ? dataRoot() : root;
+
+    QDir directory(target);
+    if (!directory.mkpath(QStringLiteral(".")))
+    {
+        qWarning() << "Could not create the Seamly data root" << QDir::toNativeSeparators(target);
+        return false;
+    }
+
+    // The nine standard subfolders, named exactly as the getDefault*Path() family below
+    // spells them so a folder is never created twice under two different names.
+    const QStringList subdirectories
+    {
+        tr("measurements") + QLatin1String("/") + tr("individual"),
+        tr("measurements") + QLatin1String("/") + tr("multisize"),
+        tr("templates"),
+        tr("bodyscans"),
+        tr("label templates"),
+        tr("images"),
+        tr("backups"),
+        tr("patterns"),
+        tr("layouts")
+    };
+
+    for (const QString &subdirectory : subdirectories)
+    {
+        directory.mkpath(subdirectory);
+    }
+
+    return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief rebaseOntoDataRoot follows a path from an old data root into a new one.
+ *
+ * Preferences → Paths writes every row back as an explicit absolute override, so without
+ * this a user who repoints the data root would leave all nine subfolders pinned to the old
+ * location and the move would achieve nothing. A path that lies outside the old root is a
+ * deliberate choice of its own and is returned unchanged.
+ *
+ * @param path path to relocate.
+ * @param oldRoot data root the path was derived from.
+ * @param newRoot data root to move it under.
+ * @return the path relocated under newRoot, or unchanged when it was not inside oldRoot.
+ */
+QString VCommonSettings::rebaseOntoDataRoot(const QString &path, const QString &oldRoot, const QString &newRoot)
+{
+    // Windows path comparison is case-insensitive; POSIX filesystems are not.
+#ifdef Q_OS_WIN
+    const Qt::CaseSensitivity caseSensitivity = Qt::CaseInsensitive;
+#else
+    const Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive;
+#endif
+
+    const QString cleanOld = QDir::cleanPath(QDir::fromNativeSeparators(oldRoot.trimmed()));
+    const QString cleanNew = QDir::cleanPath(QDir::fromNativeSeparators(newRoot.trimmed()));
+
+    if (cleanOld.isEmpty() || cleanNew.isEmpty() || cleanOld.compare(cleanNew, caseSensitivity) == 0)
+    {
+        return path;
+    }
+
+    const QString cleanPath = QDir::cleanPath(QDir::fromNativeSeparators(path.trimmed()));
+    if (cleanPath.compare(cleanOld, caseSensitivity) == 0)
+    {
+        return cleanNew;
+    }
+
+    if (cleanPath.startsWith(cleanOld + QLatin1Char('/'), caseSensitivity))
+    {
+        return cleanNew + QLatin1Char('/') + cleanPath.mid(cleanOld.length() + 1);
+    }
+
+    return path;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief initializeDataRoot resolves the user-data root once, at application start-up.
+ *
+ * Called before any data path is read, from every application's openSettings(). Three cases:
+ *
+ *  1. A root is already configured — honour it untouched (this includes a root the Windows
+ *     installer or a previous run wrote).
+ *  2. Nothing configured and a populated legacy ~/seamly2d tree exists while the new
+ *     ~/seamly does not — adopt the legacy tree *in place* as the root. Adoption rather than
+ *     copying is deliberate: an upgrading user's patterns and measurements can be many
+ *     gigabytes and may sit on a cloud-synced drive, so nothing is moved, copied or deleted
+ *     and the data keeps working from the moment the app starts.
+ *  3. Otherwise — a fresh install — use the ~/seamly default.
+ *
+ * The resolved root is written back so later runs take case 1 and the value is visible to
+ * the other applications and to Preferences → Paths.
+ *
+ * @param adoptedLegacyTree optional out-parameter, set to true when case 2 applied; pass
+ * null when the caller does not care.
+ * @return absolute path of the resolved user-data root.
+ */
+QString VCommonSettings::initializeDataRoot(bool *adoptedLegacyTree)
+{
+    if (adoptedLegacyTree != nullptr)
+    {
+        *adoptedLegacyTree = false;
+    }
+
+    // Recover any shared values stranded by the empty-organization defect before reading
+    // the root, so a data root written by an affected build is not lost here.
+    mergeStrayCommonSettings();
+
+    const QString organization = QCoreApplication::organizationName();
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, organization, commonIniFilename);
+
+    const QString configured = settings.value(settingPathsDataRoot).toString().trimmed();
+    if (!configured.isEmpty())
+    {
+        // Case 1: already chosen, by an earlier run, the installer, or the user.
+        return QDir::cleanPath(QDir::fromNativeSeparators(configured));
+    }
+
+    const QString resolved = chooseFirstRunDataRoot(getDefaultDataRoot(), getLegacyDataRoot(), adoptedLegacyTree);
+
+    settings.setValue(settingPathsDataRoot, resolved);
+    settings.sync();
+
+    return resolved;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief chooseFirstRunDataRoot picks between the new and the legacy data root.
+ *
+ * Split out of initializeDataRoot() so the decision can be exercised against throwaway
+ * directories: it takes both candidate roots as arguments and reads no settings and no
+ * home directory of its own. Nothing here creates, moves or deletes anything — the choice
+ * is a settings value, and an adopted legacy tree stays exactly where it is.
+ *
+ * @param defaultRoot the built-in default root, normally ~/seamly.
+ * @param legacyRoot the pre-Task-34 root, normally ~/seamly2d.
+ * @param adoptedLegacyTree optional out-parameter, set to true when the legacy tree was
+ * adopted; pass null when the caller does not care.
+ * @return legacyRoot when it is an existing directory and defaultRoot does not exist yet,
+ * otherwise defaultRoot.
+ */
+QString VCommonSettings::chooseFirstRunDataRoot(const QString &defaultRoot, const QString &legacyRoot,
+                                                bool *adoptedLegacyTree)
+{
+    if (adoptedLegacyTree != nullptr)
+    {
+        *adoptedLegacyTree = false;
+    }
+
+    if (!QFileInfo::exists(defaultRoot) && QFileInfo(legacyRoot).isDir())
+    {
+        // Upgrading from a build that hard-coded ~/seamly2d: adopt that tree in place.
+        if (adoptedLegacyTree != nullptr)
+        {
+            *adoptedLegacyTree = true;
+        }
+        return legacyRoot;
+    }
+
+    return defaultRoot;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief mergeStrayCommonSettings recovers shared settings written to the wrong folder.
+ *
+ * Builds between Task 15 and Task 34 opened the shared common settings file with an empty
+ * organization name (see commonSettingsOrganization()), so QSettings stored the shared
+ * paths/* values under an "Unknown Organization" folder. This copies any such value forward
+ * into the correctly located file, but only where that file has no value of its own, so a
+ * setting the user has since changed always wins. The stray file is never modified or
+ * deleted — nothing is lost if this runs against an already-merged installation.
+ */
+void VCommonSettings::mergeStrayCommonSettings()
+{
+    const QString organization = QCoreApplication::organizationName();
+    if (organization.isEmpty() || organization == unknownOrganizationName)
+    {
+        return;
+    }
+
+    const QSettings straySettings(QSettings::IniFormat, QSettings::UserScope,
+                                  unknownOrganizationName, commonIniFilename);
+    if (!QFileInfo::exists(straySettings.fileName()))
+    {
+        return;
+    }
+
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, organization, commonIniFilename);
+
+    bool recovered = false;
+    const QStringList strayKeys = straySettings.allKeys();
+    for (const QString &key : strayKeys)
+    {
+        if (!settings.contains(key))
+        {
+            settings.setValue(key, straySettings.value(key));
+            recovered = true;
+        }
+    }
+
+    if (recovered)
+    {
+        settings.sync();
+    }
+}
+
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getDefaultIndividualSizePath()
 {
-    return QDir::homePath() + QLatin1String("/seamly2d/") + tr("measurements") + QLatin1String("/") + tr("individual");
+    return dataSubdirPath(tr("measurements") + QLatin1String("/") + tr("individual"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getIndividualSizePath() const
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     return settings.value(settingPathsIndividualMeasurements, getDefaultIndividualSizePath()).toString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::setIndividualSizePath(const QString &value)
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     settings.setValue(settingPathsIndividualMeasurements, value);
     settings.sync();
 }
@@ -449,20 +807,20 @@ void VCommonSettings::setIndividualSizePath(const QString &value)
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getDefaultMultisizePath()
 {
-    return QDir::homePath() + QLatin1String("/seamly2d/") + tr("measurements") + QLatin1String("/") + tr("multisize");
+    return dataSubdirPath(tr("measurements") + QLatin1String("/") + tr("multisize"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getMultisizePath() const
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     return settings.value(settingPathsMultisizeMeasurements, getDefaultMultisizePath()).toString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::setMultisizePath(const QString &value)
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     settings.setValue(settingPathsMultisizeMeasurements, value);
     settings.sync();
 }
@@ -470,20 +828,20 @@ void VCommonSettings::setMultisizePath(const QString &value)
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getDefaultTemplatePath()
 {
-    return QDir::homePath() + QLatin1String("/seamly2d/") + tr("templates");
+    return dataSubdirPath(tr("templates"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getTemplatePath() const
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     return settings.value(settingPathsTemplates, getDefaultTemplatePath()).toString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::setTemplatePath(const QString &value)
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     settings.setValue(settingPathsTemplates, value);
     settings.sync();
 }
@@ -491,20 +849,20 @@ void VCommonSettings::setTemplatePath(const QString &value)
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getDefaultBodyScansPath()
 {
-    return QDir::homePath() + QLatin1String("/seamly2d/") + tr("bodyscans");
+    return dataSubdirPath(tr("bodyscans"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getBodyScansPath() const
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     return settings.value(settingPathsBodyScans, getDefaultBodyScansPath()).toString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::setBodyScansPath(const QString &value)
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     settings.setValue(settingPathsBodyScans, value);
     settings.sync();
 }
@@ -512,7 +870,7 @@ void VCommonSettings::setBodyScansPath(const QString &value)
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getDefaultLabelTemplatePath()
 {
-    return QDir::homePath() + QLatin1String("/seamly2d/") + tr("label templates");
+    return dataSubdirPath(tr("label templates"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -530,7 +888,7 @@ void VCommonSettings::SetPathLabelTemplate(const QString &text)
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getDefaultImageFilePath()
 {
-    return QDir::homePath() + QLatin1String("/seamly2d/") + tr("images");
+    return dataSubdirPath(tr("images"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -548,7 +906,7 @@ void VCommonSettings::setImageFilePath(const QString &text)
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getDefaultBackupFilePath()
 {
-    return QDir::homePath() + QLatin1String("/seamly2d/") + tr("backups");
+    return dataSubdirPath(tr("backups"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1619,14 +1977,14 @@ void VCommonSettings::setHistoryDialogSize(const QSize &sz)
 //---------------------------------------------------------------------------------------------------------------------
 int VCommonSettings::GetLatestSkippedVersion() const
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     return settings.value(settingLatestSkippedVersion, 0x0).toInt();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::SetLatestSkippedVersion(int value)
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     settings.setValue(settingLatestSkippedVersion, value);
     settings.sync();
 }
@@ -1634,14 +1992,14 @@ void VCommonSettings::SetLatestSkippedVersion(int value)
 //---------------------------------------------------------------------------------------------------------------------
 QDate VCommonSettings::GetDateOfLastRemind() const
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     return settings.value(settingDateOfLastRemind, QDate(1900, 1, 1)).toDate();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::SetDateOfLastRemind(const QDate &date)
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     settings.setValue(settingDateOfLastRemind, date);
     settings.sync();
 }
@@ -1779,14 +2137,14 @@ void VCommonSettings::setDefaultNotchColor(const QString &value)
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::SetCSVWithHeader(bool withHeader)
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     settings.setValue(settingCSVWithHeader, withHeader);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 bool VCommonSettings::GetCSVWithHeader() const
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     return settings.value(settingCSVWithHeader, GetDefCSVWithHeader()).toBool();
 }
 
@@ -1799,14 +2157,14 @@ bool VCommonSettings::GetDefCSVWithHeader() const
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::SetCSVCodec(QStringConverter::Encoding encoding)
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     settings.setValue(settingCSVCodec, encoding);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 QStringConverter::Encoding VCommonSettings::GetCSVCodec() const
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     return settings.value(settingCSVCodec, GetDefCSVCodec()).value<QStringConverter::Encoding>();
 }
 
@@ -1822,7 +2180,7 @@ QStringConverter::Encoding VCommonSettings::GetDefCSVCodec() const
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::SetCSVSeparator(const QChar &separator)
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     switch(separator.toLatin1())
     {
         case '\t':
@@ -1843,7 +2201,7 @@ void VCommonSettings::SetCSVSeparator(const QChar &separator)
 //---------------------------------------------------------------------------------------------------------------------
 QChar VCommonSettings::GetCSVSeparator() const
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), commonIniFilename);
+    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
     const quint8 separator = static_cast<quint8>(settings.value(settingCSVSeparator, 3).toUInt());
     switch(separator)
     {
