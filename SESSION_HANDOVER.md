@@ -1,6 +1,53 @@
 # Session handover
 
-## Current state: Tasks 34 and 53 are DONE and moved to `project-docs/TODO_COMPLETED.md`
+## Current state (2026-07-27): Task 58 merged; documentation reorganized
+
+**Branch:** `run-seamlyLayout`. **Task 58 is DONE** (moved to `project-docs/TODO_COMPLETED.md` — see below) and two documentation reorganizations landed alongside it.
+
+### What happened this session
+
+| Item | Outcome |
+| --- | --- |
+| **Task 58** — migrate the SeamlyLayout tests to `src/test/SeamlyLayoutTest` | **DONE, merged** via PR [#20](https://github.com/seamly/Seamly2D/pull/20) (`8ddab2a4c3`), all 12 CI checks green. Task written up in `project-docs/TODO_MIGRATE.md` first, then implemented |
+| **`status-docs/` → `project-docs/`** | Merged via PR [#21](https://github.com/seamly/Seamly2D/pull/21) (`b89fbe161d`), plus a local merge by the user — see the divergence note below |
+| **Tracking docs moved + SeamlyLayout status docs prefixed** | Committed on branch `reorganize-project-docs`, **not yet pushed** |
+
+### Task 58 — what moved and what deliberately did not
+
+The four Qt/C++ suites (`AdjustSceneTests`, `AdjustControllerTests`, `PreferencesModelTests`, `SettingsModelTests`) moved from `src/app/seamlylayout/qt_frontend/tests/{adjust,preferences,settings}/` to a flat `src/test/SeamlyLayoutTest/`, matching the sibling `Seamly2DTest`. Git recorded pure renames; no source edits were needed because every project include resolves through `target_include_directories(… src/)`.
+
+**Three decisions that must not be undone:**
+
+1. **The Rust tests stay in `crates/`.** `#[cfg(test)]` modules compile as part of their crate and reach its private items, and Cargo requires integration tests beside the crate's `Cargo.toml`. Moving them would need per-crate `[[test]] path = "../../../../test/…"` entries that break `cargo test -p <crate>`.
+2. **`src/test/test.pro` must never list `SeamlyLayoutTest`.** seamlyLayout is CMake + Cargo and stays out of the Seamly2D qmake build. All `SUBDIRS` in `Seamly.pro`, `src/src.pro` and `src/test/test.pro` are explicit literals with no globbing, so the directory cannot be picked up by accident.
+3. **`seamlylayout-ci.yml`'s path filters now include `src/test/SeamlyLayoutTest/**`.** Without it a test-only change triggers *no* CI at all — the filters were `src/app/seamlylayout/**` only. `ci.yml` has no path filters, so the parent jobs are unaffected either way.
+
+### Two pre-existing defects fixed inside Task 58
+
+- **`src/app/seamlylayout/build.ps1:117`** probed for a CMake package named `Qt6WebEngine`, which Qt has never shipped (the packages are `Qt6WebEngineCore` / `Qt6WebEngineQuick` / `Qt6WebEngineWidgets`). The guard fired on *every* correctly installed kit, aborting the build while telling the developer to install modules already present. Now probes `Qt6WebEngineQuick`.
+- **`ctest --preset debug` could not run on Windows** from a shell that had not sourced the Qt kit — the test exes launch out of the build tree with no windeployqt output beside them. Added a `WIN32`-guarded `ENVIRONMENT_MODIFICATION` prepending `$<TARGET_FILE_DIR:Qt6::Core>` to `PATH` for the test run only, as a generator expression so it follows whichever kit CMake found.
+
+Verified locally: `ctest --preset debug` with no Qt on `PATH` → 4/4 suites, **107 cases** (26 + 7 + 48 + 26), 1 skipped; `PreferencesModelTests`' 48 matches its pre-move count. `cargo test --workspace` → **251 tests across 22 targets**, 0 failures.
+
+### Documentation reorganization
+
+`status-docs/` → `project-docs/`, with `new-attributes.csv` → `NEW-ATTRIBUTES.csv` and `svg-data-attributes.md` → `SVG-DATA-ATTRIBUTES.md`. The empty `status-docs/baseline/` shell went with it; its SVG survives byte-identically (line endings aside) at `src/app/seamlylayout/input/richmond-shirt-baseline_pieces.svg`.
+
+Then, on the **unpushed `reorganize-project-docs` branch**: `PROJECT_PLAN.md` and all six `TODO_*.md` files moved into `project-docs/`, and SeamlyLayout's status docs gained an app-name prefix (`SEAMLYLAYOUT_COMPLETED.md`, `SEAMLYLAYOUT_DECISIONS.md`, `SEAMLYLAYOUT_TODO_FUTURE.md`, `SEAMLYLAYOUT_MIGRATION_STATUS.md`, `TODO_SEAMLYLAYOUT_2.md`).
+
+**`SESSION_HANDOVER.md` stays at the repository root** — a deliberate user decision, reversing an initial move. Both `.claude/settings.json` compaction hooks name it there, and that wording is correct as written. Do not move it.
+
+**`SEAMLYLAYOUT_TODO_FUTURE.md` was `FUTURE_TODOs.txt` and untracked** — `src/app/seamlylayout/.gitignore` ignores `*.txt`. The `.md` extension brought it into version control for the first time, on the user's explicit instruction.
+
+**`src/app/seamlylayout/docs/status-docs/` keeps its directory name** — only the repo-root `status-docs/` was renamed. Several lines name both in one sentence, so reference rewrites were anchored on a leading backtick, which the daughter-app mirrors never carry.
+
+### Repository state — read this before pushing
+
+Local `run-seamlyLayout` is **3 commits ahead of origin, 0 behind**. The rename branch was merged **twice** — once locally by the user (`82ed9fd7de`), once by GitHub closing PR #21 (`b89fbe161d`) — producing two merge commits with identical content. `21772605f7` reconciles them; that merge introduced **zero file changes**. Local also uniquely carries the user's `54a572ad06` ("deleted unused image files and updated README-CODE-STYLES.md"), which is not on origin.
+
+**Next steps:** push `run-seamlyLayout` (carries `54a572ad06` + the reconciliation to origin), then push `reorganize-project-docs` and open its PR against `run-seamlyLayout`.
+
+## Earlier state: Tasks 34 and 53 are DONE and moved to `project-docs/TODO_COMPLETED.md`
 
 **Date:** 2026-07-26. **Branch:** `run-seamlyLayout` at **`1d74f7e18a`** ("merge develop"), **pushed — local and `origin/run-seamlyLayout` are identical, working tree clean.** Task 53 landed via **PR [#19](https://github.com/seamly/Seamly2D/pull/19)** (`task-53-seamlydata-root` → `run-seamlyLayout`) — **all 11 CI checks green** (Windows x64 27m4s, Windows arm64 cross-compile 26m28s, macOS 16m51s, Linux AppImage 9m3s, Linux unit tests 9m55s, CodeQL, CodeSee, Analyze actions/python/rust, version) — **merged**, task branch deleted locally and on origin. Task 34 landed earlier the same day.
 
