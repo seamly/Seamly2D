@@ -1,0 +1,643 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<svg baseProfile="tiny" height="903.287mm" version="1.2" viewBox="0 0 7309 3414" width="1933.84mm" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs/>
+ <g data-name="The Richmond Shirt" data-type="pattern" data-type-number="1" id="pattern-1">
+  <g data-name="Cuff" data-parent="pattern-1" data-type="piece" data-type-number="1" id="piece-1">
+   <g data-parent="piece-1" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-1-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="15.1181,7.55906" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,4916.34,310.296)">
+     <path d="M832.649,2559.14 L832.649,2319.14 L1953.75,2319.14 L1953.75,2559.14 L832.649,2559.14 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-1" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-1-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,4916.34,310.296)">
+     <path d="M796.649,2595.14 L796.649,2283.14 L1989.75,2283.14 L1989.75,2595.14 L796.649,2595.14 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-1" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-1-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#006400" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,4916.34,310.296)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-1" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-1-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="52" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6599.39,2665.44)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="52" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="46">Cuff</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="43" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6579.39,2723.44)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="43" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="38">Cut 4 </text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="43" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6336.39,2771.44)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="43" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="38">Cut 2 Interfacing</text>
+    </g>
+   </g>
+   <g data-parent="piece-1" data-type="pattern_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-1-pattern_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,5813.26,2665.44)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">The Richmond Shirt</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6172.26,2712.44)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">v1.3</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,5818.26,2759.44)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">FoglineFabrics.com</text>
+    </g>
+   </g>
+   <g data-parent="piece-1" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-1-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#00008b" fill-opacity="1" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#00008b" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4916.34,310.296)">
+     <path d="M1857.75,2535.14 L1841.33,2490.03 L1874.17,2490.03 L1857.75,2535.14 L1857.75,2343.14 L1874.17,2388.24 L1841.33,2388.24 L1857.75,2343.14 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="Two Inch Gauge" data-parent="pattern-1" data-type="piece" data-type-number="2" id="piece-2">
+   <g data-parent="piece-2" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-2-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,6660.05,-373.781)">
+     <path d="M292.599,1742.95 L484.599,1742.95 L484.599,1934.95 L292.599,1934.95 L292.599,1742.95 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-2" data-type="internal_path" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-2-internal_path-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,6660.05,-373.781)">
+     <path d="M292.599,1838.95 L484.599,1838.95 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-2" data-type="internal_path" data-type-number="2" fill="none" fill-rule="evenodd" id="piece-2-internal_path-2" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,6660.05,-373.781)">
+     <path d="M388.599,1742.95 L388.599,1934.95 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-2" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-2-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="24" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7048.65,1417.17)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="24" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="21">Two</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="24" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7043.65,1444.17)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="24" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="21">Inch</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="24" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7015.65,1471.17)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="24" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="21">Gauge</text>
+    </g>
+   </g>
+  </g>
+  <g data-name="Collar" data-parent="pattern-1" data-type="piece" data-type-number="3" id="piece-3">
+   <g data-parent="piece-3" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-3-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="15.1181,7.55906" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3737.55,504.35)">
+     <path d="M2588.07,-37.5926 L2685.51,-37.4441 L3055.86,-37.9399 L3197.01,-38.6082 L3312.58,-39.7042 L3369.88,-40.8846 L3391.65,-41.8453 L3395.76,-42.3926 L3359.76,166.407 L3356.72,164.737 L3349.46,161.57 L3340.82,158.604 L3330.82,155.832 L3319.49,153.248 L3306.86,150.845 L3285.67,147.546 L3252.88,143.749 L3215.35,140.559 L3173.29,137.922 L3126.91,135.786 L3076.42,134.099 L3022.03,132.807 L2934.03,131.462 L2804.42,130.618 L2663.03,130.407 L2588.07,130.407 L2588.07,-37.5926 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-3" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-3-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3737.55,504.35)">
+     <path d="M2588.07,-73.5927 L2685.51,-73.4442 L3055.75,-73.9398 L3196.76,-74.6074 L3312.03,-75.7007 L3368.72,-76.8683 L3388.48,-77.7401 L3439.56,-84.5457 L3386.67,222.248 L3340.82,197.079 L3336.4,195.147 L3330.16,193.006 L3322.01,190.746 L3312.13,188.492 L3300.72,186.324 L3280.83,183.226 L3249.29,179.573 L3212.7,176.463 L3171.34,173.87 L3125.48,171.759 L3075.39,170.084 L3021.33,168.8 L2933.64,167.46 L2804.28,166.618 L2663,166.407 L2588.07,166.407 L2588.07,-73.5927 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-3" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-3-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#006400" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3737.55,504.35)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-3" data-type="internal_path" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-3-internal_path-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3737.55,504.35)">
+     <path d="M3370.32,166.407 L3370.29,167.454 L3369.88,169.484 L3369.09,171.388 L3367.94,173.11 L3367.23,173.874 L3366.46,174.59 L3364.74,175.738 L3362.84,176.527 L3360.81,176.933 L3359.76,176.967 L3358.71,176.933 L3356.69,176.527 L3354.78,175.738 L3353.06,174.59 L3352.29,173.874 L3351.58,173.11 L3350.43,171.388 L3349.64,169.484 L3349.24,167.454 L3349.2,166.407 L3349.24,165.361 L3349.64,163.331 L3350.43,161.427 L3351.58,159.705 L3352.29,158.94 L3353.06,158.225 L3354.78,157.076 L3356.69,156.288 L3358.71,155.882 L3359.76,155.847 L3360.81,155.882 L3362.84,156.288 L3364.74,157.076 L3366.46,158.225 L3367.23,158.94 L3367.94,159.705 L3369.09,161.427 L3369.88,163.331 L3370.29,165.361 L3370.32,166.407 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-3" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-3-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="40" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6862.3,488.358)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="40" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="35">Collar</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="31" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6893.3,532.358)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="31" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="27">Cut 2 </text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="31" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6721.3,566.358)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="31" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="27">Cut 1 Interfacing</text>
+    </g>
+   </g>
+   <g data-parent="piece-3" data-type="pattern_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-3-pattern_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6406.48,488.358)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="25">The Richmond Shirt</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6642.48,520.358)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="25">v1.3</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6405.48,552.358)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="25">FoglineFabrics.com</text>
+    </g>
+   </g>
+   <g data-parent="piece-3" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-3-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#00008b" fill-opacity="1" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#00008b" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,3737.55,504.35)">
+     <path d="M2636.07,106.407 L2619.65,61.3021 L2652.48,61.3021 L2636.07,106.407 L2636.07,-13.5926 L2652.48,31.5126 L2619.65,31.5126 L2636.07,-13.5926 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="Pocket Flap" data-parent="pattern-1" data-type="piece" data-type-number="4" id="piece-4">
+   <g data-parent="piece-4" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-4-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="15.1181,7.55906" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3305.44,529.283)">
+     <path d="M2557.52,2531.94 L3085.52,2531.94 L3085.52,2747.94 L2821.52,2843.94 L2557.52,2747.94 L2557.52,2531.94 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-4" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-4-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3305.44,529.283)">
+     <path d="M2521.52,2531.94 L3121.52,2531.94 L3121.52,2773.16 L2821.52,2882.25 L2521.52,2773.16 L2521.52,2531.94 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-4" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-4-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#006400" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3305.44,529.283)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-4" data-type="internal_path" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-4-internal_path-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3305.44,529.283)">
+     <path d="M2557.52,2603.94 L3085.52,2603.94 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-4" data-type="internal_path" data-type-number="2" fill="none" fill-rule="evenodd" id="piece-4-internal_path-2" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3305.44,529.283)">
+     <path d="M2833.04,2795.94 L2833,2797.08 L2832.56,2799.3 L2831.7,2801.38 L2830.44,2803.25 L2829.66,2804.09 L2828.83,2804.87 L2826.95,2806.12 L2824.87,2806.98 L2822.66,2807.42 L2821.52,2807.46 L2820.37,2807.42 L2818.16,2806.98 L2816.08,2806.12 L2814.21,2804.87 L2813.37,2804.09 L2812.59,2803.25 L2811.34,2801.38 L2810.48,2799.3 L2810.03,2797.08 L2810,2795.94 L2810.03,2794.8 L2810.48,2792.59 L2811.34,2790.51 L2812.59,2788.63 L2813.37,2787.8 L2814.21,2787.02 L2816.08,2785.76 L2818.16,2784.9 L2820.37,2784.46 L2821.52,2784.42 L2822.66,2784.46 L2824.87,2784.9 L2826.95,2785.76 L2828.83,2787.02 L2829.66,2787.8 L2830.44,2788.63 L2831.7,2790.51 L2832.56,2792.59 L2833,2794.8 L2833.04,2795.94 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-4" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-4-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6020.96,3163.23)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">Pocket Flap</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="33" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6169.96,3210.23)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="33" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="29">Cut 4 </text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="33" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,5985.96,3247.23)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="33" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="29">Cut 2 Interfacing</text>
+    </g>
+   </g>
+   <g data-parent="piece-4" data-type="pattern_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-4-pattern_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="15" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6057.48,3061.23)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="15" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="13">The Richmond Shirt</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="15" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6182.48,3078.23)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="15" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="13">v1.3</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="15" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6058.48,3095.23)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="15" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="13">FoglineFabrics.com</text>
+    </g>
+   </g>
+   <g data-parent="piece-4" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-4-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#00008b" fill-opacity="1" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#00008b" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,3305.44,529.283)">
+     <path d="M2989.52,2735.94 L2973.1,2690.84 L3005.93,2690.84 L2989.52,2735.94 L2989.52,2543.94 L3005.93,2589.05 L2973.1,2589.05 L2989.52,2543.94 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="Back" data-parent="pattern-1" data-type="piece" data-type-number="5" id="piece-5">
+   <g data-parent="piece-5" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-5-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="15.1181,7.55906" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3176.59,399.971)">
+     <path d="M-711.619,532 L-673.366,528.849 L-618.612,525.311 L-546.189,522.791 L-464.413,520 L102,520 L102,2223.06 L56.6154,2223.12 L-31.0751,2223.82 L-156.543,2225.76 L-312.426,2229.19 L-421.951,2231.49 L-492.25,2232.59 L-560.469,2233.11 L-626.844,2232.89 L-691.607,2231.72 L-754.993,2229.45 L-801.74,2226.85 L-832.62,2224.71 L-863.287,2222.18 L-893.771,2219.25 L-924.102,2215.89 L-954.307,2212.08 L-984.417,2207.8 L-1014.46,2203.03 L-1029.47,2200.43 L-1028.62,2179.85 L-1025.4,2127.03 L-1020.58,2061.97 L-1014.46,1986.66 L-995.526,1768.57 L-970.243,1477.12 L-959.207,1338.32 L-952.982,1252.1 L-948.034,1173.41 L-944.651,1104.22 L-943.376,1060.16 L-943.127,1034.55 L-943.429,1012.42 L-944.32,994.026 L-945.024,986.478 L-935.966,986.386 L-918.663,985.296 L-902.312,983.156 L-886.885,980.007 L-872.354,975.888 L-858.69,970.841 L-845.866,964.904 L-833.854,958.118 L-822.626,950.524 L-812.154,942.161 L-802.41,933.069 L-793.366,923.29 L-784.995,912.862 L-777.269,901.826 L-770.159,890.223 L-763.638,878.092 L-757.677,865.473 L-752.249,852.408 L-747.327,838.935 L-742.881,825.095 L-738.885,810.929 L-735.309,796.476 L-732.127,781.777 L-729.311,766.871 L-725.673,744.227 L-721.897,713.66 L-719.081,682.99 L-717.001,652.54 L-716.184,637.527 L-711.619,532 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-5" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-5-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3176.59,399.971)">
+     <path d="M-734.159,497.735 L-676.005,492.945 L-620.399,489.351 L-547.429,486.813 L-465.027,484 L102,484 L102,2295.06 L56.9558,2295.12 L-30.2307,2295.82 L-155.194,2297.75 L-310.877,2301.18 L-420.635,2303.48 L-491.413,2304.58 L-560.316,2305.11 L-627.613,2304.88 L-693.546,2303.7 L-758.281,2301.37 L-806.231,2298.71 L-838.072,2296.5 L-869.69,2293.89 L-901.178,2290.87 L-932.564,2287.39 L-963.874,2283.45 L-995.131,2279 L-1026.26,2274.06 L-1080.14,2264.72 L-1076.56,2177.41 L-1073.29,2123.79 L-1068.44,2058.26 L-1062.29,1982.64 L-1043.35,1764.42 L-1018.08,1473.14 L-1007.07,1334.69 L-1000.87,1248.87 L-995.961,1170.73 L-992.617,1102.36 L-991.37,1059.23 L-991.13,1034.64 L-991.413,1013.91 L-992.212,997.417 L-995.422,962.991 L-936.843,962.393 L-920.977,961.394 L-906.274,959.47 L-892.565,956.671 L-879.795,953.052 L-867.904,948.659 L-856.827,943.531 L-846.499,937.697 L-836.859,931.177 L-827.852,923.983 L-819.43,916.125 L-811.557,907.611 L-804.204,898.452 L-797.35,888.662 L-790.977,878.262 L-785.072,867.277 L-779.622,855.739 L-774.613,843.682 L-770.032,831.144 L-765.863,818.165 L-762.089,804.788 L-758.691,791.054 L-755.651,777.009 L-752.955,762.739 L-749.438,740.851 L-745.762,711.091 L-743.006,681.075 L-740.956,651.07 L-740.155,636.356 L-734.159,497.735 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-5" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-5-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#006400" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3176.59,399.971)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-5" data-type="internal_path" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-5-internal_path-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3176.59,399.971)">
+     <path d="M-6,520 L-6,568 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-5" data-type="internal_path" data-type-number="2" fill="none" fill-rule="evenodd" id="piece-5-internal_path-2" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3176.59,399.971)">
+     <path d="M66,520 L66,568 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-5" data-type="internal_path" data-type-number="3" fill="none" fill-rule="evenodd" id="piece-5-internal_path-3" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3176.59,399.971)">
+     <path d="M-699.399,676.312 L-699.463,678.215 L-700.2,681.905 L-701.634,685.366 L-703.722,688.498 L-705.023,689.888 L-706.413,691.189 L-709.545,693.277 L-713.006,694.711 L-716.696,695.448 L-718.599,695.512 L-720.502,695.448 L-724.193,694.711 L-727.654,693.277 L-730.786,691.189 L-732.176,689.888 L-733.477,688.498 L-735.565,685.366 L-736.998,681.905 L-737.736,678.215 L-737.799,676.312 L-737.736,674.409 L-736.998,670.718 L-735.565,667.257 L-733.477,664.126 L-732.176,662.735 L-730.786,661.434 L-727.654,659.346 L-724.193,657.913 L-720.502,657.175 L-718.599,657.112 L-716.696,657.175 L-713.006,657.913 L-709.545,659.346 L-706.413,661.434 L-705.023,662.735 L-703.722,664.126 L-701.634,667.257 L-700.2,670.718 L-699.463,674.409 L-699.399,676.312 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-5" data-type="internal_path" data-type-number="4" fill="none" fill-rule="evenodd" id="piece-5-internal_path-4" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3176.59,399.971)">
+     <path d="M-708.999,676.312 L-709.126,678.208 L-710.56,681.669 L-711.811,683.1 L-713.242,684.351 L-716.703,685.785 L-718.599,685.912 L-720.496,685.785 L-723.957,684.351 L-725.388,683.1 L-726.639,681.669 L-728.073,678.208 L-728.199,676.312 L-728.073,674.415 L-726.639,670.954 L-725.388,669.523 L-723.957,668.272 L-720.496,666.838 L-718.599,666.712 L-716.703,666.838 L-713.242,668.272 L-711.811,669.523 L-710.56,670.954 L-709.126,674.415 L-708.999,676.312 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-5" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-5-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="73" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2610.57,1819.66)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="73" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="64">Back</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="64" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2384.57,1900.66)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="64" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="56">Cut 1 on fold</text>
+    </g>
+   </g>
+   <g data-parent="piece-5" data-type="pattern_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-5-pattern_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2364.57,1531.66)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">The Richmond Shirt</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2723.57,1578.66)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">v1.3</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2369.57,1625.66)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">FoglineFabrics.com</text>
+    </g>
+   </g>
+   <g data-parent="piece-5" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-5-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#00008b" fill-opacity="1" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#00008b" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,3176.59,399.971)">
+     <path d="M6,1947.53 L-10.417,1902.42 L22.417,1902.42 L6,1947.53 L6,795.528 L22.417,840.633 L-10.417,840.633 L6,795.528 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="Front" data-parent="pattern-1" data-type="piece" data-type-number="6" id="piece-6">
+   <g data-parent="piece-6" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-6-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="15.1181,7.55906" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,2770.01,138.508)">
+     <path d="M-2227.25,269.2 L-1968.05,269.2 L-1955.2,268.595 L-1931.05,267.064 L-1908.67,265.149 L-1887.97,262.852 L-1868.89,260.174 L-1851.33,257.114 L-1835.22,253.674 L-1820.47,249.855 L-1807,245.657 L-1794.74,241.081 L-1783.59,236.129 L-1773.49,230.8 L-1764.34,225.096 L-1756.07,219.017 L-1748.59,212.565 L-1741.83,205.74 L-1735.7,198.543 L-1730.12,190.975 L-1725.01,183.036 L-1720.29,174.727 L-1713.73,161.619 L-1705.65,142.794 L-1693.59,111.996 L-1679.32,77.562 L-1670.73,59.1708 L-1664.32,46.4901 L-1660.85,40 L-1177.41,231 L-1182.19,240.074 L-1191.33,258.174 L-1199.96,276.199 L-1208.1,294.125 L-1219.48,320.804 L-1233,355.811 L-1244.81,390.035 L-1255.02,423.303 L-1263.74,455.441 L-1271.09,486.275 L-1277.18,515.63 L-1282.12,543.333 L-1286.02,569.21 L-1288.99,593.086 L-1291.15,614.788 L-1292.6,634.141 L-1293.74,658.735 L-1293.85,670.985 L-1293.79,677.012 L-1293.03,689.332 L-1291.53,701.935 L-1289.28,714.773 L-1286.31,727.802 L-1282.6,740.977 L-1278.18,754.253 L-1273.05,767.583 L-1267.21,780.924 L-1260.67,794.229 L-1253.45,807.453 L-1245.54,820.552 L-1236.96,833.479 L-1227.71,846.19 L-1217.8,858.639 L-1207.23,870.782 L-1196.02,882.572 L-1184.17,893.965 L-1171.69,904.915 L-1158.59,915.377 L-1144.86,925.306 L-1130.53,934.656 L-1115.59,943.383 L-1100.06,951.44 L-1083.95,958.784 L-1067.25,965.368 L-1049.97,971.147 L-1032.13,976.076 L-1013.74,980.109 L-994.786,983.203 L-975.292,985.31 L-955.26,986.386 L-945.024,986.478 L-945.727,994.026 L-946.618,1012.42 L-946.921,1034.55 L-946.671,1060.16 L-945.397,1104.22 L-942.013,1173.41 L-937.065,1252.1 L-930.84,1338.32 L-919.804,1477.12 L-894.521,1768.57 L-875.587,1986.66 L-869.467,2061.97 L-864.65,2127.03 L-861.425,2179.85 L-860.582,2200.43 L-890.549,2205.64 L-950.241,2215.25 L-1009.92,2223.93 L-1069.88,2231.73 L-1130.44,2238.68 L-1191.89,2244.82 L-1254.54,2250.21 L-1318.7,2254.86 L-1384.67,2258.84 L-1452.76,2262.17 L-1523.26,2264.91 L-1596.48,2267.09 L-1672.74,2268.74 L-1752.32,2269.93 L-1835.55,2270.67 L-1922.71,2271.03 L-1968.05,2271.06 L-2227.25,2271.06 L-2227.25,269.2 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-6" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-6-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,2770.01,138.508)">
+     <path d="M-2227.25,233.2 L-1968.9,233.2 L-1957.19,232.648 L-1933.72,231.161 L-1912.19,229.319 L-1892.46,227.13 L-1874.48,224.606 L-1858.18,221.765 L-1843.49,218.629 L-1830.34,215.224 L-1818.66,211.582 L-1808.35,207.737 L-1799.32,203.721 L-1791.43,199.563 L-1784.55,195.274 L-1778.52,190.843 L-1773.18,186.229 L-1768.36,181.364 L-1763.93,176.163 L-1759.77,170.531 L-1755.82,164.386 L-1752.06,157.772 L-1746.4,146.45 L-1738.95,129.123 L-1726.98,98.5407 L-1712.27,63.047 L-1703.11,43.437 L-1696.26,29.8726 L-1677.44,-5.26258 L-1138.07,207.835 L-1160.86,251.077 L-1169.79,268.765 L-1178.21,286.345 L-1186.14,303.799 L-1197.25,329.838 L-1210.45,364.049 L-1221.98,397.472 L-1231.96,429.97 L-1240.48,461.37 L-1247.67,491.497 L-1253.62,520.175 L-1258.44,547.228 L-1262.24,572.48 L-1265.14,595.753 L-1267.24,616.869 L-1268.64,635.596 L-1269.75,659.398 L-1269.85,670.963 L-1269.79,676.151 L-1269.12,687.175 L-1267.77,698.445 L-1265.75,710.031 L-1263.04,721.879 L-1259.65,733.934 L-1255.59,746.144 L-1250.84,758.455 L-1245.43,770.818 L-1239.36,783.18 L-1232.64,795.493 L-1225.26,807.707 L-1217.25,819.774 L-1208.61,831.648 L-1199.35,843.281 L-1189.48,854.628 L-1179,865.644 L-1167.93,876.284 L-1156.28,886.506 L-1144.06,896.266 L-1131.26,905.522 L-1117.91,914.232 L-1104.01,922.357 L-1089.56,929.854 L-1074.56,936.685 L-1059.03,942.808 L-1042.96,948.184 L-1026.36,952.771 L-1009.23,956.527 L-991.561,959.412 L-973.357,961.379 L-954.509,962.392 L-894.619,962.928 L-897.835,997.417 L-898.634,1013.91 L-898.917,1034.64 L-898.678,1059.23 L-897.43,1102.36 L-894.087,1170.73 L-889.174,1248.87 L-882.977,1334.69 L-871.969,1473.14 L-846.701,1764.42 L-827.755,1982.64 L-821.611,2058.26 L-816.759,2123.79 L-813.485,2177.41 L-809.909,2264.7 L-878.661,2276.65 L-939.333,2286.42 L-1000.09,2295.26 L-1061.13,2303.2 L-1122.75,2310.27 L-1185.23,2316.52 L-1248.86,2321.98 L-1313.93,2326.71 L-1380.75,2330.73 L-1449.6,2334.11 L-1520.79,2336.87 L-1594.63,2339.06 L-1671.42,2340.73 L-1751.47,2341.92 L-1835.08,2342.67 L-1922.54,2343.03 L-1968.03,2343.06 L-2227.25,2343.06 L-2227.25,233.2 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-6" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-6-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#006400" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,2770.01,138.508)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-6" data-type="internal_path" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-6-internal_path-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2770.01,138.508)">
+     <path d="M-2179.25,2271.06 L-2179.25,269.2 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-6" data-type="internal_path" data-type-number="2" fill="none" fill-rule="evenodd" id="piece-6-internal_path-2" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2770.01,138.508)">
+     <path d="M-2088.05,2271.06 L-2088.05,269.2 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-6" data-type="internal_path" data-type-number="3" fill="none" fill-rule="evenodd" id="piece-6-internal_path-3" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2770.01,138.508)">
+     <path d="M-2040.05,269.2 L-1896.05,269.2 L-1896.05,2271.06 L-2040.05,2271.06 L-2040.05,269.2 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-6" data-type="internal_path" data-type-number="4" fill="none" fill-rule="evenodd" id="piece-6-internal_path-4" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2770.01,138.508)">
+     <path d="M-1263.6,754.671 L-1263.65,756.098 L-1264.2,758.866 L-1265.28,761.462 L-1266.84,763.81 L-1267.82,764.853 L-1268.86,765.829 L-1271.21,767.395 L-1273.81,768.47 L-1276.57,769.023 L-1278,769.071 L-1279.43,769.023 L-1282.2,768.47 L-1284.79,767.395 L-1287.14,765.829 L-1288.18,764.853 L-1289.16,763.81 L-1290.73,761.462 L-1291.8,758.866 L-1292.35,756.098 L-1292.4,754.671 L-1292.35,753.244 L-1291.8,750.476 L-1290.73,747.88 L-1289.16,745.531 L-1288.18,744.489 L-1287.14,743.513 L-1284.79,741.947 L-1282.2,740.872 L-1279.43,740.318 L-1278,740.271 L-1276.57,740.318 L-1273.81,740.872 L-1271.21,741.947 L-1268.86,743.513 L-1267.82,744.489 L-1266.84,745.531 L-1265.28,747.88 L-1264.2,750.476 L-1263.65,753.244 L-1263.6,754.671 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-6" data-type="internal_path" data-type-number="5" fill="none" fill-rule="evenodd" id="piece-6-internal_path-5" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2770.01,138.508)">
+     <path d="M-1814.45,913.6 L-1814.45,760 L-1660.85,760 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-6" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-6-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="54" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,1220.17,1450.51)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="54" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="48">Front</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="45" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,1237.17,1511.51)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="45" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="40">Cut 2 </text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="45" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,858.165,1562.51)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="45" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="40">Cut at line on left side</text>
+    </g>
+   </g>
+   <g data-parent="piece-6" data-type="pattern_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-6-pattern_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,893.165,1198.51)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">The Richmond Shirt</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,1252.17,1245.51)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">v1.3</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,898.165,1292.51)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">FoglineFabrics.com</text>
+    </g>
+   </g>
+   <g data-parent="piece-6" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-6-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#00008b" fill-opacity="1" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#00008b" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2770.01,138.508)">
+     <path d="M-1041.02,2180.77 L-1057.44,2135.66 L-1024.61,2135.66 L-1041.02,2180.77 L-1041.02,1028.77 L-1024.61,1073.87 L-1057.44,1073.87 L-1041.02,1028.77 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="Pocket" data-parent="pattern-1" data-type="piece" data-type-number="7" id="piece-7">
+   <g data-parent="piece-7" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-7-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="15.1181,7.55906" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,4185.59,35.0806)">
+     <path d="M2557.52,1655.94 L3085.52,1655.94 L3085.52,2243.94 L2989.52,2339.94 L2653.52,2339.94 L2557.52,2243.94 L2557.52,1655.94 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-7" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-7-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,4185.59,35.0806)">
+     <path d="M2521.52,1655.94 L3121.52,1655.94 L3121.52,2258.85 L3004.43,2375.94 L2638.61,2375.94 L2521.52,2258.85 L2521.52,1655.94 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-7" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-7-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#006400" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,4185.59,35.0806)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-7" data-type="internal_path" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-7-internal_path-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4185.59,35.0806)">
+     <path d="M2557.52,1811.94 L3085.52,1811.94 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-7" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-7-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="56" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6912.11,1919.02)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="56" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="49">Pocket</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="47" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6961.11,1981.02)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="47" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="41">Cut 2 </text>
+    </g>
+   </g>
+   <g data-parent="piece-7" data-type="pattern_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-7-pattern_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6866.11,1697.02)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="25">The Richmond Shirt</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7102.11,1729.02)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="25">v1.3</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6865.11,1761.02)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="25">FoglineFabrics.com</text>
+    </g>
+   </g>
+   <g data-parent="piece-7" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-7-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#00008b" fill-opacity="1" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#00008b" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4185.59,35.0806)">
+     <path d="M2989.52,2195.94 L2973.1,2150.84 L3005.93,2150.84 L2989.52,2195.94 L2989.52,1859.94 L3005.93,1905.05 L2973.1,1905.05 L2989.52,1859.94 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="Front Placket" data-parent="pattern-1" data-type="piece" data-type-number="8" id="piece-8">
+   <g data-parent="piece-8" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-8-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="15.1181,7.55906" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,2564.66,131.039)">
+     <path d="M-2563.25,269.2 L-2323.25,269.2 L-2323.25,2271.06 L-2563.25,2271.06 L-2563.25,269.2 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-8" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-8-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,2564.66,131.039)">
+     <path d="M-2563.25,233.2 L-2323.25,233.2 L-2323.25,2343.06 L-2563.25,2343.06 L-2563.25,233.2 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-8" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-8-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#006400" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,2564.66,131.039)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-8" data-type="internal_path" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-8-internal_path-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2564.66,131.039)">
+     <path d="M-2371.25,269.2 L-2371.25,2271.06 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-8" data-type="internal_path" data-type-number="2" fill="none" fill-rule="evenodd" id="piece-8-internal_path-2" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2564.66,131.039)">
+     <path d="M-2515.25,269.2 L-2515.25,2271.06 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-8" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-8-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="37" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(0,-1,1,0,49.4171,846.882)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="37" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="33">Front…acket</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(0,-1,1,0,91.4171,692.882)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="25">Cut 1 </text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(0,-1,1,0,123.417,851.882)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="25">Cut 1 Interfacing</text>
+    </g>
+   </g>
+   <g data-parent="piece-8" data-type="pattern_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-8-pattern_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="23" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(0,-1,1,0,49.4171,2186.45)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="23" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="20">The Richmond Shirt</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="23" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(0,-1,1,0,74.4171,1989.45)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="23" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="20">v1.3</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="23" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(0,-1,1,0,99.4171,2185.45)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="23" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="20">FoglineFabrics.com</text>
+    </g>
+   </g>
+   <g data-parent="piece-8" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-8-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#00008b" fill-opacity="1" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#00008b" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2564.66,131.039)">
+     <path d="M-2443.25,1750.13 L-2459.66,1705.02 L-2426.83,1705.02 L-2443.25,1750.13 L-2443.25,790.128 L-2426.83,835.233 L-2459.66,835.233 L-2443.25,790.128 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="Yoke" data-parent="pattern-1" data-type="piece" data-type-number="9" id="piece-9">
+   <g data-parent="piece-9" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-9-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="15.1181,7.55906" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3167.59,115.274)">
+     <path d="M-711.619,520 L-710.514,506.439 L-709.016,478.278 L-708.355,449.034 L-708.515,418.89 L-709.477,388.025 L-711.224,356.622 L-713.739,324.861 L-717.004,292.923 L-721.002,260.99 L-725.716,229.244 L-731.128,197.864 L-737.221,167.033 L-743.977,136.931 L-751.378,107.74 L-759.408,79.6406 L-768.049,52.8146 L-772.618,40 L-265.2,-71.0026 L-263.619,-64.6692 L-260.072,-52.7782 L-256.073,-41.787 L-251.628,-31.6613 L-246.746,-22.3667 L-241.432,-13.8689 L-235.696,-6.13338 L-229.545,0.874098 L-222.986,7.18795 L-216.027,12.8426 L-208.675,17.8723 L-200.939,22.3115 L-192.825,26.1946 L-184.341,29.5559 L-175.495,32.4298 L-166.294,34.8507 L-156.746,36.853 L-146.858,38.471 L-131.447,40.29 L-109.725,41.6328 L-86.7816,42.0573 L-50.3412,41.6024 L2.15117,40.2408 L30,40 L30,520 L-711.619,520 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-9" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-9-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3167.59,115.274)">
+     <path d="M-738.631,556 L-734.462,504.826 L-733.002,477.369 L-732.357,448.827 L-732.513,419.327 L-733.456,389.066 L-735.171,358.236 L-737.642,327.029 L-740.852,295.635 L-744.782,264.244 L-749.415,233.046 L-754.729,202.23 L-760.706,171.988 L-767.322,142.509 L-774.553,113.988 L-782.375,86.6191 L-790.78,60.5254 L-808.441,10.9855 L-238.742,-113.642 L-228.888,-74.1789 L-225.878,-64.0869 L-222.641,-55.1907 L-219.172,-47.2866 L-215.504,-40.3058 L-211.665,-34.1647 L-207.663,-28.7678 L-203.488,-24.0124 L-199.11,-19.7973 L-194.476,-16.0319 L-189.523,-12.6437 L-184.187,-9.58179 L-178.407,-6.81577 L-172.137,-4.33147 L-165.345,-2.12481 L-158.014,-0.195987 L-150.141,1.45494 L-141.839,2.81353 L-128.224,4.42049 L-108.281,5.65337 L-86.6733,6.05311 L-51.0327,5.6082 L1.52878,4.24481 L30,3.99869 L30,556 L-738.631,556 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-9" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-9-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#006400" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3167.59,115.274)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-9" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-9-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="73" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2828.58,391.274)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="73" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="64">Yoke</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="64" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2577.58,472.274)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="64" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="56">Cut 2 on fold</text>
+    </g>
+   </g>
+   <g data-parent="piece-9" data-type="pattern_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-9-pattern_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2569.58,167.274)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">The Richmond Shirt</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2928.58,214.274)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">v1.3</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2574.58,261.274)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">FoglineFabrics.com</text>
+    </g>
+   </g>
+   <g data-parent="piece-9" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-9-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#00008b" fill-opacity="1" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#00008b" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,3167.59,115.274)">
+     <path d="M-66,424 L-82.417,378.895 L-49.583,378.895 L-66,424 L-66,136 L-49.583,181.105 L-82.417,181.105 L-66,136 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="Sleeve" data-parent="pattern-1" data-type="piece" data-type-number="10" id="piece-10">
+   <g data-parent="piece-10" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-10-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="15.1181,7.55906" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3402.09,217.05)">
+     <path d="M450.176,340.16 L461.781,338.455 L488.972,333.738 L519.756,327.607 L552.814,320.237 L586.83,311.799 L620.484,302.465 L652.46,292.41 L674.423,284.485 L687.917,279.078 L694.187,276.338 L706.484,271.698 L728.854,263.771 L750.069,256.331 L771.812,248.118 L795.764,237.87 L823.607,224.325 L857.025,206.223 L897.698,182.303 L921.688,167.445 L933.024,159.549 L958.094,142.529 L985.365,124.575 L1014.08,106.286 L1043.5,88.2598 L1072.85,71.0966 L1101.4,55.3948 L1128.38,41.7535 L1140.93,36.016 L1147.28,33.6172 L1160.38,29.0249 L1173.97,24.6857 L1188.01,20.6074 L1209.83,14.9603 L1240.39,8.45892 L1272.39,3.13677 L1305.65,-0.945638 L1339.99,-3.72776 L1375.25,-5.14909 L1393.2,-5.27005 L1407.06,-5.22876 L1437.77,-4.5842 L1471,-2.99709 L1496.87,-0.963211 L1514.26,0.816608 L1531.62,2.99968 L1548.78,5.62325 L1565.61,8.72456 L1581.95,12.3409 L1597.67,16.5094 L1612.59,21.2675 L1626.59,26.6523 L1639.51,32.701 L1645.47,36.016 L1651.73,38.7321 L1664.67,44.8965 L1678.06,51.8424 L1691.82,59.4618 L1712.97,71.8669 L1741.82,89.8503 L1785.27,118.029 L1826.84,144.842 L1852.69,160.638 L1864.71,167.445 L1869.98,171.768 L1881.42,180.247 L1893.83,188.521 L1907.08,196.582 L1921.05,204.423 L1935.61,212.036 L1958.25,223.043 L1989.39,236.813 L2020.62,249.538 L2065.68,266.686 L2092.21,276.338 L2098.42,279.16 L2111.62,284.513 L2125.67,289.541 L2140.45,294.273 L2163.64,300.908 L2196.07,308.942 L2245.79,319.854 L2293.57,329.957 L2322.87,336.696 L2336.22,340.16 L2025.75,2319.14 L760.649,2319.14 L450.176,340.16 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-10" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-10-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3402.09,217.05)">
+     <path d="M398.964,323.427 L457.985,314.755 L484.577,310.142 L514.8,304.123 L547.313,296.874 L580.732,288.584 L613.675,279.448 L644.784,269.665 L665.884,262.052 L678.647,256.937 L685.141,254.1 L698.239,249.158 L720.875,241.136 L741.856,233.779 L762.846,225.849 L785.788,216.033 L812.637,202.972 L845.222,185.321 L885.294,161.754 L908.502,147.382 L919.425,139.773 L944.755,122.577 L972.319,104.429 L1001.37,85.931 L1031.17,67.6669 L1061.01,50.2194 L1090.19,34.165 L1117.97,20.1213 L1131.69,13.852 L1139.06,11.0647 L1152.76,6.26483 L1166.97,1.72712 L1181.65,-2.53858 L1204.32,-8.40541 L1235.92,-15.1276 L1268.95,-20.6221 L1303.21,-24.8273 L1338.54,-27.6887 L1374.69,-29.1458 L1393.15,-29.2703 L1407.35,-29.228 L1438.59,-28.5722 L1472.51,-26.9522 L1499.04,-24.8673 L1516.98,-23.0304 L1534.93,-20.7729 L1552.77,-18.0458 L1570.38,-14.8008 L1587.63,-10.9845 L1604.39,-6.53653 L1620.55,-1.38531 L1636,4.55695 L1650.45,11.3224 L1656.11,14.4707 L1661.66,16.8826 L1675.36,23.4037 L1689.4,30.6883 L1703.71,38.6098 L1725.39,51.3289 L1754.7,69.5972 L1798.3,97.8765 L1839.61,124.514 L1864.87,139.951 L1878.34,147.58 L1884.75,152.839 L1895.23,160.61 L1906.73,168.275 L1919.19,175.859 L1932.49,183.319 L1946.42,190.605 L1968.35,201.269 L1998.78,214.72 L2029.41,227.207 L2074.05,244.192 L2101.3,254.105 L2107.9,257.107 L2120.18,262.083 L2133.38,266.808 L2147.41,271.302 L2169.83,277.715 L2201.53,285.569 L2250.85,296.392 L2298.74,306.52 L2328.58,313.381 L2386.65,328.448 L2068.69,2355.14 L717.71,2355.14 L398.964,323.427 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-10" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-10-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#006400" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3402.09,217.05)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-10" data-type="internal_path" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-10-internal_path-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3402.09,217.05)">
+     <path d="M1076.92,2319.14 L1076.92,1839.14 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-10" data-type="internal_path" data-type-number="2" fill="none" fill-rule="evenodd" id="piece-10-internal_path-2" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3402.09,217.05)">
+     <path d="M1235.06,2319.14 L1235.06,2127.14 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-10" data-type="internal_path" data-type-number="3" fill="none" fill-rule="evenodd" id="piece-10-internal_path-3" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3402.09,217.05)">
+     <path d="M868.082,205.326 L867.955,207.223 L866.521,210.684 L865.27,212.114 L863.839,213.366 L860.378,214.8 L858.482,214.926 L856.585,214.8 L853.124,213.366 L851.693,212.114 L850.442,210.684 L849.008,207.223 L848.882,205.326 L849.008,203.43 L850.442,199.968 L851.693,198.538 L853.124,197.286 L856.585,195.852 L858.482,195.726 L860.378,195.852 L863.839,197.286 L865.27,198.538 L866.521,199.968 L867.955,203.43 L868.082,205.326 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-10" data-type="internal_path" data-type-number="4" fill="none" fill-rule="evenodd" id="piece-10-internal_path-4" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3402.09,217.05)">
+     <path d="M877.682,205.326 L877.618,207.229 L876.881,210.92 L875.447,214.381 L873.359,217.512 L872.058,218.902 L870.668,220.203 L867.536,222.291 L864.075,223.725 L860.385,224.463 L858.482,224.526 L856.579,224.463 L852.888,223.725 L849.427,222.291 L846.296,220.203 L844.905,218.902 L843.604,217.512 L841.516,214.381 L840.083,210.92 L839.345,207.229 L839.282,205.326 L839.345,203.423 L840.083,199.732 L841.516,196.271 L843.604,193.14 L844.905,191.75 L846.296,190.449 L849.427,188.361 L852.888,186.927 L856.579,186.189 L858.482,186.126 L860.385,186.189 L864.075,186.927 L867.536,188.361 L870.668,190.449 L872.058,191.75 L873.359,193.14 L875.447,196.271 L876.881,199.732 L877.618,203.423 L877.682,205.326 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-10" data-type="internal_path" data-type-number="5" fill="none" fill-rule="evenodd" id="piece-10-internal_path-5" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3402.09,217.05)">
+     <path d="M1941.1,207.415 L1941.05,208.842 L1940.5,211.61 L1939.42,214.206 L1937.86,216.554 L1936.88,217.597 L1935.84,218.573 L1933.49,220.139 L1930.9,221.214 L1928.13,221.767 L1926.7,221.815 L1925.27,221.767 L1922.51,221.214 L1919.91,220.139 L1917.56,218.573 L1916.52,217.597 L1915.54,216.554 L1913.98,214.206 L1912.9,211.61 L1912.35,208.842 L1912.3,207.415 L1912.35,205.987 L1912.9,203.219 L1913.98,200.623 L1915.54,198.275 L1916.52,197.232 L1917.56,196.257 L1919.91,194.691 L1922.51,193.615 L1925.27,193.062 L1926.7,193.015 L1928.13,193.062 L1930.9,193.615 L1933.49,194.691 L1935.84,196.257 L1936.88,197.232 L1937.86,198.275 L1939.42,200.623 L1940.5,203.219 L1941.05,205.987 L1941.1,207.415 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-10" data-type="internal_path" data-type-number="6" fill="none" fill-rule="evenodd" id="piece-10-internal_path-6" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3402.09,217.05)">
+     <path d="M1393.2,-5.27005 L1393.2,66.7299 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-10" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-10-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="73" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4455.02,1097.98)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="73" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="64">Sleeve</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="64" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4502.02,1178.98)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="64" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="56">Cut 2 </text>
+    </g>
+   </g>
+   <g data-parent="piece-10" data-type="pattern_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-10-pattern_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4263.02,809.984)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">The Richmond Shirt</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4622.02,856.984)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">v1.3</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4268.02,903.984)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="42" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="37">FoglineFabrics.com</text>
+    </g>
+   </g>
+   <g data-parent="piece-10" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-10-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#00008b" fill-opacity="1" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#00008b" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,3402.09,217.05)">
+     <path d="M1953.75,1732.93 L1937.33,1687.83 L1970.17,1687.83 L1953.75,1732.93 L1953.75,580.935 L1970.17,626.04 L1937.33,626.04 L1953.75,580.935 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="Sleeve Placket" data-parent="pattern-1" data-type="piece" data-type-number="11" id="piece-11">
+   <g data-parent="piece-11" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-11-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="15.1181,7.55906" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3355.46,695.195)">
+     <path d="M2795.09,1390.57 L2795.09,862.57 L3035.09,862.57 L3035.09,694.57 L3131.09,694.57 L3131.09,1390.57 L2795.09,1390.57 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-11-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3355.46,695.195)">
+     <path d="M2771.09,1390.57 L2771.09,862.57 L3011.09,862.57 L3011.09,694.57 L3155.09,694.57 L3155.09,1390.57 L2771.09,1390.57 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-11-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#006400" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3355.46,695.195)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="internal_path" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-11-internal_path-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3355.46,695.195)">
+     <path d="M2915.09,1390.57 L2915.09,910.57 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="internal_path" data-type-number="2" fill="none" fill-rule="evenodd" id="piece-11-internal_path-2" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3355.46,695.195)">
+     <path d="M2891.09,1390.57 L2891.09,886.57 L2939.09,886.57 L2939.09,1390.57 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="internal_path" data-type-number="3" fill="none" fill-rule="evenodd" id="piece-11-internal_path-3" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3355.46,695.195)">
+     <path d="M2891.09,886.57 L2915.09,910.57 L2939.09,886.57 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="internal_path" data-type-number="4" fill="none" fill-rule="evenodd" id="piece-11-internal_path-4" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3355.46,695.195)">
+     <path d="M3011.09,862.57 L3035.09,862.57 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="internal_path" data-type-number="5" fill="none" fill-rule="evenodd" id="piece-11-internal_path-5" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3355.46,695.195)">
+     <path d="M3035.09,1390.57 L3035.09,862.57 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="internal_path" data-type-number="6" fill="none" fill-rule="evenodd" id="piece-11-internal_path-6" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-dasharray="1.32283,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3355.46,695.195)">
+     <path d="M3131.09,790.57 L3035.09,694.57 L3035.09,790.57 L3131.09,694.57 L3131.09,1390.57 " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-11-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="33" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1.83759e-15,-1,1,1.83759e-15,6299.34,1962.76)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="33" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="29">Sleeve Placket</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="24" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1.83759e-15,-1,1,1.83759e-15,6336.34,1798.76)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="24" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="21">Cut 2 </text>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="pattern_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-11-pattern_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="21" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1.83759e-15,-1,1,1.83759e-15,6155.34,1939.76)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="21" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="19">The Richmond Shirt</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="21" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1.83759e-15,-1,1,1.83759e-15,6179.34,1762.76)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="21" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="19">v1.3</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="21" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1.83759e-15,-1,1,1.83759e-15,6203.34,1939.76)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="21" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="19">FoglineFabrics.com</text>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-11-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#00008b" fill-opacity="1" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#00008b" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,3355.46,695.195)">
+     <path d="M3083.09,1294.57 L3066.67,1249.46 L3099.5,1249.46 L3083.09,1294.57 L3083.09,1006.57 L3099.5,1051.67 L3066.67,1051.67 L3083.09,1006.57 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="Collar Stand" data-parent="pattern-1" data-type="piece" data-type-number="12" id="piece-12">
+   <g data-parent="piece-12" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-12-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="15.1181,7.55906" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3693.49,881.931)">
+     <path d="M2588.04,154.407 L2991.9,154.767 L3029.04,154.732 L3096.35,154.245 L3155.85,153.145 L3208.19,151.305 L3253.99,148.598 L3284.26,145.889 L3302.85,143.767 L3320.16,141.356 L3336.27,138.642 L3351.25,135.608 L3365.2,132.238 L3371.76,130.407 L3373.94,129.775 L3378.5,128.824 L3383.28,128.278 L3388.22,128.17 L3393.28,128.533 L3398.41,129.402 L3403.55,130.808 L3408.66,132.786 L3413.69,135.368 L3418.59,138.587 L3423.31,142.478 L3427.8,147.072 L3432.01,152.404 L3435.9,158.507 L3439.41,165.413 L3442.5,173.156 L3443.84,177.388 L3464.24,240.158 L3395.76,262.407 L3389.15,264.237 L3374.68,267.599 L3358.71,270.618 L3341.22,273.312 L3322.22,275.697 L3301.7,277.791 L3268.22,280.452 L3217.91,283.092 L3161.34,284.868 L3098.45,285.918 L3029.17,286.375 L2991.84,286.407 L2587.93,286.407 L2588.04,154.407 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-12" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-12-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3693.49,881.931)">
+     <path d="M2588.08,118.407 L2991.9,118.767 L3028.89,118.732 L3095.88,118.247 L3154.89,117.157 L3206.5,115.343 L3251.33,112.693 L3280.62,110.072 L3298.33,108.049 L3314.69,105.771 L3329.7,103.24 L3343.45,100.457 L3356.13,97.3926 L3361.9,95.7831 L3365.23,94.8172 L3372.77,93.2444 L3380.84,92.3223 L3389.12,92.1413 L3397.59,92.7499 L3406.18,94.2057 L3414.82,96.5691 L3423.42,99.8946 L3431.85,104.223 L3439.99,109.57 L3447.7,115.929 L3454.87,123.264 L3461.39,131.52 L3467.2,140.639 L3472.25,150.563 L3476.41,161.02 L3478.11,166.368 L3509.6,263.272 L3406.13,296.891 L3398.03,299.133 L3382.1,302.834 L3364.79,306.105 L3346.21,308.969 L3326.29,311.469 L3304.95,313.646 L3270.59,316.377 L3219.42,319.062 L3162.21,320.859 L3098.87,321.916 L3029.31,322.375 L2991.86,322.407 L2587.9,322.407 L2588.08,118.407 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-12" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-12-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#006400" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="3.77953" transform="matrix(1,0,0,1,3693.49,881.931)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-12" data-type="internal_path" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-12-internal_path-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3693.49,881.931)">
+     <path d="M3370.32,130.407 L3370.29,131.454 L3369.88,133.484 L3369.09,135.388 L3367.94,137.11 L3367.23,137.874 L3366.46,138.59 L3364.74,139.738 L3362.84,140.527 L3360.81,140.933 L3359.76,140.967 L3358.71,140.933 L3356.69,140.527 L3354.78,139.738 L3353.06,138.59 L3352.29,137.874 L3351.58,137.11 L3350.43,135.388 L3349.64,133.484 L3349.24,131.454 L3349.2,130.407 L3349.24,129.361 L3349.64,127.331 L3350.43,125.427 L3351.58,123.705 L3352.29,122.94 L3353.06,122.225 L3354.78,121.076 L3356.69,120.288 L3358.71,119.882 L3359.76,119.847 L3360.81,119.882 L3362.84,120.288 L3364.74,121.076 L3366.46,122.225 L3367.23,122.94 L3367.94,123.705 L3369.09,125.427 L3369.88,127.331 L3370.29,129.361 L3370.32,130.407 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-12" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-12-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="40" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6681.16,1039.94)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="40" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="35">Collar Stand</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="31" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6737.16,1083.94)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="31" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="27">Cut 2 on fold</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="31" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6677.16,1117.94)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="31" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="27">Cut 1 Interfacing</text>
+    </g>
+   </g>
+   <g data-parent="piece-12" data-type="pattern_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-12-pattern_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6362.34,1039.94)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="25">The Richmond Shirt</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6598.34,1071.94)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="25">v1.3</text>
+    </g>
+    <g fill="none" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="#0000ff" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6361.34,1103.94)">
+     <text fill="#0000ff" fill-opacity="1" font-family="Comfortaa Medium" font-size="28" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="25">FoglineFabrics.com</text>
+    </g>
+   </g>
+   <g data-parent="piece-12" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-12-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#00008b" fill-opacity="1" font-family="Arial" font-size="10.6667" font-style="normal" font-weight="400" stroke="#00008b" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,3693.49,881.931)">
+     <path d="M2635.99,280.407 L2619.57,235.302 L2652.4,235.302 L2635.99,280.407 L2635.99,160.407 L2652.4,205.513 L2619.57,205.513 L2635.99,160.407 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>

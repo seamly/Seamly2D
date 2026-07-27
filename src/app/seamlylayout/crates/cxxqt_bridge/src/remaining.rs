@@ -485,6 +485,9 @@ mod tests {
         PieceRect {
             rect:        packing::Rect::new(w, h),
             id:          id.to_string(),
+            // Untagged fixture: no data-name / data-letter, so label() == id.
+            name:        String::new(),
+            letter:      String::new(),
             origin_x:    0.0,
             origin_y:    0.0,
             group_index,

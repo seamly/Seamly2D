@@ -440,6 +440,9 @@ void AdjustScene::loadLayout(const QString& svgPath, const QString& bboxJson)
         const QJsonObject obj = val.toObject();
 
         const QString id     = obj.value("id").toString();
+        // Human-readable piece name from the Seamly2D handoff (data-name → data-letter
+        // → id, resolved on the Rust side).  Display only; `id` stays the identity.
+        const QString label  = obj.value("label").toString();
         const double  x      = obj.value("x").toDouble(0.0); // canvas space, absolute coords
         const double  y      = obj.value("y").toDouble(0.0); // canvas space, absolute coords
         const double  w      = obj.value("w").toDouble(1.0); // can't be 0
@@ -458,6 +461,9 @@ void AdjustScene::loadLayout(const QString& svgPath, const QString& bboxJson)
 
         // Create an interactive piece overlay item at z=1.
         PieceOverlayItem* item = new PieceOverlayItem(id, ox, oy, x, y, w, h, rotDeg, transformStr); // piece placement (x,y) is in absolute canvas coords; rotation is relative to piece's (ox, oy) in piece local space coords; in this application (ox, oy) is always the default value (0,0) at bbox top-left corner.
+        // Attach the display name so the piece's context menu reads "Front Bodice",
+        // not "piece-7".  Ignored when the layout carried no label (untagged SVG).
+        item->setDisplayLabel(label);
         // Set the item's z-value above the background so it receives mouse events.
         item->setZValue(1.0);
         // Add the item to the scene

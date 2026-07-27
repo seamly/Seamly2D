@@ -49,6 +49,9 @@ pub(crate) fn build_sheet_export_inputs(
     let mut flat_dom = input_dom.clone();
 
     // Match the layout pipeline so export sees the same normalized piece space.
+    // The hoist must come first and must not be skipped: without it a Seamly2D
+    // handoff exports as one sheet-sized "piece" (Task 59).
+    crate::piece_extractor::hoist_tagged_pieces(&mut flat_dom);
     svg_dom::flatten_dom(&mut flat_dom);
     svg_dom::verticalize_dom(&mut flat_dom);
     svg_dom::flatten_dom(&mut flat_dom);
