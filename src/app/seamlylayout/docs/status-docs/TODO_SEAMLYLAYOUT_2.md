@@ -7,11 +7,11 @@ Last triaged: 2026-06-30 (Adjust rotation-pivot task added and immediately compl
 
 This file is intentionally **active tasks only**.
 
-- Migration status board: `docs/status-docs/MIGRATION_STATUS.md`
-- Architecture decisions/spec rationale: `docs/status-docs/DECISIONS.md`
+- Migration status board: `docs/status-docs/SEAMLYLAYOUT_MIGRATION_STATUS.md`
+- Architecture decisions/spec rationale: `docs/status-docs/SEAMLYLAYOUT_DECISIONS.md`
 - Completed task log: `docs/status-docs/TODO_COMPLETED.md`
 
-Completion workflow: when a task is done, remove it from this file and move it to `TODO_COMPLETED.md`.
+Completion workflow: when a task is done, remove it from this file and move it to `project-docs/TODO_COMPLETED.md`.
 
 ## Tag Schema (strict)
 
@@ -25,7 +25,7 @@ Task format:
 
 ## Current Sprint
 
-When these tasks are completed add to TODO_COMPLETED.md
+When these tasks are completed add to project-docs/TODO_COMPLETED.md
 
 **General:**
 
@@ -45,7 +45,7 @@ When these tasks are completed add to TODO_COMPLETED.md
 
 **Export:**
 
-When each task is completed, add to TODO_COMPLETED.md:
+When each task is completed, add to project-docs/TODO_COMPLETED.md:
 
 - [ ] E.6 Implement 3D export (dialog + bridge + renderer) with debug messages — implemented separately with a separate license (this feature is a 'paid' feature) — implemented after all other features of SeamlyLayout have been implemented, including the build pipeline with installation executables (e.g. *.msi file) in GitHub Actions, and connecting this application to Seamly2D through a new Seamly2D 'Advanced Layout' mode. — `Status:Active | Priority:P2 | BlockedBy:none`
 
@@ -55,22 +55,22 @@ When each task is completed, add to TODO_COMPLETED.md:
 
 ### Core functional
 
-When these tasks are completed, add to TODO_COMPLETED.md:
+When these tasks are completed, add to project-docs/TODO_COMPLETED.md:
 
 ### Layout/packing
 
-When these tasks are completed, add to TODO_COMPLETED.md:
+When these tasks are completed, add to project-docs/TODO_COMPLETED.md:
 
 ### Export
 
-When these tasks are completed, add to TODO_COMPLETED.md:
+When these tasks are completed, add to project-docs/TODO_COMPLETED.md:
 
 ### Validation & testing
 
-When these tasks are completed, add to TODO_COMPLETED.md:
+When these tasks are completed, add to project-docs/TODO_COMPLETED.md:
 
 ## Decision Queue
 
-When these tasks are completed, add to TODO_COMPLETED.md:
+When these tasks are completed, add to project-docs/TODO_COMPLETED.md:
 
-Decision metadata is tracked in `docs/status-docs/DECISIONS.md`.
+Decision metadata is tracked in `docs/status-docs/SEAMLYLAYOUT_DECISIONS.md`.

@@ -4,7 +4,7 @@
 #
 # CMakeLists.txt — Qt 6.11 + QML frontend for SeamlyLayout.
 # Links against libseamly_core (Rust FFI bridge) once Phase 2g is complete.
-# See docs/status-docs/TODO.md for the full migration plan.
+# See docs/status-docs/TODO_SEAMLYLAYOUT_2.md for the full migration plan.
 
 cmake_minimum_required(VERSION 3.28)
 

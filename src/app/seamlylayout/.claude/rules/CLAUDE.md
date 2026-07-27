@@ -1,6 +1,6 @@
 # Claude Rules for SeamlyLayout
 
-See also: [TODO.md](../../docs/status-docs/TODO.md) | [Simple Workflow](../../docs/general-docs/SIMPLE_WORKFLOW_DESCRIPTION.md)
+See also: [TODO.md](../../docs/status-docs/TODO_SEAMLYLAYOUT_2.md) | [Simple Workflow](../../docs/general-docs/SIMPLE_WORKFLOW_DESCRIPTION.md)
 
 ## General Rules
 

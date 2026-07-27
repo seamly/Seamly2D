@@ -6,8 +6,8 @@ Copyright: 2026
 Last updated: 2026-06-29
 
 This file contains architecture/design decisions and open decision records.
-Active implementation tasks are tracked in `docs/status-docs/TODO.md`.
-Status roll-up is tracked in `docs/status-docs/MIGRATION_STATUS.md`.
+Active implementation tasks are tracked in `docs/status-docs/TODO_SEAMLYLAYOUT_2.md`.
+Status roll-up is tracked in `docs/status-docs/SEAMLYLAYOUT_MIGRATION_STATUS.md`.
 
 ## Decision Status Legend
 

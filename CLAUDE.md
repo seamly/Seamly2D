@@ -48,26 +48,26 @@ Since **Task 30** all three apps — seamly2d, seamlyme and seamlyLayout — bui
 
 ## Task Tracking
 
-- `PROJECT_PLAN.md` — the current approved implementation plan
+- `project-docs/PROJECT_PLAN.md` — the current approved implementation plan
 - Task lists are split by area — pick the file matching the task:
-  - `TODO_MIGRATE.md` — migrating the SeamlyLayout app into the Seamly2D structure (SeamlyMe and SeamlyLayout callable from within Seamly2D; all three apps distributed together for installation)
-  - `TODO_SEAMLY2D.md` — tasks that add features to the Seamly2D app
-  - `TODO_SEAMLYLAYOUT.md` — tasks that add features to the SeamlyLayout app
+  - `project-docs/TODO_MIGRATE.md` — migrating the SeamlyLayout app into the Seamly2D structure (SeamlyMe and SeamlyLayout callable from within Seamly2D; all three apps distributed together for installation)
+  - `project-docs/TODO_SEAMLY2D.md` — tasks that add features to the Seamly2D app
+  - `project-docs/TODO_SEAMLYLAYOUT.md` — tasks that add features to the SeamlyLayout app
 - Each `TODO_*.md` file holds tasks with checkbox subtasks; check off subtasks as they are accomplished
-- `TODO_COMPLETED.md` — when all subtasks of a task are complete, move the task here from its `TODO_*.md` file
+- `project-docs/TODO_COMPLETED.md` — when all subtasks of a task are complete, move the task here from its `TODO_*.md` file
 - **Pre-task branch setup:** before implementing a task from any `TODO_*.md` file, always:
   1. update local `develop` from `origin` (`git fetch origin` + fast-forward `develop`)
   2. update local `run-seamlyLayout` from local `develop` (merge/fast-forward `develop` into it)
   3. create a new branch from `run-seamlyLayout` for the task, and do the work there
 - **Post-task workflow:** after implementing a task from a `TODO_*.md` file:
   1. write unit tests where the task adds or changes code, and run them; run a local check build (`scripts/sd.ps1`) and verify the change works
-  2. update task tracking in the same change: check off subtasks in the task's `TODO_*.md` file; move fully completed tasks to `TODO_COMPLETED.md`
+  2. update task tracking in the same change: check off subtasks in the task's `TODO_*.md` file; move fully completed tasks to `project-docs/TODO_COMPLETED.md`
   3. stage and commit on the task branch
   4. push the task branch to origin and create a pull request targeting `run-seamlyLayout` — always in origin `seamly/Seamly2D` (the gh default repo is set to it), NEVER in the public upstream `FashionFreedom/Seamly2D`
   5. watch the PR's CI checks (`gh pr checks <pr> --watch`); when all checks pass, merge the PR; if any check fails, do NOT merge
   6. notify the user of the outcome either way — merged (with PR URL) or not merged (with the failing checks) — then, after a merge, update local `run-seamlyLayout` from origin and delete the local task branch (origin deletes the remote branch automatically on merge)
 - **Docs-only exception:** when a commit changes only `.md`, `.txt`, and/or `.svg` files (no code), skip the local build/test verification and the push/PR/CI cycle above entirely — stage and commit locally only; do not push to origin
-- **`SESSION_HANDOVER.md`** (repo root) — keep it current with the session's state: update it before compaction and when finishing a task. It is the next chat session's starting point, so it must carry what git does not — the current task and its exact progress, which `TODO_*.md` / `TODO_COMPLETED.md` entries moved, key decisions and the reasoning behind them, files changed, concrete next steps, and any machine state changed outside the repo. The `PreCompact` / `PostCompact` hooks in `.claude/settings.json` only surface a reminder; keeping the file current is required regardless of whether that reminder appears
+- **`SESSION_HANDOVER.md`** (repo root) — keep it current with the session's state: update it before compaction and when finishing a task. It is the next chat session's starting point, so it must carry what git does not — the current task and its exact progress, which `TODO_*.md` / `project-docs/TODO_COMPLETED.md` entries moved, key decisions and the reasoning behind them, files changed, concrete next steps, and any machine state changed outside the repo. The `PreCompact` / `PostCompact` hooks in `.claude/settings.json` only surface a reminder; keeping the file current is required regardless of whether that reminder appears
 
 ## Key References
 

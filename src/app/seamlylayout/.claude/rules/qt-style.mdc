@@ -1,7 +1,7 @@
 # Qt / QML Style Guidelines
 
 Applies to all files under `qt_frontend/`.
-See [TODO.md](../../docs/status-docs/TODO.md) Phase 3 and onwards.
+See [TODO.md](../../docs/status-docs/TODO_SEAMLYLAYOUT_2.md) Phase 3 and onwards.
 
 ## C++ File Headers
 

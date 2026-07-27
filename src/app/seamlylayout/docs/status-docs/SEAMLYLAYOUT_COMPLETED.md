@@ -9,7 +9,7 @@ This file tracks tasks that were completed and moved out of `TODO.md`.
 
 ## Move rule
 
-When a task is completed in `docs/status-docs/TODO.md`:
+When a task is completed in `docs/status-docs/TODO_SEAMLYLAYOUT_2.md`:
 
 1. Remove it from `TODO.md`.
 2. Add it here under the current date.
@@ -22,7 +22,7 @@ Task entry format:
 
 ## 2026-05-22
 
-- [X] Initialized `TODO_COMPLETED.md` and completion-move workflow — `Status:Done | Priority:P1 | BlockedBy:none | CompletedBy:Copilot | Date:2026-05-22 | Notes:Created completion log and linked workflow from TODO.md`
+- [X] Initialized `project-docs/TODO_COMPLETED.md` and completion-move workflow — `Status:Done | Priority:P1 | BlockedBy:none | CompletedBy:Copilot | Date:2026-05-22 | Notes:Created completion log and linked workflow from TODO.md`
 - [X] Remove import probe before release — `Status:Done | Priority:P0 | BlockedBy:none | CompletedBy:Copilot | Date:2026-05-22 | Notes:Removed log_import_dom_probe() helper and all import_svg call sites in cxxqt_bridge; cargo check -p cxxqt_bridge passes.`
 - [X] Fix adjust_dom type warning — `Status:Done | Priority:P0 | BlockedBy:none | CompletedBy:Copilot | Date:2026-05-22 | Notes:Confirmed warning no longer reproduces in current debug build workflow (qd.ps1).`
 - [X] Add a 'settings_directory' preference that sets the default folder for settings load/save dialogs — `Status:Done | Priority:P0 | BlockedBy:none | CompletedBy:Copilot | Date:2026-05-22 | Notes:Implemented in PreferencesModel JSON contract and both Preferences UIs; Settings dialog now opens load/save pickers from resolved settings directory; full app build via qd.ps1 passes.`
@@ -152,7 +152,7 @@ Task entry format:
 - [X] PF3.2 Fix release `get_out_dir()` stub in `crates/cxxqt_bridge/src/lib.rs` to return `get_exe_dir().join("output")` instead of `PathBuf::new()` — `Status:Done | Priority:P1 | BlockedBy:none | CompletedBy:Claude | Date:2026-06-29 | Notes:Changed `OUT_DIR.get_or_init(std::path::PathBuf::new)` to `OUT_DIR.get_or_init(|| get_exe_dir().join("output"))`. Empty PathBuf caused downstream `.join()` calls to produce relative paths (e.g. "adjust_dom.svg") that could write to the current working directory; returning <exe_dir>/output without creating the directory is the correct sentinel — all writes fail gracefully with Err since the directory does not exist. Updated comment to reflect new behavior.`
 - [X] PF3.3 Update `release_get_out_dir_returns_empty_path_no_dir_created` (dg2), `release_get_out_dir_returns_empty_path_no_output_dir_created` (dg5), and `release_save_debug_dom_and_log_to_file_produce_no_filesystem_artifacts` (dg5) in `crates/cxxqt_bridge/src/lib.rs` to assert `<exe_dir>/output` path and no-directory-creation — `Status:Done | Priority:P1 | BlockedBy:PF3.2 | CompletedBy:Claude | Date:2026-06-29 | Notes:All three release tests formerly asserted `path.as_os_str().is_empty()`; updated to capture `existed_before = expected.exists()`, call `get_out_dir()`, assert `path == get_exe_dir().join("output")`, then assert `existed_before == expected.exists()` (no dir was created). Added `get_exe_dir` to the import lists in both dg2 and dg5 test modules. Updated DG5 inline comment from "get_out_dir is empty" to "returns <exe_dir>/output without creating it".`
 - [X] PF3.4 Normalize mixed CRLF/LF line endings in `crates/cxxqt_bridge/src/lib.rs` to pure LF — `Status:Done | Priority:P1 | BlockedBy:none | CompletedBy:Claude | Date:2026-06-29 | Notes:Used PowerShell `[System.IO.File]::ReadAllText` + `.Replace("\r\n", "\n").Replace("\r", "\n")` + `WriteAllText` to convert all 2434 stray CR bytes to pure LF. Verified 0 CR bytes after normalization. Prevents `\` artifacts in grep output and noisy diffs.`
-- [X] PF3.5 Fix `E.6` task marker in `docs/status-docs/TODO.md` from `* [ ]` to `- [ ]` to match documented task format — `Status:Done | Priority:P2 | BlockedBy:none | CompletedBy:Claude | Date:2026-06-29 | Notes:Changed the E.6 line from `* [ ] E.6 Implement 3D export...` to `- [ ] E.6 Implement 3D export...` (also removed a trailing double-space). Keeps the file self-consistent with the documented `- [ ] Task text` format in the Tag Schema section.`
+- [X] PF3.5 Fix `E.6` task marker in `docs/status-docs/TODO_SEAMLYLAYOUT_2.md` from `* [ ]` to `- [ ]` to match documented task format — `Status:Done | Priority:P2 | BlockedBy:none | CompletedBy:Claude | Date:2026-06-29 | Notes:Changed the E.6 line from `* [ ] E.6 Implement 3D export...` to `- [ ] E.6 Implement 3D export...` (also removed a trailing double-space). Keeps the file self-consistent with the documented `- [ ] Task text` format in the Tag Schema section.`
 
 ## 2026-06-29 (continued, proposed fixes PF2.1–PF2.3)
 
@@ -166,7 +166,7 @@ Task entry format:
 - [X] PF.2 Replace hard-coded `debug.txt` filename with `debug log file` in DG.1 line of DG.5 header comment in `crates/cxxqt_bridge/src/lib.rs` — `Status:Done | Priority:P3 | BlockedBy:none | CompletedBy:Claude | Date:2026-06-29 | Notes:Changed "(debug.txt writes; all pipelines)" to "(debug log file writes; all pipelines)"; actual default path is output/debug_log.txt and is overridable via SEAMLY_LOG_FILE.`
 - [X] PF.3 Replace `no debug.txt is written` with `no debug log file is written` in DG.5 release acceptance contract comment in `crates/cxxqt_bridge/src/lib.rs` — `Status:Done | Priority:P3 | BlockedBy:none | CompletedBy:Claude | Date:2026-06-29 | Notes:Same filename inaccuracy as PF.2; updated acceptance contract wording to be filename-agnostic.`
 - [X] PF.4 Correct `MIGRATION_STATUS.md` row 8c: `dg5_verification_tests` count 6→5; call-site counts lib.rs ~141→~123, layout_utils.rs ~26→~24 — `Status:Done | Priority:P3 | BlockedBy:none | CompletedBy:Claude | Date:2026-06-29 | Notes:Updated the 8c Completed row to match the actual module (5 tests) and current gated-call occurrence counts.`
-- [X] PF.5 Correct `TODO_COMPLETED.md` DG.5 entry: same test count (6→5) and call-site count corrections (lib.rs ~141→~123, layout_utils.rs ~26→~24) — `Status:Done | Priority:P3 | BlockedBy:none | CompletedBy:Claude | Date:2026-06-29 | Notes:Updated the original DG.5 completion log entry to match actual implementation.`
+- [X] PF.5 Correct `project-docs/TODO_COMPLETED.md` DG.5 entry: same test count (6→5) and call-site count corrections (lib.rs ~141→~123, layout_utils.rs ~26→~24) — `Status:Done | Priority:P3 | BlockedBy:none | CompletedBy:Claude | Date:2026-06-29 | Notes:Updated the original DG.5 completion log entry to match actual implementation.`
 
 ## 2026-06-29 (continued, DG.5)
 

@@ -1,12 +1,12 @@
 # Session handover
 
-## Current state: Tasks 34 and 53 are DONE and moved to `TODO_COMPLETED.md`
+## Current state: Tasks 34 and 53 are DONE and moved to `project-docs/TODO_COMPLETED.md`
 
 **Date:** 2026-07-26. **Branch:** `run-seamlyLayout` at **`1d74f7e18a`** ("merge develop"), **pushed — local and `origin/run-seamlyLayout` are identical, working tree clean.** Task 53 landed via **PR [#19](https://github.com/seamly/Seamly2D/pull/19)** (`task-53-seamlydata-root` → `run-seamlyLayout`) — **all 11 CI checks green** (Windows x64 27m4s, Windows arm64 cross-compile 26m28s, macOS 16m51s, Linux AppImage 9m3s, Linux unit tests 9m55s, CodeQL, CodeSee, Analyze actions/python/rust, version) — **merged**, task branch deleted locally and on origin. Task 34 landed earlier the same day.
 
 **`develop` was merged into `run-seamlyLayout`** (`1d74f7e18a`, the sanctioned direction — never the reverse). Local `develop` = `origin/develop` = `057e95bfca`. It brought in real upstream **code**, so "nothing has changed since PR #19" is no longer true: formula-reference guards (`vabstractpattern`, `vdrawtool`, `vtoolline`, `savetooloptions` — issues #1364/#1521), the pointname combobox colour fix (#1636), Finnish translations (#1637), and a CI consolidation that **deleted `.github/workflows/feat-ci.yml`** and folded feature-branch builds into `ci.yml`. **These changes have not been built or tested locally in this session.**
 
-Refer to `TODO_MIGRATE.md`, `TODO_SEAMLY2D.md` and `TODO_SEAMLYLAYOUT.md` for the tasks still open.
+Refer to `project-docs/TODO_MIGRATE.md`, `project-docs/TODO_SEAMLY2D.md` and `project-docs/TODO_SEAMLYLAYOUT.md` for the tasks still open.
 
 **Theme of this session:** the user-data root, then naming. Task 34 renamed and generalized the data root; Task 53 renamed it again (to `seamlyData`), made the settings migration self-cleaning, and fixed up the developer's own machine. The tail of the session moved four items out of `future-todos.md` into the task lists and settled which document owns the naming rules.
 
@@ -19,7 +19,7 @@ Refer to `TODO_MIGRATE.md`, `TODO_SEAMLY2D.md` and `TODO_SEAMLYLAYOUT.md` for th
 | **Task 14** | **Extended, not implemented.** The user asked whether the installer could check-then-move an existing data tree before anything is removed; it cannot today, so nine subtasks were folded into Task 14 under an "Update (2026-07-26) — moving an existing data tree" note |
 | **Task 52** | **Extended.** Gained a new *first* subtask: stop `CollectionTest` writing into the real user settings **before** repointing the `vsettings.cpp` accessors |
 | **Developer machine** | **Migrated and verified** — see the table below. This is state *outside* the repo; nothing in git records it |
-| **Tasks 54, 55, 57** | **Filed, not started**, moved out of `future-todos.md` (docs-only commits). **54** (`TODO_MIGRATE.md`) renames the three `vmisc` settings **files *and* classes** — `settings_common`/`SettingsCommon`, `settings_seamlyme`/`SettingsSeamlyMe`, `settings_seamly2d`/`SettingsSeamly2D` — per `.github/README-CODE-STYLES.md`; ~620 class occurrences plus 22 `.ts` `tr()` contexts (~220 translated strings) that go obsolete if not renamed with the classes. **55** (`TODO_MIGRATE.md`) refreshes `.github/README-DEVELOPER.md`; its first subtask is **already done** (see below). **57** (`TODO_SEAMLYLAYOUT.md`) was rewritten from "rename `app_core`'s `lib.rs`" to "give every crate root a unique name" — 11 crates all use `lib.rs`; splitting the root does **not** meet the uniqueness rule because Cargo still requires a root file, so the answer is `[lib] path = "src/<crate>.rs"` across all 11 |
+| **Tasks 54, 55, 57** | **Filed, not started**, moved out of `future-todos.md` (docs-only commits). **54** (`project-docs/TODO_MIGRATE.md`) renames the three `vmisc` settings **files *and* classes** — `settings_common`/`SettingsCommon`, `settings_seamlyme`/`SettingsSeamlyMe`, `settings_seamly2d`/`SettingsSeamly2D` — per `.github/README-CODE-STYLES.md`; ~620 class occurrences plus 22 `.ts` `tr()` contexts (~220 translated strings) that go obsolete if not renamed with the classes. **55** (`project-docs/TODO_MIGRATE.md`) refreshes `.github/README-DEVELOPER.md`; its first subtask is **already done** (see below). **57** (`project-docs/TODO_SEAMLYLAYOUT.md`) was rewritten from "rename `app_core`'s `lib.rs`" to "give every crate root a unique name" — 11 crates all use `lib.rs`; splitting the root does **not** meet the uniqueness rule because Cargo still requires a root file, so the answer is `[lib] path = "src/<crate>.rs"` across all 11 |
 | **Task 56** | **Filed, then removed at the user's request** — the `BUILD_PROBLEMS.txt` clangd noise is not being tracked as a task. (The finding stands if it comes back: 45 entries, all cascading from two `pp_file_not_found` roots because the repo has no compile database; qmake+MSVC builds those files clean.) |
 | **`README-DEVELOPER.md` Qt modules** | **Fixed in `09da7801e0`, then LOST in the `develop` merge.** The fix added Qt WebChannel + Qt Positioning with a note that ticking Qt WebEngine does not install them. `develop` carried four independent rewrites of the same file (`ad38f96e4e`, `d2aba7efb9`, `fbff2de94c`, `8d83757332`) and the merge resolution took their version of that section. **The current file lists neither — nor Qt WebEngine itself**, so the seamlyLayout prerequisites are now entirely undocumented and the Task 44 setup failure is fully reintroduced. Its Task 55 subtask has been un-checked |
 | **`develop` merge** | Brought 11 upstream commits (code + docs, above), and left a stray **`.github/README-DEVELOPER-NEW.md`** — a 149-line near-duplicate of `README-DEVELOPER.md` (6 insertions / 5 deletions apart) that exists on **neither** `develop` nor any earlier commit. It was introduced by the merge commit itself, so it is almost certainly a conflict-resolution artefact rather than an intended file |
@@ -34,7 +34,7 @@ Refer to `TODO_MIGRATE.md`, `TODO_SEAMLY2D.md` and `TODO_SEAMLYLAYOUT.md` for th
 | `09da7801e0` | Claude | same + `.github/README-DEVELOPER.md` | Task 54 extended to the class renames; Qt-module fix applied to the doc; **Task 56 deleted**; Task 57 rewritten around the uniqueness rule |
 | `ac65b9ee0b` | Claude | `CLAUDE.md` | Coding Rules point at `.github/README-CODE-STYLES.md`; `s`-prefix rule dropped; class-naming and file-matches-class rules added |
 | `df5d90bb14` | user | `.github/README-CODE-STYLES.md`, `future-todos.md` | The two naming **exceptions** (class-match file names; multiple `lib.rs` allowed) |
-| `5abe181d7a`, `f6dcaded15` | Claude | `SESSION_HANDOVER.md`, `CLAUDE.md`, `TODO_MIGRATE.md`, `TODO_SEAMLYLAYOUT.md` | Handover brought current; Tasks 54/57 reconciled with those exceptions |
+| `5abe181d7a`, `f6dcaded15` | Claude | `SESSION_HANDOVER.md`, `CLAUDE.md`, `project-docs/TODO_MIGRATE.md`, `project-docs/TODO_SEAMLYLAYOUT.md` | Handover brought current; Tasks 54/57 reconciled with those exceptions |
 | `b3634b4002` | user | `.github/README-CODE-STYLES.md` | Further style-guide edits |
 | `1d74f7e18a` | user | merge of `develop` (17 files) | Upstream code + doc rewrites; **dropped the Qt-module fix**; added the stray `README-DEVELOPER-NEW.md` |
 
@@ -47,7 +47,7 @@ Refer to `TODO_MIGRATE.md`, `TODO_SEAMLY2D.md` and `TODO_SEAMLYLAYOUT.md` for th
 | `src/test/Seamly2DTest/qttestmainlambda.cpp` | The Task 34 `initializeDataRoot()` mirroring was **removed**, with a comment saying not to restore it |
 | `src/test/Seamly2DTest/tst_dataroot.cpp` / `.h` | Six new cases: prune removes an empty tree / keeps one holding files / never removes the configured root / keeps a root containing the configured root / ignores a missing root; stray merged-then-deleted |
 | `.github/README-BUILDS.md` | Data-root section rewritten — why `seamlyData` and not `seamly`, the legacy-skeleton cleanup rules, the stray-deletion rules, and the real deletion incident in the testing note |
-| `TODO_MIGRATE.md`, `TODO_COMPLETED.md` | Task 53 entry added to `TODO_COMPLETED.md` (Task 34 marked partly superseded); Task 14 and Task 52 extended; every `~/seamly` → `~/seamlyData` in Tasks 14/35/36/37/38 |
+| `project-docs/TODO_MIGRATE.md`, `project-docs/TODO_COMPLETED.md` | Task 53 entry added to `project-docs/TODO_COMPLETED.md` (Task 34 marked partly superseded); Task 14 and Task 52 extended; every `~/seamly` → `~/seamlyData` in Tasks 14/35/36/37/38 |
 
 ### Two rules established here — do not undo them
 
@@ -134,4 +134,4 @@ Newly filed, none started, no priority assigned by the user yet:
 - **PowerShell splatting: `@array` is positional, `@hashtable` is by name.**
 - **Qt frontend test exes are GUI-subsystem binaries** — they print nothing to captured stdout. Run with `-o <file>,txt` and `QT_QPA_PLATFORM=offscreen`.
 - **`$proFile` collides with the automatic `$PROFILE`** (case-insensitive); `sd.ps1` still has it.
-- **Historical 6.10 references in `TODO_COMPLETED.md` and `PROJECT_PLAN.md` are deliberate** — they record what was true at the time.
+- **Historical 6.10 references in `project-docs/TODO_COMPLETED.md` and `project-docs/PROJECT_PLAN.md` are deliberate** — they record what was true at the time.

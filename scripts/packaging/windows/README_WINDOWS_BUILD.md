@@ -103,7 +103,7 @@ Output and staging live in `scripts\seamly-build-msi\` (kept out of git by the
 
 ## 3. Problems encountered on this run
 
-These were logged as **Task 31** in [`TODO_MIGRATE.md`](../../../TODO_MIGRATE.md);
+These were logged as **Task 31** in [`project-docs/TODO_MIGRATE.md`](../../../TODO_MIGRATE.md);
 they all stemmed from the family's Qt 6.10 → 6.11 migration (**Task 30**), and
 all three are **resolved by Task 30**. They are kept here as the record of what
 the two-Qt arrangement cost.

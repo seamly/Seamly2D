@@ -1,7 +1,7 @@
 # FFI Bridge Guidelines
 
 Applies to all `extern "C"` Rust code under `crates/*/src/ffi.rs` and the
-`crates/ffi_bridge/` crate. See [TODO.md](../../docs/status-docs/TODO.md) Phase 2.
+`crates/ffi_bridge/` crate. See [TODO.md](../../docs/status-docs/TODO_SEAMLYLAYOUT_2.md) Phase 2.
 
 ## Purpose
 

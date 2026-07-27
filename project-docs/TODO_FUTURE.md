@@ -1,18 +1,18 @@
 # Future TODO's
 
-Add tasks in TODO_MIGRATE.md -->
+Add tasks in project-docs/TODO_MIGRATE.md -->
 
 1. Create a plan to merge `src\app\seamlylayout\.claude` and `src\app\seamlylayout\.cgithub` data into the project `.claude` and `.github` data.
 
-Add task in TODO_SEAMLY2D.md -->
+Add task in project-docs/TODO_SEAMLY2D.md -->
 
 1.
 
-Add task in TODO_SEAMLYME.md -->
+Add task in project-docs/TODO_SEAMLYME.md -->
 
 1.
 
-Add task in TODO_SEAMLYLAYOUT.md -->
+Add task in project-docs/TODO_SEAMLYLAYOUT.md -->
 
 1.
 

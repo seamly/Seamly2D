@@ -1,6 +1,6 @@
 # Seamly Builds — Knowledge Base
 
-Pertinent knowledge about the Seamly family builds: why decisions were made, what is built, where things install and store data, and when/where each build runs. Update this file whenever build knowledge changes — it is the durable record behind the task entries in the `TODO_*.md` files / `TODO_COMPLETED.md`.
+Pertinent knowledge about the Seamly family builds: why decisions were made, what is built, where things install and store data, and when/where each build runs. Update this file whenever build knowledge changes — it is the durable record behind the task entries in the `TODO_*.md` files / `project-docs/TODO_COMPLETED.md`.
 
 Apps covered:
 
@@ -111,7 +111,7 @@ All three apps use the same `QStandardPaths::AppConfigLocation` / `QSettings::In
 
 **Bundle identifier:** seamlyLayout's CMake build previously set no `MACOSX_BUNDLE_GUI_IDENTIFIER` at all (an auto-generated placeholder); Task 16 added `io.seamly.SeamlyLayout` (`src/app/seamlylayout/qt_frontend/CMakeLists.txt`) so the bundle is well-formed for signing/notarization. This is unrelated to settings storage (see above) — seamly2d/seamlyme's existing `org.seamly2dproject.@EXECUTABLE@` identifiers (`dist/macx/*/Info.plist`) were left as-is for the same reason.
 
-**Not yet verified:** Task 16's code changes were made and build-verified on Windows (seamlyLayout is cross-platform Qt/CMake — the `Q_OS_MACOS` branches compile out on other platforms) but have not been exercised on real macOS hardware or the `macos-15` CI runner (no Mac available in this environment). Fresh-install and upgrade-with-legacy-data verification remains an open item — see `TODO_MIGRATE.md` Task 16.
+**Not yet verified:** Task 16's code changes were made and build-verified on Windows (seamlyLayout is cross-platform Qt/CMake — the `Q_OS_MACOS` branches compile out on other platforms) but have not been exercised on real macOS hardware or the `macos-15` CI runner (no Mac available in this environment). Fresh-install and upgrade-with-legacy-data verification remains an open item — see `project-docs/TODO_MIGRATE.md` Task 16.
 
 ### Linux — AppImage (as of Task 17, 2026-07)
 
@@ -232,7 +232,7 @@ CI note: `seamlylayout-ci.yml`'s `push`/`pull_request` path filters were extende
 
 ## Related records
 
-- `TODO_MIGRATE.md` — Tasks 13–18 hold the current actionable subtasks for everything marked "planned" above; completed tasks move to `TODO_COMPLETED.md`.
-- `PROJECT_PLAN.md` — the approved implementation plan.
+- `project-docs/TODO_MIGRATE.md` — Tasks 13–18 hold the current actionable subtasks for everything marked "planned" above; completed tasks move to `project-docs/TODO_COMPLETED.md`.
+- `project-docs/PROJECT_PLAN.md` — the approved implementation plan.
 - `.github/workflows/README_WORKFLOWS.md` — CI workflow details.
 - `src/app/seamlylayout/CHANGELOG.md` — history of seamlyLayout's settings-directory moves (e.g. `<exeDir>/settings/` → AppConfigLocation).

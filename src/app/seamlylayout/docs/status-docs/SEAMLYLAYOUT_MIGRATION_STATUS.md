@@ -6,8 +6,8 @@ Copyright: 2026
 Last updated: 2026-06-30 (Adjust rotation pivot moved from bbox upper-left corner to bbox center in PieceOverlayItem; buildTransform()/applyTransformString() rewritten to match; 4 new AdjustSceneTests, 26/26 green)
 
 This file is the **status board only** (phase-level progress and implementation state).
-Design rationale and open architectural choices are tracked in `docs/status-docs/DECISIONS.md`.
-Active execution tasks are tracked in `docs/status-docs/TODO.md`.
+Design rationale and open architectural choices are tracked in `docs/status-docs/SEAMLYLAYOUT_DECISIONS.md`.
+Active execution tasks are tracked in `docs/status-docs/TODO_SEAMLYLAYOUT_2.md`.
 
 ## Phase Status Board
 
@@ -50,4 +50,4 @@ Current docs should use the **DOM-string API names** below.
 
 - **Verified complete:** phases marked `Completed` above with successful build/runtime validation in prior sessions.
 - **Implemented, pending verification:** explicitly marked in the status table (e.g., 8d).
-- **Decision-blocked:** tracked in `docs/status-docs/DECISIONS.md` and referenced from `docs/status-docs/TODO.md`.
+- **Decision-blocked:** tracked in `docs/status-docs/SEAMLYLAYOUT_DECISIONS.md` and referenced from `docs/status-docs/TODO_SEAMLYLAYOUT_2.md`.
