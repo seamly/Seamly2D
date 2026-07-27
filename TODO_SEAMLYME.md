@@ -2,7 +2,7 @@
 
 Tasks that add features to the SeamlyMe measurements app.
 
-See `PROJECT_PLAN.md` for full details. Check off subtasks as they are accomplished; when every subtask of a task is complete, move the task to `COMPLETED.md`.
+See `PROJECT_PLAN.md` for full details. Check off subtasks as they are accomplished; when every subtask of a task is complete, move the task to `TODO_COMPLETED.md`.
 
 ## Task 43 — SeamlyMe: confirm Open Individual/Multisize/Template pickers default to the user measurement directories
 

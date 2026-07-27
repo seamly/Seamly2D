@@ -267,11 +267,40 @@ target_link_libraries(SeamlyLayout PRIVATE
 
 # ---------------------------------------------------------------------------
 # Qt frontend tests
+#
+# Task 58 moved the four Qt/C++ test suites out of this app tree and into
+# `src/test/SeamlyLayoutTest/`, alongside the rest of the family's tests
+# (`Seamly2DTest`, `ParserTest`, `TranslationsTest`, `CollectionTest`). They
+# stay CMake-built and ctest-run from here — `src/test/test.pro` deliberately
+# does NOT list `SeamlyLayoutTest`, because seamlyLayout is kept out of the
+# Seamly2D qmake build.
+#
+# The Rust tests did not move: `#[cfg(test)]` modules compile as part of their
+# crate and reach its private items, and Cargo requires integration tests to
+# sit beside the crate's `Cargo.toml`. They remain under `crates/*/src/`, run
+# by `cargo test --workspace`.
+#
+# SEAMLYLAYOUT_TEST_DIR is resolved once, as an absolute path, so the four
+# targets below never repeat a fragile `../../../` literal.
+#   qt_frontend -> seamlylayout -> app -> src, then down into test/
 # ---------------------------------------------------------------------------
 enable_testing()
 
+get_filename_component(SEAMLYLAYOUT_TEST_DIR
+    "${CMAKE_CURRENT_SOURCE_DIR}/../../../test/SeamlyLayoutTest"
+    ABSOLUTE
+)
+
+# Fail loudly at configure time rather than with a confusing "no such source
+# file" error if the tests are ever moved again without updating this path.
+if(NOT EXISTS "${SEAMLYLAYOUT_TEST_DIR}")
+    message(FATAL_ERROR
+        "SeamlyLayout test directory not found: ${SEAMLYLAYOUT_TEST_DIR}"
+    )
+endif()
+
 add_executable(AdjustSceneTests
-    tests/adjust/AdjustSceneTests.cpp
+    ${SEAMLYLAYOUT_TEST_DIR}/AdjustSceneTests.cpp
     src/adjust/PieceOverlayItem.cpp
     src/adjust/AdjustScene.cpp
 )
@@ -293,7 +322,7 @@ target_link_libraries(AdjustSceneTests PRIVATE
 add_test(NAME AdjustSceneTests COMMAND AdjustSceneTests)
 
 add_executable(AdjustControllerTests
-    tests/adjust/AdjustControllerTests.cpp
+    ${SEAMLYLAYOUT_TEST_DIR}/AdjustControllerTests.cpp
     src/adjust/AdjustController.cpp
     src/adjust/AdjustWindow.cpp
     src/adjust/AdjustScene.cpp
@@ -324,7 +353,7 @@ add_test(NAME AdjustControllerTests COMMAND AdjustControllerTests)
 set_tests_properties(AdjustSceneTests AdjustControllerTests PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
 
 add_executable(PreferencesModelTests
-    tests/preferences/PreferencesModelTests.cpp
+    ${SEAMLYLAYOUT_TEST_DIR}/PreferencesModelTests.cpp
     src/PreferencesModel.cpp
     src/Logger.cpp
     src/Platform.cpp
@@ -348,7 +377,7 @@ endif()
 add_test(NAME PreferencesModelTests COMMAND PreferencesModelTests)
 
 add_executable(SettingsModelTests
-    tests/settings/SettingsModelTests.cpp
+    ${SEAMLYLAYOUT_TEST_DIR}/SettingsModelTests.cpp
     src/SettingsModel.cpp
     src/Logger.cpp
 )
@@ -365,6 +394,29 @@ target_link_libraries(SettingsModelTests PRIVATE
 )
 
 add_test(NAME SettingsModelTests COMMAND SettingsModelTests)
+
+# On Windows the test executables are launched by ctest straight out of the
+# build directory, with no windeployqt output beside them. Qt's DLLs and the
+# platform plugin are then only reachable through PATH, so a bare
+# `ctest --preset debug` in a shell that has not sourced the kit fails at
+# startup - either "the code execution cannot proceed because Qt6Cored.dll was
+# not found", or, once the DLLs resolve, "could not find or load the Qt
+# platform plugin". Prepend the kit's own bin directory for the duration of the
+# test run so ctest works without any external environment setup.
+#
+# `$<TARGET_FILE_DIR:Qt6::Core>` is the directory CMake actually found Qt in,
+# so this follows the kit rather than pinning a version. Linux/macOS need no
+# equivalent: CI installs Qt onto the loader path, and RPATH covers local runs.
+if(WIN32)
+    set_tests_properties(
+        AdjustSceneTests
+        AdjustControllerTests
+        PreferencesModelTests
+        SettingsModelTests
+        PROPERTIES ENVIRONMENT_MODIFICATION
+        "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>"
+    )
+endif()
 
 # ---------------------------------------------------------------------------
 # Platform-specific libraries

@@ -15,9 +15,10 @@ name: SeamlyLayout CI
 #       steps (Rust, the cargo cache, the qtwebengine/qtwebchannel/qtpositioning
 #       module set) that no parent-app job wants.
 #     * Independent triggers — this file is path-filtered to
-#       `src/app/seamlylayout/**`, so layout-only changes do not rebuild the
-#       parent apps on every platform, and parent-only changes do not rebuild
-#       the Rust workspace.
+#       `src/app/seamlylayout/**` plus `src/test/SeamlyLayoutTest/**` (where
+#       Task 58 moved the Qt/C++ test suites), so layout-only changes do not
+#       rebuild the parent apps on every platform, and parent-only changes do
+#       not rebuild the Rust workspace.
 #     * Independent failure — a SeamlyLayout failure never blocks the
 #       seamly2d/seamlyme jobs, and vice versa.
 #   Merging is therefore a "could", not a "should"; revisit it only if the
@@ -38,12 +39,16 @@ on:
       - run-seamlyLayout
     paths:
       - 'src/app/seamlylayout/**'
+      # Task 58 moved the Qt/C++ test suites here, out of the app tree; without
+      # this entry a test-only change would trigger no CI at all.
+      - 'src/test/SeamlyLayoutTest/**'
       - '.github/workflows/seamlylayout-ci.yml'
   # Every task branch reaches run-seamlyLayout via a pull request, so this trigger
   # gives task-branch pushes their build/test coverage without duplicate runs.
   pull_request:
     paths:
       - 'src/app/seamlylayout/**'
+      - 'src/test/SeamlyLayoutTest/**'
       - '.github/workflows/seamlylayout-ci.yml'
   workflow_dispatch:
 
