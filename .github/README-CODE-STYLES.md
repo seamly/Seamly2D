@@ -50,6 +50,21 @@ For more information, read full [JSF-AV standard](http://www2.research.att.com/~
 - No `signal.h`
 - No `time.h`
 - No `abort`, `exit`
+- No absolute machine-specific paths in source
+  - Never commit a path naming one developer's machine, home directory, or checkout
+    (`C:/Users/<name>/...`, `/home/<name>/...`, `/Users/<name>/...`). It helps exactly
+    one machine, and it ships a personal filesystem path — and the private repo's
+    directory name — to everyone who reads the source.
+  - Derive the location instead: relative to the running executable
+    (`QCoreApplication::applicationDirPath()`), from a `QStandardPaths` location, or from
+    an existing setting or environment variable. See
+    `SeamlyFamilyPaths::locateSeamlyLayoutDevBuild()` for the source-checkout case.
+  - Placeholders in comments and synthetic paths in tests are fine — `C:/Users/<user>/...`
+    in a Doxygen example, `/home/user/...` as test data. It is a *real* home directory in
+    shipped code that is banned.
+  - Before pushing, check with the command below and eyeball each hit — placeholder
+    examples in comments are expected, a real user name is not:
+    `git grep -nE "C:[\\\\/]+Users[\\\\/]+[A-Za-z0-9_-]+|/home/[a-z]|/Users/[a-z]" -- 'src/**/*.cpp' 'src/**/*.h' 'src/**/*.rs' 'src/**/*.qml' ':!src/test'`
 - No macros (for functions, or constants)
 - No unions
 - No comma operator

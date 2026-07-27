@@ -198,3 +198,213 @@ void TST_SeamlyFamilyPaths::DirectoryNamedLikeExecutableIsIgnored() const
     QCOMPARE(SeamlyFamilyPaths::locateSeamlyLayout(dir.path()),
              QFileInfo(nestedExe).absoluteFilePath());
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief DevBuildEmptyStartDirectoryFindsNothing verifies an empty start
+ * directory is rejected outright rather than resolved against the process's
+ * current working directory, which would make the lookup depend on where the
+ * test runner happened to be launched from.
+ */
+void TST_SeamlyFamilyPaths::DevBuildEmptyStartDirectoryFindsNothing() const
+{
+    QVERIFY(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(QString()).isEmpty());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief DevBuildNoCheckoutFindsNothing verifies the walk returns empty when no
+ * ancestor of the start directory is a source checkout containing a build.
+ *
+ * This is the end user's case: the development fallback must stay inert on a
+ * machine that has only an installed application.
+ */
+void TST_SeamlyFamilyPaths::DevBuildNoCheckoutFindsNothing() const
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+
+    // A plausible install layout, but nothing resembling a source checkout above it.
+    const QString installBin = dir.path() + QLatin1String("/Seamly/bin");
+    QVERIFY(QDir().mkpath(installBin));
+
+    QVERIFY(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(installBin).isEmpty());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief DevBuildFoundFromReleaseShadowBuild verifies the walk reaches the
+ * checkout root from the release shadow build's bin directory.
+ *
+ * Layout reproduced: seamly2d runs from `<checkout>/build/src/app/seamly2d/bin`,
+ * five levels below the checkout root that holds the SeamlyLayout build.
+ */
+void TST_SeamlyFamilyPaths::DevBuildFoundFromReleaseShadowBuild() const
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+
+    const QString checkout = dir.path();
+    const QString seamly2dBin = checkout + QLatin1String("/build/src/app/seamly2d/bin");
+    QVERIFY(QDir().mkpath(seamly2dBin));
+
+    const QString layoutExe = checkout
+                            + QLatin1String("/src/app/seamlylayout/qt_frontend/build/Release/")
+                            + SeamlyFamilyPaths::seamlyLayoutExeName();
+    QVERIFY(createDummyFile(layoutExe));
+
+    QCOMPARE(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(seamly2dBin),
+             QFileInfo(layoutExe).absoluteFilePath());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief DevBuildFoundFromDebugShadowBuild verifies the walk also reaches the
+ * checkout root from the deeper debug shadow build produced by scripts/sd.ps1.
+ *
+ * Layout reproduced: seamly2d runs from
+ * `<checkout>/scripts/seamly2d-build-debug/src/app/seamly2d/bin` — six levels
+ * below the checkout root, the deepest layout the project uses.
+ */
+void TST_SeamlyFamilyPaths::DevBuildFoundFromDebugShadowBuild() const
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+
+    const QString checkout = dir.path();
+    const QString seamly2dBin =
+        checkout + QLatin1String("/scripts/seamly2d-build-debug/src/app/seamly2d/bin");
+    QVERIFY(QDir().mkpath(seamly2dBin));
+
+    const QString layoutExe = checkout
+                            + QLatin1String("/src/app/seamlylayout/qt_frontend/build/Debug/")
+                            + SeamlyFamilyPaths::seamlyLayoutExeName();
+    QVERIFY(createDummyFile(layoutExe));
+
+    QCOMPARE(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(seamly2dBin),
+             QFileInfo(layoutExe).absoluteFilePath());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief DevBuildReleaseTakesPrecedenceOverDebug verifies that when a developer
+ * has built both configurations, Release wins.
+ *
+ * The hard-coded path this lookup replaced (Task 50) named the Debug build
+ * unconditionally, so it could hand off a build arbitrarily older than the
+ * Release binary sitting beside it.
+ */
+void TST_SeamlyFamilyPaths::DevBuildReleaseTakesPrecedenceOverDebug() const
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+
+    const QString checkout = dir.path();
+    const QString seamly2dBin = checkout + QLatin1String("/build/src/app/seamly2d/bin");
+    QVERIFY(QDir().mkpath(seamly2dBin));
+
+    const QString buildRoot = checkout + QLatin1String("/src/app/seamlylayout/qt_frontend/build/");
+    const QString releaseExe =
+        buildRoot + QLatin1String("Release/") + SeamlyFamilyPaths::seamlyLayoutExeName();
+    const QString debugExe =
+        buildRoot + QLatin1String("Debug/") + SeamlyFamilyPaths::seamlyLayoutExeName();
+    QVERIFY(createDummyFile(releaseExe));
+    QVERIFY(createDummyFile(debugExe));
+
+    QCOMPARE(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(seamly2dBin),
+             QFileInfo(releaseExe).absoluteFilePath());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief DevBuildFindsDebugWhenReleaseAbsent verifies Debug is still found when
+ * it is the only configuration built — the common case for a developer working
+ * with scripts/sd.ps1.
+ */
+void TST_SeamlyFamilyPaths::DevBuildFindsDebugWhenReleaseAbsent() const
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+
+    const QString checkout = dir.path();
+    const QString seamly2dBin = checkout + QLatin1String("/build/src/app/seamly2d/bin");
+    QVERIFY(QDir().mkpath(seamly2dBin));
+
+    const QString debugExe = checkout
+                           + QLatin1String("/src/app/seamlylayout/qt_frontend/build/Debug/")
+                           + SeamlyFamilyPaths::seamlyLayoutExeName();
+    QVERIFY(createDummyFile(debugExe));
+
+    QCOMPARE(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(seamly2dBin),
+             QFileInfo(debugExe).absoluteFilePath());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief DevBuildDirectoryNamedLikeExecutableIsIgnored verifies the isFile()
+ * guard applies to the development lookup too: a *directory* at the executable's
+ * path is never a match, and the walk goes on to find the real Debug build.
+ *
+ * On non-Windows platforms the executable name carries no ".exe" suffix, which
+ * makes this collision easy to create by accident.
+ */
+void TST_SeamlyFamilyPaths::DevBuildDirectoryNamedLikeExecutableIsIgnored() const
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+
+    const QString checkout = dir.path();
+    const QString seamly2dBin = checkout + QLatin1String("/build/src/app/seamly2d/bin");
+    QVERIFY(QDir().mkpath(seamly2dBin));
+
+    const QString buildRoot = checkout + QLatin1String("/src/app/seamlylayout/qt_frontend/build/");
+
+    // A directory exactly where the Release executable would be.
+    QVERIFY(QDir().mkpath(buildRoot + QLatin1String("Release/")
+                          + SeamlyFamilyPaths::seamlyLayoutExeName()));
+
+    // With only the impostor directory present, nothing is found.
+    QVERIFY(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(seamly2dBin).isEmpty());
+
+    // The real Debug build must then win over the impostor Release directory.
+    const QString debugExe =
+        buildRoot + QLatin1String("Debug/") + SeamlyFamilyPaths::seamlyLayoutExeName();
+    QVERIFY(createDummyFile(debugExe));
+
+    QCOMPARE(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(seamly2dBin),
+             QFileInfo(debugExe).absoluteFilePath());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief DevBuildStopsBeforeUnboundedWalk verifies the walk is bounded: a
+ * checkout further above the start directory than the depth limit is not found.
+ *
+ * Without the bound the lookup would keep climbing to the filesystem root,
+ * probing directories that have nothing to do with the application.
+ */
+void TST_SeamlyFamilyPaths::DevBuildStopsBeforeUnboundedWalk() const
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+
+    const QString checkout = dir.path();
+
+    // Ten levels below the checkout root — beyond the eight-level limit.
+    const QString deepDirectory =
+        checkout + QLatin1String("/a/b/c/d/e/f/g/h/i/j");
+    QVERIFY(QDir().mkpath(deepDirectory));
+
+    const QString layoutExe = checkout
+                            + QLatin1String("/src/app/seamlylayout/qt_frontend/build/Release/")
+                            + SeamlyFamilyPaths::seamlyLayoutExeName();
+    QVERIFY(createDummyFile(layoutExe));
+
+    QVERIFY(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(deepDirectory).isEmpty());
+
+    // Sanity check that the same tree *is* found from within the limit, so the
+    // case above fails for the depth bound and not for a broken fixture.
+    const QString shallowDirectory = checkout + QLatin1String("/a/b/c");
+    QCOMPARE(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(shallowDirectory),
+             QFileInfo(layoutExe).absoluteFilePath());
+}

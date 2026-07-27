@@ -151,7 +151,7 @@
       "Bash(qmake *)",
       "Bash(jom *)",
       "Bash(nmake *)",
-      "PowerShell(Test-Path \"C:\\\\Qt\\\\6.10.1\\\\msvc2022_64\\\\bin\\\\qmake.exe\"; & \"${env:ProgramFiles\\(x86\\)}\\\\Microsoft Visual Studio\\\\Installer\\\\vswhere.exe\" -latest -property installationPath)"
+      "PowerShell(& \"${env:ProgramFiles\\(x86\\)}\\\\Microsoft Visual Studio\\\\Installer\\\\vswhere.exe\" *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\susan\\AppData\\Local\\Temp",

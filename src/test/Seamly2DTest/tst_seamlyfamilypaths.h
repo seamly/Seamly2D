@@ -34,10 +34,16 @@
 #include <QObject>
 
 /**
- * @brief TST_SeamlyFamilyPaths tests SeamlyFamilyPaths::locateSeamlyLayout(),
- * the install-directory lookup seamly2d uses to find the SeamlyLayout
- * executable: flat beside the caller's apps, or inside the "SeamlyLayout"
+ * @brief TST_SeamlyFamilyPaths tests the two lookups seamly2d uses to find the
+ * SeamlyLayout executable.
+ *
+ * SeamlyFamilyPaths::locateSeamlyLayout() is the install-directory lookup: the
+ * executable flat beside the caller's apps, or inside the "SeamlyLayout"
  * subdirectory created by the Windows MSI installer (Task 13).
+ *
+ * SeamlyFamilyPaths::locateSeamlyLayoutDevBuild() is the development fallback
+ * (Task 50): an upward walk from the running executable's directory looking for
+ * a SeamlyLayout build inside the source checkout, Release before Debug.
  *
  * Every case runs against a QTemporaryDir populated with dummy files, so the
  * suite is hermetic — no real installation, settings value, or application
@@ -55,6 +61,15 @@ private slots:
     void FindsSubdirectoryExecutable() const;
     void FlatLayoutTakesPrecedence() const;
     void DirectoryNamedLikeExecutableIsIgnored() const;
+
+    void DevBuildEmptyStartDirectoryFindsNothing() const;
+    void DevBuildNoCheckoutFindsNothing() const;
+    void DevBuildFoundFromReleaseShadowBuild() const;
+    void DevBuildFoundFromDebugShadowBuild() const;
+    void DevBuildReleaseTakesPrecedenceOverDebug() const;
+    void DevBuildFindsDebugWhenReleaseAbsent() const;
+    void DevBuildDirectoryNamedLikeExecutableIsIgnored() const;
+    void DevBuildStopsBeforeUnboundedWalk() const;
 };
 
 #endif // TST_SEAMLYFAMILYPATHS_H

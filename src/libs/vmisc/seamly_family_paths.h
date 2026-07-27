@@ -45,6 +45,7 @@ namespace SeamlyFamilyPaths
 {
     QString seamlyLayoutExeName();
     QString locateSeamlyLayout(const QString &directory);
+    QString locateSeamlyLayoutDevBuild(const QString &startDirectory);
 }
 
 #endif // SEAMLY_FAMILY_PATHS_H

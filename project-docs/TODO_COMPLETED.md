@@ -2,6 +2,31 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task 50 — A developer's absolute home path is hard-coded in `application_2d.cpp` (completed 2026-07-27)
+
+`Application2D::seamlyLayoutFilePath()`'s development fallback embedded one machine's checkout path — `C:/Users/susan/Projects/Seamly2D-private/src/app/seamlylayout/qt_frontend/build/Debug/SeamlyLayout.exe` — in shipped GPL source headed for the upstream PR. It named the *private* repo directory, helped exactly one machine, and on that machine silently pinned a possibly stale **Debug** build.
+
+- [X] **Replaced with a machine-independent lookup**: new `SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(startDirectory)` in `src/libs/vmisc/seamly_family_paths.cpp`. It walks up from the running executable's directory, treating each ancestor as a candidate checkout root and testing `<root>/src/app/seamlylayout/qt_frontend/build/<config>/SeamlyLayout(.exe)`. Both project shadow-build layouts resolve without being named — the release build at `<checkout>/build/…` (five levels up) and `sd.ps1`'s debug build at `<checkout>/scripts/seamly2d-build-debug/…` (six). The walk is bounded at eight parents so it cannot climb to the filesystem root probing unrelated directories. Placed in `vmisc` beside `locateSeamlyLayout()` so the test suite can reach it, and **parameterized on the start directory** — the same rule Task 34/53 established — so tests point it at a `QTemporaryDir` instead of a real path
+- [X] **Release preferred over Debug**, and still the last resort: the configured `paths/seamlyLayoutApp` setting and the installed-copy lookup both run first, so a source tree above an installed application can never shadow the installation. Because it only matches inside a *built* checkout, it is inert on an end user's machine
+- [X] **Note in the coding rules** — new "No absolute machine-specific paths in source" rule in `.github/README-CODE-STYLES.md` (the authority per `CLAUDE.md`), with the allowed alternatives, the explicit carve-out for placeholder examples and test data, and a `git grep` command to run before pushing
+
+**A CI gate was considered and deliberately not added.** Measuring the tree first showed a naive repo-wide grep is unusable: `src/test/Seamly2DTest/tst_misc.cpp` alone has ~20 synthetic `/home/user/...` rows, `tst_dataroot.cpp` uses `C:/Users/tester/...`, and `vcommonsettings.cpp` / `PreferencesModel.cpp` carry `C:/Users/<user>/...` placeholders in Doxygen comments — all legitimate. Distinguishing a *real* home directory from a placeholder needs a human, so the rule is documented with a check command rather than enforced as a build failure. Revisit if it recurs.
+
+**Found while verifying, not fixed:** `src/app/seamly2d/core/BUILD_PROBLEMS.txt` is tracked and carries ~45 absolute `/c:/Users/susan/Projects/Seamly2D-private/…` paths — the same leak this task closed in code. It is the clangd diagnostic dump `SESSION_HANDOVER.md` describes (editor noise from the repo having no compile database; the qmake build compiles those files clean). Deleting a tracked file was outside this task's scope — flagged for a decision before the upstream PR.
+
+- [X] Tests: `TST_SeamlyFamilyPaths` 5 → 13 cases, all against `QTemporaryDir` fixtures — empty start directory, no-checkout (the end user's case), found from the release shadow build, found from the deeper debug shadow build, Release-beats-Debug, Debug-when-Release-absent, a directory named like the executable rejected by the `isFile()` guard, and the depth bound (a checkout ten levels up is not found, three levels up is)
+
+## Task 45 — Stale `C:\Qt\6.10.1` paths remain in the Claude settings allowlists (completed 2026-07-27)
+
+Three permission allowlist entries still named the retired Qt 6.10.1 kit, so they no longer matched the commands actually run and had stopped pre-approving them. Harmless (a non-matching entry just means an extra prompt) but misleading documentation of a toolchain that moved to 6.11.1 in Task 30.
+
+Both files turned out to be **fully redundant with broader rules already present**, so the fix was removal rather than a version bump — which also satisfies the "make them version-agnostic so the next Qt bump does not stale them again" preference, permanently.
+
+- [X] `.claude/settings.json:154` (shared) — the compound `Test-Path "C:\Qt\6.10.1\…\qmake.exe"; & …vswhere.exe …` entry was already covered by `PowerShell(Test-Path *)` on line 10. Replaced with one version-agnostic entry that names no Qt version at all: `PowerShell(& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" *)`, a prefix pattern covering any vswhere query
+- [X] `.claude/settings.local.json:17` and `:19` (developer-local) — both **deleted**. The file opens with `PowerShell(*)` and `Bash(*)`, which already allow everything in it; line 19's `cmd /c "call vcvars64.bat && … qmake.exe …"` was additionally covered by `PowerShell(cmd /c *)` in the shared file. Note this file is **gitignored** (`.gitignore:189`), so that half of the fix exists only on the developer's machine and is not in the commit
+
+Both files re-validated as parseable JSON after the edit.
+
 ## Task 53 — Rename the default data root to `~/seamlyData`; delete the merged settings stray and the empty legacy tree (completed 2026-07-26)
 
 Follow-on to Task 34, raised by the user after inspecting the result on their own machine. Three changes, all in the same area:

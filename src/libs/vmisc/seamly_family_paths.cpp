@@ -30,9 +30,37 @@
 
 #include "seamly_family_paths.h"
 
+#include <QDir>
 #include <QFileInfo>
 #include <QLatin1Char>
 #include <QLatin1String>
+#include <QStringList>
+
+namespace
+{
+/**
+ * @brief sourceTreeBuildSubPath is the path of a SeamlyLayout development build
+ * relative to the root of a Seamly2D source checkout, without the build
+ * configuration directory.
+ *
+ * The Qt frontend's CMake build writes its executable to
+ * `<checkout>/src/app/seamlylayout/qt_frontend/build/<config>/SeamlyLayout(.exe)`.
+ */
+const QLatin1String sourceTreeBuildSubPath("/src/app/seamlylayout/qt_frontend/build/");
+
+/**
+ * @brief maxUpwardLevels bounds how far the development-build lookup walks up
+ * from the running executable's directory while searching for the checkout root.
+ *
+ * The deepest layout in use is the debug shadow build, whose executable sits at
+ * `<checkout>/scripts/seamly2d-build-debug/src/app/seamly2d/bin/` — six levels
+ * below the checkout root. The release shadow build (`<checkout>/build/...`) is
+ * five. Eight leaves room for a differently nested build tree while still
+ * terminating quickly, and keeps the walk from climbing out of the checkout and
+ * probing unrelated parts of the filesystem.
+ */
+const int maxUpwardLevels = 8;
+} // namespace
 
 namespace SeamlyFamilyPaths
 {
@@ -102,6 +130,82 @@ QString locateSeamlyLayout(const QString &directory)
     }
 
     return QString(); // Neither layout present; the caller decides what to do.
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief locateSeamlyLayoutDevBuild looks for a SeamlyLayout executable built
+ * from the same source checkout as the running application.
+ *
+ * This is the development convenience that lets a locally built seamly2d hand
+ * off to a locally built SeamlyLayout with no configuration, on any machine.
+ * It replaces the single hard-coded developer path this function grew out of
+ * (Task 50), which named one contributor's checkout and therefore helped
+ * exactly one machine.
+ *
+ * The checkout root is derived from the caller's directory rather than assumed:
+ * the walk starts at @p startDirectory and climbs up to ::maxUpwardLevels
+ * parents, treating each as a candidate checkout root and testing whether it
+ * contains a SeamlyLayout build. Both shadow-build layouts the project uses
+ * resolve this way — the release build at `<checkout>/build/...` (five levels)
+ * and `scripts/sd.ps1`'s debug build at
+ * `<checkout>/scripts/seamly2d-build-debug/...` (six) — without either being
+ * named here, so a differently nested build tree still works.
+ *
+ * At each level **Release is preferred over Debug**: a developer who has built
+ * both almost always wants the current release binary, and the old hard-coded
+ * path silently pinned Debug, which could be arbitrarily stale.
+ *
+ * This lookup is deliberately the *last* resort in Application2D's chain — a
+ * configured setting and an installed copy both outrank it — so a source tree
+ * that happens to sit above an installed application can never shadow the
+ * installation. Because it only ever matches inside a checkout that has been
+ * built, it is inert on an end user's machine.
+ *
+ * @param startDirectory absolute path to start the upward walk from (typically
+ *        the directory of the running executable). Passed in rather than read
+ *        from QCoreApplication so the tests can point it at a QTemporaryDir.
+ * @return absolute path of the SeamlyLayout development build, or an empty
+ *         string when no checkout above @p startDirectory contains one.
+ */
+QString locateSeamlyLayoutDevBuild(const QString &startDirectory)
+{
+    if (startDirectory.isEmpty())
+    {
+        return QString();
+    }
+
+    const QString exeName = seamlyLayoutExeName();
+
+    // Release first, so a stale Debug build never wins over a current Release one.
+    const QStringList configurations{QLatin1String("Release"), QLatin1String("Debug")};
+
+    QDir directory(startDirectory);
+
+    // Climb one level per iteration, testing each ancestor as a checkout root.
+    for (int level = 0; level <= maxUpwardLevels; ++level)
+    {
+        const QString candidateRoot = directory.absolutePath();
+
+        for (const QString &configuration : configurations)
+        {
+            const QFileInfo candidate(candidateRoot + sourceTreeBuildSubPath + configuration
+                                      + QLatin1Char('/') + exeName);
+            // Must be an existing regular file — a directory of the same name is not a match.
+            if (candidate.exists() && candidate.isFile())
+            {
+                return candidate.absoluteFilePath();
+            }
+        }
+
+        // cdUp() fails at the filesystem root, which ends the walk early.
+        if (!directory.cdUp())
+        {
+            break;
+        }
+    }
+
+    return QString(); // No development build above the caller; not a source checkout.
 }
 
 } // namespace SeamlyFamilyPaths

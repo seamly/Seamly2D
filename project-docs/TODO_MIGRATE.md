@@ -214,18 +214,6 @@ A **local bootstrap for Task 33** (which signs the exes + the `.msi` in GitHub A
 - [ ] Once proven locally, promote the working configuration into `.github/workflows/windows-msi.yml` (inner-exe + MSI signing), guarded on the `SEAMLY_SIGNING_*` secrets so CI and local share one recipe — at which point this task folds into Task 33
 - [ ] Document the local signing steps (and that this is a temporary bootstrap for the CI signing) in `scripts/packaging/windows/README.md` / `README_WINDOWS_BUILD.md`
 
-## Task 45 — Stale `C:\Qt\6.10.1` paths remain in the Claude settings allowlists (found doing Task 30, 2026-07-25)
-
-Two permission allowlist entries still name the retired Qt 6.10.1 kit, so they no longer match the commands actually run and silently stop pre-approving them:
-
-- `.claude/settings.json:154` — `PowerShell(Test-Path "C:\\Qt\\6.10.1\\msvc2022_64\\bin\\qmake.exe"; ...)`
-- `.claude/settings.local.json:17` and `:19` — a `Test-Path` on the same 6.10.1 qmake, and a `cmd /c ... C:\\Qt\\6.10.1\\msvc2022_64\\bin\\qmake.exe ..\\Seamly.pro CONFIG+=release` build command
-
-Harmless (a non-matching allowlist entry just means an extra prompt), but they are misleading documentation of the local toolchain now that the machine is on 6.11.1 and `sd.ps1`/`build.ps1`/`smsi.ps1` all auto-detect the kit rather than hard-coding a path.
-
-- [ ] Update or remove the 6.10.1 entries in `.claude/settings.json` (shared) so they reflect the current kit — or better, make them version-agnostic so the next Qt bump does not stale them again
-- [ ] Same for the two entries in `.claude/settings.local.json` (developer-local, not shared)
-
 ## Task 46 — `sd.ps1` silently reuses stale qmake Makefiles after a Qt change (found doing Task 30, 2026-07-25)
 
 `scripts/sd.ps1` has no `-Clean` switch and its generated Makefiles use qmake's standard recursive guard, `if not exist Makefile qmake -o Makefile ...`. The *top-level* Makefile is regenerated with the newly detected kit, but every **sub**-Makefile already present in `scripts/seamly2d-build-debug/` is reused as-is — so after the machine moved from Qt 6.10.1 to 6.11.1 the build picked the right qmake at the top and the wrong one everywhere below:
@@ -288,21 +276,6 @@ This is **pre-existing and unrelated to the Qt bump**: `git log -S "arguments()"
 - [ ] Decide and document the contract between the two apps (accepted argument forms, exit codes, what happens when SeamlyLayout is already running); record it in `src/app/seamlylayout/CLAUDE.md` and `project-docs/NEW-ATTRIBUTES.csv`'s companion notes
 - [ ] Add coverage: a Qt frontend test that the argument is parsed and dispatched, and extend `tst_seamlyfamilypaths` / a seamly2d-side test so the launch contract (`startDetached(exe, {svgPath}, workingDir)`) cannot drift from what the daughter app accepts
 - [ ] End-to-end verify: open a pattern in seamly2d, enter Layout Mode, and confirm SeamlyLayout comes up with the pieces already loaded — this is the check Task 30's verify subtask could not complete
-
-## Task 50 — A developer's absolute home path is hard-coded in `application_2d.cpp` (found doing Task 30, 2026-07-25)
-
-`Application2D::seamlyLayoutFilePath()`'s development fallback (`src/app/seamly2d/core/application_2d.cpp:507-512`) embeds one machine's checkout path in shipped source:
-
-```cpp
-const QFileInfo devBuildFile(QStringLiteral(
-    "C:/Users/susan/Projects/Seamly2D-private/src/app/seamlylayout/qt_frontend/build/Debug/SeamlyLayout.exe"));
-```
-
-It is harmless on any other machine (the path simply does not exist, so the function falls through to returning empty) but it is a personal filesystem path in a GPL source file headed for an upstream PR, it names the *private* repo directory, and it only ever helps one developer — on that machine it silently prefers a possibly stale **Debug** build over anything else the lookup would have found.
-
-- [ ] Replace the hard-coded path with something machine-independent — derive the source-tree location relative to the running executable, or read an environment variable / existing setting (`getSeamlyLayoutAppPath()` already covers the "point me at a build" case)
-- [ ] If a development fallback is kept at all, prefer the Release build and guard it so it never outranks an installed copy on a normal user's machine
-- [ ] Add a repo-wide check (or a note in the coding rules) against committing absolute `C:/Users/...`, `/home/...` or `/Users/...` paths, so this cannot recur before the upstream PR
 
 ## Task 51 — Windows MSI: finish the install-time experience (shortcuts, registry, ARP, associations, UAC, upgrade warning)
 

@@ -476,10 +476,15 @@ bool Application2D::notify(QObject *receiver, QEvent *event)
  * apps share one Qt runtime, e.g. the Linux Flatpak's /app/bin) or in the
  * "SeamlyLayout" subdirectory the Windows MSI installer uses (Task 13; there
  * SeamlyLayout carries its own Qt runtime, which cannot share a flat directory
- * with the parent apps' differently-versioned Qt DLLs) — and (3) the
- * SeamlyLayout development build inside the source tree (Debug build of the
- * Qt frontend), so that Layout Mode works during development without any
- * configuration.
+ * with the parent apps' differently-versioned Qt DLLs) — and (3) a SeamlyLayout
+ * development build inside the source checkout this executable was built from,
+ * located relative to the running executable by
+ * SeamlyFamilyPaths::locateSeamlyLayoutDevBuild() (Release preferred over
+ * Debug), so that Layout Mode works during development without any
+ * configuration and without naming any one developer's machine (Task 50).
+ *
+ * The order matters: the development build is tried last, so it can never
+ * shadow a configured path or an installed copy.
  *
  * @return absolute path of the SeamlyLayout executable, or an empty string when it cannot be found.
  */
@@ -501,17 +506,14 @@ QString Application2D::seamlyLayoutFilePath()
         return installedPath;
     }
 
-    // Development fallback: the Debug build of the SeamlyLayout Qt frontend in
-    // the source tree. Lets a locally built Seamly2D hand off to the locally
-    // built SeamlyLayout when neither a setting nor an installed copy exists.
-    const QFileInfo devBuildFile(QStringLiteral(
-        "C:/Users/susan/Projects/Seamly2D-private/src/app/seamlylayout/qt_frontend/build/Debug/SeamlyLayout.exe"));
-    if (devBuildFile.exists())
-    {
-        return devBuildFile.absoluteFilePath();
-    }
-
-    return QString(); // Not found; the caller is responsible for informing the user.
+    // Development fallback: a SeamlyLayout Qt frontend built from the same
+    // source checkout as this executable, found by walking up from the running
+    // application's directory (Release preferred over Debug). Lets a locally
+    // built Seamly2D hand off to the locally built SeamlyLayout when neither a
+    // setting nor an installed copy exists — on any machine, and only ever
+    // inside a built checkout, so it cannot shadow a real installation.
+    return SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(QCoreApplication::applicationDirPath());
+    // An empty return means not found; the caller is responsible for informing the user.
 }
 
 //---------------------------------------------------------------------------------------------------------------------

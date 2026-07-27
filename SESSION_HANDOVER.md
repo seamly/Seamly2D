@@ -1,6 +1,71 @@
 # Session handover
 
-## Current state (2026-07-27): Task 58 merged; documentation reorganized
+## Current state (2026-07-27, later session): Tasks 45 and 50 done — committed and pushed to `run-seamlyLayout`
+
+**Branch:** `run-seamlyLayout`, committed directly (no PR) — the user explicitly asked for stage + commit + push to origin `run-seamlyLayout`, skipping the `develop` pull and the task-branch/PR cycle in `CLAUDE.md`.
+
+### What was asked
+
+The session opened with an analysis question: *which task in `project-docs/TODO_MIGRATE.md` should be done next?* The answer given was **Task 49** (SeamlyLayout ignores the SVG path argument — verified still true: `qt_frontend/main.cpp` passes `argc`/`argv` to `QApplication` and never reads them; `AppController::import_svg()` already exists at `crates/cxxqt_bridge/src/lib.rs:863` and is what the QML Import button calls at `qml/Main.qml:850`, so the plumbing for the fix is in place). Every other open task in that file is blocked on hardware (clean VM / arm64 / macOS / Linux), on KMS credentials, or on a user decision. **The user then chose Tasks 45 and 50 instead.** Task 49 remains the recommended next item.
+
+### Task 45 — stale Qt 6.10.1 paths in the Claude allowlists (DONE, moved to `project-docs/TODO_COMPLETED.md`)
+
+Both entries turned out to be **redundant with broader rules already present**, so the fix is removal, not a version bump — which makes them permanently version-agnostic:
+
+- `.claude/settings.json:154` — the compound `Test-Path "C:\Qt\6.10.1\…"; & …vswhere.exe …` was already covered by `PowerShell(Test-Path *)` on line 10. Replaced with one version-agnostic prefix entry naming no Qt version: `PowerShell(& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" *)`
+- `.claude/settings.local.json:17` and `:19` — both deleted. That file opens with `PowerShell(*)` / `Bash(*)`, which already allow everything in it. **This file is gitignored (`.gitignore:189`)**, so that half exists only on this machine and is *not* in the commit
+
+Both files re-validated as parseable JSON.
+
+### Task 50 — hard-coded developer path in `application_2d.cpp` (DONE, moved to `project-docs/TODO_COMPLETED.md`)
+
+- **New `SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(startDirectory)`** in `src/libs/vmisc/seamly_family_paths.{cpp,h}`. Walks up from the running executable's directory, testing each ancestor as a checkout root for `<root>/src/app/seamlylayout/qt_frontend/build/<config>/SeamlyLayout(.exe)`. Both shadow-build layouts resolve without being named — release `<checkout>/build/…` (5 levels) and `sd.ps1`'s debug `<checkout>/scripts/seamly2d-build-debug/…` (6). **Bounded at 8 parents** so it cannot climb to the filesystem root. **Release preferred over Debug** (the old path pinned Debug unconditionally). Put in `vmisc` beside `locateSeamlyLayout()` so the test suite reaches it, and **parameterized on the start directory** per the Task 34/53 rule, so tests use `QTemporaryDir`
+- `application_2d.cpp:515` now calls it; the dev build stays **last** in the lookup chain, after the configured setting and the installed copy, so a source tree can never shadow an installation
+- **Coding-rules note** added to `.github/README-CODE-STYLES.md`: "No absolute machine-specific paths in source", with allowed alternatives, an explicit carve-out for placeholder comments and test data, and a `git grep` command
+
+**A CI gate was deliberately not added** — measured first, and a naive grep is unusable: `tst_misc.cpp` has ~20 synthetic `/home/user/...` rows, `tst_dataroot.cpp` uses `C:/Users/tester/...`, and `vcommonsettings.cpp` / `PreferencesModel.cpp` carry `C:/Users/<user>/...` Doxygen placeholders — all legitimate. Telling a real home directory from a placeholder needs a human.
+
+### Flagged, NOT fixed — decide before the upstream PR
+
+**`src/app/seamly2d/core/BUILD_PROBLEMS.txt` is tracked and carries ~45 absolute `/c:/Users/susan/Projects/Seamly2D-private/…` paths** — the same leak Task 50 just closed in code, and it names the *private* repo directory. It is the clangd dump described further down this file (editor noise; the qmake build compiles those files clean). Deleting a tracked file was outside the task's scope. This is the single most likely thing to embarrass the upstream PR.
+
+### Verification — read this before trusting the state
+
+| Check | Result |
+| --- | --- |
+| `scripts/sd.ps1` debug build | **Clean, exit 0** |
+| `scripts/st.ps1` (Seamly2DTests) | **32127 passed, 0 failed across 25 suites**, exit 0. `TST_SeamlyFamilyPaths` 5 → 13 cases (reported as 15 with init/cleanup); total up exactly +8 |
+| `ParserTest` | exit 0 |
+| `TranslationsTest` | exit 0 |
+| `CollectionTest` | **exit 1 — 42 passed, 1 failed.** `TST_Seamly2DCommandLine::TestOpenCollection(07_armhole_adjustment_010)` "Program crashed", `tst_seamly2dcommandline.cpp:302` |
+
+**The CollectionTest failure is almost certainly pre-existing, but that was NOT confirmed.** Evidence it is unrelated: the only caller of the changed `seamlyLayoutFilePath()` is `mainwindow.cpp:4136` inside `exportPiecesToSeamlyLayout()`, the GUI Layout Mode handoff, which a console `seamly2d --test <pattern>` run never enters. The definitive check — stash the change, rebuild, rerun that one case — was started and **interrupted by the user before the baseline build ran**, so it is unfinished. Note also that the previous session's handover records `ParserTest` and `TranslationsTest` as verified but **never mentions running `CollectionTest`**, so there is no known-good baseline for it either way.
+
+**Next session: finish that check.** `git stash push` the four source files, run `scripts/sd.ps1`, run `CollectionTest.exe -o <file>,txt`, compare, `git stash pop`. If it fails on the baseline too, file it as its own task.
+
+**A stash hazard was hit and cleared:** the source changes were stashed for that baseline test and the session was interrupted while stashed. They were restored with `git stash pop` (all 9 files back, stash dropped) before committing. If a future session interrupts mid-stash, check `git stash list` first.
+
+### Files changed
+
+| File | Change |
+| --- | --- |
+| `src/libs/vmisc/seamly_family_paths.cpp` / `.h` | New `locateSeamlyLayoutDevBuild()`; file-local `sourceTreeBuildSubPath` and `maxUpwardLevels` |
+| `src/app/seamly2d/core/application_2d.cpp` | Hard-coded path replaced by the call; `seamlyLayoutFilePath()` Doxygen updated |
+| `src/test/Seamly2DTest/tst_seamlyfamilypaths.cpp` / `.h` | 8 new cases, all `QTemporaryDir` |
+| `.github/README-CODE-STYLES.md` | New "No absolute machine-specific paths in source" rule |
+| `.claude/settings.json` | Line 154 replaced with the version-agnostic vswhere entry |
+| `project-docs/TODO_MIGRATE.md` | Tasks 45 and 50 removed |
+| `project-docs/TODO_COMPLETED.md` | Tasks 45 and 50 added at the top with full write-ups |
+| `.claude/settings.local.json` | Two entries deleted — **gitignored, not in the commit** |
+
+### Next steps
+
+1. **Finish the CollectionTest baseline check** (above) — the one loose end of this session.
+2. **Task 49** — the recommended next task; see the analysis at the top of this section.
+3. Decide the fate of `BUILD_PROBLEMS.txt`.
+4. The four decisions the user still owes are unchanged — see "Four decisions the user still owes" below.
+
+## Earlier state (2026-07-27): Task 58 merged; documentation reorganized
 
 **Branch:** `run-seamlyLayout`. **Task 58 is DONE** (moved to `project-docs/TODO_COMPLETED.md` — see below) and two documentation reorganizations landed alongside it.
 
