@@ -114,7 +114,13 @@ if (-not (Test-Path (Join-Path $QtPrefix "mkspecs"))) {
 # the omission indirectly - "Qt6WebEngineQuick could not be found because
 # dependency Qt6WebEngineCore could not be found" - which sends you looking at
 # WebEngine, that is installed. Name the actual missing modules instead.
-$MissingQtModules = @('Qt6WebEngine', 'Qt6WebChannel', 'Qt6Positioning') |
+#
+# These must be CMake *package* directory names under lib\cmake. Qt ships no
+# package called plain 'Qt6WebEngine' - the WebEngine packages are
+# Qt6WebEngineCore / Qt6WebEngineQuick / Qt6WebEngineWidgets - so probing for
+# 'Qt6WebEngine' made this guard fire on every correctly installed kit. Probe
+# Qt6WebEngineQuick, which is the target CMakeLists.txt actually links.
+$MissingQtModules = @('Qt6WebEngineQuick', 'Qt6WebChannel', 'Qt6Positioning') |
     Where-Object { -not (Test-Path (Join-Path $QtPrefix "lib\cmake\$_")) }
 if ($MissingQtModules) {
     Write-Error @"

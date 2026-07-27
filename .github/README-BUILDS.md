@@ -191,6 +191,22 @@ A Flatpak sandbox exports `XDG_CONFIG_HOME=~/.var/app/<app-id>/config` and `XDG_
 - Stale-tree trap: qmake subdir Makefiles in an old `build\` tree do not always regenerate when a `.pro` gains new source files, which surfaces as `LNK2019` unresolved externals for the new classes. Delete `build\src\**\Makefile*` and rebuild so qmake regenerates them.
 - CI is unaffected by any of this: the `linux-test` job runs the suite under xvfb on Ubuntu.
 
+#### Where each app's tests live (Task 58)
+
+All four test directories sit under `src/test/`, but they are **not** all built the same way:
+
+| Directory | Covers | Build system | Run with |
+| --- | --- | --- | --- |
+| `src/test/Seamly2DTest` | seamly2d + seamlyme | qmake (`src/test/test.pro`) | `make check` / `scripts\st.ps1` |
+| `src/test/ParserTest`, `TranslationsTest`, `CollectionTest` | shared libs, translations, collection | qmake (`src/test/test.pro`) | `make check` |
+| `src/test/SeamlyLayoutTest` | seamlyLayout Qt/C++ frontend (4 suites) | **CMake** (`src/app/seamlylayout/qt_frontend/CMakeLists.txt`) | `ctest --preset debug` |
+
+Task 58 moved the seamlyLayout Qt/C++ suites out of `src/app/seamlylayout/qt_frontend/tests/` so every app's tests live in one place. **`src/test/test.pro` deliberately does not list `SeamlyLayoutTest`** — seamlyLayout is CMake + Cargo and is kept out of the Seamly2D qmake build; all `SUBDIRS` in `Seamly.pro`, `src/src.pro` and `src/test/test.pro` are explicit, with no globbing, so the directory cannot be pulled in by accident. `qt_frontend/CMakeLists.txt` reaches the sources through a single normalized `SEAMLYLAYOUT_TEST_DIR` variable that hard-fails at configure time if the directory ever moves again.
+
+seamlyLayout's **Rust** tests did not move and should not: `#[cfg(test)]` modules compile as part of their crate and reach its private items, and Cargo requires integration tests to sit beside the crate's `Cargo.toml`. They stay in `src/app/seamlylayout/crates/*/src/`, run by `cargo test --workspace`.
+
+CI note: `seamlylayout-ci.yml`'s `push`/`pull_request` path filters were extended with `src/test/SeamlyLayoutTest/**`; without that entry a test-only change would trigger no workflow at all. `ci.yml` has no path filters, so the parent-app jobs are unaffected either way.
+
 ### macOS
 
 - Settings unification is Task 16: land in `~/Library/Application Support/Seamly`, migrate legacy `Seamly2D` / `Seamly Systems` Application Support dirs and preferences plists on first run, keep packaged defaults read-only inside the app bundle resources.

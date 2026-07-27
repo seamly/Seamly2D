@@ -3,6 +3,39 @@
 
 This document contains unit test commands for testing the SeamlyLayout workspace crates.
 
+## Where the tests live
+
+SeamlyLayout has two test suites in two different places, and **Task 58** moved
+one of them:
+
+| Kind | Location | Run with |
+| --- | --- | --- |
+| Qt/C++ | `src/test/SeamlyLayoutTest/` (repo root relative) | `ctest --preset debug` |
+| Rust | `#[cfg(test)]` modules inside `crates/*/src/**.rs` | `cargo test --workspace` |
+
+The four Qt/C++ suites — `AdjustSceneTests`, `AdjustControllerTests`,
+`PreferencesModelTests`, `SettingsModelTests` — used to sit at
+`qt_frontend/tests/{adjust,preferences,settings}/`. Task 58 moved them to
+`src/test/SeamlyLayoutTest/`, beside the rest of the family's suites
+(`Seamly2DTest`, `ParserTest`, `TranslationsTest`, `CollectionTest`). They are
+still built by `qt_frontend/CMakeLists.txt` and still run under `ctest` — only
+the source path changed. `src/test/test.pro` deliberately does **not** list
+`SeamlyLayoutTest`, because seamlyLayout stays out of the Seamly2D qmake build.
+
+**The Rust tests did not move, on purpose.** `#[cfg(test)]` modules are compiled
+as part of their crate and reach its private items, and Cargo requires
+integration tests to sit at `<crate>/tests/`, beside that crate's `Cargo.toml`.
+Relocating them would mean per-crate `[[test]] path = "../../../../test/..."`
+entries that break `cargo test -p <crate>` and buy nothing.
+
+### Run the Qt/C++ suites
+
+```powershell
+# From src/app/seamlylayout/ — configure + build first, then run all four suites.
+.\build.ps1 -Preset debug -NoRun
+ctest --test-dir qt_frontend --preset debug
+```
+
 ## Prerequisite: point `QMAKE` at the real Qt kit
 
 Any workspace-wide `cargo` command builds `cxxqt_bridge`, whose `cxx-qt-build`

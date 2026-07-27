@@ -2,8 +2,15 @@
 
 ## Test Organization
 
+- **Qt/C++ tests live at `src/test/SeamlyLayoutTest/`** (repo root relative), beside the
+  rest of the Seamly family's suites — not in the app tree. Task 58 moved them there from
+  `qt_frontend/tests/`. They are still built by `qt_frontend/CMakeLists.txt` and run with
+  `ctest --preset debug`.
+- **Rust tests stay in their crate** — `#[cfg(test)]` modules compile as part of the crate
+  and reach its private items, and Cargo requires integration tests at `<crate>/tests/`.
+  Do not try to relocate them under `src/test/`.
 - Create test directories, files, modules, and suites for each crate
-- Place tests in `tests/` or as inline module tests
+- Place Rust tests in the crate's `tests/` or as inline module tests
 
 ## Test Commands
 
