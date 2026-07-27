@@ -1,8 +1,12 @@
 # Session handover
 
-## Current state (2026-07-27, latest session): Task 49 DONE — the Seamly2D → SeamlyLayout handoff finally opens the pattern
+## Current state (2026-07-27, latest session): Task 49 DONE and MERGED — the Seamly2D → SeamlyLayout handoff finally opens the pattern
 
-**Branch:** `task-49-seamlylayout-svg-argument`, branched from `run-seamlyLayout` (which was already level with `origin/run-seamlyLayout`; local `develop` = `origin/develop` = `057e95bfca`, nothing to merge). Task-branch + PR cycle per `CLAUDE.md`.
+**Merged.** PR [#22](https://github.com/seamly/Seamly2D/pull/22) (`task-49-seamlylayout-svg-argument` → `run-seamlyLayout`), commit `f720df1b63`, merged by the user with a fast-forward merge and pushed to `origin/run-seamlyLayout`. **All 13 CI checks green** — Windows x64 (28m19s), Windows arm64 cross-compile (26m16s), macOS (12m53s), Linux AppImage, Linux unit tests, **Linux: Build & test SeamlyLayout (Qt 6.11) 5m5s** (the leg that runs the new `StartupOptionsTests`), CodeQL, CodeSee, Analyze actions/python/rust, version. Local task branch deleted; the remote one was deleted on merge.
+
+The user then committed `fc487aec93` "pass svg argument to seamlyLayout" on top — **no code**, only `.claude/settings.local.json` (this session's auto-approval entries) and two screenshots into `project-docs/`. Note for the upstream PR: `.claude/settings.local.json` is *tracked* despite `.gitignore:189` listing it (gitignore does not apply to already-tracked files), and its entries carry absolute `C:\Users\susan\…` paths and a session UUID — the same class of leak Task 50's new coding rule targets.
+
+Local `run-seamlyLayout` = `origin/run-seamlyLayout` = `fc487aec93`; local `develop` = `origin/develop` = `057e95bfca`.
 
 ### What Task 49 changed
 
