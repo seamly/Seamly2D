@@ -32,10 +32,12 @@
 #define SEAMLY_FAMILY_PATHS_H
 
 #include <QString>
+#include <QStringList>
 
 /**
  * @brief SeamlyFamilyPaths groups filesystem lookups shared by the Seamly app
- * family (seamly2d, seamlyme, SeamlyLayout).
+ * family (seamly2d, seamlyme, SeamlyLayout), together with the launch contract
+ * seamly2d uses to hand a pattern over to SeamlyLayout.
  *
  * The functions live in vmisc (not in the seamly2d app target) so they can be
  * exercised by the Seamly2DTests suite, which links the static libraries but
@@ -46,6 +48,9 @@ namespace SeamlyFamilyPaths
     QString seamlyLayoutExeName();
     QString locateSeamlyLayout(const QString &directory);
     QString locateSeamlyLayoutDevBuild(const QString &startDirectory);
+
+    QString piecesSvgFilePath(const QString &patternFilePath);
+    QStringList seamlyLayoutLaunchArguments(const QString &piecesSvgPath);
 }
 
 #endif // SEAMLY_FAMILY_PATHS_H

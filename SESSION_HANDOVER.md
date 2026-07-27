@@ -1,6 +1,58 @@
 # Session handover
 
-## Current state (2026-07-27, later session): Tasks 45 and 50 done — committed and pushed to `run-seamlyLayout`
+## Current state (2026-07-27, latest session): Task 49 DONE — the Seamly2D → SeamlyLayout handoff finally opens the pattern
+
+**Branch:** `task-49-seamlylayout-svg-argument`, branched from `run-seamlyLayout` (which was already level with `origin/run-seamlyLayout`; local `develop` = `origin/develop` = `057e95bfca`, nothing to merge). Task-branch + PR cycle per `CLAUDE.md`.
+
+### What Task 49 changed
+
+SeamlyLayout read `argc`/`argv` only to hand them to `QApplication`, so the `.pieces.svg` seamly2d wrote and passed was discarded and the window came up empty.
+
+| File | Change |
+| ---- | ------ |
+| `src/app/seamlylayout/qt_frontend/src/StartupOptions.{h,cpp}` | **New.** Value class (no QObject, no GUI) parsing the one positional `<svg-file>` with `QCommandLineParser::parse()` — the non-exiting sibling of `process()` — and validating it. Four statuses: `NoFile`, `OpenFile`, `ShowInformation` (`--help`/`--version`), `Failed` |
+| `src/app/seamlylayout/qt_frontend/main.cpp` | Parses after the app metadata is set (so `--version` can report it); dispatches on `QTimer::singleShot(0, …)` **after** the event loop starts, because the QML window and its WebEngine canvases must exist first |
+| `src/app/seamlylayout/qt_frontend/qml/Main.qml` | New `openSvgFile(localPath)` (the file dialog now calls it too — one entry point) and `reportStartupError(message)`; new `onImportWarning` handler |
+| `crates/cxxqt_bridge/src/piece_extractor.rs` | New `count_tagged_pieces()` (recursive `data-type="piece"` count) + 3 unit tests |
+| `crates/cxxqt_bridge/src/lib.rs` | New `import_warning` qsignal; `import_svg` emits it when the imported SVG carries no piece tagging — **a warning, never an error**, because untagged SVGs still lay out |
+| `src/libs/vmisc/seamly_family_paths.{cpp,h}` | New `piecesSvgFilePath()` and `seamlyLayoutLaunchArguments()` — the seamly2d half of the contract, extracted out of `mainwindow.cpp` so it has one definition and one test |
+| `src/app/seamly2d/mainwindow.cpp` | `exportPiecesToSeamlyLayout()` now calls both; added the `seamly_family_paths.h` include |
+| `src/test/SeamlyLayoutTest/StartupOptionsTests.cpp` | **New**, 5th ctest target (guiless), 18 cases |
+| `src/test/Seamly2DTest/tst_seamlyfamilypaths.{cpp,h}` | 6 new cases for the contract |
+| `src/app/seamlylayout/CLAUDE.md`, `project-docs/SVG-DATA-ATTRIBUTES.md` | The contract, written down on both sides |
+| `project-docs/TODO_MIGRATE.md` / `TODO_COMPLETED.md` | Task 49 moved across; **new Task 59 filed** (below) |
+| `.claude/settings.json` | Allowlist entries for the repo's build/test scripts + `ctest` (the user asked for this mid-session after a prompt on `sd.ps1`) |
+
+### Decisions recorded in the contract (do not quietly reverse them)
+
+- **No single-instance handling** — every launch is its own process and window; one document per process (no tabs), which is also why a *second* positional argument is rejected rather than queued.
+- **A bad argument does not exit.** The message goes to the QML error dialog and the app stays open with an empty canvas — a detached launch has no console to print to.
+- **`--help`/`--version` go to a `QMessageBox`**, because this is a WIN32-subsystem binary with no console on Windows.
+- **Untagged SVGs are opened, not refused** — warning only.
+
+### Verification (all local, all passing)
+
+`scripts/sd.ps1` exit 0 · `scripts/st.ps1` **32133 passed / 0 failed, 25 suites** (`TST_SeamlyFamilyPaths` 15 → 21) · `ParserTest` 0 · `TranslationsTest` 0 · SeamlyLayout `ctest --preset debug` **5/5** (`StartupOptionsTests` 19 passed / 1 skipped — the unreadable-file case, NTFS) · `cargo test --workspace` **252 / 0 across 20 targets**.
+
+**End-to-end, with a genuine handoff file:** `seamly2d.exe <pattern>.sm2d -b handoff -d <dir> -f 0 --exportOnlyDetails` produces a tagged SVG through the same `exportSVG()` `generatePiecesSvg()` uses (12 `data-type="piece"` groups). `SeamlyLayout.exe <that file>` logs `main(): opening startup file …` then `[import_svg] 12 tagged pattern piece(s) found`. The untagged baseline SVG logs the `no data-type="piece" groups` warning; a non-existent path logs the startup error. **All three paths confirmed.**
+
+### THE CollectionTest LOOSE END IS CLOSED — it is pre-existing
+
+The previous session's unfinished baseline check was completed here. With every Task 49 source change stashed and the tree rebuilt, `TST_Seamly2DCommandLine::TestOpenCollection(07_armhole_adjustment_010)` fails **identically** (42 passed / 1 failed). Unrelated to Tasks 49/50. Two facts worth keeping:
+
+- **`CollectionTest.exe` must be run with its working directory set to its own `bin/`.** `initTestCase()` removes `tst_seamly2d_tmp` *relative to the CWD* but creates it under `applicationDirPath()`, so running it from anywhere else aborts on a leftover directory from the previous run ("Fail to prepare test files for testing").
+- The failure presents as either "Program crashed" or "The finish operation timed out" against `AbstractTest::Run()`'s 120 s limit.
+
+### NEW — Task 59, filed not fixed: the layout packs the whole pattern as one piece
+
+Found by the end-to-end run and **the most valuable thing in this session after the fix itself.** `piece_extractor::extract_piece_rects()` treats each direct child `<g>` of the SVG root as a piece, but the tagged handoff nests all 12 pieces inside one `<g id="pattern-1" data-type="pattern">`. The packer therefore receives a single sheet-sized object: `0 placements, 1 unplaced: ["pattern-1"]`. Task 49 made the handoff *open*; Task 59 (`project-docs/TODO_MIGRATE.md`, bottom) makes it *lay out*. It should be the next task.
+
+### Loose ends carried forward
+
+- `src/app/seamly2d/core/BUILD_PROBLEMS.txt` — the user said to delete it if it is not useful; **not done in this session** (out of Task 49's scope).
+- The user's own uncommitted edits to `SESSION_HANDOVER.md` and `project-docs/TODO_SEAMLYLAYOUT.md` (Task 57 deleted) were present at session start and are folded into this branch's commit.
+
+## Earlier state (2026-07-27, later session): Tasks 45 and 50 done — committed and pushed to `run-seamlyLayout`
 
 **Branch:** `run-seamlyLayout`, committed directly (no PR) — the user explicitly asked for stage + commit + push to origin `run-seamlyLayout`, skipping the `develop` pull and the task-branch/PR cycle in `CLAUDE.md`.
 
@@ -27,43 +79,43 @@ Both files re-validated as parseable JSON.
 
 ### Flagged, NOT fixed — decide before the upstream PR
 
-**`src/app/seamly2d/core/BUILD_PROBLEMS.txt` is tracked and carries ~45 absolute `/c:/Users/susan/Projects/Seamly2D-private/…` paths** — the same leak Task 50 just closed in code, and it names the *private* repo directory. It is the clangd dump described further down this file (editor noise; the qmake build compiles those files clean). Deleting a tracked file was outside the task's scope. This is the single most likely thing to embarrass the upstream PR.
+**`src/app/seamly2d/core/BUILD_PROBLEMS.txt` is tracked and carries ~45 absolute `/c:/Users/susan/Projects/Seamly2D-private/…` paths** — the same leak Task 50 just closed in code, and it names the *private* repo directory. It is the clangd dump described further down this file (editor noise; the qmake build compiles those files clean). Deleting a tracked file was outside the task's scope. This is the single most likely thing to embarrass the upstream PR. --> user says to delete `src/app/seamly2d/core/BUILD_PROBLEMS.txt`if it isn't useful.
 
 ### Verification — read this before trusting the state
 
-| Check | Result |
-| --- | --- |
-| `scripts/sd.ps1` debug build | **Clean, exit 0** |
-| `scripts/st.ps1` (Seamly2DTests) | **32127 passed, 0 failed across 25 suites**, exit 0. `TST_SeamlyFamilyPaths` 5 → 13 cases (reported as 15 with init/cleanup); total up exactly +8 |
-| `ParserTest` | exit 0 |
-| `TranslationsTest` | exit 0 |
-| `CollectionTest` | **exit 1 — 42 passed, 1 failed.** `TST_Seamly2DCommandLine::TestOpenCollection(07_armhole_adjustment_010)` "Program crashed", `tst_seamly2dcommandline.cpp:302` |
+| Check                              | Result                                                                                                                                                                     |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scripts/sd.ps1` debug build     | **Clean, exit 0**                                                                                                                                                    |
+| `scripts/st.ps1` (Seamly2DTests) | **32127 passed, 0 failed across 25 suites**, exit 0. `TST_SeamlyFamilyPaths` 5 → 13 cases (reported as 15 with init/cleanup); total up exactly +8                 |
+| `ParserTest`                     | exit 0                                                                                                                                                                     |
+| `TranslationsTest`               | exit 0                                                                                                                                                                     |
+| `CollectionTest`                 | **exit 1 — 42 passed, 1 failed.** `TST_Seamly2DCommandLine::TestOpenCollection(07_armhole_adjustment_010)` "Program crashed", `tst_seamly2dcommandline.cpp:302` |
 
-**The CollectionTest failure is almost certainly pre-existing, but that was NOT confirmed.** Evidence it is unrelated: the only caller of the changed `seamlyLayoutFilePath()` is `mainwindow.cpp:4136` inside `exportPiecesToSeamlyLayout()`, the GUI Layout Mode handoff, which a console `seamly2d --test <pattern>` run never enters. The definitive check — stash the change, rebuild, rerun that one case — was started and **interrupted by the user before the baseline build ran**, so it is unfinished. Note also that the previous session's handover records `ParserTest` and `TranslationsTest` as verified but **never mentions running `CollectionTest`**, so there is no known-good baseline for it either way.
+**The CollectionTest failure is pre-existing per the user, but that was NOT confirmed.** Evidence it is unrelated: the only caller of the changed `seamlyLayoutFilePath()` is `mainwindow.cpp:4136` inside `exportPiecesToSeamlyLayout()`, the GUI Layout Mode handoff, which a console `seamly2d --test <pattern>` run never enters. The definitive check — stash the change, rebuild, rerun that one case — was started and **interrupted by the user before the baseline build ran**, so it is unfinished. Note also that the previous session's handover records `ParserTest` and `TranslationsTest` as verified but **never mentions running `CollectionTest`**, so there is no known-good baseline for it either way.
 
 **Next session: finish that check.** `git stash push` the four source files, run `scripts/sd.ps1`, run `CollectionTest.exe -o <file>,txt`, compare, `git stash pop`. If it fails on the baseline too, file it as its own task.
 
-**A stash hazard was hit and cleared:** the source changes were stashed for that baseline test and the session was interrupted while stashed. They were restored with `git stash pop` (all 9 files back, stash dropped) before committing. If a future session interrupts mid-stash, check `git stash list` first.
+**A stash hazard was hit and cleared:** the source changes were stashed for that baseline test and the session was interrupted while stashed. They were restored with `git stash pop` (all 9 files back, stash dropped) before committing. If a future session interrupts mid-stash, check `git stash list` first. --> user pushed to origin/run-seamlyLayout, currently nothing to commit.
 
 ### Files changed
 
-| File | Change |
-| --- | --- |
-| `src/libs/vmisc/seamly_family_paths.cpp` / `.h` | New `locateSeamlyLayoutDevBuild()`; file-local `sourceTreeBuildSubPath` and `maxUpwardLevels` |
-| `src/app/seamly2d/core/application_2d.cpp` | Hard-coded path replaced by the call; `seamlyLayoutFilePath()` Doxygen updated |
-| `src/test/Seamly2DTest/tst_seamlyfamilypaths.cpp` / `.h` | 8 new cases, all `QTemporaryDir` |
-| `.github/README-CODE-STYLES.md` | New "No absolute machine-specific paths in source" rule |
-| `.claude/settings.json` | Line 154 replaced with the version-agnostic vswhere entry |
-| `project-docs/TODO_MIGRATE.md` | Tasks 45 and 50 removed |
-| `project-docs/TODO_COMPLETED.md` | Tasks 45 and 50 added at the top with full write-ups |
-| `.claude/settings.local.json` | Two entries deleted — **gitignored, not in the commit** |
+| File                                                         | Change                                                                                             |
+| ------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| `src/libs/vmisc/seamly_family_paths.cpp` / `.h`          | New`locateSeamlyLayoutDevBuild()`; file-local `sourceTreeBuildSubPath` and `maxUpwardLevels` |
+| `src/app/seamly2d/core/application_2d.cpp`                 | Hard-coded path replaced by the call;`seamlyLayoutFilePath()` Doxygen updated                    |
+| `src/test/Seamly2DTest/tst_seamlyfamilypaths.cpp` / `.h` | 8 new cases, all`QTemporaryDir`                                                                  |
+| `.github/README-CODE-STYLES.md`                            | New "No absolute machine-specific paths in source" rule                                            |
+| `.claude/settings.json`                                    | Line 154 replaced with the version-agnostic vswhere entry                                          |
+| `project-docs/TODO_MIGRATE.md`                             | Tasks 45 and 50 removed                                                                            |
+| `project-docs/TODO_COMPLETED.md`                           | Tasks 45 and 50 added at the top with full write-ups                                               |
+| `.claude/settings.local.json`                              | Two entries deleted —**gitignored, not in the commit**                                      |
 
 ### Next steps
 
 1. **Finish the CollectionTest baseline check** (above) — the one loose end of this session.
 2. **Task 49** — the recommended next task; see the analysis at the top of this section.
 3. Decide the fate of `BUILD_PROBLEMS.txt`.
-4. The four decisions the user still owes are unchanged — see "Four decisions the user still owes" below.
+4. The four decisions the user still owes are unchanged — see "Four decisions the user still owes" below --> user added answers to the four decisions.
 
 ## Earlier state (2026-07-27): Task 58 merged; documentation reorganized
 
@@ -71,11 +123,11 @@ Both files re-validated as parseable JSON.
 
 ### What happened this session
 
-| Item | Outcome |
-| --- | --- |
+| Item                                                                                 | Outcome                                                                                                                                                                                              |
+| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Task 58** — migrate the SeamlyLayout tests to `src/test/SeamlyLayoutTest` | **DONE, merged** via PR [#20](https://github.com/seamly/Seamly2D/pull/20) (`8ddab2a4c3`), all 12 CI checks green. Task written up in `project-docs/TODO_MIGRATE.md` first, then implemented |
-| **`status-docs/` → `project-docs/`** | Merged via PR [#21](https://github.com/seamly/Seamly2D/pull/21) (`b89fbe161d`), plus a local merge by the user — see the divergence note below |
-| **Tracking docs moved + SeamlyLayout status docs prefixed** | Committed on branch `reorganize-project-docs`, **not yet pushed** |
+| **`status-docs/` → `project-docs/`**                                      | Merged via PR[#21](https://github.com/seamly/Seamly2D/pull/21) (`b89fbe161d`), plus a local merge by the user — see the divergence note below                                                      |
+| **Tracking docs moved + SeamlyLayout status docs prefixed**                    | Committed on branch`reorganize-project-docs`, **not yet pushed**                                                                                                                             |
 
 ### Task 58 — what moved and what deliberately did not
 
@@ -108,9 +160,7 @@ Then, on the **unpushed `reorganize-project-docs` branch**: `PROJECT_PLAN.md` an
 
 ### Repository state — read this before pushing
 
-Local `run-seamlyLayout` is **3 commits ahead of origin, 0 behind**. The rename branch was merged **twice** — once locally by the user (`82ed9fd7de`), once by GitHub closing PR #21 (`b89fbe161d`) — producing two merge commits with identical content. `21772605f7` reconciles them; that merge introduced **zero file changes**. Local also uniquely carries the user's `54a572ad06` ("deleted unused image files and updated README-CODE-STYLES.md"), which is not on origin.
-
-**Next steps:** push `run-seamlyLayout` (carries `54a572ad06` + the reconciliation to origin), then push `reorganize-project-docs` and open its PR against `run-seamlyLayout`.
+Local `run-seamlyLayout` is **0 commits ahead of origin, 0 behind**. The rename branch was merged **twice** — once locally by the user (`82ed9fd7de`), once by GitHub closing PR #21 (`b89fbe161d`) — producing two merge commits with identical content. `21772605f7` reconciles them; that merge introduced **zero file changes**. Local also uniquely carries the user's `54a572ad06` ("deleted unused image files and updated README-CODE-STYLES.md"), which is not on origin.
 
 ## Earlier state: Tasks 34 and 53 are DONE and moved to `project-docs/TODO_COMPLETED.md`
 
@@ -124,42 +174,42 @@ Refer to `project-docs/TODO_MIGRATE.md`, `project-docs/TODO_SEAMLY2D.md` and `pr
 
 ### What was done this session
 
-| Step | Outcome |
-| --- | --- |
-| **Task 34** | **Done.** `~/seamly2d` → `~/seamly`, made relocatable via `paths/dataRoot`; `chooseFirstRunDataRoot()`, `ensureDataRootTree()`, `rebaseOntoDataRoot()`, `mergeStrayCommonSettings()`; `TST_DataRoot` added (16 cases) |
-| **Task 53** | **Done.** Default root renamed `~/seamly` → **`~/seamlyData`**; `mergeStrayCommonSettings()` now verifies then **deletes** the stray; new `pruneEmptyLegacyDataRoot()` removes the empty `~/seamly2d` skeleton. `TST_DataRoot` 16 → **22 cases** |
-| **Task 14** | **Extended, not implemented.** The user asked whether the installer could check-then-move an existing data tree before anything is removed; it cannot today, so nine subtasks were folded into Task 14 under an "Update (2026-07-26) — moving an existing data tree" note |
-| **Task 52** | **Extended.** Gained a new *first* subtask: stop `CollectionTest` writing into the real user settings **before** repointing the `vsettings.cpp` accessors |
-| **Developer machine** | **Migrated and verified** — see the table below. This is state *outside* the repo; nothing in git records it |
-| **Tasks 54, 55, 57** | **Filed, not started**, moved out of `future-todos.md` (docs-only commits). **54** (`project-docs/TODO_MIGRATE.md`) renames the three `vmisc` settings **files *and* classes** — `settings_common`/`SettingsCommon`, `settings_seamlyme`/`SettingsSeamlyMe`, `settings_seamly2d`/`SettingsSeamly2D` — per `.github/README-CODE-STYLES.md`; ~620 class occurrences plus 22 `.ts` `tr()` contexts (~220 translated strings) that go obsolete if not renamed with the classes. **55** (`project-docs/TODO_MIGRATE.md`) refreshes `.github/README-DEVELOPER.md`; its first subtask is **already done** (see below). **57** (`project-docs/TODO_SEAMLYLAYOUT.md`) was rewritten from "rename `app_core`'s `lib.rs`" to "give every crate root a unique name" — 11 crates all use `lib.rs`; splitting the root does **not** meet the uniqueness rule because Cargo still requires a root file, so the answer is `[lib] path = "src/<crate>.rs"` across all 11 |
-| **Task 56** | **Filed, then removed at the user's request** — the `BUILD_PROBLEMS.txt` clangd noise is not being tracked as a task. (The finding stands if it comes back: 45 entries, all cascading from two `pp_file_not_found` roots because the repo has no compile database; qmake+MSVC builds those files clean.) |
-| **`README-DEVELOPER.md` Qt modules** | **Fixed in `09da7801e0`, then LOST in the `develop` merge.** The fix added Qt WebChannel + Qt Positioning with a note that ticking Qt WebEngine does not install them. `develop` carried four independent rewrites of the same file (`ad38f96e4e`, `d2aba7efb9`, `fbff2de94c`, `8d83757332`) and the merge resolution took their version of that section. **The current file lists neither — nor Qt WebEngine itself**, so the seamlyLayout prerequisites are now entirely undocumented and the Task 44 setup failure is fully reintroduced. Its Task 55 subtask has been un-checked |
-| **`develop` merge** | Brought 11 upstream commits (code + docs, above), and left a stray **`.github/README-DEVELOPER-NEW.md`** — a 149-line near-duplicate of `README-DEVELOPER.md` (6 insertions / 5 deletions apart) that exists on **neither** `develop` nor any earlier commit. It was introduced by the merge commit itself, so it is almost certainly a conflict-resolution artefact rather than an intended file |
-| **Naming rules** | **`CLAUDE.md` corrected.** It required new files to begin with `s`; `.github/README-CODE-STYLES.md` says *"don't start filenames with 's'!"* and gives meaningful prefixes instead. The user chose the **style guide as authoritative**, so `CLAUDE.md` now names it and carries the rules that come up constantly — snake_case, the prefix list, unique repo-wide, UpperCamelCase classes, file-matches-class. Only the "not `v`" half of the old rule survives |
-| **Style guide revised by the user** (`df5d90bb14`) | **Two new exceptions that supersede parts of the tasks filed minutes earlier.** (1) *"Match Class names exactly for file names that define a class … in UpperCamelCase"* — a file primarily defining one class is now an **exception to snake_case**, which reopens Task 54's file names (`SettingsCommon.h` vs `settings_common.h`; note the repo has no UpperCamelCase `.cpp`/`.h` today outside vendored xerces-c). (2) *"Crate files in SeamlyLayout require multiple `lib.rs` files distinguishable by their paths"* — **voids Task 57's premise**. Both are recorded in the tasks and mirrored into `CLAUDE.md`; both still need a user decision (see next steps) |
+| Step                                                       | Outcome                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Task 34**                                          | **Done.** `~/seamly2d` → `~/seamly`, made relocatable via `paths/dataRoot`; `chooseFirstRunDataRoot()`, `ensureDataRootTree()`, `rebaseOntoDataRoot()`, `mergeStrayCommonSettings()`; `TST_DataRoot` added (16 cases)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| **Task 53**                                          | **Done.** Default root renamed `~/seamly` → **`~/seamlyData`**; `mergeStrayCommonSettings()` now verifies then **deletes** the stray; new `pruneEmptyLegacyDataRoot()` removes the empty `~/seamly2d` skeleton. `TST_DataRoot` 16 → **22 cases**                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| **Task 14**                                          | **Extended, not implemented.** The user asked whether the installer could check-then-move an existing data tree before anything is removed; it cannot today, so nine subtasks were folded into Task 14 under an "Update (2026-07-26) — moving an existing data tree" note                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| **Task 52**                                          | **Extended.** Gained a new *first* subtask: stop `CollectionTest` writing into the real user settings **before** repointing the `vsettings.cpp` accessors                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| **Developer machine**                                | **Migrated and verified** — see the table below. This is state *outside* the repo; nothing in git records it                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| **Tasks 54, 55, 57**                                 | **Filed, not started**, moved out of `future-todos.md` (docs-only commits). **54** (`project-docs/TODO_MIGRATE.md`) renames the three `vmisc` settings **files *and* classes** — `settings_common`/`SettingsCommon`, `settings_seamlyme`/`SettingsSeamlyMe`, `settings_seamly2d`/`SettingsSeamly2D` — per `.github/README-CODE-STYLES.md`; ~620 class occurrences plus 22 `.ts` `tr()` contexts (~220 translated strings) that go obsolete if not renamed with the classes. **55** (`project-docs/TODO_MIGRATE.md`) refreshes `.github/README-DEVELOPER.md`; its first subtask is **already done** (see below). **57** (`project-docs/TODO_SEAMLYLAYOUT.md`) was rewritten from "rename `app_core`'s `lib.rs`" to "give every crate root a unique name" — 11 crates all use `lib.rs`; splitting the root does **not** meet the uniqueness rule because Cargo still requires a root file, so the answer is `[lib] path = "src/<crate>.rs"` across all 11 |
+| **Task 56**                                          | **Filed, then removed at the user's request** — the `BUILD_PROBLEMS.txt` clangd noise is not being tracked as a task. (The finding stands if it comes back: 45 entries, all cascading from two `pp_file_not_found` roots because the repo has no compile database; qmake+MSVC builds those files clean.)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| **`README-DEVELOPER.md` Qt modules**               | **Fixed in `09da7801e0`, then LOST in the `develop` merge.** The fix added Qt WebChannel + Qt Positioning with a note that ticking Qt WebEngine does not install them. `develop` carried four independent rewrites of the same file (`ad38f96e4e`, `d2aba7efb9`, `fbff2de94c`, `8d83757332`) and the merge resolution took their version of that section. **The current file lists neither — nor Qt WebEngine itself**, so the seamlyLayout prerequisites are now entirely undocumented and the Task 44 setup failure is fully reintroduced. Its Task 55 subtask has been un-checked                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| **`develop` merge**                                | Brought 11 upstream commits (code + docs, above), and left a stray**`.github/README-DEVELOPER-NEW.md`** — a 149-line near-duplicate of `README-DEVELOPER.md` (6 insertions / 5 deletions apart) that exists on **neither** `develop` nor any earlier commit. It was introduced by the merge commit itself, so it is almost certainly a conflict-resolution artefact rather than an intended file                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| **Naming rules**                                     | **`CLAUDE.md` corrected.** It required new files to begin with `s`; `.github/README-CODE-STYLES.md` says *"don't start filenames with 's'!"* and gives meaningful prefixes instead. The user chose the **style guide as authoritative**, so `CLAUDE.md` now names it and carries the rules that come up constantly — snake_case, the prefix list, unique repo-wide, UpperCamelCase classes, file-matches-class. Only the "not `v`" half of the old rule survives                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| **Style guide revised by the user** (`df5d90bb14`) | **Two new exceptions that supersede parts of the tasks filed minutes earlier.** (1) *"Match Class names exactly for file names that define a class … in UpperCamelCase"* — a file primarily defining one class is now an **exception to snake_case**, which reopens Task 54's file names (`SettingsCommon.h` vs `settings_common.h`; note the repo has no UpperCamelCase `.cpp`/`.h` today outside vendored xerces-c). (2) *"Crate files in SeamlyLayout require multiple `lib.rs` files distinguishable by their paths"* — **voids Task 57's premise**. Both are recorded in the tasks and mirrored into `CLAUDE.md`; both still need a user decision (see next steps)                                                                                                                                                                                                                                                                                                                                 |
 
 ### Commits after PR #19 (all on origin)
 
-| Commit | Author | Files | Change |
-| --- | --- | --- | --- |
-| `da1ac2d1be` | Claude | 3 × `TODO_*.md`, `SESSION_HANDOVER.md` | Tasks 54-57 written up from `future-todos.md`, each with its scope measured in the tree |
-| `09da7801e0` | Claude | same + `.github/README-DEVELOPER.md` | Task 54 extended to the class renames; Qt-module fix applied to the doc; **Task 56 deleted**; Task 57 rewritten around the uniqueness rule |
-| `ac65b9ee0b` | Claude | `CLAUDE.md` | Coding Rules point at `.github/README-CODE-STYLES.md`; `s`-prefix rule dropped; class-naming and file-matches-class rules added |
-| `df5d90bb14` | user | `.github/README-CODE-STYLES.md`, `future-todos.md` | The two naming **exceptions** (class-match file names; multiple `lib.rs` allowed) |
-| `5abe181d7a`, `f6dcaded15` | Claude | `SESSION_HANDOVER.md`, `CLAUDE.md`, `project-docs/TODO_MIGRATE.md`, `project-docs/TODO_SEAMLYLAYOUT.md` | Handover brought current; Tasks 54/57 reconciled with those exceptions |
-| `b3634b4002` | user | `.github/README-CODE-STYLES.md` | Further style-guide edits |
-| `1d74f7e18a` | user | merge of `develop` (17 files) | Upstream code + doc rewrites; **dropped the Qt-module fix**; added the stray `README-DEVELOPER-NEW.md` |
+| Commit                         | Author | Files                                                                                                           | Change                                                                                                                                          |
+| ------------------------------ | ------ | --------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `da1ac2d1be`                 | Claude | 3 ×`TODO_*.md`, `SESSION_HANDOVER.md`                                                                      | Tasks 54-57 written up from`future-todos.md`, each with its scope measured in the tree                                                        |
+| `09da7801e0`                 | Claude | same +`.github/README-DEVELOPER.md`                                                                           | Task 54 extended to the class renames; Qt-module fix applied to the doc;**Task 56 deleted**; Task 57 rewritten around the uniqueness rule |
+| `ac65b9ee0b`                 | Claude | `CLAUDE.md`                                                                                                   | Coding Rules point at`.github/README-CODE-STYLES.md`; `s`-prefix rule dropped; class-naming and file-matches-class rules added              |
+| `df5d90bb14`                 | user   | `.github/README-CODE-STYLES.md`, `future-todos.md`                                                          | The two naming**exceptions** (class-match file names; multiple `lib.rs` allowed)                                                        |
+| `5abe181d7a`, `f6dcaded15` | Claude | `SESSION_HANDOVER.md`, `CLAUDE.md`, `project-docs/TODO_MIGRATE.md`, `project-docs/TODO_SEAMLYLAYOUT.md` | Handover brought current; Tasks 54/57 reconciled with those exceptions                                                                          |
+| `b3634b4002`                 | user   | `.github/README-CODE-STYLES.md`                                                                               | Further style-guide edits                                                                                                                       |
+| `1d74f7e18a`                 | user   | merge of`develop` (17 files)                                                                                  | Upstream code + doc rewrites;**dropped the Qt-module fix**; added the stray `README-DEVELOPER-NEW.md`                                   |
 
 ### Files changed (Task 53, commit `a89801e4f4`)
 
-| File | Change |
-| --- | --- |
-| `src/libs/vmisc/vcommonsettings.cpp` / `.h` | `getDefaultDataRoot()` → `~/seamlyData`; `mergeStrayCommonSettings()` verifies every key reached the destination and the destination reports `NoError`, then calls the new private `removeStrayCommonSettings()`; new public static `pruneEmptyLegacyDataRoot(legacyRoot, configuredRoot)` |
-| `src/app/seamly2d/core/application_2d.cpp`, `src/app/seamlyme/application_me.cpp` | One `pruneEmptyLegacyDataRoot()` call each, after `initializeDataRoot()` — the **only** places real home paths reach it |
-| `src/test/Seamly2DTest/qttestmainlambda.cpp` | The Task 34 `initializeDataRoot()` mirroring was **removed**, with a comment saying not to restore it |
-| `src/test/Seamly2DTest/tst_dataroot.cpp` / `.h` | Six new cases: prune removes an empty tree / keeps one holding files / never removes the configured root / keeps a root containing the configured root / ignores a missing root; stray merged-then-deleted |
-| `.github/README-BUILDS.md` | Data-root section rewritten — why `seamlyData` and not `seamly`, the legacy-skeleton cleanup rules, the stray-deletion rules, and the real deletion incident in the testing note |
-| `project-docs/TODO_MIGRATE.md`, `project-docs/TODO_COMPLETED.md` | Task 53 entry added to `project-docs/TODO_COMPLETED.md` (Task 34 marked partly superseded); Task 14 and Task 52 extended; every `~/seamly` → `~/seamlyData` in Tasks 14/35/36/37/38 |
+| File                                                                                  | Change                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/libs/vmisc/vcommonsettings.cpp` / `.h`                                       | `getDefaultDataRoot()` → `~/seamlyData`; `mergeStrayCommonSettings()` verifies every key reached the destination and the destination reports `NoError`, then calls the new private `removeStrayCommonSettings()`; new public static `pruneEmptyLegacyDataRoot(legacyRoot, configuredRoot)` |
+| `src/app/seamly2d/core/application_2d.cpp`, `src/app/seamlyme/application_me.cpp` | One`pruneEmptyLegacyDataRoot()` call each, after `initializeDataRoot()` — the **only** places real home paths reach it                                                                                                                                                                       |
+| `src/test/Seamly2DTest/qttestmainlambda.cpp`                                        | The Task 34`initializeDataRoot()` mirroring was **removed**, with a comment saying not to restore it                                                                                                                                                                                            |
+| `src/test/Seamly2DTest/tst_dataroot.cpp` / `.h`                                   | Six new cases: prune removes an empty tree / keeps one holding files / never removes the configured root / keeps a root containing the configured root / ignores a missing root; stray merged-then-deleted                                                                                              |
+| `.github/README-BUILDS.md`                                                          | Data-root section rewritten — why`seamlyData` and not `seamly`, the legacy-skeleton cleanup rules, the stray-deletion rules, and the real deletion incident in the testing note                                                                                                                    |
+| `project-docs/TODO_MIGRATE.md`, `project-docs/TODO_COMPLETED.md`                  | Task 53 entry added to`project-docs/TODO_COMPLETED.md` (Task 34 marked partly superseded); Task 14 and Task 52 extended; every `~/seamly` → `~/seamlyData` in Tasks 14/35/36/37/38                                                                                                               |
 
 ### Two rules established here — do not undo them
 
@@ -173,15 +223,15 @@ The user first asked for `dataRoot=G:/My Drive/seamly`. That folder already exis
 
 ### Developer-machine state (not in git — re-derive from here, do not assume the old paths)
 
-| Item | Now |
-| --- | --- |
-| Data tree | **`G:\My Drive\seamlyData`** (was `G:\My Drive\seamly2d`). Moved by **folder rename**, not copy — one Google Drive metadata operation, no 17.6 GB re-upload, reversible. Verified identical before/after: **8,713 files / 1,050 dirs / 17,629,852,473 bytes** |
-| `%APPDATA%\Seamly\qt6_common.ini` | `dataRoot=G:/My Drive/seamlyData`, all seven path overrides repointed |
-| Also repointed | `%APPDATA%\Seamly\common.ini`; `%APPDATA%\Unknown Organization.ini`; `%LOCALAPPDATA%\Seamly\Seamly2D\qt6_seamly2d.ini` (10 paths). Zero stale `seamly2d` paths remain |
-| `C:\Users\susan\seamly2d` | **Deleted** after confirming 0 files / 8 empty dirs |
-| `%APPDATA%\Unknown Organization\` (the **folder**) | **Gone** — merged into `%APPDATA%\Seamly\qt6_common.ini`, all four values confirmed present first |
-| `%APPDATA%\Unknown Organization.ini` (the **file**) | **Still live**, still holds `paths/pattern` and `paths/layout`. That is Task 52, untouched |
-| Backups | Every settings file touched was backed up to the session scratchpad `…\scratchpad\settings-backup\` — session-scoped, treat as gone |
+| Item                                                        | Now                                                                                                                                                                                                                                                                                  |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Data tree                                                   | **`G:\My Drive\seamlyData`** (was `G:\My Drive\seamly2d`). Moved by **folder rename**, not copy — one Google Drive metadata operation, no 17.6 GB re-upload, reversible. Verified identical before/after: **8,713 files / 1,050 dirs / 17,629,852,473 bytes** |
+| `%APPDATA%\Seamly\qt6_common.ini`                         | `dataRoot=G:/My Drive/seamlyData`, all seven path overrides repointed                                                                                                                                                                                                              |
+| Also repointed                                              | `%APPDATA%\Seamly\common.ini`; `%APPDATA%\Unknown Organization.ini`; `%LOCALAPPDATA%\Seamly\Seamly2D\qt6_seamly2d.ini` (10 paths). Zero stale `seamly2d` paths remain                                                                                                        |
+| `C:\Users\susan\seamly2d`                                 | **Deleted** after confirming 0 files / 8 empty dirs                                                                                                                                                                                                                            |
+| `%APPDATA%\Unknown Organization\` (the **folder**)  | **Gone** — merged into `%APPDATA%\Seamly\qt6_common.ini`, all four values confirmed present first                                                                                                                                                                           |
+| `%APPDATA%\Unknown Organization.ini` (the **file**) | **Still live**, still holds `paths/pattern` and `paths/layout`. That is Task 52, untouched                                                                                                                                                                                 |
+| Backups                                                     | Every settings file touched was backed up to the session scratchpad`…\scratchpad\settings-backup\` — session-scoped, treat as gone                                                                                                                                               |
 
 ### What is verified
 
@@ -212,23 +262,20 @@ The `PreCompact` / `PostCompact` hooks in `.claude/settings.json` were emitting 
 Newly filed, none started, no priority assigned by the user yet:
 
 - **Task 54** — rename the three `vmisc` settings files **and** their classes. Mechanical but wide: ~620 class occurrences over 25 files, 101 files including the headers, and the 22 `.ts` `tr()` contexts must move in the **same commit** or ~220 translated strings go obsolete. Do files and classes together — a split leaves the new file declaring the old class. **Blocked on one decision:** the file-name form, see below.
-- **Task 55** — the `.github/README-DEVELOPER.md` refresh. **Re-read the file before starting:** the `develop` merge rewrote it, so the task's line references are stale, its Qt-module subtask is un-checked again, and the target file itself is in question (decision 3 below). Defects that survive the rewrite: the self-contradicting IDE/compiler lines (VS Code vs Visual Studio 2022 vs `CLAUDE.md`'s VS 18 Community), the Qt 5 Windows link, the ```` ```bash ```` fence over Windows `nmake` commands with no `vcvars64.bat` requirement, the duplicated pdftops paragraph, and **no mention of Rust/cargo, the build scripts, or the WebEngine modules**. The Qt Design Studio "don't select" warning (Task 47's hazard) was also dropped in the rewrite.
+- **Task 55** — the `.github/README-DEVELOPER.md` refresh. **Re-read the file before starting:** the `develop` merge rewrote it, so the task's line references are stale, its Qt-module subtask is un-checked again, and the target file itself is in question (decision 3 below). Defects that survive the rewrite: the self-contradicting IDE/compiler lines (VS Code vs Visual Studio 2022 vs `CLAUDE.md`'s VS 18 Community), the Qt 5 Windows link, the `` ```bash `` fence over Windows `nmake` commands with no `vcvars64.bat` requirement, the duplicated pdftops paragraph, and **no mention of Rust/cargo, the build scripts, or the WebEngine modules**. The Qt Design Studio "don't select" warning (Task 47's hazard) was also dropped in the rewrite.
 - **Task 57** — **premise superseded**, see below; decide whether to delete it (as Task 56 was) or keep only the `error.rs` ×2 collision. The user had already answered "no plan yet" before the exception was written.
 
 ## Four decisions the user still owes
 
-1. **Task 54's file-name form** — `SettingsCommon.h` (the class-match exception) or `settings_common.h` (snake_case + the `settings_*` prefix, as originally requested). Six file names and every future class-file rename hang on it; the task's first subtask is exactly this.
-2. **Task 57's fate** — delete it like Task 56, or keep only the `error.rs` ×2 collision, now that multiple `lib.rs` files are explicitly allowed.
-3. **`.github/README-DEVELOPER-NEW.md`** — delete it, or fold it into `README-DEVELOPER.md` and delete the original. Two near-identical developer READMEs is worse than either alone, and a `-NEW` suffix ages badly. Whichever survives is Task 55's target.
-4. **Re-apply the Qt WebChannel / Qt Positioning documentation?** The merge left the developer README with no WebEngine-family modules at all. Until it is restored, a new contributor cannot build seamlyLayout and the error they get names the wrong module. `CLAUDE.md` still carries the rule, so nothing is lost — but the doc a newcomer reads does not.
+1. **Task 54's file-name form** — `SettingsCommon.h` (the class-match exception) or `settings_common.h` (snake_case + the `settings_*` prefix, as originally requested). Six file names and every future class-file rename hang on it; the task's first subtask is exactly this. --> user says to use SettingsCommon.h so that the file name matches the class name.
+2. **`.github/README-DEVELOPER-NEW.md`** — delete it, or fold it into `README-DEVELOPER.md` and delete the original. Two near-identical developer READMEs is worse than either alone, and a `-NEW` suffix ages badly. Whichever survives is Task 55's target. --> user says to rename `.github/README-DEVELOPER-NEW.md`to `.github/README-DEVELOPER-SEAMLY-FAMILY.md` which will be folded into `.github/README-DEVELOPER.md`when the migration is completed.
+3. **Re-apply the Qt WebChannel / Qt Positioning documentation?** The merge left the developer README with no WebEngine-family modules at all. Until it is restored, a new contributor cannot build seamlyLayout and the error they get names the wrong module. `CLAUDE.md` still carries the rule, so nothing is lost — but the doc a newcomer reads does not. -->user says to maintain `.github/README-DEVELOPER-SEAMLY-FAMILY.md` until migration is complete.
 
 ## Uncommitted work in the tree
 
-**None — the tree is clean** and local `run-seamlyLayout` equals `origin/run-seamlyLayout`. The user has been editing docs directly and committing them (`df5d90bb14`, `b3634b4002`, and the merge), so re-check `git status` before assuming a dirty file is yours.
+**None — the tree is clean** and local `run-seamlyLayout` equals `origin/run-seamlyLayout`. The user has been editing docs directly and committing them, so re-check `git status` before assuming a dirty file is yours.
 
 ## Gotchas
-
-### New this session
 
 - **A `develop` merge can silently drop doc edits made on this branch.** `.github/README-DEVELOPER.md` was edited on `run-seamlyLayout` and, in the same window, four times on `develop`; the merge resolution took develop's side and the branch edit vanished with no conflict marker left behind. After merging `develop`, `git log -S "<a phrase you added>" -- <file>` is the cheapest way to confirm your change survived. The same merge also deposited a stray `README-DEVELOPER-NEW.md` that exists in no parent commit.
 - **`QSettings(fileName, format, parent)` records neither an organization nor an application name** — both come back empty, and QSettings substitutes the literal `"Unknown Organization"`. Root cause of the stray files in Tasks 34 and 52. `QSettings::setPath(format, scope, dir)` *does* redirect settings files, but has **no getter** — recover the base from a probe instance.
@@ -241,7 +288,7 @@ Newly filed, none started, no priority assigned by the user yet:
 
 ### Carried forward (still true)
 
-- **Qt Design Studio poisons `PATH`.** Bare `qmake`, `windeployqt` and `windeployqt6` resolve to a Qt **6.8.7** kit with no `mkspecs`. Never call these bare; use `qtPrepareTool` or `$$[QT_INSTALL_BINS]/…`. Root cause of Tasks 47 and 48.
+- **Qt Design Studio poisons `PATH`.** Bare `qmake`, `windeployqt` and `windeployqt6` resolve to a Qt **6.8.7** kit with no `mkspecs`. Never call these bare; use `qtPrepareTool` or `$$[QT_INSTALL_BINS]/…`. Root cause of Tasks 47 and 48. --> The user removed Qt Design Studio
 - **PowerShell 5.1 wraps a native exe's stderr in `NativeCommandError`** and sets `$?` to `$false` even on exit 0. Do not redirect native stderr inside PowerShell — run the script as a child process with `Start-Process … -RedirectStandardOutput/-RedirectStandardError -Wait -PassThru -NoNewWindow`.
 - **PowerShell splatting: `@array` is positional, `@hashtable` is by name.**
 - **Qt frontend test exes are GUI-subsystem binaries** — they print nothing to captured stdout. Run with `-o <file>,txt` and `QT_QPA_PLATFORM=offscreen`.

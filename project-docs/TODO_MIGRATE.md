@@ -256,27 +256,6 @@ What is and is not affected:
 - [X] Consider a guard: if the resolved `qmake -query QT_INSTALL_PREFIX` has no `mkspecs\` directory, fail early naming the real kit instead of letting the build produce a confusing spec error — added to `build.ps1`: it queries `QT_INSTALL_PREFIX` from the selected qmake and aborts with a message naming the offending prefix when that prefix has no `mkspecs\`. Verified the guard accepts `C:\Qt\6.11.1\msvc2022_64` and rejects `C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version`
 - [ ] Optional developer-environment cleanup: reorder `PATH` so the real kit's `bin\` precedes `C:\Qt\Tools\QtDesignStudio\...\bin`, or drop the Design Studio entry from `PATH` entirely — left to the developer; the script-level pinning above makes it unnecessary for repo builds, but it would also fix Qt Creator kit auto-detection and any ad-hoc `qmake` use
 
-## Task 49 — SeamlyLayout ignores the SVG path seamly2d passes it, so the handoff opens an empty app (found doing Task 30, 2026-07-25)
-
-**Severity: the Layout Mode handoff does not actually hand anything off.**
-
-`MainWindow::exportPiecesToSeamlyLayout()` (`src/app/seamly2d/mainwindow.cpp:4104-4145`) writes the tagged `<pattern>.pieces.svg` beside the pattern file and then launches the daughter app with it as its argument — the behaviour its own Doxygen comment describes:
-
-```cpp
-// Launch SeamlyLayout as a detached process, the same way SeamlyMe is launched.
-return QProcess::startDetached(seamlyLayout, QStringList(svgPath), workingDirectory);
-```
-
-But `src/app/seamlylayout/qt_frontend/main.cpp` never looks at its command line. It passes `argc`/`argv` to `QApplication` and stops there — there is no `QCoreApplication::arguments()`, no `QCommandLineParser`, and no `std::env::args` anywhere under `src/app/seamlylayout/`. Verified on the freshly built Qt 6.11.1 release exe: launching `SeamlyLayout.exe <some>.svg` brings up the window with both panes empty — *"Import an SVG pattern to begin"* / *"Apply settings to generate layout"* — exactly as if it had been started with no argument. The user has to click **Import SVG** and navigate to the file seamly2d just wrote.
-
-This is **pre-existing and unrelated to the Qt bump**: `git log -S "arguments()" -- src/app/seamlylayout/qt_frontend/main.cpp` finds no commit that ever added argument handling. Task 30's verify subtask can therefore confirm that seamly2d *locates and launches* SeamlyLayout, but not that the pattern *renders*.
-
-- [ ] Consume the positional argument in `src/app/seamlylayout/qt_frontend/main.cpp`: read `QCoreApplication::arguments()` (or a `QCommandLineParser` with a documented `<svg-file>` positional) and load that file through the same path the **Import SVG** button uses, so the handoff opens the pattern
-- [ ] Handle the failure modes explicitly — missing file, unreadable file, an SVG without the `data-*` piece tagging — with a visible message rather than a silently empty canvas
-- [ ] Decide and document the contract between the two apps (accepted argument forms, exit codes, what happens when SeamlyLayout is already running); record it in `src/app/seamlylayout/CLAUDE.md` and `project-docs/NEW-ATTRIBUTES.csv`'s companion notes
-- [ ] Add coverage: a Qt frontend test that the argument is parsed and dispatched, and extend `tst_seamlyfamilypaths` / a seamly2d-side test so the launch contract (`startDetached(exe, {svgPath}, workingDir)`) cannot drift from what the daughter app accepts
-- [ ] End-to-end verify: open a pattern in seamly2d, enter Layout Mode, and confirm SeamlyLayout comes up with the pieces already loaded — this is the check Task 30's verify subtask could not complete
-
 ## Task 51 — Windows MSI: finish the install-time experience (shortcuts, registry, ARP, associations, UAC, upgrade warning)
 
 Task 30's verification exercised the MSI's **payload** — the flat install directory, the single shared Qt 6.11.1 runtime, and all three apps launching from it — by extracting the package with `msiexec /a` and running the exes out of the expanded tree. That deliberately stops short of everything Windows Installer does *around* the files. This task covers that remainder, and adds the install-time choices and warnings the installer should be offering the user but does not yet.
@@ -384,3 +363,34 @@ Rewrite the **"Recommended installation for development on all platforms (Linux,
 - [ ] Fix the stale link on line 108 (Qt 5 → Qt 6) and sweep the section for any other Qt 5-era links
 - [ ] Cross-link `.github/README-BUILDS.md` (toolchains, packaging, settings/data locations) and `.github/workflows/README_WORKFLOWS.md` instead of restating them; keep CI's Qt version named in exactly one place
 - [ ] Verify the instructions by following them literally on this Windows PC (and, where they can only be reviewed, say so) — a doc that has not been walked through is the reason for this task
+
+## Task 59 — SeamlyLayout packs the whole pattern as one piece: the handoff SVG nests every piece inside `<g data-type="pattern">` (found doing Task 49, 2026-07-27)
+
+**Severity: the handoff now opens (Task 49), but the layout it produces is wrong.** This is the next thing standing between Layout Mode and a usable layout.
+
+`piece_extractor::extract_piece_rects()` (`src/app/seamlylayout/crates/cxxqt_bridge/src/piece_extractor.rs:52`) treats **each direct child `<g>` of the SVG root** as one pattern piece — the shape an ad-hoc drawing has. The tagged handoff SVG that `SvgGenerator` writes has a different shape: one single top-level group, the pattern, with every piece nested inside it:
+
+```xml
+<svg …>
+  <g id="pattern-1" data-type="pattern" data-name="The Richmond Shirt">
+    <g id="piece-1" data-type="piece" data-name="Two Inch Gauge">…</g>
+    <g id="piece-2" data-type="piece" …>…</g>   <!-- 12 of these -->
+  </g>
+</svg>
+```
+
+So the extractor finds exactly **one** "piece" — the entire pattern — and the packer is handed a single object the size of the whole sheet. Observed end to end on 2026-07-27 with a real handoff file exported from `richmond-shirt_v1_v061-test.sm2d` (12 `data-type="piece"` groups; `project-docs/SVG-DATA-ATTRIBUTES.md` documents the shape, and `data-parent` names the containing pattern group):
+
+```text
+[process_layout] non-tiled pack_polygons call: pieces=1, polygon_verts=5, gap_px=5, bin=4560x47952
+[process_layout] non-tiled pack_polygons_lenient returned … 0 placements, 1 unplaced: ["pattern-1"]
+```
+
+Nothing is placed, and the piece that fails to place is reported to the user as `pattern-1`.
+
+- [ ] Make piece discovery follow the documented contract: select elements carrying `data-type="piece"` at any depth (the new `piece_extractor::count_tagged_pieces()` already walks the tree this way), and fall back to the current "top-level `<g>`" rule only for untagged SVGs — the same files the Task 49 `import_warning` already flags. Keep both paths, since SeamlyLayout deliberately still opens untagged drawings
+- [ ] Check every other consumer that assumes the top-level-`<g>` shape, not just `extract_piece_rects`: `extract_piece_rects_and_polygons()`, `layout_assembler` (which locates the original element by `group_index` — an index into the root's `<g>` children, so it moves with this change), `oversized`, `remaining`, `sheets`, and the flatten/verticalize/translate stages in `layout_utils`
+- [ ] Decide what happens to the pattern wrapper group itself in the output layout DOM — pieces have to be re-parented or the transform composed, or every placed piece inherits the pattern group's transform twice
+- [ ] Preserve the piece identity in the output: `id`, `data-name` and `data-letter` should reach the layout SVG and the Adjust overlay, so a user sees "Front Bodice", not `piece-7`
+- [ ] Tests: a Rust fixture built from the real tagged shape (nested pieces under `pattern-1`) asserting *n* pieces are extracted, plus a regression case for the untagged fallback so the ad-hoc path does not break
+- [ ] End-to-end: export the handoff from `richmond-shirt_v1_v061-test.sm2d`, open it in SeamlyLayout, Create Layout, and confirm the 12 pieces are packed individually

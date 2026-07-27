@@ -12,6 +12,24 @@
 
 Whole-scene exports (draft blocks) keep the legacy untagged single-group structure; only piece-based exports are tagged.
 
+## Launch contract (Task 49)
+
+The handoff in (1) is a process launch, and both halves of it are pinned by tests so they cannot drift apart.
+
+| | Producer — Seamly2D | Consumer — SeamlyLayout |
+|---|---|---|
+| Code | `MainWindow::exportPiecesToSeamlyLayout()` via `SeamlyFamilyPaths::piecesSvgFilePath()` and `SeamlyFamilyPaths::seamlyLayoutLaunchArguments()` (`src/libs/vmisc/seamly_family_paths.cpp`) | `StartupOptions::parse()` (`src/app/seamlylayout/qt_frontend/src/StartupOptions.cpp`), dispatched from `main.cpp` into `Main.qml`'s `openSvgFile()` |
+| Tests | `TST_SeamlyFamilyPaths` (`src/test/Seamly2DTest`) | `StartupOptionsTests` (`src/test/SeamlyLayoutTest`) |
+
+**The contract:**
+
+- **File name** — `<pattern complete base name>.pieces.svg`, in the pattern file's own directory. `richmond-shirt.sm2d` → `richmond-shirt.pieces.svg`; `shirt.v2.sm2d` → `shirt.v2.pieces.svg` (only the last extension is replaced).
+- **Command line** — `SeamlyLayout <absolute path to the .pieces.svg>`, launched detached with the SeamlyLayout executable's own directory as the working directory. **Exactly one positional argument**; the path is passed as a single argument-vector element, so spaces in it need no quoting by the caller.
+- **Also accepted** — `-h` / `--help` and `-v` / `--version` (shown in a dialog, exit 0), and no argument at all (empty canvas). Anything else — a second positional argument, an unknown option, a missing/unreadable/non-`.svg` file — is reported to the user in SeamlyLayout's error dialog, and the application then continues with an empty canvas rather than exiting.
+- **Exit codes** — `0` for `--help` / `--version` and for a normal session; `-1` when the QML root object fails to load. A rejected argument is *not* an exit code: the window is already the place the message has to appear, because the launch is detached and has no console.
+- **Already running** — no single-instance handling: every launch is a new process with its own window, so a second Layout Mode handoff opens a second SeamlyLayout. This is deliberate — the app holds one document with no tabs, and comparing two layouts side by side is useful. Seamly2D does not track or reuse a previously launched instance.
+- **Untagged input** — the `data-*` tagging is *not* required to open a file. SeamlyLayout treats every top-level `<g>` with geometry as a piece, so an ordinary SVG still lays out. When an imported file contains no `data-type="piece"` group at all, SeamlyLayout shows a non-blocking warning saying so (`AppController::import_svg` → the `import_warning` signal), because a file that did not come from Layout Mode will usually not lay out the way the user expects.
+
 ## Document shape
 
 ```xml

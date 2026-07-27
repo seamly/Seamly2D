@@ -45,6 +45,13 @@
  * (Task 50): an upward walk from the running executable's directory looking for
  * a SeamlyLayout build inside the source checkout, Release before Debug.
  *
+ * SeamlyFamilyPaths::piecesSvgFilePath() and seamlyLayoutLaunchArguments() are
+ * the seamly2d half of the Layout Mode launch contract (Task 49): the handoff
+ * file is "<pattern>.pieces.svg" beside the pattern, and it is passed as the
+ * single positional argument of the SeamlyLayout process. The daughter app's
+ * half — that it accepts exactly that and rejects anything else — is locked by
+ * StartupOptionsTests in src/test/SeamlyLayoutTest.
+ *
  * Every case runs against a QTemporaryDir populated with dummy files, so the
  * suite is hermetic — no real installation, settings value, or application
  * directory is involved.
@@ -70,6 +77,13 @@ private slots:
     void DevBuildFindsDebugWhenReleaseAbsent() const;
     void DevBuildDirectoryNamedLikeExecutableIsIgnored() const;
     void DevBuildStopsBeforeUnboundedWalk() const;
+
+    void PiecesSvgSitsBesideThePattern() const;
+    void PiecesSvgKeepsDotsInThePatternName() const;
+    void PiecesSvgPathIsAbsolute() const;
+    void PiecesSvgOfEmptyPatternPathIsEmpty() const;
+    void LaunchArgumentsAreTheSvgPathAlone() const;
+    void LaunchArgumentsOfEmptySvgPathAreEmpty() const;
 };
 
 #endif // TST_SEAMLYFAMILYPATHS_H

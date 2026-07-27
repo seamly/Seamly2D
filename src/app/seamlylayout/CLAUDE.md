@@ -22,6 +22,22 @@ A pattern layout application — daughter app to Seamly2D. Lives at `src/app/sea
 - Read docs in `docs/` regularly and update them to reflect code changes
 - **UI work must consult `crates/cxxqt_bridge/` and `qt_frontend/`.** The active UI is QML in `qt_frontend/qml/` with the Rust↔Qt bridge in `crates/cxxqt_bridge/`.
 
+## Command Line — the Seamly2D handoff contract (Task 49)
+
+Seamly2D's Layout Mode writes `<pattern>.pieces.svg` beside the pattern file and launches this app **detached** with that path. The contract is implemented in `qt_frontend/src/StartupOptions.{h,cpp}` and pinned by `src/test/SeamlyLayoutTest/StartupOptionsTests.cpp`; the producing half lives in `src/libs/vmisc/seamly_family_paths.cpp` and is pinned by `TST_SeamlyFamilyPaths`. **Change one side and you must change the other** — see `project-docs/SVG-DATA-ATTRIBUTES.md` for the full statement.
+
+| Invocation | Behaviour |
+| ---------- | --------- |
+| `SeamlyLayout` | Empty canvas — the double-clicked-icon case |
+| `SeamlyLayout <file.svg>` | Opens that file through the same path as the **Import SVG** button (`Main.qml`'s `openSvgFile()` → `AppController::importSvg`) |
+| `SeamlyLayout -h` / `--help`, `-v` / `--version` | Text in a dialog (no console on Windows: this is a WIN32-subsystem binary), exit 0 |
+| Two or more files, unknown option, missing / unreadable / non-`.svg` file | Error dialog naming the problem, then an empty canvas — never a silent no-op |
+
+- **Absolute paths only** — a relative argument is resolved with `QFileInfo::absoluteFilePath()` at parse time, because the detached launch inherits SeamlyLayout's own working directory, not the user's.
+- **No single-instance handling** — each launch is its own process and window. One document per process; there are no tabs, which is also why a second positional argument is rejected rather than queued.
+- **Untagged SVGs are opened, not refused.** Every top-level `<g>` with geometry is treated as a piece, so an ordinary drawing still lays out. When the file carries no `data-type="piece"` group, `import_svg` emits `import_warning` and QML shows a non-blocking popup (`piece_extractor::count_tagged_pieces` does the counting).
+- Dispatch happens from `main.cpp` on a `QTimer::singleShot(0, …)`, **after** the event loop starts — the QML window and its WebEngine canvases must exist before an SVG can be pushed into them.
+
 ## Platform Support
 
 Windows 11, Linux (all flavors), macOS (latest 3 versions)

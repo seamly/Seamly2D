@@ -298,6 +298,45 @@ fn collect_all_path_points(element: &xmltree::Element, points: &mut Vec<Point>) 
     } // for child
 } // fn collect_all_path_points
 
+// @brief Count the elements tagged as pattern pieces by Seamly2D.
+//
+// Seamly2D's Layout Mode writes one `<g data-type="piece" …>` per pattern
+// piece (see `project-docs/NEW-ATTRIBUTES.csv` and
+// `src/libs/vformat/svg_generator.cpp`).  SeamlyLayout does not *require* the
+// tagging — `extract_piece_rects` treats every top-level `<g>` with geometry as
+// a piece, so a hand-drawn SVG still lays out — but its absence means the file
+// did not come from the Layout Mode handoff, which is worth telling the user
+// about before they wonder why the result looks nothing like their pattern.
+//
+// The whole tree is walked, not just the root's children, so the count is
+// unaffected by any wrapper group a future exporter might introduce.
+//
+// @param doc SVG document previously loaded by `app_core::load_svg`.
+// @return Number of elements carrying `data-type="piece"`; 0 for an untagged SVG.
+pub fn count_tagged_pieces(doc: &svg_dom::Document) -> usize {
+    count_tagged_pieces_in(&doc.root)
+} // fn count_tagged_pieces
+
+// @brief Recursive worker for `count_tagged_pieces`.
+// @param element Subtree root to count within (counted itself as well).
+// @return Number of `data-type="piece"` elements in this subtree.
+fn count_tagged_pieces_in(element: &xmltree::Element) -> usize {
+    // Count this element when it carries the piece tag.
+    let mut count = match element.attributes.get("data-type") {
+        Some(value) if value == "piece" => 1,
+        _ => 0, // untagged, or tagged as pattern/seamline/cutline/…
+    }; // match data-type
+
+    // Recurse into every child element; text nodes and comments cannot be tagged.
+    for child in &element.children {
+        if let XMLNode::Element(child_elem) = child {
+            count += count_tagged_pieces_in(child_elem);
+        } // if XMLNode::Element
+    } // for child
+
+    count
+} // fn count_tagged_pieces_in
+
 // @brief Determine SVG user-units-per-CSS-pixel from the root `<svg>` element.
 //
 // SVG files exported by Seamly2D typically set `width`/`height` in millimetres
@@ -410,6 +449,55 @@ mod tests {
         assert_eq!(pieces.len(), 1);
         assert_eq!(pieces[0].id, "");
     } // handles_missing_id
+
+    // @brief A Seamly2D handoff SVG reports one tagged piece per data-type="piece" group.
+    #[test]
+    fn counts_tagged_pieces() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g id="pattern-1" data-type="pattern" data-name="Richmond Shirt">
+    <g id="piece-1" data-type="piece" data-type-number="1" data-parent="pattern-1">
+      <g id="seamline-1" data-type="seamline" data-parent="piece-1">
+        <path d="M 0 0 L 96 0 L 96 96 L 0 96 Z"/>
+      </g>
+    </g>
+    <g id="piece-2" data-type="piece" data-type-number="2" data-parent="pattern-1">
+      <path d="M 0 0 L 48 0 L 48 48 L 0 48 Z"/>
+    </g>
+  </g>
+</svg>"#;
+        let doc = svg_dom::Document::parse(svg).expect("parse ok");
+        // Nested two levels below the root — the walk is recursive, not top-level only.
+        assert_eq!(count_tagged_pieces(&doc), 2);
+    } // counts_tagged_pieces
+
+    // @brief An SVG with no data-* tagging reports zero pieces.
+    // This is what triggers the import warning: the file did not come from
+    // Seamly2D's Layout Mode, even though it may still lay out fine.
+    #[test]
+    fn counts_zero_for_untagged_svg() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g id="piece-1">
+    <path d="M 0 0 L 96 0 L 96 96 L 0 96 Z"/>
+  </g>
+</svg>"#;
+        let doc = svg_dom::Document::parse(svg).expect("parse ok");
+        assert_eq!(count_tagged_pieces(&doc), 0);
+    } // counts_zero_for_untagged_svg
+
+    // @brief Other data-type values (pattern, seamline, grainline, …) are not counted.
+    #[test]
+    fn counts_only_the_piece_data_type() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g id="pattern-1" data-type="pattern">
+    <g id="grainline-1" data-type="grainline"/>
+    <g id="notch-1" data-type="notch"/>
+    <g id="pieces" data-type="piecework"/>
+  </g>
+</svg>"#;
+        let doc = svg_dom::Document::parse(svg).expect("parse ok");
+        // "piecework" must not match: the comparison is exact, not a prefix.
+        assert_eq!(count_tagged_pieces(&doc), 0);
+    } // counts_only_the_piece_data_type
 
     // @brief Non-<g> top-level elements (rect, defs, title) are skipped.
     #[test]

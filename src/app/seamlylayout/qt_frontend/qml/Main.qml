@@ -60,8 +60,45 @@ ApplicationWindow {
     } // Component.onCompleted
 
     // Base filename (without extension) of the most recently imported SVG.
-    // Populated by importDialog.onAccepted; used to build default export filenames.
+    // Populated by openSvgFile(); used to build default export filenames.
     property string importedBaseName: ""
+
+    // -----------------------------------------------------------------------
+    // SVG import entry point
+    //
+    // Both ways of opening a file funnel through openSvgFile():
+    //   - the Import SVG file dialog (importDialog.onAccepted), and
+    //   - the Seamly2D Layout Mode handoff, invoked from main.cpp by
+    //     QMetaObject::invokeMethod(window, "openSvgFile", ...) once the event
+    //     loop starts (Task 49).
+    // Keeping one entry point is what stops the two paths from drifting apart
+    // — before Task 49 the command-line path did not exist at all.
+    // -----------------------------------------------------------------------
+
+    // @brief Open an SVG file: remember its base name, then hand it to Rust.
+    // @param localPath Absolute local file path (NOT a file:// URL).
+    function openSvgFile(localPath) {
+        if (!localPath || localPath === "") return;   // nothing to open
+        // Extract base filename (without path and .svg extension) for default export names.
+        var name = localPath.replace(/\\/g, "/")        // normalise backslashes
+        name = name.substring(name.lastIndexOf("/") + 1) // strip directory
+        if (name.toLowerCase().endsWith(".svg"))
+            name = name.substring(0, name.length - 4)    // strip .svg extension
+        root.importedBaseName = name
+        // importSvg emits importFinished on success, errorOccurred on failure;
+        // both are handled by the AppController block above.
+        appController.importSvg(localPath);
+    } // openSvgFile
+
+    // @brief Report a command-line problem detected before the window existed.
+    // Called from main.cpp when the positional <svg-file> argument is missing,
+    // unreadable, a folder, or not an SVG. The application stays open with an
+    // empty canvas so the user can pick a file themselves.
+    // @param message Complete sentence naming the file and the problem.
+    function reportStartupError(message) {
+        errorDialog.errorText = message;
+        errorDialog.open();
+    } // reportStartupError
 
     // Staging path for the DXF save location chosen in dxfSaveDialog.
     // Held here across the two-step dialog flow (save path → teaching dialog).
@@ -155,6 +192,14 @@ ApplicationWindow {
             warningDialog.warningText = message;
             warningDialog.open();
         } // onLayoutWarning
+
+        // Import warning — the SVG loaded, but it carries no data-type="piece"
+        // tagging, so it is not a Seamly2D Layout Mode handoff file (Task 49).
+        // Non-blocking: the file is already on the left canvas.
+        onImportWarning: function(message) {
+            warningDialog.warningText = message;
+            warningDialog.open();
+        } // onImportWarning
 
         // Load the input SVG in the left canvas after self.input_dom is successfully created.
         // Clear the right canvas — the old layout is no longer valid for the new SVG.
@@ -841,13 +886,8 @@ ApplicationWindow {
             // drive letters ("file:///C:/..." → "C:/...") and Unix absolute paths
             // ("file:///home/..." → "/home/...") without platform-specific string hacks.
             var localPath = preferencesModel.urlToLocalFile(selectedFile.toString())
-            // Extract base filename (without path and .svg extension) for default export names.
-            var name = localPath.replace(/\\/g, "/")        // normalise backslashes
-            name = name.substring(name.lastIndexOf("/") + 1) // strip directory
-            if (name.toLowerCase().endsWith(".svg"))
-                name = name.substring(0, name.length - 4)    // strip .svg extension
-            root.importedBaseName = name
-            appController.importSvg(localPath);
+            // Shared entry point — also used by the command-line handoff (Task 49).
+            root.openSvgFile(localPath)
         } // onAccepted
     } // FileDialog importDialog
 

@@ -12,11 +12,15 @@
 // QApplication is a subclass of QGuiApplication; it supports both QML Quick
 // windows and QtWidgets windows in the same process (required for AdjustWindow).
 #include <QApplication>
+#include <QMessageBox>
+#include <QMetaObject>
 #include <QQmlApplicationEngine>
 #include <QQmlEngine>
 #include <QQuickStyle>
 #include <QIcon>
+#include <QTimer>
 #include <QUrl>
+#include <QVariant>
 #include <QQuickWindow>
 #include <QtWebEngineQuick>
 
@@ -44,6 +48,10 @@
 
 // PreferencesController — QML-accessible bridge that owns the QtWidgets PreferencesWindow.
 #include "src/PreferencesController.h"
+
+// StartupOptions — parses and validates the optional positional <svg-file>
+// argument that Seamly2D's Layout Mode hands over (Task 49).
+#include "src/StartupOptions.h"
 
 // ---------------------------------------------------------------------------
 // Platform-specific title bar color customization
@@ -145,6 +153,31 @@ int main(int argc, char *argv[])
     app.setApplicationName("SeamlyLayout");
     app.setApplicationVersion("0.1.0");
 
+    // -----------------------------------------------------------------------
+    // Command line — Task 49: the Seamly2D Layout Mode handoff.
+    //
+    // Seamly2D writes "<pattern>.pieces.svg" beside the pattern file and then
+    // launches this application detached with that path as its single
+    // positional argument. Parsing happens here, AFTER the metadata above, so
+    // --version can report the application name and version set there, and
+    // BEFORE the QML engine is built, so --help / --version cost no startup.
+    //
+    // The parsed result is only dispatched once the event loop is running (see
+    // the QTimer::singleShot below): the QML window and its WebEngine canvases
+    // must exist before an SVG can be pushed into them.
+    // -----------------------------------------------------------------------
+    const StartupOptions startupOptions = StartupOptions::parse(app.arguments());
+
+    if (startupOptions.status() == StartupOptions::Status::ShowInformation) {
+        // --help / --version. This is a WIN32-subsystem binary with no console
+        // to print to, so the text goes in a dialog on every platform.
+        QMessageBox::information(nullptr, QStringLiteral("SeamlyLayout"), startupOptions.message());
+        return 0;
+    } // if information requested
+
+    Logger::log(QStringLiteral("main(): startup file = '%1', message = '%2'")
+                    .arg(startupOptions.filePath(), startupOptions.message()));
+
     // Application icon — SeamlyLayout logo (SVG scales to all resolutions)
     app.setWindowIcon(QIcon(QStringLiteral(":/icons/seamly-layout.svg")));
 
@@ -233,6 +266,50 @@ int main(int argc, char *argv[])
             } // if window cast succeeded
         }, Qt::QueuedConnection);
 #endif
+
+    // -----------------------------------------------------------------------
+    // Task 49 — act on the command line once the event loop is running.
+    //
+    // A zero-delay single shot fires on the first pass of the event loop, by
+    // which time Main.qml's root ApplicationWindow (and the two SvgCanvas
+    // WebEngineViews inside it) have been constructed and shown. Calling the
+    // QML functions directly after loadFromModule() would push the SVG into a
+    // canvas whose web view has not yet been realised.
+    //
+    // The lambda captures `engine` by reference: it lives on this stack frame
+    // for the whole of app.exec(), which is the only time the timer can fire.
+    // -----------------------------------------------------------------------
+    if (startupOptions.hasFile() || startupOptions.hasError()) {
+        QTimer::singleShot(0, &app, [&engine, startupOptions]() {
+            const QList<QObject *> rootObjects = engine.rootObjects();
+            if (rootObjects.isEmpty()) {
+                // QML failed to load; objectCreationFailed above is already
+                // tearing the application down. Nothing to hand the file to.
+                Logger::log(QStringLiteral("main(): no QML root object — startup file dropped"));
+                return;
+            } // if rootObjects.isEmpty()
+
+            QObject *const window = rootObjects.constFirst();
+
+            if (startupOptions.hasFile()) {
+                // Main.qml: function openSvgFile(localPath) — the same entry
+                // point the Import SVG file dialog uses, so the handoff and a
+                // manual import cannot diverge.
+                Logger::log(QStringLiteral("main(): opening startup file %1").arg(startupOptions.filePath()));
+                QMetaObject::invokeMethod(window,
+                                          "openSvgFile",
+                                          Q_ARG(QVariant, QVariant(startupOptions.filePath())));
+            } else {
+                // Main.qml: function reportStartupError(message) — shows the
+                // error dialog over the empty canvas instead of leaving the
+                // user to guess why nothing opened.
+                Logger::log(QStringLiteral("main(): startup error: %1").arg(startupOptions.message()));
+                QMetaObject::invokeMethod(window,
+                                          "reportStartupError",
+                                          Q_ARG(QVariant, QVariant(startupOptions.message())));
+            } // if hasFile
+        }); // QTimer::singleShot
+    } // if a startup file or error is pending
 
     return app.exec();
 } // main

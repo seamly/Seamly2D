@@ -77,6 +77,7 @@
 #include "../vmisc/def.h"
 #include "../vmisc/logging.h"
 #include "../vmisc/qxtcsvmodel.h"
+#include "../vmisc/seamly_family_paths.h"
 #include "../vmisc/vsettings.h"
 #include "../vmisc/dialogs/dialogexporttocsv.h"
 #include "../vpatterndb/vpiecepath.h"
@@ -4118,10 +4119,10 @@ bool MainWindow::exportPiecesToSeamlyLayout()
         return false;
     }
 
-    // Build "<pattern directory>/<pattern basename>.pieces.svg".
-    const QFileInfo patternFile(qApp->getFilePath());
-    const QString svgPath = patternFile.absolutePath() + QLatin1String("/") + patternFile.completeBaseName()
-                            + QLatin1String(".pieces.svg");
+    // Build "<pattern directory>/<pattern basename>.pieces.svg". The naming rule
+    // lives in vmisc so the daughter app's documented input file name has one
+    // definition and one test (TST_SeamlyFamilyPaths).
+    const QString svgPath = SeamlyFamilyPaths::piecesSvgFilePath(qApp->getFilePath());
 
     // Render the pieces (pieceList was prepared by showLayoutMode) into the tagged SVG.
     if (!generatePiecesSvg(svgPath))
@@ -4145,8 +4146,12 @@ bool MainWindow::exportPiecesToSeamlyLayout()
     }
 
     // Launch SeamlyLayout as a detached process, the same way SeamlyMe is launched.
+    // The argument vector is built by SeamlyFamilyPaths so the contract stays in
+    // step with what SeamlyLayout's StartupOptions accepts: exactly one
+    // positional argument, the absolute path of the SVG to open (Task 49).
     const QString workingDirectory = QFileInfo(seamlyLayout).absoluteDir().absolutePath();
-    return QProcess::startDetached(seamlyLayout, QStringList(svgPath), workingDirectory);
+    return QProcess::startDetached(seamlyLayout, SeamlyFamilyPaths::seamlyLayoutLaunchArguments(svgPath),
+                                   workingDirectory);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

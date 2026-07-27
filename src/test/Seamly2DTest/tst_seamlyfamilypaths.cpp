@@ -408,3 +408,104 @@ void TST_SeamlyFamilyPaths::DevBuildStopsBeforeUnboundedWalk() const
     QCOMPARE(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(shallowDirectory),
              QFileInfo(layoutExe).absoluteFilePath());
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PiecesSvgSitsBesideThePattern verifies the handoff SVG is named after
+ * the pattern and written into the same directory.
+ *
+ * This is the file name SeamlyLayout is launched with, so it is part of the
+ * two-app contract rather than an implementation detail of Layout Mode.
+ */
+void TST_SeamlyFamilyPaths::PiecesSvgSitsBesideThePattern() const
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+
+    const QString patternFile = dir.path() + QLatin1String("/richmond-shirt.sm2d");
+    const QString expected    = dir.path() + QLatin1String("/richmond-shirt.pieces.svg");
+
+    QCOMPARE(SeamlyFamilyPaths::piecesSvgFilePath(patternFile),
+             QFileInfo(expected).absoluteFilePath());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PiecesSvgKeepsDotsInThePatternName verifies only the final extension is
+ * replaced.
+ *
+ * completeBaseName() keeps everything up to the last dot, so a pattern named
+ * "shirt.v2.sm2d" keeps its version segment. baseName() would have produced
+ * "shirt.pieces.svg" and quietly collided with a different pattern's handoff.
+ */
+void TST_SeamlyFamilyPaths::PiecesSvgKeepsDotsInThePatternName() const
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+
+    const QString patternFile = dir.path() + QLatin1String("/shirt.v2.sm2d");
+    const QString expected    = dir.path() + QLatin1String("/shirt.v2.pieces.svg");
+
+    QCOMPARE(SeamlyFamilyPaths::piecesSvgFilePath(patternFile),
+             QFileInfo(expected).absoluteFilePath());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PiecesSvgPathIsAbsolute verifies a relative pattern path still produces
+ * an absolute handoff path.
+ *
+ * SeamlyLayout is started detached with its own working directory, so a relative
+ * argument would resolve against the wrong directory in the daughter app.
+ */
+void TST_SeamlyFamilyPaths::PiecesSvgPathIsAbsolute() const
+{
+    const QString svgPath = SeamlyFamilyPaths::piecesSvgFilePath(QStringLiteral("relative.sm2d"));
+
+    QVERIFY(!svgPath.isEmpty());
+    QVERIFY(QFileInfo(svgPath).isAbsolute());
+    QVERIFY(svgPath.endsWith(QLatin1String("/relative.pieces.svg")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PiecesSvgOfEmptyPatternPathIsEmpty verifies an unsaved pattern yields
+ * no path, so Layout Mode can ask the user to save instead of writing a file
+ * named after nothing.
+ */
+void TST_SeamlyFamilyPaths::PiecesSvgOfEmptyPatternPathIsEmpty() const
+{
+    QVERIFY(SeamlyFamilyPaths::piecesSvgFilePath(QString()).isEmpty());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief LaunchArgumentsAreTheSvgPathAlone pins the launch contract: SeamlyLayout
+ * is started with exactly one positional argument, the SVG path.
+ *
+ * Its StartupOptions parser rejects a second positional argument, so a change
+ * here without the matching change there breaks the handoff — this case is what
+ * makes that break visible in CI rather than in a user's Layout Mode.
+ */
+void TST_SeamlyFamilyPaths::LaunchArgumentsAreTheSvgPathAlone() const
+{
+    const QString svgPath = QStringLiteral("/patterns/richmond shirt.pieces.svg");
+
+    const QStringList arguments = SeamlyFamilyPaths::seamlyLayoutLaunchArguments(svgPath);
+
+    QCOMPARE(arguments.size(), 1);
+    // Passed unquoted and unsplit: QProcess quotes list elements itself, which
+    // is what keeps a directory containing spaces working.
+    QCOMPARE(arguments.first(), svgPath);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief LaunchArgumentsOfEmptySvgPathAreEmpty verifies no argument list is built
+ * for an empty path — launching SeamlyLayout bare would open an empty canvas,
+ * which is exactly the Task 49 defect this contract exists to prevent.
+ */
+void TST_SeamlyFamilyPaths::LaunchArgumentsOfEmptySvgPathAreEmpty() const
+{
+    QVERIFY(SeamlyFamilyPaths::seamlyLayoutLaunchArguments(QString()).isEmpty());
+}

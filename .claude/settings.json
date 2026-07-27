@@ -151,7 +151,19 @@
       "Bash(qmake *)",
       "Bash(jom *)",
       "Bash(nmake *)",
-      "PowerShell(& \"${env:ProgramFiles\\(x86\\)}\\\\Microsoft Visual Studio\\\\Installer\\\\vswhere.exe\" *)"
+      "PowerShell(& \"${env:ProgramFiles\\(x86\\)}\\\\Microsoft Visual Studio\\\\Installer\\\\vswhere.exe\" *)",
+      "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File scripts\\\\*)",
+      "PowerShell(powershell -NoProfile -ExecutionPolicy Bypass -File src\\\\app\\\\seamlylayout\\\\*)",
+      "PowerShell(& scripts\\\\*.ps1*)",
+      "PowerShell(.\\\\scripts\\\\*.ps1*)",
+      "PowerShell(scripts\\\\*.ps1*)",
+      "PowerShell(& src\\\\app\\\\seamlylayout\\\\*.ps1*)",
+      "PowerShell(.\\\\src\\\\app\\\\seamlylayout\\\\*.ps1*)",
+      "PowerShell(src\\\\app\\\\seamlylayout\\\\*.ps1*)",
+      "PowerShell(ctest *)",
+      "Bash(ctest *)",
+      "Bash(./scripts/*.ps1*)",
+      "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File *)"
     ],
     "additionalDirectories": [
       "C:\\Users\\susan\\AppData\\Local\\Temp",

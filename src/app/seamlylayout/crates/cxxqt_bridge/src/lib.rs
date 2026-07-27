@@ -522,6 +522,14 @@ pub mod qobject {
         #[qsignal]
         fn layout_warning(self: Pin<&mut AppController>, message: QString);
 
+        // Emitted when an import succeeded but the SVG is not a Seamly2D Layout
+        // Mode handoff file — it carries no `data-type="piece"` groups (Task 49).
+        // The SVG is loaded and displayed regardless; QML shows `message` as a
+        // non-blocking warning popup so an unexpected file cannot look like a
+        // silent failure.
+        #[qsignal]
+        fn import_warning(self: Pin<&mut AppController>, message: QString);
+
         #[qsignal]
         fn progress_updated(self: Pin<&mut AppController>, percent: i32);
 
@@ -894,6 +902,10 @@ impl qobject::AppController {
         // Load SVG from disk: parse into editable DOM + usvg tree for geometry
         match app_core::load_svg(std::path::Path::new(&path_str)) {
             Ok((mut doc, _tree)) => {
+                // Count the Seamly2D piece tagging BEFORE the DOM is moved into
+                // `input_dom`.  Zero means this is not a Layout Mode handoff file.
+                let tagged_pieces = crate::piece_extractor::count_tagged_pieces(&doc);
+
                 // Add a white background rectangle so the canvas has a visible background.
                 doc.add_background_rect();
 
@@ -908,6 +920,25 @@ impl qobject::AppController {
                 // QML handler: onImportFinished: leftCanvas.reloadSvg(appController.getImportedSvgString())
                 self.as_mut().set_is_svg_imported(true);
                 self.as_mut().import_finished();
+
+                // Warn — but do not fail — when the SVG carries no piece tagging.
+                // Layout still works (every top-level <g> with geometry is packed),
+                // so this is a non-blocking popup shown after the canvas has the
+                // file, never an error dialog instead of it.
+                if tagged_pieces == 0 {
+                    log_to_file("[import_svg] no data-type=\"piece\" groups — not a Seamly2D handoff file");
+                    let msg = cxx_qt_lib::QString::from(
+                        "This SVG carries no tagged pattern pieces \
+                         (data-type=\"piece\").\n\n\
+                         Files exported by Seamly2D's Layout Mode are tagged; this one \
+                         was not, so it may be an ordinary drawing. Every top-level group \
+                         will be laid out as a piece.",
+                    );
+                    self.as_mut().import_warning(msg); // QML: onImportWarning → warning popup
+                } else {
+                    log_to_file(&format!("[import_svg] {tagged_pieces} tagged pattern piece(s) found"));
+                } // if tagged_pieces == 0
+
                 true // success
             }
             Err(e) => {

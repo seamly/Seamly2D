@@ -120,6 +120,7 @@ qt_add_executable(SeamlyLayout
     src/Logger.cpp
     src/Platform.cpp
     src/SettingsModel.cpp
+    src/StartupOptions.cpp
     src/PreferencesModel.cpp
     src/PreferencesController.cpp
     src/PreferencesWindow.cpp
@@ -395,6 +396,25 @@ target_link_libraries(SettingsModelTests PRIVATE
 
 add_test(NAME SettingsModelTests COMMAND SettingsModelTests)
 
+# Task 49 — the command-line contract with Seamly2D's Layout Mode handoff.
+# StartupOptions is a plain value type with no QObject and no GUI, so this
+# suite needs neither the offscreen platform nor a window.
+add_executable(StartupOptionsTests
+    ${SEAMLYLAYOUT_TEST_DIR}/StartupOptionsTests.cpp
+    src/StartupOptions.cpp
+)
+
+target_include_directories(StartupOptionsTests PRIVATE
+    src/
+)
+
+target_link_libraries(StartupOptionsTests PRIVATE
+    Qt6::Core
+    Qt6::Test
+)
+
+add_test(NAME StartupOptionsTests COMMAND StartupOptionsTests)
+
 # On Windows the test executables are launched by ctest straight out of the
 # build directory, with no windeployqt output beside them. Qt's DLLs and the
 # platform plugin are then only reachable through PATH, so a bare
@@ -413,6 +433,7 @@ if(WIN32)
         AdjustControllerTests
         PreferencesModelTests
         SettingsModelTests
+        StartupOptionsTests
         PROPERTIES ENVIRONMENT_MODIFICATION
         "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>"
     )
