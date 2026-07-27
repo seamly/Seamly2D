@@ -185,8 +185,12 @@ target_wrapper.sh
 !xerces-c_3D.lib
 !xerces-c_3_2D.dll
 
-# track Claude Code personal overrides (shared settings.json is committed)
-!.claude/settings.local.json
+# Claude Code personal overrides — NOT tracked. The shared .claude/settings.json
+# is committed; this file is per-machine and the harness rewrites it on every
+# permission grant, accumulating absolute paths and session ids that have no
+# business in a repository headed for the upstream pull request.
+# (Was "!.claude/settings.local.json" — force-tracked — until 2026-07-27.)
+.claude/settings.local.json
 
 # track claude Session handover file
 !SESSION_HANDOVER.md
