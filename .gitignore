@@ -185,9 +185,11 @@ target_wrapper.sh
 !xerces-c_3D.lib
 !xerces-c_3_2D.dll
 
-# Claude Code personal overrides (shared settings.json is committed)
-.claude/settings.local.json
+# track Claude Code personal overrides (shared settings.json is committed)
+!.claude/settings.local.json
 
+# track claude Session handover file
+!SESSION_HANDOVER.md
 
 # documents
 docs/

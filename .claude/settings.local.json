@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(*)",
+      "Bash(*)",
+      "Bash(cargo:*)",
+      "Bash(cmake:*)",
+      "Bash(ctest:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git restore:*)",
+      "Bash(git rm:*)",
+      "PowerShell($s = Get-Content .claude\\\\settings.json -Raw | ConvertFrom-Json; \"settings.json parses OK\"; foreach \\($ev in @\\(\"PreCompact\",\"PostCompact\"\\)\\) { $cmd = $s.hooks.$ev[0].hooks[0].command; if \\($cmd -match \"SESSION_HANDOVER\"\\) { \"$ev references SESSION_HANDOVER.md\" }; $json = $cmd -replace \"^echo '\",\"\" -replace \"'$\",\"\"; try { $null = $json | ConvertFrom-Json; \"$ev payload is valid JSON\" } catch { \"$ev payload INVALID: $_\" } })",
+      "PowerShell(New-Item -ItemType Directory -Force c:\\\\Users\\\\susan\\\\Projects\\\\Seamly2D-private\\\\build)",
+      "Bash(mv \"/c/Users/susan/.claude/projects/c--Users-susan-Projects-Seamly2D-private/memory/no-outline-fonts-policy.md\" \"/c/Users/susan/.claude/projects/c--Users-susan-Projects-Seamly2D-private/memory/label-font-policy.md\")",
+      "WebFetch(domain:stackoverflow.com)",
+      "WebSearch",
+      "WebFetch"
+    ],
+    "additionalDirectories": [
+      "C:\\Users\\susan\\.claude\\projects\\c--Users-susan-Projects-Seamly2D-private\\memory",
+      "C:\\Users\\susan\\AppData\\Local\\Seamly\\Seamly2D"
+    ]
+  }
+}
