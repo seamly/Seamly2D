@@ -285,7 +285,7 @@ This is **pre-existing and unrelated to the Qt bump**: `git log -S "arguments()"
 
 - [ ] Consume the positional argument in `src/app/seamlylayout/qt_frontend/main.cpp`: read `QCoreApplication::arguments()` (or a `QCommandLineParser` with a documented `<svg-file>` positional) and load that file through the same path the **Import SVG** button uses, so the handoff opens the pattern
 - [ ] Handle the failure modes explicitly — missing file, unreadable file, an SVG without the `data-*` piece tagging — with a visible message rather than a silently empty canvas
-- [ ] Decide and document the contract between the two apps (accepted argument forms, exit codes, what happens when SeamlyLayout is already running); record it in `src/app/seamlylayout/CLAUDE.md` and `status-docs/new-attributes.csv`'s companion notes
+- [ ] Decide and document the contract between the two apps (accepted argument forms, exit codes, what happens when SeamlyLayout is already running); record it in `src/app/seamlylayout/CLAUDE.md` and `project-docs/NEW-ATTRIBUTES.csv`'s companion notes
 - [ ] Add coverage: a Qt frontend test that the argument is parsed and dispatched, and extend `tst_seamlyfamilypaths` / a seamly2d-side test so the launch contract (`startDetached(exe, {svgPath}, workingDir)`) cannot drift from what the daughter app accepts
 - [ ] End-to-end verify: open a pattern in seamly2d, enter Layout Mode, and confirm SeamlyLayout comes up with the pieces already loaded — this is the check Task 30's verify subtask could not complete
 

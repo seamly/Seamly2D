@@ -23,7 +23,7 @@ Replace the single "SVG" item in the SeamlyLayout Exports menu (`src/app/seamlyl
 - [ ] Detect path-only input (no `<text>` in labels) and gate all three text modes accordingly
 - [ ] Persist the last chosen SVG text mode in preferences (`PreferencesModel`)
 - [ ] Tests: Rust unit tests for each conversion mode (mode 3 output is stroked polylines, not filled contours), plus the path-only-input case; frontend test for menu gating; end-to-end check with the richmond test pattern
-- [ ] Update `src/app/seamlylayout/docs/status-docs/svg-data-attributes.md`, the root `status-docs/svg-data-attributes.md` mirror, and `src/app/seamlylayout/docs` export docs
+- [ ] Update `src/app/seamlylayout/docs/status-docs/svg-data-attributes.md`, the root `project-docs/SVG-DATA-ATTRIBUTES.md` mirror, and `src/app/seamlylayout/docs` export docs
 - [ ] Doxygen briefs + inline comments on all touched functions
 
 ## Task 26 — Export multisize patterns (nested / marker / sized-layout-set)
