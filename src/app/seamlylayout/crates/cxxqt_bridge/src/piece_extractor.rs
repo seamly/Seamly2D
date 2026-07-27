@@ -6,7 +6,24 @@
 // @brief Extracts pattern piece bounding boxes from a `svg_dom::Document` for
 //        use with `packing::pack_shelves` / `packing::pack_pieces`.
 //
-// Each top-level `<g>` element in the SVG root is treated as one pattern piece.
+// Piece discovery has two modes, chosen per document:
+//
+//   * **Tagged** — the file came from Seamly2D's Layout Mode handoff and carries
+//     `data-type="piece"` groups (see `project-docs/SVG-DATA-ATTRIBUTES.md`).
+//     Only those groups are pieces; everything else at the root is ignored.
+//   * **Untagged** — an ordinary drawing with no `data-*` tagging.  Every
+//     top-level `<g>` with geometry is treated as one piece, which is what makes
+//     a hand-drawn SVG lay out.  This is the historical rule and is kept as the
+//     fallback (see the Task 49 `import_warning` contract in this app's CLAUDE.md).
+//
+// The handoff nests every piece inside a single `<g data-type="pattern">` wrapper,
+// so `hoist_tagged_pieces` re-parents the tagged pieces up to the SVG root before
+// the layout pipeline runs.  After that one normalisation the whole pipeline —
+// `verticalize_dom`, `translate_dom`, extraction, `layout_assembler`, `oversized`,
+// `remaining`, `sheets` — sees the flat "one piece per top-level `<g>`" shape it
+// has always assumed, and `PieceRect::group_index` stays a valid index into the
+// root's `<g>` children.
+//
 // The bounding box is computed by collecting all coordinate points from every
 // descendant `<path>` element, parsing the `d` attribute via `geometry::Path`.
 //
@@ -16,19 +33,27 @@
 use layout_tiling::measurement_to_px;
 use geometry::{BoundingBox, Path, PathSegment, Point};
 use packing::Rect;
-use xmltree::XMLNode;
+use xmltree::{Element, XMLNode};
 
 // @brief One extracted pattern piece ready for bin packing.
 //
-// Holds the `Rect` (integer pixel dimensions), the piece's `id` attribute,
+// Holds the `Rect` (integer pixel dimensions), the piece's identity attributes,
 // and `group_index` so Phase 8c can locate the original `<g>` element.
 #[derive(Debug, Clone)]
 pub struct PieceRect {
     // Dimensions in pixels at the DPI used during extraction.
     pub rect: Rect,
     // Value of the `id` attribute on the piece's top-level `<g>` element.
-    // Empty string if the element has no id.
+    // Empty string if the element has no id.  This is the piece's *identity*
+    // (`piece-7`), not its display name — use `label()` for anything a user reads.
     pub id: String,
+    // Value of `data-name` — the human-readable piece name ("Front Bodice").
+    // Empty for untagged SVGs and for tagged pieces whose name is blank
+    // (Seamly2D omits the attribute when the name is empty).
+    pub name: String,
+    // Value of `data-letter` — the piece letter ("A"), only set when the pattern
+    // assigns one.  Empty otherwise.
+    pub letter: String,
     // Bounding-box origin in SVG user units — used by Phase 8c to compute
     // the translate offset so pieces are packed at (0,0) within their slot.
     // keep these pixel-precise as f64 for accurate translate offsets; the Rect will be rounded to u32 for packing
@@ -41,13 +66,37 @@ pub struct PieceRect {
     pub group_index: usize,
 }
 
-// @brief Extract bounding boxes from all top-level `<g>` elements in `doc`.
+impl PieceRect {
+    // @brief The name to show a user for this piece.
+    //
+    // Prefers `data-name` ("Front Bodice"), then `data-letter` ("A"), then the
+    // raw `id` ("piece-7").  Used for the unplaced-piece warning, the packing
+    // error messages and the Adjust overlay — never for identity lookups, which
+    // must keep using `id`.
+    //
+    // @return Borrowed display label; never empty unless the piece has no id either.
+    pub fn label(&self) -> &str {
+        if !self.name.is_empty() {
+            return self.name.as_str(); // data-name is the best label
+        } // if named
+        if !self.letter.is_empty() {
+            return self.letter.as_str(); // fall back to the piece letter
+        } // if lettered
+        self.id.as_str() // last resort: the machine id
+    } // fn label
+} // impl PieceRect
+
+// @brief Extract bounding boxes for every pattern piece in `doc`.
 //
-// Each direct child `<g>` of the SVG root is considered one pattern piece.
-// Pieces with no parseable `<path>` data (empty, text-only, etc.) are skipped.
+// Piece discovery follows the two modes described in this file's header: when the
+// document contains any `data-type="piece"` element (a Seamly2D handoff) only the
+// tagged groups are pieces; otherwise every direct child `<g>` is one piece.
+// Pieces with no parseable `<path>` data (empty, text-only, etc.) are skipped in
+// both modes.  Call `hoist_tagged_pieces` first — a handoff whose pieces are still
+// nested inside their pattern wrapper yields nothing here, by design.
 //
 // @param doc SVG document previously loaded by `app_core::load_svg`.
-// @return `Vec<PieceRect>` — one entry per non-empty top-level `<g>`.
+// @return `Vec<PieceRect>` — one entry per non-empty piece group.
 //         Returns an empty `Vec` if no pieces could be extracted.
 pub fn extract_piece_rects(doc: &svg_dom::Document) -> Vec<PieceRect> {
     use layout_tiling::LAYOUT_PPI;
@@ -55,12 +104,16 @@ pub fn extract_piece_rects(doc: &svg_dom::Document) -> Vec<PieceRect> {
     // If no viewBox is present, assume 1 user unit = 1 px (i.e., scale = 1.0).
     let uu_per_px = svg_uu_per_px(&doc.root);
 
+    // Tagged handoff or untagged drawing?  Decided once for the whole document so
+    // a stray untagged group cannot slip into a tagged pattern's piece list.
+    let tagged_mode = document_has_tagged_pieces(&doc.root);
+
     let mut pieces = Vec::new();
-    // Counts every <g> child of the SVG root (including empty ones that are skipped).
+    // Counts every <g> child of the SVG root (including ones that are skipped).
     // Stored in PieceRect::group_index so the assembler can look up the element.
     let mut g_idx: usize = 0;
 
-    // Iterate direct children of the SVG root; each <g> is one pattern piece.
+    // Iterate direct children of the SVG root; each <g> is a candidate piece.
     for child in &doc.root.children {
         let XMLNode::Element(elem) = child else {
             continue; // skip text nodes, comments, etc.
@@ -73,11 +126,13 @@ pub fn extract_piece_rects(doc: &svg_dom::Document) -> Vec<PieceRect> {
         let this_g_idx = g_idx;
         g_idx += 1; // always increment, even if piece will be skipped
 
-        let piece_id = elem
-            .attributes
-            .get("id")
-            .cloned()
-            .unwrap_or_default();
+        // In tagged mode the pattern's own wrapper leftovers, legend groups and
+        // anything else untagged are NOT pieces — only `data-type="piece"` is.
+        if tagged_mode && !is_tagged_piece(elem) {
+            continue; // untagged group inside a tagged document — not a piece
+        } // if tagged_mode
+
+        let (piece_id, piece_name, piece_letter) = piece_identity(elem);
 
         // Collect all path points from descendants of this <g>.
         let mut all_points: Vec<Point> = Vec::new();
@@ -108,6 +163,8 @@ pub fn extract_piece_rects(doc: &svg_dom::Document) -> Vec<PieceRect> {
         pieces.push(PieceRect {
             rect: Rect::new(w_px, h_px),
             id: piece_id,
+            name: piece_name,
+            letter: piece_letter,
             origin_x: bbox.min.x as f64,
             origin_y: bbox.min.y as f64,
             group_index: this_g_idx,
@@ -119,8 +176,9 @@ pub fn extract_piece_rects(doc: &svg_dom::Document) -> Vec<PieceRect> {
 
 // @brief Extract piece bounding boxes AND cutline polygons in a single walk.
 //
-// Walks `doc.root.children` once, applying the same skip rules as
-// `extract_piece_rects` (no path geometry → skipped; zero-dim AABB → skipped).
+// Walks `doc.root.children` once, applying the same discovery and skip rules as
+// `extract_piece_rects` (tagged-vs-untagged mode; no path geometry → skipped;
+// zero-dim AABB → skipped).
 // For each surviving piece, additionally invokes
 // `polygon_pack::svg_extract::extract_piece_outline` on the same `<g>` to
 // recover the piece's cut silhouette.  When extraction returns `None`
@@ -150,6 +208,10 @@ pub fn extract_piece_rects_and_polygons(
     let uu_per_px = svg_uu_per_px(&doc.root);
     let scale = LAYOUT_PPI / (uu_per_px * 96.0);
 
+    // Same discovery decision as `extract_piece_rects` — the two functions must
+    // agree on which `<g>` children are pieces or `group_index` diverges.
+    let tagged_mode = document_has_tagged_pieces(&doc.root);
+
     let mut pieces = Vec::new();
     let mut polygons = Vec::new();
     let mut g_idx: usize = 0;
@@ -161,11 +223,11 @@ pub fn extract_piece_rects_and_polygons(
         let this_g_idx = g_idx;
         g_idx += 1;
 
-        let piece_id = elem
-            .attributes
-            .get("id")
-            .cloned()
-            .unwrap_or_default();
+        if tagged_mode && !is_tagged_piece(elem) {
+            continue; // untagged group inside a tagged document — not a piece
+        } // if tagged_mode
+
+        let (piece_id, piece_name, piece_letter) = piece_identity(elem);
 
         // Identical skip rules to `extract_piece_rects` so the two functions
         // agree on which `<g>` children are pieces.
@@ -216,6 +278,8 @@ pub fn extract_piece_rects_and_polygons(
         pieces.push(PieceRect {
             rect: Rect::new(w_px, h_px),
             id: piece_id,
+            name: piece_name,
+            letter: piece_letter,
             origin_x,
             origin_y,
             group_index: this_g_idx,
@@ -225,6 +289,243 @@ pub fn extract_piece_rects_and_polygons(
 
     (pieces, polygons)
 } // fn extract_piece_rects_and_polygons
+
+// ---------------------------------------------------------------------------
+// Piece discovery — the Seamly2D handoff contract
+// ---------------------------------------------------------------------------
+
+// @brief Re-parent every nested `data-type="piece"` element up to the SVG root.
+//
+// Seamly2D's Layout Mode wraps the whole pattern in one group:
+//
+// ```xml
+// <svg>
+//   <g id="pattern-1" data-type="pattern">
+//     <g id="piece-1" data-type="piece">…</g>   <!-- ×12 -->
+//   </g>
+// </svg>
+// ```
+//
+// Every stage of this app's layout pipeline — `svg_dom::verticalize_dom`,
+// `svg_dom::translate_dom`, `extract_piece_rects*`, `layout_assembler`,
+// `oversized`, `remaining`, `sheets` — treats a **direct** `<g>` child of the
+// root as one piece.  Left alone, the wrapper is that one piece: the packer is
+// handed a single sheet-sized object and places nothing (Task 59).
+//
+// Rather than teach eight call sites a new tree shape, the document is
+// normalised once, here: each tagged piece is lifted out of its wrapper and
+// appended to the root, and any wrapper left with no element children is
+// dropped.  Wrappers that still hold content (a legend, a title group) are
+// kept — in tagged mode `extract_piece_rects` ignores them anyway because they
+// carry no `data-type="piece"`.
+//
+// **Transforms are composed, not discarded.** Each hoisted piece inherits the
+// concatenation of its former ancestors' `transform` attributes, prepended to
+// its own so the ancestor transform still applies first.  Seamly2D's exporter
+// puts no transform on the pattern group today, so this is normally a no-op —
+// but a piece that silently moved would be a very expensive bug to find later.
+//
+// Untagged SVGs and already-flat tagged SVGs are left byte-for-byte alone.
+//
+// @param doc SVG document to normalise in place.
+// @return Number of pieces re-parented; 0 when the document needed no change.
+pub fn hoist_tagged_pieces(doc: &mut svg_dom::Document) -> usize {
+    // Cheap guard: only tagged documents whose pieces are actually nested need
+    // rewriting.  Keeps the untagged fallback path completely untouched.
+    if !has_nested_tagged_piece(&doc.root) {
+        return 0; // nothing nested — leave the document as it is
+    } // if not nested
+
+    // Pieces lifted out of wrappers, in document order.  Appended to the root
+    // after the surviving children so their relative order is preserved.
+    let mut hoisted: Vec<Element> = Vec::new();
+
+    // Rebuild the root's child list: take ownership so each child can be
+    // mutated (pieces removed from it) before deciding whether to keep it.
+    let children = std::mem::take(&mut doc.root.children);
+    let mut kept: Vec<XMLNode> = Vec::new();
+
+    for node in children {
+        let XMLNode::Element(mut elem) = node else {
+            kept.push(node); // text, comment, CDATA — nothing to hoist
+            continue;
+        }; // XMLNode::Element
+
+        if is_tagged_piece(&elem) {
+            kept.push(XMLNode::Element(elem)); // already at the root — leave in place
+            continue;
+        } // if already a top-level piece
+
+        // A wrapper's own transform is the first link of the inherited chain for
+        // every piece beneath it.  The `<svg>` root itself cannot carry one.
+        let wrapper_transform = elem.attributes.get("transform").cloned().unwrap_or_default();
+
+        let before = hoisted.len();
+        take_tagged_pieces(&mut elem, &wrapper_transform, &mut hoisted);
+        let took_pieces = hoisted.len() > before;
+
+        // A wrapper that existed only to hold pieces is now empty — drop it so
+        // it cannot be mistaken for a piece or emit a stray empty group.
+        if took_pieces && !has_element_child(&elem) {
+            continue; // wrapper consumed
+        } // if emptied wrapper
+
+        kept.push(XMLNode::Element(elem));
+    } // for node in children
+
+    doc.root.children = kept;
+
+    let count = hoisted.len();
+    for piece in hoisted {
+        doc.root.children.push(XMLNode::Element(piece));
+    } // for piece
+
+    count
+} // fn hoist_tagged_pieces
+
+// @brief Recursive worker for `hoist_tagged_pieces`.
+//
+// Removes every `data-type="piece"` descendant of `parent` from the tree,
+// prepending `inherited` to each one's own transform, and appends them to `out`
+// in document order.  Intermediate groups that end up with no element children
+// are dropped; ones that still hold content are kept.
+//
+// @param parent    Subtree root to strip pieces out of (mutated in place).
+// @param inherited Concatenated `transform` of every ancestor between the SVG
+//                  root and `parent`, inclusive; empty when there is none.
+// @param out       Accumulator receiving the removed piece elements.
+fn take_tagged_pieces(parent: &mut Element, inherited: &str, out: &mut Vec<Element>) {
+    let children = std::mem::take(&mut parent.children);
+    let mut kept: Vec<XMLNode> = Vec::new();
+
+    for node in children {
+        let XMLNode::Element(mut elem) = node else {
+            kept.push(node); // non-element node — keep it where it is
+            continue;
+        }; // XMLNode::Element
+
+        if is_tagged_piece(&elem) {
+            // Bake the ancestor chain into the piece so it renders unchanged
+            // once it hangs directly off the root.
+            let own = elem.attributes.get("transform").cloned().unwrap_or_default();
+            let composed = join_transforms(inherited, &own);
+            if composed.is_empty() {
+                elem.attributes.remove("transform"); // no transform at all — do not emit an empty one
+            } else {
+                elem.attributes.insert("transform".to_string(), composed);
+            } // if composed.is_empty
+            out.push(elem);
+            continue;
+        } // if tagged piece
+
+        // Not a piece: descend, carrying this element's transform along.
+        let own = elem.attributes.get("transform").cloned().unwrap_or_default();
+        let chained = join_transforms(inherited, &own);
+
+        let before = out.len();
+        take_tagged_pieces(&mut elem, &chained, out);
+        let took_pieces = out.len() > before;
+
+        if took_pieces && !has_element_child(&elem) {
+            continue; // intermediate group emptied by the hoist — drop it
+        } // if emptied
+
+        kept.push(XMLNode::Element(elem));
+    } // for node in children
+
+    parent.children = kept;
+} // fn take_tagged_pieces
+
+// @brief Concatenate two SVG transform lists, outer first.
+//
+// SVG applies a transform list left-to-right as nested coordinate systems, so
+// `"<ancestor> <own>"` reproduces exactly what the nesting did.  Either side may
+// be empty.
+//
+// @param outer Ancestor transform (applied first); may be empty.
+// @param inner Element's own transform (applied second); may be empty.
+// @return Combined transform string; empty when both inputs are empty.
+fn join_transforms(outer: &str, inner: &str) -> String {
+    match (outer.trim(), inner.trim()) {
+        ("", "")         => String::new(),
+        ("", i)          => i.to_string(),
+        (o, "")          => o.to_string(),
+        (o, i)           => format!("{o} {i}"),
+    } // match
+} // fn join_transforms
+
+// @brief True when the element carries the Seamly2D piece tag.
+// @param elem Element to test.
+// @return `true` for `data-type="piece"`, `false` otherwise (exact match — the
+//         `piecework` case in the tests must not be treated as a prefix).
+fn is_tagged_piece(elem: &Element) -> bool {
+    matches!(elem.attributes.get("data-type"), Some(value) if value == "piece")
+} // fn is_tagged_piece
+
+// @brief True when the document contains a tagged piece **anywhere**.
+//
+// This is the switch between tagged and untagged discovery.  It deliberately
+// searches the whole tree rather than just the root's children: extraction only
+// ever *collects* top-level groups, so a handoff that reached it without being
+// hoisted would otherwise fall back to the untagged rule and pack the pattern
+// wrapper as one sheet-sized piece — the exact Task 59 failure.  Searching the
+// whole tree makes that case yield zero pieces instead, which surfaces as the
+// loud "No pattern pieces found" error rather than a silently wrong layout.
+//
+// @param root The `<svg>` root element.
+// @return `true` for a Seamly2D handoff, `false` for an ordinary drawing.
+fn document_has_tagged_pieces(root: &Element) -> bool {
+    is_tagged_piece(root) || subtree_has_tagged_piece(root)
+} // fn document_has_tagged_pieces
+
+// @brief True when a tagged piece sits below a direct child of the SVG root.
+//
+// Distinguishes "needs hoisting" (the handoff's `<g data-type="pattern">` shape)
+// from "already flat" and from "untagged", so `hoist_tagged_pieces` can leave the
+// latter two documents untouched.
+//
+// @param root The `<svg>` root element.
+// @return `true` when at least one piece is nested two or more levels deep.
+fn has_nested_tagged_piece(root: &Element) -> bool {
+    root.children.iter().any(|node| match node {
+        // A root child that IS a piece is already flat — look inside the others.
+        XMLNode::Element(e) if !is_tagged_piece(e) => subtree_has_tagged_piece(e),
+        _ => false,
+    })
+} // fn has_nested_tagged_piece
+
+// @brief Recursive worker for `has_nested_tagged_piece`.
+// @param elem Subtree root to search below (not counting `elem` itself).
+// @return `true` when any descendant carries `data-type="piece"`.
+fn subtree_has_tagged_piece(elem: &Element) -> bool {
+    elem.children.iter().any(|node| match node {
+        XMLNode::Element(child) => is_tagged_piece(child) || subtree_has_tagged_piece(child),
+        _ => false,
+    })
+} // fn subtree_has_tagged_piece
+
+// @brief True when the element has at least one child element node.
+// @param elem Element to test.
+// @return `false` for an element holding only text, comments, or nothing.
+fn has_element_child(elem: &Element) -> bool {
+    elem.children.iter().any(|node| matches!(node, XMLNode::Element(_)))
+} // fn has_element_child
+
+// @brief Read a piece group's identity attributes.
+//
+// `id` is the machine identity used for element lookup; `data-name` and
+// `data-letter` are what a user should see (see `PieceRect::label`).  Untagged
+// SVGs have neither `data-*` attribute, so both come back empty and `label()`
+// falls through to the id — the historical behaviour.
+//
+// @param elem Piece `<g>` element.
+// @return `(id, data-name, data-letter)`, each empty when the attribute is absent.
+fn piece_identity(elem: &Element) -> (String, String, String) {
+    let id     = elem.attributes.get("id").cloned().unwrap_or_default();
+    let name   = elem.attributes.get("data-name").cloned().unwrap_or_default();
+    let letter = elem.attributes.get("data-letter").cloned().unwrap_or_default();
+    (id, name, letter)
+} // fn piece_identity
 
 // ---------------------------------------------------------------------------
 // Private helpers
@@ -711,6 +1012,258 @@ mod tests {
         assert_eq!(pieces[0].rect.h, 20,
             "height inflated by notch: got {} expected 20", pieces[0].rect.h);
     } // notch_sibling_bbox_not_inflated
+
+    // -----------------------------------------------------------------------
+    // Task 59 — the Seamly2D handoff shape: pieces nested in a pattern wrapper
+    // -----------------------------------------------------------------------
+
+    // @brief The real handoff shape, as `SvgGenerator::mergeSvgDoms` writes it:
+    // one `<g data-type="pattern">` wrapping every piece.  Two levels deep, and
+    // the seamline group inside each piece adds a third.
+    fn nested_handoff_svg() -> &'static str {
+        r#"<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">
+  <g id="pattern-1" data-type="pattern" data-type-number="1" data-name="The Richmond Shirt">
+    <g id="piece-1" data-type="piece" data-type-number="1" data-parent="pattern-1"
+       data-name="Front Bodice" data-letter="A">
+      <g id="seamline-1" data-type="seamline" data-parent="piece-1">
+        <path d="M 0 0 L 96 0 L 96 96 L 0 96 Z"/>
+      </g>
+    </g>
+    <g id="piece-2" data-type="piece" data-type-number="2" data-parent="pattern-1"
+       data-name="Back Bodice">
+      <path d="M 0 0 L 48 0 L 48 48 L 0 48 Z"/>
+    </g>
+  </g>
+</svg>"#
+    } // fn nested_handoff_svg
+
+    // @brief The pattern wrapper must never pack as a piece.
+    //
+    // This is the Task 59 failure pinned from the other side: before the fix the
+    // untagged rule packed `<g id="pattern-1">` as one sheet-sized object and the
+    // packer reported `0 placements, 1 unplaced: ["pattern-1"]`.  Because the
+    // tagged/untagged decision searches the whole tree, a handoff that somehow
+    // reaches extraction un-hoisted now yields *nothing* — which `do_process_layout`
+    // turns into a visible "No pattern pieces found" error instead of a silently
+    // wrong layout.
+    #[test]
+    fn pattern_wrapper_never_packs_as_a_piece() {
+        let doc = svg_dom::Document::parse(nested_handoff_svg()).expect("parse ok");
+        let pieces = extract_piece_rects(&doc);
+        assert_eq!(pieces.len(), 0, "the pattern wrapper must never pack as a piece");
+    } // pattern_wrapper_never_packs_as_a_piece
+
+    // @brief After hoisting, each tagged piece is a direct child of the root and
+    // extraction finds all of them at their own dimensions.
+    #[test]
+    fn hoist_flattens_the_pattern_wrapper() {
+        let mut doc = svg_dom::Document::parse(nested_handoff_svg()).expect("parse ok");
+        assert_eq!(hoist_tagged_pieces(&mut doc), 2, "both pieces should be hoisted");
+
+        // The emptied wrapper is gone; only the two pieces remain at the root.
+        let root_groups: Vec<&str> = doc.root.children.iter()
+            .filter_map(|n| n.as_element())
+            .filter(|e| e.name == "g")
+            .map(|e| e.attributes.get("id").map(String::as_str).unwrap_or(""))
+            .collect();
+        assert_eq!(root_groups, vec!["piece-1", "piece-2"]);
+
+        // And they pack as two pieces of their own sizes, not one sheet-sized blob.
+        let pieces = extract_piece_rects(&doc);
+        assert_eq!(pieces.len(), 2);
+        assert_eq!((pieces[0].rect.w, pieces[0].rect.h), (96, 96));
+        assert_eq!((pieces[1].rect.w, pieces[1].rect.h), (48, 48));
+    } // hoist_flattens_the_pattern_wrapper
+
+    // @brief Piece identity survives the hoist: id, data-name and data-letter all
+    // reach `PieceRect`, and `label()` prefers the name a user recognises.
+    #[test]
+    fn hoist_preserves_piece_identity() {
+        let mut doc = svg_dom::Document::parse(nested_handoff_svg()).expect("parse ok");
+        hoist_tagged_pieces(&mut doc);
+        let pieces = extract_piece_rects(&doc);
+
+        assert_eq!(pieces[0].id,     "piece-1");
+        assert_eq!(pieces[0].name,   "Front Bodice");
+        assert_eq!(pieces[0].letter, "A");
+        assert_eq!(pieces[0].label(), "Front Bodice"); // name wins over letter and id
+
+        assert_eq!(pieces[1].name,   "Back Bodice");
+        assert_eq!(pieces[1].letter, "");              // this piece has no letter
+        assert_eq!(pieces[1].label(), "Back Bodice");
+    } // hoist_preserves_piece_identity
+
+    // @brief `label()` falls back letter → id when data-name is absent, so an
+    // untagged drawing still labels its pieces exactly as it always did.
+    #[test]
+    fn label_falls_back_to_letter_then_id() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g id="pattern-1" data-type="pattern">
+    <g id="piece-1" data-type="piece" data-letter="B">
+      <path d="M 0 0 L 10 0 L 10 10 L 0 10 Z"/>
+    </g>
+    <g id="piece-2" data-type="piece">
+      <path d="M 0 0 L 10 0 L 10 10 L 0 10 Z"/>
+    </g>
+  </g>
+</svg>"#;
+        let mut doc = svg_dom::Document::parse(svg).expect("parse ok");
+        hoist_tagged_pieces(&mut doc);
+        let pieces = extract_piece_rects(&doc);
+        assert_eq!(pieces[0].label(), "B");       // no name → letter
+        assert_eq!(pieces[1].label(), "piece-2"); // neither → id
+    } // label_falls_back_to_letter_then_id
+
+    // @brief A transform on the pattern wrapper is composed onto each piece as it
+    // is re-parented, so a hoisted piece renders exactly where it did before.
+    // Seamly2D writes no wrapper transform today; a silently moved piece would be
+    // a very expensive bug, so the composition is pinned.
+    #[test]
+    fn hoist_composes_wrapper_transform_onto_pieces() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">
+  <g id="pattern-1" data-type="pattern" transform="translate(10,20)">
+    <g id="piece-1" data-type="piece" transform="rotate(90)">
+      <path d="M 0 0 L 10 0 L 10 10 L 0 10 Z"/>
+    </g>
+    <g id="piece-2" data-type="piece">
+      <path d="M 0 0 L 10 0 L 10 10 L 0 10 Z"/>
+    </g>
+  </g>
+</svg>"#;
+        let mut doc = svg_dom::Document::parse(svg).expect("parse ok");
+        assert_eq!(hoist_tagged_pieces(&mut doc), 2);
+
+        let transform_of = |id: &str| -> String {
+            doc.root.children.iter()
+                .filter_map(|n| n.as_element())
+                .find(|e| e.attributes.get("id").map(String::as_str) == Some(id))
+                .and_then(|e| e.attributes.get("transform").cloned())
+                .unwrap_or_default()
+        };
+
+        // Wrapper transform first (outermost), then the piece's own — the same
+        // order SVG applied them when the piece was still nested.
+        assert_eq!(transform_of("piece-1"), "translate(10,20) rotate(90)");
+        // A piece with no transform of its own simply inherits the wrapper's.
+        assert_eq!(transform_of("piece-2"), "translate(10,20)");
+    } // hoist_composes_wrapper_transform_onto_pieces
+
+    // @brief An untagged SVG is left completely alone — the hoist reports 0 and
+    // the historical "every top-level <g> is a piece" rule still applies.
+    #[test]
+    fn hoist_leaves_untagged_svg_untouched() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g id="drawing">
+    <g id="inner"><path d="M 0 0 L 40 0 L 40 20 L 0 20 Z"/></g>
+  </g>
+</svg>"#;
+        let mut doc = svg_dom::Document::parse(svg).expect("parse ok");
+        assert_eq!(hoist_tagged_pieces(&mut doc), 0, "no tagging — nothing to hoist");
+
+        // Still one top-level group holding its nested child, and it packs as the
+        // single piece the untagged rule says it is.
+        let pieces = extract_piece_rects(&doc);
+        assert_eq!(pieces.len(), 1);
+        assert_eq!(pieces[0].id, "drawing");
+        assert_eq!(pieces[0].label(), "drawing"); // no data-* → id is the label
+    } // hoist_leaves_untagged_svg_untouched
+
+    // @brief A tagged SVG whose pieces already sit at the root needs no rewrite.
+    #[test]
+    fn hoist_is_a_no_op_when_pieces_are_already_top_level() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g id="piece-1" data-type="piece"><path d="M 0 0 L 10 0 L 10 10 L 0 10 Z"/></g>
+  <g id="piece-2" data-type="piece"><path d="M 0 0 L 20 0 L 20 20 L 0 20 Z"/></g>
+</svg>"#;
+        let mut doc = svg_dom::Document::parse(svg).expect("parse ok");
+        assert_eq!(hoist_tagged_pieces(&mut doc), 0);
+        assert_eq!(extract_piece_rects(&doc).len(), 2);
+    } // hoist_is_a_no_op_when_pieces_are_already_top_level
+
+    // @brief A wrapper that still holds non-piece content survives the hoist, and
+    // tagged mode refuses to pack it even though it carries path geometry.
+    #[test]
+    fn hoist_keeps_a_wrapper_that_still_has_content() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">
+  <g id="pattern-1" data-type="pattern">
+    <g id="legend"><path d="M 0 0 L 300 0 L 300 300 L 0 300 Z"/></g>
+    <g id="piece-1" data-type="piece"><path d="M 0 0 L 10 0 L 10 10 L 0 10 Z"/></g>
+  </g>
+</svg>"#;
+        let mut doc = svg_dom::Document::parse(svg).expect("parse ok");
+        assert_eq!(hoist_tagged_pieces(&mut doc), 1);
+
+        // The wrapper is kept because <g id="legend"> is still inside it.
+        let root_groups: Vec<&str> = doc.root.children.iter()
+            .filter_map(|n| n.as_element())
+            .filter(|e| e.name == "g")
+            .map(|e| e.attributes.get("id").map(String::as_str).unwrap_or(""))
+            .collect();
+        assert_eq!(root_groups, vec!["pattern-1", "piece-1"]);
+
+        // ...but only the tagged piece packs.  Were the untagged rule still in
+        // force the 300×300 legend wrapper would swamp the 10×10 piece.
+        let pieces = extract_piece_rects(&doc);
+        assert_eq!(pieces.len(), 1);
+        assert_eq!(pieces[0].id, "piece-1");
+    } // hoist_keeps_a_wrapper_that_still_has_content
+
+    // @brief `group_index` must stay a valid index into the root's `<g>` children
+    // after hoisting — `layout_assembler`, `oversized` and `remaining` all look
+    // the original element up that way, and an off-by-one there silently places
+    // the wrong geometry.
+    #[test]
+    fn group_index_indexes_root_groups_after_hoist() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">
+  <g id="legend"><path d="M 0 0 L 300 0 L 300 300 L 0 300 Z"/></g>
+  <g id="pattern-1" data-type="pattern">
+    <g id="piece-1" data-type="piece"><path d="M 0 0 L 10 0 L 10 10 L 0 10 Z"/></g>
+    <g id="piece-2" data-type="piece"><path d="M 0 0 L 20 0 L 20 20 L 0 20 Z"/></g>
+  </g>
+</svg>"#;
+        let mut doc = svg_dom::Document::parse(svg).expect("parse ok");
+        hoist_tagged_pieces(&mut doc);
+
+        // Root order after the hoist: legend (kept), then the two hoisted pieces.
+        let root_groups: Vec<&xmltree::Element> = doc.root.children.iter()
+            .filter_map(|n| n.as_element())
+            .filter(|e| e.name == "g")
+            .collect();
+
+        let pieces = extract_piece_rects(&doc);
+        assert_eq!(pieces.len(), 2);
+        for piece in &pieces {
+            let looked_up = root_groups[piece.group_index];
+            assert_eq!(
+                looked_up.attributes.get("id").map(String::as_str),
+                Some(piece.id.as_str()),
+                "group_index {} does not resolve back to {}", piece.group_index, piece.id
+            );
+        }
+        assert_eq!(pieces[0].group_index, 1); // index 0 is the legend group
+        assert_eq!(pieces[1].group_index, 2);
+    } // group_index_indexes_root_groups_after_hoist
+
+    // @brief The paired extractor makes the same discovery decision as
+    // `extract_piece_rects`; if the two disagreed, `group_index` would diverge
+    // between the packing inputs and the assembler's element lookup.
+    #[test]
+    fn paired_extractor_agrees_with_rect_extractor_on_tagged_pieces() {
+        let mut doc = svg_dom::Document::parse(nested_handoff_svg()).expect("parse ok");
+        hoist_tagged_pieces(&mut doc);
+
+        let rects_only = extract_piece_rects(&doc);
+        let (paired, polygons) = extract_piece_rects_and_polygons(&doc);
+
+        assert_eq!(paired.len(), polygons.len());
+        assert_eq!(rects_only.len(), paired.len());
+        for (a, b) in rects_only.iter().zip(paired.iter()) {
+            assert_eq!(a.id, b.id);
+            assert_eq!(a.group_index, b.group_index);
+            assert_eq!(a.rect.w, b.rect.w);
+            assert_eq!(a.rect.h, b.rect.h);
+        }
+    } // paired_extractor_agrees_with_rect_extractor_on_tagged_pieces
 
     // @brief Grainline sibling groups must not inflate the piece bounding box.
     //

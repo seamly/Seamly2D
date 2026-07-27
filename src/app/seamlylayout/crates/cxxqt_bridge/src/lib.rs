@@ -17,7 +17,7 @@ use xmltree::{Element as XmlElement, XMLNode};
 pub use layout_tiling::LayoutSettings;
 
 mod piece_extractor;
-pub use piece_extractor::{extract_piece_rects, PieceRect};
+pub use piece_extractor::{extract_piece_rects, hoist_tagged_pieces, PieceRect};
 
 mod layout_assembler;
 pub use layout_assembler::{create_layout, create_initial_layout_dom, remove_color_blocks, trim_bottom};
@@ -1186,8 +1186,18 @@ impl qobject::AppController {
             let ox = 0.0;
             let oy = 0.0;
             let transform_str = el.attributes.get("transform").map(String::as_str).unwrap_or("");
+            // Piece identity survives into the saved adjust_dom because
+            // `create_layout` clones the whole piece <g> — attributes included —
+            // so the human-readable name can be read straight back off it here.
+            let name   = el.attributes.get("data-name").map(String::as_str).unwrap_or("");
+            let letter = el.attributes.get("data-letter").map(String::as_str).unwrap_or("");
+            // Same precedence as PieceRect::label(): name → letter → id.
+            let label  = if !name.is_empty() { name } else if !letter.is_empty() { letter } else { id };
             arr.push(serde_json::json!({
                 "id": id,
+                "name": name,
+                "letter": letter,
+                "label": label,
                 "x": x,
                 "y": y,
                 "w": w,

@@ -441,8 +441,9 @@ void PieceOverlayItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
 {
     QMenu menu;
 
-    // Header action — shows the piece id but is not interactive.
-    QAction* header = menu.addAction(QString("Piece: %1").arg(m_id));
+    // Header action — shows the piece's human-readable name ("Front Bodice")
+    // when the Seamly2D handoff supplied one, falling back to the id. Not interactive.
+    QAction* header = menu.addAction(QString("Piece: %1").arg(displayLabel()));
     header->setEnabled(false);
     menu.addSeparator();
 

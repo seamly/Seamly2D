@@ -20,7 +20,7 @@ use layout_tiling::{
     pick_best_tiled_candidate, widest_piece_tile_cols, LayoutSettings, TileDimensions,
 };
 
-use crate::piece_extractor::extract_piece_rects_and_polygons;
+use crate::piece_extractor::{extract_piece_rects_and_polygons, hoist_tagged_pieces};
 use crate::layout_assembler::{create_layout, create_initial_layout_dom, trim_bottom};
 use crate::save_debug_dom;
 use crate::log_to_file;
@@ -197,7 +197,22 @@ pub fn do_process_layout(
     // margin right (mr_px) isn't used in these calculations
 
     // --- 2 clone input_dom for piece pre-processing ---
-    let input_dom_clone = args.input_dom.clone();
+    let mut input_dom_clone = args.input_dom.clone();
+
+    // 2a: normalise the Seamly2D handoff shape.
+    //
+    // Layout Mode nests every piece inside one `<g data-type="pattern">`; every
+    // stage below treats a direct `<g>` child of the root as one piece, so
+    // without this the packer receives the whole pattern as a single sheet-sized
+    // object and places nothing (Task 59).  Untagged drawings are left alone.
+    // Done on the clone so the imported document the user sees is untouched.
+    let hoisted = hoist_tagged_pieces(&mut input_dom_clone);
+    if hoisted > 0 {
+        log_to_file(&format!(
+            "[debug] layout_utils::do_process_layout(): 1a hoisted {} tagged piece(s) out of their pattern wrapper",
+            hoisted
+        ));
+    } // if hoisted
 
     // --- 3 pre-process pieces in input_dom_clone ---
     // Pipeline: flatten → verticalize → flatten → translate → flatten
@@ -262,7 +277,8 @@ pub fn do_process_layout(
     if pieces.is_empty() {
         return Err(
             "[ERROR] layout_utils::do_process_layout(): 8 No pattern pieces found in the imported SVG. \
-             Each top-level <g> element is treated as one piece.".to_string()
+             A Seamly2D handoff is read from its <g data-type=\"piece\"> groups; any other SVG has \
+             each top-level <g> element treated as one piece.".to_string()
         );
     } // if pieces.is_empty
 
@@ -349,7 +365,7 @@ pub fn do_process_layout(
         let choice = pick_best_tiled_candidate(&rects, trim_w, trim_h, floor_cols, ceil_cols, gap_px, &trial_angles_deg)
             .map_err(|e| match e {
                 packing::PackError::TooLarge { id, w, h, bin_w, bin_h } => {
-                    let label = pieces.get(id).map(|p| p.id.as_str()).unwrap_or("?");
+                    let label = pieces.get(id).map(|p| p.label()).unwrap_or("?");
                     format!(
                         "Piece \"{label}\" ({w}\u{d7}{h} px) is larger than the widest \
                          tiled-bin candidate ({bin_w}\u{d7}{bin_h} px). \
@@ -357,14 +373,14 @@ pub fn do_process_layout(
                     )
                 }, // TooLarge
                 packing::PackError::NoSpace { id } => {
-                    let label = pieces.get(id).map(|p| p.id.as_str()).unwrap_or("?");
+                    let label = pieces.get(id).map(|p| p.label()).unwrap_or("?");
                     format!(
                         "Not enough tiled-bin space to place piece \"{label}\". \
                          Try a larger tile size, reduce margins, or remove pieces."
                     )
                 }, // NoSpace
                 packing::PackError::SearchLimit { id } => {
-                    let label = pieces.get(id).map(|p| p.id.as_str()).unwrap_or("?");
+                    let label = pieces.get(id).map(|p| p.label()).unwrap_or("?");
                     format!(
                         "Search limit reached while placing piece \"{label}\". \
                          The rotate solver hit runtime/complexity guardrails before finishing this layout. \
@@ -451,10 +467,12 @@ pub fn do_process_layout(
             Some(&mut piece_status),
         );
 
-        // Map the unplaced original indices to their user-facing piece ids.
+        // Map the unplaced original indices to their user-facing piece labels
+        // (`data-name` where the handoff supplied one, so the warning reads
+        // "Front Bodice" rather than "piece-7").
         let unplaced_labels: Vec<String> = unplaced_ids
             .iter()
-            .map(|&i| pieces.get(i).map(|p| p.id.clone()).unwrap_or_else(|| format!("#{i}")))
+            .map(|&i| pieces.get(i).map(|p| p.label().to_string()).unwrap_or_else(|| format!("#{i}")))
             .collect();
 
         log_to_file(&format!(
@@ -577,12 +595,18 @@ pub fn do_process_layout(
     // (piece.x, piece.y) = piece bbox upper left corner in layout_dom's coordinate space.
     let bbox_json = {
         let piece_arr: Vec<serde_json::Value> = placements.iter().map(|p| {
-            let piece = pieces.get(p.id);
-            let id    = piece.map(|pc| pc.id.as_str()).unwrap_or("");
-            let ox    = piece.map(|pc| pc.origin_x).unwrap_or(0.0);
-            let oy    = piece.map(|pc| pc.origin_y).unwrap_or(0.0);
+            let piece  = pieces.get(p.id);
+            let id     = piece.map(|pc| pc.id.as_str()).unwrap_or("");
+            let name   = piece.map(|pc| pc.name.as_str()).unwrap_or("");
+            let letter = piece.map(|pc| pc.letter.as_str()).unwrap_or("");
+            let label  = piece.map(|pc| pc.label()).unwrap_or("");
+            let ox     = piece.map(|pc| pc.origin_x).unwrap_or(0.0);
+            let oy     = piece.map(|pc| pc.origin_y).unwrap_or(0.0);
             serde_json::json!({
-                "id":           id,
+                "id":           id,                // machine identity — never shown to the user
+                "name":         name,              // data-name from the Seamly2D handoff ("" when untagged)
+                "letter":       letter,            // data-letter from the handoff ("" when unset)
+                "label":        label,             // what the Adjust overlay displays: name → letter → id
                 "x":            work_ml_px + p.x, // piece absolute canvasspace-x position
                 "y":            work_mt_px + p.y, // piece absolute canvasspace-y position
                 "w":            p.w,              // piece width
@@ -617,3 +641,117 @@ pub fn do_process_layout(
         translate_dom,
     })
 } // fn do_process_layout
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    // @brief The real Seamly2D handoff for the Richmond shirt: 12 pieces nested
+    // inside one `<g id="pattern-1" data-type="pattern">`.
+    //
+    // Produced with the headless export the Task 49 / 59 checks use:
+    //   seamly2d.exe input/richmond-shirt_v1_v061-test.sm2d \
+    //       -b handoff -d <dir> -f 0 --exportOnlyDetails
+    //
+    // It lives in this crate's `test_data/` and NOT in the app's `input/`
+    // directory: `src/app/seamlylayout/.gitignore` ignores `/input`, so a fixture
+    // placed there would be missing from a fresh clone and this test would fail
+    // to compile on CI.  Embedded at compile time so the test needs no runtime
+    // path resolution and behaves identically on every runner.
+    const HANDOFF_SVG: &str = include_str!("../test_data/richmond-shirt-handoff_pieces.svg");
+
+    // @brief Layout settings for the end-to-end pack: a wide fabric roll, which
+    // is the media the handoff is meant for and gives the packer room for all 12.
+    fn fabric_roll_settings_json() -> &'static str {
+        r#"{
+            "unit": "in",
+            "mediaType": "fabric",
+            "paperType": "roll",
+            "pageWidth": 60.0,
+            "pageHeight": 300.0,
+            "marginLeft": 0.5,
+            "marginRight": 0.5,
+            "marginTop": 0.5,
+            "marginBottom": 0.5,
+            "pieceGap": 0.125,
+            "layoutMode": "alongGrainline",
+            "rotationStep": 180,
+            "tileSize": "Letter",
+            "tileOrientation": "Portrait"
+        }"#
+    } // fn fabric_roll_settings_json
+
+    // @brief Task 59, end to end: the handoff must pack as 12 individual pieces.
+    //
+    // Before the fix `extract_piece_rects` saw the pattern wrapper as the only
+    // top-level `<g>`, so the packer was handed one sheet-sized object and logged
+    // `0 placements, 1 unplaced: ["pattern-1"]`.  This drives the whole public
+    // pipeline — `do_initialize_layout` then `do_process_layout` — against the
+    // genuine exporter output, which is the only way to catch a regression in the
+    // hoist, in discovery, or in any stage that assumes the flat shape.
+    #[test]
+    fn richmond_shirt_handoff_packs_twelve_individual_pieces() {
+        let input_dom = Document::parse(HANDOFF_SVG).expect("handoff fixture should parse");
+
+        // Sanity-check the fixture itself, so a bad copy fails loudly here rather
+        // than looking like a packing regression.
+        assert_eq!(
+            crate::piece_extractor::count_tagged_pieces(&input_dom), 12,
+            "fixture should carry 12 data-type=\"piece\" groups"
+        );
+
+        let settings_json = fabric_roll_settings_json();
+        let init = do_initialize_layout(settings_json, Some(&input_dom))
+            .expect("initialize_layout should succeed");
+
+        let mut progress_calls = 0;
+        let mut progress = |_pct: i32, _status: Option<&str>| { progress_calls += 1; };
+
+        let result = do_process_layout(
+            ProcessLayoutArgs {
+                settings_json,
+                input_dom: &input_dom,
+                initial_layout_dom: &init.initial_dom,
+                layout_h_px: init.h_px,
+            },
+            &mut progress,
+        ).expect("process_layout should succeed on the tagged handoff");
+
+        // Every piece placed, none reported unplaced.
+        assert!(
+            result.unplaced_labels.is_empty(),
+            "no piece should be left unplaced, got {:?}", result.unplaced_labels
+        );
+
+        // The bbox JSON is the layout's per-piece record; 12 entries means 12
+        // separate placements, not one pattern-sized blob.
+        let bbox: serde_json::Value =
+            serde_json::from_str(&result.bbox_json).expect("bbox_json should be valid JSON");
+        let placed = bbox["pieces"].as_array().expect("pieces array");
+        assert_eq!(placed.len(), 12, "expected 12 placed pieces");
+
+        // Identity reached the layout: names, not ids (Task 59's last subtask).
+        let names: Vec<&str> = placed.iter()
+            .filter_map(|p| p["name"].as_str())
+            .collect();
+        assert!(names.contains(&"Front"), "piece names should reach the layout, got {names:?}");
+        assert!(names.contains(&"Back"),  "piece names should reach the layout, got {names:?}");
+        assert!(
+            !placed.iter().any(|p| p["label"].as_str() == Some("pattern-1")),
+            "the pattern wrapper must never appear as a placed piece"
+        );
+
+        // No two pieces may share a slot — a single stacked position would mean
+        // the placements are degenerate even though the count looks right.
+        let mut positions: Vec<(i64, i64)> = placed.iter()
+            .map(|p| (p["x"].as_i64().unwrap_or(0), p["y"].as_i64().unwrap_or(0)))
+            .collect();
+        positions.sort_unstable();
+        positions.dedup();
+        assert_eq!(positions.len(), 12, "each piece should occupy its own slot");
+    } // richmond_shirt_handoff_packs_twelve_individual_pieces
+} // mod tests

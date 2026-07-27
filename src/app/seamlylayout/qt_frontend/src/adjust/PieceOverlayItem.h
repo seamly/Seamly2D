@@ -49,6 +49,19 @@ public:
     /// @brief Set the current transform string (SVG format) for this piece.
     void setTransformStr(const QString& str) { m_transformStr = str; }
 
+    /// @brief Set the human-readable name shown for this piece.
+    /// @details Sourced from the layout's bbox JSON `label` field, which the Rust
+    ///          side derives from the Seamly2D handoff attributes in the order
+    ///          `data-name` → `data-letter` → `id`.  Display only — the piece's
+    ///          identity for history and transform bookkeeping stays `m_id`.
+    ///          An empty string is ignored so the id remains the fallback.
+    /// @param label Display label, e.g. "Front Bodice".
+    void setDisplayLabel(const QString& label) { if (!label.isEmpty()) { m_displayLabel = label; } }
+
+    /// @brief Get the human-readable name for this piece.
+    /// @return The display label, or the piece id when none was supplied.
+    const QString& displayLabel() const { return m_displayLabel.isEmpty() ? m_id : m_displayLabel; }
+
     /// @brief Construct a PieceOverlayItem.
     /// @param id       Piece identifier string (matches SVG group id).
     /// @param originX  SVG origin offset X in pixels (origin_x_px from bbox JSON).
@@ -165,6 +178,9 @@ protected:
 private:
     /// @brief Piece identifier (matches the SVG group id attribute).
     QString m_id;
+
+    /// @brief Human-readable piece name for display; empty until setDisplayLabel().
+    QString m_displayLabel;
 
     /// @brief Current SVG transform string for this piece (updated on every move/rotate).
     QString m_transformStr;
