@@ -153,6 +153,7 @@ Public Slots</h2></td></tr>
 <tr class="memdesc:a19f4cef7661e4d67cd2ef45a5e99fd92"><td class="mdescLeft">&#160;</td><td class="mdescRight">exportSVG save layout to svg file.  <br /></td></tr>
 <tr class="separator:a19f4cef7661e4d67cd2ef45a5e99fd92"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a510c301d0ed21860bab65c99d969d56e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a510c301d0ed21860bab65c99d969d56e">exportSVG</a> (const QString &amp;name, QGraphicsRectItem *paper, const <a class="el" href="../../d1/d4a/classQList.html">QList</a>&lt; QGraphicsItem * &gt; &amp;<a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a4812a2638cdda3dc94c6f20ad4bde228">pieces</a>) const</td></tr>
+<tr class="memdesc:a510c301d0ed21860bab65c99d969d56e"><td class="mdescLeft">&#160;</td><td class="mdescRight">exportSVG save a list of piece items to one svg file, one tagged group per piece.  <br /></td></tr>
 <tr class="separator:a510c301d0ed21860bab65c99d969d56e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a870e66ec909c0d93480f9132eeef39f3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a870e66ec909c0d93480f9132eeef39f3">exportPNG</a> (const QString &amp;name, QGraphicsScene *scene) const</td></tr>
 <tr class="memdesc:a870e66ec909c0d93480f9132eeef39f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">exportPNG save layout to png file.  <br /></td></tr>
@@ -192,6 +193,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a313c4b8909f9c82ba01ad318f9369f66"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a78289bd171b00e2dd7995f28750c848c"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a78289bd171b00e2dd7995f28750c848c">~MainWindowsNoGUI</a> () override</td></tr>
 <tr class="separator:a78289bd171b00e2dd7995f28750c848c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b0b7e729d25d716625b69931454c304"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a0b0b7e729d25d716625b69931454c304">generatePiecesSvg</a> (const QString &amp;filePath)</td></tr>
+<tr class="memdesc:a0b0b7e729d25d716625b69931454c304"><td class="mdescLeft">&#160;</td><td class="mdescRight">generatePiecesSvg writes the tagged pieces SVG consumed by SeamlyLayout.  <br /></td></tr>
+<tr class="separator:a0b0b7e729d25d716625b69931454c304"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_classVAbstractMainWindow"><td colspan="2" onclick="javascript:toggleInherit('pub_methods_classVAbstractMainWindow')"><img src="../../closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="../../dc/d59/classVAbstractMainWindow.html">VAbstractMainWindow</a></td></tr>
 <tr class="memitem:a98df58db7adb372304f04b2f72936fd5 inherit pub_methods_classVAbstractMainWindow"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d59/classVAbstractMainWindow.html#a98df58db7adb372304f04b2f72936fd5">VAbstractMainWindow</a> (QWidget *parent=nullptr)</td></tr>
 <tr class="separator:a98df58db7adb372304f04b2f72936fd5 inherit pub_methods_classVAbstractMainWindow"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -320,7 +324,6 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a98bb3e38205cbd40bfc21425b15fec2c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a98bb3e38205cbd40bfc21425b15fec2c">RestorePaper</a> (int index) const</td></tr>
 <tr class="separator:a98bb3e38205cbd40bfc21425b15fec2c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a142a989f984c187be7418bc958ac82bc"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a142a989f984c187be7418bc958ac82bc">PrepareTextForDXF</a> (const QString &amp;placeholder, const <a class="el" href="../../d1/d4a/classQList.html">QList</a>&lt; <a class="el" href="../../d1/d4a/classQList.html">QList</a>&lt; QGraphicsItem * &gt; &gt; &amp;<a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a4812a2638cdda3dc94c6f20ad4bde228">pieces</a>) const</td></tr>
-<tr class="memdesc:a142a989f984c187be7418bc958ac82bc"><td class="mdescLeft">&#160;</td><td class="mdescRight">PrepareTextForDXF prepare QGraphicsSimpleTextItem items for export to flat dxf.  <br /></td></tr>
 <tr class="separator:a142a989f984c187be7418bc958ac82bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afbb09cac06eddc5692e26d3991075f42"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#afbb09cac06eddc5692e26d3991075f42">RestoreTextAfterDXF</a> (const QString &amp;placeholder, const <a class="el" href="../../d1/d4a/classQList.html">QList</a>&lt; <a class="el" href="../../d1/d4a/classQList.html">QList</a>&lt; QGraphicsItem * &gt; &gt; &amp;<a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a4812a2638cdda3dc94c6f20ad4bde228">pieces</a>) const</td></tr>
 <tr class="memdesc:afbb09cac06eddc5692e26d3991075f42"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#afbb09cac06eddc5692e26d3991075f42" title="MainWindowsNoGUI::RestoreTextAfterDXF restore QGraphicsSimpleTextItem items after export to flat dxf.">MainWindowsNoGUI::RestoreTextAfterDXF</a> restore QGraphicsSimpleTextItem items after export to flat dxf.  <br /></td></tr>
@@ -349,7 +352,11 @@ Private Member Functions</h2></td></tr>
 <tr class="memitem:a5960a82100f1fd581b20ecd08678adc9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a5960a82100f1fd581b20ecd08678adc9">ExportFlatLayout</a> (const <a class="el" href="../../de/dbd/classExportLayoutDialog.html">ExportLayoutDialog</a> &amp;dialog, const <a class="el" href="../../d1/d4a/classQList.html">QList</a>&lt; QGraphicsScene * &gt; &amp;<a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#ac710c5b0988a0f9e12523620a7f66d80">scenes</a>, const <a class="el" href="../../d1/d4a/classQList.html">QList</a>&lt; QGraphicsItem * &gt; &amp;<a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a5beca5f0d20a7e4adeb4c0590c13ab6e">papers</a>, const <a class="el" href="../../d1/d4a/classQList.html">QList</a>&lt; QGraphicsItem * &gt; &amp;<a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a4c0f1d2b5e02ce25f7dbbd0c8fe963e1">shadows</a>, const <a class="el" href="../../d1/d4a/classQList.html">QList</a>&lt; <a class="el" href="../../d1/d4a/classQList.html">QList</a>&lt; QGraphicsItem * &gt; &gt; &amp;<a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a4812a2638cdda3dc94c6f20ad4bde228">pieces</a>, bool <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a92c8bd4edcaea67313d136035d87171d">ignoreMargins</a>, const QMarginsF &amp;<a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#ab663f823013c37df2c5562ccced1cae8">margins</a>)</td></tr>
 <tr class="separator:a5960a82100f1fd581b20ecd08678adc9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa8462e23ba5db6152e26536ad5fdee62"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#aa8462e23ba5db6152e26536ad5fdee62">exportPiecesAsFlatLayout</a> (const <a class="el" href="../../de/dbd/classExportLayoutDialog.html">ExportLayoutDialog</a> &amp;dialog, const QVector&lt; <a class="el" href="../../df/de5/classVLayoutPiece.html">VLayoutPiece</a> &gt; &amp;<a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a94419150478fdbf1348c4b9487bf1518">pieceList</a>)</td></tr>
+<tr class="memdesc:aa8462e23ba5db6152e26536ad5fdee62"><td class="mdescLeft">&#160;</td><td class="mdescRight">exportPiecesAsFlatLayout exports the pieces from piece mode onto one flat sheet (non-AAMA formats).  <br /></td></tr>
 <tr class="separator:aa8462e23ba5db6152e26536ad5fdee62"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac374c61165023898340dd2521c0be868"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d1/d4a/classQList.html">QList</a>&lt; QGraphicsItem * &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#ac374c61165023898340dd2521c0be868">arrangePieceItemsFlat</a> (QGraphicsScene *scene, const QVector&lt; <a class="el" href="../../df/de5/classVLayoutPiece.html">VLayoutPiece</a> &gt; &amp;<a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a94419150478fdbf1348c4b9487bf1518">pieceList</a>, bool textAsPaths) const</td></tr>
+<tr class="memdesc:ac374c61165023898340dd2521c0be868"><td class="mdescLeft">&#160;</td><td class="mdescRight">arrangePieceItemsFlat creates the graphics items of all pieces and arranges them on one flat sheet.  <br /></td></tr>
+<tr class="separator:ac374c61165023898340dd2521c0be868"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-methods" name="pri-static-methods"></a>
 Static Private Member Functions</h2></td></tr>
@@ -437,7 +444,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00117">117</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00797">InitTempLayoutScene()</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00858">InitTempLayoutScene()</a>.</p>
 
 </div>
 </div>
@@ -523,11 +530,71 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01192">1192</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01259">1259</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d2/de5/vdxfpaintdevice_8cpp_source.html#l00166">VDxfPaintDevice::ExportToAAMA()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00220">PrintDPI</a>, <a class="el" href="../../d2/de5/vdxfpaintdevice_8cpp_source.html#l00127">VDxfPaintDevice::SetBinaryFormat()</a>, <a class="el" href="../../d2/de5/vdxfpaintdevice_8cpp_source.html#l00063">VDxfPaintDevice::setFileName()</a>, <a class="el" href="../../d2/de5/vdxfpaintdevice_8cpp_source.html#l00155">VDxfPaintDevice::setInsunits()</a>, <a class="el" href="../../d2/de5/vdxfpaintdevice_8cpp_source.html#l00099">VDxfPaintDevice::setResolution()</a>, <a class="el" href="../../d2/de5/vdxfpaintdevice_8cpp_source.html#l00082">VDxfPaintDevice::setSize()</a>, and <a class="el" href="../../d2/de5/vdxfpaintdevice_8cpp_source.html#l00116">VDxfPaintDevice::setVersion()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00401">ExportApparelLayout()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00462">ExportApparelLayout()</a>.</p>
+
+</div>
+</div>
+<a id="ac374c61165023898340dd2521c0be868" name="ac374c61165023898340dd2521c0be868"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac374c61165023898340dd2521c0be868">&#9670;&#160;</a></span>arrangePieceItemsFlat()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../d1/d4a/classQList.html">QList</a>&lt; QGraphicsItem * &gt; MainWindowsNoGUI::arrangePieceItemsFlat </td>
+          <td>(</td>
+          <td class="paramtype">QGraphicsScene *&#160;</td>
+          <td class="paramname"><em>scene</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const QVector&lt; <a class="el" href="../../df/de5/classVLayoutPiece.html">VLayoutPiece</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>pieceList</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>textAsPaths</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>arrangePieceItemsFlat creates the graphics items of all pieces and arranges them on one flat sheet. </p>
+<p>Each piece keeps its own position (Mx/My offsets); afterwards every item is translated so the combined bounding rectangle starts at the scene origin. The items are added to the given scene so its itemsBoundingRect() describes the flat "paper" holding all pieces.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">scene</td><td>scene the items are added to (takes ownership). </td></tr>
+    <tr><td class="paramname">pieceList</td><td>pieces to create items for. </td></tr>
+    <tr><td class="paramname">textAsPaths</td><td>true to convert label text into vector paths. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>list of the created piece root items, in pieceList order. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00355">355</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00101">pieceList</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00448">SCASSERT</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00393">exportPiecesAsFlatLayout()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00440">generatePiecesSvg()</a>.</p>
 
 </div>
 </div>
@@ -583,11 +650,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01769">1769</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01861">1861</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d4/da4/def_8h_source.html#l00448">SCASSERT</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06896">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01336">LayoutPrint()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01058">PdfTiledFile()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01304">PrintPreview()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06960">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01428">LayoutPrint()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01125">PdfTiledFile()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01396">PrintPreview()</a>.</p>
 
 </div>
 </div>
@@ -623,11 +690,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01123">1123</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01190">1190</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00089">PDFTOPS</a>, and <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01088">exportEPS()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01105">exportPS()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01155">exportEPS()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01172">exportPS()</a>.</p>
 
 </div>
 </div>
@@ -671,11 +738,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00864">864</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00925">925</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00109">shadows</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00342">exportPiecesAsFlatLayout()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00393">exportPiecesAsFlatLayout()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>.</p>
 
 </div>
 </div>
@@ -703,11 +770,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00839">839</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00900">900</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00109">shadows</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00342">exportPiecesAsFlatLayout()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00393">exportPiecesAsFlatLayout()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>.</p>
 
 </div>
 </div>
@@ -789,11 +856,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00401">401</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00462">462</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01192">AAMADxfFile()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00535">ExportLayoutDialog::format()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00317">ExportLayoutDialog::isBinaryDXFFormat()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00517">ExportLayoutDialog::path()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, and <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01259">AAMADxfFile()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00535">ExportLayoutDialog::format()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00317">ExportLayoutDialog::isBinaryDXFFormat()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00517">ExportLayoutDialog::path()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, and <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00464">exportPiecesAsApparelLayout()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00525">exportPiecesAsApparelLayout()</a>.</p>
 
 </div>
 </div>
@@ -839,11 +906,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00975">975</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01042">1042</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07250">MainWindow::exportDraftBlocksAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07314">MainWindow::exportDraftBlocksAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>.</p>
 
 </div>
 </div>
@@ -883,9 +950,9 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">259</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00401">ExportApparelLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00452">ExportLayoutDialog::exportFormatSuffix()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00464">exportPiecesAsApparelLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00342">exportPiecesAsFlatLayout()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00523">ExportLayoutDialog::fileName()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00535">ExportLayoutDialog::format()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00446">ExportLayoutDialog::mode()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00517">ExportLayoutDialog::path()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00101">pieceList</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00112">piecesOnLayout</a>, <a class="el" href="../../d4/da4/def_8h_source.html#l00448">SCASSERT</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00109">shadows</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00462">ExportApparelLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00452">ExportLayoutDialog::exportFormatSuffix()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00525">exportPiecesAsApparelLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00393">exportPiecesAsFlatLayout()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00523">ExportLayoutDialog::fileName()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00535">ExportLayoutDialog::format()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00446">ExportLayoutDialog::mode()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00517">ExportLayoutDialog::path()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00101">pieceList</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00112">piecesOnLayout</a>, <a class="el" href="../../d4/da4/def_8h_source.html#l00448">SCASSERT</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00109">shadows</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07698">MainWindow::DoExport()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06896">MainWindow::exportLayoutAs()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07100">MainWindow::exportPiecesAs()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07762">MainWindow::DoExport()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06960">MainWindow::exportLayoutAs()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07164">MainWindow::exportPiecesAs()</a>.</p>
 
 </div>
 </div>
@@ -949,11 +1016,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01088">1088</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01155">1155</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01123">convertPdfToPs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01009">exportPDF()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01190">convertPdfToPs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01076">exportPDF()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07250">MainWindow::exportDraftBlocksAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07314">MainWindow::exportDraftBlocksAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>.</p>
 
 </div>
 </div>
@@ -1023,9 +1090,9 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">308</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00452">ExportLayoutDialog::exportFormatSuffix()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00523">ExportLayoutDialog::fileName()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00535">ExportLayoutDialog::format()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00446">ExportLayoutDialog::mode()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00517">ExportLayoutDialog::path()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01058">PdfTiledFile()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00109">shadows</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00452">ExportLayoutDialog::exportFormatSuffix()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00523">ExportLayoutDialog::fileName()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00535">ExportLayoutDialog::format()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00446">ExportLayoutDialog::mode()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00517">ExportLayoutDialog::path()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01125">PdfTiledFile()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00109">shadows</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00342">exportPiecesAsFlatLayout()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00393">exportPiecesAsFlatLayout()</a>.</p>
 
 </div>
 </div>
@@ -1071,11 +1138,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00958">958</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01025">1025</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07250">MainWindow::exportDraftBlocksAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07314">MainWindow::exportDraftBlocksAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>.</p>
 
 </div>
 </div>
@@ -1139,11 +1206,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01009">1009</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01076">1076</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01734">FileName()</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00242">FromPixel()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00220">PrintDPI</a>, and <a class="el" href="../../db/d7d/global_8cpp_source.html#l00060">widthMainLine</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01826">FileName()</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00242">FromPixel()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00220">PrintDPI</a>, and <a class="el" href="../../db/d7d/global_8cpp_source.html#l00060">widthMainLine</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07250">MainWindow::exportDraftBlocksAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01088">exportEPS()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01105">exportPS()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07314">MainWindow::exportDraftBlocksAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01155">exportEPS()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01172">exportPS()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>.</p>
 
 </div>
 </div>
@@ -1181,9 +1248,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00464">464</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00525">525</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00401">ExportApparelLayout()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00452">ExportLayoutDialog::exportFormatSuffix()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00523">ExportLayoutDialog::fileName()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00535">ExportLayoutDialog::format()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00762">ExportLayoutDialog::isTextAsPaths()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00446">ExportLayoutDialog::mode()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00517">ExportLayoutDialog::path()</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00101">pieceList</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00462">ExportApparelLayout()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00452">ExportLayoutDialog::exportFormatSuffix()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00523">ExportLayoutDialog::fileName()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00535">ExportLayoutDialog::format()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00762">ExportLayoutDialog::isTextAsPaths()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00446">ExportLayoutDialog::mode()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00517">ExportLayoutDialog::path()</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00101">pieceList</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>.</p>
 
@@ -1223,9 +1290,18 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00342">342</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p>exportPiecesAsFlatLayout exports the pieces from piece mode onto one flat sheet (non-AAMA formats). </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">dialog</td><td>export dialog holding format, path and text options. </td></tr>
+    <tr><td class="paramname">pieceList</td><td>pieces to export. </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00864">CreateScenes()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00839">CreateShadows()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00762">ExportLayoutDialog::isTextAsPaths()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00101">pieceList</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00109">shadows</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00393">393</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00355">arrangePieceItemsFlat()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00925">CreateScenes()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00900">CreateShadows()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00762">ExportLayoutDialog::isTextAsPaths()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00101">pieceList</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00109">shadows</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>.</p>
 
@@ -1273,11 +1349,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00919">919</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00986">986</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07250">MainWindow::exportDraftBlocksAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07314">MainWindow::exportDraftBlocksAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>.</p>
 
 </div>
 </div>
@@ -1323,11 +1399,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00992">992</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01059">1059</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07250">MainWindow::exportDraftBlocksAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07314">MainWindow::exportDraftBlocksAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>.</p>
 
 </div>
 </div>
@@ -1391,11 +1467,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01105">1105</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01172">1172</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01123">convertPdfToPs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01009">exportPDF()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01190">convertPdfToPs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01076">exportPDF()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07250">MainWindow::exportDraftBlocksAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07314">MainWindow::exportDraftBlocksAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>.</p>
 
 </div>
 </div>
@@ -1463,9 +1539,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">1610</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">1702</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00975">exportBMP()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01088">exportEPS()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00452">ExportLayoutDialog::exportFormatSuffix()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00958">exportJPG()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01009">exportPDF()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00919">exportPNG()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00992">exportPPM()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01105">exportPS()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00893">exportSVG()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00936">exportTIF()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00523">ExportLayoutDialog::fileName()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01170">FlatDxfFile()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00535">ExportLayoutDialog::format()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00317">ExportLayoutDialog::isBinaryDXFFormat()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00446">ExportLayoutDialog::mode()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01154">ObjFile()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00517">ExportLayoutDialog::path()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00109">shadows</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01042">exportBMP()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01155">exportEPS()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00452">ExportLayoutDialog::exportFormatSuffix()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01025">exportJPG()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01076">exportPDF()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00986">exportPNG()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01059">exportPPM()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01172">exportPS()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00954">exportSVG()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01003">exportTIF()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00523">ExportLayoutDialog::fileName()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01237">FlatDxfFile()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00535">ExportLayoutDialog::format()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00317">ExportLayoutDialog::isBinaryDXFFormat()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00446">ExportLayoutDialog::mode()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01221">ObjFile()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00517">ExportLayoutDialog::path()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00109">shadows</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>.</p>
 
@@ -1511,9 +1587,19 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00900">900</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p>exportSVG save a list of piece items to one svg file, one tagged group per piece. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">name</td><td>layout file name. </td></tr>
+    <tr><td class="paramname">paper</td><td>paper rectangle defining the SVG size. </td></tr>
+    <tr><td class="paramname">pieces</td><td>piece root items to export; each is rendered in its own scene. </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="reference">References <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00193">SvgGenerator::addSvgFromScene()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00106">doc</a>, <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00244">SvgGenerator::generate()</a>, <a class="el" href="../../de/d7d/vabstractpattern_8cpp_source.html#l01361">VAbstractPattern::GetDescription()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00220">PrintDPI</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00967">967</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00355">SvgGenerator::addSvgFromScene()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00106">doc</a>, <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00409">SvgGenerator::generate()</a>, <a class="el" href="../../de/d7d/vabstractpattern_8cpp_source.html#l01361">VAbstractPattern::GetDescription()</a>, <a class="el" href="../../de/d7d/vabstractpattern_8cpp_source.html#l01391">VAbstractPattern::GetPatternName()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00220">PrintDPI</a>.</p>
 
 </div>
 </div>
@@ -1565,11 +1651,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00893">893</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00954">954</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00193">SvgGenerator::addSvgFromScene()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00106">doc</a>, <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00244">SvgGenerator::generate()</a>, <a class="el" href="../../de/d7d/vabstractpattern_8cpp_source.html#l01361">VAbstractPattern::GetDescription()</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00220">PrintDPI</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00355">SvgGenerator::addSvgFromScene()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00106">doc</a>, <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00409">SvgGenerator::generate()</a>, <a class="el" href="../../de/d7d/vabstractpattern_8cpp_source.html#l01361">VAbstractPattern::GetDescription()</a>, <a class="el" href="../../de/d7d/vabstractpattern_8cpp_source.html#l01391">VAbstractPattern::GetPatternName()</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00220">PrintDPI</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07250">MainWindow::exportDraftBlocksAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07314">MainWindow::exportDraftBlocksAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00440">generatePiecesSvg()</a>.</p>
 
 </div>
 </div>
@@ -1615,11 +1701,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00936">936</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01003">1003</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07250">MainWindow::exportDraftBlocksAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07314">MainWindow::exportDraftBlocksAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>.</p>
 
 </div>
 </div>
@@ -1646,11 +1732,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01734">1734</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01826">1826</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07250">MainWindow::exportDraftBlocksAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06896">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01009">exportPDF()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07100">MainWindow::exportPiecesAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01371">SetPrinterSettings()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07314">MainWindow::exportDraftBlocksAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06960">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01076">exportPDF()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07164">MainWindow::exportPiecesAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01463">SetPrinterSettings()</a>.</p>
 
 </div>
 </div>
@@ -1687,9 +1773,9 @@ Additional Inherited Members</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd></dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01529">1529</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01621">1621</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01371">SetPrinterSettings()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01463">SetPrinterSettings()</a>.</p>
 
 </div>
 </div>
@@ -1751,11 +1837,45 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01170">1170</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01237">1237</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d44/dxfdef_8cpp_source.html#l00056">endStringPlaceholder</a>, <a class="el" href="../../d7/de8/dxfdef_8h.html#a76a334d2cdefeb4fca03969a8d1acbe8a3be6521a73bcafce5b38459ec548bd11">Millimeters</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00220">PrintDPI</a>, <a class="el" href="../../d2/de5/vdxfpaintdevice_8cpp_source.html#l00127">VDxfPaintDevice::SetBinaryFormat()</a>, <a class="el" href="../../d2/de5/vdxfpaintdevice_8cpp_source.html#l00063">VDxfPaintDevice::setFileName()</a>, <a class="el" href="../../d2/de5/vdxfpaintdevice_8cpp_source.html#l00155">VDxfPaintDevice::setInsunits()</a>, <a class="el" href="../../d2/de5/vdxfpaintdevice_8cpp_source.html#l00099">VDxfPaintDevice::setResolution()</a>, <a class="el" href="../../d2/de5/vdxfpaintdevice_8cpp_source.html#l00082">VDxfPaintDevice::setSize()</a>, and <a class="el" href="../../d2/de5/vdxfpaintdevice_8cpp_source.html#l00116">VDxfPaintDevice::setVersion()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>.</p>
+
+</div>
+</div>
+<a id="a0b0b7e729d25d716625b69931454c304" name="a0b0b7e729d25d716625b69931454c304"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b0b7e729d25d716625b69931454c304">&#9670;&#160;</a></span>generatePiecesSvg()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool MainWindowsNoGUI::generatePiecesSvg </td>
+          <td>(</td>
+          <td class="paramtype">const QString &amp;&#160;</td>
+          <td class="paramname"><em>filePath</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>generatePiecesSvg writes the tagged pieces SVG consumed by SeamlyLayout. </p>
+<p>Renders every piece in pieceList (prepared by <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a591ebb6ae7c50b0e9ef1be2c099b5f36">preparePiecesForLayout()</a>) into one SVG file where the pattern, each piece and each piece component carry the SVG data-* attributes (data-type, data-type-number, data-parent, data-name, data-letter). This is the automatic handoff file created when the user enters Layout Mode; no export dialog is involved. Text is kept as real text so the layout application can still read the label contents.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">filePath</td><td>absolute path of the SVG file to write. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true when the file was written successfully. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00440">440</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00355">arrangePieceItemsFlat()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00954">exportSVG()</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00101">pieceList</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04109">MainWindow::exportPiecesToSeamlyLayout()</a>.</p>
 
 </div>
 </div>
@@ -1782,7 +1902,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00797">797</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00858">858</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00104">tempSceneLayout</a>.</p>
 
@@ -1813,11 +1933,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01489">1489</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01581">1581</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01208">PreparePaper()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01222">RestorePaper()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, and <a class="el" href="../../db/d7d/global_8cpp_source.html#l00060">widthMainLine</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01275">PreparePaper()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01289">RestorePaper()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, and <a class="el" href="../../db/d7d/global_8cpp_source.html#l00060">widthMainLine</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01371">SetPrinterSettings()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01463">SetPrinterSettings()</a>.</p>
 
 </div>
 </div>
@@ -1845,11 +1965,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01594">1594</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01686">1686</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00448">SCASSERT</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01058">PdfTiledFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01125">PdfTiledFile()</a>.</p>
 
 </div>
 </div>
@@ -1876,11 +1996,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01570">1570</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01662">1662</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00448">SCASSERT</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00703">PrintOrigin()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00683">PrintPreviewOrigin()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00764">PrintOrigin()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00744">PrintPreviewOrigin()</a>.</p>
 
 </div>
 </div>
@@ -1907,11 +2027,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01336">1336</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01428">1428</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01769">ContinueIfLayoutStale()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00123">isLayoutStale</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00152">layoutPrinterName</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00568">PreparePrinter()</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00220">PrintDPI</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#aa22aa8c63b30c458a5fe33e486ae1da9ad5af3186f321912e45b31c56f0c7e7d2">PrintNative</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00526">PrintPages()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01371">SetPrinterSettings()</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01861">ContinueIfLayoutStale()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00123">isLayoutStale</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00152">layoutPrinterName</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00568">PreparePrinter()</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00220">PrintDPI</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#aa22aa8c63b30c458a5fe33e486ae1da9ad5af3186f321912e45b31c56f0c7e7d2">PrintNative</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00587">PrintPages()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01463">SetPrinterSettings()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00703">PrintOrigin()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00716">PrintTiled()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00764">PrintOrigin()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00777">PrintTiled()</a>.</p>
 
 </div>
 </div>
@@ -1941,9 +2061,9 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">184</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d64/classDialogLayoutProgress.html#a36a1e771d3577166179a2fb3e9de24f2">DialogLayoutProgress::Abort()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00321">VLayoutGenerator::Abort()</a>, <a class="el" href="../../d6/d89/dialoglayoutprogress_8cpp_source.html#l00101">DialogLayoutProgress::Arranged()</a>, <a class="el" href="../../d8/d8a/classVLayoutGenerator.html#a359129571ff4922be2b39ac4261d07c3">VLayoutGenerator::Arranged()</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a8b59fc83af17e2b954d41fd2d8144990">CleanLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00864">CreateScenes()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00839">CreateShadows()</a>, <a class="el" href="../../d6/d89/dialoglayoutprogress_8cpp_source.html#l00108">DialogLayoutProgress::Error()</a>, <a class="el" href="../../d8/d8a/classVLayoutGenerator.html#ad6e4d45809775725afaab645781fe3a6">VLayoutGenerator::Error()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00238">ErrorConsoleMode()</a>, <a class="el" href="../../d6/d89/dialoglayoutprogress_8cpp_source.html#l00129">DialogLayoutProgress::Finished()</a>, <a class="el" href="../../d8/d8a/classVLayoutGenerator.html#a42fd669afb64adde0481d56ddc807d41">VLayoutGenerator::Finished()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00150">VLayoutGenerator::Generate()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00287">VLayoutGenerator::getAllPieceItems()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00304">VLayoutGenerator::getAllPieces()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00688">VLayoutGenerator::GetAutoCrop()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00848">VLayoutGenerator::GetPaperHeight()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00267">VLayoutGenerator::GetPapersItems()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00760">VLayoutGenerator::GetPaperWidth()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00796">VLayoutGenerator::GetPrinterFields()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00149">isAutoCrop</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00777">Application2D::isGUIMode()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00123">isLayoutStale</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00150">isUnitePages</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00651">VLayoutGenerator::IsUnitePages()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00784">VLayoutGenerator::IsUsePrinterFields()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00126">paperSize</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00101">pieceList</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00112">piecesOnLayout</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a4f5ce26383724f12e1630bcf36a8ce42">PrepareSceneList()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00102">VLayoutGenerator::setPieces()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00109">shadows</a>, <a class="el" href="../../d6/d89/dialoglayoutprogress_8cpp_source.html#l00095">DialogLayoutProgress::Start()</a>, <a class="el" href="../../d8/d8a/classVLayoutGenerator.html#a3845eec98806acd5ec4e210895b171ba">VLayoutGenerator::Start()</a>, and <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00255">VLayoutGenerator::State()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d64/classDialogLayoutProgress.html#a36a1e771d3577166179a2fb3e9de24f2">DialogLayoutProgress::Abort()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00321">VLayoutGenerator::Abort()</a>, <a class="el" href="../../d6/d89/dialoglayoutprogress_8cpp_source.html#l00101">DialogLayoutProgress::Arranged()</a>, <a class="el" href="../../d8/d8a/classVLayoutGenerator.html#a359129571ff4922be2b39ac4261d07c3">VLayoutGenerator::Arranged()</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a8b59fc83af17e2b954d41fd2d8144990">CleanLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00925">CreateScenes()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00900">CreateShadows()</a>, <a class="el" href="../../d6/d89/dialoglayoutprogress_8cpp_source.html#l00108">DialogLayoutProgress::Error()</a>, <a class="el" href="../../d8/d8a/classVLayoutGenerator.html#ad6e4d45809775725afaab645781fe3a6">VLayoutGenerator::Error()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00238">ErrorConsoleMode()</a>, <a class="el" href="../../d6/d89/dialoglayoutprogress_8cpp_source.html#l00129">DialogLayoutProgress::Finished()</a>, <a class="el" href="../../d8/d8a/classVLayoutGenerator.html#a42fd669afb64adde0481d56ddc807d41">VLayoutGenerator::Finished()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00150">VLayoutGenerator::Generate()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00287">VLayoutGenerator::getAllPieceItems()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00304">VLayoutGenerator::getAllPieces()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00688">VLayoutGenerator::GetAutoCrop()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00848">VLayoutGenerator::GetPaperHeight()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00267">VLayoutGenerator::GetPapersItems()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00760">VLayoutGenerator::GetPaperWidth()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00796">VLayoutGenerator::GetPrinterFields()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">ignoreMargins</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00149">isAutoCrop</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00877">Application2D::isGUIMode()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00123">isLayoutStale</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00150">isUnitePages</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00651">VLayoutGenerator::IsUnitePages()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00784">VLayoutGenerator::IsUsePrinterFields()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00126">paperSize</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00101">pieceList</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00112">piecesOnLayout</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#a4f5ce26383724f12e1630bcf36a8ce42">PrepareSceneList()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00102">VLayoutGenerator::setPieces()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00109">shadows</a>, <a class="el" href="../../d6/d89/dialoglayoutprogress_8cpp_source.html#l00095">DialogLayoutProgress::Start()</a>, <a class="el" href="../../d8/d8a/classVLayoutGenerator.html#a3845eec98806acd5ec4e210895b171ba">VLayoutGenerator::Start()</a>, and <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00255">VLayoutGenerator::State()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07698">MainWindow::DoExport()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06896">MainWindow::exportLayoutAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00158">toolLayoutSettings()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07762">MainWindow::DoExport()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06960">MainWindow::exportLayoutAs()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00158">toolLayoutSettings()</a>.</p>
 
 </div>
 </div>
@@ -1987,11 +2107,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01154">1154</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01221">1221</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00220">PrintDPI</a>, <a class="el" href="../../d8/d30/vobjpaintdevice_8cpp_source.html#l00092">VObjPaintDevice::setFileName()</a>, <a class="el" href="../../d8/d30/vobjpaintdevice_8cpp_source.html#l00155">VObjPaintDevice::setResolution()</a>, and <a class="el" href="../../d8/d30/vobjpaintdevice_8cpp_source.html#l00119">VObjPaintDevice::setSize()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>.</p>
 
 </div>
 </div>
@@ -2019,9 +2139,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01058">1058</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01125">1125</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01769">ContinueIfLayoutStale()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00123">isLayoutStale</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01594">IsPagesFit()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00148">isTiled</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00220">PrintDPI</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00526">PrintPages()</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#aa22aa8c63b30c458a5fe33e486ae1da9a9bc1a90b8be024dee17cdc6f020ad5ab">PrintPDF</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01371">SetPrinterSettings()</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01861">ContinueIfLayoutStale()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00123">isLayoutStale</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01686">IsPagesFit()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00148">isTiled</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00220">PrintDPI</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00587">PrintPages()</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#aa22aa8c63b30c458a5fe33e486ae1da9a9bc1a90b8be024dee17cdc6f020ad5ab">PrintPDF</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01463">SetPrinterSettings()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>.</p>
 
@@ -2051,11 +2171,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01208">1208</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01275">1275</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00109">shadows</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01489">IsLayoutGrayscale()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00526">PrintPages()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01581">IsLayoutGrayscale()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00587">PrintPages()</a>.</p>
 
 </div>
 </div>
@@ -2083,11 +2203,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00778">778</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00839">839</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">VLayoutPiece::Create()</a>, <a class="el" href="../../d1/de6/vabstracttool_8h_source.html#l00199">VAbstractTool::getData()</a>, <a class="el" href="../../de/d7d/vabstractpattern_8cpp_source.html#l00674">VAbstractPattern::getTool()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00101">pieceList</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00448">SCASSERT</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00425">VLayoutPiece::Create()</a>, <a class="el" href="../../d1/de6/vabstracttool_8h_source.html#l00199">VAbstractTool::getData()</a>, <a class="el" href="../../de/d7d/vabstractpattern_8cpp_source.html#l00674">VAbstractPattern::getTool()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00101">pieceList</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00448">SCASSERT</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07698">MainWindow::DoExport()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06896">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07100">MainWindow::exportPiecesAs()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03968">MainWindow::showLayoutMode()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07762">MainWindow::DoExport()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06960">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07164">MainWindow::exportPiecesAs()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03968">MainWindow::showLayoutMode()</a>.</p>
 
 </div>
 </div>
@@ -2154,18 +2274,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>PrepareTextForDXF prepare QGraphicsSimpleTextItem items for export to flat dxf. </p>
-<p>Because QPaintEngine::drawTextItem doesn't pass whole string per time we mark end of each string by adding special placeholder. This method append it.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">placeholder</td><td>placeholder that will be appended to each QGraphicsSimpleTextItem item's text string. </td></tr>
-  </table>
-  </dd>
-</dl>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01343">1343</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01244">1244</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01325">collectTextItems()</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>.</p>
 
 </div>
 </div>
@@ -2192,9 +2303,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00703">703</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00764">764</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01570">isPagesUniform()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00148">isTiled</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01336">LayoutPrint()</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01662">isPagesUniform()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00148">isTiled</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01428">LayoutPrint()</a>.</p>
 
 </div>
 </div>
@@ -2222,11 +2333,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00526">526</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00587">587</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00753">VSettings::getTiledPDFOrientation()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00148">isTiled</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01208">PreparePaper()</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01222">RestorePaper()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>, and <a class="el" href="../../db/d7d/global_8cpp_source.html#l00060">widthMainLine</a>.</p>
+<p class="reference">References <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00777">VSettings::getTiledPDFOrientation()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00148">isTiled</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01275">PreparePaper()</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01289">RestorePaper()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>, and <a class="el" href="../../db/d7d/global_8cpp_source.html#l00060">widthMainLine</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01336">LayoutPrint()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01058">PdfTiledFile()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01304">PrintPreview()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01428">LayoutPrint()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01125">PdfTiledFile()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01396">PrintPreview()</a>.</p>
 
 </div>
 </div>
@@ -2253,11 +2364,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01304">1304</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01396">1396</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01769">ContinueIfLayoutStale()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00123">isLayoutStale</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00152">layoutPrinterName</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00568">PreparePrinter()</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00220">PrintDPI</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00526">PrintPages()</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#aa22aa8c63b30c458a5fe33e486ae1da9acb83fba9c48fd911128ab4d9159d47d2">PrintPreview</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01371">SetPrinterSettings()</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01861">ContinueIfLayoutStale()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00123">isLayoutStale</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00152">layoutPrinterName</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00568">PreparePrinter()</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00220">PrintDPI</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00587">PrintPages()</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#aa22aa8c63b30c458a5fe33e486ae1da9acb83fba9c48fd911128ab4d9159d47d2">PrintPreview</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01463">SetPrinterSettings()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00683">PrintPreviewOrigin()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00696">PrintPreviewTiled()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00744">PrintPreviewOrigin()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00757">PrintPreviewTiled()</a>.</p>
 
 </div>
 </div>
@@ -2284,9 +2395,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00683">683</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00744">744</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01570">isPagesUniform()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00148">isTiled</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01304">PrintPreview()</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01662">isPagesUniform()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00148">isTiled</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01396">PrintPreview()</a>.</p>
 
 </div>
 </div>
@@ -2313,9 +2424,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00696">696</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00757">757</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00148">isTiled</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01304">PrintPreview()</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00148">isTiled</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01396">PrintPreview()</a>.</p>
 
 </div>
 </div>
@@ -2342,9 +2453,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00716">716</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00777">777</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00148">isTiled</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01336">LayoutPrint()</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00148">isTiled</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01428">LayoutPrint()</a>.</p>
 
 </div>
 </div>
@@ -2373,7 +2484,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>refreshGrainLines call to recalculate piece grainlines. For example after show / hide grainlines. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00745">745</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00806">806</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d6/d46/vcontainer_8cpp_source.html#l01275">VContainer::DataPieces()</a>, <a class="el" href="../../de/d7d/vabstractpattern_8cpp_source.html#l00674">VAbstractPattern::getTool()</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00105">pattern</a>.</p>
 
@@ -2404,11 +2515,11 @@ Additional Inherited Members</h2></td></tr>
 
 <p>refreshLabels call to recalculate piece labels. For example after changing a font. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00726">726</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00787">787</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d6/d46/vcontainer_8cpp_source.html#l01275">VContainer::DataPieces()</a>, <a class="el" href="../../de/d7d/vabstractpattern_8cpp_source.html#l00674">VAbstractPattern::getTool()</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00105">pattern</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06859">MainWindow::updatePreferences()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06923">MainWindow::updatePreferences()</a>.</p>
 
 </div>
 </div>
@@ -2437,7 +2548,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>refreshSeamAllowances call to show / hide seam allowances. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00763">763</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00824">824</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d6/d46/vcontainer_8cpp_source.html#l01275">VContainer::DataPieces()</a>, <a class="el" href="../../de/d7d/vabstractpattern_8cpp_source.html#l00674">VAbstractPattern::getTool()</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00105">pattern</a>.</p>
 
@@ -2467,11 +2578,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01222">1222</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01289">1289</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00109">shadows</a>, and <a class="el" href="../../db/d7d/global_8cpp_source.html#l00060">widthMainLine</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01489">IsLayoutGrayscale()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00526">PrintPages()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01581">IsLayoutGrayscale()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00587">PrintPages()</a>.</p>
 
 </div>
 </div>
@@ -2518,9 +2629,9 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01277">1277</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01372">1372</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01325">collectTextItems()</a>, and <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">pieces</a>.</p>
 
 </div>
 </div>
@@ -2548,7 +2659,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00804">804</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00865">865</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">scenes</a>, and <a class="el" href="../../db/d7d/global_8cpp_source.html#l00060">widthMainLine</a>.</p>
 
@@ -2590,11 +2701,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01371">1371</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01463">1463</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01734">FileName()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01529">FindQPrinterPageSize()</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00242">FromPixel()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00657">VSettings::GetTiledPDFMargins()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00753">VSettings::getTiledPDFOrientation()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00692">VSettings::getTiledPDFPaperHeight()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00724">VSettings::getTiledPDFPaperWidth()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00149">isAutoCrop</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01489">IsLayoutGrayscale()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00148">isTiled</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00150">isUnitePages</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00126">paperSize</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#aa22aa8c63b30c458a5fe33e486ae1da9ad5af3186f321912e45b31c56f0c7e7d2">PrintNative</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#aa22aa8c63b30c458a5fe33e486ae1da9a9bc1a90b8be024dee17cdc6f020ad5ab">PrintPDF</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#aa22aa8c63b30c458a5fe33e486ae1da9acb83fba9c48fd911128ab4d9159d47d2">PrintPreview</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, <a class="el" href="../../d4/da4/def_8h_source.html#l00448">SCASSERT</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00261">UnitConvertor()</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01826">FileName()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01621">FindQPrinterPageSize()</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00242">FromPixel()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00681">VSettings::GetTiledPDFMargins()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00777">VSettings::getTiledPDFOrientation()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00716">VSettings::getTiledPDFPaperHeight()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00748">VSettings::getTiledPDFPaperWidth()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00149">isAutoCrop</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01581">IsLayoutGrayscale()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00148">isTiled</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00150">isUnitePages</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">margins</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">papers</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00126">paperSize</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#aa22aa8c63b30c458a5fe33e486ae1da9ad5af3186f321912e45b31c56f0c7e7d2">PrintNative</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#aa22aa8c63b30c458a5fe33e486ae1da9a9bc1a90b8be024dee17cdc6f020ad5ab">PrintPDF</a>, <a class="el" href="../../de/d1a/classMainWindowsNoGUI.html#aa22aa8c63b30c458a5fe33e486ae1da9acb83fba9c48fd911128ab4d9159d47d2">PrintPreview</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, <a class="el" href="../../d4/da4/def_8h_source.html#l00448">SCASSERT</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00261">UnitConvertor()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01336">LayoutPrint()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01058">PdfTiledFile()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01304">PrintPreview()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01428">LayoutPrint()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01125">PdfTiledFile()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01396">PrintPreview()</a>.</p>
 
 </div>
 </div>
@@ -2621,7 +2732,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01742">1742</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01834">1834</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d6/d46/vcontainer_8cpp_source.html#l01290">VContainer::DataVariables()</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00106">doc</a>, <a class="el" href="../../dd/de9/measurements__def_8cpp_source.html#l00063">height_M</a>, <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00105">pattern</a>, <a class="el" href="../../d6/d46/vcontainer_8cpp_source.html#l01183">VContainer::setHeight()</a>, <a class="el" href="../../de/d7d/vabstractpattern_8cpp_source.html#l01534">VAbstractPattern::SetPatternWasChanged()</a>, <a class="el" href="../../d6/d46/vcontainer_8cpp_source.html#l01168">VContainer::setSize()</a>, <a class="el" href="../../dd/de9/measurements__def_8cpp_source.html#l00128">size_M</a>, and <a class="el" href="../../d8/dba/classVAbstractPattern.html#a366f4c38fb4b0297ca11dab5281d3730">VAbstractPattern::updatePatternLabel()</a>.</p>
 
@@ -2694,7 +2805,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00117">117</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05387">MainWindow::createMenus()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04658">MainWindow::setWidgetsEnabled()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05451">MainWindow::createMenus()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04722">MainWindow::setWidgetsEnabled()</a>.</p>
 
 </div>
 </div>
@@ -2720,7 +2831,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00119">119</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05387">MainWindow::createMenus()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04658">MainWindow::setWidgetsEnabled()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05451">MainWindow::createMenus()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04722">MainWindow::setWidgetsEnabled()</a>.</p>
 
 </div>
 </div>
@@ -2746,7 +2857,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00118">118</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05387">MainWindow::createMenus()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04658">MainWindow::setWidgetsEnabled()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05451">MainWindow::createMenus()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04722">MainWindow::setWidgetsEnabled()</a>.</p>
 
 </div>
 </div>
@@ -2772,7 +2883,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00120">120</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05387">MainWindow::createMenus()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05451">MainWindow::createMenus()</a>.</p>
 
 </div>
 </div>
@@ -2798,7 +2909,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00116">116</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05387">MainWindow::createMenus()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04658">MainWindow::setWidgetsEnabled()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05451">MainWindow::createMenus()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04722">MainWindow::setWidgetsEnabled()</a>.</p>
 
 </div>
 </div>
@@ -2852,7 +2963,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00106">106</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00361">MainWindow::addDraftBlock()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00911">MainWindow::ApplyDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02710">MainWindow::basePointChanged()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04904">MainWindow::ChangedHeight()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07630">MainWindow::changeDraftBlock()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04864">MainWindow::ChangedSize()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07448">MainWindow::checkPathToMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00733">MainWindow::checkRequiredMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04326">MainWindow::Clear()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00855">MainWindow::ClosedDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01669">MainWindow::ClosedDialogAnchorPoint()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00876">MainWindow::ClosedDialogWithApply()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01522">MainWindow::ClosedEditGroupDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01726">MainWindow::ClosedInsertNodesDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01695">MainWindow::ClosedInternalPathDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01809">MainWindow::closeUnionDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02190">MainWindow::editMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07250">MainWindow::exportDraftBlocksAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06896">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07100">MainWindow::exportPiecesAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00893">exportSVG()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04451">MainWindow::fullParseFile()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07936">MainWindow::GetMeasurementFileName()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01750">MainWindow::handleImageTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02480">MainWindow::initBasePointComboBox()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05722">MainWindow::initializeDocksContain()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02501">MainWindow::initializeDraftToolBar()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02314">MainWindow::initializeStatusToolBar()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02687">MainWindow::initPropertyEditor()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02047">MainWindow::LoadIndividual()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00616">MainWindow::loadMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02088">MainWindow::LoadMultisize()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06473">MainWindow::LoadPattern()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04848">MainWindow::patternChangesWereSaved()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02705">MainWindow::penChanged()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04093">MainWindow::SaveAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03735">MainWindow::SaveCurrentScene()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05178">MainWindow::SavePattern()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05235">MainWindow::setCurrentFile()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04930">MainWindow::SetDefaultHeight()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04950">MainWindow::SetDefaultSize()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01742">setSizeHeightForIndividualM()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00762">MainWindow::SetToolButton()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04974">MainWindow::setToolsEnabled()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04658">MainWindow::setWidgetsEnabled()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03821">MainWindow::showDraftMode()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03968">MainWindow::showLayoutMode()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03885">MainWindow::showPieceMode()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02260">MainWindow::syncMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02151">MainWindow::UnloadMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00679">MainWindow::updateMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06859">MainWindow::updatePreferences()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02845">MainWindow::zoomToPoint()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02763">MainWindow::zoomToSelected()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06458">MainWindow::~MainWindow()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00361">MainWindow::addDraftBlock()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00911">MainWindow::ApplyDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02710">MainWindow::basePointChanged()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04968">MainWindow::ChangedHeight()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07694">MainWindow::changeDraftBlock()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04928">MainWindow::ChangedSize()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07512">MainWindow::checkPathToMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00733">MainWindow::checkRequiredMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04390">MainWindow::Clear()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00855">MainWindow::ClosedDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01669">MainWindow::ClosedDialogAnchorPoint()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00876">MainWindow::ClosedDialogWithApply()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01522">MainWindow::ClosedEditGroupDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01726">MainWindow::ClosedInsertNodesDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01695">MainWindow::ClosedInternalPathDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01809">MainWindow::closeUnionDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02190">MainWindow::editMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07314">MainWindow::exportDraftBlocksAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06960">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07164">MainWindow::exportPiecesAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00954">exportSVG()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04515">MainWindow::fullParseFile()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l08000">MainWindow::GetMeasurementFileName()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01750">MainWindow::handleImageTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02480">MainWindow::initBasePointComboBox()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05786">MainWindow::initializeDocksContain()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02501">MainWindow::initializeDraftToolBar()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02314">MainWindow::initializeStatusToolBar()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02687">MainWindow::initPropertyEditor()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02047">MainWindow::LoadIndividual()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00616">MainWindow::loadMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02088">MainWindow::LoadMultisize()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06537">MainWindow::LoadPattern()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04912">MainWindow::patternChangesWereSaved()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02705">MainWindow::penChanged()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04157">MainWindow::SaveAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03735">MainWindow::SaveCurrentScene()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05242">MainWindow::SavePattern()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05299">MainWindow::setCurrentFile()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04994">MainWindow::SetDefaultHeight()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05014">MainWindow::SetDefaultSize()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01834">setSizeHeightForIndividualM()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00762">MainWindow::SetToolButton()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05038">MainWindow::setToolsEnabled()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04722">MainWindow::setWidgetsEnabled()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03821">MainWindow::showDraftMode()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03968">MainWindow::showLayoutMode()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03885">MainWindow::showPieceMode()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02260">MainWindow::syncMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02151">MainWindow::UnloadMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00679">MainWindow::updateMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06923">MainWindow::updatePreferences()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02845">MainWindow::zoomToPoint()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02763">MainWindow::zoomToSelected()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06522">MainWindow::~MainWindow()</a>.</p>
 
 </div>
 </div>
@@ -2878,7 +2989,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00124">124</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01088">exportEPS()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01009">exportPDF()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00342">exportPiecesAsFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01105">exportPS()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01155">exportEPS()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01076">exportPDF()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00393">exportPiecesAsFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01172">exportPS()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>.</p>
 
 </div>
 </div>
@@ -2904,7 +3015,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00149">149</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01371">SetPrinterSettings()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01463">SetPrinterSettings()</a>.</p>
 
 </div>
 </div>
@@ -2930,7 +3041,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00123">123</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06896">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01336">LayoutPrint()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04848">MainWindow::patternChangesWereSaved()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01058">PdfTiledFile()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01304">PrintPreview()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06960">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01428">LayoutPrint()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04912">MainWindow::patternChangesWereSaved()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01125">PdfTiledFile()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01396">PrintPreview()</a>.</p>
 
 </div>
 </div>
@@ -2956,7 +3067,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00122">122</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02190">MainWindow::editMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06473">MainWindow::LoadPattern()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07853">MainWindow::processCommandLine()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02190">MainWindow::editMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06537">MainWindow::LoadPattern()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07917">MainWindow::processCommandLine()</a>.</p>
 
 </div>
 </div>
@@ -2982,7 +3093,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00148">148</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01058">PdfTiledFile()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00703">PrintOrigin()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00526">PrintPages()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00683">PrintPreviewOrigin()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00696">PrintPreviewTiled()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00716">PrintTiled()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01371">SetPrinterSettings()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01125">PdfTiledFile()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00764">PrintOrigin()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00587">PrintPages()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00744">PrintPreviewOrigin()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00757">PrintPreviewTiled()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00777">PrintTiled()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01463">SetPrinterSettings()</a>.</p>
 
 </div>
 </div>
@@ -3008,7 +3119,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00150">150</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01371">SetPrinterSettings()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01463">SetPrinterSettings()</a>.</p>
 
 </div>
 </div>
@@ -3034,7 +3145,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00152">152</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01336">LayoutPrint()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01304">PrintPreview()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00158">toolLayoutSettings()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01428">LayoutPrint()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01396">PrintPreview()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00158">toolLayoutSettings()</a>.</p>
 
 </div>
 </div>
@@ -3060,7 +3171,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00125">125</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07250">MainWindow::exportDraftBlocksAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01088">exportEPS()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01009">exportPDF()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01105">exportPS()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01371">SetPrinterSettings()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07314">MainWindow::exportDraftBlocksAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01155">exportEPS()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01076">exportPDF()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01172">exportPS()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01463">SetPrinterSettings()</a>.</p>
 
 </div>
 </div>
@@ -3088,7 +3199,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00108">108</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01952">MainWindow::CleanLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00864">CreateScenes()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00839">CreateShadows()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00342">exportPiecesAsFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01489">IsLayoutGrayscale()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01594">IsPagesFit()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01570">isPagesUniform()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01208">PreparePaper()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00526">PrintPages()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01222">RestorePaper()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00804">ScenePreview()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01371">SetPrinterSettings()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01952">MainWindow::CleanLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00925">CreateScenes()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00900">CreateShadows()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00393">exportPiecesAsFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01581">IsLayoutGrayscale()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01686">IsPagesFit()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01662">isPagesUniform()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01275">PreparePaper()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00587">PrintPages()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01289">RestorePaper()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00865">ScenePreview()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01463">SetPrinterSettings()</a>.</p>
 
 </div>
 </div>
@@ -3114,7 +3225,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00126">126</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01371">SetPrinterSettings()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01463">SetPrinterSettings()</a>.</p>
 
 </div>
 </div>
@@ -3142,7 +3253,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00105">105</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00361">MainWindow::addDraftBlock()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00911">MainWindow::ApplyDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07448">MainWindow::checkPathToMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04326">MainWindow::Clear()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00855">MainWindow::ClosedDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01669">MainWindow::ClosedDialogAnchorPoint()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01726">MainWindow::ClosedInsertNodesDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01695">MainWindow::ClosedInternalPathDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00946">MainWindow::ClosedPiecesDialogWithApply()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07698">MainWindow::DoExport()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l08107">MainWindow::draftPointNamesList()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06896">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07100">MainWindow::exportPiecesAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01981">MainWindow::exportToCSVData()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03286">MainWindow::handlePieceMenu()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05722">MainWindow::initializeDocksContain()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02687">MainWindow::initPropertyEditor()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00616">MainWindow::loadMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06473">MainWindow::LoadPattern()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04800">MainWindow::New()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00546">MainWindow::openMeasurementFile()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00745">refreshGrainLines()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00726">refreshLabels()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00763">refreshSeamAllowances()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07810">MainWindow::setHeight()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07767">MainWindow::setSize()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01742">setSizeHeightForIndividualM()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00762">MainWindow::SetToolButton()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04974">MainWindow::setToolsEnabled()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03968">MainWindow::showLayoutMode()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03885">MainWindow::showPieceMode()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00679">MainWindow::updateMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07666">MainWindow::zoomFirstShow()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02845">MainWindow::zoomToPoint()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00151">~MainWindowsNoGUI()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00361">MainWindow::addDraftBlock()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00911">MainWindow::ApplyDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07512">MainWindow::checkPathToMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04390">MainWindow::Clear()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00855">MainWindow::ClosedDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01669">MainWindow::ClosedDialogAnchorPoint()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01726">MainWindow::ClosedInsertNodesDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01695">MainWindow::ClosedInternalPathDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00946">MainWindow::ClosedPiecesDialogWithApply()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07762">MainWindow::DoExport()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l08171">MainWindow::draftPointNamesList()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06960">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07164">MainWindow::exportPiecesAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01981">MainWindow::exportToCSVData()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03286">MainWindow::handlePieceMenu()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05786">MainWindow::initializeDocksContain()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02687">MainWindow::initPropertyEditor()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00616">MainWindow::loadMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06537">MainWindow::LoadPattern()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04864">MainWindow::New()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00546">MainWindow::openMeasurementFile()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00806">refreshGrainLines()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00787">refreshLabels()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00824">refreshSeamAllowances()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07874">MainWindow::setHeight()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07831">MainWindow::setSize()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01834">setSizeHeightForIndividualM()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00762">MainWindow::SetToolButton()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05038">MainWindow::setToolsEnabled()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03968">MainWindow::showLayoutMode()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03885">MainWindow::showPieceMode()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00679">MainWindow::updateMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07730">MainWindow::zoomFirstShow()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l02845">MainWindow::zoomToPoint()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00151">~MainWindowsNoGUI()</a>.</p>
 
 </div>
 </div>
@@ -3168,7 +3279,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00101">101</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04326">MainWindow::Clear()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07698">MainWindow::DoExport()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06896">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07100">MainWindow::exportPiecesAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00464">exportPiecesAsApparelLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00342">exportPiecesAsFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00778">preparePiecesForLayout()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03968">MainWindow::showLayoutMode()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00355">arrangePieceItemsFlat()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04390">MainWindow::Clear()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07762">MainWindow::DoExport()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06960">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07164">MainWindow::exportPiecesAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00525">exportPiecesAsApparelLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00393">exportPiecesAsFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00440">generatePiecesSvg()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00839">preparePiecesForLayout()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03968">MainWindow::showLayoutMode()</a>.</p>
 
 </div>
 </div>
@@ -3194,7 +3305,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00111">111</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01192">AAMADxfFile()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00864">CreateScenes()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07698">MainWindow::DoExport()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00401">ExportApparelLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07100">MainWindow::exportPiecesAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00342">exportPiecesAsFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00900">exportSVG()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00778">preparePiecesForLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01244">PrepareTextForDXF()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01277">RestoreTextAfterDXF()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03968">MainWindow::showLayoutMode()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01259">AAMADxfFile()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00925">CreateScenes()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07762">MainWindow::DoExport()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00462">ExportApparelLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07164">MainWindow::exportPiecesAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00393">exportPiecesAsFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00967">exportSVG()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00839">preparePiecesForLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01343">PrepareTextForDXF()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01372">RestoreTextAfterDXF()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03968">MainWindow::showLayoutMode()</a>.</p>
 
 </div>
 </div>
@@ -3246,7 +3357,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00115">115</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01900">MainWindow::changeEvent()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05387">MainWindow::createMenus()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04658">MainWindow::setWidgetsEnabled()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01900">MainWindow::changeEvent()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05451">MainWindow::createMenus()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04722">MainWindow::setWidgetsEnabled()</a>.</p>
 
 </div>
 </div>
@@ -3272,7 +3383,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00110">110</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01952">MainWindow::CleanLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00864">CreateScenes()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07698">MainWindow::DoExport()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06896">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00342">exportPiecesAsFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01489">IsLayoutGrayscale()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01208">PreparePaper()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01965">MainWindow::PrepareSceneList()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00526">PrintPages()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01222">RestorePaper()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00804">ScenePreview()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05148">MainWindow::SetLayoutModeActions()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03968">MainWindow::showLayoutMode()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06816">MainWindow::showLayoutPages()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01952">MainWindow::CleanLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00925">CreateScenes()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07762">MainWindow::DoExport()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06960">MainWindow::exportLayoutAs()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00393">exportPiecesAsFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01581">IsLayoutGrayscale()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01275">PreparePaper()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01965">MainWindow::PrepareSceneList()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00587">PrintPages()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01289">RestorePaper()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00865">ScenePreview()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05212">MainWindow::SetLayoutModeActions()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06880">MainWindow::showLayoutPages()</a>.</p>
 
 </div>
 </div>
@@ -3298,7 +3409,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00109">109</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01952">MainWindow::CleanLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00864">CreateScenes()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00839">CreateShadows()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00342">exportPiecesAsFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01610">ExportScene()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01208">PreparePaper()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01222">RestorePaper()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01952">MainWindow::CleanLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00925">CreateScenes()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00900">CreateShadows()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00259">ExportData()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00308">ExportFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00393">exportPiecesAsFlatLayout()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01702">ExportScene()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">LayoutSettings()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01275">PreparePaper()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01289">RestorePaper()</a>.</p>
 
 </div>
 </div>
@@ -3326,7 +3437,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00104">104</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00797">InitTempLayoutScene()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03968">MainWindow::showLayoutMode()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06816">MainWindow::showLayoutPages()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00151">~MainWindowsNoGUI()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00858">InitTempLayoutScene()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l03968">MainWindow::showLayoutMode()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06880">MainWindow::showLayoutPages()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00151">~MainWindowsNoGUI()</a>.</p>
 
 </div>
 </div>
@@ -3352,7 +3463,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html#l00114">114</a> of file <a class="el" href="../../d1/d82/mainwindowsnogui_8h_source.html">mainwindowsnogui.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01900">MainWindow::changeEvent()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05387">MainWindow::createMenus()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04658">MainWindow::setWidgetsEnabled()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01900">MainWindow::changeEvent()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05451">MainWindow::createMenus()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04722">MainWindow::setWidgetsEnabled()</a>.</p>
 
 </div>
 </div>

@@ -139,6 +139,9 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:acc90172242fad6ce0fd0c4482333144a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab9a0e0ccc40693db35ca00669322cad8"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/db1/classApplication2D.html#ab9a0e0ccc40693db35ca00669322cad8">seamlyMeFilePath</a> () const</td></tr>
 <tr class="separator:ab9a0e0ccc40693db35ca00669322cad8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a111f477268b69695ba22d256119c0f1a"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/db1/classApplication2D.html#a111f477268b69695ba22d256119c0f1a">seamlyLayoutFilePath</a> ()</td></tr>
+<tr class="memdesc:a111f477268b69695ba22d256119c0f1a"><td class="mdescLeft">&#160;</td><td class="mdescRight">seamlyLayoutFilePath locates the SeamlyLayout executable.  <br /></td></tr>
+<tr class="separator:a111f477268b69695ba22d256119c0f1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a772bf7a2a5f55279eda670d4d823a0fb"><td class="memItemLeft" align="right" valign="top">QTimer *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/db1/classApplication2D.html#a772bf7a2a5f55279eda670d4d823a0fb">getAutoSaveTimer</a> () const</td></tr>
 <tr class="separator:a772bf7a2a5f55279eda670d4d823a0fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a40f49fc9e5e7e0862e9f994985959644"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/db1/classApplication2D.html#a40f49fc9e5e7e0862e9f994985959644">setAutoSaveTimer</a> (QTimer *value)</td></tr>
@@ -186,6 +189,12 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aaf7f1160ef591e625cb67d208c6eb6c8 inherit pub_methods_classVAbstractApplication"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/d0f/classVCommonSettings.html">VCommonSettings</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#aaf7f1160ef591e625cb67d208c6eb6c8">Settings</a> ()</td></tr>
 <tr class="memdesc:aaf7f1160ef591e625cb67d208c6eb6c8 inherit pub_methods_classVAbstractApplication"><td class="mdescLeft">&#160;</td><td class="mdescRight">getSettings hide settings constructor.  <br /></td></tr>
 <tr class="separator:aaf7f1160ef591e625cb67d208c6eb6c8 inherit pub_methods_classVAbstractApplication"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3e414d029ec861ecafbbd3d8d9654359 inherit pub_methods_classVAbstractApplication"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a3e414d029ec861ecafbbd3d8d9654359">MigrateSeamlySettingsLocation</a> (const QString &amp;appIniFileName, const QStringList &amp;legacyAppIniFileNames, bool *migrated=nullptr)</td></tr>
+<tr class="memdesc:a3e414d029ec861ecafbbd3d8d9654359 inherit pub_methods_classVAbstractApplication"><td class="mdescLeft">&#160;</td><td class="mdescRight">MigrateSeamlySettingsLocation resolves this app's settings-file path under the unified "Seamly" organization (Task 15), migrating the file forward from the pre-unification "Seamly2DTeam" organization folder on first run after an upgrade.  <br /></td></tr>
+<tr class="separator:a3e414d029ec861ecafbbd3d8d9654359 inherit pub_methods_classVAbstractApplication"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45c0d86a724548a095a807084c044fc4 inherit pub_methods_classVAbstractApplication"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a45c0d86a724548a095a807084c044fc4">NotifySeamlySettingsMigrated</a> (const QString &amp;appDisplayName)</td></tr>
+<tr class="memdesc:a45c0d86a724548a095a807084c044fc4 inherit pub_methods_classVAbstractApplication"><td class="mdescLeft">&#160;</td><td class="mdescRight">NotifySeamlySettingsMigrated shows a one-time informational dialog after Task 15 settings migration moved a user's preferences to the new unified "Seamly" location. Only call this from a confirmed GUI-mode code path — never from a headless/CLI export run or an automated test, since a modal dialog with no automatic dismissal would hang a scripted caller waiting on process exit.  <br /></td></tr>
+<tr class="separator:a45c0d86a724548a095a807084c044fc4 inherit pub_methods_classVAbstractApplication"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63c2326cbf6b742e49a9005a60d29206 inherit pub_methods_classVAbstractApplication"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a63c2326cbf6b742e49a9005a60d29206 inherit pub_methods_classVAbstractApplication"><td class="memTemplItemLeft" align="right" valign="top">QString&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a63c2326cbf6b742e49a9005a60d29206">LocaleToString</a> (const T &amp;value)</td></tr>
 <tr class="separator:a63c2326cbf6b742e49a9005a60d29206 inherit pub_methods_classVAbstractApplication"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -268,6 +277,8 @@ Private Attributes</h2></td></tr>
 <tr class="separator:aef9d903c33517586ab31969ae75eb2fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5883b6a892152f24482d80d9a9ceaab3"><td class="memItemLeft" align="right" valign="top">std::shared_ptr&lt; QTextStream &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/db1/classApplication2D.html#a5883b6a892152f24482d80d9a9ceaab3">m_out</a></td></tr>
 <tr class="separator:a5883b6a892152f24482d80d9a9ceaab3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae54ea0e782a21a50e17e3993777c9a0f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../da/db1/classApplication2D.html#ae54ea0e782a21a50e17e3993777c9a0f">m_settingsMigrated</a> {false}</td></tr>
+<tr class="separator:ae54ea0e782a21a50e17e3993777c9a0f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
 Additional Inherited Members</h2></td></tr>
@@ -330,9 +341,9 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00272">272</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00273">273</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dc/d73/projectversion_8h.html#affc756b919ac131545c35a7d7d5ee3d7">APP_VERSION_STR</a>, <a class="el" href="../../df/d9b/vcmdexport_8cpp_source.html#l00558">VCommandLine::Get()</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00264">VAbstractApplication::loadTranslations()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00744">openSettings()</a>, <a class="el" href="../../df/d9b/vcmdexport_8cpp_source.html#l00592">VCommandLine::Reset()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00305">setTheme()</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00139">VAbstractApplication::undoStack</a>, <a class="el" href="../../dc/d73/projectversion_8h_source.html#l00087">VER_COMPANYDOMAIN</a>, <a class="el" href="../../dc/d73/projectversion_8h_source.html#l00080">VER_COMPANYNAME_STR</a>, and <a class="el" href="../../d1/d9f/seamly2d_2version_8h_source.html#l00057">VER_INTERNALNAME_STR</a>.</p>
+<p class="reference">References <a class="el" href="../../dc/d73/projectversion_8h.html#affc756b919ac131545c35a7d7d5ee3d7">APP_VERSION_STR</a>, <a class="el" href="../../df/d9b/vcmdexport_8cpp_source.html#l00558">VCommandLine::Get()</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00360">VAbstractApplication::loadTranslations()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00808">openSettings()</a>, <a class="el" href="../../df/d9b/vcmdexport_8cpp_source.html#l00592">VCommandLine::Reset()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00306">setTheme()</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00146">VAbstractApplication::undoStack</a>, <a class="el" href="../../dc/d73/projectversion_8h_source.html#l00091">VER_COMPANYDOMAIN</a>, <a class="el" href="../../dc/d73/projectversion_8h_source.html#l00084">VER_COMPANYNAME_STR</a>, and <a class="el" href="../../d1/d9f/seamly2d_2version_8h_source.html#l00057">VER_INTERNALNAME_STR</a>.</p>
 
 </div>
 </div>
@@ -359,9 +370,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00297">297</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00298">298</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00106">m_trVars</a>, and <a class="el" href="../../df/d9b/vcmdexport_8cpp_source.html#l00592">VCommandLine::Reset()</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00107">m_trVars</a>, and <a class="el" href="../../df/d9b/vcmdexport_8cpp_source.html#l00592">VCommandLine::Reset()</a>.</p>
 
 </div>
 </div>
@@ -389,11 +400,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00553">553</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00602">602</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00536">logPath()</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00109">m_lockLog</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00110">m_out</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00094">noisyFailureMsgHandler()</a>, and <a class="el" href="../../df/dd9/vlockguard_8h_source.html#l00225">VlpCreateLock()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00585">logPath()</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00110">m_lockLog</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00111">m_out</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00095">noisyFailureMsgHandler()</a>, and <a class="el" href="../../df/dd9/vlockguard_8h_source.html#l00225">VlpCreateLock()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00673">startLogging()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00730">startLogging()</a>.</p>
 
 </div>
 </div>
@@ -420,11 +431,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00578">578</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00627">627</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00091">DAYS_TO_KEEP_LOGS</a>, <a class="el" href="../../df/dd9/vlockguard_8h_source.html#l00153">VLockGuard&lt; Guarded &gt;::GetProtected()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00522">logDirPath()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00092">DAYS_TO_KEEP_LOGS</a>, <a class="el" href="../../df/dd9/vlockguard_8h_source.html#l00153">VLockGuard&lt; Guarded &gt;::GetProtected()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00571">logDirPath()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00673">startLogging()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00730">startLogging()</a>.</p>
 
 </div>
 </div>
@@ -443,7 +454,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00789">789</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00889">889</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../dd/d57/vcmdexport_8h_source.html#l00081">VCommandLine::commandLine</a>.</p>
 
@@ -472,11 +483,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00542">542</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00591">591</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00522">logDirPath()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00571">logDirPath()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00673">startLogging()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00730">startLogging()</a>.</p>
 
 </div>
 </div>
@@ -504,11 +515,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00704">704</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00761">761</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00704">event()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06473">MainWindow::LoadPattern()</a>, and <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00145">VAbstractApplication::mainWindow</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00761">event()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06537">MainWindow::LoadPattern()</a>, and <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00152">VAbstractApplication::mainWindow</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00704">event()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00403">notify()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00761">event()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00404">notify()</a>.</p>
 
 </div>
 </div>
@@ -535,9 +546,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00124">124</a> of file <a class="el" href="../../d7/d61/application__2d_8h_source.html">application_2d.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00130">130</a> of file <a class="el" href="../../d7/d61/application__2d_8h_source.html">application_2d.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00107">m_autoSaveTimer</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00108">m_autoSaveTimer</a>.</p>
 
 </div>
 </div>
@@ -556,9 +567,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00620">620</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00669">669</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dc/d73/projectversion_8h.html#affc756b919ac131545c35a7d7d5ee3d7">APP_VERSION_STR</a>, <a class="el" href="../../d1/d65/projectversion_8cpp_source.html#l00138">buildCompatibilityString()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00549">VCommonSettings::getDefaultBackupFilePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00429">VCommonSettings::getDefaultIndividualSizePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00513">VCommonSettings::getDefaultLabelTemplatePath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00163">VSettings::getDefaultLayoutPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00450">VCommonSettings::getDefaultMultisizePath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00142">VSettings::getDefaultPatternPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00471">VCommonSettings::getDefaultTemplatePath()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00777">isGUIMode()</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00264">VAbstractApplication::loadTranslations()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00744">openSettings()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00770">Seamly2DSettings()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00673">startLogging()</a>.</p>
+<p class="reference">References <a class="el" href="../../dc/d73/projectversion_8h.html#affc756b919ac131545c35a7d7d5ee3d7">APP_VERSION_STR</a>, <a class="el" href="../../d1/d65/projectversion_8cpp_source.html#l00138">buildCompatibilityString()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01067">VCommonSettings::getDefaultBackupFilePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00947">VCommonSettings::getDefaultIndividualSizePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01031">VCommonSettings::getDefaultLabelTemplatePath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00164">VSettings::getDefaultLayoutPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00968">VCommonSettings::getDefaultMultisizePath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00143">VSettings::getDefaultPatternPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00989">VCommonSettings::getDefaultTemplatePath()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00877">isGUIMode()</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00360">VAbstractApplication::loadTranslations()</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00116">m_settingsMigrated</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00312">VAbstractApplication::NotifySeamlySettingsMigrated()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00808">openSettings()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00870">Seamly2DSettings()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00730">startLogging()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../dc/d14/app_2seamly2d_2main_8cpp_source.html#l00068">main()</a>.</p>
 
@@ -589,9 +600,9 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="../../db/dda/classVAbstractApplication.html#a884c9e99ce93e12379b60ca08808f37f">VAbstractApplication</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00695">695</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00752">752</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00106">m_trVars</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00107">m_trVars</a>.</p>
 
 </div>
 </div>
@@ -622,9 +633,9 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="../../db/dda/classVAbstractApplication.html#a823b7e97a16df7584127a53635ecc3fa">VAbstractApplication</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00783">783</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00883">883</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00777">isGUIMode()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00877">isGUIMode()</a>.</p>
 
 </div>
 </div>
@@ -651,11 +662,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00777">777</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00877">877</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../dd/d57/vcmdexport_8h_source.html#l00081">VCommandLine::commandLine</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04586">MainWindow::changeDraftBlockGlobally()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07448">MainWindow::checkPathToMeasurements()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00074">ExportLayoutDialog::ExportLayoutDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04451">MainWindow::fullParseFile()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l08037">MainWindow::IgnoreLocking()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00620">initOptions()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00783">isAppInGUIMode()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">MainWindowsNoGUI::LayoutSettings()</a>, <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00533">VPattern::LiteParseTree()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00616">MainWindow::loadMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06473">MainWindow::LoadPattern()</a>, <a class="el" href="../../dc/d14/app_2seamly2d_2main_8cpp_source.html#l00068">main()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00094">noisyFailureMsgHandler()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00546">MainWindow::openMeasurementFile()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07853">MainWindow::processCommandLine()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05235">MainWindow::setCurrentFile()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07810">MainWindow::setHeight()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07767">MainWindow::setSize()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00679">MainWindow::updateMeasurements()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04650">MainWindow::changeDraftBlockGlobally()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07512">MainWindow::checkPathToMeasurements()</a>, <a class="el" href="../../dd/d54/export__layout__dialog_8cpp_source.html#l00074">ExportLayoutDialog::ExportLayoutDialog()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04515">MainWindow::fullParseFile()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l08101">MainWindow::IgnoreLocking()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00669">initOptions()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00883">isAppInGUIMode()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00184">MainWindowsNoGUI::LayoutSettings()</a>, <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00533">VPattern::LiteParseTree()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00616">MainWindow::loadMeasurements()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l06537">MainWindow::LoadPattern()</a>, <a class="el" href="../../dc/d14/app_2seamly2d_2main_8cpp_source.html#l00068">main()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00095">noisyFailureMsgHandler()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00546">MainWindow::openMeasurementFile()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07917">MainWindow::processCommandLine()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05299">MainWindow::setCurrentFile()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07874">MainWindow::setHeight()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07831">MainWindow::setSize()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00679">MainWindow::updateMeasurements()</a>.</p>
 
 </div>
 </div>
@@ -682,11 +693,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00522">522</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00571">571</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00522">logDirPath()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00571">logDirPath()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00578">clearOldLogs()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00542">createLogDir()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00522">logDirPath()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00536">logPath()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00627">clearOldLogs()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00591">createLogDir()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00571">logDirPath()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00585">logPath()</a>.</p>
 
 </div>
 </div>
@@ -705,9 +716,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00683">683</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00740">740</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00110">m_out</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00111">m_out</a>.</p>
 
 </div>
 </div>
@@ -734,11 +745,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00536">536</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00585">585</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00522">logDirPath()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00571">logDirPath()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00553">beginLogging()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00602">beginLogging()</a>.</p>
 
 </div>
 </div>
@@ -786,9 +797,9 @@ Additional Inherited Members</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>value that is returned from the receiver's event handler. reimplemented from QApplication so we can throw exceptions in slots </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00403">403</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00404">404</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d0/d2c/vexceptionobjecterror_8cpp_source.html#l00119">VExceptionObjectError::DetailedInformation()</a>, <a class="el" href="../../d0/d2c/vexceptionobjecterror_8cpp_source.html#l00109">VExceptionObjectError::ErrorMessage()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00704">event()</a>, <a class="el" href="../../dd/d3c/vsysexits_8h_source.html#l00068">V_EX_DATAERR</a>, <a class="el" href="../../dd/d3c/vsysexits_8h_source.html#l00079">V_EX_SOFTWARE</a>, and <a class="el" href="../../dc/d9d/vexception_8cpp_source.html#l00163">VException::what()</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/d2c/vexceptionobjecterror_8cpp_source.html#l00119">VExceptionObjectError::DetailedInformation()</a>, <a class="el" href="../../d0/d2c/vexceptionobjecterror_8cpp_source.html#l00109">VExceptionObjectError::ErrorMessage()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00761">event()</a>, <a class="el" href="../../dd/d3c/vsysexits_8h_source.html#l00068">V_EX_DATAERR</a>, <a class="el" href="../../dd/d3c/vsysexits_8h_source.html#l00079">V_EX_SOFTWARE</a>, and <a class="el" href="../../dc/d9d/vexception_8cpp_source.html#l00163">VException::what()</a>.</p>
 
 </div>
 </div>
@@ -816,14 +827,15 @@ Additional Inherited Members</h2></td></tr>
 </div><div class="memdoc">
 
 <p>openSettings get access to application settings. Because we can create object in constructor we open file separately. </p>
+<p>Task 15: seamly2d's own settings now live in their own directory nested under the shared "Seamly" organization (AppData/Local/Seamly/Seamly2D on Windows) instead of a flat .ini file sharing a folder with SeamlyMe's. The "common" settings (shared across Seamly apps, see <a class="el" href="../../de/d0f/classVCommonSettings.html">VCommonSettings</a>) still use Qt's native per-organization resolution and are bridged forward from the pre-unification "Seamly2DTeam" folder the same way they always bridged qt5 -&gt; qt6 formats. </p>
 
 <p>Implements <a class="el" href="../../db/dda/classVAbstractApplication.html#a36ebaef6c70a1e6ead6d2ffcb476fa2e">VAbstractApplication</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00744">744</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00808">808</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00150">VAbstractApplication::m_settings</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00521">VCommonSettings::dataRoot()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00506">VCommonSettings::getLegacyDataRoot()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00682">VCommonSettings::initializeDataRoot()</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00157">VAbstractApplication::m_settings</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00116">m_settingsMigrated</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00258">VAbstractApplication::MigrateSeamlySettingsLocation()</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00773">VCommonSettings::pruneEmptyLegacyDataRoot()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00272">Application2D()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00620">initOptions()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00273">Application2D()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00669">initOptions()</a>.</p>
 
 </div>
 </div>
@@ -850,7 +862,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00659">659</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00716">716</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l01322">VPattern::GetCurrentAlphabet()</a>.</p>
 
@@ -871,11 +883,36 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00770">770</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00870">870</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00150">VAbstractApplication::m_settings</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00448">SCASSERT</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00157">VAbstractApplication::m_settings</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00448">SCASSERT</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00620">initOptions()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00305">setTheme()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00669">initOptions()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00486">seamlyLayoutFilePath()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00306">setTheme()</a>.</p>
+
+</div>
+</div>
+<a id="a111f477268b69695ba22d256119c0f1a" name="a111f477268b69695ba22d256119c0f1a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a111f477268b69695ba22d256119c0f1a">&#9670;&#160;</a></span>seamlyLayoutFilePath()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">QString Application2D::seamlyLayoutFilePath </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>seamlyLayoutFilePath locates the SeamlyLayout executable. </p>
+<p>Lookup order: (1) the user-configured path from the application settings, (2) the install-directory lookup via <a class="el" href="../../d9/d8f/namespaceSeamlyFamilyPaths.html#adcb6730b407184ae29df1b6ac25678dc" title="locateSeamlyLayout looks for the SeamlyLayout executable in the two layouts an installation can use,...">SeamlyFamilyPaths::locateSeamlyLayout()</a> — the executable directly beside seamly2d (the flat layout used where all apps share one Qt runtime, e.g. the Linux Flatpak's /app/bin) or in the "SeamlyLayout" subdirectory the Windows MSI installer uses (Task 13; there SeamlyLayout carries its own Qt runtime, which cannot share a flat directory with the parent apps' differently-versioned Qt DLLs) — and (3) the SeamlyLayout development build inside the source tree (Debug build of the Qt frontend), so that Layout Mode works during development without any configuration.</p>
+<dl class="section return"><dt>Returns</dt><dd>absolute path of the SeamlyLayout executable, or an empty string when it cannot be found. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00486">486</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00189">VSettings::getSeamlyLayoutAppPath()</a>, <a class="el" href="../../d4/dce/seamly__family__paths_8cpp_source.html#l00086">SeamlyFamilyPaths::locateSeamlyLayout()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00870">Seamly2DSettings()</a>.</p>
 
 </div>
 </div>
@@ -894,7 +931,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00469">469</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00518">518</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
 </div>
 </div>
@@ -922,9 +959,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00130">130</a> of file <a class="el" href="../../d7/d61/application__2d_8h_source.html">application_2d.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00136">136</a> of file <a class="el" href="../../d7/d61/application__2d_8h_source.html">application_2d.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00107">m_autoSaveTimer</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00108">m_autoSaveTimer</a>.</p>
 
 </div>
 </div>
@@ -943,11 +980,11 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00305">305</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00306">306</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00415">darkPalette()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00591">VCommonSettings::getAppTheme()</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00396">lightPalette()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00770">Seamly2DSettings()</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00434">twilightPalette()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00415">darkPalette()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01109">VCommonSettings::getAppTheme()</a>, <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00396">lightPalette()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00870">Seamly2DSettings()</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00434">twilightPalette()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00272">Application2D()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00273">Application2D()</a>.</p>
 
 </div>
 </div>
@@ -966,11 +1003,11 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00673">673</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00730">730</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00553">beginLogging()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00578">clearOldLogs()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00542">createLogDir()</a>.</p>
+<p class="reference">References <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00602">beginLogging()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00627">clearOldLogs()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00591">createLogDir()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00620">initOptions()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00669">initOptions()</a>.</p>
 
 </div>
 </div>
@@ -1006,9 +1043,9 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00364">364</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00365">365</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05753">MainWindow::startNewSeamly2D()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05817">MainWindow::startNewSeamly2D()</a>.</p>
 
 </div>
 </div>
@@ -1037,9 +1074,9 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="../../db/dda/classVAbstractApplication.html#a24a3274cdd93cb33ad66d2770d4925bf">VAbstractApplication</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00689">689</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00746">746</a> of file <a class="el" href="../../df/d3e/application__2d_8cpp_source.html">application_2d.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00106">m_trVars</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00107">m_trVars</a>.</p>
 
 </div>
 </div>
@@ -1064,9 +1101,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00107">107</a> of file <a class="el" href="../../d7/d61/application__2d_8h_source.html">application_2d.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00108">108</a> of file <a class="el" href="../../d7/d61/application__2d_8h_source.html">application_2d.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00124">getAutoSaveTimer()</a>, and <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00130">setAutoSaveTimer()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00130">getAutoSaveTimer()</a>, and <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00136">setAutoSaveTimer()</a>.</p>
 
 </div>
 </div>
@@ -1090,9 +1127,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00109">109</a> of file <a class="el" href="../../d7/d61/application__2d_8h_source.html">application_2d.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00110">110</a> of file <a class="el" href="../../d7/d61/application__2d_8h_source.html">application_2d.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00553">beginLogging()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00602">beginLogging()</a>.</p>
 
 </div>
 </div>
@@ -1116,9 +1153,35 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00110">110</a> of file <a class="el" href="../../d7/d61/application__2d_8h_source.html">application_2d.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00111">111</a> of file <a class="el" href="../../d7/d61/application__2d_8h_source.html">application_2d.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00553">beginLogging()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00683">logFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00602">beginLogging()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00740">logFile()</a>.</p>
+
+</div>
+</div>
+<a id="ae54ea0e782a21a50e17e3993777c9a0f" name="ae54ea0e782a21a50e17e3993777c9a0f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae54ea0e782a21a50e17e3993777c9a0f">&#9670;&#160;</a></span>m_settingsMigrated</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Application2D::m_settingsMigrated {false}</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00116">116</a> of file <a class="el" href="../../d7/d61/application__2d_8h_source.html">application_2d.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00669">initOptions()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00808">openSettings()</a>.</p>
 
 </div>
 </div>
@@ -1142,9 +1205,9 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00106">106</a> of file <a class="el" href="../../d7/d61/application__2d_8h_source.html">application_2d.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00107">107</a> of file <a class="el" href="../../d7/d61/application__2d_8h_source.html">application_2d.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00695">initTranslateVariables()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00689">translateVariables()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00297">~Application2D()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00752">initTranslateVariables()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00746">translateVariables()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00298">~Application2D()</a>.</p>
 
 </div>
 </div>
