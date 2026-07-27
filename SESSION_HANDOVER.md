@@ -2,7 +2,9 @@
 
 ## Current state (2026-07-27, latest session): Task 59 DONE — the handoff now lays out, not just opens
 
-**Branch `task-59-nested-piece-extraction`**, cut from `run-seamlyLayout` (`19406d6dd5`). Task 59 moved from `project-docs/TODO_MIGRATE.md` to `project-docs/TODO_COMPLETED.md` (full write-up at the top of that file).
+**Merged.** PR [#23](https://github.com/seamly/Seamly2D/pull/23) (`task-59-nested-piece-extraction` → `run-seamlyLayout`), commit `34f66462d5`, merge commit `11c0b0f4c5`. **All 13 CI checks green** — Windows x64 27m21s, Windows arm64 cross-compile 26m6s, macOS 8m53s, Linux AppImage 8m41s, Linux unit tests 9m28s, **Linux: Build & test SeamlyLayout (Qt 6.11) 4m57s**, CodeQL, CodeSee, Analyze actions/python/rust, version. Local and remote task branches deleted; local `run-seamlyLayout` = `origin/run-seamlyLayout` = `11c0b0f4c5`.
+
+Task 59 moved from `project-docs/TODO_MIGRATE.md` to `project-docs/TODO_COMPLETED.md` (full write-up at the top of that file).
 
 ### The bug and the shape of the fix
 
@@ -43,13 +45,12 @@ A **stale `SeamlyLayout.exe` debug process from a previous session (PID 37316, 0
 
 ### Next steps
 
-1. Push `task-59-nested-piece-extraction`, open the PR to `run-seamlyLayout`, watch CI, merge.
-2. **Task 51** — the Windows MSI install-time experience; its upgrade-warning wording must say **`seamlyData`**.
-3. **Task 14** — the check-and-move flow for an existing data tree (also needed by Tasks 35/36/37; satisfies Task 38).
-4. **Task 52** — the `vsettings.cpp` "Unknown Organization" stray, starting with its `CollectionTest` isolation subtask.
-5. **Task 54** — rename the three `vmisc` settings files *and* their classes (`SettingsCommon.h`); the 22 `.ts` `tr()` contexts must move in the **same commit**.
-6. **Task 55** — the developer-README refresh; the rename to `.github/README-DEVELOPER-SEAMLY-FAMILY.md` has still not been done.
-7. `src/app/seamly2d/core/BUILD_PROBLEMS.txt` — the user said to delete it if it is not useful; still not done.
+1. **Task 51** — the Windows MSI install-time experience; its upgrade-warning wording must say **`seamlyData`**.
+2. **Task 14** — the check-and-move flow for an existing data tree (also needed by Tasks 35/36/37; satisfies Task 38).
+3. **Task 52** — the `vsettings.cpp` "Unknown Organization" stray, starting with its `CollectionTest` isolation subtask.
+4. **Task 54** — rename the three `vmisc` settings files *and* their classes (`SettingsCommon.h`); the 22 `.ts` `tr()` contexts must move in the **same commit**.
+5. **Task 55** — the developer-README refresh; the rename to `.github/README-DEVELOPER-SEAMLY-FAMILY.md` has still not been done.
+6. `src/app/seamly2d/core/BUILD_PROBLEMS.txt` — the user said to delete it if it is not useful; still not done.
 
 Blocked, not startable here: Tasks 13/38/39/40 (clean VM, arm64, macOS, Linux hardware), Task 33/41 (KMS credentials).
 
@@ -120,7 +121,7 @@ Found by the end-to-end run and **the most valuable thing in this session after 
 4. **Task 52** — the `vsettings.cpp` "Unknown Organization" stray, **starting with** its `CollectionTest` isolation subtask.
 5. **Task 54** — rename the three `vmisc` settings files *and* their classes. The blocking decision is now answered: **`SettingsCommon.h`**, file name matching the class name. Wide but mechanical — ~620 class occurrences over 25 files, and the 22 `.ts` `tr()` contexts must move in the **same commit** or ~220 translated strings go obsolete.
 6. **Task 55** — the developer-README refresh. Per the user's answer, the target is now `.github/README-DEVELOPER-SEAMLY-FAMILY.md` (renamed from `-NEW`), maintained separately until the migration completes and then folded into `README-DEVELOPER.md`. **Neither rename nor fold has been done yet.**
-7. **Task 57** — premise superseded by the style-guide carve-out; decide whether to delete it (as Task 56 was) or keep only the `error.rs` ×2 collision. *(The user deleted this task from `project-docs/TODO_SEAMLYLAYOUT.md` in an uncommitted edit that the Task 49 commit carried in, so this may already be closed — check that file first.)*
+6. **Task 57** — premise superseded by the style-guide carve-out; decide whether to delete it (as Task 56 was) or keep only the `error.rs` ×2 collision. *(The user deleted this task from `project-docs/TODO_SEAMLYLAYOUT.md` in an uncommitted edit that the Task 49 commit carried in, so this may already be closed — check that file first.)*
 
 Blocked, not startable here: Tasks 13/38/39/40 (clean VM, arm64, macOS, Linux hardware), Task 33/41 (KMS credentials).
 
