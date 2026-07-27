@@ -2,7 +2,7 @@
 
 Tasks for migrating the SeamlyLayout app into the Seamly2D structure — where SeamlyMe and SeamlyLayout are callable from within Seamly2D and all three apps are distributed together for installation on a user's computer.
 
-See `PROJECT_PLAN.md` for full details. Check off subtasks as they are accomplished; when every subtask of a task is complete, move the task to `COMPLETED.md`.
+See `PROJECT_PLAN.md` for full details. Check off subtasks as they are accomplished; when every subtask of a task is complete, move the task to `TODO_COMPLETED.md`.
 
 ## Task 13 — Windows .msi installer for seamly2d, seamlyme, and seamlylayout (x64 + arm64)
 
@@ -380,7 +380,7 @@ Two smaller naming calls, same decision point: the brand casing `SettingsSeamlyM
 - [ ] Rename the three classes at every occurrence (~620 across 25 distinct files): the `class X : public Y` declarations, constructors/destructors, every forward declaration (`class VSettings;`), member and pointer types (`VSettings *Seamly2DSettings()`, `VCommonSettings *settings`), and every static/qualified call (`VCommonSettings::…`). `VSettings` is a whole-word match — nothing else contains it — so use word-boundary, case-**sensitive** replacement and never touch the lowercase `settings` identifiers that surround them
 - [ ] Rename the `tr()` contexts in all 22 `share/translations/seamly2d_*.ts` files (`<name>VCommonSettings</name>` → `SettingsCommon`, `<name>VSettings</name>` → `SettingsSeamly2D`) in the same commit, or the ~220 existing translated strings in those contexts go obsolete. Verify afterwards by running `lupdate` and confirming it reports no newly-obsolete messages in these contexts
 - [ ] Update the `@file` line in each of the six license-header blocks (e.g. `//  @file   vcommonsettings.h`), and the `@brief`/`@class` text of anything that names the old class, leaving the existing `@author`/`@date`/copyright lines as they are
-- [ ] Update the docs that name these paths **or classes** — `.github/README-BUILDS.md:17` (`VSettings`, `src/libs/vmisc/vsettings.cpp`) and `:77` (`VCommonSettings::dataRoot()` and the rest of that API row) at minimum — and decide whether historical entries (`COMPLETED.md`, `SESSION_HANDOVER.md`, `TODO_SEAMLY2D.md` Task 42, `TODO_SEAMLYME.md` Task 43) get rewritten or left as the record of what things were called at the time; record the decision either way
+- [ ] Update the docs that name these paths **or classes** — `.github/README-BUILDS.md:17` (`VSettings`, `src/libs/vmisc/vsettings.cpp`) and `:77` (`VCommonSettings::dataRoot()` and the rest of that API row) at minimum — and decide whether historical entries (`TODO_COMPLETED.md`, `SESSION_HANDOVER.md`, `TODO_SEAMLY2D.md` Task 42, `TODO_SEAMLYME.md` Task 43) get rewritten or left as the record of what things were called at the time; record the decision either way
 - [ ] Amend Task 52 above — it points at "the eight `vsettings.cpp` accessors" and at `VCommonSettings::mergeStrayCommonSettings()` / `getLabelTemplatePath()` — so whoever picks it up looks for `settings_seamly2d.cpp` and `SettingsCommon`
 - [ ] Build and test locally: `scripts/sd.ps1` plus the test binaries (`scripts/st.ps1` runs only one of the four that CI runs via `make check` — run the others too). Wipe the shadow-build tree first; a stale `Makefile`/object tree can link an old object and mask a missed include (Task 46)
 - [ ] Confirm CI stays green on all three workflows that compile these sources (`ci.yml`, `windows-msi.yml`, and `seamlylayout-ci.yml` only if it pulls the parent libs)

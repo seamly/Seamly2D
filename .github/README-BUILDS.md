@@ -1,6 +1,6 @@
 # Seamly Builds — Knowledge Base
 
-Pertinent knowledge about the Seamly family builds: why decisions were made, what is built, where things install and store data, and when/where each build runs. Update this file whenever build knowledge changes — it is the durable record behind the task entries in the `TODO_*.md` files / `COMPLETED.md`.
+Pertinent knowledge about the Seamly family builds: why decisions were made, what is built, where things install and store data, and when/where each build runs. Update this file whenever build knowledge changes — it is the durable record behind the task entries in the `TODO_*.md` files / `TODO_COMPLETED.md`.
 
 Apps covered:
 
@@ -216,7 +216,7 @@ A Flatpak sandbox exports `XDG_CONFIG_HOME=~/.var/app/<app-id>/config` and `XDG_
 
 ## Related records
 
-- `TODO_MIGRATE.md` — Tasks 13–18 hold the current actionable subtasks for everything marked "planned" above; completed tasks move to `COMPLETED.md`.
+- `TODO_MIGRATE.md` — Tasks 13–18 hold the current actionable subtasks for everything marked "planned" above; completed tasks move to `TODO_COMPLETED.md`.
 - `PROJECT_PLAN.md` — the approved implementation plan.
 - `.github/workflows/README_WORKFLOWS.md` — CI workflow details.
 - `src/app/seamlylayout/CHANGELOG.md` — history of seamlyLayout's settings-directory moves (e.g. `<exeDir>/settings/` → AppConfigLocation).

@@ -1,6 +1,6 @@
 # Session handover
 
-## Current state: Tasks 34 and 53 are DONE and moved to `COMPLETED.md`
+## Current state: Tasks 34 and 53 are DONE and moved to `TODO_COMPLETED.md`
 
 **Date:** 2026-07-26. **Branch:** `run-seamlyLayout` at **`1d74f7e18a`** ("merge develop"), **pushed — local and `origin/run-seamlyLayout` are identical, working tree clean.** Task 53 landed via **PR [#19](https://github.com/seamly/Seamly2D/pull/19)** (`task-53-seamlydata-root` → `run-seamlyLayout`) — **all 11 CI checks green** (Windows x64 27m4s, Windows arm64 cross-compile 26m28s, macOS 16m51s, Linux AppImage 9m3s, Linux unit tests 9m55s, CodeQL, CodeSee, Analyze actions/python/rust, version) — **merged**, task branch deleted locally and on origin. Task 34 landed earlier the same day.
 
@@ -47,7 +47,7 @@ Refer to `TODO_MIGRATE.md`, `TODO_SEAMLY2D.md` and `TODO_SEAMLYLAYOUT.md` for th
 | `src/test/Seamly2DTest/qttestmainlambda.cpp` | The Task 34 `initializeDataRoot()` mirroring was **removed**, with a comment saying not to restore it |
 | `src/test/Seamly2DTest/tst_dataroot.cpp` / `.h` | Six new cases: prune removes an empty tree / keeps one holding files / never removes the configured root / keeps a root containing the configured root / ignores a missing root; stray merged-then-deleted |
 | `.github/README-BUILDS.md` | Data-root section rewritten — why `seamlyData` and not `seamly`, the legacy-skeleton cleanup rules, the stray-deletion rules, and the real deletion incident in the testing note |
-| `TODO_MIGRATE.md`, `COMPLETED.md` | Task 53 entry added to `COMPLETED.md` (Task 34 marked partly superseded); Task 14 and Task 52 extended; every `~/seamly` → `~/seamlyData` in Tasks 14/35/36/37/38 |
+| `TODO_MIGRATE.md`, `TODO_COMPLETED.md` | Task 53 entry added to `TODO_COMPLETED.md` (Task 34 marked partly superseded); Task 14 and Task 52 extended; every `~/seamly` → `~/seamlyData` in Tasks 14/35/36/37/38 |
 
 ### Two rules established here — do not undo them
 
@@ -134,4 +134,4 @@ Newly filed, none started, no priority assigned by the user yet:
 - **PowerShell splatting: `@array` is positional, `@hashtable` is by name.**
 - **Qt frontend test exes are GUI-subsystem binaries** — they print nothing to captured stdout. Run with `-o <file>,txt` and `QT_QPA_PLATFORM=offscreen`.
 - **`$proFile` collides with the automatic `$PROFILE`** (case-insensitive); `sd.ps1` still has it.
-- **Historical 6.10 references in `COMPLETED.md` and `PROJECT_PLAN.md` are deliberate** — they record what was true at the time.
+- **Historical 6.10 references in `TODO_COMPLETED.md` and `PROJECT_PLAN.md` are deliberate** — they record what was true at the time.

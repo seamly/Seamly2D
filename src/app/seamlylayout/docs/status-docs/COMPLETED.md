@@ -22,7 +22,7 @@ Task entry format:
 
 ## 2026-05-22
 
-- [X] Initialized `COMPLETED.md` and completion-move workflow — `Status:Done | Priority:P1 | BlockedBy:none | CompletedBy:Copilot | Date:2026-05-22 | Notes:Created completion log and linked workflow from TODO.md`
+- [X] Initialized `TODO_COMPLETED.md` and completion-move workflow — `Status:Done | Priority:P1 | BlockedBy:none | CompletedBy:Copilot | Date:2026-05-22 | Notes:Created completion log and linked workflow from TODO.md`
 - [X] Remove import probe before release — `Status:Done | Priority:P0 | BlockedBy:none | CompletedBy:Copilot | Date:2026-05-22 | Notes:Removed log_import_dom_probe() helper and all import_svg call sites in cxxqt_bridge; cargo check -p cxxqt_bridge passes.`
 - [X] Fix adjust_dom type warning — `Status:Done | Priority:P0 | BlockedBy:none | CompletedBy:Copilot | Date:2026-05-22 | Notes:Confirmed warning no longer reproduces in current debug build workflow (qd.ps1).`
 - [X] Add a 'settings_directory' preference that sets the default folder for settings load/save dialogs — `Status:Done | Priority:P0 | BlockedBy:none | CompletedBy:Copilot | Date:2026-05-22 | Notes:Implemented in PreferencesModel JSON contract and both Preferences UIs; Settings dialog now opens load/save pickers from resolved settings directory; full app build via qd.ps1 passes.`
@@ -166,7 +166,7 @@ Task entry format:
 - [X] PF.2 Replace hard-coded `debug.txt` filename with `debug log file` in DG.1 line of DG.5 header comment in `crates/cxxqt_bridge/src/lib.rs` — `Status:Done | Priority:P3 | BlockedBy:none | CompletedBy:Claude | Date:2026-06-29 | Notes:Changed "(debug.txt writes; all pipelines)" to "(debug log file writes; all pipelines)"; actual default path is output/debug_log.txt and is overridable via SEAMLY_LOG_FILE.`
 - [X] PF.3 Replace `no debug.txt is written` with `no debug log file is written` in DG.5 release acceptance contract comment in `crates/cxxqt_bridge/src/lib.rs` — `Status:Done | Priority:P3 | BlockedBy:none | CompletedBy:Claude | Date:2026-06-29 | Notes:Same filename inaccuracy as PF.2; updated acceptance contract wording to be filename-agnostic.`
 - [X] PF.4 Correct `MIGRATION_STATUS.md` row 8c: `dg5_verification_tests` count 6→5; call-site counts lib.rs ~141→~123, layout_utils.rs ~26→~24 — `Status:Done | Priority:P3 | BlockedBy:none | CompletedBy:Claude | Date:2026-06-29 | Notes:Updated the 8c Completed row to match the actual module (5 tests) and current gated-call occurrence counts.`
-- [X] PF.5 Correct `COMPLETED.md` DG.5 entry: same test count (6→5) and call-site count corrections (lib.rs ~141→~123, layout_utils.rs ~26→~24) — `Status:Done | Priority:P3 | BlockedBy:none | CompletedBy:Claude | Date:2026-06-29 | Notes:Updated the original DG.5 completion log entry to match actual implementation.`
+- [X] PF.5 Correct `TODO_COMPLETED.md` DG.5 entry: same test count (6→5) and call-site count corrections (lib.rs ~141→~123, layout_utils.rs ~26→~24) — `Status:Done | Priority:P3 | BlockedBy:none | CompletedBy:Claude | Date:2026-06-29 | Notes:Updated the original DG.5 completion log entry to match actual implementation.`
 
 ## 2026-06-29 (continued, DG.5)
 
