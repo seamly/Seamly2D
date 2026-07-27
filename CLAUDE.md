@@ -71,6 +71,6 @@ Since **Task 30** all three apps — seamly2d, seamlyme and seamlyLayout — bui
 
 ## Key References
 
-- `status-docs/new-attributes.csv` — SVG `data-*` attribute spec for the SeamlyLayout handoff
+- `project-docs/NEW-ATTRIBUTES.csv` — SVG `data-*` attribute spec for the SeamlyLayout handoff
 - Test pattern: `src/app/seamlylayout/input/richmond-shirt_v1_v061-test.sm2d`
 - `.github/README-BUILDS.md` — build knowledge base (toolchains, per-platform packaging, settings/data locations, packaging decisions); keep it updated when build knowledge changes
