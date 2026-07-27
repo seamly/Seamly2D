@@ -4,7 +4,9 @@
 
 **Merged.** PR [#22](https://github.com/seamly/Seamly2D/pull/22) (`task-49-seamlylayout-svg-argument` → `run-seamlyLayout`), commit `f720df1b63`, merged by the user with a fast-forward merge and pushed to `origin/run-seamlyLayout`. **All 13 CI checks green** — Windows x64 (28m19s), Windows arm64 cross-compile (26m16s), macOS (12m53s), Linux AppImage, Linux unit tests, **Linux: Build & test SeamlyLayout (Qt 6.11) 5m5s** (the leg that runs the new `StartupOptionsTests`), CodeQL, CodeSee, Analyze actions/python/rust, version. Local task branch deleted; the remote one was deleted on merge.
 
-The user then committed `fc487aec93` "pass svg argument to seamlyLayout" on top — **no code**, only `.claude/settings.local.json` (this session's auto-approval entries) and two screenshots into `project-docs/`. Note for the upstream PR: `.claude/settings.local.json` is *tracked* despite `.gitignore:189` listing it (gitignore does not apply to already-tracked files), and its entries carry absolute `C:\Users\susan\…` paths and a session UUID — the same class of leak Task 50's new coding rule targets.
+The user then committed `fc487aec93` "pass svg argument to seamlyLayout" on top — **no code**, only `.claude/settings.local.json` (this session's auto-approval entries) and two screenshots into `project-docs/`.
+
+**`.claude/settings.local.json` is no longer tracked** (`84724ac5c2`). It had been tracked *deliberately*: `.gitignore:189` read `!.claude/settings.local.json`, an explicit negation commented "track Claude Code personal overrides (shared settings.json is committed)", and no other rule in the file matched that path. The harness rewrites it on every permission grant, so it kept accumulating absolute `C:\Users\susan\…` paths and session ids — the same class of leak Task 50's coding rule targets, in a repo headed for the upstream PR. Untracking alone would not have held: with only the negation removed the file shows as *untracked* rather than ignored, and the next `git add -A` re-commits it (which is exactly how it reached `fc487aec93`), so the negation was replaced by a plain ignore rule at `.gitignore:193`. The shared `.claude/settings.json` is unaffected and stays committed. **To reverse:** flip line 193 back to `!.claude/settings.local.json` and re-add the file.
 
 Local `run-seamlyLayout` = `origin/run-seamlyLayout` = `fc487aec93`; local `develop` = `origin/develop` = `057e95bfca`.
 
@@ -54,7 +56,7 @@ Found by the end-to-end run and **the most valuable thing in this session after 
 ### Loose ends carried forward
 
 - `src/app/seamly2d/core/BUILD_PROBLEMS.txt` — the user said to delete it if it is not useful; **not done in this session** (out of Task 49's scope).
-- **`.claude/settings.local.json` is tracked**, despite `.gitignore:189` listing it — gitignore has no effect on an already-tracked file. It now carries this session's auto-approval entries, which contain absolute `C:\Users\susan\…` paths and a session UUID. Decide before the upstream PR: `git rm --cached` it, or accept it.
+- ~~`.claude/settings.local.json`~~ — **resolved in `84724ac5c2`**, see the current-state section above. It is untracked and genuinely ignored now.
 - The user's own uncommitted edits to `SESSION_HANDOVER.md` and `project-docs/TODO_SEAMLYLAYOUT.md` (Task 57 deleted) were present at session start and went into the Task 49 commit.
 
 ### NEXT STEPS — this list supersedes the older "Concrete next steps" further down
@@ -82,7 +84,7 @@ The session opened with an analysis question: *which task in `project-docs/TODO_
 Both entries turned out to be **redundant with broader rules already present**, so the fix is removal, not a version bump — which makes them permanently version-agnostic:
 
 - `.claude/settings.json:154` — the compound `Test-Path "C:\Qt\6.10.1\…"; & …vswhere.exe …` was already covered by `PowerShell(Test-Path *)` on line 10. Replaced with one version-agnostic prefix entry naming no Qt version: `PowerShell(& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" *)`
-- `.claude/settings.local.json:17` and `:19` — both deleted. That file opens with `PowerShell(*)` / `Bash(*)`, which already allow everything in it. **This file is gitignored (`.gitignore:189`)**, so that half exists only on this machine and is *not* in the commit
+- `.claude/settings.local.json:17` and `:19` — both deleted. That file opens with `PowerShell(*)` / `Bash(*)`, which already allow everything in it. ~~**This file is gitignored (`.gitignore:189`)**, so that half exists only on this machine and is *not* in the commit~~ — **wrong, corrected 2026-07-27:** `.gitignore:189` was `!.claude/settings.local.json`, a *negation* that force-tracked the file. The deletions were left out of commit `4a6054ab14` because they were never staged, not because git was ignoring them; they reached origin later inside the user's `fc487aec93`. (Verified: no `6.10.1` entry survives anywhere.) The file is untracked and ignored for real as of `84724ac5c2`
 
 Both files re-validated as parseable JSON.
 
@@ -125,7 +127,7 @@ Both files re-validated as parseable JSON.
 | `.claude/settings.json`                                    | Line 154 replaced with the version-agnostic vswhere entry                                          |
 | `project-docs/TODO_MIGRATE.md`                             | Tasks 45 and 50 removed                                                                            |
 | `project-docs/TODO_COMPLETED.md`                           | Tasks 45 and 50 added at the top with full write-ups                                               |
-| `.claude/settings.local.json`                              | Two entries deleted —**gitignored, not in the commit**                                      |
+| `.claude/settings.local.json`                              | Two entries deleted — not in that commit because they were never**staged** (the "gitignored" reason recorded here at the time was wrong; see the correction above) |
 
 ### Next steps
 
@@ -292,7 +294,7 @@ Still open, background on each:
 
 ## Uncommitted work in the tree
 
-Only `.claude/settings.local.json` (auto-managed by the Claude Code harness — it rewrites this file as permissions are granted). Local `run-seamlyLayout` is one docs-only commit ahead of `origin/run-seamlyLayout`: `dc8756d64d`, this handover update, deliberately unpushed per the docs-only exception in `CLAUDE.md`. The user edits docs directly and commits them, so re-check `git status` before assuming a dirty file is yours.
+**None — the tree is clean** and local `run-seamlyLayout` equals `origin/run-seamlyLayout`. `.claude/settings.local.json` no longer appears in `git status` at all (untracked *and* ignored since `84724ac5c2`), so a dirty tree from here on is real work. The user edits docs directly and commits them, so re-check `git status` before assuming a dirty file is yours.
 
 ## Gotchas
 
