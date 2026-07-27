@@ -75,7 +75,7 @@ enum class BestFrom : char
  *
  * VLayoutPiece::GetItem() tags every piece component item with these keys so that
  * SvgGenerator can identify each rendered component and write the matching
- * data-* attributes into the exported SVG (see status-docs/new-attributes.csv).
+ * data-* attributes into the exported SVG (see project-docs/NEW-ATTRIBUTES.csv).
  * The keys live in a namespace so the enumerator names cannot collide with
  * identifiers elsewhere in the codebase (e.g. VDrawTool::ObjectName).
  */

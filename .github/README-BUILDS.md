@@ -13,7 +13,7 @@ Apps covered:
 This constrains every packaging decision below:
 
 - seamly2d launches seamlyme and seamlyLayout as detached processes (`QProcess::startDetached` in `src/app/seamly2d/mainwindow.cpp`; seamlyLayout via `exportPiecesToSeamlyLayout()`).
-- seamly2d hands a tagged `.pieces.svg` file to seamlyLayout (Layout Mode handoff; attribute spec in `status-docs/new-attributes.csv`).
+- seamly2d hands a tagged `.pieces.svg` file to seamlyLayout (Layout Mode handoff; attribute spec in `project-docs/NEW-ATTRIBUTES.csv`).
 - The apps share files and variables: measurement files, settings values (e.g. the `paths/seamlyLayoutApp` executable path stored via `VSettings`, `src/libs/vmisc/vsettings.cpp`).
 
 Therefore all packaging must keep the apps installed together (or mutually locatable) and able to see the same user data. On sandboxed platforms (Flatpak) they must share one sandbox.

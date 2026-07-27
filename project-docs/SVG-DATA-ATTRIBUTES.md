@@ -3,7 +3,7 @@
 **Status:** implemented (Seamly2D branch `run-seamlyLayout`)
 **Producer:** Seamly2D — `SvgGenerator` (`src/libs/vformat/svg_generator.cpp`) fed by the piece item tree built in `VLayoutPiece::GetItem()` (`src/libs/vlayout/vlayoutpiece.cpp`)
 **Consumer:** SeamlyLayout (SVG parsed via its `svg_dom` crate)
-**Source spec:** `status-docs/new-attributes.csv` — this document is the authoritative, expanded contract; keep both apps developing against it.
+**Source spec:** `project-docs/NEW-ATTRIBUTES.csv` — this document is the authoritative, expanded contract; keep both apps developing against it.
 
 ## When tagged SVGs are produced
 

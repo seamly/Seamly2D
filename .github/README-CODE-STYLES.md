@@ -31,6 +31,7 @@ For more information, read full [JSF-AV standard](http://www2.research.att.com/~
     - application_\<appname>
     - dialog_\<toolgroup>\_\<toolname>
     - tool_\<toolgroup>\_\<toolname>
+    - docs_*
     - settings_*
     - options_*
     - exception_*
