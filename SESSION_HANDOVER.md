@@ -2,7 +2,9 @@
 
 ## Current state (2026-07-27, latest session): Task 59 DONE — the handoff now lays out, not just opens
 
-**Branch `task-59-nested-piece-extraction`**, cut from `run-seamlyLayout` (`19406d6dd5`). Task 59 moved from `project-docs/TODO_MIGRATE.md` to `project-docs/TODO_COMPLETED.md` (full write-up at the top of that file).
+**Merged.** PR [#23](https://github.com/seamly/Seamly2D/pull/23) (`task-59-nested-piece-extraction` → `run-seamlyLayout`), commit `34f66462d5`, merge commit `11c0b0f4c5`. **All 13 CI checks green** — Windows x64 27m21s, Windows arm64 cross-compile 26m6s, macOS 8m53s, Linux AppImage 8m41s, Linux unit tests 9m28s, **Linux: Build & test SeamlyLayout (Qt 6.11) 4m57s**, CodeQL, CodeSee, Analyze actions/python/rust, version. Local and remote task branches deleted; local `run-seamlyLayout` = `origin/run-seamlyLayout` = `11c0b0f4c5`.
+
+Task 59 moved from `project-docs/TODO_MIGRATE.md` to `project-docs/TODO_COMPLETED.md` (full write-up at the top of that file).
 
 ### The bug and the shape of the fix
 
@@ -21,7 +23,7 @@
 | `crates/cxxqt_bridge/src/{oversized,remaining}.rs` | Test `PieceRect` helpers updated for the two new fields |
 | `qt_frontend/src/adjust/PieceOverlayItem.{h,cpp}` | New `setDisplayLabel()` / `displayLabel()`; the context menu header shows the name, not the id. **Deliberately a setter, not a constructor parameter** — the constructor signature is used by `AdjustSceneTests` |
 | `qt_frontend/src/adjust/AdjustScene.cpp` | Reads `label` from the bbox JSON and passes it to the overlay item |
-| `crates/cxxqt_bridge/test_data/richmond-shirt-handoff_pieces.svg` | **New fixture, 101 KB** — genuine exporter output, `include_str!`'d by the pipeline test. **Deliberately not in `input/`:** `src/app/seamlylayout/.gitignore` ignores `/input`, and none of the SVGs sitting there are tracked, so the fixture would have been missing from a fresh clone and CI would not have compiled |
+| `crates/cxxqt_bridge/test_data/richmond-shirt-handoff_pieces.svg` | **New fixture, 101 KB** — genuine exporter output, `include_str!`'d by the pipeline test. **Deliberately not in `input/`:** `include_str!` makes it a compile-time dependency that must be tracked unconditionally, whereas `input/` is tracked only until development is complete |
 | `src/app/seamlylayout/CLAUDE.md`, `project-docs/SVG-DATA-ATTRIBUTES.md` | The discovery + identity contract on both sides |
 
 ### Decisions worth not reversing
@@ -37,19 +39,34 @@
 
 **The end-to-end check is now a permanent test, not a one-off run.** `layout_utils::tests::richmond_shirt_handoff_packs_twelve_individual_pieces` drives `do_initialize_layout` + `do_process_layout` — the exact `ProcessLayoutArgs` the QML `process_layout` wrapper builds — against the committed exporter output, asserting 12 placements, 0 unplaced, 12 *distinct* slot positions, real piece names, and no `pattern-1`. **Confirmed load-bearing:** disabling the hoist call makes it fail. The GUI "Create Layout" button was *not* clicked (no GUI automation here); the test covers the identical code path.
 
+### `input/` SVGs are now tracked — standing user decision (2026-07-27)
+
+`src/app/seamlylayout/.gitignore` ignored `/input` outright, so only the files that happened to be carried in by Task 19's directory move were tracked; `richmond-shirt-baseline_pieces.svg` and the two `MyMullerShirt-2_layout_*.svg` files were **untracked and invisible**, and earlier handover notes referred to the baseline SVG as though it were in the repo. On the user's instruction — *"track the input SVGs, we'll track these until we've completed development"* — the rule is now:
+
+```gitignore
+/input/*
+!/input/*.svg
+!/input/*.sm2d
+```
+
+`/input/*` rather than `/input` matters: **git does not descend into an ignored directory**, so negations under a bare `/input` are never evaluated. Tracking is now the default there, instead of depending on someone remembering `git add -f`.
+
+`input/2025-06-08-Sue.smis` (a measurements file) is **still ignored** — the instruction named SVGs, and the pattern `.sm2d` was already tracked. Add `!/input/*.smis` if it should be tracked too.
+
+**When development is complete this is meant to be reverted**, which is exactly why the Task 59 test fixture lives in `crates/cxxqt_bridge/test_data/` and not here: `include_str!` makes it a compile-time dependency that must be tracked unconditionally.
+
 ### Machine-state note (not in git)
 
 A **stale `SeamlyLayout.exe` debug process from a previous session (PID 37316, 01:47) held the build outputs locked** and would not die — `taskkill` reported "no running instance" while `Get-Process` still listed it with `HasExited=True`. `build.ps1`'s own `Stop-Process` could not clear it either. Fix: rename `SeamlyLayout.exe`, `SeamlyLayout.pdb` and `SeamlyLayout.lib` aside (renaming worked where deleting/killing did not), rebuild, then delete the `*.stale` files. Worth trying first if a link fails with LNK1168 / LNK1201.
 
 ### Next steps
 
-1. Push `task-59-nested-piece-extraction`, open the PR to `run-seamlyLayout`, watch CI, merge.
-2. **Task 51** — the Windows MSI install-time experience; its upgrade-warning wording must say **`seamlyData`**.
-3. **Task 14** — the check-and-move flow for an existing data tree (also needed by Tasks 35/36/37; satisfies Task 38).
-4. **Task 52** — the `vsettings.cpp` "Unknown Organization" stray, starting with its `CollectionTest` isolation subtask.
-5. **Task 54** — rename the three `vmisc` settings files *and* their classes (`SettingsCommon.h`); the 22 `.ts` `tr()` contexts must move in the **same commit**.
-6. **Task 55** — the developer-README refresh; the rename to `.github/README-DEVELOPER-SEAMLY-FAMILY.md` has still not been done.
-7. `src/app/seamly2d/core/BUILD_PROBLEMS.txt` — the user said to delete it if it is not useful; still not done.
+1. **Task 51** — the Windows MSI install-time experience; its upgrade-warning wording must say **`seamlyData`**.
+2. **Task 14** — the check-and-move flow for an existing data tree (also needed by Tasks 35/36/37; satisfies Task 38).
+3. **Task 52** — the `vsettings.cpp` "Unknown Organization" stray, starting with its `CollectionTest` isolation subtask.
+4. **Task 54** — rename the three `vmisc` settings files *and* their classes (`SettingsCommon.h`); the 22 `.ts` `tr()` contexts must move in the **same commit**.
+5. **Task 55** — the developer-README refresh; the rename to `.github/README-DEVELOPER-SEAMLY-FAMILY.md` has still not been done.
+6. `src/app/seamly2d/core/BUILD_PROBLEMS.txt` — the user said to delete it if it is not useful; still not done.
 
 Blocked, not startable here: Tasks 13/38/39/40 (clean VM, arm64, macOS, Linux hardware), Task 33/41 (KMS credentials).
 
@@ -120,7 +137,7 @@ Found by the end-to-end run and **the most valuable thing in this session after 
 4. **Task 52** — the `vsettings.cpp` "Unknown Organization" stray, **starting with** its `CollectionTest` isolation subtask.
 5. **Task 54** — rename the three `vmisc` settings files *and* their classes. The blocking decision is now answered: **`SettingsCommon.h`**, file name matching the class name. Wide but mechanical — ~620 class occurrences over 25 files, and the 22 `.ts` `tr()` contexts must move in the **same commit** or ~220 translated strings go obsolete.
 6. **Task 55** — the developer-README refresh. Per the user's answer, the target is now `.github/README-DEVELOPER-SEAMLY-FAMILY.md` (renamed from `-NEW`), maintained separately until the migration completes and then folded into `README-DEVELOPER.md`. **Neither rename nor fold has been done yet.**
-7. **Task 57** — premise superseded by the style-guide carve-out; decide whether to delete it (as Task 56 was) or keep only the `error.rs` ×2 collision. *(The user deleted this task from `project-docs/TODO_SEAMLYLAYOUT.md` in an uncommitted edit that the Task 49 commit carried in, so this may already be closed — check that file first.)*
+6. **Task 57** — premise superseded by the style-guide carve-out; decide whether to delete it (as Task 56 was) or keep only the `error.rs` ×2 collision. *(The user deleted this task from `project-docs/TODO_SEAMLYLAYOUT.md` in an uncommitted edit that the Task 49 commit carried in, so this may already be closed — check that file first.)*
 
 Blocked, not startable here: Tasks 13/38/39/40 (clean VM, arm64, macOS, Linux hardware), Task 33/41 (KMS credentials).
 

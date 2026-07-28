@@ -1,7 +1,13 @@
 AGENTS.md
 /.claude
 /.claude/rules/CLAUDE.md
-/input
+# Test-pattern inputs are TRACKED until development is complete (user decision).
+# The directory is listed as `/input/*` rather than `/input` on purpose: git does
+# not descend into an ignored *directory*, so the negations below would never be
+# considered. Scratch files of other types stay ignored.
+/input/*
+!/input/*.svg
+!/input/*.sm2d
 /logs
 /output
 /target
