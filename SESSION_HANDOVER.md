@@ -23,7 +23,7 @@ Task 59 moved from `project-docs/TODO_MIGRATE.md` to `project-docs/TODO_COMPLETE
 | `crates/cxxqt_bridge/src/{oversized,remaining}.rs` | Test `PieceRect` helpers updated for the two new fields |
 | `qt_frontend/src/adjust/PieceOverlayItem.{h,cpp}` | New `setDisplayLabel()` / `displayLabel()`; the context menu header shows the name, not the id. **Deliberately a setter, not a constructor parameter** — the constructor signature is used by `AdjustSceneTests` |
 | `qt_frontend/src/adjust/AdjustScene.cpp` | Reads `label` from the bbox JSON and passes it to the overlay item |
-| `crates/cxxqt_bridge/test_data/richmond-shirt-handoff_pieces.svg` | **New fixture, 101 KB** — genuine exporter output, `include_str!`'d by the pipeline test. **Deliberately not in `input/`:** `src/app/seamlylayout/.gitignore` ignores `/input`, and none of the SVGs sitting there are tracked, so the fixture would have been missing from a fresh clone and CI would not have compiled |
+| `crates/cxxqt_bridge/test_data/richmond-shirt-handoff_pieces.svg` | **New fixture, 101 KB** — genuine exporter output, `include_str!`'d by the pipeline test. **Deliberately not in `input/`:** `include_str!` makes it a compile-time dependency that must be tracked unconditionally, whereas `input/` is tracked only until development is complete |
 | `src/app/seamlylayout/CLAUDE.md`, `project-docs/SVG-DATA-ATTRIBUTES.md` | The discovery + identity contract on both sides |
 
 ### Decisions worth not reversing
@@ -38,6 +38,22 @@ Task 59 moved from `project-docs/TODO_MIGRATE.md` to `project-docs/TODO_COMPLETE
 `cargo test --workspace` **265 passed / 0 failed** (252 at Task 49) · SeamlyLayout `ctest --preset debug` **5/5** · `build.ps1 -Preset debug` clean, exit 0 · launching `SeamlyLayout.exe <handoff>` still logs `[import_svg] 12 tagged pattern piece(s) found`.
 
 **The end-to-end check is now a permanent test, not a one-off run.** `layout_utils::tests::richmond_shirt_handoff_packs_twelve_individual_pieces` drives `do_initialize_layout` + `do_process_layout` — the exact `ProcessLayoutArgs` the QML `process_layout` wrapper builds — against the committed exporter output, asserting 12 placements, 0 unplaced, 12 *distinct* slot positions, real piece names, and no `pattern-1`. **Confirmed load-bearing:** disabling the hoist call makes it fail. The GUI "Create Layout" button was *not* clicked (no GUI automation here); the test covers the identical code path.
+
+### `input/` SVGs are now tracked — standing user decision (2026-07-27)
+
+`src/app/seamlylayout/.gitignore` ignored `/input` outright, so only the files that happened to be carried in by Task 19's directory move were tracked; `richmond-shirt-baseline_pieces.svg` and the two `MyMullerShirt-2_layout_*.svg` files were **untracked and invisible**, and earlier handover notes referred to the baseline SVG as though it were in the repo. On the user's instruction — *"track the input SVGs, we'll track these until we've completed development"* — the rule is now:
+
+```gitignore
+/input/*
+!/input/*.svg
+!/input/*.sm2d
+```
+
+`/input/*` rather than `/input` matters: **git does not descend into an ignored directory**, so negations under a bare `/input` are never evaluated. Tracking is now the default there, instead of depending on someone remembering `git add -f`.
+
+`input/2025-06-08-Sue.smis` (a measurements file) is **still ignored** — the instruction named SVGs, and the pattern `.sm2d` was already tracked. Add `!/input/*.smis` if it should be tracked too.
+
+**When development is complete this is meant to be reverted**, which is exactly why the Task 59 test fixture lives in `crates/cxxqt_bridge/test_data/` and not here: `include_str!` makes it a compile-time dependency that must be tracked unconditionally.
 
 ### Machine-state note (not in git)
 

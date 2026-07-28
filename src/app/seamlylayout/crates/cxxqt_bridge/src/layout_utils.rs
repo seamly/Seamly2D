@@ -657,11 +657,13 @@ mod tests {
     //   seamly2d.exe input/richmond-shirt_v1_v061-test.sm2d \
     //       -b handoff -d <dir> -f 0 --exportOnlyDetails
     //
-    // It lives in this crate's `test_data/` and NOT in the app's `input/`
-    // directory: `src/app/seamlylayout/.gitignore` ignores `/input`, so a fixture
-    // placed there would be missing from a fresh clone and this test would fail
-    // to compile on CI.  Embedded at compile time so the test needs no runtime
-    // path resolution and behaves identically on every runner.
+    // It lives in this crate's `test_data/` rather than the app's `input/`
+    // directory on purpose: `include_str!` makes this a *compile-time* dependency
+    // of the test, so the file has to be tracked unconditionally.  `input/` holds
+    // hand-run sample patterns and is tracked only "until development is
+    // complete" (`src/app/seamlylayout/.gitignore`); a fixture there would stop
+    // compiling the day that policy is reverted.  Embedded at compile time so the
+    // test needs no runtime path resolution and behaves identically on every runner.
     const HANDOFF_SVG: &str = include_str!("../test_data/richmond-shirt-handoff_pieces.svg");
 
     // @brief Layout settings for the end-to-end pack: a wide fabric roll, which
