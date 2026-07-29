@@ -6,9 +6,10 @@ WiX authoring and build instructions for the Windows `.msi` installer that ships
 
 | File | Purpose |
 |---|---|
-| `seamly-family.wxs` | WiX (v6) source: install layout, shortcuts, file associations, upgrade logic |
+| `seamly-family.wxs` | WiX (v6) source: install layout, shortcuts, file associations, upgrade logic, install-time dialogs |
 | `license.rtf` | License summary shown by the installer UI (GPL-3.0-or-later for seamly2d/seamlyme, LGPL-3.0 + MIT for SeamlyLayout, LGPL-3.0 for Qt) |
 | `smsi.ps1` | Staging + `wix build` driver, used locally and by CI |
+| `test_msi_authoring.ps1` | Asserts the built MSI still contains the expected shortcuts, associations, registry rows, elevation, upgrade detection and dialogs; run by `smsi.ps1` on every build |
 | `../../../.github/workflows/windows-msi.yml` | CI workflow producing `Seamly2D-x64.msi` / `Seamly2D-arm64.msi` artifacts |
 
 ## Key decisions
@@ -22,7 +23,26 @@ WiX authoring and build instructions for the Windows `.msi` installer that ships
 - **MSI version mapping**: MSI limits ProductVersion to `major ≤ 255`, so the project's `YYYY.M.D.HHMM` rolling version cannot be used directly. `smsi.ps1` derives `(YYYY−2000).M.((D−1)·1440 + HH·60 + MM)` — strictly increasing per build — and stores the full project version as `DisplayVersion` in `HKLM\SOFTWARE\Seamly\Seamly2D`.
 - **File associations**: `.sm2d` → Seamly2D, `.smis` (individual) and `.smms` (multisize) → SeamlyMe, authored as classic (non-advertised) registry values. SeamlyLayout gets no association — its input is the `.pieces.svg` handoff, and a double extension cannot be registered separately from plain `.svg`.
 - **Start Menu**: three advertised shortcuts directly in the Start Menu root (no folder — Windows 11 flattens folders anyway, and folderless shortcuts need no removal component).
-- **User data is never touched**: settings live under `%LOCALAPPDATA%\Seamly\<app>` (`AppData\Local\Seamly\Seamly2D`, `...\SeamlyMe`, `...\SeamlyLayout` — the Task 15 unified locations) plus `%APPDATA%\Seamly\qt6_common.ini`, and pattern/measurement data defaults to `C:\Users\<user>\seamly2d`. The apps create these on first run (including legacy-location migration); install, upgrade and uninstall leave them alone.
+- **User data is never touched**: settings live under `%LOCALAPPDATA%\Seamly\<app>` (`AppData\Local\Seamly\Seamly2D`, `...\SeamlyMe`, `...\SeamlyLayout` — the Task 15 unified locations) plus `%APPDATA%\Seamly\qt6_common.ini`, and pattern/measurement data defaults to `C:\Users\<user>\seamlyData` (Task 34 renamed it from `...\seamly2d`; Task 53 settled on `seamlyData`). The apps create these on first run (including legacy-location migration); install, upgrade and uninstall leave them alone.
+
+## Install-time experience (Task 51)
+
+The wizard is WixUI's `WixUI_InstallDir` — welcome, license, install folder, ready — with two Seamly pages added:
+
+| Page | When it appears | What it does |
+|---|---|---|
+| **An existing installation was found** | before the welcome page, only when a previous install is detected and only when installing | Warns that the program files will be replaced, and states plainly that user data is not touched — naming `C:\Users\<you>\seamlyData`, `AppData\Local\Seamly` and `AppData\Roaming\Seamly`. Two paragraphs appear conditionally: one for an older MSI of this product (`WIX_UPGRADE_DETECTED`), one for the old NSIS installation. |
+| **Shortcuts** | after Next on the install-folder page | One checkbox: *Create desktop shortcuts for Seamly2D and SeamlyMe*, default **on** (`SEAMLYDESKTOPSHORTCUTS`). |
+
+Decisions behind those two pages:
+
+- **Desktop shortcuts are one checkbox covering seamly2d and seamlyme, not one per app, and SeamlyLayout gets none.** SeamlyLayout is a document-driven daughter app that seamly2d launches with a `.pieces.svg` argument; a bare desktop launch would only ever show an empty canvas. Per-app checkboxes would be three decisions for a choice users make once. Unattended installs can override: `msiexec /i Seamly2D-x64.msi /qn SEAMLYDESKTOPSHORTCUTS=0`.
+- **There is no "pin to taskbar" checkbox, and there should not be one.** Windows 10 removed programmatic taskbar pinning: the `taskbarpin` verb is blocked for third-party callers, there is no MSI or WiX element for it, and the only supported mechanisms are OEM/enterprise provisioning (a Start/taskbar layout-modification XML applied by Group Policy or during imaging) which cannot be driven from a per-machine MSI a user double-clicks. A checkbox here would silently do nothing, so the choice is simply not offered.
+- **The old NSIS installation is detected and explained, never removed automatically.** `dist\seamly2d-installer.nsi` is a *different product*: its own ARP entry, its own `uninstall.exe`, installed by default in `C:\Program Files (x86)\Seamly2D`, and the MSI's `UpgradeCode` says nothing about it. Running its uninstaller from a custom action was rejected — it is an interactive EXE, its uninstall section is `RMDir /r $INSTDIR` (which would delete anything a user had put in that folder), and Windows Installer cannot roll back an external uninstaller if the rest of the install then fails. So the dialog names the path it found and tells the user to remove it from Apps & features afterwards; leaving it installed is harmless because the two products install to different directories. Note both entries are called "Seamly2D" in ARP — the NSIS one shows no version, the MSI one shows `26.y.z`.
+- **The NSIS search reads the 32-bit registry view** (`RegistrySearch Bitness="always32"`). The NSIS installer is a 32-bit executable and never switches views, so both `SOFTWARE\NSIS_Seamly2D` and its `Uninstall\Seamly2D` key land under `WOW6432Node`; an x64 MSI searching the default view would never find them.
+- **ARP's DisplayVersion shows the numeric MSI ProductVersion (`26.y.z`) and cannot show the project version.** The `RegisterProduct` standard action writes the Uninstall key *after* `WriteRegistryValues`, so a component-authored override is overwritten every time. The full `YYYY.M.D.HHMM` version reaches the user through `ARPCOMMENTS` and through `HKLM\SOFTWARE\Seamly\Seamly2D\DisplayVersion` instead.
+- **Both pages are wired without touching WixUI's publish chain.** Adding a second `NewDialog` publish to `InstallDirDlg`'s Next button — the obvious way to insert a wizard page — relies on undefined behaviour: two unconditionally-true `NewDialog` events on one control, with nothing in the MSI documentation saying which wins. WixUI never relies on it (all of its competing `NewDialog` publishes carry mutually exclusive conditions) and the built-in row's condition is the literal `1`, so no condition can exclude it. Instead the warning page is a `Show` entry in `InstallUISequence` (sequence 1250, before WixUI's first dialog at 1296), and the shortcuts page is a `SpawnDialog` at `Ordering` 2 on the same Next button, ahead of the built-in `NewDialog` at 4 — the same mechanism WixUI uses for its own `BrowseDlg`. **Do not express that sequence number as `Before="WelcomeDlg"`:** every WixUI dialog set defines that symbol, so the reference drags `WixUI_Minimal` and `WixUI_Advanced` into the link and the build dies on duplicate `TextStyle`/`Property` symbols.
+- **ICE43 and ICE57 are suppressed in `smsi.ps1`, and only those two.** Both fire on the optional desktop-shortcut components and both assume `DesktopFolder` is inside the installing user's profile — true only of a per-user install. This package is `Scope="perMachine"` with `ALLUSERS=1`, so `DesktopFolder` is always the All Users desktop and the HKLM key path is correct. Doing what the ICEs ask would break the package: the server side of a per-machine install runs as LocalSystem, so an HKCU key path would be written into the SYSTEM hive where component detection can never find it, and every launch would trigger installer self-repair.
 
 ## Building locally
 
@@ -40,7 +60,16 @@ Then:
 .\scripts\packaging\windows\smsi.ps1 -Arch arm64 -NoSeamlyLayout   # arm64 (needs arm64 build trees)
 ```
 
-Output: `scripts\seamly-build-msi\<arch>\Seamly2D-<arch>.msi` (gitignored). Only the `.msi` is produced — the `.wixpdb` symbol database is suppressed via `wix build -pdbtype none` (it is only used for `wix` patch/melt diffing, not by the shipped installer); to keep it for inspection, remove that flag from `$wixArguments` in `smsi.ps1`. The script runs `wix msi validate` (ICE checks) automatically; the only expected warning is ICE61, a known consequence of `AllowSameVersionUpgrades`.
+Output: `scripts\seamly-build-msi\<arch>\Seamly2D-<arch>.msi` (gitignored). Only the `.msi` is produced — the `.wixpdb` symbol database is suppressed via `wix build -pdbtype none` (it is only used for `wix` patch/melt diffing, not by the shipped installer); to keep it for inspection, remove that flag from `$wixArguments` in `smsi.ps1`. The script then runs two checks, both of which fail the build:
+
+1. `wix msi validate` (ICE checks, skip with `-SkipValidation`). ICE43 and ICE57 are suppressed for the reason given above; the only expected warning is **ICE61**, a known consequence of `AllowSameVersionUpgrades`.
+2. `test_msi_authoring.ps1`, which opens the built MSI and asserts ~50 expectations about what it contains — elevation, ARP properties, the upgrade and NSIS detection, both install-time dialogs and the wording of the warning, the Start Menu and desktop shortcuts, the three file associations, and the install-info registry rows. Run it by hand against any MSI:
+
+   ```powershell
+   .\scripts\packaging\windows\test_msi_authoring.ps1 -Msi scripts\seamly-build-msi\x64\Seamly2D-x64.msi -ExpectSeamlyLayout
+   ```
+
+   It checks *content*, not behaviour: it cannot tell you whether a shortcut launches or Explorer shows the right icon. That is the manual checklist below.
 
 ## Installing / testing
 
@@ -52,13 +81,34 @@ msiexec /x Seamly2D-x64.msi /qn          # silent uninstall
 msiexec /a Seamly2D-x64.msi /qn TARGETDIR=C:\extract        # extract without installing
 ```
 
-Manual verification checklist (clean machine):
+Manual verification checklist (clean machine — everything here is runtime behaviour that `test_msi_authoring.ps1` cannot see):
 
-- [ ] Fresh install: all three apps launch from the Start Menu shortcuts
+**Install**
+
+- [ ] Double-clicking the `.msi` produces exactly one UAC prompt, showing the verified publisher once the package is signed (Task 33)
+- [ ] The **Shortcuts** page appears after the install-folder page; unticking it results in no desktop shortcuts, leaving it ticked creates Seamly2D and SeamlyMe on the All Users desktop with the right icons
+- [ ] Fresh install: all three apps launch from the Start Menu shortcuts, with the right icons, from the install directory
 - [ ] seamly2d Layout Mode finds `SeamlyLayout.exe` beside it without configuring `paths/seamlyLayoutApp`
-- [ ] Double-clicking `.sm2d` opens seamly2d; `.smis`/`.smms` open SeamlyMe
-- [ ] Install a newer MSI over an older one: upgrades in place, settings retained
-- [ ] Uninstall removes `Program Files\Seamly2D` and the shortcuts/associations, leaves `%LOCALAPPDATA%\Seamly` and the user's pattern data untouched
+- [ ] Double-clicking `.sm2d` opens seamly2d **and loads the pattern**; `.smis`/`.smms` open SeamlyMe; Explorer shows the app icons for all three
+
+**Apps & features**
+
+- [ ] The product is listed with the right name, publisher, icon, a plausible estimated size (Windows Installer computes this itself from the installed files), and working help/about links
+- [ ] Uninstall from there removes the product completely
+
+**Existing installations**
+
+- [ ] Installing over an older MSI shows the "existing installation was found" page with the *upgrade* paragraph, then upgrades in place with settings retained
+- [ ] On a machine with the old NSIS install, the same page shows the *NSIS* paragraph naming `C:\Program Files (x86)\Seamly2D`, and that installation is still present and still working afterwards
+- [ ] The page does **not** appear on a clean machine, nor when repairing or uninstalling
+
+**Uninstall**
+
+- [ ] Removes `Program Files\Seamly2D`, the Start Menu shortcuts, the desktop shortcuts, the file associations, `HKLM\SOFTWARE\Seamly\Seamly2D` and the ARP entry
+- [ ] Leaves `%LOCALAPPDATA%\Seamly`, `%APPDATA%\Seamly` and the user's `seamlyData` tree untouched
+
+**Other architectures**
+
 - [ ] Repeat on an arm64 machine with `Seamly2D-arm64.msi`
 
 ## arm64

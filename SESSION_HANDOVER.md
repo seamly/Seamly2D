@@ -1,6 +1,50 @@
 # Session handover
 
-## Current state (2026-07-27, latest session): Task 59 DONE — the handoff now lays out, not just opens
+## Current state (2026-07-28, latest session): Task 51 — the MSI install-time experience is authored and machine-checked; only the clean-VM cycle is left
+
+**Branch `task-51-msi-install-experience`, off `run-seamlyLayout` (`39e9512637`).** `develop` was already merged into `run-seamlyLayout`, so no sync was needed. Task 51 stays in `project-docs/TODO_MIGRATE.md` — 5 of its 9 subtasks are checked off, 4 need an elevated install on a clean machine.
+
+### What was done
+
+| File | Change |
+| ---- | ------ |
+| `scripts/packaging/windows/seamly-family.wxs` | Two install-time dialogs (`SeamlyPreviousInstallDlg`, `SeamlyShortcutsDlg`), the NSIS registry searches, `SEAMLYDESKTOPSHORTCUTS`, `ARPCOMMENTS`, and two conditional desktop-shortcut components |
+| `scripts/packaging/windows/test_msi_authoring.ps1` | **New.** ~50 assertions against the built MSI's database (elevation, ARP, upgrade + NSIS detection, both dialogs and the warning's wording, shortcuts, associations, registry rows) |
+| `scripts/packaging/windows/smsi.ps1` | Runs that check after `wix msi validate`; suppresses ICE43/ICE57 with the reasoning inline |
+| `scripts/packaging/windows/README.md` | New "Install-time experience (Task 51)" section with all seven decisions; the manual clean-machine checklist rewritten and now kept here only |
+| `scripts/packaging/windows/README_WINDOWS_BUILD.md` | Wizard walkthrough, the new build step, §3.5 on the local Qt kit gap |
+| `project-docs/TODO_MIGRATE.md` | Task 51 subtasks checked off / annotated with what was verified statically |
+
+### Decisions worth not reversing
+
+- **Neither dialog is wired by publishing a second `NewDialog` on `InstallDirDlg`'s Next button**, the obvious way to insert a WixUI page. Two unconditionally-true `NewDialog` events on one control is undefined behaviour — WixUI itself never does it (its competing publishes all carry mutually exclusive conditions) and the built-in row's condition is the literal `1`, so nothing can exclude it. The warning page is a `Show` in `InstallUISequence` (1250, before WixUI's first dialog at 1296); the shortcuts page is a `SpawnDialog` at `Ordering` 2, ahead of the built-in `NewDialog` at 4 — the mechanism WixUI uses for its own `BrowseDlg`. Both are correct whichever way that ambiguity resolves.
+- **Never write that as `Before="WelcomeDlg"`.** Every WixUI dialog set defines `InstallUISequence/WelcomeDlg`, so the reference pulls `WixUI_Minimal` and `WixUI_Advanced` into the link beside `WixUI_InstallDir` and the build dies on duplicate `TextStyle`/`Property`/`WixAction` symbols. Hit and diagnosed; the sequence number is written out with a comment.
+- **The NSIS search must be `Bitness="always32"`.** The old installer is 32-bit and never switches views, so its keys are under `WOW6432Node`; verified against the real NSIS install on this PC (`HKLM\SOFTWARE\WOW6432Node\NSIS_Seamly2D\Install_Dir` = `C:\Program Files (x86)\Seamly2D`).
+- **The NSIS install is detected and explained, never removed.** Its uninstaller is interactive, its uninstall section is `RMDir /r $INSTDIR`, and MSI cannot roll back an external uninstaller.
+- **One desktop-shortcut checkbox for seamly2d + seamlyme, none for SeamlyLayout** (a desktop launch of a document-driven app shows an empty canvas). **No taskbar-pinning checkbox at all** — Windows 10+ blocks programmatic pinning, so it would silently do nothing.
+- **ICE43 and ICE57 are suppressed, and only those two.** Both assume `DesktopFolder` is in the user profile, true only of a per-user install. Obeying them would be actively wrong: the server side of a per-machine install runs as LocalSystem, so an HKCU key path lands in the SYSTEM hive and every launch triggers self-repair.
+- **ARP's DisplayVersion cannot show the project version** — `RegisterProduct` overwrites it after `WriteRegistryValues`. It reaches the user via `ARPCOMMENTS` and `HKLM\SOFTWARE\Seamly\Seamly2D\DisplayVersion` instead.
+
+### Verification
+
+`smsi.ps1 -NoSeamlyLayout` exit 0 — `wix build` clean, `wix msi validate` clean apart from the expected ICE61, `test_msi_authoring.ps1` **48/48**. The three-app authoring path (`-d IncludeSeamlyLayout=1`, built by hand against a staged exe) also builds, validates and passes **51/51**. **No install was performed** — the user chose static verification only, so the four "verify on a real install" subtasks are explicitly still open.
+
+Two bugs in the new checker were found and fixed while writing it, both worth remembering: **rows must be PSCustomObjects, not arrays** (a row array passing through a pipeline gets unrolled, so `(… | Where-Object {…}).Count -eq 1` counts the matched row's *fields* and reports 2 for a single two-column match), and **the MSI `Shortcut.Name` column stores `short|long` for names over 8.3**, so `SeamlyLayout` is `SEAMLY~1|SeamlyLayout` while `Seamly2D` and `SeamlyMe` are plain.
+
+### Machine state (not in git) — the local Qt kit is incomplete
+
+**`C:\Qt\6.11.1\msvc2022_64` has Qt WebEngine but no Qt WebChannel and no Qt Positioning** — no `Qt6WebChannel*` in `bin\`/`lib\`, no `qml\QtWebChannel`, no `lib\cmake\Qt6WebChannel*`. `windeployqt6` therefore fails with *"Unable to find dependent libraries … Qt6WebChannelQuick.dll"* and **the three-app MSI cannot be built on this machine** until the Maintenance Tool adds those two modules. `CLAUDE.md` already requires them. Note `src/app/seamlylayout/build.ps1`'s guard probes `Qt6WebEngineQuick`, which *is* present, so it passes and the gap only appears at deploy time. Recorded as §3.5 of `README_WINDOWS_BUILD.md`. CI is unaffected.
+
+### Next steps
+
+1. **Task 51's remaining four subtasks** — the elevated install/upgrade/uninstall cycle on a clean Windows x64 VM, working through the checklist in `scripts/packaging/windows/README.md`. Closes **Task 13**'s last subtask too.
+2. **Task 14** — the check-and-move flow for an existing data tree (also needed by Tasks 35/36/37; satisfies Task 38).
+3. **Task 52** — the `vsettings.cpp` "Unknown Organization" stray, starting with its `CollectionTest` isolation subtask.
+4. **Task 54** — rename the three `vmisc` settings files *and* their classes (`SettingsCommon.h`); the 22 `.ts` `tr()` contexts must move in the **same commit**.
+5. **Task 55** — the developer-README refresh; the rename to `.github/README-DEVELOPER-SEAMLY-FAMILY.md` has still not been done.
+6. `src/app/seamly2d/core/BUILD_PROBLEMS.txt` — the user said to delete it if it is not useful; still not done.
+
+## Earlier state (2026-07-27): Task 59 DONE — the handoff now lays out, not just opens
 
 **Merged.** PR [#23](https://github.com/seamly/Seamly2D/pull/23) (`task-59-nested-piece-extraction` → `run-seamlyLayout`), commit `34f66462d5`, merge commit `11c0b0f4c5`. **All 13 CI checks green** — Windows x64 27m21s, Windows arm64 cross-compile 26m6s, macOS 8m53s, Linux AppImage 8m41s, Linux unit tests 9m28s, **Linux: Build & test SeamlyLayout (Qt 6.11) 4m57s**, CodeQL, CodeSee, Analyze actions/python/rust, version. Local and remote task branches deleted; local `run-seamlyLayout` = `origin/run-seamlyLayout` = `11c0b0f4c5`.
 
@@ -14,17 +58,17 @@ Task 59 moved from `project-docs/TODO_MIGRATE.md` to `project-docs/TODO_COMPLETE
 
 ### Files changed (all under `src/app/seamlylayout/` — no Seamly2D parent source was touched)
 
-| File | Change |
-| ---- | ------ |
-| `crates/cxxqt_bridge/src/piece_extractor.rs` | New `hoist_tagged_pieces()` + helpers (`take_tagged_pieces`, `join_transforms`, `is_tagged_piece`, `document_has_tagged_pieces`, `has_nested_tagged_piece`, `piece_identity`). Both extractors now select only `data-type="piece"` groups in tagged mode. `PieceRect` gained `name` / `letter` / `label()`. 10 new tests |
-| `crates/cxxqt_bridge/src/layout_utils.rs` | Calls the hoist on the `input_dom` clone (stage 2a); `label()` in the unplaced warning and all three `PackError` messages; `name`/`letter`/`label` added to the bbox JSON; new `mod tests` with the full-pipeline regression test |
-| `crates/cxxqt_bridge/src/sheets.rs` | `build_sheet_export_inputs` calls the hoist first — it mirrors the same preprocessing pipeline for sheet-mode PDF export |
-| `crates/cxxqt_bridge/src/lib.rs` | Exports `hoist_tagged_pieces`; `get_adjust_piece_boxes` emits `name`/`letter`/`label` |
-| `crates/cxxqt_bridge/src/{oversized,remaining}.rs` | Test `PieceRect` helpers updated for the two new fields |
-| `qt_frontend/src/adjust/PieceOverlayItem.{h,cpp}` | New `setDisplayLabel()` / `displayLabel()`; the context menu header shows the name, not the id. **Deliberately a setter, not a constructor parameter** — the constructor signature is used by `AdjustSceneTests` |
-| `qt_frontend/src/adjust/AdjustScene.cpp` | Reads `label` from the bbox JSON and passes it to the overlay item |
-| `crates/cxxqt_bridge/test_data/richmond-shirt-handoff_pieces.svg` | **New fixture, 101 KB** — genuine exporter output, `include_str!`'d by the pipeline test. **Deliberately not in `input/`:** `include_str!` makes it a compile-time dependency that must be tracked unconditionally, whereas `input/` is tracked only until development is complete |
-| `src/app/seamlylayout/CLAUDE.md`, `project-docs/SVG-DATA-ATTRIBUTES.md` | The discovery + identity contract on both sides |
+| File                                                                        | Change                                                                                                                                                                                                                                                                                                                                          |
+| --------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `crates/cxxqt_bridge/src/piece_extractor.rs`                              | New`hoist_tagged_pieces()` + helpers (`take_tagged_pieces`, `join_transforms`, `is_tagged_piece`, `document_has_tagged_pieces`, `has_nested_tagged_piece`, `piece_identity`). Both extractors now select only `data-type="piece"` groups in tagged mode. `PieceRect` gained `name` / `letter` / `label()`. 10 new tests |
+| `crates/cxxqt_bridge/src/layout_utils.rs`                                 | Calls the hoist on the`input_dom` clone (stage 2a); `label()` in the unplaced warning and all three `PackError` messages; `name`/`letter`/`label` added to the bbox JSON; new `mod tests` with the full-pipeline regression test                                                                                                  |
+| `crates/cxxqt_bridge/src/sheets.rs`                                       | `build_sheet_export_inputs` calls the hoist first — it mirrors the same preprocessing pipeline for sheet-mode PDF export                                                                                                                                                                                                                     |
+| `crates/cxxqt_bridge/src/lib.rs`                                          | Exports`hoist_tagged_pieces`; `get_adjust_piece_boxes` emits `name`/`letter`/`label`                                                                                                                                                                                                                                                  |
+| `crates/cxxqt_bridge/src/{oversized,remaining}.rs`                        | Test`PieceRect` helpers updated for the two new fields                                                                                                                                                                                                                                                                                        |
+| `qt_frontend/src/adjust/PieceOverlayItem.{h,cpp}`                         | New`setDisplayLabel()` / `displayLabel()`; the context menu header shows the name, not the id. **Deliberately a setter, not a constructor parameter** — the constructor signature is used by `AdjustSceneTests`                                                                                                                    |
+| `qt_frontend/src/adjust/AdjustScene.cpp`                                  | Reads`label` from the bbox JSON and passes it to the overlay item                                                                                                                                                                                                                                                                             |
+| `crates/cxxqt_bridge/test_data/richmond-shirt-handoff_pieces.svg`         | **New fixture, 101 KB** — genuine exporter output, `include_str!`'d by the pipeline test. **Deliberately not in `input/`:** `include_str!` makes it a compile-time dependency that must be tracked unconditionally, whereas `input/` is tracked only until development is complete                                         |
+| `src/app/seamlylayout/CLAUDE.md`, `project-docs/SVG-DATA-ATTRIBUTES.md` | The discovery + identity contract on both sides                                                                                                                                                                                                                                                                                                 |
 
 ### Decisions worth not reversing
 
@@ -137,7 +181,7 @@ Found by the end-to-end run and **the most valuable thing in this session after 
 4. **Task 52** — the `vsettings.cpp` "Unknown Organization" stray, **starting with** its `CollectionTest` isolation subtask.
 5. **Task 54** — rename the three `vmisc` settings files *and* their classes. The blocking decision is now answered: **`SettingsCommon.h`**, file name matching the class name. Wide but mechanical — ~620 class occurrences over 25 files, and the 22 `.ts` `tr()` contexts must move in the **same commit** or ~220 translated strings go obsolete.
 6. **Task 55** — the developer-README refresh. Per the user's answer, the target is now `.github/README-DEVELOPER-SEAMLY-FAMILY.md` (renamed from `-NEW`), maintained separately until the migration completes and then folded into `README-DEVELOPER.md`. **Neither rename nor fold has been done yet.**
-6. **Task 57** — premise superseded by the style-guide carve-out; decide whether to delete it (as Task 56 was) or keep only the `error.rs` ×2 collision. *(The user deleted this task from `project-docs/TODO_SEAMLYLAYOUT.md` in an uncommitted edit that the Task 49 commit carried in, so this may already be closed — check that file first.)*
+7. **Task 57** — premise superseded by the style-guide carve-out; decide whether to delete it (as Task 56 was) or keep only the `error.rs` ×2 collision. *(The user deleted this task from `project-docs/TODO_SEAMLYLAYOUT.md` in an uncommitted edit that the Task 49 commit carried in, so this may already be closed — check that file first.)*
 
 Blocked, not startable here: Tasks 13/38/39/40 (clean VM, arm64, macOS, Linux hardware), Task 33/41 (KMS credentials).
 

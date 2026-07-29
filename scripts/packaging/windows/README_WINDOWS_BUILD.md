@@ -24,7 +24,7 @@ need all of:
 | Release build of **seamlyme** with windeployqt output | `build\src\app\seamlyme\bin\seamlyme.exe` | present |
 | Release build of **SeamlyLayout** | `src\app\seamlylayout\qt_frontend\build\Release\SeamlyLayout.exe` | present |
 | **WiX v6** CLI + UI extension | `wix 6.0.2`, `WixToolset.UI.wixext 6.0.2` | present |
-| **windeployqt6** from SeamlyLayout's Qt kit | Qt **6.11.1** (`C:\Qt\6.11.1\msvc2022_64\bin\windeployqt6.exe`) | present — auto-detected since Task 30/31 (see §3.1) |
+| **windeployqt6** from SeamlyLayout's Qt kit | Qt **6.11.1** (`C:\Qt\6.11.1\msvc2022_64\bin\windeployqt6.exe`) | present — auto-detected since Task 30/31 (see §3.1) — but the kit must also carry **Qt WebChannel** and **Qt Positioning** or deployment fails (see §3.5) |
 | **MSVC CRT redistributable** | VS 18 Community (`…\VC\Redist\MSVC\14.50.35710\x64\Microsoft.VC145.CRT`) | present (found by fallback scan) |
 
 Install the pieces that are missing:
@@ -94,7 +94,8 @@ expected **ICE61** warning — a benign consequence of `AllowSameVersionUpgrades
    - `exes\` — the three executables (authored explicitly in the `.wxs` so shortcuts/associations can reference them)
 2. Derives the MSI `ProductVersion` from `YYYY.M.D.HHMM` as `(YYYY−2000).M.((D−1)·1440 + HH·60 + MM)` (MSI caps the major field at 255), stores the full project version as `DisplayVersion`.
 3. Runs `wix build seamly-family.wxs -arch x64 -ext WixToolset.UI.wixext …` → `Seamly2D-x64.msi`.
-4. Runs `wix msi validate` (skip with `-SkipValidation`).
+4. Runs `wix msi validate` (skip with `-SkipValidation`), suppressing ICE43 and ICE57 — both are false positives raised by the optional desktop-shortcut components; see [`README.md`](README.md).
+5. Runs [`test_msi_authoring.ps1`](test_msi_authoring.ps1) against the built MSI (Task 51): ~50 assertions covering elevation, the ARP properties, upgrade and NSIS detection, the two install-time dialogs, the shortcuts, the file associations and the install-info registry rows. This one is **not** covered by `-SkipValidation` — it is cheap and it guards a silent failure mode, an MSI that installs perfectly and does the wrong thing.
 
 Output and staging live in `scripts\seamly-build-msi\` (kept out of git by the
 `*-build-*` .gitignore pattern).
@@ -178,6 +179,21 @@ not as evidence about the parent Qt version. The numbers under §2 for the
 single-runtime MSI were produced after this fix, with the deployed runtime
 verified to match the compiling kit.
 
+### 3.5 `windeployqt6` failed on a Qt kit without Qt WebChannel  *(2026-07-28, Task 51 — developer machine, OPEN)*
+
+Staging SeamlyLayout aborted immediately:
+
+```text
+Unable to find dependent libraries of C:\Qt\6.11.1\msvc2022_64\bin\Qt6WebChannelQuick.dll :
+Cannot open 'C:/Qt/6.11.1/msvc2022_64/bin/Qt6WebChannelQuick.dll': The system cannot find the file specified.
+```
+
+The kit on this machine has the Qt WebEngine modules (`Qt6WebEngineCore/Quick/Widgets`, `qml\QtWebEngine`, and their CMake packages) but **no Qt WebChannel and no Qt Positioning at all** — no `Qt6WebChannel*` in `bin\` or `lib\`, no `qml\QtWebChannel`, no `lib\cmake\Qt6WebChannel*`. WebEngine depends on both, so `windeployqt6` walks into a dependency it cannot resolve and exits 1. `CLAUDE.md` and `.github/README-DEVELOPER-SEAMLY-FAMILY.md` both say the kit must include `qtwebengine` **plus** `qtwebchannel` and `qtpositioning`; this is what it looks like when it does not.
+
+**Fix:** re-run the Qt Maintenance Tool and add *Qt WebChannel* and *Qt Positioning* to the 6.11.1 `msvc2022_64` kit. Until then the three-app MSI cannot be built on this machine — `smsi.ps1 -NoSeamlyLayout` still produces a valid two-app package, and CI is unaffected (`install-qt-action` installs the full module list).
+
+Worth knowing: `src\app\seamlylayout\build.ps1`'s guard probes for the `Qt6WebEngineQuick` CMake package, which **is** present here, so it passes and the gap only shows up at deployment time.
+
 ### Benign warnings (no action needed)
 
 - `Cannot determine dependencies of …\qtposition_nmea.dll: … Qt6SerialPort.dll` — optional dependency of the NMEA positioning plugin; not used.
@@ -198,13 +214,9 @@ msiexec /x Seamly2D-x64.msi /qn                   # silent uninstall
 msiexec /a Seamly2D-x64.msi /qn TARGETDIR=C:\extract        # extract without installing
 ```
 
-Manual verification checklist (clean machine — **not yet run**, see Task 13):
+What the user sees when installing interactively (Task 51): welcome → license → install folder → **Shortcuts** (one checkbox for desktop shortcuts, default on) → ready → install. An extra page appears **before** the welcome page when a previous installation is found — an older MSI of this product or the old NSIS installation — warning that the program files will be replaced and stating that patterns, measurements and settings under `seamlyData`, `AppData\Local\Seamly` and `AppData\Roaming\Seamly` are not touched. Silent installs skip both pages; pass `SEAMLYDESKTOPSHORTCUTS=0` to suppress the desktop shortcuts there.
 
-- [ ] All three apps launch from the Start Menu shortcuts
-- [ ] seamly2d Layout Mode finds `SeamlyLayout.exe` beside it without configuring `paths/seamlyLayoutApp`
-- [ ] `.sm2d` opens seamly2d; `.smis`/`.smms` open SeamlyMe
-- [ ] Installing a newer MSI over an older one upgrades in place, settings retained
-- [ ] Uninstall removes `Program Files\Seamly2D` + shortcuts/associations, leaves `%LOCALAPPDATA%\Seamly` and the user's pattern data untouched
+The **manual** verification checklist (clean machine, **not yet run** — Task 13's outstanding subtask and Task 51's last one) now lives in one place, [`README.md`](README.md#installing--testing), so it does not drift between two files. What can be checked without installing is automated in `test_msi_authoring.ps1` and runs on every build.
 
 ---
 

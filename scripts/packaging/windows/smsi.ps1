@@ -483,9 +483,45 @@ if (-not (Test-Path $msi)) {
 }
 
 # --- Validate (ICE checks) -----------------------------------------------------
+# Two ICEs are suppressed, both raised by the Task 51 optional desktop-shortcut
+# components and both false positives for this package:
+#
+#   ICE43  "non-advertised shortcut ... KeyPath should fall under HKCU"
+#   ICE57  "per-user and per-machine data with a per-machine KeyPath"
+#
+# Each assumes DesktopFolder is inside the installing user's profile, which is
+# only true of a per-user install. This package is Scope="perMachine" with
+# ALLUSERS=1, so DesktopFolder always resolves to the common (All Users)
+# desktop and the HKLM key path is the correct one. Doing what the ICEs ask
+# would actively break the package: the server-side sequence of a per-machine
+# install runs elevated as LocalSystem, so an HKCU key path would be written
+# into the SYSTEM account's hive, where component detection can never find it
+# again - every launch would then trigger installer self-repair. The shortcuts
+# cannot be advertised instead (an advertised shortcut has to live in the
+# component that owns its target file, which would stop them being optional).
+#
+# ICE61 stays visible and is expected: it is a known consequence of
+# MajorUpgrade/@AllowSameVersionUpgrades.
 if (-not $SkipValidation) {
     Write-Host "running wix msi validate (ICE checks)..."
-    Invoke-Tool -Description 'wix msi validate' -Exe 'wix' -Arguments @('msi', 'validate', $msi)
+    Invoke-Tool -Description 'wix msi validate' -Exe 'wix' -Arguments @(
+        'msi', 'validate', $msi, '-sice', 'ICE43', '-sice', 'ICE57')
+}
+
+# --- Check the install-time authoring (Task 51) --------------------------------
+# The ICE checks say the package is well formed; this says it still contains the
+# shortcuts, associations, registry rows, elevation, upgrade detection and
+# install-time dialogs the project expects. Runs on every build, including CI,
+# because the failure mode it guards against is silent - a WixUI or WiX change
+# that drops a row produces an MSI that installs perfectly and does the wrong
+# thing.
+Write-Host "checking install-time authoring..."
+# A hashtable, not an array: @array splats positionally, @hashtable by name.
+$checkArguments = @{ Msi = $msi; Arch = $Arch }
+if ($includeLayout) { $checkArguments['ExpectSeamlyLayout'] = $true }
+& (Join-Path $PSScriptRoot 'test_msi_authoring.ps1') @checkArguments
+if ($LASTEXITCODE -ne 0) {
+    throw "install-time authoring check failed (exit code $LASTEXITCODE) - see output above."
 }
 
 $msiSize = [math]::Round((Get-Item $msi).Length / 1MB, 1)
