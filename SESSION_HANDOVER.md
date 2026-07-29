@@ -27,13 +27,17 @@
 
 ### Verification
 
-`smsi.ps1 -NoSeamlyLayout` exit 0 — `wix build` clean, `wix msi validate` clean apart from the expected ICE61, `test_msi_authoring.ps1` **48/48**. The three-app authoring path (`-d IncludeSeamlyLayout=1`, built by hand against a staged exe) also builds, validates and passes **51/51**. **No install was performed** — the user chose static verification only, so the four "verify on a real install" subtasks are explicitly still open.
+`smsi.ps1` (the default, all three apps) exit 0 — `wix build` clean, `wix msi validate` clean apart from the expected ICE61, `test_msi_authoring.ps1` **51/51**, `Seamly2D-x64.msi` **165.4 MB**. The two-app package (`-NoSeamlyLayout`, the arm64 shape) passes **48/48**. **No install was performed** — the user chose static verification only, so the four "verify on a real install" subtasks are explicitly still open.
+
+Sequence note: the three-app build was only possible after the user reinstalled the missing Qt modules mid-session (below). Before that, the three-app *authoring* was verified by building with `-d IncludeSeamlyLayout=1` against a hand-staged exe; the run recorded above is the genuine one, with SeamlyLayout's real Qt runtime deployed.
 
 Two bugs in the new checker were found and fixed while writing it, both worth remembering: **rows must be PSCustomObjects, not arrays** (a row array passing through a pipeline gets unrolled, so `(… | Where-Object {…}).Count -eq 1` counts the matched row's *fields* and reports 2 for a single two-column match), and **the MSI `Shortcut.Name` column stores `short|long` for names over 8.3**, so `SeamlyLayout` is `SEAMLY~1|SeamlyLayout` while `Seamly2D` and `SeamlyMe` are plain.
 
-### Machine state (not in git) — the local Qt kit is incomplete
+### Machine state (not in git) — the local Qt kit was incomplete, and the user fixed it mid-session
 
-**`C:\Qt\6.11.1\msvc2022_64` has Qt WebEngine but no Qt WebChannel and no Qt Positioning** — no `Qt6WebChannel*` in `bin\`/`lib\`, no `qml\QtWebChannel`, no `lib\cmake\Qt6WebChannel*`. `windeployqt6` therefore fails with *"Unable to find dependent libraries … Qt6WebChannelQuick.dll"* and **the three-app MSI cannot be built on this machine** until the Maintenance Tool adds those two modules. `CLAUDE.md` already requires them. Note `src/app/seamlylayout/build.ps1`'s guard probes `Qt6WebEngineQuick`, which *is* present, so it passes and the gap only appears at deploy time. Recorded as §3.5 of `README_WINDOWS_BUILD.md`. CI is unaffected.
+**`C:\Qt\6.11.1\msvc2022_64` had Qt WebEngine but no Qt WebChannel and no Qt Positioning**, so `windeployqt6` failed with *"Unable to find dependent libraries … Qt6WebChannelQuick.dll"* and the three-app MSI could not be built here at all. **The user reinstalled the Qt WebEngine and WebChannel extensions on 2026-07-28**; the kit now has `Qt6WebChannel[Quick].dll` and `Qt6Positioning[Quick].dll` in `bin\`, `qml\QtWebChannel` and `qml\QtPositioning`, and the matching CMake packages, and the default `smsi.ps1` produces the full package again.
+
+The lesson worth keeping: **`src/app/seamlylayout/build.ps1`'s guard probes the `Qt6WebEngineQuick` CMake package, which was present the whole time**, so the guard passed while deployment was impossible. A kit can satisfy `find_package(Qt6 … WebEngineQuick)` and still be undeployable. Recorded as §3.5 of `README_WINDOWS_BUILD.md`. CI was never affected — `install-qt-action` installs the full module list.
 
 ### Next steps
 

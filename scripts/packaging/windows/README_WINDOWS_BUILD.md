@@ -24,7 +24,7 @@ need all of:
 | Release build of **seamlyme** with windeployqt output | `build\src\app\seamlyme\bin\seamlyme.exe` | present |
 | Release build of **SeamlyLayout** | `src\app\seamlylayout\qt_frontend\build\Release\SeamlyLayout.exe` | present |
 | **WiX v6** CLI + UI extension | `wix 6.0.2`, `WixToolset.UI.wixext 6.0.2` | present |
-| **windeployqt6** from SeamlyLayout's Qt kit | Qt **6.11.1** (`C:\Qt\6.11.1\msvc2022_64\bin\windeployqt6.exe`) | present — auto-detected since Task 30/31 (see §3.1) — but the kit must also carry **Qt WebChannel** and **Qt Positioning** or deployment fails (see §3.5) |
+| **windeployqt6** from SeamlyLayout's Qt kit | Qt **6.11.1** (`C:\Qt\6.11.1\msvc2022_64\bin\windeployqt6.exe`) | present — auto-detected since Task 30/31 (see §3.1). The kit must also carry **Qt WebChannel** and **Qt Positioning**, not just Qt WebEngine, or deployment fails (see §3.5) |
 | **MSVC CRT redistributable** | VS 18 Community (`…\VC\Redist\MSVC\14.50.35710\x64\Microsoft.VC145.CRT`) | present (found by fallback scan) |
 
 Install the pieces that are missing:
@@ -179,7 +179,7 @@ not as evidence about the parent Qt version. The numbers under §2 for the
 single-runtime MSI were produced after this fix, with the deployed runtime
 verified to match the compiling kit.
 
-### 3.5 `windeployqt6` failed on a Qt kit without Qt WebChannel  *(2026-07-28, Task 51 — developer machine, OPEN)*
+### 3.5 `windeployqt6` failed on a Qt kit without Qt WebChannel  *(2026-07-28, Task 51 — developer machine, RESOLVED same day)*
 
 Staging SeamlyLayout aborted immediately:
 
@@ -190,9 +190,15 @@ Cannot open 'C:/Qt/6.11.1/msvc2022_64/bin/Qt6WebChannelQuick.dll': The system ca
 
 The kit on this machine has the Qt WebEngine modules (`Qt6WebEngineCore/Quick/Widgets`, `qml\QtWebEngine`, and their CMake packages) but **no Qt WebChannel and no Qt Positioning at all** — no `Qt6WebChannel*` in `bin\` or `lib\`, no `qml\QtWebChannel`, no `lib\cmake\Qt6WebChannel*`. WebEngine depends on both, so `windeployqt6` walks into a dependency it cannot resolve and exits 1. `CLAUDE.md` and `.github/README-DEVELOPER-SEAMLY-FAMILY.md` both say the kit must include `qtwebengine` **plus** `qtwebchannel` and `qtpositioning`; this is what it looks like when it does not.
 
-**Fix:** re-run the Qt Maintenance Tool and add *Qt WebChannel* and *Qt Positioning* to the 6.11.1 `msvc2022_64` kit. Until then the three-app MSI cannot be built on this machine — `smsi.ps1 -NoSeamlyLayout` still produces a valid two-app package, and CI is unaffected (`install-qt-action` installs the full module list).
+**Fix (applied 2026-07-28):** re-run the Qt Maintenance Tool and add *Qt WebEngine*, *Qt WebChannel* and *Qt Positioning* to the 6.11.1 `msvc2022_64` kit. The kit then carries `Qt6WebChannel[Quick].dll` and `Qt6Positioning[Quick].dll` in `bin\`, `qml\QtWebChannel` and `qml\QtPositioning`, and the matching `lib\cmake\Qt6WebChannel*` / `Qt6Positioning*` packages, and the default `smsi.ps1` invocation builds the three-app MSI again:
 
-Worth knowing: `src\app\seamlylayout\build.ps1`'s guard probes for the `Qt6WebEngineQuick` CMake package, which **is** present here, so it passes and the gap only shows up at deployment time.
+```text
+MSI OK: …\scripts\seamly-build-msi\x64\Seamly2D-x64.msi (165.4 MB)
+```
+
+Until it is fixed, `smsi.ps1 -NoSeamlyLayout` still produces a valid two-app package. CI was never affected (`install-qt-action` installs the full module list).
+
+Worth knowing: `src\app\seamlylayout\build.ps1`'s guard probes for the `Qt6WebEngineQuick` CMake package, which **was** present throughout, so it passed and the gap only showed up at deployment time. A kit can satisfy `find_package(Qt6 … WebEngineQuick)` and still be unable to deploy.
 
 ### Benign warnings (no action needed)
 
