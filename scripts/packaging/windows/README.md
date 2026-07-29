@@ -10,6 +10,7 @@ WiX authoring and build instructions for the Windows `.msi` installer that ships
 | `license.rtf` | License summary shown by the installer UI (GPL-3.0-or-later for seamly2d/seamlyme, LGPL-3.0 + MIT for SeamlyLayout, LGPL-3.0 for Qt) |
 | `smsi.ps1` | Staging + `wix build` driver, used locally and by CI |
 | `test_msi_authoring.ps1` | Asserts the built MSI still contains the expected shortcuts, associations, registry rows, elevation, upgrade detection and dialogs; run by `smsi.ps1` on every build |
+| `test_msi_install.ps1` | Asserts what an **installed** MSI actually did to a real machine, in four phases around the `msiexec` commands; standalone, copied to the test machine beside the `.msi` |
 | `../../../.github/workflows/windows-msi.yml` | CI workflow producing `Seamly2D-x64.msi` / `Seamly2D-arm64.msi` artifacts |
 
 ## Key decisions
@@ -81,35 +82,41 @@ msiexec /x Seamly2D-x64.msi /qn          # silent uninstall
 msiexec /a Seamly2D-x64.msi /qn TARGETDIR=C:\extract        # extract without installing
 ```
 
-Manual verification checklist (clean machine — everything here is runtime behaviour that `test_msi_authoring.ps1` cannot see):
+### The scripted cycle
 
-**Install**
+`test_msi_install.ps1` verifies a real install. It runs in four phases around the `msiexec` commands, sharing a state file so each phase can compare against the ones before it — which is how "uninstall did not take any user data with it" becomes a check rather than an opinion. It is standalone (no repository, no build tree, no Qt on the test machine), so copy it next to the `.msi` and run it from an elevated prompt:
+
+```powershell
+.\test_msi_install.ps1 -Phase Baseline                     # BEFORE installing
+msiexec /i Seamly2D-x64-older.msi
+.\test_msi_install.ps1 -Phase Installed -ExpectSeamlyLayout -PatternFile .\sample.sm2d
+msiexec /i Seamly2D-x64-newer.msi                          # upgrade over the top
+.\test_msi_install.ps1 -Phase Upgraded  -ExpectSeamlyLayout -PatternFile .\sample.sm2d
+msiexec /x Seamly2D-x64-newer.msi
+.\test_msi_install.ps1 -Phase Removed
+```
+
+The upgrade step needs **two packages built at different times**: `smsi.ps1` derives the MSI ProductVersion from the build timestamp and generates a fresh ProductCode per build, so two builds share the fixed `UpgradeCode` and major-upgrade each other, whereas re-running the same `.msi` is only a repair.
+
+What it asserts: the installed files and a slice of the Qt runtime; that **each app starts and stays running** (the only check that proves the deployed runtime is complete — a missing QML module kills the process in a second and no package inspection can see it); the Start Menu and desktop shortcuts and their targets; the `HKLM\SOFTWARE\Seamly\Seamly2D` rows including the desktop-shortcut breadcrumbs; the Apps & features entry down to the estimated size and help links; all three associations in the registry *and* opening a real `.sm2d` through the shell; that an upgrade leaves exactly one ARP entry, a changed version and an unmoved install directory; that uninstall removes every one of those; and that `seamlyData`, `%LOCALAPPDATA%\Seamly`, `%APPDATA%\Seamly` and any old NSIS installation survive all of it.
+
+Two deliberate choices worth knowing. **User data is checked as "never shrank", not "identical"** — starting the apps legitimately creates settings and seeds the data tree, so an exact-match test would fail for the right reasons; what must never happen is a file disappearing. And **the effective file association is reported, not asserted**: a per-user `UserChoice` overrides the machine-wide registration, so HKLM being correct is all an installer can be held to.
+
+### What still needs human eyes
+
+Everything below is appearance or wizard flow, which neither script can see:
 
 - [ ] Double-clicking the `.msi` produces exactly one UAC prompt, showing the verified publisher once the package is signed (Task 33)
-- [ ] The **Shortcuts** page appears after the install-folder page; unticking it results in no desktop shortcuts, leaving it ticked creates Seamly2D and SeamlyMe on the All Users desktop with the right icons
-- [ ] Fresh install: all three apps launch from the Start Menu shortcuts, with the right icons, from the install directory
-- [ ] seamly2d Layout Mode finds `SeamlyLayout.exe` beside it without configuring `paths/seamlyLayoutApp`
-- [ ] Double-clicking `.sm2d` opens seamly2d **and loads the pattern**; `.smis`/`.smms` open SeamlyMe; Explorer shows the app icons for all three
-
-**Apps & features**
-
-- [ ] The product is listed with the right name, publisher, icon, a plausible estimated size (Windows Installer computes this itself from the installed files), and working help/about links
-- [ ] Uninstall from there removes the product completely
-
-**Existing installations**
-
-- [ ] Installing over an older MSI shows the "existing installation was found" page with the *upgrade* paragraph, then upgrades in place with settings retained
-- [ ] On a machine with the old NSIS install, the same page shows the *NSIS* paragraph naming `C:\Program Files (x86)\Seamly2D`, and that installation is still present and still working afterwards
+- [ ] The **Shortcuts** page appears after the install-folder page; unticking it results in no desktop shortcuts (verify with `test_msi_install.ps1 -Phase Installed -NoDesktopShortcuts`), leaving it ticked creates Seamly2D and SeamlyMe on the All Users desktop
+- [ ] Start Menu, desktop and Explorer show the right icons for all three apps and for `.sm2d`/`.smis`/`.smms`
+- [ ] seamly2d Layout Mode finds `SeamlyLayout.exe` beside it without configuring `paths/seamlyLayoutApp`, and the handoff opens the pieces
+- [ ] Installing over an older MSI shows the "existing installation was found" page with the *upgrade* paragraph
+- [ ] On a machine with the old NSIS install, the same page shows the *NSIS* paragraph naming `C:\Program Files (x86)\Seamly2D`; afterwards both entries are listed in Apps & features, the MSI one with a version and the NSIS one without
 - [ ] The page does **not** appear on a clean machine, nor when repairing or uninstalling
-
-**Uninstall**
-
-- [ ] Removes `Program Files\Seamly2D`, the Start Menu shortcuts, the desktop shortcuts, the file associations, `HKLM\SOFTWARE\Seamly\Seamly2D` and the ARP entry
-- [ ] Leaves `%LOCALAPPDATA%\Seamly`, `%APPDATA%\Seamly` and the user's `seamlyData` tree untouched
 
 **Other architectures**
 
-- [ ] Repeat on an arm64 machine with `Seamly2D-arm64.msi`
+- [ ] Repeat on an arm64 machine with `Seamly2D-arm64.msi` (omit `-ExpectSeamlyLayout`, which that package does not ship)
 
 ## arm64
 

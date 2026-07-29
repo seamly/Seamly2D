@@ -1,6 +1,65 @@
 # Session handover
 
-## Current state (2026-07-28, latest session): Task 51 — the MSI install-time experience is authored and machine-checked; only the clean-VM cycle is left
+## Current state (2026-07-29, latest session): Task 51 — the install cycle is now scripted and a test kit is staged; it awaits a run on the test Windows 11 laptop
+
+**Branch `task-51-msi-install-experience`.** Task 51 stays in `project-docs/TODO_MIGRATE.md` with the same five subtasks open — nothing was installed anywhere, so nothing could be checked off. What changed is that those subtasks are now *executable* instead of a prose checklist.
+
+### The decision that shaped this session
+
+The only work left in Task 51 is an elevated install/upgrade/uninstall cycle. **There is no VM on this PC** — Hyper-V's PowerShell module is absent and there is no VirtualBox or VMware. Asked where to run it, **the user chose the test Windows 11 laptop** (2026-07-29), not the developer PC. So the deliverable became a portable, self-contained verification kit rather than a run.
+
+### What was built
+
+| File | Change |
+| ---- | ------ |
+| `scripts/packaging/windows/test_msi_install.ps1` | **New.** Verifies a *real install* in four phases — `Baseline` / `Installed` / `Upgraded` / `Removed` — run around the `msiexec` commands, sharing a JSON state file. Standalone: no repo, build tree or Qt needed on the test machine |
+| `scripts/packaging/windows/README.md` | "Installing / testing" rewritten into "The scripted cycle" + "What still needs human eyes"; the file table gained the new script |
+| `scripts/packaging/windows/README_WINDOWS_BUILD.md` | The user's own trim of the historical §3 problem sections, **plus** repair of the two references it broke (see below) |
+| `project-docs/TODO_MIGRATE.md` | Task 51 "Progress 2026-07-29" paragraph; the four verify subtasks and the cycle subtask annotated with what the script now covers; Task 33's stale `§6` pointer fixed |
+| `scripts/seamly-build-msi/task51-test-kit/` | **Gitignored, ~330 MB.** Both MSIs, the checker, `sample-pattern.sm2d`, and `RUN-ME-FIRST.md` |
+
+### Two packages exist, and the pair matters
+
+The upgrade leg cannot be tested with one MSI — re-running the same package is a *repair*, not an upgrade. `smsi.ps1` derives ProductVersion from the build timestamp and generates a fresh ProductCode per build, so two builds share the fixed UpgradeCode and genuinely major-upgrade each other:
+
+| Package | project version | ProductVersion | ProductCode |
+| --- | --- | --- | --- |
+| `Seamly2D-x64-older.msi` | 2026.7.28.2355 | 26.7.40315 | `{DE4AB233-…}` |
+| `Seamly2D-x64-newer.msi` | 2026.7.29.0041 | 26.7.40361 | `{BEB6C667-…}` |
+
+The rebuild that produced the newer one ran clean: `wix build` OK, `test_msi_authoring.ps1` passed, 165.4 MB.
+
+### What the checker covers, and the two judgement calls in it
+
+It asserts the installed files and a slice of the Qt runtime; the Start Menu and desktop shortcuts and their targets; the `HKLM\SOFTWARE\Seamly\Seamly2D` rows including the desktop-shortcut breadcrumbs; the Apps & features entry (found by **UpgradeCode**, because the old NSIS product shares the DisplayName "Seamly2D"); all three associations in the registry *and* opening a real `.sm2d` via `Start-Process`, which goes through ShellExecute — the same route Explorer takes on a double-click; that an upgrade leaves exactly one ARP entry, a changed version and an unmoved install directory; that uninstall removes all of it; and that `seamlyData`, `%LOCALAPPDATA%\Seamly`, `%APPDATA%\Seamly` and any NSIS install survive.
+
+**The highest-value check is that it starts each app and confirms it stays running.** A missing Qt DLL or QML module kills the process in about a second, and no amount of package inspection can see that — it is exactly the class of bug §2 of `README_WINDOWS_BUILD.md` records twice.
+
+- **User data is checked as "never shrank", not "identical".** Starting the apps legitimately creates settings and seeds the data tree, so an exact-match test would fail for the right reasons. What must never happen is a file disappearing.
+- **The effective file association is reported, not asserted.** A per-user `UserChoice` overrides the machine-wide registration, so HKLM being correct is all an installer can be held to.
+
+### Verification of the checker itself (it was not written and left untested)
+
+- `Baseline` on this PC **passes**, correctly reporting the NSIS install at `C:\Program Files (x86)\Seamly2D` and the three user-data trees (`G:\My Drive\seamlyData` 8751 files / 16.8 GB, and the two settings dirs). 2.3 s even against the cloud drive.
+- A deliberate **negative** run — `-Phase Installed` on a machine with nothing installed — **fails with exit 1** and names the two failing expectations. So the checks are known not to be vacuous, which is the failure mode a checker like this actually has.
+- Fixed while testing: a failed phase used to blank `InstallFolder` in the state file, which would have silently disabled the `Removed` phase's leftover-file check — turning one real failure into a false pass later. Now only non-empty values overwrite state.
+
+### The user's concurrent edits, carried in this commit
+
+Two edits were in the working tree and are **not mine**: the trim of `README_WINDOWS_BUILD.md`'s historical §3 sections, and **Task 54's naming decision being settled in `TODO_MIGRATE.md`** (the A/B table collapsed to the class-match form — `SettingsCommon.h` etc.). That answers Task 54's first subtask; treat it as decided.
+
+That trim renumbered the file's sections and deleted §3.1/§3.5, leaving two **broken pointers** which are now repaired: the prerequisites table's `(see §3.1)` / `(see §3.5)` were rewritten to name §2 instead of a deleted number, and Task 33's `README_WINDOWS_BUILD.md §6` became `§5`.
+
+### Next steps
+
+1. **Copy `scripts/seamly-build-msi/task51-test-kit/` to the test Windows 11 laptop and follow `RUN-ME-FIRST.md`** — elevated PowerShell, `Start-Transcript`, five steps, ~20 minutes. The transcript closes Task 51's four verify subtasks and its cycle subtask, and **Task 13**'s last subtask with them. Note the laptop already had the old standalone install per Task 38, so the NSIS warning paragraph should appear on the first install.
+2. **Task 14** — the check-and-move flow for an existing data tree (also needed by Tasks 35/36/37; satisfies Task 38).
+3. **Task 52** — the `vsettings.cpp` "Unknown Organization" stray, starting with its `CollectionTest` isolation subtask.
+4. **Task 54** — the file-name form is now settled by the user; the 22 `.ts` `tr()` contexts must still move in the **same commit** as the classes.
+5. **Task 55** — the developer-README refresh; the rename to `.github/README-DEVELOPER-SEAMLY-FAMILY.md` has still not been done.
+6. `src/app/seamly2d/core/BUILD_PROBLEMS.txt` — the user said to delete it if it is not useful; still not done.
+
+## Earlier state (2026-07-28): Task 51 — the MSI install-time experience is authored and machine-checked; only the clean-VM cycle is left
 
 **Branch `task-51-msi-install-experience`, off `run-seamlyLayout` (`39e9512637`).** `develop` was already merged into `run-seamlyLayout`, so no sync was needed. Task 51 stays in `project-docs/TODO_MIGRATE.md` — 5 of its 9 subtasks are checked off, 4 need an elevated install on a clean machine.
 
