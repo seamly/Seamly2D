@@ -403,6 +403,58 @@ void TST_DataRoot::EnsureDataRootTreeKeepsExistingFiles() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief StartupResolvesThenSeedsTheConfiguredRoot locks the two-step start-up sequence
+ * both applications perform in openSettings(), and the split between its halves.
+ *
+ * Task 51's clean-machine install verification found that a fresh installation recorded the
+ * data root but never created it: initializeDataRoot() writes the setting directly instead
+ * of going through setDataRoot(), which was the only caller of ensureDataRootTree(). Nothing
+ * seeded the tree, so Preferences → Paths listed nine folders that did not exist.
+ *
+ * The fix is a second call in each application's openSettings(), and this case pins both
+ * halves of it. The first assertion is as important as the second: resolution must stay
+ * free of side effects on disk, because these tests call initializeDataRoot() while on a
+ * real run its default root is ~/seamlyData — seeding from inside it would create folders
+ * in the developer's home directory during every test run.
+ */
+void TST_DataRoot::StartupResolvesThenSeedsTheConfiguredRoot() const
+{
+    const QString root = scratchPath(QStringLiteral("startup-root"));
+    writeDataRoot(root);
+    QVERIFY(!QFileInfo::exists(root));
+
+    // Step one, as openSettings() does it: settle the root. This must not touch the disk.
+    QCOMPARE(VCommonSettings::initializeDataRoot(), root);
+    QVERIFY2(!QFileInfo::exists(root),
+             "initializeDataRoot() must not create directories - it is called by these tests, "
+             "and on a real run its default root lies under the home directory");
+
+    // Step two: seed the tree at whatever root step one settled on.
+    QVERIFY(VCommonSettings::ensureDataRootTree(VCommonSettings::dataRoot()));
+
+    const QStringList expected
+    {
+        QStringLiteral("measurements/individual"),
+        QStringLiteral("measurements/multisize"),
+        QStringLiteral("templates"),
+        QStringLiteral("bodyscans"),
+        QStringLiteral("label templates"),
+        QStringLiteral("images"),
+        QStringLiteral("backups"),
+        QStringLiteral("patterns"),
+        QStringLiteral("layouts")
+    };
+
+    for (const QString &subdirectory : expected)
+    {
+        QVERIFY2(QFileInfo(root + QLatin1Char('/') + subdirectory).isDir(),
+                 qPrintable(QStringLiteral("'%1' is missing after start-up seeded the root")
+                                .arg(subdirectory)));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief RebaseMovesPathsInsideTheOldRoot checks the rule Preferences → Paths applies so
  * that changing the root actually relocates the subfolders shown alongside it.
  */

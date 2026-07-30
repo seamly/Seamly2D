@@ -1,6 +1,62 @@
 # Session handover
 
-## Current state (2026-07-29, latest session): Task 51 — the install cycle is now scripted and a test kit is staged; it awaits a run on the test Windows 11 laptop
+## Current state (2026-07-30, latest session): Task 51 — the laptop install run happened and found three real defects; one is fixed
+
+**Branch `task-51-msi-install-experience`.** The user ran the kit on the test Windows 11 laptop through the upgrade step. **52 of 57 automated checks passed.** Task 51 stays open in `project-docs/TODO_MIGRATE.md`, which now carries a "Progress 2026-07-30" block and **two new subtasks** for the defects still open.
+
+### What the run proved works
+
+All three apps start and stay running from the install (so the deployed Qt/WebEngine runtime is complete — the single highest-value check); all three file associations resolve and a real `.sm2d` opens through ShellExecute; desktop shortcuts and their registry breadcrumbs correct; ARP entry correct on name, publisher, version, comments, links, size, uninstall string; exactly one UAC prompt; `SeamlyPreviousInstallDlg` displayed correctly and in the right position (log: `Action start 18:20:16` → `Dialog created` → `Return value 1`), ahead of Welcome → EULA → Destination Folder → Ready.
+
+### The three defects
+
+1. **`SeamlyShortcutsDlg` never appears — STILL OPEN.** Not a packaging error. The `ControlEvent` row is in the shipped MSI and correct in every column (`InstallDirDlg`/`Next`/`SpawnDialog`/`SeamlyShortcutsDlg`, condition `1`, ordering 2, ahead of the built-in `NewDialog` at 4), and the `Dialog` row has `Attributes = 7`. The `/l*v` log shows **no attempt to create it** — and a failed creation would have logged 2803/2826 like the other dialogs. **Root cause is the WiX version:** the design notes assumed WiX v3/v4's `InstallDirDlg` (`DoAction WixUIValidatePath` + conditional `SpawnDialog InvalidDirDlg`), but this is **WiX 6.0.2**, whose `InstallDirDlg` Next publishes `CheckTargetPath` — a v6 built-in from the UI extension's `uica.dll`. Our `SpawnDialog` is skipped in that chain. Because `SEAMLYDESKTOPSHORTCUTS` defaults to 1 the shortcuts were created anyway and every automated check passed: the default works, the *choice* is never offered. **Do not chase this by rebuilding the 165 MB package per attempt** — build a small UI-only MSI with the same `ui:WixUI` reference and the same dialogs; it compiles in seconds and can be clicked through and cancelled at the Ready page without installing anything.
+2. **Dialog geometry — STILL OPEN.** `SeamlyPreviousInstallDlg`'s `BannerLine`/`BottomLine` are `Width="373"` on a 370-wide dialog → error 2826 twice. Stock WixUI dialogs log the same code at `DEBUG:` only; ours is *also* logged as a user-facing "unexpected error". Three characters to fix.
+3. **The user-data tree was never created on a fresh install — FIXED in this session.** `~\seamlyData` did not exist at all after installing and running the apps. `ensureDataRootTree()` creates the nine subfolders but its only production caller was `setDataRoot()`, which runs only when the user *changes* the root in Preferences → Paths; first run goes through `initializeDataRoot()`, which resolves and records the path directly. Fixed by calling `ensureDataRootTree(dataRoot())` from `Application2D::openSettings()` and `ApplicationME::openSettings()` — **in the applications, not inside `initializeDataRoot()`**, because that is the only place the real home directory reaches it and the unit tests do call `initializeDataRoot()` (the standing Task 34/53 rule).
+
+### The checker had a bug of its own, now fixed
+
+All three Start Menu shortcuts reported `FAILED … points into the install directory - target = 'C:\Windows\Installer\{ProductCode}\seamly2d.ico'`. They are **advertised** shortcuts (nested inside `<File KeyPath="yes">` with no `Target` — WiX's standard pattern), and **`WScript.Shell` does not report an advertised shortcut's target; it returns the extracted icon path.** The script assumed an unresolvable advertised shortcut came back *empty*, so that branch was never reached and three correct shortcuts failed every run. `test_msi_install.ps1` now resolves the Darwin descriptor through `MsiGetShortcutTarget` + `MsiGetComponentPath`, asserting something stronger: that the shortcut resolves to an installed file inside the install directory. **The kit copy was refreshed from the source copy — they are byte-identical again.**
+
+### Files changed
+
+| File | Change |
+| ---- | ------ |
+| `src/app/seamly2d/core/application_2d.cpp`, `src/app/seamlyme/application_me.cpp` | `ensureDataRootTree(dataRoot())` after `initializeDataRoot()`, with the reasoning inline |
+| `src/test/Seamly2DTest/tst_dataroot.{cpp,h}` | New `StartupResolvesThenSeedsTheConfiguredRoot` — pins that resolution has no disk side effects *and* that seeding creates all nine folders |
+| `scripts/packaging/windows/test_msi_install.ps1` | New `Get-AdvertisedShortcutTarget` (msi.dll P/Invoke) + rewritten Start Menu check |
+| `scripts/seamly-build-msi/task51-test-kit/test_msi_install.ps1` | Refreshed copy (gitignored) |
+| `project-docs/TODO_MIGRATE.md` | Task 51 "Progress 2026-07-30" + two new subtasks |
+
+### Verification
+
+Build exit 0 · `scripts/st.ps1` **32134 passed, 0 failed across 25 suites** (`TST_DataRoot` 22 → 23) · `ParserTest` exit 0 · `TranslationsTest` exit 0. **`CollectionTest` was deliberately not run locally** — it has a documented pre-existing failure *and* it launches the real seamly2d, which now seeds folders into the live `G:\My Drive\seamlyData`. CI runs it on a clean machine.
+
+### MACHINE STATE: the Visual Studio installation is broken (not caused by anything here)
+
+**`scripts/sd.ps1` fails with `'cl' is not recognized`.** It is not the script and not the agent sandbox — the same failure occurs with the sandbox disabled:
+
+- `vcvars64.bat` **and** `vcvarsall.bat x64` exit 1 with `[ERROR:VsDevCmd.bat] *** VsDevCmd.bat encountered errors ***`; three sub-scripts fail to init — `core\msbuild.bat`, `ext\cmake.bat`, `ext\ConnectionManagerExe.bat`
+- The toolset is fine on disk: `cl.exe` 19.51.36252 under `VC\Tools\MSVC\14.51.36231`, Windows SDKs 10.0.22621.0 / 10.0.26100.0 present
+- **Plain `vswhere -products *` returns nothing**; only `vswhere -all -prerelease -legacy` finds `C:\Program Files\Microsoft Visual Studio\18\Community`. This VS is *"Visual Studio 2026 Developer Command Prompt v18.8.1"*, a prerelease build, and the instance registration looks damaged. Instance data exists at `C:\ProgramData\Microsoft\VisualStudio\Packages\_Instances\a9afd7ad`
+
+**Workaround used for this session's build, local only — nothing on the machine and nothing in `sd.ps1` was changed:** set `PATH`/`INCLUDE`/`LIB` by hand at `VC\Tools\MSVC\14.51.36231` + SDK `10.0.26100.0`, then run `C:\Qt\Tools\QtCreator\bin\jom\jom.exe -f Makefile` in `scripts/seamly2d-build-debug`. **The user should repair VS 18 Community from the Visual Studio Installer** — until then `sd.ps1` fails for them too.
+
+### Open questions from the laptop run (needed to close subtasks)
+
+- **ARP `DisplayIcon` came back empty**, although `ARPPRODUCTICON = seamly2d.ico` *is* in the built MSI's Property table and the Icon table has the matching `seamly2d.ico` row (both verified locally by querying the package). Authoring is correct; cause unknown. Asked for `MsiGetProductInfo`'s `ProductIcon` and whether Apps & features paints the right icon — **not yet answered**
+- **The old NSIS install was gone** by the `Installed` phase (both `HKLM\SOFTWARE\WOW6432Node\NSIS_Seamly2D` and `C:\Program Files (x86)\Seamly2D`). The package contains **no `CustomAction` at all**, so it cannot have removed it; the tester most likely uninstalled it as the dialog advises. **Not yet confirmed** — if it was *not* the tester, this needs a proper investigation
+- Which paragraph the existing-installation page showed on the upgrade (should be the *upgrade* one, since NSIS was gone) — **not yet answered**
+- `-Phase Upgraded` and the uninstall + `-Phase Removed` legs — **not yet run**. Note the "uninstall preserves user data" check is currently **vacuous on that laptop** because no user data exists; create a saved pattern first if that guarantee is to be tested for real
+
+### Next steps
+
+1. Fix `SeamlyShortcutsDlg` (UI-only test MSI, per above) and the 373→370 geometry; assert both in `test_msi_authoring.ps1` *and* confirm with a real wizard run, since authoring passed while the page never appeared.
+2. Finish the laptop cycle: `-Phase Upgraded`, uninstall, `-Phase Removed`, with the refreshed checker copied over.
+3. Repair Visual Studio, then re-run `scripts/sd.ps1` to confirm the normal build path works again.
+4. Push the branch and open the PR to `run-seamlyLayout` once Task 51's remaining subtasks land.
+
+## Earlier state (2026-07-29): Task 51 — the install cycle is now scripted and a test kit is staged; it awaits a run on the test Windows 11 laptop
 
 **Branch `task-51-msi-install-experience`.** Task 51 stays in `project-docs/TODO_MIGRATE.md` with the same five subtasks open — nothing was installed anywhere, so nothing could be checked off. What changed is that those subtasks are now *executable* instead of a prose checklist.
 

@@ -595,6 +595,19 @@ void ApplicationME::openSettings()
     // an existing ~/seamly2d tree in place when upgrading. Non-destructive and re-entrant.
     VCommonSettings::initializeDataRoot();
 
+    // Task 51: create the nine standard subfolders under that root. initializeDataRoot()
+    // only resolves and records the path — it deliberately writes the setting directly
+    // rather than through setDataRoot(), which is the only other caller of
+    // ensureDataRootTree() — so without this a fresh install left the data root recorded
+    // but never created, and Preferences → Paths pointed at nine folders that did not
+    // exist. Found by the Task 51 clean-machine install verification.
+    //
+    // Called here rather than inside initializeDataRoot() for the same reason as the prune
+    // below: this is the only place the real home directory reaches it, so the unit tests,
+    // which do call initializeDataRoot(), can never create folders outside their temporary
+    // directories. Purely additive — existing files and folders are left untouched.
+    VCommonSettings::ensureDataRootTree(VCommonSettings::dataRoot());
+
     // Task 53: clear away the empty ~/seamly2d skeleton the rename leaves behind. Kept here
     // in the application rather than inside initializeDataRoot() on purpose — this is the
     // only place the real home directory is fed to it, so the unit tests, which do call

@@ -330,12 +330,12 @@ function Get-InstallInfo {
 }
 
 #------------------------------------------------------------------------------
-# @brief  Resolve a shortcut's target path.
+# @brief  Resolve a NON-advertised shortcut's target path.
 #
-# Advertised shortcuts (the Start Menu ones) hold a Darwin descriptor rather
-# than a path; Windows resolves it for a WScript.Shell caller while the product
-# is installed, but can also hand back an empty string. The caller therefore
-# treats an empty result as "present but not resolvable here", not as failure.
+# Only trustworthy for a shortcut that stores a literal path - the desktop ones,
+# authored with Target="[INSTALLFOLDER]...". For an advertised shortcut this
+# returns the extracted ICON path, not the target, so callers must try
+# Get-AdvertisedShortcutTarget first. See the comment there.
 #
 # @param  LinkPath  full path of the .lnk
 # @return target path, or an empty string
@@ -347,6 +347,84 @@ function Get-ShortcutTarget {
         return [string]$shell.CreateShortcut($LinkPath).TargetPath
     } catch {
         return ''
+    }
+}
+
+# msi.dll entry points for resolving advertised shortcuts. Defined once; the
+# guard keeps a re-run in the same session from failing on a duplicate type.
+if (-not ('Seamly.MsiShortcut' -as [type])) {
+    Add-Type -Namespace Seamly -Name MsiShortcut -MemberDefinition @'
+[DllImport("msi.dll", CharSet = CharSet.Unicode)]
+public static extern uint MsiGetShortcutTarget(string szShortcutPath,
+                                               System.Text.StringBuilder szProductCode,
+                                               System.Text.StringBuilder szFeatureId,
+                                               System.Text.StringBuilder szComponentCode);
+
+[DllImport("msi.dll", CharSet = CharSet.Unicode)]
+public static extern int MsiGetComponentPath(string szProduct,
+                                             string szComponent,
+                                             System.Text.StringBuilder lpPathBuf,
+                                             ref uint pcchBuf);
+'@
+}
+
+#------------------------------------------------------------------------------
+# @brief  Resolve an advertised shortcut through the Windows Installer.
+#
+# The Start Menu shortcuts are advertised: seamly-family.wxs nests each one
+# inside its <File KeyPath="yes">, with no Target attribute, which is WiX's
+# standard pattern for a shortcut that carries a Darwin descriptor (product,
+# feature and component GUIDs) instead of a path. The desktop shortcuts set
+# Target="[INSTALLFOLDER]..." explicitly and are ordinary path shortcuts.
+#
+# The distinction matters because WScript.Shell does NOT report an advertised
+# shortcut's target. It hands back the icon Windows Installer extracted to
+# %WINDIR%\Installer\{ProductCode}\<name>.ico - a real, non-empty path that
+# points nowhere near the install directory. Asserting on it fails every time,
+# which is exactly what this script used to do; it assumed an unresolvable
+# advertised shortcut would come back EMPTY, and nothing here ever hit that
+# branch. Found by the Task 51 install run, where all three Start Menu
+# shortcuts "failed" while being perfectly correct.
+#
+# MsiGetShortcutTarget reads the descriptor, and MsiGetComponentPath turns the
+# component GUID into the installed file it currently resolves to - which is
+# the thing worth asserting: not merely that a .lnk exists, but that clicking
+# it reaches an executable inside this install.
+#
+# @param  LinkPath  full path of the .lnk
+# @return PSCustomObject with ProductCode, ComponentPath and InstallState, or
+#         $null when the shortcut is not advertised (use Get-ShortcutTarget)
+#------------------------------------------------------------------------------
+function Get-AdvertisedShortcutTarget {
+    param([string]$LinkPath)
+
+    # GUID buffers: 38 characters plus the terminator.
+    $product   = New-Object System.Text.StringBuilder 39
+    $feature   = New-Object System.Text.StringBuilder 39
+    $component = New-Object System.Text.StringBuilder 39
+
+    try {
+        $result = [Seamly.MsiShortcut]::MsiGetShortcutTarget($LinkPath, $product, $feature, $component)
+    } catch {
+        return $null
+    }
+
+    # Anything but ERROR_SUCCESS means "not an advertised shortcut".
+    if ($result -ne 0) { return $null }
+
+    $buffer = New-Object System.Text.StringBuilder 1024
+    $size   = [uint32]$buffer.Capacity
+    $state  = [Seamly.MsiShortcut]::MsiGetComponentPath($product.ToString(), $component.ToString(),
+                                                        $buffer, [ref]$size)
+
+    # INSTALLSTATE_LOCAL (4) and INSTALLSTATE_SOURCE (5) are the states that
+    # yield a usable path; anything else means the component is not installed.
+    $path = if ($state -eq 4 -or $state -eq 5) { $buffer.ToString() } else { '' }
+
+    return [PSCustomObject]@{
+        ProductCode   = $product.ToString()
+        ComponentPath = $path
+        InstallState  = $state
     }
 }
 
@@ -547,12 +625,23 @@ function Invoke-InstalledChecks {
         $exists = Test-Path -LiteralPath $link
         Assert-That -Name "Start Menu shortcut '$name' exists" -Succeeded $exists -Detail $link
         if ($exists) {
-            # Advertised shortcuts hold a Darwin descriptor. Windows usually
-            # resolves it for us; when it does, check where it points.
-            $target = Get-ShortcutTarget -LinkPath $link
-            if ([string]::IsNullOrWhiteSpace($target)) {
-                Write-Note "'$name' is advertised; its target does not resolve to a plain path (expected)"
+            # Advertised first: these shortcuts carry a Darwin descriptor, and
+            # WScript.Shell would report their extracted .ico instead of the
+            # target. Get-AdvertisedShortcutTarget returns $null for an ordinary
+            # path shortcut, which is what the else branch is for.
+            $advertised = Get-AdvertisedShortcutTarget -LinkPath $link
+            if ($null -ne $advertised) {
+                Write-Note "'$name' is advertised, product $($advertised.ProductCode), install state $($advertised.InstallState)"
+                Assert-That -Name "Start Menu shortcut '$name' resolves to an installed file" `
+                    -Succeeded (-not [string]::IsNullOrWhiteSpace($advertised.ComponentPath)) `
+                    -Detail "MsiGetComponentPath returned install state $($advertised.InstallState)"
+                if (-not [string]::IsNullOrWhiteSpace($advertised.ComponentPath)) {
+                    Assert-That -Name "Start Menu shortcut '$name' resolves into the install directory" `
+                        -Succeeded ($advertised.ComponentPath -like "$installFolder*") `
+                        -Detail "resolves to '$($advertised.ComponentPath)'"
+                }
             } else {
+                $target = Get-ShortcutTarget -LinkPath $link
                 Assert-That -Name "Start Menu shortcut '$name' points into the install directory" `
                     -Succeeded ($target -like "$installFolder*") -Detail "target = '$target'"
             }

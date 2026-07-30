@@ -80,6 +80,7 @@ private slots:
     void AConfiguredRootIsNeverOverwritten() const;
     void EnsureDataRootTreeCreatesTheSubfolders() const;
     void EnsureDataRootTreeKeepsExistingFiles() const;
+    void StartupResolvesThenSeedsTheConfiguredRoot() const;
     void RebaseMovesPathsInsideTheOldRoot() const;
     void RebaseLeavesPathsOutsideTheOldRootAlone() const;
 
