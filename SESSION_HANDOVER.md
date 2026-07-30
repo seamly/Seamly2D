@@ -6,7 +6,9 @@
 
 ### The decision that shaped this session
 
-The only work left in Task 51 is an elevated install/upgrade/uninstall cycle. **There is no VM on this PC** — Hyper-V's PowerShell module is absent and there is no VirtualBox or VMware. Asked where to run it, **the user chose the test Windows 11 laptop** (2026-07-29), not the developer PC. So the deliverable became a portable, self-contained verification kit rather than a run.
+The only work left in Task 51 is an elevated install/upgrade/uninstall cycle. **There is no VM on this PC, and there will not be one.** Asked where to run it, **the user chose the test Windows 11 laptop** (2026-07-29), not the developer PC. So the deliverable became a portable, self-contained verification kit rather than a run.
+
+**Do not propose a VM again (re-asked and re-declined 2026-07-30).** This PC runs **Windows 11 Home**, which ships neither Hyper-V nor Windows Sandbox — both are Pro/Enterprise-only — so any VM here means installing a third-party hypervisor. The hardware would be fine (Ryzen 9 7900X 12c/24t, 63 GB RAM, 478 GB free on C:, 863 GB on E:; VBS is running, so VirtualBox/VMware would use Hyper-V-backed mode). The user considered VirtualBox and VMware Workstation Pro and **chose to keep testing on the laptop**. Note that a VM could not close two of the checklist items anyway — the *verified-publisher* UAC prompt needs Task 33's KMS signing, and the arm64 repeat needs arm64 hardware.
 
 ### What was built
 
