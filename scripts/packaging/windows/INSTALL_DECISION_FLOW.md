@@ -89,10 +89,10 @@ flowchart TD
     rep -->|no| nsis
     rem --> nsis
 
-    nsis{SEAMLYNSISUNINSTALLSTRING?}
+    nsis{SEAMLYNSISINSTALLDIR?}
     nsis -->|no| done
-    nsis -->|yes| leave["today: LEAVE IT ALONE<br/>proposed: remove its program files"]
-    leave --> done([finish])
+    nsis -->|yes| kill["remove the NSIS product:<br/>its directory tree, its Start Menu folder,<br/>and both of its registry keys.<br/>Its uninstall.exe is never run"]
+    kill --> done([finish])
 ```
 
 Two notes on that diagram:
@@ -156,8 +156,10 @@ Program files, by case:
 | Warning page | not shown | shown, NSIS paragraph | shown, upgrade paragraph | shown, **both** paragraphs |
 | New files land in | `Program Files\SeamlyApps` | same | same | same |
 | Old MSI directory | — | — | removed by `RemoveExistingProducts` | removed |
-| Old NSIS directory | — | **[today]** left in place | — | **[today]** left in place |
-| ARP entries afterwards | 1 | **[today]** 2 (NSIS shows no version) | 1 | **[today]** 2 |
+| Old NSIS directory | — | **removed** | — | **removed** |
+| Old NSIS Start Menu folder | — | **removed** (installing user's) | — | **removed** (installing user's) |
+| Old NSIS registry keys | — | **removed** (32-bit view) | — | **removed** |
+| ARP entries afterwards | 1 | 1 | 1 | 1 |
 | Associations | claimed | re-claimed from NSIS | kept | re-claimed |
 
 User data, by case — the installer changes **none** of this; the app does it on
@@ -176,22 +178,23 @@ data root and `~/seamlyData` was correctly never created.
 
 ## Open decisions for step 2
 
-1. **[undecided] Which "previous installation" does step 2 remove?** Case B and
-   case D both have an NSIS install; case C and D both have an MSI one, which
-   Windows Installer already removes correctly by itself. If the rule is only
-   about the NSIS product, say so explicitly.
-2. **[undecided] Removing the NSIS product reverses a recorded Task 51
-   decision**, and the reasons behind it still hold: its uninstaller is an
-   interactive EXE that cannot run unattended reliably; its uninstall section is
-   `RMDir /r $INSTDIR`, so it deletes **anything** in that folder, including
-   files a user put there; and Windows Installer cannot roll it back if the rest
-   of the install then fails, leaving a machine with neither product. If it is
-   to be removed anyway, the safer shape is to delete the known file set
-   ourselves from a deferred custom action rather than invoking their
-   uninstaller — which needs its own decision about the ARP entry it leaves.
-3. **[undecided] What happens to the NSIS ARP entry** if its files are removed —
-   an orphaned "Seamly2D" with no version and a broken uninstaller is worse than
-   leaving both alone.
+1. **[settled] Which "previous installation" is removed.** Only the **NSIS**
+   product needs new code. A previous MSI is already removed correctly by
+   `RemoveExistingProducts`, so cases C and D need nothing extra there.
+2. **[settled] The NSIS product is removed, but its `uninstall.exe` is never
+   run.** The earlier decision to leave it alone was reversed by the user, on
+   the grounds that the MSI is a strict superset — it installs seamly2d and
+   seamlyme too, so leaving the old product behind means two copies of each and
+   Start Menu shortcuts that launch the old binaries. Every hazard in the
+   original decision came from *invoking their uninstaller*: interactive, and
+   `RMDir /r $INSTDIR` deletes anything else in the folder, with no rollback if
+   the install then fails. Deleting the four things it created ourselves has
+   none of those properties, and `RemoveFiles` rolls it back. **The dialog now
+   warns the user to move their own files out of that folder first**, because
+   the directory goes as a whole.
+3. **[settled] The NSIS ARP entry goes with it** —
+   `HKLM\...\Uninstall\Seamly2D` and `HKLM\SOFTWARE\NSIS_Seamly2D` are both
+   removed, so there is no orphaned entry pointing at a deleted uninstaller.
 4. **[undecided] The data-folder migration** the user made the "leave data to
    the app" decision conditional on: legacy `~/seamly2d` → `~/SeamlyData`, or
    old subfolder names → the nine standard ones? This is **Task 14**, and it

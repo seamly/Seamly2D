@@ -173,6 +173,10 @@ jobs:
           $wixVer = (wix --version).ToString().Split('+')[0]
           wix extension add --global WixToolset.UI.wixext/$wixVer
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          # Util supplies RemoveFolderEx, used to remove the old NSIS
+          # installation's directory tree and Start Menu folder.
+          wix extension add --global WixToolset.Util.wixext/$wixVer
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Build MSI (x64 - all three apps)
         if: matrix.arch == 'x64'

@@ -256,8 +256,54 @@ Assert-That -Name 'the warning names the seamlyData user-data folder' `
 Assert-That -Name 'the warning states that user data is not removed' `
     -Succeeded ($userDataText.Count -eq 1 -and $userDataText[0].Text -match 'not touched')
 $nsisText = @($warningText | Where-Object { $_.Control -eq 'NsisText' })
-Assert-That -Name 'the warning explains that the old NSIS install must be removed by hand' `
-    -Succeeded ($nsisText.Count -eq 1 -and $nsisText[0].Text -match 'uninstall it from Apps and features')
+Assert-That -Name 'the warning says Setup removes the old NSIS installation' `
+    -Succeeded ($nsisText.Count -eq 1 -and $nsisText[0].Text -match 'Setup will remove')
+# The removal takes the whole directory, so the page has to warn about anything
+# of the user's that happens to be sitting in it.
+Assert-That -Name 'the warning tells the user to move their own files out of it first' `
+    -Succeeded ($nsisText.Count -eq 1 -and $nsisText[0].Text -match 'move anything of your own out')
+Assert-That -Name 'the warning names the directory it found' `
+    -Succeeded ($nsisText.Count -eq 1 -and $nsisText[0].Text -match '\[SEAMLYNSISINSTALLDIR\]')
+
+# --- 5b. removal of the old NSIS installation ----------------------------------
+# Its own uninstall.exe is deliberately never invoked - see seamly-family.wxs.
+# What must be present is the removal of the four things it created.
+$removeComponents = Get-MsiRows -Sql "SELECT ``Component``, ``Condition``, ``Attributes`` FROM ``Component``" `
+    -Columns 'Component', 'Condition', 'Attributes'
+foreach ($component in @('RemoveNsisProgramFiles', 'RemoveNsisRegistryKeys')) {
+    $row = @($removeComponents | Where-Object { $_.Component -eq $component })
+    Assert-That -Name "$component exists and is conditional on finding the NSIS install" `
+        -Succeeded ($row.Count -eq 1 -and $row[0].Condition -eq 'SEAMLYNSISINSTALLDIR')
+}
+# msidbComponentAttributes64bit = 256. The NSIS keys live under WOW6432Node
+# because that installer was 32-bit and never switched view, so the component
+# carrying the RemoveRegistryKey rows must NOT have the 64-bit bit set.
+$registryRemoval = @($removeComponents | Where-Object { $_.Component -eq 'RemoveNsisRegistryKeys' })
+Assert-That -Name 'the NSIS registry keys are removed from the 32-bit view' `
+    -Succeeded ($registryRemoval.Count -eq 1 -and (([int]$registryRemoval[0].Attributes -band 256) -eq 0)) `
+    -Detail "Attributes = $($registryRemoval.Attributes)"
+
+$removeRegistry = Get-MsiRows -Sql "SELECT ``Root``, ``Key`` FROM ``RemoveRegistry``" -Columns 'Root', 'Key'
+foreach ($key in @('SOFTWARE\NSIS_Seamly2D', 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Seamly2D')) {
+    Assert-That -Name "the NSIS key '$key' is removed on install" `
+        -Succeeded (@($removeRegistry | Where-Object { $_.Root -eq '2' -and $_.Key -eq $key }).Count -eq 1)
+}
+
+# util:RemoveFolderEx writes its instructions into a table the Util extension
+# owns, read at install time by its Wix4RemoveFoldersEx custom action. The name
+# is namespaced to the extension's MAJOR version - "Wix4RemoveFolderEx" under
+# WiX 6.0.2 - so if these two checks ever fail with an OpenView error rather
+# than a missing row, look for a renamed table before suspecting the authoring.
+$removeFolderEx = Get-MsiRows -Sql "SELECT ``Component_``, ``Property``, ``InstallMode`` FROM ``Wix4RemoveFolderEx``" `
+    -Columns 'Component', 'Property', 'InstallMode'
+foreach ($property in @('SEAMLYNSISINSTALLDIR', 'SEAMLYNSISSTARTMENU')) {
+    # InstallMode 1 = remove on install, which is the point: the old product has
+    # to be gone before this one takes over its shortcuts and associations.
+    Assert-That -Name "'$property' is scheduled for recursive removal on install" `
+        -Succeeded (@($removeFolderEx | Where-Object {
+            $_.Property -eq $property -and $_.InstallMode -eq '1' -and
+            $_.Component -eq 'RemoveNsisProgramFiles' }).Count -eq 1)
+}
 
 $conditions = Get-MsiRows -Sql "SELECT ``Control_``, ``Action``, ``Condition`` FROM ``ControlCondition`` WHERE ``Dialog_``='SeamlyPreviousInstallDlg'" `
     -Columns 'Control', 'Action', 'Condition'

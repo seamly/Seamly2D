@@ -136,7 +136,8 @@
 <?endif?>
 
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
 
   <Package Name="Seamly2D"
            Manufacturer="Seamly2D Project"
@@ -208,6 +209,20 @@
                       Type="raw"
                       Bitness="always32" />
     </Property>
+
+    <!-- Where the NSIS product put its Start Menu shortcuts, for the removal
+         components below. The .nsi never calls SetShellVarContext all, so
+         $SMPROGRAMS is the INSTALLING USER's Start Menu rather than the All
+         Users one. RemoveFolderEx resolves its paths in the immediate sequence,
+         which runs as that user, so this reaches them; a *different* user's
+         stale copy cannot be reached by a per-machine install and survives.
+         Sequenced after CostFinalize so the directory properties it expands
+         are resolved, and in both sequences because a silent install never
+         runs the UI one. -->
+    <SetProperty Id="SEAMLYNSISSTARTMENU"
+                 Value="[AppDataFolder]Microsoft\Windows\Start Menu\Programs\Seamly2D"
+                 After="CostFinalize" Sequence="both"
+                 Condition="SEAMLYNSISINSTALLDIR" />
 
     <!-- ================= optional desktop shortcuts ======================= -->
     <!-- Set by the checkbox on SeamlyShortcutsDlg, and overridable on the
@@ -294,7 +309,7 @@
                  NoPrefix="yes"
                  ShowCondition="SEAMLYNSISUNINSTALLSTRING"
                  HideCondition="NOT SEAMLYNSISUNINSTALLSTRING"
-                 Text="Seamly2D is also installed by the older Seamly2D installer in [SEAMLYNSISINSTALLDIR]. That is a separate program: Setup cannot remove it, it keeps its own entry in Apps and features, and its Start Menu shortcuts keep pointing at it. To avoid running two copies, uninstall it from Apps and features (the entry with no version number) once Setup has finished." />
+                 Text="An older Seamly2D from the previous installer was found in [SEAMLYNSISINSTALLDIR]. It holds Seamly2D and SeamlyMe, and this version replaces both, so Setup will remove its program files, its Start Menu shortcuts and its entry in Apps and features. Nothing else in that folder is kept, so move anything of your own out of it before continuing." />
 
         <!-- Always shown: the point of the whole dialog. -->
         <Control Id="UserDataText" Type="Text" X="20" Y="150" Width="330" Height="76"
@@ -463,6 +478,38 @@
       </Component>
       <?endif?>
 
+      <!-- ========== remove the old NSIS installation (Task 51 step 2) ====== -->
+      <!-- The NSIS product installs seamly2d and seamlyme; this package
+           installs both of those PLUS SeamlyLayout, so it is a strict superset
+           and leaving the old product behind means two copies of each parent
+           app, two "Seamly2D" entries in Apps & features, and Start Menu
+           shortcuts that silently launch the OLD binaries.
+
+           Its own uninstall.exe is deliberately NOT run. It is interactive, its
+           uninstall section is `RMDir /r $INSTDIR` (so it deletes anything else
+           a user happened to put in that folder), and Windows Installer cannot
+           roll an external uninstaller back if the rest of this install then
+           fails - which would leave a machine with neither product. Removing
+           the things it created ourselves has none of those problems, and it is
+           undone by the standard RemoveFiles rollback if the install aborts.
+
+           Its complete footprint, read from dist\seamly2d-installer.nsi:
+             - $INSTDIR, default C:\Program Files (x86)\Seamly2D (File /r *)
+             - HKLM\SOFTWARE\NSIS_Seamly2D
+             - HKLM\...\Uninstall\Seamly2D
+             - Start Menu folder "Seamly2D" with 3 shortcuts
+           It registers NO file associations and makes NO PATH changes, so
+           nothing else has to be undone. -->
+
+      <Component Id="RemoveNsisProgramFiles" Condition="SEAMLYNSISINSTALLDIR">
+        <!-- Breadcrumb doubling as the component's key path, in the 64-bit view
+             beside the package's other install info. Records what was removed. -->
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D" Name="RemovedNsisInstallDir"
+                       Type="string" Value="[SEAMLYNSISINSTALLDIR]" KeyPath="yes" />
+        <util:RemoveFolderEx Property="SEAMLYNSISINSTALLDIR" On="install" />
+        <util:RemoveFolderEx Property="SEAMLYNSISSTARTMENU" On="install" />
+      </Component>
+
       <!-- Install breadcrumbs: read by upgrades and by the Task 14 installer
            prompts; removed on uninstall automatically (component rules). -->
       <Component Id="InstallInfoRegistry">
@@ -494,6 +541,28 @@
          in the component that holds its target file, which would tie it to the
          executable's component and make it impossible to condition
          separately. -->
+    <!-- The NSIS registry keys live under WOW6432Node - that installer was
+         32-bit and never switched registry view - so the component carrying the
+         RemoveRegistryKey rows must be 32-bit. Bitness is a per-component
+         setting, hence a component of its own: folding these rows into
+         RemoveNsisProgramFiles would drag that component's 64-bit breadcrumb
+         into WOW6432Node with them.
+
+         It sits under ProgramFilesFolder (the 32-bit tree) rather than
+         INSTALLFOLDER because ICE80 rejects a 32-bit component in a 64-bit
+         directory. The choice is nominal - the component installs no files, and
+         its directory is never created - but it has to be a 32-bit one. -->
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Component Id="RemoveNsisRegistryKeys" Condition="SEAMLYNSISINSTALLDIR" Bitness="always32">
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D" Name="RemovedNsisRegistry"
+                       Type="string" Value="1" KeyPath="yes" />
+        <RemoveRegistryKey Root="HKLM" Key="SOFTWARE\NSIS_Seamly2D" Action="removeOnInstall" />
+        <RemoveRegistryKey Root="HKLM"
+                           Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Seamly2D"
+                           Action="removeOnInstall" />
+      </Component>
+    </StandardDirectory>
+
     <StandardDirectory Id="DesktopFolder" />
     <ComponentGroup Id="OptionalDesktopShortcuts" Directory="INSTALLFOLDER">
       <Component Id="Seamly2DDesktopShortcutComponent" Condition="SEAMLYDESKTOPSHORTCUTS">

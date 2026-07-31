@@ -356,9 +356,16 @@ if ($includeLayout -and -not (Test-Path (Join-Path $SeamlyLayoutBuildDir 'Seamly
 if (-not (Get-Command wix -ErrorAction SilentlyContinue)) {
     throw "The WiX toolset is not installed - run: dotnet tool install --global wix --version '6.*'"
 }
-$uiExtensionInstalled = (& wix extension list --global 2>$null) -match 'WixToolset\.UI\.wixext'
-if (-not $uiExtensionInstalled) {
+$installedExtensions = (& wix extension list --global 2>$null)
+if (-not ($installedExtensions -match 'WixToolset\.UI\.wixext')) {
     throw "The WiX UI extension is missing - run: wix extension add --global WixToolset.UI.wixext/<wix version, e.g. 6.0.2>"
+}
+# Util provides RemoveFolderEx, which is what removes the old NSIS installation's
+# directory tree and Start Menu folder: both paths come from properties resolved
+# at install time, so the fixed RemoveFile/RemoveFolder rows cannot express them,
+# and neither can delete a tree recursively.
+if (-not ($installedExtensions -match 'WixToolset\.Util\.wixext')) {
+    throw "The WiX Util extension is missing - run: wix extension add --global WixToolset.Util.wixext/<wix version, e.g. 6.0.2>"
 }
 
 if ($includeLayout -and -not $WinDeployQt6) { $WinDeployQt6 = Find-WinDeployQt6 -BuildDir $SeamlyLayoutBuildDir }
@@ -462,6 +469,7 @@ $wixArguments = @(
     # the build output to just the .msi. WiX v6 equivalent of light.exe -spdb.
     '-pdbtype', 'none',
     '-ext', 'WixToolset.UI.wixext',
+    '-ext', 'WixToolset.Util.wixext',
     '-d', "ProductVersion=$msiVersion",
     '-d', "DisplayVersion=$Version",
     '-d', "RepoRoot=$repoRoot",
