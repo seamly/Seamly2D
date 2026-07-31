@@ -29,6 +29,8 @@ In the updated Windows installation process (Task 13 installer), prompt the user
 
 **Update (2026-07-26) — moving an existing data tree:** Task 34 made the root relocatable but **nothing moves files**. Adoption of a legacy `~/seamly2d` tree is in place (a settings pointer, `chooseFirstRunDataRoot()`), `ensureDataRootTree()` only ever `mkpath`s, and `rebaseOntoDataRoot()` rewrites the nine path *strings* — not the files they name. So repointing the root today creates nine empty subfolders at the new location and silently strands every existing file at the old one, which reads to the user as data loss. The "no hand-moving of the data tree" promise above therefore still needs the check-and-move step below. Note this is *not* a deletion hazard in shipped code — neither the MSI nor the apps ever remove a data tree (`seamly-family.wxs`: "USER DATA IS NEVER TOUCHED") — it is a silent-orphan hazard. The migration itself is shared cross-platform app code, used by **Tasks 35/36/37** as well, and satisfies **Task 38**'s "never overwrite an existing user-data directory" requirement; this Windows task drives it from the installer prompt.
 
+**Update (2026-07-31) — the destination has changed; see Task 60.** The user has reworked where user data should live: a brand-level **`Seamly`** parent rather than any `seamlyData` variant, and — the more important half — **user documents separated from internal application state**, which the current design does not do. The **migration mechanics below are unaffected and still wanted**; what changes is the destination they migrate to. Do not implement the "user data path" prompt against `seamlyData` — settle Task 60's layout first. Note also that subtask 2 of this task's original text is obsolete in two ways: the program folder is now `C:\Program Files\SeamlyApps` (Task 51), and **nothing is added to the system `PATH`** — the claim that the NSIS installer did so was wrong, `dist/seamly2d-installer.nsi` contains no PATH handling at all.
+
 Check off all completed tasks:
 
 - [ ] Inventory the old tree before any root change — file count, total bytes, and which of the nine standard subfolders are populated; the current `QFileInfo(legacyRoot).isDir()` existence check in `vcommonsettings.cpp` cannot tell an empty folder from gigabytes of patterns
@@ -376,3 +378,33 @@ Rewrite the **"Recommended installation for development on all platforms (Linux,
 - [ ] Fix the stale link on line 108 (Qt 5 → Qt 6) and sweep the section for any other Qt 5-era links
 - [ ] Cross-link `.github/README-BUILDS.md` (toolchains, packaging, settings/data locations) and `.github/workflows/README_WORKFLOWS.md` instead of restating them; keep CI's Qt version named in exactly one place
 - [ ] Verify the instructions by following them literally on this Windows PC (and, where they can only be reviewed, say so) — a doc that has not been walked through is the reason for this task
+
+## Task 60 — Rethink where user data lives: a `Seamly` brand tree, and separate documents from application state (user proposal, 2026-07-31)
+
+Supersedes the **default locations** in Task 14 and Task 34/53. It does not supersede Task 14's *migration mechanics* (inventory, merge-never-overwrite, copy → verify → remove, fail-safe abort) — those subtasks stand and this task changes what they migrate **to**.
+
+**The user's reasoning, kept because it is the rationale for the whole change:** `Seamly` represents the complete product family, "Data" is redundant when the parent location already says these are application files, PascalCase matches the product names and is safe on macOS and Linux, `seamlyData` mixes naming conventions, and keeping `seamly2d` wrongly implies SeamlyMe and SeamlyLayout belong to Seamly2D. **The principle behind it — do not put user-created documents and internal application state in the same directory — is the most valuable part and the current design violates it.**
+
+### Settled
+
+- **The brand-level parent folder is `Seamly`.** Not `seamlyData`, not `seamly2d`, not any variation.
+- **Migration is copy-and-verify, and the legacy tree is left intact**, because a user may need to roll back to an earlier release. Never a bare rename. (Confirmed 2026-07-31; matches Task 14's existing cross-volume subtask.)
+- **The installer does not do this.** A per-machine MSI's server side runs as LocalSystem, so a per-user path resolves to the SYSTEM profile and would only ever cover whoever ran setup — and macOS and Linux have no MSI at all. It is app code on first run, where adoption happens today.
+
+### Three things to resolve before implementing
+
+1. **`%APPDATA%\Seamly` is already taken.** Task 15 put the *settings* there — `%APPDATA%\Seamly\qt6_common.ini` and `%LOCALAPPDATA%\Seamly\<app>\`. So "shared application data → `%APPDATA%\Seamly`" is already true, and putting the document tree there too would break this task's own separation principle. **Recommendation: the document tree goes to `Documents\Seamly\`** (the proposal's own second sketch), and `%APPDATA%`/`%LOCALAPPDATA%\Seamly` keeps internal state exactly as it is now. That satisfies the principle with no change to settings at all.
+2. **The proposal gives two different taxonomies.** `Seamly/{Seamly2D, SeamlyMe, SeamlyLayout, Shared}` groups by *application*; `Documents/Seamly/{Patterns, Measurements, Layouts, Exports}` groups by *document type*. They cannot both be the layout. **Recommendation: by type.** Measurements are authored in SeamlyMe and consumed by Seamly2D; layouts are produced from a Seamly2D handoff and opened in SeamlyLayout — grouping by app would split data that two apps share and force a `Shared/` folder to hold most of it. By-type also maps onto the existing nine subfolders, so migration is a rename per folder rather than a re-sort of every file.
+3. **Relocatability must survive untouched.** The user's own use case is `G:\My Drive\...` for access while travelling, and `Documents` is frequently OneDrive-redirected already. Only the **default** changes; `paths/dataRoot` stays the single setting everything derives from.
+
+### Subtasks
+
+- [ ] Settle the two recommendations above with the user, then write the chosen layout into `.github/README-BUILDS.md` before any code changes
+- [ ] New per-platform defaults for the **document** root: Windows `%USERPROFILE%\Documents\Seamly`, macOS `~/Documents/Seamly`, Linux `~/Documents/Seamly` (falling back to `$XDG_DOCUMENTS_DIR`); replaces `getDefaultDataRoot()`'s `~/seamlyData`
+- [ ] Decide whether the nine subfolder names become PascalCase (`Patterns`, `Measurements/Individual`, ...). **They are `tr()`-translated today** (`vcommonsettings.cpp:594-605`), so this also decides whether they stay translated — a translated folder name means the tree looks different per UI language, which migration has to cope with
+- [ ] Detection must recognise **three** legacy roots now — `~/seamly2d`, `~/seamlyData`, and an already-migrated `Documents\Seamly` — and pick correctly when more than one exists
+- [ ] Mark a migrated legacy tree so it is not offered again and is obviously stale to a human — a marker file naming the new location and the date, rather than deleting anything
+- [ ] Reuse Task 14's migration mechanics rather than writing a second copier; if Task 14 is not yet built, build it here and let Task 14 consume it
+- [ ] `pruneEmptyLegacyDataRoot()` must not remove a tree that is now merely *stale* rather than empty — re-check its conditions against the new three-root world
+- [ ] Unit-test against `QTemporaryDir` only, never a path under `QDir::homePath()` — it cannot be redirected on Windows
+- [ ] Update `.github/README-BUILDS.md`, `scripts/packaging/windows/INSTALL_DECISION_FLOW.md` and the installer's user-data dialog text, which names `seamlyData` today
