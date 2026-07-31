@@ -225,15 +225,43 @@ function Get-DataRootPath {
 #------------------------------------------------------------------------------
 # @brief  Take an inventory of every tree the installer promises not to touch.
 #
-# @return array of inventory objects (data root, per-app settings, shared
-#         settings)
+# The set is deliberately FIXED rather than derived solely from the live
+# configuration, for two reasons found during the Task 51 laptop run:
+#
+#  - On a machine upgrading from the old NSIS build, ~/seamly2d already exists,
+#    so VCommonSettings::chooseFirstRunDataRoot() ADOPTS it as the data root
+#    instead of using ~/seamlyData. The user's patterns then live in ~/seamly2d
+#    and an inventory of ~/seamlyData alone watches an empty directory - exactly
+#    the case this check exists to cover.
+#  - Get-DataRootPath follows the configured root, which CHANGES the moment the
+#    apps first run and write paths/dataRoot. Baseline would then inventory one
+#    directory and a later phase a different one; because Assert-UserDataIntact
+#    matches on Path, the baseline entry would find no counterpart and report a
+#    failure that means nothing.
+#
+# Listing the configured root, both candidate roots and both settings folders
+# keeps the comparison stable across phases whichever root ends up live.
+#
+# @return array of inventory objects, de-duplicated by path
 #------------------------------------------------------------------------------
 function Get-UserDataInventory {
-    return @(
-        (Get-TreeInventory -Path (Get-DataRootPath)),
-        (Get-TreeInventory -Path (Join-Path $env:LOCALAPPDATA 'Seamly')),
-        (Get-TreeInventory -Path (Join-Path $env:APPDATA 'Seamly'))
+    $paths = @(
+        (Get-DataRootPath),
+        (Join-Path $env:USERPROFILE 'seamlyData'),
+        (Join-Path $env:USERPROFILE 'seamly2d'),
+        (Join-Path $env:LOCALAPPDATA 'Seamly'),
+        (Join-Path $env:APPDATA 'Seamly')
     )
+
+    $seen = @{}
+    $inventory = @()
+    foreach ($path in $paths) {
+        $key = $path.TrimEnd('\').ToLowerInvariant()
+        if ($seen.ContainsKey($key)) { continue }
+        $seen[$key] = $true
+        $inventory += (Get-TreeInventory -Path $path)
+    }
+    return $inventory
 }
 
 #------------------------------------------------------------------------------
