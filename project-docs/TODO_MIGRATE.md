@@ -411,12 +411,27 @@ Also specified: logs and recovery under `%LOCALAPPDATA%\Seamly\<app>\{Logs,Recov
 
 Settings today are **not** in the specified shape: `%APPDATA%\Seamly\qt6_common.ini` is a shared file at the parent level, and `%LOCALAPPDATA%\Seamly\<app>\qt6_<app>.ini` holds per-app *configuration* rather than cache. Moving to the table above means config consolidates under `%APPDATA%\Seamly\<app>\` and `%LOCALAPPDATA%` becomes cache/logs/recovery only — a settings migration in its own right, on top of the document migration. Task 15 established the current shape, so this supersedes it.
 
-- [ ] **Map all nine existing document subfolders onto the six proposed ones.** The proposal names `Projects, Patterns, Measurements, Layouts, Templates, Exports`, but the tree today is `patterns, measurements/{individual,multisize}, templates, bodyscans, label templates, images, backups, layouts`. **`bodyscans`, `label templates`, `images` and `backups` have no home in the new list** and migration cannot proceed until each is placed — including whether `backups` is user-visible at all or belongs under `Recovery\`
-- [ ] **Decide what `Projects` means.** There is no project concept in the apps today — a pattern is a single `.sm2d` file. Either define it or drop the folder; creating an empty folder users never fill is worse than not having it
-- [ ] **Decide whether `measurements/{individual,multisize}` keeps its two children** under the new `Measurements`
-- [ ] **macOS native `.plist` preferences** (`org.seamly.<app>.plist`) are listed as optional ("may"). **Recommendation: do not.** Everything uses `QSettings::IniFormat` deliberately so the three platforms behave identically and a settings file can be inspected or copied between them; `NativeFormat` on macOS would fork that behaviour for no functional gain
-- [ ] **Qt has no `StateLocation`**, so `~/.local/state/Seamly/…` must be composed by hand from `XDG_STATE_HOME` with the `~/.local/state` fallback; every other path in the table maps to a `QStandardPaths` value
-- [ ] Settle the above, then write the chosen layout into `.github/README-BUILDS.md` **before** any code change
+### Answered by the user, 2026-07-31 — these close the questions above
+
+- **Copy the tree WHOLESALE. Do not enumerate known subfolders.** Users have added their own directories under `seamly2d` — the user's own machine has `Projects` and `bodyscans` among them — so anything that migrates a fixed list silently strands the rest. This single rule also disposes of the "four folders have no home" problem: nothing is re-sorted, everything comes across.
+- **The structure is copied as-is and only the ROOT is renamed**, to `Seamly`. Existing subfolder names are preserved, so `measurements/` keeps `individual`, `multisize` **and any other directory found under it**. PascalCase subfolder names are therefore *not* part of this task — if wanted, that is a separate change with translation consequences (`vcommonsettings.cpp` names them through `tr()`).
+- **`backups` stays where it is for now.** It arguably belongs under `Recovery\`, and that is agreed in principle, but the behaviour is deliberately not being changed yet.
+- **`images` and `backups` belong to the Seamly2D application** — noted; whether `images` should ship *with the install* rather than living in the user tree is a separate packaging question, and wholesale copying makes it moot for migration purposes.
+- **`~/.local/state/…` is not needed**, so the missing Qt `StateLocation` is a non-issue. Logs and recovery stay where they are today.
+- **`Projects` is a real user folder**, not a concept the apps need to invent — the user already has one. Nothing to define; wholesale copy carries it.
+- **macOS `.plist` preferences: not adopted.** `QSettings::IniFormat` everywhere, so the three platforms behave identically.
+
+### Implementation decision (2026-07-31)
+
+**The migration lives in the applications, not the installer**, on the user's explicit "whatever approach you believe is efficient and also is easy to troubleshoot and maintain". A per-machine MSI custom action can only reach the *installing* user's profile (its server side runs as LocalSystem), cannot be unit-tested, does not exist on macOS or Linux so the logic would be written twice, and fails in the hardest place to diagnose. The same code in `VCommonSettings` runs for every user on every platform, is testable against `QTemporaryDir`, and can be logged and re-run.
+
+- [ ] `getDefaultDataRoot()` returns `<DocumentsLocation>/Seamly` (`QStandardPaths::DocumentsLocation`, which resolves `XDG_DOCUMENTS_DIR` on Linux and the known-folder API on Windows)
+- [ ] New migration function: recursive copy of the **entire** legacy tree, merge-never-overwrite (skip and report collisions), verify each file by size after copy, abort with the source intact on any failure, and never delete the source
+- [ ] Leave the legacy tree in place and drop a marker file in it naming the new root and the date, so it is not offered again and is obviously stale to a human
+- [ ] Wire it into `initializeDataRoot()`'s first-run path in place of adopt-in-place; a configured root is still honoured untouched
+- [ ] **A multi-gigabyte copy cannot block startup silently** — the user's own tree is ~17 GB on a cloud drive. Decide the UX (progress, cancel, or defer-and-offer) before this ships
+- [ ] Unit-test against `QTemporaryDir` only — never a path under `QDir::homePath()`
+- [ ] Write the chosen layout into `.github/README-BUILDS.md` and update the installer's user-data dialog text, which names `seamlyData` today
 
 ### Subtasks
 

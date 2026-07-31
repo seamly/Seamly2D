@@ -68,7 +68,7 @@ private slots:
     void init();
     void cleanupTestCase();
 
-    void DefaultDataRootIsSeamlyUnderHome() const;
+    void DefaultDataRootIsSeamlyUnderDocuments() const;
     void LegacyDataRootIsTheOldSeamly2dFolder() const;
     void UnconfiguredRootFallsBackToTheDefault() const;
     void EveryDefaultPathDerivesFromTheDataRoot() const;
@@ -81,6 +81,12 @@ private slots:
     void EnsureDataRootTreeCreatesTheSubfolders() const;
     void EnsureDataRootTreeKeepsExistingFiles() const;
     void StartupResolvesThenSeedsTheConfiguredRoot() const;
+
+    void MigrationCopiesTheWholeTreeIncludingUnknownFolders() const;
+    void MigrationNeverOverwritesAnExistingFile() const;
+    void MigrationLeavesTheSourceTreeIntact() const;
+    void MigrationRefusesADestinationInsideTheSource() const;
+    void MigrationMarksTheLegacyTree() const;
     void RebaseMovesPathsInsideTheOldRoot() const;
     void RebaseLeavesPathsOutsideTheOldRootAlone() const;
 

@@ -591,9 +591,26 @@ void ApplicationME::openSettings()
         QFile::copy(qt5Common, qt6Common);
     }
 
-    // Task 34: settle the one shared user-data root before any data path is read, adopting
-    // an existing ~/seamly2d tree in place when upgrading. Non-destructive and re-entrant.
-    VCommonSettings::initializeDataRoot();
+    // Task 34: settle the one shared user-data root before any data path is read. Resolves
+    // and records a path only — it touches no files, which is what keeps it safe for the
+    // unit tests to call.
+    bool adoptedLegacyTree = false;
+    VCommonSettings::initializeDataRoot(&adoptedLegacyTree);
+
+    // Task 60: when that resolution adopted an old ~/seamly2d tree, copy it out to the new
+    // <Documents>/Seamly root instead of using it where it stands. The whole tree is
+    // copied, including any folders the user added themselves; nothing is moved or deleted,
+    // and the legacy tree is left in place with a marker so a rollback stays possible. On
+    // any failure the legacy root simply stays configured and in use.
+    //
+    // Here rather than inside initializeDataRoot() for the same reason as the prune below:
+    // this is the only place the real home directory reaches it, so the unit tests cannot
+    // copy anything into the developer's home.
+    if (adoptedLegacyTree)
+    {
+        VCommonSettings::migrateAdoptedLegacyTree(VCommonSettings::getLegacyDataRoot(),
+                                                  VCommonSettings::getDefaultDataRoot());
+    }
 
     // Task 51: create the nine standard subfolders under that root. initializeDataRoot()
     // only resolves and records the path — it deliberately writes the setting directly
