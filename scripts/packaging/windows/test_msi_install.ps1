@@ -836,12 +836,30 @@ switch ($Phase) {
         }
 
         # The installer must not have disturbed the separate NSIS product.
+        # Task 51 step 2a INVERTED this expectation. The MSI used to detect the
+        # old NSIS product and leave it alone; it now removes it, because the
+        # MSI is a strict superset - NSIS ships seamly2d and seamlyme, this
+        # package ships both plus SeamlyLayout - so leaving it behind means two
+        # copies of each parent app and Start Menu shortcuts that launch the old
+        # binaries. All four things the .nsi created must be gone.
         if ($state.NsisInstallDir) {
-            Assert-That -Name 'the old NSIS installation is still present and untouched' `
-                -Succeeded ((Get-NsisInstallDir) -eq $state.NsisInstallDir -and (Test-Path -LiteralPath $state.NsisInstallDir)) `
-                -Detail "was '$($state.NsisInstallDir)'"
+            Assert-That -Name "the old NSIS install directory was removed" `
+                -Succeeded (-not (Test-Path -LiteralPath $state.NsisInstallDir)) `
+                -Detail "'$($state.NsisInstallDir)' still exists"
+            Assert-That -Name 'the NSIS Install_Dir registry key was removed' `
+                -Succeeded ([string]::IsNullOrEmpty((Get-NsisInstallDir)))
+            Assert-That -Name 'the NSIS Apps & features entry was removed' `
+                -Succeeded (-not (Test-Path -LiteralPath 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Seamly2D'))
+
+            # Per-user, because the .nsi never calls SetShellVarContext all.
+            $nsisStartMenu = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs\Seamly2D'
+            Assert-That -Name "the NSIS Start Menu folder was removed" `
+                -Succeeded (-not (Test-Path -LiteralPath $nsisStartMenu)) -Detail $nsisStartMenu
+
             Assert-That -Name 'the family MSI installed somewhere other than the NSIS directory' `
                 -Succeeded ($installFolder -and ($installFolder.TrimEnd('\') -ne ([string]$state.NsisInstallDir).TrimEnd('\')))
+        } else {
+            Write-Note 'no NSIS installation was present at Baseline - the removal path was not exercised by this run'
         }
 
         Assert-UserDataIntact -Earlier $state.BaselineData -Now $userData -Since 'Baseline'
@@ -949,9 +967,16 @@ switch ($Phase) {
         Assert-UserDataIntact -Earlier $state.LatestData -Now $userData -Since 'the last installed phase'
         Assert-UserDataIntact -Earlier $state.BaselineData -Now $userData -Since 'Baseline'
 
+        # The NSIS product was removed during install (step 2a) and is NOT
+        # restored by uninstalling this one - Windows Installer only puts back
+        # what it installed, and the old product was never ours to reinstate.
+        # Asserted so the state is recorded deliberately rather than assumed:
+        # a machine that had the old product and then removes this one ends up
+        # with neither, which is the intended outcome but worth pinning.
         if ($state.NsisInstallDir) {
-            Assert-That -Name 'uninstalling the family MSI left the old NSIS installation alone' `
-                -Succeeded ((Get-NsisInstallDir) -eq $state.NsisInstallDir -and (Test-Path -LiteralPath $state.NsisInstallDir))
+            Assert-That -Name 'the old NSIS installation stays removed after uninstall' `
+                -Succeeded (-not (Test-Path -LiteralPath $state.NsisInstallDir)) `
+                -Detail "'$($state.NsisInstallDir)' reappeared"
         }
 
         $state.Phase = 'Removed'
