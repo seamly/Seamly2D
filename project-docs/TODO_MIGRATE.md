@@ -391,11 +391,32 @@ Supersedes the **default locations** in Task 14 and Task 34/53. It does not supe
 - **Migration is copy-and-verify, and the legacy tree is left intact**, because a user may need to roll back to an earlier release. Never a bare rename. (Confirmed 2026-07-31; matches Task 14's existing cross-volume subtask.)
 - **The installer does not do this.** A per-machine MSI's server side runs as LocalSystem, so a per-user path resolves to the SYSTEM profile and would only ever cover whoever ran setup — and macOS and Linux have no MSI at all. It is app code on first run, where adoption happens today.
 
-### Three things to resolve before implementing
+### The specification (user, 2026-07-31)
 
-1. **`%APPDATA%\Seamly` is already taken.** Task 15 put the *settings* there — `%APPDATA%\Seamly\qt6_common.ini` and `%LOCALAPPDATA%\Seamly\<app>\`. So "shared application data → `%APPDATA%\Seamly`" is already true, and putting the document tree there too would break this task's own separation principle. **Recommendation: the document tree goes to `Documents\Seamly\`** (the proposal's own second sketch), and `%APPDATA%`/`%LOCALAPPDATA%\Seamly` keeps internal state exactly as it is now. That satisfies the principle with no change to settings at all.
-2. **The proposal gives two different taxonomies.** `Seamly/{Seamly2D, SeamlyMe, SeamlyLayout, Shared}` groups by *application*; `Documents/Seamly/{Patterns, Measurements, Layouts, Exports}` groups by *document type*. They cannot both be the layout. **Recommendation: by type.** Measurements are authored in SeamlyMe and consumed by Seamly2D; layouts are produced from a Seamly2D handoff and opened in SeamlyLayout — grouping by app would split data that two apps share and force a `Shared/` folder to hold most of it. By-type also maps onto the existing nine subfolders, so migration is a rename per folder rather than a re-sort of every file.
-3. **Relocatability must survive untouched.** The user's own use case is `G:\My Drive\...` for access while travelling, and `Documents` is frequently OneDrive-redirected already. Only the **default** changes; `paths/dataRoot` stays the single setting everything derives from.
+**The boundary that drives everything:** users see and manage `Documents/Seamly`; internal configuration, caches, logs and recovery stay in the operating system's application-data locations. Two trees, two different groupings — **application data by application, user documents by type**. (These are not competing taxonomies, as an earlier reading of the proposal assumed; they apply to different trees.)
+
+| Platform | Configuration | Cache | User documents |
+| --- | --- | --- | --- |
+| Windows | `%APPDATA%\Seamly\<app>\` | `%LOCALAPPDATA%\Seamly\<app>\Cache\` | `%USERPROFILE%\Documents\Seamly\` |
+| Linux | `$XDG_CONFIG_HOME/Seamly/<app>/` | `$XDG_CACHE_HOME/Seamly/<app>/` | `$XDG_DOCUMENTS_DIR/Seamly/` |
+| macOS | `~/Library/Application Support/Seamly/<app>/` | `~/Library/Caches/Seamly/<app>/` | `~/Documents/Seamly/` |
+
+Also specified: logs and recovery under `%LOCALAPPDATA%\Seamly\<app>\{Logs,Recovery}\` on Windows, `~/.local/state/Seamly/<app>/{Logs,Recovery}/` on Linux, `~/Library/Logs/Seamly/<app>/` on macOS; a `Shared\` sibling for genuinely shared internal data; and the document tree as `Documents/Seamly/{Projects, Patterns, Measurements, Layouts, Templates, Exports}`.
+
+**Linux must resolve `XDG_DOCUMENTS_DIR` rather than assuming the folder is literally named `Documents`** — localized systems rename it. Same for the other XDG variables when a user overrides them.
+
+**Relocatability is unaffected**: `paths/dataRoot` stays the single setting the document tree derives from, because `G:\My Drive\…` is the whole reason it exists and `Documents` is often OneDrive-redirected already. Only the *default* changes.
+
+### What this changes about today's layout, and what is still open
+
+Settings today are **not** in the specified shape: `%APPDATA%\Seamly\qt6_common.ini` is a shared file at the parent level, and `%LOCALAPPDATA%\Seamly\<app>\qt6_<app>.ini` holds per-app *configuration* rather than cache. Moving to the table above means config consolidates under `%APPDATA%\Seamly\<app>\` and `%LOCALAPPDATA%` becomes cache/logs/recovery only — a settings migration in its own right, on top of the document migration. Task 15 established the current shape, so this supersedes it.
+
+- [ ] **Map all nine existing document subfolders onto the six proposed ones.** The proposal names `Projects, Patterns, Measurements, Layouts, Templates, Exports`, but the tree today is `patterns, measurements/{individual,multisize}, templates, bodyscans, label templates, images, backups, layouts`. **`bodyscans`, `label templates`, `images` and `backups` have no home in the new list** and migration cannot proceed until each is placed — including whether `backups` is user-visible at all or belongs under `Recovery\`
+- [ ] **Decide what `Projects` means.** There is no project concept in the apps today — a pattern is a single `.sm2d` file. Either define it or drop the folder; creating an empty folder users never fill is worse than not having it
+- [ ] **Decide whether `measurements/{individual,multisize}` keeps its two children** under the new `Measurements`
+- [ ] **macOS native `.plist` preferences** (`org.seamly.<app>.plist`) are listed as optional ("may"). **Recommendation: do not.** Everything uses `QSettings::IniFormat` deliberately so the three platforms behave identically and a settings file can be inspected or copied between them; `NativeFormat` on macOS would fork that behaviour for no functional gain
+- [ ] **Qt has no `StateLocation`**, so `~/.local/state/Seamly/…` must be composed by hand from `XDG_STATE_HOME` with the `~/.local/state` fallback; every other path in the table maps to a `QStandardPaths` value
+- [ ] Settle the above, then write the chosen layout into `.github/README-BUILDS.md` **before** any code change
 
 ### Subtasks
 
