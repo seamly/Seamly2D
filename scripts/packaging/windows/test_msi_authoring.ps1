@@ -292,6 +292,27 @@ foreach ($component in @('Seamly2DDesktopShortcutComponent', 'SeamlyMeDesktopSho
         -Succeeded ($row.Count -eq 1 -and $row[0].Condition -eq 'SEAMLYDESKTOPSHORTCUTS')
 }
 
+# --- 6b. install location ------------------------------------------------------
+# The family installs into ProgramFiles64Folder\SeamlyApps. Both halves are
+# asserted because both have been wrong before in ways nothing else catches: the
+# 32-bit tree would be wrong for an all-x64/arm64 package (only the OLD NSIS
+# installer belongs there, being 32-bit), and the folder is named for the whole
+# family rather than for seamly2d alone.
+$directories = Get-MsiRows -Sql "SELECT ``Directory``, ``Directory_Parent``, ``DefaultDir`` FROM ``Directory``" `
+    -Columns 'Directory', 'Parent', 'DefaultDir'
+$installFolder = @($directories | Where-Object { $_.Directory -eq 'INSTALLFOLDER' })
+Assert-That -Name 'INSTALLFOLDER is defined exactly once' -Succeeded ($installFolder.Count -eq 1)
+if ($installFolder.Count -eq 1) {
+    # DefaultDir stores "short|long" when the name does not fit 8.3, and
+    # "SeamlyApps" (10 characters) does not - so compare the long half.
+    $longName = ($installFolder[0].DefaultDir -split '\|')[-1]
+    Assert-That -Name 'the install folder is named SeamlyApps' `
+        -Succeeded ($longName -eq 'SeamlyApps') -Detail "DefaultDir = '$($installFolder[0].DefaultDir)'"
+    Assert-That -Name 'the install folder sits under ProgramFiles64Folder' `
+        -Succeeded ($installFolder[0].Parent -eq 'ProgramFiles64Folder') `
+        -Detail "parent = '$($installFolder[0].Parent)'"
+}
+
 # --- 7. shortcuts --------------------------------------------------------------
 $shortcuts = Get-MsiRows -Sql "SELECT ``Shortcut``, ``Directory_``, ``Name``, ``Target``, ``Icon_``, ``WkDir`` FROM ``Shortcut``" `
     -Columns 'Shortcut', 'Directory', 'Name', 'Target', 'Icon', 'WorkingDirectory'

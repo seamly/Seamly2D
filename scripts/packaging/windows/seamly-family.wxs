@@ -15,7 +15,7 @@
  **  `wix build -arch arm64`, from this same source.
  **
  **  INSTALL LAYOUT
- **    [ProgramFiles64Folder]\Seamly2D\          seamly2d.exe, seamlyme.exe,
+ **    [ProgramFiles64Folder]\SeamlyApps\        seamly2d.exe, seamlyme.exe,
  **                                              SeamlyLayout.exe and the ONE
  **                                              Qt runtime all three share
  **                                              (merged windeployqt +
@@ -365,8 +365,15 @@
     </InstallUISequence>
 
     <!-- ================= directory tree + harvested runtimes ============= -->
+    <!-- ProgramFiles64Folder, not ProgramFiles6432Folder or the x86 tree: every
+         binary in this package is x64 (or arm64), so the 32-bit tree would be
+         wrong even though the OLD NSIS installer genuinely lives there because
+         it was a 32-bit installer. "SeamlyApps" rather than "Seamly2D" because
+         the folder holds the whole family - seamly2d, seamlyme and
+         SeamlyLayout - and naming it after one member misdescribes it and
+         collides confusingly with the NSIS product's own folder name. -->
     <StandardDirectory Id="ProgramFiles64Folder">
-      <Directory Id="INSTALLFOLDER" Name="Seamly2D">
+      <Directory Id="INSTALLFOLDER" Name="SeamlyApps">
         <!-- The single Qt runtime shared by all apps in this package (Qt DLLs,
              plugins, QML modules, QtWebEngineProcess.exe, MSVC CRT, xerces-c,
              SeamlyLayout's packaged settings\ and licenses\, ...), harvested
