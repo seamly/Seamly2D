@@ -62,13 +62,13 @@ Then:
 .\scripts\packaging\windows\smsi.ps1 -Arch arm64 -NoSeamlyLayout   # arm64 (needs arm64 build trees)
 ```
 
-Output: `scripts\seamly-build-msi\<arch>\Seamly2D-<arch>.msi` (gitignored). Only the `.msi` is produced — the `.wixpdb` symbol database is suppressed via `wix build -pdbtype none` (it is only used for `wix` patch/melt diffing, not by the shipped installer); to keep it for inspection, remove that flag from `$wixArguments` in `smsi.ps1`. The script then runs two checks, both of which fail the build:
+Output: `scripts\seamly-msi\<arch>\Seamly2D-<arch>.msi` (gitignored). Only the `.msi` is produced — the `.wixpdb` symbol database is suppressed via `wix build -pdbtype none` (it is only used for `wix` patch/melt diffing, not by the shipped installer); to keep it for inspection, remove that flag from `$wixArguments` in `smsi.ps1`. The script then runs two checks, both of which fail the build:
 
 1. `wix msi validate` (ICE checks, skip with `-SkipValidation`). ICE43 and ICE57 are suppressed for the reason given above; the only expected warning is **ICE61**, a known consequence of `AllowSameVersionUpgrades`.
 2. `test_msi_authoring.ps1`, which opens the built MSI and asserts ~50 expectations about what it contains — elevation, ARP properties, the upgrade and NSIS detection, both install-time dialogs and the wording of the warning, the Start Menu and desktop shortcuts, the three file associations, and the install-info registry rows. Run it by hand against any MSI:
 
    ```powershell
-   .\scripts\packaging\windows\test_msi_authoring.ps1 -Msi scripts\seamly-build-msi\x64\Seamly2D-x64.msi -ExpectSeamlyLayout
+   .\scripts\packaging\windows\test_msi_authoring.ps1 -Msi scripts\seamly-msi\x64\Seamly2D-x64.msi -ExpectSeamlyLayout
    ```
 
    It checks *content*, not behaviour: it cannot tell you whether a shortcut launches or Explorer shows the right icon. That is the manual checklist below.

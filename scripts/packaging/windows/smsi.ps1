@@ -38,9 +38,9 @@
     Build the Windows MSI installer for the Seamly app family (Task 13).
 
 .DESCRIPTION
-    Stages the already-built apps into <repo>\scripts\seamly-build-msi\<arch>\
+    Stages the already-built apps into <repo>\scripts\seamly-msi\<arch>\
     and runs `wix build` on scripts\packaging\windows\seamly-family.wxs to
-    produce scripts\seamly-build-msi\<arch>\Seamly2D-<arch>.msi. Only the .msi
+    produce scripts\seamly-msi\<arch>\Seamly2D-<arch>.msi. Only the .msi
     is written — the .wixpdb symbol database is suppressed with `-pdbtype none`
     (it is used only for wix patch/melt diffing, not by the installer).
 
@@ -123,8 +123,8 @@
 
 .NOTES
     "smsi" = seamly msi, following sd.ps1 ("seamly2d debug") / st.ps1
-    ("seamly2d tests"). Output and staging live in scripts\seamly-build-msi\,
-    which the *-build-* .gitignore pattern keeps out of the repository.
+    ("seamly2d tests"). Output and staging live in scripts\seamly-msi\ (or
+    whatever -OutputDirName names), which .gitignore lists by name.
 #>
 
 param(
@@ -147,7 +147,15 @@ param(
     [string]$WinDeployQt6,
 
     # Skip the ICE validation pass.
-    [switch]$SkipValidation
+    [switch]$SkipValidation,
+
+    # Name of the staging/output directory created under scripts\. Exposed as a
+    # parameter, and used in exactly one place below, so the name lives here
+    # rather than being repeated: renaming this directory on disk used to mean
+    # hunting literals through the script, the docs and the CI workflow. The
+    # workflow publishes scripts/<this>/<arch>/Seamly2D-<arch>.msi, so a change
+    # here has to be mirrored in .github/workflows/windows-msi.yml.
+    [string]$OutputDirName = 'seamly-msi'
 )
 
 # Stop on any PowerShell-level error; native tool failures are checked via
@@ -386,14 +394,18 @@ Write-Host "msvc crt    : $crtDir"
 
 # --- Stage ---------------------------------------------------------------------
 # Fresh staging tree per run:
-# <repo>\scripts\seamly-build-msi\<arch>\{parent,exes}
-# (the *-build-* .gitignore pattern keeps all of it untracked). The output lives
-# at the scripts\ root — a sibling of scripts\seamly2d-build-debug\ from sd.ps1 —
-# not beside this script, so it is anchored to $repoRoot.
+# <repo>\scripts\<OutputDirName>\<arch>\{parent,exes}
+# .gitignore lists that directory BY NAME - it used to be covered only by the
+# generic *-build-* pattern, which matched the old "seamly-build-msi"
+# incidentally, so renaming it silently made two 165 MB packages committable.
+# A new -OutputDirName needs a new .gitignore entry, and the CI workflow's
+# artifact path updated with it. The output lives at the scripts\ root - a
+# sibling of sd.ps1's shadow build - not beside this script, so it is anchored
+# to $repoRoot.
 #
 # 'parent' is now the ONE shared runtime tree for every app in the package
 # (Task 30); the separate 'layout' tree it used to sit beside is gone.
-$stageRoot = Join-Path $repoRoot "scripts\seamly-build-msi\$Arch"
+$stageRoot = Join-Path $repoRoot (Join-Path 'scripts' (Join-Path $OutputDirName $Arch))
 if (Test-Path $stageRoot) {
     Remove-Item $stageRoot -Recurse -Force
 }

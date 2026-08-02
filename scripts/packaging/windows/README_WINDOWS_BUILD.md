@@ -49,7 +49,7 @@ Result of the original run (two Qt runtimes; the Task 30 single-runtime MSI is
 substantially smaller):
 
 ```
-MSI OK: …\scripts\seamly-build-msi\x64\Seamly2D-x64.msi (186.8 MB)
+MSI OK: …\scripts\seamly-msi\x64\Seamly2D-x64.msi (186.8 MB)
 ```
 
 Verified with the Windows Installer COM API:
@@ -67,7 +67,7 @@ expected **ICE61** warning — a benign consequence of `AllowSameVersionUpgrades
 
 ### What the script does
 
-1. **Stages** a fresh tree under `scripts\seamly-build-msi\x64\`:
+1. **Stages** a fresh tree under `scripts\seamly-msi\x64\`:
    - `parent\` — seamly2d + seamlyme windeployqt trees merged (shared Qt runtime, plugins, xerces-c…) + MSVC CRT DLLs, exes removed
    - `layout\` — `SeamlyLayout.exe` with its own Qt runtime deployed by `windeployqt6 --qmldir …\qml --release`, packaged default `settings\`, LGPL `licenses\`, + MSVC CRT DLLs, exe removed
    - `exes\` — the three executables (authored explicitly in the `.wxs` so shortcuts/associations can reference them)
@@ -76,7 +76,7 @@ expected **ICE61** warning — a benign consequence of `AllowSameVersionUpgrades
 4. Runs `wix msi validate` (skip with `-SkipValidation`), suppressing ICE43 and ICE57 — both are false positives raised by the optional desktop-shortcut components; see [`README.md`](README.md).
 5. Runs [`test_msi_authoring.ps1`](test_msi_authoring.ps1) against the built MSI (Task 51): ~50 assertions covering elevation, the ARP properties, upgrade and NSIS detection, the two install-time dialogs, the shortcuts, the file associations and the install-info registry rows. This one is **not** covered by `-SkipValidation` — it is cheap and it guards a silent failure mode, an MSI that installs perfectly and does the wrong thing.
 
-Output and staging live in `scripts\seamly-build-msi\` (kept out of git by the
+Output and staging live in `scripts\seamly-msi\` (kept out of git by the
 `*-build-*` .gitignore pattern).
 
 - `Find-WinDeployQt6` now reads `CMAKE_PREFIX_PATH` from
@@ -120,7 +120,7 @@ Worth knowing: `src\app\seamlylayout\build.ps1`'s guard probes for the `Qt6WebEn
 ## 3. Installing / testing the MSI
 
 ```powershell
-cd scripts\seamly-build-msi\x64
+cd scripts\seamly-msi\x64
 msiexec /i Seamly2D-x64.msi                       # interactive (license + directory page)
 msiexec /i Seamly2D-x64.msi /qn                   # silent, defaults (needs elevation)
 msiexec /i Seamly2D-x64.msi /qn INSTALLFOLDER=D:\Seamly2D   # silent, custom dir

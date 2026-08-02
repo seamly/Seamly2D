@@ -162,7 +162,7 @@ the agent sandbox — the same failure occurs with the sandbox disabled:
 **Workaround used for this session's build — local only, nothing on the machine
 and nothing in `sd.ps1` was changed:** set `PATH`/`INCLUDE`/`LIB` by hand at
 `VC\Tools\MSVC\14.51.36231` + SDK `10.0.26100.0`, then run
-`C:\Qt\Tools\QtCreator\bin\jom\jom.exe -f Makefile` in `scripts/seamly2d-build-debug`.
+`C:\Qt\Tools\QtCreator\bin\jom\jom.exe -f Makefile` in `scripts/seamly2d-debug`.
 **The user should repair VS 18 Community from the Visual Studio Installer** —
 until then `sd.ps1` fails for them too.
 
@@ -254,8 +254,17 @@ with `wix extension remove`. `smsi.ps1` now requires it, and
   Run the other three by hand before pushing.
 - **`gh` is not on this agent shell's `PATH`** — invoke it as
   `& "C:\Program Files\GitHub CLI\gh.exe"`.
-- **The sandbox blocks a command containing both a `Remove-Item` and a `G:`
-  path**, even when they are unrelated. Split into separate calls.
+- **The sandbox blocks a command containing both a `Remove-Item` and a protected
+  path string** — `G:` paths and `C:\Program Files` have both triggered it, even
+  when the deletion targets something else entirely (the MSVC environment
+  variables set at the top of a build command are enough). Put deletions in
+  their own call.
+- **Renaming a shadow-build directory invalidates the whole tree.** qmake bakes
+  absolute paths into every generated Makefile, so after a rename the sub-builds
+  still look for `...\<old name>\...\vtools.lib` and fail with "dependent ...
+  does not exist". The tree can only be regenerated, not repaired: delete it and
+  re-run qmake. Same failure shape as the toolchain-change trap in
+  `.github/README-BUILDS.md`.
 - **PowerShell here-strings passed to `git commit -m` get mangled** when the
   message contains quotes; write the message to a file and use `git commit -F`.
 - **clangd diagnostics in this repo are noise.** The tree has no

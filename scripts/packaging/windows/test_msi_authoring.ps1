@@ -63,7 +63,7 @@
     package, which ships the two parent apps only.
 
 .EXAMPLE
-    .\test_msi_authoring.ps1 -Msi scripts\seamly-build-msi\x64\Seamly2D-x64.msi -ExpectSeamlyLayout
+    .\test_msi_authoring.ps1 -Msi scripts\seamly-msi\x64\Seamly2D-x64.msi -ExpectSeamlyLayout
 #>
 
 param(

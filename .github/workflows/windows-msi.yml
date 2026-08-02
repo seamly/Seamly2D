@@ -238,10 +238,10 @@ jobs:
           --alias "${{ secrets.SEAMLY_SIGNING_KEY_NAME }}" \
           --certfile .github/workflows/signing/codesign-chain.pem \
           --tsaurl http://timestamp.sectigo.com \
-          scripts/seamly-build-msi/${{ matrix.arch }}/Seamly2D-${{ matrix.arch }}.msi
+          scripts/seamly-msi/${{ matrix.arch }}/Seamly2D-${{ matrix.arch }}.msi
 
       - uses: actions/upload-artifact@v7
         with:
           name: Seamly2D-${{ matrix.arch }}.msi
-          path: scripts/seamly-build-msi/${{ matrix.arch }}/Seamly2D-${{ matrix.arch }}.msi
+          path: scripts/seamly-msi/${{ matrix.arch }}/Seamly2D-${{ matrix.arch }}.msi
           if-no-files-found: error

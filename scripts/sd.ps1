@@ -8,7 +8,7 @@
 # **  seamlyLayout's qd.ps1 precedent. Auto-locates the newest Qt
 # **  msvc2022_64 kit under C:\Qt (6.11.1 or newer) and the VS 18 Community MSVC environment,
 # **  then shadow-builds Seamly.pro with CONFIG+=debug into
-# **  scripts\seamly2d-build-debug\ (kept separate from the
+# **  scripts\seamly2d-debug\ (kept separate from the
 # **  release build\ tree).
 # **
 # **  @copyright
@@ -38,8 +38,9 @@
 
 .DESCRIPTION
     Shadow-builds the whole Seamly2D qmake project with CONFIG+=debug into
-    <repo-root>\scripts\seamly2d-build-debug\ (gitignored via the *-build-*
-    pattern), keeping it separate from the release build\ tree.
+    <repo-root>\scripts\seamly2d-debug\ (ignored by name in .gitignore),
+    keeping it separate from the release build\ tree. Override the directory
+    name with -BuildDirName, but add the new name to .gitignore if you do.
 
     Toolchain is auto-detected and the script fails early with a clear
     message naming whatever is missing:
@@ -51,7 +52,7 @@
 
     The seamly2d.pro post-link step runs windeployqt, so the Qt debug DLLs
     are deployed beside the executable automatically. The debug binary lands
-    at scripts\seamly2d-build-debug\src\app\seamly2d\bin\seamly2d.exe.
+    at scripts\seamly2d-debug\src\app\seamly2d\bin\seamly2d.exe.
 
 .PARAMETER Run
     Launch the freshly built debug seamly2d.exe after a successful build.
@@ -70,7 +71,15 @@
 
 param(
     # When set, launch the debug seamly2d.exe after a successful build.
-    [switch]$Run
+    [switch]$Run,
+
+    # Name of the shadow-build directory, created under scripts\. Exposed as a
+    # parameter, and used in exactly one place below, so the name lives here
+    # rather than being repeated through the script: renaming the directory on
+    # disk used to mean hunting literals through sd.ps1, st.ps1 and the docs.
+    # st.ps1 defaults to the same name and must be passed the same value if this
+    # one is overridden, since it runs the tests out of this tree.
+    [string]$BuildDirName = 'seamly2d-debug'
 )
 
 # Stop on any PowerShell-level error; native tool failures are checked via
@@ -161,9 +170,12 @@ if (-not (Test-Path $proFile)) {
 }
 
 # Dedicated shadow-build dir under scripts\, separate from the release build\
-# tree. The name matches the *-build-* .gitignore pattern, so it is never
-# committed.
-$buildDir = Join-Path $PSScriptRoot 'seamly2d-build-debug'
+# tree. .gitignore lists this directory BY NAME. It used to be covered only by
+# the generic *-build-* pattern, which matched the old "seamly2d-build-debug"
+# incidentally - so renaming the directory silently made gigabytes of build
+# output committable. Keep the two in step: a new -BuildDirName needs a new
+# .gitignore entry.
+$buildDir = Join-Path $PSScriptRoot $BuildDirName
 if (-not (Test-Path $buildDir)) {
     New-Item -ItemType Directory -Path $buildDir | Out-Null
 }
