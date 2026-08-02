@@ -1,0 +1,52 @@
+msiexec /i Seamly2D-x64-newer.msi /l*v "$env:USERPROFILE\Desktop\task51-upgrade.log"
+
+An existing installation was found.
+Welcome to the Seamly2D Setup Wizard.
+EULA.
+Destination Folder. Install Seamly2D to C:\Program Files\Seamly2D.
+Ready to install Seamly2D.
+Installing Seamly2D.
+Completed the Seamly2D Setup Wizard.
+
+----
+
+Select-String -Path "$env:USERPROFILE\Desktop\task51-upgrade.log" `
+    -Pattern "SeamlyShortcutsDlg|SeamlyPreviousInstallDlg|SEAMLYDESKTOPSHORTCUTS|Error 2\d{3}" |
+    Select-Object -ExpandProperty Line -First 40
+
+PS D:\Seamly-msi-test-installer\task51-test-kit> Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\NSIS_Seamly2D" -ErrorAction SilentlyContinue |
+>>     Select-Object Install_Dir
+>> Test-Path "C:\Program Files (x86)\Seamly2D"
+False
+PS D:\Seamly-msi-test-installer\task51-test-kit> msiexec /i Seamly2D-x64-newer.msi /l*v "$env:USERPROFILE\Desktop\task51-upgrade.log"
+PS D:\Seamly-msi-test-installer\task51-test-kit> Select-String -Path "$env:USERPROFILE\Desktop\task51-upgrade.log" `
+>>     -Pattern "SeamlyShortcutsDlg|SeamlyPreviousInstallDlg|SEAMLYDESKTOPSHORTCUTS|Error 2\d{3}" |
+>>     Select-Object -ExpandProperty Line -First 40
+>>
+DEBUG: Error 2826:  Control BottomLine on dialog PrepareDlg extends beyond the boundaries of the dialog to the right by 5 pixels
+MSI (c) (90:54) [18:20:16:153]: Doing action: SeamlyPreviousInstallDlg
+Action 18:20:16: SeamlyPreviousInstallDlg.
+Action start 18:20:16: SeamlyPreviousInstallDlg.
+DEBUG: Error 2826:  Control BannerLine on dialog SeamlyPreviousInstallDlg extends beyond the boundaries of the dialog to the right by 5 pixels
+The installer has encountered an unexpected error installing this package. This may indicate a problem with this package. The error code is 2826. The arguments are: SeamlyPreviousInstallDlg, BannerLine, to the right
+DEBUG: Error 2826:  Control BottomLine on dialog SeamlyPreviousInstallDlg extends beyond the boundaries of the dialog to the right by 5 pixels
+The installer has encountered an unexpected error installing this package. This may indicate a problem with this package. The error code is 2826. The arguments are: SeamlyPreviousInstallDlg, BottomLine, to the right
+Action 18:20:16: SeamlyPreviousInstallDlg. Dialog created
+Action ended 18:20:44: SeamlyPreviousInstallDlg. Return value 1.
+DEBUG: Error 2826:  Control BottomLine on dialog WelcomeDlg extends beyond the boundaries of the dialog to the right by 5 pixels
+DEBUG: Error 2826:  Control BannerLine on dialog LicenseAgreementDlg extends beyond the boundaries of the dialog to the right by 5 pixels
+DEBUG: Error 2826:  Control BottomLine on dialog LicenseAgreementDlg extends beyond the boundaries of the dialog to the right by 5 pixels
+DEBUG: Error 2826:  Control BannerLine on dialog InstallDirDlg extends beyond the boundaries of the dialog to the right by 5 pixels
+DEBUG: Error 2826:  Control BottomLine on dialog InstallDirDlg extends beyond the boundaries of the dialog to the right by 5 pixels
+DEBUG: Error 2826:  Control BannerLine on dialog VerifyReadyDlg extends beyond the boundaries of the dialog to the right by 5 pixels
+DEBUG: Error 2826:  Control BottomLine on dialog VerifyReadyDlg extends beyond the boundaries of the dialog to the right by 5 pixels
+DEBUG: Error 2826:  Control BannerLine on dialog ProgressDlg extends beyond the boundaries of the dialog to the right by 5 pixels
+DEBUG: Error 2826:  Control BottomLine on dialog ProgressDlg extends beyond the boundaries of the dialog to the right by 5 pixels
+Property(N): SEAMLYDESKTOPSHORTCUTS = 1
+Property(N): SecureCustomProperties = BURNMSIMODIFY;BURNMSIREPAIR;BURNMSIUNINSTALL;SEAMLYDESKTOPSHORTCUTS;SEAMLYNSISINSTALLDIR;SEAMLYNSISUNINSTALLSTRING;WIX_DOWNGRADE_DETECTED;WIX_UPGRADE_DETECTED
+Property(S): SEAMLYDESKTOPSHORTCUTS = 1
+Property(S): SecureCustomProperties = BURNMSIMODIFY;BURNMSIREPAIR;BURNMSIUNINSTALL;SEAMLYDESKTOPSHORTCUTS;SEAMLYNSISINSTALLDIR;SEAMLYNSISUNINSTALLSTRING;WIX_DOWNGRADE_DETECTED;WIX_UPGRADE_DETECTED
+DEBUG: Error 2826:  Control BottomLine on dialog ExitDialog extends beyond the boundaries of the dialog to the right by 5 pixels
+Property(C): SEAMLYDESKTOPSHORTCUTS = 1
+Property(C): SecureCustomProperties = BURNMSIMODIFY;BURNMSIREPAIR;BURNMSIUNINSTALL;SEAMLYDESKTOPSHORTCUTS;SEAMLYNSISINSTALLDIR;SEAMLYNSISUNINSTALLSTRING;WIX_DOWNGRADE_DETECTED;WIX_UPGRADE_DETECTED
+PS D:\Seamly-msi-test-installer\task51-test-kit>

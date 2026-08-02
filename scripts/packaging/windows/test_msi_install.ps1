@@ -245,10 +245,17 @@ function Get-DataRootPath {
 # @return array of inventory objects, de-duplicated by path
 #------------------------------------------------------------------------------
 function Get-UserDataInventory {
+    # Documents is resolved through the shell rather than assumed to be
+    # %USERPROFILE%\Documents: it is routinely redirected, and a OneDrive-backed
+    # profile puts it somewhere else entirely - which is exactly why the app
+    # resolves it through QStandardPaths rather than building the path by hand.
+    $documents = [Environment]::GetFolderPath('MyDocuments')
+
     $paths = @(
         (Get-DataRootPath),
-        (Join-Path $env:USERPROFILE 'seamlyData'),
-        (Join-Path $env:USERPROFILE 'seamly2d'),
+        (Join-Path $documents 'Seamly'),          # the Task 60 root
+        (Join-Path $env:USERPROFILE 'seamlyData'), # Task 53's root
+        (Join-Path $env:USERPROFILE 'seamly2d'),   # the original, still the source of a migration
         (Join-Path $env:LOCALAPPDATA 'Seamly'),
         (Join-Path $env:APPDATA 'Seamly')
     )
