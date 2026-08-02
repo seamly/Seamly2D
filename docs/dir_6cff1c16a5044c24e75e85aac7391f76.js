@@ -13,8 +13,6 @@ var dir_6cff1c16a5044c24e75e85aac7391f76 =
     [ "projectversion.h", "dc/d73/projectversion_8h.html", "dc/d73/projectversion_8h" ],
     [ "qxtcsvmodel.cpp", "d9/d26/qxtcsvmodel_8cpp.html", "d9/d26/qxtcsvmodel_8cpp" ],
     [ "qxtcsvmodel.h", "d4/d21/qxtcsvmodel_8h.html", "d4/d21/qxtcsvmodel_8h" ],
-    [ "seamly_family_paths.cpp", "d4/dce/seamly__family__paths_8cpp.html", "d4/dce/seamly__family__paths_8cpp" ],
-    [ "seamly_family_paths.h", "d2/dbc/seamly__family__paths_8h.html", "d2/dbc/seamly__family__paths_8h" ],
     [ "stable.cpp", "d7/d20/libs_2vmisc_2stable_8cpp.html", null ],
     [ "stable.h", "db/d17/libs_2vmisc_2stable_8h.html", null ],
     [ "vabstractapplication.cpp", "d0/df6/vabstractapplication_8cpp.html", null ],

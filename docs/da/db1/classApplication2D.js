@@ -19,7 +19,6 @@ var classApplication2D =
     [ "openSettings", "da/db1/classApplication2D.html#a1da39c4875a2498a0d323e3089fffef8", null ],
     [ "pointNameLanguages", "da/db1/classApplication2D.html#ab9747f73b57ae84a4563fdc86019035f", null ],
     [ "Seamly2DSettings", "da/db1/classApplication2D.html#a978f62b6565ede1bc1b0d920370bfeb0", null ],
-    [ "seamlyLayoutFilePath", "da/db1/classApplication2D.html#a111f477268b69695ba22d256119c0f1a", null ],
     [ "seamlyMeFilePath", "da/db1/classApplication2D.html#ab9a0e0ccc40693db35ca00669322cad8", null ],
     [ "setAutoSaveTimer", "da/db1/classApplication2D.html#a40f49fc9e5e7e0862e9f994985959644", null ],
     [ "setTheme", "da/db1/classApplication2D.html#a81284062d0a0ef844a100898eee712c1", null ],
@@ -29,6 +28,5 @@ var classApplication2D =
     [ "m_autoSaveTimer", "da/db1/classApplication2D.html#ae1af763ca32d78950acb26024d0a1a91", null ],
     [ "m_lockLog", "da/db1/classApplication2D.html#aef9d903c33517586ab31969ae75eb2fc", null ],
     [ "m_out", "da/db1/classApplication2D.html#a5883b6a892152f24482d80d9a9ceaab3", null ],
-    [ "m_settingsMigrated", "da/db1/classApplication2D.html#ae54ea0e782a21a50e17e3993777c9a0f", null ],
     [ "m_trVars", "da/db1/classApplication2D.html#aa363a4edd10ea8bd48900c8cce48ada3", null ]
 ];
