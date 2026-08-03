@@ -98,7 +98,7 @@ jobs:
         shell: bash
         run: echo "VERSION_NUMBER=$(date +%Y.%-m.%-d.%-H%M)" >> $GITHUB_ENV
 
-      - uses: ilammy/msvc-dev-cmd@v1
+      - uses: ilammy/msvc-dev-cmd@v1.13.0
         with:
           arch: ${{ matrix.msvc-arch }}
 
