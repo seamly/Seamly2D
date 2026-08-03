@@ -303,17 +303,33 @@ void InternalPathDialog::showContextMenu(const QPoint &pos)
     QAction *actionDelete = menu->addAction(QIcon::fromTheme("edit-delete"), tr("Delete"));
 
     QAction *selectedAction = menu->exec(ui->listWidget->viewport()->mapToGlobal(pos));
+    if (selectedAction == nullptr)
+    {
+        return; // menu dismissed
+    }
+
+    const QList<QListWidgetItem *> items = selectedRowItems(ui->listWidget, rowItem);
+
     if (selectedAction == actionDelete)
     {
-        delete ui->listWidget->item(row);
+        qDeleteAll(items); // deleting an item also removes it from the list
     }
     else if (rowNode.GetTypeTool() != Tool::NodePoint && selectedAction == actionReverse)
     {
-        rowNode.SetReverse(!rowNode.GetReverse());
-        info = getNodeInfo(rowNode, true);
-        rowItem->setData(Qt::UserRole, QVariant::fromValue(rowNode));
-        rowItem->setIcon(QIcon(info.icon));
-        rowItem->setText(info.name);
+        const bool reverse = !rowNode.GetReverse();
+        for (QListWidgetItem *item : items)
+        {
+            VPieceNode node = qvariant_cast<VPieceNode>(item->data(Qt::UserRole));
+            if (node.GetTypeTool() == Tool::NodePoint)
+            {
+                continue;
+            }
+            node.SetReverse(reverse);
+            info = getNodeInfo(node, true);
+            item->setData(Qt::UserRole, QVariant::fromValue(node));
+            item->setIcon(QIcon(info.icon));
+            item->setText(info.name);
+        }
     }
     //else if (selectedAction == actionNotch)
     //{
@@ -1376,31 +1392,8 @@ QString InternalPathDialog::getSeamAllowanceWidthFormulaAfter() const
 //---------------------------------------------------------------------------------------------------------------------
 void InternalPathDialog::setMoveExclusions()
 {
-    ui->moveTop_ToolButton->setEnabled(false);
-    ui->moveUp_ToolButton->setEnabled(false);
-    ui->moveDown_ToolButton->setEnabled(false);
-    ui->moveBottom_ToolButton->setEnabled(false);
-
-    if (ui->listWidget->count() > 1)
-    {
-        if (ui->listWidget->currentRow() == 0)
-        {
-            ui->moveDown_ToolButton->setEnabled(true);
-            ui->moveBottom_ToolButton->setEnabled(true);
-        }
-        else if (ui->listWidget->currentRow() == ui->listWidget->count() - 1)
-        {
-            ui->moveTop_ToolButton->setEnabled(true);
-            ui->moveUp_ToolButton->setEnabled(true);
-        }
-        else
-        {
-            ui->moveTop_ToolButton->setEnabled(true);
-            ui->moveUp_ToolButton->setEnabled(true);
-            ui->moveDown_ToolButton->setEnabled(true);
-            ui->moveBottom_ToolButton->setEnabled(true);
-        }
-    }
+    setMoveButtonState(ui->listWidget, ui->moveTop_ToolButton, ui->moveUp_ToolButton,
+                       ui->moveDown_ToolButton, ui->moveBottom_ToolButton);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

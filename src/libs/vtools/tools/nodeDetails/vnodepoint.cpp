@@ -339,7 +339,7 @@ void VNodePoint::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
         QMenu menu;
 
         const VPiece piece  = VAbstractTool::data.GetPiece(tool->getId());
-        bool isBuiltInSA    = piece.IsSeamAllowanceBuiltIn();
+        bool isBuiltInSA    = piece.hasSeamAllowanceBuiltIn();
         bool isHideSeamline = piece.isHideSeamLine();
         const int index     = piece.GetPath().indexOfNode(m_id);
         VPieceNode node     = piece.GetPath().at(index);
@@ -550,8 +550,8 @@ void VNodePoint::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
                 notchWidth   = qApp->Settings()->getDefaultNotchWidth();
                 notchCount   = 1;
                 isNotch      = true;
-                showCutline  = true;
-                showSeamline = true;
+                showCutline  = qApp->Settings()->showSeamAllowanceNotch();
+                showSeamline = qApp->Settings()->showSeamlineNotch();
             }
 
             if (selectedAction == actionSlit)
