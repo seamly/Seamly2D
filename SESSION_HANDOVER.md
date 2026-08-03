@@ -1,326 +1,305 @@
 # Session handover
 
-## Current state (2026-07-27, latest session): Task 59 DONE — the handoff now lays out, not just opens
+Only the **current** state lives here. Completed tasks are written up in
+`project-docs/TODO_COMPLETED.md`, and the reasoning behind shipped decisions
+lives beside the code it governs — for Windows packaging that is
+`scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
+re-accumulate finished-session narrative in this file.
 
-**Merged.** PR [#23](https://github.com/seamly/Seamly2D/pull/23) (`task-59-nested-piece-extraction` → `run-seamlyLayout`), commit `34f66462d5`, merge commit `11c0b0f4c5`. **All 13 CI checks green** — Windows x64 27m21s, Windows arm64 cross-compile 26m6s, macOS 8m53s, Linux AppImage 8m41s, Linux unit tests 9m28s, **Linux: Build & test SeamlyLayout (Qt 6.11) 4m57s**, CodeQL, CodeSee, Analyze actions/python/rust, version. Local and remote task branches deleted; local `run-seamlyLayout` = `origin/run-seamlyLayout` = `11c0b0f4c5`.
+## Current state (2026-08-02): Task 51's install cycle has been run twice; the findings are filed as Tasks 61-67
 
-Task 59 moved from `project-docs/TODO_MIGRATE.md` to `project-docs/TODO_COMPLETED.md` (full write-up at the top of that file).
+**Branch `task-51-msi-install-experience`, 12 commits, not pushed, no PR.**
+Tasks 51 and 60 stay open in `project-docs/TODO_MIGRATE.md`.
 
-### The bug and the shape of the fix
+The install-layout rework the user asked for "one thing at a time" is **complete**:
+step 1 (install to `C:\Program Files\SeamlyApps`) and step 2a (remove any
+pre-existing NSIS installation) are both implemented and both verified on the
+laptop. **There is no step 2b** — the user's message was cut off mid-sentence,
+and they later said not to expect more after 2a. Do not go looking for it.
 
-`SvgGenerator` wraps all 12 pieces in one `<g id="pattern-1" data-type="pattern">`, but `piece_extractor::extract_piece_rects()` treated each **direct child `<g>` of the SVG root** as a piece. The packer got one sheet-sized object: `0 placements, 1 unplaced: ["pattern-1"]`.
+### What run 2 proved (2026-08-02, packages `26.7.44158` → `26.7.44161`)
 
-**The decision that matters: normalise the document once, do not teach eight call sites a new tree shape.** `extract_piece_rects` is far from the only consumer of the flat assumption — `extract_piece_rects_and_polygons`, `layout_assembler::create_layout`, `oversized::build_oversized_svg` and `remaining::build_sheet_doc` all resolve a piece to its element through `PieceRect::group_index` (an index into the root's `<g>` children), and **`svg_dom::verticalize_dom` / `svg_dom::translate_dom` iterate `doc.root.children` directly**, so a wrapper would have verticalized and translated the whole pattern as one piece. New `piece_extractor::hoist_tagged_pieces()` re-parents the tagged pieces to the root before any of that runs; every other stage is untouched and `group_index` stays valid.
+The test machine is **Windows 10 22H2 (10.0.19045), PowerShell 5.1** — not
+Windows 11. That matters for one finding below.
 
-### Files changed (all under `src/app/seamlylayout/` — no Seamly2D parent source was touched)
+1. **Install lands in `C:\Program Files\SeamlyApps`**, unchanged across upgrade.
+2. **The NSIS installation is removed by the install** — all five checks passed
+   (directory, `Install_Dir` key, ARP entry, Start Menu folder, and the MSI
+   provably installed elsewhere), still with **no `CustomAction` in the package**.
+   Its `uninstall.exe` is never run; we delete what it created, which
+   `RemoveFiles` rolls back.
+3. **Task 60's migration works on a real profile** — `~/seamly2d` was copied
+   wholesale to `Documents\Seamly`: all eight existing folders including the
+   user-added `bodyscans`, plus the nine standard ones so `images` finally
+   exists; the legacy tree intact at 4 → 5 files (the gain is the marker); and
+   `MIGRATED-TO-SEAMLY.txt` naming the new root and date.
 
-| File | Change |
-| ---- | ------ |
-| `crates/cxxqt_bridge/src/piece_extractor.rs` | New `hoist_tagged_pieces()` + helpers (`take_tagged_pieces`, `join_transforms`, `is_tagged_piece`, `document_has_tagged_pieces`, `has_nested_tagged_piece`, `piece_identity`). Both extractors now select only `data-type="piece"` groups in tagged mode. `PieceRect` gained `name` / `letter` / `label()`. 10 new tests |
-| `crates/cxxqt_bridge/src/layout_utils.rs` | Calls the hoist on the `input_dom` clone (stage 2a); `label()` in the unplaced warning and all three `PackError` messages; `name`/`letter`/`label` added to the bbox JSON; new `mod tests` with the full-pipeline regression test |
-| `crates/cxxqt_bridge/src/sheets.rs` | `build_sheet_export_inputs` calls the hoist first — it mirrors the same preprocessing pipeline for sheet-mode PDF export |
-| `crates/cxxqt_bridge/src/lib.rs` | Exports `hoist_tagged_pieces`; `get_adjust_piece_boxes` emits `name`/`letter`/`label` |
-| `crates/cxxqt_bridge/src/{oversized,remaining}.rs` | Test `PieceRect` helpers updated for the two new fields |
-| `qt_frontend/src/adjust/PieceOverlayItem.{h,cpp}` | New `setDisplayLabel()` / `displayLabel()`; the context menu header shows the name, not the id. **Deliberately a setter, not a constructor parameter** — the constructor signature is used by `AdjustSceneTests` |
-| `qt_frontend/src/adjust/AdjustScene.cpp` | Reads `label` from the bbox JSON and passes it to the overlay item |
-| `crates/cxxqt_bridge/test_data/richmond-shirt-handoff_pieces.svg` | **New fixture, 101 KB** — genuine exporter output, `include_str!`'d by the pipeline test. **Deliberately not in `input/`:** `include_str!` makes it a compile-time dependency that must be tracked unconditionally, whereas `input/` is tracked only until development is complete |
-| `src/app/seamlylayout/CLAUDE.md`, `project-docs/SVG-DATA-ATTRIBUTES.md` | The discovery + identity contract on both sides |
+Also passing: one ARP entry after upgrade, newer build, unmoved directory, all
+three apps starting and staying running, all three associations resolving, a
+real `.sm2d` opening through ShellExecute.
 
-### Decisions worth not reversing
+**The `Removed` phase was never run** — the tester issued `msiexec /x` then
+`Stop-Transcript`. Nothing about uninstall is verified on a real machine.
 
-- **The tagged/untagged decision searches the whole tree**, not just the root's children. My first version checked only root children, and a test caught it: an un-hoisted handoff then fell back to the untagged rule and packed the wrapper. Now such a document yields **zero** pieces → the visible "No pattern pieces found" error, which is a much better failure than a silently wrong layout.
-- **Wrapper transforms are composed onto each hoisted piece** (`"<ancestor> <own>"`). Seamly2D writes no transform on the pattern group today, so this is a no-op in practice — kept and tested because a silently moved piece would be very expensive to find.
-- **A wrapper that still holds non-piece content is kept**, not deleted; it simply cannot pack, because tagged mode only accepts `data-type="piece"`.
-- **`id` stays the identity key everywhere.** `label()` (`data-name` → `data-letter` → `id`) is display-only.
+### The four failures, neither of which is a package defect
 
-### Verification
+- **Three Start Menu shortcut failures are a second checker bug**, same shape as
+  run 1's. `Get-AdvertisedShortcutTarget` accepts `MsiGetComponentPath` states
+  **4/5**; the constants are `INSTALLSTATE_LOCAL = 3` and
+  `INSTALLSTATE_SOURCE = 4`. All three returned 3 — installed locally — reported
+  as broken. **The shortcuts have been correct in both runs and the checker
+  wrong in both.** Fix is Task 61.
+- **ARP `DisplayIcon`** — diagnosed, no longer a mystery. `ARPPRODUCTICON` is set
+  and `ProductInfo(… ProductIcon=seamly2d.ico …)` executes, so Windows Installer
+  records the icon as *product metadata* and never writes the registry value.
+  The tester's by-eye check corroborates it: `appwiz.cpl` shows icon and
+  publisher, the Settings app shows neither, because Settings reads the registry
+  directly. Fix is Task 62.
 
-`cargo test --workspace` **265 passed / 0 failed** (252 at Task 49) · SeamlyLayout `ctest --preset debug` **5/5** · `build.ps1 -Preset debug` clean, exit 0 · launching `SeamlyLayout.exe <handoff>` still logs `[import_svg] 12 tagged pattern piece(s) found`.
+### Tasks 61-67 — run 2's findings, filed 2026-08-02
 
-**The end-to-end check is now a permanent test, not a one-off run.** `layout_utils::tests::richmond_shirt_handoff_packs_twelve_individual_pieces` drives `do_initialize_layout` + `do_process_layout` — the exact `ProcessLayoutArgs` the QML `process_layout` wrapper builds — against the committed exporter output, asserting 12 placements, 0 unplaced, 12 *distinct* slot positions, real piece names, and no `pattern-1`. **Confirmed load-bearing:** disabling the hoist call makes it fail. The GUI "Create Layout" button was *not* clicked (no GUI automation here); the test covers the identical code path.
+Filed as tasks rather than Task 51 subtasks because they span three areas (the
+checker, the package authoring, the applications).
 
-### `input/` SVGs are now tracked — standing user decision (2026-07-27)
+| Task | Problem                                                                                                                        |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 61   | checker:`INSTALLSTATE` constants; inventory snapshotted before the migration; sample pattern needs a `.smis` the kit lacks |
+| 62   | ARP`DisplayIcon` (and possibly `Publisher`) never written to the registry                                                  |
+| 63   | wizard says "Seamly2D" while installing three apps                                                                             |
+| 64   | previous-install dialog too long, and names the dead`seamlyData` path; absorbs the 2826 geometry fix                         |
+| 65   | destination-folder wording, and whether`INSTALLFOLDER` becomes `Seamly`                                                    |
+| 66   | one ARP entry for three apps                                                                                                   |
+| 67   | first-run modal dialogs swallow a pattern opened by double-click                                                               |
 
-`src/app/seamlylayout/.gitignore` ignored `/input` outright, so only the files that happened to be carried in by Task 19's directory move were tracked; `richmond-shirt-baseline_pieces.svg` and the two `MyMullerShirt-2_layout_*.svg` files were **untracked and invisible**, and earlier handover notes referred to the baseline SVG as though it were in the repo. On the user's instruction — *"track the input SVGs, we'll track these until we've completed development"* — the rule is now:
+**Task 61 must land before the uninstall leg**, or the same four false failures
+reappear in the next transcript.
 
-```gitignore
-/input/*
-!/input/*.svg
-!/input/*.sm2d
-```
+**Task 67 is the only genuine user-facing bug in the set.** Some of what the
+tester saw was the checker killing processes, but "double-click a pattern on a
+freshly installed machine and it does not open" is a real path, and the three
+apps disagree today — Seamly2D and SeamlyMe show a first-run dialog,
+SeamlyLayout shows none.
 
-`/input/*` rather than `/input` matters: **git does not descend into an ignored directory**, so negations under a bare `/input` are never evaluated. Tracking is now the default there, instead of depending on someone remembering `git add -f`.
+### Decisions the user made on these (act on them, do not re-ask)
 
-`input/2025-06-08-Sue.smis` (a measurements file) is **still ignored** — the instruction named SVGs, and the pattern `.sm2d` was already tracked. Add `!/input/*.smis` if it should be tracked too.
+- **Task 66 → keep one ARP entry and rename it "Seamly".** Display-only entries
+  for SeamlyMe and SeamlyLayout were rejected as misleading (uninstalling
+  "SeamlyMe" would remove all three); three products or a Burn bundle is far
+  larger than the problem. Note `test_msi_install.ps1` finds the product by
+  `UpgradeCode`, not DisplayName — deliberately, because the old NSIS product
+  also called itself "Seamly2D" — so the rename breaks assertions, not lookup.
+- **Task 63 → the "Seamly2D Project" → "Seamly Project" rename is
+  package-and-About ONLY.** `Manufacturer`/`ARPPUBLISHER`, the three exes'
+  version resources, and the About boxes. **Source-file copyright headers stay
+  "2026 Seamly2D Project"** as `CLAUDE.md` specifies. Do not extend this while
+  editing nearby code.
 
-**When development is complete this is meant to be reverted**, which is exactly why the Task 59 test fixture lives in `crates/cxxqt_bridge/test_data/` and not here: `include_str!` makes it a compile-time dependency that must be tracked unconditionally.
+### Still open on Task 51 itself
 
-### Machine-state note (not in git)
+- **`SeamlyShortcutsDlg` never displays.** The `ControlEvent` row is in the
+  shipped MSI and correct in every column (condition `1`, ordering 2, ahead of
+  the built-in `NewDialog` at 4), `Dialog` `Attributes = 7`, and the `/l*v` log
+  shows **no attempt to create it**. Root cause is the WiX version: the design
+  notes assumed v3/v4's `InstallDirDlg`, but this is **WiX 6.0.2**, whose
+  `InstallDirDlg` Next publishes `CheckTargetPath` (a v6 built-in in the UI
+  extension's `uica.dll`) and the `SpawnDialog` is skipped in that chain.
+  `SEAMLYDESKTOPSHORTCUTS` defaults to 1, so shortcuts are created and every
+  automated check passes: the default works, the *choice* is never offered. Creat
+  **Do not chase this by rebuilding the 165 MB package per attempt** — build a
+  small UI-only MSI with the same `ui:WixUI` reference and dialogs; it compiles
+  in seconds and can be clicked through and cancelled at Ready.
+- The four "verify …" subtasks and Task 13's outstanding subtask all close on
+  the uninstall leg.
 
-A **stale `SeamlyLayout.exe` debug process from a previous session (PID 37316, 01:47) held the build outputs locked** and would not die — `taskkill` reported "no running instance" while `Get-Process` still listed it with `HasExited=True`. `build.ps1`'s own `Stop-Process` could not clear it either. Fix: rename `SeamlyLayout.exe`, `SeamlyLayout.pdb` and `SeamlyLayout.lib` aside (renaming worked where deleting/killing did not), rebuild, then delete the `*.stale` files. Worth trying first if a link fails with LNK1168 / LNK1201.
+### Open question, not yet answered
+
+**Task 65 reverses a settled decision.** The tester's requested destination-page
+wording implies `C:\Program Files\Seamly`, not `SeamlyApps` — which run 2 just
+verified end to end. Renaming invalidates both staged MSIs, every path assertion
+in both test scripts, `INSTALL_DECISION_FLOW.md` and the READMEs. There is also
+a wrinkle: showing `C:\Program Files\` in the edit box while silently appending
+`Seamly` means the control no longer displays the path it edits. **Ask before
+changing `INSTALLFOLDER`**. -->
+- use `C:\Program Files\` as the default parent program directory and `Seamly` as the program directory (child of the parent program directory), display the final program directory path (user selected parentprogramdrive & parentprogramdirectory + `Seamly`) to the user then accept OK to continue or Cancel to exit. This question is now answered to follow recommended best practices for naming application directories.
+
+### Task 60 — implemented, and verified where it counts least
+
+`getDefaultDataRoot()` → `<DocumentsLocation>/Seamly`; `migrateDataTree()` does a
+wholesale recursive copy, merge-never-overwrite, size-verified per file,
+refusing a destination nested inside the source and never deleting the source;
+`markDataTreeMigrated()` / `dataTreeWasMigrated()` handle the marker;
+`migrateAdoptedLegacyTree()` repoints `paths/dataRoot` **only after** the copy
+verifies. `TST_DataRoot` is 28 cases.
+
+**The one subtask that matters most is untested:** the laptop's legacy tree was
+four files, so the copy was instant. **A multi-gigabyte copy still blocks
+startup silently** — the user's own tree is ~17 GB on a cloud drive — and the UX
+(progress, cancel, or defer-and-offer) is undecided. -->
+- Prompt the user whether to copy current data files to new directory location (Y/N). This question is now answered to follow recommended best practices for updating applications.
+
+Two Task 60 subtasks remain: three-root detection (only the `~/seamly2d`-alone
+case has been exercised) and `pruneEmptyLegacyDataRoot()` against the new
+three-root world. -->
+- list the remaining two cases that have not been excercised to the user
+
+### The test kit, and where the evidence is
+
+`scripts/seamly-msi/task51-test-kit/` holds both MSIs, `test_msi_install.ps1`,
+`sample-pattern.sm2d`, the annotated `RUN-ME-FIRST.md`, `task51-run2.txt` and
+`task51-upgrade.log`. **That whole directory is no longer gitignored** (`.gitignore:115`),
+so the next run 2's transcript and the tester's annotations will be **saved by git**. The
+eight earlier transcripts are tracked in `installation-troubleshooting/`.
 
 ### Next steps
 
-1. **Task 51** — the Windows MSI install-time experience; its upgrade-warning wording must say **`seamlyData`**.
-2. **Task 14** — the check-and-move flow for an existing data tree (also needed by Tasks 35/36/37; satisfies Task 38).
-3. **Task 52** — the `vsettings.cpp` "Unknown Organization" stray, starting with its `CollectionTest` isolation subtask.
-4. **Task 54** — rename the three `vmisc` settings files *and* their classes (`SettingsCommon.h`); the 22 `.ts` `tr()` contexts must move in the **same commit**.
-5. **Task 55** — the developer-README refresh; the rename to `.github/README-DEVELOPER-SEAMLY-FAMILY.md` has still not been done.
-6. `src/app/seamly2d/core/BUILD_PROBLEMS.txt` — the user said to delete it if it is not useful; still not done.
-
-Blocked, not startable here: Tasks 13/38/39/40 (clean VM, arm64, macOS, Linux hardware), Task 33/41 (KMS credentials).
-
-## Earlier state (2026-07-27): Task 49 DONE and MERGED — the Seamly2D → SeamlyLayout handoff finally opens the pattern
-
-**Merged.** PR [#22](https://github.com/seamly/Seamly2D/pull/22) (`task-49-seamlylayout-svg-argument` → `run-seamlyLayout`), commit `f720df1b63`, merged by the user with a fast-forward merge and pushed to `origin/run-seamlyLayout`. **All 13 CI checks green** — Windows x64 (28m19s), Windows arm64 cross-compile (26m16s), macOS (12m53s), Linux AppImage, Linux unit tests, **Linux: Build & test SeamlyLayout (Qt 6.11) 5m5s** (the leg that runs the new `StartupOptionsTests`), CodeQL, CodeSee, Analyze actions/python/rust, version. Local task branch deleted; the remote one was deleted on merge.
-
-The user then committed `fc487aec93` "pass svg argument to seamlyLayout" on top — **no code**, only `.claude/settings.local.json` (this session's auto-approval entries) and two screenshots into `project-docs/`.
-
-**`.claude/settings.local.json` is no longer tracked** (`84724ac5c2`). It had been tracked *deliberately*: `.gitignore:189` read `!.claude/settings.local.json`, an explicit negation commented "track Claude Code personal overrides (shared settings.json is committed)", and no other rule in the file matched that path. The harness rewrites it on every permission grant, so it kept accumulating absolute `C:\Users\susan\…` paths and session ids — the same class of leak Task 50's coding rule targets, in a repo headed for the upstream PR. Untracking alone would not have held: with only the negation removed the file shows as *untracked* rather than ignored, and the next `git add -A` re-commits it (which is exactly how it reached `fc487aec93`), so the negation was replaced by a plain ignore rule at `.gitignore:193`. The shared `.claude/settings.json` is unaffected and stays committed. **To reverse:** flip line 193 back to `!.claude/settings.local.json` and re-add the file.
-
-Local `run-seamlyLayout` = `origin/run-seamlyLayout` = `fc487aec93`; local `develop` = `origin/develop` = `057e95bfca`.
-
-### What Task 49 changed
-
-SeamlyLayout read `argc`/`argv` only to hand them to `QApplication`, so the `.pieces.svg` seamly2d wrote and passed was discarded and the window came up empty.
-
-| File                                                                        | Change                                                                                                                                                                                                                                                                                               |
-| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/app/seamlylayout/qt_frontend/src/StartupOptions.{h,cpp}`             | **New.** Value class (no QObject, no GUI) parsing the one positional `<svg-file>` with `QCommandLineParser::parse()` — the non-exiting sibling of `process()` — and validating it. Four statuses: `NoFile`, `OpenFile`, `ShowInformation` (`--help`/`--version`), `Failed` |
-| `src/app/seamlylayout/qt_frontend/main.cpp`                               | Parses after the app metadata is set (so`--version` can report it); dispatches on `QTimer::singleShot(0, …)` **after** the event loop starts, because the QML window and its WebEngine canvases must exist first                                                                          |
-| `src/app/seamlylayout/qt_frontend/qml/Main.qml`                           | New`openSvgFile(localPath)` (the file dialog now calls it too — one entry point) and `reportStartupError(message)`; new `onImportWarning` handler                                                                                                                                             |
-| `crates/cxxqt_bridge/src/piece_extractor.rs`                              | New`count_tagged_pieces()` (recursive `data-type="piece"` count) + 3 unit tests                                                                                                                                                                                                                  |
-| `crates/cxxqt_bridge/src/lib.rs`                                          | New`import_warning` qsignal; `import_svg` emits it when the imported SVG carries no piece tagging — **a warning, never an error**, because untagged SVGs still lay out                                                                                                                    |
-| `src/libs/vmisc/seamly_family_paths.{cpp,h}`                              | New`piecesSvgFilePath()` and `seamlyLayoutLaunchArguments()` — the seamly2d half of the contract, extracted out of `mainwindow.cpp` so it has one definition and one test                                                                                                                     |
-| `src/app/seamly2d/mainwindow.cpp`                                         | `exportPiecesToSeamlyLayout()` now calls both; added the `seamly_family_paths.h` include                                                                                                                                                                                                         |
-| `src/test/SeamlyLayoutTest/StartupOptionsTests.cpp`                       | **New**, 5th ctest target (guiless), 18 cases                                                                                                                                                                                                                                                  |
-| `src/test/Seamly2DTest/tst_seamlyfamilypaths.{cpp,h}`                     | 6 new cases for the contract                                                                                                                                                                                                                                                                         |
-| `src/app/seamlylayout/CLAUDE.md`, `project-docs/SVG-DATA-ATTRIBUTES.md` | The contract, written down on both sides                                                                                                                                                                                                                                                             |
-| `project-docs/TODO_MIGRATE.md` / `TODO_COMPLETED.md`                    | Task 49 moved across;**new Task 59 filed** (below)                                                                                                                                                                                                                                             |
-| `.claude/settings.json`                                                   | Allowlist entries for the repo's build/test scripts +`ctest` (the user asked for this mid-session after a prompt on `sd.ps1`)                                                                                                                                                                    |
-
-### Decisions recorded in the contract (do not quietly reverse them)
-
-- **No single-instance handling** — every launch is its own process and window; one document per process (no tabs), which is also why a *second* positional argument is rejected rather than queued.
-- **A bad argument does not exit.** The message goes to the QML error dialog and the app stays open with an empty canvas — a detached launch has no console to print to.
-- **`--help`/`--version` go to a `QMessageBox`**, because this is a WIN32-subsystem binary with no console on Windows.
-- **Untagged SVGs are opened, not refused** — warning only.
-
-### Verification (all local, all passing)
-
-`scripts/sd.ps1` exit 0 · `scripts/st.ps1` **32133 passed / 0 failed, 25 suites** (`TST_SeamlyFamilyPaths` 15 → 21) · `ParserTest` 0 · `TranslationsTest` 0 · SeamlyLayout `ctest --preset debug` **5/5** (`StartupOptionsTests` 19 passed / 1 skipped — the unreadable-file case, NTFS) · `cargo test --workspace` **252 / 0 across 20 targets**.
-
-**End-to-end, with a genuine handoff file:** `seamly2d.exe <pattern>.sm2d -b handoff -d <dir> -f 0 --exportOnlyDetails` produces a tagged SVG through the same `exportSVG()` `generatePiecesSvg()` uses (12 `data-type="piece"` groups). `SeamlyLayout.exe <that file>` logs `main(): opening startup file …` then `[import_svg] 12 tagged pattern piece(s) found`. The untagged baseline SVG logs the `no data-type="piece" groups` warning; a non-existent path logs the startup error. **All three paths confirmed.**
-
-### THE CollectionTest LOOSE END IS CLOSED — it is pre-existing
-
-The previous session's unfinished baseline check was completed here. With every Task 49 source change stashed and the tree rebuilt, `TST_Seamly2DCommandLine::TestOpenCollection(07_armhole_adjustment_010)` fails **identically** (42 passed / 1 failed). Unrelated to Tasks 49/50. Two facts worth keeping:
-
-- **`CollectionTest.exe` must be run with its working directory set to its own `bin/`.** `initTestCase()` removes `tst_seamly2d_tmp` *relative to the CWD* but creates it under `applicationDirPath()`, so running it from anywhere else aborts on a leftover directory from the previous run ("Fail to prepare test files for testing").
-- The failure presents as either "Program crashed" or "The finish operation timed out" against `AbstractTest::Run()`'s 120 s limit.
-
-### NEW — Task 59, filed not fixed: the layout packs the whole pattern as one piece
-
-Found by the end-to-end run and **the most valuable thing in this session after the fix itself.** `piece_extractor::extract_piece_rects()` treats each direct child `<g>` of the SVG root as a piece, but the tagged handoff nests all 12 pieces inside one `<g id="pattern-1" data-type="pattern">`. The packer therefore receives a single sheet-sized object: `0 placements, 1 unplaced: ["pattern-1"]`. Task 49 made the handoff *open*; Task 59 (`project-docs/TODO_MIGRATE.md`, bottom) makes it *lay out*. It should be the next task.
-
-### Loose ends carried forward
-
-- `src/app/seamly2d/core/BUILD_PROBLEMS.txt` — the user said to delete it if it is not useful; **not done in this session** (out of Task 49's scope).
-- ~~`.claude/settings.local.json`~~ — **resolved in `84724ac5c2`**, see the current-state section above. It is untracked and genuinely ignored now.
-- The user's own uncommitted edits to `SESSION_HANDOVER.md` and `project-docs/TODO_SEAMLYLAYOUT.md` (Task 57 deleted) were present at session start and went into the Task 49 commit.
-
-### NEXT STEPS — this list supersedes the older "Concrete next steps" further down
-
-1. **Task 59** — the layout stage packs the whole pattern as one piece (see above). Highest value: Task 49 made the handoff open, this makes it *work*. `project-docs/TODO_MIGRATE.md`, bottom of the file.
-2. **Task 51** — the Windows MSI install-time experience plus the clean-machine install/upgrade/uninstall cycle. Its upgrade-warning wording must say **`seamlyData`**.
-3. **Task 14** — the check-and-move flow for an existing data tree (nine subtasks). Shared cross-platform code; also needed by Tasks 35/36/37 and satisfies Task 38.
-4. **Task 52** — the `vsettings.cpp` "Unknown Organization" stray, **starting with** its `CollectionTest` isolation subtask.
-5. **Task 54** — rename the three `vmisc` settings files *and* their classes. The blocking decision is now answered: **`SettingsCommon.h`**, file name matching the class name. Wide but mechanical — ~620 class occurrences over 25 files, and the 22 `.ts` `tr()` contexts must move in the **same commit** or ~220 translated strings go obsolete.
-6. **Task 55** — the developer-README refresh. Per the user's answer, the target is now `.github/README-DEVELOPER-SEAMLY-FAMILY.md` (renamed from `-NEW`), maintained separately until the migration completes and then folded into `README-DEVELOPER.md`. **Neither rename nor fold has been done yet.**
-6. **Task 57** — premise superseded by the style-guide carve-out; decide whether to delete it (as Task 56 was) or keep only the `error.rs` ×2 collision. *(The user deleted this task from `project-docs/TODO_SEAMLYLAYOUT.md` in an uncommitted edit that the Task 49 commit carried in, so this may already be closed — check that file first.)*
-
-Blocked, not startable here: Tasks 13/38/39/40 (clean VM, arm64, macOS, Linux hardware), Task 33/41 (KMS credentials).
-
-## Earlier state (2026-07-27, later session): Tasks 45 and 50 done — committed and pushed to `run-seamlyLayout`
-
-**Branch:** `run-seamlyLayout`, committed directly (no PR) — the user explicitly asked for stage + commit + push to origin `run-seamlyLayout`, skipping the `develop` pull and the task-branch/PR cycle in `CLAUDE.md`.
-
-### What was asked
-
-The session opened with an analysis question: *which task in `project-docs/TODO_MIGRATE.md` should be done next?* The answer given was **Task 49** (SeamlyLayout ignores the SVG path argument — verified still true: `qt_frontend/main.cpp` passes `argc`/`argv` to `QApplication` and never reads them; `AppController::import_svg()` already exists at `crates/cxxqt_bridge/src/lib.rs:863` and is what the QML Import button calls at `qml/Main.qml:850`, so the plumbing for the fix is in place). Every other open task in that file is blocked on hardware (clean VM / arm64 / macOS / Linux), on KMS credentials, or on a user decision. **The user then chose Tasks 45 and 50 instead.** Task 49 remains the recommended next item.
-
-### Task 45 — stale Qt 6.10.1 paths in the Claude allowlists (DONE, moved to `project-docs/TODO_COMPLETED.md`)
-
-Both entries turned out to be **redundant with broader rules already present**, so the fix is removal, not a version bump — which makes them permanently version-agnostic:
-
-- `.claude/settings.json:154` — the compound `Test-Path "C:\Qt\6.10.1\…"; & …vswhere.exe …` was already covered by `PowerShell(Test-Path *)` on line 10. Replaced with one version-agnostic prefix entry naming no Qt version: `PowerShell(& "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" *)`
-- `.claude/settings.local.json:17` and `:19` — both deleted. That file opens with `PowerShell(*)` / `Bash(*)`, which already allow everything in it. ~~**This file is gitignored (`.gitignore:189`)**, so that half exists only on this machine and is *not* in the commit~~ — **wrong, corrected 2026-07-27:** `.gitignore:189` was `!.claude/settings.local.json`, a *negation* that force-tracked the file. The deletions were left out of commit `4a6054ab14` because they were never staged, not because git was ignoring them; they reached origin later inside the user's `fc487aec93`. (Verified: no `6.10.1` entry survives anywhere.) The file is untracked and ignored for real as of `84724ac5c2`
-
-Both files re-validated as parseable JSON.
-
-### Task 50 — hard-coded developer path in `application_2d.cpp` (DONE, moved to `project-docs/TODO_COMPLETED.md`)
-
-- **New `SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(startDirectory)`** in `src/libs/vmisc/seamly_family_paths.{cpp,h}`. Walks up from the running executable's directory, testing each ancestor as a checkout root for `<root>/src/app/seamlylayout/qt_frontend/build/<config>/SeamlyLayout(.exe)`. Both shadow-build layouts resolve without being named — release `<checkout>/build/…` (5 levels) and `sd.ps1`'s debug `<checkout>/scripts/seamly2d-build-debug/…` (6). **Bounded at 8 parents** so it cannot climb to the filesystem root. **Release preferred over Debug** (the old path pinned Debug unconditionally). Put in `vmisc` beside `locateSeamlyLayout()` so the test suite reaches it, and **parameterized on the start directory** per the Task 34/53 rule, so tests use `QTemporaryDir`
-- `application_2d.cpp:515` now calls it; the dev build stays **last** in the lookup chain, after the configured setting and the installed copy, so a source tree can never shadow an installation
-- **Coding-rules note** added to `.github/README-CODE-STYLES.md`: "No absolute machine-specific paths in source", with allowed alternatives, an explicit carve-out for placeholder comments and test data, and a `git grep` command
-
-**A CI gate was deliberately not added** — measured first, and a naive grep is unusable: `tst_misc.cpp` has ~20 synthetic `/home/user/...` rows, `tst_dataroot.cpp` uses `C:/Users/tester/...`, and `vcommonsettings.cpp` / `PreferencesModel.cpp` carry `C:/Users/<user>/...` Doxygen placeholders — all legitimate. Telling a real home directory from a placeholder needs a human.
-
-### Flagged, NOT fixed — decide before the upstream PR
-
-**`src/app/seamly2d/core/BUILD_PROBLEMS.txt` is tracked and carries ~45 absolute `/c:/Users/susan/Projects/Seamly2D-private/…` paths** — the same leak Task 50 just closed in code, and it names the *private* repo directory. It is the clangd dump described further down this file (editor noise; the qmake build compiles those files clean). Deleting a tracked file was outside the task's scope. This is the single most likely thing to embarrass the upstream PR. --> user says to delete `src/app/seamly2d/core/BUILD_PROBLEMS.txt`if it isn't useful.
-
-### Verification — read this before trusting the state
-
-| Check                              | Result                                                                                                                                                                     |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `scripts/sd.ps1` debug build     | **Clean, exit 0**                                                                                                                                                    |
-| `scripts/st.ps1` (Seamly2DTests) | **32127 passed, 0 failed across 25 suites**, exit 0. `TST_SeamlyFamilyPaths` 5 → 13 cases (reported as 15 with init/cleanup); total up exactly +8                 |
-| `ParserTest`                     | exit 0                                                                                                                                                                     |
-| `TranslationsTest`               | exit 0                                                                                                                                                                     |
-| `CollectionTest`                 | **exit 1 — 42 passed, 1 failed.** `TST_Seamly2DCommandLine::TestOpenCollection(07_armhole_adjustment_010)` "Program crashed", `tst_seamly2dcommandline.cpp:302` |
-
-**The CollectionTest failure is pre-existing per the user, but that was NOT confirmed.** Evidence it is unrelated: the only caller of the changed `seamlyLayoutFilePath()` is `mainwindow.cpp:4136` inside `exportPiecesToSeamlyLayout()`, the GUI Layout Mode handoff, which a console `seamly2d --test <pattern>` run never enters. The definitive check — stash the change, rebuild, rerun that one case — was started and **interrupted by the user before the baseline build ran**, so it is unfinished. Note also that the previous session's handover records `ParserTest` and `TranslationsTest` as verified but **never mentions running `CollectionTest`**, so there is no known-good baseline for it either way.
-
-> **RESOLVED in the Task 49 session — do not redo this check.** The baseline run was completed: with all changes stashed and the tree rebuilt, the same case fails identically. Pre-existing and unrelated. See "THE CollectionTest LOOSE END IS CLOSED" in the current-state section at the top.
-
-**A stash hazard was hit and cleared:** the source changes were stashed for that baseline test and the session was interrupted while stashed. They were restored with `git stash pop` (all 9 files back, stash dropped) before committing. If a future session interrupts mid-stash, check `git stash list` first. --> user pushed to origin/run-seamlyLayout, currently nothing to commit.
-
-### Files changed
-
-| File                                                         | Change                                                                                                                                                                    |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `src/libs/vmisc/seamly_family_paths.cpp` / `.h`          | New`locateSeamlyLayoutDevBuild()`; file-local `sourceTreeBuildSubPath` and `maxUpwardLevels`                                                                        |
-| `src/app/seamly2d/core/application_2d.cpp`                 | Hard-coded path replaced by the call;`seamlyLayoutFilePath()` Doxygen updated                                                                                           |
-| `src/test/Seamly2DTest/tst_seamlyfamilypaths.cpp` / `.h` | 8 new cases, all`QTemporaryDir`                                                                                                                                         |
-| `.github/README-CODE-STYLES.md`                            | New "No absolute machine-specific paths in source" rule                                                                                                                   |
-| `.claude/settings.json`                                    | Line 154 replaced with the version-agnostic vswhere entry                                                                                                                 |
-| `project-docs/TODO_MIGRATE.md`                             | Tasks 45 and 50 removed                                                                                                                                                   |
-| `project-docs/TODO_COMPLETED.md`                           | Tasks 45 and 50 added at the top with full write-ups                                                                                                                      |
-| `.claude/settings.local.json`                              | Two entries deleted — not in that commit because they were never**staged** (the "gitignored" reason recorded here at the time was wrong; see the correction above) |
-
-### Next steps
-
-1. **Finish the CollectionTest baseline check** (above) — the one loose end of this session.
-2. **Task 49** — the recommended next task; see the analysis at the top of this section.
-3. Decide the fate of `BUILD_PROBLEMS.txt`.
-4. The four decisions the user still owes are unchanged — see "Four decisions the user still owes" below --> user added answers to the four decisions.
-
-## Earlier state (2026-07-27): Task 58 merged; documentation reorganized
-
-**Branch:** `run-seamlyLayout`. **Task 58 is DONE** (moved to `project-docs/TODO_COMPLETED.md` — see below) and two documentation reorganizations landed alongside it.
-
-### What happened this session
-
-| Item                                                                                 | Outcome                                                                                                                                                                                              |
-| ------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Task 58** — migrate the SeamlyLayout tests to `src/test/SeamlyLayoutTest` | **DONE, merged** via PR [#20](https://github.com/seamly/Seamly2D/pull/20) (`8ddab2a4c3`), all 12 CI checks green. Task written up in `project-docs/TODO_MIGRATE.md` first, then implemented |
-| **`status-docs/` → `project-docs/`**                                      | Merged via PR[#21](https://github.com/seamly/Seamly2D/pull/21) (`b89fbe161d`), plus a local merge by the user — see the divergence note below                                                      |
-| **Tracking docs moved + SeamlyLayout status docs prefixed**                    | Committed on branch`reorganize-project-docs`, **not yet pushed**                                                                                                                             |
-
-### Task 58 — what moved and what deliberately did not
-
-The four Qt/C++ suites (`AdjustSceneTests`, `AdjustControllerTests`, `PreferencesModelTests`, `SettingsModelTests`) moved from `src/app/seamlylayout/qt_frontend/tests/{adjust,preferences,settings}/` to a flat `src/test/SeamlyLayoutTest/`, matching the sibling `Seamly2DTest`. Git recorded pure renames; no source edits were needed because every project include resolves through `target_include_directories(… src/)`.
-
-**Three decisions that must not be undone:**
-
-1. **The Rust tests stay in `crates/`.** `#[cfg(test)]` modules compile as part of their crate and reach its private items, and Cargo requires integration tests beside the crate's `Cargo.toml`. Moving them would need per-crate `[[test]] path = "../../../../test/…"` entries that break `cargo test -p <crate>`.
-2. **`src/test/test.pro` must never list `SeamlyLayoutTest`.** seamlyLayout is CMake + Cargo and stays out of the Seamly2D qmake build. All `SUBDIRS` in `Seamly.pro`, `src/src.pro` and `src/test/test.pro` are explicit literals with no globbing, so the directory cannot be picked up by accident.
-3. **`seamlylayout-ci.yml`'s path filters now include `src/test/SeamlyLayoutTest/**`.** Without it a test-only change triggers *no* CI at all — the filters were `src/app/seamlylayout/**` only. `ci.yml` has no path filters, so the parent jobs are unaffected either way.
-
-### Two pre-existing defects fixed inside Task 58
-
-- **`src/app/seamlylayout/build.ps1:117`** probed for a CMake package named `Qt6WebEngine`, which Qt has never shipped (the packages are `Qt6WebEngineCore` / `Qt6WebEngineQuick` / `Qt6WebEngineWidgets`). The guard fired on *every* correctly installed kit, aborting the build while telling the developer to install modules already present. Now probes `Qt6WebEngineQuick`.
-- **`ctest --preset debug` could not run on Windows** from a shell that had not sourced the Qt kit — the test exes launch out of the build tree with no windeployqt output beside them. Added a `WIN32`-guarded `ENVIRONMENT_MODIFICATION` prepending `$<TARGET_FILE_DIR:Qt6::Core>` to `PATH` for the test run only, as a generator expression so it follows whichever kit CMake found.
-
-Verified locally: `ctest --preset debug` with no Qt on `PATH` → 4/4 suites, **107 cases** (26 + 7 + 48 + 26), 1 skipped; `PreferencesModelTests`' 48 matches its pre-move count. `cargo test --workspace` → **251 tests across 22 targets**, 0 failures.
-
-### Documentation reorganization
-
-`status-docs/` → `project-docs/`, with `new-attributes.csv` → `NEW-ATTRIBUTES.csv` and `svg-data-attributes.md` → `SVG-DATA-ATTRIBUTES.md`. The empty `status-docs/baseline/` shell went with it; its SVG survives byte-identically (line endings aside) at `src/app/seamlylayout/input/richmond-shirt-baseline_pieces.svg`.
-
-Then, on the **unpushed `reorganize-project-docs` branch**: `PROJECT_PLAN.md` and all six `TODO_*.md` files moved into `project-docs/`, and SeamlyLayout's status docs gained an app-name prefix (`SEAMLYLAYOUT_COMPLETED.md`, `SEAMLYLAYOUT_DECISIONS.md`, `SEAMLYLAYOUT_TODO_FUTURE.md`, `SEAMLYLAYOUT_MIGRATION_STATUS.md`, `TODO_SEAMLYLAYOUT_2.md`).
-
-**`SESSION_HANDOVER.md` stays at the repository root** — a deliberate user decision, reversing an initial move. Both `.claude/settings.json` compaction hooks name it there, and that wording is correct as written. Do not move it.
-
-**`SEAMLYLAYOUT_TODO_FUTURE.md` was `FUTURE_TODOs.txt` and untracked** — `src/app/seamlylayout/.gitignore` ignores `*.txt`. The `.md` extension brought it into version control for the first time, on the user's explicit instruction.
-
-**`src/app/seamlylayout/docs/status-docs/` keeps its directory name** — only the repo-root `status-docs/` was renamed. Several lines name both in one sentence, so reference rewrites were anchored on a leading backtick, which the daughter-app mirrors never carry.
-
-## Earlier state: Tasks 34 and 53 are DONE and moved to `project-docs/TODO_COMPLETED.md`
-
-### Two rules established here — do not undo them
-
-1. **Any function that deletes is called with real home paths only from `Application2D::openSettings()` / `ApplicationME::openSettings()`** — never from a shared init function the test harness also calls. `TestApplication2D`'s constructor runs *before any* `initTestCase()`, so anything it reaches executes against the developer's real settings and real home directory no matter how carefully individual tests redirect. A test run must not mutate the machine it runs on.
-2. **`pruneEmptyLegacyDataRoot()` is parameterized on purpose** so tests can point it at a `QTemporaryDir`. `QDir::homePath()` cannot be redirected on Windows. Same reason Task 34 split `chooseFirstRunDataRoot(defaultRoot, legacyRoot)` out of `initializeDataRoot()`.
-3. **`.github/README-CODE-STYLES.md` is the naming authority — do not reinstate the `s` prefix.** New files are snake_case with a meaningful prefix from that guide's list (`settings_*`, `dialog_<toolgroup>_<toolname>`, `tool_*`, `model_*`, `options_*`, `test_*`, `application_<appname>`, `<platform>_*`) and **unique repo-wide**, with two exceptions the user added in `df5d90bb14`: a file that primarily defines one class takes the class's **UpperCamelCase** name instead of snake_case, and seamlyLayout's multiple `lib.rs` crate roots are allowed. The old "begin new files with `s`" line in `CLAUDE.md` was removed deliberately on 2026-07-26; the "must not begin with `v`" half was kept.
-
-### Why `seamlyData` and not `seamly`
-
-The user first asked for `dataRoot=G:/My Drive/seamly`. That folder already existed and held **73 GB of unrelated business data** (Finances, Team, Security). A bare `seamly` collides far too easily with a folder a user already has; `seamlyData` says what it is. The rename was applied to the default, the tests, the docs and every open task that mentioned it.
-
-### Developer-machine state (not in git — re-derive from here, do not assume the old paths)
-
-| Item                                                        | Now                                                                                                                                                                                                                                                                                  |
-| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Data tree                                                   | **`G:\My Drive\seamlyData`** (was `G:\My Drive\seamly2d`). Moved by **folder rename**, not copy — one Google Drive metadata operation, no 17.6 GB re-upload, reversible. Verified identical before/after: **8,713 files / 1,050 dirs / 17,629,852,473 bytes** |
-| `%APPDATA%\Seamly\qt6_common.ini`                         | `dataRoot=G:/My Drive/seamlyData`, all seven path overrides repointed                                                                                                                                                                                                              |
-| Also repointed                                              | `%APPDATA%\Seamly\common.ini`; `%APPDATA%\Unknown Organization.ini`; `%LOCALAPPDATA%\Seamly\Seamly2D\qt6_seamly2d.ini` (10 paths). Zero stale `seamly2d` paths remain                                                                                                        |
-| `C:\Users\susan\seamly2d`                                 | **Deleted** after confirming 0 files / 8 empty dirs                                                                                                                                                                                                                            |
-| `%APPDATA%\Unknown Organization\` (the **folder**)  | **Gone** — merged into `%APPDATA%\Seamly\qt6_common.ini`, all four values confirmed present first                                                                                                                                                                           |
-| `%APPDATA%\Unknown Organization.ini` (the **file**) | **Still live**, still holds `paths/pattern` and `paths/layout`. That is Task 52, untouched                                                                                                                                                                                 |
-| Backups                                                     | Every settings file touched was backed up to the session scratchpad`…\scratchpad\settings-backup\` — session-scoped, treat as gone                                                                                                                                               |
-
-### What is verified
-
-- **Local build** — `scripts\sd.ps1` clean.
-- **Local tests** — `scripts\st.ps1`: **32119 passed, 0 failed across 25 suites**, exit 0, with `TST_DataRoot … 22 passed, 0 failed`. `ParserTest` exit 0, `TranslationsTest` exit 0.
-- **The suite no longer mutates the machine** — `C:\Users\susan\seamly2d`, `C:\Users\susan\seamlyData` and `%APPDATA%\Unknown Organization` were byte-identical before and after a full run.
-- **CI** — all 11 checks on PR #19.
-
-### Crossed `labels` / `images` — found and fixed
-
-`%LOCALAPPDATA%\Seamly\Seamly2D\qt6_seamly2d.ini` had **`labels` and `images` crossed**: `labels=…/seamlyData/images`, `images=…/seamlyData/label templates`. This was *pre-existing stored data*, not a code bug — `preferencespathpage.cpp` maps rows 0–9 consistently between `Apply()` and `initializeTable()`, and `vcommonsettings.cpp` confirms `paths/labels` is the label-template path (`settingPathsLabelTemplate`) while `paths/images` is `settingImagesPath`. **Un-crossed at the user's instruction** and verified against the filesystem: `label templates` (34 files) and `images` (3 files) both resolve. Backup at `qt6_seamly2d.ini.bak-uncross`. Nothing in the repo changed — this was stored user state only.
-
-### `/compact` hooks fixed, and the handover rule is now in `CLAUDE.md`
-
-The `PreCompact` / `PostCompact` hooks in `.claude/settings.json` were emitting `hookSpecificOutput.additionalContext`, which the hook schema accepts **only** for `UserPromptSubmit`, `PostToolUse`, `PostToolBatch` and `Stop`. Both failed validation on every compaction, so the SESSION_HANDOVER.md instruction never reached the model. Both now emit top-level **`systemMessage`** — the only text-carrying key the compact events accept.
-
-**Know the limitation:** `systemMessage` is *displayed*, not injected as instruction context. The hooks are a visible nudge, not a guarantee, and `PreCompact` can no longer shape the summary at all. That is why the requirement was also added to `CLAUDE.md` under Task Tracking, which *is* loaded every session — that line is the actual mechanism; the hooks are the reminder.
+1. Task 61 — the checker fixes; then run the **uninstall leg** on the laptop.
+2. Tasks 62, 63, 64, 66 — all touch `seamly-family.wxs` and both test scripts;
+   worth doing as one package change and one laptop run.
+3. Ask about Task 65 before touching `INSTALLFOLDER`.
+4. Decide Task 60's large-copy UX before that migration ships to anyone.
+5. Fix `SeamlyShortcutsDlg` via a UI-only test MSI, plus the 373→370 geometry.
+6. Repair Visual Studio, then re-run `scripts/sd.ps1`.
+7. Push the branch and open the PR to `run-seamlyLayout` once Task 51 lands.
+
+## MACHINE STATE: the Visual Studio installation is broken
+
+**`scripts/sd.ps1` fails with `'cl' is not recognized`.** Not the script, and not
+the agent sandbox — the same failure occurs with the sandbox disabled:
+
+- `vcvars64.bat` **and** `vcvarsall.bat x64` exit 1 with `[ERROR:VsDevCmd.bat] *** VsDevCmd.bat encountered errors ***`; three sub-scripts fail to init —
+  `core\msbuild.bat`, `ext\cmake.bat`, `ext\ConnectionManagerExe.bat`
+- The toolset is fine on disk: `cl.exe` 19.51.36252 under
+  `VC\Tools\MSVC\14.51.36231`, Windows SDKs 10.0.22621.0 / 10.0.26100.0 present
+- **Plain `vswhere -products *` returns nothing**; only
+  `vswhere -all -prerelease -legacy` finds
+  `C:\Program Files\Microsoft Visual Studio\18\Community`. This is *"Visual
+  Studio 2026 Developer Command Prompt v18.8.1"*, a prerelease build, and the
+  instance registration looks damaged. Instance data exists at
+  `C:\ProgramData\Microsoft\VisualStudio\Packages\_Instances\a9afd7ad`
+
+**Workaround — local only, nothing on the machine and nothing in `sd.ps1` was
+changed:** set `PATH`/`INCLUDE`/`LIB` by hand at `VC\Tools\MSVC\14.51.36231` +
+SDK `10.0.26100.0`, then run `C:\Qt\Tools\QtCreator\bin\jom\jom.exe -f Makefile`
+in `scripts/seamly2d-debug`. **The user should repair VS 18 Community from the
+Visual Studio Installer** — until then `sd.ps1` fails for them too.
+
+## Other machine state changed outside the repo
+
+`WixToolset.Util.wixext` 6.0.2 is installed globally
+(`wix extension add --global`), because `util:RemoveFolderEx` needs it.
+Reversible with `wix extension remove`. `smsi.ps1` requires it, and
+`.github/workflows/windows-msi.yml` installs it alongside the UI extension.
+
+## SAFETY — read before deleting anything
+
+- **`C:\Users\susan\seamly2d` on the test laptop is live user data.** It holds a
+  real pattern of the user's and is the source tree Task 60's migration copies
+  from. A `Remove-Item -Recurse` on it was suggested in an earlier session and
+  withdrawn: it bypasses the Recycle Bin, and that is how the dev PC's copy was
+  permanently destroyed.
+- **No test may touch a path under `QDir::homePath()`** — it cannot be faked on
+  Windows. First-run resolution is tested through
+  `VCommonSettings::chooseFirstRunDataRoot()`, which takes both candidate roots
+  as arguments; everything else uses `QTemporaryDir`.
+- **`CollectionTest` is deliberately not run locally.** It has a documented
+  pre-existing failure *and* launches the real seamly2d, which seeds folders into
+  the live data root. CI runs it on a clean machine.
 
 ## Decisions the user has ANSWERED (act on these, do not re-ask)
 
-1. **Task 54's file-name form** → **`SettingsCommon.h`**, i.e. the file name matches the class name (the style guide's class-match exception wins over the `settings_*` snake_case prefix for class-defining files).
-2. **`.github/README-DEVELOPER-NEW.md`** → **rename it to `.github/README-DEVELOPER-SEAMLY-FAMILY.md`**, to be folded into `.github/README-DEVELOPER.md` when the migration is complete. **The rename has not been done yet.**
-3. **Qt WebChannel / Qt Positioning documentation** → maintain it in `.github/README-DEVELOPER-SEAMLY-FAMILY.md` until the migration is complete.
-4. **`src/app/seamly2d/core/BUILD_PROBLEMS.txt`** → delete it if it is not useful. **Not done yet.**
+1. **Task 54's file-name form** → **`SettingsCommon.h`**, i.e. the file name
+   matches the class name (the style guide's class-match exception wins over the
+   `settings_*` snake_case prefix for class-defining files).
+2. **`.github/README-DEVELOPER-NEW.md`** → **rename it to
+   `.github/README-DEVELOPER-SEAMLY-FAMILY.md`**, to be folded into
+   `.github/README-DEVELOPER.md` when the migration is complete. **Not done yet.**
+3. **Qt WebChannel / Qt Positioning documentation** → maintain it in
+   `.github/README-DEVELOPER-SEAMLY-FAMILY.md` until the migration completes.
+4. **`src/app/seamly2d/core/BUILD_PROBLEMS.txt`** → delete it if it is not
+   useful. **Not done yet.**
+5. **Testing happens on the test laptop, not in a VM** (re-confirmed 2026-07-30).
+   This PC is Windows 11 **Home**, which ships neither Hyper-V nor Windows
+   Sandbox, so a VM here means a third-party hypervisor; the user considered
+   VirtualBox and VMware Workstation Pro and declined both. A VM could not close
+   two checklist items anyway — the *verified-publisher* UAC prompt needs Task
+   33's signing, and the arm64 repeat needs arm64 hardware.
+6. **Data migration is copy-and-verify, leaving the legacy tree intact** — never
+   a bare rename, because a user may need to roll back to an earlier release.
+7. **The migration lives in the applications, not the installer.** A per-machine
+   MSI's server side runs as LocalSystem, so a per-user path resolves to the
+   SYSTEM profile and would only cover whoever ran setup; macOS and Linux have no
+   MSI at all, so the logic would be written twice.
 
 ## Gotchas
 
-### Learned in the Task 49 session (2026-07-27)
-
-- **`CollectionTest.exe` must be run with its working directory set to its own `bin/`.** `initTestCase()` removes `tst_seamly2d_tmp` *relative to the CWD* but re-creates it under `applicationDirPath()`, so from any other CWD it aborts at `initTestCase` on the leftover directory from the previous run ("Fail to prepare test files for testing"). Use `Start-Process … -WorkingDirectory <that bin>`.
-- **A SeamlyLayout build-tree exe needs Qt on `PATH` to launch.** There is no windeployqt output beside `qt_frontend/build/Debug/SeamlyLayout.exe`, so launching it from a plain shell produces a process that starts and does nothing (no log file is even created). Prepend `C:\Qt\6.11.1\msvc2022_64\bin` first. `ctest` handles this itself via the `ENVIRONMENT_MODIFICATION` added in Task 58.
-- **SeamlyLayout's log file has two independent writers and they overwrite each other.** C++ `Logger` holds a buffered `QTextStream` on the file while Rust's `log_to_file()` opens/appends per call, so lines get clipped mid-string (`-shirt.pieces.svg` on its own line, a missing leading `[`). Do not conclude a log line is absent because it looks truncated — grep for a distinctive fragment instead.
-- **A tagged handoff SVG can be produced headlessly**, without driving the Layout Mode GUI: `seamly2d.exe <pattern>.sm2d -b <name> -d <dir> -f 0 --exportOnlyDetails` writes `<name>_pieces.svg` through the same `exportSVG()` that `generatePiecesSvg()` uses. This is how Task 49's end-to-end check was run, and how Task 59's should be.
-- **`QCommandLineParser::parse()` ≠ `process()`.** `process()` prints to a console this GUI-subsystem app does not have on Windows, and calls `exit()`. `parse()` returns a bool and fills `errorText()`, which is what makes `StartupOptions` unit-testable.
-
-### Standing
-
-- **A `develop` merge can silently drop doc edits made on this branch.** `.github/README-DEVELOPER.md` was edited on `run-seamlyLayout` and, in the same window, four times on `develop`; the merge resolution took develop's side and the branch edit vanished with no conflict marker left behind. After merging `develop`, `git log -S "<a phrase you added>" -- <file>` is the cheapest way to confirm your change survived. The same merge also deposited a stray `README-DEVELOPER-NEW.md` that exists in no parent commit.
-- **`QSettings(fileName, format, parent)` records neither an organization nor an application name** — both come back empty, and QSettings substitutes the literal `"Unknown Organization"`. Root cause of the stray files in Tasks 34 and 52. `QSettings::setPath(format, scope, dir)` *does* redirect settings files, but has **no getter** — recover the base from a probe instance.
-- **`QDir::fromNativeSeparators()` rewrites backslashes only on Windows** (a backslash is a legal POSIX filename character), and Windows path comparison must be `Qt::CaseInsensitive` — both matter when comparing a configured root against a legacy one.
-- **`QDir::rmdir()` over `removeRecursively()`, deliberately.** `rmdir()` cannot delete a file and refuses a non-empty directory, so it cannot run away. `removeRecursively()` also bypasses the Recycle Bin — that is how `C:\Users\susan\seamly2d` was permanently destroyed in the previous session.
-- **`scripts\st.ps1` runs only `Seamly2DTests.exe`.** CI's `make check` runs four binaries — `Seamly2DTest`, `CollectionTest`, `ParserTest`, `TranslationsTest`. Run the other three by hand before pushing.
-- **`gh` is not on this agent shell's `PATH`** — invoke it as `& "C:\Program Files\GitHub CLI\gh.exe"`.
-- **The sandbox blocks a command that contains both a `Remove-Item` and a `G:` path**, even when they are unrelated. Split into separate calls.
-- **clangd diagnostics in this repo are noise, and here is why** — the tree has **no** `compile_commands.json`, `.clangd`, `.vscode/c_cpp_properties.json` or `compile_flags.txt`, so the editor parses each file with zero include paths. The `#include "../vmisc/vabstractapplication.h"` form is valid only because every `.pro` adds `INCLUDEPATH += $$PWD/../../libs/<lib>`, which clangd never sees; one unresolved include then cascades into dozens of `Unknown type name 'QString'` / `undeclared identifier 'QStringLiteral'` entries. `src/app/seamly2d/core/BUILD_PROBLEMS.txt` is a tracked 45-entry dump of exactly this (two `pp_file_not_found` roots + 43 cascade). **The qmake build is the authority** — those same files compile clean. Filing this as a task was considered and declined; if it is ever fixed, the dump should go with it (it carries absolute `/c:/Users/susan/…` paths into source headed for the upstream PR).
-
-### Carried forward (still true)
-
-- **Qt Design Studio poisons `PATH`.** Bare `qmake`, `windeployqt` and `windeployqt6` resolve to a Qt **6.8.7** kit with no `mkspecs`. Never call these bare; use `qtPrepareTool` or `$$[QT_INSTALL_BINS]/…`. Root cause of Tasks 47 and 48. --> The user removed Qt Design Studio
-- **PowerShell 5.1 wraps a native exe's stderr in `NativeCommandError`** and sets `$?` to `$false` even on exit 0. Do not redirect native stderr inside PowerShell — run the script as a child process with `Start-Process … -RedirectStandardOutput/-RedirectStandardError -Wait -PassThru -NoNewWindow`.
+- **`CollectionTest.exe` must be run with its working directory set to its own
+  `bin/`.** `initTestCase()` removes `tst_seamly2d_tmp` *relative to the CWD* but
+  re-creates it under `applicationDirPath()`, so from any other CWD it aborts on
+  the leftover directory from the previous run ("Fail to prepare test files for
+  testing"). Use `Start-Process … -WorkingDirectory <that bin>`.
+- **A SeamlyLayout build-tree exe needs Qt on `PATH` to launch.** There is no
+  windeployqt output beside `qt_frontend/build/Debug/SeamlyLayout.exe`, so from a
+  plain shell it starts and does nothing — no log file is even created. Prepend
+  `C:\Qt\6.11.1\msvc2022_64\bin`. `ctest` handles this itself via the
+  `ENVIRONMENT_MODIFICATION` added in Task 58.
+- **SeamlyLayout's log file has two independent writers and they overwrite each
+  other.** C++ `Logger` holds a buffered `QTextStream` on the file while Rust's
+  `log_to_file()` opens/appends per call, so lines get clipped mid-string. Do not
+  conclude a log line is absent because it looks truncated — grep for a
+  distinctive fragment.
+- **A tagged handoff SVG can be produced headlessly**, without driving the Layout
+  Mode GUI: `seamly2d.exe <pattern>.sm2d -b <name> -d <dir> -f 0 --exportOnlyDetails` writes `<name>_pieces.svg` through the same `exportSVG()`
+  that `generatePiecesSvg()` uses.
+- **`QCommandLineParser::parse()` ≠ `process()`.** `process()` prints to a console
+  this GUI-subsystem app does not have on Windows, and calls `exit()`. `parse()`
+  returns a bool and fills `errorText()`.
+- **A `develop` merge can silently drop doc edits made on this branch.** After
+  merging `develop`, `git log -S "<a phrase you added>" -- <file>` is the cheapest
+  way to confirm your change survived.
+- **`QSettings(fileName, format, parent)` records neither an organization nor an
+  application name** — both come back empty, and QSettings substitutes the literal
+  `"Unknown Organization"`. Root cause of the stray files in Tasks 34 and 52.
+  `QSettings::setPath(format, scope, dir)` *does* redirect settings files, but has
+  **no getter** — recover the base from a probe instance.
+- **`QDir::fromNativeSeparators()` rewrites backslashes only on Windows** (a
+  backslash is a legal POSIX filename character), and Windows path comparison must
+  be `Qt::CaseInsensitive`.
+- **`QDir::rmdir()` over `removeRecursively()`, deliberately.** `rmdir()` cannot
+  delete a file and refuses a non-empty directory, so it cannot run away.
+- **`scripts\st.ps1` runs only `Seamly2DTests.exe`.** CI's `make check` runs four
+  binaries — `Seamly2DTest`, `CollectionTest`, `ParserTest`, `TranslationsTest`.
+  Run the other three by hand before pushing.
+- **`gh` is not on this agent shell's `PATH`** — invoke it as
+  `& "C:\Program Files\GitHub CLI\gh.exe"`.
+- **The sandbox blocks a command containing both a `Remove-Item` and a protected
+  path string** — `G:` paths and `C:\Program Files` have both triggered it, even
+  when the deletion targets something else entirely (the MSVC environment
+  variables set at the top of a build command are enough). Put deletions in
+  their own call.
+- **Renaming a shadow-build directory invalidates the whole tree.** qmake bakes
+  absolute paths into every generated Makefile, so after a rename the sub-builds
+  still look for `...\<old name>\...\vtools.lib` and fail with "dependent ...
+  does not exist". The tree can only be regenerated, not repaired: delete it and
+  re-run qmake. Same failure shape as the toolchain-change trap in
+  `.github/README-BUILDS.md`. The build and packaging directory names are now
+  `-BuildDirName` / `-OutputDirName` parameters; **a new value needs a matching
+  `.gitignore` entry**, and for packaging also the CI artifact path.
+- **PowerShell here-strings passed to `git commit -m` get mangled** when the
+  message contains quotes; write the message to a file and use `git commit -F`.
+- **clangd diagnostics in this repo are noise.** The tree has no
+  `compile_commands.json`, so the editor parses each file with zero include
+  paths; one unresolved include cascades into dozens of `Unknown type name 'QString'` entries. **The qmake build is the authority.**
+- **`MD060`/`MD056` table warnings from the editor are noise** on the wide spec
+  tables in `TODO_MIGRATE.md`, as `MD041` is repo-wide. Fix a genuinely malformed
+  row; do not reflow tables to silence alignment style.
+- **PowerShell 5.1 wraps a native exe's stderr in `NativeCommandError`** and sets
+  `$?` to `$false` even on exit 0. Do not redirect native stderr inside
+  PowerShell — run the script as a child process with `Start-Process … -RedirectStandardOutput/-RedirectStandardError -Wait -PassThru -NoNewWindow`.
 - **PowerShell splatting: `@array` is positional, `@hashtable` is by name.**
-- **Qt frontend test exes are GUI-subsystem binaries** — they print nothing to captured stdout. Run with `-o <file>,txt` and `QT_QPA_PLATFORM=offscreen`.
-- **`$proFile` collides with the automatic `$PROFILE`** (case-insensitive); `sd.ps1` still has it.
-- **Historical 6.10 references in `project-docs/TODO_COMPLETED.md` and `project-docs/PROJECT_PLAN.md` are deliberate** — they record what was true at the time.
+- **Qt frontend test exes are GUI-subsystem binaries** — they print nothing to
+  captured stdout. Run with `-o <file>,txt` and `QT_QPA_PLATFORM=offscreen`.
+- **`$proFile` collides with the automatic `$PROFILE`** (case-insensitive);
+  `sd.ps1` still has it.
+- **Historical 6.10 references and old directory names in
+  `project-docs/TODO_COMPLETED.md` and `project-docs/PROJECT_PLAN.md` are
+  deliberate** — they record what was true at the time.

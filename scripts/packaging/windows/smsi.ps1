@@ -7,66 +7,59 @@
 # **  "seamly msi" — stage the built Seamly app family (seamly2d, seamlyme,
 # **  SeamlyLayout) and build the Windows MSI installer from
 # **  scripts\packaging\windows\seamly-family.wxs with the WiX toolset
-# **  (Task 13).
 # **  Used both locally (against the release build trees) and by the
 # **  .github\workflows\windows-msi.yml CI workflow (against the in-source
 # **  CI build output), following the scripts\sd.ps1 precedent.
 # **
-# **  @copyright
-# **  This source code is part of the Seamly2D project, a pattern making
-# **  program, whose allow create and modeling patterns of clothing.
-# **  Copyright (C) 2026 Seamly2D Project
+# ** @copyright
+# **  This source code is part of the Seamly project, a suite of apparel CAD
+# **  software.
+# **  Copyright (C) 2026 Seamly Project
 # **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 # **
-# **  Seamly2D is free software: you can redistribute it and/or modify
+# **  @license
+# **  Seamly2D/SeamlyMe is free software: you can redistribute it and/or modify
 # **  it under the terms of the GNU General Public License as published by
 # **  the Free Software Foundation, either version 3 of the License, or
 # **  (at your option) any later version.
 # **
-# **  Seamly2D is distributed in the hope that it will be useful,
+# **  Seamly2D/SeamlyMe is distributed in the hope that it will be useful,
 # **  but WITHOUT ANY WARRANTY; without even the implied warranty of
 # **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # **  GNU General Public License for more details.
 # **
 # **  You should have received a copy of the GNU General Public License
-# **  along with Seamly2D.  If not, see <http://www.gnu.org/licenses/>.
+# **  along with Seamly2D/SeamlyMe.  If not, see <http://www.gnu.org/licenses/>.
 # **
+# ** SeamlyLayout is licensed under the MIT license.
 #******************************************************************************
 
 <#
 .SYNOPSIS
-    Build the Windows MSI installer for the Seamly app family (Task 13).
+    Build the Windows MSI installer for the Seamly app family.
 
 .DESCRIPTION
-    Stages the already-built apps into <repo>\scripts\seamly-build-msi\<arch>\
+    Stages the already-built apps into <repo>\scripts\seamly-msi\<arch>\
     and runs `wix build` on scripts\packaging\windows\seamly-family.wxs to
-    produce scripts\seamly-build-msi\<arch>\Seamly2D-<arch>.msi. Only the .msi
+    produce scripts\seamly-msi\<arch>\Seamly2D-<arch>.msi. Only the .msi
     is written — the .wixpdb symbol database is suppressed with `-pdbtype none`
     (it is used only for wix patch/melt diffing, not by the installer).
 
     Staging layout (mirrors what the MSI installs):
       parent\  the ONE Qt runtime every app in the package shares: seamly2d +
-               seamlyme windeployqt trees merged with SeamlyLayout's
-               windeployqt6 output (Qt DLLs, plugins, QML modules,
-               QtWebEngineProcess.exe, xerces-c, ...) plus SeamlyLayout's
-               packaged settings\ and licenses\ and the MSVC CRT DLLs,
-               minus the exes
-      exes\    seamly2d.exe, seamlyme.exe, SeamlyLayout.exe (authored
+               seamlyme + seamlylayout's windeployqt output (Qt DLLs, plugins, QML modules,
+               QtWebEngineProcess.exe, xerces-c, ...)
+      exes\    seamly2d.exe, seamlyme.exe, seamlylayout.exe (authored
                explicitly in the .wxs so shortcuts/associations can reference
                them; kept out of the wildcard-harvested tree above)
 
-    Task 30 merged what used to be a separate layout\ staging tree (installed
-    into a ...\Seamly2D\SeamlyLayout\ subdirectory with its own private Qt
-    copy) into parent\. That split existed only because SeamlyLayout was built
-    against a different Qt release than the parent apps and Qt's DLL file names
-    are identical across releases; all three now build against Qt 6.11.1, so
-    one runtime serves them all and the MSI is correspondingly smaller.
+    All three apps build against Qt 6.11.1, so one Qt runtime serves them all.
 
     PREREQUISITES (the script fails early naming whatever is missing):
       * release builds of seamly2d/seamlyme with windeployqt output in their
         bin directories (local: qmake release shadow-build in build\;
         CI: in-source src\app\<app>\bin)
-      * a release build of SeamlyLayout (src\app\seamlylayout\qt_frontend\
+      * a release build of seamlylayout (src\app\seamlylayout\qt_frontend\
         build\Release), unless -NoSeamlyLayout
       * the WiX .NET tool:      dotnet tool install --global wix
         and its UI extension:   wix extension add --global WixToolset.UI.wixext
@@ -98,17 +91,15 @@
     Default: <repo>\src\app\seamlylayout\qt_frontend\build\Release.
 
 .PARAMETER NoSeamlyLayout
-    Build a two-app MSI without SeamlyLayout. Used for the arm64 package until
-    SeamlyLayout has an arm64 build (see .github\README-BUILDS.md).
+    Build a two-app MSI without SeamlyLayout. Used during testing.
 
 .PARAMETER WinDeployQt6
     Full path of windeployqt6.exe from SeamlyLayout's Qt kit. Default: the kit
     SeamlyLayout was actually built against, read from CMAKE_PREFIX_PATH in its
     build directory's CMakeCache.txt, falling back to the newest
     C:\Qt\<version>\msvc2022_64 kit. (CI passes the installed Qt explicitly.)
-    Deliberately NOT pinned to a hard-coded Qt version — Task 31: the old
-    ^6\.10\.\d+$ pin made the documented default invocation fail outright once
-    the 6.10 kit was uninstalled.
+    Deliberately NOT pinned to a hard-coded Qt version —
+    But seamly2d, seamlyme, and seamlylayout should be built from the same Qt 6.11.1 kit.
 
 .PARAMETER SkipValidation
     Skip the `wix msi validate` (ICE) pass after the build.
@@ -123,8 +114,8 @@
 
 .NOTES
     "smsi" = seamly msi, following sd.ps1 ("seamly2d debug") / st.ps1
-    ("seamly2d tests"). Output and staging live in scripts\seamly-build-msi\,
-    which the *-build-* .gitignore pattern keeps out of the repository.
+    ("seamly2d tests"). Output and staging live in scripts\seamly-msi\ (or
+    whatever -OutputDirName names), which .gitignore lists by name.
 #>
 
 param(
@@ -147,7 +138,15 @@ param(
     [string]$WinDeployQt6,
 
     # Skip the ICE validation pass.
-    [switch]$SkipValidation
+    [switch]$SkipValidation,
+
+    # Name of the staging/output directory created under scripts\. Exposed as a
+    # parameter, and used in exactly one place below, so the name lives here
+    # rather than being repeated: renaming this directory on disk used to mean
+    # hunting literals through the script, the docs and the CI workflow. The
+    # workflow publishes scripts/<this>/<arch>/Seamly-<arch>.msi, so a change
+    # here has to be mirrored in .github/workflows/windows-msi.yml.
+    [string]$OutputDirName = 'seamly-msi'
 )
 
 # Stop on any PowerShell-level error; native tool failures are checked via
@@ -356,9 +355,16 @@ if ($includeLayout -and -not (Test-Path (Join-Path $SeamlyLayoutBuildDir 'Seamly
 if (-not (Get-Command wix -ErrorAction SilentlyContinue)) {
     throw "The WiX toolset is not installed - run: dotnet tool install --global wix --version '6.*'"
 }
-$uiExtensionInstalled = (& wix extension list --global 2>$null) -match 'WixToolset\.UI\.wixext'
-if (-not $uiExtensionInstalled) {
+$installedExtensions = (& wix extension list --global 2>$null)
+if (-not ($installedExtensions -match 'WixToolset\.UI\.wixext')) {
     throw "The WiX UI extension is missing - run: wix extension add --global WixToolset.UI.wixext/<wix version, e.g. 6.0.2>"
+}
+# Util provides RemoveFolderEx, which is what removes the old NSIS installation's
+# directory tree and Start Menu folder: both paths come from properties resolved
+# at install time, so the fixed RemoveFile/RemoveFolder rows cannot express them,
+# and neither can delete a tree recursively.
+if (-not ($installedExtensions -match 'WixToolset\.Util\.wixext')) {
+    throw "The WiX Util extension is missing - run: wix extension add --global WixToolset.Util.wixext/<wix version, e.g. 6.0.2>"
 }
 
 if ($includeLayout -and -not $WinDeployQt6) { $WinDeployQt6 = Find-WinDeployQt6 -BuildDir $SeamlyLayoutBuildDir }
@@ -379,14 +385,18 @@ Write-Host "msvc crt    : $crtDir"
 
 # --- Stage ---------------------------------------------------------------------
 # Fresh staging tree per run:
-# <repo>\scripts\seamly-build-msi\<arch>\{parent,exes}
-# (the *-build-* .gitignore pattern keeps all of it untracked). The output lives
-# at the scripts\ root — a sibling of scripts\seamly2d-build-debug\ from sd.ps1 —
-# not beside this script, so it is anchored to $repoRoot.
+# <repo>\scripts\<OutputDirName>\<arch>\{parent,exes}
+# .gitignore lists that directory BY NAME - it used to be covered only by the
+# generic *-build-* pattern, which matched the old "seamly-build-msi"
+# incidentally, so renaming it silently made two 165 MB packages committable.
+# A new -OutputDirName needs a new .gitignore entry, and the CI workflow's
+# artifact path updated with it. The output lives at the scripts\ root - a
+# sibling of sd.ps1's shadow build - not beside this script, so it is anchored
+# to $repoRoot.
 #
 # 'parent' is now the ONE shared runtime tree for every app in the package
-# (Task 30); the separate 'layout' tree it used to sit beside is gone.
-$stageRoot = Join-Path $repoRoot "scripts\seamly-build-msi\$Arch"
+# the separate 'layout' tree it used to sit beside is gone.
+$stageRoot = Join-Path $repoRoot (Join-Path 'scripts' (Join-Path $OutputDirName $Arch))
 if (Test-Path $stageRoot) {
     Remove-Item $stageRoot -Recurse -Force
 }
@@ -409,17 +419,17 @@ Move-Item -Path (Join-Path $parentDir 'seamlyme.exe') -Destination $exesDir
 if ($includeLayout) {
     Write-Host "staging SeamlyLayout runtime (windeployqt6) into the shared tree..."
 
-    # Task 30: deploy SeamlyLayout's Qt runtime into the SAME tree as the parent
+    # deploy SeamlyLayout's Qt runtime into the SAME tree as the parent
     # apps'. All three are built against Qt 6.11.1, so wherever the two
     # windeployqt runs produce the same DLL it is the same file — what
     # SeamlyLayout adds on top is the QML module tree, Qt Quick/WebEngine DLLs
     # and QtWebEngineProcess.exe. Deploying against a staged copy of the exe
     # keeps the build tree pristine; --qmldir points windeployqt6 at the QML
     # sources so it can resolve the app's QML module imports.
-    Copy-Item -Path (Join-Path $SeamlyLayoutBuildDir 'SeamlyLayout.exe') -Destination $parentDir
+    Copy-Item -Path (Join-Path $SeamlyLayoutBuildDir 'seamlylayout.exe') -Destination $parentDir
     $qmlDir = Join-Path $repoRoot 'src\app\seamlylayout\qt_frontend\qml'
     Invoke-Tool -Description 'windeployqt6' -Exe $WinDeployQt6 -Arguments @(
-        '--qmldir', $qmlDir, '--release', (Join-Path $parentDir 'SeamlyLayout.exe'))
+        '--qmldir', $qmlDir, '--release', (Join-Path $parentDir 'seamlylayout.exe'))
 
     # Packaged default settings (read-only legacy-migration source / first-run
     # seed), read by SeamlyLayout from <exeDir>\settings\. preferences.json is
@@ -441,7 +451,7 @@ if ($includeLayout) {
         Copy-Item -Path (Join-Path $licensesSrc '*.txt') -Destination $licensesDst
     }
 
-    Move-Item -Path (Join-Path $parentDir 'SeamlyLayout.exe') -Destination $exesDir
+    Move-Item -Path (Join-Path $parentDir 'seamlylayout.exe') -Destination $exesDir
 }
 
 # MSVC CRT app-local deployment: the directory holding the exes gets the runtime
@@ -452,7 +462,7 @@ Copy-Item -Path (Join-Path $crtDir '*.dll') -Destination $parentDir -Force
 
 # --- Build the MSI -------------------------------------------------------------
 $wxs = Join-Path $PSScriptRoot 'seamly-family.wxs'
-$msi = Join-Path $stageRoot "Seamly2D-$Arch.msi"
+$msi = Join-Path $stageRoot "seamly-$Arch.msi"
 
 $wixArguments = @(
     'build', $wxs,
@@ -462,6 +472,7 @@ $wixArguments = @(
     # the build output to just the .msi. WiX v6 equivalent of light.exe -spdb.
     '-pdbtype', 'none',
     '-ext', 'WixToolset.UI.wixext',
+    '-ext', 'WixToolset.Util.wixext',
     '-d', "ProductVersion=$msiVersion",
     '-d', "DisplayVersion=$Version",
     '-d', "RepoRoot=$repoRoot",
@@ -483,9 +494,45 @@ if (-not (Test-Path $msi)) {
 }
 
 # --- Validate (ICE checks) -----------------------------------------------------
+# Two ICEs are suppressed, both raised by the Task 51 optional desktop-shortcut
+# components and both false positives for this package:
+#
+#   ICE43  "non-advertised shortcut ... KeyPath should fall under HKCU"
+#   ICE57  "per-user and per-machine data with a per-machine KeyPath"
+#
+# Each assumes DesktopFolder is inside the installing user's profile, which is
+# only true of a per-user install. This package is Scope="perMachine" with
+# ALLUSERS=1, so DesktopFolder always resolves to the common (All Users)
+# desktop and the HKLM key path is the correct one. Doing what the ICEs ask
+# would actively break the package: the server-side sequence of a per-machine
+# install runs elevated as LocalSystem, so an HKCU key path would be written
+# into the SYSTEM account's hive, where component detection can never find it
+# again - every launch would then trigger installer self-repair. The shortcuts
+# cannot be advertised instead (an advertised shortcut has to live in the
+# component that owns its target file, which would stop them being optional).
+#
+# ICE61 stays visible and is expected: it is a known consequence of
+# MajorUpgrade/@AllowSameVersionUpgrades.
 if (-not $SkipValidation) {
     Write-Host "running wix msi validate (ICE checks)..."
-    Invoke-Tool -Description 'wix msi validate' -Exe 'wix' -Arguments @('msi', 'validate', $msi)
+    Invoke-Tool -Description 'wix msi validate' -Exe 'wix' -Arguments @(
+        'msi', 'validate', $msi, '-sice', 'ICE43', '-sice', 'ICE57')
+}
+
+# --- Check the install-time authoring (Task 51) --------------------------------
+# The ICE checks say the package is well formed; this says it still contains the
+# shortcuts, associations, registry rows, elevation, upgrade detection and
+# install-time dialogs the project expects. Runs on every build, including CI,
+# because the failure mode it guards against is silent - a WixUI or WiX change
+# that drops a row produces an MSI that installs perfectly and does the wrong
+# thing.
+Write-Host "checking install-time authoring..."
+# A hashtable, not an array: @array splats positionally, @hashtable by name.
+$checkArguments = @{ Msi = $msi; Arch = $Arch }
+if ($includeLayout) { $checkArguments['ExpectSeamlyLayout'] = $true }
+& (Join-Path $PSScriptRoot 'test_msi_authoring.ps1') @checkArguments
+if ($LASTEXITCODE -ne 0) {
+    throw "install-time authoring check failed (exit code $LASTEXITCODE) - see output above."
 }
 
 $msiSize = [math]::Round((Get-Item $msi).Length / 1MB, 1)

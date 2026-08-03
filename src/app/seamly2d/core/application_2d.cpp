@@ -94,6 +94,15 @@ constexpr auto DAYS_TO_KEEP_LOGS = 3;
 //---------------------------------------------------------------------------------------------------------------------
 inline void noisyFailureMsgHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
+    // Qt's Wayland plugin warns on every focus change when the compositor sends a text input leave
+    // event for a surface it isn't tracking. The plugin carries on as normal after logging it, so
+    // it is noise. Drop it instead of logging it and popping up a dialog on every interaction.
+    if ((type == QtWarningMsg) && msg.contains(QStringLiteral("zwp_text_input_v3_leave"))
+            && msg.contains(QStringLiteral("Got leave event for surface")))
+    {
+        return;
+    }
+
     // Why on earth didn't Qt want to make failed signal/slot connections qWarning?
     if ((type == QtDebugMsg) && msg.contains(QStringLiteral("::connect")))
     {
@@ -844,9 +853,39 @@ void Application2D::openSettings()
         QFile::copy(qt5Common, qt6Common);
     }
 
-    // Task 34: settle the one shared user-data root before any data path is read, adopting
-    // an existing ~/seamly2d tree in place when upgrading. Non-destructive and re-entrant.
-    VCommonSettings::initializeDataRoot();
+    // Task 34: settle the one shared user-data root before any data path is read. Resolves
+    // and records a path only — it touches no files, which is what keeps it safe for the
+    // unit tests to call.
+    bool adoptedLegacyTree = false;
+    VCommonSettings::initializeDataRoot(&adoptedLegacyTree);
+
+    // Task 60: when that resolution adopted an old ~/seamly2d tree, copy it out to the new
+    // <Documents>/Seamly root instead of using it where it stands. The whole tree is
+    // copied, including any folders the user added themselves; nothing is moved or deleted,
+    // and the legacy tree is left in place with a marker so a rollback stays possible. On
+    // any failure the legacy root simply stays configured and in use.
+    //
+    // Here rather than inside initializeDataRoot() for the same reason as the prune below:
+    // this is the only place the real home directory reaches it, so the unit tests cannot
+    // copy anything into the developer's home.
+    if (adoptedLegacyTree)
+    {
+        VCommonSettings::migrateAdoptedLegacyTree(VCommonSettings::getLegacyDataRoot(),
+                                                  VCommonSettings::getDefaultDataRoot());
+    }
+
+    // Task 51: create the nine standard subfolders under that root. initializeDataRoot()
+    // only resolves and records the path — it deliberately writes the setting directly
+    // rather than through setDataRoot(), which is the only other caller of
+    // ensureDataRootTree() — so without this a fresh install left the data root recorded
+    // but never created, and Preferences → Paths pointed at nine folders that did not
+    // exist. Found by the Task 51 clean-machine install verification.
+    //
+    // Called here rather than inside initializeDataRoot() for the same reason as the prune
+    // below: this is the only place the real home directory reaches it, so the unit tests,
+    // which do call initializeDataRoot(), can never create folders outside their temporary
+    // directories. Purely additive — existing files and folders are left untouched.
+    VCommonSettings::ensureDataRootTree(VCommonSettings::dataRoot());
 
     // Task 53: clear away the empty ~/seamly2d skeleton the rename leaves behind. Kept here
     // in the application rather than inside initializeDataRoot() on purpose — this is the

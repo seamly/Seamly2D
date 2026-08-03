@@ -1,0 +1,2 @@
+Get-ChildItem "$env:USERPROFILE\seamlyData" -Recurse -Depth 1 -Directory |
+    Select-Object -ExpandProperty FullName

@@ -39,6 +39,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QSettings>
+#include <QStandardPaths>
 #include <QTemporaryDir>
 #include <QtTest>
 
@@ -150,15 +151,34 @@ void TST_DataRoot::clearDataRoot() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief DefaultDataRootIsSeamlyUnderHome checks the built-in default: renamed from
- * ~/seamly2d by Task 34, and from the too-generic ~/seamly to ~/seamlyData by Task 53.
+ * @brief DefaultDataRootIsSeamlyUnderDocuments checks the built-in default.
+ *
+ * The lineage: ~/seamly2d (original) → ~/seamly (Task 34) → ~/seamlyData (Task 53) →
+ * <Documents>/Seamly (Task 60). The last move is the one with a principle behind it —
+ * these are documents the user creates, opens and backs up, so they belong where every
+ * other application puts documents, while internal state stays in the platform's
+ * application-data locations.
+ *
+ * The expected value is built from QStandardPaths rather than hard-coded, deliberately:
+ * hard-coding "Documents" would pass on this machine and fail on a localized Linux system
+ * or a redirected Windows profile — the very cases DocumentsLocation exists to handle.
  */
-void TST_DataRoot::DefaultDataRootIsSeamlyUnderHome() const
+void TST_DataRoot::DefaultDataRootIsSeamlyUnderDocuments() const
 {
-    QCOMPARE(VCommonSettings::getDefaultDataRoot(), QDir::homePath() + QStringLiteral("/seamlyData"));
-    QVERIFY(!VCommonSettings::getDefaultDataRoot().endsWith(QStringLiteral("seamly2d")));
-    // "seamly" alone collides too easily with an unrelated user folder of the same name.
-    QVERIFY(!VCommonSettings::getDefaultDataRoot().endsWith(QStringLiteral("/seamly")));
+    QString documents = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    if (documents.isEmpty())
+    {
+        documents = QDir::homePath();
+    }
+    QCOMPARE(VCommonSettings::getDefaultDataRoot(), QDir::cleanPath(documents) + QStringLiteral("/Seamly"));
+
+    // None of the superseded names may come back.
+    const QString root = VCommonSettings::getDefaultDataRoot();
+    QVERIFY(!root.endsWith(QStringLiteral("seamly2d")));
+    QVERIFY(!root.endsWith(QStringLiteral("seamlyData")));
+    // "seamly" alone collides too easily with an unrelated user folder of the same name;
+    // the capitalised family name under Documents does not.
+    QVERIFY(!root.endsWith(QStringLiteral("/seamly")));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -399,6 +419,241 @@ void TST_DataRoot::EnsureDataRootTreeKeepsExistingFiles() const
     QVERIFY(QFileInfo::exists(existing));
     QCOMPARE(QFileInfo(existing).size(), qint64(10));
     QVERIFY(QFileInfo(root + QStringLiteral("/templates")).isDir());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief StartupResolvesThenSeedsTheConfiguredRoot locks the two-step start-up sequence
+ * both applications perform in openSettings(), and the split between its halves.
+ *
+ * Task 51's clean-machine install verification found that a fresh installation recorded the
+ * data root but never created it: initializeDataRoot() writes the setting directly instead
+ * of going through setDataRoot(), which was the only caller of ensureDataRootTree(). Nothing
+ * seeded the tree, so Preferences → Paths listed nine folders that did not exist.
+ *
+ * The fix is a second call in each application's openSettings(), and this case pins both
+ * halves of it. The first assertion is as important as the second: resolution must stay
+ * free of side effects on disk, because these tests call initializeDataRoot() while on a
+ * real run its default root is ~/seamlyData — seeding from inside it would create folders
+ * in the developer's home directory during every test run.
+ */
+void TST_DataRoot::StartupResolvesThenSeedsTheConfiguredRoot() const
+{
+    const QString root = scratchPath(QStringLiteral("startup-root"));
+    writeDataRoot(root);
+    QVERIFY(!QFileInfo::exists(root));
+
+    // Step one, as openSettings() does it: settle the root. This must not touch the disk.
+    QCOMPARE(VCommonSettings::initializeDataRoot(), root);
+    QVERIFY2(!QFileInfo::exists(root),
+             "initializeDataRoot() must not create directories - it is called by these tests, "
+             "and on a real run its default root lies under the home directory");
+
+    // Step two: seed the tree at whatever root step one settled on.
+    QVERIFY(VCommonSettings::ensureDataRootTree(VCommonSettings::dataRoot()));
+
+    const QStringList expected
+    {
+        QStringLiteral("measurements/individual"),
+        QStringLiteral("measurements/multisize"),
+        QStringLiteral("templates"),
+        QStringLiteral("bodyscans"),
+        QStringLiteral("label templates"),
+        QStringLiteral("images"),
+        QStringLiteral("backups"),
+        QStringLiteral("patterns"),
+        QStringLiteral("layouts")
+    };
+
+    for (const QString &subdirectory : expected)
+    {
+        QVERIFY2(QFileInfo(root + QLatin1Char('/') + subdirectory).isDir(),
+                 qPrintable(QStringLiteral("'%1' is missing after start-up seeded the root")
+                                .arg(subdirectory)));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief writeTestFile creates a file with known contents, making any parent directories.
+ *
+ * @param path     file to write.
+ * @param contents text to put in it.
+ * @return true when the file was written.
+ */
+static bool writeTestFile(const QString &path, const QString &contents)
+{
+    if (!QDir().mkpath(QFileInfo(path).absolutePath()))
+    {
+        return false;
+    }
+    QFile file(path);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        return false;
+    }
+    file.write(contents.toUtf8());
+    file.close();
+    return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief readTestFile returns a file's contents, or an empty string when it cannot be read.
+ */
+static QString readTestFile(const QString &path)
+{
+    QFile file(path);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        return QString();
+    }
+    const QString contents = QString::fromUtf8(file.readAll());
+    file.close();
+    return contents;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief MigrationCopiesTheWholeTreeIncludingUnknownFolders is the central Task 60 rule.
+ *
+ * Users add their own directories to the data tree — `Projects` and `bodyscans` have both
+ * been seen on real machines — so a migration that walked a known list of subfolders would
+ * silently strand everything the list did not mention. This case therefore mixes standard
+ * folders, a deeply nested one, and folders the code has never heard of, and requires all
+ * of them at the destination.
+ */
+void TST_DataRoot::MigrationCopiesTheWholeTreeIncludingUnknownFolders() const
+{
+    const QString source = scratchPath(QStringLiteral("migrate-all/seamly2d"));
+    const QString destination = scratchPath(QStringLiteral("migrate-all/Seamly"));
+
+    const QStringList files
+    {
+        QStringLiteral("patterns/shirt.sm2d"),
+        QStringLiteral("measurements/individual/sue.smis"),
+        QStringLiteral("measurements/multisize/table.smms"),
+        QStringLiteral("measurements/experimental/draft.smis"),  // an extra child of a known folder
+        QStringLiteral("Projects/spring/notes.txt"),             // entirely the user's own
+        QStringLiteral("bodyscans/scan.dat"),
+        QStringLiteral("label templates/plain.xml"),
+        QStringLiteral("images/logo.png")
+    };
+
+    for (const QString &relative : files)
+    {
+        QVERIFY(writeTestFile(source + QLatin1Char('/') + relative, relative));
+    }
+
+    int copied = 0;
+    int skipped = 0;
+    QString errorMessage;
+    QVERIFY2(VCommonSettings::migrateDataTree(source, destination, &copied, &skipped, &errorMessage),
+             qPrintable(errorMessage));
+
+    QCOMPARE(copied, files.count());
+    QCOMPARE(skipped, 0);
+
+    for (const QString &relative : files)
+    {
+        const QString target = destination + QLatin1Char('/') + relative;
+        QVERIFY2(QFileInfo::exists(target),
+                 qPrintable(QStringLiteral("'%1' did not reach the new root").arg(relative)));
+        QCOMPARE(readTestFile(target), relative);
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief MigrationNeverOverwritesAnExistingFile checks the merge rule.
+ *
+ * The destination can legitimately be a populated folder — the cloud-drive use case targets
+ * one — so a collision must skip and be reported, never clobber the file already there.
+ */
+void TST_DataRoot::MigrationNeverOverwritesAnExistingFile() const
+{
+    const QString source = scratchPath(QStringLiteral("migrate-merge/seamly2d"));
+    const QString destination = scratchPath(QStringLiteral("migrate-merge/Seamly"));
+
+    QVERIFY(writeTestFile(source + QStringLiteral("/patterns/shared.sm2d"), QStringLiteral("from the old tree")));
+    QVERIFY(writeTestFile(source + QStringLiteral("/patterns/fresh.sm2d"), QStringLiteral("only in the old tree")));
+    QVERIFY(writeTestFile(destination + QStringLiteral("/patterns/shared.sm2d"), QStringLiteral("ALREADY HERE")));
+
+    int copied = 0;
+    int skipped = 0;
+    QVERIFY(VCommonSettings::migrateDataTree(source, destination, &copied, &skipped));
+
+    QCOMPARE(copied, 1);
+    QCOMPARE(skipped, 1);
+    QCOMPARE(readTestFile(destination + QStringLiteral("/patterns/shared.sm2d")), QStringLiteral("ALREADY HERE"));
+    QCOMPARE(readTestFile(destination + QStringLiteral("/patterns/fresh.sm2d")),
+             QStringLiteral("only in the old tree"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief MigrationLeavesTheSourceTreeIntact — the whole point of copying rather than moving.
+ *
+ * The legacy tree must survive so a user can roll back to an earlier release.
+ */
+void TST_DataRoot::MigrationLeavesTheSourceTreeIntact() const
+{
+    const QString source = scratchPath(QStringLiteral("migrate-keep/seamly2d"));
+    const QString destination = scratchPath(QStringLiteral("migrate-keep/Seamly"));
+
+    const QString pattern = source + QStringLiteral("/patterns/keep.sm2d");
+    QVERIFY(writeTestFile(pattern, QStringLiteral("<pattern/>")));
+
+    QVERIFY(VCommonSettings::migrateDataTree(source, destination));
+
+    QVERIFY2(QFileInfo::exists(pattern), "the source file was removed - migration must never move or delete");
+    QCOMPARE(readTestFile(pattern), QStringLiteral("<pattern/>"));
+    QVERIFY(QFileInfo(source + QStringLiteral("/patterns")).isDir());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief MigrationRefusesADestinationInsideTheSource guards against endless recursion.
+ *
+ * Copying a tree into its own subdirectory would keep finding new files to copy. Cheap to
+ * get wrong, expensive to notice — it fills the disk rather than failing.
+ */
+void TST_DataRoot::MigrationRefusesADestinationInsideTheSource() const
+{
+    const QString source = scratchPath(QStringLiteral("migrate-nested/seamly2d"));
+    QVERIFY(writeTestFile(source + QStringLiteral("/patterns/a.sm2d"), QStringLiteral("a")));
+
+    QString errorMessage;
+    QVERIFY(!VCommonSettings::migrateDataTree(source, source + QStringLiteral("/Seamly"), nullptr, nullptr,
+                                              &errorMessage));
+    QVERIFY(!errorMessage.isEmpty());
+
+    // And the same tree as both ends.
+    QVERIFY(!VCommonSettings::migrateDataTree(source, source));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief MigrationMarksTheLegacyTree checks the breadcrumb that retires the old root.
+ *
+ * The tree is kept rather than deleted, so it needs to be obvious to the code — which must
+ * not offer it again — and to a human opening the folder.
+ */
+void TST_DataRoot::MigrationMarksTheLegacyTree() const
+{
+    const QString source = scratchPath(QStringLiteral("migrate-marker/seamly2d"));
+    const QString destination = scratchPath(QStringLiteral("migrate-marker/Seamly"));
+    QVERIFY(writeTestFile(source + QStringLiteral("/patterns/a.sm2d"), QStringLiteral("a")));
+
+    QVERIFY(!VCommonSettings::dataTreeWasMigrated(source));
+    QVERIFY(VCommonSettings::migrateDataTree(source, destination));
+    QVERIFY(VCommonSettings::markDataTreeMigrated(source, destination));
+    QVERIFY(VCommonSettings::dataTreeWasMigrated(source));
+
+    // A human opening the folder must be told where the files went.
+    const QString marker = source + QStringLiteral("/MIGRATED-TO-SEAMLY.txt");
+    QVERIFY(QFileInfo::exists(marker));
+    QVERIFY(readTestFile(marker).contains(QDir::toNativeSeparators(destination)));
 }
 
 //---------------------------------------------------------------------------------------------------------------------

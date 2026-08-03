@@ -55,6 +55,7 @@
 #include <QApplication>
 #include <QCoreApplication>
 #include <QDate>
+#include <QDateTime>
 #include <QDir>
 #include <QDirIterator>
 #include <QFile>
@@ -63,8 +64,10 @@
 #include <QtGlobal>
 #include <QLocale>
 #include <QMessageLogger>
+#include <QStandardPaths>
 #include <QString>
 #include <QStringConverter>
+#include <QTextStream>
 #include <QVariant>
 #include <QtDebug>
 
@@ -480,18 +483,33 @@ QString VCommonSettings::commonSettingsOrganization() const
 /**
  * @brief getDefaultDataRoot returns the built-in default root of the user's data tree.
  *
- * Task 34 renamed this from ~/seamly2d, and Task 53 settled on "seamlyData" rather than the
- * bare "seamly" Task 34 first used: "seamly" is too generic to claim as a folder name — on
- * the developer's own machine G:/My Drive/seamly was already a large unrelated business
- * folder, so pointing a data root at it would have scattered nine app subfolders through it.
- * "seamlyData" says what the folder holds and is unlikely to collide. QDir::homePath()
- * resolves it natively on every platform, so no per-platform variant is needed.
+ * Task 60 moved this to <Documents>/Seamly. Two changes, for two reasons:
  *
- * @return absolute path of the default user-data root, e.g. C:/Users/<user>/seamlyData.
+ *  - **Documents, not the home directory.** These are files the user creates, opens, saves
+ *    and backs up, so they belong where every other application puts documents. Internal
+ *    state — settings, caches, logs — stays in the platform's application-data locations
+ *    and is deliberately NOT mixed in here.
+ *  - **"Seamly", not "seamlyData" or "seamly2d".** The folder holds the whole family's
+ *    work, so naming it after one member (seamly2d) wrongly implies SeamlyMe and
+ *    SeamlyLayout belong to Seamly2D, and "Data" is redundant once the parent location
+ *    already says what these files are.
+ *
+ * QStandardPaths::DocumentsLocation is used rather than a hand-built path because it
+ * resolves the Windows known-folder API (so a redirected or OneDrive-backed Documents is
+ * honoured) and XDG_DOCUMENTS_DIR on Linux, where a localized system may not call the
+ * folder "Documents" at all. It falls back to the home directory on the rare system that
+ * reports no documents location, which keeps the result absolute in every case.
+ *
+ * @return absolute path of the default user-data root, e.g. C:/Users/<user>/Documents/Seamly.
  */
 QString VCommonSettings::getDefaultDataRoot()
 {
-    return QDir::homePath() + QLatin1String("/seamlyData");
+    QString documents = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    if (documents.isEmpty())
+    {
+        documents = QDir::homePath();
+    }
+    return QDir::cleanPath(documents) + QLatin1String("/Seamly");
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -609,6 +627,265 @@ bool VCommonSettings::ensureDataRootTree(const QString &root)
         directory.mkpath(subdirectory);
     }
 
+    return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief migrationMarkerFileName names the breadcrumb left in a tree that has been migrated.
+ */
+static const QString migrationMarkerFileName = QStringLiteral("MIGRATED-TO-SEAMLY.txt");
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief dataTreeWasMigrated reports whether a legacy tree already carries the marker.
+ *
+ * @param root tree to test.
+ * @return true when the marker file is present.
+ */
+bool VCommonSettings::dataTreeWasMigrated(const QString &root)
+{
+    if (root.isEmpty())
+    {
+        return false;
+    }
+    return QFileInfo::exists(root + QLatin1Char('/') + migrationMarkerFileName);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief migrateDataTree copies a whole user-data tree to a new root (Task 60).
+ *
+ * Copies EVERY file and directory found under sourceRoot, not a known list of subfolders.
+ * That is deliberate and is the single most important property of this function: users add
+ * their own directories to the data tree — Projects, bodyscans and others have been seen in
+ * the wild — so migrating a fixed list would silently strand whatever the list did not
+ * mention. The structure is reproduced exactly; only the root's name changes.
+ *
+ * The safety rules, each of which exists because the alternative loses data:
+ *
+ *  - **Never a rename or a move.** The source tree is left completely intact so a user can
+ *    roll back to an earlier release, which is why the caller can also mark it rather than
+ *    delete it. Nothing here removes anything, ever.
+ *  - **Merge, never overwrite.** An existing destination file is skipped and counted, not
+ *    clobbered — the destination may be an already-populated folder.
+ *  - **Verify every copy.** Sizes are compared after each file, because a cloud-synced
+ *    target (Google Drive, OneDrive, Dropbox) can report a write complete before it is
+ *    durable. A file that does not verify aborts the migration.
+ *  - **Fail safe.** On any error the function stops, removes only the partial file it was
+ *    writing at that moment, and returns false with the source untouched. A half-copied
+ *    destination must never become the configured root, so the caller must not record the
+ *    new root unless this returned true.
+ *
+ * @param sourceRoot      tree to copy from; must exist.
+ * @param destinationRoot tree to copy to; created if missing.
+ * @param filesCopied     optional out-parameter, number of files actually copied.
+ * @param filesSkipped    optional out-parameter, number already present at the destination.
+ * @param errorMessage    optional out-parameter, human-readable reason for a false return.
+ * @return true when every file is present and verified at the destination.
+ */
+bool VCommonSettings::migrateDataTree(const QString &sourceRoot, const QString &destinationRoot,
+                                      int *filesCopied, int *filesSkipped, QString *errorMessage)
+{
+    const auto fail = [errorMessage](const QString &reason)
+    {
+        if (errorMessage != nullptr)
+        {
+            *errorMessage = reason;
+        }
+        qWarning() << "Data-tree migration failed:" << reason;
+        return false;
+    };
+
+    if (filesCopied != nullptr)  { *filesCopied = 0; }
+    if (filesSkipped != nullptr) { *filesSkipped = 0; }
+    if (errorMessage != nullptr) { errorMessage->clear(); }
+
+    const QString source = QDir::cleanPath(QDir::fromNativeSeparators(sourceRoot.trimmed()));
+    const QString destination = QDir::cleanPath(QDir::fromNativeSeparators(destinationRoot.trimmed()));
+
+    if (source.isEmpty() || destination.isEmpty())
+    {
+        return fail(QStringLiteral("source or destination path is empty"));
+    }
+    if (!QFileInfo(source).isDir())
+    {
+        return fail(QStringLiteral("source '%1' is not a directory").arg(source));
+    }
+#ifdef Q_OS_WIN
+    const Qt::CaseSensitivity caseSensitivity = Qt::CaseInsensitive;
+#else
+    const Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive;
+#endif
+    if (source.compare(destination, caseSensitivity) == 0)
+    {
+        return fail(QStringLiteral("source and destination are the same directory"));
+    }
+    // Copying a tree into its own subdirectory would recurse without end.
+    if (destination.startsWith(source + QLatin1Char('/'), caseSensitivity))
+    {
+        return fail(QStringLiteral("destination '%1' lies inside the source tree").arg(destination));
+    }
+
+    QDir destinationDir(destination);
+    if (!destinationDir.mkpath(QStringLiteral(".")))
+    {
+        return fail(QStringLiteral("could not create '%1'").arg(destination));
+    }
+
+    const QDir sourceDir(source);
+    int copied = 0;
+    int skipped = 0;
+
+    QDirIterator iterator(source, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden,
+                          QDirIterator::Subdirectories);
+    while (iterator.hasNext())
+    {
+        const QString entryPath = iterator.next();
+        const QFileInfo entry(entryPath);
+        const QString relative = sourceDir.relativeFilePath(entryPath);
+        const QString target = destination + QLatin1Char('/') + relative;
+
+        if (entry.isDir())
+        {
+            if (!destinationDir.mkpath(relative))
+            {
+                return fail(QStringLiteral("could not create '%1'").arg(target));
+            }
+            continue;
+        }
+
+        if (QFileInfo::exists(target))
+        {
+            // Merge, never overwrite. Reported so a collision is visible rather than silent.
+            ++skipped;
+            qDebug() << "Data-tree migration skipped existing file" << QDir::toNativeSeparators(target);
+            continue;
+        }
+
+        // The parent may not exist yet: QDirIterator does not guarantee a directory is
+        // visited before the files inside it.
+        const QString targetParent = QFileInfo(target).absolutePath();
+        if (!QDir().mkpath(targetParent))
+        {
+            return fail(QStringLiteral("could not create '%1'").arg(targetParent));
+        }
+
+        if (!QFile::copy(entryPath, target))
+        {
+            return fail(QStringLiteral("could not copy '%1' to '%2'").arg(entryPath, target));
+        }
+
+        // Verify, because a cloud-synced destination can report success early.
+        if (QFileInfo(target).size() != entry.size())
+        {
+            QFile::remove(target);
+            return fail(QStringLiteral("copy of '%1' did not verify (expected %2 bytes)")
+                            .arg(entryPath)
+                            .arg(entry.size()));
+        }
+        ++copied;
+    }
+
+    if (filesCopied != nullptr)  { *filesCopied = copied; }
+    if (filesSkipped != nullptr) { *filesSkipped = skipped; }
+    return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief migrateAdoptedLegacyTree turns a first-run adoption into a Task 60 migration.
+ *
+ * initializeDataRoot() still *adopts* a legacy tree — it resolves and records a path and
+ * touches no files, which is what keeps it safe for the unit tests to call. This function
+ * is the second half, and it is deliberately called only from the applications'
+ * openSettings(), the one place the real home directory is fed in. The tests therefore
+ * cannot copy anything into the developer's home no matter what they resolve, which is the
+ * same rule pruneEmptyLegacyDataRoot() and ensureDataRootTree() follow.
+ *
+ * Fail-safe by construction: the configured root is only repointed at newRoot after the
+ * copy has completed and verified. If anything goes wrong the legacy tree stays configured
+ * and in use, so the worst case is that the user carries on exactly as before.
+ *
+ * @param legacyRoot the adopted tree, e.g. ~/seamly2d.
+ * @param newRoot    where it should live now, e.g. <Documents>/Seamly.
+ * @return the root actually in force afterwards — newRoot on success, legacyRoot on failure.
+ */
+QString VCommonSettings::migrateAdoptedLegacyTree(const QString &legacyRoot, const QString &newRoot)
+{
+    if (legacyRoot.isEmpty() || newRoot.isEmpty() || !QFileInfo(legacyRoot).isDir())
+    {
+        return legacyRoot;
+    }
+
+    // Already dealt with on an earlier run: leave the marked tree alone.
+    if (dataTreeWasMigrated(legacyRoot))
+    {
+        return legacyRoot;
+    }
+
+    int copied = 0;
+    int skipped = 0;
+    QString errorMessage;
+    if (!migrateDataTree(legacyRoot, newRoot, &copied, &skipped, &errorMessage))
+    {
+        qWarning() << "Keeping the existing data root" << QDir::toNativeSeparators(legacyRoot)
+                   << "because migration failed:" << errorMessage;
+        return legacyRoot;
+    }
+
+    qInfo() << "Migrated the user-data tree from" << QDir::toNativeSeparators(legacyRoot) << "to"
+            << QDir::toNativeSeparators(newRoot) << '-' << copied << "file(s) copied," << skipped
+            << "already present";
+
+    // Only now is it safe to repoint the configured root.
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::organizationName(),
+                       commonIniFilename);
+    settings.setValue(settingPathsDataRoot, newRoot);
+    settings.sync();
+
+    markDataTreeMigrated(legacyRoot, newRoot);
+    return newRoot;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief markDataTreeMigrated writes the breadcrumb that retires a migrated legacy tree.
+ *
+ * The legacy tree is deliberately kept — a user may need to roll back to an earlier release
+ * — so it needs to be obvious to both the code and a human that it is no longer live. The
+ * marker stops initializeDataRoot() offering the same tree again on the next run, and its
+ * contents tell a person opening the folder where their files went and when.
+ *
+ * A failure here is not fatal to the migration that preceded it: the files are already
+ * copied and verified. It is reported and ignored.
+ *
+ * @param legacyRoot tree that was migrated away from.
+ * @param newRoot    where its contents now live.
+ * @return true when the marker was written.
+ */
+bool VCommonSettings::markDataTreeMigrated(const QString &legacyRoot, const QString &newRoot)
+{
+    if (legacyRoot.isEmpty() || !QFileInfo(legacyRoot).isDir())
+    {
+        return false;
+    }
+
+    QFile marker(legacyRoot + QLatin1Char('/') + migrationMarkerFileName);
+    if (!marker.open(QIODevice::WriteOnly | QIODevice::Text))
+    {
+        qWarning() << "Could not write the migration marker in" << QDir::toNativeSeparators(legacyRoot);
+        return false;
+    }
+
+    QTextStream stream(&marker);
+    stream << "This folder has been migrated and is no longer used by the Seamly "
+              "applications.\r\n\r\n"
+           << "Your files were copied to:\r\n    " << QDir::toNativeSeparators(newRoot) << "\r\n\r\n"
+           << "Date: " << QDateTime::currentDateTime().toString(Qt::ISODate) << "\r\n\r\n"
+           << "Nothing here was deleted. Once you are satisfied that everything is present "
+              "at the new location, this folder can be removed.\r\n";
+    marker.close();
     return true;
 }
 

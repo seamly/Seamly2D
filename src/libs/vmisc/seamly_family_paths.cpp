@@ -53,7 +53,7 @@ const QLatin1String sourceTreeBuildSubPath("/src/app/seamlylayout/qt_frontend/bu
  * from the running executable's directory while searching for the checkout root.
  *
  * The deepest layout in use is the debug shadow build, whose executable sits at
- * `<checkout>/scripts/seamly2d-build-debug/src/app/seamly2d/bin/` — six levels
+ * `<checkout>/scripts/seamly2d-debug/src/app/seamly2d/bin/` — six levels
  * below the checkout root. The release shadow build (`<checkout>/build/...`) is
  * five. Eight leaves room for a differently nested build tree while still
  * terminating quickly, and keeps the walk from climbing out of the checkout and
@@ -160,7 +160,7 @@ QString locateSeamlyLayout(const QString &directory)
  * contains a SeamlyLayout build. Both shadow-build layouts the project uses
  * resolve this way — the release build at `<checkout>/build/...` (five levels)
  * and `scripts/sd.ps1`'s debug build at
- * `<checkout>/scripts/seamly2d-build-debug/...` (six) — without either being
+ * `<checkout>/scripts/seamly2d-debug/...` (six) — without either being
  * named here, so a differently nested build tree still works.
  *
  * At each level **Release is preferred over Debug**: a developer who has built

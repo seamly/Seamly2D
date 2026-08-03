@@ -8,70 +8,78 @@
  **  @brief
  **  WiX (v5/v6) authoring for the Windows MSI installer of the Seamly app
  **  family: seamly2d (pattern drafting), seamlyme (measurements) and
- **  SeamlyLayout (pattern layout) — Task 13.
+ **  SeamlyLayout (pattern layout).
  **
- **  Build with scripts\packaging\windows\smsi.ps1 (locally) or .github\workflows\windows-msi.yml
- **  (CI). One MSI is produced per architecture: `wix build -arch x64` and
- **  `wix build -arch arm64`, from this same source.
+ **  Build with `scripts\packaging\windows\smsi.ps1` (local)
+ **  or with `.github\workflows\windows-msi.yml` (origin).
+ **
+ **  (CI). One MSI is produced per architecture from this same source:
+ **     Windows x64:    `wix build -arch x64`
+ **     Windows arm64:  `wix build -arch arm64`
  **
  **  INSTALL LAYOUT
- **    [ProgramFiles64Folder]\Seamly2D\          seamly2d.exe, seamlyme.exe,
- **                                              SeamlyLayout.exe and the ONE
- **                                              Qt runtime all three share
- **                                              (merged windeployqt +
- **                                              windeployqt6 output, incl. the
- **                                              QML modules and
- **                                              QtWebEngineProcess.exe
- **                                              SeamlyLayout needs, plus the
- **                                              MSVC CRT).
+ **    [ProgramFiles64Folder]\Seamly\        seamly2d.exe, seamlyme.exe,
+ **                                          SeamlyLayout.exe and the ONE
+ **                                          Qt runtime all three share
+ **                                          (merged windeployqt +
+ **                                          windeployqt6 output, incl. the
+ **                                          QML modules and
+ **                                          QtWebEngineProcess.exe
+ **                                          SeamlyLayout needs, plus the
+ **                                          MSVC CRT).
  **
- **                                              Task 30 collapsed the former
- **                                              ...\Seamly2D\SeamlyLayout\
- **                                              subdirectory. It existed only
- **                                              because SeamlyLayout was built
- **                                              against a different Qt release
- **                                              than the parent apps, and Qt's
- **                                              DLL file names are identical
- **                                              across releases, so the two
- **                                              runtimes could not share a flat
- **                                              directory. All three apps now
- **                                              build against Qt 6.11.1, so one
- **                                              runtime serves them all.
- **                                              seamly2d still resolves the exe
- **                                              through
- **                                              SeamlyFamilyPaths::locateSeamlyLayout()
- **                                              (src/libs/vmisc/seamly_family_paths.cpp),
- **                                              which checks the flat layout
- **                                              first and keeps the old
- **                                              subdirectory layout as a
- **                                              fallback for installs made by
- **                                              an earlier MSI.
+ **                                          All three apps build against Qt 6.11.1, so one
+ **                                          runtime serves them all.
+ **                                          seamly2d still resolves the exe through
+ **                                          SeamlyFamilyPaths::locateSeamlyLayout()
+ **                                          (src/libs/vmisc/seamly_family_paths.cpp),
+ **                                          which checks the flat layout
+ **                                          first and keeps the old
+ **                                          subdirectory layout as a
+ **                                          fallback for installs made by
+ **                                          an earlier MSI.
  **
- **  USER DATA IS NEVER TOUCHED
+ **  USER DATA IS NEVER DELETED:
+ **    - USER DATA FILES MAY BE COPIED TO THE NEW USER DATA DIRECTORIES.
+ **    - USER APPLICATION DATA MAY BE UPDATED.
  **    Per-user settings live under %LOCALAPPDATA%\Seamly\<app>
- **    (AppData\Local\Seamly\Seamly2D, ...\SeamlyMe, ...\SeamlyLayout — the
- **    Task 15 unified locations) plus the shared
- **    %APPDATA%\Seamly\qt6_common.ini; pattern/measurement user data defaults
- **    to C:\Users\<user>\seamly2d. The installer neither creates nor removes
- **    any of these: the apps create them on first run (including the
+ **    (AppData\Local\Seamly\Seamly2D, ...\SeamlyMe, ...\SeamlyLayout) plus the shared
+ **    %APPDATA%\Seamly\qt6_common.ini; pattern, measurement, and other user data defaults
+ **    to C:\Users\<user>\Documents\Seamly. The installer neither creates nor
+ **    removes any of these: the apps create them on first run (including the
  **    legacy-location migration), and uninstall leaves them in place, so an
- **    uninstall/reinstall or upgrade never loses user data.
+ **    uninstall/reinstall or upgrade never loses user data. This is what the
+ **    Task 51 "existing installation" dialog below tells the user, in those
+ **    words, before it replaces anything.
+ **
+ **  INSTALL-TIME EXPERIENCE (Task 51)
+ **    SeamlyPreviousInstallDlg  shown before the welcome page when an earlier
+ **                              install is detected — either an older MSI of
+ **                              this product (WIX_UPGRADE_DETECTED, set by
+ **                              MajorUpgrade) or the old NSIS installation
+ **                              (SEAMLYNSISUNINSTALLSTRING, found by the
+ **                              registry search below). Warns that the program
+ **                              files will be replaced and states plainly that
+ **                              user data is not touched.
+ **    SeamlyShortcutsDlg        the optional-desktop-shortcut checkbox, spawned
+ **                              from the install-directory page.
+ **    Both dialogs are wired without touching WixUI's own publish chain — see
+ **    the comments at the <UI> element for why that matters.
  **
  **  PREPROCESSOR VARIABLES (passed by smsi.ps1 via -d)
  **    ProductVersion       numeric MSI version x.y.z (see smsi.ps1 for the
  **                         mapping from the project version — MSI limits the
- **                         major field to 255, so the YYYY.M.D.HHMM project
- **                         scheme cannot be used directly)
+ **                         major field to 255 so YYYY.M.D.HHMM is adjusted to
+ **                         (YYYY-2000).M.((D-1)*1440 + HH*60 + MM) in smsi.ps1
  **    DisplayVersion       full project version string (YYYY.M.D.HHMM)
  **    RepoRoot             absolute path of the repository root
  **    ParentStagingDir     staged shared runtime tree for every app in the
- **                         package (no exes) — seamly2d/seamlyme windeployqt
- **                         output merged with SeamlyLayout's windeployqt6
- **                         output when IncludeSeamlyLayout is defined
+ **                         package (no exes) — seamly2d/seamlylayout/seamlyme windeployqt
+ **                         output -
+ **    IncludeSeamlyLayout  defined (=1). IncludeSeamlyLayout should always be defined.
+ **                         This flag may be removed when SeamlyLayout migration is completed.
  **    ExeStagingDir        staged directory holding the app executables
- **    IncludeSeamlyLayout  defined (=1) when SeamlyLayout is part of this MSI;
- **                         undefined for the arm64 package until SeamlyLayout
- **                         has an arm64 build (see .github/README-BUILDS.md)
+ **
  **
  **  UPGRADES
  **    The UpgradeCode below is FIXED for the lifetime of the product family
@@ -81,23 +89,26 @@
  **    ProductCode is auto-generated on every build.
  **
  **  @copyright
- **  This source code is part of the Seamly2D project, a pattern making
- **  program, whose allow create and modeling patterns of clothing.
- **  Copyright (C) 2026 Seamly2D Project
+ **  This source code is part of the Seamly project, a suite of apparel CAD
+ **  software.
+ **  Copyright (C) 2026 Seamly Project
  **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
  **
- **  Seamly2D is free software: you can redistribute it and/or modify
+ **  @license
+ **  Seamly2D/SeamlyMe is free software: you can redistribute it and/or modify
  **  it under the terms of the GNU General Public License as published by
  **  the Free Software Foundation, either version 3 of the License, or
  **  (at your option) any later version.
  **
- **  Seamly2D is distributed in the hope that it will be useful,
+ **  Seamly2D/SeamlyMe is distributed in the hope that it will be useful,
  **  but WITHOUT ANY WARRANTY; without even the implied warranty of
  **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  **  GNU General Public License for more details.
  **
  **  You should have received a copy of the GNU General Public License
- **  along with Seamly2D.  If not, see <http://www.gnu.org/licenses/>.
+ **  along with Seamly2D/SeamlyMe.  If not, see <http://www.gnu.org/licenses/>.
+ **
+ **  SeamlyLayout is licensed under the MIT license.
  ******************************************************************************
 -->
 
@@ -119,17 +130,18 @@
 <?endif?>
 
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
 
-  <Package Name="Seamly2D"
-           Manufacturer="Seamly2D Project"
+  <Package Name="Seamly"
+           Manufacturer="Seamly Project"
            Version="$(var.ProductVersion)"
            UpgradeCode="cbf4b5f1-c32c-4dbb-b385-3ee4a7b30658"
            Language="1033"
            Compressed="yes"
            Scope="perMachine">
 
-    <SummaryInformation Description="Seamly2D $(var.DisplayVersion) - pattern drafting, measurements and layout" />
+    <SummaryInformation Description="Seamly $(var.DisplayVersion) - apparel CAD for drafting, measurements/sizing, and layout" />
 
     <!-- Newer versions upgrade in place: the old product (any architecture,
          same UpgradeCode) is removed before the new files are installed.
@@ -145,23 +157,227 @@
     <Icon Id="seamly2d.ico" SourceFile="$(var.RepoRoot)\dist\win\seamly2d.ico" />
     <Icon Id="seamlyme.ico" SourceFile="$(var.RepoRoot)\dist\win\seamlyme.ico" />
     <?ifdef var.IncludeSeamlyLayout ?>
-    <Icon Id="seamlylayout.ico" SourceFile="$(var.RepoRoot)\src\app\seamlylayout\qt_frontend\assets\images\seamly-layout.ico" />
+    <Icon Id="seamlyme.ico" SourceFile="$(var.RepoRoot)\dist\win\seamlylayout.ico" />
     <?endif?>
 
     <Property Id="ARPPRODUCTICON" Value="seamly2d.ico" />
     <Property Id="ARPHELPLINK" Value="https://seamly.io" />
     <Property Id="ARPURLINFOABOUT" Value="https://seamly.io" />
+    <!-- Apps &amp; features shows the numeric MSI ProductVersion (26.y.z) as its
+         DisplayVersion, and that cannot be overridden: the RegisterProduct
+         standard action writes that value into the Uninstall key *after*
+         WriteRegistryValues, so any component-authored override is overwritten.
+         The full YYYY.M.D.HHMM project version therefore reaches the user two
+         other ways — the ARP comment here, and HKLM\SOFTWARE\Seamly\Seamly2D
+         (DisplayVersion) written by InstallInfoRegistry below. -->
+    <Property Id="ARPCOMMENTS" Value="Seamly $(var.DisplayVersion) - apparel CAD pattern drafting (Seamly2D), measurements/sizing (SeamlyMe), and layout (SeamlyLayout)" />
 
-    <!-- Directory-chooser UI (Task 14 extends this with the user-data path
-         prompt). The license page shows license.rtf, which sits beside this
+    <!-- ================= previous-installation detection ================== -->
+    <!-- Two entirely different things can already be on the machine:
+
+           1. an older MSI of THIS product - MajorUpgrade (above) finds it by
+              UpgradeCode and sets WIX_UPGRADE_DETECTED, and removes it during
+              the install;
+
+           2. the old NSIS installation (dist\seamly2d-installer.nsi), which is
+              a DIFFERENT product with its own ARP entry and its own
+              uninstall.exe. The MSI neither upgrades nor removes it.
+
+         The NSIS installer is a 32-bit executable that does not switch the
+         registry view, so on x64 both of its keys land under WOW6432Node -
+         hence Bitness="always32", without which an x64 MSI looks in the 64-bit
+         view and never sees them. -->
+    <Property Id="SEAMLYNSISUNINSTALLSTRING" Secure="yes">
+      <RegistrySearch Id="SeamlyNsisUninstallStringSearch"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Seamly2D"
+                      Name="UninstallString"
+                      Type="raw"
+                      Bitness="always32" />
+    </Property>
+    <Property Id="SEAMLYNSISINSTALLDIR" Secure="yes">
+      <RegistrySearch Id="SeamlyNsisInstallDirSearch"
+                      Root="HKLM"
+                      Key="SOFTWARE\NSIS_Seamly2D"
+                      Name="Install_Dir"
+                      Type="raw"
+                      Bitness="always32" />
+    </Property>
+
+    <!-- Where the NSIS product put its Start Menu shortcuts, for the removal
+         components below. The .nsi never calls SetShellVarContext all, so
+         $SMPROGRAMS is the INSTALLING USER's Start Menu rather than the All
+         Users' Start Menu. RemoveFolderEx resolves its paths in the immediate sequence,
+         which runs as that user, so this reaches them; a *different* user's
+         stale copy cannot be reached by a per-machine install and survives.
+         Sequenced after CostFinalize so the directory properties it expands
+         are resolved, and in both sequences because a silent install never
+         runs the UI one. -->
+    <SetProperty Id="SEAMLYNSISSTARTMENU"
+                 Value="[AppDataFolder]Microsoft\Windows\Start Menu\Programs\Seamly2D"
+                 After="CostFinalize" Sequence="both"
+                 Condition="SEAMLYNSISINSTALLDIR" />
+
+    <!-- ================= optional desktop shortcuts ======================= -->
+    <!-- Set by the checkbox on SeamlyShortcutsDlg, and overridable on the
+         command line for unattended installs:
+             msiexec /i Seamly-x64.msi /qn SEAMLYDESKTOPSHORTCUTS=0
+         Default 1 (checked), matching the NSIS installer's behaviour of always
+         creating shortcuts. Secure="yes" so the value survives the hand-off to
+         the elevated server-side sequence that evaluates the component
+         conditions. -->
+    <Property Id="SEAMLYDESKTOPSHORTCUTS" Value="1" Secure="yes" />
+
+    <!-- Directory-chooser UI. The license page shows license.rtf, which sits beside this
          .wxs; $(sys.SOURCEFILEDIR) is the folder of this source file (with a
          trailing backslash), so the reference survives relocating the tree. -->
     <ui:WixUI Id="WixUI_InstallDir" InstallDirectory="INSTALLFOLDER" />
     <WixVariable Id="WixUILicenseRtf" Value="$(sys.SOURCEFILEDIR)license.rtf" />
 
+    <!-- ================= install-time dialogs ===================== -->
+    <!--
+      HOW THESE TWO DIALOGS ARE REACHED, AND WHY NOT THE OBVIOUS WAY
+
+      The obvious way to add a page to WixUI_InstallDir is to publish another
+      NewDialog on InstallDirDlg's Next button with a higher Order than the
+      built-in one (Order 4, condition "1", straight to VerifyReadyDlg). That
+      relies on undefined behaviour: Windows Installer processes a control's
+      events in Ordering order and defers NewDialog until the end, but nothing
+      documents which of two unconditionally-true NewDialog events wins. Note
+      that WixUI itself never relies on it - every one of its competing
+      NewDialog publishes carries a mutually exclusive condition. Since the
+      built-in row's condition is the literal "1", no condition can be written
+      that excludes it, so both dialogs here are wired through mechanisms whose
+      outcome is defined:
+
+        SeamlyPreviousInstallDlg  a Show entry in InstallUISequence, before
+                                  WelcomeDlg. Sequence-driven dialogs are
+                                  independent of WixUI's publish chain, and
+                                  they are skipped automatically in reduced and
+                                  silent UI levels (/qb, /qn), which is what we
+                                  want for unattended installs.
+
+        SeamlyShortcutsDlg        SpawnDialog from InstallDirDlg's Next at
+                                  Order 2 - i.e. before the built-in NewDialog
+                                  at Order 4, so it runs whichever way that
+                                  ambiguity resolves. This is the same
+                                  mechanism WixUI uses for BrowseDlg (spawned
+                                  from InstallDirDlg's ChangeFolder at
+                                  Order 2).
+
+      Geometry, fonts and the banner bitmap mirror the stock WixUI dialogs
+      (370x270, WixUI_Font_Title, WixUI_Bmp_Banner) so the pages look like part
+      of the same wizard.
+    -->
+    <UI>
+
+      <!-- ========== "an existing installation was found" ================= -->
+      <!-- No NoMinimize: the stock WixUI dialogs allow minimizing (Attributes
+           7), and these two have to feel like pages of the same wizard. -->
+      <Dialog Id="SeamlyPreviousInstallDlg" Width="370" Height="270"
+              Title="[ProductName] Setup">
+
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
+                 TabSkip="no" Text="WixUI_Bmp_Banner" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="373" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
+
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="{\WixUI_Font_Title}An existing installation was found" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="Please read this before Setup replaces any program files." />
+
+        <!-- Shown only for an older MSI of this same product. -->
+        <Control Id="UpgradeText" Type="Text" X="20" Y="58" Width="330" Height="32"
+                 NoPrefix="yes"
+                 ShowCondition="WIX_UPGRADE_DETECTED"
+                 HideCondition="NOT WIX_UPGRADE_DETECTED"
+                 Text="An earlier version of Seamly apps installed by this installer was found. It holds Seamly2D, SeamlyLayout, and SeamlyMe. Setup will remove these program files and install this version in its place." />
+
+        <!-- Shown only for the old NSIS installation, which is a separate
+             product this installer must not and cannot remove. -->
+        <Control Id="NsisText" Type="Text" X="20" Y="94" Width="330" Height="50"
+                 NoPrefix="yes"
+                 ShowCondition="SEAMLYNSISUNINSTALLSTRING"
+                 HideCondition="NOT SEAMLYNSISUNINSTALLSTRING"
+                 Text="An older Seamly2D from the previous installer was found in [SEAMLYNSISINSTALLDIR]. It holds Seamly2D and SeamlyMe, and this version replaces both, so Setup will remove its program directory, program files,  Start Menu shortcuts, and entries in Apps and features." />
+
+        <!-- Always shown: the point of the whole dialog. -->
+        <Control Id="UserDataText" Type="Text" X="20" Y="150" Width="330" Height="76"
+                 NoPrefix="yes"
+                 Text="Your own work is not touched. Patterns, measurements, templates, etc. stay in your Seamly user data folder. Your settings stay in AppData\Local\Seamly and AppData\Roaming\Seamly. Neither installing nor uninstalling Seamly removes any of them." />
+
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
+                 Disabled="yes" Text="&amp;Back" />
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
+                 Default="yes" Text="&amp;Next">
+          <Publish Event="EndDialog" Value="Return" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
+                 Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+      </Dialog>
+
+      <!-- ========== optional desktop shortcuts =========================== -->
+      <!-- Deliberately one checkbox each for seamly2d, seamlyme, and seamlyLayout.
+           SeamlyLayout can be opened without a .svg input file (launched as a standalone app),
+           and without a .pieces.svg argument (launched from from seamly2d). -->
+      <Dialog Id="SeamlyShortcutsDlg" Width="270" Height="135"
+              Title="[ProductName] Setup">
+
+        <Control Id="Title" Type="Text" X="15" Y="12" Width="240" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="{\WixUI_Font_Title}Shortcuts" />
+        <Control Id="Description" Type="Text" X="15" Y="32" Width="240" Height="24"
+                 NoPrefix="yes"
+                 Text="Start Menu shortcuts are always created. Desktop shortcuts are optional." />
+        <Control Id="DesktopShortcutsCheckBox" Type="CheckBox" X="15" Y="62" Width="240" Height="18"
+                 Property="SEAMLYDESKTOPSHORTCUTS" CheckBoxValue="1"
+                 Text="Create &amp;desktop shortcuts for Seamly2D, SeamlyLayout, and SeamlyMe" />
+        <Control Id="OK" Type="PushButton" X="199" Y="105" Width="56" Height="17"
+                 Default="yes" Cancel="yes" Text="OK">
+          <Publish Event="EndDialog" Value="Return" />
+        </Control>
+      </Dialog>
+
+      <!-- Spawn the shortcut question from the install-directory page, before
+           the built-in transition to VerifyReadyDlg (Order 4). -->
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog"
+               Value="SeamlyShortcutsDlg" Order="2" />
+    </UI>
+
+    <!-- Runs after FindRelatedProducts (25, which sets WIX_UPGRADE_DETECTED)
+         and AppSearch (50, which runs the registry searches above), after
+         CostFinalize (1000) so directory properties resolve, and before the
+         first WixUI dialog - ResumeDlg (1296), WelcomeDlg (1297),
+         MaintenanceWelcomeDlg (1298). Only for a fresh install or an upgrade,
+         never for maintenance, repair or uninstall of this same product.
+
+         The number is written out rather than expressed as Before="WelcomeDlg"
+         on purpose: a Before= reference makes the linker resolve the symbol
+         InstallUISequence/WelcomeDlg, which every WixUI dialog set defines, so
+         it drags WixUI_Minimal and WixUI_Advanced into the link beside
+         WixUI_InstallDir and the build dies on duplicate TextStyle, Property
+         and WixAction symbols. Any value in 1201..1295 works; only the
+         relative order matters. -->
+    <InstallUISequence>
+      <Show Dialog="SeamlyPreviousInstallDlg" Sequence="1250"
+            Condition="(WIX_UPGRADE_DETECTED OR SEAMLYNSISUNINSTALLSTRING) AND NOT Installed" />
+    </InstallUISequence>
+
     <!-- ================= directory tree + harvested runtimes ============= -->
+    <!-- ProgramFiles64Folder, not ProgramFiles6432Folder or the x86 tree: every
+         binary in this package is x64 (or arm64), so the 32-bit tree would be
+         wrong even though the OLD NSIS installer lives there because
+         it was a 32-bit installer. "Seamly" rather than "Seamly2D" because
+         the folder holds the whole family - Seamly2D, SeamlyMe, and
+         SeamlyLayout - and naming it after one member misdescribes it and
+         collides confusingly with the NSIS product's own folder name. -->
     <StandardDirectory Id="ProgramFiles64Folder">
-      <Directory Id="INSTALLFOLDER" Name="Seamly2D">
+      <Directory Id="INSTALLFOLDER" Name="Seamly">
         <!-- The single Qt runtime shared by all apps in this package (Qt DLLs,
              plugins, QML modules, QtWebEngineProcess.exe, MSVC CRT, xerces-c,
              SeamlyLayout's packaged settings\ and licenses\, ...), harvested
@@ -181,7 +397,7 @@
           <Shortcut Id="Seamly2DShortcut"
                     Directory="ProgramMenuFolder"
                     Name="Seamly2D"
-                    Description="Seamly2D pattern drafting"
+                    Description="Seamly2D apparel CAD pattern drafting"
                     WorkingDirectory="INSTALLFOLDER"
                     Icon="seamly2d.ico"
                     Advertise="yes" />
@@ -205,7 +421,7 @@
           <Shortcut Id="SeamlyMeShortcut"
                     Directory="ProgramMenuFolder"
                     Name="SeamlyMe"
-                    Description="SeamlyMe measurements"
+                    Description="SeamlyMe apparel CAD measurements and sizes"
                     WorkingDirectory="INSTALLFOLDER"
                     Icon="seamlyme.ico"
                     Advertise="yes" />
@@ -231,8 +447,8 @@
       </Component>
 
       <?ifdef var.IncludeSeamlyLayout ?>
-      <!-- SeamlyLayout: Start Menu shortcut. No file association - its input
-           is the .pieces.svg handoff written by seamly2d's Layout Mode, and a
+      <!-- SeamlyLayout: Start Menu shortcut. Its input can be a .svg file (from Seamly2D)
+           or the .pieces.svg handoff written by seamly2d's Layout Mode, and a
            double ".pieces.svg" extension cannot be registered distinctly from
            plain .svg (which must stay with the user's SVG viewer).
            Task 30: installed into INSTALLFOLDER beside the parent apps now
@@ -243,13 +459,45 @@
           <Shortcut Id="SeamlyLayoutShortcut"
                     Directory="ProgramMenuFolder"
                     Name="SeamlyLayout"
-                    Description="SeamlyLayout pattern layout"
+                    Description="SeamlyLayout apparel CAD pattern pieces layout"
                     WorkingDirectory="INSTALLFOLDER"
                     Icon="seamlylayout.ico"
                     Advertise="yes" />
         </File>
       </Component>
       <?endif?>
+
+      <!-- ========== remove the old NSIS installation (Task 51 step 2) ====== -->
+      <!-- The NSIS product installs seamly2d and seamlyme; this package
+           installs both of those PLUS SeamlyLayout, so it is a strict superset
+           and leaving the old product behind means two copies of each parent
+           app, two "Seamly2D" entries in Apps & features, and Start Menu
+           shortcuts that silently launch the OLD binaries.
+
+           Its own uninstall.exe is deliberately NOT run. It is interactive, its
+           uninstall section is `RMDir /r $INSTDIR` (so it deletes anything else
+           a user happened to put in that folder), and Windows Installer cannot
+           roll an external uninstaller back if the rest of this install then
+           fails - which would leave a machine with neither product. Removing
+           the things it created ourselves has none of those problems, and it is
+           undone by the standard RemoveFiles rollback if the install aborts.
+
+           Its complete footprint, read from dist\seamly2d-installer.nsi:
+             - $INSTDIR, default C:\Program Files (x86)\Seamly2D (File /r *)
+             - HKLM\SOFTWARE\NSIS_Seamly2D
+             - HKLM\...\Uninstall\Seamly2D
+             - Start Menu folder "Seamly2D" with 3 shortcuts
+           It registers NO file associations and makes NO PATH changes, so
+           nothing else has to be undone. -->
+
+      <Component Id="RemoveNsisProgramFiles" Condition="SEAMLYNSISINSTALLDIR">
+        <!-- Breadcrumb doubling as the component's key path, in the 64-bit view
+             beside the package's other install info. Records what was removed. -->
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D" Name="RemovedNsisInstallDir"
+                       Type="string" Value="[SEAMLYNSISINSTALLDIR]" KeyPath="yes" />
+        <util:RemoveFolderEx Property="SEAMLYNSISINSTALLDIR" On="install" />
+        <util:RemoveFolderEx Property="SEAMLYNSISSTARTMENU" On="install" />
+      </Component>
 
       <!-- Install breadcrumbs: read by upgrades and by the Task 14 installer
            prompts; removed on uninstall automatically (component rules). -->
@@ -260,6 +508,83 @@
         </RegistryKey>
       </Component>
 
+    </ComponentGroup>
+
+    <!-- ================= optional desktop shortcuts ======================= -->
+    <!-- Installed only when SEAMLYDESKTOPSHORTCUTS is set - by the checkbox on
+         SeamlyShortcutsDlg, by its default of 1, or on the command line. The
+         property is public and secure, so the value the user chose in the
+         client-side UI reaches the elevated server-side sequence, where
+         CostFinalize evaluates these component conditions.
+
+         Per-machine install, so these land on the All Users desktop and each
+         component needs a KeyPath of its own; a non-advertised shortcut cannot
+         be one, so an HKLM breadcrumb beside the install-info key serves. That
+         is what raises ICE43 ("should use a registry key under HKCU as its
+         KeyPath") during validation - expected here and documented in
+         scripts\packaging\windows\README.md, since HKCU is exactly wrong for a
+         per-machine package.
+
+         The shortcuts are non-advertised (a plain Target) rather than
+         advertised like the Start Menu ones: an advertised shortcut has to sit
+         in the component that holds its target file, which would tie it to the
+         executable's component and make it impossible to condition
+         separately. -->
+    <!-- The NSIS registry keys live under WOW6432Node - that installer was
+         32-bit and never switched registry view - so the component carrying the
+         RemoveRegistryKey rows must be 32-bit. Bitness is a per-component
+         setting, hence a component of its own: folding these rows into
+         RemoveNsisProgramFiles would drag that component's 64-bit breadcrumb
+         into WOW6432Node with them.
+
+         It sits under ProgramFilesFolder (the 32-bit tree) rather than
+         INSTALLFOLDER because ICE80 rejects a 32-bit component in a 64-bit
+         directory. The choice is nominal - the component installs no files, and
+         its directory is never created - but it has to be a 32-bit one. -->
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Component Id="RemoveNsisRegistryKeys" Condition="SEAMLYNSISINSTALLDIR" Bitness="always32">
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D" Name="RemovedNsisRegistry"
+                       Type="string" Value="1" KeyPath="yes" />
+        <RemoveRegistryKey Root="HKLM" Key="SOFTWARE\NSIS_Seamly2D" Action="removeOnInstall" />
+        <RemoveRegistryKey Root="HKLM"
+                           Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Seamly2D"
+                           Action="removeOnInstall" />
+      </Component>
+    </StandardDirectory>
+
+    <StandardDirectory Id="DesktopFolder" />
+    <ComponentGroup Id="OptionalDesktopShortcuts" Directory="INSTALLFOLDER">
+      <Component Id="Seamly2DDesktopShortcutComponent" Condition="SEAMLYDESKTOPSHORTCUTS">
+        <Shortcut Id="Seamly2DDesktopShortcut"
+                  Directory="DesktopFolder"
+                  Name="Seamly2D"
+                  Description="Seamly2D pattern drafting"
+                  Target="[INSTALLFOLDER]seamly2d.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="seamly2d.ico" />
+        <RegistryValue Root="HKLM"
+                       Key="SOFTWARE\Seamly\Seamly2D"
+                       Name="DesktopShortcutSeamly2D"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+
+      <Component Id="SeamlyMeDesktopShortcutComponent" Condition="SEAMLYDESKTOPSHORTCUTS">
+        <Shortcut Id="SeamlyMeDesktopShortcut"
+                  Directory="DesktopFolder"
+                  Name="SeamlyMe"
+                  Description="SeamlyMe measurements"
+                  Target="[INSTALLFOLDER]seamlyme.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="seamlyme.ico" />
+        <RegistryValue Root="HKLM"
+                       Key="SOFTWARE\Seamly\Seamly2D"
+                       Name="DesktopShortcutSeamlyMe"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
     </ComponentGroup>
 
   </Package>

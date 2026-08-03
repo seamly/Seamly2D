@@ -111,6 +111,22 @@ ui_*.h
 Makefile*
 *-build-*
 
+# track the local windows .msi build instructions in seamly-msi directory
+!scripts/seamly-msi/
+
+# Local build and packaging output, ignored by NAME rather than by relying on the
+# "*-build-*" pattern above. That pattern matched scripts/seamly-build-msi and
+# scripts/seamly2d-build-debug only incidentally, so renaming either directory
+# silently made hundreds of megabytes of build output committable - which is
+# exactly what happened when they were renamed to the names below. Both spellings
+# are listed so an older checkout stays covered too.
+scripts/seamly-msi/x86_64
+scripts/seamly-msi/x64
+scripts/seamly-msi/arm64
+scripts/seamly2d-debug/
+scripts/seamly2d-build-debug/
+build/
+
 # Qt translation file
 *.qm
 

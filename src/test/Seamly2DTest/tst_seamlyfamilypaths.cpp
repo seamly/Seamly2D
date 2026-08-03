@@ -263,7 +263,7 @@ void TST_SeamlyFamilyPaths::DevBuildFoundFromReleaseShadowBuild() const
  * checkout root from the deeper debug shadow build produced by scripts/sd.ps1.
  *
  * Layout reproduced: seamly2d runs from
- * `<checkout>/scripts/seamly2d-build-debug/src/app/seamly2d/bin` — six levels
+ * `<checkout>/scripts/seamly2d-debug/src/app/seamly2d/bin` — six levels
  * below the checkout root, the deepest layout the project uses.
  */
 void TST_SeamlyFamilyPaths::DevBuildFoundFromDebugShadowBuild() const
@@ -273,7 +273,7 @@ void TST_SeamlyFamilyPaths::DevBuildFoundFromDebugShadowBuild() const
 
     const QString checkout = dir.path();
     const QString seamly2dBin =
-        checkout + QLatin1String("/scripts/seamly2d-build-debug/src/app/seamly2d/bin");
+        checkout + QLatin1String("/scripts/seamly2d-debug/src/app/seamly2d/bin");
     QVERIFY(QDir().mkpath(seamly2dBin));
 
     const QString layoutExe = checkout

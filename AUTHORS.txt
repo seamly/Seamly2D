@@ -1,0 +1,72 @@
+This file contains a list of people who have made contributions
+to the Seamly2D project.
+
+Project founders:
+	Roman Telezhynskyi <dismine@gmail.com>
+	Susan Spencer <susan.spencer@gmail.com>
+
+Project maintainer, Product designer, Prototype developer, Community manager:
+    Susan Spencer <susan.spencer@gmail.com>
+
+Primary code developers:
+    Douglas Caskey
+    Evans Perret
+    Christoph Settgast
+
+User community moderators at https://forum.seamly.io:
+    @Grace
+    @Pneumarian
+
+Contributors (alphabetical order):
+    Abhijith Subhas
+    Aleenejejw
+    Aleksey Zaharov
+    Alex Lopez Zubieta
+    Alexsey Schmuley
+    Araceli Yanez
+    AstHrO
+    Ayoub Jalyta
+    Benjamin Nauk
+    Bernd Zeimetz
+    Bettina Gatzlaff
+    Bojan Kverh
+    Castiane Lefeuvre - French translations
+    Christine Neupert
+    Dan McMahill
+    Evgeniy Strelnikov
+    Fabrice Salvaire
+    Felix Ulber
+    Frukto
+    Harshil Patel
+    H. Naehmann - German translations
+    Ian Cunningham
+    Jackstr
+    Jim Wouda
+    Johannes Brakensiek
+    Keepy38
+    Kim March-Force
+    Lindsay Williams
+    Luo - Chinese translations
+    Marius Ghita
+    Martijn Kleptog
+    Matias Hirvonen - Finnish translations
+    Mischa Linus Krempel
+    Mo Odling
+    Mohammed Ibrahim
+    Odrnorn
+    Oni303
+    Patrick Proy
+    Peter Gsellmann
+    QtGirl
+    Raina Gufstafson
+    Roman Postanciuk
+    Ronan LeTiec
+    Sabine Schmaltz
+    Sergey Alyoshin
+    SS-Adam
+    Steve Conklin
+    Ths80
+    Timo Virtaneva
+    U38cg
+    Valentina Zhuravska
+    Vincent Bermel

@@ -1,0 +1,69 @@
+PS D:\Seamly-msi-test-installer\task51-test-kit> .\test_msi_install.ps1 -Phase Installed -ExpectSeamlyLayout -PatternFile .\sample-pattern.sm2d
+Seamly2D MSI install check - phase: Installed
+state file: C:\Users\susan\AppData\Local\seamly-msi-install-test\state.json
+
+  ok      HKLM\SOFTWARE\Seamly\Seamly2D was created by the install
+  ok      InstallPath in the registry points at a real directory
+  note    install directory: C:\Program Files\Seamly2D\
+  ok      seamly2d.exe is installed
+  ok      seamlyme.exe is installed
+  ok      SeamlyLayout.exe is installed
+  ok      runtime file 'Qt6Core.dll' was installed
+  ok      runtime file 'platforms\qwindows.dll' was installed
+  ok      runtime file 'msvcp140.dll' was installed
+  ok      runtime file 'vcruntime140.dll' was installed
+  ok      runtime file 'QtWebEngineProcess.exe' was installed
+  ok      runtime file 'Qt6WebEngineCore.dll' was installed
+  ok      runtime file 'Qt6WebChannel.dll' was installed
+  ok      runtime file 'Qt6Positioning.dll' was installed
+  ok      SeamlyLayout.exe sits beside seamly2d.exe, where Layout Mode looks for it
+  ok      the full project version is recorded in HKLM\SOFTWARE\Seamly\Seamly2D
+  ok      DesktopShortcutSeamly2D records that the desktop shortcut was created
+  ok      DesktopShortcutSeamlyMe records that the desktop shortcut was created
+  ok      the product is listed in Apps & features
+  note    ARP ProductCode {DE4AB233-E025-47B1-B694-6CC59F128AEC}, DisplayVersion 26.7.40315
+  ok      ARP DisplayName is Seamly2D
+  ok      ARP Publisher is set
+  ok      ARP DisplayVersion is the numeric MSI version
+  ok      ARP Comments carry the full project version
+  ok      ARP estimated size is plausible (> 50 MB)
+  ok      ARP help link is set
+  ok      ARP about link is set
+  FAILED  ARP icon is set
+  ok      ARP uninstall runs msiexec
+  ok      Start Menu shortcut 'Seamly2D' exists
+  FAILED  Start Menu shortcut 'Seamly2D' points into the install directory - target = 'C:\Windows\Installer\{DE4AB233-E025-47B1-B694-6CC59F128AEC}\seamly2d.ico'
+  ok      Start Menu shortcut 'SeamlyMe' exists
+  FAILED  Start Menu shortcut 'SeamlyMe' points into the install directory - target = 'C:\Windows\Installer\{DE4AB233-E025-47B1-B694-6CC59F128AEC}\seamlyme.ico'
+  ok      Start Menu shortcut 'SeamlyLayout' exists
+  FAILED  Start Menu shortcut 'SeamlyLayout' points into the install directory - target = 'C:\Windows\Installer\{DE4AB233-E025-47B1-B694-6CC59F128AEC}\seamlylayout.ico'
+  ok      desktop shortcut 'Seamly2D' exists
+  ok      desktop shortcut 'Seamly2D' targets the installed executable
+  ok      desktop shortcut 'SeamlyMe' exists
+  ok      desktop shortcut 'SeamlyMe' targets the installed executable
+  ok      SeamlyLayout has no desktop shortcut
+  ok      .sm2d is registered to Seamly2D.Pattern
+  ok      Seamly2D.Pattern opens with the installed seamly2d.exe
+  ok      Seamly2D.Pattern has an Explorer icon
+  ok      .smis is registered to SeamlyMe.IndividualMeasurements
+  ok      SeamlyMe.IndividualMeasurements opens with the installed seamlyme.exe
+  ok      SeamlyMe.IndividualMeasurements has an Explorer icon
+  ok      .smms is registered to SeamlyMe.MultisizeMeasurements
+  ok      SeamlyMe.MultisizeMeasurements opens with the installed seamlyme.exe
+  ok      SeamlyMe.MultisizeMeasurements has an Explorer icon
+  ok      seamly2d.exe starts and stays running
+  ok      seamlyme.exe starts and stays running
+  ok      SeamlyLayout.exe starts and stays running
+  ok      opening a .sm2d through its association starts seamly2d
+  FAILED  the old NSIS installation is still present and untouched - was 'C:\Program Files (x86)\Seamly2D'
+  ok      the family MSI installed somewhere other than the NSIS directory
+  note    'C:\Users\susan\seamlyData' did not exist at Baseline - nothing to preserve
+  note    'C:\Users\susan\AppData\Local\Seamly' did not exist at Baseline - nothing to preserve
+  note    'C:\Users\susan\AppData\Roaming\Seamly' did not exist at Baseline - nothing to preserve
+
+MSI install check FAILED at phase 'Installed' - 5 problem(s):
+  - ARP icon is set
+  - Start Menu shortcut 'Seamly2D' points into the install directory
+  - Start Menu shortcut 'SeamlyMe' points into the install directory
+  - Start Menu shortcut 'SeamlyLayout' points into the install directory
+  - the old NSIS installation is still present and untouched

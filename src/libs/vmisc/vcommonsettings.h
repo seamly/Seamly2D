@@ -92,6 +92,16 @@ public:
     static QString       chooseFirstRunDataRoot(const QString &defaultRoot, const QString &legacyRoot,
                                                 bool *adoptedLegacyTree = nullptr);
     static bool          ensureDataRootTree(const QString &root = QString());
+    // Task 60: copy a whole legacy tree to the new root. Takes both paths as arguments so
+    // it can be tested against throwaway directories; never moves, renames or deletes.
+    static bool          migrateDataTree(const QString &sourceRoot, const QString &destinationRoot,
+                                         int *filesCopied = nullptr, int *filesSkipped = nullptr,
+                                         QString *errorMessage = nullptr);
+    static bool          markDataTreeMigrated(const QString &legacyRoot, const QString &newRoot);
+    static bool          dataTreeWasMigrated(const QString &root);
+    // Called ONLY from the applications' openSettings(), never from initializeDataRoot():
+    // it copies files, and the unit tests call initializeDataRoot() with real home paths.
+    static QString       migrateAdoptedLegacyTree(const QString &legacyRoot, const QString &newRoot);
     static QString       rebaseOntoDataRoot(const QString &path, const QString &oldRoot, const QString &newRoot);
     // Task 53: takes both roots as arguments so it can be tested against throwaway
     // directories — never a path under QDir::homePath(), which cannot be faked on Windows.

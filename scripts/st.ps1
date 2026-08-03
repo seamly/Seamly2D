@@ -11,24 +11,26 @@
 # **  issue), and prints an aggregated pass/fail summary.
 # **
 # **  @copyright
-# **  This source code is part of the Seamly2D project, a pattern making
-# **  program, whose allow create and modeling patterns of clothing.
-# **  Copyright (C) 2026 Seamly2D Project
+# **  This source code is part of the Seamly project, a suite of apparel CAD
+# **  software.
+# **  Copyright (C) 2026 Seamly Project
 # **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 # **
-# **  Seamly2D is free software: you can redistribute it and/or modify
+# **  @license
+# **  Seamly2D/SeamlyMe is free software: you can redistribute it and/or modify
 # **  it under the terms of the GNU General Public License as published by
 # **  the Free Software Foundation, either version 3 of the License, or
 # **  (at your option) any later version.
 # **
-# **  Seamly2D is distributed in the hope that it will be useful,
+# **  Seamly2D/SeamlyMe is distributed in the hope that it will be useful,
 # **  but WITHOUT ANY WARRANTY; without even the implied warranty of
 # **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # **  GNU General Public License for more details.
 # **
 # **  You should have received a copy of the GNU General Public License
-# **  along with Seamly2D.  If not, see <http://www.gnu.org/licenses/>.
+# **  along with Seamly2D/SeamlyMe.  If not, see <http://www.gnu.org/licenses/>.
 # **
+# **  SeamlyLayout is distributed under the MIT license.
 #******************************************************************************
 
 <#
@@ -37,7 +39,7 @@
 
 .DESCRIPTION
     Runs the debug-built Seamly2DTests.exe from the sd.ps1 shadow build
-    (<repo-root>\scripts\seamly2d-build-debug\), or the release build\ tree
+    (<repo-root>\scripts\seamly2d-debug\), or the release build\ tree
     with -Release. Build first with scripts\sd.ps1 — this script only runs.
 
     Two Windows-specific traps are handled (Task 23):
@@ -64,7 +66,7 @@
 
 .PARAMETER Release
     Run the release-built suite from build\ instead of the debug suite from
-    scripts\seamly2d-build-debug\.
+    scripts\seamly2d-debug\.
 
 .PARAMETER TestArgs
     Any remaining arguments are forwarded to Seamly2DTests.exe (standard
@@ -83,8 +85,13 @@
 #>
 
 param(
-    # When set, use the release build\ tree instead of scripts\seamly2d-build-debug\.
+    # When set, use the release build\ tree instead of the debug shadow build.
     [switch]$Release,
+
+    # Name of sd.ps1's shadow-build directory under scripts\. Must match the
+    # value sd.ps1 built with; both default to the same name, so it only needs
+    # passing if sd.ps1 was given a non-default -BuildDirName.
+    [string]$BuildDirName = 'seamly2d-debug',
 
     # Extra arguments forwarded verbatim to Seamly2DTests.exe.
     [Parameter(ValueFromRemainingArguments = $true)]
@@ -99,11 +106,11 @@ $repoRoot = Split-Path -Parent $PSScriptRoot
 if ($Release) {
     $buildDir = Join-Path $repoRoot 'build'
 } else {
-    $buildDir = Join-Path $PSScriptRoot 'seamly2d-build-debug'
+    $buildDir = Join-Path $PSScriptRoot $BuildDirName
 }
 
 $testBin = Join-Path $buildDir 'src\test\Seamly2DTest\bin'
-$testExe = Join-Path $testBin 'Seamly2DTests.exe'
+$testExe = Join-Path $testBin 'seamly2dtests.exe'
 $appBin  = Join-Path $buildDir 'src\app\seamly2d\bin'
 
 if (-not (Test-Path $testExe)) {

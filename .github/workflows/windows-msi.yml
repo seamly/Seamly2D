@@ -1,7 +1,7 @@
 name: Windows MSI
 
 # ---------------------------------------------------------------------------
-# Task 13 — build the Windows MSI installer that ships the whole Seamly app
+# build the Windows MSI installer that ships the whole Seamly app
 # family: seamly2d + seamlyme (qmake) and SeamlyLayout (Rust + CMake), all
 # against ONE Qt release, packaged per architecture (x64 and arm64) with the
 # WiX toolset from scripts/packaging/windows/seamly-family.wxs via
@@ -17,7 +17,7 @@ name: Windows MSI
 #   of two side-by-side copies.
 #
 # WHY A SEPARATE WORKFLOW FROM ci.yml:
-#   Same reasoning as seamlylayout-ci.yml (Task 20): the MSI needs BOTH build
+#   Same reasoning as seamlylayout-ci.yml: the MSI needs BOTH build
 #   systems in one job — qmake for the parent apps plus Rust + CMake/Ninja for
 #   SeamlyLayout — and it should not slow down or destabilize every ci.yml run.
 #   ci.yml's NSIS installer remains the released Windows installer until the
@@ -173,6 +173,10 @@ jobs:
           $wixVer = (wix --version).ToString().Split('+')[0]
           wix extension add --global WixToolset.UI.wixext/$wixVer
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          # Util supplies RemoveFolderEx, used to remove the old NSIS
+          # installation's directory tree and Start Menu folder.
+          wix extension add --global WixToolset.Util.wixext/$wixVer
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
       - name: Build MSI (x64 - all three apps)
         if: matrix.arch == 'x64'
@@ -234,10 +238,10 @@ jobs:
           --alias "${{ secrets.SEAMLY_SIGNING_KEY_NAME }}" \
           --certfile .github/workflows/signing/codesign-chain.pem \
           --tsaurl http://timestamp.sectigo.com \
-          scripts/seamly-build-msi/${{ matrix.arch }}/Seamly2D-${{ matrix.arch }}.msi
+          scripts/seamly-msi/${{ matrix.arch }}/Seamly2D-${{ matrix.arch }}.msi
 
       - uses: actions/upload-artifact@v7
         with:
-          name: Seamly2D-${{ matrix.arch }}.msi
-          path: scripts/seamly-build-msi/${{ matrix.arch }}/Seamly2D-${{ matrix.arch }}.msi
+          name: seamly-${{ matrix.arch }}.msi
+          path: scripts/seamly-msi/${{ matrix.arch }}/seamly-${{ matrix.arch }}.msi
           if-no-files-found: error
