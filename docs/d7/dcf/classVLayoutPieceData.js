@@ -10,6 +10,7 @@ var classVLayoutPieceData =
     [ "layoutWidth", "d7/dcf/classVLayoutPieceData.html#a842b3bca7911d0f58292be3ca1776e4e", null ],
     [ "m_cutoutPaths", "d7/dcf/classVLayoutPieceData.html#a3e3548f81f0a787d22a31662d1820821", null ],
     [ "m_internalPaths", "d7/dcf/classVLayoutPieceData.html#a19af223caf54e6cac1bc243e62216edf", null ],
+    [ "m_pieceLetter", "d7/dcf/classVLayoutPieceData.html#aa806206254d1acc07eb25107eb76051f", null ],
     [ "m_tmPattern", "d7/dcf/classVLayoutPieceData.html#a3e6d662f5aa0ab129074cb19d04cb261", null ],
     [ "m_tmPiece", "d7/dcf/classVLayoutPieceData.html#a663d9c5180d765478d8bf504dc2f2dbc", null ],
     [ "mirror", "d7/dcf/classVLayoutPieceData.html#ac028f1955a381593c9c30837720b9f59", null ],
