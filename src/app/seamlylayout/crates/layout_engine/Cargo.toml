@@ -1,0 +1,13 @@
+# MIT License: https://opensource.org/licenses/MIT
+[package]
+name = "layout_engine"
+version = "0.1.0"
+edition = "2021"
+authors = ["slspencer"]
+license = "MIT"
+
+[dependencies]
+pack_types = { path = "../pack_types" }
+thiserror  = "1.0"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["fmt"] }

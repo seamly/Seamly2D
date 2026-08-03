@@ -1,0 +1,18 @@
+PS D:\Seamly-msi-test-installer\task51-test-kit> .\test_msi_install.ps1
+
+cmdlet test_msi_install.ps1 at command pipeline position 1
+Supply values for the following parameters:
+Phase: Baseline
+Seamly2D MSI install check - phase: Baseline
+state file: C:\Users\susan\AppData\Local\seamly-msi-install-test\state.json
+
+  FAILED  the Seamly family MSI is not already installed - found ProductCode {5877F039-BD25-414B-8FEF-65EEB4191904}  - uninstall it before starting
+  FAILED  HKLM\SOFTWARE\Seamly\Seamly2D does not exist yet
+  note    the old NSIS installation IS present at 'C:\Program Files (x86)\Seamly2D' - the warning dialog's NSIS paragraph should appear during install
+  note    user data 'C:\Users\susan\seamlyData': does not exist
+  note    user data 'C:\Users\susan\AppData\Local\Seamly': does not exist
+  note    user data 'C:\Users\susan\AppData\Roaming\Seamly': does not exist
+
+MSI install check FAILED at phase 'Baseline' - 2 problem(s):
+  - the Seamly family MSI is not already installed
+  - HKLM\SOFTWARE\Seamly\Seamly2D does not exist yet

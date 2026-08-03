@@ -1,0 +1,31 @@
+# DXF_DISCUSSION_2.
+For the full DXF reference guide, see https://help.autodesk.com/view/OARX/2018/ENU/?guid=GUID-235B22E0-A567-4CF6-92D3-38A2306D73F3
+for the VIEW reference guide specifically, see https://help.autodesk.com/view/OARX/2018/ENU/?guid=GUID-CF3094AB-ECA9-43C1-8075-7791AC84F97C
+For the VPORT reference guide specifically, see https://help.autodesk.com/view/OARX/2018/ENU/?guid=GUID-8CE7CC87-27BD-4490-89DA-C21F516415A9
+
+1. Key DXF VPORT Group Codes (ASTM/Standard)
+a. 10, 20 (Group Code): View Center Point (in DCS) - Defines the center of the viewport in the Display Coordinate System.
+b. 41 (Group Code): Viewport Aspect Ratio - Defines the shape of the viewport.
+c. 40 (Group Code): View Height - The height of the view in drawing units. This is the primary control for zoom level.
+d. 12, 22, 32 (Group Code): View Target Point (in WCS) - The center of the drawing in World Coordinate System.
+e. 16, 26, 36 (Group Code): View Direction Vector (in WCS) - Usually (0, 0, 1) for a top-down 2D view. 
+
+2. Steps to Configure the Viewport
+To automate this in a script or program, you need to calculate the boundary box of your model space drawing:
+a.  Calculate Extents: Determine the minimum and maximum X/Y  coordinates (MinX, MinY), (MaxX, MaxY) of the full drawing, including margins. And determine the ViewportWidth and ViewportHeight. If these variable values are in mm, cm, or in, convert them to px. 
+b. Calculate Center (Code 12/22):
+   i. TargetX = (MinX + MaxX)/2
+   ii. TargetY = (MinY + MaxY)/2
+   iii. Set 12 to TargetX and 22 to TargetY
+c. Calculate View Height (Code 40):
+  i. DrawingHeight = MaxY - MinY
+  ii. Set 40 to the DrawingHeight
+d. Calculate Center in DCS (Code 10/20):
+  i. For a single viewport, set 10 and 20 to 0.5 to center the view within the viewport boundary.
+e. Set Aspect Ratio (Code 41):
+  i. Set 41 to the ratio (ViewportWidth/ViewportHeight) in paperspace. 
+
+3. Alternative Methods
+a. ezdxf Python library: If using ezdxf, you can use viewport.fit_to_view(models_space_objects) to automate these calculations.
+b. AutoCAD Command line (for reference): ZOOM -> Extents is the equivalent of this setup.
+c. UCSFOLLOW Variable: Setting UCSFOLLOW to 1 can sometimes trigger an automatic zoom extents on viewport activation. 

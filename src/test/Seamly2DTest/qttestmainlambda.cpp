@@ -50,6 +50,7 @@
 //  along with Valentina.  If not, see <http://www.gnu.org/licenses/>.
 //-----------------------------------------------------------------------------
 
+#include <QDir>
 #include <QtTest>
 
 #include "tst_vposter.h"
@@ -73,6 +74,10 @@
 #include "tst_vpointf.h"
 #include "tst_readval.h"
 #include "tst_vtranslatevars.h"
+#include "tst_svgtextitem.h"
+#include "tst_svgcomponenttags.h"
+#include "tst_seamlyfamilypaths.h"
+#include "tst_dataroot.h"
 
 #include "../vmisc/def.h"
 #include "../qmuparser/qmudef.h"
@@ -108,27 +113,61 @@ const VTranslateVars *TestApplication2D::translateVariables()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+// Task 15: mirrors Application2D::openSettings() so the test suite resolves settings the
+// same way the real app does. No migration notice is ever shown here — tests must never
+// block on a modal dialog — so MigrateSeamlySettingsLocation() is called with a null
+// out-parameter, which the shared helper treats as "caller doesn't need to know".
 void TestApplication2D::openSettings()
 {
     QSettings settings(QSettings::IniFormat, QSettings::UserScope,
                        QCoreApplication::organizationName(),
                        QCoreApplication::applicationName());
 
-    const QString qt5Settings = settings.fileName();
-    const QString dir = QFileInfo(qt5Settings).absolutePath();
+    const QString dir = QFileInfo(settings.fileName()).absolutePath();
     const QString qt5Common   = dir + "/common.ini";
-    const QString qt6Settings = dir + "/qt6_seamly2d.ini";
     const QString qt6Common   = dir + "/qt6_common.ini";
+
+    // QFile::copy() never creates missing parent directories, and the "Seamly" organization
+    // folder does not exist yet the very first time any app runs under the renamed
+    // organization.
+    QDir().mkpath(dir);
+
+    static const QString kLegacyOrganizationName = QStringLiteral("SeamlyTeam");
+    const QSettings legacyCommonProbe(QSettings::IniFormat, QSettings::UserScope,
+                                      kLegacyOrganizationName, QCoreApplication::applicationName());
+    const QString legacyDir = QFileInfo(legacyCommonProbe.fileName()).absolutePath();
+    if (!QFileInfo::exists(qt6Common) && QFileInfo::exists(legacyDir + "/qt6_common.ini"))
+    {
+        QFile::copy(legacyDir + "/qt6_common.ini", qt6Common);
+    }
+    else if (!QFileInfo::exists(qt5Common) && QFileInfo::exists(legacyDir + "/common.ini"))
+    {
+        QFile::copy(legacyDir + "/common.ini", qt5Common);
+    }
 
     if (!QFileInfo::exists(qt6Common) && QFileInfo::exists(qt5Common))
     {
         QFile::copy(qt5Common, qt6Common);
     }
 
-    if (!QFileInfo::exists(qt6Settings) && QFileInfo::exists(qt5Settings))
-    {
-        QFile::copy(qt5Settings, qt6Settings);
-    }
+    // Task 34 called VCommonSettings::initializeDataRoot() here to mirror
+    // Application2D::openSettings(). Task 53 removed it, along with the matching
+    // pruneEmptyLegacyDataRoot() call the real application makes after it.
+    //
+    // This constructor runs before any test's initTestCase(), so whatever it calls executes
+    // against the developer's REAL settings and home directory, not a QTemporaryDir. That was
+    // tolerable while those functions only copied values forward. It stopped being tolerable
+    // once they delete: merging now removes the emptied "Unknown Organization" folder, and
+    // pruning removes an empty ~/seamly2d. Running the test suite must not mutate the machine
+    // it runs on.
+    //
+    // Nothing is lost by leaving them out — TST_DataRoot calls both directly, with QSettings
+    // redirected at a temporary directory and throwaway roots passed as arguments. Do not
+    // "restore" these calls for symmetry with the application.
+
+    const QString qt6Settings = MigrateSeamlySettingsLocation(
+        QStringLiteral("qt6_seamly2d.ini"),
+        { QStringLiteral("qt6_seamly2d.ini"), QStringLiteral("Seamly2D.ini") });
 
     m_settings = new VSettings(qt6Settings, QSettings::IniFormat, this);
 }
@@ -145,16 +184,57 @@ void TestApplication2D::initTranslateVariables()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Run every registered test suite in one process and OR their exit codes.
+ *
+ * Each suite is executed through QTest::qExec() by the ASSERT_TEST lambda; the
+ * combined status (0 only when every suite passed) is the process exit code.
+ *
+ * Per-suite log capture: when the environment variable SEAMLY_TEST_LOG_DIR is
+ * set to a directory, each suite additionally writes a plain-text QTest log to
+ * "<dir>/<SuiteClassName>.txt" via an injected "-o file,txt" argument. Without
+ * it, a single "-o" on the command line is overwritten by every subsequent
+ * qExec() call, and on Windows the console/stdout output of the suite can be
+ * lost entirely when redirected — so this hook is what makes local per-suite
+ * results capturable at all (used by scripts/st.ps1; see Task 23).
+ *
+ * @param argc argument count, forwarded to every QTest::qExec() call
+ * @param argv argument values, forwarded to every QTest::qExec() call
+ * @return OR-ed QTest failure status across all suites (0 = all passed)
+ */
 int main(int argc, char** argv)
 {
     Q_INIT_RESOURCE(schema);
 
     TestApplication2D app( argc, argv );// For QPrinter
 
+    // Optional directory for per-suite plain-text QTest logs (empty = disabled).
+    const QString logDir = qEnvironmentVariable("SEAMLY_TEST_LOG_DIR");
+
     int status = 0;
-    auto ASSERT_TEST = [&status, argc, argv](QObject* obj)
+    auto ASSERT_TEST = [&status, &logDir, argc, argv](QObject* obj)
     {
-        status |= QTest::qExec(obj, argc, argv);
+        if (logDir.isEmpty())
+        {
+            // Default behavior: forward the process arguments unchanged.
+            status |= QTest::qExec(obj, argc, argv);
+        }
+        else
+        {
+            // Rebuild the argument list and append a per-suite file logger so
+            // each suite's output survives in its own file instead of every
+            // qExec() overwriting one shared "-o" target.
+            QStringList args;
+            args.reserve(argc + 2);
+            for (int i = 0; i < argc; ++i)
+            {
+                args << QString::fromLocal8Bit(argv[i]);
+            }
+            const QString suiteName = QString::fromLatin1(obj->metaObject()->className());
+            args << QStringLiteral("-o")
+                 << QStringLiteral("%1/%2.txt,txt").arg(logDir, suiteName);
+            status |= QTest::qExec(obj, args);
+        }
         delete obj;
     };
 
@@ -179,6 +259,10 @@ int main(int argc, char** argv)
     ASSERT_TEST(new TST_VPointF());
     ASSERT_TEST(new TST_ReadVal());
     ASSERT_TEST(new TST_VTranslateVars());
+    ASSERT_TEST(new TST_SvgTextItem());
+    ASSERT_TEST(new TST_SvgComponentTags());
+    ASSERT_TEST(new TST_SeamlyFamilyPaths());
+    ASSERT_TEST(new TST_DataRoot());
 
     return status;
 }

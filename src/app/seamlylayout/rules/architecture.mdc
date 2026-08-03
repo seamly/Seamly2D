@@ -1,0 +1,22 @@
+# Architecture Rules
+
+Author: slspencer
+Copyright: 2026
+
+## Scope
+
+Applies to architecture-level decisions and cross-module design.
+
+## Rules
+
+- Keep frontend concerns in `qt_frontend/` and core logic in `crates/`.
+- Prefer Rust for business logic and data transformations.
+- Keep bridge boundaries explicit and minimal (`cxxqt_bridge` only).
+- Preserve clear ownership of data across Rust ↔ Qt boundaries.
+- Favor composable modules over monolithic utility files.
+
+## Repository-Specific Notes
+
+- Frontend: Qt 6.11 + QML/QtWidgets (LGPL-3.0).
+- Core: Rust crates (MIT).
+- Bridge: CXX-Qt.

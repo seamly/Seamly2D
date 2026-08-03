@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core testlib gui printsupport xml 
+# widgets: QGraphicsScene in tst_svgtextitem; svg: QSvgGenerator in tst_svgtextitem
+QT       += core testlib gui widgets svg printsupport xml
 
 TARGET = Seamly2DTests
 
@@ -49,7 +50,11 @@ SOURCES += \
     tst_vpointf.cpp \
     tst_readval.cpp \
     tst_vtranslatevars.cpp \
-    tst_vabstractpiece.cpp
+    tst_vabstractpiece.cpp \
+    tst_svgtextitem.cpp \
+    tst_svgcomponenttags.cpp \
+    tst_seamlyfamilypaths.cpp \
+    tst_dataroot.cpp
 
 *msvc*:SOURCES += stable.cpp
 
@@ -75,7 +80,11 @@ HEADERS += \
     tst_vpointf.h \
     tst_readval.h \
     tst_vtranslatevars.h \
-    tst_vabstractpiece.h
+    tst_vabstractpiece.h \
+    tst_svgtextitem.h \
+    tst_svgcomponenttags.h \
+    tst_seamlyfamilypaths.h \
+    tst_dataroot.h
 
 include(warnings.pri)
 
@@ -184,3 +193,34 @@ else:unix: LIBS += -lxerces-c
 win32-msvc: LIBS += -L$${PWD}/../../libs/xerces-c/msvc/lib -lxerces-c_3
 win32-arm64-msvc: LIBS += -L$${PWD}/../../libs/xerces-c/msvc-arm64/lib -lxerces-c_3
 win32-g++: LIBS += -L$${PWD}/../../libs/xerces-c/mingw/lib -lxerces-c
+
+# Deploy the xerces-c DLL beside the test executable (the windeployqt step
+# below only handles Qt's own DLLs). Same helper the app .pro files use;
+# INSTALL_XERCES comes from common.pri and resolves to src/libs/xerces-c/...
+# at this directory depth. Must stay before the windeployqt += below: the
+# helper terminates its command with a newline, windeployqt does not.
+win32 {
+    copyToDestdir($${PWD}/$$INSTALL_XERCES, $$shell_path($${OUT_PWD}/$$DESTDIR))
+}
+
+# Run windeployqt so the Qt runtime — the DLLs and, critically, the platform
+# plugin directory (platforms\qwindows[d].dll) — lands beside
+# Seamly2DTests.exe. Qt searches for the platform plugin relative to the
+# executable only, so without this the suite dies at QGuiApplication startup
+# with the "no Qt platform plugin could be initialized" qFatal, which in a
+# debug-CRT build pops a hidden modal dialog and looks like a startup hang
+# (Task 23). Mirrors the seamly2d.pro post-link step.
+#
+# qtPrepareTool() resolves windeployqt out of $$[QT_INSTALL_BINS] — the Qt that
+# *this* qmake belongs to — rather than the first windeployqt on PATH, so the
+# deployed runtime always matches the kit the tests were linked against. A
+# stray older Qt on PATH (e.g. Qt Design Studio's reduced 6.8.x kit) would
+# otherwise deploy DLLs the test exe cannot load.
+win32-msvc{
+    qtPrepareTool(WINDEPLOYQT, windeployqt)
+    QMAKE_POST_LINK += $$WINDEPLOYQT $$shell_path($$DESTDIR/$${TARGET}.exe)
+}
+win32-arm64-msvc{
+    qtPrepareTool(WINDEPLOYQT, windeployqt)
+    QMAKE_POST_LINK += $$WINDEPLOYQT --qtpaths $$shell_path($$[QT_INSTALL_BINS]/qtpaths.bat) $$shell_path($$DESTDIR/$${TARGET}.exe)
+}

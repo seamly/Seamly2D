@@ -76,6 +76,14 @@ int main(int argc, char *argv[])
     ApplicationME app(argc, argv);
     app.initOptions();
 
+    // Task 15: tell the user once if their settings were just migrated to the new
+    // unified "Seamly" location. Skipped in --test mode for the same reason the welcome
+    // dialog below is — a modal dialog would hang an automated test run.
+    if (app.settingsMigrated() && !app.arguments().contains("--test"))
+    {
+        app.NotifySeamlySettingsMigrated(QStringLiteral("SeamlyMe"));
+    }
+
     // Only show welcome dialog if in test mode
     if (!app.arguments().contains("--test"))
     {

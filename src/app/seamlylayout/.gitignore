@@ -1,0 +1,25 @@
+AGENTS.md
+/.claude
+/.claude/rules/CLAUDE.md
+# Test-pattern inputs are TRACKED until development is complete (user decision).
+# The directory is listed as `/input/*` rather than `/input` on purpose: git does
+# not descend into an ignored *directory*, so the negations below would never be
+# considered. Scratch files of other types stay ignored.
+/input/*
+!/input/*.svg
+!/input/*.sm2d
+/logs
+/output
+/target
+/qt_frontend/build/
+/qt_frontend/CMakeFiles/
+/qt_frontend/CMakeCache.txt
+/qt_frontend/.cmake/
+/qt_frontend/.qt/
+/qt_frontend/.qtc_clangd/
+/qt_frontend/*.user
+/qt_frontend/*.user.*
+/.vs/
+/.vscode/
+*.dxf
+*.txt

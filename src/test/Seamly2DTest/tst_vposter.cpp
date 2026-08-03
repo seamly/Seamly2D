@@ -54,6 +54,7 @@
 #include "../vmisc/def.h"
 
 #include <QImage>
+#include <QPageSize>
 #include <QPrinter>
 #include <QtTest>
 
@@ -65,11 +66,25 @@ TST_VPoster::TST_VPoster(QObject *parent)
 
 //---------------------------------------------------------------------------------------------------------------------
 // cppcheck-suppress unusedFunction
+/**
+ * @brief Check that an image slightly larger than A1 splits into a 4 x 3 grid of A4 pages.
+ *
+ * The printer is forced to PDF output with an explicit A4 page size so the
+ * result does not depend on the machine's default printer. Previously the test
+ * re-used the default printer's own page size
+ * (printer.setPageSize(printer.pageLayout().pageSize()) is a no-op), so a
+ * default printer with a non-A4 page — e.g. a 5x7in photo printer — changed
+ * the page grid and failed the test locally while CI (no printers installed,
+ * QPrinter falls back to PDF/A4) passed (Task 23).
+ */
 void TST_VPoster::BigPoster()
 {
     QPrinter printer;
+    // Machine-independence: PDF format detaches the test from any installed
+    // printer driver, and the page size is pinned to A4 explicitly.
+    printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setResolution(PrintDPI);// By default
-    printer.setPageSize(printer.pageLayout().pageSize());
+    printer.setPageSize(QPageSize(QPageSize::A4));
     printer.setFullPage(true);
     // We need to set full page because otherwise QPrinter->pageRect returns different values in Windows and Linux
 
@@ -92,11 +107,21 @@ void TST_VPoster::BigPoster()
 
 //---------------------------------------------------------------------------------------------------------------------
 // cppcheck-suppress unusedFunction
+/**
+ * @brief Check that an image slightly smaller than A4 fits on a single A4 page.
+ *
+ * Forced to PDF output with an explicit A4 page size for the same
+ * machine-independence reason as BigPoster() (Task 23): the previous
+ * default-printer page size made the expected single page become a 2 x 2 grid
+ * on a machine whose default printer uses a small page (e.g. 5x7in photo).
+ */
 void TST_VPoster::SmallPoster()
 {
     QPrinter printer;
+    // Machine-independence: PDF format + explicit A4, see BigPoster().
+    printer.setOutputFormat(QPrinter::PdfFormat);
     printer.setResolution(96);// By default
-    printer.setPageSize(printer.pageLayout().pageSize());
+    printer.setPageSize(QPageSize(QPageSize::A4));
 
     const QRect image(0, 0, 700, 1000); // Little bit less than A4
     VPoster posterazor(&printer);
