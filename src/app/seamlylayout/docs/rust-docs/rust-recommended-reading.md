@@ -1,3 +1,0 @@
-
-
-https://leanpub.com/rustwebapps, "Build full-stack applications using Rust-based Leptos framework, GraphQL, WebAssembly, and cloud-native deployment. Build a sample book-selling application that evolves as you progress. You'll start by setting up Rust, Cargo, and Leptos in VS Code, compiling your first WebAssembly bundle, and watching "Hello, LibroCommerce!" light up your browser. You'll design a microservice-inspired architecture, model data with Serde-annotated structs, implement CRUD operations, secure every endpoint, then broadcast channels, and finally you get to write Playwright end-to-end tests that spin up headless browsers, place orders, and assert live status updates, all inside your continuous integration pipeline."

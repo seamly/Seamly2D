@@ -86,9 +86,6 @@ public:
     QString        getLayoutPath() const;
     void           SetPathLayout(const QString &value);
 
-    QString        getSeamlyLayoutAppPath() const;
-    void           setSeamlyLayoutAppPath(const QString &value);
-
     bool           GetGraphicalOutput() const;
     void           SetGraphicalOutput(const bool &value);
 

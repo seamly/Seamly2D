@@ -90,38 +90,20 @@ void PreferencesPathPage::changeEvent(QEvent *event)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief Apply stores every path shown in the table back into the application settings.
- *
- * The data root (row 0) is applied first, and every subfolder still living inside the
- * previous root follows it to the new location, so repointing the root at another drive or
- * a cloud-synced folder relocates the whole tree in one edit (Task 34).
- */
 void PreferencesPathPage::Apply()
 {
     VSettings *settings = qApp->Seamly2DSettings();
-
-    const QString previousRoot = settings->getDataRoot();
-    const QString dataRoot     = ui->pathTable->item(0, 1)->text();
-    settings->setDataRoot(dataRoot);
-
-    settings->SetPathPattern(VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(1, 1)->text(), previousRoot, dataRoot));
-    settings->setTemplatePath(VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(2, 1)->text(), previousRoot, dataRoot));
-    settings->setIndividualSizePath(VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(3, 1)->text(), previousRoot, dataRoot));
-    settings->setMultisizePath(VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(4, 1)->text(), previousRoot, dataRoot));
-    settings->SetPathLayout(VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(5, 1)->text(), previousRoot, dataRoot));
-    settings->SetPathLabelTemplate(VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(6, 1)->text(), previousRoot, dataRoot));
-    settings->setImageFilePath(VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(7, 1)->text(), previousRoot, dataRoot));
-    settings->setBackupFilePath(VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(8, 1)->text(), previousRoot, dataRoot));
-
-    // Not a data path: the SeamlyLayout executable is never rebased onto the data root.
-    settings->setSeamlyLayoutAppPath(ui->pathTable->item(9, 1)->text());
+    settings->SetPathPattern(ui->pathTable->item(0, 1)->text());
+    settings->setTemplatePath(ui->pathTable->item(1, 1)->text());
+    settings->setIndividualSizePath(ui->pathTable->item(2, 1)->text());
+    settings->setMultisizePath(ui->pathTable->item(3, 1)->text());
+    settings->SetPathLayout(ui->pathTable->item(4, 1)->text());
+    settings->SetPathLabelTemplate(ui->pathTable->item(5, 1)->text());
+    settings->setImageFilePath(ui->pathTable->item(6, 1)->text());
+    settings->setBackupFilePath(ui->pathTable->item(7, 1)->text());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief defaultPath resets the currently selected table row to its built-in default path.
- */
 void PreferencesPathPage::defaultPath()
 {
     const int row = ui->pathTable->currentRow();
@@ -132,37 +114,29 @@ void PreferencesPathPage::defaultPath()
 
     switch (row)
     {
-        case 0: // user data root
-            path = VCommonSettings::getDefaultDataRoot();
-            break;
-        case 1: // pattern path
+        case 0: // pattern path
             path = VSettings::getDefaultPatternPath();
             break;
-        case 2: // templates
+        case 1: // templates
             path = VCommonSettings::getDefaultTemplatePath();
             break;
-        case 3: // individual measurements
+        case 2: // individual measurements
             path = VCommonSettings::getDefaultIndividualSizePath();
             break;
-        case 4: // multisize measurements
+        case 3: // multisize measurements
             path = VCommonSettings::getDefaultMultisizePath();
             break;
-        case 5: // layout path
+        case 4: // layout path
             path = VSettings::getDefaultLayoutPath();
             break;
-        case 6: // label templates
+        case 5: // label templates
             path = VSettings::getDefaultLabelTemplatePath();
             break;
-        case 7: // images
+        case 6: // images
             path = VSettings::getDefaultImageFilePath();
             break;
-        case 8: // backups
+        case 7: // backups
             path = VSettings::getDefaultBackupFilePath();
-            break;
-        case 9: // SeamlyLayout application
-            // Empty means "not configured": the executable is then looked up
-            // next to the Seamly2D executable (see Application2D::seamlyLayoutFilePath()).
-            path = QString();
             break;
         default:
             break;
@@ -173,12 +147,6 @@ void PreferencesPathPage::defaultPath()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief editPath opens a picker dialog for the currently selected table row.
- *
- * Directory rows open a directory picker; the SeamlyLayout application row
- * opens a file picker because it points at an executable, not a folder.
- */
 void PreferencesPathPage::editPath()
 {
     const int row = ui->pathTable->currentRow();
@@ -188,57 +156,31 @@ void PreferencesPathPage::editPath()
     QString path;
     switch (row)
     {
-        case 0: // user data root
-            // Any drive, volume or path is accepted here, including an external disk or a
-            // cloud-synced folder such as G:/My Drive/seamly (Task 34).
-            path = qApp->Seamly2DSettings()->getDataRoot();
-            break;
-        case 1: // pattern path
+        case 0: // pattern path
             path = qApp->Seamly2DSettings()->getPatternPath();
             break;
-        case 2: // templates
+        case 1: // templates
             path = qApp->Seamly2DSettings()->getTemplatePath();
             break;
-        case 3: // individual measurements
+        case 2: // individual measurements
             path = qApp->Seamly2DSettings()->getIndividualSizePath();
             break;
-        case 4: // multisize measurements
+        case 3: // multisize measurements
             path = qApp->Seamly2DSettings()->getMultisizePath();
             path = VCommonSettings::prepareMultisizeTables(path);
             break;
-        case 5: // layout path
+        case 4: // layout path
             path = qApp->Seamly2DSettings()->getLayoutPath();
             break;
-        case 6: // label templates
+        case 5: // label templates
             path = qApp->Seamly2DSettings()->getLabelTemplatePath();
             break;
-        case 7: // images
+        case 6: // images
                 path = qApp->Seamly2DSettings()->getImageFilePath();
                 break;
-        case 8: // backups
+        case 7: // backups
                 path = qApp->Seamly2DSettings()->getBackupFilePath();
                 break;
-        case 9: // SeamlyLayout application
-        {
-            // Executable file, not a directory: use a file picker and skip the
-            // directory handling below.
-            const QString appPath = qApp->Seamly2DSettings()->getSeamlyLayoutAppPath();
-#ifdef Q_OS_WIN
-            const QString filter = tr("Applications (*.exe);;All files (*.*)");
-#else
-            const QString filter = tr("All files (*.*)");
-#endif
-            const QString filename = fileDialog(this, tr("Select SeamlyLayout Application"),
-                                                QFileInfo(appPath).absolutePath(), filter, nullptr,
-                                                FILEDIALOG_OPTIONS, QFileDialog::ExistingFile,
-                                                QFileDialog::AcceptOpen);
-            if (!filename.isEmpty())
-            {
-                item->setText(filename);
-                item->setToolTip(filename);
-            }
-            return;
-        }
         default:
             break;
     }
@@ -274,108 +216,83 @@ void PreferencesPathPage::editPath()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief initializeTable fills the paths table with the configured paths from the settings.
- */
 void PreferencesPathPage::initializeTable()
 {
-    ui->pathTable->setRowCount(10);
+    ui->pathTable->setRowCount(8);
     ui->pathTable->setColumnCount(2);
 
     const VSettings *settings = qApp->Seamly2DSettings();
 
     {
-        // Task 34: the root every data folder below sits under. Changing it moves the
-        // whole tree, since Apply() rebases the rows that live inside it.
-        QTableWidgetItem *item = new QTableWidgetItem(tr("My Seamly Data"));
-        item->setIcon(QIcon("://icon/32x32/backup_files.png"));
-        ui->pathTable->setItem(0, 0, item);
-        item = new QTableWidgetItem(settings->getDataRoot());
-        item->setToolTip(settings->getDataRoot());
-        ui->pathTable->setItem(0, 1, item);
-    }
-
-    {
         QTableWidgetItem *item = new QTableWidgetItem(tr("My Patterns"));
         item->setIcon(QIcon("://icon/32x32/seamly2d_file.png"));
-        ui->pathTable->setItem(1, 0, item);
+        ui->pathTable->setItem(0, 0, item);
         item = new QTableWidgetItem(settings->getPatternPath());
         item->setToolTip(settings->getPatternPath());
-        ui->pathTable->setItem(1, 1, item);
+        ui->pathTable->setItem(0, 1, item);
     }
 
     {
         QTableWidgetItem *item = new QTableWidgetItem(tr("My Templates"));
         item->setIcon(QIcon("://icon/32x32/template_size_file.png"));
-        ui->pathTable->setItem(2, 0, item);
+        ui->pathTable->setItem(1, 0, item);
         item = new QTableWidgetItem(settings->getTemplatePath());
         item->setToolTip(settings->getTemplatePath());
-        ui->pathTable->setItem(2, 1, item);
+        ui->pathTable->setItem(1, 1, item);
     }
 
     {
         QTableWidgetItem *item = new QTableWidgetItem(tr("My Individual Measurements"));
         item->setIcon(QIcon("://icon/32x32/individual_size_file.png"));
-        ui->pathTable->setItem(3, 0, item);
+        ui->pathTable->setItem(2, 0, item);
         item = new QTableWidgetItem(settings->getIndividualSizePath());
         item->setToolTip(settings->getIndividualSizePath());
-        ui->pathTable->setItem(3, 1, item);
+        ui->pathTable->setItem(2, 1, item);
     }
 
     {
         QTableWidgetItem *item = new QTableWidgetItem(tr("My Multisize Measurements"));
         item->setIcon(QIcon("://icon/32x32/multisize_size_file.png"));
-        ui->pathTable->setItem(4, 0, item);
+        ui->pathTable->setItem(3, 0, item);
         item = new QTableWidgetItem(settings->getMultisizePath());
         item->setToolTip(settings->getMultisizePath());
-        ui->pathTable->setItem(4, 1, item);
+        ui->pathTable->setItem(3, 1, item);
     }
 
     {
         QTableWidgetItem *item = new QTableWidgetItem(tr("My Layouts"));
         item->setIcon(QIcon("://icon/32x32/layout.png"));
-        ui->pathTable->setItem(5, 0, item);
+        ui->pathTable->setItem(4, 0, item);
         item = new QTableWidgetItem(settings->getLayoutPath());
         item->setToolTip(settings->getLayoutPath());
-        ui->pathTable->setItem(5, 1, item);
+        ui->pathTable->setItem(4, 1, item);
     }
 
     {
         QTableWidgetItem *item = new QTableWidgetItem(tr("My Label Templates"));
         item->setIcon(QIcon("://icon/32x32/labels.png"));
-        ui->pathTable->setItem(6, 0, item);
+        ui->pathTable->setItem(5, 0, item);
         item = new QTableWidgetItem(settings->getLabelTemplatePath());
         item->setToolTip(settings->getLabelTemplatePath());
-        ui->pathTable->setItem(6, 1, item);
+        ui->pathTable->setItem(5, 1, item);
     }
 
     {
         QTableWidgetItem *item = new QTableWidgetItem(tr("My Images"));
         item->setIcon(QIcon("://icon/32x32/add_image.png"));
-        ui->pathTable->setItem(7, 0, item);
+        ui->pathTable->setItem(6, 0, item);
         item = new QTableWidgetItem(settings->getImageFilePath());
         item->setToolTip(settings->getImageFilePath());
-        ui->pathTable->setItem(7, 1, item);
+        ui->pathTable->setItem(6, 1, item);
     }
 
     {
         QTableWidgetItem *item = new QTableWidgetItem(tr("My Backups"));
         item->setIcon(QIcon("://icon/32x32/backup_files.png"));
-        ui->pathTable->setItem(8, 0, item);
+        ui->pathTable->setItem(7, 0, item);
         item = new QTableWidgetItem(settings->getBackupFilePath());
         item->setToolTip(settings->getBackupFilePath());
-        ui->pathTable->setItem(8, 1, item);
-    }
-
-    {
-        // Path of the SeamlyLayout executable used by the Layout Mode handoff.
-        // Empty means "auto-detect next to the Seamly2D executable".
-        QTableWidgetItem *item = new QTableWidgetItem(tr("SeamlyLayout Application"));
-        item->setIcon(QIcon("://icon/32x32/layout.png"));
-        ui->pathTable->setItem(9, 0, item);
-        item = new QTableWidgetItem(settings->getSeamlyLayoutAppPath());
-        item->setToolTip(settings->getSeamlyLayoutAppPath());
-        ui->pathTable->setItem(9, 1, item);
+        ui->pathTable->setItem(7, 1, item);
     }
 
     ui->pathTable->verticalHeader()->setDefaultSectionSize(20);

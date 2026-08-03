@@ -1,8 +1,0 @@
-"--- ARP DisplayIcon ---"
-Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{DE4AB233-E025-47B1-B694-6CC59F128AEC}" |
-    Select-Object DisplayName, DisplayIcon, DisplayVersion
-
-"--- NSIS: key and directory ---"
-Get-ItemProperty "HKLM:\SOFTWARE\WOW6432Node\NSIS_Seamly2D" -ErrorAction SilentlyContinue |
-    Select-Object Install_Dir
-Test-Path "C:\Program Files (x86)\Seamly2D"

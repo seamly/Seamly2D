@@ -85,8 +85,7 @@ public:
           patternInfo(),
           grainlinePoints(),
           m_tmPiece(),
-          m_tmPattern(),
-          m_pieceLetter()
+          m_tmPattern()
     {}
 
     VLayoutPieceData(const VLayoutPieceData &piece)
@@ -104,8 +103,7 @@ public:
           patternInfo(piece.patternInfo),
           grainlinePoints(piece.grainlinePoints),
           m_tmPiece(piece.m_tmPiece),
-          m_tmPattern(piece.m_tmPattern),
-          m_pieceLetter(piece.m_pieceLetter)
+          m_tmPattern(piece.m_tmPattern)
     {}
 
     ~VLayoutPieceData() {}
@@ -124,7 +122,6 @@ public:
     QVector<QPointF>           grainlinePoints;    /// @brief grainlineInfo line
     VTextManager               m_tmPiece;          /// @brief m_tmPiece text manager for laying out piece info
     VTextManager               m_tmPattern;        /// @brief m_tmPattern text manager for laying out pattern info */
-    QString                    m_pieceLetter;      /// @brief m_pieceLetter piece letter, exported as the SVG data-letter attribute
 
 private:
     VLayoutPieceData &operator=(const VLayoutPieceData &) Q_DECL_EQ_DELETE;

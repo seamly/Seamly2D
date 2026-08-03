@@ -51,13 +51,8 @@
 #include "vabstractapplication.h"
 
 #include <QDir>
-#include <QFile>
-#include <QFileInfo>
 #include <QLibraryInfo>
-#include <QMessageBox>
 #include <QMessageLogger>
-#include <QSettings>
-#include <QStandardPaths>
 #include <QString>
 #include <QTranslator>
 #include <Qt>
@@ -226,97 +221,6 @@ VCommonSettings *VAbstractApplication::Settings()
 {
     SCASSERT(m_settings != nullptr)
     return m_settings;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief MigrateSeamlySettingsLocation resolves this app's settings-file path under the
- * unified "Seamly" organization (Task 15), migrating the file forward from the
- * pre-unification "SeamlyTeam" organization folder on first run after an upgrade.
- *
- * Before Task 15, seamly2d and seamlyme each stored one flat .ini file (named after the
- * application) as a sibling inside a single shared "SeamlyTeam" organization folder
- * (Qt's native IniFormat/UserScope resolution). After Task 15 every Seamly application
- * gets its own directory nested under the "Seamly" organization instead — QStandardPaths
- * ::AppConfigLocation already resolves to AppData/Local/Seamly/<AppName> on Windows once
- * the organization name is "Seamly" and the application name is set, matching the layout
- * seamlyLayout already uses via QStandardPaths internally. This function creates that new
- * per-app directory and — only if its settings file does not already exist there — copies
- * it in from whichever legacy filename candidate is found, so upgrading is non-destructive
- * and re-entrant (running it again after the file exists is a cheap no-op).
- *
- * @param appIniFileName filename to use for this app's settings in the new location, e.g.
- * "qt6_seamly2d.ini".
- * @param legacyAppIniFileNames candidate filenames to look for inside the legacy
- * organization folder, tried in order (newest format first), e.g. {"qt6_seamly2d.ini",
- * "Seamly2D.ini"}.
- * @param migrated optional out-parameter set to true if a legacy file was copied into the
- * new location; leave null if the caller does not need to know (e.g. test harnesses, which
- * must never show the migration notice dialog).
- * @return absolute path to this app's settings file in the new unified location.
- */
-QString VAbstractApplication::MigrateSeamlySettingsLocation(const QString &appIniFileName,
-                                                             const QStringList &legacyAppIniFileNames,
-                                                             bool *migrated)
-{
-    if (migrated != nullptr)
-    {
-        *migrated = false;
-    }
-
-    // New home: one directory per application, nested under the shared "Seamly"
-    // organization folder (AppData/Local/Seamly/<AppName> on Windows).
-    const QString newAppDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-    QDir().mkpath(newAppDir);
-    const QString newAppIniPath = QDir(newAppDir).filePath(appIniFileName);
-
-    if (QFileInfo::exists(newAppIniPath))
-    {
-        // Already migrated on a previous run, or a fresh install with nothing to bring
-        // forward — either way there is nothing left to do.
-        return newAppIniPath;
-    }
-
-    // Legacy home: pre-Task-15 builds used organization name "SeamlyTeam", with both
-    // apps' settings living as sibling flat files in that one shared folder.
-    static const QString kLegacyOrganizationName = QStringLiteral("SeamlyTeam");
-    const QSettings legacyProbe(QSettings::IniFormat, QSettings::UserScope,
-                                kLegacyOrganizationName, QCoreApplication::applicationName());
-    const QString legacyDir = QFileInfo(legacyProbe.fileName()).absolutePath();
-
-    for (const QString &legacyFileName : legacyAppIniFileNames)
-    {
-        const QString legacyPath = QDir(legacyDir).filePath(legacyFileName);
-        if (QFileInfo::exists(legacyPath) && QFile::copy(legacyPath, newAppIniPath))
-        {
-            if (migrated != nullptr)
-            {
-                *migrated = true;
-            }
-            break;
-        } // if legacy file found and copied
-    } // for each candidate legacy filename
-
-    return newAppIniPath;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief NotifySeamlySettingsMigrated shows a one-time informational dialog after Task 15
- * settings migration moved a user's preferences to the new unified "Seamly" location.
- * Only call this from a confirmed GUI-mode code path — never from a headless/CLI export
- * run or an automated test, since a modal dialog with no automatic dismissal would hang
- * a scripted caller waiting on process exit.
- * @param appDisplayName human-readable app name to mention in the message (e.g. "Seamly2D").
- */
-void VAbstractApplication::NotifySeamlySettingsMigrated(const QString &appDisplayName)
-{
-    QMessageBox::information(
-        mainWindow,
-        tr("Settings moved"),
-        tr("%1's settings and preferences have moved to a new shared location "
-           "(the \"Seamly\" folder). Nothing was lost — this happens automatically, "
-           "once, after upgrading.").arg(appDisplayName));
 }
 
 //---------------------------------------------------------------------------------------------------------------------

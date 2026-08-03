@@ -75,7 +75,6 @@ const QString settingConfigurationPointLanguage = QStringLiteral("configuration/
 
 const QString settingPathsPattern = QStringLiteral("paths/pattern");
 const QString settingPathsLayout  = QStringLiteral("paths/layout");
-const QString settingPathsSeamlyLayoutApp = QStringLiteral("paths/seamlyLayoutApp");
 
 const QString settingPatternGraphicalOutput = QStringLiteral("pattern/graphicalOutput");
 
@@ -142,7 +141,7 @@ void VSettings::setPointNameLanguage(const QString &value)
 //---------------------------------------------------------------------------------------------------------------------
 QString VSettings::getDefaultPatternPath()
 {
-    return dataSubdirPath(tr("patterns"));
+    return QDir::homePath() + QLatin1String("/seamly2d/") + tr("patterns");
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -163,7 +162,7 @@ void VSettings::SetPathPattern(const QString &value)
 //---------------------------------------------------------------------------------------------------------------------
 QString VSettings::getDefaultLayoutPath()
 {
-    return dataSubdirPath(tr("layouts"));
+    return QDir::homePath() + QLatin1String("/seamly2d/") + tr("layouts");
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -178,29 +177,6 @@ void VSettings::SetPathLayout(const QString &value)
 {
     QSettings settings(this->format(), this->scope(), this->organizationName(), this->applicationName());
     settings.setValue(settingPathsLayout, value);
-    settings.sync();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief getSeamlyLayoutAppPath returns the user-configured path of the SeamlyLayout executable.
- * @return absolute path of the SeamlyLayout executable, or an empty string when not configured.
- */
-QString VSettings::getSeamlyLayoutAppPath() const
-{
-    QSettings settings(this->format(), this->scope(), this->organizationName(), this->applicationName());
-    return settings.value(settingPathsSeamlyLayoutApp, QString()).toString();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief setSeamlyLayoutAppPath stores the path of the SeamlyLayout executable.
- * @param value absolute path of the SeamlyLayout executable.
- */
-void VSettings::setSeamlyLayoutAppPath(const QString &value)
-{
-    QSettings settings(this->format(), this->scope(), this->organizationName(), this->applicationName());
-    settings.setValue(settingPathsSeamlyLayoutApp, value);
     settings.sync();
 }
 

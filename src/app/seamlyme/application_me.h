@@ -95,12 +95,6 @@ public:
     virtual void                        openSettings() override;
     VSeamlyMeSettings                  *seamlyMeSettings();
 
-    // Task 15: true once this run's openSettings() pulled settings forward from the
-    // legacy "SeamlyTeam" organization folder. main.cpp shows the one-time migration
-    // notice using this, gated the same way as the welcome dialog (skipped in --test
-    // mode), since m_testMode itself is not set yet this early in startup.
-    bool                                settingsMigrated() const { return m_settingsMigrated; }
-
     void                                showDataBase();
     void                                retranslateGroups();
     void                                retranslateTables();
@@ -124,11 +118,6 @@ private:
     VTranslateVars                     *m_trVars;
     QPointer<MeasurementDatabaseDialog> m_dataBase;
     bool                                m_testMode;
-
-    // Task 15: set true by openSettings() when it pulls settings forward from the legacy
-    // "SeamlyTeam" organization folder; main.cpp shows the one-time migration notice
-    // only when this is set and the app is not running in automated test mode.
-    bool                                m_settingsMigrated{false};
 
     void                                clean();
 };

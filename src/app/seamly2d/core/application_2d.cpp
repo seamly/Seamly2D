@@ -61,7 +61,6 @@
 #include "../ifc/exception/vexceptionwrongid.h"
 #include "../vmisc/def.h"
 #include "../vmisc/logging.h"
-#include "../vmisc/seamly_family_paths.h"
 #include "../vmisc/vmath.h"
 #include "../qmuparser/qmuparsererror.h"
 #include "../vwidgets/vmaingraphicsview.h"
@@ -476,56 +475,6 @@ bool Application2D::notify(QObject *receiver, QEvent *event)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief seamlyLayoutFilePath locates the SeamlyLayout executable.
- *
- * Lookup order: (1) the user-configured path from the application settings,
- * (2) the install-directory lookup via SeamlyFamilyPaths::locateSeamlyLayout()
- * — the executable directly beside seamly2d (the flat layout used where all
- * apps share one Qt runtime, e.g. the Linux Flatpak's /app/bin) or in the
- * "SeamlyLayout" subdirectory the Windows MSI installer uses (Task 13; there
- * SeamlyLayout carries its own Qt runtime, which cannot share a flat directory
- * with the parent apps' differently-versioned Qt DLLs) — and (3) a SeamlyLayout
- * development build inside the source checkout this executable was built from,
- * located relative to the running executable by
- * SeamlyFamilyPaths::locateSeamlyLayoutDevBuild() (Release preferred over
- * Debug), so that Layout Mode works during development without any
- * configuration and without naming any one developer's machine (Task 50).
- *
- * The order matters: the development build is tried last, so it can never
- * shadow a configured path or an installed copy.
- *
- * @return absolute path of the SeamlyLayout executable, or an empty string when it cannot be found.
- */
-QString Application2D::seamlyLayoutFilePath()
-{
-    // A path configured in the settings takes precedence over the default lookup.
-    const QString configuredPath = Seamly2DSettings()->getSeamlyLayoutAppPath();
-    if (!configuredPath.isEmpty() && QFileInfo::exists(configuredPath))
-    {
-        return QFileInfo(configuredPath).absoluteFilePath();
-    }
-
-    // Default: the standard install locations relative to the Seamly2D
-    // executable — flat beside it, or in the MSI's "SeamlyLayout" subdirectory.
-    const QString installedPath =
-        SeamlyFamilyPaths::locateSeamlyLayout(QCoreApplication::applicationDirPath());
-    if (!installedPath.isEmpty())
-    {
-        return installedPath;
-    }
-
-    // Development fallback: a SeamlyLayout Qt frontend built from the same
-    // source checkout as this executable, found by walking up from the running
-    // application's directory (Release preferred over Debug). Lets a locally
-    // built Seamly2D hand off to the locally built SeamlyLayout when neither a
-    // setting nor an installed copy exists — on any machine, and only ever
-    // inside a built checkout, so it cannot shadow a real installation.
-    return SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(QCoreApplication::applicationDirPath());
-    // An empty return means not found; the caller is responsible for informing the user.
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 QString Application2D::seamlyMeFilePath() const
 {
     const QString seamlyme = QStringLiteral("seamlyme");
@@ -713,14 +662,6 @@ void Application2D::initOptions()
     QDir().mkpath(settings->getDefaultTemplatePath());
     QDir().mkpath(settings->getDefaultLabelTemplatePath());
     QDir().mkpath(settings->getDefaultBackupFilePath());
-
-    // Task 15: only tell the user their settings moved once command-line parsing (done in
-    // the constructor, before initOptions() runs) has determined real GUI-vs-console mode —
-    // showing a modal dialog during a headless/CLI export would hang a scripted caller.
-    if (m_settingsMigrated && Application2D::isGUIMode())
-    {
-        NotifySeamlySettingsMigrated(QStringLiteral("Seamly2D"));
-    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -809,100 +750,27 @@ bool Application2D::event(QEvent *event)
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief openSettings get access to application settings.
 /// Because we can create object in constructor we open file separately.
-///
-/// Task 15: seamly2d's own settings now live in their own directory nested under the
-/// shared "Seamly" organization (AppData/Local/Seamly/Seamly2D on Windows) instead of a
-/// flat .ini file sharing a folder with SeamlyMe's. The "common" settings (shared across
-/// Seamly apps, see VCommonSettings) still use Qt's native per-organization resolution and
-/// are bridged forward from the pre-unification "SeamlyTeam" folder the same way they
-/// always bridged qt5 -> qt6 formats.
 void Application2D::openSettings()
 {
     QSettings settings(QSettings::IniFormat, QSettings::UserScope,
                        QCoreApplication::organizationName(),
                        QCoreApplication::applicationName());
 
-    const QString dir = QFileInfo(settings.fileName()).absolutePath();
+    const QString qt5Settings = settings.fileName();
+    const QString dir = QFileInfo(qt5Settings).absolutePath();
     const QString qt5Common   = dir + "/common.ini";
+    const QString qt6Settings = dir + "/qt6_seamly2d.ini";
     const QString qt6Common   = dir + "/qt6_common.ini";
-
-    // QFile::copy() never creates missing parent directories, and the "Seamly" organization
-    // folder does not exist yet the very first time any app runs under the renamed
-    // organization — unlike the qt5 -> qt6 bridge below, which only ever runs against an
-    // organization folder some earlier build already created.
-    QDir().mkpath(dir);
-
-    // Bridge the shared "common" settings forward from the pre-Task-15 organization
-    // folder ("SeamlyTeam") into the current one ("Seamly"), same non-destructive
-    // copy-if-missing pattern as the existing qt5 -> qt6 bridge below.
-    static const QString kLegacyOrganizationName = QStringLiteral("SeamlyTeam");
-    const QSettings legacyCommonProbe(QSettings::IniFormat, QSettings::UserScope,
-                                      kLegacyOrganizationName, QCoreApplication::applicationName());
-    const QString legacyDir = QFileInfo(legacyCommonProbe.fileName()).absolutePath();
-    if (!QFileInfo::exists(qt6Common) && QFileInfo::exists(legacyDir + "/qt6_common.ini"))
-    {
-        QFile::copy(legacyDir + "/qt6_common.ini", qt6Common);
-    }
-    else if (!QFileInfo::exists(qt5Common) && QFileInfo::exists(legacyDir + "/common.ini"))
-    {
-        QFile::copy(legacyDir + "/common.ini", qt5Common);
-    }
 
     if (!QFileInfo::exists(qt6Common) && QFileInfo::exists(qt5Common))
     {
         QFile::copy(qt5Common, qt6Common);
     }
 
-    // Task 34: settle the one shared user-data root before any data path is read. Resolves
-    // and records a path only — it touches no files, which is what keeps it safe for the
-    // unit tests to call.
-    bool adoptedLegacyTree = false;
-    VCommonSettings::initializeDataRoot(&adoptedLegacyTree);
-
-    // Task 60: when that resolution adopted an old ~/seamly2d tree, copy it out to the new
-    // <Documents>/Seamly root instead of using it where it stands. The whole tree is
-    // copied, including any folders the user added themselves; nothing is moved or deleted,
-    // and the legacy tree is left in place with a marker so a rollback stays possible. On
-    // any failure the legacy root simply stays configured and in use.
-    //
-    // Here rather than inside initializeDataRoot() for the same reason as the prune below:
-    // this is the only place the real home directory reaches it, so the unit tests cannot
-    // copy anything into the developer's home.
-    if (adoptedLegacyTree)
+    if (!QFileInfo::exists(qt6Settings) && QFileInfo::exists(qt5Settings))
     {
-        VCommonSettings::migrateAdoptedLegacyTree(VCommonSettings::getLegacyDataRoot(),
-                                                  VCommonSettings::getDefaultDataRoot());
+        QFile::copy(qt5Settings, qt6Settings);
     }
-
-    // Task 51: create the nine standard subfolders under that root. initializeDataRoot()
-    // only resolves and records the path — it deliberately writes the setting directly
-    // rather than through setDataRoot(), which is the only other caller of
-    // ensureDataRootTree() — so without this a fresh install left the data root recorded
-    // but never created, and Preferences → Paths pointed at nine folders that did not
-    // exist. Found by the Task 51 clean-machine install verification.
-    //
-    // Called here rather than inside initializeDataRoot() for the same reason as the prune
-    // below: this is the only place the real home directory reaches it, so the unit tests,
-    // which do call initializeDataRoot(), can never create folders outside their temporary
-    // directories. Purely additive — existing files and folders are left untouched.
-    VCommonSettings::ensureDataRootTree(VCommonSettings::dataRoot());
-
-    // Task 53: clear away the empty ~/seamly2d skeleton the rename leaves behind. Kept here
-    // in the application rather than inside initializeDataRoot() on purpose — this is the
-    // only place the real home directory is fed to it, so the unit tests, which do call
-    // initializeDataRoot(), can never reach outside their temporary directories. It is a
-    // no-op unless ~/seamly2d exists, is not the configured root, and holds no files at all.
-    VCommonSettings::pruneEmptyLegacyDataRoot(VCommonSettings::getLegacyDataRoot(),
-                                              VCommonSettings::dataRoot());
-
-    // seamly2d's own settings: new per-app directory under "Seamly", migrated forward
-    // from the legacy shared organization folder on first run after an upgrade.
-    bool migratedThisCall = false;
-    const QString qt6Settings = MigrateSeamlySettingsLocation(
-        QStringLiteral("qt6_seamly2d.ini"),
-        { QStringLiteral("qt6_seamly2d.ini"), QStringLiteral("Seamly2D.ini") },
-        &migratedThisCall);
-    m_settingsMigrated = m_settingsMigrated || migratedThisCall;
 
     m_settings = new VSettings(qt6Settings, QSettings::IniFormat, this);
 }

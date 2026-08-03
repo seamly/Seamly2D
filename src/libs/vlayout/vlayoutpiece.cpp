@@ -78,7 +78,8 @@
 #include "vlayoutpiece_p.h"
 #include "vtextmanager.h"
 #include "vgraphicsfillitem.h"
-#include "svg_text_item.h"
+
+static const int ObjectName = 0;
 
 namespace
 {
@@ -436,8 +437,6 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
     layoutPiece.setCutoutPaths(convertInternalPaths (piece, pattern, true));
     layoutPiece.setNotches(piece.createNotchLines(pattern));
     layoutPiece.SetName(piece.GetName());
-    // Keep the piece letter so the SVG exporter can emit it as the data-letter attribute.
-    layoutPiece.setPieceLetter(piece.GetPatternPieceData().GetLetter());
 
     // Very important to set main path first!
     if (layoutPiece.createMainPath().isEmpty() && layoutPiece.createAllowancePath().isEmpty())
@@ -471,26 +470,6 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
     layoutPiece.SetForbidFlipping(piece.IsForbidFlipping());
 
     return layoutPiece;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief getPieceLetter returns the piece letter entered in the piece label data.
- * @return piece letter, or an empty string when none was set.
- */
-QString VLayoutPiece::getPieceLetter() const
-{
-    return d->m_pieceLetter;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief setPieceLetter stores the piece letter for later use by the SVG exporter (data-letter attribute).
- * @param letter piece letter from VPieceLabelData::GetLetter().
- */
-void VLayoutPiece::setPieceLetter(const QString &letter)
-{
-    d->m_pieceLetter = letter;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1060,11 +1039,6 @@ QPainterPath VLayoutPiece::createNotchesPath() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief createInternalPathItem creates the child item for one internal path of the piece.
- * @param i      index into the internal paths list.
- * @param parent piece root item the path item is added to.
- */
 void VLayoutPiece::createInternalPathItem(int i, QGraphicsItem *parent) const
 {
     SCASSERT(parent != nullptr)
@@ -1073,17 +1047,11 @@ void VLayoutPiece::createInternalPathItem(int i, QGraphicsItem *parent) const
     qreal        lineWeight = ToPixel(d->m_internalPaths.at(i).getLineWeight().toDouble(), Unit::Mm);
 
     QGraphicsPathItem* item = new QGraphicsPathItem(parent);
-    item->setData(PieceItemData::ItemType, QStringLiteral("internal_path"));
     item->setPath(d->transform.map(d->m_internalPaths.at(i).GetPainterPath()));
     item->setPen(QPen(color, lineWeight, lineType, Qt::RoundCap, Qt::RoundJoin));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief createCutoutPathItem creates the child item for one internal cutout path of the piece.
- * @param i      index into the cutout paths list.
- * @param parent piece root item the path item is added to.
- */
 void VLayoutPiece::createCutoutPathItem(int i, QGraphicsItem *parent) const
 {
     SCASSERT(parent != nullptr)
@@ -1092,7 +1060,6 @@ void VLayoutPiece::createCutoutPathItem(int i, QGraphicsItem *parent) const
     qreal        lineWeight = ToPixel(d->m_cutoutPaths.at(i).getLineWeight().toDouble(), Unit::Mm);
 
     QGraphicsPathItem* item = new QGraphicsPathItem(parent);
-    item->setData(PieceItemData::ItemType, QStringLiteral("cut_path"));
     item->setPath(d->transform.map(d->m_cutoutPaths.at(i).GetPainterPath()));
     item->setPen(QPen(color, lineWeight, lineType, Qt::RoundCap, Qt::RoundJoin));
 }
@@ -1115,26 +1082,11 @@ QPainterPath VLayoutPiece::LayoutAllowancePath() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief GetItem builds the graphics item tree for one pattern piece.
- *
- * The root item is a pure container: it paints nothing itself. Every visual
- * component (seamline, cutline, notches, internal paths, labels, grainline)
- * is created as a direct child tagged with PieceItemData::ItemType so the SVG
- * exporter can render and identify each component independently.
- *
- * @param textAsPaths true to convert label text into vector paths.
- * @return root QGraphicsItem owning all component child items.
- */
 QGraphicsItem *VLayoutPiece::GetItem(bool textAsPaths) const
 {
-    // Empty QGraphicsPathItem: no path and no pen, so the root draws nothing.
-    QGraphicsPathItem *item = new QGraphicsPathItem();
-    item->setData(PieceItemData::ObjectName, GetName());
-    item->setData(PieceItemData::PieceLetter, getPieceLetter());
+    QGraphicsPathItem *item = createMainItem();
+    item->setData(ObjectName, GetName());
 
-    // Child components, one taggable item (or item group) each.
-    createSeamlineItem(item);
     createAllowanceItem(item);
     createNotchesItem(item);
 
@@ -1148,47 +1100,22 @@ QGraphicsItem *VLayoutPiece::GetItem(bool textAsPaths) const
         createCutoutPathItem(i, item);
     }
 
-    createLabelItem(item, d->pieceLabel, d->m_tmPiece, QStringLiteral("piece_label"), textAsPaths);
-    createLabelItem(item, d->patternInfo, d->m_tmPattern, QStringLiteral("pattern_label"), textAsPaths);
+    createLabelItem(item, d->pieceLabel, d->m_tmPiece, textAsPaths);
+    createLabelItem(item, d->patternInfo, d->m_tmPattern, textAsPaths);
     createGrainlineItem(item, textAsPaths);
 
     return item;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief createLabelItem creates the graphics items for one label (piece or pattern label).
- *
- * All text lines of the label are parented to one invisible group item tagged
- * with the given SVG data-type, so the SVG exporter can render the whole label
- * as a single identifiable component.
- *
- * Each line keeps its font (family, size, per-line bold/italic), color,
- * alignment, middle-eliding to the label width, mirroring and rotation. The
- * line is emitted either as an explicit vector path (textAsPaths == true,
- * QGraphicsPathItem holding the glyph outlines) or as real text
- * (textAsPaths == false, SvgTextItem) so that SVG/PDF/DXF exports receive
- * text draw calls and can output actual text elements.
- *
- * @param parent      piece root item the label group is added to.
- * @param labelShape  label rectangle corners; fewer than 3 points means no label.
- * @param tm          text manager holding the label's text lines.
- * @param type        SVG data-type tag: "piece_label" or "pattern_label".
- * @param textAsPaths true to convert the text into vector paths.
- */
 void VLayoutPiece::createLabelItem(QGraphicsItem *parent, const QVector<QPointF> &labelShape,
-                                      const VTextManager &tm, const QString &type, bool textAsPaths) const
+                                      const VTextManager &tm, bool textAsPaths) const
 {
     SCASSERT(parent != nullptr)
     QColor color = QColor(qApp->Settings()->getDefaultLabelColor());
 
     if (labelShape.count() > 2)
     {
-        // Invisible group item: every text line below becomes one SVG label component.
-        QGraphicsPathItem *labelGroup = new QGraphicsPathItem(parent);
-        labelGroup->setData(PieceItemData::ObjectName, QStringLiteral("label"));
-        labelGroup->setData(PieceItemData::ItemType, type);
-
         const qreal dW = QLineF(labelShape.at(0), labelShape.at(1)).length();
         const qreal dH = QLineF(labelShape.at(1), labelShape.at(2)).length();
         const qreal angle = - QLineF(labelShape.at(0), labelShape.at(1)).angle();
@@ -1256,9 +1183,8 @@ void VLayoutPiece::createLabelItem(QGraphicsItem *parent, const QVector<QPointF>
                 QPainterPath path;
                 path.addText(0, - static_cast<qreal>(fm.ascent())/6., fnt, qsText);
 
-                // Text line as vector path, parented to the label group.
-                QGraphicsPathItem* item = new QGraphicsPathItem(labelGroup);
-                item->setData(PieceItemData::ObjectName, QString("label"));
+                QGraphicsPathItem* item = new QGraphicsPathItem(parent);
+                item->setData(ObjectName, QString("label"));
                 item->setPath(path);
                 item->setPen(QPen(color, widthHairLine));
                 item->setBrush(QBrush(Qt::NoBrush));
@@ -1268,18 +1194,12 @@ void VLayoutPiece::createLabelItem(QGraphicsItem *parent, const QVector<QPointF>
             }
             else
             {
-                // Text line as real text, parented to the label group. SvgTextItem
-                // paints through QPainter::drawText(), so text-capable export
-                // engines receive real text draw calls: SVG exports emit <text>
-                // elements instead of glyph outlines, PDF keeps searchable text
-                // and DXF gets TEXT entities. The fill color comes from the
-                // brush; no pen is set because an outline pen is exactly what
-                // forces Qt to convert text to filled glyph outlines.
-                SvgTextItem* item = new SvgTextItem(labelGroup);
-                item->setData(PieceItemData::ObjectName, QString("label"));
+                QGraphicsSimpleTextItem* item = new QGraphicsSimpleTextItem(parent);
+                item->setData(ObjectName, QString("label"));
                 item->setFont(fnt);
                 item->setText(qsText);
                 item->setTransform(labelTransform);
+                item->setPen(QPen(color));
                 item->setBrush(QBrush(color));
 
                 dY += (fm.height() + tm.GetSpacing());
@@ -1289,11 +1209,6 @@ void VLayoutPiece::createLabelItem(QGraphicsItem *parent, const QVector<QPointF>
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief createGrainlineItem creates the grainline child item of the piece.
- * @param parent      piece root item the grainline item is added to.
- * @param textAsPaths true when the export renders text as vector paths.
- */
 void VLayoutPiece::createGrainlineItem(QGraphicsItem *parent, bool textAsPaths) const
 {
     SCASSERT(parent != nullptr)
@@ -1304,8 +1219,7 @@ void VLayoutPiece::createGrainlineItem(QGraphicsItem *parent, bool textAsPaths) 
         return;
     }
     VGraphicsFillItem* item = new VGraphicsFillItem(color, textAsPaths, parent);
-    item->setData(PieceItemData::ObjectName, QString("grainline"));
-    item->setData(PieceItemData::ItemType, QStringLiteral("grainline"));
+    item->setData(ObjectName, QString("grainline"));
 
     QPainterPath path;
 
@@ -1332,17 +1246,8 @@ QVector<QPointF> VLayoutPiece::piecePath() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief createSeamlineItem creates the seamline (main path) child item of a piece.
- *
- * Replaces the former createMainItem(): the seamline is now an ordinary child
- * of the piece container so the SVG exporter can render it independently.
- *
- * @param parent piece root item the seamline item is added to.
- */
-void VLayoutPiece::createSeamlineItem(QGraphicsItem *parent) const
+QGraphicsPathItem *VLayoutPiece::createMainItem() const
 {
-    SCASSERT(parent != nullptr)
     QColor  color;
     QString lineType;
     qreal   lineWeight;
@@ -1358,18 +1263,14 @@ void VLayoutPiece::createSeamlineItem(QGraphicsItem *parent) const
         lineType   = qApp->Settings()->getDefaultCutLinetype();
         lineWeight = ToPixel(qApp->Settings()->getDefaultCutLineweight(), Unit::Mm);
     }
-    QGraphicsPathItem *item = new QGraphicsPathItem(parent);
-    item->setData(PieceItemData::ObjectName, QString("seamline"));
-    item->setData(PieceItemData::ItemType, QStringLiteral("seamline"));
+    QGraphicsPathItem *item = new QGraphicsPathItem();
+    item->setData(ObjectName, QString("seamline"));
     item->setPath(createMainPath());
     item->setPen(QPen(color, lineWeight, lineTypeToPenStyle(lineType), Qt::RoundCap, Qt::RoundJoin));
+    return item;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief createAllowanceItem creates the seam allowance (cutline) child item of the piece.
- * @param parent piece root item the cutline item is added to.
- */
 void VLayoutPiece::createAllowanceItem(QGraphicsItem *parent) const
 {
     if (qApp->Settings()->showSeamAllowances())
@@ -1379,26 +1280,20 @@ void VLayoutPiece::createAllowanceItem(QGraphicsItem *parent) const
         qreal   lineWeight = ToPixel(qApp->Settings()->getDefaultCutLineweight(), Unit::Mm);
 
         QGraphicsPathItem *item = new QGraphicsPathItem(parent);
-        item->setData(PieceItemData::ObjectName, QString("cutline"));
-        item->setData(PieceItemData::ItemType, QStringLiteral("cutline"));
+        item->setData(ObjectName, QString("cutline"));
         item->setPath(createAllowancePath());
         item->setPen(QPen(color, lineWeight, lineTypeToPenStyle(lineType), Qt::RoundCap, Qt::RoundJoin));
     }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief createNotchesItem creates the child item holding all notches of the piece.
- * @param parent piece root item the notches item is added to.
- */
 void VLayoutPiece::createNotchesItem(QGraphicsItem *parent) const
 {
     QColor color      = QColor(qApp->Settings()->getDefaultNotchColor());
     qreal  lineWeight = ToPixel(qApp->Settings()->getDefaultCutLineweight(), Unit::Mm);
 
     QGraphicsPathItem *item = new QGraphicsPathItem(parent);
-    item->setData(PieceItemData::ObjectName, QString("notches"));
-    item->setData(PieceItemData::ItemType, QStringLiteral("notch"));
+    item->setData(ObjectName, QString("notches"));
     item->setPath(createNotchesPath());
     item->setPen(QPen(color, lineWeight, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 }

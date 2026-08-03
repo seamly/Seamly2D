@@ -91,29 +91,13 @@ void SeamlyMePreferencesPathPage::changeEvent(QEvent *event)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief Apply stores every path shown in the table back into the application settings.
- *
- * The shared data root (row 0) is applied first, and every subfolder still living inside
- * the previous root follows it to the new location, so repointing the root at another
- * drive or a cloud-synced folder relocates the whole tree in one edit (Task 34).
- */
 void SeamlyMePreferencesPathPage::Apply()
 {
     VSeamlyMeSettings *settings = qApp->seamlyMeSettings();
-
-    const QString previousRoot = settings->getDataRoot();
-    const QString dataRoot     = ui->pathTable->item(0, 1)->text();
-    settings->setDataRoot(dataRoot);
-
-    settings->setIndividualSizePath(
-        VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(1, 1)->text(), previousRoot, dataRoot));
-    settings->setMultisizePath(
-        VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(2, 1)->text(), previousRoot, dataRoot));
-    settings->setTemplatePath(
-        VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(3, 1)->text(), previousRoot, dataRoot));
-    settings->setBodyScansPath(
-        VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(4, 1)->text(), previousRoot, dataRoot));
+    settings->setIndividualSizePath(ui->pathTable->item(0, 1)->text());
+    settings->setMultisizePath(ui->pathTable->item(1, 1)->text());
+    settings->setTemplatePath(ui->pathTable->item(2, 1)->text());
+    settings->setBodyScansPath(ui->pathTable->item(3, 1)->text());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -126,19 +110,16 @@ void SeamlyMePreferencesPathPage::defaultPath()
     QString path;
     switch (row)
     {
-        case 0: // shared user data root
-            path = VCommonSettings::getDefaultDataRoot();
-            break;
-        case 1: // individual measurements
+        case 0: // individual measurements
             path = VCommonSettings::getDefaultIndividualSizePath();
             break;
-        case 2: // multisize measurements
+        case 1: // multisize measurements
             path = VCommonSettings::getDefaultMultisizePath();
             break;
-        case 3: // templates
+        case 2: // templates
             path = VCommonSettings::getDefaultTemplatePath();
             break;
-        case 4: // body scans
+        case 3: // body scans
             path = VCommonSettings::getDefaultBodyScansPath();
             break;
         default:
@@ -159,22 +140,17 @@ void SeamlyMePreferencesPathPage::editPath()
     QString path;
     switch (row)
     {
-        case 0: // shared user data root
-            // Any drive, volume or path is accepted here, including an external disk or a
-            // cloud-synced folder such as G:/My Drive/seamly (Task 34).
-            path = qApp->seamlyMeSettings()->getDataRoot();
-            break;
-        case 1: // individual measurements
+        case 0: // individual measurements
             path = qApp->seamlyMeSettings()->getIndividualSizePath();
             break;
-        case 2: // multisize measurements
+        case 1: // multisize measurements
             path = qApp->seamlyMeSettings()->getMultisizePath();
             path = VCommonSettings::prepareMultisizeTables(path);
             break;
-        case 3: // templates
+        case 2: // templates
             path = qApp->seamlyMeSettings()->getTemplatePath();
             break;
-        case 4: // body scans
+        case 3: // body scans
             path = qApp->seamlyMeSettings()->getBodyScansPath();
             break;
         default:
@@ -214,56 +190,45 @@ void SeamlyMePreferencesPathPage::editPath()
 //---------------------------------------------------------------------------------------------------------------------
 void SeamlyMePreferencesPathPage::initializeTable()
 {
-    ui->pathTable->setRowCount(5);
+    ui->pathTable->setRowCount(4);
     ui->pathTable->setColumnCount(2);
 
     const VSeamlyMeSettings *settings = qApp->seamlyMeSettings();
 
     {
-        // Task 34: the shared user-data root, the same setting seamly2d edits — both apps
-        // read it from the common settings file, so a change here moves both apps' data.
-        QTableWidgetItem *item = new QTableWidgetItem(tr("My Seamly Data"));
-        item->setIcon(QIcon("://icon/32x32/template_size_file.png"));
-        ui->pathTable->setItem(0, 0, item);
-        item = new QTableWidgetItem(settings->getDataRoot());
-        item->setToolTip(settings->getDataRoot());
-        ui->pathTable->setItem(0, 1, item);
-    }
-
-    {
         QTableWidgetItem *item = new QTableWidgetItem(tr("My Individual Measurements"));
         item->setIcon(QIcon("://icon/32x32/individual_size_file.png"));
-        ui->pathTable->setItem(1, 0, item);
+        ui->pathTable->setItem(0, 0, item);
         item = new QTableWidgetItem(settings->getIndividualSizePath());
         item->setToolTip(settings->getIndividualSizePath());
-        ui->pathTable->setItem(1, 1, item);
+        ui->pathTable->setItem(0, 1, item);
     }
 
     {
         QTableWidgetItem *item = new QTableWidgetItem(tr("My Multisize Measurements"));
         item->setIcon(QIcon("://icon/32x32/multisize_size_file.png"));
-        ui->pathTable->setItem(2, 0, item);
+        ui->pathTable->setItem(1, 0, item);
         item = new QTableWidgetItem(settings->getMultisizePath());
         item->setToolTip(settings->getMultisizePath());
-        ui->pathTable->setItem(2, 1, item);
+        ui->pathTable->setItem(1, 1, item);
     }
 
     {
         QTableWidgetItem *item = new QTableWidgetItem(tr("My Templates"));
         item->setIcon(QIcon("://icon/32x32/template_size_file.png"));
-        ui->pathTable->setItem(3, 0, item);
+        ui->pathTable->setItem(2, 0, item);
         item = new QTableWidgetItem(settings->getTemplatePath());
         item->setToolTip(settings->getTemplatePath());
-        ui->pathTable->setItem(3, 1, item);
+        ui->pathTable->setItem(2, 1, item);
     }
 
     {
         QTableWidgetItem *item = new QTableWidgetItem(tr("My Body Scans"));
         item->setIcon(QIcon("://icon/32x32/body_scan.png"));
-        ui->pathTable->setItem(4, 0, item);
+        ui->pathTable->setItem(3, 0, item);
         item = new QTableWidgetItem(settings->getBodyScansPath());
         item->setToolTip(settings->getBodyScansPath());
-        ui->pathTable->setItem(4, 1, item);
+        ui->pathTable->setItem(3, 1, item);
     }
 
     ui->pathTable->verticalHeader()->setDefaultSectionSize(20);

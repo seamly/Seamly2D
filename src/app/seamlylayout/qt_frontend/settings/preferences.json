@@ -1,8 +1,0 @@
-{
-    "dxf_viewer_path": "C:/Program Files/LibreCAD/LibreCAD.exe",
-    "input_directory": "C:/Users/susan/Projects/Seamly2D-private/src/app/seamlylayout/input",
-    "layout_directory": "C:/Users/susan/Projects/Seamly2D-private/src/app/seamlylayout/output",
-    "pdf_viewer_path": "C:/Program Files/Soda PDF Desktop 14/soda.exe",
-    "png_viewer_path": "C:/Program Files/WindowsApps/Microsoft.Paint_11.2601.401.0_x64__8wekyb3d8bbwe/PaintApp/mspaint.exe",
-    "settings_file": "C:/Users/susan/Projects/Seamly2D-private/src/app/seamlylayout/qt_frontend/settings/B0.json"
-}

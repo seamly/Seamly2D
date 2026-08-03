@@ -76,7 +76,7 @@ jobs:
 
       - name: build Seamly2D & SeamlyMe for tests
         run: |
-          qmake Seamly.pro
+          qmake Seamly2D.pro
           make -j$(nproc)
 
       - name: install test dependencies

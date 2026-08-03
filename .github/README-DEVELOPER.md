@@ -2,7 +2,7 @@
 
 ## General
 
-Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started on GitFlow, Issues, Branches, etc.
+Read [.github\CONTRIBUTING.md](.github\CONTRIBUTING.md) to get started on GitFlow, Issues, Branches, etc.
 
 ## Basic Software Prerequisites
 
@@ -15,19 +15,29 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started on GitFlow, Issues, Branc
 * Pdftops (from XpdfReader or poppler) - Required to create PS or EPS layout files.
 * Check the sections below for your operating system to find additional installation requirements.
 
+## Code Style
+
+* Applies to new and edited code going forward (as of 2026/06/09)
+* Follow JSF code styling for readability and maintainability
+* Exceptions:
+  * variables: snake_case
+  * functions: lowerCamelCase
+  * classes: UpperCamelCase
+  * pointers: int* correct_pointer (bind the asterisk to the type not the name)
+  * braces: sit on a new line, can't be omitted
+  * line limit: 120 chars max
+  * indents: spaces, no tabs, for uniformity in rendering
+  * comments: single line // only, not /*...*/ multiline to prevent accidently nesting
+
 ## Code Documentation
 
-* [Doxygen](https://fashionfreedom.github.io/Seamly2D/)
+* [Doxygen Docs](https://fashionfreedom.github.io/Seamly2D/)
 
 ## Development methods and styles
 
 * [GitHub Flow workflow](https://githubflow.github.io)
 * [Gibhub commit message style guide](https://www.conventionalcommits.org/en/v1.0.0/)
 * [Github issue description style guide](https://guides.github.com/features/issues/)
-* Code Style
-
-  * Applies to new and edited code going forward (as of 2026/06/09)
-  * [Seamly code style](README-DEVELOPER.md)
 * Read more about code styles and developer items of interest on our [Developer wiki](https://github.com/FashionFreedom/Seamly2D/wiki).
 
 ## Fonts, Icons, Images
@@ -49,16 +59,14 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started on GitFlow, Issues, Branc
 
 ---
 
-## Recommended installation for development on all platforms (Linux, MacOSX, Windows)
+## Install
 
-#### 1. Install on all platforms
+### ... on all platforms (Linux, MacOSX, Windows)
 
-* MS Visual Code Community Edition 18 (for the IDE)
-* MS Visual Studio 2022 (for the compiler)
-* *Qt 6.11.1* via [Qt unified installer](https://www.qt.io/download-qt-installer); you'll need a Qt account for the *Open Source Community Edition*
-  * If you have Qt currently installed, run the **Maintenance Tool (maintenancetool.exe)** & select "Add or remove programs"
-  * If you don't have Qt installed, download & run the [Qt unified installer](https://www.qt.io/download-qt-installer) & select "Custom Installation".
+* Install Qt 6.11.1, eg via [Qt unified installer](https://www.qt.io/download-qt-installer). Create a Qt account for open source Community Edition if you don't have one.
+  * Download & run the [Qt unified installer](https://www.qt.io/download-qt-installer).
   * Select:
+    * Custom Installation
     * Qt -- Minimize your options, otherwise your download size could be in Gs
       * Qt 6.11.1
         * MSVC 2022
@@ -88,67 +96,80 @@ sudo apt install -y build-essential git poppler-utils \
     libxerces-c-dev libgl1-mesa-dev libxkbcommon-dev libxcb-cursor0
 ```
 
-#### On MacOSX
+* Build and install:
 
-* Learn more about Qt for [macOS](https://doc.qt.io/qt-6/macos.html)
+```bash
+qmake
+make -j$(nproc)
+sudo make install
+```
+
+Note: The default prefix for command `make install` is `/usr`.  To define another prefix, install with an INSTALL_ROOT specified. This example sets `/usr/local` as the new prefix for Seamly's installation binary files:
+
+```bash
+sudo make INSTALL_ROOT=/usr/local install
+```
+
+Note: For distributions where `qmake` default is not Qt 6
+
+On some Linux distributions (e.g. Arch Linux), the `qmake` binary still points to Qt 5. In this case, create the Makefile with `qmake6`, `make`, and `make install`.  If you accidentally invoke the Qt 5 `qmake` and generate the makefile with it, run `make distclean` to remove all generated files, then re-run with Qt 6 `qmake6`.
+
+```bash
+qmake6
+make -j$(nproc)
+sudo make install
+```
+
+### ... on MacOSX and Windows 10/11
+
+#### MacOS only
+
+* Read about Qt for [macOS](https://doc.qt.io/qt-5/macos.html)
 * Ensure you have Xcode Command Line Tools installed by running `xcode-select --install` in your terminal. Then, download the installer directly from your Qt Account Portal or the Qt Downloads page.
 * Install [Xcode 15](https://developer.apple.com/download/all/) - Qt has been validated against Xcode SDK 15
-  * Setup/validate build environment. [Read more](https://doc.qt.io/qt-6/macos.html#build-environment).
-  * Switch to Xcode: `sudo xcode-select --switch /Applications/Xcode.app`
-  * Validate clang compiler points to Xcode: `xcrun -sdk macosx -find clang`
-  * Validate SDK version (macOS 10.15): `xcrun -sdk macosx --show-sdk-path`
+* Setup/validate build environment. [Read more](https://doc.qt.io/qt-5/macos.html#build-environment).
+* Switch to Xcode: `sudo xcode-select --switch /Applications/Xcode.app`
+* Validate clang compiler points to Xcode: `xcrun -sdk macosx -find clang`
+* Validate SDK version (macOS 10.15): `xcrun -sdk macosx --show-sdk-path`
 * Install Xpdf: `sudo port install xpdf`
-  * Copy `Program Files\Xpdf\bin64\pdftops.exe` in Windows, or `bin32/pdftops.exe` in MacOS, to the Seamly build directory to enable creation of post script (.ps and .eps) pattern piece layouts.
 
-#### Windows
+#### Windows only
 
-* Learn more about [Qt for Windows](https://doc.qt.io/qt-5/windows.html).
+* Read about [Qt for Windows](https://doc.qt.io/qt-5/windows.html).
 * Add Qt and QtCreator directories to the Windows PATH environment variable through Control Panel:
   `[Control Panel | System And Security | System | Advanced Tab | Environment Variables button]`
+
+#### Final install step for both MacOS and Windows
 
 * Copy `Program Files\Xpdf\bin64\pdftops.exe` in Windows, or `bin32/pdftops.exe` in MacOS, to the Seamly build directory to enable creation of post script (.ps and .eps) pattern piece layouts.
 
 ---
 
-## Building Seamly
+## Build
 
-### Build with Qt's *QtCreator* IDE
+### with Qt's *QtCreator* IDE
 
-* Create your compiler kit with MSVC 2022 and gcc.  Read more about adding compilers [on the Qt website](https://doc.qt.io/qtcreator/creator-tool-chains.html).
+* Create your compiler kit.  Read more about adding compilers [on the Qt website](https://doc.qt.io/qtcreator/creator-tool-chains.html).
 * Complete your build settings.  Read more about [build settings](https://doc.qt.io/qtcreator/creator-build-settings.html).
-* Open the Seamly2D project with `File > Open File or Project`. * Navigate to the 'seamly2d/src' directory and select `Seamly.pro`.
+* Open the Seamly2D project with `File > Open File or Project`. * Navigate to the 'seamly2d/src' directory and select `Seamly2D.pro`.
 * Open the Configure Project tab and select your compiler kit. [Read more](https://doc.qt.io/qtcreator/creator-project-opening.html).
 * Build with the `Build and Run Kit Selector` icon, or use `Build` and `Run` from the Tools menu. [Read more](https://doc.qt.io/qtcreator/creator-building-targets.html).
 
-### Build with Qt's *qmake* from command line
+### with Qt's *qmake* from a terminal window
 
 * Read more about [jom](https://wiki.qt.io/Jom)
 * Read more about [nmake](https://learn.microsoft.com/en-us/cpp/build/reference/nmake-reference?view=msvc-170)
 
-#### On Windows
-
 ```bash
 cd $SOURCE_DIRECTORY\build
-qmake ..\Seamly.pro
+qmake ..\Seamly2D.pro
 nmake      # (or use jom and assign multiple CPUs to speed up compilation time but don't use all - leave at least one CPU for your OS.)
 ```
 
-#### On Linux
-
-```bash
-qmake
-make -j$(nproc)
-# Default prefix for make install is /usr. Use 'sudo make INSTALL_ROOT=/usr/local install' to change the prefix..
-# to /usr/local as the new prefix for Seamly's installation binary files.
-sudo make install
-```
-
-For distributions where `qmake` default is not Qt 6 (e.g. Arch Linux), the `qmake` binary still points to Qt 5. In this case, use `qmake6` instead. If you accidentally invoke the Qt 5 `qmake`, run `make distclean` to remove all generated files then re-run with `qmake6`.
-
-#### On MacOS
+### Additional build option for MacOSX
 
 * Enable signing and notarizing at qmake step
 
 ```bash
-qmake Seamly.pro CONFIG+=macSign
+qmake Seamly2D.pro CONFIG+=macSign
 ```
