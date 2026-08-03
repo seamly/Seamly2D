@@ -42,26 +42,24 @@
 # **  right icons. Those need human eyes.
 # **
 # **  @copyright
-# **  This source code is part of the Seamly project, a suite of apparel CAD
-# **  software.
+# **  This source code is part of the Seamly2D project, a pattern making
+# **  program, whose allow create and modeling patterns of clothing.
 # **  Copyright (C) 2026 Seamly2D Project
 # **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 # **
-# **  @license
-# **  Seamly2D/SeamlyMe is free software: you can redistribute it and/or modify
+# **  Seamly2D is free software: you can redistribute it and/or modify
 # **  it under the terms of the GNU General Public License as published by
 # **  the Free Software Foundation, either version 3 of the License, or
 # **  (at your option) any later version.
 # **
-# **  Seamly2D/SeamlyMe is distributed in the hope that it will be useful,
+# **  Seamly2D is distributed in the hope that it will be useful,
 # **  but WITHOUT ANY WARRANTY; without even the implied warranty of
 # **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # **  GNU General Public License for more details.
 # **
 # **  You should have received a copy of the GNU General Public License
-# **  along with Seamly2D/SeamlyMe.  If not, see <http://www.gnu.org/licenses/>.
+# **  along with Seamly2D.  If not, see <http://www.gnu.org/licenses/>.
 # **
-# **  SeamlyLayout is licensed under the MIT license.
 #******************************************************************************
 
 <#

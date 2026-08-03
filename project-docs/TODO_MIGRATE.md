@@ -4,38 +4,46 @@ Tasks for migrating the SeamlyLayout app into the Seamly2D structure — where S
 
 See `project-docs/PROJECT_PLAN.md` for full details. Check off subtasks as they are accomplished; when every subtask of a task is complete, move the task to `project-docs/TODO_COMPLETED.md`.
 
+If decisions are required for any portion of a task or subtask, present the user with radio buttons to select options including 'Other'.
+
 ## Task 14 — Windows installer: prompt for executable and user-data install paths
 
 Task 13 — Windows MSI installer (x64 and arm64)
 
 Build locally and in CI. The x64 MSI installs Seamly2D, SeamlyMe, and SeamlyLayout; the arm64 MSI installs supported apps until SeamlyLayout gains arm64 support. Use the new AppData\Local\Seamly\<app> paths.
 
-Prerequisite: Seamly2D must launch SeamlyLayout, and all tests must pass.
+Prerequisite: Seamly2D must launch SeamlyLayout and SeamlyMe, and all tests must pass.
 
- Configure WiX v6 and create one bundled MSI per architecture. WiX v7 requires an unevaluated OSMF EULA. See scripts/packaging/windows/seamly-family.wxs.
- Package Seamly2D and SeamlyMe with their shared Qt runtime. Package SeamlyLayout in its own subdirectory with Qt 6.10, QML modules, WebEngine, and app-local MSVC runtime. Rust is statically linked.
- Locate SeamlyLayout through SeamlyFamilyPaths::locateSeamlyLayout(), covered by TST_SeamlyFamilyPaths.
- Add Start Menu shortcuts, in-place upgrades, clean uninstall, and associations for .sm2d, .smis, and .smms. Preserve all user data.
- Use fixed upgrade code cbf4b5f1-c32c-4dbb-b385-3ee4a7b30658.
- Build Seamly2D-arm64.msi with Seamly2D and SeamlyMe. Exclude SeamlyLayout until its arm64 build is supported.
- Add local builds through scripts/smsi.ps1 and x64/arm64 CI builds through .github/workflows/windows-msi.yml.
- Build parent apps with Qt 6.11.1 and SeamlyLayout with Qt 6.10.1. Sign with jsign when SEAMLY_SIGNING_PROJECT_ID is available.
- Test clean installation, launch, shortcuts, associations, upgrade, and uninstall on x64 and, if available, arm64. Static x64 validation passed on 2026-07-22; clean-machine testing remains.
- Document building, signing, and verification in:
-scripts/packaging/windows/README.md
-.github/README-BUILDS.md
-.github/workflows/README_WORKFLOWS.md
+- Configure WiX v6 and create one bundled MSI per architecture. WiX v7 requires an unevaluated OSMF EULA. See `scripts/packaging/windows/seamly-family.wxs`.
+- Build Seamly-windows.msi with Seamly2D, SeamlyMe, and SeamlyLayout and their shared Qt runtime using Qt 6.11.1, QML modules,WebEngine, and app-local MSVC runtime. Rust is statically linked.
+- Add Start Menu shortcuts for Seamly2D, SeamlyLayout, and SeamlyMe, in-place upgrades, clean uninstall, and file associations for .sm2d, .smis, and .smms.
+- Preserve all user data.
+- Build Seamly2D-arm64.msi with Seamly2D, SeamlyMe, and SeamlLayout similarly to the Windows 64-bit build above but for amd64.
+- Sign with jsign when SEAMLY_SIGNING_PROJECT_ID is available.
+- Add local builds through scripts/smsi.ps1 and x64/arm64 CI builds through .github/workflows/windows-msi.yml.
+- Test clean installation, launch, shortcuts, associations, upgrade, and uninstall on x64 and, if available, arm64.
+- Static x64 validation passed on 2026-07-22; clean-machine testing remains.
+- Document building, signing, and verification in:
 
-In the updated Windows installation process (Task 13 installer), prompt the user for two locations instead of hard-coding the defaults:
+  - `scripts/packaging/windows/README.md`
+  - `.github/README-BUILDS.md`
+  - `.github/workflows/README_WORKFLOWS.md`
+- In the updated Windows installation process (Task 13 installer), prompt the user for two locations instead of hard-coding the defaults:
 
-1. **Executable install path** — where the Seamly executables go. Default `C:\Program Files (x86)\Seamly2D`; must support any drive/filepath (use case: install to `D:\Program Files (x86)\Seamly2D`) and add the chosen executable directory to the system `PATH` automatically.
-2. **User data path** — root of the Seamly user data file tree. Default `C:\Users\<user>\seamly2d`; must support any drive/filepath, including cloud-synced drives (use case: `G:\My Drive\seamly2d` so patterns/measurements are accessible while travelling), and register the chosen user data path automatically (add to the system `PATH` per the request; evaluate whether an env var / registry setting / app config is the more appropriate mechanism for a data directory and document the decision).
+  - **Executable install path** — where the Seamly executables go. Default `C:\Program Files\Seamly`; must support any drive/filepath but not cloud-synced drives (use case: `D:\Program Files\Seamly`if C: drive is too full) and add the chosen executable directory to the system `PATH` automatically.
+  - **User data path** — root of the Seamly user data file tree. Default is `C:\Users\<user>\Documents\Seamly`;
+    - must support any drive/filepath, including cloud-synced drives (use case: `G:\My Drive\seamly2d` so patterns/measurements are accessible while traveling);
+    - register the chosen user data path automatically (add to the system `PATH` per the request;
+    - evaluate whether an env var / registry setting / app config is the more appropriate mechanism for a data directory and document the decision then implement the decision.
 
-**Update (2026-07-23) — renamed defaults:** the family now installs under a **`Seamly`** umbrella, not `Seamly2D`. Supersede the names above: the **program install folder** default becomes `C:\Program Files\Seamly` (folder `Seamly`, was `Seamly2D`), and the **user-data root** default becomes `C:\Users\<user>\seamlyData` (folder `seamly`, was `seamly2d`), with the cloud use case now `G:\My Drive\seamlyData` (so no hand-moving of the data tree, as is required today). The data-root rename + migration is shared cross-platform app code — see **Task 34**; this Windows task layers the installer's program-folder rename and the data-root directory-picker prompt on top of it.
+**Update (2026-07-26) — moving an existing data tree:** Task 34 made the program root relocatable but so far **nothing moves the user's data files**.
 
-**Update (2026-07-26) — moving an existing data tree:** Task 34 made the root relocatable but **nothing moves files**. Adoption of a legacy `~/seamly2d` tree is in place (a settings pointer, `chooseFirstRunDataRoot()`), `ensureDataRootTree()` only ever `mkpath`s, and `rebaseOntoDataRoot()` rewrites the nine path *strings* — not the files they name. So repointing the root today creates nine empty subfolders at the new location and silently strands every existing file at the old one, which reads to the user as data loss. The "no hand-moving of the data tree" promise above therefore still needs the check-and-move step below. Note this is *not* a deletion hazard in shipped code — neither the MSI nor the apps ever remove a data tree (`seamly-family.wxs`: "USER DATA IS NEVER TOUCHED") — it is a silent-orphan hazard. The migration itself is shared cross-platform app code, used by **Tasks 35/36/37** as well, and satisfies **Task 38**'s "never overwrite an existing user-data directory" requirement; this Windows task drives it from the installer prompt.
+- Fix the current bad implementation strategy: Adoption of a legacy `~/seamly2d` tree is in place (a settings pointer, `chooseFirstRunDataRoot()`), `ensureDataRootTree()` only ever `mkpath`s, and `rebaseOntoDataRoot()` rewrites the nine path *strings* — not the files they name. So repointing the root today creates nine empty subfolders at the new location and silently strands every existing file at the old one, which reads to the user as data loss. The "no hand-moving of the data tree" promise above therefore still needs the check-and-move step below. Note this is *not* a deletion hazard in shipped code — neither the MSI nor the apps ever remove a data tree (`seamly-family.wxs`: "USER DATA IS NEVER TOUCHED") — it is a silent-orphan hazard. The migration itself is shared cross-platform app code, used by **Tasks 35/36/37** as well, and satisfies **Task 38**'s "never overwrite an existing user-data directory" requirement; this Windows task drives it from the installer prompt.
 
-**Update (2026-07-31) — the destination has changed; see Task 60.** The user has reworked where user data should live: a brand-level **`Seamly`** parent rather than any `seamlyData` variant, and — the more important half — **user documents separated from internal application state**, which the current design does not do. The **migration mechanics below are unaffected and still wanted**; what changes is the destination they migrate to. Do not implement the "user data path" prompt against `seamlyData` — settle Task 60's layout first. Note also that subtask 2 of this task's original text is obsolete in two ways: the program folder is now `C:\Program Files\SeamlyApps` (Task 51), and **nothing is added to the system `PATH`** — the claim that the NSIS installer did so was wrong, `dist/seamly2d-installer.nsi` contains no PATH handling at all.
+**Update (2026-07-31) — the destination has changed; see Task 60.** Use best practices' `C:\Program Files\Seamly` for the program and `C:\Users\<username>\Documents\Seamly` for the data.
+
+- Background: The user re-decided where user data should live: a brand-level **`Seamly`** parent rather than `seamlyData`variant, and — the more important half — **user documents are now separated from internal application state**, which the current design does not do. The **migration mechanics below are unaffected and still wanted**; what changes is the destination they migrate to.
+- Note: Subtask 2 of this task's original text is obsolete in two ways: the program folder is now`C:\Program Files\SeamlyApps`(Task 51), and **nothing is added to the system`PATH`** — the claim that the NSIS installer did so was wrong, `dist/seamly2d-installer.nsi` contains no PATH handling at all.
 
 Check off all completed tasks:
 
@@ -62,9 +70,9 @@ Check off all completed tasks:
 
 ## Task 16 — Unify settings directories: macOS build
 
-Apply the Task 15 consolidation to the macOS build, where the organization name maps to `~/Library/Application Support/<org>` and `~/Library/Preferences` plist domains instead of `AppData\Local`.
+Apply the Task 15 consolidation to the macOS build
 
-**Note (2026-07-20):** all three apps use `QSettings::IniFormat` with explicit `QStandardPaths::AppConfigLocation`-derived file paths — none use `QSettings::NativeFormat`/CFPreferences plists — so there is no plist-domain migration to do; "Preferences plists" in the task title above doesn't apply in practice. `QStandardPaths` resolves the org-name change generically per platform, so no macOS-specific code was needed for the directory move itself.
+- [  ] fix or remove treferences to plist domains.**:** all three apps use `QSettings::IniFormat` with explicit `QStandardPaths::AppConfigLocation`-derived file paths — none use `QSettings::NativeFormat`/CFPreferences plists — so there is no plist-domain migration to do; "Preferences plists" in the task title above doesn't apply in practice, `QStandardPaths` resolves the org-name change generically per platform, so no macOS-specific code was needed for the directory move itself.
 
 - [X] Confirm the org-name change from Task 15 lands the apps in `~/Library/Application Support/Seamly/<app>`; adjust any macOS-specific bundle identifiers / `Info.plist` values that feed the settings domain — confirmed generic (`QStandardPaths::AppConfigLocation` keys off `organizationName`/`applicationName`, not `CFBundleIdentifier`); seamly2d/seamlyme's existing `org.seamly2dproject.@EXECUTABLE@` identifiers are unrelated and left as-is; seamlyLayout had **no** bundle identifier at all (CMake default placeholder) — added `MACOSX_BUNDLE_GUI_IDENTIFIER "io.seamly.SeamlyLayout"` plus bundle version properties in `qt_frontend/CMakeLists.txt` for a well-formed, signable bundle
 - [X] Migrate existing user data from the legacy `Seamly2D` and `Seamly Systems` locations on first run — already implemented generically in Task 15 (`VAbstractApplication::MigrateSeamlySettingsLocation()`, seamlyLayout's `appConfigRootPath()`/`migrateLegacyOrganizationTree()`); all three resolve the legacy path by temporarily swapping `organizationName` and re-querying `QStandardPaths`, with no Windows-specific literals, so it applies to macOS unchanged (code-reviewed, not yet exercised on real macOS — see the unchecked verify item below)
@@ -75,9 +83,9 @@ Apply the Task 15 consolidation to the macOS build, where the organization name 
 
 ## Task 17 — Unify settings directories: Linux AppImage build
 
-Apply the Task 15 consolidation to the Linux AppImage build, where settings follow the XDG paths (`~/.config/<org>`, `~/.local/share/<org>`).
+Apply the Task 15 consolidation to the Linux AppImage build,
 
-**Note (2026-07-21):** as with Task 16, `QStandardPaths::AppConfigLocation` resolves the shared `"Seamly"` org folder generically per platform (`$XDG_CONFIG_HOME/<org>/<app>` on Linux), so the base directory move and the generic `MigrateSeamlySettingsLocation()`/`migrateLegacyOrganizationTree()` migration needed no Linux-specific code — same finding as macOS. The real Linux-specific work: a mounted AppImage is read-only, the same problem Task 16 found for a signed macOS `.app` bundle, but on Linux this can't be told apart from a normal install at compile time — added `Platform::isAppImage()` (checks the `APPIMAGE` env var the AppImage runtime sets) and used it at runtime in the same three `PreferencesModel` fallback functions and `Logger::init()` that Task 16 branched on `Q_OS_MACOS`.
+**Note (2026-07-21):** as with Task 16, `QStandardPaths::AppConfigLocation` resolves the shared `"Seamly"` org folder generically per platform (`$XDG_CONFIG_HOME/<org>/<app>` on Linux), so the base directory move and the generic `MigrateSeamlySettingsLocation()`/`migrateLegacyOrganizationTree()` migration needed no Linux-specific code — same finding as macOS. The real Linux-specific work: a mounted AppImage is read-only, the same problem Task 16 found for a signed macOS `.app` bundle, but on Linux this can't be identified apart from a normal install at compile time — added `Platform::isAppImage()` (checks the `APPIMAGE` env var the AppImage runtime sets) and used it at runtime in the same three `PreferencesModel` fallback functions and `Logger::init()` that Task 16 branched on `Q_OS_MACOS`.
 
 - [X] Confirm the org-name change lands the apps in `~/.config/Seamly/` and `~/.local/share/Seamly/`; check any AppImage-specific overrides (`APPDIR`-relative paths, `portable`-mode config) — confirmed generic (same `QStandardPaths::AppConfigLocation` mechanism as Windows/macOS); confirmed the AppImage runtime does not override `$HOME`/`$XDG_CONFIG_HOME`/`$XDG_DATA_HOME`, and no code in the tree reads `$APPDIR` or implements a "portable mode", so nothing interferes with the unified resolution
 - [X] Migrate existing user data from `~/.config/Seamly2D`, `~/.local/share/Seamly2D`, and the `Seamly Systems` equivalents on first run — already implemented generically in Task 15 (`VAbstractApplication::MigrateSeamlySettingsLocation()` for seamly2d/seamlyme, bridging from the real legacy org folder name `"Seamly2DTeam"`; seamlyLayout's `appConfigRootPath()`/`migrateLegacyOrganizationTree()` bridging from `"Seamly Systems"`); both reconstruct the legacy path via `QStandardPaths` with no platform-specific literals, so this applies to Linux XDG paths unchanged
@@ -275,7 +283,7 @@ Related: **Task 13** authored the shortcuts/associations/upgrade behaviour and i
 
 **Progress 2026-07-29.** The install cycle is now *executable* rather than a prose checklist. New `scripts/packaging/windows/test_msi_install.ps1` verifies a real install in four phases (`Baseline` / `Installed` / `Upgraded` / `Removed`) run around the `msiexec` commands, sharing a state file so the uninstall phase can prove that the user's data survived by comparing inventories rather than by assertion. It is standalone — no repository, build tree or Qt on the test machine — and it covers the one thing package inspection can never reach: **it starts each app and checks it stays running**, which is the only way a missing Qt DLL or QML module shows up. Self-tested on the developer PC: the `Baseline` phase passes and correctly reports the machine's NSIS install and its three user-data trees, and a deliberate negative run of `Installed` against a machine with nothing installed fails with exit 1, so the checks are known not to be vacuous. Two packages were built for the upgrade leg (project versions **2026.7.28.2355** and **2026.7.29.0041**, same `UpgradeCode`, different `ProductCode`) and staged with the checker and a sample pattern in `scripts/seamly-msi/task51-test-kit/` (gitignored) alongside a `RUN-ME-FIRST.md` walkthrough. **The user's decision (2026-07-29) is to run the cycle on the test Windows 11 laptop, not on the developer PC**, so the five subtasks below stay open until that transcript comes back.
 
-**Progress 2026-07-30 — the cycle was run on the test laptop, and it found three real defects.** The `Baseline`, install and `Installed` phases were run against `Seamly2D-x64-older.msi`, then the upgrade to `-newer.msi` with `/l*v` logging. **52 of 57 automated checks passed**, including the ones that matter most: all three apps start and stay running (so the deployed Qt/WebEngine runtime is complete), all three file associations resolve and a real `.sm2d` opens through ShellExecute, the desktop shortcuts and their registry breadcrumbs are correct, and the ARP entry carries the right name, publisher, version, comments, links, size and uninstall string. Exactly one UAC prompt. `SeamlyPreviousInstallDlg` displayed correctly (log: `Action start 18:20:16` → `Dialog created` → `Return value 1`), in the right position — before Welcome → EULA → Destination Folder → Ready.
+**Progress 2026-07-30 — the cycle was run on the test laptop, and it found three real defects.** The `Baseline`, install and `Installed` phases were run against `Seamly-x64-older.msi`, then the upgrade to `-newer.msi` with `/l*v` logging. **52 of 57 automated checks passed**, including the ones that matter most: all three apps start and stay running (so the deployed Qt/WebEngine runtime is complete), all three file associations resolve and a real `.sm2d` opens through ShellExecute, the desktop shortcuts and their registry breadcrumbs are correct, and the ARP entry carries the right name, publisher, version, comments, links, size and uninstall string. Exactly one UAC prompt. `SeamlyPreviousInstallDlg` displayed correctly (log: `Action start 18:20:16` → `Dialog created` → `Return value 1`), in the right position — before Welcome → EULA → Destination Folder → Ready.
 
 Three defects came out of it, none of which static verification could have found:
 
@@ -423,11 +431,11 @@ Supersedes the **default locations** in Task 14 and Task 34/53. It does not supe
 
 **The boundary that drives everything:** users see and manage `Documents/Seamly`; internal configuration, caches, logs and recovery stay in the operating system's application-data locations. Two trees, two different groupings — **application data by application, user documents by type**. (These are not competing taxonomies, as an earlier reading of the proposal assumed; they apply to different trees.)
 
-| Platform | Configuration                                                          | Cache                                  | User documents                      |
-| -------- | ---------------------------------------------------------------------- | -------------------------------------- | ----------------------------------- |
-| Windows  | `%APPDATA%\Seamly\<app>\`                                            | `%LOCALAPPDATA%\Seamly\<app>\Cache\` | `%USERPROFILE%\Documents\Seamly\` |
-| Linux    | `$XDG_CONFIG_HOME/Seamly/<app>/`                                       | `$XDG_CACHE_HOME/Seamly/<app>/`        | `$XDG_DOCUMENTS_DIR/Seamly/`        |
-| macOS    | `~/Library/Application Support/Seamly/<app>/`                        | `~/Library/Caches/Seamly/<app>/`     | `~/Documents/Seamly/`             |
+| Platform | Configuration                                                                                                | Cache                                  | User documents                      |
+| -------- | ------------------------------------------------------------------------------------------------------------ | -------------------------------------- | ----------------------------------- |
+| Windows  | `%APPDATA%\Seamly\<app>\`                                                                                  | `%LOCALAPPDATA%\Seamly\<app>\Cache\` | `%USERPROFILE%\Documents\Seamly\` |
+| Linux    | `$XDG_CONFIG_HOME/Seamly/<app>/`                                       | `$XDG_CACHE_HOME/Seamly/<app>/` | `$XDG_DOCUMENTS_DIR/Seamly/`         |                                     |
+| macOS    | `~/Library/Application Support/Seamly/<app>/`                                                              | `~/Library/Caches/Seamly/<app>/`     | `~/Documents/Seamly/`             |
 
 Also specified: logs and recovery under `%LOCALAPPDATA%\Seamly\<app>\{Logs,Recovery}\` on Windows, `~/.local/state/Seamly/<app>/{Logs,Recovery}/` on Linux, `~/Library/Logs/Seamly/<app>/` on macOS; a `Shared\` sibling for genuinely shared internal data; and the document tree as `Documents/Seamly/{Projects, Patterns, Measurements, Layouts, Templates, Exports}`.
 

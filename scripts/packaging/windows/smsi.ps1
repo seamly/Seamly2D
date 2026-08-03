@@ -7,35 +7,36 @@
 # **  "seamly msi" — stage the built Seamly app family (seamly2d, seamlyme,
 # **  SeamlyLayout) and build the Windows MSI installer from
 # **  scripts\packaging\windows\seamly-family.wxs with the WiX toolset
-# **  (Task 13).
 # **  Used both locally (against the release build trees) and by the
 # **  .github\workflows\windows-msi.yml CI workflow (against the in-source
 # **  CI build output), following the scripts\sd.ps1 precedent.
 # **
-# **  @copyright
-# **  This source code is part of the Seamly2D project, a pattern making
-# **  program, whose allow create and modeling patterns of clothing.
-# **  Copyright (C) 2026 Seamly2D Project
+# ** @copyright
+# **  This source code is part of the Seamly project, a suite of apparel CAD
+# **  software.
+# **  Copyright (C) 2026 Seamly Project
 # **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 # **
-# **  Seamly2D is free software: you can redistribute it and/or modify
+# **  @license
+# **  Seamly2D/SeamlyMe is free software: you can redistribute it and/or modify
 # **  it under the terms of the GNU General Public License as published by
 # **  the Free Software Foundation, either version 3 of the License, or
 # **  (at your option) any later version.
 # **
-# **  Seamly2D is distributed in the hope that it will be useful,
+# **  Seamly2D/SeamlyMe is distributed in the hope that it will be useful,
 # **  but WITHOUT ANY WARRANTY; without even the implied warranty of
 # **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # **  GNU General Public License for more details.
 # **
 # **  You should have received a copy of the GNU General Public License
-# **  along with Seamly2D.  If not, see <http://www.gnu.org/licenses/>.
+# **  along with Seamly2D/SeamlyMe.  If not, see <http://www.gnu.org/licenses/>.
 # **
+# ** SeamlyLayout is licensed under the MIT license.
 #******************************************************************************
 
 <#
 .SYNOPSIS
-    Build the Windows MSI installer for the Seamly app family (Task 13).
+    Build the Windows MSI installer for the Seamly app family.
 
 .DESCRIPTION
     Stages the already-built apps into <repo>\scripts\seamly-msi\<arch>\
@@ -46,27 +47,19 @@
 
     Staging layout (mirrors what the MSI installs):
       parent\  the ONE Qt runtime every app in the package shares: seamly2d +
-               seamlyme windeployqt trees merged with SeamlyLayout's
-               windeployqt6 output (Qt DLLs, plugins, QML modules,
-               QtWebEngineProcess.exe, xerces-c, ...) plus SeamlyLayout's
-               packaged settings\ and licenses\ and the MSVC CRT DLLs,
-               minus the exes
-      exes\    seamly2d.exe, seamlyme.exe, SeamlyLayout.exe (authored
+               seamlyme + seamlylayout's windeployqt output (Qt DLLs, plugins, QML modules,
+               QtWebEngineProcess.exe, xerces-c, ...)
+      exes\    seamly2d.exe, seamlyme.exe, seamlylayout.exe (authored
                explicitly in the .wxs so shortcuts/associations can reference
                them; kept out of the wildcard-harvested tree above)
 
-    Task 30 merged what used to be a separate layout\ staging tree (installed
-    into a ...\Seamly2D\SeamlyLayout\ subdirectory with its own private Qt
-    copy) into parent\. That split existed only because SeamlyLayout was built
-    against a different Qt release than the parent apps and Qt's DLL file names
-    are identical across releases; all three now build against Qt 6.11.1, so
-    one runtime serves them all and the MSI is correspondingly smaller.
+    All three apps build against Qt 6.11.1, so one Qt runtime serves them all.
 
     PREREQUISITES (the script fails early naming whatever is missing):
       * release builds of seamly2d/seamlyme with windeployqt output in their
         bin directories (local: qmake release shadow-build in build\;
         CI: in-source src\app\<app>\bin)
-      * a release build of SeamlyLayout (src\app\seamlylayout\qt_frontend\
+      * a release build of seamlylayout (src\app\seamlylayout\qt_frontend\
         build\Release), unless -NoSeamlyLayout
       * the WiX .NET tool:      dotnet tool install --global wix
         and its UI extension:   wix extension add --global WixToolset.UI.wixext
@@ -98,17 +91,15 @@
     Default: <repo>\src\app\seamlylayout\qt_frontend\build\Release.
 
 .PARAMETER NoSeamlyLayout
-    Build a two-app MSI without SeamlyLayout. Used for the arm64 package until
-    SeamlyLayout has an arm64 build (see .github\README-BUILDS.md).
+    Build a two-app MSI without SeamlyLayout. Used during testing.
 
 .PARAMETER WinDeployQt6
     Full path of windeployqt6.exe from SeamlyLayout's Qt kit. Default: the kit
     SeamlyLayout was actually built against, read from CMAKE_PREFIX_PATH in its
     build directory's CMakeCache.txt, falling back to the newest
     C:\Qt\<version>\msvc2022_64 kit. (CI passes the installed Qt explicitly.)
-    Deliberately NOT pinned to a hard-coded Qt version — Task 31: the old
-    ^6\.10\.\d+$ pin made the documented default invocation fail outright once
-    the 6.10 kit was uninstalled.
+    Deliberately NOT pinned to a hard-coded Qt version —
+    But seamly2d, seamlyme, and seamlylayout should be built from the same Qt 6.11.1 kit.
 
 .PARAMETER SkipValidation
     Skip the `wix msi validate` (ICE) pass after the build.
@@ -153,7 +144,7 @@ param(
     # parameter, and used in exactly one place below, so the name lives here
     # rather than being repeated: renaming this directory on disk used to mean
     # hunting literals through the script, the docs and the CI workflow. The
-    # workflow publishes scripts/<this>/<arch>/Seamly2D-<arch>.msi, so a change
+    # workflow publishes scripts/<this>/<arch>/Seamly-<arch>.msi, so a change
     # here has to be mirrored in .github/workflows/windows-msi.yml.
     [string]$OutputDirName = 'seamly-msi'
 )
@@ -404,7 +395,7 @@ Write-Host "msvc crt    : $crtDir"
 # to $repoRoot.
 #
 # 'parent' is now the ONE shared runtime tree for every app in the package
-# (Task 30); the separate 'layout' tree it used to sit beside is gone.
+# the separate 'layout' tree it used to sit beside is gone.
 $stageRoot = Join-Path $repoRoot (Join-Path 'scripts' (Join-Path $OutputDirName $Arch))
 if (Test-Path $stageRoot) {
     Remove-Item $stageRoot -Recurse -Force
@@ -428,17 +419,17 @@ Move-Item -Path (Join-Path $parentDir 'seamlyme.exe') -Destination $exesDir
 if ($includeLayout) {
     Write-Host "staging SeamlyLayout runtime (windeployqt6) into the shared tree..."
 
-    # Task 30: deploy SeamlyLayout's Qt runtime into the SAME tree as the parent
+    # deploy SeamlyLayout's Qt runtime into the SAME tree as the parent
     # apps'. All three are built against Qt 6.11.1, so wherever the two
     # windeployqt runs produce the same DLL it is the same file — what
     # SeamlyLayout adds on top is the QML module tree, Qt Quick/WebEngine DLLs
     # and QtWebEngineProcess.exe. Deploying against a staged copy of the exe
     # keeps the build tree pristine; --qmldir points windeployqt6 at the QML
     # sources so it can resolve the app's QML module imports.
-    Copy-Item -Path (Join-Path $SeamlyLayoutBuildDir 'SeamlyLayout.exe') -Destination $parentDir
+    Copy-Item -Path (Join-Path $SeamlyLayoutBuildDir 'seamlylayout.exe') -Destination $parentDir
     $qmlDir = Join-Path $repoRoot 'src\app\seamlylayout\qt_frontend\qml'
     Invoke-Tool -Description 'windeployqt6' -Exe $WinDeployQt6 -Arguments @(
-        '--qmldir', $qmlDir, '--release', (Join-Path $parentDir 'SeamlyLayout.exe'))
+        '--qmldir', $qmlDir, '--release', (Join-Path $parentDir 'seamlylayout.exe'))
 
     # Packaged default settings (read-only legacy-migration source / first-run
     # seed), read by SeamlyLayout from <exeDir>\settings\. preferences.json is
@@ -460,7 +451,7 @@ if ($includeLayout) {
         Copy-Item -Path (Join-Path $licensesSrc '*.txt') -Destination $licensesDst
     }
 
-    Move-Item -Path (Join-Path $parentDir 'SeamlyLayout.exe') -Destination $exesDir
+    Move-Item -Path (Join-Path $parentDir 'seamlylayout.exe') -Destination $exesDir
 }
 
 # MSVC CRT app-local deployment: the directory holding the exes gets the runtime
@@ -471,7 +462,7 @@ Copy-Item -Path (Join-Path $crtDir '*.dll') -Destination $parentDir -Force
 
 # --- Build the MSI -------------------------------------------------------------
 $wxs = Join-Path $PSScriptRoot 'seamly-family.wxs'
-$msi = Join-Path $stageRoot "Seamly2D-$Arch.msi"
+$msi = Join-Path $stageRoot "seamly-$Arch.msi"
 
 $wixArguments = @(
     'build', $wxs,

@@ -1,4 +1,4 @@
-msiexec /i Seamly2D-x64-newer.msi /l*v "$env:USERPROFILE\Desktop\task51-upgrade.log"
+msiexec /i Seamly-x64-newer.msi /l*v "$env:USERPROFILE\Desktop\task51-upgrade.log"
 
 An existing installation was found.
 Welcome to the Seamly2D Setup Wizard.
@@ -18,7 +18,7 @@ PS D:\Seamly-msi-test-installer\task51-test-kit> Get-ItemProperty "HKLM:\SOFTWAR
 >>     Select-Object Install_Dir
 >> Test-Path "C:\Program Files (x86)\Seamly2D"
 False
-PS D:\Seamly-msi-test-installer\task51-test-kit> msiexec /i Seamly2D-x64-newer.msi /l*v "$env:USERPROFILE\Desktop\task51-upgrade.log"
+PS D:\Seamly-msi-test-installer\task51-test-kit> msiexec /i Seamly-x64-newer.msi /l*v "$env:USERPROFILE\Desktop\task51-upgrade.log"
 PS D:\Seamly-msi-test-installer\task51-test-kit> Select-String -Path "$env:USERPROFILE\Desktop\task51-upgrade.log" `
 >>     -Pattern "SeamlyShortcutsDlg|SeamlyPreviousInstallDlg|SEAMLYDESKTOPSHORTCUTS|Error 2\d{3}" |
 >>     Select-Object -ExpandProperty Line -First 40

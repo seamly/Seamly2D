@@ -14,7 +14,7 @@ before it can be built.
 Program files and user data are handled by different actors, at different
 times, with different privileges. Conflating them is what makes this confusing.
 
-| | Installer (`Seamly2D-x64.msi`) | Application (`seamly2d.exe` / `seamlyme.exe`) |
+| | Installer (`Seamly-x64.msi`) | Application (`seamly2d.exe` / `seamlyme.exe`) |
 |---|---|---|
 | Runs | once, at install time | every launch, per user |
 | As | **LocalSystem** (per-machine install) | the logged-in user |

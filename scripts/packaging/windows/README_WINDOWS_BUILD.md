@@ -9,7 +9,7 @@ for the durable build knowledge base see
 
 The MSI bundles all three apps — **seamly2d**, **seamlyme**, and
 **SeamlyLayout** — into one per-architecture installer
-(`Seamly2D-x64.msi` / `Seamly2D-arm64.msi`).
+(`Seamly-x64.msi` / `Seamly2D-arm64.msi`).
 
 ---
 
@@ -49,7 +49,7 @@ Result of the original run (two Qt runtimes; the Task 30 single-runtime MSI is
 substantially smaller):
 
 ```
-MSI OK: …\scripts\seamly-msi\x64\Seamly2D-x64.msi (186.8 MB)
+MSI OK: …\scripts\seamly-msi\x64\Seamly-x64.msi (186.8 MB)
 ```
 
 Verified with the Windows Installer COM API:
@@ -72,7 +72,7 @@ expected **ICE61** warning — a benign consequence of `AllowSameVersionUpgrades
    - `layout\` — `SeamlyLayout.exe` with its own Qt runtime deployed by `windeployqt6 --qmldir …\qml --release`, packaged default `settings\`, LGPL `licenses\`, + MSVC CRT DLLs, exe removed
    - `exes\` — the three executables (authored explicitly in the `.wxs` so shortcuts/associations can reference them)
 2. Derives the MSI `ProductVersion` from `YYYY.M.D.HHMM` as `(YYYY−2000).M.((D−1)·1440 + HH·60 + MM)` (MSI caps the major field at 255), stores the full project version as `DisplayVersion`.
-3. Runs `wix build seamly-family.wxs -arch x64 -ext WixToolset.UI.wixext …` → `Seamly2D-x64.msi`.
+3. Runs `wix build seamly-family.wxs -arch x64 -ext WixToolset.UI.wixext …` → `Seamly-x64.msi`.
 4. Runs `wix msi validate` (skip with `-SkipValidation`), suppressing ICE43 and ICE57 — both are false positives raised by the optional desktop-shortcut components; see [`README.md`](README.md).
 5. Runs [`test_msi_authoring.ps1`](test_msi_authoring.ps1) against the built MSI (Task 51): ~50 assertions covering elevation, the ARP properties, upgrade and NSIS detection, the two install-time dialogs, the shortcuts, the file associations and the install-info registry rows. This one is **not** covered by `-SkipValidation` — it is cheap and it guards a silent failure mode, an MSI that installs perfectly and does the wrong thing.
 
@@ -121,11 +121,11 @@ Worth knowing: `src\app\seamlylayout\build.ps1`'s guard probes for the `Qt6WebEn
 
 ```powershell
 cd scripts\seamly-msi\x64
-msiexec /i Seamly2D-x64.msi                       # interactive (license + directory page)
-msiexec /i Seamly2D-x64.msi /qn                   # silent, defaults (needs elevation)
-msiexec /i Seamly2D-x64.msi /qn INSTALLFOLDER=D:\Seamly2D   # silent, custom dir
-msiexec /x Seamly2D-x64.msi /qn                   # silent uninstall
-msiexec /a Seamly2D-x64.msi /qn TARGETDIR=C:\extract        # extract without installing
+msiexec /i Seamly-x64.msi                       # interactive (license + directory page)
+msiexec /i Seamly-x64.msi /qn                   # silent, defaults (needs elevation)
+msiexec /i Seamly-x64.msi /qn INSTALLFOLDER=D:\Seamly2D   # silent, custom dir
+msiexec /x Seamly-x64.msi /qn                   # silent uninstall
+msiexec /a Seamly-x64.msi /qn TARGETDIR=C:\extract        # extract without installing
 ```
 
 What the user sees when installing interactively (Task 51): welcome → license → install folder → **Shortcuts** (one checkbox for desktop shortcuts, default on) → ready → install. An extra page appears **before** the welcome page when a previous installation is found — an older MSI of this product or the old NSIS installation — warning that the program files will be replaced and stating that patterns, measurements and settings under `seamlyData`, `AppData\Local\Seamly` and `AppData\Roaming\Seamly` are not touched. Silent installs skip both pages; pass `SEAMLYDESKTOPSHORTCUTS=0` to suppress the desktop shortcuts there.

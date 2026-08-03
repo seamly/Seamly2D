@@ -25,9 +25,9 @@
 - written in Cpp (code) & Qt 6.11/QtWidgets (GUI)
 - built with qmake/make/make install
 - Seamly2D Header for new files and edited files:
--- **Author:** slspencer
--- **Copyright:** 2026 Seamly2D Project
--- **License:** GPL-3.0-or-later
+  -- **Author:** slspencer
+  -- **Copyright:** 2026 Seamly2D Project
+  -- **License:** GPL-3.0-or-later
 
 2.SeamlyLayout
 
@@ -36,9 +36,9 @@
 - built with `src/app/seamlylayout/qd.ps1` which will be incorporated into a single CI/CD build script that builds Seamly2d/SeamlyMe/SeamlyLayout that will run in a single Qt runtime
 - has its own CLAUDE.md and rules.md that should be merged into the project claude.md and rules.md files.
 - SeamlyLayout file header for new files and edited files:
--- **Author:** slspencer
--- **Copyright:** 2026 Seamly2D Project
--- **License:** MIT
+  -- **Author:** slspencer
+  -- **Copyright:** 2026 Seamly2D Project
+  -- **License:** MIT
 
 3.SeamlyMe
 
@@ -46,9 +46,9 @@
 - written in Cpp (code) & Qt 6.11/QtWidgets (GUI)
 - built with qmake/make/make install
 - SeamlyMe file header for new files and edited files:
--- **Author:** slspencer
--- **Copyright:** 2026 Seamly2D Project
--- **License:** GPL-3.0-or-later
+  -- **Author:** slspencer
+  -- **Copyright:** 2026 Seamly2D Project
+  -- **License:** GPL-3.0-or-later
 
 ## Build Notes
 
@@ -56,18 +56,18 @@ All three apps — seamly2d, seamlyMe and seamlyLayout — build against **Qt re
 
 - **CI toolchain (GitHub runner):** -- Qt 6.11.1 + MSVC 2022 — `QT_VERSION` in `ci.yml`, `seamlylayout-ci.yml` and `windows-msi.yml` must all name this one release
 - **Local toolchain (developer Windows 11 PC, check builds of current work):** -- Qt 6.11.1 `msvc2022_64` + VS 18 Community MSVC (`vcvars64.bat`)
--- seamly2d -- qmake + jom
--- seamlyLayout -- CMake + Ninja + Cargo
--- seamlyMe -- qmake + jom
+  -- seamly2d -- qmake + jom
+  -- seamlyLayout -- CMake + Ninja + Cargo
+  -- seamlyMe -- qmake + jom
 - release shadow-build in `build/` (gitignored)
 - local debug build in `scripts/sd.ps1` ("seamly2d debug")
--- auto-detects the newest Qt msvc2022_64 kit (6.11.1 or newer) under `C:\Qt` and the VS 18 Community MSVC environment
--- shadow-builds `CONFIG+=debug` into `scripts/seamly2d-debug/` (gitignored)
--- the debug exe lands at `scripts/seamly2d-debug/src/app/seamly2d/bin/seamly2d.exe` with Qt debug DLLs deployed by windeployqt
--- `-Run` launches it after the build; see the script's `.SYNOPSIS` for details.
+  -- auto-detects the newest Qt msvc2022_64 kit (6.11.1 or newer) under `C:\Qt` and the VS 18 Community MSVC environment
+  -- shadow-builds `CONFIG+=debug` into `scripts/seamly2d-debug/` (gitignored)
+  -- the debug exe lands at `scripts/seamly2d-debug/src/app/seamly2d/bin/seamly2d.exe` with Qt debug DLLs deployed by windeployqt
+  -- `-Run` launches it after the build; see the script's `.SYNOPSIS` for details.
 - **Local Qt kit must include**:
--- `qtwebengine`, `qtwebchannel`, & `qtpositioning`
--- `WebEngineView`, `QtWebEngineQuick`, `Qt6WebEngineCore` for seamlyLayout's `SvgCanvas.qml`.Qt6WebEngineCore's CMake config requires the other two, so a kit without them fails `find_package(Qt6 ... WebEngineQuick)` at configure time. The Qt online installer does not pull them in automatically when you tick Qt WebEngine.
+  -- `qtwebengine`, `qtwebchannel`, & `qtpositioning`
+  -- `WebEngineView`, `QtWebEngineQuick`, `Qt6WebEngineCore` for seamlyLayout's `SvgCanvas.qml`.Qt6WebEngineCore's CMake config requires the other two, so a kit without them fails `find_package(Qt6 ... WebEngineQuick)` at configure time. The Qt online installer does not pull them in automatically when you tick Qt WebEngine.
 
 ## Coding Rules
 
@@ -95,9 +95,9 @@ All three apps — seamly2d, seamlyMe and seamlyLayout — build against **Qt re
 
 - `project-docs/PROJECT_PLAN.md` — the current approved implementation plan
 - Task lists are split by area — pick the file matching the task:
--- `project-docs/TODO_MIGRATE.md` — migrating the SeamlyLayout app into the Seamly2D structure (SeamlyMe and SeamlyLayout callable from within Seamly2D; all three apps distributed together for installation; all three apps run in the same Qt runtime)
--- `project-docs/TODO_SEAMLY2D.md` — tasks that add features to the Seamly2D app
--- `project-docs/TODO_SEAMLYLAYOUT.md` — tasks that add features to the SeamlyLayout app
+  -- `project-docs/TODO_MIGRATE.md` — migrating the SeamlyLayout app into the Seamly2D structure (SeamlyMe and SeamlyLayout callable from within Seamly2D; all three apps distributed together for installation; all three apps run in the same Qt runtime)
+  -- `project-docs/TODO_SEAMLY2D.md` — tasks that add features to the Seamly2D app
+  -- `project-docs/TODO_SEAMLYLAYOUT.md` — tasks that add features to the SeamlyLayout app
 - Each `TODO_*.md` file holds tasks with numbered checkbox subtasks; check off subtasks as they are accomplished
 - `project-docs/TODO_COMPLETED.md` — when all subtasks of a task are complete, move the task here from its `TODO_*.md` file
 - **Pre-task branch setup:** before implementing a task from any `TODO_*.md` file, always:

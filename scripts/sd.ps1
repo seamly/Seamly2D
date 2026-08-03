@@ -12,24 +12,26 @@
 # **  release build\ tree).
 # **
 # **  @copyright
-# **  This source code is part of the Seamly2D project, a pattern making
-# **  program, whose allow create and modeling patterns of clothing.
-# **  Copyright (C) 2026 Seamly2D Project
+# **  This source code is part of the Seamly project, a suite of apparel CAD
+# **  software.
+# **  Copyright (C) 2026 Seamly Project
 # **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 # **
-# **  Seamly2D is free software: you can redistribute it and/or modify
+ # ** @license
+# **  Seamly2D/SeamlyLayout/SeamlyMe is free software: you can redistribute it and/or modify
 # **  it under the terms of the GNU General Public License as published by
 # **  the Free Software Foundation, either version 3 of the License, or
 # **  (at your option) any later version.
 # **
-# **  Seamly2D is distributed in the hope that it will be useful,
+# **  Seamly2D/SeamlyLayout/SeamlyMe is distributed in the hope that it will be useful,
 # **  but WITHOUT ANY WARRANTY; without even the implied warranty of
 # **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # **  GNU General Public License for more details.
 # **
 # **  You should have received a copy of the GNU General Public License
-# **  along with Seamly2D.  If not, see <http://www.gnu.org/licenses/>.
+# **  along with Seamly2D/SeamlyLayout/SeamlyMe.  If not, see <http://www.gnu.org/licenses/>.
 # **
+# **  SeamlyLayout is distributed under the MIT license.
 #******************************************************************************
 
 <#

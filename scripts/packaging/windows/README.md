@@ -12,12 +12,12 @@ WiX authoring and build instructions for the Windows `.msi` installer that ships
 | `test_msi_authoring.ps1` | Asserts the built MSI still contains the expected shortcuts, associations, registry rows, elevation, upgrade detection and dialogs; run by `smsi.ps1` on every build |
 | `test_msi_install.ps1` | Asserts what an **installed** MSI actually did to a real machine, in four phases around the `msiexec` commands; standalone, copied to the test machine beside the `.msi` |
 | `INSTALL_DECISION_FLOW.md` | What the installer decides and what the *application* decides, as flowcharts, across all four pre-existing-installation cases (clean / old NSIS / previous MSI / both). Read this before changing upgrade or previous-install behaviour |
-| `../../../.github/workflows/windows-msi.yml` | CI workflow producing `Seamly2D-x64.msi` / `Seamly2D-arm64.msi` artifacts |
+| `../../../.github/workflows/windows-msi.yml` | CI workflow producing `Seamly-x64.msi` / `Seamly2D-arm64.msi` artifacts |
 
 ## Key decisions
 
 - **Tooling — WiX v6** (`dotnet tool install --global wix --version '6.*'`), the modern `wix` CLI. Its wildcard `Files` harvesting ingests the whole windeployqt output trees without maintaining per-file authoring. Pinned to v6 because WiX v7 refuses to run until its Open Source Maintenance Fee (OSMF) EULA is accepted (error WIX7015) — adopting that is a project policy decision, not a packaging one. The UI extension version must match the core tool: `wix extension add --global WixToolset.UI.wixext/<version>`.
-- **One bundled MSI per architecture** (not per-app MSIs): the apps are a family — seamly2d launches the other two and they share files/settings — so they install and upgrade as one unit. Output: `Seamly2D-x64.msi`, `Seamly2D-arm64.msi`.
+- **One bundled MSI per architecture** (not per-app MSIs): the apps are a family — seamly2d launches the other two and they share files/settings — so they install and upgrade as one unit. Output: `Seamly-x64.msi`, `Seamly2D-arm64.msi`.
 - **Install layout — one flat directory, one Qt runtime** (Task 30): `[ProgramFiles64Folder]\SeamlyApps\` holds all three executables and the single Qt 6.11.1 runtime they share (the parents' windeployqt output merged with SeamlyLayout's `windeployqt6` output — QML modules, Qt Quick/WebEngine DLLs, `QtWebEngineProcess.exe` — plus SeamlyLayout's packaged `settings\` and `licenses\`). seamly2d finds the executable via `SeamlyFamilyPaths::locateSeamlyLayout()` (`src/libs/vmisc/seamly_family_paths.cpp`), which checks flat-beside-seamly2d first.
   - Before Task 30, SeamlyLayout was built against Qt 6.10 while the parents were on 6.11. Qt DLL file names are identical across releases, so the runtimes could not share a directory and SeamlyLayout was installed into a `...\Seamly2D\SeamlyLayout\` subdirectory with its **own** full Qt copy (the reason the MSI weighed ~187 MB). `locateSeamlyLayout()` keeps that subdirectory as a fallback so an in-place upgrade over such an install still resolves.
 - **MSVC CRT is deployed app-locally** (the redist DLLs are copied beside the exes by `smsi.ps1`) instead of merge modules or chaining `vc_redist.exe`: an MSI cannot cleanly run a nested installer, merge modules are deprecated by Microsoft, and app-local deployment is supported and arch-symmetric. With one shared install directory this is a single copy for all three apps. Note the NSIS installer's `vc_redist` step never actually shipped the redist in CI (`File /nonfatal` with no file present), so this is strictly an improvement.
@@ -38,7 +38,7 @@ The wizard is WixUI's `WixUI_InstallDir` — welcome, license, install folder, r
 
 Decisions behind those two pages:
 
-- **Desktop shortcuts are one checkbox covering seamly2d and seamlyme, not one per app, and SeamlyLayout gets none.** SeamlyLayout is a document-driven daughter app that seamly2d launches with a `.pieces.svg` argument; a bare desktop launch would only ever show an empty canvas. Per-app checkboxes would be three decisions for a choice users make once. Unattended installs can override: `msiexec /i Seamly2D-x64.msi /qn SEAMLYDESKTOPSHORTCUTS=0`.
+- **Desktop shortcuts are one checkbox covering seamly2d and seamlyme, not one per app, and SeamlyLayout gets none.** SeamlyLayout is a document-driven daughter app that seamly2d launches with a `.pieces.svg` argument; a bare desktop launch would only ever show an empty canvas. Per-app checkboxes would be three decisions for a choice users make once. Unattended installs can override: `msiexec /i Seamly-x64.msi /qn SEAMLYDESKTOPSHORTCUTS=0`.
 - **There is no "pin to taskbar" checkbox, and there should not be one.** Windows 10 removed programmatic taskbar pinning: the `taskbarpin` verb is blocked for third-party callers, there is no MSI or WiX element for it, and the only supported mechanisms are OEM/enterprise provisioning (a Start/taskbar layout-modification XML applied by Group Policy or during imaging) which cannot be driven from a per-machine MSI a user double-clicks. A checkbox here would silently do nothing, so the choice is simply not offered.
 - **The old NSIS installation is detected and explained, never removed automatically.** `dist\seamly2d-installer.nsi` is a *different product*: its own ARP entry, its own `uninstall.exe`, installed by default in `C:\Program Files (x86)\Seamly2D`, and the MSI's `UpgradeCode` says nothing about it. Running its uninstaller from a custom action was rejected — it is an interactive EXE, its uninstall section is `RMDir /r $INSTDIR` (which would delete anything a user had put in that folder), and Windows Installer cannot roll back an external uninstaller if the rest of the install then fails. So the dialog names the path it found and tells the user to remove it from Apps & features afterwards; leaving it installed is harmless because the two products install to different directories. Note both entries are called "Seamly2D" in ARP — the NSIS one shows no version, the MSI one shows `26.y.z`.
 - **The NSIS search reads the 32-bit registry view** (`RegistrySearch Bitness="always32"`). The NSIS installer is a 32-bit executable and never switches views, so both `SOFTWARE\NSIS_Seamly2D` and its `Uninstall\Seamly2D` key land under `WOW6432Node`; an x64 MSI searching the default view would never find them.
@@ -68,7 +68,7 @@ Output: `scripts\seamly-msi\<arch>\Seamly2D-<arch>.msi` (gitignored). Only the `
 2. `test_msi_authoring.ps1`, which opens the built MSI and asserts ~50 expectations about what it contains — elevation, ARP properties, the upgrade and NSIS detection, both install-time dialogs and the wording of the warning, the Start Menu and desktop shortcuts, the three file associations, and the install-info registry rows. Run it by hand against any MSI:
 
    ```powershell
-   .\scripts\packaging\windows\test_msi_authoring.ps1 -Msi scripts\seamly-msi\x64\Seamly2D-x64.msi -ExpectSeamlyLayout
+   .\scripts\packaging\windows\test_msi_authoring.ps1 -Msi scripts\seamly-msi\x64\Seamly-x64.msi -ExpectSeamlyLayout
    ```
 
    It checks *content*, not behaviour: it cannot tell you whether a shortcut launches or Explorer shows the right icon. That is the manual checklist below.
@@ -76,11 +76,11 @@ Output: `scripts\seamly-msi\<arch>\Seamly2D-<arch>.msi` (gitignored). Only the `
 ## Installing / testing
 
 ```powershell
-msiexec /i Seamly2D-x64.msi              # interactive (license + directory page)
-msiexec /i Seamly2D-x64.msi /qn          # silent, defaults (needs elevation)
-msiexec /i Seamly2D-x64.msi /qn INSTALLFOLDER=D:\Seamly2D   # silent, custom dir
-msiexec /x Seamly2D-x64.msi /qn          # silent uninstall
-msiexec /a Seamly2D-x64.msi /qn TARGETDIR=C:\extract        # extract without installing
+msiexec /i Seamly-x64.msi              # interactive (license + directory page)
+msiexec /i Seamly-x64.msi /qn          # silent, defaults (needs elevation)
+msiexec /i Seamly-x64.msi /qn INSTALLFOLDER=D:\Seamly2D   # silent, custom dir
+msiexec /x Seamly-x64.msi /qn          # silent uninstall
+msiexec /a Seamly-x64.msi /qn TARGETDIR=C:\extract        # extract without installing
 ```
 
 ### The scripted cycle
@@ -89,11 +89,11 @@ msiexec /a Seamly2D-x64.msi /qn TARGETDIR=C:\extract        # extract without in
 
 ```powershell
 .\test_msi_install.ps1 -Phase Baseline                     # BEFORE installing
-msiexec /i Seamly2D-x64-older.msi
+msiexec /i Seamly-x64-older.msi
 .\test_msi_install.ps1 -Phase Installed -ExpectSeamlyLayout -PatternFile .\sample.sm2d
-msiexec /i Seamly2D-x64-newer.msi                          # upgrade over the top
+msiexec /i Seamly-x64-newer.msi                          # upgrade over the top
 .\test_msi_install.ps1 -Phase Upgraded  -ExpectSeamlyLayout -PatternFile .\sample.sm2d
-msiexec /x Seamly2D-x64-newer.msi
+msiexec /x Seamly-x64-newer.msi
 .\test_msi_install.ps1 -Phase Removed
 ```
 

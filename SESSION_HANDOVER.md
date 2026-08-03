@@ -61,15 +61,15 @@ real `.sm2d` opening through ShellExecute.
 Filed as tasks rather than Task 51 subtasks because they span three areas (the
 checker, the package authoring, the applications).
 
-| Task | Problem |
-| --- | --- |
-| 61 | checker: `INSTALLSTATE` constants; inventory snapshotted before the migration; sample pattern needs a `.smis` the kit lacks |
-| 62 | ARP `DisplayIcon` (and possibly `Publisher`) never written to the registry |
-| 63 | wizard says "Seamly2D" while installing three apps |
-| 64 | previous-install dialog too long, and names the dead `seamlyData` path; absorbs the 2826 geometry fix |
-| 65 | destination-folder wording, and whether `INSTALLFOLDER` becomes `Seamly` |
-| 66 | one ARP entry for three apps |
-| 67 | first-run modal dialogs swallow a pattern opened by double-click |
+| Task | Problem                                                                                                                        |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------ |
+| 61   | checker:`INSTALLSTATE` constants; inventory snapshotted before the migration; sample pattern needs a `.smis` the kit lacks |
+| 62   | ARP`DisplayIcon` (and possibly `Publisher`) never written to the registry                                                  |
+| 63   | wizard says "Seamly2D" while installing three apps                                                                             |
+| 64   | previous-install dialog too long, and names the dead`seamlyData` path; absorbs the 2826 geometry fix                         |
+| 65   | destination-folder wording, and whether`INSTALLFOLDER` becomes `Seamly`                                                    |
+| 66   | one ARP entry for three apps                                                                                                   |
+| 67   | first-run modal dialogs swallow a pattern opened by double-click                                                               |
 
 **Task 61 must land before the uninstall leg**, or the same four false failures
 reappear in the next transcript.
@@ -104,7 +104,7 @@ SeamlyLayout shows none.
   `InstallDirDlg` Next publishes `CheckTargetPath` (a v6 built-in in the UI
   extension's `uica.dll`) and the `SpawnDialog` is skipped in that chain.
   `SEAMLYDESKTOPSHORTCUTS` defaults to 1, so shortcuts are created and every
-  automated check passes: the default works, the *choice* is never offered.
+  automated check passes: the default works, the *choice* is never offered. Creat
   **Do not chase this by rebuilding the 165 MB package per attempt** — build a
   small UI-only MSI with the same `ui:WixUI` reference and dialogs; it compiles
   in seconds and can be clicked through and cancelled at Ready.
@@ -119,7 +119,8 @@ verified end to end. Renaming invalidates both staged MSIs, every path assertion
 in both test scripts, `INSTALL_DECISION_FLOW.md` and the READMEs. There is also
 a wrinkle: showing `C:\Program Files\` in the edit box while silently appending
 `Seamly` means the control no longer displays the path it edits. **Ask before
-changing `INSTALLFOLDER`.**
+changing `INSTALLFOLDER`**. -->
+- use `C:\Program Files\` as the default parent program directory and `Seamly` as the program directory (child of the parent program directory), display the final program directory path (user selected parentprogramdrive & parentprogramdirectory + `Seamly`) to the user then accept OK to continue or Cancel to exit. This question is now answered to follow recommended best practices for naming application directories.
 
 ### Task 60 — implemented, and verified where it counts least
 
@@ -133,20 +134,21 @@ verifies. `TST_DataRoot` is 28 cases.
 **The one subtask that matters most is untested:** the laptop's legacy tree was
 four files, so the copy was instant. **A multi-gigabyte copy still blocks
 startup silently** — the user's own tree is ~17 GB on a cloud drive — and the UX
-(progress, cancel, or defer-and-offer) is undecided.
+(progress, cancel, or defer-and-offer) is undecided. -->
+- Prompt the user whether to copy current data files to new directory location (Y/N). This question is now answered to follow recommended best practices for updating applications.
 
 Two Task 60 subtasks remain: three-root detection (only the `~/seamly2d`-alone
 case has been exercised) and `pruneEmptyLegacyDataRoot()` against the new
-three-root world.
+three-root world. -->
+- list the remaining two cases that have not been excercised to the user
 
 ### The test kit, and where the evidence is
 
 `scripts/seamly-msi/task51-test-kit/` holds both MSIs, `test_msi_install.ps1`,
 `sample-pattern.sm2d`, the annotated `RUN-ME-FIRST.md`, `task51-run2.txt` and
-`task51-upgrade.log`. **That whole directory is gitignored** (`.gitignore:120`),
-so run 2's transcript and the tester's annotations are **not saved by git**. The
-eight earlier transcripts are tracked in `installation-troubleshooting/`; the
-user has been offered the same for these and has not answered.
+`task51-upgrade.log`. **That whole directory is no longer gitignored** (`.gitignore:115`),
+so the next run 2's transcript and the tester's annotations will be **saved by git**. The
+eight earlier transcripts are tracked in `installation-troubleshooting/`.
 
 ### Next steps
 
@@ -164,8 +166,7 @@ user has been offered the same for these and has not answered.
 **`scripts/sd.ps1` fails with `'cl' is not recognized`.** Not the script, and not
 the agent sandbox — the same failure occurs with the sandbox disabled:
 
-- `vcvars64.bat` **and** `vcvarsall.bat x64` exit 1 with `[ERROR:VsDevCmd.bat]
-  *** VsDevCmd.bat encountered errors ***`; three sub-scripts fail to init —
+- `vcvars64.bat` **and** `vcvarsall.bat x64` exit 1 with `[ERROR:VsDevCmd.bat] *** VsDevCmd.bat encountered errors ***`; three sub-scripts fail to init —
   `core\msbuild.bat`, `ext\cmake.bat`, `ext\ConnectionManagerExe.bat`
 - The toolset is fine on disk: `cl.exe` 19.51.36252 under
   `VC\Tools\MSVC\14.51.36231`, Windows SDKs 10.0.22621.0 / 10.0.26100.0 present
@@ -247,8 +248,7 @@ Reversible with `wix extension remove`. `smsi.ps1` requires it, and
   conclude a log line is absent because it looks truncated — grep for a
   distinctive fragment.
 - **A tagged handoff SVG can be produced headlessly**, without driving the Layout
-  Mode GUI: `seamly2d.exe <pattern>.sm2d -b <name> -d <dir> -f 0
-  --exportOnlyDetails` writes `<name>_pieces.svg` through the same `exportSVG()`
+  Mode GUI: `seamly2d.exe <pattern>.sm2d -b <name> -d <dir> -f 0 --exportOnlyDetails` writes `<name>_pieces.svg` through the same `exportSVG()`
   that `generatePiecesSvg()` uses.
 - **`QCommandLineParser::parse()` ≠ `process()`.** `process()` prints to a console
   this GUI-subsystem app does not have on Windows, and calls `exit()`. `parse()`
@@ -288,15 +288,13 @@ Reversible with `wix extension remove`. `smsi.ps1` requires it, and
   message contains quotes; write the message to a file and use `git commit -F`.
 - **clangd diagnostics in this repo are noise.** The tree has no
   `compile_commands.json`, so the editor parses each file with zero include
-  paths; one unresolved include cascades into dozens of `Unknown type name
-  'QString'` entries. **The qmake build is the authority.**
+  paths; one unresolved include cascades into dozens of `Unknown type name 'QString'` entries. **The qmake build is the authority.**
 - **`MD060`/`MD056` table warnings from the editor are noise** on the wide spec
   tables in `TODO_MIGRATE.md`, as `MD041` is repo-wide. Fix a genuinely malformed
   row; do not reflow tables to silence alignment style.
 - **PowerShell 5.1 wraps a native exe's stderr in `NativeCommandError`** and sets
   `$?` to `$false` even on exit 0. Do not redirect native stderr inside
-  PowerShell — run the script as a child process with `Start-Process …
-  -RedirectStandardOutput/-RedirectStandardError -Wait -PassThru -NoNewWindow`.
+  PowerShell — run the script as a child process with `Start-Process … -RedirectStandardOutput/-RedirectStandardError -Wait -PassThru -NoNewWindow`.
 - **PowerShell splatting: `@array` is positional, `@hashtable` is by name.**
 - **Qt frontend test exes are GUI-subsystem binaries** — they print nothing to
   captured stdout. Run with `-o <file>,txt` and `QT_QPA_PLATFORM=offscreen`.
