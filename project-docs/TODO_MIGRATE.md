@@ -426,7 +426,7 @@ Supersedes the **default locations** in Task 14 and Task 34/53. It does not supe
 | Platform | Configuration                                                          | Cache                                  | User documents                      |
 | -------- | ---------------------------------------------------------------------- | -------------------------------------- | ----------------------------------- |
 | Windows  | `%APPDATA%\Seamly\<app>\`                                            | `%LOCALAPPDATA%\Seamly\<app>\Cache\` | `%USERPROFILE%\Documents\Seamly\` |
-| Linux    | `$XDG_CONFIG_HOME/Seamly/<app>/` | `$XDG_CACHE_HOME/Seamly/<app>/` | `$XDG_DOCUMENTS_DIR/Seamly/`         |                                     |
+| Linux    | `$XDG_CONFIG_HOME/Seamly/<app>/`                                       | `$XDG_CACHE_HOME/Seamly/<app>/`        | `$XDG_DOCUMENTS_DIR/Seamly/`        |
 | macOS    | `~/Library/Application Support/Seamly/<app>/`                        | `~/Library/Caches/Seamly/<app>/`     | `~/Documents/Seamly/`             |
 
 Also specified: logs and recovery under `%LOCALAPPDATA%\Seamly\<app>\{Logs,Recovery}\` on Windows, `~/.local/state/Seamly/<app>/{Logs,Recovery}/` on Linux, `~/Library/Logs/Seamly/<app>/` on macOS; a `Shared\` sibling for genuinely shared internal data; and the document tree as `Documents/Seamly/{Projects, Patterns, Measurements, Layouts, Templates, Exports}`.
@@ -503,7 +503,7 @@ Every wizard page still says "Seamly2D" while the package installs three applica
 - [ ] Wizard strings → **"Seamly"**: the window title (`Seamly2D Setup`), "Welcome to the Seamly2D Setup Wizard", "Ready to install Seamly2D", "Installing Seamly2D", "Completed the Seamly2D Setup Wizard", and the uninstall's "Please wait while Windows configures Seamly2D"
 - [ ] The welcome body must name all three: "The Setup Wizard will install Seamly2D, SeamlyLayout, and SeamlyMe on your computer. Click Next to continue or Cancel to exit the Setup Wizard."
 - [ ] EULA: "Seamly2D application family" → "Seamly application family"
-- [ ] **Publisher and copyright: "Seamly2D Project" → "Seamly Project".** This is the one item that reaches beyond the package — it is the `Manufacturer`/`ARPPUBLISHER` in `seamly-family.wxs`, the executables' version resources, the About boxes, and the copyright line in every source header, which `CLAUDE.md` currently specifies as "2026 Seamly2D Project". **Decide the scope before starting:** package-and-About only, or a repo-wide header change. The latter touches every file and should not ride along with an installer fix
+- [ ] **Publisher and copyright: "Seamly2D Project" → "Seamly Project" — scope is package-and-About ONLY** (user, 2026-08-02). That means `Manufacturer`/`ARPPUBLISHER` in `seamly-family.wxs`, the three executables' version resources, and the About boxes. **Source-file copyright headers are explicitly out of scope and stay "2026 Seamly2D Project"**, as `CLAUDE.md` specifies — a repo-wide header rewrite would touch every file and must not ride along with an installer fix. Do not "helpfully" extend this while editing nearby code
 - [ ] Update the assertions in `test_msi_authoring.ps1`, which pin several of these strings
 - [ ] Confirm the wizard by eye — string changes are exactly the class of change that authoring tests pass and users still see wrong
 

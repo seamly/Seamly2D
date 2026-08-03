@@ -6,143 +6,160 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## Current state (2026-07-31): Task 51 — the install layout is being reworked; 2 of 3 requested pieces are done
+## Current state (2026-08-02): Task 51's install cycle has been run twice; the findings are filed as Tasks 61-67
 
-**Branch `task-51-msi-install-experience`, not pushed, no PR yet.** Task 51 stays
-open in `project-docs/TODO_MIGRATE.md`.
+**Branch `task-51-msi-install-experience`, 12 commits, not pushed, no PR.**
+Tasks 51 and 60 stay open in `project-docs/TODO_MIGRATE.md`.
 
-### The install run that started all of this
+The install-layout rework the user asked for "one thing at a time" is **complete**:
+step 1 (install to `C:\Program Files\SeamlyApps`) and step 2a (remove any
+pre-existing NSIS installation) are both implemented and both verified on the
+laptop. **There is no step 2b** — the user's message was cut off mid-sentence,
+and they later said not to expect more after 2a. Do not go looking for it.
 
-The user ran the test kit on the Windows 11 laptop through the upgrade step.
-**52 of 57 automated checks passed**, including the ones that matter most: all
-three apps start and stay running from the install (so the deployed
-Qt/WebEngine runtime is complete), all three file associations resolve and a
-real `.sm2d` opens through ShellExecute, desktop shortcuts and their registry
-breadcrumbs are correct, and the ARP entry carries the right name, publisher,
-version, comments, links, size and uninstall string. Exactly one UAC prompt.
-`SeamlyPreviousInstallDlg` displayed correctly and in the right position.
+### What run 2 proved (2026-08-02, packages `26.7.44158` → `26.7.44161`)
 
-It found three real defects and one bug in the checker itself — none of which
-static package inspection could have reached. **This is the argument for doing
-real installs.**
+The test machine is **Windows 10 22H2 (10.0.19045), PowerShell 5.1** — not
+Windows 11. That matters for one finding below.
 
-### Fixed
+1. **Install lands in `C:\Program Files\SeamlyApps`**, unchanged across upgrade.
+2. **The NSIS installation is removed by the install** — all five checks passed
+   (directory, `Install_Dir` key, ARP entry, Start Menu folder, and the MSI
+   provably installed elsewhere), still with **no `CustomAction` in the package**.
+   Its `uninstall.exe` is never run; we delete what it created, which
+   `RemoveFiles` rolls back.
+3. **Task 60's migration works on a real profile** — `~/seamly2d` was copied
+   wholesale to `Documents\Seamly`: all eight existing folders including the
+   user-added `bodyscans`, plus the nine standard ones so `images` finally
+   exists; the legacy tree intact at 4 → 5 files (the gain is the marker); and
+   `MIGRATED-TO-SEAMLY.txt` naming the new root and date.
 
-1. **The user-data tree was never seeded** (`cfcba75238`). `ensureDataRootTree()`
-   creates the nine subfolders, but its only production caller was
-   `setDataRoot()`, which runs only when the user *changes* the root in
-   Preferences → Paths. First run goes through `initializeDataRoot()`, which
-   resolves and records the path directly — so a fresh machine recorded
-   `~/seamlyData` and never created it, and an adopted legacy tree never gained
-   the subfolders it lacked. `pruneEmptyLegacyDataRoot()`'s own doc comment had
-   been asserting the opposite all along. Both apps now call
-   `ensureDataRootTree(dataRoot())` from `openSettings()` — **in the
-   applications, never inside `initializeDataRoot()`**, because that is the only
-   place the real home directory reaches it and the unit tests do call
-   `initializeDataRoot()`. New `TST_DataRoot::StartupResolvesThenSeedsTheConfiguredRoot`
-   pins both halves, including that resolution stays free of disk side effects.
+Also passing: one ARP entry after upgrade, newer build, unmoved directory, all
+three apps starting and staying running, all three associations resolving, a
+real `.sm2d` opening through ShellExecute.
 
-   **Do not mistake root *adoption* for this bug.** On the laptop `~/seamlyData`
-   was correctly absent and the live data root is `C:\Users\susan\seamly2d`: the
-   old NSIS build left that directory, and `chooseFirstRunDataRoot()` adopts an
-   existing legacy tree **in place** whenever `~/seamlyData` does not exist and
-   `~/seamly2d` is a directory (`vcommonsettings.cpp:735`) — deliberate Task 34
-   behaviour so an upgrading user's gigabytes are never moved.
-   **`C:\Users\susan\seamly2d` on that laptop is live user data; never delete
-   it.** A `Remove-Item -Recurse` on it was suggested in this session before the
-   adoption was understood, and withdrawn — it bypasses the Recycle Bin, and is
-   how the dev PC's copy was destroyed in an earlier session.
+**The `Removed` phase was never run** — the tester issued `msiexec /x` then
+`Stop-Transcript`. Nothing about uninstall is verified on a real machine.
 
-2. **The checker mis-handled advertised shortcuts** (`cfcba75238`). All three
-   Start Menu shortcuts "failed" with a target of
-   `C:\Windows\Installer\{ProductCode}\*.ico`. They are advertised — nested
-   inside `<File KeyPath="yes">` with no `Target`, WiX's standard pattern — and
-   **`WScript.Shell` does not report an advertised shortcut's target; it returns
-   the extracted icon path.** The script assumed such a shortcut came back
-   *empty*, so that branch was never reached and three correct shortcuts failed
-   every run. It now resolves the Darwin descriptor via `MsiGetShortcutTarget` +
-   `MsiGetComponentPath`, asserting something stronger: that the shortcut
-   resolves to an installed file inside the install directory.
+### The four failures, neither of which is a package defect
 
-3. **The checker watched the wrong data directory** (`90a91afa3f`).
-   `Get-UserDataInventory` followed only the *configured* root, which (a) misses
-   the adopted legacy tree holding the user's patterns on any upgraded machine
-   and (b) **changes** the moment the apps first write `paths/dataRoot`, so
-   Baseline and a later phase inventoried different directories and
-   `Assert-UserDataIntact` — which matches on `Path` — reported a meaningless
-   failure. It now takes a fixed, de-duplicated set: the configured root, both
-   candidate roots, and both settings folders.
+- **Three Start Menu shortcut failures are a second checker bug**, same shape as
+  run 1's. `Get-AdvertisedShortcutTarget` accepts `MsiGetComponentPath` states
+  **4/5**; the constants are `INSTALLSTATE_LOCAL = 3` and
+  `INSTALLSTATE_SOURCE = 4`. All three returned 3 — installed locally — reported
+  as broken. **The shortcuts have been correct in both runs and the checker
+  wrong in both.** Fix is Task 61.
+- **ARP `DisplayIcon`** — diagnosed, no longer a mystery. `ARPPRODUCTICON` is set
+  and `ProductInfo(… ProductIcon=seamly2d.ico …)` executes, so Windows Installer
+  records the icon as *product metadata* and never writes the registry value.
+  The tester's by-eye check corroborates it: `appwiz.cpl` shows icon and
+  publisher, the Settings app shows neither, because Settings reads the registry
+  directly. Fix is Task 62.
 
-### The user's rework, "one thing at a time"
+### Tasks 61-67 — run 2's findings, filed 2026-08-02
 
-1. **DONE — install to `SeamlyApps`** (`b773f40b3f`). `INSTALLFOLDER` is now
-   `ProgramFiles64Folder\SeamlyApps` (was `\Seamly2D`). The user first asked for
-   `C:\Program Files (x86)\SeamlyApps` and **accepted the 64-bit tree instead** —
-   every binary here is x64/arm64, and only the *old NSIS* product belongs under
-   `(x86)` because its installer was 32-bit. **User data was deliberately left to
-   the app**; a per-machine MSI's server side runs as LocalSystem, so
-   `C:\Users\<name>\...` cannot be created meaningfully at install time and would
-   only ever cover the installing user. That acceptance was conditional —
-   *"leave it to the app if we can migrate the existing subfolders to the new
-   subfolders"* — and **that migration is Task 14, NOT done.** It needs a
-   decision, because today's rule deliberately adopts in place rather than
-   moving. Ask which is meant: `~/seamly2d` → `~/SeamlyData`, or old subfolder
-   names → the nine standard ones.
+Filed as tasks rather than Task 51 subtasks because they span three areas (the
+checker, the package authoring, the applications).
 
-2. **DONE — remove the old NSIS installation** (`59e3494690`). A deliberate
-   reversal of the earlier "detect it, never remove it" decision, on the user's
-   reasoning that the MSI is a strict superset: NSIS installs seamly2d and
-   seamlyme, this package installs both plus SeamlyLayout, so leaving it behind
-   means two copies of each parent app and Start Menu shortcuts that launch the
-   old binaries. **Its `uninstall.exe` is still never run** — that is what made
-   the original decision right, and every hazard in it came from invoking that
-   EXE. We delete what it created instead, which `RemoveFiles` rolls back.
+| Task | Problem |
+| --- | --- |
+| 61 | checker: `INSTALLSTATE` constants; inventory snapshotted before the migration; sample pattern needs a `.smis` the kit lacks |
+| 62 | ARP `DisplayIcon` (and possibly `Publisher`) never written to the registry |
+| 63 | wizard says "Seamly2D" while installing three apps |
+| 64 | previous-install dialog too long, and names the dead `seamlyData` path; absorbs the 2826 geometry fix |
+| 65 | destination-folder wording, and whether `INSTALLFOLDER` becomes `Seamly` |
+| 66 | one ARP entry for three apps |
+| 67 | first-run modal dialogs swallow a pattern opened by double-click |
 
-3. **NOT STARTED — 2b.** **The user's message was cut off mid-sentence at
-   "2b. it checks for user", so the requirement is unknown.** Get it before
-   implementing anything further.
+**Task 61 must land before the uninstall leg**, or the same four false failures
+reappear in the next transcript.
 
-### Still open on Task 51
+**Task 67 is the only genuine user-facing bug in the set.** Some of what the
+tester saw was the checker killing processes, but "double-click a pattern on a
+freshly installed machine and it does not open" is a real path, and the three
+apps disagree today — Seamly2D and SeamlyMe show a first-run dialog,
+SeamlyLayout shows none.
+
+### Decisions the user made on these (act on them, do not re-ask)
+
+- **Task 66 → keep one ARP entry and rename it "Seamly".** Display-only entries
+  for SeamlyMe and SeamlyLayout were rejected as misleading (uninstalling
+  "SeamlyMe" would remove all three); three products or a Burn bundle is far
+  larger than the problem. Note `test_msi_install.ps1` finds the product by
+  `UpgradeCode`, not DisplayName — deliberately, because the old NSIS product
+  also called itself "Seamly2D" — so the rename breaks assertions, not lookup.
+- **Task 63 → the "Seamly2D Project" → "Seamly Project" rename is
+  package-and-About ONLY.** `Manufacturer`/`ARPPUBLISHER`, the three exes'
+  version resources, and the About boxes. **Source-file copyright headers stay
+  "2026 Seamly2D Project"** as `CLAUDE.md` specifies. Do not extend this while
+  editing nearby code.
+
+### Still open on Task 51 itself
 
 - **`SeamlyShortcutsDlg` never displays.** The `ControlEvent` row is in the
   shipped MSI and correct in every column (condition `1`, ordering 2, ahead of
-  the built-in `NewDialog` at 4), and the `Dialog` row has `Attributes = 7`. The
-  `/l*v` log shows **no attempt to create it**. Root cause is the WiX version:
-  the design notes assumed WiX v3/v4's `InstallDirDlg`, but this is **WiX
-  6.0.2**, whose `InstallDirDlg` Next publishes `CheckTargetPath` — a v6
-  built-in from the UI extension's `uica.dll` — and the `SpawnDialog` is skipped
-  in that chain. `SEAMLYDESKTOPSHORTCUTS` defaults to 1, so shortcuts are
-  created and every automated check passes: the default works, the *choice* is
-  never offered. **Do not chase this by rebuilding the 165 MB package per
-  attempt** — build a small UI-only MSI with the same `ui:WixUI` reference and
-  the same dialogs; it compiles in seconds and can be clicked through and
-  cancelled at the Ready page without installing anything.
-- **Dialog geometry.** `SeamlyPreviousInstallDlg`'s `BannerLine`/`BottomLine` are
-  `Width="373"` on a 370-wide dialog → error 2826 twice. Stock WixUI dialogs log
-  the same code at `DEBUG:` only; ours is *also* logged as a user-facing
-  "unexpected error". Three characters to fix.
-- **ARP `DisplayIcon` came back empty**, although `ARPPRODUCTICON = seamly2d.ico`
-  *is* in the built MSI's Property table and the Icon table has the matching row
-  (both verified by querying the package). Authoring is correct; cause unknown.
-  Asked for `MsiGetProductInfo`'s `ProductIcon` and whether Apps & features
-  paints the right icon — **not yet answered**.
-- **The NSIS removal has never run against a real NSIS install.** It is verified
-  at package level only (63 authoring assertions). **The user is re-running the
-  `.nsi` on the laptop as of 2026-07-31 specifically so this can be tested.**
-- `-Phase Upgraded` / `-Phase Removed` on the laptop.
+  the built-in `NewDialog` at 4), `Dialog` `Attributes = 7`, and the `/l*v` log
+  shows **no attempt to create it**. Root cause is the WiX version: the design
+  notes assumed v3/v4's `InstallDirDlg`, but this is **WiX 6.0.2**, whose
+  `InstallDirDlg` Next publishes `CheckTargetPath` (a v6 built-in in the UI
+  extension's `uica.dll`) and the `SpawnDialog` is skipped in that chain.
+  `SEAMLYDESKTOPSHORTCUTS` defaults to 1, so shortcuts are created and every
+  automated check passes: the default works, the *choice* is never offered.
+  **Do not chase this by rebuilding the 165 MB package per attempt** — build a
+  small UI-only MSI with the same `ui:WixUI` reference and dialogs; it compiles
+  in seconds and can be clicked through and cancelled at Ready.
+- The four "verify …" subtasks and Task 13's outstanding subtask all close on
+  the uninstall leg.
 
-### Verification of everything committed today
+### Open question, not yet answered
 
-Debug build clean · `scripts/st.ps1` **32134 passed, 0 failed across 25 suites**
-(`TST_DataRoot` 22 → 23) · `ParserTest` exit 0 · `TranslationsTest` exit 0 ·
-`smsi.ps1` exit 0 with `wix build` clean, `wix msi validate` clean apart from the
-expected ICE61, **authoring 63/63**, `Seamly2D-x64.msi` 165.4 MB.
+**Task 65 reverses a settled decision.** The tester's requested destination-page
+wording implies `C:\Program Files\Seamly`, not `SeamlyApps` — which run 2 just
+verified end to end. Renaming invalidates both staged MSIs, every path assertion
+in both test scripts, `INSTALL_DECISION_FLOW.md` and the READMEs. There is also
+a wrinkle: showing `C:\Program Files\` in the edit box while silently appending
+`Seamly` means the control no longer displays the path it edits. **Ask before
+changing `INSTALLFOLDER`.**
 
-**`CollectionTest` was deliberately not run locally** — it has a documented
-pre-existing failure *and* it launches the real seamly2d, which now seeds
-folders into the live `G:\My Drive\seamlyData`. CI runs it on a clean machine.
+### Task 60 — implemented, and verified where it counts least
 
-### MACHINE STATE: the Visual Studio installation is broken
+`getDefaultDataRoot()` → `<DocumentsLocation>/Seamly`; `migrateDataTree()` does a
+wholesale recursive copy, merge-never-overwrite, size-verified per file,
+refusing a destination nested inside the source and never deleting the source;
+`markDataTreeMigrated()` / `dataTreeWasMigrated()` handle the marker;
+`migrateAdoptedLegacyTree()` repoints `paths/dataRoot` **only after** the copy
+verifies. `TST_DataRoot` is 28 cases.
+
+**The one subtask that matters most is untested:** the laptop's legacy tree was
+four files, so the copy was instant. **A multi-gigabyte copy still blocks
+startup silently** — the user's own tree is ~17 GB on a cloud drive — and the UX
+(progress, cancel, or defer-and-offer) is undecided.
+
+Two Task 60 subtasks remain: three-root detection (only the `~/seamly2d`-alone
+case has been exercised) and `pruneEmptyLegacyDataRoot()` against the new
+three-root world.
+
+### The test kit, and where the evidence is
+
+`scripts/seamly-msi/task51-test-kit/` holds both MSIs, `test_msi_install.ps1`,
+`sample-pattern.sm2d`, the annotated `RUN-ME-FIRST.md`, `task51-run2.txt` and
+`task51-upgrade.log`. **That whole directory is gitignored** (`.gitignore:120`),
+so run 2's transcript and the tester's annotations are **not saved by git**. The
+eight earlier transcripts are tracked in `installation-troubleshooting/`; the
+user has been offered the same for these and has not answered.
+
+### Next steps
+
+1. Task 61 — the checker fixes; then run the **uninstall leg** on the laptop.
+2. Tasks 62, 63, 64, 66 — all touch `seamly-family.wxs` and both test scripts;
+   worth doing as one package change and one laptop run.
+3. Ask about Task 65 before touching `INSTALLFOLDER`.
+4. Decide Task 60's large-copy UX before that migration ships to anyone.
+5. Fix `SeamlyShortcutsDlg` via a UI-only test MSI, plus the 373→370 geometry.
+6. Repair Visual Studio, then re-run `scripts/sd.ps1`.
+7. Push the branch and open the PR to `run-seamlyLayout` once Task 51 lands.
+
+## MACHINE STATE: the Visual Studio installation is broken
 
 **`scripts/sd.ps1` fails with `'cl' is not recognized`.** Not the script, and not
 the agent sandbox — the same failure occurs with the sandbox disabled:
@@ -159,32 +176,33 @@ the agent sandbox — the same failure occurs with the sandbox disabled:
   instance registration looks damaged. Instance data exists at
   `C:\ProgramData\Microsoft\VisualStudio\Packages\_Instances\a9afd7ad`
 
-**Workaround used for this session's build — local only, nothing on the machine
-and nothing in `sd.ps1` was changed:** set `PATH`/`INCLUDE`/`LIB` by hand at
-`VC\Tools\MSVC\14.51.36231` + SDK `10.0.26100.0`, then run
-`C:\Qt\Tools\QtCreator\bin\jom\jom.exe -f Makefile` in `scripts/seamly2d-debug`.
-**The user should repair VS 18 Community from the Visual Studio Installer** —
-until then `sd.ps1` fails for them too.
+**Workaround — local only, nothing on the machine and nothing in `sd.ps1` was
+changed:** set `PATH`/`INCLUDE`/`LIB` by hand at `VC\Tools\MSVC\14.51.36231` +
+SDK `10.0.26100.0`, then run `C:\Qt\Tools\QtCreator\bin\jom\jom.exe -f Makefile`
+in `scripts/seamly2d-debug`. **The user should repair VS 18 Community from the
+Visual Studio Installer** — until then `sd.ps1` fails for them too.
 
-### Other machine state changed this session
+## Other machine state changed outside the repo
 
-`WixToolset.Util.wixext` 6.0.2 was installed globally
-(`wix extension add --global`), because `util:RemoveFolderEx` needs it. Reversible
-with `wix extension remove`. `smsi.ps1` now requires it, and
+`WixToolset.Util.wixext` 6.0.2 is installed globally
+(`wix extension add --global`), because `util:RemoveFolderEx` needs it.
+Reversible with `wix extension remove`. `smsi.ps1` requires it, and
 `.github/workflows/windows-msi.yml` installs it alongside the UI extension.
 
-### Next steps
+## SAFETY — read before deleting anything
 
-1. Get **2b** from the user; it is the only thing blocking step 2's completion.
-2. Fix `SeamlyShortcutsDlg` (UI-only test MSI) and the 373→370 geometry; assert
-   both in `test_msi_authoring.ps1` **and** confirm with a real wizard run,
-   since authoring passed while the page never appeared.
-3. Build a fresh package and run the full cycle on the laptop — now including
-   the NSIS-removal path, which the user is re-creating.
-4. Repair Visual Studio, then re-run `scripts/sd.ps1` to confirm the normal
-   build path works.
-5. Push the branch and open the PR to `run-seamlyLayout` once Task 51's
-   remaining subtasks land.
+- **`C:\Users\susan\seamly2d` on the test laptop is live user data.** It holds a
+  real pattern of the user's and is the source tree Task 60's migration copies
+  from. A `Remove-Item -Recurse` on it was suggested in an earlier session and
+  withdrawn: it bypasses the Recycle Bin, and that is how the dev PC's copy was
+  permanently destroyed.
+- **No test may touch a path under `QDir::homePath()`** — it cannot be faked on
+  Windows. First-run resolution is tested through
+  `VCommonSettings::chooseFirstRunDataRoot()`, which takes both candidate roots
+  as arguments; everything else uses `QTemporaryDir`.
+- **`CollectionTest` is deliberately not run locally.** It has a documented
+  pre-existing failure *and* launches the real seamly2d, which seeds folders into
+  the live data root. CI runs it on a clean machine.
 
 ## Decisions the user has ANSWERED (act on these, do not re-ask)
 
@@ -193,18 +211,23 @@ with `wix extension remove`. `smsi.ps1` now requires it, and
    `settings_*` snake_case prefix for class-defining files).
 2. **`.github/README-DEVELOPER-NEW.md`** → **rename it to
    `.github/README-DEVELOPER-SEAMLY-FAMILY.md`**, to be folded into
-   `.github/README-DEVELOPER.md` when the migration is complete. **The rename has
-   not been done yet.**
+   `.github/README-DEVELOPER.md` when the migration is complete. **Not done yet.**
 3. **Qt WebChannel / Qt Positioning documentation** → maintain it in
    `.github/README-DEVELOPER-SEAMLY-FAMILY.md` until the migration completes.
 4. **`src/app/seamly2d/core/BUILD_PROBLEMS.txt`** → delete it if it is not
    useful. **Not done yet.**
-5. **Testing happens on the test Windows 11 laptop, not in a VM** (re-confirmed
-   2026-07-30). This PC is Windows 11 **Home**, which ships neither Hyper-V nor
-   Windows Sandbox, so a VM here means a third-party hypervisor; the user
-   considered VirtualBox and VMware Workstation Pro and declined both. A VM could
-   not close two checklist items anyway — the *verified-publisher* UAC prompt
-   needs Task 33's signing, and the arm64 repeat needs arm64 hardware.
+5. **Testing happens on the test laptop, not in a VM** (re-confirmed 2026-07-30).
+   This PC is Windows 11 **Home**, which ships neither Hyper-V nor Windows
+   Sandbox, so a VM here means a third-party hypervisor; the user considered
+   VirtualBox and VMware Workstation Pro and declined both. A VM could not close
+   two checklist items anyway — the *verified-publisher* UAC prompt needs Task
+   33's signing, and the arm64 repeat needs arm64 hardware.
+6. **Data migration is copy-and-verify, leaving the legacy tree intact** — never
+   a bare rename, because a user may need to roll back to an earlier release.
+7. **The migration lives in the applications, not the installer.** A per-machine
+   MSI's server side runs as LocalSystem, so a per-user path resolves to the
+   SYSTEM profile and would only cover whoever ran setup; macOS and Linux have no
+   MSI at all, so the logic would be written twice.
 
 ## Gotchas
 
@@ -243,12 +266,6 @@ with `wix extension remove`. `smsi.ps1` now requires it, and
   be `Qt::CaseInsensitive`.
 - **`QDir::rmdir()` over `removeRecursively()`, deliberately.** `rmdir()` cannot
   delete a file and refuses a non-empty directory, so it cannot run away.
-  `removeRecursively()` also bypasses the Recycle Bin — that is how
-  `C:\Users\susan\seamly2d` was permanently destroyed.
-- **`QDir::homePath()` cannot be faked on Windows**, so no test may touch a path
-  under it. First-run resolution is tested through
-  `VCommonSettings::chooseFirstRunDataRoot()`, which takes both candidate roots as
-  arguments.
 - **`scripts\st.ps1` runs only `Seamly2DTests.exe`.** CI's `make check` runs four
   binaries — `Seamly2DTest`, `CollectionTest`, `ParserTest`, `TranslationsTest`.
   Run the other three by hand before pushing.
@@ -264,16 +281,18 @@ with `wix extension remove`. `smsi.ps1` now requires it, and
   still look for `...\<old name>\...\vtools.lib` and fail with "dependent ...
   does not exist". The tree can only be regenerated, not repaired: delete it and
   re-run qmake. Same failure shape as the toolchain-change trap in
-  `.github/README-BUILDS.md`.
+  `.github/README-BUILDS.md`. The build and packaging directory names are now
+  `-BuildDirName` / `-OutputDirName` parameters; **a new value needs a matching
+  `.gitignore` entry**, and for packaging also the CI artifact path.
 - **PowerShell here-strings passed to `git commit -m` get mangled** when the
   message contains quotes; write the message to a file and use `git commit -F`.
 - **clangd diagnostics in this repo are noise.** The tree has no
   `compile_commands.json`, so the editor parses each file with zero include
   paths; one unresolved include cascades into dozens of `Unknown type name
   'QString'` entries. **The qmake build is the authority.**
-  `src/app/seamly2d/core/BUILD_PROBLEMS.txt` is a tracked 45-entry dump of exactly
-  this, carrying absolute `/c:/Users/susan/…` paths into source headed for the
-  upstream PR — see decision 4 above.
+- **`MD060`/`MD056` table warnings from the editor are noise** on the wide spec
+  tables in `TODO_MIGRATE.md`, as `MD041` is repo-wide. Fix a genuinely malformed
+  row; do not reflow tables to silence alignment style.
 - **PowerShell 5.1 wraps a native exe's stderr in `NativeCommandError`** and sets
   `$?` to `$false` even on exit 0. Do not redirect native stderr inside
   PowerShell — run the script as a child process with `Start-Process …
@@ -283,6 +302,6 @@ with `wix extension remove`. `smsi.ps1` now requires it, and
   captured stdout. Run with `-o <file>,txt` and `QT_QPA_PLATFORM=offscreen`.
 - **`$proFile` collides with the automatic `$PROFILE`** (case-insensitive);
   `sd.ps1` still has it.
-- **Historical 6.10 references in `project-docs/TODO_COMPLETED.md` and
-  `project-docs/PROJECT_PLAN.md` are deliberate** — they record what was true at
-  the time.
+- **Historical 6.10 references and old directory names in
+  `project-docs/TODO_COMPLETED.md` and `project-docs/PROJECT_PLAN.md` are
+  deliberate** — they record what was true at the time.
