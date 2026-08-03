@@ -1,8 +1,8 @@
 <map id="TestApplication2D" name="TestApplication2D">
 <area shape="rect" id="node1" title=" " alt="" coords="473,2473,660,2624"/>
 <area shape="rect" id="node2" href="$db/dda/classVAbstractApplication.html" title=" " alt="" coords="470,2009,663,2424"/>
-<area shape="rect" id="node3" title=" " alt="" coords="73,1349,178,1426"/>
-<area shape="rect" id="node4" href="$de/d0f/classVCommonSettings.html" title=" " alt="" coords="201,1173,439,1602"/>
+<area shape="rect" id="node3" title=" " alt="" coords="71,1349,177,1426"/>
+<area shape="rect" id="node4" href="$de/d0f/classVCommonSettings.html" title=" " alt="" coords="201,1165,439,1609"/>
 <area shape="rect" id="node5" title=" " alt="" coords="5,417,91,494"/>
 <area shape="rect" id="node6" href="$da/d5d/classVMainGraphicsView.html" title="The VMainGraphicsView class main scene view." alt="" coords="463,1085,670,1690"/>
 <area shape="rect" id="node7" title=" " alt="" coords="115,417,237,494"/>

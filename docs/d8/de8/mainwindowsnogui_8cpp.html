@@ -161,9 +161,6 @@ Functions</h2></td></tr>
 <tr class="separator:adc02e3f28db0229af91f2077610c4b9d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba458b4f78f014b23015631f3a439456"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/da0/namespaceanonymous__namespace_02mainwindowsnogui_8cpp_03.html#aba458b4f78f014b23015631f3a439456">anonymous_namespace{mainwindowsnogui.cpp}::RemoveLayoutPath</a> (const QString &amp;path, bool usedNotExistedDir)</td></tr>
 <tr class="separator:aba458b4f78f014b23015631f3a439456"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:afb115eba5a02331d066b94abfbcb8799"><td class="memItemLeft" align="right" valign="top">static void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/de8/mainwindowsnogui_8cpp.html#afb115eba5a02331d066b94abfbcb8799">collectTextItems</a> (QGraphicsItem *item, <a class="el" href="../../d1/d4a/classQList.html">QList</a>&lt; QGraphicsSimpleTextItem * &gt; &amp;textItems)</td></tr>
-<tr class="memdesc:afb115eba5a02331d066b94abfbcb8799"><td class="mdescLeft">&#160;</td><td class="mdescRight">PrepareTextForDXF prepare QGraphicsSimpleTextItem items for export to flat dxf.  <br /></td></tr>
-<tr class="separator:afb115eba5a02331d066b94abfbcb8799"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Macro Definition Documentation</h2>
 <a id="a912a77a5eeb3952fe9c0efc114027c64" name="a912a77a5eeb3952fe9c0efc114027c64"></a>
@@ -179,68 +176,6 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00089">89</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
-
-</div>
-</div>
-<h2 class="groupheader">Function Documentation</h2>
-<a id="afb115eba5a02331d066b94abfbcb8799" name="afb115eba5a02331d066b94abfbcb8799"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#afb115eba5a02331d066b94abfbcb8799">&#9670;&#160;</a></span>collectTextItems()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">static void collectTextItems </td>
-          <td>(</td>
-          <td class="paramtype">QGraphicsItem *&#160;</td>
-          <td class="paramname"><em>item</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="../../d1/d4a/classQList.html">QList</a>&lt; QGraphicsSimpleTextItem * &gt; &amp;&#160;</td>
-          <td class="paramname"><em>textItems</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>PrepareTextForDXF prepare QGraphicsSimpleTextItem items for export to flat dxf. </p>
-<p>Because QPaintEngine::drawTextItem doesn't pass whole string per time we mark end of each string by adding special placeholder. This method append it.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">placeholder</td><td>placeholder that will be appended to each QGraphicsSimpleTextItem item's text string.</td></tr>
-  </table>
-  </dd>
-</dl>
-<p>collectTextItems recursively collects every QGraphicsSimpleTextItem below an item.</p>
-<p>Label text items are grandchildren of the piece root (each label's lines are grouped under an invisible label group item), so a recursive walk is required to reach them.</p>
-<p>The label lines are <a class="el" href="../../d5/d2f/classSvgTextItem.html" title="SvgTextItem text item whose painting goes through QPainter::drawText().">SvgTextItem</a> instances (vlayout), a QGraphicsSimpleTextItem subclass that shares its type(); both the type check and the cast below therefore match them.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">item</td><td>graphics item whose descendants are searched. </td></tr>
-    <tr><td class="paramname">textItems</td><td>output list the found text items are appended to. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p class="definition">Definition at line <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01325">1325</a> of file <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html">mainwindowsnogui.cpp</a>.</p>
-
-<p class="reference">References <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01325">collectTextItems()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01325">collectTextItems()</a>, <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01343">MainWindowsNoGUI::PrepareTextForDXF()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l01372">MainWindowsNoGUI::RestoreTextAfterDXF()</a>.</p>
 
 </div>
 </div>
