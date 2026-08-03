@@ -177,7 +177,7 @@ Variables</h2></td></tr>
 </div><div class="memdoc">
 
 <p>maxUpwardLevels bounds how far the development-build lookup walks up from the running executable's directory while searching for the checkout root. </p>
-<p>The deepest layout in use is the debug shadow build, whose executable sits at <code>&lt;checkout&gt;/scripts/seamly2d-build-debug/src/app/seamly2d/bin/</code> — six levels below the checkout root. The release shadow build (<code>&lt;checkout&gt;/build/...</code>) is five. Eight leaves room for a differently nested build tree while still terminating quickly, and keeps the walk from climbing out of the checkout and probing unrelated parts of the filesystem. </p>
+<p>The deepest layout in use is the debug shadow build, whose executable sits at <code>&lt;checkout&gt;/scripts/seamly2d-debug/src/app/seamly2d/bin/</code> — six levels below the checkout root. The release shadow build (<code>&lt;checkout&gt;/build/...</code>) is five. Eight leaves room for a differently nested build tree while still terminating quickly, and keeps the walk from climbing out of the checkout and probing unrelated parts of the filesystem. </p>
 
 <p class="definition">Definition at line <a class="el" href="../../d4/dce/seamly__family__paths_8cpp_source.html#l00062">62</a> of file <a class="el" href="../../d4/dce/seamly__family__paths_8cpp_source.html">seamly_family_paths.cpp</a>.</p>
 

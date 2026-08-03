@@ -156,7 +156,7 @@ $(document).ready(function(){initNavTree('d4/dce/seamly__family__paths_8cpp_sour
 <div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment"> * from the running executable&#39;s directory while searching for the checkout root.</span></div>
 <div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="comment"> *</span></div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="comment"> * The deepest layout in use is the debug shadow build, whose executable sits at</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="comment"> * `&lt;checkout&gt;/scripts/seamly2d-build-debug/src/app/seamly2d/bin/` — six levels</span></div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="comment"> * `&lt;checkout&gt;/scripts/seamly2d-debug/src/app/seamly2d/bin/` — six levels</span></div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="comment"> * below the checkout root. The release shadow build (`&lt;checkout&gt;/build/...`) is</span></div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="comment"> * five. Eight leaves room for a differently nested build tree while still</span></div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment"> * terminating quickly, and keeps the walk from climbing out of the checkout and</span></div>
@@ -263,7 +263,7 @@ $(document).ready(function(){initNavTree('d4/dce/seamly__family__paths_8cpp_sour
 <div class="line"><a id="l00160" name="l00160"></a><span class="lineno">  160</span><span class="comment"> * contains a SeamlyLayout build. Both shadow-build layouts the project uses</span></div>
 <div class="line"><a id="l00161" name="l00161"></a><span class="lineno">  161</span><span class="comment"> * resolve this way — the release build at `&lt;checkout&gt;/build/...` (five levels)</span></div>
 <div class="line"><a id="l00162" name="l00162"></a><span class="lineno">  162</span><span class="comment"> * and `scripts/sd.ps1`&#39;s debug build at</span></div>
-<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span><span class="comment"> * `&lt;checkout&gt;/scripts/seamly2d-build-debug/...` (six) — without either being</span></div>
+<div class="line"><a id="l00163" name="l00163"></a><span class="lineno">  163</span><span class="comment"> * `&lt;checkout&gt;/scripts/seamly2d-debug/...` (six) — without either being</span></div>
 <div class="line"><a id="l00164" name="l00164"></a><span class="lineno">  164</span><span class="comment"> * named here, so a differently nested build tree still works.</span></div>
 <div class="line"><a id="l00165" name="l00165"></a><span class="lineno">  165</span><span class="comment"> *</span></div>
 <div class="line"><a id="l00166" name="l00166"></a><span class="lineno">  166</span><span class="comment"> * At each level **Release is preferred over Debug**: a developer who has built</span></div>

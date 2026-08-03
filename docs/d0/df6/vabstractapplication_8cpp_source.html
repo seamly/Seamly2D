@@ -335,10 +335,10 @@ $(document).ready(function(){initNavTree('d0/df6/vabstractapplication_8cpp_sourc
 <div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span><span class="comment">/**</span></div>
 <div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span><span class="comment"> * @brief MigrateSeamlySettingsLocation resolves this app&#39;s settings-file path under the</span></div>
 <div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span><span class="comment"> * unified &quot;Seamly&quot; organization (Task 15), migrating the file forward from the</span></div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span><span class="comment"> * pre-unification &quot;Seamly2DTeam&quot; organization folder on first run after an upgrade.</span></div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span><span class="comment"> * pre-unification &quot;SeamlyTeam&quot; organization folder on first run after an upgrade.</span></div>
 <div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span><span class="comment"> *</span></div>
 <div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span><span class="comment"> * Before Task 15, seamly2d and seamlyme each stored one flat .ini file (named after the</span></div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span><span class="comment"> * application) as a sibling inside a single shared &quot;Seamly2DTeam&quot; organization folder</span></div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span><span class="comment"> * application) as a sibling inside a single shared &quot;SeamlyTeam&quot; organization folder</span></div>
 <div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span><span class="comment"> * (Qt&#39;s native IniFormat/UserScope resolution). After Task 15 every Seamly application</span></div>
 <div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span><span class="comment"> * gets its own directory nested under the &quot;Seamly&quot; organization instead — QStandardPaths</span></div>
 <div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span><span class="comment"> * ::AppConfigLocation already resolves to AppData/Local/Seamly/&lt;AppName&gt; on Windows once</span></div>
@@ -380,9 +380,9 @@ $(document).ready(function(){initNavTree('d0/df6/vabstractapplication_8cpp_sourc
 <div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>        <span class="keywordflow">return</span> newAppIniPath;</div>
 <div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>    }</div>
 <div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span> </div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>    <span class="comment">// Legacy home: pre-Task-15 builds used organization name &quot;Seamly2DTeam&quot;, with both</span></div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>    <span class="comment">// Legacy home: pre-Task-15 builds used organization name &quot;SeamlyTeam&quot;, with both</span></div>
 <div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>    <span class="comment">// apps&#39; settings living as sibling flat files in that one shared folder.</span></div>
-<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>    <span class="keyword">static</span> <span class="keyword">const</span> QString kLegacyOrganizationName = QStringLiteral(<span class="stringliteral">&quot;Seamly2DTeam&quot;</span>);</div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>    <span class="keyword">static</span> <span class="keyword">const</span> QString kLegacyOrganizationName = QStringLiteral(<span class="stringliteral">&quot;SeamlyTeam&quot;</span>);</div>
 <div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>    <span class="keyword">const</span> QSettings legacyProbe(QSettings::IniFormat, QSettings::UserScope,</div>
 <div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>                                kLegacyOrganizationName, QCoreApplication::applicationName());</div>
 <div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>    <span class="keyword">const</span> QString legacyDir = QFileInfo(legacyProbe.fileName()).absolutePath();</div>

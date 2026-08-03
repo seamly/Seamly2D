@@ -5,6 +5,7 @@ var vcommonsettings_8cpp =
     [ "readDataRoot", "d4/d11/vcommonsettings_8cpp.html#a0c351cecb80a5bf23fa2b4629c099a54", null ],
     [ "SymlinkCopyDirRecursive", "d4/d11/vcommonsettings_8cpp.html#a8dd613aa76590f88f4a60fee8b89ae13", null ],
     [ "commonIniFilename", "d4/d11/vcommonsettings_8cpp.html#a9474e9c5c20683cf4a411eb51f84f3da", null ],
+    [ "migrationMarkerFileName", "d4/d11/vcommonsettings_8cpp.html#a4bf12fd444064d56141a99f6226d70b7", null ],
     [ "pointNameSize", "d4/d11/vcommonsettings_8cpp.html#a7136b7a2ed9ead08f0f849054160457b", null ],
     [ "settingBackupPath", "d4/d11/vcommonsettings_8cpp.html#a33d50aa96456f560a5ac1845a77a682c", null ],
     [ "settingConfigurationAddress", "d4/d11/vcommonsettings_8cpp.html#a7308b7a66e0e6d69b9b7aab47d4253d3", null ],

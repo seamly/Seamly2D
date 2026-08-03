@@ -366,7 +366,7 @@ $(document).ready(function(){initNavTree('d3/d03/tst__seamlyfamilypaths_8cpp_sou
 <div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span><span class="comment"> * checkout root from the deeper debug shadow build produced by scripts/sd.ps1.</span></div>
 <div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span><span class="comment"> *</span></div>
 <div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span><span class="comment"> * Layout reproduced: seamly2d runs from</span></div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span><span class="comment"> * `&lt;checkout&gt;/scripts/seamly2d-build-debug/src/app/seamly2d/bin` — six levels</span></div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span><span class="comment"> * `&lt;checkout&gt;/scripts/seamly2d-debug/src/app/seamly2d/bin` — six levels</span></div>
 <div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span><span class="comment"> * below the checkout root, the deepest layout the project uses.</span></div>
 <div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span><span class="comment"> */</span></div>
 <div class="line"><a id="l00269" name="l00269"></a><span class="lineno"><a class="line" href="../../df/da4/classTST__SeamlyFamilyPaths.html#a4eeb9935590a83040310cd14599b6d89">  269</a></span><span class="keywordtype">void</span> <a class="code hl_slot" href="../../df/da4/classTST__SeamlyFamilyPaths.html#a4eeb9935590a83040310cd14599b6d89">TST_SeamlyFamilyPaths::DevBuildFoundFromDebugShadowBuild</a>()<span class="keyword"> const</span></div>
@@ -376,7 +376,7 @@ $(document).ready(function(){initNavTree('d3/d03/tst__seamlyfamilypaths_8cpp_sou
 <div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span> </div>
 <div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>    <span class="keyword">const</span> QString checkout = dir.path();</div>
 <div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    <span class="keyword">const</span> QString seamly2dBin =</div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>        checkout + QLatin1String(<span class="stringliteral">&quot;/scripts/seamly2d-build-debug/src/app/seamly2d/bin&quot;</span>);</div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>        checkout + QLatin1String(<span class="stringliteral">&quot;/scripts/seamly2d-debug/src/app/seamly2d/bin&quot;</span>);</div>
 <div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>    QVERIFY(QDir().mkpath(seamly2dBin));</div>
 <div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
 <div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>    <span class="keyword">const</span> QString layoutExe = checkout</div>
