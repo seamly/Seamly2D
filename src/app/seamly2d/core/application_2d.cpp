@@ -814,7 +814,7 @@ bool Application2D::event(QEvent *event)
 /// shared "Seamly" organization (AppData/Local/Seamly/Seamly2D on Windows) instead of a
 /// flat .ini file sharing a folder with SeamlyMe's. The "common" settings (shared across
 /// Seamly apps, see VCommonSettings) still use Qt's native per-organization resolution and
-/// are bridged forward from the pre-unification "Seamly2DTeam" folder the same way they
+/// are bridged forward from the pre-unification "SeamlyTeam" folder the same way they
 /// always bridged qt5 -> qt6 formats.
 void Application2D::openSettings()
 {
@@ -833,9 +833,9 @@ void Application2D::openSettings()
     QDir().mkpath(dir);
 
     // Bridge the shared "common" settings forward from the pre-Task-15 organization
-    // folder ("Seamly2DTeam") into the current one ("Seamly"), same non-destructive
+    // folder ("SeamlyTeam") into the current one ("Seamly"), same non-destructive
     // copy-if-missing pattern as the existing qt5 -> qt6 bridge below.
-    static const QString kLegacyOrganizationName = QStringLiteral("Seamly2DTeam");
+    static const QString kLegacyOrganizationName = QStringLiteral("SeamlyTeam");
     const QSettings legacyCommonProbe(QSettings::IniFormat, QSettings::UserScope,
                                       kLegacyOrganizationName, QCoreApplication::applicationName());
     const QString legacyDir = QFileInfo(legacyCommonProbe.fileName()).absolutePath();

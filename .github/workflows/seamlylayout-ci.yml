@@ -7,7 +7,7 @@ name: SeamlyLayout CI
 #
 # WHY A SEPARATE WORKFLOW FROM ci.yml:
 #   Task 30 removed the original reason — the Qt pin. This job used to carry a
-#   Qt 6.10.1 pin while `ci.yml` built seamly2d/seamlyme on a different release;
+#   Qt 6.11 pin while `ci.yml` built seamly2d/seamlyme on a different release;
 #   both are now Qt 6.11.1, so the two `QT_VERSION` values must simply be kept
 #   in step. The workflow stays separate for the reasons that remain true:
 #     * Different build system — SeamlyLayout is CMake/Ninja + Cargo/Corrosion,

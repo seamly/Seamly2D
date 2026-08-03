@@ -565,7 +565,7 @@ bool ApplicationME::event(QEvent *event)
 /// shared "Seamly" organization (AppData/Local/Seamly/SeamlyMe on Windows) instead of a
 /// flat .ini file sharing a folder with Seamly2D's. The "common" settings (shared across
 /// Seamly apps via VCommonSettings) still use Qt's native per-organization resolution and
-/// are bridged forward from the pre-unification "Seamly2DTeam" folder here too, since a
+/// are bridged forward from the pre-unification "SeamlyTeam" folder here too, since a
 /// user might run SeamlyMe before ever launching Seamly2D after an upgrade.
 void ApplicationME::openSettings()
 {
@@ -582,7 +582,7 @@ void ApplicationME::openSettings()
     // organization.
     QDir().mkpath(dir);
 
-    static const QString kLegacyOrganizationName = QStringLiteral("Seamly2DTeam");
+    static const QString kLegacyOrganizationName = QStringLiteral("SeamlyTeam");
     const QSettings legacyCommonProbe(QSettings::IniFormat, QSettings::UserScope,
                                       kLegacyOrganizationName, QCoreApplication::applicationName());
     const QString legacyDir = QFileInfo(legacyCommonProbe.fileName()).absolutePath();

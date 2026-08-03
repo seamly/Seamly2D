@@ -586,7 +586,7 @@ void TMainWindow::handleBodyScanner2()
     messageBox.exec();
 
 /*
-    VSettings *settings = new VSettings(QSettings::IniFormat, QSettings::UserScope, "Seamly2DTeam", "Seamly2D", this);
+    VSettings *settings = new VSettings(QSettings::IniFormat, QSettings::UserScope, "SeamlyTeam", "Seamly2D", this);
 
     QString to = "convert@seamly.io";
     QString name = settings->getCompanyName();

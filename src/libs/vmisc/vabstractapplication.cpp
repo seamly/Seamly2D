@@ -232,10 +232,10 @@ VCommonSettings *VAbstractApplication::Settings()
 /**
  * @brief MigrateSeamlySettingsLocation resolves this app's settings-file path under the
  * unified "Seamly" organization (Task 15), migrating the file forward from the
- * pre-unification "Seamly2DTeam" organization folder on first run after an upgrade.
+ * pre-unification "SeamlyTeam" organization folder on first run after an upgrade.
  *
  * Before Task 15, seamly2d and seamlyme each stored one flat .ini file (named after the
- * application) as a sibling inside a single shared "Seamly2DTeam" organization folder
+ * application) as a sibling inside a single shared "SeamlyTeam" organization folder
  * (Qt's native IniFormat/UserScope resolution). After Task 15 every Seamly application
  * gets its own directory nested under the "Seamly" organization instead — QStandardPaths
  * ::AppConfigLocation already resolves to AppData/Local/Seamly/<AppName> on Windows once
@@ -277,9 +277,9 @@ QString VAbstractApplication::MigrateSeamlySettingsLocation(const QString &appIn
         return newAppIniPath;
     }
 
-    // Legacy home: pre-Task-15 builds used organization name "Seamly2DTeam", with both
+    // Legacy home: pre-Task-15 builds used organization name "SeamlyTeam", with both
     // apps' settings living as sibling flat files in that one shared folder.
-    static const QString kLegacyOrganizationName = QStringLiteral("Seamly2DTeam");
+    static const QString kLegacyOrganizationName = QStringLiteral("SeamlyTeam");
     const QSettings legacyProbe(QSettings::IniFormat, QSettings::UserScope,
                                 kLegacyOrganizationName, QCoreApplication::applicationName());
     const QString legacyDir = QFileInfo(legacyProbe.fileName()).absolutePath();

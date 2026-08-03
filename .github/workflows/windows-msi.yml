@@ -9,7 +9,7 @@ name: Windows MSI
 #
 # ONE Qt FOR THE WHOLE FAMILY (Task 30):
 #   This job used to install two Qt kits — ci.yml's for the parent apps and a
-#   separate Qt 6.10.1 for SeamlyLayout — in a carefully ordered dance, because
+#   separate Qt 6.11.1 for SeamlyLayout — in a carefully ordered dance, because
 #   Qt's DLL and tool names are identical across releases and a second kit on
 #   PATH made the parent `qmake` bind to the wrong one. SeamlyLayout now builds
 #   against the same Qt 6.11.1 as the parents, so there is a single install

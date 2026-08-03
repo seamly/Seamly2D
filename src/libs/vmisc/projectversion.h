@@ -79,7 +79,7 @@ extern const QString APP_VERSION_STR;
 #define VER_INTERNALNAME_2D_STR     "Seamly2D"
 // Task 15: unified organization name — QSettings/QStandardPaths now resolve every Seamly
 // app's own settings under one shared "Seamly" folder (e.g. AppData/Local/Seamly/<App> on
-// Windows) instead of the old per-product "Seamly2DTeam" org. See vabstractapplication.h's
+// Windows) instead of the old per-product "SeamlyTeam" org. See vabstractapplication.h's
 // MigrateSeamlySettingsLocation() for the first-run migration from the old org folder.
 #define VER_COMPANYNAME_STR         "Seamly"
 #define VER_LEGALCOPYRIGHT_STR      "Copyright © 2014-2025 Seamly2D Team"

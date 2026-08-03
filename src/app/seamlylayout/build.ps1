@@ -42,7 +42,7 @@ if ((Test-Path (Join-Path $ScriptDir "CMakeLists.txt")) -and (Test-Path (Join-Pa
 
 # Qt kit (Task 30): SeamlyLayout builds against the same Qt release as the
 # seamly2d/seamlyme parent apps — Qt 6.11.1 msvc2022_64 or newer. Rather than
-# pinning one patch release (which broke the moment 6.10.1 was uninstalled),
+# pinning one patch release (which broke the moment 6.11.1 was uninstalled),
 # scan C:\Qt for msvc2022_64 kits and take the newest one that meets the
 # minimum required by qt_frontend/CMakeLists.txt's find_package(Qt6 6.11.1).
 $QtMinimumVersion = [version]"6.11.1"

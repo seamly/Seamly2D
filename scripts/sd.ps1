@@ -95,12 +95,15 @@ $ErrorActionPreference = 'Stop'
 # 6.11.9, and 6.11.x beats 6.10.x), and returns the qmake.exe of the newest kit
 # that actually contains msvc2022_64\bin\qmake.exe.
 #
-# Task 30/31: this used to be pinned to '^6\.10\.\d+$' and threw outright once
+# Task 30/31:
 # the machine moved to Qt 6.11.1 and the 6.10 kit was uninstalled. The version
-# is deliberately not hard-coded — the script follows whatever msvc2022_64 kit
+# is deliberately not hard-coded but it should be as we work as a team, independent
+# of this PCs installed software — the script currently follows whatever msvc2022_64 kit
 # is installed, so a Qt upgrade does not require editing the build scripts.
 # $MinimumQtVersion below is the floor the family currently builds against
 # (see src/app/seamlylayout/qt_frontend/CMakeLists.txt and ci.yml's QT_VERSION).
+# Upgrade scripts to use a named variable that holds the Qt version that the SeamlyTeam
+# is using in GitHub Actions at the origin.
 #
 # @return Full path to qmake.exe.
 #------------------------------------------------------------------------------

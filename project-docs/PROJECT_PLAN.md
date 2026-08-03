@@ -116,11 +116,11 @@ Keep the existing guards (zero pieces / zero in-layout pieces, 3993–4020) and 
 
 - **Id scheme**: `pattern-1`, `piece-<n>`, `piece-<n>-<type>-<m>` — unique, XML-valid. Breaking change for manual SVG export: piece `id` was previously the raw piece name; the name moves to `data-name` (strictly better for downstream tools). Call out in PR.
 - **Handoff file**: `<pattern-basename>.pieces.svg` beside the pattern file — persistent and debuggable; trivial to change to a temp file later if preferred.
-- **SeamlyLayout code**: tracked in the `src/app/seamlylayout/` subdirectory (Rust crates + Qt 6.10/QML frontend, built via `src/app/seamlylayout/qd.ps1`). It must stay out of the Seamly2D qmake build. Its `svg_dom` crate parses generic SVG DOM and defines no `data-*` expectations yet, so the attribute contract in this plan is the source of truth — document it in `project-docs/` and mirror it into `src/app/seamlylayout/docs/` so both apps develop against the same spec. The launch mechanism remains a preferences-configurable executable path (pointing at the built SeamlyLayout frontend).
+- **SeamlyLayout code**: tracked in the `src/app/seamlylayout/` subdirectory (Rust crates + Qt 6.11.1/QML frontend, built via `src/app/seamlylayout/qd.ps1`). It must stay out of the Seamly2D qmake build. Its `svg_dom` crate parses generic SVG DOM and defines no `data-*` expectations yet, so the attribute contract in this plan is the source of truth — document it in `project-docs/` and mirror it into `src/app/seamlylayout/docs/` so both apps develop against the same spec. The launch mechanism remains a preferences-configurable executable path (pointing at the built SeamlyLayout frontend).
 - **Notches**: one `data-type="notch"` group per piece for now; per-notch splitting is a small follow-on in `createNotchesItem` if the algorithm needs individual notches.
 - **Counters**: per-type counters local per piece; piece counter on the SvgGenerator instance (one instance = one file = one pattern).
 
-## Verification (Windows, Qt 6.8.3, MSVC 2022)
+## Verification (Windows, Qt 6.11.1, MSVC 2022)
 
 1. Build on branch `svg-update` (targets `vlayout`, `vformat`, `seamly2d` recompile).
 2. Export a baseline SVG (Export Pieces) before changes for visual diffing.

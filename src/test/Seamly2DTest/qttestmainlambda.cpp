@@ -132,7 +132,7 @@ void TestApplication2D::openSettings()
     // organization.
     QDir().mkpath(dir);
 
-    static const QString kLegacyOrganizationName = QStringLiteral("Seamly2DTeam");
+    static const QString kLegacyOrganizationName = QStringLiteral("SeamlyTeam");
     const QSettings legacyCommonProbe(QSettings::IniFormat, QSettings::UserScope,
                                       kLegacyOrganizationName, QCoreApplication::applicationName());
     const QString legacyDir = QFileInfo(legacyCommonProbe.fileName()).absolutePath();

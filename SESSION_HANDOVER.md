@@ -1,21 +1,25 @@
 # Session handover
 
-Only the **current** state lives here. Completed tasks are written up in
-`project-docs/TODO_COMPLETED.md`, and the reasoning behind shipped decisions
-lives beside the code it governs — for Windows packaging that is
-`scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
-re-accumulate finished-session narrative in this file.
+Only the **current** state lives here, described tersely in bulleted format whenever possible.
+
+Completed tasks are tersely written up in `project-docs/TODO_COMPLETED.md`,
+and the reasoning behind shipped decisions lives beside the code it governs —
+for Windows packaging that is `scripts/packaging/windows/README.md` and
+`INSTALL_DECISION_FLOW.md`.
+
+Do not re-accumulate finished-session narratives in this file.
+
+Remove deprecated data.
 
 ## Current state (2026-08-02): Task 51's install cycle has been run twice; the findings are filed as Tasks 61-67
 
 **Branch `task-51-msi-install-experience`, 12 commits, not pushed, no PR.**
 Tasks 51 and 60 stay open in `project-docs/TODO_MIGRATE.md`.
 
-The install-layout rework the user asked for "one thing at a time" is **complete**:
-step 1 (install to `C:\Program Files\SeamlyApps`) and step 2a (remove any
-pre-existing NSIS installation) are both implemented and both verified on the
-laptop. **There is no step 2b** — the user's message was cut off mid-sentence,
-and they later said not to expect more after 2a. Do not go looking for it.
+**Complete, both verified on the test laptop:**
+
+- install to `C:\Program Files\SeamlyApps`
+- remove any pre-existing NSIS installation
 
 ### What run 2 proved (2026-08-02, packages `26.7.44158` → `26.7.44161`)
 
@@ -29,7 +33,7 @@ Windows 11. That matters for one finding below.
    Its `uninstall.exe` is never run; we delete what it created, which
    `RemoveFiles` rolls back.
 3. **Task 60's migration works on a real profile** — `~/seamly2d` was copied
-   wholesale to `Documents\Seamly`: all eight existing folders including the
+   wholesale to `SeamlyData`: all eight existing folders including the
    user-added `bodyscans`, plus the nine standard ones so `images` finally
    exists; the legacy tree intact at 4 → 5 files (the gain is the marker); and
    `MIGRATED-TO-SEAMLY.txt` naming the new root and date.
@@ -61,15 +65,15 @@ real `.sm2d` opening through ShellExecute.
 Filed as tasks rather than Task 51 subtasks because they span three areas (the
 checker, the package authoring, the applications).
 
-| Task | Problem                                                                                                                        |
+| Task | Problem                                                                                                               |
 | ---- | ------------------------------------------------------------------------------------------------------------------------------ |
 | 61   | checker:`INSTALLSTATE` constants; inventory snapshotted before the migration; sample pattern needs a `.smis` the kit lacks |
 | 62   | ARP`DisplayIcon` (and possibly `Publisher`) never written to the registry                                                  |
-| 63   | wizard says "Seamly2D" while installing three apps                                                                             |
-| 64   | previous-install dialog too long, and names the dead`seamlyData` path; absorbs the 2826 geometry fix                         |
-| 65   | destination-folder wording, and whether`INSTALLFOLDER` becomes `Seamly`                                                    |
-| 66   | one ARP entry for three apps                                                                                                   |
-| 67   | first-run modal dialogs swallow a pattern opened by double-click                                                               |
+| 63   | wizard says "Seamly2D" while installing three apps                                                                         |
+| 64   | previous-install dialog too long, and names the dead`seamlyData` path; absorbs the 2826 geometry fix                       |
+| 65   | destination-folder wording, and whether`INSTALLFOLDER` becomes `Seamly`                       |
+| 66   | one ARP entry for three apps                                                                  |
+| 67   | first-run modal dialogs swallow a pattern opened by double-click                              |
 
 **Task 61 must land before the uninstall leg**, or the same four false failures
 reappear in the next transcript.
@@ -120,11 +124,12 @@ in both test scripts, `INSTALL_DECISION_FLOW.md` and the READMEs. There is also
 a wrinkle: showing `C:\Program Files\` in the edit box while silently appending
 `Seamly` means the control no longer displays the path it edits. **Ask before
 changing `INSTALLFOLDER`**. -->
-- use `C:\Program Files\` as the default parent program directory and `Seamly` as the program directory (child of the parent program directory), display the final program directory path (user selected parentprogramdrive & parentprogramdirectory + `Seamly`) to the user then accept OK to continue or Cancel to exit. This question is now answered to follow recommended best practices for naming application directories.
+
+- use `C:\Program Files\` as the default parent program directory and `SeamlyApps` as the program directory (child of the parent program directory), display the final program directory path (user selected \<parentprogramdrive>:\<parentprogramdirectory>\ + `SeamlyApps`) to the user, then accept OK to continue or Cancel to exit. This approach follows recommended best practices.
 
 ### Task 60 — implemented, and verified where it counts least
 
-`getDefaultDataRoot()` → `<DocumentsLocation>/Seamly`; `migrateDataTree()` does a
+`getDefaultDataRoot()` → `<user home directory/SeamlyData`; `migrateDataTree()` does a
 wholesale recursive copy, merge-never-overwrite, size-verified per file,
 refusing a destination nested inside the source and never deleting the source;
 `markDataTreeMigrated()` / `dataTreeWasMigrated()` handle the marker;
@@ -135,11 +140,13 @@ verifies. `TST_DataRoot` is 28 cases.
 four files, so the copy was instant. **A multi-gigabyte copy still blocks
 startup silently** — the user's own tree is ~17 GB on a cloud drive — and the UX
 (progress, cancel, or defer-and-offer) is undecided. -->
+
 - Prompt the user whether to copy current data files to new directory location (Y/N). This question is now answered to follow recommended best practices for updating applications.
 
 Two Task 60 subtasks remain: three-root detection (only the `~/seamly2d`-alone
 case has been exercised) and `pruneEmptyLegacyDataRoot()` against the new
 three-root world. -->
+
 - list the remaining two cases that have not been excercised to the user
 
 ### The test kit, and where the evidence is
@@ -158,11 +165,15 @@ eight earlier transcripts are tracked in `installation-troubleshooting/`.
 3. Ask about Task 65 before touching `INSTALLFOLDER`.
 4. Decide Task 60's large-copy UX before that migration ships to anyone.
 5. Fix `SeamlyShortcutsDlg` via a UI-only test MSI, plus the 373→370 geometry.
-6. Repair Visual Studio, then re-run `scripts/sd.ps1`.
+6. Repair Visual Studio, then re-run `scripts/sd.ps1`. --> c++ extension "Apply the Visual Studio developer environment" has been turned on.
 7. Push the branch and open the PR to `run-seamlyLayout` once Task 51 lands.
 
 ## MACHINE STATE: the Visual Studio installation is broken
 
+2026-08-03- c++ extension "Apply the Visual Studio developer environment" has been turned on.
+The VS installation is set to be the primary cl/ build environment.
+
+This may be deprecated information:
 **`scripts/sd.ps1` fails with `'cl' is not recognized`.** Not the script, and not
 the agent sandbox — the same failure occurs with the sandbox disabled:
 
@@ -208,22 +219,19 @@ Reversible with `wix extension remove`. `smsi.ps1` requires it, and
 ## Decisions the user has ANSWERED (act on these, do not re-ask)
 
 1. **Task 54's file-name form** → **`SettingsCommon.h`**, i.e. the file name
-   matches the class name (the style guide's class-match exception wins over the
+   should match the class name (the style guide's class-match exception wins over the
    `settings_*` snake_case prefix for class-defining files).
 2. **`.github/README-DEVELOPER-NEW.md`** → **rename it to
    `.github/README-DEVELOPER-SEAMLY-FAMILY.md`**, to be folded into
    `.github/README-DEVELOPER.md` when the migration is complete. **Not done yet.**
 3. **Qt WebChannel / Qt Positioning documentation** → maintain it in
    `.github/README-DEVELOPER-SEAMLY-FAMILY.md` until the migration completes.
-4. **`src/app/seamly2d/core/BUILD_PROBLEMS.txt`** → delete it if it is not
-   useful. **Not done yet.**
-5. **Testing happens on the test laptop, not in a VM** (re-confirmed 2026-07-30).
-   This PC is Windows 11 **Home**, which ships neither Hyper-V nor Windows
-   Sandbox, so a VM here means a third-party hypervisor; the user considered
-   VirtualBox and VMware Workstation Pro and declined both. A VM could not close
-   two checklist items anyway — the *verified-publisher* UAC prompt needs Task
-   33's signing, and the arm64 repeat needs arm64 hardware.
-6. **Data migration is copy-and-verify, leaving the legacy tree intact** — never
+4. **`src/app/seamly2d/core/BUILD_PROBLEMS.txt`** → maintain this file. Delete it
+   after the installation .msi files have been built for 64-bit & 32-bit
+   for amd64 and arm64. **Not done yet.**
+5. **Installation testing happens on the test laptop, not in a VM**
+   No VM available, re-confirmed 2026-07-30.
+6. **Data migration is copy-and-verify on first launch, leaving the legacy tree intact** — never
    a bare rename, because a user may need to roll back to an earlier release.
 7. **The migration lives in the applications, not the installer.** A per-machine
    MSI's server side runs as LocalSystem, so a per-user path resolves to the
@@ -237,25 +245,26 @@ Reversible with `wix extension remove`. `smsi.ps1` requires it, and
   re-creates it under `applicationDirPath()`, so from any other CWD it aborts on
   the leftover directory from the previous run ("Fail to prepare test files for
   testing"). Use `Start-Process … -WorkingDirectory <that bin>`.
-- **A SeamlyLayout build-tree exe needs Qt on `PATH` to launch.** There is no
-  windeployqt output beside `qt_frontend/build/Debug/SeamlyLayout.exe`, so from a
+- **A SeamlyLayout build-tree exe needs Qt on `PATH` to launch.** 2026-08-03 --
+  C:\Qt\6.11.1\msvc2022_64\bin is in the system path.
+  This may be deprecated data:
+  There is no windeployqt output beside `qt_frontend/build/Debug/SeamlyLayout.exe`, so from a
   plain shell it starts and does nothing — no log file is even created. Prepend
   `C:\Qt\6.11.1\msvc2022_64\bin`. `ctest` handles this itself via the
   `ENVIRONMENT_MODIFICATION` added in Task 58.
-- **SeamlyLayout's log file has two independent writers and they overwrite each
-  other.** C++ `Logger` holds a buffered `QTextStream` on the file while Rust's
+- **SeamlyLayout's log file has 2 independent writers that overwrite each other.**
+  C++ `Logger` holds a buffered `QTextStream` on the file while Rust's
   `log_to_file()` opens/appends per call, so lines get clipped mid-string. Do not
   conclude a log line is absent because it looks truncated — grep for a
   distinctive fragment.
 - **A tagged handoff SVG can be produced headlessly**, without driving the Layout
-  Mode GUI: `seamly2d.exe <pattern>.sm2d -b <name> -d <dir> -f 0 --exportOnlyDetails` writes `<name>_pieces.svg` through the same `exportSVG()`
-  that `generatePiecesSvg()` uses.
+  Mode GUI: `seamly2d.exe <pattern>.sm2d -b <name> -d <dir> -f 0 --exportOnlyDetails` writes `<name>_pieces.svg` through the same `exportSVG()` that `generatePiecesSvg()` uses.
 - **`QCommandLineParser::parse()` ≠ `process()`.** `process()` prints to a console
   this GUI-subsystem app does not have on Windows, and calls `exit()`. `parse()`
   returns a bool and fills `errorText()`.
 - **A `develop` merge can silently drop doc edits made on this branch.** After
   merging `develop`, `git log -S "<a phrase you added>" -- <file>` is the cheapest
-  way to confirm your change survived.
+  way to confirm your change survived. Best solution
 - **`QSettings(fileName, format, parent)` records neither an organization nor an
   application name** — both come back empty, and QSettings substitutes the literal
   `"Unknown Organization"`. Root cause of the stray files in Tasks 34 and 52.
@@ -269,8 +278,8 @@ Reversible with `wix extension remove`. `smsi.ps1` requires it, and
 - **`scripts\st.ps1` runs only `Seamly2DTests.exe`.** CI's `make check` runs four
   binaries — `Seamly2DTest`, `CollectionTest`, `ParserTest`, `TranslationsTest`.
   Run the other three by hand before pushing.
-- **`gh` is not on this agent shell's `PATH`** — invoke it as
-  `& "C:\Program Files\GitHub CLI\gh.exe"`.
+- **`gh` is not on this agent shell's `PATH`** — 2026-08-03 - Github CLI is on the system path.
+  This data may be deprecated. Invoke GitHub's CLI gh.exe as `& "C:\Program Files\GitHub CLI\gh.exe"`.
 - **The sandbox blocks a command containing both a `Remove-Item` and a protected
   path string** — `G:` paths and `C:\Program Files` have both triggered it, even
   when the deletion targets something else entirely (the MSVC environment
@@ -282,8 +291,8 @@ Reversible with `wix extension remove`. `smsi.ps1` requires it, and
   does not exist". The tree can only be regenerated, not repaired: delete it and
   re-run qmake. Same failure shape as the toolchain-change trap in
   `.github/README-BUILDS.md`. The build and packaging directory names are now
-  `-BuildDirName` / `-OutputDirName` parameters; **a new value needs a matching
-  `.gitignore` entry**, and for packaging also the CI artifact path.
+  `-BuildDirName` / `-OutputDirName` parameters;
+  **a new value needs a matching `.gitignore` entry**, and for packaging also the CI artifact path.
 - **PowerShell here-strings passed to `git commit -m` get mangled** when the
   message contains quotes; write the message to a file and use `git commit -F`.
 - **clangd diagnostics in this repo are noise.** The tree has no
@@ -300,6 +309,6 @@ Reversible with `wix extension remove`. `smsi.ps1` requires it, and
   captured stdout. Run with `-o <file>,txt` and `QT_QPA_PLATFORM=offscreen`.
 - **`$proFile` collides with the automatic `$PROFILE`** (case-insensitive);
   `sd.ps1` still has it.
-- **Historical 6.10 references and old directory names in
+- Deprecated: **Historical 6.10 references and old directory names in
   `project-docs/TODO_COMPLETED.md` and `project-docs/PROJECT_PLAN.md` are
   deliberate** — they record what was true at the time.

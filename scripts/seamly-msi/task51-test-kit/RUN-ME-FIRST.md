@@ -11,12 +11,12 @@ These packages are built from current source and differ from run 1 in four ways,
 3. **Your user data is COPIED to `Documents\Seamly` on first launch.** The whole tree comes across, including folders you added yourself. **Nothing is moved or deleted:** `C:\Users\susan\seamly2d` stays exactly as it is and gains a `MIGRATED-TO-SEAMLY.txt` saying where the copy went, so you can roll back.
 4. **The nine standard subfolders are created** at the new root — including the `images` folder your NSIS install never made.
 
-| File | What it is |
-|---|---|
-| `Seamly-x64-older.msi` | install this one FIRST |
-| `Seamly-x64-newer.msi` | the upgrade, built later so it genuinely major-upgrades |
-| `test_msi_install.ps1` | the automated checker, run between the msiexec steps |
-| `sample-pattern.sm2d` | used to prove the `.sm2d` association opens *and loads* |
+| File                     | What it is                                                 |
+| ------------------------ | ---------------------------------------------------------- |
+| `Seamly-x64-older.msi` | install this one FIRST                                     |
+| `Seamly-x64-newer.msi` | the upgrade, built later so it genuinely major-upgrades    |
+| `test_msi_install.ps1` | the automated checker, run between the msiexec steps       |
+| `sample-pattern.sm2d`  | used to prove the`.sm2d` association opens *and loads* |
 
 ## Expected starting state
 
@@ -96,7 +96,7 @@ msiexec /i Seamly-x64-older.msi
 - [X] **A "Shortcuts" page is expected NOT to appear — known defect, nothing to report.** Desktop shortcuts are created anyway, because the setting defaults to on.
 
 TODO: Window title is 'Seamly2D Setup' --> change this to 'Seamly Setup'
-TODO: Users shouldn't have added any of their own files to C:\Program Files (x86)\Seamly2D so don't tell users to move anything of their own out of it before continuing. The text should be shortened to 'An older Seamly2D version was found in C:\Program Files (x86)\Seamly2D.'
+TODO: Users shouldn't have added any of their own files to `C:\Program Files (x86)\Seamly2D` so don't tell users to move anything of their own out of it before continuing. The text should be shortened to 'An older Seamly2D version was found in `C:\Program Files (x86)\Seamly2D`.'
 TODO: Make the text "Your own work..." much more terse.
 TODO: Change 'Welcome to the Seamly2D Setup Wizard' to 'Welcome to the Seamly Setup Wizard'
 TODO: Change 'The Setup Wizard with install Seamly2D on your computer. Click Next to continue or Cancel to exit the Setup Wizard.' to 'The Setup Wizard will install Seamly2D, SeamlyLayout, and SeamlyMe on your computer. Click Next to continue or Cancel to exit the Setup Wizard.'
@@ -112,6 +112,7 @@ TODO: In the 'Completed the Seamly2D Setup Wizard' page, change 'Completed the S
 ```powershell
 .\test_msi_install.ps1 -Phase Installed -ExpectSeamlyLayout -PatternFile .\sample-pattern.sm2d
 ```
+
 Checks the installed files and Qt runtime, shortcuts, registry rows, the Apps &
 features entry, all three associations, that **each app actually starts**
 (windows will flash up), that the sample pattern opens through its association —
@@ -127,7 +128,7 @@ TODO: Popup the Seamly2D welcome dialog and wait for OK or Cancel to close the d
 Then by eye:
 
 - [X] **Apps & features lists exactly ONE Seamly2D**, with a version and
-      publisher "Seamly2D Project". The old publisher-less entry is gone.
+  publisher "Seamly2D Project". The old publisher-less entry is gone.
 - [X] `C:\Program Files (x86)\Seamly2D` no longer exists.
 - [ ] Explorer shows the Seamly icons on `sample-pattern.sm2d`.
 
@@ -155,7 +156,6 @@ Get-ChildItem "$env:USERPROFILE\Documents\Seamly\patterns"
 Get-Content "$env:USERPROFILE\seamly2d\MIGRATED-TO-SEAMLY.txt"
 ```
 
-
 Response #1:
 "backups
 bodyscans
@@ -172,15 +172,16 @@ Response #2:
 Response #3:
 "    Directory: C:\Users\susan\Documents\Seamly\patterns
 
-
 Mode                 LastWriteTime         Length Name
-----                 -------------         ------ ----
+
+---
+
 -a----         7/30/2026   7:02 PM           1120 pattern.sm2d
 "
 
 - [ ] `Documents\Seamly` exists and contains **everything the old tree had**,
-      including any folders you created yourself, plus the nine standard ones —
-      `images` among them.
+  including any folders you created yourself, plus the nine standard ones —
+  `images` among them.
 - [ ] **Your pattern is in `Documents\Seamly\patterns\`.**
 - [ ] The old tree's file count is **unchanged** from what you recorded in step 1.
 - [ ] `MIGRATED-TO-SEAMLY.txt` exists in the old tree and names the new location.
@@ -206,7 +207,7 @@ msiexec /i Seamly-x64-newer.msi
 ```
 
 - [X] The existing-installation page appears again, this time with the
-      **upgrade** paragraph, not the NSIS one.
+  **upgrade** paragraph, not the NSIS one.
 
 Response:
 "An earlier version of Seamly2D installed by this installer was found. Setup will remove its program files and install this version in their place.
@@ -215,9 +216,7 @@ Clicked OK, then 'Welcome to the Seamly2D Setup Wizard' page appears.
 
 Issue: Should prompt with 'C:\Users\<your name>\Documents\Seamly' instead of 'C:\Users\<your name>\seamlyData'
 Issue: Change 'Install Seamly2D to' should say 'Install Seamly to'
-Issue: Change prompt default 'C:\Program Files\SeamlyApps\' to 'C:\Program Files\Seamly' or 'C:\Program Files\seamly\'
-
-
+Issue: Change prompt default 'C:\Program Files\SeamlyApps\' to 'C:\Program Files\'
 
 ```powershell
 .\test_msi_install.ps1 -Phase Upgraded -ExpectSeamlyLayout -PatternFile .\sample-pattern.sm2d
@@ -231,11 +230,12 @@ Displays Seamly2D welcome dialog (disappears without input from user), SeamlyMe 
 
 Response:
 "...MSI install check FAILED at phase 'Upgraded' - 4 problem(s):
-  - ARP icon is set
-  - Start Menu shortcut 'Seamly2D' resolves to an installed file
-  - Start Menu shortcut 'SeamlyMe' resolves to an installed file
-  - Start Menu shortcut 'SeamlyLayout' resolves to an installed file
-"
+
+- ARP icon is set
+- Start Menu shortcut 'Seamly2D' resolves to an installed file
+- Start Menu shortcut 'SeamlyMe' resolves to an installed file
+- Start Menu shortcut 'SeamlyLayout' resolves to an installed file
+  "
 
 ## 6. Uninstall
 
@@ -244,28 +244,22 @@ msiexec /x Seamly-x64-newer.msi
 .\test_msi_install.ps1 -Phase Removed
 ```
 
-- [ ] Program files, both sets of shortcuts, registry rows, ARP entry and all
-      three associations gone.
+- [ ] Program files, both sets of shortcuts, registry rows, ARP entry and all three associations gone.
 - [ ] Apps & features lists no Seamly2D at all.
-- [ ] **Both** `Documents\Seamly` and `seamly2d` still hold your files.
+- [ ] **Both** `C:\Users\<user>\SeamlyData` and `seamly2d` still hold your files.
 
-Issue: "Please wait while Windows configures Seamly2D" --> change 'Seamly2D' to 'Seamly'
+Issue: "Please wait while Windows configures Seamly2D" --> change 'Seamly2D' to 'SeamlyData'
 
 ```powershell
 Stop-Transcript
 ```
 
-- [X] Send back `task51-run2.txt` from your Desktop, plus your answers to the
-      by-eye boxes.
+- [X] Send back `task51-run2.txt` from your Desktop, plus your answers to the by-eye boxes.
 
 ## If something fails
 
-The checker prints one line per expectation and lists failures at the end, so
-the failing line is the report. Send the transcript as-is.
+The checker prints one line per expectation and lists failures at the end, so the failing line is the report. Send the transcript as-is.
 
 To reset: uninstall from Apps & features, delete
-`%LOCALAPPDATA%\seamly-msi-install-test`, and go back to step 1. The NSIS
-install cannot be restored by starting over — re-run the old installer if you
-need that path again. To re-test the **migration**, also delete
-`Documents\Seamly` and the `MIGRATED-TO-SEAMLY.txt` marker, or the app will
+`%LOCALAPPDATA%\seamly-msi-install-test`, and go back to step 1. The NSIS install cannot be restored by starting over — re-run the old installer if you need that path again. To re-test the **migration**, also delete `<parentdatadrive>:\<parentdatadirectory>` and the `MIGRATED-TO-SEAMLY.txt` marker, or the app will
 correctly decline to migrate a second time.

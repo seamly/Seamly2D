@@ -111,7 +111,7 @@ private:
     std::shared_ptr<QTextStream>       m_out;
 
     // Task 15: set true by openSettings() when it pulls settings forward from the legacy
-    // "Seamly2DTeam" organization folder; checked once command-line parsing has determined
+    // "SeamlyTeam" organization folder; checked once command-line parsing has determined
     // GUI vs console mode, so the one-time migration notice never blocks a headless run.
     bool                                m_settingsMigrated{false};
 
