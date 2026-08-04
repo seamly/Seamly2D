@@ -1,306 +1,139 @@
-# TODO — Migrate SeamlyLayout into the Seamly2D structure
+# TODO — Create the combined MSI installer for Seamly2D, SeamlyMe, and SeamlyLayout
 
-Tasks for migrating the SeamlyLayout app into the Seamly2D structure — where SeamlyMe and SeamlyLayout are callable from within Seamly2D and all three apps are distributed together for installation on a user's computer.
+Tasks for creating an .msi file for installation on a user's amd64 computer with Windows 10 or Windows 11.
 
-See `project-docs/PROJECT_PLAN.md` for full details. Check off subtasks as they are accomplished; when every subtask of a task is complete, move the task to `project-docs/TODO_COMPLETED.md`.
+Check off subtasks as they are accomplished; when every subtask of a task is complete, move the task to `project-docs/TODO_COMPLETED.md`.
 
 If decisions are required for any portion of a task or subtask, present the user with radio buttons to select options including 'Other'.
 
-Check off all completed tasks & subtasks and move completed tasks to TODO_COMPLETED.md
+## Task 14 — Windows installer: choose program and user-data paths
 
-## Task 14 — Windows installer: prompt for executable and user-data install paths
+**Dependencies:** Task 13 (family MSI), Task 34 (`SeamlyData` rename), Task 38 (standalone-install replacement and data protection).
 
-- [ ] 14.1 In the updated Windows installation process (Task 13 installer), prompt the user for two locations instead of hard-coding the defaults:
-  - [ ] 14.1.1 **Executable install path** — where the Seamly executables go. Default `C:\Program Files\SeamlyApps`; must support any drive/filepath but not cloud-synced drives (use case: `D:\Program Files\SeamlyApps` if C: drive is too full) and add the chosen executable directory to the system `PATH` automatically.
-  - [ ] 14.1.2 Set the default program install folder to `SeamlyApps` (was `Seamly2D`): rename `INSTALLFOLDER Name="Seamly2D"` → `"Seamly"` in `scripts/packaging/windows/seamly-family.wxs` and every reference to it (the `…\Seamly\SeamlyLayout\` subfolder, shortcut `WorkingDirectory`, the `.sm2d`/`.smis`/`.smms` association `DefaultIcon`/verb targets, and the `HKLM\SOFTWARE\Seamly\Seamly2D` `InstallPath` value), keeping the fixed `UpgradeCode` so an existing `Seamly2D`-folder install still upgrades in place (the old folder is removed by `MajorUpgrade` and the files reland under `Seamly`)
-  - [ ] 14.1.3 Default the user-data-root prompt to `C:\Users\<user>\seamlyData` (per the shared rename in Task 34) and confirm the directory picker accepts any drive/path so the cloud use case `G:\My Drive\seamlyData` works without hand-moving files
-- [ ] 14.2 Add an installer UI page (or command-line properties for silent installs) prompting for the `SeamlyApps` executable install directory, prefilled with the `C:\Program Files\` defaults, accepting any drive and filepath, that will be used to create the app drive:\directory as `<parentappdrive>:\<parentappdirectory>\SeamlyApps`
-- [ ] 14.3 Add a second installer prompt for the `SeamlyData` user data root, prefilled with `C:\Users\<user>\`, accepting any drive and filepath (including cloud-synced locations like `G:\My Drive\seamly2d`). If user changes their user data root path from their current user data root path, ask user to confirm their decision to move their data (OK / Cancel) then tellthem their data will be copied over (leaving a copy in the old location) during the first run of the newly installed `Seamly2D` application, and ask them if they wish to proceed with their decision (Y/N?).
-- [ ] 14.4 On install, append the chosen executable directory to the system `PATH` (machine-wide, with proper broadcast so new shells pick it up); remove it on uninstall
-- [ ] 14.5 On install, register the chosen user data path automatically — add to the system `PATH` as requested, and/or persist it where the apps read it (registry/`QSettings`) so seamly2d/seamlyme/seamlylayout use it as their default data location; remove/clean up on uninstall
-- [ ] 14.6 Make the apps honor the configured user data path on first run (no re-prompting, no using hard-coded values)
-- [ ] 14.7 Handle upgrades: preserve both previously chosen paths when a newer MSI upgrades in place
-- [ ] 14.8 Verify use case #1: fresh install to `C:\Program Files\SeamlyApps` with data at `C:\Users\<user>\SeamlyData`, exes run from there, directory present on system `PATH` --> pattern file is found and opened in Seamly2D, measurement file is found and opened in SeamlyMe, svg file is found and opened in SeamlyLayout; uninstall cleans it up.
-- [ ] 14.9 Verify use case #2: user executable root reads and prompts with original executable root, user sets executable root to USB drive `E:\Programs\` + `SeamlyApps` -- original executable root is `C:\Program Files (x86)\Seamly2D`; user data root reads and prompts with original data root, user sets data root to `E:\` + `SeamlyData`, original data root is `C:\Users\<user>\seamly2d`. check:
-  - [ ] installer adds paths to PATH
-  - [ ] installer adds desktop icons
-  - [ ] installer asks if user wants to open Seamly apps (user enters Y)
-  - [ ] pattern file is found and opened in Seamly2D
-  - [ ] measurement file is found and opened in SeamlyMe
-  - [ ] svg file is found and opened in SeamlyLayout
-  - [ ] after apps close:
-    - [ ] paths registered automatically
-    - [ ] original data was not deleted during data migration
-  - [ ] user uninstalls apps
-    - [ ] check uninstall
-      - [ ] apps removed
-      - [ ] data not removed
-      - [ ] path cleaned up
-      - [ ] desktop icons cleaned up
-- [ ] V14.10 Verify use case #3, user executable root reads and prompts with original executable root, user updates executable root to`C:\Program Files` + `SeamlyData`, user data root reads and prompts user with original user data root `G:\My Drive\seamly2d`, user updates data root to `G:\My Drive\` + `SeamlyData` --> add paths to PATH, open Seamly apps -->
-  - [ ] installer adds paths to PATH
-  - [ ] installer adds desktop icons
-  - [ ] installer asks if user wants to open Seamly apps (user enters Y)
-  - [ ] pattern file is found and opened in Seamly2D
-  - [ ] measurement file is found and opened in SeamlyMe
-  - [ ] svg file is found and opened in SeamlyLayout
-  - [ ] after apps close:
-    - [ ] paths registered automatically
-    - [ ] original data was not deleted during data migration
-  - [ ] user uninstalls apps
-    - [ ] check uninstall
-      - [ ] apps removed
-      - [ ] data not removed
-      - [ ] path cleaned up
-      - [ ] desktop icons cleaned up
-- [ ] 14.11 Document both prompts and the silent-install property equivalents in the installer docs
-- [ ] 14.12 **User data path** — root of the Seamly user data file tree. Default is `C:\Users\<user>\SeamlyData`;
-  - [ ] 14.12.1 must support any drive/filepath, including cloud-synced drives (use case: `G:\My Drive\seamly2d` so patterns/measurements are accessible while traveling);
-  - [ ] 14.12.2 register the chosen user data path automatically (add to the system `PATH` per the request);
-  - [ ] 14.12.3  evaluate whether an env var / registry setting / app config is the more appropriate mechanism for a data directory and document the decision then implement the decision.
-  - [ ] 14.12.4 Add the user data path and the apps path to the user's `PATH` variable. The user re-turned to using `SeamlyData`as the parent user data directory, and — the more important half — **user documents are now separated from internal application state**, which the current design does not do. The **migration mechanics below are unaffected and still wanted**; what changes is the destination they migrate to.
-  - [ ] 14.12.5 The program folder is now `C:\Program Files\SeamlyApps`(Task 51), and **nothing is added to the system`PATH`** — the claim that the NSIS installer did so was wrong, `dist/seamly2d-installer.nsi` contains no PATH handling at all. Add Seamly executable and data paths to the user PATH.
+- [ ] **14.1 Program directory**
 
-## Task 13 — Windows MSI installer (x64 and arm64)
+  - Default to `C:\Program Files\SeamlyApps`.
+  - Update `seamly-family.wxs` and all shortcuts, file associations, registry values, and SeamlyLayout paths.
+  - Accept any local or removable drive/path; reject cloud-synced locations.
+  - Add a `Change` button and silent-install property.
 
-Build locally for Windows x64 using scripts, MSVC, Qt 6.11.1, Rust, etc. The x64 MSI installs Seamly2D, SeamlyMe, and SeamlyLayout apps; Utilize user's AppData directories to store app state, etc.
+- [ ] **14.2 User-data directory**
 
-Prerequisite: Seamly2D must be able to launch SeamlyLayout and SeamlyMe.
+  - Default to `C:\Users\<user>\SeamlyData`.
+  - Accept any drive/path, including OneDrive, Google Drive, Dropbox, external drives, and USB media.
+  - Add a `Change` button and silent-install property.
 
-- [ ] 13.1 Configure WiX v6 and create one bundled MSI per architecture. WiX v7 requires an unevaluated OSMF EULA. See `scripts/packaging/windows/seamly-family.wxs`.
-- [ ] 13.2 Build Seamly-windows.msi with Seamly2D, SeamlyMe, and SeamlyLayout and their shared Qt runtime using Qt 6.11.1, QML modules,WebEngine, and app-local MSVC runtime. Rust is statically linked.
-- [ ] 13.3 Add Start Menu shortcuts for Seamly2D, SeamlyLayout, and SeamlyMe, in-place upgrades, clean uninstall, and file associations for .sm2d, .smis, and .smms.
-- [ ] 13.4 Preserve all user data during installation
-- [ ] 13.5 Build Seamly2D-arm64.msi with Seamly2D, SeamlyMe, and SeamlLayout similarly to the Windows 64-bit build above but for amd64.
-- [ ] 13.6 Sign with jsign when SEAMLY_SIGNING_PROJECT_ID is available.
-- [ ] 13.7 Add local builds through `scripts/smsi.ps1` and `x64/arm64` CI builds through `.github/workflows/windows-msi.yml`.
-- [ ] 13.8 Test clean installation, launch, shortcuts, associations, upgrade, and uninstall on x64 and, if available, arm64.
-- [ ] 13.9 Static x64 validation passed on 2026-07-22; clean-machine testing remains.
-- [ ] 13.10 Document building, signing, and verification occur in:
+- [ ] **14.3 Persist both selections** and prefill them during repair or upgrade.
+- [ ] **14.4 Register the data root** through a dedicated environment variable, registry value, or application setting so all three apps use it without prompting. Document the selected mechanism.
+- [ ] **14.5 Add the executable and data directories to the current user’s `PATH`**, broadcast the change, and remove only installer-created entries during uninstall.
+- [ ] **14.6 When the data root changes:**
+
+  - Explain that first run will copy existing data without deleting the source.
+  - Require confirmation before continuing.
+  - Copy only missing files; never overwrite existing destination files.
+
+- [ ] **14.7 Make Seamly2D, SeamlyMe, and SeamlyLayout honor the configured data root on first run and thereafter.**
+- [ ] **14.8 Preserve user data during uninstall;** remove applications, shortcuts, registry/configuration entries, and installer-created `PATH` entries only.
+- [ ] **14.9 Optionally offer to launch the Seamly applications after installation.**
+- [ ] **14.10 Document** both prompts, silent-install properties, path registration, migration behavior, and uninstall behavior in:
+
+  - `scripts/packaging/windows/README.md`
+  - `.github/README-BUILDS.md`
+
+### Verification
+
+- [ ] **14.11 Fresh install**
+
+  - Programs: `C:\Program Files\SeamlyApps`
+  - Data: `C:\Users\<user>\SeamlyData`
+
+- [ ] **14.12 Standalone migration**
+
+  - Programs: `C:\Program Files (x86)\Seamly2D` → `E:\Programs\SeamlyApps`
+  - Data: `C:\Users\<user>\seamly2d` → `E:\SeamlyData`
+
+- [ ] **14.13 Cloud-data migration**
+
+  - Programs: `C:\Program Files\SeamlyApps`
+  - Data: `G:\My Drive\seamly2d` → `G:\My Drive\SeamlyData`
+
+- [ ] **14.14 For each scenario, verify:**
+
+  - The installer remembers and registers both paths.
+  - Desktop shortcuts are created.
+  - `.sm2d`, measurement, and SVG files open in the correct app.
+  - Existing data is copied without overwrite or deletion.
+  - Upgrade preserves both paths.
+  - Uninstall removes apps, shortcuts, and installer-created `PATH` entries while preserving data.
+
+## Task 13 — Windows MSI installer (x64 and ARM64)
+
+Build one WiX v6 MSI per architecture containing Seamly2D, SeamlyMe, SeamlyLayout, and their dependencies. Store application state in the appropriate AppData directories; user-data paths and migration are covered by Task 14.
+
+**Related:** Task 14 (path selection and data migration), Task 34 (data-root structure), Task 38 (standalone-install replacement).
+
+- [ ] **13.1 Configure WiX v6** using `scripts/packaging/windows/seamly-family.wxs`. Do not adopt WiX v7 until its OSMF EULA is approved.
+- [ ] **13.2 Build x64 and ARM64 MSIs** containing:
+
+  - Seamly2D, SeamlyMe, and SeamlyLayout
+  - Qt 6.11.1 runtime, QML modules, and WebEngine
+  - App-local MSVC runtime
+  - Statically linked Rust dependencies
+- [ ] **13.3 Add Windows integration:**
+
+  - Start Menu shortcuts for all three apps
+  - `.sm2d`, `.smis`, and `.smms` associations
+  - In-place major upgrades
+  - Clean application uninstall
+- [ ] **13.4 Preserve all user data** during installation, upgrade, repair, and uninstall.
+- [ ] **13.5 Sign MSI artifacts with `jsign`** when `SEAMLY_SIGNING_PROJECT_ID` is available.
+- [ ] **13.6 Support builds through:**
+
+  - Local: `scripts/smsi.ps1`
+  - CI: `.github/workflows/windows-msi.yml`
+- [ ] **13.7 Test both architectures**, where hardware is available:
+
+  - Clean installation and launch
+  - Shortcuts and file associations
+  - Upgrade and repair
+  - Uninstall without data removal
+
+- [x] **13.8 Complete static x64 validation** — passed July 22, 2026; clean-machine testing remains.
+- [ ] **13.9 Document building, signing, and verification in:**
+
   - `scripts/packaging/windows/README.md`
   - `.github/README-BUILDS.md`
   - `.github/workflows/README_WORKFLOWS.md`
-- [ ] 13.12 **Update (2026-07-26) — moving an existing data tree:** Task 34 made the program root relocatable but so far **nothing moves the user's data files**.
-  - [ ] 13.12.1 Fix the current bad implementation strategy: Adoption of a legacy `~/seamly2d` tree is in place (a settings pointer, `chooseFirstRunDataRoot()`), `ensureDataRootTree()` only ever `mkpath`s, and `rebaseOntoDataRoot()` rewrites the nine path *strings* — not the files they name. So repointing the root today creates nine empty subfolders at the new location and silently strands every existing file at the old one, which reads to the user as data loss. The "no hand-moving of the data tree" promise above therefore still needs the check-and-move step below. Note this is *not* a deletion hazard in shipped code  — neither the MSI nor the apps ever remove a data tree (`seamly-family.wxs`: "USER DATA IS NEVER TOUCHED") — it is a silent-orphan hazard. The migration itself is shared cross-platform app code, used by **Tasks 35/36/37** as well, and satisfies **Task 38**'s "never overwrite an existing user-data directory" requirement; this Windows task drives it from the installer prompt. Create a plan to improve this problem, share it with me, if I ok the plan then add the plan's tasks to the TODO_MIGRATE.md file in terse, bulleted, numbered format.
-- [ ] 13.14 Inventory the old tree before any root change — file count, total bytes, and which of the nine standard subfolders are populated; the current `QFileInfo(legacyRoot).isDir()` existence check in `vcommonsettings.cpp` cannot tell an empty folder from gigabytes of patterns
-- [ ] 13.15 When the chosen root differs from an existing populated root, offer **Move / Copy / Leave in place**, showing that inventory and both paths; "Leave in place" stays a first-class option, since adopt-in-place is Task 34's deliberate default for large or cloud-synced trees
-- [ ] 13. 16 Merge, never overwrite: copy per file with skip-if-exists, and report every skipped collision instead of clobbering — the `G:\My Drive\seamly2d` use case targets an **already-populated** directory
-- [ ] 13.17 Treat every cross-volume move as copy → verify → remove source, never a rename: `C:` → `G:` cannot be renamed, and a cloud-sync target (Google Drive, OneDrive, Dropbox) can report a write complete before it is durable, so verify each file and never delete a source whose copy did not verify
-- [ ] 13.18 Fail safe: on any error abort with the source tree intact and `paths/dataRoot` still pointing at it — a partially copied destination must never become the configured root
-- [ ] 13.19 Wire the same flow into Preferences → Paths (`preferencespathpage.cpp`, `seamlymepreferencespathpage.cpp`), which today calls `setDataRoot()` + `rebaseOntoDataRoot()` and relocates nothing — shared code, so the fix lands on all platforms at once
-- [ ] 13.20 Decide and document whether the MSI runs the migration itself or records the chosen root and defers it to the app's first run — the MSI is elevated and per-machine while the data tree is per-user, which argues for deferring
-- [ ] 13.21 Unit-test the migration against throwaway `QTemporaryDir` trees only — never a path under `QDir::homePath()`, which cannot be redirected on Windows (see the Task 34 testing note in `.github/README-BUILDS.md`)
-- [ ] 13.22 Verify use case #3: a populated `C:\Users\<user>\seamlyData` plus a populated `G:\My Drive\seamly2d` — Move merges without overwriting, leaves nothing stranded, and the apps read and write the merged tree afterwards
 
-## Task 16 — Unify settings directories: macOS build
+## Task 32 — Suppress `.wixpdb` generation
 
-Apply the Task 15 consolidation to the macOS build
+The WiX v6 MSI build needs only the `.msi`; suppress the optional linker database with `wix build -pdbtype none`.
 
-- [  ] fix or remove treferences to plist domains.**:** all three apps use `QSettings::IniFormat` with explicit `QStandardPaths::AppConfigLocation`-derived file paths — none use `QSettings::NativeFormat`/CFPreferences plists — so there is no plist-domain migration to do; "Preferences plists" in the task title above doesn't apply in practice, `QStandardPaths` resolves the org-name change generically per platform, so no macOS-specific code was needed for the directory move itself.
+- [x] 32.1 Add `-pdbtype none` to `$wixArguments` in `scripts/packaging/windows/smsi.ps1`, covering x64, ARM64, local, and CI builds.
+- [ ] 32.2 Run a full Seamly MSI build and confirm:
 
-- [X] Confirm the org-name change from Task 15 lands the apps in `~/Library/Application Support/Seamly/<app>`; adjust any macOS-specific bundle identifiers / `Info.plist` values that feed the settings domain — confirmed generic (`QStandardPaths::AppConfigLocation` keys off `organizationName`/`applicationName`, not `CFBundleIdentifier`); seamly2d/seamlyme's existing `org.seamly2dproject.@EXECUTABLE@` identifiers are unrelated and left as-is; seamlyLayout had **no** bundle identifier at all (CMake default placeholder) — added `MACOSX_BUNDLE_GUI_IDENTIFIER "io.seamly.SeamlyLayout"` plus bundle version properties in `qt_frontend/CMakeLists.txt` for a well-formed, signable bundle
-- [X] Migrate existing user data from the legacy `Seamly2D` and `Seamly Systems` locations on first run — already implemented generically in Task 15 (`VAbstractApplication::MigrateSeamlySettingsLocation()`, seamlyLayout's `appConfigRootPath()`/`migrateLegacyOrganizationTree()`); all three resolve the legacy path by temporarily swapping `organizationName` and re-querying `QStandardPaths`, with no Windows-specific literals, so it applies to macOS unchanged (code-reviewed, not yet exercised on real macOS — see the unchecked verify item below)
-- [X] Remove any exe-relative (app-bundle-relative) writable settings usage in seamlyLayout on macOS; keep packaged defaults read-only inside the bundle resources — `PreferencesModel::defaultInputFolderUrl()`/`resolvedInputDirectory()`/`resolvedLayoutDirectory()` and `Logger::init()` branch on `Q_OS_MACOS` to use the writable `AppConfigLocation` root instead of `<exeDir>/input`, `<exeDir>/output` (a signed/notarized bundle's `Contents/MacOS/` is read-only); Windows/Linux behavior unchanged; `Contents/Resources/settings/` packaged defaults remain read-only, used only as a legacy-migration source
-- [X] Update the macOS packaging/CI (dmg/bundle steps) for any path references — `packaging/macos/build_dmg.sh` header comment corrected (was describing a stale `~/seamlyLayout/settings/` scheme; now documents the actual `~/Library/Application Support/Seamly/SeamlyLayout/{settings,preferences,input,output}/` layout and both migration paths); `.github/README-BUILDS.md` gained a full macOS settings-storage section
-- [ ] Verify: fresh install and upgrade-with-legacy-data on macOS; both apps retain preferences after migration — **not verified**, no macOS hardware available in this environment; code changes are cross-platform Qt/CMake, build-verified on Windows (seamlyLayout debug build + all 4 Qt frontend ctest suites + full `cargo test --workspace`, all passing, 2026-07-20), and the `Q_OS_MACOS` branches compile out on other platforms, but real macOS runtime behavior (including the `macos-15` CI runner, which currently only builds seamly2d/seamlyme, not seamlyLayout) remains unexercised
-- [ ] Verify the macOS build succeeds in GitHub Actions on origin, branch `run-seamlyLayout` (`.github/workflows/ci.yml`'s `macos` job) — note: that job currently builds only seamly2d/seamlyme via qmake (`Seamly.pro`), not seamlyLayout, so a green run confirms the org-name change doesn't break the parent-app macOS build but does not exercise seamlyLayout's own `Q_OS_MACOS` settings-path code (see Task 20 for adding seamlyLayout to CI)
+  - [ ] 32.2.1 No `.wixpdb` is generated.
+  - [ ] 32.2.2 `wix msi validate` passes.
+  - [ ] 32.2.3 Windows Installer COM inspection passes.
+  - [ ] 32.2.4 Pending restoration of the Qt build environment tracked in Task 31.
 
-## Task 17 — Unify settings directories: Linux AppImage build
+- [x] 32.3 Confirm no scripts, workflows, or inspection tools require `.wixpdb`.
+- [x] 32.4 Document that `.wixpdb` is suppressed by default and can be restored by removing `-pdbtype none` from `$wixArguments`.
 
-Apply the Task 15 consolidation to the Linux AppImage build,
+# TODO — Build the Seamly2D, SeamlyMe, and SeamlyLayout executables on this local PC
 
-**Note (2026-07-21):** as with Task 16, `QStandardPaths::AppConfigLocation` resolves the shared `"Seamly"` org folder generically per platform (`$XDG_CONFIG_HOME/<org>/<app>` on Linux), so the base directory move and the generic `MigrateSeamlySettingsLocation()`/`migrateLegacyOrganizationTree()` migration needed no Linux-specific code — same finding as macOS. The real Linux-specific work: a mounted AppImage is read-only, the same problem Task 16 found for a signed macOS `.app` bundle, but on Linux this can't be identified apart from a normal install at compile time — added `Platform::isAppImage()` (checks the `APPIMAGE` env var the AppImage runtime sets) and used it at runtime in the same three `PreferencesModel` fallback functions and `Logger::init()` that Task 16 branched on `Q_OS_MACOS`.
+## Task 46 — Prevent stale qmake Makefiles after Qt changes
 
-- [X] Confirm the org-name change lands the apps in `~/.config/Seamly/` and `~/.local/share/Seamly/`; check any AppImage-specific overrides (`APPDIR`-relative paths, `portable`-mode config) — confirmed generic (same `QStandardPaths::AppConfigLocation` mechanism as Windows/macOS); confirmed the AppImage runtime does not override `$HOME`/`$XDG_CONFIG_HOME`/`$XDG_DATA_HOME`, and no code in the tree reads `$APPDIR` or implements a "portable mode", so nothing interferes with the unified resolution
-- [X] Migrate existing user data from `~/.config/Seamly2D`, `~/.local/share/Seamly2D`, and the `Seamly Systems` equivalents on first run — already implemented generically in Task 15 (`VAbstractApplication::MigrateSeamlySettingsLocation()` for seamly2d/seamlyme, bridging from the real legacy org folder name `"Seamly2DTeam"`; seamlyLayout's `appConfigRootPath()`/`migrateLegacyOrganizationTree()` bridging from `"Seamly Systems"`); both reconstruct the legacy path via `QStandardPaths` with no platform-specific literals, so this applies to Linux XDG paths unchanged
-- [X] Ensure seamlyLayout inside the AppImage treats its bundled `settings/` defaults as read-only (AppImage mounts are read-only anyway) and writes only to the XDG `Seamly` paths — packaged defaults are compiled-in Qt resources (`:/defaults/default_preferences.json`, inherently read-only on every platform) or would ship inside the read-only squashfs mount if/when seamlyLayout is added to the AppImage; the writable-path gap was `PreferencesModel::defaultInputFolderUrl()`/`resolvedInputDirectory()`/`resolvedLayoutDirectory()` and `Logger::init()` falling back to `<exeDir>/input`, `<exeDir>/output`, which can't be created inside a read-only AppImage mount — added `Platform::isAppImage()` (`src/app/seamlylayout/qt_frontend/src/Platform.h`) and branch on it at runtime in all four functions to use the writable `AppConfigLocation` root instead, matching Task 16's macOS fix; a normal (non-AppImage) Linux install and Windows are unaffected
-- [X] Update the AppImage build/CI scripts for any path references — `ci.yml`'s `linux` job builds only seamly2d's AppImage today (seamlyLayout is not yet part of it; Task 20 adds Linux CI build/test coverage for seamlyLayout but not AppImage packaging), and that job has no settings-path references to update; `.github/README-BUILDS.md` gained a full Linux/AppImage settings-storage section plus updates to the existing "Linux — AppImage" packaging section
-- [ ] Verify: run the AppImage fresh and over legacy data; preferences persist across runs and migrate correctly — **not verified end-to-end**: seamlyLayout is not currently packaged into any Linux AppImage (see above), and this Windows dev environment cannot build/run a Linux AppImage directly. The `Platform::isAppImage()` code path is unit-tested (`PreferencesModelTests`, which sets the `APPIMAGE` environment variable directly, since the check is a plain env-var read with no OS-specific API); real end-to-end AppImage verification remains open, same caveat as Task 16's macOS verification
-- [ ] Verify the Linux AppImage build succeeds in GitHub Actions on origin, branch `run-seamlyLayout` (`.github/workflows/ci.yml`'s `linux` job) — note: that job currently builds only seamly2d's AppImage (`linuxdeploy` + `dist/seamly2d.desktop`), not seamlyLayout, so a green run confirms the org-name change doesn't break the parent-app Linux AppImage build but does not exercise seamlyLayout's own `Platform::isAppImage()` code path (see Task 20 for adding seamlyLayout to Linux CI)
+After a Qt change, `sd.ps1` may regenerate the top-level Makefile while reusing stale sub-Makefiles. This can produce misleading missing-library errors. Deleting the shadow-build directory resolves the problem.
 
-## Task 18 — Unify settings directories: Linux Flatpak build (built at Flathub, not on GitHub)
+- [ ] 46.1 Add `scripts/sd.ps1 -Clean` to remove `scripts/seamly2d-debug/` before configuration.
+- [ ] 46.2 Detect qmake/Qt kit changes automatically and recreate the debug build tree before configuring.
+- [ ] 46.3 Apply equivalent protection to the release `build/` directory.
+- [ ] 46.4 Check `scripts/st.ps1` for the same stale-Makefile behavior and fix it if affected.
+- [ ] 46.5 Document automatic cleanup and `-Clean` usage in:
 
-Apply the Task 15 consolidation to the Flatpak build. Flatpak sandboxes per-app data under `~/.var/app/<flatpak-app-id>/`, and the build is produced from the Flathub manifest repo rather than this repo's CI.
-
-**Decision:** do NOT change the Flatpak way of building — keep the existing Flathub package structure and app id. The apps share files and variables and launch each other via `QProcess::startDetached` (seamly2d → seamlyme in `src/app/seamly2d/mainwindow.cpp`, seamly2d → seamlyLayout in `exportPiecesToSeamlyLayout()`, plus the `.pieces.svg` handoff and shared measurement files), so they must live in the **same sandbox**: all apps ship inside the one existing Flatpak app id, and the unified `Seamly` folder (`~/.var/app/<app-id>/config/Seamly/`) is one shared physical directory inside that sandbox. The folder-name change itself flows entirely from the Task 15 org-name change in the app source.
-
-**Note (2026-07-21):** as with Task 16 (macOS) and Task 17 (AppImage), `QStandardPaths::AppConfigLocation` resolves the shared `"Seamly"` org folder generically — a Flatpak exports `XDG_CONFIG_HOME=~/.var/app/<app-id>/config` (and `XDG_DATA_HOME=.../data`) into the app process, so the base directory move and the generic `MigrateSeamlySettingsLocation()`/`migrateLegacyOrganizationTree()` migration land under the sandbox automatically with no Flatpak-specific code. The real Flatpak-specific work mirrored Task 17: the app payload is mounted at the `/app` prefix **read-only** (the exe is at `/app/bin/...`), the same problem Task 16 found for a signed macOS `.app` bundle and Task 17 for an AppImage mount, but — like the AppImage case — it can't be told apart from a native install at compile time. Added `Platform::isFlatpak()` (`src/app/seamlylayout/qt_frontend/src/Platform.h`; checks the `FLATPAK_ID` env var and the bind-mounted `/.flatpak-info` file) and branched on it at runtime — alongside the existing `Platform::isAppImage()` check — in the same three `PreferencesModel` fallback functions and `Logger::init()` that Tasks 16/17 touched, so seamlyLayout's default input/output/log directories fall back to the writable `AppConfigLocation` root (which Flatpak maps into `~/.var/app/<app-id>/config/Seamly/SeamlyLayout`) instead of the read-only `/app/bin/input`, `/app/bin/output`.
-
-- [X] Confirm the org-name change lands all apps' settings under `~/.var/app/<app-id>/config/Seamly/` (and `data/Seamly/`) inside the single shared sandbox, and that cross-app sharing (settings variables, `.pieces.svg` handoff paths, measurement files) works there — confirmed generic: the sandbox's `XDG_CONFIG_HOME`/`XDG_DATA_HOME` make `AppConfigLocation` resolve under `~/.var/app/<app-id>/config/Seamly/`; because all three apps live in one app id, that `Seamly` folder is one physical shared directory, so shared settings, the `.pieces.svg` handoff, and measurement files all resolve to the same in-sandbox paths (full breakdown in `.github/README-BUILDS.md` "Linux — Flatpak" settings-storage section)
-- [X] Confirm the in-sandbox app launches keep working: seamly2d → seamlyme and seamly2d → seamlyLayout via `QProcess::startDetached` resolve to executables inside the same Flatpak prefix (`/app/bin`), not host paths; the `paths/seamlyLayoutApp` setting default must work inside the sandbox — confirmed: `Application2D::seamlyMeFilePath()`/`seamlyLayoutFilePath()` resolve via `QCoreApplication::applicationDirPath()` (= `/app/bin` in-sandbox), yielding `/app/bin/seamlyme` and `/app/bin/SeamlyLayout`; the empty `paths/seamlyLayoutApp` default falls through to exactly that `/app/bin/SeamlyLayout` lookup, so no host path or per-sandbox config is involved
-- [X] Migrate legacy `Seamly2D` / `Seamly Systems` config dirs inside the sandbox on first run (same in-app migration as Task 15 — it must not rely on installer logic, since Flatpak has no installer) — confirmed: the generic `MigrateSeamlySettingsLocation()` (seamly2d/seamlyme) and `appConfigRootPath()`/`migrateLegacyOrganizationTree()` (seamlyLayout) reconstruct the legacy org path via `QStandardPaths`, which resolves the legacy folder **inside the sandbox** (`~/.var/app/<app-id>/config/Seamly2DTeam`, `.../Seamly Systems`); it runs in-app on first launch, so it needs no installer step
-- [X] Ensure seamlyLayout's packaged defaults are read from the Flatpak app prefix (`/app/...`) read-only, with all writable settings in the sandbox `Seamly` paths — done: added `Platform::isFlatpak()` and branched `PreferencesModel::defaultInputFolderUrl()`/`resolvedInputDirectory()`/`resolvedLayoutDirectory()` and `Logger::init()` on it so the read-only-`/app` exe-relative fallbacks use the writable `AppConfigLocation` root instead; packaged defaults are compiled-in Qt resources (`:/defaults/default_preferences.json`) or read from the read-only `/app` prefix. Unit-tested (5 new `PreferencesModelTests` cases setting `FLATPAK_ID`), local Windows build/test pass (43 → 48 PreferencesModelTests cases, all passing)
-- [ ] Flathub manifest: no build restructuring — add seamlyLayout to the existing package if not yet included (it must ship in the same sandbox for the handoff to work), fix any stale references to the old dir names, and otherwise a routine version bump to the new source release — **out of this repo's scope**: the Flathub manifest lives in a separate manifest repo, not here (no Flatpak manifest exists in this tree). The required manifest changes are documented in `.github/README-BUILDS.md` ("Linux — Flatpak" packaging section) so they can be applied there at release time
-- [ ] Verify: install the Flatpak fresh and over an existing sandbox with legacy data; preferences migrate and persist; the seamly2d → seamlyLayout handoff works end-to-end inside the sandbox — **not verified end-to-end**: seamlyLayout is not yet part of the Flathub package, and this Windows dev environment cannot build/run a Flatpak. The `Platform::isFlatpak()` code path is unit-tested (the check is a plain env-var/file read) and Windows build/test-verified; real end-to-end Flatpak verification remains open, the same caveat as Task 16 (macOS) and Task 17 (AppImage)
-
-## Task 24 — CLI: run seamly2d/seamlyme/seamlylayout from the command line from an input .sm2d file and an input measurement file to an exported .pdf seamlyLayout layout
-
-Extend the existing console export mode (`--basename` in `src/app/seamly2d/core/vcmdexport.cpp`) so a single seamly2d command line produces the final layout: seamly2d generates the tagged `.pieces.svg` (the Layout Mode handoff, `exportPiecesToSeamlyLayout()` in `src/app/seamly2d/mainwindow.cpp`) and then runs seamlyLayout on it to produce the layout output, using the new seamlyLayout export options (the Task 21 SVG text modes and the other export formats).
-
-**Dependency:** Task 21 (seamlyLayout export modes) for the mode pass-through; seamlyLayout also needs a headless/CLI export mode of its own, since today it is only driven interactively through its QML UI.
-
-- [ ] Add a seamly2d CLI option (export mode) that triggers the Layout Mode handoff from the console: generate `<basename>.pieces.svg` and invoke seamlyLayout on it, resolving the app path the same way as the GUI (`paths/seamlyLayoutApp` setting)
-- [ ] Add a headless CLI export mode to seamlyLayout: input `.pieces.svg`, run the layout/nesting, export to a chosen format and output path without showing the QML UI, exit with a meaningful status code
-- [ ] Pass the seamlyLayout export options through the seamly2d command line (export format incl. the Task 21 SVG text modes, output destination), and document the option mapping
-- [ ] Make the seamly2d invocation wait for seamlyLayout (unlike the GUI's `QProcess::startDetached`), propagate its exit status and stderr so scripted callers see failures
-- [ ] Tests: seamly2d CLI option parsing (extend `tst_vcommandline`), seamlyLayout headless-export tests (Rust/Qt side), and an end-to-end check with the richmond test pattern
-- [ ] Document the workflow (command-line examples) in the repo docs / `--help` output
-
-## Task 32 — Suppress generation of the `.wixpdb` file when building the MSI
-
-The Windows MSI build (`scripts/packaging/windows/smsi.ps1` → `wix build`) emits a `.wixpdb` alongside `Seamly2D-<arch>.msi`. The `.wixpdb` is a WiX linker debug/symbol database only needed for `wix` patch/melt diffing and post-build inspection; it is not part of the shipped installer, so suppress its creation to keep the build output clean (both locally and in `.github/workflows/windows-msi.yml`, which runs the same script).
-
-**Method** (from the referenced Stack Overflow answer, [https://stackoverflow.com/questions/47668454/how-to-stop-generating-wixpdb-file-in-wix-setup-project](https://stackoverflow.com/questions/47668454/how-to-stop-generating-wixpdb-file-in-wix-setup-project)): that answer targets **WiX v3**, where you pass `light.exe -spdb` (or set `<SuppressPdbOutput>True</SuppressPdbOutput>` in the `.wixproj` PropertyGroup). This project builds with **WiX v6** (`wix build`, not `light.exe`), so the equivalent is the `wix build` option `-pdbtype none` (suppresses the `.wixpdb`; default is `-pdbtype full`). Add it to the `$wixArguments` array in `smsi.ps1` (`scripts/packaging/windows/smsi.ps1:402-412`).
-
-- [X] Add `-pdbtype none` to the `wix build` invocation in `smsi.ps1` (`$wixArguments`) so no `.wixpdb` is produced for x64 or arm64 — added (with an inline comment) between `-arch` and `-ext`; `smsi.ps1` is the single driver for both the local build and the `windows-msi.yml` CI job, so this covers CI/CD too
-- [ ] Confirm `wix msi validate` and the existing Windows Installer COM inspection still pass and the `.msi` is unchanged (only the `.wixpdb` should disappear from the output dir) — **mechanism proven, full-app re-validate pending.** Verified `-pdbtype none` on a minimal WiX v6 package in isolation: default `wix build` emits `.msi` + `.wixpdb`, and `-pdbtype none` emits only the `.msi`. A full `smsi.ps1` rebuild + `wix msi validate` + COM inspection against the real Seamly MSI is not clean in this environment (Qt 6.10 kit uninstalled — see Task 31's `windeployqt6` detection issue); left unchecked until a full MSI build runs
-- [X] If any tooling/docs relied on the `.wixpdb` (e.g. melt/patch diffing or the inspection steps in `scripts/packaging/windows/README.md`), note the removal or make it opt-in via a script switch — repo-wide search found **no** references to `.wixpdb`/`pdbtype` anywhere (scripts, workflows, `.wxs`, docs), so nothing relied on it; the READMEs now document that removing the flag from `$wixArguments` restores it
-- [X] Update `scripts/packaging/windows/README.md` / `README_WINDOWS_BUILD.md` to document that the `.wixpdb` is suppressed by default and how to re-enable it if needed — updated the `smsi.ps1` docstring and `scripts/packaging/windows/README.md` output section (noting suppression + how to re-enable); `README_WINDOWS_BUILD.md` never mentioned the `.wixpdb`, so no change needed there
-
-## Task 33 — Sign the bundled executables (and DLLs) as well as the `.msi`, so the installed apps are signed too
-
-Today only the MSI *package* itself is signed: `.github/workflows/windows-msi.yml` (lines 226-240) signs `Seamly2D-<arch>.msi` with `jsign` + Google Cloud KMS (Sectigo RFC-3161 timestamp), and `ci.yml` signs only the NSIS installer exe. The three app executables staged into the MSI — `seamly2d.exe`, `seamlyme.exe`, `SeamlyLayout.exe` — and the bundled Qt/xerces runtime DLLs come straight from windeployqt output and are **unsigned**. Consequence: the installer's UAC prompt shows "Verified publisher: Seamly Systems, Inc.", but each *installed* app is unsigned, so the first launch of each app can still trip Microsoft Defender SmartScreen / Defender ("unknown publisher" / "unrecognized app"). Sign the inner files too so the whole install is trusted.
-
-The project already holds an **EV** code-signing certificate for **Seamly Systems, Inc.** (`.github/workflows/signing/codesign-chain.pem` — GlobalSign GCC R45 EV CodeSigning CA 2020; EV gives instant SmartScreen reputation, no download-volume warm-up), so no new certificate is needed — the same `jsign` / Google Cloud KMS / `codesign-chain.pem` / Sectigo-timestamp mechanism that signs the `.msi` can sign the exes/DLLs. The signing must run **after staging but before `wix build`** so the signed files are what gets packaged, then the finished `.msi` is signed last as it is now. Keep it guarded on the `SEAMLY_SIGNING_*` secrets so local builds (no KMS access) degrade to an unsigned MSI exactly as today (third-party PRs likewise stay unsigned).
-
-- [ ] Sign the three staged app exes (`scripts/seamly-msi/<arch>/exes/{seamly2d.exe,seamlyme.exe,SeamlyLayout.exe}`) after staging and before `wix build`, using the same `jsign` / Google Cloud KMS keystore, cert chain (`.github/workflows/signing/codesign-chain.pem`), and `http://timestamp.sectigo.com` timestamp as the existing MSI signing step
-- [ ] Decide the DLL scope and sign accordingly — the Qt runtime DLLs/plugins and xerces-c staged from windeployqt output are unsigned (the MSVC CRT DLLs are already Microsoft-signed, so skip those); sign at least the app exes, and ideally the bundled Qt/xerces DLLs too, so Defender/SmartScreen sees a fully signed install tree (`parent\`, `layout\`, `exes\`)
-- [ ] Provide the hook point without breaking local builds: either add optional signing parameters to `smsi.ps1` (a sign callback / KMS params it applies to the staged files before `wix build` and to the finished `.msi`), or split staging and `wix build` into separate phases so `windows-msi.yml` can sign between them — either way, guard on `SEAMLY_SIGNING_*` so a local run with no secrets still produces an unsigned MSI (current behavior)
-- [ ] Keep signing the finished `.msi` last (after its contents are signed and packaged), unchanged from the current `windows-msi.yml` step (lines 226-240), so both the installer and everything it installs are signed
-- [ ] Add a post-sign verification step to `windows-msi.yml` — `Get-AuthenticodeSignature` on the signed exes and the `.msi` (Status `Valid`, signer `Seamly Systems, Inc.`, timestamp present), mirroring `ci.yml`'s "Print installer signature" step — so a silently-failed or skipped sign is caught in CI before the artifact ships
-- [ ] Apply the same inner-exe signing to the arm64 MSI leg (`seamly2d.exe` + `seamlyme.exe`; SeamlyLayout is absent there via `-NoSeamlyLayout` until it has an arm64 build)
-- [ ] (While NSIS is still the released Windows installer) apply the same inner-exe signing to `ci.yml`'s NSIS installer so its bundled apps are signed too, until the MSI replaces it — or explicitly defer if NSIS is being retired first
-- [ ] Update the docs: `.github/workflows/CODE_SIGNING.md`, `scripts/packaging/windows/README.md` (Code signing section) and `README_WINDOWS_BUILD.md` §5 ("CI equivalent" — renumbered from §6 on 2026-07-29 when the historical problem sections were folded away) to state that the exes/DLLs *and* the `.msi` are signed, how the signing is guarded on the secrets, and how it is verified
-- [ ] Verify on a clean Windows machine: the installer UAC prompt shows "Verified publisher: Seamly Systems, Inc.", no SmartScreen "unrecognized app" prompt appears, and each installed app reports a `Valid`, timestamped Authenticode signature (`Get-AuthenticodeSignature`)
-
-## Task 35 — macOS: let the user choose the `seamlyData` user-data directory (default `~/seamlyData`)
-
-The macOS build ships as a drag-installed `.app` (no installer with a directory picker), so the Windows install-time data-directory prompt (Task 14) has no install-time equivalent on macOS. Provide the same capability as an in-app **first-run chooser**: on first launch, prompt for the user-data root with a native directory picker defaulting to `~/seamlyData` (the Task 34 default), and let the user pick any volume/path — an external disk or a cloud-synced folder (e.g. `~/Library/CloudStorage/GoogleDrive-…/seamlyData` or `/Volumes/<drive>/seamlyData`). Persist the choice via the shared `paths/dataRoot` setting and honor it thereafter; migrate any existing `~/seamly2d` tree. (This is the pattern/measurement **data** tree — distinct from Task 16, which unified the *settings* dirs under `~/Library/Application Support/Seamly`.)
-
-- [ ] On first run (macOS), show a native directory-picker prompt for the user-data root, prefilled with `~/seamlyData`, accepting any volume/path incl. external and cloud-synced locations
-- [ ] Persist the chosen root via the shared `paths/dataRoot` setting (Task 34), resolve all data subfolders under it, and never re-prompt on later launches
-- [ ] Migrate an existing `~/seamly2d` tree to the chosen root on first run (Task 34's migration), keeping user data intact
-- [ ] Reflect the "Seamly" family umbrella in the macOS packaging where user-visible (dmg/app naming as appropriate) without breaking the bundle identifiers set in Task 16
-- [ ] Verify on macOS: the first-run chooser sets the root (incl. a cloud/external path like `/Volumes/GoogleDrive/.../seamlyData`), data reads/writes there, migration from `~/seamly2d` works, and no re-prompt occurs on later launches — real-hardware caveat as in Tasks 16/18
-- [ ] Document the macOS first-run data-directory chooser in the repo docs
-
-## Task 36 — Linux AppImage: let the user choose the `seamlyData` user-data directory (default `~/seamlyData`)
-
-The Linux AppImage is a single self-contained executable with no installer, so — as on macOS — the Windows install-time data-directory prompt (Task 14) maps to an in-app **first-run chooser**. On first launch, prompt for the user-data root (native directory picker) defaulting to `~/seamlyData` (Task 34), selectable to any mounted volume/path (external drive, a cloud-synced/`rclone` mount). Persist via `paths/dataRoot` and honor it; migrate an existing `~/seamly2d` tree. (Distinct from Task 17, which unified the *settings* dirs under `~/.config/Seamly`; this is the pattern/measurement **data** tree.)
-
-- [ ] On first run (Linux/AppImage), show a directory-picker prompt for the user-data root, prefilled with `~/seamlyData`, accepting any mounted drive/path incl. external and cloud-synced mounts
-- [ ] Persist the chosen root via the shared `paths/dataRoot` setting (Task 34); resolve all data subfolders under it; do not re-prompt on later runs
-- [ ] Migrate an existing `~/seamly2d` tree to the chosen root on first run (Task 34's migration)
-- [ ] Verify with the AppImage: the first-run chooser sets the root (incl. an external/cloud mount), data reads/writes there, and migration from `~/seamly2d` works — AppImage-packaging/real-run caveat as in Task 17
-- [ ] Document the AppImage first-run data-directory chooser in the repo docs
-
-## Task 37 — Linux Flatpak: let the user choose the `seamlyData` user-data directory (default `~/seamlyData`)
-
-Flatpak sandboxes the app and has no installer prompt (Task 18), so the data-directory choice is again an in-app **first-run chooser** — with a sandbox wrinkle: by default the app only sees `~/.var/app/<app-id>/…`, so letting the user store data at an arbitrary **host** path (`~/seamlyData`, an external drive, a cloud mount) requires host filesystem access via a portal (the `xdg-desktop-portal` file chooser grants access to exactly the picked directory) and/or a documented `--filesystem` permission in the Flathub manifest. Default to `~/seamlyData` on the host (Task 34) reached through the portal; persist via `paths/dataRoot`; migrate an existing `~/seamly2d` tree. (Distinct from Task 18's *settings* unification under the sandbox `~/.var/app/<app-id>/config/Seamly`.)
-
-- [ ] On first run (Flatpak), prompt for the user-data root using the `xdg-desktop-portal` file/directory chooser (so the picked host directory is granted to the sandbox), defaulting to `~/seamlyData` on the host
-- [ ] Decide and document the Flatpak filesystem permissions for an arbitrary user-chosen root (portal-granted per-directory access vs. a `--filesystem=host`/`--filesystem=home` entry in the Flathub manifest) and the security trade-off
-- [ ] Persist the chosen root via the shared `paths/dataRoot` setting (Task 34); resolve all data subfolders under it; do not re-prompt on later runs
-- [ ] Migrate an existing `~/seamly2d` tree (once its location is accessible) to the chosen root on first run (Task 34's migration)
-- [ ] Verify in the Flatpak sandbox: the portal-based chooser sets a host root (incl. an external/cloud path), data reads/writes there, migration works, and the required permissions are documented for the Flathub manifest — end-to-end Flatpak caveat as in Task 18
-- [ ] Document the Flatpak first-run data-directory chooser and the required manifest permissions in the repo docs
-
-## Task 38 — Windows installer: replace a pre-existing standalone Seamly2D/SeamlyMe install and never overwrite existing user data
-
-Follow-up from testing the family MSI on a Windows 11 machine (2026-07-24) that already had the **old standalone Seamly2D** installed to `C:\Program Files (x86)\Seamly2D`. The pre-family Windows installer is the NSIS `.exe` built by `.github/workflows/ci.yml`; it is a different product with a different `UpgradeCode` than the family MSI (`scripts/packaging/windows/seamly-family.wxs`, fixed `UpgradeCode cbf4b5f1-c32c-4dbb-b385-3ee4a7b30658`), so the MSI's `MajorUpgrade` does **not** recognize or remove it — the result is two side-by-side installs. This task makes the family installer detect and clear a prior standalone install and guarantees existing user data is never overwritten. The install-time **path prompts** themselves (program-folder default + user-data directory picker) are **Task 14**; this task layers the migrate-from-standalone and no-overwrite install semantics on top, plus the explicit `Change`-button UX requested.
-
-**Program-folder default — reconciled with Task 14 (settled).** The request restated the default as `C:\Program Files (x86)\Seamly`, but a 64-bit app conventionally installs to `Program Files`, not `(x86)` — the `(x86)` path only reflects where the *old* 32-bit-era NSIS installer put it. **The default is `C:\Program Files\SeamlyApps`**, used consistently in `seamly-family.wxs` and Task 14.
-
-- [ ] Detect a pre-existing **standalone** Seamly2D/SeamlyMe install that the family MSI's `UpgradeCode`/`MajorUpgrade` does not already supersede — the NSIS installer's ARP/uninstall registry entry and/or an install under `C:\Program Files (x86)\Seamly2D` — during the family MSI's install sequence (WiX `<Upgrade>`/`FindRelatedProducts` on the old product code, or a registry/`AppSearch` probe) — 1c
-- [ ] Only when **SeamlyLayout is not installed** (i.e. this is an upgrade from the pre-family standalone apps, not a repair/upgrade of a family install): run the old uninstaller / remove the old product before laying down the family payload, so the two do not coexist — 1c
-- [ ] Preserve all user data during that uninstall: never touch `%LOCALAPPDATA%\Seamly\<app>`, `%APPDATA%\Seamly\…`, or the user-data root (`C:\Users\<user>\seamly2d`, →`seamlyData` per Tasks 34/53); if the old NSIS uninstaller would remove any user data, scope/suppress it so data survives — 1c
-- [ ] Never overwrite an existing user-data directory: on install, create only the directories and files that do not already exist under the user-data root; leave every existing user file untouched (idempotent first-run seeding, not a copy-over) — 1d
-- [ ] User-data directory picker (`Change` button): confirm the Task 14 user-data prompt exposes a `Change` button opening a native directory picker that accepts any drive/path, explicitly including cloud-sync roots (OneDrive, Google Drive for Desktop, Dropbox) and removable/external media (external HDD, USB) — 1b
-- [X] Resolve the program-folder default (`Program Files` vs `Program Files (x86)`) and align `seamly-family.wxs` with the Task 14 decision — 1a — done: `C:\Program Files\SeamlyApps`
-- [ ] Verify the reported scenario end-to-end: on a machine with the old `C:\Program Files (x86)\Seamly2D` standalone install and no SeamlyLayout, running the family MSI removes the old install, installs the family once (no duplicate), and leaves all pre-existing user files/patterns/measurements intact
-- [ ] Document the migrate-from-standalone behavior and the no-overwrite guarantee in `scripts/packaging/windows/README.md` and `.github/README-BUILDS.md`
-
-## Task 39 — macOS installer (.pkg) for the Seamly family (parity with the Windows MSI)
-
-Today macOS ships as a drag-installed `.app`/`.dmg` (`packaging/macos/build_dmg.sh`) with no installer, no install-location choice, and no way to clear a prior standalone install. Provide a real macOS installer — a signed/notarized `productbuild`/`pkgbuild` `.pkg` bundling all three apps — matching the Windows MSI capabilities. Where a native `.pkg` cannot do something (arbitrary install-location choice is limited in Installer.app; drag-install has no uninstall hook), record the design decision rather than forcing it. The in-app first-run **data-directory** chooser is **Task 35**; this task is the installer/packaging side and may supersede or complement that first-run prompt with an install-time prompt.
-
-- [ ] Build a `.pkg` installer (`pkgbuild`/`productbuild`) that installs `seamly2d`, `seamlyme`, and `seamlylayout` together, signed and notarized (reuse the macOS signing story), with payload file modes preserved so the app-bundle executables are marked executable (`+x`) — 2a
-- [ ] Let the user choose where the program files install (custom install location) — evaluate what the macOS Installer supports (volume/destination selection, relocatable payload) vs. a custom installer UI; document the chosen mechanism and its limits — 2b
-- [ ] Let the user choose where **data files** live (external/cloud storage such as `~/Library/CloudStorage/GoogleDrive-…/Seamly` or `/Volumes/<drive>/Seamly`), persisted via the shared `paths/dataRoot` setting (Task 34, default set by Task 60) — either an installer pane or the Task 35 first-run chooser; pick one and document it — 2c
-- [ ] If a standalone Seamly2D/SeamlyMe `.app` is already installed but SeamlyLayout is not, remove the old apps before installing the family (installer preinstall script detecting the old bundle ids / `/Applications/Seamly2D.app`), without deleting any user files — 2d(c)
-- [ ] Never overwrite an existing user-data directory: create only missing directories/files under the data root; leave existing user files intact — 2d
-- [ ] Verify on macOS: `.pkg` installs all three apps (executable), install-location and data-location choices honored, old standalone removed when SeamlyLayout absent, user data preserved and not overwritten — real-hardware caveat as in Tasks 16/35
-- [ ] Document the macOS installer (build, sign/notarize, choices, uninstall-old behavior) in the repo docs (`.github/README-BUILDS.md`, `src/app/seamlylayout/docs/packaging-docs/INSTALLER_NOTES.md`)
-
-## Task 40 — Linux native installers (Debian/.deb, Arch, openSUSE/.rpm) for the Seamly family (parity with the Windows MSI)
-
-Today Linux ships as an AppImage (Task 17 / `ci.yml`) and Flatpak (Task 18); neither is a native distro package. Provide native installers for **Debian/Ubuntu (`.deb`)**, **Arch (`PKGBUILD`/pacman)**, and **openSUSE/RPM (`.rpm`, zypper)** that install all three apps together with the MSI-parity behaviors below. Packaging reality to note: dpkg/rpm/pacman install to fixed FHS prefixes (`/usr`, `/opt`) — a user-chosen arbitrary **program** location is not native to these formats, so decide between a relocatable `/opt/seamlyapps` layout, a configurable prefix, or a self-extracting installer script, and record the trade-off. The in-app first-run **data-directory** chooser is **Task 36**; this task is the native-package side.
-
-- [ ] Author packaging for each target: a Debian `.deb` (control/rules or `cpack -G DEB`), an Arch `PKGBUILD`, and an openSUSE/RPM `.spec` (or `cpack -G RPM`), each installing `seamly2d`, `seamlyme`, and `seamlylayout` plus their runtimes, with executables installed mode `0755` (marked executable) — 3b
-- [ ] Program-file install location: decide and document how to support a custom location within native packaging (fixed FHS `/usr` vs. relocatable `/opt/seamlyapps` vs. a self-extracting installer offering a prefix prompt) — 3a
-- [ ] Data-file location: let the user choose the user-data root incl. external/cloud-synced mounts, persisted via the shared `paths/dataRoot` setting (Task 34) — via the Task 36 first-run chooser and/or a post-install prompt; document which — 3c
-- [ ] If a standalone Seamly2D/SeamlyMe is already installed but SeamlyLayout is not, remove the old package/files first (package `Conflicts:`/`Replaces:` metadata, or a preinstall script for non-package installs), without deleting user files — 3d
-- [ ] Never overwrite an existing user-data directory: create only missing directories/files under the data root; leave existing user files intact — 3e
-- [ ] Wire the three package builds into a repeatable build (local script + CI job, following the AppImage / `windows-msi.yml` pattern) and produce installable artifacts
-- [ ] Verify on each distro (Debian/Ubuntu, Arch, openSUSE): package installs all three apps (executable), location choices honored, old standalone removed when SeamlyLayout absent, user data preserved and not overwritten
-- [ ] Document the three Linux native installers in `.github/README-BUILDS.md`
-
-## Task 41 — Temporary: sign the Windows installer and apps locally on this PC, then promote to CI
-
-**Deferred (2026-08-03): skip local signing until the Windows installer (amd64) installs without error on the test laptop for all three use cases.**
-
-A **local bootstrap for Task 33** (which signs the exes + the `.msi` in GitHub Actions). Before wiring signing into `.github/workflows/windows-msi.yml`, get it working on the developer PC and prove it on the test Windows 11 laptop: build a signed MSI locally in which `seamly2d.exe`, `seamlyme.exe`, `SeamlyLayout.exe`, and the `.msi` itself all carry a valid, trusted signature; install it on the laptop and confirm the UAC "Verified publisher: Seamly Systems, Inc." prompt and no SmartScreen warning. Once it works locally, fold the same recipe into the CI workflow. Uses the existing EV cert (GlobalSign GCC R45 EV; `jsign` + Google Cloud KMS + `.github/workflows/signing/codesign-chain.pem` + Sectigo timestamp — the mechanism Task 33 describes).
-
-- [ ] Set up local signing on this PC: authenticate to the Google Cloud KMS keystore (gcloud credentials for the signing key/project) so `jsign` can sign locally — or document the local hardware-token/cert path if one is used instead; keep it isolated to the dev PC (no secrets committed)
-- [ ] Add an optional local-sign path to `scripts/packaging/windows/smsi.ps1`: sign the three staged exes before `wix build`, then the finished `.msi`, reusing the Task 33 cert chain + timestamp; guard it so a run with no signing config still produces an unsigned MSI (current behavior)
-- [ ] Build a locally-signed MSI and install it on the test Windows 11 laptop; verify with `Get-AuthenticodeSignature` that the MSI and all three installed exes report `Valid`, signer `Seamly Systems, Inc.`, timestamp present; confirm the UAC "Verified publisher" prompt and no SmartScreen "unrecognized app" warning
-- [ ] Once proven locally, promote the working configuration into `.github/workflows/windows-msi.yml` (inner-exe + MSI signing), guarded on the `SEAMLY_SIGNING_*` secrets so CI and local share one recipe — at which point this task folds into Task 33
-- [ ] Document the local signing steps (and that this is a temporary bootstrap for the CI signing) in `scripts/packaging/windows/README.md` / `README_WINDOWS_BUILD.md`
-
-## Task 46 — `sd.ps1` silently reuses stale qmake Makefiles after a Qt change (found doing Task 30, 2026-07-25)
-
-`scripts/sd.ps1` has no `-Clean` switch and its generated Makefiles use qmake's standard recursive guard, `if not exist Makefile qmake -o Makefile ...`. The *top-level* Makefile is regenerated with the newly detected kit, but every **sub**-Makefile already present in `scripts/seamly2d-debug/` is reused as-is — so after the machine moved from Qt 6.10.1 to 6.11.1 the build picked the right qmake at the top and the wrong one everywhere below:
-
-```text
-qmake : C:\Qt\6.11.1\msvc2022_64\bin\qmake.exe          <- sd.ps1 detected 6.11.1 correctly
-        cd libs\ && ( if not exist Makefile C:\Qt\6.11.1\msvc2022_64\bin\qmake.exe ... )   <- stale sub-Makefile
-Error: dependent 'C:\Qt\6.11.1\msvc2022_64\lib\Qt6Cored.lib' does not exist.
-2026-08-03 -- C:\Qt\6.11.1\msvc2022_64\lib\Qt6Cored.lib confirmed to exist; the error was the stale sub-Makefile, not a missing kit.
-```
-
-**Workaround used:** delete `scripts/seamly2d-debug/` and re-run `sd.ps1`. The failure mode is confusing because the script's own banner reports the *correct* Qt while the error names the *old* one, and nothing in the script or docs says a toolchain change requires wiping the tree. The same hazard applies to the release shadow-build in `build/`, and `src/app/seamlylayout/build.ps1` already solves the analogous problem for CMake (it compares `CMAKE_HOME_DIRECTORY` in `CMakeCache.txt` and recreates the directory on mismatch).
-
-- [ ] Add a `-Clean` switch to `scripts/sd.ps1` (mirroring `src/app/seamlylayout/build.ps1 -Clean`) that removes `scripts/seamly2d-debug/` before configuring
-- [ ] Better: detect the mismatch automatically — record the qmake path used (or read it back from the generated top-level Makefile) and wipe/regenerate the tree when the detected kit differs, so a Qt upgrade never produces the misleading error above
-- [ ] Note the same hazard for the release `build/` tree in `.github/README-BUILDS.md` (and mention the wipe in `sd.ps1`'s `.SYNOPSIS`/`.DESCRIPTION`)
-- [ ] Check whether `scripts/st.ps1` (unit tests) shares the same stale-Makefile behaviour and fix it the same way if so
-
-## Task 47 — Bare `qmake` on PATH resolves to Qt Design Studio's reduced Qt (no `mkspecs`) (found doing Task 30, 2026-07-25) DEPRECATED -- UNINSTALLED Qt Design Studio! This problem is handled.
-
-**Deprecated data (2026-08-03): Qt Design Studio has been uninstalled from this PC** — only an empty `C:\Qt\Tools\QtDesignStudio\share\` remains, the reduced Qt is gone, and `C:\Qt\6.11.1\msvc2022_64\mkspecs` is now what a bare `qmake` would find. Everything below describes the environment as it was; the committed pins and the `mkspecs` guard are kept regardless, since they are what makes a build independent of `PATH`.
-
-On the developer PC the `qmake` first on `PATH` was **not** the build kit:
-
-```text
-qmake on PATH : C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version\bin\qmake.exe
-  qmake -query QT_INSTALL_PREFIX -> C:/Qt/Tools/QtDesignStudio/qt6_design_studio_reduced_version
-  that prefix has NO mkspecs directory
-real build kit : C:\Qt\6.11.1\msvc2022_64\bin\qmake.exe   (mkspecs at C:\Qt\6.11.1\msvc2022_64\mkspecs)
-```
-
-Qt Design Studio ships a stripped Qt with no `mkspecs/`, so anything invoking a bare `qmake` gets a Qt that cannot supply a spec, and the build fails pointing at the Design Studio path instead of `C:\Qt\6.11.1\msvc2022_64\mkspecs`.
-
-What is and is not affected:
-
-- **`scripts/sd.ps1` — safe.** `Find-QtQmake` resolves an absolute path and the generated batch calls that, never a bare `qmake`.
-- **`cargo` builds of SeamlyLayout — exposed.** `cxx-qt-build` locates Qt via the `QMAKE` environment variable, falling back to `qmake` on `PATH`. `src/app/seamlylayout/build.ps1` selects a kit for CMake (`CMAKE_PREFIX_PATH`) but does **not** export `QMAKE` or put the kit's `bin\` first on `PATH`, so a direct `cargo build`/`cargo test --workspace` in that workspace picks up the Design Studio Qt. (Working around this by hand — `$env:QMAKE = 'C:\Qt\6.11.1\msvc2022_64\bin\qmake.exe'` — was required to run the Task 30 verification.)
-- **Qt Creator — kit configuration.** If Creator builds against the reduced Qt, its kit's Qt version is pointing there; set it to `C:\Qt\6.11.1\msvc2022_64\bin\qmake.exe`.
-- **CI — unaffected.** `install-qt-action` puts the correct Qt first on `PATH`, and `seamlylayout-ci.yml` already exports `QMAKE: qmake` as a belt-and-braces fallback.
-
-- [X] Make `src/app/seamlylayout/build.ps1` export `QMAKE` (and prepend `<kit>\bin` to `PATH`) for the kit it already selects, so Corrosion/cxx-qt-build can never fall back to the Design Studio Qt — done: after the kit is chosen the script resolves `<kit>\bin\qmake.exe`, sets `$env:QMAKE` and prepends `<kit>\bin` to `$env:PATH`, and prints the pinned qmake. Both settings are inherited by the `cmd.exe` the script spawns for cmake/cargo (verified: `where qmake` inside that child lists the 6.11.1 kit first and `%QMAKE%` is set)
-- [X] Do the same for any documented bare `cargo build` / `cargo test --workspace` invocation in the SeamlyLayout docs (`README.md`, `.claude/rules/testing.mdc`), or note the required `QMAKE` export there — documented in `README.md` (the "Rust-only checks" section, which also wrongly claimed "no Qt required" — `cxxqt_bridge` does need it) and `docs/testing-docs/UNIT_TEST_COMMANDS.md` (new prerequisite section), both with the PowerShell and bash export forms and the Design Studio explanation. `.claude/rules/testing.mdc` documents no bare workspace `cargo` invocation, so it needed no change
-- [X] Consider a guard: if the resolved `qmake -query QT_INSTALL_PREFIX` has no `mkspecs\` directory, fail early naming the real kit instead of letting the build produce a confusing spec error — added to `build.ps1`: it queries `QT_INSTALL_PREFIX` from the selected qmake and aborts with a message naming the offending prefix when that prefix has no `mkspecs\`. Verified the guard accepts `C:\Qt\6.11.1\msvc2022_64` and rejects `C:\Qt\Tools\QtDesignStudio\qt6_design_studio_reduced_version`
-- [X] Optional developer-environment cleanup: reorder `PATH` so the real kit's `bin\` precedes `C:\Qt\Tools\QtDesignStudio\...\bin`, or drop the Design Studio entry from `PATH` entirely — **resolved 2026-08-03 by uninstalling Qt Design Studio**, which removes the reduced Qt from `PATH` altogether and fixes Qt Creator kit auto-detection and ad-hoc `qmake` use along with it
+  - [ ] 46.5.1 `sd.ps1` help
+  - [ ] 46.5.2 `.github/README-BUILDS.md`
 
 ## Task 51 — Windows MSI: finish the install-time experience (shortcuts, registry, ARP, associations, UAC, upgrade warning)
 
