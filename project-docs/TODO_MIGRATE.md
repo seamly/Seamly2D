@@ -1,8 +1,6 @@
 # TODO — Migrate SeamlyLayout into the Seamly2D structure
 
-Tasks for migrating the SeamlyLayout app into the Seamly2D structure — where SeamlyMe and SeamlyLayout are callable from within Seamly2D and all three apps are distributed together for installation on a user's computer.
-
-See `project-docs/PROJECT_PLAN.md` for full details. Check off subtasks as they are accomplished; when every subtask of a task is complete, move the task to `project-docs/TODO_COMPLETED.md`.
+Tasks for migrating the SeamlyLayout app into the Seamly2D structure — where SeamlyMe and SeamlyLayout are callable from within Seamly2D and as standalone applications, can be called from CLI for the full combined workflow of seamly2d+seamlyme+seamlylayout and as individual appications, and all three apps are distributed together in a single Qt runtime for installation on a user's computer.
 
 If decisions are required for any portion of a task or subtask, present the user with radio buttons to select options including 'Other'.
 
@@ -20,7 +18,7 @@ All TODO_MIGRATE.md tasks begin with 'M.' and all tasks are numbered
 - M.2.4 - Linux AppImage .appimage file
 - M.2.5 - Linux FlatPak
 
-## Task M.3 - Create step-by-step instructions as .pdf (including steps regarding data migration from previous version without SeamlyLayout) for each (Win X64, Win Arm64, MacOS, Linux AppImage -- not needed for Linux FlatPak).
+## Task M.3 - Create step-by-step instructions as .pdf (including steps regarding data migration from previous version without SeamlyLayout) for each (Win X64, Win Arm64, MacOS, Linux AppImage -- not needed for Linux FlatPak)
 
 - M.3.1 - Windows x64 .msi
 - M.3.2 - Windows arm64 .msi
@@ -28,7 +26,7 @@ All TODO_MIGRATE.md tasks begin with 'M.' and all tasks are numbered
 - M.3.4 - Linux AppImage .appimage file
 - M.3.5 - Linux FlatPak
 
-## Task M.4 - Re-organize all files needed to build the Seamly executables with the GitHub CI/CD ci.yml file so that all files are under the .github directory; update the CI/CD files with the new locations of moved files; build & test the updated 
+## Task M.4 - Re-organize all files needed to build the Seamly executables with the GitHub CI/CD ci.yml file so that all files are under the .github directory; update the CI/CD files with the new locations of moved files; build & test the updated
 
 - M.4.0 - Re-organize files
 - M.4.1 - Update ci.yml and related files to reflect new location

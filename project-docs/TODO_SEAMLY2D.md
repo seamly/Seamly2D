@@ -2,8 +2,6 @@
 
 Tasks that add features to the Seamly2D pattern-drafting app.
 
-See `project-docs/PROJECT_PLAN.md` for full details. Check off subtasks as they are accomplished; when every subtask of a task is complete, move the task to `project-docs/TODO_COMPLETED.md`.
-
 Tasks in this file begin with `Seamly2D.`
 
 ## Task Seamly2D.1 — Seamly2D: optional single-stroke (Hershey) label display and export

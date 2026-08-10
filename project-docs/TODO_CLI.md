@@ -1,6 +1,4 @@
-# TODO — Create the combined MSI installer for Seamly2D, SeamlyMe, and SeamlyLayout
-
-Tasks for creating an .msi file for installation on a user's amd64 computer with Windows 10 or Windows 11.
+# TODO — CLI
 
 Check off subtasks as they are accomplished; when every subtask of a task is complete, move the task to `project-docs/TODO_COMPLETED.md`.
 
