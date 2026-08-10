@@ -4,9 +4,11 @@ Tasks for creating an .msi file for installation on a user's amd64 computer with
 
 Check off subtasks as they are accomplished; when every subtask of a task is complete, move the task to `project-docs/TODO_COMPLETED.md`.
 
-If decisions are required for any portion of a task or subtask, present the user with radio buttons to select options including 'Other'.
+If decisions are required for any portion of a task or subtask, present the user with radio buttons to select options.
 
-## Task 14 — Windows installer: choose program and user-data paths
+Tasks in this file begin with `InstWinX64.`
+
+## Task InstWinX64.1 — Windows installer: choose program and user-data paths
 
 **Dependencies:** Task 13 (family MSI), Task 34 (`SeamlyData` rename), Task 38 (standalone-install replacement and data protection).
 
@@ -66,7 +68,7 @@ If decisions are required for any portion of a task or subtask, present the user
   - Upgrade preserves both paths.
   - Uninstall removes apps, shortcuts, and installer-created `PATH` entries while preserving data.
 
-## Task 13 — Windows MSI installer (x64 and ARM64)
+## Task InstWinX64.2 — Windows MSI installer (x64 and ARM64)
 
 Build one WiX v6 MSI per architecture containing Seamly2D, SeamlyMe, SeamlyLayout, and their dependencies. Store application state in the appropriate AppData directories; user-data paths and migration are covered by Task 14.
 
@@ -108,7 +110,7 @@ Build one WiX v6 MSI per architecture containing Seamly2D, SeamlyMe, SeamlyLayou
   - `.github/README-BUILDS.md`
   - `.github/workflows/README_WORKFLOWS.md`
 
-## Task 32 — Suppress `.wixpdb` generation
+## Task InstWinX64.3 — Suppress `.wixpdb` generation
 
 The WiX v6 MSI build needs only the `.msi`; suppress the optional linker database with `wix build -pdbtype none`.
 
@@ -123,35 +125,8 @@ The WiX v6 MSI build needs only the `.msi`; suppress the optional linker databas
 - [x] 32.3 Confirm no scripts, workflows, or inspection tools require `.wixpdb`.
 - [x] 32.4 Document that `.wixpdb` is suppressed by default and can be restored by removing `-pdbtype none` from `$wixArguments`.
 
-# TODO — Build the Seamly2D, SeamlyMe, and SeamlyLayout executables on this local PC
 
-## Task 46 — Prevent stale qmake Makefiles after Qt changes
-
-After a Qt change, `sd.ps1` may regenerate the top-level Makefile while reusing stale sub-Makefiles. This can produce misleading missing-library errors. Deleting the shadow-build directory resolves the problem.
-
-- [ ] 46.1 Add `scripts/sd.ps1 -Clean` to remove `scripts/seamly2d-debug/` before configuration.
-- [ ] 46.2 Detect qmake/Qt kit changes automatically and recreate the debug build tree before configuring.
-- [ ] 46.3 Apply equivalent protection to the release `build/` directory.
-- [ ] 46.4 Check `scripts/st.ps1` for the same stale-Makefile behavior and fix it if affected.
-- [ ] 46.5 Document automatic cleanup and `-Clean` usage in
-
-  - `sd.ps1`
-  - `.github/README-BUILDS.md`
-
-## Task 46 — Prevent stale qmake Makefiles after Qt changes
-
-After a Qt change, `sd.ps1` may regenerate the top-level Makefile while reusing stale sub-Makefiles. This can produce misleading missing-library errors. Deleting the shadow-build directory resolves the problem.
-
-- [ ] 46.1 Add `scripts/sd.ps1 -Clean` to remove `scripts/seamly2d-debug/` before configuration.
-- [ ] 46.2 Detect qmake/Qt kit changes automatically and recreate the debug build tree before configuring.
-- [ ] 46.3 Apply equivalent protection to the release `build/` directory.
-- [ ] 46.4 Check `scripts/st.ps1` for the same stale-Makefile behavior and fix it if affected.
-- [ ] 46.5 Document automatic cleanup and `-Clean` usage in:
-
-  - [ ] 46.5.1 `sd.ps1` help
-  - [ ] 46.5.2 `.github/README-BUILDS.md`
-
-## Task 51 — Complete the Windows MSI install experience
+## Task InstWinX64.4 — Complete the Windows MSI install experience
 
 Related: Tasks 13, 14, 60–67.
 
@@ -167,7 +142,7 @@ Related: Tasks 13, 14, 60–67.
 - [ ] 51.10 Complete the remaining branding, dialog, and ARP corrections in Tasks 62–66.
 - [x] 51.11 Document the installer flow and verification procedure in `scripts/packaging/windows/README.md` and `README_WINDOWS_BUILD.md`.
 
-## Task 52 — Eliminate `Unknown Organization` settings
+## Task InstWinX64.5 — Eliminate `Unknown Organization` settings
 
 Eight `VSettings` accessors currently read and write `%APPDATA%\Unknown Organization.ini`.
 
@@ -179,38 +154,7 @@ Eight `VSettings` accessors currently read and write `%APPDATA%\Unknown Organiza
 - [ ] 52.6 Test that no Seamly setting resolves under `Unknown Organization`.
 - [ ] 52.7 Update the settings-storage documentation in `.github/README-BUILDS.md`.
 
-## Task 54 — Rename the `vmisc` settings files and classes
-
-Target classes: `SettingsCommon`, `SettingsSeamly2D`, and `SettingsSeamlyMe`.
-
-- [ ] 54.1 Confirm whether filenames match class names or use snake_case; document the convention.
-- [ ] 54.2 Rename the six `.h`/`.cpp` files with `git mv`.
-- [ ] 54.3 Rename `VCommonSettings`, `VSettings`, and `VSeamlyMeSettings` throughout the source and tests.
-- [ ] 54.4 Update `src/libs/vmisc/vmisc.pri`, includes, forward declarations, types, constructors, and qualified calls.
-- [ ] 54.5 Rename include guards and file/class documentation.
-- [ ] 54.6 Rename the `VCommonSettings` and `VSettings` translation contexts in all 22 `.ts` files.
-- [ ] 54.7 Run `lupdate` and confirm the rename creates no obsolete translations.
-- [ ] 54.8 Update current documentation and Task 52 references; retain historical names where appropriate.
-- [ ] 54.9 Confirm no old filenames, includes, guards, or class names remain.
-- [ ] 54.10 Clean the shadow-build directories, then build and run all local and CI test suites.
-
-## Task 55 — Refresh developer setup and build instructions
-
-Update `.github/README-DEVELOPER.md` to reflect the current Qt 6.11.1, MSVC, CMake, Ninja, and Rust toolchains.
-
-- [ ] 55.1 State the supported IDE/compiler combination once and distinguish local from CI requirements.
-- [ ] 55.2 Document required Qt modules, including WebEngine, WebChannel, and Positioning, plus Maintenance Tool recovery.
-- [ ] 55.3 Document CMake, Ninja, rustup, and Cargo requirements for SeamlyLayout.
-- [ ] 55.4 Refresh Windows, Linux, and macOS installation instructions; state the Xpdf/pdftops requirement once.
-- [ ] 55.5 Document the qmake/jom Seamly2D and SeamlyMe build and the CMake/Cargo SeamlyLayout build.
-- [ ] 55.6 Document `sd.ps1`, `st.ps1`, SeamlyLayout build scripts, and `smsi.ps1`.
-- [ ] 55.7 State the Windows developer-shell requirement and warn against Qt Design Studio’s stripped `qmake`.
-- [ ] 55.8 Document local tests and the complete `make check` suite used by CI.
-- [ ] 55.9 Replace Qt 5 links and remove other obsolete instructions.
-- [ ] 55.10 Link to `README-BUILDS.md` and `README_WORKFLOWS.md` instead of duplicating detailed information.
-- [ ] 55.11 Follow the Windows instructions literally and record anything not directly verified.
-
-## Task 60 — Separate user documents from application state
+## Task InstWinX64.6 — Separate user documents from application state
 
 Default user documents to `<DocumentsLocation>/Seamly`. Keep configuration, cache, logs, and recovery in platform-standard application-data locations. Migration runs in application code, not the installer.
 
@@ -230,7 +174,7 @@ Default user documents to `<DocumentsLocation>/Seamly`. Keep configuration, cach
 - [ ] 60.14 Move per-app configuration to the platform-standard configuration tree while keeping cache, logs, and recovery separate.
 - [ ] 60.15 Replace remaining `seamlyData` references in the installer UI through Task 64.
 
-## Task 61 — Repair `test_msi_install.ps1`
+## Task InstWinX64.7 — Repair `test_msi_install.ps1`
 
 - [ ] 61.1 Replace bare install-state values with named constants: `INSTALLSTATE_LOCAL = 3` and `INSTALLSTATE_SOURCE = 4`.
 - [ ] 61.2 Require advertised shortcuts to resolve to a non-empty installed component path.
@@ -238,14 +182,14 @@ Default user documents to `<DocumentsLocation>/Seamly`. Keep configuration, cach
 - [ ] 61.4 Replace the sample pattern with a self-contained file and verify that it loads, not merely that Seamly2D starts.
 - [ ] 61.5 Re-run the affected phases with no false failures before Task 51’s uninstall test.
 
-## Task 62 — Add complete ARP metadata
+## Task InstWinX64.8 — Add complete ARP metadata
 
 - [ ] 62.1 Write `DisplayIcon` explicitly under the product’s Uninstall registry key while retaining `ARPPRODUCTICON`.
 - [ ] 62.2 Determine whether `Publisher` also requires an explicit registry value.
 - [ ] 62.3 Validate the authored and installed registry values in both MSI test scripts.
 - [ ] 62.4 Verify the icon and publisher in both `appwiz.cpl` and Windows Settings.
 
-## Task 63 — Brand the installer for the Seamly family
+## Task InstWinX64.9 — Brand the installer for the Seamly family
 
 - [ ] 63.1 Replace installer-facing “Seamly2D” branding with “Seamly.”
 - [ ] 63.2 State that the package installs Seamly2D, SeamlyLayout, and SeamlyMe.
@@ -255,7 +199,7 @@ Default user documents to `<DocumentsLocation>/Seamly`. Keep configuration, cach
 - [ ] 63.6 Update authoring-test assertions.
 - [ ] 63.7 Verify all wizard text visually.
 
-## Task 64 — Shorten and correct the previous-install dialog
+## Task InstWinX64.10 — Shorten and correct the previous-install dialog
 
 - [ ] 64.1 Replace `C:\Users\<you>\seamlyData` with `C:\Users\<you>\Documents\Seamly`.
 - [ ] 64.2 Verify the AppData paths against the implemented storage layout.
@@ -265,7 +209,7 @@ Default user documents to `<DocumentsLocation>/Seamly`. Keep configuration, cach
 - [ ] 64.6 Change `BannerLine` and `BottomLine` from width 373 to 370.
 - [ ] 64.7 Update authoring tests and `INSTALL_DECISION_FLOW.md`.
 
-## Task 65 — Correct the destination-folder page
+## Task InstWinX64.11 — Correct the destination-folder page
 
 Task 14 retains `C:\Program Files\SeamlyApps` as the default.
 
@@ -274,7 +218,7 @@ Task 14 retains `C:\Program Files\SeamlyApps` as the default.
 - [ ] 65.3 Show the complete editable destination path, including `SeamlyApps`.
 - [ ] 65.4 Update tests and installer documentation.
 
-## Task 66 — Rename the ARP product entry to “Seamly”
+## Task InstWinX64.12 — Rename the ARP product entry to “Seamly”
 
 One MSI installs all three applications, so Windows should show one family-level ARP entry.
 
@@ -286,7 +230,7 @@ One MSI installs all three applications, so Windows should show one family-level
 - [ ] 66.6 Verify the renamed entry, icon, and publisher in both Windows applets.
 - [ ] 66.7 Verify upgrades retain the fixed `UpgradeCode` and leave one ARP entry.
 
-## Task 67 — Preserve command-line files through first-run dialogs
+## Task InstWinX64.13 — Preserve command-line files through first-run dialogs
 
 - [ ] 67.1 Reproduce a first-launch `.sm2d` association outside the automated checker.
 - [ ] 67.2 Queue the requested file until first-run dialogs close, or suppress the dialogs when launched with a document.
