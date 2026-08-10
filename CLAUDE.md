@@ -89,29 +89,35 @@ All three apps — seamly2d, seamlyMe and seamlyLayout — build against **Qt re
 - `develop` on origin is a **pristine mirror of upstream develop**: update it only by syncing from upstream; never merge project work into it before the endgame
 - All project work accumulates on `run-seamlyLayout`; keep it current by merging `develop` into it (that direction only)
 - **Endgame:** when the project is finished, push `seamly:run-seamlyLayout` → `FashionFreedom:run-seamlyLayout` — the single sanctioned upstream PR, created by the user (not by Claude)
-- GitHub's green "Compare & pull request" banner on the fork defaults to FashionFreedom as base and cannot be disabled — NEVER USE IT; create PRs to `seamly:run-seamlyLayout` when needed via `gh` (default repo pinned to origin) or from the fork's own branch pages
+- Task work does **not** go through a PR — task branches merge into local `run-seamlyLayout`, which is then pushed to origin (see the task workflow below)
+- GitHub's green "Compare & pull request" banner on the fork defaults to FashionFreedom as base and cannot be disabled — NEVER USE IT; if a PR is ever needed, target `seamly:run-seamlyLayout` via `gh` (default repo pinned to origin) or from the fork's own branch pages
 
 ## Task Tracking
 
 - `project-docs/PROJECT_PLAN.md` — the current approved implementation plan
-- Task lists are split by area — pick the file matching the task:
-  -- `project-docs/TODO_MIGRATE.md` — migrating the SeamlyLayout app into the Seamly2D structure (SeamlyMe and SeamlyLayout callable from within Seamly2D; all three apps distributed together for installation; all three apps run in the same Qt runtime)
-  -- `project-docs/TODO_SEAMLY2D.md` — tasks that add features to the Seamly2D app
-  -- `project-docs/TODO_SEAMLYLAYOUT.md` — tasks that add features to the SeamlyLayout app
+- Task lists are split by area — the task's own `TODO_*.md` file is the one to read and update. `project-docs/TODO_MIGRATE.md` is the hub and cross-references the others; the set is not fixed, so **list `project-docs/TODO_*.md` and follow those cross-references rather than relying on any list here.** Current files: `TODO_MIGRATE.md`, `TODO_SEAMLY2D.md`, `TODO_SEAMLYLAYOUT.md`, `TODO_SEAMLYME.md`, `TODO_SEAMLYTEAM.md`, `TODO_CLI.md`, `TODO_CODE_SIGNING.md`, `TODO_RENAME_SETTINGS_FILES_CLASSES.md`, `TODO_INSTALLER.md`, `TODO_INSTALLER_WIN_X64.md`, `TODO_INSTALLER_WIN_ARM64.md`, `TODO_INSTALLER_MACOSX.md`, `TODO_INSTALLER_LINUX_APPIMAGE.md`, `TODO_INSTALLER_LINUX_FLATPAK.md`, `TODO_FUTURE.md`
 - Each `TODO_*.md` file holds tasks with numbered checkbox subtasks; check off subtasks as they are accomplished
 - `project-docs/TODO_COMPLETED.md` — when all subtasks of a task are complete, move the task here from its `TODO_*.md` file
-- **Pre-task branch setup:** before implementing a task from any `TODO_*.md` file, always:
-  1. update local `develop` from `origin` (`git fetch origin` + fast-forward `develop`)
-  2. update local `run-seamlyLayout` from local `develop` (merge/fast-forward `develop` into it)
-  3. create a new branch from `run-seamlyLayout` for the task, and do the work there
-- **Post-task workflow:** after implementing a task or subtask from a `TODO_*.md` file:
-  1. write unit tests where the task adds or changes code, and run them; run a local check build (`scripts/sd.ps1`) and verify the change works
-  2. update task tracking in the same change: check off tasks and subtasks in the task's `TODO_*.md` file; move fully completed tasks to `project-docs/TODO_COMPLETED.md`
-  3. stage and commit on the task branch
-  4. push the task branch to origin `seamly/seamly2D` task branch, & create a PR to merge task branch into `run-seamlyLayout` feature branch (the gh default repo is set to it) --> NEVER push to the public upstream `FashionFreedom/Seamly2D`
-  5. watch the PR's CI checks (`gh pr checks <pr> --watch`); when all checks pass, merge the PR into origin `run-seamlyLayout` branch; if any check fails, do NOT merge
-  6. notify the user of the outcome either way — merged (with PR URL) or not merged (with the failing checks) — then, after a merge, update local `run-seamlyLayout` from origin and delete the local task branch (origin deletes the remote branch automatically on merge)
-- **Docs-only exception:** when a commit changes only `.md`, `.txt`, and/or `.svg` files (no code), skip the local build/test verification and the push/PR/CI cycle above entirely — stage and commit locally only; do not push to origin
+- `project-docs/WONT_DO_MIGRATE.md` — tasks dropped from `TODO_MIGRATE.md`; kept for reference, never worked on
+
+### Task workflow (required for every prompt that says to implement a task/subtask from a `TODO_*.md` file)
+
+Run these steps in order, every time, without being asked:
+
+1. **Sync `develop`** — `git fetch origin`; if local `develop` is behind `origin/develop`, fast-forward it. Never merge project work into `develop`.
+2. **Sync `run-seamlyLayout`** — merge (or fast-forward) local `develop` into local `run-seamlyLayout`; that direction only.
+3. **Branch** — create a task branch off `run-seamlyLayout` (`task-<short-name>`) and do all work there.
+4. **Implement** the task.
+5. **Test** — write unit tests wherever the task adds or changes code, run them, and run a local check build (`scripts/sd.ps1`) to verify the change works. Report failures; do not proceed past a red build/test.
+6. **Update task tracking** — check off the task's subtasks in its `TODO_*.md` file; move fully completed tasks to `project-docs/TODO_COMPLETED.md`; update `SESSION_HANDOVER.md`.
+7. **Stage and commit** on the task branch.
+8. **Merge** the task branch into local `run-seamlyLayout`.
+9. **Push** local `run-seamlyLayout` to `origin run-seamlyLayout` --> NEVER push to the public upstream `FashionFreedom/Seamly2D`.
+10. **Report** to the user: what changed, whether tests/build passed, and anything needing their decision. Then delete the local task branch.
+
+No PR is required for this flow — the merge happens locally and reaches origin by the push in step 9.
+
+- **Docs-only exception:** when a commit changes only `.md`, `.txt`, and/or `.svg` files (no code), skip steps 1–5 and 8–9 — stage and commit locally on the current branch only; do not push to origin
 - **`SESSION_HANDOVER.md`** (repo root) — keep it current with the session's state: update it before compaction and when finishing a task. It is the next chat session's starting point, so it must carry what git does not — the current task and its exact progress, which `TODO_*.md` / `project-docs/TODO_COMPLETED.md` entries moved, key decisions and the reasoning behind them, files changed, concrete next steps, and any machine state changed outside the repo. The `PreCompact` / `PostCompact` hooks in `.claude/settings.json` only surface a reminder; keeping the file current is required regardless of whether that reminder appears
 
 ## Key References

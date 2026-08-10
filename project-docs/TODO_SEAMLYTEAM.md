@@ -1,4 +1,4 @@
-# Task 68 — Retire the legacy organization names (`Seamly2DTeam`, `Seamly Systems`)
+# Task Team.1 — Retire the legacy organization names (`Seamly2DTeam`, `Seamly Systems`)
 
 Goal: get `Seamly2DTeam` and `Seamly Systems` out of the codebase without breaking settings migration.
 
@@ -6,21 +6,21 @@ Goal: get `Seamly2DTeam` and `Seamly Systems` out of the codebase without breaki
 
 ## Now
 
-- [ ] 68.1 Confirm the live labels are consistent — current org is `"Seamly"` (`VER_COMPANYNAME_STR`, seamlyLayout `main.cpp`), MSI `Manufacturer="Seamly Project"`, Doxygen `DOCSET_PUBLISHER_NAME="Seamly Project"` (done 2026-08-03)
-- [ ] 68.2 Grep for any remaining *live* (non-legacy, non-comment) use of either string; there should be none
-- [ ] 68.3 Delete the dead commented-out `VSettings(... "Seamly2DTeam", "Seamly2D" ...)` block at `src/app/seamlyme/tmainwindow.cpp:596`
-- [ ] 68.4 Leave the five `kLegacyOrganizationName` constants and the Inno Setup legacy probe untouched, and add a one-line "do not rename — on-disk folder name" comment to each so this does not resurface
+- [ ] Team.1 Confirm the live labels are consistent — current org is `"Seamly"` (`VER_COMPANYNAME_STR`, seamlyLayout `main.cpp`), MSI `Manufacturer="Seamly Project"`, Doxygen `DOCSET_PUBLISHER_NAME="Seamly Project"` (done 2026-08-03)
+- [ ] Team.2 Grep for any remaining *live* (non-legacy, non-comment) use of either string; there should be none
+- [ ] Team.3 Delete the dead commented-out `VSettings(... "Seamly2DTeam", "Seamly2D" ...)` block at `src/app/seamlyme/tmainwindow.cpp:596`
+- [ ] Team.4 Leave the five `kLegacyOrganizationName` constants and the Inno Setup legacy probe untouched, and add a one-line "do not rename — on-disk folder name" comment to each so this does not resurface
 
 ## At sunset
 
-- [ ] 68.5 Pick the sunset release — the first that no longer migrates pre-Task-15 settings; record the version and the reasoning here
-- [ ] 68.6 Release-note it beforehand: upgrading from a pre-Task-15 build requires an intermediate release first, or settings start fresh
-- [ ] 68.7 Delete `VAbstractApplication::MigrateSeamlySettingsLocation()` / `NotifySeamlySettingsMigrated()` and their call sites in `Application2D::openSettings()` / `ApplicationME::openSettings()`
-- [ ] 68.8 Delete seamlyLayout's `migrateLegacyOrganizationTree()` and the legacy branches in `PreferencesModel::appConfigRootPath()` / `SettingsModel::defaultSettingsFilePath()`
-- [ ] 68.9 Delete the legacy probe and upgrade-guard text in `src/app/seamlylayout/packaging/windows/SeamlyLayout.iss`
-- [ ] 68.10 Delete the migration tests and the `kLegacyOrganizationName` fixture in `src/test/Seamly2DTest/qttestmainlambda.cpp`
-- [ ] 68.11 Strip the now-obsolete legacy-org paragraphs from `.github/README-BUILDS.md` (Windows/macOS/AppImage/Flatpak settings sections) and `project-docs/TODO_MIGRATE.md` Tasks 17/18
-- [ ] 68.12 Verify: `scripts\st.ps1` green, `ctest --preset debug` green, and a clean-profile first run still lands in `%LOCALAPPDATA%\Seamly\<app>\` with no legacy lookup attempted
+- [ ] Team.5 Pick the sunset release — the first that no longer migrates pre-Task-15 settings; record the version and the reasoning here
+- [ ] Team.6 Release-note it beforehand: upgrading from a pre-Task-15 build requires an intermediate release first, or settings start fresh
+- [ ] Team.7 Delete `VAbstractApplication::MigrateSeamlySettingsLocation()` / `NotifySeamlySettingsMigrated()` and their call sites in `Application2D::openSettings()` / `ApplicationME::openSettings()`
+- [ ] Team.8 Delete seamlyLayout's `migrateLegacyOrganizationTree()` and the legacy branches in `PreferencesModel::appConfigRootPath()` / `SettingsModel::defaultSettingsFilePath()`
+- [ ] Team.9 Delete the legacy probe and upgrade-guard text in `src/app/seamlylayout/packaging/windows/SeamlyLayout.iss`
+- [ ] Team.10 Delete the migration tests and the `kLegacyOrganizationName` fixture in `src/test/Seamly2DTest/qttestmainlambda.cpp`
+- [ ] Team.11 Strip the now-obsolete legacy-org paragraphs from `.github/README-BUILDS.md` (Windows/macOS/AppImage/Flatpak settings sections) and `project-docs/TODO_MIGRATE.md` Tasks 17/18
+- [ ] Team.12 Verify: `scripts\st.ps1` green, `ctest --preset debug` green, and a clean-profile first run still lands in `%LOCALAPPDATA%\Seamly\<app>\` with no legacy lookup attempted
 
 ## Verification note
 
