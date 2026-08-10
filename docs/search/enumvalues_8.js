@@ -25,8 +25,8 @@ var searchData=
   ['idcolumn_22',['IdColumn',['../d5/d6c/history__dialog_8cpp.html#adf764cbdea00d65edcd07bb9953ad2b7ad2ccd87de8c7cb42843e22fca3903b56',1,'history_dialog.cpp']]],
   ['identity_5fconstraint_23',['IDENTITY_CONSTRAINT',['../dc/d80/classXSConstants.html#a60daf162650cd8e58f53b85d8b93b99aa5db0d4744806a004eb0f3a681ea40ae8',1,'XSConstants']]],
   ['idnotdeclared_24',['IDNotDeclared',['../d5/dc5/classXMLValid.html#ac30e7f5d9612c52f5f1208c83f090c86aa2c58714c82af72d72aceb7f080de214',1,'XMLValid']]],
-  ['idref_25',['IDREF',['../d9/db9/classDatatypeValidator.html#a3fbf8d58a1883dd3b6b2e83660eedf8da5ed2b455cb8372c1db1b5d9a2aba462f',1,'DatatypeValidator']]],
-  ['idref_26',['IDRef',['../df/d1f/classXMLAttDef.html#ad029f037065bfaeb991ab7855de79255a60f559b6f8dc0f7a2634fdd5ca690785',1,'XMLAttDef']]],
+  ['idref_25',['IDRef',['../df/d1f/classXMLAttDef.html#ad029f037065bfaeb991ab7855de79255a60f559b6f8dc0f7a2634fdd5ca690785',1,'XMLAttDef']]],
+  ['idref_26',['IDREF',['../d9/db9/classDatatypeValidator.html#a3fbf8d58a1883dd3b6b2e83660eedf8da5ed2b455cb8372c1db1b5d9a2aba462f',1,'DatatypeValidator']]],
   ['idrefs_27',['IDRefs',['../df/d1f/classXMLAttDef.html#ad029f037065bfaeb991ab7855de79255aa063ccbf0d165af79a2173f29fd9e981',1,'XMLAttDef']]],
   ['idtype_5feither_28',['IDType_Either',['../db/d85/classDTDScanner.html#a565c62d06721333c05847a5faf798f10a01cc3fa5f3aaa84c97fa83b71c7fba14',1,'DTDScanner']]],
   ['idtype_5fexternal_29',['IDType_External',['../db/d85/classDTDScanner.html#a565c62d06721333c05847a5faf798f10a967bcd961ac444116d0140a47518aa7f',1,'DTDScanner']]],
@@ -66,7 +66,7 @@ var searchData=
   ['invalid_5fcharacter_5ferr_63',['INVALID_CHARACTER_ERR',['../d9/dac/classXMLDOMMsg.html#a638402474bd1e57588abfdbfc8b5dcdeab21c444ab0728740cc7ccad203630d27',1,'XMLDOMMsg::INVALID_CHARACTER_ERR()'],['../dd/d0a/classDOMException.html#af80f80a377221615d84e59dd2cf71af5a23fad77fb1fcd269d0b35c9e48593b18',1,'DOMException::INVALID_CHARACTER_ERR()']]],
   ['invalid_5fexpression_5ferr_64',['INVALID_EXPRESSION_ERR',['../d9/dac/classXMLDOMMsg.html#a638402474bd1e57588abfdbfc8b5dcdea03c3a6d41f880ee28133fc3965429f31',1,'XMLDOMMsg::INVALID_EXPRESSION_ERR()'],['../dc/d03/classDOMXPathException.html#a501cfc0a5287d3c4abb059ce049c8149a8c523d61c51112439dc7ee85b1e83aba',1,'DOMXPathException::INVALID_EXPRESSION_ERR()']]],
   ['invalid_5fmodification_5ferr_65',['INVALID_MODIFICATION_ERR',['../d9/dac/classXMLDOMMsg.html#a638402474bd1e57588abfdbfc8b5dcdea9a57852f8e6790f3710afc0cc9c0bb2c',1,'XMLDOMMsg::INVALID_MODIFICATION_ERR()'],['../dd/d0a/classDOMException.html#af80f80a377221615d84e59dd2cf71af5a701dd40bc89af8b581dbf5c048f83716',1,'DOMException::INVALID_MODIFICATION_ERR()']]],
-  ['invalid_5fnode_5ftype_5ferr_66',['INVALID_NODE_TYPE_ERR',['../df/d41/classDOMRangeException.html#ae54db705840de3e7632e2b49c7cc2fefab7285a55aeb03c64483b3dcee30dd835',1,'DOMRangeException::INVALID_NODE_TYPE_ERR()'],['../d9/dac/classXMLDOMMsg.html#a638402474bd1e57588abfdbfc8b5dcdea1c14ba8ccb964dc04953ef0b2c188a8b',1,'XMLDOMMsg::INVALID_NODE_TYPE_ERR()']]],
+  ['invalid_5fnode_5ftype_5ferr_66',['INVALID_NODE_TYPE_ERR',['../d9/dac/classXMLDOMMsg.html#a638402474bd1e57588abfdbfc8b5dcdea1c14ba8ccb964dc04953ef0b2c188a8b',1,'XMLDOMMsg::INVALID_NODE_TYPE_ERR()'],['../df/d41/classDOMRangeException.html#ae54db705840de3e7632e2b49c7cc2fefab7285a55aeb03c64483b3dcee30dd835',1,'DOMRangeException::INVALID_NODE_TYPE_ERR()']]],
   ['invalid_5fstate_5ferr_67',['INVALID_STATE_ERR',['../dd/d0a/classDOMException.html#af80f80a377221615d84e59dd2cf71af5ae47e8bf63218e9e771f7716826c28030',1,'DOMException::INVALID_STATE_ERR()'],['../d9/dac/classXMLDOMMsg.html#a638402474bd1e57588abfdbfc8b5dcdeac2d6cb4eecaa3be0e4c5755b183e9de0',1,'XMLDOMMsg::INVALID_STATE_ERR()']]],
   ['invalidannotationcontent_68',['InvalidAnnotationContent',['../d7/d8e/classXMLErrs.html#aefe9817ef5442905d86fd17cb0c35e47a4906e6b51939413919331bbd0985e0dc',1,'XMLErrs']]],
   ['invalidattributecontent_69',['InvalidAttributeContent',['../d7/d8e/classXMLErrs.html#aefe9817ef5442905d86fd17cb0c35e47ab5cf7c35e53788cf2a42d52095940ada',1,'XMLErrs']]],
@@ -109,5 +109,6 @@ var searchData=
   ['isresizable_106',['IsResizable',['../da/d7d/classVPieceItem.html#a09ecb9f194c9e7bb7b1008938050cd03a92953b8a07491625abe19b8330ce77cd',1,'VPieceItem']]],
   ['isrotatable_107',['IsRotatable',['../da/d7d/classVPieceItem.html#a09ecb9f194c9e7bb7b1008938050cd03a8c9a284c49ff00c7bf0d28cf4b59e5ad',1,'VPieceItem']]],
   ['item_108',['Item',['../d1/df9/vabstractnode_8h.html#a9dee9d00fa02343fa254019d71bceb25a7d74f3b92b19da5e606d737d339a9679',1,'vabstractnode.h']]],
-  ['iterator_5fresult_5ftype_109',['ITERATOR_RESULT_TYPE',['../da/d5a/classDOMXPathResult.html#ab718aec450c5438e0cc3a6920044a0c1a9fb151ff521ba37491645fa4f9ad43fb',1,'DOMXPathResult']]]
+  ['itemtype_109',['ItemType',['../dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52aa789d47dbe06374b0c99c1513bc151cdb',1,'PieceItemData']]],
+  ['iterator_5fresult_5ftype_110',['ITERATOR_RESULT_TYPE',['../da/d5a/classDOMXPathResult.html#ab718aec450c5438e0cc3a6920044a0c1a9fb151ff521ba37491645fa4f9ad43fb',1,'DOMXPathResult']]]
 ];

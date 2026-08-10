@@ -11,5 +11,6 @@ var searchData=
   ['liteparseevent_8',['LiteParseEvent',['../d5/d08/classLiteParseEvent.html',1,'']]],
   ['localfileformattarget_9',['LocalFileFormatTarget',['../dc/d8f/classLocalFileFormatTarget.html',1,'']]],
   ['localfileinputsource_10',['LocalFileInputSource',['../dd/d30/classLocalFileInputSource.html',1,'']]],
-  ['locator_11',['Locator',['../d3/d50/classLocator.html',1,'']]]
+  ['locator_11',['Locator',['../d3/d50/classLocator.html',1,'']]],
+  ['logger_12',['Logger',['../db/d67/classLogger.html',1,'']]]
 ];
