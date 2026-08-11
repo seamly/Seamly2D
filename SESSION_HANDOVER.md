@@ -6,9 +6,31 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## PICK UP HERE (2026-08-11, end of session)
+
+**One commit is committed locally and deliberately NOT pushed:** `a0e70635a7`
+("freeze the two legacy-removal breadcrumb value names" — comment-only in
+`seamly-family.wxs`). It was held back because a CI + Windows MSI run was in
+flight on `361b743fa0`, and `ci.yml`'s new `cancel-in-progress` concurrency
+means any push cancels it. **Next action: confirm that run finished, then
+`git push origin run-seamlyLayout`.** No skip token — it touches
+`scripts/packaging/**`.
+
+**Verification still outstanding.** As of the last check, run `31461308276`
+(CI) and `31461308379` (Windows MSI) on `361b743fa0` were still in progress.
+They are the first runs to exercise (a) the edited `ci.yml`, (b) the repaired
+MSI authoring assertions, and (c) the Nsis→Legacy rename — all three at once,
+so a failure will not say which. `gh run list --branch run-seamlyLayout`.
+Note the runs on the *previous* push were cancelled by the concurrency rule,
+which is working as designed but means the authoring fix was never verified
+on its own.
+
+Everything below is the state as shipped this session.
+
 ## Current state (2026-08-11): CI cost control + MSI authoring check repaired
 
-Two changes, both merged to `run-seamlyLayout` and force-pushed (see below for why).
+Three changes merged to `run-seamlyLayout`; the branch was force-pushed once
+(see the skip-token gotcha below for why).
 
 **1. CI no longer runs on every push.** `ci.yml` gained a top-level `concurrency`
 (cancel-in-progress) and a `paths-ignore` for `**.md` / `project-docs/**` /
@@ -75,10 +97,17 @@ records both rules.
 
 `SecureCustomProperties` needed no manual edit — WiX generates it from
 `Secure="yes"`, and `test_msi_authoring.ps1` asserts both renamed properties
-appear in it. The two breadcrumb value names are component KeyPaths with no
-explicit `Guid`, so renaming them changes the auto-GUID; on an upgrade the old
-component's value is removed and the new one written, which is the desired
-behaviour, but it is why those two names are worth not churning again.
+appear in it.
+
+**DECIDED with the user 2026-08-11: `RemovedLegacyInstallDir` and
+`RemovedLegacyRegistry` are frozen — never rename them again.** They are
+component KeyPaths on components with no explicit `Guid`, so WiX derives the
+component GUID from the Id plus the value name. This rename spent that change
+once (on upgrade the old value is removed and the new one written, which is
+correct); repeating it leaves users' machines accreting orphaned breadcrumbs
+under `SOFTWARE\Seamly\Seamly2D`. Recorded as `FROZEN NAME` comments at both
+components in `seamly-family.wxs` — that is commit `a0e70635a7`, the unpushed
+one named at the top of this file.
 
 Verified locally: `.wxs` parses as XML, every `Legacy` identifier referenced by
 `test_msi_authoring.ps1` exists in the `.wxs`, the six repaired assertions still
