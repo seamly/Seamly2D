@@ -218,14 +218,14 @@ Assert-That -Name 'NSIS Install_Dir search reads the 32-bit registry view' `
     -Succeeded ($installDirLocator.Count -eq 1 -and (([int]$installDirLocator[0].Type) -band 16) -eq 0)
 
 $appSearch = @(Get-MsiRows -Sql "SELECT ``Property`` FROM ``AppSearch``" -Columns 'Property' | ForEach-Object { $_.Property })
-foreach ($searched in @('SEAMLYNSISUNINSTALLSTRING', 'SEAMLYNSISINSTALLDIR')) {
+foreach ($searched in @('SEAMLYLEGACYUNINSTALLSTRING', 'SEAMLYLEGACYINSTALLDIR')) {
     Assert-That -Name "$searched is filled in by AppSearch" -Succeeded ($appSearch -contains $searched)
 }
 
 # Public properties only survive the hand-off to the elevated server-side
 # sequence when they are listed here.
 $secure = Get-MsiProperty -Name 'SecureCustomProperties'
-foreach ($property in @('SEAMLYDESKTOPSHORTCUTS', 'SEAMLYNSISUNINSTALLSTRING', 'SEAMLYNSISINSTALLDIR')) {
+foreach ($property in @('SEAMLYDESKTOPSHORTCUTS', 'SEAMLYLEGACYUNINSTALLSTRING', 'SEAMLYLEGACYINSTALLDIR')) {
     Assert-That -Name "$property is a secure custom property" -Succeeded ($secure -like "*$property*")
 }
 
@@ -243,7 +243,7 @@ if ($warningRow.Count -eq 1) {
         -Detail "warning at $($warningRow[0].Sequence), first WixUI dialog at $firstWixUiDialog"
     Assert-That -Name 'the warning triggers on either kind of existing install, and only on install' `
         -Succeeded ($warningRow[0].Condition -match 'WIX_UPGRADE_DETECTED' -and
-                    $warningRow[0].Condition -match 'SEAMLYNSISUNINSTALLSTRING' -and
+                    $warningRow[0].Condition -match 'SEAMLYLEGACYUNINSTALLSTRING' -and
                     $warningRow[0].Condition -match 'NOT Installed') `
         -Detail "condition is '$($warningRow[0].Condition)'"
 }
@@ -257,7 +257,7 @@ Assert-That -Name 'the warning names the seamlyData user-data folder' `
     -Succeeded ($userDataText.Count -eq 1 -and $userDataText[0].Text -match 'seamlyData')
 Assert-That -Name 'the warning states that user data is not removed' `
     -Succeeded ($userDataText.Count -eq 1 -and $userDataText[0].Text -match 'not touched')
-$nsisText = @($warningText | Where-Object { $_.Control -eq 'NsisText' })
+$nsisText = @($warningText | Where-Object { $_.Control -eq 'LegacyInstallText' })
 Assert-That -Name 'the warning says Setup removes the old NSIS installation' `
     -Succeeded ($nsisText.Count -eq 1 -and $nsisText[0].Text -match 'Setup will remove')
 # The removal takes the whole directory, so the page has to warn about anything
@@ -265,22 +265,22 @@ Assert-That -Name 'the warning says Setup removes the old NSIS installation' `
 Assert-That -Name 'the warning tells the user to move their own files out of it first' `
     -Succeeded ($nsisText.Count -eq 1 -and $nsisText[0].Text -match 'move anything of your own out')
 Assert-That -Name 'the warning names the directory it found' `
-    -Succeeded ($nsisText.Count -eq 1 -and $nsisText[0].Text -match '\[SEAMLYNSISINSTALLDIR\]')
+    -Succeeded ($nsisText.Count -eq 1 -and $nsisText[0].Text -match '\[SEAMLYLEGACYINSTALLDIR\]')
 
 # --- 5b. removal of the old NSIS installation ----------------------------------
 # Its own uninstall.exe is deliberately never invoked - see seamly-family.wxs.
 # What must be present is the removal of the four things it created.
 $removeComponents = Get-MsiRows -Sql "SELECT ``Component``, ``Condition``, ``Attributes`` FROM ``Component``" `
     -Columns 'Component', 'Condition', 'Attributes'
-foreach ($component in @('RemoveNsisProgramFiles', 'RemoveNsisRegistryKeys')) {
+foreach ($component in @('RemoveLegacyProgramFiles', 'RemoveLegacyRegistryKeys')) {
     $row = @($removeComponents | Where-Object { $_.Component -eq $component })
     Assert-That -Name "$component exists and is conditional on finding the NSIS install" `
-        -Succeeded ($row.Count -eq 1 -and $row[0].Condition -eq 'SEAMLYNSISINSTALLDIR')
+        -Succeeded ($row.Count -eq 1 -and $row[0].Condition -eq 'SEAMLYLEGACYINSTALLDIR')
 }
 # msidbComponentAttributes64bit = 256. The NSIS keys live under WOW6432Node
 # because that installer was 32-bit and never switched view, so the component
 # carrying the RemoveRegistryKey rows must NOT have the 64-bit bit set.
-$registryRemoval = @($removeComponents | Where-Object { $_.Component -eq 'RemoveNsisRegistryKeys' })
+$registryRemoval = @($removeComponents | Where-Object { $_.Component -eq 'RemoveLegacyRegistryKeys' })
 Assert-That -Name 'the NSIS registry keys are removed from the 32-bit view' `
     -Succeeded ($registryRemoval.Count -eq 1 -and (([int]$registryRemoval[0].Attributes -band 256) -eq 0)) `
     -Detail "Attributes = $($registryRemoval.Attributes)"
@@ -298,18 +298,18 @@ foreach ($key in @('SOFTWARE\NSIS_Seamly2D', 'SOFTWARE\Microsoft\Windows\Current
 # than a missing row, look for a renamed table before suspecting the authoring.
 $removeFolderEx = Get-MsiRows -Sql "SELECT ``Component_``, ``Property``, ``InstallMode`` FROM ``Wix4RemoveFolderEx``" `
     -Columns 'Component', 'Property', 'InstallMode'
-foreach ($property in @('SEAMLYNSISINSTALLDIR', 'SEAMLYNSISSTARTMENU')) {
+foreach ($property in @('SEAMLYLEGACYINSTALLDIR', 'SEAMLYLEGACYSTARTMENU')) {
     # InstallMode 1 = remove on install, which is the point: the old product has
     # to be gone before this one takes over its shortcuts and associations.
     Assert-That -Name "'$property' is scheduled for recursive removal on install" `
         -Succeeded (@($removeFolderEx | Where-Object {
             $_.Property -eq $property -and $_.InstallMode -eq '1' -and
-            $_.Component -eq 'RemoveNsisProgramFiles' }).Count -eq 1)
+            $_.Component -eq 'RemoveLegacyProgramFiles' }).Count -eq 1)
 }
 
 $conditions = Get-MsiRows -Sql "SELECT ``Control_``, ``Action``, ``Condition`` FROM ``ControlCondition`` WHERE ``Dialog_``='SeamlyPreviousInstallDlg'" `
     -Columns 'Control', 'Action', 'Condition'
-foreach ($control in @('UpgradeText', 'NsisText')) {
+foreach ($control in @('UpgradeText', 'LegacyInstallText')) {
     Assert-That -Name "$control is shown and hidden by condition" `
         -Succeeded ((@($conditions | Where-Object { $_.Control -eq $control -and $_.Action -eq 'Show' }).Count -eq 1) -and
                     (@($conditions | Where-Object { $_.Control -eq $control -and $_.Action -eq 'Hide' }).Count -eq 1))

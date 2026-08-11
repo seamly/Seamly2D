@@ -57,7 +57,7 @@
  **                              install is detected — either an older MSI of
  **                              this product (WIX_UPGRADE_DETECTED, set by
  **                              MajorUpgrade) or the old NSIS installation
- **                              (SEAMLYNSISUNINSTALLSTRING, found by the
+ **                              (SEAMLYLEGACYUNINSTALLSTRING, found by the
  **                              registry search below). Warns that the program
  **                              files will be replaced and states plainly that
  **                              user data is not touched.
@@ -192,17 +192,28 @@
          The NSIS installer is a 32-bit executable that does not switch the
          registry view, so on x64 both of its keys land under WOW6432Node -
          hence Bitness="always32", without which an x64 MSI looks in the 64-bit
-         view and never sees them. -->
-    <Property Id="SEAMLYNSISUNINSTALLSTRING" Secure="yes">
-      <RegistrySearch Id="SeamlyNsisUninstallStringSearch"
+         view and never sees them.
+
+         NAMING: everything below calls (2) the LEGACY installation, not the
+         "NSIS" one. NSIS is a build tool this project stopped using when the
+         `windows` job was retired, so an identifier named for it reads as
+         though this package still produces one. What the identifiers actually
+         refer to is the product already sitting on a user's machine, which
+         outlives the tool that authored it. The word NSIS is kept only in
+         prose, and in `SOFTWARE\NSIS_Seamly2D` - that is a real key name that
+         installer wrote, and it is NOT ours to rename. -->
+    <!-- Legacy = the pre-MSI Seamly2D, whatever installed it. -->
+
+    <Property Id="SEAMLYLEGACYUNINSTALLSTRING" Secure="yes">
+      <RegistrySearch Id="SeamlyLegacyUninstallStringSearch"
                       Root="HKLM"
                       Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Seamly2D"
                       Name="UninstallString"
                       Type="raw"
                       Bitness="always32" />
     </Property>
-    <Property Id="SEAMLYNSISINSTALLDIR" Secure="yes">
-      <RegistrySearch Id="SeamlyNsisInstallDirSearch"
+    <Property Id="SEAMLYLEGACYINSTALLDIR" Secure="yes">
+      <RegistrySearch Id="SeamlyLegacyInstallDirSearch"
                       Root="HKLM"
                       Key="SOFTWARE\NSIS_Seamly2D"
                       Name="Install_Dir"
@@ -219,10 +230,10 @@
          Sequenced after CostFinalize so the directory properties it expands
          are resolved, and in both sequences because a silent install never
          runs the UI one. -->
-    <SetProperty Id="SEAMLYNSISSTARTMENU"
+    <SetProperty Id="SEAMLYLEGACYSTARTMENU"
                  Value="[AppDataFolder]Microsoft\Windows\Start Menu\Programs\Seamly2D"
                  After="CostFinalize" Sequence="both"
-                 Condition="SEAMLYNSISINSTALLDIR" />
+                 Condition="SEAMLYLEGACYINSTALLDIR" />
 
     <!-- ================= optional desktop shortcuts ======================= -->
     <!-- Set by the checkbox on SeamlyShortcutsDlg, and overridable on the
@@ -304,11 +315,11 @@
 
         <!-- Shown only for the old NSIS installation, which is a separate
              product this installer must not and cannot remove. -->
-        <Control Id="NsisText" Type="Text" X="20" Y="94" Width="330" Height="50"
+        <Control Id="LegacyInstallText" Type="Text" X="20" Y="94" Width="330" Height="50"
                  NoPrefix="yes"
-                 ShowCondition="SEAMLYNSISUNINSTALLSTRING"
-                 HideCondition="NOT SEAMLYNSISUNINSTALLSTRING"
-                 Text="An older Seamly2D from the previous installer was found in [SEAMLYNSISINSTALLDIR]. It holds Seamly2D and SeamlyMe, and this version replaces both, so Setup will remove its program directory, Start Menu shortcuts and entry in Apps and features. Nothing else in that folder is kept, so move anything of your own out of it before continuing." />
+                 ShowCondition="SEAMLYLEGACYUNINSTALLSTRING"
+                 HideCondition="NOT SEAMLYLEGACYUNINSTALLSTRING"
+                 Text="An older Seamly2D from the previous installer was found in [SEAMLYLEGACYINSTALLDIR]. It holds Seamly2D and SeamlyMe, and this version replaces both, so Setup will remove its program directory, Start Menu shortcuts and entry in Apps and features. Nothing else in that folder is kept, so move anything of your own out of it before continuing." />
 
         <!-- Always shown: the point of the whole dialog. -->
         <Control Id="UserDataText" Type="Text" X="20" Y="150" Width="330" Height="76"
@@ -371,7 +382,7 @@
          relative order matters. -->
     <InstallUISequence>
       <Show Dialog="SeamlyPreviousInstallDlg" Sequence="1250"
-            Condition="(WIX_UPGRADE_DETECTED OR SEAMLYNSISUNINSTALLSTRING) AND NOT Installed" />
+            Condition="(WIX_UPGRADE_DETECTED OR SEAMLYLEGACYUNINSTALLSTRING) AND NOT Installed" />
     </InstallUISequence>
 
     <!-- ================= directory tree + harvested runtimes ============= -->
@@ -501,13 +512,13 @@
            It registers NO file associations and makes NO PATH changes, so
            nothing else has to be undone. -->
 
-      <Component Id="RemoveNsisProgramFiles" Condition="SEAMLYNSISINSTALLDIR">
+      <Component Id="RemoveLegacyProgramFiles" Condition="SEAMLYLEGACYINSTALLDIR">
         <!-- Breadcrumb doubling as the component's key path, in the 64-bit view
              beside the package's other install info. Records what was removed. -->
-        <RegistryValue Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D" Name="RemovedNsisInstallDir"
-                       Type="string" Value="[SEAMLYNSISINSTALLDIR]" KeyPath="yes" />
-        <util:RemoveFolderEx Property="SEAMLYNSISINSTALLDIR" On="install" />
-        <util:RemoveFolderEx Property="SEAMLYNSISSTARTMENU" On="install" />
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D" Name="RemovedLegacyInstallDir"
+                       Type="string" Value="[SEAMLYLEGACYINSTALLDIR]" KeyPath="yes" />
+        <util:RemoveFolderEx Property="SEAMLYLEGACYINSTALLDIR" On="install" />
+        <util:RemoveFolderEx Property="SEAMLYLEGACYSTARTMENU" On="install" />
       </Component>
 
       <!-- Install breadcrumbs: read by upgrades and by the Task 14 installer
@@ -545,7 +556,7 @@
          32-bit and never switched registry view - so the component carrying the
          RemoveRegistryKey rows must be 32-bit. Bitness is a per-component
          setting, hence a component of its own: folding these rows into
-         RemoveNsisProgramFiles would drag that component's 64-bit breadcrumb
+         RemoveLegacyProgramFiles would drag that component's 64-bit breadcrumb
          into WOW6432Node with them.
 
          It sits under ProgramFilesFolder (the 32-bit tree) rather than
@@ -553,8 +564,8 @@
          directory. The choice is nominal - the component installs no files, and
          its directory is never created - but it has to be a 32-bit one. -->
     <StandardDirectory Id="ProgramFilesFolder">
-      <Component Id="RemoveNsisRegistryKeys" Condition="SEAMLYNSISINSTALLDIR" Bitness="always32">
-        <RegistryValue Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D" Name="RemovedNsisRegistry"
+      <Component Id="RemoveLegacyRegistryKeys" Condition="SEAMLYLEGACYINSTALLDIR" Bitness="always32">
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D" Name="RemovedLegacyRegistry"
                        Type="string" Value="1" KeyPath="yes" />
         <RemoveRegistryKey Root="HKLM" Key="SOFTWARE\NSIS_Seamly2D" Action="removeOnInstall" />
         <RemoveRegistryKey Root="HKLM"
