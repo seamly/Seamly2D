@@ -8,7 +8,12 @@ All TODO_MIGRATE.md tasks begin with `Installer.`
 
 ## Installer.1 — Create .msi/.pkg/.appimage/flatpak artifacts as pre-releases in github workflow ci.yml file
 
-- [ ] Task Installer.1.1 - Windows x64 .msi - refer to tasks in project-docs\TODO_INSTALLER_WIN_X64.md to define the .msi capabilities and options
+- [x] Task Installer.1.1 - Windows x64 .msi - refer to tasks in project-docs\TODO_INSTALLER_WIN_X64.md to define the .msi capabilities and options
+  - `ci.yml` gained a `windows-msi` job (x64): one Qt 6.11.1 kit, qmake for seamly2d/seamlyme, CMake/Ninja + Cargo for SeamlyLayout, WiX v6 via `scripts/packaging/windows/smsi.ps1`, jsign signing, artifact `seamly-x64.msi`.
+  - The `.msi` **replaces** the NSIS `Seamly2D-windows.zip` in the release; the `windows` job is now arm64-NSIS only until Installer.1.2.
+  - `publish` now emits a **pre-release** (`prerelease: true`) and is gated on `run-seamlyLayout`, not `develop` (develop stays a pristine upstream mirror).
+  - `windows-msi.yml` kept as the packaging-only workflow; its stale jsign path `Seamly2D-<arch>.msi` corrected to the name `smsi.ps1` writes, `seamly-<arch>.msi`.
+  - **Follow-up for the endgame:** `.github/README.md`'s "Windows 64-bit" download badge still points at upstream's `Seamly2D-windows.zip`. Correct to the `.msi` only when the migration is pushed upstream — changing it now breaks the live public download link.
 - [ ] Task Installer.1.2 - Windows arm64 .msi - should re-implement the Windows x64 .msi capabilities - track tasks in project-docs\TODO_INSTALLER_WIN_ARM64.md
 - [ ] Task Installer.1.3 - MacOS .pkg - refer to tasks in project-docs\TODO_INSTALLER_LINUX_APPIMAGE.md to define the .msi capabilities and options
 - [ ] Task Installer.1.4 - Linux .appimage - refer to tasks in project-docs\TODO_INSTALLER_LINUX_APPIMAGE.md to define the .msi capabilities and options

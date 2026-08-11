@@ -191,12 +191,53 @@
       "PowerShell(ctest *)",
       "Bash(ctest *)",
       "Bash(./scripts/*.ps1*)",
-      "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File *)"
+      "Bash(powershell -NoProfile -ExecutionPolicy Bypass -File *)",
+      "Bash(git)",
+      "Bash(git *; *)",
+      "Bash(git * && *)",
+      "Bash(git * || *)",
+      "Bash(git * | *)",
+      "Bash(* ; git *)",
+      "Bash(* && git *)",
+      "Bash(* || git *)",
+      "Bash(git fetch *)",
+      "Bash(git merge *)",
+      "Bash(git checkout *)",
+      "Bash(git switch *)",
+      "Bash(git rev-parse *)",
+      "Bash(git rev-list *)",
+      "Bash(git push *)",
+      "PowerShell(git)",
+      "PowerShell(git * ; *)",
+      "PowerShell(git * | *)",
+      "PowerShell(* ; git *)",
+      "PowerShell(git merge *)",
+      "PowerShell(git checkout *)",
+      "PowerShell(git switch *)",
+      "PowerShell(git rev-parse *)",
+      "PowerShell(git rev-list *)",
+      "PowerShell($* = *; *)",
+      "PowerShell($* = *; *; *)",
+      "PowerShell($* = *; *; *; *)",
+      "PowerShell($* = *; \"*)",
+      "PowerShell(\"* + *)",
+      "PowerShell(* + *)",
+      "PowerShell(*)",
+      "Bash(*)"
     ],
     "additionalDirectories": [
       "C:\\Users\\susan\\AppData\\Local\\Temp",
       "C:\\Users\\susan\\.claude"
     ]
+  },
+  "sandbox": {
+    "network": {
+      "allowedDomains": [
+        "github.com",
+        "*.github.com",
+        "*.githubusercontent.com"
+      ]
+    }
   },
   "hooks": {
     "PreCompact": [

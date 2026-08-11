@@ -3,19 +3,28 @@
 ## Automated Workflows
 
 ### [CI](ci.yml) - Main Continuous Integration Workflow
-**Triggers**: Pull requests, pushes to develop, scheduled releases (Mondays 01:30 UTC), manual dispatch
+**Triggers**: Pull requests, pushes to `develop` / `run-seamlyLayout` / `feat-*`, scheduled releases (Mondays 01:30 UTC), manual dispatch
 
 **Features**:
 - **Tests**: Builds all platforms on pull requests with downloadable artifacts and Linux unit tests
-- **Pre-Releases**: Automatic prereleases when PRs are merged to develop branch
-- **Releases**: Scheduled weekly releases with date-based versioning (vYYYY.MM.DD.HHMM)
-- **Code Signing**: Integrated Windows and Mac code signing for develop branch
-  - Signs both 64-bit and 32-bit Windows executables
+- **Pre-Releases**: `schedule` and `workflow_dispatch` runs on **`run-seamlyLayout`** publish a GitHub **pre-release** (`prerelease: true`) with date-based versioning (vYYYY.MM.DD.HHMM). The ref is deliberately *not* `develop`: `origin/develop` is kept as a pristine mirror of upstream `FashionFreedom/Seamly2D` until the SeamlyLayout migration is finished, so nothing is released from it. `run-seamlyLayout` is also this repository's default branch, which is the ref the `schedule` trigger runs on.
+- **Code Signing**: Integrated Windows and Mac code signing
+  - Signs the Windows x64 `.msi` and the arm64 NSIS installer
   - Signs and notarizes Mac builds
   - Uses Google Cloud KMS with CloudHSM for secure signing
   - Uses Mac Developer ID certificate and private key and notarize API key in secrets
 
-**Builds**: Linux AppImage, Windows 64-bit/32-bit installers (.exe/.zip), macOS (.dmg/.zip)
+**Builds**: Linux AppImage, macOS (.dmg/.zip), Windows **x64 `.msi`** (all three apps — see the `windows-msi` job below), Windows arm64 NSIS installer (.exe/.zip).
+
+#### The `windows-msi` job (Task Installer.1.1)
+
+The released x64 Windows installer is a **WiX MSI carrying all three apps**, not the NSIS package it replaced. This job installs one Qt 6.11.1 kit (with `qtwebengine qtwebchannel qtpositioning` for SeamlyLayout), builds `seamly2d`/`seamlyme` with qmake and `SeamlyLayout` with CMake/Ninja + Cargo, then runs [`smsi.ps1`](../../scripts/packaging/windows/smsi.ps1) to stage the shared runtime and build, validate and authoring-test `scripts/seamly-msi/x64/seamly-x64.msi`. `jsign` signs it, and the `publish` job attaches it to the pre-release.
+
+**Why the steps are inline here rather than reused from `windows-msi.yml`:** the `publish` job releases this `.msi`, so it has to be built from the same commit, in the same run, as every other release artifact. `windows-msi.yml` is unchanged and still rebuilds the package on its own path-filtered triggers when only the packaging inputs change, without dragging the whole of CI along. **The two copies of the build steps must be kept in step** — the job below is `windows-msi.yml`'s x64 leg verbatim.
+
+**Why it is a separate job from `windows`:** it needs *both* build systems on one runner (qmake **and** CMake/Cargo), which the NSIS matrix leg does not.
+
+The `windows` job now builds **arm64 only**. SeamlyLayout has no arm64 build yet, so an arm64 MSI would ship two of the three apps; NSIS stays there until Task Installer.1.2.
 
 ### [SeamlyLayout CI](seamlylayout-ci.yml) - SeamlyLayout build + test (Qt 6.11)
 
@@ -38,16 +47,16 @@
 
 **Purpose**: builds the Windows **MSI installer** that ships the whole Seamly app family — `seamly2d`, `seamlyme`, and `SeamlyLayout` — in one bundled package **per architecture** (x64 and arm64), using the WiX toolset from [`seamly-family.wxs`](../../scripts/packaging/windows/seamly-family.wxs) via [`scripts/packaging/windows/smsi.ps1`](../../scripts/packaging/windows/smsi.ps1). The hands-on build/test reference is [`scripts/packaging/windows/README.md`](../../scripts/packaging/windows/README.md).
 
-**Why it is separate from [CI](ci.yml)**: same reasoning as SeamlyLayout CI, but inverted — the MSI needs **both build systems** in one job (qmake for the parent apps *and* Rust + CMake/Ninja for SeamlyLayout) to build all three apps and bundle them. Folding that into `ci.yml` would slow and destabilize every push, so it lives on its own and only runs when the packaging inputs change. `ci.yml`'s NSIS installer remains the released Windows installer until the MSI replaces it.
+**Why it is separate from [CI](ci.yml)**: it only runs when the packaging inputs change, so a `seamly-family.wxs` or `smsi.ps1` edit gets a full x64 **and** arm64 package check without waiting on the rest of CI. Since Task Installer.1.1 `ci.yml` has its own `windows-msi` job carrying **the same x64 build steps**, because the artifact it publishes must come from the same commit and run as every other release artifact — **keep the two in step when either changes**. The x64 `.msi` is now the released Windows installer; NSIS survives in `ci.yml` for arm64 only.
 
 **What it does** (matrix: `x64`, `arm64`):
 
 1. Installs **one** Qt 6.11.1 kit for all three apps (Task 30 — it used to install two kits in a carefully ordered dance so the parent `qmake` would not bind to SeamlyLayout's Qt) plus MSVC (`ilammy/msvc-dev-cmd`), and for x64 also Rust + Ninja. The x64 leg adds the `qtwebengine qtwebchannel qtpositioning` modules SeamlyLayout needs; arm64 takes `qtmultimedia` only.
 2. Builds `seamly2d.exe` + `seamlyme.exe` (qmake/nmake, cross-compiled for arm64) and, on x64 only, `SeamlyLayout.exe` (CMake release preset).
 3. Runs `scripts/packaging/windows/smsi.ps1` to stage the **single shared Qt runtime** and build the MSI with WiX **v6** (v7 is gated behind an OSMF EULA, error `WIX7015`) — **x64 = all three apps, arm64 = the two parents only** (`-NoSeamlyLayout`, since SeamlyLayout has no arm64 build yet).
-4. Signs the `.msi` with `jsign` (Google Cloud KMS, same as the NSIS exe), guarded on the `SEAMLY_SIGNING_PROJECT_ID` secret so untrusted PR runs skip it, and uploads the MSI as a build artifact.
+4. Signs `scripts/seamly-msi/<arch>/seamly-<arch>.msi` with `jsign` (Google Cloud KMS, same as the NSIS exe), guarded on the `SEAMLY_SIGNING_PROJECT_ID` secret so untrusted PR runs skip it, and uploads the MSI as a build artifact.
 
-**Future consolidation**: when the MSI replaces the NSIS installer, fold these steps into `ci.yml`'s windows job and wire the `.msi` into the release/publish job (noted in the workflow's header comment).
+**Consolidation, done for x64 (Task Installer.1.1)**: `ci.yml` now builds and releases the x64 `.msi` itself. This workflow keeps both architectures for packaging-only checks; when arm64 gains an MSI (Task Installer.1.2) reconsider whether it still earns its place.
 
 ## Code Signing Workflow
 

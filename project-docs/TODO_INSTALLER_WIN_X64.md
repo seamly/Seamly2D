@@ -91,10 +91,11 @@ Build one WiX v6 MSI per architecture containing Seamly2D, SeamlyMe, SeamlyLayou
 
 - [ ] **13.4 Preserve all user data** during installation, upgrade, repair, and uninstall.
 - [ ] **13.5 Sign MSI artifacts with `jsign`** when `SEAMLY_SIGNING_PROJECT_ID` is available.
-- [ ] **13.6 Support builds through:**
+- [x] **13.6 Support builds through:**
 
-  - Local: `scripts/smsi.ps1`
-  - CI: `.github/workflows/windows-msi.yml`
+  - Local: `scripts/packaging/windows/smsi.ps1`
+  - CI (packaging-only, x64 + arm64): `.github/workflows/windows-msi.yml`
+  - CI (release, x64): `.github/workflows/ci.yml`'s `windows-msi` job — the package the `publish` job attaches to the pre-release (Task Installer.1.1). Its build steps duplicate `windows-msi.yml`'s x64 leg; keep the two in step.
 
 - [ ] **13.7 Test both architectures**, where hardware is available:
 
@@ -104,11 +105,13 @@ Build one WiX v6 MSI per architecture containing Seamly2D, SeamlyMe, SeamlyLayou
   - Uninstall without data removal
 
 - [x] **13.8 Complete static x64 validation** — passed July 22, 2026; clean-machine testing remains.
-- [ ] **13.9 Document building, signing, and verification in:**
+- [x] **13.9 Document building, signing, and verification in:**
 
   - `scripts/packaging/windows/README.md`
   - `.github/README-BUILDS.md`
   - `.github/workflows/README_WORKFLOWS.md`
+
+  All three updated for Task Installer.1.1: the `ci.yml` release path, the arm64-only NSIS remainder, the pre-release ref, and the corrected `seamly-<arch>.msi` output name (the docs had carried the stale `Seamly-x64.msi` / `Seamly2D-arm64.msi` names).
 
 ## Task InstWinX64.3 — Suppress `.wixpdb` generation
 
