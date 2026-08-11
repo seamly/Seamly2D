@@ -7,7 +7,30 @@ on:
   push:
     branches:
     - run-seamlyLayout
+    # This workflow builds the whole family on four platforms and takes ~50
+    # minutes, so changes that cannot possibly affect a binary must not start
+    # it. Documentation lives in `project-docs/` and in `**.md` files scattered
+    # through the tree; neither is a build input.
+    #
+    # `*.txt` is deliberately NOT ignored here — `CMakeLists.txt` is a build
+    # input, and a blanket `**.txt` would silently stop building SeamlyLayout
+    # whenever its CMake wiring changed.
+    #
+    # The filter is on `push` only. `pull_request` runs stay unfiltered so a
+    # docs-only PR still reports its checks instead of hanging on a status that
+    # never arrives.
+    paths-ignore:
+      - '**.md'
+      - 'project-docs/**'
+      - 'LICENSE'
   pull_request:
+
+# A session that merges several task branches used to queue one full ~50-minute
+# run per push. Only the newest run per ref is meaningful, so supersede the
+# older ones instead of paying for all of them.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -193,8 +216,8 @@ jobs:
   # WHAT EACH ARCH SHIPS: all three apps — seamly2d + seamlyme (qmake) and
   # SeamlyLayout (Rust + CMake/Ninja) — against ONE Qt 6.11.1 runtime.
   #
-  # EACH ARCH BUILDS NATIVELY ON ITS OWN RUNNER (2026-08-11): x64 on
-  # windows-latest with the win64_msvc2022_64 kit, arm64 on windows-11-arm with
+  # EACH ARCH BUILDS NATIVELY ON ITS OWN RUNNER : x64 on windows-latest 
+  # with the win64_msvc2022_64 kit, arm64 on windows-11-arm with
   # the windows_arm64 host and the win64_msvc2022_arm64 kit. NOTHING IS
   # CROSS-COMPILED — no amd64_arm64 MSVC, no ..._cross_compiled Qt, no
   # host-qmake, and no explicit cargo target.
@@ -217,19 +240,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # qt-modules is now IDENTICAL for both arches: qtmultimedia for the
+          # qt-modules is IDENTICAL for both arches: qtmultimedia for the
           # parent apps, and qtwebengine (SvgCanvas.qml's WebEngineView) plus
           # its dependencies qtwebchannel/qtpositioning for SeamlyLayout —
           # aqtinstall does not auto-resolve a module's Qt dependencies, and
           # without them find_package(Qt6 ... WebEngineQuick) fails at
           # configure time.
           #
-          # The arm64 leg carried qtmultimedia alone until 2026-08-11, on the
-          # documented belief that Qt publishes no arm64 Windows WebEngine.
-          # That was true of Qt 6.8 and is FALSE for 6.11.1: `aqt list-qt
-          # windows desktop --modules 6.11.1 win64_msvc2022_arm64_cross_compiled`
-          # lists qtwebengine. Verified by the qt-arm64-module-probe workflow,
-          # run 31453192356.
           # Each arch builds NATIVELY on its own runner — no cross-compiling.
           # That means a plain `qmake` (not `host-qmake`), a native MSVC arch, a
           # native cargo host toolchain, and a `windeployqt6.exe` the runner can
@@ -254,7 +271,7 @@ jobs:
         with:
           arch: ${{ matrix.msvc-arch }}
 
-      # ONE Qt install for every app in the package (Task 30). `host` is set
+      # ONE Qt install for every app in the package. `host` is set
       # explicitly per leg: the arm64 runner needs the NATIVE windows_arm64 host
       # kit, not the x64 `windows` host the action would otherwise assume.
       - uses: jurplel/install-qt-action@v4
@@ -280,9 +297,8 @@ jobs:
           nmake
 
       # ------------------- SeamlyLayout (both arches) ----------------------
-      # Built on every arch since 2026-08-11. No `targets:` and no explicit
-      # cargo target: each runner's default host toolchain already matches the
-      # package it is building.
+      # No `targets:` and no explicit cargo target: each runner's default host 
+      # toolchain already matches the package it is building.
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
@@ -391,13 +407,7 @@ jobs:
           path: scripts/seamly-msi/${{ matrix.arch }}/seamly-${{ matrix.arch }}.msi
           if-no-files-found: error
 
-  # Publishes the installer artifacts as a GitHub PRE-RELEASE (Task Installer.1).
-  #
-  # The ref is `run-seamlyLayout`, NOT `develop`: origin/develop is kept as a
-  # pristine mirror of the upstream FashionFreedom/Seamly2D develop branch for
-  # the duration of the SeamlyLayout migration, so nothing is released from it.
-  # run-seamlyLayout is this repository's default branch, which is also the ref
-  # the weekly `schedule` trigger runs on.
+  # Publish the installer artifacts
   publish:
     if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref_name == 'run-seamlyLayout'
     runs-on: ubuntu-latest
@@ -434,6 +444,7 @@ jobs:
             seamly-x64.msi
             seamly-arm64.msi
 
+  # update doxygen files and deploy to gh-pages branch 
   document:
     # Deploy Doxygen documentation for scheduled releases (schedule) and manual releases (workflow_dispatch) and pre-releases (push)
     if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push')

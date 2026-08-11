@@ -111,11 +111,21 @@ Run these steps in order, every time, without being asked:
 5. **Test** — write unit tests wherever the task adds or changes code, run them, and run a local check build (`scripts/sd.ps1`) to verify the change works. Report failures; do not proceed past a red build/test.
 6. **Update task tracking** — check off the task's subtasks in its `TODO_*.md` file; move fully completed tasks to `project-docs/TODO_COMPLETED.md`; update `SESSION_HANDOVER.md`.
 7. **Stage and commit** on the task branch.
-8. **Merge** the task branch into local `run-seamlyLayout`.
-9. **Push** local `run-seamlyLayout` to `origin run-seamlyLayout` --> NEVER push to the public upstream `FashionFreedom/Seamly2D`.
+8. **Merge** the task branch into local `run-seamlyLayout` with `--no-ff`, so the merge always produces a commit whose message step 9 can mark.
+9. **Push** local `run-seamlyLayout` to `origin run-seamlyLayout` --> NEVER push to the public upstream `FashionFreedom/Seamly2D`. Always push: origin is the branch of record and the only offsite copy of the work.
 10. **Report** to the user: what changed, whether tests/build passed, and anything needing their decision. Then delete the local task branch.
 
 No PR is required for this flow — the merge happens locally and reaches origin by the push in step 9.
+
+#### CI cost control (decided 2026-08-10)
+
+A push to `run-seamlyLayout` starts `ci.yml`, which builds the family on Linux, macOS, and Windows x64/arm64 — roughly **50 minutes**. Step 5's local build already verifies the change on the developer PC, so running that suite on every task merge is mostly redundant. Do not drop the push to avoid it; suppress the CI run instead:
+
+- **Put `[skip ci]` in the step 8 merge commit subject by default.** GitHub reads the pushed head commit's message, which is why step 8 uses `--no-ff`.
+- **Omit `[skip ci]` — let the full suite run — when the task touched anything the local Windows build cannot verify:** `.github/workflows/**`, `scripts/packaging/**`, any `*.pro` / `*.pri` / `CMakeLists.txt` / `Cargo.toml`, or platform-specific code (Linux/macOS paths, `#ifdef Q_OS_*`, arm64 handling). These are exactly the changes that only fail on the runners.
+- **Run the full suite deliberately before a milestone** (a release, or handing the branch to the upstream PR): `gh workflow run ci.yml --ref run-seamlyLayout`, then wait for it to go green. Skipped CI is deferred CI, not cancelled CI — a run of accumulated skips must be cleared before the branch is considered shippable.
+
+Supporting workflow config, so a skip is the only thing left to decide: all three workflows carry `concurrency` with `cancel-in-progress: true` (several merges in one session collapse to one run instead of queueing N), and `ci.yml`'s push trigger has a `paths-ignore` for `**.md` / `project-docs/**` so documentation never triggers a build.
 
 - **Docs-only exception:** when a commit changes only `.md`, `.txt`, and/or `.svg` files (no code), skip steps 1–5 and 8–9 — stage and commit locally on the current branch only; do not push to origin
 - **`SESSION_HANDOVER.md`** (repo root) — keep it current with the session's state: update it before compaction and when finishing a task. It is the next chat session's starting point, so it must carry what git does not — the current task and its exact progress, which `TODO_*.md` / `project-docs/TODO_COMPLETED.md` entries moved, key decisions and the reasoning behind them, files changed, concrete next steps, and any machine state changed outside the repo. The `PreCompact` / `PostCompact` hooks in `.claude/settings.json` only surface a reminder; keeping the file current is required regardless of whether that reminder appears

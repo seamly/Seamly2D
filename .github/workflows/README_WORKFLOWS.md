@@ -3,11 +3,13 @@
 ## Automated Workflows
 
 ### [CI](ci.yml) - Main Continuous Integration Workflow
-**Triggers**: Pull requests, pushes to `develop` / `run-seamlyLayout` / `feat-*`, scheduled releases (Mondays 01:30 UTC), manual dispatch
+**Triggers**: Pull requests, pushes to `run-seamlyLayout`, manual dispatch. Pushes carry a `paths-ignore` for `**.md` / `project-docs/**` / `LICENSE`, so documentation changes never start a build; `pull_request` is deliberately unfiltered so a docs-only PR still reports its checks. `concurrency: cancel-in-progress` supersedes older in-progress runs on the same ref.
+
+> **A full run costs ~50 minutes** across Linux, macOS and Windows x64/arm64. The task workflow in [CLAUDE.md](../../CLAUDE.md) therefore puts `[skip ci]` in the step-8 merge commit by default and clears the accumulated skips with one deliberate `gh workflow run ci.yml --ref run-seamlyLayout` before a milestone. Omit the skip when the task touched workflows, packaging, build files (`*.pro`, `CMakeLists.txt`, `Cargo.toml`) or platform-specific code — the local Windows build cannot verify those.
 
 **Features**:
 - **Tests**: Builds all platforms on pull requests with downloadable artifacts and Linux unit tests
-- **Pre-Releases**: `schedule` and `workflow_dispatch` runs on **`run-seamlyLayout`** publish a GitHub **pre-release** (`prerelease: true`) with date-based versioning (vYYYY.MM.DD.HHMM). The ref is deliberately *not* `develop`: `origin/develop` is kept as a pristine mirror of upstream `FashionFreedom/Seamly2D` until the SeamlyLayout migration is finished, so nothing is released from it. `run-seamlyLayout` is also this repository's default branch, which is the ref the `schedule` trigger runs on.
+- **Pre-Releases**: `workflow_dispatch` runs on **`run-seamlyLayout`** publish a GitHub **pre-release** (`prerelease: true`) with date-based versioning (vYYYY.MM.DD.HHMM). The `publish` job also still tests for `github.event_name == 'schedule'`, but `on:` carries no `schedule` trigger any more, so dispatch is the only way a release is cut — **a plain push never publishes**, it only builds. The ref is deliberately *not* `develop`: `origin/develop` is kept as a pristine mirror of upstream `FashionFreedom/Seamly2D` until the SeamlyLayout migration is finished, so nothing is released from it. `run-seamlyLayout` is also this repository's default branch, which is the ref the `schedule` trigger runs on.
 - **Code Signing**: Integrated Windows and Mac code signing
   - Signs both Windows `.msi` packages (x64 and arm64)
   - Signs and notarizes Mac builds
