@@ -105,13 +105,13 @@ $(document).ready(function(){initNavTree('d8/de3/md_src_app_seamlylayout_AGENTS.
 <blockquote class="doxtable">
 <p>&zwj;Synchronization note: This file mirrors <code>.github/copilot-instructions.md</code>. If content diverges, treat <code>.github/copilot-instructions.md</code> as the source of truth and sync this file. </p>
 </blockquote>
-<h1><a class="anchor" id="autotoc_md5"></a>
+<h1><a class="anchor" id="autotoc_md11"></a>
 Priority and Scope</h1>
 <ul>
 <li>Prompts are requirements, not suggestions.</li>
 <li>Apply these rules across this entire workspace unless a task explicitly states otherwise.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md6"></a>
+<h1><a class="anchor" id="autotoc_md12"></a>
 Architecture Context</h1>
 <ul>
 <li>Frontend: Qt 6.11 + QML/QtWidgets (<code>qt_frontend/</code>) under LGPL-3.0.</li>
@@ -119,7 +119,7 @@ Architecture Context</h1>
 <li>Bridge: CXX-Qt (<code>crates/cxxqt_bridge/</code>) connecting Rust and Qt.</li>
 <li>For UI tasks, always inspect both <code>qt_frontend/qml/</code> and <code>crates/cxxqt_bridge/</code>.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md7"></a>
+<h1><a class="anchor" id="autotoc_md13"></a>
 Mandatory Engineering Rules</h1>
 <ul>
 <li>Always use absolute file paths (C++: <code>QFileInfo::absoluteFilePath()</code>, Rust: <code>std::path::Path::canonicalize()</code>).</li>
@@ -131,7 +131,7 @@ Mandatory Engineering Rules</h1>
 </ul>
 </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md8"></a>
+<h1><a class="anchor" id="autotoc_md14"></a>
 File Update Coverage</h1>
 <ul>
 <li>When making code changes, search relevant files with extensions:<ul>
@@ -144,7 +144,7 @@ File Update Coverage</h1>
 </li>
 <li>Keep docs in <code>docs/</code> synchronized with behavior changes.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md9"></a>
+<h1><a class="anchor" id="autotoc_md15"></a>
 Language and Licensing Expectations</h1>
 <ul>
 <li>Prefer moving business logic into Rust where practical.</li>
@@ -154,13 +154,13 @@ Language and Licensing Expectations</h1>
 </ul>
 </li>
 </ul>
-<h1><a class="anchor" id="autotoc_md10"></a>
+<h1><a class="anchor" id="autotoc_md16"></a>
 Code Quality Expectations</h1>
 <ul>
 <li>Add <code>@doxygen</code> briefs to functions/methods/wrappers/controllers.</li>
 <li>Add inline comments that clarify workflow, control flow, and data flow.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md11"></a>
+<h1><a class="anchor" id="autotoc_md17"></a>
 Shell Commands Policy</h1>
 <p>The following Bash and PowerShell commands are permitted and may be run without restriction:</p>
 <p><b>Bash (Git Bash / POSIX):</b></p><ul>
@@ -179,7 +179,7 @@ Shell Commands Policy</h1>
 <li>Scripting: <code>echo *</code>, <code>$env:*</code>, <code>$*</code></li>
 <li>Version control: <code>git *</code>, <code>gh *</code></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md12"></a>
+<h1><a class="anchor" id="autotoc_md18"></a>
 Rule References</h1>
 <ul>
 <li>Root guidance: <code><a class="el" href="../../da/ddc/CLAUDE_8md.html">CLAUDE.md</a></code></li>

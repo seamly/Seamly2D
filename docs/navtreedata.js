@@ -26,41 +26,41 @@ var NAVTREE =
 [
   [ "Seamly2D", "index.html", [
     [ "SeamlyLayout Workspace Instructions for Agents", "d8/de3/md_src_app_seamlylayout_AGENTS.html", [
-      [ "Priority and Scope", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md5", null ],
-      [ "Architecture Context", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md6", null ],
-      [ "Mandatory Engineering Rules", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md7", null ],
-      [ "File Update Coverage", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md8", null ],
-      [ "Language and Licensing Expectations", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md9", null ],
-      [ "Code Quality Expectations", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md10", null ],
-      [ "Shell Commands Policy", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md11", null ],
-      [ "Rule References", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md12", null ]
+      [ "Priority and Scope", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md11", null ],
+      [ "Architecture Context", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md12", null ],
+      [ "Mandatory Engineering Rules", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md13", null ],
+      [ "File Update Coverage", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md14", null ],
+      [ "Language and Licensing Expectations", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md15", null ],
+      [ "Code Quality Expectations", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md16", null ],
+      [ "Shell Commands Policy", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md17", null ],
+      [ "Rule References", "d8/de3/md_src_app_seamlylayout_AGENTS.html#autotoc_md18", null ]
     ] ],
     [ "SeamlyLayout Changelog", "d9/d10/md_src_app_seamlylayout_CHANGELOG.html", [
-      [ "[Unreleased] — 0.1.0", "d9/d10/md_src_app_seamlylayout_CHANGELOG.html#autotoc_md15", [
-        [ "Added", "d9/d10/md_src_app_seamlylayout_CHANGELOG.html#autotoc_md16", null ],
-        [ "Changed", "d9/d10/md_src_app_seamlylayout_CHANGELOG.html#autotoc_md17", null ],
-        [ "Migration notes (upgrading from pre-0.1.0)", "d9/d10/md_src_app_seamlylayout_CHANGELOG.html#autotoc_md18", null ]
+      [ "[Unreleased] — 0.1.0", "d9/d10/md_src_app_seamlylayout_CHANGELOG.html#autotoc_md7", [
+        [ "Added", "d9/d10/md_src_app_seamlylayout_CHANGELOG.html#autotoc_md8", null ],
+        [ "Changed", "d9/d10/md_src_app_seamlylayout_CHANGELOG.html#autotoc_md9", null ],
+        [ "Migration notes (upgrading from pre-0.1.0)", "d9/d10/md_src_app_seamlylayout_CHANGELOG.html#autotoc_md10", null ]
       ] ]
     ] ],
     [ "SeamlyLayout", "d8/dad/md_src_app_seamlylayout_CLAUDE.html", [
-      [ "Architecture", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md20", null ],
-      [ "Key Conventions", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md21", null ],
-      [ "Command Line — the Seamly2D handoff contract (Task 49)", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md22", null ],
-      [ "Platform Support", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md23", null ],
-      [ "Build Commands", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md24", null ],
-      [ "Search & Update Policy", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md25", null ],
-      [ "Rules", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md26", null ],
-      [ "Workflow Guidelines", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md27", null ],
-      [ "Seamly2D Family", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md28", null ]
+      [ "Architecture", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md27", null ],
+      [ "Key Conventions", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md28", null ],
+      [ "Command Line — the Seamly2D handoff contract (Task 49)", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md29", null ],
+      [ "Platform Support", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md30", null ],
+      [ "Build Commands", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md31", null ],
+      [ "Search & Update Policy", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md32", null ],
+      [ "Rules", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md33", null ],
+      [ "Workflow Guidelines", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md34", null ],
+      [ "Seamly2D Family", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md35", null ]
     ] ],
     [ "Fonts for SeamlyLayout", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html", [
-      [ "Required Fonts", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md30", [
-        [ "Comfortaa", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md31", null ],
-        [ "Inter Tight", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md32", null ]
+      [ "Required Fonts", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md20", [
+        [ "Comfortaa", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md21", null ],
+        [ "Inter Tight", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md22", null ]
       ] ],
-      [ "How to Download", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md33", null ],
-      [ "Font Pairing Strategy", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md34", null ],
-      [ "Alternative: Using Google Fonts Package", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md35", null ]
+      [ "How to Download", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md23", null ],
+      [ "Font Pairing Strategy", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md24", null ],
+      [ "Alternative: Using Google Fonts Package", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md25", null ]
     ] ],
     [ "README", "d1/dff/md_src_app_seamlylayout_qt_frontend_node_modules_tailwindcss_README.html", null ],
     [ "README", "df/da2/md_src_app_seamlylayout_README.html", [
