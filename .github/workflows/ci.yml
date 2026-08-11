@@ -203,16 +203,19 @@ jobs:
   # what a legacy NSIS installation left on disk, which is what the MSI's
   # RemoveFolderEx authoring removes on upgrade.
   #
-  # WHAT EACH ARCH SHIPS:
-  #   x64   — seamly2d + seamlyme (qmake) AND SeamlyLayout (Rust + CMake/Ninja),
-  #           all against ONE Qt 6.11.1 runtime.
-  #   arm64 — seamly2d + seamlyme only (`-NoSeamlyLayout`). SeamlyLayout has no
-  #           arm64 build yet: its Rust + cxx-qt cross story is unresolved and Qt
-  #           ships no cross-compiled arm64 WebEngine, which SvgCanvas.qml needs.
-  #           This is exactly what the retired arm64 NSIS package carried, so
-  #           nothing was lost by dropping it. When SeamlyLayout gains an arm64
-  #           build, delete the `arch == 'x64'` guards below, give the arm64 leg
-  #           the WebEngine modules, and drop -NoSeamlyLayout.
+  # WHAT EACH ARCH SHIPS: all three apps — seamly2d + seamlyme (qmake) and
+  # SeamlyLayout (Rust + CMake/Ninja) — against ONE Qt 6.11.1 runtime.
+  #
+  # EACH ARCH BUILDS NATIVELY ON ITS OWN RUNNER (2026-08-11): x64 on
+  # windows-latest, arm64 on windows-11-arm. Nothing is cross-compiled, so both
+  # legs run the same plain `qmake`, the same cargo host toolchain and the same
+  # smsi.ps1 invocation — the legs differ only in the runner, the MSVC arch and
+  # the Qt host/arch names.
+  #
+  # arm64 carried just the two parent apps until 2026-08-11, on the documented
+  # belief that Qt publishes no arm64 Windows WebEngine (SvgCanvas.qml's
+  # WebEngineView). That was true of Qt 6.8 and is FALSE for 6.11.1 — see the
+  # matrix comment below and the qt-arm64-module-probe workflow.
   #
   # WHY THE STEPS ARE INLINE HERE rather than reused from windows-msi.yml:
   # the publish job below releases these .msi files, so they have to be built
@@ -226,7 +229,7 @@ jobs:
   windows-msi:
     if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate'
     name: 'Windows: Build MSI (${{ matrix.arch }})'
-    runs-on: windows-2022
+    runs-on: ${{ matrix.runner }}
     needs: version
     env:
       VERSION_NUMBER: ${{ needs.version.outputs.version_number }}
@@ -236,22 +239,35 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # qt-modules: qtmultimedia is required by the parent apps on every
-          # arch. Only the x64 leg builds SeamlyLayout, which needs qtwebengine
-          # (SvgCanvas.qml's WebEngineView) plus its own dependencies
-          # qtwebchannel/qtpositioning — aqtinstall does not auto-resolve a
-          # module's Qt dependencies, and without them
-          # find_package(Qt6 ... WebEngineQuick) fails at configure time.
+          # qt-modules is now IDENTICAL for both arches: qtmultimedia for the
+          # parent apps, and qtwebengine (SvgCanvas.qml's WebEngineView) plus
+          # its dependencies qtwebchannel/qtpositioning for SeamlyLayout —
+          # aqtinstall does not auto-resolve a module's Qt dependencies, and
+          # without them find_package(Qt6 ... WebEngineQuick) fails at
+          # configure time.
+          #
+          # The arm64 leg carried qtmultimedia alone until 2026-08-11, on the
+          # documented belief that Qt publishes no arm64 Windows WebEngine.
+          # That was true of Qt 6.8 and is FALSE for 6.11.1: `aqt list-qt
+          # windows desktop --modules 6.11.1 win64_msvc2022_arm64_cross_compiled`
+          # lists qtwebengine. Verified by the qt-arm64-module-probe workflow,
+          # run 31453192356.
+          # Each arch builds NATIVELY on its own runner — no cross-compiling.
+          # That means a plain `qmake` (not `host-qmake`), a native MSVC arch, a
+          # native cargo host toolchain, and a `windeployqt6.exe` the runner can
+          # execute, so no QT_HOST_PATH juggling anywhere below.
           - arch: x64
+            runner: windows-latest
             msvc-arch: x64
+            qt-host: windows
             qt-arch: win64_msvc2022_64
-            qmake: qmake
             qt-modules: qtmultimedia qtwebengine qtwebchannel qtpositioning
           - arch: arm64
-            msvc-arch: amd64_arm64
-            qt-arch: win64_msvc2022_arm64_cross_compiled
-            qmake: host-qmake
-            qt-modules: qtmultimedia
+            runner: windows-11-arm
+            msvc-arch: arm64
+            qt-host: windows_arm64
+            qt-arch: win64_msvc2022_arm64
+            qt-modules: qtmultimedia qtwebengine qtwebchannel qtpositioning
 
     steps:
       - uses: actions/checkout@v7
@@ -260,10 +276,13 @@ jobs:
         with:
           arch: ${{ matrix.msvc-arch }}
 
-      # ONE Qt install for every app in the package (Task 30).
+      # ONE Qt install for every app in the package (Task 30). `host` is set
+      # explicitly per leg: the arm64 runner needs the NATIVE windows_arm64 host
+      # kit, not the x64 `windows` host the action would otherwise assume.
       - uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
+          host: ${{ matrix.qt-host }}
           arch: ${{ matrix.qt-arch }}
           cache: true
           modules: ${{ matrix.qt-modules }}
@@ -275,32 +294,33 @@ jobs:
           ./scripts/version.sh ${VERSION_NUMBER}
 
       # The .pro post-link runs windeployqt, so each app's bin\ ends up
-      # install-ready and smsi.ps1 can stage it directly. `host-qmake` is the
-      # x64 qmake that emits arm64 makefiles when cross-compiling.
+      # install-ready and smsi.ps1 can stage it directly. Plain `qmake` on both
+      # legs — each runner is native, so there is no host/target split.
       - name: make seamly2d.exe and seamlyme.exe
         run: |
-          ${{ matrix.qmake }} Seamly.pro -config release CONFIG+=noTests
+          qmake Seamly.pro -config release CONFIG+=noTests
           nmake
 
-      # ------------------- SeamlyLayout (x64 only) -------------------------
-      - name: Install Rust toolchain (x64 only)
-        if: matrix.arch == 'x64'
+      # ------------------- SeamlyLayout (both arches) ----------------------
+      # Built on every arch since 2026-08-11. No `targets:` and no explicit
+      # cargo target: each runner's default host toolchain already matches the
+      # package it is building.
+      - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo build (x64 only)
-        if: matrix.arch == 'x64'
+      - name: Cache cargo build
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: src/app/seamlylayout
+          # Keeps the two legs from sharing one cache key across architectures.
+          key: ${{ matrix.arch }}
 
-      - name: Install Ninja (x64 only)
-        if: matrix.arch == 'x64'
+      - name: Install Ninja
         run: choco install ninja -y
 
       # One CMake build produces both the Rust bridge (Corrosion/cxx-qt) and the
       # C++/QML app, against the same Qt kit installed above.
-      - name: Build SeamlyLayout release (x64 only)
-        if: matrix.arch == 'x64'
+      - name: Build SeamlyLayout release
         working-directory: src/app/seamlylayout/qt_frontend
         shell: pwsh
         run: |
@@ -329,28 +349,16 @@ jobs:
       # smsi.ps1 stages the shared Qt runtime, builds the MSI, runs the ICE
       # checks and the install-time authoring test, and fails the job on any of
       # them. Output: scripts\seamly-msi\<arch>\seamly-<arch>.msi
-      - name: Build MSI (x64 - all three apps)
-        if: matrix.arch == 'x64'
+      # One invocation for both arches: each package carries all three apps, and
+      # each runner is native, so $QT_ROOT_DIR's windeployqt6.exe is always one
+      # this runner can execute.
+      - name: Build MSI (all three apps)
         shell: pwsh
         run: |
-          .\scripts\packaging\windows\smsi.ps1 -Arch x64 -Version $env:VERSION_NUMBER `
+          .\scripts\packaging\windows\smsi.ps1 -Arch ${{ matrix.arch }} -Version $env:VERSION_NUMBER `
             -Seamly2DBin src\app\seamly2d\bin `
             -SeamlyMeBin src\app\seamlyme\bin `
             -WinDeployQt6 "$env:QT_ROOT_DIR\bin\windeployqt6.exe"
-
-      # No -WinDeployQt6 here, deliberately: smsi.ps1 only runs windeployqt6 for
-      # SeamlyLayout, and only resolves the parameter under `if ($includeLayout
-      # -and -not $WinDeployQt6)`, so with -NoSeamlyLayout it is unused. The
-      # parent apps' Qt runtime is whatever their .pro post-link windeployqt
-      # already put in bin\. Same invocation as windows-msi.yml's arm64 leg.
-      - name: Build MSI (arm64 - seamly2d and seamlyme)
-        if: matrix.arch == 'arm64'
-        shell: pwsh
-        run: |
-          .\scripts\packaging\windows\smsi.ps1 -Arch arm64 -Version $env:VERSION_NUMBER `
-            -Seamly2DBin src\app\seamly2d\bin `
-            -SeamlyMeBin src\app\seamlyme\bin `
-            -NoSeamlyLayout
 
       # ------------------- sign (main builds only) --------------------------
       - name: Authenticate to Google Cloud (for signing)
