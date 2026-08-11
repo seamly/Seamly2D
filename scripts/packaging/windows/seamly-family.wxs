@@ -514,7 +514,17 @@
 
       <Component Id="RemoveLegacyProgramFiles" Condition="SEAMLYLEGACYINSTALLDIR">
         <!-- Breadcrumb doubling as the component's key path, in the 64-bit view
-             beside the package's other install info. Records what was removed. -->
+             beside the package's other install info. Records what was removed.
+
+             FROZEN NAME (decided 2026-08-11) - do not rename this value again.
+             The component has no explicit Guid, so WiX derives one from the
+             component Id and this KeyPath; changing either changes the GUID and
+             makes Windows Installer treat it as a different component. The
+             Nsis -> Legacy rename already spent that change once, and on
+             upgrade it does the right thing (old value removed, new one
+             written). Spending it repeatedly leaves users' machines accreting
+             orphaned breadcrumbs under SOFTWARE\Seamly\Seamly2D. The same
+             applies to RemovedLegacyRegistry below. -->
         <RegistryValue Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D" Name="RemovedLegacyInstallDir"
                        Type="string" Value="[SEAMLYLEGACYINSTALLDIR]" KeyPath="yes" />
         <util:RemoveFolderEx Property="SEAMLYLEGACYINSTALLDIR" On="install" />
@@ -565,6 +575,8 @@
          its directory is never created - but it has to be a 32-bit one. -->
     <StandardDirectory Id="ProgramFilesFolder">
       <Component Id="RemoveLegacyRegistryKeys" Condition="SEAMLYLEGACYINSTALLDIR" Bitness="always32">
+        <!-- FROZEN NAME (decided 2026-08-11) - see RemoveLegacyProgramFiles
+             above for why this KeyPath value name must not change again. -->
         <RegistryValue Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D" Name="RemovedLegacyRegistry"
                        Type="string" Value="1" KeyPath="yes" />
         <RemoveRegistryKey Root="HKLM" Key="SOFTWARE\NSIS_Seamly2D" Action="removeOnInstall" />
