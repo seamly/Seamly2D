@@ -6,7 +6,47 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## Current state (2026-08-11): CI version numbers could be octal C++ literals — fixed
+## Current state (2026-08-11): Task Installer.1.2 — NSIS retired, arm64 ships an `.msi`
+
+**Branch `task-installer-win-arm64-msi`, off `run-seamlyLayout`.**
+
+Windows now ships **MSIs only**. `ci.yml`'s `windows` job — the last NSIS
+producer, arm64-only since Installer.1.1 — is deleted, and `windows-msi` became
+a **matrix over `arch`** (`x64`, `arm64`, `fail-fast: false`), which is
+`windows-msi.yml`'s `msi` job verbatim minus its own version step. `publish`
+releases `seamly-x64.msi` + `seamly-arm64.msi` and no longer needs the `windows`
+job.
+
+**Why NSIS could go at all:** the stated reason for keeping it (no arm64
+SeamlyLayout build) never justified NSIS. `windows-msi.yml` has always built an
+arm64 MSI with `smsi.ps1 -NoSeamlyLayout`, carrying seamly2d + seamlyme —
+*exactly* the two apps the arm64 NSIS package carried. The format swap loses
+nothing; shipping SeamlyLayout on arm64 is a separate, still-open problem.
+
+**arm64 still ships two of three apps.** SeamlyLayout needs an
+`aarch64-pc-windows-msvc` Rust + cxx-qt build and an arm64 Qt WebEngine (for
+`SvgCanvas.qml`), neither of which exists. Tracked in the newly written
+`TODO_INSTALLER_WIN_ARM64.md` as InstWinArm64.1, with the exact three-line
+change to both workflows when it lands.
+
+**`dist/seamly2d-installer.nsi` is kept, unbuilt,** with a RETIRED header
+explaining why: `seamly-family.wxs` cites it as the authoritative record of what
+a pre-MSI installation left on disk, which the MSI's `RemoveFolderEx` authoring
+has to remove on upgrade. Deleting it would orphan that authoring's reference.
+
+`-WinDeployQt6` is deliberately not passed on the arm64 leg — verified at
+`smsi.ps1:370`, the parameter is only resolved and used under `$includeLayout`.
+
+Docs updated: `README-BUILDS.md`, `README_WORKFLOWS.md`, `TODO_INSTALLER.md`
+(Installer.1.2 checked off), `TODO_INSTALLER_WIN_ARM64.md` (written from a stub),
+`TODO_MIGRATE.md` M.12 arm64 row, `TODO_CODE_SIGNING.md` CodeSign.1.7 (closed as
+moot — it was explicitly conditional on NSIS still being the released installer).
+
+**Verification is the CI run for this commit** — there is no YAML tooling on this
+PC and no arm64 hardware. Confirm both MSI legs go green and that
+`seamly-arm64.msi` uploads.
+
+## Also 2026-08-11: CI version numbers could be octal C++ literals — fixed
 
 **Branch `task-ci-version-octal`, off `run-seamlyLayout`.**
 
@@ -121,10 +161,10 @@ alongside the UI extension.
    matches the class name (the style guide's class-match exception wins over the
    `settings_*` snake_case prefix for class-defining files).
 2. **`.github/README-DEVELOPER-NEW.md`** → **rename it to
-   `.github/README-DEVELOPER-SEAMLY-FAMILY.md`**, to be folded into
+   `.github/README-DEVELOPER-SEAMLY-APPS.md`**, to be folded into
    `.github/README-DEVELOPER.md` when the migration is complete. **Not done yet.**
 3. **Qt WebChannel / Qt Positioning documentation** → maintain it in
-   `.github/README-DEVELOPER-SEAMLY-FAMILY.md` until the migration completes.
+   `.github/README-DEVELOPER-SEAMLY-APPS.md` until the migration completes.
 4. **`src/app/seamly2d/core/BUILD_PROBLEMS.txt`** → delete it if it is not
    useful. **Not done yet.**
 5. **Testing happens on the test laptop, not in a VM** (re-confirmed 2026-07-30).
@@ -139,7 +179,7 @@ alongside the UI extension.
    MSI's server side runs as LocalSystem, so a per-user path resolves to the
    SYSTEM profile and would only cover whoever ran setup; macOS and Linux have no
    MSI at all, so the logic would be written twice.
-8. **The program directory is `C:\Program Files\` + `Seamly`** — show the user
+8. **The program directory in Windows is `C:\Program Files\` + `Seamly`** — show the user
    the final assembled path and take OK/Cancel, rather than editing a box whose
    contents differ from the path it applies.
 9. **Data-root relocation asks first** — prompt Y/N before copying existing data
@@ -166,12 +206,12 @@ alongside the UI extension.
   windeployqt output beside `qt_frontend/build/Debug/SeamlyLayout.exe`, so from a
   plain shell it starts and does nothing — no log file is even created. Prepend
   `C:\Qt\6.11.1\msvc2022_64\bin`. `ctest` handles this itself via the
-  `ENVIRONMENT_MODIFICATION` added in Task 58.
+  `ENVIRONMENT_MODIFICATION` added in Task 58. **Not a problem when building with ci.yml on GitHub with Ubuntu-latest runner**
 - **SeamlyLayout's log file has two independent writers and they overwrite each
   other.** C++ `Logger` holds a buffered `QTextStream` on the file while Rust's
   `log_to_file()` opens/appends per call, so lines get clipped mid-string. Do not
   conclude a log line is absent because it looks truncated — grep for a
-  distinctive fragment.
+  distinctive fragment. **Added this as a task in TODO_SEAMLYLAYOUT.md**
 - **A tagged handoff SVG can be produced headlessly**, without driving the Layout
   Mode GUI: `seamly2d.exe <pattern>.sm2d -b <name> -d <dir> -f 0 --exportOnlyDetails`
   writes `<name>_pieces.svg` through the same `exportSVG()` that

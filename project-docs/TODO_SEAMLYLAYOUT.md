@@ -45,3 +45,39 @@ Add layout export for multisize patterns — `.sm2d` patterns opened with a `.sm
   - [ ] Layout 2.5.2 Export the set to a single multi-page PDF, or to individual files of any export type
 - [ ] Layout 2.6 Tests with a multisize test pattern (need a `.sm2d` + `.smms` fixture); verify grouping/grainline orientation in the exported SVG/PDF
 - [ ] Layout 2.7 Doxygen briefs + inline comments on all touched functions; document the three products in the repo docs
+
+## Task Layout.3 — One writer for the SeamlyLayout debug log
+
+The log file has **two independent writers and they overwrite each other**, so
+lines get clipped mid-string and a message that was written can look absent:
+
+- C++ `Logger` (`src/app/seamlylayout/qt_frontend/src/Logger.h`) holds a static
+  `QFile s_file` plus a **buffered** `QTextStream s_stream` open on the file for
+  the life of the process.
+- Rust `log_to_file()` (`src/app/seamlylayout/crates/cxxqt_bridge/src/lib.rs:457`,
+  debug builds only) opens the **same path** with `OpenOptions::append(true)` and
+  closes it on every call.
+
+Two file handles with independent positions, one of them buffered, means each
+side's flush can land on top of the other's bytes. Until this is fixed: do not
+conclude a log line is absent because it looks truncated — grep for a
+distinctive fragment instead.
+
+- [ ] Layout.3.1 Decide the single owner of the file and record it in
+  `DECISIONS.md` — either the Rust side logs through the C++ `Logger` across the
+  cxx-qt bridge, or `Logger` stops holding the file open and both sides
+  append-and-close per line. Prefer one writer over trying to interleave two
+- [ ] Layout.3.2 Implement the chosen design; keep the existing line format
+  (`[unix_seconds] DEBUG: message`) so current logs stay readable and both call
+  sites' signatures stay unchanged (~20 Rust call sites in `lib.rs`,
+  `layout_utils.rs` and `exports.rs`; `Logger::log()` on the C++ side)
+- [ ] Layout.3.3 Serialize concurrent writes — the Rust bridge can be called from
+  a non-GUI thread, so whatever owns the file needs a mutex or an equivalent
+  guarantee
+- [ ] Layout.3.4 Keep the release-build behaviour: `log_to_file()` is a no-op
+  when `debug_assertions` is off, and that must not regress
+- [ ] Layout.3.5 Test: write interleaved lines from both sides (and from two
+  threads) and assert every line arrives whole and in order
+- [ ] Layout.3.6 Remove the "two independent writers" gotcha from
+  `SESSION_HANDOVER.md` once this is fixed
+- [ ] Layout.3.7 Doxygen briefs + inline comments on all touched functions
