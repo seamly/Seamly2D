@@ -1,0 +1,78 @@
+name: Qt arm64 module probe
+
+# ---------------------------------------------------------------------------
+# Answers one question, authoritatively: which Qt modules does Qt actually
+# PUBLISH for the Windows arm64 cross-compilation kit?
+#
+# WHY THIS EXISTS (Task InstWinArm64.3):
+#   SeamlyLayout requires Qt WebEngine (SvgCanvas.qml's WebEngineView, and
+#   QtWebEngineQuick::initialize() in main.cpp), so the arm64 MSI ships only
+#   seamly2d + seamlyme (smsi.ps1 -NoSeamlyLayout). The stated reason is that Qt
+#   publishes no arm64 Windows WebEngine — but that has been taken on trust from
+#   documentation and forum posts, and it decides whether InstWinArm64.3's
+#   from-source Chromium build is necessary at all.
+#
+#   jurplel/install-qt-action is a front end to aqtinstall, which can only
+#   download what Qt publishes to its mirrors. So aqtinstall's own listing IS
+#   the answer: if `qtwebengine` appears for the arm64 kit, InstWinArm64.3 is
+#   unnecessary and arm64 becomes the three-line change in InstWinArm64.1.3
+#   (add the modules, drop the `arch == 'x64'` step guards, drop
+#   -NoSeamlyLayout). If it does not appear, the from-source build is confirmed
+#   as the only route and the decision rests on evidence rather than inference.
+#
+# This is a manual, read-only probe: workflow_dispatch only, no build, no
+# artifact, nothing pushed. It downloads nothing but package metadata and takes
+# about a minute. Delete it once InstWinArm64.3 is settled.
+# ---------------------------------------------------------------------------
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # Keep in step with ci.yml / windows-msi.yml / seamlylayout-ci.yml.
+  QT_VERSION: '6.11.1'
+
+jobs:
+
+  probe:
+    name: 'List published Qt modules per Windows arch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Same source ci.yml's arm64 legs pin for install-qt-action, so the
+      # listing matches what those jobs would actually be able to install.
+      - name: Install aqtinstall
+        run: pip install git+https://github.com/miurahr/aqtinstall.git
+
+      - name: Architectures published for windows_desktop
+        run: aqt list-qt windows_desktop --arch ${QT_VERSION}
+
+      # The kit ci.yml's x64 MSI leg uses. Expected to list qtwebengine — this
+      # is the control, proving the probe reports modules correctly.
+      - name: Modules for win64_msvc2022_64 (x64 - control)
+        run: aqt list-qt windows_desktop --modules ${QT_VERSION} win64_msvc2022_64
+
+      # The kit ci.yml's arm64 MSI leg uses. THIS is the question: is
+      # qtwebengine in this list?
+      - name: Modules for win64_msvc2022_arm64_cross_compiled (arm64 - the question)
+        run: aqt list-qt windows_desktop --modules ${QT_VERSION} win64_msvc2022_arm64_cross_compiled
+
+      # A plain grep verdict, so the answer is readable without scrolling the
+      # log. Never fails the job: "absent" is a legitimate result, not an error.
+      - name: Verdict
+        run: |
+          if aqt list-qt windows_desktop --modules ${QT_VERSION} \
+               win64_msvc2022_arm64_cross_compiled | tr ' ' '\n' | grep -qx 'qtwebengine'; then
+            echo "RESULT: qtwebengine IS published for win64_msvc2022_arm64_cross_compiled."
+            echo "InstWinArm64.3 (from-source Chromium build) is NOT needed - do InstWinArm64.1.3 instead."
+          else
+            echo "RESULT: qtwebengine is NOT published for win64_msvc2022_arm64_cross_compiled."
+            echo "InstWinArm64.3 (from-source Chromium build) is confirmed as the only route."
+          fi
