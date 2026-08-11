@@ -6,7 +6,51 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## Current state (2026-08-10): arm64 MSI build fixed — `windeployqt --qtpaths` removed
+## Current state (2026-08-11): CI cost control + MSI authoring check repaired
+
+Two changes, both merged to `run-seamlyLayout` and force-pushed (see below for why).
+
+**1. CI no longer runs on every push.** `ci.yml` gained a top-level `concurrency`
+(cancel-in-progress) and a `paths-ignore` for `**.md` / `project-docs/**` /
+`LICENSE` on its push trigger; `seamlylayout-ci.yml` and `windows-msi.yml`
+already had both. `CLAUDE.md`'s task workflow now merges with `--no-ff` (step 8)
+and puts the skip token in the merge commit by default (step 9), omitting it
+when the task touched `.github/workflows/**`, `scripts/packaging/**`,
+`*.pro`/`CMakeLists.txt`/`Cargo.toml` or platform-specific code — the things
+`scripts/sd.ps1` (debug, msvc2022_64, qmake on `Seamly.pro`) cannot verify.
+Accumulated skips get cleared with `gh workflow run ci.yml --ref run-seamlyLayout`
+before a milestone.
+
+**GOTCHA that cost a push:** GitHub matches the skip token anywhere in the head
+commit message, including a sentence *saying the token is absent*. The first
+version of that merge commit explained the new rule, contained the literal
+token, and skipped the very run it was describing — only CodeQL (default setup,
+not governed by the token) ran. Both commits were rewritten to spell it
+"skip token" in prose and the branch was force-pushed with `--force-with-lease`.
+Never write the literal token in a commit message.
+
+**2. The MSI authoring check was failing, and not because of anything above.**
+`546e9d5def` (2026-08-03, "fixed issues in build files related to directories,
+filenames, etc.") hand-edited `seamly-family.wxs` and left
+`test_msi_authoring.ps1` asserting the old values, so three assertions failed on
+every push since. Fixed in the `.wxs`, test left alone, because the test encodes
+Task 51's documented requirements and `SeamlyApps` is the name used by
+`README-BUILDS.md`, `scripts/packaging/windows/README.md`,
+`INSTALL_DECISION_FLOW.md`, `TODO_INSTALLER_WIN_X64.md` and the Task 51 test kit:
+
+- `INSTALLFOLDER` `Name="Seamly"` → `Name="SeamlyApps"`.
+- `UserDataText` names the user-data folder again (`C:\Users\your name\seamlyData`).
+- `NsisText` regained the deleted sentence "Nothing else in that folder is kept,
+  so move anything of your own out of it before continuing." That one was a real
+  data-loss warning, not just a test mismatch — the dialog still says Setup
+  removes the whole NSIS *program directory*. Kept to 338 chars so it fits the
+  unchanged `Height="50"` control; the pre-`546e9d5def` text was 337.
+
+Verified locally by parsing the `.wxs` and running the six assertions' regexes
+against the real attribute values (all pass, XML well-formed). The MSI itself
+still only builds on CI.
+
+## Superseded (2026-08-10): arm64 MSI build fixed — `windeployqt --qtpaths` removed
 
 **Branch `task-arm64-windeployqt`, off `run-seamlyLayout`.**
 
