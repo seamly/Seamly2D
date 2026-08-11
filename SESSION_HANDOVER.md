@@ -70,9 +70,10 @@ release step end to end.
 ### Follow-up left open deliberately
 
 `.github/README.md`'s "Windows 64-bit" download badge still points at upstream's
-`Seamly2D-windows.zip`. It has to become the `.msi`, but only when the migration
-is pushed upstream — editing it now breaks the live public download link.
-Recorded under Installer.1.1 in `project-docs/TODO_INSTALLER.md`.
+`Seamly2D-windows.zip`. It has to become `seamly-x64.msi`, but only when the
+migration is pushed upstream — the badges link to
+`FashionFreedom/Seamly2D/releases/latest`, so editing them now breaks the live
+public download link. Tracked as **Task M.12** in `TODO_MIGRATE.md`.
 
 ## MACHINE STATE: the Visual Studio installation is broken
 
