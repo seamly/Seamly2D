@@ -103,9 +103,9 @@ $(document).ready(function(){initNavTree('d9/d10/md_src_app_seamlylayout_CHANGEL
 <div class="contents">
 <div class="textblock"><p>Author: slspencer Copyright: 2026</p>
 <hr  />
-<h1><a class="anchor" id="autotoc_md7"></a>
+<h1><a class="anchor" id="autotoc_md15"></a>
 [Unreleased] — 0.1.0</h1>
-<h2><a class="anchor" id="autotoc_md8"></a>
+<h2><a class="anchor" id="autotoc_md16"></a>
 Added</h2>
 <ul>
 <li><b>Installer packaging</b> — Windows Inno Setup script (<code>packaging/windows/SeamlyLayout.iss</code>) and build script (<code>packaging/windows/build_installer.ps1</code>); macOS DMG script (<code>packaging/macos/build_dmg.sh</code>); Linux desktop entry (<code>packaging/linux/seamlylayout.desktop</code>).</li>
@@ -113,13 +113,13 @@ Added</h2>
 <li><b><a class="el" href="../../d8/dd6/classSettingsModelTests.html">SettingsModelTests</a></b> — new Qt test suite covering default field values, legacy <code>layoutMode</code> schema migration (<code>withGrain</code>/<code>withoutGrain</code> → <code>alongGrainline</code>/<code>withNap</code>), save/load round-trips, and <code>resetToDefaults()</code>.</li>
 <li><b><a class="el" href="../../d9/d4e/classPreferencesModel.html">PreferencesModel</a> migration tests</b> — six new tests in <code><a class="el" href="../../d7/d0f/classPreferencesModelTests.html">PreferencesModelTests</a></code> covering legacy folder-name rewriting (<code>layout-settings</code> → <code>settings</code>, <code>layout-preferences</code> → <code>preferences</code>) performed by <code><a class="el" href="../../d9/d4e/classPreferencesModel.html#a68ce169e170232c35375512e78311f16">PreferencesModel::load()</a></code>.</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md9"></a>
+<h2><a class="anchor" id="autotoc_md17"></a>
 Changed</h2>
 <ul>
 <li><b>Runtime folder rename</b> — canonical user runtime folders are now <code>~/seamlyLayout/settings/</code> and <code>~/seamlyLayout/preferences/</code> (previously <code>layout-settings</code> and <code>layout-preferences</code> under <code>AppConfigLocation</code>). Existing files are copied to the new locations automatically on first launch after upgrade; old folders are not deleted.</li>
 <li><b>CMakeLists.txt install rules</b> — added <code>install(DIRECTORY settings/ ...)</code> target that bundles default settings JSON files next to the executable (excluding the user-specific <code>preferences.json</code>).</li>
 </ul>
-<h2><a class="anchor" id="autotoc_md10"></a>
+<h2><a class="anchor" id="autotoc_md18"></a>
 Migration notes (upgrading from pre-0.1.0)</h2>
 <p>On first launch after upgrade, <code><a class="el" href="../../d9/d4e/classPreferencesModel.html#a68ce169e170232c35375512e78311f16">PreferencesModel::load()</a></code> detects any paths in <code>preferences.json</code> that still reference the legacy folder names and rewrites them to the canonical names, copying files where they do not yet exist at the new location. No manual steps are required.</p>
 <p>Legacy folder name mapping:</p>
