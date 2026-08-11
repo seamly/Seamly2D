@@ -13,7 +13,7 @@ All TODO_MIGRATE.md tasks begin with `Installer.`
   - The `.msi` **replaces** the NSIS `Seamly2D-windows.zip` in the release; the `windows` job is now arm64-NSIS only until Installer.1.2.
   - `publish` now emits a **pre-release** (`prerelease: true`) and is gated on `run-seamlyLayout`, not `develop` (develop stays a pristine upstream mirror).
   - `windows-msi.yml` kept as the packaging-only workflow; its stale jsign path `Seamly2D-<arch>.msi` corrected to the name `smsi.ps1` writes, `seamly-<arch>.msi`.
-  - **Follow-up for the endgame:** `.github/README.md`'s "Windows 64-bit" download badge still points at upstream's `Seamly2D-windows.zip`. Correct to the `.msi` only when the migration is pushed upstream — changing it now breaks the live public download link.
+  - **Follow-up:** `.github/README.md`'s "Windows 64-bit" download badge still points at upstream's `Seamly2D-windows.zip` and must become the `.msi` — tracked as **Task M.12** in `TODO_MIGRATE.md`. Do it only when the migration is pushed upstream; changing it earlier breaks the live public download link.
 - [ ] Task Installer.1.2 - Windows arm64 .msi - should re-implement the Windows x64 .msi capabilities - track tasks in project-docs\TODO_INSTALLER_WIN_ARM64.md
 - [ ] Task Installer.1.3 - MacOS .pkg - refer to tasks in project-docs\TODO_INSTALLER_LINUX_APPIMAGE.md to define the .msi capabilities and options
 - [ ] Task Installer.1.4 - Linux .appimage - refer to tasks in project-docs\TODO_INSTALLER_LINUX_APPIMAGE.md to define the .msi capabilities and options
@@ -38,6 +38,7 @@ All TODO_MIGRATE.md tasks begin with `Installer.`
 ## Installer.4 - Re-organize all directories, files, and scripts needed to build the Seamly executables with the GitHub CI/CD ci.yml file so that all CI/CD build information is under the .github directory tree; remove unnecessary and unused CI/CD files; copy files to new location if the original file is under the src/ or share/ directories; update the CI/CD files with the new locations of moved files; build & test the updated CI/CD workflow and artifacts
 
 - Installer.4.1 - Re-organize files; Update ci.yml and related files to reflect new file locations
+  - **DONE 2026-08-10 — `.github/workflows/action.yaml` deleted.** It was never a workflow: it is Corrosion's own `setup_test_environment` *composite action* (`name`/`description`/`inputs`/`runs`, no `jobs`), added by accident in `d1bb78c495` ("updated ilammy action in .yml/.yaml files", 2026-08-03). GitHub tried to run it as a workflow on every push and failed with *"Required property is missing: jobs"*, which is what made the branch look red. Nothing in the repo referenced it, and Corrosion is fetched by CMake rather than vendored, so there was nowhere for it to belong.
 - Installer.4.2 - Build pre-releases with ci.yml
 - Installer.4.3 - Test pre-releases
 - Installer.4.3.1 - Windows x64 .msi
