@@ -8,22 +8,27 @@ re-accumulate finished-session narrative in this file.
 
 ## PICK UP HERE (2026-08-11, end of session)
 
-**One commit is committed locally and deliberately NOT pushed:** `a0e70635a7`
-("freeze the two legacy-removal breadcrumb value names" — comment-only in
-`seamly-family.wxs`). It was held back because a CI + Windows MSI run was in
-flight on `361b743fa0`, and `ci.yml`'s new `cancel-in-progress` concurrency
-means any push cancels it. **Next action: confirm that run finished, then
-`git push origin run-seamlyLayout`.** No skip token — it touches
-`scripts/packaging/**`.
+**Task InstWinX64.0 — the x64 MSI builds clean on CI.** Runs `31461308276`
+(CI) and `31461308379` (Windows MSI) on `361b743fa0` both finished **green**,
+including `Windows: Build MSI (x64)`. `wix msi validate` passed,
+`test_msi_authoring.ps1` passed, and `seamly-x64.msi` (163.5 MB) uploaded with
+all three apps in it. So the three changes those runs were the first to
+exercise — the edited `ci.yml`, the repaired authoring assertions, and the
+Nsis→Legacy rename — are all verified. Nothing in `ci.yml` or the packaging
+scripts needed a fix. Details, including the two harmless warnings (ICE61 from
+`AllowSameVersionUpgrades`, and windeployqt's missing `Qt6SerialPort.dll` for
+the unused NMEA plugin), are written up under Task InstWinX64.0 in
+`TODO_INSTALLER_WIN_X64.md`.
 
-**Verification still outstanding.** As of the last check, run `31461308276`
-(CI) and `31461308379` (Windows MSI) on `361b743fa0` were still in progress.
-They are the first runs to exercise (a) the edited `ci.yml`, (b) the repaired
-MSI authoring assertions, and (c) the Nsis→Legacy rename — all three at once,
-so a failure will not say which. `gh run list --branch run-seamlyLayout`.
-Note the runs on the *previous* push were cancelled by the concurrency rule,
-which is working as designed but means the authoring fix was never verified
-on its own.
+**The held-back commit is pushed.** `a0e70635a7` and `064a1e49dd` went to
+origin once those runs finished; `run-seamlyLayout` is at `064a1e49dd` on both
+sides. That push started runs `31538442167` (CI) and `31538442086` (Windows
+MSI) — a re-verification of a comment-only `.wxs` change, so a failure there
+would be new and unrelated to the MSI authoring.
+
+**The one thing left in Task InstWinX64.0** is its second subtask: the user has
+to confirm the x64 `.msi` built without error. Only then does the task move to
+`TODO_COMPLETED.md`.
 
 Everything below is the state as shipped this session.
 

@@ -27,7 +27,6 @@ Notes:
 - **Data-root relocation asks first** — prompt Y/N before copying existing data
    files to a new directory location.
 
-
 ## Installer.1 — Create .msi/.pkg/.appimage/flatpak artifacts as pre-releases in github workflow ci.yml file
 
 - [x] Task Installer.1.1 - Windows x64 .msi - refer to tasks in project-docs\TODO_INSTALLER_WIN_X64.md to define the .msi capabilities and options
@@ -35,16 +34,15 @@ Notes:
   - The `.msi` **replaces** the NSIS `Seamly2D-windows.zip` in the release; the `windows` job was left arm64-NSIS only, and Installer.1.2 then retired it entirely.
   - `publish` now emits a **pre-release** (`prerelease: true`) and is gated on `run-seamlyLayout`, not `develop` (develop stays a pristine upstream mirror).
   - `windows-msi.yml` kept as the packaging-only workflow; its stale jsign path `Seamly2D-<arch>.msi` corrected to the name `smsi.ps1` writes, `seamly-<arch>.msi`.
-  - **Follow-up:** `.github/README.md`'s "Windows 64-bit" download badge still points at upstream's `Seamly2D-windows.zip` and must become the `.msi` — tracked as **Task M.12** in `TODO_MIGRATE.md`. Do it only when the migration is pushed upstream; changing it earlier breaks the live public download link.
 - [x] Task Installer.1.2 - Windows arm64 .msi - should re-implement the Windows x64 .msi capabilities - track tasks in project-docs\TODO_INSTALLER_WIN_ARM64.md
-  - `ci.yml`'s `windows-msi` job is now a **matrix over `arch`** (`x64`, `arm64`, `fail-fast: false`) — `windows-msi.yml`'s `msi` job verbatim, minus its own version step. The arm64 leg cross-compiles the parents (`amd64_arm64` / `win64_msvc2022_arm64_cross_compiled` / `host-qmake`, `qtmultimedia` only) and packages them with `smsi.ps1 -Arch arm64 -NoSeamlyLayout`.
+  - `ci.yml`'s `windows-msi` job is now a **matrix over `arch`** (`x64`, `arm64`, `fail-fast: false`) — `windows-msi.yml`'s `msi` job verbatim, minus its own version step. 
   - **NSIS retired.** The `windows` job is deleted; nothing runs `makensis` any more. `publish` releases `seamly-x64.msi` + `seamly-arm64.msi` in place of `Seamly2D-win-arm64.zip`.
-  - `dist/seamly2d-installer.nsi` is **kept in the tree, unbuilt**, with a RETIRED header: `seamly-family.wxs` cites it as the record of a pre-MSI installation's on-disk footprint, which the MSI's `RemoveFolderEx` authoring removes on upgrade.
-  - **arm64 ships two apps** (seamly2d + seamlyme), exactly what the retired arm64 NSIS package carried. SeamlyLayout needs an arm64 Rust + cxx-qt build and an arm64 Qt WebEngine, neither of which exists — see `TODO_INSTALLER_WIN_ARM64.md` InstWinArm64.1.
   - **Verification is CI-only** (no arm64 hardware here): the arm64 leg has to build, validate and pass `test_msi_authoring.ps1` in the run for this change. A real arm64 install still has never been run — that stays Installer.2.2.
-- [ ] Task Installer.1.3 - MacOS .pkg - refer to tasks in project-docs\TODO_INSTALLER_LINUX_APPIMAGE.md to define the .msi capabilities and options
-- [ ] Task Installer.1.4 - Linux .appimage - refer to tasks in project-docs\TODO_INSTALLER_LINUX_APPIMAGE.md to define the .msi capabilities and options
-- [ ] Task Installer.1.5 - Linux FlatPak - should re-implement the Linux .appimage capabilities - track tasks in project-docs\TODO_INSTALLER_WIN_ARM64.md
+
+- [ ] Task Installer 1.4 - **Seamly Apps for Windows 11 (x64)** must be built on the Github `windows-latest` runner, and **Seamly Apps for Windows 11 (arm64)** must be built on the `windows_11_arm` runner. Both builds should contain Seamly2D/SeamlyLayout/SeamlyMe that run in the same Qt runtime. SeamlyLayout needs a Rust + cxx-qt build and a Qt WebEngine -- the binaries for these exist on windows_11_arm and on windows-latest.
+- [ ] Task Installer.1.5 - MacOS .pkg - refer to tasks in project-docs\TODO_INSTALLER_LINUX_APPIMAGE.md to define the .msi capabilities and options
+- [ ] Task Installer.1.6 - Linux .appimage - refer to tasks in project-docs\TODO_INSTALLER_LINUX_APPIMAGE.md to define the .msi capabilities and options
+- [ ] Task Installer.1.7 - Linux FlatPak - should re-implement the Linux .appimage capabilities - track tasks in project-docs\TODO_INSTALLER_WIN_ARM64.md
 
 ## Installer.2 - Test Seamly pre-releases installation for 3 use cases: a. where Seamly is not previously installed, b. where Seamly version without SeamlyLayout is installed, c. where Seamly version with SeamlyLayout is installed
 
@@ -73,3 +71,5 @@ Notes:
 - Installer.4.3.3 - MacOS .pkg
 - Installer.4.3.4 - Linux .appimage
 - Installer.4.3.5 - Linux FlatPak
+
+  ## Installer.5 - `.github/README.md`'s "Windows 64-bit" download badge still points at upstream's `Seamly2D-windows.zip` and must become the `.msi` — tracked as **Task M.12** in `TODO_MIGRATE.md`. Do it only when the migration is pushed upstream; changing it earlier breaks the live public download link

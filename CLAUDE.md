@@ -14,6 +14,32 @@
   3. any decision or action needed from me.
 - Provide detailed explanations only when I request them.
 
+### Writing Style
+
+Applies to all prose I write for you: chat replies, commit messages, code comments,
+Doxygen blocks, `TODO_*.md` / `project-docs/**` entries, `SESSION_HANDOVER.md`, and README text.
+
+- **Write in ASD-STE100 (Simplified Technical English), adapted for software development.**
+  - One idea per sentence. Keep instructions to 20 words or fewer, descriptions to 25 or fewer.
+  - Use the active voice. Name the actor: "the installer writes the key", not "the key is written".
+  - Use one word for one meaning, and keep the same word for the same thing throughout a document.
+    Do not use synonyms for variety ("build" stays "build"; it does not become "compile" or "make").
+  - Use the imperative for instructions: "Run `scripts/sd.ps1`", not "You should run...".
+  - Use simple verb tenses — present, simple past, simple future. No perfect or progressive forms
+    where a simple one works.
+  - Do not drop articles or helper words. Write "delete the file in the build directory".
+  - Avoid noun stacks longer than three words: "settings file name", not "user settings file name
+    format string".
+  - Technical terms, API names, file paths, and identifiers are exempt — write them exactly.
+- **Follow Zinsser's four principles:**
+  - **Simplicity** — cut every word that does no work. No jargon where a plain word fits.
+  - **Brevity** — the shortest version that stays complete. No throat-clearing, no summary of what
+    I am about to say, no restatement at the end.
+  - **Clarity** — the reader must not have to re-read a sentence. Put the subject early. Prefer a
+    concrete noun to an abstraction.
+  - **Humanity** — write to a person, not to a template. Plain, direct, honest about what is unknown
+    or unverified. No filler enthusiasm and no false confidence.
+
 ## Seamly Apps
 
 - Seamly2D & SeamlyLayout & SeamlyMe apps distributed in a single Qt 6.11.1 runtime
