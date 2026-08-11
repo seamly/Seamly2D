@@ -80,7 +80,9 @@ Rename the settings sources in `src/libs/vmisc/` so each name says which app it 
 
 ## Task M.11 - Implement tasks in TODO_CLI.md
 
-## Task M.12 - Update the .github/README.md file to point at the correct downloadable release
+## Task M.12 - Implement tasks in TODO_REMOVE_DEAD_LAYOUT_CODE.md
+
+## Task M.13 - Update the .github/README.md file to point at the correct downloadable release
 
 Do this only when the migration is pushed upstream — the badges link to
 `FashionFreedom/Seamly2D/releases/latest`, so repointing them before the release

@@ -4,7 +4,29 @@ If decisions are required for any portion of a task or subtask, present the user
 
 Check off all completed tasks & subtasks and move completed tasks to TODO_COMPLETED.md
 
-All TODO_MIGRATE.md tasks begin with `Installer.` 
+All TODO_MIGRATE.md tasks begin with `Installer.`
+
+Notes:
+
+- **Data migration is copy-and-verify, leaving the legacy tree intact**, never
+   a bare rename, because a user may need to roll back to an earlier release.
+- **The migration lives in the applications, not the installer.** A per-machine
+   MSI's server side runs as LocalSystem, so a per-user path resolves to the
+   SYSTEM profile and would only cover whoever ran setup; macOS and Linux have no
+   MSI at all, so the logic would be written twice.
+- **Testing happens on the test laptop, not in a VM** 
+   The Windows PC is Windows 11 **Home**, which ships neither Hyper-V nor Windows
+   Sandbox, so a VM here means a third-party hypervisor; the user considered
+   VirtualBox and VMware Workstation Pro and declined both. A VM could not close
+   two checklist items anyway — the *verified-publisher* UAC prompt needs Task
+   33's signing, and the arm64 repeat needs arm64 hardware.
+- **Pre-releases are cut from `run-seamlyLayout`**; `develop` stays a pristine 
+    upstream mirror** Nothing is published from `develop` until the whole
+    SeamlyLayout migration is finished and pushed upstream in one go —
+    incremental upstream commits are not workable given the size of the change.
+- **Data-root relocation asks first** — prompt Y/N before copying existing data
+   files to a new directory location.
+
 
 ## Installer.1 — Create .msi/.pkg/.appimage/flatpak artifacts as pre-releases in github workflow ci.yml file
 

@@ -8,6 +8,20 @@ If decisions are required for any portion of a task or subtask, present the user
 
 Tasks in this file begin with `InstWinX64.`
 
+Notes:
+
+- **Data-root relocation asks first** — prompt Y/N before copying existing data
+   files to a new directory location.
+- **The program directory in Windows is `C:\Program Files\` + `Seamly`** — show the user
+   the final assembled path and take OK/Cancel, rather than editing a box whose
+   contents differ from the path it applies.
+- **The MSI steps are inlined in `ci.yml`**, not factored out of
+    `windows-msi.yml` as a reusable `workflow_call`. The two copies of the x64
+    build steps must therefore be kept in step by hand.
+- **The x64 `.msi` replaces the NSIS Windows zip** rather than shipping
+    alongside it. NSIS stays for arm64 until Task Installer.1.2, because there is
+    still no arm64 SeamlyLayout build.
+
 ## Task InstWinX64.1 — Windows installer: choose program and user-data paths
 
 **Dependencies:** Task 13 (family MSI), Task 34 (`SeamlyData` rename), Task 38 (standalone-install replacement and data protection).
