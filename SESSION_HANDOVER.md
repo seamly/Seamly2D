@@ -41,90 +41,22 @@ paths, and backs up/restores all four files it rewrites. **26/26 assertions
 pass.** No local qmake build was run — no C++ changed, and the emitted
 `projectversion.cpp` is restored byte-for-byte by the test.
 
-## Previous state (2026-08-10): Task Installer.1.1 — the x64 `.msi` is now a CI release artifact
+## Verification happens on GitHub CI, not on this PC
 
-**Branch `task-installer-win-x64-msi`, off `run-seamlyLayout`,** which first took
-a merge of `origin/develop` (three upstream commits: dark-mode fixes, a Finnish
-Weblate update, mac font fixes).
+User's instruction, 2026-08-10: concentrate on the CI pre-releases and ignore
+local MSVC/qmake builds. That also settles what to do about the broken Visual
+Studio install below — nothing, for now.
 
-### What changed
+A plain push run **skips `publish`** — only a `schedule` or `workflow_dispatch`
+run on `run-seamlyLayout` exercises the pre-release path, so dispatch one to
+prove the release step end to end.
 
-- **`.github/workflows/ci.yml`**
-  - New `windows-msi` job (x64): one Qt 6.11.1 kit with
-    `qtmultimedia qtwebengine qtwebchannel qtpositioning`, qmake/nmake for
-    seamly2d + seamlyme, Rust + Ninja + the CMake release preset for
-    SeamlyLayout, WiX v6 (+ UI and Util extensions) driven by
-    `smsi.ps1 -Arch x64`, jsign signing of `scripts/seamly-msi/x64/seamly-x64.msi`,
-    artifact `seamly-x64.msi`.
-  - The `windows` job is **arm64 only** now — its x64 NSIS leg (which produced
-    `Seamly2D-windows.zip`) is gone. NSIS stays for arm64 until Task
-    Installer.1.2, because there is still no arm64 SeamlyLayout build.
-  - `publish` needs `windows-msi`, releases `seamly-x64.msi` in place of
-    `Seamly2D-windows.zip`, sets **`prerelease: true`**, and is gated on
-    **`github.ref_name == 'run-seamlyLayout'`** instead of `develop`.
-  - `push` trigger gained `run-seamlyLayout`.
-- **`.github/workflows/windows-msi.yml`** — one-line fix: its jsign step signed
-  `Seamly2D-<arch>.msi`, a name `smsi.ps1` has never written. Corrected to
-  `seamly-<arch>.msi`. Signing in that workflow had therefore never touched the
-  real package.
-- **Docs** — `.github/README-BUILDS.md`, `.github/workflows/README_WORKFLOWS.md`
-  and `scripts/packaging/windows/README.md` (the last also carried the stale
-  `Seamly-x64.msi` / `Seamly2D-arm64.msi` output names).
-- **Task tracking** — `TODO_INSTALLER.md` Installer.1.1 checked off;
-  `TODO_INSTALLER_WIN_X64.md` 13.6 and 13.9 checked off.
-- **`.claude/settings.json`** — git/PowerShell permission rules broadened and
-  `sandbox.network.allowedDomains` added for github.com, because `git fetch` was
-  prompting on every call. The session had to **reload settings** before it took
-  effect (`/reload-skills` did it).
-
-### Decisions the user made (act on these, do not re-ask)
-
-- **Inline the MSI steps in `ci.yml`** rather than converting `windows-msi.yml`
-  into a reusable `workflow_call`. The two copies of the x64 build steps must
-  therefore be kept in step by hand.
-- **The `.msi` replaces the NSIS Windows zip** for x64 rather than shipping
-  alongside it.
-- **Pre-releases are cut from `run-seamlyLayout`; `develop` stays a pristine
-  upstream mirror.** Nothing is published from `develop` until the whole
-  SeamlyLayout migration is finished and pushed upstream in one go — incremental
-  upstream commits are not workable given the size of the change.
-
-### Verification — CI, not local. Local MSVC builds are out of scope by decision
-
-**Verification happens on GitHub, not on this PC** (user's instruction,
-2026-08-10): concentrate on the CI pre-releases and ignore local MSVC/qmake
-builds. That also settles what to do about the broken Visual Studio install
-below — nothing, for now.
-
-Nothing local could validate the change anyway: it is workflow YAML, and this PC
-has no YAML parser, no `actionlint`, no `node` and no working `python` (only
-Git's perl, without any YAML module).
-
-**Run `31445164255` (`ci.yml`, commit `15a54b3641`) proved the workflow parses
-and the surrounding jobs still pass:** `version`, `document`, `Linux: Build
-AppImage`, `macOS: Build` and `Windows: Build NSIS installer (arm64)` all green;
-`Windows: Build MSI (x64)` was still running when this was written. **Confirm
-that job went green and uploaded `seamly-x64.msi`.**
-
-The plain push run **skips `publish`** — only a `schedule` or
-`workflow_dispatch` run on `run-seamlyLayout` exercises the pre-release path, so
-dispatch one to prove the release step end to end.
-
-**`gh` is installed *and authenticated* now** (2026-08-11), at
+**`gh` is installed and authenticated** (2026-08-11), at
 `C:\Program Files\GitHub CLI\gh.exe`. Read run state with it directly —
 `gh run list --repo seamly/Seamly2D --branch run-seamlyLayout --workflow ci.yml`,
 then `gh run view <id>` and `gh run view --job <id> --log-failed`.
 
-### A red branch that was not this change
-
-`.github/workflows/action.yaml` was **not a workflow** — it is Corrosion's
-`setup_test_environment` composite action (`inputs`/`runs`, no `jobs`), added by
-accident in `d1bb78c495` on 2026-08-03. GitHub ran it as a workflow on every
-push and failed with *"Required property is missing: jobs"*, which is what made
-the branch look red. Deleted 2026-08-10; nothing referenced it, and Corrosion is
-fetched by CMake rather than vendored.
-
-### Follow-up left open deliberately
+## Follow-up left open deliberately
 
 `.github/README.md`'s "Windows 64-bit" download badge still points at upstream's
 `Seamly2D-windows.zip`. It has to become `seamly-x64.msi`, but only when the
@@ -212,6 +144,16 @@ alongside the UI extension.
    contents differ from the path it applies.
 9. **Data-root relocation asks first** — prompt Y/N before copying existing data
    files to a new directory location.
+10. **The MSI steps are inlined in `ci.yml`**, not factored out of
+    `windows-msi.yml` as a reusable `workflow_call`. The two copies of the x64
+    build steps must therefore be kept in step by hand.
+11. **The x64 `.msi` replaces the NSIS Windows zip** rather than shipping
+    alongside it. NSIS stays for arm64 until Task Installer.1.2, because there is
+    still no arm64 SeamlyLayout build.
+12. **Pre-releases are cut from `run-seamlyLayout`; `develop` stays a pristine
+    upstream mirror.** Nothing is published from `develop` until the whole
+    SeamlyLayout migration is finished and pushed upstream in one go —
+    incremental upstream commits are not workable given the size of the change.
 
 ## Gotchas
 
