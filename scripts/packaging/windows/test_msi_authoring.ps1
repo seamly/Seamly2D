@@ -398,6 +398,23 @@ foreach ($icon in $expectedIcons) {
     Assert-That -Name "icon '$icon' is packaged" -Succeeded ($icons -contains $icon)
 }
 
+# Every Icon Id must be distinct. Declaring two <Icon> elements with the same Id
+# silently collapses them, so one app ends up wearing another's icon — and the
+# app whose Id was overwritten has no identifier left for its shortcut to
+# reference. That is exactly how SeamlyLayout's icon was authored as a second
+# "seamlyme.ico" and broke the x64 link with WIX0094.
+Assert-That -Name 'icon identifiers are unique' `
+    -Succeeded ($icons.Count -eq (@($icons | Sort-Object -Unique).Count))
+
+# Every shortcut that names an icon must name one that exists. The MSI linker
+# catches a dangling reference in the authoring, but only for shortcuts it
+# actually compiles - assert it on the built package so no arch-conditional
+# branch can ship a shortcut pointing at a missing Icon row.
+foreach ($shortcut in @($shortcuts | Where-Object { $_.Icon -ne '' -and $null -ne $_.Icon })) {
+    Assert-That -Name "shortcut '$($shortcut.Shortcut)' references a packaged icon ('$($shortcut.Icon)')" `
+        -Succeeded ($icons -contains $shortcut.Icon)
+}
+
 # --- 8. file associations and install breadcrumbs ------------------------------
 $registry = Get-MsiRows -Sql "SELECT ``Root``, ``Key``, ``Name``, ``Value`` FROM ``Registry``" `
     -Columns 'Root', 'Key', 'Name', 'Value'

@@ -153,11 +153,17 @@
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
     <!-- Icons for shortcuts and Apps &amp; Features. MSI requires Icon table
-         ids used by advertised shortcuts to carry the matching extension. -->
+         ids used by advertised shortcuts to carry the matching extension, so
+         each Id is the icon's own file name — and each Id must be UNIQUE and
+         must match what the shortcuts below reference by name. Getting this
+         wrong is a link-time failure, not a runtime one: SeamlyLayout's icon
+         was declared as a second "seamlyme.ico", which both left SeamlyMe's
+         icon ambiguous and left SeamlyLayoutShortcut's Icon="seamlylayout.ico"
+         pointing at an identifier that did not exist (error WIX0094). -->
     <Icon Id="seamly2d.ico" SourceFile="$(var.RepoRoot)\dist\win\seamly2d.ico" />
     <Icon Id="seamlyme.ico" SourceFile="$(var.RepoRoot)\dist\win\seamlyme.ico" />
     <?ifdef var.IncludeSeamlyLayout ?>
-    <Icon Id="seamlyme.ico" SourceFile="$(var.RepoRoot)\dist\win\seamlylayout.ico" />
+    <Icon Id="seamlylayout.ico" SourceFile="$(var.RepoRoot)\dist\win\seamlylayout.ico" />
     <?endif?>
 
     <Property Id="ARPPRODUCTICON" Value="seamly2d.ico" />
