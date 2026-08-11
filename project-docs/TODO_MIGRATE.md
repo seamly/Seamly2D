@@ -87,7 +87,7 @@ Do this only when the migration is pushed upstream — the badges link to
 that carries the new artifacts breaks the live public download links.
 
 - [ ] Windows x64 — `Seamly2D-windows.zip` (NSIS) → **`seamly-x64.msi`**, which `ci.yml`'s `windows-msi` job now builds and the `publish` job attaches to the pre-release (Task Installer.1.1). The NSIS x64 package is no longer produced at all.
-- [ ] Windows arm64
+- [ ] Windows arm64 — `Seamly2D-win-arm64.zip` (NSIS) → **`seamly-arm64.msi`**, from the same `windows-msi` matrix (Task Installer.1.2). **NSIS is retired entirely**; no workflow runs `makensis` any more.
 - [ ] MacOS
 - [ ] Linux appimage
 - [ ] Linux flatpak

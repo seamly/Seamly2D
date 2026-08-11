@@ -1,3 +1,18 @@
+; ============================================================================
+; RETIRED — THIS INSTALLER IS NO LONGER BUILT (Task Installer.1.2, 2026-08-11)
+;
+; Windows now ships one WiX MSI per architecture — seamly-x64.msi and
+; seamly-arm64.msi — built by scripts\packaging\windows\smsi.ps1 from
+; scripts\packaging\windows\seamly-family.wxs. No workflow runs makensis any
+; more, and nothing in CI reads this file.
+;
+; It is kept ONLY as the authoritative record of what an installation made by
+; a pre-MSI release left on disk. seamly-family.wxs cites it by name for
+; exactly that (see its "old NSIS installation" comments), because the MSI has
+; to find and remove those leftovers when it upgrades such a machine. Do not
+; delete it while that removal authoring exists.
+; ============================================================================
+
 Name "Seamly2D installer"
 
 OutFile "Seamly2D-installer.exe"
