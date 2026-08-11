@@ -35,8 +35,8 @@ Everything the installer branches on, and where it comes from.
 |---|---|---|
 | `WIX_UPGRADE_DETECTED` | `FindRelatedProducts`, via the family `UpgradeCode` | an **older MSI** of this family is installed |
 | `WIX_DOWNGRADE_DETECTED` | same | a **newer MSI** is installed |
-| `SEAMLYNSISUNINSTALLSTRING` | `RegistrySearch`, `HKLM\...\Uninstall\Seamly2D\UninstallString`, `Bitness="always32"` | the **old NSIS** product is installed |
-| `SEAMLYNSISINSTALLDIR` | `RegistrySearch`, `HKLM\SOFTWARE\NSIS_Seamly2D\Install_Dir`, `Bitness="always32"` | where it is, normally `C:\Program Files (x86)\Seamly2D` |
+| `SEAMLYLEGACYUNINSTALLSTRING` | `RegistrySearch`, `HKLM\...\Uninstall\Seamly2D\UninstallString`, `Bitness="always32"` | the **old NSIS** product is installed |
+| `SEAMLYLEGACYINSTALLDIR` | `RegistrySearch`, `HKLM\SOFTWARE\NSIS_Seamly2D\Install_Dir`, `Bitness="always32"` | where it is, normally `C:\Program Files (x86)\Seamly2D` |
 | `Installed` | Windows Installer | **this** product is already installed — i.e. repair / modify / uninstall, not a first install |
 
 `Bitness="always32"` is required: the NSIS installer is 32-bit and never
@@ -74,7 +74,7 @@ flowchart TD
 
     dlg --> para{which paragraphs?}
     para -->|WIX_UPGRADE_DETECTED| pu[upgrade paragraph]
-    para -->|SEAMLYNSISUNINSTALLSTRING| pn[NSIS paragraph<br/>names SEAMLYNSISINSTALLDIR]
+    para -->|SEAMLYLEGACYUNINSTALLSTRING| pn[NSIS paragraph<br/>names SEAMLYLEGACYINSTALLDIR]
     pu --> always
     pn --> always
     always[always: your work is not touched<br/>seamlyData, AppData Local and Roaming Seamly] --> wizard
@@ -86,12 +86,12 @@ flowchart TD
     install --> reg[write HKLM Seamly Seamly2D,<br/>shortcuts, 3 file associations, ARP]
     reg --> rep{WIX_UPGRADE_DETECTED?}
     rep -->|yes| rem[RemoveExistingProducts<br/>removes the older MSI product<br/>including its directory]
-    rep -->|no| nsis
-    rem --> nsis
+    rep -->|no| legacy
+    rem --> legacy
 
-    nsis{SEAMLYNSISINSTALLDIR?}
-    nsis -->|no| done
-    nsis -->|yes| kill["remove the NSIS product:<br/>its directory tree, its Start Menu folder,<br/>and both of its registry keys.<br/>Its uninstall.exe is never run"]
+    legacy{SEAMLYLEGACYINSTALLDIR?}
+    legacy -->|no| done
+    legacy -->|yes| kill["remove the NSIS product:<br/>its directory tree, its Start Menu folder,<br/>and both of its registry keys.<br/>Its uninstall.exe is never run"]
     kill --> done([finish])
 ```
 

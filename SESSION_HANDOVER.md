@@ -40,15 +40,50 @@ Task 51's documented requirements and `SeamlyApps` is the name used by
 
 - `INSTALLFOLDER` `Name="Seamly"` → `Name="SeamlyApps"`.
 - `UserDataText` names the user-data folder again (`C:\Users\your name\seamlyData`).
-- `NsisText` regained the deleted sentence "Nothing else in that folder is kept,
-  so move anything of your own out of it before continuing." That one was a real
-  data-loss warning, not just a test mismatch — the dialog still says Setup
-  removes the whole NSIS *program directory*. Kept to 338 chars so it fits the
-  unchanged `Height="50"` control; the pre-`546e9d5def` text was 337.
+- `NsisText` (now `LegacyInstallText`, see below) regained the deleted sentence
+  "Nothing else in that folder is kept, so move anything of your own out of it
+  before continuing." That one was a real data-loss warning, not just a test
+  mismatch — the dialog still says Setup removes the whole legacy *program
+  directory*. Kept to 338 chars so it fits the unchanged `Height="50"` control;
+  the pre-`546e9d5def` text was 337.
 
 Verified locally by parsing the `.wxs` and running the six assertions' regexes
 against the real attribute values (all pass, XML well-formed). The MSI itself
 still only builds on CI.
+
+**3. `Nsis` identifiers renamed to `Legacy`.** NSIS is a build tool this project
+stopped using when the `windows` job was retired, so identifiers named for it
+read as though the package still produces one. What they actually name is the
+pre-MSI Seamly2D already sitting on a user's machine, which outlives the tool
+that authored it. Renamed across `seamly-family.wxs`, `test_msi_authoring.ps1`,
+both copies of `test_msi_install.ps1` and `INSTALL_DECISION_FLOW.md`:
+
+| was | now |
+|---|---|
+| `SEAMLYNSISUNINSTALLSTRING` / `SEAMLYNSISINSTALLDIR` / `SEAMLYNSISSTARTMENU` | `SEAMLYLEGACY…` |
+| `SeamlyNsisUninstallStringSearch` / `SeamlyNsisInstallDirSearch` | `SeamlyLegacy…` |
+| `RemoveNsisProgramFiles` / `RemoveNsisRegistryKeys` | `RemoveLegacy…` |
+| `RemovedNsisInstallDir` / `RemovedNsisRegistry` (registry breadcrumbs) | `RemovedLegacy…` |
+| `NsisText` | `LegacyInstallText` |
+| `Get-NsisInstallDir`, `$state.NsisInstallDir` | `Get-LegacyInstallDir`, `…LegacyInstallDir` |
+
+**Two things deliberately NOT renamed.** `SOFTWARE\NSIS_Seamly2D` is a real key
+name the old installer wrote — renaming it would make the MSI stop finding the
+product it exists to remove. And prose still says NSIS where it names the actual
+historical product; only identifiers moved. A `NAMING:` comment in the `.wxs`
+records both rules.
+
+`SecureCustomProperties` needed no manual edit — WiX generates it from
+`Secure="yes"`, and `test_msi_authoring.ps1` asserts both renamed properties
+appear in it. The two breadcrumb value names are component KeyPaths with no
+explicit `Guid`, so renaming them changes the auto-GUID; on an upgrade the old
+component's value is removed and the new one written, which is the desired
+behaviour, but it is why those two names are worth not churning again.
+
+Verified locally: `.wxs` parses as XML, every `Legacy` identifier referenced by
+`test_msi_authoring.ps1` exists in the `.wxs`, the six repaired assertions still
+pass, and all four `.ps1` files parse with zero errors. The authoring check
+itself runs only on CI.
 
 ## Superseded (2026-08-10): arm64 MSI build fixed — `windeployqt --qtpaths` removed
 

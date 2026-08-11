@@ -344,7 +344,7 @@ function Get-InstalledSeamlyProduct {
 #
 # @return install directory, or an empty string when it is not installed
 #------------------------------------------------------------------------------
-function Get-NsisInstallDir {
+function Get-LegacyInstallDir {
     $key = 'HKLM:\SOFTWARE\WOW6432Node\NSIS_Seamly2D'
     if (Test-Path -LiteralPath $key) {
         $value = (Get-ItemProperty -LiteralPath $key -ErrorAction SilentlyContinue).Install_Dir
@@ -794,7 +794,7 @@ Write-Host "state file: $StateFile"
 Write-Host ''
 
 $state = Read-State
-$nsisInstallDir = Get-NsisInstallDir
+$legacyInstallDir = Get-LegacyInstallDir
 $userData = Get-UserDataInventory
 
 switch ($Phase) {
@@ -807,8 +807,8 @@ switch ($Phase) {
             -Detail "found ProductCode $(if ($product) { $product.ProductCode })  - uninstall it before starting"
         Assert-That -Name 'HKLM\SOFTWARE\Seamly\Seamly2D does not exist yet' -Succeeded ($null -eq (Get-InstallInfo))
 
-        if ($nsisInstallDir) {
-            Write-Note "the old NSIS installation IS present at '$nsisInstallDir' - the warning dialog's NSIS paragraph should appear during install"
+        if ($legacyInstallDir) {
+            Write-Note "the old NSIS installation IS present at '$legacyInstallDir' - the warning dialog's NSIS paragraph should appear during install"
         } else {
             Write-Note 'no old NSIS installation on this machine - the warning dialog should NOT appear on a first install'
         }
@@ -826,7 +826,7 @@ switch ($Phase) {
             RecordedAt     = (Get-Date).ToString('o')
             BaselineData   = $userData
             LatestData     = $userData
-            NsisInstallDir = $nsisInstallDir
+            LegacyInstallDir = $legacyInstallDir
             InstallFolder  = ''
             DisplayVersion = ''
         })
@@ -849,12 +849,12 @@ switch ($Phase) {
         # package ships both plus SeamlyLayout - so leaving it behind means two
         # copies of each parent app and Start Menu shortcuts that launch the old
         # binaries. All four things the .nsi created must be gone.
-        if ($state.NsisInstallDir) {
+        if ($state.LegacyInstallDir) {
             Assert-That -Name "the old NSIS install directory was removed" `
-                -Succeeded (-not (Test-Path -LiteralPath $state.NsisInstallDir)) `
-                -Detail "'$($state.NsisInstallDir)' still exists"
+                -Succeeded (-not (Test-Path -LiteralPath $state.LegacyInstallDir)) `
+                -Detail "'$($state.LegacyInstallDir)' still exists"
             Assert-That -Name 'the NSIS Install_Dir registry key was removed' `
-                -Succeeded ([string]::IsNullOrEmpty((Get-NsisInstallDir)))
+                -Succeeded ([string]::IsNullOrEmpty((Get-LegacyInstallDir)))
             Assert-That -Name 'the NSIS Apps & features entry was removed' `
                 -Succeeded (-not (Test-Path -LiteralPath 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Seamly2D'))
 
@@ -864,7 +864,7 @@ switch ($Phase) {
                 -Succeeded (-not (Test-Path -LiteralPath $nsisStartMenu)) -Detail $nsisStartMenu
 
             Assert-That -Name 'the family MSI installed somewhere other than the NSIS directory' `
-                -Succeeded ($installFolder -and ($installFolder.TrimEnd('\') -ne ([string]$state.NsisInstallDir).TrimEnd('\')))
+                -Succeeded ($installFolder -and ($installFolder.TrimEnd('\') -ne ([string]$state.LegacyInstallDir).TrimEnd('\')))
         } else {
             Write-Note 'no NSIS installation was present at Baseline - the removal path was not exercised by this run'
         }
@@ -980,10 +980,10 @@ switch ($Phase) {
         # Asserted so the state is recorded deliberately rather than assumed:
         # a machine that had the old product and then removes this one ends up
         # with neither, which is the intended outcome but worth pinning.
-        if ($state.NsisInstallDir) {
+        if ($state.LegacyInstallDir) {
             Assert-That -Name 'the old NSIS installation stays removed after uninstall' `
-                -Succeeded (-not (Test-Path -LiteralPath $state.NsisInstallDir)) `
-                -Detail "'$($state.NsisInstallDir)' reappeared"
+                -Succeeded (-not (Test-Path -LiteralPath $state.LegacyInstallDir)) `
+                -Detail "'$($state.LegacyInstallDir)' reappeared"
         }
 
         $state.Phase = 'Removed'
