@@ -19,10 +19,20 @@ on:
     # The filter is on `push` only. `pull_request` runs stay unfiltered so a
     # docs-only PR still reports its checks instead of hanging on a status that
     # never arrives.
+    #
+    # `paths-ignore` skips a push only when EVERY file it carries matches. One
+    # unmatched path starts the full run, so a documentation push that also
+    # touches an agent settings file still builds all four platforms.
     paths-ignore:
       - '**.md'
       - 'project-docs/**'
       - 'LICENSE'
+      # Claude Code configuration. It never reaches a compiler, a linker, or
+      # the MSI, but it sits outside `project-docs/` and is not `**.md`. On
+      # 2026-08-11 a `.claude/settings.json` edit rode along with a docs commit
+      # and started a ~50-minute run.
+      - '.claude/**'
+      - '.vscode/**'
   pull_request:
 
 # A session that merges several task branches used to queue one full ~50-minute
