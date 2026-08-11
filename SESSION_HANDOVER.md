@@ -54,18 +54,45 @@ Weblate update, mac font fixes).
   SeamlyLayout migration is finished and pushed upstream in one go — incremental
   upstream commits are not workable given the size of the change.
 
-### Verification status — INCOMPLETE, and this is the next step
+### Verification — CI, not local. Local MSVC builds are out of scope by decision
 
-**No build was run for this change.** It is workflow YAML, and this PC has no
-YAML parser, no `actionlint`, no `node` and no working `python` (only Git's
-perl, without any YAML module), so nothing local can validate it.
+**Verification happens on GitHub, not on this PC** (user's instruction,
+2026-08-10): concentrate on the CI pre-releases and ignore local MSVC/qmake
+builds. That also settles what to do about the broken Visual Studio install
+below — nothing, for now.
 
-**The real check is a CI run.** The `push` trigger now includes
-`run-seamlyLayout`, so pushing starts one. Confirm the **`Windows: Build MSI
-(x64)`** job goes green and uploads `seamly-x64.msi`. Note the plain push run
-**skips `publish`** — only a `schedule` or `workflow_dispatch` run on
-`run-seamlyLayout` exercises the pre-release path, so dispatch one to prove the
-release step end to end.
+Nothing local could validate the change anyway: it is workflow YAML, and this PC
+has no YAML parser, no `actionlint`, no `node` and no working `python` (only
+Git's perl, without any YAML module).
+
+**Run `31445164255` (`ci.yml`, commit `15a54b3641`) proved the workflow parses
+and the surrounding jobs still pass:** `version`, `document`, `Linux: Build
+AppImage`, `macOS: Build` and `Windows: Build NSIS installer (arm64)` all green;
+`Windows: Build MSI (x64)` was still running when this was written. **Confirm
+that job went green and uploaded `seamly-x64.msi`.**
+
+The plain push run **skips `publish`** — only a `schedule` or
+`workflow_dispatch` run on `run-seamlyLayout` exercises the pre-release path, so
+dispatch one to prove the release step end to end.
+
+**`gh` is installed now** (`winget install --id GitHub.cli`), at
+`C:\Program Files\GitHub CLI\gh.exe`, but **not authenticated** — `gh auth
+login` is interactive, so the agent cannot do it. Until then, read run state
+straight from the public API, which needs no token:
+
+```bash
+curl -s "https://api.github.com/repos/seamly/Seamly2D/actions/runs/<id>/jobs" \
+  | tr ',' '\n' | grep -E '^      "(name|status|conclusion)"' | paste - - -
+```
+
+### A red branch that was not this change
+
+`.github/workflows/action.yaml` was **not a workflow** — it is Corrosion's
+`setup_test_environment` composite action (`inputs`/`runs`, no `jobs`), added by
+accident in `d1bb78c495` on 2026-08-03. GitHub ran it as a workflow on every
+push and failed with *"Required property is missing: jobs"*, which is what made
+the branch look red. Deleted 2026-08-10; nothing referenced it, and Corrosion is
+fetched by CMake rather than vendored.
 
 ### Follow-up left open deliberately
 
@@ -75,7 +102,11 @@ migration is pushed upstream — the badges link to
 `FashionFreedom/Seamly2D/releases/latest`, so editing them now breaks the live
 public download link. Tracked as **Task M.12** in `TODO_MIGRATE.md`.
 
-## MACHINE STATE: the Visual Studio installation is broken
+## MACHINE STATE: the Visual Studio installation is broken — and that is now accepted
+
+**The user's decision (2026-08-10): build and verify on GitHub CI; do not try to
+build locally with MSVC.** So this section is background, not a blocker. Do not
+spend a session repairing Visual Studio unless the user asks.
 
 **`scripts/sd.ps1` fails with `'cl' is not recognized`.** Not the script, and not
 the agent sandbox — the same failure occurs with the sandbox disabled:
