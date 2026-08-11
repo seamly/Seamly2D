@@ -6,7 +6,63 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## Current state (2026-08-11): Task Installer.1.2 — NSIS retired, arm64 ships an `.msi`
+## Current state (2026-08-10): arm64 MSI build fixed — `windeployqt --qtpaths` removed
+
+**Branch `task-arm64-windeployqt`, off `run-seamlyLayout`.**
+
+**The failure.** `Windows: Build MSI (arm64)` died in the `nmake` leg:
+
+```text
+windeployqt.exe --qtpaths ...\msvc2022_arm64\bin\host-qtpaths.bat bin\seamlyme.exe
+Error: "...\bin\host-qtpaths.bat" does not exist.
+NMAKE : fatal error U1077 ... return code '0x1'
+```
+
+**Root cause.** `host-qtpaths.bat` is generated only for a **cross-compiled** kit
+(`win64_msvc2022_arm64_cross_compiled`), whose x64 `windeployqt` cannot infer an
+arm64 target's paths. Commit `fba962c4d8` moved arm64 onto the native
+`windows-11-arm` runner with `win64_msvc2022_arm64`, where that wrapper does not
+exist — but the `win32-arm64-msvc` block in the `.pro` files still passed
+`--qtpaths` unconditionally.
+
+**Fix — one shared qmake helper, `deployQtRuntime()` in `common.pri`.** All three
+MSVC targets (`seamly2d.pro`, `seamlyme.pro`, `Seamly2DTest.pro`) had their own
+hand-maintained copy of the windeployqt post-link block, which is exactly how
+they drifted. They now all call the one helper, which runs
+`qtPrepareTool(WINDEPLOYQT, windeployqt)` and invokes it **bare** — identically
+for `win32-msvc` and `win32-arm64-msvc`. No probe, no `--qtpaths`: every Windows
+leg is native, so `windeployqt` always belongs to the kit being deployed and
+resolves its own paths. **Restore `--qtpaths` only if a cross kit is ever
+reintroduced** (the comment block in `common.pri` says so).
+
+**Also fixed, found on the way:** `tst_svgcomponenttags.cpp` called
+`VLayoutPiece::SetCountourPoints()`, which does not exist (typo, and no such
+setter) — it broke the whole `Seamly2DTest` target. The real setter behind
+`getContourPoints()` is `setMainPathPoints()`. Pre-existing since `0dcdc3d35d`;
+CI's MSI legs pass `CONFIG+=noTests` so they never hit it, but `linux-test` runs
+`make check` on PRs and would have.
+
+**Verified locally:** `scripts/sd.ps1` green; all three targets post-link
+`C:\Qt\6.11.1\msvc2022_64\bin\windeployqt.exe bin\<app>.exe` with `Qt6Cored.dll`
++ `platforms\` deployed beside each exe; `scripts/st.ps1` = **32139 passed, 0
+failed across 25 suites**. The arm64 path itself is **only provable by a CI
+run** — no arm64 cross tools on this PC.
+
+**Docs brought in line with the native-runner reality** (they still described
+arm64 as cross-compiled and two-app): `README-BUILDS.md`,
+`README_WORKFLOWS.md`, `README_WINDOWS_BUILD.md`, `ci.yml` (one comment was also
+truncated mid-sentence), `windows-msi.yml`, and `TODO_INSTALLER_WIN_ARM64.md` —
+where **InstWinArm64.1 is now DONE** (only .1.5, the three-app authoring-test
+re-run, is open) and **InstWinArm64.3 is DROPPED**: the from-source Qt WebEngine
+build existed solely to work around "Qt ships no arm64 WebEngine", which is Qt
+6.8-era and false for 6.11.1.
+
+**Next step:** push and confirm both MSI legs go green.
+
+## Superseded (2026-08-11): Task Installer.1.2 — NSIS retired, arm64 ships an `.msi`
+
+> The "arm64 still ships two of three apps" statement below was overtaken by
+> commit `fba962c4d8` — arm64 now ships all three apps, built natively.
 
 **Branch `task-installer-win-arm64-msi`, off `run-seamlyLayout`.**
 
@@ -155,45 +211,48 @@ alongside the UI extension.
   pre-existing failure *and* launches the real seamly2d, which seeds folders into
   the live data root. CI runs it on a clean machine.
 
-## Decisions the user has ANSWERED (act on these, do not re-ask)
+## Decisions the user has ANSWERED
+
+Act on these, do not re-ask, remove from this file for the next Session handover if marked as done or added to a TODO_*.md file
 
 1. **Task 54's file-name form** → **`SettingsCommon.h`**, i.e. the file name
    matches the class name (the style guide's class-match exception wins over the
-   `settings_*` snake_case prefix for class-defining files).
+   `settings_*` snake_case prefix for class-defining files). **Added another rename to TODO_RENAME_SETTINGS_FILES_CLASSES.md**
 2. **`.github/README-DEVELOPER-NEW.md`** → **rename it to
    `.github/README-DEVELOPER-SEAMLY-APPS.md`**, to be folded into
-   `.github/README-DEVELOPER.md` when the migration is complete. **Not done yet.**
+   `.github/README-DEVELOPER.md` when the migration is complete. **DONE.**
 3. **Qt WebChannel / Qt Positioning documentation** → maintain it in
    `.github/README-DEVELOPER-SEAMLY-APPS.md` until the migration completes.
 4. **`src/app/seamly2d/core/BUILD_PROBLEMS.txt`** → delete it if it is not
-   useful. **Not done yet.**
+   useful. **Done**
 5. **Testing happens on the test laptop, not in a VM** (re-confirmed 2026-07-30).
    This PC is Windows 11 **Home**, which ships neither Hyper-V nor Windows
    Sandbox, so a VM here means a third-party hypervisor; the user considered
    VirtualBox and VMware Workstation Pro and declined both. A VM could not close
    two checklist items anyway — the *verified-publisher* UAC prompt needs Task
-   33's signing, and the arm64 repeat needs arm64 hardware.
+   33's signing, and the arm64 repeat needs arm64 hardware. **ADDED to TODO_INSTALLER.md**
 6. **Data migration is copy-and-verify, leaving the legacy tree intact** — never
-   a bare rename, because a user may need to roll back to an earlier release.
+   a bare rename, because a user may need to roll back to an earlier release. **ADDED to TODO_INSTALLER.md**
 7. **The migration lives in the applications, not the installer.** A per-machine
    MSI's server side runs as LocalSystem, so a per-user path resolves to the
    SYSTEM profile and would only cover whoever ran setup; macOS and Linux have no
-   MSI at all, so the logic would be written twice.
+   MSI at all, so the logic would be written twice. **ADDED to TODO_INSTALLER.md**
 8. **The program directory in Windows is `C:\Program Files\` + `Seamly`** — show the user
    the final assembled path and take OK/Cancel, rather than editing a box whose
-   contents differ from the path it applies.
+   contents differ from the path it applies. **ADDED to TODO_INSTALLER_WIN_X64.md**
 9. **Data-root relocation asks first** — prompt Y/N before copying existing data
-   files to a new directory location.
+   files to a new directory location. **ADDED to TODO_INSTALLER.md**
 10. **The MSI steps are inlined in `ci.yml`**, not factored out of
     `windows-msi.yml` as a reusable `workflow_call`. The two copies of the x64
-    build steps must therefore be kept in step by hand.
+    build steps must therefore be kept in step by hand. **ADDED to TODO_INSTALLER_WIN_X64.md**
 11. **The x64 `.msi` replaces the NSIS Windows zip** rather than shipping
     alongside it. NSIS stays for arm64 until Task Installer.1.2, because there is
-    still no arm64 SeamlyLayout build.
-12. **Pre-releases are cut from `run-seamlyLayout`; `develop` stays a pristine
+    still no arm64 SeamlyLayout build. **ADDED to TODO_INSTALLER_WIN_X64.md**
+12. **Pre-releases are cut from `run-seamlyLayout`**; `develop` stays a pristine
     upstream mirror.** Nothing is published from `develop` until the whole
     SeamlyLayout migration is finished and pushed upstream in one go —
     incremental upstream commits are not workable given the size of the change.
+    **ADDED to TODO_INSTALLER.md**
 
 ## Gotchas
 

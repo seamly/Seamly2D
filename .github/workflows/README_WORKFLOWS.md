@@ -22,14 +22,16 @@
 
 The job is a two-leg matrix over `arch`:
 
-| Leg | Apps in the package | Qt modules |
-|---|---|---|
-| `x64` | seamly2d + seamlyme (qmake) **and** SeamlyLayout (CMake/Ninja + Cargo) | `qtmultimedia qtwebengine qtwebchannel qtpositioning` |
-| `arm64` | seamly2d + seamlyme only (`-NoSeamlyLayout`) | `qtmultimedia` |
+| Leg | Runner | Apps in the package | Qt host / arch | Qt modules |
+|---|---|---|---|---|
+| `x64` | `windows-latest` | seamly2d + seamlyme (qmake) **and** SeamlyLayout (CMake/Ninja + Cargo) | `windows` / `win64_msvc2022_64` | `qtmultimedia qtwebengine qtwebchannel qtpositioning` |
+| `arm64` | `windows-11-arm` | same three apps | `windows_arm64` / `win64_msvc2022_arm64` | same four modules |
 
 Each leg installs one Qt 6.11.1 kit, builds the apps, then runs [`smsi.ps1`](../../scripts/packaging/windows/smsi.ps1) to stage the shared runtime and build, validate and authoring-test `scripts/seamly-msi/<arch>/seamly-<arch>.msi`. `jsign` signs each package and `publish` attaches both to the pre-release. `fail-fast: false` so one arch's failure does not hide the other's result.
 
-**Why arm64 ships two apps:** SeamlyLayout has no arm64 build — its Rust + cxx-qt cross story is unresolved and Qt ships no cross-compiled arm64 WebEngine, which `SvgCanvas.qml` needs. That is exactly what the retired arm64 NSIS package carried, so retiring NSIS lost nothing. When an arm64 SeamlyLayout build exists, drop the `arch == 'x64'` step guards, add the WebEngine modules to the arm64 leg and remove `-NoSeamlyLayout`.
+**Both legs are native — nothing is cross-compiled.** Each arch builds on its own runner with its own host kit: no `amd64_arm64` MSVC, no `..._cross_compiled` Qt, no `host-qmake`, and no explicit cargo target (each runner's default host toolchain already matches the package it is building). That is also why `windeployqt` needs no `--qtpaths` wrapper on either leg — see `common.pri`'s `deployQtRuntime()`.
+
+**arm64 ships all three apps as of 2026-08-11** (commit `fba962c4d8`). It previously shipped the two parents only (`-NoSeamlyLayout`, `qtmultimedia` alone), on the belief that Qt publishes no arm64 Windows WebEngine — true of Qt 6.8, **false for 6.11.1**. The `qt-arm64-module-probe` workflow verifies this at every Qt bump; do not re-assert the claim without re-running it.
 
 **Why the steps are inline here rather than reused from `windows-msi.yml`:** the `publish` job releases these `.msi` files, so they have to be built from the same commit, in the same run, as every other release artifact. `windows-msi.yml` still rebuilds the packages on its own path-filtered triggers when only the packaging inputs change, without dragging the whole of CI along. **The two copies of the build steps must be kept in step** — the job here is `windows-msi.yml`'s `msi` job verbatim, minus its own version step.
 
@@ -54,16 +56,16 @@ Each leg installs one Qt 6.11.1 kit, builds the apps, then runs [`smsi.ps1`](../
 
 **Purpose**: builds the Windows **MSI installer** that ships the whole Seamly app family — `seamly2d`, `seamlyme`, and `SeamlyLayout` — in one bundled package **per architecture** (x64 and arm64), using the WiX toolset from [`seamly-family.wxs`](../../scripts/packaging/windows/seamly-family.wxs) via [`scripts/packaging/windows/smsi.ps1`](../../scripts/packaging/windows/smsi.ps1). The hands-on build/test reference is [`scripts/packaging/windows/README.md`](../../scripts/packaging/windows/README.md).
 
-**Why it is separate from [CI](ci.yml)**: it only runs when the packaging inputs change, so a `seamly-family.wxs` or `smsi.ps1` edit gets a full x64 **and** arm64 package check without waiting on the rest of CI. Since Task Installer.1.1 `ci.yml` has its own `windows-msi` job carrying **the same x64 build steps**, because the artifact it publishes must come from the same commit and run as every other release artifact — **keep the two in step when either changes**. The x64 `.msi` is now the released Windows installer; NSIS survives in `ci.yml` for arm64 only.
+**Why it is separate from [CI](ci.yml)**: it only runs when the packaging inputs change, so a `seamly-family.wxs` or `smsi.ps1` edit gets a full x64 **and** arm64 package check without waiting on the rest of CI. `ci.yml` has its own `windows-msi` job carrying **the same build steps for both arches**, because the artifacts it publishes must come from the same commit and run as every other release artifact — **keep the two in step when either changes**. Both `.msi` files are the released Windows installers; NSIS is retired entirely.
 
 **What it does** (matrix: `x64`, `arm64`):
 
-1. Installs **one** Qt 6.11.1 kit for all three apps (Task 30 — it used to install two kits in a carefully ordered dance so the parent `qmake` would not bind to SeamlyLayout's Qt) plus MSVC (`ilammy/msvc-dev-cmd`), and for x64 also Rust + Ninja. The x64 leg adds the `qtwebengine qtwebchannel qtpositioning` modules SeamlyLayout needs; arm64 takes `qtmultimedia` only.
-2. Builds `seamly2d.exe` + `seamlyme.exe` (qmake/nmake, cross-compiled for arm64) and, on x64 only, `SeamlyLayout.exe` (CMake release preset).
-3. Runs `scripts/packaging/windows/smsi.ps1` to stage the **single shared Qt runtime** and build the MSI with WiX **v6** (v7 is gated behind an OSMF EULA, error `WIX7015`) — **x64 = all three apps, arm64 = the two parents only** (`-NoSeamlyLayout`, since SeamlyLayout has no arm64 build yet).
+1. Installs **one** Qt 6.11.1 kit for all three apps (Task 30 — it used to install two kits in a carefully ordered dance so the parent `qmake` would not bind to SeamlyLayout's Qt) plus MSVC (`ilammy/msvc-dev-cmd`), Rust and Ninja. Both legs take the identical module set: `qtmultimedia qtwebengine qtwebchannel qtpositioning`.
+2. Builds `seamly2d.exe` + `seamlyme.exe` (qmake/nmake) and `SeamlyLayout.exe` (CMake release preset). **Every leg is native** — x64 on `windows-latest`, arm64 on `windows-11-arm` with the `windows_arm64` host kit; nothing is cross-compiled.
+3. Runs `scripts/packaging/windows/smsi.ps1` to stage the **single shared Qt runtime** and build the MSI with WiX **v6** (v7 is gated behind an OSMF EULA, error `WIX7015`). **Both arches ship all three apps** — the same `smsi.ps1` invocation, no `-NoSeamlyLayout`.
 4. Signs `scripts/seamly-msi/<arch>/seamly-<arch>.msi` with `jsign` (Google Cloud KMS, same as the NSIS exe), guarded on the `SEAMLY_SIGNING_PROJECT_ID` secret so untrusted PR runs skip it, and uploads the MSI as a build artifact.
 
-**Consolidation, done for x64 (Task Installer.1.1)**: `ci.yml` now builds and releases the x64 `.msi` itself. This workflow keeps both architectures for packaging-only checks; when arm64 gains an MSI (Task Installer.1.2) reconsider whether it still earns its place.
+**Consolidation (Tasks Installer.1.1 and Installer.1.2)**: `ci.yml` now builds and releases **both** `.msi` files itself. This workflow is kept only for packaging-only checks and is marked deprecated in `ci.yml` — remove it once that arrangement has been exercised.
 
 ## Code Signing Workflow
 
