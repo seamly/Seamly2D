@@ -20,13 +20,11 @@ var classApplicationME =
     [ "retranslateTables", "d0/d17/classApplicationME.html#a7667d0abd29b03c1f01e934e796ee648", null ],
     [ "seamlyMeSettings", "d0/d17/classApplicationME.html#a3d6672c5f065dad78c9fcb7796fa6d70", null ],
     [ "setTheme", "d0/d17/classApplicationME.html#a0b63de6fa1a5e5cb021a68a1f8cf99df", null ],
-    [ "settingsMigrated", "d0/d17/classApplicationME.html#acaedb3a49660744539de050c8ec3f3f6", null ],
     [ "showDataBase", "d0/d17/classApplicationME.html#a2b9d2597a05bb2a4f7d413bb1eb8e30c", null ],
     [ "translateVariables", "d0/d17/classApplicationME.html#a6827fc9c34a0a3b105d6f5cad4259bc0", null ],
     [ "m_dataBase", "d0/d17/classApplicationME.html#a9948301625587dd64e344f8a43be2e91", null ],
     [ "m_localServer", "d0/d17/classApplicationME.html#ae68d0db8a1fd101ee6dc74e1e955a496", null ],
     [ "m_mainWindows", "d0/d17/classApplicationME.html#a1c7b711afa46c9e292d520075e8c757b", null ],
-    [ "m_settingsMigrated", "d0/d17/classApplicationME.html#a3cfdc43af97bfec30c874b0654deb5c4", null ],
     [ "m_testMode", "d0/d17/classApplicationME.html#acdddbcebd71f412014515e2c7dfe0884", null ],
     [ "m_trVars", "d0/d17/classApplicationME.html#a49c74a9b0bd5eaaa464ff05e0c9478f8", null ]
 ];

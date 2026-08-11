@@ -102,7 +102,7 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="356.5" y="-212.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setPatternUnit()</text>
 <text text-anchor="start" x="356.5" y="-201.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ patternType()</text>
 <text text-anchor="start" x="356.5" y="-190.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setPatternType()</text>
-<text text-anchor="start" x="356.5" y="-179.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 23 more...</text>
+<text text-anchor="start" x="356.5" y="-179.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 21 more...</text>
 <text text-anchor="start" x="356.5" y="-168.5" font-family="Helvetica,sans-Serif" font-size="10.00"># initTranslateVariables()</text>
 <text text-anchor="start" x="356.5" y="-157.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; ClearTranslation()</text>
 </a>
@@ -118,62 +118,63 @@ var sectionId = 'dynsection-1';
 <g id="node3" class="node">
 <title>Node3</title>
 <g id="a_node3"><a xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="50.5,-899 50.5,-956 129.5,-956 129.5,-899 50.5,-899"/>
-<text text-anchor="middle" x="90" y="-944" font-family="Helvetica,sans-Serif" font-size="10.00">QApplication</text>
-<polyline fill="none" stroke="#666666" points="50.5,-937 129.5,-937 "/>
-<text text-anchor="middle" x="90" y="-925" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
-<polyline fill="none" stroke="#666666" points="50.5,-918 129.5,-918 "/>
-<text text-anchor="middle" x="90" y="-906" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
+<polygon fill="white" stroke="#666666" points="49.5,-899 49.5,-956 128.5,-956 128.5,-899 49.5,-899"/>
+<text text-anchor="middle" x="89" y="-944" font-family="Helvetica,sans-Serif" font-size="10.00">QApplication</text>
+<polyline fill="none" stroke="#666666" points="49.5,-937 128.5,-937 "/>
+<text text-anchor="middle" x="89" y="-925" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
+<polyline fill="none" stroke="#666666" points="49.5,-918 128.5,-918 "/>
+<text text-anchor="middle" x="89" y="-906" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
 </a>
 </g>
 </g>
 <!-- Node3&#45;&gt;Node2 -->
 <g id="edge2" class="edge">
 <title>Node3&#45;&gt;Node2</title>
-<path fill="none" stroke="#63b8ff" d="M84.67,-888.69C75.72,-811.24 65.14,-631.47 138,-508 186.13,-426.45 281.66,-369.14 348.36,-337.01"/>
-<polygon fill="none" stroke="#63b8ff" points="81.24,-889.42 85.92,-898.92 88.18,-888.57 81.24,-889.42"/>
+<path fill="none" stroke="#63b8ff" d="M83.66,-888.68C74.67,-811.21 64.04,-631.41 137,-508 185.38,-426.17 281.48,-368.84 348.42,-336.79"/>
+<polygon fill="none" stroke="#63b8ff" points="80.22,-889.41 84.9,-898.91 87.17,-888.56 80.22,-889.41"/>
 </g>
 <!-- Node4 -->
 <g id="node4" class="node">
 <title>Node4</title>
 <g id="a_node4"><a xlink:href="../../de/d0f/classVCommonSettings.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="147,-767 147,-1088 325,-1088 325,-767 147,-767"/>
-<text text-anchor="middle" x="236" y="-1076" font-family="Helvetica,sans-Serif" font-size="10.00">VCommonSettings</text>
-<polyline fill="none" stroke="#666666" points="147,-1069 325,-1069 "/>
-<text text-anchor="start" x="155" y="-1057" font-family="Helvetica,sans-Serif" font-size="10.00">+ unixStandardSharePath</text>
-<polyline fill="none" stroke="#666666" points="147,-1050 325,-1050 "/>
-<text text-anchor="start" x="155" y="-1038" font-family="Helvetica,sans-Serif" font-size="10.00">+ VCommonSettings()</text>
-<text text-anchor="start" x="155" y="-1027" font-family="Helvetica,sans-Serif" font-size="10.00">+ VCommonSettings()</text>
-<text text-anchor="start" x="155" y="-1016" font-family="Helvetica,sans-Serif" font-size="10.00">+ getDataRoot()</text>
-<text text-anchor="start" x="155" y="-1005" font-family="Helvetica,sans-Serif" font-size="10.00">+ setDataRoot()</text>
-<text text-anchor="start" x="155" y="-994" font-family="Helvetica,sans-Serif" font-size="10.00">+ getIndividualSizePath()</text>
-<text text-anchor="start" x="155" y="-983" font-family="Helvetica,sans-Serif" font-size="10.00">+ setIndividualSizePath()</text>
-<text text-anchor="start" x="155" y="-972" font-family="Helvetica,sans-Serif" font-size="10.00">+ getMultisizePath()</text>
-<text text-anchor="start" x="155" y="-961" font-family="Helvetica,sans-Serif" font-size="10.00">+ setMultisizePath()</text>
-<text text-anchor="start" x="155" y="-950" font-family="Helvetica,sans-Serif" font-size="10.00">+ getBodyScansPath()</text>
-<text text-anchor="start" x="155" y="-939" font-family="Helvetica,sans-Serif" font-size="10.00">+ setBodyScansPath()</text>
-<text text-anchor="start" x="155" y="-928" font-family="Helvetica,sans-Serif" font-size="10.00">and 295 more...</text>
-<text text-anchor="start" x="155" y="-917" font-family="Helvetica,sans-Serif" font-size="10.00">+ SharePath()</text>
-<text text-anchor="start" x="155" y="-906" font-family="Helvetica,sans-Serif" font-size="10.00">+ MultisizeTablesPath()</text>
-<text text-anchor="start" x="155" y="-895" font-family="Helvetica,sans-Serif" font-size="10.00">+ StandardTemplatesPath()</text>
-<text text-anchor="start" x="155" y="-884" font-family="Helvetica,sans-Serif" font-size="10.00">+ PrepareStandardTemplates()</text>
-<text text-anchor="start" x="155" y="-873" font-family="Helvetica,sans-Serif" font-size="10.00">+ prepareMultisizeTables()</text>
-<text text-anchor="start" x="155" y="-862" font-family="Helvetica,sans-Serif" font-size="10.00">+ getDefaultDataRoot()</text>
-<text text-anchor="start" x="155" y="-851" font-family="Helvetica,sans-Serif" font-size="10.00">+ getLegacyDataRoot()</text>
-<text text-anchor="start" x="155" y="-840" font-family="Helvetica,sans-Serif" font-size="10.00">+ dataRoot()</text>
-<text text-anchor="start" x="155" y="-829" font-family="Helvetica,sans-Serif" font-size="10.00">+ dataSubdirPath()</text>
-<text text-anchor="start" x="155" y="-818" font-family="Helvetica,sans-Serif" font-size="10.00">+ initializeDataRoot()</text>
-<text text-anchor="start" x="155" y="-807" font-family="Helvetica,sans-Serif" font-size="10.00">and 17 more...</text>
-<text text-anchor="start" x="155" y="-796" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; commonSettingsOrganization()</text>
-<text text-anchor="start" x="155" y="-785" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; mergeStrayCommonSettings()</text>
-<text text-anchor="start" x="155" y="-774" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; removeStrayCommonSettings()</text>
+<polygon fill="white" stroke="#666666" points="146.5,-761.5 146.5,-1093.5 325.5,-1093.5 325.5,-761.5 146.5,-761.5"/>
+<text text-anchor="middle" x="236" y="-1081.5" font-family="Helvetica,sans-Serif" font-size="10.00">VCommonSettings</text>
+<polyline fill="none" stroke="#666666" points="146.5,-1074.5 325.5,-1074.5 "/>
+<text text-anchor="start" x="154.5" y="-1062.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ unixStandardSharePath</text>
+<polyline fill="none" stroke="#666666" points="146.5,-1055.5 325.5,-1055.5 "/>
+<text text-anchor="start" x="154.5" y="-1043.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ VCommonSettings()</text>
+<text text-anchor="start" x="154.5" y="-1032.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ VCommonSettings()</text>
+<text text-anchor="start" x="154.5" y="-1021.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getIndividualSizePath()</text>
+<text text-anchor="start" x="154.5" y="-1010.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setIndividualSizePath()</text>
+<text text-anchor="start" x="154.5" y="-999.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getMultisizePath()</text>
+<text text-anchor="start" x="154.5" y="-988.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setMultisizePath()</text>
+<text text-anchor="start" x="154.5" y="-977.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getBodyScansPath()</text>
+<text text-anchor="start" x="154.5" y="-966.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setBodyScansPath()</text>
+<text text-anchor="start" x="154.5" y="-955.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getTemplatePath()</text>
+<text text-anchor="start" x="154.5" y="-944.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setTemplatePath()</text>
+<text text-anchor="start" x="154.5" y="-933.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 293 more...</text>
+<text text-anchor="start" x="154.5" y="-922.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ SharePath()</text>
+<text text-anchor="start" x="154.5" y="-911.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ MultisizeTablesPath()</text>
+<text text-anchor="start" x="154.5" y="-900.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ StandardTemplatesPath()</text>
+<text text-anchor="start" x="154.5" y="-889.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ PrepareStandardTemplates()</text>
+<text text-anchor="start" x="154.5" y="-878.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ prepareMultisizeTables()</text>
+<text text-anchor="start" x="154.5" y="-867.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getDefaultIndividualSize</text>
+<text text-anchor="start" x="154.5" y="-856.5" font-family="Helvetica,sans-Serif" font-size="10.00">Path()</text>
+<text text-anchor="start" x="154.5" y="-845.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getDefaultMultisizePath()</text>
+<text text-anchor="start" x="154.5" y="-834.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getDefaultBodyScansPath()</text>
+<text text-anchor="start" x="154.5" y="-823.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getDefaultTemplatePath()</text>
+<text text-anchor="start" x="154.5" y="-812.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getDefaultLabelTemplatePath()</text>
+<text text-anchor="start" x="154.5" y="-801.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getDefaultImageFilePath()</text>
+<text text-anchor="start" x="154.5" y="-790.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getDefaultBackupFilePath()</text>
+<text text-anchor="start" x="154.5" y="-779.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ PredefinedDateFormats()</text>
+<text text-anchor="start" x="154.5" y="-768.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ PredefinedTimeFormats()</text>
 </a>
 </g>
 </g>
 <!-- Node4&#45;&gt;Node2 -->
 <g id="edge3" class="edge">
 <title>Node4&#45;&gt;Node2</title>
-<path fill="none" stroke="#404040" d="M266.46,-766.67C283.23,-687.87 306.28,-591.97 334,-508 337.89,-496.21 342.2,-484.16 346.76,-472.1"/>
+<path fill="none" stroke="#404040" d="M267.58,-761.41C284.25,-683.63 306.9,-590.11 334,-508 337.89,-496.21 342.2,-484.16 346.76,-472.1"/>
 <polygon fill="none" stroke="#404040" points="346.9,-471.74 345.32,-464.71 351.2,-460.54 352.79,-467.58 346.9,-471.74"/>
 <text text-anchor="middle" x="377" y="-482" font-family="Helvetica,sans-Serif" font-size="10.00"> #m_settings</text>
 </g>
@@ -193,8 +194,8 @@ var sectionId = 'dynsection-1';
 <!-- Node5&#45;&gt;Node4 -->
 <g id="edge4" class="edge">
 <title>Node5&#45;&gt;Node4</title>
-<path fill="none" stroke="#63b8ff" d="M30.31,-1587.77C29.91,-1539.25 35.33,-1454.09 73,-1394 77.73,-1386.45 133.06,-1354.42 138,-1347 188.87,-1270.6 213.48,-1171 225.32,-1088.14"/>
-<polygon fill="none" stroke="#63b8ff" points="26.81,-1587.9 30.48,-1597.84 33.81,-1587.78 26.81,-1587.9"/>
+<path fill="none" stroke="#63b8ff" d="M30.38,-1587.82C30.05,-1539.34 35.55,-1454.22 73,-1394 82.32,-1379.02 127.26,-1361.71 137,-1347 186.56,-1272.14 211.41,-1175.27 223.82,-1093.58"/>
+<polygon fill="none" stroke="#63b8ff" points="26.88,-1587.93 30.54,-1597.87 33.88,-1587.82 26.88,-1587.93"/>
 </g>
 <!-- Node6 -->
 <g id="node6" class="node">
