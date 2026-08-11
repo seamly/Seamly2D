@@ -597,14 +597,16 @@ void MainWindowsNoGUI::PrintPages(QPrinter *printer)
     const double yscale = pageRect.height() / printerPageRect.height();
     const double scale = qMin(xscale, yscale);
 
+    QFont appFont;
+    appFont.setPointSize(8);
+
     QPainter painter;
     if (!painter.begin(printer))
     { // failed to open file
         qWarning("failed to open file, is it writable?");
         return;
     }
-
-    painter.setFont( QFont( "Arial", 8, QFont::Normal ) );
+    painter.setFont(appFont);
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.setPen(QPen(Qt::black, widthMainLine, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     painter.setBrush ( QBrush ( Qt::NoBrush ) );
@@ -875,8 +877,12 @@ QIcon MainWindowsNoGUI::ScenePreview(int i) const
         if (!image.isNull())
         {
             image.fill(Qt::white);
+
+            QFont appFont;
+            appFont.setPointSize(8);
+
             QPainter painter(&image);
-            painter.setFont( QFont( "Arial", 8, QFont::Normal ) );
+            painter.setFont(appFont);
             painter.setRenderHint(QPainter::Antialiasing, true);
             painter.setPen(QPen(Qt::black, widthMainLine, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             painter.setBrush ( QBrush ( Qt::NoBrush ) );
@@ -1107,13 +1113,16 @@ void MainWindowsNoGUI::exportPDF(const QString &name, QGraphicsRectItem *paper, 
         }
     }
 
+    QFont appFont;
+    appFont.setPointSize(8);
+
     QPainter painter;
     if (painter.begin(&printer) == false)
     {
         qCritical("%s", qUtf8Printable(tr("Can't open printer %1").arg(name))); // failed to open file
         return;
     }
-    painter.setFont(QFont( "Arial", 8, QFont::Normal));
+    painter.setFont(appFont);
     painter.setRenderHint(QPainter::Antialiasing, true);
     painter.setPen(QPen(Qt::black, widthMainLine, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
     painter.setBrush(QBrush(Qt::NoBrush));
