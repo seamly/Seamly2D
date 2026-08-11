@@ -247,20 +247,8 @@ macx{
     }
 }
 
-# run windeployqt to include all qt libraries and vc_redist in $${DESTDIR}
-#
-# qtPrepareTool() resolves windeployqt out of $$[QT_INSTALL_BINS] — the Qt that
-# *this* qmake belongs to — instead of letting the shell find the first
-# windeployqt on PATH. That matters because an unrelated Qt earlier on PATH
-# (e.g. Qt Design Studio's reduced 6.8.x kit) would otherwise deploy its own,
-# older Qt DLLs beside an exe linked against the build kit. Qt's binary
-# compatibility is forward-only, so that mismatch produces a build tree whose
-# exes cannot start — and which the MSI packaging script would ship verbatim.
-win32-msvc{
-    qtPrepareTool(WINDEPLOYQT, windeployqt)
-    QMAKE_POST_LINK += $$WINDEPLOYQT $$shell_path($$DESTDIR/$${TARGET}.exe)
-}
-win32-arm64-msvc{
-    qtPrepareTool(WINDEPLOYQT, windeployqt)
-    QMAKE_POST_LINK += $$WINDEPLOYQT --qtpaths $$shell_path($$[QT_INSTALL_BINS]/host-qtpaths.bat) $$shell_path($$DESTDIR/$${TARGET}.exe)
-}
+# run windeployqt to include all qt libraries and vc_redist in $${DESTDIR}.
+# deployQtRuntime() lives in common.pri and is shared with seamly2d.pro and
+# Seamly2DTest.pro — see the comment block there for why the tool is resolved
+# through qtPrepareTool() and why x64 and arm64 need no per-arch handling.
+deployQtRuntime($$DESTDIR/$${TARGET}.exe)

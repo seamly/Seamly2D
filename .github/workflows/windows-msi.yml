@@ -20,9 +20,10 @@ name: Windows MSI
 #   Same reasoning as seamlylayout-ci.yml: the MSI needs BOTH build
 #   systems in one job — qmake for the parent apps plus Rust + CMake/Ninja for
 #   SeamlyLayout — and it should not slow down or destabilize every ci.yml run.
-#   ci.yml's NSIS installer remains the released Windows installer until the
-#   MSI replaces it; at that point fold these steps into ci.yml's windows job
-#   and wire the .msi into the publish job's release files.
+#   That has since happened: NSIS is retired and ci.yml carries its own
+#   windows-msi job for BOTH arches, wired into the publish job's release
+#   files. This workflow is now deprecated and kept only for packaging-only
+#   checks — keep its steps in step with ci.yml's copy until it is removed.
 #
 # ARM64:
 #   Both architectures ship ALL THREE apps as of 2026-08-11, and each builds

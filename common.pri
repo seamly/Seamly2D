@@ -127,6 +127,49 @@ defineTest(forceCopyToDestdir) {
     export(QMAKE_CLEAN)
 }
 
+# @brief  Append a windeployqt post-link step for the given executable (MSVC only).
+# @param  1  Path of the executable to deploy beside, e.g. $$DESTDIR/$${TARGET}.exe
+# @return true (always) — a no-op on every non-MSVC mkspec.
+#
+# Why this is a shared helper rather than a block copied into each .pro: the
+# three MSVC targets (seamly2d, seamlyme, Seamly2DTests) each kept their own
+# copy of this step, and they drifted — the arm64 MSI build broke because one
+# copy passed a --qtpaths wrapper that the arm64 kit does not ship.
+#
+# qtPrepareTool() resolves windeployqt out of $$[QT_INSTALL_BINS] — the Qt that
+# *this* qmake belongs to — instead of letting the shell find the first
+# windeployqt on PATH. That matters because an unrelated Qt earlier on PATH
+# (e.g. Qt Design Studio's reduced 6.8.x kit) would otherwise deploy its own,
+# older Qt DLLs beside an exe linked against the build kit. Qt's binary
+# compatibility is forward-only, so that mismatch produces a build tree whose
+# exes cannot start — and which the MSI packaging script would ship verbatim.
+#
+# x64 and arm64 are handled IDENTICALLY, with no --qtpaths flag, because every
+# Windows build is NATIVE: ci.yml and windows-msi.yml build x64 on
+# windows-latest and arm64 on windows-11-arm, each installing its own host kit
+# (win64_msvc2022_64 / win64_msvc2022_arm64). Nothing is cross-compiled, so the
+# windeployqt qtPrepareTool() picks is always an executable the runner can run
+# and always belongs to the kit being deployed — it resolves its own paths.
+#
+# --qtpaths is only needed by a CROSS-COMPILED kit
+# (win64_msvc2022_arm64_cross_compiled), whose windeployqt is an x64 binary that
+# cannot infer the arm64 target's paths and must be pointed at the
+# host-qtpaths.bat wrapper install-qt-action generates. Passing the flag anyway
+# is what broke the arm64 MSI build — the native kit ships no such wrapper, and
+# windeployqt fails with '"...\bin\host-qtpaths.bat" does not exist'. Restore
+# the flag only if a cross-compiled kit is ever reintroduced.
+defineTest(deployQtRuntime) {
+    EXE = $$shell_path($$1)
+
+    win32-msvc|win32-arm64-msvc {
+        qtPrepareTool(WINDEPLOYQT, windeployqt)
+        QMAKE_POST_LINK += $$WINDEPLOYQT $$EXE
+        export(QMAKE_POST_LINK)
+    }
+
+    return(true)
+}
+
 CONFIG(debug, debug|release){
     # Debug mode, intentionally left empty
 } else {

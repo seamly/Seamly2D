@@ -81,7 +81,9 @@ VLayoutPiecePath makePath(const QVector<QPointF> &points, bool cut)
 VLayoutPiece makeTestPiece()
 {
     VLayoutPiece piece;
-    piece.SetCountourPoints(squarePoints(10, 10, 180));
+    // setMainPathPoints() is the setter behind getContourPoints() — it writes
+    // the piece's contour (d->contour) after removing duplicate points.
+    piece.setMainPathPoints(squarePoints(10, 10, 180));
     piece.SetName(QStringLiteral("Test Piece"));
 
     QVector<VLayoutPiecePath> internalPaths;

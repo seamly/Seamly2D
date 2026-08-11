@@ -140,7 +140,8 @@ The verification of a real install (clean machine, **not yet run** — Task 13's
 .\scripts\packaging\windows\smsi.ps1 -Arch arm64 -NoSeamlyLayout   # needs arm64 build trees
 ```
 
-seamly2d/seamlyme cross-compile for arm64 in CI (`windows-msi.yml`); SeamlyLayout
+seamly2d/seamlyme build natively on the `windows-11-arm` runner in CI
+(`windows-msi.yml`) — nothing is cross-compiled; SeamlyLayout
 has no arm64 build yet, so the arm64 MSI ships the two parent apps only
 (`-NoSeamlyLayout`). Not built on this machine (no arm64 build trees present).
 
