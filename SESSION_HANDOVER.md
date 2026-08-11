@@ -6,7 +6,42 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## Current state (2026-08-10): Task Installer.1.1 — the x64 `.msi` is now a CI release artifact
+## Current state (2026-08-11): CI version numbers could be octal C++ literals — fixed
+
+**Branch `task-ci-version-octal`, off `run-seamlyLayout`.**
+
+Run [`31447296387`](https://github.com/seamly/Seamly2D/actions/runs/31447296387)
+failed **all four build jobs** (macOS, Linux AppImage, Windows NSIS arm64,
+Windows MSI x64) on the same error:
+
+```text
+projectversion.cpp:67:43: error: invalid digit '8' in octal constant
+   67 | extern const int SUPER_MINOR__VERSION = 048;
+```
+
+Not a code regression — a **time-of-day bug**. `ci.yml:35` and
+`windows-msi.yml:99` build the version with `date +%Y.%-m.%-d.%-H%M`; the run
+started at 00:48 UTC, so the fourth component was `048`, and `scripts/version.sh`
+substituted it verbatim into `projectversion.cpp` as a C++ integer literal. A
+leading zero makes that literal **octal**: it fails to compile when the minutes
+contain an 8 or a 9, and — more quietly — compiles to the *wrong number*
+otherwise (`047` is 39). Any build started in the 00:00 UTC hour was affected.
+
+**Fix is in `scripts/version.sh`, not the workflows**, so it covers both YAML
+call sites at once: every component is validated as numeric and normalized with
+`$((10#…))`, and `VERSIONSTR` is rebuilt from the normalized parts so
+`VER_FILEVERSION_STR` and the two `Info.plist` files agree with the integers. A
+non-4-part or non-numeric argument is now rejected instead of corrupting the
+source files.
+
+`scripts/test_version_script.sh` is new: it drives `version.sh` over the release
+case, the `048` regression, the silently-wrong `047` case and an all-zero
+component, asserts no `= 0[0-9]` literal is ever written, checks both rejection
+paths, and backs up/restores all four files it rewrites. **26/26 assertions
+pass.** No local qmake build was run — no C++ changed, and the emitted
+`projectversion.cpp` is restored byte-for-byte by the test.
+
+## Previous state (2026-08-10): Task Installer.1.1 — the x64 `.msi` is now a CI release artifact
 
 **Branch `task-installer-win-x64-msi`, off `run-seamlyLayout`,** which first took
 a merge of `origin/develop` (three upstream commits: dark-mode fixes, a Finnish
@@ -75,15 +110,10 @@ The plain push run **skips `publish`** — only a `schedule` or
 `workflow_dispatch` run on `run-seamlyLayout` exercises the pre-release path, so
 dispatch one to prove the release step end to end.
 
-**`gh` is installed now** (`winget install --id GitHub.cli`), at
-`C:\Program Files\GitHub CLI\gh.exe`, but **not authenticated** — `gh auth
-login` is interactive, so the agent cannot do it. Until then, read run state
-straight from the public API, which needs no token:
-
-```bash
-curl -s "https://api.github.com/repos/seamly/Seamly2D/actions/runs/<id>/jobs" \
-  | tr ',' '\n' | grep -E '^      "(name|status|conclusion)"' | paste - - -
-```
+**`gh` is installed *and authenticated* now** (2026-08-11), at
+`C:\Program Files\GitHub CLI\gh.exe`. Read run state with it directly —
+`gh run list --repo seamly/Seamly2D --branch run-seamlyLayout --workflow ci.yml`,
+then `gh run view <id>` and `gh run view --job <id> --log-failed`.
 
 ### A red branch that was not this change
 
@@ -223,8 +253,12 @@ alongside the UI extension.
 - **`scripts\st.ps1` runs only `Seamly2DTests.exe`.** CI's `make check` runs four
   binaries — `Seamly2DTest`, `CollectionTest`, `ParserTest`, `TranslationsTest`.
   Run the other three by hand before pushing.
-- **`gh` is not on this agent shell's `PATH`** — invoke it as
+- **`gh` is on `PATH` and authenticated** as of 2026-08-11; plain `gh …` works.
+  If a shell ever comes up without it, invoke
   `& "C:\Program Files\GitHub CLI\gh.exe"`.
+- **A CI version component with a leading zero is a C++ octal literal.**
+  `scripts/version.sh` now normalizes them; do not "simplify" that `$((10#…))`
+  away. Covered by `scripts/test_version_script.sh`.
 - **There is no YAML tooling on this PC.** No `actionlint`, no `yamllint`, no
   `node`, and `python`/`python3` are the Microsoft Store stubs. Git's `perl` has
   no YAML module. Workflow edits can only be validated by pushing and watching
