@@ -22,7 +22,7 @@ Notes:
     alongside it. NSIS stays for arm64 until Task Installer.1.2, because there is
     still no arm64 SeamlyLayout build.
 - build occurs in Github on pull request to run-seamlyLayout branch. .github/workflows/ci.yml is the build file of record.
-- update the installer features after the Windows 11 x64 .msi can be built on GitHub without error. 
+- update the installer features after the Windows 11 x64 .msi can be built on GitHub without error
 
 ## Task InstWinX64.0 - Build current .msi on Github workflows without error
 
