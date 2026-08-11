@@ -1,0 +1,28 @@
+var classAdjustWindow =
+[
+    [ "AdjustWindow", "df/d1d/classAdjustWindow.html#a3b7b7d4590603148d5ac009c16d7d4fc", null ],
+    [ "abandoned", "df/d1d/classAdjustWindow.html#a1d37adbc64cb038bfc2a5d257b9f8459", null ],
+    [ "accepted", "df/d1d/classAdjustWindow.html#afb856fe6f261953f551dce0adeaa1b41", null ],
+    [ "buildUi", "df/d1d/classAdjustWindow.html#aa6aaec1a8ec82da3d413eaf35efbe1f9", null ],
+    [ "cancelled", "df/d1d/classAdjustWindow.html#a92a89596b95bd5ff13c2fddb1de618d9", null ],
+    [ "closeEvent", "df/d1d/classAdjustWindow.html#ae375b6795e3469f959c9d4804ad3605e", null ],
+    [ "closeWindow", "df/d1d/classAdjustWindow.html#a4f4ccec755a1f3a03aeab832fa8c19e3", null ],
+    [ "eventFilter", "df/d1d/classAdjustWindow.html#ad77df9bd4e399388962dfb96ffc65cee", null ],
+    [ "fitToView", "df/d1d/classAdjustWindow.html#aa7ec74722241e601a2555419298c877a", null ],
+    [ "onApplyClicked", "df/d1d/classAdjustWindow.html#ad55d9e2e8854cb6c16d6fd074015710f", null ],
+    [ "onCancelClicked", "df/d1d/classAdjustWindow.html#a5e27389676a725f29076adbefd3dc143", null ],
+    [ "onOperationConflictsDetected", "df/d1d/classAdjustWindow.html#abc62792caeae9a9d5e05a01955ae00dc", null ],
+    [ "onRedoTriggered", "df/d1d/classAdjustWindow.html#a47f5fd47cad27fba0a6177da7dfc42ce", null ],
+    [ "onSaveClicked", "df/d1d/classAdjustWindow.html#a52044882c1ea1d5b7e37705145a74b24", null ],
+    [ "onUndoTriggered", "df/d1d/classAdjustWindow.html#afbbcd4f9f0beee51f8d2f74a83cbeb3d", null ],
+    [ "reload", "df/d1d/classAdjustWindow.html#a80772fc0bc0124b976b899d416ec645c", null ],
+    [ "saveRequested", "df/d1d/classAdjustWindow.html#a38469fbd67ea901ff616a8c5548c485f", null ],
+    [ "updateUndoRedoActions", "df/d1d/classAdjustWindow.html#a24ba55ec4c13f64ad3bed807027fd9af", null ],
+    [ "zoomIn", "df/d1d/classAdjustWindow.html#a13c4d92fbb76e2b1614d764884f819d5", null ],
+    [ "zoomOut", "df/d1d/classAdjustWindow.html#ad7ce91648aaf26588afc10eafe10fc45", null ],
+    [ "m_closeHandled", "df/d1d/classAdjustWindow.html#acd09c3e55699a6653635e91cbc6eb5b7", null ],
+    [ "m_redoAct", "df/d1d/classAdjustWindow.html#a8cf8ef80920c590d288fdf12629c6077", null ],
+    [ "m_scene", "df/d1d/classAdjustWindow.html#acfdc6edf0d0b7f40d334fbb304ebfe0d", null ],
+    [ "m_undoAct", "df/d1d/classAdjustWindow.html#a01fa1b6a219c62a1817db7e488995beb", null ],
+    [ "m_view", "df/d1d/classAdjustWindow.html#a8edcc7efb0ac75b8011fe072f3c629af", null ]
+];

@@ -104,7 +104,8 @@ $(document).ready(function(){initNavTree('df/dc8/Seamly2DTest_2qttestmainlambda_
   <div class="headertitle"><div class="title">qttestmainlambda.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><code>#include &lt;QtTest&gt;</code><br />
+<div class="textblock"><code>#include &lt;QDir&gt;</code><br />
+<code>#include &lt;QtTest&gt;</code><br />
 <code>#include &quot;<a class="el" href="../../d0/d7c/tst__vposter_8h_source.html">tst_vposter.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d4/d6c/tst__vabstractpiece_8h_source.html">tst_vabstractpiece.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d8/d07/tst__vspline_8h_source.html">tst_vspline.h</a>&quot;</code><br />
@@ -126,6 +127,10 @@ $(document).ready(function(){initNavTree('df/dc8/Seamly2DTest_2qttestmainlambda_
 <code>#include &quot;<a class="el" href="../../d7/d4a/tst__vpointf_8h_source.html">tst_vpointf.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d1/dd5/tst__readval_8h_source.html">tst_readval.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/de1/tst__vtranslatevars_8h_source.html">tst_vtranslatevars.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dc/d11/tst__svgtextitem_8h_source.html">tst_svgtextitem.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../dd/dee/tst__svgcomponenttags_8h_source.html">tst_svgcomponenttags.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../de/d38/tst__seamlyfamilypaths_8h_source.html">tst_seamlyfamilypaths.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d4/d08/tst__dataroot_8h_source.html">tst_dataroot.h</a>&quot;</code><br />
 <code>#include &quot;../vmisc/def.h&quot;</code><br />
 <code>#include &quot;../qmuparser/qmudef.h&quot;</code><br />
 <code>#include &quot;../vmisc/vabstractapplication.h&quot;</code><br />
@@ -147,6 +152,7 @@ Classes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:a3c04138a5bfe5d72780bb7e82a18e627"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp.html#a3c04138a5bfe5d72780bb7e82a18e627">main</a> (int argc, char **argv)</td></tr>
+<tr class="memdesc:a3c04138a5bfe5d72780bb7e82a18e627"><td class="mdescLeft">&#160;</td><td class="mdescRight">Run every registered test suite in one process and OR their exit codes.  <br /></td></tr>
 <tr class="separator:a3c04138a5bfe5d72780bb7e82a18e627"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
@@ -176,7 +182,19 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00148">148</a> of file <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html">qttestmainlambda.cpp</a>.</p>
+<p>Run every registered test suite in one process and OR their exit codes. </p>
+<p>Each suite is executed through QTest::qExec() by the ASSERT_TEST lambda; the combined status (0 only when every suite passed) is the process exit code.</p>
+<p>Per-suite log capture: when the environment variable SEAMLY_TEST_LOG_DIR is set to a directory, each suite additionally writes a plain-text QTest log to "&lt;dir&gt;/&lt;SuiteClassName&gt;.txt" via an injected "-o file,txt" argument. Without it, a single "-o" on the command line is overwritten by every subsequent qExec() call, and on Windows the console/stdout output of the suite can be lost entirely when redirected — so this hook is what makes local per-suite results capturable at all (used by scripts/st.ps1; see Task 23).</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">argc</td><td>argument count, forwarded to every QTest::qExec() call </td></tr>
+    <tr><td class="paramname">argv</td><td>argument values, forwarded to every QTest::qExec() call </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>OR-ed QTest failure status across all suites (0 = all passed) </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00205">205</a> of file <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html">qttestmainlambda.cpp</a>.</p>
 
 </div>
 </div>
