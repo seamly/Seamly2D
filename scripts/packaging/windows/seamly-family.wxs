@@ -308,12 +308,12 @@
                  NoPrefix="yes"
                  ShowCondition="SEAMLYNSISUNINSTALLSTRING"
                  HideCondition="NOT SEAMLYNSISUNINSTALLSTRING"
-                 Text="An older Seamly2D from the previous installer was found in [SEAMLYNSISINSTALLDIR]. It holds Seamly2D and SeamlyMe, and this version replaces both, so Setup will remove its program directory, program files,  Start Menu shortcuts, and entries in Apps and features." />
+                 Text="An older Seamly2D from the previous installer was found in [SEAMLYNSISINSTALLDIR]. It holds Seamly2D and SeamlyMe, and this version replaces both, so Setup will remove its program directory, Start Menu shortcuts and entry in Apps and features. Nothing else in that folder is kept, so move anything of your own out of it before continuing." />
 
         <!-- Always shown: the point of the whole dialog. -->
         <Control Id="UserDataText" Type="Text" X="20" Y="150" Width="330" Height="76"
                  NoPrefix="yes"
-                 Text="Your own work is not touched. Patterns, measurements, templates, etc. stay in your Seamly user data folder. Your settings stay in AppData\Local\Seamly and AppData\Roaming\Seamly. Neither installing nor uninstalling Seamly removes any of them." />
+                 Text="Your own work is not touched. Patterns, measurements, templates, etc. stay in your user data folder - C:\Users\your name\seamlyData unless you have moved it. Your settings stay in AppData\Local\Seamly and AppData\Roaming\Seamly. Neither installing nor uninstalling Seamly removes any of them." />
 
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
                  Disabled="yes" Text="&amp;Back" />
@@ -378,12 +378,17 @@
     <!-- ProgramFiles64Folder, not ProgramFiles6432Folder or the x86 tree: every
          binary in this package is x64 (or arm64), so the 32-bit tree would be
          wrong even though the OLD NSIS installer lives there because
-         it was a 32-bit installer. "Seamly" rather than "Seamly2D" because
-         the folder holds the whole family - Seamly2D, SeamlyMe, and
+         it was a 32-bit installer. "SeamlyApps" rather than "Seamly2D"
+         because the folder holds the whole family - Seamly2D, SeamlyMe, and
          SeamlyLayout - and naming it after one member misdescribes it and
-         collides confusingly with the NSIS product's own folder name. -->
+         collides confusingly with the NSIS product's own folder name.
+         The name is asserted by test_msi_authoring.ps1 and documented in
+         README-BUILDS.md, scripts/packaging/windows/README.md and
+         INSTALL_DECISION_FLOW.md - change all of them together or not at
+         all. It was briefly "Seamly" (546e9d5def, 2026-08-03), which left
+         every one of those out of step and failed the authoring check. -->
     <StandardDirectory Id="ProgramFiles64Folder">
-      <Directory Id="INSTALLFOLDER" Name="Seamly">
+      <Directory Id="INSTALLFOLDER" Name="SeamlyApps">
         <!-- The single Qt runtime shared by all apps in this package (Qt DLLs,
              plugins, QML modules, QtWebEngineProcess.exe, MSVC CRT, xerces-c,
              SeamlyLayout's packaged settings\ and licenses\, ...), harvested
