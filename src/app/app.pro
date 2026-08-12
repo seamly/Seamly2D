@@ -33,7 +33,7 @@ SUBDIRS = \
 #
 # How SeamlyLayout is built instead:
 #   * locally  - src/app/seamlylayout/qd.ps1 (debug) or build.ps1 (CMake+Cargo)
-#   * in CI    - .github/workflows/seamlylayout-ci.yml (CMake/Ninja + cargo test)
+#   * in CI    - .github/workflows/ci.yml, 'windows-msi' job (CMake/Ninja + Cargo)
 #
 # The three apps are integrated at PACKAGING time, not compile time. All three
 # apps build against the same Qt release (currently 6.11.1), so

@@ -37,20 +37,11 @@ Each leg installs one Qt 6.11.1 kit, builds the apps, then runs [`smsi.ps1`](../
 
 **These steps live here and nowhere else.** The `publish` job releases these `.msi` files, so they must be built from the same commit, in the same run, as every other release artifact. A second packaging-only workflow, `windows-msi.yml`, used to carry a duplicate of these steps on a `scripts/packaging/windows/**` path trigger; it was deleted on 2026-08-11 (Task InstWinX64.1.3.2) because it built both packages a second time on every packaging edit and its copy drifted. A `.wxs` or `smsi.ps1` change now runs the full CI suite — that is the trade, and it is the only copy to maintain.
 
-### [SeamlyLayout CI](seamlylayout-ci.yml) - SeamlyLayout build + test (Qt 6.11)
+### SeamlyLayout CI — removed 2026-08-12
 
-**Triggers**: pushes to `develop` / `run-seamlyLayout` that touch `src/app/seamlylayout/**` (or the workflow file), pull requests touching the same paths, and manual dispatch. Path filters keep it from running on unrelated changes.
+`seamlylayout-ci.yml` built the SeamlyLayout daughter app (Rust core + Qt QML frontend) on `ubuntu-latest` and ran its `ctest` and `cargo test --workspace` suites. It was deleted on 2026-08-12: **`ci.yml` is the only workflow that builds the family on GitHub.** `ci.yml`'s `windows-msi` job already builds SeamlyLayout on both arches with the same CMake/Ninja + Cargo toolchain, so the second workflow duplicated the build and added a second `QT_VERSION` to keep in step.
 
-**Purpose**: builds and unit-tests the SeamlyLayout daughter app (Rust core + Qt 6.11 QML frontend) on `ubuntu-latest`, mirroring what `src/app/seamlylayout/qd.ps1` / `build.ps1` do locally.
-
-**Why it is separate from [CI](ci.yml)**: **not** the Qt version — since Task 30 this workflow and `ci.yml` both pin **Qt 6.11.1**, and the two `QT_VERSION` values must be kept in step. What keeps them apart is the build system: SeamlyLayout is CMake/Ninja + Cargo/Corrosion with its own toolchain steps (Rust, cargo cache, the WebEngine module set), while `ci.yml`'s parent-app jobs are qmake. Separate workflows also keep the triggers path-filtered and the failures independent — a SeamlyLayout failure never blocks the seamly2d/seamlyme jobs, and vice versa.
-
-**What it does**:
-1. Installs Rust (stable) and Qt 6.11 (`jurplel/install-qt-action`, with the `qtwebengine` module the frontend needs plus its own `qtwebchannel`/`qtpositioning` dependencies, which `aqtinstall` does not auto-resolve), with cargo and Qt caching.
-2. Configures + builds `qt_frontend` via its CMake `debug` preset; the same build drives Corrosion / cxx-qt-cmake, which compiles the `cxxqt_bridge` Rust crate — so one step builds both the Rust bridge and the C++/QML app.
-3. Runs the Qt frontend unit tests (`ctest`, under `xvfb`) and the Rust workspace tests (`cargo test --workspace`).
-
-**Consolidation, re-evaluated (Task 30)**: the differing Qt pins used to be the blocker for merging this job into `ci.yml`. That is resolved, but the merge was **deliberately not made** — different build systems and different path filters mean folding them together would rebuild the parent apps on every layout-only change for no benefit. Revisit only if the parent apps also move to CMake.
+**What CI no longer does:** SeamlyLayout's unit tests do not run on GitHub any more, and SeamlyLayout is not built on Linux there. Run both locally — `ctest --preset debug` in `src/app/seamlylayout/qt_frontend/`, and `cargo test --workspace` in `src/app/seamlylayout/`. Add the two test steps to `ci.yml` if that coverage is wanted back.
 
 ### Windows MSI — removed 2026-08-11
 

@@ -54,8 +54,9 @@ export QMAKE=/path/to/Qt/6.11.1/gcc_64/bin/qmake
 Skipping this on a machine with **Qt Design Studio** installed picks up its
 stripped `qt6_design_studio_reduced_version` Qt, which has no `mkspecs`
 directory, and the build fails naming that path. Builds driven through
-`build.ps1` set `QMAKE` themselves and are unaffected; CI sets it in
-`.github/workflows/seamlylayout-ci.yml`.
+`build.ps1` set `QMAKE` themselves and are unaffected. CI does not need the
+variable: `ci.yml` builds seamlyLayout on GitHub runners, which have no Qt
+Design Studio. CI also runs none of these tests — run them locally.
 
 ## General Test Commands
 

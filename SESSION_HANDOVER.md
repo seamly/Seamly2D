@@ -6,6 +6,23 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## CI: one workflow (2026-08-12)
+
+`.github/workflows/seamlylayout-ci.yml` is deleted. **`ci.yml` is the only
+workflow that builds the family on GitHub.** It already built seamlyLayout in
+the `windows-msi` job, so the second workflow duplicated the build and carried a
+second `QT_VERSION`.
+
+**Coverage lost, on purpose:** seamlyLayout's `ctest` and `cargo test
+--workspace` suites no longer run in CI, and seamlyLayout is no longer built on
+Linux. Run both locally before merging seamlyLayout work. To restore the
+coverage, add the two test steps to `ci.yml`.
+
+Docs updated: `README_WORKFLOWS.md`, `README-BUILDS.md`, `CLAUDE.md`,
+`src/app/app.pro`, `UNIT_TEST_COMMANDS.md`, `TODO_MIGRATE.md`,
+`TODO_RENAME_SETTINGS_FILES_CLASSES.md`. `TODO_COMPLETED.md` keeps the Task 20
+entry as the record of what was built at the time.
+
 ## PICK UP HERE (2026-08-11, data-root append + SpawnDialog investigation)
 
 **Next task: InstWinX64.12** — replace `WixUI_InstallDir` with a custom dialog
