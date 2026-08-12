@@ -24,9 +24,8 @@ name: SeamlyLayout CI
 #   Merging is therefore a "could", not a "should"; revisit it only if the
 #   parent apps also move to CMake.
 #
-# KEEP IN SYNC: `QT_VERSION` below, `ci.yml`'s `QT_VERSION`, and
-# `windows-msi.yml`'s `QT_VERSION` must all name the same Qt release — the
-# family now ships one shared Qt runtime (Task 30).
+# KEEP IN SYNC: `QT_VERSION` below and `ci.yml`'s `QT_VERSION` must name the
+# same Qt release — the family now ships one shared Qt runtime (Task 30).
 # ---------------------------------------------------------------------------
 
 on:
@@ -63,7 +62,7 @@ permissions:
 env:
   # SeamlyLayout's required Qt — must match qt_frontend/CMakeLists.txt's
   # `find_package(Qt6 6.11.1 ...)` and stay in sync with ci.yml's QT_VERSION
-  # and windows-msi.yml's QT_VERSION (Task 30: one Qt for the whole family).
+  # (Task 30: one Qt for the whole family).
   # Quoted, or the YAML parser reads it as a float.
   QT_VERSION: '6.11.1'
 

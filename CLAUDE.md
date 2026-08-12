@@ -80,7 +80,7 @@ Doxygen blocks, `TODO_*.md` / `project-docs/**` entries, `SESSION_HANDOVER.md`, 
 
 All three apps — seamly2d, seamlyMe and seamlyLayout — build against **Qt release, 6.11.1**
 
-- **CI toolchain (GitHub runner):** -- Qt 6.11.1 + MSVC 2022 — `QT_VERSION` in `ci.yml`, `seamlylayout-ci.yml` and `windows-msi.yml` must all name this one release
+- **CI toolchain (GitHub runner):** -- Qt 6.11.1 + MSVC 2022 — `QT_VERSION` in `ci.yml` and `seamlylayout-ci.yml` must both name this one release
 - **Local toolchain (developer Windows 11 PC, check builds of current work):** -- Qt 6.11.1 `msvc2022_64` + VS 18 Community MSVC (`vcvars64.bat`)
   -- seamly2d -- qmake + jom
   -- seamlyLayout -- CMake + Ninja + Cargo

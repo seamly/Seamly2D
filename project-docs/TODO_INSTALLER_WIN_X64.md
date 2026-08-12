@@ -83,7 +83,10 @@ Build one WiX v6 MSI per architecture containing Seamly2D, SeamlyMe, SeamlyLayou
   - [ ] InstWinX64.1.2.3 Add a `Change` button and silent-install property.
 - [ ] **InstWinX64.1.3 file clean up**
   - [ ] InstWinX64.1.3.1 remove `dist/seamly2d-installer.nsi`. It is currently kept in the tree, unbuilt, with a RETIRED header: `seamly-family.wxs` cites it as the record of a pre-MSI installation's on-disk footprint, which the MSI's `RemoveFolderEx` authoring removes on upgrade. Remove the citation from `seamly-family.wxs`
-  - [ ] InstWinX64.1.3.2 remove `windows-msi.yml`; it has stale information and is no longer needed. Remove it to remove confusion and clear out unused files.
+  - [x] InstWinX64.1.3.2 remove `windows-msi.yml`; it has stale information and is no longer needed. Remove it to remove confusion and clear out unused files.
+    - Deleted 2026-08-11. `ci.yml`'s `windows-msi` matrix job builds both arches and feeds `publish`, so the file only duplicated work: its push trigger on `scripts/packaging/windows/**` built both MSI packages a second time on every `.wxs` or `smsi.ps1` edit.
+    - Every live pointer to it now names `ci.yml`'s `windows-msi` job. Completed-task records in `TODO_COMPLETED.md`, `TODO_INSTALLER.md` and `TODO_INSTALLER_WIN_ARM64.md` keep the old name — they describe what happened at the time.
+    - The "keep the two copies of the build steps in step" warning is gone from every document. One copy remains.
 - [ ] **InstWinX64.1.4 Persist both selections** and prefill them during repair or upgrade.
 - [ ] **InstWinX64.1.5 Register the data root** through a dedicated environment variable, registry value, or application setting so all three apps use it without prompting. Document the selected mechanism.
 - [ ] **InstWinX64.1.6 Add the executable and data directories to the current user’s `PATH`**, broadcast the change, and remove only installer-created entries during uninstall.
@@ -135,8 +138,7 @@ Build one WiX v6 MSI per architecture containing Seamly2D, SeamlyMe, SeamlyLayou
 - [x] **InstWinX64.2.6 Support builds through:**
 
   - Local: `scripts/packaging/windows/smsi.ps1`
-  - CI (packaging-only, x64 + arm64): `.github/workflows/windows-msi.yml`
-  - CI (release, x64): `.github/workflows/ci.yml`'s `windows-msi` job — the package the `publish` job attaches to the pre-release (Task Installer.1.1). Its build steps duplicate `windows-msi.yml`'s x64 leg; keep the two in step.
+  - CI (release, x64 + arm64): `.github/workflows/ci.yml`'s `windows-msi` job — the packages the `publish` job attaches to the pre-release (Tasks Installer.1.1 and Installer.1.2). This is the only CI route; the packaging-only `windows-msi.yml` was deleted in InstWinX64.1.3.2.
 
 - [ ] **InstWinX64.2.7 Test both architectures**, where hardware is available:
 

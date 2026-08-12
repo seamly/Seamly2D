@@ -30,10 +30,7 @@ Notes:
 ## Installer.1 — Create .msi/.pkg/.appimage/flatpak artifacts as pre-releases in github workflow ci.yml file
 
 - [x] Task Installer.1.1 - Windows x64 .msi - refer to tasks in project-docs\TODO_INSTALLER_WIN_X64.md to define the .msi capabilities and options
-  - `ci.yml` gained a `windows-msi` job (x64): one Qt 6.11.1 kit, qmake for seamly2d/seamlyme, CMake/Ninja + Cargo for SeamlyLayout, WiX v6 via `scripts/packaging/windows/smsi.ps1`, jsign signing, artifact `seamly-x64.msi`.
-  - The `.msi` **replaces** the NSIS `Seamly2D-windows.zip` in the release; the `windows` job was left arm64-NSIS only, and Installer.1.2 then retired it entirely.
-  - `publish` now emits a **pre-release** (`prerelease: true`) and is gated on `run-seamlyLayout`, not `develop` (develop stays a pristine upstream mirror).
-  - `windows-msi.yml` kept as the packaging-only workflow; its stale jsign path `Seamly2D-<arch>.msi` corrected to the name `smsi.ps1` writes, `seamly-<arch>.msi`.
+
 - [x] Task Installer.1.2 - Windows arm64 .msi - should re-implement the Windows x64 .msi capabilities - track tasks in project-docs\TODO_INSTALLER_WIN_ARM64.md
   - `ci.yml`'s `windows-msi` job is now a **matrix over `arch`** (`x64`, `arm64`, `fail-fast: false`) — `windows-msi.yml`'s `msi` job verbatim, minus its own version step. 
   - **NSIS retired.** The `windows` job is deleted; nothing runs `makensis` any more. `publish` releases `seamly-x64.msi` + `seamly-arm64.msi` in place of `Seamly2D-win-arm64.zip`.

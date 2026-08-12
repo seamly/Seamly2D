@@ -6,7 +6,55 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## PICK UP HERE (2026-08-11, end of session)
+## PICK UP HERE (2026-08-11, later session)
+
+**Task InstWinX64.1.3.2 is done — `windows-msi.yml` is deleted.** `ci.yml`'s
+`windows-msi` matrix job already built both architectures and fed `publish`, so
+the packaging-only workflow only duplicated the work: its push trigger on
+`scripts/packaging/windows/**` built both MSI packages a second time on every
+`.wxs` or `smsi.ps1` edit. Its copy of the build steps had also drifted — it
+signed `Seamly2D-<arch>.msi`, a name `smsi.ps1` has never written, so that
+signing step had never touched a real file.
+
+**Consequence to expect:** an edit under `scripts/packaging/windows/` now runs
+the full ~50-minute suite instead of a path-filtered packaging job. That is the
+accepted trade for one copy of the steps.
+
+**Over twenty references had to be redirected, not four.** They were spread
+across `.github/README-BUILDS.md`, `.github/workflows/README_WORKFLOWS.md`,
+`common.pri`, `scripts/sb.ps1`, `scripts/packaging/windows/` (README.md,
+README_WINDOWS_BUILD.md, smsi.ps1, seamly-family.wxs, test_msi_authoring.ps1),
+`CLAUDE.md`, `seamlylayout-ci.yml`, `qt-arm64-module-probe.yml`, and four
+`TODO_*.md` files. Completed-task records in `TODO_COMPLETED.md`,
+`TODO_INSTALLER.md` and `TODO_INSTALLER_WIN_ARM64.md` keep the old name on
+purpose — they describe what was true at the time.
+
+**Stale claims corrected while redirecting.** Several packaging documents still
+said the arm64 MSI ships the parents only (`-NoSeamlyLayout`) and that arm64
+cross-compiles with `host-qmake`. Both are false since 2026-08-11: all three
+apps build natively on `windows-11-arm`. `TODO_CODE_SIGNING.md` also cited a
+`ci.yml` step named "Print installer signature" that went with the NSIS
+`windows` job; CodeSign.1.5 now says the step has to be written, not mirrored.
+
+**Known stale, deliberately not fixed:** `TODO_CODE_SIGNING.md` CodeSign.1.6
+still says SeamlyLayout is absent from the arm64 MSI via `-NoSeamlyLayout`. It
+is a live subtask whose scope changes if that is corrected, so it needs a
+decision rather than an edit.
+
+**Also this session:** `ci.yml`'s `paths-ignore` gained `.claude/**` and
+`.vscode/**`. A push of documentation plus a `.claude/settings.json` edit had
+started the full suite, because the filter skips a push only when *every* file
+it carries matches. `CLAUDE.md`'s docs-only exception was corrected at the same
+time — it told the reader to commit locally and never push, and it wrongly
+counted `.txt` and `.svg` as documentation (`CMakeLists.txt` is a build input;
+an `.svg` can be a compiled Qt resource).
+
+**Verification status:** no code changed, so there was no build to run. The
+edited PowerShell scripts and `seamly-family.wxs` were parse-checked. The
+`ci.yml` YAML edit is unverified locally — the push that carries it is the
+first real check, and the skip token was deliberately omitted for that reason.
+
+### Previous session (2026-08-11)
 
 **Task InstWinX64.0 — the x64 MSI builds clean on CI.** Runs `31461308276`
 (CI) and `31461308379` (Windows MSI) on `361b743fa0` both finished **green**,
@@ -39,8 +87,8 @@ Three changes merged to `run-seamlyLayout`; the branch was force-pushed once
 
 **1. CI no longer runs on every push.** `ci.yml` gained a top-level `concurrency`
 (cancel-in-progress) and a `paths-ignore` for `**.md` / `project-docs/**` /
-`LICENSE` on its push trigger; `seamlylayout-ci.yml` and `windows-msi.yml`
-already had both. `CLAUDE.md`'s task workflow now merges with `--no-ff` (step 8)
+`LICENSE` on its push trigger (since extended with `.claude/**` and
+`.vscode/**`); `seamlylayout-ci.yml` already had both. `CLAUDE.md`'s task workflow now merges with `--no-ff` (step 8)
 and puts the skip token in the merge commit by default (step 9), omitting it
 when the task touched `.github/workflows/**`, `scripts/packaging/**`,
 `*.pro`/`CMakeLists.txt`/`Cargo.toml` or platform-specific code — the things

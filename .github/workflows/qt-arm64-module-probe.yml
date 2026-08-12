@@ -32,7 +32,7 @@ permissions:
   contents: read
 
 env:
-  # Keep in step with ci.yml / windows-msi.yml / seamlylayout-ci.yml.
+  # Keep in step with ci.yml / seamlylayout-ci.yml.
   QT_VERSION: '6.11.1'
 
 jobs:
