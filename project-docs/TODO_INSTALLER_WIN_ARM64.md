@@ -40,8 +40,8 @@ for the native `windows_arm64` host kit.
 - [X] InstWinArm64.1.2 Qt WebEngine on arm64 — **the "Qt ships no arm64 WebEngine"
   premise was false for 6.11.1** (true only of the Qt 6.8 era it came from).
   `qtwebengine` is published for the native `windows_arm64` host kit; verified by
-  the `qt-arm64-module-probe` workflow. No from-source build was needed — see
-  InstWinArm64.3, dropped
+  the `qt-arm64-module-probe` workflow, since deleted. No from-source build was
+  needed — see InstWinArm64.3, dropped
 - [X] InstWinArm64.1.3 `ci.yml` and `windows-msi.yml` both carry
   `qtmultimedia qtwebengine qtwebchannel qtpositioning` on the arm64 leg, the
   `matrix.arch == 'x64'` step guards are gone, and neither passes
@@ -61,7 +61,8 @@ for the native `windows_arm64` host kit.
 belief that Qt ships no arm64 Windows WebEngine. That belief was Qt 6.8-era and
 is false for 6.11.1: `aqt list-qt windows desktop --modules 6.11.1` lists
 `qtwebengine` for the native `windows_arm64` host kit (and for the cross-compiled
-one), as the `qt-arm64-module-probe` workflow verifies. Installing the published
+one). The `qt-arm64-module-probe` workflow confirmed this before it was deleted
+on 2026-08-11; re-run the `aqt list-qt` command above at any Qt bump. Installing the published
 module reaches the same end state — all three apps native arm64, one Qt runtime,
 Task 30's flat layout intact — at zero build cost, so a one-off Chromium build
 and its per-Qt-bump repeat cost buy nothing.

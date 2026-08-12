@@ -36,10 +36,15 @@ apps build natively on `windows-11-arm`. `TODO_CODE_SIGNING.md` also cited a
 `ci.yml` step named "Print installer signature" that went with the NSIS
 `windows` job; CodeSign.1.5 now says the step has to be written, not mirrored.
 
-**Known stale, deliberately not fixed:** `TODO_CODE_SIGNING.md` CodeSign.1.6
-still says SeamlyLayout is absent from the arm64 MSI via `-NoSeamlyLayout`. It
-is a live subtask whose scope changes if that is corrected, so it needs a
-decision rather than an edit.
+**`qt-arm64-module-probe.yml` is also deleted** (by the user, same session). It
+had answered its question — Qt 6.11.1 does publish an arm64 WebEngine — and the
+subtask asking to re-run it at every Qt bump was removed first. Four documents
+still pointed at it, two in the present tense; each now carries the `aqt
+list-qt` command the workflow ran, so the check survives the file:
+`aqt list-qt windows_arm64 desktop --modules <version> <arch>`, and the same for
+the `windows` host.
+
+`TODO_CODE_SIGNING.md` was updated by the user in the same session.
 
 **Also this session:** `ci.yml`'s `paths-ignore` gained `.claude/**` and
 `.vscode/**`. A push of documentation plus a `.claude/settings.json` edit had

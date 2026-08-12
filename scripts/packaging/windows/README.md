@@ -123,7 +123,7 @@ Everything below is appearance or wizard flow, which neither script can see:
 
 All three apps build **natively** on the `windows-11-arm` runner in `ci.yml`'s `windows-msi` job — the `windows_arm64` host with the `win64_msvc2022_arm64` kit, the cargo host toolchain, and plain `qmake`. Nothing is cross-compiled. `smsi.ps1` then builds the arm64 package with `wix build -arch arm64`.
 
-The arm64 MSI shipped the two parent apps only (`-NoSeamlyLayout`) until 2026-08-11, on the belief that Qt publishes no arm64 Windows WebEngine. That was true of Qt 6.8 and is false for 6.11.1; the `qt-arm64-module-probe` workflow is what verified it. Both architectures now ship all three apps.
+The arm64 MSI shipped the two parent apps only (`-NoSeamlyLayout`) until 2026-08-11, on the belief that Qt publishes no arm64 Windows WebEngine. That was true of Qt 6.8 and is false for 6.11.1; the `qt-arm64-module-probe` workflow verified it before being deleted. Both architectures now ship all three apps. Re-check at any Qt bump with `aqt list-qt windows_arm64 desktop --modules <version> <arch>`.
 
 ## Code signing
 

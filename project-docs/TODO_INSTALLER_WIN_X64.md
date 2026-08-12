@@ -59,49 +59,48 @@ Two warnings appear in the job. Both are known and neither fails the build:
 The signing steps did not run. They are gated on `SEAMLY_SIGNING_PROJECT_ID`,
 which is not set in this repository — see Task InstWinX64.2.5.
 
-## Task InstWinX64.1 — Windows installer
-
-### Notes
-
-- `ci.yml` gained a `windows-msi` job (x64): one Qt 6.11.1 kit, qmake for seamly2d/seamlyme, CMake/Ninja + Cargo for SeamlyLayout, WiX v6 via `scripts/packaging/windows/smsi.ps1`, jsign signing, artifact `seamly-x64.msi`.
-- The `.msi` **replaces** the NSIS `Seamly2D-windows.zip` in the release; the `windows` job was left arm64-NSIS only, and Installer.1.2 then retired it entirely.
-- `publish` now emits a **pre-release** (`prerelease: true`) and is gated on `run-seamlyLayout`, not `develop` (develop stays a pristine upstream mirror).
+## Task InstWinX64.1 — Windows 11 x64 .msi installer
 
 ### Implementation
 
 Build one WiX v6 MSI per architecture containing Seamly2D, SeamlyMe, SeamlyLayout, and their dependencies. Store application state in the appropriate AppData directories; user-data paths and migration are covered by Task InstWinX64.1
+Configure WiX v6 using `scripts/packaging/windows/seamly-family.wxs`
 
-- [ ] **InstWinX64.1.0 Configure WiX v6** using `scripts/packaging/windows/seamly-family.wxs`. Do not adopt WiX v7 until its OSMF EULA is approved.
-- [ ] **InstWinX64.1.1 Program directory**
-  - [ ] InstWinX64.1.1.1 Default program directory to `C:\Program Files\SeamlyApps`.
-  - [ ] InstWinX64.1.1.2 Update `seamly-family.wxs` and all shortcuts, file associations, registry values, and SeamlyLayout paths.
-  - [ ] InstWinX64.1.1.3 Accept any local or removable drive/path; reject cloud-synced locations.
-  - [ ] InstWinX64.1.1.4 Add a `Change` button and silent-install property.
-- [ ] **InstWinX64.1.2 User-data directory**
-  - [ ] InstWinX64.1.2.1 Default user directory to `C:\Users\<user>\SeamlyData`.
-  - [ ] InstWinX64.1.2.2 Accept any drive/path, including OneDrive, Google Drive, Dropbox, external drives, and USB media.
-  - [ ] InstWinX64.1.2.3 Add a `Change` button and silent-install property.
-- [ ] **InstWinX64.1.3 file clean up**
-  - [ ] InstWinX64.1.3.1 remove `dist/seamly2d-installer.nsi`. It is currently kept in the tree, unbuilt, with a RETIRED header: `seamly-family.wxs` cites it as the record of a pre-MSI installation's on-disk footprint, which the MSI's `RemoveFolderEx` authoring removes on upgrade. Remove the citation from `seamly-family.wxs`
-  - [x] InstWinX64.1.3.2 remove `windows-msi.yml`; it has stale information and is no longer needed. Remove it to remove confusion and clear out unused files.
-    - Deleted 2026-08-11. `ci.yml`'s `windows-msi` matrix job builds both arches and feeds `publish`, so the file only duplicated work: its push trigger on `scripts/packaging/windows/**` built both MSI packages a second time on every `.wxs` or `smsi.ps1` edit.
-    - Every live pointer to it now names `ci.yml`'s `windows-msi` job. Completed-task records in `TODO_COMPLETED.md`, `TODO_INSTALLER.md` and `TODO_INSTALLER_WIN_ARM64.md` keep the old name — they describe what happened at the time.
-    - The "keep the two copies of the build steps in step" warning is gone from every document. One copy remains.
-- [ ] **InstWinX64.1.4 Persist both selections** and prefill them during repair or upgrade.
-- [ ] **InstWinX64.1.5 Register the data root** through a dedicated environment variable, registry value, or application setting so all three apps use it without prompting. Document the selected mechanism.
-- [ ] **InstWinX64.1.6 Add the executable and data directories to the current user’s `PATH`**, broadcast the change, and remove only installer-created entries during uninstall.
-- [ ] **InstWinX64.1.7 When the data root changes:**
-  - [ ] InstWinX64.1.7.1 Explain that first run will copy existing data without deleting the source.
-  - [ ] InstWinX64.1.7.2 Require confirmation before continuing.
-  - [ ] InstWinX64.1.7.3 Copy only missing files; never overwrite existing destination files.
-- [ ] **InstWinX64.1.8 Make Seamly2D, SeamlyMe, and SeamlyLayout honor the configured data root on first run and thereafter.**
-- [ ] **InstWinX64.1.9 Preserve user data during uninstall;** remove applications, shortcuts, registry/configuration entries, and installer-created `PATH` entries only.
-- [ ] **InstWinX64.1.10 Optionally offer to launch the Seamly applications after installation.**
-- [ ] **InstWinX64.1.11 Document** both prompts, silent-install properties, path registration, migration behavior, and uninstall behavior in:
-  - [ ] InstWinX64.1.11.1 `scripts/packaging/windows/README.md`
-  - [ ] InstWinX64.1.11.2 `.github/README-BUILDS.md`
+- [ ] **InstWinX64.1.0** - Create installer
+  - [ ] **InstWinX64.1.1 - Program directory**
+    - [ ] InstWinX64.1.1.1 Default program directory to `C:\Program Files\SeamlyApps`
+    - [ ] InstWinX64.1.1.2 Update `seamly-family.wxs` and all shortcuts, file associations, registry values, and SeamlyLayout paths.
+    --> How can the user confirm this?
+    - [ ] InstWinX64.1.1.3 - Accept any local or removable drive/path for program directory; reject cloud-synced locations; install 'SeamlyApps' directory to the selected drive/path.
+    --> unconfirmed
+    - [ ] InstWinX64.1.1.4 - Add a `Change` button and silent-install property.
+    --> unconfirmed
+  - [ ] **InstWinX64.1.2 - User-data directory**
+    - [ ] InstWinX64.1.2.1 - Default user directory to `C:\Users\<user>\SeamlyData`.
+    --> unconfirmed
+    - [ ] InstWinX64.1.2.2 - Accept any drive/path, including OneDrive, Google Drive, Dropbox, external drives, and USB media; install 'SeamlyData' directory to this drive/path.
+    --> installer did not prompt user for the user data directory, fix this
+    - [ ] InstWinX64.1.2.3 - Add a `Change` button and silent-install property.
+    --> unconfirmed
+    - [ ] **InstWinX64.1.2.4 When the data root changes:**
+      - [ ] InstWinX64.1.2.4.1 Explain that first run will copy existing data without deleting the source.
+      - [ ] InstWinX64.1.2.4.2 Require confirmation before continuing.
+      - [ ] InstWinX64.1.2.4.3 Copy only missing files; never overwrite existing destination files.
+  - [ ] **InstWinX64.1.3 - file clean up**
+    - [ ] InstWinX64.1.3.1 - Delete `dist/seamly2d-installer.nsi`. It is currently kept in the tree, unbuilt, with a RETIRED header: `seamly-family.wxs` cites it as the record of a pre-MSI installation's on-disk footprint, which the MSI's `RemoveFolderEx` authoring removes on upgrade. Remove the citation from `seamly-family.wxs`
+    --> I deleted it
+    - [x] InstWinX64.1.3.2 - Remove `windows-msi.yml`
+    --> confirmed
+  - [ ] **InstWinX64.1.4 - Persist both selections** and prefill them during repair or upgrade.
+  - [ ] **InstWinX64.1.5 - Register the data root** through a dedicated environment variable, registry value, or application setting so all three apps use it without prompting. Document the selected mechanism.
+  - [ ] **InstWinX64.1.6 - Add the executable and data directories to the current user’s `PATH`**, broadcast the change, and remove only installer-created entries during uninstall.
+  - [ ] **InstWinX64.1.7 - Make Seamly2D, SeamlyMe, and SeamlyLayout honor the configured data root on first run and thereafter.**
+  - [ ] **InstWinX64.1.8** - Preserve user data during uninstall; remove applications, shortcuts, registry/configuration entries, and installer-created `PATH` entries only.
+  - [ ] **InstWinX64.1.9** - Optionally offer to launch the Seamly applications after installation.
+  - [ ] **InstWinX64.1.10** - Document both prompts, silent-install properties, path registration, migration behavior, and uninstall behavior in:
+    - [ ] InstWinX64.1.10.1 `scripts/packaging/windows/README.md`
+    - [ ] InstWinX64.1.10.2 `.github/README-BUILDS.md`
   
-
 ### Verification
 
 - [ ] **InstWinX64.1.12 Fresh install**
@@ -180,7 +179,7 @@ The WiX v6 MSI build needs only the `.msi`; suppress the optional linker databas
 - [x] InstWinX64.3.7 Warn before replacing an MSI or NSIS installation.
 - [ ] InstWinX64.3.8 Make `SeamlyShortcutsDlg` appear under WiX 6; verify through authoring tests and a real wizard run.
 - [ ] InstWinX64.3.9 After Task InstWinX64.6, run the `Removed` phase and verify removal of apps, shortcuts, associations, registry entries, and ARP metadata while preserving user data.
-- [ ] InstWinX64.3.10 Complete the remaining branding, dialog, and ARP corrections in Tasks InstWinX64.7–InstWinX64.11.
+- [ ] InstWinX64.3.10 Complete the remaining branding, dialog, and ARP corrections in Tasks InstWinX64.6–InstWinX64.10.
 - [x] InstWinX64.3.11 Document the installer flow and verification procedure in `scripts/packaging/windows/README.md` and `README_WINDOWS_BUILD.md`.
 
 ## Task InstWinX64.4 — Eliminate `Unknown Organization` settings
@@ -213,65 +212,58 @@ Default user documents to `<DocumentsLocation>/Seamly`. Keep configuration, cach
 - [ ] InstWinX64.5.12 Ensure `pruneEmptyLegacyDataRoot()` never removes a populated or migration-marked tree.
 - [ ] InstWinX64.5.13 Move per-app configuration to the platform-standard configuration tree while keeping cache, logs, and recovery separate.
 
-## Task InstWinX64.6 — Repair `test_msi_install.ps1`
 
-- [ ] InstWinX64.6.1 Replace bare install-state values with named constants: `INSTALLSTATE_LOCAL = 3` and `INSTALLSTATE_SOURCE = 4`.
-- [ ] InstWinX64.6.2 Require advertised shortcuts to resolve to a non-empty installed component path.
-- [ ] InstWinX64.6.3 Snapshot `Documents\Seamly` after first-run migration, before the upgrade.
-- [ ] InstWinX64.6.4 Replace the sample pattern with a self-contained file and verify that it loads, not merely that Seamly2D starts.
-- [ ] InstWinX64.6.5 Re-run the affected phases with no false failures before Task 51’s uninstall test.
+## Task InstWinX64.6 — Add complete ARP metadata
 
-## Task InstWinX64.7 — Add complete ARP metadata
+- [ ] InstWinX64.6.1 Write `DisplayIcon` explicitly under the product’s Uninstall registry key while retaining `ARPPRODUCTICON`.
+- [ ] InstWinX64.6.2 Determine whether `Publisher` also requires an explicit registry value.
+- [ ] InstWinX64.6.3 Validate the authored and installed registry values in both MSI test scripts.
+- [ ] InstWinX64.6.4 Verify the icon and publisher in both `appwiz.cpl` and Windows Settings.
 
-- [ ] InstWinX64.7.1 Write `DisplayIcon` explicitly under the product’s Uninstall registry key while retaining `ARPPRODUCTICON`.
-- [ ] InstWinX64.7.2 Determine whether `Publisher` also requires an explicit registry value.
-- [ ] InstWinX64.7.3 Validate the authored and installed registry values in both MSI test scripts.
-- [ ] InstWinX64.7.4 Verify the icon and publisher in both `appwiz.cpl` and Windows Settings.
+## Task InstWinX64.7 — Brand the installer for the Seamly family
 
-## Task InstWinX64.8 — Brand the installer for the Seamly family
+- [ ] InstWinX64.7.1 Replace installer-facing “Seamly2D” branding with “Seamly.”
+- [ ] InstWinX64.7.2 State that the package installs Seamly2D, SeamlyLayout, and SeamlyMe.
+- [ ] InstWinX64.7.3 Change “Seamly2D application family” to “Seamly application family” in the EULA.
+- [ ] InstWinX64.7.4 Change package metadata, executable resources, and About dialogs from “Seamly2D Project” to “Seamly Project.”
+- [ ] InstWinX64.7.5 Leave source-file copyright headers unchanged.
+- [ ] InstWinX64.7.6 Update authoring-test assertions.
+- [ ] InstWinX64.7.7 Verify all wizard text visually.
 
-- [ ] InstWinX64.8.1 Replace installer-facing “Seamly2D” branding with “Seamly.”
-- [ ] InstWinX64.8.2 State that the package installs Seamly2D, SeamlyLayout, and SeamlyMe.
-- [ ] InstWinX64.8.3 Change “Seamly2D application family” to “Seamly application family” in the EULA.
-- [ ] InstWinX64.8.4 Change package metadata, executable resources, and About dialogs from “Seamly2D Project” to “Seamly Project.”
-- [ ] InstWinX64.8.5 Leave source-file copyright headers unchanged.
-- [ ] InstWinX64.8.6 Update authoring-test assertions.
-- [ ] InstWinX64.8.7 Verify all wizard text visually.
+## Task InstWinX64.8 — Shorten and correct the previous-install dialog
 
-## Task InstWinX64.9 — Shorten and correct the previous-install dialog
+- [ ] InstWinX64.8.1 Replace `C:\Users\<you>\seamlyData` with `C:\Users\<you>\Documents\Seamly`.
+- [ ] InstWinX64.8.2 Verify the AppData paths against the implemented storage layout.
+- [ ] InstWinX64.8.3 Shorten the NSIS warning to: “An older Seamly2D version was found in `C:\Program Files (x86)\Seamly2D`.”
+- [ ] InstWinX64.8.4 Remove obsolete advice about moving files from Program Files.
+- [ ] InstWinX64.8.5 Shorten the user-data preservation message.
+- [ ] InstWinX64.8.6 Change `BannerLine` and `BottomLine` from width 373 to 370.
+- [ ] InstWinX64.8.7 Update authoring tests and `INSTALL_DECISION_FLOW.md`.
 
-- [ ] InstWinX64.9.1 Replace `C:\Users\<you>\seamlyData` with `C:\Users\<you>\Documents\Seamly`.
-- [ ] InstWinX64.9.2 Verify the AppData paths against the implemented storage layout.
-- [ ] InstWinX64.9.3 Shorten the NSIS warning to: “An older Seamly2D version was found in `C:\Program Files (x86)\Seamly2D`.”
-- [ ] InstWinX64.9.4 Remove obsolete advice about moving files from Program Files.
-- [ ] InstWinX64.9.5 Shorten the user-data preservation message.
-- [ ] InstWinX64.9.6 Change `BannerLine` and `BottomLine` from width 373 to 370.
-- [ ] InstWinX64.9.7 Update authoring tests and `INSTALL_DECISION_FLOW.md`.
+## Task InstWinX64.9 — Correct the destination-folder page
 
-## Task InstWinX64.10 — Correct the destination-folder page
+- [x] InstWinX64.9.1 Keep the `SeamlyApps` program directory.
+- [ ] InstWinX64.9.2 Replace “Install Seamly2D to” with wording that names the Seamly application family.
+- [ ] InstWinX64.9.3 Show the complete editable destination path, including `SeamlyApps`.
+- [ ] InstWinX64.9.4 Update tests and installer documentation.
 
-- [x] InstWinX64.10.1 Keep the `SeamlyApps` program directory.
-- [ ] InstWinX64.10.2 Replace “Install Seamly2D to” with wording that names the Seamly application family.
-- [ ] InstWinX64.10.3 Show the complete editable destination path, including `SeamlyApps`.
-- [ ] InstWinX64.10.4 Update tests and installer documentation.
-
-## Task InstWinX64.11 — Rename the ARP product entry to “Seamly”
+## Task InstWinX64.10 — Rename the ARP product entry to “Seamly”
 
 One MSI installs all three applications, and will be able to update each separately in the future
 Revisit -- if we update each separately in the future should these tasks change?
 
-- [x] InstWinX64.11.1 Keep one ARP entry named “Seamly.” ?? 
-- [ ] InstWinX64.11.2 Change `ProductName` and `ARPDISPLAYNAME` to `Seamly`. ??
-- [ ] InstWinX64.11.3 Make `ARPCOMMENTS` name Seamly2D, SeamlyMe, and SeamlyLayout. ??
-- [ ] InstWinX64.11.4 Update DisplayName assertions in both MSI test scripts. ??
-- [ ] InstWinX64.11.5 Confirm NSIS detection remains registry-based and unaffected. ??
-- [ ] InstWinX64.11.6 Verify the renamed entry, icon, and publisher in both Windows applets. ??
-- [ ] InstWinX64.11.7 Verify upgrades retain the fixed `UpgradeCode` and leave one ARP entry. ??
+- [x] InstWinX64.10.1 Keep one ARP entry named “Seamly.” ?? 
+- [ ] InstWinX64.10.2 Change `ProductName` and `ARPDISPLAYNAME` to `Seamly`. ??
+- [ ] InstWinX64.10.3 Make `ARPCOMMENTS` name Seamly2D, SeamlyMe, and SeamlyLayout. ??
+- [ ] InstWinX64.10.4 Update DisplayName assertions in both MSI test scripts. ??
+- [ ] InstWinX64.10.5 Confirm NSIS detection remains registry-based and unaffected. ??
+- [ ] InstWinX64.10.6 Verify the renamed entry, icon, and publisher in both Windows applets. ??
+- [ ] InstWinX64.10.7 Verify upgrades retain the fixed `UpgradeCode` and leave one ARP entry. ??
 
-## Task InstWinX64.12 — Preserve command-line files through first-run dialogs
+## Task InstWinX64.11 — Preserve command-line files through first-run dialogs
 
-- [ ] InstWinX64.12.1 Reproduce a first-launch `.sm2d` association outside the automated checker.
-- [ ] InstWinX64.12.2 Queue the requested file until first-run dialogs close, or suppress the dialogs when launched with a document.
-- [ ] InstWinX64.12.3 Define consistent first-run behavior for Seamly2D, SeamlyMe, and SeamlyLayout.
-- [ ] InstWinX64.12.4 Repeat the test with `.smis` and `.smms` files.
-- [ ] InstWinX64.12.5 Verify the requested document loads after the first-run flow.
+- [ ] InstWinX64.11.1 Reproduce a first-launch `.sm2d` association outside the automated checker.
+- [ ] InstWinX64.11.2 Queue the requested file until first-run dialogs close, or suppress the dialogs when launched with a document.
+- [ ] InstWinX64.11.3 Define consistent first-run behavior for Seamly2D, SeamlyMe, and SeamlyLayout.
+- [ ] InstWinX64.11.4 Repeat the test with `.smis` and `.smms` files.
+- [ ] InstWinX64.11.5 Verify the requested document loads after the first-run flow.
