@@ -124,7 +124,7 @@ cd scripts\seamly-msi\x64
 msiexec /i seamly-x64.msi                       # interactive (license + directory pages)
 msiexec /i seamly-x64.msi /qn                   # silent, defaults (needs elevation)
 msiexec /i seamly-x64.msi /qn INSTALLFOLDER=D:\SeamlyApps        # silent, custom program dir
-msiexec /i seamly-x64.msi /qn SEAMLYDATAROOT=E:\SeamlyData       # silent, custom data root
+msiexec /i seamly-x64.msi /qn SEAMLYDATAPARENT=E:\               # silent, data root E:\SeamlyData
 msiexec /i seamly-x64.msi /qn SEAMLYDESKTOPSHORTCUTS=0           # silent, no desktop shortcuts
 msiexec /x seamly-x64.msi /qn                   # silent uninstall
 ```
@@ -134,7 +134,8 @@ msiexec /x seamly-x64.msi /qn                   # silent uninstall
 | Property | Default | Notes |
 |---|---|---|
 | `INSTALLFOLDER` | `C:\Program Files\SeamlyApps` | Rejected if the path contains OneDrive, Dropbox, Google Drive, iCloud or Box Sync — a sync client replaces files that are in use, which breaks the program and its uninstall. The check is a launch condition, so it applies to `/qn` too. |
-| `SEAMLYDATAROOT` | `C:\Users\<user>\SeamlyData` | Patterns and measurements. **Any** drive is allowed here, including synced folders and USB media. **Under `/qn` there is no default** — the UI sequence computes it from `%USERPROFILE%`, and `/qn` runs no UI sequence, so pass it explicitly or the apps fall back to their own first-run default. |
+| `SEAMLYDATAPARENT` | `C:\Users\<user>` | Where the `SeamlyData` folder is placed. Setup always appends the `SeamlyData` leaf, so `E:\` gives `E:\SeamlyData`. **Any** drive is allowed, including synced folders and USB media. **Under `/qn` there is no default** — the UI sequence computes it from `%USERPROFILE%`, and `/qn` runs no UI sequence, so pass it explicitly or the apps fall back to their own first-run default. |
+| `SEAMLYDATAROOT` | `[SEAMLYDATAPARENT]\SeamlyData` | The composed path. Set it directly to override the composition and name the folder yourself — `SEAMLYDATAROOT=E:\Patterns` gives exactly that. |
 | `SEAMLYCOPYUSERDATA` | `0` | Set to `1` to copy existing work into `SEAMLYDATAROOT`. Additive only: nothing is deleted, and a file already at the destination is never overwritten. |
 | `SEAMLYDESKTOPSHORTCUTS` | `1` | Desktop shortcuts for Seamly2D and SeamlyMe. |
 
