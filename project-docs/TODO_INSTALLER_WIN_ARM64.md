@@ -68,11 +68,6 @@ and its per-Qt-bump repeat cost buy nothing.
 
 **Kept for the record — do not re-litigate without new information:**
 
-- **Re-asserting "Qt ships no arm64 WebEngine"** requires re-running
-  `qt-arm64-module-probe` first. That workflow exists precisely to re-check the
-  claim at every Qt bump; if a future release genuinely drops the module, revive
-  this task from git history (`project-docs/TODO_INSTALLER_WIN_ARM64.md` before
-  2026-08-10).
 - **Ship SeamlyLayout as an emulated x64 app with its own Qt runtime.** Rejected:
   puts the Rust nesting core — the number-crunching — on the slow side of Prism
   to solve a problem that only exists on the display side, and re-introduces the

@@ -11,7 +11,7 @@
  **  SeamlyLayout (pattern layout).
  **
  **  Build with `scripts\packaging\windows\smsi.ps1` (local)
- **  or with `.github\workflows\windows-msi.yml` (origin).
+ **  or with `ci.yml`'s `windows-msi` job (origin).
  **
  **  (CI). One MSI is produced per architecture from this same source:
  **     Windows x64:    `wix build -arch x64`

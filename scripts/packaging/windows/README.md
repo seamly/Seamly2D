@@ -12,8 +12,7 @@ WiX authoring and build instructions for the Windows `.msi` installer that ships
 | `test_msi_authoring.ps1` | Asserts the built MSI still contains the expected shortcuts, associations, registry rows, elevation, upgrade detection and dialogs; run by `smsi.ps1` on every build |
 | `test_msi_install.ps1` | Asserts what an **installed** MSI actually did to a real machine, in four phases around the `msiexec` commands; standalone, copied to the test machine beside the `.msi` |
 | `INSTALL_DECISION_FLOW.md` | What the installer decides and what the *application* decides, as flowcharts, across all four pre-existing-installation cases (clean / old NSIS / previous MSI / both). Read this before changing upgrade or previous-install behaviour |
-| `../../../.github/workflows/ci.yml` | Main CI. Its `windows-msi` job builds `seamly-x64.msi` and the `publish` job attaches it to the GitHub **pre-release** — this is the released Windows x64 installer (Task Installer.1.1) |
-| `../../../.github/workflows/windows-msi.yml` | Packaging-only workflow, path-filtered to this directory, producing `seamly-x64.msi` / `seamly-arm64.msi` artifacts for **both** architectures. Its x64 build steps are duplicated in `ci.yml`'s `windows-msi` job — **keep the two in step** |
+| `../../../.github/workflows/ci.yml` | The only CI route to a Windows package. Its `windows-msi` job is a matrix over `arch` that builds `seamly-x64.msi` and `seamly-arm64.msi`, and the `publish` job attaches both to the GitHub **pre-release** (Tasks Installer.1.1 and Installer.1.2). A packaging-only `windows-msi.yml` duplicated this job until 2026-08-11; it is deleted, so an edit in this directory now runs the full CI suite |
 
 ## Key decisions
 
@@ -122,7 +121,9 @@ Everything below is appearance or wizard flow, which neither script can see:
 
 ## arm64
 
-seamly2d/seamlyme cross-compile for arm64 in CI exactly as in `ci.yml`'s windows job (the `win64_msvc2022_arm64_cross_compiled` Qt kit + `host-qmake` — since Task Installer.1.1 that job is arm64-only and still builds the **NSIS** installer, which stays the released arm64 package until Task Installer.1.2), and the arm64 MSI is produced from those trees with `wix build -arch arm64` by `windows-msi.yml`. SeamlyLayout has no arm64 build yet, so the arm64 MSI currently ships the two parent apps only (`-NoSeamlyLayout`); the cross-compile story for SeamlyLayout (Rust `aarch64-pc-windows-msvc` target + cxx-qt + an arm64 cross kit, which Qt does not ship with WebEngine) is documented in `.github/README-BUILDS.md`.
+All three apps build **natively** on the `windows-11-arm` runner in `ci.yml`'s `windows-msi` job — the `windows_arm64` host with the `win64_msvc2022_arm64` kit, the cargo host toolchain, and plain `qmake`. Nothing is cross-compiled. `smsi.ps1` then builds the arm64 package with `wix build -arch arm64`.
+
+The arm64 MSI shipped the two parent apps only (`-NoSeamlyLayout`) until 2026-08-11, on the belief that Qt publishes no arm64 Windows WebEngine. That was true of Qt 6.8 and is false for 6.11.1; the `qt-arm64-module-probe` workflow is what verified it. Both architectures now ship all three apps.
 
 ## Code signing
 

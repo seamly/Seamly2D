@@ -28,9 +28,7 @@ on:
       - 'project-docs/**'
       - 'LICENSE'
       # Claude Code configuration. It never reaches a compiler, a linker, or
-      # the MSI, but it sits outside `project-docs/` and is not `**.md`. On
-      # 2026-08-11 a `.claude/settings.json` edit rode along with a docs commit
-      # and started a ~50-minute run.
+      # the MSI, but it sits outside `project-docs/` and is not `**.md`.
       - '.claude/**'
       - '.vscode/**'
   pull_request:
@@ -235,7 +233,11 @@ jobs:
   # smsi.ps1 invocation — each differs only in the runner, the MSVC arch, and
   # the Qt host/arch names.
   #
-  # windows-msi.yml file is deprecated and will be removed once testing complete.
+  # This is the ONLY CI route to a Windows package. The packaging-only
+  # windows-msi.yml that carried a duplicate of these steps was deleted on
+  # 2026-08-11 (Task InstWinX64.1.3.2), so an edit under
+  # scripts/packaging/windows/ now runs this whole suite instead of a
+  # path-filtered packaging job.
   # ---------------------------------------------------------------------------
   windows-msi:
     if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate'

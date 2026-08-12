@@ -145,7 +145,7 @@ defineTest(forceCopyToDestdir) {
 # exes cannot start — and which the MSI packaging script would ship verbatim.
 #
 # x64 and arm64 are handled IDENTICALLY, with no --qtpaths flag, because every
-# Windows build is NATIVE: ci.yml and windows-msi.yml build x64 on
+# Windows build is NATIVE: ci.yml's windows-msi job builds x64 on
 # windows-latest and arm64 on windows-11-arm, each installing its own host kit
 # (win64_msvc2022_64 / win64_msvc2022_arm64). Nothing is cross-compiled, so the
 # windeployqt qtPrepareTool() picks is always an executable the runner can run

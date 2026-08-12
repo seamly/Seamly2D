@@ -140,16 +140,17 @@ The verification of a real install (clean machine, **not yet run** — Task 13's
 .\scripts\packaging\windows\smsi.ps1 -Arch arm64 -NoSeamlyLayout   # needs arm64 build trees
 ```
 
-seamly2d/seamlyme build natively on the `windows-11-arm` runner in CI
-(`windows-msi.yml`) — nothing is cross-compiled; SeamlyLayout
-has no arm64 build yet, so the arm64 MSI ships the two parent apps only
-(`-NoSeamlyLayout`). Not built on this machine (no arm64 build trees present).
+All three apps build natively on the `windows-11-arm` runner in CI
+(`ci.yml`'s `windows-msi` job) — nothing is cross-compiled. The arm64 MSI
+shipped the two parent apps only (`-NoSeamlyLayout`) until 2026-08-11; Qt
+6.11.1 publishes an arm64 WebEngine, so it now ships all three. Not built on
+this machine (no arm64 build trees present).
 
 ---
 
 ## 5. CI equivalent
 
-`.github/workflows/windows-msi.yml` runs the same `smsi.ps1` against its
+`ci.yml`'s `windows-msi` job runs the same `smsi.ps1` against its
 in-source CI build output (matrix x64/arm64), installs the required Qt kits,
 signs the MSI with `jsign`/Google Cloud KMS when the `SEAMLY_SIGNING_*` secrets
 are present (unsigned otherwise), and uploads the MSI artifact.

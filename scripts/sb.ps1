@@ -7,7 +7,7 @@
 # **  "seamly build" — build the whole Seamly app family locally in release
 # **  configuration: seamly2d + seamlyme via qmake (shadow-built into build\)
 # **  and SeamlyLayout via CMake/Cargo (src\app\seamlylayout\build.ps1).
-# **  Mirrors what .github\workflows\windows-msi.yml does in CI, and produces
+# **  Mirrors what ci.yml's windows-msi job does in CI, and produces
 # **  exactly the trees scripts\packaging\windows\smsi.ps1 expects by default,
 # **  so `sb.ps1` followed by `smsi.ps1` yields the family MSI.
 # **
@@ -52,7 +52,7 @@
     Sharing one Qt release (6.11.1, Task 30) is what lets the resulting trees
     be packaged into a single MSI with one shared Qt runtime; it does not make
     them one build. This script is the local equivalent of the two build steps
-    in .github\workflows\windows-msi.yml.
+    in ci.yml's windows-msi job.
 
     Toolchain is auto-detected and the script fails early naming whatever is
     missing:
@@ -316,7 +316,7 @@ if ($SkipParents) {
     # pitfalls). vcvars output is discarded: it only prints a banner plus a
     # harmless vswhere warning, and failures are still caught via exit code.
     #
-    # CONFIG+=noTests matches ci.yml's and windows-msi.yml's release build - the
+    # CONFIG+=noTests matches ci.yml's release build - the
     # unit tests are built and run by scripts\st.ps1, not here.
     $batch = Join-Path $buildDir 'sb-build.cmd'
     @"

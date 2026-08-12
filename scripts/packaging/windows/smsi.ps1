@@ -8,7 +8,7 @@
 # **  SeamlyLayout) and build the Windows MSI installer from
 # **  scripts\packaging\windows\seamly-family.wxs with the WiX toolset
 # **  Used both locally (against the release build trees) and by the
-# **  .github\workflows\windows-msi.yml CI workflow (against the in-source
+# **  ci.yml windows-msi job (against the in-source
 # **  CI build output), following the scripts\sd.ps1 precedent.
 # **
 # ** @copyright
@@ -144,8 +144,8 @@ param(
     # parameter, and used in exactly one place below, so the name lives here
     # rather than being repeated: renaming this directory on disk used to mean
     # hunting literals through the script, the docs and the CI workflow. The
-    # workflow publishes scripts/<this>/<arch>/Seamly-<arch>.msi, so a change
-    # here has to be mirrored in .github/workflows/windows-msi.yml.
+    # workflow publishes scripts/<this>/<arch>/seamly-<arch>.msi, so a change
+    # here has to be mirrored in ci.yml's windows-msi job.
     [string]$OutputDirName = 'seamly-msi'
 )
 

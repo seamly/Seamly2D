@@ -35,7 +35,7 @@ Each leg installs one Qt 6.11.1 kit, builds the apps, then runs [`smsi.ps1`](../
 
 **arm64 ships all three apps as of 2026-08-11** (commit `fba962c4d8`). It previously shipped the two parents only (`-NoSeamlyLayout`, `qtmultimedia` alone), on the belief that Qt publishes no arm64 Windows WebEngine — true of Qt 6.8, **false for 6.11.1**. The `qt-arm64-module-probe` workflow verifies this at every Qt bump; do not re-assert the claim without re-running it.
 
-**Why the steps are inline here rather than reused from `windows-msi.yml`:** the `publish` job releases these `.msi` files, so they have to be built from the same commit, in the same run, as every other release artifact. `windows-msi.yml` still rebuilds the packages on its own path-filtered triggers when only the packaging inputs change, without dragging the whole of CI along. **The two copies of the build steps must be kept in step** — the job here is `windows-msi.yml`'s `msi` job verbatim, minus its own version step.
+**These steps live here and nowhere else.** The `publish` job releases these `.msi` files, so they must be built from the same commit, in the same run, as every other release artifact. A second packaging-only workflow, `windows-msi.yml`, used to carry a duplicate of these steps on a `scripts/packaging/windows/**` path trigger; it was deleted on 2026-08-11 (Task InstWinX64.1.3.2) because it built both packages a second time on every packaging edit and its copy drifted. A `.wxs` or `smsi.ps1` change now runs the full CI suite — that is the trade, and it is the only copy to maintain.
 
 ### [SeamlyLayout CI](seamlylayout-ci.yml) - SeamlyLayout build + test (Qt 6.11)
 
@@ -52,22 +52,9 @@ Each leg installs one Qt 6.11.1 kit, builds the apps, then runs [`smsi.ps1`](../
 
 **Consolidation, re-evaluated (Task 30)**: the differing Qt pins used to be the blocker for merging this job into `ci.yml`. That is resolved, but the merge was **deliberately not made** — different build systems and different path filters mean folding them together would rebuild the parent apps on every layout-only change for no benefit. Revisit only if the parent apps also move to CMake.
 
-### [Windows MSI](windows-msi.yml) - Bundled WiX `.msi` installer (Task 13)
+### Windows MSI — removed 2026-08-11
 
-**Triggers**: pushes to `develop` / `run-seamlyLayout` that touch `scripts/packaging/windows/**` (the WiX source, `license.rtf`, and the `smsi.ps1` driver all live here) or the workflow file; pull requests touching the same paths; and manual dispatch. Path filters keep it from running on unrelated changes.
-
-**Purpose**: builds the Windows **MSI installer** that ships the whole Seamly app family — `seamly2d`, `seamlyme`, and `SeamlyLayout` — in one bundled package **per architecture** (x64 and arm64), using the WiX toolset from [`seamly-family.wxs`](../../scripts/packaging/windows/seamly-family.wxs) via [`scripts/packaging/windows/smsi.ps1`](../../scripts/packaging/windows/smsi.ps1). The hands-on build/test reference is [`scripts/packaging/windows/README.md`](../../scripts/packaging/windows/README.md).
-
-**Why it is separate from [CI](ci.yml)**: it only runs when the packaging inputs change, so a `seamly-family.wxs` or `smsi.ps1` edit gets a full x64 **and** arm64 package check without waiting on the rest of CI. `ci.yml` has its own `windows-msi` job carrying **the same build steps for both arches**, because the artifacts it publishes must come from the same commit and run as every other release artifact — **keep the two in step when either changes**. Both `.msi` files are the released Windows installers; NSIS is retired entirely.
-
-**What it does** (matrix: `x64`, `arm64`):
-
-1. Installs **one** Qt 6.11.1 kit for all three apps (Task 30 — it used to install two kits in a carefully ordered dance so the parent `qmake` would not bind to SeamlyLayout's Qt) plus MSVC (`ilammy/msvc-dev-cmd`), Rust and Ninja. Both legs take the identical module set: `qtmultimedia qtwebengine qtwebchannel qtpositioning`.
-2. Builds `seamly2d.exe` + `seamlyme.exe` (qmake/nmake) and `SeamlyLayout.exe` (CMake release preset). **Every leg is native** — x64 on `windows-latest`, arm64 on `windows-11-arm` with the `windows_arm64` host kit; nothing is cross-compiled.
-3. Runs `scripts/packaging/windows/smsi.ps1` to stage the **single shared Qt runtime** and build the MSI with WiX **v6** (v7 is gated behind an OSMF EULA, error `WIX7015`). **Both arches ship all three apps** — the same `smsi.ps1` invocation, no `-NoSeamlyLayout`.
-4. Signs `scripts/seamly-msi/<arch>/seamly-<arch>.msi` with `jsign` (Google Cloud KMS, same as the NSIS exe), guarded on the `SEAMLY_SIGNING_PROJECT_ID` secret so untrusted PR runs skip it, and uploads the MSI as a build artifact.
-
-**Consolidation (Tasks Installer.1.1 and Installer.1.2)**: `ci.yml` now builds and releases **both** `.msi` files itself. This workflow is kept only for packaging-only checks and is marked deprecated in `ci.yml` — remove it once that arrangement has been exercised.
+`windows-msi.yml` built the same two `.msi` packages on a `scripts/packaging/windows/**` path trigger. Task InstWinX64.1.3.2 deleted it: `ci.yml`'s `windows-msi` job (described above) already builds both arches and feeds `publish`, so the file only duplicated the work and gave the build steps a second copy to drift out of step. The Windows packaging description now lives in the [CI](ci.yml) section above.
 
 ## Code Signing Workflow
 
@@ -103,5 +90,5 @@ To restore normal signing after emergency:
 - [Install Qt](https://github.com/marketplace/actions/install-qt). Referenced as `jurplel/install-qt-action`, installs the Qt platform across all the three different runners (ubuntu-18.04, macos-latest, windows-2022) consistently. Internally it uses the [aqtinstall](https://github.com/miurahr/aqtinstall/) installer written in Python. Worth knowing if those errors propagate up through the GitHub action.
 - [Enable Developer Command Prompt](https://github.com/marketplace/actions/enable-developer-command-prompt) Referenced as `ilammy/msvc-dev-cmd`, sets up the command line environment on the windows-2022 runner (`PATH` and such) to expose Microsoft Visual C++.
 - [softprops/action-gh-release](https://github.com/marketplace/actions/gh-release). Referenced as `softprops/action-gh-release`, creates a release and uploads all artifacts to that release.
-- [WiX Toolset](https://wixtoolset.org/) Not an action — installed in [ci.yml](ci.yml) and [windows-msi.yml](windows-msi.yml) as the `wix` .NET global tool (pinned to `6.*`; v7 is gated behind an Open Source Maintenance Fee EULA, error `WIX7015`). It builds the bundled Seamly family MSI from [`scripts/packaging/windows/seamly-family.wxs`](../../scripts/packaging/windows/seamly-family.wxs); the `WixToolset.UI.wixext` extension (version-matched to the core tool) supplies the directory-chooser installer UI, and `WixToolset.Util.wixext` supplies the `RemoveFolderEx` used to clear a pre-MSI installation.
+- [WiX Toolset](https://wixtoolset.org/) Not an action — installed in [ci.yml](ci.yml) as the `wix` .NET global tool (pinned to `6.*`; v7 is gated behind an Open Source Maintenance Fee EULA, error `WIX7015`). It builds the bundled Seamly family MSI from [`scripts/packaging/windows/seamly-family.wxs`](../../scripts/packaging/windows/seamly-family.wxs); the `WixToolset.UI.wixext` extension (version-matched to the core tool) supplies the directory-chooser installer UI, and `WixToolset.Util.wixext` supplies the `RemoveFolderEx` used to clear a pre-MSI installation.
 - **NSIS is retired** (Task Installer.1.2, 2026-08-11). No workflow runs `makensis` any more; Windows ships `seamly-x64.msi` and `seamly-arm64.msi` only. [`dist/seamly2d-installer.nsi`](/dist/seamly2d-installer.nsi) is kept unbuilt, as the record of what a pre-MSI installation left on disk for the MSI's removal authoring to clean up.

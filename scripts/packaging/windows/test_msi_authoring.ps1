@@ -19,7 +19,7 @@
 # **  through by a human.
 # **
 # **  Run automatically by smsi.ps1 after `wix msi validate`, so it also runs in
-# **  CI for both architectures via .github\workflows\windows-msi.yml.
+# **  CI for both architectures via ci.yml's windows-msi job.
 # **
 # **  @copyright
 # **  This source code is part of the Seamly project, a suite of apparel CAD
