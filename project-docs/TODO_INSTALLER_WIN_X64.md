@@ -90,8 +90,8 @@ Configure WiX v6 using `scripts/packaging/windows/seamly-family.wxs`
 > undefined behaviour.
 >
 > Everything that does not depend on the wizard works and is verified. What is
-> blocked is only the interactive prompting. Fix the SpawnDialog defect
-> (tracked in `TODO_MIGRATE.md`) before ticking 1.2.1-1.2.3.
+> blocked is only the interactive prompting. Do **Task InstWinX64.12** first —
+> it replaces the stock dialog set and removes the cause. Then tick 1.2.1-1.2.3.
     - [x] InstWinX64.1.2.1 - Default user directory to `C:\Users\<user>\SeamlyData`.
     --> `SEAMLYDATAROOT`, defaulted from `%USERPROFILE%` in the **UI sequence only**: the elevated sequence runs as SYSTEM, whose `%USERPROFILE%` is not the user's
     - [x] InstWinX64.1.2.2 - Accept any drive/path, including OneDrive, Google Drive, Dropbox, external drives, and USB media; install 'SeamlyData' directory to this drive/path.
@@ -195,7 +195,7 @@ The WiX v6 MSI build needs only the `.msi`; suppress the optional linker databas
 - [x] InstWinX64.3.5 Add optional Seamly2D and SeamlyMe desktop shortcuts through `SEAMLYDESKTOPSHORTCUTS`; do not offer SeamlyLayout or taskbar shortcuts.
 - [x] InstWinX64.3.6 Configure and verify one per-machine UAC elevation prompt.
 - [x] InstWinX64.3.7 Warn before replacing an MSI or NSIS installation.
-- [ ] InstWinX64.3.8 Make `SeamlyShortcutsDlg` appear under WiX 6; verify through authoring tests and a real wizard run.
+- [ ] InstWinX64.3.8 Make `SeamlyShortcutsDlg` appear under WiX 6; verify through authoring tests and a real wizard run. **Blocked on Task InstWinX64.12** — `WixUI_InstallDir` owns the transition out of `InstallDirDlg`, so no `Ordering` change can fix this.
 - [ ] InstWinX64.3.9 After Task InstWinX64.6, run the `Removed` phase and verify removal of apps, shortcuts, associations, registry entries, and ARP metadata while preserving user data.
 - [ ] InstWinX64.3.10 Complete the remaining branding, dialog, and ARP corrections in Tasks InstWinX64.6–InstWinX64.10.
 - [x] InstWinX64.3.11 Document the installer flow and verification procedure in `scripts/packaging/windows/README.md` and `README_WINDOWS_BUILD.md`.
@@ -285,3 +285,40 @@ Revisit -- if we update each separately in the future should these tasks change?
 - [ ] InstWinX64.11.3 Define consistent first-run behavior for Seamly2D, SeamlyMe, and SeamlyLayout.
 - [ ] InstWinX64.11.4 Repeat the test with `.smis` and `.smms` files.
 - [ ] InstWinX64.11.5 Verify the requested document loads after the first-run flow.
+
+## Task InstWinX64.12 — Replace `WixUI_InstallDir` with a custom dialog set
+
+`WixUI_InstallDir` owns the transitions out of `InstallDirDlg`. Its `NewDialog
+VerifyReadyDlg` row sits at Order 4 with condition `1`, so no page of ours can
+replace it, and `SpawnDialog` is the only mechanism left. That is the root cause
+of the defect in InstWinX64.3.8 and the blocker on InstWinX64.1.2.
+
+The built-in Next rows occupy Orders 1, 3 and 4. Below the Order 4 `NewDialog`
+only Orders 0 and 2 are free — two slots for three pages. The ordering ties are
+forced. No arrangement of `Ordering` values can remove them, so the mechanism
+must change, not the numbers.
+
+A custom dialog set owns its whole `NewDialog` chain. Every transition is then
+ours and defined, there is no competing Order 4 row, and the Cancel/Back/Continue
+flow becomes straightforward to author.
+
+- [ ] InstWinX64.12.1 Author a custom `UI` element that defines the full dialog
+  chain: welcome → license → previous-install warning → program directory →
+  data root → copy existing work → shortcuts → ready → progress → exit.
+- [ ] InstWinX64.12.2 Reuse the stock WiX dialogs where they need no change.
+  Reference `WixUI_Common` for the shared dialogs (`BrowseDlg`, `CancelDlg`,
+  `ErrorDlg`, `FilesInUse`, …) instead of rewriting them.
+- [ ] InstWinX64.12.3 Convert `SeamlyDataDirDlg`, `SeamlyDataMigrateDlg` and
+  `SeamlyShortcutsDlg` from `SpawnDialog` to `NewDialog` transitions.
+- [ ] InstWinX64.12.4 Author `Back` on every page, and `Cancel` through the
+  stock `CancelDlg` confirmation.
+- [ ] InstWinX64.12.5 Update `test_msi_authoring.ps1`. The existing assertion
+  "SpawnDialog must have a lower Ordering than every NewDialog" no longer
+  applies once no page uses `SpawnDialog`. Replace it with assertions on the
+  `NewDialog` chain itself.
+- [ ] InstWinX64.12.6 Verify with a real interactive install: every page
+  displays, in order, and `Back` returns to the previous page.
+- [ ] InstWinX64.12.7 Tick InstWinX64.1.2.1-1.2.3 and InstWinX64.3.8 once the
+  interactive run passes.
+- [ ] InstWinX64.12.8 Update `INSTALL_DECISION_FLOW.md` and
+  `scripts/packaging/windows/README.md` with the new page order.

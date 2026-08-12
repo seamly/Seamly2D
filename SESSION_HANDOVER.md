@@ -8,44 +8,30 @@ re-accumulate finished-session narrative in this file.
 
 ## PICK UP HERE (2026-08-11, data-root append + SpawnDialog investigation)
 
-**Done: the data root now appends a fixed leaf.** `SEAMLYDATAPARENT` is what the
+**Next task: InstWinX64.12** — replace `WixUI_InstallDir` with a custom dialog
+set. Written up with subtasks in `TODO_INSTALLER_WIN_X64.md`. It unblocks
+InstWinX64.1.2.1-1.2.3 and InstWinX64.3.8.
+
+**Done: the data root appends a fixed leaf.** `SEAMLYDATAPARENT` is what the
 user picks (default `%USERPROFILE%`); `SEAMLYDATAROOT` is that parent plus a
-fixed `SeamlyData` leaf, exactly as `INSTALLFOLDER` is `SeamlyApps` under
-`ProgramFiles64Folder`. Choosing `E:\` gives `E:\SeamlyData`. Setting
-`SEAMLYDATAROOT` directly still overrides the composition. This closes the open
-question from the previous session. 96 authoring assertions pass, two of them
-new and pinning the composition — if the leaf is ever folded back into the
-parent, a user who picks a drive root gets patterns loose in that root.
+fixed `SeamlyData` leaf. `E:\` gives `E:\SeamlyData`. Setting `SEAMLYDATAROOT`
+directly still overrides the composition. 96 authoring assertions pass, two new
+ones pinning the composition. Merged and pushed (`4a8c0a07dc..37fb33f1f9`).
 
-**Not done: the SpawnDialog defect. Here is what the investigation established,
-so the next attempt does not repeat it.**
+**Not done: the SpawnDialog defect.** The built-in `InstallDirDlg` Next rows
+occupy Orders 1, 3 and 4. Below the Order 4 `NewDialog` only 0 and 2 are free —
+two slots for three pages. The ties are forced. No arrangement of `Ordering`
+values can fix them; the mechanism has to change, not the numbers.
 
-The built-in `InstallDirDlg` Next rows occupy Orders 1, 3 and 4. Below the
-Order 4 `NewDialog` only **0 and 2 are free — two slots for three pages**. The
-ordering ties are therefore forced, not careless, and *no* arrangement of
-Ordering values can fix them. That is the concrete finding: the mechanism has to
-change, not the numbers.
-
-Moving the three pages to Orders 5-7 was tried and **reverted**. It does remove
-every tie, and `NewDialog`/`EndDialog` are deferred until all of a control's
-events are processed, so the pages should still run. But it directly contradicts
-a deliberate existing assertion in `test_msi_authoring.ps1` ("SpawnDialog must
-have a lower Ordering than every NewDialog event"), and nothing available here
-can settle which reading is correct — that needs an interactive install, which
-cannot be driven from this session. Shipping an unverified contradiction was the
-wrong trade, so the tree is back to Orders 1-3 with the finding written into the
-comment beside the `Publish` rows.
-
-**Recommended next step: replace `WixUI_InstallDir` with a custom dialog set**
-that owns its whole `NewDialog` chain. Then every transition is ours and
-defined, there is no competing Order 4 row with condition `1`, and the user's
-Cancel/Back/Continue flow becomes straightforward to author. This is the tracked
-subtask in `TODO_MIGRATE.md`.
+Orders 5-7 was tried and **reverted**. It removes every tie, but it contradicts
+a deliberate assertion in `test_msi_authoring.ps1` ("SpawnDialog must have a
+lower Ordering than every NewDialog"), and only an interactive install can
+settle which reading is right. The tree is back to Orders 1-3, with the finding
+in the comment beside the `Publish` rows.
 
 **Also this session:** `.claude/settings.json` gained the nuget and dotnet
-domains in the sandbox allowlist, so the WiX toolchain can be installed. The
-`Bash`/`PowerShell` permission rules were already maximal (`Bash(*)`,
-`PowerShell(*)`); `permissions.defaultMode` remains unset.
+sandbox domains, so the WiX toolchain can be installed. `Bash`/`PowerShell`
+rules were already maximal; `permissions.defaultMode` remains unset.
 
 ### Earlier the same day
 
