@@ -462,10 +462,22 @@ foreach ($service in @('OneDrive', 'Dropbox', 'Google Drive', 'iCloud')) {
 }
 
 # InstWinX64.1.2.1 - 1.2.3. The data root is a directory id so it can be browsed
-# in the UI and set on the command line for an unattended install.
-Assert-That -Name 'the user-data root is a settable directory' `
-    -Succeeded (@($directories | Where-Object { $_.Directory -eq 'SEAMLYDATAROOT' }).Count -eq 1)
-foreach ($property in @('SEAMLYDATAROOT', 'SEAMLYCOPYUSERDATA')) {
+# in the UI and set on the command line for an unattended install. The user
+# picks the PARENT and Setup appends a fixed SeamlyData leaf, so choosing E:\
+# yields E:\SeamlyData rather than E:\ — the same shape as SeamlyApps under
+# ProgramFiles64Folder. Assert the composition, not just the presence: if the
+# leaf is ever folded back into the parent, a user who picks a drive root gets
+# their patterns loose in the root of that drive.
+$dataRoot = @($directories | Where-Object { $_.Directory -eq 'SEAMLYDATAROOT' })
+Assert-That -Name 'the user-data root is a settable directory' -Succeeded ($dataRoot.Count -eq 1)
+Assert-That -Name 'the data root appends a fixed SeamlyData leaf to a user-chosen parent' `
+    -Succeeded ($dataRoot.Count -eq 1 -and
+                $dataRoot[0].DefaultDir -match 'SeamlyData' -and
+                $dataRoot[0].Parent -eq 'SEAMLYDATAPARENT') `
+    -Detail "DefaultDir '$(if ($dataRoot.Count) { $dataRoot[0].DefaultDir } else { '<nothing>' })', parent '$(if ($dataRoot.Count) { $dataRoot[0].Parent } else { '<nothing>' })'"
+Assert-That -Name 'the data-root parent is itself replaceable' `
+    -Succeeded (@($directories | Where-Object { $_.Directory -eq 'SEAMLYDATAPARENT' -and $_.Parent -eq 'TARGETDIR' }).Count -eq 1)
+foreach ($property in @('SEAMLYDATAROOT', 'SEAMLYDATAPARENT', 'SEAMLYCOPYUSERDATA')) {
     Assert-That -Name "$property is a secure custom property" -Succeeded ($secure -like "*$property*")
 }
 # The default is computed in the UI sequence only: the execute sequence runs as
@@ -475,9 +487,9 @@ $uiActions = @(Get-MsiRows -Sql "SELECT ``Action`` FROM ``InstallUISequence``" -
 $executeActions = @(Get-MsiRows -Sql "SELECT ``Action`` FROM ``InstallExecuteSequence``" -Columns 'Action' |
     ForEach-Object { $_.Action })
 Assert-That -Name 'the data-root default is computed in the UI sequence' `
-    -Succeeded ($uiActions -contains 'SetSEAMLYDATAROOT')
+    -Succeeded ($uiActions -contains 'SetSEAMLYDATAPARENT')
 Assert-That -Name 'the data-root default is NOT computed in the elevated sequence' `
-    -Succeeded (-not ($executeActions -contains 'SetSEAMLYDATAROOT'))
+    -Succeeded (-not ($executeActions -contains 'SetSEAMLYDATAPARENT'))
 Assert-That -Name 'the chosen data root is recorded for the apps to read' `
     -Succeeded (@($registry | Where-Object { $_.Root -eq '2' -and $_.Key -eq 'SOFTWARE\Seamly\Seamly2D' -and $_.Name -eq 'DataRoot' }).Count -eq 1)
 

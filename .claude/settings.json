@@ -236,7 +236,11 @@
       "allowedDomains": [
         "github.com",
         "*.github.com",
-        "*.githubusercontent.com"
+        "*.githubusercontent.com",
+        "api.nuget.org",
+        "*.nuget.org",
+        "dotnetcli.azureedge.net",
+        "*.dot.net"
       ]
     }
   },
