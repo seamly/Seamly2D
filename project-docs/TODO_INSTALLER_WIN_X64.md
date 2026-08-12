@@ -1,324 +1,230 @@
-# TODO — Create the combined Windows 11 x64 MSI installer for Seamly2D, SeamlyMe, and SeamlyLayout
+# TODO — Windows x64 MSI Installer
 
-Tasks for creating an .msi file for installation on a user's amd64 computer with Windows 10 or Windows 11.
+Create one WiX v6 MSI for Seamly2D, SeamlyMe, and SeamlyLayout on Windows 10/11 x64.
 
-Check off subtasks as they are accomplished; when every subtask of a task is complete, move the task to `project-docs/TODO_COMPLETED.md`.
+- Prefix: `InstWinX64.`
+- Check completed subtasks.
+- Move completed tasks to `project-docs/TODO_COMPLETED.md`.
+- Update `TODO_INSTALLER.md` when all tasks are complete.
+- Ask the user only when a decision is required.
+- Build in `.github/workflows/ci.yml`.
+- Author in `scripts/packaging/windows/seamly-family.wxs`.
+- Replace the x64 NSIS package with the MSI.
+- Keep arm64 NSIS until SeamlyLayout supports arm64.
+- Default programs to `C:\Program Files\SeamlyApps`.
+- Ask before copying existing user data.
 
-If decisions are required for any portion of a task or subtask, present the user with radio buttons to select options.
+## InstWinX64.0 — Verify Baseline MSI Build
 
-Tasks and subtasks in this file are numbered and have a prefix of `InstWinX64.`
+Complete before other tasks.
 
-When all tasks are completed and have been moved to TODO_COMPLETED.md, update TODO_INSTALLER.md to show completion.
+- [x] **InstWinX64.0.1** Verify the x64 MSI builds in CI.
+- [ ] **InstWinX64.0.2** Get user confirmation.
 
-Notes:
+### Result — 2026-08-11
 
-- **Data-root relocation asks first** — prompt Y/N before copying existing data
-   files to a new directory location.
-- **The program directory in Windows is `C:\Program Files\` + `Seamly`** — show the user
-   the final assembled path and take OK/Cancel, rather than editing a box whose
-   contents differ from the path it applies.
-- **The MSI steps are inlined in `ci.yml`**.
-- **The x64 `.msi` replaces the NSIS Windows zip** rather than shipping
-    alongside it. NSIS stays for arm64 until Task Installer.1.2, because there is
-    still no arm64 SeamlyLayout build.
-- build occurs in Github on pull request to run-seamlyLayout branch. .github/workflows/ci.yml is the build file of record.
-- update the installer features after the Windows 11 x64 .msi can be built on GitHub without error
+Verified commit `361b743fa0`.
 
-## Task InstWinX64.0 - Build current .msi on Github workflows without error
+- CI run `31461308276`: passed.
+- MSI run `31461308379`: passed.
+- `wix msi validate`: passed.
+- `test_msi_authoring.ps1`: passed.
+- Output: `seamly-x64.msi`, 163.5 MB.
+- Artifact upload: passed.
+- Package includes all three apps and QML runtime.
+- Signing skipped because `SEAMLY_SIGNING_PROJECT_ID` is unset.
 
-Complete this task and move it to TODO_COMPLETED.md before implementing remaining tasks in this file
+Known non-blocking warnings:
 
-- [x] check that the previous workflow run on windows completed the Windows 11 x64 .msi build without error; if errors then update ci.yml, scripts, etc. as needed to eliminate build errors; repeat until no errors
-- [ ] confirm from the user that the Windows 11 x64.msi was built without error
+- `WIX1076 / ICE61`: expected with `AllowSameVersionUpgrades="yes"`.
+- `windeployqt`: unused `qtposition_nmea.dll` lacks `Qt6SerialPort.dll`.
 
-### Result (2026-08-11)
+## InstWinX64.1 — Replace WiX Dialog Framework
 
-The x64 MSI builds clean. No change to `ci.yml` or the packaging scripts was
-needed. Verified on commit `361b743fa0`:
+Blocks installer path dialogs and `SeamlyShortcutsDlg`.
 
-- CI run [`31461308276`](https://github.com/seamly/Seamly2D/actions/runs/31461308276)
-  — job `Windows: Build MSI (x64)`, success in 38m12s.
-- Windows MSI run [`31461308379`](https://github.com/seamly/Seamly2D/actions/runs/31461308379)
-  — job `Windows: Build MSI (x64)`, success in 31m18s.
+`WixUI_InstallDir` owns the unconditional transition from `InstallDirDlg` to `VerifyReadyDlg`. Replace it with a custom dialog chain.
 
-Inside the x64 job: `wix msi validate` passed, `test_msi_authoring.ps1` reported
-`MSI authoring check passed.`, the package came out as
-`seamly-x64.msi` (163.5 MB), and `actions/upload-artifact` uploaded it. All
-three apps are in it — the log links `SeamlyLayout.exe` and deploys
-`seamlylayout.exe` with its QML runtime beside seamly2d and seamlyme.
+- [ ] **InstWinX64.1.1** Define: Welcome → License → Previous Install → Program Directory → Data Root → Data Migration → Shortcuts → Ready → Progress → Exit.
+- [ ] **InstWinX64.1.2** Reuse unchanged stock dialogs through `WixUI_Common`.
+- [ ] **InstWinX64.1.3** Replace custom `SpawnDialog` transitions with `NewDialog`.
+- [ ] **InstWinX64.1.4** Add Back navigation and stock `CancelDlg`.
+- [ ] **InstWinX64.1.5** Replace obsolete `SpawnDialog` assertions with dialog-chain assertions.
+- [ ] **InstWinX64.1.6** Verify every page and Back transition in a real install.
+- [ ] **InstWinX64.1.7** Update `INSTALL_DECISION_FLOW.md` and `scripts/packaging/windows/README.md`.
 
-Two warnings appear in the job. Both are known and neither fails the build:
+## InstWinX64.2 — Configure Installation Paths
 
-- `WIX1076: ICE61 ... The Maximum version is not less than the current product`.
-  `MajorUpgrade` carries `AllowSameVersionUpgrades="yes"` on purpose, so
-  same-minute rebuilds still upgrade. ICE61 always fires on that authoring.
-- `windeployqt`: `Cannot determine dependencies of ... qtposition_nmea.dll`,
-  because the kit has no `Qt6SerialPort.dll`. The NMEA position plugin is not
-  used by any of the three apps.
+### Program Directory
 
-The signing steps did not run. They are gated on `SEAMLY_SIGNING_PROJECT_ID`,
-which is not set in this repository — see Task InstWinX64.2.5.
+- [x] **InstWinX64.2.1** Default to `C:\Program Files\SeamlyApps`.
+- [x] **InstWinX64.2.2** Resolve shortcuts, associations, registry values, and SeamlyLayout through `[INSTALLFOLDER]`.
+- [x] **InstWinX64.2.3** Accept local and removable paths.
+- [x] **InstWinX64.2.4** Reject OneDrive, Dropbox, Google Drive, iCloud, and Box Sync program paths.
+- [x] **InstWinX64.2.5** Support interactive selection and `INSTALLFOLDER=`.
 
-## Task InstWinX64.1 — Windows 11 x64 .msi installer
+Verify `HKLM\SOFTWARE\Seamly\Seamly2D\InstallPath` with `test_msi_install.ps1`.
 
-### Implementation
+### User-Data Directory
 
-Build one WiX v6 MSI per architecture containing Seamly2D, SeamlyMe, SeamlyLayout, and their dependencies. Store application state in the appropriate AppData directories; user-data paths and migration are covered by Task InstWinX64.1
-Configure WiX v6 using `scripts/packaging/windows/seamly-family.wxs`
+Interactive verification is blocked by InstWinX64.1.
 
-- [ ] **InstWinX64.1.0** - Create installer
-  - [x] **InstWinX64.1.1 - Program directory** — authored 2026-08-11, awaiting a real install
-    - [x] InstWinX64.1.1.1 Default program directory to `C:\Program Files\SeamlyApps`
-    --> already authored that way (`ProgramFiles64Folder` + `Name="SeamlyApps"`); kept. `Program Files (x86)` was considered and rejected — it is Windows' tree for **32-bit** programs, every binary here is x64 or arm64, and the two architectures would resolve it differently
-    - [x] InstWinX64.1.1.2 Update `seamly-family.wxs` and all shortcuts, file associations, registry values, and SeamlyLayout paths.
-    --> already correct: every shortcut, association and registry value resolves through `[INSTALLFOLDER]`, and SeamlyLayout installs beside the parents (Task 30 flat layout). **How the user confirms it:** the installer writes the chosen path to `HKLM\SOFTWARE\Seamly\Seamly2D\InstallPath`, and `test_msi_install.ps1` checks it on a real machine. `test_msi_authoring.ps1` now also asserts the folder name and its parent, so a silent rename fails CI
-    - [x] InstWinX64.1.1.3 - Accept any local or removable drive/path for program directory; reject cloud-synced locations; install 'SeamlyApps' directory to the selected drive/path.
-    --> a `Launch` condition rejects any path containing OneDrive, Dropbox, Google Drive, iCloud or Box Sync. Written as a launch condition rather than a dialog check because it is the only form that also blocks a silent `/qn` install
-    - [x] InstWinX64.1.1.4 - Add a `Change` button and silent-install property.
-    --> `WixUI_InstallDir` already supplies the browse button; the silent-install property is `INSTALLFOLDER=`
-  - [ ] **InstWinX64.1.2 - User-data directory** — authoring done 2026-08-11, but **BLOCKED on the SpawnDialog defect below**
+- [x] **InstWinX64.2.6** Default `SEAMLYDATAROOT` to `%USERPROFILE%\SeamlyData` in the UI sequence.
+- [x] **InstWinX64.2.7** Accept local, removable, and cloud paths.
+- [x] **InstWinX64.2.8** Support `BrowseDlg` and `SEAMLYDATAROOT=`.
+- [x] **InstWinX64.2.9** Require opt-in before migration.
+- [x] **InstWinX64.2.10** Copy without overwrite or source deletion.
+- [ ] **InstWinX64.2.11** Persist program and data paths through repair and upgrade.
+- [ ] **InstWinX64.2.12** Register one shared data-root setting.
+- [ ] **InstWinX64.2.13** Make all three apps honor the configured data root.
 
-> **BLOCKER, found 2026-08-11.** The two new pages are wired the same way as
-> `SeamlyShortcutsDlg`, which `INSTALL_DECISION_FLOW.md` records as a known
-> defect: it **never displays**. Dumping the built MSI's `ControlEvent` rows for
-> `InstallDirDlg`'s Next confirms why there is no alternative — the built-in
-> `NewDialog VerifyReadyDlg` sits at Order 4 with condition `1`, so no competing
-> `NewDialog` can ever be excluded, leaving `SpawnDialog` as the only mechanism.
-> The same dump also shows two ordering collisions introduced by this task:
-> `SeamlyDataDirDlg` ties with `CheckTargetPath` at Order 1, and
-> `SeamlyShortcutsDlg` ties with `SetTargetPath` at Order 3. Tied orderings are
-> undefined behaviour.
->
-> Everything that does not depend on the wizard works and is verified. What is
-> blocked is only the interactive prompting. Do **Task InstWinX64.12** first —
-> it replaces the stock dialog set and removes the cause. Then tick 1.2.1-1.2.3.
-    - [x] InstWinX64.1.2.1 - Default user directory to `C:\Users\<user>\SeamlyData`.
-    --> `SEAMLYDATAROOT`, defaulted from `%USERPROFILE%` in the **UI sequence only**: the elevated sequence runs as SYSTEM, whose `%USERPROFILE%` is not the user's
-    - [x] InstWinX64.1.2.2 - Accept any drive/path, including OneDrive, Google Drive, Dropbox, external drives, and USB media; install 'SeamlyData' directory to this drive/path.
-    --> `SeamlyDataDirDlg` now prompts for it, and it is deliberately **not** subject to the cloud-folder rejection above: syncing your own patterns is the point, only program files must stay local. **Decision to confirm:** `SEAMLYDATAROOT` holds the *whole* path, so choosing `E:\` gives `E:\`, not `E:\SeamlyData`. Auto-appending the leaf would turn a typed `E:\SeamlyData` into `E:\SeamlyData\SeamlyData`. Say if you want the append instead
-    - [x] InstWinX64.1.2.3 - Add a `Change` button and silent-install property.
-    --> `Change...` spawns WixUI's `BrowseDlg`; `SEAMLYDATAROOT=` sets it unattended. Note: `/qn` runs no UI sequence, so an unattended install must pass the value or the apps fall back to their own default
-    - [x] **InstWinX64.1.2.4 When the data root changes:**
-      - [x] InstWinX64.1.2.4.1 Explain that first run will copy existing data without deleting the source.
-      - [x] InstWinX64.1.2.4.2 Require confirmation before continuing.
-      --> `SeamlyDataMigrateDlg`, an opt-in checkbox defaulting to **off**, so an unattended install never starts moving files nobody asked about
-      - [x] InstWinX64.1.2.4.3 Copy the user data to the new directory then copy only missing installation data files; never overwrite existing destination files. -- tell the user that their old data is still where it was as a backup and that their data is now accessible in the new location.
-      --> enforced by `seamly_copy_user_data.ps1`, run as a deferred **impersonated** action (SYSTEM cannot read the user's own folders) with `Return="ignore"` (a file-copy problem must not roll back a good program install). The dialog states both halves of the reassurance in as many words. **No rollback action, on purpose:** it could only undo the copy by deleting files from a folder that may already have held the user's work, and nothing can tell those apart. The copy is additive-only, so there is nothing to undo. Verified locally: subfolders preserved, an existing destination file left byte-for-byte, source untouched, second run copies 0
-  - [ ] **InstWinX64.1.3 - file clean up**
-    - [x] InstWinX64.1.3.1 - Delete `dist/seamly2d-installer.nsi`. It is currently kept in the tree, unbuilt, with a RETIRED header: `seamly-family.wxs` cites it as the record of a pre-MSI installation's on-disk footprint, which the MSI's `RemoveFolderEx` authoring removes on upgrade. Remove the citation from `seamly-family.wxs`
-    --> user deleted the file; the two citations in `seamly-family.wxs` are now rewritten. The footprint list in that file is marked as the record — it can no longer be re-derived, so it must not be trimmed
-    - [x] InstWinX64.1.3.2 - Remove `windows-msi.yml`
-    --> confirmed
-  - [ ] **InstWinX64.1.4 - Persist both selections** and prefill them during repair or upgrade.
-  - [ ] **InstWinX64.1.5 - Register the data root** through a dedicated environment variable, registry value, or application setting so all three apps use it without prompting. Document the selected mechanism.
-  - [ ] **InstWinX64.1.6 - Add the executable and data directories to the current user’s `PATH`**, broadcast the change, and remove only installer-created entries during uninstall.
-  - [ ] **InstWinX64.1.7 - Make Seamly2D, SeamlyMe, and SeamlyLayout honor the configured data root on first run and thereafter.**
-  - [ ] **InstWinX64.1.8** - Preserve user data during uninstall; remove applications, shortcuts, registry/configuration entries, and installer-created `PATH` entries only.
-  - [ ] **InstWinX64.1.9** - Optionally offer to launch the Seamly applications after installation.
-  - [ ] **InstWinX64.1.10** - Document both prompts, silent-install properties, path registration, migration behavior, and uninstall behavior in:
-    - [ ] InstWinX64.1.10.1 `scripts/packaging/windows/README.md`
-    - [ ] InstWinX64.1.10.2 `.github/README-BUILDS.md`
-  
-### Verification
+**Decision:** `SEAMLYDATAROOT` currently stores the complete selected path. Selecting `E:\` uses `E:\`, not `E:\SeamlyData`.
 
-- [ ] **InstWinX64.1.12 Fresh install**
-  - [ ] InstWinX64.1.12.1 Programs: `C:\Program Files\SeamlyApps`
-  - [ ] InstWinX64.1.12.2 Data: `C:\Users\<user>\SeamlyData`
-- [ ] **InstWinX64.1.13 Standalone migration**
-  - [ ] InstWinX64.1.13.1 Programs: `C:\Program Files (x86)\Seamly2D` → `E:\Programs\SeamlyApps`
-  - [ ] InstWinX64.1.13.2 Data: `C:\Users\<user>\seamly2d` → `E:\SeamlyData`
-- [ ] **InstWinX64.1.14 Cloud-data migration**
-  - [ ] InstWinX64.1.14.1 Programs: `C:\Program Files\SeamlyApps`
-  - [ ] InstWinX64.1.14.2 Data: `G:\My Drive\seamly2d` → `G:\My Drive\SeamlyData`
-- [ ] **InstWinX64.1.15 For each scenario, verify:**
-  - [ ] InstWinX64.1.15.1 The installer remembers and registers both paths.
-  - [ ] InstWinX64.1.15.2 Desktop shortcuts are created.
-  - [ ] InstWinX64.1.15.3 `.sm2d`, measurement, and SVG files open in the correct app.
-  - [ ] InstWinX64.1.15.4 Existing data is copied without overwrite or deletion.
-  - [ ] InstWinX64.1.15.5 Upgrade preserves both paths.
-  - [ ] InstWinX64.1.15.6 Uninstall removes apps, shortcuts, and installer-created `PATH` entries while preserving data.
+## InstWinX64.3 — Configure Installed Applications
 
-- [ ] **InstWinX64.2.3 verify:**
+- [ ] **InstWinX64.3.1** Add executable and data directories to the current user's `PATH`.
+- [ ] **InstWinX64.3.2** Broadcast `PATH` changes.
+- [ ] **InstWinX64.3.3** Remove only installer-created `PATH` entries on uninstall.
+- [ ] **InstWinX64.3.4** Configure Start Menu shortcuts.
+- [x] **InstWinX64.3.5** Add optional Seamly2D and SeamlyMe desktop shortcuts.
+- [ ] **InstWinX64.3.6** Verify `.sm2d`, `.smis`, `.smms`, and SVG associations.
+- [ ] **InstWinX64.3.7** Optionally offer to launch apps after installation.
+- [ ] **InstWinX64.3.8** Preserve user data during uninstall.
+- [ ] **InstWinX64.3.9** Remove apps, shortcuts, associations, installer registry data, and installer-created `PATH` entries.
 
-  - Seamly2D, SeamlyMe, and SeamlyLayout Installed
-  - Qt 6.11.1 runtime, QML modules, and WebEngine
-  - App-local MSVC runtime
-  - Statically linked Rust dependencies
+## InstWinX64.4 — Separate Documents and Application State
 
-  - Start Menu shortcuts for all three apps
-  - `.sm2d`, `.smis`, and `.smms` associations
-  - In-place major upgrades
-  - Clean application uninstall
+Use `<DocumentsLocation>/Seamly` for user documents. Use platform-standard locations for configuration, cache, logs, and recovery. Migrate in application code.
 
-- [ ] **InstWinX64.2.4 Preserve all user data** during installation, upgrade, repair, and uninstall.
-- [ ] **InstWinX64.2.5 Sign MSI artifacts with `jsign`** when `SEAMLY_SIGNING_PROJECT_ID` is available.
-- [x] **InstWinX64.2.6 Support builds through:**
+- [x] **InstWinX64.4.1** Default documents to `QStandardPaths::DocumentsLocation/Seamly`.
+- [x] **InstWinX64.4.2** Support relocation through `paths/dataRoot`.
+- [x] **InstWinX64.4.3** Copy the complete legacy tree, including unknown folders.
+- [x] **InstWinX64.4.4** Merge without overwrite; verify copies; preserve source.
+- [x] **InstWinX64.4.5** Reject destinations inside the source.
+- [x] **InstWinX64.4.6** Mark migrated roots with `MIGRATED-TO-SEAMLY.txt`.
+- [x] **InstWinX64.4.7** Configure the new root only after verification.
+- [x] **InstWinX64.4.8** Seed standard subfolders.
+- [x] **InstWinX64.4.9** Test with `QTemporaryDir`.
+- [x] **InstWinX64.4.10** Verify on a real Windows profile.
+- [ ] **InstWinX64.4.11** Add progress, cancellation, or deferral for large migrations.
+- [ ] **InstWinX64.4.12** Prevent `pruneEmptyLegacyDataRoot()` from removing populated or migration-marked trees.
+- [ ] **InstWinX64.4.13** Move per-app configuration to the platform-standard configuration tree.
 
-  - Local: `scripts/packaging/windows/smsi.ps1`
-  - CI (release, x64 + arm64): `.github/workflows/ci.yml`'s `windows-msi` job — the packages the `publish` job attaches to the pre-release (Tasks Installer.1.1 and Installer.1.2). This is the only CI route; the packaging-only `windows-msi.yml` was deleted in InstWinX64.1.3.2.
+## InstWinX64.5 — Correct Application Settings
 
-- [ ] **InstWinX64.2.7 Test both architectures**, where hardware is available:
+Eight `VSettings` accessors use `%APPDATA%\Unknown Organization.ini`.
 
-  - Clean installation and launch
-  - Shortcuts and file associations
-  - Upgrade and repair
-  - Uninstall without data removal
+- [ ] **InstWinX64.5.1** Isolate tests from real user settings.
+- [ ] **InstWinX64.5.2** Decide whether `paths/pattern` and `paths/layout` are shared or per-app.
+- [ ] **InstWinX64.5.3** Replace temporary `QSettings` with configured application settings.
+- [ ] **InstWinX64.5.4** Check `VSeamlyMeSettings`.
+- [ ] **InstWinX64.5.5** Import missing legacy values without overwrite or source deletion.
+- [ ] **InstWinX64.5.6** Verify no Seamly setting uses `Unknown Organization`.
+- [ ] **InstWinX64.5.7** Update `.github/README-BUILDS.md`.
 
-- [x] **InstWinX64.2.8 Complete static x64 validation** — passed July 22, 2026; clean-machine testing remains.
-- [x] **InstWinX64.2.9 Document building, signing, and verification in:**
+## InstWinX64.6 — Complete Metadata and Branding
 
-  - `scripts/packaging/windows/README.md`
-  - `.github/README-BUILDS.md`
-  - `.github/workflows/README_WORKFLOWS.md`
+### ARP Metadata
 
-  All three updated for Task Installer.1.1: the `ci.yml` release path, the arm64-only NSIS remainder, the pre-release ref, and the corrected `seamly-<arch>.msi` output name (the docs had carried the stale `Seamly-x64.msi` / `Seamly2D-arm64.msi` names).
+- [ ] **InstWinX64.6.1** Write `DisplayIcon` while retaining `ARPPRODUCTICON`.
+- [ ] **InstWinX64.6.2** Determine whether `Publisher` needs an explicit registry value.
+- [ ] **InstWinX64.6.3** Validate authored and installed ARP registry values.
+- [ ] **InstWinX64.6.4** Verify icon and publisher in `appwiz.cpl` and Windows Settings.
 
-## Task InstWinX64.2 — Suppress `.wixpdb` generation
+### Seamly Branding
 
-The WiX v6 MSI build needs only the `.msi`; suppress the optional linker database with `wix build -pdbtype none`.
+- [ ] **InstWinX64.6.5** Use `Seamly` for installer-facing branding.
+- [ ] **InstWinX64.6.6** State that the package installs Seamly2D, SeamlyLayout, and SeamlyMe.
+- [ ] **InstWinX64.6.7** Use “Seamly application family” in the EULA.
+- [ ] **InstWinX64.6.8** Change package, executable, and About metadata to “Seamly Project.”
+- [ ] **InstWinX64.6.9** Keep source-file copyright headers unchanged.
+- [ ] **InstWinX64.6.10** Update authoring tests.
+- [ ] **InstWinX64.6.11** Verify wizard branding.
 
-- [x] InstWinX64.2.1 Add `-pdbtype none` to `$wixArguments` in `scripts/packaging/windows/smsi.ps1`, covering x64, ARM64, local, and CI builds.
-- [ ] InstWinX64.2.2 Run a full Seamly MSI build and confirm:
-  - [ ] InstWinX64.2.2.1 No `.wixpdb` is generated.
-  - [ ] InstWinX64.2.2.2 `wix msi validate` passes.
-  - [ ] InstWinX64.2.2.3 Windows Installer COM inspection passes.
-  - [ ] InstWinX64.2.2.4 Pending restoration of the Qt build environment tracked in Task 31.
-- [x] InstWinX64.2.3 Confirm no scripts, workflows, or inspection tools require `.wixpdb`.
-- [x] InstWinX64.2.4 Document that `.wixpdb` is suppressed by default and can be restored by removing `-pdbtype none` from `$wixArguments`.
+### ARP Product
 
-## Task InstWinX64.3 — Complete the Windows MSI install experience
+**Decision:** confirm whether one `Seamly` ARP entry remains correct if apps later update independently.
 
-- [x] InstWinX64.3.1 Add `test_msi_authoring.ps1` and run it from `smsi.ps1` for both architectures.
-- [x] InstWinX64.3.2 Add the standalone `test_msi_install.ps1` phases: `Baseline`, `Installed`, `Upgraded`, and `Removed`.
-- [x] InstWinX64.3.3 Verify installation and upgrade on the test laptop: all apps launch, associations work, the install path is preserved, one ARP entry remains, and the legacy NSIS installation is removed.
-- [x] InstWinX64.3.4 Verify first-run migration copies the complete legacy tree to `Documents\Seamly` without overwriting or deleting the source.
-- [x] InstWinX64.3.5 Add optional Seamly2D and SeamlyMe desktop shortcuts through `SEAMLYDESKTOPSHORTCUTS`; do not offer SeamlyLayout or taskbar shortcuts.
-- [x] InstWinX64.3.6 Configure and verify one per-machine UAC elevation prompt.
-- [x] InstWinX64.3.7 Warn before replacing an MSI or NSIS installation.
-- [ ] InstWinX64.3.8 Make `SeamlyShortcutsDlg` appear under WiX 6; verify through authoring tests and a real wizard run. **Blocked on Task InstWinX64.12** — `WixUI_InstallDir` owns the transition out of `InstallDirDlg`, so no `Ordering` change can fix this.
-- [ ] InstWinX64.3.9 After Task InstWinX64.6, run the `Removed` phase and verify removal of apps, shortcuts, associations, registry entries, and ARP metadata while preserving user data.
-- [ ] InstWinX64.3.10 Complete the remaining branding, dialog, and ARP corrections in Tasks InstWinX64.6–InstWinX64.10.
-- [x] InstWinX64.3.11 Document the installer flow and verification procedure in `scripts/packaging/windows/README.md` and `README_WINDOWS_BUILD.md`.
+- [x] **InstWinX64.6.12** Keep one ARP entry named `Seamly`.
+- [ ] **InstWinX64.6.13** Set `ProductName` and `ARPDISPLAYNAME` to `Seamly`.
+- [ ] **InstWinX64.6.14** Name all three apps in `ARPCOMMENTS`.
+- [ ] **InstWinX64.6.15** Update DisplayName assertions.
+- [ ] **InstWinX64.6.16** Verify NSIS detection remains registry-based.
+- [ ] **InstWinX64.6.17** Verify entry, icon, and publisher.
+- [ ] **InstWinX64.6.18** Verify upgrades retain the `UpgradeCode` and one ARP entry.
 
-## Task InstWinX64.4 — Eliminate `Unknown Organization` settings
+## InstWinX64.7 — Correct Installer UI
 
-Eight `VSettings` accessors currently read and write `%APPDATA%\Unknown Organization.ini`.
+- [ ] **InstWinX64.7.1** Use `C:\Users\<user>\Documents\Seamly` in previous-install text.
+- [ ] **InstWinX64.7.2** Verify displayed AppData paths.
+- [ ] **InstWinX64.7.3** Use: “An older Seamly2D version was found in `C:\Program Files (x86)\Seamly2D`.”
+- [ ] **InstWinX64.7.4** Remove obsolete Program Files migration advice.
+- [ ] **InstWinX64.7.5** Shorten the data-preservation message.
+- [ ] **InstWinX64.7.6** Change `BannerLine` and `BottomLine` width from 373 to 370.
+- [ ] **InstWinX64.7.7** Replace “Install Seamly2D to” with Seamly-family wording.
+- [ ] **InstWinX64.7.8** Show the complete editable destination path.
+- [ ] **InstWinX64.7.9** Update UI tests and documentation.
 
-- [ ] InstWinX64.4.1 Isolate test-launched applications from real user settings before changing storage.
-- [ ] InstWinX64.4.2 Decide whether `paths/pattern` and `paths/layout` are per-app or shared settings.
-- [ ] InstWinX64.4.3 Replace temporary `QSettings` objects with the application’s configured settings object.
-- [ ] InstWinX64.4.4 Check `VSeamlyMeSettings` for the same defect.
-- [ ] InstWinX64.4.5 Import missing values from the stray settings file without overwriting existing values or deleting the source.
-- [ ] InstWinX64.4.6 Test that no Seamly setting resolves under `Unknown Organization`.
-- [ ] InstWinX64.4.7 Update the settings-storage documentation in `.github/README-BUILDS.md`.
+## InstWinX64.8 — Preserve Command-Line Documents
 
-## Task InstWinX64.5 — Separate user documents from application state
+- [ ] **InstWinX64.8.1** Reproduce first-launch `.sm2d` association behavior manually.
+- [ ] **InstWinX64.8.2** Preserve the requested file through first-run dialogs.
+- [ ] **InstWinX64.8.3** Define consistent behavior for all three apps.
+- [ ] **InstWinX64.8.4** Test `.smis` and `.smms`.
+- [ ] **InstWinX64.8.5** Verify the requested document opens after first-run setup.
 
-Default user documents to `<DocumentsLocation>/Seamly`. Keep configuration, cache, logs, and recovery in platform-standard application-data locations. Migration runs in application code, not the installer.
+## InstWinX64.9 — Complete MSI Packaging
 
-- [x] InstWinX64.5.1 Set the default document root to `QStandardPaths::DocumentsLocation/Seamly`.
-- [x] InstWinX64.5.2 Preserve relocatability through `paths/dataRoot`.
-- [x] InstWinX64.5.3 Copy the complete legacy tree, including unknown folders, without reorganizing it.
-- [x] InstWinX64.5.4 Merge without overwriting, verify every copied file, and leave the source intact.
-- [x] InstWinX64.5.5 Reject destinations nested inside the source.
-- [x] InstWinX64.5.6 Mark migrated roots with `MIGRATED-TO-SEAMLY.txt`.
-- [x] InstWinX64.5.7 Configure the new root only after successful verification.
-- [x] InstWinX64.5.8 Seed the standard subfolders after resolving the root.
-- [x] InstWinX64.5.9 Cover migration with `QTemporaryDir` tests only.
-- [x] InstWinX64.5.10 Verify migration on a real Windows profile.
-- [ ] InstWinX64.5.11 Add progress, cancellation, or deferral for multi-gigabyte migrations.
-- [ ] InstWinX64.5.12 Ensure `pruneEmptyLegacyDataRoot()` never removes a populated or migration-marked tree.
-- [ ] InstWinX64.5.13 Move per-app configuration to the platform-standard configuration tree while keeping cache, logs, and recovery separate.
+- [x] **InstWinX64.9.1** Suppress `.wixpdb` with `-pdbtype none`.
+- [ ] **InstWinX64.9.2** Run a full MSI build.
+- [ ] **InstWinX64.9.3** Verify no `.wixpdb` is generated.
+- [ ] **InstWinX64.9.4** Verify `wix msi validate`.
+- [ ] **InstWinX64.9.5** Verify Windows Installer COM inspection.
+- [x] **InstWinX64.9.6** Confirm no tooling requires `.wixpdb`.
+- [x] **InstWinX64.9.7** Document how to restore `.wixpdb`.
+- [ ] **InstWinX64.9.8** Verify Qt 6.11.1, QML, WebEngine, MSVC runtime, and Rust dependencies.
+- [ ] **InstWinX64.9.9** Verify in-place major upgrades.
+- [ ] **InstWinX64.9.10** Sign with `jsign` when `SEAMLY_SIGNING_PROJECT_ID` is available.
+- [x] **InstWinX64.9.11** Support local builds through `scripts/packaging/windows/smsi.ps1`.
+- [x] **InstWinX64.9.12** Support CI builds through `.github/workflows/ci.yml`.
+- [ ] **InstWinX64.9.13** Test x64 and arm64 where hardware is available.
+- [x] **InstWinX64.9.14** Complete static x64 validation.
+- [x] **InstWinX64.9.15** Document build, signing, and verification.
 
+## InstWinX64.10 — Verify Installer
 
-## Task InstWinX64.6 — Add complete ARP metadata
+### Fresh Install
 
-- [ ] InstWinX64.6.1 Write `DisplayIcon` explicitly under the product’s Uninstall registry key while retaining `ARPPRODUCTICON`.
-- [ ] InstWinX64.6.2 Determine whether `Publisher` also requires an explicit registry value.
-- [ ] InstWinX64.6.3 Validate the authored and installed registry values in both MSI test scripts.
-- [ ] InstWinX64.6.4 Verify the icon and publisher in both `appwiz.cpl` and Windows Settings.
+- [ ] **InstWinX64.10.1** Programs: `C:\Program Files\SeamlyApps`.
+- [ ] **InstWinX64.10.2** Data: `C:\Users\<user>\SeamlyData`.
 
-## Task InstWinX64.7 — Brand the installer for the Seamly family
+### Standalone Migration
 
-- [ ] InstWinX64.7.1 Replace installer-facing “Seamly2D” branding with “Seamly.”
-- [ ] InstWinX64.7.2 State that the package installs Seamly2D, SeamlyLayout, and SeamlyMe.
-- [ ] InstWinX64.7.3 Change “Seamly2D application family” to “Seamly application family” in the EULA.
-- [ ] InstWinX64.7.4 Change package metadata, executable resources, and About dialogs from “Seamly2D Project” to “Seamly Project.”
-- [ ] InstWinX64.7.5 Leave source-file copyright headers unchanged.
-- [ ] InstWinX64.7.6 Update authoring-test assertions.
-- [ ] InstWinX64.7.7 Verify all wizard text visually.
+- [ ] **InstWinX64.10.3** Programs: `C:\Program Files (x86)\Seamly2D` → `E:\Programs\SeamlyApps`.
+- [ ] **InstWinX64.10.4** Data: `C:\Users\<user>\seamly2d` → `E:\SeamlyData`.
 
-## Task InstWinX64.8 — Shorten and correct the previous-install dialog
+### Cloud Migration
 
-- [ ] InstWinX64.8.1 Replace `C:\Users\<you>\seamlyData` with `C:\Users\<you>\Documents\Seamly`.
-- [ ] InstWinX64.8.2 Verify the AppData paths against the implemented storage layout.
-- [ ] InstWinX64.8.3 Shorten the NSIS warning to: “An older Seamly2D version was found in `C:\Program Files (x86)\Seamly2D`.”
-- [ ] InstWinX64.8.4 Remove obsolete advice about moving files from Program Files.
-- [ ] InstWinX64.8.5 Shorten the user-data preservation message.
-- [ ] InstWinX64.8.6 Change `BannerLine` and `BottomLine` from width 373 to 370.
-- [ ] InstWinX64.8.7 Update authoring tests and `INSTALL_DECISION_FLOW.md`.
+- [ ] **InstWinX64.10.5** Programs: `C:\Program Files\SeamlyApps`.
+- [ ] **InstWinX64.10.6** Data: `G:\My Drive\seamly2d` → `G:\My Drive\SeamlyData`.
 
-## Task InstWinX64.9 — Correct the destination-folder page
+### Common Checks
 
-- [x] InstWinX64.9.1 Keep the `SeamlyApps` program directory.
-- [ ] InstWinX64.9.2 Replace “Install Seamly2D to” with wording that names the Seamly application family.
-- [ ] InstWinX64.9.3 Show the complete editable destination path, including `SeamlyApps`.
-- [ ] InstWinX64.9.4 Update tests and installer documentation.
+- [ ] **InstWinX64.10.7** Paths persist and register.
+- [ ] **InstWinX64.10.8** Shortcuts work.
+- [ ] **InstWinX64.10.9** File associations work.
+- [ ] **InstWinX64.10.10** Migration preserves source and destination files.
+- [ ] **InstWinX64.10.11** Upgrade preserves paths and one ARP entry.
+- [ ] **InstWinX64.10.12** Uninstall removes installer-owned resources and preserves user data.
+- [ ] **InstWinX64.10.13** All three apps launch.
 
-## Task InstWinX64.10 — Rename the ARP product entry to “Seamly”
+## InstWinX64.11 — Cleanup and Documentation
 
-One MSI installs all three applications, and will be able to update each separately in the future
-Revisit -- if we update each separately in the future should these tasks change?
-
-- [x] InstWinX64.10.1 Keep one ARP entry named “Seamly.” ?? 
-- [ ] InstWinX64.10.2 Change `ProductName` and `ARPDISPLAYNAME` to `Seamly`. ??
-- [ ] InstWinX64.10.3 Make `ARPCOMMENTS` name Seamly2D, SeamlyMe, and SeamlyLayout. ??
-- [ ] InstWinX64.10.4 Update DisplayName assertions in both MSI test scripts. ??
-- [ ] InstWinX64.10.5 Confirm NSIS detection remains registry-based and unaffected. ??
-- [ ] InstWinX64.10.6 Verify the renamed entry, icon, and publisher in both Windows applets. ??
-- [ ] InstWinX64.10.7 Verify upgrades retain the fixed `UpgradeCode` and leave one ARP entry. ??
-
-## Task InstWinX64.11 — Preserve command-line files through first-run dialogs
-
-- [ ] InstWinX64.11.1 Reproduce a first-launch `.sm2d` association outside the automated checker.
-- [ ] InstWinX64.11.2 Queue the requested file until first-run dialogs close, or suppress the dialogs when launched with a document.
-- [ ] InstWinX64.11.3 Define consistent first-run behavior for Seamly2D, SeamlyMe, and SeamlyLayout.
-- [ ] InstWinX64.11.4 Repeat the test with `.smis` and `.smms` files.
-- [ ] InstWinX64.11.5 Verify the requested document loads after the first-run flow.
-
-## Task InstWinX64.12 — Replace `WixUI_InstallDir` with a custom dialog set
-
-`WixUI_InstallDir` owns the transitions out of `InstallDirDlg`. Its `NewDialog
-VerifyReadyDlg` row sits at Order 4 with condition `1`, so no page of ours can
-replace it, and `SpawnDialog` is the only mechanism left. That is the root cause
-of the defect in InstWinX64.3.8 and the blocker on InstWinX64.1.2.
-
-The built-in Next rows occupy Orders 1, 3 and 4. Below the Order 4 `NewDialog`
-only Orders 0 and 2 are free — two slots for three pages. The ordering ties are
-forced. No arrangement of `Ordering` values can remove them, so the mechanism
-must change, not the numbers.
-
-A custom dialog set owns its whole `NewDialog` chain. Every transition is then
-ours and defined, there is no competing Order 4 row, and the Cancel/Back/Continue
-flow becomes straightforward to author.
-
-- [ ] InstWinX64.12.1 Author a custom `UI` element that defines the full dialog
-  chain: welcome → license → previous-install warning → program directory →
-  data root → copy existing work → shortcuts → ready → progress → exit.
-- [ ] InstWinX64.12.2 Reuse the stock WiX dialogs where they need no change.
-  Reference `WixUI_Common` for the shared dialogs (`BrowseDlg`, `CancelDlg`,
-  `ErrorDlg`, `FilesInUse`, …) instead of rewriting them.
-- [ ] InstWinX64.12.3 Convert `SeamlyDataDirDlg`, `SeamlyDataMigrateDlg` and
-  `SeamlyShortcutsDlg` from `SpawnDialog` to `NewDialog` transitions.
-- [ ] InstWinX64.12.4 Author `Back` on every page, and `Cancel` through the
-  stock `CancelDlg` confirmation.
-- [ ] InstWinX64.12.5 Update `test_msi_authoring.ps1`. The existing assertion
-  "SpawnDialog must have a lower Ordering than every NewDialog" no longer
-  applies once no page uses `SpawnDialog`. Replace it with assertions on the
-  `NewDialog` chain itself.
-- [ ] InstWinX64.12.6 Verify with a real interactive install: every page
-  displays, in order, and `Back` returns to the previous page.
-- [ ] InstWinX64.12.7 Tick InstWinX64.1.2.1-1.2.3 and InstWinX64.3.8 once the
-  interactive run passes.
-- [ ] InstWinX64.12.8 Update `INSTALL_DECISION_FLOW.md` and
-  `scripts/packaging/windows/README.md` with the new page order.
+- [x] **InstWinX64.11.1** Remove `dist/seamly2d-installer.nsi`.
+- [x] **InstWinX64.11.2** Preserve its legacy footprint in `seamly-family.wxs`.
+- [x] **InstWinX64.11.3** Remove `windows-msi.yml`.
+- [ ] **InstWinX64.11.4** Update `scripts/packaging/windows/README.md`.
+- [ ] **InstWinX64.11.5** Update `.github/README-BUILDS.md`.
+- [ ] **InstWinX64.11.6** Update `INSTALL_DECISION_FLOW.md`.
+- [ ] **InstWinX64.11.7** Move completed tasks to `TODO_COMPLETED.md`.
+- [ ] **InstWinX64.11.8** Update `TODO_INSTALLER.md` when this file is complete.
