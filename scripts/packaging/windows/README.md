@@ -29,14 +29,22 @@ WiX authoring and build instructions for the Windows `.msi` installer that ships
 
 ## Install-time experience (Task 51)
 
-The wizard is WixUI's `WixUI_InstallDir` — welcome, license, install folder, ready — with two Seamly pages added:
+The wizard is WixUI's `WixUI_InstallDir` — welcome, license, install folder, ready — with four Seamly pages added:
 
 | Page | When it appears | What it does |
 |---|---|---|
-| **An existing installation was found** | before the welcome page, only when a previous install is detected and only when installing | Warns that the program files will be replaced, and states plainly that user data is not touched — naming `C:\Users\<you>\seamlyData`, `AppData\Local\Seamly` and `AppData\Roaming\Seamly`. Two paragraphs appear conditionally: one for an older MSI of this product (`WIX_UPGRADE_DETECTED`), one for the old NSIS installation. |
-| **Shortcuts** | after Next on the install-folder page | One checkbox: *Create desktop shortcuts for Seamly2D and SeamlyMe*, default **on** (`SEAMLYDESKTOPSHORTCUTS`). |
+| **An existing installation was found** | before the welcome page, only when a previous install is detected and only when installing | Warns that the program files will be replaced, and states plainly that user data is not touched. Two paragraphs appear conditionally: one for an older MSI of this product (`WIX_UPGRADE_DETECTED`), one for the old NSIS installation. |
+| **Where do you keep your work?** | after Next on the install-folder page (Order 1) | The user-data root (`SEAMLYDATAROOT`), default `C:\Users\<you>\SeamlyData`, with a **Change** button that spawns WixUI's `BrowseDlg`. Any drive is allowed, including synced folders and USB media. |
+| **Copy your existing work?** | Order 2 | Opt-in checkbox (`SEAMLYCOPYUSERDATA`, default **off**) to copy existing patterns and measurements into the new root. States that the originals stay put as a backup and that the same files are then also at the new location. |
+| **Shortcuts** | Order 3 | One checkbox: *Create desktop shortcuts for Seamly2D and SeamlyMe*, default **on** (`SEAMLYDESKTOPSHORTCUTS`). |
 
-Decisions behind those two pages:
+All three of the middle pages are spawned from the install-folder page's Next below WixUI's own transition to the ready page (Order 4).
+
+Decisions behind those pages:
+
+- **The program folder rejects cloud-synced paths; the data root welcomes them.** A sync client renames, locks or replaces a file that an app has mapped, which corrupts a running install and breaks repair and uninstall — so `INSTALLFOLDER` containing OneDrive, Dropbox, Google Drive, iCloud or Box Sync is refused by a `Launch` condition (a launch condition, not a dialog check, because it is the only form that also blocks `/qn`). The data root is the opposite case: syncing your own patterns between machines is the point, so nothing there is restricted.
+- **The copy is opt-in and additive only.** It never deletes and never overwrites — a file already at the destination wins. That makes it safe to repeat, so an interrupted copy can simply be run again. It runs as a deferred, **impersonated** action, because a per-machine install's execute sequence is SYSTEM and SYSTEM cannot read the user's own folders. `Return="ignore"`: a file-copy problem must not roll back a working program install.
+- **There is deliberately no rollback action for the copy.** Undoing it would mean deleting files from a folder that may already have held the user's work, and nothing can tell the two apart. Deleting user data to tidy up a failed install is worse than leaving copied files behind, and since the copy only ever adds, there is nothing whose absence leaves the machine inconsistent.
 
 - **Desktop shortcuts are one checkbox covering seamly2d and seamlyme, not one per app, and SeamlyLayout gets none.** SeamlyLayout is a document-driven daughter app that seamly2d launches with a `.pieces.svg` argument; a bare desktop launch would only ever show an empty canvas. Per-app checkboxes would be three decisions for a choice users make once. Unattended installs can override: `msiexec /i Seamly-x64.msi /qn SEAMLYDESKTOPSHORTCUTS=0`.
 - **There is no "pin to taskbar" checkbox, and there should not be one.** Windows 10 removed programmatic taskbar pinning: the `taskbarpin` verb is blocked for third-party callers, there is no MSI or WiX element for it, and the only supported mechanisms are OEM/enterprise provisioning (a Start/taskbar layout-modification XML applied by Group Policy or during imaging) which cannot be driven from a per-machine MSI a user double-clicks. A checkbox here would silently do nothing, so the choice is simply not offered.

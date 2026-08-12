@@ -248,13 +248,17 @@ if ($warningRow.Count -eq 1) {
         -Detail "condition is '$($warningRow[0].Condition)'"
 }
 
-# The wording is load-bearing: Task 51 requires the dialog to name the current
-# user-data folder, which Tasks 34 and 53 renamed to seamlyData.
+# The wording is load-bearing: Task 51 requires the dialog to tell the user what
+# happens to their own work. It no longer names a fixed folder - Task
+# InstWinX64.1.2 made the data root a choice made later in Setup, so the page
+# points forward to that question instead of naming a path that may be wrong.
 $warningText = Get-MsiRows -Sql "SELECT ``Control``, ``Text`` FROM ``Control`` WHERE ``Dialog_``='SeamlyPreviousInstallDlg'" `
     -Columns 'Control', 'Text'
 $userDataText = @($warningText | Where-Object { $_.Control -eq 'UserDataText' })
-Assert-That -Name 'the warning names the seamlyData user-data folder' `
-    -Succeeded ($userDataText.Count -eq 1 -and $userDataText[0].Text -match 'seamlyData')
+Assert-That -Name 'the warning points at the user-data folder question' `
+    -Succeeded ($userDataText.Count -eq 1 -and $userDataText[0].Text -match 'user data folder')
+Assert-That -Name 'the warning promises no delete and no overwrite' `
+    -Succeeded ($userDataText.Count -eq 1 -and $userDataText[0].Text -match 'never deletes or overwrites')
 Assert-That -Name 'the warning states that user data is not removed' `
     -Succeeded ($userDataText.Count -eq 1 -and $userDataText[0].Text -match 'not touched')
 $nsisText = @($warningText | Where-Object { $_.Control -eq 'LegacyInstallText' })
@@ -431,6 +435,89 @@ foreach ($association in @(
 }
 Assert-That -Name 'the install path is recorded in HKLM\SOFTWARE\Seamly\Seamly2D' `
     -Succeeded (@($registry | Where-Object { $_.Root -eq '2' -and $_.Key -eq 'SOFTWARE\Seamly\Seamly2D' -and $_.Name -eq 'InstallPath' }).Count -eq 1)
+
+# --- 9. program folder and user-data root (Task InstWinX64.1.1 / 1.2) ----------
+# The program folder name is asserted here because three documents and the
+# migration authoring all name it; renaming it silently would leave them out of
+# step, which is exactly what happened in 546e9d5def.
+$directories = Get-MsiRows -Sql "SELECT ``Directory``, ``Directory_Parent``, ``DefaultDir`` FROM ``Directory``" `
+    -Columns 'Directory', 'Parent', 'DefaultDir'
+$installFolder = @($directories | Where-Object { $_.Directory -eq 'INSTALLFOLDER' })
+Assert-That -Name 'the program folder is SeamlyApps under the 64-bit Program Files' `
+    -Succeeded ($installFolder.Count -eq 1 -and
+                $installFolder[0].DefaultDir -match 'SeamlyApps' -and
+                $installFolder[0].Parent -eq 'ProgramFiles64Folder') `
+    -Detail "DefaultDir '$(if ($installFolder.Count) { $installFolder[0].DefaultDir } else { '<nothing>' })', parent '$(if ($installFolder.Count) { $installFolder[0].Parent } else { '<nothing>' })'"
+
+# InstWinX64.1.1.3. A Launch condition, not a dialog check, because a silent
+# install has no dialog to press - so this is the only place the rule holds for
+# /qn as well as for the wizard.
+$launchConditions = @(Get-MsiRows -Sql "SELECT ``Condition`` FROM ``LaunchCondition``" -Columns 'Condition' |
+    ForEach-Object { $_.Condition })
+$cloudCondition = @($launchConditions | Where-Object { $_ -match 'INSTALLFOLDER' -and $_ -match 'OneDrive' })
+Assert-That -Name 'a cloud-synced program folder is rejected' -Succeeded ($cloudCondition.Count -eq 1)
+foreach ($service in @('OneDrive', 'Dropbox', 'Google Drive', 'iCloud')) {
+    Assert-That -Name "the cloud-folder check covers $service" `
+        -Succeeded ($cloudCondition.Count -eq 1 -and $cloudCondition[0] -match [regex]::Escape($service))
+}
+
+# InstWinX64.1.2.1 - 1.2.3. The data root is a directory id so it can be browsed
+# in the UI and set on the command line for an unattended install.
+Assert-That -Name 'the user-data root is a settable directory' `
+    -Succeeded (@($directories | Where-Object { $_.Directory -eq 'SEAMLYDATAROOT' }).Count -eq 1)
+foreach ($property in @('SEAMLYDATAROOT', 'SEAMLYCOPYUSERDATA')) {
+    Assert-That -Name "$property is a secure custom property" -Succeeded ($secure -like "*$property*")
+}
+# The default is computed in the UI sequence only: the execute sequence runs as
+# SYSTEM, whose %USERPROFILE% is not the user's.
+$uiActions = @(Get-MsiRows -Sql "SELECT ``Action`` FROM ``InstallUISequence``" -Columns 'Action' |
+    ForEach-Object { $_.Action })
+$executeActions = @(Get-MsiRows -Sql "SELECT ``Action`` FROM ``InstallExecuteSequence``" -Columns 'Action' |
+    ForEach-Object { $_.Action })
+Assert-That -Name 'the data-root default is computed in the UI sequence' `
+    -Succeeded ($uiActions -contains 'SetSEAMLYDATAROOT')
+Assert-That -Name 'the data-root default is NOT computed in the elevated sequence' `
+    -Succeeded (-not ($executeActions -contains 'SetSEAMLYDATAROOT'))
+Assert-That -Name 'the chosen data root is recorded for the apps to read' `
+    -Succeeded (@($registry | Where-Object { $_.Root -eq '2' -and $_.Key -eq 'SOFTWARE\Seamly\Seamly2D' -and $_.Name -eq 'DataRoot' }).Count -eq 1)
+
+$dialogs = @(Get-MsiRows -Sql "SELECT ``Dialog`` FROM ``Dialog``" -Columns 'Dialog' | ForEach-Object { $_.Dialog })
+foreach ($dialog in @('SeamlyDataDirDlg', 'SeamlyDataMigrateDlg')) {
+    Assert-That -Name "dialog '$dialog' is present" -Succeeded ($dialogs -contains $dialog)
+}
+# Each question is spawned from InstallDirDlg's Next below the built-in
+# transition to VerifyReadyDlg (Order 4), so all three pages run before it.
+$spawned = Get-MsiRows -Sql "SELECT ``Dialog_``, ``Argument``, ``Ordering`` FROM ``ControlEvent`` WHERE ``Dialog_``='InstallDirDlg' AND ``Event``='SpawnDialog'" `
+    -Columns 'Dialog', 'Argument', 'Ordering'
+foreach ($dialog in @('SeamlyDataDirDlg', 'SeamlyDataMigrateDlg', 'SeamlyShortcutsDlg')) {
+    $row = @($spawned | Where-Object { $_.Argument -eq $dialog })
+    Assert-That -Name "'$dialog' is spawned before the ready page" `
+        -Succeeded ($row.Count -eq 1 -and [int]$row[0].Ordering -lt 4) `
+        -Detail "ordering $(if ($row.Count) { $row[0].Ordering } else { '<nothing>' })"
+}
+
+# InstWinX64.1.2.4. The copy must be deferred (it needs the script on disk),
+# impersonated (SYSTEM cannot read the user's own folders) and non-fatal (a
+# file-copy problem must not roll back a good program install).
+$copyAction = @(Get-MsiRows -Sql "SELECT ``Action``, ``Type`` FROM ``CustomAction`` WHERE ``Action``='SeamlyCopyUserData'" `
+    -Columns 'Action', 'Type')
+Assert-That -Name 'the user-data copy action exists' -Succeeded ($copyAction.Count -eq 1)
+if ($copyAction.Count -eq 1) {
+    $type = [int]$copyAction[0].Type
+    # msidbCustomActionTypeInScript 1024, NoImpersonate 2048, ContinueOnError 64.
+    Assert-That -Name 'the copy runs deferred' -Succeeded (($type -band 1024) -ne 0) -Detail "type $type"
+    Assert-That -Name 'the copy runs as the user, not SYSTEM' -Succeeded (($type -band 2048) -eq 0) -Detail "type $type"
+    Assert-That -Name 'a failed copy does not fail the install' -Succeeded (($type -band 64) -ne 0) -Detail "type $type"
+}
+# There is deliberately no rollback action: it could only "undo" the copy by
+# deleting files out of a folder that may have held the user's work already.
+$customActions = @(Get-MsiRows -Sql "SELECT ``Action`` FROM ``CustomAction``" -Columns 'Action' |
+    ForEach-Object { $_.Action })
+Assert-That -Name 'no rollback action deletes copied user data' `
+    -Succeeded (-not ($customActions -contains 'SeamlyCopyUserDataRollback'))
+Assert-That -Name 'the copy helper script is packaged' `
+    -Succeeded (@(Get-MsiRows -Sql "SELECT ``FileName`` FROM ``File`` WHERE ``Component_``='UserDataCopyScript'" -Columns 'FileName' |
+                  Where-Object { $_.FileName -match 'seamly_copy_user_data\.ps1' }).Count -eq 1)
 
 # --- report --------------------------------------------------------------------
 [System.Runtime.InteropServices.Marshal]::ReleaseComObject($script:database) | Out-Null

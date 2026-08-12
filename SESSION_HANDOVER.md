@@ -6,6 +6,71 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## PICK UP HERE (2026-08-11, installer directories session)
+
+**Tasks InstWinX64.1.1 and 1.2 — authored, and 1.2 is BLOCKED on a defect that
+was already in the tree.** Read the blocker note in `TODO_INSTALLER_WIN_X64.md`
+before continuing.
+
+**1.1 was mostly already built.** `C:\Program Files\SeamlyApps` was the existing
+default (`ProgramFiles64Folder` + `Name="SeamlyApps"`), and every shortcut,
+association and registry value already resolved through `[INSTALLFOLDER]`. The
+user asked about `Program Files (x86)`, then decided to keep the current path —
+correctly, since that tree is for 32-bit programs and every binary here is x64
+or arm64. What was genuinely missing was the cloud-folder rejection (1.1.3),
+now a `Launch` condition covering OneDrive, Dropbox, Google Drive, iCloud and
+Box Sync. It is a launch condition rather than a dialog check because that is
+the only form that also blocks a silent `/qn` install.
+
+**1.2 was built to "installer does everything"** — the user chose that split
+over "installer records, apps copy". So the MSI now carries `SEAMLYDATAROOT`,
+`SEAMLYCOPYUSERDATA`, two dialogs, a registry breadcrumb, and a deferred
+impersonated custom action running `seamly_copy_user_data.ps1`.
+
+**THE BLOCKER.** The two new dialogs use `SpawnDialog` from `InstallDirDlg`'s
+Next — the same mechanism as `SeamlyShortcutsDlg`, which
+`INSTALL_DECISION_FLOW.md` already records as **never displaying**. Dumping the
+built MSI's `ControlEvent` rows proved there is no alternative: the built-in
+`NewDialog VerifyReadyDlg` is at Order 4 with condition `1`, so no competing
+`NewDialog` can be excluded. The dump also exposed two ordering collisions this
+task introduced (`SeamlyDataDirDlg` ties with `CheckTargetPath` at Order 1;
+`SeamlyShortcutsDlg` ties with `SetTargetPath` at Order 3). The full chain is
+transcribed in a comment beside the `Publish` rows in `seamly-family.wxs`.
+
+Consequence: the **properties work** (an unattended install passing
+`SEAMLYDATAROOT` / `SEAMLYCOPYUSERDATA` behaves correctly, defaults apply
+otherwise) but the **interactive prompting does not**. 1.2.1-1.2.3 are left
+unticked on purpose. Fixing the SpawnDialog defect is the tracked subtask in
+`TODO_MIGRATE.md` and must come first.
+
+**Why there is no rollback action for the copy** — a deliberate deviation from
+the option text the user picked, flagged at the time and worth keeping: undoing
+the copy could only mean deleting files from a folder that may already have held
+the user's work, and nothing can tell those apart. The copy is additive-only and
+never overwrites, so nothing is left inconsistent. `Return="ignore"` likewise: a
+file-copy problem must not roll back a good program install.
+
+**Verification done locally.** `wix build` + `wix msi validate` (with the same
+`-sice ICE43 -sice ICE57` the real build uses) are clean, only the expected
+ICE61. `test_msi_authoring.ps1` gained ~25 assertions and all 94 pass. The copy
+script was run against a real tree: subfolders preserved, an existing
+destination file left byte-for-byte, source untouched, second run copies 0.
+
+**MACHINE STATE CHANGED OUTSIDE THE REPO.** The user installed .NET SDK 9
+(`Microsoft.DotNet.SDK.9`, 9.0.316) and I installed the WiX v6 global tool
+(`wix` 6.0.2) plus `WixToolset.UI.wixext` and `WixToolset.Util.wixext` at the
+matching version. `dotnet` is NOT on `PATH` — prepend
+`$env:USERPROFILE\.dotnet\tools` and `$env:ProgramFiles\dotnet`. This makes a
+`.wxs` change checkable in seconds instead of a ~50-minute CI round trip. Undo
+with `dotnet tool uninstall --global wix`.
+
+**One open question for the user**, recorded in the task file: `SEAMLYDATAROOT`
+holds the whole path, so choosing `E:\` gives `E:\`, not `E:\SeamlyData`.
+Auto-appending the leaf would turn a typed `E:\SeamlyData` into
+`E:\SeamlyData\SeamlyData`. Confirm which is wanted.
+
+### Earlier the same day
+
 ## PICK UP HERE (2026-08-11, later session)
 
 **Task InstWinX64.1.3.2 is done — `windows-msi.yml` is deleted.** `ci.yml`'s
