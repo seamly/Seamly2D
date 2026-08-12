@@ -54,13 +54,13 @@ var NAVTREE =
       [ "Seamly2D Family", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md35", null ]
     ] ],
     [ "Fonts for SeamlyLayout", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html", [
-      [ "Required Fonts", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md21", [
-        [ "Comfortaa", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md22", null ],
-        [ "Inter Tight", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md23", null ]
+      [ "Required Fonts", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md20", [
+        [ "Comfortaa", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md21", null ],
+        [ "Inter Tight", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md22", null ]
       ] ],
-      [ "How to Download", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md24", null ],
-      [ "Font Pairing Strategy", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md25", null ],
-      [ "Alternative: Using Google Fonts Package", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md26", null ]
+      [ "How to Download", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md23", null ],
+      [ "Font Pairing Strategy", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md24", null ],
+      [ "Alternative: Using Google Fonts Package", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md25", null ]
     ] ],
     [ "README", "d1/dff/md_src_app_seamlylayout_qt_frontend_node_modules_tailwindcss_README.html", null ],
     [ "README", "df/da2/md_src_app_seamlylayout_README.html", [
