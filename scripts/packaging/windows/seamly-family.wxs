@@ -18,7 +18,7 @@
  **     Windows arm64:  `wix build -arch arm64`
  **
  **  INSTALL LAYOUT
- **    [ProgramFiles64Folder]\Seamly\        seamly2d.exe, seamlyme.exe,
+ **    [ProgramFiles64Folder]\SeamlyApps\    seamly2d.exe, seamlyme.exe,
  **                                          SeamlyLayout.exe and the ONE
  **                                          Qt runtime all three share
  **                                          (merged windeployqt +
@@ -39,18 +39,25 @@
  **                                          fallback for installs made by
  **                                          an earlier MSI.
  **
- **  USER DATA IS NEVER DELETED:
- **    - USER DATA FILES MAY BE COPIED TO THE NEW USER DATA DIRECTORIES.
- **    - USER APPLICATION DATA MAY BE UPDATED.
+ **  USER DATA IS NEVER DELETED OR OVERWRITTEN:
  **    Per-user settings live under %LOCALAPPDATA%\Seamly\<app>
  **    (AppData\Local\Seamly\Seamly2D, ...\SeamlyMe, ...\SeamlyLayout) plus the shared
- **    %APPDATA%\Seamly\qt6_common.ini; pattern, measurement, and other user data defaults
- **    to C:\Users\<user>\Documents\Seamly. The installer neither creates nor
- **    removes any of these: the apps create them on first run (including the
- **    legacy-location migration), and uninstall leaves them in place, so an
- **    uninstall/reinstall or upgrade never loses user data. This is what the
- **    Task 51 "existing installation" dialog below tells the user, in those
- **    words, before it replaces anything.
+ **    %APPDATA%\Seamly\qt6_common.ini. The installer never touches those.
+ **
+ **    Patterns, measurements and templates live in the USER DATA ROOT, which
+ **    Task InstWinX64.1.2 made a choice the user makes during setup:
+ **      - SEAMLYDATAROOT holds the folder, default C:\Users\<user>\SeamlyData.
+ **      - SeamlyDataDirDlg asks for it; any drive is allowed, including USB and
+ **        cloud-synced folders (unlike the program folder, which rejects them).
+ **      - The chosen path is recorded in HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot
+ **        for the apps to read on first run.
+ **      - SeamlyDataMigrateDlg offers to COPY existing work into it. The copy is
+ **        opt-in, additive only, and never overwrites: a file already present at
+ **        the destination is left exactly as it is. Source files are only read.
+ **
+ **    Uninstall removes no user data of any kind, so uninstall/reinstall and
+ **    upgrade never lose work. This is what the Task 51 "existing installation"
+ **    dialog below tells the user, in those words, before it replaces anything.
  **
  **  INSTALL-TIME EXPERIENCE (Task 51)
  **    SeamlyPreviousInstallDlg  shown before the welcome page when an earlier
@@ -185,9 +192,11 @@
               UpgradeCode and sets WIX_UPGRADE_DETECTED, and removes it during
               the install;
 
-           2. the old NSIS installation (dist\seamly2d-installer.nsi), which is
-              a DIFFERENT product with its own ARP entry and its own
-              uninstall.exe. The MSI neither upgrades nor removes it.
+           2. the old NSIS installation, which is a DIFFERENT product with its
+              own ARP entry and its own uninstall.exe. The MSI neither upgrades
+              nor removes it. Its authoring file, dist\seamly2d-installer.nsi,
+              was deleted in Task InstWinX64.1.3.1; the footprint list further
+              down this file is now the only record of what it left on disk.
 
          The NSIS installer is a 32-bit executable that does not switch the
          registry view, so on x64 both of its keys land under WOW6432Node -
@@ -244,6 +253,61 @@
          the elevated server-side sequence that evaluates the component
          conditions. -->
     <Property Id="SEAMLYDESKTOPSHORTCUTS" Value="1" Secure="yes" />
+
+    <!-- ================= user-data root (Task InstWinX64.1.2) ============== -->
+    <!-- SEAMLYDATAROOT is the folder the apps keep patterns, measurements and
+         templates in. It is a DIRECTORY id, not a plain property, for three
+         reasons: WixUI's BrowseDlg edits a directory (it browses whatever
+         _BrowseProperty names), a public uppercase directory id can be set on
+         the msiexec command line for unattended installs, and CostFinalize
+         resolves it so [SEAMLYDATAROOT] expands everywhere below.
+
+             msiexec /i seamly-x64.msi /qn SEAMLYDATAROOT="E:\SeamlyData"
+
+         Default C:\Users\<user>\SeamlyData, set from %USERPROFILE% in the UI
+         sequence ONLY. The execute sequence of a perMachine package runs
+         elevated as SYSTEM, where %USERPROFILE% is SYSTEM's own profile - so
+         computing the default there would silently install a data root under
+         C:\Windows\system32\config\systemprofile. Secure="yes" carries the
+         value the user actually chose across to that elevated sequence.
+
+         Consequence for silent installs: /qn runs no UI sequence, so nothing
+         computes the default. Pass SEAMLYDATAROOT explicitly on the command
+         line for an unattended install; if it is absent the apps fall back to
+         their own first-run default, which is the behaviour that shipped
+         before this task. -->
+    <Property Id="SEAMLYDATAROOT" Secure="yes" />
+    <SetProperty Id="SEAMLYDATAROOT"
+                 Value="[%USERPROFILE]\SeamlyData"
+                 Before="CostFinalize"
+                 Sequence="ui"
+                 Condition="NOT SEAMLYDATAROOT" />
+
+    <!-- Set by SeamlyDataMigrateDlg's confirmation. 0 = record the folder but
+         copy nothing. The copy is opt-in: it is the user's data, and an
+         unattended install must not start moving files nobody asked about. -->
+    <Property Id="SEAMLYCOPYUSERDATA" Value="0" Secure="yes" />
+
+    <!-- ================= reject cloud-synced program folders =============== -->
+    <!-- InstWinX64.1.1.3. Program files must not live in a folder a sync client
+         owns. OneDrive, Dropbox and Google Drive all rename, lock, or replace a
+         file with a placeholder while an app has it mapped, which corrupts a
+         running install and breaks repair and uninstall. `><` is the Windows
+         Installer substring operator, so this matches the sync root anywhere in
+         the path.
+
+         This is a Launch condition, not a dialog button check, because it is
+         the only mechanism that also blocks a silent install - where no dialog
+         exists to press. LaunchConditions runs in both sequences: in the UI
+         sequence INSTALLFOLDER still holds the default (no match, no message),
+         and in the execute sequence it holds whatever the user chose or passed
+         on the command line, which is the value that has to be rejected.
+
+         The user-data root is deliberately NOT checked: InstWinX64.1.2.2
+         requires it to accept OneDrive, Google Drive, Dropbox and USB media,
+         because syncing your patterns between machines is the point. -->
+    <Launch Condition="NOT ((INSTALLFOLDER &gt;&lt; &quot;OneDrive&quot;) OR (INSTALLFOLDER &gt;&lt; &quot;Dropbox&quot;) OR (INSTALLFOLDER &gt;&lt; &quot;Google Drive&quot;) OR (INSTALLFOLDER &gt;&lt; &quot;GoogleDrive&quot;) OR (INSTALLFOLDER &gt;&lt; &quot;iCloud&quot;) OR (INSTALLFOLDER &gt;&lt; &quot;Box Sync&quot;))"
+            Message="Seamly cannot be installed in a cloud-synced folder. OneDrive, Dropbox and Google Drive replace files that are in use, which breaks the program and its uninstall. Choose a local or removable drive." />
 
     <!-- Directory-chooser UI. The license page shows license.rtf, which sits beside this
          .wxs; $(sys.SOURCEFILEDIR) is the folder of this source file (with a
@@ -324,7 +388,7 @@
         <!-- Always shown: the point of the whole dialog. -->
         <Control Id="UserDataText" Type="Text" X="20" Y="150" Width="330" Height="76"
                  NoPrefix="yes"
-                 Text="Your own work is not touched. Patterns, measurements, templates, etc. stay in your user data folder - C:\Users\your name\seamlyData unless you have moved it. Your settings stay in AppData\Local\Seamly and AppData\Roaming\Seamly. Neither installing nor uninstalling Seamly removes any of them." />
+                 Text="Your own work is not touched. Patterns, measurements and templates stay in your user data folder - Setup asks you for it on a later page, and never deletes or overwrites what is already there. Your settings stay in AppData\Local\Seamly and AppData\Roaming\Seamly. Neither installing nor uninstalling Seamly removes any of them." />
 
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
                  Disabled="yes" Text="&amp;Back" />
@@ -360,10 +424,148 @@
         </Control>
       </Dialog>
 
-      <!-- Spawn the shortcut question from the install-directory page, before
-           the built-in transition to VerifyReadyDlg (Order 4). -->
+      <!-- ========== user-data directory (InstWinX64.1.2.1 - 1.2.3) ======== -->
+      <!-- Mirrors the stock InstallDirDlg layout: a PathEdit bound to the
+           directory property, and a Change button that spawns WixUI's own
+           BrowseDlg. BrowseDlg edits whatever _BrowseProperty names, so the
+           Change button sets that first (Order 1) and spawns second (Order 2)
+           - the identical mechanism InstallDirDlg uses for INSTALLFOLDER. -->
+      <Dialog Id="SeamlyDataDirDlg" Width="370" Height="270"
+              Title="[ProductName] Setup">
+
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
+                 TabSkip="no" Text="WixUI_Bmp_Banner" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="373" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
+
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="{\WixUI_Font_Title}Where do you keep your work?" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="Choose the folder for your patterns and measurements." />
+
+        <Control Id="Explain" Type="Text" X="20" Y="60" Width="330" Height="40"
+                 NoPrefix="yes"
+                 Text="This folder may be on any drive, including a USB stick or a synced folder such as OneDrive, Google Drive or Dropbox. Syncing your own work is supported - only the program files have to stay on a local drive." />
+
+        <Control Id="FolderLabel" Type="Text" X="20" Y="110" Width="330" Height="10"
+                 NoPrefix="yes" Text="&amp;Folder:" />
+        <Control Id="Folder" Type="PathEdit" X="20" Y="122" Width="255" Height="18"
+                 Property="SEAMLYDATAROOT" Indirect="yes" />
+        <Control Id="ChangeFolder" Type="PushButton" X="285" Y="122" Width="66" Height="18"
+                 Text="Ch&amp;ange...">
+          <Publish Property="_BrowseProperty" Value="SEAMLYDATAROOT" Order="1" />
+          <Publish Event="SpawnDialog" Value="BrowseDlg" Order="2" />
+        </Control>
+
+        <Control Id="Note" Type="Text" X="20" Y="152" Width="330" Height="60"
+                 NoPrefix="yes"
+                 Text="Nothing is written here now. Setup records the folder, and the apps use it from their first run. Your existing work is never deleted or moved out of where it is today." />
+
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
+                 Text="&amp;Back">
+          <Publish Event="EndDialog" Value="Return" />
+        </Control>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
+                 Default="yes" Text="&amp;Next">
+          <Publish Event="EndDialog" Value="Return" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
+                 Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+      </Dialog>
+
+      <!-- ========== copy existing work? (InstWinX64.1.2.4) ================ -->
+      <!-- 1.2.4.1 explain, 1.2.4.2 require confirmation. The checkbox defaults
+           to 0, so the copy happens only when the user actively asks for it.
+           1.2.4.3 (copy only missing files, never overwrite) is enforced by the
+           script the deferred action runs, not by this dialog. -->
+      <Dialog Id="SeamlyDataMigrateDlg" Width="370" Height="270"
+              Title="[ProductName] Setup">
+
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
+                 TabSkip="no" Text="WixUI_Bmp_Banner" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="373" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
+
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="{\WixUI_Font_Title}Copy your existing work?" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="Setup can copy what you already have into the new folder." />
+
+        <Control Id="Explain" Type="Text" X="20" Y="60" Width="330" Height="72"
+                 NoPrefix="yes"
+                 Text="Setup can copy your existing patterns and measurements into [SEAMLYDATAROOT]. Nothing is deleted or moved: every file stays where it is now, and you keep a complete second copy. A file that already exists in the new folder is left exactly as it is - Setup never overwrites your work." />
+
+        <Control Id="CopyCheckBox" Type="CheckBox" X="20" Y="140" Width="330" Height="18"
+                 Property="SEAMLYCOPYUSERDATA" CheckBoxValue="1"
+                 Text="&amp;Yes, copy my existing patterns and measurements" />
+
+        <!-- InstWinX64.1.2.4.3 requires the user to be told, in as many words,
+             that the old copy survives as a backup AND that their work is
+             reachable at the new location. Both halves are stated here. -->
+        <Control Id="Caveat" Type="Text" X="20" Y="166" Width="330" Height="60"
+                 NoPrefix="yes"
+                 Text="Afterwards your work is in both places: everything stays exactly where it is today, which is your backup, and the same files are also available in [SEAMLYDATAROOT], which is where the apps will look. Leave the box unticked to record the folder without copying anything - you can copy the files yourself at any time." />
+
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
+                 Text="&amp;Back">
+          <Publish Event="EndDialog" Value="Return" />
+        </Control>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
+                 Default="yes" Text="&amp;Next">
+          <Publish Event="EndDialog" Value="Return" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
+                 Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+      </Dialog>
+
+      <!-- Spawn the three questions from the install-directory page, before the
+           built-in transition to VerifyReadyDlg (Order 4).
+
+           KNOWN DEFECT - THESE PAGES DO NOT DISPLAY IN WiX 6.0.2.
+           SeamlyShortcutsDlg has never displayed (recorded in
+           INSTALL_DECISION_FLOW.md), and these two share its mechanism, so they
+           inherit the same fault. Dumping the built package's ControlEvent rows
+           for InstallDirDlg's Next shows the whole chain:
+
+             1  CheckTargetPath  [WIXUI_INSTALLDIR]     cond 1
+             1  SpawnDialog      SeamlyDataDirDlg       cond 1
+             2  SpawnDialog      SeamlyDataMigrateDlg   cond 1
+             3  SetTargetPath    [WIXUI_INSTALLDIR]     cond 1
+             3  SpawnDialog      SeamlyShortcutsDlg     cond 1
+             4  NewDialog        VerifyReadyDlg         cond 1
+
+           Two things to fix, and neither is a one-line change:
+
+           a) ORDERING COLLISIONS. SeamlyDataDirDlg ties with CheckTargetPath at
+              Order 1, and SeamlyShortcutsDlg ties with SetTargetPath at Order 3.
+              Nothing defines which of two rows with equal Ordering runs first.
+
+           b) NO ALTERNATIVE MECHANISM. The Order 4 NewDialog's condition is the
+              literal "1", so no competing NewDialog can be written that excludes
+              it - which is the reasoning in this file's header, and the dump
+              confirms it still holds in 6.0.2. SpawnDialog is the only route,
+              and SpawnDialog is the thing that does not fire.
+
+           The authoring below is correct and every automated check passes,
+           because the checks assert the rows exist - which is exactly the
+           failure mode. The properties still work: an unattended install
+           setting SEAMLYDATAROOT / SEAMLYCOPYUSERDATA / SEAMLYDESKTOPSHORTCUTS
+           behaves correctly, and the defaults apply otherwise. What is missing
+           is only the interactive choice. Tracked in TODO_MIGRATE.md. -->
       <Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog"
-               Value="SeamlyShortcutsDlg" Order="2" />
+               Value="SeamlyDataDirDlg" Order="1" />
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog"
+               Value="SeamlyDataMigrateDlg" Order="2" />
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="SpawnDialog"
+               Value="SeamlyShortcutsDlg" Order="3" />
     </UI>
 
     <!-- Runs after FindRelatedProducts (25, which sets WIX_UPGRADE_DETECTED)
@@ -384,6 +586,59 @@
       <Show Dialog="SeamlyPreviousInstallDlg" Sequence="1250"
             Condition="(WIX_UPGRADE_DETECTED OR SEAMLYLEGACYUNINSTALLSTRING) AND NOT Installed" />
     </InstallUISequence>
+
+    <!-- ================= copy existing user data (InstWinX64.1.2.4) ======= -->
+    <!-- WHY A SCRIPT AND NOT THE MoveFile TABLE
+         MSI's own CopyFile/MoveFile rows can only copy within a single
+         directory - their wildcards do not recurse - and a user's pattern
+         folder has subdirectories. So the copy is a deferred action running the
+         PowerShell helper installed above.
+
+         Impersonate="yes" is required, not cosmetic. A deferred action defaults
+         to running as SYSTEM in a perMachine package, and SYSTEM cannot read a
+         user's OneDrive or mapped drive. Impersonating puts the copy back in
+         the account whose files these are, with exactly that account's rights.
+
+         Return="ignore" is deliberate. The copy is a convenience, and the
+         source files are never modified, so a failure mid-copy leaves the
+         user's originals untouched and the new folder partly filled - harmless,
+         and the apps read whatever is there. Failing the install instead would
+         roll back a perfectly good program installation over a file-copy
+         problem.
+
+         THERE IS NO ROLLBACK ACTION, ON PURPOSE. A rollback would have to
+         delete files out of a folder that may already have held the user's own
+         work before this install ran, and no rollback action can reliably tell
+         which files it put there from which were already present. Deleting user
+         data to tidy up a failed install is a worse outcome than leaving a few
+         copied files behind. The copy is additive-only and never overwrites, so
+         there is nothing whose absence would leave the machine inconsistent.
+
+         Deferred actions cannot read properties, so the command line is handed
+         over through the CustomActionData property of the SAME name - the
+         standard pattern, and why the SetProperty below is sequenced
+         immediately before the action it feeds. -->
+    <SetProperty Id="SeamlyCopyUserData"
+                 Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]seamly_copy_user_data.ps1&quot; -Destination &quot;[SEAMLYDATAROOT]&quot;"
+                 Before="SeamlyCopyUserData"
+                 Sequence="execute"
+                 Condition="SEAMLYCOPYUSERDATA = &quot;1&quot; AND SEAMLYDATAROOT AND NOT Installed" />
+
+    <CustomAction Id="SeamlyCopyUserData"
+                  DllEntry="WixQuietExec64"
+                  BinaryRef="Wix4UtilCA_X64"
+                  Execute="deferred"
+                  Impersonate="yes"
+                  Return="ignore" />
+
+    <!-- After InstallFiles, so the helper script exists on disk; after
+         WriteRegistryValues so the recorded DataRoot is already correct even if
+         the copy is skipped or fails. -->
+    <InstallExecuteSequence>
+      <Custom Action="SeamlyCopyUserData"
+              After="WriteRegistryValues"
+              Condition="SEAMLYCOPYUSERDATA = &quot;1&quot; AND SEAMLYDATAROOT AND NOT Installed" />
+    </InstallExecuteSequence>
 
     <!-- ================= directory tree + harvested runtimes ============= -->
     <!-- ProgramFiles64Folder, not ProgramFiles6432Folder or the x86 tree: every
@@ -408,6 +663,16 @@
              shortcuts and file associations can reference them. -->
         <Files Include="$(var.ParentStagingDir)\**" />
       </Directory>
+    </StandardDirectory>
+
+    <!-- The user-data root. Parented to TARGETDIR rather than to a standard
+         folder so the whole path is replaceable: the user may put it on any
+         drive, including removable and cloud-synced ones (InstWinX64.1.2.2).
+         The installer authors NO components under this directory - it creates
+         no files here. It exists so CostFinalize resolves [SEAMLYDATAROOT] and
+         so BrowseDlg has a directory to edit. -->
+    <StandardDirectory Id="TARGETDIR">
+      <Directory Id="SEAMLYDATAROOT" />
     </StandardDirectory>
 
     <!-- ================= executables, shortcuts, associations ============ -->
@@ -504,7 +769,9 @@
            the things it created ourselves has none of those problems, and it is
            undone by the standard RemoveFiles rollback if the install aborts.
 
-           Its complete footprint, read from dist\seamly2d-installer.nsi:
+           Its complete footprint, transcribed from dist\seamly2d-installer.nsi
+           before that file was deleted (Task InstWinX64.1.3.1). This list is
+           now the record - it cannot be re-derived, so do not trim it:
              - $INSTDIR, default C:\Program Files (x86)\Seamly2D (File /r *)
              - HKLM\SOFTWARE\NSIS_Seamly2D
              - HKLM\...\Uninstall\Seamly2D
@@ -537,7 +804,25 @@
         <RegistryKey Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D">
           <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
           <RegistryValue Name="DisplayVersion" Type="string" Value="$(var.DisplayVersion)" />
+          <!-- InstWinX64.1.2: the data root the user chose, for the apps to
+               read on first run (InstWinX64.1.5 / 1.8). Written even when the
+               user declined the copy - recording the folder and filling it are
+               separate decisions. Empty when a silent install passed no
+               SEAMLYDATAROOT, which the apps read as "use your own default". -->
+          <RegistryValue Name="DataRoot" Type="string" Value="[SEAMLYDATAROOT]" />
         </RegistryKey>
+      </Component>
+
+      <!-- The copy helper the deferred action runs. It ships inside
+           INSTALLFOLDER rather than being embedded as a binary custom action so
+           it is readable on disk: a script that touches a user's own files
+           should be one they can open and check. It stays after uninstall only
+           as long as the rest of the program does - ordinary component rules
+           remove it. -->
+      <Component Id="UserDataCopyScript">
+        <File Id="seamly_copy_user_data.ps1"
+              Source="$(sys.SOURCEFILEDIR)seamly_copy_user_data.ps1"
+              KeyPath="yes" />
       </Component>
 
     </ComponentGroup>

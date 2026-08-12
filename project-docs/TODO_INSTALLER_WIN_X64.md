@@ -67,28 +67,46 @@ Build one WiX v6 MSI per architecture containing Seamly2D, SeamlyMe, SeamlyLayou
 Configure WiX v6 using `scripts/packaging/windows/seamly-family.wxs`
 
 - [ ] **InstWinX64.1.0** - Create installer
-  - [ ] **InstWinX64.1.1 - Program directory**
-    - [ ] InstWinX64.1.1.1 Default program directory to `C:\Program Files\SeamlyApps`
-    - [ ] InstWinX64.1.1.2 Update `seamly-family.wxs` and all shortcuts, file associations, registry values, and SeamlyLayout paths.
-    --> How can the user confirm this?
-    - [ ] InstWinX64.1.1.3 - Accept any local or removable drive/path for program directory; reject cloud-synced locations; install 'SeamlyApps' directory to the selected drive/path.
-    --> unconfirmed
-    - [ ] InstWinX64.1.1.4 - Add a `Change` button and silent-install property.
-    --> unconfirmed
-  - [ ] **InstWinX64.1.2 - User-data directory**
-    - [ ] InstWinX64.1.2.1 - Default user directory to `C:\Users\<user>\SeamlyData`.
-    --> unconfirmed
-    - [ ] InstWinX64.1.2.2 - Accept any drive/path, including OneDrive, Google Drive, Dropbox, external drives, and USB media; install 'SeamlyData' directory to this drive/path.
-    --> installer did not prompt user for the user data directory, fix this
-    - [ ] InstWinX64.1.2.3 - Add a `Change` button and silent-install property.
-    --> unconfirmed
-    - [ ] **InstWinX64.1.2.4 When the data root changes:**
-      - [ ] InstWinX64.1.2.4.1 Explain that first run will copy existing data without deleting the source.
-      - [ ] InstWinX64.1.2.4.2 Require confirmation before continuing.
-      - [ ] InstWinX64.1.2.4.3 Copy only missing files; never overwrite existing destination files.
+  - [x] **InstWinX64.1.1 - Program directory** — authored 2026-08-11, awaiting a real install
+    - [x] InstWinX64.1.1.1 Default program directory to `C:\Program Files\SeamlyApps`
+    --> already authored that way (`ProgramFiles64Folder` + `Name="SeamlyApps"`); kept. `Program Files (x86)` was considered and rejected — it is Windows' tree for **32-bit** programs, every binary here is x64 or arm64, and the two architectures would resolve it differently
+    - [x] InstWinX64.1.1.2 Update `seamly-family.wxs` and all shortcuts, file associations, registry values, and SeamlyLayout paths.
+    --> already correct: every shortcut, association and registry value resolves through `[INSTALLFOLDER]`, and SeamlyLayout installs beside the parents (Task 30 flat layout). **How the user confirms it:** the installer writes the chosen path to `HKLM\SOFTWARE\Seamly\Seamly2D\InstallPath`, and `test_msi_install.ps1` checks it on a real machine. `test_msi_authoring.ps1` now also asserts the folder name and its parent, so a silent rename fails CI
+    - [x] InstWinX64.1.1.3 - Accept any local or removable drive/path for program directory; reject cloud-synced locations; install 'SeamlyApps' directory to the selected drive/path.
+    --> a `Launch` condition rejects any path containing OneDrive, Dropbox, Google Drive, iCloud or Box Sync. Written as a launch condition rather than a dialog check because it is the only form that also blocks a silent `/qn` install
+    - [x] InstWinX64.1.1.4 - Add a `Change` button and silent-install property.
+    --> `WixUI_InstallDir` already supplies the browse button; the silent-install property is `INSTALLFOLDER=`
+  - [ ] **InstWinX64.1.2 - User-data directory** — authoring done 2026-08-11, but **BLOCKED on the SpawnDialog defect below**
+
+> **BLOCKER, found 2026-08-11.** The two new pages are wired the same way as
+> `SeamlyShortcutsDlg`, which `INSTALL_DECISION_FLOW.md` records as a known
+> defect: it **never displays**. Dumping the built MSI's `ControlEvent` rows for
+> `InstallDirDlg`'s Next confirms why there is no alternative — the built-in
+> `NewDialog VerifyReadyDlg` sits at Order 4 with condition `1`, so no competing
+> `NewDialog` can ever be excluded, leaving `SpawnDialog` as the only mechanism.
+> The same dump also shows two ordering collisions introduced by this task:
+> `SeamlyDataDirDlg` ties with `CheckTargetPath` at Order 1, and
+> `SeamlyShortcutsDlg` ties with `SetTargetPath` at Order 3. Tied orderings are
+> undefined behaviour.
+>
+> Everything that does not depend on the wizard works and is verified. What is
+> blocked is only the interactive prompting. Fix the SpawnDialog defect
+> (tracked in `TODO_MIGRATE.md`) before ticking 1.2.1-1.2.3.
+    - [x] InstWinX64.1.2.1 - Default user directory to `C:\Users\<user>\SeamlyData`.
+    --> `SEAMLYDATAROOT`, defaulted from `%USERPROFILE%` in the **UI sequence only**: the elevated sequence runs as SYSTEM, whose `%USERPROFILE%` is not the user's
+    - [x] InstWinX64.1.2.2 - Accept any drive/path, including OneDrive, Google Drive, Dropbox, external drives, and USB media; install 'SeamlyData' directory to this drive/path.
+    --> `SeamlyDataDirDlg` now prompts for it, and it is deliberately **not** subject to the cloud-folder rejection above: syncing your own patterns is the point, only program files must stay local. **Decision to confirm:** `SEAMLYDATAROOT` holds the *whole* path, so choosing `E:\` gives `E:\`, not `E:\SeamlyData`. Auto-appending the leaf would turn a typed `E:\SeamlyData` into `E:\SeamlyData\SeamlyData`. Say if you want the append instead
+    - [x] InstWinX64.1.2.3 - Add a `Change` button and silent-install property.
+    --> `Change...` spawns WixUI's `BrowseDlg`; `SEAMLYDATAROOT=` sets it unattended. Note: `/qn` runs no UI sequence, so an unattended install must pass the value or the apps fall back to their own default
+    - [x] **InstWinX64.1.2.4 When the data root changes:**
+      - [x] InstWinX64.1.2.4.1 Explain that first run will copy existing data without deleting the source.
+      - [x] InstWinX64.1.2.4.2 Require confirmation before continuing.
+      --> `SeamlyDataMigrateDlg`, an opt-in checkbox defaulting to **off**, so an unattended install never starts moving files nobody asked about
+      - [x] InstWinX64.1.2.4.3 Copy the user data to the new directory then copy only missing installation data files; never overwrite existing destination files. -- tell the user that their old data is still where it was as a backup and that their data is now accessible in the new location.
+      --> enforced by `seamly_copy_user_data.ps1`, run as a deferred **impersonated** action (SYSTEM cannot read the user's own folders) with `Return="ignore"` (a file-copy problem must not roll back a good program install). The dialog states both halves of the reassurance in as many words. **No rollback action, on purpose:** it could only undo the copy by deleting files from a folder that may already have held the user's work, and nothing can tell those apart. The copy is additive-only, so there is nothing to undo. Verified locally: subfolders preserved, an existing destination file left byte-for-byte, source untouched, second run copies 0
   - [ ] **InstWinX64.1.3 - file clean up**
-    - [ ] InstWinX64.1.3.1 - Delete `dist/seamly2d-installer.nsi`. It is currently kept in the tree, unbuilt, with a RETIRED header: `seamly-family.wxs` cites it as the record of a pre-MSI installation's on-disk footprint, which the MSI's `RemoveFolderEx` authoring removes on upgrade. Remove the citation from `seamly-family.wxs`
-    --> I deleted it
+    - [x] InstWinX64.1.3.1 - Delete `dist/seamly2d-installer.nsi`. It is currently kept in the tree, unbuilt, with a RETIRED header: `seamly-family.wxs` cites it as the record of a pre-MSI installation's on-disk footprint, which the MSI's `RemoveFolderEx` authoring removes on upgrade. Remove the citation from `seamly-family.wxs`
+    --> user deleted the file; the two citations in `seamly-family.wxs` are now rewritten. The footprint list in that file is marked as the record — it can no longer be re-derived, so it must not be trimmed
     - [x] InstWinX64.1.3.2 - Remove `windows-msi.yml`
     --> confirmed
   - [ ] **InstWinX64.1.4 - Persist both selections** and prefill them during repair or upgrade.

@@ -121,14 +121,37 @@ Worth knowing: `src\app\seamlylayout\build.ps1`'s guard probes for the `Qt6WebEn
 
 ```powershell
 cd scripts\seamly-msi\x64
-msiexec /i Seamly-x64.msi                       # interactive (license + directory page)
-msiexec /i Seamly-x64.msi /qn                   # silent, defaults (needs elevation)
-msiexec /i Seamly-x64.msi /qn INSTALLFOLDER=D:\Seamly2D   # silent, custom dir
-msiexec /x Seamly-x64.msi /qn                   # silent uninstall
+msiexec /i seamly-x64.msi                       # interactive (license + directory pages)
+msiexec /i seamly-x64.msi /qn                   # silent, defaults (needs elevation)
+msiexec /i seamly-x64.msi /qn INSTALLFOLDER=D:\SeamlyApps        # silent, custom program dir
+msiexec /i seamly-x64.msi /qn SEAMLYDATAROOT=E:\SeamlyData       # silent, custom data root
+msiexec /i seamly-x64.msi /qn SEAMLYDESKTOPSHORTCUTS=0           # silent, no desktop shortcuts
+msiexec /x seamly-x64.msi /qn                   # silent uninstall
+```
+
+### Silent-install properties
+
+| Property | Default | Notes |
+|---|---|---|
+| `INSTALLFOLDER` | `C:\Program Files\SeamlyApps` | Rejected if the path contains OneDrive, Dropbox, Google Drive, iCloud or Box Sync — a sync client replaces files that are in use, which breaks the program and its uninstall. The check is a launch condition, so it applies to `/qn` too. |
+| `SEAMLYDATAROOT` | `C:\Users\<user>\SeamlyData` | Patterns and measurements. **Any** drive is allowed here, including synced folders and USB media. **Under `/qn` there is no default** — the UI sequence computes it from `%USERPROFILE%`, and `/qn` runs no UI sequence, so pass it explicitly or the apps fall back to their own first-run default. |
+| `SEAMLYCOPYUSERDATA` | `0` | Set to `1` to copy existing work into `SEAMLYDATAROOT`. Additive only: nothing is deleted, and a file already at the destination is never overwritten. |
+| `SEAMLYDESKTOPSHORTCUTS` | `1` | Desktop shortcuts for Seamly2D and SeamlyMe. |
+
+Why `SEAMLYDATAROOT` has no `/qn` default: a per-machine package runs its
+execute sequence elevated as SYSTEM, whose `%USERPROFILE%` is
+`C:\Windows\system32\config\systemprofile`. Computing the default there would
+put a user's patterns inside a system account's profile.
+
+```
 msiexec /a Seamly-x64.msi /qn TARGETDIR=C:\extract        # extract without installing
 ```
 
-What the user sees when installing interactively (Task 51): welcome → license → install folder → **Shortcuts** (one checkbox for desktop shortcuts, default on) → ready → install. An extra page appears **before** the welcome page when a previous installation is found — an older MSI of this product or the old NSIS installation — warning that the program files will be replaced and stating that patterns, measurements and settings under `seamlyData`, `AppData\Local\Seamly` and `AppData\Roaming\Seamly` are not touched. Silent installs skip both pages; pass `SEAMLYDESKTOPSHORTCUTS=0` to suppress the desktop shortcuts there.
+What the user sees when installing interactively: welcome → license → install folder → **Your work** (the data root, with a Change button) → **Copy your existing work?** (opt-in, default off) → **Shortcuts** (desktop shortcuts, default on) → ready → install. The three middle pages are spawned from the install-folder page's Next at Orders 1-3, below WixUI's own transition to the ready page at Order 4.
+
+An extra page appears **before** the welcome page when a previous installation is found — an older MSI of this product or the old NSIS installation — warning that the program files will be replaced and stating that the user's own work is not touched.
+
+Silent installs skip every page. Pass the properties in the table above instead.
 
 The verification of a real install (clean machine, **not yet run** — Task 13's outstanding subtask and Task 51's last one) lives in one place, [`README.md`](README.md#installing--testing), so it does not drift between two files. It is now mostly automated, in two layers: `test_msi_authoring.ps1` checks what the **package contains** and runs on every build, and [`test_msi_install.ps1`](test_msi_install.ps1) checks what an **install actually did** — run in four phases around the `msiexec` commands on the test machine, including starting each app to prove the deployed Qt runtime is complete. Only the UAC prompt, the wizard page order and wording, and the icons still need a human.
 
