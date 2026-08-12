@@ -107,7 +107,7 @@ $(document).ready(function(){initNavTree('d8/dad/md_src_app_seamlylayout_CLAUDE.
 <li><b>Copyright:</b> 2026</li>
 <li><b>Prompts are requirements, not suggestions.</b></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md21"></a>
+<h1><a class="anchor" id="autotoc_md27"></a>
 Architecture</h1>
 <ul>
 <li><b>Frontend:</b> Qt 6.11 + QML and QtWidgets (LGPL-3.0)</li>
@@ -115,7 +115,7 @@ Architecture</h1>
 <li><b>Bridge:</b> CXX-Qt 0.7.3 — generates C++ glue from Rust</li>
 <li><b>Dual license:</b> Qt frontend LGPL-3.0, Rust core MIT (de-linkable)</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md22"></a>
+<h1><a class="anchor" id="autotoc_md28"></a>
 Key Conventions</h1>
 <ul>
 <li>Always use absolute file paths, never relative paths</li>
@@ -125,7 +125,7 @@ Key Conventions</h1>
 <li>Read docs in <code>docs/</code> regularly and update them to reflect code changes</li>
 <li><b>UI work must consult <code>crates/cxxqt_bridge/</code> and <code>qt_frontend/</code>.</b> The active UI is QML in <code>qt_frontend/qml/</code> with the Rust↔Qt bridge in <code>crates/cxxqt_bridge/</code>.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md26"></a>
+<h1><a class="anchor" id="autotoc_md29"></a>
 Command Line — the Seamly2D handoff contract (Task 49)</h1>
 <p>Seamly2D's Layout Mode writes <code>&lt;pattern&gt;.pieces.svg</code> beside the pattern file and launches this app <b>detached</b> with that path. The contract is implemented in <code>qt_frontend/src/StartupOptions.{h,cpp}</code> and pinned by <code><a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp.html">src/test/SeamlyLayoutTest/StartupOptionsTests.cpp</a></code>; the producing half lives in <code><a class="el" href="../../d4/dce/seamly__family__paths_8cpp.html">src/libs/vmisc/seamly_family_paths.cpp</a></code> and is pinned by <code><a class="el" href="../../df/da4/classTST__SeamlyFamilyPaths.html" title="TST_SeamlyFamilyPaths tests the two lookups seamly2d uses to find the SeamlyLayout executable.">TST_SeamlyFamilyPaths</a></code>. <b>Change one side and you must change the other</b> — see <code>project-docs/SVG-DATA-ATTRIBUTES.md</code> for the full statement.</p>
 <table class="markdownTable">
