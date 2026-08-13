@@ -229,24 +229,111 @@ foreach ($property in @('SEAMLYDESKTOPSHORTCUTS', 'SEAMLYLEGACYUNINSTALLSTRING',
     Assert-That -Name "$property is a secure custom property" -Succeeded ($secure -like "*$property*")
 }
 
-# --- 5. the "existing installation" warning dialog ----------------------------
+# --- 5. the wizard dialog chain (Task InstWinX64.1) ---------------------------
+# The package defines its own dialog set, so it owns every page transition. Each
+# arrow is a NewDialog row it authors itself.
+#
+#   WelcomeDlg -> LicenseAgreementDlg -> [SeamlyPreviousInstallDlg] ->
+#   InstallDirDlg -> SeamlyDataDirDlg -> SeamlyDataMigrateDlg ->
+#   SeamlyShortcutsDlg -> VerifyReadyDlg
+#
+# This replaced SpawnDialog wiring that WiX 6.0.2 never ran, so the three Seamly
+# question pages were in the package and never displayed. A missing arrow leaves
+# a page whose button does nothing - the same failure, silently - which is why
+# both directions of every step are asserted here.
+$script:controlEvents = Get-MsiRows `
+    -Sql "SELECT ``Dialog_``, ``Control_``, ``Event``, ``Argument``, ``Condition``, ``Ordering`` FROM ``ControlEvent``" `
+    -Columns 'Dialog', 'Control', 'Event', 'Argument', 'Condition', 'Ordering'
+
+#------------------------------------------------------------------------------
+# @brief  Assert one page-to-page transition of the wizard.
+#
+# @param  From            dialog the button is on
+# @param  Control         button id, normally Next or Back
+# @param  To              dialog the button opens
+# @param  ConditionMatch  regex the row's condition must match, when it is
+#                         conditional; omit for an unconditional transition
+#------------------------------------------------------------------------------
+function Assert-Transition {
+    param(
+        [string]$From,
+        [string]$Control,
+        [string]$To,
+        [string]$ConditionMatch
+    )
+    $rows = @($script:controlEvents | Where-Object {
+        $_.Dialog -eq $From -and $_.Control -eq $Control -and
+        $_.Event -eq 'NewDialog' -and $_.Argument -eq $To })
+    $succeeded = ($rows.Count -eq 1)
+    if ($succeeded -and $ConditionMatch) { $succeeded = ($rows[0].Condition -match $ConditionMatch) }
+    Assert-That -Name "$From's $Control opens $To" -Succeeded $succeeded `
+        -Detail "$($rows.Count) row(s), condition '$(if ($rows.Count) { $rows[0].Condition } else { '<nothing>' })'"
+}
+
+Assert-Transition -From 'WelcomeDlg' -Control 'Next' -To 'LicenseAgreementDlg' -ConditionMatch 'NOT Installed'
+Assert-Transition -From 'LicenseAgreementDlg' -Control 'Next' -To 'SeamlyPreviousInstallDlg' `
+    -ConditionMatch 'WIX_UPGRADE_DETECTED.*SEAMLYLEGACYUNINSTALLSTRING.*NOT Installed'
+Assert-Transition -From 'LicenseAgreementDlg' -Control 'Next' -To 'InstallDirDlg' -ConditionMatch 'NOT \('
+Assert-Transition -From 'SeamlyPreviousInstallDlg' -Control 'Next' -To 'InstallDirDlg'
+Assert-Transition -From 'InstallDirDlg' -Control 'Next' -To 'SeamlyDataDirDlg'
+Assert-Transition -From 'SeamlyDataDirDlg' -Control 'Next' -To 'SeamlyDataMigrateDlg'
+Assert-Transition -From 'SeamlyDataMigrateDlg' -Control 'Next' -To 'SeamlyShortcutsDlg'
+Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Next' -To 'VerifyReadyDlg'
+
+Assert-Transition -From 'LicenseAgreementDlg' -Control 'Back' -To 'WelcomeDlg'
+Assert-Transition -From 'SeamlyPreviousInstallDlg' -Control 'Back' -To 'LicenseAgreementDlg'
+Assert-Transition -From 'InstallDirDlg' -Control 'Back' -To 'SeamlyPreviousInstallDlg' `
+    -ConditionMatch 'WIX_UPGRADE_DETECTED.*SEAMLYLEGACYUNINSTALLSTRING.*NOT Installed'
+Assert-Transition -From 'InstallDirDlg' -Control 'Back' -To 'LicenseAgreementDlg' -ConditionMatch 'NOT \('
+Assert-Transition -From 'SeamlyDataDirDlg' -Control 'Back' -To 'InstallDirDlg'
+Assert-Transition -From 'SeamlyDataMigrateDlg' -Control 'Back' -To 'SeamlyDataDirDlg'
+Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyDataMigrateDlg'
+Assert-Transition -From 'VerifyReadyDlg' -Control 'Back' -To 'SeamlyShortcutsDlg' -ConditionMatch 'NOT Installed'
+
+# The two License Next rows must not both be true and must not both be false,
+# or the button either picks an undefined winner or does nothing at all. They
+# come from one preprocessor variable, so the test is that the second is the
+# negation of the first.
+$licenseNext = @($script:controlEvents | Where-Object {
+    $_.Dialog -eq 'LicenseAgreementDlg' -and $_.Control -eq 'Next' -and $_.Event -eq 'NewDialog' })
+$toPrevious = @($licenseNext | Where-Object { $_.Argument -eq 'SeamlyPreviousInstallDlg' })
+$toInstallDir = @($licenseNext | Where-Object { $_.Argument -eq 'InstallDirDlg' })
+Assert-That -Name 'the license page has exactly two exits' -Succeeded ($licenseNext.Count -eq 2)
+if ($toPrevious.Count -eq 1 -and $toInstallDir.Count -eq 1) {
+    $found = [regex]::Escape('(WIX_UPGRADE_DETECTED OR SEAMLYLEGACYUNINSTALLSTRING) AND NOT Installed')
+    Assert-That -Name 'the previous-install page is skipped on a clean machine' `
+        -Succeeded ($toPrevious[0].Condition -match $found -and
+                    $toInstallDir[0].Condition -match "NOT \($found\)") `
+        -Detail "conditions '$($toPrevious[0].Condition)' and '$($toInstallDir[0].Condition)'"
+}
+
+# The install directory must be committed before the next page reads it.
+$installDirNext = @($script:controlEvents | Where-Object {
+    $_.Dialog -eq 'InstallDirDlg' -and $_.Control -eq 'Next' })
+$setTargetPath = @($installDirNext | Where-Object { $_.Event -eq 'SetTargetPath' })
+$leaveInstallDir = @($installDirNext | Where-Object { $_.Event -eq 'NewDialog' })
+Assert-That -Name 'the chosen program directory is committed before the wizard moves on' `
+    -Succeeded ($setTargetPath.Count -eq 1 -and $leaveInstallDir.Count -eq 1 -and
+                [int]$setTargetPath[0].Ordering -lt [int]$leaveInstallDir[0].Ordering) `
+    -Detail "SetTargetPath at $(if ($setTargetPath.Count) { $setTargetPath[0].Ordering } else { '<nothing>' }), NewDialog at $(if ($leaveInstallDir.Count) { $leaveInstallDir[0].Ordering } else { '<nothing>' })"
+
+# The three sequenced dialogs decide which page opens the wizard, and the first
+# one whose condition holds wins. A resumed install must reach ResumeDlg, not
+# the welcome page. WiX numbers them from the order of the DialogRef elements in
+# seamly-family.wxs, so this asserts the resulting numbers.
 $uiSequence = Get-MsiRows -Sql "SELECT ``Action``, ``Sequence``, ``Condition`` FROM ``InstallUISequence``" `
     -Columns 'Action', 'Sequence', 'Condition'
-$warningRow = @($uiSequence | Where-Object { $_.Action -eq 'SeamlyPreviousInstallDlg' })
-Assert-That -Name 'the previous-installation dialog is in the UI sequence' -Succeeded ($warningRow.Count -eq 1)
-if ($warningRow.Count -eq 1) {
-    $firstWixUiDialog = ($uiSequence |
-        Where-Object { $_.Action -in @('WelcomeDlg', 'ResumeDlg', 'MaintenanceWelcomeDlg') } |
-        ForEach-Object { [int]$_.Sequence } | Measure-Object -Minimum).Minimum
-    Assert-That -Name 'the warning is shown before the first WixUI dialog' `
-        -Succeeded ([int]$warningRow[0].Sequence -lt $firstWixUiDialog) `
-        -Detail "warning at $($warningRow[0].Sequence), first WixUI dialog at $firstWixUiDialog"
-    Assert-That -Name 'the warning triggers on either kind of existing install, and only on install' `
-        -Succeeded ($warningRow[0].Condition -match 'WIX_UPGRADE_DETECTED' -and
-                    $warningRow[0].Condition -match 'SEAMLYLEGACYUNINSTALLSTRING' -and
-                    $warningRow[0].Condition -match 'NOT Installed') `
-        -Detail "condition is '$($warningRow[0].Condition)'"
+foreach ($entry in @(@('ResumeDlg', 1296), @('WelcomeDlg', 1297), @('MaintenanceWelcomeDlg', 1298))) {
+    $row = @($uiSequence | Where-Object { $_.Action -eq $entry[0] })
+    Assert-That -Name "$($entry[0]) is sequenced at $($entry[1])" `
+        -Succeeded ($row.Count -eq 1 -and [int]$row[0].Sequence -eq $entry[1]) `
+        -Detail "found $(if ($row.Count) { $row[0].Sequence } else { '<nothing>' })"
 }
+# The previous-install page is a page of the chain now, not a sequenced dialog.
+Assert-That -Name 'the previous-installation page is not sequenced separately' `
+    -Succeeded (@($uiSequence | Where-Object { $_.Action -eq 'SeamlyPreviousInstallDlg' }).Count -eq 0)
+
+# --- 5a. the "existing installation" warning text -----------------------------
 
 # The wording is load-bearing: Task 51 requires the dialog to tell the user what
 # happens to their own work. It no longer names a fixed folder - Task
@@ -325,17 +412,7 @@ $checkBoxes = Get-MsiRows -Sql "SELECT ``Property``, ``Value`` FROM ``CheckBox``
 Assert-That -Name 'the shortcuts checkbox sets SEAMLYDESKTOPSHORTCUTS' `
     -Succeeded (@($checkBoxes | Where-Object { $_.Property -eq 'SEAMLYDESKTOPSHORTCUTS' -and $_.Value -eq '1' }).Count -eq 1)
 
-# The checkbox dialog must be spawned before the built-in transition to
-# VerifyReadyDlg - that ordering is the one thing this authoring depends on.
-$nextEvents = Get-MsiRows -Sql "SELECT ``Event``, ``Argument``, ``Ordering`` FROM ``ControlEvent`` WHERE ``Dialog_``='InstallDirDlg' AND ``Control_``='Next'" `
-    -Columns 'Event', 'Argument', 'Ordering'
-$spawn = @($nextEvents | Where-Object { $_.Event -eq 'SpawnDialog' -and $_.Argument -eq 'SeamlyShortcutsDlg' })
-$leave = @($nextEvents | Where-Object { $_.Event -eq 'NewDialog' })
-Assert-That -Name 'the shortcuts dialog is spawned from the install-directory page' -Succeeded ($spawn.Count -eq 1)
-Assert-That -Name 'it is spawned before the page hands off to the ready page' `
-    -Succeeded ($spawn.Count -eq 1 -and $leave.Count -ge 1 -and
-                [int]$spawn[0].Ordering -lt ([int](($leave | ForEach-Object { [int]$_.Ordering } | Measure-Object -Minimum).Minimum))) `
-    -Detail 'SpawnDialog must have a lower Ordering than every NewDialog event'
+# Where the shortcuts page sits in the wizard is asserted in section 5.
 
 $components = Get-MsiRows -Sql "SELECT ``Component``, ``Condition`` FROM ``Component``" -Columns 'Component', 'Condition'
 foreach ($component in @('Seamly2DDesktopShortcutComponent', 'SeamlyMeDesktopShortcutComponent')) {
@@ -494,19 +571,30 @@ Assert-That -Name 'the chosen data root is recorded for the apps to read' `
     -Succeeded (@($registry | Where-Object { $_.Root -eq '2' -and $_.Key -eq 'SOFTWARE\Seamly\Seamly2D' -and $_.Name -eq 'DataRoot' }).Count -eq 1)
 
 $dialogs = @(Get-MsiRows -Sql "SELECT ``Dialog`` FROM ``Dialog``" -Columns 'Dialog' | ForEach-Object { $_.Dialog })
-foreach ($dialog in @('SeamlyDataDirDlg', 'SeamlyDataMigrateDlg')) {
+foreach ($dialog in @('SeamlyDataDirDlg', 'SeamlyDataMigrateDlg', 'SeamlyShortcutsDlg')) {
     Assert-That -Name "dialog '$dialog' is present" -Succeeded ($dialogs -contains $dialog)
 }
-# Each question is spawned from InstallDirDlg's Next below the built-in
-# transition to VerifyReadyDlg (Order 4), so all three pages run before it.
-$spawned = Get-MsiRows -Sql "SELECT ``Dialog_``, ``Argument``, ``Ordering`` FROM ``ControlEvent`` WHERE ``Dialog_``='InstallDirDlg' AND ``Event``='SpawnDialog'" `
-    -Columns 'Dialog', 'Argument', 'Ordering'
-foreach ($dialog in @('SeamlyDataDirDlg', 'SeamlyDataMigrateDlg', 'SeamlyShortcutsDlg')) {
-    $row = @($spawned | Where-Object { $_.Argument -eq $dialog })
-    Assert-That -Name "'$dialog' is spawned before the ready page" `
-        -Succeeded ($row.Count -eq 1 -and [int]$row[0].Ordering -lt 4) `
-        -Detail "ordering $(if ($row.Count) { $row[0].Ordering } else { '<nothing>' })"
-}
+# Where each question sits in the wizard is asserted in section 5.
+
+# The data-root page browses with the shared BrowseDlg, which edits whatever
+# _BrowseProperty names. Setting that property must come first, or Change
+# browses the previous page's directory.
+$changeFolder = @($script:controlEvents | Where-Object {
+    $_.Dialog -eq 'SeamlyDataDirDlg' -and $_.Control -eq 'ChangeFolder' })
+$browseProperty = @($changeFolder | Where-Object { $_.Event -eq '[_BrowseProperty]' -and $_.Argument -eq 'SEAMLYDATAPARENT' })
+$browseSpawn = @($changeFolder | Where-Object { $_.Event -eq 'SpawnDialog' -and $_.Argument -eq 'BrowseDlg' })
+Assert-That -Name 'the data-root page browses the data-root parent' `
+    -Succeeded ($browseProperty.Count -eq 1 -and $browseSpawn.Count -eq 1 -and
+                [int]$browseProperty[0].Ordering -lt [int]$browseSpawn[0].Ordering) `
+    -Detail "_BrowseProperty at $(if ($browseProperty.Count) { $browseProperty[0].Ordering } else { '<nothing>' }), SpawnDialog at $(if ($browseSpawn.Count) { $browseSpawn[0].Ordering } else { '<nothing>' })"
+# BrowseDlg's OK must close the dialog and commit the path it browsed to, and it
+# must validate only the program directory: the data root is allowed on cloud
+# and removable drives that the program-directory rules reject.
+$browseOk = @($script:controlEvents | Where-Object { $_.Dialog -eq 'BrowseDlg' -and $_.Control -eq 'OK' })
+Assert-That -Name 'browsing commits the folder it was given' `
+    -Succeeded (@($browseOk | Where-Object { $_.Event -eq 'SetTargetPath' -and $_.Argument -eq '[_BrowseProperty]' }).Count -eq 1)
+Assert-That -Name 'browsing validates the program directory only' `
+    -Succeeded (@($browseOk | Where-Object { $_.Event -eq 'CheckTargetPath' -and $_.Condition -match 'INSTALLFOLDER' }).Count -eq 1)
 
 # InstWinX64.1.2.4. The copy must be deferred (it needs the script on disk),
 # impersonated (SYSTEM cannot read the user's own folders) and non-fatal (a
