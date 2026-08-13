@@ -14,30 +14,8 @@ Create one WiX v6 MSI for Seamly2D, SeamlyMe, and SeamlyLayout on Windows 10/11 
 - Default programs to `C:\Program Files\SeamlyApps`.
 - Ask before copying existing user data.
 
-## InstWinX64.0 — Verify Baseline MSI Build
-
-Complete before other tasks.
-
-- [x] **InstWinX64.0.1** Verify the x64 MSI builds in CI.
-- [x] **InstWinX64.0.2** Get user confirmation. Confirmed 2026-08-12.
-
-### Result — 2026-08-11
-
-Verified commit `361b743fa0`.
-
-- CI run `31461308276`: passed.
-- MSI run `31461308379`: passed.
-- `wix msi validate`: passed.
-- `test_msi_authoring.ps1`: passed.
-- Output: `seamly-x64.msi`, 163.5 MB.
-- Artifact upload: passed.
-- Package includes all three apps and QML runtime.
-- Signing skipped because `SEAMLY_SIGNING_PROJECT_ID` is unset.
-
-Known non-blocking warnings:
-
-- `WIX1076 / ICE61`: expected with `AllowSameVersionUpgrades="yes"`.
-- `windeployqt`: unused `qtposition_nmea.dll` lacks `Qt6SerialPort.dll`.
+InstWinX64.0 (verify the baseline MSI build) is complete. It is written up in
+`project-docs/TODO_COMPLETED.md`.
 
 ## InstWinX64.1 — Replace WiX Dialog Framework
 

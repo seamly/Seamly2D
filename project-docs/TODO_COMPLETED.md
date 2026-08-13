@@ -2,6 +2,30 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task InstWinX64.0 — Verify the baseline x64 MSI build (completed 2026-08-12)
+
+The gate on every other Windows x64 installer task: prove the MSI builds in CI
+before changing what it contains.
+
+- [x] **InstWinX64.0.1** Verify the x64 MSI builds in CI.
+- [x] **InstWinX64.0.2** Get user confirmation. Confirmed 2026-08-12.
+
+Verified commit `361b743fa0`.
+
+- CI run `31461308276`: passed.
+- MSI run `31461308379`: passed.
+- `wix msi validate`: passed.
+- `test_msi_authoring.ps1`: passed.
+- Output: `seamly-x64.msi`, 163.5 MB.
+- Artifact upload: passed.
+- Package includes all three apps and QML runtime.
+- Signing skipped because `SEAMLY_SIGNING_PROJECT_ID` is unset.
+
+Known non-blocking warnings, both expected and still expected:
+
+- `WIX1076 / ICE61`: a consequence of `AllowSameVersionUpgrades="yes"`.
+- `windeployqt`: the unused `qtposition_nmea.dll` lacks `Qt6SerialPort.dll`.
+
 ## Task 59 — SeamlyLayout packed the whole pattern as one piece: the handoff nests every piece inside `<g data-type="pattern">` (completed 2026-07-27)
 
 Task 49 made the handoff *open*; this makes it *lay out*. The tagged SVG `SvgGenerator` writes wraps all 12 pieces in a single `<g id="pattern-1" data-type="pattern">`, but `piece_extractor::extract_piece_rects()` treated each **direct child `<g>` of the SVG root** as one piece. The packer was therefore handed one object the size of the whole sheet and placed nothing — `0 placements, 1 unplaced: ["pattern-1"]` — and the failure was reported to the user as the meaningless id `pattern-1`.
