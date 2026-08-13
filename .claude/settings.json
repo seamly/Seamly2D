@@ -53,6 +53,8 @@
       "Bash(jom *)",
       "Bash(nmake *)",
       "Bash(ctest *)",
+      "Bash(openssl *)",
+      "Bash(cmake *)",
       "PowerShell",
       "PowerShell(*)",
       "PowerShell(git *)",

@@ -147,8 +147,13 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
      xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
 
+  <!-- Manufacturer must be the legal entity named on the EV code-signing
+       certificate (CN=Seamly Systems, Inc.). Windows takes the UAC and
+       SmartScreen publisher from the Authenticode signature, not from this
+       attribute, so any other value makes Apps &amp; Features disagree with the
+       elevation prompt. Source-file copyright headers keep "Seamly Project". -->
   <Package Name="Seamly"
-           Manufacturer="Seamly Project"
+           Manufacturer="Seamly Systems, Inc."
            Version="$(var.ProductVersion)"
            UpgradeCode="cbf4b5f1-c32c-4dbb-b385-3ee4a7b30658"
            Language="1033"
