@@ -67,9 +67,11 @@ flowchart TD
     uac --> search[AppSearch + FindRelatedProducts<br/>set the detection properties]
     search --> down{WIX_DOWNGRADE_DETECTED?}
     down -->|yes| abort[/DowngradeErrorMessage<br/>install aborts/]
-    down -->|no| warn{"(upgrade OR NSIS)<br/>AND NOT Installed?"}
+    down -->|no| wizard[/WelcomeDlg<br/>LicenseAgreementDlg/]
 
-    warn -->|no - case A, or a repair| wizard
+    wizard --> warn{"(upgrade OR NSIS)<br/>AND NOT Installed?"}
+
+    warn -->|no - case A, or a repair| dir
     warn -->|yes - cases B, C, D| dlg[/SeamlyPreviousInstallDlg/]
 
     dlg --> para{which paragraphs?}
@@ -77,10 +79,12 @@ flowchart TD
     para -->|SEAMLYLEGACYUNINSTALLSTRING| pn[NSIS paragraph<br/>names SEAMLYLEGACYINSTALLDIR]
     pu --> always
     pn --> always
-    always[always: your work is not touched<br/>seamlyData, AppData Local and Roaming Seamly] --> wizard
+    always[always: your work is not touched<br/>SeamlyData, AppData Local and Roaming Seamly] --> dir
 
-    wizard[/WixUI: Welcome, License,<br/>Destination Folder/] --> shortcuts[/SeamlyShortcutsDlg<br/>DEFECT: never displays/]
-    shortcuts --> ready[/Ready to install/]
+    dir[/InstallDirDlg<br/>program directory/] --> dataroot[/SeamlyDataDirDlg<br/>user-data root/]
+    dataroot --> migrate[/SeamlyDataMigrateDlg<br/>copy existing work?/]
+    migrate --> shortcuts[/SeamlyShortcutsDlg<br/>desktop shortcuts/]
+    shortcuts --> ready[/VerifyReadyDlg/]
     ready --> install[install files to<br/>Program Files SeamlyApps]
 
     install --> reg[write HKLM Seamly Seamly2D,<br/>shortcuts, 3 file associations, ARP]
@@ -95,16 +99,21 @@ flowchart TD
     kill --> done([finish])
 ```
 
-Two notes on that diagram:
+Three notes on that diagram:
 
-- **`SeamlyShortcutsDlg` never displays.** The `ControlEvent` row is present and
-  correct, but WiX 6.0.2's `InstallDirDlg` publishes `CheckTargetPath` rather
-  than the v3/v4 `DoAction WixUIValidatePath`, and the `SpawnDialog` is skipped
-  in that chain. `SEAMLYDESKTOPSHORTCUTS` defaults to 1, so the shortcuts are
-  created and every automated check passes — the default works, the *choice* is
-  never offered. Tracked as an open subtask in `TODO_MIGRATE.md`.
-- **The page does not appear on repair or uninstall**, because of `AND NOT
-  Installed`. That is deliberate.
+- **The package defines its own dialog set** (Task InstWinX64.1), so every arrow
+  between pages is a `NewDialog` row it authors itself, and `Back` reverses each
+  one. Until 2026-08-12 the three question pages were reached by `SpawnDialog`
+  from `WixUI_InstallDir`'s `InstallDirDlg`, and **none of them displayed**: that
+  set's own `NewDialog VerifyReadyDlg` row sits at `Ordering` 4 with the
+  condition `1`, so it could neither be excluded nor preceded. The defaults
+  applied and every automated check passed, which is why the fault survived — the
+  checks asserted the rows existed, and they did.
+- **The previous-install page does not appear on repair or uninstall**, because
+  of `AND NOT Installed`. That is deliberate.
+- **Silent installs show no page at all.** `/qn` runs no UI sequence, so pass
+  `SEAMLYDATAPARENT` (or `SEAMLYDATAROOT`), `SEAMLYCOPYUSERDATA` and
+  `SEAMLYDESKTOPSHORTCUTS` on the command line to override the defaults.
 
 ## Application flow — the user-data root, at first launch
 
@@ -200,9 +209,11 @@ data root and `~/seamlyData` was correctly never created.
    old subfolder names → the nine standard ones? This is **Task 14**, and it
    contradicts the adopt-in-place rule above, so it is a design decision rather
    than a code change.
-5. **[known defect]** `SeamlyShortcutsDlg` never displays, and the
-   `SeamlyPreviousInstallDlg` line controls are 3 px too wide (error 2826 ×2).
-   Both tracked in `TODO_MIGRATE.md`.
+5. **[settled] `SeamlyShortcutsDlg` displays.** The custom dialog set replaced
+   the `SpawnDialog` wiring on 2026-08-12 (Task InstWinX64.1). The authoring is
+   verified; the pages themselves await the interactive run, InstWinX64.1.6.
+6. **[known defect]** The `SeamlyPreviousInstallDlg` line controls are 3 px too
+   wide (error 2826 ×2). Task InstWinX64.7.6.
 
 ## Where the behaviour is defined
 

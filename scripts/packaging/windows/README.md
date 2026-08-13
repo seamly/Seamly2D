@@ -27,18 +27,33 @@ WiX authoring and build instructions for the Windows `.msi` installer that ships
 - **Start Menu**: three advertised shortcuts directly in the Start Menu root (no folder — Windows 11 flattens folders anyway, and folderless shortcuts need no removal component).
 - **User data is never touched**: settings live under `%LOCALAPPDATA%\Seamly\<app>` (`AppData\Local\Seamly\Seamly2D`, `...\SeamlyMe`, `...\SeamlyLayout` — the Task 15 unified locations) plus `%APPDATA%\Seamly\qt6_common.ini`, and pattern/measurement data defaults to `C:\Users\<user>\seamlyData` (Task 34 renamed it from `...\seamly2d`; Task 53 settled on `seamlyData`). The apps create these on first run (including legacy-location migration); install, upgrade and uninstall leave them alone.
 
-## Install-time experience (Task 51)
+## Install-time experience
 
-The wizard is WixUI's `WixUI_InstallDir` — welcome, license, install folder, ready — with four Seamly pages added:
+The package defines **its own dialog set** (Task InstWinX64.1). It reuses the stock dialogs unchanged and owns every transition between them, so the page order is authored in `seamly-family.wxs` and nothing competes with it. Fresh install:
 
-| Page | When it appears | What it does |
-|---|---|---|
-| **An existing installation was found** | before the welcome page, only when a previous install is detected and only when installing | Warns that the program files will be replaced, and states plainly that user data is not touched. Two paragraphs appear conditionally: one for an older MSI of this product (`WIX_UPGRADE_DETECTED`), one for the old NSIS installation. |
-| **Where do you keep your work?** | after Next on the install-folder page (Order 1) | The user-data root (`SEAMLYDATAROOT`), default `C:\Users\<you>\SeamlyData`, with a **Change** button that spawns WixUI's `BrowseDlg`. Any drive is allowed, including synced folders and USB media. |
-| **Copy your existing work?** | Order 2 | Opt-in checkbox (`SEAMLYCOPYUSERDATA`, default **off**) to copy existing patterns and measurements into the new root. States that the originals stay put as a backup and that the same files are then also at the new location. |
-| **Shortcuts** | Order 3 | One checkbox: *Create desktop shortcuts for Seamly2D and SeamlyMe*, default **on** (`SEAMLYDESKTOPSHORTCUTS`). |
+| # | Page | Dialog | When it appears |
+|---|---|---|---|
+| 1 | Welcome | `WelcomeDlg` | always |
+| 2 | License | `LicenseAgreementDlg` | always |
+| 3 | An existing installation was found | `SeamlyPreviousInstallDlg` | only when `WIX_UPGRADE_DETECTED` or `SEAMLYLEGACYUNINSTALLSTRING` is set, and only when installing |
+| 4 | Program directory | `InstallDirDlg` | always |
+| 5 | Where do you keep your work? | `SeamlyDataDirDlg` | always |
+| 6 | Copy your existing work? | `SeamlyDataMigrateDlg` | always |
+| 7 | Shortcuts | `SeamlyShortcutsDlg` | always |
+| 8 | Ready to install | `VerifyReadyDlg` | always |
+| 9 | Progress | `ProgressDlg` | always |
+| 10 | Finish | `ExitDialog` | always |
 
-All three of the middle pages are spawned from the install-folder page's Next below WixUI's own transition to the ready page (Order 4).
+**Back** reverses every arrow, and **Cancel** spawns the stock `CancelDlg` on every page. Maintenance, repair and uninstall keep the stock route (`MaintenanceWelcomeDlg` → `MaintenanceTypeDlg` → `VerifyReadyDlg`); none of the Seamly pages appear, because none of their answers apply to a product that is already installed.
+
+What the four Seamly pages do:
+
+| Page | What it does |
+|---|---|
+| **An existing installation was found** | Warns that the program files will be replaced, and states plainly that user data is not touched. Two paragraphs appear conditionally: one for an older MSI of this product (`WIX_UPGRADE_DETECTED`), one for the old NSIS installation. |
+| **Where do you keep your work?** | The user-data root (`SEAMLYDATAROOT`), default `C:\Users\<you>\SeamlyData`, with a **Change** button that spawns the stock `BrowseDlg`. Any drive is allowed, including synced folders and USB media. |
+| **Copy your existing work?** | Opt-in checkbox (`SEAMLYCOPYUSERDATA`, default **off**) to copy existing patterns and measurements into the new root. States that the originals stay put as a backup and that the same files are then also at the new location. |
+| **Shortcuts** | One checkbox: *Create desktop shortcuts for Seamly2D, SeamlyLayout and SeamlyMe*, default **on** (`SEAMLYDESKTOPSHORTCUTS`). |
 
 Decisions behind those pages:
 
@@ -48,10 +63,13 @@ Decisions behind those pages:
 
 - **Desktop shortcuts are one checkbox covering seamly2d and seamlyme, not one per app, and SeamlyLayout gets none.** SeamlyLayout is a document-driven daughter app that seamly2d launches with a `.pieces.svg` argument; a bare desktop launch would only ever show an empty canvas. Per-app checkboxes would be three decisions for a choice users make once. Unattended installs can override: `msiexec /i Seamly-x64.msi /qn SEAMLYDESKTOPSHORTCUTS=0`.
 - **There is no "pin to taskbar" checkbox, and there should not be one.** Windows 10 removed programmatic taskbar pinning: the `taskbarpin` verb is blocked for third-party callers, there is no MSI or WiX element for it, and the only supported mechanisms are OEM/enterprise provisioning (a Start/taskbar layout-modification XML applied by Group Policy or during imaging) which cannot be driven from a per-machine MSI a user double-clicks. A checkbox here would silently do nothing, so the choice is simply not offered.
-- **The old NSIS installation is detected and explained, never removed automatically.** `dist\seamly2d-installer.nsi` is a *different product*: its own ARP entry, its own `uninstall.exe`, installed by default in `C:\Program Files (x86)\Seamly2D`, and the MSI's `UpgradeCode` says nothing about it. Running its uninstaller from a custom action was rejected — it is an interactive EXE, its uninstall section is `RMDir /r $INSTDIR` (which would delete anything a user had put in that folder), and Windows Installer cannot roll back an external uninstaller if the rest of the install then fails. So the dialog names the path it found and tells the user to remove it from Apps & features afterwards; leaving it installed is harmless because the two products install to different directories. Note both entries are called "Seamly2D" in ARP — the NSIS one shows no version, the MSI one shows `26.y.z`.
+- **The old NSIS installation is removed, but its `uninstall.exe` is never run.** It is a *different product*: its own ARP entry, its own uninstaller, installed by default in `C:\Program Files (x86)\Seamly2D`, and the MSI's `UpgradeCode` says nothing about it. The MSI is a strict superset of it, so leaving it behind means two copies of seamly2d and seamlyme and Start Menu shortcuts that launch the old binaries. Setup therefore removes the four things that installation created — its program directory, its Start Menu folder, and both of its registry keys — through components that `RemoveFiles` can roll back. Running its uninstaller instead was rejected: it is an interactive EXE, its uninstall section is `RMDir /r $INSTDIR`, and Windows Installer cannot roll back an external uninstaller if the rest of the install then fails. Because the program directory goes as a whole, the warning page tells the user to move anything of their own out of it first. The reasoning is written up in `INSTALL_DECISION_FLOW.md`.
 - **The NSIS search reads the 32-bit registry view** (`RegistrySearch Bitness="always32"`). The NSIS installer is a 32-bit executable and never switches views, so both `SOFTWARE\NSIS_Seamly2D` and its `Uninstall\Seamly2D` key land under `WOW6432Node`; an x64 MSI searching the default view would never find them.
 - **ARP's DisplayVersion shows the numeric MSI ProductVersion (`26.y.z`) and cannot show the project version.** The `RegisterProduct` standard action writes the Uninstall key *after* `WriteRegistryValues`, so a component-authored override is overwritten every time. The full `YYYY.M.D.HHMM` version reaches the user through `ARPCOMMENTS` and through `HKLM\SOFTWARE\Seamly\Seamly2D\DisplayVersion` instead.
-- **Both pages are wired without touching WixUI's publish chain.** Adding a second `NewDialog` publish to `InstallDirDlg`'s Next button — the obvious way to insert a wizard page — relies on undefined behaviour: two unconditionally-true `NewDialog` events on one control, with nothing in the MSI documentation saying which wins. WixUI never relies on it (all of its competing `NewDialog` publishes carry mutually exclusive conditions) and the built-in row's condition is the literal `1`, so no condition can exclude it. Instead the warning page is a `Show` entry in `InstallUISequence` (sequence 1250, before WixUI's first dialog at 1296), and the shortcuts page is a `SpawnDialog` at `Ordering` 2 on the same Next button, ahead of the built-in `NewDialog` at 4 — the same mechanism WixUI uses for its own `BrowseDlg`. **Do not express that sequence number as `Before="WelcomeDlg"`:** every WixUI dialog set defines that symbol, so the reference drags `WixUI_Minimal` and `WixUI_Advanced` into the link and the build dies on duplicate `TextStyle`/`Property` symbols.
+- **The package defines its own dialog set instead of using `WixUI_InstallDir`.** A dialog set owns every transition out of its own pages, and `WixUI_InstallDir`'s `InstallDirDlg` Next row is `NewDialog VerifyReadyDlg` at `Ordering` 4 with the condition `1` — so no page could take that slot and no condition could exclude it. `SpawnDialog` was the only mechanism left, and WiX 6.0.2 never ran it: the three question pages were in the package and never displayed. Replacing the set removes the cause. A stock dialog brings its own controls, control conditions and internal events (Cancel → `CancelDlg`, `VerifyReadyDlg`'s Install → `EndDialog`) but **never** a `NewDialog` row, so reuse costs one `DialogRef` each and the whole page order stays ours.
+- **`WixUI_Common` supplies the bitmaps, not the fonts.** A custom set must define `WixUI_Font_Normal`, `WixUI_Font_Bigger` and `WixUI_Font_Title` itself, plus `DefaultUIFont`, `WIXUI_INSTALLDIR` (which names the directory `InstallDirDlg` edits) and `ARPNOMODIFY`.
+- **The order of four `DialogRef` elements is load-bearing.** `ResumeDlg`, `WelcomeDlg`, `MaintenanceWelcomeDlg` and `ProgressDlg` carry no absolute sequence number of their own; WiX numbers them 1296–1299 from the order they are referenced, and the first one whose condition is true is the first page the user sees. Listing `WelcomeDlg` before `ResumeDlg` shows the welcome page to a user resuming a suspended install. `test_msi_authoring.ps1` asserts the resulting numbers.
+- **`BrowseDlg` is shared, so it validates only the program directory.** It edits whatever `_BrowseProperty` names, and the set owns its OK button. `CheckTargetPath` is conditional on `_BrowseProperty = "INSTALLFOLDER"`: the data root is allowed on cloud and removable drives that the program-directory rules reject.
 - **ICE43 and ICE57 are suppressed in `smsi.ps1`, and only those two.** Both fire on the optional desktop-shortcut components and both assume `DesktopFolder` is inside the installing user's profile — true only of a per-user install. This package is `Scope="perMachine"` with `ALLUSERS=1`, so `DesktopFolder` is always the All Users desktop and the HKLM key path is correct. Doing what the ICEs ask would break the package: the server side of a per-machine install runs as LocalSystem, so an HKCU key path would be written into the SYSTEM hive where component detection can never find it, and every launch would trigger installer self-repair.
 
 ## Building locally
@@ -73,7 +91,7 @@ Then:
 Output: `scripts\seamly-msi\<arch>\Seamly2D-<arch>.msi` (gitignored). Only the `.msi` is produced — the `.wixpdb` symbol database is suppressed via `wix build -pdbtype none` (it is only used for `wix` patch/melt diffing, not by the shipped installer); to keep it for inspection, remove that flag from `$wixArguments` in `smsi.ps1`. The script then runs two checks, both of which fail the build:
 
 1. `wix msi validate` (ICE checks, skip with `-SkipValidation`). ICE43 and ICE57 are suppressed for the reason given above; the only expected warning is **ICE61**, a known consequence of `AllowSameVersionUpgrades`.
-2. `test_msi_authoring.ps1`, which opens the built MSI and asserts ~50 expectations about what it contains — elevation, ARP properties, the upgrade and NSIS detection, both install-time dialogs and the wording of the warning, the Start Menu and desktop shortcuts, the three file associations, and the install-info registry rows. Run it by hand against any MSI:
+2. `test_msi_authoring.ps1`, which opens the built MSI and asserts over a hundred expectations about what it contains — elevation, ARP properties, the upgrade and NSIS detection, every Next and Back arrow of the dialog chain, the wording of the warning page, the Start Menu and desktop shortcuts, the three file associations, and the install-info registry rows. Run it by hand against any MSI:
 
    ```powershell
    .\scripts\packaging\windows\test_msi_authoring.ps1 -Msi scripts\seamly-msi\x64\Seamly-x64.msi -ExpectSeamlyLayout

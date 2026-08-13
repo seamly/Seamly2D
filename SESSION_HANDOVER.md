@@ -39,11 +39,15 @@ seconds: `wix build` clean, `wix msi validate` clean except the expected ICE61,
 `test_msi_authoring.ps1` 113 assertions pass. It proves the authoring, not the
 product.
 
-**Next: InstWinX64.1.6** — an interactive install. Every page must display, in
-order, and Back must return to the previous page. Then InstWinX64.1.7, which
-must delete the "SeamlyShortcutsDlg never displays" defect note from
-`INSTALL_DECISION_FLOW.md` (it is stale as of this change) and record the new
-page order there and in `scripts/packaging/windows/README.md`.
+**InstWinX64.1.7 is done too.** `INSTALL_DECISION_FLOW.md` and
+`scripts/packaging/windows/README.md` carry the new page order, and the
+"SeamlyShortcutsDlg never displays" defect note is gone. The README also claimed
+the old NSIS installation is never removed automatically; Setup has removal
+components for it, so that claim was corrected.
+
+**Next: InstWinX64.1.6** — an interactive install on the test laptop. Every page
+must display, in order, and Back must return to the previous page. It is the
+only part of Task InstWinX64.1 that local checks cannot cover.
 
 ## CI: one workflow (2026-08-12)
 

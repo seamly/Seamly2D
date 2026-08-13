@@ -51,7 +51,7 @@ Blocks installer path dialogs and `SeamlyShortcutsDlg`.
 - [x] **InstWinX64.1.4** Add Back navigation and stock `CancelDlg`.
 - [x] **InstWinX64.1.5** Replace obsolete `SpawnDialog` assertions with dialog-chain assertions.
 - [ ] **InstWinX64.1.6** Verify every page and Back transition in a real install.
-- [ ] **InstWinX64.1.7** Update `INSTALL_DECISION_FLOW.md` and `scripts/packaging/windows/README.md`.
+- [x] **InstWinX64.1.7** Update `INSTALL_DECISION_FLOW.md` and `scripts/packaging/windows/README.md`.
 
 ### Result — 2026-08-12
 
@@ -74,6 +74,12 @@ Verified with a link-only build (stub staging tree, real authoring):
 
 Not verified: the pages themselves. That is 1.6, and it needs an interactive
 install of a real MSI.
+
+1.7 rewrote the page order in `INSTALL_DECISION_FLOW.md` and
+`scripts/packaging/windows/README.md`, and deleted the "SeamlyShortcutsDlg never
+displays" defect note. Two stale claims were corrected in passing: the README
+said the old NSIS installation is never removed automatically, which has not
+been true since Setup gained the removal components.
 
 ## InstWinX64.2 — Configure Installation Paths
 
