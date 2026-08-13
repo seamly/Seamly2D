@@ -58,6 +58,22 @@ displays" defect note. Two stale claims were corrected in passing: the README
 said the old NSIS installation is never removed automatically, which has not
 been true since Setup gained the removal components.
 
+## InstWinX64.0 — Fix installaton
+
+User selected from Change (disabled), repair, remove --> Repair.
+
+### Installation pages
+
+- [x] **InstWinX64.0.1** When no SeamlyData data is detected look for seamly2d data folder and migrate it to SeamlyData.
+
+- [ ] **InstWinX64.0.2** Display the detected existing directories for program data and user data.
+
+### Application preferences
+
+- [ ] **InstWinX64.0.3** Fix user directory path for Pattern Label --> C:/Users/susan/seamly2d/label templates/default_pattern_label.xml should be C:/Users/susan/seamlyData/label templates/default_pattern_label.xml
+- [ ] **InstWinX64.0.4** Fix user directory path for Piece Label --> C:/Users/susan/seamly2d/label templates/default_pattern_label.xml should be C:/Users/susan/seamlyData/label templates/default_pattern_label.xml
+
+
 ## InstWinX64.2 — Configure Installation Paths
 
 ### Program Directory
