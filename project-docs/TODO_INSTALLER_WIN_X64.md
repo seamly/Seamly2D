@@ -14,8 +14,7 @@ Create one WiX v6 MSI for Seamly2D, SeamlyMe, and SeamlyLayout on Windows 10/11 
 - Default programs to `C:\Program Files\SeamlyApps`.
 - Ask before copying existing user data.
 
-InstWinX64.0 (verify the baseline MSI build) is complete. It is written up in
-`project-docs/TODO_COMPLETED.md`.
+- [x] InstWinX64.0 (verify the baseline MSI build) is complete.
 
 ## InstWinX64.1 — Replace WiX Dialog Framework
 
