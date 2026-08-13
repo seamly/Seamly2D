@@ -19,7 +19,7 @@ Create one WiX v6 MSI for Seamly2D, SeamlyMe, and SeamlyLayout on Windows 10/11 
 Complete before other tasks.
 
 - [x] **InstWinX64.0.1** Verify the x64 MSI builds in CI.
-- [ ] **InstWinX64.0.2** Get user confirmation.
+- [x] **InstWinX64.0.2** Get user confirmation. Confirmed 2026-08-12.
 
 ### Result — 2026-08-11
 
@@ -45,13 +45,35 @@ Blocks installer path dialogs and `SeamlyShortcutsDlg`.
 
 `WixUI_InstallDir` owns the unconditional transition from `InstallDirDlg` to `VerifyReadyDlg`. Replace it with a custom dialog chain.
 
-- [ ] **InstWinX64.1.1** Define: Welcome → License → Previous Install → Program Directory → Data Root → Data Migration → Shortcuts → Ready → Progress → Exit.
-- [ ] **InstWinX64.1.2** Reuse unchanged stock dialogs through `WixUI_Common`.
-- [ ] **InstWinX64.1.3** Replace custom `SpawnDialog` transitions with `NewDialog`.
-- [ ] **InstWinX64.1.4** Add Back navigation and stock `CancelDlg`.
-- [ ] **InstWinX64.1.5** Replace obsolete `SpawnDialog` assertions with dialog-chain assertions.
+- [x] **InstWinX64.1.1** Define: Welcome → License → Previous Install → Program Directory → Data Root → Data Migration → Shortcuts → Ready → Progress → Exit.
+- [x] **InstWinX64.1.2** Reuse unchanged stock dialogs through `WixUI_Common`.
+- [x] **InstWinX64.1.3** Replace custom `SpawnDialog` transitions with `NewDialog`.
+- [x] **InstWinX64.1.4** Add Back navigation and stock `CancelDlg`.
+- [x] **InstWinX64.1.5** Replace obsolete `SpawnDialog` assertions with dialog-chain assertions.
 - [ ] **InstWinX64.1.6** Verify every page and Back transition in a real install.
 - [ ] **InstWinX64.1.7** Update `INSTALL_DECISION_FLOW.md` and `scripts/packaging/windows/README.md`.
+
+### Result — 2026-08-12
+
+`seamly-family.wxs` defines its own dialog set. `WixUI_InstallDir` is gone, and
+with it the `SpawnDialog` wiring that WiX 6.0.2 never ran.
+
+- 1.1–1.5 are one change: the chain cannot be authored without converting the
+  three pages, and the old assertions fail the moment it is.
+- `SeamlyPreviousInstallDlg` moved out of `InstallUISequence` into the chain.
+- `SeamlyShortcutsDlg` became a full 370x270 page with Back, Next and Cancel.
+- The package now owns the `BrowseDlg` OK events. `CheckTargetPath` runs for the
+  program directory only, so the data root still accepts cloud and removable
+  drives.
+- `DialogRef` order sets the sequence numbers of `ResumeDlg`, `WelcomeDlg` and
+  `MaintenanceWelcomeDlg`. The test pins 1296, 1297 and 1298.
+
+Verified with a link-only build (stub staging tree, real authoring):
+`wix build` clean, `wix msi validate` clean except the expected ICE61,
+`test_msi_authoring.ps1` 113 assertions pass.
+
+Not verified: the pages themselves. That is 1.6, and it needs an interactive
+install of a real MSI.
 
 ## InstWinX64.2 — Configure Installation Paths
 
@@ -67,7 +89,7 @@ Verify `HKLM\SOFTWARE\Seamly\Seamly2D\InstallPath` with `test_msi_install.ps1`.
 
 ### User-Data Directory
 
-Interactive verification is blocked by InstWinX64.1.
+Interactive verification waits on InstWinX64.1.6.
 
 - [x] **InstWinX64.2.6** Default `SEAMLYDATAROOT` to `%USERPROFILE%\SeamlyData` in the UI sequence.
 - [x] **InstWinX64.2.7** Accept local, removable, and cloud paths.

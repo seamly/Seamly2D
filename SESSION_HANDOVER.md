@@ -6,6 +6,45 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## PICK UP HERE (2026-08-12, custom dialog set)
+
+**Tasks InstWinX64.0.2 and InstWinX64.1.1–1.5 are done.** The user confirmed the
+x64 MSI builds in CI, and `seamly-family.wxs` now defines its own dialog set
+instead of using `WixUI_InstallDir`.
+
+**The SpawnDialog blocker is gone.** A dialog set owns every `NewDialog` row; a
+stock dialog carries only its own internal events. So replacing the set — rather
+than publishing against it — makes every transition ours, and the Order 4
+`NewDialog VerifyReadyDlg` row that could not be excluded no longer exists.
+
+Chain: `WelcomeDlg` → `LicenseAgreementDlg` → `SeamlyPreviousInstallDlg` (only
+when an earlier install is found) → `InstallDirDlg` → `SeamlyDataDirDlg` →
+`SeamlyDataMigrateDlg` → `SeamlyShortcutsDlg` → `VerifyReadyDlg` → `ProgressDlg`
+→ `ExitDialog`. Back reverses every arrow.
+
+**Two findings worth keeping.**
+
+1. `DialogRef` order decides the `InstallUISequence` numbers of `ResumeDlg`,
+   `WelcomeDlg`, `MaintenanceWelcomeDlg` and `ProgressDlg` (1296–1299). Listing
+   `WelcomeDlg` first put it at 1296 and pushed `ResumeDlg` to 1298, which would
+   show the welcome page to a user resuming an install. The order is now
+   commented as load-bearing and the test pins the numbers.
+2. `WixUI_Common` supplies the bitmaps but **not** `WixUI_Font_Normal`,
+   `WixUI_Font_Bigger` or `WixUI_Font_Title`. A custom set has to define them,
+   plus `DefaultUIFont`, `WIXUI_INSTALLDIR` and `ARPNOMODIFY`.
+
+**Local verification is now cheap and was done.** A stub staging tree (three
+empty `.exe` files and two files for the runtime) links the real authoring in
+seconds: `wix build` clean, `wix msi validate` clean except the expected ICE61,
+`test_msi_authoring.ps1` 113 assertions pass. It proves the authoring, not the
+product.
+
+**Next: InstWinX64.1.6** — an interactive install. Every page must display, in
+order, and Back must return to the previous page. Then InstWinX64.1.7, which
+must delete the "SeamlyShortcutsDlg never displays" defect note from
+`INSTALL_DECISION_FLOW.md` (it is stale as of this change) and record the new
+page order there and in `scripts/packaging/windows/README.md`.
+
 ## CI: one workflow (2026-08-12)
 
 `.github/workflows/seamlylayout-ci.yml` is deleted. **`ci.yml` is the only
@@ -23,11 +62,10 @@ Docs updated: `README_WORKFLOWS.md`, `README-BUILDS.md`, `CLAUDE.md`,
 `TODO_RENAME_SETTINGS_FILES_CLASSES.md`. `TODO_COMPLETED.md` keeps the Task 20
 entry as the record of what was built at the time.
 
-## PICK UP HERE (2026-08-11, data-root append + SpawnDialog investigation)
+## Earlier (2026-08-11, data-root append + SpawnDialog investigation)
 
-**Next task: InstWinX64.12** — replace `WixUI_InstallDir` with a custom dialog
-set. Written up with subtasks in `TODO_INSTALLER_WIN_X64.md`. It unblocks
-InstWinX64.1.2.1-1.2.3 and InstWinX64.3.8.
+> The SpawnDialog blocker described below was fixed on 2026-08-12 by the custom
+> dialog set. Kept for the reasoning that led there.
 
 **Done: the data root appends a fixed leaf.** `SEAMLYDATAPARENT` is what the
 user picks (default `%USERPROFILE%`); `SEAMLYDATAROOT` is that parent plus a
