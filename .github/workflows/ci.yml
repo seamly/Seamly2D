@@ -219,7 +219,7 @@ jobs:
   # Windows MSI for x64 and arm64 
   #
   # Each WiX MSIs built by scripts/packaging/windows/smsi.ps1 from
-  # seamly-family.wxs with WiX v6.
+  # smsi.wxs with WiX v6.
   #
   # WHAT EACH ARCH SHIPS: all three apps — seamly2d + seamlyme (qmake) and
   # SeamlyLayout (Rust + CMake/Ninja) — against ONE Qt 6.11.1 runtime.

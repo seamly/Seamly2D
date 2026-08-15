@@ -9,7 +9,7 @@ Tasks in this file begin with `InstWinArm64.`
 `seamly-arm64.msi` is built and released by `ci.yml`'s `windows-msi` job (Task
 Installer.1.2). **NSIS is retired** — no workflow builds `Seamly2D-win-arm64.zip`
 or runs `makensis` any more, and `dist/seamly2d-installer.nsi` is kept unbuilt
-only because `seamly-family.wxs` cites it as the record of a pre-MSI
+only because `smsi.wxs` cites it as the record of a pre-MSI
 installation's on-disk footprint.
 
 **The arm64 package ships all three apps, same as x64, and builds NATIVELY.**
@@ -54,7 +54,7 @@ for the native `windows_arm64` host kit.
   split and no `--qtpaths` wrapper. (The same reasoning drives `common.pri`'s
   `deployQtRuntime()`; passing `--qtpaths host-qtpaths.bat` is what broke the
   arm64 MSI build on 2026-08-10)
-- [X] InstWinArm64.1.5 Re-run `test_msi_authoring.ps1` expectations for a
+- [X] InstWinArm64.1.5 Re-run `smsi_check_authoring.ps1` expectations for a
   three-app arm64 package — done by removing `-ExpectSeamlyLayout` on
   2026-08-15: the SeamlyLayout shortcut and icon are now asserted on every
   package, so the arm64 leg checks all three apps with no caller opt-in

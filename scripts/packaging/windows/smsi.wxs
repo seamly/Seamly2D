@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
  ******************************************************************************
- **  @file   seamly-family.wxs
+ **  @file   smsi.wxs
  **  @author slspencer
  **  @date   July 22, 2026
  **
@@ -779,7 +779,7 @@
          standard pattern, and why the SetProperty below is sequenced
          immediately before the action it feeds. -->
     <SetProperty Id="SeamlyCopyUserData"
-                 Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]seamly_copy_user_data.ps1&quot; -Destination &quot;[SEAMLYDATAROOT]&quot;"
+                 Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]smsi_migrate_user_data.ps1&quot; -Destination &quot;[SEAMLYDATAROOT]&quot;"
                  Before="SeamlyCopyUserData"
                  Sequence="execute"
                  Condition="SEAMLYCOPYUSERDATA = &quot;1&quot; AND SEAMLYDATAROOT AND NOT Installed" />
@@ -998,8 +998,8 @@
            as long as the rest of the program does - ordinary component rules
            remove it. -->
       <Component Id="UserDataCopyScript">
-        <File Id="seamly_copy_user_data.ps1"
-              Source="$(sys.SOURCEFILEDIR)seamly_copy_user_data.ps1"
+        <File Id="smsi_migrate_user_data.ps1"
+              Source="$(sys.SOURCEFILEDIR)smsi_migrate_user_data.ps1"
               KeyPath="yes" />
       </Component>
 

@@ -81,7 +81,7 @@ every resolved input before touching anything.
      deployed. The `.wxs` authors them explicitly so shortcuts and associations
      can reference them, which is why they must not be in the
      wildcard-harvested tree.
-3. **Runs `wix build`** on `seamly-family.wxs` with `-arch`, `-pdbtype none`,
+3. **Runs `wix build`** on `smsi.wxs` with `-arch`, `-pdbtype none`,
    both extensions, and the `ProductVersion`, `DisplayVersion`, `RepoRoot`,
    `ParentStagingDir` and `ExeStagingDir` defines → `seamly-<arch>.msi`.
 4. **Runs `wix msi validate`** (skip with `-SkipValidation`), suppressing ICE43
@@ -144,7 +144,7 @@ execute sequence elevated as SYSTEM, whose `%USERPROFILE%` is
 `C:\Windows\system32\config\systemprofile`. Computing the default there would
 put a user's patterns inside a system account's profile.
 
-What the user sees when installing interactively: welcome → license → install folder → **Your work** (the data root, with a Change button) → **Copy your existing work?** (opt-in, default off) → **Shortcuts** (desktop shortcuts, default on) → ready → install. The package defines its own dialog set, so every one of those arrows is a `NewDialog` row `seamly-family.wxs` authors, and `Back` reverses each one.
+What the user sees when installing interactively: welcome → license → install folder → **Your work** (the data root, with a Change button) → **Copy your existing work?** (opt-in, default off) → **Shortcuts** (desktop shortcuts, default on) → ready → install. The package defines its own dialog set, so every one of those arrows is a `NewDialog` row `smsi.wxs` authors, and `Back` reverses each one.
 
 An extra page appears **before** the welcome page when a previous installation is found — an older MSI of this product or the old NSIS installation — warning that the program files will be replaced and stating that the user's own work is not touched.
 

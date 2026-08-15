@@ -314,7 +314,7 @@ Assert-That -Name 'the chosen program directory is committed before the wizard m
 # The three sequenced dialogs decide which page opens the wizard, and the first
 # one whose condition holds wins. A resumed install must reach ResumeDlg, not
 # the welcome page. WiX numbers them from the order of the DialogRef elements in
-# seamly-family.wxs, so this asserts the resulting numbers.
+# smsi.wxs, so this asserts the resulting numbers.
 $uiSequence = Get-MsiRows -Sql "SELECT ``Action``, ``Sequence``, ``Condition`` FROM ``InstallUISequence``" `
     -Columns 'Action', 'Sequence', 'Condition'
 foreach ($entry in @(@('ResumeDlg', 1296), @('WelcomeDlg', 1297), @('MaintenanceWelcomeDlg', 1298))) {
@@ -353,7 +353,7 @@ Assert-That -Name 'the warning names the directory it found' `
     -Succeeded ($nsisText.Count -eq 1 -and $nsisText[0].Text -match '\[SEAMLYLEGACYINSTALLDIR\]')
 
 # --- 5b. removal of the old NSIS installation ----------------------------------
-# Its own uninstall.exe is deliberately never invoked - see seamly-family.wxs.
+# Its own uninstall.exe is deliberately never invoked - see smsi.wxs.
 # What must be present is the removal of the four things it created.
 $removeComponents = Get-MsiRows -Sql "SELECT ``Component``, ``Condition``, ``Attributes`` FROM ``Component``" `
     -Columns 'Component', 'Condition', 'Attributes'
@@ -611,7 +611,7 @@ Assert-That -Name 'no rollback action deletes copied user data' `
     -Succeeded (-not ($customActions -contains 'SeamlyCopyUserDataRollback'))
 Assert-That -Name 'the copy helper script is packaged' `
     -Succeeded (@(Get-MsiRows -Sql "SELECT ``FileName`` FROM ``File`` WHERE ``Component_``='UserDataCopyScript'" -Columns 'FileName' |
-                  Where-Object { $_.FileName -match 'seamly_copy_user_data\.ps1' }).Count -eq 1)
+                  Where-Object { $_.FileName -match 'smsi_migrate_user_data\.ps1' }).Count -eq 1)
 
 # --- report --------------------------------------------------------------------
 [System.Runtime.InteropServices.Marshal]::ReleaseComObject($script:database) | Out-Null

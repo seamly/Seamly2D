@@ -6,7 +6,7 @@
 # **  @brief
 # **  "seamly msi" — stage the built Seamly app family (seamly2d, seamlyme,
 # **  SeamlyLayout) and build the Windows MSI installer from
-# **  scripts\packaging\windows\seamly-family.wxs with the WiX toolset.
+# **  scripts\packaging\windows\smsi.wxs with the WiX toolset.
 # **  Driven by the ci.yml windows-msi job against the in-source CI build
 # **  output. Every input is named on the command line; the script detects
 # **  nothing from the machine it runs on.
@@ -40,7 +40,7 @@
 
 .DESCRIPTION
     Stages the already-built apps into <repo>\scripts\seamly-msi\<arch>\
-    and runs `wix build` on scripts\packaging\windows\seamly-family.wxs to
+    and runs `wix build` on scripts\packaging\windows\smsi.wxs to
     produce scripts\seamly-msi\<arch>\seamly-<arch>.msi. Only the .msi
     is written — the .wixpdb symbol database is suppressed with `-pdbtype none`
     (it is used only for wix patch/melt diffing, not by the installer).
@@ -373,7 +373,7 @@ Write-Host "staging MSVC CRT runtime..."
 Copy-Item -Path (Join-Path $crtDir '*.dll') -Destination $parentDir -Force
 
 # --- Build the MSI -------------------------------------------------------------
-$wxs = Join-Path $PSScriptRoot 'seamly-family.wxs'
+$wxs = Join-Path $PSScriptRoot 'smsi.wxs'
 $msi = Join-Path $stageRoot "seamly-$Arch.msi"
 
 $wixArguments = @(

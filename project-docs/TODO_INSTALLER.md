@@ -34,7 +34,7 @@ Notes:
 - [x] Task Installer.1.2 - Windows arm64 .msi - should re-implement the Windows x64 .msi capabilities - track tasks in project-docs\TODO_INSTALLER_WIN_ARM64.md
   - `ci.yml`'s `windows-msi` job is now a **matrix over `arch`** (`x64`, `arm64`, `fail-fast: false`) — `windows-msi.yml`'s `msi` job verbatim, minus its own version step. 
   - **NSIS retired.** The `windows` job is deleted; nothing runs `makensis` any more. `publish` releases `seamly-x64.msi` + `seamly-arm64.msi` in place of `Seamly2D-win-arm64.zip`.
-  - **Verification is CI-only** (no arm64 hardware here): the arm64 leg has to build, validate and pass `test_msi_authoring.ps1` in the run for this change. A real arm64 install still has never been run — that stays Installer.2.2.
+  - **Verification is CI-only** (no arm64 hardware here): the arm64 leg has to build, validate and pass `smsi_check_authoring.ps1` in the run for this change. A real arm64 install still has never been run — that stays Installer.2.2.
 
 - [ ] Task Installer 1.4 - **Seamly Apps for Windows 11 (x64)** must be built on the Github `windows-latest` runner, and **Seamly Apps for Windows 11 (arm64)** must be built on the `windows_11_arm` runner. Both builds should contain Seamly2D/SeamlyLayout/SeamlyMe that run in the same Qt runtime. SeamlyLayout needs a Rust + cxx-qt build and a Qt WebEngine -- the binaries for these exist on windows_11_arm and on windows-latest.
 - [ ] Task Installer.1.5 - MacOS .pkg - refer to tasks in project-docs\TODO_INSTALLER_LINUX_APPIMAGE.md to define the .msi capabilities and options

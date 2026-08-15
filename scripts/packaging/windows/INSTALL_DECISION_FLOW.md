@@ -96,7 +96,7 @@ flowchart TD
     extras --> move2["into exes: move seamlylayout.exe<br/>out of parent"]
     move2 --> crtcopy["into parent: copy the MSVC CRT DLLs"]
 
-    crtcopy --> build["wix build seamly-family.wxs<br/>-arch, -pdbtype none, UI + Util ext,<br/>-d ProductVersion DisplayVersion RepoRoot<br/>ParentStagingDir ExeStagingDir"]
+    crtcopy --> build["wix build smsi.wxs<br/>-arch, -pdbtype none, UI + Util ext,<br/>-d ProductVersion DisplayVersion RepoRoot<br/>ParentStagingDir ExeStagingDir"]
     build --> exists{seamly-arch.msi written?}
     exists -->|no| fail
     exists -->|yes| ice{"-SkipValidation?"}
@@ -285,7 +285,7 @@ data root and `~/seamlyData` was correctly never created.
 
 | Concern | File |
 |---|---|
-| Detection, dialogs, directories, components | `scripts/packaging/windows/seamly-family.wxs` |
+| Detection, dialogs, directories, components | `scripts/packaging/windows/smsi.wxs` |
 | Staging layout, version mapping, `wix build`, ICE suppressions | `scripts/packaging/windows/smsi.ps1` |
 | The only invocation of that script | `.github/workflows/ci.yml`, job `windows-msi` |
 | Assertions about the built package | `scripts/packaging/windows/smsi_check_authoring.ps1` |

@@ -8,7 +8,7 @@ Create one WiX v6 MSI for Seamly2D, SeamlyMe, and SeamlyLayout on Windows 10/11 
 - Update `TODO_INSTALLER.md` when all tasks are complete.
 - Ask the user only when a decision is required.
 - Build in `.github/workflows/ci.yml`.
-- Author in `scripts/packaging/windows/seamly-family.wxs`.
+- Author in `scripts/packaging/windows/smsi.wxs`.
 - Replace the x64 NSIS package with the MSI.
 - Keep arm64 NSIS until SeamlyLayout supports arm64.
 - Default programs to `C:\Program Files\SeamlyApps`.
@@ -32,7 +32,7 @@ Blocks installer path dialogs and `SeamlyShortcutsDlg`.
 
 ### Result — 2026-08-12
 
-`seamly-family.wxs` defines its own dialog set. `WixUI_InstallDir` is gone, and
+`smsi.wxs` defines its own dialog set. `WixUI_InstallDir` is gone, and
 with it the `SpawnDialog` wiring that WiX 6.0.2 never ran.
 
 - 1.1–1.5 are one change: the chain cannot be authored without converting the
@@ -47,7 +47,7 @@ with it the `SpawnDialog` wiring that WiX 6.0.2 never ran.
 
 Verified with a link-only build (stub staging tree, real authoring):
 `wix build` clean, `wix msi validate` clean except the expected ICE61,
-`test_msi_authoring.ps1` 115 assertions pass.
+`smsi_check_authoring.ps1` 115 assertions pass.
 
 Not verified: the pages themselves. That is 1.6, and it needs an interactive
 install of a real MSI.
@@ -242,7 +242,7 @@ Eight `VSettings` accessors use `%APPDATA%\Unknown Organization.ini`.
 ## InstWinX64.11 — Cleanup and Documentation
 
 - [x] **InstWinX64.11.1** Remove `dist/seamly2d-installer.nsi`.
-- [x] **InstWinX64.11.2** Preserve its legacy footprint in `seamly-family.wxs`.
+- [x] **InstWinX64.11.2** Preserve its legacy footprint in `smsi.wxs`.
 - [x] **InstWinX64.11.3** Remove `windows-msi.yml`.
 - [ ] **InstWinX64.11.4** Update `scripts/packaging/windows/README.md`.
 - [ ] **InstWinX64.11.5** Update `.github/README-BUILDS.md`.

@@ -1,6 +1,6 @@
 <#
  ******************************************************************************
- **  @file   seamly_copy_user_data.ps1
+ **  @file   smsi_migrate_user_data.ps1
  **  @author slspencer
  **  @date   August 11, 2026
  **
@@ -65,10 +65,10 @@
 
 .PARAMETER LogPath
     Where to write the transcript. Defaults to
-    %LOCALAPPDATA%\Seamly\seamly_copy_user_data.log.
+    %LOCALAPPDATA%\Seamly\smsi_migrate_user_data.log.
 
 .EXAMPLE
-    .\seamly_copy_user_data.ps1 -Destination "E:\SeamlyData"
+    .\smsi_migrate_user_data.ps1 -Destination "E:\SeamlyData"
 #>
 
 [CmdletBinding()]
@@ -85,7 +85,7 @@ param(
 $ErrorActionPreference = 'Continue'
 
 if (-not $LogPath) {
-    $LogPath = Join-Path $env:LOCALAPPDATA 'Seamly\seamly_copy_user_data.log'
+    $LogPath = Join-Path $env:LOCALAPPDATA 'Seamly\smsi_migrate_user_data.log'
 }
 
 <#

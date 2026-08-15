@@ -128,7 +128,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-# The family UpgradeCode from seamly-family.wxs. Fixed for the lifetime of the
+# The family UpgradeCode from smsi.wxs. Fixed for the lifetime of the
 # product and shared by x64 and arm64, so it is the one reliable way to find
 # "our" installed product and tell it apart from the old NSIS Seamly2D, which
 # carries the same DisplayName.
@@ -341,7 +341,7 @@ function Get-InstalledSeamlyProduct {
 # @brief  Locate the old NSIS Seamly2D installation, if present.
 #
 # The NSIS installer is 32-bit and never switches registry views, so its keys
-# are always under WOW6432Node — the same reason seamly-family.wxs searches
+# are always under WOW6432Node — the same reason smsi.wxs searches
 # with Bitness="always32".
 #
 # @return install directory, or an empty string when it is not installed
@@ -408,7 +408,7 @@ public static extern int MsiGetComponentPath(string szProduct,
 #------------------------------------------------------------------------------
 # @brief  Resolve an advertised shortcut through the Windows Installer.
 #
-# The Start Menu shortcuts are advertised: seamly-family.wxs nests each one
+# The Start Menu shortcuts are advertised: smsi.wxs nests each one
 # inside its <File KeyPath="yes">, with no Target attribute, which is WiX's
 # standard pattern for a shortcut that carries a Darwin descriptor (product,
 # feature and component GUIDs) instead of a path. The desktop shortcuts set
