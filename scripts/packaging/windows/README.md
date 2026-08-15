@@ -7,6 +7,7 @@ WiX authoring and build instructions for the Windows `.msi` installer that ships
 | File | Purpose |
 |---|---|
 | `smsi.wxs` | WiX (v6) source: install layout, shortcuts, file associations, upgrade logic, install-time dialogs |
+| `seamly2d.ico`, `seamlyme.ico`, `seamlylayout.ico` | Shortcut and Apps &amp; features icons, compiled into the MSI `Icon` table by `smsi.wxs`. Each `<Icon Id>` must equal the file name |
 | `license.rtf` | License summary shown by the installer UI (GPL-3.0-or-later for seamly2d/seamlyme, LGPL-3.0 + MIT for SeamlyLayout, LGPL-3.0 for Qt) |
 | `smsi.ps1` | Staging + `wix build` driver, run by `ci.yml`'s `windows-msi` job. CI-only: it has no local-build mode and detects nothing from the machine it runs on |
 | `smsi_check_authoring.ps1` | Asserts the built MSI still contains the expected shortcuts, associations, registry rows, elevation, upgrade detection and dialogs; run by `smsi.ps1` on every build |
