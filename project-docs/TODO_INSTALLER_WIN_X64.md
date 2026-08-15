@@ -206,7 +206,7 @@ Eight `VSettings` accessors use `%APPDATA%\Unknown Organization.ini`.
 - [ ] **InstWinX64.9.8** Verify Qt 6.11.1, QML, WebEngine, MSVC runtime, and Rust dependencies.
 - [ ] **InstWinX64.9.9** Verify in-place major upgrades.
 - [ ] **InstWinX64.9.10** Sign with `jsign` when `SEAMLY_SIGNING_PROJECT_ID` is available.
-- [x] **InstWinX64.9.11** Support local builds through `scripts/packaging/windows/smsi.ps1`.
+- [x] **InstWinX64.9.11** ~~Support local builds through `scripts/packaging/windows/smsi.ps1`.~~ **Reversed 2026-08-15:** the local-build mode is removed. `smsi.ps1` is CI-only and detects nothing from the machine it runs on, because each of its defaults and fallbacks could ship a runtime no app in the package was built against. See `scripts/packaging/windows/README.md`.
 - [x] **InstWinX64.9.12** Support CI builds through `.github/workflows/ci.yml`.
 - [ ] **InstWinX64.9.13** Test x64 and arm64 where hardware is available.
 - [x] **InstWinX64.9.14** Complete static x64 validation.

@@ -21,8 +21,8 @@
  **    [ProgramFiles64Folder]\SeamlyApps\    seamly2d.exe, seamlyme.exe,
  **                                          SeamlyLayout.exe and the ONE
  **                                          Qt runtime all three share
- **                                          (merged windeployqt +
- **                                          windeployqt6 output, incl. the
+ **                                          (the merged windeployqt output
+ **                                          of all three, incl. the
  **                                          QML modules and
  **                                          QtWebEngineProcess.exe
  **                                          SeamlyLayout needs, plus the
@@ -91,8 +91,6 @@
  **    ParentStagingDir     staged shared runtime tree for every app in the
  **                         package (no exes) — seamly2d/seamlylayout/seamlyme windeployqt
  **                         output -
- **    IncludeSeamlyLayout  defined (=1). IncludeSeamlyLayout should always be defined.
- **                         This flag may be removed when SeamlyLayout migration is completed.
  **    ExeStagingDir        staged directory holding the app executables
  **
  **
@@ -181,9 +179,7 @@
          pointing at an identifier that did not exist (error WIX0094). -->
     <Icon Id="seamly2d.ico" SourceFile="$(var.RepoRoot)\dist\win\seamly2d.ico" />
     <Icon Id="seamlyme.ico" SourceFile="$(var.RepoRoot)\dist\win\seamlyme.ico" />
-    <?ifdef var.IncludeSeamlyLayout ?>
     <Icon Id="seamlylayout.ico" SourceFile="$(var.RepoRoot)\dist\win\seamlylayout.ico" />
-    <?endif?>
 
     <Property Id="ARPPRODUCTICON" Value="seamly2d.ico" />
     <Property Id="ARPHELPLINK" Value="https://seamly.io" />
@@ -917,7 +913,6 @@
                        Type="string" />
       </Component>
 
-      <?ifdef var.IncludeSeamlyLayout ?>
       <!-- SeamlyLayout: Start Menu shortcut. Its input can be a .svg file (from Seamly2D)
            or the .pieces.svg handoff written by seamly2d's Layout Mode, and a
            double ".pieces.svg" extension cannot be registered distinctly from
@@ -936,7 +931,6 @@
                     Advertise="yes" />
         </File>
       </Component>
-      <?endif?>
 
       <!-- ========== remove the old NSIS installation (Task 51 step 2) ====== -->
       <!-- The NSIS product installs seamly2d and seamlyme; this package

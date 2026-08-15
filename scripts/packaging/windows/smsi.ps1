@@ -6,10 +6,10 @@
 # **  @brief
 # **  "seamly msi" — stage the built Seamly app family (seamly2d, seamlyme,
 # **  SeamlyLayout) and build the Windows MSI installer from
-# **  scripts\packaging\windows\seamly-family.wxs with the WiX toolset
-# **  Used both locally (against the release build trees) and by the
-# **  ci.yml windows-msi job (against the in-source
-# **  CI build output), following the scripts\sd.ps1 precedent.
+# **  scripts\packaging\windows\seamly-family.wxs with the WiX toolset.
+# **  Driven by the ci.yml windows-msi job against the in-source CI build
+# **  output. Every input is named on the command line; the script detects
+# **  nothing from the machine it runs on.
 # **
 # ** @copyright
 # **  This source code is part of the Seamly project, a suite of apparel CAD
@@ -41,7 +41,7 @@
 .DESCRIPTION
     Stages the already-built apps into <repo>\scripts\seamly-msi\<arch>\
     and runs `wix build` on scripts\packaging\windows\seamly-family.wxs to
-    produce scripts\seamly-msi\<arch>\Seamly2D-<arch>.msi. Only the .msi
+    produce scripts\seamly-msi\<arch>\seamly-<arch>.msi. Only the .msi
     is written — the .wixpdb symbol database is suppressed with `-pdbtype none`
     (it is used only for wix patch/melt diffing, not by the installer).
 
@@ -56,14 +56,14 @@
     All three apps build against Qt 6.11.1, so one Qt runtime serves them all.
 
     PREREQUISITES (the script fails early naming whatever is missing):
-      * release builds of seamly2d/seamlyme with windeployqt output in their
-        bin directories (local: qmake release shadow-build in build\;
-        CI: in-source src\app\<app>\bin)
+      * release builds of seamly2d/seamlyme with windeployqt output in the
+        bin directories named by -Seamly2DBin / -SeamlyMeBin
       * a release build of seamlylayout (src\app\seamlylayout\qt_frontend\
-        build\Release), unless -NoSeamlyLayout
+        build\Release)
       * the WiX .NET tool:      dotnet tool install --global wix
         and its UI extension:   wix extension add --global WixToolset.UI.wixext
-      * the MSVC redistributable runtime (VCToolsRedistDir from a VS install)
+      * the MSVC developer environment, which sets VCToolsRedistDir (ci.yml
+        uses ilammy/msvc-dev-cmd)
 
     The MSI ProductVersion cannot carry the project's YYYY.M.D.HHMM scheme
     (MSI limits the major field to 255), so the script derives a monotonic
@@ -75,42 +75,33 @@
     Target architecture of the MSI: x64 (default) or arm64.
 
 .PARAMETER Version
-    Project version as YYYY.M.D.HHMM (the ci.yml scheme). Defaults to the
-    current date/time.
+    Project version as YYYY.M.D.HHMM (the ci.yml scheme). Required.
 
 .PARAMETER Seamly2DBin
-    Directory holding seamly2d.exe plus its windeployqt output.
-    Default: <repo>\build\src\app\seamly2d\bin (the local release tree).
+    Directory holding seamly2d.exe plus its windeployqt output. Required.
 
 .PARAMETER SeamlyMeBin
-    Directory holding seamlyme.exe plus its windeployqt output.
-    Default: <repo>\build\src\app\seamlyme\bin.
+    Directory holding seamlyme.exe plus its windeployqt output. Required.
 
 .PARAMETER SeamlyLayoutBuildDir
     Directory holding the release SeamlyLayout.exe.
-    Default: <repo>\src\app\seamlylayout\qt_frontend\build\Release.
+    Default: <repo>\src\app\seamlylayout\qt_frontend\build\Release — where
+    ci.yml's `cmake --build --preset release` step writes it.
 
-.PARAMETER NoSeamlyLayout
-    Build a two-app MSI without SeamlyLayout. Used during testing.
-
-.PARAMETER WinDeployQt6
-    Full path of windeployqt6.exe from SeamlyLayout's Qt kit. Default: the kit
-    SeamlyLayout was actually built against, read from CMAKE_PREFIX_PATH in its
-    build directory's CMakeCache.txt, falling back to the newest
-    C:\Qt\<version>\msvc2022_64 kit. (CI passes the installed Qt explicitly.)
-    Deliberately NOT pinned to a hard-coded Qt version —
-    But seamly2d, seamlyme, and seamlylayout should be built from the same Qt 6.11.1 kit.
+.PARAMETER WinDeployQt
+    Full path of windeployqt.exe from the Qt kit SeamlyLayout was built
+    against. Required. The caller names the kit, so no Qt version is hard-coded
+    and none is detected. seamly2d, seamlyme and seamlylayout must all come
+    from that one Qt 6.11.1 kit.
 
 .PARAMETER SkipValidation
     Skip the `wix msi validate` (ICE) pass after the build.
 
 .EXAMPLE
-    .\scripts\packaging\windows\smsi.ps1
-    Stage from the local release trees and build the x64 MSI.
-
-.EXAMPLE
-    .\scripts\packaging\windows\smsi.ps1 -Arch arm64 -NoSeamlyLayout
-    Build the arm64 MSI (seamly2d + seamlyme only) from arm64 build trees.
+    .\scripts\packaging\windows\smsi.ps1 -Arch x64 -Version 2026.8.15.0930 `
+        -Seamly2DBin src\app\seamly2d\bin -SeamlyMeBin src\app\seamlyme\bin `
+        -WinDeployQt "$env:QT_ROOT_DIR\bin\windeployqt.exe"
+    The invocation ci.yml's windows-msi job runs, for either architecture.
 
 .NOTES
     "smsi" = seamly msi, following sd.ps1 ("seamly2d debug") / st.ps1
@@ -124,28 +115,36 @@ param(
     [string]$Arch = 'x64',
 
     # Project version YYYY.M.D.HHMM; the MSI ProductVersion is derived from it.
-    [string]$Version = (Get-Date -Format 'yyyy.M.d.HHmm'),
+    # The package must carry the version of the run that produced it, so the
+    # caller states it.
+    [Parameter(Mandatory = $true)]
+    [string]$Version,
 
-    # Built app trees (windeployqt output included).
+    # Built app trees (windeployqt output included). The job that built them
+    # names them.
+    [Parameter(Mandatory = $true)]
     [string]$Seamly2DBin,
+
+    [Parameter(Mandatory = $true)]
     [string]$SeamlyMeBin,
+
+    # SeamlyLayout's CMake release output; the default is the path ci.yml
+    # builds into.
     [string]$SeamlyLayoutBuildDir,
 
-    # Omit SeamlyLayout (arm64 packages, until an arm64 SeamlyLayout build exists).
-    [switch]$NoSeamlyLayout,
-
-    # windeployqt6.exe of SeamlyLayout's Qt kit (auto-detected under C:\Qt if omitted).
-    [string]$WinDeployQt6,
+    # windeployqt.exe of the Qt kit SeamlyLayout was built against. Use the
+    # unsuffixed name, matching ci.yml and the .pro post-link steps.
+    [Parameter(Mandatory = $true)]
+    [string]$WinDeployQt,
 
     # Skip the ICE validation pass.
     [switch]$SkipValidation,
 
-    # Name of the staging/output directory created under scripts\. Exposed as a
-    # parameter, and used in exactly one place below, so the name lives here
-    # rather than being repeated: renaming this directory on disk used to mean
-    # hunting literals through the script, the docs and the CI workflow. The
-    # workflow publishes scripts/<this>/<arch>/seamly-<arch>.msi, so a change
-    # here has to be mirrored in ci.yml's windows-msi job.
+    # Name of the staging/output directory created under scripts\. It lives
+    # here rather than as a literal, because three other places have to agree
+    # with it: the .gitignore entry that keeps the staged package out of git,
+    # and the artifact and signing paths in ci.yml's windows-msi job, which
+    # publishes scripts/<this>/<arch>/seamly-<arch>.msi.
     [string]$OutputDirName = 'seamly-msi'
 )
 
@@ -170,8 +169,8 @@ function Invoke-Tool {
         [string]$Exe,
         [string[]]$Arguments
     )
-    # Native tools (windeployqt6, wix) legitimately write warnings to stderr —
-    # e.g. windeployqt6 warning about the optional Qt6SerialPort dependency of
+    # Native tools (windeployqt, wix) legitimately write warnings to stderr —
+    # e.g. windeployqt warning about the optional Qt6SerialPort dependency of
     # the NMEA positioning plugin. Under $ErrorActionPreference='Stop',
     # Windows PowerShell 5.1 turns captured stderr lines into terminating
     # errors even when the tool exits 0, so the preference is relaxed for the
@@ -227,76 +226,15 @@ function ConvertTo-MsiVersion {
 }
 
 #------------------------------------------------------------------------------
-# @brief  Locate the windeployqt6.exe belonging to SeamlyLayout's Qt kit.
-#
-# Task 31: this used to be hard-pinned to '^6\.10\.\d+$', so the documented
-# default invocation threw as soon as the 6.10 kit was uninstalled, and it could
-# silently deploy a runtime from a different Qt release than the exe was linked
-# against. It now follows the build instead of a fixed version:
-#
-#   1. Read CMAKE_PREFIX_PATH out of SeamlyLayout's CMakeCache.txt — that is
-#      literally the kit the staged SeamlyLayout.exe was compiled and linked
-#      against, so its deploy tool always matches the binary.
-#   2. Fall back to the newest C:\Qt\<version>\msvc2022_64 kit (any 6.x), so a
-#      clean tree with no build cache still resolves.
-#
-# Either way the unsuffixed windeployqt.exe is accepted as an alternate name.
-#
-# @param  BuildDir  SeamlyLayout's release build directory (holds CMakeCache.txt)
-# @return Full path of the deploy tool.
-#------------------------------------------------------------------------------
-function Find-WinDeployQt6 {
-    param([string]$BuildDir)
-
-    #--- 1. the kit recorded in SeamlyLayout's own CMake cache ----------------
-    $cache = Join-Path $BuildDir 'CMakeCache.txt'
-    if (Test-Path $cache) {
-        # CMAKE_PREFIX_PATH:PATH=C:/Qt/6.11.1/msvc2022_64 (forward slashes, and
-        # possibly a ';'-separated list — the Qt kit is the entry that has the
-        # deploy tool under bin\).
-        $entry = Select-String -LiteralPath $cache -Pattern '^CMAKE_PREFIX_PATH:[A-Z]+=(.+)$' |
-            Select-Object -First 1
-        if ($entry) {
-            foreach ($prefix in $entry.Matches[0].Groups[1].Value.Split(';')) {
-                foreach ($name in @('windeployqt6.exe', 'windeployqt.exe')) {
-                    $tool = Join-Path $prefix.Trim() "bin\$name"
-                    if ($prefix.Trim() -and (Test-Path $tool)) { return (Resolve-Path $tool).Path }
-                }
-            }
-        }
-    }
-
-    #--- 2. newest installed msvc2022_64 kit, whatever its version -----------
-    $qtRoot = 'C:\Qt'
-    if (Test-Path $qtRoot) {
-        $kits = Get-ChildItem $qtRoot -Directory -ErrorAction SilentlyContinue |
-            ForEach-Object {
-                $parsed = $null
-                if ([version]::TryParse($_.Name, [ref]$parsed)) {
-                    [pscustomobject]@{ Version = $parsed; Dir = $_.FullName }
-                }
-            } |
-            Sort-Object Version -Descending
-        foreach ($kit in $kits) {
-            foreach ($name in @('windeployqt6.exe', 'windeployqt.exe')) {
-                $tool = Join-Path $kit.Dir "msvc2022_64\bin\$name"
-                if (Test-Path $tool) { return $tool }
-            }
-        }
-    }
-    throw "windeployqt6 not found - no CMAKE_PREFIX_PATH kit in '$cache' and no msvc2022_64 kit under '$qtRoot'. Install Qt (msvc2022_64) or pass -WinDeployQt6."
-}
-
-#------------------------------------------------------------------------------
 # @brief  Locate the MSVC CRT redistributable DLL directory for an architecture.
 #
-# Preferred source is the VCToolsRedistDir environment variable (set by
-# vcvars/msvc-dev-cmd); otherwise the newest version directory under any
-# Visual Studio install's VC\Redist\MSVC is used. The returned directory is
-# the Microsoft.VC*.CRT folder holding msvcp140.dll, vcruntime140.dll, etc.,
-# which the script copies app-locally (decision recorded in
+# The only source is VCToolsRedistDir, set by the MSVC developer environment
+# (vcvars, or ilammy/msvc-dev-cmd in ci.yml). The returned directory is the
+# Microsoft.VC*.CRT folder holding msvcp140.dll, vcruntime140.dll, etc., which
+# the script copies app-locally (decision recorded in
 # scripts\packaging\windows\README.md: no merge modules, no vc_redist.exe
-# chaining).
+# chaining). Taking the redist from the developer environment and from nowhere
+# else keeps the shipped CRT the toolset that compiled the exes.
 #
 # @param  Architecture  'x64' or 'arm64'
 # @return Full path of the CRT DLL directory.
@@ -304,51 +242,35 @@ function Find-WinDeployQt6 {
 function Find-CrtDirectory {
     param([string]$Architecture)
 
-    $candidates = @()
-    if ($env:VCToolsRedistDir) {
-        $candidates += $env:VCToolsRedistDir.TrimEnd('\')
+    if (-not $env:VCToolsRedistDir) {
+        throw "VCToolsRedistDir is not set - run this script inside the MSVC developer environment for '$Architecture'."
     }
-    # Fall back to scanning installed Visual Studios (any edition/version).
-    foreach ($vsRoot in @('C:\Program Files\Microsoft Visual Studio', 'C:\Program Files (x86)\Microsoft Visual Studio')) {
-        if (Test-Path $vsRoot) {
-            $versionDirs = Get-ChildItem "$vsRoot\*\*\VC\Redist\MSVC" -Directory -ErrorAction SilentlyContinue |
-                Get-ChildItem -Directory -ErrorAction SilentlyContinue |
-                Where-Object { $_.Name -match '^\d+\.\d+' } |
-                Sort-Object { [version]($_.Name -replace '[^\d.].*$', '') } -Descending
-            $candidates += ($versionDirs | ForEach-Object { $_.FullName })
-        }
+    $archDir = Join-Path ($env:VCToolsRedistDir).TrimEnd('\') $Architecture
+    if (Test-Path $archDir) {
+        $crt = Get-ChildItem $archDir -Directory -Filter 'Microsoft.VC*.CRT' -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+        if ($crt) { return $crt.FullName }
     }
-
-    foreach ($base in $candidates) {
-        $archDir = Join-Path $base $Architecture
-        if (Test-Path $archDir) {
-            $crt = Get-ChildItem $archDir -Directory -Filter 'Microsoft.VC*.CRT' -ErrorAction SilentlyContinue |
-                Select-Object -First 1
-            if ($crt) { return $crt.FullName }
-        }
-    }
-    throw "MSVC CRT redistributable for '$Architecture' not found - run from a VS developer environment (VCToolsRedistDir) or install the VS C++ workload."
+    throw "MSVC CRT redistributable for '$Architecture' not found under '$archDir' (VCToolsRedistDir = '$env:VCToolsRedistDir')."
 }
 
 # --- Resolve inputs and tools (fail early with clear messages) ----------------
-if (-not $Seamly2DBin)          { $Seamly2DBin          = Join-Path $repoRoot 'build\src\app\seamly2d\bin' }
-if (-not $SeamlyMeBin)          { $SeamlyMeBin          = Join-Path $repoRoot 'build\src\app\seamlyme\bin' }
 if (-not $SeamlyLayoutBuildDir) { $SeamlyLayoutBuildDir = Join-Path $repoRoot 'src\app\seamlylayout\qt_frontend\build\Release' }
-$includeLayout = -not $NoSeamlyLayout
 
 foreach ($required in @(
-        @{ Path = (Join-Path $Seamly2DBin 'seamly2d.exe'); What = 'seamly2d.exe (build the release tree first)' },
+        @{ Path = (Join-Path $Seamly2DBin 'seamly2d.exe'); What = 'seamly2d.exe (-Seamly2DBin must name a completed release build)' },
         @{ Path = (Join-Path $Seamly2DBin 'platforms');    What = "seamly2d's windeployqt output (platforms\ plugin dir)" },
-        @{ Path = (Join-Path $SeamlyMeBin 'seamlyme.exe'); What = 'seamlyme.exe (build the release tree first)' })) {
+        @{ Path = (Join-Path $SeamlyMeBin 'seamlyme.exe'); What = 'seamlyme.exe (-SeamlyMeBin must name a completed release build)' })) {
     if (-not (Test-Path $required.Path)) {
         throw "Missing $($required.What): '$($required.Path)'."
     }
 }
-if ($includeLayout -and -not (Test-Path (Join-Path $SeamlyLayoutBuildDir 'SeamlyLayout.exe'))) {
-    throw "Missing SeamlyLayout.exe in '$SeamlyLayoutBuildDir' - build it (src\app\seamlylayout, release preset) or pass -NoSeamlyLayout."
+if (-not (Test-Path (Join-Path $SeamlyLayoutBuildDir 'SeamlyLayout.exe'))) {
+    throw "Missing SeamlyLayout.exe in '$SeamlyLayoutBuildDir' - run the CMake release build first, or point -SeamlyLayoutBuildDir at its output."
 }
 
-# WiX .NET tool + UI extension (the .wxs uses WixUI_InstallDir). Pinned to v6:
+# WiX .NET tool + UI extension (the .wxs builds its dialog set on the stock
+# dialogs and WixUI_Common, all of which the extension supplies). Pinned to v6:
 # WiX v7 refuses to run until its Open Source Maintenance Fee EULA is accepted
 # (error WIX7015); v6 is the newest line without that gate. The UI extension
 # version must match the installed core tool version.
@@ -367,7 +289,9 @@ if (-not ($installedExtensions -match 'WixToolset\.Util\.wixext')) {
     throw "The WiX Util extension is missing - run: wix extension add --global WixToolset.Util.wixext/<wix version, e.g. 6.0.2>"
 }
 
-if ($includeLayout -and -not $WinDeployQt6) { $WinDeployQt6 = Find-WinDeployQt6 -BuildDir $SeamlyLayoutBuildDir }
+if (-not (Test-Path $WinDeployQt)) {
+    throw "windeployqt not found at '$WinDeployQt'."
+}
 $crtDir = Find-CrtDirectory -Architecture $Arch
 $msiVersion = ConvertTo-MsiVersion -ProjectVersion $Version
 
@@ -375,27 +299,18 @@ Write-Host "arch        : $Arch"
 Write-Host "version     : $Version  (MSI ProductVersion $msiVersion)"
 Write-Host "seamly2d    : $Seamly2DBin"
 Write-Host "seamlyme    : $SeamlyMeBin"
-if ($includeLayout) {
-    Write-Host "seamlylayout: $SeamlyLayoutBuildDir"
-    Write-Host "windeployqt6: $WinDeployQt6"
-} else {
-    Write-Host "seamlylayout: EXCLUDED (-NoSeamlyLayout)"
-}
+Write-Host "seamlylayout: $SeamlyLayoutBuildDir"
+Write-Host "windeployqt : $WinDeployQt"
 Write-Host "msvc crt    : $crtDir"
 
 # --- Stage ---------------------------------------------------------------------
 # Fresh staging tree per run:
 # <repo>\scripts\<OutputDirName>\<arch>\{parent,exes}
-# .gitignore lists that directory BY NAME - it used to be covered only by the
-# generic *-build-* pattern, which matched the old "seamly-build-msi"
-# incidentally, so renaming it silently made two 165 MB packages committable.
-# A new -OutputDirName needs a new .gitignore entry, and the CI workflow's
-# artifact path updated with it. The output lives at the scripts\ root - a
-# sibling of sd.ps1's shadow build - not beside this script, so it is anchored
-# to $repoRoot.
-#
-# 'parent' is now the ONE shared runtime tree for every app in the package
-# the separate 'layout' tree it used to sit beside is gone.
+# 'parent' is the one shared runtime tree for every app in the package.
+# .gitignore lists that directory by name, so a new -OutputDirName needs a new
+# .gitignore entry and the CI workflow's artifact path updated with it - a
+# 165 MB package is otherwise committable. The output is anchored to $repoRoot
+# at the scripts\ root, not beside this script.
 $stageRoot = Join-Path $repoRoot (Join-Path 'scripts' (Join-Path $OutputDirName $Arch))
 if (Test-Path $stageRoot) {
     Remove-Item $stageRoot -Recurse -Force
@@ -404,9 +319,8 @@ $parentDir = Join-Path $stageRoot 'parent'
 $exesDir   = Join-Path $stageRoot 'exes'
 New-Item -ItemType Directory -Force -Path $parentDir, $exesDir | Out-Null
 
-# seamly2d + seamlyme runtimes merged into one tree (they share the same Qt
-# release, so the overlapping DLLs are identical), exactly like the NSIS
-# packaging step in ci.yml merges the two bin trees.
+# seamly2d + seamlyme runtimes merged into one tree: they share the same Qt
+# release, so the overlapping DLLs are identical.
 Write-Host "staging seamly2d + seamlyme runtime..."
 Copy-Item -Path (Join-Path $Seamly2DBin '*') -Destination $parentDir -Recurse
 Copy-Item -Path (Join-Path $SeamlyMeBin '*') -Destination $parentDir -Recurse -Force
@@ -416,43 +330,41 @@ Copy-Item -Path (Join-Path $SeamlyMeBin '*') -Destination $parentDir -Recurse -F
 Move-Item -Path (Join-Path $parentDir 'seamly2d.exe') -Destination $exesDir
 Move-Item -Path (Join-Path $parentDir 'seamlyme.exe') -Destination $exesDir
 
-if ($includeLayout) {
-    Write-Host "staging SeamlyLayout runtime (windeployqt6) into the shared tree..."
+Write-Host "staging SeamlyLayout runtime (windeployqt) into the shared tree..."
 
-    # deploy SeamlyLayout's Qt runtime into the SAME tree as the parent
-    # apps'. All three are built against Qt 6.11.1, so wherever the two
-    # windeployqt runs produce the same DLL it is the same file — what
-    # SeamlyLayout adds on top is the QML module tree, Qt Quick/WebEngine DLLs
-    # and QtWebEngineProcess.exe. Deploying against a staged copy of the exe
-    # keeps the build tree pristine; --qmldir points windeployqt6 at the QML
-    # sources so it can resolve the app's QML module imports.
-    Copy-Item -Path (Join-Path $SeamlyLayoutBuildDir 'seamlylayout.exe') -Destination $parentDir
-    $qmlDir = Join-Path $repoRoot 'src\app\seamlylayout\qt_frontend\qml'
-    Invoke-Tool -Description 'windeployqt6' -Exe $WinDeployQt6 -Arguments @(
-        '--qmldir', $qmlDir, '--release', (Join-Path $parentDir 'seamlylayout.exe'))
+# Deploy SeamlyLayout's Qt runtime into the SAME tree as the parent apps'. All
+# three are built against Qt 6.11.1, so wherever two windeployqt runs produce
+# the same DLL it is the same file — what SeamlyLayout adds on top is the QML
+# module tree, Qt Quick/WebEngine DLLs and QtWebEngineProcess.exe. Deploying
+# against a staged copy of the exe keeps the build tree pristine; --qmldir
+# points windeployqt at the QML sources so it can resolve the app's QML module
+# imports.
+Copy-Item -Path (Join-Path $SeamlyLayoutBuildDir 'seamlylayout.exe') -Destination $parentDir
+$qmlDir = Join-Path $repoRoot 'src\app\seamlylayout\qt_frontend\qml'
+Invoke-Tool -Description 'windeployqt' -Exe $WinDeployQt -Arguments @(
+    '--qmldir', $qmlDir, '--release', (Join-Path $parentDir 'seamlylayout.exe'))
 
-    # Packaged default settings (read-only legacy-migration source / first-run
-    # seed), read by SeamlyLayout from <exeDir>\settings\. preferences.json is
-    # deliberately excluded: it contains per-user paths (same exclusion as the
-    # Inno Setup script SeamlyLayout.iss). The parent apps ship no settings\
-    # directory, so nothing collides in the now-shared tree.
-    $settingsSrc = Join-Path $repoRoot 'src\app\seamlylayout\qt_frontend\settings'
-    $settingsDst = Join-Path $parentDir 'settings'
-    New-Item -ItemType Directory -Force -Path $settingsDst | Out-Null
-    foreach ($file in @('default_settings.json', 'B0.json', 'roll_36in.json', 'roll_48in.json')) {
-        Copy-Item -Path (Join-Path $settingsSrc $file) -Destination $settingsDst
-    }
-
-    # LGPL compliance notices for the bundled Qt runtime.
-    $licensesSrc = Join-Path $repoRoot 'src\app\seamlylayout\packaging\licenses'
-    if (Test-Path $licensesSrc) {
-        $licensesDst = Join-Path $parentDir 'licenses'
-        New-Item -ItemType Directory -Force -Path $licensesDst | Out-Null
-        Copy-Item -Path (Join-Path $licensesSrc '*.txt') -Destination $licensesDst
-    }
-
-    Move-Item -Path (Join-Path $parentDir 'seamlylayout.exe') -Destination $exesDir
+# Packaged default settings (read-only legacy-migration source / first-run
+# seed), read by SeamlyLayout from <exeDir>\settings\. preferences.json is
+# deliberately excluded: it contains per-user paths (same exclusion as the
+# Inno Setup script SeamlyLayout.iss). The parent apps ship no settings\
+# directory, so nothing collides in the shared tree.
+$settingsSrc = Join-Path $repoRoot 'src\app\seamlylayout\qt_frontend\settings'
+$settingsDst = Join-Path $parentDir 'settings'
+New-Item -ItemType Directory -Force -Path $settingsDst | Out-Null
+foreach ($file in @('default_settings.json', 'B0.json', 'roll_36in.json', 'roll_48in.json')) {
+    Copy-Item -Path (Join-Path $settingsSrc $file) -Destination $settingsDst
 }
+
+# LGPL compliance notices for the bundled Qt runtime.
+$licensesSrc = Join-Path $repoRoot 'src\app\seamlylayout\packaging\licenses'
+if (Test-Path $licensesSrc) {
+    $licensesDst = Join-Path $parentDir 'licenses'
+    New-Item -ItemType Directory -Force -Path $licensesDst | Out-Null
+    Copy-Item -Path (Join-Path $licensesSrc '*.txt') -Destination $licensesDst
+}
+
+Move-Item -Path (Join-Path $parentDir 'seamlylayout.exe') -Destination $exesDir
 
 # MSVC CRT app-local deployment: the directory holding the exes gets the runtime
 # DLLs, since PATH-independent DLL resolution is per-directory. With one shared
@@ -468,23 +380,20 @@ $wixArguments = @(
     'build', $wxs,
     '-arch', $Arch,
     # Suppress the .wixpdb symbol database: it is only used for wix patch/melt
-    # diffing and post-build inspection, not by the shipped installer, so we keep
-    # the build output to just the .msi. WiX v6 equivalent of light.exe -spdb.
+    # diffing and post-build inspection, not by the shipped installer, so the
+    # build output stays just the .msi.
     '-pdbtype', 'none',
     '-ext', 'WixToolset.UI.wixext',
     '-ext', 'WixToolset.Util.wixext',
     '-d', "ProductVersion=$msiVersion",
     '-d', "DisplayVersion=$Version",
     '-d', "RepoRoot=$repoRoot",
+    # One runtime tree and one exe tree: SeamlyLayout's runtime is merged into
+    # ParentStagingDir, so the .wxs harvests a single tree.
     '-d', "ParentStagingDir=$parentDir",
     '-d', "ExeStagingDir=$exesDir",
     '-o', $msi
 )
-if ($includeLayout) {
-    # No LayoutStagingDir any more — SeamlyLayout's runtime is merged into
-    # ParentStagingDir (Task 30), so the .wxs harvests one tree.
-    $wixArguments += @('-d', 'IncludeSeamlyLayout=1')
-}
 
 Write-Host "running wix build..."
 Invoke-Tool -Description 'wix build' -Exe 'wix' -Arguments $wixArguments
@@ -494,7 +403,7 @@ if (-not (Test-Path $msi)) {
 }
 
 # --- Validate (ICE checks) -----------------------------------------------------
-# Two ICEs are suppressed, both raised by the Task 51 optional desktop-shortcut
+# Two ICEs are suppressed, both raised by the optional desktop-shortcut
 # components and both false positives for this package:
 #
 #   ICE43  "non-advertised shortcut ... KeyPath should fall under HKCU"
@@ -519,7 +428,7 @@ if (-not $SkipValidation) {
         'msi', 'validate', $msi, '-sice', 'ICE43', '-sice', 'ICE57')
 }
 
-# --- Check the install-time authoring (Task 51) --------------------------------
+# --- Check the install-time authoring  --------------------------------
 # The ICE checks say the package is well formed; this says it still contains the
 # shortcuts, associations, registry rows, elevation, upgrade detection and
 # install-time dialogs the project expects. Runs on every build, including CI,
@@ -529,7 +438,6 @@ if (-not $SkipValidation) {
 Write-Host "checking install-time authoring..."
 # A hashtable, not an array: @array splats positionally, @hashtable by name.
 $checkArguments = @{ Msi = $msi; Arch = $Arch }
-if ($includeLayout) { $checkArguments['ExpectSeamlyLayout'] = $true }
 & (Join-Path $PSScriptRoot 'test_msi_authoring.ps1') @checkArguments
 if ($LASTEXITCODE -ne 0) {
     throw "install-time authoring check failed (exit code $LASTEXITCODE) - see output above."

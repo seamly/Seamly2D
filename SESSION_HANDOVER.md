@@ -6,7 +6,34 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## PICK UP HERE (2026-08-12, custom dialog set)
+## PICK UP HERE (2026-08-15, smsi.ps1 is CI-only)
+
+**`smsi.ps1` no longer builds locally, no longer builds a two-app package, and
+no longer detects anything.** Three removals, all done:
+
+1. **Local-build mode.** `-Version`, `-Seamly2DBin`, `-SeamlyMeBin` and
+   `-WinDeployQt` are `Mandatory`. `Find-WinDeployQt6` (CMakeCache + `C:\Qt`
+   scan) is deleted; `Find-CrtDirectory` reads `VCToolsRedistDir` only, with no
+   Visual Studio scan. Each removed fallback could ship a runtime nothing in the
+   package was built against.
+2. **`-NoSeamlyLayout`.** Gone, with the `IncludeSeamlyLayout` define, the two
+   `<?ifdef?>` guards in `seamly-family.wxs`, and `-ExpectSeamlyLayout` in
+   `test_msi_authoring.ps1` (its SeamlyLayout assertions are unconditional now).
+   Both architectures have shipped all three apps since 2026-08-11.
+3. **`windeployqt6`.** The project uses the unsuffixed `windeployqt` everywhere:
+   the parameter is `-WinDeployQt`, `ci.yml` passes
+   `"$env:QT_ROOT_DIR\bin\windeployqt.exe"`, and
+   `src/app/seamlylayout/packaging/windows/build_installer.ps1` was renamed to
+   match. A Qt 6 kit ships both names, so this is a naming choice, not a
+   behaviour change.
+
+**Verified with the stub-staging-tree trick** (see below): `wix build` clean,
+`wix msi validate` clean except the expected ICE61, `test_msi_authoring.ps1`
+all assertions pass including the three SeamlyLayout ones. The next real CI run
+is what proves the `-WinDeployQt` rename against the runners' Qt kits — the
+change is untested on a runner.
+
+## Earlier (2026-08-12, custom dialog set)
 
 **Tasks InstWinX64.0.2 and InstWinX64.1.1–1.5 are done.** The user confirmed the
 x64 MSI builds in CI, and `seamly-family.wxs` now defines its own dialog set
@@ -409,8 +436,10 @@ explaining why: `seamly-family.wxs` cites it as the authoritative record of what
 a pre-MSI installation left on disk, which the MSI's `RemoveFolderEx` authoring
 has to remove on upgrade. Deleting it would orphan that authoring's reference.
 
-`-WinDeployQt6` is deliberately not passed on the arm64 leg — verified at
-`smsi.ps1:370`, the parameter is only resolved and used under `$includeLayout`.
+`-WinDeployQt6` was deliberately not passed on the arm64 leg while that leg
+shipped two apps. **Superseded twice since:** both legs pass the deploy tool,
+and on 2026-08-15 the parameter was renamed `-WinDeployQt` and `$includeLayout`
+was removed with `-NoSeamlyLayout`.
 
 Docs updated: `README-BUILDS.md`, `README_WORKFLOWS.md`, `TODO_INSTALLER.md`
 (Installer.1.2 checked off), `TODO_INSTALLER_WIN_ARM64.md` (written from a stub),

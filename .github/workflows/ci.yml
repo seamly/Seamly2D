@@ -261,7 +261,7 @@ jobs:
           #
           # Each arch builds NATIVELY on its own runner — no cross-compiling.
           # That means a plain `qmake` (not `host-qmake`), a native MSVC arch, a
-          # native cargo host toolchain, and a `windeployqt6.exe` the runner can
+          # native cargo host toolchain, and a `windeployqt.exe` the runner can
           # execute, so no QT_HOST_PATH juggling anywhere below.
           - arch: x64
             runner: windows-latest
@@ -356,15 +356,16 @@ jobs:
       # checks and the install-time authoring test, and fails the job on any of
       # them. Output: scripts\seamly-msi\<arch>\seamly-<arch>.msi
       # One invocation for both arches: each package carries all three apps, and
-      # each runner is native, so $QT_ROOT_DIR's windeployqt6.exe is always one
-      # this runner can execute.
+      # each runner is native, so $QT_ROOT_DIR's windeployqt.exe is always one
+      # this runner can execute. A Qt 6 kit ships both windeployqt.exe and
+      # windeployqt6.exe; the project uses the unsuffixed name everywhere.
       - name: Build MSI (all three apps)
         shell: pwsh
         run: |
           .\scripts\packaging\windows\smsi.ps1 -Arch ${{ matrix.arch }} -Version $env:VERSION_NUMBER `
             -Seamly2DBin src\app\seamly2d\bin `
             -SeamlyMeBin src\app\seamlyme\bin `
-            -WinDeployQt6 "$env:QT_ROOT_DIR\bin\windeployqt6.exe"
+            -WinDeployQt "$env:QT_ROOT_DIR\bin\windeployqt.exe"
 
       # ------------------- sign (main builds only) --------------------------
       - name: Authenticate to Google Cloud (for signing)

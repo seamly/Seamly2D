@@ -60,12 +60,8 @@
     Architecture the package was built for: x64 (default) or arm64. Checked
     against the summary-information template.
 
-.PARAMETER ExpectSeamlyLayout
-    Assert the SeamlyLayout shortcut and icon are present. Omit for the arm64
-    package, which ships the two parent apps only.
-
 .EXAMPLE
-    .\test_msi_authoring.ps1 -Msi scripts\seamly-msi\x64\Seamly-x64.msi -ExpectSeamlyLayout
+    .\test_msi_authoring.ps1 -Msi scripts\seamly-msi\x64\seamly-x64.msi
 #>
 
 param(
@@ -73,9 +69,7 @@ param(
     [string]$Msi,
 
     [ValidateSet('x64', 'arm64')]
-    [string]$Arch = 'x64',
-
-    [switch]$ExpectSeamlyLayout
+    [string]$Arch = 'x64'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -452,8 +446,9 @@ $shortcuts = $shortcuts | ForEach-Object {
     $_.Name = ($_.Name -split '\|')[-1]
     $_
 }
-$expectedStartMenu = @('Seamly2D', 'SeamlyMe')
-if ($ExpectSeamlyLayout) { $expectedStartMenu += 'SeamlyLayout' }
+# Every package carries all three apps: the two-app package built with
+# smsi.ps1 -NoSeamlyLayout is gone, and both architectures ship SeamlyLayout.
+$expectedStartMenu = @('Seamly2D', 'SeamlyMe', 'SeamlyLayout')
 foreach ($name in $expectedStartMenu) {
     # Target of an advertised shortcut is the feature it belongs to, not a path.
     $row = @($shortcuts | Where-Object { $_.Directory -eq 'ProgramMenuFolder' -and $_.Name -eq $name })
@@ -473,8 +468,7 @@ Assert-That -Name 'SeamlyLayout has no desktop shortcut' `
     -Succeeded (@($shortcuts | Where-Object { $_.Directory -eq 'DesktopFolder' -and $_.Name -eq 'SeamlyLayout' }).Count -eq 0)
 
 $icons = @(Get-MsiRows -Sql "SELECT ``Name`` FROM ``Icon``" -Columns 'Name' | ForEach-Object { $_.Name })
-$expectedIcons = @('seamly2d.ico', 'seamlyme.ico')
-if ($ExpectSeamlyLayout) { $expectedIcons += 'seamlylayout.ico' }
+$expectedIcons = @('seamly2d.ico', 'seamlyme.ico', 'seamlylayout.ico')
 foreach ($icon in $expectedIcons) {
     Assert-That -Name "icon '$icon' is packaged" -Succeeded ($icons -contains $icon)
 }

@@ -18,8 +18,9 @@ Commit `fba962c4d8` moved the arm64 leg onto the `windows-11-arm` runner with th
 cross-compiled: no `amd64_arm64` MSVC, no `..._cross_compiled` Qt, no
 `host-qmake`, no explicit cargo target. Both matrix legs install the identical Qt
 module set (`qtmultimedia qtwebengine qtwebchannel qtpositioning`) and run the
-identical `smsi.ps1` invocation — `-NoSeamlyLayout` is no longer passed by either
-workflow. Everything else about the package — install layout, UpgradeCode,
+identical `smsi.ps1` invocation. `-NoSeamlyLayout` was removed from `smsi.ps1`
+on 2026-08-15, so a two-app package can no longer be built at all. Everything
+else about the package — install layout, UpgradeCode,
 associations, shortcuts, legacy-install removal, version mapping, signing — is
 shared with x64 and documented in `.github/README-BUILDS.md` and
 `scripts/packaging/windows/README.md`.
@@ -45,15 +46,18 @@ for the native `windows_arm64` host kit.
 - [X] InstWinArm64.1.3 `ci.yml` and `windows-msi.yml` both carry
   `qtmultimedia qtwebengine qtwebchannel qtpositioning` on the arm64 leg, the
   `matrix.arch == 'x64'` step guards are gone, and neither passes
-  `-NoSeamlyLayout`. The two workflows are in step
-- [X] InstWinArm64.1.4 `smsi.ps1` gets `-WinDeployQt6 "$env:QT_ROOT_DIR\bin\windeployqt6.exe"`
+  `-NoSeamlyLayout` (the switch itself was removed on 2026-08-15). The two
+  workflows are in step
+- [X] InstWinArm64.1.4 `smsi.ps1` gets `-WinDeployQt "$env:QT_ROOT_DIR\bin\windeployqt.exe"`
   on both legs. Because each runner is native, that executable is always one the
   runner can run *and* belongs to the kit being deployed — no `QT_HOST_PATH`
   split and no `--qtpaths` wrapper. (The same reasoning drives `common.pri`'s
   `deployQtRuntime()`; passing `--qtpaths host-qtpaths.bat` is what broke the
   arm64 MSI build on 2026-08-10)
-- [ ] InstWinArm64.1.5 Re-run `test_msi_authoring.ps1` expectations for a
-  three-app arm64 package — the only subtask here still outstanding
+- [X] InstWinArm64.1.5 Re-run `test_msi_authoring.ps1` expectations for a
+  three-app arm64 package — done by removing `-ExpectSeamlyLayout` on
+  2026-08-15: the SeamlyLayout shortcut and icon are now asserted on every
+  package, so the arm64 leg checks all three apps with no caller opt-in
 
 ## InstWinArm64.3 — Build Qt WebEngine for win-arm64 from source, once — DROPPED (2026-08-11)
 

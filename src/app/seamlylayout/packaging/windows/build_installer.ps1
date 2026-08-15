@@ -7,7 +7,7 @@
 # Steps performed:
 #   1. Verify prerequisites (Qt, Inno Setup, LGPL license file)
 #   2. Build a Release executable via qr.ps1 (if not already built)
-#   3. Run windeployqt6 to gather Qt runtime DLLs alongside the exe
+#   3. Run windeployqt to gather Qt runtime DLLs alongside the exe
 #   4. Run iscc.exe (Inno Setup Compiler) to produce the installer
 #
 # Output: packaging\windows\Output\SeamlyLayout-0.1.0-win64.exe
@@ -27,7 +27,7 @@
 
 param(
     [switch]$SkipBuild,   # Skip the cmake/cargo build step (exe already built)
-    [switch]$SkipDeploy   # Skip windeployqt6 (DLLs already deployed)
+    [switch]$SkipDeploy   # Skip windeployqt (DLLs already deployed)
 )
 
 $ErrorActionPreference = "Stop"
@@ -84,21 +84,21 @@ if (-not (Test-Path $ExePath)) {
 }
 
 # ---------------------------------------------------------------------------
-# 3. Run windeployqt6 to gather Qt runtime DLLs
+# 3. Run windeployqt to gather Qt runtime DLLs
 # ---------------------------------------------------------------------------
 if (-not $SkipDeploy) {
-    Write-Host "3 Running windeployqt6..."
-    $WinDeployQt = Join-Path $QtBin "windeployqt6.exe"
+    Write-Host "3 Running windeployqt..."
+    $WinDeployQt = Join-Path $QtBin "windeployqt.exe"
     & $WinDeployQt `
         --qmldir (Join-Path $RepoRoot "qt_frontend\qml") `
         --release `
         $ExePath
     if ($LASTEXITCODE -ne 0) {
-        Write-Error "windeployqt6 failed (exit $LASTEXITCODE)"
+        Write-Error "windeployqt failed (exit $LASTEXITCODE)"
         exit $LASTEXITCODE
     }
 } else {
-    Write-Host "3 Skipping windeployqt6 (SkipDeploy flag set)"
+    Write-Host "3 Skipping windeployqt (SkipDeploy flag set)"
 }
 
 # ---------------------------------------------------------------------------
