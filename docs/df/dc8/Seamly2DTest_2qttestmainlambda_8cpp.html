@@ -184,7 +184,7 @@ Functions</h2></td></tr>
 
 <p>Run every registered test suite in one process and OR their exit codes. </p>
 <p>Each suite is executed through QTest::qExec() by the ASSERT_TEST lambda; the combined status (0 only when every suite passed) is the process exit code.</p>
-<p>Per-suite log capture: when the environment variable SEAMLY_TEST_LOG_DIR is set to a directory, each suite additionally writes a plain-text QTest log to "&lt;dir&gt;/&lt;SuiteClassName&gt;.txt" via an injected "-o file,txt" argument. Without it, a single "-o" on the command line is overwritten by every subsequent qExec() call, and on Windows the console/stdout output of the suite can be lost entirely when redirected — so this hook is what makes local per-suite results capturable at all (used by scripts/st.ps1; see Task 23).</p>
+<p>Per-suite log capture: when the environment variable SEAMLY_TEST_LOG_DIR is set to a directory, each suite additionally writes a plain-text QTest log to "&lt;dir&gt;/&lt;SuiteClassName&gt;.txt" via an injected "-o file,txt" argument. Without it, a single "-o" on the command line is overwritten by every subsequent qExec() call, and on Windows the console/stdout output of the suite can be lost entirely when redirected — so this hook is what makes local per-suite results capturable at all (see Task 23).</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">argc</td><td>argument count, forwarded to every QTest::qExec() call </td></tr>

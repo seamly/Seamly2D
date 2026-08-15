@@ -156,13 +156,13 @@ Private Slots</h2></td></tr>
 <tr class="memdesc:af8d760c01387ec6a94144c5469b5ad2f"><td class="mdescLeft">&#160;</td><td class="mdescRight">DevBuildFoundFromReleaseShadowBuild verifies the walk reaches the checkout root from the release shadow build's bin directory.  <br /></td></tr>
 <tr class="separator:af8d760c01387ec6a94144c5469b5ad2f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4eeb9935590a83040310cd14599b6d89"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/da4/classTST__SeamlyFamilyPaths.html#a4eeb9935590a83040310cd14599b6d89">DevBuildFoundFromDebugShadowBuild</a> () const</td></tr>
-<tr class="memdesc:a4eeb9935590a83040310cd14599b6d89"><td class="mdescLeft">&#160;</td><td class="mdescRight">DevBuildFoundFromDebugShadowBuild verifies the walk also reaches the checkout root from the deeper debug shadow build produced by scripts/sd.ps1.  <br /></td></tr>
+<tr class="memdesc:a4eeb9935590a83040310cd14599b6d89"><td class="mdescLeft">&#160;</td><td class="mdescRight">DevBuildFoundFromDebugShadowBuild verifies the walk also reaches the checkout root from the deeper debug shadow build layout.  <br /></td></tr>
 <tr class="separator:a4eeb9935590a83040310cd14599b6d89"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad3bf37abab8451596503f3a092c885b1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/da4/classTST__SeamlyFamilyPaths.html#ad3bf37abab8451596503f3a092c885b1">DevBuildReleaseTakesPrecedenceOverDebug</a> () const</td></tr>
 <tr class="memdesc:ad3bf37abab8451596503f3a092c885b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">DevBuildReleaseTakesPrecedenceOverDebug verifies that when a developer has built both configurations, Release wins.  <br /></td></tr>
 <tr class="separator:ad3bf37abab8451596503f3a092c885b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe69b9411f3b064470bc0a65698e7529"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/da4/classTST__SeamlyFamilyPaths.html#afe69b9411f3b064470bc0a65698e7529">DevBuildFindsDebugWhenReleaseAbsent</a> () const</td></tr>
-<tr class="memdesc:afe69b9411f3b064470bc0a65698e7529"><td class="mdescLeft">&#160;</td><td class="mdescRight">DevBuildFindsDebugWhenReleaseAbsent verifies Debug is still found when it is the only configuration built — the common case for a developer working with scripts/sd.ps1.  <br /></td></tr>
+<tr class="memdesc:afe69b9411f3b064470bc0a65698e7529"><td class="mdescLeft">&#160;</td><td class="mdescRight">DevBuildFindsDebugWhenReleaseAbsent verifies Debug is still found when it is the only configuration built — the common case for a developer working from a debug tree.  <br /></td></tr>
 <tr class="separator:afe69b9411f3b064470bc0a65698e7529"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a61fd5efcbd6d7de72b55d895cc338598"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/da4/classTST__SeamlyFamilyPaths.html#a61fd5efcbd6d7de72b55d895cc338598">DevBuildDirectoryNamedLikeExecutableIsIgnored</a> () const</td></tr>
 <tr class="memdesc:a61fd5efcbd6d7de72b55d895cc338598"><td class="mdescLeft">&#160;</td><td class="mdescRight">DevBuildDirectoryNamedLikeExecutableIsIgnored verifies the isFile() guard applies to the development lookup too: a <em>directory</em> at the executable's path is never a match, and the walk goes on to find the real Debug build.  <br /></td></tr>
@@ -321,7 +321,7 @@ Private Slots</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>DevBuildFindsDebugWhenReleaseAbsent verifies Debug is still found when it is the only configuration built — the common case for a developer working with scripts/sd.ps1. </p>
+<p>DevBuildFindsDebugWhenReleaseAbsent verifies Debug is still found when it is the only configuration built — the common case for a developer working from a debug tree. </p>
 
 <p class="definition">Definition at line <a class="el" href="../../d3/d03/tst__seamlyfamilypaths_8cpp_source.html#l00324">324</a> of file <a class="el" href="../../d3/d03/tst__seamlyfamilypaths_8cpp_source.html">tst_seamlyfamilypaths.cpp</a>.</p>
 
@@ -352,7 +352,7 @@ Private Slots</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>DevBuildFoundFromDebugShadowBuild verifies the walk also reaches the checkout root from the deeper debug shadow build produced by scripts/sd.ps1. </p>
+<p>DevBuildFoundFromDebugShadowBuild verifies the walk also reaches the checkout root from the deeper debug shadow build layout. </p>
 <p>Layout reproduced: seamly2d runs from <code>&lt;checkout&gt;/scripts/seamly2d-debug/src/app/seamly2d/bin</code> — six levels below the checkout root, the deepest layout the project uses. </p>
 
 <p class="definition">Definition at line <a class="el" href="../../d3/d03/tst__seamlyfamilypaths_8cpp_source.html#l00269">269</a> of file <a class="el" href="../../d3/d03/tst__seamlyfamilypaths_8cpp_source.html">tst_seamlyfamilypaths.cpp</a>.</p>
