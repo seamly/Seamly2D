@@ -104,7 +104,7 @@ What the job must provide (`smsi.ps1` checks all of it before touching anything,
 
 The script then deletes any previous staging tree and rebuilds it: the two parent bin trees are copied over each other into `parent\`, `windeployqt --qmldir … --release` adds SeamlyLayout's QML modules and WebEngine runtime to the same folder, SeamlyLayout's packaged `settings\` and LGPL `licenses\` and the CRT DLLs follow, and each executable is moved into `exes\` as it is deployed. `wix build` then harvests `parent\` by wildcard and takes the three executables from `exes\`.
 
-Output: `scripts\seamly-msi\<arch>\seamly-<arch>.msi` (gitignored), attached to the pre-release by the `publish` job. Only the `.msi` is produced — the `.wixpdb` symbol database is suppressed via `wix build -pdbtype none` (it is only used for `wix` patch/melt diffing, not by the shipped installer); to keep it for inspection, remove that flag from `$wixArguments` in `smsi.ps1`. The script then runs two checks, both of which fail the build:
+Output: `scripts\seamly-msi\<arch>\seamly-<arch>.msi` (gitignored), published as described under [Downloading the MSI](#downloading-the-msi). Only the `.msi` is produced — the `.wixpdb` symbol database is suppressed via `wix build -pdbtype none` (it is only used for `wix` patch/melt diffing, not by the shipped installer); to keep it for inspection, remove that flag from `$wixArguments` in `smsi.ps1`. The script then runs two checks, both of which fail the build:
 
 1. `wix msi validate` (ICE checks, skip with `-SkipValidation`). ICE43 and ICE57 are suppressed for the reason given above; the only expected warning is **ICE61**, a known consequence of `AllowSameVersionUpgrades`.
 2. `smsi_check_authoring.ps1`, which opens the built MSI and asserts over a hundred expectations about what it contains — elevation, ARP properties, the upgrade and NSIS detection, every Next and Back arrow of the dialog chain, the wording of the warning page, the Start Menu and desktop shortcuts, the three file associations, and the install-info registry rows. Run it by hand against any MSI:
@@ -114,6 +114,24 @@ Output: `scripts\seamly-msi\<arch>\seamly-<arch>.msi` (gitignored), attached to 
    ```
 
    It checks *content*, not behaviour: it cannot tell you whether a shortcut launches or Explorer shows the right icon. That is the manual checklist below.
+
+### Downloading the MSI
+
+Take the MSI from a **release**, not from the Actions page.
+
+| Source | Trigger | What you get |
+| --- | --- | --- |
+| Release `dev-latest` (`publish-windows-dev`) | every push to `run-seamlyLayout` | `seamly-x64.msi` and `seamly-arm64.msi`, raw |
+| Release `v<version>` (`publish`) | `schedule` or `workflow_dispatch` | the same two MSIs plus the Linux and macOS builds |
+| Build artifact `seamly-<arch>.msi` | every run | `seamly-<arch>.msi.zip` — unzip it first |
+
+GitHub serves every workflow artifact as a zip archive. `actions/upload-artifact` has no option to return a bare file, so the artifact named `seamly-x64.msi` downloads as `seamly-x64.msi.zip`. A release asset is the only raw `.msi` GitHub hands back. The build artifacts stay because `publish` and `publish-windows-dev` read the MSIs from them.
+
+`dev-latest` is one rolling pre-release. Each push deletes it, recreates it on the new commit, and uploads that build. It is a pre-release, so `/releases/latest` still resolves to the newest full release. It carries the Windows MSIs only: it depends on `windows-msi` alone, so a broken Linux or macOS leg cannot hold back the Windows package.
+
+```powershell
+gh release download dev-latest --repo seamly/Seamly2D --pattern 'seamly-x64.msi'
+```
 
 ## Installing / testing
 

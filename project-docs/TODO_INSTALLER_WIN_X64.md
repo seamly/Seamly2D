@@ -68,10 +68,50 @@ User selected from Change (disabled), repair, remove --> Repair.
 
 - [ ] **InstWinX64.0.2** Display the detected existing directories for program data and user data.
 
+- [x] **InstWinX64.0.3** create artifacts in ci.yml as .msi files, not .zip files
+
+Publish the .msi as a GitHub Release asset or pre-release asset instead of an Actions artifact.
+
+#### Result — 2026-08-15
+
+The literal task is impossible. GitHub serves **every** workflow artifact as a
+zip, and `actions/upload-artifact` has no option to return a bare file. The
+artifact named `seamly-x64.msi` downloads as `seamly-x64.msi.zip`. A release
+asset is the only raw `.msi` GitHub hands back.
+
+`ci.yml` gained a `publish-windows-dev` job. Every push to `run-seamlyLayout`
+deletes the `dev-latest` release, recreates it on the pushed commit, and uploads
+`seamly-x64.msi` and `seamly-arm64.msi`.
+
+- Delete and recreate, not edit: GitHub pins a tag to its creation commit, and
+  no `gh` command moves it. An edited `dev-latest` would advertise the first
+  commit that ever built it.
+- The job depends on `windows-msi` only. A broken Linux or macOS leg cannot hold
+  back the Windows package, and the release carries no Linux or macOS file.
+- `fail-fast` is off, so one failed architecture fails `windows-msi` and skips
+  this job instead of shipping half a release.
+- `dev-latest` is a pre-release, so `/releases/latest` still resolves to the
+  newest full release.
+- The build artifacts stay. Both publish jobs read the MSIs from them.
+
+The versioned `publish` job is unchanged: `schedule` and `workflow_dispatch`
+still make the `v<version>` pre-release with all four platform files.
+
+Verified statically — the workflow parses and the release-notes heredoc expands
+correctly. Not verified: the job itself. It needs one real push to CI.
+
+`scripts/packaging/windows/README.md` gained a "Downloading the MSI" section.
+`.github/README-BUILDS.md` records the decision.
+
+- [ ] **InstWinX64.0.4** use Seamly's logo and brand colors in the .msi installer
+
 ### Application preferences
 
-- [ ] **InstWinX64.0.3** Fix user directory path for Pattern Label --> C:/Users/susan/seamly2d/label templates/default_pattern_label.xml should be C:/Users/susan/seamlyData/label templates/default_pattern_label.xml
-- [ ] **InstWinX64.0.4** Fix user directory path for Piece Label --> C:/Users/susan/seamly2d/label templates/default_pattern_label.xml should be C:/Users/susan/seamlyData/label templates/default_pattern_label.xml
+Numbered from 0.5. Two tasks below used to repeat the `InstWinX64.0.3` and
+`InstWinX64.0.4` identifiers of the installation-page tasks above.
+
+- [ ] **InstWinX64.0.5** Fix user directory path for Pattern Label --> C:/Users/susan/seamly2d/label templates/default_pattern_label.xml should be C:/Users/susan/seamlyData/label templates/default_pattern_label.xml
+- [ ] **InstWinX64.0.6** Fix user directory path for Piece Label --> C:/Users/susan/seamly2d/label templates/default_pattern_label.xml should be C:/Users/susan/seamlyData/label templates/default_pattern_label.xml
 
 
 ## InstWinX64.2 — Configure Installation Paths

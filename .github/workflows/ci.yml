@@ -419,14 +419,81 @@ jobs:
           --tsaurl http://timestamp.sectigo.com \
           scripts/seamly-msi/${{ matrix.arch }}/seamly-${{ matrix.arch }}.msi
 
-      # The artifact name is the file name, so the publish job's
-      # download-artifact drops seamly-<arch>.msi straight into its working
-      # directory and can list it verbatim in the release files.
+      # download-artifact extracts the archive, so both publish jobs get
+      # seamly-<arch>.msi in their working directory and can list it verbatim in
+      # the release files. The artifact name repeats the file name only so the
+      # two match.
+      #
+      # GitHub serves EVERY workflow artifact as a zip, so this one downloads
+      # from the Actions page as seamly-<arch>.msi.zip. upload-artifact has no
+      # option to change that. A raw .msi comes from a release asset, which is
+      # what publish-windows-dev and publish exist for.
       - uses: actions/upload-artifact@v7
         with:
           name: seamly-${{ matrix.arch }}.msi
           path: scripts/seamly-msi/${{ matrix.arch }}/seamly-${{ matrix.arch }}.msi
           if-no-files-found: error
+
+  # Publish the Windows MSIs of every run-seamlyLayout push to one rolling
+  # pre-release (Task InstWinX64.0.3).
+  #
+  # WHY A RELEASE AND NOT THE BUILD ARTIFACT: GitHub serves every workflow
+  # artifact as a zip, so the seamly-x64.msi artifact downloads as
+  # seamly-x64.msi.zip. actions/upload-artifact cannot return a bare file. A
+  # release asset is the only raw .msi GitHub hands back.
+  #
+  # This job needs windows-msi only. A broken Linux or macOS leg must not hold
+  # back the Windows package, and this release carries no Linux or macOS file.
+  # It still needs BOTH architectures: fail-fast is off, so one failed arch
+  # fails windows-msi and skips this job rather than shipping half a release.
+  #
+  # dev-latest never becomes the "latest" release. It is a pre-release, so
+  # /releases/latest keeps resolving to the newest full release.
+  publish-windows-dev:
+    if: github.event_name == 'push' && github.ref_name == 'run-seamlyLayout'
+    runs-on: ubuntu-latest
+    needs: [version, windows-msi]
+    env:
+      VERSION_NUMBER: ${{ needs.version.outputs.version_number }}
+
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: seamly-x64.msi
+      - uses: actions/download-artifact@v8
+        with:
+          name: seamly-arm64.msi
+
+      # Replace the release instead of editing it. GitHub pins a tag to the
+      # commit it was created on, and no gh command moves it, so an edited
+      # dev-latest would advertise the first commit that ever built it.
+      # `|| true` covers the first run, which has nothing to delete.
+      #
+      # The delete leaves a gap of a few seconds with no dev-latest. A run
+      # cancelled inside that gap leaves none until the next push.
+      - name: Replace the rolling Windows pre-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete dev-latest --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true
+
+          cat > notes.md <<EOF
+          Windows installers built from the newest \`run-seamlyLayout\` commit.
+
+          - Version: ${VERSION_NUMBER}
+          - Commit: ${GITHUB_SHA}
+
+          Every push to \`run-seamlyLayout\` replaces this pre-release. It carries the
+          Windows MSIs only. Linux and macOS builds ship in the versioned pre-releases.
+          EOF
+
+          gh release create dev-latest \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --title "Windows development build ${VERSION_NUMBER}" \
+            --notes-file notes.md \
+            seamly-x64.msi seamly-arm64.msi
 
   # Publish the installer artifacts
   publish:
