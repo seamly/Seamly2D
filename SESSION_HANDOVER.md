@@ -6,7 +6,31 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## PICK UP HERE (2026-08-15, the local build and test scripts are deleted)
+## PICK UP HERE (2026-08-15, the MSIs publish to a rolling pre-release)
+
+**Task InstWinX64.0.3 is done, and it needs one real CI push to prove it.**
+`ci.yml` gained a `publish-windows-dev` job. Every push to `run-seamlyLayout`
+deletes the `dev-latest` release, recreates it on the pushed commit, and uploads
+`seamly-x64.msi` and `seamly-arm64.msi` as raw release assets.
+
+- **The task as written was impossible.** GitHub serves every workflow artifact
+  as a zip. `actions/upload-artifact` has no option to return a bare file, so
+  the artifact named `seamly-x64.msi` downloads as `seamly-x64.msi.zip`. A
+  release asset is the only raw `.msi` GitHub hands back. Do not reopen this.
+- The job deletes and recreates instead of editing, because GitHub pins a tag to
+  its creation commit and no `gh` command moves it.
+- It depends on `windows-msi` only, and carries no Linux or macOS file.
+- The versioned `publish` job is untouched.
+- **Untested on a runner.** Watch the first run for two things: the
+  `gh release delete ... || true` on the very first push, which has no
+  `dev-latest` to delete, and the `GITHUB_TOKEN` permission (workflow-level
+  `contents: write` should cover it).
+
+**`TODO_INSTALLER_WIN_X64.md` had two tasks numbered `InstWinX64.0.3` and two
+numbered `InstWinX64.0.4`.** The Application-preferences pair is renumbered to
+`0.5` and `0.6`. Check for a collision before adding a task number to that file.
+
+## Earlier (2026-08-15, the local build and test scripts are deleted)
 
 **`scripts/sb.ps1`, `scripts/sd.ps1` and `scripts/st.ps1` are gone.** The user
 decided the family needs no local release build, no local debug build, and no
