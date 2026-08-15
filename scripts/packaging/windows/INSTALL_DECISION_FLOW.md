@@ -1,20 +1,18 @@
 # Windows install — decision and data flow
 
 What the installer decides, what the *application* decides, and what happens in
-every combination of pre-existing installation. Written for Task 51 step 2, so
-that the "uninstall the previous installation" behaviour is specified before it
-is built.
+every combination of pre-existing installation.
 
-Status marks used throughout: **[today]** is current, verified behaviour;
-**[proposed]** is step 2, not yet implemented; **[undecided]** needs an answer
-before it can be built.
+Status marks used below: **[settled]** is decided and built; **[undecided]**
+needs an answer before it can be built; **[known defect]** is a fault with an
+open task.
 
 ## The one thing to understand first: there are two actors, not one
 
 Program files and user data are handled by different actors, at different
 times, with different privileges. Conflating them is what makes this confusing.
 
-| | Installer (`Seamly-x64.msi`) | Application (`seamly2d.exe` / `seamlyme.exe`) |
+| | Installer (`seamly-x64.msi`) | Application (`seamly2d.exe` / `seamlyme.exe`) |
 |---|---|---|
 | Runs | once, at install time | every launch, per user |
 | As | **LocalSystem** (per-machine install) | the logged-in user |
@@ -58,6 +56,79 @@ fourth is not hypothetical — it is exactly what the test laptop was in.
 Case D matters because the two products install to different directories, keep
 separate ARP entries, and are removed by different mechanisms. Any step-2 rule
 about "the previous installation" has to say which one it means.
+
+## Package build flow
+
+Before anything can be decided at install time, a package has to exist.
+[`smsi.ps1`](smsi.ps1) is the only thing that builds one, and `ci.yml`'s
+`windows-msi` job is the only thing that runs `smsi.ps1`.
+
+**The script decides nothing about its inputs.** Every one is named on the
+command line, so a package cannot inherit a Qt runtime, a CRT or a version from
+whatever happens to be installed on the machine that built it.
+
+| Input | What `ci.yml` passes | Required |
+|---|---|---|
+| `-Arch` | `matrix.arch` — `x64` or `arm64` | defaults to `x64` |
+| `-Version` | `$env:VERSION_NUMBER`, the run's `YYYY.M.D.HHMM` | **yes** |
+| `-Seamly2DBin` | `src\app\seamly2d\bin` | **yes** |
+| `-SeamlyMeBin` | `src\app\seamlyme\bin` | **yes** |
+| `-WinDeployQt` | `"$env:QT_ROOT_DIR\bin\windeployqt.exe"` | **yes** |
+| `-SeamlyLayoutBuildDir` | nothing — the default is where the job's `cmake --build --preset release` writes it | no |
+| `VCToolsRedistDir` | set by `ilammy/msvc-dev-cmd`, read from the environment | **yes** |
+
+```mermaid
+flowchart TD
+    start([ci.yml windows-msi job, per arch]) --> args[/smsi.ps1 with every input named/]
+    args --> inputs{seamly2d.exe + platforms,<br/>seamlyme.exe,<br/>SeamlyLayout.exe present?}
+    inputs -->|no| fail[/throw, naming what is missing/]
+    inputs -->|yes| tools{wix on PATH,<br/>UI and Util extensions installed,<br/>windeployqt at the given path?}
+    tools -->|no| fail
+    tools -->|yes| crt{VCToolsRedistDir set,<br/>Microsoft.VC*.CRT under arch?}
+    crt -->|no| fail
+    crt -->|yes| ver["derive ProductVersion:<br/>(YYYY-2000).M.((D-1)*1440 + HH*60 + MM)"]
+
+    ver --> wipe[delete and recreate<br/>scripts seamly-msi arch]
+    wipe --> merge["into parent: copy the seamly2d and<br/>seamlyme bin trees over each other"]
+    merge --> move1["into exes: move seamly2d.exe<br/>and seamlyme.exe out of parent"]
+    move1 --> deploy["windeployqt --qmldir --release<br/>against a staged copy of<br/>seamlylayout.exe, into parent"]
+    deploy --> extras["into parent: settings, 4 JSON files;<br/>licenses, LGPL notices"]
+    extras --> move2["into exes: move seamlylayout.exe<br/>out of parent"]
+    move2 --> crtcopy["into parent: copy the MSVC CRT DLLs"]
+
+    crtcopy --> build["wix build seamly-family.wxs<br/>-arch, -pdbtype none, UI + Util ext,<br/>-d ProductVersion DisplayVersion RepoRoot<br/>ParentStagingDir ExeStagingDir"]
+    build --> exists{seamly-arch.msi written?}
+    exists -->|no| fail
+    exists -->|yes| ice{"-SkipValidation?"}
+    ice -->|yes| authoring
+    ice -->|no| validate["wix msi validate<br/>-sice ICE43 -sice ICE57"]
+    validate --> authoring[test_msi_authoring.ps1<br/>Msi + Arch]
+    authoring --> ok([MSI OK: path and size])
+```
+
+Four properties of that flow the installer flow below depends on:
+
+- **The derived `ProductVersion` is what makes cases C and D work.** MSI caps
+  the major field at 255, so `YYYY.M.D.HHMM` cannot be used directly. The
+  mapping encodes day and time as minutes-of-month, which increases strictly
+  with every build, so `FindRelatedProducts` sees a newer package as newer and
+  `WIX_UPGRADE_DETECTED` fires. Two packages built in the same minute are the
+  same `ProductVersion`; that is why an upgrade test needs two runs.
+- **One staging tree becomes one flat install directory.** `parent\` holds the
+  single Qt runtime all three apps share, `exes\` holds only the three
+  executables — kept out of the wildcard-harvested tree because the `.wxs`
+  authors them explicitly so shortcuts and associations can reference them.
+- **Every package carries all three apps.** There is no switch to leave
+  SeamlyLayout out, so the SeamlyLayout Start Menu shortcut and icon are in
+  every package on both architectures, and `test_msi_authoring.ps1` asserts them
+  unconditionally.
+- **Two checks run on every build and both fail it.** `wix msi validate` says
+  the package is well formed (ICE43 and ICE57 suppressed as false positives for
+  a `perMachine` package; ICE61 stays visible and is expected).
+  `test_msi_authoring.ps1` says it still contains the decisions this document
+  describes — the detection properties, the dialog chain, the removal
+  components, the shortcuts and the registry rows. `-SkipValidation` skips the
+  first; nothing skips the second.
 
 ## Installer flow
 
@@ -103,12 +174,9 @@ Three notes on that diagram:
 
 - **The package defines its own dialog set** (Task InstWinX64.1), so every arrow
   between pages is a `NewDialog` row it authors itself, and `Back` reverses each
-  one. Until 2026-08-12 the three question pages were reached by `SpawnDialog`
-  from `WixUI_InstallDir`'s `InstallDirDlg`, and **none of them displayed**: that
-  set's own `NewDialog VerifyReadyDlg` row sits at `Ordering` 4 with the
-  condition `1`, so it could neither be excluded nor preceded. The defaults
-  applied and every automated check passed, which is why the fault survived — the
-  checks asserted the rows existed, and they did.
+  one. A stock set cannot be extended this way: `WixUI_InstallDir`'s `NewDialog
+  VerifyReadyDlg` row sits at `Ordering` 4 with the condition `1`, so no page can
+  precede it and no condition can exclude it.
 - **The previous-install page does not appear on repair or uninstall**, because
   of `AND NOT Installed`. That is deliberate.
 - **Silent installs show no page at all.** `/qn` runs no UI sequence, so pass
@@ -185,22 +253,20 @@ The second row is the normal outcome of case B, and was what the test laptop
 did: the old NSIS product had left `C:\Users\susan\seamly2d`, so that became the
 data root and `~/seamlyData` was correctly never created.
 
-## Open decisions for step 2
+## Decisions
 
 1. **[settled] Which "previous installation" is removed.** Only the **NSIS**
-   product needs new code. A previous MSI is already removed correctly by
+   product needs its own code. A previous MSI is removed by
    `RemoveExistingProducts`, so cases C and D need nothing extra there.
 2. **[settled] The NSIS product is removed, but its `uninstall.exe` is never
-   run.** The earlier decision to leave it alone was reversed by the user, on
-   the grounds that the MSI is a strict superset — it installs seamly2d and
-   seamlyme too, so leaving the old product behind means two copies of each and
-   Start Menu shortcuts that launch the old binaries. Every hazard in the
-   original decision came from *invoking their uninstaller*: interactive, and
-   `RMDir /r $INSTDIR` deletes anything else in the folder, with no rollback if
-   the install then fails. Deleting the four things it created ourselves has
-   none of those properties, and `RemoveFiles` rolls it back. **The dialog now
-   warns the user to move their own files out of that folder first**, because
-   the directory goes as a whole.
+   run.** The MSI is a strict superset — it installs seamly2d and seamlyme too,
+   so leaving the old product behind means two copies of each and Start Menu
+   shortcuts that launch the old binaries. Invoking their uninstaller is the
+   hazard: it is interactive, its `RMDir /r $INSTDIR` deletes anything else in
+   the folder, and Windows Installer cannot roll it back if the install then
+   fails. Deleting the four things it created has none of those properties, and
+   `RemoveFiles` rolls it back. **The dialog warns the user to move their own
+   files out of that folder first**, because the directory goes as a whole.
 3. **[settled] The NSIS ARP entry goes with it** —
    `HKLM\...\Uninstall\Seamly2D` and `HKLM\SOFTWARE\NSIS_Seamly2D` are both
    removed, so there is no orphaned entry pointing at a deleted uninstaller.
@@ -209,9 +275,9 @@ data root and `~/seamlyData` was correctly never created.
    old subfolder names → the nine standard ones? This is **Task 14**, and it
    contradicts the adopt-in-place rule above, so it is a design decision rather
    than a code change.
-5. **[settled] `SeamlyShortcutsDlg` displays.** The custom dialog set replaced
-   the `SpawnDialog` wiring on 2026-08-12 (Task InstWinX64.1). The authoring is
-   verified; the pages themselves await the interactive run, InstWinX64.1.6.
+5. **[settled] `SeamlyShortcutsDlg` displays**, through the custom dialog set
+   (Task InstWinX64.1). The authoring is verified; the pages themselves await
+   the interactive run, InstWinX64.1.6.
 6. **[known defect]** The `SeamlyPreviousInstallDlg` line controls are 3 px too
    wide (error 2826 ×2). Task InstWinX64.7.6.
 
@@ -220,7 +286,8 @@ data root and `~/seamlyData` was correctly never created.
 | Concern | File |
 |---|---|
 | Detection, dialogs, directories, components | `scripts/packaging/windows/seamly-family.wxs` |
-| Package build + validation | `scripts/packaging/windows/smsi.ps1` |
+| Staging layout, version mapping, `wix build`, ICE suppressions | `scripts/packaging/windows/smsi.ps1` |
+| The only invocation of that script | `.github/workflows/ci.yml`, job `windows-msi` |
 | Assertions about the built package | `scripts/packaging/windows/test_msi_authoring.ps1` |
 | Assertions about a real install | `scripts/packaging/windows/test_msi_install.ps1` |
 | Data root resolution, adoption, seeding, pruning | `src/libs/vmisc/vcommonsettings.cpp` |

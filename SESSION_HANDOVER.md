@@ -63,7 +63,7 @@ when an earlier install is found) → `InstallDirDlg` → `SeamlyDataDirDlg` →
 **Local verification is now cheap and was done.** A stub staging tree (three
 empty `.exe` files and two files for the runtime) links the real authoring in
 seconds: `wix build` clean, `wix msi validate` clean except the expected ICE61,
-`test_msi_authoring.ps1` 113 assertions pass. It proves the authoring, not the
+`test_msi_authoring.ps1` 115 assertions pass. It proves the authoring, not the
 product.
 
 **InstWinX64.1.7 is done too.** `INSTALL_DECISION_FLOW.md` and

@@ -47,7 +47,7 @@ with it the `SpawnDialog` wiring that WiX 6.0.2 never ran.
 
 Verified with a link-only build (stub staging tree, real authoring):
 `wix build` clean, `wix msi validate` clean except the expected ICE61,
-`test_msi_authoring.ps1` 113 assertions pass.
+`test_msi_authoring.ps1` 115 assertions pass.
 
 Not verified: the pages themselves. That is 1.6, and it needs an interactive
 install of a real MSI.

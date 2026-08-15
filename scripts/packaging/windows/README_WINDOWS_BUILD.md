@@ -14,8 +14,8 @@ The MSI bundles all three apps — **seamly2d**, **seamlyme**, and
 
 ## 1. How the package is built
 
-**By CI, and only by CI.** `smsi.ps1` has no local-build mode: it names every
-input on the command line and detects nothing from the machine it runs on.
+**By CI, and only by CI.** `smsi.ps1` names every input on the command line and
+detects nothing from the machine it runs on.
 
 ```powershell
 gh workflow run ci.yml --ref run-seamlyLayout
@@ -31,57 +31,77 @@ gh workflow run ci.yml --ref run-seamlyLayout
   -WinDeployQt "$env:QT_ROOT_DIR\bin\windeployqt.exe"
 ```
 
-`-Version`, `-Seamly2DBin`, `-SeamlyMeBin` and `-WinDeployQt` are required.
-A Qt 6 kit ships both `windeployqt.exe` and `windeployqt6.exe`; the project
-uses the unsuffixed name everywhere, matching `qtPrepareTool(WINDEPLOYQT,
-windeployqt)` in the `.pro` post-link steps.
-`VCToolsRedistDir` must be set by the MSVC developer environment
-(`ilammy/msvc-dev-cmd`) — it is the only source of the CRT redist DLLs.
-The script fails early with a clear message naming whatever is missing.
+### Parameters
 
-The removed local mode defaulted the build trees to `build\`, defaulted the
-version to the current time, guessed the Qt kit from `CMakeCache.txt` or the
-newest `C:\Qt` install, and scanned installed Visual Studios for the CRT. Each
-of those could produce a package that installs perfectly and ships a runtime no
-app in it was built against; see [`README.md`](README.md#key-decisions).
+| Parameter | Required | Default | Notes |
+|---|---|---|---|
+| `-Arch` | no | `x64` | `x64` or `arm64`. Must match the architecture of the staged binaries. |
+| `-Version` | **yes** | — | `YYYY.M.D.HHMM`. The package carries the version of the run that produced it. |
+| `-Seamly2DBin` | **yes** | — | Directory holding `seamly2d.exe` **and** its windeployqt output. |
+| `-SeamlyMeBin` | **yes** | — | Directory holding `seamlyme.exe` and its windeployqt output. |
+| `-WinDeployQt` | **yes** | — | `windeployqt.exe` of the Qt kit SeamlyLayout was built against. |
+| `-SeamlyLayoutBuildDir` | no | `src\app\seamlylayout\qt_frontend\build\Release` | Where the job's `cmake --build --preset release` writes `SeamlyLayout.exe`. |
+| `-SkipValidation` | no | off | Skips `wix msi validate` only. |
+| `-OutputDirName` | no | `seamly-msi` | Staging and output directory under `scripts\`. Changing it also means changing the `.gitignore` entry and `ci.yml`'s artifact and signing paths. |
+
+`VCToolsRedistDir` must be set in the environment by the MSVC developer
+environment (`ilammy/msvc-dev-cmd`). It is the only source of the CRT redist
+DLLs.
+
+Use `windeployqt`, not `windeployqt6`. A Qt 6 kit ships both names; the project
+uses the unsuffixed one everywhere, matching `qtPrepareTool(WINDEPLOYQT,
+windeployqt)` in the `.pro` post-link steps.
 
 ---
 
 ## 2. What the script does
 
-1. **Stages** a fresh tree under `scripts\seamly-msi\<arch>\`:
-   - `parent\` — the one Qt runtime all three apps share: seamly2d's and
-     seamlyme's windeployqt output merged with SeamlyLayout's
-     `windeployqt --qmldir …\qml --release` output (QML modules, Qt
-     Quick/WebEngine DLLs, `QtWebEngineProcess.exe`, xerces-c), plus
-     SeamlyLayout's packaged `settings\`, its LGPL `licenses\`, and the MSVC
-     CRT DLLs
-   - `exes\` — the three executables (authored explicitly in the `.wxs` so
-     shortcuts and associations can reference them, and therefore kept out of
-     the wildcard-harvested tree above)
-2. Derives the MSI `ProductVersion` from `-Version` (`YYYY.M.D.HHMM`) as
-   `(YYYY−2000).M.((D−1)·1440 + HH·60 + MM)` — MSI caps the major field at 255
-   — and stores the full project version as `DisplayVersion`.
-3. Runs `wix build seamly-family.wxs -arch <arch> -ext WixToolset.UI.wixext …`
-   → `seamly-<arch>.msi`.
-4. Runs `wix msi validate` (skip with `-SkipValidation`), suppressing ICE43 and
-   ICE57 — both are false positives raised by the optional desktop-shortcut
+**Checks first, and fails on the first problem**, naming what is missing:
+`seamly2d.exe` and its `platforms\` plugin directory, `seamlyme.exe`,
+`SeamlyLayout.exe`, the `wix` command, the `WixToolset.UI` and
+`WixToolset.Util` extensions, the `-WinDeployQt` path, and a
+`Microsoft.VC*.CRT` directory under `VCToolsRedistDir\<arch>`. Then it echoes
+every resolved input before touching anything.
+
+1. **Derives the MSI `ProductVersion`** from `-Version` as
+   `(YYYY−2000).M.((D−1)·1440 + HH·60 + MM)` — MSI caps the major field at 255,
+   so `YYYY.M.D.HHMM` cannot be used directly. The third field is
+   minutes-of-month, so the result increases strictly with every build. The
+   full project version is stored as `DisplayVersion`.
+2. **Stages** a fresh tree under `scripts\seamly-msi\<arch>\`, deleting any
+   previous one:
+   - `parent\` — the one Qt runtime all three apps share. The seamly2d and
+     seamlyme bin trees are copied over each other (same Qt release, so the
+     overlapping DLLs are identical), then `windeployqt --qmldir …\qml
+     --release` runs against a staged copy of `seamlylayout.exe` and adds the
+     QML module tree, the Qt Quick/WebEngine DLLs and `QtWebEngineProcess.exe`.
+     SeamlyLayout's four packaged `settings\` JSON files and its LGPL
+     `licenses\` notices land here too, and finally the MSVC CRT DLLs.
+   - `exes\` — the three executables, moved out of `parent\` after each is
+     deployed. The `.wxs` authors them explicitly so shortcuts and associations
+     can reference them, which is why they must not be in the
+     wildcard-harvested tree.
+3. **Runs `wix build`** on `seamly-family.wxs` with `-arch`, `-pdbtype none`,
+   both extensions, and the `ProductVersion`, `DisplayVersion`, `RepoRoot`,
+   `ParentStagingDir` and `ExeStagingDir` defines → `seamly-<arch>.msi`.
+4. **Runs `wix msi validate`** (skip with `-SkipValidation`), suppressing ICE43
+   and ICE57 — both are false positives raised by the optional desktop-shortcut
    components; see [`README.md`](README.md).
-5. Runs [`test_msi_authoring.ps1`](test_msi_authoring.ps1) against the built
-   MSI: 63 assertions covering elevation, the ARP properties, upgrade and NSIS
-   detection, the install-time dialogs, the shortcuts, the file associations
-   and the install-info registry rows. This one is **not** covered by
+5. **Runs [`test_msi_authoring.ps1`](test_msi_authoring.ps1)** against the built
+   MSI: assertions covering elevation, the ARP properties, upgrade and NSIS
+   detection, the install-time dialogs, the shortcuts, the file associations and
+   the install-info registry rows. This one is **not** covered by
    `-SkipValidation` — it is cheap and it guards a silent failure mode, an MSI
    that installs perfectly and does the wrong thing.
 
-Output and staging live in `scripts\seamly-msi\`, which `.gitignore` lists by
-name. Every package carries all three apps: `-NoSeamlyLayout` and the `.wxs`
-`IncludeSeamlyLayout` guards were removed on 2026-08-15, so a two-app package
-can no longer be built.
+Only the `.msi` is written: `-pdbtype none` suppresses the `.wixpdb` symbol
+database, which is used for `wix` patch/melt diffing rather than by the
+installer. To keep it for inspection, drop that flag from `$wixArguments`.
 
-Because all three apps are built from one Qt 6.11.1 kit, the staging tree and
-the install directory are a single flat folder; the pre-Task-30 `layout\`
-subtree with its own duplicate Qt copy is gone.
+Output and staging live in `scripts\seamly-msi\`, which `.gitignore` lists by
+name. Every package carries all three apps — there is no switch to leave
+SeamlyLayout out — and because all three come from one Qt 6.11.1 kit, the
+staging tree and the install directory are a single flat folder.
 
 ### Benign warnings (no action needed)
 
@@ -124,13 +144,13 @@ execute sequence elevated as SYSTEM, whose `%USERPROFILE%` is
 `C:\Windows\system32\config\systemprofile`. Computing the default there would
 put a user's patterns inside a system account's profile.
 
-What the user sees when installing interactively: welcome → license → install folder → **Your work** (the data root, with a Change button) → **Copy your existing work?** (opt-in, default off) → **Shortcuts** (desktop shortcuts, default on) → ready → install. The three middle pages are spawned from the install-folder page's Next at Orders 1-3, below WixUI's own transition to the ready page at Order 4.
+What the user sees when installing interactively: welcome → license → install folder → **Your work** (the data root, with a Change button) → **Copy your existing work?** (opt-in, default off) → **Shortcuts** (desktop shortcuts, default on) → ready → install. The package defines its own dialog set, so every one of those arrows is a `NewDialog` row `seamly-family.wxs` authors, and `Back` reverses each one.
 
 An extra page appears **before** the welcome page when a previous installation is found — an older MSI of this product or the old NSIS installation — warning that the program files will be replaced and stating that the user's own work is not touched.
 
 Silent installs skip every page. Pass the properties in the table above instead.
 
-The verification of a real install (clean machine, **not yet run** — Task 13's outstanding subtask and Task 51's last one) lives in one place, [`README.md`](README.md#installing--testing), so it does not drift between two files. It is now mostly automated, in two layers: `test_msi_authoring.ps1` checks what the **package contains** and runs on every build, and [`test_msi_install.ps1`](test_msi_install.ps1) checks what an **install actually did** — run in four phases around the `msiexec` commands on the test machine, including starting each app to prove the deployed Qt runtime is complete. Only the UAC prompt, the wizard page order and wording, and the icons still need a human.
+The verification of a real install (clean machine, **not yet run** — Task 13's outstanding subtask and Task 51's last one) lives in one place, [`README.md`](README.md#installing--testing), so it does not drift between two files. It is mostly automated, in two layers: `test_msi_authoring.ps1` checks what the **package contains** and runs on every build, and [`test_msi_install.ps1`](test_msi_install.ps1) checks what an **install actually did** — run in four phases around the `msiexec` commands on the test machine, including starting each app to prove the deployed Qt runtime is complete. Only the UAC prompt, the wizard page order and wording, and the icons still need a human.
 
 ---
 
@@ -138,39 +158,23 @@ The verification of a real install (clean machine, **not yet run** — Task 13's
 
 All three apps build natively on the `windows-11-arm` runner in `ci.yml`'s
 `windows-msi` job — nothing is cross-compiled, and both legs run the identical
-`smsi.ps1` invocation. The arm64 MSI shipped the two parent apps only until
-2026-08-11; Qt 6.11.1 publishes an arm64 WebEngine, so it now ships all three.
+`smsi.ps1` invocation. Qt 6.11.1 publishes an arm64 WebEngine, so the arm64
+package ships all three apps.
 
 `windeployqt` needs no `--qtpaths` wrapper on either arch, because both legs
 are native. Reintroduce that flag only alongside a cross-compiled kit.
 
 ---
 
-## 5. Historical record — the last local build (2026-07-23)
+## 5. Two rules the deployed runtime depends on
 
-Kept for the measurements, not as instructions: local building was removed on
-2026-08-15 and the command below no longer runs.
+**A Qt kit can satisfy `find_package(Qt6 … WebEngineQuick)` and still fail to
+deploy.** The kit must also carry Qt WebChannel and Qt Positioning, which is why
+`ci.yml` installs `qtwebengine qtwebchannel qtpositioning` on both legs.
 
-| Property | Value |
-|---|---|
-| Package | `scripts\seamly-msi\x64\Seamly-x64.msi`, 186.8 MB (two Qt runtimes; the Task 30 single-runtime package is 165.3 MB) |
-| Platform (summary template) | `x64;1033` |
-| ProductName | `Seamly2D` |
-| ProductVersion | `26.7.31987` (derived from project version `2026.7.23.0507`) |
-| UpgradeCode | `{CBF4B5F1-C32C-4DBB-B385-3EE4A7B30658}` (fixed, shared by both arches) |
-| File rows | 1691 |
-| Qt kit | 6.11.1 `msvc2022_64` |
-| MSVC CRT | VS 18 Community, `…\VC\Redist\MSVC\14.50.35710\x64\Microsoft.VC145.CRT` |
-
-`wix msi validate` passed with only the expected **ICE61** warning.
-
-Two lessons from that run are still live rules. **A Qt kit can satisfy
-`find_package(Qt6 … WebEngineQuick)` and still fail to deploy** — the kit must
-also carry Qt WebChannel and Qt Positioning, which is why `ci.yml` installs
-`qtwebengine qtwebchannel qtpositioning` on both legs. And **no Qt tool is ever
-invoked by bare name**: the `.pro` post-link steps use
+**No Qt tool is ever invoked by bare name.** The `.pro` post-link steps use
 `qtPrepareTool(WINDEPLOYQT, windeployqt)`, so the deployed runtime can only be
-the kit that compiled the exe. `scripts\sb.ps1` and `scripts\sd.ps1` compare
-the deployed `Qt6Core.dll` / `Qt6Cored.dll` FileVersion against that kit and
-fail loudly on a mismatch, because the bug was invisible until someone read the
-DLL version by hand.
+the kit that compiled the exe. `scripts\sb.ps1` and `scripts\sd.ps1` compare the
+deployed `Qt6Core.dll` / `Qt6Cored.dll` FileVersion against that kit and fail
+loudly on a mismatch — a mismatch is invisible until someone reads the DLL
+version by hand.
