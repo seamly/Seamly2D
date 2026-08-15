@@ -455,10 +455,11 @@ nothing; shipping SeamlyLayout on arm64 is a separate, still-open problem.
 `TODO_INSTALLER_WIN_ARM64.md` as InstWinArm64.1, with the exact three-line
 change to both workflows when it lands.
 
-**`dist/seamly2d-installer.nsi` is kept, unbuilt,** with a RETIRED header
-explaining why: `seamly-family.wxs` cites it as the authoritative record of what
-a pre-MSI installation left on disk, which the MSI's `RemoveFolderEx` authoring
-has to remove on upgrade. Deleting it would orphan that authoring's reference.
+**`dist/seamly2d-installer.nsi` was deleted** (Task InstWinX64.11.1). It was
+first kept unbuilt as the record of what a pre-MSI installation left on disk.
+Task InstWinX64.11.2 transcribed that footprint into `smsi.wxs`, above the
+`RemoveLegacyProgramFiles` component, so the MSI's removal authoring keeps its
+record and the file could go.
 
 `-WinDeployQt6` was deliberately not passed on the arm64 leg while that leg
 shipped two apps. **Superseded twice since:** both legs pass the deploy tool,

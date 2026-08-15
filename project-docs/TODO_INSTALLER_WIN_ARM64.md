@@ -8,9 +8,9 @@ Tasks in this file begin with `InstWinArm64.`
 
 `seamly-arm64.msi` is built and released by `ci.yml`'s `windows-msi` job (Task
 Installer.1.2). **NSIS is retired** — no workflow builds `Seamly2D-win-arm64.zip`
-or runs `makensis` any more, and `dist/seamly2d-installer.nsi` is kept unbuilt
-only because `smsi.wxs` cites it as the record of a pre-MSI
-installation's on-disk footprint.
+or runs `makensis` any more, and `dist/seamly2d-installer.nsi` was deleted (Task
+InstWinX64.11.1). `smsi.wxs` transcribes a pre-MSI installation's on-disk
+footprint and is now the only record of it.
 
 **The arm64 package ships all three apps, same as x64, and builds NATIVELY.**
 Commit `fba962c4d8` moved the arm64 leg onto the `windows-11-arm` runner with the
