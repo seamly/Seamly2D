@@ -36,7 +36,7 @@ gh workflow run ci.yml --ref run-seamlyLayout
 | Parameter | Required | Default | Notes |
 |---|---|---|---|
 | `-Arch` | no | `x64` | `x64` or `arm64`. Must match the architecture of the staged binaries. |
-| `-Version` | **yes** | — | `YYYY.M.D.HHMM`. The package carries the version of the run that produced it. |
+| `-Version` | **yes** | — | `YY.M.D.MMMM`, where `MMMM` is the minute of the day. The package carries the version of the run that produced it. |
 | `-Seamly2DBin` | **yes** | — | Directory holding `seamly2d.exe` **and** its windeployqt output. |
 | `-SeamlyMeBin` | **yes** | — | Directory holding `seamlyme.exe` and its windeployqt output. |
 | `-WinDeployQt` | **yes** | — | `windeployqt.exe` of the Qt kit SeamlyLayout was built against. |
@@ -64,10 +64,10 @@ windeployqt)` in the `.pro` post-link steps.
 every resolved input before touching anything.
 
 1. **Derives the MSI `ProductVersion`** from `-Version` as
-   `(YYYY−2000).M.((D−1)·1440 + HH·60 + MM)` — MSI caps the major field at 255,
-   so `YYYY.M.D.HHMM` cannot be used directly. The third field is
-   minutes-of-month, so the result increases strictly with every build. The
-   full project version is stored as `DisplayVersion`.
+   `YY.M.((D−1)·1440 + MMMM)` — MSI ignores the 4th field for upgrade
+   comparisons, so the 4-part `YY.M.D.MMMM` cannot be used directly. The third
+   field is minutes-of-month, so the result increases strictly with every
+   build. The full project version is stored as `DisplayVersion`.
 2. **Stages** a fresh tree under `scripts\seamly-msi\<arch>\`, deleting any
    previous one:
    - `parent\` — the one Qt runtime all three apps share. The seamly2d and

@@ -70,7 +70,7 @@ whatever happens to be installed on the machine that built it.
 | Input | What `ci.yml` passes | Required |
 |---|---|---|
 | `-Arch` | `matrix.arch` — `x64` or `arm64` | defaults to `x64` |
-| `-Version` | `$env:VERSION_NUMBER`, the run's `YYYY.M.D.HHMM` | **yes** |
+| `-Version` | `$env:VERSION_NUMBER`, the run's `YY.M.D.MMMM` | **yes** |
 | `-Seamly2DBin` | `src\app\seamly2d\bin` | **yes** |
 | `-SeamlyMeBin` | `src\app\seamlyme\bin` | **yes** |
 | `-WinDeployQt` | `"$env:QT_ROOT_DIR\bin\windeployqt.exe"` | **yes** |
@@ -86,7 +86,7 @@ flowchart TD
     tools -->|no| fail
     tools -->|yes| crt{VCToolsRedistDir set,<br/>Microsoft.VC*.CRT under arch?}
     crt -->|no| fail
-    crt -->|yes| ver["derive ProductVersion:<br/>(YYYY-2000).M.((D-1)*1440 + HH*60 + MM)"]
+    crt -->|yes| ver["derive ProductVersion:<br/>YY.M.((D-1)*1440 + MMMM)"]
 
     ver --> wipe[delete and recreate<br/>scripts seamly-msi arch]
     wipe --> merge["into parent: copy the seamly2d and<br/>seamlyme bin trees over each other"]
@@ -108,9 +108,10 @@ flowchart TD
 
 Four properties of that flow the installer flow below depends on:
 
-- **The derived `ProductVersion` is what makes cases C and D work.** MSI caps
-  the major field at 255, so `YYYY.M.D.HHMM` cannot be used directly. The
-  mapping encodes day and time as minutes-of-month, which increases strictly
+- **The derived `ProductVersion` is what makes cases C and D work.** MSI ignores
+  the 4th field for upgrade comparisons, so the 4-part `YY.M.D.MMMM` cannot be
+  used directly. The mapping folds day and time into minutes-of-month, which
+  increases strictly
   with every build, so `FindRelatedProducts` sees a newer package as newer and
   `WIX_UPGRADE_DETECTED` fires. Two packages built in the same minute are the
   same `ProductVersion`; that is why an upgrade test needs two runs.

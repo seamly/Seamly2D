@@ -65,17 +65,18 @@
       * the MSVC developer environment, which sets VCToolsRedistDir (ci.yml
         uses ilammy/msvc-dev-cmd)
 
-    The MSI ProductVersion cannot carry the project's YYYY.M.D.HHMM scheme
-    (MSI limits the major field to 255), so the script derives a monotonic
-    numeric version:  (YYYY-2000).M.((D-1)*1440 + HH*60 + MM)  — strictly
-    increasing across builds, so MajorUpgrade always upgrades in place. The
-    full project version is embedded as DisplayVersion.
+    The MSI ProductVersion cannot carry the project's 4-part YY.M.D.MMMM
+    scheme (MSI ignores the 4th field for upgrade comparisons), so the script
+    derives a monotonic 3-part numeric version:  YY.M.((D-1)*1440 + MMMM)  —
+    strictly increasing across builds, so MajorUpgrade always upgrades in
+    place. The full project version is embedded as DisplayVersion.
 
 .PARAMETER Arch
     Target architecture of the MSI: x64 (default) or arm64.
 
 .PARAMETER Version
-    Project version as YYYY.M.D.HHMM (the ci.yml scheme). Required.
+    Project version as YY.M.D.MMMM (the ci.yml scheme), where MMMM is the
+    minute of the day. Required.
 
 .PARAMETER Seamly2DBin
     Directory holding seamly2d.exe plus its windeployqt output. Required.
@@ -98,7 +99,7 @@
     Skip the `wix msi validate` (ICE) pass after the build.
 
 .EXAMPLE
-    .\scripts\packaging\windows\smsi.ps1 -Arch x64 -Version 2026.8.15.0930 `
+    .\scripts\packaging\windows\smsi.ps1 -Arch x64 -Version 26.8.15.570 `
         -Seamly2DBin src\app\seamly2d\bin -SeamlyMeBin src\app\seamlyme\bin `
         -WinDeployQt "$env:QT_ROOT_DIR\bin\windeployqt.exe"
     The invocation ci.yml's windows-msi job runs, for either architecture.
@@ -117,7 +118,7 @@ param(
     [ValidateSet('x64', 'arm64')]
     [string]$Arch = 'x64',
 
-    # Project version YYYY.M.D.HHMM; the MSI ProductVersion is derived from it.
+    # Project version YY.M.D.MMMM; the MSI ProductVersion is derived from it.
     # The package must carry the version of the run that produced it, so the
     # caller states it.
     [Parameter(Mandatory = $true)]
@@ -192,12 +193,15 @@ function Invoke-Tool {
 #
 # MSI ProductVersion fields are limited to major<=255, minor<=255,
 # build<=65535, and the 4th field is ignored for upgrade comparisons - the
-# project's YYYY.M.D.HHMM scheme therefore cannot be used directly (2026>255).
-# Mapping: (YYYY-2000).(M).((D-1)*1440 + HH*60 + MM). The third field encodes
-# day+time as minutes-of-month (max 44639 < 65535), so the result increases
-# strictly with every build and MajorUpgrade always sees newer builds as newer.
+# project's 4-part YY.M.D.MMMM scheme therefore cannot be used directly.
+# Mapping: YY.M.((D-1)*1440 + MMMM). The third field encodes day+time as
+# minutes-of-month (max 44639 < 65535), so the result increases strictly with
+# every build and MajorUpgrade always sees newer builds as newer.
 #
-# @param  ProjectVersion  version string YYYY.M.D.HHMM
+# The derived value is unchanged from the earlier YYYY.M.D.HHMM scheme, so
+# packages built before and after that change still upgrade each other.
+#
+# @param  ProjectVersion  version string YY.M.D.MMMM
 # @return the derived x.y.z MSI version string
 #------------------------------------------------------------------------------
 function ConvertTo-MsiVersion {
@@ -205,27 +209,21 @@ function ConvertTo-MsiVersion {
 
     $parts = $ProjectVersion.Split('.')
     if ($parts.Count -ne 4 -or ($parts | Where-Object { $_ -notmatch '^\d+$' })) {
-        throw "Version '$ProjectVersion' is not in the expected YYYY.M.D.HHMM form."
+        throw "Version '$ProjectVersion' is not in the expected YY.M.D.MMMM form."
     }
-    $year  = [int]$parts[0]
-    $month = [int]$parts[1]
-    $day   = [int]$parts[2]
-    $hhmm  = $parts[3]
-    if ($year -lt 2000 -or $year -gt 2255 -or $month -lt 1 -or $month -gt 12 -or $day -lt 1 -or $day -gt 31) {
+    $year    = [int]$parts[0]
+    $month   = [int]$parts[1]
+    $day     = [int]$parts[2]
+    $minutes = [int]$parts[3]
+    if ($year -gt 255 -or $month -lt 1 -or $month -gt 12 -or $day -lt 1 -or $day -gt 31) {
         throw "Version '$ProjectVersion' has out-of-range date fields."
     }
-    # HHMM has no fixed width (ci.yml uses %-H%M): the last two digits are the
-    # minutes, whatever precedes them (possibly nothing) is the hour.
-    if ($hhmm.Length -lt 2) { $hhmm = $hhmm.PadLeft(2, '0') }
-    $minute = [int]$hhmm.Substring($hhmm.Length - 2)
-    $hourText = $hhmm.Substring(0, $hhmm.Length - 2)
-    if ($hourText -eq '') { $hour = 0 } else { $hour = [int]$hourText }
-    if ($hour -gt 23 -or $minute -gt 59) {
-        throw "Version '$ProjectVersion' has an out-of-range HHMM field."
+    if ($minutes -gt 1439) {
+        throw "Version '$ProjectVersion' has an out-of-range minute-of-day field."
     }
 
-    $minutesOfMonth = (($day - 1) * 1440) + ($hour * 60) + $minute
-    return "$($year - 2000).$month.$minutesOfMonth"
+    $minutesOfMonth = (($day - 1) * 1440) + $minutes
+    return "$year.$month.$minutesOfMonth"
 }
 
 #------------------------------------------------------------------------------

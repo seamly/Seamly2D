@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# @file   test_version_script.sh
+# @file   version_test.sh
 # @author slspencer
 # @date   2026
 # @brief  Unit tests for scripts/version.sh.
@@ -12,7 +12,7 @@
 # C++ octal literal, which fails to compile on '8'/'9' and silently yields the
 # wrong number otherwise.
 #
-# Usage: ./scripts/test_version_script.sh
+# Usage: ./scripts/version_test.sh
 #
 # @copyright 2026 Seamly2D Project
 # @license   GPL-3.0-or-later
@@ -126,22 +126,27 @@ restore() {
 }
 trap restore EXIT
 
-# An ordinary release version passes through unchanged.
-run_case "2023.1.1.1046" 2023 1 1 1046 "2023.1.1.1046"
+# An ordinary release version passes through unchanged. The scheme is
+# YY.M.D.MMMM, where MMMM is the minute of the day (0-1439).
+run_case "23.1.1.1046" 23 1 1 1046 "23.1.1.1046"
 
-# The regression: 00:48 UTC produced '048', an illegal octal literal.
-run_case "2026.8.11.048" 2026 8 11 48 "2026.8.11.48"
+# The regression: 00:48 UTC produced '048', an illegal octal literal. ci.yml now
+# normalizes too, so this guards the script against a caller that does not.
+run_case "26.8.11.048" 26 8 11 48 "26.8.11.48"
 
 # A leading zero that *is* valid octal is still wrong (047 == 39), so it must
 # also be normalized rather than left alone.
-run_case "2026.8.11.047" 2026 8 11 47 "2026.8.11.47"
+run_case "26.8.11.047" 26 8 11 47 "26.8.11.47"
 
 # Leading zeros in any position, and an all-zero component, are handled.
-run_case "2026.08.09.0000" 2026 8 9 0 "2026.8.9.0"
+run_case "26.08.09.0000" 26 8 9 0 "26.8.9.0"
+
+# Midnight is minute 0 of the day.
+run_case "26.8.15.0" 26 8 15 0 "26.8.15.0"
 
 # Malformed input is rejected instead of corrupting the source files.
-run_reject_case "2026.8.11"
-run_reject_case "2026.8.11.x48"
+run_reject_case "26.8.11"
+run_reject_case "26.8.11.x48"
 
 echo
 if [ "${FAILURES}" -eq 0 ]; then

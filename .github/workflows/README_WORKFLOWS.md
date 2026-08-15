@@ -9,7 +9,7 @@
 
 **Features**:
 - **Tests**: Builds all platforms on pull requests with downloadable artifacts and Linux unit tests
-- **Pre-Releases**: `workflow_dispatch` runs on **`run-seamlyLayout`** publish a GitHub **pre-release** (`prerelease: true`) with date-based versioning (vYYYY.MM.DD.HHMM). The `publish` job also still tests for `github.event_name == 'schedule'`, but `on:` carries no `schedule` trigger any more, so dispatch is the only way a release is cut — **a plain push never publishes**, it only builds. The ref is deliberately *not* `develop`: `origin/develop` is kept as a pristine mirror of upstream `FashionFreedom/Seamly2D` until the SeamlyLayout migration is finished, so nothing is released from it. `run-seamlyLayout` is also this repository's default branch, which is the ref the `schedule` trigger runs on.
+- **Pre-Releases**: `workflow_dispatch` runs on **`run-seamlyLayout`** publish a GitHub **pre-release** (`prerelease: true`) with date-based versioning (v`YY.M.D.MMMM`, where `MMMM` is the minute of the day and no component keeps a leading zero). The `publish` job also still tests for `github.event_name == 'schedule'`, but `on:` carries no `schedule` trigger any more, so dispatch is the only way a release is cut — **a plain push never publishes**, it only builds. The ref is deliberately *not* `develop`: `origin/develop` is kept as a pristine mirror of upstream `FashionFreedom/Seamly2D` until the SeamlyLayout migration is finished, so nothing is released from it. `run-seamlyLayout` is also this repository's default branch, which is the ref the `schedule` trigger runs on.
 - **Code Signing**: Integrated Windows and Mac code signing
   - Signs both Windows `.msi` packages (x64 and arm64)
   - Signs and notarizes Mac builds

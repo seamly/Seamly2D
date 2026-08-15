@@ -83,10 +83,10 @@
  **
  **  PREPROCESSOR VARIABLES (passed by smsi.ps1 via -d)
  **    ProductVersion       numeric MSI version x.y.z (see smsi.ps1 for the
- **                         mapping from the project version — MSI limits the
- **                         major field to 255 so YYYY.M.D.HHMM is adjusted to
- **                         (YYYY-2000).M.((D-1)*1440 + HH*60 + MM) in smsi.ps1
- **    DisplayVersion       full project version string (YYYY.M.D.HHMM)
+ **                         mapping from the project version — MSI ignores the
+ **                         4th field for upgrades so YY.M.D.MMMM is folded to
+ **                         YY.M.((D-1)*1440 + MMMM) in smsi.ps1
+ **    DisplayVersion       full project version string (YY.M.D.MMMM)
  **    RepoRoot             absolute path of the repository root
  **    ParentStagingDir     staged shared runtime tree for every app in the
  **                         package (no exes) — seamly2d/seamlylayout/seamlyme windeployqt
@@ -130,7 +130,7 @@
   <?error ProductVersion is not defined - build via scripts\packaging\windows\smsi.ps1, which passes -d ProductVersion=x.y.z ?>
 <?endif?>
 <?ifndef var.DisplayVersion ?>
-  <?error DisplayVersion is not defined - build via scripts\packaging\windows\smsi.ps1, which passes -d DisplayVersion=YYYY.M.D.HHMM ?>
+  <?error DisplayVersion is not defined - build via scripts\packaging\windows\smsi.ps1, which passes -d DisplayVersion=YY.M.D.MMMM ?>
 <?endif?>
 <?ifndef var.RepoRoot ?>
   <?error RepoRoot is not defined - build via scripts\packaging\windows\smsi.ps1, which passes -d RepoRoot=<repo root> ?>
@@ -188,7 +188,7 @@
          DisplayVersion, and that cannot be overridden: the RegisterProduct
          standard action writes that value into the Uninstall key *after*
          WriteRegistryValues, so any component-authored override is overwritten.
-         The full YYYY.M.D.HHMM project version therefore reaches the user two
+         The full YY.M.D.MMMM project version therefore reaches the user two
          other ways — the ARP comment here, and HKLM\SOFTWARE\Seamly\Seamly2D
          (DisplayVersion) written by InstallInfoRegistry below. -->
     <Property Id="ARPCOMMENTS" Value="Seamly $(var.DisplayVersion) - apparel CAD pattern drafting (Seamly2D), measurements/sizing (SeamlyMe), and layout (SeamlyLayout)" />

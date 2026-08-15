@@ -502,7 +502,7 @@ call sites at once: every component is validated as numeric and normalized with
 non-4-part or non-numeric argument is now rejected instead of corrupting the
 source files.
 
-`scripts/test_version_script.sh` is new: it drives `version.sh` over the release
+`scripts/version_test.sh` is new: it drives `version.sh` over the release
 case, the `048` regression, the silently-wrong `047` case and an all-zero
 component, asserts no `= 0[0-9]` literal is ever written, checks both rejection
 paths, and backs up/restores all four files it rewrites. **26/26 assertions
@@ -673,7 +673,7 @@ Act on these, do not re-ask, remove from this file for the next Session handover
   `& "C:\Program Files\GitHub CLI\gh.exe"`.
 - **A CI version component with a leading zero is a C++ octal literal.**
   `scripts/version.sh` now normalizes them; do not "simplify" that `$((10#…))`
-  away. Covered by `scripts/test_version_script.sh`.
+  away. Covered by `scripts/version_test.sh`.
 - **There is no YAML tooling on this PC.** No `actionlint`, no `yamllint`, no
   `node`, and `python`/`python3` are the Microsoft Store stubs. Git's `perl` has
   no YAML module. Workflow edits can only be validated by pushing and watching

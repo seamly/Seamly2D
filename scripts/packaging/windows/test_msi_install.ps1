@@ -610,7 +610,7 @@ function Invoke-InstalledChecks {
 
     # --- install-info registry rows -------------------------------------------
     Assert-That -Name 'the full project version is recorded in HKLM\SOFTWARE\Seamly\Seamly2D' `
-        -Succeeded ([string]$InstallInfo.DisplayVersion -match '^\d{4}\.\d+\.\d+\.\d+$') `
+        -Succeeded ([string]$InstallInfo.DisplayVersion -match '^\d{2}\.\d+\.\d+\.\d+$') `
         -Detail "DisplayVersion = '$($InstallInfo.DisplayVersion)'"
 
     $breadcrumbs = @('DesktopShortcutSeamly2D', 'DesktopShortcutSeamlyMe')
@@ -639,7 +639,7 @@ function Invoke-InstalledChecks {
             -Succeeded ([string]$arp.DisplayVersion -match '^\d+\.\d+\.\d+$') `
             -Detail "DisplayVersion = '$($arp.DisplayVersion)'"
         Assert-That -Name 'ARP Comments carry the full project version' `
-            -Succeeded ([string]$arp.Comments -match '\d{4}\.\d+\.\d+\.\d+') `
+            -Succeeded ([string]$arp.Comments -match '\d{2}\.\d+\.\d+\.\d+') `
             -Detail "Comments = '$($arp.Comments)'"
         Assert-That -Name 'ARP estimated size is plausible (> 50 MB)' `
             -Succeeded ([int]$arp.EstimatedSize -gt 51200) `

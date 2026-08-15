@@ -53,13 +53,21 @@ jobs:
     outputs:
       version_number: ${{ steps.create-version.outputs.version_number }}
 
-    # The version number is YYYY.MM.DD.hhmm to create simple, easy-to-read "rolling release" versioning
-    # for pull requests before merge keep a static version number
+    # The version number is YY.M.D.MMMM, a simple, easy-to-read "rolling release"
+    # scheme. For pull requests before merge, keep a static version number.
+    # YY is the year minus 2000. MMMM is the minute of the day (HH*60+MM,
+    # 0-1439) - the same minutes-based encoding smsi.ps1 uses to derive the MSI
+    # ProductVersion.
+    # No component keeps a leading zero. A leading zero is an octal literal in
+    # projectversion.cpp, and it makes the MSI DisplayVersion and the release tag
+    # disagree with the version the binary reports.
     steps:
       - name: create version number
         id: create-version
         run: |
-          echo "version_number=$(date +%Y.%-m.%-d.%-H%M)" >> $GITHUB_OUTPUT
+          # One date call: two calls can straddle a minute boundary.
+          read -r year month day hour minute <<< "$(date +'%Y %m %d %H %M')"
+          echo "version_number=$((10#$year - 2000)).$((10#$month)).$((10#$day)).$((10#$hour * 60 + 10#$minute))" >> $GITHUB_OUTPUT
 
   linux-test:
     if: github.event_name == 'pull_request'

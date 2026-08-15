@@ -180,14 +180,14 @@ foreach ($arp in @('ARPPRODUCTICON', 'ARPHELPLINK', 'ARPURLINFOABOUT', 'ARPCOMME
     Assert-That -Name "$arp is set" -Succeeded ((Get-MsiProperty -Name $arp) -ne '')
 }
 # ARP shows the numeric MSI ProductVersion and that cannot be overridden, so the
-# full YYYY.M.D.HHMM project version has to reach the user another way: the ARP
+# full YY.M.D.MMMM project version has to reach the user another way: the ARP
 # comment, and the install-info registry key.
 $displayVersion = @(Get-MsiRows -Sql "SELECT ``Value`` FROM ``Registry`` WHERE ``Name``='DisplayVersion'" -Columns 'Value')
 Assert-That -Name 'full project version recorded in HKLM\SOFTWARE\Seamly\Seamly2D' `
-    -Succeeded ($displayVersion.Count -eq 1 -and $displayVersion[0].Value -match '^\d{4}\.\d+\.\d+\.\d+$') `
+    -Succeeded ($displayVersion.Count -eq 1 -and $displayVersion[0].Value -match '^\d{2}\.\d+\.\d+\.\d+$') `
     -Detail "found '$(if ($displayVersion.Count) { $displayVersion[0].Value } else { '<nothing>' })'"
 Assert-That -Name 'ARPCOMMENTS carries the full project version' `
-    -Succeeded ((Get-MsiProperty -Name 'ARPCOMMENTS') -match '\d{4}\.\d+\.\d+\.\d+')
+    -Succeeded ((Get-MsiProperty -Name 'ARPCOMMENTS') -match '\d{2}\.\d+\.\d+\.\d+')
 
 # --- 3. upgrade behaviour ------------------------------------------------------
 $upgrade = Get-MsiRows -Sql "SELECT ``UpgradeCode``, ``ActionProperty`` FROM ``Upgrade``" -Columns 'UpgradeCode', 'ActionProperty'
