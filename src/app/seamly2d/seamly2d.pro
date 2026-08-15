@@ -81,8 +81,11 @@ win32:RC_FILE = share/resources/seamly2d.rc
 # INSTALL_MULTISIZE_MEASUREMENTS and INSTALL_STANDARD_TEMPLATES and INSTALL_LABEL_TEMPLATES inside samples.pri
 include(../samples.pri)
 
+# Utility pdftops needed to save a layout to PS and EPS. The win32 block below
+# copies it next to seamly2d.exe, where convertPdfToPs() runs it. The macOS twin
+# stays in dist/macx/bin64 until the macOS pass moves it to share/bin/macx.
 win32 {
-    INSTALL_PDFTOPS += ../../../dist/win/pdftops.exe
+    INSTALL_PDFTOPS += share/bin/win/pdftops.exe
 }
 
 include(../translations.pri)

@@ -87,3 +87,15 @@ distinctive fragment instead.
 - [ ] Layout.4.5 Test: write interleaved lines from both sides (and from two
   threads) and assert every line arrives whole and in order
 - [ ] Layout.4.6 Doxygen briefs + inline comments on all touched functions
+
+## Task Layout.5 - Implement additional export formats
+
+- [ ] Layout 5.1 DXF-AAMA — biggest install base in apparel PLM, reference implementation already in the repo
+- [ ] Layout 5.2 HPGL — unlocks the whole plotter and cutter class
+- [ ] Layout 5.3 PS/EPS — one writer covers both and retires pdftops
+- [ ] Layout 5.4 JPG — trivial, fit it anywhere
+
+## Task Layout.6 - Implement export stubs for paid export modules (To be developed)
+
+- [ ] Layout 6.1 Export G-Code
+- [ ] Layout 7.1 Export 3DMesh
