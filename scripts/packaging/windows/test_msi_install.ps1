@@ -11,7 +11,7 @@
 # **  is gone while the user's own data is still there.
 # **
 # **  This is the runtime half of Task 51's verification. Its sibling
-# **  test_msi_authoring.ps1 reads the .msi database and checks what the PACKAGE
+# **  smsi_check_authoring.ps1 reads the .msi database and checks what the PACKAGE
 # **  CONTAINS; this script checks what a real elevated install actually DID.
 # **  Neither can replace the other: authoring passes on a package whose exes
 # **  cannot start, and this one cannot run without a machine to install on.

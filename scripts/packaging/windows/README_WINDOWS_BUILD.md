@@ -87,7 +87,7 @@ every resolved input before touching anything.
 4. **Runs `wix msi validate`** (skip with `-SkipValidation`), suppressing ICE43
    and ICE57 — both are false positives raised by the optional desktop-shortcut
    components; see [`README.md`](README.md).
-5. **Runs [`test_msi_authoring.ps1`](test_msi_authoring.ps1)** against the built
+5. **Runs [`smsi_check_authoring.ps1`](smsi_check_authoring.ps1)** against the built
    MSI: assertions covering elevation, the ARP properties, upgrade and NSIS
    detection, the install-time dialogs, the shortcuts, the file associations and
    the install-info registry rows. This one is **not** covered by
@@ -150,7 +150,7 @@ An extra page appears **before** the welcome page when a previous installation i
 
 Silent installs skip every page. Pass the properties in the table above instead.
 
-The verification of a real install (clean machine, **not yet run** — Task 13's outstanding subtask and Task 51's last one) lives in one place, [`README.md`](README.md#installing--testing), so it does not drift between two files. It is mostly automated, in two layers: `test_msi_authoring.ps1` checks what the **package contains** and runs on every build, and [`test_msi_install.ps1`](test_msi_install.ps1) checks what an **install actually did** — run in four phases around the `msiexec` commands on the test machine, including starting each app to prove the deployed Qt runtime is complete. Only the UAC prompt, the wizard page order and wording, and the icons still need a human.
+The verification of a real install (clean machine, **not yet run** — Task 13's outstanding subtask and Task 51's last one) lives in one place, [`README.md`](README.md#installing--testing), so it does not drift between two files. It is mostly automated, in two layers: `smsi_check_authoring.ps1` checks what the **package contains** and runs on every build, and [`test_msi_install.ps1`](test_msi_install.ps1) checks what an **install actually did** — run in four phases around the `msiexec` commands on the test machine, including starting each app to prove the deployed Qt runtime is complete. Only the UAC prompt, the wizard page order and wording, and the icons still need a human.
 
 ---
 

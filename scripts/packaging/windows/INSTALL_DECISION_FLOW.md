@@ -102,7 +102,7 @@ flowchart TD
     exists -->|yes| ice{"-SkipValidation?"}
     ice -->|yes| authoring
     ice -->|no| validate["wix msi validate<br/>-sice ICE43 -sice ICE57"]
-    validate --> authoring[test_msi_authoring.ps1<br/>Msi + Arch]
+    validate --> authoring[smsi_check_authoring.ps1<br/>Msi + Arch]
     authoring --> ok([MSI OK: path and size])
 ```
 
@@ -120,12 +120,12 @@ Four properties of that flow the installer flow below depends on:
   authors them explicitly so shortcuts and associations can reference them.
 - **Every package carries all three apps.** There is no switch to leave
   SeamlyLayout out, so the SeamlyLayout Start Menu shortcut and icon are in
-  every package on both architectures, and `test_msi_authoring.ps1` asserts them
+  every package on both architectures, and `smsi_check_authoring.ps1` asserts them
   unconditionally.
 - **Two checks run on every build and both fail it.** `wix msi validate` says
   the package is well formed (ICE43 and ICE57 suppressed as false positives for
   a `perMachine` package; ICE61 stays visible and is expected).
-  `test_msi_authoring.ps1` says it still contains the decisions this document
+  `smsi_check_authoring.ps1` says it still contains the decisions this document
   describes — the detection properties, the dialog chain, the removal
   components, the shortcuts and the registry rows. `-SkipValidation` skips the
   first; nothing skips the second.
@@ -288,7 +288,7 @@ data root and `~/seamlyData` was correctly never created.
 | Detection, dialogs, directories, components | `scripts/packaging/windows/seamly-family.wxs` |
 | Staging layout, version mapping, `wix build`, ICE suppressions | `scripts/packaging/windows/smsi.ps1` |
 | The only invocation of that script | `.github/workflows/ci.yml`, job `windows-msi` |
-| Assertions about the built package | `scripts/packaging/windows/test_msi_authoring.ps1` |
+| Assertions about the built package | `scripts/packaging/windows/smsi_check_authoring.ps1` |
 | Assertions about a real install | `scripts/packaging/windows/test_msi_install.ps1` |
 | Data root resolution, adoption, seeding, pruning | `src/libs/vmisc/vcommonsettings.cpp` |
 | Where the apps call it | `src/app/seamly2d/core/application_2d.cpp`, `src/app/seamlyme/application_me.cpp` |

@@ -438,7 +438,7 @@ if (-not $SkipValidation) {
 Write-Host "checking install-time authoring..."
 # A hashtable, not an array: @array splats positionally, @hashtable by name.
 $checkArguments = @{ Msi = $msi; Arch = $Arch }
-& (Join-Path $PSScriptRoot 'test_msi_authoring.ps1') @checkArguments
+& (Join-Path $PSScriptRoot 'smsi_check_authoring.ps1') @checkArguments
 if ($LASTEXITCODE -ne 0) {
     throw "install-time authoring check failed (exit code $LASTEXITCODE) - see output above."
 }

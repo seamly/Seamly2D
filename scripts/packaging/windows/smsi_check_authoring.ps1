@@ -1,5 +1,5 @@
 #******************************************************************************
-# **  @file   test_msi_authoring.ps1
+# **  @file   smsi_check_authoring.ps1
 # **  @author slspencer
 # **  @date   July 28, 2026
 # **
@@ -61,7 +61,7 @@
     against the summary-information template.
 
 .EXAMPLE
-    .\test_msi_authoring.ps1 -Msi scripts\seamly-msi\x64\seamly-x64.msi
+    .\smsi_check_authoring.ps1 -Msi scripts\seamly-msi\x64\seamly-x64.msi
 #>
 
 param(
@@ -623,6 +623,6 @@ if ($script:failures.Count -gt 0) {
     exit 1
 }
 Write-Host 'MSI authoring check passed.'
-# Explicit, so a caller reading $LASTEXITCODE after `& test_msi_authoring.ps1`
+# Explicit, so a caller reading $LASTEXITCODE after `& smsi_check_authoring.ps1`
 # sees 0 rather than whatever the previous command left there.
 exit 0
