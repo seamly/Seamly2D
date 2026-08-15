@@ -104,27 +104,19 @@ All three applications build against **Qt 6.11.1**.
 
 ### Local Windows Build
 
+The repository has no local build or test script for Seamly2D and SeamlyMe.
+`ci.yml` builds and tests them. Build them by hand with qmake + jom if you need
+a local tree.
+
+SeamlyLayout keeps its own local scripts:
+
+* `src/app/seamlylayout/qd.ps1` — debug build.
+* `src/app/seamlylayout/build.ps1` — CMake + Ninja + Cargo. CI calls it too.
+
 Use Qt 6.11.1 `msvc2022_64` with the VS 18 Community MSVC environment.
 
-* Seamly2D: qmake + jom.
-* SeamlyLayout: CMake + Ninja + Cargo.
-* SeamlyMe: qmake + jom.
-* Put release shadow builds in `build/`.
+* Put shadow builds in `build/`.
 * `build/` is gitignored.
-
-Use `scripts/sd.ps1` for local Seamly2D debug builds.
-
-The script:
-
-* detects Qt `msvc2022_64` 6.11.1 or newer under `C:\Qt`;
-* detects the VS 18 Community MSVC environment;
-* builds `CONFIG+=debug` in `scripts/seamly2d-debug/`;
-* deploys Qt debug DLLs with `windeployqt`;
-* supports `-Run` to launch the executable.
-
-Debug executable:
-
-`./scripts/seamly2d-debug/src/app/seamly2d/bin/seamly2d.exe`
 
 The local Qt kit must include:
 
@@ -301,8 +293,11 @@ Implement only the required task scope.
 For code changes:
 
 * add or update unit tests;
-* run the relevant tests;
-* run the local check build with `scripts/sd.ps1`.
+* run the tests that still run locally — SeamlyLayout `ctest --preset debug` and
+  `cargo test --workspace`.
+
+Seamly2D and SeamlyMe have no local build or test script. `ci.yml` verifies
+them. A skip-ci push defers that verification. See CI Cost Control.
 
 Do not proceed after a failing required test or build.
 
@@ -345,6 +340,10 @@ No PR is required for normal task work.
 A push to `run-seamlyLayout` can start the full multi-platform `ci.yml` suite.
 
 Use the CI skip token in the step 8 merge commit subject by default.
+
+This default stands even though no local build remains. The user decided on
+2026-08-15 to verify releases with a manual `workflow_dispatch` run instead. See
+Milestones.
 
 The token is `[skip ci]`.
 
@@ -391,7 +390,8 @@ Run the full CI suite before a release or upstream handoff:
 
 Wait for it to pass.
 
-Skipped CI is deferred verification.
+This manual run is the only verification for Seamly2D and SeamlyMe. Skipped CI
+is deferred verification, and nothing runs locally to catch a break sooner.
 
 ## Documentation-Only Changes
 

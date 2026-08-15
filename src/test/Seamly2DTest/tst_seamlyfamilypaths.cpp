@@ -260,7 +260,7 @@ void TST_SeamlyFamilyPaths::DevBuildFoundFromReleaseShadowBuild() const
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief DevBuildFoundFromDebugShadowBuild verifies the walk also reaches the
- * checkout root from the deeper debug shadow build produced by scripts/sd.ps1.
+ * checkout root from the deeper debug shadow build layout.
  *
  * Layout reproduced: seamly2d runs from
  * `<checkout>/scripts/seamly2d-debug/src/app/seamly2d/bin` — six levels
@@ -319,7 +319,7 @@ void TST_SeamlyFamilyPaths::DevBuildReleaseTakesPrecedenceOverDebug() const
 /**
  * @brief DevBuildFindsDebugWhenReleaseAbsent verifies Debug is still found when
  * it is the only configuration built — the common case for a developer working
- * with scripts/sd.ps1.
+ * from a debug tree.
  */
 void TST_SeamlyFamilyPaths::DevBuildFindsDebugWhenReleaseAbsent() const
 {

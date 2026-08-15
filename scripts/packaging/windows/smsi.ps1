@@ -104,9 +104,12 @@
     The invocation ci.yml's windows-msi job runs, for either architecture.
 
 .NOTES
-    "smsi" = seamly msi, following sd.ps1 ("seamly2d debug") / st.ps1
-    ("seamly2d tests"). Output and staging live in scripts\seamly-msi\ (or
-    whatever -OutputDirName names), which .gitignore lists by name.
+    "smsi" = seamly msi. This script only packages; it never builds. The
+    scripts that produced its input trees locally (sb.ps1, sd.ps1) were
+    deleted in August 2026, so either build the trees by hand or let ci.yml's
+    windows-msi job do the whole job. Output and staging live in
+    scripts\seamly-msi\ (or whatever -OutputDirName names), which .gitignore
+    lists by name.
 #>
 
 param(

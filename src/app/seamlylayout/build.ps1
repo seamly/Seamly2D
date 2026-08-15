@@ -10,7 +10,7 @@ param(
     [string]$Preset = "debug",
     [switch]$Clean,
     # Build only; do not launch the freshly built executable. Required by any
-    # non-interactive caller (scripts\sb.ps1, CI), since launching a GUI app
+    # non-interactive caller (CI), since launching a GUI app
     # blocks the script until the user closes the window.
     [switch]$NoRun
 )

@@ -159,9 +159,9 @@ QString locateSeamlyLayout(const QString &directory)
  * parents, treating each as a candidate checkout root and testing whether it
  * contains a SeamlyLayout build. Both shadow-build layouts the project uses
  * resolve this way — the release build at `<checkout>/build/...` (five levels)
- * and `scripts/sd.ps1`'s debug build at
- * `<checkout>/scripts/seamly2d-debug/...` (six) — without either being
- * named here, so a differently nested build tree still works.
+ * and a debug shadow build at `<checkout>/scripts/seamly2d-debug/...` (six) —
+ * without either being named here, so a differently nested build tree still
+ * works.
  *
  * At each level **Release is preferred over Debug**: a developer who has built
  * both almost always wants the current release binary, and the old hard-coded

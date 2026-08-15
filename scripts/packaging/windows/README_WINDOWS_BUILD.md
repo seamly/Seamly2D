@@ -174,7 +174,8 @@ deploy.** The kit must also carry Qt WebChannel and Qt Positioning, which is why
 
 **No Qt tool is ever invoked by bare name.** The `.pro` post-link steps use
 `qtPrepareTool(WINDEPLOYQT, windeployqt)`, so the deployed runtime can only be
-the kit that compiled the exe. `scripts\sb.ps1` and `scripts\sd.ps1` compare the
-deployed `Qt6Core.dll` / `Qt6Cored.dll` FileVersion against that kit and fail
-loudly on a mismatch — a mismatch is invisible until someone reads the DLL
-version by hand.
+the kit that compiled the exe. `scripts\sb.ps1` and `scripts\sd.ps1` used to
+compare the deployed `Qt6Core.dll` / `Qt6Cored.dll` FileVersion against that kit
+and fail loudly on a mismatch. Both scripts were deleted in August 2026, so
+**read that FileVersion by hand before you package a local tree** — a mismatch
+is invisible otherwise.

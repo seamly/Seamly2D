@@ -6,7 +6,30 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## PICK UP HERE (2026-08-15, smsi.ps1 is CI-only)
+## PICK UP HERE (2026-08-15, the local build and test scripts are deleted)
+
+**`scripts/sb.ps1`, `scripts/sd.ps1` and `scripts/st.ps1` are gone.** The user
+decided the family needs no local release build, no local debug build, and no
+local test runner. `ci.yml` is the verification path for seamly2d and seamlyme.
+SeamlyLayout keeps its own local scripts (`qd.ps1`, `build.ps1`) and its local
+`ctest`/`cargo test`.
+
+Consequences to keep in mind:
+
+- **A skip-ci push now defers *all* verification for the parents.** Nothing runs
+  locally to catch a broken build first. **The user kept the skip token as the
+  default anyway (2026-08-15)** and verifies releases with a manual
+  `gh workflow run ci.yml --ref run-seamlyLayout`. `ci.yml` already carries a
+  `workflow_dispatch` trigger. Do not reopen this.
+- **`smsi.ps1` has no local producer for its input trees.** It only packages.
+  Build the trees by hand, or let `ci.yml`'s `windows-msi` job do the whole job.
+- **The deployed-runtime FileVersion check went with `sb.ps1`/`sd.ps1`.** Read
+  `Qt6Core.dll`'s FileVersion by hand before trusting a hand-built tree.
+- `scripts/seamly2d-debug/` (2.1 GB) was deleted from disk, and its `.gitignore`
+  entry with it, along with the older `scripts/seamly2d-build-debug/` spelling.
+  `scripts/seamly-msi/` and `build/` stay ignored by name.
+
+## Earlier (2026-08-15, smsi.ps1 is CI-only)
 
 **`smsi.ps1` no longer builds locally, no longer builds a two-app package, and
 no longer detects anything.** Three removals, all done:
@@ -276,8 +299,9 @@ Three changes merged to `run-seamlyLayout`; the branch was force-pushed once
 `.vscode/**`); `seamlylayout-ci.yml` already had both. `CLAUDE.md`'s task workflow now merges with `--no-ff` (step 8)
 and puts the skip token in the merge commit by default (step 9), omitting it
 when the task touched `.github/workflows/**`, `scripts/packaging/**`,
-`*.pro`/`CMakeLists.txt`/`Cargo.toml` or platform-specific code — the things
-`scripts/sd.ps1` (debug, msvc2022_64, qmake on `Seamly.pro`) cannot verify.
+`*.pro`/`CMakeLists.txt`/`Cargo.toml` or platform-specific code — the things the
+local debug build could not verify. That script is gone since 2026-08-15, so a
+skip-ci push now defers verification of everything, not only those paths.
 Accumulated skips get cleared with `gh workflow run ci.yml --ref run-seamlyLayout`
 before a milestone.
 
@@ -514,8 +538,10 @@ public download link. Tracked as **Task M.12** in `TODO_MIGRATE.md`.
 build locally with MSVC.** So this section is background, not a blocker. Do not
 spend a session repairing Visual Studio unless the user asks.
 
-**`scripts/sd.ps1` fails with `'cl' is not recognized`.** Not the script, and not
-the agent sandbox — the same failure occurs with the sandbox disabled:
+The local build scripts were deleted on 2026-08-15, so nothing in the repository
+depends on this any more. Keep the findings — a hand-built local tree hits the
+same wall. The symptom was `'cl' is not recognized`. Not the script, and not the
+agent sandbox — the same failure occurs with the sandbox disabled:
 
 - `vcvars64.bat` **and** `vcvarsall.bat x64` exit 1 with
   `[ERROR:VsDevCmd.bat] *** VsDevCmd.bat encountered errors ***`; three
@@ -530,11 +556,11 @@ the agent sandbox — the same failure occurs with the sandbox disabled:
   instance registration looks damaged. Instance data exists at
   `C:\ProgramData\Microsoft\VisualStudio\Packages\_Instances\a9afd7ad`
 
-**Workaround — local only, nothing on the machine and nothing in `sd.ps1` was
-changed:** set `PATH`/`INCLUDE`/`LIB` by hand at `VC\Tools\MSVC\14.51.36231` +
-SDK `10.0.26100.0`, then run `C:\Qt\Tools\QtCreator\bin\jom\jom.exe -f Makefile`
-in `scripts/seamly2d-debug`. **The user should repair VS 18 Community from the
-Visual Studio Installer** — until then `sd.ps1` fails for them too.
+**Workaround — local only, nothing on the machine was changed:** set
+`PATH`/`INCLUDE`/`LIB` by hand at `VC\Tools\MSVC\14.51.36231` + SDK
+`10.0.26100.0`, then run `C:\Qt\Tools\QtCreator\bin\jom\jom.exe -f Makefile` in
+the shadow-build directory. **The user should repair VS 18 Community from the
+Visual Studio Installer** before attempting any local MSVC build.
 
 ## Other machine state changed outside the repo
 
@@ -639,9 +665,9 @@ Act on these, do not re-ask, remove from this file for the next Session handover
   be `Qt::CaseInsensitive`.
 - **`QDir::rmdir()` over `removeRecursively()`, deliberately.** `rmdir()` cannot
   delete a file and refuses a non-empty directory, so it cannot run away.
-- **`scripts\st.ps1` runs only `Seamly2DTests.exe`.** CI's `make check` runs four
-  binaries — `Seamly2DTest`, `CollectionTest`, `ParserTest`, `TranslationsTest`.
-  Run the other three by hand before pushing.
+- **CI's `make check` runs four test binaries** — `Seamly2DTest`,
+  `CollectionTest`, `ParserTest`, `TranslationsTest`. Any hand-run local check
+  must cover all four; `Seamly2DTests.exe` alone is one of them.
 - **`gh` is on `PATH` and authenticated** as of 2026-08-11; plain `gh …` works.
   If a shell ever comes up without it, invoke
   `& "C:\Program Files\GitHub CLI\gh.exe"`.
@@ -681,8 +707,8 @@ Act on these, do not re-ask, remove from this file for the next Session handover
 - **PowerShell splatting: `@array` is positional, `@hashtable` is by name.**
 - **Qt frontend test exes are GUI-subsystem binaries** — they print nothing to
   captured stdout. Run with `-o <file>,txt` and `QT_QPA_PLATFORM=offscreen`.
-- **`$proFile` collides with the automatic `$PROFILE`** (case-insensitive);
-  `sd.ps1` still has it.
+- **`$proFile` collides with the automatic `$PROFILE`** (case-insensitive) in
+  PowerShell. Do not use that variable name in a new script.
 - **Historical 6.10 references and old directory names in
   `project-docs/TODO_COMPLETED.md` and `project-docs/PROJECT_PLAN.md` are
   deliberate** — they record what was true at the time.

@@ -196,7 +196,7 @@ void TestApplication2D::initTranslateVariables()
  * it, a single "-o" on the command line is overwritten by every subsequent
  * qExec() call, and on Windows the console/stdout output of the suite can be
  * lost entirely when redirected — so this hook is what makes local per-suite
- * results capturable at all (used by scripts/st.ps1; see Task 23).
+ * results capturable at all (see Task 23).
  *
  * @param argc argument count, forwarded to every QTest::qExec() call
  * @param argv argument values, forwarded to every QTest::qExec() call
