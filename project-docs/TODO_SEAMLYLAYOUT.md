@@ -14,7 +14,7 @@ Tasks in this file are numbered and are prefixed with `Layout.`
 
 - [ ] Layout 1.1 - The 'Adjust Layout' feature has suffered regression - when 'Adjust Layout' opens there are no pattern pieces to adjust - the pieces from the main SeamlyLayout canvas should be available in 'Adjust Layout', otherwise there is nothing to adjust and save back to the main SeamlyLayout canvas.
 
-## Task Layout.2 - add option for three text modes for SVG export in the Exports menu
+## Task Layout.2 - in 'Export SVG' menu selection, create three options for text mode
 
 Replace the single "SVG" item in the SeamlyLayout Exports menu (`src/app/seamlylayout/qt_frontend/qml/ExportMenu.qml`, `exportSvgRequested()` wired through `Main.qml` to the Rust backend in `src/app/seamlylayout/crates/cxxqt_bridge/src/exports.rs`) with three SVG export modes differing in how label text is written.
 
@@ -36,10 +36,11 @@ Replace the single "SVG" item in the SeamlyLayout Exports menu (`src/app/seamlyl
 - [ ] Layout.2.11 - Update `src/app/seamlylayout/docs/status-docs/svg-data-attributes.md`, the root `project-docs/SVG-DATA-ATTRIBUTES.md` mirror, and `src/app/seamlylayout/docs` export docs
 - [ ] Layout.2.13 - Doxygen briefs + inline comments on all touched functions
 
-## Task Layout 3 — Export multisize patterns (nested / marker / sized-layout-set)
+## Task Layout 3 — if current pattern is 'multisize', create three multisize options (nested / marker / sized-layout-set) that is required before user can select the export file format
 
 Add layout export for multisize patterns — `.sm2d` patterns opened with a `.smms` multisize measurement file (multiple sizes; the CLI already exposes per-size gradation via `--gradationsize`/`--gradationheight`). The user chooses one of three multisize layout products in the settings dialog; all products orient every piece with its grainline pointing up.
 
+- [ ] Layout 3.0 on Import of svg file, detect if .sm2d file reference an .smis measurement file (individual measurements) or .smms measurement file (multisize measurements), this variable should be readable (not writable) by the Export menu, layout algorithm, 'Adjust mode', and other code.
 - [ ] Layout 3.1 Settings dialog: user chooses "nested layout", "marker layout", or "set of sized layouts" for multisize export
 - [ ] Layout 3.2 Generate a "size layout" for each size in the `.smms` file, all grainlines pointing up (per-size piece generation via the existing gradation machinery)
 - [ ] Layout 3.3 Nested layout:
@@ -97,5 +98,7 @@ distinctive fragment instead.
 
 ## Task Layout.6 - Implement export stubs for paid export modules (To be developed)
 
+These options in the Export menu will remain invisible to the user until these features are developed. Put stubs in the code now to mark where they will go.
+
 - [ ] Layout 6.1 Export G-Code
-- [ ] Layout 7.1 Export 3DMesh
+- [ ] Layout 6.2 Export 3DMesh

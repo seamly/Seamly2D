@@ -10,7 +10,7 @@ All TODO_MIGRATE.md tasks begin with 'Dead.' and all tasks are numbered.
 
 ## TASK Dead.1 - Remove the orphaned layout code; orphaned when calling SeamlyLayout instead of the previous layout code and workflow
 
-- [ ] Dead.1.1 - locate the code that was orphaned by calling SeamlyLayout
+- [ ] Dead.1.1 - locate the seamly2d code (vlayout*.cpp, etc.) that was orphaned by calling the new seamlylayout.exe
 - [ ] Dead.1.2 - remove the located orphaned code
 - [ ] Dead.1.3 - remove the tests for the located orphaned code
 - [ ] Dead.1.4 - check that tests are run for SeamlyLayout during the linux-test job in ci.yml
