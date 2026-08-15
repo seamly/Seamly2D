@@ -27,22 +27,11 @@ macx{
     QMAKE_APPLE_DEVICE_ARCHS = x86_64 arm64
 }
 
-# See question on StackOwerflow "QSslSocket error when SSL is NOT used" (http://stackoverflow.com/a/31277055/3045403)
-# Copy of answer:
-# We occasionally had customers getting very similar warning messages but the software was also crashing.
-# We determined it was because, although we weren't using SSL either, the program found a copy of OpenSSL on the
-# customer's computer and tried interfacing with it. The version it found was too old though (from Qt 5.2 onwards v1.0.0
-# or later is required).
-#
-# Our solution was to distribute the OpenSSL DLLs along with our application (~7 MB). The alternative is to compile
-# Qt from scratch without OpenSSL support.
-#
-# Source of the openssl binaries: http://wiki.overbyte.eu/wiki/index.php/ICS_Download
-win32-msvc {
-    INSTALL_OPENSSL += \
-                       ../../../dist/win/libcrypto-1_1-x64.dll \
-                       ../../../dist/win/libssl-1_1-x64.dll
-}
+# The build shipped libcrypto-1_1-x64.dll and libssl-1_1-x64.dll here until
+# 2026-08-15. Do not add them back. Qt 6.11's TLS plugin loads libssl-3-x64 and
+# libcrypto-3-x64 only, so the 1.1 files were dead weight. Fervor is the one
+# TLS user, and it falls back to Schannel, which is what the arm64 build has
+# always done - INSTALL_OPENSSL never applied to the win32-arm64-msvc spec.
 
 # Ensure xerces-c_3_3.dll is deployed into the target folder
 win32-msvc {
