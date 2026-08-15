@@ -8,6 +8,13 @@ Tasks in this file begin with `InstMacOS.`
 
 Tasks in this file may overlap in scope with other tasks -- analyze tasks to consolidate and list them in the order they should be implemented, then renumber to reflect the new ordering, then remove this instruction.
 
+## Task InstMacOS.00 - fix file names
+
+Fix the casing, update references to these files
+
+- [ ] ICON = ../../../dist/seamly2d.icns — the file is Seamly2D.icns
+- [ ] QMAKE_INFO_PLIST = .../seamly2d/info.plist — the file is Info.plist
+
 ## Task InstMacOS.0 — macOS installer (.pkg) for the Seamly family (parity with the Windows MSI)
 
 Today macOS ships as a drag-installed `.app`/`.dmg` (`packaging/macos/build_dmg.sh`) with no installer, no install-location choice, and no way to clear a prior standalone install. Provide a real macOS installer — a signed/notarized `productbuild`/`pkgbuild` `.pkg` bundling all three apps — matching the Windows MSI capabilities. Where a native `.pkg` cannot do something (arbitrary install-location choice is limited in Installer.app; drag-install has no uninstall hook), record the design decision rather than forcing it. The in-app first-run **data-directory** chooser is **Task 35**; this task is the installer/packaging side and may supersede or complement that first-run prompt with an install-time prompt.
