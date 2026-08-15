@@ -203,7 +203,7 @@
            2. the old NSIS installation, which is a DIFFERENT product with its
               own ARP entry and its own uninstall.exe. The MSI neither upgrades
               nor removes it. Its authoring file, dist\seamly2d-installer.nsi,
-              was deleted in Task InstWinX64.1.3.1; the footprint list further
+              was deleted in Task InstWinX64.11.1; the footprint list further
               down this file is now the only record of what it left on disk.
 
          The NSIS installer is a 32-bit executable that does not switch the
@@ -948,7 +948,7 @@
            undone by the standard RemoveFiles rollback if the install aborts.
 
            Its complete footprint, transcribed from dist\seamly2d-installer.nsi
-           before that file was deleted (Task InstWinX64.1.3.1). This list is
+           before that file was deleted (Task InstWinX64.11.1). This list is
            now the record - it cannot be re-derived, so do not trim it:
              - $INSTDIR, default C:\Program Files (x86)\Seamly2D (File /r *)
              - HKLM\SOFTWARE\NSIS_Seamly2D
