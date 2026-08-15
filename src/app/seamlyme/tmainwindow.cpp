@@ -3112,7 +3112,7 @@ void TMainWindow::ReadSettings()
 	const VSeamlyMeSettings *settings = qApp->seamlyMeSettings();
 	restoreGeometry(settings->GetGeometry());
 	restoreState(settings->GetWindowState());
-	restoreState(settings->GetToolbarsState(), APP_VERSION);
+	restoreState(settings->GetToolbarsState(), WINDOW_STATE_VERSION);
 
 	// Text under tool button icon
 	initToolBarStyles();
@@ -3127,7 +3127,7 @@ void TMainWindow::WriteSettings()
 	VSeamlyMeSettings *settings = qApp->seamlyMeSettings();
 	settings->SetGeometry(saveGeometry());
 	settings->SetWindowState(saveState());
-	settings->SetToolbarsState(saveState(APP_VERSION));
+	settings->SetToolbarsState(saveState(WINDOW_STATE_VERSION));
 }
 
 //---------------------------------------------------------------------------------------------------------------------

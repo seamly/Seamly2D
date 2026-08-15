@@ -5344,7 +5344,7 @@ void MainWindow::ReadSettings()
     const VSettings *settings = qApp->Seamly2DSettings();
     restoreGeometry(settings->GetGeometry());
     restoreState(settings->GetWindowState());
-    restoreState(settings->GetToolbarsState(), APP_VERSION);
+    restoreState(settings->GetToolbarsState(), WINDOW_STATE_VERSION);
 
     // Scene antialiasing
     const bool graphOutputValue = settings->GetGraphicalOutput();
@@ -5375,7 +5375,7 @@ void MainWindow::WriteSettings()
     VSettings *setings = qApp->Seamly2DSettings();
     setings->SetGeometry(saveGeometry());
     setings->SetWindowState(saveState());
-    setings->SetToolbarsState(saveState(APP_VERSION));
+    setings->SetToolbarsState(saveState(WINDOW_STATE_VERSION));
 }
 
 //---------------------------------------------------------------------------------------------------------------------

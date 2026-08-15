@@ -66,6 +66,18 @@ extern const QString APP_VERSION_STR;
 */
 #define APP_VERSION ((MAJOR_VERSION << 16) + (MINOR_VERSION << 8) + DEBUG_VERSION)
 
+/*
+   WINDOW_STATE_VERSION keys the blob that QMainWindow::saveState() writes and
+   restoreState() reads. It marks the window layout schema, not the build.
+   Bump it by hand only when a toolbar or a dock widget is added, removed or
+   renamed, so that restoreState() rejects state that no longer fits.
+
+   Do not use APP_VERSION here. APP_VERSION carries the build date (year,
+   month and day), so it changes with every rolling release, and restoreState()
+   would discard the user's toolbar and dock layout on every update.
+*/
+#define WINDOW_STATE_VERSION 1
+
 // Start: Do not edit here, use scripts/version.sh to update
 #define VER_FILEVERSION 0,6,0,1
 #define VER_FILEVERSION_STR "0.6.0.1"
