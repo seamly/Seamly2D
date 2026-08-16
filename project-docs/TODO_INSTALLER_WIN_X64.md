@@ -52,6 +52,37 @@ Verified with a link-only build (stub staging tree, real authoring):
 Not verified: the pages themselves. That is 1.6, and it needs an interactive
 install of a real MSI.
 
+### Defect — 2026-08-15: error 2343 on leaving the program-directory page
+
+The first interactive install stopped with "error code 2343" when the user
+pressed Next on `InstallDirDlg`. 2343 is "specified path is empty".
+
+Cause: the `SeamlyDataDirDlg` path box carried `Indirect="yes"`. An indirect
+`PathEdit` reads its property to get the **name** of the property that holds the
+path. Stock `InstallDirDlg` is indirect because `WIXUI_INSTALLDIR` holds the
+string `INSTALLFOLDER`. `SEAMLYDATAPARENT` holds the path itself, so the lookup
+asked for a property named `C:\Users\<user>\`, found nothing, and aborted the
+install as the page was created. The page never drew, so no earlier check
+caught it.
+
+Three changes in `smsi.wxs`:
+
+- The path box binds directly. `Indirect` is gone.
+- `SeamlyDataDirDlg`'s Next runs `SetTargetPath` before `NewDialog`, so an
+  edited parent reaches the Directory table and `[SEAMLYDATAROOT]` recomposes
+  for the next page and the registry value. It is conditional on a non-empty
+  property, which is the other route to 2343. No `CheckTargetPath`: the data
+  root may be a cloud or removable drive.
+- The `SEAMLYDATAPARENT` default gained a trailing backslash. Windows Installer
+  appends a child directory verbatim, so `C:\Users\me` gave
+  `C:\Users\meSeamlyData`.
+
+`smsi_check_authoring.ps1` gained two assertions: the path box binds directly,
+and the page commits before it advances. 118 assertions pass on a link-only
+build with a stub staging tree.
+
+Still not verified: the pages themselves. 1.6 needs a rebuilt MSI.
+
 1.7 rewrote the page order in `INSTALL_DECISION_FLOW.md` and
 `scripts/packaging/windows/README.md`, and deleted the "SeamlyShortcutsDlg never
 displays" defect note. Two stale claims were corrected in passing: the README
@@ -289,3 +320,12 @@ Eight `VSettings` accessors use `%APPDATA%\Unknown Organization.ini`.
 - [ ] **InstWinX64.11.6** Update `INSTALL_DECISION_FLOW.md`.
 - [ ] **InstWinX64.11.7** Move completed tasks to `TODO_COMPLETED.md`.
 - [ ] **InstWinX64.11.8** Update `TODO_INSTALLER.md` when this file is complete.
+
+## InstWinX64.12 - Microsoft store distribution
+
+package the desktop app as an msix and submit it through the official developer portal.
+
+- [ ] **InstWinX64.12.1** Create Account: Sign up for a developer profile on the Microsoft Partner 
+- [ ] **InstWinX64.12.2** Center using a Microsoft account.Package the App: Convert or wrap the Windows build (MSI/EXE) into an MSIX or use the Microsoft packaging tools so it fits store guidelines.
+- [ ] **InstWinX64.12.3** Associate and Sign: Link your Visual Studio project or package with your reserved store name and sign it with a verified certificate.
+- [ ] **InstWinX64.12.4** Submit: Upload the package file, fill out the store listing details (icons, descriptions, screenshots), and submit it for certificatio

@@ -295,8 +295,11 @@
          shipped before this task. -->
     <Property Id="SEAMLYDATAROOT" Secure="yes" />
     <Property Id="SEAMLYDATAPARENT" Secure="yes" />
+    <!-- The trailing backslash is required, not cosmetic: Windows Installer
+         composes a child directory onto the parent's value verbatim, so
+         "C:\Users\me" without it gives C:\Users\meSeamlyData. -->
     <SetProperty Id="SEAMLYDATAPARENT"
-                 Value="[%USERPROFILE]"
+                 Value="[%USERPROFILE]\"
                  Before="CostFinalize"
                  Sequence="ui"
                  Condition="NOT SEAMLYDATAPARENT" />
@@ -573,8 +576,15 @@
              and E:\ can never be mistaken for the data root itself. -->
         <Control Id="FolderLabel" Type="Text" X="20" Y="110" Width="330" Height="10"
                  NoPrefix="yes" Text="Put the &amp;SeamlyData folder in:" />
+        <!-- NOT Indirect. An indirect PathEdit reads its property to get the
+             NAME of the property that holds the path - which is why stock
+             InstallDirDlg is indirect through WIXUI_INSTALLDIR, whose value is
+             the string "INSTALLFOLDER". SEAMLYDATAPARENT holds the path itself,
+             so an indirect lookup here asks for a property named
+             "C:\Users\<user>\", finds nothing, and fails the install with
+             error 2343 the moment this page is created. -->
         <Control Id="Folder" Type="PathEdit" X="20" Y="122" Width="255" Height="18"
-                 Property="SEAMLYDATAPARENT" Indirect="yes" />
+                 Property="SEAMLYDATAPARENT" />
         <Control Id="ChangeFolder" Type="PushButton" X="285" Y="122" Width="66" Height="18"
                  Text="Ch&amp;ange...">
           <Publish Property="_BrowseProperty" Value="SEAMLYDATAPARENT" Order="1" />
@@ -594,9 +604,17 @@
                  Text="&amp;Back">
           <Publish Event="NewDialog" Value="InstallDirDlg" />
         </Control>
+        <!-- The PathEdit writes the property; SetTargetPath commits it to the
+             Directory table, which is what recomposes [SEAMLYDATAROOT] for the
+             next page and for the registry value. No CheckTargetPath: the data
+             root may live on a cloud or removable drive (InstWinX64.2.7). The
+             condition guards SetTargetPath against an empty property, which is
+             the other way to reach error 2343. -->
         <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
                  Default="yes" Text="&amp;Next">
-          <Publish Event="NewDialog" Value="SeamlyDataMigrateDlg" />
+          <Publish Event="SetTargetPath" Value="SEAMLYDATAPARENT" Order="1"
+                   Condition="SEAMLYDATAPARENT" />
+          <Publish Event="NewDialog" Value="SeamlyDataMigrateDlg" Order="2" />
         </Control>
         <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
                  Cancel="yes" Text="Cancel">

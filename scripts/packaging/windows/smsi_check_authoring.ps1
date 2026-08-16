@@ -581,6 +581,30 @@ Assert-That -Name 'the data-root page browses the data-root parent' `
     -Succeeded ($browseProperty.Count -eq 1 -and $browseSpawn.Count -eq 1 -and
                 [int]$browseProperty[0].Ordering -lt [int]$browseSpawn[0].Ordering) `
     -Detail "_BrowseProperty at $(if ($browseProperty.Count) { $browseProperty[0].Ordering } else { '<nothing>' }), SpawnDialog at $(if ($browseSpawn.Count) { $browseSpawn[0].Ordering } else { '<nothing>' })"
+# The path box must bind DIRECTLY. An indirect PathEdit reads its property to
+# get the NAME of the property holding the path, so an indirect
+# SEAMLYDATAPARENT asks for a property named "C:\Users\<user>\" and aborts the
+# install with error 2343 as the page is created. Stock InstallDirDlg is
+# indirect only because WIXUI_INSTALLDIR holds the string "INSTALLFOLDER".
+$folderControl = @(Get-MsiRows `
+    -Sql "SELECT ``Control``, ``Attributes``, ``Property`` FROM ``Control`` WHERE ``Dialog_``='SeamlyDataDirDlg' AND ``Control``='Folder'" `
+    -Columns 'Control', 'Attributes', 'Property')
+# msidbControlAttributesIndirect 8.
+Assert-That -Name 'the data-root path box binds directly, not indirectly' `
+    -Succeeded ($folderControl.Count -eq 1 -and
+                $folderControl[0].Property -eq 'SEAMLYDATAPARENT' -and
+                ([int]$folderControl[0].Attributes -band 8) -eq 0) `
+    -Detail "property '$(if ($folderControl.Count) { $folderControl[0].Property } else { '<nothing>' })', attributes $(if ($folderControl.Count) { $folderControl[0].Attributes } else { '<nothing>' })"
+# A typed path reaches the Directory table only through SetTargetPath, and it
+# has to happen before the next page reads [SEAMLYDATAROOT].
+$dataDirNext = @($script:controlEvents | Where-Object {
+    $_.Dialog -eq 'SeamlyDataDirDlg' -and $_.Control -eq 'Next' })
+$dataDirCommit = @($dataDirNext | Where-Object { $_.Event -eq 'SetTargetPath' -and $_.Argument -eq 'SEAMLYDATAPARENT' })
+$dataDirAdvance = @($dataDirNext | Where-Object { $_.Event -eq 'NewDialog' })
+Assert-That -Name 'the data-root page commits the path before it advances' `
+    -Succeeded ($dataDirCommit.Count -eq 1 -and $dataDirAdvance.Count -eq 1 -and
+                [int]$dataDirCommit[0].Ordering -lt [int]$dataDirAdvance[0].Ordering) `
+    -Detail "SetTargetPath at $(if ($dataDirCommit.Count) { $dataDirCommit[0].Ordering } else { '<nothing>' }), NewDialog at $(if ($dataDirAdvance.Count) { $dataDirAdvance[0].Ordering } else { '<nothing>' })"
 # BrowseDlg's OK must close the dialog and commit the path it browsed to, and it
 # must validate only the program directory: the data root is allowed on cloud
 # and removable drives that the program-directory rules reject.
