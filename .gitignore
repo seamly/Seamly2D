@@ -47,6 +47,7 @@ rcc/
 man/
 build/
 .vscode/*
+.codex/
 
 # Python bytecode cache
 __pycache__/
