@@ -27,7 +27,7 @@ Blocks installer path dialogs and `SeamlyShortcutsDlg`.
 - [x] **InstWinX64.1.3** Replace custom `SpawnDialog` transitions with `NewDialog`.
 - [x] **InstWinX64.1.4** Add Back navigation and stock `CancelDlg`.
 - [x] **InstWinX64.1.5** Replace obsolete `SpawnDialog` assertions with dialog-chain assertions.
-- [ ] **InstWinX64.1.6** Verify every page and Back transition in a real install.
+- [x] **InstWinX64.1.6** Verify every page and Back transition in a real install.
 - [x] **InstWinX64.1.7** Update `INSTALL_DECISION_FLOW.md` and `scripts/packaging/windows/README.md`.
 
 ### Result — 2026-08-12
@@ -81,7 +81,15 @@ Three changes in `smsi.wxs`:
 and the page commits before it advances. 118 assertions pass on a link-only
 build with a stub staging tree.
 
-Still not verified: the pages themselves. 1.6 needs a rebuilt MSI.
+### Result — 2026-08-15: the install completes
+
+The rebuilt `dev-latest` MSI installed end to end. 1.6 is closed. Every page
+drew, and the composed data root read `C:\Users\susan\SeamlyData\` — the
+trailing-backslash fix holds.
+
+One cosmetic defect is open: `FolderLabel` on `SeamlyDataDirDlg` shows a literal
+ampersand, "Put the &SeamlyData folder in:". `NoPrefix="yes"` suppresses the
+accelerator and leaves the character visible. Delete the `&amp;`.
 
 1.7 rewrote the page order in `INSTALL_DECISION_FLOW.md` and
 `scripts/packaging/windows/README.md`, and deleted the "SeamlyShortcutsDlg never
@@ -159,7 +167,7 @@ Verify `HKLM\SOFTWARE\Seamly\Seamly2D\InstallPath` with `test_msi_install.ps1`.
 
 ### User-Data Directory
 
-Interactive verification waits on InstWinX64.1.6.
+Interactive verification is done. See InstWinX64.1.6.
 
 - [x] **InstWinX64.2.6** Default `SEAMLYDATAROOT` to `%USERPROFILE%\SeamlyData` in the UI sequence.
 - [x] **InstWinX64.2.7** Accept local, removable, and cloud paths.
@@ -329,3 +337,4 @@ package the desktop app as an msix and submit it through the official developer 
 - [ ] **InstWinX64.12.2** Center using a Microsoft account.Package the App: Convert or wrap the Windows build (MSI/EXE) into an MSIX or use the Microsoft packaging tools so it fits store guidelines.
 - [ ] **InstWinX64.12.3** Associate and Sign: Link your Visual Studio project or package with your reserved store name and sign it with a verified certificate.
 - [ ] **InstWinX64.12.4** Submit: Upload the package file, fill out the store listing details (icons, descriptions, screenshots), and submit it for certificatio
+- [ ] **InstWin64.12.5** Automating submissions via the Microsoft Store Submission API

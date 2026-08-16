@@ -6,11 +6,28 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## PICK UP HERE (2026-08-15, error 2343 fixed — the fix needs a real install)
+## PICK UP HERE (2026-08-15, the MSI installs end to end)
 
-**The first interactive install of the MSI failed with "error code 2343" when
-the user pressed Next on the program-directory page.** Fixed and pushed
-(`a843503ab7..6bde38b1b3`). Full CI is running; it rebuilds `dev-latest`.
+**The rebuilt `dev-latest` MSI completed a full interactive install.**
+`InstWinX64.1.6` is closed. All ten pages drew. The data root composed as
+`C:\Users\susan\SeamlyData\`, so the trailing-backslash fix holds. Screenshots
+are in `project-docs/Install*-Screenshot 2026-08-15 *.png`.
+
+**Next, one open cosmetic defect:** `scripts/packaging/windows/smsi.wxs:578`.
+The `FolderLabel` text reads `Put the &SeamlyData folder in:` — the ampersand
+prints literally because the control carries `NoPrefix="yes"`. Delete the
+`&amp;`. It touches `scripts/packaging/**`, so that push must not carry the skip
+token.
+
+Two housekeeping items in `project-docs/`:
+
+- `Installer-6-Screenshot 2026-08-15 162124.png` is the *old* "ended
+  prematurely" page. It sits in the middle of the new sequence. Delete it.
+- The screenshots are untracked. Decide whether they belong in the repository.
+
+### The 2343 defect (fixed, keep the lesson)
+
+Fixed and pushed (`a843503ab7..6bde38b1b3`).
 
 2343 is "specified path is empty". `SeamlyDataDirDlg`'s path box carried
 `Indirect="yes"`. **An indirect `PathEdit` reads its property to get the NAME of
@@ -34,10 +51,6 @@ Two more defects fixed on the way, both on the same page:
 
 `smsi_check_authoring.ps1` gained two assertions and now runs 118. Verified with
 a link-only `wix build` over a stub staging tree.
-
-**Next: InstWinX64.1.6 is still open.** Download the rebuilt `dev-latest`
-`seamly-x64.msi` and walk every page and every Back transition. The pages beyond
-`InstallDirDlg` have never been seen by a human.
 
 ## Earlier (2026-08-15, the MSIs publish to a rolling pre-release)
 
