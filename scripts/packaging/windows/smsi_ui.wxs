@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ **  @file   smsi_ui.wxs
+ **  @author slspencer
+ **  @date   2026-08-15
+ **
+ **  @brief  The Seamly installer wizard: its dialogs and every transition
+ **          between them.
+ **
+ **  Split out of smsi.wxs, which keeps <Package> and everything the linker
+ **  needs to see there. This fragment is pulled in by the <UIRef Id="SeamlyUI">
+ **  in that file. WITHOUT THAT REFERENCE THE FRAGMENT IS DROPPED SILENTLY -
+ **  the MSI still builds, and the wizard is simply wrong. smsi_check_authoring.ps1
+ **  asserts every page and arrow, so run it after any change here.
+ **
+ **  @copyright
+ **  This source code is part of the Seamly project, a suite of apparel CAD
+ **  software.
+ **  Copyright (C) 2026 Seamly2D Project
+ **  All Rights Reserved.
+ **
+ **  SeamlyLayout is licensed under the MIT license.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:ui="http://wixtoolset.org/schemas/v4/wxs/ui">
+
+  <Fragment>
+    <!-- The license page shows license.rtf, which sits beside this .wxs;
+         $(sys.SOURCEFILEDIR) is the folder of this source file (with a trailing
+         backslash), so the reference survives relocating the tree. It resolves
+         against THIS file now, and both live in the same directory. -->
+    <WixVariable Id="WixUILicenseRtf" Value="$(sys.SOURCEFILEDIR)license.rtf" />
+
+    <!-- WixUI_Common carries the shared bitmaps and icons the stock dialogs
+         draw with (WixUI_Bmp_Banner, WixUI_Bmp_Dialog, WixUI_Ico_Info, ...).
+         It defines no page order, so the chain below is entirely ours. Each
+         stock dialog is its own fragment, pulled in by DialogRef. -->
+    <UIRef Id="WixUI_Common" />
+
+    <!-- ================= wizard dialog set (Task InstWinX64.1) ============= -->
+    <!--
+      THE DIALOG SET IS OURS, NOT WixUI_InstallDir's.
+
+      WixUI_InstallDir owned every transition out of its own pages. Its
+      InstallDirDlg Next row is `NewDialog VerifyReadyDlg` at Order 4 with the
+      condition `1`, so no page of ours could take that slot and no condition
+      could exclude it. SpawnDialog was the only mechanism left, and SpawnDialog
+      does not fire from that chain in WiX 6.0.2 - which is why the shortcuts,
+      data-root and migration pages never displayed.
+
+      This set replaces it. Every NewDialog row below is ours, so each page has
+      one defined successor and one defined predecessor.
+
+      REUSED UNCHANGED, one DialogRef each: WelcomeDlg, LicenseAgreementDlg,
+      InstallDirDlg, BrowseDlg, InvalidDirDlg, VerifyReadyDlg, ProgressDlg,
+      ExitDialog, CancelDlg, ErrorDlg, FilesInUse, MsiRMFilesInUse, PrepareDlg,
+      ResumeDlg, UserExit, DiskCostDlg, OutOfDiskDlg, OutOfRbDiskDlg,
+      MaintenanceWelcomeDlg, MaintenanceTypeDlg, FatalError. A stock dialog
+      brings its own controls, its own control conditions and its own internal
+      events (Cancel -> CancelDlg, VerifyReadyDlg's Install -> EndDialog). It
+      brings no NewDialog row at all. Only the four Seamly pages are authored
+      here.
+
+      PAGE ORDER, fresh install:
+
+        WelcomeDlg
+          -> LicenseAgreementDlg
+          -> SeamlyPreviousInstallDlg   only when an earlier install was found
+          -> InstallDirDlg              program directory
+          -> SeamlyDataDirDlg           user-data root
+          -> SeamlyDataMigrateDlg       copy existing work?
+          -> SeamlyShortcutsDlg         desktop shortcuts
+          -> VerifyReadyDlg
+          -> ProgressDlg                InstallUISequence 1299
+          -> ExitDialog                 InstallUISequence -1
+
+      Maintenance keeps the stock route: MaintenanceWelcomeDlg ->
+      MaintenanceTypeDlg -> VerifyReadyDlg. A patch keeps the stock shortcut
+      WelcomeDlg -> VerifyReadyDlg.
+
+      Back reverses every arrow. Cancel spawns the stock CancelDlg on every
+      page.
+
+      Geometry, fonts and the banner bitmap of the four Seamly pages mirror the
+      stock dialogs (370x270, WixUI_Font_Title, WixUI_Bmp_Banner) so the pages
+      look like part of the same wizard.
+    -->
+    <!-- One source for the condition that decides whether the previous-install
+         page appears. It is needed three times - the two License Next rows and
+         the two InstallDirDlg Back rows - and the four must not drift apart,
+         because a gap or an overlap between them strands the wizard on a page
+         with no working button. -->
+    <?define PreviousInstallFound = "(WIX_UPGRADE_DETECTED OR SEAMLYLEGACYUNINSTALLSTRING) AND NOT Installed" ?>
+
+    <!-- The Id is what smsi.wxs's UIRef names. An unnamed <UI> in a fragment
+         has nothing to reference and would never link. -->
+    <UI Id="SeamlyUI">
+
+      <!-- The stock sets define these three styles themselves; WixUI_Common
+           does not. Same face, sizes and bold bit as WixUI_InstallDir used. -->
+      <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
+      <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
+      <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
+      <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
+
+      <!-- InstallDirDlg's PathEdit and its CheckTargetPath/SetTargetPath events
+           all address the directory NAMED by this property. WixUI_InstallDir
+           set it from its InstallDirectory attribute; we set it directly. -->
+      <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
+
+      <!-- Carried over from WixUI_InstallDir: the package has one feature, so
+           Apps and features offers Repair and Uninstall but no Change. -->
+      <Property Id="ARPNOMODIFY" Value="1" />
+
+      <!-- THE ORDER OF THE NEXT FOUR LINES IS LOAD-BEARING.
+           A dialog that InstallUISequence shows carries no absolute sequence
+           number of its own; the linker numbers these four from the order they
+           are referenced here, and they land on 1296, 1297, 1298 and 1299. The
+           first one whose condition is true is the first page the user sees, so
+           this order is the stock order and must stay:
+
+             ResumeDlg              1296  Installed AND (RESUME OR Preselected)
+             WelcomeDlg             1297  NOT Installed OR PATCH
+             MaintenanceWelcomeDlg  1298  Installed, not resuming, not a patch
+             ProgressDlg            1299
+
+           Reversing ResumeDlg and WelcomeDlg would show the welcome page to a
+           user resuming a suspended patch install. The authoring test asserts
+           the resulting numbers. -->
+      <DialogRef Id="ResumeDlg" />
+      <DialogRef Id="WelcomeDlg" />
+      <DialogRef Id="MaintenanceWelcomeDlg" />
+      <DialogRef Id="ProgressDlg" />
+
+      <!-- Order below is irrelevant: these are reached by a button, not by a
+           sequence number. -->
+      <DialogRef Id="LicenseAgreementDlg" />
+      <DialogRef Id="InstallDirDlg" />
+      <DialogRef Id="VerifyReadyDlg" />
+      <DialogRef Id="MaintenanceTypeDlg" />
+      <DialogRef Id="BrowseDlg" />
+      <DialogRef Id="InvalidDirDlg" />
+      <DialogRef Id="CancelDlg" />
+      <DialogRef Id="DiskCostDlg" />
+      <DialogRef Id="ErrorDlg" />
+      <DialogRef Id="FatalError" />
+      <DialogRef Id="FilesInUse" />
+      <DialogRef Id="MsiRMFilesInUse" />
+      <DialogRef Id="OutOfDiskDlg" />
+      <DialogRef Id="OutOfRbDiskDlg" />
+      <DialogRef Id="PrepareDlg" />
+      <DialogRef Id="UserExit" />
+      <DialogRef Id="ExitDialog" />
+
+      <!-- ========== "an existing installation was found" ================= -->
+      <!-- No NoMinimize: the stock WixUI dialogs allow minimizing (Attributes
+           7), and these two have to feel like pages of the same wizard. -->
+      <Dialog Id="SeamlyPreviousInstallDlg" Width="370" Height="270"
+              Title="[ProductName] Setup">
+
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
+                 TabSkip="no" Text="WixUI_Bmp_Banner" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="373" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
+
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="{\WixUI_Font_Title}An existing installation was found" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="Please read this before Setup replaces any program files." />
+
+        <!-- Shown only for an older MSI of this same product. -->
+        <Control Id="UpgradeText" Type="Text" X="20" Y="58" Width="330" Height="32"
+                 NoPrefix="yes"
+                 ShowCondition="WIX_UPGRADE_DETECTED"
+                 HideCondition="NOT WIX_UPGRADE_DETECTED"
+                 Text="An earlier version of Seamly apps installed by this installer was found. It holds Seamly2D, SeamlyLayout, and SeamlyMe. Setup will remove these program files and install this version in its place." />
+
+        <!-- Shown only for the old NSIS installation, which is a separate
+             product this installer must not and cannot remove. -->
+        <Control Id="LegacyInstallText" Type="Text" X="20" Y="94" Width="330" Height="50"
+                 NoPrefix="yes"
+                 ShowCondition="SEAMLYLEGACYUNINSTALLSTRING"
+                 HideCondition="NOT SEAMLYLEGACYUNINSTALLSTRING"
+                 Text="An older Seamly2D from the previous installer was found in [SEAMLYLEGACYINSTALLDIR]. It holds Seamly2D and SeamlyMe, and this version replaces both, so Setup will remove its program directory, Start Menu shortcuts and entry in Apps and features. Nothing else in that folder is kept, so move anything of your own out of it before continuing." />
+
+        <!-- Always shown: the point of the whole dialog. -->
+        <Control Id="UserDataText" Type="Text" X="20" Y="150" Width="330" Height="76"
+                 NoPrefix="yes"
+                 Text="Your own work is not touched. Patterns, measurements and templates stay in your user data folder - Setup asks you for it on a later page, and never deletes or overwrites what is already there. Your settings stay in AppData\Local\Seamly and AppData\Roaming\Seamly. Neither installing nor uninstalling Seamly removes any of them." />
+
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
+                 Text="&amp;Back">
+          <Publish Event="NewDialog" Value="LicenseAgreementDlg" />
+        </Control>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
+                 Default="yes" Text="&amp;Next">
+          <Publish Event="NewDialog" Value="InstallDirDlg" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
+                 Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+      </Dialog>
+
+      <!-- ========== optional desktop shortcuts =========================== -->
+      <!-- ONE checkbox for all three apps, not one per app: it is a choice a
+           user makes once. SeamlyLayout gets a desktop shortcut like the other
+           two, because it opens without a .svg input file (a standalone launch)
+           as well as with the .pieces.svg argument seamly2d gives it. -->
+      <Dialog Id="SeamlyShortcutsDlg" Width="370" Height="270"
+              Title="[ProductName] Setup">
+
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
+                 TabSkip="no" Text="WixUI_Bmp_Banner" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="373" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
+
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="{\WixUI_Font_Title}Shortcuts" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="Choose where Setup puts the shortcuts." />
+
+        <Control Id="Explain" Type="Text" X="20" Y="60" Width="330" Height="24"
+                 NoPrefix="yes"
+                 Text="Start Menu shortcuts are always created. Desktop shortcuts are optional." />
+        <Control Id="DesktopShortcutsCheckBox" Type="CheckBox" X="20" Y="94" Width="330" Height="18"
+                 Property="SEAMLYDESKTOPSHORTCUTS" CheckBoxValue="1"
+                 Text="Create &amp;desktop shortcuts for Seamly2D, SeamlyLayout, and SeamlyMe" />
+
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
+                 Text="&amp;Back">
+          <Publish Event="NewDialog" Value="SeamlyDataMigrateDlg" />
+        </Control>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
+                 Default="yes" Text="&amp;Next">
+          <Publish Event="NewDialog" Value="VerifyReadyDlg" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
+                 Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+      </Dialog>
+
+      <!-- ========== user-data directory (InstWinX64.1.2.1 - 1.2.3) ======== -->
+      <!-- Mirrors the stock InstallDirDlg layout: a PathEdit bound to the
+           directory property, and a Change button that spawns WixUI's own
+           BrowseDlg. BrowseDlg edits whatever _BrowseProperty names, so the
+           Change button sets that first (Order 1) and spawns second (Order 2)
+           - the identical mechanism InstallDirDlg uses for INSTALLFOLDER. -->
+      <Dialog Id="SeamlyDataDirDlg" Width="370" Height="270"
+              Title="[ProductName] Setup">
+
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
+                 TabSkip="no" Text="WixUI_Bmp_Banner" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="373" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
+
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="{\WixUI_Font_Title}Where do you keep your work?" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="Choose the folder for your patterns and measurements." />
+
+        <Control Id="Explain" Type="Text" X="20" Y="60" Width="330" Height="40"
+                 NoPrefix="yes"
+                 Text="This folder may be on any drive, including a USB stick or a synced folder such as OneDrive, Google Drive or Dropbox. Syncing your own work is supported - only the program files have to stay on a local drive." />
+
+        <!-- The user edits the PARENT; the SeamlyData leaf is fixed and shown
+             read-only below, so the full path is visible before they continue
+             and E:\ can never be mistaken for the data root itself. -->
+        <!-- No accelerator ampersand. NoPrefix="yes" turns off accelerator
+             parsing, so an "&" in this text prints as a literal character. -->
+        <Control Id="FolderLabel" Type="Text" X="20" Y="110" Width="330" Height="10"
+                 NoPrefix="yes" Text="Put the SeamlyData folder in:" />
+        <!-- NOT Indirect. An indirect PathEdit reads its property to get the
+             NAME of the property that holds the path - which is why stock
+             InstallDirDlg is indirect through WIXUI_INSTALLDIR, whose value is
+             the string "INSTALLFOLDER". SEAMLYDATAPARENT holds the path itself,
+             so an indirect lookup here asks for a property named
+             "C:\Users\<user>\", finds nothing, and fails the install with
+             error 2343 the moment this page is created. -->
+        <Control Id="Folder" Type="PathEdit" X="20" Y="122" Width="255" Height="18"
+                 Property="SEAMLYDATAPARENT" />
+        <Control Id="ChangeFolder" Type="PushButton" X="285" Y="122" Width="66" Height="18"
+                 Text="Ch&amp;ange...">
+          <Publish Property="_BrowseProperty" Value="SEAMLYDATAPARENT" Order="1" />
+          <Publish Event="SpawnDialog" Value="BrowseDlg" Order="2" />
+        </Control>
+
+        <Control Id="FullPathLabel" Type="Text" X="20" Y="148" Width="330" Height="10"
+                 NoPrefix="yes" Text="Your work will be kept in:" />
+        <Control Id="FullPath" Type="Text" X="20" Y="160" Width="330" Height="12"
+                 NoPrefix="yes" Text="[SEAMLYDATAROOT]" />
+
+        <Control Id="Note" Type="Text" X="20" Y="180" Width="330" Height="44"
+                 NoPrefix="yes"
+                 Text="Nothing is written there now. Setup records the folder, and the apps use it from their first run. Your existing work is never deleted or moved out of where it is today." />
+
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
+                 Text="&amp;Back">
+          <Publish Event="NewDialog" Value="InstallDirDlg" />
+        </Control>
+        <!-- The PathEdit writes the property; SetTargetPath commits it to the
+             Directory table, which is what recomposes [SEAMLYDATAROOT] for the
+             next page and for the registry value. No CheckTargetPath: the data
+             root may live on a cloud or removable drive (InstWinX64.2.7). The
+             condition guards SetTargetPath against an empty property, which is
+             the other way to reach error 2343. -->
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
+                 Default="yes" Text="&amp;Next">
+          <Publish Event="SetTargetPath" Value="SEAMLYDATAPARENT" Order="1"
+                   Condition="SEAMLYDATAPARENT" />
+          <Publish Event="NewDialog" Value="SeamlyDataMigrateDlg" Order="2" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
+                 Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+      </Dialog>
+
+      <!-- ========== copy existing work? (InstWinX64.1.2.4) ================ -->
+      <!-- 1.2.4.1 explain, 1.2.4.2 require confirmation. The checkbox defaults
+           to 0, so the copy happens only when the user actively asks for it.
+           1.2.4.3 (copy only missing files, never overwrite) is enforced by the
+           script the deferred action runs, not by this dialog. -->
+      <Dialog Id="SeamlyDataMigrateDlg" Width="370" Height="270"
+              Title="[ProductName] Setup">
+
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
+                 TabSkip="no" Text="WixUI_Bmp_Banner" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="373" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
+
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="{\WixUI_Font_Title}Copy your existing work?" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15"
+                 Transparent="yes" NoPrefix="yes"
+                 Text="Setup can copy what you already have into the new folder." />
+
+        <Control Id="Explain" Type="Text" X="20" Y="60" Width="330" Height="72"
+                 NoPrefix="yes"
+                 Text="Setup can copy your existing patterns and measurements into [SEAMLYDATAROOT]. Nothing is deleted or moved: every file stays where it is now, and you keep a complete second copy. A file that already exists in the new folder is left exactly as it is - Setup never overwrites your work." />
+
+        <Control Id="CopyCheckBox" Type="CheckBox" X="20" Y="140" Width="330" Height="18"
+                 Property="SEAMLYCOPYUSERDATA" CheckBoxValue="1"
+                 Text="&amp;Yes, copy my existing patterns and measurements" />
+
+        <!-- InstWinX64.1.2.4.3 requires the user to be told, in as many words,
+             that the old copy survives as a backup AND that their work is
+             reachable at the new location. Both halves are stated here. -->
+        <Control Id="Caveat" Type="Text" X="20" Y="166" Width="330" Height="60"
+                 NoPrefix="yes"
+                 Text="Afterwards your work is in both places: everything stays exactly where it is today, which is your backup, and the same files are also available in [SEAMLYDATAROOT], which is where the apps will look. Leave the box unticked to record the folder without copying anything - you can copy the files yourself at any time." />
+
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
+                 Text="&amp;Back">
+          <Publish Event="NewDialog" Value="SeamlyDataDirDlg" />
+        </Control>
+        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
+                 Default="yes" Text="&amp;Next">
+          <Publish Event="NewDialog" Value="SeamlyShortcutsDlg" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
+                 Cancel="yes" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+      </Dialog>
+
+      <!-- ========== the chain ============================================ -->
+      <!-- Every row here is a transition BETWEEN pages. A stock dialog's own
+           buttons (Cancel, Print, the VerifyReadyDlg action buttons) already
+           work without us; what a stock dialog never carries is a NewDialog
+           row, because the page order belongs to the dialog set. That is why
+           this block is the whole wizard, and why nothing competes with it. -->
+
+      <!-- Welcome. The patch route is the stock one: a patch has nothing to
+           choose, so it goes straight to the ready page. -->
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog"
+               Value="LicenseAgreementDlg" Condition="NOT Installed" />
+      <Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog"
+               Value="VerifyReadyDlg" Condition="Installed AND PATCH" />
+
+      <!-- License. LicenseAgreementDlg disables its own Next until the radio
+           button is accepted, so the LicenseAccepted test only repeats what the
+           control condition already enforces - the stock sets carry it too.
+           The two rows are mutually exclusive: the previous-install page is
+           skipped on a clean machine. -->
+      <Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog"
+               Value="WelcomeDlg" />
+      <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog"
+               Value="SeamlyPreviousInstallDlg"
+               Condition="LicenseAccepted = &quot;1&quot; AND ($(var.PreviousInstallFound))" />
+      <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog"
+               Value="InstallDirDlg"
+               Condition="LicenseAccepted = &quot;1&quot; AND NOT ($(var.PreviousInstallFound))" />
+
+      <!-- Program directory. CheckTargetPath validates what the user typed and
+           SetTargetPath commits it; both address the directory named by
+           WIXUI_INSTALLDIR. The NewDialog runs last, as in the stock set, so
+           the path is committed before the next page reads it. -->
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="CheckTargetPath"
+               Value="[WIXUI_INSTALLDIR]" Order="1" />
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath"
+               Value="[WIXUI_INSTALLDIR]" Order="2" />
+      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog"
+               Value="SeamlyDataDirDlg" Order="3" />
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog"
+               Value="SeamlyPreviousInstallDlg"
+               Condition="$(var.PreviousInstallFound)" />
+      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog"
+               Value="LicenseAgreementDlg"
+               Condition="NOT ($(var.PreviousInstallFound))" />
+      <Publish Dialog="InstallDirDlg" Control="ChangeFolder"
+               Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1" />
+      <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog"
+               Value="BrowseDlg" Order="2" />
+
+      <!-- BrowseDlg is shared by the program-directory page and the data-root
+           page, and it edits whatever _BrowseProperty names. Its OK button
+           carries no rows of its own, so all three are ours.
+
+           CheckTargetPath is limited to the program directory. The data root is
+           allowed on removable and cloud-synced drives (InstWinX64.2.7), and
+           validating it against the program-directory rules would reject paths
+           the task requires us to accept. -->
+      <Publish Dialog="BrowseDlg" Control="OK" Event="CheckTargetPath"
+               Value="[WIXUI_INSTALLDIR]" Order="1"
+               Condition="_BrowseProperty = &quot;INSTALLFOLDER&quot;" />
+      <Publish Dialog="BrowseDlg" Control="OK" Event="SetTargetPath"
+               Value="[_BrowseProperty]" Order="2" />
+      <Publish Dialog="BrowseDlg" Control="OK" Event="EndDialog"
+               Value="Return" Order="3" />
+
+      <!-- Ready page. Back returns to the last question asked, which on a fresh
+           install is the shortcuts page. The two maintenance rows are the stock
+           ones. -->
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog"
+               Value="SeamlyShortcutsDlg" Condition="NOT Installed" Order="1" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog"
+               Value="WelcomeDlg" Condition="Installed AND PATCH" Order="2" />
+      <Publish Dialog="VerifyReadyDlg" Control="Back" Event="NewDialog"
+               Value="MaintenanceTypeDlg" Condition="Installed AND NOT PATCH" Order="2" />
+
+      <!-- Maintenance, repair and uninstall: the stock route, unchanged. None
+           of the Seamly pages appear, because none of their answers apply to a
+           product that is already installed. -->
+      <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog"
+               Value="MaintenanceTypeDlg" />
+      <Publish Dialog="MaintenanceTypeDlg" Control="Back" Event="NewDialog"
+               Value="MaintenanceWelcomeDlg" />
+      <Publish Dialog="MaintenanceTypeDlg" Control="RepairButton" Event="NewDialog"
+               Value="VerifyReadyDlg" />
+      <Publish Dialog="MaintenanceTypeDlg" Control="RemoveButton" Event="NewDialog"
+               Value="VerifyReadyDlg" />
+
+      <!-- Exit. Order 999 leaves room for a later row to run before the wizard
+           closes - the slot the stock sets reserve for "launch the application
+           now" (InstWinX64.3.7). -->
+      <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog"
+               Value="Return" Order="999" />
+    </UI>
+  </Fragment>
+</Wix>

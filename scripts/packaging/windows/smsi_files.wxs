@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ **  @file   smsi_files.wxs
+ **  @author slspencer
+ **  @date   2026-08-15
+ **
+ **  @brief  The install directory tree, the three executables, their
+ **          Start Menu shortcuts and their file associations.
+ **
+ **  Split out of smsi.wxs. Linked by the <ComponentGroupRef Id="FamilyExecutables"> in that file. A WiX fragment
+ **  nothing refers to is dropped WITHOUT AN ERROR, so the MSI would still
+ **  build and would simply be missing all of this.
+ **
+ **  @copyright
+ **  This source code is part of the Seamly project, a suite of apparel CAD
+ **  software.
+ **  Copyright (C) 2026 Seamly2D Project
+ **  All Rights Reserved.
+ **
+ **  SeamlyLayout is licensed under the MIT license.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <Fragment>
+
+    <!-- ================= directory tree + harvested runtimes ============= -->
+    <!-- ProgramFiles64Folder, not ProgramFiles6432Folder or the x86 tree: every
+         binary in this package is x64 (or arm64), so the 32-bit tree would be
+         wrong even though the OLD NSIS installer lives there because
+         it was a 32-bit installer. "SeamlyApps" rather than "Seamly2D"
+         because the folder holds the whole family - Seamly2D, SeamlyMe, and
+         SeamlyLayout - and naming it after one member misdescribes it and
+         collides confusingly with the NSIS product's own folder name.
+         The name is asserted by smsi_check_authoring.ps1 and documented in
+         README-BUILDS.md, scripts/packaging/windows/README.md and
+         INSTALL_DECISION_FLOW.md - change all of them together or not at
+         all. It was briefly "Seamly" (546e9d5def, 2026-08-03), which left
+         every one of those out of step and failed the authoring check. -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="SeamlyApps">
+        <!-- The single Qt runtime shared by all apps in this package (Qt DLLs,
+             plugins, QML modules, QtWebEngineProcess.exe, MSVC CRT, xerces-c,
+             SeamlyLayout's packaged settings\ and licenses\, ...), harvested
+             recursively from the one staging tree smsi.ps1 merges everything
+             into. The executables themselves are authored explicitly below so
+             shortcuts and file associations can reference them. -->
+        <Files Include="$(var.ParentStagingDir)\**" />
+      </Directory>
+    </StandardDirectory>
+
+    <!-- The user-data root, as a "SeamlyData" leaf under a parent the user
+         picks - the same shape as INSTALLFOLDER being "SeamlyApps" under
+         ProgramFiles64Folder.
+
+         WHY THE LEAF IS FIXED RATHER THAN PART OF WHAT THE USER TYPES
+         The user chooses the PARENT (SEAMLYDATAPARENT, default their profile
+         folder) and Setup always appends SeamlyData. Picking E:\ therefore
+         gives E:\SeamlyData, not E:\. Letting the user type the whole path
+         instead invited the opposite mistake: typing E:\SeamlyData when the
+         leaf is auto-appended would yield E:\SeamlyData\SeamlyData. A fixed
+         leaf cannot produce either surprise, and it guarantees every install
+         is recognisable on disk by the same folder name.
+
+         Both identifiers are public, so an unattended install can set either:
+           SEAMLYDATAPARENT=E:\        -> E:\SeamlyData
+           SEAMLYDATAROOT=E:\Patterns  -> exactly that, leaf and all
+         Setting SEAMLYDATAROOT overrides the composition entirely, which is
+         the escape hatch for anyone who wants a name of their own.
+
+         Parented to TARGETDIR so the whole path is replaceable: any drive is
+         allowed, including removable and cloud-synced ones (InstWinX64.1.2.2).
+         The installer authors NO components under either directory - it
+         creates no files here. They exist so CostFinalize resolves
+         [SEAMLYDATAROOT] and so BrowseDlg has a directory to edit. -->
+    <StandardDirectory Id="TARGETDIR">
+      <Directory Id="SEAMLYDATAPARENT">
+        <Directory Id="SEAMLYDATAROOT" Name="SeamlyData" />
+      </Directory>
+    </StandardDirectory>
+
+    <!-- ================= executables, shortcuts, associations ============ -->
+    <ComponentGroup Id="FamilyExecutables" Directory="INSTALLFOLDER">
+
+      <!-- seamly2d: Start Menu shortcut + .sm2d pattern association -->
+      <Component Id="Seamly2DExeComponent">
+        <File Id="Seamly2DExe" Source="$(var.ExeStagingDir)\seamly2d.exe" KeyPath="yes">
+          <Shortcut Id="Seamly2DShortcut"
+                    Directory="ProgramMenuFolder"
+                    Name="Seamly2D"
+                    Description="Seamly2D apparel CAD pattern drafting"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="seamly2d.ico"
+                    Advertise="yes" />
+        </File>
+        <ProgId Id="Seamly2D.Pattern" Description="Seamly2D pattern">
+          <Extension Id="sm2d" ContentType="application/x-seamly2d">
+            <Verb Id="open" Command="Open" TargetFile="Seamly2DExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <!-- Explorer icon for .sm2d documents: the icon embedded in the exe. -->
+        <RegistryValue Root="HKLM"
+                       Key="Software\Classes\Seamly2D.Pattern\DefaultIcon"
+                       Value="[INSTALLFOLDER]seamly2d.exe,0"
+                       Type="string" />
+      </Component>
+
+      <!-- seamlyme: Start Menu shortcut + measurement file associations
+           (.smis individual, .smms multisize) -->
+      <Component Id="SeamlyMeExeComponent">
+        <File Id="SeamlyMeExe" Source="$(var.ExeStagingDir)\seamlyme.exe" KeyPath="yes">
+          <Shortcut Id="SeamlyMeShortcut"
+                    Directory="ProgramMenuFolder"
+                    Name="SeamlyMe"
+                    Description="SeamlyMe apparel CAD measurements and sizes"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="seamlyme.ico"
+                    Advertise="yes" />
+        </File>
+        <ProgId Id="SeamlyMe.IndividualMeasurements" Description="SeamlyMe individual measurements">
+          <Extension Id="smis" ContentType="application/x-seamlyme-individual">
+            <Verb Id="open" Command="Open" TargetFile="SeamlyMeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <ProgId Id="SeamlyMe.MultisizeMeasurements" Description="SeamlyMe multisize measurements">
+          <Extension Id="smms" ContentType="application/x-seamlyme-multisize">
+            <Verb Id="open" Command="Open" TargetFile="SeamlyMeExe" Argument="&quot;%1&quot;" />
+          </Extension>
+        </ProgId>
+        <RegistryValue Root="HKLM"
+                       Key="Software\Classes\SeamlyMe.IndividualMeasurements\DefaultIcon"
+                       Value="[INSTALLFOLDER]seamlyme.exe,0"
+                       Type="string" />
+        <RegistryValue Root="HKLM"
+                       Key="Software\Classes\SeamlyMe.MultisizeMeasurements\DefaultIcon"
+                       Value="[INSTALLFOLDER]seamlyme.exe,0"
+                       Type="string" />
+      </Component>
+
+      <!-- SeamlyLayout: Start Menu shortcut. Its input can be a .svg file (from Seamly2D)
+           or the .pieces.svg handoff written by seamly2d's Layout Mode, and a
+           double ".pieces.svg" extension cannot be registered distinctly from
+           plain .svg (which must stay with the user's SVG viewer).
+           Task 30: installed into INSTALLFOLDER beside the parent apps now
+           that all three share one Qt runtime (it used to live in its own
+           SeamlyLayout\ subdirectory with a second, private Qt copy). -->
+      <Component Id="SeamlyLayoutExeComponent">
+        <File Id="SeamlyLayoutExe" Source="$(var.ExeStagingDir)\SeamlyLayout.exe" KeyPath="yes">
+          <Shortcut Id="SeamlyLayoutShortcut"
+                    Directory="ProgramMenuFolder"
+                    Name="SeamlyLayout"
+                    Description="SeamlyLayout apparel CAD pattern pieces layout"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="seamlylayout.ico"
+                    Advertise="yes" />
+        </File>
+      </Component>
+
+      <!-- The copy helper the deferred action runs. It ships inside
+           INSTALLFOLDER rather than being embedded as a binary custom action so
+           it is readable on disk: a script that touches a user's own files
+           should be one they can open and check. It stays after uninstall only
+           as long as the rest of the program does - ordinary component rules
+           remove it. -->
+      <Component Id="UserDataCopyScript">
+        <File Id="smsi_migrate_user_data.ps1"
+              Source="$(sys.SOURCEFILEDIR)smsi_migrate_user_data.ps1"
+              KeyPath="yes" />
+      </Component>
+
+    </ComponentGroup>
+
+  </Fragment>
+</Wix>

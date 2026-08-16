@@ -59,6 +59,29 @@ Two housekeeping items in `project-docs/`:
   prematurely" page. It sits in the middle of the new sequence. Delete it.
 - The screenshots are untracked. Decide whether they belong in the repository.
 
+### smsi.wxs is now five files (2026-08-15)
+
+`smsi.wxs` (the `<Package>`) plus `smsi_ui.wxs`, `smsi_legacy.wxs`,
+`smsi_files.wxs`, `smsi_shortcuts.wxs`.
+
+**Two ways to break the package with no error at all:**
+
+- leave a `.wxs` off the `wix build` command line;
+- delete a `ComponentGroupRef` or `UIRef` from `smsi.wxs`.
+
+Either way the build succeeds and the MSI silently lacks that whole area. WiX
+discards an unreferenced fragment without a diagnostic. `smsi.ps1` now globs
+`*.wxs`, and `smsi_check_authoring.ps1` reads the built MSI — that check is the
+only thing that catches it.
+
+`<Package>`, `MajorUpgrade`, `MediaTemplate` and `SummaryInformation` cannot go
+in a fragment. That is why there are four fragments and not five.
+
+**How to verify a refactor of this file changed nothing:** dump every MSI table
+before and after, sort the rows, and diff. The scratchpad scripts
+`dump_msi_tables.ps1` and `build_stub.ps1` do it and are worth recreating —
+they caught nothing this time only because they were used at each step.
+
 ### Three defects fixed on 2026-08-15 (keep the lessons)
 
 - **`Wix4RemoveFoldersEx` runs at sequence 799, before `CostInitialize`.** Its
