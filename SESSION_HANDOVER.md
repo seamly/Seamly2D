@@ -6,7 +6,40 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## PICK UP HERE (2026-08-15, the MSIs publish to a rolling pre-release)
+## PICK UP HERE (2026-08-15, error 2343 fixed — the fix needs a real install)
+
+**The first interactive install of the MSI failed with "error code 2343" when
+the user pressed Next on the program-directory page.** Fixed and pushed
+(`a843503ab7..6bde38b1b3`). Full CI is running; it rebuilds `dev-latest`.
+
+2343 is "specified path is empty". `SeamlyDataDirDlg`'s path box carried
+`Indirect="yes"`. **An indirect `PathEdit` reads its property to get the NAME of
+the property that holds the path.** Stock `InstallDirDlg` is indirect only
+because `WIXUI_INSTALLDIR` holds the string `INSTALLFOLDER`. `SEAMLYDATAPARENT`
+holds the path itself, so the lookup asked for a property named
+`C:\Users\<user>\`, found nothing, and aborted the install while the page was
+being created. Remember this before copying an `Indirect` attribute off a stock
+dialog.
+
+Two more defects fixed on the way, both on the same page:
+
+- Next had no `SetTargetPath`, so an edited parent never reached the Directory
+  table and `[SEAMLYDATAROOT]` would not have recomposed. It runs before
+  `NewDialog`, conditional on a non-empty property (the other route to 2343).
+  Deliberately no `CheckTargetPath` — the data root may be a cloud or removable
+  drive.
+- The `SEAMLYDATAPARENT` default had no trailing backslash. Windows Installer
+  appends a child directory verbatim, so `C:\Users\me` gave
+  `C:\Users\meSeamlyData`.
+
+`smsi_check_authoring.ps1` gained two assertions and now runs 118. Verified with
+a link-only `wix build` over a stub staging tree.
+
+**Next: InstWinX64.1.6 is still open.** Download the rebuilt `dev-latest`
+`seamly-x64.msi` and walk every page and every Back transition. The pages beyond
+`InstallDirDlg` have never been seen by a human.
+
+## Earlier (2026-08-15, the MSIs publish to a rolling pre-release)
 
 **Task InstWinX64.0.3 is done, and it needs one real CI push to prove it.**
 `ci.yml` gained a `publish-windows-dev` job. Every push to `run-seamlyLayout`
