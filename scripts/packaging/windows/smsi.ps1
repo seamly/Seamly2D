@@ -374,11 +374,20 @@ Write-Host "staging MSVC CRT runtime..."
 Copy-Item -Path (Join-Path $crtDir '*.dll') -Destination $parentDir -Force
 
 # --- Build the MSI -------------------------------------------------------------
-$wxs = Join-Path $PSScriptRoot 'smsi.wxs'
+# EVERY .wxs in this directory, not just smsi.wxs. The authoring is split into
+# smsi.wxs (the Package) plus one fragment per area - smsi_ui, smsi_legacy,
+# smsi_files, smsi_shortcuts. Omit a source file and `wix build` still succeeds:
+# it links whatever it was given, and a fragment it never saw is simply absent.
+# The MSI would install and be wrong. Globbing keeps a newly added fragment
+# working without a change here.
+$wxsFiles = @(Get-ChildItem -Path $PSScriptRoot -Filter '*.wxs' | Sort-Object Name | ForEach-Object { $_.FullName })
+if ($wxsFiles.Count -eq 0) {
+    throw "No .wxs source files found in '$PSScriptRoot'."
+}
+Write-Host "authoring    : $((($wxsFiles | Split-Path -Leaf)) -join ', ')"
 $msi = Join-Path $stageRoot "seamly-$Arch.msi"
 
-$wixArguments = @(
-    'build', $wxs,
+$wixArguments = @('build') + $wxsFiles + @(
     '-arch', $Arch,
     # Suppress the .wixpdb symbol database: it is only used for wix patch/melt
     # diffing and post-build inspection, not by the shipped installer, so the

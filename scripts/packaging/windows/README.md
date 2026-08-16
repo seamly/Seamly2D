@@ -15,6 +15,26 @@ WiX authoring and build instructions for the Windows `.msi` installer that ships
 | `INSTALL_DECISION_FLOW.md` | What the installer decides and what the *application* decides, as flowcharts, across all four pre-existing-installation cases (clean / old NSIS / previous MSI / both). Read this before changing upgrade or previous-install behaviour |
 | `../../../.github/workflows/ci.yml` | The only CI route to a Windows package. Its `windows-msi` job is a matrix over `arch` that builds `seamly-x64.msi` and `seamly-arm64.msi`, and the `publish` job attaches both to the GitHub **pre-release** (Tasks Installer.1.1 and Installer.1.2). An edit in this directory runs the full CI suite |
 
+## Source layout
+
+The authoring was one 1,142-line file until 2026-08-15. It is now one package file plus four fragments:
+
+| File | Holds |
+|---|---|
+| `smsi.wxs` | `<Package>` and everything that must sit inside it: identity, upgrade, ARP, the properties the dialogs read, the launch conditions, the user-data copy action, and the references that pull the fragments in |
+| `smsi_ui.wxs` | the wizard — its dialogs and every transition |
+| `smsi_legacy.wxs` | finding and removing the pre-MSI installation |
+| `smsi_files.wxs` | directory tree, executables, Start Menu shortcuts, file associations |
+| `smsi_shortcuts.wxs` | optional desktop shortcuts, install-info registry values |
+
+**Two ways to break this silently.** `wix build` links the files it is handed, and a WiX fragment that nothing references is discarded without a diagnostic. Drop a source file from the command line, or delete a `ComponentGroupRef`/`UIRef` from `smsi.wxs`, and the build still succeeds — the MSI simply lacks that whole area. There is no error, no warning.
+
+Two things guard it. `smsi.ps1` globs `*.wxs` rather than naming files, so a new fragment needs no change there. `smsi_check_authoring.ps1` reads the *built* MSI and asserts the rows exist, so a lost fragment fails the build.
+
+`<Package>` cannot live in a fragment, and neither can `MajorUpgrade`, `MediaTemplate` or `SummaryInformation`. That is why there are four fragments and not five.
+
+The split was verified by dumping all 37 MSI tables before and after and diffing them: identical, component GUIDs included.
+
 ## Key decisions
 
 - **Tooling — WiX v6** (`dotnet tool install --global wix --version '6.*'`), the modern `wix` CLI. Its wildcard `Files` harvesting ingests the whole windeployqt output trees without maintaining per-file authoring. Pinned to v6 because WiX v7 refuses to run until its Open Source Maintenance Fee (OSMF) EULA is accepted (error WIX7015) — adopt v7 when income by the project or by supporting companies exceeds $10,000 USD. The UI extension version must match the core tool: `wix extension add --global WixToolset.UI.wixext/<version>`.
@@ -107,7 +127,7 @@ The script then deletes any previous staging tree and rebuilds it: the two paren
 Output: `scripts\seamly-msi\<arch>\seamly-<arch>.msi` (gitignored), published as described under [Downloading the MSI](#downloading-the-msi). Only the `.msi` is produced — the `.wixpdb` symbol database is suppressed via `wix build -pdbtype none` (it is only used for `wix` patch/melt diffing, not by the shipped installer); to keep it for inspection, remove that flag from `$wixArguments` in `smsi.ps1`. The script then runs two checks, both of which fail the build:
 
 1. `wix msi validate` (ICE checks, skip with `-SkipValidation`). ICE43 and ICE57 are suppressed for the reason given above; the only expected warning is **ICE61**, a known consequence of `AllowSameVersionUpgrades`.
-2. `smsi_check_authoring.ps1`, which opens the built MSI and asserts over a hundred expectations about what it contains — elevation, ARP properties, the upgrade and NSIS detection, every Next and Back arrow of the dialog chain, the wording of the warning page, the Start Menu and desktop shortcuts, the three file associations, and the install-info registry rows. Run it by hand against any MSI:
+2. `smsi_check_authoring.ps1`, which opens the built MSI and asserts over a hundred expectations about what it contains — and which is the only thing standing between you and a silently dropped fragment (see **Source layout** below) — elevation, ARP properties, the upgrade and NSIS detection, every Next and Back arrow of the dialog chain, the wording of the warning page, the Start Menu and desktop shortcuts, the three file associations, and the install-info registry rows. Run it by hand against any MSI:
 
    ```powershell
    .\scripts\packaging\windows\smsi_check_authoring.ps1 -Msi scripts\seamly-msi\x64\seamly-x64.msi

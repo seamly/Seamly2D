@@ -120,6 +120,32 @@ one-row query still works, because PowerShell unwraps a one-element array on a
 cast or a member access, so the trap only appears when a query first returns
 more than one row.
 
+### Maintenance — 2026-08-15: smsi.wxs split into fragments
+
+One 1,142-line file became a package file plus four fragments: `smsi_ui.wxs`,
+`smsi_legacy.wxs`, `smsi_files.wxs`, `smsi_shortcuts.wxs`.
+
+Four fragments, not the five first proposed: `<Package>` cannot live in a
+fragment, and neither can `MajorUpgrade`, `MediaTemplate` or
+`SummaryInformation`.
+
+**Two silent failure modes now exist.** `wix build` links only the files it is
+given, and a fragment nothing references is discarded with no diagnostic. Drop a
+file from the command line, or delete a `ComponentGroupRef`/`UIRef` from
+`smsi.wxs`, and the MSI builds without that whole area.
+
+- `smsi.ps1` globs `*.wxs` instead of naming `smsi.wxs`, so a new fragment works
+  with no edit there.
+- `smsi_check_authoring.ps1` reads the built MSI, so a lost fragment fails the
+  build.
+
+Verified: all 37 MSI tables dumped before and after and diffed — identical,
+component GUIDs included. 122 assertions pass. `wix msi validate` clean apart
+from the expected ICE61.
+
+Comments were left alone. They are 55% of the source, and this file produced
+three defects in one week that only a comment prevents.
+
 ### Defect — 2026-08-15: the shortcuts page promised three desktop shortcuts
 
 `SeamlyShortcutsDlg`'s checkbox reads "Create desktop shortcuts for Seamly2D,

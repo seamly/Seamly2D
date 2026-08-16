@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ **  @file   smsi_shortcuts.wxs
+ **  @author slspencer
+ **  @date   2026-08-15
+ **
+ **  @brief  The optional desktop shortcuts and the install-info
+ **          registry values the apps read on first run.
+ **
+ **  Split out of smsi.wxs. Linked by the two ComponentGroupRefs in that file. A WiX fragment
+ **  nothing refers to is dropped WITHOUT AN ERROR, so the MSI would still
+ **  build and would simply be missing all of this.
+ **
+ **  @copyright
+ **  This source code is part of the Seamly project, a suite of apparel CAD
+ **  software.
+ **  Copyright (C) 2026 Seamly2D Project
+ **  All Rights Reserved.
+ **
+ **  SeamlyLayout is licensed under the MIT license.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <Fragment>
+
+    <ComponentGroup Id="InstallInfo" Directory="INSTALLFOLDER">
+
+      <!-- Install breadcrumbs: read by upgrades and by the Task 14 installer
+           prompts; removed on uninstall automatically (component rules). -->
+      <Component Id="InstallInfoRegistry">
+        <RegistryKey Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D">
+          <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
+          <RegistryValue Name="DisplayVersion" Type="string" Value="$(var.DisplayVersion)" />
+          <!-- InstWinX64.1.2: the data root the user chose, for the apps to
+               read on first run (InstWinX64.1.5 / 1.8). Written even when the
+               user declined the copy - recording the folder and filling it are
+               separate decisions. Empty when a silent install passed no
+               SEAMLYDATAROOT, which the apps read as "use your own default". -->
+          <RegistryValue Name="DataRoot" Type="string" Value="[SEAMLYDATAROOT]" />
+        </RegistryKey>
+      </Component>
+
+    </ComponentGroup>
+
+    <!-- ================= optional desktop shortcuts ======================= -->
+    <!-- Installed only when SEAMLYDESKTOPSHORTCUTS is set - by the checkbox on
+         SeamlyShortcutsDlg, by its default of 1, or on the command line. The
+         property is public and secure, so the value the user chose in the
+         client-side UI reaches the elevated server-side sequence, where
+         CostFinalize evaluates these component conditions.
+
+         Per-machine install, so these land on the All Users desktop and each
+         component needs a KeyPath of its own; a non-advertised shortcut cannot
+         be one, so an HKLM breadcrumb beside the install-info key serves. That
+         is what raises ICE43 ("should use a registry key under HKCU as its
+         KeyPath") during validation - expected here and documented in
+         scripts\packaging\windows\README.md, since HKCU is exactly wrong for a
+         per-machine package.
+
+         The shortcuts are non-advertised (a plain Target) rather than
+         advertised like the Start Menu ones: an advertised shortcut has to sit
+         in the component that holds its target file, which would tie it to the
+         executable's component and make it impossible to condition
+         separately. -->
+
+    <StandardDirectory Id="DesktopFolder" />
+    <ComponentGroup Id="OptionalDesktopShortcuts" Directory="INSTALLFOLDER">
+      <Component Id="Seamly2DDesktopShortcutComponent" Condition="SEAMLYDESKTOPSHORTCUTS">
+        <Shortcut Id="Seamly2DDesktopShortcut"
+                  Directory="DesktopFolder"
+                  Name="Seamly2D"
+                  Description="Seamly2D pattern drafting"
+                  Target="[INSTALLFOLDER]seamly2d.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="seamly2d.ico" />
+        <RegistryValue Root="HKLM"
+                       Key="SOFTWARE\Seamly\Seamly2D"
+                       Name="DesktopShortcutSeamly2D"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+
+      <Component Id="SeamlyMeDesktopShortcutComponent" Condition="SEAMLYDESKTOPSHORTCUTS">
+        <Shortcut Id="SeamlyMeDesktopShortcut"
+                  Directory="DesktopFolder"
+                  Name="SeamlyMe"
+                  Description="SeamlyMe measurements"
+                  Target="[INSTALLFOLDER]seamlyme.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="seamlyme.ico" />
+        <RegistryValue Root="HKLM"
+                       Key="SOFTWARE\Seamly\Seamly2D"
+                       Name="DesktopShortcutSeamlyMe"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+
+      <!-- SeamlyLayout gets one too. It opens standalone with no argument, so a
+           bare desktop launch is a supported way to start it - see the comment
+           on SeamlyShortcutsDlg above. The checkbox has always named all three
+           apps; only the component was missing. -->
+      <Component Id="SeamlyLayoutDesktopShortcutComponent" Condition="SEAMLYDESKTOPSHORTCUTS">
+        <Shortcut Id="SeamlyLayoutDesktopShortcut"
+                  Directory="DesktopFolder"
+                  Name="SeamlyLayout"
+                  Description="SeamlyLayout pattern pieces layout"
+                  Target="[INSTALLFOLDER]SeamlyLayout.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="seamlylayout.ico" />
+        <RegistryValue Root="HKLM"
+                       Key="SOFTWARE\Seamly\Seamly2D"
+                       Name="DesktopShortcutSeamlyLayout"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+    </ComponentGroup>
+
+  </Fragment>
+</Wix>

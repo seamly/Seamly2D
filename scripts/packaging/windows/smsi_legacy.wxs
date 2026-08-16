@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ **  @file   smsi_legacy.wxs
+ **  @author slspencer
+ **  @date   2026-08-15
+ **
+ **  @brief  Finding the pre-MSI Seamly2D installation and removing it.
+ **
+ **  Split out of smsi.wxs. Linked by the <ComponentGroupRef Id="LegacyRemoval">
+ **  in that file. A WiX fragment nothing refers to is dropped WITHOUT AN ERROR,
+ **  so removing that reference would silently stop the old product from being
+ **  removed. smsi_check_authoring.ps1 asserts these rows.
+ **
+ **  The registry searches live here too. A fragment links as a unit, so the
+ **  ComponentGroupRef pulls in the properties as well - they need no
+ **  PropertyRef of their own.
+ **
+ **  @copyright
+ **  This source code is part of the Seamly project, a suite of apparel CAD
+ **  software.
+ **  Copyright (C) 2026 Seamly2D Project
+ **  All Rights Reserved.
+ **
+ **  SeamlyLayout is licensed under the MIT license.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+
+  <Fragment>
+
+    <!-- ================= previous-installation detection ================== -->
+    <!-- Two entirely different things can already be on the machine:
+
+           1. an older MSI of THIS product - MajorUpgrade in smsi.wxs finds it
+              by UpgradeCode and sets WIX_UPGRADE_DETECTED, and removes it
+              during the install;
+
+           2. the old NSIS installation, which is a DIFFERENT product with its
+              own ARP entry and its own uninstall.exe. The MSI neither upgrades
+              nor removes it. Its authoring file, dist\seamly2d-installer.nsi,
+              was deleted in Task InstWinX64.11.1; the footprint list further
+              down this file is now the only record of what it left on disk.
+
+         The NSIS installer is a 32-bit executable that does not switch the
+         registry view, so on x64 both of its keys land under WOW6432Node -
+         hence Bitness="always32", without which an x64 MSI looks in the 64-bit
+         view and never sees them.
+
+         NAMING: everything below calls (2) the LEGACY installation, not the
+         "NSIS" one. NSIS is a build tool this project stopped using when the
+         `windows` job was retired, so an identifier named for it reads as
+         though this package still produces one. What the identifiers actually
+         refer to is the product already sitting on a user's machine, which
+         outlives the tool that authored it. The word NSIS is kept only in
+         prose, and in `SOFTWARE\NSIS_Seamly2D` - that is a real key name that
+         installer wrote, and it is NOT ours to rename. -->
+    <!-- Legacy = the pre-MSI Seamly2D, whatever installed it. -->
+
+    <Property Id="SEAMLYLEGACYUNINSTALLSTRING" Secure="yes">
+      <RegistrySearch Id="SeamlyLegacyUninstallStringSearch"
+                      Root="HKLM"
+                      Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Seamly2D"
+                      Name="UninstallString"
+                      Type="raw"
+                      Bitness="always32" />
+    </Property>
+    <Property Id="SEAMLYLEGACYINSTALLDIR" Secure="yes">
+      <RegistrySearch Id="SeamlyLegacyInstallDirSearch"
+                      Root="HKLM"
+                      Key="SOFTWARE\NSIS_Seamly2D"
+                      Name="Install_Dir"
+                      Type="raw"
+                      Bitness="always32" />
+    </Property>
+
+    <!-- Where the NSIS product put its Start Menu shortcuts, for the removal
+         components below. The .nsi never calls SetShellVarContext all, so
+         $SMPROGRAMS is the INSTALLING USER's Start Menu rather than the All
+         Users' Start Menu. RemoveFolderEx resolves its paths in the immediate sequence,
+         which runs as that user, so this reaches them; a *different* user's
+         stale copy cannot be reached by a per-machine install and survives.
+         MUST be set before Wix4RemoveFoldersEx, which WiX sequences at 799 -
+         before CostInitialize, because the RemoveFile rows it adds have to
+         exist in time for costing. This SetProperty used to run After
+         CostFinalize (1001), so RemoveFolderEx read an EMPTY property and the
+         legacy Start Menu folder was never removed. Verified against the
+         built MSI: the InstallExecuteSequence numbers are 799 and 1001.
+
+         That is also why the value expands [%APPDATA] and not [AppDataFolder].
+         A directory property is only resolved by CostFinalize, so at sequence
+         51 it would expand to nothing. The environment property is set when
+         the session starts. Both name the same folder here: the immediate
+         sequence runs as the installing user.
+
+         After AppSearch because the condition reads SEAMLYLEGACYINSTALLDIR,
+         which the RegistrySearch above sets there. In both sequences because a
+         silent install never runs the UI one. -->
+    <SetProperty Id="SEAMLYLEGACYSTARTMENU"
+                 Value="[%APPDATA]\Microsoft\Windows\Start Menu\Programs\Seamly2D"
+                 After="AppSearch" Sequence="both"
+                 Condition="SEAMLYLEGACYINSTALLDIR" />
+
+    <!-- ProgramFilesFolder must be declared for RemoveLegacyRegistryKeys to
+         name it below. It holds no files; see that component for why. -->
+    <StandardDirectory Id="ProgramFilesFolder" />
+
+    <!-- ========== remove the old NSIS installation (Task 51 step 2) ====== -->
+    <!-- The NSIS product installs seamly2d and seamlyme; this package
+         installs both of those PLUS SeamlyLayout, so it is a strict superset
+         and leaving the old product behind means two copies of each parent
+         app, two "Seamly2D" entries in Apps & features, and Start Menu
+         shortcuts that silently launch the OLD binaries.
+
+         Its own uninstall.exe is deliberately NOT run. It is interactive, its
+         uninstall section is `RMDir /r $INSTDIR` (so it deletes anything else
+         a user happened to put in that folder), and Windows Installer cannot
+         roll an external uninstaller back if the rest of this install then
+         fails - which would leave a machine with neither product. Removing
+         the things it created ourselves has none of those problems, and it is
+         undone by the standard RemoveFiles rollback if the install aborts.
+
+         Its complete footprint, transcribed from dist\seamly2d-installer.nsi
+         before that file was deleted (Task InstWinX64.11.1). This list is
+         now the record - it cannot be re-derived, so do not trim it:
+           - $INSTDIR, default C:\Program Files (x86)\Seamly2D (File /r *)
+           - HKLM\SOFTWARE\NSIS_Seamly2D
+           - HKLM\...\Uninstall\Seamly2D
+           - Start Menu folder "Seamly2D" with 3 shortcuts
+         It registers NO file associations and makes NO PATH changes, so
+         nothing else has to be undone. -->
+    <ComponentGroup Id="LegacyRemoval">
+
+      <Component Id="RemoveLegacyProgramFiles" Directory="INSTALLFOLDER"
+                 Condition="SEAMLYLEGACYINSTALLDIR">
+        <!-- Breadcrumb doubling as the component's key path, in the 64-bit view
+             beside the package's other install info. Records what was removed.
+
+             FROZEN NAME (decided 2026-08-11) - do not rename this value again.
+             The component has no explicit Guid, so WiX derives one from the
+             component Id and this KeyPath; changing either changes the GUID and
+             makes Windows Installer treat it as a different component. The
+             Nsis -> Legacy rename already spent that change once, and on
+             upgrade it does the right thing (old value removed, new one
+             written). Spending it repeatedly leaves users' machines accreting
+             orphaned breadcrumbs under SOFTWARE\Seamly\Seamly2D. The same
+             applies to RemovedLegacyRegistry below. -->
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D" Name="RemovedLegacyInstallDir"
+                       Type="string" Value="[SEAMLYLEGACYINSTALLDIR]" KeyPath="yes" />
+        <util:RemoveFolderEx Property="SEAMLYLEGACYINSTALLDIR" On="install" />
+        <util:RemoveFolderEx Property="SEAMLYLEGACYSTARTMENU" On="install" />
+      </Component>
+
+      <!-- The NSIS registry keys live under WOW6432Node - that installer was
+           32-bit and never switched registry view - so the component carrying
+           the RemoveRegistryKey rows must be 32-bit. Bitness is a per-component
+           setting, hence a component of its own: folding these rows into
+           RemoveLegacyProgramFiles would drag that component's 64-bit
+           breadcrumb into WOW6432Node with them.
+
+           It sits under ProgramFilesFolder (the 32-bit tree) rather than
+           INSTALLFOLDER because ICE80 rejects a 32-bit component in a 64-bit
+           directory. The choice is nominal - the component installs no files,
+           and its directory is never created - but it has to be a 32-bit one. -->
+      <Component Id="RemoveLegacyRegistryKeys" Directory="ProgramFilesFolder"
+                 Condition="SEAMLYLEGACYINSTALLDIR" Bitness="always32">
+        <!-- FROZEN NAME (decided 2026-08-11) - see RemoveLegacyProgramFiles
+             above for why this KeyPath value name must not change again. -->
+        <RegistryValue Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D" Name="RemovedLegacyRegistry"
+                       Type="string" Value="1" KeyPath="yes" />
+        <RemoveRegistryKey Root="HKLM" Key="SOFTWARE\NSIS_Seamly2D" Action="removeOnInstall" />
+        <RemoveRegistryKey Root="HKLM"
+                           Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Seamly2D"
+                           Action="removeOnInstall" />
+      </Component>
+
+    </ComponentGroup>
+
+  </Fragment>
+</Wix>
