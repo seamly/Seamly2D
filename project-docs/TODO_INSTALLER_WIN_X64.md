@@ -87,9 +87,41 @@ The rebuilt `dev-latest` MSI installed end to end. 1.6 is closed. Every page
 drew, and the composed data root read `C:\Users\susan\SeamlyData\` — the
 trailing-backslash fix holds.
 
-One cosmetic defect is open: `FolderLabel` on `SeamlyDataDirDlg` shows a literal
-ampersand, "Put the &SeamlyData folder in:". `NoPrefix="yes"` suppresses the
-accelerator and leaves the character visible. Delete the `&amp;`.
+### Defects — 2026-08-15, found after the install completed
+
+Three defects, all fixed. None of them stops an install.
+
+1. **`FolderLabel` printed a literal ampersand** — "Put the &SeamlyData folder
+   in:". `NoPrefix="yes"` turns accelerator parsing off, so the `&` reached the
+   screen. The `&amp;` is deleted.
+
+2. **The legacy Start Menu folder was never removed.** `SEAMLYLEGACYSTARTMENU`
+   was set `After="CostFinalize"` (sequence 1001), but WiX schedules
+   `Wix4RemoveFoldersEx` at 799 — before `CostInitialize`, because the
+   `RemoveFile` rows it adds must exist in time for costing. The action read an
+   empty property and did nothing, silently. Now set `After="AppSearch"`, and
+   the value expands `[%APPDATA]` instead of `[AppDataFolder]`: a directory
+   property is unresolved that early.
+
+3. **SeamlyLayout wrote its log files into the install directory** on Windows —
+   `Logger::init()` used `applicationDirPath()/output`. `C:\Program Files` is
+   not writable by a standard user, and the leftover `output\` directory is not
+   owned by the installer, so no uninstall removes it. It now uses the
+   `AppConfigLocation` root, as macOS and the Linux AppImage already did. See
+   `src/app/seamlylayout/docs/status-docs/SEAMLYLAYOUT_DECISIONS.md`.
+
+`smsi_check_authoring.ps1` gained three assertions and now runs 120: no
+`NoPrefix` label carries a `&`, the Start Menu property is set before
+`RemoveFolderEx` reads it, and its value comes from the environment.
+
+Its `Get-MsiRows` helper returns `, $rows`. **Assign that directly — never
+write `@(Get-MsiRows ...)`.** The wrapper produces an array holding an array. A
+one-row query still works, because PowerShell unwraps a one-element array on a
+cast or a member access, so the trap only appears when a query first returns
+more than one row.
+
+Not verified locally: the SeamlyLayout C++ change. Rust is not installed on the
+development machine, so `build.ps1` cannot run. CI compiles it.
 
 1.7 rewrote the page order in `INSTALL_DECISION_FLOW.md` and
 `scripts/packaging/windows/README.md`, and deleted the "SeamlyShortcutsDlg never

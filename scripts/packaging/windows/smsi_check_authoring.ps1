@@ -138,6 +138,12 @@ function Get-MsiRows {
     [System.Runtime.InteropServices.Marshal]::ReleaseComObject($view) | Out-Null
     # Leading comma: without it PowerShell unrolls the outer array on return, so
     # a no-row or single-row result would not come back as an array.
+    #
+    # ASSIGN THE RESULT DIRECTLY - do NOT write @(Get-MsiRows ...). The array
+    # subexpression collects one stream item, and that item is already the row
+    # array, so wrapping gives an array holding an array. A single-row query
+    # still works, because PowerShell unwraps a one-element array on a cast or a
+    # member access. A multi-row query then fails on the first cast instead.
     return , $rows
 }
 
@@ -392,6 +398,34 @@ foreach ($property in @('SEAMLYLEGACYINSTALLDIR', 'SEAMLYLEGACYSTARTMENU')) {
             $_.Component -eq 'RemoveLegacyProgramFiles' }).Count -eq 1)
 }
 
+# Wix4RemoveFoldersEx runs BEFORE CostInitialize, because the RemoveFile rows it
+# adds must exist in time for costing. Any property it reads therefore has to be
+# set before it. SEAMLYLEGACYSTARTMENU once ran After CostFinalize, which is
+# later, so the action read an empty property and the legacy Start Menu folder
+# survived. Nothing failed and nothing logged - the folder was simply still
+# there. The suffix on the action name is the package architecture (_X64 /
+# _A64), so match on the prefix.
+$executeSequence = Get-MsiRows -Sql "SELECT ``Action``, ``Sequence`` FROM ``InstallExecuteSequence``" `
+    -Columns 'Action', 'Sequence'
+$removeFoldersExAction = @($executeSequence | Where-Object { $_.Action -like 'Wix4RemoveFoldersEx*' })
+$setStartMenuAction = @($executeSequence | Where-Object { $_.Action -eq 'SetSEAMLYLEGACYSTARTMENU' })
+Assert-That -Name 'the legacy Start Menu path is set before RemoveFolderEx reads it' `
+    -Succeeded ($removeFoldersExAction.Count -eq 1 -and $setStartMenuAction.Count -eq 1 -and
+                [int]$setStartMenuAction[0].Sequence -lt [int]$removeFoldersExAction[0].Sequence) `
+    -Detail "SetSEAMLYLEGACYSTARTMENU at $(if ($setStartMenuAction.Count) { $setStartMenuAction[0].Sequence } else { '<nothing>' }), $(if ($removeFoldersExAction.Count) { "$($removeFoldersExAction[0].Action) at $($removeFoldersExAction[0].Sequence)" } else { 'RemoveFoldersEx <nothing>' })"
+# A directory property is unresolved that early, so the value must come from the
+# environment. [AppDataFolder] there expands to nothing.
+# A SetProperty compiles to a type-51 custom action: Source is the property it
+# sets, Target is the value. The CustomAction table has no Property or Value
+# column - asking for one fails with an OpenView error, not an empty result.
+$startMenuValue = Get-MsiRows -Sql "SELECT ``Action``, ``Source``, ``Target`` FROM ``CustomAction`` WHERE ``Action``='SetSEAMLYLEGACYSTARTMENU'" `
+    -Columns 'Action', 'Source', 'Target'
+Assert-That -Name 'the legacy Start Menu path expands an environment property' `
+    -Succeeded ($startMenuValue.Count -eq 1 -and
+                $startMenuValue[0].Source -eq 'SEAMLYLEGACYSTARTMENU' -and
+                $startMenuValue[0].Target.StartsWith('[%APPDATA]')) `
+    -Detail "value '$(if ($startMenuValue.Count) { $startMenuValue[0].Target } else { '<nothing>' })'"
+
 $conditions = Get-MsiRows -Sql "SELECT ``Control_``, ``Action``, ``Condition`` FROM ``ControlCondition`` WHERE ``Dialog_``='SeamlyPreviousInstallDlg'" `
     -Columns 'Control', 'Action', 'Condition'
 foreach ($control in @('UpgradeText', 'LegacyInstallText')) {
@@ -595,6 +629,18 @@ Assert-That -Name 'the data-root path box binds directly, not indirectly' `
                 $folderControl[0].Property -eq 'SEAMLYDATAPARENT' -and
                 ([int]$folderControl[0].Attributes -band 8) -eq 0) `
     -Detail "property '$(if ($folderControl.Count) { $folderControl[0].Property } else { '<nothing>' })', attributes $(if ($folderControl.Count) { $folderControl[0].Attributes } else { '<nothing>' })"
+# NoPrefix turns accelerator parsing off, so any '&' in a label prints as a
+# literal character. The data-root label used to read "Put the &SeamlyData
+# folder in:" on screen. msidbControlAttributesNoPrefix is 0x20000.
+$labelControls = Get-MsiRows `
+    -Sql "SELECT ``Control``, ``Attributes``, ``Text`` FROM ``Control`` WHERE ``Dialog_``='SeamlyDataDirDlg' AND ``Type``='Text'" `
+    -Columns 'Control', 'Attributes', 'Text'
+$literalAmpersands = @($labelControls | Where-Object {
+    $controlAttributes = [int]$_.Attributes
+    (($controlAttributes -band 131072) -ne 0) -and ($_.Text -match '&') })
+Assert-That -Name 'no NoPrefix label prints a literal ampersand' `
+    -Succeeded ($labelControls.Count -gt 0 -and $literalAmpersands.Count -eq 0) `
+    -Detail "$($labelControls.Count) text control(s), offending: $(if ($literalAmpersands.Count) { ($literalAmpersands | ForEach-Object { $_.Control }) -join ', ' } else { 'none' })"
 # A typed path reaches the Directory table only through SetTargetPath, and it
 # has to happen before the next page reads [SEAMLYDATAROOT].
 $dataDirNext = @($script:controlEvents | Where-Object {
