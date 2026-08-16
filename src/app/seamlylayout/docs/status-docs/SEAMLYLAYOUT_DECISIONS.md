@@ -93,6 +93,24 @@ Option C selected, applied app-wide. All observability file writes are gated by 
 - Aligns with Rust idiom (`#[cfg(debug_assertions)]`) and Qt idiom (`#ifdef QT_DEBUG`).
 - App-wide scope ensures no observability path is accidentally left ungated.
 
+## Log files never go in the install directory (2026-08-15)
+
+`Logger::init()` writes to the `AppConfigLocation` root on Windows, not beside
+the executable. macOS, the Linux AppImage and Flatpak already did.
+
+**Why:** the MSI installs into `C:\Program Files\SeamlyApps`, which a standard
+user cannot write. An installed build with `--debug` therefore either failed to
+log or was silently redirected to `VirtualStore`. Running as an administrator
+hid the fault and left an `output\` directory inside Program Files that no
+uninstall removes — the installer does not own it, so no component rule
+applies. One was found on a test machine on 2026-08-15, left by an earlier
+install at `C:\Program Files\Seamly2D\output\`.
+
+Only an ordinary Linux install still logs next to the executable.
+
+This is separate from the DG.1–DG.5 gate above: that decides *whether* debug
+files are written, this decides *where*.
+
 ## Accepted Architectural Decisions (snapshot)
 
 - CXX-Qt bridge is the Rust↔Qt integration boundary.

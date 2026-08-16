@@ -244,12 +244,25 @@
          Users' Start Menu. RemoveFolderEx resolves its paths in the immediate sequence,
          which runs as that user, so this reaches them; a *different* user's
          stale copy cannot be reached by a per-machine install and survives.
-         Sequenced after CostFinalize so the directory properties it expands
-         are resolved, and in both sequences because a silent install never
-         runs the UI one. -->
+         MUST be set before Wix4RemoveFoldersEx, which WiX sequences at 799 -
+         before CostInitialize, because the RemoveFile rows it adds have to
+         exist in time for costing. This SetProperty used to run After
+         CostFinalize (1001), so RemoveFolderEx read an EMPTY property and the
+         legacy Start Menu folder was never removed. Verified against the
+         built MSI: the InstallExecuteSequence numbers are 799 and 1001.
+
+         That is also why the value expands [%APPDATA] and not [AppDataFolder].
+         A directory property is only resolved by CostFinalize, so at sequence
+         51 it would expand to nothing. The environment property is set when
+         the session starts. Both name the same folder here: the immediate
+         sequence runs as the installing user.
+
+         After AppSearch because the condition reads SEAMLYLEGACYINSTALLDIR,
+         which the RegistrySearch above sets there. In both sequences because a
+         silent install never runs the UI one. -->
     <SetProperty Id="SEAMLYLEGACYSTARTMENU"
-                 Value="[AppDataFolder]Microsoft\Windows\Start Menu\Programs\Seamly2D"
-                 After="CostFinalize" Sequence="both"
+                 Value="[%APPDATA]\Microsoft\Windows\Start Menu\Programs\Seamly2D"
+                 After="AppSearch" Sequence="both"
                  Condition="SEAMLYLEGACYINSTALLDIR" />
 
     <!-- ================= optional desktop shortcuts ======================= -->
@@ -574,8 +587,10 @@
         <!-- The user edits the PARENT; the SeamlyData leaf is fixed and shown
              read-only below, so the full path is visible before they continue
              and E:\ can never be mistaken for the data root itself. -->
+        <!-- No accelerator ampersand. NoPrefix="yes" turns off accelerator
+             parsing, so an "&" in this text prints as a literal character. -->
         <Control Id="FolderLabel" Type="Text" X="20" Y="110" Width="330" Height="10"
-                 NoPrefix="yes" Text="Put the &amp;SeamlyData folder in:" />
+                 NoPrefix="yes" Text="Put the SeamlyData folder in:" />
         <!-- NOT Indirect. An indirect PathEdit reads its property to get the
              NAME of the property that holds the path - which is why stock
              InstallDirDlg is indirect through WIXUI_INSTALLDIR, whose value is

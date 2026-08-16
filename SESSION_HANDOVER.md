@@ -13,17 +13,76 @@ re-accumulate finished-session narrative in this file.
 `C:\Users\susan\SeamlyData\`, so the trailing-backslash fix holds. Screenshots
 are in `project-docs/Install*-Screenshot 2026-08-15 *.png`.
 
-**Next, one open cosmetic defect:** `scripts/packaging/windows/smsi.wxs:578`.
-The `FolderLabel` text reads `Put the &SeamlyData folder in:` — the ampersand
-prints literally because the control carries `NoPrefix="yes"`. Delete the
-`&amp;`. It touches `scripts/packaging/**`, so that push must not carry the skip
-token.
+**Next: confirm the three follow-up fixes in a real install.** They are pushed
+but only the two `.wxs` ones are verified, and only statically. Download the
+rebuilt `dev-latest` MSI and check the data-root page reads "Put the SeamlyData
+folder in:" with no ampersand.
+
+### seamly2d.exe and seamlyme.exe went missing after a successful install
+
+**Unexplained. Watch for it.** After the 20:57 install the two parent
+executables were absent from `C:\Program Files\SeamlyApps`, while
+`SeamlyLayout.exe` and all 1600 harvested files were present.
+
+Ruled out, each by direct evidence:
+
+- The package. `msiexec /a` on that exact MSI extracts all three exes.
+- The authoring. `File`, `Component` and `FeatureComponents` rows are correct
+  and unconditional; all three exes sit in `WixDefaultFeature`/`INSTALLFOLDER`.
+- The sequence. `RemoveExistingProducts` 1401, `RemoveFiles` 3500,
+  `InstallFiles` 4000.
+- The legacy remover. No `NSIS_Seamly2D` key on the machine, so
+  `SEAMLYLEGACYINSTALLDIR` was empty and its component never installed.
+- Defender. No detection, no quarantine event.
+
+Windows Installer registered both components as `Installed: Local` with the
+right key paths, and logged the install as successful. `MsiGetComponentPath`
+returned empty, which is what it does when a registered key path is gone from
+disk.
+
+Fixed by an elevated repair: `msiexec /i <msi> REINSTALL=ALL
+REINSTALLMODE=vomus`. The repair log says `No existing file`, confirming the
+files were genuinely absent rather than skipped by file versioning. A silent
+repair without `-Verb RunAs` fails with 1625.
+
+**If it happens again, get a log — that is the missing evidence:**
+`msiexec /i seamly-x64.msi /l*v %USERPROFILE%\Desktop\seamly.log`
+
+One contributing factor to remove: the install ran the MSI straight out of
+Explorer's zip temp folder
+(`InstallSource: ...\Temp\<guid>_seamly-x64.msi (3).zip.c9c\`). Explorer deletes
+that folder when the zip window closes. Extract the MSI first.
 
 Two housekeeping items in `project-docs/`:
 
 - `Installer-6-Screenshot 2026-08-15 162124.png` is the *old* "ended
   prematurely" page. It sits in the middle of the new sequence. Delete it.
 - The screenshots are untracked. Decide whether they belong in the repository.
+
+### Three defects fixed on 2026-08-15 (keep the lessons)
+
+- **`Wix4RemoveFoldersEx` runs at sequence 799, before `CostInitialize`.** Its
+  `RemoveFile` rows have to exist in time for costing. Any property it reads
+  must therefore be set earlier than that, and cannot expand a directory
+  property — those are unresolved until `CostFinalize`. `SEAMLYLEGACYSTARTMENU`
+  was set at 1001 with `[AppDataFolder]`; it is now set after `AppSearch` with
+  `[%APPDATA]`. **Nothing failed and nothing logged.** The legacy Start Menu
+  folder was simply still there.
+- **`NoPrefix="yes"` turns accelerator parsing off**, so an `&` in that label
+  prints. Removed from `FolderLabel`.
+- **SeamlyLayout logged into the install directory on Windows.** Now the
+  `AppConfigLocation` root, like macOS and the AppImage.
+
+**`smsi_check_authoring.ps1`: `Get-MsiRows` returns `, $rows`. Assign it
+directly — never `@(Get-MsiRows ...)`.** The wrapper gives an array holding an
+array. Single-row queries still work, because PowerShell unwraps a one-element
+array on a cast or member access, so the trap stays hidden until a query first
+returns more than one row. 120 assertions pass.
+
+**Rust is not installed on this machine.** `cargo`, `rustc` and `rustup` are all
+absent, so `src/app/seamlylayout/build.ps1` fails in Corrosion's `FindRust`.
+Nothing in SeamlyLayout builds locally until Rust is installed. CI is the only
+verification for its C++ and Rust changes.
 
 ### The 2343 defect (fixed, keep the lesson)
 
