@@ -79,10 +79,15 @@ array. Single-row queries still work, because PowerShell unwraps a one-element
 array on a cast or member access, so the trap stays hidden until a query first
 returns more than one row. 120 assertions pass.
 
-**Rust is not installed on this machine.** `cargo`, `rustc` and `rustup` are all
-absent, so `src/app/seamlylayout/build.ps1` fails in Corrosion's `FindRust`.
-Nothing in SeamlyLayout builds locally until Rust is installed. CI is the only
-verification for its C++ and Rust changes.
+**Rust lives in `C:\Users\susan\.cargo\bin` and is NOT on the default PATH.**
+`build.ps1` fails in Corrosion's `FindRust` unless the shell prepends it:
+
+```powershell
+$env:PATH = "$env:USERPROFILE\.cargo\bin;$env:PATH"
+```
+
+Check the directory before concluding Rust is missing — `Get-Command cargo`
+alone gives a false negative.
 
 ### The 2343 defect (fixed, keep the lesson)
 
