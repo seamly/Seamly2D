@@ -21,6 +21,30 @@
 | `cargo test --bench` | Performance benchmarks |
 | `cargo test --test` | Integration tests |
 
+### `cargo test` needs Qt in the environment (Windows)
+
+`build.ps1` sets this up. A bare shell does not, and `cargo test --workspace`
+then fails **twice, for two different reasons**:
+
+```powershell
+$env:PATH  = "C:\Qt\6.11.1\msvc2022_64\bin;$env:USERPROFILE\.cargo\bin;$env:PATH"
+$env:QMAKE = 'C:/Qt/6.11.1/msvc2022_64/bin/qmake.exe'
+cargo test --workspace
+```
+
+- **Without `QMAKE`**: `cxx-qt-build` panics at build-script time with
+  `Could not find Qt installation: QtMissing`. It locates Qt through that
+  variable and does not read `CMAKE_PREFIX_PATH`.
+- **Without Qt's `bin` on `PATH`**: the build succeeds and the `cxxqt_bridge`
+  test binary dies on launch with exit code `0xc0000135`,
+  `STATUS_DLL_NOT_FOUND`. It links Qt DLLs that nothing has put where the
+  loader looks. The message names no DLL, so it reads like a crash rather than
+  a missing dependency.
+
+Rust itself is at `C:\Users\susan\.cargo\bin` on the development machine and is
+not on the default `PATH`. `Get-Command cargo` returning nothing does not mean
+Rust is absent — check that directory.
+
 ## Testing Frameworks
 
 - Use **insta** (1.0) for snapshot testing

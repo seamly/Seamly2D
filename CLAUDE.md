@@ -296,6 +296,18 @@ For code changes:
 * run the tests that still run locally — SeamlyLayout `ctest --preset debug` and
   `cargo test --workspace`.
 
+Both need Qt and Rust in the shell first. `build.ps1` sets this up; a bare
+shell does not:
+
+```powershell
+$env:PATH  = "C:\Qt\6.11.1\msvc2022_64\bin;$env:USERPROFILE\.cargo\bin;$env:PATH"
+$env:QMAKE = 'C:/Qt/6.11.1/msvc2022_64/bin/qmake.exe'
+```
+
+Without them the failures name the wrong cause: a missing `cargo`, a
+`QtMissing` panic, or `STATUS_DLL_NOT_FOUND`. See
+`.github/README-BUILDS.md`.
+
 Seamly2D and SeamlyMe have no local build or test script. `ci.yml` verifies
 them. A skip-ci push defers that verification. See CI Cost Control.
 

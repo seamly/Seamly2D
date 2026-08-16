@@ -22,6 +22,34 @@ Write-Host "Ignore warnings about missing pthreads..."
 
 $ErrorActionPreference = "Stop"
 
+# ---------------------------------------------------------------------------
+# Run a native program without letting its stderr abort this script.
+#
+# Windows PowerShell 5.1 wraps every stderr line a native program writes in an
+# ErrorRecord. With $ErrorActionPreference = "Stop" that record is TERMINATING,
+# so a tool that reports ordinary progress on stderr kills the script even when
+# it exits 0. cargo does exactly that - "Compiling serde v1.0.228" and
+# "Finished `dev` profile" are stderr lines - so this script used to fail with
+# the name of a crate as its error message while the same
+# `cmake --build --preset debug` succeeded when run by hand.
+#
+# Judge a native command by its exit code, never by whether it wrote to stderr.
+# @param Command  scriptblock invoking the native program
+# @return         whatever the program wrote to stdout; the caller reads
+#                 $LASTEXITCODE for success or failure
+# ---------------------------------------------------------------------------
+function Invoke-NativeCommand {
+    param([Parameter(Mandatory = $true)][scriptblock]$Command)
+
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & $Command
+    } finally {
+        $ErrorActionPreference = $previousPreference
+    }
+}
+
 # Enable Claude prompt suggestion for code
 $env:CLAUDE_CODE_ENABLE_PROMPT_SUGGESTION = "1"
 
@@ -102,7 +130,7 @@ if (-not (Test-Path $QtQmake)) {
 # Guard against a Qt whose prefix ships no mkspecs (the Design Studio reduced
 # Qt is exactly this). Failing here names the real problem; letting the build
 # proceed produces a confusing "could not find qmake spec" pointing elsewhere.
-$QtPrefix = (& $QtQmake -query QT_INSTALL_PREFIX) -replace '/', '\'
+$QtPrefix = (Invoke-NativeCommand { & $QtQmake -query QT_INSTALL_PREFIX }) -replace '/', '\'
 if (-not (Test-Path (Join-Path $QtPrefix "mkspecs"))) {
     Write-Error "Qt kit at '$QtPrefix' has no mkspecs directory - it is not a full Qt installation (a Qt Design Studio reduced Qt looks like this). Install/select a full msvc2022_64 kit."
     exit 1
@@ -206,9 +234,14 @@ if errorlevel 1 (
 
 cd /d "$FrontendDir"
 
+rem 2>&1 merges each tool's stderr into stdout INSIDE cmd, so PowerShell never
+rem sees a stderr stream to decorate. Without it every cargo progress line
+rem reaches the console wrapped in a NativeCommandError block and the real
+rem output is unreadable. Redirection does not affect errorlevel.
+
 echo.
 echo === Configuring CMake ($Preset) ===
-cmake --preset $Preset -DCMAKE_PREFIX_PATH="$QtPath"
+cmake --preset $Preset -DCMAKE_PREFIX_PATH="$QtPath" 2>&1
 if errorlevel 1 (
     echo CMake configure failed
     exit /b 1
@@ -216,7 +249,7 @@ if errorlevel 1 (
 
 echo.
 echo === Building ===
-cmake --build --preset $Preset
+cmake --build --preset $Preset 2>&1
 if errorlevel 1 (
     echo Build failed
     exit /b 1
@@ -233,7 +266,9 @@ Write-Host "7 Run build batch file..."
 try {
     # Run the batch file
     Write-Host "Initializing VS 2025 x64 environment and building..." -ForegroundColor Cyan
-    & cmd.exe /c $TempBat
+    # cargo writes its progress to stderr. See Invoke-NativeCommand above for
+    # why calling this directly aborted the script on a perfectly good build.
+    Invoke-NativeCommand { & cmd.exe /c $TempBat }
     $ExitCode = $LASTEXITCODE
 
     if ($ExitCode -ne 0) {
@@ -251,7 +286,9 @@ try {
         Write-Host "`nBuild OK (not launching, -NoRun): $Exe" -ForegroundColor Green
     } else {
         Write-Host "`nLaunching SeamlyLayout..." -ForegroundColor Green
-        & $Exe
+        # Qt and Chromium both log to stderr at startup, which would otherwise
+        # end this script with the app's own diagnostics as the error.
+        Invoke-NativeCommand { & $Exe }
     }
 } catch {
     Write-Error "An error occurred during the build process: $_"
