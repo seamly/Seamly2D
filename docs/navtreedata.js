@@ -43,24 +43,24 @@ var NAVTREE =
       ] ]
     ] ],
     [ "SeamlyLayout", "d8/dad/md_src_app_seamlylayout_CLAUDE.html", [
-      [ "Architecture", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md20", null ],
-      [ "Key Conventions", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md21", null ],
-      [ "Command Line — the Seamly2D handoff contract (Task 49)", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md22", null ],
-      [ "Platform Support", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md23", null ],
-      [ "Build Commands", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md24", null ],
-      [ "Search & Update Policy", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md25", null ],
-      [ "Rules", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md26", null ],
-      [ "Workflow Guidelines", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md27", null ],
-      [ "Seamly2D Family", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md28", null ]
+      [ "Architecture", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md27", null ],
+      [ "Key Conventions", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md28", null ],
+      [ "Command Line — the Seamly2D handoff contract (Task 49)", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md29", null ],
+      [ "Platform Support", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md30", null ],
+      [ "Build Commands", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md31", null ],
+      [ "Search & Update Policy", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md32", null ],
+      [ "Rules", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md33", null ],
+      [ "Workflow Guidelines", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md34", null ],
+      [ "Seamly2D Family", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md35", null ]
     ] ],
     [ "Fonts for SeamlyLayout", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html", [
-      [ "Required Fonts", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md30", [
-        [ "Comfortaa", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md31", null ],
-        [ "Inter Tight", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md32", null ]
+      [ "Required Fonts", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md21", [
+        [ "Comfortaa", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md22", null ],
+        [ "Inter Tight", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md23", null ]
       ] ],
-      [ "How to Download", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md33", null ],
-      [ "Font Pairing Strategy", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md34", null ],
-      [ "Alternative: Using Google Fonts Package", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md35", null ]
+      [ "How to Download", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md24", null ],
+      [ "Font Pairing Strategy", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md25", null ],
+      [ "Alternative: Using Google Fonts Package", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md26", null ]
     ] ],
     [ "README", "d1/dff/md_src_app_seamlylayout_qt_frontend_node_modules_tailwindcss_README.html", null ],
     [ "README", "df/da2/md_src_app_seamlylayout_README.html", [
@@ -229,7 +229,7 @@ var NAVTREEINDEX =
 "d5/de8/classDOMCDATASectionImpl.html#aac964aca2a62d365f7ca910c9d9cbb20",
 "d5/df1/classXMLTransService.html#afbf0df74495928631fc102d86a993179a5e22f1e25789a3087a4debd08aaaed40",
 "d6/d0b/def_8cpp.html#ace05d8de4ddacda154ba7dfca94c1542",
-"d6/d1a/classMainWindow.html#aad592cbbdfa871c4349365ca0761bee0",
+"d6/d1a/classMainWindow.html#aad2104d216ba8f48f0278e5c31b95e10",
 "d6/d25/classMemBufInputSource.html#a9894b7cc0b6560911bedf78040c6c597",
 "d6/d37/classDOMCommentImpl.html#a4d59057a9568eb1a9d1da0814a2724fe",
 "d6/d55/classInsertNodesDialog.html#ad847ec532551cd0f120cd403aa1f8c8c",

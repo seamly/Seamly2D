@@ -83,7 +83,7 @@ var searchData=
   ['openinviewer_80',['openInViewer',['../d9/d4e/classPreferencesModel.html#abc08cd296bd93fc359bc574b020fdfbc',1,'PreferencesModel']]],
   ['openinviewer_5femptytokens_5freturnsfalse_81',['openInViewer_emptyTokens_returnsFalse',['../d7/d0f/classPreferencesModelTests.html#a6dc4bb378baa00159223fec72558daa6',1,'PreferencesModelTests']]],
   ['openinviewer_5femptyviewer_5freturnsfalse_82',['openInViewer_emptyViewer_returnsFalse',['../d7/d0f/classPreferencesModelTests.html#a2f3d49c4c2e578c960dc83503f5ef5e9',1,'PreferencesModelTests']]],
-  ['openmeasurementfile_83',['openMeasurementFile',['../d6/d1a/classMainWindow.html#ae37d49c2b2b3c07cead2d2cbcc7ce748',1,'MainWindow']]],
+  ['openmeasurementfile_83',['openMeasurementFile',['../d6/d1a/classMainWindow.html#aad2104d216ba8f48f0278e5c31b95e10',1,'MainWindow']]],
   ['openmeasurements_84',['OpenMeasurements',['../d8/dde/classTST__SeamlyMeCommandLine.html#a0abb52416ca77b9a6690a2294761617a',1,'TST_SeamlyMeCommandLine']]],
   ['openmeasurements_5fdata_85',['OpenMeasurements_data',['../d8/dde/classTST__SeamlyMeCommandLine.html#a3c4994cfdca37ee043da8a70e3276455',1,'TST_SeamlyMeCommandLine']]],
   ['openmultisize_86',['OpenMultisize',['../d8/d61/classTMainWindow.html#a374ee45b77b051eb76dc69d73f86243b',1,'TMainWindow']]],
