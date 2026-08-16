@@ -111,7 +111,9 @@ a local tree.
 SeamlyLayout keeps its own local scripts:
 
 * `src/app/seamlylayout/qd.ps1` — debug build.
-* `src/app/seamlylayout/build.ps1` — CMake + Ninja + Cargo. CI calls it too.
+* `src/app/seamlylayout/build.ps1` — CMake + Ninja + Cargo. **Local only.**
+  `ci.yml` runs `cmake --preset release` directly and never calls this script,
+  so a change here needs no CI run.
 
 Use Qt 6.11.1 `msvc2022_64` with the VS 18 Community MSVC environment.
 
