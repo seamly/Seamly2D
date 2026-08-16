@@ -689,7 +689,19 @@ function Invoke-InstalledChecks {
             -Succeeded (-not (Test-Path -LiteralPath (Join-Path $startMenu 'SeamlyLayout.lnk')))
     }
 
-    foreach ($name in @('Seamly2D', 'SeamlyMe')) {
+    # The checkbox covers all three apps. SeamlyLayout opens standalone with no
+    # argument, so a desktop launch is a supported way to start it.
+    # The file name is not the lower-cased shortcut name: SeamlyLayout.exe keeps
+    # its camel case on disk, and PowerShell's -eq compares strings case
+    # sensitively, so each shortcut names its own executable here.
+    $desktopShortcuts = @(
+        @{ Name = 'Seamly2D'; Exe = 'seamly2d.exe' },
+        @{ Name = 'SeamlyMe'; Exe = 'seamlyme.exe' })
+    if ($ExpectSeamlyLayout) {
+        $desktopShortcuts += @{ Name = 'SeamlyLayout'; Exe = 'SeamlyLayout.exe' }
+    }
+    foreach ($shortcut in $desktopShortcuts) {
+        $name = $shortcut.Name
         $link = Join-Path $publicDesktop "$name.lnk"
         $exists = Test-Path -LiteralPath $link
         if ($NoDesktopShortcuts) {
@@ -699,15 +711,15 @@ function Invoke-InstalledChecks {
             if ($exists) {
                 $target = Get-ShortcutTarget -LinkPath $link
                 Assert-That -Name "desktop shortcut '$name' targets the installed executable" `
-                    -Succeeded ($target -eq (Join-Path $installFolder "$($name.ToLower()).exe")) `
+                    -Succeeded ($target -eq (Join-Path $installFolder $shortcut.Exe)) `
                     -Detail "target = '$target'"
             }
         }
     }
-    # Deliberate: a bare SeamlyLayout launch would only ever show an empty
-    # canvas, because seamly2d starts it with a .pieces.svg argument.
-    Assert-That -Name 'SeamlyLayout has no desktop shortcut' `
-        -Succeeded (-not (Test-Path -LiteralPath (Join-Path $publicDesktop 'SeamlyLayout.lnk')))
+    if (-not $ExpectSeamlyLayout) {
+        Assert-That -Name 'no SeamlyLayout desktop shortcut in this package' `
+            -Succeeded (-not (Test-Path -LiteralPath (Join-Path $publicDesktop 'SeamlyLayout.lnk')))
+    }
 
     # --- file associations -----------------------------------------------------
     foreach ($association in @(

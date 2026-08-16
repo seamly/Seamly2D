@@ -443,7 +443,8 @@ Assert-That -Name 'the shortcuts checkbox sets SEAMLYDESKTOPSHORTCUTS' `
 # Where the shortcuts page sits in the wizard is asserted in section 5.
 
 $components = Get-MsiRows -Sql "SELECT ``Component``, ``Condition`` FROM ``Component``" -Columns 'Component', 'Condition'
-foreach ($component in @('Seamly2DDesktopShortcutComponent', 'SeamlyMeDesktopShortcutComponent')) {
+# All three must be conditional, or unticking the checkbox leaves one behind.
+foreach ($component in @('Seamly2DDesktopShortcutComponent', 'SeamlyMeDesktopShortcutComponent', 'SeamlyLayoutDesktopShortcutComponent')) {
     $row = @($components | Where-Object { $_.Component -eq $component })
     Assert-That -Name "$component is conditional on the checkbox" `
         -Succeeded ($row.Count -eq 1 -and $row[0].Condition -eq 'SEAMLYDESKTOPSHORTCUTS')
@@ -490,16 +491,15 @@ foreach ($name in $expectedStartMenu) {
         -Succeeded ($row.Count -eq 1 -and $row[0].Target -eq 'WixDefaultFeature' -and
                     $row[0].Icon -ne '' -and $row[0].WorkingDirectory -eq 'INSTALLFOLDER')
 }
-foreach ($name in @('Seamly2D', 'SeamlyMe')) {
+# All three, matching what the checkbox on SeamlyShortcutsDlg promises.
+# SeamlyLayout opens standalone with no argument, so a desktop launch is a
+# supported way to start it.
+foreach ($name in @('Seamly2D', 'SeamlyMe', 'SeamlyLayout')) {
     $row = @($shortcuts | Where-Object { $_.Directory -eq 'DesktopFolder' -and $_.Name -eq $name })
     Assert-That -Name "desktop shortcut '$name' targets the installed executable" `
         -Succeeded ($row.Count -eq 1 -and $row[0].Target -like '`[INSTALLFOLDER`]*.exe' -and $row[0].Icon -ne '') `
         -Detail "target is '$(if ($row.Count) { $row[0].Target } else { '<nothing>' })'"
 }
-# Deliberate: SeamlyLayout opens a .pieces.svg handed to it by seamly2d, so a
-# desktop launch would only ever show an empty canvas.
-Assert-That -Name 'SeamlyLayout has no desktop shortcut' `
-    -Succeeded (@($shortcuts | Where-Object { $_.Directory -eq 'DesktopFolder' -and $_.Name -eq 'SeamlyLayout' }).Count -eq 0)
 
 $icons = @(Get-MsiRows -Sql "SELECT ``Name`` FROM ``Icon``" -Columns 'Name' | ForEach-Object { $_.Name })
 $expectedIcons = @('seamly2d.ico', 'seamlyme.ico', 'seamlylayout.ico')

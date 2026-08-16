@@ -120,8 +120,27 @@ one-row query still works, because PowerShell unwraps a one-element array on a
 cast or a member access, so the trap only appears when a query first returns
 more than one row.
 
-Not verified locally: the SeamlyLayout C++ change. Rust is not installed on the
-development machine, so `build.ps1` cannot run. CI compiles it.
+### Defect — 2026-08-15: the shortcuts page promised three desktop shortcuts
+
+`SeamlyShortcutsDlg`'s checkbox reads "Create desktop shortcuts for Seamly2D,
+SeamlyLayout, and SeamlyMe". The package authored two — SeamlyLayout had none.
+
+The label was right. `smsi.wxs` already carried the reason beside the dialog:
+SeamlyLayout opens standalone with no argument, so a bare desktop launch is a
+supported way to start it, not only the `.pieces.svg` handoff from seamly2d.
+`README.md` alone argued the other way; it is corrected.
+
+- Added `SeamlyLayoutDesktopShortcutComponent`, conditional on
+  `SEAMLYDESKTOPSHORTCUTS` like the other two.
+- `smsi_check_authoring.ps1` now requires all three desktop shortcuts and all
+  three conditions. The old "SeamlyLayout has no desktop shortcut" assertion is
+  gone. 122 assertions pass.
+- `test_msi_install.ps1` checks the third shortcut, gated on
+  `-ExpectSeamlyLayout`. Its shortcut list now names each executable instead of
+  lower-casing the shortcut name: `SeamlyLayout.exe` keeps its camel case on
+  disk and PowerShell's `-eq` compares strings case sensitively.
+- `wix msi validate` raises only the already-suppressed ICE43 and ICE57 for the
+  new component, plus the expected ICE61.
 
 1.7 rewrote the page order in `INSTALL_DECISION_FLOW.md` and
 `scripts/packaging/windows/README.md`, and deleted the "SeamlyShortcutsDlg never

@@ -520,9 +520,10 @@
       </Dialog>
 
       <!-- ========== optional desktop shortcuts =========================== -->
-      <!-- Deliberately one checkbox each for seamly2d, seamlyme, and seamlyLayout.
-           SeamlyLayout can be opened without a .svg input file (launched as a standalone app),
-           and without a .pieces.svg argument (launched from from seamly2d). -->
+      <!-- ONE checkbox for all three apps, not one per app: it is a choice a
+           user makes once. SeamlyLayout gets a desktop shortcut like the other
+           two, because it opens without a .svg input file (a standalone launch)
+           as well as with the .pieces.svg argument seamly2d gives it. -->
       <Dialog Id="SeamlyShortcutsDlg" Width="370" Height="270"
               Title="[ProductName] Setup">
 
@@ -1111,6 +1112,26 @@
         <RegistryValue Root="HKLM"
                        Key="SOFTWARE\Seamly\Seamly2D"
                        Name="DesktopShortcutSeamlyMe"
+                       Type="integer"
+                       Value="1"
+                       KeyPath="yes" />
+      </Component>
+
+      <!-- SeamlyLayout gets one too. It opens standalone with no argument, so a
+           bare desktop launch is a supported way to start it - see the comment
+           on SeamlyShortcutsDlg above. The checkbox has always named all three
+           apps; only the component was missing. -->
+      <Component Id="SeamlyLayoutDesktopShortcutComponent" Condition="SEAMLYDESKTOPSHORTCUTS">
+        <Shortcut Id="SeamlyLayoutDesktopShortcut"
+                  Directory="DesktopFolder"
+                  Name="SeamlyLayout"
+                  Description="SeamlyLayout pattern pieces layout"
+                  Target="[INSTALLFOLDER]SeamlyLayout.exe"
+                  WorkingDirectory="INSTALLFOLDER"
+                  Icon="seamlylayout.ico" />
+        <RegistryValue Root="HKLM"
+                       Key="SOFTWARE\Seamly\Seamly2D"
+                       Name="DesktopShortcutSeamlyLayout"
                        Type="integer"
                        Value="1"
                        KeyPath="yes" />
