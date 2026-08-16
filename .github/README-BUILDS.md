@@ -218,6 +218,20 @@ seamlyLayout's **Rust** tests did not move and should not: `#[cfg(test)]` module
 
 CI note: **no workflow runs `SeamlyLayoutTest`.** `seamlylayout-ci.yml`, which ran `ctest` and `cargo test --workspace`, was deleted on 2026-08-12; `ci.yml` builds seamlyLayout in the `windows-msi` job but runs none of its tests. Run both suites locally before a merge that touches seamlyLayout.
 
+#### Running the two suites on Windows
+
+`build.ps1` prepares the environment; a bare shell does not. Set it up first, or both suites fail in ways that name the wrong problem:
+
+```powershell
+$env:PATH  = "C:\Qt\6.11.1\msvc2022_64\bin;$env:USERPROFILE\.cargo\bin;$env:PATH"
+$env:QMAKE = 'C:/Qt/6.11.1/msvc2022_64/bin/qmake.exe'
+```
+
+- **Rust is at `C:\Users\<you>\.cargo\bin` and is not on the default `PATH`.** Without it, CMake fails inside Corrosion's `FindRust`. `Get-Command cargo` finding nothing does not mean Rust is missing — check the directory.
+- **Without `QMAKE`**, `cxx-qt-build` panics during its build script: `Could not find Qt installation: QtMissing`. It does not read `CMAKE_PREFIX_PATH`.
+- **Without Qt's `bin` on `PATH`**, `cargo test --workspace` builds fine and then the `cxxqt_bridge` test binary dies at launch with `0xc0000135` / `STATUS_DLL_NOT_FOUND`. No DLL is named, so it reads as a crash rather than a missing Qt.
+- `ctest --preset debug` runs from `src/app/seamlylayout/qt_frontend/`, inside a `vcvars64` environment. `cargo test --workspace` runs from `src/app/seamlylayout/`.
+
 ### macOS
 
 - Settings unification is Task 16: land in `~/Library/Application Support/Seamly`, migrate legacy `Seamly2D` / `Seamly Systems` Application Support dirs and preferences plists on first run, keep packaged defaults read-only inside the app bundle resources.

@@ -103,14 +103,31 @@ array on a cast or member access, so the trap stays hidden until a query first
 returns more than one row. 120 assertions pass.
 
 **Rust lives in `C:\Users\susan\.cargo\bin` and is NOT on the default PATH.**
-`build.ps1` fails in Corrosion's `FindRust` unless the shell prepends it:
+Neither is Qt's `bin`. Set both before building or testing SeamlyLayout by
+hand:
 
 ```powershell
-$env:PATH = "$env:USERPROFILE\.cargo\bin;$env:PATH"
+$env:PATH  = "C:\Qt\6.11.1\msvc2022_64\bin;$env:USERPROFILE\.cargo\bin;$env:PATH"
+$env:QMAKE = 'C:/Qt/6.11.1/msvc2022_64/bin/qmake.exe'
 ```
+
+Each omission fails in a way that names the wrong cause: Corrosion's
+`FindRust` without cargo, a `QtMissing` panic in `cxx-qt-build` without
+`QMAKE`, and `STATUS_DLL_NOT_FOUND` from the `cxxqt_bridge` test binary
+without Qt's `bin`. Written up in `.github/README-BUILDS.md` and
+`src/app/seamlylayout/.claude/rules/testing.mdc`.
 
 Check the directory before concluding Rust is missing — `Get-Command cargo`
 alone gives a false negative.
+
+**`build.ps1` no longer fails on cargo's progress output.** Windows PowerShell
+5.1 wraps a native program's stderr in an ErrorRecord, and
+`$ErrorActionPreference = "Stop"` made it terminating, so `Compiling serde
+v1.0.228` ended the script. Native calls now go through `Invoke-NativeCommand`,
+which relaxes the preference and judges by exit code, and the batch file merges
+stderr with `2>&1` so the log stays readable. Verified both ways: a clean build
+exits 0, and a deliberate syntax error still fails with the compiler
+diagnostics visible.
 
 ### The 2343 defect (fixed, keep the lesson)
 
