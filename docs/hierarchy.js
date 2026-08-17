@@ -682,7 +682,7 @@ var hierarchy =
       [ "TST_NameRegExp", "d3/d4d/classTST__NameRegExp.html", null ],
       [ "TST_QmuTokenParser", "d3/df0/classTST__QmuTokenParser.html", null ],
       [ "TST_ReadVal", "dc/d3d/classTST__ReadVal.html", null ],
-      [ "TST_SeamlyFamilyPaths", "df/da4/classTST__SeamlyFamilyPaths.html", null ],
+      [ "TST_SeamlySuitePaths", "dc/daf/classTST__SeamlySuitePaths.html", null ],
       [ "TST_SvgComponentTags", "db/dc1/classTST__SvgComponentTags.html", null ],
       [ "TST_SvgTextItem", "df/de1/classTST__SvgTextItem.html", null ],
       [ "TST_TSTranslation", "d9/dd4/classTST__TSTranslation.html", null ],

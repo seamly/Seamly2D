@@ -1862,7 +1862,7 @@ Static Private Member Functions</h2></td></tr>
 <p>Task 60 moved this to &lt;Documents&gt;/Seamly. Two changes, for two reasons:</p>
 <ul>
 <li><b>Documents, not the home directory.</b> These are files the user creates, opens, saves and backs up, so they belong where every other application puts documents. Internal state — settings, caches, logs — stays in the platform's application-data locations and is deliberately NOT mixed in here.</li>
-<li>**"Seamly", not "seamlyData" or "seamly2d".** The folder holds the whole family's work, so naming it after one member (seamly2d) wrongly implies SeamlyMe and SeamlyLayout belong to Seamly2D, and "Data" is redundant once the parent location already says what these files are.</li>
+<li>**"Seamly", not "seamlyData" or "seamly2d".** The folder holds the whole suite's work, so naming it after one member (seamly2d) wrongly implies SeamlyMe and SeamlyLayout belong to Seamly2D, and "Data" is redundant once the parent location already says what these files are.</li>
 </ul>
 <p>QStandardPaths::DocumentsLocation is used rather than a hand-built path because it resolves the Windows known-folder API (so a redirected or OneDrive-backed Documents is honoured) and XDG_DOCUMENTS_DIR on Linux, where a localized system may not call the folder "Documents" at all. It falls back to the home directory on the rare system that reports no documents location, which keeps the result absolute in every case.</p>
 <dl class="section return"><dt>Returns</dt><dd>absolute path of the default user-data root, e.g. C:/Users/&lt;user&gt;/Documents/Seamly. </dd></dl>

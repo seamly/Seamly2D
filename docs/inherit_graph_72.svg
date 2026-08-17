@@ -2126,16 +2126,16 @@
 <!-- Node48 -->
 <g id="node155" class="node">
 <title>Node48</title>
-<g id="a_node155"><a xlink:href="df/da4/classTST__SeamlyFamilyPaths.html" target="_top" xlink:title="TST_SeamlyFamilyPaths tests the two lookups seamly2d uses to find the SeamlyLayout executable.">
-<polygon fill="white" stroke="#666666" points="477,-2427 342,-2427 342,-2408 477,-2408 477,-2427"/>
-<text text-anchor="middle" x="409.5" y="-2415" font-family="Helvetica,sans-Serif" font-size="10.00">TST_SeamlyFamilyPaths</text>
+<g id="a_node155"><a xlink:href="dc/daf/classTST__SeamlySuitePaths.html" target="_top" xlink:title="TST_SeamlySuitePaths tests the two lookups seamly2d uses to find the SeamlyLayout executable.">
+<polygon fill="white" stroke="#666666" points="473.5,-2427 345.5,-2427 345.5,-2408 473.5,-2408 473.5,-2427"/>
+<text text-anchor="middle" x="409.5" y="-2415" font-family="Helvetica,sans-Serif" font-size="10.00">TST_SeamlySuitePaths</text>
 </a>
 </g>
 </g>
 <!-- Node12&#45;&gt;Node48 -->
 <g id="edge149" class="edge">
 <title>Node12&#45;&gt;Node48</title>
-<path fill="none" stroke="#63b8ff" d="M256.68,-2216.9C268.79,-2219.49 281.33,-2224.39 290,-2233.5 342.04,-2288.19 272.65,-2346.09 326,-2399.5 330.56,-2404.06 335.99,-2407.59 341.85,-2410.3"/>
+<path fill="none" stroke="#63b8ff" d="M256.68,-2216.9C268.79,-2219.49 281.33,-2224.39 290,-2233.5 342.04,-2288.19 272.65,-2346.09 326,-2399.5 331.39,-2404.89 337.99,-2408.84 345.09,-2411.7"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="257.15,-2213.43 246.71,-2215.23 255.99,-2220.33 257.15,-2213.43"/>
 </g>
 <!-- Node49 -->
