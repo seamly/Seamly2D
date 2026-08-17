@@ -69,7 +69,7 @@ StartupOptions StartupOptions::parse(const QStringList &arguments)
 
     QCommandLineParser parser;
     parser.setApplicationDescription(QStringLiteral(
-        "SeamlyLayout — pattern layout application of the Seamly2D family.\n"
+        "SeamlyLayout — pattern layout application of the Seamly Application Suite.\n"
         "Opens the tagged pieces SVG that Seamly2D's Layout Mode writes beside "
         "the pattern file."));
 

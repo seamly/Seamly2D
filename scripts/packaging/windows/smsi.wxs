@@ -7,7 +7,7 @@
  **
  **  @brief
  **  WiX (v5/v6) authoring for the Windows MSI installer of the Seamly app
- **  family: seamly2d (pattern drafting), seamlyme (measurements) and
+ **  suite: seamly2d (pattern drafting), seamlyme (measurements) and
  **  SeamlyLayout (pattern layout).
  **
  **  Build with `scripts\packaging\windows\smsi.ps1` (local)
@@ -50,8 +50,8 @@
  **                                          All three apps build against Qt 6.11.1, so one
  **                                          runtime serves them all.
  **                                          seamly2d still resolves the exe through
- **                                          SeamlyFamilyPaths::locateSeamlyLayout()
- **                                          (src/libs/vmisc/seamly_family_paths.cpp),
+ **                                          SeamlySuitePaths::locateSeamlyLayout()
+ **                                          (src/libs/vmisc/seamly_suite_paths.cpp),
  **                                          which checks the flat layout
  **                                          first and keeps the old
  **                                          subdirectory layout as a
@@ -114,7 +114,7 @@
  **
  **
  **  UPGRADES
- **    The UpgradeCode below is FIXED for the lifetime of the product family
+ **    The UpgradeCode below is FIXED for the lifetime of the product suite
  **    and shared by the x64 and arm64 packages: MajorUpgrade removes any older
  **    install (either architecture) before the new one lands, so newer
  **    versions upgrade in place. Never change the UpgradeCode; the per-build
@@ -361,7 +361,7 @@
          desktop shortcuts and the install-info registry values are in
          smsi_shortcuts.wxs. These references are what link those fragments -
          a fragment nothing refers to is dropped without an error. -->
-    <ComponentGroupRef Id="FamilyExecutables" />
+    <ComponentGroupRef Id="SuiteExecutables" />
     <ComponentGroupRef Id="InstallInfo" />
     <ComponentGroupRef Id="OptionalDesktopShortcuts" />
 

@@ -12,7 +12,7 @@
 //     SeamlyLayout <absolute path to .pieces.svg>
 //
 // detached (MainWindow::exportPiecesToSeamlyLayout(), which builds the argument
-// vector through SeamlyFamilyPaths::seamlyLayoutLaunchArguments()).  Before this
+// vector through SeamlySuitePaths::seamlyLayoutLaunchArguments()).  Before this
 // class existed, main.cpp handed argc/argv to QApplication and read nothing
 // else, so the handoff opened an empty canvas and the user had to re-find the
 // file Seamly2D had just written.

@@ -1,10 +1,10 @@
 /******************************************************************************
- **  @file   tst_seamlyfamilypaths.h
+ **  @file   tst_seamlysuitepaths.h
  **  @author slspencer
  **  @date   July 22, 2026
  **
  **  @brief
- **  Unit tests for the SeamlyFamilyPaths install-directory lookup helpers
+ **  Unit tests for the SeamlySuitePaths install-directory lookup helpers
  **  (flat layout vs the Windows MSI "SeamlyLayout" subdirectory layout).
  **
  **  @copyright
@@ -28,24 +28,24 @@
  **
  *****************************************************************************/
 
-#ifndef TST_SEAMLYFAMILYPATHS_H
-#define TST_SEAMLYFAMILYPATHS_H
+#ifndef TST_SEAMLYSUITEPATHS_H
+#define TST_SEAMLYSUITEPATHS_H
 
 #include <QObject>
 
 /**
- * @brief TST_SeamlyFamilyPaths tests the two lookups seamly2d uses to find the
+ * @brief TST_SeamlySuitePaths tests the two lookups seamly2d uses to find the
  * SeamlyLayout executable.
  *
- * SeamlyFamilyPaths::locateSeamlyLayout() is the install-directory lookup: the
+ * SeamlySuitePaths::locateSeamlyLayout() is the install-directory lookup: the
  * executable flat beside the caller's apps, or inside the "SeamlyLayout"
  * subdirectory created by the Windows MSI installer (Task 13).
  *
- * SeamlyFamilyPaths::locateSeamlyLayoutDevBuild() is the development fallback
+ * SeamlySuitePaths::locateSeamlyLayoutDevBuild() is the development fallback
  * (Task 50): an upward walk from the running executable's directory looking for
  * a SeamlyLayout build inside the source checkout, Release before Debug.
  *
- * SeamlyFamilyPaths::piecesSvgFilePath() and seamlyLayoutLaunchArguments() are
+ * SeamlySuitePaths::piecesSvgFilePath() and seamlyLayoutLaunchArguments() are
  * the seamly2d half of the Layout Mode launch contract (Task 49): the handoff
  * file is "<pattern>.pieces.svg" beside the pattern, and it is passed as the
  * single positional argument of the SeamlyLayout process. The daughter app's
@@ -56,11 +56,11 @@
  * suite is hermetic — no real installation, settings value, or application
  * directory is involved.
  */
-class TST_SeamlyFamilyPaths : public QObject
+class TST_SeamlySuitePaths : public QObject
 {
     Q_OBJECT
 public:
-    explicit TST_SeamlyFamilyPaths(QObject *parent = nullptr);
+    explicit TST_SeamlySuitePaths(QObject *parent = nullptr);
 
 private slots:
     void EmptyDirectoryFindsNothing() const;
@@ -86,4 +86,4 @@ private slots:
     void LaunchArgumentsOfEmptySvgPathAreEmpty() const;
 };
 
-#endif // TST_SEAMLYFAMILYPATHS_H
+#endif // TST_SEAMLYSUITEPATHS_H

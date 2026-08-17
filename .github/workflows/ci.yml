@@ -7,7 +7,7 @@ on:
   push:
     branches:
     - run-seamlyLayout
-    # This workflow builds the whole family on four platforms and takes ~50
+    # This workflow builds the whole suite on four platforms and takes ~50
     # minutes, so changes that cannot possibly affect a binary must not start
     # it. Documentation lives in `project-docs/` and in `**.md` files scattered
     # through the tree; neither is a build input.

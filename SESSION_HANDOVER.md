@@ -6,6 +6,26 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## Terminology: "suite", not "family" (2026-08-17)
+
+The three apps are the **Seamly Application Suite**. "Family" is retired. Use
+"suite" in prose, "Seamly Application Suite" in user-visible text.
+
+Renamed with it:
+
+- `SeamlyFamilyPaths` → `SeamlySuitePaths` (`src/libs/vmisc/seamly_suite_paths.h/.cpp`).
+- `TST_SeamlyFamilyPaths` → `TST_SeamlySuitePaths` (`src/test/Seamly2DTest/tst_seamlysuitepaths.h/.cpp`).
+- WiX `ComponentGroup Id="FamilyExecutables"` → `SuiteExecutables`.
+
+Left alone on purpose: `FamilyName` (the measurement surname field), `font-family`,
+the `GetDef*Path()` "family" of functions, GPL licence text, the captured logs in
+`installation-troubleshooting/`, and the historical `seamly-family.wxs` filename in
+old handover and completed-task entries — that file is now `smsi.wxs`.
+
+**Not verified locally:** the qmake half. Seamly2D and SeamlyMe have no local
+build, so the `vmisc.pri` / `Seamly2DTest.pro` renames rest on CI. This push runs
+the full suite (no skip token) for that reason.
+
 ## PICK UP HERE (2026-08-15, the MSI installs end to end)
 
 **The rebuilt `dev-latest` MSI completed a full interactive install.**
@@ -183,7 +203,7 @@ numbered `InstWinX64.0.4`.** The Application-preferences pair is renumbered to
 ## Earlier (2026-08-15, the local build and test scripts are deleted)
 
 **`scripts/sb.ps1`, `scripts/sd.ps1` and `scripts/st.ps1` are gone.** The user
-decided the family needs no local release build, no local debug build, and no
+decided the suite needs no local release build, no local debug build, and no
 local test runner. `ci.yml` is the verification path for seamly2d and seamlyme.
 SeamlyLayout keeps its own local scripts (`qd.ps1`, `build.ps1`) and its local
 `ctest`/`cargo test`.
@@ -276,7 +296,7 @@ only part of Task InstWinX64.1 that local checks cannot cover.
 ## CI: one workflow (2026-08-12)
 
 `.github/workflows/seamlylayout-ci.yml` is deleted. **`ci.yml` is the only
-workflow that builds the family on GitHub.** It already built seamlyLayout in
+workflow that builds the suite on GitHub.** It already built seamlyLayout in
 the `windows-msi` job, so the second workflow duplicated the build and carried a
 second `QT_VERSION`.
 

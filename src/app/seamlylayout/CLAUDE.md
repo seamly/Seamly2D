@@ -24,7 +24,7 @@ A pattern layout application — daughter app to Seamly2D. Lives at `src/app/sea
 
 ## Command Line — the Seamly2D handoff contract (Task 49)
 
-Seamly2D's Layout Mode writes `<pattern>.pieces.svg` beside the pattern file and launches this app **detached** with that path. The contract is implemented in `qt_frontend/src/StartupOptions.{h,cpp}` and pinned by `src/test/SeamlyLayoutTest/StartupOptionsTests.cpp`; the producing half lives in `src/libs/vmisc/seamly_family_paths.cpp` and is pinned by `TST_SeamlyFamilyPaths`. **Change one side and you must change the other** — see `project-docs/SVG-DATA-ATTRIBUTES.md` for the full statement.
+Seamly2D's Layout Mode writes `<pattern>.pieces.svg` beside the pattern file and launches this app **detached** with that path. The contract is implemented in `qt_frontend/src/StartupOptions.{h,cpp}` and pinned by `src/test/SeamlyLayoutTest/StartupOptionsTests.cpp`; the producing half lives in `src/libs/vmisc/seamly_suite_paths.cpp` and is pinned by `TST_SeamlySuitePaths`. **Change one side and you must change the other** — see `project-docs/SVG-DATA-ATTRIBUTES.md` for the full statement.
 
 | Invocation | Behaviour |
 | ---------- | --------- |
@@ -73,7 +73,7 @@ Detailed guidelines are in `.claude/rules/`:
 - [Guidelines_Settings.mdc](./.claude/rules/Guidelines_Settings.mdc) — Settings workflow and defaults
 - [Guidelines_Tiling.mdc](./.claude/rules/Guidelines_Tiling.mdc) — Tiling calculation and reduction
 
-## Seamly2D Family
+## Seamly Application Suite
 
 | Application            | Role                       | UI Framework       |
 | ---------------------- | -------------------------- | ------------------ |

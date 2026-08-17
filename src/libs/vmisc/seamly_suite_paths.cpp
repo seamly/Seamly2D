@@ -1,10 +1,10 @@
 /******************************************************************************
- **  @file   seamly_family_paths.cpp
+ **  @file   seamly_suite_paths.cpp
  **  @author slspencer
  **  @date   July 22, 2026
  **
  **  @brief
- **  Helpers for locating the executables of the Seamly app family
+ **  Helpers for locating the executables of the Seamly app suite
  **  (seamly2d, seamlyme, SeamlyLayout) relative to an install directory.
  **
  **  @copyright
@@ -28,7 +28,7 @@
  **
  *****************************************************************************/
 
-#include "seamly_family_paths.h"
+#include "seamly_suite_paths.h"
 
 #include <QDir>
 #include <QFileInfo>
@@ -73,7 +73,7 @@ const int maxUpwardLevels = 8;
 const QLatin1String piecesSvgSuffix(".pieces.svg");
 } // namespace
 
-namespace SeamlyFamilyPaths
+namespace SeamlySuitePaths
 {
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -231,7 +231,7 @@ QString locateSeamlyLayoutDevBuild(const QString &startDirectory)
  *
  * Keeping the rule here rather than inline in MainWindow means SeamlyLayout's
  * documented input file name has exactly one definition in this codebase, and
- * one the test suite can pin (TST_SeamlyFamilyPaths).
+ * one the test suite can pin (TST_SeamlySuitePaths).
  *
  * QFileInfo::completeBaseName() is used deliberately — it keeps everything up to
  * the *last* dot, so a pattern called "shirt.v2.sm2d" yields "shirt.v2.pieces.svg"
@@ -286,4 +286,4 @@ QStringList seamlyLayoutLaunchArguments(const QString &piecesSvgPath)
     return QStringList(piecesSvgPath);
 }
 
-} // namespace SeamlyFamilyPaths
+} // namespace SeamlySuitePaths

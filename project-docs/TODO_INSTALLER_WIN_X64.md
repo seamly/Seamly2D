@@ -312,7 +312,7 @@ Eight `VSettings` accessors use `%APPDATA%\Unknown Organization.ini`.
 
 - [ ] **InstWinX64.6.5** Use `Seamly` for installer-facing branding.
 - [ ] **InstWinX64.6.6** State that the package installs Seamly2D, SeamlyLayout, and SeamlyMe.
-- [ ] **InstWinX64.6.7** Use “Seamly application family” in the EULA.
+- [x] **InstWinX64.6.7** Use “Seamly Application Suite” in the EULA. `license.rtf` heading now reads “Seamly Application Suite - license summary”.
 - [ ] **InstWinX64.6.8** Change package, executable, and About metadata to “Seamly Project.”
 - [ ] **InstWinX64.6.9** Keep source-file copyright headers unchanged.
 - [ ] **InstWinX64.6.10** Update authoring tests.
@@ -338,7 +338,7 @@ Eight `VSettings` accessors use `%APPDATA%\Unknown Organization.ini`.
 - [ ] **InstWinX64.7.4** Remove obsolete Program Files migration advice.
 - [ ] **InstWinX64.7.5** Shorten the data-preservation message.
 - [ ] **InstWinX64.7.6** Change `BannerLine` and `BottomLine` width from 373 to 370.
-- [ ] **InstWinX64.7.7** Replace “Install Seamly2D to” with Seamly-family wording.
+- [ ] **InstWinX64.7.7** Replace “Install Seamly2D to” with Seamly-suite wording.
 - [ ] **InstWinX64.7.8** Show the complete editable destination path.
 - [ ] **InstWinX64.7.9** Update UI tests and documentation.
 

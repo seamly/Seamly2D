@@ -1,10 +1,10 @@
 /******************************************************************************
- **  @file   tst_seamlyfamilypaths.cpp
+ **  @file   tst_seamlysuitepaths.cpp
  **  @author slspencer
  **  @date   July 22, 2026
  **
  **  @brief
- **  Unit tests for the SeamlyFamilyPaths install-directory lookup helpers
+ **  Unit tests for the SeamlySuitePaths install-directory lookup helpers
  **  (the flat layout every current installer produces, vs the legacy
  **  "SeamlyLayout" subdirectory layout the pre-Task-30 Windows MSI used).
  **
@@ -29,9 +29,9 @@
  **
  *****************************************************************************/
 
-#include "tst_seamlyfamilypaths.h"
+#include "tst_seamlysuitepaths.h"
 
-#include "../vmisc/seamly_family_paths.h"
+#include "../vmisc/seamly_suite_paths.h"
 
 #include <QDir>
 #include <QFile>
@@ -72,10 +72,10 @@ bool createDummyFile(const QString &filePath)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief TST_SeamlyFamilyPaths constructor, forwards to QObject.
+ * @brief TST_SeamlySuitePaths constructor, forwards to QObject.
  * @param parent optional QObject parent.
  */
-TST_SeamlyFamilyPaths::TST_SeamlyFamilyPaths(QObject *parent)
+TST_SeamlySuitePaths::TST_SeamlySuitePaths(QObject *parent)
     : QObject(parent)
 {
 }
@@ -85,12 +85,12 @@ TST_SeamlyFamilyPaths::TST_SeamlyFamilyPaths(QObject *parent)
  * @brief EmptyDirectoryFindsNothing verifies the lookup returns an empty
  * string for a directory containing neither layout.
  */
-void TST_SeamlyFamilyPaths::EmptyDirectoryFindsNothing() const
+void TST_SeamlySuitePaths::EmptyDirectoryFindsNothing() const
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
 
-    QVERIFY(SeamlyFamilyPaths::locateSeamlyLayout(dir.path()).isEmpty());
+    QVERIFY(SeamlySuitePaths::locateSeamlyLayout(dir.path()).isEmpty());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -98,16 +98,16 @@ void TST_SeamlyFamilyPaths::EmptyDirectoryFindsNothing() const
  * @brief FindsFlatExecutable verifies the flat layout is found: the
  * executable directly inside the install directory.
  */
-void TST_SeamlyFamilyPaths::FindsFlatExecutable() const
+void TST_SeamlySuitePaths::FindsFlatExecutable() const
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
 
     const QString flatExe = dir.path() + QLatin1Char('/')
-                          + SeamlyFamilyPaths::seamlyLayoutExeName();
+                          + SeamlySuitePaths::seamlyLayoutExeName();
     QVERIFY(createDummyFile(flatExe));
 
-    const QString found = SeamlyFamilyPaths::locateSeamlyLayout(dir.path());
+    const QString found = SeamlySuitePaths::locateSeamlyLayout(dir.path());
     QCOMPARE(found, QFileInfo(flatExe).absoluteFilePath());
 }
 
@@ -119,16 +119,16 @@ void TST_SeamlyFamilyPaths::FindsFlatExecutable() const
  * (Task 13). No current installer produces this layout, but an install made by
  * an older MSI can still be on disk, so the fallback must keep working.
  */
-void TST_SeamlyFamilyPaths::FindsSubdirectoryExecutable() const
+void TST_SeamlySuitePaths::FindsSubdirectoryExecutable() const
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
 
     const QString nestedExe = dir.path() + QLatin1String("/SeamlyLayout/")
-                            + SeamlyFamilyPaths::seamlyLayoutExeName();
+                            + SeamlySuitePaths::seamlyLayoutExeName();
     QVERIFY(createDummyFile(nestedExe));
 
-    const QString found = SeamlyFamilyPaths::locateSeamlyLayout(dir.path());
+    const QString found = SeamlySuitePaths::locateSeamlyLayout(dir.path());
     QCOMPARE(found, QFileInfo(nestedExe).absoluteFilePath());
 }
 
@@ -148,7 +148,7 @@ void TST_SeamlyFamilyPaths::FindsSubdirectoryExecutable() const
  * so precedence never arises. That mutually-exclusive non-Windows case is
  * covered instead by DirectoryNamedLikeExecutableIsIgnored().
  */
-void TST_SeamlyFamilyPaths::FlatLayoutTakesPrecedence() const
+void TST_SeamlySuitePaths::FlatLayoutTakesPrecedence() const
 {
 #ifndef Q_OS_WIN
     QSKIP("Both layouts can coexist only on Windows (the flat exe's \".exe\" "
@@ -160,13 +160,13 @@ void TST_SeamlyFamilyPaths::FlatLayoutTakesPrecedence() const
     QVERIFY(dir.isValid());
 
     const QString flatExe = dir.path() + QLatin1Char('/')
-                          + SeamlyFamilyPaths::seamlyLayoutExeName();
+                          + SeamlySuitePaths::seamlyLayoutExeName();
     const QString nestedExe = dir.path() + QLatin1String("/SeamlyLayout/")
-                            + SeamlyFamilyPaths::seamlyLayoutExeName();
+                            + SeamlySuitePaths::seamlyLayoutExeName();
     QVERIFY(createDummyFile(flatExe));
     QVERIFY(createDummyFile(nestedExe));
 
-    const QString found = SeamlyFamilyPaths::locateSeamlyLayout(dir.path());
+    const QString found = SeamlySuitePaths::locateSeamlyLayout(dir.path());
     QCOMPARE(found, QFileInfo(flatExe).absoluteFilePath());
 #endif
 }
@@ -179,23 +179,23 @@ void TST_SeamlyFamilyPaths::FlatLayoutTakesPrecedence() const
  * subdirectory itself collides with the flat candidate's name — the isFile()
  * guard must reject it and let the subdirectory lookup succeed instead.
  */
-void TST_SeamlyFamilyPaths::DirectoryNamedLikeExecutableIsIgnored() const
+void TST_SeamlySuitePaths::DirectoryNamedLikeExecutableIsIgnored() const
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
 
     // A directory whose name matches the flat executable candidate exactly.
-    QVERIFY(QDir(dir.path()).mkpath(SeamlyFamilyPaths::seamlyLayoutExeName()));
+    QVERIFY(QDir(dir.path()).mkpath(SeamlySuitePaths::seamlyLayoutExeName()));
 
     // With nothing else present the lookup must find nothing...
-    QVERIFY(SeamlyFamilyPaths::locateSeamlyLayout(dir.path()).isEmpty());
+    QVERIFY(SeamlySuitePaths::locateSeamlyLayout(dir.path()).isEmpty());
 
     // ...and with the real executable inside the MSI-style subdirectory, the
     // lookup must skip the impostor directory and return the nested file.
     const QString nestedExe = dir.path() + QLatin1String("/SeamlyLayout/")
-                            + SeamlyFamilyPaths::seamlyLayoutExeName();
+                            + SeamlySuitePaths::seamlyLayoutExeName();
     QVERIFY(createDummyFile(nestedExe));
-    QCOMPARE(SeamlyFamilyPaths::locateSeamlyLayout(dir.path()),
+    QCOMPARE(SeamlySuitePaths::locateSeamlyLayout(dir.path()),
              QFileInfo(nestedExe).absoluteFilePath());
 }
 
@@ -206,9 +206,9 @@ void TST_SeamlyFamilyPaths::DirectoryNamedLikeExecutableIsIgnored() const
  * current working directory, which would make the lookup depend on where the
  * test runner happened to be launched from.
  */
-void TST_SeamlyFamilyPaths::DevBuildEmptyStartDirectoryFindsNothing() const
+void TST_SeamlySuitePaths::DevBuildEmptyStartDirectoryFindsNothing() const
 {
-    QVERIFY(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(QString()).isEmpty());
+    QVERIFY(SeamlySuitePaths::locateSeamlyLayoutDevBuild(QString()).isEmpty());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -219,7 +219,7 @@ void TST_SeamlyFamilyPaths::DevBuildEmptyStartDirectoryFindsNothing() const
  * This is the end user's case: the development fallback must stay inert on a
  * machine that has only an installed application.
  */
-void TST_SeamlyFamilyPaths::DevBuildNoCheckoutFindsNothing() const
+void TST_SeamlySuitePaths::DevBuildNoCheckoutFindsNothing() const
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
@@ -228,7 +228,7 @@ void TST_SeamlyFamilyPaths::DevBuildNoCheckoutFindsNothing() const
     const QString installBin = dir.path() + QLatin1String("/Seamly/bin");
     QVERIFY(QDir().mkpath(installBin));
 
-    QVERIFY(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(installBin).isEmpty());
+    QVERIFY(SeamlySuitePaths::locateSeamlyLayoutDevBuild(installBin).isEmpty());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -239,7 +239,7 @@ void TST_SeamlyFamilyPaths::DevBuildNoCheckoutFindsNothing() const
  * Layout reproduced: seamly2d runs from `<checkout>/build/src/app/seamly2d/bin`,
  * five levels below the checkout root that holds the SeamlyLayout build.
  */
-void TST_SeamlyFamilyPaths::DevBuildFoundFromReleaseShadowBuild() const
+void TST_SeamlySuitePaths::DevBuildFoundFromReleaseShadowBuild() const
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
@@ -250,10 +250,10 @@ void TST_SeamlyFamilyPaths::DevBuildFoundFromReleaseShadowBuild() const
 
     const QString layoutExe = checkout
                             + QLatin1String("/src/app/seamlylayout/qt_frontend/build/Release/")
-                            + SeamlyFamilyPaths::seamlyLayoutExeName();
+                            + SeamlySuitePaths::seamlyLayoutExeName();
     QVERIFY(createDummyFile(layoutExe));
 
-    QCOMPARE(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(seamly2dBin),
+    QCOMPARE(SeamlySuitePaths::locateSeamlyLayoutDevBuild(seamly2dBin),
              QFileInfo(layoutExe).absoluteFilePath());
 }
 
@@ -266,7 +266,7 @@ void TST_SeamlyFamilyPaths::DevBuildFoundFromReleaseShadowBuild() const
  * `<checkout>/scripts/seamly2d-debug/src/app/seamly2d/bin` — six levels
  * below the checkout root, the deepest layout the project uses.
  */
-void TST_SeamlyFamilyPaths::DevBuildFoundFromDebugShadowBuild() const
+void TST_SeamlySuitePaths::DevBuildFoundFromDebugShadowBuild() const
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
@@ -278,10 +278,10 @@ void TST_SeamlyFamilyPaths::DevBuildFoundFromDebugShadowBuild() const
 
     const QString layoutExe = checkout
                             + QLatin1String("/src/app/seamlylayout/qt_frontend/build/Debug/")
-                            + SeamlyFamilyPaths::seamlyLayoutExeName();
+                            + SeamlySuitePaths::seamlyLayoutExeName();
     QVERIFY(createDummyFile(layoutExe));
 
-    QCOMPARE(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(seamly2dBin),
+    QCOMPARE(SeamlySuitePaths::locateSeamlyLayoutDevBuild(seamly2dBin),
              QFileInfo(layoutExe).absoluteFilePath());
 }
 
@@ -294,7 +294,7 @@ void TST_SeamlyFamilyPaths::DevBuildFoundFromDebugShadowBuild() const
  * unconditionally, so it could hand off a build arbitrarily older than the
  * Release binary sitting beside it.
  */
-void TST_SeamlyFamilyPaths::DevBuildReleaseTakesPrecedenceOverDebug() const
+void TST_SeamlySuitePaths::DevBuildReleaseTakesPrecedenceOverDebug() const
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
@@ -305,13 +305,13 @@ void TST_SeamlyFamilyPaths::DevBuildReleaseTakesPrecedenceOverDebug() const
 
     const QString buildRoot = checkout + QLatin1String("/src/app/seamlylayout/qt_frontend/build/");
     const QString releaseExe =
-        buildRoot + QLatin1String("Release/") + SeamlyFamilyPaths::seamlyLayoutExeName();
+        buildRoot + QLatin1String("Release/") + SeamlySuitePaths::seamlyLayoutExeName();
     const QString debugExe =
-        buildRoot + QLatin1String("Debug/") + SeamlyFamilyPaths::seamlyLayoutExeName();
+        buildRoot + QLatin1String("Debug/") + SeamlySuitePaths::seamlyLayoutExeName();
     QVERIFY(createDummyFile(releaseExe));
     QVERIFY(createDummyFile(debugExe));
 
-    QCOMPARE(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(seamly2dBin),
+    QCOMPARE(SeamlySuitePaths::locateSeamlyLayoutDevBuild(seamly2dBin),
              QFileInfo(releaseExe).absoluteFilePath());
 }
 
@@ -321,7 +321,7 @@ void TST_SeamlyFamilyPaths::DevBuildReleaseTakesPrecedenceOverDebug() const
  * it is the only configuration built — the common case for a developer working
  * from a debug tree.
  */
-void TST_SeamlyFamilyPaths::DevBuildFindsDebugWhenReleaseAbsent() const
+void TST_SeamlySuitePaths::DevBuildFindsDebugWhenReleaseAbsent() const
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
@@ -332,10 +332,10 @@ void TST_SeamlyFamilyPaths::DevBuildFindsDebugWhenReleaseAbsent() const
 
     const QString debugExe = checkout
                            + QLatin1String("/src/app/seamlylayout/qt_frontend/build/Debug/")
-                           + SeamlyFamilyPaths::seamlyLayoutExeName();
+                           + SeamlySuitePaths::seamlyLayoutExeName();
     QVERIFY(createDummyFile(debugExe));
 
-    QCOMPARE(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(seamly2dBin),
+    QCOMPARE(SeamlySuitePaths::locateSeamlyLayoutDevBuild(seamly2dBin),
              QFileInfo(debugExe).absoluteFilePath());
 }
 
@@ -348,7 +348,7 @@ void TST_SeamlyFamilyPaths::DevBuildFindsDebugWhenReleaseAbsent() const
  * On non-Windows platforms the executable name carries no ".exe" suffix, which
  * makes this collision easy to create by accident.
  */
-void TST_SeamlyFamilyPaths::DevBuildDirectoryNamedLikeExecutableIsIgnored() const
+void TST_SeamlySuitePaths::DevBuildDirectoryNamedLikeExecutableIsIgnored() const
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
@@ -361,17 +361,17 @@ void TST_SeamlyFamilyPaths::DevBuildDirectoryNamedLikeExecutableIsIgnored() cons
 
     // A directory exactly where the Release executable would be.
     QVERIFY(QDir().mkpath(buildRoot + QLatin1String("Release/")
-                          + SeamlyFamilyPaths::seamlyLayoutExeName()));
+                          + SeamlySuitePaths::seamlyLayoutExeName()));
 
     // With only the impostor directory present, nothing is found.
-    QVERIFY(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(seamly2dBin).isEmpty());
+    QVERIFY(SeamlySuitePaths::locateSeamlyLayoutDevBuild(seamly2dBin).isEmpty());
 
     // The real Debug build must then win over the impostor Release directory.
     const QString debugExe =
-        buildRoot + QLatin1String("Debug/") + SeamlyFamilyPaths::seamlyLayoutExeName();
+        buildRoot + QLatin1String("Debug/") + SeamlySuitePaths::seamlyLayoutExeName();
     QVERIFY(createDummyFile(debugExe));
 
-    QCOMPARE(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(seamly2dBin),
+    QCOMPARE(SeamlySuitePaths::locateSeamlyLayoutDevBuild(seamly2dBin),
              QFileInfo(debugExe).absoluteFilePath());
 }
 
@@ -383,7 +383,7 @@ void TST_SeamlyFamilyPaths::DevBuildDirectoryNamedLikeExecutableIsIgnored() cons
  * Without the bound the lookup would keep climbing to the filesystem root,
  * probing directories that have nothing to do with the application.
  */
-void TST_SeamlyFamilyPaths::DevBuildStopsBeforeUnboundedWalk() const
+void TST_SeamlySuitePaths::DevBuildStopsBeforeUnboundedWalk() const
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
@@ -397,15 +397,15 @@ void TST_SeamlyFamilyPaths::DevBuildStopsBeforeUnboundedWalk() const
 
     const QString layoutExe = checkout
                             + QLatin1String("/src/app/seamlylayout/qt_frontend/build/Release/")
-                            + SeamlyFamilyPaths::seamlyLayoutExeName();
+                            + SeamlySuitePaths::seamlyLayoutExeName();
     QVERIFY(createDummyFile(layoutExe));
 
-    QVERIFY(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(deepDirectory).isEmpty());
+    QVERIFY(SeamlySuitePaths::locateSeamlyLayoutDevBuild(deepDirectory).isEmpty());
 
     // Sanity check that the same tree *is* found from within the limit, so the
     // case above fails for the depth bound and not for a broken fixture.
     const QString shallowDirectory = checkout + QLatin1String("/a/b/c");
-    QCOMPARE(SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(shallowDirectory),
+    QCOMPARE(SeamlySuitePaths::locateSeamlyLayoutDevBuild(shallowDirectory),
              QFileInfo(layoutExe).absoluteFilePath());
 }
 
@@ -417,7 +417,7 @@ void TST_SeamlyFamilyPaths::DevBuildStopsBeforeUnboundedWalk() const
  * This is the file name SeamlyLayout is launched with, so it is part of the
  * two-app contract rather than an implementation detail of Layout Mode.
  */
-void TST_SeamlyFamilyPaths::PiecesSvgSitsBesideThePattern() const
+void TST_SeamlySuitePaths::PiecesSvgSitsBesideThePattern() const
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
@@ -425,7 +425,7 @@ void TST_SeamlyFamilyPaths::PiecesSvgSitsBesideThePattern() const
     const QString patternFile = dir.path() + QLatin1String("/richmond-shirt.sm2d");
     const QString expected    = dir.path() + QLatin1String("/richmond-shirt.pieces.svg");
 
-    QCOMPARE(SeamlyFamilyPaths::piecesSvgFilePath(patternFile),
+    QCOMPARE(SeamlySuitePaths::piecesSvgFilePath(patternFile),
              QFileInfo(expected).absoluteFilePath());
 }
 
@@ -438,7 +438,7 @@ void TST_SeamlyFamilyPaths::PiecesSvgSitsBesideThePattern() const
  * "shirt.v2.sm2d" keeps its version segment. baseName() would have produced
  * "shirt.pieces.svg" and quietly collided with a different pattern's handoff.
  */
-void TST_SeamlyFamilyPaths::PiecesSvgKeepsDotsInThePatternName() const
+void TST_SeamlySuitePaths::PiecesSvgKeepsDotsInThePatternName() const
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
@@ -446,7 +446,7 @@ void TST_SeamlyFamilyPaths::PiecesSvgKeepsDotsInThePatternName() const
     const QString patternFile = dir.path() + QLatin1String("/shirt.v2.sm2d");
     const QString expected    = dir.path() + QLatin1String("/shirt.v2.pieces.svg");
 
-    QCOMPARE(SeamlyFamilyPaths::piecesSvgFilePath(patternFile),
+    QCOMPARE(SeamlySuitePaths::piecesSvgFilePath(patternFile),
              QFileInfo(expected).absoluteFilePath());
 }
 
@@ -458,9 +458,9 @@ void TST_SeamlyFamilyPaths::PiecesSvgKeepsDotsInThePatternName() const
  * SeamlyLayout is started detached with its own working directory, so a relative
  * argument would resolve against the wrong directory in the daughter app.
  */
-void TST_SeamlyFamilyPaths::PiecesSvgPathIsAbsolute() const
+void TST_SeamlySuitePaths::PiecesSvgPathIsAbsolute() const
 {
-    const QString svgPath = SeamlyFamilyPaths::piecesSvgFilePath(QStringLiteral("relative.sm2d"));
+    const QString svgPath = SeamlySuitePaths::piecesSvgFilePath(QStringLiteral("relative.sm2d"));
 
     QVERIFY(!svgPath.isEmpty());
     QVERIFY(QFileInfo(svgPath).isAbsolute());
@@ -473,9 +473,9 @@ void TST_SeamlyFamilyPaths::PiecesSvgPathIsAbsolute() const
  * no path, so Layout Mode can ask the user to save instead of writing a file
  * named after nothing.
  */
-void TST_SeamlyFamilyPaths::PiecesSvgOfEmptyPatternPathIsEmpty() const
+void TST_SeamlySuitePaths::PiecesSvgOfEmptyPatternPathIsEmpty() const
 {
-    QVERIFY(SeamlyFamilyPaths::piecesSvgFilePath(QString()).isEmpty());
+    QVERIFY(SeamlySuitePaths::piecesSvgFilePath(QString()).isEmpty());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -487,11 +487,11 @@ void TST_SeamlyFamilyPaths::PiecesSvgOfEmptyPatternPathIsEmpty() const
  * here without the matching change there breaks the handoff — this case is what
  * makes that break visible in CI rather than in a user's Layout Mode.
  */
-void TST_SeamlyFamilyPaths::LaunchArgumentsAreTheSvgPathAlone() const
+void TST_SeamlySuitePaths::LaunchArgumentsAreTheSvgPathAlone() const
 {
     const QString svgPath = QStringLiteral("/patterns/richmond shirt.pieces.svg");
 
-    const QStringList arguments = SeamlyFamilyPaths::seamlyLayoutLaunchArguments(svgPath);
+    const QStringList arguments = SeamlySuitePaths::seamlyLayoutLaunchArguments(svgPath);
 
     QCOMPARE(arguments.size(), 1);
     // Passed unquoted and unsplit: QProcess quotes list elements itself, which
@@ -505,7 +505,7 @@ void TST_SeamlyFamilyPaths::LaunchArgumentsAreTheSvgPathAlone() const
  * for an empty path — launching SeamlyLayout bare would open an empty canvas,
  * which is exactly the Task 49 defect this contract exists to prevent.
  */
-void TST_SeamlyFamilyPaths::LaunchArgumentsOfEmptySvgPathAreEmpty() const
+void TST_SeamlySuitePaths::LaunchArgumentsOfEmptySvgPathAreEmpty() const
 {
-    QVERIFY(SeamlyFamilyPaths::seamlyLayoutLaunchArguments(QString()).isEmpty());
+    QVERIFY(SeamlySuitePaths::seamlyLayoutLaunchArguments(QString()).isEmpty());
 }

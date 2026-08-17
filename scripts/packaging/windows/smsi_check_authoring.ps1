@@ -197,7 +197,7 @@ Assert-That -Name 'ARPCOMMENTS carries the full project version' `
 
 # --- 3. upgrade behaviour ------------------------------------------------------
 $upgrade = Get-MsiRows -Sql "SELECT ``UpgradeCode``, ``ActionProperty`` FROM ``Upgrade``" -Columns 'UpgradeCode', 'ActionProperty'
-Assert-That -Name 'MajorUpgrade keyed on the fixed family UpgradeCode' `
+Assert-That -Name 'MajorUpgrade keyed on the fixed suite UpgradeCode' `
     -Succeeded (@($upgrade | Where-Object { $_.UpgradeCode -eq '{CBF4B5F1-C32C-4DBB-B385-3EE4A7B30658}' -and $_.ActionProperty -eq 'WIX_UPGRADE_DETECTED' }).Count -eq 1)
 
 # --- 4. previous-installation detection ---------------------------------------
@@ -451,11 +451,11 @@ foreach ($component in @('Seamly2DDesktopShortcutComponent', 'SeamlyMeDesktopSho
 }
 
 # --- 6b. install location ------------------------------------------------------
-# The family installs into ProgramFiles64Folder\SeamlyApps. Both halves are
+# The suite installs into ProgramFiles64Folder\SeamlyApps. Both halves are
 # asserted because both have been wrong before in ways nothing else catches: the
 # 32-bit tree would be wrong for an all-x64/arm64 package (only the OLD NSIS
 # installer belongs there, being 32-bit), and the folder is named for the whole
-# family rather than for seamly2d alone.
+# suite rather than for seamly2d alone.
 $directories = Get-MsiRows -Sql "SELECT ``Directory``, ``Directory_Parent``, ``DefaultDir`` FROM ``Directory``" `
     -Columns 'Directory', 'Parent', 'DefaultDir'
 $installFolder = @($directories | Where-Object { $_.Directory -eq 'INSTALLFOLDER' })

@@ -128,7 +128,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-# The family UpgradeCode from smsi.wxs. Fixed for the lifetime of the
+# The suite UpgradeCode from smsi.wxs. Fixed for the lifetime of the
 # product and shared by x64 and arm64, so it is the one reliable way to find
 # "our" installed product and tell it apart from the old NSIS Seamly2D, which
 # carries the same DisplayName.
@@ -274,7 +274,7 @@ function Get-UserDataInventory {
 }
 
 #------------------------------------------------------------------------------
-# @brief  Find the installed MSI product belonging to the Seamly family.
+# @brief  Find the installed MSI product belonging to the Seamly suite.
 #
 # Matched on the fixed UpgradeCode rather than on the display name, because the
 # old NSIS installation is also called "Seamly2D" in Apps & features. Falls
@@ -601,7 +601,7 @@ function Invoke-InstalledChecks {
     }
 
     # seamly2d resolves its daughter app flat-beside-itself first
-    # (SeamlyFamilyPaths::locateSeamlyLayout), so this is what Layout Mode needs.
+    # (SeamlySuitePaths::locateSeamlyLayout), so this is what Layout Mode needs.
     if ($ExpectSeamlyLayout) {
         Assert-That -Name 'SeamlyLayout.exe sits beside seamly2d.exe, where Layout Mode looks for it' `
             -Succeeded ((Test-Path -LiteralPath (Join-Path $installFolder 'SeamlyLayout.exe')) -and
@@ -817,7 +817,7 @@ switch ($Phase) {
         # A run that starts with the product already installed would report
         # someone else's install, so this is a hard stop rather than a note.
         $product = Get-InstalledSeamlyProduct
-        Assert-That -Name 'the Seamly family MSI is not already installed' -Succeeded ($null -eq $product) `
+        Assert-That -Name 'the Seamly suite MSI is not already installed' -Succeeded ($null -eq $product) `
             -Detail "found ProductCode $(if ($product) { $product.ProductCode })  - uninstall it before starting"
         Assert-That -Name 'HKLM\SOFTWARE\Seamly\Seamly2D does not exist yet' -Succeeded ($null -eq (Get-InstallInfo))
 
@@ -877,7 +877,7 @@ switch ($Phase) {
             Assert-That -Name "the NSIS Start Menu folder was removed" `
                 -Succeeded (-not (Test-Path -LiteralPath $nsisStartMenu)) -Detail $nsisStartMenu
 
-            Assert-That -Name 'the family MSI installed somewhere other than the NSIS directory' `
+            Assert-That -Name 'the suite MSI installed somewhere other than the NSIS directory' `
                 -Succeeded ($installFolder -and ($installFolder.TrimEnd('\') -ne ([string]$state.LegacyInstallDir).TrimEnd('\')))
         } else {
             Write-Note 'no NSIS installation was present at Baseline - the removal path was not exercised by this run'
