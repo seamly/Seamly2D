@@ -4,7 +4,7 @@
 # **  @date   July 22, 2026
 # **
 # **  @brief
-# **  "seamly msi" — stage the built Seamly app family (seamly2d, seamlyme,
+# **  "seamly msi" — stage the built Seamly app suite (seamly2d, seamlyme,
 # **  SeamlyLayout) and build the Windows MSI installer from
 # **  scripts\packaging\windows\smsi.wxs with the WiX toolset.
 # **  Driven by the ci.yml windows-msi job against the in-source CI build
@@ -36,7 +36,7 @@
 
 <#
 .SYNOPSIS
-    Build the Windows MSI installer for the Seamly app family.
+    Build the Windows MSI installer for the Seamly app suite.
 
 .DESCRIPTION
     Stages the already-built apps into <repo>\scripts\seamly-msi\<arch>\

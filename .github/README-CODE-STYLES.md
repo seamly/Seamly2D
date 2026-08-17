@@ -58,7 +58,7 @@ For more information, read full [JSF-AV standard](http://www2.research.att.com/~
   - Derive the location instead: relative to the running executable
     (`QCoreApplication::applicationDirPath()`), from a `QStandardPaths` location, or from
     an existing setting or environment variable. See
-    `SeamlyFamilyPaths::locateSeamlyLayoutDevBuild()` for the source-checkout case.
+    `SeamlySuitePaths::locateSeamlyLayoutDevBuild()` for the source-checkout case.
   - Placeholders in comments and synthetic paths in tests are fine — `C:/Users/<user>/...`
     in a Doxygen example, `/home/user/...` as test data. It is a *real* home directory in
     shipped code that is banned.

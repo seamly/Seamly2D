@@ -1,4 +1,4 @@
-# Windows MSI — build reference (Seamly2D app family)
+# Windows MSI — build reference (Seamly application suite)
 
 What [`smsi.ps1`](smsi.ps1) does with the build trees CI hands it, how to read
 its output, and how to install and test the package it produces. For the

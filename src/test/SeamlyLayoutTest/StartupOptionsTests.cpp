@@ -13,7 +13,7 @@
 // detached, and until Task 49 that argument was read by nobody: the daughter
 // app opened an empty canvas. The seamly2d half of the same contract — that
 // the launch really is "one positional argument, the .pieces.svg path" — is
-// locked by TST_SeamlyFamilyPaths in the Seamly2DTest suite.
+// locked by TST_SeamlySuitePaths in the Seamly2DTest suite.
 //
 // Covers:
 //   • No argument / empty argument list → start with an empty canvas

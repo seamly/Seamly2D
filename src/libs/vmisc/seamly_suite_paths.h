@@ -1,10 +1,10 @@
 /******************************************************************************
- **  @file   seamly_family_paths.h
+ **  @file   seamly_suite_paths.h
  **  @author slspencer
  **  @date   July 22, 2026
  **
  **  @brief
- **  Helpers for locating the executables of the Seamly app family
+ **  Helpers for locating the executables of the Seamly app suite
  **  (seamly2d, seamlyme, SeamlyLayout) relative to an install directory.
  **
  **  @copyright
@@ -28,22 +28,22 @@
  **
  *****************************************************************************/
 
-#ifndef SEAMLY_FAMILY_PATHS_H
-#define SEAMLY_FAMILY_PATHS_H
+#ifndef SEAMLY_SUITE_PATHS_H
+#define SEAMLY_SUITE_PATHS_H
 
 #include <QString>
 #include <QStringList>
 
 /**
- * @brief SeamlyFamilyPaths groups filesystem lookups shared by the Seamly app
- * family (seamly2d, seamlyme, SeamlyLayout), together with the launch contract
+ * @brief SeamlySuitePaths groups filesystem lookups shared by the Seamly app
+ * suite (seamly2d, seamlyme, SeamlyLayout), together with the launch contract
  * seamly2d uses to hand a pattern over to SeamlyLayout.
  *
  * The functions live in vmisc (not in the seamly2d app target) so they can be
  * exercised by the Seamly2DTests suite, which links the static libraries but
  * not the application sources.
  */
-namespace SeamlyFamilyPaths
+namespace SeamlySuitePaths
 {
     QString seamlyLayoutExeName();
     QString locateSeamlyLayout(const QString &directory);
@@ -53,4 +53,4 @@ namespace SeamlyFamilyPaths
     QStringList seamlyLayoutLaunchArguments(const QString &piecesSvgPath);
 }
 
-#endif // SEAMLY_FAMILY_PATHS_H
+#endif // SEAMLY_SUITE_PATHS_H

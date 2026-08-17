@@ -31,7 +31,7 @@ Everything the installer branches on, and where it comes from.
 
 | Property | Source | Meaning |
 |---|---|---|
-| `WIX_UPGRADE_DETECTED` | `FindRelatedProducts`, via the family `UpgradeCode` | an **older MSI** of this family is installed |
+| `WIX_UPGRADE_DETECTED` | `FindRelatedProducts`, via the suite `UpgradeCode` | an **older MSI** of this suite is installed |
 | `WIX_DOWNGRADE_DETECTED` | same | a **newer MSI** is installed |
 | `SEAMLYLEGACYUNINSTALLSTRING` | `RegistrySearch`, `HKLM\...\Uninstall\Seamly2D\UninstallString`, `Bitness="always32"` | the **old NSIS** product is installed |
 | `SEAMLYLEGACYINSTALLDIR` | `RegistrySearch`, `HKLM\SOFTWARE\NSIS_Seamly2D\Install_Dir`, `Bitness="always32"` | where it is, normally `C:\Program Files (x86)\Seamly2D` |

@@ -12,7 +12,7 @@ SOURCES += \
     $$PWD/vtablesearch.cpp \
     $$PWD/dialogs/dialogexporttocsv.cpp \
     $$PWD/def.cpp \
-    $$PWD/seamly_family_paths.cpp
+    $$PWD/seamly_suite_paths.cpp
 
 *msvc*:SOURCES += $$PWD/stable.cpp
 
@@ -35,7 +35,7 @@ HEADERS += \
     $$PWD/diagnostic.h \
     $$PWD/dialogs/dialogexporttocsv.h \
     $$PWD/customevents.h \
-    $$PWD/seamly_family_paths.h
+    $$PWD/seamly_suite_paths.h
 
 # Qt's versions
 # 5.2.0, 5.2.1

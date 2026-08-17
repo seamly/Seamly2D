@@ -489,7 +489,7 @@ QString VCommonSettings::commonSettingsOrganization() const
  *    and backs up, so they belong where every other application puts documents. Internal
  *    state — settings, caches, logs — stays in the platform's application-data locations
  *    and is deliberately NOT mixed in here.
- *  - **"Seamly", not "seamlyData" or "seamly2d".** The folder holds the whole family's
+ *  - **"Seamly", not "seamlyData" or "seamly2d".** The folder holds the whole suite's
  *    work, so naming it after one member (seamly2d) wrongly implies SeamlyMe and
  *    SeamlyLayout belong to Seamly2D, and "Data" is redundant once the parent location
  *    already says what these files are.

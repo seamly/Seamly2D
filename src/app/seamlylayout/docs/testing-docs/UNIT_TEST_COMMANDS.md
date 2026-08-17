@@ -16,7 +16,7 @@ one of them:
 The four Qt/C++ suites — `AdjustSceneTests`, `AdjustControllerTests`,
 `PreferencesModelTests`, `SettingsModelTests` — used to sit at
 `qt_frontend/tests/{adjust,preferences,settings}/`. Task 58 moved them to
-`src/test/SeamlyLayoutTest/`, beside the rest of the family's suites
+`src/test/SeamlyLayoutTest/`, beside the rest of the suite's tests
 (`Seamly2DTest`, `ParserTest`, `TranslationsTest`, `CollectionTest`). They are
 still built by `qt_frontend/CMakeLists.txt` and still run under `ctest` — only
 the source path changed. `src/test/test.pro` deliberately does **not** list

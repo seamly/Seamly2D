@@ -61,7 +61,7 @@
 #include "../ifc/exception/vexceptionwrongid.h"
 #include "../vmisc/def.h"
 #include "../vmisc/logging.h"
-#include "../vmisc/seamly_family_paths.h"
+#include "../vmisc/seamly_suite_paths.h"
 #include "../vmisc/vmath.h"
 #include "../qmuparser/qmuparsererror.h"
 #include "../vwidgets/vmaingraphicsview.h"
@@ -480,7 +480,7 @@ bool Application2D::notify(QObject *receiver, QEvent *event)
  * @brief seamlyLayoutFilePath locates the SeamlyLayout executable.
  *
  * Lookup order: (1) the user-configured path from the application settings,
- * (2) the install-directory lookup via SeamlyFamilyPaths::locateSeamlyLayout()
+ * (2) the install-directory lookup via SeamlySuitePaths::locateSeamlyLayout()
  * — the executable directly beside seamly2d (the flat layout used where all
  * apps share one Qt runtime, e.g. the Linux Flatpak's /app/bin) or in the
  * "SeamlyLayout" subdirectory the Windows MSI installer uses (Task 13; there
@@ -488,7 +488,7 @@ bool Application2D::notify(QObject *receiver, QEvent *event)
  * with the parent apps' differently-versioned Qt DLLs) — and (3) a SeamlyLayout
  * development build inside the source checkout this executable was built from,
  * located relative to the running executable by
- * SeamlyFamilyPaths::locateSeamlyLayoutDevBuild() (Release preferred over
+ * SeamlySuitePaths::locateSeamlyLayoutDevBuild() (Release preferred over
  * Debug), so that Layout Mode works during development without any
  * configuration and without naming any one developer's machine (Task 50).
  *
@@ -509,7 +509,7 @@ QString Application2D::seamlyLayoutFilePath()
     // Default: the standard install locations relative to the Seamly2D
     // executable — flat beside it, or in the MSI's "SeamlyLayout" subdirectory.
     const QString installedPath =
-        SeamlyFamilyPaths::locateSeamlyLayout(QCoreApplication::applicationDirPath());
+        SeamlySuitePaths::locateSeamlyLayout(QCoreApplication::applicationDirPath());
     if (!installedPath.isEmpty())
     {
         return installedPath;
@@ -521,7 +521,7 @@ QString Application2D::seamlyLayoutFilePath()
     // built Seamly2D hand off to the locally built SeamlyLayout when neither a
     // setting nor an installed copy exists — on any machine, and only ever
     // inside a built checkout, so it cannot shadow a real installation.
-    return SeamlyFamilyPaths::locateSeamlyLayoutDevBuild(QCoreApplication::applicationDirPath());
+    return SeamlySuitePaths::locateSeamlyLayoutDevBuild(QCoreApplication::applicationDirPath());
     // An empty return means not found; the caller is responsible for informing the user.
 }
 

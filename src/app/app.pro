@@ -8,7 +8,7 @@ SUBDIRS = \
 # ---------------------------------------------------------------------------
 # Why seamlylayout/ is NOT in SUBDIRS
 #
-# src/app/seamlylayout/ holds the third family app, SeamlyLayout. It is tracked
+# src/app/seamlylayout/ holds the third suite app, SeamlyLayout. It is tracked
 # in this repository like seamlyme, but it is deliberately kept out of the qmake
 # build and must stay out (see the root CLAUDE.md).
 #
