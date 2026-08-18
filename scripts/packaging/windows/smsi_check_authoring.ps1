@@ -597,6 +597,83 @@ Assert-That -Name 'the data-root default is NOT computed in the elevated sequenc
     -Succeeded (-not ($executeActions -contains 'SetSEAMLYDATAPARENT'))
 Assert-That -Name 'the chosen data root is recorded for the apps to read' `
     -Succeeded (@($registry | Where-Object { $_.Root -eq '2' -and $_.Key -eq 'SOFTWARE\Seamly\Seamly2D' -and $_.Name -eq 'DataRoot' }).Count -eq 1)
+# InstWinX64.00. Three things went wrong together before this: the wizard
+# offered C:\Users\<user>\SeamlyData, the apps created <Documents>\Seamly, and
+# nothing read what the wizard recorded. Pin all three.
+#
+# The default parent is the Documents folder, because that is where users go to
+# find the files other applications write. PersonalFolder is preferred over
+# %USERPROFILE%\Documents so a redirected Documents - OneDrive Known Folder Move
+# - is followed, which is what QStandardPaths::DocumentsLocation does app-side.
+$dataParentActions = Get-MsiRows `
+    -Sql "SELECT ``Action``, ``Target`` FROM ``CustomAction`` WHERE ``Source``='SEAMLYDATAPARENT'" `
+    -Columns 'Action', 'Target'
+Assert-That -Name 'the data-root default prefers the Documents known folder' `
+    -Succeeded (@($dataParentActions | Where-Object { $_.Target -eq '[PersonalFolder]' }).Count -eq 1)
+Assert-That -Name 'the data-root default falls back to %USERPROFILE%\Documents' `
+    -Succeeded (@($dataParentActions | Where-Object { $_.Target -eq '[%USERPROFILE]\Documents\' }).Count -eq 1) `
+    -Detail 'an empty SEAMLYDATAPARENT aborts the wizard with error 2343'
+# Both UI defaults must stand down on a maintenance run. Without this a repair
+# recomputes the default parent, SEAMLYDATACHOSEN follows in the elevated
+# sequence, and a user who moved their data root loses it silently.
+$uiDataParent = Get-MsiRows `
+    -Sql "SELECT ``Action``, ``Condition`` FROM ``InstallUISequence`` WHERE ``Action``='SetSEAMLYDATAPARENT' OR ``Action``='SetSEAMLYDATAPARENTFallback'" `
+    -Columns 'Action', 'Condition'
+Assert-That -Name 'both data-root defaults are skipped on a maintenance run' `
+    -Succeeded ($uiDataParent.Count -eq 2 -and
+                @($uiDataParent | Where-Object { $_.Condition -match 'NOT Installed' }).Count -eq 2)
+# What reaches the registry is SEAMLYDATAROOTRECORDED, never SEAMLYDATAROOT. A
+# directory id always resolves, so [SEAMLYDATAROOT] in a silent install with no
+# arguments composes onto TARGETDIR and records C:\SeamlyData - which every app
+# would then adopt as the user's data root.
+$dataRootValue = @($registry | Where-Object {
+    $_.Root -eq '2' -and $_.Key -eq 'SOFTWARE\Seamly\Seamly2D' -and $_.Name -eq 'DataRoot' })
+Assert-That -Name 'the recorded data root is the guarded property, not the raw directory' `
+    -Succeeded ($dataRootValue.Count -eq 1 -and $dataRootValue[0].Value -eq '[SEAMLYDATAROOTRECORDED]') `
+    -Detail "value '$(if ($dataRootValue.Count) { $dataRootValue[0].Value } else { '<nothing>' })'"
+Assert-That -Name 'SEAMLYDATAROOTRECORDED is a secure custom property' `
+    -Succeeded ($secure -like '*SEAMLYDATAROOTRECORDED*')
+# Repair and maintenance keep the recorded value: AppSearch prefills it from the
+# key the last install wrote, and nothing overwrites it unless this run chose a
+# root. Type 18 is a raw registry value read from the 64-bit view (2 + 16).
+$recordedSearch = Get-MsiRows `
+    -Sql "SELECT ``Signature_``, ``Root``, ``Key``, ``Name``, ``Type`` FROM ``RegLocator`` WHERE ``Name``='DataRoot'" `
+    -Columns 'Signature_', 'Root', 'Key', 'Name', 'Type'
+Assert-That -Name 'the recorded data root is prefilled from the existing install' `
+    -Succeeded ($recordedSearch.Count -eq 1 -and
+                $recordedSearch[0].Root -eq '2' -and
+                $recordedSearch[0].Key -eq 'SOFTWARE\Seamly\Seamly2D' -and
+                $recordedSearch[0].Type -eq '18')
+$recordedAppSearch = Get-MsiRows `
+    -Sql "SELECT ``Property``, ``Signature_`` FROM ``AppSearch`` WHERE ``Property``='SEAMLYDATAROOTRECORDED'" `
+    -Columns 'Property', 'Signature_'
+Assert-That -Name 'AppSearch fills SEAMLYDATAROOTRECORDED' -Succeeded ($recordedAppSearch.Count -eq 1)
+# Order is the whole mechanism. SEAMLYDATACHOSEN must be decided BEFORE
+# CostInitialize, while SEAMLYDATAPARENT and SEAMLYDATAROOT are non-empty only if
+# the wizard or the command line set them; afterwards the Directory table has
+# resolved both and the test cannot tell a choice from a fallback. The value
+# itself must be composed AFTER CostFinalize, when [SEAMLYDATAROOT] is resolved.
+$executeSequence = Get-MsiRows `
+    -Sql "SELECT ``Action``, ``Sequence`` FROM ``InstallExecuteSequence``" -Columns 'Action', 'Sequence'
+function Get-SequenceNumber {
+    param([string]$Action)
+    $row = @($executeSequence | Where-Object { $_.Action -eq $Action })
+    if ($row.Count -ne 1) { return -1 }
+    return [int]$row[0].Sequence
+}
+$chosenAt = Get-SequenceNumber -Action 'SetSEAMLYDATACHOSEN'
+$recordedAt = Get-SequenceNumber -Action 'SetSEAMLYDATAROOTRECORDED'
+$costInitializeAt = Get-SequenceNumber -Action 'CostInitialize'
+$costFinalizeAt = Get-SequenceNumber -Action 'CostFinalize'
+$writeRegistryAt = Get-SequenceNumber -Action 'WriteRegistryValues'
+Assert-That -Name 'a chosen data root is detected before the directories resolve' `
+    -Succeeded ($chosenAt -gt 0 -and $costInitializeAt -gt 0 -and $chosenAt -lt $costInitializeAt) `
+    -Detail "SetSEAMLYDATACHOSEN at $chosenAt, CostInitialize at $costInitializeAt"
+Assert-That -Name 'the recorded data root is composed after the directories resolve' `
+    -Succeeded ($recordedAt -gt 0 -and $costFinalizeAt -gt 0 -and $recordedAt -gt $costFinalizeAt) `
+    -Detail "SetSEAMLYDATAROOTRECORDED at $recordedAt, CostFinalize at $costFinalizeAt"
+Assert-That -Name 'the recorded data root is composed before it is written' `
+    -Succeeded ($recordedAt -gt 0 -and $writeRegistryAt -gt 0 -and $recordedAt -lt $writeRegistryAt)
 
 $dialogs = @(Get-MsiRows -Sql "SELECT ``Dialog`` FROM ``Dialog``" -Columns 'Dialog' | ForEach-Object { $_.Dialog })
 foreach ($dialog in @('SeamlyDataDirDlg', 'SeamlyDataMigrateDlg', 'SeamlyShortcutsDlg')) {

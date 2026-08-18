@@ -31,12 +31,17 @@
         <RegistryKey Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D">
           <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
           <RegistryValue Name="DisplayVersion" Type="string" Value="$(var.DisplayVersion)" />
-          <!-- InstWinX64.1.2: the data root the user chose, for the apps to
-               read on first run (InstWinX64.1.5 / 1.8). Written even when the
-               user declined the copy - recording the folder and filling it are
-               separate decisions. Empty when a silent install passed no
-               SEAMLYDATAROOT, which the apps read as "use your own default". -->
-          <RegistryValue Name="DataRoot" Type="string" Value="[SEAMLYDATAROOT]" />
+          <!-- InstWinX64.1.2: the data root the user chose. Every app reads it
+               on first run and adopts it, so the value must name a folder
+               somebody chose. SEAMLYDATAROOTRECORDED is what guarantees that -
+               see the long note beside it in smsi.wxs. Do NOT put
+               [SEAMLYDATAROOT] here: a directory id always resolves, so a
+               silent install with no arguments would record C:\SeamlyData.
+
+               Written even when the user declined the copy - recording the
+               folder and filling it are separate decisions. Empty when nothing
+               chose a root, which the apps read as "use your own default". -->
+          <RegistryValue Name="DataRoot" Type="string" Value="[SEAMLYDATAROOTRECORDED]" />
         </RegistryKey>
       </Component>
 

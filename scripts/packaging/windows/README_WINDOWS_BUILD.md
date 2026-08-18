@@ -134,7 +134,7 @@ at `InstallFinalize` with 1603 on MAX_PATH.
 | Property | Default | Notes |
 |---|---|---|
 | `INSTALLFOLDER` | `C:\Program Files\SeamlyApps` | Rejected if the path contains OneDrive, Dropbox, Google Drive, iCloud or Box Sync — a sync client replaces files that are in use, which breaks the program and its uninstall. The check is a launch condition, so it applies to `/qn` too. |
-| `SEAMLYDATAPARENT` | `C:\Users\<user>` | Where the `SeamlyData` folder is placed. Setup always appends the `SeamlyData` leaf, so `E:\` gives `E:\SeamlyData`. **Any** drive is allowed, including synced folders and USB media. **Under `/qn` there is no default** — the UI sequence computes it from `%USERPROFILE%`, and `/qn` runs no UI sequence, so pass it explicitly or the apps fall back to their own first-run default. |
+| `SEAMLYDATAPARENT` | `C:\Users\<user>\Documents` | Where the `SeamlyData` folder is placed. Setup always appends the `SeamlyData` leaf, so `E:\` gives `E:\SeamlyData`. **Any** drive is allowed, including synced folders and USB media. **Under `/qn` there is no default** — the UI sequence computes it from the `PersonalFolder` known folder, and `/qn` runs no UI sequence, so pass it explicitly or the apps fall back to their own first-run default. |
 | `SEAMLYDATAROOT` | `[SEAMLYDATAPARENT]\SeamlyData` | The composed path. Set it directly to override the composition and name the folder yourself — `SEAMLYDATAROOT=E:\Patterns` gives exactly that. |
 | `SEAMLYCOPYUSERDATA` | `0` | Set to `1` to copy existing work into `SEAMLYDATAROOT`. Additive only: nothing is deleted, and a file already at the destination is never overwritten. |
 | `SEAMLYDESKTOPSHORTCUTS` | `1` | Desktop shortcuts for Seamly2D and SeamlyMe. |
@@ -143,6 +143,14 @@ Why `SEAMLYDATAROOT` has no `/qn` default: a per-machine package runs its
 execute sequence elevated as SYSTEM, whose `%USERPROFILE%` is
 `C:\Windows\system32\config\systemprofile`. Computing the default there would
 put a user's patterns inside a system account's profile.
+
+What Setup records, and what the apps read: the answer to the data-root page
+goes to `HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot`, and every app adopts it on
+that user's first run. The value comes from `SEAMLYDATAROOTRECORDED`, not from
+`SEAMLYDATAROOT` directly — a directory id always resolves to something, so a
+`/qn` install with no arguments would otherwise record `C:\SeamlyData` and every
+app would adopt that. With no argument the value stays empty, which the apps
+read as "use your own default". A repair keeps whatever is already recorded.
 
 What the user sees when installing interactively: welcome → license → install folder → **Your work** (the data root, with a Change button) → **Copy your existing work?** (opt-in, default off) → **Shortcuts** (desktop shortcuts, default on) → ready → install. The package defines its own dialog set, so every one of those arrows is a `NewDialog` row `smsi.wxs` authors, and `Back` reverses each one.
 

@@ -514,6 +514,46 @@ QString VCommonSettings::getDefaultDataRoot()
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief installerDataRoot returns the user-data root the Windows installer recorded.
+ *
+ * Setup asks "Where do you keep your work?" and writes the answer to
+ * HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot. Without this the answer was inert: every app
+ * resolved its own default instead, so a user who was promised
+ * C:\Users\<user>\Documents\SeamlyData got <Documents>/Seamly (InstWinX64.00).
+ *
+ * HKLM, not HKCU: a per-machine MSI runs its server side as LocalSystem and cannot write a
+ * real user's hive. The value is therefore machine-wide, and each user adopts it once, on
+ * that user's first run, into their own settings file. A user who later changes the root in
+ * Preferences keeps that choice — initializeDataRoot() reads the settings file first and
+ * never comes back here.
+ *
+ * The installer writes an empty value when nothing chose a root, which is the signal to use
+ * the built-in default.
+ *
+ * @return absolute path recorded by the installer, in Qt's '/' separator form; empty when no
+ * installer recorded one, and always empty off Windows.
+ */
+QString VCommonSettings::installerDataRoot()
+{
+#ifdef Q_OS_WIN
+    // Registry64Format rather than NativeFormat: the apps are 64-bit today, so the two agree,
+    // but the installer is x64 and always writes the 64-bit view.
+    const QSettings installerKey(QStringLiteral("HKEY_LOCAL_MACHINE\\SOFTWARE\\Seamly\\Seamly2D"),
+                                 QSettings::Registry64Format);
+    const QString recorded = installerKey.value(QStringLiteral("DataRoot")).toString().trimmed();
+    if (recorded.isEmpty())
+    {
+        return QString();
+    }
+
+    return QDir::cleanPath(QDir::fromNativeSeparators(recorded));
+#else
+    return QString();
+#endif
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief getLegacyDataRoot returns the pre-Task-34 default root of the user's data tree.
  *
  * Kept so first-run resolution can spot an existing installation's data and adopt it
@@ -938,21 +978,23 @@ QString VCommonSettings::rebaseOntoDataRoot(const QString &path, const QString &
 /**
  * @brief initializeDataRoot resolves the user-data root once, at application start-up.
  *
- * Called before any data path is read, from every application's openSettings(). Three cases:
+ * Called before any data path is read, from every application's openSettings(). Four cases:
  *
- *  1. A root is already configured — honour it untouched (this includes a root the Windows
- *     installer or a previous run wrote).
- *  2. Nothing configured and a populated legacy ~/seamly2d tree exists while the new
- *     ~/seamlyData does not — adopt the legacy tree *in place* as the root. Adoption rather than
- *     copying is deliberate: an upgrading user's patterns and measurements can be many
- *     gigabytes and may sit on a cloud-synced drive, so nothing is moved, copied or deleted
- *     and the data keeps working from the moment the app starts.
- *  3. Otherwise — a fresh install — use the ~/seamlyData default.
+ *  1. A root is already configured — honour it untouched.
+ *  2. Nothing configured, and the Windows installer recorded one — adopt it. The user
+ *     chose that folder on Setup's "Where do you keep your work?" page and was told the
+ *     apps would use it, so it outranks every default below.
+ *  3. Nothing configured or recorded, and a populated legacy ~/seamly2d tree exists while
+ *     the default root does not — adopt the legacy tree *in place* as the root. Adoption
+ *     rather than copying is deliberate: an upgrading user's patterns and measurements can
+ *     be many gigabytes and may sit on a cloud-synced drive, so nothing is moved, copied
+ *     or deleted and the data keeps working from the moment the app starts.
+ *  4. Otherwise — a fresh install — use the built-in default.
  *
  * The resolved root is written back so later runs take case 1 and the value is visible to
  * the other applications and to Preferences → Paths.
  *
- * @param adoptedLegacyTree optional out-parameter, set to true when case 2 applied; pass
+ * @param adoptedLegacyTree optional out-parameter, set to true when case 3 applied; pass
  * null when the caller does not care.
  * @return absolute path of the resolved user-data root.
  */
@@ -973,8 +1015,20 @@ QString VCommonSettings::initializeDataRoot(bool *adoptedLegacyTree)
     const QString configured = settings.value(settingPathsDataRoot).toString().trimmed();
     if (!configured.isEmpty())
     {
-        // Case 1: already chosen, by an earlier run, the installer, or the user.
+        // Case 1: already chosen, by an earlier run or by the user.
         return QDir::cleanPath(QDir::fromNativeSeparators(configured));
+    }
+
+    // Case 2: the Windows installer recorded the folder the user chose. It outranks both the
+    // legacy tree and the built-in default, because the user was shown that path and told the
+    // apps would use it. Recorded here, so later runs take case 1 and a change made in
+    // Preferences is never overridden by the installer.
+    const QString fromInstaller = installerDataRoot();
+    if (!fromInstaller.isEmpty())
+    {
+        settings.setValue(settingPathsDataRoot, fromInstaller);
+        settings.sync();
+        return fromInstaller;
     }
 
     const QString resolved = chooseFirstRunDataRoot(getDefaultDataRoot(), getLegacyDataRoot(), adoptedLegacyTree);

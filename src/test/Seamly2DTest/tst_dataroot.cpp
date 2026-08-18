@@ -368,6 +368,54 @@ void TST_DataRoot::AConfiguredRootIsNeverOverwritten() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief InstallerDataRootIsCleanOrEmpty checks the shape of whatever the Windows installer
+ * recorded, on any platform.
+ *
+ * The value cannot be arranged from a test: it lives under HKLM, which an unelevated process
+ * cannot write. What the test can hold is the contract every caller depends on — the result
+ * is either empty or a path already cleaned into Qt's '/' form, because initializeDataRoot()
+ * stores it in the settings file verbatim and every getDefault*Path() then appends to it.
+ *
+ * Off Windows the result is always empty, and there the assertions still run: a change that
+ * made the function return something on Linux or macOS would fail here.
+ */
+void TST_DataRoot::InstallerDataRootIsCleanOrEmpty() const
+{
+    const QString recorded = VCommonSettings::installerDataRoot();
+    if (recorded.isEmpty())
+    {
+        return;
+    }
+
+    QVERIFY2(!recorded.contains(QLatin1Char('\')),
+             "the recorded root must be converted out of native separators");
+    QCOMPARE(recorded, QDir::cleanPath(recorded));
+    QVERIFY2(QDir::isAbsolutePath(recorded), "the installer records an absolute path");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief AConfiguredRootOutranksTheInstaller checks that the installer's answer is a
+ * first-run default and nothing more.
+ *
+ * The Windows installer records its data-root page in HKLM, machine-wide. A user who later
+ * moves the root in Preferences → Paths must keep that choice, on this machine and every
+ * later start-up, so the configured value has to win. Same guarantee as
+ * AConfiguredRootIsNeverOverwritten, stated against the case that motivated it.
+ */
+void TST_DataRoot::AConfiguredRootOutranksTheInstaller() const
+{
+    const QString chosenByUser = scratchPath(QStringLiteral("chosen-in-preferences"));
+    writeDataRoot(chosenByUser);
+
+    QCOMPARE(VCommonSettings::initializeDataRoot(), chosenByUser);
+    QVERIFY2(VCommonSettings::initializeDataRoot() != VCommonSettings::installerDataRoot() ||
+                 VCommonSettings::installerDataRoot().isEmpty(),
+             "a configured root must not be replaced by the installer's");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief EnsureDataRootTreeCreatesTheSubfolders checks the "create the subfolder tree at
  * that location on first use" requirement.
  */

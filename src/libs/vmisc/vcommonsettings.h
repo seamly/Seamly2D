@@ -86,6 +86,9 @@ public:
     // images and backups together.
     static QString       getDefaultDataRoot();
     static QString       getLegacyDataRoot();
+    // InstWinX64.00: the root Setup recorded in HKLM. Empty off Windows, and empty when
+    // no installer chose one.
+    static QString       installerDataRoot();
     static QString       dataRoot();
     static QString       dataSubdirPath(const QString &subdirectory);
     static QString       initializeDataRoot(bool *adoptedLegacyTree = nullptr);

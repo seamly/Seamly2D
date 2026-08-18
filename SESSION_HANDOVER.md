@@ -6,6 +6,60 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## PICK UP HERE (2026-08-17, the data root the wizard promises is the one the apps use)
+
+InstWinX64.00 is closed. It was two defects wearing one hat.
+
+1. **Page 5 offered the wrong folder.** `SEAMLYDATAPARENT` defaulted to
+   `%USERPROFILE%`, so the wizard promised `C:\Users\<user>\SeamlyData` while the
+   apps created `<Documents>\Seamly`. The default parent is now the `PersonalFolder`
+   known folder, with `%USERPROFILE%\Documents` as a second action in reserve.
+   **User decision, 2026-08-17: the parent is Documents; the leaf stays
+   `SeamlyData`; the page keeps asking for the parent only.**
+2. **Nothing read what Setup recorded.** `HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot`
+   was written and never read. `VCommonSettings::installerDataRoot()` reads it,
+   and `initializeDataRoot()` adopts it when `paths/dataRoot` is unset. That
+   closes InstWinX64.2.13 as well.
+
+A third defect fell out of trusting that value: the registry row held
+`[SEAMLYDATAROOT]`, and **a directory id always resolves**, so `/qn` with no
+arguments composed onto `TARGETDIR` and recorded `C:\SeamlyData`. Harmless while
+nothing read it. The row now holds `[SEAMLYDATAROOTRECORDED]`, set only when this
+run chose a root, and a `RegistrySearch` prefills it so repair keeps the old
+value.
+
+**Two ordering facts that are the whole mechanism — do not reschedule these:**
+
+- `SetSEAMLYDATACHOSEN` runs **before `CostInitialize`** (798). That is the only
+  window where `SEAMLYDATAPARENT` and `SEAMLYDATAROOT` are empty unless somebody
+  set them. Afterwards the Directory table has resolved both and a choice is
+  indistinguishable from a fallback.
+- `SetSEAMLYDATAROOTRECORDED` runs **after `CostFinalize`** (1001), where
+  `[SEAMLYDATAROOT]` is a real path, and before `WriteRegistryValues` (5000).
+- Both UI default actions carry `AND NOT Installed`. Without it a repair
+  recomputes the default parent and silently moves a customised data root.
+
+**Verified:** link-only `wix build` clean; `wix msi validate` clean apart from
+the already-suppressed ICE43/ICE57 and the expected ICE61;
+`smsi_check_authoring.ps1` **133 assertions** pass (was 122); MSI tables queried
+directly for the sequence numbers above.
+
+**Not verified:** an interactive install, and the C++ half — Seamly2D and
+SeamlyMe have no local build, so `ci.yml` is their only check. The new Qt code
+was syntax-checked against Qt 6.11.1 headers with `cl /Zs`.
+
+**Next, and adjacent:** InstWinX64.2.11 wants the root to survive an *upgrade*.
+A major upgrade runs the wizard, so page 5 still offers the default rather than
+the recorded root. The `RegistrySearch` already supplies the value; prefilling
+the page from it is the remaining work.
+
+**A link-only MSI build is reproducible on this PC.** `wix` 6.0.2 is on `PATH`.
+Point `ParentStagingDir` and `ExeStagingDir` at a stub tree holding any files
+named `seamly2d.exe`, `seamlyme.exe`, `SeamlyLayout.exe` plus one file in the
+parent directory, pass every `-d` `smsi.ps1` passes, and glob **every** `*.wxs`
+in `scripts/packaging/windows`. That verifies all authoring and both check
+scripts without a real build.
+
 ## Terminology: "suite", not "family" (2026-08-17)
 
 The three apps are the **Seamly Application Suite**. "Family" is retired. Use
@@ -26,7 +80,7 @@ old handover and completed-task entries — that file is now `smsi.wxs`.
 build, so the `vmisc.pri` / `Seamly2DTest.pro` renames rest on CI. This push runs
 the full suite (no skip token) for that reason.
 
-## PICK UP HERE (2026-08-15, the MSI installs end to end)
+## Earlier (2026-08-15, the MSI installs end to end)
 
 **The rebuilt `dev-latest` MSI completed a full interactive install.**
 `InstWinX64.1.6` is closed. All ten pages drew. The data root composed as
