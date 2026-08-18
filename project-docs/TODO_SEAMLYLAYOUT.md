@@ -6,9 +6,21 @@ Check off subtasks as they are accomplished; when every subtask of a task is com
 
 Tasks in this file are numbered and are prefixed with `Layout.`
 
+## Task Layout.000 - Open SeamlyLayout.exe
+
+- [ ] Layout.000.1 While in 'Piece Mode' in Seamly2D, pressing the 'Layout' button on the menu should immediately run SeamlyLayout.exe; currently when the Layout button is pressed Seamly2d's 'Layout Mode' appears then seamlyLayout.exe appears --> fix: do not display the old layout canvas and tools, they have been superceded by the SeamlyLayout.exe application.
+
+- [ ] Layout.000.2 When the 'Adjust Mode' is exited, return to 'Piece Mode' in Seamly 2D.
+
+## Task Layout.00 - Layout Settings
+
+- [ ] Layout.00.1 - For setting 'Layout Mode', add a checkbox for 'None'; when 'None' is checked the layout algorithm should ignore the grainline direction when placing the pieces efficiently.
+
 ## Task Layout.0 - layout algorithm improvement
 
-- [ ] Layout 0.1 - The layout algorithm has suffered regression - the pieces are nested sub-optimally (there is a lot of space between the pieces). Fix the layout algorithm so that the pieces only have the gap specified between them.  
+- [ ] Layout 0.1 - The layout algorithm has suffered regression - the pieces are nested sub-optimally (there is a lot of space between the pieces). Fix the layout algorithm so that the pieces only have the gap specified between them.
+
+- [ ] Layout 0.2 - Implement the 'Layout Mode' == 'None' option so that the grainline direction is ignored while the pieces are efficiently arranged. 
 
 ## Task Layout.1 - 'Adjust Layout' improvement
 
