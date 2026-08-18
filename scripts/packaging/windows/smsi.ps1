@@ -14,7 +14,7 @@
 # ** @copyright
 # **  This source code is part of the Seamly project, a suite of apparel CAD
 # **  software.
-# **  Copyright (C) 2026 Seamly Project
+# **  Copyright (C) 2026 Seamly2D Project
 # **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 # **
 # **  @license
@@ -451,6 +451,12 @@ $checkArguments = @{ Msi = $msi; Arch = $Arch }
 & (Join-Path $PSScriptRoot 'smsi_check_authoring.ps1') @checkArguments
 if ($LASTEXITCODE -ne 0) {
     throw "install-time authoring check failed (exit code $LASTEXITCODE) - see output above."
+}
+
+Write-Host "checking user-data migration..."
+& (Join-Path $PSScriptRoot 'smsi_migrate_user_data_test.ps1')
+if ($LASTEXITCODE -ne 0) {
+    throw "user-data migration check failed (exit code $LASTEXITCODE) - see output above."
 }
 
 $msiSize = [math]::Round((Get-Item $msi).Length / 1MB, 1)

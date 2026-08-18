@@ -6,52 +6,45 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## PICK UP HERE (2026-08-17, the data root the wizard promises is the one the apps use)
+## PICK UP HERE (2026-08-18, three Windows data-tree cases)
 
-InstWinX64.00 is closed. It was two defects wearing one hat.
+InstWinX64.01 implements the user's three required cases.
 
-1. **Page 5 offered the wrong folder.** `SEAMLYDATAPARENT` defaulted to
-   `%USERPROFILE%`, so the wizard promised `C:\Users\<user>\SeamlyData` while the
-   apps created `<Documents>\Seamly`. The default parent is now the `PersonalFolder`
-   known folder, with `%USERPROFILE%\Documents` as a second action in reserve.
-   **User decision, 2026-08-17: the parent is Documents; the leaf stays
-   `SeamlyData`; the page keeps asking for the parent only.**
-2. **Nothing read what Setup recorded.** `HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot`
-   was written and never read. `VCommonSettings::installerDataRoot()` reads it,
-   and `initializeDataRoot()` adopts it when `paths/dataRoot` is unset. That
-   closes InstWinX64.2.13 as well.
+- A fresh install skips the migration page. Setup records the selected
+  `SeamlyData` root. The first app launch creates the tree and standard
+  directories.
+- An old Seamly update reads the legacy `seamly2d` root from application path
+  settings. It archives `seamly2d`, extracts it below the selected parent, and
+  renames the extracted root to `SeamlyData`.
+- A new Seamly update archives `SeamlyData` with that top-level directory. It
+  does nothing when the selected location is unchanged.
 
-A third defect fell out of trusting that value: the registry row held
-`[SEAMLYDATAROOT]`, and **a directory id always resolves**, so `/qn` with no
-arguments composed onto `TARGETDIR` and recorded `C:\SeamlyData`. Harmless while
-nothing read it. The row now holds `[SEAMLYDATAROOTRECORDED]`, set only when this
-run chose a root, and a `RegistrySearch` prefills it so repair keeps the old
-value.
+Both update modes preserve the source, keep existing destination objects, add
+missing standard directories, retain non-path settings, and replace path
+settings after verification.
 
-**Two ordering facts that are the whole mechanism — do not reschedule these:**
+AppSearch verifies `seamly2d.exe`, `seamlyme.exe`, and `SeamlyLayout.exe`
+before Windows Installer removes the previous program files. Old mode requires
+both parent apps and no SeamlyLayout. New mode requires SeamlyLayout.
 
-- `SetSEAMLYDATACHOSEN` runs **before `CostInitialize`** (798). That is the only
-  window where `SEAMLYDATAPARENT` and `SEAMLYDATAROOT` are empty unless somebody
-  set them. Afterwards the Directory table has resolved both and a choice is
-  indistinguishable from a fallback.
-- `SetSEAMLYDATAROOTRECORDED` runs **after `CostFinalize`** (1001), where
-  `[SEAMLYDATAROOT]` is a real path, and before `WriteRegistryValues` (5000).
-- Both UI default actions carry `AND NOT Installed`. Without it a repair
-  recomputes the default parent and silently moves a customised data root.
+`SEAMLYDATAPARENT` now reads and writes `HKLM\SOFTWARE\Seamly\Seamly2D\DataParent`.
+Page 5 therefore preserves the previous parent during a major upgrade.
+`SEAMLYPREVIOUSDATAROOT` keeps the old `DataRoot` available after the registry
+component records the new root.
 
-**Verified:** link-only `wix build` clean; `wix msi validate` clean apart from
-the already-suppressed ICE43/ICE57 and the expected ICE61;
-`smsi_check_authoring.ps1` **133 assertions** pass (was 122); MSI tables queried
-directly for the sequence numbers above.
+The migration action remains deferred, impersonated, and non-fatal. It can read
+the installing user's settings and cloud folders. A data-copy failure cannot
+roll back a valid program install.
 
-**Not verified:** an interactive install, and the C++ half — Seamly2D and
-SeamlyMe have no local build, so `ci.yml` is their only check. The new Qt code
-was syntax-checked against Qt 6.11.1 headers with `cl /Zs`.
+Verification completed on the task branch:
 
-**Next, and adjacent:** InstWinX64.2.11 wants the root to survive an *upgrade*.
-A major upgrade runs the wizard, so page 5 still offers the default rather than
-the recorded root. The `RegistrySearch` already supplies the value; prefilling
-the page from it is the remaining work.
+- `smsi_migrate_user_data_test.ps1`: 15 passed, 0 failed.
+- Link-only x64 and arm64 `wix build`: passed.
+- `smsi_check_authoring.ps1`: passed for both packages.
+- `wix msi validate`: passed for both packages with only expected ICE61.
+
+A real interactive test remains open under Installer.2.1. Test all three cases
+with the next `dev-latest` MSI.
 
 **A link-only MSI build is reproducible on this PC.** `wix` 6.0.2 is on `PATH`.
 Point `ParentStagingDir` and `ExeStagingDir` at a stub tree holding any files

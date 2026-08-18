@@ -73,6 +73,46 @@
                       Bitness="always32" />
     </Property>
 
+    <!-- Classify the installed applications before RemoveFiles removes them.
+         Old Seamly has both parent apps and no SeamlyLayout. New Seamly has
+         SeamlyLayout in the suite install directory. -->
+    <Property Id="SEAMLYOLDS2DEXE" Secure="yes">
+      <RegistrySearch Id="SeamlyOld2DDirectorySearch"
+                      Root="HKLM" Key="SOFTWARE\NSIS_Seamly2D" Name="Install_Dir"
+                      Type="directory" Bitness="always32">
+        <DirectorySearch Id="SeamlyOld2DFileDirectory">
+          <FileSearch Id="SeamlyOld2DFileSearch" Name="seamly2d.exe" />
+        </DirectorySearch>
+      </RegistrySearch>
+    </Property>
+    <Property Id="SEAMLYOLDMEEXE" Secure="yes">
+      <RegistrySearch Id="SeamlyOldMeDirectorySearch"
+                      Root="HKLM" Key="SOFTWARE\NSIS_Seamly2D" Name="Install_Dir"
+                      Type="directory" Bitness="always32">
+        <DirectorySearch Id="SeamlyOldMeFileDirectory">
+          <FileSearch Id="SeamlyOldMeFileSearch" Name="seamlyme.exe" />
+        </DirectorySearch>
+      </RegistrySearch>
+    </Property>
+    <Property Id="SEAMLYOLDLAYOUTEXE" Secure="yes">
+      <RegistrySearch Id="SeamlyOldLayoutDirectorySearch"
+                      Root="HKLM" Key="SOFTWARE\NSIS_Seamly2D" Name="Install_Dir"
+                      Type="directory" Bitness="always32">
+        <DirectorySearch Id="SeamlyOldLayoutFileDirectory">
+          <FileSearch Id="SeamlyOldLayoutFileSearch" Name="SeamlyLayout.exe" />
+        </DirectorySearch>
+      </RegistrySearch>
+    </Property>
+    <Property Id="SEAMLYNEWLAYOUTEXE" Secure="yes">
+      <RegistrySearch Id="SeamlyNewLayoutDirectorySearch"
+                      Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D" Name="InstallPath"
+                      Type="directory" Bitness="always64">
+        <DirectorySearch Id="SeamlyNewLayoutFileDirectory">
+          <FileSearch Id="SeamlyNewLayoutFileSearch" Name="SeamlyLayout.exe" />
+        </DirectorySearch>
+      </RegistrySearch>
+    </Property>
+
     <!-- Where the NSIS product put its Start Menu shortcuts, for the removal
          components below. The .nsi never calls SetShellVarContext all, so
          $SMPROGRAMS is the INSTALLING USER's Start Menu rather than the All
