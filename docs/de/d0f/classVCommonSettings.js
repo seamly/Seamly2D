@@ -156,6 +156,7 @@ var classVCommonSettings =
     [ "getZoomRBPositiveColor", "de/d0f/classVCommonSettings.html#a07d231aab06af8d67de6d356a5732205", null ],
     [ "getZoomSpeedFactor", "de/d0f/classVCommonSettings.html#a0b1a5bd307c24dae43a8fb00ae468bd3", null ],
     [ "initializeDataRoot", "de/d0f/classVCommonSettings.html#aafe7454ee52f4197fe4ff6e042e2f764", null ],
+    [ "installerDataRoot", "de/d0f/classVCommonSettings.html#a8d7f5be2b3c53f56b58a77acd1aa9f70", null ],
     [ "isHideSeamLine", "de/d0f/classVCommonSettings.html#a818ff0d8d7f245e860261512006844ad", null ],
     [ "isPanActiveSpaceKey", "de/d0f/classVCommonSettings.html#a969bdc27b1b2d828d1bd250c87def9ee", null ],
     [ "isWireframe", "de/d0f/classVCommonSettings.html#a86f66843a96b7ea688d3cde1f0f059c0", null ],
