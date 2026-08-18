@@ -302,7 +302,7 @@
 
         <Control Id="Note" Type="Text" X="20" Y="180" Width="330" Height="44"
                  NoPrefix="yes"
-                 Text="Nothing is written there now. Setup records the folder, and the apps use it from their first run. Your existing work is never deleted or moved out of where it is today." />
+                 Text="Setup creates this folder. The apps add their standard folders on first run. Your existing work is never deleted or moved out of where it is today." />
 
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
                  Text="&amp;Back">

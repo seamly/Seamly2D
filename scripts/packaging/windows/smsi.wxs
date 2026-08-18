@@ -66,7 +66,7 @@
  **
  **    Patterns, measurements and templates live in the USER DATA ROOT, which
  **    Task InstWinX64.1.2 made a choice the user makes during setup:
- **      - SEAMLYDATAROOT holds the folder, default C:\Users\<user>\SeamlyData.
+ **      - SEAMLYDATAROOT holds the folder, default C:\Users\<user>\Documents\SeamlyData.
  **      - SeamlyDataDirDlg asks for it; any drive is allowed, including USB and
  **        cloud-synced folders (unlike the program folder, which rejects them).
  **      - The chosen path is recorded in HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot
@@ -471,6 +471,7 @@
          smsi_shortcuts.wxs. These references are what link those fragments -
          a fragment nothing refers to is dropped without an error. -->
     <ComponentGroupRef Id="SuiteExecutables" />
+    <ComponentGroupRef Id="UserDataRootFolder" />
     <ComponentGroupRef Id="InstallInfo" />
     <ComponentGroupRef Id="OptionalDesktopShortcuts" />
 

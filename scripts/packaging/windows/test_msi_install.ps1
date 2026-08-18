@@ -619,6 +619,13 @@ function Invoke-InstalledChecks {
         -Succeeded ([string]$InstallInfo.DisplayVersion -match '^\d{2}\.\d+\.\d+\.\d+$') `
         -Detail "DisplayVersion = '$($InstallInfo.DisplayVersion)'"
 
+    $dataRoot = [string]$InstallInfo.DataRoot
+    if (-not [string]::IsNullOrWhiteSpace($dataRoot)) {
+        Assert-That -Name 'Setup created the recorded user-data root' `
+            -Succeeded (Test-Path -LiteralPath $dataRoot -PathType Container) `
+            -Detail "DataRoot = '$dataRoot'"
+    }
+
     $breadcrumbs = @('DesktopShortcutSeamly2D', 'DesktopShortcutSeamlyMe')
     foreach ($breadcrumb in $breadcrumbs) {
         $present = $null -ne $InstallInfo.PSObject.Properties[$breadcrumb]

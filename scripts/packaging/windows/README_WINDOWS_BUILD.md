@@ -152,8 +152,8 @@ that user's first run. The value comes from `SEAMLYDATAROOTRECORDED`, not from
 app would adopt that. With no argument the value stays empty, which the apps
 read as "use your own default". A repair keeps whatever is already recorded.
 
-Fresh Setup skips the migration page. The first app launch creates the selected
-`SeamlyData` tree and its standard directories.
+Fresh Setup skips the migration page and creates the selected `SeamlyData`
+root. The first app launch creates its standard directories.
 
 An old-version update reads the `seamly2d` source root from application
 settings. It creates `seamly2d.zip`, extracts it below the selected parent, and
