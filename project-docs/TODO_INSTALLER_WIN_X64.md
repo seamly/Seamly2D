@@ -85,6 +85,42 @@ Documentation updated: `.github/README-BUILDS.md`,
 default rather than the recorded root. The `RegistrySearch` above supplies the
 value; prefilling page 5 from it is the remaining work.
 
+## InstWinX64.01 - Implement the three data-tree cases
+
+- [x] Detect a fresh install, an update from old Seamly, and an update from new Seamly.
+- [x] Skip migration on a fresh install. The first app launch creates the selected tree.
+- [x] Archive old `seamly2d`, extract it, and rename the extracted root to `SeamlyData`.
+- [x] Archive new `SeamlyData` with `SeamlyData` as its top-level directory.
+- [x] Do nothing when a new Seamly update keeps the current data location.
+- [x] Keep source data and existing destination objects.
+- [x] Retain non-path settings and replace path settings after verification.
+
+### Result — 2026-08-18
+
+Fresh installs skip `SeamlyDataMigrateDlg`. Setup records the selected parent
+and root. The existing application first-run logic creates `SeamlyData` and its
+nine standard directories.
+
+The impersonated update action now selects one of two explicit modes. Old mode
+reads the `seamly2d` source root from the user's INI path settings. It creates
+`seamly2d.zip`, extracts it below the selected parent, and renames the extracted
+root to `SeamlyData`. New mode reads the previous recorded root and archives a
+`SeamlyData` top-level directory. It exits without changes when both roots are
+the same.
+
+Both modes merge without overwrite, verify each copied file by size, add any
+missing standard directories, retain non-path settings, and replace path
+settings. The source remains unchanged.
+
+`DataParent` now persists beside `DataRoot`. An upgrade therefore starts with
+the previous parent instead of resetting page 5 to Documents. This completes
+InstWinX64.2.11.
+
+Verification: `smsi_migrate_user_data_test.ps1` passes 15 assertions. Link-only
+x64 and arm64 MSIs build. `smsi_check_authoring.ps1` passes for both packages.
+`wix msi validate` passes with only the expected ICE61 warning. A real
+interactive update remains part of Installer.2.1.
+
 ## InstWinX64.1 — Replace WiX Dialog Framework
 
 Blocks installer path dialogs and `SeamlyShortcutsDlg`.
@@ -320,7 +356,7 @@ Interactive verification is done. See InstWinX64.1.6.
 - [x] **InstWinX64.2.8** Support `BrowseDlg` and `SEAMLYDATAROOT=`.
 - [x] **InstWinX64.2.9** Require opt-in before migration.
 - [x] **InstWinX64.2.10** Copy without overwrite or source deletion.
-- [ ] **InstWinX64.2.11** Persist program and data paths through repair and upgrade.
+- [x] **InstWinX64.2.11** Persist program and data paths through repair and upgrade.
 - [ ] **InstWinX64.2.12** Register one shared data-root setting.
 - [x] **InstWinX64.2.13** Make all three apps honor the configured data root. Done by InstWinX64.00: `VCommonSettings::installerDataRoot()` reads the recorded root and `initializeDataRoot()` adopts it, which covers seamly2d and seamlyme. SeamlyLayout has no data root.
 

@@ -42,6 +42,7 @@
                folder and filling it are separate decisions. Empty when nothing
                chose a root, which the apps read as "use your own default". -->
           <RegistryValue Name="DataRoot" Type="string" Value="[SEAMLYDATAROOTRECORDED]" />
+          <RegistryValue Name="DataParent" Type="string" Value="[SEAMLYDATAPARENT]" />
         </RegistryKey>
       </Component>
 

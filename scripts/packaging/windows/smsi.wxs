@@ -61,7 +61,8 @@
  **  USER DATA IS NEVER DELETED OR OVERWRITTEN:
  **    Per-user settings live under %LOCALAPPDATA%\Seamly\<app>
  **    (AppData\Local\Seamly\Seamly2D, ...\SeamlyMe, ...\SeamlyLayout) plus the shared
- **    %APPDATA%\Seamly\qt6_common.ini. The installer never touches those.
+ **    %APPDATA%\Seamly\qt6_common.ini. Update migration retains non-path
+ **    settings and replaces path settings after the data copy verifies.
  **
  **    Patterns, measurements and templates live in the USER DATA ROOT, which
  **    Task InstWinX64.1.2 made a choice the user makes during setup:
@@ -70,9 +71,9 @@
  **        cloud-synced folders (unlike the program folder, which rejects them).
  **      - The chosen path is recorded in HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot
  **        for the apps to read on first run.
- **      - SeamlyDataMigrateDlg offers to COPY existing work into it. The copy is
- **        opt-in, additive only, and never overwrites: a file already present at
- **        the destination is left exactly as it is. Source files are only read.
+ **      - SeamlyDataMigrateDlg appears only for an update. Old updates archive
+ **        seamly2d and rename the extracted root. New updates archive a
+ **        SeamlyData top-level root when the selected location changed.
  **
  **    Uninstall removes no user data of any kind, so uninstall/reinstall and
  **    upgrade never lose work. This is what the Task 51 "existing installation"
@@ -87,11 +88,10 @@
  **      SeamlyShortcutsDlg -> VerifyReadyDlg -> ProgressDlg -> ExitDialog
  **
  **    SeamlyPreviousInstallDlg  shown only when an earlier install is detected
- **                              — either an older MSI of this product
- **                              (WIX_UPGRADE_DETECTED, set by MajorUpgrade) or
- **                              the old NSIS installation
- **                              (SEAMLYLEGACYUNINSTALLSTRING, found by the
- **                              registry search below). Warns that the program
+ **                              — either old Seamly2D plus SeamlyMe without
+ **                              SeamlyLayout, or new Seamly with SeamlyLayout.
+ **                              AppSearch verifies the executable files before
+ **                              the old program directory is removed. Warns that the program
  **                              files will be replaced and states plainly that
  **                              user data is not touched.
  **    SeamlyDataDirDlg          where the user keeps patterns and measurements.
@@ -263,7 +263,14 @@
          back to their own first-run default, which is the behaviour that
          shipped before this task. -->
     <Property Id="SEAMLYDATAROOT" Secure="yes" />
-    <Property Id="SEAMLYDATAPARENT" Secure="yes" />
+    <Property Id="SEAMLYDATAPARENT" Secure="yes">
+      <RegistrySearch Id="RecordedDataParentSearch"
+                      Root="HKLM"
+                      Key="SOFTWARE\Seamly\Seamly2D"
+                      Name="DataParent"
+                      Type="raw"
+                      Bitness="always64" />
+    </Property>
     <!-- The default parent is the user's Documents folder (InstWinX64.00), so
          the data root lands beside the documents every other application
          writes, and so Setup and the apps agree on one place. The apps derive
@@ -341,6 +348,14 @@
                       Type="raw"
                       Bitness="always64" />
     </Property>
+    <Property Id="SEAMLYPREVIOUSDATAROOT" Secure="yes">
+      <RegistrySearch Id="PreviousDataRootSearch"
+                      Root="HKLM"
+                      Key="SOFTWARE\Seamly\Seamly2D"
+                      Name="DataRoot"
+                      Type="raw"
+                      Bitness="always64" />
+    </Property>
     <SetProperty Id="SEAMLYDATACHOSEN"
                  Value="1"
                  Before="CostInitialize"
@@ -383,12 +398,18 @@
          shows the wrong pages. Do not remove it. -->
     <UIRef Id="SeamlyUI" />
 
-    <!-- ================= copy existing user data (InstWinX64.1.2.4) ======= -->
-    <!-- WHY A SCRIPT AND NOT THE MoveFile TABLE
-         MSI's own CopyFile/MoveFile rows can only copy within a single
-         directory - their wildcards do not recurse - and a user's pattern
-         folder has subdirectories. So the copy is a deferred action running the
-         PowerShell helper installed above.
+    <!-- ================= migrate existing user data ====================== -->
+    <!-- The legacy installer identifies old Seamly. A major upgrade identifies
+         new Seamly. The helper reads the source tree from application settings,
+         archives it, extracts it below the selected parent, and updates only
+         path settings after the copy verifies.
+
+         Old archives contain seamly2d. The helper renames that extracted root
+         to SeamlyData. New archives contain SeamlyData as their top-level root.
+
+         WHY A SCRIPT AND NOT THE MoveFile TABLE
+         MSI's CopyFile and MoveFile rows cannot create or extract an archive.
+         The deferred action runs the installed PowerShell helper.
 
          Impersonate="yes" is required, not cosmetic. A deferred action defaults
          to running as SYSTEM in a perMachine package, and SYSTEM cannot read a
@@ -415,10 +436,18 @@
          standard pattern, and why the SetProperty below is sequenced
          immediately before the action it feeds. -->
     <SetProperty Id="SeamlyCopyUserData"
-                 Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]smsi_migrate_user_data.ps1&quot; -Destination &quot;[SEAMLYDATAROOT]&quot;"
+                 Action="SetSeamlyOldDataMigration"
+                 Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]smsi_migrate_user_data.ps1&quot; -Mode Old -Destination &quot;[SEAMLYDATAROOT]&quot; -InstallFolder &quot;[INSTALLFOLDER]&quot;"
                  Before="SeamlyCopyUserData"
                  Sequence="execute"
-                 Condition="SEAMLYCOPYUSERDATA = &quot;1&quot; AND SEAMLYDATAROOT AND NOT Installed" />
+                 Condition="SEAMLYCOPYUSERDATA = &quot;1&quot; AND SEAMLYDATAROOT AND SEAMLYOLDS2DEXE AND SEAMLYOLDMEEXE AND NOT SEAMLYOLDLAYOUTEXE AND NOT Installed" />
+
+    <SetProperty Id="SeamlyCopyUserData"
+                 Action="SetSeamlyNewDataMigration"
+                 Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]smsi_migrate_user_data.ps1&quot; -Mode New -Destination &quot;[SEAMLYDATAROOT]&quot; -PreviousDataRoot &quot;[SEAMLYPREVIOUSDATAROOT]&quot; -InstallFolder &quot;[INSTALLFOLDER]&quot;"
+                 Before="SeamlyCopyUserData"
+                 Sequence="execute"
+                 Condition="SEAMLYCOPYUSERDATA = &quot;1&quot; AND SEAMLYDATAROOT AND SEAMLYNEWLAYOUTEXE AND NOT Installed" />
 
     <CustomAction Id="SeamlyCopyUserData"
                   DllEntry="WixQuietExec64"
@@ -433,7 +462,7 @@
     <InstallExecuteSequence>
       <Custom Action="SeamlyCopyUserData"
               After="WriteRegistryValues"
-              Condition="SEAMLYCOPYUSERDATA = &quot;1&quot; AND SEAMLYDATAROOT AND NOT Installed" />
+              Condition="SEAMLYCOPYUSERDATA = &quot;1&quot; AND SEAMLYDATAROOT AND ((SEAMLYOLDS2DEXE AND SEAMLYOLDMEEXE AND NOT SEAMLYOLDLAYOUTEXE) OR SEAMLYNEWLAYOUTEXE) AND NOT Installed" />
     </InstallExecuteSequence>
 
     <!-- The directory tree, the three executables, their Start Menu shortcuts

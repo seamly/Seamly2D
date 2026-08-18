@@ -10,10 +10,9 @@ Notes:
 
 - **Data migration is copy-and-verify, leaving the legacy tree intact**, never
    a bare rename, because a user may need to roll back to an earlier release.
-- **The migration lives in the applications, not the installer.** A per-machine
-   MSI's server side runs as LocalSystem, so a per-user path resolves to the
-   SYSTEM profile and would only cover whoever ran setup; macOS and Linux have no
-   MSI at all, so the logic would be written twice.
+- **Windows interactive updates use an impersonated MSI migration action.** It
+   reads the installing user's paths and settings. Fresh installs and other
+   platforms keep application first-run creation and fallback migration.
 - **Testing happens on the test laptop, not in a VM** 
    The Windows PC is Windows 11 **Home**, which ships neither Hyper-V nor Windows
    Sandbox, so a VM here means a third-party hypervisor; the user considered

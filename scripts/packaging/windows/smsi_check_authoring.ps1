@@ -208,7 +208,7 @@ Assert-That -Name 'MajorUpgrade keyed on the fixed suite UpgradeCode' `
 $locators = Get-MsiRows -Sql "SELECT ``Signature_``, ``Root``, ``Key``, ``Name``, ``Type`` FROM ``RegLocator``" `
     -Columns 'Signature', 'Root', 'Key', 'Name', 'Type'
 $uninstallLocator = @($locators | Where-Object { $_.Name -eq 'UninstallString' })
-$installDirLocator = @($locators | Where-Object { $_.Name -eq 'Install_Dir' })
+$installDirLocator = @($locators | Where-Object { $_.Signature -eq 'SeamlyLegacyInstallDirSearch' })
 Assert-That -Name 'NSIS UninstallString is searched for under HKLM' `
     -Succeeded ($uninstallLocator.Count -eq 1 -and $uninstallLocator[0].Root -eq '2')
 Assert-That -Name 'NSIS UninstallString search reads the 32-bit registry view' `
@@ -218,14 +218,17 @@ Assert-That -Name 'NSIS Install_Dir search reads the 32-bit registry view' `
     -Succeeded ($installDirLocator.Count -eq 1 -and (([int]$installDirLocator[0].Type) -band 16) -eq 0)
 
 $appSearch = @(Get-MsiRows -Sql "SELECT ``Property`` FROM ``AppSearch``" -Columns 'Property' | ForEach-Object { $_.Property })
-foreach ($searched in @('SEAMLYLEGACYUNINSTALLSTRING', 'SEAMLYLEGACYINSTALLDIR')) {
+foreach ($searched in @('SEAMLYLEGACYUNINSTALLSTRING', 'SEAMLYLEGACYINSTALLDIR', 'SEAMLYOLDS2DEXE',
+                        'SEAMLYOLDMEEXE', 'SEAMLYOLDLAYOUTEXE', 'SEAMLYNEWLAYOUTEXE')) {
     Assert-That -Name "$searched is filled in by AppSearch" -Succeeded ($appSearch -contains $searched)
 }
 
 # Public properties only survive the hand-off to the elevated server-side
 # sequence when they are listed here.
 $secure = Get-MsiProperty -Name 'SecureCustomProperties'
-foreach ($property in @('SEAMLYDESKTOPSHORTCUTS', 'SEAMLYLEGACYUNINSTALLSTRING', 'SEAMLYLEGACYINSTALLDIR')) {
+foreach ($property in @('SEAMLYDESKTOPSHORTCUTS', 'SEAMLYLEGACYUNINSTALLSTRING', 'SEAMLYLEGACYINSTALLDIR',
+                        'SEAMLYOLDS2DEXE', 'SEAMLYOLDMEEXE', 'SEAMLYOLDLAYOUTEXE',
+                        'SEAMLYNEWLAYOUTEXE', 'SEAMLYPREVIOUSDATAROOT')) {
     Assert-That -Name "$property is a secure custom property" -Succeeded ($secure -like "*$property*")
 }
 
@@ -271,23 +274,28 @@ function Assert-Transition {
 }
 
 Assert-Transition -From 'WelcomeDlg' -Control 'Next' -To 'LicenseAgreementDlg' -ConditionMatch 'NOT Installed'
+$previousInstallCondition = 'SEAMLYOLDS2DEXE.*SEAMLYOLDMEEXE.*SEAMLYOLDLAYOUTEXE.*SEAMLYNEWLAYOUTEXE.*NOT Installed'
 Assert-Transition -From 'LicenseAgreementDlg' -Control 'Next' -To 'SeamlyPreviousInstallDlg' `
-    -ConditionMatch 'WIX_UPGRADE_DETECTED.*SEAMLYLEGACYUNINSTALLSTRING.*NOT Installed'
+    -ConditionMatch $previousInstallCondition
 Assert-Transition -From 'LicenseAgreementDlg' -Control 'Next' -To 'InstallDirDlg' -ConditionMatch 'NOT \('
 Assert-Transition -From 'SeamlyPreviousInstallDlg' -Control 'Next' -To 'InstallDirDlg'
 Assert-Transition -From 'InstallDirDlg' -Control 'Next' -To 'SeamlyDataDirDlg'
-Assert-Transition -From 'SeamlyDataDirDlg' -Control 'Next' -To 'SeamlyDataMigrateDlg'
+Assert-Transition -From 'SeamlyDataDirDlg' -Control 'Next' -To 'SeamlyDataMigrateDlg' `
+    -ConditionMatch $previousInstallCondition
+Assert-Transition -From 'SeamlyDataDirDlg' -Control 'Next' -To 'SeamlyShortcutsDlg' -ConditionMatch 'NOT \('
 Assert-Transition -From 'SeamlyDataMigrateDlg' -Control 'Next' -To 'SeamlyShortcutsDlg'
 Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Next' -To 'VerifyReadyDlg'
 
 Assert-Transition -From 'LicenseAgreementDlg' -Control 'Back' -To 'WelcomeDlg'
 Assert-Transition -From 'SeamlyPreviousInstallDlg' -Control 'Back' -To 'LicenseAgreementDlg'
 Assert-Transition -From 'InstallDirDlg' -Control 'Back' -To 'SeamlyPreviousInstallDlg' `
-    -ConditionMatch 'WIX_UPGRADE_DETECTED.*SEAMLYLEGACYUNINSTALLSTRING.*NOT Installed'
+    -ConditionMatch $previousInstallCondition
 Assert-Transition -From 'InstallDirDlg' -Control 'Back' -To 'LicenseAgreementDlg' -ConditionMatch 'NOT \('
 Assert-Transition -From 'SeamlyDataDirDlg' -Control 'Back' -To 'InstallDirDlg'
 Assert-Transition -From 'SeamlyDataMigrateDlg' -Control 'Back' -To 'SeamlyDataDirDlg'
-Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyDataMigrateDlg'
+Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyDataMigrateDlg' `
+    -ConditionMatch $previousInstallCondition
+Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyDataDirDlg' -ConditionMatch 'NOT \('
 Assert-Transition -From 'VerifyReadyDlg' -Control 'Back' -To 'SeamlyShortcutsDlg' -ConditionMatch 'NOT Installed'
 
 # The two License Next rows must not both be true and must not both be false,
@@ -300,7 +308,7 @@ $toPrevious = @($licenseNext | Where-Object { $_.Argument -eq 'SeamlyPreviousIns
 $toInstallDir = @($licenseNext | Where-Object { $_.Argument -eq 'InstallDirDlg' })
 Assert-That -Name 'the license page has exactly two exits' -Succeeded ($licenseNext.Count -eq 2)
 if ($toPrevious.Count -eq 1 -and $toInstallDir.Count -eq 1) {
-    $found = [regex]::Escape('(WIX_UPGRADE_DETECTED OR SEAMLYLEGACYUNINSTALLSTRING) AND NOT Installed')
+    $found = [regex]::Escape('((SEAMLYOLDS2DEXE AND SEAMLYOLDMEEXE AND NOT SEAMLYOLDLAYOUTEXE) OR SEAMLYNEWLAYOUTEXE) AND NOT Installed')
     Assert-That -Name 'the previous-install page is skipped on a clean machine' `
         -Succeeded ($toPrevious[0].Condition -match $found -and
                     $toInstallDir[0].Condition -match "NOT \($found\)") `
@@ -637,7 +645,7 @@ Assert-That -Name 'SEAMLYDATAROOTRECORDED is a secure custom property' `
 # key the last install wrote, and nothing overwrites it unless this run chose a
 # root. Type 18 is a raw registry value read from the 64-bit view (2 + 16).
 $recordedSearch = Get-MsiRows `
-    -Sql "SELECT ``Signature_``, ``Root``, ``Key``, ``Name``, ``Type`` FROM ``RegLocator`` WHERE ``Name``='DataRoot'" `
+    -Sql "SELECT ``Signature_``, ``Root``, ``Key``, ``Name``, ``Type`` FROM ``RegLocator`` WHERE ``Signature_``='RecordedDataRootSearch'" `
     -Columns 'Signature_', 'Root', 'Key', 'Name', 'Type'
 Assert-That -Name 'the recorded data root is prefilled from the existing install' `
     -Succeeded ($recordedSearch.Count -eq 1 -and
@@ -648,6 +656,15 @@ $recordedAppSearch = Get-MsiRows `
     -Sql "SELECT ``Property``, ``Signature_`` FROM ``AppSearch`` WHERE ``Property``='SEAMLYDATAROOTRECORDED'" `
     -Columns 'Property', 'Signature_'
 Assert-That -Name 'AppSearch fills SEAMLYDATAROOTRECORDED' -Succeeded ($recordedAppSearch.Count -eq 1)
+$previousRootSearch = Get-MsiRows `
+    -Sql "SELECT ``Property``, ``Signature_`` FROM ``AppSearch`` WHERE ``Property``='SEAMLYPREVIOUSDATAROOT'" `
+    -Columns 'Property', 'Signature_'
+Assert-That -Name 'AppSearch preserves the previous data root for relocation' `
+    -Succeeded ($previousRootSearch.Count -eq 1)
+$dataParentValue = @($registry | Where-Object {
+    $_.Root -eq '2' -and $_.Key -eq 'SOFTWARE\Seamly\Seamly2D' -and $_.Name -eq 'DataParent' })
+Assert-That -Name 'the selected data parent is recorded for upgrades' `
+    -Succeeded ($dataParentValue.Count -eq 1 -and $dataParentValue[0].Value -eq '[SEAMLYDATAPARENT]')
 # Order is the whole mechanism. SEAMLYDATACHOSEN must be decided BEFORE
 # CostInitialize, while SEAMLYDATAPARENT and SEAMLYDATAROOT are non-empty only if
 # the wizard or the command line set them; afterwards the Directory table has
@@ -725,9 +742,10 @@ $dataDirNext = @($script:controlEvents | Where-Object {
 $dataDirCommit = @($dataDirNext | Where-Object { $_.Event -eq 'SetTargetPath' -and $_.Argument -eq 'SEAMLYDATAPARENT' })
 $dataDirAdvance = @($dataDirNext | Where-Object { $_.Event -eq 'NewDialog' })
 Assert-That -Name 'the data-root page commits the path before it advances' `
-    -Succeeded ($dataDirCommit.Count -eq 1 -and $dataDirAdvance.Count -eq 1 -and
-                [int]$dataDirCommit[0].Ordering -lt [int]$dataDirAdvance[0].Ordering) `
-    -Detail "SetTargetPath at $(if ($dataDirCommit.Count) { $dataDirCommit[0].Ordering } else { '<nothing>' }), NewDialog at $(if ($dataDirAdvance.Count) { $dataDirAdvance[0].Ordering } else { '<nothing>' })"
+    -Succeeded ($dataDirCommit.Count -eq 1 -and $dataDirAdvance.Count -eq 2 -and
+                @($dataDirAdvance | Where-Object {
+                    [int]$dataDirCommit[0].Ordering -ge [int]$_.Ordering }).Count -eq 0) `
+    -Detail "SetTargetPath at $(if ($dataDirCommit.Count) { $dataDirCommit[0].Ordering } else { '<nothing>' }), NewDialog rows at $(($dataDirAdvance | ForEach-Object { $_.Ordering }) -join ', ')"
 # BrowseDlg's OK must close the dialog and commit the path it browsed to, and it
 # must validate only the program directory: the data root is allowed on cloud
 # and removable drives that the program-directory rules reject.
@@ -759,6 +777,30 @@ Assert-That -Name 'no rollback action deletes copied user data' `
 Assert-That -Name 'the copy helper script is packaged' `
     -Succeeded (@(Get-MsiRows -Sql "SELECT ``FileName`` FROM ``File`` WHERE ``Component_``='UserDataCopyScript'" -Columns 'FileName' |
                   Where-Object { $_.FileName -match 'smsi_migrate_user_data\.ps1' }).Count -eq 1)
+$migrationCommands = Get-MsiRows `
+    -Sql "SELECT ``Action``, ``Target`` FROM ``CustomAction`` WHERE ``Action``='SetSeamlyOldDataMigration' OR ``Action``='SetSeamlyNewDataMigration'" `
+    -Columns 'Action', 'Target'
+$oldMigrationCommand = @($migrationCommands | Where-Object { $_.Action -eq 'SetSeamlyOldDataMigration' })
+$newMigrationCommand = @($migrationCommands | Where-Object { $_.Action -eq 'SetSeamlyNewDataMigration' })
+Assert-That -Name 'old Seamly uses the archive migration mode' `
+    -Succeeded ($oldMigrationCommand.Count -eq 1 -and $oldMigrationCommand[0].Target -match '-Mode Old')
+Assert-That -Name 'new Seamly uses the relocation migration mode' `
+    -Succeeded ($newMigrationCommand.Count -eq 1 -and
+                $newMigrationCommand[0].Target -match '-Mode New' -and
+                $newMigrationCommand[0].Target -match 'SEAMLYPREVIOUSDATAROOT')
+$migrationConditions = Get-MsiRows `
+    -Sql "SELECT ``Action``, ``Condition`` FROM ``InstallExecuteSequence`` WHERE ``Action``='SetSeamlyOldDataMigration' OR ``Action``='SetSeamlyNewDataMigration'" `
+    -Columns 'Action', 'Condition'
+$oldMigrationCondition = @($migrationConditions | Where-Object { $_.Action -eq 'SetSeamlyOldDataMigration' })
+$newMigrationCondition = @($migrationConditions | Where-Object { $_.Action -eq 'SetSeamlyNewDataMigration' })
+Assert-That -Name 'old Seamly requires both parent apps and no SeamlyLayout' `
+    -Succeeded ($oldMigrationCondition.Count -eq 1 -and
+                $oldMigrationCondition[0].Condition -match 'SEAMLYOLDS2DEXE' -and
+                $oldMigrationCondition[0].Condition -match 'SEAMLYOLDMEEXE' -and
+                $oldMigrationCondition[0].Condition -match 'NOT SEAMLYOLDLAYOUTEXE')
+Assert-That -Name 'new Seamly requires an existing SeamlyLayout executable' `
+    -Succeeded ($newMigrationCondition.Count -eq 1 -and
+                $newMigrationCondition[0].Condition -match 'SEAMLYNEWLAYOUTEXE')
 
 # --- report --------------------------------------------------------------------
 [System.Runtime.InteropServices.Marshal]::ReleaseComObject($script:database) | Out-Null

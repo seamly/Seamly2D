@@ -49,7 +49,8 @@ The split was verified by dumping all 37 MSI tables before and after and diffing
 - **MSI version mapping**: MSI ignores the 4th ProductVersion field for upgrade comparisons, so the project's 4-part `YY.M.D.MMMM` rolling version cannot be used directly. `smsi.ps1` derives `YY.M.((D−1)·1440 + MMMM)` — strictly increasing per build — and stores the full project version as `DisplayVersion` in `HKLM\SOFTWARE\Seamly\Seamly2D`. `MMMM` is the minute of the day, so the third field is minutes-of-month (max 44639 < 65535).
 - **File associations**: `.sm2d` → Seamly2D, `.smis` (individual) and `.smms` (multisize) → SeamlyMe, authored as classic (non-advertised) registry values. SeamlyLayout gets no association — its input is the `.pieces.svg` handoff, and a double extension cannot be registered separately from plain `.svg`.
 - **Start Menu**: three advertised shortcuts directly in the Start Menu root (no folder — Windows 11 flattens folders anyway, and folderless shortcuts need no removal component).
-- **User data is never touched**: settings live under `%LOCALAPPDATA%\Seamly\<app>` (`AppData\Local\Seamly\Seamly2D`, `...\SeamlyMe`, `...\SeamlyLayout` — the Task 15 unified locations) plus `%APPDATA%\Seamly\qt6_common.ini`, and pattern/measurement data defaults to `C:\Users\<user>\Documents\SeamlyData`. The apps create these on first run (including legacy-location migration); install, upgrade and uninstall leave them alone.
+- **Fresh installs create no user data during Setup.** The first app launch creates `SeamlyData`, adds the nine standard directories, and writes the default paths.
+- **Updates can migrate user data.** The impersonated migration action runs as the installing user. It preserves non-path settings and replaces path settings only after verification.
 
 ## Install-time experience
 
@@ -59,10 +60,10 @@ The package defines **its own dialog set** (Task InstWinX64.1). It reuses the st
 |---|---|---|---|
 | 1 | Welcome | `WelcomeDlg` | always |
 | 2 | License | `LicenseAgreementDlg` | always |
-| 3 | An existing installation was found | `SeamlyPreviousInstallDlg` | only when `WIX_UPGRADE_DETECTED` or `SEAMLYLEGACYUNINSTALLSTRING` is set, and only when installing |
+| 3 | An existing installation was found | `SeamlyPreviousInstallDlg` | only when Setup finds old Seamly2D and SeamlyMe without SeamlyLayout, or finds new SeamlyLayout |
 | 4 | Program directory | `InstallDirDlg` | always |
 | 5 | Where do you keep your work? | `SeamlyDataDirDlg` | always |
-| 6 | Copy your existing work? | `SeamlyDataMigrateDlg` | always |
+| 6 | Copy your existing work? | `SeamlyDataMigrateDlg` | only when an old or new Seamly installation exists |
 | 7 | Shortcuts | `SeamlyShortcutsDlg` | always |
 | 8 | Ready to install | `VerifyReadyDlg` | always |
 | 9 | Progress | `ProgressDlg` | always |
@@ -76,13 +77,14 @@ What the four Seamly pages do:
 |---|---|
 | **An existing installation was found** | Warns that the program files will be replaced, and states plainly that user data is not touched. Two paragraphs appear conditionally: one for an older MSI of this product (`WIX_UPGRADE_DETECTED`), one for the old NSIS installation. |
 | **Where do you keep your work?** | The user-data root (`SEAMLYDATAROOT`), default `C:\Users\<you>\Documents\SeamlyData`, with a **Change** button that spawns the stock `BrowseDlg`. The user edits the **parent** and Setup appends the fixed `SeamlyData` leaf. Any drive is allowed, including synced folders and USB media. The answer reaches `HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot`, and every app adopts it on that user's first run. |
-| **Copy your existing work?** | Opt-in checkbox (`SEAMLYCOPYUSERDATA`, default **off**) to copy existing patterns and measurements into the new root. States that the originals stay put as a backup and that the same files are then also at the new location. |
+| **Copy your existing work?** | Opt-in checkbox (`SEAMLYCOPYUSERDATA`, default **off**) to migrate existing work. Old Seamly archives `seamly2d`, extracts it, and renames the extracted root to `SeamlyData`. New Seamly archives `SeamlyData` with that top-level name. |
 | **Shortcuts** | One checkbox: *Create desktop shortcuts for Seamly2D, SeamlyLayout and SeamlyMe*, default **on** (`SEAMLYDESKTOPSHORTCUTS`). |
 
 Decisions behind those pages:
 
 - **The program folder rejects cloud-synced paths; the data root welcomes them.** A sync client renames, locks or replaces a file that an app has mapped, which corrupts a running install and breaks repair and uninstall — so `INSTALLFOLDER` containing OneDrive, Dropbox, Google Drive, iCloud or Box Sync is refused by a `Launch` condition (a launch condition, not a dialog check, because it is the only form that also blocks `/qn`). The data root is the opposite case: syncing your own patterns between machines is the point, so nothing there is restricted.
-- **The copy is opt-in and additive only.** It never deletes and never overwrites — a file already at the destination wins. That makes it safe to repeat, so an interrupted copy can simply be run again. It runs as a deferred, **impersonated** action, because a per-machine install's execute sequence is SYSTEM and SYSTEM cannot read the user's own folders. `Return="ignore"`: a file-copy problem must not roll back a working program install.
+- **Migration is opt-in and additive only.** It archives the complete source tree, extracts it below the selected parent, and never overwrites an existing destination file. The action reads the source path from application settings. It runs deferred and impersonated so it can access the installing user's files and settings.
+- **A new-version update does nothing when the selected location is unchanged.** A changed location migrates the complete `SeamlyData` tree and replaces path settings.
 - **There is deliberately no rollback action for the copy.** Undoing it would mean deleting files from a folder that may already have held the user's work, and nothing can tell the two apart. Deleting user data to tidy up a failed install is worse than leaving copied files behind, and since the copy only ever adds, there is nothing whose absence leaves the machine inconsistent.
 
 - **Desktop shortcuts are one checkbox covering all three apps, not one per app.** SeamlyLayout gets one as well: it opens standalone with no argument, so a bare desktop launch is a supported way to start it, not only the `.pieces.svg` handoff from seamly2d. Per-app checkboxes would be three decisions for a choice users make once. Unattended installs can override: `msiexec /i Seamly-x64.msi /qn SEAMLYDESKTOPSHORTCUTS=0`. (Until 2026-08-15 the checkbox named three apps and the package authored two. The label was right and the component was missing.)

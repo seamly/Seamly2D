@@ -16,14 +16,14 @@ times, with different privileges. Conflating them is what makes this confusing.
 |---|---|---|
 | Runs | once, at install time | every launch, per user |
 | As | **LocalSystem** (per-machine install) | the logged-in user |
-| Owns | `C:\Program Files\SeamlyApps\`, HKLM rows, shortcuts, associations, ARP | the user-data root and its nine subfolders, settings under `AppData` |
-| Knows | machine-wide registry, the previous install | that user's home directory and settings |
+| Owns | program files, update migration, HKLM rows, shortcuts, associations, ARP | fresh data-tree creation and runtime settings |
+| Knows | machine-wide registry and the previous install | that user's current data root and settings |
 
-**A per-machine MSI cannot create per-user data.** Its server side runs as
-LocalSystem, so `C:\Users\<name>\...` resolves to the SYSTEM profile, and it
-could only ever cover the one user who ran setup — not everyone on the machine.
-That is why the data root is settled by the app on first launch, on all three
-platforms, and why the installer only *tells* the user where data lives.
+**Fresh Setup does not create per-user data.** The first app launch creates the
+selected tree and writes its default paths.
+
+**Update migration runs as the installing user.** The deferred custom action is
+impersonated. It can read that user's settings, archives, and cloud folders.
 
 ## Detection inputs
 
@@ -34,6 +34,10 @@ Everything the installer branches on, and where it comes from.
 | `WIX_UPGRADE_DETECTED` | `FindRelatedProducts`, via the suite `UpgradeCode` | an **older MSI** of this suite is installed |
 | `WIX_DOWNGRADE_DETECTED` | same | a **newer MSI** is installed |
 | `SEAMLYLEGACYUNINSTALLSTRING` | `RegistrySearch`, `HKLM\...\Uninstall\Seamly2D\UninstallString`, `Bitness="always32"` | the **old NSIS** product is installed |
+| `SEAMLYOLDS2DEXE` | `RegistrySearch` plus `FileSearch` under the legacy install directory | old `seamly2d.exe` exists |
+| `SEAMLYOLDMEEXE` | `RegistrySearch` plus `FileSearch` under the legacy install directory | old `seamlyme.exe` exists |
+| `SEAMLYOLDLAYOUTEXE` | `RegistrySearch` plus `FileSearch` under the legacy install directory | a legacy-directory `SeamlyLayout.exe` exists |
+| `SEAMLYNEWLAYOUTEXE` | `RegistrySearch` plus `FileSearch` under the suite install directory | new Seamly with SeamlyLayout exists |
 | `SEAMLYLEGACYINSTALLDIR` | `RegistrySearch`, `HKLM\SOFTWARE\NSIS_Seamly2D\Install_Dir`, `Bitness="always32"` | where it is, normally `C:\Program Files (x86)\Seamly2D` |
 | `Installed` | Windows Installer | **this** product is already installed — i.e. repair / modify / uninstall, not a first install |
 
@@ -141,7 +145,7 @@ flowchart TD
     down -->|yes| abort[/DowngradeErrorMessage<br/>install aborts/]
     down -->|no| wizard[/WelcomeDlg<br/>LicenseAgreementDlg/]
 
-    wizard --> warn{"(upgrade OR NSIS)<br/>AND NOT Installed?"}
+    wizard --> warn{"old parent apps without Layout<br/>OR new Layout exists?"}
 
     warn -->|no - case A, or a repair| dir
     warn -->|yes - cases B, C, D| dlg[/SeamlyPreviousInstallDlg/]
@@ -154,7 +158,9 @@ flowchart TD
     always[always: your work is not touched<br/>SeamlyData, AppData Local and Roaming Seamly] --> dir
 
     dir[/InstallDirDlg<br/>program directory/] --> dataroot[/SeamlyDataDirDlg<br/>user-data root/]
-    dataroot --> migrate[/SeamlyDataMigrateDlg<br/>copy existing work?/]
+    dataroot --> update{previous install?}
+    update -->|yes| migrate[/SeamlyDataMigrateDlg<br/>archive and migrate work?/]
+    update -->|no| shortcuts
     migrate --> shortcuts[/SeamlyShortcutsDlg<br/>desktop shortcuts/]
     shortcuts --> ready[/VerifyReadyDlg/]
     ready --> install[install files to<br/>Program Files SeamlyApps]
@@ -166,9 +172,17 @@ flowchart TD
     rem --> legacy
 
     legacy{SEAMLYLEGACYINSTALLDIR?}
-    legacy -->|no| done
+    legacy -->|no| migrateData
     legacy -->|yes| kill["remove the NSIS product:<br/>its directory tree, its Start Menu folder,<br/>and both of its registry keys.<br/>Its uninstall.exe is never run"]
-    kill --> done([finish])
+    kill --> migrateData
+
+    migrateData{migration selected?}
+    migrateData -->|no| done([finish])
+    migrateData -->|old Seamly| oldzip[read seamly2d root from settings<br/>archive and extract<br/>rename to SeamlyData]
+    migrateData -->|new Seamly| newzip[archive SeamlyData<br/>keep SeamlyData as top level<br/>skip when location is unchanged]
+    oldzip --> settings[add missing directories<br/>retain non-path settings<br/>replace path settings]
+    newzip --> settings
+    settings --> done
 ```
 
 Three notes on that diagram:
@@ -223,9 +237,8 @@ Four rules embedded there that must not be reversed casually:
   what makes that true. It sits below `paths/dataRoot`, so a user who moves the
   root in Preferences keeps their choice (Task InstWinX64.00).
 
-- **Adoption, not migration.** An upgrading user's patterns can be many
-  gigabytes and may sit on a cloud-synced drive, so the legacy tree becomes the
-  root where it stands. Nothing is moved, copied or deleted.
+- **The MSI handles interactive Windows updates.** The in-app legacy flow stays
+  as a fallback for silent installs and non-Windows packages.
 - **Seeding happens in the applications, never inside `initializeDataRoot()`.**
   That is the only place the real home directory reaches it, and the unit tests
   call `initializeDataRoot()` — seeding from there would create folders in the

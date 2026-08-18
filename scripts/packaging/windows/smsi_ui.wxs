@@ -90,7 +90,7 @@
          the two InstallDirDlg Back rows - and the four must not drift apart,
          because a gap or an overlap between them strands the wizard on a page
          with no working button. -->
-    <?define PreviousInstallFound = "(WIX_UPGRADE_DETECTED OR SEAMLYLEGACYUNINSTALLSTRING) AND NOT Installed" ?>
+    <?define PreviousInstallFound = "((SEAMLYOLDS2DEXE AND SEAMLYOLDMEEXE AND NOT SEAMLYOLDLAYOUTEXE) OR SEAMLYNEWLAYOUTEXE) AND NOT Installed" ?>
 
     <!-- The Id is what smsi.wxs's UIRef names. An unnamed <UI> in a fragment
          has nothing to reference and would never link. -->
@@ -233,7 +233,10 @@
 
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
                  Text="&amp;Back">
-          <Publish Event="NewDialog" Value="SeamlyDataMigrateDlg" />
+          <Publish Event="NewDialog" Value="SeamlyDataMigrateDlg" Order="1"
+                   Condition="$(var.PreviousInstallFound)" />
+          <Publish Event="NewDialog" Value="SeamlyDataDirDlg" Order="2"
+                   Condition="NOT ($(var.PreviousInstallFound))" />
         </Control>
         <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
                  Default="yes" Text="&amp;Next">
@@ -315,7 +318,10 @@
                  Default="yes" Text="&amp;Next">
           <Publish Event="SetTargetPath" Value="SEAMLYDATAPARENT" Order="1"
                    Condition="SEAMLYDATAPARENT" />
-          <Publish Event="NewDialog" Value="SeamlyDataMigrateDlg" Order="2" />
+          <Publish Event="NewDialog" Value="SeamlyDataMigrateDlg" Order="2"
+                   Condition="$(var.PreviousInstallFound)" />
+          <Publish Event="NewDialog" Value="SeamlyShortcutsDlg" Order="3"
+                   Condition="NOT ($(var.PreviousInstallFound))" />
         </Control>
         <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
                  Cancel="yes" Text="Cancel">

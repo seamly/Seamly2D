@@ -2,217 +2,506 @@
  ******************************************************************************
  **  @file   smsi_migrate_user_data.ps1
  **  @author slspencer
- **  @date   August 11, 2026
+ **  @date   August 18, 2026
  **
  **  @brief
- **  Copies a user's existing Seamly work into a newly chosen data root.
- **
- **  Run by the MSI as a deferred, impersonated custom action when the user
- **  ticks "copy my existing patterns and measurements" on SeamlyDataMigrateDlg
- **  (Task InstWinX64.1.2.4). Also runnable by hand.
- **
- **  THE THREE RULES THIS SCRIPT EXISTS TO ENFORCE
- **    1. Never delete anything. The source is only ever read.
- **    2. Never overwrite anything. A file already present at the destination
- **       wins, always, and is left byte-for-byte as it was.
- **    3. Never fail the install. Every error is reported and swallowed; the
- **       exit code is always 0.
- **
- **  Rule 2 is what makes the operation safe to repeat. Running it twice copies
- **  only what is still missing, so an interrupted run can simply be run again.
+ **  Archives and migrates a Windows user's Seamly data tree.
  **
  **  @copyright
- **  This source code is part of the Seamly project, a suite of apparel CAD
- **  software.
- **  Copyright (C) 2026 Seamly Project
- **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
+ **  Copyright (C) 2026 Seamly2D Project
+ **  All Rights Reserved.
  **
  **  @license
- **  Seamly2D/SeamlyMe is free software: you can redistribute it and/or modify
- **  it under the terms of the GNU General Public License as published by
- **  the Free Software Foundation, either version 3 of the License, or
- **  (at your option) any later version.
- **
- **  Seamly2D/SeamlyMe is distributed in the hope that it will be useful,
- **  but WITHOUT ANY WARRANTY; without even the implied warranty of
- **  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- **  GNU General Public License for more details.
- **
- **  You should have received a copy of the GNU General Public License
- **  along with Seamly2D/SeamlyMe.  If not, see <http://www.gnu.org/licenses/>.
+ **  GPL-3.0-or-later
  ******************************************************************************
 #>
 
 <#
 .SYNOPSIS
-    Copies existing Seamly user data into a new data root, without deleting or
-    overwriting anything.
+    Migrates an old or new Seamly data tree into a selected SeamlyData directory.
 
 .DESCRIPTION
-    Searches the folders earlier Seamly versions used for patterns and
-    measurements, and copies any file that the destination does not already
-    have. Existing destination files are never replaced. Source files are never
-    changed or removed.
+    Old migrations archive a seamly2d tree. The script extracts it and renames
+    the extracted root to SeamlyData.
 
-    The script always exits 0. It is run during an installation, where failing
-    would roll back a working program install over a file-copy problem.
+    New migrations archive a SeamlyData tree. The archive keeps SeamlyData as
+    its top-level directory.
 
-.PARAMETER Destination
-    The new data root, e.g. C:\Users\susan\SeamlyData. Created if absent.
-
-.PARAMETER Source
-    Extra folder to copy from, on top of the known previous locations. Optional.
-
-.PARAMETER LogPath
-    Where to write the transcript. Defaults to
-    %LOCALAPPDATA%\Seamly\smsi_migrate_user_data.log.
-
-.EXAMPLE
-    .\smsi_migrate_user_data.ps1 -Destination "E:\SeamlyData"
+    The source tree remains unchanged. Existing destination files always win.
+    The script updates path settings only after all copied files verify.
 #>
 
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)]
+    [ValidateSet('Old', 'New')]
+    [string]$Mode,
+
+    [Parameter(Mandatory = $true)]
     [string]$Destination,
 
+    [string]$PreviousDataRoot,
     [string]$Source,
-
+    [string]$InstallFolder,
+    [string]$RoamingSettingsRoot,
+    [string]$LocalSettingsRoot,
+    [string]$ArchivePath,
     [string]$LogPath
 )
 
-# Never abort the installation. Every failure below is caught and logged.
-$ErrorActionPreference = 'Continue'
+$ErrorActionPreference = 'Stop'
 
+if (-not $RoamingSettingsRoot) {
+    $RoamingSettingsRoot = $env:APPDATA
+}
+if (-not $LocalSettingsRoot) {
+    $LocalSettingsRoot = $env:LOCALAPPDATA
+}
 if (-not $LogPath) {
-    $LogPath = Join-Path $env:LOCALAPPDATA 'Seamly\smsi_migrate_user_data.log'
+    $LogPath = Join-Path $LocalSettingsRoot 'Seamly\smsi_migrate_user_data.log'
 }
 
 <#
 .SYNOPSIS
-    Appends one timestamped line to the log, and never throws.
+    Writes one migration log entry without stopping the migration.
 #>
 function Write-Log {
     param([string]$Message)
 
-    $line = "{0}  {1}" -f (Get-Date -Format 's'), $Message
+    $line = '{0}  {1}' -f (Get-Date -Format 's'), $Message
     Write-Output $line
     try {
-        $dir = Split-Path -Parent $LogPath
-        if ($dir -and -not (Test-Path $dir)) {
-            New-Item -ItemType Directory -Path $dir -Force | Out-Null
+        $logDirectory = Split-Path -Parent $LogPath
+        if ($logDirectory -and -not (Test-Path -LiteralPath $logDirectory)) {
+            New-Item -ItemType Directory -Path $logDirectory -Force | Out-Null
         }
-        Add-Content -Path $LogPath -Value $line -Encoding utf8
+        Add-Content -LiteralPath $LogPath -Value $line -Encoding utf8
     } catch {
-        # A log that cannot be written must not stop the copy.
+        Write-Output "Could not write the migration log: $_"
     }
 }
 
 <#
 .SYNOPSIS
-    Returns the folders earlier Seamly versions kept user data in.
-
-.DESCRIPTION
-    Order matters only for logging; a file found in two sources is copied from
-    whichever is read first, and the second is then skipped by the
-    already-exists rule.
+    Returns the known Seamly settings files that exist for the current user.
 #>
-function Get-SourceCandidate {
-    $profileDir = $env:USERPROFILE
-    $documents  = [Environment]::GetFolderPath('MyDocuments')
-
-    $candidates = @(
-        # Current default: Documents\Seamly
-        (Join-Path $documents 'Seamly'),
-        # Pre-MSI layout, written by the old installer's apps
-        (Join-Path $profileDir 'seamly2d'),
-        (Join-Path $documents 'seamly2d'),
-        # Lowercase variant named in the installer's own dialog text
-        (Join-Path $profileDir 'seamlyData')
+function Get-SettingsFile {
+    $roots = @(
+        (Join-Path $RoamingSettingsRoot 'Seamly'),
+        (Join-Path $RoamingSettingsRoot 'Seamly2DTeam'),
+        (Join-Path $RoamingSettingsRoot 'Unknown Organization'),
+        (Join-Path $LocalSettingsRoot 'Seamly\Seamly2D'),
+        (Join-Path $LocalSettingsRoot 'Seamly\SeamlyMe')
     )
 
-    if ($Source) {
-        $candidates = @($Source) + $candidates
+    $files = @()
+    foreach ($root in $roots) {
+        if (Test-Path -LiteralPath $root) {
+            $files += Get-ChildItem -LiteralPath $root -Filter '*.ini' -File -Recurse -ErrorAction SilentlyContinue
+        }
     }
 
-    return $candidates
+    $flatLegacy = Join-Path $RoamingSettingsRoot 'Unknown Organization.ini'
+    if (Test-Path -LiteralPath $flatLegacy) {
+        $files += Get-Item -LiteralPath $flatLegacy
+    }
+
+    return @($files | Sort-Object FullName -Unique)
 }
 
-Write-Log "=== copy to '$Destination' ==="
+<#
+.SYNOPSIS
+    Reads all values from an INI file's paths section.
+#>
+function Get-IniPathValue {
+    param([Parameter(Mandatory = $true)][string]$Path)
 
-# A destination equal to a source would make the copy meaningless and risks
-# walking a tree while writing into it.
-try {
-    if (-not (Test-Path $Destination)) {
-        New-Item -ItemType Directory -Path $Destination -Force | Out-Null
-        Write-Log "created destination"
+    $values = @{}
+    $section = ''
+    foreach ($line in Get-Content -LiteralPath $Path -ErrorAction Stop) {
+        if ($line -match '^\s*\[([^]]+)\]\s*$') {
+            $section = $Matches[1]
+            continue
+        }
+        if ($section -ieq 'paths' -and $line -match '^\s*([^=]+?)\s*=\s*(.*)$') {
+            $values[$Matches[1].Trim()] = $Matches[2].Trim()
+        }
     }
-    $destFull = (Resolve-Path $Destination).Path
-} catch {
-    Write-Log "FAILED to create destination: $_"
-    exit 0
+    return $values
 }
 
-$copied  = 0
-$skipped = 0
-$failed  = 0
+<#
+.SYNOPSIS
+    Returns a legacy seamly2d root derived from application path settings.
+#>
+function Find-LegacyDataRoot {
+    param([System.IO.FileInfo[]]$SettingsFiles)
 
-foreach ($candidate in Get-SourceCandidate) {
-    if (-not $candidate) { continue }
-    if (-not (Test-Path $candidate)) { continue }
+    foreach ($file in $SettingsFiles) {
+        $values = Get-IniPathValue -Path $file.FullName
+        if ($values.ContainsKey('dataRoot') -and $values['dataRoot']) {
+            $candidate = $values['dataRoot'].Replace('/', '\')
+            if ((Split-Path -Leaf $candidate) -ieq 'seamly2d' -and (Test-Path -LiteralPath $candidate -PathType Container)) {
+                return (Resolve-Path -LiteralPath $candidate).Path
+            }
+        }
 
+        foreach ($value in $values.Values) {
+            $candidate = $value.Replace('/', '\')
+            if ($candidate -match '^(.*[\\/]seamly2d)(?:[\\/].*)?$') {
+                $root = $Matches[1]
+                if (Test-Path -LiteralPath $root -PathType Container) {
+                    return (Resolve-Path -LiteralPath $root).Path
+                }
+            }
+        }
+    }
+
+    $defaultLegacyRoot = Join-Path $env:USERPROFILE 'seamly2d'
+    if (Test-Path -LiteralPath $defaultLegacyRoot -PathType Container) {
+        return (Resolve-Path -LiteralPath $defaultLegacyRoot).Path
+    }
+    return $null
+}
+
+<#
+.SYNOPSIS
+    Returns the current SeamlyData root for a new-version relocation.
+#>
+function Find-NewDataRoot {
+    param([System.IO.FileInfo[]]$SettingsFiles)
+
+    if ($PreviousDataRoot -and (Test-Path -LiteralPath $PreviousDataRoot -PathType Container)) {
+        return (Resolve-Path -LiteralPath $PreviousDataRoot).Path
+    }
+
+    foreach ($file in $SettingsFiles) {
+        $values = Get-IniPathValue -Path $file.FullName
+        if ($values.ContainsKey('dataRoot') -and $values['dataRoot']) {
+            $candidate = $values['dataRoot'].Replace('/', '\')
+            if ((Split-Path -Leaf $candidate) -ieq 'SeamlyData' -and
+                (Test-Path -LiteralPath $candidate -PathType Container)) {
+                return (Resolve-Path -LiteralPath $candidate).Path
+            }
+        }
+    }
+    return $null
+}
+
+<#
+.SYNOPSIS
+    Creates an archive with the source directory as its top-level directory.
+#>
+function New-DataArchive {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourceRoot,
+        [Parameter(Mandatory = $true)][string]$Path
+    )
+
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $sourcePath = (Resolve-Path -LiteralPath $SourceRoot).Path
+    $sourceName = Split-Path -Leaf $sourcePath
+    $archive = [System.IO.Compression.ZipFile]::Open($Path, [System.IO.Compression.ZipArchiveMode]::Create)
     try {
-        $sourceFull = (Resolve-Path $candidate).Path
-    } catch {
-        continue
+        $archive.CreateEntry("$sourceName/") | Out-Null
+        foreach ($directory in Get-ChildItem -LiteralPath $sourcePath -Directory -Recurse -Force) {
+            $relative = $directory.FullName.Substring($sourcePath.Length).TrimStart('\').Replace('\', '/')
+            $archive.CreateEntry("$sourceName/$relative/") | Out-Null
+        }
+        foreach ($file in Get-ChildItem -LiteralPath $sourcePath -File -Recurse -Force) {
+            $relative = $file.FullName.Substring($sourcePath.Length).TrimStart('\').Replace('\', '/')
+            [System.IO.Compression.ZipFileExtensions]::CreateEntryFromFile(
+                $archive, $file.FullName, "$sourceName/$relative",
+                [System.IO.Compression.CompressionLevel]::Optimal) | Out-Null
+        }
+    } finally {
+        $archive.Dispose()
+    }
+}
+
+<#
+.SYNOPSIS
+    Copies a complete tree without overwriting and verifies each copied file.
+#>
+function Merge-DataTree {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourceRoot,
+        [Parameter(Mandatory = $true)][string]$DestinationRoot
+    )
+
+    if (-not (Test-Path -LiteralPath $DestinationRoot)) {
+        New-Item -ItemType Directory -Path $DestinationRoot -Force | Out-Null
     }
 
-    if ($sourceFull -eq $destFull) {
-        Write-Log "skip '$sourceFull' - same folder as the destination"
-        continue
+    $sourcePath = (Resolve-Path -LiteralPath $SourceRoot).Path
+    $destinationPath = (Resolve-Path -LiteralPath $DestinationRoot).Path
+    $copied = 0
+    $skipped = 0
+
+    foreach ($directory in Get-ChildItem -LiteralPath $sourcePath -Directory -Recurse -Force) {
+        $relative = $directory.FullName.Substring($sourcePath.Length).TrimStart('\')
+        $targetDirectory = Join-Path $destinationPath $relative
+        if (-not (Test-Path -LiteralPath $targetDirectory)) {
+            New-Item -ItemType Directory -Path $targetDirectory -Force | Out-Null
+        }
     }
 
-    Write-Log "reading '$sourceFull'"
-
-    try {
-        $files = Get-ChildItem -Path $sourceFull -Recurse -File -Force -ErrorAction Stop
-    } catch {
-        Write-Log "FAILED to list '$sourceFull': $_"
-        $failed++
-        continue
-    }
-
-    foreach ($file in $files) {
-        # Rebuild the tree under the destination, so a pattern in a subfolder
-        # stays in that subfolder.
-        $relative = $file.FullName.Substring($sourceFull.Length).TrimStart('\')
-        $target   = Join-Path $destFull $relative
-
-        # RULE 2. The destination always wins. Checked immediately before the
-        # copy rather than once up front, so a file that appears mid-run is
-        # still respected.
+    foreach ($file in Get-ChildItem -LiteralPath $sourcePath -File -Recurse -Force) {
+        $relative = $file.FullName.Substring($sourcePath.Length).TrimStart('\')
+        $target = Join-Path $destinationPath $relative
         if (Test-Path -LiteralPath $target) {
             $skipped++
             continue
         }
 
-        try {
-            $targetDir = Split-Path -Parent $target
-            if ($targetDir -and -not (Test-Path $targetDir)) {
-                New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-            }
-            # -Confirm:$false and no -Force: -Force would overwrite a read-only
-            # destination file, which rule 2 forbids.
-            Copy-Item -LiteralPath $file.FullName -Destination $target -Confirm:$false -ErrorAction Stop
-            $copied++
-        } catch {
-            Write-Log "FAILED '$($file.FullName)': $_"
-            $failed++
+        $targetDirectory = Split-Path -Parent $target
+        if (-not (Test-Path -LiteralPath $targetDirectory)) {
+            New-Item -ItemType Directory -Path $targetDirectory -Force | Out-Null
+        }
+        Copy-Item -LiteralPath $file.FullName -Destination $target -Confirm:$false
+        if ((Get-Item -LiteralPath $target).Length -ne $file.Length) {
+            Remove-Item -LiteralPath $target -Force
+            throw "Copy verification failed for '$($file.FullName)'."
+        }
+        $copied++
+    }
+
+    Write-Log "$copied file(s) copied; $skipped existing file(s) kept"
+}
+
+<#
+.SYNOPSIS
+    Adds the standard SeamlyData directories without changing existing objects.
+#>
+function Add-StandardDirectory {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    $directories = @(
+        'measurements\individual',
+        'measurements\multisize',
+        'templates',
+        'bodyscans',
+        'label templates',
+        'images',
+        'backups',
+        'patterns',
+        'layouts'
+    )
+    foreach ($directory in $directories) {
+        $path = Join-Path $Root $directory
+        if (-not (Test-Path -LiteralPath $path)) {
+            New-Item -ItemType Directory -Path $path -Force | Out-Null
         }
     }
 }
 
-Write-Log "done - $copied copied, $skipped already present, $failed failed"
+<#
+.SYNOPSIS
+    Replaces path settings while preserving all non-path settings.
+#>
+function Set-IniPathValue {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][hashtable]$Values,
+        [Parameter(Mandatory = $true)][hashtable]$PatternValues
+    )
 
-# RULE 3. The installation continues whatever happened above.
+    $sourceLines = @(Get-Content -LiteralPath $Path -ErrorAction Stop)
+    $result = [System.Collections.Generic.List[string]]::new()
+    $section = ''
+    $pathsWritten = $false
+    $patternKeysWritten = @{}
+
+    foreach ($line in $sourceLines) {
+        if ($line -match '^\s*\[([^]]+)\]\s*$') {
+            if ($section -ieq 'paths' -and -not $pathsWritten) {
+                foreach ($key in ($Values.Keys | Sort-Object)) {
+                    $result.Add("$key=$($Values[$key])")
+                }
+                $pathsWritten = $true
+            }
+            $section = $Matches[1]
+            $result.Add($line)
+            continue
+        }
+
+        if ($section -ieq 'paths') {
+            continue
+        }
+        if ($section -ieq 'pattern' -and $line -match '^\s*([^=]+?)\s*=') {
+            $key = $Matches[1].Trim()
+            if ($PatternValues.ContainsKey($key)) {
+                $result.Add("$key=$($PatternValues[$key])")
+                $patternKeysWritten[$key] = $true
+                continue
+            }
+        }
+        $result.Add($line)
+    }
+
+    if ($section -ieq 'paths' -and -not $pathsWritten) {
+        foreach ($key in ($Values.Keys | Sort-Object)) {
+            $result.Add("$key=$($Values[$key])")
+        }
+        $pathsWritten = $true
+    }
+    if (-not $pathsWritten) {
+        if ($result.Count -gt 0 -and $result[$result.Count - 1] -ne '') {
+            $result.Add('')
+        }
+        $result.Add('[paths]')
+        foreach ($key in ($Values.Keys | Sort-Object)) {
+            $result.Add("$key=$($Values[$key])")
+        }
+    }
+
+    $missingPatternKeys = @($PatternValues.Keys | Where-Object { -not $patternKeysWritten.ContainsKey($_) })
+    if ($missingPatternKeys.Count -gt 0) {
+        $patternSection = -1
+        for ($index = 0; $index -lt $result.Count; $index++) {
+            if ($result[$index] -match '^\s*\[pattern\]\s*$') {
+                $patternSection = $index
+                break
+            }
+        }
+        if ($patternSection -lt 0) {
+            $result.Add('')
+            $result.Add('[pattern]')
+            foreach ($key in ($missingPatternKeys | Sort-Object)) {
+                $result.Add("$key=$($PatternValues[$key])")
+            }
+        } else {
+            $insertAt = $patternSection + 1
+            while ($insertAt -lt $result.Count -and $result[$insertAt] -notmatch '^\s*\[') {
+                $insertAt++
+            }
+            foreach ($key in ($missingPatternKeys | Sort-Object -Descending)) {
+                $result.Insert($insertAt, "$key=$($PatternValues[$key])")
+            }
+        }
+    }
+
+    Set-Content -LiteralPath $Path -Value $result -Encoding utf8
+}
+
+<#
+.SYNOPSIS
+    Replaces every discovered path setting with a destination-relative value.
+#>
+function Update-PathSettings {
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][System.IO.FileInfo[]]$SettingsFiles,
+        [Parameter(Mandatory = $true)][string]$Root
+    )
+
+    $qtRoot = $Root.Replace('\', '/')
+    $layoutExecutable = if ($InstallFolder) {
+        (Join-Path $InstallFolder 'SeamlyLayout.exe').Replace('\', '/')
+    } else {
+        ''
+    }
+    $values = @{
+        'dataRoot' = $qtRoot
+        'individual_size_measurements' = "$qtRoot/measurements/individual"
+        'multi_size_measurements' = "$qtRoot/measurements/multisize"
+        'templates' = "$qtRoot/templates"
+        'bodyscans' = "$qtRoot/bodyscans"
+        'labels' = "$qtRoot/label templates"
+        'images' = "$qtRoot/images"
+        'backups' = "$qtRoot/backups"
+        'pattern' = "$qtRoot/patterns"
+        'layout' = "$qtRoot/layouts"
+    }
+    if ($layoutExecutable) {
+        $values['seamlyLayoutApp'] = $layoutExecutable
+    }
+    $patternValues = @{
+        'defaultPatternTemplate' = "$qtRoot/label templates/default_pattern_label.xml"
+        'defaultPieceTemplate' = "$qtRoot/label templates/default_piece_label.xml"
+    }
+
+    foreach ($file in $SettingsFiles) {
+        Set-IniPathValue -Path $file.FullName -Values $values -PatternValues $patternValues
+        Write-Log "updated path settings in '$($file.FullName)'"
+    }
+}
+
+$settingsFiles = @(Get-SettingsFile)
+$destinationParent = Split-Path -Parent $Destination
+$destinationLeaf = Split-Path -Leaf ($Destination.TrimEnd('\'))
+if ($destinationLeaf -ine 'SeamlyData') {
+    Write-Log "FAILED: destination '$Destination' does not end in SeamlyData"
+    exit 0
+}
+
+try {
+    $sourceRoot = if ($Source) {
+        (Resolve-Path -LiteralPath $Source).Path
+    } elseif ($Mode -eq 'Old') {
+        Find-LegacyDataRoot -SettingsFiles $settingsFiles
+    } else {
+        Find-NewDataRoot -SettingsFiles $settingsFiles
+    }
+
+    if (-not $sourceRoot) {
+        throw "No $Mode Seamly data tree was found."
+    }
+    $expectedLeaf = if ($Mode -eq 'Old') { 'seamly2d' } else { 'SeamlyData' }
+    if ((Split-Path -Leaf $sourceRoot) -ine $expectedLeaf) {
+        throw "The $Mode source root '$sourceRoot' is not named $expectedLeaf."
+    }
+
+    $sourceRoot = [System.IO.Path]::GetFullPath($sourceRoot).TrimEnd('\')
+    $destinationFull = [System.IO.Path]::GetFullPath($Destination).TrimEnd('\')
+    if ($destinationFull.StartsWith($sourceRoot + '\', [System.StringComparison]::OrdinalIgnoreCase) -or
+        $sourceRoot.StartsWith($destinationFull + '\', [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw 'The source and destination directories cannot contain each other.'
+    }
+
+    if (Test-Path -LiteralPath $Destination) {
+        $destinationResolved = (Resolve-Path -LiteralPath $Destination).Path
+        if ($sourceRoot -ieq $destinationResolved) {
+            Write-Log 'source and destination are unchanged; no migration is required'
+            exit 0
+        }
+    }
+
+    if (-not (Test-Path -LiteralPath $destinationParent)) {
+        New-Item -ItemType Directory -Path $destinationParent -Force | Out-Null
+    }
+    $workRoot = Join-Path $destinationParent ('.seamly-migration-' + [guid]::NewGuid().ToString('N'))
+    $extractRoot = Join-Path $workRoot 'expanded'
+    New-Item -ItemType Directory -Path $extractRoot -Force | Out-Null
+
+    $temporaryArchive = -not $ArchivePath
+    if (-not $ArchivePath) {
+        $ArchivePath = Join-Path $workRoot 'seamly2d.zip'
+    }
+    Write-Log "archiving '$sourceRoot' as '$ArchivePath'"
+    New-DataArchive -SourceRoot $sourceRoot -Path $ArchivePath
+    Expand-Archive -LiteralPath $ArchivePath -DestinationPath $extractRoot
+
+    $extractedRoot = Join-Path $extractRoot $expectedLeaf
+    if (-not (Test-Path -LiteralPath $extractedRoot -PathType Container)) {
+        throw "The archive does not contain $expectedLeaf as its top-level directory."
+    }
+    if ($Mode -eq 'Old') {
+        $renamedRoot = Join-Path $extractRoot 'SeamlyData'
+        Rename-Item -LiteralPath $extractedRoot -NewName 'SeamlyData'
+        $extractedRoot = $renamedRoot
+    }
+
+    Merge-DataTree -SourceRoot $extractedRoot -DestinationRoot $Destination
+    Add-StandardDirectory -Root $Destination
+    Update-PathSettings -SettingsFiles $settingsFiles -Root (Resolve-Path -LiteralPath $Destination).Path
+    Write-Log "migration completed from '$sourceRoot' to '$Destination'"
+
+    if ($temporaryArchive -and (Test-Path -LiteralPath $workRoot)) {
+        Remove-Item -LiteralPath $workRoot -Recurse -Force
+    }
+} catch {
+    Write-Log "FAILED: $_"
+}
+
+# A data migration failure must not roll back a valid application installation.
 exit 0
