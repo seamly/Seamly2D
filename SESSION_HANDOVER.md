@@ -6,13 +6,26 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## PICK UP HERE (2026-08-18, three Windows data-tree cases)
+## PICK UP HERE (2026-08-18, Setup creates the data root)
+
+The MSI now creates the selected `SeamlyData` root during installation.
+`CreateUserDataRoot` is permanent, so uninstall keeps the folder and its
+contents. Its condition prevents an unconfigured silent install from creating
+`C:\SeamlyData`.
+
+Link-only x64 and arm64 MSI builds passed. Both authoring checks passed. WiX
+validation passed with only expected ICE61. The migration test passed 15
+assertions. The runtime script now checks that Setup created the recorded root.
+
+The next `dev-latest` MSI needs a real interactive install. Confirm that
+`C:\Users\susan\Documents\SeamlyData` exists before an app starts. Confirm that
+Windows uninstall keeps the folder.
 
 InstWinX64.01 implements the user's three required cases.
 
-- A fresh install skips the migration page. Setup records the selected
-  `SeamlyData` root. The first app launch creates the tree and standard
-  directories.
+- A fresh install skips the migration page. Setup records and creates the
+  selected `SeamlyData` root. The first app launch creates its standard
+  directories. Uninstall keeps the root and its contents.
 - An old Seamly update reads the legacy `seamly2d` root from application path
   settings. It archives `seamly2d`, extracts it below the selected parent, and
   renames the extracted root to `SeamlyData`.

@@ -16,11 +16,12 @@ times, with different privileges. Conflating them is what makes this confusing.
 |---|---|---|
 | Runs | once, at install time | every launch, per user |
 | As | **LocalSystem** (per-machine install) | the logged-in user |
-| Owns | program files, update migration, HKLM rows, shortcuts, associations, ARP | fresh data-tree creation and runtime settings |
+| Owns | program files, selected data root, update migration, HKLM rows, shortcuts, associations, ARP | standard data directories and runtime settings |
 | Knows | machine-wide registry and the previous install | that user's current data root and settings |
 
-**Fresh Setup does not create per-user data.** The first app launch creates the
-selected tree and writes its default paths.
+**Fresh Setup creates the selected `SeamlyData` root.** The first app launch
+creates the standard directories and writes their default paths. Uninstall
+keeps the root and its contents.
 
 **Update migration runs as the installing user.** The deferred custom action is
 impersonated. It can read that user's settings, archives, and cloud folders.

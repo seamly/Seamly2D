@@ -88,7 +88,7 @@ value; prefilling page 5 from it is the remaining work.
 ## InstWinX64.01 - Implement the three data-tree cases
 
 - [x] Detect a fresh install, an update from old Seamly, and an update from new Seamly.
-- [x] Skip migration on a fresh install. The first app launch creates the selected tree.
+- [x] Skip migration on a fresh install. Setup creates the selected root. The first app launch creates its standard directories.
 - [x] Archive old `seamly2d`, extract it, and rename the extracted root to `SeamlyData`.
 - [x] Archive new `SeamlyData` with `SeamlyData` as its top-level directory.
 - [x] Do nothing when a new Seamly update keeps the current data location.
@@ -98,8 +98,8 @@ value; prefilling page 5 from it is the remaining work.
 ### Result — 2026-08-18
 
 Fresh installs skip `SeamlyDataMigrateDlg`. Setup records the selected parent
-and root. The existing application first-run logic creates `SeamlyData` and its
-nine standard directories.
+and root. Setup creates `SeamlyData`. The existing application first-run logic
+creates its nine standard directories.
 
 The impersonated update action now selects one of two explicit modes. Old mode
 reads the `seamly2d` source root from the user's INI path settings. It creates
@@ -359,6 +359,21 @@ Interactive verification is done. See InstWinX64.1.6.
 - [x] **InstWinX64.2.11** Persist program and data paths through repair and upgrade.
 - [ ] **InstWinX64.2.12** Register one shared data-root setting.
 - [x] **InstWinX64.2.13** Make all three apps honor the configured data root. Done by InstWinX64.00: `VCommonSettings::installerDataRoot()` reads the recorded root and `initializeDataRoot()` adopts it, which covers seamly2d and seamlyme. SeamlyLayout has no data root.
+- [x] **InstWinX64.2.14** Create the selected data root during installation. Keep it and its contents during uninstall.
+
+#### Result — 2026-08-18
+
+`CreateUserDataRoot` creates the selected `SEAMLYDATAROOT` during installation.
+The permanent component keeps the folder and its contents during uninstall.
+Its `SEAMLYDATACHOSEN` condition prevents an unconfigured silent install from
+creating the Directory table fallback at `C:\SeamlyData`.
+
+The runtime install check now requires the recorded root to exist. Three new
+authoring checks require the component, `CreateFolder` row, and permanent bit.
+
+Link-only x64 and arm64 MSI builds passed. Both authoring checks passed. WiX
+validation passed with only the expected ICE61 warning. The migration test
+passed 15 assertions. A real interactive install remains required.
 
 **Decision:** `SEAMLYDATAROOT` currently stores the complete selected path. Selecting `E:\` uses `E:\`, not `E:\SeamlyData`.
 

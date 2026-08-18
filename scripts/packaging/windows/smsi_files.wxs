@@ -69,14 +69,24 @@
 
          Parented to TARGETDIR so the whole path is replaceable: any drive is
          allowed, including removable and cloud-synced ones (InstWinX64.1.2.2).
-         The installer authors NO components under either directory - it
-         creates no files here. They exist so CostFinalize resolves
-         [SEAMLYDATAROOT] and so BrowseDlg has a directory to edit. -->
+         A permanent component creates the selected root during installation.
+         It creates no files and uninstall never removes it. The condition
+         prevents an unattended install without a selected root from creating
+         the Directory table fallback at C:\SeamlyData. -->
     <StandardDirectory Id="TARGETDIR">
       <Directory Id="SEAMLYDATAPARENT">
         <Directory Id="SEAMLYDATAROOT" Name="SeamlyData" />
       </Directory>
     </StandardDirectory>
+
+    <ComponentGroup Id="UserDataRootFolder" Directory="SEAMLYDATAROOT">
+      <Component Id="CreateUserDataRoot"
+                 Guid="51C0B456-2C35-48CB-A3C5-3EFC4A9EF2D5"
+                 Condition="SEAMLYDATACHOSEN"
+                 Permanent="yes">
+        <CreateFolder />
+      </Component>
+    </ComponentGroup>
 
     <!-- ================= executables, shortcuts, associations ============ -->
     <ComponentGroup Id="SuiteExecutables" Directory="INSTALLFOLDER">

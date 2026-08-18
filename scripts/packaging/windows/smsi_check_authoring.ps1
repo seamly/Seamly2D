@@ -590,6 +590,23 @@ Assert-That -Name 'the data root appends a fixed SeamlyData leaf to a user-chose
     -Detail "DefaultDir '$(if ($dataRoot.Count) { $dataRoot[0].DefaultDir } else { '<nothing>' })', parent '$(if ($dataRoot.Count) { $dataRoot[0].Parent } else { '<nothing>' })'"
 Assert-That -Name 'the data-root parent is itself replaceable' `
     -Succeeded (@($directories | Where-Object { $_.Directory -eq 'SEAMLYDATAPARENT' -and $_.Parent -eq 'TARGETDIR' }).Count -eq 1)
+$dataRootComponent = Get-MsiRows `
+    -Sql "SELECT ``Component``, ``Directory_``, ``Condition``, ``Attributes`` FROM ``Component`` WHERE ``Component``='CreateUserDataRoot'" `
+    -Columns 'Component', 'Directory', 'Condition', 'Attributes'
+Assert-That -Name 'Setup creates the selected user-data root' `
+    -Succeeded ($dataRootComponent.Count -eq 1 -and
+                $dataRootComponent[0].Directory -eq 'SEAMLYDATAROOT' -and
+                $dataRootComponent[0].Condition -eq 'SEAMLYDATACHOSEN')
+# msidbComponentAttributesPermanent = 16. User data must survive uninstall.
+Assert-That -Name 'the user-data root component is permanent' `
+    -Succeeded ($dataRootComponent.Count -eq 1 -and
+                (([int]$dataRootComponent[0].Attributes -band 16) -eq 16)) `
+    -Detail "Attributes = $(if ($dataRootComponent.Count) { $dataRootComponent[0].Attributes } else { '<nothing>' })"
+$createdDataRoots = Get-MsiRows `
+    -Sql "SELECT ``Directory_``, ``Component_`` FROM ``CreateFolder`` WHERE ``Component_``='CreateUserDataRoot'" `
+    -Columns 'Directory', 'Component'
+Assert-That -Name 'the folder component creates SEAMLYDATAROOT' `
+    -Succeeded ($createdDataRoots.Count -eq 1 -and $createdDataRoots[0].Directory -eq 'SEAMLYDATAROOT')
 foreach ($property in @('SEAMLYDATAROOT', 'SEAMLYDATAPARENT', 'SEAMLYCOPYUSERDATA')) {
     Assert-That -Name "$property is a secure custom property" -Succeeded ($secure -like "*$property*")
 }

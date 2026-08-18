@@ -49,7 +49,7 @@ The split was verified by dumping all 37 MSI tables before and after and diffing
 - **MSI version mapping**: MSI ignores the 4th ProductVersion field for upgrade comparisons, so the project's 4-part `YY.M.D.MMMM` rolling version cannot be used directly. `smsi.ps1` derives `YY.M.((D−1)·1440 + MMMM)` — strictly increasing per build — and stores the full project version as `DisplayVersion` in `HKLM\SOFTWARE\Seamly\Seamly2D`. `MMMM` is the minute of the day, so the third field is minutes-of-month (max 44639 < 65535).
 - **File associations**: `.sm2d` → Seamly2D, `.smis` (individual) and `.smms` (multisize) → SeamlyMe, authored as classic (non-advertised) registry values. SeamlyLayout gets no association — its input is the `.pieces.svg` handoff, and a double extension cannot be registered separately from plain `.svg`.
 - **Start Menu**: three advertised shortcuts directly in the Start Menu root (no folder — Windows 11 flattens folders anyway, and folderless shortcuts need no removal component).
-- **Fresh installs create no user data during Setup.** The first app launch creates `SeamlyData`, adds the nine standard directories, and writes the default paths.
+- **Fresh Setup creates the selected `SeamlyData` root.** The first app launch adds the nine standard directories and writes the default paths. Uninstall keeps the root and its contents.
 - **Updates can migrate user data.** The impersonated migration action runs as the installing user. It preserves non-path settings and replaces path settings only after verification.
 
 ## Install-time experience
