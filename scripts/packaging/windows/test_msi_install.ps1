@@ -206,8 +206,8 @@ function Get-TreeInventory {
 # @brief  Work out where the user's pattern/measurement data root is.
 #
 # The apps store it as paths/dataRoot in the shared common settings file; when
-# that is absent (a machine where the apps have never run) the Task 34 default
-# applies.
+# that is absent (a machine where the apps have never run) the folder Setup
+# recorded applies, and failing that the built-in default.
 #
 # @return absolute path of the data root
 #------------------------------------------------------------------------------
@@ -221,7 +221,12 @@ function Get-DataRootPath {
             }
         }
     }
-    return (Join-Path $env:USERPROFILE 'seamlyData')
+    $recorded = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\Seamly\Seamly2D' `
+        -Name 'DataRoot' -ErrorAction SilentlyContinue).DataRoot
+    if (-not [string]::IsNullOrWhiteSpace($recorded)) {
+        return $recorded.TrimEnd('\')
+    }
+    return (Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'Seamly')
 }
 
 #------------------------------------------------------------------------------
@@ -232,9 +237,9 @@ function Get-DataRootPath {
 #
 #  - On a machine upgrading from the old NSIS build, ~/seamly2d already exists,
 #    so VCommonSettings::chooseFirstRunDataRoot() ADOPTS it as the data root
-#    instead of using ~/seamlyData. The user's patterns then live in ~/seamly2d
-#    and an inventory of ~/seamlyData alone watches an empty directory - exactly
-#    the case this check exists to cover.
+#    instead of using the default. The user's patterns then live in ~/seamly2d
+#    and an inventory of the default root alone watches an empty directory -
+#    exactly the case this check exists to cover.
 #  - Get-DataRootPath follows the configured root, which CHANGES the moment the
 #    apps first run and write paths/dataRoot. Baseline would then inventory one
 #    directory and a later phase a different one; because Assert-UserDataIntact
@@ -255,7 +260,8 @@ function Get-UserDataInventory {
 
     $paths = @(
         (Get-DataRootPath),
-        (Join-Path $documents 'Seamly'),          # the Task 60 root
+        (Join-Path $documents 'Seamly'),          # the Task 60 built-in default
+        (Join-Path $documents 'SeamlyData'),      # what the MSI offers (InstWinX64.00)
         (Join-Path $env:USERPROFILE 'seamlyData'), # Task 53's root
         (Join-Path $env:USERPROFILE 'seamly2d'),   # the original, still the source of a migration
         (Join-Path $env:LOCALAPPDATA 'Seamly'),

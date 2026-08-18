@@ -194,12 +194,16 @@ flowchart TD
     launch([app starts, per user]) --> init[initializeDataRoot]
     init --> cfg{"paths/dataRoot already set<br/>in qt6_common.ini?"}
     cfg -->|yes| honour[use it unchanged]
-    cfg -->|no| legacy{"~/seamlyData missing<br/>AND ~/seamly2d is a directory?"}
+    cfg -->|no| recorded{"Setup recorded a root in<br/>HKLM Seamly2D DataRoot?"}
+
+    recorded -->|yes| adoptsetup["use the folder the user<br/>chose on Setup page 5"]
+    recorded -->|no| legacy{"the default root is missing<br/>AND ~/seamly2d is a directory?"}
 
     legacy -->|yes| adopt["ADOPT ~/seamly2d in place<br/>nothing is moved or copied"]
-    legacy -->|no| default["use the default ~/seamlyData"]
+    legacy -->|no| default["use the built-in default<br/>Documents/Seamly"]
 
     honour --> seed
+    adoptsetup --> seed
     adopt --> seed
     default --> seed
 
@@ -212,7 +216,12 @@ flowchart TD
     keep --> ready
 ```
 
-Three rules embedded there that must not be reversed casually:
+Four rules embedded there that must not be reversed casually:
+
+- **What Setup promised outranks every built-in default.** Page 5 shows the
+  user a folder and tells them the apps will use it. `installerDataRoot()` is
+  what makes that true. It sits below `paths/dataRoot`, so a user who moves the
+  root in Preferences keeps their choice (Task InstWinX64.00).
 
 - **Adoption, not migration.** An upgrading user's patterns can be many
   gigabytes and may sit on a cloud-synced drive, so the legacy tree becomes the
@@ -246,13 +255,18 @@ first launch:
 | Data state found | Resulting root | Folders created |
 |---|---|---|
 | `paths/dataRoot` already configured | that path, unchanged | the nine, if missing |
-| `~/seamly2d` exists, `~/seamlyData` does not | `~/seamly2d` (adopted) | the nine, if missing |
-| neither exists | `~/seamlyData` | all nine |
-| both exist | `~/seamlyData` | the nine, if missing |
+| Setup recorded a root | that path | all nine |
+| `~/seamly2d` exists, the default root does not | `~/seamly2d` (adopted) | the nine, if missing |
+| neither exists | `<Documents>/Seamly` | all nine |
+| both exist | `<Documents>/Seamly` | the nine, if missing |
 
-The second row is the normal outcome of case B, and was what the test laptop
-did: the old NSIS product had left `C:\Users\susan\seamly2d`, so that became the
-data root and `~/seamlyData` was correctly never created.
+The second row is the normal outcome of an MSI install: Setup writes the page-5
+answer to `HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot`, defaulting to
+`C:\Users\<user>\Documents\SeamlyData`.
+
+The third row is the normal outcome of case B on a machine with no recorded
+root, and was what the test laptop did before Task InstWinX64.00: the old NSIS
+product had left `C:\Users\susan\seamly2d`, so that became the data root.
 
 ## Decisions
 

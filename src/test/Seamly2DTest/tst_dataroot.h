@@ -78,6 +78,8 @@ private slots:
     void FirstRunPrefersAnExistingNewRoot() const;
     void AdoptionNeverRemovesTheLegacyTree() const;
     void AConfiguredRootIsNeverOverwritten() const;
+    void InstallerDataRootIsCleanOrEmpty() const;
+    void AConfiguredRootOutranksTheInstaller() const;
     void EnsureDataRootTreeCreatesTheSubfolders() const;
     void EnsureDataRootTreeKeepsExistingFiles() const;
     void StartupResolvesThenSeedsTheConfiguredRoot() const;

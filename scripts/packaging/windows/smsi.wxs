@@ -233,9 +233,11 @@
     <!-- Where the apps keep patterns, measurements and templates. TWO
          identifiers, because the user picks a place and Setup names the folder:
 
-           SEAMLYDATAPARENT  what the user chooses. Default %USERPROFILE%.
+           SEAMLYDATAPARENT  what the user chooses. Default the user's
+                             Documents folder.
            SEAMLYDATAROOT    SEAMLYDATAPARENT plus the fixed leaf SeamlyData,
-                             so the default is C:\Users\<user>\SeamlyData.
+                             so the default is
+                             C:\Users\<user>\Documents\SeamlyData.
 
          Both are DIRECTORY ids rather than plain properties, for three reasons:
          WixUI's BrowseDlg edits a directory (it browses whatever
@@ -262,15 +264,93 @@
          shipped before this task. -->
     <Property Id="SEAMLYDATAROOT" Secure="yes" />
     <Property Id="SEAMLYDATAPARENT" Secure="yes" />
-    <!-- The trailing backslash is required, not cosmetic: Windows Installer
+    <!-- The default parent is the user's Documents folder (InstWinX64.00), so
+         the data root lands beside the documents every other application
+         writes, and so Setup and the apps agree on one place. The apps derive
+         their own default from QStandardPaths::DocumentsLocation, which reads
+         the same known folder.
+
+         PersonalFolder first, %USERPROFILE%\Documents second. PersonalFolder
+         is the known-folder value, so it follows a redirected Documents -
+         OneDrive Known Folder Move being the common case, where
+         %USERPROFILE%\Documents no longer exists at all. It is a system folder
+         property, set by CostInitialize, so it is readable here but NOT as
+         early as AppSearch. Should it ever be empty, the second action still
+         gives a usable path: an empty SEAMLYDATAPARENT makes the page's
+         PathEdit abort the install with error 2343.
+
+         Two actions need two Action names. WiX names a SetProperty action
+         after its property, so the two would otherwise collide.
+
+         The trailing backslash is required, not cosmetic: Windows Installer
          composes a child directory onto the parent's value verbatim, so
-         "C:\Users\me" without it gives C:\Users\meSeamlyData. -->
+         "C:\Users\me" without it gives C:\Users\meSeamlyData. A resolved
+         folder property already ends in one. -->
     <SetProperty Id="SEAMLYDATAPARENT"
-                 Value="[%USERPROFILE]\"
+                 Action="SetSEAMLYDATAPARENT"
+                 Value="[PersonalFolder]"
                  Before="CostFinalize"
                  Sequence="ui"
-                 Condition="NOT SEAMLYDATAPARENT" />
+                 Condition="NOT SEAMLYDATAPARENT AND PersonalFolder AND NOT Installed" />
+    <SetProperty Id="SEAMLYDATAPARENT"
+                 Action="SetSEAMLYDATAPARENTFallback"
+                 Value="[%USERPROFILE]\Documents\"
+                 After="SetSEAMLYDATAPARENT"
+                 Sequence="ui"
+                 Condition="NOT SEAMLYDATAPARENT AND NOT Installed" />
 
+    <!-- ============ the value the apps actually read (InstWinX64.00) ===== -->
+    <!-- SEAMLYDATAROOTRECORDED, not SEAMLYDATAROOT, is what reaches
+         HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot. The apps trust that value and
+         adopt it on first run, so it must hold a folder somebody actually
+         chose - never a fallback the Directory table composed on its own.
+
+         SEAMLYDATAROOT cannot be used directly. It is a directory id, so
+         CostFinalize always resolves it to something: with no parent given it
+         composes onto TARGETDIR and yields ROOTDRIVE\SeamlyData, e.g.
+         C:\SeamlyData - a per-machine folder a standard user cannot write to.
+         A silent install with no arguments would record that, and every app
+         would then adopt it.
+
+         Three cases, and each needs a different answer:
+
+           this run chose a root   record the resolved SEAMLYDATAROOT.
+                                   SEAMLYDATACHOSEN spots it, BEFORE
+                                   CostInitialize resolves the directories -
+                                   at that point SEAMLYDATAPARENT and
+                                   SEAMLYDATAROOT are non-empty only if the
+                                   wizard or the command line set them.
+                                   The wizard's value crosses into this
+                                   elevated sequence because both are Secure.
+           repair or maintenance   keep what is already in the registry. The
+                                   RegistrySearch prefills the property, and
+                                   SEAMLYDATACHOSEN stays unset, so the
+                                   component rewrites the same value.
+           silent, no arguments    leave it empty. The apps read an empty
+                                   value as "use your own default".
+
+         Repair depends on the UI defaults above carrying AND NOT Installed:
+         without it the maintenance UI sequence would set SEAMLYDATAPARENT,
+         SEAMLYDATACHOSEN would follow, and a repair would silently move a
+         customised data root back to the default. -->
+    <Property Id="SEAMLYDATAROOTRECORDED" Secure="yes">
+      <RegistrySearch Id="RecordedDataRootSearch"
+                      Root="HKLM"
+                      Key="SOFTWARE\Seamly\Seamly2D"
+                      Name="DataRoot"
+                      Type="raw"
+                      Bitness="always64" />
+    </Property>
+    <SetProperty Id="SEAMLYDATACHOSEN"
+                 Value="1"
+                 Before="CostInitialize"
+                 Sequence="execute"
+                 Condition="SEAMLYDATAPARENT OR SEAMLYDATAROOT" />
+    <SetProperty Id="SEAMLYDATAROOTRECORDED"
+                 Value="[SEAMLYDATAROOT]"
+                 After="CostFinalize"
+                 Sequence="execute"
+                 Condition="SEAMLYDATACHOSEN" />
     <!-- Set by SeamlyDataMigrateDlg's confirmation. 0 = record the folder but
          copy nothing. The copy is opt-in: it is the user's data, and an
          unattended install must not start moving files nobody asked about. -->

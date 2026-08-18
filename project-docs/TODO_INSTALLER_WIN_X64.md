@@ -16,6 +16,75 @@ Create one WiX v6 MSI for Seamly2D, SeamlyMe, and SeamlyLayout on Windows 10/11 
 
 - [x] InstWinX64.0 (verify the baseline MSI build) is complete.
 
+## InstWinX64.00 - Fix user data diretories
+
+- [x] the user data is prompted on page 5 that the user directory SeamlyData will be installed to C:\Users\<username>, i.e. C:\users\susan in this case. The seamly data directory is written to c:\users\<usersname>\Documents\Seamly.  The SeamlyData was never created at c:\users\susan; instead a Seamly directory was created at c:\users\susan\Documents --> C:\users\susan\Documents\Seamly was the result in this case.
+
+### Result — 2026-08-17
+
+Two defects, not one. The wizard offered the wrong folder, and nothing read the
+answer it recorded.
+
+**The default parent is now the Documents folder.** `SEAMLYDATAPARENT` was
+`%USERPROFILE%`; it is now the `PersonalFolder` known folder, so page 5 offers
+`C:\Users\<user>\Documents\SeamlyData`. **Decision (user, 2026-08-17): the parent is
+Documents, because that is where users go to find data written by other
+applications. The leaf stays `SeamlyData`, and the page keeps asking for the
+parent only.**
+
+`PersonalFolder` rather than `%USERPROFILE%\Documents` so a redirected Documents is
+followed — OneDrive Known Folder Move being the common case, where
+`%USERPROFILE%\Documents` does not exist at all. It is a system folder property set
+by `CostInitialize`, so it is readable where the action is scheduled but not at
+`AppSearch` time. A second action holds `%USERPROFILE%\Documents` in reserve: an
+empty `SEAMLYDATAPARENT` aborts the wizard with error 2343, which this project
+has already hit once.
+
+**The apps now read what Setup recorded.** `VCommonSettings::installerDataRoot()`
+reads `HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot`, and `initializeDataRoot()` adopts
+it when nothing is configured yet. Precedence, highest first:
+
+1. `paths/dataRoot` in the settings file — an earlier run, or Preferences → Paths.
+2. the root Setup recorded.
+3. an adopted legacy `~/seamly2d` tree.
+4. the built-in default, `<Documents>/Seamly`.
+
+Case 1 above case 2 is what stops the machine-wide installer value overriding a
+user who moved their root afterwards. SeamlyLayout needs no change: it has no
+data root.
+
+**A third defect surfaced while making the value trustworthy.** The registry row
+held `[SEAMLYDATAROOT]`, a directory id, and a directory id always resolves: a
+`/qn` install with no arguments composes onto `TARGETDIR` and records
+`C:\SeamlyData`, a folder a standard user cannot write to. Inert until now, and
+adopted by every app the moment the apps started reading it. The row now holds
+`[SEAMLYDATAROOTRECORDED]`, which is filled in only when this run actually chose
+a root — `SEAMLYDATACHOSEN` decides that before `CostInitialize`, while the two
+directory properties are still empty unless the wizard or the command line set
+them. A `RegistrySearch` prefills the property from the existing key, so repair
+and maintenance keep the recorded value, and both UI defaults gained
+`AND NOT Installed` so a repair cannot recompute them.
+
+Verified with a link-only build (stub staging tree, real authoring):
+`wix build` clean, `wix msi validate` clean apart from the already-suppressed
+ICE43/ICE57 and the expected ICE61, `smsi_check_authoring.ps1` 133 assertions
+pass (11 new). The MSI tables were queried directly: `SetSEAMLYDATACHOSEN` at
+798, `SetSEAMLYDATAROOTRECORDED` at 1001, `RegLocator` type 18 (raw, 64-bit
+view).
+
+Not verified: an interactive install, and the C++ change. Neither Seamly2D nor
+SeamlyMe builds locally — `ci.yml` is their only verification. The new Qt code
+was syntax-checked against Qt 6.11.1 headers with MSVC (`cl /Zs`).
+
+Documentation updated: `.github/README-BUILDS.md`,
+`scripts/packaging/windows/README.md`, `README_WINDOWS_BUILD.md`,
+`INSTALL_DECISION_FLOW.md`. `test_msi_install.ps1` now reads the recorded root.
+
+**Still open, and adjacent:** InstWinX64.2.11 wants the data root to survive an
+*upgrade* as well as a repair. A major upgrade runs the wizard, so it offers the
+default rather than the recorded root. The `RegistrySearch` above supplies the
+value; prefilling page 5 from it is the remaining work.
+
 ## InstWinX64.1 — Replace WiX Dialog Framework
 
 Blocks installer path dialogs and `SeamlyShortcutsDlg`.
@@ -253,7 +322,7 @@ Interactive verification is done. See InstWinX64.1.6.
 - [x] **InstWinX64.2.10** Copy without overwrite or source deletion.
 - [ ] **InstWinX64.2.11** Persist program and data paths through repair and upgrade.
 - [ ] **InstWinX64.2.12** Register one shared data-root setting.
-- [ ] **InstWinX64.2.13** Make all three apps honor the configured data root.
+- [x] **InstWinX64.2.13** Make all three apps honor the configured data root. Done by InstWinX64.00: `VCommonSettings::installerDataRoot()` reads the recorded root and `initializeDataRoot()` adopts it, which covers seamly2d and seamlyme. SeamlyLayout has no data root.
 
 **Decision:** `SEAMLYDATAROOT` currently stores the complete selected path. Selecting `E:\` uses `E:\`, not `E:\SeamlyData`.
 
