@@ -15,9 +15,10 @@ contents. Its condition prevents an unconfigured silent install from creating
 
 Link-only x64 and arm64 MSI builds passed. Both authoring checks passed. WiX
 validation passed with only expected ICE61. The migration test passed 15
-assertions. The runtime script now checks that Setup created the recorded root.
+assertions. Full CI run 32197329093 passed. `dev-latest` published both MSIs
+from commit `4dd1bcff19`.
 
-The next `dev-latest` MSI needs a real interactive install. Confirm that
+The published `dev-latest` MSI needs a real interactive install. Confirm that
 `C:\Users\susan\Documents\SeamlyData` exists before an app starts. Confirm that
 Windows uninstall keeps the folder.
 

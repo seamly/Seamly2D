@@ -373,7 +373,8 @@ authoring checks require the component, `CreateFolder` row, and permanent bit.
 
 Link-only x64 and arm64 MSI builds passed. Both authoring checks passed. WiX
 validation passed with only the expected ICE61 warning. The migration test
-passed 15 assertions. A real interactive install remains required.
+passed 15 assertions. Full CI run 32197329093 passed and published both
+`dev-latest` MSIs. A real interactive install remains required.
 
 **Decision:** `SEAMLYDATAROOT` currently stores the complete selected path. Selecting `E:\` uses `E:\`, not `E:\SeamlyData`.
 
