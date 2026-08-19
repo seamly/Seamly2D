@@ -357,7 +357,7 @@ Interactive verification is done. See InstWinX64.1.6.
 - [x] **InstWinX64.2.8** Support `BrowseDlg` and `SEAMLYDATAROOT=`.
 - [x] **InstWinX64.2.9** Require opt-in before migration.
 - [x] **InstWinX64.2.10** Copy without overwrite or source deletion.
-- [x] **InstWinX64.2.11** Persist program and data paths through repair and upgrade.
+- [x] **InstWinX64.2.11** Persist program and data paths through repair and upgrade. Data half 2026-08-18, program half 2026-08-19.
 - [ ] **InstWinX64.2.12** Register one shared data-root setting.
 - [x] **InstWinX64.2.13** Make all three apps honor the configured data root. Done by InstWinX64.00: `VCommonSettings::installerDataRoot()` reads the recorded root and `initializeDataRoot()` adopts it, which covers seamly2d and seamlyme. SeamlyLayout has no data root.
 - [x] **InstWinX64.2.14** Create the selected data root during installation. Keep it and its contents during uninstall.
@@ -378,6 +378,49 @@ passed 15 assertions. Full CI run 32197329093 passed and published both
 `dev-latest` MSIs. A real interactive install remains required.
 
 **Decision:** `SEAMLYDATAROOT` currently stores the complete selected path. Selecting `E:\` uses `E:\`, not `E:\SeamlyData`.
+
+#### Result — 2026-08-19: the program-directory half of 2.11
+
+2.11 was ticked on 2026-08-18 for the data half alone. The program directory
+still reset. `INSTALLFOLDER` had no `RegistrySearch`, so a major upgrade offered
+`C:\Program Files\SeamlyApps` to somebody who had installed to
+`E:\Programs\SeamlyApps`. Pressing Next moved all three apps to another drive.
+
+`RecordedInstallPathSearch` prefills `INSTALLFOLDER` from the same
+`HKLM\SOFTWARE\Seamly\Seamly2D\InstallPath` value `InstallInfoRegistry` writes, so
+the path round-trips exactly, trailing backslash included. AppSearch runs at 50
+and CostFinalize at 1000, so the found value beats the authored default;
+AppSearch never overwrites a property already set, so `INSTALLFOLDER=` on the
+command line still beats both.
+
+`INSTALLFOLDER` also gained `Secure="yes"`. The wizard sets it client-side and a
+perMachine package runs its execute sequence elevated, so a public property has
+to be in `SecureCustomProperties` to cross that boundary. It was not listed
+before. Whether the package relied on undocumented behaviour until now is
+untested here — it needs an interactive install to a non-default folder.
+
+Seven new authoring assertions: the search and its 64-bit raw type, both
+AppSearch rows, the secure flag, AppSearch before CostFinalize in both
+sequences, and that the Property row did not displace the Directory row.
+
+Verified with a link-only build: `wix build` clean, `wix msi validate` clean
+apart from the already-suppressed ICE43/ICE57 and the expected ICE61, all
+authoring assertions pass.
+
+**Windows Installer cannot move an installed product, and no button can.** The
+location is fixed at install time and every component is registered against it,
+so a maintenance run ignores `INSTALLFOLDER`. Relocating means uninstall and
+reinstall, or a major upgrade — which is the case this prefill serves. That is
+why the Change button stays disabled rather than being wired to the
+program-directory page.
+
+**Found, not fixed:** the `DataParent` registry row holds `[SEAMLYDATAPARENT]`
+directly, and a directory id always resolves. A silent install that passes
+`SEAMLYDATAROOT=E:\Patterns` and no parent records a `DataParent` composed from
+`TARGETDIR`. `SEAMLYDATACHOSEN` then turns true on the next repair and rewrites
+the root to `<that parent>\SeamlyData`, losing the chosen name. Same trap
+`SEAMLYDATAROOTRECORDED` exists to close, one level up. Narrow — it needs the
+documented `SEAMLYDATAROOT=` escape hatch — but it is real.
 
 ## InstWinX64.3 — Configure Installed Applications
 

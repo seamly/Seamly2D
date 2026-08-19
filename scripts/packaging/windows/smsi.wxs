@@ -281,6 +281,36 @@
          explicitly for an unattended install; if neither is given the apps fall
          back to their own first-run default, which is the behaviour that
          shipped before this task. -->
+    <!-- ====== keep the program directory across an upgrade (2.11) ======= -->
+    <!-- Without this a major upgrade offers C:\Program Files\SeamlyApps again, even
+         to somebody who installed to E:\Programs\SeamlyApps. Press Next and the
+         apps move drive. The recorded InstallPath is the same value
+         InstallInfoRegistry writes, so it round-trips exactly, trailing
+         backslash included.
+
+         AppSearch runs at 50, before CostFinalize resolves the Directory
+         table, so the found value wins over the authored default - and
+         AppSearch never overwrites a property already set, so
+         INSTALLFOLDER= on the command line still wins over both.
+
+         Nothing here can MOVE an installed product. Windows Installer fixes a
+         product's location at install time and registers every component
+         against it, so a maintenance run ignores this value. Relocating means
+         uninstall and reinstall, or a major upgrade - which is exactly the
+         case this prefill serves.
+
+         Secure="yes" because the wizard sets INSTALLFOLDER on the client side
+         and a perMachine package runs its execute sequence elevated. A public
+         property has to be in SecureCustomProperties to cross that boundary.
+         It was not there before. -->
+    <Property Id="INSTALLFOLDER" Secure="yes">
+      <RegistrySearch Id="RecordedInstallPathSearch"
+                      Root="HKLM"
+                      Key="SOFTWARE\Seamly\Seamly2D"
+                      Name="InstallPath"
+                      Type="raw"
+                      Bitness="always64" />
+    </Property>
     <Property Id="SEAMLYDATAROOT" Secure="yes" />
     <Property Id="SEAMLYDATAPARENT" Secure="yes">
       <RegistrySearch Id="RecordedDataParentSearch"

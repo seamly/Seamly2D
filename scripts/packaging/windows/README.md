@@ -81,7 +81,7 @@ That page is reached only when **this** ProductCode is already installed, and `s
 | recorded version differs | Seamly `<installed>` is installed. This installer holds `<this build>`. |
 | nothing recorded | This installer holds Seamly `<version>`. |
 
-**Change stays disabled** (`ARPNOMODIFY`): the package has one feature, so there is nothing to select. **Repair** and **Remove** each set `WixUI_InstallMode` and *then* open `VerifyReadyDlg` — that page keys its action buttons on the property alone, so dropping either row would leave the wizard with no enabled button and no error. `smsi_check_authoring.ps1` asserts both rows and their order.
+**Change stays disabled** (`ARPNOMODIFY`): the package has one feature, so there is nothing to select. It is also the wrong place to move an installation — **Windows Installer cannot move an installed product.** The location is fixed at install time and every component is registered against it, so a maintenance run ignores `INSTALLFOLDER`. Relocating means uninstall and reinstall, or a major upgrade, which re-asks. Both path pages are prefilled from the previous install (`InstallPath` and `DataParent`), so an upgrade keeps the folders you chose unless you change them on the page. **Repair** and **Remove** each set `WixUI_InstallMode` and *then* open `VerifyReadyDlg` — that page keys its action buttons on the property alone, so dropping either row would leave the wizard with no enabled button and no error. `smsi_check_authoring.ps1` asserts both rows and their order.
 
 What the four Seamly pages do:
 
