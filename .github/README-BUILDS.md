@@ -155,7 +155,7 @@ A Flatpak sandbox exports `XDG_CONFIG_HOME=~/.var/app/<app-id>/config` and `XDG_
 
 ## User data files (patterns, measurements)
 
-- Default user data tree on Windows: `C:\Users\<user>\Documents\Seamly` (Task 60; `seamlyData` in Task 53, `seamly` in Task 34, `seamly2d` before that). **An existing `seamly2d` tree is copied wholesale to the new root on first run and left intact**, marked with `MIGRATED-TO-SEAMLY.txt` — never deleted, never a bare rename, so an upgrading user can still roll back. See "User data tree — the relocatable data root" above. The nine standard subfolders are created under whichever root wins, by `ensureDataRootTree()`, called from each app's `openSettings()`.
+- Default user data tree on Windows: `C:\Users\<user>\Documents\SeamlyData` (Task 60; `seamlyData` in Task 53, `seamly` in Task 34, `seamly2d` before that). **An existing `seamly2d` tree is copied wholesale to the new root on first run and left intact**, marked with `MIGRATED-TO-SEAMLY.txt` — never deleted, never a bare rename, so an upgrading user can still roll back. See "User data tree — the relocatable data root" above. The nine standard subfolders are created under whichever root wins, by `ensureDataRootTree()`, called from each app's `openSettings()`.
 - Users legitimately relocate it — e.g. to a cloud-synced drive (`G:\My Drive\Seamly`) for access while travelling. Since Task 34 the location is one setting, `paths/dataRoot`, that every data subfolder derives from; installers and apps must treat it as configurable, not fixed (see the Task 14 installer prompts).
 
 ## Per-platform build & packaging

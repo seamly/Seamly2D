@@ -2,230 +2,124 @@ I recommend using **`Seamly` as the suite-level directory**, with separate subdi
 
 ## Application data
 
-Application data includes settings, configuration, caches, logs, downloaded resources, recovery files, and other files managed internally by the software.
+- Notes:
+  - Application data includes settings, configuration, caches, logs, downloaded resources, recovery files, and other files managed internally by the software. Internal configuration and caches should remain in the operating system’s application-data locations.
+  - User Data means files the user creates, opens, saves, manages, backs up, or transfers: patterns, measurement files, layouts, exports, templates, and projects. Users should see and manage `Documents/SeamlyData` or similar.
+
+For the transition, the new build should detect the legacy `seamly2d` directory and migrate or adopt it automatically. It should not simply rename the folder, because users may need to roll back to an earlier release. A copy-and-verify migration, followed by leaving the legacy directory intact or clearly marking it as migrated, would be safer.
 
 ### Windows
 
-```text
-%APPDATA%\Seamly\
-├── Seamly2D\
-├── SeamlyMe\
-├── SeamlyLayout\
-└── Shared\
-```
+- Configuration files:
 
-Use `%APPDATA%` for configuration that should follow the user if Windows roaming profiles are enabled:
+  ```text
+  %APPDATA%\seamly\
+  ├── seamly2D\
+  ├── seamlyMe\
+  ├── seamlyLayout\
+  └── shared\
+  ```
 
-```text
-C:\Users\<username>\AppData\Roaming\Seamly\
-```
+  - Use `%APPDATA%` for configuration that should follow the user if Windows roaming profiles are enabled: `C:\Users\<username>\AppData\Roaming\seamly\`
 
-Use `%LOCALAPPDATA%` for caches, logs, temporary data, recovery data, and machine-specific state:
+  - Use `%LOCALAPPDATA%` for caches, logs, temporary data, recovery data, and machine-specific state:
 
-```text
-C:\Users\<username>\AppData\Local\Seamly\
-├── Seamly2D\
-│   ├── Cache\
-│   ├── Logs\
-│   └── Recovery\
-├── SeamlyMe\
-├── SeamlyLayout\
-└── Shared\
-```
+  ```text
+  C:\Users\<username>\AppData\Local\seamly\
+  ├── seamly2d\
+  │   ├── cache\
+  │   ├── logs\
+  │   └── recovery\
+  ├── seamlyme\
+  │   ├── cache\
+  │    ├── logs\
+  │   └── recovery\
+  ├── seamlylayout\
+  │   ├── cache\
+  │   ├── logs\
+  │   └── recovery\
+  └── shared\
+  ```
 
-Recommended Windows mapping:
-
-| Data                 | Directory                                         |
-| -------------------- | ------------------------------------------------- |
-| Configuration        | `%APPDATA%\Seamly\<application>\`               |
-| Cache                | `%LOCALAPPDATA%\Seamly\<application>\Cache\`    |
-| Logs                 | `%LOCALAPPDATA%\Seamly\<application>\Logs\`     |
-| Recovery/autosave    | `%LOCALAPPDATA%\Seamly\<application>\Recovery\` |
-| Shared internal data | `%LOCALAPPDATA%\Seamly\Shared\`                 |
+- Recommended **Windows** mapping:
+  
+  | Data                 | Directory                                       |
+  | -------------------- | ----------------------------------------------- |
+  | Configuration        | `%APPDATA%\seamly\<application>\`               |
+  | Cache                | `%LOCALAPPDATA%\seamly\<application>\cache\`    |
+  | Logs                 | `%LOCALAPPDATA%\seamly\<application>\logs\`     |
+  | Recovery/autosave    | `%LOCALAPPDATA%\seamly\<application>\recovery\` |
+  | Shared internal data | `%LOCALAPPDATA%\seamly\shared\`                 |
+  | User data            | `%HOME\Documents\SeamlyData\                                 |
 
 ### Linux
 
-Follow the XDG Base Directory specification.
+- Follow the XDG Base Directory specification. The application must honor the XDG environment variables when users override these defaults.
 
-```text
-$XDG_CONFIG_HOME/Seamly/
-```
+  - `$XDG_CONFIG_HOME` Default path: `~/.config/`; Purpose: Stores user-specific configuration files, settings, and preferences. Top level folder for configuration data for seamly would be `$XDG_CONFIG_HOME/seamly/`, e.g. `~/.config/seamly/`
 
-Normally:
+  - `$XDG_DATA_HOME` Default path: `~/.local/share/`; Purpose: Stores user-specific data files like save files, media databases, or local app states. Top level folder for persistent internal data for seamly would be `$XDG_DATA_HOME/seamly/`, e.g. `~/.local/share/seamly/`
 
-```text
-/home/<username>/.config/Seamly/
-```
+  - `$XDG_CACHE_HOME` Default path: `~/.cache/` Purpose: Stores non-essential data like web browser caches or thumbnail previews. Top level tree For cache data for seamly would be  `$XDG_CACHE_HOME/seamly`, e.g. `~/.cache/seamly/`
 
-Persistent application data:
+  - `$XDG_LOGS_HOME` Default path: `~/.local/state/`.The top level folder for logs for seamly would be `$XDG_LOGS_HOME/seamly`, e.g. `~/.local/state/seamly/`
 
-```text
-$XDG_DATA_HOME/Seamly/
-```
+- Recommended **Debian Linux** mapping:
 
-Normally:
-
-```text
-/home/<username>/.local/share/Seamly/
-```
-
-Cache:
-
-```text
-$XDG_CACHE_HOME/Seamly/
-```
-
-Normally:
-
-```text
-/home/<username>/.cache/Seamly/
-```
-
-Recommended Linux mapping:
-
-| Data                     | Directory                                         |
-| ------------------------ | ------------------------------------------------- |
-| Configuration            | `~/.config/Seamly/<application>/`               |
-| Persistent internal data | `~/.local/share/Seamly/<application>/`          |
-| Cache                    | `~/.cache/Seamly/<application>/`                |
-| Logs                     | `~/.local/state/Seamly/<application>/Logs/`     |
-| Recovery/autosave        | `~/.local/state/Seamly/<application>/Recovery/` |
-| Shared internal data     | `~/.local/share/Seamly/Shared/`                 |
-
-The application must honor the XDG environment variables when users override these defaults.
+| Data                 | Directory                                        |
+| -------------------- | ------------------------------------------------ |
+| Configuration        | `~/.config/seamly/<application>/`                |
+| Cache                | `~/.cache/seamly/<application>/`                 |
+| Logs                 | `~/.local/state//seamly/<application>/logs`      |
+| Recovery/autosave    | `~/.local/state//seamly/<application>/recovery/` |
+| Shared internal data | `~/.local/share/seamly/`                         |
+| User data            | `~/Documents/SeamlyData/`                        |
 
 ### macOS
 
+- Follow the Apple Standard Directory specification. The application must honor the Apple Standard Directory environment variables when users override these defaults.
+- Preference Files (.plist): Instead of raw text files (like .conf or .yaml), macOS applications store configuration settings inside ~/Library/Preferences/ as binary or XML files called property lists (.plist).
+
+
+| Data                 | Directory                                                      |
+| -------------------- | -------------------------------------------------------------- |
+| Configuration        | `~/Library/Application/seamly/<application>/`                  |
+| Native preferences   | `~/Library/Preferences/org.seamly.<application>.plist`         |
+| Cache                | `~/Library/Caches/seamly/<application>/`                       |
+| Logs                 | `~/Library/Logs/seamly/<application>/`                         |
+| Recovery/autosave    | `~/Library/Application/seamly/<application>/recovery/`         |
+| Shared internal data | `~/Library/Application/seamly/shared/`                         |
+| User data            | `~/Documents/SeamlyData/`                                      |
+
 Persistent application data:
 
 ```text
-/Users/<username>/Library/Application Support/Seamly/
-├── Seamly2D/
-├── SeamlyMe/
-├── SeamlyLayout/
-└── Shared/
+~/Library/Application/seamly/
+├── seamly2d/
+├── seamlyme/
+├── seamlylayout/
+└── shared/
 ```
 
 Caches:
 
 ```text
-/Users/<username>/Library/Caches/Seamly/
-├── Seamly2D/
-├── SeamlyMe/
-└── SeamlyLayout/
+~/Library/Caches/seamly/
+├── seamly2d/
+├── seamlyme/
+└── seamlylayout/
 ```
 
 Logs:
 
 ```text
-/Users/<username>/Library/Logs/Seamly/
+~/Library/Logs/seamly/
 ```
 
-Preferences may be stored as standard macOS property-list files:
+Preferences may be stored as standard macOS property-list (.plist) files:
 
 ```text
-/Users/<username>/Library/Preferences/org.seamly.Seamly2D.plist
-/Users/<username>/Library/Preferences/org.seamly.SeamlyMe.plist
-/Users/<username>/Library/Preferences/org.seamly.SeamlyLayout.plist
+~/Library/Preferences/org.seamly.Seamly2D.plist
+~/Library/Preferences/org.seamly.SeamlyMe.plist
+~/Library/Preferences/org.seamly.SeamlyLayout.plist
 ```
-
-Recommended macOS mapping:
-
-| Data                 | Directory                                                        |
-| -------------------- | ---------------------------------------------------------------- |
-| Configuration        | `~/Library/Application Support/Seamly/<application>/`          |
-| Native preferences   | `~/Library/Preferences/org.seamly.<application>.plist`         |
-| Cache                | `~/Library/Caches/Seamly/<application>/`                       |
-| Logs                 | `~/Library/Logs/Seamly/<application>/`                         |
-| Recovery/autosave    | `~/Library/Application Support/Seamly/<application>/Recovery/` |
-| Shared internal data | `~/Library/Application Support/Seamly/Shared/`                 |
-
-## User data
-
-User data means files the user creates, opens, saves, manages, backs up, or transfers: patterns, measurement files, layouts, exports, templates, and projects.
-
-### Windows
-
-Default root:
-
-```text
-C:\Users\<username>\Documents\Seamly\
-```
-
-Using the Windows known-folder API:
-
-```text
-%USERPROFILE%\Documents\Seamly\
-```
-
-Suggested structure:
-
-```text
-Documents\Seamly\
-├── Projects\
-├── Patterns\
-├── Measurements\
-├── Layouts\
-├── Templates\
-└── Exports\
-```
-
-### Linux
-
-Default root:
-
-```text
-/home/<username>/Documents/Seamly/
-```
-
-Conceptually:
-
-```text
-$XDG_DOCUMENTS_DIR/Seamly/
-```
-
-Suggested structure:
-
-```text
-Documents/Seamly/
-├── Projects/
-├── Patterns/
-├── Measurements/
-├── Layouts/
-├── Templates/
-└── Exports/
-```
-
-The application should resolve `XDG_DOCUMENTS_DIR` rather than assuming the folder is literally named `Documents`, because localized Linux systems may use a different name.
-
-### macOS
-
-Default root:
-
-```text
-/Users/<username>/Documents/Seamly/
-```
-
-Suggested structure:
-
-```text
-Documents/Seamly/
-├── Projects/
-├── Patterns/
-├── Measurements/
-├── Layouts/
-├── Templates/
-└── Exports/
-```
-
-## Consolidated recommendation
-
-| Platform | Configuration                                                           | Cache                          | User documents                      |
-| -------- | ----------------------------------------------------------------------- | ------------------------------ | ----------------------------------- |
-| Windows  | `%APPDATA%\Seamly\`                                                   | `%LOCALAPPDATA%\Seamly\`     | `%USERPROFILE%\Documents\Seamly\` |
-| Linux    | `$XDG_CONFIG_HOME/Seamly/`              | `$XDG_CACHE_HOME/Seamly/` | `$XDG_DOCUMENTS_DIR/Seamly/` |                                     |
-| macOS    | `~/Library/Application Support/Seamly/`                               | `~/Library/Caches/Seamly/`   | `~/Documents/Seamly/`             |
-
-The important boundary is: **users should see and manage `Documents/Seamly`; internal configuration and caches should remain in the operating system’s application-data locations.**
-
-For the transition, the new build should detect the legacy `seamly2d` directory and migrate or adopt it automatically. It should not simply rename the folder, because users may need to roll back to an earlier release. A copy-and-verify migration, followed by leaving the legacy directory intact or clearly marking it as migrated, would be safer.
