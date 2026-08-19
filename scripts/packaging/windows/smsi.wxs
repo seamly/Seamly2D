@@ -212,6 +212,25 @@
          (DisplayVersion) written by InstallInfoRegistry below. -->
     <Property Id="ARPCOMMENTS" Value="Seamly $(var.DisplayVersion) - apparel CAD pattern drafting (Seamly2D), measurements/sizing (SeamlyMe), and layout (SeamlyLayout)" />
 
+    <!-- The full version of whatever is installed now, for the maintenance
+         page to name (InstWinX64.7.10). Read from the same HKLM value
+         InstallInfoRegistry writes, because Apps and features stores only the
+         numeric MSI ProductVersion and that is not the version a user sees in
+         the apps.
+
+         AppSearch runs at 50, long before any dialog, and does NOT overwrite a
+         property already set on the command line. Empty when nothing is
+         installed, which the page reads as "say nothing about an installed
+         version". -->
+    <Property Id="SEAMLYINSTALLEDVERSION" Secure="yes">
+      <RegistrySearch Id="InstalledDisplayVersionSearch"
+                      Root="HKLM"
+                      Key="SOFTWARE\Seamly\Seamly2D"
+                      Name="DisplayVersion"
+                      Type="raw"
+                      Bitness="always64" />
+    </Property>
+
     <!-- Finding the pre-MSI Seamly2D installation and removing it lives in
          smsi_legacy.wxs: the two registry searches, the Start Menu property,
          and the two removal components. This reference is what links that

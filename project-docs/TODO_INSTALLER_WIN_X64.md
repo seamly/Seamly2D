@@ -16,9 +16,9 @@ Create one WiX v6 MSI for Seamly2D, SeamlyMe, and SeamlyLayout on Windows 10/11 
 
 - [x] InstWinX64.0 (verify the baseline MSI build) is complete.
 
-## InstWinX64.00 - Fix user data diretories
+## InstWinX64.00 - Fix user data directories
 
-- [x] the user data is prompted on page 5 that the user directory SeamlyData will be installed to C:\Users\<username>, i.e. C:\users\susan in this case. The seamly data directory is written to c:\users\<usersname>\Documents\Seamly.  The SeamlyData was never created at c:\users\susan; instead a Seamly directory was created at c:\users\susan\Documents --> C:\users\susan\Documents\Seamly was the result in this case.
+- [x] the user data is prompted on page 5 that the user directory SeamlyData will be installed to C:\Users\<username>, i.e. C:\users\susan in this case. The seamly data directory was incorrectly written to c:\users\<usersname>\Documents\Seamly.  The correct SeamlyData folder was never created at c:\users\susan\Documents; instead a Seamly directory was created at c:\users\susan\Documents --> C:\users\susan\Documents\SeamlyData should be the result.
 
 ### Result — 2026-08-17
 
@@ -30,7 +30,8 @@ answer it recorded.
 `C:\Users\<user>\Documents\SeamlyData`. **Decision (user, 2026-08-17): the parent is
 Documents, because that is where users go to find data written by other
 applications. The leaf stays `SeamlyData`, and the page keeps asking for the
-parent only.**
+parent only.** This is so that the user cannot change the name of the seamly data folder,
+although they can change its location.
 
 `PersonalFolder` rather than `%USERPROFILE%\Documents` so a redirected Documents is
 followed — OneDrive Known Folder Move being the common case, where
@@ -453,7 +454,7 @@ Eight `VSettings` accessors use `%APPDATA%\Unknown Organization.ini`.
 
 ## InstWinX64.7 — Correct Installer UI
 
-- [ ] **InstWinX64.7.1** Use `C:\Users\<user>\Documents\Seamly` in previous-install text.
+- [ ] **InstWinX64.7.1** Use `C:\Users\<user>\Documents\SeamlyData` in previous-install text.
 - [ ] **InstWinX64.7.2** Verify displayed AppData paths.
 - [ ] **InstWinX64.7.3** Use: “An older Seamly2D version was found in `C:\Program Files (x86)\Seamly2D`.”
 - [ ] **InstWinX64.7.4** Remove obsolete Program Files migration advice.
@@ -462,6 +463,57 @@ Eight `VSettings` accessors use `%APPDATA%\Unknown Organization.ini`.
 - [ ] **InstWinX64.7.7** Replace “Install Seamly2D to” with Seamly-suite wording.
 - [ ] **InstWinX64.7.8** Show the complete editable destination path.
 - [ ] **InstWinX64.7.9** Update UI tests and documentation.
+- [x] **InstWinX64.7.10** Name the installed version on the maintenance page.
+
+### Result — 2026-08-19
+
+The Change / Repair / Remove page now says which version is installed and
+whether this installer holds the same one.
+
+Why it was needed: that page appears only when THIS ProductCode is already
+installed, and `smsi.ps1` generates a fresh ProductCode per build. Reaching it
+means the user re-ran the very package that is installed — easy to do by accident
+with a rolling `dev-latest` download, and the screen gave no clue.
+
+`SEAMLYINSTALLEDVERSION` comes from a `RegistrySearch` on the `DisplayVersion`
+the last install wrote to `HKLM\SOFTWARE\Seamly\Seamly2D`. Apps and features
+stores only the numeric MSI `ProductVersion`, which is not the version the apps
+show, so the ARP value is no use here.
+
+Three lines share one slot, with disjoint conditions:
+
+| Condition | Line |
+|---|---|
+| recorded version equals this build | Seamly `<version>` is installed. This installer holds that same version. |
+| recorded version differs | Seamly `<installed>` is installed. This installer holds `<this build>`. |
+| nothing recorded | This installer holds Seamly `<version>`. |
+
+The middle line is unreachable while ProductCode is per-build. It is kept
+because the alternative to a wrong-looking screen is a blank one.
+
+**The stock `MaintenanceTypeDlg` is replaced, not reused.** WiX cannot add a
+control to a `<Dialog>` another fragment defines, so naming the version on that
+page means owning the whole page. `SeamlyMaintenanceTypeDlg` transcribes the
+stock geometry, texts and the three Disable/Show conditions exactly.
+
+**The silent failure this creates, and the assertions that catch it.**
+`VerifyReadyDlg` shows its Repair and Remove buttons on `WixUI_InstallMode`
+alone. The stock page set that property; ours must too, and must set it *before*
+`NewDialog`. Drop either row and the wizard reaches the ready page with no
+enabled action button — Repair and Remove would do nothing and report nothing.
+`smsi_check_authoring.ps1` gained 24 assertions covering the replacement, both
+orderings, the ARPNOMODIFY disable, and all three version lines.
+
+Verified with a link-only build: `wix build` clean, `wix msi validate` clean
+apart from the already-suppressed ICE43/ICE57 and the expected ICE61, all
+authoring assertions pass. The dialog's control table was diffed against the
+stock one — identical geometry, plus the three version lines at y=214.
+
+Not verified: the page on screen. That needs an interactive maintenance run.
+
+Not done: the same note on `MaintenanceWelcomeDlg`, the page shown just before
+it. That is a second stock dialog to replace, and the version is already stated
+one click later.
 
 ## InstWinX64.8 — Preserve Command-Line Documents
 

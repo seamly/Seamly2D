@@ -297,6 +297,84 @@ Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyDataMigr
     -ConditionMatch $previousInstallCondition
 Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyDataDirDlg' -ConditionMatch 'NOT \('
 Assert-Transition -From 'VerifyReadyDlg' -Control 'Back' -To 'SeamlyShortcutsDlg' -ConditionMatch 'NOT Installed'
+# InstWinX64.7.10. The maintenance page is ours, not the stock MaintenanceTypeDlg,
+# because WiX cannot add a control to a dialog another fragment defines and the
+# page has to name the installed version. Replacing a stock dialog means owning
+# every row it used to bring, so assert the ones that fail silently.
+Assert-That -Name 'the stock maintenance-type page is replaced, not reused' `
+    -Succeeded ((Get-MsiRows -Sql "SELECT ``Dialog`` FROM ``Dialog`` WHERE ``Dialog``='MaintenanceTypeDlg'" `
+        -Columns 'Dialog').Count -eq 0)
+Assert-That -Name 'dialog SeamlyMaintenanceTypeDlg is present' `
+    -Succeeded ((Get-MsiRows -Sql "SELECT ``Dialog`` FROM ``Dialog`` WHERE ``Dialog``='SeamlyMaintenanceTypeDlg'" `
+        -Columns 'Dialog').Count -eq 1)
+Assert-Transition -From 'MaintenanceWelcomeDlg' -Control 'Next' -To 'SeamlyMaintenanceTypeDlg'
+Assert-Transition -From 'SeamlyMaintenanceTypeDlg' -Control 'Back' -To 'MaintenanceWelcomeDlg'
+Assert-Transition -From 'SeamlyMaintenanceTypeDlg' -Control 'RepairButton' -To 'VerifyReadyDlg'
+Assert-Transition -From 'SeamlyMaintenanceTypeDlg' -Control 'RemoveButton' -To 'VerifyReadyDlg'
+Assert-Transition -From 'VerifyReadyDlg' -Control 'Back' -To 'SeamlyMaintenanceTypeDlg' `
+    -ConditionMatch 'Installed AND NOT PATCH'
+# THE silent failure. VerifyReadyDlg shows its Repair and Remove buttons on
+# WixUI_InstallMode alone; the stock page set it and ours must too. Drop these
+# two rows and the wizard reaches the ready page with no enabled action button,
+# so Repair and Remove do nothing and report nothing.
+foreach ($mode in @('Repair', 'Remove', 'Change')) {
+    $setMode = @($script:controlEvents | Where-Object {
+        $_.Dialog -eq 'SeamlyMaintenanceTypeDlg' -and $_.Control -eq "${mode}Button" -and
+        $_.Event -eq '[WixUI_InstallMode]' -and $_.Argument -eq $mode })
+    Assert-That -Name "the $($mode.ToLower()) button sets WixUI_InstallMode" -Succeeded ($setMode.Count -eq 1)
+}
+# The mode must be set before the page changes, or VerifyReadyDlg is created
+# while the property still holds the previous answer.
+foreach ($mode in @('Repair', 'Remove')) {
+    $rows = @($script:controlEvents | Where-Object {
+        $_.Dialog -eq 'SeamlyMaintenanceTypeDlg' -and $_.Control -eq "${mode}Button" })
+    $setModeOrder = @($rows | Where-Object { $_.Event -eq '[WixUI_InstallMode]' })
+    $newDialogOrder = @($rows | Where-Object { $_.Event -eq 'NewDialog' })
+    Assert-That -Name "the $($mode.ToLower()) button sets the mode before it advances" `
+        -Succeeded ($setModeOrder.Count -eq 1 -and $newDialogOrder.Count -eq 1 -and
+                    [int]$setModeOrder[0].Ordering -lt [int]$newDialogOrder[0].Ordering)
+}
+# Change stays disabled: the package has one feature, so there is nothing to
+# select. ARPNOMODIFY is what Apps and features reads too.
+$maintenanceConditions = Get-MsiRows `
+    -Sql "SELECT ``Control_``, ``Action``, ``Condition`` FROM ``ControlCondition`` WHERE ``Dialog_``='SeamlyMaintenanceTypeDlg'" `
+    -Columns 'Control', 'Action', 'Condition'
+Assert-That -Name 'the change button is disabled by ARPNOMODIFY' `
+    -Succeeded (@($maintenanceConditions | Where-Object {
+        $_.Control -eq 'ChangeButton' -and $_.Action -eq 'Disable' -and $_.Condition -match 'ARPNOMODIFY' }).Count -eq 1)
+# The version note. Three lines share one slot and their conditions must stay
+# disjoint, or two print on top of each other.
+$maintenanceControls = Get-MsiRows `
+    -Sql "SELECT ``Control``, ``X``, ``Y``, ``Text`` FROM ``Control`` WHERE ``Dialog_``='SeamlyMaintenanceTypeDlg'" `
+    -Columns 'Control', 'X', 'Y', 'Text'
+foreach ($line in @('SameVersionText', 'OtherVersionText', 'UnknownVersionText')) {
+    $shown = @($maintenanceConditions | Where-Object { $_.Control -eq $line -and $_.Action -eq 'Show' })
+    Assert-That -Name "$line is shown by condition" -Succeeded ($shown.Count -eq 1)
+    Assert-That -Name "$line names a version" `
+        -Succeeded (@($maintenanceControls | Where-Object {
+            $_.Control -eq $line -and $_.Text -match '\d+\.\d+\.\d+\.\d+' }).Count -eq 1)
+}
+$sameVersion = @($maintenanceConditions | Where-Object { $_.Control -eq 'SameVersionText' })
+Assert-That -Name 'the same-version line compares against the built version' `
+    -Succeeded ($sameVersion.Count -eq 1 -and $sameVersion[0].Condition -match 'SEAMLYINSTALLEDVERSION = "\d+\.\d+\.\d+\.\d+"') `
+    -Detail "condition '$(if ($sameVersion.Count) { $sameVersion[0].Condition } else { '<nothing>' })'"
+$unknownVersion = @($maintenanceConditions | Where-Object { $_.Control -eq 'UnknownVersionText' })
+Assert-That -Name 'a machine with no recorded version still gets a line' `
+    -Succeeded ($unknownVersion.Count -eq 1 -and $unknownVersion[0].Condition -match 'NOT SEAMLYINSTALLEDVERSION')
+# Read from the same HKLM value InstallInfoRegistry writes, 64-bit view, raw
+# (type 2 + 16). Apps and features stores only the numeric MSI ProductVersion,
+# which is not the version the apps show.
+$versionSearch = Get-MsiRows `
+    -Sql "SELECT ``Signature_``, ``Root``, ``Key``, ``Name``, ``Type`` FROM ``RegLocator`` WHERE ``Name``='DisplayVersion'" `
+    -Columns 'Signature', 'Root', 'Key', 'Name', 'Type'
+Assert-That -Name 'the installed version is read from the Seamly install key' `
+    -Succeeded ($versionSearch.Count -eq 1 -and
+                $versionSearch[0].Root -eq '2' -and
+                $versionSearch[0].Key -eq 'SOFTWARE\Seamly\Seamly2D' -and
+                $versionSearch[0].Type -eq '18')
+Assert-That -Name 'AppSearch fills SEAMLYINSTALLEDVERSION' `
+    -Succeeded ((Get-MsiRows -Sql "SELECT ``Property`` FROM ``AppSearch`` WHERE ``Property``='SEAMLYINSTALLEDVERSION'" `
+        -Columns 'Property').Count -eq 1)
 
 # The two License Next rows must not both be true and must not both be false,
 # or the button either picks an undefined winner or does nothing at all. They

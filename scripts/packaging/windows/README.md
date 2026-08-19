@@ -69,7 +69,19 @@ The package defines **its own dialog set** (Task InstWinX64.1). It reuses the st
 | 9 | Progress | `ProgressDlg` | always |
 | 10 | Finish | `ExitDialog` | always |
 
-**Back** reverses every arrow, and **Cancel** spawns the stock `CancelDlg` on every page. Maintenance, repair and uninstall keep the stock route (`MaintenanceWelcomeDlg` → `MaintenanceTypeDlg` → `VerifyReadyDlg`); none of the Seamly pages appear, because none of their answers apply to a product that is already installed.
+**Back** reverses every arrow, and **Cancel** spawns the stock `CancelDlg` on every page. Maintenance, repair and uninstall follow `MaintenanceWelcomeDlg` → `SeamlyMaintenanceTypeDlg` → `VerifyReadyDlg`; none of the install-time Seamly pages appear, because none of their answers apply to a product that is already installed.
+
+**The maintenance page is ours, not the stock `MaintenanceTypeDlg`.** It transcribes that dialog exactly — same geometry, same texts, same Disable/Show conditions — and adds one line naming the installed version. WiX cannot add a control to a `<Dialog>` another fragment defines, so naming the version there means owning the whole page.
+
+That page is reached only when **this** ProductCode is already installed, and `smsi.ps1` generates a fresh ProductCode per build. So reaching it means the user re-ran the very package that is installed — easy to do by accident with a rolling `dev-latest` download. `SEAMLYINSTALLEDVERSION` is read by `AppSearch` from `HKLM\SOFTWARE\Seamly\Seamly2D\DisplayVersion`, and one of three lines shows:
+
+| Condition | Line |
+|---|---|
+| recorded version equals this build | Seamly `<version>` is installed. This installer holds that same version. |
+| recorded version differs | Seamly `<installed>` is installed. This installer holds `<this build>`. |
+| nothing recorded | This installer holds Seamly `<version>`. |
+
+**Change stays disabled** (`ARPNOMODIFY`): the package has one feature, so there is nothing to select. **Repair** and **Remove** each set `WixUI_InstallMode` and *then* open `VerifyReadyDlg` — that page keys its action buttons on the property alone, so dropping either row would leave the wizard with no enabled button and no error. `smsi_check_authoring.ps1` asserts both rows and their order.
 
 What the four Seamly pages do:
 
