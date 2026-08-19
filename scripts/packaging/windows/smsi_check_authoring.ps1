@@ -760,6 +760,48 @@ $dataParentValue = @($registry | Where-Object {
     $_.Root -eq '2' -and $_.Key -eq 'SOFTWARE\Seamly\Seamly2D' -and $_.Name -eq 'DataParent' })
 Assert-That -Name 'the selected data parent is recorded for upgrades' `
     -Succeeded ($dataParentValue.Count -eq 1 -and $dataParentValue[0].Value -eq '[SEAMLYDATAPARENT]')
+# InstWinX64.2.11. A major upgrade is a fresh install of a new ProductCode, so it
+# re-asks every question - including the program directory. Without a prefill it
+# offers the default, and somebody who installed to E:\Programs\SeamlyApps moves
+# drive by pressing Next. Both halves of the prefill are asserted here: the
+# program directory from InstallPath, the data root from the recorded DataParent.
+#
+# Type 18 is a raw registry value read from the 64-bit view (2 + 16).
+$installPathSearch = Get-MsiRows `
+    -Sql "SELECT ``Signature_``, ``Root``, ``Key``, ``Name``, ``Type`` FROM ``RegLocator`` WHERE ``Signature_``='RecordedInstallPathSearch'" `
+    -Columns 'Signature', 'Root', 'Key', 'Name', 'Type'
+Assert-That -Name 'the program directory is read back from the Seamly install key' `
+    -Succeeded ($installPathSearch.Count -eq 1 -and
+                $installPathSearch[0].Root -eq '2' -and
+                $installPathSearch[0].Key -eq 'SOFTWARE\Seamly\Seamly2D' -and
+                $installPathSearch[0].Name -eq 'InstallPath' -and
+                $installPathSearch[0].Type -eq '18')
+Assert-That -Name 'AppSearch prefills INSTALLFOLDER for an upgrade' `
+    -Succeeded ((Get-MsiRows -Sql "SELECT ``Property`` FROM ``AppSearch`` WHERE ``Property``='INSTALLFOLDER'" `
+        -Columns 'Property').Count -eq 1)
+Assert-That -Name 'AppSearch prefills SEAMLYDATAPARENT for an upgrade' `
+    -Succeeded ((Get-MsiRows -Sql "SELECT ``Property`` FROM ``AppSearch`` WHERE ``Property``='SEAMLYDATAPARENT'" `
+        -Columns 'Property').Count -eq 1)
+# The wizard sets INSTALLFOLDER client-side; a perMachine package runs its
+# execute sequence elevated. A public property must be in SecureCustomProperties
+# to cross that boundary, and INSTALLFOLDER was not listed before this task.
+Assert-That -Name 'INSTALLFOLDER is a secure custom property' -Succeeded ($secure -like '*INSTALLFOLDER*')
+# The prefill only wins because AppSearch is earlier than the directory
+# resolution that would otherwise compose the authored default.
+foreach ($sequence in @('InstallUISequence', 'InstallExecuteSequence')) {
+    $rows = Get-MsiRows -Sql "SELECT ``Action``, ``Sequence`` FROM ``$sequence``" -Columns 'Action', 'Sequence'
+    $appSearchAt = @($rows | Where-Object { $_.Action -eq 'AppSearch' })
+    $costFinalizeAt = @($rows | Where-Object { $_.Action -eq 'CostFinalize' })
+    Assert-That -Name "$sequence searches before it resolves directories" `
+        -Succeeded ($appSearchAt.Count -eq 1 -and $costFinalizeAt.Count -eq 1 -and
+                    [int]$appSearchAt[0].Sequence -lt [int]$costFinalizeAt[0].Sequence)
+}
+# The program folder must still be authored as a directory under the 64-bit
+# Program Files. A Property row of the same name overrides the resolved path; it
+# must not replace the Directory row, or a fresh machine gets no default at all.
+Assert-That -Name 'the prefill did not replace the program directory row' `
+    -Succeeded (@($directories | Where-Object {
+        $_.Directory -eq 'INSTALLFOLDER' -and $_.Parent -eq 'ProgramFiles64Folder' }).Count -eq 1)
 # Order is the whole mechanism. SEAMLYDATACHOSEN must be decided BEFORE
 # CostInitialize, while SEAMLYDATAPARENT and SEAMLYDATAROOT are non-empty only if
 # the wizard or the command line set them; afterwards the Directory table has
