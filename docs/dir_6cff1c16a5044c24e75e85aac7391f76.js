@@ -8,6 +8,8 @@ var dir_6cff1c16a5044c24e75e85aac7391f76 =
     [ "def.cpp", "d6/d0b/def_8cpp.html", "d6/d0b/def_8cpp" ],
     [ "def.h", "d4/da4/def_8h.html", "d4/da4/def_8h" ],
     [ "diagnostic.h", "d6/dcd/diagnostic_8h.html", null ],
+    [ "installer_record.cpp", "d2/d14/installer__record_8cpp.html", "d2/d14/installer__record_8cpp" ],
+    [ "installer_record.h", "d1/dac/installer__record_8h.html", "d1/dac/installer__record_8h" ],
     [ "logging.h", "d5/d77/logging_8h.html", null ],
     [ "projectversion.cpp", "d1/d65/projectversion_8cpp.html", "d1/d65/projectversion_8cpp" ],
     [ "projectversion.h", "dc/d73/projectversion_8h.html", "dc/d73/projectversion_8h" ],

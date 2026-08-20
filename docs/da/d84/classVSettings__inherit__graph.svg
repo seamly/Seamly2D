@@ -118,10 +118,10 @@ var sectionId = 'dynsection-0';
 <text text-anchor="start" x="11.5" y="-464.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ prepareMultisizeTables()</text>
 <text text-anchor="start" x="11.5" y="-453.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getDefaultDataRoot()</text>
 <text text-anchor="start" x="11.5" y="-442.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getLegacyDataRoot()</text>
-<text text-anchor="start" x="11.5" y="-431.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ installerDataRoot()</text>
-<text text-anchor="start" x="11.5" y="-420.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ dataRoot()</text>
-<text text-anchor="start" x="11.5" y="-409.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ dataSubdirPath()</text>
-<text text-anchor="start" x="11.5" y="-398.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 18 more...</text>
+<text text-anchor="start" x="11.5" y="-431.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ dataRoot()</text>
+<text text-anchor="start" x="11.5" y="-420.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ dataSubdirPath()</text>
+<text text-anchor="start" x="11.5" y="-409.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ initializeDataRoot()</text>
+<text text-anchor="start" x="11.5" y="-398.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 17 more...</text>
 <text text-anchor="start" x="11.5" y="-387.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; commonSettingsOrganization()</text>
 <text text-anchor="start" x="11.5" y="-376.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; mergeStrayCommonSettings()</text>
 <text text-anchor="start" x="11.5" y="-365.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; removeStrayCommonSettings()</text>

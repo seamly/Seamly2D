@@ -21,6 +21,7 @@ var namespaces_dup =
     [ "anonymous_namespace{dialogtool.cpp}", "d3/d7d/namespaceanonymous__namespace_02dialogtool_8cpp_03.html", [
       [ "RowId", "d3/d7d/namespaceanonymous__namespace_02dialogtool_8cpp_03.html#ac2e003f541cb5afc14468f3b6945ef46", null ]
     ] ],
+    [ "anonymous_namespace{installer_record.cpp}", "d8/d56/namespaceanonymous__namespace_02installer__record_8cpp_03.html", null ],
     [ "anonymous_namespace{internal_path_dialog.cpp}", "df/de6/namespaceanonymous__namespace_02internal__path__dialog_8cpp_03.html", [
       [ "cutLinePath", "df/de6/namespaceanonymous__namespace_02internal__path__dialog_8cpp_03.html#a394f1f735699f1b1d0e822cf8d3af1d3", null ]
     ] ],
@@ -338,6 +339,9 @@ var namespaces_dup =
     ] ],
     [ "anonymous_namespace{vtoolmove.cpp}", "dd/dbe/namespaceanonymous__namespace_02vtoolmove_8cpp_03.html", [
       [ "findRotationOrigin", "dd/dbe/namespaceanonymous__namespace_02vtoolmove_8cpp_03.html#a2f7cb2fa85efab3c7cc6db3569f5bd15", null ]
+    ] ],
+    [ "InstallerRecord", "db/dd6/namespaceInstallerRecord.html", [
+      [ "dataRoot", "db/dd6/namespaceInstallerRecord.html#aca26b8e2ff640b1f1eacd139d05b95c7", null ]
     ] ],
     [ "PieceItemData", "dd/d2f/namespacePieceItemData.html", [
       [ "Key", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52a", [
