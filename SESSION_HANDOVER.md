@@ -27,7 +27,123 @@ builds the test target by hand.
 
 Not fixed — it is a CI-cost decision for the user. The options are to drop the
 `pull_request` gate on `linux-test`, or to run it on a schedule.
-## PICK UP HERE (2026-08-18, Setup creates the data root)
+## PICK UP HERE (2026-08-19, the installer's answers are the ones the apps use)
+
+Four task branches merged and pushed. HEAD is `f230c638e9`. Full CI ran on each
+(no skip token — `scripts/packaging/**` and C++ both changed).
+
+| Task | What shipped |
+|---|---|
+| InstWinX64.00 | Page 5 defaults to `Documents`; the apps read what Setup recorded |
+| InstWinX64.7.10 | The maintenance page names the installed version |
+| InstWinX64.2.11 | The program directory survives a major upgrade |
+| InstWinX64.7.11 | The registry read moved into `installer_record.{h,cpp}` |
+
+### The one rule that ties them together
+
+**Whatever the wizard shows is what the apps use.** Page 5 promised
+`C:\Users\<user>\SeamlyData` and the apps created `<Documents>\Seamly`. Both
+halves are fixed: the default parent is the `PersonalFolder` known folder, and
+`InstallerRecord::dataRoot()` reads
+`HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot` on first run.
+
+Precedence in `VCommonSettings::initializeDataRoot()`, highest first:
+
+1. `paths/dataRoot` in the settings file — an earlier run, or Preferences → Paths.
+2. the root Setup recorded.
+3. an adopted legacy `~/seamly2d` tree.
+4. the built-in default, `<Documents>/Seamly`.
+
+1 above 2 is what stops a machine-wide installer value overriding a user who
+moved their root afterwards. Do not reorder these.
+
+### Ordering facts that are load-bearing — do not reschedule
+
+- `SetSEAMLYDATACHOSEN` runs **before `CostInitialize`** (798). That is the only
+  window where `SEAMLYDATAPARENT` and `SEAMLYDATAROOT` are empty unless somebody
+  set them. Afterwards the Directory table has resolved both and a choice is
+  indistinguishable from a fallback.
+- `SetSEAMLYDATAROOTRECORDED` runs **after `CostFinalize`** (1001), before
+  `WriteRegistryValues` (5000).
+- Both UI default actions carry `AND NOT Installed`. Without it a repair
+  recomputes the default parent and silently moves a customised data root.
+- `AppSearch` (50) beats `CostFinalize` (1000), which is why the `INSTALLFOLDER`
+  and `SEAMLYDATAPARENT` prefills win over the authored defaults — and AppSearch
+  never overwrites a property already set, so the command line still wins.
+
+### A directory id always resolves — the trap this codebase keeps hitting
+
+`[SEAMLYDATAROOT]` in a registry value looked safe and was not: a `/qn` install
+with no arguments composes onto `TARGETDIR` and records `C:\SeamlyData`. Hence
+`SEAMLYDATAROOTRECORDED`, filled only when this run actually chose a root.
+
+**Still open, same trap one level up.** The `DataParent` row holds
+`[SEAMLYDATAPARENT]` directly. A silent install passing
+`SEAMLYDATAROOT=E:\Patterns` and no parent records a `DataParent` composed from
+`TARGETDIR`; `SEAMLYDATACHOSEN` then turns true on the next repair and rewrites
+the root to `<that parent>\SeamlyData`, losing the chosen name. Narrow — it needs
+the documented `SEAMLYDATAROOT=` escape hatch — but real. Fix it the same way:
+`SEAMLYDATAPARENTRECORDED` plus a guard.
+
+### Windows Installer cannot move an installed product
+
+Asked whether the Change button could repoint the program or data directory. It
+cannot. A product's location is fixed at install time and every component is
+registered against it, so a maintenance run ignores `INSTALLFOLDER`. Relocating
+means uninstall and reinstall, or a major upgrade — which now prefills both path
+pages from `InstallPath` and `DataParent`. Change stays disabled (`ARPNOMODIFY`,
+one feature). Documented in `scripts/packaging/windows/README.md` and
+`README_WINDOWS_BUILD.md`; do not re-litigate.
+
+A data-root change in the installer would also be a lie: the apps read the
+recorded value only when `paths/dataRoot` is unset, which stops being true after
+the first launch of any app. **Preferences → Paths is where that belongs.**
+
+### Replacing a stock WiX dialog
+
+`SeamlyMaintenanceTypeDlg` replaces the stock `MaintenanceTypeDlg`, because WiX
+cannot add a control to a `<Dialog>` another fragment defines. Its silent failure
+mode: `VerifyReadyDlg` shows its Repair and Remove buttons on
+`WixUI_InstallMode` alone, so the page must set it **before** `NewDialog`. Drop
+either row and the wizard reaches the ready page with no enabled button and no
+error. Asserted.
+
+Side effect: `BURNMSIMODIFY/REPAIR/UNINSTALL` left `SecureCustomProperties` with
+the stock dialog. No effect — they are Burn-only and used only in client-side UI
+conditions — but the new page still references them, so a future bundling still
+behaves like stock.
+
+### `INSTALLFOLDER` gained `Secure="yes"`
+
+It was not in `SecureCustomProperties`. The wizard sets it client-side and a
+perMachine package runs its execute sequence elevated, so a public property must
+be listed there to cross that boundary. **Whether the package relied on
+undocumented behaviour before is untested** — it needs an interactive install to
+a non-default program folder. Worth checking early.
+
+### Not verified — the whole session
+
+Nothing here has been seen on screen or on a real machine:
+
+- an interactive install, upgrade, repair or uninstall;
+- the maintenance page and its version line;
+- an upgrade that keeps a non-default program directory;
+- every C++ change, for the reason in the CI section at the top of this file.
+
+`smsi_check_authoring.ps1` and `wix msi validate` are the only checks that ran,
+plus one MSVC syntax pass over the new Qt code.
+
+### Next steps
+
+1. Install the newest `dev-latest` MSI interactively. Confirm page 5 offers
+   `C:\Users\susan\Documents\SeamlyData` and that the apps then use it.
+2. Re-run the same MSI to reach the maintenance page. Confirm the version line.
+3. Install to a non-default program folder, then upgrade, and confirm the apps
+   do not move.
+4. Decide the CI unit-test gate (top of this file).
+5. Fix the `DataParent` trap above.
+
+## Earlier (2026-08-18, Setup creates the data root)
 
 The MSI now creates the selected `SeamlyData` root during installation.
 `CreateUserDataRoot` is permanent, so uninstall keeps the folder and its
@@ -420,7 +536,7 @@ rules were already maximal; `permissions.defaultMode` remains unset.
 
 ### Earlier the same day
 
-## PICK UP HERE (2026-08-11, installer directories session)
+## Earlier (2026-08-11, installer directories session)
 
 **Tasks InstWinX64.1.1 and 1.2 — authored, and 1.2 is BLOCKED on a defect that
 was already in the tree.** Read the blocker note in `TODO_INSTALLER_WIN_X64.md`
@@ -485,7 +601,7 @@ Auto-appending the leaf would turn a typed `E:\SeamlyData` into
 
 ### Earlier the same day
 
-## PICK UP HERE (2026-08-11, later session)
+## Earlier (2026-08-11, later session)
 
 **Task InstWinX64.1.3.2 is done — `windows-msi.yml` is deleted.** `ci.yml`'s
 `windows-msi` matrix job already built both architectures and fed `publish`, so
@@ -792,6 +908,10 @@ User's instruction, 2026-08-10: concentrate on the CI pre-releases and ignore
 local MSVC/qmake builds. That also settles what to do about the broken Visual
 Studio install below — nothing, for now.
 
+**Read that together with the unit-test section at the top of this file.** CI
+proves Seamly2D and SeamlyMe BUILD. It compiles no test and runs no test on a
+push, so "CI verifies it" is only ever a claim about the build.
+
 A plain push run **skips `publish`** — only a `schedule` or `workflow_dispatch`
 run on `run-seamlyLayout` exercises the pre-release path, so dispatch one to
 prove the release step end to end.
@@ -904,9 +1024,32 @@ Act on these, do not re-ask, remove from this file for the next Session handover
     SeamlyLayout migration is finished and pushed upstream in one go —
     incremental upstream commits are not workable given the size of the change.
     **ADDED to TODO_INSTALLER.md**
+13. **The user-data folder is `SeamlyData`, and page 5 asks only for its
+    parent** (2026-08-19). The default parent is the user's `Documents`
+    folder, "because users go to this folder to find their data from other
+    applications". The leaf is fixed so the user can change the location but
+    not the name. **ADDED to TODO_INSTALLER_WIN_X64.md (InstWinX64.00)**
+14. **The Change button stays disabled** (2026-08-19). Windows Installer
+    cannot move an installed product, and a data-root change in the
+    installer would be ignored by anyone who has run an app once. The
+    upgrade path is the place both directories can change, and it now
+    prefills from the previous install. **ADDED to TODO_INSTALLER_WIN_X64.md
+    (InstWinX64.2.11)**
+15. **`installer_*` is a file-name prefix** (2026-08-19), added to
+    `.github/README-CODE-STYLES.md`. First user:
+    `src/libs/vmisc/installer_record.{h,cpp}`. No platform tag on it — the
+    contract is cross-platform and the `Q_OS_WIN` block stays inside, as
+    `seamly_suite_paths.cpp` already does. **DONE**
 
 ## Gotchas
 
+- **A quoted bash heredoc still eats backslashes when the body is written by a
+  tool.** Two files were committed this session with a backslash silently
+  halved: a registry path in `installer_record.cpp` (`\\` became `\`) and
+  `QLatin1Char('\\')` in `tst_dataroot.cpp`, which is an unterminated
+  character literal and a hard compile error. **Write C++, XML or Markdown that
+  contains backslashes with the Write tool or a Python script, never a
+  heredoc**, and grep the result for the backslash before committing.
 - **`CollectionTest.exe` must be run with its working directory set to its own
   `bin/`.** `initTestCase()` removes `tst_seamly2d_tmp` *relative to the CWD* but
   re-creates it under `applicationDirPath()`, so from any other CWD it aborts on
