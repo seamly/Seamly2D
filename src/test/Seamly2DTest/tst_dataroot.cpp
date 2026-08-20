@@ -31,6 +31,7 @@
 
 #include "tst_dataroot.h"
 
+#include "../vmisc/installer_record.h"
 #include "../vmisc/vcommonsettings.h"
 #include "../vmisc/vsettings.h"
 
@@ -369,7 +370,7 @@ void TST_DataRoot::AConfiguredRootIsNeverOverwritten() const
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief InstallerDataRootIsCleanOrEmpty checks the shape of whatever the Windows installer
- * recorded, on any platform.
+ * recorded, on any platform. Pins the contract of InstallerRecord::dataRoot().
  *
  * The value cannot be arranged from a test: it lives under HKLM, which an unelevated process
  * cannot write. What the test can hold is the contract every caller depends on — the result
@@ -381,13 +382,13 @@ void TST_DataRoot::AConfiguredRootIsNeverOverwritten() const
  */
 void TST_DataRoot::InstallerDataRootIsCleanOrEmpty() const
 {
-    const QString recorded = VCommonSettings::installerDataRoot();
+    const QString recorded = InstallerRecord::dataRoot();
     if (recorded.isEmpty())
     {
         return;
     }
 
-    QVERIFY2(!recorded.contains(QLatin1Char('\')),
+    QVERIFY2(!recorded.contains(QLatin1Char('\\')),
              "the recorded root must be converted out of native separators");
     QCOMPARE(recorded, QDir::cleanPath(recorded));
     QVERIFY2(QDir::isAbsolutePath(recorded), "the installer records an absolute path");
@@ -409,8 +410,8 @@ void TST_DataRoot::AConfiguredRootOutranksTheInstaller() const
     writeDataRoot(chosenByUser);
 
     QCOMPARE(VCommonSettings::initializeDataRoot(), chosenByUser);
-    QVERIFY2(VCommonSettings::initializeDataRoot() != VCommonSettings::installerDataRoot() ||
-                 VCommonSettings::installerDataRoot().isEmpty(),
+    QVERIFY2(VCommonSettings::initializeDataRoot() != InstallerRecord::dataRoot() ||
+                 InstallerRecord::dataRoot().isEmpty(),
              "a configured root must not be replaced by the installer's");
 }
 
