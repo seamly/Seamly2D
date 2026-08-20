@@ -103,28 +103,28 @@ jobs:
           xvfb-run -a make check
 
   # ---------------------------------------------------------------------------
-  # Windows: COMPILE the unit tests.
+  # Windows: build and RUN the unit tests, and gate both pre-releases on them.
   #
   # WHY THIS JOB EXISTS
   # Nothing else compiles src/test on a push. Every build job passes
   # CONFIG+=noTests, and linux-test is gated on pull_request, so a compile error
   # in a test file reached the branch and two CI runs went green over it
   # (tst_dataroot.cpp carried QLatin1Char('\'), an unterminated character
-  # literal, 2026-08-17). This job closes that hole on the platform the
-  # installer work targets.
+  # literal, 2026-08-17).
+  #
+  # WHAT IT GATES
+  # publish-windows-dev and publish both list this job in `needs`, so a failing
+  # Windows test stops the rolling dev-latest MSIs and the versioned
+  # pre-release. It does NOT stop windows-msi: the packages still build and stay
+  # downloadable as run artifacts, which is what you want when diagnosing the
+  # failure that blocked the publish.
   #
   # WHY IT IS SEPARATE, NOT FOLDED INTO windows-msi
   # Folding it in would save a Qt install and an app build, but it would put the
-  # tests on the release-critical path: a broken test would then stop the MSI
-  # and the dev-latest publish. Separate, it runs in PARALLEL with the package
-  # legs, so it costs almost nothing in wall-clock time and cannot block a
-  # package.
-  #
-  # WHY IT DOES NOT RUN THE TESTS YET
-  # `nmake check` is one line below this build step, but the suite has never
-  # been executed on Windows in CI and CollectionTest is known to depend on its
-  # working directory. Compiling is the whole of the gap that let the defect
-  # through; running them is a follow-up once this is green.
+  # tests on the package-critical path instead of the publish-critical path, and
+  # it would run them twice - once per architecture. Separate, it runs in
+  # PARALLEL with the package legs, so it adds almost nothing to wall-clock
+  # time.
   #
   # x64 only. Nothing in the tests is architecture-specific, and the arm64
   # runner is the scarcer resource.
@@ -137,7 +137,7 @@ jobs:
   # ---------------------------------------------------------------------------
   windows-test:
     if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate'
-    name: 'Windows: Compile unit tests'
+    name: 'Windows: Run unit tests'
     runs-on: windows-latest
 
     steps:
@@ -163,6 +163,24 @@ jobs:
         run: |
           qmake Seamly.pro -config release
           nmake
+      # Runs all four test binaries — Seamly2DTest, CollectionTest, ParserTest,
+      # TranslationsTest. `CONFIG += testcase` in each .pro is what supplies the
+      # `check` target.
+      #
+      # QT_QPA_PLATFORM=offscreen because a GitHub Windows runner has no
+      # interactive desktop the widget tests can rely on. The Linux job reaches
+      # the same place with xvfb-run.
+      #
+      # DIAGNOSING A FAILURE HERE IS AWKWARD, so read this before assuming the
+      # log is broken: only ParserTest.pro sets `CONFIG += console`. The other
+      # three link as GUI-subsystem binaries on MSVC, so a failure can arrive as
+      # a bare non-zero exit code with no message. If that happens, re-run the
+      # binary by hand with `-o <file>,txt` and print the file — the same trick
+      # SESSION_HANDOVER.md records for SeamlyLayout's Qt frontend tests.
+      - name: run the unit tests
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: nmake check
 
   linux:
     if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate'
@@ -288,22 +306,18 @@ jobs:
   # ---------------------------------------------------------------------------
   # Windows MSI for x64 and arm64 
   #
-  # Each WiX MSIs built by scripts/packaging/windows/smsi.ps1 from
+  # Each WiX MSI is built by 'scripts/packaging/windows/smsi.ps1' from
   # smsi.wxs with WiX v6.
   #
-  # WHAT EACH ARCH SHIPS: all three apps — seamly2d + seamlyme (qmake) and
+  # EACH MSI shipsall three apps — seamly2d + seamlyme (qmake) and
   # SeamlyLayout (Rust + CMake/Ninja) — against ONE Qt 6.11.1 runtime.
   #
   # EACH ARCH BUILDS NATIVELY ON ITS OWN RUNNER : x64 on windows-latest 
   # with the win64_msvc2022_64 kit, arm64 on windows-11-arm with
   # the windows_arm64 host and the win64_msvc2022_arm64 kit. NOTHING IS
-  # CROSS-COMPILED — no amd64_arm64 MSVC, no ..._cross_compiled Qt, no
-  # host-qmake, and no explicit cargo target.
-  # Both run the same plain `qmake`, the same cargo host toolchain and the same
-  # smsi.ps1 invocation — each differs only in the runner, the MSVC arch, and
-  # the Qt host/arch names.
-  #
-  # This is the ONLY CI route to a Windows package. 
+  # CROSS-COMPILED. Both run the same plain `qmake`, the same cargo host 
+  # toolchain, and the same smsi.ps1 invocation — each differs only in the 
+  # runner, the MSVC arch, and the Qt host/arch names.
   # ---------------------------------------------------------------------------
   windows-msi:
     if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate'
@@ -324,11 +338,6 @@ jobs:
           # aqtinstall does not auto-resolve a module's Qt dependencies, and
           # without them find_package(Qt6 ... WebEngineQuick) fails at
           # configure time.
-          #
-          # Each arch builds NATIVELY on its own runner — no cross-compiling.
-          # That means a plain `qmake` (not `host-qmake`), a native MSVC arch, a
-          # native cargo host toolchain, and a `windeployqt.exe` the runner can
-          # execute, so no QT_HOST_PATH juggling anywhere below.
           - arch: x64
             runner: windows-latest
             msvc-arch: x64
@@ -349,9 +358,7 @@ jobs:
         with:
           arch: ${{ matrix.msvc-arch }}
 
-      # ONE Qt install for every app in the package. `host` is set
-      # explicitly per leg: the arm64 runner needs the NATIVE windows_arm64 host
-      # kit, not the x64 `windows` host the action would otherwise assume.
+      # ONE Qt install for every app in the package. 
       - uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
@@ -367,8 +374,7 @@ jobs:
           ./scripts/version.sh ${VERSION_NUMBER}
 
       # The .pro post-link runs windeployqt, so each app's bin\ ends up
-      # install-ready and smsi.ps1 can stage it directly. Plain `qmake` on both
-      # legs — each runner is native, so there is no host/target split.
+      # install-ready and smsi.ps1 can stage it directly. 
       - name: make seamly2d.exe and seamlyme.exe
         run: |
           qmake Seamly.pro -config release CONFIG+=noTests
@@ -403,10 +409,10 @@ jobs:
 
       # ------------------- package ------------------------------------------
       # Pinned to WiX v6: v7 (July 2026) refuses to run until an Open Source
-      # Maintenance Fee (OSMF) EULA is accepted (error WIX7015), a policy
-      # decision this project has not made. Extension versions must match the
-      # core tool: UI supplies the directory chooser, Util supplies
-      # RemoveFolderEx (used to remove a previous NSIS installation).
+      # Maintenance Fee (OSMF) EULA is accepted (error WIX7015). 
+      # Extension versions must match the core tool: 
+      # UI supplies the directory chooser, 
+      # Util supplies RemoveFolderEx (removes a previous NSIS installation).
       - name: Install WiX toolset (v6)
         shell: pwsh
         run: |
@@ -420,11 +426,7 @@ jobs:
 
       # smsi.ps1 stages the shared Qt runtime, builds the MSI, runs the ICE
       # checks and the install-time authoring test, and fails the job on any of
-      # them. Output: scripts\seamly-msi\<arch>\seamly-<arch>.msi
-      # One invocation for both arches: each package carries all three apps, and
-      # each runner is native, so $QT_ROOT_DIR's windeployqt.exe is always one
-      # this runner can execute. A Qt 6 kit ships both windeployqt.exe and
-      # windeployqt6.exe; the project uses the unsuffixed name everywhere.
+      # them. Output: 'scripts\seamly-msi\<arch>\seamly-<arch>.msi'
       - name: Build MSI (all three apps)
         shell: pwsh
         run: |
@@ -438,7 +440,7 @@ jobs:
         uses: google-github-actions/auth@v3
         env:
           SEAMLY_SIGNING_PROJECT_ID: ${{ secrets.SEAMLY_SIGNING_PROJECT_ID }}
-        # run signing part if secrets are available (main builds), otherwise (3rd party PRs etc) skip
+        # run signing part if secrets are available (main builds), otherwise skip
         if: ${{ env.SEAMLY_SIGNING_PROJECT_ID }}
         with:
           credentials_json: ${{ secrets.SEAMLY_SIGNING_SA_KEY }}
@@ -448,7 +450,7 @@ jobs:
         uses: google-github-actions/setup-gcloud@v3
         env:
           SEAMLY_SIGNING_PROJECT_ID: ${{ secrets.SEAMLY_SIGNING_PROJECT_ID }}
-        # run signing part if secrets are available (main builds), otherwise (3rd party PRs etc) skip
+        # run signing part if secrets are available (main builds), otherwise skip
         if: ${{ env.SEAMLY_SIGNING_PROJECT_ID }}
 
       - name: Set up Java (for signing)
@@ -464,7 +466,7 @@ jobs:
       - name: Sign the MSI
         env:
           SEAMLY_SIGNING_PROJECT_ID: ${{ secrets.SEAMLY_SIGNING_PROJECT_ID }}
-        # run signing part if secrets are available (main builds), otherwise (3rd party PRs etc) skip
+        # run signing part if secrets are available (main builds), otherwise skip
         if: ${{ env.SEAMLY_SIGNING_PROJECT_ID }}
         shell: bash
         run: |
@@ -478,39 +480,21 @@ jobs:
           scripts/seamly-msi/${{ matrix.arch }}/seamly-${{ matrix.arch }}.msi
 
       # download-artifact extracts the archive, so both publish jobs get
-      # seamly-<arch>.msi in their working directory and can list it verbatim in
-      # the release files. The artifact name repeats the file name only so the
+      # seamly-<arch>.msi. The artifact name repeats the file name only so the
       # two match.
-      #
-      # GitHub serves EVERY workflow artifact as a zip, so this one downloads
-      # from the Actions page as seamly-<arch>.msi.zip. upload-artifact has no
-      # option to change that. A raw .msi comes from a release asset, which is
-      # what publish-windows-dev and publish exist for.
+      # GitHub workflow artifacts are downloadable as a zip file. 
+      # Releases are downloadable as .msi (not msi.zip)
       - uses: actions/upload-artifact@v7
         with:
           name: seamly-${{ matrix.arch }}.msi
           path: scripts/seamly-msi/${{ matrix.arch }}/seamly-${{ matrix.arch }}.msi
           if-no-files-found: error
 
-  # Publish the Windows MSIs of every run-seamlyLayout push to one rolling
-  # pre-release (Task InstWinX64.0.3).
-  #
-  # WHY A RELEASE AND NOT THE BUILD ARTIFACT: GitHub serves every workflow
-  # artifact as a zip, so the seamly-x64.msi artifact downloads as
-  # seamly-x64.msi.zip. actions/upload-artifact cannot return a bare file. A
-  # release asset is the only raw .msi GitHub hands back.
-  #
-  # This job needs windows-msi only. A broken Linux or macOS leg must not hold
-  # back the Windows package, and this release carries no Linux or macOS file.
-  # It still needs BOTH architectures: fail-fast is off, so one failed arch
-  # fails windows-msi and skips this job rather than shipping half a release.
-  #
-  # dev-latest never becomes the "latest" release. It is a pre-release, so
-  # /releases/latest keeps resolving to the newest full release.
+  # Publish the Windows MSIs to one rolling pre-release for testing..
   publish-windows-dev:
     if: github.event_name == 'push' && github.ref_name == 'run-seamlyLayout'
     runs-on: ubuntu-latest
-    needs: [version, windows-msi]
+    needs: [version, windows-msi, windows-test]
     env:
       VERSION_NUMBER: ${{ needs.version.outputs.version_number }}
 
@@ -522,11 +506,7 @@ jobs:
         with:
           name: seamly-arm64.msi
 
-      # Replace the release instead of editing it. GitHub pins a tag to the
-      # commit it was created on, and no gh command moves it, so an edited
-      # dev-latest would advertise the first commit that ever built it.
-      # `|| true` covers the first run, which has nothing to delete.
-      #
+      # Replace the windows rolling pre-release instead of editing it.
       # The delete leaves a gap of a few seconds with no dev-latest. A run
       # cancelled inside that gap leaves none until the next push.
       - name: Replace the rolling Windows pre-release
@@ -541,8 +521,7 @@ jobs:
           - Version: ${VERSION_NUMBER}
           - Commit: ${GITHUB_SHA}
 
-          Every push to \`run-seamlyLayout\` replaces this pre-release. It carries the
-          Windows MSIs only. Linux and macOS builds ship in the versioned pre-releases.
+          Every push to \`run-seamlyLayout\` replaces this pre-release of windows MSIs only.
           EOF
 
           gh release create dev-latest \
@@ -557,7 +536,7 @@ jobs:
   publish:
     if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref_name == 'run-seamlyLayout'
     runs-on: ubuntu-latest
-    needs: [version, linux, macos, windows-msi]
+    needs: [version, linux, macos, windows-msi, windows-test]
     env:
       VERSION_NUMBER: ${{ needs.version.outputs.version_number }}
 
@@ -568,9 +547,6 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           name: Seamly2D-macos.zip
-      # Windows is MSI-only now (Tasks Installer.1.1 and Installer.1.2). BOTH
-      # architectures ship all three apps — seamly2d + seamlyme + SeamlyLayout
-      # — each built natively on its own runner (2026-08-11).
       - uses: actions/download-artifact@v8
         with:
           name: seamly-x64.msi
@@ -592,7 +568,6 @@ jobs:
 
   # update doxygen files and deploy to gh-pages branch 
   document:
-    # Deploy Doxygen documentation for scheduled releases (schedule) and manual releases (workflow_dispatch) and pre-releases (push)
     if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push')
     runs-on: ubuntu-latest
 

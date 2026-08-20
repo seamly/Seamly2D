@@ -6,37 +6,59 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## THE UNIT TESTS DO NOT RUN IN CI (found 2026-08-19)
+## The unit tests run on Windows now (2026-08-19)
 
-**No push to `run-seamlyLayout` compiles `src/test/`.** Two independent gates:
+**`windows-test` builds and runs the four test binaries on every push**, and
+both pre-release jobs list it in `needs`. A failing Windows test stops the
+rolling `dev-latest` MSIs and the versioned pre-release. It does **not** stop
+`windows-msi`: the packages still build and stay downloadable as run artifacts,
+which is what you want while diagnosing the failure that blocked the publish.
 
-- Every build job passes `CONFIG+=noTests` — Linux AppImage, macOS, and both
-  Windows MSI legs. The test subdirectory is excluded.
-- `linux-test` is the only job that builds and runs them, and it carries
-  `if: github.event_name == 'pull_request'`. Normal task work pushes to the
-  branch without a PR, so it never fires.
+Separate from `windows-msi` on purpose. Folded in, the tests would sit on the
+package-critical path and run twice, once per architecture.
+
+`windows-latest`, x64, `qtmultimedia` only, `-config release` (the MSVC default
+is `debug_and_release`, which builds the tree twice), `QT_QPA_PLATFORM=offscreen`.
+
+### What this replaced, and why it mattered
+
+Before 2026-08-19 **no push compiled `src/test/` at all.** Two independent
+gates: every build job passes `CONFIG+=noTests`, and `linux-test` carries
+`if: github.event_name == 'pull_request'`, which normal task work never
+satisfies.
 
 Proof: `tst_dataroot.cpp` was committed on 2026-08-17 with `QLatin1Char('\')`, an
-unterminated character literal and a hard compile error. Two CI runs passed
-after it landed. Fixed 2026-08-19.
+unterminated character literal and a hard compile error. Two CI runs passed over
+it. Fixed 2026-08-19.
 
-**Consequence for every handover note that says "ci.yml verifies Seamly2D and
-SeamlyMe":** it verifies that they BUILD. It does not compile or run a single
-unit test. A C++ test written here is unverified until somebody opens a PR or
-builds the test target by hand.
+So treat any older note claiming "ci.yml verifies Seamly2D and SeamlyMe" as a
+statement about the BUILD only. That is no longer the whole story on Windows,
+but it is still true of Linux and macOS: `linux-test` remains gated on
+`pull_request`, and ungating it is a one-line change nobody has asked for.
 
-**Half fixed, 2026-08-19.** A `windows-test` job now COMPILES `src/test` on
-every push (`windows-latest`, x64, `qtmultimedia` only, no `CONFIG+=noTests`).
-It is separate from `windows-msi` on purpose: folded in, a broken test would
-stop the MSI and the `dev-latest` publish; separate, it runs in parallel and
-cannot block a package. Actions minutes are free — `seamly/Seamly2D` is public
-— so wall time and release coupling are the only costs.
+### First result is still unknown (2026-08-20)
 
-**Still not RUN anywhere on a push.** `nmake check` is one line away in that
-job, but the suite has never executed on Windows in CI and `CollectionTest`
-depends on its working directory (see Gotchas). Add it once the compile step is
-green. `linux-test` is still gated on `pull_request`; ungating it is a one-line
-change and the user has not asked for it.
+The job has never completed. Run 32392386946 would have proved the compile step
+but was superseded before it finished — `concurrency.cancel-in-progress` is true,
+so the push that added `nmake check` cancelled it. **Compile and test results
+therefore arrive together, in the first run after that push.**
+
+If it is red, check the compile step before the test step: a build failure there
+means the tests have never compiled on Windows and the breakage is older than
+any of this work.
+
+**If a red test blocks an MSI you need**, the packages still build — download them
+from the run's artifacts, or drop `windows-test` from `publish-windows-dev`'s
+`needs` for one push.
+
+### Diagnosing a red run here
+
+Only `ParserTest.pro` sets `CONFIG += console`. Seamly2DTest, CollectionTest and
+TranslationsTest link as **GUI-subsystem** binaries on MSVC, so a failure can
+arrive as a bare non-zero exit code with no message in the log. Re-run the
+binary by hand with `-o <file>,txt` and print the file. `CollectionTest` also
+depends on its working directory — see Gotchas.
+
 ## PICK UP HERE (2026-08-19, the installer's answers are the ones the apps use)
 
 Four task branches merged and pushed. HEAD is `f230c638e9`. Full CI ran on each
