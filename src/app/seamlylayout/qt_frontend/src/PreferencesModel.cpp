@@ -5,8 +5,8 @@
 // @file PreferencesModel.cpp
 // @brief Implementation of PreferencesModel — application preferences load/save.
 //
-// JSON is read/written with snake_case keys matching the Rust serde format
-// Matches the Rust AppSettings struct used by the Qt frontend.
+// QSettings stores application preferences with snake_case keys.
+// JSON remains the format for bundled defaults and legacy migration.
 
 #include "PreferencesModel.h"
 #include "Logger.h"
@@ -27,6 +27,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QProcess>
+#include <QSettings>
 #include <QStandardPaths>
 #include <QUrl>
 
@@ -37,6 +38,7 @@ constexpr auto kLegacySettingsFolderName = "layout-settings";
 constexpr auto kPreferencesFolderName = "preferences";
 constexpr auto kLegacyPreferencesFolderName = "layout-preferences";
 constexpr auto kLegacyOrganizationName = "Seamly Systems";
+constexpr auto kPreferencesFileName = "qt6_seamlylayout.ini";
 
 // Forward declaration — defined further down; migrateLegacyOrganizationTree() (added for
 // Task 15) needs it before its definition appears in this file.
@@ -341,46 +343,92 @@ void PreferencesModel::setProjectorPath(const QString &v)
 // load
 // ---------------------------------------------------------------------------
 
-// @brief Load preferences from a JSON file.
-// Uses snake_case keys matching the Rust serde AppSettings format.
-// If the file does not exist, returns false and keeps current defaults.
+// @brief Load preferences from an INI file or a legacy JSON defaults file.
 bool PreferencesModel::load(const QString &path)
 {
     Logger::log(QStringLiteral("==========LOAD PREFERENCES=========="));
     Logger::log(QStringLiteral("PreferencesModel::load(): path=") + path);
 
+    const QString absolutePath = QFileInfo(path).absoluteFilePath();
+    if (QFileInfo(absolutePath).suffix().compare(QStringLiteral("json"), Qt::CaseInsensitive) == 0) {
+        return loadJsonPreferences(absolutePath);
+    } // if legacy JSON or defaults profile
+
+    if (!QFileInfo::exists(absolutePath)) {
+        if (QFileInfo(absolutePath).fileName() != QString::fromUtf8(kPreferencesFileName)) {
+            Logger::log(QStringLiteral("PreferencesModel::load(): INI file not found"));
+            return false;
+        } // if this is not the application preferences file
+
+        if (migrateLegacyPreferencesJson(absolutePath)) {
+            return true;
+        } // if legacy preferences migrated
+
+        if (!resetToDefaults() || !save(absolutePath)) {
+            Logger::log(QStringLiteral("PreferencesModel::load(): failed to create the INI file"));
+            return false;
+        } // if defaults could not be saved
+        return true;
+    } // if INI file is missing
+
+    QSettings settings(absolutePath, QSettings::IniFormat);
+    setInputDirectory(settings.value(QStringLiteral("input_directory"), m_inputDirectory).toString());
+    setLayoutDirectory(settings.value(QStringLiteral("layout_directory"), m_layoutDirectory).toString());
+    setPreferencesDirectory(
+        settings.value(QStringLiteral("preferences_directory"), m_preferencesDirectory).toString());
+    setSettingsDirectory(settings.value(QStringLiteral("settings_directory"), m_settingsDirectory).toString());
+    setSettingsFile(settings.value(QStringLiteral("settings_file"), m_settingsFile).toString());
+    setPreferencesFile(settings.value(QStringLiteral("preferences_file"), m_preferencesFile).toString());
+    setDxfViewerPath(settings.value(QStringLiteral("dxf_viewer_path"), m_dxfViewerPath).toString());
+    setPdfViewerPath(settings.value(QStringLiteral("pdf_viewer_path"), m_pdfViewerPath).toString());
+    setPngViewerPath(settings.value(QStringLiteral("png_viewer_path"), m_pngViewerPath).toString());
+    setProjectorPath(settings.value(QStringLiteral("projector_path"), m_projectorPath).toString());
+
+    if (settings.status() != QSettings::NoError) {
+        Logger::log(QStringLiteral("PreferencesModel::load(): QSettings reported an error"));
+        return false;
+    } // if read failed
+
+    migrateLegacyPreferencePaths();
+    Logger::log(QStringLiteral("PreferencesModel::load(): loaded successfully"));
+    return true;
+} // load
+
+// @brief Load and apply a JSON defaults file or legacy preferences file.
+bool PreferencesModel::loadJsonPreferences(const QString &path)
+{
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
-        // File not found — keep current defaults
-        Logger::log(QStringLiteral("PreferencesModel::load(): file not found, keeping defaults"));
         return false;
-    } // if !open
+    } // if file cannot be opened
 
     QJsonParseError parseError;
-    QJsonDocument doc = QJsonDocument::fromJson(file.readAll(), &parseError);
+    const QJsonDocument document = QJsonDocument::fromJson(file.readAll(), &parseError);
     file.close();
-
-    if (doc.isNull() || !doc.isObject()) {
+    if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
         return false;
-    } // if parse failed
+    } // if JSON is invalid
 
-    QJsonObject obj = doc.object();
+    const QJsonObject object = document.object();
+    setInputDirectory(object.value(QStringLiteral("input_directory")).toString(m_inputDirectory));
+    setLayoutDirectory(object.value(QStringLiteral("layout_directory")).toString(m_layoutDirectory));
+    setPreferencesDirectory(
+        object.value(QStringLiteral("preferences_directory")).toString(m_preferencesDirectory));
+    setSettingsDirectory(object.value(QStringLiteral("settings_directory")).toString(m_settingsDirectory));
+    setSettingsFile(object.value(QStringLiteral("settings_file")).toString(m_settingsFile));
+    setPreferencesFile(object.value(QStringLiteral("preferences_file")).toString(m_preferencesFile));
+    setDxfViewerPath(object.value(QStringLiteral("dxf_viewer_path")).toString(m_dxfViewerPath));
+    setPdfViewerPath(object.value(QStringLiteral("pdf_viewer_path")).toString(m_pdfViewerPath));
+    setPngViewerPath(object.value(QStringLiteral("png_viewer_path")).toString(m_pngViewerPath));
+    setProjectorPath(object.value(QStringLiteral("projector_path")).toString(m_projectorPath));
 
-    // Read each field; fall back to current value if key is absent
-    setInputDirectory   (obj.value(QStringLiteral("input_directory"))   .toString(m_inputDirectory));
-    setLayoutDirectory  (obj.value(QStringLiteral("layout_directory"))  .toString(m_layoutDirectory));
-    setPreferencesDirectory(obj.value(QStringLiteral("preferences_directory")).toString(m_preferencesDirectory));
-    setSettingsDirectory(obj.value(QStringLiteral("settings_directory")).toString(m_settingsDirectory));
-    setSettingsFile     (obj.value(QStringLiteral("settings_file"))     .toString(m_settingsFile));
-    setPreferencesFile  (obj.value(QStringLiteral("preferences_file"))  .toString(m_preferencesFile));
-    setDxfViewerPath    (obj.value(QStringLiteral("dxf_viewer_path"))   .toString(m_dxfViewerPath));
-    setPdfViewerPath    (obj.value(QStringLiteral("pdf_viewer_path"))   .toString(m_pdfViewerPath));
-    setPngViewerPath    (obj.value(QStringLiteral("png_viewer_path"))   .toString(m_pngViewerPath));
-    setProjectorPath    (obj.value(QStringLiteral("projector_path"))    .toString(m_projectorPath));
+    migrateLegacyPreferencePaths();
+    return true;
+} // loadJsonPreferences
 
-    // Migrate legacy folder names in persisted preference paths:
-    //   layout-settings     -> settings
-    //   layout-preferences  -> preferences
+// @brief Migrate saved paths from legacy folder names.
+void PreferencesModel::migrateLegacyPreferencePaths()
+{
     const QString migratedSettingsDir = migrateLegacyFolderName(
         m_settingsDirectory,
         QString::fromUtf8(kLegacySettingsFolderName),
@@ -423,48 +471,66 @@ bool PreferencesModel::load(const QString &path)
         setPreferencesFile(migratedPreferencesFile);
     } // if migrated preferences file
 
-    Logger::log(QStringLiteral("PreferencesModel::load(): loaded successfully"));
-    return true;
-} // load
+} // migrateLegacyPreferencePaths
+
+// @brief Import the first available legacy preferences JSON file.
+bool PreferencesModel::migrateLegacyPreferencesJson(const QString &iniPath)
+{
+    const QString configRoot = QFileInfo(iniPath).absolutePath();
+    const QStringList candidates = {
+        QFileInfo(QDir(configRoot).filePath(QStringLiteral("preferences/preferences.json"))).absoluteFilePath(),
+        QFileInfo(QDir(configRoot).filePath(QStringLiteral("layout-preferences/preferences.json"))).absoluteFilePath(),
+        QFileInfo(QDir(QCoreApplication::applicationDirPath()).filePath(
+            QStringLiteral("layout-settings/preferences.json"))).absoluteFilePath(),
+        QFileInfo(QDir(QCoreApplication::applicationDirPath()).filePath(
+            QStringLiteral("settings/preferences.json"))).absoluteFilePath()
+    };
+
+    for (const QString &candidate : candidates) {
+        if (QFileInfo::exists(candidate) && loadJsonPreferences(candidate)) {
+            const bool saved = save(iniPath);
+            if (saved) {
+                Logger::log(QStringLiteral("PreferencesModel::load(): migrated preferences from ") + candidate);
+            } // if saved
+            return saved;
+        } // if candidate imported
+    } // for candidate
+
+    return false;
+} // migrateLegacyPreferencesJson
 
 // ---------------------------------------------------------------------------
 // save
 // ---------------------------------------------------------------------------
 
-// @brief Save preferences to a JSON file.
-// Creates the parent directory if it does not exist.
-// Uses snake_case keys matching the Rust serde AppSettings format.
+// @brief Save preferences to an INI file.
 bool PreferencesModel::save(const QString &path)
 {
-    Logger::log(QStringLiteral("PreferencesModel::save(): path=") + path);
+    const QString absolutePath = QFileInfo(path).absoluteFilePath();
+    Logger::log(QStringLiteral("PreferencesModel::save(): path=") + absolutePath);
 
-    // Ensure parent directory exists
-    QDir dir = QFileInfo(path).absoluteDir();
+    QDir dir = QFileInfo(absolutePath).absoluteDir();
     if (!dir.exists()) {
-        dir.mkpath(dir.absolutePath());
+        dir.mkpath(QStringLiteral("."));
     } // if dir does not exist
 
-    QJsonObject obj;
-    obj[QStringLiteral("input_directory")]  = m_inputDirectory;
-    obj[QStringLiteral("layout_directory")] = m_layoutDirectory;
-    obj[QStringLiteral("preferences_directory")] = m_preferencesDirectory;
-    obj[QStringLiteral("settings_directory")] = m_settingsDirectory;
-    obj[QStringLiteral("settings_file")]    = m_settingsFile;
-    obj[QStringLiteral("preferences_file")] = m_preferencesFile;
-    obj[QStringLiteral("dxf_viewer_path")]  = m_dxfViewerPath;
-    obj[QStringLiteral("pdf_viewer_path")]  = m_pdfViewerPath;
-    obj[QStringLiteral("png_viewer_path")]  = m_pngViewerPath;
-    obj[QStringLiteral("projector_path")]   = m_projectorPath;
+    QSettings settings(absolutePath, QSettings::IniFormat);
+    settings.setValue(QStringLiteral("input_directory"), m_inputDirectory);
+    settings.setValue(QStringLiteral("layout_directory"), m_layoutDirectory);
+    settings.setValue(QStringLiteral("preferences_directory"), m_preferencesDirectory);
+    settings.setValue(QStringLiteral("settings_directory"), m_settingsDirectory);
+    settings.setValue(QStringLiteral("settings_file"), m_settingsFile);
+    settings.setValue(QStringLiteral("preferences_file"), m_preferencesFile);
+    settings.setValue(QStringLiteral("dxf_viewer_path"), m_dxfViewerPath);
+    settings.setValue(QStringLiteral("pdf_viewer_path"), m_pdfViewerPath);
+    settings.setValue(QStringLiteral("png_viewer_path"), m_pngViewerPath);
+    settings.setValue(QStringLiteral("projector_path"), m_projectorPath);
+    settings.sync();
 
-    QJsonDocument doc(obj);
-    QFile file(path);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
-        return false;
-    } // if !open
-
-    file.write(doc.toJson(QJsonDocument::Indented));
-    Logger::log(QStringLiteral("PreferencesModel::save(): saved successfully"));
-    return true;
+    const bool saved = settings.status() == QSettings::NoError;
+    Logger::log(saved ? QStringLiteral("PreferencesModel::save(): saved successfully")
+                      : QStringLiteral("PreferencesModel::save(): QSettings reported an error"));
+    return saved;
 } // save
 
 // @brief Reset preferences from the defaults profile file.
@@ -483,7 +549,7 @@ bool PreferencesModel::resetToDefaults()
         } // if seeded
     } // if missing defaults file
 
-    const bool loaded = load(defaultsPath);
+    const bool loaded = loadJsonPreferences(defaultsPath);
     if (!loaded) {
         Logger::log(QStringLiteral("PreferencesModel::resetToDefaults(): failed to load defaults profile"));
         return false;
@@ -543,39 +609,11 @@ QString PreferencesModel::defaultInputFolderUrl()
     return QUrl::fromLocalFile(dir).toString();
 } // defaultInputFolderUrl
 
-// @brief Return the absolute default preferences file path.
-    // Uses AppConfigLocation/preferences/preferences.json and ensures the directory exists.
+// @brief Return the absolute application preferences INI file path.
 QString PreferencesModel::defaultPreferencesFilePath() const
 {
     const QString appConfigRoot = appConfigRootPath();
-    const QString prefDir = QDir(appConfigRoot).filePath(QString::fromUtf8(kPreferencesFolderName));
-
-    QDir dir(prefDir);
-    if (!dir.exists()) {
-        dir.mkpath(QStringLiteral("."));
-    } // if missing
-
-    const QString target = QFileInfo(dir.filePath(QStringLiteral("preferences.json"))).absoluteFilePath();
-
-    // First-run migration/seed: copy legacy preferences if present.
-    const QString legacyAppConfig = QFileInfo(
-        QDir(appConfigRoot).filePath(
-            QString::fromUtf8(kLegacyPreferencesFolderName) + QStringLiteral("/preferences.json"))).absoluteFilePath();
-    const QString legacyPackagedLayoutSettings = QFileInfo(
-        QDir(QCoreApplication::applicationDirPath()).filePath(
-            QString::fromUtf8(kLegacySettingsFolderName) + QStringLiteral("/preferences.json"))).absoluteFilePath();
-    const QString legacyPackagedSettings = QFileInfo(
-        QDir(QCoreApplication::applicationDirPath()).filePath(
-            QString::fromUtf8(kSettingsFolderName) + QStringLiteral("/preferences.json"))).absoluteFilePath();
-    if (copyIfMissing(legacyAppConfig, target)
-        || copyIfMissing(legacyPackagedLayoutSettings, target)
-        || copyIfMissing(legacyPackagedSettings, target)) {
-        Logger::log(QStringLiteral("PreferencesModel::defaultPreferencesFilePath(): migrated legacy preferences to user preferences directory"));
-    } else if (!QFileInfo::exists(target) && seedFromBundledDefaults(target)) {
-        Logger::log(QStringLiteral("PreferencesModel::defaultPreferencesFilePath(): seeded default preferences from bundled resource"));
-    } // if copied
-
-    return target;
+    return QFileInfo(QDir(appConfigRoot).filePath(QString::fromUtf8(kPreferencesFileName))).absoluteFilePath();
 } // defaultPreferencesFilePath
 
 // @brief Return the resolved settings directory for load/save dialogs.

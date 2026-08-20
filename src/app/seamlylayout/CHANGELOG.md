@@ -25,6 +25,9 @@ Copyright: 2026
 
 ### Changed
 
+- **Application preferences storage** — SeamlyLayout now stores preferences in
+  `QStandardPaths::AppConfigLocation/qt6_seamlylayout.ini`. First startup imports
+  the previous `preferences.json` without deleting it.
 - **Runtime folder rename** — canonical user runtime folders are now
   `~/seamlyLayout/settings/` and `~/seamlyLayout/preferences/` (previously
   `layout-settings` and `layout-preferences` under `AppConfigLocation`).
@@ -36,8 +39,8 @@ Copyright: 2026
 
 ### Migration notes (upgrading from pre-0.1.0)
 
-On first launch after upgrade, `PreferencesModel::load()` detects any paths in
-`preferences.json` that still reference the legacy folder names and rewrites them
+On first launch after upgrade, `PreferencesModel::load()` imports `preferences.json`
+into `qt6_seamlylayout.ini`. It detects paths that still reference legacy folder names and rewrites them
 to the canonical names, copying files where they do not yet exist at the new
 location.  No manual steps are required.
 

@@ -1,6 +1,7 @@
 # SETTINGS WORKFLOW
 
-- Prepopulate the settings fields with values from the default settings file specified in preferences.json; if no default settings file is specified then prepopulate the settings field values with the defaults specified below.
+- Prepopulate settings from the default settings file specified in `qt6_seamlylayout.ini`.
+- Use the defaults below when the INI file does not specify a default settings file.
 
 - Unit -- 'cm', 'mm', or 'in' radio buttons; Default is 'in'.
 # Media Settings

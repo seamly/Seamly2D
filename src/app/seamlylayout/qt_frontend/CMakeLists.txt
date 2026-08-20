@@ -479,9 +479,8 @@ install(TARGETS SeamlyLayout
 #
 #   <installBin>/settings/  — default_settings.json + sample settings files
 #
-# preferences.json is a per-user file and must NOT be bundled; user
-# preferences are seeded at first run from the embedded Qt resource
-# :/defaults/default_preferences.json instead.
+# Legacy preferences.json is not bundled. The app stores user preferences in
+# qt6_seamlylayout.ini and seeds them from :/defaults/default_preferences.json.
 # ---------------------------------------------------------------------------
 install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/settings/"
     DESTINATION ${CMAKE_INSTALL_BINDIR}/settings

@@ -55,7 +55,7 @@ Since **Task 30** every app in the suite builds against the **same Qt release, 6
 | seamly2d | `C:\Users\<user>\AppData\Local\Seamly\Seamly2D\qt6_seamly2d.ini` | `Application2D::openSettings()` resolves `QStandardPaths::AppConfigLocation` explicitly (previously it used Qt's native `QSettings(IniFormat, UserScope, org, app)` resolution, which put a flat `Seamly2D.ini` in `%APPDATA%\Roaming\<org>\` alongside SeamlyMe's) |
 | seamlyme | `C:\Users\<user>\AppData\Local\Seamly\SeamlyMe\qt6_seamlyme.ini` | same mechanism, `ApplicationME::openSettings()` |
 | seamly2d + seamlyme shared "common" settings (`VCommonSettings`, e.g. individual/multisize table paths) | `%APPDATA%\Roaming\Seamly\qt6_common.ini` | unchanged mechanism — Qt's native per-organization `QSettings(IniFormat, UserScope, org, "qt6_common")` resolution, just under the renamed org folder |
-| seamlyLayout | `C:\Users\<user>\AppData\Local\Seamly\SeamlyLayout\` | `QStandardPaths::AppConfigLocation` (already used before Task 15 — only the org name changed) |
+| seamlyLayout | `C:\Users\<user>\AppData\Local\Seamly\SeamlyLayout\qt6_seamlylayout.ini` | `PreferencesModel` stores application preferences with `QSettings::IniFormat` under `QStandardPaths::AppConfigLocation` |
 | seamlyLayout (packaged defaults) | `<exeDir>\settings\` (relative to `seamlyLayout.exe`) | Inno Setup installs `default_settings.json` and paper/roll presets there; read-only legacy-migration source only, never written to at runtime |
 
 **First-run migration (non-destructive, copy-if-missing, left in place):** each app bridges its own settings forward from its pre-Task-15 location the first time the new location is resolved:
@@ -103,7 +103,7 @@ All three apps use the same `QStandardPaths::AppConfigLocation` / `QSettings::In
 | seamly2d | `~/Library/Application Support/Seamly/Seamly2D/qt6_seamly2d.ini` |
 | seamlyme | `~/Library/Application Support/Seamly/SeamlyMe/qt6_seamlyme.ini` |
 | seamly2d + seamlyme shared "common" settings | `~/Library/Preferences/Seamly/qt6_common.ini` (Qt's native per-organization `IniFormat`/`UserScope` resolution on macOS) |
-| seamlyLayout | `~/Library/Application Support/Seamly/SeamlyLayout/{settings,preferences,input,output}/` |
+| seamlyLayout | `~/Library/Application Support/Seamly/SeamlyLayout/qt6_seamlylayout.ini` |
 
 **First-run migration** uses the same generic `MigrateSeamlySettingsLocation()` / `migrateLegacyOrganizationTree()` logic as Windows (see above) — both reconstruct the legacy path by temporarily swapping `organizationName` and re-querying `AppConfigLocation`, so no macOS-specific path literals were needed.
 
@@ -122,7 +122,7 @@ All three apps use the same generic `QStandardPaths::AppConfigLocation` / `QSett
 | seamly2d | `~/.config/Seamly/Seamly2D/qt6_seamly2d.ini` |
 | seamlyme | `~/.config/Seamly/SeamlyMe/qt6_seamlyme.ini` |
 | seamly2d + seamlyme shared "common" settings | `~/.config/Seamly/qt6_common.ini` (Qt's native per-organization `IniFormat`/`UserScope` resolution on Linux) |
-| seamlyLayout | `~/.config/Seamly/SeamlyLayout/{settings,preferences,input,output}/` |
+| seamlyLayout | `~/.config/Seamly/SeamlyLayout/qt6_seamlylayout.ini` |
 
 **First-run migration** reuses the same generic `MigrateSeamlySettingsLocation()` / `migrateLegacyOrganizationTree()` logic as Windows/macOS (see above): the legacy path is reconstructed by temporarily swapping `organizationName` to the pre-Task-15 value (`"Seamly2DTeam"` for seamly2d/seamlyme, `"Seamly Systems"` for seamlyLayout) and re-querying `AppConfigLocation`, so it resolves the real legacy XDG folder (`~/.config/Seamly2DTeam`, `~/.config/Seamly Systems`) with no Linux-specific path literals.
 
@@ -141,7 +141,7 @@ A Flatpak sandbox exports `XDG_CONFIG_HOME=~/.var/app/<app-id>/config` and `XDG_
 | seamly2d | `~/.var/app/<app-id>/config/Seamly/Seamly2D/qt6_seamly2d.ini` |
 | seamlyme | `~/.var/app/<app-id>/config/Seamly/SeamlyMe/qt6_seamlyme.ini` |
 | seamly2d + seamlyme shared "common" settings | `~/.var/app/<app-id>/config/Seamly/qt6_common.ini` |
-| seamlyLayout | `~/.var/app/<app-id>/config/Seamly/SeamlyLayout/{settings,preferences,input,output}/` |
+| seamlyLayout | `~/.var/app/<app-id>/config/Seamly/SeamlyLayout/qt6_seamlylayout.ini` |
 
 **One shared physical directory:** because all three apps ship inside the **single existing Flatpak app id** (the apps launch each other via `QProcess::startDetached` and share files/variables, which does not work across sandboxes), the `~/.var/app/<app-id>/config/Seamly/` folder above is **one physical directory shared by all three** — not per-app copies. This is what makes the cross-app settings sharing, the `.pieces.svg` handoff, and shared measurement files work inside the sandbox.
 

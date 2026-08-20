@@ -3,7 +3,7 @@
 // LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
 //
 // @file PreferencesModelTests.cpp
-// @brief Qt tests for PreferencesModel viewer-launch helpers and legacy migration.
+// @brief Qt tests for PreferencesModel INI persistence, viewer helpers, and legacy migration.
 //
 // Covers URL-vs-file detection and command-line parsing for openInViewer,
 // the Projector use case (launcher-only viewer with optional arguments),
@@ -19,6 +19,7 @@
 #include <QDesktopServices>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSettings>
 #include <QSignalSpy>
 #include <QStandardPaths>
 #include <QTemporaryDir>
@@ -69,7 +70,9 @@ private slots:
     void openInViewer_emptyViewer_returnsFalse();
     void openInViewer_emptyTokens_returnsFalse();
 
-    void projectorPath_roundTripsThroughJson();
+    void defaultPreferencesFilePath_usesAppConfigIni();
+    void legacyJson_migratesToIni();
+    void projectorPath_roundTripsThroughIni();
     void projectorPath_emitsSignalOnChange();
 
     void parseViewerCommand_emptyReturnsEmpty();
@@ -96,7 +99,7 @@ private slots:
     // These tests document and guard the policy at the PreferencesModel level.
     // -----------------------------------------------------------------------
     void e7_dxfViewerPath_defaultsToEmpty();
-    void e7_dxfViewerPath_roundTripsThroughJson();
+    void e7_dxfViewerPath_roundTripsThroughIni();
     void e7_openInViewer_dxfFile_withViewer_returnsTrue();
 
     // -----------------------------------------------------------------------
@@ -191,11 +194,49 @@ void PreferencesModelTests::openInViewer_emptyTokens_returnsFalse()
     QCOMPARE(PreferencesModel::openInViewer(QStringLiteral("   "), QString()), false);
 }
 
-void PreferencesModelTests::projectorPath_roundTripsThroughJson()
+// @brief The application preferences file is stored directly in AppConfigLocation.
+void PreferencesModelTests::defaultPreferencesFilePath_usesAppConfigIni()
+{
+    PreferencesModel model;
+    const QString expectedRoot = QFileInfo(
+        QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)).absoluteFilePath();
+    const QFileInfo actual(model.defaultPreferencesFilePath());
+
+    QCOMPARE(actual.fileName(), QStringLiteral("qt6_seamlylayout.ini"));
+    QCOMPARE(actual.absolutePath(), expectedRoot);
+} // defaultPreferencesFilePath_usesAppConfigIni
+
+// @brief A legacy preferences JSON file is imported into the application INI file.
+void PreferencesModelTests::legacyJson_migratesToIni()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
-    const QString path = tempDir.filePath(QStringLiteral("prefs.json"));
+
+    const QString legacyDir = tempDir.filePath(QStringLiteral("preferences"));
+    QVERIFY(QDir().mkpath(legacyDir));
+    const QString legacyPath = QDir(legacyDir).filePath(QStringLiteral("preferences.json"));
+    QFile legacyFile(legacyPath);
+    QVERIFY(legacyFile.open(QIODevice::WriteOnly | QIODevice::Truncate));
+    legacyFile.write(R"({"projector_path":"https://patternprojector.com"})");
+    legacyFile.close();
+
+    const QString iniPath = tempDir.filePath(QStringLiteral("qt6_seamlylayout.ini"));
+    PreferencesModel model;
+    QVERIFY(model.load(iniPath));
+    QCOMPARE(model.projectorPath(), QStringLiteral("https://patternprojector.com"));
+    QVERIFY(QFileInfo::exists(iniPath));
+
+    const QSettings settings(iniPath, QSettings::IniFormat);
+    QCOMPARE(settings.value(QStringLiteral("projector_path")).toString(),
+             QStringLiteral("https://patternprojector.com"));
+    QVERIFY(QFileInfo::exists(legacyPath));
+} // legacyJson_migratesToIni
+
+void PreferencesModelTests::projectorPath_roundTripsThroughIni()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString path = tempDir.filePath(QStringLiteral("preferences.ini"));
 
     PreferencesModel writer;
     const QString chromeShortcut = QStringLiteral(
@@ -565,15 +606,15 @@ void PreferencesModelTests::e7_dxfViewerPath_defaultsToEmpty()
     QVERIFY(m.dxfViewerPath().isEmpty());
 }
 
-// @brief dxfViewerPath round-trips through JSON correctly for the View menu.
+// @brief dxfViewerPath round-trips through INI correctly for the View menu.
 //
 // The View → DXF-ASTM path reads dxfViewerPath and passes it to openInViewer.
 // If the path is lost on save/load the viewer cannot be launched.
-void PreferencesModelTests::e7_dxfViewerPath_roundTripsThroughJson()
+void PreferencesModelTests::e7_dxfViewerPath_roundTripsThroughIni()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
-    const QString path = tempDir.filePath(QStringLiteral("prefs.json"));
+    const QString path = tempDir.filePath(QStringLiteral("preferences.ini"));
 
     PreferencesModel writer;
     const QString viewerPath = QStringLiteral("https://sharecad.org");

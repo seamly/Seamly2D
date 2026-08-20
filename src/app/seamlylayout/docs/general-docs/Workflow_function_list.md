@@ -67,7 +67,7 @@ fn makeExportFilename(ext,tiled):
 ->return "<name.ext>" or "<name_tiled.ext>"
 
 onCompleted():
-->preferencesModel.load("settings/preferences.json"
+->preferencesModel.load("<AppConfigLocation>/qt6_seamlylayout.ini")
 ->settingsModel.load("settings/default_settings.json"
 
 **AppController

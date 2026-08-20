@@ -26,7 +26,8 @@ See full documentation in [`docs/settings-docs/SETTINGS_WORKFLOW.md`](../../docs
 - Settings file extension: `.settings`
 - Settings directory: `/settings`
 - Paper sizes source: `/assets/paperSizes/paper_sizes`
-- Preferences file: `preferences.json`
+- Application preferences file: `QStandardPaths::AppConfigLocation/qt6_seamlylayout.ini`
+- Default preferences profile: `default_preferences.json`
 
 ## Piece Arrangement Options
 

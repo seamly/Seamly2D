@@ -6,8 +6,8 @@
 // @brief Application preferences dialog — directory and viewer executable paths.
 //
 // Opens as a modal dialog centered on the ApplicationWindow.
-// Save: persists to the resolved preferences JSON path and closes.
-// Discard: reloads from the resolved preferences JSON path (reverts edits) and closes.
+// Save: persists to the application preferences INI file and closes.
+// Discard: reloads the application preferences INI file and closes.
 //
 // Usage:
 //   PreferencesPanel {

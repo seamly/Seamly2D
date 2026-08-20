@@ -3,7 +3,7 @@
 Author: slspencer
 Copyright: 2026
 
-Last updated: 2026-06-22
+Last updated: 2026-08-20
 
 ## Overview
 
@@ -14,14 +14,13 @@ platform-specific packaging for SeamlyLayout releases.
 
 ## Runtime Folder Layout
 
-SeamlyLayout uses two runtime folder trees — one for **settings** (layout
-parameters) and one for **preferences** (application preferences such as viewer
-paths and default directories).
+SeamlyLayout stores layout profiles separately from application preferences.
 
-| Folder | Platform path | Purpose |
+| Item | Platform path | Purpose |
 |---|---|---|
 | `settings` | `~/seamlyLayout/settings/` | Layout settings JSON files (`*.json`) |
-| `preferences` | `~/seamlyLayout/preferences/` | User preferences (`preferences.json`) |
+| `qt6_seamlylayout.ini` | `QStandardPaths::AppConfigLocation` | Application preferences |
+| `preferences` | `~/seamlyLayout/preferences/` | Optional JSON default profiles |
 
 The exact OS paths are:
 
@@ -31,19 +30,21 @@ The exact OS paths are:
 | Linux | `$HOME/seamlyLayout/` |
 | macOS | `$HOME/seamlyLayout/` |
 
-Both folders are created automatically on first run if they do not exist.
+The application creates required folders on first run.
 
 ### settings folder
 
 - Stores named layout settings files (`.json`), including `default_settings.json`.
 - The user can save additional named settings files here for quick recall.
 - The Settings dialog's **Load** / **Save** file pickers default to this folder.
-- Configured via `settings_directory` in `preferences.json`.
+- Configured through `settings_directory` in `qt6_seamlylayout.ini`.
 
-### preferences folder
+### Application preferences
 
-- Stores `preferences.json` — viewer executable paths, default directories.
-- Configured via `preferences_directory` in `preferences.json`.
+- Stores viewer paths, default directories, and the selected settings profile.
+- Uses `qt6_seamlylayout.ini` directly under `QStandardPaths::AppConfigLocation`.
+- Uses `%LOCALAPPDATA%\Seamly\SeamlyLayout\qt6_seamlylayout.ini` on Windows.
+- Keeps `default_preferences.json` as an optional reset profile.
 
 ---
 
@@ -59,8 +60,8 @@ The installer bundles the following files next to the executable under
 | `roll_36in.json` | Sample 36-inch roll settings |
 | `roll_48in.json` | Sample 48-inch roll settings |
 
-`preferences.json` is **not** bundled — it contains user-specific paths and is
-seeded at first run from the embedded Qt resource `:/defaults/default_preferences.json`.
+The installer does not bundle `qt6_seamlylayout.ini` because it contains user-specific values.
+The embedded `:/defaults/default_preferences.json` resource supplies first-run defaults.
 
 ---
 
@@ -80,8 +81,10 @@ the install directory (`<exeDir>/settings/`) rather than the user's home tree.
 
 ### What the app does on first run after an upgrade
 
-`PreferencesModel::load()` inspects every stored directory and file path in
-`preferences.json`. Any path whose folder segment still uses a legacy name is
+`PreferencesModel::load()` imports an existing `preferences.json` when the INI file is absent.
+It saves the imported values to `qt6_seamlylayout.ini` and keeps the JSON file.
+
+The model inspects every stored directory and file path. Any path whose folder segment uses a legacy name is
 automatically rewritten to the canonical name:
 
 1. The canonical target folder is created if it does not exist.
@@ -90,13 +93,12 @@ automatically rewritten to the canonical name:
 3. The in-memory path value is updated to point at the new location.
 4. A log line is emitted for each migration (`PreferencesModel::load(): migrated legacy ...`).
 
-`PreferencesModel::defaultPreferencesFilePath()` performs the same seed/copy
-logic for `preferences.json` itself when it does not yet exist in the canonical
-location, checking three legacy source candidates in priority order:
+The first-run import checks these JSON source candidates in priority order:
 
-1. `AppConfigLocation/layout-preferences/preferences.json`
-2. `<exeDir>/layout-settings/preferences.json`
-3. `<exeDir>/settings/preferences.json`
+1. `AppConfigLocation/preferences/preferences.json`
+2. `AppConfigLocation/layout-preferences/preferences.json`
+3. `<exeDir>/layout-settings/preferences.json`
+4. `<exeDir>/settings/preferences.json`
 
 ### What the installer does
 

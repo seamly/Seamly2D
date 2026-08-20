@@ -6,6 +6,19 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## SeamlyLayout INI preferences change (2026-08-20)
+
+SeamlyLayout stores application preferences in
+`AppConfigLocation/qt6_seamlylayout.ini`.
+On Windows, this resolves to
+`%LOCALAPPDATA%\Seamly\SeamlyLayout\qt6_seamlylayout.ini`.
+
+First startup imports the previous `preferences.json` and keeps that file.
+JSON remains the format for default preference profiles and layout profiles.
+
+The debug build passed. All five Qt test executables passed.
+`cargo test --workspace` passed.
+
 ## Seamly2D log-directory change (2026-08-20)
 
 `Application2D::logDirPath()` uses `AppLocalDataLocation` on Windows.

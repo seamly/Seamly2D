@@ -6,10 +6,10 @@
 // @brief QObject model for SeamlyLayout application preferences.
 //
 // Mirrors the Rust AppSettings data model exposed to the Qt frontend.
-// Exposes all fields as Q_PROPERTY items for QML binding and handles
-// JSON load/save to preferences.json.
+// Exposes all fields as Q_PROPERTY items for QML binding and stores
+// application preferences in qt6_seamlylayout.ini.
 //
-// JSON keys use snake_case for compatibility with the Rust serde format:
+// INI keys use snake_case for compatibility with legacy preferences JSON:
 //   input_directory, layout_directory, preferences_directory,
 //   settings_directory, settings_file, preferences_file,
 //   dxf_viewer_path, pdf_viewer_path, png_viewer_path
@@ -97,14 +97,14 @@ public:
     void setPngViewerPath(const QString &v);
     void setProjectorPath(const QString &v);
 
-    // @brief Load preferences from a JSON file.
-    // @param path File path (relative or absolute).
-    // @return true on success; false if file not found (defaults kept) or parse error.
+    // @brief Load preferences from an INI file or a legacy JSON defaults file.
+    // @param path Absolute or relative file path.
+    // @return true on success; false if the file cannot be read.
     Q_INVOKABLE bool load(const QString &path);
 
-    // @brief Save current preferences to a JSON file.
-    // @param path File path (relative or absolute).  Parent directory created if absent.
-    // @return true on success; false on write error.
+    // @brief Save current preferences to an INI file.
+    // @param path Absolute or relative file path. The function creates the parent directory.
+    // @return true on success; false when QSettings reports an error.
     Q_INVOKABLE bool save(const QString &path);
 
     // @brief Reset preferences to defaults from the configured defaults profile.
@@ -138,11 +138,8 @@ public:
     // Uses QCoreApplication::applicationDirPath() for a reliable absolute path.
     Q_INVOKABLE static QString defaultInputFolderUrl();
 
-    // @brief Return the absolute default preferences JSON file path.
-    // Uses QStandardPaths::AppConfigLocation/preferences/preferences.json and
-    // ensures the parent directory exists.
-    // On first run, if the user file is missing, attempts to seed/migrate from
-    // legacy <exeDir>/settings/preferences.json.
+    // @brief Return the absolute application preferences INI file path.
+    // Uses QStandardPaths::AppConfigLocation/qt6_seamlylayout.ini.
     Q_INVOKABLE QString defaultPreferencesFilePath() const;
 
     // @brief Return the settings file path to use when the Settings dialog opens.
@@ -173,7 +170,7 @@ public:
     Q_INVOKABLE QString resolvedInputDirectory() const;
 
     // @brief Return the resolved layout output directory path.
-    // Uses the directory configured in preferences.json (`layout_directory`) when set.
+    // Uses the directory configured in qt6_seamlylayout.ini (`layout_directory`) when set.
     // Falls back to <exeDir>/output when the configured value is empty (AppConfigLocation
     // root on macOS, or at runtime inside a read-only Linux AppImage mount or Flatpak /app
     // prefix — see Task 16 / 17 / 18).
@@ -257,6 +254,19 @@ signals:
     void projectorPathChanged();
 
 private:
+    /// @brief Load a JSON defaults file or a legacy preferences file.
+    /// @param path Absolute JSON file path.
+    /// @return true when the JSON object was read and applied.
+    bool loadJsonPreferences(const QString &path);
+
+    /// @brief Migrate saved paths from legacy folder names.
+    void migrateLegacyPreferencePaths();
+
+    /// @brief Import the first available legacy preferences JSON file.
+    /// @param iniPath Absolute destination INI file path.
+    /// @return true when values were imported and saved.
+    bool migrateLegacyPreferencesJson(const QString &iniPath);
+
     // Fields — defaults match AppSettings::default() in Rust
     QString m_inputDirectory  = QStringLiteral("");
     QString m_layoutDirectory = QStringLiteral("");
