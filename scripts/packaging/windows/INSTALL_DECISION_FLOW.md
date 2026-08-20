@@ -234,7 +234,7 @@ flowchart TD
 Four rules embedded there that must not be reversed casually:
 
 - **What Setup promised outranks every built-in default.** Page 5 shows the
-  user a folder and tells them the apps will use it. `installerDataRoot()` is
+  user a folder and tells them the apps will use it. `InstallerRecord::dataRoot()` is
   what makes that true. It sits below `paths/dataRoot`, so a user who moves the
   root in Preferences keeps their choice (Task InstWinX64.00).
 

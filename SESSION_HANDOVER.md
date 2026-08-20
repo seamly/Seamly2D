@@ -6,6 +6,27 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## THE UNIT TESTS DO NOT RUN IN CI (found 2026-08-19)
+
+**No push to `run-seamlyLayout` compiles `src/test/`.** Two independent gates:
+
+- Every build job passes `CONFIG+=noTests` — Linux AppImage, macOS, and both
+  Windows MSI legs. The test subdirectory is excluded.
+- `linux-test` is the only job that builds and runs them, and it carries
+  `if: github.event_name == 'pull_request'`. Normal task work pushes to the
+  branch without a PR, so it never fires.
+
+Proof: `tst_dataroot.cpp` was committed on 2026-08-17 with `QLatin1Char('\')`, an
+unterminated character literal and a hard compile error. Two CI runs passed
+after it landed. Fixed 2026-08-19.
+
+**Consequence for every handover note that says "ci.yml verifies Seamly2D and
+SeamlyMe":** it verifies that they BUILD. It does not compile or run a single
+unit test. A C++ test written here is unverified until somebody opens a PR or
+builds the test target by hand.
+
+Not fixed — it is a CI-cost decision for the user. The options are to drop the
+`pull_request` gate on `linux-test`, or to run it on a schedule.
 ## PICK UP HERE (2026-08-18, Setup creates the data root)
 
 The MSI now creates the selected `SeamlyData` root during installation.

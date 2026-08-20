@@ -41,7 +41,7 @@ by `CostInitialize`, so it is readable where the action is scheduled but not at
 empty `SEAMLYDATAPARENT` aborts the wizard with error 2343, which this project
 has already hit once.
 
-**The apps now read what Setup recorded.** `VCommonSettings::installerDataRoot()`
+**The apps now read what Setup recorded.** `InstallerRecord::dataRoot()`
 reads `HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot`, and `initializeDataRoot()` adopts
 it when nothing is configured yet. Precedence, highest first:
 
@@ -359,7 +359,7 @@ Interactive verification is done. See InstWinX64.1.6.
 - [x] **InstWinX64.2.10** Copy without overwrite or source deletion.
 - [x] **InstWinX64.2.11** Persist program and data paths through repair and upgrade. Data half 2026-08-18, program half 2026-08-19.
 - [ ] **InstWinX64.2.12** Register one shared data-root setting.
-- [x] **InstWinX64.2.13** Make all three apps honor the configured data root. Done by InstWinX64.00: `VCommonSettings::installerDataRoot()` reads the recorded root and `initializeDataRoot()` adopts it, which covers seamly2d and seamlyme. SeamlyLayout has no data root.
+- [x] **InstWinX64.2.13** Make all three apps honor the configured data root. Done by InstWinX64.00: `InstallerRecord::dataRoot()` reads the recorded root and `initializeDataRoot()` adopts it, which covers seamly2d and seamlyme. SeamlyLayout has no data root.
 - [x] **InstWinX64.2.14** Create the selected data root during installation. Keep it and its contents during uninstall.
 
 #### Result — 2026-08-18
@@ -507,6 +507,44 @@ Eight `VSettings` accessors use `%APPDATA%\Unknown Organization.ini`.
 - [ ] **InstWinX64.7.8** Show the complete editable destination path.
 - [ ] **InstWinX64.7.9** Update UI tests and documentation.
 - [x] **InstWinX64.7.10** Name the installed version on the maintenance page.
+- [x] **InstWinX64.7.11** Move the installer-registry read out of `VCommonSettings`.
+
+### Result — 2026-08-19
+
+`VCommonSettings::installerDataRoot()` became `InstallerRecord::dataRoot()` in
+new `src/libs/vmisc/installer_record.{h,cpp}`.
+
+Why: `vcommonsettings.cpp` is 3,343 lines, and that function was its only
+registry read and the only place in `src/` that touched
+`SOFTWARE\Seamly\Seamly2D`. A packaging concern had leaked into a settings class.
+One reader does not earn a file; the seven values in that key mean a second one
+will come.
+
+Naming, against `.github/README-CODE-STYLES.md`: snake_case, no `s` start (which
+ruled out `seamly_install_registry`), no `v` prefix, no abbreviation, unique
+repo-wide. Not a class file, so the class-match exception does not apply and the
+open `Rename.2.1` decision does not bind it. `installer_*` was added to the
+guide's prefix list.
+
+No platform tag. The guide asks for one on low-level platform code, but the
+contract is cross-platform — the function returns empty off Windows and every
+caller is cross-platform, so a `windows_*` header included from cross-platform
+code would read wrong. The house already keeps `Q_OS_WIN` blocks inside neutral
+files: `seamly_suite_paths.cpp` has one, `vcommonsettings.cpp` has seven. A
+Linux or macOS installer record slots into the same file.
+
+Verified: `installer_record.cpp` compiles clean against Qt 6.11.1 with MSVC
+`/W3` (`cl /Zs`). `vmisc.pri` carries both new files, and the test target links
+the `vmisc` library, so `tst_dataroot.cpp` needs no build change beyond its
+include.
+
+**Defect fixed in passing.** `tst_dataroot.cpp` carried `QLatin1Char('\')` — an
+unterminated character literal, from a lost escape when the test was written on
+2026-08-17. It is a hard compile error, and **no CI job caught it**: every build
+job passes `CONFIG+=noTests`, and `linux-test` is gated on
+`github.event_name == 'pull_request'`. Normal task work pushes without a PR, so
+the unit tests have not been compiled at all. See the note in
+`SESSION_HANDOVER.md`.
 
 ### Result — 2026-08-19
 

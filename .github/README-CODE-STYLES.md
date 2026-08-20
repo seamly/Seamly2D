@@ -35,6 +35,7 @@ For more information, read full [JSF-AV standard](http://www2.research.att.com/~
     - settings_*
     - options_*
     - exception_*
+    - installer_*
     - event_*
     - model_*
     - search_*

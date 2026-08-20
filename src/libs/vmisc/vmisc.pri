@@ -12,6 +12,7 @@ SOURCES += \
     $$PWD/vtablesearch.cpp \
     $$PWD/dialogs/dialogexporttocsv.cpp \
     $$PWD/def.cpp \
+    $$PWD/installer_record.cpp \
     $$PWD/seamly_suite_paths.cpp
 
 *msvc*:SOURCES += $$PWD/stable.cpp
@@ -35,6 +36,7 @@ HEADERS += \
     $$PWD/diagnostic.h \
     $$PWD/dialogs/dialogexporttocsv.h \
     $$PWD/customevents.h \
+    $$PWD/installer_record.h \
     $$PWD/seamly_suite_paths.h
 
 # Qt's versions

@@ -75,6 +75,7 @@
 
 #include "../ifc/ifcdef.h"
 #include "../vmisc/def.h"
+#include "../vmisc/installer_record.h"
 #include "../vmisc/vmath.h"
 #include "../vpatterndb/pmsystems.h"
 
@@ -510,46 +511,6 @@ QString VCommonSettings::getDefaultDataRoot()
         documents = QDir::homePath();
     }
     return QDir::cleanPath(documents) + QLatin1String("/Seamly");
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief installerDataRoot returns the user-data root the Windows installer recorded.
- *
- * Setup asks "Where do you keep your work?" and writes the answer to
- * HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot. Without this the answer was inert: every app
- * resolved its own default instead, so a user who was promised
- * C:\Users\<user>\Documents\SeamlyData got <Documents>/Seamly (InstWinX64.00).
- *
- * HKLM, not HKCU: a per-machine MSI runs its server side as LocalSystem and cannot write a
- * real user's hive. The value is therefore machine-wide, and each user adopts it once, on
- * that user's first run, into their own settings file. A user who later changes the root in
- * Preferences keeps that choice — initializeDataRoot() reads the settings file first and
- * never comes back here.
- *
- * The installer writes an empty value when nothing chose a root, which is the signal to use
- * the built-in default.
- *
- * @return absolute path recorded by the installer, in Qt's '/' separator form; empty when no
- * installer recorded one, and always empty off Windows.
- */
-QString VCommonSettings::installerDataRoot()
-{
-#ifdef Q_OS_WIN
-    // Registry64Format rather than NativeFormat: the apps are 64-bit today, so the two agree,
-    // but the installer is x64 and always writes the 64-bit view.
-    const QSettings installerKey(QStringLiteral("HKEY_LOCAL_MACHINE\\SOFTWARE\\Seamly\\Seamly2D"),
-                                 QSettings::Registry64Format);
-    const QString recorded = installerKey.value(QStringLiteral("DataRoot")).toString().trimmed();
-    if (recorded.isEmpty())
-    {
-        return QString();
-    }
-
-    return QDir::cleanPath(QDir::fromNativeSeparators(recorded));
-#else
-    return QString();
-#endif
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1023,7 +984,7 @@ QString VCommonSettings::initializeDataRoot(bool *adoptedLegacyTree)
     // legacy tree and the built-in default, because the user was shown that path and told the
     // apps would use it. Recorded here, so later runs take case 1 and a change made in
     // Preferences is never overridden by the installer.
-    const QString fromInstaller = installerDataRoot();
+    const QString fromInstaller = InstallerRecord::dataRoot();
     if (!fromInstaller.isEmpty())
     {
         settings.setValue(settingPathsDataRoot, fromInstaller);
