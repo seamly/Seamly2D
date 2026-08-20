@@ -103,6 +103,7 @@ $(document).ready(function(){initNavTree('d9/d4e/classPreferencesModel.html','..
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="#properties">Properties</a> &#124;
+<a href="#pri-methods">Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="../../d4/d8b/classPreferencesModel-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">PreferencesModel Class Reference</div></div>
@@ -255,6 +256,18 @@ Properties</h2></td></tr>
 <tr class="memitem:a0d353f86aa3929a5a354de2b777268a7"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d4e/classPreferencesModel.html#a0d353f86aa3929a5a354de2b777268a7">projectorPath</a></td></tr>
 <tr class="separator:a0d353f86aa3929a5a354de2b777268a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
+Private Member Functions</h2></td></tr>
+<tr class="memitem:a55ad1b3a49e72d95f5e8ce644f1a4fea"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d4e/classPreferencesModel.html#a55ad1b3a49e72d95f5e8ce644f1a4fea">loadJsonPreferences</a> (const QString &amp;path)</td></tr>
+<tr class="memdesc:a55ad1b3a49e72d95f5e8ce644f1a4fea"><td class="mdescLeft">&#160;</td><td class="mdescRight">Load a JSON defaults file or a legacy preferences file.  <br /></td></tr>
+<tr class="separator:a55ad1b3a49e72d95f5e8ce644f1a4fea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7e61effc36f7d0b0f5ce43a879083a4c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d4e/classPreferencesModel.html#a7e61effc36f7d0b0f5ce43a879083a4c">migrateLegacyPreferencePaths</a> ()</td></tr>
+<tr class="memdesc:a7e61effc36f7d0b0f5ce43a879083a4c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Migrate saved paths from legacy folder names.  <br /></td></tr>
+<tr class="separator:a7e61effc36f7d0b0f5ce43a879083a4c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac46467cdeab4c89f035e679ec8397743"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d4e/classPreferencesModel.html#ac46467cdeab4c89f035e679ec8397743">migrateLegacyPreferencesJson</a> (const QString &amp;iniPath)</td></tr>
+<tr class="memdesc:ac46467cdeab4c89f035e679ec8397743"><td class="mdescLeft">&#160;</td><td class="mdescRight">Import the first available legacy preferences JSON file.  <br /></td></tr>
+<tr class="separator:ac46467cdeab4c89f035e679ec8397743"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
 <tr class="memitem:a1d8046ff306e83b5b7fd71c1de7b46e0"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d9/d4e/classPreferencesModel.html#a1d8046ff306e83b5b7fd71c1de7b46e0">m_inputDirectory</a> = QStringLiteral(&quot;&quot;)</td></tr>
@@ -306,7 +319,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00251">251</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00253">253</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
 </div>
 </div>
@@ -334,11 +347,11 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00534">534</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00600">600</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00092">Platform::isAppImage()</a>, and <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00118">Platform::isFlatpak()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00883">PreferencesModelTests::appImage_defaultInputFolderUrl_fallsBackToAppConfigLocation()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00965">PreferencesModelTests::flatpak_defaultInputFolderUrl_fallsBackToAppConfigLocation()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00924">PreferencesModelTests::appImage_defaultInputFolderUrl_fallsBackToAppConfigLocation()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l01006">PreferencesModelTests::flatpak_defaultInputFolderUrl_fallsBackToAppConfigLocation()</a>.</p>
 
 </div>
 </div>
@@ -357,11 +370,9 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00548">548</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00613">613</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00198">PreferencesModelTests::defaultPreferencesFilePath_usesAppConfigIni()</a>, and <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>.</p>
 
 </div>
 </div>
@@ -389,9 +400,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l01036">1036</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l01074">1074</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00774">PreferencesModelTests::v2_dxfTeachingFilePath_emptyInputReturnsEmpty()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00759">PreferencesModelTests::v2_dxfTeachingFilePath_handlesMultipleDots()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00744">PreferencesModelTests::v2_dxfTeachingFilePath_handlesUppercaseExtension()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00726">PreferencesModelTests::v2_dxfTeachingFilePath_preservesDirectoryAndBaseName()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00711">PreferencesModelTests::v2_dxfTeachingFilePath_replacesExtension()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00783">PreferencesModelTests::v2_fileExists_trueForActualTeachingFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00815">PreferencesModelTests::v2_dxfTeachingFilePath_emptyInputReturnsEmpty()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00800">PreferencesModelTests::v2_dxfTeachingFilePath_handlesMultipleDots()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00785">PreferencesModelTests::v2_dxfTeachingFilePath_handlesUppercaseExtension()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00767">PreferencesModelTests::v2_dxfTeachingFilePath_preservesDirectoryAndBaseName()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00752">PreferencesModelTests::v2_dxfTeachingFilePath_replacesExtension()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00824">PreferencesModelTests::v2_fileExists_trueForActualTeachingFile()</a>.</p>
 
 </div>
 </div>
@@ -420,7 +431,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00083">83</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00267">m_dxfViewerPath</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00277">m_dxfViewerPath</a>.</p>
 
 </div>
 </div>
@@ -447,7 +458,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00309">setDxfViewerPath()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00311">setDxfViewerPath()</a>.</p>
 
 </div>
 </div>
@@ -475,9 +486,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l01015">1015</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l01053">1053</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00704">PreferencesModelTests::v2_fileExists_falseForEmptyPath()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00693">PreferencesModelTests::v2_fileExists_falseForMissingFile()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00783">PreferencesModelTests::v2_fileExists_trueForActualTeachingFile()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00678">PreferencesModelTests::v2_fileExists_trueForExistingFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00745">PreferencesModelTests::v2_fileExists_falseForEmptyPath()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00734">PreferencesModelTests::v2_fileExists_falseForMissingFile()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00824">PreferencesModelTests::v2_fileExists_trueForActualTeachingFile()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00719">PreferencesModelTests::v2_fileExists_trueForExistingFile()</a>.</p>
 
 </div>
 </div>
@@ -521,7 +532,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00788">788</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00826">826</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>, <a class="el" href="../../de/dc9/SeamlyTheme_8h_source.html#l00071">SeamlyTheme::makeSeamlyPalette()</a>, and <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00050">Platform::toNativePath()</a>.</p>
 
@@ -573,7 +584,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00846">846</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00884">884</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>, <a class="el" href="../../de/dc9/SeamlyTheme_8h_source.html#l00071">SeamlyTheme::makeSeamlyPalette()</a>, and <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00050">Platform::toNativePath()</a>.</p>
 
@@ -604,7 +615,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00077">77</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00261">m_inputDirectory</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00271">m_inputDirectory</a>.</p>
 
 </div>
 </div>
@@ -631,7 +642,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00261">setInputDirectory()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00263">setInputDirectory()</a>.</p>
 
 </div>
 </div>
@@ -659,11 +670,11 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l01001">1001</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l01039">1039</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00898">isHttpUrl()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00936">isHttpUrl()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00595">PreferencesModelTests::e7_openInViewer_dxfFile_withViewer_returnsTrue()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00150">PreferencesModelTests::isViewerUrl_detectsHttp()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00155">PreferencesModelTests::isViewerUrl_detectsHttps()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00168">PreferencesModelTests::isViewerUrl_rejectsEmpty()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00173">PreferencesModelTests::isViewerUrl_rejectsLocalCommandWithArgs()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00161">PreferencesModelTests::isViewerUrl_rejectsLocalPath()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00636">PreferencesModelTests::e7_openInViewer_dxfFile_withViewer_returnsTrue()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00153">PreferencesModelTests::isViewerUrl_detectsHttp()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00158">PreferencesModelTests::isViewerUrl_detectsHttps()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00171">PreferencesModelTests::isViewerUrl_rejectsEmpty()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00176">PreferencesModelTests::isViewerUrl_rejectsLocalCommandWithArgs()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00164">PreferencesModelTests::isViewerUrl_rejectsLocalPath()</a>.</p>
 
 </div>
 </div>
@@ -692,7 +703,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00078">78</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00262">m_layoutDirectory</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00272">m_layoutDirectory</a>.</p>
 
 </div>
 </div>
@@ -719,7 +730,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00269">setLayoutDirectory()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00271">setLayoutDirectory()</a>.</p>
 
 </div>
 </div>
@@ -741,9 +752,50 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">347</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00267">m_dxfViewerPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00261">m_inputDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00262">m_layoutDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00268">m_pdfViewerPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00269">m_pngViewerPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00263">m_preferencesDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00266">m_preferencesFile</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00270">m_projectorPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00264">m_settingsDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00265">m_settingsFile</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00309">setDxfViewerPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00261">setInputDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00269">setLayoutDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00317">setPdfViewerPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00325">setPngViewerPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00277">setPreferencesDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00301">setPreferencesFile()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00333">setProjectorPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00285">setSettingsDirectory()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00293">setSettingsFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00277">m_dxfViewerPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00271">m_inputDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00272">m_layoutDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00278">m_pdfViewerPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00279">m_pngViewerPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00273">m_preferencesDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00276">m_preferencesFile</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00280">m_projectorPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00274">m_settingsDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00275">m_settingsFile</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00430">migrateLegacyPreferencePaths()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00477">migrateLegacyPreferencesJson()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00538">resetToDefaults()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00507">save()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00311">setDxfViewerPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00263">setInputDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00271">setLayoutDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00319">setPdfViewerPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00327">setPngViewerPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00279">setPreferencesDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00303">setPreferencesFile()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00335">setProjectorPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00287">setSettingsDirectory()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00295">setSettingsFile()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00572">PreferencesModelTests::e7_dxfViewerPath_roundTripsThroughJson()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00404">PreferencesModelTests::migration_legacyPreferencesFolder_updatesPreferencesDirectory()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00461">PreferencesModelTests::migration_legacyPreferencesFolder_updatesPreferencesFilePath()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00376">PreferencesModelTests::migration_legacySettingsFolder_updatesSettingsDirectory()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00429">PreferencesModelTests::migration_legacySettingsFolder_updatesSettingsFilePath()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00492">PreferencesModelTests::migration_noLegacyFolder_leavesPathUnchanged()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00520">PreferencesModelTests::migration_settingsFileCopied_toNewFolder()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00194">PreferencesModelTests::projectorPath_roundTripsThroughJson()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00472">resetToDefaults()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00613">PreferencesModelTests::e7_dxfViewerPath_roundTripsThroughIni()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00210">PreferencesModelTests::legacyJson_migratesToIni()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00445">PreferencesModelTests::migration_legacyPreferencesFolder_updatesPreferencesDirectory()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00502">PreferencesModelTests::migration_legacyPreferencesFolder_updatesPreferencesFilePath()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00417">PreferencesModelTests::migration_legacySettingsFolder_updatesSettingsDirectory()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00470">PreferencesModelTests::migration_legacySettingsFolder_updatesSettingsFilePath()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00533">PreferencesModelTests::migration_noLegacyFolder_leavesPathUnchanged()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00561">PreferencesModelTests::migration_settingsFileCopied_toNewFolder()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00235">PreferencesModelTests::projectorPath_roundTripsThroughIni()</a>.</p>
+
+</div>
+</div>
+<a id="a55ad1b3a49e72d95f5e8ce644f1a4fea" name="a55ad1b3a49e72d95f5e8ce644f1a4fea"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a55ad1b3a49e72d95f5e8ce644f1a4fea">&#9670;&#160;</a></span>loadJsonPreferences()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PreferencesModel::loadJsonPreferences </td>
+          <td>(</td>
+          <td class="paramtype">const QString &amp;&#160;</td>
+          <td class="paramname"><em>path</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Load a JSON defaults file or a legacy preferences file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">path</td><td>Absolute JSON file path. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true when the JSON object was read and applied. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">398</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00277">m_dxfViewerPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00271">m_inputDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00272">m_layoutDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00278">m_pdfViewerPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00279">m_pngViewerPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00273">m_preferencesDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00276">m_preferencesFile</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00280">m_projectorPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00274">m_settingsDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00275">m_settingsFile</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00430">migrateLegacyPreferencePaths()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00311">setDxfViewerPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00263">setInputDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00271">setLayoutDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00319">setPdfViewerPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00327">setPngViewerPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00279">setPreferencesDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00303">setPreferencesFile()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00335">setProjectorPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00287">setSettingsDirectory()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00295">setSettingsFile()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00477">migrateLegacyPreferencesJson()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00538">resetToDefaults()</a>.</p>
 
 </div>
 </div>
@@ -771,7 +823,81 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00513">513</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00579">579</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a7e61effc36f7d0b0f5ce43a879083a4c" name="a7e61effc36f7d0b0f5ce43a879083a4c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7e61effc36f7d0b0f5ce43a879083a4c">&#9670;&#160;</a></span>migrateLegacyPreferencePaths()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void PreferencesModel::migrateLegacyPreferencePaths </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Migrate saved paths from legacy folder names. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00430">430</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00273">m_preferencesDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00276">m_preferencesFile</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00274">m_settingsDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00275">m_settingsFile</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00279">setPreferencesDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00303">setPreferencesFile()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00287">setSettingsDirectory()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00295">setSettingsFile()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>.</p>
+
+</div>
+</div>
+<a id="ac46467cdeab4c89f035e679ec8397743" name="ac46467cdeab4c89f035e679ec8397743"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac46467cdeab4c89f035e679ec8397743">&#9670;&#160;</a></span>migrateLegacyPreferencesJson()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool PreferencesModel::migrateLegacyPreferencesJson </td>
+          <td>(</td>
+          <td class="paramtype">const QString &amp;&#160;</td>
+          <td class="paramname"><em>iniPath</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Import the first available legacy preferences JSON file. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">iniPath</td><td>Absolute destination INI file path. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true when values were imported and saved. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00477">477</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00507">save()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>.</p>
 
 </div>
 </div>
@@ -809,11 +935,11 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00929">929</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00967">967</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00898">isHttpUrl()</a>, <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00060">Platform::isStoreApp()</a>, <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l01058">parseViewerCommand()</a>, and <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00050">Platform::toNativePath()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00936">isHttpUrl()</a>, <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00060">Platform::isStoreApp()</a>, <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l01096">parseViewerCommand()</a>, and <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00050">Platform::toNativePath()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00595">PreferencesModelTests::e7_openInViewer_dxfFile_withViewer_returnsTrue()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00188">PreferencesModelTests::openInViewer_emptyTokens_returnsFalse()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00182">PreferencesModelTests::openInViewer_emptyViewer_returnsFalse()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00636">PreferencesModelTests::e7_openInViewer_dxfFile_withViewer_returnsTrue()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00191">PreferencesModelTests::openInViewer_emptyTokens_returnsFalse()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00185">PreferencesModelTests::openInViewer_emptyViewer_returnsFalse()</a>.</p>
 
 </div>
 </div>
@@ -841,11 +967,11 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l01058">1058</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l01096">1096</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00050">Platform::toNativePath()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00929">openInViewer()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00241">PreferencesModelTests::parseViewerCommand_emptyReturnsEmpty()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00247">PreferencesModelTests::parseViewerCommand_existingFileWithSpaces_singleToken()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00274">PreferencesModelTests::parseViewerCommand_fileUrlPrefix_strippedAndResolved()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00308">PreferencesModelTests::parseViewerCommand_missingPathFallsBackToSplit()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00293">PreferencesModelTests::parseViewerCommand_quotedChromePwa_splitsExecAndArgs()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00967">openInViewer()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00282">PreferencesModelTests::parseViewerCommand_emptyReturnsEmpty()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00288">PreferencesModelTests::parseViewerCommand_existingFileWithSpaces_singleToken()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00315">PreferencesModelTests::parseViewerCommand_fileUrlPrefix_strippedAndResolved()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00349">PreferencesModelTests::parseViewerCommand_missingPathFallsBackToSplit()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00334">PreferencesModelTests::parseViewerCommand_quotedChromePwa_splitsExecAndArgs()</a>.</p>
 
 </div>
 </div>
@@ -874,7 +1000,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00084">84</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00268">m_pdfViewerPath</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00278">m_pdfViewerPath</a>.</p>
 
 </div>
 </div>
@@ -901,7 +1027,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00317">setPdfViewerPath()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00319">setPdfViewerPath()</a>.</p>
 
 </div>
 </div>
@@ -930,7 +1056,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00085">85</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00269">m_pngViewerPath</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00279">m_pngViewerPath</a>.</p>
 
 </div>
 </div>
@@ -957,7 +1083,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00325">setPngViewerPath()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00327">setPngViewerPath()</a>.</p>
 
 </div>
 </div>
@@ -986,7 +1112,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00079">79</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00263">m_preferencesDirectory</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00273">m_preferencesDirectory</a>.</p>
 
 </div>
 </div>
@@ -1013,7 +1139,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00277">setPreferencesDirectory()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00279">setPreferencesDirectory()</a>.</p>
 
 </div>
 </div>
@@ -1042,7 +1168,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00082">82</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00266">m_preferencesFile</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00276">m_preferencesFile</a>.</p>
 
 </div>
 </div>
@@ -1069,7 +1195,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00301">setPreferencesFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00303">setPreferencesFile()</a>.</p>
 
 </div>
 </div>
@@ -1088,11 +1214,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00699">699</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00737">737</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00263">m_preferencesDirectory</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00266">m_preferencesFile</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00273">m_preferencesDirectory</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00276">m_preferencesFile</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00472">resetToDefaults()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00538">resetToDefaults()</a>.</p>
 
 </div>
 </div>
@@ -1121,7 +1247,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00086">86</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00270">m_projectorPath</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00280">m_projectorPath</a>.</p>
 
 </div>
 </div>
@@ -1148,7 +1274,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00219">PreferencesModelTests::projectorPath_emitsSignalOnChange()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00333">setProjectorPath()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00260">PreferencesModelTests::projectorPath_emitsSignalOnChange()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00335">setProjectorPath()</a>.</p>
 
 </div>
 </div>
@@ -1167,11 +1293,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00472">472</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00538">538</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00699">preferencesFilePath()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00737">preferencesFilePath()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00324">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00365">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
 
 </div>
 </div>
@@ -1190,11 +1316,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00636">636</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00674">674</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00092">Platform::isAppImage()</a>, <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00118">Platform::isFlatpak()</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00261">m_inputDirectory</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00092">Platform::isAppImage()</a>, <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00118">Platform::isFlatpak()</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00271">m_inputDirectory</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00848">PreferencesModelTests::appImage_resolvedInputDirectory_fallsBackToAppConfigLocation()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00930">PreferencesModelTests::flatpak_resolvedInputDirectory_fallsBackToAppConfigLocation()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00889">PreferencesModelTests::appImage_resolvedInputDirectory_fallsBackToAppConfigLocation()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00971">PreferencesModelTests::flatpak_resolvedInputDirectory_fallsBackToAppConfigLocation()</a>.</p>
 
 </div>
 </div>
@@ -1213,11 +1339,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00735">735</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00773">773</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00092">Platform::isAppImage()</a>, <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00118">Platform::isFlatpak()</a>, <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00262">m_layoutDirectory</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00092">Platform::isAppImage()</a>, <a class="el" href="../../d9/dd0/Platform_8h_source.html#l00118">Platform::isFlatpak()</a>, <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00272">m_layoutDirectory</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00865">PreferencesModelTests::appImage_resolvedLayoutDirectory_fallsBackToAppConfigLocation()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00947">PreferencesModelTests::flatpak_resolvedLayoutDirectory_fallsBackToAppConfigLocation()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00653">PreferencesModelTests::v1_resolvedLayoutDirectory_createsDirectoryIfMissing()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00644">PreferencesModelTests::v1_resolvedLayoutDirectory_fallsBackWhenEmpty()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00628">PreferencesModelTests::v1_resolvedLayoutDirectory_returnsAbsoluteLayoutDir()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00906">PreferencesModelTests::appImage_resolvedLayoutDirectory_fallsBackToAppConfigLocation()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00988">PreferencesModelTests::flatpak_resolvedLayoutDirectory_fallsBackToAppConfigLocation()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00694">PreferencesModelTests::v1_resolvedLayoutDirectory_createsDirectoryIfMissing()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00685">PreferencesModelTests::v1_resolvedLayoutDirectory_fallsBackWhenEmpty()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00669">PreferencesModelTests::v1_resolvedLayoutDirectory_returnsAbsoluteLayoutDir()</a>.</p>
 
 </div>
 </div>
@@ -1236,11 +1362,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00588">588</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00626">626</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00264">m_settingsDirectory</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00274">m_settingsDirectory</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00677">settingsFilePath()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00715">settingsFilePath()</a>.</p>
 
 </div>
 </div>
@@ -1260,11 +1386,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00437">437</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00507">507</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00267">m_dxfViewerPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00261">m_inputDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00262">m_layoutDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00268">m_pdfViewerPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00269">m_pngViewerPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00263">m_preferencesDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00266">m_preferencesFile</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00270">m_projectorPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00264">m_settingsDirectory</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00265">m_settingsFile</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger::log()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00277">m_dxfViewerPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00271">m_inputDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00272">m_layoutDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00278">m_pdfViewerPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00279">m_pngViewerPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00273">m_preferencesDirectory</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00276">m_preferencesFile</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00280">m_projectorPath</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00274">m_settingsDirectory</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00275">m_settingsFile</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00572">PreferencesModelTests::e7_dxfViewerPath_roundTripsThroughJson()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00194">PreferencesModelTests::projectorPath_roundTripsThroughJson()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00613">PreferencesModelTests::e7_dxfViewerPath_roundTripsThroughIni()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00477">migrateLegacyPreferencesJson()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00235">PreferencesModelTests::projectorPath_roundTripsThroughIni()</a>.</p>
 
 </div>
 </div>
@@ -1284,11 +1410,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00309">309</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00311">311</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/d4e/classPreferencesModel.html#a6a2ba332a40e8a7e844a7bc5977bbdf9">dxfViewerPathChanged()</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00267">m_dxfViewerPath</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d4e/classPreferencesModel.html#a6a2ba332a40e8a7e844a7bc5977bbdf9">dxfViewerPathChanged()</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00277">m_dxfViewerPath</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00572">PreferencesModelTests::e7_dxfViewerPath_roundTripsThroughJson()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00324">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00613">PreferencesModelTests::e7_dxfViewerPath_roundTripsThroughIni()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00365">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
 
 </div>
 </div>
@@ -1308,11 +1434,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00261">261</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00263">263</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/d4e/classPreferencesModel.html#aab3785e07b29aebaf738f1fc5115a7bf">inputDirectoryChanged()</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00261">m_inputDirectory</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d4e/classPreferencesModel.html#aab3785e07b29aebaf738f1fc5115a7bf">inputDirectoryChanged()</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00271">m_inputDirectory</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00324">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00365">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
 
 </div>
 </div>
@@ -1332,11 +1458,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00269">269</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00271">271</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/d4e/classPreferencesModel.html#a4dda65c52b57681a5cac9e444aacee79">layoutDirectoryChanged()</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00262">m_layoutDirectory</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d4e/classPreferencesModel.html#a4dda65c52b57681a5cac9e444aacee79">layoutDirectoryChanged()</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00272">m_layoutDirectory</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00653">PreferencesModelTests::v1_resolvedLayoutDirectory_createsDirectoryIfMissing()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00628">PreferencesModelTests::v1_resolvedLayoutDirectory_returnsAbsoluteLayoutDir()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00694">PreferencesModelTests::v1_resolvedLayoutDirectory_createsDirectoryIfMissing()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00669">PreferencesModelTests::v1_resolvedLayoutDirectory_returnsAbsoluteLayoutDir()</a>.</p>
 
 </div>
 </div>
@@ -1356,11 +1482,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00317">317</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00319">319</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00268">m_pdfViewerPath</a>, and <a class="el" href="../../d9/d4e/classPreferencesModel.html#a520eab9c3e134fea8ce88c2afadfa127">pdfViewerPathChanged()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00278">m_pdfViewerPath</a>, and <a class="el" href="../../d9/d4e/classPreferencesModel.html#a520eab9c3e134fea8ce88c2afadfa127">pdfViewerPathChanged()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, and <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, and <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>.</p>
 
 </div>
 </div>
@@ -1380,11 +1506,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00325">325</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00327">327</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00269">m_pngViewerPath</a>, and <a class="el" href="../../d9/d4e/classPreferencesModel.html#af012aa352fa84da1b8aeeecdbd200e68">pngViewerPathChanged()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00279">m_pngViewerPath</a>, and <a class="el" href="../../d9/d4e/classPreferencesModel.html#af012aa352fa84da1b8aeeecdbd200e68">pngViewerPathChanged()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, and <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, and <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>.</p>
 
 </div>
 </div>
@@ -1404,11 +1530,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00277">277</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00279">279</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00263">m_preferencesDirectory</a>, and <a class="el" href="../../d9/d4e/classPreferencesModel.html#aea80510e7ad9cd0984a8f840d4eb3cdb">preferencesDirectoryChanged()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00273">m_preferencesDirectory</a>, and <a class="el" href="../../d9/d4e/classPreferencesModel.html#aea80510e7ad9cd0984a8f840d4eb3cdb">preferencesDirectoryChanged()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00324">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00430">migrateLegacyPreferencePaths()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00365">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
 
 </div>
 </div>
@@ -1428,11 +1554,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00301">301</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00303">303</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00266">m_preferencesFile</a>, and <a class="el" href="../../d9/d4e/classPreferencesModel.html#af2df9e976e77a8768787d657edcfe8c5">preferencesFileChanged()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00276">m_preferencesFile</a>, and <a class="el" href="../../d9/d4e/classPreferencesModel.html#af2df9e976e77a8768787d657edcfe8c5">preferencesFileChanged()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00324">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00430">migrateLegacyPreferencePaths()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00365">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
 
 </div>
 </div>
@@ -1452,11 +1578,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00333">333</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00335">335</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00270">m_projectorPath</a>, and <a class="el" href="../../d9/d4e/classPreferencesModel.html#a9900980e030f30c7a4c39551fdff3f15">projectorPathChanged()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00280">m_projectorPath</a>, and <a class="el" href="../../d9/d4e/classPreferencesModel.html#a9900980e030f30c7a4c39551fdff3f15">projectorPathChanged()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00219">PreferencesModelTests::projectorPath_emitsSignalOnChange()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00194">PreferencesModelTests::projectorPath_roundTripsThroughJson()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00324">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00260">PreferencesModelTests::projectorPath_emitsSignalOnChange()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00235">PreferencesModelTests::projectorPath_roundTripsThroughIni()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00365">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
 
 </div>
 </div>
@@ -1476,11 +1602,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00285">285</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00287">287</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00264">m_settingsDirectory</a>, and <a class="el" href="../../d9/d4e/classPreferencesModel.html#a46873c79a73746093adc6879ebc87a25">settingsDirectoryChanged()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00274">m_settingsDirectory</a>, and <a class="el" href="../../d9/d4e/classPreferencesModel.html#a46873c79a73746093adc6879ebc87a25">settingsDirectoryChanged()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, and <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00430">migrateLegacyPreferencePaths()</a>, and <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>.</p>
 
 </div>
 </div>
@@ -1500,11 +1626,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00293">293</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00295">295</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00265">m_settingsFile</a>, and <a class="el" href="../../d9/d4e/classPreferencesModel.html#a4d8dd7e26bd4245bd69c5f7f8e68ce3a">settingsFileChanged()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00275">m_settingsFile</a>, and <a class="el" href="../../d9/d4e/classPreferencesModel.html#a4d8dd7e26bd4245bd69c5f7f8e68ce3a">settingsFileChanged()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, and <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00430">migrateLegacyPreferencePaths()</a>, and <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00258">PreferencesWindow::PreferencesWindow()</a>.</p>
 
 </div>
 </div>
@@ -1533,7 +1659,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00080">80</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00264">m_settingsDirectory</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00274">m_settingsDirectory</a>.</p>
 
 </div>
 </div>
@@ -1560,7 +1686,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00285">setSettingsDirectory()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00287">setSettingsDirectory()</a>.</p>
 
 </div>
 </div>
@@ -1589,7 +1715,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00081">81</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00265">m_settingsFile</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00275">m_settingsFile</a>.</p>
 
 </div>
 </div>
@@ -1616,7 +1742,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00293">setSettingsFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00295">setSettingsFile()</a>.</p>
 
 </div>
 </div>
@@ -1635,9 +1761,9 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00677">677</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00715">715</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00265">m_settingsFile</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00588">resolvedSettingsDirectory()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00275">m_settingsFile</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00626">resolvedSettingsDirectory()</a>.</p>
 
 </div>
 </div>
@@ -1665,7 +1791,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00504">504</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00570">570</a> of file <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html">PreferencesModel.cpp</a>.</p>
 
 </div>
 </div>
@@ -1690,9 +1816,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00267">267</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00277">277</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00083">dxfViewerPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00437">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00309">setDxfViewerPath()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00083">dxfViewerPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00507">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00311">setDxfViewerPath()</a>.</p>
 
 </div>
 </div>
@@ -1716,9 +1842,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00261">261</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00271">271</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00077">inputDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00636">resolvedInputDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00437">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00261">setInputDirectory()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00077">inputDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00674">resolvedInputDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00507">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00263">setInputDirectory()</a>.</p>
 
 </div>
 </div>
@@ -1742,9 +1868,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00262">262</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00272">272</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00078">layoutDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00735">resolvedLayoutDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00437">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00269">setLayoutDirectory()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00078">layoutDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00773">resolvedLayoutDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00507">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00271">setLayoutDirectory()</a>.</p>
 
 </div>
 </div>
@@ -1768,9 +1894,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00268">268</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00278">278</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00084">pdfViewerPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00437">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00317">setPdfViewerPath()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00084">pdfViewerPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00507">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00319">setPdfViewerPath()</a>.</p>
 
 </div>
 </div>
@@ -1794,9 +1920,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00269">269</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00279">279</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00085">pngViewerPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00437">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00325">setPngViewerPath()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00085">pngViewerPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00507">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00327">setPngViewerPath()</a>.</p>
 
 </div>
 </div>
@@ -1820,9 +1946,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00263">263</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00273">273</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00079">preferencesDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00699">preferencesFilePath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00437">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00277">setPreferencesDirectory()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00430">migrateLegacyPreferencePaths()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00079">preferencesDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00737">preferencesFilePath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00507">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00279">setPreferencesDirectory()</a>.</p>
 
 </div>
 </div>
@@ -1846,9 +1972,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00266">266</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00276">276</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00082">preferencesFile()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00699">preferencesFilePath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00437">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00301">setPreferencesFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00430">migrateLegacyPreferencePaths()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00082">preferencesFile()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00737">preferencesFilePath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00507">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00303">setPreferencesFile()</a>.</p>
 
 </div>
 </div>
@@ -1872,9 +1998,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00270">270</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00280">280</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00086">projectorPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00437">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00333">setProjectorPath()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00086">projectorPath()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00507">save()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00335">setProjectorPath()</a>.</p>
 
 </div>
 </div>
@@ -1898,9 +2024,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00264">264</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00274">274</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00588">resolvedSettingsDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00437">save()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00285">setSettingsDirectory()</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00080">settingsDirectory()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00430">migrateLegacyPreferencePaths()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00626">resolvedSettingsDirectory()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00507">save()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00287">setSettingsDirectory()</a>, and <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00080">settingsDirectory()</a>.</p>
 
 </div>
 </div>
@@ -1924,9 +2050,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00265">265</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00275">275</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00437">save()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00293">setSettingsFile()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00081">settingsFile()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00677">settingsFilePath()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00347">load()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00398">loadJsonPreferences()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00430">migrateLegacyPreferencePaths()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00507">save()</a>, <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00295">setSettingsFile()</a>, <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00081">settingsFile()</a>, and <a class="el" href="../../dd/d74/PreferencesModel_8cpp_source.html#l00715">settingsFilePath()</a>.</p>
 
 </div>
 </div>
@@ -1953,7 +2079,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00001">1</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00562">PreferencesModelTests::e7_dxfViewerPath_defaultsToEmpty()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00572">PreferencesModelTests::e7_dxfViewerPath_roundTripsThroughJson()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00717">PreferencesWindow::populateFields()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00324">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00603">PreferencesModelTests::e7_dxfViewerPath_defaultsToEmpty()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00613">PreferencesModelTests::e7_dxfViewerPath_roundTripsThroughIni()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00717">PreferencesWindow::populateFields()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00365">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
 
 </div>
 </div>
@@ -1979,7 +2105,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00001">1</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00717">PreferencesWindow::populateFields()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00324">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00717">PreferencesWindow::populateFields()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00365">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
 
 </div>
 </div>
@@ -2005,7 +2131,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00001">1</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00717">PreferencesWindow::populateFields()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00324">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00717">PreferencesWindow::populateFields()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00365">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
 
 </div>
 </div>
@@ -2083,7 +2209,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00001">1</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00404">PreferencesModelTests::migration_legacyPreferencesFolder_updatesPreferencesDirectory()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00492">PreferencesModelTests::migration_noLegacyFolder_leavesPathUnchanged()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00445">PreferencesModelTests::migration_legacyPreferencesFolder_updatesPreferencesDirectory()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00533">PreferencesModelTests::migration_noLegacyFolder_leavesPathUnchanged()</a>.</p>
 
 </div>
 </div>
@@ -2109,7 +2235,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00001">1</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00461">PreferencesModelTests::migration_legacyPreferencesFolder_updatesPreferencesFilePath()</a>, and <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00717">PreferencesWindow::populateFields()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00502">PreferencesModelTests::migration_legacyPreferencesFolder_updatesPreferencesFilePath()</a>, and <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00717">PreferencesWindow::populateFields()</a>.</p>
 
 </div>
 </div>
@@ -2135,7 +2261,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00001">1</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00717">PreferencesWindow::populateFields()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00194">PreferencesModelTests::projectorPath_roundTripsThroughJson()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00324">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00210">PreferencesModelTests::legacyJson_migratesToIni()</a>, <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00717">PreferencesWindow::populateFields()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00235">PreferencesModelTests::projectorPath_roundTripsThroughIni()</a>, and <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00365">PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()</a>.</p>
 
 </div>
 </div>
@@ -2161,7 +2287,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00001">1</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00376">PreferencesModelTests::migration_legacySettingsFolder_updatesSettingsDirectory()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00492">PreferencesModelTests::migration_noLegacyFolder_leavesPathUnchanged()</a>, and <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00717">PreferencesWindow::populateFields()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00417">PreferencesModelTests::migration_legacySettingsFolder_updatesSettingsDirectory()</a>, <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00533">PreferencesModelTests::migration_noLegacyFolder_leavesPathUnchanged()</a>, and <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00717">PreferencesWindow::populateFields()</a>.</p>
 
 </div>
 </div>
@@ -2187,7 +2313,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html#l00001">1</a> of file <a class="el" href="../../d6/d40/PreferencesModel_8h_source.html">PreferencesModel.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00429">PreferencesModelTests::migration_legacySettingsFolder_updatesSettingsFilePath()</a>, and <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00717">PreferencesWindow::populateFields()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/d62/PreferencesModelTests_8cpp_source.html#l00470">PreferencesModelTests::migration_legacySettingsFolder_updatesSettingsFilePath()</a>, and <a class="el" href="../../d8/d50/PreferencesWindow_8cpp_source.html#l00717">PreferencesWindow::populateFields()</a>.</p>
 
 </div>
 </div>

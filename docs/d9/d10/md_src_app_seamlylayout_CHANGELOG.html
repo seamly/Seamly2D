@@ -116,12 +116,13 @@ Added</h2>
 <h2><a class="anchor" id="autotoc_md17"></a>
 Changed</h2>
 <ul>
+<li><b>Application preferences storage</b> — SeamlyLayout now stores preferences in <code>QStandardPaths::AppConfigLocation/qt6_seamlylayout.ini</code>. First startup imports the previous <code>preferences.json</code> without deleting it.</li>
 <li><b>Runtime folder rename</b> — canonical user runtime folders are now <code>~/seamlyLayout/settings/</code> and <code>~/seamlyLayout/preferences/</code> (previously <code>layout-settings</code> and <code>layout-preferences</code> under <code>AppConfigLocation</code>). Existing files are copied to the new locations automatically on first launch after upgrade; old folders are not deleted.</li>
 <li><b>CMakeLists.txt install rules</b> — added <code>install(DIRECTORY settings/ ...)</code> target that bundles default settings JSON files next to the executable (excluding the user-specific <code>preferences.json</code>).</li>
 </ul>
 <h2><a class="anchor" id="autotoc_md18"></a>
 Migration notes (upgrading from pre-0.1.0)</h2>
-<p>On first launch after upgrade, <code><a class="el" href="../../d9/d4e/classPreferencesModel.html#a68ce169e170232c35375512e78311f16">PreferencesModel::load()</a></code> detects any paths in <code>preferences.json</code> that still reference the legacy folder names and rewrites them to the canonical names, copying files where they do not yet exist at the new location. No manual steps are required.</p>
+<p>On first launch after upgrade, <code><a class="el" href="../../d9/d4e/classPreferencesModel.html#a68ce169e170232c35375512e78311f16">PreferencesModel::load()</a></code> imports <code>preferences.json</code> into <code>qt6_seamlylayout.ini</code>. It detects paths that still reference legacy folder names and rewrites them to the canonical names, copying files where they do not yet exist at the new location. No manual steps are required.</p>
 <p>Legacy folder name mapping:</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">

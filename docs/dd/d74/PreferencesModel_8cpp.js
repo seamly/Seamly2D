@@ -11,6 +11,7 @@ var PreferencesModel_8cpp =
     [ "kLegacyOrganizationName", "dd/d74/PreferencesModel_8cpp.html#a7a720e78cc99c7cb0d97bd6858a2e984", null ],
     [ "kLegacyPreferencesFolderName", "dd/d74/PreferencesModel_8cpp.html#a64ec81db8349d51aad8ab68f2455b972", null ],
     [ "kLegacySettingsFolderName", "dd/d74/PreferencesModel_8cpp.html#adda8a1508d10549910e55ce5bce5a70d", null ],
+    [ "kPreferencesFileName", "dd/d74/PreferencesModel_8cpp.html#a583f91baf0c9788c4b6d32062d452bd9", null ],
     [ "kPreferencesFolderName", "dd/d74/PreferencesModel_8cpp.html#af74f3ee7105adef526e0b1e231f06410", null ],
     [ "kSettingsFolderName", "dd/d74/PreferencesModel_8cpp.html#a6f6ec424b86d0c2a6f7e228c395008c6", null ]
 ];

@@ -52,6 +52,7 @@ var namespaces_dup =
       [ "kLegacyOrganizationName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a7a720e78cc99c7cb0d97bd6858a2e984", null ],
       [ "kLegacyPreferencesFolderName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a64ec81db8349d51aad8ab68f2455b972", null ],
       [ "kLegacySettingsFolderName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#adda8a1508d10549910e55ce5bce5a70d", null ],
+      [ "kPreferencesFileName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a583f91baf0c9788c4b6d32062d452bd9", null ],
       [ "kPreferencesFolderName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#af74f3ee7105adef526e0b1e231f06410", null ],
       [ "kSettingsFolderName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a6f6ec424b86d0c2a6f7e228c395008c6", null ]
     ] ],
