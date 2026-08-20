@@ -25,8 +25,18 @@ SeamlyMe":** it verifies that they BUILD. It does not compile or run a single
 unit test. A C++ test written here is unverified until somebody opens a PR or
 builds the test target by hand.
 
-Not fixed — it is a CI-cost decision for the user. The options are to drop the
-`pull_request` gate on `linux-test`, or to run it on a schedule.
+**Half fixed, 2026-08-19.** A `windows-test` job now COMPILES `src/test` on
+every push (`windows-latest`, x64, `qtmultimedia` only, no `CONFIG+=noTests`).
+It is separate from `windows-msi` on purpose: folded in, a broken test would
+stop the MSI and the `dev-latest` publish; separate, it runs in parallel and
+cannot block a package. Actions minutes are free — `seamly/Seamly2D` is public
+— so wall time and release coupling are the only costs.
+
+**Still not RUN anywhere on a push.** `nmake check` is one line away in that
+job, but the suite has never executed on Windows in CI and `CollectionTest`
+depends on its working directory (see Gotchas). Add it once the compile step is
+green. `linux-test` is still gated on `pull_request`; ungating it is a one-line
+change and the user has not asked for it.
 ## PICK UP HERE (2026-08-19, the installer's answers are the ones the apps use)
 
 Four task branches merged and pushed. HEAD is `f230c638e9`. Full CI ran on each
