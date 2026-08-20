@@ -6,6 +6,13 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## Seamly2D log-directory change (2026-08-20)
+
+`Application2D::logDirPath()` uses `AppLocalDataLocation` on Windows.
+It appends `logs` to produce `%LOCALAPPDATA%\Seamly\Seamly2D\logs`.
+
+`git diff --check` passed. No local build ran because Seamly2D has no local build script.
+
 ## The unit tests run on Windows now (2026-08-19)
 
 **`windows-test` builds and runs the four test binaries on every push**, and
