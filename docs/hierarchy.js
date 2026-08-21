@@ -257,6 +257,7 @@ var hierarchy =
     ] ],
     [ "Hash2KeysSetBucketElem", "d7/df4/structHash2KeysSetBucketElem.html", null ],
     [ "HexBin", "dc/d8b/classHexBin.html", null ],
+    [ "PieceOverlayItem::HistorySnapshot", "d8/d66/structPieceOverlayItem_1_1HistorySnapshot.html", null ],
     [ "ICValueHasher", "da/d10/structICValueHasher.html", null ],
     [ "JanitorMemFunCall< T >", "d9/db9/classJanitorMemFunCall.html", null ],
     [ "LexicalHandler", "d6/dad/classLexicalHandler.html", [
@@ -266,6 +267,7 @@ var hierarchy =
       [ "ReaderMgr", "d4/d1c/classReaderMgr.html", null ],
       [ "XSDLocator", "dd/d47/classXSDLocator.html", null ]
     ] ],
+    [ "Logger", "db/d67/classLogger.html", null ],
     [ "MemoryManager", "d6/d9a/classMemoryManager.html", [
       [ "MemoryManagerImpl", "d2/d42/classMemoryManagerImpl.html", null ]
     ] ],
@@ -281,6 +283,7 @@ var hierarchy =
       [ "SAXParser", "da/da7/classSAXParser.html", null ]
     ] ],
     [ "Pen", "d9/de7/classPen.html", null ],
+    [ "Platform", "df/d1e/classPlatform.html", null ],
     [ "point2d_s", "dc/d79/structpoint2d__s.html", null ],
     [ "XMLStringPool::PoolElem", "d9/d93/structXMLStringPool_1_1PoolElem.html", null ],
     [ "PosterData", "d1/dd2/structPosterData.html", null ],
@@ -381,6 +384,7 @@ var hierarchy =
       [ "MeShortcutsDialog", "dd/d67/classMeShortcutsDialog.html", null ],
       [ "MeasurementDatabaseDialog", "d3/d63/classMeasurementDatabaseDialog.html", null ],
       [ "NewMeasurementsDialog", "dc/da3/classNewMeasurementsDialog.html", null ],
+      [ "PreferencesWindow", "d9/da8/classPreferencesWindow.html", null ],
       [ "SeamlyMeWelcomeDialog", "d5/d64/classSeamlyMeWelcomeDialog.html", null ],
       [ "SeamlyWelcomeDialog", "d4/d8f/classSeamlyWelcomeDialog.html", null ],
       [ "ShortcutsDialog", "de/d8e/classShortcutsDialog.html", null ],
@@ -550,15 +554,18 @@ var hierarchy =
       ] ]
     ] ],
     [ "QGraphicsRectItem", null, [
+      [ "PieceOverlayItem", "d4/dbc/classPieceOverlayItem.html", null ],
       [ "ResizeHandlesItem::HandleItem", "d0/dc5/classResizeHandlesItem_1_1HandleItem.html", null ],
       [ "SceneRect", "d3/db3/classSceneRect.html", [
         [ "VControlPointSpline", "dd/dcb/classVControlPointSpline.html", null ]
       ] ]
     ] ],
     [ "QGraphicsScene", null, [
+      [ "AdjustScene", "d1/d42/classAdjustScene.html", null ],
       [ "VMainGraphicsScene", "d7/df5/classVMainGraphicsScene.html", null ]
     ] ],
     [ "QGraphicsSimpleTextItem", null, [
+      [ "SvgTextItem", "d5/d2f/classSvgTextItem.html", null ],
       [ "VGraphicsSimpleTextItem", "de/dbc/classVGraphicsSimpleTextItem.html", null ]
     ] ],
     [ "QGraphicsView", null, [
@@ -571,6 +578,7 @@ var hierarchy =
     ] ],
     [ "QHash< K, V >", "da/da1/classQHash.html", null ],
     [ "QHash< int, qint64 >", "da/da1/classQHash.html", null ],
+    [ "QHash< QString, PieceOverlayItem::HistorySnapshot >", "da/da1/classQHash.html", null ],
     [ "QHash< QString, QSharedPointer< VInternalVariable > >", "da/da1/classQHash.html", null ],
     [ "QHash< quint32, QDomElement >", "da/da1/classQHash.html", null ],
     [ "QHash< quint32, QSharedPointer< VGObject > >", "da/da1/classQHash.html", null ],
@@ -580,6 +588,7 @@ var hierarchy =
       [ "VLineEdit", "d7/d0f/classVLineEdit.html", null ]
     ] ],
     [ "QList< T >", "d1/d4a/classQList.html", null ],
+    [ "QList< PieceOverlayItem * >", "d1/d4a/classQList.html", null ],
     [ "QList< QCommandLineOption * >", "d1/d4a/classQList.html", null ],
     [ "QList< QDomDocument >", "d1/d4a/classQList.html", null ],
     [ "QList< QGraphicsItem * >", "d1/d4a/classQList.html", null ],
@@ -589,12 +598,14 @@ var hierarchy =
     [ "QList< QSharedPointer< QTableWidget > >", "d1/d4a/classQList.html", null ],
     [ "QList< QStringList >", "d1/d4a/classQList.html", null ],
     [ "QList< QTableWidgetItem * >", "d1/d4a/classQList.html", null ],
+    [ "QList< QUrl >", "d1/d4a/classQList.html", null ],
     [ "QList< ResizeHandlesItem::HandleItem * >", "d1/d4a/classQList.html", null ],
     [ "QList< TextLine >", "d1/d4a/classQList.html", null ],
     [ "QList< VPE::VProperty * >", "d1/d4a/classQList.html", null ],
     [ "QList< VPE::VPropertyFormWidgetPrivate::SEditorWidget >", "d1/d4a/classQList.html", null ],
     [ "QList< VPE::VSerializedProperty >", "d1/d4a/classQList.html", null ],
     [ "QMainWindow", null, [
+      [ "AdjustWindow", "df/d1d/classAdjustWindow.html", null ],
       [ "VAbstractMainWindow", "dc/d59/classVAbstractMainWindow.html", [
         [ "MainWindowsNoGUI", "de/d1a/classMainWindowsNoGUI.html", [
           [ "MainWindow", "d6/d1a/classMainWindow.html", null ]
@@ -650,17 +661,30 @@ var hierarchy =
         [ "TST_VPiece", "db/dbb/classTST__VPiece.html", null ],
         [ "TST_VSpline", "d7/d3f/classTST__VSpline.html", null ]
       ] ],
+      [ "AdjustController", "d5/d52/classAdjustController.html", null ],
+      [ "AdjustControllerTests", "d3/d44/classAdjustControllerTests.html", null ],
+      [ "AdjustSceneTests", "d1/d4c/classAdjustSceneTests.html", null ],
       [ "FvUpdater", "d5/d23/classFvUpdater.html", null ],
       [ "GraphicsViewZoom", "da/d19/classGraphicsViewZoom.html", null ],
       [ "ImageItem", "d6/da8/classImageItem.html", null ],
       [ "ImageTool", "df/d5b/classImageTool.html", null ],
+      [ "PreferencesController", "d2/d34/classPreferencesController.html", null ],
+      [ "PreferencesModel", "d9/d4e/classPreferencesModel.html", null ],
+      [ "PreferencesModelTests", "d7/d0f/classPreferencesModelTests.html", null ],
       [ "ResizeHandlesItem", "d0/de9/classResizeHandlesItem.html", null ],
+      [ "SettingsModel", "db/d56/classSettingsModel.html", null ],
+      [ "SettingsModelTests", "d8/dd6/classSettingsModelTests.html", null ],
+      [ "StartupOptionsTests", "db/dba/classStartupOptionsTests.html", null ],
+      [ "TST_DataRoot", "dd/db9/classTST__DataRoot.html", null ],
       [ "TST_FindPoint", "d6/d30/classTST__FindPoint.html", null ],
       [ "TST_Measurements", "da/d3b/classTST__Measurements.html", null ],
       [ "TST_Misc", "d5/d79/classTST__Misc.html", null ],
       [ "TST_NameRegExp", "d3/d4d/classTST__NameRegExp.html", null ],
       [ "TST_QmuTokenParser", "d3/df0/classTST__QmuTokenParser.html", null ],
       [ "TST_ReadVal", "dc/d3d/classTST__ReadVal.html", null ],
+      [ "TST_SeamlySuitePaths", "dc/daf/classTST__SeamlySuitePaths.html", null ],
+      [ "TST_SvgComponentTags", "db/dc1/classTST__SvgComponentTags.html", null ],
+      [ "TST_SvgTextItem", "df/de1/classTST__SvgTextItem.html", null ],
       [ "TST_TSTranslation", "d9/dd4/classTST__TSTranslation.html", null ],
       [ "TST_VArc", "df/daf/classTST__VArc.html", null ],
       [ "TST_VCommandLine", "d0/dcb/classTST__VCommandLine.html", null ],
@@ -671,6 +695,7 @@ var hierarchy =
       [ "TST_VPoster", "db/d56/classTST__VPoster.html", null ],
       [ "TST_VSplinePath", "d8/d25/classTST__VSplinePath.html", null ],
       [ "TST_VTranslateVars", "da/d3d/classTST__VTranslateVars.html", null ],
+      [ "UrlCapture", "d3/d35/classUrlCapture.html", null ],
       [ "VAbstractPattern", "d8/dba/classVAbstractPattern.html", null ],
       [ "VAbstractSimple", "dc/de5/classVAbstractSimple.html", [
         [ "VSimpleCurve", "d4/d36/classVSimpleCurve.html", null ],
@@ -942,10 +967,14 @@ var hierarchy =
       ] ],
       [ "SAX2XMLReaderImpl", "d2/daa/classSAX2XMLReaderImpl.html", null ]
     ] ],
+    [ "AdjustScene::SceneOperation", "de/d03/structAdjustScene_1_1SceneOperation.html", null ],
     [ "SchemaSymbols", "d3/d5c/classSchemaSymbols.html", null ],
+    [ "ScopedEnvVar", "d7/de9/classScopedEnvVar.html", null ],
     [ "SecurityManager", "d0/d59/classSecurityManager.html", null ],
     [ "VPE::VPropertyFormWidgetPrivate::SEditorWidget", "d9/d9b/structVPE_1_1VPropertyFormWidgetPrivate_1_1SEditorWidget.html", null ],
+    [ "anonymous_namespace{SettingsModel.cpp}::SizeEntry", "d3/dcb/structanonymous__namespace_02SettingsModel_8cpp_03_1_1SizeEntry.html", null ],
     [ "SourceItem", "d9/d96/structSourceItem.html", null ],
+    [ "StartupOptions", "de/dbc/classStartupOptions.html", null ],
     [ "StDOMNode< T >", "d8/d3c/classStDOMNode.html", null ],
     [ "qmu::SToken", "dc/d14/structqmu_1_1SToken.html", null ],
     [ "StringHasher", "d8/d6a/structStringHasher.html", null ],
@@ -955,6 +984,7 @@ var hierarchy =
     [ "ThrowEOEJanitor", "d6/d5d/classThrowEOEJanitor.html", null ],
     [ "TranscodeFromStr", "d3/d55/classTranscodeFromStr.html", null ],
     [ "TranscodeToStr", "d8/dad/classTranscodeToStr.html", null ],
+    [ "PieceOverlayItem::TransformState", "d4/d83/structPieceOverlayItem_1_1TransformState.html", null ],
     [ "XMLTransService::TransRec", "de/d76/structXMLTransService_1_1TransRec.html", null ],
     [ "UnionToolInitData", "d9/d2d/structUnionToolInitData.html", null ],
     [ "VAbstractFloatItemData", "d4/dc0/classVAbstractFloatItemData.html", [
