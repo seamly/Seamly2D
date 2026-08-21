@@ -69,7 +69,6 @@ var classMainWindow =
     [ "exportDraftBlocksAs", "d6/d1a/classMainWindow.html#a6e79103994b5acf3d9f1e7083709e12e", null ],
     [ "exportLayoutAs", "d6/d1a/classMainWindow.html#af5538b9f7cd0d52646d6e2072084c552", null ],
     [ "exportPiecesAs", "d6/d1a/classMainWindow.html#a25e30566fadddbad2234b32f1d6b54e0", null ],
-    [ "exportPiecesToSeamlyLayout", "d6/d1a/classMainWindow.html#a2e5c6fec1599863298a0960aa2d07cb1", null ],
     [ "exportToCSVData", "d6/d1a/classMainWindow.html#ac3ed7566a6b9505cd8a8088aefbbaff7", null ],
     [ "FileClosedCorrect", "d6/d1a/classMainWindow.html#a117b9afa1b61c0489bf17c4bab73c089", null ],
     [ "fullParseFile", "d6/d1a/classMainWindow.html#a3476c6743218f0cb4bd127e16e58fc01", null ],

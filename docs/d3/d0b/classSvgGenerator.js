@@ -1,20 +1,16 @@
 var classSvgGenerator =
 [
-    [ "SvgGenerator", "d3/d0b/classSvgGenerator.html#a243603ddfefe60b71876349e704c6046", null ],
-    [ "addComponentGroups", "d3/d0b/classSvgGenerator.html#ae019becdb749f8810927ca5b069b7d3f", null ],
+    [ "SvgGenerator", "d3/d0b/classSvgGenerator.html#a3b78a32bc46a35d26422b3a06d17dad0", null ],
     [ "addSvgFromScene", "d3/d0b/classSvgGenerator.html#a77e7024af6c7c60472a271ab8b5438d3", null ],
     [ "cleanSvg", "d3/d0b/classSvgGenerator.html#a25c878abd3851e47d48ce770e8ae20bb", null ],
     [ "generate", "d3/d0b/classSvgGenerator.html#af27ac7cbc5cbbda05dbcf3cfad9d4038", null ],
     [ "mergeSvgDoms", "d3/d0b/classSvgGenerator.html#a6a4e2d0faf08a836d209658d9a5bc954", null ],
     [ "removeEmptyGroups", "d3/d0b/classSvgGenerator.html#a3db4f306a94fcb8015a824f02fb829cc", null ],
     [ "removeEmptyOriginPath", "d3/d0b/classSvgGenerator.html#a0e5d4cc5d4b9618c8f78361809fa3191", null ],
-    [ "renderSceneToDom", "d3/d0b/classSvgGenerator.html#ada44cf415f6c41dd6fb228734c963318", null ],
     [ "setAttribute", "d3/d0b/classSvgGenerator.html#a94d8d61e45968f7c9ee2c4157b84fa5f", null ],
     [ "m_description", "d3/d0b/classSvgGenerator.html#a62e09365c5f102e8052cffd268018eec", null ],
     [ "m_domList", "d3/d0b/classSvgGenerator.html#a8fec17258843c927687e4b9035d06ef3", null ],
     [ "m_filepath", "d3/d0b/classSvgGenerator.html#ad034307c9a3e07b696335e0a5a7b4a63", null ],
     [ "m_paper", "d3/d0b/classSvgGenerator.html#a6bcc2c8f9372619ed3ff93139e736754", null ],
-    [ "m_patternName", "d3/d0b/classSvgGenerator.html#a5999a28bea74a90e19c0f04992d05280", null ],
-    [ "m_pieceCount", "d3/d0b/classSvgGenerator.html#ab1629211e5ec489238eea3e1085b5aed", null ],
     [ "m_resolution", "d3/d0b/classSvgGenerator.html#ab2cae8cce0321bffe06893778396d59e", null ]
 ];

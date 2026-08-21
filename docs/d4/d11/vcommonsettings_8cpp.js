@@ -2,10 +2,8 @@ var vcommonsettings_8cpp =
 [
     [ "ClearFormats", "d4/d11/vcommonsettings_8cpp.html#ad33f2f0b5106c172dee047d0af12ebc6", null ],
     [ "PrepareStandardFiles", "d4/d11/vcommonsettings_8cpp.html#a3abe77374f88330d2dce8aa3fc77479c", null ],
-    [ "readDataRoot", "d4/d11/vcommonsettings_8cpp.html#a0c351cecb80a5bf23fa2b4629c099a54", null ],
     [ "SymlinkCopyDirRecursive", "d4/d11/vcommonsettings_8cpp.html#a8dd613aa76590f88f4a60fee8b89ae13", null ],
     [ "commonIniFilename", "d4/d11/vcommonsettings_8cpp.html#a9474e9c5c20683cf4a411eb51f84f3da", null ],
-    [ "migrationMarkerFileName", "d4/d11/vcommonsettings_8cpp.html#a4bf12fd444064d56141a99f6226d70b7", null ],
     [ "pointNameSize", "d4/d11/vcommonsettings_8cpp.html#a7136b7a2ed9ead08f0f849054160457b", null ],
     [ "settingBackupPath", "d4/d11/vcommonsettings_8cpp.html#a33d50aa96456f560a5ac1845a77a682c", null ],
     [ "settingConfigurationAddress", "d4/d11/vcommonsettings_8cpp.html#a7308b7a66e0e6d69b9b7aab47d4253d3", null ],
@@ -76,6 +74,7 @@ var vcommonsettings_8cpp =
     [ "settingGeneralToolbarsState", "d4/d11/vcommonsettings_8cpp.html#af3454acdd594dd98d4348de6cc8643a7", null ],
     [ "settingGeneralWindowState", "d4/d11/vcommonsettings_8cpp.html#a0696d67afde5d1eb5346a7a90c11beae", null ],
     [ "settingGraphicsAutoClearFx", "d4/d11/vcommonsettings_8cpp.html#ab6d7c0132ed611b7a2c649e0e7d65771", null ],
+    [ "settingGraphicsUseNativeDialogs", "d4/d11/vcommonsettings_8cpp.html#ae909559fcf29f9941cfe10bffcec8932", null ],
     [ "settingGraphicsUseSecondMonitor", "d4/d11/vcommonsettings_8cpp.html#a2474fcf7a475730787f7dcc8c7789a6f", null ],
     [ "settingGraphicsUseToolColor", "d4/d11/vcommonsettings_8cpp.html#a634ebb3df267982daf0e69606dbcda37", null ],
     [ "settingGraphicsViewAngleDelta", "d4/d11/vcommonsettings_8cpp.html#a4737f155235118b924d74d65812b04b6", null ],
@@ -134,7 +133,6 @@ var vcommonsettings_8cpp =
     [ "settingLabelUserTimeFormats", "d4/d11/vcommonsettings_8cpp.html#a963422ce8f013135de5d22a96c0ef172", null ],
     [ "settingLatestSkippedVersion", "d4/d11/vcommonsettings_8cpp.html#a057fa48d101cde9aa147dd59534486e8", null ],
     [ "settingPathsBodyScans", "d4/d11/vcommonsettings_8cpp.html#ade216e15a69dff3a6e8c9786c180d592", null ],
-    [ "settingPathsDataRoot", "d4/d11/vcommonsettings_8cpp.html#a8db1bb6eaf2ed89b9f9ebe4710fcd21b", null ],
     [ "settingPathsIndividualMeasurements", "d4/d11/vcommonsettings_8cpp.html#a2637561a27c415fd5d43d96cc585ba2e", null ],
     [ "settingPathsLabelTemplate", "d4/d11/vcommonsettings_8cpp.html#acfd4254aeddc1d40c0425558b4f0b42f", null ],
     [ "settingPathsMultisizeMeasurements", "d4/d11/vcommonsettings_8cpp.html#a71547d95fb3ded7735c8d75fda092ad2", null ],
@@ -157,6 +155,5 @@ var vcommonsettings_8cpp =
     [ "settingShowPieceLabels", "d4/d11/vcommonsettings_8cpp.html#ae878122ddcaae25fa2369875ccac14b6", null ],
     [ "settingShowSeamAllowances", "d4/d11/vcommonsettings_8cpp.html#aead542985bef57407eb367a8c7c0da1f", null ],
     [ "settingToolSeamAllowanceDialogSize", "d4/d11/vcommonsettings_8cpp.html#a91bf7a4d63951d137db9cb09112c61d2", null ],
-    [ "settingVariablesDialogSize", "d4/d11/vcommonsettings_8cpp.html#a724bd4de8bb4e50cd42068755d13f6fe", null ],
-    [ "unknownOrganizationName", "d4/d11/vcommonsettings_8cpp.html#a71ae26c24c640338ca8bc4dba19b13fc", null ]
+    [ "settingVariablesDialogSize", "d4/d11/vcommonsettings_8cpp.html#a724bd4de8bb4e50cd42068755d13f6fe", null ]
 ];
