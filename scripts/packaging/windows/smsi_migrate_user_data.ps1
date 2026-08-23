@@ -198,6 +198,7 @@ function New-DataArchive {
         [Parameter(Mandatory = $true)][string]$Path
     )
 
+    Add-Type -AssemblyName System.IO.Compression
     Add-Type -AssemblyName System.IO.Compression.FileSystem
     $sourcePath = (Resolve-Path -LiteralPath $SourceRoot).Path
     $sourceName = Split-Path -Leaf $sourcePath

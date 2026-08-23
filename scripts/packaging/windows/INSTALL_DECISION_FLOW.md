@@ -299,11 +299,16 @@ product had left `C:\Users\susan\seamly2d`, so that became the data root.
 3. **[settled] The NSIS ARP entry goes with it** —
    `HKLM\...\Uninstall\Seamly2D` and `HKLM\SOFTWARE\NSIS_Seamly2D` are both
    removed, so there is no orphaned entry pointing at a deleted uninstaller.
-4. **[undecided] The data-folder migration** the user made the "leave data to
-   the app" decision conditional on: legacy `~/seamly2d` → `~/SeamlyData`, or
-   old subfolder names → the nine standard ones? This is **Task 14**, and it
-   contradicts the adopt-in-place rule above, so it is a design decision rather
-   than a code change.
+4. **[settled] The data-folder migration** (Task 14). Legacy `~/seamly2d` is
+   zipped, extracted, and merged into the chosen `SeamlyData` root under its
+   standard subfolder names - `Find-LegacyDataRoot` /
+   `smsi_migrate_user_data.ps1` already implement this. Verified 2026-08-21 by
+   running the script directly against a seeded `~/seamly2d`; it also
+   surfaced a real bug (now fixed): `New-DataArchive` loaded only
+   `System.IO.Compression.FileSystem`, and on this machine's PowerShell 5.1
+   that left `[System.IO.Compression.ZipArchiveMode]` unresolvable, so every
+   migration failed silently (caught, logged, `exit 0` - the install itself
+   never showed a failure). Fixed by also loading `System.IO.Compression`.
 5. **[settled] `SeamlyShortcutsDlg` displays**, through the custom dialog set
    (Task InstWinX64.1). The authoring is verified; the pages themselves await
    the interactive run, InstWinX64.1.6.

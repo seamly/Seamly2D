@@ -6,6 +6,68 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## seamly-x64.msi run on a PC with the current suite installed (2026-08-21)
+
+Exploratory installer test, not a tracked task. Machine had Seamly 26.8.28339
+already installed (ProductCode `{CA5D0784-6F85-4DC5-96FF-CAC4327DBF81}`),
+matching the built `scripts\seamly-msi\x64\seamly-x64.msi` exactly, so
+`msiexec /i` ran as a repair/reconfigure. Exit 0, "Configuration completed
+successfully."
+
+**Found and FIXED a real bug.** `smsi_migrate_user_data.ps1`'s
+`New-DataArchive` (line ~201) loaded only `System.IO.Compression.FileSystem`.
+On this machine's PowerShell 5.1, `[System.IO.Compression.ZipArchiveMode]`
+stayed unresolvable without also loading `System.IO.Compression` - so every
+real data migration (`Old` and `New` mode) failed silently: caught, logged,
+`exit 0`, no install-time symptom at all. Fixed by adding the second
+`Add-Type`. Verified against a seeded legacy `~/seamly2d` test folder:
+zip -> extract -> merge into the real `Documents\SeamlyData` -> the real
+per-app `.ini` path settings updated correctly, legacy source left untouched.
+Test files removed afterward. **`INSTALL_DECISION_FLOW.md` item 4** (the
+legacy data-folder migration) moved from `[undecided]` to `[settled]` - the
+design was already right, just broken by this bug.
+
+**Not a defect, just a cosmetic log line.** The first repair run logged
+`Wix4RemoveFoldersEx_X64` hitting `Error 0x80070057: Missing folder property:
+SEAMLYLEGACYINSTALLDIR` (marked continue-on-error, non-fatal). This fires
+whenever `HKLM\SOFTWARE\NSIS_Seamly2D` genuinely does not exist - the normal
+case with no pre-MSI install on the machine. Confirmed by setting
+`SEAMLYLEGACYINSTALLDIR` on the `msiexec` command line (a property override,
+no real registry or `Program Files (x86)` writes) - the error disappeared and
+`RemoveLegacyRegistryKeys` / `Wix4RemoveFoldersEx_X64` completed cleanly. No
+code change needed.
+
+**Not tested: a genuine different-version upgrade** (`WIX_UPGRADE_DETECTED`
+with `NOT Installed`) - the "current suite installed, different version ->
+install files + new data folders, skip data migration" case. Verified only by
+reading the authoring: `SEAMLYCOPYUSERDATA` defaults to `"0"` and the
+migration action requires `NOT Installed`, so this is already the default
+behaviour. A real end-to-end run needs a second MSI built with a bumped
+`ProductVersion`, which needs a local qmake+jom build of `seamly2d`/`seamlyme`
+(no local build script exists for those; CI-only, `scripts/seamly2d-debug`
+kind of tree would have to be rebuilt by hand) plus SeamlyLayout's
+`build.ps1`. Not attempted this session.
+
+**Machine state, outside the repo:** no lasting changes. The legacy-removal
+test used command-line property overrides only - no real
+`HKLM\SOFTWARE\NSIS_Seamly2D` key or `C:\Program Files (x86)\Seamly` folder
+was ever created. The migration test's throwaway `C:\Users\susan\seamly2d`
+and the 3 sample files it merged into the real `SeamlyData` were deleted
+after verification. The real settings `.ini` files (`qt6_seamly2d.ini`,
+`qt6_seamlyme.ini`, `qt6_common.ini`, `Unknown Organization.ini`) WERE
+rewritten for real by the migration script during the test - values were
+unchanged (already pointed at the same `SeamlyData` path), so this was a
+no-op in practice, but note it in case anything looks different later.
+
+**Next steps:**
+
+1. Decide whether to commit the one-line `smsi_migrate_user_data.ps1` fix and
+   the `INSTALL_DECISION_FLOW.md` update - discovered mid-investigation, not
+   from a `TODO_*.md` task, so no task branch exists for it yet.
+2. Decide whether the different-version-upgrade case needs the real
+   second-MSI end-to-end test above, or whether the authoring-level
+   verification is enough.
+
 ## SeamlyLayout INI preferences change (2026-08-20)
 
 SeamlyLayout stores application preferences in
