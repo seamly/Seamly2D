@@ -6,6 +6,38 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## Legacy data tree backed up as a verified .zip (2026-08-24)
+
+User request: port the abandoned `task-data-migration-backup` branch's
+zip-backup step into current code, so an upgrading user's old `~/seamly2d`
+tree gets a second, portable backup on top of the copy-and-verify migration
+`VCommonSettings::migrateAdoptedLegacyTree()` already does (InstWinX64.4,
+done 2026-08-18/19). See InstWinX64.4.14 in `TODO_INSTALLER_WIN_X64.md` for
+the full writeup.
+
+**Deliberate divergence from the source branch: no delete.** The branch
+archived the tree then removed it. This project keeps the legacy tree in
+place after migration (marker file, InstWinX64.4.6/4.7) so a rollback stays
+possible — decided with the user before porting anything. New
+`LegacyDataArchive::archive()` writes and verifies the `.zip`; it has no
+delete path at all, unlike the branch's `archiveAndRemove()`/`removeTree()`.
+New `LegacyDataMigration::run()` orchestrates copy → backup with a splash
+screen (ported from the branch unchanged — it was never coupled to deletion),
+and both `application_2d.cpp`/`application_me.cpp` call it in place of the
+direct `migrateAdoptedLegacyTree()` call.
+
+`vmisc.pro` and `Seamly2DTest.pro` both gained `core-private` — the archive
+code and its tests use `QZipWriter`/`QZipReader`, Qt private API since Qt 6.
+
+**Verified:** `legacy_data_archive.cpp`, `legacy_data_migration.cpp`, and the
+updated `tst_dataroot.cpp` (8 new cases) were syntax-checked against Qt
+6.11.1 with MSVC (`cl /Zs /permissive- /Zc:__cplusplus`) — all clean. Not
+verified: `ctest`/a full build. Building the whole Seamly2D dependency tree
+locally just for `Seamly2DTest` was judged disproportionate to this change;
+`ci.yml` is the verification path for Seamly2D/SeamlyMe per `CLAUDE.md`.
+Pushed without `[skip ci]` since `.pro`/`.pri` files changed — full CI is
+running on `fceefbeb4d`.
+
 ## SeamlyLayout's dataRoot now feeds resolvedInputDirectory/resolvedLayoutDirectory (2026-08-24)
 
 Follow-up to the entry directly below. `dataRoot` was adopted from the registry
