@@ -25,6 +25,14 @@ var namespaces_dup =
     [ "anonymous_namespace{internal_path_dialog.cpp}", "df/de6/namespaceanonymous__namespace_02internal__path__dialog_8cpp_03.html", [
       [ "cutLinePath", "df/de6/namespaceanonymous__namespace_02internal__path__dialog_8cpp_03.html#a394f1f735699f1b1d0e822cf8d3af1d3", null ]
     ] ],
+    [ "anonymous_namespace{legacy_data_archive.cpp}", "dc/d5b/namespaceanonymous__namespace_02legacy__data__archive_8cpp_03.html", [
+      [ "cleaned", "dc/d5b/namespaceanonymous__namespace_02legacy__data__archive_8cpp_03.html#a669a4beaf8c0a31595bf5bae7fef14be", null ],
+      [ "fail", "dc/d5b/namespaceanonymous__namespace_02legacy__data__archive_8cpp_03.html#a667bb037e922763134fb3ed267961a95", null ],
+      [ "hashOfFile", "dc/d5b/namespaceanonymous__namespace_02legacy__data__archive_8cpp_03.html#a0ed8609eb7913aecda84f46f3930f38f", null ],
+      [ "relativeEntries", "dc/d5b/namespaceanonymous__namespace_02legacy__data__archive_8cpp_03.html#a30ee7c4dbe8e9cf71f65731e2f556820", null ],
+      [ "hashChunkSize", "dc/d5b/namespaceanonymous__namespace_02legacy__data__archive_8cpp_03.html#a99a187df1e0e37ae6f44e8d6eae65a2f", null ]
+    ] ],
+    [ "anonymous_namespace{legacy_data_migration.cpp}", "df/d38/namespaceanonymous__namespace_02legacy__data__migration_8cpp_03.html", "df/d38/namespaceanonymous__namespace_02legacy__data__migration_8cpp_03" ],
     [ "anonymous_namespace{mainwindowsnogui.cpp}", "df/da0/namespaceanonymous__namespace_02mainwindowsnogui_8cpp_03.html", [
       [ "CreateLayoutPath", "df/da0/namespaceanonymous__namespace_02mainwindowsnogui_8cpp_03.html#adc02e3f28db0229af91f2077610c4b9d", null ],
       [ "RemoveLayoutPath", "df/da0/namespaceanonymous__namespace_02mainwindowsnogui_8cpp_03.html#aba458b4f78f014b23015631f3a439456", null ]
@@ -344,6 +352,15 @@ var namespaces_dup =
     ] ],
     [ "InstallerRecord", "db/dd6/namespaceInstallerRecord.html", [
       [ "dataRoot", "db/dd6/namespaceInstallerRecord.html#aca26b8e2ff640b1f1eacd139d05b95c7", null ]
+    ] ],
+    [ "LegacyDataArchive", "da/d5e/namespaceLegacyDataArchive.html", [
+      [ "archive", "da/d5e/namespaceLegacyDataArchive.html#a14d951396de5e7479a8ccdf5794b4164", null ],
+      [ "archivePath", "da/d5e/namespaceLegacyDataArchive.html#aeea6bf3fdd26d9154904906c4c4f0cec", null ],
+      [ "create", "da/d5e/namespaceLegacyDataArchive.html#a9cfe29f10d17ed84a0603ef228958ac9", null ],
+      [ "verifyAgainst", "da/d5e/namespaceLegacyDataArchive.html#afd7572deac173e689917b53137343640", null ]
+    ] ],
+    [ "LegacyDataMigration", "d8/ddf/namespaceLegacyDataMigration.html", [
+      [ "run", "d8/ddf/namespaceLegacyDataMigration.html#a587ca3782a570502f6cb18586a208e19", null ]
     ] ],
     [ "PieceItemData", "dd/d2f/namespacePieceItemData.html", [
       [ "Key", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52a", [

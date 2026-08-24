@@ -1,5 +1,8 @@
 var annotated_dup =
 [
+    [ "anonymous_namespace{legacy_data_migration.cpp}", "df/d38/namespaceanonymous__namespace_02legacy__data__migration_8cpp_03.html", [
+      [ "MigrationSplash", "d7/d46/classanonymous__namespace_02legacy__data__migration_8cpp_03_1_1MigrationSplash.html", "d7/d46/classanonymous__namespace_02legacy__data__migration_8cpp_03_1_1MigrationSplash" ]
+    ] ],
     [ "anonymous_namespace{SettingsModel.cpp}", "d2/dc7/namespaceanonymous__namespace_02SettingsModel_8cpp_03.html", [
       [ "SizeEntry", "d3/dcb/structanonymous__namespace_02SettingsModel_8cpp_03_1_1SizeEntry.html", "d3/dcb/structanonymous__namespace_02SettingsModel_8cpp_03_1_1SizeEntry" ]
     ] ],

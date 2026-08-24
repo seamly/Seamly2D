@@ -271,6 +271,7 @@ var hierarchy =
     [ "MemoryManager", "d6/d9a/classMemoryManager.html", [
       [ "MemoryManagerImpl", "d2/d42/classMemoryManagerImpl.html", null ]
     ] ],
+    [ "anonymous_namespace{legacy_data_migration.cpp}::MigrationSplash", "d7/d46/classanonymous__namespace_02legacy__data__migration_8cpp_03_1_1MigrationSplash.html", null ],
     [ "NodeInfo", "d7/d55/structNodeInfo.html", null ],
     [ "NotchData", "d2/daa/structNotchData.html", null ],
     [ "std::numpunct", null, [

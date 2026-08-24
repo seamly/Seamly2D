@@ -13,7 +13,7 @@
 <title>Node0</title>
 <g id="a_node1"><a xlink:href="d0/d4c/classQMap.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="146,-19 0,-19 0,0 146,0 146,-19"/>
-<text text-anchor="middle" x="73" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">QMap&lt; QString, quint32 &gt;</text>
+<text text-anchor="middle" x="73" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">QMap&lt; QString, QString &gt;</text>
 </a>
 </g>
 </g>
