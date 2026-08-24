@@ -451,6 +451,52 @@ Use `<DocumentsLocation>/Seamly` for user documents. Use platform-standard locat
 - [ ] **InstWinX64.4.11** Add progress, cancellation, or deferral for large migrations.
 - [ ] **InstWinX64.4.12** Prevent `pruneEmptyLegacyDataRoot()` from removing populated or migration-marked trees.
 - [ ] **InstWinX64.4.13** Move per-app configuration to the platform-standard configuration tree.
+- [x] **InstWinX64.4.14** Back up the migrated legacy tree as one verified `.zip`, as a
+  second, portable copy beside the existing `MIGRATED-TO-SEAMLY.txt` marker.
+
+### Result — 2026-08-24
+
+`LegacyDataArchive` (`legacy_data_archive.h`/`.cpp`) packs the legacy tree into
+`<newRoot>/seamly2d-backup-<timestamp>.zip` with `QZipWriter`, then reads the
+archive back and compares every entry against the source file by SHA-256
+before calling it good — the size/CRC in a `.zip` central directory describe
+only what the writer meant to store. `QZipWriter`/`QZipReader` are Qt private
+API (moved into `QtCore` in Qt 6), so `vmisc.pro` and `Seamly2DTest.pro` both
+gained `core-private`.
+
+**The legacy tree is never deleted.** This module never removes the source
+tree it archives — that would reverse the InstWinX64.4.6/4.7 rollback-safety
+design and the still-open InstWinX64.4.12 intent. The `.zip` is a second
+backup beside the marker file, not a replacement for keeping the tree in
+place. A tree holding a symbolic link is refused outright, since a `.zip`
+entry cannot reproduce one.
+
+`LegacyDataMigration::run()` (`legacy_data_migration.h`/`.cpp`) wraps the
+existing `VCommonSettings::migrateAdoptedLegacyTree()` call with this backup
+step and a non-modal splash screen ("Moving your work to…" / "Backing up your
+old folder…"), shown only when a real window can appear
+(`QT_QPA_PLATFORM=offscreen` in tests and CI gets no splash). This gives
+first-run migration user-visible progress text, addressing part of the intent
+behind the still-open InstWinX64.4.11 — no progress bar, cancellation, or
+deferral yet.
+
+`application_2d.cpp` and `application_me.cpp` both call
+`LegacyDataMigration::run()` in place of the direct
+`migrateAdoptedLegacyTree()` call; the copy behavior itself is unchanged.
+
+Eight new `tst_dataroot.cpp` cases cover the archive: every file and empty
+folder round-trips, verification catches a missing or altered file, archive
+names never collide, a symbolic link is refused, a destination inside the
+source is refused, and the source tree is provably untouched afterward.
+
+Verified: `legacy_data_archive.cpp`, `legacy_data_migration.cpp`, and the
+updated `tst_dataroot.cpp` were syntax-checked against Qt 6.11.1 headers with
+MSVC (`cl /Zs /permissive- /Zc:__cplusplus`), matching the precedent set for
+Seamly2D/SeamlyMe changes elsewhere in this file. Not verified locally: a full
+build and `ctest` run — this project has no local build script for Seamly2D
+or SeamlyMe, and building the whole dependency tree by hand for one test
+target was judged out of proportion to this change; `ci.yml` is the
+verification path, per `CLAUDE.md`.
 
 ## InstWinX64.5 — Correct Application Settings
 
