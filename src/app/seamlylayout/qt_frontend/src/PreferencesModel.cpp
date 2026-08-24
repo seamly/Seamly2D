@@ -735,7 +735,8 @@ QString PreferencesModel::resolvedSettingsDirectory() const
 // @brief Return resolved input directory for import file dialogs.
 // Priority:
 //   1. preferences inputDirectory — if non-empty.
-//   2. <exeDir>/input — fallback default (AppConfigLocation root on macOS, or at runtime
+//   2. <dataRoot>/input — if the installer-recorded/adopted data root is set.
+//   3. <exeDir>/input — fallback default (AppConfigLocation root on macOS, or at runtime
 //      inside a read-only Linux AppImage mount or Flatpak /app prefix; see Task 16 / 17 / 18).
 // Relative configured paths are resolved against <exeDir>.
 // Ensures the directory exists before returning.
@@ -744,7 +745,14 @@ QString PreferencesModel::resolvedInputDirectory() const
     QString dir = m_inputDirectory;
     const QString appConfigRoot = appConfigRootPath();
 
-    if (dir.isEmpty()) {
+    if (dir.isEmpty() && !m_dataRoot.isEmpty()) {
+        // InstWinX64.2.13: the installer-recorded data root, once adopted, is the shared
+        // folder Seamly2D/SeamlyMe already write patterns/measurements under. Nest
+        // SeamlyLayout's own input folder under it too, ahead of the exeDir/AppConfigLocation
+        // fallback below, so a fresh install lands input files beside the rest of the suite's
+        // data instead of next to the executable.
+        dir = QDir(m_dataRoot).filePath(QStringLiteral("input"));
+    } else if (dir.isEmpty()) {
 #if defined(Q_OS_MACOS)
         // Task 16: a signed .app bundle is read-only — use the writable AppConfigLocation
         // root instead of the bundle-relative path used on Windows/Linux.
@@ -835,7 +843,8 @@ QString PreferencesModel::preferencesFilePath() const
 // @brief Return resolved output directory for export file dialogs.
 // Priority:
 //   1. preferences layoutDirectory — if non-empty.
-//   2. <exeDir>/output — fallback default (AppConfigLocation root on macOS, or at runtime
+//   2. <dataRoot>/output — if the installer-recorded/adopted data root is set.
+//   3. <exeDir>/output — fallback default (AppConfigLocation root on macOS, or at runtime
 //      inside a read-only Linux AppImage mount or Flatpak /app prefix; see Task 16 / 17 / 18).
 // Ensures the directory exists before returning.
 QString PreferencesModel::resolvedLayoutDirectory() const
@@ -846,7 +855,11 @@ QString PreferencesModel::resolvedLayoutDirectory() const
     QString dir = m_layoutDirectory;
     const QString appConfigRoot = appConfigRootPath();
 
-    if (dir.isEmpty()) {
+    if (dir.isEmpty() && !m_dataRoot.isEmpty()) {
+        // InstWinX64.2.13: same rationale as resolvedInputDirectory() — nest under the
+        // installer-recorded/adopted data root ahead of the exeDir/AppConfigLocation fallback.
+        dir = QDir(m_dataRoot).filePath(QStringLiteral("output"));
+    } else if (dir.isEmpty()) {
 #if defined(Q_OS_MACOS)
         // Task 16: a signed .app bundle is read-only — use the writable AppConfigLocation
         // root instead of the bundle-relative path used on Windows/Linux.
