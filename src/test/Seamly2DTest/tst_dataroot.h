@@ -99,6 +99,15 @@ private slots:
     void PruneIgnoresAMissingLegacyRoot() const;
     void StrayCommonSettingsAreMergedThenDeleted() const;
 
+    void ArchiveHoldsEveryFileAndFolder() const;
+    void ArchiveVerifiesAgainstTheTreeItCameFrom() const;
+    void ArchiveVerificationCatchesAMissingFile() const;
+    void ArchiveVerificationCatchesAlteredContents() const;
+    void ArchiveNamesDoNotCollide() const;
+    void ArchiveRefusesATreeHoldingASymbolicLink() const;
+    void ArchiveRefusesADestinationInsideTheSource() const;
+    void ArchiveLeavesTheSourceTreeInPlace() const;
+
 private:
     /** Scratch directory holding every root, tree and file the suite creates. */
     QScopedPointer<QTemporaryDir> m_scratch;

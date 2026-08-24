@@ -32,11 +32,20 @@
 #include "tst_dataroot.h"
 
 #include "../vmisc/installer_record.h"
+#include "../vmisc/legacy_data_archive.h"
 #include "../vmisc/vcommonsettings.h"
 #include "../vmisc/vsettings.h"
 
+// The archive cases read the .zip back with the same private reader the code under test
+// uses. See the note in legacy_data_archive.cpp; Seamly2DTest.pro carries the matching
+// "QT += core-private".
+#include <QtCore/private/qzipreader_p.h>
+
 #include <QCoreApplication>
+#include <QDateTime>
 #include <QDir>
+
+#include <filesystem>
 #include <QFile>
 #include <QFileInfo>
 #include <QSettings>
@@ -904,4 +913,237 @@ void TST_DataRoot::StrayCommonSettingsAreMergedThenDeleted() const
     QVERIFY2(!QFileInfo::exists(strayFileName), "The merged stray settings file should have been deleted");
     QVERIFY2(!QFileInfo(QFileInfo(strayFileName).absolutePath()).isDir(),
              "The emptied 'Unknown Organization' folder should have been removed");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ArchiveHoldsEveryFileAndFolder is the backup's central promise.
+ *
+ * Folders the user invented and an empty folder are both included on purpose: the first is
+ * the Task 60 rule, the second is the case a naive file-only walk silently drops.
+ */
+void TST_DataRoot::ArchiveHoldsEveryFileAndFolder() const
+{
+    const QString source = scratchPath(QStringLiteral("archive-all/seamly2d"));
+    const QString destination = scratchPath(QStringLiteral("archive-all/Seamly"));
+    QVERIFY(QDir().mkpath(destination));
+
+    const QStringList files
+    {
+        QStringLiteral("patterns/shirt.sm2d"),
+        QStringLiteral("measurements/individual/sue.smis"),
+        QStringLiteral("Projects/spring/notes.txt"),   // entirely the user's own
+        QStringLiteral("images/logo.png")
+    };
+    for (const QString &relative : files)
+    {
+        QVERIFY(writeTestFile(source + QLatin1Char('/') + relative, relative));
+    }
+    QVERIFY(QDir().mkpath(source + QStringLiteral("/layouts")));   // empty, and must still survive
+
+    const QString archive = destination + QStringLiteral("/backup.zip");
+    QString errorMessage;
+    QVERIFY2(LegacyDataArchive::create(source, archive, &errorMessage), qPrintable(errorMessage));
+    QVERIFY(QFileInfo(archive).size() > 0);
+
+    QZipReader reader(archive);
+    QVERIFY(reader.isReadable());
+
+    QStringList entries;
+    const QList<QZipReader::FileInfo> infoList = reader.fileInfoList();
+    for (const QZipReader::FileInfo &info : infoList)
+    {
+        entries.append(info.filePath);
+    }
+
+    for (const QString &relative : files)
+    {
+        QVERIFY2(entries.contains(relative),
+                 qPrintable(QStringLiteral("'%1' is not in the archive").arg(relative)));
+        QCOMPARE(QString::fromUtf8(reader.fileData(relative)), relative);
+    }
+    QVERIFY2(entries.contains(QStringLiteral("layouts")) || entries.contains(QStringLiteral("layouts/")),
+             "The empty folder is not in the archive");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ArchiveVerifiesAgainstTheTreeItCameFrom proves a good backup verifies clean.
+ */
+void TST_DataRoot::ArchiveVerifiesAgainstTheTreeItCameFrom() const
+{
+    const QString source = scratchPath(QStringLiteral("archive-verify/seamly2d"));
+    const QString destination = scratchPath(QStringLiteral("archive-verify/Seamly"));
+    QVERIFY(QDir().mkpath(destination));
+    QVERIFY(writeTestFile(source + QStringLiteral("/patterns/shirt.sm2d"), QStringLiteral("shirt")));
+    QVERIFY(writeTestFile(source + QStringLiteral("/notes.txt"), QString()));   // empty file
+
+    const QString archive = destination + QStringLiteral("/backup.zip");
+    QString errorMessage;
+    QVERIFY2(LegacyDataArchive::create(source, archive, &errorMessage), qPrintable(errorMessage));
+    QVERIFY2(LegacyDataArchive::verifyAgainst(source, archive, &errorMessage), qPrintable(errorMessage));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ArchiveVerificationCatchesAMissingFile checks the count, not just the contents.
+ *
+ * A file added to the tree after the archive was written stands in for the case that
+ * matters: an archive that does not hold everything the tree now holds.
+ */
+void TST_DataRoot::ArchiveVerificationCatchesAMissingFile() const
+{
+    const QString source = scratchPath(QStringLiteral("archive-missing/seamly2d"));
+    const QString destination = scratchPath(QStringLiteral("archive-missing/Seamly"));
+    QVERIFY(QDir().mkpath(destination));
+    QVERIFY(writeTestFile(source + QStringLiteral("/patterns/shirt.sm2d"), QStringLiteral("shirt")));
+
+    const QString archive = destination + QStringLiteral("/backup.zip");
+    QString errorMessage;
+    QVERIFY2(LegacyDataArchive::create(source, archive, &errorMessage), qPrintable(errorMessage));
+
+    QVERIFY(writeTestFile(source + QStringLiteral("/patterns/skirt.sm2d"), QStringLiteral("skirt")));
+
+    QVERIFY2(!LegacyDataArchive::verifyAgainst(source, archive, &errorMessage),
+             "A file absent from the archive should fail verification");
+    QVERIFY(errorMessage.contains(QStringLiteral("skirt.sm2d")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ArchiveVerificationCatchesAlteredContents proves the check reads the bytes back.
+ *
+ * The size and CRC recorded in the .zip describe what the writer meant to store. Only
+ * decompressing the entry and comparing it with the file catches a mismatch.
+ */
+void TST_DataRoot::ArchiveVerificationCatchesAlteredContents() const
+{
+    const QString source = scratchPath(QStringLiteral("archive-altered/seamly2d"));
+    const QString destination = scratchPath(QStringLiteral("archive-altered/Seamly"));
+    QVERIFY(QDir().mkpath(destination));
+    QVERIFY(writeTestFile(source + QStringLiteral("/patterns/shirt.sm2d"), QStringLiteral("original")));
+
+    const QString archive = destination + QStringLiteral("/backup.zip");
+    QString errorMessage;
+    QVERIFY2(LegacyDataArchive::create(source, archive, &errorMessage), qPrintable(errorMessage));
+
+    // Same length, different bytes: a size check alone would pass this.
+    QVERIFY(writeTestFile(source + QStringLiteral("/patterns/shirt.sm2d"), QStringLiteral("ORIGINAL")));
+
+    QVERIFY2(!LegacyDataArchive::verifyAgainst(source, archive, &errorMessage),
+             "Altered contents should fail verification");
+    QVERIFY(errorMessage.contains(QStringLiteral("shirt.sm2d")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ArchiveNamesDoNotCollide keeps a second migration from overwriting the first backup.
+ */
+void TST_DataRoot::ArchiveNamesDoNotCollide() const
+{
+    const QString destination = scratchPath(QStringLiteral("archive-names"));
+    QVERIFY(QDir().mkpath(destination));
+
+    const QDateTime when = QDateTime::fromString(QStringLiteral("2026-08-20T11:30:00"), Qt::ISODate);
+    const QString first = LegacyDataArchive::archivePath(destination, when);
+    QCOMPARE(QFileInfo(first).fileName(), QStringLiteral("seamly2d-backup-20260820-113000.zip"));
+
+    QVERIFY(writeTestFile(first, QStringLiteral("not really a zip")));
+    const QString second = LegacyDataArchive::archivePath(destination, when);
+    QVERIFY(second != first);
+    QVERIFY(!QFileInfo::exists(second));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ArchiveRefusesATreeHoldingASymbolicLink stops an incomplete backup passing as good.
+ *
+ * A .zip entry cannot reproduce a link, so a tree holding one is never archived.
+ *
+ * std::filesystem rather than QFile::link(), which on Windows writes a .lnk shortcut — an
+ * ordinary file, and deliberately not what this guard rejects. Creating a real symbolic
+ * link on Windows needs Developer Mode or elevation, so the case skips where it cannot.
+ */
+void TST_DataRoot::ArchiveRefusesATreeHoldingASymbolicLink() const
+{
+    const QString source = scratchPath(QStringLiteral("archive-link/seamly2d"));
+    const QString destination = scratchPath(QStringLiteral("archive-link/Seamly"));
+    QVERIFY(QDir().mkpath(destination));
+    QVERIFY(writeTestFile(source + QStringLiteral("/patterns/shirt.sm2d"), QStringLiteral("shirt")));
+
+    const QString target = source + QStringLiteral("/patterns/shirt.sm2d");
+    const QString link = source + QStringLiteral("/patterns/shirt-link.sm2d");
+    try
+    {
+        std::filesystem::create_symlink(std::filesystem::path(target.toStdWString()),
+                                        std::filesystem::path(link.toStdWString()));
+    }
+    catch (const std::filesystem::filesystem_error &)
+    {
+        QSKIP("This platform did not allow a symbolic link to be created");
+    }
+    QVERIFY2(QFileInfo(link).isSymbolicLink(), "The test did not create a real symbolic link");
+
+    const QString archive = destination + QStringLiteral("/backup.zip");
+    QString errorMessage;
+    QVERIFY2(!LegacyDataArchive::create(source, archive, &errorMessage),
+             "A tree holding a symbolic link should not be archived");
+    QVERIFY(!QFileInfo::exists(archive));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ArchiveRefusesADestinationInsideTheSource stops the archive folding into itself.
+ */
+void TST_DataRoot::ArchiveRefusesADestinationInsideTheSource() const
+{
+    const QString source = scratchPath(QStringLiteral("archive-inside/seamly2d"));
+    const QString destination = source + QStringLiteral("/Seamly");
+    QVERIFY(QDir().mkpath(destination));
+    QVERIFY(writeTestFile(source + QStringLiteral("/patterns/shirt.sm2d"), QStringLiteral("shirt")));
+
+    QString errorMessage;
+    const QString archive = LegacyDataArchive::archive(source, destination, &errorMessage);
+
+    QVERIFY(archive.isEmpty());
+    QVERIFY(!errorMessage.isEmpty());
+    QVERIFY2(QFileInfo(source).isDir(), "The tree being archived should be untouched");
+    QVERIFY2(QFileInfo(destination).isDir(), "The new root should still be there");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ArchiveLeavesTheSourceTreeInPlace is the rule that replaces the old branch's delete.
+ *
+ * This project keeps the legacy tree after migration (marker file, no delete) so a rollback
+ * stays possible. LegacyDataArchive backs the tree up; it must never remove it.
+ */
+void TST_DataRoot::ArchiveLeavesTheSourceTreeInPlace() const
+{
+    const QString source = scratchPath(QStringLiteral("archive-keep/seamly2d"));
+    const QString destination = scratchPath(QStringLiteral("archive-keep/Seamly"));
+    QVERIFY(QDir().mkpath(destination));
+
+    const QStringList files
+    {
+        QStringLiteral("patterns/shirt.sm2d"),
+        QStringLiteral("measurements/individual/sue.smis")
+    };
+    for (const QString &relative : files)
+    {
+        QVERIFY(writeTestFile(source + QLatin1Char('/') + relative, relative));
+    }
+
+    QString errorMessage;
+    const QString archive = LegacyDataArchive::archive(source, destination, &errorMessage);
+    QVERIFY2(!archive.isEmpty(), qPrintable(errorMessage));
+
+    QVERIFY2(QFileInfo(source).isDir(), "The old tree should still be there");
+    for (const QString &relative : files)
+    {
+        QVERIFY2(QFileInfo(source + QLatin1Char('/') + relative).isFile(),
+                 qPrintable(QStringLiteral("'%1' should still be in the old tree").arg(relative)));
+    }
+    QVERIFY2(QFileInfo(archive).isFile(), "The archive should be in the new data root");
+    QCOMPARE(QFileInfo(archive).absolutePath(), QDir(destination).absolutePath());
 }

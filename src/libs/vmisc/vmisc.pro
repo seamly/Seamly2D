@@ -8,7 +8,9 @@
 message("Entering vmisc.pro")
 include(../../../common.pri)
 
-QT += widgets printsupport testlib gui
+# core-private: legacy_data_archive.cpp uses QZipWriter and QZipReader, which are
+# Qt private API living in QtCore since Qt 6. See the note beside the include.
+QT += widgets printsupport testlib gui core-private
 
 # Name of library
 TARGET = vmisc

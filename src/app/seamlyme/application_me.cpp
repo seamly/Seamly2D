@@ -59,6 +59,7 @@
 #include "../ifc/exception/vexceptionemptyparameter.h"
 #include "../ifc/exception/vexceptionwrongid.h"
 #include "../vmisc/def.h"
+#include "../vmisc/legacy_data_migration.h"
 #include "../vmisc/logging.h"
 #include "../vmisc/vsysexits.h"
 #include "../vmisc/diagnostic.h"
@@ -612,13 +613,16 @@ void ApplicationME::openSettings()
     // and the legacy tree is left in place with a marker so a rollback stays possible. On
     // any failure the legacy root simply stays configured and in use.
     //
+    // LegacyDataMigration::run() also packs the legacy tree into a .zip beside the new root,
+    // as a second backup alongside the marker file, and shows a splash screen while a large
+    // collection of patterns copies and hashes.
+    //
     // Here rather than inside initializeDataRoot() for the same reason as the prune below:
     // this is the only place the real home directory reaches it, so the unit tests cannot
     // copy anything into the developer's home.
     if (adoptedLegacyTree)
     {
-        VCommonSettings::migrateAdoptedLegacyTree(VCommonSettings::getLegacyDataRoot(),
-                                                  VCommonSettings::getDefaultDataRoot());
+        LegacyDataMigration::run(VCommonSettings::getLegacyDataRoot(), VCommonSettings::getDefaultDataRoot());
     }
 
     // Task 51: create the nine standard subfolders under that root. initializeDataRoot()
