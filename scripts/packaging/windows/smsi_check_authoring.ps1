@@ -655,6 +655,12 @@ foreach ($association in @(
 }
 Assert-That -Name 'the install path is recorded in HKLM\SOFTWARE\Seamly\Seamly2D' `
     -Succeeded (@($registry | Where-Object { $_.Root -eq '2' -and $_.Key -eq 'SOFTWARE\Seamly\Seamly2D' -and $_.Name -eq 'InstallPath' }).Count -eq 1)
+foreach ($app in @('SeamlyMe', 'SeamlyLayout')) {
+    Assert-That -Name "the install breadcrumbs are also recorded in HKLM\SOFTWARE\Seamly\$app" `
+        -Succeeded (@($registry | Where-Object {
+            $_.Root -eq '2' -and $_.Key -eq "SOFTWARE\Seamly\$app" -and
+            $_.Name -in @('InstallPath', 'DisplayVersion', 'DataRoot', 'DataParent') }).Count -eq 4)
+}
 
 # --- 9. program folder and user-data root (Task InstWinX64.1.1 / 1.2) ----------
 # The program folder name is asserted here because three documents and the

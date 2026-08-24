@@ -33,7 +33,8 @@ Known defect to watch for: an empty organization name can make Qt write settings
 ### Case 1 — Not installed
 
 - [ ] 1a. Uninstall Seamly (any and all versions detected)
-- [ ] 1b. Run latest windows x64 installation .msi (with SeamlyLayout)
+  - [ ] 1a-i. Confirm that %PROGRAMROOT, %DATAROOT, AppData\Roaming\Seamly, AppData\Local\Seamly, desktop shortcuts, and registry keys have been removed
+- [ ] 1b. Run latest windows x64 installation .msi (with SeamlyLayout), using:
   - [ ] 1b-i. Default settings
 
 Non-default settings means at least: a non-default `%PROGRAMDIR%`, a non-default `%DATAROOT%`
@@ -44,12 +45,12 @@ parent, and desktop shortcuts turned off (`SEAMLYDESKTOPSHORTCUTS=0`).
 Run this suite after every test case in section A.
 
 - [ ] 1. Check the `%PROGRAMDIR%` location (default `C:\Program Files\SeamlyApps`).
-- [ ] 2. Check the `%DATAROOT%` location (default `<Documents>\SeamlyData`).
-- [ ] 3. Check the `%LOCALAPPDATA%\Seamly\<AppName>\` locations for Seamly2D, SeamlyMe, and SeamlyLayout.
+- [ ] 2. Check the `%DATAROOT%` location (default `C:\Users\<user>\Documents\SeamlyData`).
+- [ ] 3. Check the `%LOCALAPPDATA%\Seamly\<AppName>\` and `%APPDATA%\Seamly\<AppName>\` locations for Seamly2D, SeamlyMe, and SeamlyLayout.
 - [ ] 4. Check the registry.
   - [ ] 4a. If applicable, confirm old-version entries were removed.
-  - [ ] 4b. Confirm the installed-version entries were added, under `HKLM\SOFTWARE\Seamly\Seamly2D`.
-- [ ] 5. Check Seamly2D.
+  - [ ] 4b. Confirm the installed-version entries were added, under `HKLM\SOFTWARE\Seamly\Seamly2D`, `HKLM\SOFTWARE\Seamly\SeamlyMe`, and `HKLM\SOFTWARE\Seamly\SeamlyLayout`.
+- [ ] 5. Check Seamly apps
   - [ ] 5a. Run Seamly2D.
   - [ ] 5b. Open `%DATAROOT%\patterns\pattern.sm2d`.
   - [ ] 5c. Check Application Preferences → File Paths.
