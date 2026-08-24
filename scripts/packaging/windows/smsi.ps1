@@ -376,7 +376,7 @@ Copy-Item -Path (Join-Path $crtDir '*.dll') -Destination $parentDir -Force
 # --- Build the MSI -------------------------------------------------------------
 # EVERY .wxs in this directory, not just smsi.wxs. The authoring is split into
 # smsi.wxs (the Package) plus one fragment per area - smsi_ui, smsi_legacy,
-# smsi_files, smsi_shortcuts. Omit a source file and `wix build` still succeeds:
+# smsi_files, smsi_shortcuts, smsi_registry. Omit a source file and `wix build` still succeeds:
 # it links whatever it was given, and a fragment it never saw is simply absent.
 # The MSI would install and be wrong. Globbing keeps a newly added fragment
 # working without a change here.

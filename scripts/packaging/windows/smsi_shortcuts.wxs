@@ -4,12 +4,14 @@
  **  @author slspencer
  **  @date   2026-08-15
  **
- **  @brief  The optional desktop shortcuts and the install-info
- **          registry values the apps read on first run.
+ **  @brief  The optional desktop shortcuts.
  **
- **  Split out of smsi.wxs. Linked by the two ComponentGroupRefs in that file. A WiX fragment
- **  nothing refers to is dropped WITHOUT AN ERROR, so the MSI would still
- **  build and would simply be missing all of this.
+ **  Split out of smsi.wxs. Linked by the ComponentGroupRef in that file. A WiX
+ **  fragment nothing refers to is dropped WITHOUT AN ERROR, so the MSI would
+ **  still build and would simply be missing all of this. The install-info
+ **  registry values and the per-user settings removal that used to live here
+ **  moved to smsi_registry.wxs (2026-08-24) - "shortcuts" never described
+ **  either of them.
  **
  **  @copyright
  **  This source code is part of the Seamly project, a suite of apparel CAD
@@ -19,40 +21,9 @@
  **
  **  SeamlyLayout is licensed under the MIT license.
 -->
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
-     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
 
   <Fragment>
-
-    <ComponentGroup Id="InstallInfo" Directory="INSTALLFOLDER">
-
-      <!-- Install breadcrumbs: read by upgrades and by the Task 14 installer
-           prompts; removed on uninstall automatically (component rules). -->
-      <Component Id="InstallInfoRegistry">
-        <RegistryKey Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D">
-          <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
-          <RegistryValue Name="DisplayVersion" Type="string" Value="$(var.DisplayVersion)" />
-          <!-- InstWinX64.1.2: the data root the user chose. Every app reads it
-               on first run and adopts it, so the value must name a folder
-               somebody chose. SEAMLYDATAROOTRECORDED is what guarantees that -
-               see the long note beside it in smsi.wxs. Do NOT put
-               [SEAMLYDATAROOT] here: a directory id always resolves, so a
-               silent install with no arguments would record C:\SeamlyData.
-
-               Written even when the user declined the copy - recording the
-               folder and filling it are separate decisions. Empty when nothing
-               chose a root, which the apps read as "use your own default". -->
-          <RegistryValue Name="DataRoot" Type="string" Value="[SEAMLYDATAROOTRECORDED]" />
-          <!-- Same guard as DataRoot above, and for the same reason: raw
-               [SEAMLYDATAPARENT] is a directory id, so it always resolves by
-               the time this runs (sequence 5000, after CostFinalize), even on
-               a run that chose nothing. SEAMLYDATAPARENTRECORDED is empty
-               unless SEAMLYDATACHOSEN - see smsi.wxs. -->
-          <RegistryValue Name="DataParent" Type="string" Value="[SEAMLYDATAPARENTRECORDED]" />
-        </RegistryKey>
-      </Component>
-
-    </ComponentGroup>
 
     <!-- ================= optional desktop shortcuts ======================= -->
     <!-- Installed only when SEAMLYDESKTOPSHORTCUTS is set - by the checkbox on
@@ -127,54 +98,6 @@
                        Type="integer"
                        Value="1"
                        KeyPath="yes" />
-      </Component>
-    </ComponentGroup>
-
-    <!-- ============ per-user settings cleanup on uninstall ================ -->
-    <!-- Each app's AppConfigLocation settings (%LOCALAPPDATA%\Seamly\<App>\)
-         and the shared common settings (%APPDATA%\Seamly\) are per-user, so a
-         perMachine uninstall cannot reach every user's profile - only the one
-         it runs as. See the same limitation already documented for
-         SEAMLYLEGACYSTARTMENU in smsi_legacy.wxs.
-
-         The user-data root (patterns, measurements) is deliberately NOT
-         touched here - that is CreateUserDataRoot's Permanent="yes" component
-         in smsi_files.wxs, and stays untouched on purpose.
-
-         NOT UPGRADINGPRODUCTCODE matters: RemoveExistingProducts also
-         "uninstalls" the old product's ProductCode partway through a major
-         upgrade, and Windows Installer sets UPGRADINGPRODUCTCODE for exactly
-         that case. Without the guard, every version bump would wipe the
-         settings the new version is about to read forward on its own first
-         run. A genuine standalone uninstall (Programs & Features, or
-         msiexec /x with no newer package mid-install) leaves it unset.
-
-         Properties, not directory ids: RemoveFolderEx resolves at sequence
-         799, before CostFinalize resolves the Directory table, so a directory
-         id would read empty there - the same trap documented at length in
-         smsi.wxs for SEAMLYDATAROOT/SEAMLYDATAPARENT. [%LOCALAPPDATA] and
-         [%APPDATA] are environment properties instead, set at session start,
-         and resolve to the user this immediate action runs as - the
-         installing user in the normal interactive-elevation case. -->
-    <SetProperty Id="SEAMLYLOCALAPPDATA"
-                 Value="[%LOCALAPPDATA]\Seamly"
-                 After="AppSearch" Sequence="both" />
-    <SetProperty Id="SEAMLYROAMINGAPPDATA"
-                 Value="[%APPDATA]\Seamly"
-                 After="AppSearch" Sequence="both" />
-
-    <ComponentGroup Id="PerUserSettingsRemoval" Directory="INSTALLFOLDER">
-      <Component Id="RemoveLocalAppDataSettings" Guid="15BCCEA7-CD8F-4A58-9F46-86125519AC35"
-                 Condition="NOT UPGRADINGPRODUCTCODE">
-        <RegistryValue Root="HKCU" Key="Software\Seamly\Seamly2D" Name="RemovedLocalAppData"
-                       Type="string" Value="[SEAMLYLOCALAPPDATA]" KeyPath="yes" />
-        <util:RemoveFolderEx Property="SEAMLYLOCALAPPDATA" On="uninstall" />
-      </Component>
-      <Component Id="RemoveRoamingAppDataSettings" Guid="7381D399-B7CE-47F9-9423-460ED69209E7"
-                 Condition="NOT UPGRADINGPRODUCTCODE">
-        <RegistryValue Root="HKCU" Key="Software\Seamly\Seamly2D" Name="RemovedRoamingAppData"
-                       Type="string" Value="[SEAMLYROAMINGAPPDATA]" KeyPath="yes" />
-        <util:RemoveFolderEx Property="SEAMLYROAMINGAPPDATA" On="uninstall" />
       </Component>
     </ComponentGroup>
 

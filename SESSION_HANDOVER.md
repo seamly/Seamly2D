@@ -12,8 +12,10 @@ Testing Case 1b-i of `TEST_INSTALLER_WIN_X64.md` (uninstall, then a `/quiet`
 install with no properties) on this machine found two real defects, both
 fixed on branch `task-silent-install-dataroot` off `run-seamlyLayout`:
 
-1. **`DataParent` recorded as `C:\`.** `smsi_shortcuts.wxs` wrote the raw
-   `[SEAMLYDATAPARENT]` property directly. It is also a Directory id, so
+1. **`DataParent` recorded as `C:\`.** (Written to `smsi_shortcuts.wxs` at the
+   time, moved to the new `smsi_registry.wxs` later the same session - see
+   below.) The raw `[SEAMLYDATAPARENT]` property was written directly. It is
+   also a Directory id, so
    `CostFinalize` always resolves it to something - even on a run that chose
    nothing - the same trap `SEAMLYDATAROOTRECORDED` already existed to avoid
    for `DataRoot`. Fixed the same way: new `SEAMLYDATAPARENTRECORDED`
@@ -61,6 +63,15 @@ user asked to skip further manual/GUI installer testing this session (Seamly2D
 / SeamlyMe / SeamlyLayout launch-and-verify steps need a human watching the
 screen) - that verification, and the real end-to-end reset-script run, are
 next.
+
+**`smsi_shortcuts.wxs` split, same session:** the user pointed out the name no
+longer fit - it held desktop shortcuts, install-info registry, and (after
+fix 1 above) per-user settings removal, three unrelated concerns under a name
+describing one. New `smsi_registry.wxs` now holds the registry values and the
+per-user removal; `smsi_shortcuts.wxs` holds only the shortcuts.
+`smsi.wxs`/`smsi.ps1`/`README.md` comments updated to match. Not yet
+re-verified against a rebuilt stub MSI after the split - do that before
+trusting `InstWinX64.13.4`'s "all assertions pass" claim again.
 
 **Process note:** this branch was cut from `run-seamlyLayout` only after the
 `.wxs`/`.ps1` edits were already made, not before - steps 1-2 of the task

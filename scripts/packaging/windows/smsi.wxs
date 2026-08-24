@@ -17,7 +17,7 @@
  **     Windows x64:    `wix build -arch x64`
  **     Windows arm64:  `wix build -arch arm64`
  **
- **  SOURCE LAYOUT (split 2026-08-15)
+ **  SOURCE LAYOUT (split 2026-08-15; smsi_registry.wxs split out 2026-08-24)
  **    smsi.wxs            THIS FILE. <Package> and everything that must be
  **                        inside it: identity, upgrade, ARP, the properties
  **                        the dialogs read, the launch conditions, the
@@ -27,7 +27,10 @@
  **    smsi_legacy.wxs     finding and removing the pre-MSI installation.
  **    smsi_files.wxs      directory tree, executables, Start Menu shortcuts,
  **                        file associations.
- **    smsi_shortcuts.wxs  optional desktop shortcuts, install-info registry.
+ **    smsi_shortcuts.wxs  optional desktop shortcuts only.
+ **    smsi_registry.wxs   install-info registry, and per-user settings
+ **                        removal (%LOCALAPPDATA%\Seamly, %APPDATA%\Seamly)
+ **                        on a genuine uninstall.
  **
  **  EVERY ONE OF THOSE FILES MUST BE PASSED TO `wix build`, and each fragment
  **  must stay referenced from this file. `wix build` links what it is handed
@@ -566,8 +569,9 @@
 
     <!-- The directory tree, the three executables, their Start Menu shortcuts
          and their file associations are in smsi_files.wxs. The optional
-         desktop shortcuts and the install-info registry values are in
-         smsi_shortcuts.wxs. These references are what link those fragments -
+         desktop shortcuts are in smsi_shortcuts.wxs. The install-info
+         registry values and the per-user settings removal are in
+         smsi_registry.wxs. These references are what link those fragments -
          a fragment nothing refers to is dropped without an error. -->
     <ComponentGroupRef Id="SuiteExecutables" />
     <ComponentGroupRef Id="UserDataRootFolder" />
