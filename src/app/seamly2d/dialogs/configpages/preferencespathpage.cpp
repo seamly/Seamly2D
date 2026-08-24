@@ -230,7 +230,8 @@ void PreferencesPathPage::editPath()
 #endif
             const QString filename = fileDialog(this, tr("Select SeamlyLayout Application"),
                                                 QFileInfo(appPath).absolutePath(), filter, nullptr,
-                                                FILEDIALOG_OPTIONS, QFileDialog::ExistingFile,
+                                                qApp->Seamly2DSettings()->getUseNativeFileDialogs(),
+                                                QFileDialog::ExistingFile,
                                                 QFileDialog::AcceptOpen);
             if (!filename.isEmpty())
             {
