@@ -38,30 +38,34 @@ Known defect to watch for: an empty organization name can make Qt write settings
 Non-default settings means at least: a non-default `%PROGRAMDIR%`, a non-default `%DATAROOT%`
 parent, and desktop shortcuts turned off (`SEAMLYDESKTOPSHORTCUTS=0`).
 
-## B. Verification Suite
+### B. Verification Suite
 
 Run this suite after every test case in section A.
 
-- [ ] 1. Check the `%PROGRAMsDIR%` location (default `C:\Program Files\SeamlyApps`).
-- [ ] 2. Check the `%DATAROOT%` location (default `<Documents>\SeamlyData`).
-- [ ] 3. Check the `%LOCALAPPDATA%\Seamly\<AppName>\` locations for Seamly2D, SeamlyMe, and SeamlyLayout.
+- [ ] 1. Check the `%PROGRAMDIR%` location (default `C:\Program Files\SeamlyApps`).
+- [ ] 2. Check the `%DATAROOT%` location (default `C:\Users\<user>\Documents\SeamlyData`).
+- [ ] 3. Check the `%LOCALAPPDATA%\Seamly\<AppName>\` and `%APPDATA%\Seamly\<AppName>\` locations for Seamly2D, SeamlyMe, and SeamlyLayout.
 - [ ] 4. Check the registry.
   - [ ] 4a. If applicable, confirm old-version entries were removed.
-  - [ ] 4b. Confirm the installed-version entries were added, under `HKLM\SOFTWARE\Seamly\Seamly2D`.
-- [ ] 5. Check Seamly2D.
-  - [ ] 5a. Run Seamly2D.
-  - [ ] 5b. Open `%DATAROOT%\patterns\pattern.sm2d`.
-  - [ ] 5c. Check Application Preferences → File Paths.
-    - [ ] 5c-i. Confirm the file paths start with `%DATAROOT%`.
-- [ ] 6. If applicable, check user-data migration.
-  - [ ] 6a. Confirm `%DATAROOT%\seamly2d.zip` exists. Confirm it contains the old `seamly2d`
-     user-data tree and files.
-  - [ ] 6b. Confirm `%DATAROOT%\seamly2d.zip` was expanded into the new `%DATAROOT%` directories.
-    - [ ] 6b-i. No duplicate directories.
-    - [ ] 6b-ii. Directories created at the correct level below `%DATAROOT%`.
-    - [ ] 6b-iii. Old `seamly2d` files expanded into the correct directories.
-- [ ] 7. Check SeamlyMe.
-  - [ ] 7a. Run SeamlyMe. Open a `.smis` file from `%DATAROOT%\measurements\individual`. Close SeamlyMe.
-  - [ ] 7b. Run SeamlyMe. Open a `.smis` file from `%DATAROOT%\measurements\multisize`. Close SeamlyMe.
-- [ ] 8. Check SeamlyLayout.
-  - [ ] 8a. Run SeamlyLayout. Import a Seamly `.svg` layout file from `%DATAROOT%\layouts`. Close SeamlyLayout.
+  - [ ] 4b. Confirm the installed-version entries were added, under `HKLM\SOFTWARE\Seamly\Seamly2D`, `HKLM\SOFTWARE\Seamly\SeamlyMe`, and `HKLM\SOFTWARE\Seamly\SeamlyLayout`.
+- [ ] 5. Run Seamly2D, then close Seamly2D to install the user directories
+- [ ] 6. Check user-data location, directories, and files
+  - [ ] 6a. confirm that installed data is correct
+    - [ ] 6a-i. No duplicate directories
+    - [ ] 6a-ii. Directories created at the correct level below `%DATAROOT%`
+    - [ ] 6a-iii. `seamly2d.zip` was expanded into the correct directories
+  - [ ] 6b.if upgrading from previous non-SeamlyLayout version then:
+    - [ ] 6b-i. confirm `%DATAROOT%\seamly2d.zip` exists and contains the old `seamly2d` user-data tree.
+    - [ ] 6b-ii. Confirm `%DATAROOT%\seamly2d.zip` was expanded into the new `%DATAROOT%` directories.
+- [ ] 7. Check Seamly2D
+  - [ ] 7b. Run Seamly2D and open `%DATAROOT%\patterns\sample-pattern.sm2d`.
+  - [ ] 7c. Confirm `Application Preferences → File Paths` --> all paths should start with `%DATAROOT%` value.
+- [ ] 8. Check SeamlyMe
+  - [ ] 8a. Run SeamlyMe from within Seamly2D
+  - [ ] 8b. Open `%DATAROOT%\measurements\individual\sample-measurements-individual.smis` file, then close file
+  - [ ] 8c. Open `%DATAROOT%\measurements\multisize\sample-measurements-multisize.smms` file, then close file
+  - [ ] 8d. Close SeamlyMe
+- [ ] 9. Check SeamlyLayout
+  - [ ] 9a. Run SeamlyLayout from within Seamly2D
+  - [ ] 9b. Check that the sample pattern's `Piece mode` data was passed to SeamlyLayout as a stringified svg document (not as a svg file)
+  - [ ] 9c. Close SeamlyLayout.
