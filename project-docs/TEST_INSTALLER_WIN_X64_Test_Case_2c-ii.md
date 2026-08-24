@@ -30,35 +30,13 @@ Known defect to watch for: an empty organization name can make Qt write settings
 | 3 | Previous version installed, with SeamlyLayout | disabled | enabled | enabled |
 | 4 | Same version installed, with SeamlyLayout | enabled | enabled | disabled |
 
-### Case 1 — Not installed
-- [ ] 1a. Uninstall Seamly (any and all versions deteected)
-- [ ] 1b. Run latest windows x64 installation .msi (with SeamlyLayout)
-  - [ ] 1b-i. Default settings.
-  - [ ] 1b-ii. Non-default settings.
 
 ### Case 2 — Previous version installed, no SeamlyLayout
 
 - [ ] 2a. Uninstall Seamly (any and all versions deteected)
 - [ ] 2b. Run installation for previous Seamly version (no SeamlyLaout) from `C:\Users\susan\Downloads\seamly2d-windows.zip` with default settings.
 - [ ] 2c. Run latest windows x64 installation .msi (with SeamlyLayout)
-  - [ ] 2c-i. Default settings.
   - [ ] 2c-ii. Non-default settings.
-
-### Case 3 — Previous version installed, with SeamlyLayout
-
-- [ ] 3a. Uninstall Seamly (any and all versions detected)
-- [ ] 3b. Run older windows x64 installation .msi (with SeamlyLayout) from `C:\Users\susan\Downloads\seamly-x64 (5).msi`
-- [ ] 3c. Run latest windows x64 installation .msi (with SeamlyLayout)
-  - [ ] 3c-i. Default settings.
-  - [ ] 3c-ii. Non-default settings.
-
-### Case 4 — Same version installed, with SeamlyLayout
-
-- [ ] 4a. uninstall Seamly (any and all versions detected) 
-- [ ] 4b. Run latest windows x64 installation .msi (with SeamlyLayout) with default settings
-- [ ] 4c. Re-run latest windows x64 installation .msi (with SeamlyLayout)
-  - [ ] 4c-i. Run Repair.
-  - [ ] 4c-ii. Run Uninstall.
 
 Non-default settings means at least: a non-default `%PROGRAMDIR%`, a non-default `%DATAROOT%`
 parent, and desktop shortcuts turned off (`SEAMLYDESKTOPSHORTCUTS=0`).
