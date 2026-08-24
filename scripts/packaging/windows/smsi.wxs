@@ -269,18 +269,25 @@
              msiexec /i seamly-x64.msi /qn SEAMLYDATAROOT="E:\Patterns"
                  -> exactly that; overrides the composition, leaf and all
 
-         The default is computed in the UI sequence ONLY. The execute sequence
-         of a perMachine package runs elevated as SYSTEM, where %USERPROFILE% is
-         SYSTEM's own profile - so computing it there would silently put a data
-         root under C:\Windows\system32\config\systemprofile. Secure="yes"
-         carries the value the user actually chose across to that elevated
-         sequence.
+         The UI sequence computes the default for an interactive install.
+         Secure="yes" carries the value the user actually chose across to the
+         elevated execute sequence.
 
-         Consequence for silent installs: /qn runs no UI sequence, so nothing
-         computes the default. Pass SEAMLYDATAPARENT (or SEAMLYDATAROOT)
-         explicitly for an unattended install; if neither is given the apps fall
-         back to their own first-run default, which is the behaviour that
-         shipped before this task. -->
+         The execute sequence ALSO computes the same default now (2026-08-24),
+         so a bare `/qn` install with no properties creates and records
+         `<Documents>\SeamlyData` too, instead of silently deferring to each
+         app's own first-run default - Case 1b-i of
+         TEST_INSTALLER_WIN_X64.md found the two disagreeing. Accepted
+         tradeoff: a perMachine package's execute sequence normally runs
+         impersonating the installing user, but a genuinely unattended
+         SYSTEM-context deployment (SCCM/Intune, no logged-in user) has no user
+         to impersonate, so PersonalFolder there resolves to SYSTEM's own
+         profile - a data root nobody can see. Decided (2026-08-24): accept
+         that risk rather than leave a bare `/qn` install landing patterns in a
+         differently-named folder than the one Setup and the wizard both
+         advertise. A real unattended deployment that cares should already
+         pass SEAMLYDATAPARENT or SEAMLYDATAROOT explicitly - documented in
+         README_WINDOWS_BUILD.md - which this computation never overrides. -->
     <!-- ====== keep the program directory across an upgrade (2.11) ======= -->
     <!-- Without this a major upgrade offers C:\Program Files\SeamlyApps again, even
          to somebody who installed to E:\Programs\SeamlyApps. Press Next and the
@@ -355,45 +362,83 @@
                  Sequence="ui"
                  Condition="NOT SEAMLYDATAPARENT AND NOT Installed" />
 
+    <!-- Same two defaults, computed again in the execute sequence, for a
+         `/qn` install that ran no UI sequence at all. See the accepted
+         SYSTEM-profile tradeoff in the comment above SEAMLYDATAPARENT.
+         Mirrors the UI pair exactly: PersonalFolder first, %USERPROFILE%
+         second, both skipped on a maintenance run so a repair never
+         recomputes a customised root. -->
+    <SetProperty Id="SEAMLYDATAPARENT"
+                 Action="SetSEAMLYDATAPARENTExecute"
+                 Value="[PersonalFolder]"
+                 Before="CostFinalize"
+                 Sequence="execute"
+                 Condition="NOT SEAMLYDATAPARENT AND PersonalFolder AND NOT Installed" />
+    <SetProperty Id="SEAMLYDATAPARENT"
+                 Action="SetSEAMLYDATAPARENTExecuteFallback"
+                 Value="[%USERPROFILE]\Documents\"
+                 After="SetSEAMLYDATAPARENTExecute"
+                 Sequence="execute"
+                 Condition="NOT SEAMLYDATAPARENT AND NOT Installed" />
+
     <!-- ============ the value the apps actually read (InstWinX64.00) ===== -->
     <!-- SEAMLYDATAROOTRECORDED, not SEAMLYDATAROOT, is what reaches
          HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot. The apps trust that value and
          adopt it on first run, so it must hold a folder somebody actually
          chose - never a fallback the Directory table composed on its own.
+         SEAMLYDATAPARENTRECORDED protects HKLM\...\DataParent the same way -
+         it is read only by a future upgrade's wizard prefill, but the same
+         directory-table trap applies to it, so it gets the same guard.
 
-         SEAMLYDATAROOT cannot be used directly. It is a directory id, so
-         CostFinalize always resolves it to something: with no parent given it
-         composes onto TARGETDIR and yields ROOTDRIVE\SeamlyData, e.g.
-         C:\SeamlyData - a per-machine folder a standard user cannot write to.
-         A silent install with no arguments would record that, and every app
-         would then adopt it.
+         SEAMLYDATAROOT and SEAMLYDATAPARENT cannot be used directly. Both are
+         directory ids, so CostFinalize always resolves them to something:
+         with no parent given, SEAMLYDATAROOT composes onto TARGETDIR and
+         yields ROOTDRIVE\SeamlyData, e.g. C:\SeamlyData - a per-machine
+         folder a standard user cannot write to, and SEAMLYDATAPARENT composes
+         onto TARGETDIR alone, e.g. bare C:\. Writing either raw property to
+         the registry after CostFinalize records that composed garbage, not
+         emptiness, even on a run that chose nothing.
 
          Three cases, and each needs a different answer:
 
-           this run chose a root   record the resolved SEAMLYDATAROOT.
-                                   SEAMLYDATACHOSEN spots it, BEFORE
-                                   CostInitialize resolves the directories -
-                                   at that point SEAMLYDATAPARENT and
-                                   SEAMLYDATAROOT are non-empty only if the
-                                   wizard or the command line set them.
-                                   The wizard's value crosses into this
+           this run chose a root   record the resolved SEAMLYDATAROOT /
+                                   SEAMLYDATAPARENT. SEAMLYDATACHOSEN spots it
+                                   after the UI or execute default above has
+                                   run, but still BEFORE CostFinalize resolves
+                                   the directories - at that point both
+                                   properties are non-empty only if the
+                                   wizard, this run's own execute-sequence
+                                   default, or the command line set them.
+                                   The wizard's value crosses into the
                                    elevated sequence because both are Secure.
            repair or maintenance   keep what is already in the registry. The
                                    RegistrySearch prefills the property, and
-                                   SEAMLYDATACHOSEN stays unset, so the
-                                   component rewrites the same value.
-           silent, no arguments    leave it empty. The apps read an empty
-                                   value as "use your own default".
+                                   both UI and execute defaults carry
+                                   AND NOT Installed, so SEAMLYDATACHOSEN
+                                   reflects only what AppSearch found.
+           silent, no arguments    the execute-sequence default above now
+                                   fills SEAMLYDATAPARENT before this is
+                                   checked, so this case merges into the
+                                   first one - see the accepted-risk comment
+                                   above SEAMLYDATAPARENT.
 
-         Repair depends on the UI defaults above carrying AND NOT Installed:
-         without it the maintenance UI sequence would set SEAMLYDATAPARENT,
-         SEAMLYDATACHOSEN would follow, and a repair would silently move a
-         customised data root back to the default. -->
+         Repair depends on the UI and execute defaults above carrying
+         AND NOT Installed: without it a maintenance run would recompute
+         SEAMLYDATAPARENT, SEAMLYDATACHOSEN would follow, and a repair would
+         silently move a customised data root back to the default. -->
     <Property Id="SEAMLYDATAROOTRECORDED" Secure="yes">
       <RegistrySearch Id="RecordedDataRootSearch"
                       Root="HKLM"
                       Key="SOFTWARE\Seamly\Seamly2D"
                       Name="DataRoot"
+                      Type="raw"
+                      Bitness="always64" />
+    </Property>
+    <Property Id="SEAMLYDATAPARENTRECORDED" Secure="yes">
+      <RegistrySearch Id="RecordedDataParentRecordedSearch"
+                      Root="HKLM"
+                      Key="SOFTWARE\Seamly\Seamly2D"
+                      Name="DataParent"
                       Type="raw"
                       Bitness="always64" />
     </Property>
@@ -407,11 +452,16 @@
     </Property>
     <SetProperty Id="SEAMLYDATACHOSEN"
                  Value="1"
-                 Before="CostInitialize"
+                 After="SetSEAMLYDATAPARENTExecuteFallback"
                  Sequence="execute"
                  Condition="SEAMLYDATAPARENT OR SEAMLYDATAROOT" />
     <SetProperty Id="SEAMLYDATAROOTRECORDED"
                  Value="[SEAMLYDATAROOT]"
+                 After="CostFinalize"
+                 Sequence="execute"
+                 Condition="SEAMLYDATACHOSEN" />
+    <SetProperty Id="SEAMLYDATAPARENTRECORDED"
+                 Value="[SEAMLYDATAPARENT]"
                  After="CostFinalize"
                  Sequence="execute"
                  Condition="SEAMLYDATACHOSEN" />
@@ -523,6 +573,7 @@
     <ComponentGroupRef Id="UserDataRootFolder" />
     <ComponentGroupRef Id="InstallInfo" />
     <ComponentGroupRef Id="OptionalDesktopShortcuts" />
+    <ComponentGroupRef Id="PerUserSettingsRemoval" />
 
   </Package>
 </Wix>

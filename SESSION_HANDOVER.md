@@ -6,6 +6,80 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## InstWinX64.13 - silent-default data root recording fixed, not yet real-machine verified (2026-08-24)
+
+Testing Case 1b-i of `TEST_INSTALLER_WIN_X64.md` (uninstall, then a `/quiet`
+install with no properties) on this machine found two real defects, both
+fixed on branch `task-silent-install-dataroot` off `run-seamlyLayout`:
+
+1. **`DataParent` recorded as `C:\`.** `smsi_shortcuts.wxs` wrote the raw
+   `[SEAMLYDATAPARENT]` property directly. It is also a Directory id, so
+   `CostFinalize` always resolves it to something - even on a run that chose
+   nothing - the same trap `SEAMLYDATAROOTRECORDED` already existed to avoid
+   for `DataRoot`. Fixed the same way: new `SEAMLYDATAPARENTRECORDED`
+   property, gated on `SEAMLYDATACHOSEN`.
+2. **A bare `/quiet` install (no properties) never created the data root at
+   all.** `SEAMLYDATACHOSEN`'s default-computing `SetProperty` actions ran in
+   the UI sequence only - a deliberate, tested choice (the execute sequence of
+   a genuinely unattended SYSTEM-context deployment has no real user to
+   impersonate, so `PersonalFolder` there is SYSTEM's own profile). But it
+   meant a plain `/quiet` install left `DataRoot` unrecorded, and the apps
+   fell back to their OWN built-in default - `<Documents>\Seamly` - which is a
+   **different folder** than the MSI's own default composition,
+   `<Documents>\SeamlyData`. Confirmed by reading `vcommonsettings.cpp:509`
+   and `smsi_files.wxs:78` side by side; `README-BUILDS.md:78` already
+   documents the two names as deliberately different, reconciled only "on an
+   installed machine" - which a no-properties `/quiet` install turns out not
+   to be.
+
+**Decided with the user 2026-08-24: accept the SYSTEM-profile risk.** The
+execute sequence now computes the same `PersonalFolder`/`%USERPROFILE%`
+default the UI sequence does, so a bare `/quiet` install also creates and
+records `<Documents>\SeamlyData`. A real unattended deployment that cares
+should already pass `SEAMLYDATAPARENT`/`SEAMLYDATAROOT` explicitly - the
+documented escape hatch, unaffected by this change.
+
+**Also added, per the user's follow-up request:** the product's own uninstall
+now removes `%LOCALAPPDATA%\Seamly` and `%APPDATA%\Seamly` (guarded
+`NOT UPGRADINGPRODUCTCODE`, so a version upgrade's `RemoveExistingProducts`
+never wipes them), while `%DATAROOT%` stays untouched on uninstall - unchanged,
+on purpose. And a new test-only script,
+`scripts/packaging/windows/test_reset_environment.ps1`, wipes everything
+including `%DATAROOT%`, for resetting a test machine back to Case 1
+("Not installed") between test-matrix runs - this is deliberately MORE
+destructive than the real uninstall.
+
+**Verified locally, not yet on a real machine.** `wix build` and
+`wix msi validate` (link-only, stub staging tree from today's real
+`scripts\seamly-msi\x64\` build) pass clean except the expected ICE61.
+`smsi_check_authoring.ps1` passes all assertions, including new ones for both
+fixes and for the per-user-settings removal. **InstWinX64.13.5 is open:** a
+real `msiexec /i ... /quiet` with no properties has not been run against this
+build to confirm `<Documents>\SeamlyData` actually gets created and recorded,
+and the uninstall's AppData removal has not been run for real either. The
+user asked to skip further manual/GUI installer testing this session (Seamly2D
+/ SeamlyMe / SeamlyLayout launch-and-verify steps need a human watching the
+screen) - that verification, and the real end-to-end reset-script run, are
+next.
+
+**Process note:** this branch was cut from `run-seamlyLayout` only after the
+`.wxs`/`.ps1` edits were already made, not before - steps 1-2 of the task
+workflow (sync `develop`, merge into `run-seamlyLayout`) were skipped. Several
+unrelated files were already modified uncommitted on `run-seamlyLayout` before
+this session started (`dist/macx/*/Info.plist`,
+`src/app/seamly2d/dialogs/configpages/preferencespathpage.cpp`,
+`src/libs/vmisc/projectversion.{cpp,h}`, `project-docs/TEST_INSTALLER_WIN_X64.md`)
+plus several new untracked `project-docs/TEST_INSTALLER_WIN_X64_Test_Case_*.md`
+files that appeared mid-session from the user's own IDE activity - none of
+that is part of this task and none of it was touched, staged, or committed.
+
+**Real machine state changed this session (all reversible, all recorded in
+`TEST_INSTALLER_WIN_X64_Test_Case_1b-i.md` if that file still holds the
+narrative):** the pre-existing Seamly install (`26.8.32541`) was uninstalled,
+then today's local build (`scripts\seamly-msi\x64\seamly-x64.msi`,
+`/quiet`, no properties) was installed. Left as-is: this is what Case
+1b/1b-i needs installed for the next verification pass anyway.
+
 ## seamly-x64.msi run on a PC with the current suite installed (2026-08-21)
 
 Exploratory installer test, not a tracked task. Machine had Seamly 26.8.28339
