@@ -43,24 +43,24 @@ var NAVTREE =
       ] ]
     ] ],
     [ "SeamlyLayout", "d8/dad/md_src_app_seamlylayout_CLAUDE.html", [
-      [ "Architecture", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md20", null ],
-      [ "Key Conventions", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md21", null ],
-      [ "Command Line — the Seamly2D handoff contract (Task 49)", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md22", null ],
-      [ "Platform Support", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md23", null ],
-      [ "Build Commands", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md24", null ],
-      [ "Search & Update Policy", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md25", null ],
-      [ "Rules", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md26", null ],
-      [ "Workflow Guidelines", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md27", null ],
-      [ "Seamly Application Suite", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md28", null ]
+      [ "Architecture", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md27", null ],
+      [ "Key Conventions", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md28", null ],
+      [ "Command Line — the Seamly2D handoff contract (Task 49)", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md29", null ],
+      [ "Platform Support", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md30", null ],
+      [ "Build Commands", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md31", null ],
+      [ "Search & Update Policy", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md32", null ],
+      [ "Rules", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md33", null ],
+      [ "Workflow Guidelines", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md34", null ],
+      [ "Seamly Application Suite", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md35", null ]
     ] ],
     [ "Fonts for SeamlyLayout", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html", [
-      [ "Required Fonts", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md30", [
-        [ "Comfortaa", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md31", null ],
-        [ "Inter Tight", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md32", null ]
+      [ "Required Fonts", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md21", [
+        [ "Comfortaa", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md22", null ],
+        [ "Inter Tight", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md23", null ]
       ] ],
-      [ "How to Download", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md33", null ],
-      [ "Font Pairing Strategy", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md34", null ],
-      [ "Alternative: Using Google Fonts Package", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md35", null ]
+      [ "How to Download", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md24", null ],
+      [ "Font Pairing Strategy", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md25", null ],
+      [ "Alternative: Using Google Fonts Package", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md26", null ]
     ] ],
     [ "README", "d1/dff/md_src_app_seamlylayout_qt_frontend_node_modules_tailwindcss_README.html", null ],
     [ "README", "df/da2/md_src_app_seamlylayout_README.html", [
@@ -232,7 +232,7 @@ var NAVTREEINDEX =
 "d6/d1a/classMainWindow.html#ab0efcaf54da732a5a5c9a2badf4ec741",
 "d6/d25/classMemBufInputSource.html#aaf0fe1535b049c9c2576519e7d3a5b33",
 "d6/d37/classDOMCommentImpl.html#a512f278cca8dd03fbbae63dff1895131",
-"d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md31",
+"d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md22",
 "d6/d6b/classDOMDocumentTypeImpl.html#a4cc1944e2d2b5c0db7ce0e8c3461d436",
 "d6/d77/classPSVIUni.html#a27e0c879acea8f12ec2bd6b989c6cf04",
 "d6/d7d/classDOMDocumentFragmentImpl.html#a4118bf2d5863eec97a0fa9a37c96998c",
