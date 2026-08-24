@@ -40,6 +40,33 @@ constexpr auto kLegacyPreferencesFolderName = "layout-preferences";
 constexpr auto kLegacyOrganizationName = "Seamly Systems";
 constexpr auto kPreferencesFileName = "qt6_seamlylayout.ini";
 
+#ifdef Q_OS_WIN
+// @brief Read the DataRoot value the Windows installer recorded for SeamlyLayout.
+//
+// smsi_registry.wxs mirrors the same install breadcrumbs Seamly2D's key carries under
+// HKLM\SOFTWARE\Seamly\SeamlyLayout. This is that key's reader — the per-app counterpart to
+// InstallerRecord::dataRoot() (src/libs/vmisc/installer_record.cpp), which SeamlyLayout's
+// standalone CMake/Cargo build does not link against.
+//
+// Registry64Format rather than NativeFormat: the apps are 64-bit today, so the two agree,
+// but the MSI is x64 and always writes the 64-bit view.
+//
+// @return the recorded path cleaned into Qt's '/' separator form; empty when absent, blank,
+// or off Windows.
+QString installerDataRoot()
+{
+    const QSettings installKey(
+        QLatin1String("HKEY_LOCAL_MACHINE\\SOFTWARE\\Seamly\\SeamlyLayout"),
+        QSettings::Registry64Format);
+    const QString recorded = installKey.value(QStringLiteral("DataRoot")).toString().trimmed();
+    if (recorded.isEmpty()) {
+        return QString();
+    } // if nothing recorded
+
+    return QDir::cleanPath(QDir::fromNativeSeparators(recorded));
+} // installerDataRoot
+#endif // Q_OS_WIN
+
 // Forward declaration — defined further down; migrateLegacyOrganizationTree() (added for
 // Task 15) needs it before its definition appears in this file.
 bool copyIfMissing(const QString &sourcePath, const QString &destPath);
@@ -339,6 +366,14 @@ void PreferencesModel::setProjectorPath(const QString &v)
     emit projectorPathChanged();
 } // setProjectorPath
 
+// @brief Set the installer-recorded data root; emits dataRootChanged if changed.
+void PreferencesModel::setDataRoot(const QString &v)
+{
+    if (m_dataRoot == v) return;
+    m_dataRoot = v;
+    emit dataRootChanged();
+} // setDataRoot
+
 // ---------------------------------------------------------------------------
 // load
 // ---------------------------------------------------------------------------
@@ -361,6 +396,7 @@ bool PreferencesModel::load(const QString &path)
         } // if this is not the application preferences file
 
         if (migrateLegacyPreferencesJson(absolutePath)) {
+            adoptInstallerDataRootIfEmpty(absolutePath);
             return true;
         } // if legacy preferences migrated
 
@@ -368,6 +404,7 @@ bool PreferencesModel::load(const QString &path)
             Logger::log(QStringLiteral("PreferencesModel::load(): failed to create the INI file"));
             return false;
         } // if defaults could not be saved
+        adoptInstallerDataRootIfEmpty(absolutePath);
         return true;
     } // if INI file is missing
 
@@ -383,6 +420,7 @@ bool PreferencesModel::load(const QString &path)
     setPdfViewerPath(settings.value(QStringLiteral("pdf_viewer_path"), m_pdfViewerPath).toString());
     setPngViewerPath(settings.value(QStringLiteral("png_viewer_path"), m_pngViewerPath).toString());
     setProjectorPath(settings.value(QStringLiteral("projector_path"), m_projectorPath).toString());
+    setDataRoot(settings.value(QStringLiteral("data_root"), m_dataRoot).toString());
 
     if (settings.status() != QSettings::NoError) {
         Logger::log(QStringLiteral("PreferencesModel::load(): QSettings reported an error"));
@@ -390,6 +428,7 @@ bool PreferencesModel::load(const QString &path)
     } // if read failed
 
     migrateLegacyPreferencePaths();
+    adoptInstallerDataRootIfEmpty(absolutePath);
     Logger::log(QStringLiteral("PreferencesModel::load(): loaded successfully"));
     return true;
 } // load
@@ -421,6 +460,7 @@ bool PreferencesModel::loadJsonPreferences(const QString &path)
     setPdfViewerPath(object.value(QStringLiteral("pdf_viewer_path")).toString(m_pdfViewerPath));
     setPngViewerPath(object.value(QStringLiteral("png_viewer_path")).toString(m_pngViewerPath));
     setProjectorPath(object.value(QStringLiteral("projector_path")).toString(m_projectorPath));
+    setDataRoot(object.value(QStringLiteral("data_root")).toString(m_dataRoot));
 
     migrateLegacyPreferencePaths();
     return true;
@@ -499,6 +539,33 @@ bool PreferencesModel::migrateLegacyPreferencesJson(const QString &iniPath)
     return false;
 } // migrateLegacyPreferencesJson
 
+// @brief Adopt the Windows installer's recorded data root, once, if dataRoot is unset.
+//
+// Mirrors VCommonSettings::initializeDataRoot() (src/libs/vmisc/vcommonsettings.cpp) for
+// Seamly2D/SeamlyMe: the installer's answer outranks nothing already chosen, because once
+// dataRoot holds a value — the installer's or the user's own, set later in Preferences — it
+// is never overwritten here again.
+void PreferencesModel::adoptInstallerDataRootIfEmpty(const QString &iniPath)
+{
+    if (!m_dataRoot.isEmpty()) {
+        return;
+    } // if already set — installer read never overrides an existing value
+
+#ifdef Q_OS_WIN
+    const QString fromInstaller = installerDataRoot();
+    if (fromInstaller.isEmpty()) {
+        return;
+    } // if the installer recorded nothing
+
+    setDataRoot(fromInstaller);
+    save(iniPath);
+    Logger::log(QStringLiteral("PreferencesModel::adoptInstallerDataRootIfEmpty(): adopted ")
+                + fromInstaller);
+#else
+    Q_UNUSED(iniPath);
+#endif
+} // adoptInstallerDataRootIfEmpty
+
 // ---------------------------------------------------------------------------
 // save
 // ---------------------------------------------------------------------------
@@ -525,6 +592,7 @@ bool PreferencesModel::save(const QString &path)
     settings.setValue(QStringLiteral("pdf_viewer_path"), m_pdfViewerPath);
     settings.setValue(QStringLiteral("png_viewer_path"), m_pngViewerPath);
     settings.setValue(QStringLiteral("projector_path"), m_projectorPath);
+    settings.setValue(QStringLiteral("data_root"), m_dataRoot);
     settings.sync();
 
     const bool saved = settings.status() == QSettings::NoError;
