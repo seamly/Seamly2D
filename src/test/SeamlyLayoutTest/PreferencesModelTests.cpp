@@ -78,6 +78,10 @@ private slots:
     void dataRoot_roundTripsThroughIni();
     void dataRoot_emitsSignalOnChange();
     void dataRoot_load_preservesExistingValue();
+    void dataRoot_resolvedInputDirectory_nestsUnderDataRoot();
+    void dataRoot_resolvedLayoutDirectory_nestsUnderDataRoot();
+    void dataRoot_resolvedInputDirectory_configuredValueWins();
+    void dataRoot_resolvedLayoutDirectory_configuredValueWins();
 
     void parseViewerCommand_emptyReturnsEmpty();
     void parseViewerCommand_existingFileWithSpaces_singleToken();
@@ -339,6 +343,70 @@ void PreferencesModelTests::dataRoot_load_preservesExistingValue()
     PreferencesModel reader2;
     QVERIFY(reader2.load(path));
     QCOMPARE(reader2.dataRoot(), QStringLiteral("C:/Users/example/Documents/SeamlyData"));
+}
+
+// @brief With no inputDirectory configured, a set dataRoot becomes <dataRoot>/input.
+void PreferencesModelTests::dataRoot_resolvedInputDirectory_nestsUnderDataRoot()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+
+    PreferencesModel m;
+    m.setDataRoot(tempDir.path());
+    const QString expected = QDir(tempDir.path()).filePath(QStringLiteral("input"));
+
+    const QString resolved = m.resolvedInputDirectory();
+
+    QCOMPARE(QFileInfo(resolved).absoluteFilePath(), QFileInfo(expected).absoluteFilePath());
+    QVERIFY(QFileInfo::exists(resolved));
+}
+
+// @brief With no layoutDirectory configured, a set dataRoot becomes <dataRoot>/output.
+void PreferencesModelTests::dataRoot_resolvedLayoutDirectory_nestsUnderDataRoot()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+
+    PreferencesModel m;
+    m.setDataRoot(tempDir.path());
+    const QString expected = QDir(tempDir.path()).filePath(QStringLiteral("output"));
+
+    const QString resolved = m.resolvedLayoutDirectory();
+
+    QCOMPARE(QFileInfo(resolved).absoluteFilePath(), QFileInfo(expected).absoluteFilePath());
+    QVERIFY(QFileInfo::exists(resolved));
+}
+
+// @brief A configured inputDirectory outranks dataRoot — the user's own choice always wins.
+void PreferencesModelTests::dataRoot_resolvedInputDirectory_configuredValueWins()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString configuredDir = tempDir.filePath(QStringLiteral("my_input"));
+
+    PreferencesModel m;
+    m.setDataRoot(tempDir.filePath(QStringLiteral("SeamlyData")));
+    m.setInputDirectory(configuredDir);
+
+    const QString resolved = m.resolvedInputDirectory();
+
+    QCOMPARE(QFileInfo(resolved).absoluteFilePath(), QFileInfo(configuredDir).absoluteFilePath());
+}
+
+// @brief A configured layoutDirectory outranks dataRoot — the user's own choice always wins.
+void PreferencesModelTests::dataRoot_resolvedLayoutDirectory_configuredValueWins()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString configuredDir = tempDir.filePath(QStringLiteral("my_output"));
+
+    PreferencesModel m;
+    m.setDataRoot(tempDir.filePath(QStringLiteral("SeamlyData")));
+    m.setLayoutDirectory(configuredDir);
+
+    const QString resolved = m.resolvedLayoutDirectory();
+
+    QCOMPARE(QFileInfo(resolved).absoluteFilePath(), QFileInfo(configuredDir).absoluteFilePath());
 }
 
 // ---------------------------------------------------------------------------

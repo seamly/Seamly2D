@@ -6,6 +6,30 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## SeamlyLayout's dataRoot now feeds resolvedInputDirectory/resolvedLayoutDirectory (2026-08-24)
+
+Follow-up to the entry directly below. `dataRoot` was adopted from the registry
+but stored inert. Wired it in — priority order unchanged elsewhere, new tier
+inserted between "configured value" and "exeDir/AppConfigLocation fallback":
+
+1. `input_directory`/`layout_directory` if configured — the user's own choice, unchanged.
+2. **New:** `<dataRoot>/input` or `<dataRoot>/output`, if `dataRoot` is set.
+3. `<exeDir>/input`/`/output` (macOS/AppImage/Flatpak-aware AppConfigLocation
+   fallback) — unchanged.
+
+Correction to the note below: **InstWinX64.5.2 was the wrong task reference.**
+That item is "Decide whether `paths/pattern` and `paths/layout` are shared or
+per-app" under "InstWinX64.5 — Correct Application Settings" — Seamly2D/SeamlyMe's
+own `VSettings` accessors falling back to `%APPDATA%\Unknown Organization.ini`,
+unrelated to SeamlyLayout's `PreferencesModel`. No open decision actually
+blocked this wiring; it just hadn't been done yet.
+
+**Verified:** `cmake --build --preset debug` succeeded; `ctest --preset debug` —
+5/5 suites pass, including `PreferencesModelTests` with 4 new cases
+(`dataRoot_resolvedInputDirectory_nestsUnderDataRoot`,
+`dataRoot_resolvedLayoutDirectory_nestsUnderDataRoot`, and the two
+`_configuredValueWins` priority tests).
+
 ## SeamlyLayout reads its own mirrored DataRoot key (2026-08-24)
 
 User request: SeamlyMe/SeamlyLayout registry keys were mirrored (previous

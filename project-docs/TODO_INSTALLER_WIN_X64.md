@@ -359,7 +359,7 @@ Interactive verification is done. See InstWinX64.1.6.
 - [x] **InstWinX64.2.10** Copy without overwrite or source deletion.
 - [x] **InstWinX64.2.11** Persist program and data paths through repair and upgrade. Data half 2026-08-18, program half 2026-08-19.
 - [ ] **InstWinX64.2.12** Register one shared data-root setting.
-- [x] **InstWinX64.2.13** Make all three apps honor the configured data root. Done by InstWinX64.00: `InstallerRecord::dataRoot()` reads the recorded root and `initializeDataRoot()` adopts it, which covers seamly2d and seamlyme. 2026-08-24: SeamlyLayout now reads its own mirrored key (`HKLM\SOFTWARE\Seamly\SeamlyLayout`) via `PreferencesModel::adoptInstallerDataRootIfEmpty()` into a new `dataRoot` property/`data_root` INI key, stored but not yet consumed by `resolvedInputDirectory()`/`resolvedLayoutDirectory()` — see InstWinX64.5.2.
+- [x] **InstWinX64.2.13** Make all three apps honor the configured data root. Done by InstWinX64.00: `InstallerRecord::dataRoot()` reads the recorded root and `initializeDataRoot()` adopts it, which covers seamly2d and seamlyme. 2026-08-24: SeamlyLayout now reads its own mirrored key (`HKLM\SOFTWARE\Seamly\SeamlyLayout`) via `PreferencesModel::adoptInstallerDataRootIfEmpty()` into a new `dataRoot` property/`data_root` INI key, and `resolvedInputDirectory()`/`resolvedLayoutDirectory()` nest under `<dataRoot>/input` and `<dataRoot>/output` when no per-directory value is configured (InstWinX64.5.2 is unrelated — it is about Seamly2D/SeamlyMe's own `paths/pattern`/`paths/layout` `VSettings` keys, not SeamlyLayout's PreferencesModel).
 - [x] **InstWinX64.2.14** Create the selected data root during installation. Keep it and its contents during uninstall.
 
 #### Result — 2026-08-18

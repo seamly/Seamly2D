@@ -170,18 +170,18 @@ public:
     Q_INVOKABLE QString resolvedSettingsDirectory() const;
 
     // @brief Return the resolved input SVG directory path.
-    // Uses `input_directory` when configured; otherwise falls back to
-    // <exeDir>/input (AppConfigLocation root on macOS, or at runtime inside a read-only Linux
-    // AppImage mount or Flatpak /app prefix — see Task 16 / 17 / 18). Relative configured paths
-    // are resolved against AppConfigLocation (never process working directory). Ensures the
-    // directory exists before returning.
+    // Uses `input_directory` when configured; otherwise falls back to <dataRoot>/input when
+    // dataRoot is set; otherwise <exeDir>/input (AppConfigLocation root on macOS, or at
+    // runtime inside a read-only Linux AppImage mount or Flatpak /app prefix — see Task 16 /
+    // 17 / 18). Relative configured paths are resolved against AppConfigLocation (never
+    // process working directory). Ensures the directory exists before returning.
     Q_INVOKABLE QString resolvedInputDirectory() const;
 
     // @brief Return the resolved layout output directory path.
     // Uses the directory configured in qt6_seamlylayout.ini (`layout_directory`) when set.
-    // Falls back to <exeDir>/output when the configured value is empty (AppConfigLocation
-    // root on macOS, or at runtime inside a read-only Linux AppImage mount or Flatpak /app
-    // prefix — see Task 16 / 17 / 18).
+    // Falls back to <dataRoot>/output when dataRoot is set; otherwise <exeDir>/output
+    // (AppConfigLocation root on macOS, or at runtime inside a read-only Linux AppImage mount
+    // or Flatpak /app prefix — see Task 16 / 17 / 18).
     // Relative configured paths are resolved against AppConfigLocation.
     // Ensures the returned directory exists by creating it if needed.
     Q_INVOKABLE QString resolvedLayoutDirectory() const;
