@@ -669,3 +669,36 @@ package the desktop app as an msix and submit it through the official developer 
 - [ ] **InstWinX64.12.3** Associate and Sign: Link your Visual Studio project or package with your reserved store name and sign it with a verified certificate.
 - [ ] **InstWinX64.12.4** Submit: Upload the package file, fill out the store listing details (icons, descriptions, screenshots), and submit it for certificatio
 - [ ] **InstWin64.12.5** Automating submissions via the Microsoft Store Submission API
+
+## InstWinX64.13 - Fix silent-default data root recording
+
+Found running Case 1b-i of `TEST_INSTALLER_WIN_X64.md`: a `/quiet` install with
+no properties left `DataParent` recorded as `C:\` (a directory-id resolution
+trap), and left `DataRoot` unrecorded, so the apps fell back to their own
+`<Documents>\Seamly` default while the MSI's own default composition is
+`<Documents>\SeamlyData` - the two disagreeing on the exact scenario
+InstWinX64.10.1/10.2 test.
+
+- [x] **InstWinX64.13.1** Guard the `DataParent` registry write with
+  `SEAMLYDATAPARENTRECORDED`, mirroring `SEAMLYDATAROOTRECORDED` - a directory
+  id always resolves after `CostFinalize`, so the raw property is never safe
+  to write directly.
+- [x] **InstWinX64.13.2** Compute the `SEAMLYDATAPARENT`/`SEAMLYDATAROOT`
+  default in the execute sequence too, not just the UI sequence, so a bare
+  `/quiet` install also creates and records `<Documents>\SeamlyData`. Decided
+  2026-08-24: accept the SYSTEM-profile risk for a genuinely unattended
+  deployment (no properties passed) rather than leave silent and interactive
+  defaults disagreeing - see the comment above `SEAMLYDATAPARENT` in
+  `smsi.wxs`.
+- [x] **InstWinX64.13.3** Remove `%LOCALAPPDATA%\Seamly` and `%APPDATA%\Seamly`
+  on a genuine uninstall (guarded `NOT UPGRADINGPRODUCTCODE` so a version
+  upgrade never wipes them). `%DATAROOT%` stays untouched on uninstall, on
+  purpose.
+- [x] **InstWinX64.13.4** `smsi_check_authoring.ps1` updated: new/changed
+  assertions for both fixes, all passing against a link-only stub build.
+- [ ] **InstWinX64.13.5** Verify on a real machine: a genuinely fresh
+  `msiexec /i ... /quiet` install (no properties) creates and records
+  `<Documents>\SeamlyData`, and `msiexec /x` leaves it in place while removing
+  the AppData folders. Not done this session - see
+  `scripts/packaging/windows/test_reset_environment.ps1` for resetting the
+  test machine between runs.
