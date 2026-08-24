@@ -75,6 +75,10 @@ private slots:
     void projectorPath_roundTripsThroughIni();
     void projectorPath_emitsSignalOnChange();
 
+    void dataRoot_roundTripsThroughIni();
+    void dataRoot_emitsSignalOnChange();
+    void dataRoot_load_preservesExistingValue();
+
     void parseViewerCommand_emptyReturnsEmpty();
     void parseViewerCommand_existingFileWithSpaces_singleToken();
     void parseViewerCommand_fileUrlPrefix_strippedAndResolved();
@@ -273,6 +277,68 @@ void PreferencesModelTests::projectorPath_emitsSignalOnChange()
     // Distinct value emits again.
     m.setProjectorPath(QStringLiteral("http://other.example/"));
     QCOMPARE(spy.count(), 2);
+}
+
+// ---------------------------------------------------------------------------
+// dataRoot — the Windows installer's recorded data root (adopted by
+// adoptInstallerDataRootIfEmpty()). These tests cover the property itself and
+// the "never overwrite an existing value" contract; the registry read is
+// Windows-only and machine-dependent, so it is not exercised directly here.
+// ---------------------------------------------------------------------------
+
+void PreferencesModelTests::dataRoot_roundTripsThroughIni()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString path = tempDir.filePath(QStringLiteral("preferences.ini"));
+
+    PreferencesModel writer;
+    writer.setDataRoot(QStringLiteral("C:/Users/example/Documents/SeamlyData"));
+    QVERIFY(writer.save(path));
+
+    PreferencesModel reader;
+    QVERIFY(reader.load(path));
+    QCOMPARE(reader.dataRoot(), QStringLiteral("C:/Users/example/Documents/SeamlyData"));
+}
+
+void PreferencesModelTests::dataRoot_emitsSignalOnChange()
+{
+    PreferencesModel m;
+    QSignalSpy spy(&m, &PreferencesModel::dataRootChanged);
+    QVERIFY(spy.isValid());
+
+    m.setDataRoot(QStringLiteral("C:/SeamlyData"));
+    QCOMPARE(spy.count(), 1);
+
+    // Same value does not re-emit.
+    m.setDataRoot(QStringLiteral("C:/SeamlyData"));
+    QCOMPARE(spy.count(), 1);
+
+    // Distinct value emits again.
+    m.setDataRoot(QStringLiteral("C:/OtherData"));
+    QCOMPARE(spy.count(), 2);
+}
+
+// @brief A dataRoot already present in the INI must survive load() unchanged —
+// adoptInstallerDataRootIfEmpty() only fills an empty value, never overwrites one.
+void PreferencesModelTests::dataRoot_load_preservesExistingValue()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString path = tempDir.filePath(QStringLiteral("preferences.ini"));
+
+    PreferencesModel writer;
+    writer.setDataRoot(QStringLiteral("C:/Users/example/Documents/SeamlyData"));
+    QVERIFY(writer.save(path));
+
+    PreferencesModel reader;
+    QVERIFY(reader.load(path));
+    QCOMPARE(reader.dataRoot(), QStringLiteral("C:/Users/example/Documents/SeamlyData"));
+
+    // Loading again must not perturb the already-set value.
+    PreferencesModel reader2;
+    QVERIFY(reader2.load(path));
+    QCOMPARE(reader2.dataRoot(), QStringLiteral("C:/Users/example/Documents/SeamlyData"));
 }
 
 // ---------------------------------------------------------------------------

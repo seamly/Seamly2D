@@ -12,7 +12,7 @@
 // INI keys use snake_case for compatibility with legacy preferences JSON:
 //   input_directory, layout_directory, preferences_directory,
 //   settings_directory, settings_file, preferences_file,
-//   dxf_viewer_path, pdf_viewer_path, png_viewer_path
+//   dxf_viewer_path, pdf_viewer_path, png_viewer_path, data_root
 //
 // Registration:
 //   Registered at runtime in main.cpp:
@@ -70,6 +70,12 @@ class PreferencesModel : public QObject
     // ).
     Q_PROPERTY(QString projectorPath   READ projectorPath   WRITE setProjectorPath   NOTIFY projectorPathChanged)
 
+    // @brief The user-data root the Windows installer recorded, adopted on first run.
+    // Empty when no installer recorded one (unpackaged build, non-Windows) or the user
+    // has not been offered one yet; a value set here or by the user in Preferences is
+    // never overwritten by a later installer read (see load()/adoptInstallerDataRootIfEmpty()).
+    Q_PROPERTY(QString dataRoot        READ dataRoot        WRITE setDataRoot        NOTIFY dataRootChanged)
+
 public:
     explicit PreferencesModel(QObject *parent = nullptr);
 
@@ -84,6 +90,7 @@ public:
     QString pdfViewerPath()   const { return m_pdfViewerPath;   }
     QString pngViewerPath()   const { return m_pngViewerPath;   }
     QString projectorPath()   const { return m_projectorPath;   }
+    QString dataRoot()        const { return m_dataRoot;        }
 
     // Setters
     void setInputDirectory(const QString &v);
@@ -96,6 +103,7 @@ public:
     void setPdfViewerPath(const QString &v);
     void setPngViewerPath(const QString &v);
     void setProjectorPath(const QString &v);
+    void setDataRoot(const QString &v);
 
     // @brief Load preferences from an INI file or a legacy JSON defaults file.
     // @param path Absolute or relative file path.
@@ -252,6 +260,7 @@ signals:
     void pdfViewerPathChanged();
     void pngViewerPathChanged();
     void projectorPathChanged();
+    void dataRootChanged();
 
 private:
     /// @brief Load a JSON defaults file or a legacy preferences file.
@@ -267,6 +276,12 @@ private:
     /// @return true when values were imported and saved.
     bool migrateLegacyPreferencesJson(const QString &iniPath);
 
+    /// @brief Adopt the Windows installer's recorded data root, once, if dataRoot is unset.
+    /// No-op when dataRoot is already set (the user's own choice always wins), when no
+    /// installer value was recorded, or off Windows. Persists the adopted value to iniPath.
+    /// @param iniPath Absolute application preferences INI path to save into on adoption.
+    void adoptInstallerDataRootIfEmpty(const QString &iniPath);
+
     // Fields — defaults match AppSettings::default() in Rust
     QString m_inputDirectory  = QStringLiteral("");
     QString m_layoutDirectory = QStringLiteral("");
@@ -278,4 +293,5 @@ private:
     QString m_pdfViewerPath   = QStringLiteral("");
     QString m_pngViewerPath   = QStringLiteral("");
     QString m_projectorPath   = QStringLiteral("");
+    QString m_dataRoot        = QStringLiteral("");
 }; // PreferencesModel

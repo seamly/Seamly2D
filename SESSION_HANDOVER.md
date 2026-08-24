@@ -6,6 +6,41 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## SeamlyLayout reads its own mirrored DataRoot key (2026-08-24)
+
+User request: SeamlyMe/SeamlyLayout registry keys were mirrored (previous
+entry below) but nothing read them — `InstallerRecord::dataRoot()` still
+hard-coded the Seamly2D key, and SeamlyLayout's standalone CMake/Cargo build
+does not link `vmisc`, so it could not call that reader anyway.
+
+Added, in `src/app/seamlylayout/qt_frontend/src/PreferencesModel.{h,cpp}`:
+
+- A new `dataRoot` Q_PROPERTY / `data_root` INI key, round-tripped through
+  `load()`/`save()`/`loadJsonPreferences()` alongside the existing preference fields.
+- `installerDataRoot()` (anonymous namespace, `Q_OS_WIN`-guarded): reads
+  `HKLM\SOFTWARE\Seamly\SeamlyLayout\DataRoot` via `QSettings::Registry64Format`,
+  mirroring `InstallerRecord::dataRoot()` (`src/libs/vmisc/installer_record.cpp:40`)
+  but scoped to SeamlyLayout's own mirrored key.
+- `PreferencesModel::adoptInstallerDataRootIfEmpty(iniPath)`: adopts the
+  installer value once, only when `dataRoot` is still empty, then persists it —
+  same never-overwrite contract as `VCommonSettings::initializeDataRoot()`.
+  Called from every `load()` success path (existing INI, freshly-defaulted INI,
+  legacy-JSON-migrated INI).
+
+**Not wired further.** `resolvedInputDirectory()`/`resolvedLayoutDirectory()`
+still resolve independently of `dataRoot` — whether SeamlyLayout's
+input/output folders should nest under it is InstWinX64.5.2 (still open:
+"Decide whether `paths/pattern` and `paths/layout` are shared or per-app").
+This task only gives the value a place to land.
+
+**Verified:** `cmake --build --preset debug` (qt_frontend) succeeded;
+`ctest --preset debug` — 5/5 suites passed, including 3 new `PreferencesModelTests`
+(`dataRoot_roundTripsThroughIni`, `dataRoot_emitsSignalOnChange`,
+`dataRoot_load_preservesExistingValue`); `cargo test --workspace` — all passed
+(no Rust changed). The registry read itself was not exercised against a real
+`HKLM\SOFTWARE\Seamly\SeamlyLayout` key — no local machine has that key set
+outside a real MSI install.
+
 ## Install-info registry mirrored to SeamlyMe and SeamlyLayout keys (2026-08-24)
 
 User request, not a tracked `TODO_*.md` item: the MSI wrote install breadcrumbs
