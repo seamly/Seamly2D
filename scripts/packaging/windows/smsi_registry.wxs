@@ -4,8 +4,9 @@
  **  @author slspencer
  **  @date   2026-08-24
  **
- **  @brief  The install-info registry values the apps read on first run, and
- **          the per-user settings removal that runs on a genuine uninstall.
+ **  @brief  The install-info registry values written under each app's own
+ **          HKLM\SOFTWARE\Seamly\<App> key, and the per-user settings
+ **          removal that runs on a genuine uninstall.
  **
  **  Split out of smsi_shortcuts.wxs, which until this file existed held these
  **  components alongside the desktop shortcuts - a name describing only one
@@ -29,7 +30,11 @@
     <ComponentGroup Id="InstallInfo" Directory="INSTALLFOLDER">
 
       <!-- Install breadcrumbs: read by upgrades and by the Task 14 installer
-           prompts; removed on uninstall automatically (component rules). -->
+           prompts; removed on uninstall automatically (component rules).
+           Seamly2D is the canonical copy - InstallerRecord::dataRoot() and
+           the SEAMLYINSTALLEDVERSION / InstalledDisplayVersionSearch upgrade
+           check in smsi.wxs both read this key specifically. Do not repoint
+           either of those at SeamlyMe or SeamlyLayout. -->
       <Component Id="InstallInfoRegistry">
         <RegistryKey Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D">
           <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
@@ -50,6 +55,31 @@
                the time this runs (sequence 5000, after CostFinalize), even on
                a run that chose nothing. SEAMLYDATAPARENTRECORDED is empty
                unless SEAMLYDATACHOSEN - see smsi.wxs. -->
+          <RegistryValue Name="DataParent" Type="string" Value="[SEAMLYDATAPARENTRECORDED]" />
+        </RegistryKey>
+      </Component>
+
+      <!-- Same breadcrumbs, mirrored under each sibling app's own key so a
+           registry lookup scoped to SeamlyMe or SeamlyLayout finds its own
+           InstallPath/DisplayVersion/DataRoot/DataParent instead of having to
+           know to look under Seamly2D. Nothing in this repo reads these two
+           copies yet (InstallerRecord::dataRoot() still hard-codes the
+           Seamly2D key) - they exist for external tooling and for future
+           per-app readers. -->
+      <Component Id="InstallInfoRegistrySeamlyMe">
+        <RegistryKey Root="HKLM" Key="SOFTWARE\Seamly\SeamlyMe">
+          <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
+          <RegistryValue Name="DisplayVersion" Type="string" Value="$(var.DisplayVersion)" />
+          <RegistryValue Name="DataRoot" Type="string" Value="[SEAMLYDATAROOTRECORDED]" />
+          <RegistryValue Name="DataParent" Type="string" Value="[SEAMLYDATAPARENTRECORDED]" />
+        </RegistryKey>
+      </Component>
+
+      <Component Id="InstallInfoRegistrySeamlyLayout">
+        <RegistryKey Root="HKLM" Key="SOFTWARE\Seamly\SeamlyLayout">
+          <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
+          <RegistryValue Name="DisplayVersion" Type="string" Value="$(var.DisplayVersion)" />
+          <RegistryValue Name="DataRoot" Type="string" Value="[SEAMLYDATAROOTRECORDED]" />
           <RegistryValue Name="DataParent" Type="string" Value="[SEAMLYDATAPARENTRECORDED]" />
         </RegistryKey>
       </Component>

@@ -6,6 +6,32 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## Install-info registry mirrored to SeamlyMe and SeamlyLayout keys (2026-08-24)
+
+User request, not a tracked `TODO_*.md` item: the MSI wrote install breadcrumbs
+(`InstallPath`, `DisplayVersion`, `DataRoot`, `DataParent`) only under
+`HKLM\SOFTWARE\Seamly\Seamly2D`. Added two more components in
+`smsi_registry.wxs` (`InstallInfoRegistrySeamlyMe`, `InstallInfoRegistrySeamlyLayout`)
+writing the same four values under `HKLM\SOFTWARE\Seamly\SeamlyMe` and
+`HKLM\SOFTWARE\Seamly\SeamlyLayout`. Seamly2D's key stays canonical -
+`InstallerRecord::dataRoot()` (`src/libs/vmisc/installer_record.cpp:40`) and
+the `SEAMLYINSTALLEDVERSION` upgrade check in `smsi.wxs` still read only that
+key; the two new copies are not read by anything in-repo yet.
+
+Added matching assertions to `smsi_check_authoring.ps1` (the four values
+present under each of the two new keys).
+`project-docs/TEST_INSTALLER_WIN_X64_Test_Case_1b-i.md` step 4b already
+expected all three keys (pre-existing uncommitted edit at session start,
+unrelated to this change but consistent with it).
+
+**Verified:** `smsi_registry.wxs` is well-formed XML;
+`smsi_check_authoring.ps1` parses clean. **Not verified:** no local release
+builds of the three apps existed to run `smsi.ps1` / `wix build` /
+`smsi_check_authoring.ps1` for real (Seamly2D/SeamlyMe have no local build
+script - see CLAUDE.md). Full CI (`ci.yml` windows-msi job, both
+architectures) is the first real verification - pushed without `skip-ci`
+because `scripts/packaging/**` changed.
+
 ## InstWinX64.13 - silent-default data root recording fixed, not yet real-machine verified (2026-08-24)
 
 Testing Case 1b-i of `TEST_INSTALLER_WIN_X64.md` (uninstall, then a `/quiet`
