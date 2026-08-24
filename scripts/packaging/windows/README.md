@@ -17,7 +17,7 @@ WiX authoring and build instructions for the Windows `.msi` installer that ships
 
 ## Source layout
 
-The authoring was one 1,142-line file until 2026-08-15. It is now one package file plus four fragments:
+The authoring was one 1,142-line file until 2026-08-15. It is now one package file plus five fragments (`smsi_registry.wxs` split out of `smsi_shortcuts.wxs` on 2026-08-24 — "shortcuts" never described the registry values or the per-user settings removal it also held):
 
 | File | Holds |
 |---|---|
@@ -25,13 +25,14 @@ The authoring was one 1,142-line file until 2026-08-15. It is now one package fi
 | `smsi_ui.wxs` | the wizard — its dialogs and every transition |
 | `smsi_legacy.wxs` | finding and removing the pre-MSI installation |
 | `smsi_files.wxs` | directory tree, executables, Start Menu shortcuts, file associations |
-| `smsi_shortcuts.wxs` | optional desktop shortcuts, install-info registry values |
+| `smsi_shortcuts.wxs` | optional desktop shortcuts only |
+| `smsi_registry.wxs` | install-info registry values, and per-user settings removal (`%LOCALAPPDATA%\Seamly`, `%APPDATA%\Seamly`) on a genuine uninstall |
 
 **Two ways to break this silently.** `wix build` links the files it is handed, and a WiX fragment that nothing references is discarded without a diagnostic. Drop a source file from the command line, or delete a `ComponentGroupRef`/`UIRef` from `smsi.wxs`, and the build still succeeds — the MSI simply lacks that whole area. There is no error, no warning.
 
 Two things guard it. `smsi.ps1` globs `*.wxs` rather than naming files, so a new fragment needs no change there. `smsi_check_authoring.ps1` reads the *built* MSI and asserts the rows exist, so a lost fragment fails the build.
 
-`<Package>` cannot live in a fragment, and neither can `MajorUpgrade`, `MediaTemplate` or `SummaryInformation`. That is why there are four fragments and not five.
+`<Package>` cannot live in a fragment, and neither can `MajorUpgrade`, `MediaTemplate` or `SummaryInformation`. That is why the package file cannot itself be a fragment.
 
 The split was verified by dumping all 37 MSI tables before and after and diffing them: identical, component GUIDs included.
 
