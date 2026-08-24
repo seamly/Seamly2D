@@ -1,6 +1,9 @@
 var classPreferencesModel =
 [
     [ "PreferencesModel", "d9/d4e/classPreferencesModel.html#aa3c1ee7e93ee05820f263f308cfacf47", null ],
+    [ "adoptInstallerDataRootIfEmpty", "d9/d4e/classPreferencesModel.html#a0a02a12b97394656e9ff70f51201cbbc", null ],
+    [ "dataRoot", "d9/d4e/classPreferencesModel.html#a227bc1bc361753cbdd98b33f09477726", null ],
+    [ "dataRootChanged", "d9/d4e/classPreferencesModel.html#ade2babc45c04540c13230624dc3558de", null ],
     [ "defaultInputFolderUrl", "d9/d4e/classPreferencesModel.html#a82fef5c4a0a7d2ca451c6a23b61c35b0", null ],
     [ "defaultPreferencesFilePath", "d9/d4e/classPreferencesModel.html#a0403794c1cb278e2eed340ecbb819798", null ],
     [ "dxfTeachingFilePath", "d9/d4e/classPreferencesModel.html#aab6fb523d56ba28c25102ff55120d535", null ],
@@ -37,6 +40,7 @@ var classPreferencesModel =
     [ "resolvedLayoutDirectory", "d9/d4e/classPreferencesModel.html#aea87ac4fcf264a1e404933c940ec934b", null ],
     [ "resolvedSettingsDirectory", "d9/d4e/classPreferencesModel.html#aa4f4bfd5276d91a244ba1efc76b2b28f", null ],
     [ "save", "d9/d4e/classPreferencesModel.html#a646e5a0d50d9e84789bc6056dea32d04", null ],
+    [ "setDataRoot", "d9/d4e/classPreferencesModel.html#a469f1f0f0cf197ef5346ed417bb1accb", null ],
     [ "setDxfViewerPath", "d9/d4e/classPreferencesModel.html#ac8edecd740b31f4755c1366a0f0db32f", null ],
     [ "setInputDirectory", "d9/d4e/classPreferencesModel.html#ae6b13beddc3335f404a56ea1af9588b0", null ],
     [ "setLayoutDirectory", "d9/d4e/classPreferencesModel.html#ac3100db80cf2446bc8438cd310196bb2", null ],
@@ -53,6 +57,7 @@ var classPreferencesModel =
     [ "settingsFileChanged", "d9/d4e/classPreferencesModel.html#a4d8dd7e26bd4245bd69c5f7f8e68ce3a", null ],
     [ "settingsFilePath", "d9/d4e/classPreferencesModel.html#a9309273dea7ee36ebab122191d315e65", null ],
     [ "urlToLocalFile", "d9/d4e/classPreferencesModel.html#accb26a11c72b8c62433ef224bbf949f4", null ],
+    [ "m_dataRoot", "d9/d4e/classPreferencesModel.html#a016a0c0f90d910aa310463200fcd1687", null ],
     [ "m_dxfViewerPath", "d9/d4e/classPreferencesModel.html#ad3607ba755275372707ee4e87c6bd328", null ],
     [ "m_inputDirectory", "d9/d4e/classPreferencesModel.html#a1d8046ff306e83b5b7fd71c1de7b46e0", null ],
     [ "m_layoutDirectory", "d9/d4e/classPreferencesModel.html#a146bcfe98a2a1a37247c7120be369166", null ],
@@ -63,6 +68,7 @@ var classPreferencesModel =
     [ "m_projectorPath", "d9/d4e/classPreferencesModel.html#aa6f99072707a699136916798e14844bd", null ],
     [ "m_settingsDirectory", "d9/d4e/classPreferencesModel.html#a120be59be79b90cadde94f13a2cef44b", null ],
     [ "m_settingsFile", "d9/d4e/classPreferencesModel.html#a560a2e08d6cd2826019a9aea86458f06", null ],
+    [ "dataRoot", "d9/d4e/classPreferencesModel.html#a101d33614b4a9fb1d2729afa9e574976", null ],
     [ "dxfViewerPath", "d9/d4e/classPreferencesModel.html#a9199ca72b93f9b9302983f84289e42ce", null ],
     [ "inputDirectory", "d9/d4e/classPreferencesModel.html#a6bf168653f1537d6b25bf3cd9eac94c8", null ],
     [ "layoutDirectory", "d9/d4e/classPreferencesModel.html#aa18c83ac2331518e80c33c6f30044137", null ],

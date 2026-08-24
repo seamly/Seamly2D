@@ -1,7 +1,7 @@
 <map id="PreferencesController" name="PreferencesController">
-<area shape="rect" id="node1" title="QML&#45;accessible controller that owns and manages PreferencesWindow." alt="" coords="21,1219,209,1355"/>
+<area shape="rect" id="node1" title="QML&#45;accessible controller that owns and manages PreferencesWindow." alt="" coords="21,1277,209,1413"/>
 <area shape="rect" id="node2" title=" " alt="" coords="5,5,80,83"/>
-<area shape="rect" id="node5" href="$d9/d4e/classPreferencesModel.html" title=" " alt="" coords="64,132,307,840"/>
-<area shape="rect" id="node3" href="$d9/da8/classPreferencesWindow.html" title="QtWidgets preferences dialog with Seamly violet branding." alt="" coords="210,903,393,1156"/>
-<area shape="rect" id="node4" title=" " alt="" coords="331,447,405,525"/>
+<area shape="rect" id="node5" href="$d9/d4e/classPreferencesModel.html" title=" " alt="" coords="64,132,307,899"/>
+<area shape="rect" id="node3" href="$d9/da8/classPreferencesWindow.html" title="QtWidgets preferences dialog with Seamly violet branding." alt="" coords="210,961,393,1215"/>
+<area shape="rect" id="node4" title=" " alt="" coords="331,477,405,554"/>
 </map>
