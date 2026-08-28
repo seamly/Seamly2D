@@ -2,6 +2,21 @@
 
 Test plan for the Windows x64 Seamly MSI. Covers `scripts/packaging/windows/smsi.wxs`.
 
+## Status (2026-08-24)
+
+- **Build available, not yet installed or verified.** `scripts\seamly-msi\x64\seamly-x64.msi`
+  (164.6 MB, version 26.8.24.982) was built locally this session — `wix build`, `wix msi validate`
+  (clean except the expected ICE61), `smsi_check_authoring.ps1`, and the user-data migration test
+  (15 passed, 0 failed) all passed. arm64 was not built (needs the native `windows-11-arm` CI
+  runner).
+- This build carries the `InstWinX64.13` fixes (`DataParent`/`DataRoot` recording for a
+  no-properties `/quiet` install, `%LOCALAPPDATA%\Seamly` / `%APPDATA%\Seamly` removal on
+  uninstall) — see `TODO_INSTALLER_WIN_X64.md`. **`InstWinX64.13.5` is the real-machine
+  verification this test case exists to close, and it has not been run this session.**
+- None of the checkboxes below (1a, 1b, 1b-i, or the Verification Suite) have been executed
+  against this build. Reset the test machine with
+  `scripts/packaging/windows/test_reset_environment.ps1` before running Case 1b-i.
+
 ## Variable Names
 
 The three names in the request are not real environment variables. Corrected below.
