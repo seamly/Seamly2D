@@ -796,3 +796,19 @@ for the run detail behind each item below.
 `InstWinX64.6.1` (`DisplayIcon` empty despite authored `ARPPRODUCTICON`) and
 `InstWinX64.6.15` (stale `DisplayName` assertion) were also reproduced this run — see
 notes under each.
+
+## InstWinX64.15 — Rebuild the x64 MSI for the renamed sample file
+
+Referenced by name in `TEST_INSTALLER_WIN_X64_Test_Case_1b-i.md` and in
+`InstWinX64.13.5` above since the sample-rename commit, but never added as its own
+task until the 2026-08-28 checkbox re-check pass found the gap.
+
+- [ ] **InstWinX64.15.1** Run a full `ci.yml` build (or `workflow_dispatch`) on
+  `run-seamlyLayout` so the x64 MSI packages `male_chest_102cm.smis` — commit
+  `37de90cb73` renamed `male_shirt.smis` in the source tree, but the installed
+  package (`26.8.24.982`) predates it.
+- [ ] **InstWinX64.15.2** Install the rebuilt MSI and confirm
+  `%PROGRAMDIR%\samples\measurements\individual\male_chest_102cm.smis` exists and
+  `male_shirt.smis` does not.
+- [ ] **InstWinX64.15.3** Re-run Section 6a-i/6a-iii of
+  `TEST_INSTALLER_WIN_X64_Test_Case_1b-i.md`, which are blocked on this rebuild.
