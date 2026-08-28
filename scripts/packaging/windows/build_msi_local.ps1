@@ -25,20 +25,26 @@
     Build the Windows x64 MSI locally, without CI.
 
 .DESCRIPTION
-    Runs the same three build steps as ci.yml's windows-msi (x64) job, then
+    Runs the same two build steps as ci.yml's windows-msi (x64) job, then
     calls smsi.ps1:
-      1. scripts\version.sh <version> - stamps the version into
-         src\libs\vmisc\projectversion.{h,cpp} and the two Info.plist files.
-         These are git-tracked; this script leaves them modified on purpose,
-         the same way a real release build would, and prints a reminder to
-         commit or revert them afterward.
-      2. qmake Seamly.pro -config release CONFIG+=noTests && nmake - builds
+      1. qmake Seamly.pro -config release CONFIG+=noTests && nmake - builds
          seamly2d.exe and seamlyme.exe with windeployqt already run as a
-         post-link step.
-      3. cmake --preset release && cmake --build --preset release in
+         post-link step, against whatever version is already committed in
+         src\libs\vmisc\projectversion.{h,cpp}.
+      2. cmake --preset release && cmake --build --preset release in
          src\app\seamlylayout\qt_frontend - builds SeamlyLayout.exe.
     Then scripts\packaging\windows\smsi.ps1 stages all three and runs
-    `wix build`.
+    `wix build`, carrying -Version only as the MSI's own DisplayVersion/
+    ProductVersion - it does not have to match what the binaries report.
+
+    By design, this script never runs scripts\version.sh and never touches
+    src\libs\vmisc\projectversion.{h,cpp} or the two Info.plist files: those
+    are git-tracked, and a local dev build has no business stamping a value
+    into them (that is a real-release concern, handled by ci.yml). Pass
+    -StampVersion only if you deliberately want the source tree's compiled-in
+    version to match -Version for this build; it reverts the stamp afterward
+    via `git checkout`, unless those files already carried uncommitted changes
+    before the run, in which case they are left alone.
 
     Requires an elevated-free MSVC + Qt + Rust dev machine: Visual Studio 18
     Community (VC\Auxiliary\Build\vcvars64.bat), a Qt 6.11.1+ msvc2022_64 kit
@@ -47,13 +53,15 @@
     automatically if missing.
 
 .PARAMETER Version
-    Project version as YY.M.D.MMMM. Default: computed from the current local
-    time, the same formula ci.yml's version job uses.
+    Project version as YY.M.D.MMMM, used only for the MSI's DisplayVersion/
+    ProductVersion. Default: computed from the current local time, the same
+    formula ci.yml's version job uses.
 
-.PARAMETER SkipVersionStamp
-    Skip scripts\version.sh. Use this to build against whatever version is
-    already stamped in the working tree (e.g. right after a real release
-    build) instead of dirtying projectversion.cpp again.
+.PARAMETER StampVersion
+    Also run scripts\version.sh <version>, so the compiled seamly2d/seamlyme
+    binaries report -Version too, not just the MSI metadata. Git-tracked files
+    get modified for the duration of the build and reverted afterward (see
+    .DESCRIPTION). Off by default - most local test builds don't need it.
 
 .PARAMETER SkipValidation
     Passed through to smsi.ps1 - skip the `wix msi validate` ICE pass.
@@ -65,7 +73,7 @@
 
 param(
     [string]$Version,
-    [switch]$SkipVersionStamp,
+    [switch]$StampVersion,
     [switch]$SkipValidation
 )
 
@@ -94,16 +102,32 @@ if (-not $Version) {
 }
 Write-Host "version: $Version"
 
-if (-not $SkipVersionStamp) {
+# scripts\version.sh writes the version into these git-tracked files. This
+# script does NOT run it by default - a local dev build has no business
+# stamping a value into files that only a real release should change. Pass
+# -StampVersion to opt in; the stamp is then reverted (via `git checkout`)
+# once the build succeeds, unless one of these files already carried
+# uncommitted changes before this run (then it is left alone, to not discard
+# unrelated work).
+$versionStampedFiles = @(
+    'src\libs\vmisc\projectversion.cpp',
+    'src\libs\vmisc\projectversion.h',
+    'dist\macx\seamly2d\Info.plist',
+    'dist\macx\seamlyme\Info.plist'
+)
+$versionFilesWereClean = $false
+
+if ($StampVersion) {
     $bash = Get-Command bash -ErrorAction SilentlyContinue
     if (-not $bash) {
-        throw "scripts\version.sh needs bash + perl (Git for Windows ships both) - install Git for Windows, or pass -SkipVersionStamp to build against the version already in the working tree."
+        throw "scripts\version.sh needs bash + perl (Git for Windows ships both) - install Git for Windows, or omit -StampVersion to build against the version already in the working tree."
     }
-    Write-Host "stamping version into projectversion.cpp/.h and Info.plist (git-tracked - commit or revert after this build)..."
+    $versionFilesWereClean = -not (& git -C $repoRoot status --porcelain -- $versionStampedFiles)
+    Write-Host "stamping version into projectversion.cpp/.h and Info.plist (-StampVersion)..."
     Invoke-NativeCommand { & bash 'scripts/version.sh' $Version }
     if ($LASTEXITCODE -ne 0) { throw "scripts/version.sh failed (exit code $LASTEXITCODE)." }
 } else {
-    Write-Host "skipping version stamp (-SkipVersionStamp) - building with whatever is already in projectversion.cpp."
+    Write-Host "not stamping the version (default) - seamly2d/seamlyme report whatever is already committed in projectversion.cpp; -Version applies to the MSI's own metadata only."
 }
 
 # --- Locate the Qt kit ---------------------------------------------------------
@@ -223,6 +247,11 @@ try {
 
 Write-Host ''
 Write-Host "MSI OK: scripts\seamly-msi\x64\seamly-x64.msi"
-if (-not $SkipVersionStamp) {
-    Write-Host "projectversion.cpp/.h and both Info.plist files are now modified (git status) - commit or 'git checkout' them once you're done testing this build."
+if ($StampVersion) {
+    if ($versionFilesWereClean) {
+        Write-Host "reverting the version stamp (projectversion.cpp/.h, both Info.plist) - scripts\version.sh regenerates it on demand, nothing to keep..."
+        & git -C $repoRoot checkout -- $versionStampedFiles
+    } else {
+        Write-Host "projectversion.cpp/.h and/or Info.plist carried uncommitted changes before this build - not auto-reverting them; check 'git status' for what to keep."
+    }
 }
