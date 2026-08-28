@@ -25,26 +25,27 @@
     Build the Windows x64 MSI locally, without CI.
 
 .DESCRIPTION
-    Runs the same two build steps as ci.yml's windows-msi (x64) job, then
-    calls smsi.ps1:
-      1. qmake Seamly.pro -config release CONFIG+=noTests && nmake - builds
+    Runs the same steps as ci.yml's windows-msi (x64) job, in the same order:
+      1. scripts\version.sh <Version> - stamps the build's version into
+         src\libs\vmisc\projectversion.{h,cpp}, so seamly2d/seamlyme report
+         the version this build was made with, same as every ci.yml build
+         job (linux-test, appimage, macos, windows-msi all run this
+         unconditionally, not only on release builds).
+      2. qmake Seamly.pro -config release CONFIG+=noTests && nmake - builds
          seamly2d.exe and seamlyme.exe with windeployqt already run as a
-         post-link step, against whatever version is already committed in
-         src\libs\vmisc\projectversion.{h,cpp}.
-      2. cmake --preset release && cmake --build --preset release in
+         post-link step.
+      3. cmake --preset release && cmake --build --preset release in
          src\app\seamlylayout\qt_frontend - builds SeamlyLayout.exe.
     Then scripts\packaging\windows\smsi.ps1 stages all three and runs
-    `wix build`, carrying -Version only as the MSI's own DisplayVersion/
-    ProductVersion - it does not have to match what the binaries report.
+    `wix build`, carrying -Version as the MSI's DisplayVersion/ProductVersion
+    too, so the MSI and the binaries it contains agree.
 
-    By design, this script never runs scripts\version.sh and never touches
-    src\libs\vmisc\projectversion.{h,cpp} or the two Info.plist files: those
-    are git-tracked, and a local dev build has no business stamping a value
-    into them (that is a real-release concern, handled by ci.yml). Pass
-    -StampVersion only if you deliberately want the source tree's compiled-in
-    version to match -Version for this build; it reverts the stamp afterward
-    via `git checkout`, unless those files already carried uncommitted changes
-    before the run, in which case they are left alone.
+    The version stamp touches git-tracked files
+    (src\libs\vmisc\projectversion.{h,cpp}, dist\macx\seamly2d\Info.plist,
+    dist\macx\seamlyme\Info.plist). A successful build reverts them via
+    `git checkout`, unless those files already carried uncommitted changes
+    before the run, in which case they are left alone so unrelated work is
+    not discarded.
 
     Requires an elevated-free MSVC + Qt + Rust dev machine: Visual Studio 18
     Community (VC\Auxiliary\Build\vcvars64.bat), a Qt 6.11.1+ msvc2022_64 kit
@@ -53,15 +54,10 @@
     automatically if missing.
 
 .PARAMETER Version
-    Project version as YY.M.D.MMMM, used only for the MSI's DisplayVersion/
-    ProductVersion. Default: computed from the current local time, the same
-    formula ci.yml's version job uses.
-
-.PARAMETER StampVersion
-    Also run scripts\version.sh <version>, so the compiled seamly2d/seamlyme
-    binaries report -Version too, not just the MSI metadata. Git-tracked files
-    get modified for the duration of the build and reverted afterward (see
-    .DESCRIPTION). Off by default - most local test builds don't need it.
+    Project version as YY.M.D.MMMM, stamped into seamly2d/seamlyme via
+    scripts\version.sh and used as the MSI's DisplayVersion/ProductVersion.
+    Default: computed from the current local time, the same formula ci.yml's
+    version job uses.
 
 .PARAMETER SkipValidation
     Passed through to smsi.ps1 - skip the `wix msi validate` ICE pass.
@@ -73,7 +69,6 @@
 
 param(
     [string]$Version,
-    [switch]$StampVersion,
     [switch]$SkipValidation
 )
 
@@ -102,33 +97,26 @@ if (-not $Version) {
 }
 Write-Host "version: $Version"
 
-# scripts\version.sh writes the version into these git-tracked files. This
-# script does NOT run it by default - a local dev build has no business
-# stamping a value into files that only a real release should change. Pass
-# -StampVersion to opt in; the stamp is then reverted (via `git checkout`)
-# once the build succeeds, unless one of these files already carried
-# uncommitted changes before this run (then it is left alone, to not discard
-# unrelated work).
+# scripts\version.sh writes the version into these git-tracked files, the
+# same way every ci.yml build job does. The stamp is reverted (via
+# `git checkout`) once the build succeeds, unless one of these files already
+# carried uncommitted changes before this run (then it is left alone, to not
+# discard unrelated work).
 $versionStampedFiles = @(
     'src\libs\vmisc\projectversion.cpp',
     'src\libs\vmisc\projectversion.h',
     'dist\macx\seamly2d\Info.plist',
     'dist\macx\seamlyme\Info.plist'
 )
-$versionFilesWereClean = $false
 
-if ($StampVersion) {
-    $bash = Get-Command bash -ErrorAction SilentlyContinue
-    if (-not $bash) {
-        throw "scripts\version.sh needs bash + perl (Git for Windows ships both) - install Git for Windows, or omit -StampVersion to build against the version already in the working tree."
-    }
-    $versionFilesWereClean = -not (& git -C $repoRoot status --porcelain -- $versionStampedFiles)
-    Write-Host "stamping version into projectversion.cpp/.h and Info.plist (-StampVersion)..."
-    Invoke-NativeCommand { & bash 'scripts/version.sh' $Version }
-    if ($LASTEXITCODE -ne 0) { throw "scripts/version.sh failed (exit code $LASTEXITCODE)." }
-} else {
-    Write-Host "not stamping the version (default) - seamly2d/seamlyme report whatever is already committed in projectversion.cpp; -Version applies to the MSI's own metadata only."
+$bash = Get-Command bash -ErrorAction SilentlyContinue
+if (-not $bash) {
+    throw "scripts\version.sh needs bash + perl (Git for Windows ships both) - install Git for Windows."
 }
+$versionFilesWereClean = -not (& git -C $repoRoot status --porcelain -- $versionStampedFiles)
+Write-Host "stamping version into projectversion.cpp/.h and Info.plist..."
+Invoke-NativeCommand { & bash 'scripts/version.sh' $Version }
+if ($LASTEXITCODE -ne 0) { throw "scripts/version.sh failed (exit code $LASTEXITCODE)." }
 
 # --- Locate the Qt kit ---------------------------------------------------------
 # Same kit selection as src\app\seamlylayout\build.ps1: newest msvc2022_64 kit
@@ -247,11 +235,9 @@ try {
 
 Write-Host ''
 Write-Host "MSI OK: scripts\seamly-msi\x64\seamly-x64.msi"
-if ($StampVersion) {
-    if ($versionFilesWereClean) {
-        Write-Host "reverting the version stamp (projectversion.cpp/.h, both Info.plist) - scripts\version.sh regenerates it on demand, nothing to keep..."
-        & git -C $repoRoot checkout -- $versionStampedFiles
-    } else {
-        Write-Host "projectversion.cpp/.h and/or Info.plist carried uncommitted changes before this build - not auto-reverting them; check 'git status' for what to keep."
-    }
+if ($versionFilesWereClean) {
+    Write-Host "reverting the version stamp (projectversion.cpp/.h, both Info.plist) - scripts\version.sh regenerates it on demand, nothing to keep..."
+    & git -C $repoRoot checkout -- $versionStampedFiles
+} else {
+    Write-Host "projectversion.cpp/.h and/or Info.plist carried uncommitted changes before this build - not auto-reverting them; check 'git status' for what to keep."
 }

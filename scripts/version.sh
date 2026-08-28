@@ -6,6 +6,12 @@
 #
 # The version number has to be a four part version (with 3 dots in between).
 # This script works under linux and mac (as they have perl and and bash by default), and under windows if you have bash and perl.
+#
+# Updates these files, unconditionally:
+#   src/libs/vmisc/projectversion.cpp
+#   src/libs/vmisc/projectversion.h
+#   dist/macx/seamly2d/Info.plist
+#   dist/macx/seamlyme/Info.plist
 
 if [ $# -eq 1 ]; then
 	VERSIONSTR="${1}"

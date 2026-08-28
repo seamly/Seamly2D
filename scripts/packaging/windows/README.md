@@ -122,7 +122,7 @@ Decisions behind those pages:
 .\scripts\packaging\windows\build_msi_local.ps1
 ```
 
-It auto-detects a Qt 6.11.1+ `msvc2022_64` kit under `C:\Qt` and installs WiX v6 if missing. `-Version` sets only the MSI's own DisplayVersion/ProductVersion; by default the script never touches the git-tracked `projectversion.cpp/.h`/`Info.plist` files, so seamly2d/seamlyme report whatever version is already committed. Pass `-StampVersion` to also run `scripts\version.sh` so the binaries report `-Version` too — a successful build then reverts those files with `git checkout` (skipped if they already carried uncommitted changes before the run). Output: `scripts\seamly-msi\x64\seamly-x64.msi`, same as CI produces. Treat it as a local dev build, not a release artifact.
+It auto-detects a Qt 6.11.1+ `msvc2022_64` kit under `C:\Qt` and installs WiX v6 if missing. `-Version` is stamped into the git-tracked `projectversion.cpp/.h`/`Info.plist` files via `scripts\version.sh`, the same as every `ci.yml` build job, so seamly2d/seamlyme report it too, not only the MSI's DisplayVersion/ProductVersion. A successful build reverts those files with `git checkout` (skipped if they already carried uncommitted changes before the run). Output: `scripts\seamly-msi\x64\seamly-x64.msi`, same as CI produces. Treat it as a local dev build, not a release artifact.
 
 ```powershell
 gh workflow run ci.yml --ref run-seamlyLayout
