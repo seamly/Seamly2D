@@ -756,11 +756,11 @@ InstWinX64.10.1/10.2 test.
   the AppData folders. Confirmed 2026-08-28 on a real Windows machine: `DataRoot`/
   `DataParent` recorded correctly under all three apps' `HKLM\SOFTWARE\Seamly\*`
   keys for a bare `/quiet` install with no properties. See
-  `TEST_INSTALLER_WIN_X64_Test_Case_1b-i.md` B.4b.
+  `TEST_MSI_WIN_X64_Test_Case_1b-i.md` B.4b.
 
 ## InstWinX64.14 — Case 1b-i real-machine findings (2026-08-28)
 
-Found running Case 1 (fresh install) of `TEST_INSTALLER_WIN_X64_Test_Case_1b-i.md`.
+Found running Case 1 (fresh install) of `TEST_MSI_WIN_X64_Test_Case_1b-i.md`.
 Full verification log there; see its "New tasks found while running this suite" section
 for the run detail behind each item below.
 
@@ -789,7 +789,7 @@ for the run detail behind each item below.
   are intended, or whether one shared `%APPDATA%\Seamly\qt6_common.ini` is the correct
   design — related to **InstWinX64.5.2**'s `paths/pattern`/`paths/layout` shared-vs-per-app
   question, but specifically about where the ini file itself lives.
-  `TEST_INSTALLER_WIN_X64_Test_Case_1b-i.md` B.3 currently reads as if a subfolder per app
+  `TEST_MSI_WIN_X64_Test_Case_1b-i.md` B.3 currently reads as if a subfolder per app
   is expected; this build never creates one. If shared-only is correct, reword B.3 instead
   of treating the missing subfolders as a defect.
 
@@ -799,7 +799,7 @@ notes under each.
 
 ## InstWinX64.15 — Rebuild the x64 MSI for the renamed sample file
 
-Referenced by name in `TEST_INSTALLER_WIN_X64_Test_Case_1b-i.md` and in
+Referenced by name in `TEST_MSI_WIN_X64_Test_Case_1b-i.md` and in
 `InstWinX64.13.5` above since the sample-rename commit, but never added as its own
 task until the 2026-08-28 checkbox re-check pass found the gap.
 
@@ -807,8 +807,18 @@ task until the 2026-08-28 checkbox re-check pass found the gap.
   `run-seamlyLayout` so the x64 MSI packages `male_chest_102cm.smis` — commit
   `37de90cb73` renamed `male_shirt.smis` in the source tree, but the installed
   package (`26.8.24.982`) predates it.
+  - **In progress 2026-08-28:** CI run `33217012694` (headSha `aff7135cd8`, which
+    includes the `1be9460d77` `samples.pri` fix) started 22:29:41Z. An earlier run,
+    `33209728564` (headSha `3a5ada7dc1b`), failed both MSI builds with `NMAKE : fatal
+    error U1077` on the `male_shirt.smis` xcopy step — that commit predates the fix,
+    so the failure is expected and not a new defect.
 - [ ] **InstWinX64.15.2** Install the rebuilt MSI and confirm
   `%PROGRAMDIR%\samples\measurements\individual\male_chest_102cm.smis` exists and
   `male_shirt.smis` does not.
 - [ ] **InstWinX64.15.3** Re-run Section 6a-i/6a-iii of
-  `TEST_INSTALLER_WIN_X64_Test_Case_1b-i.md`, which are blocked on this rebuild.
+  `TEST_MSI_WIN_X64_Test_Case_1b-i.md`, which are blocked on this rebuild.
+- [ ] **InstWinX64.15.4** Fix stale `TEST_INSTALLER_WIN_X64_Test_Case_1b-i.md`
+  references in `SESSION_HANDOVER.md` (lines 114, 200, 205) — the `renamed files`
+  commit (`13fff008d8`) renamed the doc to `TEST_MSI_WIN_X64_Test_Case_1b-i.md` but
+  did not update this cross-reference. (Same stale references in
+  `TODO_INSTALLER_WIN_X64.md` were fixed directly in this pass.)

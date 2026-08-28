@@ -69,6 +69,18 @@ Test plan for the Windows x64 Seamly MSI. Covers `scripts/packaging/windows/smsi
   the note above have referenced it since at least the last pass, but the task was never
   actually added. Added below in "New tasks found while running this suite", and as
   `InstWinX64.15` in `TODO_INSTALLER_WIN_X64.md`.
+- **Live re-check, 2026-08-28 (this run).** `C:\Program Files\SeamlyApps\samples\measurements\individual\`
+  still holds `male_shirt.smis`, not `male_chest_102cm.smis`. Section 6a-i stays blocked on
+  `InstWinX64.15`. No other section changed since the prior checkbox pass.
+  - CI run `33209728564` (headSha `3a5ada7dc1b`, pushed 20:47:22Z) failed both x64 and arm64
+    MSI builds and the Windows unit-test build with `NMAKE : fatal error U1077` on the
+    `xcopy ... male_shirt.smis` sample-copy step. That commit predates the `1be9460d77` fix
+    to `src/app/samples.pri` (confirmed: `1be9460d77` is not an ancestor of `3a5ada7dc1b`).
+    **Not a new defect** — the failure is expected on that stale commit and is already resolved
+    on later commits. No task added for it.
+  - CI run `33217012694` (headSha `aff7135cd8`, includes the `samples.pri` fix) was in progress
+    at the time of this check. This is the build that will satisfy `InstWinX64.15.1` once it
+    completes — see that task for the install/verify follow-up.
 
 ### New tasks found while running this suite
 
@@ -78,6 +90,13 @@ Test plan for the Windows x64 Seamly MSI. Covers `scripts/packaging/windows/smsi
   `ci.yml` build is installed. This was referenced by name in this doc and in
   `TODO_INSTALLER_WIN_X64.md`'s InstWinX64.13.5 entry before the task itself existed — added to
   `TODO_INSTALLER_WIN_X64.md` in this pass.
+  - CI run `33217012694` (commit `aff7135cd8`) was in progress as of this pass — that's the
+    build that satisfies InstWinX64.15.1.
+- **InstWinX64.15.4 — Fix stale filename references left by the `renamed files` commit
+  (`13fff008d8`).** That commit renamed this doc from `TEST_INSTALLER_WIN_X64_Test_Case_1b-i.md`
+  to `TEST_MSI_WIN_X64_Test_Case_1b-i.md` but did not update every cross-reference. Fixed
+  directly in `TODO_INSTALLER_WIN_X64.md` (5 occurrences) this pass; `SESSION_HANDOVER.md`
+  (lines 114, 200, 205) still needs the same fix — tracked as `InstWinX64.15.4`.
 
 ## Variable Names
 
