@@ -515,6 +515,11 @@ Eight `VSettings` accessors use `%APPDATA%\Unknown Organization.ini`.
 ### ARP Metadata
 
 - [ ] **InstWinX64.6.1** Write `DisplayIcon` while retaining `ARPPRODUCTICON`.
+  Reproduced 2026-08-28: `ARPPRODUCTICON` authors correctly (`seamly2d.ico`, confirmed via
+  the MSI's `Property` table) and the icon caches to
+  `%WINDIR%\Installer\{ProductCode}\seamly2d.ico`, but the ARP `DisplayIcon` registry value
+  is empty, so Apps & Features shows no icon. Check `RegisterProduct`/`RegisterUser`
+  sequencing or the `ARPPRODUCTICON` Icon table binding in `smsi.wxs`.
 - [ ] **InstWinX64.6.2** Determine whether `Publisher` needs an explicit registry value.
 - [ ] **InstWinX64.6.3** Validate authored and installed ARP registry values.
 - [ ] **InstWinX64.6.4** Verify icon and publisher in `appwiz.cpl` and Windows Settings.
@@ -537,6 +542,9 @@ Eight `VSettings` accessors use `%APPDATA%\Unknown Organization.ini`.
 - [ ] **InstWinX64.6.13** Set `ProductName` and `ARPDISPLAYNAME` to `Seamly`.
 - [ ] **InstWinX64.6.14** Name all three apps in `ARPCOMMENTS`.
 - [ ] **InstWinX64.6.15** Update DisplayName assertions.
+  Reproduced 2026-08-28: `test_msi_install.ps1`'s `ARP DisplayName is Seamly2D` assertion
+  checks a stale name. The product now correctly registers `DisplayName = "Seamly"` (see
+  `smsi.wxs` `<Package Name="Seamly" ...>`) — update the assertion to expect `"Seamly"`.
 - [ ] **InstWinX64.6.16** Verify NSIS detection remains registry-based.
 - [ ] **InstWinX64.6.17** Verify entry, icon, and publisher.
 - [ ] **InstWinX64.6.18** Verify upgrades retain the `UpgradeCode` and one ARP entry.
@@ -742,9 +750,49 @@ InstWinX64.10.1/10.2 test.
   purpose.
 - [x] **InstWinX64.13.4** `smsi_check_authoring.ps1` updated: new/changed
   assertions for both fixes, all passing against a link-only stub build.
-- [ ] **InstWinX64.13.5** Verify on a real machine: a genuinely fresh
+- [x] **InstWinX64.13.5** Verify on a real machine: a genuinely fresh
   `msiexec /i ... /quiet` install (no properties) creates and records
   `<Documents>\SeamlyData`, and `msiexec /x` leaves it in place while removing
-  the AppData folders. Not done this session - see
-  `scripts/packaging/windows/test_reset_environment.ps1` for resetting the
-  test machine between runs.
+  the AppData folders. Confirmed 2026-08-28 on a real Windows machine: `DataRoot`/
+  `DataParent` recorded correctly under all three apps' `HKLM\SOFTWARE\Seamly\*`
+  keys for a bare `/quiet` install with no properties. See
+  `TEST_INSTALLER_WIN_X64_Test_Case_1b-i.md` B.4b.
+
+## InstWinX64.14 — Case 1b-i real-machine findings (2026-08-28)
+
+Found running Case 1 (fresh install) of `TEST_INSTALLER_WIN_X64_Test_Case_1b-i.md`.
+Full verification log there; see its "New tasks found while running this suite" section
+for the run detail behind each item below.
+
+- [ ] **InstWinX64.14.1** Seed `%PROGRAMDIR%\samples\...` into `%DATAROOT%` at install
+  or first run. Nothing does this today: `smsi.wxs` stages samples only into
+  `%PROGRAMDIR%\samples\...`, and `vcommonsettings.cpp`'s `chooseFirstRunDataRoot` never
+  copies them into `%DATAROOT%\patterns\`, `%DATAROOT%\measurements\individual\`, or
+  `%DATAROOT%\measurements\multisize\`. Confirmed by running Seamly2D through first run
+  and finding all three directories empty. This is the root cause of Case 1b-i's B.6a-ii,
+  7b, 8b, and 8c failures — none of them can pass until this exists. Reconcile this doc's
+  expected `%DATAROOT%` filenames with whatever the seeding step actually produces once
+  it's built.
+- [ ] **InstWinX64.14.2** Fix `test_msi_install.ps1`'s `Get-AdvertisedShortcutTarget`:
+  it checks `$state -eq 4 -or $state -eq 5` for `INSTALLSTATE_LOCAL`/`INSTALLSTATE_SOURCE`,
+  but the Windows Installer SDK values are `LOCAL = 3` and `SOURCE = 4`. The 2026-08-28 run
+  observed `InstallState = 3` (a genuinely installed, resolvable shortcut) reported FAILED
+  for all three Start Menu shortcuts — an off-by-one in the script's constants, not a
+  packaging defect.
+- [ ] **InstWinX64.14.3** Document that `test_reset_environment.ps1` must run fully
+  elevated, not just its own msiexec `-Verb RunAs` call. `Remove-Item` on
+  `C:\Program Files\SeamlyApps` also needs elevation — hit `Access to the path is denied`
+  on a leftover log file when run from a non-elevated shell, aborting before HKLM/AppData
+  cleanup ran. Either update the docstring or wrap the Program Files removal in the same
+  `-Verb RunAs` pattern already used for msiexec.
+- [ ] **InstWinX64.14.4** Decide whether `%APPDATA%\Seamly\<AppName>\` per-app subfolders
+  are intended, or whether one shared `%APPDATA%\Seamly\qt6_common.ini` is the correct
+  design — related to **InstWinX64.5.2**'s `paths/pattern`/`paths/layout` shared-vs-per-app
+  question, but specifically about where the ini file itself lives.
+  `TEST_INSTALLER_WIN_X64_Test_Case_1b-i.md` B.3 currently reads as if a subfolder per app
+  is expected; this build never creates one. If shared-only is correct, reword B.3 instead
+  of treating the missing subfolders as a defect.
+
+`InstWinX64.6.1` (`DisplayIcon` empty despite authored `ARPPRODUCTICON`) and
+`InstWinX64.6.15` (stale `DisplayName` assertion) were also reproduced this run — see
+notes under each.
