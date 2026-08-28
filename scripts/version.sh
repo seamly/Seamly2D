@@ -8,10 +8,10 @@
 # This script works under linux and mac (as they have perl and and bash by default), and under windows if you have bash and perl.
 #
 # Updates these files, unconditionally:
-#   src/libs/vmisc/projectversion.cpp
-#   src/libs/vmisc/projectversion.h
-#   dist/macx/seamly2d/Info.plist
-#   dist/macx/seamlyme/Info.plist
+#   src/libs/vmisc/projectversion.cpp -- compiles `extern cost in` constants read by the About dialog 
+#   src/libs/vmisc/projectversion.h 
+#   dist/macx/seamly2d/Info.plist -- macos metadata read by Finder, Launch Services, and Gatekeeper
+#   dist/macx/seamlyme/Info.plist -- macos metadata read by Finder, Launch Services, and Gatekeeper
 
 if [ $# -eq 1 ]; then
 	VERSIONSTR="${1}"
