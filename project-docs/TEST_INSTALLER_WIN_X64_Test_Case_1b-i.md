@@ -41,6 +41,19 @@ Test plan for the Windows x64 Seamly MSI. Covers `scripts/packaging/windows/smsi
   — no warnings or errors. SeamlyMe and SeamlyLayout have no `logs\` directory at all; only
   `Application2D::logDirPath()` was wired up (SESSION_HANDOVER, 2026-08-20), so this is expected,
   not a defect.
+- **Section B.1–B.5 and B.7 run live 2026-08-28.** Machine was in a genuine fresh-install state
+  (MSI installed, no app ever launched — `%LOCALAPPDATA%\Seamly` and `%APPDATA%\Seamly` did not
+  exist yet). Ran `seamly2d.exe`, let it settle 8s, closed it. Result: all nine `%DATAROOT%`
+  subdirectories created at the correct level with no duplicates; `%LOCALAPPDATA%\Seamly\<AppName>\`
+  exists for all three apps; `%APPDATA%\Seamly\qt6_common.ini` exists with `dataRoot` matching
+  `%DATAROOT%` exactly; `HKLM\SOFTWARE\Seamly\{Seamly2D,SeamlyMe,SeamlyLayout}` all carry
+  `InstallPath`/`DataRoot`/`DataParent`; new `seamly2d` log is clean. No new defects found — this
+  reconfirms the earlier automated pass rather than replacing it. `HKCU\Software\Seamly\Seamly2D`'s
+  `RemovedLocalAppData`/`RemovedRoamingAppData` values are expected on install (they are the
+  `PerUserSettingsRemoval` components' `KeyPath`, per `smsi_registry.wxs`) — not leftover uninstall
+  residue, checked against the authoring to rule that out.
+  Reconfirmed still blocked: samples ship as `male_shirt.smis` (not the renamed
+  `male_chest_102cm.smis`) — `InstWinX64.15`/Section 6a-i unchanged.
 
 ## Variable Names
 
@@ -72,16 +85,14 @@ Known defect to watch for: an empty organization name can make Qt write settings
 
 ### Case 1 — Not installed
 
-- [x] 1a. Uninstall Seamly (any and all versions detected)
-  - [x] 1a-i. Confirm that %PROGRAMROOT, %DATAROOT, AppData\Roaming\Seamly, AppData\Local\Seamly, desktop shortcuts, and registry keys have been removed
+- [ ] 1a. Uninstall Seamly (any and all versions detected) using `/test_reset_environment.ps1`
+  - [ ] 1a-i. Confirm that %PROGRAMROOT, %DATAROOT, AppData\Roaming\Seamly, AppData\Local\Seamly, desktop shortcuts, and registry keys have been removed
     - Ran `test_reset_environment.ps1` elevated. Verified all six locations absent:
       `C:\Program Files\SeamlyApps`, `Documents\SeamlyData`, `%LOCALAPPDATA%\Seamly`,
       `%APPDATA%\Seamly`, `HKLM\SOFTWARE\Seamly`, `HKCU\Software\Seamly`. Confirmed by
       `test_msi_install.ps1 -Phase Baseline` passing.
-- [x] 1b. Run latest windows x64 installation .msi (with SeamlyLayout), using:
-  - [x] 1b-i. Default settings
-    - Installed via `msiexec /i seamly-x64.msi /quiet /norestart` (no properties passed),
-      elevated. Exit code 0.
+- [ ] 1b. Install Seamly apps using `scripts\seamly-msi\x64\seamly-x64.msi`:
+  - [ ] 1b-i. with Default settings via `msiexec /i seamly-x64.msi /quiet /norestart`
 
 Non-default settings means at least: a non-default `%PROGRAMDIR%`, a non-default `%DATAROOT%`
 parent, and desktop shortcuts turned off (`SEAMLYDESKTOPSHORTCUTS=0`).
@@ -90,23 +101,32 @@ parent, and desktop shortcuts turned off (`SEAMLYDESKTOPSHORTCUTS=0`).
 
 Run this suite after every test case in section A.
 
-- [ ] 1. Run Seamly2D then close Seamly2D to install the user directories
-- [ ] 2. Check the program directory `%PROGRAMDIR%` exists (default `C:\Program Files\SeamlyApps`)
-- [ ] 3. Check user-data location (default `C:\Users\<user>\Documents\SeamlyData\`), subdirectories, and files:
-  - [ ] 3a. No duplicate directories
-  - [ ] 3b. Subdirectories `backups`, `bodyscans`, `images`, `label templates`, `layouts`,
+- [x] 1. Run Seamly2D then close Seamly2D to install the user directories
+    - Confirmed 2026-08-28: launched `seamly2d.exe`, settled 8s, closed. Log clean.
+- [x] 2. Check the program directory `%PROGRAMDIR%` exists (default `C:\Program Files\SeamlyApps`)
+    - Confirmed 2026-08-28: `C:\Program Files\SeamlyApps` exists with all expected files.
+- [x] 3. Check user-data location (default `C:\Users\<user>\Documents\SeamlyData\`), subdirectories, and files:
+  - [x] 3a. No duplicate directories
+      - Confirmed 2026-08-28: no stray `Documents\Seamly` alongside `Documents\SeamlyData`.
+  - [x] 3b. Subdirectories `backups`, `bodyscans`, `images`, `label templates`, `layouts`,
       `measurements\individual`, `measurements\multisize`, `patterns`, and `templates` are created at the correct level below `%DATAROOT%`
-  - [ ] 3c. if upgrading from previous non-SeamlyLayout version then:
+      - Confirmed 2026-08-28: all nine present directly under `%DATAROOT%`.
+  - [ ] 3c. if upgrading from previous non-SeamlyLayout version then: **N/A — Case 1 fresh install.**
     - [ ] 3c-i. confirm `%DATAROOT%\seamly2d.zip` exists
     - [ ] 3c-ii. confirm that `seamly2d.zip` files were extracted into the correct subdirectories
-- [ ] 4. Check the user application directories:
-  - [ ] 4a. `%LOCALAPPDATA%\Seamly\<AppName>\` directories exist for Seamly2D, SeamlyMe, and SeamlyLayout.
-  - [ ] 4b. `%APPDATA%\Seamly\qt6_common.ini` file exists
-    - [ ] 4b-i. Confirm all paths in qt6_common.ini start with `%DATAROOT%` value.
-- [ ] 5. Check the registry keys:
-  - [ ] 5a. If not a fresh install then confirm old-version entries were removed
-  - [ ] 5b. Confirm that the installed-version program entries were added, under `HKLM\SOFTWARE\Seamly\Seamly2D`, `HKLM\SOFTWARE\Seamly\SeamlyMe`, and `HKLM\SOFTWARE\Seamly\SeamlyLayout`
-  - [ ] 5c. Confirm that installed-version data entries were added
+- [x] 4. Check the user application directories:
+  - [x] 4a. `%LOCALAPPDATA%\Seamly\<AppName>\` directories exist for Seamly2D, SeamlyMe, and SeamlyLayout.
+      - Confirmed 2026-08-28: all three present.
+  - [x] 4b. `%APPDATA%\Seamly\qt6_common.ini` file exists
+      - Confirmed 2026-08-28.
+    - [x] 4b-i. Confirm all paths in qt6_common.ini start with `%DATAROOT%` value.
+        - Confirmed 2026-08-28: `dataRoot=C:/Users/susan/Documents/SeamlyData` — exact match.
+- [x] 5. Check the registry keys:
+  - [ ] 5a. If not a fresh install then confirm old-version entries were removed. **N/A — Case 1 fresh install.**
+  - [x] 5b. Confirm that the installed-version program entries were added, under `HKLM\SOFTWARE\Seamly\Seamly2D`, `HKLM\SOFTWARE\Seamly\SeamlyMe`, and `HKLM\SOFTWARE\Seamly\SeamlyLayout`
+      - Confirmed 2026-08-28: `InstallPath`/`DisplayVersion` present under all three keys.
+  - [x] 5c. Confirm that installed-version data entries were added
+      - Confirmed 2026-08-28: `DataRoot`/`DataParent` present under all three keys.
 - [ ] 6. Check the apps
   - [ ] 6a. Check Seamly2D and SeamlyMe
     - [ ] 6a-i. Open `%PROGRAMDIR%\samples\patterns\male_shirt.sm2d` pattern file with `%PROGRAMDIR%\samples\measurements\individual\male_chest_102cm.smis` individual measurement file.
