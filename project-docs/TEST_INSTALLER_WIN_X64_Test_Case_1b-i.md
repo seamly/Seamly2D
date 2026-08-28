@@ -16,6 +16,31 @@ Test plan for the Windows x64 Seamly MSI. Covers `scripts/packaging/windows/smsi
   Files\SeamlyApps` deletion, not just for the msiexec uninstall and HKLM keys — its own
   docstring undersells this. Run it from an Administrator PowerShell, not just expect the
   in-script `-Verb RunAs` on the msiexec call to cover everything.
+- **Verification Suite (Section B) re-run 2026-08-28, automated portion.** `test_msi_install.ps1
+  -Phase Installed -ExpectSeamlyLayout -SkipLaunch` reproduced exactly 5 known, already-tracked
+  failures and nothing new: `InstWinX64.6.1` (ARP `DisplayIcon` empty), `InstWinX64.6.15` (ARP
+  `DisplayName` assertion checks the stale `Seamly2D` name; the product correctly registers
+  `Seamly`), and `InstWinX64.14.2` (all three Start Menu shortcuts, off-by-one `INSTALLSTATE_*`
+  constants in the script itself). All filesystem, registry, association, and desktop-shortcut
+  checks passed. Manually confirmed on top of the script: no stray `%APPDATA%\Unknown
+  Organization\` folder, no nested/duplicate `SeamlyData` directory, `qt6_common.ini`'s
+  `dataRoot` matches `%DATAROOT%` exactly, and the old NSIS registry key is absent (nothing to
+  clean up on this fresh install).
+- **Section 6a-i is blocked on this build.** The installed MSI (built 2026-08-24) still ships
+  `samples\measurements\individual\male_shirt.smis`; the rename to `male_chest_102cm.smis` (this
+  doc, commit `37de90cb73`) landed in the source tree afterward and is not in this package.
+  Rebuild the MSI before running 6a-i/6a-iii for real. See `InstWinX64.15` in
+  `TODO_INSTALLER_WIN_X64.md`.
+- **Section 6 (app launch/menu checks) needs a human at the keyboard.** Confirmed only that all
+  three installed executables start and stay running (`seamly2d.exe`, `seamlyme.exe`,
+  `SeamlyLayout.exe` launched standalone, settled, closed cleanly). One `seamlyme.exe` launch
+  exited within 6 seconds on the very first try; a second and third launch ran normally with no
+  error in stdout/stderr and no crash. Not reproduced — watch for it, don't file a task on one
+  unrepeated instance.
+- **Log check (B.7):** `seamly2d`'s latest log (`%LOCALAPPDATA%\Seamly\Seamly2D\logs\`) is clean
+  — no warnings or errors. SeamlyMe and SeamlyLayout have no `logs\` directory at all; only
+  `Application2D::logDirPath()` was wired up (SESSION_HANDOVER, 2026-08-20), so this is expected,
+  not a defect.
 
 ## Variable Names
 
@@ -47,14 +72,14 @@ Known defect to watch for: an empty organization name can make Qt write settings
 
 ### Case 1 — Not installed
 
-- [ ] 1a. Uninstall Seamly (any and all versions detected)
-  - [ ] 1a-i. Confirm that %PROGRAMROOT, %DATAROOT, AppData\Roaming\Seamly, AppData\Local\Seamly, desktop shortcuts, and registry keys have been removed
+- [x] 1a. Uninstall Seamly (any and all versions detected)
+  - [x] 1a-i. Confirm that %PROGRAMROOT, %DATAROOT, AppData\Roaming\Seamly, AppData\Local\Seamly, desktop shortcuts, and registry keys have been removed
     - Ran `test_reset_environment.ps1` elevated. Verified all six locations absent:
       `C:\Program Files\SeamlyApps`, `Documents\SeamlyData`, `%LOCALAPPDATA%\Seamly`,
       `%APPDATA%\Seamly`, `HKLM\SOFTWARE\Seamly`, `HKCU\Software\Seamly`. Confirmed by
       `test_msi_install.ps1 -Phase Baseline` passing.
-- [ ] 1b. Run latest windows x64 installation .msi (with SeamlyLayout), using:
-  - [ ] 1b-i. Default settings
+- [x] 1b. Run latest windows x64 installation .msi (with SeamlyLayout), using:
+  - [x] 1b-i. Default settings
     - Installed via `msiexec /i seamly-x64.msi /quiet /norestart` (no properties passed),
       elevated. Exit code 0.
 
