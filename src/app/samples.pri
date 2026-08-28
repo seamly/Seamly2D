@@ -1,6 +1,6 @@
 # Keep path to all files with individual measurements we support right now
 INSTALL_INDIVIDUAL_MEASUREMENTS += \
-    $${PWD}/share/samples/measurements/individual/male_shirt.smis \
+    $${PWD}/share/samples/measurements/individual/male_chest_102cm.smis \
     $${PWD}/share/samples/measurements/individual/trousers.smis
 
 # Keep path to all files with multisize measurements we support right now
