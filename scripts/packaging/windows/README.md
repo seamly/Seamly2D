@@ -10,6 +10,7 @@ WiX authoring and build instructions for the Windows `.msi` installer that ships
 | `seamly2d.ico`, `seamlyme.ico`, `seamlylayout.ico` | Shortcut and Apps &amp; features icons, compiled into the MSI `Icon` table by `smsi.wxs`. Each `<Icon Id>` must equal the file name |
 | `license.rtf` | License summary shown by the installer UI (GPL-3.0-or-later for seamly2d/seamlyme, LGPL-3.0 + MIT for SeamlyLayout, LGPL-3.0 for Qt) |
 | `smsi.ps1` | Staging + `wix build` driver, run by `ci.yml`'s `windows-msi` job. CI-only: it has no local-build mode and detects nothing from the machine it runs on |
+| `build_msi_local.ps1` | Local x64 dev-build driver: builds seamly2d/seamlyme/SeamlyLayout release binaries on the developer machine, then calls `smsi.ps1` with every path named explicitly. Not run by CI |
 | `smsi_check_authoring.ps1` | Asserts the built MSI still contains the expected shortcuts, associations, registry rows, elevation, upgrade detection and dialogs; run by `smsi.ps1` on every build |
 | `test_msi_install.ps1` | Asserts what an **installed** MSI actually did to a real machine, in four phases around the `msiexec` commands; standalone, copied to the test machine beside the `.msi` |
 | `INSTALL_DECISION_FLOW.md` | What the installer decides and what the *application* decides, as flowcharts, across all four pre-existing-installation cases (clean / old NSIS / previous MSI / both). Read this before changing upgrade or previous-install behaviour |
@@ -113,7 +114,15 @@ Decisions behind those pages:
 
 ## Building the package
 
-**Run the CI workflow — there is no local build.**
+**Release packages: run the CI workflow.** `smsi.ps1` itself still has no local-build mode: every input is named on the command line and the script detects nothing from the machine it runs on.
+
+**Local x64 dev builds:** `build_msi_local.ps1` builds seamly2d, seamlyme and SeamlyLayout release binaries on your machine, then calls `smsi.ps1` the same way `ci.yml` does.
+
+```powershell
+.\scripts\packaging\windows\build_msi_local.ps1
+```
+
+It auto-detects a Qt 6.11.1+ `msvc2022_64` kit under `C:\Qt`, installs WiX v6 if missing, and stamps `-Version` via `scripts\version.sh` — that modifies git-tracked files (`projectversion.cpp/.h`, both `Info.plist`); commit or revert them once you're done testing. Pass `-SkipVersionStamp` to build against whatever version is already in the working tree. Output: `scripts\seamly-msi\x64\seamly-x64.msi`, same as CI produces. Treat it as a local dev build, not a release artifact.
 
 ```powershell
 gh workflow run ci.yml --ref run-seamlyLayout
