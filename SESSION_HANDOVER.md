@@ -6,6 +6,49 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## SeamlyMe Open-dialog fix pushed; CLAUDE.md's local-build claim was stale (2026-08-29)
+
+MSI Test Case 1b-i step 6a-v/6a-vi found SeamlyMe's File Open Individual/Multisize
+dialog opening in the wrong Seamly folder. Root cause: Windows' native Open dialog
+keeps one process-wide "last visited folder" and silently overrides the app-supplied
+start folder after the first native dialog use — confirmed against the user's report
+of seeing "a real but different Seamly folder," not a random OS default. The getter
+code (`OpenIndividual()`/`OpenMultisize()`/`OpenTemplate()`) already read the correct
+per-purpose settings, so this is a different bug class from the fix below.
+
+Fixed in the shared `TMainWindow::Open()` helper (`src/app/seamlyme/tmainwindow.cpp:3059`)
+by forcing `QFileDialog::DontUseNativeDialog`, so Qt's own dialog (no shared history)
+is always used for these three actions regardless of the native-dialog preference.
+Tracked as Seamly2D.2.2 in `project-docs/TODO_SEAMLY2D.md` — done. Committed, merged
+`--no-ff` into `run-seamlyLayout`, and pushed at `8a76c2b22a` with `[skip ci]`.
+
+**Not build-verified before push.** I incorrectly told the user twice that "Seamly2D
+and SeamlyMe have no local build script," repeating stale text from this file's own
+"Local Windows Build" section. The user corrected me:
+`scripts/packaging/windows/build_msi_local.ps1` exists and builds all three apps
+(qmake + nmake for Seamly2D/SeamlyMe, cmake + ninja + cargo for SeamlyLayout), then
+packages them via `smsi.ps1`/`wix build`. Confirmed by reading the script directly.
+CLAUDE.md's "Local Windows Build" section is being corrected to reference it.
+
+**Still open in `project-docs/TODO_SEAMLY2D.md`:**
+
+- Seamly2D.2.1 — `MainWindow::Open()` (`src/app/seamly2d/mainwindow.cpp:4378-4408`)
+  never reads `getPatternPath()`; needs a fallback added when the recent-files list
+  is empty. Separate root cause from Seamly2D.2.2 above — do not reuse that fix.
+- Seamly2D.3.1 — closing SeamlyLayout restores Seamly2D's Layout Mode instead of
+  whichever mode (e.g. Piece Mode) was active before SeamlyLayout launched.
+
+`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md` step 6a carries a `-->` note
+cross-referencing Seamly2D.2.2 and says "**Re-test needed to confirm**" — the
+SeamlyMe fix has not been re-verified interactively since it was pushed.
+
+**Next steps:**
+
+1. Run `scripts/packaging/windows/build_msi_local.ps1` to build all three apps and
+   confirm the `tmainwindow.cpp` change actually compiles.
+2. Re-test MSI Test Case 1b-i step 6a-v/6a-vi interactively to confirm the fix works.
+3. Pick up Seamly2D.2.1 and Seamly2D.3.1 above.
+
 ## First run also seeds sample measurement files (2026-08-28)
 
 Task Seamly2D.3, done. Follow-up to the entry directly below. Re-running MSI Test Case

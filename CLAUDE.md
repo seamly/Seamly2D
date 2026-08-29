@@ -104,9 +104,16 @@ All three applications build against **Qt 6.11.1**.
 
 ### Local Windows Build
 
-The repository has no local build or test script for Seamly2D and SeamlyMe.
-`ci.yml` builds and tests them. Build them by hand with qmake + jom if you need
-a local tree.
+`scripts\packaging\windows\build_msi_local.ps1` builds Seamly2D, SeamlyMe, and
+SeamlyLayout release binaries locally, then packages them into the Windows x64
+MSI via `smsi.ps1`. It runs the same steps as `ci.yml`'s `windows-msi` job:
+qmake + nmake for Seamly2D/SeamlyMe, CMake + Ninja + Cargo for SeamlyLayout.
+Requires VS 18 Community, a Qt 6.11.1+ `msvc2022_64` kit, and Rust on PATH.
+Treat its output as a local dev build, not a release artifact — releases still
+go through `gh workflow run ci.yml`.
+
+`ci.yml` remains the verification path for Seamly2D and SeamlyMe unit tests;
+this script does not run them.
 
 SeamlyLayout keeps its own local scripts:
 
