@@ -10,8 +10,9 @@
 # **  Removes everything the product MSI's own uninstall deliberately leaves
 # **  behind, plus everything a fresh test run needs gone: every detected
 # **  Seamly product, %PROGRAMDIR%, %DATAROOT% and its contents,
-# **  %LOCALAPPDATA%\Seamly, %APPDATA%\Seamly, and the Seamly registry keys
-# **  under both HKLM and HKCU.
+# **  %LOCALAPPDATA%\Seamly, %APPDATA%\Seamly, leftover
+# **  %APPDATA%\Unknown Organization(.ini) from the empty-organization-name
+# **  defect, and the Seamly registry keys under both HKLM and HKCU.
 # **
 # **  This is test-support only. It is deliberately more destructive than the
 # **  shipped uninstall (scripts/packaging/windows/smsi_registry.wxs), which
@@ -151,7 +152,11 @@ Write-Host '=== 4. Removing %LOCALAPPDATA%\Seamly and %APPDATA%\Seamly ==='
 Remove-PathIfPresent (Join-Path $env:LOCALAPPDATA 'Seamly')
 Remove-PathIfPresent (Join-Path $env:APPDATA 'Seamly')
 
-Write-Host '=== 5. Removing Seamly registry keys ==='
+Write-Host '=== 5. Removing leftover "Unknown Organization" artifacts (empty-organization-name defect) ==='
+Remove-PathIfPresent (Join-Path $env:APPDATA 'Unknown Organization.ini')
+Remove-PathIfPresent (Join-Path $env:APPDATA 'Unknown Organization')
+
+Write-Host '=== 6. Removing Seamly registry keys ==='
 Remove-RegistryKeyIfPresent 'HKLM:\SOFTWARE\Seamly'
 Remove-RegistryKeyIfPresent 'HKCU:\Software\Seamly'
 
