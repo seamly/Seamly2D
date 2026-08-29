@@ -3058,8 +3058,12 @@ bool TMainWindow::EvalFormula(const QString &formula, bool fromUser, VContainer 
 //---------------------------------------------------------------------------------------------------------------------
 void TMainWindow::Open(const QString &dir, const QString &filter)
 {
+    // Windows' native picker keeps one process-wide "last visited folder" and silently
+    // ignores the requested start folder once any native dialog has been shown before, so
+    // OpenIndividual()/OpenMultisize()/OpenTemplate() would stop opening in the correct
+    // measurements/templates folder after the first use. Qt's own dialog has no such history.
     const QString filename = fileDialog(this, tr("Open file"), dir, filter, nullptr,
-                                        qApp->seamlyMeSettings()->getUseNativeFileDialogs(),
+                                        QFileDialog::DontUseNativeDialog,
                                         QFileDialog::ExistingFile, QFileDialog::AcceptOpen);
 
 	if (!filename.isEmpty())
