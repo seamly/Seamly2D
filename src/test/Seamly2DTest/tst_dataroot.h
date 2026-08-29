@@ -84,6 +84,10 @@ private slots:
     void EnsureDataRootTreeKeepsExistingFiles() const;
     void StartupResolvesThenSeedsTheConfiguredRoot() const;
 
+    void SeedSamplePatternsCopiesBundledFiles() const;
+    void SeedSamplePatternsNeverOverwritesAnExistingFile() const;
+    void SeedSamplePatternsIsANoOpWhenSourceIsMissing() const;
+
     void MigrationCopiesTheWholeTreeIncludingUnknownFolders() const;
     void MigrationNeverOverwritesAnExistingFile() const;
     void MigrationLeavesTheSourceTreeIntact() const;

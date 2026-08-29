@@ -6,6 +6,29 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## First run seeds the patterns folder from the bundled samples (2026-08-28)
+
+Task Seamly2D.2, done. MSI Test Case 1b-i step 6a-i found
+`%PROGRAMDIR%\samples\patterns\*.sm2d` cannot be opened and saved back in
+place — a standard user has no write access to Program Files.
+`VSettings::SeedSamplePatterns()` (`src/libs/vmisc/vsettings.{h,cpp}`) now
+copies the bundled `.sm2d` files into the writable patterns folder on every
+launch, skipping any file already there (sample or user-edited) — same
+merge rule as `ensureDataRootTree()`. Wired into
+`Application2D::initOptions()` (`src/app/seamly2d/core/application_2d.cpp`)
+right after the existing pattern-folder `mkpath()`. Full writeup in
+`project-docs/TODO_COMPLETED.md` under Task Seamly2D.2.
+
+Scope: Seamly2D only, `.sm2d` patterns only — the report was specific to
+that. SeamlyMe's sample measurements/templates are a separate, unfiled
+concern.
+
+**Verified:** `vsettings.cpp`, `application_2d.cpp`, and `tst_dataroot.cpp`
+(3 new cases) syntax-checked clean against Qt 6.11.1 with MSVC
+(`cl /Zs /permissive- /Zc:__cplusplus`) — same method as the 2026-08-24
+entry below. Not verified: `ctest`/a full build; `ci.yml` is the
+verification path for Seamly2D per `CLAUDE.md`.
+
 ## Legacy data tree backed up as a verified .zip (2026-08-24)
 
 User request: port the abandoned `task-data-migration-backup` branch's

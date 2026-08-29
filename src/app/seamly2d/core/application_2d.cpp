@@ -696,6 +696,11 @@ void Application2D::initOptions()
     QDir().mkpath(settings->getDefaultLabelTemplatePath());
     QDir().mkpath(settings->getDefaultBackupFilePath());
 
+    // A standard user has no write access to the Program Files installation folder, so the
+    // bundled samples under %PROGRAMDIR%\samples\patterns can be opened but never saved back
+    // in place. Seed the writable patterns folder with editable copies instead.
+    VSettings::SeedSamplePatterns(VSettings::getSamplePatternsPath(), settings->getDefaultPatternPath());
+
     // Task 15: only tell the user their settings moved once command-line parsing (done in
     // the constructor, before initOptions() runs) has determined real GUI-vs-console mode —
     // showing a modal dialog during a headless/CLI export would hang a scripted caller.
