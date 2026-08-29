@@ -2,6 +2,34 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task Seamly2D.2 — First run seeds the patterns folder from the bundled samples (completed 2026-08-28)
+
+MSI Test Case 1b-i step 6a-i found that `%PROGRAMDIR%\samples\patterns\*.sm2d` cannot be
+opened and saved back in place: a standard user has no write access to the Program Files
+installation folder. `VSettings::SeedSamplePatterns()` (`src/libs/vmisc/vsettings.{h,cpp}`)
+copies the bundled `.sm2d` samples into the writable patterns folder so the user gets an
+editable starting point.
+
+- [X] **New static method.** `SeedSamplePatterns(sourceDir, destinationDir)` copies every
+  `*.sm2d` from `sourceDir` into `destinationDir`, skipping any file that already exists at
+  the destination — purely additive, same merge rule as `ensureDataRootTree()` and
+  `migrateDataTree()`. `getSamplePatternsPath()` resolves the bundled source folder via the
+  existing `SharePath("/samples/patterns")`
+- [X] **Called on startup.** `Application2D::initOptions()`
+  (`src/app/seamly2d/core/application_2d.cpp`) calls it right after the existing
+  `getDefaultPatternPath()` folder creation, so it runs on every launch — safe because a file
+  already present, sample or user-edited, is never overwritten
+- [X] **Unit tests.** Three new cases in `tst_dataroot.cpp`: copies the bundled `.sm2d` files
+  and ignores non-pattern files; never overwrites an existing (possibly user-edited) file;
+  no-op, no destination folder created, when the source folder does not exist (the case for a
+  platform samples.pri never installs to)
+
+**Scope:** Seamly2D only — the report was about `.sm2d` pattern files specifically. SeamlyMe's
+sample measurements/templates are a separate concern, not covered here.
+
+**Verification:** no local build or test script exists for Seamly2D (see `README-BUILDS.md`);
+`ci.yml` builds and runs `Seamly2DTest` on push.
+
 ## Task InstWinX64.0 — Verify the baseline x64 MSI build (completed 2026-08-12)
 
 The gate on every other Windows x64 installer task: prove the MSI builds in CI

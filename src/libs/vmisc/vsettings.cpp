@@ -53,6 +53,8 @@
 #include "vsettings.h"
 
 #include <QDir>
+#include <QFile>
+#include <QFileInfo>
 #include <QLocale>
 #include <QMetaType>
 #include <QPrinter>
@@ -158,6 +160,66 @@ void VSettings::SetPathPattern(const QString &value)
     QSettings settings(this->format(), this->scope(), this->organizationName(), this->applicationName());
     settings.setValue(settingPathsPattern, value);
     settings.sync();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+QString VSettings::getSamplePatternsPath()
+{
+    return SharePath(QStringLiteral("/samples/patterns"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief SeedSamplePatterns copies the bundled sample patterns into the user's patterns folder.
+ *
+ * A standard user has no write access to the Program Files installation folder, so the
+ * bundled samples under sourceDir can be opened but never saved back in place. Copying them
+ * into the writable destinationDir gives the user an editable starting point instead.
+ *
+ * Purely additive and safe to call on every launch: an existing file at the destination is
+ * left untouched, so a sample the user deleted stays deleted and an edited copy is never
+ * overwritten by the original.
+ *
+ * @param sourceDir      bundled samples/patterns folder; a missing folder is a silent no-op.
+ * @param destinationDir the user's patterns folder; created if missing.
+ * @return number of sample files copied.
+ */
+int VSettings::SeedSamplePatterns(const QString &sourceDir, const QString &destinationDir)
+{
+    const QDir source(sourceDir);
+    if (!source.exists())
+    {
+        return 0;
+    }
+
+    QDir destination(destinationDir);
+    if (!destination.mkpath(QStringLiteral(".")))
+    {
+        qWarning() << "Could not create the patterns folder" << QDir::toNativeSeparators(destinationDir);
+        return 0;
+    }
+
+    int copied = 0;
+    const QStringList sampleFiles = source.entryList(QStringList(QStringLiteral("*.sm2d")), QDir::Files);
+    for (const QString &fileName : sampleFiles)
+    {
+        const QString target = destination.filePath(fileName);
+        if (QFileInfo::exists(target))
+        {
+            continue;
+        }
+
+        if (QFile::copy(source.filePath(fileName), target))
+        {
+            ++copied;
+        }
+        else
+        {
+            qWarning() << "Could not copy sample pattern" << QDir::toNativeSeparators(source.filePath(fileName))
+                       << "to" << QDir::toNativeSeparators(target);
+        }
+    }
+    return copied;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

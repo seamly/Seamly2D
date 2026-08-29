@@ -573,6 +573,63 @@ static QString readTestFile(const QString &path)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief SeedSamplePatternsCopiesBundledFiles checks the fix for samples bundled under a
+ * read-only Program Files install: seeding must copy every bundled .sm2d into the writable
+ * patterns folder, and ignore files that are not sample patterns.
+ */
+void TST_DataRoot::SeedSamplePatternsCopiesBundledFiles() const
+{
+    const QString source = scratchPath(QStringLiteral("bundled-samples/patterns"));
+    QVERIFY(writeTestFile(source + QStringLiteral("/male_shirt.sm2d"), QStringLiteral("<pattern/>")));
+    QVERIFY(writeTestFile(source + QStringLiteral("/trousers.sm2d"), QStringLiteral("<pattern/>")));
+    QVERIFY(writeTestFile(source + QStringLiteral("/readme.txt"), QStringLiteral("not a pattern")));
+
+    const QString destination = scratchPath(QStringLiteral("seeded-patterns"));
+    QVERIFY(!QFileInfo::exists(destination));
+
+    QCOMPARE(VSettings::SeedSamplePatterns(source, destination), 2);
+
+    QVERIFY(QFileInfo::exists(destination + QStringLiteral("/male_shirt.sm2d")));
+    QVERIFY(QFileInfo::exists(destination + QStringLiteral("/trousers.sm2d")));
+    QVERIFY2(!QFileInfo::exists(destination + QStringLiteral("/readme.txt")),
+             "SeedSamplePatterns must copy only .sm2d files");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief SeedSamplePatternsNeverOverwritesAnExistingFile checks the merge rule: a file the
+ * user already has at the destination, sample or edited copy alike, is left untouched.
+ */
+void TST_DataRoot::SeedSamplePatternsNeverOverwritesAnExistingFile() const
+{
+    const QString source = scratchPath(QStringLiteral("bundled-samples-2/patterns"));
+    QVERIFY(writeTestFile(source + QStringLiteral("/male_shirt.sm2d"), QStringLiteral("<pattern/>")));
+
+    const QString destination = scratchPath(QStringLiteral("edited-patterns"));
+    const QString edited = destination + QStringLiteral("/male_shirt.sm2d");
+    QVERIFY(writeTestFile(edited, QStringLiteral("<pattern>edited by the user</pattern>")));
+
+    QCOMPARE(VSettings::SeedSamplePatterns(source, destination), 0);
+
+    QCOMPARE(readTestFile(edited), QStringLiteral("<pattern>edited by the user</pattern>"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief SeedSamplePatternsIsANoOpWhenSourceIsMissing checks the platform where samples were
+ * never bundled next to the executable: seeding must not create the destination folder.
+ */
+void TST_DataRoot::SeedSamplePatternsIsANoOpWhenSourceIsMissing() const
+{
+    const QString source = scratchPath(QStringLiteral("no-such-samples-folder"));
+    const QString destination = scratchPath(QStringLiteral("untouched-patterns"));
+
+    QCOMPARE(VSettings::SeedSamplePatterns(source, destination), 0);
+    QVERIFY(!QFileInfo::exists(destination));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief MigrationCopiesTheWholeTreeIncludingUnknownFolders is the central Task 60 rule.
  *
  * Users add their own directories to the data tree — `Projects` and `bodyscans` have both

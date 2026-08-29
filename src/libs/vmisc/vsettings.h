@@ -82,6 +82,9 @@ public:
     QString        getPatternPath() const;
     void           SetPathPattern(const QString &value);
 
+    static QString getSamplePatternsPath();
+    static int     SeedSamplePatterns(const QString &sourceDir, const QString &destinationDir);
+
     static QString getDefaultLayoutPath();
     QString        getLayoutPath() const;
     void           SetPathLayout(const QString &value);
