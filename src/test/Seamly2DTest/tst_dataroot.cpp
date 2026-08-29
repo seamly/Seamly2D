@@ -630,6 +630,82 @@ void TST_DataRoot::SeedSamplePatternsIsANoOpWhenSourceIsMissing() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief SeedSampleMeasurementsCopiesBundledFiles checks the measurements half of the same
+ * read-only Program Files fix: a bundled individual measurement file must be copied into the
+ * writable measurements folder so it can be opened, edited, and saved back.
+ */
+void TST_DataRoot::SeedSampleMeasurementsCopiesBundledFiles() const
+{
+    const QString source = scratchPath(QStringLiteral("bundled-samples/measurements/individual"));
+    QVERIFY(writeTestFile(source + QStringLiteral("/male_chest_102cm.smis"), QStringLiteral("<measurements/>")));
+    QVERIFY(writeTestFile(source + QStringLiteral("/readme.txt"), QStringLiteral("not a measurement file")));
+
+    const QString destination = scratchPath(QStringLiteral("seeded-measurements/individual"));
+    QVERIFY(!QFileInfo::exists(destination));
+
+    QCOMPARE(VSettings::SeedSampleMeasurements(source, destination, QStringLiteral("*.smis")), 1);
+
+    QVERIFY(QFileInfo::exists(destination + QStringLiteral("/male_chest_102cm.smis")));
+    QVERIFY2(!QFileInfo::exists(destination + QStringLiteral("/readme.txt")),
+             "SeedSampleMeasurements must copy only files matching the name filter");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief SeedSampleMeasurementsNeverOverwritesAnExistingFile checks the merge rule: a file the
+ * user already has at the destination, sample or edited copy alike, is left untouched.
+ */
+void TST_DataRoot::SeedSampleMeasurementsNeverOverwritesAnExistingFile() const
+{
+    const QString source = scratchPath(QStringLiteral("bundled-samples-2/measurements/individual"));
+    QVERIFY(writeTestFile(source + QStringLiteral("/male_chest_102cm.smis"), QStringLiteral("<measurements/>")));
+
+    const QString destination = scratchPath(QStringLiteral("edited-measurements/individual"));
+    const QString edited = destination + QStringLiteral("/male_chest_102cm.smis");
+    QVERIFY(writeTestFile(edited, QStringLiteral("<measurements>edited by the user</measurements>")));
+
+    QCOMPARE(VSettings::SeedSampleMeasurements(source, destination, QStringLiteral("*.smis")), 0);
+
+    QCOMPARE(readTestFile(edited), QStringLiteral("<measurements>edited by the user</measurements>"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief SeedSampleMeasurementsIsANoOpWhenSourceIsMissing checks the platform where samples
+ * were never bundled next to the executable: seeding must not create the destination folder.
+ */
+void TST_DataRoot::SeedSampleMeasurementsIsANoOpWhenSourceIsMissing() const
+{
+    const QString source = scratchPath(QStringLiteral("no-such-samples-folder/measurements"));
+    const QString destination = scratchPath(QStringLiteral("untouched-measurements"));
+
+    QCOMPARE(VSettings::SeedSampleMeasurements(source, destination, QStringLiteral("*.smis")), 0);
+    QVERIFY(!QFileInfo::exists(destination));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief SeedSampleMeasurementsHonoursTheNameFilter checks that the caller-supplied filter,
+ * not a hard-coded extension, decides which bundled files are copied — the same function
+ * seeds both individual (.smis) and multisize (.smms) measurement folders.
+ */
+void TST_DataRoot::SeedSampleMeasurementsHonoursTheNameFilter() const
+{
+    const QString source = scratchPath(QStringLiteral("bundled-samples/measurements/multisize"));
+    QVERIFY(writeTestFile(source + QStringLiteral("/gost_man_ru.smms"), QStringLiteral("<measurements/>")));
+    QVERIFY(writeTestFile(source + QStringLiteral("/unrelated.smis"), QStringLiteral("<measurements/>")));
+
+    const QString destination = scratchPath(QStringLiteral("seeded-measurements/multisize"));
+
+    QCOMPARE(VSettings::SeedSampleMeasurements(source, destination, QStringLiteral("*.smms")), 1);
+
+    QVERIFY(QFileInfo::exists(destination + QStringLiteral("/gost_man_ru.smms")));
+    QVERIFY2(!QFileInfo::exists(destination + QStringLiteral("/unrelated.smis")),
+             "The name filter must exclude files with a different extension");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief MigrationCopiesTheWholeTreeIncludingUnknownFolders is the central Task 60 rule.
  *
  * Users add their own directories to the data tree — `Projects` and `bodyscans` have both

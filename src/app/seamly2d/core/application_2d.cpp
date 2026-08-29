@@ -700,6 +700,10 @@ void Application2D::initOptions()
     // bundled samples under %PROGRAMDIR%\samples\patterns can be opened but never saved back
     // in place. Seed the writable patterns folder with editable copies instead.
     VSettings::SeedSamplePatterns(VSettings::getSamplePatternsPath(), settings->getDefaultPatternPath());
+    VSettings::SeedSampleMeasurements(VSettings::getSampleMeasurementsIndividualPath(),
+                                       settings->getDefaultIndividualSizePath(), QStringLiteral("*.smis"));
+    VSettings::SeedSampleMeasurements(VSettings::getSampleMeasurementsMultisizePath(),
+                                       settings->getDefaultMultisizePath(), QStringLiteral("*.smms"));
 
     // Task 15: only tell the user their settings moved once command-line parsing (done in
     // the constructor, before initOptions() runs) has determined real GUI-vs-console mode —

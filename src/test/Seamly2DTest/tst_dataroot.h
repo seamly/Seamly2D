@@ -88,6 +88,11 @@ private slots:
     void SeedSamplePatternsNeverOverwritesAnExistingFile() const;
     void SeedSamplePatternsIsANoOpWhenSourceIsMissing() const;
 
+    void SeedSampleMeasurementsCopiesBundledFiles() const;
+    void SeedSampleMeasurementsNeverOverwritesAnExistingFile() const;
+    void SeedSampleMeasurementsIsANoOpWhenSourceIsMissing() const;
+    void SeedSampleMeasurementsHonoursTheNameFilter() const;
+
     void MigrationCopiesTheWholeTreeIncludingUnknownFolders() const;
     void MigrationNeverOverwritesAnExistingFile() const;
     void MigrationLeavesTheSourceTreeIntact() const;
