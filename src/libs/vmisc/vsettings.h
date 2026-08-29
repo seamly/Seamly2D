@@ -85,6 +85,11 @@ public:
     static QString getSamplePatternsPath();
     static int     SeedSamplePatterns(const QString &sourceDir, const QString &destinationDir);
 
+    static QString getSampleMeasurementsIndividualPath();
+    static QString getSampleMeasurementsMultisizePath();
+    static int     SeedSampleMeasurements(const QString &sourceDir, const QString &destinationDir,
+                                           const QString &nameFilter);
+
     static QString getDefaultLayoutPath();
     QString        getLayoutPath() const;
     void           SetPathLayout(const QString &value);

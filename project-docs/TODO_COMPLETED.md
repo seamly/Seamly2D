@@ -25,10 +25,44 @@ editable starting point.
   platform samples.pri never installs to)
 
 **Scope:** Seamly2D only — the report was about `.sm2d` pattern files specifically. SeamlyMe's
-sample measurements/templates are a separate concern, not covered here.
+sample measurements/templates were a separate concern at the time, not covered here — see
+Task Seamly2D.3 below, which closes that gap.
 
 **Verification:** no local build or test script exists for Seamly2D (see `README-BUILDS.md`);
 `ci.yml` builds and runs `Seamly2DTest` on push.
+
+## Task Seamly2D.3 — Seed sample measurement files too (completed 2026-08-28)
+
+Follow-up to Task Seamly2D.2. MSI Test Case 1b-i step 3e found that
+`%DATADIR%\measurements\individual\male_chest_102cm.smis` was still missing after a fresh
+install and first run: `SeedSamplePatterns()` copies only `.sm2d` patterns, and no equivalent
+existed for measurement files, even though the bundled sample is present at
+`%PROGRAMDIR%\samples\measurements\individual\male_chest_102cm.smis`. Same write-access
+constraint as Seamly2D.2: a standard user cannot save back into Program Files.
+
+- [X] **Shared the copy logic.** `SeedSamplePatterns()`'s file-copying body moved into a
+  private free function, `copySampleFiles(sourceDir, destinationDir, nameFilter)`
+  (`src/libs/vmisc/vsettings.cpp`, anonymous namespace) — same missing-source-is-a-no-op and
+  never-overwrite behaviour, generalized to take a caller-supplied glob filter instead of a
+  hard-coded `*.sm2d`.
+- [X] **New static method.** `VSettings::SeedSampleMeasurements(sourceDir, destinationDir,
+  nameFilter)` (`src/libs/vmisc/vsettings.{h,cpp}`) wraps `copySampleFiles()`, public so it
+  can seed both `measurements/individual` (`*.smis`) and `measurements/multisize` (`*.smms`)
+  with one function. `getSampleMeasurementsIndividualPath()` /
+  `getSampleMeasurementsMultisizePath()` resolve the two bundled source folders via
+  `SharePath()`, mirroring `getSamplePatternsPath()`.
+- [X] **Called on startup.** `Application2D::initOptions()`
+  (`src/app/seamly2d/core/application_2d.cpp`) calls it twice, right after the existing
+  `SeedSamplePatterns()` call — once for `measurements/individual`, once for
+  `measurements/multisize`.
+- [X] **Unit tests.** Four new cases in `tst_dataroot.cpp`: copies bundled `.smis` files and
+  ignores non-matching files; never overwrites an existing (possibly user-edited) file; no-op,
+  no destination folder created, when the source folder does not exist; the name filter
+  parameter — not a hard-coded extension — decides what gets copied, proven by seeding `.smms`
+  through the same function.
+
+**Verification:** no local build or test script exists for Seamly2D (see `README-BUILDS.md`);
+`ci.yml` builds and runs `Seamly2DTest` on push. Not run locally this session.
 
 ## Task InstWinX64.0 — Verify the baseline x64 MSI build (completed 2026-08-12)
 

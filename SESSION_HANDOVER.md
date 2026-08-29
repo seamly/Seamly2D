@@ -6,6 +6,38 @@ lives beside the code it governs — for Windows packaging that is
 `scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## First run also seeds sample measurement files (2026-08-28)
+
+Task Seamly2D.3, done. Follow-up to the entry directly below. Re-running MSI Test Case
+1b-i's verification suite after that fix still failed step 3e:
+`%DATADIR%\measurements\individual\male_chest_102cm.smis` was missing even though the
+bundled sample exists at `%PROGRAMDIR%\samples\measurements\individual\male_chest_102cm.smis`
+— `SeedSamplePatterns()` only ever copied `.sm2d` files.
+
+`SeedSamplePatterns()`'s copy body moved into a shared private helper,
+`copySampleFiles(sourceDir, destinationDir, nameFilter)`
+(`src/libs/vmisc/vsettings.cpp`, anonymous namespace). New public
+`VSettings::SeedSampleMeasurements(sourceDir, destinationDir, nameFilter)` wraps it, called
+twice from `Application2D::initOptions()` — `*.smis` into `measurements/individual`, `*.smms`
+into `measurements/multisize`. Full writeup in `project-docs/TODO_COMPLETED.md` under Task
+Seamly2D.3. `project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md` section C (D1/D2) records the
+verification-pass findings that led here.
+
+**Scope, corrected from the note below:** SeamlyMe's sample measurements are no longer a
+separate unfiled concern — SeamlyMe reads the same `%DATAROOT%\measurements\` tree Seamly2D
+now seeds, so seeding from Seamly2D's `initOptions()` covers both apps. Sample *templates*
+(`%PROGRAMDIR%\samples\measurements\templates\`) are still not seeded — out of scope, not
+reported by the test plan.
+
+**Verified:** `vsettings.cpp`, `application_2d.cpp`, and `tst_dataroot.{h,cpp}` (4 new cases)
+were reviewed by hand for consistency with the existing pattern-seeding code and tests, not
+syntax-checked with a compiler this session. Not verified: `ctest`/a full build; `ci.yml` is
+the verification path for Seamly2D per `CLAUDE.md`.
+
+**Not yet done:** rebuild and reinstall `seamly-x64.msi` so this code actually reaches a real
+machine, then re-run MSI Test Case 1b-i steps 3d/3e to confirm both files now appear
+(`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, defects D1/D2).
+
 ## First run seeds the patterns folder from the bundled samples (2026-08-28)
 
 Task Seamly2D.2, done. MSI Test Case 1b-i step 6a-i found

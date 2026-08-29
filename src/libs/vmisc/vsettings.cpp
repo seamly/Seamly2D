@@ -112,6 +112,56 @@ const QString settingTiledPDFMargins        = QStringLiteral("tiledPDF/margins")
 const QString settingTiledPDFPaperHeight    = QStringLiteral("tiledPDF/paperHeight");
 const QString settingTiledPDFPaperWidth     = QStringLiteral("tiledPDF/paperWidth");
 const QString settingTiledPDFOrientation    = QStringLiteral("tiledPDF/orientation");
+
+/**
+ * @brief copySampleFiles copies files matching nameFilter from sourceDir into destinationDir.
+ *
+ * Shared by SeedSamplePatterns() and SeedSampleMeasurements(): both need the same
+ * missing-source-is-a-no-op and never-overwrite-an-existing-file behaviour, only the file
+ * extension differs.
+ *
+ * @param sourceDir      bundled samples folder; a missing folder is a silent no-op.
+ * @param destinationDir the user's folder to seed; created if missing.
+ * @param nameFilter     glob filter selecting which bundled files to copy, e.g. "*.sm2d".
+ * @return number of sample files copied.
+ */
+int copySampleFiles(const QString &sourceDir, const QString &destinationDir, const QString &nameFilter)
+{
+    const QDir source(sourceDir);
+    if (!source.exists())
+    {
+        return 0;
+    }
+
+    QDir destination(destinationDir);
+    if (!destination.mkpath(QStringLiteral(".")))
+    {
+        qWarning() << "Could not create the folder" << QDir::toNativeSeparators(destinationDir);
+        return 0;
+    }
+
+    int copied = 0;
+    const QStringList sampleFiles = source.entryList(QStringList(nameFilter), QDir::Files);
+    for (const QString &fileName : sampleFiles)
+    {
+        const QString target = destination.filePath(fileName);
+        if (QFileInfo::exists(target))
+        {
+            continue;
+        }
+
+        if (QFile::copy(source.filePath(fileName), target))
+        {
+            ++copied;
+        }
+        else
+        {
+            qWarning() << "Could not copy sample file" << QDir::toNativeSeparators(source.filePath(fileName))
+                       << "to" << QDir::toNativeSeparators(target);
+        }
+    }
+    return copied;
+}
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -186,40 +236,44 @@ QString VSettings::getSamplePatternsPath()
  */
 int VSettings::SeedSamplePatterns(const QString &sourceDir, const QString &destinationDir)
 {
-    const QDir source(sourceDir);
-    if (!source.exists())
-    {
-        return 0;
-    }
+    return copySampleFiles(sourceDir, destinationDir, QStringLiteral("*.sm2d"));
+}
 
-    QDir destination(destinationDir);
-    if (!destination.mkpath(QStringLiteral(".")))
-    {
-        qWarning() << "Could not create the patterns folder" << QDir::toNativeSeparators(destinationDir);
-        return 0;
-    }
+//---------------------------------------------------------------------------------------------------------------------
+QString VSettings::getSampleMeasurementsIndividualPath()
+{
+    return SharePath(QStringLiteral("/samples/measurements/individual"));
+}
 
-    int copied = 0;
-    const QStringList sampleFiles = source.entryList(QStringList(QStringLiteral("*.sm2d")), QDir::Files);
-    for (const QString &fileName : sampleFiles)
-    {
-        const QString target = destination.filePath(fileName);
-        if (QFileInfo::exists(target))
-        {
-            continue;
-        }
+//---------------------------------------------------------------------------------------------------------------------
+QString VSettings::getSampleMeasurementsMultisizePath()
+{
+    return SharePath(QStringLiteral("/samples/measurements/multisize"));
+}
 
-        if (QFile::copy(source.filePath(fileName), target))
-        {
-            ++copied;
-        }
-        else
-        {
-            qWarning() << "Could not copy sample pattern" << QDir::toNativeSeparators(source.filePath(fileName))
-                       << "to" << QDir::toNativeSeparators(target);
-        }
-    }
-    return copied;
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief SeedSampleMeasurements copies the bundled sample measurement files into the user's
+ * measurements folder.
+ *
+ * Same rationale as SeedSamplePatterns(): a standard user has no write access to the Program
+ * Files installation folder, so a bundled measurement file can be opened but never saved back
+ * in place. Copying it into the writable destinationDir gives the user an editable starting
+ * point instead.
+ *
+ * Purely additive and safe to call on every launch: an existing file at the destination is
+ * left untouched, so a sample the user deleted stays deleted and an edited copy is never
+ * overwritten by the original.
+ *
+ * @param sourceDir      bundled samples/measurements folder; a missing folder is a silent no-op.
+ * @param destinationDir the user's measurements folder; created if missing.
+ * @param nameFilter     glob filter selecting which bundled files to copy, e.g. "*.smis".
+ * @return number of sample files copied.
+ */
+int VSettings::SeedSampleMeasurements(const QString &sourceDir, const QString &destinationDir,
+                                       const QString &nameFilter)
+{
+    return copySampleFiles(sourceDir, destinationDir, nameFilter);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
