@@ -29,7 +29,7 @@ The job is a two-leg matrix over `arch`:
 | `x64` | `windows-latest` | seamly2d + seamlyme (qmake) **and** SeamlyLayout (CMake/Ninja + Cargo) | `windows` / `win64_msvc2022_64` | `qtmultimedia qtwebengine qtwebchannel qtpositioning` |
 | `arm64` | `windows-11-arm` | same three apps | `windows_arm64` / `win64_msvc2022_arm64` | same four modules |
 
-Each leg installs one Qt 6.11.1 kit, builds the apps, then runs [`smsi.ps1`](../../packaging/windows/smsi.ps1) to stage the shared runtime and build, validate and authoring-test `scripts/seamly-msi/<arch>/seamly-<arch>.msi`. `jsign` signs each package and `publish` attaches both to the pre-release. `fail-fast: false` so one arch's failure does not hide the other's result.
+Each leg installs one Qt 6.11.1 kit, builds the apps, then runs [`smsi.ps1`](../../packaging/windows/smsi.ps1) to stage the shared runtime and build, validate and authoring-test `packaging/windows/seamly-msi/<arch>/seamly-<arch>.msi`. `jsign` signs each package and `publish` attaches both to the pre-release. `fail-fast: false` so one arch's failure does not hide the other's result.
 
 **Both legs are native — nothing is cross-compiled.** Each arch builds on its own runner with its own host kit: no `amd64_arm64` MSVC, no `..._cross_compiled` Qt, no `host-qmake`, and no explicit cargo target (each runner's default host toolchain already matches the package it is building). That is also why `windeployqt` needs no `--qtpaths` wrapper on either leg — see `common.pri`'s `deployQtRuntime()`.
 

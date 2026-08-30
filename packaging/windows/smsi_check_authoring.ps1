@@ -61,7 +61,7 @@
     against the summary-information template.
 
 .EXAMPLE
-    .\smsi_check_authoring.ps1 -Msi scripts\seamly-msi\x64\seamly-x64.msi
+    .\smsi_check_authoring.ps1 -Msi packaging\windows\seamly-msi\x64\seamly-x64.msi
 #>
 
 param(

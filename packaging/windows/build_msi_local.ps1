@@ -236,7 +236,7 @@ try {
 }
 
 Write-Host ''
-Write-Host "MSI OK: scripts\seamly-msi\x64\seamly-x64.msi"
+Write-Host "MSI OK: packaging\windows\seamly-msi\x64\seamly-x64.msi"
 if ($versionFilesWereClean) {
     Write-Host "reverting the version stamp (projectversion.cpp/.h, both Info.plist) - scripts\version.sh regenerates it on demand, nothing to keep..."
     & git -C $repoRoot checkout -- $versionStampedFiles

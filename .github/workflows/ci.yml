@@ -426,7 +426,7 @@ jobs:
 
       # smsi.ps1 stages the shared Qt runtime, builds the MSI, runs the ICE
       # checks and the install-time authoring test, and fails the job on any of
-      # them. Output: 'scripts\seamly-msi\<arch>\seamly-<arch>.msi'
+      # them. Output: 'packaging\windows\seamly-msi\<arch>\seamly-<arch>.msi'
       - name: Build MSI (all three apps)
         shell: pwsh
         run: |
@@ -477,17 +477,17 @@ jobs:
           --alias "${{ secrets.SEAMLY_SIGNING_KEY_NAME }}" \
           --certfile .github/workflows/signing/codesign-chain.pem \
           --tsaurl http://timestamp.sectigo.com \
-          scripts/seamly-msi/${{ matrix.arch }}/seamly-${{ matrix.arch }}.msi
+          packaging/windows/seamly-msi/${{ matrix.arch }}/seamly-${{ matrix.arch }}.msi
 
       # download-artifact extracts the archive, so both publish jobs get
       # seamly-<arch>.msi. The artifact name repeats the file name only so the
       # two match.
-      # GitHub workflow artifacts are downloadable as a zip file. 
+      # GitHub workflow artifacts are downloadable as a zip file.
       # Releases are downloadable as .msi (not msi.zip)
       - uses: actions/upload-artifact@v7
         with:
           name: seamly-${{ matrix.arch }}.msi
-          path: scripts/seamly-msi/${{ matrix.arch }}/seamly-${{ matrix.arch }}.msi
+          path: packaging/windows/seamly-msi/${{ matrix.arch }}/seamly-${{ matrix.arch }}.msi
           if-no-files-found: error
 
   # Publish the Windows MSIs to one rolling pre-release for testing..

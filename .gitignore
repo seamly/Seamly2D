@@ -117,8 +117,9 @@ Makefile*
 # incidentally, so renaming the directory silently made hundreds of megabytes of
 # build output committable - which is exactly what happened when it was renamed
 # to the name below.
-# smsi.ps1 creates scripts/seamly-msi/<arch>; nothing in that tree is tracked.
-scripts/seamly-msi/
+# smsi.ps1 creates packaging/windows/seamly-msi/<arch>; nothing in that tree
+# is tracked.
+packaging/windows/seamly-msi/
 build/
 
 # Qt translation file

@@ -39,9 +39,10 @@
     Build the Windows MSI installer for the Seamly app suite.
 
 .DESCRIPTION
-    Stages the already-built apps into <repo>\scripts\seamly-msi\<arch>\
-    and runs `wix build` on packaging\windows\smsi.wxs to
-    produce scripts\seamly-msi\<arch>\seamly-<arch>.msi. Only the .msi
+    Stages the already-built apps into
+    <repo>\packaging\windows\seamly-msi\<arch>\ and runs `wix build` on
+    packaging\windows\smsi.wxs to produce
+    packaging\windows\seamly-msi\<arch>\seamly-<arch>.msi. Only the .msi
     is written — the .wixpdb symbol database is suppressed with `-pdbtype none`
     (it is used only for wix patch/melt diffing, not by the installer).
 
@@ -109,8 +110,8 @@
     scripts that produced its input trees locally (sb.ps1, sd.ps1) were
     deleted in August 2026, so either build the trees by hand or let ci.yml's
     windows-msi job do the whole job. Output and staging live in
-    scripts\seamly-msi\ (or whatever -OutputDirName names), which .gitignore
-    lists by name.
+    packaging\windows\seamly-msi\ (or whatever -OutputDirName names), which
+    .gitignore lists by name.
 #>
 
 param(
@@ -144,11 +145,11 @@ param(
     # Skip the ICE validation pass.
     [switch]$SkipValidation,
 
-    # Name of the staging/output directory created under scripts\. It lives
-    # here rather than as a literal, because three other places have to agree
-    # with it: the .gitignore entry that keeps the staged package out of git,
-    # and the artifact and signing paths in ci.yml's windows-msi job, which
-    # publishes scripts/<this>/<arch>/seamly-<arch>.msi.
+    # Name of the staging/output directory created under packaging\windows\.
+    # It lives here rather than as a literal, because three other places have
+    # to agree with it: the .gitignore entry that keeps the staged package
+    # out of git, and the artifact and signing paths in ci.yml's windows-msi
+    # job, which publishes packaging/windows/<this>/<arch>/seamly-<arch>.msi.
     [string]$OutputDirName = 'seamly-msi'
 )
 
@@ -306,13 +307,13 @@ Write-Host "msvc crt    : $crtDir"
 
 # --- Stage ---------------------------------------------------------------------
 # Fresh staging tree per run:
-# <repo>\scripts\<OutputDirName>\<arch>\{parent,exes}
+# <repo>\packaging\windows\<OutputDirName>\<arch>\{parent,exes}
 # 'parent' is the one shared runtime tree for every app in the package.
 # .gitignore lists that directory by name, so a new -OutputDirName needs a new
 # .gitignore entry and the CI workflow's artifact path updated with it - a
-# 165 MB package is otherwise committable. The output is anchored to $repoRoot
-# at the scripts\ root, not beside this script.
-$stageRoot = Join-Path $repoRoot (Join-Path 'scripts' (Join-Path $OutputDirName $Arch))
+# 165 MB package is otherwise committable. The output is anchored beside this
+# script, under $PSScriptRoot.
+$stageRoot = Join-Path $PSScriptRoot (Join-Path $OutputDirName $Arch)
 if (Test-Path $stageRoot) {
     Remove-Item $stageRoot -Recurse -Force
 }

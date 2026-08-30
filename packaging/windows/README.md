@@ -29,7 +29,7 @@ Editing any file here triggers full CI (no `paths-ignore` match).
 ## Key decisions
 
 - **WiX v6**, not v7 (v7 requires accepting its EULA). Extension version must match core.
-- **One MSI per arch**, not per-app. Output: `scripts\seamly-msi\<arch>\seamly-<arch>.msi`.
+- **One MSI per arch**, not per-app. Output: `packaging\windows\seamly-msi\<arch>\seamly-<arch>.msi`.
 - **One flat install dir**: `[ProgramFiles64Folder]\SeamlyApps\` holds all 3 exes + one shared Qt runtime.
 - **CRT deployed app-local** from `VCToolsRedistDir`, not merge modules.
 - **CI-only build.** Run via `gh workflow run ci.yml --ref run-seamlyLayout`.

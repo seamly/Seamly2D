@@ -40,7 +40,7 @@ gh workflow run ci.yml --ref run-seamlyLayout
 Checks first, fails on the first missing item: both exes, `seamly2d`'s `platforms\` dir, `SeamlyLayout.exe`, `wix`, the WiX UI/Util extensions, `-WinDeployQt`, and a `Microsoft.VC*.CRT` dir under `VCToolsRedistDir\<arch>`.
 
 1. **Derives `ProductVersion`**: `YY.M.((D−1)·1440 + MMMM)` — MSI ignores the 4th field for upgrade comparisons; this always increases. Full version is stored as `DisplayVersion`.
-2. **Stages** `scripts\seamly-msi\<arch>\`: `parent\` (shared Qt runtime + `windeployqt --qmldir …\qml --release` for SeamlyLayout, its `settings\`/`licenses\`, MSVC CRT DLLs) and `exes\` (the three exes, moved out of `parent\` after deployment so `.wxs` can author them explicitly for shortcuts/associations).
+2. **Stages** `packaging\windows\seamly-msi\<arch>\`: `parent\` (shared Qt runtime + `windeployqt --qmldir …\qml --release` for SeamlyLayout, its `settings\`/`licenses\`, MSVC CRT DLLs) and `exes\` (the three exes, moved out of `parent\` after deployment so `.wxs` can author them explicitly for shortcuts/associations).
 3. **`wix build`** on `smsi.wxs` → `seamly-<arch>.msi` (`-pdbtype none`, no `.wixpdb`).
 4. **`wix msi validate`** (skip with `-SkipValidation`), suppressing ICE43/57 — false positives from optional desktop-shortcut components.
 5. **[`smsi_check_authoring.ps1`](smsi_check_authoring.ps1)** — asserts elevation, ARP properties, upgrade/NSIS detection, dialogs, shortcuts, associations, registry rows. Always runs, even with `-SkipValidation`.
