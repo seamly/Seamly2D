@@ -6,6 +6,59 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## Layout.8 — SeamlyLayout preferences/settings paths fixed under AppConfigLocation (2026-08-30)
+
+Task Layout.8 (`TODO_SEAMLYLAYOUT.md`), 8.1-8.3 done, 8.4 open. Found during
+MSI Test Case 1 verification (`TEST_MSI_WIN_X64_Test_Case_1b-i.md` steps
+6c/6d/7c/7d/7e): a fresh install seeded `preferences_directory`,
+`preferences_file`, `settings_directory`, `settings_file` (and
+`default_settings.json`'s own location) under the raw home directory
+(`C:\Users\<user>\seamlyLayout\...`) instead of resolving under `%DATAROOT%`
+as the test plan expected.
+
+**Root cause:** `seedFromBundledDefaults()` (`PreferencesModel.cpp`) routed
+all six `default_preferences.json` path keys through
+`expandDefaultPathTokens()`/`installerDataRoot()` (a Windows registry read of
+`HKLM\SOFTWARE\Seamly\SeamlyLayout\DataRoot`), including the four app-config
+keys that should never have depended on DataRoot or MSI custom-action
+ordering at all — they should sit beside `qt6_seamlylayout.ini` under
+`appConfigRootPath()` (`%LOCALAPPDATA%\Seamly\SeamlyLayout` on Windows),
+exactly like Seamly2D/SeamlyMe's own `qt6_*.ini`.
+
+**Fix:** `seedFromBundledDefaults()` now anchors
+`settings_directory`/`preferences_directory`/`settings_file`/`preferences_file`
+directly under `appConfigRootPath()`, with zero dependency on the installer
+registry key. `input_directory`/`layout_directory` are untouched — they are
+genuine user data (already confirmed correct by 7c) and keep the
+DataRoot-substituted template. Removed the now-unused four keys from the
+bundled `preferences/default_preferences.json`. Added `Logger::log`
+instrumentation to `installerDataRoot()`/`seedFromBundledDefaults()` per
+Layout.8.1. Updated `docs/packaging-docs/INSTALLER_NOTES.md`'s Runtime Folder
+Layout section.
+
+**Layout.8.2 left open** — could not conclusively determine, by static
+reading alone, what previously set `input_directory`/`layout_directory` to
+the literal `<DataRoot>\layouts` the tester observed (no current code path
+produces exactly that value; ruled out `resolvedInputDirectory()`/
+`resolvedLayoutDirectory()` (`/input`+`/output`, not `/layouts`) and a
+packaged `settings/preferences.json` (`smsi_files.wxs` explicitly excludes
+it)). Does not block 8.3, since 7c already confirmed those two resolve
+correctly and the fix does not touch them.
+
+**Verified:** `cmake --build --preset debug` (qt_frontend) succeeded;
+`ctest --preset debug` — 5/5 suites passed, including new
+`PreferencesModelTests::layout8_resetToDefaults_seedsAppConfigPreferencesAndSettingsPaths`.
+Confirmed no side effects on this machine's real `%LOCALAPPDATA%\Seamly\SeamlyLayout\`
+state (the pre-existing `default_preferences.json` there predates this
+session and was untouched — the test points `preferencesDirectory` at a
+`QTemporaryDir` so seeding happens there, not against the real file).
+`cargo test --workspace` not run (no Rust changed).
+
+**Layout.8.4 still open — needs a human at the keyboard.** Re-run MSI Test
+Case verification steps 6c/6d/7c/7d/7e on a fresh elevated MSI install/uninstall
+cycle to confirm the fix on a real machine, per
+`TEST_MSI_WIN_X64_Test_Case_1b-i.md`. Not run this session.
+
 ## version.sh moved to packaging/ (2026-08-29)
 
 `scripts/version.sh` moved to `packaging/version.sh` — it stamps the

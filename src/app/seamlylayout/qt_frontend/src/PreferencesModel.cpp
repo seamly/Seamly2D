@@ -60,10 +60,17 @@ QString installerDataRoot()
         QSettings::Registry64Format);
     const QString recorded = installKey.value(QStringLiteral("DataRoot")).toString().trimmed();
     if (recorded.isEmpty()) {
+        // Layout.8.1: logged so a fresh-install repro can show whether this is an MSI
+        // custom-action ordering race (registry value not yet written) or a genuine
+        // absence (unpackaged/dev build, non-installer run).
+        Logger::log(QStringLiteral(
+            "installerDataRoot(): HKLM\\SOFTWARE\\Seamly\\SeamlyLayout\\DataRoot empty or absent"));
         return QString();
     } // if nothing recorded
 
-    return QDir::cleanPath(QDir::fromNativeSeparators(recorded));
+    const QString cleaned = QDir::cleanPath(QDir::fromNativeSeparators(recorded));
+    Logger::log(QStringLiteral("installerDataRoot(): read \"") + cleaned + QStringLiteral("\""));
+    return cleaned;
 } // installerDataRoot
 #endif // Q_OS_WIN
 
@@ -146,10 +153,14 @@ QString platformDefaultsKey()
 
 // @brief Replace supported tokens in default path templates.
 //
-// ${HOME} resolves to the Windows installer's recorded DataRoot when one exists, so a
-// fresh MSI install seeds settings/preferences/input/layout defaults under %DATAROOT%
+// Layout.8.3: only input_directory/layout_directory (user data, shared with the rest of
+// the suite) go through this. ${HOME} resolves to the Windows installer's recorded
+// DataRoot when one exists, so a fresh MSI install nests those two under %DATAROOT%
 // instead of the user's home directory. Falls back to the real home path everywhere else
-// (dev builds, Linux, macOS, or Windows without an installer record).
+// (dev builds, Linux, macOS, or Windows without an installer record). preferences/settings
+// paths are app-config, not user data, and are seeded straight from appConfigRootPath() in
+// seedFromBundledDefaults() below — never through this function — so they carry no
+// dependency on the installer registry key or MSI custom-action ordering.
 QString expandDefaultPathTokens(const QString &value)
 {
     QString homeBase = QDir::homePath();
@@ -166,8 +177,19 @@ QString expandDefaultPathTokens(const QString &value)
 } // expandDefaultPathTokens
 
 // @brief Seed preferences.json from bundled resource defaults.
+//
+// Layout.8.3: settings_directory/preferences_directory/settings_file/preferences_file are
+// app-config, exactly like Seamly2D/SeamlyMe's own qt6_*.ini — they must resolve under
+// appConfigRootPath() (%LOCALAPPDATA%\Seamly\SeamlyLayout on Windows) regardless of
+// whether the Windows installer's DataRoot registry key has been written yet. Routing them
+// through expandDefaultPathTokens()/installerDataRoot() (as before) made them depend on
+// MSI custom-action ordering and silently fell back to the raw home directory when that
+// race lost. input_directory/layout_directory are genuine user data, shared with the rest
+// of the suite, so they keep the DataRoot-substituted template below.
 bool seedFromBundledDefaults(const QString &destPath)
 {
+    Logger::log(QStringLiteral("seedFromBundledDefaults(): destPath=") + destPath);
+
     QFile bundled(QStringLiteral(":/defaults/default_preferences.json"));
     if (!bundled.open(QIODevice::ReadOnly)) {
         return false;
@@ -187,12 +209,13 @@ bool seedFromBundledDefaults(const QString &destPath)
     // Build normalized OS-appropriate defaults for runtime use.
     QJsonObject out;
 
+    const QString appConfigRoot = appConfigRootPath();
+    Logger::log(QStringLiteral("seedFromBundledDefaults(): appConfigRoot=") + appConfigRoot);
+
     const QString defaultSettingsDir = QDir::toNativeSeparators(
-        expandDefaultPathTokens(source.value(QStringLiteral("settings_directory"))
-            .toString(QStringLiteral("${HOME}/seamlyLayout/settings"))));
+        QDir(appConfigRoot).filePath(QString::fromUtf8(kSettingsFolderName)));
     const QString defaultPreferencesDir = QDir::toNativeSeparators(
-        expandDefaultPathTokens(source.value(QStringLiteral("preferences_directory"))
-            .toString(QStringLiteral("${HOME}/seamlyLayout/preferences"))));
+        QDir(appConfigRoot).filePath(QString::fromUtf8(kPreferencesFolderName)));
     const QString defaultInputDir = QDir::toNativeSeparators(
         expandDefaultPathTokens(source.value(QStringLiteral("input_directory"))
             .toString(QStringLiteral("${HOME}/seamlyLayout/input"))));
@@ -200,21 +223,10 @@ bool seedFromBundledDefaults(const QString &destPath)
         expandDefaultPathTokens(source.value(QStringLiteral("layout_directory"))
             .toString(QStringLiteral("${HOME}/seamlyLayout/output"))));
 
-    QString defaultSettingsFile = expandDefaultPathTokens(
-        source.value(QStringLiteral("settings_file"))
-            .toString(QStringLiteral("${HOME}/seamlyLayout/settings/default_settings.json")));
-    if (!QFileInfo(defaultSettingsFile).isAbsolute()) {
-        defaultSettingsFile = QFileInfo(QDir(defaultSettingsDir).filePath(defaultSettingsFile)).absoluteFilePath();
-    } // if relative settings_file
-    defaultSettingsFile = QDir::toNativeSeparators(defaultSettingsFile);
-
-    QString defaultPreferencesFile = expandDefaultPathTokens(
-        source.value(QStringLiteral("preferences_file"))
-            .toString(QStringLiteral("${HOME}/seamlyLayout/preferences/default_preferences.json")));
-    if (!QFileInfo(defaultPreferencesFile).isAbsolute()) {
-        defaultPreferencesFile = QFileInfo(QDir(defaultPreferencesDir).filePath(defaultPreferencesFile)).absoluteFilePath();
-    } // if relative preferences_file
-    defaultPreferencesFile = QDir::toNativeSeparators(defaultPreferencesFile);
+    const QString defaultSettingsFile = QDir::toNativeSeparators(
+        QFileInfo(QDir(defaultSettingsDir).filePath(QStringLiteral("default_settings.json"))).absoluteFilePath());
+    const QString defaultPreferencesFile = QDir::toNativeSeparators(
+        QFileInfo(QDir(defaultPreferencesDir).filePath(QStringLiteral("default_preferences.json"))).absoluteFilePath());
 
     out[QStringLiteral("settings_directory")] = defaultSettingsDir;
     out[QStringLiteral("preferences_directory")] = defaultPreferencesDir;
