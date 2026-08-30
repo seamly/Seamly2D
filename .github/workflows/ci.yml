@@ -216,7 +216,7 @@ jobs:
 
       - name: update version
         run: |
-          ./scripts/version.sh ${VERSION_NUMBER}
+          ./packaging/version.sh ${VERSION_NUMBER}
 
       - name: build Seamly2D appimage
         env:
@@ -260,7 +260,7 @@ jobs:
 
       - name: update version
         run: |
-          ./scripts/version.sh ${VERSION_NUMBER}
+          ./packaging/version.sh ${VERSION_NUMBER}
 
       - name: setup signing and notarization
         env:
@@ -371,7 +371,7 @@ jobs:
       - name: update version
         shell: bash
         run: |
-          ./scripts/version.sh ${VERSION_NUMBER}
+          ./packaging/version.sh ${VERSION_NUMBER}
 
       # The .pro post-link runs windeployqt, so each app's bin\ ends up
       # install-ready and smsi.ps1 can stage it directly. 
