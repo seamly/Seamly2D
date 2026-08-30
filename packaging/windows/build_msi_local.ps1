@@ -117,8 +117,8 @@ if (-not $bash) {
 }
 $versionFilesWereClean = -not (& git -C $repoRoot status --porcelain -- $versionStampedFiles)
 Write-Host "stamping version into projectversion.cpp/.h and Info.plist..."
-Invoke-NativeCommand { & bash 'scripts/version.sh' $Version }
-if ($LASTEXITCODE -ne 0) { throw "scripts/version.sh failed (exit code $LASTEXITCODE)." }
+Invoke-NativeCommand { & bash 'packaging/version.sh' $Version }
+if ($LASTEXITCODE -ne 0) { throw "packaging/version.sh failed (exit code $LASTEXITCODE)." }
 
 # --- Locate the Qt kit ---------------------------------------------------------
 # Same kit selection as src\app\seamlylayout\build.ps1: newest msvc2022_64 kit

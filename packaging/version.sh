@@ -2,7 +2,7 @@
 
 # instead of manually editing the version in multiple places, run this script with the desired version number, eg 2023.1.1.1046:
 #
-# ./scripts/version.sh 2023.1.1.1046
+# ./packaging/version.sh 2023.1.1.1046
 #
 # The version number has to be a four part version (with 3 dots in between).
 # This script works under linux and mac (as they have perl and and bash by default), and under windows if you have bash and perl.

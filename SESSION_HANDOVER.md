@@ -6,6 +6,18 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## version.sh moved to packaging/ (2026-08-29)
+
+`scripts/version.sh` moved to `packaging/version.sh` — it stamps the
+version into `projectversion.cpp/.h` and both `Info.plist` files for
+every build, so it belongs with build-pipeline scripts, not misc dev
+utilities. Updated every reference: `ci.yml` (3 call sites),
+`packaging/windows/build_msi_local.ps1`, both `Info.plist` comments,
+and the `projectversion.cpp/.h` header comments. Script internals
+unchanged — all its paths are relative to the repo root, so only the
+invocation path changed. Touches `ci.yml` and `packaging/**`, so this
+push needs full CI, no skip-ci token.
+
 ## Windows packaging moved to packaging/windows/ (2026-08-29)
 
 `scripts/packaging/windows/` moved to `packaging/windows/` — `scripts/`

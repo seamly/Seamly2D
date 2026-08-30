@@ -60,7 +60,7 @@
 #include <QSysInfo>
 #include <QtGlobal>
 
-// Start: Do not edit here, use scripts/version.sh to update
+// Start: Do not edit here, use packaging/version.sh to update
 extern const int MAJOR_VERSION = 26;
 extern const int MINOR_VERSION = 8;
 extern const int DEBUG_VERSION = 24;
