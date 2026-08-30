@@ -38,10 +38,15 @@ The exact OS paths are:
 The application creates required folders on first run.
 
 By contrast, `input_directory`/`layout_directory` (the SVG import default and the export
-default) are user data — they nest under the installer-recorded `%DATAROOT%` on Windows
-(`<DataRoot>/input`, `<DataRoot>/output`) so they sit beside the rest of the suite's data,
-falling back to `<exeDir>/input`/`/output` (or the `AppConfigLocation` root inside a
-read-only macOS bundle, Linux AppImage, or Flatpak sandbox) when no data root is recorded.
+default) are user data. The bundled `default_preferences.json` seeds both to the same
+shared `<DataRoot-or-home>/seamlyLayout/layouts` folder on Windows — one folder for both
+import and export, not separate `/input`/`/output` trees — nested under the
+installer-recorded `%DATAROOT%` when one was recorded, or under the raw home directory
+otherwise. If either field is later cleared back to empty, the runtime fallback in
+`resolvedInputDirectory()`/`resolvedLayoutDirectory()` takes over instead and nests them
+separately as `<DataRoot>/input`/`<DataRoot>/output`, falling back further to
+`<exeDir>/input`/`/output` (or the `AppConfigLocation` root inside a read-only macOS
+bundle, Linux AppImage, or Flatpak sandbox) when no data root is recorded.
 
 ### settings folder
 

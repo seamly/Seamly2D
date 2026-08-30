@@ -101,6 +101,11 @@ private slots:
     // -----------------------------------------------------------------------
     void layout8_resetToDefaults_seedsAppConfigPreferencesAndSettingsPaths();
 
+    // @brief The bundled default_preferences.json seeds input_directory and
+    // layout_directory to the same shared "layouts" folder, not separate
+    // "input"/"output" folders.
+    void layout8_resetToDefaults_seedsSharedLayoutsFolderForInputAndLayout();
+
     // -----------------------------------------------------------------------
     // Legacy folder-name migration: layout-settings → settings,
     //                               layout-preferences → preferences
@@ -592,6 +597,28 @@ void PreferencesModelTests::layout8_resetToDefaults_seedsAppConfigPreferencesAnd
     const QString legacyHomeBase = QDir(QDir::homePath()).filePath(QStringLiteral("seamlyLayout"));
     QVERIFY(!m.settingsDirectory().startsWith(legacyHomeBase));
     QVERIFY(!m.preferencesDirectory().startsWith(legacyHomeBase));
+}
+
+// @brief seedFromBundledDefaults() must seed input_directory and layout_directory to the
+// same shared "layouts" folder — one folder for both import and export, not the older
+// separate "input"/"output" pair — so a fresh install nests both under one shared folder
+// name (matching the `layouts` subfolder Seamly2D's ensureDataRootTree() already creates
+// under %DATAROOT%).
+void PreferencesModelTests::layout8_resetToDefaults_seedsSharedLayoutsFolderForInputAndLayout()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+
+    PreferencesModel m;
+    m.setPreferencesDirectory(tempDir.path()); // guarantees seedFromBundledDefaults() runs
+
+    QVERIFY(m.resetToDefaults());
+
+    QVERIFY(!m.inputDirectory().isEmpty());
+    QCOMPARE(QFileInfo(m.inputDirectory()).absoluteFilePath(),
+             QFileInfo(m.layoutDirectory()).absoluteFilePath());
+    QVERIFY(QDir::fromNativeSeparators(m.inputDirectory()).endsWith(
+        QStringLiteral("seamlyLayout/layouts")));
 }
 
 // ---------------------------------------------------------------------------

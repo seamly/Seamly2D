@@ -1,23 +1,23 @@
 {
     "windows": {
-        "input_directory": "${HOME}/seamlyLayout/input",
-        "layout_directory": "${HOME}/seamlyLayout/output",
+        "input_directory": "${HOME}/seamlyLayout/layouts",
+        "layout_directory": "${HOME}/seamlyLayout/layouts",
         "dxf_viewer_path": "https://sharecad.org",
         "pdf_viewer_path": "",
         "png_viewer_path": "",
         "projector_path": "https://patternprojector.com"
     },
     "linux": {
-        "input_directory": "${HOME}/seamlyLayout/input",
-        "layout_directory": "${HOME}/seamlyLayout/output",
+        "input_directory": "${HOME}/seamlyLayout/layouts",
+        "layout_directory": "${HOME}/seamlyLayout/layouts",
         "dxf_viewer_path": "https://sharecad.org",
         "pdf_viewer_path": "",
         "png_viewer_path": "",
         "projector_path": "https://patternprojector.com"
     },
     "macos": {
-        "input_directory": "${HOME}/seamlyLayout/input",
-        "layout_directory": "${HOME}/seamlyLayout/output",
+        "input_directory": "${HOME}/seamlyLayout/layouts",
+        "layout_directory": "${HOME}/seamlyLayout/layouts",
         "dxf_viewer_path": "https://sharecad.org",
         "pdf_viewer_path": "",
         "png_viewer_path": "",
