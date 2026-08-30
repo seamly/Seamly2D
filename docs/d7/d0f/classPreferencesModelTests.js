@@ -22,6 +22,7 @@ var classPreferencesModelTests =
     [ "isViewerUrl_rejectsEmpty", "d7/d0f/classPreferencesModelTests.html#ad6f063fc2673b1397a972819596f0235", null ],
     [ "isViewerUrl_rejectsLocalCommandWithArgs", "d7/d0f/classPreferencesModelTests.html#aeefab804609fc30e4eea4735d990074c", null ],
     [ "isViewerUrl_rejectsLocalPath", "d7/d0f/classPreferencesModelTests.html#aaac6c7bc771de3e39d91912f6e7884d0", null ],
+    [ "layout8_resetToDefaults_seedsAppConfigPreferencesAndSettingsPaths", "d7/d0f/classPreferencesModelTests.html#a2905f30bb8db2f18dc68e7a3e2ccf50a", null ],
     [ "legacyJson_migratesToIni", "d7/d0f/classPreferencesModelTests.html#aec3804fa32beb1edd7eab0ee30995027", null ],
     [ "migration_legacyPreferencesFolder_updatesPreferencesDirectory", "d7/d0f/classPreferencesModelTests.html#acb1f8b15af44355fed65ef70b3881e46", null ],
     [ "migration_legacyPreferencesFolder_updatesPreferencesFilePath", "d7/d0f/classPreferencesModelTests.html#abc573b1c57ed936f4861f6ae0a28066d", null ],
