@@ -2,7 +2,7 @@
 
 WiX build reference for the Windows `.msi` shipping **seamly2d.exe**, **seamlyme.exe**, **seamlylayout.exe** together, per arch (x64, arm64).
 
-Related docs: [`.github/README-BUILDS.md`](../../../.github/README-BUILDS.md) (KB record), [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md) (build mechanics), [`INSTALL_DECISION_FLOW.md`](INSTALL_DECISION_FLOW.md) (installer-vs-app flowcharts).
+Related docs: [`.github/README-BUILDS.md`](../../.github/README-BUILDS.md) (KB record), [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md) (build mechanics), [`INSTALL_DECISION_FLOW.md`](INSTALL_DECISION_FLOW.md) (installer-vs-app flowcharts).
 
 ## Files
 
@@ -64,7 +64,7 @@ Fresh install: Welcome → License → Existing-install warning (if found) → P
 
 **Release (CI only):** `gh workflow run ci.yml --ref run-seamlyLayout`. `windows-msi` matrix: x64 on `windows-latest`, arm64 (native) on `windows-11-arm`.
 
-**Local x64 dev build:** `.\scripts\packaging\windows\build_msi_local.ps1`. Builds all 3 apps release, auto-detects Qt kit, installs WiX v6 if missing. Not a release artifact.
+**Local x64 dev build:** `.\packaging\windows\build_msi_local.ps1`. Builds all 3 apps release, auto-detects Qt kit, installs WiX v6 if missing. Not a release artifact.
 
 Full param reference: [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md).
 

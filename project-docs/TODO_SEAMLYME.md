@@ -25,7 +25,7 @@ Requested: the **Open Individual**, **Open Multisize**, and **Open Template** pi
 
 ## Task SeamlyMe.3 — Installer: write SeamlyMe's desktop-shortcut flag to its own registry key
 
-Found during MSI Test Case verification, step 5c (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`). `SeamlyMeDesktopShortcutComponent`'s `RegistryValue` (`scripts/packaging/windows/smsi_shortcuts.wxs:75-80`) writes `DesktopShortcutSeamlyMe` under `HKLM\SOFTWARE\Seamly\Seamly2D` instead of `HKLM\SOFTWARE\Seamly\SeamlyMe`.
+Found during MSI Test Case verification, step 5c (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`). `SeamlyMeDesktopShortcutComponent`'s `RegistryValue` (`packaging/windows/smsi_shortcuts.wxs:75-80`) writes `DesktopShortcutSeamlyMe` under `HKLM\SOFTWARE\Seamly\Seamly2D` instead of `HKLM\SOFTWARE\Seamly\SeamlyMe`.
 
 - [ ] SeamlyMe.3.1 Change the `RegistryValue`'s `Key` at `smsi_shortcuts.wxs:76` from `SOFTWARE\Seamly\Seamly2D` to `SOFTWARE\Seamly\SeamlyMe`
 - [ ] SeamlyMe.3.2 Confirm `smsi_check_authoring.ps1:562` and `test_msi_install.ps1` still pass, and update either script if it asserts the old key

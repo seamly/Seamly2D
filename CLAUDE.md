@@ -104,7 +104,7 @@ All three applications build against **Qt 6.11.1**.
 
 ### Local Windows Build
 
-`scripts\packaging\windows\build_msi_local.ps1` builds Seamly2D, SeamlyMe, and
+`packaging\windows\build_msi_local.ps1` builds Seamly2D, SeamlyMe, and
 SeamlyLayout release binaries locally, then packages them into the Windows x64
 MSI via `smsi.ps1`. It runs the same steps as `ci.yml`'s `windows-msi` job:
 qmake + nmake for Seamly2D/SeamlyMe, CMake + Ninja + Cargo for SeamlyLayout.
@@ -377,7 +377,7 @@ Use `skip-ci` when referring to it without activating it.
 Omit the skip token when functional changes touch:
 
 * `.github/workflows/**`
-* `scripts/packaging/**`
+* `packaging/**`
 * `*.pro`
 * `*.pri`
 * `CMakeLists.txt`

@@ -306,7 +306,7 @@ jobs:
   # ---------------------------------------------------------------------------
   # Windows MSI for x64 and arm64 
   #
-  # Each WiX MSI is built by 'scripts/packaging/windows/smsi.ps1' from
+  # Each WiX MSI is built by 'packaging/windows/smsi.ps1' from
   # smsi.wxs with WiX v6.
   #
   # EACH MSI shipsall three apps — seamly2d + seamlyme (qmake) and
@@ -430,7 +430,7 @@ jobs:
       - name: Build MSI (all three apps)
         shell: pwsh
         run: |
-          .\scripts\packaging\windows\smsi.ps1 -Arch ${{ matrix.arch }} -Version $env:VERSION_NUMBER `
+          .\packaging\windows\smsi.ps1 -Arch ${{ matrix.arch }} -Version $env:VERSION_NUMBER `
             -Seamly2DBin src\app\seamly2d\bin `
             -SeamlyMeBin src\app\seamlyme\bin `
             -WinDeployQt "$env:QT_ROOT_DIR\bin\windeployqt.exe"

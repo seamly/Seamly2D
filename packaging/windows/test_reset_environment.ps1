@@ -15,7 +15,7 @@
 # **  defect, and the Seamly registry keys under both HKLM and HKCU.
 # **
 # **  This is test-support only. It is deliberately more destructive than the
-# **  shipped uninstall (scripts/packaging/windows/smsi_registry.wxs), which
+# **  shipped uninstall (packaging/windows/smsi_registry.wxs), which
 # **  keeps %DATAROOT% on purpose - a real user's uninstall must never delete
 # **  their patterns and measurements. This script exists precisely to undo
 # **  that safety for a test machine between test-matrix runs.

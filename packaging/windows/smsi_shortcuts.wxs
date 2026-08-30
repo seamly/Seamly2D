@@ -37,7 +37,7 @@
          be one, so an HKLM breadcrumb beside the install-info key serves. That
          is what raises ICE43 ("should use a registry key under HKCU as its
          KeyPath") during validation - expected here and documented in
-         scripts\packaging\windows\README.md, since HKCU is exactly wrong for a
+         packaging\windows\README.md, since HKCU is exactly wrong for a
          per-machine package.
 
          The shortcuts are non-advertised (a plain Target) rather than

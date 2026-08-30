@@ -1,6 +1,6 @@
 # TEST_MSI_WIN_X64_Test_Case_1b-i.md
 
-Test plan for the Windows x64 Seamly MSI. Covers `scripts/packaging/windows/smsi.wxs`.
+Test plan for the Windows x64 Seamly MSI. Covers `packaging/windows/smsi.wxs`.
 
 This document uses two placeholders as shorthand. Neither is a real environment variable.
 

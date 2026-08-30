@@ -32,7 +32,7 @@
          SeamlyLayout - and naming it after one member misdescribes it and
          collides confusingly with the NSIS product's own folder name.
          The name is asserted by smsi_check_authoring.ps1 and documented in
-         README-BUILDS.md, scripts/packaging/windows/README.md and
+         README-BUILDS.md, packaging/windows/README.md and
          INSTALL_DECISION_FLOW.md - change all of them together or not at
          all. It was briefly "Seamly" (546e9d5def, 2026-08-03), which left
          every one of those out of step and failed the authoring check. -->

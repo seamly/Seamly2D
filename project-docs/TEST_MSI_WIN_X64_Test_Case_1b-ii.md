@@ -1,6 +1,6 @@
 # TEST_INSTALLER_WIN_X64
 
-Test plan for the Windows x64 Seamly MSI. Covers `scripts/packaging/windows/smsi.wxs`.
+Test plan for the Windows x64 Seamly MSI. Covers `packaging/windows/smsi.wxs`.
 
 ## Variable Names
 
