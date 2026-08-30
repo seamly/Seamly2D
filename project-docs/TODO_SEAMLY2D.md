@@ -36,3 +36,18 @@ Found during MSI Test Case 1 (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`,
 Found during MSI Test Case 1, step 7b-iv: closing SeamlyLayout returns focus to Seamly2D's Layout Mode, not the Piece Mode that was active before SeamlyLayout launched.
 
 - [ ] Seamly2D.3.1 Record the Seamly2D mode active when SeamlyLayout launches, and restore that mode (not Layout Mode) when SeamlyLayout closes.
+
+## Task Seamly2D.4 — Preferences > Paths has no row for bodyscans
+
+Found during MSI Test Case 1 verification (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step 7a).
+
+`PreferencesPathPage::Apply()` (`src/app/seamly2d/dialogs/configpages/preferencespathpage.cpp:100-119`) reads table rows 0–9 (data root, pattern, template, individual, multisize, layout, label template, image, backup, SeamlyLayout app path) but has no row for bodyscans. `VCommonSettings::setBodyScansPath()`/`getBodyScansPath()` (`src/libs/vmisc/vcommonsettings.cpp:1311-1323`) exist and target `qt6_common.ini`'s `paths/bodyscans` key, but nothing in the UI ever calls the setter, so that key never gets written — even after visiting Preferences and clicking Apply/OK.
+
+- [ ] Seamly2D.4.1 Add a "My Body Scans" row to the Preferences > Paths table (`preferencespathpage.cpp`, alongside the existing Patterns/Templates/Measurements/Layouts/Label Templates/Images/Backups rows) and wire it to `getBodyScansPath()`/`setBodyScansPath()`.
+- [ ] Seamly2D.4.2 Re-run MSI Test Case verification step 7a to confirm a `bodyscans` key appears in `qt6_common.ini` after visiting Preferences > Paths.
+
+## Task Seamly2D.5 — Piece-mode handoff passes a file, not a stringified SVG document
+
+Found during MSI Test Case 1 verification (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step 6b-ii). Cross-reference: `Layout.9` in `TODO_SEAMLYLAYOUT.md` is the SeamlyLayout-side half of this same task.
+
+`MainWindow::exportPiecesToSeamlyLayout()` (`mainwindow.cpp:4153`) writes the pieces to `<pattern-basename>.pieces.svg` next to the pattern file and launches SeamlyLayout detached with that file path as its one positional argument (`StartupOptions.{h,cpp}`, `SeamlySuitePaths::seamlyLayoutLaunchArguments()`). The MSI test plan's expectation is that piece-mode data reaches SeamlyLayout as a stringified SVG document, not as a file — so either the test expectation is stale or this handoff needs to change to pass the SVG content directly instead of a file path. See `Layout.9` for the resolution subtasks; do not duplicate work between the two.

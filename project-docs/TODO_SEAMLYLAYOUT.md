@@ -122,3 +122,28 @@ Found during MSI Test Case verification, step 5c (`project-docs/TEST_MSI_WIN_X64
 - [ ] Layout.7.1 Change the `RegistryValue`'s `Key` at `smsi_shortcuts.wxs:96` from `SOFTWARE\Seamly\Seamly2D` to `SOFTWARE\Seamly\SeamlyLayout`
 - [ ] Layout.7.2 Confirm `smsi_check_authoring.ps1:562` and `test_msi_install.ps1` still pass, and update either script if it asserts the old key
 - [ ] Layout.7.3 Re-run MSI Test Case verification step 5c to confirm `HKLM\SOFTWARE\Seamly\SeamlyLayout` carries `DesktopShortcutSeamlyLayout`
+
+## Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
+
+Found during MSI Test Case 1 verification (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, steps 6c, 6d, 7c, 7d, 7e), on a fresh install with no prior SeamlyLayout state.
+
+Fresh-install symptom in `qt6_seamlylayout.ini` and `preferences/default_preferences.json`: `preferences_directory`, `preferences_file`, `settings_directory`, `settings_file` all resolve to `C:\Users\<user>\seamlyLayout\...` (raw home directory) instead of a path under `%DATAROOT%`. `default_settings.json` is written to that same wrong directory. Only `data_root` (in the ini) resolves correctly.
+
+`installerDataRoot()` (`PreferencesModel.cpp:56`) exists specifically to prevent this — it reads `HKLM\SOFTWARE\Seamly\SeamlyLayout\DataRoot` and feeds it into `expandDefaultPathTokens()` (`PreferencesModel.cpp:153`), which every one of the six `default_preferences.json` path keys goes through identically in `seedFromBundledDefaults()` (`PreferencesModel.cpp:190-224`). On the test machine the registry key is present and correct (`DataRoot=C:\Users\<user>\Documents\SeamlyData\`, confirmed via `Get-ItemProperty HKLM:\SOFTWARE\Seamly\SeamlyLayout`), so `installerDataRoot()` should not be returning empty — yet the seeded `preferences_directory`/`settings_directory` show no sign of it.
+
+`input_directory` and `layout_directory` are not a clean counterexample: both hold the identical value `<DataRoot>\layouts`, which matches neither the raw `${HOME}/seamlyLayout/input`+`/output` template nor the DataRoot-substituted form of that same template (`<DataRoot>/seamlyLayout/input`+`/output`). Something other than `seedFromBundledDefaults()` — most likely the runtime fallback in `resolvedInputDirectory()`/`resolvedLayoutDirectory()` (`PreferencesModel.cpp:756` on, `<dataRoot>/input` and `<dataRoot>/output` respectively — still not `/layouts`) or a save-on-close of a session value the UI set to the shared `%DATAROOT%\layouts` folder — overwrote these two after seeding. `preferences_directory`/`settings_directory` have no equivalent runtime fallback, so they were never touched again after the (apparently DataRoot-less) initial seed.
+
+- [ ] Layout.8.1 Determine why `installerDataRoot()` returned empty (or was never consulted) when `seedFromBundledDefaults()` first ran on this fresh install, despite the registry key being correct by the time of manual inspection — prime suspect: MSI custom-action ordering, i.e. SeamlyLayout's first launch (or a validation script's launch of it) happening before the `DataRoot` registry value is written. Instrument `installerDataRoot()` and `seedFromBundledDefaults()` (`Logger::log`) and reproduce with a fresh install.
+- [ ] Layout.8.2 Determine what sets `input_directory`/`layout_directory` to `<DataRoot>\layouts` at runtime, and why `preferences_directory`/`settings_directory` have no equivalent correction.
+- [ ] Layout.8.3 Fix root cause so `preferences_directory`, `preferences_file`, `settings_directory`, `settings_file`, and `default_settings.json`'s own location all resolve under `%DATAROOT%` (or `%LOCALAPPDATA%\Seamly\SeamlyLayout`, matching how Seamly2D/SeamlyMe keep app-config separate from user data) on a fresh MSI install, with no dependency on launch ordering.
+- [ ] Layout.8.4 Re-run MSI Test Case verification steps 6c/6d/7c/7d/7e on a fresh install to confirm.
+
+## Task Layout.9 — Piece-mode handoff passes a file, not a stringified SVG document
+
+Found during MSI Test Case 1 verification (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step 6b-ii). Cross-reference: `Seamly2D.5` in `TODO_SEAMLY2D.md` is the Seamly2D-side half of this same task.
+
+`MainWindow::exportPiecesToSeamlyLayout()` (`src/app/seamly2d/mainwindow.cpp:4153`) writes the pieces to `<pattern-basename>.pieces.svg` next to the pattern file and launches SeamlyLayout detached with that file path as its one positional argument (`StartupOptions.{h,cpp}`, `SeamlySuitePaths::seamlyLayoutLaunchArguments()`). The MSI test plan's expectation is that piece-mode data reaches SeamlyLayout as a stringified SVG document, not as a file — so either the test expectation is stale or this handoff needs to change to pass the SVG content directly (e.g. via stdin, a temp pipe, or an IPC call) instead of a file path.
+
+- [ ] Layout.9.1 Confirm with the project owner whether the file-based handoff is the accepted design (in which case update the MSI test doc's expectation and close this task) or whether a stringified-SVG handoff is still required.
+- [ ] Layout.9.2 If a stringified-SVG handoff is required: design the transport (stdin vs. a new CLI flag vs. IPC) and update `StartupOptions.{h,cpp}` and the Seamly2D-side launch call together — see the "Change one side and you must change the other" rule in `src/app/seamlylayout/CLAUDE.md`.
+- [ ] Layout.9.3 Update `StartupOptionsTests.cpp` and `TST_SeamlySuitePaths` to pin the new contract; update `project-docs/SVG-DATA-ATTRIBUTES.md`.
