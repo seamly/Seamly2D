@@ -107,26 +107,35 @@ $(document).ready(function(){initNavTree('d4/d11/vcommonsettings_8cpp.html','../
 <div class="contents">
 <div class="textblock"><code>#include &quot;<a class="el" href="../../d4/d5c/vcommonsettings_8h_source.html">vcommonsettings.h</a>&quot;</code><br />
 <code>#include &lt;QApplication&gt;</code><br />
+<code>#include &lt;QCoreApplication&gt;</code><br />
 <code>#include &lt;QDate&gt;</code><br />
+<code>#include &lt;QDateTime&gt;</code><br />
 <code>#include &lt;QDir&gt;</code><br />
+<code>#include &lt;QDirIterator&gt;</code><br />
+<code>#include &lt;QFile&gt;</code><br />
+<code>#include &lt;QFileInfo&gt;</code><br />
 <code>#include &lt;QColorDialog&gt;</code><br />
 <code>#include &lt;QFileDialog&gt;</code><br />
 <code>#include &lt;QFont&gt;</code><br />
 <code>#include &lt;QtGlobal&gt;</code><br />
 <code>#include &lt;QLocale&gt;</code><br />
 <code>#include &lt;QMessageLogger&gt;</code><br />
+<code>#include &lt;QStandardPaths&gt;</code><br />
 <code>#include &lt;QString&gt;</code><br />
 <code>#include &lt;QStringConverter&gt;</code><br />
+<code>#include &lt;QTextStream&gt;</code><br />
 <code>#include &lt;QVariant&gt;</code><br />
 <code>#include &lt;QtDebug&gt;</code><br />
+<code>#include &lt;algorithm&gt;</code><br />
 <code>#include &quot;<a class="el" href="../../d3/da5/ifcdef_8h_source.html">../ifc/ifcdef.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d4/da4/def_8h_source.html">../vmisc/def.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/dac/installer__record_8h_source.html">../vmisc/installer_record.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/db3/vmath_8h_source.html">../vmisc/vmath.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d0/d32/pmsystems_8h_source.html">../vpatterndb/pmsystems.h</a>&quot;</code><br />
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for vcommonsettings.cpp:</div>
 <div class="dyncontent">
-<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../db/d3f/vcommonsettings_8cpp__incl.svg" width="100%" height="547"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+<div class="center"><div class="zoom"><iframe scrolling="no" frameborder="0" src="../../db/d3f/vcommonsettings_8cpp__incl.svg" width="100%" height="558"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
 </div>
 </div>
 </div>
@@ -145,9 +154,14 @@ Functions</h2></td></tr>
 <tr class="separator:a8dd613aa76590f88f4a60fee8b89ae13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3abe77374f88330d2dce8aa3fc77479c"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a3abe77374f88330d2dce8aa3fc77479c">anonymous_namespace{vcommonsettings.cpp}::PrepareStandardFiles</a> (const QString &amp;currentPath, const QString &amp;standardPath, const QString &amp;defPath)</td></tr>
 <tr class="separator:a3abe77374f88330d2dce8aa3fc77479c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0c351cecb80a5bf23fa2b4629c099a54"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a0c351cecb80a5bf23fa2b4629c099a54">anonymous_namespace{vcommonsettings.cpp}::readDataRoot</a> (const QString &amp;organization)</td></tr>
+<tr class="memdesc:a0c351cecb80a5bf23fa2b4629c099a54"><td class="mdescLeft">&#160;</td><td class="mdescRight">readDataRoot reads the configured user-data root out of the shared "common" settings file, falling back to the built-in default when nothing has been configured.  <br /></td></tr>
+<tr class="separator:a0c351cecb80a5bf23fa2b4629c099a54"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
+<tr class="memitem:a8db1bb6eaf2ed89b9f9ebe4710fcd21b"><td class="memItemLeft" align="right" valign="top">const QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a8db1bb6eaf2ed89b9f9ebe4710fcd21b">anonymous_namespace{vcommonsettings.cpp}::settingPathsDataRoot</a> = QStringLiteral(&quot;paths/dataRoot&quot;)</td></tr>
+<tr class="separator:a8db1bb6eaf2ed89b9f9ebe4710fcd21b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a13498b0f2dc5512d31e522096d1484ad"><td class="memItemLeft" align="right" valign="top">const QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a13498b0f2dc5512d31e522096d1484ad">anonymous_namespace{vcommonsettings.cpp}::settingImagesPath</a> = QStringLiteral(&quot;paths/images&quot;)</td></tr>
 <tr class="separator:a13498b0f2dc5512d31e522096d1484ad"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2637561a27c415fd5d43d96cc585ba2e"><td class="memItemLeft" align="right" valign="top">const QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a2637561a27c415fd5d43d96cc585ba2e">anonymous_namespace{vcommonsettings.cpp}::settingPathsIndividualMeasurements</a> = QStringLiteral(&quot;paths/individual_size_measurements&quot;)</td></tr>
@@ -454,6 +468,11 @@ Variables</h2></td></tr>
 <tr class="separator:a7136b7a2ed9ead08f0f849054160457b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9474e9c5c20683cf4a411eb51f84f3da"><td class="memItemLeft" align="right" valign="top">static const QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d11/vcommonsettings_8cpp.html#a9474e9c5c20683cf4a411eb51f84f3da">commonIniFilename</a> = QStringLiteral(&quot;qt6_common&quot;)</td></tr>
 <tr class="separator:a9474e9c5c20683cf4a411eb51f84f3da"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a71ae26c24c640338ca8bc4dba19b13fc"><td class="memItemLeft" align="right" valign="top">const QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a71ae26c24c640338ca8bc4dba19b13fc">anonymous_namespace{vcommonsettings.cpp}::unknownOrganizationName</a> = QStringLiteral(&quot;Unknown Organization&quot;)</td></tr>
+<tr class="separator:a71ae26c24c640338ca8bc4dba19b13fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4bf12fd444064d56141a99f6226d70b7"><td class="memItemLeft" align="right" valign="top">static const QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d11/vcommonsettings_8cpp.html#a4bf12fd444064d56141a99f6226d70b7">migrationMarkerFileName</a> = QStringLiteral(&quot;MIGRATED-TO-SEAMLY.txt&quot;)</td></tr>
+<tr class="memdesc:a4bf12fd444064d56141a99f6226d70b7"><td class="mdescLeft">&#160;</td><td class="mdescRight">migrationMarkerFileName names the breadcrumb left in a tree that has been migrated.  <br /></td></tr>
+<tr class="separator:a4bf12fd444064d56141a99f6226d70b7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Variable Documentation</h2>
 <a id="a9474e9c5c20683cf4a411eb51f84f3da" name="a9474e9c5c20683cf4a411eb51f84f3da"></a>
@@ -476,9 +495,37 @@ Variables</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00260">260</a> of file <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html">vcommonsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00271">271</a> of file <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html">vcommonsettings.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00501">VCommonSettings::getBodyScansPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01844">VCommonSettings::GetCSVCodec()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01881">VCommonSettings::GetCSVSeparator()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01824">VCommonSettings::GetCSVWithHeader()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01672">VCommonSettings::GetDateOfLastRemind()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00438">VCommonSettings::getIndividualSizePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01657">VCommonSettings::GetLatestSkippedVersion()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00459">VCommonSettings::getMultisizePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00480">VCommonSettings::getTemplatePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00508">VCommonSettings::setBodyScansPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01837">VCommonSettings::SetCSVCodec()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01860">VCommonSettings::SetCSVSeparator()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01817">VCommonSettings::SetCSVWithHeader()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01679">VCommonSettings::SetDateOfLastRemind()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00445">VCommonSettings::setIndividualSizePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01664">VCommonSettings::SetLatestSkippedVersion()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00466">VCommonSettings::setMultisizePath()</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00487">VCommonSettings::setTemplatePath()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01311">VCommonSettings::getBodyScansPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l02654">VCommonSettings::GetCSVCodec()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l02691">VCommonSettings::GetCSVSeparator()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l02634">VCommonSettings::GetCSVWithHeader()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l02482">VCommonSettings::GetDateOfLastRemind()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01248">VCommonSettings::getIndividualSizePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l02467">VCommonSettings::GetLatestSkippedVersion()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01269">VCommonSettings::getMultisizePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01290">VCommonSettings::getTemplatePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00965">VCommonSettings::initializeDataRoot()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01150">VCommonSettings::mergeStrayCommonSettings()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00818">VCommonSettings::migrateAdoptedLegacyTree()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00455">anonymous_namespace{vcommonsettings.cpp}::readDataRoot()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01318">VCommonSettings::setBodyScansPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l02647">VCommonSettings::SetCSVCodec()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l02670">VCommonSettings::SetCSVSeparator()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l02627">VCommonSettings::SetCSVWithHeader()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00580">VCommonSettings::setDataRoot()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l02489">VCommonSettings::SetDateOfLastRemind()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01255">VCommonSettings::setIndividualSizePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l02474">VCommonSettings::SetLatestSkippedVersion()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01276">VCommonSettings::setMultisizePath()</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01297">VCommonSettings::setTemplatePath()</a>.</p>
+
+</div>
+</div>
+<a id="a4bf12fd444064d56141a99f6226d70b7" name="a4bf12fd444064d56141a99f6226d70b7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4bf12fd444064d56141a99f6226d70b7">&#9670;&#160;</a></span>migrationMarkerFileName</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">const QString migrationMarkerFileName = QStringLiteral(&quot;MIGRATED-TO-SEAMLY.txt&quot;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>migrationMarkerFileName names the breadcrumb left in a tree that has been migrated. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00641">641</a> of file <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html">vcommonsettings.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00650">VCommonSettings::dataTreeWasMigrated()</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00871">VCommonSettings::markDataTreeMigrated()</a>.</p>
 
 </div>
 </div>

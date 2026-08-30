@@ -1,3 +1,8 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$d0/d4c/classQMap.html" title=" " alt="" coords="5,5,176,45"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,31,121,56"/>
+<area shape="rect" id="node2" href="$df/d1d/classAdjustWindow.html" title="Top&#45;level QtWidgets window for interactive layout piece adjustment." alt="" coords="196,5,311,31"/>
+<area shape="rect" id="node3" href="$dc/d59/classVAbstractMainWindow.html" title=" " alt="" coords="169,55,337,80"/>
+<area shape="rect" id="node4" href="$de/d1a/classMainWindowsNoGUI.html" title=" " alt="" coords="385,29,540,55"/>
+<area shape="rect" id="node6" href="$d8/d61/classTMainWindow.html" title=" " alt="" coords="405,79,520,104"/>
+<area shape="rect" id="node5" href="$d6/d1a/classMainWindow.html" title="The MainWindow class main windows." alt="" coords="588,29,695,55"/>
 </map>

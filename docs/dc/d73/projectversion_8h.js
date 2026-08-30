@@ -13,6 +13,7 @@ var projectversion_8h =
     [ "VER_LEGALTRADEMARKS2_STR", "dc/d73/projectversion_8h.html#a3788d012ee2bbc1972b1003a16608f31", null ],
     [ "VER_PRODUCTVERSION", "dc/d73/projectversion_8h.html#a1f0c72807dfc9de46855bff55bae541c", null ],
     [ "VER_PRODUCTVERSION_STR", "dc/d73/projectversion_8h.html#a5084df706ac15e76da275c143313f3d9", null ],
+    [ "WINDOW_STATE_VERSION", "dc/d73/projectversion_8h.html#a41862a96cd51340dbdd1d6271c48ef28", null ],
     [ "buildCompatibilityString", "dc/d73/projectversion_8h.html#ae6e97c7da4092b13b8cf9a7905806d24", null ],
     [ "compilerString", "dc/d73/projectversion_8h.html#a1318100cf18fdcf2278888f75b9b82a6", null ],
     [ "APP_VERSION_STR", "dc/d73/projectversion_8h.html#affc756b919ac131545c35a7d7d5ee3d7", null ],

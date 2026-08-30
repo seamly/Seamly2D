@@ -12,5 +12,6 @@ var searchData=
   ['hash2keyssetofenumerator_9',['Hash2KeysSetOfEnumerator',['../d3/dcc/classHash2KeysSetOfEnumerator.html',1,'']]],
   ['hexbin_10',['HexBin',['../dc/d8b/classHexBin.html',1,'']]],
   ['hexbinarydatatypevalidator_11',['HexBinaryDatatypeValidator',['../dc/d11/classHexBinaryDatatypeValidator.html',1,'']]],
-  ['historydialog_12',['HistoryDialog',['../d1/d42/classHistoryDialog.html',1,'']]]
+  ['historydialog_12',['HistoryDialog',['../d1/d42/classHistoryDialog.html',1,'']]],
+  ['historysnapshot_13',['HistorySnapshot',['../d8/d66/structPieceOverlayItem_1_1HistorySnapshot.html',1,'PieceOverlayItem']]]
 ];
