@@ -218,10 +218,10 @@ bool seedFromBundledDefaults(const QString &destPath)
         QDir(appConfigRoot).filePath(QString::fromUtf8(kPreferencesFolderName)));
     const QString defaultInputDir = QDir::toNativeSeparators(
         expandDefaultPathTokens(source.value(QStringLiteral("input_directory"))
-            .toString(QStringLiteral("${HOME}/seamlyLayout/input"))));
+            .toString(QStringLiteral("${HOME}/seamlyLayout/layouts"))));
     const QString defaultLayoutDir = QDir::toNativeSeparators(
         expandDefaultPathTokens(source.value(QStringLiteral("layout_directory"))
-            .toString(QStringLiteral("${HOME}/seamlyLayout/output"))));
+            .toString(QStringLiteral("${HOME}/seamlyLayout/layouts"))));
 
     const QString defaultSettingsFile = QDir::toNativeSeparators(
         QFileInfo(QDir(defaultSettingsDir).filePath(QStringLiteral("default_settings.json"))).absoluteFilePath());

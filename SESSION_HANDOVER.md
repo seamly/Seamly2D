@@ -6,6 +6,33 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## Layout.8.2 resolved — input_directory/layout_directory share one "layouts" folder (2026-08-30)
+
+Follow-up to the entry directly below, same session. The project owner confirmed the
+`<DataRoot>\layouts` value Layout.8.2 could not explain was the *intended* design all
+along — one shared `layouts` folder for both SVG import and layout export, not separate
+`input`/`output` folders — the code just never implemented it. Changed
+`default_preferences.json`'s `input_directory`/`layout_directory` (all three platform
+blocks) from `${HOME}/seamlyLayout/input`+`/output` to `${HOME}/seamlyLayout/layouts` for
+both, and the matching hardcoded fallback strings in `seedFromBundledDefaults()`
+(`PreferencesModel.cpp`).
+
+**Rejected wording, kept for the next person who reaches for it:** the initial ask used
+the literal string `${HOME}/Documents/SeamlyData/seamlyLayout/layouts`. `${HOME}` is
+substituted by `installerDataRoot()` on Windows when a DataRoot is recorded, and that
+value is already `.../Documents/SeamlyData` — so the literal string would have doubled to
+`.../Documents/SeamlyData/Documents/SeamlyData/seamlyLayout/layouts` on any real MSI
+install. Asked the user; confirmed intent was `${HOME}/seamlyLayout/layouts`, keeping
+`expandDefaultPathTokens()`'s existing DataRoot-substitution behavior unchanged (so a
+custom, non-default DataRoot chosen at install time is still honored) rather than hardcode
+`Documents/SeamlyData`.
+
+New test: `PreferencesModelTests::layout8_resetToDefaults_seedsSharedLayoutsFolderForInputAndLayout`.
+
+**Verified:** `build.ps1 -Preset debug -NoRun` succeeded; `ctest --preset debug` — 5/5
+passed. Pushed with `[skip ci]` — no `CMakeLists.txt`/`.pro`/`.pri`/`packaging/**` touched
+this time, only `PreferencesModel.cpp`, the bundled JSON, the test file, and docs.
+
 ## Layout.8 — SeamlyLayout preferences/settings paths fixed under AppConfigLocation (2026-08-30)
 
 Task Layout.8 (`TODO_SEAMLYLAYOUT.md`), 8.1-8.3 done, 8.4 open. Found during
