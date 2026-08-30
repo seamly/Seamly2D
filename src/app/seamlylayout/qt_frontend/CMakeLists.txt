@@ -360,6 +360,15 @@ add_executable(PreferencesModelTests
     src/Platform.cpp
 )
 
+# Layout.8: exercises seedFromBundledDefaults(), which reads the same
+# :/defaults/default_preferences.json resource the SeamlyLayout target embeds.
+qt_add_resources(PreferencesModelTests "defaults"
+    PREFIX "/defaults"
+    BASE "${CMAKE_CURRENT_SOURCE_DIR}/preferences"
+    FILES
+        "${CMAKE_CURRENT_SOURCE_DIR}/preferences/default_preferences.json"
+)
+
 target_include_directories(PreferencesModelTests PRIVATE
     src/
 )

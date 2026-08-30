@@ -14,23 +14,34 @@ platform-specific packaging for SeamlyLayout releases.
 
 ## Runtime Folder Layout
 
-SeamlyLayout stores layout profiles separately from application preferences.
+SeamlyLayout stores layout profiles separately from application preferences and from
+user data (patterns, exported layouts). Both `settings` and `preferences` are app-config,
+so they nest under the same `QStandardPaths::AppConfigLocation` root as
+`qt6_seamlylayout.ini` — never under the user's home directory or under `%DATAROOT%`
+(Layout.8, 2026-08-30: fixed a defect where a fresh MSI install seeded them under the raw
+home directory instead).
 
 | Item | Platform path | Purpose |
 |---|---|---|
-| `settings` | `~/seamlyLayout/settings/` | Layout settings JSON files (`*.json`) |
+| `settings` | `<AppConfigLocation>/settings/` | Layout settings JSON files (`*.json`) |
 | `qt6_seamlylayout.ini` | `QStandardPaths::AppConfigLocation` | Application preferences |
-| `preferences` | `~/seamlyLayout/preferences/` | Optional JSON default profiles |
+| `preferences` | `<AppConfigLocation>/preferences/` | Optional JSON default profiles |
 
 The exact OS paths are:
 
-| OS | Base (`~/seamlyLayout/`) |
+| OS | `AppConfigLocation` |
 |---|---|
-| Windows | `%USERPROFILE%\seamlyLayout\` |
-| Linux | `$HOME/seamlyLayout/` |
-| macOS | `$HOME/seamlyLayout/` |
+| Windows | `%LOCALAPPDATA%\Seamly\SeamlyLayout\` |
+| Linux | `$HOME/.config/Seamly/SeamlyLayout/` |
+| macOS | `$HOME/Library/Preferences/Seamly/SeamlyLayout/` |
 
 The application creates required folders on first run.
+
+By contrast, `input_directory`/`layout_directory` (the SVG import default and the export
+default) are user data — they nest under the installer-recorded `%DATAROOT%` on Windows
+(`<DataRoot>/input`, `<DataRoot>/output`) so they sit beside the rest of the suite's data,
+falling back to `<exeDir>/input`/`/output` (or the `AppConfigLocation` root inside a
+read-only macOS bundle, Linux AppImage, or Flatpak sandbox) when no data root is recorded.
 
 ### settings folder
 

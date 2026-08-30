@@ -92,6 +92,16 @@ private slots:
     void resetToDefaults_loadsValuesFromDefaultsFile();
 
     // -----------------------------------------------------------------------
+    // Layout.8 — a fresh MSI install must seed preferences_directory,
+    // preferences_file, settings_directory, and settings_file under
+    // AppConfigLocation, never under the raw home directory or a
+    // DataRoot-substituted path, regardless of where the defaults profile
+    // itself happens to be read from and with no dependency on whether the
+    // installer's DataRoot registry key has been written yet.
+    // -----------------------------------------------------------------------
+    void layout8_resetToDefaults_seedsAppConfigPreferencesAndSettingsPaths();
+
+    // -----------------------------------------------------------------------
     // Legacy folder-name migration: layout-settings → settings,
     //                               layout-preferences → preferences
     // -----------------------------------------------------------------------
@@ -533,6 +543,55 @@ void PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()
     QCOMPARE(m.layoutDirectory(), QStringLiteral("/tmp/out"));
     QCOMPARE(m.dxfViewerPath(),   QStringLiteral("https://sharecad.org"));
     QCOMPARE(m.projectorPath(),   QStringLiteral("https://patternprojector.com"));
+}
+
+// ---------------------------------------------------------------------------
+// Layout.8 — settings/preferences paths anchor under AppConfigLocation
+// ---------------------------------------------------------------------------
+
+// @brief seedFromBundledDefaults() (invoked by resetToDefaults() when the defaults
+// profile is missing) must anchor settings_directory/preferences_directory/settings_file/
+// preferences_file under AppConfigLocation — never under the raw home directory (the
+// pre-Layout.8 defect) — regardless of where the defaults profile itself lives, and with
+// no dependency on the Windows installer's DataRoot registry key.
+void PreferencesModelTests::layout8_resetToDefaults_seedsAppConfigPreferencesAndSettingsPaths()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+
+    const QString appConfigRoot = QDir(
+        QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)).absolutePath();
+    const QString expectedSettingsDir    = QDir(appConfigRoot).filePath(QStringLiteral("settings"));
+    const QString expectedPreferencesDir = QDir(appConfigRoot).filePath(QStringLiteral("preferences"));
+    const QString expectedSettingsFile = QDir(expectedSettingsDir).filePath(
+        QStringLiteral("default_settings.json"));
+    const QString expectedPreferencesFile = QDir(expectedPreferencesDir).filePath(
+        QStringLiteral("default_preferences.json"));
+
+    PreferencesModel m;
+    // Point the defaults profile at a guaranteed-fresh, nonexistent location so
+    // resetToDefaults() actually runs seedFromBundledDefaults() (it only seeds when the
+    // defaults file is missing). seedFromBundledDefaults() ignores this directory for the
+    // settings/preferences paths it seeds — it anchors those under the real
+    // AppConfigLocation regardless — so this only controls whether seeding triggers.
+    m.setPreferencesDirectory(tempDir.path());
+
+    QVERIFY(m.resetToDefaults());
+
+    QCOMPARE(QFileInfo(m.settingsDirectory()).absoluteFilePath(),
+             QFileInfo(expectedSettingsDir).absoluteFilePath());
+    QCOMPARE(QFileInfo(m.preferencesDirectory()).absoluteFilePath(),
+             QFileInfo(expectedPreferencesDir).absoluteFilePath());
+    QCOMPARE(QFileInfo(m.settingsFile()).absoluteFilePath(),
+             QFileInfo(expectedSettingsFile).absoluteFilePath());
+    QCOMPARE(QFileInfo(m.preferencesFile()).absoluteFilePath(),
+             QFileInfo(expectedPreferencesFile).absoluteFilePath());
+
+    // Regression guard for the pre-Layout.8 defect: must not land under the raw home
+    // directory's seamlyLayout tree.
+    const QString legacyHomeBase = QDir(QDir::homePath()).filePath(QStringLiteral("seamlyLayout"));
+    QVERIFY(!m.settingsDirectory().startsWith(legacyHomeBase));
+    QVERIFY(!m.preferencesDirectory().startsWith(legacyHomeBase));
 }
 
 // ---------------------------------------------------------------------------
