@@ -158,12 +158,6 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:aaf7f1160ef591e625cb67d208c6eb6c8 inherit pub_methods_classVAbstractApplication"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/d0f/classVCommonSettings.html">VCommonSettings</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#aaf7f1160ef591e625cb67d208c6eb6c8">Settings</a> ()</td></tr>
 <tr class="memdesc:aaf7f1160ef591e625cb67d208c6eb6c8 inherit pub_methods_classVAbstractApplication"><td class="mdescLeft">&#160;</td><td class="mdescRight">getSettings hide settings constructor.  <br /></td></tr>
 <tr class="separator:aaf7f1160ef591e625cb67d208c6eb6c8 inherit pub_methods_classVAbstractApplication"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3e414d029ec861ecafbbd3d8d9654359 inherit pub_methods_classVAbstractApplication"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a3e414d029ec861ecafbbd3d8d9654359">MigrateSeamlySettingsLocation</a> (const QString &amp;appIniFileName, const QStringList &amp;legacyAppIniFileNames, bool *migrated=nullptr)</td></tr>
-<tr class="memdesc:a3e414d029ec861ecafbbd3d8d9654359 inherit pub_methods_classVAbstractApplication"><td class="mdescLeft">&#160;</td><td class="mdescRight">MigrateSeamlySettingsLocation resolves this app's settings-file path under the unified "Seamly" organization (Task 15), migrating the file forward from the pre-unification "Seamly2DTeam" organization folder on first run after an upgrade.  <br /></td></tr>
-<tr class="separator:a3e414d029ec861ecafbbd3d8d9654359 inherit pub_methods_classVAbstractApplication"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a45c0d86a724548a095a807084c044fc4 inherit pub_methods_classVAbstractApplication"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a45c0d86a724548a095a807084c044fc4">NotifySeamlySettingsMigrated</a> (const QString &amp;appDisplayName)</td></tr>
-<tr class="memdesc:a45c0d86a724548a095a807084c044fc4 inherit pub_methods_classVAbstractApplication"><td class="mdescLeft">&#160;</td><td class="mdescRight">NotifySeamlySettingsMigrated shows a one-time informational dialog after Task 15 settings migration moved a user's preferences to the new unified "Seamly" location. Only call this from a confirmed GUI-mode code path — never from a headless/CLI export run or an automated test, since a modal dialog with no automatic dismissal would hang a scripted caller waiting on process exit.  <br /></td></tr>
-<tr class="separator:a45c0d86a724548a095a807084c044fc4 inherit pub_methods_classVAbstractApplication"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63c2326cbf6b742e49a9005a60d29206 inherit pub_methods_classVAbstractApplication"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a63c2326cbf6b742e49a9005a60d29206 inherit pub_methods_classVAbstractApplication"><td class="memTemplItemLeft" align="right" valign="top">QString&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a63c2326cbf6b742e49a9005a60d29206">LocaleToString</a> (const T &amp;value)</td></tr>
 <tr class="separator:a63c2326cbf6b742e49a9005a60d29206 inherit pub_methods_classVAbstractApplication"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -230,7 +224,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00087">87</a> of file <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html">qttestmainlambda.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00082">82</a> of file <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html">qttestmainlambda.cpp</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a8e8f13aa80c626988933e75e3d405a02" name="a8e8f13aa80c626988933e75e3d405a02"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8e8f13aa80c626988933e75e3d405a02">&#9670;&#160;</a></span>TestApplication2D()</h2>
@@ -258,9 +252,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00101">101</a> of file <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html">qttestmainlambda.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00096">96</a> of file <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html">qttestmainlambda.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00120">openSettings()</a>, <a class="el" href="../../dc/d73/projectversion_8h_source.html#l00096">VER_COMPANYNAME_STR</a>, and <a class="el" href="../../dc/d73/projectversion_8h_source.html#l00091">VER_INTERNALNAME_2D_STR</a>.</p>
+<p class="reference">References <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00111">openSettings()</a>, <a class="el" href="../../dc/d73/projectversion_8h_source.html#l00080">VER_COMPANYNAME_STR</a>, and <a class="el" href="../../dc/d73/projectversion_8h_source.html#l00079">VER_INTERNALNAME_2D_STR</a>.</p>
 
 </div>
 </div>
@@ -315,7 +309,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="../../db/dda/classVAbstractApplication.html#a884c9e99ce93e12379b60ca08808f37f">VAbstractApplication</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00182">182</a> of file <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html">qttestmainlambda.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00143">143</a> of file <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html">qttestmainlambda.cpp</a>.</p>
 
 </div>
 </div>
@@ -344,7 +338,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="../../db/dda/classVAbstractApplication.html#a823b7e97a16df7584127a53635ecc3fa">VAbstractApplication</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00176">176</a> of file <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html">qttestmainlambda.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00137">137</a> of file <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html">qttestmainlambda.cpp</a>.</p>
 
 </div>
 </div>
@@ -373,11 +367,11 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="../../db/dda/classVAbstractApplication.html#a36ebaef6c70a1e6ead6d2ffcb476fa2e">VAbstractApplication</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00120">120</a> of file <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html">qttestmainlambda.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00111">111</a> of file <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html">qttestmainlambda.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00157">VAbstractApplication::m_settings</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00258">VAbstractApplication::MigrateSeamlySettingsLocation()</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00150">VAbstractApplication::m_settings</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00101">TestApplication2D()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00096">TestApplication2D()</a>.</p>
 
 </div>
 </div>
@@ -406,7 +400,7 @@ Additional Inherited Members</h2></td></tr>
 
 <p>Implements <a class="el" href="../../db/dda/classVAbstractApplication.html#a24a3274cdd93cb33ad66d2770d4925bf">VAbstractApplication</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00110">110</a> of file <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html">qttestmainlambda.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00105">105</a> of file <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html">qttestmainlambda.cpp</a>.</p>
 
 </div>
 </div>

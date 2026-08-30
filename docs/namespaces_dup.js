@@ -1,38 +1,14 @@
 var namespaces_dup =
 [
-    [ "anonymous_namespace{AdjustControllerTests.cpp}", "d8/dd1/namespaceanonymous__namespace_02AdjustControllerTests_8cpp_03.html", [
-      [ "buildBboxJson", "d8/dd1/namespaceanonymous__namespace_02AdjustControllerTests_8cpp_03.html#a191901a17589d09019c1c2f7f3ce3983", null ],
-      [ "writeLayoutSvg", "d8/dd1/namespaceanonymous__namespace_02AdjustControllerTests_8cpp_03.html#a9260e6224720c38d4df7d1328666cec2", null ]
-    ] ],
-    [ "anonymous_namespace{AdjustScene.cpp}", "de/d51/namespaceanonymous__namespace_02AdjustScene_8cpp_03.html", [
-      [ "findElementById", "de/d51/namespaceanonymous__namespace_02AdjustScene_8cpp_03.html#a77f6a358977a79f0b99489a1146ee137", null ],
-      [ "intervalsOverlap", "de/d51/namespaceanonymous__namespace_02AdjustScene_8cpp_03.html#a8ed87045dcf16056181360fbf8bb3d51", null ],
-      [ "parseSvgNumber", "de/d51/namespaceanonymous__namespace_02AdjustScene_8cpp_03.html#af525baa1cb323becb980fd84842566bd", null ],
-      [ "kAbutGapTol", "de/d51/namespaceanonymous__namespace_02AdjustScene_8cpp_03.html#a6915c4293ce2e606f3e586a70508334f", null ]
-    ] ],
-    [ "anonymous_namespace{AdjustSceneTests.cpp}", "d5/d33/namespaceanonymous__namespace_02AdjustSceneTests_8cpp_03.html", [
-      [ "buildBboxJson", "d5/d33/namespaceanonymous__namespace_02AdjustSceneTests_8cpp_03.html#a4ff935193f94cd2d14b7e0089b4ebb07", null ],
-      [ "findPiece", "d5/d33/namespaceanonymous__namespace_02AdjustSceneTests_8cpp_03.html#a3f41ea2f612e26cf4a0f7030eacb9fa8", null ],
-      [ "writeLayoutSvg", "d5/d33/namespaceanonymous__namespace_02AdjustSceneTests_8cpp_03.html#a90d4322b7f56166cdaa5c1aafbc6917d", null ]
-    ] ],
     [ "anonymous_namespace{dialogexporttocsv.cpp}", "d2/d4e/namespaceanonymous__namespace_02dialogexporttocsv_8cpp_03.html", [
       [ "encodingName", "d2/d4e/namespaceanonymous__namespace_02dialogexporttocsv_8cpp_03.html#a6f7c62063135531346d419500b1f7894", null ]
     ] ],
     [ "anonymous_namespace{dialogtool.cpp}", "d3/d7d/namespaceanonymous__namespace_02dialogtool_8cpp_03.html", [
       [ "RowId", "d3/d7d/namespaceanonymous__namespace_02dialogtool_8cpp_03.html#ac2e003f541cb5afc14468f3b6945ef46", null ]
     ] ],
-    [ "anonymous_namespace{installer_record.cpp}", "d8/d56/namespaceanonymous__namespace_02installer__record_8cpp_03.html", null ],
     [ "anonymous_namespace{internal_path_dialog.cpp}", "df/de6/namespaceanonymous__namespace_02internal__path__dialog_8cpp_03.html", [
       [ "cutLinePath", "df/de6/namespaceanonymous__namespace_02internal__path__dialog_8cpp_03.html#a394f1f735699f1b1d0e822cf8d3af1d3", null ]
     ] ],
-    [ "anonymous_namespace{legacy_data_archive.cpp}", "dc/d5b/namespaceanonymous__namespace_02legacy__data__archive_8cpp_03.html", [
-      [ "cleaned", "dc/d5b/namespaceanonymous__namespace_02legacy__data__archive_8cpp_03.html#a669a4beaf8c0a31595bf5bae7fef14be", null ],
-      [ "fail", "dc/d5b/namespaceanonymous__namespace_02legacy__data__archive_8cpp_03.html#a667bb037e922763134fb3ed267961a95", null ],
-      [ "hashOfFile", "dc/d5b/namespaceanonymous__namespace_02legacy__data__archive_8cpp_03.html#a0ed8609eb7913aecda84f46f3930f38f", null ],
-      [ "relativeEntries", "dc/d5b/namespaceanonymous__namespace_02legacy__data__archive_8cpp_03.html#a30ee7c4dbe8e9cf71f65731e2f556820", null ],
-      [ "hashChunkSize", "dc/d5b/namespaceanonymous__namespace_02legacy__data__archive_8cpp_03.html#a99a187df1e0e37ae6f44e8d6eae65a2f", null ]
-    ] ],
-    [ "anonymous_namespace{legacy_data_migration.cpp}", "df/d38/namespaceanonymous__namespace_02legacy__data__migration_8cpp_03.html", "df/d38/namespaceanonymous__namespace_02legacy__data__migration_8cpp_03" ],
     [ "anonymous_namespace{mainwindowsnogui.cpp}", "df/da0/namespaceanonymous__namespace_02mainwindowsnogui_8cpp_03.html", [
       [ "CreateLayoutPath", "df/da0/namespaceanonymous__namespace_02mainwindowsnogui_8cpp_03.html#adc02e3f28db0229af91f2077610c4b9d", null ],
       [ "RemoveLayoutPath", "df/da0/namespaceanonymous__namespace_02mainwindowsnogui_8cpp_03.html#aba458b4f78f014b23015631f3a439456", null ]
@@ -44,58 +20,12 @@ var namespaces_dup =
       [ "enableDefaultButton", "d7/d49/namespaceanonymous__namespace_02pattern__piece__dialog_8cpp_03.html#af04aa336f20ec8424e3ff06065363df1", null ],
       [ "getFormulaFromUser", "d7/d49/namespaceanonymous__namespace_02pattern__piece__dialog_8cpp_03.html#a6e4259470f736c8f847d8d04b3fef36d", null ]
     ] ],
-    [ "anonymous_namespace{PieceOverlayItem.cpp}", "d3/de7/namespaceanonymous__namespace_02PieceOverlayItem_8cpp_03.html", [
-      [ "kConflictRed", "d3/de7/namespaceanonymous__namespace_02PieceOverlayItem_8cpp_03.html#a6cc3cecb1540f234925eaed90f6718fc", null ],
-      [ "kVioletFill", "d3/de7/namespaceanonymous__namespace_02PieceOverlayItem_8cpp_03.html#a73e7a8e437bda176fb1582e97e8cb14a", null ],
-      [ "kVioletMedium", "d3/de7/namespaceanonymous__namespace_02PieceOverlayItem_8cpp_03.html#ad4089e894a6f973694515bfaf0d8ee48", null ]
-    ] ],
-    [ "anonymous_namespace{PreferencesModel.cpp}", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html", [
-      [ "appConfigRootPath", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#aac0296009080bac5e792823e5fce233a", null ],
-      [ "copyIfMissing", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#acd350233edab6b78005650b57674681d", null ],
-      [ "expandDefaultPathTokens", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a983acb8b49611cc236baf276afce4fd2", null ],
-      [ "migrateLegacyFolderName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#acbce9f9555ea8021af4ecd25c7dad9ca", null ],
-      [ "migrateLegacyOrganizationTree", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a7d869d6881abdbacf84cd639a94eedb1", null ],
-      [ "platformDefaultsKey", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#aed4ee8d3fb526b87f1ffd02508da4e65", null ],
-      [ "seedFromBundledDefaults", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a5f0581e471b66a21a7125346b3eea91c", null ],
-      [ "kLegacyOrganizationName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a7a720e78cc99c7cb0d97bd6858a2e984", null ],
-      [ "kLegacyPreferencesFolderName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a64ec81db8349d51aad8ab68f2455b972", null ],
-      [ "kLegacySettingsFolderName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#adda8a1508d10549910e55ce5bce5a70d", null ],
-      [ "kPreferencesFileName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a583f91baf0c9788c4b6d32062d452bd9", null ],
-      [ "kPreferencesFolderName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#af74f3ee7105adef526e0b1e231f06410", null ],
-      [ "kSettingsFolderName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a6f6ec424b86d0c2a6f7e228c395008c6", null ]
-    ] ],
     [ "anonymous_namespace{preferencespatternpage.cpp}", "d1/dbe/namespaceanonymous__namespace_02preferencespatternpage_8cpp_03.html", [
       [ "initAllStringsComboBox", "d1/dbe/namespaceanonymous__namespace_02preferencespatternpage_8cpp_03.html#a97383a8b46e2afedbc957a5c56b7522f", null ]
     ] ],
     [ "anonymous_namespace{savetooloptions.cpp}", "dd/da8/namespaceanonymous__namespace_02savetooloptions_8cpp_03.html", [
       [ "childElements", "dd/da8/namespaceanonymous__namespace_02savetooloptions_8cpp_03.html#a90bc00f8429f2767711cee83fd7c5b09", null ],
       [ "referencesChanged", "dd/da8/namespaceanonymous__namespace_02savetooloptions_8cpp_03.html#a37fef8eec386cdf9b1548406ee1b6175", null ]
-    ] ],
-    [ "anonymous_namespace{seamly_suite_paths.cpp}", "dc/d0b/namespaceanonymous__namespace_02seamly__suite__paths_8cpp_03.html", [
-      [ "piecesSvgSuffix", "dc/d0b/namespaceanonymous__namespace_02seamly__suite__paths_8cpp_03.html#a1f71734be3fc03f81e8bed32f98f65af", null ],
-      [ "sourceTreeBuildSubPath", "dc/d0b/namespaceanonymous__namespace_02seamly__suite__paths_8cpp_03.html#a004294aa7b379f52e0e8bd1955ba88af", null ],
-      [ "maxUpwardLevels", "dc/d0b/namespaceanonymous__namespace_02seamly__suite__paths_8cpp_03.html#ac1dc10ab6133d809128d6d24e6953f8b", null ]
-    ] ],
-    [ "anonymous_namespace{SettingsModel.cpp}", "d2/dc7/namespaceanonymous__namespace_02SettingsModel_8cpp_03.html", "d2/dc7/namespaceanonymous__namespace_02SettingsModel_8cpp_03" ],
-    [ "anonymous_namespace{StartupOptions.cpp}", "d6/d61/namespaceanonymous__namespace_02StartupOptions_8cpp_03.html", [
-      [ "svgSuffix", "d6/d61/namespaceanonymous__namespace_02StartupOptions_8cpp_03.html#a33a46bf1d3ce24cf0f9994f1ba3b8335", null ],
-      [ "versionText", "d6/d61/namespaceanonymous__namespace_02StartupOptions_8cpp_03.html#ad409c49545bf4ca89716fbfae1922562", null ]
-    ] ],
-    [ "anonymous_namespace{tst_dataroot.cpp}", "d9/d48/namespaceanonymous__namespace_02tst__dataroot_8cpp_03.html", [
-      [ "commonIniName", "d9/d48/namespaceanonymous__namespace_02tst__dataroot_8cpp_03.html#a664ce00f0e3fc85596851d75b4883b68", null ],
-      [ "dataRootKey", "d9/d48/namespaceanonymous__namespace_02tst__dataroot_8cpp_03.html#a848c3b975c29ef8bbdd2bfe840ecec4f", null ]
-    ] ],
-    [ "anonymous_namespace{tst_seamlysuitepaths.cpp}", "d5/d91/namespaceanonymous__namespace_02tst__seamlysuitepaths_8cpp_03.html", [
-      [ "createDummyFile", "d5/d91/namespaceanonymous__namespace_02tst__seamlysuitepaths_8cpp_03.html#acc9bdd3b67830e69cdade3f8fc30411e", null ]
-    ] ],
-    [ "anonymous_namespace{tst_svgcomponenttags.cpp}", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html", [
-      [ "groupsOfType", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#a2d7b69f1bd0c5ecc33e37213be6dcc55", null ],
-      [ "makePath", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#aad667cd3fa73c258b622b363cfdb6489", null ],
-      [ "makeTestPiece", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#adc538687a0a778fba80e6b4d386e3165", null ],
-      [ "squarePoints", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#a887dc0def7310a2058744fccc20a44fc", null ]
-    ] ],
-    [ "anonymous_namespace{tst_svgtextitem.cpp}", "db/da3/namespaceanonymous__namespace_02tst__svgtextitem_8cpp_03.html", [
-      [ "renderItemToSvg", "db/da3/namespaceanonymous__namespace_02tst__svgtextitem_8cpp_03.html#aa3743175c7e5de4200845ac240a757c5", null ]
     ] ],
     [ "anonymous_namespace{vabstractpattern.cpp}", "d0/d42/namespaceanonymous__namespace_02vabstractpattern_8cpp_03.html", [
       [ "ReadExpressionAttribute", "d0/d42/namespaceanonymous__namespace_02vabstractpattern_8cpp_03.html#a03b1fb578fba1ecb51300ab233820199", null ]
@@ -107,7 +37,6 @@ var namespaces_dup =
     [ "anonymous_namespace{vcommonsettings.cpp}", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html", [
       [ "ClearFormats", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#ad33f2f0b5106c172dee047d0af12ebc6", null ],
       [ "PrepareStandardFiles", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a3abe77374f88330d2dce8aa3fc77479c", null ],
-      [ "readDataRoot", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a0c351cecb80a5bf23fa2b4629c099a54", null ],
       [ "SymlinkCopyDirRecursive", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a8dd613aa76590f88f4a60fee8b89ae13", null ],
       [ "pointNameSize", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a7136b7a2ed9ead08f0f849054160457b", null ],
       [ "settingBackupPath", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a33d50aa96456f560a5ac1845a77a682c", null ],
@@ -238,7 +167,6 @@ var namespaces_dup =
       [ "settingLabelUserTimeFormats", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a963422ce8f013135de5d22a96c0ef172", null ],
       [ "settingLatestSkippedVersion", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a057fa48d101cde9aa147dd59534486e8", null ],
       [ "settingPathsBodyScans", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#ade216e15a69dff3a6e8c9786c180d592", null ],
-      [ "settingPathsDataRoot", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a8db1bb6eaf2ed89b9f9ebe4710fcd21b", null ],
       [ "settingPathsIndividualMeasurements", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a2637561a27c415fd5d43d96cc585ba2e", null ],
       [ "settingPathsLabelTemplate", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#acfd4254aeddc1d40c0425558b4f0b42f", null ],
       [ "settingPathsMultisizeMeasurements", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a71547d95fb3ded7735c8d75fda092ad2", null ],
@@ -261,8 +189,7 @@ var namespaces_dup =
       [ "settingShowPieceLabels", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#ae878122ddcaae25fa2369875ccac14b6", null ],
       [ "settingShowSeamAllowances", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#aead542985bef57407eb367a8c7c0da1f", null ],
       [ "settingToolSeamAllowanceDialogSize", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a91bf7a4d63951d137db9cb09112c61d2", null ],
-      [ "settingVariablesDialogSize", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a724bd4de8bb4e50cd42068755d13f6fe", null ],
-      [ "unknownOrganizationName", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a71ae26c24c640338ca8bc4dba19b13fc", null ]
+      [ "settingVariablesDialogSize", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a724bd4de8bb4e50cd42068755d13f6fe", null ]
     ] ],
     [ "anonymous_namespace{vdomdocument.cpp}", "d6/db9/namespaceanonymous__namespace_02vdomdocument_8cpp_03.html", [
       [ "SaveNodeCanonically", "d6/db9/namespaceanonymous__namespace_02vdomdocument_8cpp_03.html#a48dca2f0db8a0c3d00d69eff6118f8bf", null ]
@@ -303,7 +230,6 @@ var namespaces_dup =
       [ "intersectsWithCutLine", "d4/d24/namespaceanonymous__namespace_02vpiecepath_8cpp_03.html#ae7f025addb773313273dc4382280a626", null ]
     ] ],
     [ "anonymous_namespace{vsettings.cpp}", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html", [
-      [ "copySampleFiles", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#a876fd9d16934c626d8c81ab40ce1a705", null ],
       [ "settingCommunityProxyAddress", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#afe08e293ff54709b6b3afa9992665100", null ],
       [ "settingCommunityProxyPass", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#a4a67c673d60108adfde815b76a0a8874", null ],
       [ "settingCommunityProxyPort", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#a47f3dfb18c411919a02ac2b84306e326", null ],
@@ -330,7 +256,6 @@ var namespaces_dup =
       [ "settingMultiplier", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#a438399a0cf9605103f6b11d324b91f2b", null ],
       [ "settingPathsLayout", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#aeeae12a9e716a36285066894137cee19", null ],
       [ "settingPathsPattern", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#abd078475c23bc1ef0d914344990ee54e", null ],
-      [ "settingPathsSeamlyLayoutApp", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#af5d4d7f733ae18fa76ed7f61f1744551", null ],
       [ "settingPatternGraphicalOutput", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#ad09214ea81d66f68b5137cc6c98545aa", null ],
       [ "settingStripOptimization", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#a0aab5ed79c0e768799ffca56521c62a6", null ],
       [ "settingTextAsPaths", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#a05f57745d9f819090b29f07e2569fd9e", null ],
@@ -350,25 +275,6 @@ var namespaces_dup =
     ] ],
     [ "anonymous_namespace{vtoolmove.cpp}", "dd/dbe/namespaceanonymous__namespace_02vtoolmove_8cpp_03.html", [
       [ "findRotationOrigin", "dd/dbe/namespaceanonymous__namespace_02vtoolmove_8cpp_03.html#a2f7cb2fa85efab3c7cc6db3569f5bd15", null ]
-    ] ],
-    [ "InstallerRecord", "db/dd6/namespaceInstallerRecord.html", [
-      [ "dataRoot", "db/dd6/namespaceInstallerRecord.html#aca26b8e2ff640b1f1eacd139d05b95c7", null ]
-    ] ],
-    [ "LegacyDataArchive", "da/d5e/namespaceLegacyDataArchive.html", [
-      [ "archive", "da/d5e/namespaceLegacyDataArchive.html#a14d951396de5e7479a8ccdf5794b4164", null ],
-      [ "archivePath", "da/d5e/namespaceLegacyDataArchive.html#aeea6bf3fdd26d9154904906c4c4f0cec", null ],
-      [ "create", "da/d5e/namespaceLegacyDataArchive.html#a9cfe29f10d17ed84a0603ef228958ac9", null ],
-      [ "verifyAgainst", "da/d5e/namespaceLegacyDataArchive.html#afd7572deac173e689917b53137343640", null ]
-    ] ],
-    [ "LegacyDataMigration", "d8/ddf/namespaceLegacyDataMigration.html", [
-      [ "run", "d8/ddf/namespaceLegacyDataMigration.html#a587ca3782a570502f6cb18586a208e19", null ]
-    ] ],
-    [ "PieceItemData", "dd/d2f/namespacePieceItemData.html", [
-      [ "Key", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52a", [
-        [ "ObjectName", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52aa7941596f64d95ae0eb0ce7799abfc1fa", null ],
-        [ "ItemType", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52aa789d47dbe06374b0c99c1513bc151cdb", null ],
-        [ "PieceLetter", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52aa3cc1357d3e7fb46ec8eaac232f6e6364", null ]
-      ] ]
     ] ],
     [ "qmu", "da/d92/namespaceqmu.html", "da/d92/namespaceqmu" ],
     [ "QT_WARNING_POP", "dd/db0/namespaceQT__WARNING__POP.html", [
@@ -423,23 +329,6 @@ var namespaces_dup =
       [ "updateUnionCSA", "dd/db0/namespaceQT__WARNING__POP.html#a87a98d38cedbf08597b6e3efb022e94d", null ],
       [ "updateUnionInternalPaths", "dd/db0/namespaceQT__WARNING__POP.html#aeb3cad6fd9643948b4a44c7a8ba576be", null ],
       [ "UpdateUnitedNodes", "dd/db0/namespaceQT__WARNING__POP.html#a5736c077b3b3069a8f171feceae4310f", null ]
-    ] ],
-    [ "SeamlySuitePaths", "d2/d5f/namespaceSeamlySuitePaths.html", [
-      [ "locateSeamlyLayout", "d2/d5f/namespaceSeamlySuitePaths.html#af679b3efdaa31e7f49398e6254d54b96", null ],
-      [ "locateSeamlyLayoutDevBuild", "d2/d5f/namespaceSeamlySuitePaths.html#a8147aac96b8024022a49ea6c4798ed06", null ],
-      [ "piecesSvgFilePath", "d2/d5f/namespaceSeamlySuitePaths.html#a0397777496948588c84dedac9589c868", null ],
-      [ "seamlyLayoutExeName", "d2/d5f/namespaceSeamlySuitePaths.html#a51ab6af75bd10c154be72d4e42ceee66", null ],
-      [ "seamlyLayoutLaunchArguments", "d2/d5f/namespaceSeamlySuitePaths.html#a315f5743f9e141cbeb6e4e270d42080f", null ]
-    ] ],
-    [ "SeamlyTheme", "d2/dd7/namespaceSeamlyTheme.html", [
-      [ "makeSeamlyPalette", "d2/dd7/namespaceSeamlyTheme.html#ad2e8a009530c1b2cdb45c292db776cd6", null ],
-      [ "SEAMLY_BLACK_SOFT", "d2/dd7/namespaceSeamlyTheme.html#af25a7afedb862d9f0908b095d90fe4d4", null ],
-      [ "SEAMLY_GRAY_LIGHT", "d2/dd7/namespaceSeamlyTheme.html#ad2167c9169f6b66b22672c7a7a9c8568", null ],
-      [ "SEAMLY_GRAY_MEDIUM", "d2/dd7/namespaceSeamlyTheme.html#a9b25fdec9aabe8172b9b10a18050d944", null ],
-      [ "SEAMLY_VIOLET", "d2/dd7/namespaceSeamlyTheme.html#a99dbf6a337a013c731cd6dcd67675b14", null ],
-      [ "SEAMLY_VIOLET_DARK", "d2/dd7/namespaceSeamlyTheme.html#ad034fb7257245043a4c6ff7fc7d1f382", null ],
-      [ "SEAMLY_VIOLET_LIGHT", "d2/dd7/namespaceSeamlyTheme.html#a9b55b9497fd0307b9c66e760475bf4c8", null ],
-      [ "SEAMLY_VIOLET_MEDIUM", "d2/dd7/namespaceSeamlyTheme.html#aaae9f493d998ee30ef4995ae8c2a8e9d", null ]
     ] ],
     [ "Ui", "db/d3c/namespaceUi.html", null ],
     [ "Utils", "d4/d3d/namespaceUtils.html", "d4/d3d/namespaceUtils" ],

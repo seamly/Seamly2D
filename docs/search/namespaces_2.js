@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['legacydataarchive_0',['LegacyDataArchive',['../da/d5e/namespaceLegacyDataArchive.html',1,'']]],
-  ['legacydatamigration_1',['LegacyDataMigration',['../d8/ddf/namespaceLegacyDataMigration.html',1,'']]]
+  ['ui_0',['Ui',['../db/d3c/namespaceUi.html',1,'']]],
+  ['utils_1',['Utils',['../d4/d3d/namespaceUtils.html',1,'']]]
 ];
