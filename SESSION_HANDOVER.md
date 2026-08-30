@@ -3,7 +3,7 @@
 Only the **current** state lives here. Completed tasks are written up in
 `project-docs/TODO_COMPLETED.md`, and the reasoning behind shipped decisions
 lives beside the code it governs — for Windows packaging that is
-`packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
+`packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
 ## version.sh moved to packaging/ (2026-08-29)
@@ -12,7 +12,7 @@ re-accumulate finished-session narrative in this file.
 version into `projectversion.cpp/.h` and both `Info.plist` files for
 every build, so it belongs with build-pipeline scripts, not misc dev
 utilities. Updated every reference: `ci.yml` (3 call sites),
-`packaging/windows/build_msi_local.ps1`, both `Info.plist` comments,
+`packaging/windows/test_build_msi_local.ps1`, both `Info.plist` comments,
 and the `projectversion.cpp/.h` header comments. Script internals
 unchanged — all its paths are relative to the repo root, so only the
 invocation path changed. Touches `ci.yml` and `packaging/**`, so this
@@ -25,7 +25,7 @@ held only misc dev utilities, so Windows packaging (MSI/WiX, PowerShell)
 now sits at the same top level as `dist/` (Linux/macOS packaging assets).
 Updated every reference: `ci.yml`, `src/app/app.pro`, `CLAUDE.md`,
 `AGENTS.md`, and project-docs. Fixed a `repoRoot` depth bug the move
-exposed in `smsi.ps1` and `build_msi_local.ps1` — both walked one
+exposed in `smsi.ps1` and `test_build_msi_local.ps1` — both walked one
 directory too many with `Split-Path -Parent` (correct at the old
 3-deep path, wrong at the new 2-deep one). Merged `--no-ff` into
 `run-seamlyLayout` and pushed at `da090ae733` without `skip-ci`
@@ -57,7 +57,7 @@ Tracked as Seamly2D.2.2 in `project-docs/TODO_SEAMLY2D.md` — done. Committed, 
 **Not build-verified before push.** I incorrectly told the user twice that "Seamly2D
 and SeamlyMe have no local build script," repeating stale text from this file's own
 "Local Windows Build" section. The user corrected me:
-`packaging/windows/build_msi_local.ps1` exists and builds all three apps
+`packaging/windows/test_build_msi_local.ps1` exists and builds all three apps
 (qmake + nmake for Seamly2D/SeamlyMe, cmake + ninja + cargo for SeamlyLayout), then
 packages them via `smsi.ps1`/`wix build`. Confirmed by reading the script directly.
 CLAUDE.md's "Local Windows Build" section is being corrected to reference it.
@@ -76,7 +76,7 @@ SeamlyMe fix has not been re-verified interactively since it was pushed.
 
 **Next steps:**
 
-1. Run `packaging/windows/build_msi_local.ps1` to build all three apps and
+1. Run `packaging/windows/test_build_msi_local.ps1` to build all three apps and
    confirm the `tmainwindow.cpp` change actually compiles.
 2. Re-test MSI Test Case 1b-i step 6a-v/6a-vi interactively to confirm the fix works.
 3. Pick up Seamly2D.2.1 and Seamly2D.3.1 above.
@@ -355,7 +355,7 @@ real data migration (`Old` and `New` mode) failed silently: caught, logged,
 `Add-Type`. Verified against a seeded legacy `~/seamly2d` test folder:
 zip -> extract -> merge into the real `Documents\SeamlyData` -> the real
 per-app `.ini` path settings updated correctly, legacy source left untouched.
-Test files removed afterward. **`INSTALL_DECISION_FLOW.md` item 4** (the
+Test files removed afterward. **`README_MSI_WORKFLOW.md` item 4** (the
 legacy data-folder migration) moved from `[undecided]` to `[settled]` - the
 design was already right, just broken by this bug.
 
@@ -394,7 +394,7 @@ no-op in practice, but note it in case anything looks different later.
 **Next steps:**
 
 1. Decide whether to commit the one-line `smsi_migrate_user_data.ps1` fix and
-   the `INSTALL_DECISION_FLOW.md` update - discovered mid-investigation, not
+   the `README_MSI_WORKFLOW.md` update - discovered mid-investigation, not
    from a `TODO_*.md` task, so no task branch exists for it yet.
 2. Decide whether the different-version-upgrade case needs the real
    second-MSI end-to-end test above, or whether the authoring-level
@@ -927,7 +927,7 @@ seconds: `wix build` clean, `wix msi validate` clean except the expected ICE61,
 `test_msi_authoring.ps1` 115 assertions pass. It proves the authoring, not the
 product.
 
-**InstWinX64.1.7 is done too.** `INSTALL_DECISION_FLOW.md` and
+**InstWinX64.1.7 is done too.** `README_MSI_WORKFLOW.md` and
 `packaging/windows/README.md` carry the new page order, and the
 "SeamlyShortcutsDlg never displays" defect note is gone. The README also claimed
 the old NSIS installation is never removed automatically; Setup has removal
@@ -1005,7 +1005,7 @@ impersonated custom action running `seamly_copy_user_data.ps1`.
 
 **THE BLOCKER.** The two new dialogs use `SpawnDialog` from `InstallDirDlg`'s
 Next — the same mechanism as `SeamlyShortcutsDlg`, which
-`INSTALL_DECISION_FLOW.md` already records as **never displaying**. Dumping the
+`README_MSI_WORKFLOW.md` already records as **never displaying**. Dumping the
 built MSI's `ControlEvent` rows proved there is no alternative: the built-in
 `NewDialog VerifyReadyDlg` is at Order 4 with condition `1`, so no competing
 `NewDialog` can be excluded. The dump also exposed two ordering collisions this
@@ -1158,7 +1158,7 @@ filenames, etc.") hand-edited `seamly-family.wxs` and left
 every push since. Fixed in the `.wxs`, test left alone, because the test encodes
 Task 51's documented requirements and `SeamlyApps` is the name used by
 `README-BUILDS.md`, `packaging/windows/README.md`,
-`INSTALL_DECISION_FLOW.md`, `TODO_INSTALLER_WIN_X64.md` and the Task 51 test kit:
+`README_MSI_WORKFLOW.md`, `TODO_INSTALLER_WIN_X64.md` and the Task 51 test kit:
 
 - `INSTALLFOLDER` `Name="Seamly"` → `Name="SeamlyApps"`.
 - `UserDataText` names the user-data folder again (`C:\Users\your name\seamlyData`).
@@ -1178,7 +1178,7 @@ stopped using when the `windows` job was retired, so identifiers named for it
 read as though the package still produces one. What they actually name is the
 pre-MSI Seamly2D already sitting on a user's machine, which outlives the tool
 that authored it. Renamed across `seamly-family.wxs`, `test_msi_authoring.ps1`,
-both copies of `test_msi_install.ps1` and `INSTALL_DECISION_FLOW.md`:
+both copies of `test_msi_install.ps1` and `README_MSI_WORKFLOW.md`:
 
 | was | now |
 |---|---|

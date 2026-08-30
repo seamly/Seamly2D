@@ -2,7 +2,7 @@
 
 WiX build reference for the Windows `.msi` shipping **seamly2d.exe**, **seamlyme.exe**, **seamlylayout.exe** together, per arch (x64, arm64).
 
-Related docs: [`.github/README-BUILDS.md`](../../.github/README-BUILDS.md) (KB record), [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md) (build mechanics), [`INSTALL_DECISION_FLOW.md`](INSTALL_DECISION_FLOW.md) (installer-vs-app flowcharts).
+Related docs: [`.github/README-BUILDS.md`](../../.github/README-BUILDS.md) (KB record), [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md) (build mechanics), [`README_MSI_WORKFLOW.md`](README_MSI_WORKFLOW.md) (installer-vs-app flowcharts).
 
 ## Files
 
@@ -17,7 +17,7 @@ Related docs: [`.github/README-BUILDS.md`](../../.github/README-BUILDS.md) (KB r
 | `../assets/*.ico` | Shortcut/ARP icons; `<Icon Id>` must equal file name |
 | `license.rtf` | License text shown in installer UI |
 | `smsi.ps1` | Stage + `wix build` driver. CI-only, no local mode |
-| `build_msi_local.ps1` | Local x64 dev build: builds all 3 apps, calls `smsi.ps1` |
+| `test_build_msi_local.ps1` | Local x64 dev build: builds all 3 apps, calls `smsi.ps1` |
 | `smsi_check_authoring.ps1` | Asserts built MSI contents; runs every build |
 | `smsi_migrate_user_data.ps1` / `..._test.ps1` | Deferred action migrating user data during install/upgrade, + its unit tests |
 | `test_msi_install.ps1` | Asserts an installed MSI's effect on a real machine |
@@ -64,7 +64,7 @@ Fresh install: Welcome → License → Existing-install warning (if found) → P
 
 **Release (CI only):** `gh workflow run ci.yml --ref run-seamlyLayout`. `windows-msi` matrix: x64 on `windows-latest`, arm64 (native) on `windows-11-arm`.
 
-**Local x64 dev build:** `.\packaging\windows\build_msi_local.ps1`. Builds all 3 apps release, auto-detects Qt kit, installs WiX v6 if missing. Not a release artifact.
+**Local x64 dev build:** `.\packaging\windows\test_build_msi_local.ps1`. Builds all 3 apps release, auto-detects Qt kit, installs WiX v6 if missing. Not a release artifact.
 
 Full param reference: [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md).
 

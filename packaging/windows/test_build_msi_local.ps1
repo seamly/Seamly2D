@@ -1,5 +1,5 @@
 #******************************************************************************
-# **  @file   build_msi_local.ps1
+# **  @file   test_build_msi_local.ps1
 # **  @author slspencer
 # **  @date   August 28, 2026
 # **
@@ -63,7 +63,7 @@
     Passed through to smsi.ps1 - skip the `wix msi validate` ICE pass.
 
 .EXAMPLE
-    .\packaging\windows\build_msi_local.ps1
+    .\packaging\windows\test_build_msi_local.ps1
     Full local x64 MSI build with an auto-computed version.
 #>
 
