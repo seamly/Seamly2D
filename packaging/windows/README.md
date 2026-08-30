@@ -14,7 +14,7 @@ Related docs: [`.github/README-BUILDS.md`](../../.github/README-BUILDS.md) (KB r
 | `smsi_files.wxs` | Directory tree, exes, shortcuts, file associations |
 | `smsi_shortcuts.wxs` | Optional desktop shortcuts |
 | `smsi_registry.wxs` | Install-info registry, per-user settings cleanup |
-| `*.ico` | Shortcut/ARP icons; `<Icon Id>` must equal file name |
+| `../assets/*.ico` | Shortcut/ARP icons; `<Icon Id>` must equal file name |
 | `license.rtf` | License text shown in installer UI |
 | `smsi.ps1` | Stage + `wix build` driver. CI-only, no local mode |
 | `build_msi_local.ps1` | Local x64 dev build: builds all 3 apps, calls `smsi.ps1` |

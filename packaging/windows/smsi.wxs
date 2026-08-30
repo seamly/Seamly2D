@@ -199,9 +199,9 @@
          was declared as a second "seamlyme.ico", which both left SeamlyMe's
          icon ambiguous and left SeamlyLayoutShortcut's Icon="seamlylayout.ico"
          pointing at an identifier that did not exist (error WIX0094). -->
-    <Icon Id="seamly2d.ico" SourceFile="$(var.RepoRoot)\packaging\windows\seamly2d.ico" />
-    <Icon Id="seamlyme.ico" SourceFile="$(var.RepoRoot)\packaging\windows\seamlyme.ico" />
-    <Icon Id="seamlylayout.ico" SourceFile="$(var.RepoRoot)\packaging\windows\seamlylayout.ico" />
+    <Icon Id="seamly2d.ico" SourceFile="$(var.RepoRoot)\packaging\assets\seamly2d.ico" />
+    <Icon Id="seamlyme.ico" SourceFile="$(var.RepoRoot)\packaging\assets\seamlyme.ico" />
+    <Icon Id="seamlylayout.ico" SourceFile="$(var.RepoRoot)\packaging\assets\seamlylayout.ico" />
 
     <Property Id="ARPPRODUCTICON" Value="seamly2d.ico" />
     <Property Id="ARPHELPLINK" Value="https://seamly.io" />
