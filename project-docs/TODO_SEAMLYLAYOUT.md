@@ -114,3 +114,11 @@ These options in the Export menu will remain invisible to the user until these f
 
 - [ ] Layout 6.1 Export G-Code
 - [ ] Layout 6.2 Export 3DMesh
+
+## Task Layout.7 — Installer: write SeamlyLayout's desktop-shortcut flag to its own registry key
+
+Found during MSI Test Case verification, step 5c (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`). `SeamlyLayoutDesktopShortcutComponent`'s `RegistryValue` (`scripts/packaging/windows/smsi_shortcuts.wxs:95-100`) writes `DesktopShortcutSeamlyLayout` under `HKLM\SOFTWARE\Seamly\Seamly2D` instead of `HKLM\SOFTWARE\Seamly\SeamlyLayout`.
+
+- [ ] Layout.7.1 Change the `RegistryValue`'s `Key` at `smsi_shortcuts.wxs:96` from `SOFTWARE\Seamly\Seamly2D` to `SOFTWARE\Seamly\SeamlyLayout`
+- [ ] Layout.7.2 Confirm `smsi_check_authoring.ps1:562` and `test_msi_install.ps1` still pass, and update either script if it asserts the old key
+- [ ] Layout.7.3 Re-run MSI Test Case verification step 5c to confirm `HKLM\SOFTWARE\Seamly\SeamlyLayout` carries `DesktopShortcutSeamlyLayout`

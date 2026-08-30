@@ -22,3 +22,19 @@ Requested: the **Open Individual**, **Open Multisize**, and **Open Template** pi
 - [ ] SeamlyMe.1.4 Doxygen briefs + inline comments on any touched function(s)
 
 ## Task SeamlyMe.2 — SeamlyMe: default the Open dialog to the user measurements/individual directory
+
+## Task SeamlyMe.3 — Installer: write SeamlyMe's desktop-shortcut flag to its own registry key
+
+Found during MSI Test Case verification, step 5c (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`). `SeamlyMeDesktopShortcutComponent`'s `RegistryValue` (`scripts/packaging/windows/smsi_shortcuts.wxs:75-80`) writes `DesktopShortcutSeamlyMe` under `HKLM\SOFTWARE\Seamly\Seamly2D` instead of `HKLM\SOFTWARE\Seamly\SeamlyMe`.
+
+- [ ] SeamlyMe.3.1 Change the `RegistryValue`'s `Key` at `smsi_shortcuts.wxs:76` from `SOFTWARE\Seamly\Seamly2D` to `SOFTWARE\Seamly\SeamlyMe`
+- [ ] SeamlyMe.3.2 Confirm `smsi_check_authoring.ps1:562` and `test_msi_install.ps1` still pass, and update either script if it asserts the old key
+- [ ] SeamlyMe.3.3 Re-run MSI Test Case verification step 5c to confirm `HKLM\SOFTWARE\Seamly\SeamlyMe` carries `DesktopShortcutSeamlyMe`
+
+## Task SeamlyMe.4 — write a persisted `[paths]` section to `qt6_seamlyme.ini`
+
+Found during MSI Test Case verification, step 6b (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`). `qt6_seamlyme.ini` has no `[paths]` section. `VCommonSettings` (shared with Seamly2D) already exposes `getIndividualSizePath()`/`getMultisizePath()`/`getTemplatePath()` under the `paths/individual_size_measurements`, `paths/multi_size_measurements`, and `paths/templates` keys (`src/libs/vmisc/vcommonsettings.cpp:86-93`), but nothing in SeamlyMe ever calls the matching setters, so QSettings never writes the section — the paths only resolve correctly at runtime through each getter's default fallback. Related to Task SeamlyMe.1 (same getters, dialog defaults).
+
+- [ ] SeamlyMe.4.1 Have SeamlyMe persist `individual_size_measurements`, `multi_size_measurements`, and `templates` under `[paths]` in `qt6_seamlyme.ini`, each defaulting to `%DATADIR%\measurements\individual`, `%DATADIR%\measurements\multisize`, and `%DATADIR%\templates` respectively (call the existing `set*Path()` setters on first run/save, matching how Seamly2D persists its own `[paths]` section)
+- [ ] SeamlyMe.4.2 Re-run MSI Test Case verification step 6b to confirm the persisted section exists and every value begins with `%DATADIR%`
+- [ ] SeamlyMe.4.3 Doxygen briefs + inline comments on any touched function(s)

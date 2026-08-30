@@ -145,10 +145,23 @@ QString platformDefaultsKey()
 } // platformDefaultsKey
 
 // @brief Replace supported tokens in default path templates.
+//
+// ${HOME} resolves to the Windows installer's recorded DataRoot when one exists, so a
+// fresh MSI install seeds settings/preferences/input/layout defaults under %DATAROOT%
+// instead of the user's home directory. Falls back to the real home path everywhere else
+// (dev builds, Linux, macOS, or Windows without an installer record).
 QString expandDefaultPathTokens(const QString &value)
 {
+    QString homeBase = QDir::homePath();
+#ifdef Q_OS_WIN
+    const QString installedDataRoot = installerDataRoot();
+    if (!installedDataRoot.isEmpty()) {
+        homeBase = installedDataRoot;
+    } // if the installer recorded a data root
+#endif // Q_OS_WIN
+
     QString result = value;
-    result.replace(QStringLiteral("${HOME}"), QDir::homePath());
+    result.replace(QStringLiteral("${HOME}"), homeBase);
     return QDir::cleanPath(result);
 } // expandDefaultPathTokens
 
