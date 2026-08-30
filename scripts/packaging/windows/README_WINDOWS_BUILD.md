@@ -1,28 +1,25 @@
 # Windows MSI — build reference (Seamly application suite)
 
-What [`smsi.ps1`](smsi.ps1) does with the build trees CI hands it, how to read
-its output, and how to install and test the package it produces. For the
-*design* decisions (why WiX v6, why one MSI per arch, install layout, upgrade
-codes, signing) see [`README.md`](README.md); for the durable build knowledge
-base see [`.github/README-BUILDS.md`](../../../.github/README-BUILDS.md).
+Covers [`smsi.ps1`](smsi.ps1): inputs, steps, install/test commands. Design
+decisions: [`README.md`](README.md). Build/toolchain knowledge base:
+[`.github/README-BUILDS.md`](../../../.github/README-BUILDS.md).
 
-The MSI bundles all three apps — **seamly2d**, **seamlyme**, and
-**SeamlyLayout** — into one per-architecture installer
+One MSI per arch bundles **seamly2d**, **seamlyme**, **SeamlyLayout**
 (`seamly-x64.msi` / `seamly-arm64.msi`).
 
 ---
 
-## 1. How the package is built
+## 1. Building
 
-**By CI, and only by CI.** `smsi.ps1` names every input on the command line and
-detects nothing from the machine it runs on.
+**CI only.** `smsi.ps1` takes every input on the command line; detects
+nothing from the host.
 
 ```powershell
 gh workflow run ci.yml --ref run-seamlyLayout
 ```
 
-`ci.yml`'s `windows-msi` job is a matrix over `arch`. Each leg installs one Qt
-6.11.1 kit, builds all three apps natively, and calls:
+`ci.yml`'s `windows-msi` job matrixes over `arch`. Each leg builds all three
+apps, then calls:
 
 ```powershell
 .\scripts\packaging\windows\smsi.ps1 -Arch <arch> -Version $env:VERSION_NUMBER `
@@ -31,178 +28,134 @@ gh workflow run ci.yml --ref run-seamlyLayout
   -WinDeployQt "$env:QT_ROOT_DIR\bin\windeployqt.exe"
 ```
 
-### Parameters
-
 | Parameter | Required | Default | Notes |
 |---|---|---|---|
-| `-Arch` | no | `x64` | `x64` or `arm64`. Must match the architecture of the staged binaries. |
-| `-Version` | **yes** | — | `YY.M.D.MMMM`, where `MMMM` is the minute of the day. The package carries the version of the run that produced it. |
-| `-Seamly2DBin` | **yes** | — | Directory holding `seamly2d.exe` **and** its windeployqt output. |
-| `-SeamlyMeBin` | **yes** | — | Directory holding `seamlyme.exe` and its windeployqt output. |
-| `-WinDeployQt` | **yes** | — | `windeployqt.exe` of the Qt kit SeamlyLayout was built against. |
-| `-SeamlyLayoutBuildDir` | no | `src\app\seamlylayout\qt_frontend\build\Release` | Where the job's `cmake --build --preset release` writes `SeamlyLayout.exe`. |
+| `-Arch` | no | `x64` | `x64` or `arm64`; must match staged binaries. |
+| `-Version` | yes | — | `YY.M.D.MMMM` (`MMMM` = minute of day). |
+| `-Seamly2DBin` | yes | — | Dir with `seamly2d.exe` + windeployqt output. |
+| `-SeamlyMeBin` | yes | — | Dir with `seamlyme.exe` + windeployqt output. |
+| `-WinDeployQt` | yes | — | `windeployqt.exe` from the kit SeamlyLayout built against. |
+| `-SeamlyLayoutBuildDir` | no | `src\app\seamlylayout\qt_frontend\build\Release` | Where `cmake --build --preset release` writes `SeamlyLayout.exe`. |
 | `-SkipValidation` | no | off | Skips `wix msi validate` only. |
-| `-OutputDirName` | no | `seamly-msi` | Staging and output directory under `scripts\`. Changing it also means changing the `.gitignore` entry and `ci.yml`'s artifact and signing paths. |
+| `-OutputDirName` | no | `seamly-msi` | Rename needs matching `.gitignore` and `ci.yml` changes. |
 
-`VCToolsRedistDir` must be set in the environment by the MSVC developer
-environment (`ilammy/msvc-dev-cmd`). It is the only source of the CRT redist
-DLLs.
-
-Use `windeployqt`, not `windeployqt6`. A Qt 6 kit ships both names; the project
-uses the unsuffixed one everywhere, matching `qtPrepareTool(WINDEPLOYQT,
-windeployqt)` in the `.pro` post-link steps.
+`VCToolsRedistDir` must be set by `ilammy/msvc-dev-cmd` — the only CRT redist
+source. Use `windeployqt`, not `windeployqt6` (matches `.pro` files'
+`qtPrepareTool(WINDEPLOYQT, windeployqt)`).
 
 ---
 
 ## 2. What the script does
 
-**Checks first, and fails on the first problem**, naming what is missing:
-`seamly2d.exe` and its `platforms\` plugin directory, `seamlyme.exe`,
-`SeamlyLayout.exe`, the `wix` command, the `WixToolset.UI` and
-`WixToolset.Util` extensions, the `-WinDeployQt` path, and a
-`Microsoft.VC*.CRT` directory under `VCToolsRedistDir\<arch>`. Then it echoes
-every resolved input before touching anything.
+Checks first, fails on the first missing item: both exes and
+`seamly2d`'s `platforms\` dir, `SeamlyLayout.exe`, `wix`, the
+`WixToolset.UI`/`WixToolset.Util` extensions, `-WinDeployQt`, and a
+`Microsoft.VC*.CRT` dir under `VCToolsRedistDir\<arch>`.
 
-1. **Derives the MSI `ProductVersion`** from `-Version` as
-   `YY.M.((D−1)·1440 + MMMM)` — MSI ignores the 4th field for upgrade
-   comparisons, so the 4-part `YY.M.D.MMMM` cannot be used directly. The third
-   field is minutes-of-month, so the result increases strictly with every
-   build. The full project version is stored as `DisplayVersion`.
-2. **Stages** a fresh tree under `scripts\seamly-msi\<arch>\`, deleting any
-   previous one:
-   - `parent\` — the one Qt runtime all three apps share. The seamly2d and
-     seamlyme bin trees are copied over each other (same Qt release, so the
-     overlapping DLLs are identical), then `windeployqt --qmldir …\qml
-     --release` runs against a staged copy of `seamlylayout.exe` and adds the
-     QML module tree, the Qt Quick/WebEngine DLLs and `QtWebEngineProcess.exe`.
-     SeamlyLayout's four packaged `settings\` JSON files and its LGPL
-     `licenses\` notices land here too, and finally the MSVC CRT DLLs.
-   - `exes\` — the three executables, moved out of `parent\` after each is
-     deployed. The `.wxs` authors them explicitly so shortcuts and associations
-     can reference them, which is why they must not be in the
-     wildcard-harvested tree.
-3. **Runs `wix build`** on `smsi.wxs` with `-arch`, `-pdbtype none`,
-   both extensions, and the `ProductVersion`, `DisplayVersion`, `RepoRoot`,
-   `ParentStagingDir` and `ExeStagingDir` defines → `seamly-<arch>.msi`.
-4. **Runs `wix msi validate`** (skip with `-SkipValidation`), suppressing ICE43
-   and ICE57 — both are false positives raised by the optional desktop-shortcut
-   components; see [`README.md`](README.md).
-5. **Runs [`smsi_check_authoring.ps1`](smsi_check_authoring.ps1)** against the built
-   MSI: assertions covering elevation, the ARP properties, upgrade and NSIS
-   detection, the install-time dialogs, the shortcuts, the file associations and
-   the install-info registry rows. This one is **not** covered by
-   `-SkipValidation` — it is cheap and it guards a silent failure mode, an MSI
-   that installs perfectly and does the wrong thing.
+1. **Derives `ProductVersion`**: `YY.M.((D−1)·1440 + MMMM)` — MSI ignores the
+   4th field for upgrade comparisons; this always increases. Full version
+   stored as `DisplayVersion`.
+2. **Stages** `scripts\seamly-msi\<arch>\`:
+   - `parent\` — shared Qt runtime + `windeployqt --qmldir …\qml --release`
+     output for SeamlyLayout (QML, Qt Quick/WebEngine DLLs,
+     `QtWebEngineProcess.exe`), SeamlyLayout's `settings\`/`licenses\`, MSVC
+     CRT DLLs.
+   - `exes\` — the three exes, moved out of `parent\` after deployment (the
+     `.wxs` authors them explicitly for shortcuts/associations).
+3. **`wix build`** on `smsi.wxs` → `seamly-<arch>.msi`.
+4. **`wix msi validate`** (skip with `-SkipValidation`), suppressing ICE43/57
+   — false positives from optional desktop-shortcut components.
+5. **[`smsi_check_authoring.ps1`](smsi_check_authoring.ps1)** — asserts
+   elevation, ARP properties, upgrade/NSIS detection, dialogs, shortcuts,
+   associations, registry rows. Always runs, even with `-SkipValidation`.
 
-Only the `.msi` is written: `-pdbtype none` suppresses the `.wixpdb` symbol
-database, which is used for `wix` patch/melt diffing rather than by the
-installer. To keep it for inspection, drop that flag from `$wixArguments`.
+Only the `.msi` is written (`-pdbtype none`). All three apps ship in every
+package — no switch to omit SeamlyLayout.
 
-Output and staging live in `scripts\seamly-msi\`, which `.gitignore` lists by
-name. Every package carries all three apps — there is no switch to leave
-SeamlyLayout out — and because all three come from one Qt 6.11.1 kit, the
-staging tree and the install directory are a single flat folder.
+### Benign warnings
 
-### Benign warnings (no action needed)
-
-- `Cannot determine dependencies of …\qtposition_nmea.dll: … Qt6SerialPort.dll` — optional dependency of the NMEA positioning plugin; not used.
-- `Cannot find any version of the dxcompiler.dll and dxil.dll` — only needed for Direct3D 12 features.
-- `Cannot find Visual Studio installation directory, VCINSTALLDIR is not set` — `windeployqt` cannot deploy the CRT itself; the script deploys it app-locally from `VCToolsRedistDir`.
-- `warning WIX1076: ICE61: … Maximum version is not less than the current product` — expected result of `AllowSameVersionUpgrades`.
+- `Cannot determine dependencies of …qtposition_nmea.dll` — unused NMEA plugin dependency.
+- `Cannot find any version of the dxcompiler.dll and dxil.dll` — Direct3D 12 only.
+- `VCINSTALLDIR is not set` — expected; script deploys CRT app-locally.
+- `ICE61: Maximum version is not less than the current product` — expected with `AllowSameVersionUpgrades`.
 
 ---
 
-## 3. Installing / testing the MSI
-
-Download the `.msi` from the CI run's artifacts or from the pre-release, then:
+## 3. Installing / testing
 
 ```powershell
-msiexec /i seamly-x64.msi                       # interactive (license + directory pages)
-msiexec /i seamly-x64.msi /qn                   # silent, defaults (needs elevation)
-msiexec /i seamly-x64.msi /qn INSTALLFOLDER=D:\SeamlyApps        # silent, custom program dir
-msiexec /i seamly-x64.msi /qn SEAMLYDATAPARENT=E:\               # silent, data root E:\SeamlyData
-msiexec /i seamly-x64.msi /qn SEAMLYDESKTOPSHORTCUTS=0           # silent, no desktop shortcuts
-msiexec /x seamly-x64.msi /qn                   # silent uninstall
-msiexec /a seamly-x64.msi /qn TARGETDIR=C:\extract               # extract without installing
+msiexec /i seamly-x64.msi                                          # interactive
+msiexec /i seamly-x64.msi /qn                                       # silent, defaults (needs elevation)
+msiexec /i seamly-x64.msi /qn INSTALLFOLDER=D:\SeamlyApps            # silent, custom program dir
+msiexec /i seamly-x64.msi /qn SEAMLYDATAPARENT=E:\                   # silent, data root E:\SeamlyData
+msiexec /i seamly-x64.msi /qn SEAMLYDESKTOPSHORTCUTS=0                # silent, no desktop shortcuts
+msiexec /x seamly-x64.msi /qn                                       # silent uninstall
+msiexec /a seamly-x64.msi /qn TARGETDIR=C:\extract                   # extract without installing
 ```
 
-`msiexec /a` needs a **short** target path: extracting under a long path fails
-at `InstallFinalize` with 1603 on MAX_PATH.
-
-### Silent-install properties
+`msiexec /a` needs a **short** target path — a long path fails at
+`InstallFinalize` with 1603 on MAX_PATH.
 
 | Property | Default | Notes |
 |---|---|---|
-| `INSTALLFOLDER` | the previous install's path, else `C:\Program Files\SeamlyApps` | Rejected if the path contains OneDrive, Dropbox, Google Drive, iCloud or Box Sync — a sync client replaces files that are in use, which breaks the program and its uninstall. The check is a launch condition, so it applies to `/qn` too. |
-| `SEAMLYDATAPARENT` | `C:\Users\<user>\Documents` | Where the `SeamlyData` folder is placed. Setup always appends the `SeamlyData` leaf, so `E:\` gives `E:\SeamlyData`. **Any** drive is allowed, including synced folders and USB media. **Under `/qn` there is no default** — the UI sequence computes it from the `PersonalFolder` known folder, and `/qn` runs no UI sequence, so pass it explicitly or the apps fall back to their own first-run default. |
-| `SEAMLYDATAROOT` | `[SEAMLYDATAPARENT]\SeamlyData` | The composed path. Set it directly to override the composition and name the folder yourself — `SEAMLYDATAROOT=E:\Patterns` gives exactly that. |
-| `SEAMLYCOPYUSERDATA` | `0` | Set to `1` during an update to archive and migrate existing work into `SEAMLYDATAROOT`. Existing destination files are never overwritten. |
-| `SEAMLYDESKTOPSHORTCUTS` | `1` | Desktop shortcuts for Seamly2D and SeamlyMe. |
+| `INSTALLFOLDER` | previous path, else `C:\Program Files\SeamlyApps` | Rejected if it contains a sync-client folder (OneDrive/Dropbox/Google Drive/iCloud/Box Sync), even under `/qn`. |
+| `SEAMLYDATAPARENT` | `C:\Users\<user>\Documents` | `SeamlyData` leaf always appended. **No `/qn` default** — the UI sequence computes it and `/qn` skips the UI; pass it explicitly. |
+| `SEAMLYDATAROOT` | `[SEAMLYDATAPARENT]\SeamlyData` | Set directly to override, e.g. `SEAMLYDATAROOT=E:\Patterns`. |
+| `SEAMLYCOPYUSERDATA` | `0` | Set `1` on update to archive/migrate work into `SEAMLYDATAROOT`. Never overwrites existing files. |
+| `SEAMLYDESKTOPSHORTCUTS` | `1` | Desktop shortcuts for Seamly2D/SeamlyMe. |
 
-Why `SEAMLYDATAROOT` has no `/qn` default: a per-machine package runs its
-execute sequence elevated as SYSTEM, whose `%USERPROFILE%` is
-`C:\Windows\system32\config\systemprofile`. Computing the default there would
-put a user's patterns inside a system account's profile.
+No `/qn` default for `SEAMLYDATAROOT`: the execute sequence runs elevated as
+SYSTEM, so a computed default would misplace user data under the system
+profile. Setup writes the answer to
+`HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot`; every app adopts it on first run. An
+unset value stays empty (apps use their own default) rather than resolving to
+`C:\SeamlyData`. Repair keeps the recorded value.
 
-What Setup records, and what the apps read: the answer to the data-root page
-goes to `HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot`, and every app adopts it on
-that user's first run. The value comes from `SEAMLYDATAROOTRECORDED`, not from
-`SEAMLYDATAROOT` directly — a directory id always resolves to something, so a
-`/qn` install with no arguments would otherwise record `C:\SeamlyData` and every
-app would adopt that. With no argument the value stays empty, which the apps
-read as "use your own default". A repair keeps whatever is already recorded.
+**Moving an installed Seamly is not supported by Windows Installer** —
+location is fixed at install time. Uninstall/reinstall, or run a major
+upgrade (prefills the program-directory page from
+`HKLM\SOFTWARE\Seamly\Seamly2D\InstallPath`).
 
-Moving an installed Seamly: **Windows Installer cannot.** A product's location
-is fixed at install time and every component is registered against it, so a
-maintenance run ignores `INSTALLFOLDER`. Uninstall and reinstall, or install a
-newer build — a major upgrade runs the full wizard, and its program-directory
-page is prefilled from `HKLM\SOFTWARE\Seamly\Seamly2D\InstallPath` so the apps stay
-where you put them unless you change it there.
-
-Fresh Setup skips the migration page and creates the selected `SeamlyData`
-root. The first app launch creates its standard directories.
-
-An old-version update reads the `seamly2d` source root from application
-settings. It creates `seamly2d.zip`, extracts it below the selected parent, and
-renames the extracted root to `SeamlyData`.
-
-A new-version update archives `SeamlyData` with `SeamlyData` as its top-level
-directory. It migrates only when the selected location changed. Both update
-paths preserve non-path settings and replace all path settings after the copy
+Fresh Setup creates the selected `SeamlyData` root; first launch creates
+standard directories. An old-version update zips the existing `seamly2d`
+source root, extracts it below the selected parent, renames to `SeamlyData`.
+A new-version update archives `SeamlyData` and migrates only if the location
+changed. Both preserve non-path settings, replacing path settings after copy
 verifies.
 
-What the user sees when installing interactively: welcome → license → install folder → **Your work** (the data root, with a Change button) → **Copy your existing work?** (opt-in, default off) → **Shortcuts** (desktop shortcuts, default on) → ready → install. The package defines its own dialog set, so every one of those arrows is a `NewDialog` row `smsi.wxs` authors, and `Back` reverses each one.
+Interactive sequence: welcome → license → install folder → **Your work**
+(data root) → **Copy your existing work?** (default off) → **Shortcuts**
+(default on) → ready → install. A warning page precedes welcome when a prior
+install (this MSI or the old NSIS installer) is found. Silent installs skip
+all pages — use the properties table.
 
-An extra page appears **before** the welcome page when a previous installation is found — an older MSI of this product or the old NSIS installation — warning that the program files will be replaced and stating that the user's own work is not touched.
-
-Silent installs skip every page. Pass the properties in the table above instead.
-
-The verification of a real install (clean machine, **not yet run** — Task 13's outstanding subtask and Task 51's last one) lives in one place, [`README.md`](README.md#installing--testing), so it does not drift between two files. It is mostly automated, in two layers: `smsi_check_authoring.ps1` checks what the **package contains** and runs on every build, and [`test_msi_install.ps1`](test_msi_install.ps1) checks what an **install actually did** — run in four phases around the `msiexec` commands on the test machine, including starting each app to prove the deployed Qt runtime is complete. Only the UAC prompt, the wizard page order and wording, and the icons still need a human.
+Real-install verification (clean machine — **not yet run**; Task 13/51):
+[`README.md`](README.md#installing--testing). Two automated layers:
+`smsi_check_authoring.ps1` (package contents, every build) and
+[`test_msi_install.ps1`](test_msi_install.ps1) (install effects, incl.
+launching each app to check the Qt runtime). Only UAC prompt, wizard wording,
+and icons need a human.
 
 ---
 
 ## 4. arm64
 
-All three apps build natively on the `windows-11-arm` runner in `ci.yml`'s
-`windows-msi` job — nothing is cross-compiled, and both legs run the identical
-`smsi.ps1` invocation. Qt 6.11.1 publishes an arm64 WebEngine, so the arm64
-package ships all three apps.
-
-`windeployqt` needs no `--qtpaths` wrapper on either arch, because both legs
-are native. Reintroduce that flag only alongside a cross-compiled kit.
+Both `x64` and `arm64` build natively (`windows-11-arm` runner); nothing
+cross-compiled, both legs run the identical `smsi.ps1` invocation. Qt 6.11.1
+ships an arm64 WebEngine, so the arm64 package includes all three apps.
+`windeployqt` needs no `--qtpaths` wrapper on either arch — add it back only
+for a cross-compiled kit.
 
 ---
 
-## 5. Two rules the deployed runtime depends on
+## 5. Runtime rules
 
-**A Qt kit can satisfy `find_package(Qt6 … WebEngineQuick)` and still fail to
-deploy.** The kit must also carry Qt WebChannel and Qt Positioning, which is why
-`ci.yml` installs `qtwebengine qtwebchannel qtpositioning` on both legs.
-
-**No Qt tool is ever invoked by bare name.** The `.pro` post-link steps use
-`qtPrepareTool(WINDEPLOYQT, windeployqt)`, so the deployed runtime can only be
-the kit that compiled the exe. `scripts\sb.ps1` and `scripts\sd.ps1` used to
-compare the deployed `Qt6Core.dll` / `Qt6Cored.dll` FileVersion against that kit
-and fail loudly on a mismatch. Both scripts were deleted in August 2026, so
-**read that FileVersion by hand before you package a local tree** — a mismatch
-is invisible otherwise.
+- A Qt kit satisfying `find_package(Qt6 … WebEngineQuick)` can still fail to
+  deploy — it must also carry Qt WebChannel and Qt Positioning, hence
+  `ci.yml` installs `qtwebengine qtwebchannel qtpositioning` on both legs.
+- No Qt tool is invoked by bare name (`qtPrepareTool(WINDEPLOYQT,
+  windeployqt)` in the `.pro` files), so the deployed runtime is always the
+  kit that compiled the exe. `scripts\sb.ps1`/`sd.ps1` used to check the
+  deployed `Qt6Core.dll` FileVersion against the kit; both were deleted
+  August 2026. **Check that FileVersion by hand before packaging a local
+  tree** — a mismatch is otherwise invisible.
