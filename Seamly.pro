@@ -10,9 +10,9 @@ count(LIST, 1, >): error("The build will fail. Path '$${OUT_PWD}' contains space
 TEMPLATE = subdirs
 SUBDIRS = \
     src \
-    out
+    packaging/macos
 
-out.depends = src
+packaging/macos.depends = src
 
 qtPrepareTool(LUPDATE, lupdate)
 lupdate.commands = $$LUPDATE -noobsolete -locations none $$shell_path($${PWD}/share/translations/translations.pro)
