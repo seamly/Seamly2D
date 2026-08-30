@@ -6,7 +6,7 @@
 # **  @brief
 # **  "seamly msi" — stage the built Seamly app suite (seamly2d, seamlyme,
 # **  SeamlyLayout) and build the Windows MSI installer from
-# **  scripts\packaging\windows\smsi.wxs with the WiX toolset.
+# **  packaging\windows\smsi.wxs with the WiX toolset.
 # **  Driven by the ci.yml windows-msi job against the in-source CI build
 # **  output. Every input is named on the command line; the script detects
 # **  nothing from the machine it runs on.
@@ -40,7 +40,7 @@
 
 .DESCRIPTION
     Stages the already-built apps into <repo>\scripts\seamly-msi\<arch>\
-    and runs `wix build` on scripts\packaging\windows\smsi.wxs to
+    and runs `wix build` on packaging\windows\smsi.wxs to
     produce scripts\seamly-msi\<arch>\seamly-<arch>.msi. Only the .msi
     is written — the .wixpdb symbol database is suppressed with `-pdbtype none`
     (it is used only for wix patch/melt diffing, not by the installer).
@@ -99,7 +99,7 @@
     Skip the `wix msi validate` (ICE) pass after the build.
 
 .EXAMPLE
-    .\scripts\packaging\windows\smsi.ps1 -Arch x64 -Version 26.8.15.570 `
+    .\packaging\windows\smsi.ps1 -Arch x64 -Version 26.8.15.570 `
         -Seamly2DBin src\app\seamly2d\bin -SeamlyMeBin src\app\seamlyme\bin `
         -WinDeployQt "$env:QT_ROOT_DIR\bin\windeployqt.exe"
     The invocation ci.yml's windows-msi job runs, for either architecture.
@@ -156,9 +156,9 @@ param(
 # exit codes after each call.
 $ErrorActionPreference = 'Stop'
 
-# The script lives in <repo-root>\scripts\packaging\windows\, so the repo root
-# is three directories up.
-$repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+# The script lives in <repo-root>\packaging\windows\, so the repo root
+# is two directories up.
+$repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
 #------------------------------------------------------------------------------
 # @brief  Run a native tool and fail the script if its exit code is nonzero.
@@ -233,7 +233,7 @@ function ConvertTo-MsiVersion {
 # (vcvars, or ilammy/msvc-dev-cmd in ci.yml). The returned directory is the
 # Microsoft.VC*.CRT folder holding msvcp140.dll, vcruntime140.dll, etc., which
 # the script copies app-locally (decision recorded in
-# scripts\packaging\windows\README.md: no merge modules, no vc_redist.exe
+# packaging\windows\README.md: no merge modules, no vc_redist.exe
 # chaining). Taking the redist from the developer environment and from nowhere
 # else keeps the shipped CRT the toolset that compiled the exes.
 #

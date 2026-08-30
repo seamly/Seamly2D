@@ -1,6 +1,6 @@
 # Windows MSI — build reference (Seamly application suite)
 
-Covers [`smsi.ps1`](smsi.ps1): inputs, steps, install/test commands. Design decisions: [`README.md`](README.md). Build/toolchain reference: [`.github/README-BUILDS.md`](../../../.github/README-BUILDS.md).
+Covers [`smsi.ps1`](smsi.ps1): inputs, steps, install/test commands. Design decisions: [`README.md`](README.md). Build/toolchain reference: [`.github/README-BUILDS.md`](../../.github/README-BUILDS.md).
 
 One MSI per arch bundles **seamly2d**, **seamlyme**, **SeamlyLayout** (`seamly-x64.msi` / `seamly-arm64.msi`).
 
@@ -15,7 +15,7 @@ gh workflow run ci.yml --ref run-seamlyLayout
 `ci.yml`'s `windows-msi` job matrixes over `arch`. Each leg builds all three apps, then calls:
 
 ```powershell
-.\scripts\packaging\windows\smsi.ps1 -Arch <arch> -Version $env:VERSION_NUMBER `
+.\packaging\windows\smsi.ps1 -Arch <arch> -Version $env:VERSION_NUMBER `
   -Seamly2DBin src\app\seamly2d\bin `
   -SeamlyMeBin src\app\seamlyme\bin `
   -WinDeployQt "$env:QT_ROOT_DIR\bin\windeployqt.exe"

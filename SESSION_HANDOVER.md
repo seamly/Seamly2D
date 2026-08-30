@@ -3,7 +3,7 @@
 Only the **current** state lives here. Completed tasks are written up in
 `project-docs/TODO_COMPLETED.md`, and the reasoning behind shipped decisions
 lives beside the code it governs — for Windows packaging that is
-`scripts/packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
+`packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
 ## SeamlyMe Open-dialog fix pushed; CLAUDE.md's local-build claim was stale (2026-08-29)
@@ -25,7 +25,7 @@ Tracked as Seamly2D.2.2 in `project-docs/TODO_SEAMLY2D.md` — done. Committed, 
 **Not build-verified before push.** I incorrectly told the user twice that "Seamly2D
 and SeamlyMe have no local build script," repeating stale text from this file's own
 "Local Windows Build" section. The user corrected me:
-`scripts/packaging/windows/build_msi_local.ps1` exists and builds all three apps
+`packaging/windows/build_msi_local.ps1` exists and builds all three apps
 (qmake + nmake for Seamly2D/SeamlyMe, cmake + ninja + cargo for SeamlyLayout), then
 packages them via `smsi.ps1`/`wix build`. Confirmed by reading the script directly.
 CLAUDE.md's "Local Windows Build" section is being corrected to reference it.
@@ -44,7 +44,7 @@ SeamlyMe fix has not been re-verified interactively since it was pushed.
 
 **Next steps:**
 
-1. Run `scripts/packaging/windows/build_msi_local.ps1` to build all three apps and
+1. Run `packaging/windows/build_msi_local.ps1` to build all three apps and
    confirm the `tmainwindow.cpp` change actually compiles.
 2. Re-test MSI Test Case 1b-i step 6a-v/6a-vi interactively to confirm the fix works.
 3. Pick up Seamly2D.2.1 and Seamly2D.3.1 above.
@@ -261,7 +261,7 @@ now removes `%LOCALAPPDATA%\Seamly` and `%APPDATA%\Seamly` (guarded
 `NOT UPGRADINGPRODUCTCODE`, so a version upgrade's `RemoveExistingProducts`
 never wipes them), while `%DATAROOT%` stays untouched on uninstall - unchanged,
 on purpose. And a new test-only script,
-`scripts/packaging/windows/test_reset_environment.ps1`, wipes everything
+`packaging/windows/test_reset_environment.ps1`, wipes everything
 including `%DATAROOT%`, for resetting a test machine back to Case 1
 ("Not installed") between test-matrix runs - this is deliberately MORE
 destructive than the real uninstall.
@@ -506,7 +506,7 @@ cannot. A product's location is fixed at install time and every component is
 registered against it, so a maintenance run ignores `INSTALLFOLDER`. Relocating
 means uninstall and reinstall, or a major upgrade — which now prefills both path
 pages from `InstallPath` and `DataParent`. Change stays disabled (`ARPNOMODIFY`,
-one feature). Documented in `scripts/packaging/windows/README.md` and
+one feature). Documented in `packaging/windows/README.md` and
 `README_WINDOWS_BUILD.md`; do not re-litigate.
 
 A data-root change in the installer would also be a lie: the apps read the
@@ -615,7 +615,7 @@ with the next `dev-latest` MSI.
 Point `ParentStagingDir` and `ExeStagingDir` at a stub tree holding any files
 named `seamly2d.exe`, `seamlyme.exe`, `SeamlyLayout.exe` plus one file in the
 parent directory, pass every `-d` `smsi.ps1` passes, and glob **every** `*.wxs`
-in `scripts/packaging/windows`. That verifies all authoring and both check
+in `packaging/windows`. That verifies all authoring and both check
 scripts without a real build.
 
 ## Terminology: "suite", not "family" (2026-08-17)
@@ -896,7 +896,7 @@ seconds: `wix build` clean, `wix msi validate` clean except the expected ICE61,
 product.
 
 **InstWinX64.1.7 is done too.** `INSTALL_DECISION_FLOW.md` and
-`scripts/packaging/windows/README.md` carry the new page order, and the
+`packaging/windows/README.md` carry the new page order, and the
 "SeamlyShortcutsDlg never displays" defect note is gone. The README also claimed
 the old NSIS installation is never removed automatically; Setup has removal
 components for it, so that claim was corrected.
@@ -1020,18 +1020,18 @@ Auto-appending the leaf would turn a typed `E:\SeamlyData` into
 **Task InstWinX64.1.3.2 is done — `windows-msi.yml` is deleted.** `ci.yml`'s
 `windows-msi` matrix job already built both architectures and fed `publish`, so
 the packaging-only workflow only duplicated the work: its push trigger on
-`scripts/packaging/windows/**` built both MSI packages a second time on every
+`packaging/windows/**` built both MSI packages a second time on every
 `.wxs` or `smsi.ps1` edit. Its copy of the build steps had also drifted — it
 signed `Seamly2D-<arch>.msi`, a name `smsi.ps1` has never written, so that
 signing step had never touched a real file.
 
-**Consequence to expect:** an edit under `scripts/packaging/windows/` now runs
+**Consequence to expect:** an edit under `packaging/windows/` now runs
 the full ~50-minute suite instead of a path-filtered packaging job. That is the
 accepted trade for one copy of the steps.
 
 **Over twenty references had to be redirected, not four.** They were spread
 across `.github/README-BUILDS.md`, `.github/workflows/README_WORKFLOWS.md`,
-`common.pri`, `scripts/sb.ps1`, `scripts/packaging/windows/` (README.md,
+`common.pri`, `scripts/sb.ps1`, `packaging/windows/` (README.md,
 README_WINDOWS_BUILD.md, smsi.ps1, seamly-family.wxs, test_msi_authoring.ps1),
 `CLAUDE.md`, `seamlylayout-ci.yml`, `qt-arm64-module-probe.yml`, and four
 `TODO_*.md` files. Completed-task records in `TODO_COMPLETED.md`,
@@ -1125,7 +1125,7 @@ filenames, etc.") hand-edited `seamly-family.wxs` and left
 `test_msi_authoring.ps1` asserting the old values, so three assertions failed on
 every push since. Fixed in the `.wxs`, test left alone, because the test encodes
 Task 51's documented requirements and `SeamlyApps` is the name used by
-`README-BUILDS.md`, `scripts/packaging/windows/README.md`,
+`README-BUILDS.md`, `packaging/windows/README.md`,
 `INSTALL_DECISION_FLOW.md`, `TODO_INSTALLER_WIN_X64.md` and the Task 51 test kit:
 
 - `INSTALLFOLDER` `Name="Seamly"` → `Name="SeamlyApps"`.

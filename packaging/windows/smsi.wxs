@@ -10,7 +10,7 @@
  **  suite: seamly2d (pattern drafting), seamlyme (measurements) and
  **  SeamlyLayout (pattern layout).
  **
- **  Build with `scripts\packaging\windows\smsi.ps1` (local)
+ **  Build with `packaging\windows\smsi.ps1` (local)
  **  or with `ci.yml`'s `windows-msi` job (origin).
  **
  **  (CI). One MSI is produced per architecture from this same source:
@@ -149,19 +149,19 @@
 
 <!-- Fail fast with a clear message when the build script forgot a define. -->
 <?ifndef var.ProductVersion ?>
-  <?error ProductVersion is not defined - build via scripts\packaging\windows\smsi.ps1, which passes -d ProductVersion=x.y.z ?>
+  <?error ProductVersion is not defined - build via packaging\windows\smsi.ps1, which passes -d ProductVersion=x.y.z ?>
 <?endif?>
 <?ifndef var.DisplayVersion ?>
-  <?error DisplayVersion is not defined - build via scripts\packaging\windows\smsi.ps1, which passes -d DisplayVersion=YY.M.D.MMMM ?>
+  <?error DisplayVersion is not defined - build via packaging\windows\smsi.ps1, which passes -d DisplayVersion=YY.M.D.MMMM ?>
 <?endif?>
 <?ifndef var.RepoRoot ?>
-  <?error RepoRoot is not defined - build via scripts\packaging\windows\smsi.ps1, which passes -d RepoRoot=<repo root> ?>
+  <?error RepoRoot is not defined - build via packaging\windows\smsi.ps1, which passes -d RepoRoot=<repo root> ?>
 <?endif?>
 <?ifndef var.ParentStagingDir ?>
-  <?error ParentStagingDir is not defined - build via scripts\packaging\windows\smsi.ps1 ?>
+  <?error ParentStagingDir is not defined - build via packaging\windows\smsi.ps1 ?>
 <?endif?>
 <?ifndef var.ExeStagingDir ?>
-  <?error ExeStagingDir is not defined - build via scripts\packaging\windows\smsi.ps1 ?>
+  <?error ExeStagingDir is not defined - build via packaging\windows\smsi.ps1 ?>
 <?endif?>
 
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
@@ -199,9 +199,9 @@
          was declared as a second "seamlyme.ico", which both left SeamlyMe's
          icon ambiguous and left SeamlyLayoutShortcut's Icon="seamlylayout.ico"
          pointing at an identifier that did not exist (error WIX0094). -->
-    <Icon Id="seamly2d.ico" SourceFile="$(var.RepoRoot)\scripts\packaging\windows\seamly2d.ico" />
-    <Icon Id="seamlyme.ico" SourceFile="$(var.RepoRoot)\scripts\packaging\windows\seamlyme.ico" />
-    <Icon Id="seamlylayout.ico" SourceFile="$(var.RepoRoot)\scripts\packaging\windows\seamlylayout.ico" />
+    <Icon Id="seamly2d.ico" SourceFile="$(var.RepoRoot)\packaging\windows\seamly2d.ico" />
+    <Icon Id="seamlyme.ico" SourceFile="$(var.RepoRoot)\packaging\windows\seamlyme.ico" />
+    <Icon Id="seamlylayout.ico" SourceFile="$(var.RepoRoot)\packaging\windows\seamlylayout.ico" />
 
     <Property Id="ARPPRODUCTICON" Value="seamly2d.ico" />
     <Property Id="ARPHELPLINK" Value="https://seamly.io" />

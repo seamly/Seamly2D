@@ -6,7 +6,7 @@
 # **  @brief
 # **  Local, developer-machine build of the Windows x64 MSI: builds seamly2d,
 # **  seamlyme and SeamlyLayout release binaries, then runs smsi.ps1 against
-# **  them. scripts\packaging\windows\README.md records the project's
+# **  them. packaging\windows\README.md records the project's
 # **  documented "CI builds the MSI" decision (a dev-machine default can carry
 # **  the wrong Qt/CRT runtime); this script exists because the local Qt kit is
 # **  the same 6.11.1 release CI installs, so that risk does not apply here.
@@ -36,7 +36,7 @@
          post-link step.
       3. cmake --preset release && cmake --build --preset release in
          src\app\seamlylayout\qt_frontend - builds SeamlyLayout.exe.
-    Then scripts\packaging\windows\smsi.ps1 stages all three and runs
+    Then packaging\windows\smsi.ps1 stages all three and runs
     `wix build`, carrying -Version as the MSI's DisplayVersion/ProductVersion
     too, so the MSI and the binaries it contains agree.
 
@@ -63,7 +63,7 @@
     Passed through to smsi.ps1 - skip the `wix msi validate` ICE pass.
 
 .EXAMPLE
-    .\scripts\packaging\windows\build_msi_local.ps1
+    .\packaging\windows\build_msi_local.ps1
     Full local x64 MSI build with an auto-computed version.
 #>
 
@@ -73,7 +73,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$repoRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $PSScriptRoot))
+# The script lives in <repo-root>\packaging\windows\, so the repo root
+# is two directories up.
+$repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
 #------------------------------------------------------------------------------
 # @brief  Run a native program without letting stderr abort the script.

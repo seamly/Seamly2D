@@ -358,7 +358,7 @@ Use `skip-ci` when referring to it without activating it.
 Omit the skip token when functional changes touch:
 
 * `.github/workflows/**`
-* `scripts/packaging/**`
+* `packaging/**`
 * `*.pro`
 * `*.pri`
 * `CMakeLists.txt`

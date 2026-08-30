@@ -5,7 +5,7 @@ Add tasks in project-docs/TODO_MIGRATE.md -->
 
 1. Merge data from `src\app\seamlylayout\.claude` into the project's top-level `.claude` data files, then remove the `src\app\seamlylayout\.claude` directory.
 2. Create a plan to merge data from `src\app\seamlylayout\.github` into the project's top-level `.github` directories and files; review the plan with the user; on user 'ok' add plan tasks to `project-docs/TODO_MIGRATE.md`.
-3. Create a plan to move all build scripts from various directories (dist, scripts/packaging, etc.) to the .github directory; review plan with user; on user 'ok' add plan tasks to `project-docs/TODO_MIGRATE.md`
+3. Create a plan to move all build scripts from various directories (dist, packaging, etc.) to the .github directory; review plan with user; on user 'ok' add plan tasks to `project-docs/TODO_MIGRATE.md`
 4. Create a plan to update `src/test`. Review it with the user and, after approval, save it as tasks in `project-docs/TODO_MIGRATE.md`. Test only current Seamly application versions, covering:
 
 * Seamly2D, SeamlyMe, and SeamlyLayout through both GUI and CLI workflows

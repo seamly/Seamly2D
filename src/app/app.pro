@@ -37,9 +37,9 @@ SUBDIRS = \
 #
 # The three apps are integrated at PACKAGING time, not compile time. All three
 # apps build against the same Qt release (currently 6.11.1), so
-# scripts/packaging/windows/smsi.ps1 builds seamly2d.exe and seamlym.exe with qmake
+# packaging/windows/smsi.ps1 builds seamly2d.exe and seamlym.exe with qmake
 # and SeamlyLayout with CMake, then stages all three into one install directory
-# sharing a single Qt runtime (scripts/packaging/windows/smsi.wxs).
+# sharing a single Qt runtime (packaging/windows/smsi.wxs).
 # Sharing a Qt version does not mean sharing a build system.
 # ---------------------------------------------------------------------------
 

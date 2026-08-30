@@ -23,7 +23,7 @@ on 2026-08-15, so a two-app package can no longer be built at all. Everything
 else about the package — install layout, UpgradeCode,
 associations, shortcuts, legacy-install removal, version mapping, signing — is
 shared with x64 and documented in `.github/README-BUILDS.md` and
-`scripts/packaging/windows/README.md`.
+`packaging/windows/README.md`.
 
 **What remains open is verification on real hardware (InstWinArm64.2), not
 toolchain work.**
@@ -88,7 +88,7 @@ but nothing here has ever been installed or run on an arm64 machine — the job
 only inspects the package it built. Overlaps Installer.2.2.
 
 - [ ] InstWinArm64.2.1 Install `seamly-arm64.msi` on a Windows 11 arm64 machine
-  and run `scripts/packaging/windows/test_msi_install.ps1` through all four
+  and run `packaging/windows/test_msi_install.ps1` through all four
   phases (`Baseline`/`Installed`/`Upgraded`/`Removed`)
 - [ ] InstWinArm64.2.2 Confirm each app starts and stays running natively (not
   under x64 emulation) and that the file associations resolve
