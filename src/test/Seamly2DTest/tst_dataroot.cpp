@@ -1050,6 +1050,47 @@ void TST_DataRoot::StrayCommonSettingsAreMergedThenDeleted() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief PerAppPathsPersistToTheOwnSettingsFile guards against VSettings's per-app path
+ * getters and setters (pattern, layout, the SeamlyLayout executable, graphical output)
+ * reopening a fresh QSettings from format()/scope()/organizationName()/applicationName()
+ * instead of reading and writing "this".
+ *
+ * Application2D builds VSettings from an explicit file path (see
+ * Application2D::InitTrVars()), so organizationName() and applicationName() are both empty
+ * on it. Reopening QSettings from those empty values landed the four settings under the
+ * literal "Unknown Organization" file instead of the app's own qt6_seamly2d.ini, which is
+ * also why qt6_seamly2d.ini's [paths] section was missing pattern and layout.
+ */
+void TST_DataRoot::PerAppPathsPersistToTheOwnSettingsFile() const
+{
+    const QString iniPath = scratchPath(QStringLiteral("per-app-paths/qt6_seamly2d.ini"));
+
+    VSettings settings(iniPath, QSettings::IniFormat);
+    settings.SetPathPattern(QStringLiteral("G:/My Drive/seamlyData/patterns"));
+    settings.SetPathLayout(QStringLiteral("G:/My Drive/seamlyData/layouts"));
+    settings.setSeamlyLayoutAppPath(QStringLiteral("C:/Program Files/SeamlyApps/SeamlyLayout.exe"));
+    settings.SetGraphicalOutput(false);
+    settings.sync();
+
+    QCOMPARE(settings.getPatternPath(), QStringLiteral("G:/My Drive/seamlyData/patterns"));
+    QCOMPARE(settings.getLayoutPath(), QStringLiteral("G:/My Drive/seamlyData/layouts"));
+    QCOMPARE(settings.getSeamlyLayoutAppPath(), QStringLiteral("C:/Program Files/SeamlyApps/SeamlyLayout.exe"));
+    QCOMPARE(settings.GetGraphicalOutput(), false);
+
+    // Re-open the file directly, bypassing the VSettings instance, to prove the values
+    // landed on disk in the app's own ini rather than only in a live QSettings cache.
+    const QSettings onDisk(iniPath, QSettings::IniFormat);
+    QCOMPARE(onDisk.value(QStringLiteral("paths/pattern")).toString(),
+             QStringLiteral("G:/My Drive/seamlyData/patterns"));
+    QCOMPARE(onDisk.value(QStringLiteral("paths/layout")).toString(),
+             QStringLiteral("G:/My Drive/seamlyData/layouts"));
+    QCOMPARE(onDisk.value(QStringLiteral("paths/seamlyLayoutApp")).toString(),
+             QStringLiteral("C:/Program Files/SeamlyApps/SeamlyLayout.exe"));
+    QCOMPARE(onDisk.value(QStringLiteral("pattern/graphicalOutput")).toBool(), false);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief ArchiveHoldsEveryFileAndFolder is the backup's central promise.
  *
  * Folders the user invented and an empty folder are both included on purpose: the first is

@@ -107,6 +107,7 @@ private slots:
     void PruneKeepsALegacyRootHoldingTheConfiguredRoot() const;
     void PruneIgnoresAMissingLegacyRoot() const;
     void StrayCommonSettingsAreMergedThenDeleted() const;
+    void PerAppPathsPersistToTheOwnSettingsFile() const;
 
     void ArchiveHoldsEveryFileAndFolder() const;
     void ArchiveVerifiesAgainstTheTreeItCameFrom() const;

@@ -200,16 +200,13 @@ QString VSettings::getDefaultPatternPath()
 //---------------------------------------------------------------------------------------------------------------------
 QString VSettings::getPatternPath() const
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), this->applicationName());
-    return settings.value(settingPathsPattern, getDefaultPatternPath()).toString();
+    return value(settingPathsPattern, getDefaultPatternPath()).toString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void VSettings::SetPathPattern(const QString &value)
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), this->applicationName());
-    settings.setValue(settingPathsPattern, value);
-    settings.sync();
+    setValue(settingPathsPattern, value);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -285,16 +282,13 @@ QString VSettings::getDefaultLayoutPath()
 //---------------------------------------------------------------------------------------------------------------------
 QString VSettings::getLayoutPath() const
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), this->applicationName());
-    return settings.value(settingPathsLayout, getDefaultLayoutPath()).toString();
+    return value(settingPathsLayout, getDefaultLayoutPath()).toString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void VSettings::SetPathLayout(const QString &value)
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), this->applicationName());
-    settings.setValue(settingPathsLayout, value);
-    settings.sync();
+    setValue(settingPathsLayout, value);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -304,8 +298,7 @@ void VSettings::SetPathLayout(const QString &value)
  */
 QString VSettings::getSeamlyLayoutAppPath() const
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), this->applicationName());
-    return settings.value(settingPathsSeamlyLayoutApp, QString()).toString();
+    return value(settingPathsSeamlyLayoutApp, QString()).toString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -315,24 +308,19 @@ QString VSettings::getSeamlyLayoutAppPath() const
  */
 void VSettings::setSeamlyLayoutAppPath(const QString &value)
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), this->applicationName());
-    settings.setValue(settingPathsSeamlyLayoutApp, value);
-    settings.sync();
+    setValue(settingPathsSeamlyLayoutApp, value);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 bool VSettings::GetGraphicalOutput() const
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), this->applicationName());
-    return settings.value(settingPatternGraphicalOutput, 1).toBool();
+    return value(settingPatternGraphicalOutput, 1).toBool();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void VSettings::SetGraphicalOutput(const bool &value)
 {
-    QSettings settings(this->format(), this->scope(), this->organizationName(), this->applicationName());
-    settings.setValue(settingPatternGraphicalOutput, value);
-    settings.sync();
+    setValue(settingPatternGraphicalOutput, value);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
