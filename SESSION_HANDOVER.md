@@ -6,6 +6,26 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `INSTALL_DECISION_FLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## Windows packaging moved to packaging/windows/ (2026-08-29)
+
+`scripts/packaging/windows/` moved to `packaging/windows/` — `scripts/`
+held only misc dev utilities, so Windows packaging (MSI/WiX, PowerShell)
+now sits at the same top level as `dist/` (Linux/macOS packaging assets).
+Updated every reference: `ci.yml`, `src/app/app.pro`, `CLAUDE.md`,
+`AGENTS.md`, and project-docs. Fixed a `repoRoot` depth bug the move
+exposed in `smsi.ps1` and `build_msi_local.ps1` — both walked one
+directory too many with `Split-Path -Parent` (correct at the old
+3-deep path, wrong at the new 2-deep one). Merged `--no-ff` into
+`run-seamlyLayout` and pushed at `da090ae733` without `skip-ci`
+(functional `packaging/**` and `*.pro` changes). Not build-verified
+locally — no local build/test covers Windows MSI packaging; `ci.yml`'s
+`windows-msi` job is the first real verification.
+
+Also merged in this push: another session's concurrent commit
+`36fde280fe` ("deleted unused screenshots"), found already on this
+branch when I went to commit — confirmed with the user as their own
+other window, not a conflict.
+
 ## SeamlyMe Open-dialog fix pushed; CLAUDE.md's local-build claim was stale (2026-08-29)
 
 MSI Test Case 1b-i step 6a-v/6a-vi found SeamlyMe's File Open Individual/Multisize
