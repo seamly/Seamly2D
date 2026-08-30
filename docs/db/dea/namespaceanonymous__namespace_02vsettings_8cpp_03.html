@@ -99,11 +99,18 @@ $(document).ready(function(){initNavTree('db/dea/namespaceanonymous__namespace_0
 
 <div class="header">
   <div class="summary">
+<a href="#func-members">Functions</a> &#124;
 <a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">anonymous_namespace{vsettings.cpp} Namespace Reference</div></div>
 </div><!--header-->
 <div class="contents">
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:a876fd9d16934c626d8c81ab40ce1a705"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#a876fd9d16934c626d8c81ab40ce1a705">copySampleFiles</a> (const QString &amp;sourceDir, const QString &amp;destinationDir, const QString &amp;nameFilter)</td></tr>
+<tr class="memdesc:a876fd9d16934c626d8c81ab40ce1a705"><td class="mdescLeft">&#160;</td><td class="mdescRight">copySampleFiles copies files matching nameFilter from sourceDir into destinationDir.  <br /></td></tr>
+<tr class="separator:a876fd9d16934c626d8c81ab40ce1a705"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
 <tr class="memitem:a47b3d658d44fe95a9ceb63a870f83fdb"><td class="memItemLeft" align="right" valign="top">const QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#a47b3d658d44fe95a9ceb63a870f83fdb">settingConfigurationPointLanguage</a> = QStringLiteral(&quot;configuration/label_language&quot;)</td></tr>
@@ -175,6 +182,55 @@ Variables</h2></td></tr>
 <tr class="memitem:a5ebced3aae1c6f5f424d404e263b118f"><td class="memItemLeft" align="right" valign="top">const QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#a5ebced3aae1c6f5f424d404e263b118f">settingTiledPDFOrientation</a> = QStringLiteral(&quot;tiledPDF/orientation&quot;)</td></tr>
 <tr class="separator:a5ebced3aae1c6f5f424d404e263b118f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Function Documentation</h2>
+<a id="a876fd9d16934c626d8c81ab40ce1a705" name="a876fd9d16934c626d8c81ab40ce1a705"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a876fd9d16934c626d8c81ab40ce1a705">&#9670;&#160;</a></span>copySampleFiles()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">int anonymous_namespace{vsettings.cpp}::copySampleFiles </td>
+          <td>(</td>
+          <td class="paramtype">const QString &amp;&#160;</td>
+          <td class="paramname"><em>sourceDir</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const QString &amp;&#160;</td>
+          <td class="paramname"><em>destinationDir</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const QString &amp;&#160;</td>
+          <td class="paramname"><em>nameFilter</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>copySampleFiles copies files matching nameFilter from sourceDir into destinationDir. </p>
+<p>Shared by SeedSamplePatterns() and SeedSampleMeasurements(): both need the same missing-source-is-a-no-op and never-overwrite-an-existing-file behaviour, only the file extension differs.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">sourceDir</td><td>bundled samples folder; a missing folder is a silent no-op. </td></tr>
+    <tr><td class="paramname">destinationDir</td><td>the user's folder to seed; created if missing. </td></tr>
+    <tr><td class="paramname">nameFilter</td><td>glob filter selecting which bundled files to copy, e.g. "*.sm2d". </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>number of sample files copied. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00128">128</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+
+</div>
+</div>
 <h2 class="groupheader">Variable Documentation</h2>
 <a id="afe08e293ff54709b6b3afa9992665100" name="afe08e293ff54709b6b3afa9992665100"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afe08e293ff54709b6b3afa9992665100">&#9670;&#160;</a></span>settingCommunityProxyAddress</h2>
@@ -188,7 +244,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00085">85</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00087">87</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -204,7 +260,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00088">88</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00090">90</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -220,7 +276,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00086">86</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00088">88</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -236,7 +292,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00087">87</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00089">89</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -252,7 +308,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00090">90</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00092">92</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -268,7 +324,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00082">82</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00084">84</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -284,7 +340,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00083">83</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00085">85</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -300,7 +356,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00084">84</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00086">86</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -316,7 +372,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00089">89</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00091">91</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -332,7 +388,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00091">91</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00093">93</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -348,7 +404,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00074">74</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00076">76</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -364,7 +420,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00103">103</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00105">105</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -380,7 +436,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00104">104</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00106">106</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -396,7 +452,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00100">100</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00102">102</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -412,7 +468,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00093">93</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00095">95</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -428,7 +484,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00095">95</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00097">97</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -444,7 +500,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00096">96</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00098">98</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -460,7 +516,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00098">98</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00100">100</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -476,7 +532,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00099">99</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00101">101</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -492,7 +548,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00101">101</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00103">103</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -508,7 +564,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00097">97</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00099">99</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -524,7 +580,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00094">94</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00096">96</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -540,7 +596,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00102">102</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00104">104</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -556,7 +612,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00106">106</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00108">108</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -572,7 +628,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00077">77</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00079">79</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -588,7 +644,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00076">76</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00078">78</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -604,7 +660,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00078">78</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00080">80</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -620,7 +676,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00080">80</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00082">82</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -636,7 +692,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00105">105</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00107">107</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -652,7 +708,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00107">107</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00109">109</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -668,7 +724,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00109">109</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00111">111</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -684,7 +740,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00112">112</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00114">114</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -700,7 +756,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00110">110</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00112">112</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>
@@ -716,7 +772,7 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00111">111</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00113">113</a> of file <a class="el" href="../../db/d28/vsettings_8cpp_source.html">vsettings.cpp</a>.</p>
 
 </div>
 </div>

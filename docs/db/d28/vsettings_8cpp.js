@@ -1,5 +1,6 @@
 var vsettings_8cpp =
 [
+    [ "copySampleFiles", "db/d28/vsettings_8cpp.html#a876fd9d16934c626d8c81ab40ce1a705", null ],
     [ "settingCommunityProxyAddress", "db/d28/vsettings_8cpp.html#afe08e293ff54709b6b3afa9992665100", null ],
     [ "settingCommunityProxyPass", "db/d28/vsettings_8cpp.html#a4a67c673d60108adfde815b76a0a8874", null ],
     [ "settingCommunityProxyPort", "db/d28/vsettings_8cpp.html#a47f3dfb18c411919a02ac2b84306e326", null ],

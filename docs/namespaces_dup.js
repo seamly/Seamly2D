@@ -303,6 +303,7 @@ var namespaces_dup =
       [ "intersectsWithCutLine", "d4/d24/namespaceanonymous__namespace_02vpiecepath_8cpp_03.html#ae7f025addb773313273dc4382280a626", null ]
     ] ],
     [ "anonymous_namespace{vsettings.cpp}", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html", [
+      [ "copySampleFiles", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#a876fd9d16934c626d8c81ab40ce1a705", null ],
       [ "settingCommunityProxyAddress", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#afe08e293ff54709b6b3afa9992665100", null ],
       [ "settingCommunityProxyPass", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#a4a67c673d60108adfde815b76a0a8874", null ],
       [ "settingCommunityProxyPort", "db/dea/namespaceanonymous__namespace_02vsettings_8cpp_03.html#a47f3dfb18c411919a02ac2b84306e326", null ],
