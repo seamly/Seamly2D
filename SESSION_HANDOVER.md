@@ -6,6 +6,53 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## Seamly2D.4.1 — bodyscans row added to Preferences > Paths (2026-08-30)
+
+`PreferencesPathPage::Apply()` (`src/app/seamly2d/dialogs/configpages/preferencespathpage.cpp`)
+had no table row for bodyscans, so `VCommonSettings::setBodyScansPath()` was
+never called from the UI and `qt6_common.ini` never got a `bodyscans` key —
+the defect `TEST_MSI_WIN_X64_Test_Case_1b-i.md` names at the top of the file
+and in step 7a.
+
+**Correction to the request that opened this task.** The request asked for
+`bodyscans`, `templates`, `individual`, and `multisize` to be written to
+`qt6_seamly2d.ini`. That contradicts the test doc itself (line 20, step 7a,
+item 4b-i, all already checked off): `templates`, `individual_size_measurements`,
+`multi_size_measurements`, and `bodyscans` are `qt6_common.ini` keys by design
+— shared across all three apps, which all read the same DataRoot subtree —
+while `pattern`, `layout`, `labels`, `images`, `backups` are the per-app
+`qt6_seamly2d.ini` keys. Verified in code: `VCommonSettings::setTemplatePath()`/
+`setIndividualSizePath()`/`setMultisizePath()`/`setBodyScansPath()`
+(`vcommonsettings.cpp`) each open a fresh `QSettings` pointed at
+`commonIniFilename` ("qt6_common"); `SetPathPattern()`/`SetPathLayout()`
+(`vsettings.cpp`) and `setImageFilePath()`/`setBackupFilePath()`/
+`SetPathLabelTemplate()` (`vcommonsettings.cpp`) call the inherited
+`QSettings::setValue()` on `this`, i.e. the per-app ini. Only the bodyscans
+row was actually missing; the rest already worked as intended. Did not
+move `templates`/`individual`/`multisize` into `qt6_seamly2d.ini` — that
+would break the shared-DataRoot design load-bearing across Seamly2D,
+SeamlyMe, and SeamlyLayout.
+
+**Fix:** added a "My Body Scans" table row (index 9, `body_scan.png` icon —
+already bundled in the shared `icon.qrc`, used by SeamlyMe's own paths page),
+shifting the SeamlyLayout-application row to index 10. Wired into
+`Apply()`/`defaultPath()`/`editPath()` alongside the existing rows, following
+the same `rebaseOntoDataRoot()` pattern as the other data-root subfolders.
+Row count bumped `setRowCount(10)` -> `setRowCount(11)`.
+
+Marked Seamly2D.4.1 done in `TODO_SEAMLY2D.md`. **Seamly2D.4.2 still open** —
+needs a human to re-run MSI Test Case verification step 7a on a rebuilt install
+to confirm the `bodyscans` key now appears in `qt6_common.ini`.
+
+**Not build-verified locally** — no `cl.exe` on PATH outside a VS Developer
+shell in this session, and Seamly2D has no local build script (`ci.yml` is the
+verification path per `CLAUDE.md`). Reviewed by hand: all three switch
+statements (`Apply()`, `defaultPath()`, `editPath()`) and `initializeTable()`
+renumbered consistently, braces balanced, confirmed `getBodyScansPath()`/
+`setBodyScansPath()` exist and are public on `VCommonSettings` (base of
+`VSettings`), and confirmed `body_scan.png` is in the shared `icon.qrc` so it
+resolves from Seamly2D too.
+
 ## Layout.8.2 correction — layouts folder sits directly under DataRoot, not seamlyLayout/layouts (2026-08-30)
 
 Follow-up to the entry directly below, same session, minutes later. After the

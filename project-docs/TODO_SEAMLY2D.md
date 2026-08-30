@@ -43,7 +43,7 @@ Found during MSI Test Case 1 verification (`project-docs/TEST_MSI_WIN_X64_Test_C
 
 `PreferencesPathPage::Apply()` (`src/app/seamly2d/dialogs/configpages/preferencespathpage.cpp:100-119`) reads table rows 0–9 (data root, pattern, template, individual, multisize, layout, label template, image, backup, SeamlyLayout app path) but has no row for bodyscans. `VCommonSettings::setBodyScansPath()`/`getBodyScansPath()` (`src/libs/vmisc/vcommonsettings.cpp:1311-1323`) exist and target `qt6_common.ini`'s `paths/bodyscans` key, but nothing in the UI ever calls the setter, so that key never gets written — even after visiting Preferences and clicking Apply/OK.
 
-- [ ] Seamly2D.4.1 Add a "My Body Scans" row to the Preferences > Paths table (`preferencespathpage.cpp`, alongside the existing Patterns/Templates/Measurements/Layouts/Label Templates/Images/Backups rows) and wire it to `getBodyScansPath()`/`setBodyScansPath()`.
+- [x] Seamly2D.4.1 Add a "My Body Scans" row to the Preferences > Paths table (`preferencespathpage.cpp`, alongside the existing Patterns/Templates/Measurements/Layouts/Label Templates/Images/Backups rows) and wire it to `getBodyScansPath()`/`setBodyScansPath()`.
 - [ ] Seamly2D.4.2 Re-run MSI Test Case verification step 7a to confirm a `bodyscans` key appears in `qt6_common.ini` after visiting Preferences > Paths.
 
 ## Task Seamly2D.5 — Piece-mode handoff passes a file, not a stringified SVG document
