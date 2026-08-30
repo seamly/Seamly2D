@@ -6,6 +6,33 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## Layout.8.2 correction — layouts folder sits directly under DataRoot, not seamlyLayout/layouts (2026-08-30)
+
+Follow-up to the entry directly below, same session, minutes later. After the
+first fix landed, deleted this machine's stale `qt6_seamlylayout.ini` and
+`preferences\default_preferences.json` and relaunched the rebuilt
+`SeamlyLayout.exe` to actually exercise the new seeding code (both files had
+predated every fix this session — see the entry two below). The user then
+read the freshly seeded live values in the IDE and caught it directly:
+`input_directory`/`layout_directory` had seeded to
+`C:\Users\susan\Documents\SeamlyData\seamlyLayout\layouts`, one level too
+deep — they should be `C:\Users\susan\Documents\SeamlyData\layouts`,
+directly under the data root.
+
+Changed `${HOME}/seamlyLayout/layouts` to `${HOME}/layouts` in
+`default_preferences.json` (all three platform blocks) and the matching
+hardcoded fallback strings in `seedFromBundledDefaults()`
+(`PreferencesModel.cpp`). Updated the
+`layout8_resetToDefaults_seedsSharedLayoutsFolderForInputAndLayout` assertion
+and `INSTALLER_NOTES.md` to match.
+
+**Verified against the real running app, not just the test suite:** rebuilt,
+deleted the two stale files again, relaunched `SeamlyLayout.exe`, read the
+freshly seeded `qt6_seamlylayout.ini` back — `input_directory`/
+`layout_directory` now both read
+`C:\Users\susan\Documents\SeamlyData\layouts`. `ctest --preset debug` 5/5
+still passed.
+
 ## Layout.8.2 resolved — input_directory/layout_directory share one "layouts" folder (2026-08-30)
 
 Follow-up to the entry directly below, same session. The project owner confirmed the

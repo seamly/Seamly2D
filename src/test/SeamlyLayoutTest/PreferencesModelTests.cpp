@@ -617,8 +617,8 @@ void PreferencesModelTests::layout8_resetToDefaults_seedsSharedLayoutsFolderForI
     QVERIFY(!m.inputDirectory().isEmpty());
     QCOMPARE(QFileInfo(m.inputDirectory()).absoluteFilePath(),
              QFileInfo(m.layoutDirectory()).absoluteFilePath());
-    QVERIFY(QDir::fromNativeSeparators(m.inputDirectory()).endsWith(
-        QStringLiteral("seamlyLayout/layouts")));
+    QVERIFY(QDir::fromNativeSeparators(m.inputDirectory()).endsWith(QStringLiteral("layouts")));
+    QVERIFY(!QDir::fromNativeSeparators(m.inputDirectory()).contains(QStringLiteral("seamlyLayout")));
 }
 
 // ---------------------------------------------------------------------------
