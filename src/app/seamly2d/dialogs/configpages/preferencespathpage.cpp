@@ -1,12 +1,12 @@
 //  @file   preferencespathpage.cpp
-//  @author Douglas S Caskey
-//  @date   24 Jun, 2024
+//  @author slspencer
+//  @date   30 Aug, 2026
 //
 //  @brief
 //  @copyright
 //  This source code is part of the Seamly2D project, a pattern making
 //  program to create and model patterns of clothing.
-//  Copyright (C) 2017-2024 Seamly2D project
+//  Copyright (C) 2026 Seamly2D Project
 //  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 //
 //  Seamly2D is free software: you can redistribute it and/or modify
@@ -113,9 +113,10 @@ void PreferencesPathPage::Apply()
     settings->SetPathLabelTemplate(VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(6, 1)->text(), previousRoot, dataRoot));
     settings->setImageFilePath(VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(7, 1)->text(), previousRoot, dataRoot));
     settings->setBackupFilePath(VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(8, 1)->text(), previousRoot, dataRoot));
+    settings->setBodyScansPath(VCommonSettings::rebaseOntoDataRoot(ui->pathTable->item(9, 1)->text(), previousRoot, dataRoot));
 
     // Not a data path: the SeamlyLayout executable is never rebased onto the data root.
-    settings->setSeamlyLayoutAppPath(ui->pathTable->item(9, 1)->text());
+    settings->setSeamlyLayoutAppPath(ui->pathTable->item(10, 1)->text());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -159,7 +160,10 @@ void PreferencesPathPage::defaultPath()
         case 8: // backups
             path = VSettings::getDefaultBackupFilePath();
             break;
-        case 9: // SeamlyLayout application
+        case 9: // body scans
+            path = VCommonSettings::getDefaultBodyScansPath();
+            break;
+        case 10: // SeamlyLayout application
             // Empty means "not configured": the executable is then looked up
             // next to the Seamly2D executable (see Application2D::seamlyLayoutFilePath()).
             path = QString();
@@ -218,7 +222,10 @@ void PreferencesPathPage::editPath()
         case 8: // backups
                 path = qApp->Seamly2DSettings()->getBackupFilePath();
                 break;
-        case 9: // SeamlyLayout application
+        case 9: // body scans
+                path = qApp->Seamly2DSettings()->getBodyScansPath();
+                break;
+        case 10: // SeamlyLayout application
         {
             // Executable file, not a directory: use a file picker and skip the
             // directory handling below.
@@ -280,7 +287,7 @@ void PreferencesPathPage::editPath()
  */
 void PreferencesPathPage::initializeTable()
 {
-    ui->pathTable->setRowCount(10);
+    ui->pathTable->setRowCount(11);
     ui->pathTable->setColumnCount(2);
 
     const VSettings *settings = qApp->Seamly2DSettings();
@@ -369,14 +376,23 @@ void PreferencesPathPage::initializeTable()
     }
 
     {
+        QTableWidgetItem *item = new QTableWidgetItem(tr("My Body Scans"));
+        item->setIcon(QIcon("://icon/32x32/body_scan.png"));
+        ui->pathTable->setItem(9, 0, item);
+        item = new QTableWidgetItem(settings->getBodyScansPath());
+        item->setToolTip(settings->getBodyScansPath());
+        ui->pathTable->setItem(9, 1, item);
+    }
+
+    {
         // Path of the SeamlyLayout executable used by the Layout Mode handoff.
         // Empty means "auto-detect next to the Seamly2D executable".
         QTableWidgetItem *item = new QTableWidgetItem(tr("SeamlyLayout Application"));
         item->setIcon(QIcon("://icon/32x32/layout.png"));
-        ui->pathTable->setItem(9, 0, item);
+        ui->pathTable->setItem(10, 0, item);
         item = new QTableWidgetItem(settings->getSeamlyLayoutAppPath());
         item->setToolTip(settings->getSeamlyLayoutAppPath());
-        ui->pathTable->setItem(9, 1, item);
+        ui->pathTable->setItem(10, 1, item);
     }
 
     ui->pathTable->verticalHeader()->setDefaultSectionSize(20);
