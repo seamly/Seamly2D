@@ -434,6 +434,7 @@ private:
     QStringList        getUnlockedRestoreFileList()const;
 
     void               addDraftBlock(const QString &blockName);
+    void               deleteDraftBlock();
     QPointF            draftBlockStartPosition() const;
 
     void               initializeScenes();
