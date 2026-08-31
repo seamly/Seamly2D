@@ -415,6 +415,12 @@ bool PreferencesModel::load(const QString &path)
     } // if legacy JSON or defaults profile
 
     if (!QFileInfo::exists(absolutePath)) {
+        // DEPRECATED first-run seeding (Task SettingsFiles.3, 2026-08-31). The
+        // Windows MSI seeds a complete qt6_seamlylayout.ini at install time
+        // (packaging/windows/smsi_seed_user_settings.ps1), so on an installed
+        // Windows machine this branch never runs. It stays only for packages
+        // with no install hook — the macOS dmg, the Linux AppImage/Flatpak,
+        // dev builds. Remove it when those packages gain install-time seeding.
         if (QFileInfo(absolutePath).fileName() != QString::fromUtf8(kPreferencesFileName)) {
             Logger::log(QStringLiteral("PreferencesModel::load(): INI file not found"));
             return false;

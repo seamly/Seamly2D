@@ -569,6 +569,43 @@
               Condition="SEAMLYCOPYUSERDATA = &quot;1&quot; AND SEAMLYDATAROOT AND ((SEAMLYOLDS2DEXE AND SEAMLYOLDMEEXE AND NOT SEAMLYOLDLAYOUTEXE) OR SEAMLYNEWLAYOUTEXE) AND NOT Installed" />
     </InstallExecuteSequence>
 
+    <!-- SettingsFiles.2: seed the per-user settings directories and ini files,
+         so a fresh install works without a Preferences > Paths visit. Deferred
+         and impersonated for the same reasons as SeamlyCopyUserData, and
+         non-fatal: the apps still supply every default at runtime, so a
+         seeding failure costs convenience, not correctness.
+
+         Add-only: the script writes a file only when absent and adds only
+         missing keys, so it runs safely after SeamlyCopyUserData carried a
+         previous install's configuration forward - migrated values always
+         win. SEAMLYDATAROOTRECORDED gates it: a run that never chose a data
+         root (an unattended install that skipped the default computation)
+         has nothing trustworthy to seed.
+
+         The space before each closing quote is load-bearing. Both properties
+         can end with a backslash, and backslash-quote is an escaped quote to
+         PowerShell's command-line parser - without the space the arguments
+         run together into one mangled value. The script trims each value. -->
+    <SetProperty Id="SeamlySeedUserSettings"
+                 Action="SetSeamlySeedUserSettings"
+                 Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]smsi_seed_user_settings.ps1&quot; -DataRoot &quot;[SEAMLYDATAROOTRECORDED] &quot; -InstallFolder &quot;[INSTALLFOLDER] &quot;"
+                 Before="SeamlySeedUserSettings"
+                 Sequence="execute"
+                 Condition="SEAMLYDATAROOTRECORDED AND NOT Installed" />
+
+    <CustomAction Id="SeamlySeedUserSettings"
+                  DllEntry="WixQuietExec64"
+                  BinaryRef="Wix4UtilCA_X64"
+                  Execute="deferred"
+                  Impersonate="yes"
+                  Return="ignore" />
+
+    <InstallExecuteSequence>
+      <Custom Action="SeamlySeedUserSettings"
+              After="SeamlyCopyUserData"
+              Condition="SEAMLYDATAROOTRECORDED AND NOT Installed" />
+    </InstallExecuteSequence>
+
     <!-- The directory tree, the three executables, their Start Menu shortcuts
          and their file associations are in smsi_files.wxs. The optional
          desktop shortcuts are in smsi_shortcuts.wxs. The install-info

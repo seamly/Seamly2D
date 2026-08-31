@@ -1024,6 +1024,44 @@ Assert-That -Name 'new Seamly requires an existing SeamlyLayout executable' `
     -Succeeded ($newMigrationCondition.Count -eq 1 -and
                 $newMigrationCondition[0].Condition -match 'SEAMLYNEWLAYOUTEXE')
 
+# SettingsFiles.2. The seeding action mirrors the copy action's contract:
+# deferred (needs the script on disk), impersonated (writes the user's own
+# %LOCALAPPDATA%), non-fatal (the apps supply defaults at runtime anyway).
+$seedAction = @(Get-MsiRows -Sql "SELECT ``Action``, ``Type`` FROM ``CustomAction`` WHERE ``Action``='SeamlySeedUserSettings'" `
+    -Columns 'Action', 'Type')
+Assert-That -Name 'the settings-seeding action exists' -Succeeded ($seedAction.Count -eq 1)
+if ($seedAction.Count -eq 1) {
+    $type = [int]$seedAction[0].Type
+    # msidbCustomActionTypeInScript 1024, NoImpersonate 2048, ContinueOnError 64.
+    Assert-That -Name 'the seeding runs deferred' -Succeeded (($type -band 1024) -ne 0) -Detail "type $type"
+    Assert-That -Name 'the seeding runs as the user, not SYSTEM' -Succeeded (($type -band 2048) -eq 0) -Detail "type $type"
+    Assert-That -Name 'a failed seeding does not fail the install' -Succeeded (($type -band 64) -ne 0) -Detail "type $type"
+}
+Assert-That -Name 'the seeding helper script is packaged' `
+    -Succeeded (@(Get-MsiRows -Sql "SELECT ``FileName`` FROM ``File`` WHERE ``Component_``='UserSettingsSeedScript'" -Columns 'FileName' |
+                  Where-Object { $_.FileName -match 'smsi_seed_user_settings\.ps1' }).Count -eq 1)
+$seedCommand = @(Get-MsiRows -Sql "SELECT ``Action``, ``Target`` FROM ``CustomAction`` WHERE ``Action``='SetSeamlySeedUserSettings'" `
+    -Columns 'Action', 'Target')
+# SEAMLYDATAROOTRECORDED, not SEAMLYDATAROOT: a directory id always resolves,
+# so only the recorded property proves this run actually chose a root.
+Assert-That -Name 'the seeding command passes the recorded data root' `
+    -Succeeded ($seedCommand.Count -eq 1 -and
+                $seedCommand[0].Target -match 'SEAMLYDATAROOTRECORDED' -and
+                $seedCommand[0].Target -match '-InstallFolder')
+# Both path properties can resolve with a trailing backslash. Backslash-quote
+# is an escaped quote to PowerShell's command-line parser, so each closing
+# quote needs a space before it; the script trims the values.
+Assert-That -Name 'the seeding command quotes its path arguments quote-safely' `
+    -Succeeded ($seedCommand.Count -eq 1 -and
+                $seedCommand[0].Target -match '-DataRoot "\[SEAMLYDATAROOTRECORDED\] "' -and
+                $seedCommand[0].Target -match '-InstallFolder "\[INSTALLFOLDER\] "')
+$seedSequence = @(Get-MsiRows -Sql "SELECT ``Action``, ``Condition`` FROM ``InstallExecuteSequence`` WHERE ``Action``='SeamlySeedUserSettings'" `
+    -Columns 'Action', 'Condition')
+Assert-That -Name 'the seeding runs on first install only, with a recorded root' `
+    -Succeeded ($seedSequence.Count -eq 1 -and
+                $seedSequence[0].Condition -match 'SEAMLYDATAROOTRECORDED' -and
+                $seedSequence[0].Condition -match 'NOT Installed')
+
 # --- report --------------------------------------------------------------------
 [System.Runtime.InteropServices.Marshal]::ReleaseComObject($script:database) | Out-Null
 

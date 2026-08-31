@@ -89,6 +89,13 @@ function Remove-PathIfPresent
 {
     param([string]$Path)
     if ([string]::IsNullOrWhiteSpace($Path)) { return }
+    # A defective install can record a mangled path (for example one holding a
+    # quote). Test-Path throws on such a value; skip it instead of aborting.
+    if ($Path.IndexOfAny([System.IO.Path]::GetInvalidPathChars()) -ge 0)
+    {
+        Write-Warning "Skipping invalid recorded path: $Path"
+        return
+    }
     if (Test-Path -LiteralPath $Path)
     {
         Write-Host "Removing $Path"

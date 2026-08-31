@@ -177,6 +177,16 @@
               KeyPath="yes" />
       </Component>
 
+      <!-- SettingsFiles.2: seeds the per-user settings directories and ini
+           files after install, so no app needs a Preferences > Paths visit
+           to get working path settings. Same on-disk reasoning as the
+           migration script above. -->
+      <Component Id="UserSettingsSeedScript">
+        <File Id="smsi_seed_user_settings.ps1"
+              Source="$(sys.SOURCEFILEDIR)smsi_seed_user_settings.ps1"
+              KeyPath="yes" />
+      </Component>
+
     </ComponentGroup>
 
   </Fragment>

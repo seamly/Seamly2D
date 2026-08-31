@@ -71,6 +71,16 @@ machine. Parameter table: [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md).
    `uninstall.exe` never run (interactive, `RMDir /r`, no rollback).
 8. Migration selected → archive+extract into `SeamlyData`, merge settings
    (retain non-path settings, replace path settings).
+9. Root recorded → `smsi_seed_user_settings.ps1` (deferred, impersonated,
+   non-fatal, after migration) seeds `%LOCALAPPDATA%\Seamly`: `qt6_common.ini`
+   and `Seamly2D\qt6_seamly2d.ini` get every missing `[paths]` key,
+   `SeamlyMe\qt6_seamlyme.ini` is created empty,
+   `SeamlyLayout\qt6_seamlylayout.ini` gets the complete 11-key set
+   (`PreferencesModel::load()` takes an existing ini as authoritative, so a
+   partial one must never be written). Add-only: migrated or existing values
+   always win. No app needs a Preferences > Paths visit, and no app seeds
+   its own ini on an installed machine (app-side first-run seeding is
+   deprecated — Task SettingsFiles.3).
 
 - Own dialog set (Task InstWinX64.1) — every transition self-authored;
   stock `WixUI_InstallDir` can't be extended this way.
@@ -114,6 +124,13 @@ tests call that directly).
    pending (InstWinX64.1.6).
 6. **[known defect]** `SeamlyPreviousInstallDlg` controls 3px too wide
    (error 2826 ×2). Task InstWinX64.7.6.
+7. **[settled]** Settings seeding (Tasks SettingsFiles.2/3, 2026-08-31):
+   `smsi_seed_user_settings.ps1` seeds every ini completely,
+   `qt6_seamlylayout.ini` included. The user never has to open Preferences >
+   Paths — fresh installs get defaults, upgrades keep the migrated
+   configuration (add-only merge). App-side first-run seeding is deprecated;
+   it stays only for packages with no install hook (macOS dmg, Linux
+   AppImage, dev builds, other Windows accounts).
 
 ## Where behaviour is defined
 
