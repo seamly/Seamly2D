@@ -72,7 +72,7 @@ defineTest(copyToDestdir) {
 
     for(FILE, files) {
         unix{
-            QMAKE_POST_LINK += ln -s -f $$quote($$FILE) $$quote($$DDIR/$$basename(FILE)) & $$escape_expand(\\n\\t)
+            QMAKE_POST_LINK += ln -s -f $$quote($$FILE) $$quote($$DDIR/$$basename(FILE)) $$escape_expand(\\n\\t)
         } else {
             !exists($$DDIR/$$basename(FILE)) {
                 # Replace slashes in paths with backslashes for Windows
@@ -100,7 +100,7 @@ defineTest(forceCopyToDestdir) {
 
     for(FILE, files) {
         unix{
-            QMAKE_POST_LINK += ln -s -f $$quote($$FILE) $$quote($$DDIR/$$basename(FILE)) & $$escape_expand(\\n\\t)
+            QMAKE_POST_LINK += ln -s -f $$quote($$FILE) $$quote($$DDIR/$$basename(FILE)) $$escape_expand(\\n\\t)
         } else {
             # Replace slashes in paths with backslashes for Windows
             win32{
