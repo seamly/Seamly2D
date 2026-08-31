@@ -64,7 +64,7 @@
 extern const int MAJOR_VERSION = 26;
 extern const int MINOR_VERSION = 8;
 extern const int DEBUG_VERSION = 31;
-extern const int SUPER_MINOR__VERSION = 989;
+extern const int SUPER_MINOR__VERSION = 1094;
 // End: Do not edit here
 
 extern const QString APP_VERSION_STR(QStringLiteral("%1.%2.%3.%4").arg(MAJOR_VERSION).arg(MINOR_VERSION)
