@@ -41,8 +41,13 @@ Verification (2026-08-30, local): full qmake/nmake release build in
 `build/qmake-test` compiled clean, and `Seamly2DTests.exe` passed all 25
 suites — `TST_DataRoot` 48 passed / 0 failed / 1 pre-existing skip, the three
 new common-settings cases included. `smsi_migrate_user_data_test.ps1` 16/16.
-The merge to `run-seamlyLayout` runs full CI (no skip token): functional lines
-changed under `packaging/**`.
+
+Merged as `bb120db15f` and pushed 2026-08-31. Full CI runs (no skip token —
+functional lines under `packaging/**`): run 33355737878. **Next session:
+check that run** (`gh run view 33355737878`), then start SettingsFiles.2.
+
+The user's edit to `project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md` is
+uncommitted on purpose — not this task's work.
 
 ## Seamly2D.4.1 — bodyscans row added to Preferences > Paths (2026-08-30)
 
