@@ -565,41 +565,15 @@ bool ApplicationME::event(QEvent *event)
 /// Task 15: SeamlyMe's own settings now live in their own directory nested under the
 /// shared "Seamly" organization (AppData/Local/Seamly/SeamlyMe on Windows) instead of a
 /// flat .ini file sharing a folder with Seamly2D's. The "common" settings (shared across
-/// Seamly apps via VCommonSettings) still use Qt's native per-organization resolution and
-/// are bridged forward from the pre-unification "Seamly2DTeam" folder here too, since a
-/// user might run SeamlyMe before ever launching Seamly2D after an upgrade.
+/// Seamly apps via VCommonSettings) live beside that directory in
+/// AppData/Local/Seamly/qt6_common.ini; migrateCommonSettingsLocation() bridges them
+/// forward here too, since a user might run SeamlyMe before ever launching Seamly2D
+/// after an upgrade.
 void ApplicationME::openSettings()
 {
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
-                       QCoreApplication::organizationName(),
-                       QCoreApplication::applicationName());
-
-    const QString dir = QFileInfo(settings.fileName()).absolutePath();
-    const QString qt5Common = dir + "/common.ini";
-    const QString qt6Common = dir + "/qt6_common.ini";
-
-    // QFile::copy() never creates missing parent directories, and the "Seamly" organization
-    // folder does not exist yet the very first time any app runs under the renamed
-    // organization.
-    QDir().mkpath(dir);
-
-    static const QString kLegacyOrganizationName = QStringLiteral("Seamly2DTeam");
-    const QSettings legacyCommonProbe(QSettings::IniFormat, QSettings::UserScope,
-                                      kLegacyOrganizationName, QCoreApplication::applicationName());
-    const QString legacyDir = QFileInfo(legacyCommonProbe.fileName()).absolutePath();
-    if (!QFileInfo::exists(qt6Common) && QFileInfo::exists(legacyDir + "/qt6_common.ini"))
-    {
-        QFile::copy(legacyDir + "/qt6_common.ini", qt6Common);
-    }
-    else if (!QFileInfo::exists(qt5Common) && QFileInfo::exists(legacyDir + "/common.ini"))
-    {
-        QFile::copy(legacyDir + "/common.ini", qt5Common);
-    }
-
-    if (!QFileInfo::exists(qt6Common) && QFileInfo::exists(qt5Common))
-    {
-        QFile::copy(qt5Common, qt6Common);
-    }
+    // Task SettingsFiles.1: the shared common settings moved from %APPDATA%\Seamly to
+    // %LOCALAPPDATA%\Seamly. Bring an existing file forward before anything reads it.
+    VCommonSettings::migrateCommonSettingsLocation();
 
     // Task 34: settle the one shared user-data root before any data path is read. Resolves
     // and records a path only — it touches no files, which is what keeps it safe for the

@@ -45,8 +45,9 @@ class QTemporaryDir;
  *
  * The suite is hermetic, and deliberately so: every case works inside a QTemporaryDir or
  * on plain strings, and initTestCase() additionally redirects QSettings' IniFormat/
- * UserScope base at a temporary directory so the developer's real settings file is never
- * read or written. That redirection is undone in cleanupTestCase().
+ * UserScope base AND VCommonSettings' common-settings base at a temporary directory so
+ * the developer's real settings files are never read or written. Both redirections are
+ * undone in cleanupTestCase().
  *
  * No test may touch a path under QDir::homePath(). The home directory CANNOT be faked on
  * Windows — QFileSystemEngine::homePath() asks the OS through GetUserProfileDirectory()
@@ -67,6 +68,10 @@ private slots:
     void initTestCase();
     void init();
     void cleanupTestCase();
+
+    void CommonSettingsFileLivesUnderLocalConfig() const;
+    void CommonSettingsBridgeCopiesRoamingFileForward() const;
+    void CommonSettingsBridgeNeverOverwritesTheLocalFile() const;
 
     void DefaultDataRootIsSeamlyUnderDocuments() const;
     void LegacyDataRootIsTheOldSeamly2dFolder() const;

@@ -122,9 +122,15 @@ if ($installKey -and $installKey.DataRoot)
 {
     $recordedDataRoots += $installKey.DataRoot
 }
-$commonIni = Join-Path $env:APPDATA 'Seamly\qt6_common.ini'
-if (Test-Path $commonIni)
+# Task SettingsFiles.1 moved the shared common settings file to Local; the
+# Roaming file may still exist on a machine the apps last ran on before the move.
+$commonIniCandidates = @(
+    (Join-Path $env:LOCALAPPDATA 'Seamly\qt6_common.ini'),
+    (Join-Path $env:APPDATA 'Seamly\qt6_common.ini')
+)
+foreach ($commonIni in $commonIniCandidates)
 {
+    if (-not (Test-Path $commonIni)) { continue }
     $match = Select-String -Path $commonIni -Pattern '^dataRoot=(.+)$' | Select-Object -First 1
     if ($match)
     {

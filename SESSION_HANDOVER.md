@@ -6,6 +6,44 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## SettingsFiles.1 — qt6_common.ini moved to %LOCALAPPDATA%\Seamly (2026-08-30)
+
+New task file `project-docs/TODO_SETTINGS_FILES.md`; decisions recorded at its
+top. Task SettingsFiles.1 (app-side move) is implemented on branch
+`task-common-ini-localappdata`:
+
+- `VCommonSettings::commonSettingsFilePath()` resolves the shared file as
+  `<GenericConfigLocation>/<org>/qt6_common.ini` (= `%LOCALAPPDATA%\Seamly\qt6_common.ini`
+  on Windows; unchanged paths on Linux/macOS). Every common-settings QSettings
+  in `vcommonsettings.cpp` now opens that explicit path.
+  `commonSettingsOrganization()` removed (unused after the change). The
+  "Unknown Organization" stray probe stays on the old constructor form.
+- `VCommonSettings::migrateCommonSettingsLocation()` copies forward, in order:
+  Roaming `Seamly\qt6_common.ini`, Roaming `Seamly2DTeam\qt6_common.ini`, and
+  the qt5 `common.ini` from either. Copy-if-missing, re-entrant, never deletes.
+  Replaces the three duplicated bridge blocks in `Application2D::openSettings()`,
+  `ApplicationME::openSettings()`, and `TestApplication2D::openSettings()`.
+- Tests: `TST_DataRoot` gains a common-settings base-dir override (set in
+  `initTestCase()`, re-armed in `init()`, cleared in `cleanupTestCase()`) and
+  three new cases: location contract, Roaming→Local bridge copy, bridge
+  never-overwrite.
+- Packaging: `smsi_migrate_user_data.ps1` `Get-SettingsFile` also returns
+  `%LOCALAPPDATA%\Seamly\qt6_common.ini`; its test asserts that file is
+  updated (16/16 pass locally). `test_msi_install.ps1` and
+  `test_reset_environment.ps1` read the Local file first, Roaming second.
+  Location comments updated in `smsi.wxs`, `smsi_registry.wxs`,
+  `.github/README-BUILDS.md`.
+
+**Task SettingsFiles.2 (installer seeds the ini files) is NOT started** — it
+depends on this task being merged.
+
+Verification (2026-08-30, local): full qmake/nmake release build in
+`build/qmake-test` compiled clean, and `Seamly2DTests.exe` passed all 25
+suites — `TST_DataRoot` 48 passed / 0 failed / 1 pre-existing skip, the three
+new common-settings cases included. `smsi_migrate_user_data_test.ps1` 16/16.
+The merge to `run-seamlyLayout` runs full CI (no skip token): functional lines
+changed under `packaging/**`.
+
 ## Seamly2D.4.1 — bodyscans row added to Preferences > Paths (2026-08-30)
 
 `PreferencesPathPage::Apply()` (`src/app/seamly2d/dialogs/configpages/preferencespathpage.cpp`)

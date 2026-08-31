@@ -82,6 +82,7 @@
 #include "../vmisc/def.h"
 #include "../qmuparser/qmudef.h"
 #include "../vmisc/vabstractapplication.h"
+#include "../vmisc/vcommonsettings.h"
 #include "../vmisc/projectversion.h"
 
 class TestApplication2D : public VAbstractApplication
@@ -119,36 +120,10 @@ const VTranslateVars *TestApplication2D::translateVariables()
 // out-parameter, which the shared helper treats as "caller doesn't need to know".
 void TestApplication2D::openSettings()
 {
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
-                       QCoreApplication::organizationName(),
-                       QCoreApplication::applicationName());
-
-    const QString dir = QFileInfo(settings.fileName()).absolutePath();
-    const QString qt5Common   = dir + "/common.ini";
-    const QString qt6Common   = dir + "/qt6_common.ini";
-
-    // QFile::copy() never creates missing parent directories, and the "Seamly" organization
-    // folder does not exist yet the very first time any app runs under the renamed
-    // organization.
-    QDir().mkpath(dir);
-
-    static const QString kLegacyOrganizationName = QStringLiteral("Seamly2DTeam");
-    const QSettings legacyCommonProbe(QSettings::IniFormat, QSettings::UserScope,
-                                      kLegacyOrganizationName, QCoreApplication::applicationName());
-    const QString legacyDir = QFileInfo(legacyCommonProbe.fileName()).absolutePath();
-    if (!QFileInfo::exists(qt6Common) && QFileInfo::exists(legacyDir + "/qt6_common.ini"))
-    {
-        QFile::copy(legacyDir + "/qt6_common.ini", qt6Common);
-    }
-    else if (!QFileInfo::exists(qt5Common) && QFileInfo::exists(legacyDir + "/common.ini"))
-    {
-        QFile::copy(legacyDir + "/common.ini", qt5Common);
-    }
-
-    if (!QFileInfo::exists(qt6Common) && QFileInfo::exists(qt5Common))
-    {
-        QFile::copy(qt5Common, qt6Common);
-    }
+    // Task SettingsFiles.1: same call the real applications make. Copy-only and
+    // re-entrant, so running the suite on a developer machine at most copies the real
+    // common settings file forward to its new location — it never modifies or deletes.
+    VCommonSettings::migrateCommonSettingsLocation();
 
     // Task 34 called VCommonSettings::initializeDataRoot() here to mirror
     // Application2D::openSettings(). Task 53 removed it, along with the matching

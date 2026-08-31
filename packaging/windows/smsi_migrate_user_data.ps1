@@ -106,6 +106,15 @@ function Get-SettingsFile {
         $files += Get-Item -LiteralPath $flatLegacy
     }
 
+    # Task SettingsFiles.1: the shared common settings file lives in
+    # %LOCALAPPDATA%\Seamly\qt6_common.ini. The Roaming roots above stay for installs
+    # made before the move. Named explicitly rather than recursing the Seamly root,
+    # which would also sweep up SeamlyLayout's own preferences file.
+    $localCommon = Join-Path $LocalSettingsRoot 'Seamly\qt6_common.ini'
+    if (Test-Path -LiteralPath $localCommon) {
+        $files += Get-Item -LiteralPath $localCommon
+    }
+
     return @($files | Sort-Object FullName -Unique)
 }
 

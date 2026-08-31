@@ -64,8 +64,10 @@
  **  USER DATA IS NEVER DELETED OR OVERWRITTEN:
  **    Per-user settings live under %LOCALAPPDATA%\Seamly\<app>
  **    (AppData\Local\Seamly\Seamly2D, ...\SeamlyMe, ...\SeamlyLayout) plus the shared
- **    %APPDATA%\Seamly\qt6_common.ini. Update migration retains non-path
- **    settings and replaces path settings after the data copy verifies.
+ **    %LOCALAPPDATA%\Seamly\qt6_common.ini (in %APPDATA%\Seamly before Task
+ **    SettingsFiles.1; the apps copy that file forward on first run). Update
+ **    migration retains non-path settings and replaces path settings after the
+ **    data copy verifies.
  **
  **    Patterns, measurements and templates live in the USER DATA ROOT, which
  **    Task InstWinX64.1.2 made a choice the user makes during setup:

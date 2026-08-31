@@ -98,6 +98,11 @@ void TST_DataRoot::initTestCase()
 
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, m_settings->path());
 
+    // Task SettingsFiles.1: the common settings file no longer resolves through
+    // QSettings::setPath() — it lives under GenericConfigLocation, which cannot be
+    // redirected per test — so it gets its own override at the same temporary base.
+    VCommonSettings::setCommonSettingsBaseDir(m_settings->path());
+
     QVERIFY2(!QCoreApplication::organizationName().isEmpty(),
              "The data root resolves through the application organization name, which must be set");
 }
@@ -116,9 +121,14 @@ QString TST_DataRoot::scratchPath(const QString &relative) const
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief init clears the data-root setting so each test starts from "nothing configured".
+ *
+ * Also re-arms the common-settings base override: a test that moves it to its own
+ * directory and then fails would otherwise leave every later test pointed at the wrong
+ * base.
  */
 void TST_DataRoot::init()
 {
+    VCommonSettings::setCommonSettingsBaseDir(m_settings->path());
     clearDataRoot();
 }
 
@@ -128,6 +138,7 @@ void TST_DataRoot::init()
  */
 void TST_DataRoot::cleanupTestCase()
 {
+    VCommonSettings::setCommonSettingsBaseDir(QString());
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, m_originalSettingsBase);
 
     m_settings.reset();
@@ -141,8 +152,7 @@ void TST_DataRoot::cleanupTestCase()
  */
 void TST_DataRoot::writeDataRoot(const QString &root) const
 {
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
-                       QCoreApplication::organizationName(), commonIniName);
+    QSettings settings(VCommonSettings::commonSettingsFilePath(), QSettings::IniFormat);
     settings.setValue(dataRootKey, root);
     settings.sync();
 }
@@ -153,10 +163,109 @@ void TST_DataRoot::writeDataRoot(const QString &root) const
  */
 void TST_DataRoot::clearDataRoot() const
 {
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope,
-                       QCoreApplication::organizationName(), commonIniName);
+    QSettings settings(VCommonSettings::commonSettingsFilePath(), QSettings::IniFormat);
     settings.remove(dataRootKey);
     settings.sync();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief CommonSettingsFileLivesUnderLocalConfig pins the Task SettingsFiles.1 location
+ * contract: qt6_common.ini resolves as <base>/<organization>/qt6_common.ini, and the
+ * production base is GenericConfigLocation — %LOCALAPPDATA% on Windows — not the Roaming
+ * folder Qt's IniFormat/UserScope default names.
+ *
+ * The production half is a string comparison only; nothing is read or written at the
+ * real location.
+ */
+void TST_DataRoot::CommonSettingsFileLivesUnderLocalConfig() const
+{
+    const QString organization = QCoreApplication::organizationName();
+    QCOMPARE(VCommonSettings::commonSettingsFilePath(),
+             m_settings->path() + QLatin1Char('/') + organization + QLatin1Char('/') + commonIniName
+                 + QStringLiteral(".ini"));
+
+    VCommonSettings::setCommonSettingsBaseDir(QString());
+    const QString production = VCommonSettings::commonSettingsFilePath();
+    VCommonSettings::setCommonSettingsBaseDir(m_settings->path());
+
+    const QString genericBase = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+    QVERIFY2(production.startsWith(genericBase + QLatin1Char('/')),
+             qPrintable(QStringLiteral("'%1' is not under GenericConfigLocation '%2'")
+                            .arg(production, genericBase)));
+    QCOMPARE(production,
+             genericBase + QLatin1Char('/') + organization + QLatin1Char('/') + commonIniName
+                 + QStringLiteral(".ini"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief CommonSettingsBridgeCopiesRoamingFileForward checks the move's migration: a
+ * common settings file at the pre-move location — whatever Qt's IniFormat/UserScope
+ * resolution names, which initTestCase() redirected to the temporary base — is copied
+ * to the new location, and the source file survives so a rollback to an earlier release
+ * keeps its settings.
+ */
+void TST_DataRoot::CommonSettingsBridgeCopiesRoamingFileForward() const
+{
+    // A "Local" base distinct from the redirected "Roaming" base, under the scratch
+    // directory so a failing test leaves no dangling override target.
+    const QString localBase = scratchPath(QStringLiteral("bridge-copies/local-config"));
+    QVERIFY(QDir().mkpath(localBase));
+    VCommonSettings::setCommonSettingsBaseDir(localBase);
+
+    {
+        QSettings roaming(QSettings::IniFormat, QSettings::UserScope,
+                          QCoreApplication::organizationName(), commonIniName);
+        roaming.setValue(dataRootKey, QStringLiteral("G:/My Drive/Seamly"));
+        roaming.sync();
+    }
+
+    const QString target = VCommonSettings::migrateCommonSettingsLocation();
+    QCOMPARE(target, VCommonSettings::commonSettingsFilePath());
+    QVERIFY(QFileInfo::exists(target));
+
+    const QSettings migrated(target, QSettings::IniFormat);
+    QCOMPARE(migrated.value(dataRootKey).toString(), QStringLiteral("G:/My Drive/Seamly"));
+
+    const QSettings roamingProbe(QSettings::IniFormat, QSettings::UserScope,
+                                 QCoreApplication::organizationName(), commonIniName);
+    QVERIFY2(QFileInfo::exists(roamingProbe.fileName()),
+             "the migration must copy, never move, the pre-move settings file");
+
+    VCommonSettings::setCommonSettingsBaseDir(m_settings->path());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief CommonSettingsBridgeNeverOverwritesTheLocalFile checks re-entrancy: once a file
+ * exists at the new location, the migration must not touch it, whatever an older file at
+ * the pre-move location says.
+ */
+void TST_DataRoot::CommonSettingsBridgeNeverOverwritesTheLocalFile() const
+{
+    const QString localBase = scratchPath(QStringLiteral("bridge-keeps/local-config"));
+    QVERIFY(QDir().mkpath(localBase));
+    VCommonSettings::setCommonSettingsBaseDir(localBase);
+
+    {
+        QSettings local(VCommonSettings::commonSettingsFilePath(), QSettings::IniFormat);
+        local.setValue(dataRootKey, QStringLiteral("D:/kept/Seamly"));
+        local.sync();
+    }
+    {
+        QSettings roaming(QSettings::IniFormat, QSettings::UserScope,
+                          QCoreApplication::organizationName(), commonIniName);
+        roaming.setValue(dataRootKey, QStringLiteral("C:/stale/Seamly"));
+        roaming.sync();
+    }
+
+    VCommonSettings::migrateCommonSettingsLocation();
+
+    const QSettings kept(VCommonSettings::commonSettingsFilePath(), QSettings::IniFormat);
+    QCOMPARE(kept.value(dataRootKey).toString(), QStringLiteral("D:/kept/Seamly"));
+
+    VCommonSettings::setCommonSettingsBaseDir(m_settings->path());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1027,16 +1136,14 @@ void TST_DataRoot::StrayCommonSettingsAreMergedThenDeleted() const
     const QString strayFileName = stray.fileName();
     QVERIFY(QFileInfo::exists(strayFileName));
 
-    QSettings destination(QSettings::IniFormat, QSettings::UserScope,
-                          QCoreApplication::organizationName(), commonIniName);
+    QSettings destination(VCommonSettings::commonSettingsFilePath(), QSettings::IniFormat);
     destination.setValue(QStringLiteral("paths/templates"), QStringLiteral("G:/My Drive/seamlyData/templates"));
     destination.sync();
 
     // mergeStrayCommonSettings() is private; initializeDataRoot() is its only caller.
     VCommonSettings::initializeDataRoot();
 
-    QSettings merged(QSettings::IniFormat, QSettings::UserScope,
-                     QCoreApplication::organizationName(), commonIniName);
+    QSettings merged(VCommonSettings::commonSettingsFilePath(), QSettings::IniFormat);
     QCOMPARE(merged.value(QStringLiteral("paths/bodyscans")).toString(),
              QStringLiteral("G:/My Drive/seamlyData/bodyscans"));
     // The user's own value survives the merge — copy-if-missing, never overwrite.
