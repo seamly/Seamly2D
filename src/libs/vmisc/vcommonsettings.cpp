@@ -441,9 +441,6 @@ QString VCommonSettings::prepareMultisizeTables(const QString &currentPath)
 
 namespace
 {
-/** Organization name QSettings substitutes when it is handed an empty one. */
-const QString unknownOrganizationName = QStringLiteral("Unknown Organization");
-
 /** Test-only base-directory override for the common settings file; empty in production. */
 QString commonSettingsBaseDirOverride;
 
@@ -474,9 +471,7 @@ QString readDataRoot()
  * file's paths/* values are absolute machine paths: a roaming Windows profile would
  * carry them to a machine where they are wrong. Task SettingsFiles.1.
  *
- * The organization mirrors what QSettings would use: the application-wide organization
- * name, or the literal "Unknown Organization" when none is set. Every application sets
- * "Seamly", so all of them resolve one file.
+ * Every application sets "Seamly", so all of them resolve one file.
  *
  * @return absolute path, e.g. C:/Users/<user>/AppData/Local/Seamly/qt6_common.ini.
  */
@@ -491,7 +486,7 @@ QString VCommonSettings::commonSettingsFilePath()
     QString organization = QCoreApplication::organizationName();
     if (organization.isEmpty())
     {
-        organization = unknownOrganizationName;
+        organization = QStringLiteral("Seamly");
     }
 
     return base + QLatin1Char('/') + organization + QLatin1Char('/') + commonIniFilename
@@ -1064,10 +1059,6 @@ QString VCommonSettings::initializeDataRoot(bool *adoptedLegacyTree)
         *adoptedLegacyTree = false;
     }
 
-    // Recover any shared values stranded by the empty-organization defect before reading
-    // the root, so a data root written by an affected build is not lost here.
-    mergeStrayCommonSettings();
-
     QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
 
     const QString configured = settings.value(settingPathsDataRoot).toString().trimmed();
@@ -1142,9 +1133,7 @@ QString VCommonSettings::chooseFirstRunDataRoot(const QString &defaultRoot, cons
  * have stocked it with the nine standard subfolders, so what remains after the move is an
  * empty skeleton that looks like data but is not. This deletes that skeleton.
  *
- * Deliberately *not* part of mergeStrayCommonSettings(): that function reconciles settings
- * files, this one deletes a directory tree, and the two want very different amounts of
- * caution. Two conditions gate it, and both matter:
+ * Two conditions gate it, and both matter:
  *
  *  - the legacy root must not be the configured root. Task 34's first-run rule *adopts* an
  *    existing ~/seamly2d in place, so for an upgrading user that directory is the live data
@@ -1220,116 +1209,6 @@ bool VCommonSettings::pruneEmptyLegacyDataRoot(const QString &legacyRoot, const 
     }
 
     return true;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief mergeStrayCommonSettings recovers shared settings written to the wrong folder.
- *
- * Builds between Task 15 and Task 34 opened the shared common settings file with an empty
- * organization name, so QSettings stored the shared
- * paths/* values under an "Unknown Organization" folder. This copies any such value forward
- * into the correctly located file, but only where that file has no value of its own, so a
- * setting the user has since changed always wins.
- *
- * Task 53: once every stray key is accounted for, the stray file is deleted and its
- * "Unknown Organization" folder removed if that leaves it empty, so the misplaced folder
- * does not linger in %APPDATA% forever. The deletion is strictly conditional — each key must
- * be present in the destination *and* compare equal to the stray's value, which is exactly
- * the state "the merge already brought this forward". A key the destination holds with a
- * different value is a value the user changed after the stray was written, so it is treated
- * as accounted for too. If any key cannot be verified, or the destination file cannot be
- * written, nothing is deleted and the stray survives for the next run to retry.
- */
-void VCommonSettings::mergeStrayCommonSettings()
-{
-    const QString organization = QCoreApplication::organizationName();
-    if (organization.isEmpty() || organization == unknownOrganizationName)
-    {
-        return;
-    }
-
-    const QSettings straySettings(QSettings::IniFormat, QSettings::UserScope,
-                                  unknownOrganizationName, commonIniFilename);
-    const QString strayFileName = straySettings.fileName();
-    if (!QFileInfo::exists(strayFileName))
-    {
-        return;
-    }
-
-    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
-
-    bool recovered = false;
-    const QStringList strayKeys = straySettings.allKeys();
-    for (const QString &key : strayKeys)
-    {
-        if (!settings.contains(key))
-        {
-            settings.setValue(key, straySettings.value(key));
-            recovered = true;
-        }
-    }
-
-    if (recovered)
-    {
-        settings.sync();
-    }
-
-    // Re-read rather than trusting the writes above: sync() can fail (read-only location,
-    // full disk), and deleting the only remaining copy of these values on the strength of an
-    // unverified write is precisely the mistake worth not making.
-    if (settings.status() != QSettings::NoError)
-    {
-        qWarning() << "Kept the stray common settings file" << QDir::toNativeSeparators(strayFileName)
-                   << "because the merge destination reported an error";
-        return;
-    }
-
-    for (const QString &key : strayKeys)
-    {
-        if (!settings.contains(key))
-        {
-            qWarning() << "Kept the stray common settings file" << QDir::toNativeSeparators(strayFileName)
-                       << "because key" << key << "was not carried forward";
-            return;
-        }
-    }
-
-    removeStrayCommonSettings(strayFileName);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief removeStrayCommonSettings deletes a fully merged stray settings file and its folder.
- *
- * Split out of mergeStrayCommonSettings() so the "is it safe to delete" decision and the
- * deletion itself stay separately readable and separately testable. Only ever called once
- * every key in the stray file has been verified present in the correctly located file.
- *
- * The parent directory is removed with QDir::rmdir(), which fails harmlessly on a non-empty
- * directory — so anything else that happens to live under "Unknown Organization" (another
- * application's settings, say) keeps the folder alive and is left strictly alone. Never
- * removeRecursively(): this function must not be capable of deleting a tree it did not
- * inspect.
- *
- * @param strayFileName absolute path of the verified-redundant stray settings file.
- */
-void VCommonSettings::removeStrayCommonSettings(const QString &strayFileName)
-{
-    if (!QFile::remove(strayFileName))
-    {
-        qWarning() << "Could not delete the stray common settings file"
-                   << QDir::toNativeSeparators(strayFileName);
-        return;
-    }
-
-    // Only the "Unknown Organization" folder QSettings invented is a candidate for removal;
-    // a stray written straight into %APPDATA% has no folder of its own to clean up.
-    const QDir strayDirectory = QFileInfo(strayFileName).absoluteDir();
-    if (strayDirectory.dirName() == unknownOrganizationName)
-    {
-        QDir().rmdir(strayDirectory.absolutePath());
-    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------

@@ -1117,46 +1117,6 @@ void TST_DataRoot::PruneIgnoresAMissingLegacyRoot() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief StrayCommonSettingsAreMergedThenDeleted checks the Task 53 half of the
- * "Unknown Organization" recovery: values are carried forward, a value the user has since
- * changed still wins, and only then is the stray file and its folder removed.
- *
- * Safe because initTestCase() has pointed QSettings' IniFormat/UserScope base at a temporary
- * directory, so both the stray and the destination live inside it.
- */
-void TST_DataRoot::StrayCommonSettingsAreMergedThenDeleted() const
-{
-    static const QString strayOrganization = QStringLiteral("Unknown Organization");
-
-    // A value only the stray has, and one the destination already holds differently.
-    QSettings stray(QSettings::IniFormat, QSettings::UserScope, strayOrganization, commonIniName);
-    stray.setValue(QStringLiteral("paths/bodyscans"), QStringLiteral("G:/My Drive/seamlyData/bodyscans"));
-    stray.setValue(QStringLiteral("paths/templates"), QStringLiteral("C:/stale/templates"));
-    stray.sync();
-    const QString strayFileName = stray.fileName();
-    QVERIFY(QFileInfo::exists(strayFileName));
-
-    QSettings destination(VCommonSettings::commonSettingsFilePath(), QSettings::IniFormat);
-    destination.setValue(QStringLiteral("paths/templates"), QStringLiteral("G:/My Drive/seamlyData/templates"));
-    destination.sync();
-
-    // mergeStrayCommonSettings() is private; initializeDataRoot() is its only caller.
-    VCommonSettings::initializeDataRoot();
-
-    QSettings merged(VCommonSettings::commonSettingsFilePath(), QSettings::IniFormat);
-    QCOMPARE(merged.value(QStringLiteral("paths/bodyscans")).toString(),
-             QStringLiteral("G:/My Drive/seamlyData/bodyscans"));
-    // The user's own value survives the merge — copy-if-missing, never overwrite.
-    QCOMPARE(merged.value(QStringLiteral("paths/templates")).toString(),
-             QStringLiteral("G:/My Drive/seamlyData/templates"));
-
-    QVERIFY2(!QFileInfo::exists(strayFileName), "The merged stray settings file should have been deleted");
-    QVERIFY2(!QFileInfo(QFileInfo(strayFileName).absolutePath()).isDir(),
-             "The emptied 'Unknown Organization' folder should have been removed");
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
  * @brief PerAppPathsPersistToTheOwnSettingsFile guards against VSettings's per-app path
  * getters and setters (pattern, layout, the SeamlyLayout executable, graphical output)
  * reopening a fresh QSettings from format()/scope()/organizationName()/applicationName()

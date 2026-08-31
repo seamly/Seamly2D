@@ -595,9 +595,6 @@ public:
 
 private:
     Q_DISABLE_COPY(VCommonSettings)
-
-    static void          mergeStrayCommonSettings();
-    static void          removeStrayCommonSettings(const QString &strayFileName);
 };
 
 #endif // VCOMMONSETTINGS_H

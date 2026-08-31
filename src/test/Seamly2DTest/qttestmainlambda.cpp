@@ -132,9 +132,8 @@ void TestApplication2D::openSettings()
     // This constructor runs before any test's initTestCase(), so whatever it calls executes
     // against the developer's REAL settings and home directory, not a QTemporaryDir. That was
     // tolerable while those functions only copied values forward. It stopped being tolerable
-    // once they delete: merging now removes the emptied "Unknown Organization" folder, and
-    // pruning removes an empty ~/seamly2d. Running the test suite must not mutate the machine
-    // it runs on.
+    // once they delete: pruning removes an empty ~/seamly2d. Running the test suite must not
+    // mutate the machine it runs on.
     //
     // Nothing is lost by leaving them out — TST_DataRoot calls both directly, with QSettings
     // redirected at a temporary directory and throwaway roots passed as arguments. Do not
