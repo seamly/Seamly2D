@@ -122,6 +122,9 @@ try {
                     ((Get-IniValue -Path $slay -Section 'General' -Key 'png_viewer_path') -eq '') -and
                     ((Get-IniValue -Path $slay -Section 'General' -Key 'projector_path') -eq 'https://patternprojector.com'))
 
+    Assert-That -Name 'fresh seeding marks the first-run data notice pending' `
+        -Succeeded ((Get-IniValue -Path $common -Section 'notices' -Key 'firstRunDataNotice') -eq 'pending')
+
     $commonBytes = [System.IO.File]::ReadAllBytes($common)
     Assert-That -Name 'the seeded files carry no UTF-8 BOM' `
         -Succeeded (-not ($commonBytes.Length -ge 3 -and $commonBytes[0] -eq 0xEF -and $commonBytes[1] -eq 0xBB -and $commonBytes[2] -eq 0xBF))
@@ -151,6 +154,8 @@ templates=D:/CustomRoot/my templates
         -Succeeded ((Get-IniValue -Path $mergeCommon -Section 'paths' -Key 'bodyscans') -eq 'C:/Users/test/Documents/SeamlyData/bodyscans')
     Assert-That -Name 'merging leaves other sections alone' `
         -Succeeded ((Get-IniValue -Path $mergeCommon -Section 'configuration' -Key 'theme') -eq 'dark')
+    Assert-That -Name 'an existing qt6_common.ini gets no first-run data notice' `
+        -Succeeded ($null -eq (Get-IniValue -Path $mergeCommon -Section 'notices' -Key 'firstRunDataNotice'))
 
     $mergeLayoutDirectory = Join-Path $mergeLocal 'Seamly\SeamlyLayout'
     $mergeLayout = Join-Path $mergeLayoutDirectory 'qt6_seamlylayout.ini'

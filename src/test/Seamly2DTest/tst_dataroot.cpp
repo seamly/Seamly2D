@@ -270,6 +270,43 @@ void TST_DataRoot::CommonSettingsBridgeNeverOverwritesTheLocalFile() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief FirstRunNoticePendingOnlyWhileSeeded pins the one-shot notice contract
+ * (Task SettingsFiles.5).
+ *
+ * The installer seeds notices/firstRunDataNotice=pending on a fresh machine. The flag
+ * must read pending only while it holds exactly that value: an absent key (dev build,
+ * no installer) and the post-notice "shown" value both mean no notice — so a dev build
+ * never pops the dialog, and the suite shows it once in total.
+ */
+void TST_DataRoot::FirstRunNoticePendingOnlyWhileSeeded() const
+{
+    const QString localBase = scratchPath(QStringLiteral("first-run-notice/local-config"));
+    QVERIFY(QDir().mkpath(localBase));
+    VCommonSettings::setCommonSettingsBaseDir(localBase);
+
+    QVERIFY2(!VCommonSettings::firstRunNoticePending(),
+             "an absent flag must not report a pending notice");
+
+    {
+        QSettings seeded(VCommonSettings::commonSettingsFilePath(), QSettings::IniFormat);
+        seeded.setValue(QStringLiteral("notices/firstRunDataNotice"), QStringLiteral("pending"));
+        seeded.sync();
+    }
+    QVERIFY(VCommonSettings::firstRunNoticePending());
+
+    VCommonSettings::markFirstRunNoticeShown();
+    QVERIFY2(!VCommonSettings::firstRunNoticePending(),
+             "a shown notice must never become pending again");
+
+    const QSettings after(VCommonSettings::commonSettingsFilePath(), QSettings::IniFormat);
+    QCOMPARE(after.value(QStringLiteral("notices/firstRunDataNotice")).toString(),
+             QStringLiteral("shown"));
+
+    VCommonSettings::setCommonSettingsBaseDir(m_settings->path());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief DefaultDataRootIsSeamlyUnderDocuments checks the built-in default.
  *
  * The lineage: ~/seamly2d (original) → ~/seamly (Task 34) → ~/seamlyData (Task 53) →

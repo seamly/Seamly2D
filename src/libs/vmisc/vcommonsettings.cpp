@@ -92,6 +92,13 @@ const QString settingPathsBodyScans                      = QStringLiteral("paths
 const QString settingPathsLabelTemplate                  = QStringLiteral("paths/labels");
 const QString settingBackupPath                          = QStringLiteral("paths/backups");
 
+// One-shot cross-application notice flags. The Windows installer seeds
+// "pending" on a fresh machine; the first Seamly app to run shows the notice
+// and writes "shown". Absent on dev builds and non-installer platforms.
+const QString settingNoticesFirstRunData                 = QStringLiteral("notices/firstRunDataNotice");
+const QString noticeStatePending                         = QStringLiteral("pending");
+const QString noticeStateShown                           = QStringLiteral("shown");
+
 const QString settingConfigurationCompanyName            = QStringLiteral("graphicsview/companyName");
 const QString settingConfigurationContact                = QStringLiteral("graphicsview/contact");
 const QString settingConfigurationAddress                = QStringLiteral("graphicsview/address");
@@ -507,6 +514,35 @@ QString VCommonSettings::commonSettingsFilePath()
 void VCommonSettings::setCommonSettingsBaseDir(const QString &baseDir)
 {
     commonSettingsBaseDirOverride = baseDir;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief firstRunNoticePending reports whether the one-shot first-run data notice is due.
+ *
+ * The Windows installer writes notices/firstRunDataNotice=pending into qt6_common.ini
+ * when it creates that file on a fresh machine. The first Seamly application to run
+ * shows the notice and calls markFirstRunNoticeShown(). When the key is absent — dev
+ * builds, platforms without an installer, upgrades — no notice is due.
+ *
+ * @return true only while the key holds "pending".
+ */
+bool VCommonSettings::firstRunNoticePending()
+{
+    const QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
+    return settings.value(settingNoticesFirstRunData).toString() == noticeStatePending;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief markFirstRunNoticeShown records that the first-run data notice was shown.
+ *
+ * Sets the flag to "shown" so no later application run repeats the notice.
+ */
+void VCommonSettings::markFirstRunNoticeShown()
+{
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
+    settings.setValue(settingNoticesFirstRunData, noticeStateShown);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

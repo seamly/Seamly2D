@@ -19,8 +19,8 @@
 	<key>CFBundleIdentifier</key>
 	<string>org.seamly2dproject.@EXECUTABLE@</string>
 	<!-- Start: Do not edit here, use packaging/version.sh to update -->
-	<key>CFBundleShortVersionString</key><string>26.8.24</string>
-	<key>CFBundleVersion</key><string>26.8.24</string>
+	<key>CFBundleShortVersionString</key><string>26.8.31</string>
+	<key>CFBundleVersion</key><string>26.8.31</string>
 	<!-- End: Do not edit here -->
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>

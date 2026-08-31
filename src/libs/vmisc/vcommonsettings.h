@@ -99,6 +99,10 @@ public:
     // Test seam: redirect the base directory so the suite never touches the real
     // per-user configuration. Pass an empty string to restore the platform location.
     static void          setCommonSettingsBaseDir(const QString &baseDir);
+    // One-shot first-run data notice, seeded as "pending" by the Windows installer
+    // on a fresh machine. The first app to run shows it and marks it shown.
+    static bool          firstRunNoticePending();
+    static void          markFirstRunNoticeShown();
 
     static QString       getDefaultDataRoot();
     static QString       getLegacyDataRoot();

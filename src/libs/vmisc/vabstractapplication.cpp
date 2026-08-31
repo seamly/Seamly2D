@@ -128,7 +128,7 @@ VAbstractApplication::~VAbstractApplication()
 {}
 
 //=====================================================================================================================
-// Settings, migration, and one-shot notices
+// Settings, installation data migration, and one-shot notices
 //=====================================================================================================================
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -216,6 +216,39 @@ void VAbstractApplication::NotifySeamlySettingsMigrated(const QString &appDispla
         tr("%1's settings and preferences have moved to a new shared location "
            "(the \"Seamly\" folder). Nothing was lost — this happens automatically, "
            "once, after upgrading.").arg(appDisplayName));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief NotifySeamlyDataLocation shows the one-shot fresh-install notice about where
+ * Seamly keeps its data and how existing user files were backed up.
+ *
+ * The Windows installer seeds the pending flag into qt6_common.ini when it creates that
+ * file on a fresh machine. Whichever Seamly application runs first shows the notice,
+ * then marks it shown, so the suite shows it once in total. Only call this from a
+ * confirmed GUI-mode code path — a modal dialog would hang a headless or automated run.
+ */
+void VAbstractApplication::NotifySeamlyDataLocation()
+{
+    if (!VCommonSettings::firstRunNoticePending())
+    {
+        return;
+    }
+
+    QMessageBox::information(
+        mainWindow,
+        tr("Seamly data moved"),
+        tr("Your files for patterns, measurements, images, layouts, and more\n"
+           "   have been copied to the new data location--%1.\n"
+           "Don't worry: \n"
+           " • they have been left in their original location as a backup;\n"
+           " • They have been archived (zipped) to %1 as a second backup.\n\n"
+           "You may safely delete the files from the old location at your discretion,\n"
+           "   (typically C:\\Users\\seamly2d).\n"
+           )
+            .arg(QDir::toNativeSeparators(VCommonSettings::dataRoot())));
+
+    VCommonSettings::markFirstRunNoticeShown();
 }
 
 //=====================================================================================================================

@@ -41,6 +41,11 @@
     Values use Qt's '/' separator form. The folder names match the English
     defaults the MSI itself creates under the data root.
 
+    Task SettingsFiles.5: when qt6_common.ini is newly created (a fresh
+    machine), the script also seeds [notices] firstRunDataNotice=pending.
+    The first Seamly app to run shows a one-shot notice about the data
+    locations and backups, then rewrites the value as 'shown'.
+
 .PARAMETER DataRoot
     The recorded user-data root, e.g. C:\Users\name\Documents\SeamlyData.
 
@@ -224,7 +229,19 @@ try {
         'templates'                    = "$root/templates"
         'bodyscans'                    = "$root/bodyscans"
     }
-    Add-IniKey -Path (Join-Path $seamlyRoot 'qt6_common.ini') -Section 'paths' -Pairs $commonKeys
+    $commonIni = Join-Path $seamlyRoot 'qt6_common.ini'
+    # Task SettingsFiles.5: an absent qt6_common.ini marks a fresh machine.
+    # Only then is the one-shot first-run data notice due — an existing file
+    # means a previous install already ran here.
+    $freshMachine = -not (Test-Path -LiteralPath $commonIni)
+    Add-IniKey -Path $commonIni -Section 'paths' -Pairs $commonKeys
+    if ($freshMachine) {
+        # The first Seamly app to run shows the data-location notice, then
+        # rewrites this value as 'shown'.
+        Add-IniKey -Path $commonIni -Section 'notices' -Pairs ([ordered]@{
+            'firstRunDataNotice' = 'pending'
+        })
+    }
 
     # Per-app keys. labels/images/backups are per-app, not shared: their
     # setters call QSettings::setValue on the app's own settings object
