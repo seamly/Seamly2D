@@ -7,6 +7,8 @@ var vcommonsettings_8cpp =
     [ "commonIniFilename", "d4/d11/vcommonsettings_8cpp.html#a9474e9c5c20683cf4a411eb51f84f3da", null ],
     [ "commonSettingsBaseDirOverride", "d4/d11/vcommonsettings_8cpp.html#a3295063fe877a3e18073b9ba00f3f75b", null ],
     [ "migrationMarkerFileName", "d4/d11/vcommonsettings_8cpp.html#a4bf12fd444064d56141a99f6226d70b7", null ],
+    [ "noticeStatePending", "d4/d11/vcommonsettings_8cpp.html#a24cf882297c47d9b474847a34e9095ff", null ],
+    [ "noticeStateShown", "d4/d11/vcommonsettings_8cpp.html#abf82afea97129e6eb05c2611113c6567", null ],
     [ "pointNameSize", "d4/d11/vcommonsettings_8cpp.html#a7136b7a2ed9ead08f0f849054160457b", null ],
     [ "settingBackupPath", "d4/d11/vcommonsettings_8cpp.html#a33d50aa96456f560a5ac1845a77a682c", null ],
     [ "settingConfigurationAddress", "d4/d11/vcommonsettings_8cpp.html#a7308b7a66e0e6d69b9b7aab47d4253d3", null ],
@@ -135,6 +137,7 @@ var vcommonsettings_8cpp =
     [ "settingLabelUserDateFormats", "d4/d11/vcommonsettings_8cpp.html#a55a4ea7793a79bc584e55669b40e6d7c", null ],
     [ "settingLabelUserTimeFormats", "d4/d11/vcommonsettings_8cpp.html#a963422ce8f013135de5d22a96c0ef172", null ],
     [ "settingLatestSkippedVersion", "d4/d11/vcommonsettings_8cpp.html#a057fa48d101cde9aa147dd59534486e8", null ],
+    [ "settingNoticesFirstRunData", "d4/d11/vcommonsettings_8cpp.html#a7a87cd1d968ae79226a7a473776678f4", null ],
     [ "settingPathsBodyScans", "d4/d11/vcommonsettings_8cpp.html#ade216e15a69dff3a6e8c9786c180d592", null ],
     [ "settingPathsDataRoot", "d4/d11/vcommonsettings_8cpp.html#a8db1bb6eaf2ed89b9f9ebe4710fcd21b", null ],
     [ "settingPathsIndividualMeasurements", "d4/d11/vcommonsettings_8cpp.html#a2637561a27c415fd5d43d96cc585ba2e", null ],
@@ -159,6 +162,5 @@ var vcommonsettings_8cpp =
     [ "settingShowPieceLabels", "d4/d11/vcommonsettings_8cpp.html#ae878122ddcaae25fa2369875ccac14b6", null ],
     [ "settingShowSeamAllowances", "d4/d11/vcommonsettings_8cpp.html#aead542985bef57407eb367a8c7c0da1f", null ],
     [ "settingToolSeamAllowanceDialogSize", "d4/d11/vcommonsettings_8cpp.html#a91bf7a4d63951d137db9cb09112c61d2", null ],
-    [ "settingVariablesDialogSize", "d4/d11/vcommonsettings_8cpp.html#a724bd4de8bb4e50cd42068755d13f6fe", null ],
-    [ "unknownOrganizationName", "d4/d11/vcommonsettings_8cpp.html#a71ae26c24c640338ca8bc4dba19b13fc", null ]
+    [ "settingVariablesDialogSize", "d4/d11/vcommonsettings_8cpp.html#a724bd4de8bb4e50cd42068755d13f6fe", null ]
 ];

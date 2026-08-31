@@ -126,8 +126,10 @@ Collaboration diagram for VAbstractApplication:</div>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:af7726df174e0447e9922c0cb8f3455fd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#af7726df174e0447e9922c0cb8f3455fd">VAbstractApplication</a> (int &amp;argc, char **argv)</td></tr>
+<tr class="memdesc:af7726df174e0447e9922c0cb8f3455fd"><td class="mdescLeft">&#160;</td><td class="mdescRight"><a class="el" href="../../db/dda/classVAbstractApplication.html">VAbstractApplication</a> sets logging rules, high-DPI pixmaps, and a settings sync on quit.  <br /></td></tr>
 <tr class="separator:af7726df174e0447e9922c0cb8f3455fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac1af9dbece2a90fc6d47b9c4285be109"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#ac1af9dbece2a90fc6d47b9c4285be109">~VAbstractApplication</a> () override</td></tr>
+<tr class="memdesc:ac1af9dbece2a90fc6d47b9c4285be109"><td class="mdescLeft">&#160;</td><td class="mdescRight">~VAbstractApplication is empty; Qt parent ownership releases the members.  <br /></td></tr>
 <tr class="separator:ac1af9dbece2a90fc6d47b9c4285be109"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a24a3274cdd93cb33ad66d2770d4925bf"><td class="memItemLeft" align="right" valign="top">virtual const <a class="el" href="../../dc/dbc/classVTranslateVars.html">VTranslateVars</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a24a3274cdd93cb33ad66d2770d4925bf">translateVariables</a> ()=0</td></tr>
 <tr class="separator:a24a3274cdd93cb33ad66d2770d4925bf"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -135,60 +137,84 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:a7f8f1033b717fb83f76d40aea526db87"><td class="mdescLeft">&#160;</td><td class="mdescRight">translationsPath return path to the root directory that contains QM files.  <br /></td></tr>
 <tr class="separator:a7f8f1033b717fb83f76d40aea526db87"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a92886d256c5e9be89659da9dcc191107"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a92886d256c5e9be89659da9dcc191107">loadTranslations</a> (const QString &amp;locale)</td></tr>
+<tr class="memdesc:a92886d256c5e9be89659da9dcc191107"><td class="mdescLeft">&#160;</td><td class="mdescRight">loadTranslations loads and installs the Qt and application translators for a locale.  <br /></td></tr>
 <tr class="separator:a92886d256c5e9be89659da9dcc191107"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad4fb122e68296fcc616f36f75e67fc1e"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/da4/def_8h.html#aa5a23406ae0e7d969b980e50c4e94889">Unit</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#ad4fb122e68296fcc616f36f75e67fc1e">patternUnit</a> () const</td></tr>
+<tr class="memdesc:ad4fb122e68296fcc616f36f75e67fc1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">patternUnit returns the pattern's measurement unit.  <br /></td></tr>
 <tr class="separator:ad4fb122e68296fcc616f36f75e67fc1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a12b9545d6469461f81797e73dd65aae8"><td class="memItemLeft" align="right" valign="top">const <a class="el" href="../../d4/da4/def_8h.html#aa5a23406ae0e7d969b980e50c4e94889">Unit</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a12b9545d6469461f81797e73dd65aae8">patternUnitP</a> () const</td></tr>
+<tr class="memdesc:a12b9545d6469461f81797e73dd65aae8"><td class="mdescLeft">&#160;</td><td class="mdescRight">patternUnitP returns a pointer to the pattern unit, for callers that track changes.  <br /></td></tr>
 <tr class="separator:a12b9545d6469461f81797e73dd65aae8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2d5a5eb9c0102caf4176fd5542c2bba7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a2d5a5eb9c0102caf4176fd5542c2bba7">setPatternUnit</a> (const <a class="el" href="../../d4/da4/def_8h.html#aa5a23406ae0e7d969b980e50c4e94889">Unit</a> &amp;<a class="el" href="../../db/dda/classVAbstractApplication.html#ad4fb122e68296fcc616f36f75e67fc1e">patternUnit</a>)</td></tr>
+<tr class="memdesc:a2d5a5eb9c0102caf4176fd5542c2bba7"><td class="mdescLeft">&#160;</td><td class="mdescRight">setPatternUnit sets the pattern's measurement unit.  <br /></td></tr>
 <tr class="separator:a2d5a5eb9c0102caf4176fd5542c2bba7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab354e58700c474ae6d0ea167419e1c9c"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d4/da4/def_8h.html#a55ff83aa1faba5d2fcc34767a5502386">MeasurementsType</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#ab354e58700c474ae6d0ea167419e1c9c">patternType</a> () const</td></tr>
+<tr class="memdesc:ab354e58700c474ae6d0ea167419e1c9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">patternType returns the measurements type of the open pattern.  <br /></td></tr>
 <tr class="separator:ab354e58700c474ae6d0ea167419e1c9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab6ab93b0a13844b1d56d9050834e9de2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#ab6ab93b0a13844b1d56d9050834e9de2">setPatternType</a> (const <a class="el" href="../../d4/da4/def_8h.html#a55ff83aa1faba5d2fcc34767a5502386">MeasurementsType</a> &amp;<a class="el" href="../../db/dda/classVAbstractApplication.html#ab354e58700c474ae6d0ea167419e1c9c">patternType</a>)</td></tr>
+<tr class="memdesc:ab6ab93b0a13844b1d56d9050834e9de2"><td class="mdescLeft">&#160;</td><td class="mdescRight">setPatternType sets the measurements type of the open pattern.  <br /></td></tr>
 <tr class="separator:ab6ab93b0a13844b1d56d9050834e9de2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a36ebaef6c70a1e6ead6d2ffcb476fa2e"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a36ebaef6c70a1e6ead6d2ffcb476fa2e">openSettings</a> ()=0</td></tr>
 <tr class="separator:a36ebaef6c70a1e6ead6d2ffcb476fa2e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aaf7f1160ef591e625cb67d208c6eb6c8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../de/d0f/classVCommonSettings.html">VCommonSettings</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#aaf7f1160ef591e625cb67d208c6eb6c8">Settings</a> ()</td></tr>
-<tr class="memdesc:aaf7f1160ef591e625cb67d208c6eb6c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">getSettings hide settings constructor.  <br /></td></tr>
+<tr class="memdesc:aaf7f1160ef591e625cb67d208c6eb6c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Settings returns the application settings object; asserts it is open.  <br /></td></tr>
 <tr class="separator:aaf7f1160ef591e625cb67d208c6eb6c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3e414d029ec861ecafbbd3d8d9654359"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a3e414d029ec861ecafbbd3d8d9654359">MigrateSeamlySettingsLocation</a> (const QString &amp;appIniFileName, const QStringList &amp;legacyAppIniFileNames, bool *migrated=nullptr)</td></tr>
-<tr class="memdesc:a3e414d029ec861ecafbbd3d8d9654359"><td class="mdescLeft">&#160;</td><td class="mdescRight">MigrateSeamlySettingsLocation resolves this app's settings-file path under the unified "Seamly" organization (Task 15), migrating the file forward from the pre-unification "Seamly2DTeam" organization folder on first run after an upgrade.  <br /></td></tr>
+<tr class="memdesc:a3e414d029ec861ecafbbd3d8d9654359"><td class="mdescLeft">&#160;</td><td class="mdescRight">MigrateSeamlySettingsLocation migrates application settings files from the previous "Seamly2DTeam" folder to the new unified "Seamly" folder with a subdirectory for each app. Enables future applications to share settings and data.  <br /></td></tr>
 <tr class="separator:a3e414d029ec861ecafbbd3d8d9654359"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a45c0d86a724548a095a807084c044fc4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a45c0d86a724548a095a807084c044fc4">NotifySeamlySettingsMigrated</a> (const QString &amp;appDisplayName)</td></tr>
-<tr class="memdesc:a45c0d86a724548a095a807084c044fc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">NotifySeamlySettingsMigrated shows a one-time informational dialog after Task 15 settings migration moved a user's preferences to the new unified "Seamly" location. Only call this from a confirmed GUI-mode code path — never from a headless/CLI export run or an automated test, since a modal dialog with no automatic dismissal would hang a scripted caller waiting on process exit.  <br /></td></tr>
+<tr class="memdesc:a45c0d86a724548a095a807084c044fc4"><td class="mdescLeft">&#160;</td><td class="mdescRight">NotifySeamlySettingsMigrated shows a one-time informational dialog after settings migration moved a user's preferences to the new unified "Seamly" location. Only call this from a confirmed GUI-mode code path — never from a headless/CLI export run or an automated test, since a modal dialog with no automatic dismissal would hang a scripted caller waiting on process exit.  <br /></td></tr>
 <tr class="separator:a45c0d86a724548a095a807084c044fc4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a384ef91c00a79b213594deaca3da465f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a384ef91c00a79b213594deaca3da465f">NotifySeamlyDataLocation</a> ()</td></tr>
+<tr class="memdesc:a384ef91c00a79b213594deaca3da465f"><td class="mdescLeft">&#160;</td><td class="mdescRight">NotifySeamlyDataLocation shows the one-shot fresh-install notice about where Seamly keeps its data and how existing user files were backed up.  <br /></td></tr>
+<tr class="separator:a384ef91c00a79b213594deaca3da465f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a63c2326cbf6b742e49a9005a60d29206"><td class="memTemplParams" colspan="2">template&lt;typename T &gt; </td></tr>
 <tr class="memitem:a63c2326cbf6b742e49a9005a60d29206"><td class="memTemplItemLeft" align="right" valign="top">QString&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a63c2326cbf6b742e49a9005a60d29206">LocaleToString</a> (const T &amp;value)</td></tr>
 <tr class="separator:a63c2326cbf6b742e49a9005a60d29206"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af0feb90ee902a084bfc7abe2afb5a744"><td class="memItemLeft" align="right" valign="top">QGraphicsScene *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#af0feb90ee902a084bfc7abe2afb5a744">getCurrentScene</a> () const</td></tr>
+<tr class="memdesc:af0feb90ee902a084bfc7abe2afb5a744"><td class="mdescLeft">&#160;</td><td class="mdescRight">getCurrentScene returns the current graphics scene; asserts it is set.  <br /></td></tr>
 <tr class="separator:af0feb90ee902a084bfc7abe2afb5a744"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a2f8427be7b244fd1d1f16ede1bd1dd0a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a2f8427be7b244fd1d1f16ede1bd1dd0a">setCurrentScene</a> (QGraphicsScene **value)</td></tr>
+<tr class="memdesc:a2f8427be7b244fd1d1f16ede1bd1dd0a"><td class="mdescLeft">&#160;</td><td class="mdescRight">setCurrentScene stores the address of the caller's current-scene pointer.  <br /></td></tr>
 <tr class="separator:a2f8427be7b244fd1d1f16ede1bd1dd0a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:adad4a5d898ccf03d503fdf9896845eda"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../da/d5d/classVMainGraphicsView.html">VMainGraphicsView</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#adad4a5d898ccf03d503fdf9896845eda">getSceneView</a> () const</td></tr>
+<tr class="memdesc:adad4a5d898ccf03d503fdf9896845eda"><td class="mdescLeft">&#160;</td><td class="mdescRight">getSceneView returns the main graphics view.  <br /></td></tr>
 <tr class="separator:adad4a5d898ccf03d503fdf9896845eda"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae268ff4b92ec50ceeb624ede966ad2a6"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#ae268ff4b92ec50ceeb624ede966ad2a6">setSceneView</a> (<a class="el" href="../../da/d5d/classVMainGraphicsView.html">VMainGraphicsView</a> *value)</td></tr>
+<tr class="memdesc:ae268ff4b92ec50ceeb624ede966ad2a6"><td class="mdescLeft">&#160;</td><td class="mdescRight">setSceneView sets the main graphics view.  <br /></td></tr>
 <tr class="separator:ae268ff4b92ec50ceeb624ede966ad2a6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a82a68e4e4625193cb2cb439325ab8699"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a82a68e4e4625193cb2cb439325ab8699">toPixel</a> (double val) const</td></tr>
+<tr class="memdesc:a82a68e4e4625193cb2cb439325ab8699"><td class="mdescLeft">&#160;</td><td class="mdescRight">toPixel converts a value in the pattern unit to pixels.  <br /></td></tr>
 <tr class="separator:a82a68e4e4625193cb2cb439325ab8699"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50d149897aa4a87d01a071420d86c6c5"><td class="memItemLeft" align="right" valign="top">double&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a50d149897aa4a87d01a071420d86c6c5">fromPixel</a> (double pix) const</td></tr>
+<tr class="memdesc:a50d149897aa4a87d01a071420d86c6c5"><td class="mdescLeft">&#160;</td><td class="mdescRight">fromPixel converts pixels to a value in the pattern unit.  <br /></td></tr>
 <tr class="separator:a50d149897aa4a87d01a071420d86c6c5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0dfd5d5f8049b62a35c870ea3521b616"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a0dfd5d5f8049b62a35c870ea3521b616">setCurrentDocument</a> (<a class="el" href="../../d8/dba/classVAbstractPattern.html">VAbstractPattern</a> *<a class="el" href="../../db/dda/classVAbstractApplication.html#a83712518dcd81978d3f54ef8cb77bf7f">doc</a>)</td></tr>
+<tr class="memdesc:a0dfd5d5f8049b62a35c870ea3521b616"><td class="mdescLeft">&#160;</td><td class="mdescRight">setCurrentDocument sets the active pattern document.  <br /></td></tr>
 <tr class="separator:a0dfd5d5f8049b62a35c870ea3521b616"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ae1b899800e84b0875383c64d76ad3e64"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d8/dba/classVAbstractPattern.html">VAbstractPattern</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#ae1b899800e84b0875383c64d76ad3e64">getCurrentDocument</a> () const</td></tr>
+<tr class="memdesc:ae1b899800e84b0875383c64d76ad3e64"><td class="mdescLeft">&#160;</td><td class="mdescRight">getCurrentDocument returns the active pattern document; asserts it is set.  <br /></td></tr>
 <tr class="separator:ae1b899800e84b0875383c64d76ad3e64"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aebdbce178306c330a0e33b3a1107c1fb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#aebdbce178306c330a0e33b3a1107c1fb">setCurrentData</a> (<a class="el" href="../../d2/d83/classVContainer.html">VContainer</a> *<a class="el" href="../../db/dda/classVAbstractApplication.html#a226cf6b25116f6408e94fe87d53e09d7">data</a>)</td></tr>
+<tr class="memdesc:aebdbce178306c330a0e33b3a1107c1fb"><td class="mdescLeft">&#160;</td><td class="mdescRight">setCurrentData sets the active variable container.  <br /></td></tr>
 <tr class="separator:aebdbce178306c330a0e33b3a1107c1fb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a66802fa332e70eed60f483f1a725bef1"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d2/d83/classVContainer.html">VContainer</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a66802fa332e70eed60f483f1a725bef1">getCurrentData</a> () const</td></tr>
+<tr class="memdesc:a66802fa332e70eed60f483f1a725bef1"><td class="mdescLeft">&#160;</td><td class="mdescRight">getCurrentData returns the active variable container; asserts it is set.  <br /></td></tr>
 <tr class="separator:a66802fa332e70eed60f483f1a725bef1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a55128bf836ebd9f9875ad787cb022292"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a55128bf836ebd9f9875ad787cb022292">getOpeningPattern</a> () const</td></tr>
+<tr class="memdesc:a55128bf836ebd9f9875ad787cb022292"><td class="mdescLeft">&#160;</td><td class="mdescRight">getOpeningPattern reports whether a pattern file is being opened.  <br /></td></tr>
 <tr class="separator:a55128bf836ebd9f9875ad787cb022292"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a311fbafead9e7563ac189b123b1513ba"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a311fbafead9e7563ac189b123b1513ba">setOpeningPattern</a> ()</td></tr>
+<tr class="memdesc:a311fbafead9e7563ac189b123b1513ba"><td class="mdescLeft">&#160;</td><td class="mdescRight">setOpeningPattern toggles the opening-pattern flag; it does not set it.  <br /></td></tr>
 <tr class="separator:a311fbafead9e7563ac189b123b1513ba"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a442b5d6addd10367c87f86eebba2ced2"><td class="memItemLeft" align="right" valign="top">QWidget *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a442b5d6addd10367c87f86eebba2ced2">getMainWindow</a> () const</td></tr>
+<tr class="memdesc:a442b5d6addd10367c87f86eebba2ced2"><td class="mdescLeft">&#160;</td><td class="mdescRight">getMainWindow returns the main window widget.  <br /></td></tr>
 <tr class="separator:a442b5d6addd10367c87f86eebba2ced2"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a10d1e05f0f266507a37c5fc497d1203b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a10d1e05f0f266507a37c5fc497d1203b">setMainWindow</a> (QWidget *value)</td></tr>
+<tr class="memdesc:a10d1e05f0f266507a37c5fc497d1203b"><td class="mdescLeft">&#160;</td><td class="mdescRight">setMainWindow sets the main window widget; asserts it is not null.  <br /></td></tr>
 <tr class="separator:a10d1e05f0f266507a37c5fc497d1203b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5ee7ed495fc2df2bd6cc924767c82cc8"><td class="memItemLeft" align="right" valign="top">QUndoStack *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a5ee7ed495fc2df2bd6cc924767c82cc8">getUndoStack</a> () const</td></tr>
+<tr class="memdesc:a5ee7ed495fc2df2bd6cc924767c82cc8"><td class="mdescLeft">&#160;</td><td class="mdescRight">getUndoStack returns the shared undo stack.  <br /></td></tr>
 <tr class="separator:a5ee7ed495fc2df2bd6cc924767c82cc8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a823b7e97a16df7584127a53635ecc3fa"><td class="memItemLeft" align="right" valign="top">virtual bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a823b7e97a16df7584127a53635ecc3fa">isAppInGUIMode</a> () const =0</td></tr>
 <tr class="separator:a823b7e97a16df7584127a53635ecc3fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -226,6 +252,7 @@ Protected Attributes</h2></td></tr>
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
 <tr class="memitem:a62efee28a6929615e17eb77f79d57caa"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dda/classVAbstractApplication.html#a62efee28a6929615e17eb77f79d57caa">ClearTranslation</a> ()</td></tr>
+<tr class="memdesc:a62efee28a6929615e17eb77f79d57caa"><td class="mdescLeft">&#160;</td><td class="mdescRight">ClearTranslation removes and deletes every installed translator.  <br /></td></tr>
 <tr class="separator:a62efee28a6929615e17eb77f79d57caa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
@@ -278,9 +305,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00070">70</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p><a class="el" href="../../db/dda/classVAbstractApplication.html">VAbstractApplication</a> sets logging rules, high-DPI pixmaps, and a settings sync on quit. </p>
 
-<p class="reference">References <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00225">Settings()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00079">79</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00136">Settings()</a>.</p>
 
 </div>
 </div>
@@ -307,7 +336,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00118">118</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>~VAbstractApplication is empty; Qt parent ownership releases the members. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00127">127</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
 
 </div>
 </div>
@@ -335,11 +366,13 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00403">403</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>ClearTranslation removes and deletes every installed translator. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00162">appTranslator</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00163">pmsTranslator</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00161">qtBaseTranslator</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00159">qtTranslator</a>, and <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00160">qtxmlTranslator</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00472">472</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00360">loadTranslations()</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00166">appTranslator</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00167">pmsTranslator</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00165">qtBaseTranslator</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00163">qtTranslator</a>, and <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00164">qtxmlTranslator</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00428">loadTranslations()</a>.</p>
 
 </div>
 </div>
@@ -359,9 +392,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00354">354</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>fromPixel converts pixels to a value in the pattern unit. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00169">_patternUnit</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00242">FromPixel()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00302">302</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00173">_patternUnit</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00242">FromPixel()</a>.</p>
 
 </div>
 </div>
@@ -380,9 +415,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00165">165</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>getCurrentData returns the active variable container; asserts it is set. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00177">data</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00349">349</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00181">data</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>.</p>
 
 </div>
 </div>
@@ -401,9 +438,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00152">152</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>getCurrentDocument returns the active pattern document; asserts it is set. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00176">doc</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00334">334</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00180">doc</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>.</p>
 
 </div>
 </div>
@@ -422,9 +461,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00323">323</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>getCurrentScene returns the current graphics scene; asserts it is set. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00173">currentScene</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00383">383</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00177">currentScene</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>.</p>
 
 </div>
 </div>
@@ -451,9 +492,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00189">189</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00193">193</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00171">patternFilePath</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00175">patternFilePath</a>.</p>
 
 </div>
 </div>
@@ -472,9 +513,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00184">184</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>getMainWindow returns the main window widget. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00152">mainWindow</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00361">361</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00156">mainWindow</a>.</p>
 
 </div>
 </div>
@@ -493,9 +536,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00172">172</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>getOpeningPattern reports whether a pattern file is being opened. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00183">openingPattern</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00309">309</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00187">openingPattern</a>.</p>
 
 </div>
 </div>
@@ -514,9 +559,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00336">336</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>getSceneView returns the main graphics view. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00174">sceneView</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00398">398</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00178">sceneView</a>.</p>
 
 </div>
 </div>
@@ -535,9 +582,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00197">197</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>getUndoStack returns the shared undo stack. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00146">undoStack</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00376">376</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00150">undoStack</a>.</p>
 
 </div>
 </div>
@@ -566,7 +615,7 @@ Private Attributes</h2></td></tr>
 
 <p>Implemented in <a class="el" href="../../d8/dd6/classTestApplication2D.html#a9b3fda3eb94de7a9aff99c179335db15">TestApplication2D</a>, <a class="el" href="../../da/db1/classApplication2D.html#a5db07c99651a1d2e2cf7b520bd147a37">Application2D</a>, and <a class="el" href="../../d0/d17/classApplicationME.html#a0489401980fff7d73a5afd4e87618260">ApplicationME</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00360">loadTranslations()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00428">loadTranslations()</a>.</p>
 
 </div>
 </div>
@@ -613,9 +662,11 @@ Private Attributes</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00360">360</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>loadTranslations loads and installs the Qt and application translators for a locale. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00162">appTranslator</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00403">ClearTranslation()</a>, <a class="el" href="../../db/dda/classVAbstractApplication.html#a884c9e99ce93e12379b60ca08808f37f">initTranslateVariables()</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00163">pmsTranslator</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00161">qtBaseTranslator</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00159">qtTranslator</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00160">qtxmlTranslator</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00127">translationsPath()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00428">428</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00166">appTranslator</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00472">ClearTranslation()</a>, <a class="el" href="../../db/dda/classVAbstractApplication.html#a884c9e99ce93e12379b60ca08808f37f">initTranslateVariables()</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00167">pmsTranslator</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00165">qtBaseTranslator</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00163">qtTranslator</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00164">qtxmlTranslator</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00420">translationsPath()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00260">Application2D::Application2D()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00662">Application2D::initOptions()</a>, <a class="el" href="../../d8/dd0/application__me_8cpp_source.html#l00470">ApplicationME::initOptions()</a>, and <a class="el" href="../../dc/d14/app_2seamly2d_2main_8cpp_source.html#l00068">main()</a>.</p>
 
@@ -647,7 +698,7 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00202">202</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00206">206</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00083">qApp</a>.</p>
 
@@ -685,8 +736,7 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>MigrateSeamlySettingsLocation resolves this app's settings-file path under the unified "Seamly" organization (Task 15), migrating the file forward from the pre-unification "Seamly2DTeam" organization folder on first run after an upgrade. </p>
-<p>Before Task 15, seamly2d and seamlyme each stored one flat .ini file (named after the application) as a sibling inside a single shared "Seamly2DTeam" organization folder (Qt's native IniFormat/UserScope resolution). After Task 15 every Seamly application gets its own directory nested under the "Seamly" organization instead — QStandardPaths ::AppConfigLocation already resolves to AppData/Local/Seamly/&lt;AppName&gt; on Windows once the organization name is "Seamly" and the application name is set, matching the layout seamlyLayout already uses via QStandardPaths internally. This function creates that new per-app directory and — only if its settings file does not already exist there — copies it in from whichever legacy filename candidate is found, so upgrading is non-destructive and re-entrant (running it again after the file exists is a cheap no-op).</p>
+<p>MigrateSeamlySettingsLocation migrates application settings files from the previous "Seamly2DTeam" folder to the new unified "Seamly" folder with a subdirectory for each app. Enables future applications to share settings and data. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">appIniFileName</td><td>filename to use for this app's settings in the new location, e.g. "qt6_seamly2d.ini". </td></tr>
@@ -697,9 +747,35 @@ template&lt;typename T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>absolute path to this app's settings file in the new unified location. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00258">258</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00158">158</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00121">TestApplication2D::openSettings()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00811">Application2D::openSettings()</a>, and <a class="el" href="../../d8/dd0/application__me_8cpp_source.html#l00572">ApplicationME::openSettings()</a>.</p>
+
+</div>
+</div>
+<a id="a384ef91c00a79b213594deaca3da465f" name="a384ef91c00a79b213594deaca3da465f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a384ef91c00a79b213594deaca3da465f">&#9670;&#160;</a></span>NotifySeamlyDataLocation()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void VAbstractApplication::NotifySeamlyDataLocation </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>NotifySeamlyDataLocation shows the one-shot fresh-install notice about where Seamly keeps its data and how existing user files were backed up. </p>
+<p>The Windows installer seeds the pending flag into qt6_common.ini when it creates that file on a fresh machine. Whichever Seamly application runs first shows the notice, then marks it shown, so the suite shows it once in total. Only call this from a confirmed GUI-mode code path — a modal dialog would hang a headless or automated run. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00231">231</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00664">VCommonSettings::dataRoot()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00530">VCommonSettings::firstRunNoticePending()</a>, <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00156">mainWindow</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00542">VCommonSettings::markFirstRunNoticeShown()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dc/d14/app_2seamly2d_2main_8cpp_source.html#l00068">main()</a>.</p>
 
 </div>
 </div>
@@ -719,7 +795,7 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>NotifySeamlySettingsMigrated shows a one-time informational dialog after Task 15 settings migration moved a user's preferences to the new unified "Seamly" location. Only call this from a confirmed GUI-mode code path — never from a headless/CLI export run or an automated test, since a modal dialog with no automatic dismissal would hang a scripted caller waiting on process exit. </p>
+<p>NotifySeamlySettingsMigrated shows a one-time informational dialog after settings migration moved a user's preferences to the new unified "Seamly" location. Only call this from a confirmed GUI-mode code path — never from a headless/CLI export run or an automated test, since a modal dialog with no automatic dismissal would hang a scripted caller waiting on process exit. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">appDisplayName</td><td>human-readable app name to mention in the message (e.g. "Seamly2D"). </td></tr>
@@ -727,9 +803,9 @@ template&lt;typename T &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00312">312</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00211">211</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00152">mainWindow</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00156">mainWindow</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00662">Application2D::initOptions()</a>, and <a class="el" href="../../db/de0/app_2seamlyme_2main_8cpp_source.html#l00064">main()</a>.</p>
 
@@ -777,11 +853,13 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00134">134</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>patternType returns the measurements type of the open pattern. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00170">_patternType</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00260">260</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00140">setPatternType()</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00174">_patternType</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00267">setPatternType()</a>.</p>
 
 </div>
 </div>
@@ -800,11 +878,13 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00203">203</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>patternUnit returns the pattern's measurement unit. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00169">_patternUnit</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00274">274</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00215">setPatternUnit()</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00173">_patternUnit</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00288">setPatternUnit()</a>.</p>
 
 </div>
 </div>
@@ -823,9 +903,11 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00209">209</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>patternUnitP returns a pointer to the pattern unit, for callers that track changes. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00169">_patternUnit</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00281">281</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00173">_patternUnit</a>.</p>
 
 </div>
 </div>
@@ -845,9 +927,11 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00159">159</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>setCurrentData sets the active variable container. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00177">data</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00342">342</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00181">data</a>.</p>
 
 </div>
 </div>
@@ -867,9 +951,11 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00146">146</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>setCurrentDocument sets the active pattern document. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00176">doc</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00327">327</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00180">doc</a>.</p>
 
 </div>
 </div>
@@ -889,9 +975,11 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00330">330</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>setCurrentScene stores the address of the caller's current-scene pointer. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00173">currentScene</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00391">391</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00177">currentScene</a>.</p>
 
 </div>
 </div>
@@ -919,9 +1007,9 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00195">195</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00199">199</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00171">patternFilePath</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00175">patternFilePath</a>.</p>
 
 </div>
 </div>
@@ -941,9 +1029,11 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00190">190</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>setMainWindow sets the main window widget; asserts it is not null. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00152">mainWindow</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00368">368</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00156">mainWindow</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../dc/d14/app_2seamly2d_2main_8cpp_source.html#l00068">main()</a>.</p>
 
@@ -964,9 +1054,11 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00178">178</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>setOpeningPattern toggles the opening-pattern flag; it does not set it. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00183">openingPattern</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00316">316</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00187">openingPattern</a>.</p>
 
 </div>
 </div>
@@ -986,9 +1078,11 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00140">140</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>setPatternType sets the measurements type of the open pattern. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00170">_patternType</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00134">patternType()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00267">267</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00174">_patternType</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00260">patternType()</a>.</p>
 
 </div>
 </div>
@@ -1008,9 +1102,11 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00215">215</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>setPatternUnit sets the pattern's measurement unit. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00169">_patternUnit</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00203">patternUnit()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00288">288</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00173">_patternUnit</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00274">patternUnit()</a>.</p>
 
 </div>
 </div>
@@ -1030,9 +1126,11 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00342">342</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>setSceneView sets the main graphics view. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00174">sceneView</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00405">405</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00178">sceneView</a>.</p>
 
 </div>
 </div>
@@ -1051,14 +1149,13 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p>getSettings hide settings constructor. </p>
-<dl class="section return"><dt>Returns</dt><dd>pointer to class for acssesing to settings in ini file. </dd></dl>
+<p>Settings returns the application settings object; asserts it is open. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00225">225</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00136">136</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00157">m_settings</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>.</p>
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00161">m_settings</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00070">VAbstractApplication()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00079">VAbstractApplication()</a>.</p>
 
 </div>
 </div>
@@ -1078,9 +1175,11 @@ template&lt;typename T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00348">348</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p>toPixel converts a value in the pattern unit to pixels. </p>
 
-<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00169">_patternUnit</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00295">295</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00173">_patternUnit</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>.</p>
 
 </div>
 </div>
@@ -1136,9 +1235,9 @@ template&lt;typename T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>path to a directory that contains QM files, default from CONFIG+=embed_translations as set in translations.pri </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00127">127</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00420">420</a> of file <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html">vabstractapplication.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00360">loadTranslations()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00428">loadTranslations()</a>.</p>
 
 </div>
 </div>
@@ -1163,9 +1262,9 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00170">170</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00174">174</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00134">patternType()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00140">setPatternType()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00260">patternType()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00267">setPatternType()</a>.</p>
 
 </div>
 </div>
@@ -1189,9 +1288,9 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00169">169</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00173">173</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00354">fromPixel()</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00203">patternUnit()</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00209">patternUnitP()</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00215">setPatternUnit()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00348">toPixel()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00302">fromPixel()</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00274">patternUnit()</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00281">patternUnitP()</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00288">setPatternUnit()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00295">toPixel()</a>.</p>
 
 </div>
 </div>
@@ -1215,9 +1314,9 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00162">162</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00166">166</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00403">ClearTranslation()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00360">loadTranslations()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00472">ClearTranslation()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00428">loadTranslations()</a>.</p>
 
 </div>
 </div>
@@ -1241,9 +1340,9 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00173">173</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00177">177</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00323">getCurrentScene()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00330">setCurrentScene()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00383">getCurrentScene()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00391">setCurrentScene()</a>.</p>
 
 </div>
 </div>
@@ -1267,9 +1366,9 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00177">177</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00181">181</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00165">getCurrentData()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00159">setCurrentData()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00349">getCurrentData()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00342">setCurrentData()</a>.</p>
 
 </div>
 </div>
@@ -1293,9 +1392,9 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00176">176</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00180">180</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00152">getCurrentDocument()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00146">setCurrentDocument()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00334">getCurrentDocument()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00327">setCurrentDocument()</a>.</p>
 
 </div>
 </div>
@@ -1321,9 +1420,9 @@ template&lt;typename T &gt; </div>
 
 <p>settings pointer to settings. Help hide constructor creation settings. Make make code more readable. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00157">157</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00161">161</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00121">TestApplication2D::openSettings()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00811">Application2D::openSettings()</a>, <a class="el" href="../../d8/dd0/application__me_8cpp_source.html#l00572">ApplicationME::openSettings()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00875">Application2D::Seamly2DSettings()</a>, <a class="el" href="../../d8/dd0/application__me_8cpp_source.html#l00634">ApplicationME::seamlyMeSettings()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00225">Settings()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/dc8/Seamly2DTest_2qttestmainlambda_8cpp_source.html#l00121">TestApplication2D::openSettings()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00811">Application2D::openSettings()</a>, <a class="el" href="../../d8/dd0/application__me_8cpp_source.html#l00572">ApplicationME::openSettings()</a>, <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00875">Application2D::Seamly2DSettings()</a>, <a class="el" href="../../d8/dd0/application__me_8cpp_source.html#l00634">ApplicationME::seamlyMeSettings()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00136">Settings()</a>.</p>
 
 </div>
 </div>
@@ -1349,9 +1448,9 @@ template&lt;typename T &gt; </div>
 
 <p>mainWindow pointer to main window. Usefull if need create modal dialog. Without pointer to main window modality doesn't work. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00152">152</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00156">156</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00763">Application2D::event()</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00184">getMainWindow()</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00312">NotifySeamlySettingsMigrated()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00190">setMainWindow()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00763">Application2D::event()</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00361">getMainWindow()</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00231">NotifySeamlyDataLocation()</a>, <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00211">NotifySeamlySettingsMigrated()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00368">setMainWindow()</a>.</p>
 
 </div>
 </div>
@@ -1377,9 +1476,9 @@ template&lt;typename T &gt; </div>
 
 <p>openingPattern true when we opening pattern. If something will be wrong in formula this help understand if we can allow user use Undo option. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00183">183</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00187">187</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00172">getOpeningPattern()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00178">setOpeningPattern()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00309">getOpeningPattern()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00316">setOpeningPattern()</a>.</p>
 
 </div>
 </div>
@@ -1403,9 +1502,9 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00171">171</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00175">175</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00189">getFilePath()</a>, and <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00195">setFilePath()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00193">getFilePath()</a>, and <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00199">setFilePath()</a>.</p>
 
 </div>
 </div>
@@ -1429,9 +1528,9 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00163">163</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00167">167</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00403">ClearTranslation()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00360">loadTranslations()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00472">ClearTranslation()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00428">loadTranslations()</a>.</p>
 
 </div>
 </div>
@@ -1455,9 +1554,9 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00161">161</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00165">165</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00403">ClearTranslation()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00360">loadTranslations()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00472">ClearTranslation()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00428">loadTranslations()</a>.</p>
 
 </div>
 </div>
@@ -1481,9 +1580,9 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00159">159</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00163">163</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00403">ClearTranslation()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00360">loadTranslations()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00472">ClearTranslation()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00428">loadTranslations()</a>.</p>
 
 </div>
 </div>
@@ -1507,9 +1606,9 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00160">160</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00164">164</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00403">ClearTranslation()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00360">loadTranslations()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00472">ClearTranslation()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00428">loadTranslations()</a>.</p>
 
 </div>
 </div>
@@ -1533,9 +1632,9 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00174">174</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00178">178</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00336">getSceneView()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00342">setSceneView()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00398">getSceneView()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00405">setSceneView()</a>.</p>
 
 </div>
 </div>
@@ -1559,9 +1658,9 @@ template&lt;typename T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00146">146</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html#l00150">150</a> of file <a class="el" href="../../d5/d74/vabstractapplication_8h_source.html">vabstractapplication.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00260">Application2D::Application2D()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00197">getUndoStack()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00260">Application2D::Application2D()</a>, and <a class="el" href="../../d0/df6/vabstractapplication_8cpp_source.html#l00376">getUndoStack()</a>.</p>
 
 </div>
 </div>
