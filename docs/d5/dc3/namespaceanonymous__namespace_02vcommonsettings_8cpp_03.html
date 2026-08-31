@@ -113,9 +113,9 @@ Functions</h2></td></tr>
 <tr class="separator:a8dd613aa76590f88f4a60fee8b89ae13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a3abe77374f88330d2dce8aa3fc77479c"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a3abe77374f88330d2dce8aa3fc77479c">PrepareStandardFiles</a> (const QString &amp;currentPath, const QString &amp;standardPath, const QString &amp;defPath)</td></tr>
 <tr class="separator:a3abe77374f88330d2dce8aa3fc77479c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0c351cecb80a5bf23fa2b4629c099a54"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a0c351cecb80a5bf23fa2b4629c099a54">readDataRoot</a> (const QString &amp;organization)</td></tr>
-<tr class="memdesc:a0c351cecb80a5bf23fa2b4629c099a54"><td class="mdescLeft">&#160;</td><td class="mdescRight">readDataRoot reads the configured user-data root out of the shared "common" settings file, falling back to the built-in default when nothing has been configured.  <br /></td></tr>
-<tr class="separator:a0c351cecb80a5bf23fa2b4629c099a54"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a208659b4f4fef7ab8a1cb8c5eea94a10"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a208659b4f4fef7ab8a1cb8c5eea94a10">readDataRoot</a> ()</td></tr>
+<tr class="memdesc:a208659b4f4fef7ab8a1cb8c5eea94a10"><td class="mdescLeft">&#160;</td><td class="mdescRight">readDataRoot reads the configured user-data root out of the shared "common" settings file, falling back to the built-in default when nothing has been configured.  <br /></td></tr>
+<tr class="separator:a208659b4f4fef7ab8a1cb8c5eea94a10"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
 Variables</h2></td></tr>
@@ -427,6 +427,8 @@ Variables</h2></td></tr>
 <tr class="separator:a7136b7a2ed9ead08f0f849054160457b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a71ae26c24c640338ca8bc4dba19b13fc"><td class="memItemLeft" align="right" valign="top">const QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a71ae26c24c640338ca8bc4dba19b13fc">unknownOrganizationName</a> = QStringLiteral(&quot;Unknown Organization&quot;)</td></tr>
 <tr class="separator:a71ae26c24c640338ca8bc4dba19b13fc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3295063fe877a3e18073b9ba00f3f75b"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a3295063fe877a3e18073b9ba00f3f75b">commonSettingsBaseDirOverride</a></td></tr>
+<tr class="separator:a3295063fe877a3e18073b9ba00f3f75b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="ad33f2f0b5106c172dee047d0af12ebc6" name="ad33f2f0b5106c172dee047d0af12ebc6"></a>
@@ -497,8 +499,8 @@ Variables</h2></td></tr>
 
 </div>
 </div>
-<a id="a0c351cecb80a5bf23fa2b4629c099a54" name="a0c351cecb80a5bf23fa2b4629c099a54"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0c351cecb80a5bf23fa2b4629c099a54">&#9670;&#160;</a></span>readDataRoot()</h2>
+<a id="a208659b4f4fef7ab8a1cb8c5eea94a10" name="a208659b4f4fef7ab8a1cb8c5eea94a10"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a208659b4f4fef7ab8a1cb8c5eea94a10">&#9670;&#160;</a></span>readDataRoot()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -506,25 +508,18 @@ Variables</h2></td></tr>
         <tr>
           <td class="memname">QString anonymous_namespace{vcommonsettings.cpp}::readDataRoot </td>
           <td>(</td>
-          <td class="paramtype">const QString &amp;&#160;</td>
-          <td class="paramname"><em>organization</em></td><td>)</td>
+          <td class="paramname"></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>readDataRoot reads the configured user-data root out of the shared "common" settings file, falling back to the built-in default when nothing has been configured. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">organization</td><td>organization name identifying the shared settings file to read. </td></tr>
-  </table>
-  </dd>
-</dl>
 <dl class="section return"><dt>Returns</dt><dd>absolute path of the user-data root, in Qt's '/' separator form; never empty. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00455">455</a> of file <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html">vcommonsettings.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00457">457</a> of file <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html">vcommonsettings.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00271">commonIniFilename</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00509">VCommonSettings::getDefaultDataRoot()</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00086">settingPathsDataRoot</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00483">VCommonSettings::commonSettingsFilePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00599">VCommonSettings::getDefaultDataRoot()</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00086">settingPathsDataRoot</a>.</p>
 
 </div>
 </div>
@@ -569,6 +564,23 @@ Variables</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Variable Documentation</h2>
+<a id="a3295063fe877a3e18073b9ba00f3f75b" name="a3295063fe877a3e18073b9ba00f3f75b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3295063fe877a3e18073b9ba00f3f75b">&#9670;&#160;</a></span>commonSettingsBaseDirOverride</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">QString anonymous_namespace{vcommonsettings.cpp}::commonSettingsBaseDirOverride</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Test-only base-directory override for the common settings file; empty in production. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00448">448</a> of file <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html">vcommonsettings.cpp</a>.</p>
+
+</div>
+</div>
 <a id="a7136b7a2ed9ead08f0f849054160457b" name="a7136b7a2ed9ead08f0f849054160457b"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7136b7a2ed9ead08f0f849054160457b">&#9670;&#160;</a></span>pointNameSize</h2>
 
@@ -2647,7 +2659,7 @@ Variables</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00086">86</a> of file <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html">vcommonsettings.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00455">readDataRoot()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00457">readDataRoot()</a>.</p>
 
 </div>
 </div>

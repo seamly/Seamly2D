@@ -1,7 +1,7 @@
 <map id="SeamlyWelcomeDialog" name="SeamlyWelcomeDialog">
-<area shape="rect" id="node1" title=" " alt="" coords="5,1088,215,1268"/>
-<area shape="rect" id="node2" title=" " alt="" coords="51,779,126,857"/>
-<area shape="rect" id="node3" href="$d4/d80/classVSettings.html" title=" " alt="" coords="151,611,419,1025"/>
-<area shape="rect" id="node4" href="$de/d0f/classVCommonSettings.html" title=" " alt="" coords="166,132,403,561"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,1073,215,1253"/>
+<area shape="rect" id="node2" title=" " alt="" coords="51,765,126,842"/>
+<area shape="rect" id="node3" href="$d4/d80/classVSettings.html" title=" " alt="" coords="151,596,419,1011"/>
+<area shape="rect" id="node4" href="$de/d0f/classVCommonSettings.html" title=" " alt="" coords="152,132,417,547"/>
 <area shape="rect" id="node5" title=" " alt="" coords="242,5,327,83"/>
 </map>

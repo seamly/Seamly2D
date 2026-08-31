@@ -107,8 +107,9 @@ var namespaces_dup =
     [ "anonymous_namespace{vcommonsettings.cpp}", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html", [
       [ "ClearFormats", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#ad33f2f0b5106c172dee047d0af12ebc6", null ],
       [ "PrepareStandardFiles", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a3abe77374f88330d2dce8aa3fc77479c", null ],
-      [ "readDataRoot", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a0c351cecb80a5bf23fa2b4629c099a54", null ],
+      [ "readDataRoot", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a208659b4f4fef7ab8a1cb8c5eea94a10", null ],
       [ "SymlinkCopyDirRecursive", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a8dd613aa76590f88f4a60fee8b89ae13", null ],
+      [ "commonSettingsBaseDirOverride", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a3295063fe877a3e18073b9ba00f3f75b", null ],
       [ "pointNameSize", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a7136b7a2ed9ead08f0f849054160457b", null ],
       [ "settingBackupPath", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a33d50aa96456f560a5ac1845a77a682c", null ],
       [ "settingConfigurationAddress", "d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a7308b7a66e0e6d69b9b7aab47d4253d3", null ],

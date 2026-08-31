@@ -2,9 +2,10 @@ var vcommonsettings_8cpp =
 [
     [ "ClearFormats", "d4/d11/vcommonsettings_8cpp.html#ad33f2f0b5106c172dee047d0af12ebc6", null ],
     [ "PrepareStandardFiles", "d4/d11/vcommonsettings_8cpp.html#a3abe77374f88330d2dce8aa3fc77479c", null ],
-    [ "readDataRoot", "d4/d11/vcommonsettings_8cpp.html#a0c351cecb80a5bf23fa2b4629c099a54", null ],
+    [ "readDataRoot", "d4/d11/vcommonsettings_8cpp.html#a208659b4f4fef7ab8a1cb8c5eea94a10", null ],
     [ "SymlinkCopyDirRecursive", "d4/d11/vcommonsettings_8cpp.html#a8dd613aa76590f88f4a60fee8b89ae13", null ],
     [ "commonIniFilename", "d4/d11/vcommonsettings_8cpp.html#a9474e9c5c20683cf4a411eb51f84f3da", null ],
+    [ "commonSettingsBaseDirOverride", "d4/d11/vcommonsettings_8cpp.html#a3295063fe877a3e18073b9ba00f3f75b", null ],
     [ "migrationMarkerFileName", "d4/d11/vcommonsettings_8cpp.html#a4bf12fd444064d56141a99f6226d70b7", null ],
     [ "pointNameSize", "d4/d11/vcommonsettings_8cpp.html#a7136b7a2ed9ead08f0f849054160457b", null ],
     [ "settingBackupPath", "d4/d11/vcommonsettings_8cpp.html#a33d50aa96456f560a5ac1845a77a682c", null ],
