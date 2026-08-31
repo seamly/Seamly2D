@@ -86,6 +86,20 @@ public:
     // path below is derived from it, so pointing it at another drive or a cloud-synced
     // folder relocates patterns, measurements, templates, bodyscans, label templates,
     // images and backups together.
+    // The shared cross-application settings file, qt6_common.ini. It lives under
+    // GenericConfigLocation (%LOCALAPPDATA% on Windows, ~/.config on Linux,
+    // ~/Library/Preferences on macOS) because its paths/* values are absolute machine
+    // paths, which must not roam to another machine with a roaming Windows profile.
+    static QString       commonSettingsFilePath();
+    // Copies a pre-existing common settings file forward into that location:
+    // the pre-move Roaming file on Windows, then the pre-Task-15 "Seamly2DTeam"
+    // organization's qt6/qt5 files. Copy-if-missing; never overwrites or deletes.
+    // Called from the applications' openSettings(), before any settings value is read.
+    static QString       migrateCommonSettingsLocation();
+    // Test seam: redirect the base directory so the suite never touches the real
+    // per-user configuration. Pass an empty string to restore the platform location.
+    static void          setCommonSettingsBaseDir(const QString &baseDir);
+
     static QString       getDefaultDataRoot();
     static QString       getLegacyDataRoot();
     static QString       dataRoot();
@@ -582,7 +596,6 @@ public:
 private:
     Q_DISABLE_COPY(VCommonSettings)
 
-    QString              commonSettingsOrganization() const;
     static void          mergeStrayCommonSettings();
     static void          removeStrayCommonSettings(const QString &strayFileName);
 };

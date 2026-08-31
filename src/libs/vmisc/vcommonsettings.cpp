@@ -444,17 +444,19 @@ namespace
 /** Organization name QSettings substitutes when it is handed an empty one. */
 const QString unknownOrganizationName = QStringLiteral("Unknown Organization");
 
+/** Test-only base-directory override for the common settings file; empty in production. */
+QString commonSettingsBaseDirOverride;
+
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief readDataRoot reads the configured user-data root out of the shared "common"
  * settings file, falling back to the built-in default when nothing has been configured.
  *
- * @param organization organization name identifying the shared settings file to read.
  * @return absolute path of the user-data root, in Qt's '/' separator form; never empty.
  */
-QString readDataRoot(const QString &organization)
+QString readDataRoot()
 {
-    const QSettings settings(QSettings::IniFormat, QSettings::UserScope, organization, commonIniFilename);
+    const QSettings settings(VCommonSettings::commonSettingsFilePath(), QSettings::IniFormat);
     const QString configured = settings.value(settingPathsDataRoot).toString().trimmed();
 
     return configured.isEmpty() ? VCommonSettings::getDefaultDataRoot()
@@ -464,23 +466,111 @@ QString readDataRoot(const QString &organization)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief commonSettingsOrganization returns the organization name to use when opening the
- * shared, cross-application "common" settings file.
+ * @brief commonSettingsFilePath returns the absolute path of the shared qt6_common.ini.
  *
- * Since Task 15 the applications build their VCommonSettings from an explicit settings
- * *file path* (the VCommonSettings(fileName, format, parent) constructor). QSettings records
- * no organization for that constructor, so organizationName() is empty on those instances,
- * and QSettings silently substitutes the literal "Unknown Organization" for an empty
- * organization. The shared paths/* values were therefore being read and written under
- * %APPDATA%/Unknown Organization instead of the real %APPDATA%/Seamly folder. Falling back
- * to the application-wide organization name keeps every app on the one shared file.
+ * The file lives under GenericConfigLocation — %LOCALAPPDATA% on Windows, ~/.config on
+ * Linux, ~/Library/Preferences on macOS — so the change from Qt's IniFormat/UserScope
+ * default (%APPDATA%, Roaming) affects Windows only. Local, not Roaming, because the
+ * file's paths/* values are absolute machine paths: a roaming Windows profile would
+ * carry them to a machine where they are wrong. Task SettingsFiles.1.
  *
- * @return organization name for the shared common settings file.
+ * The organization mirrors what QSettings would use: the application-wide organization
+ * name, or the literal "Unknown Organization" when none is set. Every application sets
+ * "Seamly", so all of them resolve one file.
+ *
+ * @return absolute path, e.g. C:/Users/<user>/AppData/Local/Seamly/qt6_common.ini.
  */
-QString VCommonSettings::commonSettingsOrganization() const
+QString VCommonSettings::commonSettingsFilePath()
 {
-    const QString organization = organizationName();
-    return organization.isEmpty() ? QCoreApplication::organizationName() : organization;
+    QString base = commonSettingsBaseDirOverride;
+    if (base.isEmpty())
+    {
+        base = QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation);
+    }
+
+    QString organization = QCoreApplication::organizationName();
+    if (organization.isEmpty())
+    {
+        organization = unknownOrganizationName;
+    }
+
+    return base + QLatin1Char('/') + organization + QLatin1Char('/') + commonIniFilename
+           + QLatin1String(".ini");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setCommonSettingsBaseDir redirects the common settings file for the test suite.
+ *
+ * The tests must never read or write the developer's real per-user configuration, and
+ * QStandardPaths::GenericConfigLocation cannot be redirected per test. Production code
+ * must not call this.
+ *
+ * @param baseDir directory to resolve qt6_common.ini under; empty restores the platform
+ * location.
+ */
+void VCommonSettings::setCommonSettingsBaseDir(const QString &baseDir)
+{
+    commonSettingsBaseDirOverride = baseDir;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief migrateCommonSettingsLocation brings an existing common settings file forward
+ * into commonSettingsFilePath().
+ *
+ * Candidate sources, newest first; the first one that exists is copied:
+ *
+ *  1. the pre-move file under Qt's IniFormat/UserScope default (%APPDATA%\Seamly on
+ *     Windows — identical to the target on Linux and macOS, so skipped there);
+ *  2. the pre-Task-15 "Seamly2DTeam" organization's qt6_common.ini;
+ *  3. the qt5-era common.ini from either of those folders.
+ *
+ * Copy-if-missing and re-entrant: once the target exists, every later call is a cheap
+ * no-op, and no source file is ever modified or deleted — a rollback to an earlier
+ * release keeps working. Called from each application's openSettings() before any
+ * settings value is read.
+ *
+ * @return absolute path of the common settings file at its current location.
+ */
+QString VCommonSettings::migrateCommonSettingsLocation()
+{
+    const QString target = commonSettingsFilePath();
+    QDir().mkpath(QFileInfo(target).absolutePath());
+    if (QFileInfo::exists(target))
+    {
+        return target;
+    }
+
+    // Qt's own IniFormat/UserScope resolution names the pre-move folder, so a
+    // QSettings::setPath() redirection (the test suite) is honoured here too.
+    const QSettings roamingProbe(QSettings::IniFormat, QSettings::UserScope,
+                                 QCoreApplication::organizationName(), commonIniFilename);
+    const QString roamingDir = QFileInfo(roamingProbe.fileName()).absolutePath();
+
+    static const QString kLegacyOrganizationName = QStringLiteral("Seamly2DTeam");
+    const QSettings legacyProbe(QSettings::IniFormat, QSettings::UserScope,
+                                kLegacyOrganizationName, commonIniFilename);
+    const QString legacyDir = QFileInfo(legacyProbe.fileName()).absolutePath();
+
+    const QStringList candidates
+    {
+        roamingDir + QLatin1String("/qt6_common.ini"),
+        legacyDir + QLatin1String("/qt6_common.ini"),
+        roamingDir + QLatin1String("/common.ini"),
+        legacyDir + QLatin1String("/common.ini")
+    };
+
+    for (const QString &candidate : candidates)
+    {
+        if (candidate != target && QFileInfo::exists(candidate))
+        {
+            QFile::copy(candidate, target);
+            break;
+        }
+    }
+
+    return target;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -542,7 +632,7 @@ QString VCommonSettings::getLegacyDataRoot()
  */
 QString VCommonSettings::dataRoot()
 {
-    return readDataRoot(QCoreApplication::organizationName());
+    return readDataRoot();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -563,7 +653,7 @@ QString VCommonSettings::dataSubdirPath(const QString &subdirectory)
  */
 QString VCommonSettings::getDataRoot() const
 {
-    return readDataRoot(commonSettingsOrganization());
+    return readDataRoot();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -581,7 +671,7 @@ void VCommonSettings::setDataRoot(const QString &value)
 {
     const QString root = QDir::cleanPath(QDir::fromNativeSeparators(value.trimmed()));
 
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     settings.setValue(settingPathsDataRoot, root);
     settings.sync();
 
@@ -843,8 +933,7 @@ QString VCommonSettings::migrateAdoptedLegacyTree(const QString &legacyRoot, con
             << "already present";
 
     // Only now is it safe to repoint the configured root.
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope, QCoreApplication::organizationName(),
-                       commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     settings.setValue(settingPathsDataRoot, newRoot);
     settings.sync();
 
@@ -973,8 +1062,7 @@ QString VCommonSettings::initializeDataRoot(bool *adoptedLegacyTree)
     // the root, so a data root written by an affected build is not lost here.
     mergeStrayCommonSettings();
 
-    const QString organization = QCoreApplication::organizationName();
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope, organization, commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
 
     const QString configured = settings.value(settingPathsDataRoot).toString().trimmed();
     if (!configured.isEmpty())
@@ -1133,7 +1221,7 @@ bool VCommonSettings::pruneEmptyLegacyDataRoot(const QString &legacyRoot, const 
  * @brief mergeStrayCommonSettings recovers shared settings written to the wrong folder.
  *
  * Builds between Task 15 and Task 34 opened the shared common settings file with an empty
- * organization name (see commonSettingsOrganization()), so QSettings stored the shared
+ * organization name, so QSettings stored the shared
  * paths/* values under an "Unknown Organization" folder. This copies any such value forward
  * into the correctly located file, but only where that file has no value of its own, so a
  * setting the user has since changed always wins.
@@ -1163,7 +1251,7 @@ void VCommonSettings::mergeStrayCommonSettings()
         return;
     }
 
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope, organization, commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
 
     bool recovered = false;
     const QStringList strayKeys = straySettings.allKeys();
@@ -1247,14 +1335,14 @@ QString VCommonSettings::getDefaultIndividualSizePath()
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getIndividualSizePath() const
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     return settings.value(settingPathsIndividualMeasurements, getDefaultIndividualSizePath()).toString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::setIndividualSizePath(const QString &value)
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     settings.setValue(settingPathsIndividualMeasurements, value);
     settings.sync();
 }
@@ -1268,14 +1356,14 @@ QString VCommonSettings::getDefaultMultisizePath()
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getMultisizePath() const
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     return settings.value(settingPathsMultisizeMeasurements, getDefaultMultisizePath()).toString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::setMultisizePath(const QString &value)
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     settings.setValue(settingPathsMultisizeMeasurements, value);
     settings.sync();
 }
@@ -1289,14 +1377,14 @@ QString VCommonSettings::getDefaultTemplatePath()
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getTemplatePath() const
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     return settings.value(settingPathsTemplates, getDefaultTemplatePath()).toString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::setTemplatePath(const QString &value)
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     settings.setValue(settingPathsTemplates, value);
     settings.sync();
 }
@@ -1310,14 +1398,14 @@ QString VCommonSettings::getDefaultBodyScansPath()
 //---------------------------------------------------------------------------------------------------------------------
 QString VCommonSettings::getBodyScansPath() const
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     return settings.value(settingPathsBodyScans, getDefaultBodyScansPath()).toString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::setBodyScansPath(const QString &value)
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     settings.setValue(settingPathsBodyScans, value);
     settings.sync();
 }
@@ -2466,14 +2554,14 @@ void VCommonSettings::setHistoryDialogSize(const QSize &sz)
 //---------------------------------------------------------------------------------------------------------------------
 int VCommonSettings::GetLatestSkippedVersion() const
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     return settings.value(settingLatestSkippedVersion, 0x0).toInt();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::SetLatestSkippedVersion(int value)
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     settings.setValue(settingLatestSkippedVersion, value);
     settings.sync();
 }
@@ -2481,14 +2569,14 @@ void VCommonSettings::SetLatestSkippedVersion(int value)
 //---------------------------------------------------------------------------------------------------------------------
 QDate VCommonSettings::GetDateOfLastRemind() const
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     return settings.value(settingDateOfLastRemind, QDate(1900, 1, 1)).toDate();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::SetDateOfLastRemind(const QDate &date)
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     settings.setValue(settingDateOfLastRemind, date);
     settings.sync();
 }
@@ -2626,14 +2714,14 @@ void VCommonSettings::setDefaultNotchColor(const QString &value)
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::SetCSVWithHeader(bool withHeader)
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     settings.setValue(settingCSVWithHeader, withHeader);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 bool VCommonSettings::GetCSVWithHeader() const
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     return settings.value(settingCSVWithHeader, GetDefCSVWithHeader()).toBool();
 }
 
@@ -2646,14 +2734,14 @@ bool VCommonSettings::GetDefCSVWithHeader() const
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::SetCSVCodec(QStringConverter::Encoding encoding)
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     settings.setValue(settingCSVCodec, encoding);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 QStringConverter::Encoding VCommonSettings::GetCSVCodec() const
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     return settings.value(settingCSVCodec, GetDefCSVCodec()).value<QStringConverter::Encoding>();
 }
 
@@ -2669,7 +2757,7 @@ QStringConverter::Encoding VCommonSettings::GetDefCSVCodec() const
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::SetCSVSeparator(const QChar &separator)
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     switch(separator.toLatin1())
     {
         case '\t':
@@ -2690,7 +2778,7 @@ void VCommonSettings::SetCSVSeparator(const QChar &separator)
 //---------------------------------------------------------------------------------------------------------------------
 QChar VCommonSettings::GetCSVSeparator() const
 {
-    QSettings settings(this->format(), this->scope(), commonSettingsOrganization(), commonIniFilename);
+    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
     const quint8 separator = static_cast<quint8>(settings.value(settingCSVSeparator, 3).toUInt());
     switch(separator)
     {

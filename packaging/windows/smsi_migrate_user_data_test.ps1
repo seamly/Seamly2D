@@ -131,6 +131,15 @@ try {
         "dataRoot=$($newRoot.Replace('\', '/'))"
     )
 
+    # Task SettingsFiles.1: the live common settings file is <Local>\Seamly\qt6_common.ini.
+    $newLocalCommonDirectory = Join-Path $newLocal 'Seamly'
+    $newLocalCommon = Join-Path $newLocalCommonDirectory 'qt6_common.ini'
+    New-Item -ItemType Directory -Path $newLocalCommonDirectory -Force | Out-Null
+    Set-Content -LiteralPath $newLocalCommon -Value @(
+        '[paths]',
+        "dataRoot=$($newRoot.Replace('\', '/'))"
+    )
+
     & $migrationScript -Mode New -Destination $newDestination -PreviousDataRoot $newRoot `
         -RoamingSettingsRoot $newRoaming -LocalSettingsRoot $newLocal -ArchivePath $newArchive
 
@@ -143,6 +152,9 @@ try {
     Assert-That -Name 'new migration retains non-path settings' -Succeeded ($newSettingsText -match 'language=en')
     Assert-That -Name 'new migration records the selected root' `
         -Succeeded ($newSettingsText -match [regex]::Escape("dataRoot=$($newDestination.Replace('\', '/'))"))
+    $newLocalCommonText = Get-Content -LiteralPath $newLocalCommon -Raw
+    Assert-That -Name 'new migration updates the Local common settings file' `
+        -Succeeded ($newLocalCommonText -match [regex]::Escape("dataRoot=$($newDestination.Replace('\', '/'))"))
 
     $sameArchive = Join-Path $testRoot 'new\same-location.zip'
     & $migrationScript -Mode New -Destination $newRoot -PreviousDataRoot $newRoot `

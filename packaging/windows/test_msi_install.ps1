@@ -212,8 +212,15 @@ function Get-TreeInventory {
 # @return absolute path of the data root
 #------------------------------------------------------------------------------
 function Get-DataRootPath {
-    $commonIni = Join-Path $env:APPDATA 'Seamly\qt6_common.ini'
-    if (Test-Path -LiteralPath $commonIni) {
+    # Task SettingsFiles.1 moved the shared common settings file to Local; the
+    # Roaming path is checked second, for a machine the apps last ran on before
+    # the move.
+    $commonIniCandidates = @(
+        (Join-Path $env:LOCALAPPDATA 'Seamly\qt6_common.ini'),
+        (Join-Path $env:APPDATA 'Seamly\qt6_common.ini')
+    )
+    foreach ($commonIni in $commonIniCandidates) {
+        if (-not (Test-Path -LiteralPath $commonIni)) { continue }
         foreach ($line in (Get-Content -LiteralPath $commonIni -ErrorAction SilentlyContinue)) {
             if ($line -match '^\s*dataRoot\s*=\s*(.+?)\s*$') {
                 # QSettings writes forward slashes even on Windows.

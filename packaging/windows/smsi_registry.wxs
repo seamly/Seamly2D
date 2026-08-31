@@ -87,8 +87,10 @@
     </ComponentGroup>
 
     <!-- ============ per-user settings cleanup on uninstall ================ -->
-    <!-- Each app's AppConfigLocation settings (%LOCALAPPDATA%\Seamly\<App>\)
-         and the shared common settings (%APPDATA%\Seamly\) are per-user, so a
+    <!-- Each app's AppConfigLocation settings and the shared qt6_common.ini
+         (both under %LOCALAPPDATA%\Seamly since Task SettingsFiles.1; the
+         %APPDATA%\Seamly folder is the pre-move location, still removed here
+         for installs that predate the move) are per-user, so a
          perMachine uninstall cannot reach every user's profile - only the one
          it runs as. See the same limitation already documented for
          SEAMLYLEGACYSTARTMENU in smsi_legacy.wxs.
