@@ -27,7 +27,7 @@ Decisions (2026-08-30):
 
 Why: `dataRoot` and the shared `paths/*` keys hold absolute machine paths. Roaming profiles carry them to other machines, where they are wrong. Qt maps `QStandardPaths::GenericConfigLocation` to `%LOCALAPPDATA%` on Windows, `~/.config` on Linux, and `~/Library/Preferences` on macOS — the last two are already where the file lives, so the move changes Windows only.
 
-Do NOT use a global `QSettings::setPath()` redirect: it would also move the `Seamly2DTeam` and `Unknown Organization` legacy probes, which must keep reading the Roaming locations.
+Do NOT use a global `QSettings::setPath()` redirect: it would also move the `Seamly2DTeam` and legacy probes, which must keep reading the Roaming locations.
 
 - [x] SettingsFiles.1.1 Add `VCommonSettings::commonSettingsFilePath()` — `<GenericConfigLocation>/<organization>/qt6_common.ini` — plus a test-only base-dir override, in `src/libs/vmisc/vcommonsettings.{h,cpp}`
 - [x] SettingsFiles.1.2 Point every common-settings `QSettings` construction in `vcommonsettings.cpp` at that path (the explicit-path constructor). Keep the `"Unknown Organization"` stray probe in `mergeStrayCommonSettings()` on the old constructor form. `commonSettingsOrganization()` removed — unused after the change
@@ -80,4 +80,16 @@ Found 2026-08-31 while verifying SettingsFiles.3. The seed CA had the same defec
 - [ ] SettingsFiles.4.2 Add the matching authoring assertions
 - [ ] SettingsFiles.4.3 Re-verify migration with a real upgrade install (test cases B/C). The 2026-08-21 verification exercised the script directly, not the CA command line, so live migration has run with mangled `-Destination` until this is fixed
 
-CI: Task SettingsFiles.1 pushes with the skip token. Tasks SettingsFiles.2/3/4 touch `packaging/**` — push without it.
+## Task SettingsFiles.5 — one-shot fresh-install data notice
+
+Decision (2026-08-31): at the first app run after a fresh install, show a popup: the sample data and any existing user files (patterns, measurements, images, layouts, and more) are left in their original location as a backup, zipped into a zip file as a second backup, and copied to the new SeamlyData directory for the programs to use.
+
+Mechanism: the seeder writes `[notices] firstRunDataNotice=pending` into `qt6_common.ini`, but only when it creates that file — an existing file marks a machine a previous install already ran on. Whichever Seamly app runs first shows the notice, then rewrites the value as `shown`, so the suite shows it once in total. An absent key (dev build, platform without an installer, upgrade) shows nothing.
+
+- [x] SettingsFiles.5.1 `smsi_seed_user_settings.ps1` seeds the pending flag on a fresh machine only
+- [x] SettingsFiles.5.2 `VCommonSettings::firstRunNoticePending()` / `markFirstRunNoticeShown()`; `VAbstractApplication::NotifySeamlyDataLocation()` shows-and-marks; called from the Seamly2D and SeamlyMe GUI-mode paths only
+- [x] SettingsFiles.5.3 SeamlyLayout shows the same notice from `qt_frontend/main.cpp` (self-contained — it does not link vmisc), on the first event-loop pass
+- [x] SettingsFiles.5.4 Tests: seeder suite (fresh = pending, existing file = no flag); `TST_DataRoot::FirstRunNoticePendingOnlyWhileSeeded` (CI); `test_msi_install.ps1` asserts the flag
+- [ ] SettingsFiles.5.5 Live verify on a fresh install: the popup appears once at the first app run, the value flips to `shown`, and no later run repeats it
+
+CI: Task SettingsFiles.1 pushes with the skip token. Tasks SettingsFiles.2/3/4/5 touch `packaging/**` — push without it.

@@ -110,6 +110,10 @@ public:
                                                     const QStringList &legacyAppIniFileNames,
                                                     bool *migrated = nullptr);
     void             NotifySeamlySettingsMigrated(const QString &appDisplayName);
+    // One-shot fresh-install notice about the data locations and backups.
+    // Shows only while VCommonSettings::firstRunNoticePending(), then marks it shown.
+    // GUI-mode code paths only — a modal dialog would hang a headless run.
+    void             NotifySeamlyDataLocation();
 
     template <typename T>
     QString          LocaleToString(const T &value);

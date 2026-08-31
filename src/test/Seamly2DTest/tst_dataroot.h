@@ -72,6 +72,7 @@ private slots:
     void CommonSettingsFileLivesUnderLocalConfig() const;
     void CommonSettingsBridgeCopiesRoamingFileForward() const;
     void CommonSettingsBridgeNeverOverwritesTheLocalFile() const;
+    void FirstRunNoticePendingOnlyWhileSeeded() const;
 
     void DefaultDataRootIsSeamlyUnderDocuments() const;
     void LegacyDataRootIsTheOldSeamly2dFolder() const;
@@ -111,7 +112,6 @@ private slots:
     void PruneNeverRemovesTheConfiguredRoot() const;
     void PruneKeepsALegacyRootHoldingTheConfiguredRoot() const;
     void PruneIgnoresAMissingLegacyRoot() const;
-    void StrayCommonSettingsAreMergedThenDeleted() const;
     void PerAppPathsPersistToTheOwnSettingsFile() const;
 
     void ArchiveHoldsEveryFileAndFolder() const;

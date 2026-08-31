@@ -12,12 +12,15 @@
 // QApplication is a subclass of QGuiApplication; it supports both QML Quick
 // windows and QtWidgets windows in the same process (required for AdjustWindow).
 #include <QApplication>
+#include <QDir>
 #include <QMessageBox>
 #include <QMetaObject>
 #include <QQmlApplicationEngine>
 #include <QQmlEngine>
 #include <QQuickStyle>
 #include <QIcon>
+#include <QSettings>
+#include <QStandardPaths>
 #include <QTimer>
 #include <QUrl>
 #include <QVariant>
@@ -116,6 +119,49 @@ void setMacOSTitleBarColor(QQuickWindow *window, int r, int g, int b)
 // and its theme settings. For consistent branding on Linux, users should:
 // - Use GNOME Tweaks or similar to set window/titlebar colors, or
 // - The app could use a frameless window with custom titlebar (future feature)
+
+// ---------------------------------------------------------------------------
+// Task SettingsFiles.5 — one-shot fresh-install notice
+// ---------------------------------------------------------------------------
+// The Windows installer seeds notices/firstRunDataNotice=pending into the
+// shared qt6_common.ini when it creates that file on a fresh machine. The
+// first Seamly app to run shows the notice and writes "shown", so the suite
+// shows it once in total. An absent key (dev builds, platforms without an
+// installer, upgrades) means no notice is due. The Seamly2D/SeamlyMe half of
+// this contract lives in VAbstractApplication::NotifySeamlyDataLocation().
+
+// @brief Show the fresh-install data-location notice once, then mark it shown.
+static void showFirstRunDataNoticeIfPending()
+{
+    // Same path VCommonSettings::commonSettingsFilePath() resolves:
+    // GenericConfigLocation/<organization>/qt6_common.ini.
+    const QString commonIniPath =
+        QStandardPaths::writableLocation(QStandardPaths::GenericConfigLocation)
+        + QStringLiteral("/Seamly/qt6_common.ini");
+
+    QSettings settings(commonIniPath, QSettings::IniFormat);
+    if (settings.value(QStringLiteral("notices/firstRunDataNotice")).toString()
+        != QStringLiteral("pending")) {
+        return;
+    } // if no notice pending
+
+    const QString dataRoot = QDir::toNativeSeparators(
+        settings.value(QStringLiteral("paths/dataRoot")).toString());
+
+    QMessageBox::information(
+        nullptr,
+        QObject::tr("Your Seamly data"),
+        QObject::tr("Seamly keeps its working files in:\n%1\n\n"
+                    "The sample data and any existing user files for patterns, "
+                    "measurements, images, layouts, and more:\n"
+                    "• are left in their original location as a backup;\n"
+                    "• are zipped into a zip file as a second backup;\n"
+                    "• are copied to the folder above for the programs to use.")
+            .arg(dataRoot));
+
+    settings.setValue(QStringLiteral("notices/firstRunDataNotice"),
+                      QStringLiteral("shown"));
+} // showFirstRunDataNoticeIfPending
 
 // @brief Application entry point.
 // @param argc Argument count from the OS.
@@ -279,6 +325,11 @@ int main(int argc, char *argv[])
     // The lambda captures `engine` by reference: it lives on this stack frame
     // for the whole of app.exec(), which is the only time the timer can fire.
     // -----------------------------------------------------------------------
+    // Task SettingsFiles.5 — show the fresh-install notice on the first pass
+    // of the event loop, after Main.qml's window is up, so the dialog has a
+    // visible application behind it.
+    QTimer::singleShot(0, &app, []() { showFirstRunDataNoticeIfPending(); });
+
     if (startupOptions.hasFile() || startupOptions.hasError()) {
         QTimer::singleShot(0, &app, [&engine, startupOptions]() {
             const QList<QObject *> rootObjects = engine.rootObjects();

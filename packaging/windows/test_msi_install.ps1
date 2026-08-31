@@ -647,6 +647,10 @@ function Invoke-InstalledChecks {
         foreach ($key in @('dataRoot', 'individual_size_measurements', 'multi_size_measurements', 'templates', 'bodyscans')) {
             Assert-That -Name "qt6_common.ini holds the $key path" -Succeeded ($commonContent -match "(?m)^$key=")
         }
+        # Task SettingsFiles.5: on a fresh machine the seeder marks the one-shot
+        # first-run data notice pending; the first app run rewrites it as shown.
+        Assert-That -Name 'qt6_common.ini holds the first-run data notice flag' `
+            -Succeeded ($commonContent -match '(?m)^firstRunDataNotice=(pending|shown)$')
     }
     if (Test-Path -LiteralPath $seamly2dIni) {
         $seamly2dContent = Get-Content -LiteralPath $seamly2dIni -Raw

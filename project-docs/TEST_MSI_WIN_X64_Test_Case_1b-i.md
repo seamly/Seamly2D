@@ -56,6 +56,7 @@ Run this suite after every test case in section A.
   - [x] 4a. `%LOCALAPPDATA%\Seamly\<AppName>\` exists for each app. Confirmed for Seamly2D, SeamlyMe, SeamlyLayout.
   - [x] 4b. `%LOCALAPPDATA%\Seamly\qt6_common.ini` file exists (moved from `%APPDATA%\Seamly\` by SettingsFiles.1, 2026-08-30). Confirmed at the new location, 2026-08-31 pass.
     - [x] 4b-i. Confirm `%LOCALAPPDATA%\Seamly\qt6_common.ini` file holds 5 entries: `dataRoot`, `individual_size_measurements`, `multi_size_measurements`, `templates`, `bodyscans`; all five values are paths under `%DATAROOT%`. The installer seeds them (SettingsFiles.2, 2026-08-31) — no Preferences visit required. Confirmed at install time and unchanged after all three apps ran, 2026-08-31 quote-fix build.
+    - [ ] 4b-ii. Confirm the one-shot first-run data notice (SettingsFiles.5): at install time `qt6_common.ini` holds `[notices] firstRunDataNotice=pending`; the first app run shows one popup about the data locations and backups, then the value reads `shown`; no later app run repeats the popup.
 - [x] 5. Check the registry keys:
   - [x] 5a. If not a fresh install then confirm old-version entries were removed. N/A (fresh install).
   - [x] 5b. Confirm that the installed-version program entries were added for each app under `HKLM\SOFTWARE\Seamly\<application>`, each with matching `InstallPath` and `DisplayVersion`. Confirmed for Seamly2D, SeamlyMe, SeamlyLayout (`26.8.28.1343`, `C:\Program Files\SeamlyApps\`).

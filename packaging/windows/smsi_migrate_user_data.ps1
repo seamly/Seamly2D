@@ -89,7 +89,6 @@ function Get-SettingsFile {
     $roots = @(
         (Join-Path $RoamingSettingsRoot 'Seamly'),
         (Join-Path $RoamingSettingsRoot 'Seamly2DTeam'),
-        (Join-Path $RoamingSettingsRoot 'Unknown Organization'),
         (Join-Path $LocalSettingsRoot 'Seamly\Seamly2D'),
         (Join-Path $LocalSettingsRoot 'Seamly\SeamlyMe')
     )

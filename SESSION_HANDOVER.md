@@ -21,7 +21,9 @@ re-accumulate finished-session narrative in this file.
 
 ### Test loop pass in progress (2026-08-31)
 
-Position: "Current steps" list above, step 3.
+Position: step 1 — MSI rebuild for Task SettingsFiles.5 (see its
+section below). The prior pass (SettingsFiles.3 build) completed and
+shipped; its results stay recorded below for the open human items.
 
 - CI run 33355737878 checked: Windows unit tests + both MSIs passed;
   macOS Build failed (`hdiutil: create failed` making `Seamly2D.dmg`).
@@ -62,72 +64,100 @@ Position: "Current steps" list above, step 3.
   - No new defects found by the scripted checks; nothing filed to the
     TODO files yet.
 
-### SettingsFiles.3 — deprecate app-side first-run seeding (2026-08-31, in progress)
+### SettingsFiles.2/3 — installer seeds all inis (SHIPPED 2026-08-31)
 
-User decision (this session): deprecate first-run seeding of the ini files
-in all three apps; per-platform install hooks replace it; rework now, on
-the same `task-seed-user-settings` branch, before merge.
+Merged `--no-ff` into `run-seamlyLayout` (`c13e00b2d8`), pushed without
+skip token. Live-verified on the quote-fix build. Details:
+`TODO_SETTINGS_FILES.md`, `README_MSI_WORKFLOW.md`.
 
-Constraint found: the macOS dmg and Linux AppImage have no install step, so
-no install hook can exist for them. The deprecated app-side fallback stays
-for those packages, dev builds, and non-installing Windows accounts, until
-hook-capable packages ship (TODO_SETTINGS_FILES.md, SettingsFiles.3.3/3.4).
+Still open from it:
 
-Changes on top of SettingsFiles.2:
+- SettingsFiles.4 — migration CAs carry the same backslash-quote defect
+  the seed CA had; fix idiom `"[PROP] "` + trim, add authoring
+  assertions, re-verify a real upgrade (test cases B/C).
+- SettingsFiles.3.3/3.4 — blocked: dmg/AppImage have no install step.
+- Human: test doc item 6 walkthrough; 7a-v (bodyscans UI row); 4b-ii
+  (visual popup check, SettingsFiles.5).
+- Known: empty `Documents\SeamlyData` before any app runs is expected —
+  the data tree and samples are created at app first run, not install.
 
-- `smsi_seed_user_settings.ps1` now seeds a COMPLETE
-  `SeamlyLayout\qt6_seamlylayout.ini` — all 11 `[General]` keys, values
-  mirroring `seedFromBundledDefaults()` + `default_preferences.json`
-  (windows block) with `${HOME}` → data root; also creates the
-  `SeamlyLayout\settings\` and `preferences\` directories. This supersedes
-  the earlier "directory only" decision; the seeded set must never be
-  partial (`load()` missing-key fallbacks are empty strings).
-- Deprecation comments: `PreferencesModel::load()` ini-missing branch;
-  `VCommonSettings::initializeDataRoot()` cases 2–4. Comment-only C++
-  changes — no behavior change.
-- Tests: `smsi_seed_user_settings_test.ps1` now 26/26 (layout ini seeded,
-  merge keeps user values, partial ini completed).
-- `test_msi_install.ps1`: asserts `qt6_seamlylayout.ini` exists with all
-  11 keys when `-ExpectSeamlyLayout`.
-- Docs: `TODO_SETTINGS_FILES.md` (2.2 superseded note + new Task
-  SettingsFiles.3, 3.1/3.2 done, 3.3/3.4 blocked on packaging format),
-  `README_MSI_WORKFLOW.md` (step 9, decision 7),
-  `TEST_MSI_WIN_X64_Test_Case_1b-i.md` (note line, 7c/7d/7e rewritten:
-  7e-i..iii = seeded ini at install time; `default_preferences.json` is no
-  longer created at first launch — only on user reset-to-defaults).
+### SettingsFiles.5 — one-shot fresh-install data notice (2026-08-31, in progress)
 
-Defect found and fixed during the first live install of the seeded build:
-the CA command line mangled its arguments. `SEAMLYDATAROOTRECORDED` and
-`INSTALLFOLDER` resolve with a trailing backslash; backslash-quote is an
-escaped quote to PowerShell's parser, so the arguments ran together and
-the ini files got garbage paths. Fix: a space before each closing quote in
-`SetSeamlySeedUserSettings` (`"[PROP] "`); the script trims. New authoring
-assertion guards the idiom. The migration CAs (`SetSeamlyOldDataMigration`,
-`SetSeamlyNewDataMigration`) carry the SAME latent defect — filed as Task
-SettingsFiles.4 (fix + assertions + real upgrade re-verify), NOT fixed on
-this branch.
+User request: at the first app run after a fresh install, show a popup —
+sample data and any existing user files (patterns, measurements, images,
+layouts) are left in place as a backup, zipped as a second backup, and
+copied to the new SeamlyData directory for the programs to use.
 
-Verified on the quote-fix build (2026-08-31):
+Design: the seeder writes `[notices] firstRunDataNotice=pending` into
+`qt6_common.ini` only when it creates that file (fresh machine). The
+first app to run shows the notice and rewrites the value as `shown` —
+once in total for the suite. Absent key (dev build, no installer,
+upgrade) = no popup.
 
-- Rebuild passed: authoring check (incl. the new quote-safety assertion),
-  migration tests 16/16, MSI OK.
-- Reset ran; it aborted once on the defective install's garbage `dataRoot`
-  (illegal `"` in the path). `test_reset_environment.ps1` hardened:
-  `Remove-PathIfPresent` now skips a path with invalid characters.
-- Fresh elevated install exit 0. Seed log shows trimmed arguments
-  (`DataRoot='...\ '`), all four inis clean at install time, all 11
-  SeamlyLayout keys exact, `settings\`/`preferences\` dirs present.
-- All three apps ran once and closed. Data tree + samples created at
-  first run (empty `SeamlyData` before any app runs is expected — samples
-  copy at app first run, not install). Seeded ini values unchanged after
-  the runs. 7c: no `default_preferences.json` after first launch. 7d:
-  `default_settings.json` present.
-- Test doc updated: 4b-i, 7a-i..iv, 7c, 7d, 7e-i..iii checked. Open for
-  the human: 7a-v (bodyscans UI row), item 6 walkthrough.
+Changes on branch `task-first-run-notice`:
 
-Next: commit `task-seed-user-settings`, `--no-ff` merge into
-`run-seamlyLayout`, push WITHOUT skip token (`packaging/**` changed),
-delete task branch. Then: Task SettingsFiles.4 (migration CA quoting).
+- `smsi_seed_user_settings.ps1`: fresh-machine flag; docstring.
+- `vcommonsettings.{h,cpp}`: `firstRunNoticePending()` /
+  `markFirstRunNoticeShown()`.
+- `vabstractapplication.{h,cpp}`: `NotifySeamlyDataLocation()`
+  (check + QMessageBox + mark).
+- `seamly2d/main.cpp` (GUI mode, after `window.show()`),
+  `seamlyme/main.cpp` (non `--test`): call it.
+- `seamlylayout/qt_frontend/main.cpp`: self-contained equivalent
+  (does not link vmisc), on a `QTimer::singleShot(0, ...)`.
+- Tests: seeder suite 28/28 (pending on fresh; no flag when
+  qt6_common.ini pre-exists); `TST_DataRoot::
+  FirstRunNoticePendingOnlyWhileSeeded` (runs in CI);
+  `test_msi_install.ps1` asserts `firstRunDataNotice=(pending|shown)`.
+- Docs: `TODO_SETTINGS_FILES.md` Task SettingsFiles.5 (5.5 open =
+  live verify); test doc item 4b-ii (unchecked).
+
+State at session close (2026-08-31):
+
+- All code, tests, and doc edits are DONE and sit UNCOMMITTED in the
+  working tree on branch `task-first-run-notice`.
+- Seeder suite passed 28/28 locally.
+- First MSI rebuild failed: `\x2022` narrow-string escapes in
+  `vabstractapplication.cpp` are out of range for MSVC (`\x` eats every
+  hex digit). Fixed with literal `•` (source builds with `/utf-8`;
+  matches the SeamlyLayout copy).
+- Rebuilds 2 and 3 failed on `C1083 Permission denied` writing `.obj`
+  files: a failed background build's process tree (script host + nmake +
+  cl) survives its failure report, so consecutive launches raced on the
+  same in-source `obj\` directories and locked each other's files.
+- Recovery applied: killed every `test_build_msi_local` powershell tree
+  and every `nmake`/`cl`/`link`; deleted all `src\**\obj\` directories
+  (killed compiles can leave truncated `.obj` files with fresh
+  timestamps that nmake would trust); started ONE clean rebuild.
+- Rule for the next session: before launching this build, verify no
+  `test_build_msi_local` powershell process and no `nmake`/`cl`/`link`
+  is running; kill trees with `taskkill /PID <id> /T /F` first. After
+  any mid-build kill, delete `src\**\obj\` before rebuilding.
+- If the clean rebuild had not finished at session close, check
+  `packaging\windows\seamly-msi\x64\seamly-x64.msi` timestamp; rerun
+  `test_build_msi_local.ps1` if stale or absent (same pre-checks).
+
+Next (subtask 5.5, then ship):
+
+1. Confirm the MSI build is green ("MSI OK", authoring + migration
+   checks pass).
+2. `test_reset_environment.ps1`.
+3. Elevated quiet install (UAC prompt for the user).
+4. Verify `%LOCALAPPDATA%\Seamly\qt6_common.ini` holds
+   `firstRunDataNotice=pending` before any app runs.
+5. Start seamly2d.exe. Dismiss the modal notice — WScript.Shell
+   `AppActivate('Your Seamly data')` + `SendKeys('{ENTER}')` (a
+   force-killed app leaves the flag `pending`). A helper script existed
+   in the old session scratchpad; rewrite it if gone.
+6. Verify the value reads `shown`. Start SeamlyMe; verify no repeat
+   (value stays `shown`).
+7. Check off 5.5 in `TODO_SETTINGS_FILES.md`; move Task SettingsFiles.5
+   to `TODO_COMPLETED.md`; update this file and test doc 4b-ii note
+   (visual check stays with the human).
+8. Commit on `task-first-run-notice`, `--no-ff` merge into
+   `run-seamlyLayout`, push WITHOUT the skip token (`packaging/**` and
+   functional C++ changed — full CI runs the new TST_DataRoot case),
+   delete the task branch.
 
 ### SettingsFiles.2 — installer seeds the settings files (2026-08-31, superseded in part by SettingsFiles.3 above)
 
