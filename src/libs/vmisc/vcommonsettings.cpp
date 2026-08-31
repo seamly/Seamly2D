@@ -1047,6 +1047,12 @@ QString VCommonSettings::rebaseOntoDataRoot(const QString &path, const QString &
  * The resolved root is written back so later runs take case 1 and the value is visible to
  * the other applications and to Preferences → Paths.
  *
+ * Cases 2–4 are DEPRECATED first-run seeding (Task SettingsFiles.3, 2026-08-31). The
+ * Windows MSI seeds paths/dataRoot at install time (smsi_seed_user_settings.ps1), so an
+ * installed Windows machine takes case 1. The fallbacks stay only for packages with no
+ * install hook — the macOS dmg, the Linux AppImage, dev builds — and for other Windows
+ * accounts on a shared machine. Remove them when those packages gain install-time seeding.
+ *
  * @param adoptedLegacyTree optional out-parameter, set to true when case 3 applied; pass
  * null when the caller does not care.
  * @return absolute path of the resolved user-data root.

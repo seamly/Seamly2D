@@ -633,6 +633,44 @@ function Invoke-InstalledChecks {
             -Detail "DataRoot = '$dataRoot'"
     }
 
+    # --- seeded per-user settings files (SettingsFiles.2) ----------------------
+    # The installer seeds these so no app needs a Preferences > Paths visit.
+    $settingsRoot = Join-Path $env:LOCALAPPDATA 'Seamly'
+    $commonIni = Join-Path $settingsRoot 'qt6_common.ini'
+    $seamly2dIni = Join-Path $settingsRoot 'Seamly2D\qt6_seamly2d.ini'
+    $seamlyMeIni = Join-Path $settingsRoot 'SeamlyMe\qt6_seamlyme.ini'
+    Assert-That -Name 'Setup seeded qt6_common.ini' -Succeeded (Test-Path -LiteralPath $commonIni)
+    Assert-That -Name 'Setup seeded qt6_seamly2d.ini' -Succeeded (Test-Path -LiteralPath $seamly2dIni)
+    Assert-That -Name 'Setup seeded qt6_seamlyme.ini' -Succeeded (Test-Path -LiteralPath $seamlyMeIni)
+    if (Test-Path -LiteralPath $commonIni) {
+        $commonContent = Get-Content -LiteralPath $commonIni -Raw
+        foreach ($key in @('dataRoot', 'individual_size_measurements', 'multi_size_measurements', 'templates', 'bodyscans')) {
+            Assert-That -Name "qt6_common.ini holds the $key path" -Succeeded ($commonContent -match "(?m)^$key=")
+        }
+    }
+    if (Test-Path -LiteralPath $seamly2dIni) {
+        $seamly2dContent = Get-Content -LiteralPath $seamly2dIni -Raw
+        foreach ($key in @('pattern', 'layout', 'labels', 'images', 'backups', 'seamlyLayoutApp')) {
+            Assert-That -Name "qt6_seamly2d.ini holds the $key path" -Succeeded ($seamly2dContent -match "(?m)^$key=")
+        }
+    }
+    if ($ExpectSeamlyLayout) {
+        # SettingsFiles.3: the installer seeds the COMPLETE SeamlyLayout key
+        # set; the app's own first-run seeding is deprecated.
+        $seamlyLayoutIni = Join-Path $settingsRoot 'SeamlyLayout\qt6_seamlylayout.ini'
+        Assert-That -Name 'Setup seeded qt6_seamlylayout.ini' -Succeeded (Test-Path -LiteralPath $seamlyLayoutIni)
+        if (Test-Path -LiteralPath $seamlyLayoutIni) {
+            $seamlyLayoutContent = Get-Content -LiteralPath $seamlyLayoutIni -Raw
+            foreach ($key in @('input_directory', 'layout_directory', 'preferences_directory',
+                               'settings_directory', 'settings_file', 'preferences_file',
+                               'dxf_viewer_path', 'pdf_viewer_path', 'png_viewer_path',
+                               'projector_path', 'data_root')) {
+                Assert-That -Name "qt6_seamlylayout.ini holds the $key key" `
+                    -Succeeded ($seamlyLayoutContent -match "(?m)^$key=")
+            }
+        }
+    }
+
     $breadcrumbs = @('DesktopShortcutSeamly2D', 'DesktopShortcutSeamlyMe')
     foreach ($breadcrumb in $breadcrumbs) {
         $present = $null -ne $InstallInfo.PSObject.Properties[$breadcrumb]
