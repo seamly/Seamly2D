@@ -22,17 +22,17 @@ Known defect to watch for: `MainWindow::exportPiecesToSeamlyLayout()` (`mainwind
 
 ### Case 1 — Fresh install
 
-- [x] 0. Relaunch this shell elevated (Administrator) before any step below. — PASS 2026-09-01: elevated child, UAC approved on 3rd prompt.
-- [x] 1a. Uninstall Seamly (any and all versions detected) using `packaging\windows\test_reset_environment.ps1`. — PASS: prior 26.8.44328 removed.
-  - [x] 1a-i. Confirm that the %PROGRAMROOT, %DATAROOT, AppData\Roaming\Seamly, AppData\Local\Seamly\Seamly2D, AppData\Local\Seamly\SeamlyMe, AppData\Local\Seamly\SeamlyLayout, desktop shortcuts, and registry keys have been removed. — PASS except: stray `%LOCALAPPDATA%\SeamlyLayout` SURVIVED reset again (Layout.10 covers adding it to the reset script). All other probes clean.
-- [x] 1b. Install Seamly apps using `packaging\windows\seamly-msi\x64\seamly-x64.msi` with Default settings via `msiexec /i seamly-x64.msi /quiet /norestart`. — PASS: status 0 at 11:59 (NEW MSI built 2026-09-01, apps 26.9.1.687, includes SettingsFiles.7 SeamlyData default).
+- [ ] 0. Relaunch this shell elevated (Administrator) before any step below.
+- [ ] 1a. Uninstall Seamly (any and all versions detected) using `packaging\windows\test_reset_environment.ps1`.
+  - [ ] 1a-i. Confirm that the %PROGRAMROOT, %DATAROOT, AppData\Roaming\Seamly, AppData\Local\Seamly\Seamly2D, AppData\Local\Seamly\SeamlyMe, AppData\Local\Seamly\SeamlyLayout, desktop shortcuts, and registry keys have been removed.
+- [ ] 1b. Install Seamly apps using `packaging\windows\seamly-msi\x64\seamly-x64.msi` with Default settings via `msiexec /i seamly-x64.msi /quiet /norestart`.
 
 ## B. Verification Suite
 
 Run this suite after every test case in section A.
 
-- [x] 0. Check the directories and files — results 2026-09-01, build 26.9.1.687
-  - [x] 0a. FAIL (one file) on 26.9.1.687: after all three app first runs, everything below existed EXCEPT `SeamlyLayout\preferences\default_preferences.json` (SettingsFiles.6) and the `SeamlyLayout\logs` / `SeamlyMe\logs` dirs (Layout.10 / SeamlyMe.5, filed). RE-TESTED on build 26.9.1.728 (fresh reset → install → first runs): `default_preferences.json` NOW CREATED with correct paths — SettingsFiles.6 FIXED and completed. Remaining misses: the two `logs` dirs only. Confirm these directories and files exist:
+- [ ] 0. Check the directories and files
+  - [ ] 0a. Confirm these directories and files exist:
     %PROGRAMDIR%\SeamlyApps
     |  |_seamly2d.exe
     |  |_seamlylayout.exe
@@ -61,16 +61,16 @@ Run this suite after every test case in section A.
     |_patterns
     |  |_male_shirt.sm2d
     |_templates
-  - [x] 0b. Check the contents of the .ini files: — PASS at install time, all four seeded complete
-    - [x] 0b-i. qt6_common.ini should contain: — PASS: all 5 keys, SeamlyData paths
-      - [x] 0b-i1. "[paths]
+  - [ ] 0b. Check the contents of the .ini files:
+    - [ ] 0b-i. qt6_common.ini should contain:
+      - [ ] 0b-i1. "[paths]
 dataRoot=%DATADIR%
 individual_size_measurements=%DATADIR%/measurements/individual
 multi_size_measurements=%DATADIR%/measurements/multisize
 templates=%DATADIRT%/templates
 bodyscans=%DATADIR%/bodyscans"
-      - [x] 0b-i2. "[notices] firstRunDataNotice=pending" — PASS: `pending` at install, `shown` after the first Seamly2D run.
-    - [x] 0b-ii. qt6_seamly2d.ini should contain: — PASS: all 6 keys
+      - [ ] 0b-i2. "[notices] firstRunDataNotice=pending"
+    - [ ] 0b-ii. qt6_seamly2d.ini should contain:
     "[paths]
 pattern=%DATADIR%/patterns
 layout=%DATADIR%/layouts
@@ -78,8 +78,8 @@ labels=%DATADIR%/label templates
 images=%DATADIR%/images
 backups=%DATADIR%/backups
 seamlyLayoutApp=%PROGRAMDIR%/SeamlyApps/SeamlyLayout.exe"
-    - [x] 0b-iii. qt6_seamlyme.ini should be empty — PASS: empty at install (Qt window-state keys appear after the SeamlyMe run, expected).
-    - [x] ob-iv. qt6_seamlylayout.ini should contain: — PASS: all 11 keys, `%DATAROOT%`-resolved
+    - [ ] 0b-iii. qt6_seamly2d.ini should be empty
+    - [ ] ob-iv. qt6_seamlylayout.ini should contain:
     "[General]
 input_directory=%DATADIRROOT%/layouts
 layout_directory=%DATADIRROOT%/layouts
@@ -92,35 +92,35 @@ pdf_viewer_path=
 png_viewer_path=
 projector_path=https://patternprojector.com
 data_root=%DATADIRROOT%"
-  - [x] 0c. Check the program directory `%PROGRAMDIR%` exists (default `C:\Program Files\SeamlyApps`) contains `seamly2d.exe`, `seamlyme.exe`, `SeamlyLayout.exe`, `pdftops.exe`, `QtWebEngineProcess.exe`, `vc_redist.x64.exe`. — PASS: all six present.
-  - [x] 0d. Confirm no duplicate directories. — PASS: one dir each in Program Files, `%LOCALAPPDATA%\Seamly`, Documents (`SeamlyData` only — no stray `Documents\Seamly` from the new default). Stray `%LOCALAPPDATA%\SeamlyLayout` is Layout.10.
-  - [ ] 0e. if upgrading from previous non-SeamlyLayout version then: — N/A, fresh install.
+  - [ ] 0c. Check the program directory `%PROGRAMDIR%` exists (default `C:\Program Files\SeamlyApps`) contains `seamly2d.exe`, `seamlyme.exe`, `SeamlyLayout.exe`, `pdftops.exe`, `QtWebEngineProcess.exe`, `vc_redist.x64.exe`.
+  - [ ] 0d. Confirm no duplicate directories.
+  - [ ] 0e. if upgrading from previous non-SeamlyLayout version then:
     - [ ] 0e-i. confirm `%DATAROOT%\seamly2d.zip` exists.
     - [ ] 0e-ii. confirm that `seamly2d.zip` files were extracted into the correct subdirectories.
-- [x] 1. Check the registry keys: — results 2026-09-01
-  - [ ] 1a. If not a fresh install then confirm old-version entries were removed. — N/A, fresh install.
-  - [x] 1b. Confirm that the installed-version program entries were added for each app under `HKLM\SOFTWARE\Seamly\<application>`, each with matching `InstallPath` and `DisplayVersion`. — PASS: three keys, `InstallPath=C:\Program Files\SeamlyApps\`, `DisplayVersion=26.9.1.687`.
-  - [x] 1c. Confirm that installed-version data entries were added with matching `DataRoot` and `DataParent` values; `Seamly2D` also carries the three `DesktopShortcut*` flags (this should be fixed in the future; tasks filed: SeamlyMe.3, Layout.7) — PASS: `DataRoot=...\Documents\SeamlyData\`, `DataParent=...\Documents\` on all three; `DesktopShortcut*` still on Seamly2D only (known, filed).
+- [ ] 1. Check the registry keys:
+  - [ ] 1a. If not a fresh install then confirm old-version entries were removed.
+  - [ ] 1b. Confirm that the installed-version program entries were added for each app under `HKLM\SOFTWARE\Seamly\<application>`, each with matching `InstallPath` and `DisplayVersion`.
+  - [ ] 1c. Confirm that installed-version data entries were added with matching `DataRoot` and `DataParent` values; `Seamly2D` also carries the three `DesktopShortcut*` flags (this should be fixed in the future; tasks filed: SeamlyMe.3, Layout.7)
 - [ ] 2. Check apps - **needs a human at the keyboard for most steps**
   - [ ] 2a. Run Seamly2D
-    - [x] 2a-i. first run scripted: the "Seamly data moved" notice appears once, closes, then the main window appears — PASS 2026-09-01: Welcome closed (WM_CLOSE), notice once, main window, clean EXIT 0. The prior pass's 90 s post-WM_CLOSE hang did NOT recur.
-    - [x] 2a-ii. check if `qt6_common.ini` contains  "[notices] firstRunDataNotice=shown"; — PASS: flipped `pending`→`shown`; no repeat on the SeamlyMe or SeamlyLayout runs.
-    - [ ] 2a-iii. Select 'file open' -- the dialog should open in the `%DATADIR\patterns` directory. — PENDING THE HUMAN (last pass FAIL, Seamly2D.2.1 filed and still open).
-    - [ ] 2a-iv. Open `%DATADIR%\patterns\male_shirt.sm2d` pattern file with `%DATADIR%\measurements\individual\male_chest_102cm.smis` individual measurement file. — PENDING THE HUMAN.
-    - [x] 2a-v. Check if directory exists: `%LOCALAPPDATA%\Seamly\Seamly2D\logs` — PASS: exists, log `seamly2d-pid13876.log` clean.
+    - [ ] 2a-i. first run scripted: the "Seamly data moved" notice appears once, closes, then the main window appears
+    - [ ] 2a-ii. check if `qt6_common.ini` contains  "[notices] firstRunDataNotice=shown";
+    - [ ] 2a-iii. Select 'file open' -- the dialog should open in the `%DATADIR\patterns` directory.
+    - [ ] 2a-iv. Open `%DATADIR%\patterns\male_shirt.sm2d` pattern file with `%DATADIR%\measurements\individual\male_chest_102cm.smis` individual measurement file.
+    - [ ] 2a-v. Check if directory exists: `%LOCALAPPDATA%\Seamly\Seamly2D\logs`
   - [ ] 2b. Check SeamlyMe from within Seamly2D
   - [ ] 2b-i. Select 'File Open Individual' - the dialog should open in the `%DATADIR\measurements\individual` directory.
     - [ ] 2b-ii. Select 'File Open Multisize' - the dialog should open in the `%DATADIR\measurements\multisize` directory.
     - [ ] 2b-iii. Select 'File Open Templates' - the dialog should open in the `%DATADIR\templates` directory.
     - [ ] 2b-iv. Select 'Edit Current' from the Measurements menu - the `%DATADIR%\measurements\individual\male_chest_102cm.smis` file should open.
-    - [ ] 2b-v. Check if directory exists: `%DATADIR%\SeamlyMe\logs` — FAIL 2026-09-01 (scripted standalone run): `%LOCALAPPDATA%\Seamly\SeamlyMe\logs` not created, SeamlyMe writes no logs (SeamlyMe.5, filed).
+    - [ ] 2b-v. Check if directory exists: `%DATADIR%\SeamlyMe\logs`
     - [ ] 2b-vi. Close SeamlyMe, returning focus to Seamly2D.
   - [ ] 2c. Run SeamlyLayout from within Seamly2D.
     - [ ] 2c-i. Visually confirm that the current pattern's `Piece mode` data is opened in the left canvas.
-    - [ ] 2c-ii. Check if `MainWindow::exportPiecesToSeamlyLayout()` passes 'piece mode' data to SeamlyLayout as a stringified SVG document in a variable, not as a svg file from harddrive. — FAIL 2026-09-01 (static check): still a `.pieces.svg` file path at `mainwindow.cpp:4153/4165` (Seamly2D.5, Layout.9, filed).
-    - [ ] 2c-iii. Check if directories exist: `%DATADIR%\SeamlyLayout\cache`, `%DATADIR%\SeamlyLayout\logs` — HALF FAIL 2026-09-01 (scripted standalone run): `cache` created, `logs` not (Layout.10, filed).
+    - [ ] 2c-ii. Check if `MainWindow::exportPiecesToSeamlyLayout()` passes 'piece mode' data to SeamlyLayout as a stringified SVG document in a variable, not as a svg file from harddrive.
+    - [ ] 2c-iii. Check if directories exist: `%DATADIR%\SeamlyLayout\cache`, `%DATADIR%\SeamlyLayout\logs`
     - [ ] 2c-iv. Close SeamlyLayout, returning focus to Seamly2D.
   - [ ] 2d. Close Seamly2D.
-- [x] 3. Check if `%LOCALAPPDATA%\SeamlyLayout\output` directory was created. If exists add a task to stop creating the `%LOCALAPPDATA%\SeamlyLayout\` directory and its `output` subdirectory that stores log files, and start creating the `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` directory to store SeamlyLayout log files (similar to the `%LOCALAPPDATA\Seamly\Seamly2D\logs` directory) — CONFIRMED 2026-09-01: stray dir present (survived reset AND repopulated by the SeamlyLayout run). Task Layout.10 already filed; no new task.
-- [x] 4. Check Desktop shortcuts `Seamly2D.lnk`, `SeamlyMe.lnk`, `SeamlyLayout.lnk` for all three apps in `C:\Users\Public\Desktop` (default settings, `SEAMLYDESKTOPSHORTCUTS` on). — PASS: all three present.
-- [x] 5. Check the logs in `%LOCALAPPDATA%\Seamly\Seamly2D\logs\` for additional errors. — PASS: one log (`seamly2d-pid13876.log`), no error/warning/fatal/critical lines.
+- [ ] 3. Check if `%LOCALAPPDATA%\SeamlyLayout\output` directory was created. If exists add a task to stop creating the `%LOCALAPPDATA%\SeamlyLayout\` directory and its `output` subdirectory that stores log files, and start creating the `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` directory to store SeamlyLayout log files (similar to the `%LOCALAPPDATA\Seamly\Seamly2D\logs` directory)
+- [ ] 4. Check Desktop shortcuts `Seamly2D.lnk`, `SeamlyMe.lnk`, `SeamlyLayout.lnk` for all three apps in `C:\Users\Public\Desktop` (default settings, `SEAMLYDESKTOPSHORTCUTS` on).
+- [ ] 5. Check the logs in `%LOCALAPPDATA%\Seamly\Seamly2D\logs\` for additional errors.
