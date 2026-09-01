@@ -19,6 +19,35 @@ re-accumulate finished-session narrative in this file.
 
 ## Current Status
 
+### Test Case 1b-i pass on build 26.9.1.687 COMPLETE for scripted items (2026-09-01, ~12:00)
+
+First pass on the NEW MSI carrying SettingsFiles.7 (built 2026-09-01,
+apps 26.9.1.687). Full reset → quiet install → app first runs → verify.
+Results recorded in the test doc. Summary:
+
+- Case 1 steps 0/1a/1a-i/1b PASS (UAC on 3rd prompt; install status 0).
+  Stray `%LOCALAPPDATA%\SeamlyLayout` survived reset again (Layout.10).
+- B.0b/0c/0d, 1, 2a-i, 2a-ii, 2a-v, 3, 4, 5 PASS. B.0e/1a N/A (fresh).
+- 2a-i: Welcome → notice once → main window, clean exit 0. The prior
+  pass's 90 s post-WM_CLOSE hang did NOT recur.
+- B.0d also confirms no stray `Documents\Seamly` from the new default.
+- Fails, ALL already filed, no new tasks: B.0a
+  `preferences\default_preferences.json` missing (SettingsFiles.6);
+  `SeamlyLayout\logs` + stray output dir (Layout.10); `SeamlyMe\logs`
+  (SeamlyMe.5); 2c-ii `.pieces.svg` still at `mainwindow.cpp:4153`
+  (Seamly2D.5/Layout.9).
+- PENDING THE HUMAN: 2a-iii (Seamly2D.2.1 live check), 2a-iv, 2b-i..iv,
+  2b-vi, 2c-i, 2c-iv, 2d.
+- Machine state: fresh 26.9.1.687 install, all three apps ran once,
+  data seeded.
+- Scratchpad scripts (session 9a35047b): `elevated_reset_install.ps1`,
+  `verify_install.ps1`, `run_seamly2d_firstrun.ps1`,
+  `run_seamlyme_firstrun.ps1`, `run_seamlylayout_firstrun.ps1`.
+
+Next loop iteration (step 7): implement SettingsFiles.6, then rebuild,
+reset, install, re-test. After that: SettingsFiles.4 (needs upgrade
+cases B/C, not 1b-i).
+
 ### SettingsFiles.7 DONE — default data root leaf is SeamlyData (2026-09-01)
 
 Loop step 7: implemented Task SettingsFiles.7, moved to `TODO_COMPLETED.md`.
