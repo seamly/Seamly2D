@@ -19,6 +19,36 @@ re-accumulate finished-session narrative in this file.
 
 ## Current Status
 
+### Test Case 1b-i second pass COMPLETE for scripted items (2026-09-01, ~10:05)
+
+Full reset → quiet install → scripted verification on the same MSI
+(built 2026-08-31 7:15 PM, ProductVersion 26.8.44328, apps 26.8.31.1128).
+Results recorded in the test doc. Same outcome as the first 2026-09-01 pass:
+
+- Case 1 steps 0/1a/1b PASS. 1a-i PASS except: stray
+  `%LOCALAPPDATA%\SeamlyLayout` SURVIVED reset (recreated by the prior
+  pass's app runs; Layout.10 covers adding it to the reset script).
+- B.0b/0c/0d, 1, 2a-ii, 2a-v, 4, 5 PASS. B.0e/1a N/A (fresh install).
+- B.0a FAIL: `SeamlyLayout\logs` missing (Layout.10),
+  `SeamlyLayout\preferences\default_preferences.json` missing
+  (SettingsFiles.6). Both already filed — no new tasks.
+- B.2a-i PASS with a NEW deviation: after WM_CLOSE on the main window,
+  seamly2d.exe stayed alive 90 s and the harness killed it (first pass
+  exited 0). Log clean. Watch on the next pass; no task filed on one
+  occurrence.
+- B.3 CONFIRMED: SeamlyLayout run wrote a fresh log into the stray
+  `%LOCALAPPDATA%\SeamlyLayout\output` (Layout.10).
+- 2c-ii static check: `.pieces.svg` defect still at
+  `mainwindow.cpp:4165-4168` (Seamly2D.5, Layout.9).
+- PENDING THE HUMAN: B.2a-iii/iv, 2b-*, 2c-i/iv, 2d.
+- Machine state: fresh 26.8.44328 install with seeded data (Seamly2D and
+  SeamlyLayout each ran once).
+
+Scratchpad scripts (copied from session 8e932df7):
+`elevated_reset_install.ps1`, `verify_install.ps1`,
+`run_seamly2d_firstrun.ps1`, `run_seamlylayout_firstrun.ps1` in
+`C:\Users\susan\AppData\Local\Temp\claude\c--Users-susan-Projects-Seamly2D-private\5d51839e-9e07-4ee0-8bf9-672a21e0f523\scratchpad`.
+
 ### Session end 2026-09-01 — ready for the next loop iteration
 
 State at handover:
