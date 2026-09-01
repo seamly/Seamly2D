@@ -539,16 +539,21 @@
          over through the CustomActionData property of the SAME name - the
          standard pattern, and why the SetProperty below is sequenced
          immediately before the action it feeds. -->
+    <!-- The space before each closing quote is load-bearing (SettingsFiles.4):
+         these properties can end with a backslash, and backslash-quote is an
+         escaped quote to PowerShell's command-line parser - without the space
+         the arguments run together into one mangled value. The script trims
+         each path parameter. -->
     <SetProperty Id="SeamlyCopyUserData"
                  Action="SetSeamlyOldDataMigration"
-                 Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]smsi_migrate_user_data.ps1&quot; -Mode Old -Destination &quot;[SEAMLYDATAROOT]&quot; -InstallFolder &quot;[INSTALLFOLDER]&quot;"
+                 Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]smsi_migrate_user_data.ps1&quot; -Mode Old -Destination &quot;[SEAMLYDATAROOT] &quot; -InstallFolder &quot;[INSTALLFOLDER] &quot;"
                  Before="SeamlyCopyUserData"
                  Sequence="execute"
                  Condition="SEAMLYCOPYUSERDATA = &quot;1&quot; AND SEAMLYDATAROOT AND SEAMLYOLDS2DEXE AND SEAMLYOLDMEEXE AND NOT SEAMLYOLDLAYOUTEXE AND NOT Installed" />
 
     <SetProperty Id="SeamlyCopyUserData"
                  Action="SetSeamlyNewDataMigration"
-                 Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]smsi_migrate_user_data.ps1&quot; -Mode New -Destination &quot;[SEAMLYDATAROOT]&quot; -PreviousDataRoot &quot;[SEAMLYPREVIOUSDATAROOT]&quot; -InstallFolder &quot;[INSTALLFOLDER]&quot;"
+                 Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]smsi_migrate_user_data.ps1&quot; -Mode New -Destination &quot;[SEAMLYDATAROOT] &quot; -PreviousDataRoot &quot;[SEAMLYPREVIOUSDATAROOT] &quot; -InstallFolder &quot;[INSTALLFOLDER] &quot;"
                  Before="SeamlyCopyUserData"
                  Sequence="execute"
                  Condition="SEAMLYCOPYUSERDATA = &quot;1&quot; AND SEAMLYDATAROOT AND SEAMLYNEWLAYOUTEXE AND NOT Installed" />

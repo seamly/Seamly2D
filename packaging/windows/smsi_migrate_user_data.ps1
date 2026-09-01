@@ -51,6 +51,13 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# SettingsFiles.4: the MSI custom-action command line pads each path argument
+# with a space before the closing quote, so a property's trailing backslash
+# cannot escape that quote. Trim the padding off here.
+$Destination = $Destination.Trim()
+if ($PreviousDataRoot) { $PreviousDataRoot = $PreviousDataRoot.Trim() }
+if ($InstallFolder)    { $InstallFolder = $InstallFolder.Trim() }
+
 if (-not $RoamingSettingsRoot) {
     $RoamingSettingsRoot = $env:APPDATA
 }

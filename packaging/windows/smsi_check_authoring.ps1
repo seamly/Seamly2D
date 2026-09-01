@@ -1024,6 +1024,19 @@ Assert-That -Name 'old Seamly requires both parent apps and no SeamlyLayout' `
 Assert-That -Name 'new Seamly requires an existing SeamlyLayout executable' `
     -Succeeded ($newMigrationCondition.Count -eq 1 -and
                 $newMigrationCondition[0].Condition -match 'SEAMLYNEWLAYOUTEXE')
+# SettingsFiles.4. Both migration commands carry path properties that can
+# resolve with a trailing backslash. Backslash-quote is an escaped quote to
+# PowerShell's command-line parser, so each closing quote needs a space before
+# it; smsi_migrate_user_data.ps1 trims the values.
+Assert-That -Name 'the old-migration command quotes its path arguments quote-safely' `
+    -Succeeded ($oldMigrationCommand.Count -eq 1 -and
+                $oldMigrationCommand[0].Target -match '-Destination "\[SEAMLYDATAROOT\] "' -and
+                $oldMigrationCommand[0].Target -match '-InstallFolder "\[INSTALLFOLDER\] "')
+Assert-That -Name 'the new-migration command quotes its path arguments quote-safely' `
+    -Succeeded ($newMigrationCommand.Count -eq 1 -and
+                $newMigrationCommand[0].Target -match '-Destination "\[SEAMLYDATAROOT\] "' -and
+                $newMigrationCommand[0].Target -match '-PreviousDataRoot "\[SEAMLYPREVIOUSDATAROOT\] "' -and
+                $newMigrationCommand[0].Target -match '-InstallFolder "\[INSTALLFOLDER\] "')
 
 # SettingsFiles.2. The seeding action mirrors the copy action's contract:
 # deferred (needs the script on disk), impersonated (writes the user's own
