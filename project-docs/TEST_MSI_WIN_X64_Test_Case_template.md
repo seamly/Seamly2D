@@ -5,7 +5,7 @@ Test plan for the Windows x64 Seamly MSI. Covers `packaging/windows/smsi.wxs`.
 This document uses two placeholders as shorthand. Neither is a real environment variable.
 
 - `%PROGRAMDIR%` stands for the resolved `INSTALLFOLDER`; default is `C:\Program Files\SeamlyApps`.
-- `%DATAROOT%` stands for the resolved `SEAMLYDATAROOTRECORDED`; default is `C:\Users\<user>\SeamlyData`.
+- `%DATAROOT%` stands for the resolved `SEAMLYDATAROOTRECORDED`; default is `C:\Users\<user>\Documents\SeamlyData`.
 
 Non-default settings means at least: a non-default `%PROGRAMDIR%`, a non-default `%DATAROOT%` parent, and desktop shortcuts turned off (`SEAMLYDESKTOPSHORTCUTS=0`).
 

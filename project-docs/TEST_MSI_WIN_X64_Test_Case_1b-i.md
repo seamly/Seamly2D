@@ -5,7 +5,7 @@ Test plan for the Windows x64 Seamly MSI. Covers `packaging/windows/smsi.wxs`.
 This document uses two placeholders as shorthand. Neither is a real environment variable.
 
 - `%PROGRAMDIR%` stands for the resolved `INSTALLFOLDER`; default is `C:\Program Files\SeamlyApps`.
-- `%DATAROOT%` stands for the resolved `SEAMLYDATAROOTRECORDED`; default is `C:\Users\<user>\SeamlyData`.
+- `%DATAROOT%` stands for the resolved `SEAMLYDATAROOTRECORDED`; default is `C:\Users\<user>\Documents\SeamlyData`.
 
 Non-default settings means at least: a non-default `%PROGRAMDIR%`, a non-default `%DATAROOT%` parent, and desktop shortcuts turned off (`SEAMLYDESKTOPSHORTCUTS=0`).
 
@@ -32,7 +32,7 @@ Known defect to watch for: `MainWindow::exportPiecesToSeamlyLayout()` (`mainwind
 Run this suite after every test case in section A.
 
 - [ ] 0. Check the directories and files — 2026-09-01 pass: FAIL, two files missing (see 0a).
-  - [ ] 0a. Confirm these directories and files exist: — FAIL: all present after first app runs EXCEPT `SeamlyLayout\logs` (Layout.10) and `SeamlyLayout\preferences\default_preferences.json` (new task SettingsFiles.6). Actual `%DATADIR%` is `C:\Users\<user>\Documents\SeamlyData`, not `C:\Users\<user>\SeamlyData` as line 8 states. Install-time note: logs dirs, cache, DataRoot subtree and samples appear at app first run, not install — expected.
+  - [ ] 0a. Confirm these directories and files exist: — FAIL: all present after first app runs EXCEPT `SeamlyLayout\logs` (Layout.10) and `SeamlyLayout\preferences\default_preferences.json` (new task SettingsFiles.6). Actual `%DATADIR%` is `C:\Users\<user>\Documents\SeamlyData` (line 8 corrected 2026-09-01). Install-time note: logs dirs, cache, DataRoot subtree and samples appear at app first run, not install — expected.
     %PROGRAMDIR%\SeamlyApps
     |  |_seamly2d.exe
     |  |_seamlylayout.exe

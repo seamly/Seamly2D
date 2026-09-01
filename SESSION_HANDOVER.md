@@ -293,7 +293,7 @@ hardcoded fallback strings in `seedFromBundledDefaults()`
 (`PreferencesModel.cpp`). Updated the
 `layout8_resetToDefaults_seedsSharedLayoutsFolderForInputAndLayout` assertion
 and `INSTALLER_NOTES.md` to match. --> this is still incorrect, the layouts 
-fallback hardcoded directory should be 'C:\users\<user>\SeamlyData\layouts' 
+fallback hardcoded directory should be 'C:\users\<user>\Documents\SeamlyData\layouts' 
 (%DATADIR%\layouts), not %HOME\layouts; %HOME%\layouts makes no sense and 
 does not follow the seamly data storage pattern.
 
