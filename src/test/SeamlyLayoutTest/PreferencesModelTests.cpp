@@ -107,6 +107,14 @@ private slots:
     void layout8_resetToDefaults_seedsSharedLayoutsFolderForInputAndLayout();
 
     // -----------------------------------------------------------------------
+    // SettingsFiles.6 — an installer-seeded ini skips the deprecated first-run
+    // seeding, so load() itself must create the defaults profile the ini's
+    // preferences_file key names. Never overwrites an existing profile.
+    // -----------------------------------------------------------------------
+    void settingsFiles6_load_seedsMissingDefaultsProfileFromSeededIni();
+    void settingsFiles6_load_neverOverwritesAnExistingDefaultsProfile();
+
+    // -----------------------------------------------------------------------
     // Legacy folder-name migration: layout-settings → settings,
     //                               layout-preferences → preferences
     // -----------------------------------------------------------------------
@@ -626,6 +634,92 @@ void PreferencesModelTests::layout8_resetToDefaults_seedsSharedLayoutsFolderForI
     const QString homeLayouts = QDir(QDir::homePath()).filePath(QStringLiteral("layouts"));
     QVERIFY(QFileInfo(m.inputDirectory()).absoluteFilePath()
             != QFileInfo(homeLayouts).absoluteFilePath());
+}
+
+// ---------------------------------------------------------------------------
+// SettingsFiles.6 — load() seeds the missing defaults profile
+// ---------------------------------------------------------------------------
+
+// @brief Writes the ini shape the Windows MSI seeds (all 11 keys, preferences_file
+// naming a file nothing has created), pointing every path into tempDir.
+static QString writeSeededIni(const QString &tempPath)
+{
+    const QString iniPath = QDir(tempPath).filePath(QStringLiteral("qt6_seamlylayout.ini"));
+    QSettings s(iniPath, QSettings::IniFormat);
+    s.setValue(QStringLiteral("input_directory"),  QDir(tempPath).filePath(QStringLiteral("layouts")));
+    s.setValue(QStringLiteral("layout_directory"), QDir(tempPath).filePath(QStringLiteral("layouts")));
+    s.setValue(QStringLiteral("preferences_directory"), QDir(tempPath).filePath(QStringLiteral("preferences")));
+    s.setValue(QStringLiteral("settings_directory"),    QDir(tempPath).filePath(QStringLiteral("settings")));
+    s.setValue(QStringLiteral("settings_file"),
+               QDir(tempPath).filePath(QStringLiteral("settings/default_settings.json")));
+    s.setValue(QStringLiteral("preferences_file"),
+               QDir(tempPath).filePath(QStringLiteral("preferences/default_preferences.json")));
+    s.setValue(QStringLiteral("dxf_viewer_path"), QStringLiteral("https://sharecad.org"));
+    s.setValue(QStringLiteral("pdf_viewer_path"), QStringLiteral(""));
+    s.setValue(QStringLiteral("png_viewer_path"), QStringLiteral(""));
+    s.setValue(QStringLiteral("projector_path"),  QStringLiteral("https://patternprojector.com"));
+    s.setValue(QStringLiteral("data_root"), tempPath);
+    s.sync();
+    return iniPath;
+} // writeSeededIni
+
+// @brief load() on a complete installer-seeded ini must create the defaults profile
+// the ini's preferences_file names — the B.0a defect: the seeded ini pointed at a
+// file nothing created. The ini's own values must stay authoritative.
+void PreferencesModelTests::settingsFiles6_load_seedsMissingDefaultsProfileFromSeededIni()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+
+    const QString iniPath = writeSeededIni(tempDir.path());
+    const QString prefsFile = QDir(tempDir.path()).filePath(
+        QStringLiteral("preferences/default_preferences.json"));
+    QVERIFY(!QFileInfo::exists(prefsFile));
+
+    PreferencesModel m;
+    QVERIFY(m.load(iniPath));
+
+    QVERIFY2(QFileInfo::exists(prefsFile),
+             "load() on a seeded ini must create the defaults profile preferences_file names");
+    // The ini stays authoritative — loading must not swap in bundled defaults.
+    QCOMPARE(QFileInfo(m.preferencesFile()).absoluteFilePath(),
+             QFileInfo(prefsFile).absoluteFilePath());
+    QCOMPARE(QFileInfo(m.inputDirectory()).absoluteFilePath(),
+             QFileInfo(QDir(tempDir.path()).filePath(QStringLiteral("layouts"))).absoluteFilePath());
+
+    // The seeded profile is valid JSON a later resetToDefaults() can load.
+    QFile seeded(prefsFile);
+    QVERIFY(seeded.open(QIODevice::ReadOnly));
+    QJsonParseError parseError;
+    const QJsonDocument doc = QJsonDocument::fromJson(seeded.readAll(), &parseError);
+    QCOMPARE(parseError.error, QJsonParseError::NoError);
+    QVERIFY(doc.isObject());
+}
+
+// @brief A defaults profile that already exists — user-edited or older — must
+// survive load() byte for byte.
+void PreferencesModelTests::settingsFiles6_load_neverOverwritesAnExistingDefaultsProfile()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+
+    const QString iniPath = writeSeededIni(tempDir.path());
+    const QString prefsFile = QDir(tempDir.path()).filePath(
+        QStringLiteral("preferences/default_preferences.json"));
+    QVERIFY(QDir().mkpath(QFileInfo(prefsFile).absolutePath()));
+    const QByteArray sentinel = QByteArrayLiteral("{ \"projector_path\": \"user-edited\" }");
+    {
+        QFile existing(prefsFile);
+        QVERIFY(existing.open(QIODevice::WriteOnly));
+        existing.write(sentinel);
+    }
+
+    PreferencesModel m;
+    QVERIFY(m.load(iniPath));
+
+    QFile kept(prefsFile);
+    QVERIFY(kept.open(QIODevice::ReadOnly));
+    QCOMPARE(kept.readAll(), sentinel);
 }
 
 // ---------------------------------------------------------------------------
