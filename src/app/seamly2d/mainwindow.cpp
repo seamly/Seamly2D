@@ -4410,14 +4410,16 @@ void MainWindow::Open()
     //Get list last open files
     const QStringList files = qApp->Seamly2DSettings()->GetRecentFileList();
     QString dir;
-    if (files.isEmpty())
-    {
-        dir = QDir::homePath();
-    }
-    else
+    if (!files.isEmpty())
     {
         //Absolute path to last open file
         dir = QFileInfo(files.first()).absolutePath();
+    }
+    // Task Seamly2D.2.1: with no usable recent-file folder, fall back to the
+    // configured patterns folder — never the bare home directory.
+    if (dir.isEmpty() || !QDir(dir).exists())
+    {
+        dir = qApp->Seamly2DSettings()->getPatternPath();
     }
     qCDebug(vMainWindow, "Run QFileDialog::getOpenFileName: dir = %s.", qUtf8Printable(dir));
 
