@@ -32,7 +32,7 @@ Known defect to watch for: `MainWindow::exportPiecesToSeamlyLayout()` (`mainwind
 Run this suite after every test case in section A.
 
 - [x] 0. Check the directories and files — results 2026-09-01, build 26.9.1.687
-  - [x] 0a. FAIL (one file): after all three app first runs, everything below exists EXCEPT `SeamlyLayout\preferences\default_preferences.json` (SettingsFiles.6, filed) and the `SeamlyLayout\logs` / `SeamlyMe\logs` dirs (Layout.10 / SeamlyMe.5, filed). DataRoot tree + both samples seeded by Seamly2D first run. Confirm these directories and files exist:
+  - [x] 0a. FAIL (one file) on 26.9.1.687: after all three app first runs, everything below existed EXCEPT `SeamlyLayout\preferences\default_preferences.json` (SettingsFiles.6) and the `SeamlyLayout\logs` / `SeamlyMe\logs` dirs (Layout.10 / SeamlyMe.5, filed). RE-TESTED on build 26.9.1.728 (fresh reset → install → first runs): `default_preferences.json` NOW CREATED with correct paths — SettingsFiles.6 FIXED and completed. Remaining misses: the two `logs` dirs only. Confirm these directories and files exist:
     %PROGRAMDIR%\SeamlyApps
     |  |_seamly2d.exe
     |  |_seamlylayout.exe

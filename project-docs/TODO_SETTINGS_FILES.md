@@ -80,21 +80,9 @@ Found 2026-08-31 while verifying SettingsFiles.3. The seed CA had the same defec
 - [ ] SettingsFiles.4.2 Add the matching authoring assertions
 - [ ] SettingsFiles.4.3 Re-verify migration with a real upgrade install (test cases B/C). The 2026-08-21 verification exercised the script directly, not the CA command line, so live migration has run with mangled `-Destination` until this is fixed
 
-## Task SettingsFiles.6 — SeamlyLayout never creates preferences\default_preferences.json
-
-Found 2026-09-01, MSI Test Case 1b-i item B.0a. After a fresh install and a first
-SeamlyLayout run: `settings\default_settings.json` exists, but
-`preferences\default_preferences.json` does not. The installer-seeded
-`qt6_seamlylayout.ini` names that file in `preferences_file`, so the app points at
-a file nothing creates. Cause candidates: `PreferencesModel::load()` treats the
-seeded ini as authoritative and skips profile-JSON seeding (SettingsFiles.3.2),
-but only the preferences JSON is skipped — the settings JSON is still written.
-
-- [x] SettingsFiles.6.1 Decide the owner: the app seeds it, on demand, even when the ini exists (decided 2026-09-01). This matches `default_settings.json`, which `resolvedSettingsDirectory()` seeds app-side; the installer keeps seeding path settings only (decision 3 above).
-- [x] SettingsFiles.6.2 Implemented 2026-09-01: `PreferencesModel::load()` ini-exists path calls `seedFromBundledDefaults(preferencesFilePath())` when the profile is missing; never overwrites; the ini stays authoritative. Tests: `settingsFiles6_load_seedsMissingDefaultsProfileFromSeededIni`, `settingsFiles6_load_neverOverwritesAnExistingDefaultsProfile` (`PreferencesModelTests`). `ctest --preset debug` 5/5. `cargo test` skipped — no Rust changed.
-- [ ] SettingsFiles.6.3 Re-run MSI Test Case 1b-i item B.0a to confirm.
-
 Task SettingsFiles.5 (one-shot fresh-install data notice) is complete — moved to `TODO_COMPLETED.md` (2026-08-31).
+
+Task SettingsFiles.6 (SeamlyLayout defaults profile) is complete — moved to `TODO_COMPLETED.md` (2026-09-01).
 
 Task SettingsFiles.7 (getDefaultDataRoot() leaf → SeamlyData) is complete — moved to `TODO_COMPLETED.md` (2026-09-01).
 

@@ -19,6 +19,30 @@ re-accumulate finished-session narrative in this file.
 
 ## Current Status
 
+### SettingsFiles.6 DONE + LIVE-VERIFIED on build 26.9.1.728 (2026-09-01, ~12:20)
+
+Second loop iteration complete. `PreferencesModel::load()` now seeds a
+missing `preferences\default_preferences.json` when the installer-seeded
+ini exists (owner decision: app-side on demand, matching
+`default_settings.json`). Merged `c04aed0f69` (skip token — only
+`PreferencesModel.cpp` + tests changed). Full record: Task
+SettingsFiles.6 in `TODO_COMPLETED.md`.
+
+Live verification: rebuilt MSI 26.9.1.728, full reset (UAC approved
+first try), quiet install 0, three app first runs clean exit 0. The
+profile JSON is created with correct SeamlyData/app-config paths.
+B.0a note updated in the test doc. Remaining B misses are only
+Layout.10 (`SeamlyLayout\logs` + stray output dir) and SeamlyMe.5
+(`SeamlyMe\logs`).
+
+Machine state: fresh 26.9.1.728 install, all three apps ran, data
+seeded.
+
+`TODO_SETTINGS_FILES.md` now holds: SettingsFiles.4 (migration CA
+quoting — needs upgrade test cases B/C, NOT 1b-i; packaging change, push
+WITHOUT skip token) and SettingsFiles.3.3/3.4 (blocked on macOS/Linux
+packaging formats). Next loop iteration: SettingsFiles.4.
+
 ### Test Case 1b-i pass on build 26.9.1.687 COMPLETE for scripted items (2026-09-01, ~12:00)
 
 First pass on the NEW MSI carrying SettingsFiles.7 (built 2026-09-01,

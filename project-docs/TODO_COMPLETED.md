@@ -32,6 +32,29 @@ Verified 2026-09-01: full local qmake/nmake release build in `build/qmake-test`;
 `Seamly2DTests.exe` all 25 suites pass — `TST_DataRoot` 50 passed / 0 failed / 1
 pre-existing skip. Live MSI re-verification happens in the next Test Case 1b-i loop pass.
 
+## Task SettingsFiles.6 — SeamlyLayout now creates preferences\default_preferences.json (completed 2026-09-01)
+
+Found by MSI Test Case 1b-i item B.0a: after a fresh install and a first SeamlyLayout
+run, `settings\default_settings.json` existed but `preferences\default_preferences.json`
+did not — the installer-seeded `qt6_seamlylayout.ini` named a file nothing created.
+Cause: `PreferencesModel::load()` treats a seeded ini as authoritative and skips the
+deprecated first-run seeding, which was the only path that wrote the profile.
+
+- 6.1 Owner decision: the app seeds it, on demand, even when the ini exists. Matches
+  `default_settings.json`, which `resolvedSettingsDirectory()` seeds app-side; the
+  installer keeps seeding path settings only.
+- 6.2 `PreferencesModel::load()` ini-exists path calls
+  `seedFromBundledDefaults(preferencesFilePath())` when the profile is missing; never
+  overwrites; the ini stays authoritative. Tests:
+  `settingsFiles6_load_seedsMissingDefaultsProfileFromSeededIni`,
+  `settingsFiles6_load_neverOverwritesAnExistingDefaultsProfile`
+  (`PreferencesModelTests`). `ctest --preset debug` 5/5; `cargo test` skipped — no
+  Rust changed.
+- 6.3 Confirmed live 2026-09-01 on build 26.9.1.728: fresh reset → quiet install →
+  first SeamlyLayout run created `preferences\default_preferences.json` with correct
+  SeamlyData/app-config paths. B.0a's remaining misses are Layout.10 (`logs`) and
+  SeamlyMe.5 only.
+
 ## Task Seamly2D.2 — First run seeds the patterns folder from the bundled samples (completed 2026-08-28)
 
 MSI Test Case 1b-i step 6a-i found that `%PROGRAMDIR%\samples\patterns\*.sm2d` cannot be
