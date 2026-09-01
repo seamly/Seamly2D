@@ -19,6 +19,71 @@ re-accumulate finished-session narrative in this file.
 
 ## Current Status
 
+### Test Case 1b-i fresh pass COMPLETE for scripted items (2026-09-01)
+
+Results are recorded in the restructured test doc. Summary:
+
+- Case 1 steps 0/1a/1a-i/1b PASS (elevated child, UAC on 3rd try;
+  quiet install status 0).
+- B.0b/0c/0d, 1, 2a-i, 4, 5 PASS. B.0e/1a N/A (fresh install).
+- B.0a FAIL: after first app runs, `SeamlyLayout\logs` missing
+  (Layout.10) and `SeamlyLayout\preferences\default_preferences.json`
+  missing — NEW task SettingsFiles.6 filed (`TODO_SETTINGS_FILES.md`).
+  `default_settings.json` and `cache` did get created.
+- B.3 CONFIRMED: SeamlyLayout first run recreated the stray
+  `%LOCALAPPDATA%\SeamlyLayout\output` (Layout.10, already filed).
+- 2c-ii static check: `.pieces.svg` defect still at `mainwindow.cpp:4153`
+  (Seamly2D.5, Layout.9, already filed).
+- Scripted app runs: Seamly2D first run showed the "Seamly data moved"
+  notice then the main window — NO Welcome blocker this pass, clean
+  exit 0, notice flipped `pending`→`shown`. SeamlyLayout ran standalone,
+  clean exit 0.
+- PENDING THE HUMAN: B.2a-ii..2d (file-open dialogs, pattern open,
+  SeamlyMe and SeamlyLayout from within Seamly2D).
+- Doc nits observed: line 8 says default `%DATAROOT%` is
+  `C:\Users\<user>\SeamlyData`; actual/recorded is
+  `C:\Users\<user>\Documents\SeamlyData`. 0b-iii means
+  `qt6_seamlyme.ini`; `%DATADIRT%` typo in 0b-i1.
+
+### Test Case 1b-i fresh pass IN PROGRESS (2026-09-01, restructured doc) — superseded by the entry above
+
+The user reset and RESTRUCTURED `TEST_MSI_WIN_X64_Test_Case_1b-i.md`
+(section B now items 0–5; uncommitted). Fresh pass on the same MSI
+(built 2026-08-31 7:15 PM, ProductVersion 26.8.44328, apps 26.8.31.1128).
+
+Done so far, all PASS, results not yet written into the test doc:
+
+- Case 1 steps 0/1a/1a-i/1b: elevated child (UAC approved on 3rd try)
+  ran `test_reset_environment.ps1` — prior 26.8.44328 removed, every
+  residue probe clean (incl. stray `%LOCALAPPDATA%\SeamlyLayout`, absent
+  this time). Quiet install status 0 at 22:02.
+- B.0a/0c/0d install-time snapshot: program dir complete
+  (6 exe incl. pdftops/QtWebEngineProcess/vc_redist), all 4 inis seeded
+  and match expected keys (`qt6_seamlylayout.ini` now fully seeded at
+  install — SettingsFiles.3 rework), `firstRunDataNotice=pending`,
+  no duplicate dirs.
+- B.1 registry: three `HKLM\SOFTWARE\Seamly\<app>` keys, matching
+  InstallPath/DisplayVersion/DataRoot/DataParent; `DesktopShortcut*`
+  flags still on Seamly2D key only (known, filed: SeamlyMe.3, Layout.7).
+- B.3: no stray `%LOCALAPPDATA%\SeamlyLayout\output` (pre-app-run).
+- B.4: all three public-desktop shortcuts present.
+- Not yet created (expected pre-first-run): logs dirs, SeamlyLayout
+  cache + the two JSON profiles, DataRoot subtree + samples.
+
+Next steps:
+
+1. Run scratchpad `run_seamly2d_firstrun.ps1` (launch seamly2d.exe,
+   WM_CLOSE Welcome → notice → main) then re-run scratchpad
+   `verify_install.ps1`: expect DataRoot tree + samples, logs dir,
+   `firstRunDataNotice=shown` (B.2a-i), B.3 stray-dir check, B.5 logs.
+2. Record results with checkboxes in the test doc; file any new tasks
+   the doc's inline notes ask for (lines 12, 107, 120, 123).
+3. Report items needing the human: B.2a-ii..2d walkthrough.
+
+Scratchpad scripts this session: `elevated_reset_install.ps1`,
+`verify_install.ps1`, `run_seamly2d_firstrun.ps1`
+(`C:\Users\susan\AppData\Local\Temp\claude\c--Users-susan-Projects-Seamly2D-private\8e932df7-9855-4828-b8cd-a82390c2dfb2\scratchpad`).
+
 ### Test Case 1b-i re-pass COMPLETE for scripted items (2026-08-31 evening)
 
 The user reset every checkbox in

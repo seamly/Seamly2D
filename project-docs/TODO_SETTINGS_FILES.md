@@ -80,6 +80,20 @@ Found 2026-08-31 while verifying SettingsFiles.3. The seed CA had the same defec
 - [ ] SettingsFiles.4.2 Add the matching authoring assertions
 - [ ] SettingsFiles.4.3 Re-verify migration with a real upgrade install (test cases B/C). The 2026-08-21 verification exercised the script directly, not the CA command line, so live migration has run with mangled `-Destination` until this is fixed
 
+## Task SettingsFiles.6 — SeamlyLayout never creates preferences\default_preferences.json
+
+Found 2026-09-01, MSI Test Case 1b-i item B.0a. After a fresh install and a first
+SeamlyLayout run: `settings\default_settings.json` exists, but
+`preferences\default_preferences.json` does not. The installer-seeded
+`qt6_seamlylayout.ini` names that file in `preferences_file`, so the app points at
+a file nothing creates. Cause candidates: `PreferencesModel::load()` treats the
+seeded ini as authoritative and skips profile-JSON seeding (SettingsFiles.3.2),
+but only the preferences JSON is skipped — the settings JSON is still written.
+
+- [ ] SettingsFiles.6.1 Decide the owner: installer seeds the file, or the app seeds it even when the ini exists. Match whichever rule `default_settings.json` follows.
+- [ ] SettingsFiles.6.2 Implement; add a test pinning both JSON files after first run on a seeded ini.
+- [ ] SettingsFiles.6.3 Re-run MSI Test Case 1b-i item B.0a to confirm.
+
 Task SettingsFiles.5 (one-shot fresh-install data notice) is complete — moved to `TODO_COMPLETED.md` (2026-08-31).
 
 CI: Task SettingsFiles.1 pushes with the skip token. Tasks SettingsFiles.2/3/4 touch `packaging/**` — push without it.
