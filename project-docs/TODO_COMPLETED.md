@@ -513,6 +513,35 @@ Mechanism: the seeder writes `[notices] firstRunDataNotice=pending` into `qt6_co
 - [X] SettingsFiles.5.2 `VCommonSettings::firstRunNoticePending()` / `markFirstRunNoticeShown()`; `VAbstractApplication::NotifySeamlyDataLocation()` shows-and-marks; called from the Seamly2D and SeamlyMe GUI-mode paths only
 - [X] SettingsFiles.5.3 SeamlyLayout shows the same notice from `qt_frontend/main.cpp` (self-contained — it does not link vmisc), on the first event-loop pass
 - [X] SettingsFiles.5.4 Tests: seeder suite (fresh = pending, existing file = no flag); `TST_DataRoot::FirstRunNoticePendingOnlyWhileSeeded` (CI); `test_msi_install.ps1` asserts the flag
-- [X] SettingsFiles.5.5 Live verify on a fresh install: verified 2026-08-31 on build 26.8.31.1128 (MSI Test Case 1b-i pass). `pending` at install time; Seamly2D''s first run raised the "Seamly data moved" dialog once; value flipped to `shown`; SeamlyMe and SeamlyLayout ran with no repeat. Visual review of the dialog text stays with the human walkthrough (test doc item 6)
+- [X] SettingsFiles.5.5 Live verify on a fresh install: verified 2026-08-31 on build 26.8.31.1128 (MSI Test Case 1b-i pass). `pending` at install time; Seamly2D's first run raised the "Seamly data moved" dialog once; value flipped to `shown`; SeamlyMe and SeamlyLayout ran with no repeat. Visual review of the dialog text stays with the human walkthrough (test doc item 6)
 
 Shipped in merge `4ded2549d0` (task-first-run-notice into run-seamlyLayout), pushed without the skip token.
+
+## Task Layout.11 — layouts fallback resolves under <Documents>/SeamlyData, not the home directory (completed 2026-09-01)
+
+User request 2026-09-01 (recorded earlier as a SESSION_HANDOVER note on the Layout.8.2 fix):
+the `input_directory`/`layout_directory` default template resolved `${HOME}` to the raw
+home directory when no installer DataRoot was recorded, producing
+`C:\Users\<user>\layouts`. That does not follow the Seamly data-storage pattern; the
+fallback must be `%DATAROOT%\layouts` with the default data root
+`<Documents>/SeamlyData`.
+
+- [X] Renamed the template token `${HOME}` to `${DATAROOT}` in
+  `default_preferences.json` (all three platform blocks) and in the matching hardcoded
+  fallbacks in `seedFromBundledDefaults()` (`PreferencesModel.cpp`)
+- [X] `expandDefaultPathTokens()` now resolves `${DATAROOT}` to, in order: the Windows
+  installer's recorded DataRoot; `<Documents>/SeamlyData`
+  (`QStandardPaths::DocumentsLocation`, honoring redirected Documents); the home
+  directory only when the platform reports no documents location — and then still with
+  the `/SeamlyData` leaf
+- [X] Regression guard added to
+  `PreferencesModelTests::layout8_resetToDefaults_seedsSharedLayoutsFolderForInputAndLayout`:
+  the seeded folder must never equal `<home>/layouts`
+- [X] Docs: `INSTALLER_NOTES.md` fallback wording; `${DATAROOT}` in
+  `smsi_seed_user_settings.ps1` comments (comment-only)
+- [X] Verified: `ctest --preset debug` 5/5 passed; `cargo test --workspace` 265 passed,
+  0 failed
+
+Note: `VCommonSettings::getDefaultDataRoot()` (Seamly2D/SeamlyMe) still returns
+`<Documents>/Seamly` — a different leaf than the MSI default `<Documents>\SeamlyData`.
+Not changed here; SeamlyLayout does not link vmisc.

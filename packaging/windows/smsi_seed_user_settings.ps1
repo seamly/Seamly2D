@@ -36,7 +36,7 @@
     would suppress the app's own (now deprecated) first-run seeding and
     leave the missing keys empty. The values below mirror what
     seedFromBundledDefaults() derives from default_preferences.json with
-    ${HOME} resolved to the recorded data root.
+    ${DATAROOT} resolved to the recorded data root.
 
     Values use Qt's '/' separator form. The folder names match the English
     defaults the MSI itself creates under the data root.
@@ -267,7 +267,7 @@ try {
     # SeamlyLayout: the complete key set PreferencesModel::save() writes,
     # in the [General] section (QSettings default group). Values mirror
     # seedFromBundledDefaults() + default_preferences.json (windows block)
-    # with ${HOME} resolved to the data root. The set must stay complete:
+    # with ${DATAROOT} resolved to the data root. The set must stay complete:
     # load() takes an existing ini as authoritative and its missing-key
     # fallbacks are empty strings.
     $layoutConfig = ConvertTo-QtPath (Join-Path $seamlyRoot 'SeamlyLayout')

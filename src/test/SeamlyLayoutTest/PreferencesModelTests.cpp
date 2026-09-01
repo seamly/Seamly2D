@@ -603,7 +603,9 @@ void PreferencesModelTests::layout8_resetToDefaults_seedsAppConfigPreferencesAnd
 // same shared "layouts" folder — one folder for both import and export, not the older
 // separate "input"/"output" pair — so a fresh install nests both under one shared folder
 // name (matching the `layouts` subfolder Seamly2D's ensureDataRootTree() already creates
-// under %DATAROOT%).
+// under %DATAROOT%). Layout.11: the folder must sit under a data root — the installer's
+// recorded DataRoot or the <Documents>/SeamlyData fallback — never directly under the
+// home directory.
 void PreferencesModelTests::layout8_resetToDefaults_seedsSharedLayoutsFolderForInputAndLayout()
 {
     QTemporaryDir tempDir;
@@ -619,6 +621,11 @@ void PreferencesModelTests::layout8_resetToDefaults_seedsSharedLayoutsFolderForI
              QFileInfo(m.layoutDirectory()).absoluteFilePath());
     QVERIFY(QDir::fromNativeSeparators(m.inputDirectory()).endsWith(QStringLiteral("layouts")));
     QVERIFY(!QDir::fromNativeSeparators(m.inputDirectory()).contains(QStringLiteral("seamlyLayout")));
+
+    // Layout.11 regression guard: ${DATAROOT}/layouts must not resolve to <home>/layouts.
+    const QString homeLayouts = QDir(QDir::homePath()).filePath(QStringLiteral("layouts"));
+    QVERIFY(QFileInfo(m.inputDirectory()).absoluteFilePath()
+            != QFileInfo(homeLayouts).absoluteFilePath());
 }
 
 // ---------------------------------------------------------------------------
