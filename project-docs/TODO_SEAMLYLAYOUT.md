@@ -151,3 +151,12 @@ Found during MSI Test Case 1 verification (`project-docs/TEST_MSI_WIN_X64_Test_C
 - [ ] Layout.9.1 Confirm with the project owner whether the file-based handoff is the accepted design (in which case update the MSI test doc's expectation and close this task) or whether a stringified-SVG handoff is still required.
 - [ ] Layout.9.2 If a stringified-SVG handoff is required: design the transport (stdin vs. a new CLI flag vs. IPC) and update `StartupOptions.{h,cpp}` and the Seamly2D-side launch call together — see the "Change one side and you must change the other" rule in `src/app/seamlylayout/CLAUDE.md`.
 - [ ] Layout.9.3 Update `StartupOptionsTests.cpp` and `TST_SeamlySuitePaths` to pin the new contract; update `project-docs/SVG-DATA-ATTRIBUTES.md`.
+
+## Task Layout.10 — Move SeamlyLayout logs to %LOCALAPPDATA%\Seamly\SeamlyLayout\logs
+
+Found during MSI Test Case verification, step 7f (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`). `Logger::init()` writes session logs to `%LOCALAPPDATA%\SeamlyLayout\output\log_<timestamp>.txt` — outside the `Seamly` organization folder every other app-config file uses. Confirmed live on the 2026-08-31 pass: `log_260831204937.txt` written there during the app run. Seamly2D's pattern is `%LOCALAPPDATA%\Seamly\Seamly2D\logs`.
+
+- [ ] Layout.10.1 Change the log directory to `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` (AppConfigLocation + `logs`, same root as `qt6_seamlylayout.ini`).
+- [ ] Layout.10.2 Stop creating `%LOCALAPPDATA%\SeamlyLayout\` and its `output` subdirectory.
+- [ ] Layout.10.3 Add the new `logs` directory to `test_reset_environment.ps1` coverage if needed (removing `%LOCALAPPDATA%\Seamly` already covers it) and remove the stray `%LOCALAPPDATA%\SeamlyLayout` there too.
+- [ ] Layout.10.4 Re-run MSI Test Case verification step 7f to confirm.

@@ -19,30 +19,39 @@ re-accumulate finished-session narrative in this file.
 
 ## Current Status
 
-### Test Case 1b-i pass COMPLETE for scripted items (2026-08-31, notice build)
+### Test Case 1b-i re-pass COMPLETE for scripted items (2026-08-31 evening)
 
-Full pass of `project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md` on build
-26.8.31.1128 (MSI built 2026-08-31 7:15 PM, after merge `4ded2549d0`).
-Results are recorded in the test doc itself; every scripted item is
-checked off.
+The user reset every checkbox in
+`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`; a full fresh pass ran
+on the same build 26.8.31.1128 (MSI built 2026-08-31 7:15 PM). Results
+are recorded in the test doc itself; every scripted item is checked off.
 
-- Case 1 steps 0/1a/1a-i/1b PASS: elevated child process (UAC-approved)
-  ran `test_reset_environment.ps1` (prior 26.8.44187 removed, all nine
-  residue checks clean), then quiet install exit 0.
-- Suite items 1–5, 7 (except 7a-v), 8, 9, 10 all PASS. Install-time
-  snapshot confirmed every seeded ini complete before any app ran.
-- SettingsFiles.5 live-verified (4b-ii): `firstRunDataNotice=pending`
-  at install time; Seamly2D's first run showed "Seamly data moved"
-  once (dismissed by automation); value flipped to `shown`; SeamlyMe
-  and SeamlyLayout showed no repeat. Task moved to `TODO_COMPLETED.md`.
+- Case 1 steps 0/1a/1a-i/1b PASS: elevated child (UAC-approved) ran
+  `test_reset_environment.ps1` (prior 26.8.44328 removed, all residue
+  checks clean), then quiet install exit 0.
+- Suite items 1–5, 7 (except 7a-v), 8, 9 PASS. Install-time snapshot
+  confirmed every seeded ini complete before any app ran.
+- 4b-ii deviation, contract still holds: Seamly2D's first launch blocked
+  at the modal `SeamlyWelcomeDialog` (`main.cpp:107`, shown before the
+  notice) and the harness killed it. SeamlyMe was therefore the first
+  completed run — it showed "Seamly data moved" once, value flipped
+  `pending`→`shown`, no repeats (SeamlyLayout, Seamly2D rerun). A future
+  scripted pass must close the "Welcome" window (WM_CLOSE works).
+- NEW TASK Layout.10 (`TODO_SEAMLYLAYOUT.md`): step 7f confirmed
+  SeamlyLayout writes logs to `%LOCALAPPDATA%\SeamlyLayout\output\` —
+  move to `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs`, stop creating the
+  stray dir, and add it to `test_reset_environment.ps1` (it survives
+  reset today).
 - Known defect STILL PRESENT: `exportPiecesToSeamlyLayout()`
   (`mainwindow.cpp:4153`) passes a `.pieces.svg` file path, not a
-  stringified SVG document (test doc item 6b-ii / top-of-file note).
-- No new defects found; nothing new filed to the TODO files.
+  stringified SVG document. Already filed: `Seamly2D.5`, `Layout.9`.
+  The DesktopShortcut* flags on the Seamly2D key are already filed too:
+  `SeamlyMe.3`, `Layout.7`.
 - PENDING THE HUMAN: item 6 (interactive app walkthrough), 7a-v
   (bodyscans UI-row change test), and visual review of the notice text.
 - Helper scripts live in this session's scratchpad
-  (`elevated_reset_install.ps1`, `run_apps_pass.ps1`) — rewrite if gone.
+  (`elevated_reset_install.ps1`, `run_apps_pass.ps1`,
+  `rerun_seamly2d.ps1`) — rewrite if gone.
 - CI run 33355737878 (older note): macOS Build failed (`hdiutil: create
   failed` making `Seamly2D.dmg`). Deferred on purpose — platform order
   is x64 MSI, then arm64, then macOS.
