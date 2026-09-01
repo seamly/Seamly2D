@@ -40,9 +40,20 @@ Results recorded in the test doc. Same outcome as the first 2026-09-01 pass:
   `%LOCALAPPDATA%\SeamlyLayout\output` (Layout.10).
 - 2c-ii static check: `.pieces.svg` defect still at
   `mainwindow.cpp:4165-4168` (Seamly2D.5, Layout.9).
-- PENDING THE HUMAN: B.2a-iii/iv, 2b-*, 2c-i/iv, 2d.
-- Machine state: fresh 26.8.44328 install with seeded data (Seamly2D and
-  SeamlyLayout each ran once).
+- HUMAN WALKTHROUGH DONE (2026-09-01): 2a-iv, 2b-i..iv, 2b-vi, 2c-i,
+  2c-iv, 2d all PASS. Fails:
+  - 2a-iii FAIL — File Open opened in `C:\Users\<user>` (known,
+    Seamly2D.2.1).
+  - 2b-v FAIL — SeamlyMe writes no logs; NEW Task SeamlyMe.5 filed
+    (`TODO_SEAMLYME.md`): mirror `Application2D::logDirPath()` to get
+    `%LOCALAPPDATA%\Seamly\SeamlyMe\logs`.
+  - 2c-iii logs half FAIL — confirmed live after the in-Seamly2D run
+    (Layout.10).
+- The pass is COMPLETE. Open queue now: SettingsFiles.4, SettingsFiles.6,
+  SettingsFiles.7, Seamly2D.2.1, Seamly2D.3, Seamly2D.5/Layout.9,
+  SeamlyMe.3/Layout.7, SeamlyMe.5, Layout.10.
+- Machine state: fresh 26.8.44328 install with seeded data (all three
+  apps have run).
 
 Scratchpad scripts (copied from session 8e932df7):
 `elevated_reset_install.ps1`, `verify_install.ps1`,

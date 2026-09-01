@@ -31,6 +31,14 @@ Found during MSI Test Case verification, step 5c (`project-docs/TEST_MSI_WIN_X64
 - [ ] SeamlyMe.3.2 Confirm `smsi_check_authoring.ps1:562` and `test_msi_install.ps1` still pass, and update either script if it asserts the old key
 - [ ] SeamlyMe.3.3 Re-run MSI Test Case verification step 5c to confirm `HKLM\SOFTWARE\Seamly\SeamlyMe` carries `DesktopShortcutSeamlyMe`
 
+## Task SeamlyMe.5 — write SeamlyMe log files to `%LOCALAPPDATA%\Seamly\SeamlyMe\logs`
+
+Found during MSI Test Case verification, step B.2b-v (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, 2026-09-01). SeamlyMe writes no log files and creates no logs directory — `ApplicationME` has no equivalent of `Application2D::logDirPath()`/`beginLogging()` (`src/app/seamly2d/core/application_2d.cpp:605`). Seamly2D writes to `%LOCALAPPDATA%\Seamly\Seamly2D\logs`; SeamlyMe must mirror that pattern.
+
+- [ ] SeamlyMe.5.1 Add log-directory resolution and logging startup to `ApplicationME`, mirroring `Application2D::logDirPath()`/`beginLogging()`: `AppLocalDataLocation` + `logs` → `%LOCALAPPDATA%\Seamly\SeamlyMe\logs` on Windows
+- [ ] SeamlyMe.5.2 Re-run MSI Test Case verification step B.2b-v to confirm the directory and a log file appear after a SeamlyMe run
+- [ ] SeamlyMe.5.3 Doxygen briefs + inline comments on any touched function(s)
+
 ## Task SeamlyMe.4 — write a persisted `[paths]` section to `qt6_seamlyme.ini`
 
 Found during MSI Test Case verification, step 6b (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`). `qt6_seamlyme.ini` has no `[paths]` section. `VCommonSettings` (shared with Seamly2D) already exposes `getIndividualSizePath()`/`getMultisizePath()`/`getTemplatePath()` under the `paths/individual_size_measurements`, `paths/multi_size_measurements`, and `paths/templates` keys (`src/libs/vmisc/vcommonsettings.cpp:86-93`), but nothing in SeamlyMe ever calls the matching setters, so QSettings never writes the section — the paths only resolve correctly at runtime through each getter's default fallback. Related to Task SeamlyMe.1 (same getters, dialog defaults).

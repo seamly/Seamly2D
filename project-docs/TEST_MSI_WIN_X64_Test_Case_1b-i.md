@@ -105,22 +105,22 @@ data_root=%DATADIRROOT%"
   - [ ] 2a. Run Seamly2D
     - [x] 2a-i. first run scripted: the "Seamly data moved" notice appears once, closes, then the main window appears — PASS 2026-09-01 second pass: notice once, then main window. Deviation: after WM_CLOSE on the main window the process stayed alive 90 s and the harness killed it (prior pass exited 0); log shows no error. Watch on the next pass.
     - [x] 2a-ii. check if `qt6_common.ini` contains  "[notices] firstRunDataNotice=shown"; — PASS: `pending` → `shown`.
-    - [ ] 2a-iii. Select 'file open' -- the dialog should open in the `%DATADIR\patterns` directory.
-    - [ ] 2a-iv. Open `%DATADIR%\patterns\male_shirt.sm2d` pattern file with `%DATADIR%\measurements\individual\male_chest_102cm.smis` individual measurement file.
+    - [ ] 2a-iii. Select 'file open' -- the dialog should open in the `%DATADIR\patterns` directory. — FAIL 2026-09-01 second pass (human): dialog opened in `C:\Users\<user>`. Known cause, filed: Seamly2D.2.1 (`MainWindow::Open()` never reads `getPatternPath()` when the recent-files list is empty).
+    - [x] 2a-iv. Open `%DATADIR%\patterns\male_shirt.sm2d` pattern file with `%DATADIR%\measurements\individual\male_chest_102cm.smis` individual measurement file. — PASS 2026-09-01 second pass (human).
     - [x] 2a-v. Check if directory exists: `%LOCALAPPDATA%\Seamly\Seamly2D\logs` — PASS: created at first run; DataRoot subtree and both sample files also seeded.
-  - [ ] 2b. Check SeamlyMe from within Seamly2D
-  - [ ] 2b-i. Select 'File Open Individual' - the dialog should open in the `%DATADIR\measurements\individual` directory.
-    - [ ] 2b-ii. Select 'File Open Multisize' - the dialog should open in the `%DATADIR\measurements\multisize` directory.
-    - [ ] 2b-iii. Select 'File Open Templates' - the dialog should open in the `%DATADIR\templates` directory.
-    - [ ] 2b-iv. Select 'Edit Current' from the Measurements menu - the `%DATADIR%\measurements\individual\male_chest_102cm.smis` file should open.
-    - [ ] 2b-v. Check if directory exists: `%DATADIR%\SeamlyMe\logs`
-    - [ ] 2b-vi. Close SeamlyMe, returning focus to Seamly2D.
-  - [ ] 2c. Run SeamlyLayout from within Seamly2D.
-    - [ ] 2c-i. Visually confirm that the current pattern's `Piece mode` data is opened in the left canvas.
+  - [ ] 2b. Check SeamlyMe from within Seamly2D — 2026-09-01 second pass (human): all PASS except 2b-v.
+    - [x] 2b-i. Select 'File Open Individual' - the dialog should open in the `%DATADIR\measurements\individual` directory. — PASS.
+    - [x] 2b-ii. Select 'File Open Multisize' - the dialog should open in the `%DATADIR\measurements\multisize` directory. — PASS.
+    - [x] 2b-iii. Select 'File Open Templates' - the dialog should open in the `%DATADIR\templates` directory. — PASS.
+    - [x] 2b-iv. Select 'Edit Current' from the Measurements menu - the `%DATADIR%\measurements\individual\male_chest_102cm.smis` file should open. — PASS.
+    - [ ] 2b-v. Check if directory exists: `%LOCALAPPDATA%\SeamlyMe\logs` — FAIL: SeamlyMe writes no logs at all (`ApplicationME` has no logging setup). NEW task filed: SeamlyMe.5 (`TODO_SEAMLYME.md`) — target `%LOCALAPPDATA%\Seamly\SeamlyMe\logs`, mirroring Seamly2D.
+    - [x] 2b-vi. Close SeamlyMe, returning focus to Seamly2D. — PASS.
+  - [ ] 2c. Run SeamlyLayout from within Seamly2D. — 2026-09-01 second pass (human): PASS except 2c-ii and the logs half of 2c-iii.
+    - [x] 2c-i. Visually confirm that the current pattern's `Piece mode` data is opened in the left canvas. — PASS.
     - [ ] 2c-ii. Check if `MainWindow::exportPiecesToSeamlyLayout()` passes 'piece mode' data to SeamlyLayout as a stringified SVG document in a variable, not as a svg file from harddrive. — FAIL 2026-09-01 second pass (static check): still writes `.pieces.svg` (`mainwindow.cpp:4165-4168`). Filed: Seamly2D.5, Layout.9.
-    - [ ] 2c-iii. Check if directories exist: `%DATADIR%\SeamlyLayout\cache`, `%DATADIR%\SeamlyLayout\logs` — partial 2026-09-01 (standalone SeamlyLayout run, dirs under `%LOCALAPPDATA%\Seamly\SeamlyLayout`): `cache` PASS, `logs` FAIL (Layout.10).
-    - [ ] 2c-iv. Close SeamlyLayout, returning focus to Seamly2D.
-  - [ ] 2d. Close Seamly2D.
+    - [ ] 2c-iii. Check if directories exist: `%LOCALAPPDIR%\SeamlyLayout\cache`, `%LOCALAPPDIR%\SeamlyLayout\logs` — 2026-09-01 second pass, confirmed by the human after the in-Seamly2D run (dirs under `%LOCALAPPDATA%\Seamly\SeamlyLayout`): `cache` PASS, `logs` FAIL (Layout.10).
+    - [x] 2c-iv. Close SeamlyLayout, returning focus to Seamly2D. — PASS.
+  - [x] 2d. Close Seamly2D. — PASS.
 - [x] 3. — CONFIRMED 2026-09-01 second pass: dir survived reset and the SeamlyLayout run wrote a fresh `log_260901100840.txt` into it. Task already filed: Layout.10. Check if `%LOCALAPPDATA%\SeamlyLayout\output` directory was created. If exists add a task to stop creating the `%LOCALAPPDATA%\SeamlyLayout\` directory and its `output` subdirectory that stores log files, and start creating the `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` directory to store SeamlyLayout log files (similar to the `%LOCALAPPDATA\Seamly\Seamly2D\logs` directory)
 - [x] 4. Check Desktop shortcuts `Seamly2D.lnk`, `SeamlyMe.lnk`, `SeamlyLayout.lnk` for all three apps in `C:\Users\Public\Desktop` (default settings, `SEAMLYDESKTOPSHORTCUTS` on). — PASS: all three present.
 - [x] 5. Check the logs in `%LOCALAPPDATA%\Seamly\Seamly2D\logs\` for additional errors. — PASS: one log (`seamly2d-pid20844.log`), INFO/DEBUG only, no errors.
