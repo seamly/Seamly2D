@@ -502,3 +502,17 @@ Every other app in the suite keeps its tests under `src/test/` — `Seamly2DTest
 
 - [X] `src/app/seamlylayout/build.ps1:117` probed for a CMake package directory named **`Qt6WebEngine`**, which Qt has never shipped — the WebEngine packages are `Qt6WebEngineCore` / `Qt6WebEngineQuick` / `Qt6WebEngineWidgets`. The guard therefore fired on *every* correctly installed kit, aborting the build with "missing required module(s): Qt6WebEngine" and a long install instruction for modules that were already present (`Qt6WebChannel` and `Qt6Positioning` were both there). Now probes `Qt6WebEngineQuick`, the target `CMakeLists.txt` actually links, with a comment recording why. This is the same guard added to catch the Task 44 setup failure — it was checking the one name that cannot exist
 - [X] `ctest --preset debug` could not run on Windows from a shell that had not sourced the Qt kit: the four test exes are launched straight out of the build tree with no `windeployqt` output beside them, so Qt's DLLs and the platform plugin were unreachable and the suites aborted at startup ("could not find or load the Qt platform plugin"). Added a `WIN32`-guarded `ENVIRONMENT_MODIFICATION` test property prepending `$<TARGET_FILE_DIR:Qt6::Core>` to `PATH` for the test run only — expressed as a generator expression so it follows whichever kit CMake found rather than pinning a version. Linux/macOS need no equivalent (CI installs Qt onto the loader path; RPATH covers local runs). Verified by running `ctest --preset debug` in a shell with no Qt on `PATH`: all four pass
+
+## Task SettingsFiles.5 — one-shot fresh-install data notice (completed 2026-08-31)
+
+Decision (2026-08-31): at the first app run after a fresh install, show a popup: the sample data and any existing user files (patterns, measurements, images, layouts, and more) are left in their original location as a backup, zipped into a zip file as a second backup, and copied to the new SeamlyData directory for the programs to use.
+
+Mechanism: the seeder writes `[notices] firstRunDataNotice=pending` into `qt6_common.ini`, but only when it creates that file — an existing file marks a machine a previous install already ran on. Whichever Seamly app runs first shows the notice, then rewrites the value as `shown`, so the suite shows it once in total. An absent key (dev build, platform without an installer, upgrade) shows nothing.
+
+- [X] SettingsFiles.5.1 `smsi_seed_user_settings.ps1` seeds the pending flag on a fresh machine only
+- [X] SettingsFiles.5.2 `VCommonSettings::firstRunNoticePending()` / `markFirstRunNoticeShown()`; `VAbstractApplication::NotifySeamlyDataLocation()` shows-and-marks; called from the Seamly2D and SeamlyMe GUI-mode paths only
+- [X] SettingsFiles.5.3 SeamlyLayout shows the same notice from `qt_frontend/main.cpp` (self-contained — it does not link vmisc), on the first event-loop pass
+- [X] SettingsFiles.5.4 Tests: seeder suite (fresh = pending, existing file = no flag); `TST_DataRoot::FirstRunNoticePendingOnlyWhileSeeded` (CI); `test_msi_install.ps1` asserts the flag
+- [X] SettingsFiles.5.5 Live verify on a fresh install: verified 2026-08-31 on build 26.8.31.1128 (MSI Test Case 1b-i pass). `pending` at install time; Seamly2D''s first run raised the "Seamly data moved" dialog once; value flipped to `shown`; SeamlyMe and SeamlyLayout ran with no repeat. Visual review of the dialog text stays with the human walkthrough (test doc item 6)
+
+Shipped in merge `4ded2549d0` (task-first-run-notice into run-seamlyLayout), pushed without the skip token.

@@ -19,50 +19,33 @@ re-accumulate finished-session narrative in this file.
 
 ## Current Status
 
-### Test loop pass in progress (2026-08-31)
+### Test Case 1b-i pass COMPLETE for scripted items (2026-08-31, notice build)
 
-Position: step 1 — MSI rebuild for Task SettingsFiles.5 (see its
-section below). The prior pass (SettingsFiles.3 build) completed and
-shipped; its results stay recorded below for the open human items.
+Full pass of `project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md` on build
+26.8.31.1128 (MSI built 2026-08-31 7:15 PM, after merge `4ded2549d0`).
+Results are recorded in the test doc itself; every scripted item is
+checked off.
 
-- CI run 33355737878 checked: Windows unit tests + both MSIs passed;
-  macOS Build failed (`hdiutil: create failed` making `Seamly2D.dmg`).
-  Deferred on purpose — platform order is x64 MSI, then arm64, then macOS.
-- Step 1 done: `test_build_msi_local.ps1` passed. MSI at
-  `packaging\windows\seamly-msi\x64\seamly-x64.msi` (164.6 MB).
-  `smsi_migrate_user_data` tests 16/16.
-- Step 2 done and verified: program dir, DataRoot, both AppData Seamly
-  trees, HKLM\SOFTWARE\Seamly, and desktop shortcuts all absent.
-- Step 3 done: elevated `msiexec /i ... /quiet /norestart` exit 0
-  (version 26.8.31.737). Log at `%TEMP%\seamly-x64-install.log`.
-- Step 4 in progress: verification suite in
-  `project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`. The user's uncommitted
-  edit unchecks section 7a (items 7a-i..7a-iv plus the bodyscans re-verify).
-  - Item 1 PASS (scripted): each app launched and closed; Seamly2D wrote
-    geometry/windowState on exit, log clean.
-  - Item 2 PASS: all six program files present.
-  - Item 3 PASS after first run: all nine subdirs, no nesting, both
-    sample files seeded.
-  - Item 4a PASS. Item 4b: `qt6_common.ini` now lives at
-    `%LOCALAPPDATA%\Seamly\qt6_common.ini` (SettingsFiles.1 — the test
-    doc's `%APPDATA%` location is stale). Holds only `dataRoot`; the
-    three measurement/template keys appear only after Preferences >
-    Paths Apply (doc line 20) — pending the human pass.
-  - Item 5b/5c PASS: all three HKLM keys, matching InstallPath /
-    DisplayVersion / DataRoot / DataParent.
-  - Item 7c/7d/7e PASS — the known SeamlyLayout path defect (test doc
-    line 14) is FIXED on this build: all six path keys in
-    `qt6_seamlylayout.ini` and `default_preferences.json` resolve under
-    `%DATAROOT%\layouts` or `%LOCALAPPDATA%\Seamly\SeamlyLayout\...`;
-    no stray `C:\Users\<user>\seamlyLayout` tree. Layout.8.2's `-->`
-    correction is satisfied (fallback = `<DataRoot>\layouts`).
-  - Item 8 PASS: Seamly2D log has no error/warn/fail/crash lines.
-  - Item 9 PASS: three public-desktop shortcuts.
-  - Item 10 PASS: no "Unknown Organization" artifacts.
-  - PENDING THE HUMAN: item 6 (interactive app walkthrough) and 7a-v
-    (bodyscans UI-row change test).
-  - No new defects found by the scripted checks; nothing filed to the
-    TODO files yet.
+- Case 1 steps 0/1a/1a-i/1b PASS: elevated child process (UAC-approved)
+  ran `test_reset_environment.ps1` (prior 26.8.44187 removed, all nine
+  residue checks clean), then quiet install exit 0.
+- Suite items 1–5, 7 (except 7a-v), 8, 9, 10 all PASS. Install-time
+  snapshot confirmed every seeded ini complete before any app ran.
+- SettingsFiles.5 live-verified (4b-ii): `firstRunDataNotice=pending`
+  at install time; Seamly2D's first run showed "Seamly data moved"
+  once (dismissed by automation); value flipped to `shown`; SeamlyMe
+  and SeamlyLayout showed no repeat. Task moved to `TODO_COMPLETED.md`.
+- Known defect STILL PRESENT: `exportPiecesToSeamlyLayout()`
+  (`mainwindow.cpp:4153`) passes a `.pieces.svg` file path, not a
+  stringified SVG document (test doc item 6b-ii / top-of-file note).
+- No new defects found; nothing new filed to the TODO files.
+- PENDING THE HUMAN: item 6 (interactive app walkthrough), 7a-v
+  (bodyscans UI-row change test), and visual review of the notice text.
+- Helper scripts live in this session's scratchpad
+  (`elevated_reset_install.ps1`, `run_apps_pass.ps1`) — rewrite if gone.
+- CI run 33355737878 (older note): macOS Build failed (`hdiutil: create
+  failed` making `Seamly2D.dmg`). Deferred on purpose — platform order
+  is x64 MSI, then arm64, then macOS.
 
 ### SettingsFiles.2/3 — installer seeds all inis (SHIPPED 2026-08-31)
 
@@ -81,83 +64,18 @@ Still open from it:
 - Known: empty `Documents\SeamlyData` before any app runs is expected —
   the data tree and samples are created at app first run, not install.
 
-### SettingsFiles.5 — one-shot fresh-install data notice (2026-08-31, in progress)
+### SettingsFiles.5 — one-shot fresh-install data notice (SHIPPED + LIVE-VERIFIED 2026-08-31)
 
-User request: at the first app run after a fresh install, show a popup —
-sample data and any existing user files (patterns, measurements, images,
-layouts) are left in place as a backup, zipped as a second backup, and
-copied to the new SeamlyData directory for the programs to use.
+Merged `--no-ff` into `run-seamlyLayout` (`4ded2549d0`), pushed without
+the skip token. Live-verified on build 26.8.31.1128 — see the test-pass
+section above. Full record: `TODO_COMPLETED.md` Task SettingsFiles.5.
 
-Design: the seeder writes `[notices] firstRunDataNotice=pending` into
-`qt6_common.ini` only when it creates that file (fresh machine). The
-first app to run shows the notice and rewrites the value as `shown` —
-once in total for the suite. Absent key (dev build, no installer,
-upgrade) = no popup.
-
-Changes on branch `task-first-run-notice`:
-
-- `smsi_seed_user_settings.ps1`: fresh-machine flag; docstring.
-- `vcommonsettings.{h,cpp}`: `firstRunNoticePending()` /
-  `markFirstRunNoticeShown()`.
-- `vabstractapplication.{h,cpp}`: `NotifySeamlyDataLocation()`
-  (check + QMessageBox + mark).
-- `seamly2d/main.cpp` (GUI mode, after `window.show()`),
-  `seamlyme/main.cpp` (non `--test`): call it.
-- `seamlylayout/qt_frontend/main.cpp`: self-contained equivalent
-  (does not link vmisc), on a `QTimer::singleShot(0, ...)`.
-- Tests: seeder suite 28/28 (pending on fresh; no flag when
-  qt6_common.ini pre-exists); `TST_DataRoot::
-  FirstRunNoticePendingOnlyWhileSeeded` (runs in CI);
-  `test_msi_install.ps1` asserts `firstRunDataNotice=(pending|shown)`.
-- Docs: `TODO_SETTINGS_FILES.md` Task SettingsFiles.5 (5.5 open =
-  live verify); test doc item 4b-ii (unchecked).
-
-State at session close (2026-08-31):
-
-- All code, tests, and doc edits are DONE and sit UNCOMMITTED in the
-  working tree on branch `task-first-run-notice`.
-- Seeder suite passed 28/28 locally.
-- First MSI rebuild failed: `\x2022` narrow-string escapes in
-  `vabstractapplication.cpp` are out of range for MSVC (`\x` eats every
-  hex digit). Fixed with literal `•` (source builds with `/utf-8`;
-  matches the SeamlyLayout copy).
-- Rebuilds 2 and 3 failed on `C1083 Permission denied` writing `.obj`
-  files: a failed background build's process tree (script host + nmake +
-  cl) survives its failure report, so consecutive launches raced on the
-  same in-source `obj\` directories and locked each other's files.
-- Recovery applied: killed every `test_build_msi_local` powershell tree
-  and every `nmake`/`cl`/`link`; deleted all `src\**\obj\` directories
-  (killed compiles can leave truncated `.obj` files with fresh
-  timestamps that nmake would trust); started ONE clean rebuild.
-- Rule for the next session: before launching this build, verify no
-  `test_build_msi_local` powershell process and no `nmake`/`cl`/`link`
-  is running; kill trees with `taskkill /PID <id> /T /F` first. After
-  any mid-build kill, delete `src\**\obj\` before rebuilding.
-- If the clean rebuild had not finished at session close, check
-  `packaging\windows\seamly-msi\x64\seamly-x64.msi` timestamp; rerun
-  `test_build_msi_local.ps1` if stale or absent (same pre-checks).
-
-Next (subtask 5.5, then ship):
-
-1. Confirm the MSI build is green ("MSI OK", authoring + migration
-   checks pass).
-2. `test_reset_environment.ps1`.
-3. Elevated quiet install (UAC prompt for the user).
-4. Verify `%LOCALAPPDATA%\Seamly\qt6_common.ini` holds
-   `firstRunDataNotice=pending` before any app runs.
-5. Start seamly2d.exe. Dismiss the modal notice — WScript.Shell
-   `AppActivate('Your Seamly data')` + `SendKeys('{ENTER}')` (a
-   force-killed app leaves the flag `pending`). A helper script existed
-   in the old session scratchpad; rewrite it if gone.
-6. Verify the value reads `shown`. Start SeamlyMe; verify no repeat
-   (value stays `shown`).
-7. Check off 5.5 in `TODO_SETTINGS_FILES.md`; move Task SettingsFiles.5
-   to `TODO_COMPLETED.md`; update this file and test doc 4b-ii note
-   (visual check stays with the human).
-8. Commit on `task-first-run-notice`, `--no-ff` merge into
-   `run-seamlyLayout`, push WITHOUT the skip token (`packaging/**` and
-   functional C++ changed — full CI runs the new TST_DataRoot case),
-   delete the task branch.
+Build-recovery rule kept from this task's rebuild failures: before
+launching `test_build_msi_local.ps1`, verify no prior
+`test_build_msi_local` powershell process and no `nmake`/`cl`/`link` is
+running; kill trees with `taskkill /PID <id> /T /F`. After any mid-build
+kill, delete `src\**\obj\` before rebuilding (truncated `.obj` files
+carry fresh timestamps nmake trusts).
 
 ### SettingsFiles.2 — installer seeds the settings files (2026-08-31, superseded in part by SettingsFiles.3 above)
 
