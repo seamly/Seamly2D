@@ -40,11 +40,8 @@ Run this suite after every test case in section A.
     %LOCALAPPDATA%\Seamly
     |_qt6_common.ini
     |_Seamly2D
-    |  |_logs
     |  |_qt6_seamly2d.ini
     |_SeamlyLayout
-    |  |_cache
-    |  |_logs
     |  |_preferences
     |  |  |_default_preferences.json
     |  |_settings
@@ -106,19 +103,23 @@ data_root=%DATADIRROOT%"
   - [x] 1b. Confirm that the installed-version program entries were added for each app under `HKLM\SOFTWARE\Seamly\<application>`, each with matching `InstallPath` and `DisplayVersion`. — PASS: all three keys, `InstallPath=C:\Program Files\SeamlyApps\`, `DisplayVersion=26.8.31.1128`.
   - [x] 1c. Confirm that installed-version data entries were added with matching `DataRoot` and `DataParent` values; `Seamly2D` also carries the three `DesktopShortcut*` flags (this should be fixed in the future; add a task to fix this) — PASS: `DataRoot`/`DataParent` match on all three keys; the three `DesktopShortcut*` flags sit on the Seamly2D key as described. Fix tasks already filed: SeamlyMe.3, Layout.7.
 - [ ] 2. Check apps - **needs a human at the keyboard for most steps** — 2026-09-01: 2a-i done scripted; 2a-ii..2d pending the human.
-  - [ ] 2a. Run Seamly2D — first run scripted: the "Seamly data moved" notice appeared once, then the main window; clean exit 0. No Welcome blocker this pass.
-    - [x] 2a-i. check if `qt6_common.ini` contains  "[notices] firstRunDataNotice=shown"; — PASS: `pending` flipped to `shown` after the run.
-    - [ ] 2a-ii. Select 'file open' -- the dialog should open in the `%DATADIR\patterns` directory.
-    - [ ] 2a-iii. Open `%DATADIR%\patterns\male_shirt.sm2d` pattern file with `%DATADIR%\measurements\individual\male_chest_102cm.smis` individual measurement file.
+  - [ ] 2a. Run Seamly2D
+    - [x] 2a-i. first run scripted: the "Seamly data moved" notice appears once, closes, then the main window appears
+    - [x] 2a-ii. check if `qt6_common.ini` contains  "[notices] firstRunDataNotice=shown"; — PASS: `pending` flipped to `shown` after the run.
+    - [ ] 2a-iii. Select 'file open' -- the dialog should open in the `%DATADIR\patterns` directory. — FAIL 2026-09-01: opened in `C:\Users\<user>` despite `pattern=%DATADIR%/patterns` in `qt6_seamly2d.ini`. Task already filed: Seamly2D.2.1 (`MainWindow::Open()` ignores `getPatternPath()`). - FAIL: opened to `C:\users\<user>` directory. 
+    - [ ] 2a-iv. Open `%DATADIR%\patterns\male_shirt.sm2d` pattern file with `%DATADIR%\measurements\individual\male_chest_102cm.smis` individual measurement file.
+    - [ ] 2a-v. Check if directory exists: `%DATADIR%\Seamly2D\logs`
   - [ ] 2b. Run SeamlyMe from within Seamly2D
-    - [ ] 2b-i. Select 'Edit Current' from the Measurements menu - the `%DATADIR\measurements\individual\male_chest_102cm.smis` file should open.
+    - [ ] 2b-i. Select 'Edit Current' from the Measurements menu - the `%DATADIR%\measurements\individual\male_chest_102cm.smis` file should open.
     - [ ] 2b-ii. Select 'File Open Individual' - the dialog should open in the `%DATADIR\measurements\individual` directory.
     - [ ] 2b-iii. Select 'File Open Multisize' - the dialog should open in the `%DATADIR\measurements\multisize` directory.
-    - [ ] 2b-iv. Close SeamlyMe, returning focus to Seamly2D.
+    - [ ] 2b-iv. Check if directory exists: `%DATADIR%\SeamlyMe\logs`
+    - [ ] 2b-v. Close SeamlyMe, returning focus to Seamly2D.
   - [ ] 2c. Run SeamlyLayout from within Seamly2D.
     - [ ] 2c-i. Confirm that the current pattern's `Piece mode` data is opened in the left canvas.
     - [ ] 2c-ii. Confirm that the 'piece mode' data was passed to SeamlyLayout as a stringified svg document (not as a svg file). Claude: check if `MainWindow::exportPiecesToSeamlyLayout()` writes `<pattern-basename>.pieces.svg` from the 'piece mode' data and SeamlyLayout reads this svg file, isn't passed as a stringified SVG document; Add a task to fix this. — 2026-09-01 static check: defect STILL PRESENT at `mainwindow.cpp:4153` (writes the `.pieces.svg` file, passes its path). Tasks already filed: Seamly2D.5, Layout.9.
-    - [ ] 2c-iii. Close SeamlyLayout, returning focus to Seamly2D.
+    - [ ] 2c-iii. Check if directories exist: `%DATADIR%\SeamlyLayout\cache`, `%DATADIR%\SeamlyLayout\logs`
+    - [ ] 2c-iv. Close SeamlyLayout, returning focus to Seamly2D.
   - [ ] 2d. Close Seamly2D.
 - [x] 3. Check if `%LOCALAPPDATA%\SeamlyLayout\output` directory was created. If exists add a task to stop creating the `%LOCALAPPDATA%\SeamlyLayout\` directory and its `output` subdirectory that stores log files, and start creating the `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` directory to store SeamlyLayout log files (similar to the `%LOCALAPPDATA\Seamly\Seamly2D\logs` directory) — CONFIRMED 2026-09-01: the stray directory was created by SeamlyLayout's first run. Task already filed: Layout.10.
 - [x] 4. Check Desktop shortcuts `Seamly2D.lnk`, `SeamlyMe.lnk`, `SeamlyLayout.lnk` for all three apps in `C:\Users\Public\Desktop` (default settings, `SEAMLYDESKTOPSHORTCUTS` on). — PASS: all three present.
