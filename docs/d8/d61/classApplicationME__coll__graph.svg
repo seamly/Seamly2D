@@ -176,7 +176,7 @@ var sectionId = 'dynsection-1';
 <text text-anchor="start" x="174.5" y="-976.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setCommonSettingsBaseDir()</text>
 <text text-anchor="start" x="174.5" y="-965.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ firstRunNoticePending()</text>
 <text text-anchor="start" x="174.5" y="-954.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ markFirstRunNoticeShown()</text>
-<text text-anchor="start" x="174.5" y="-943.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 22 more...</text>
+<text text-anchor="start" x="174.5" y="-943.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 23 more...</text>
 </a>
 </g>
 </g>

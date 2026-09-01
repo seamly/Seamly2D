@@ -156,12 +156,15 @@ Private Slots</h2></td></tr>
 <tr class="memitem:a2cd8e1a6a37aa23022561b6cfacac8b2"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db9/classTST__DataRoot.html#a2cd8e1a6a37aa23022561b6cfacac8b2">FirstRunNoticePendingOnlyWhileSeeded</a> () const</td></tr>
 <tr class="memdesc:a2cd8e1a6a37aa23022561b6cfacac8b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">FirstRunNoticePendingOnlyWhileSeeded pins the one-shot notice contract (Task SettingsFiles.5).  <br /></td></tr>
 <tr class="separator:a2cd8e1a6a37aa23022561b6cfacac8b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa1079b2247464d13aa3e8c6d584b4e37"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db9/classTST__DataRoot.html#aa1079b2247464d13aa3e8c6d584b4e37">DefaultDataRootIsSeamlyUnderDocuments</a> () const</td></tr>
-<tr class="memdesc:aa1079b2247464d13aa3e8c6d584b4e37"><td class="mdescLeft">&#160;</td><td class="mdescRight">DefaultDataRootIsSeamlyUnderDocuments checks the built-in default.  <br /></td></tr>
-<tr class="separator:aa1079b2247464d13aa3e8c6d584b4e37"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a48dab74d4b02bba2358d17c83806e9e9"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db9/classTST__DataRoot.html#a48dab74d4b02bba2358d17c83806e9e9">DefaultDataRootIsSeamlyDataUnderDocuments</a> () const</td></tr>
+<tr class="memdesc:a48dab74d4b02bba2358d17c83806e9e9"><td class="mdescLeft">&#160;</td><td class="mdescRight">DefaultDataRootIsSeamlyDataUnderDocuments checks the built-in default.  <br /></td></tr>
+<tr class="separator:a48dab74d4b02bba2358d17c83806e9e9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79c049dd9b1c96bf500937adfdb59518"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db9/classTST__DataRoot.html#a79c049dd9b1c96bf500937adfdb59518">LegacyDataRootIsTheOldSeamly2dFolder</a> () const</td></tr>
 <tr class="memdesc:a79c049dd9b1c96bf500937adfdb59518"><td class="mdescLeft">&#160;</td><td class="mdescRight">LegacyDataRootIsTheOldSeamly2dFolder checks the location first-run resolution looks in when deciding whether an upgrading user already has a data tree.  <br /></td></tr>
 <tr class="separator:a79c049dd9b1c96bf500937adfdb59518"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1f87ac04f97cc0ec8c74c8d2263a68a1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db9/classTST__DataRoot.html#a1f87ac04f97cc0ec8c74c8d2263a68a1">LegacyDocumentsDataRootIsTheTask60Folder</a> () const</td></tr>
+<tr class="memdesc:a1f87ac04f97cc0ec8c74c8d2263a68a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">LegacyDocumentsDataRootIsTheTask60Folder checks the second legacy location: &lt;Documents&gt;/Seamly, the default from Task 60 until Task SettingsFiles.7 renamed the leaf to SeamlyData. It must resolve through DocumentsLocation exactly like the default, so both roots move together on a redirected profile.  <br /></td></tr>
+<tr class="separator:a1f87ac04f97cc0ec8c74c8d2263a68a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5e057f6ccb736b22cbda750c8a53882e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db9/classTST__DataRoot.html#a5e057f6ccb736b22cbda750c8a53882e">UnconfiguredRootFallsBackToTheDefault</a> () const</td></tr>
 <tr class="memdesc:a5e057f6ccb736b22cbda750c8a53882e"><td class="mdescLeft">&#160;</td><td class="mdescRight">UnconfiguredRootFallsBackToTheDefault checks that reading the root before anything has been configured yields the built-in default rather than an empty string.  <br /></td></tr>
 <tr class="separator:a5e057f6ccb736b22cbda750c8a53882e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -177,6 +180,9 @@ Private Slots</h2></td></tr>
 <tr class="memitem:a6640752e18a7baccc24dddc56af3e164"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db9/classTST__DataRoot.html#a6640752e18a7baccc24dddc56af3e164">FirstRunAdoptsAnExistingLegacyTree</a> () const</td></tr>
 <tr class="memdesc:a6640752e18a7baccc24dddc56af3e164"><td class="mdescLeft">&#160;</td><td class="mdescRight">FirstRunAdoptsAnExistingLegacyTree covers the upgrading user: a populated legacy tree and no new root means the existing tree becomes the root, in place — the data keeps working without anything being copied or moved.  <br /></td></tr>
 <tr class="separator:a6640752e18a7baccc24dddc56af3e164"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa360d4eb26ad15b1af3d8b73af53f1fe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db9/classTST__DataRoot.html#aa360d4eb26ad15b1af3d8b73af53f1fe">FirstRunPrefersTheNewestLegacyRoot</a> () const</td></tr>
+<tr class="memdesc:aa360d4eb26ad15b1af3d8b73af53f1fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">FirstRunPrefersTheNewestLegacyRoot covers a user who upgraded through several eras: the Task 60 &lt;Documents&gt;/Seamly tree holds the live data — the older ~/seamly2d was migrated into it and holds only markers — so it must win the probe.  <br /></td></tr>
+<tr class="separator:aa360d4eb26ad15b1af3d8b73af53f1fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5e5d6241f27467e25b3501bc4fe89fc1"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/db9/classTST__DataRoot.html#a5e5d6241f27467e25b3501bc4fe89fc1">FirstRunPrefersAnExistingNewRoot</a> () const</td></tr>
 <tr class="memdesc:a5e5d6241f27467e25b3501bc4fe89fc1"><td class="mdescLeft">&#160;</td><td class="mdescRight">FirstRunPrefersAnExistingNewRoot checks that an existing new-style tree wins over a legacy one, so a user who has already moved to the new layout is not dragged back.  <br /></td></tr>
 <tr class="separator:a5e5d6241f27467e25b3501bc4fe89fc1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -311,7 +317,7 @@ Private Attributes</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="../../dd/db9/classTST__DataRoot.html" title="TST_DataRoot tests VCommonSettings&#39; user-data root (Task 34) — the single settings-backed root that p...">TST_DataRoot</a> tests <a class="el" href="../../de/d0f/classVCommonSettings.html">VCommonSettings</a>' user-data root (Task 34) — the single settings-backed root that patterns, measurements, templates, bodyscans, label templates, images, backups and layouts are all derived from. </p>
 <p>The suite is hermetic, and deliberately so: every case works inside a QTemporaryDir or on plain strings, and <a class="el" href="../../dd/db9/classTST__DataRoot.html#a4a7557553fd7a63d6d586a771bdf2202" title="initTestCase creates the scratch directory every case works inside, and redirects the QSettings base ...">initTestCase()</a> additionally redirects QSettings' IniFormat/ UserScope base AND <a class="el" href="../../de/d0f/classVCommonSettings.html">VCommonSettings</a>' common-settings base at a temporary directory so the developer's real settings files are never read or written. Both redirections are undone in <a class="el" href="../../dd/db9/classTST__DataRoot.html#aa2c788b4febe93d953ce354c6554152b" title="cleanupTestCase undoes both redirections made by initTestCase().">cleanupTestCase()</a>.</p>
-<p>No test may touch a path under QDir::homePath(). The home directory CANNOT be faked on Windows — QFileSystemEngine::homePath() asks the OS through GetUserProfileDirectory() and only falls back to the USERPROFILE/HOME environment variables when that fails — so a test that created or removed ~/seamly or ~/seamly2d would be operating on the real user's data. First-run resolution is therefore tested through <a class="el" href="../../de/d0f/classVCommonSettings.html#ae4316ceb089415abc1fb30808648c4ba" title="chooseFirstRunDataRoot picks between the new and the legacy data root.">VCommonSettings::chooseFirstRunDataRoot()</a>, which takes both candidate roots as arguments and can be pointed at throwaway directories. </p>
+<p>No test may touch a path under QDir::homePath(). The home directory CANNOT be faked on Windows — QFileSystemEngine::homePath() asks the OS through GetUserProfileDirectory() and only falls back to the USERPROFILE/HOME environment variables when that fails — so a test that created or removed ~/seamly or ~/seamly2d would be operating on the real user's data. First-run resolution is therefore tested through <a class="el" href="../../de/d0f/classVCommonSettings.html#a94236f8f806c29b7f2d54fa9d4b8c2b2" title="chooseFirstRunDataRoot picks between the new and the legacy data roots.">VCommonSettings::chooseFirstRunDataRoot()</a>, which takes every candidate root as an argument and can be pointed at throwaway directories. </p>
 
 <p class="definition">Definition at line <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00060">60</a> of file <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html">tst_dataroot.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
@@ -403,9 +409,9 @@ Private Attributes</h2></td></tr>
 <p>AConfiguredRootIsNeverOverwritten checks the re-entrancy of first-run resolution: a root already chosen — by the user, or by a Windows installer prompt — survives every later start-up. </p>
 <p>This one goes through initializeDataRoot(), which reads the settings file redirected in <a class="el" href="../../dd/db9/classTST__DataRoot.html#a4a7557553fd7a63d6d586a771bdf2202" title="initTestCase creates the scratch directory every case works inside, and redirects the QSettings base ...">initTestCase()</a>. It is safe because a configured root short-circuits the resolution before any home-directory path is consulted, and nothing is created on disk. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00513">513</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00560">560</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00664">VCommonSettings::dataRoot()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01091">VCommonSettings::initializeDataRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00153">writeDataRoot()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00688">VCommonSettings::dataRoot()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01115">VCommonSettings::initializeDataRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00153">writeDataRoot()</a>.</p>
 
 </div>
 </div>
@@ -435,9 +441,9 @@ Private Attributes</h2></td></tr>
 <p>AConfiguredRootOutranksTheInstaller checks that the installer's answer is a first-run default and nothing more. </p>
 <p>The Windows installer records its data-root page in HKLM, machine-wide. A user who later moves the root in Preferences → Paths must keep that choice, on this machine and every later start-up, so the configured value has to win. Same guarantee as AConfiguredRootIsNeverOverwritten, stated against the case that motivated it. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00562">562</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00609">609</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d2/d14/installer__record_8cpp_source.html#l00089">InstallerRecord::dataRoot()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01091">VCommonSettings::initializeDataRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00153">writeDataRoot()</a>.</p>
+<p class="reference">References <a class="el" href="../../d2/d14/installer__record_8cpp_source.html#l00089">InstallerRecord::dataRoot()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01115">VCommonSettings::initializeDataRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00153">writeDataRoot()</a>.</p>
 
 </div>
 </div>
@@ -466,9 +472,9 @@ Private Attributes</h2></td></tr>
 
 <p>AdoptionNeverRemovesTheLegacyTree guards the "never delete the old tree" requirement: adoption is a settings change only, and every file stays where it was. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00483">483</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00530">530</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01143">VCommonSettings::chooseFirstRunDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01171">VCommonSettings::chooseFirstRunDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
 
 </div>
 </div>
@@ -498,9 +504,9 @@ Private Attributes</h2></td></tr>
 <p>ArchiveHoldsEveryFileAndFolder is the backup's central promise. </p>
 <p>Folders the user invented and an empty folder are both included on purpose: the first is the Task 60 rule, the second is the case a naive file-only walk silently drops. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01203">1203</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01250">1250</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00180">LegacyDataArchive::create()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00180">LegacyDataArchive::create()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -530,9 +536,9 @@ Private Attributes</h2></td></tr>
 <p>ArchiveLeavesTheSourceTreeInPlace is the rule that replaces the old branch's delete. </p>
 <p>This project keeps the legacy tree after migration (marker file, no delete) so a rollback stays possible. <a class="el" href="../../da/d5e/namespaceLegacyDataArchive.html" title="LegacyDataArchive packs the old ~/seamly2d tree into one backup .zip.">LegacyDataArchive</a> backs the tree up; it must never remove it. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01399">1399</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01446">1446</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00350">LegacyDataArchive::archive()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00350">LegacyDataArchive::archive()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -561,9 +567,9 @@ Private Attributes</h2></td></tr>
 
 <p>ArchiveNamesDoNotCollide keeps a second migration from overwriting the first backup. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01320">1320</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01367">1367</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00154">LegacyDataArchive::archivePath()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00154">LegacyDataArchive::archivePath()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -592,9 +598,9 @@ Private Attributes</h2></td></tr>
 
 <p>ArchiveRefusesADestinationInsideTheSource stops the archive folding into itself. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01376">1376</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01423">1423</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00350">LegacyDataArchive::archive()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00350">LegacyDataArchive::archive()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -625,9 +631,9 @@ Private Attributes</h2></td></tr>
 <p>A .zip entry cannot reproduce a link, so a tree holding one is never archived.</p>
 <p>std::filesystem rather than QFile::link(), which on Windows writes a .lnk shortcut — an ordinary file, and deliberately not what this guard rejects. Creating a real symbolic link on Windows needs Developer Mode or elevation, so the case skips where it cannot. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01345">1345</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01392">1392</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00180">LegacyDataArchive::create()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00180">LegacyDataArchive::create()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -657,9 +663,9 @@ Private Attributes</h2></td></tr>
 <p>ArchiveVerificationCatchesAlteredContents proves the check reads the bytes back. </p>
 <p>The size and CRC recorded in the .zip describe what the writer meant to store. Only decompressing the entry and comparing it with the file catches a mismatch. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01297">1297</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01344">1344</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00180">LegacyDataArchive::create()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00264">LegacyDataArchive::verifyAgainst()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00180">LegacyDataArchive::create()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00264">LegacyDataArchive::verifyAgainst()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -689,9 +695,9 @@ Private Attributes</h2></td></tr>
 <p>ArchiveVerificationCatchesAMissingFile checks the count, not just the contents. </p>
 <p>A file added to the tree after the archive was written stands in for the case that matters: an archive that does not hold everything the tree now holds. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01272">1272</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01319">1319</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00180">LegacyDataArchive::create()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00264">LegacyDataArchive::verifyAgainst()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00180">LegacyDataArchive::create()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00264">LegacyDataArchive::verifyAgainst()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -720,9 +726,9 @@ Private Attributes</h2></td></tr>
 
 <p>ArchiveVerifiesAgainstTheTreeItCameFrom proves a good backup verifies clean. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01251">1251</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01298">1298</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00180">LegacyDataArchive::create()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00264">LegacyDataArchive::verifyAgainst()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00180">LegacyDataArchive::create()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../d0/dfd/legacy__data__archive_8cpp_source.html#l00264">LegacyDataArchive::verifyAgainst()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -753,7 +759,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00139">139</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00132">m_originalSettingsBase</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00128">m_scratch</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00130">m_settings</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00514">VCommonSettings::setCommonSettingsBaseDir()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00134">m_originalSettingsBase</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00130">m_scratch</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00132">m_settings</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00514">VCommonSettings::setCommonSettingsBaseDir()</a>.</p>
 
 </div>
 </div>
@@ -817,7 +823,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00209">209</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00485">VCommonSettings::commonSettingsFilePath()</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00130">m_settings</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00567">VCommonSettings::migrateCommonSettingsLocation()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00514">VCommonSettings::setCommonSettingsBaseDir()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00485">VCommonSettings::commonSettingsFilePath()</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00132">m_settings</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00567">VCommonSettings::migrateCommonSettingsLocation()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00514">VCommonSettings::setCommonSettingsBaseDir()</a>.</p>
 
 </div>
 </div>
@@ -848,7 +854,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00245">245</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00485">VCommonSettings::commonSettingsFilePath()</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00130">m_settings</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00567">VCommonSettings::migrateCommonSettingsLocation()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00514">VCommonSettings::setCommonSettingsBaseDir()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00485">VCommonSettings::commonSettingsFilePath()</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00132">m_settings</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00567">VCommonSettings::migrateCommonSettingsLocation()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00514">VCommonSettings::setCommonSettingsBaseDir()</a>.</p>
 
 </div>
 </div>
@@ -880,7 +886,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00181">181</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00485">VCommonSettings::commonSettingsFilePath()</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00130">m_settings</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00514">VCommonSettings::setCommonSettingsBaseDir()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00485">VCommonSettings::commonSettingsFilePath()</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00132">m_settings</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00514">VCommonSettings::setCommonSettingsBaseDir()</a>.</p>
 
 </div>
 </div>
@@ -909,14 +915,14 @@ Private Attributes</h2></td></tr>
 
 <p>DataRootAcceptsAnyDriveOrPath covers the cloud/external-volume use case — the root is honoured as written, with no requirement that it already exist. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00403">403</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00422">422</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00664">VCommonSettings::dataRoot()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00195">VSettings::getDefaultPatternPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01293">VCommonSettings::getDefaultTemplatePath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00153">writeDataRoot()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00688">VCommonSettings::dataRoot()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00195">VSettings::getDefaultPatternPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01327">VCommonSettings::getDefaultTemplatePath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00153">writeDataRoot()</a>.</p>
 
 </div>
 </div>
-<a id="aa1079b2247464d13aa3e8c6d584b4e37" name="aa1079b2247464d13aa3e8c6d584b4e37"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa1079b2247464d13aa3e8c6d584b4e37">&#9670;&#160;</a></span>DefaultDataRootIsSeamlyUnderDocuments</h2>
+<a id="a48dab74d4b02bba2358d17c83806e9e9" name="a48dab74d4b02bba2358d17c83806e9e9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a48dab74d4b02bba2358d17c83806e9e9">&#9670;&#160;</a></span>DefaultDataRootIsSeamlyDataUnderDocuments</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -925,7 +931,7 @@ Private Attributes</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void TST_DataRoot::DefaultDataRootIsSeamlyUnderDocuments </td>
+          <td class="memname">void TST_DataRoot::DefaultDataRootIsSeamlyDataUnderDocuments </td>
           <td>(</td>
           <td class="paramname"></td><td>)</td>
           <td> const</td>
@@ -938,13 +944,13 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>DefaultDataRootIsSeamlyUnderDocuments checks the built-in default. </p>
-<p>The lineage: ~/seamly2d (original) → ~/seamly (Task 34) → ~/seamlyData (Task 53) → &lt;Documents&gt;/Seamly (Task 60). The last move is the one with a principle behind it — these are documents the user creates, opens and backs up, so they belong where every other application puts documents, while internal state stays in the platform's application-data locations.</p>
+<p>DefaultDataRootIsSeamlyDataUnderDocuments checks the built-in default. </p>
+<p>The lineage: ~/seamly2d (original) → ~/seamly (Task 34) → ~/seamlyData (Task 53) → &lt;Documents&gt;/Seamly (Task 60) → &lt;Documents&gt;/SeamlyData (Task SettingsFiles.7). Documents is the principled half — these are documents the user creates, opens and backs up, so they belong where every other application puts documents. The SeamlyData leaf matches the MSI's default SEAMLYDATAROOT and SeamlyLayout's no-installer fallback, so every entry point composes the same folder.</p>
 <p>The expected value is built from QStandardPaths rather than hard-coded, deliberately: hard-coding "Documents" would pass on this machine and fail on a localized Linux system or a redirected Windows profile — the very cases DocumentsLocation exists to handle. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00322">322</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00323">323</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00630">VCommonSettings::getDefaultDataRoot()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00632">VCommonSettings::getDefaultDataRoot()</a>.</p>
 
 </div>
 </div>
@@ -974,9 +980,9 @@ Private Attributes</h2></td></tr>
 <p>EnsureDataRootTreeCreatesTheSubfolders checks the "create the subfolder tree at
 that location on first use" requirement. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00578">578</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00625">625</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00724">VCommonSettings::ensureDataRootTree()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00748">VCommonSettings::ensureDataRootTree()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
 
 </div>
 </div>
@@ -1005,9 +1011,9 @@ that location on first use" requirement. </p>
 
 <p>EnsureDataRootTreeKeepsExistingFiles checks that populating a root is purely additive — an adopted tree full of the user's work must come through untouched. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00610">610</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00657">657</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00724">VCommonSettings::ensureDataRootTree()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00748">VCommonSettings::ensureDataRootTree()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
 
 </div>
 </div>
@@ -1036,9 +1042,9 @@ that location on first use" requirement. </p>
 
 <p>EveryDefaultPathDerivesFromTheDataRoot is the core of Task 34: all nine data subfolders — including the two that live in <a class="el" href="../../d4/d80/classVSettings.html">VSettings</a> — must come from the one root, so that changing it relocates the whole tree. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00366">366</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00385">385</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00664">VCommonSettings::dataRoot()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01371">VCommonSettings::getDefaultBackupFilePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01314">VCommonSettings::getDefaultBodyScansPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01353">VCommonSettings::getDefaultImageFilePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01251">VCommonSettings::getDefaultIndividualSizePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01335">VCommonSettings::getDefaultLabelTemplatePath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00277">VSettings::getDefaultLayoutPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01272">VCommonSettings::getDefaultMultisizePath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00195">VSettings::getDefaultPatternPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01293">VCommonSettings::getDefaultTemplatePath()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00153">writeDataRoot()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00688">VCommonSettings::dataRoot()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01405">VCommonSettings::getDefaultBackupFilePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01348">VCommonSettings::getDefaultBodyScansPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01387">VCommonSettings::getDefaultImageFilePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01285">VCommonSettings::getDefaultIndividualSizePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01369">VCommonSettings::getDefaultLabelTemplatePath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00277">VSettings::getDefaultLayoutPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01306">VCommonSettings::getDefaultMultisizePath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00195">VSettings::getDefaultPatternPath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01327">VCommonSettings::getDefaultTemplatePath()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00153">writeDataRoot()</a>.</p>
 
 </div>
 </div>
@@ -1067,9 +1073,9 @@ that location on first use" requirement. </p>
 
 <p>FirstRunAdoptsAnExistingLegacyTree covers the upgrading user: a populated legacy tree and no new root means the existing tree becomes the root, in place — the data keeps working without anything being copied or moved. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00446">446</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00467">467</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01143">VCommonSettings::chooseFirstRunDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01171">VCommonSettings::chooseFirstRunDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
 
 </div>
 </div>
@@ -1101,7 +1107,7 @@ that location on first use" requirement. </p>
 
 <p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00281">281</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00485">VCommonSettings::commonSettingsFilePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00530">VCommonSettings::firstRunNoticePending()</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00130">m_settings</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00542">VCommonSettings::markFirstRunNoticeShown()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00514">VCommonSettings::setCommonSettingsBaseDir()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00485">VCommonSettings::commonSettingsFilePath()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00530">VCommonSettings::firstRunNoticePending()</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00132">m_settings</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00542">VCommonSettings::markFirstRunNoticeShown()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00514">VCommonSettings::setCommonSettingsBaseDir()</a>.</p>
 
 </div>
 </div>
@@ -1130,9 +1136,40 @@ that location on first use" requirement. </p>
 
 <p>FirstRunPrefersAnExistingNewRoot checks that an existing new-style tree wins over a legacy one, so a user who has already moved to the new layout is not dragged back. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00466">466</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00510">510</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01143">VCommonSettings::chooseFirstRunDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01171">VCommonSettings::chooseFirstRunDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
+
+</div>
+</div>
+<a id="aa360d4eb26ad15b1af3d8b73af53f1fe" name="aa360d4eb26ad15b1af3d8b73af53f1fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa360d4eb26ad15b1af3d8b73af53f1fe">&#9670;&#160;</a></span>FirstRunPrefersTheNewestLegacyRoot</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TST_DataRoot::FirstRunPrefersTheNewestLegacyRoot </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">slot</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>FirstRunPrefersTheNewestLegacyRoot covers a user who upgraded through several eras: the Task 60 &lt;Documents&gt;/Seamly tree holds the live data — the older ~/seamly2d was migrated into it and holds only markers — so it must win the probe. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00490">490</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01171">VCommonSettings::chooseFirstRunDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
 
 </div>
 </div>
@@ -1161,9 +1198,9 @@ that location on first use" requirement. </p>
 
 <p>FirstRunWithoutLegacyTreeUsesTheDefault covers a fresh install: nothing at the legacy location to adopt, so the new default root is chosen. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00428">428</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00447">447</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01143">VCommonSettings::chooseFirstRunDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01171">VCommonSettings::chooseFirstRunDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
 
 </div>
 </div>
@@ -1195,7 +1232,7 @@ that location on first use" requirement. </p>
 
 <p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00129">129</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00164">clearDataRoot()</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00130">m_settings</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00514">VCommonSettings::setCommonSettingsBaseDir()</a>.</p>
+<p class="reference">References <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00164">clearDataRoot()</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00132">m_settings</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00514">VCommonSettings::setCommonSettingsBaseDir()</a>.</p>
 
 </div>
 </div>
@@ -1227,7 +1264,7 @@ that location on first use" requirement. </p>
 
 <p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00085">85</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00132">m_originalSettingsBase</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00128">m_scratch</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00130">m_settings</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00514">VCommonSettings::setCommonSettingsBaseDir()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00134">m_originalSettingsBase</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00130">m_scratch</a>, <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00132">m_settings</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00514">VCommonSettings::setCommonSettingsBaseDir()</a>.</p>
 
 </div>
 </div>
@@ -1258,7 +1295,7 @@ that location on first use" requirement. </p>
 <p>The value cannot be arranged from a test: it lives under HKLM, which an unelevated process cannot write. What the test can hold is the contract every caller depends on — the result is either empty or a path already cleaned into Qt's '/' form, because initializeDataRoot() stores it in the settings file verbatim and every getDefault*Path() then appends to it.</p>
 <p>Off Windows the result is always empty, and there the assertions still run: a change that made the function return something on Linux or macOS would fail here. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00538">538</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00585">585</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d2/d14/installer__record_8cpp_source.html#l00089">InstallerRecord::dataRoot()</a>.</p>
 
@@ -1289,9 +1326,40 @@ that location on first use" requirement. </p>
 
 <p>LegacyDataRootIsTheOldSeamly2dFolder checks the location first-run resolution looks in when deciding whether an upgrading user already has a data tree. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00345">345</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00346">346</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00649">VCommonSettings::getLegacyDataRoot()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00651">VCommonSettings::getLegacyDataRoot()</a>.</p>
+
+</div>
+</div>
+<a id="a1f87ac04f97cc0ec8c74c8d2263a68a1" name="a1f87ac04f97cc0ec8c74c8d2263a68a1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1f87ac04f97cc0ec8c74c8d2263a68a1">&#9670;&#160;</a></span>LegacyDocumentsDataRootIsTheTask60Folder</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TST_DataRoot::LegacyDocumentsDataRootIsTheTask60Folder </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">slot</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>LegacyDocumentsDataRootIsTheTask60Folder checks the second legacy location: &lt;Documents&gt;/Seamly, the default from Task 60 until Task SettingsFiles.7 renamed the leaf to SeamlyData. It must resolve through DocumentsLocation exactly like the default, so both roots move together on a redirected profile. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00358">358</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00668">VCommonSettings::getLegacyDocumentsDataRoot()</a>.</p>
 
 </div>
 </div>
@@ -1321,9 +1389,9 @@ that location on first use" requirement. </p>
 <p>MigrationCopiesTheWholeTreeIncludingUnknownFolders is the central Task 60 rule. </p>
 <p>Users add their own directories to the data tree — <code>Projects</code> and <code>bodyscans</code> have both been seen on real machines — so a migration that walked a known list of subfolders would silently strand everything the list did not mention. This case therefore mixes standard folders, a deeply nested one, and folders the code has never heard of, and requires all of them at the destination. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00863">863</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00910">910</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00812">VCommonSettings::migrateDataTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00708">readTestFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00836">VCommonSettings::migrateDataTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00755">readTestFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -1353,9 +1421,9 @@ that location on first use" requirement. </p>
 <p>MigrationLeavesTheSourceTreeIntact — the whole point of copying rather than moving. </p>
 <p>The legacy tree must survive so a user can roll back to an earlier release. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00936">936</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00983">983</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00812">VCommonSettings::migrateDataTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00708">readTestFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00836">VCommonSettings::migrateDataTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00755">readTestFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -1385,9 +1453,9 @@ that location on first use" requirement. </p>
 <p>MigrationMarksTheLegacyTree checks the breadcrumb that retires the old root. </p>
 <p>The tree is kept rather than deleted, so it needs to be obvious to the code — which must not offer it again — and to a human opening the folder. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00979">979</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01026">1026</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00771">VCommonSettings::dataTreeWasMigrated()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00991">VCommonSettings::markDataTreeMigrated()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00812">VCommonSettings::migrateDataTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00708">readTestFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00795">VCommonSettings::dataTreeWasMigrated()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01015">VCommonSettings::markDataTreeMigrated()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00836">VCommonSettings::migrateDataTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00755">readTestFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -1417,9 +1485,9 @@ that location on first use" requirement. </p>
 <p>MigrationNeverOverwritesAnExistingFile checks the merge rule. </p>
 <p>The destination can legitimately be a populated folder — the cloud-drive use case targets one — so a collision must skip and be reported, never clobber the file already there. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00910">910</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00957">957</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00812">VCommonSettings::migrateDataTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00708">readTestFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00836">VCommonSettings::migrateDataTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00755">readTestFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -1449,9 +1517,9 @@ that location on first use" requirement. </p>
 <p>MigrationRefusesADestinationInsideTheSource guards against endless recursion. </p>
 <p>Copying a tree into its own subdirectory would keep finding new files to copy. Cheap to get wrong, expensive to notice — it fills the disk rather than failing. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00958">958</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01005">1005</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00812">VCommonSettings::migrateDataTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00836">VCommonSettings::migrateDataTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -1481,7 +1549,7 @@ that location on first use" requirement. </p>
 <p>PerAppPathsPersistToTheOwnSettingsFile guards against <a class="el" href="../../d4/d80/classVSettings.html">VSettings</a>'s per-app path getters and setters (pattern, layout, the SeamlyLayout executable, graphical output) reopening a fresh QSettings from format()/scope()/organizationName()/applicationName() instead of reading and writing "this". </p>
 <p><a class="el" href="../../da/db1/classApplication2D.html">Application2D</a> builds <a class="el" href="../../d4/d80/classVSettings.html">VSettings</a> from an explicit file path (see Application2D::InitTrVars()), so organizationName() and applicationName() are both empty on it. Reopening QSettings from those empty values landed the four settings under the literal "Unknown Organization" file instead of the app's own qt6_seamly2d.ini, which is also why qt6_seamly2d.ini's [paths] section was missing pattern and layout. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01168">1168</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01215">1215</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00315">VSettings::GetGraphicalOutput()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00283">VSettings::getLayoutPath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00201">VSettings::getPatternPath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00299">VSettings::getSeamlyLayoutAppPath()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00321">VSettings::SetGraphicalOutput()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00289">VSettings::SetPathLayout()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00207">VSettings::SetPathPattern()</a>, and <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00309">VSettings::setSeamlyLayoutAppPath()</a>.</p>
 
@@ -1512,9 +1580,9 @@ that location on first use" requirement. </p>
 
 <p>PruneIgnoresAMissingLegacyRoot checks the ordinary case for a fresh install, where there is no legacy tree at all, plus the empty-argument guards. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01134">1134</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01181">1181</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01187">VCommonSettings::pruneEmptyLegacyDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01221">VCommonSettings::pruneEmptyLegacyDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
 
 </div>
 </div>
@@ -1543,9 +1611,9 @@ that location on first use" requirement. </p>
 
 <p>PruneKeepsALegacyRootHoldingTheConfiguredRoot checks that a root nested inside the legacy tree is not taken down along with its parent. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01118">1118</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01165">1165</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01187">VCommonSettings::pruneEmptyLegacyDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01221">VCommonSettings::pruneEmptyLegacyDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
 
 </div>
 </div>
@@ -1574,9 +1642,9 @@ that location on first use" requirement. </p>
 
 <p>PruneKeepsALegacyTreeHoldingFiles checks the condition that matters most: one file anywhere in the tree, at any depth, and nothing is removed. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01068">1068</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01115">1115</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00724">VCommonSettings::ensureDataRootTree()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01187">VCommonSettings::pruneEmptyLegacyDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00748">VCommonSettings::ensureDataRootTree()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01221">VCommonSettings::pruneEmptyLegacyDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
 
 </div>
 </div>
@@ -1605,9 +1673,9 @@ that location on first use" requirement. </p>
 
 <p>PruneNeverRemovesTheConfiguredRoot checks the upgrading user's case: Task 34 adopts an existing ~/seamly2d in place, which makes it the live data tree, not a leftover. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01092">1092</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01139">1139</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00724">VCommonSettings::ensureDataRootTree()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01187">VCommonSettings::pruneEmptyLegacyDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00748">VCommonSettings::ensureDataRootTree()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01221">VCommonSettings::pruneEmptyLegacyDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
 
 </div>
 </div>
@@ -1636,9 +1704,9 @@ that location on first use" requirement. </p>
 
 <p>PruneRemovesAnEmptyLegacyTree checks the Task 53 cleanup of the skeleton left behind by the rename — the nine subfolders ensureDataRootTree() created, holding nothing. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01051">1051</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01098">1098</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00724">VCommonSettings::ensureDataRootTree()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01187">VCommonSettings::pruneEmptyLegacyDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00748">VCommonSettings::ensureDataRootTree()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01221">VCommonSettings::pruneEmptyLegacyDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
 
 </div>
 </div>
@@ -1667,9 +1735,9 @@ that location on first use" requirement. </p>
 
 <p>RebaseLeavesPathsOutsideTheOldRootAlone checks that a folder the user has deliberately parked elsewhere is not dragged along by a data-root change. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01029">1029</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01076">1076</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01030">VCommonSettings::rebaseOntoDataRoot()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01054">VCommonSettings::rebaseOntoDataRoot()</a>.</p>
 
 </div>
 </div>
@@ -1698,9 +1766,9 @@ that location on first use" requirement. </p>
 
 <p>RebaseMovesPathsInsideTheOldRoot checks the rule Preferences → Paths applies so that changing the root actually relocates the subfolders shown alongside it. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01001">1001</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01048">1048</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01030">VCommonSettings::rebaseOntoDataRoot()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01054">VCommonSettings::rebaseOntoDataRoot()</a>.</p>
 
 </div>
 </div>
@@ -1739,9 +1807,9 @@ that location on first use" requirement. </p>
 
 <p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">116</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00128">m_scratch</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00130">m_scratch</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00513">AConfiguredRootIsNeverOverwritten()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00562">AConfiguredRootOutranksTheInstaller()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00483">AdoptionNeverRemovesTheLegacyTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01203">ArchiveHoldsEveryFileAndFolder()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01399">ArchiveLeavesTheSourceTreeInPlace()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01320">ArchiveNamesDoNotCollide()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01376">ArchiveRefusesADestinationInsideTheSource()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01345">ArchiveRefusesATreeHoldingASymbolicLink()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01297">ArchiveVerificationCatchesAlteredContents()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01272">ArchiveVerificationCatchesAMissingFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01251">ArchiveVerifiesAgainstTheTreeItCameFrom()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00209">CommonSettingsBridgeCopiesRoamingFileForward()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00245">CommonSettingsBridgeNeverOverwritesTheLocalFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00578">EnsureDataRootTreeCreatesTheSubfolders()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00610">EnsureDataRootTreeKeepsExistingFiles()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00366">EveryDefaultPathDerivesFromTheDataRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00446">FirstRunAdoptsAnExistingLegacyTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00281">FirstRunNoticePendingOnlyWhileSeeded()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00466">FirstRunPrefersAnExistingNewRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00428">FirstRunWithoutLegacyTreeUsesTheDefault()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00863">MigrationCopiesTheWholeTreeIncludingUnknownFolders()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00936">MigrationLeavesTheSourceTreeIntact()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00979">MigrationMarksTheLegacyTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00910">MigrationNeverOverwritesAnExistingFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00958">MigrationRefusesADestinationInsideTheSource()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01168">PerAppPathsPersistToTheOwnSettingsFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01134">PruneIgnoresAMissingLegacyRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01118">PruneKeepsALegacyRootHoldingTheConfiguredRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01068">PruneKeepsALegacyTreeHoldingFiles()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01092">PruneNeverRemovesTheConfiguredRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01051">PruneRemovesAnEmptyLegacyTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00783">SeedSampleMeasurementsCopiesBundledFiles()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00838">SeedSampleMeasurementsHonoursTheNameFilter()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00823">SeedSampleMeasurementsIsANoOpWhenSourceIsMissing()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00804">SeedSampleMeasurementsNeverOverwritesAnExistingFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00726">SeedSamplePatternsCopiesBundledFiles()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00768">SeedSamplePatternsIsANoOpWhenSourceIsMissing()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00749">SeedSamplePatternsNeverOverwritesAnExistingFile()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00644">StartupResolvesThenSeedsTheConfiguredRoot()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00560">AConfiguredRootIsNeverOverwritten()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00609">AConfiguredRootOutranksTheInstaller()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00530">AdoptionNeverRemovesTheLegacyTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01250">ArchiveHoldsEveryFileAndFolder()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01446">ArchiveLeavesTheSourceTreeInPlace()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01367">ArchiveNamesDoNotCollide()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01423">ArchiveRefusesADestinationInsideTheSource()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01392">ArchiveRefusesATreeHoldingASymbolicLink()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01344">ArchiveVerificationCatchesAlteredContents()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01319">ArchiveVerificationCatchesAMissingFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01298">ArchiveVerifiesAgainstTheTreeItCameFrom()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00209">CommonSettingsBridgeCopiesRoamingFileForward()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00245">CommonSettingsBridgeNeverOverwritesTheLocalFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00625">EnsureDataRootTreeCreatesTheSubfolders()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00657">EnsureDataRootTreeKeepsExistingFiles()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00385">EveryDefaultPathDerivesFromTheDataRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00467">FirstRunAdoptsAnExistingLegacyTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00281">FirstRunNoticePendingOnlyWhileSeeded()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00510">FirstRunPrefersAnExistingNewRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00490">FirstRunPrefersTheNewestLegacyRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00447">FirstRunWithoutLegacyTreeUsesTheDefault()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00910">MigrationCopiesTheWholeTreeIncludingUnknownFolders()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00983">MigrationLeavesTheSourceTreeIntact()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01026">MigrationMarksTheLegacyTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00957">MigrationNeverOverwritesAnExistingFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01005">MigrationRefusesADestinationInsideTheSource()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01215">PerAppPathsPersistToTheOwnSettingsFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01181">PruneIgnoresAMissingLegacyRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01165">PruneKeepsALegacyRootHoldingTheConfiguredRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01115">PruneKeepsALegacyTreeHoldingFiles()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01139">PruneNeverRemovesTheConfiguredRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l01098">PruneRemovesAnEmptyLegacyTree()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00830">SeedSampleMeasurementsCopiesBundledFiles()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00885">SeedSampleMeasurementsHonoursTheNameFilter()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00870">SeedSampleMeasurementsIsANoOpWhenSourceIsMissing()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00851">SeedSampleMeasurementsNeverOverwritesAnExistingFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00773">SeedSamplePatternsCopiesBundledFiles()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00815">SeedSamplePatternsIsANoOpWhenSourceIsMissing()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00796">SeedSamplePatternsNeverOverwritesAnExistingFile()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00691">StartupResolvesThenSeedsTheConfiguredRoot()</a>.</p>
 
 </div>
 </div>
@@ -1770,9 +1838,9 @@ that location on first use" requirement. </p>
 
 <p>SeedSampleMeasurementsCopiesBundledFiles checks the measurements half of the same read-only Program Files fix: a bundled individual measurement file must be copied into the writable measurements folder so it can be opened, edited, and saved back. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00783">783</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00830">830</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00270">VSettings::SeedSampleMeasurements()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00270">VSettings::SeedSampleMeasurements()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -1801,9 +1869,9 @@ that location on first use" requirement. </p>
 
 <p>SeedSampleMeasurementsHonoursTheNameFilter checks that the caller-supplied filter, not a hard-coded extension, decides which bundled files are copied — the same function seeds both individual (.smis) and multisize (.smms) measurement folders. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00838">838</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00885">885</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00270">VSettings::SeedSampleMeasurements()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00270">VSettings::SeedSampleMeasurements()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -1832,7 +1900,7 @@ that location on first use" requirement. </p>
 
 <p>SeedSampleMeasurementsIsANoOpWhenSourceIsMissing checks the platform where samples were never bundled next to the executable: seeding must not create the destination folder. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00823">823</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00870">870</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00270">VSettings::SeedSampleMeasurements()</a>.</p>
 
@@ -1863,9 +1931,9 @@ that location on first use" requirement. </p>
 
 <p>SeedSampleMeasurementsNeverOverwritesAnExistingFile checks the merge rule: a file the user already has at the destination, sample or edited copy alike, is left untouched. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00804">804</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00851">851</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00708">readTestFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00270">VSettings::SeedSampleMeasurements()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00755">readTestFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00270">VSettings::SeedSampleMeasurements()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -1894,9 +1962,9 @@ that location on first use" requirement. </p>
 
 <p>SeedSamplePatternsCopiesBundledFiles checks the fix for samples bundled under a read-only Program Files install: seeding must copy every bundled .sm2d into the writable patterns folder, and ignore files that are not sample patterns. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00726">726</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00773">773</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00234">VSettings::SeedSamplePatterns()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00234">VSettings::SeedSamplePatterns()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -1925,7 +1993,7 @@ that location on first use" requirement. </p>
 
 <p>SeedSamplePatternsIsANoOpWhenSourceIsMissing checks the platform where samples were never bundled next to the executable: seeding must not create the destination folder. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00768">768</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00815">815</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00234">VSettings::SeedSamplePatterns()</a>.</p>
 
@@ -1956,9 +2024,9 @@ that location on first use" requirement. </p>
 
 <p>SeedSamplePatternsNeverOverwritesAnExistingFile checks the merge rule: a file the user already has at the destination, sample or edited copy alike, is left untouched. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00749">749</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00796">796</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00708">readTestFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00234">VSettings::SeedSamplePatterns()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00688">writeTestFile()</a>.</p>
+<p class="reference">References <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00755">readTestFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, <a class="el" href="../../db/d28/vsettings_8cpp_source.html#l00234">VSettings::SeedSamplePatterns()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00735">writeTestFile()</a>.</p>
 
 </div>
 </div>
@@ -1989,9 +2057,9 @@ that location on first use" requirement. </p>
 <p>Task 51's clean-machine install verification found that a fresh installation recorded the data root but never created it: initializeDataRoot() writes the setting directly instead of going through setDataRoot(), which was the only caller of ensureDataRootTree(). Nothing seeded the tree, so Preferences → Paths listed nine folders that did not exist.</p>
 <p>The fix is a second call in each application's openSettings(), and this case pins both halves of it. The first assertion is as important as the second: resolution must stay free of side effects on disk, because these tests call initializeDataRoot() while on a real run its default root is ~/seamlyData — seeding from inside it would create folders in the developer's home directory during every test run. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00644">644</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00691">691</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00664">VCommonSettings::dataRoot()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00724">VCommonSettings::ensureDataRootTree()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01091">VCommonSettings::initializeDataRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00153">writeDataRoot()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00688">VCommonSettings::dataRoot()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00748">VCommonSettings::ensureDataRootTree()</a>, <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l01115">VCommonSettings::initializeDataRoot()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00153">writeDataRoot()</a>.</p>
 
 </div>
 </div>
@@ -2020,9 +2088,9 @@ that location on first use" requirement. </p>
 
 <p>UnconfiguredRootFallsBackToTheDefault checks that reading the root before anything has been configured yields the built-in default rather than an empty string. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00355">355</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00374">374</a> of file <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html">tst_dataroot.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00664">VCommonSettings::dataRoot()</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00630">VCommonSettings::getDefaultDataRoot()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00688">VCommonSettings::dataRoot()</a>, and <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00632">VCommonSettings::getDefaultDataRoot()</a>.</p>
 
 </div>
 </div>
@@ -2062,7 +2130,7 @@ that location on first use" requirement. </p>
 
 <p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00485">VCommonSettings::commonSettingsFilePath()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00513">AConfiguredRootIsNeverOverwritten()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00562">AConfiguredRootOutranksTheInstaller()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00403">DataRootAcceptsAnyDriveOrPath()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00366">EveryDefaultPathDerivesFromTheDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00644">StartupResolvesThenSeedsTheConfiguredRoot()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00560">AConfiguredRootIsNeverOverwritten()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00609">AConfiguredRootOutranksTheInstaller()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00422">DataRootAcceptsAnyDriveOrPath()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00385">EveryDefaultPathDerivesFromTheDataRoot()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00691">StartupResolvesThenSeedsTheConfiguredRoot()</a>.</p>
 
 </div>
 </div>
@@ -2087,7 +2155,7 @@ that location on first use" requirement. </p>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00132">132</a> of file <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html">tst_dataroot.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00134">134</a> of file <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html">tst_dataroot.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00139">cleanupTestCase()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00085">initTestCase()</a>.</p>
 
@@ -2114,7 +2182,7 @@ that location on first use" requirement. </p>
 </div><div class="memdoc">
 <p>Scratch directory holding every root, tree and file the suite creates. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00128">128</a> of file <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html">tst_dataroot.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00130">130</a> of file <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html">tst_dataroot.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00139">cleanupTestCase()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00085">initTestCase()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00116">scratchPath()</a>.</p>
 
@@ -2141,7 +2209,7 @@ that location on first use" requirement. </p>
 </div><div class="memdoc">
 <p>Fake QSettings base directory, so the real qt6_common.ini is never touched. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00130">130</a> of file <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html">tst_dataroot.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html#l00132">132</a> of file <a class="el" href="../../d4/d08/tst__dataroot_8h_source.html">tst_dataroot.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00139">cleanupTestCase()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00209">CommonSettingsBridgeCopiesRoamingFileForward()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00245">CommonSettingsBridgeNeverOverwritesTheLocalFile()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00181">CommonSettingsFileLivesUnderLocalConfig()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00281">FirstRunNoticePendingOnlyWhileSeeded()</a>, <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00129">init()</a>, and <a class="el" href="../../de/d0f/tst__dataroot_8cpp_source.html#l00085">initTestCase()</a>.</p>
 

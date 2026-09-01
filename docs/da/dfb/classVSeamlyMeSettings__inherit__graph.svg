@@ -104,7 +104,7 @@ var sectionId = 'dynsection-0';
 <text text-anchor="start" x="8" y="-211.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setCommonSettingsBaseDir()</text>
 <text text-anchor="start" x="8" y="-200.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ firstRunNoticePending()</text>
 <text text-anchor="start" x="8" y="-189.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ markFirstRunNoticeShown()</text>
-<text text-anchor="start" x="8" y="-178.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 22 more...</text>
+<text text-anchor="start" x="8" y="-178.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 23 more...</text>
 </a>
 </g>
 </g>

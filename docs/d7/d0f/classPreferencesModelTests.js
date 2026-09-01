@@ -45,6 +45,8 @@ var classPreferencesModelTests =
     [ "projectorPath_emitsSignalOnChange", "d7/d0f/classPreferencesModelTests.html#ac3ae3e8beb0fd9485a3978111b7a67d5", null ],
     [ "projectorPath_roundTripsThroughIni", "d7/d0f/classPreferencesModelTests.html#a716f563b91c37778cd499f7ed7fd3fcb", null ],
     [ "resetToDefaults_loadsValuesFromDefaultsFile", "d7/d0f/classPreferencesModelTests.html#a56eb047dee66da21a1d60fe149658e4d", null ],
+    [ "settingsFiles6_load_neverOverwritesAnExistingDefaultsProfile", "d7/d0f/classPreferencesModelTests.html#a2be964ff7e9d55978345177f82e4da4d", null ],
+    [ "settingsFiles6_load_seedsMissingDefaultsProfileFromSeededIni", "d7/d0f/classPreferencesModelTests.html#a26ed7d8b047fc379e0e0e78d4c22d911", null ],
     [ "v1_resolvedLayoutDirectory_createsDirectoryIfMissing", "d7/d0f/classPreferencesModelTests.html#a8a6ac2609c08de873b1178ffdaff92e3", null ],
     [ "v1_resolvedLayoutDirectory_fallsBackWhenEmpty", "d7/d0f/classPreferencesModelTests.html#af890ecf64ccc150c73dd23557490758d", null ],
     [ "v1_resolvedLayoutDirectory_returnsAbsoluteLayoutDir", "d7/d0f/classPreferencesModelTests.html#af1b6de3494d1b8e847336fe47d2c82d2", null ],
