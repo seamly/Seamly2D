@@ -465,6 +465,18 @@ bool PreferencesModel::load(const QString &path)
 
     migrateLegacyPreferencePaths();
     adoptInstallerDataRootIfEmpty(absolutePath);
+
+    // Task SettingsFiles.6: an installer-seeded ini skips the deprecated first-run
+    // seeding above, so nothing created the defaults profile the ini's
+    // preferences_file key names. Seed it here, on demand — the same app-side rule
+    // resolvedSettingsDirectory() applies to default_settings.json. Never overwrites
+    // an existing profile.
+    const QString defaultsProfile = preferencesFilePath();
+    if (!QFileInfo::exists(defaultsProfile) && seedFromBundledDefaults(defaultsProfile)) {
+        Logger::log(QStringLiteral("PreferencesModel::load(): seeded missing defaults profile ")
+                    + defaultsProfile);
+    } // if defaults profile was missing
+
     Logger::log(QStringLiteral("PreferencesModel::load(): loaded successfully"));
     return true;
 } // load

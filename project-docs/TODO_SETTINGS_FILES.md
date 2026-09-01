@@ -90,8 +90,8 @@ a file nothing creates. Cause candidates: `PreferencesModel::load()` treats the
 seeded ini as authoritative and skips profile-JSON seeding (SettingsFiles.3.2),
 but only the preferences JSON is skipped — the settings JSON is still written.
 
-- [ ] SettingsFiles.6.1 Decide the owner: installer seeds the file, or the app seeds it even when the ini exists. Match whichever rule `default_settings.json` follows.
-- [ ] SettingsFiles.6.2 Implement; add a test pinning both JSON files after first run on a seeded ini.
+- [x] SettingsFiles.6.1 Decide the owner: the app seeds it, on demand, even when the ini exists (decided 2026-09-01). This matches `default_settings.json`, which `resolvedSettingsDirectory()` seeds app-side; the installer keeps seeding path settings only (decision 3 above).
+- [x] SettingsFiles.6.2 Implemented 2026-09-01: `PreferencesModel::load()` ini-exists path calls `seedFromBundledDefaults(preferencesFilePath())` when the profile is missing; never overwrites; the ini stays authoritative. Tests: `settingsFiles6_load_seedsMissingDefaultsProfileFromSeededIni`, `settingsFiles6_load_neverOverwritesAnExistingDefaultsProfile` (`PreferencesModelTests`). `ctest --preset debug` 5/5. `cargo test` skipped — no Rust changed.
 - [ ] SettingsFiles.6.3 Re-run MSI Test Case 1b-i item B.0a to confirm.
 
 Task SettingsFiles.5 (one-shot fresh-install data notice) is complete — moved to `TODO_COMPLETED.md` (2026-08-31).
