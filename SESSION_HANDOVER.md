@@ -31,6 +31,11 @@ Task Layout.11 in `TODO_COMPLETED.md`. `ctest --preset debug` 5/5;
 `cargo test --workspace` 265/265. This resolves the "still incorrect /
 retest" notes in the Layout.8 entries below.
 
+Follow-up filed at the user's request: Task SettingsFiles.7
+(`TODO_SETTINGS_FILES.md`) — `VCommonSettings::getDefaultDataRoot()` still
+returns `<Documents>/Seamly` while the MSI and Layout.11 use
+`<Documents>/SeamlyData`.
+
 ### Test Case 1b-i fresh pass COMPLETE for scripted items (2026-09-01)
 
 Results are recorded in the restructured test doc. Summary:
