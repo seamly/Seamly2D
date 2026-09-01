@@ -9,7 +9,7 @@ This document uses two placeholders as shorthand. Neither is a real environment 
 
 Non-default settings means at least: a non-default `%PROGRAMDIR%`, a non-default `%DATAROOT%` parent, and desktop shortcuts turned off (`SEAMLYDESKTOPSHORTCUTS=0`).
 
-Known defect to watch for: `MainWindow::exportPiecesToSeamlyLayout()` (`mainwindow.cpp`) writes the pattern's pieces to a `.pieces.svg` file next to the pattern file and launches SeamlyLayout with that file path as an argument. This contradicts the intended design: the piece-mode SVG should be passed to SeamlyLayout as a stringified SVG document, not as a file. Found during Case 1 item 6b-ii. Check for this on every verification pass until fixed. STILL PRESENT on the 2026-08-31 notice-build pass (`mainwindow.cpp:4153`). add a task to fix this problem. 
+Known defect to watch for: `MainWindow::exportPiecesToSeamlyLayout()` (`mainwindow.cpp`) writes the pattern's pieces to a `.pieces.svg` file next to the pattern file and launches SeamlyLayout with that file path as an argument. This contradicts the intended design: the piece-mode SVG should be passed to SeamlyLayout as a stringified SVG document, not as a file. Check for this on every verification pass until fixed. Tasks filed: Seamly2D.5, Layout.9.
 
 ## A. MSI Test Case Matrix
 
@@ -22,7 +22,7 @@ Known defect to watch for: `MainWindow::exportPiecesToSeamlyLayout()` (`mainwind
 
 ### Case 1 — Fresh install
 
-- [ ] 0. Relaunch this shell elevated (Administrator) before any step below. 
+- [ ] 0. Relaunch this shell elevated (Administrator) before any step below.
 - [ ] 1a. Uninstall Seamly (any and all versions detected) using `packaging\windows\test_reset_environment.ps1`.
   - [ ] 1a-i. Confirm that the %PROGRAMROOT, %DATAROOT, AppData\Roaming\Seamly, AppData\Local\Seamly\Seamly2D, AppData\Local\Seamly\SeamlyMe, AppData\Local\Seamly\SeamlyLayout, desktop shortcuts, and registry keys have been removed.
 - [ ] 1b. Install Seamly apps using `packaging\windows\seamly-msi\x64\seamly-x64.msi` with Default settings via `msiexec /i seamly-x64.msi /quiet /norestart`.
@@ -30,6 +30,7 @@ Known defect to watch for: `MainWindow::exportPiecesToSeamlyLayout()` (`mainwind
 ## B. Verification Suite
 
 Run this suite after every test case in section A.
+
 - [ ] 0. Check the directories and files
   - [ ] 0a. Confirm these directories and files exist:
     %PROGRAMDIR%\SeamlyApps
@@ -39,18 +40,14 @@ Run this suite after every test case in section A.
     %LOCALAPPDATA%\Seamly
     |_qt6_common.ini
     |_Seamly2D
-    |  |_logs
     |  |_qt6_seamly2d.ini
     |_SeamlyLayout
-    |  |_cache
-    |  |_logs
     |  |_preferences
     |  |  |_default_preferences.json
     |  |_settings
     |  |  |_default_settings.json
     |  |_qt6_seamlyLayout.ini
     |_SeamlyMe
-    |  |_logs
     |  |_qt6_seamlyme.ini
     %DATADIR%\SeamlyData
     |_backups
@@ -103,21 +100,26 @@ data_root=%DATADIRROOT%"
 - [ ] 1. Check the registry keys:
   - [ ] 1a. If not a fresh install then confirm old-version entries were removed.
   - [ ] 1b. Confirm that the installed-version program entries were added for each app under `HKLM\SOFTWARE\Seamly\<application>`, each with matching `InstallPath` and `DisplayVersion`.
-  - [ ] 1c. Confirm that installed-version data entries were added with matching `DataRoot` and `DataParent` values; `Seamly2D` also carries the three `DesktopShortcut*` flags (this should be fixed in the future; add a task to fix this)
+  - [ ] 1c. Confirm that installed-version data entries were added with matching `DataRoot` and `DataParent` values; `Seamly2D` also carries the three `DesktopShortcut*` flags (this should be fixed in the future; tasks filed: SeamlyMe.3, Layout.7)
 - [ ] 2. Check apps - **needs a human at the keyboard for most steps**
   - [ ] 2a. Run Seamly2D
-    - [ ] 2a-i. check if `qt6_common.ini` contains  "[notices] firstRunDataNotice=shown";
-    - [ ] 2a-ii. Select 'file open' -- the dialog should open in the `%DATADIR\patterns` directory.
-    - [ ] 2a-iii. Open `%DATADIR%\patterns\male_shirt.sm2d` pattern file with `%DATADIR%\measurements\individual\male_chest_102cm.smis` individual measurement file.
-  - [ ] 2b. Run SeamlyMe from within Seamly2D
-    - [ ] 2b-i. Select 'Edit Current' from the Measurements menu - the `%DATADIR\measurements\individual\male_chest_102cm.smis` file should open.
-    - [ ] 2b-ii. Select 'File Open Individual' - the dialog should open in the `%DATADIR\measurements\individual` directory.
-    - [ ] 2b-iii. Select 'File Open Multisize' - the dialog should open in the `%DATADIR\measurements\multisize` directory.
-    - [ ] 2b-iv. Close SeamlyMe, returning focus to Seamly2D.
+    - [ ] 2a-i. first run scripted: the "Seamly data moved" notice appears once, closes, then the main window appears
+    - [ ] 2a-ii. check if `qt6_common.ini` contains  "[notices] firstRunDataNotice=shown";
+    - [ ] 2a-iii. Select 'file open' -- the dialog should open in the `%DATADIR\patterns` directory.
+    - [ ] 2a-iv. Open `%DATADIR%\patterns\male_shirt.sm2d` pattern file with `%DATADIR%\measurements\individual\male_chest_102cm.smis` individual measurement file.
+    - [ ] 2a-v. Check if directory exists: `%LOCALAPPDATA%\Seamly\Seamly2D\logs`
+  - [ ] 2b. Check SeamlyMe from within Seamly2D
+  - [ ] 2b-i. Select 'File Open Individual' - the dialog should open in the `%DATADIR\measurements\individual` directory.
+    - [ ] 2b-ii. Select 'File Open Multisize' - the dialog should open in the `%DATADIR\measurements\multisize` directory.
+    - [ ] 2b-iii. Select 'File Open Templates' - the dialog should open in the `%DATADIR\templates` directory.
+    - [ ] 2b-iv. Select 'Edit Current' from the Measurements menu - the `%DATADIR%\measurements\individual\male_chest_102cm.smis` file should open.
+    - [ ] 2b-v. Check if directory exists: `%DATADIR%\SeamlyMe\logs`
+    - [ ] 2b-vi. Close SeamlyMe, returning focus to Seamly2D.
   - [ ] 2c. Run SeamlyLayout from within Seamly2D.
-    - [ ] 2c-i. Confirm that the current pattern's `Piece mode` data is opened in the left canvas.
-    - [ ] 2c-ii. Confirm that the 'piece mode' data was passed to SeamlyLayout as a stringified svg document (not as a svg file). Claude: check if `MainWindow::exportPiecesToSeamlyLayout()` writes `<pattern-basename>.pieces.svg` from the 'piece mode' data and SeamlyLayout reads this svg file, isn't passed as a stringified SVG document; Add a task to fix this.
-    - [ ] 2c-iii. Close SeamlyLayout, returning focus to Seamly2D.
+    - [ ] 2c-i. Visually confirm that the current pattern's `Piece mode` data is opened in the left canvas.
+    - [ ] 2c-ii. Check if `MainWindow::exportPiecesToSeamlyLayout()` passes 'piece mode' data to SeamlyLayout as a stringified SVG document in a variable, not as a svg file from harddrive.
+    - [ ] 2c-iii. Check if directories exist: `%DATADIR%\SeamlyLayout\cache`, `%DATADIR%\SeamlyLayout\logs`
+    - [ ] 2c-iv. Close SeamlyLayout, returning focus to Seamly2D.
   - [ ] 2d. Close Seamly2D.
 - [ ] 3. Check if `%LOCALAPPDATA%\SeamlyLayout\output` directory was created. If exists add a task to stop creating the `%LOCALAPPDATA%\SeamlyLayout\` directory and its `output` subdirectory that stores log files, and start creating the `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` directory to store SeamlyLayout log files (similar to the `%LOCALAPPDATA\Seamly\Seamly2D\logs` directory)
 - [ ] 4. Check Desktop shortcuts `Seamly2D.lnk`, `SeamlyMe.lnk`, `SeamlyLayout.lnk` for all three apps in `C:\Users\Public\Desktop` (default settings, `SEAMLYDESKTOPSHORTCUTS` on).
