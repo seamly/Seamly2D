@@ -19,6 +19,28 @@ re-accumulate finished-session narrative in this file.
 
 ## Current Status
 
+### Session end 2026-09-01 — ready for the next loop iteration
+
+State at handover:
+
+- `TEST_MSI_WIN_X64_Test_Case_1b-i.md` is CLEARED for a re-run (commit
+  `ea2fd49519` plus user edits after it): all checkboxes reset, dated
+  annotations dropped, restructured section 2 kept (2a-i..v, 2b-i..vi,
+  2c-i..iv). Prior results live in git history (`01827d72cc` and earlier).
+- The 2026-09-01 walkthrough found B.2a-iii FAIL live (File Open opened
+  in `C:\Users\<user>`, not `%DATAROOT%\patterns`) — covered by existing
+  Task Seamly2D.2.1, live confirmation recorded there.
+- The machine still has the fresh 26.8.44328 install with seeded data.
+- Open task queue for the loop (implement, rebuild MSI, reset, install,
+  re-run the test doc):
+  - SettingsFiles.4 — migration CAs mangle path arguments.
+  - SettingsFiles.6 — nothing creates `preferences\default_preferences.json`.
+  - SettingsFiles.7 — `getDefaultDataRoot()` leaf `Seamly` → `SeamlyData`.
+  - Also open: Seamly2D.2.1, Seamly2D.3, Seamly2D.5/Layout.9,
+    SeamlyMe.3/Layout.7, Layout.10.
+- Next step: implement one of the SettingsFiles tasks, then loop to
+  step 1 (build MSI) above.
+
 ### Layout.11 DONE — layouts fallback now <Documents>/SeamlyData (2026-09-01)
 
 User request: the `${HOME}/layouts` fallback made no sense; the default must

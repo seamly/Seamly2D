@@ -48,7 +48,6 @@ Run this suite after every test case in section A.
     |  |  |_default_settings.json
     |  |_qt6_seamlyLayout.ini
     |_SeamlyMe
-    |  |_logs
     |  |_qt6_seamlyme.ini
     %DATADIR%\SeamlyData
     |_backups
