@@ -161,6 +161,23 @@ try {
         -RoamingSettingsRoot $newRoaming -LocalSettingsRoot $newLocal -ArchivePath $sameArchive
     Assert-That -Name 'new migration does nothing when the location is unchanged' `
         -Succeeded (-not (Test-Path -LiteralPath $sameArchive))
+
+    # SettingsFiles.4: the MSI custom-action command line pads each path with a
+    # trailing backslash and space ("[PROP] "), so the script must trim what it
+    # receives. Mirror that exact argument shape.
+    $paddedRoot = Join-Path $testRoot 'padded\current\SeamlyData'
+    $paddedRoaming = Join-Path $testRoot 'padded\roaming'
+    $paddedLocal = Join-Path $testRoot 'padded\local'
+    $paddedDestination = Join-Path $testRoot 'padded\selected-parent\SeamlyData'
+    $paddedArchive = Join-Path $testRoot 'padded\seamly2d.zip'
+    New-Item -ItemType Directory -Path (Join-Path $paddedRoot 'patterns'), $paddedRoaming, $paddedLocal -Force | Out-Null
+    Set-Content -LiteralPath (Join-Path $paddedRoot 'patterns\shirt.sm2d') -Value 'padded pattern'
+
+    & $migrationScript -Mode New -Destination "$paddedDestination\ " -PreviousDataRoot "$paddedRoot\ " `
+        -InstallFolder 'C:\Program Files\SeamlyApps\ ' `
+        -RoamingSettingsRoot $paddedRoaming -LocalSettingsRoot $paddedLocal -ArchivePath $paddedArchive
+    Assert-That -Name 'padded CA-style path arguments are trimmed before use' `
+        -Succeeded (Test-Path -LiteralPath (Join-Path $paddedDestination 'patterns\shirt.sm2d'))
 } finally {
     if (Test-Path -LiteralPath $testRoot) {
         Remove-Item -LiteralPath $testRoot -Recurse -Force
