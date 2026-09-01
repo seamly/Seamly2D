@@ -55,9 +55,14 @@
 
 #include "../vpatterndb/vtranslatevars.h"
 #include "../vmisc/def.h"
+#include "../vmisc/vlockguard.h"
 #include "../vmisc/vseamlymesettings.h"
 #include "../vmisc/vabstractapplication.h"
 #include "dialogs/database_dialog.h"
+
+#include <QFile>
+#include <QTextStream>
+#include <memory>
 
 class ApplicationME;// use in define
 class TMainWindow;
@@ -107,6 +112,13 @@ public:
     void                                parseCommandLine(const SocketConnection &connection,
                                                          const QStringList &arguments);
 
+    // Task SeamlyMe.5: log-file startup, mirroring Application2D. startLogging() creates
+    // %LOCALAPPDATA%\Seamly\SeamlyMe\logs (Windows), opens a per-pid log, and prunes old
+    // logs; logFile() is null until beginLogging() has opened the file, so the message
+    // handler must check it.
+    void                                startLogging();
+    QTextStream                        *logFile();
+
 public slots:
     void                                processCommandLine();
 
@@ -129,6 +141,17 @@ private:
     // "Seamly2DTeam" organization folder; main.cpp shows the one-time migration notice
     // only when this is set and the app is not running in automated test mode.
     bool                                m_settingsMigrated{false};
+
+    // Task SeamlyMe.5: per-pid log file, locked so parallel SeamlyMe processes never
+    // share one file — the same mechanism Application2D uses.
+    std::shared_ptr<VLockGuard<QFile>>  m_lockLog;
+    std::shared_ptr<QTextStream>        m_out;
+
+    QString                             logDirPath() const;
+    QString                             logPath() const;
+    bool                                createLogDir() const;
+    void                                beginLogging();
+    void                                clearOldLogs() const;
 
     void                                clean();
 };

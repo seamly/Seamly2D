@@ -35,9 +35,9 @@ Found during MSI Test Case verification, step 5c (`project-docs/TEST_MSI_WIN_X64
 
 Found during MSI Test Case verification, step B.2b-v (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, 2026-09-01). SeamlyMe writes no log files and creates no logs directory — `ApplicationME` has no equivalent of `Application2D::logDirPath()`/`beginLogging()` (`src/app/seamly2d/core/application_2d.cpp:605`). Seamly2D writes to `%LOCALAPPDATA%\Seamly\Seamly2D\logs`; SeamlyMe must mirror that pattern.
 
-- [ ] SeamlyMe.5.1 Add log-directory resolution and logging startup to `ApplicationME`, mirroring `Application2D::logDirPath()`/`beginLogging()`: `AppLocalDataLocation` + `logs` → `%LOCALAPPDATA%\Seamly\SeamlyMe\logs` on Windows
+- [x] SeamlyMe.5.1 Implemented 2026-09-01: `ApplicationME` gains `startLogging()`/`logFile()` plus the private `logDirPath()`/`logPath()`/`createLogDir()`/`beginLogging()`/`clearOldLogs()`, mirroring `Application2D`. `initOptions()` starts logging before installing the message handler; the handler now writes every message to the per-pid log (`seamlyme-pid<pid>.log`), null-guarded so console output survives a failed open. Windows dir: `%LOCALAPPDATA%\Seamly\SeamlyMe\logs`. 3-day retention, same as Seamly2D.
 - [ ] SeamlyMe.5.2 Re-run MSI Test Case verification step B.2b-v to confirm the directory and a log file appear after a SeamlyMe run
-- [ ] SeamlyMe.5.3 Doxygen briefs + inline comments on any touched function(s)
+- [x] SeamlyMe.5.3 Doxygen briefs on `logDirPath()`/`logFile()`; inline comments at the handler write and `initOptions()` ordering
 
 ## Task SeamlyMe.4 — write a persisted `[paths]` section to `qt6_seamlyme.ini`
 

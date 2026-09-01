@@ -66,7 +66,9 @@
 #include "../qmuparser/qmuparsererror.h"
 
 #include <Qt>
+#include <QDateTime>
 #include <QDir>
+#include <QFileInfo>
 #include <QFileOpenEvent>
 #include <QLocalSocket>
 #include <QResource>
@@ -91,11 +93,12 @@ QT_WARNING_POP
 
 #include <QCommandLineParser>
 
+// Task SeamlyMe.5: same retention as Seamly2D's logs.
+constexpr auto DAYS_TO_KEEP_LOGS = 3;
+
 //---------------------------------------------------------------------------------------------------------------------
 inline void noisyFailureMsgHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
 {
-    Q_UNUSED(context)
-
     // Qt's Wayland plugin warns on every focus change when the compositor sends a text input leave
     // event for a surface it isn't tracking. The plugin carries on as normal after logging it, so
     // it is noise. Drop it instead of logging it and popping up a dialog on every interaction.
@@ -163,6 +166,41 @@ inline void noisyFailureMsgHandler(QtMsgType type, const QMessageLogContext &con
     // a non-GUI thread, you'll have to queue the message to the GUI
     QCoreApplication *instance = QCoreApplication::instance();
     const bool isGuiThread = instance && (QThread::currentThread() == instance->thread());
+
+    // Task SeamlyMe.5: write every message into the per-pid log file, in the same
+    // timestamped format Seamly2D uses. logFile() is null until startLogging() has
+    // opened the file, and stays null if opening failed — console output above still
+    // happens either way.
+    if (QTextStream *log = qApp->logFile())
+    {
+        QString debugdate = "[" + QDateTime::currentDateTime().toString(QStringLiteral("yyyy.MM.dd hh:mm:ss"));
+        switch (type)
+        {
+            case QtDebugMsg:
+                debugdate += QString(":DEBUG:%1(%2)] %3: %4: %5").arg(context.file).arg(context.line)
+                             .arg(context.function).arg(context.category).arg(msg);
+                break;
+            case QtWarningMsg:
+                debugdate += QString(":WARNING:%1(%2)] %3: %4: %5").arg(context.file).arg(context.line)
+                             .arg(context.function).arg(context.category).arg(msg);
+                break;
+            case QtCriticalMsg:
+                debugdate += QString(":CRITICAL:%1(%2)] %3: %4: %5").arg(context.file).arg(context.line)
+                             .arg(context.function).arg(context.category).arg(msg);
+                break;
+            case QtFatalMsg:
+                debugdate += QString(":FATAL:%1(%2)] %3: %4: %5").arg(context.file).arg(context.line)
+                             .arg(context.function).arg(context.category).arg(msg);
+                break;
+            case QtInfoMsg:
+                debugdate += QString(":INFO:%1(%2)] %3: %4: %5").arg(context.file).arg(context.line)
+                             .arg(context.function).arg(context.category).arg(msg);
+                break;
+            default:
+                break;
+        }
+        *log << debugdate << Qt::endl;
+    }
 
     switch (type)
     {
@@ -469,6 +507,9 @@ QList<TMainWindow *> ApplicationME::mainWindows()
 //---------------------------------------------------------------------------------------------------------------------
 void ApplicationME::initOptions()
 {
+    // Task SeamlyMe.5: open the per-pid log file first, so the handler below writes
+    // every following message into %LOCALAPPDATA%\Seamly\SeamlyMe\logs.
+    startLogging();
     qInstallMessageHandler(noisyFailureMsgHandler);
 
     openSettings();
@@ -504,6 +545,118 @@ void ApplicationME::initOptions()
 const VTranslateVars *ApplicationME::translateVariables()
 {
     return m_trVars;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Returns the directory that stores SeamlyMe log files.
+///
+/// Task SeamlyMe.5: mirrors Application2D::logDirPath(), so on Windows the logs land in
+/// %LOCALAPPDATA%\Seamly\SeamlyMe\logs — beside qt6_seamlyme.ini, never in the data root.
+QString ApplicationME::logDirPath() const
+{
+#if defined(Q_OS_WIN)
+    const QString logDirPath = QDir(QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation))
+                                   .filePath(QStringLiteral("logs"));
+#elif defined(Q_OS_OSX)
+    const QString logDirPath = QStandardPaths::locate(QStandardPaths::GenericDataLocation, QString(),
+                                                      QStandardPaths::LocateDirectory) + "SeamlyMe";
+#else
+    const QString logDirPath = QStandardPaths::locate(QStandardPaths::ConfigLocation, QString(),
+                                                      QStandardPaths::LocateDirectory)
+            + QCoreApplication::organizationName();
+#endif
+    return logDirPath;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+QString ApplicationME::logPath() const
+{
+    return QString("%1/seamlyme-pid%2.log").arg(logDirPath()).arg(applicationPid());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+bool ApplicationME::createLogDir() const
+{
+    QDir logDir(logDirPath());
+    if (logDir.exists() == false)
+    {
+        return logDir.mkpath("."); // Create directory for log if need
+    }
+    return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void ApplicationME::beginLogging()
+{
+    VlpCreateLock(m_lockLog, logPath(), [this](){return new QFile(logPath());});
+
+    if (m_lockLog->IsLocked())
+    {
+        if (m_lockLog->GetProtected()->open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text))
+        {
+            m_out.reset(new QTextStream(m_lockLog->GetProtected().get()));
+            qCInfo(mApp, "Log file %s was locked.", qUtf8Printable(logPath()));
+        }
+        else
+        {
+            qCWarning(mApp, "Error opening log file \'%s\'. All debug output redirected to console.",
+                    qUtf8Printable(logPath()));
+        }
+    }
+    else
+    {
+        qCWarning(mApp, "Failed to lock %s", qUtf8Printable(logPath()));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void ApplicationME::clearOldLogs() const
+{
+    QDir logsDir(logDirPath());
+    logsDir.setNameFilters(QStringList("*.log"));
+    logsDir.setCurrent(logDirPath());
+
+    const QStringList allFiles = logsDir.entryList(QDir::NoDotAndDotDot | QDir::Files);
+    for (const QString &fn : allFiles)
+    {
+        QFileInfo info(fn);
+        if (info.birthTime().daysTo(QDateTime::currentDateTime()) >= DAYS_TO_KEEP_LOGS)
+        {
+            VLockGuard<QFile> tmp(info.absoluteFilePath(), [&fn](){return new QFile(fn);});
+            if (tmp.GetProtected() != nullptr)
+            {
+                if (tmp.GetProtected()->remove())
+                {
+                    qCDebug(mApp, "Deleted %s", qUtf8Printable(info.absoluteFilePath()));
+                }
+                else
+                {
+                    qCWarning(mApp, "Could not delete %s", qUtf8Printable(info.absoluteFilePath()));
+                }
+            }
+            else
+            {
+                qCWarning(mApp, "Failed to lock %s", qUtf8Printable(info.absoluteFilePath()));
+            }
+        }
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void ApplicationME::startLogging()
+{
+    if (createLogDir())
+    {
+        beginLogging();
+        clearOldLogs();
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Returns the open log stream, or null before startLogging() or after a failure.
+QTextStream *ApplicationME::logFile()
+{
+    return m_out.get();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
