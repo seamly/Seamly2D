@@ -32,6 +32,31 @@ Verified 2026-09-01: full local qmake/nmake release build in `build/qmake-test`;
 `Seamly2DTests.exe` all 25 suites pass — `TST_DataRoot` 50 passed / 0 failed / 1
 pre-existing skip. Live MSI re-verification happens in the next Test Case 1b-i loop pass.
 
+## Task SettingsFiles.4 — migration custom actions no longer mangle their path arguments (completed 2026-09-01)
+
+Found 2026-08-31 while verifying SettingsFiles.3. `SEAMLYDATAROOT` and `INSTALLFOLDER`
+resolve with a trailing backslash; PowerShell's command-line parser reads
+backslash-quote as an escaped quote, so `-Destination "[SEAMLYDATAROOT]"` swallowed the
+closing quote and the arguments ran together into one mangled value. The seed CA had
+the same defect; its fix (SettingsFiles.3) set the idiom.
+
+- 4.1 Both migration `SetProperty` rows now pad each path argument with a space before
+  the closing quote (`-Destination "[SEAMLYDATAROOT] "`, `-PreviousDataRoot
+  "[SEAMLYPREVIOUSDATAROOT] "`, `-InstallFolder "[INSTALLFOLDER] "` in `smsi.wxs`).
+  `smsi_migrate_user_data.ps1` did NOT trim — it does now (top of the script). New
+  suite case `padded CA-style path arguments are trimmed before use`; 17/17.
+- 4.2 Two quote-safety assertions added to `smsi_check_authoring.ps1` (old + new
+  migration commands); pass on MSI build 26.9.1.737.
+- 4.3 Verified live 2026-09-01 with a REAL upgrade (test case C shape): quiet install
+  of 26.9.1.737 over installed 26.9.1.728 with `SEAMLYCOPYUSERDATA=1` and a new
+  `SEAMLYDATAROOT=<Documents>\SeamlyUpgradeTest\SeamlyData`. The New-mode CA ran with
+  clean paths — log shows the exact destination, 12 files copied, all three inis
+  repointed, old root untouched. Test case B (pre-SeamlyLayout old version) cannot run
+  on this machine (no legacy install exists); the Old-mode command line uses the
+  identical idiom and the same script parsing, covered by the padded-argument test.
+- Side observation, filed as Task Installer.5 (`TODO_INSTALLER.md`): the recorded
+  `DataParent` stayed `<Documents>\` instead of the explicit `SEAMLYDATAPARENT`.
+
 ## Task SettingsFiles.6 — SeamlyLayout now creates preferences\default_preferences.json (completed 2026-09-01)
 
 Found by MSI Test Case 1b-i item B.0a: after a fresh install and a first SeamlyLayout

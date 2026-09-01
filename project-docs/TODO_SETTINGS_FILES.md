@@ -68,17 +68,7 @@ Decision (2026-08-31): the installer owns ini seeding. App-side first-run seedin
 
 The deprecated fallback also remains the only seeding for the non-installing Windows accounts named under SettingsFiles.2's known limits.
 
-## Task SettingsFiles.4 — [known defect] migration custom actions mangle their path arguments
-
-Found 2026-08-31 while verifying SettingsFiles.3. The seed CA had the same defect; its fix is in.
-
-- The properties `SEAMLYDATAROOT`, `SEAMLYDATAROOTRECORDED`, and `INSTALLFOLDER` resolve with a trailing backslash.
-- PowerShell's command-line parser reads backslash-quote as an escaped quote, so `-Destination "[SEAMLYDATAROOT]"` swallows the closing quote and the arguments run together into one mangled value.
-- Observed live: the seed CA received `DataRoot='C:\...\SeamlyData" -InstallFolder C:\Program'` and seeded garbage paths.
-- Fix idiom (applied to `SetSeamlySeedUserSettings`): a space before each closing quote — `"[PROP] "` — and the script trims the value. Guarded by an `smsi_check_authoring.ps1` assertion.
-- [x] SettingsFiles.4.1 Applied 2026-09-01: both migration `SetProperty` rows now pad each path argument (`-Destination "[SEAMLYDATAROOT] "`, `-PreviousDataRoot "[SEAMLYPREVIOUSDATAROOT] "`, `-InstallFolder "[INSTALLFOLDER] "`). The script did NOT trim — it does now (`$Destination`/`$PreviousDataRoot`/`$InstallFolder` at the top of `smsi_migrate_user_data.ps1`). New test `padded CA-style path arguments are trimmed before use`; suite 17/17
-- [x] SettingsFiles.4.2 Added 2026-09-01: two quote-safety assertions in `smsi_check_authoring.ps1` (old + new migration commands)
-- [ ] SettingsFiles.4.3 Re-verify migration with a real upgrade install (test cases B/C). The 2026-08-21 verification exercised the script directly, not the CA command line, so live migration has run with mangled `-Destination` until this is fixed
+Task SettingsFiles.4 (quote-safe migration CA path arguments) is complete — moved to `TODO_COMPLETED.md` (2026-09-01).
 
 Task SettingsFiles.5 (one-shot fresh-install data notice) is complete — moved to `TODO_COMPLETED.md` (2026-08-31).
 

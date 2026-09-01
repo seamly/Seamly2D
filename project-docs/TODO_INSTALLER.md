@@ -56,6 +56,18 @@ Notes:
 - Installer.3.4 - Linux .appimage
 - Installer.3.5 - Linux FlatPak
 
+## Installer.5 - [known defect] explicit SEAMLYDATAPARENT is not recorded on a property-driven install
+
+Found 2026-09-01 during the SettingsFiles.4.3 upgrade verification. A quiet upgrade
+with `SEAMLYDATAPARENT=<Documents>\SeamlyUpgradeTest\ SEAMLYDATAROOT=<Documents>\SeamlyUpgradeTest\SeamlyData\`
+recorded `DataRoot` correctly but recorded `DataParent=<Documents>\` — the
+execute-sequence default computation (InstWinX64.13) overrode the explicit parent.
+The apps read only `DataRoot`, so this is cosmetic today, but the recorded pair is
+inconsistent (`DataParent` is not the parent of `DataRoot`).
+
+- [ ] Installer.5.1 Guard the `SetSEAMLYDATAPARENTExecute*` actions so an explicitly passed `SEAMLYDATAPARENT` wins, or derive the recorded `DataParent` from the recorded `DataRoot`.
+- [ ] Installer.5.2 Add an authoring assertion; re-verify with a property-driven quiet install.
+
 ## Installer.4 - Re-organize all directories, files, and scripts needed to build the Seamly executables with the GitHub CI/CD ci.yml file so that all CI/CD build information is under the .github directory tree; remove unnecessary and unused CI/CD files; copy files to new location if the original file is under the src/ or share/ directories; update the CI/CD files with the new locations of moved files; build & test the updated CI/CD workflow and artifacts
 
 - Installer.4.1 - Re-organize files; Update ci.yml and related files to reflect new file locations

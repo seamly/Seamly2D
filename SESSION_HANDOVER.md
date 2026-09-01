@@ -19,6 +19,47 @@ re-accumulate finished-session narrative in this file.
 
 ## Current Status
 
+### SettingsFiles queue EXHAUSTED — loop complete (2026-09-01, ~12:40)
+
+Three loop iterations this session shipped and live-verified
+SettingsFiles.7, .6, and .4. `TODO_SETTINGS_FILES.md` now holds only
+SettingsFiles.3.3/3.4, blocked on macOS/Linux packaging formats.
+
+Iteration 3 (SettingsFiles.4, merged `2e3853dd5e`, NO skip token —
+functional `packaging/**`; full CI is running on that push):
+
+- Both migration CA rows use the quote-safe `"[PROP] "` idiom; the
+  script trims; padded-arg test added (suite 17/17); two authoring
+  assertions pass on MSI 26.9.1.737.
+- 4.3 verified with a REAL case-C upgrade: 26.9.1.737 over installed
+  26.9.1.728, `SEAMLYCOPYUSERDATA=1`, new root
+  `<Documents>\SeamlyUpgradeTest\SeamlyData`. Migration ran with clean
+  paths: 12 files copied, three inis repointed, old root untouched.
+  Case B needs a pre-SeamlyLayout install — covered at unit level only.
+- NEW Task Installer.5 (`TODO_INSTALLER.md`): explicit `SEAMLYDATAPARENT`
+  was not recorded (`DataParent` stayed `<Documents>\`); cosmetic.
+- Upgrade-test root reset away; empty `SeamlyUpgradeTest` folder removed.
+
+Final fresh pass on 26.9.1.737 (test doc reset from the template at the
+user's request; results recorded in it): reset → install → three first
+runs → verify. All
+scripted items PASS, including the first live pass of the
+SettingsFiles.6 fix (`default_preferences.json` created). Only known
+filed items remain: Layout.10 (SeamlyLayout `logs` + stray output dir,
+survives reset), SeamlyMe.5 (no SeamlyMe logs), Seamly2D.5/Layout.9
+(`.pieces.svg` static check), Seamly2D.2.1 (pending human 2a-iii).
+
+Machine state: fresh 26.9.1.737 install, all three apps ran once, data
+seeded.
+
+PENDING THE HUMAN in the test doc: 2a-iii, 2a-iv, 2b-i..iv, 2b-vi,
+2c-i, 2c-iv, 2d.
+
+Next work: check the full CI run on `2e3853dd5e`
+(`gh run list --branch run-seamlyLayout`); then the open app-defect
+queue — Seamly2D.2.1, Seamly2D.3, Seamly2D.5/Layout.9,
+SeamlyMe.3/Layout.7, SeamlyMe.5, Layout.10, Installer.5.
+
 ### SettingsFiles.6 DONE + LIVE-VERIFIED on build 26.9.1.728 (2026-09-01, ~12:20)
 
 Second loop iteration complete. `PreferencesModel::load()` now seeds a
