@@ -19,6 +19,18 @@ re-accumulate finished-session narrative in this file.
 
 ## Current Status
 
+### Layout.11 DONE — layouts fallback now <Documents>/SeamlyData (2026-09-01)
+
+User request: the `${HOME}/layouts` fallback made no sense; the default must
+follow the Seamly data-storage pattern. Renamed the template token to
+`${DATAROOT}` (`default_preferences.json`, `PreferencesModel.cpp` fallbacks);
+`expandDefaultPathTokens()` resolves it to installer DataRoot →
+`<Documents>/SeamlyData` → home only when Documents is unreported.
+Regression guard added to the layout8 shared-layouts test. Full record:
+Task Layout.11 in `TODO_COMPLETED.md`. `ctest --preset debug` 5/5;
+`cargo test --workspace` 265/265. This resolves the "still incorrect /
+retest" notes in the Layout.8 entries below.
+
 ### Test Case 1b-i fresh pass COMPLETE for scripted items (2026-09-01)
 
 Results are recorded in the restructured test doc. Summary:
@@ -296,6 +308,9 @@ and `INSTALLER_NOTES.md` to match. --> this is still incorrect, the layouts
 fallback hardcoded directory should be 'C:\users\<user>\Documents\SeamlyData\layouts' 
 (%DATADIR%\layouts), not %HOME\layouts; %HOME%\layouts makes no sense and 
 does not follow the seamly data storage pattern.
+**RESOLVED 2026-09-01 by Task Layout.11** (see the entry at the top and
+`TODO_COMPLETED.md`): the token is now `${DATAROOT}` and the no-installer
+fallback is `<Documents>/SeamlyData`.
 
 **Verified against the real running app, not just the test suite:** rebuilt, 
 deleted the two stale files again (Is it better to run the 
@@ -304,6 +319,8 @@ packaging\windows\test_reset_environment.ps1 script here?), relaunched
  read the freshly seeded `qt6_seamlylayout.ini` back — `input_directory`/
 `layout_directory` now both read `C:\Users\susan\Documents\SeamlyData\layouts`. 
 `ctest --preset debug` 5/5 still passed --> user diasgrees, retest this section
+**RESOLVED 2026-09-01 by Task Layout.11**: retested after the `${DATAROOT}`
+change — `ctest --preset debug` 5/5, `cargo test --workspace` 265/265.
 
 ### Layout.8.2 resolved — input_directory/layout_directory share one "layouts" folder (2026-08-30)
 

@@ -39,12 +39,12 @@ The application creates required folders on first run.
 
 By contrast, `input_directory`/`layout_directory` (the SVG import default and the export
 default) are user data. The bundled `default_preferences.json` seeds both to the same
-shared `<DataRoot-or-home>/layouts` folder — one folder for both import and export, not
+shared `<DataRoot>/layouts` folder — one folder for both import and export, not
 separate `/input`/`/output` trees, and directly under the data root rather than nested
 under a `seamlyLayout` subfolder, matching the `layouts` subfolder Seamly2D's
 `ensureDataRootTree()` (`src/libs/vmisc/vcommonsettings.cpp`) already creates under
 `%DATAROOT%` — nested under the installer-recorded `%DATAROOT%` when one was recorded, or
-under the raw home directory otherwise. If either field is later cleared back to empty,
+under `<Documents>/SeamlyData` otherwise (Layout.11; never the raw home directory). If either field is later cleared back to empty,
 the runtime fallback in
 `resolvedInputDirectory()`/`resolvedLayoutDirectory()` takes over instead and nests them
 separately as `<DataRoot>/input`/`<DataRoot>/output`, falling back further to

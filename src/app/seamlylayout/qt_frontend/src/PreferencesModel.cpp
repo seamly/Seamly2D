@@ -154,25 +154,30 @@ QString platformDefaultsKey()
 // @brief Replace supported tokens in default path templates.
 //
 // Layout.8.3: only input_directory/layout_directory (user data, shared with the rest of
-// the suite) go through this. ${HOME} resolves to the Windows installer's recorded
-// DataRoot when one exists, so a fresh MSI install nests those two under %DATAROOT%
-// instead of the user's home directory. Falls back to the real home path everywhere else
-// (dev builds, Linux, macOS, or Windows without an installer record). preferences/settings
-// paths are app-config, not user data, and are seeded straight from appConfigRootPath() in
-// seedFromBundledDefaults() below — never through this function — so they carry no
-// dependency on the installer registry key or MSI custom-action ordering.
+// the suite) go through this. ${DATAROOT} resolves to the Windows installer's recorded
+// DataRoot when one exists, so a fresh MSI install nests those two under %DATAROOT%.
+// Layout.11: without an installer record (dev builds, Linux, macOS) the fallback is
+// <Documents>/SeamlyData — the suite's data-storage pattern — never the raw home
+// directory. preferences/settings paths are app-config, not user data, and are seeded
+// straight from appConfigRootPath() in seedFromBundledDefaults() below — never through
+// this function — so they carry no dependency on the installer registry key or MSI
+// custom-action ordering.
 QString expandDefaultPathTokens(const QString &value)
 {
-    QString homeBase = QDir::homePath();
+    QString documents = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    if (documents.isEmpty()) {
+        documents = QDir::homePath();
+    } // if the platform reports no documents location
+    QString dataRootBase = QDir::cleanPath(documents) + QStringLiteral("/SeamlyData");
 #ifdef Q_OS_WIN
     const QString installedDataRoot = installerDataRoot();
     if (!installedDataRoot.isEmpty()) {
-        homeBase = installedDataRoot;
+        dataRootBase = installedDataRoot;
     } // if the installer recorded a data root
 #endif // Q_OS_WIN
 
     QString result = value;
-    result.replace(QStringLiteral("${HOME}"), homeBase);
+    result.replace(QStringLiteral("${DATAROOT}"), dataRootBase);
     return QDir::cleanPath(result);
 } // expandDefaultPathTokens
 
@@ -218,10 +223,10 @@ bool seedFromBundledDefaults(const QString &destPath)
         QDir(appConfigRoot).filePath(QString::fromUtf8(kPreferencesFolderName)));
     const QString defaultInputDir = QDir::toNativeSeparators(
         expandDefaultPathTokens(source.value(QStringLiteral("input_directory"))
-            .toString(QStringLiteral("${HOME}/layouts"))));
+            .toString(QStringLiteral("${DATAROOT}/layouts"))));
     const QString defaultLayoutDir = QDir::toNativeSeparators(
         expandDefaultPathTokens(source.value(QStringLiteral("layout_directory"))
-            .toString(QStringLiteral("${HOME}/layouts"))));
+            .toString(QStringLiteral("${DATAROOT}/layouts"))));
 
     const QString defaultSettingsFile = QDir::toNativeSeparators(
         QFileInfo(QDir(defaultSettingsDir).filePath(QStringLiteral("default_settings.json"))).absoluteFilePath());
