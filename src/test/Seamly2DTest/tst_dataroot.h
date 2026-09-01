@@ -54,8 +54,8 @@ class QTemporaryDir;
  * and only falls back to the USERPROFILE/HOME environment variables when that fails — so
  * a test that created or removed ~/seamly or ~/seamly2d would be operating on the real
  * user's data. First-run resolution is therefore tested through
- * VCommonSettings::chooseFirstRunDataRoot(), which takes both candidate roots as
- * arguments and can be pointed at throwaway directories.
+ * VCommonSettings::chooseFirstRunDataRoot(), which takes every candidate root as an
+ * argument and can be pointed at throwaway directories.
  */
 class TST_DataRoot : public QObject
 {
@@ -74,13 +74,15 @@ private slots:
     void CommonSettingsBridgeNeverOverwritesTheLocalFile() const;
     void FirstRunNoticePendingOnlyWhileSeeded() const;
 
-    void DefaultDataRootIsSeamlyUnderDocuments() const;
+    void DefaultDataRootIsSeamlyDataUnderDocuments() const;
     void LegacyDataRootIsTheOldSeamly2dFolder() const;
+    void LegacyDocumentsDataRootIsTheTask60Folder() const;
     void UnconfiguredRootFallsBackToTheDefault() const;
     void EveryDefaultPathDerivesFromTheDataRoot() const;
     void DataRootAcceptsAnyDriveOrPath() const;
     void FirstRunWithoutLegacyTreeUsesTheDefault() const;
     void FirstRunAdoptsAnExistingLegacyTree() const;
+    void FirstRunPrefersTheNewestLegacyRoot() const;
     void FirstRunPrefersAnExistingNewRoot() const;
     void AdoptionNeverRemovesTheLegacyTree() const;
     void AConfiguredRootIsNeverOverwritten() const;

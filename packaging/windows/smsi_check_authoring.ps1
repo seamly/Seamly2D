@@ -746,7 +746,8 @@ Assert-That -Name 'the chosen data root is recorded for the apps to read' `
     -Succeeded (@($registry | Where-Object { $_.Root -eq '2' -and $_.Key -eq 'SOFTWARE\Seamly\Seamly2D' -and $_.Name -eq 'DataRoot' }).Count -eq 1)
 # InstWinX64.00. Three things went wrong together before this: the wizard
 # offered C:\Users\<user>\SeamlyData, the apps created <Documents>\Seamly, and
-# nothing read what the wizard recorded. Pin all three.
+# nothing read what the wizard recorded. Pin all three. (Task SettingsFiles.7
+# later aligned the apps' own default to <Documents>\SeamlyData too.)
 #
 # The default parent is the Documents folder, because that is where users go to
 # find the files other applications write. PersonalFolder is preferred over

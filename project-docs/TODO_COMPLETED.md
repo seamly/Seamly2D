@@ -2,6 +2,36 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task SettingsFiles.7 — getDefaultDataRoot() leaf aligned to SeamlyData (completed 2026-09-01)
+
+`VCommonSettings::getDefaultDataRoot()` returned `<Documents>/Seamly` (Task 60), but the
+MSI's default `SEAMLYDATAROOT` is `<Documents>\SeamlyData` (`smsi.wxs`) and SeamlyLayout's
+no-installer fallback is `<Documents>/SeamlyData` (Task Layout.11). A no-installer run of
+Seamly2D/SeamlyMe therefore used a different root than the installer and SeamlyLayout.
+
+- 7.1 Leaf changed `Seamly` → `SeamlyData` (`vcommonsettings.cpp`); doc comment records
+  the new decision and supersedes Task 60's "Data is redundant" reasoning.
+- 7.2 New `VCommonSettings::getLegacyDocumentsDataRoot()` returns `<Documents>/Seamly`.
+  `chooseFirstRunDataRoot()` now takes a `QStringList` of legacy roots, probed newest
+  first: `<Documents>/Seamly`, then `~/seamly2d`. An adopted tree is migrated to the
+  current default by the existing Task 60 flow — the apps now pass the resolved root
+  (not hardcoded `getLegacyDataRoot()`) to `LegacyDataMigration::run()`, and prune both
+  legacy skeletons.
+- 7.3 `TST_DataRoot` updated: default pinned to `<Documents>/SeamlyData`
+  (`DefaultDataRootIsSeamlyDataUnderDocuments`), new
+  `LegacyDocumentsDataRootIsTheTask60Folder` and `FirstRunPrefersTheNewestLegacyRoot`
+  cases, list-signature updates throughout.
+- 7.4 Swept remaining `<Documents>/Seamly` references: `.github/README-BUILDS.md`
+  (default row, naming lineage, first-run cases, prune paragraph, testing note),
+  `packaging/windows/README_MSI_WORKFLOW.md` (application flow),
+  `packaging/windows/smsi_check_authoring.ps1` (comment only), doc comments in
+  `legacy_data_migration.cpp` and the app `openSettings()` blocks. Historical records
+  (`TODO_COMPLETED.md`, `SESSION_HANDOVER.md`) left as written.
+
+Verified 2026-09-01: full local qmake/nmake release build in `build/qmake-test`;
+`Seamly2DTests.exe` all 25 suites pass — `TST_DataRoot` 50 passed / 0 failed / 1
+pre-existing skip. Live MSI re-verification happens in the next Test Case 1b-i loop pass.
+
 ## Task Seamly2D.2 — First run seeds the patterns folder from the bundled samples (completed 2026-08-28)
 
 MSI Test Case 1b-i step 6a-i found that `%PROGRAMDIR%\samples\patterns\*.sm2d` cannot be

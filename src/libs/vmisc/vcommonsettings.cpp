@@ -608,16 +608,18 @@ QString VCommonSettings::migrateCommonSettingsLocation()
 /**
  * @brief getDefaultDataRoot returns the built-in default root of the user's data tree.
  *
- * Task 60 moved this to <Documents>/Seamly. Two changes, for two reasons:
+ * The root is <Documents>/SeamlyData. Two decisions:
  *
- *  - **Documents, not the home directory.** These are files the user creates, opens, saves
- *    and backs up, so they belong where every other application puts documents. Internal
- *    state — settings, caches, logs — stays in the platform's application-data locations
- *    and is deliberately NOT mixed in here.
- *  - **"Seamly", not "seamlyData" or "seamly2d".** The folder holds the whole suite's
- *    work, so naming it after one member (seamly2d) wrongly implies SeamlyMe and
- *    SeamlyLayout belong to Seamly2D, and "Data" is redundant once the parent location
- *    already says what these files are.
+ *  - **Documents, not the home directory** (Task 60). These are files the user creates,
+ *    opens, saves and backs up, so they belong where every other application puts
+ *    documents. Internal state — settings, caches, logs — stays in the platform's
+ *    application-data locations and is deliberately NOT mixed in here.
+ *  - **"SeamlyData", not "Seamly"** (Task SettingsFiles.7, 2026-09-01). The MSI's default
+ *    SEAMLYDATAROOT is <Documents>\SeamlyData (smsi.wxs) and SeamlyLayout's no-installer
+ *    fallback is <Documents>/SeamlyData (Task Layout.11). One suite needs one folder, so
+ *    this fallback now composes the same name. This supersedes Task 60's "Data is
+ *    redundant" reasoning. Task 60's <Documents>/Seamly is now a legacy root — see
+ *    getLegacyDocumentsDataRoot().
  *
  * QStandardPaths::DocumentsLocation is used rather than a hand-built path because it
  * resolves the Windows known-folder API (so a redirected or OneDrive-backed Documents is
@@ -625,7 +627,7 @@ QString VCommonSettings::migrateCommonSettingsLocation()
  * folder "Documents" at all. It falls back to the home directory on the rare system that
  * reports no documents location, which keeps the result absolute in every case.
  *
- * @return absolute path of the default user-data root, e.g. C:/Users/<user>/Documents/Seamly.
+ * @return absolute path of the default user-data root, e.g. C:/Users/<user>/Documents/SeamlyData.
  */
 QString VCommonSettings::getDefaultDataRoot()
 {
@@ -634,7 +636,7 @@ QString VCommonSettings::getDefaultDataRoot()
     {
         documents = QDir::homePath();
     }
-    return QDir::cleanPath(documents) + QLatin1String("/Seamly");
+    return QDir::cleanPath(documents) + QLatin1String("/SeamlyData");
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -649,6 +651,28 @@ QString VCommonSettings::getDefaultDataRoot()
 QString VCommonSettings::getLegacyDataRoot()
 {
     return QDir::homePath() + QLatin1String("/seamly2d");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getLegacyDocumentsDataRoot returns the Task 60 default root of the user's data tree.
+ *
+ * <Documents>/Seamly was the built-in default from Task 60 until Task SettingsFiles.7
+ * renamed the leaf to SeamlyData. Kept so first-run resolution can adopt a data tree
+ * created by a build of that era instead of stranding it. Composed with the same
+ * DocumentsLocation resolution as getDefaultDataRoot(), so both roots move together on a
+ * redirected or localized system.
+ *
+ * @return absolute path of the Task 60 user-data root, e.g. C:/Users/<user>/Documents/Seamly.
+ */
+QString VCommonSettings::getLegacyDocumentsDataRoot()
+{
+    QString documents = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+    if (documents.isEmpty())
+    {
+        documents = QDir::homePath();
+    }
+    return QDir::cleanPath(documents) + QLatin1String("/Seamly");
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -932,8 +956,8 @@ bool VCommonSettings::migrateDataTree(const QString &sourceRoot, const QString &
  * copy has completed and verified. If anything goes wrong the legacy tree stays configured
  * and in use, so the worst case is that the user carries on exactly as before.
  *
- * @param legacyRoot the adopted tree, e.g. ~/seamly2d.
- * @param newRoot    where it should live now, e.g. <Documents>/Seamly.
+ * @param legacyRoot the adopted tree, e.g. ~/seamly2d or <Documents>/Seamly.
+ * @param newRoot    where it should live now, e.g. <Documents>/SeamlyData.
  * @return the root actually in force afterwards — newRoot on success, legacyRoot on failure.
  */
 QString VCommonSettings::migrateAdoptedLegacyTree(const QString &legacyRoot, const QString &newRoot)
@@ -1116,7 +1140,8 @@ QString VCommonSettings::initializeDataRoot(bool *adoptedLegacyTree)
         return fromInstaller;
     }
 
-    const QString resolved = chooseFirstRunDataRoot(getDefaultDataRoot(), getLegacyDataRoot(), adoptedLegacyTree);
+    const QString resolved = chooseFirstRunDataRoot(
+        getDefaultDataRoot(), { getLegacyDocumentsDataRoot(), getLegacyDataRoot() }, adoptedLegacyTree);
 
     settings.setValue(settingPathsDataRoot, resolved);
     settings.sync();
@@ -1126,21 +1151,24 @@ QString VCommonSettings::initializeDataRoot(bool *adoptedLegacyTree)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief chooseFirstRunDataRoot picks between the new and the legacy data root.
+ * @brief chooseFirstRunDataRoot picks between the new and the legacy data roots.
  *
  * Split out of initializeDataRoot() so the decision can be exercised against throwaway
- * directories: it takes both candidate roots as arguments and reads no settings and no
+ * directories: it takes every candidate root as an argument and reads no settings and no
  * home directory of its own. Nothing here creates, moves or deletes anything — the choice
  * is a settings value, and an adopted legacy tree stays exactly where it is.
  *
- * @param defaultRoot the built-in default root, normally ~/seamlyData.
- * @param legacyRoot the pre-Task-34 root, normally ~/seamly2d.
- * @param adoptedLegacyTree optional out-parameter, set to true when the legacy tree was
+ * @param defaultRoot the built-in default root, normally <Documents>/SeamlyData.
+ * @param legacyRoots superseded roots in probe order, newest first — normally the Task 60
+ * <Documents>/Seamly, then the pre-Task-34 ~/seamly2d. The first that is an existing
+ * directory wins, because a user who upgraded through several eras has live data at the
+ * newest location and migration markers at the older ones.
+ * @param adoptedLegacyTree optional out-parameter, set to true when a legacy tree was
  * adopted; pass null when the caller does not care.
- * @return legacyRoot when it is an existing directory and defaultRoot does not exist yet,
- * otherwise defaultRoot.
+ * @return the first legacyRoots entry that is an existing directory, when defaultRoot does
+ * not exist yet; otherwise defaultRoot.
  */
-QString VCommonSettings::chooseFirstRunDataRoot(const QString &defaultRoot, const QString &legacyRoot,
+QString VCommonSettings::chooseFirstRunDataRoot(const QString &defaultRoot, const QStringList &legacyRoots,
                                                 bool *adoptedLegacyTree)
 {
     if (adoptedLegacyTree != nullptr)
@@ -1148,14 +1176,20 @@ QString VCommonSettings::chooseFirstRunDataRoot(const QString &defaultRoot, cons
         *adoptedLegacyTree = false;
     }
 
-    if (!QFileInfo::exists(defaultRoot) && QFileInfo(legacyRoot).isDir())
+    if (!QFileInfo::exists(defaultRoot))
     {
-        // Upgrading from a build that hard-coded ~/seamly2d: adopt that tree in place.
-        if (adoptedLegacyTree != nullptr)
+        for (const QString &legacyRoot : legacyRoots)
         {
-            *adoptedLegacyTree = true;
+            if (QFileInfo(legacyRoot).isDir())
+            {
+                // Upgrading from a build with an older default: adopt that tree in place.
+                if (adoptedLegacyTree != nullptr)
+                {
+                    *adoptedLegacyTree = true;
+                }
+                return legacyRoot;
+            }
         }
-        return legacyRoot;
     }
 
     return defaultRoot;

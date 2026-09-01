@@ -95,12 +95,13 @@ independent of install method. First match wins:
 
 1. `paths/dataRoot` already set in `qt6_common.ini` → use unchanged.
 2. Setup recorded a root in the registry → use that (normal MSI outcome).
-3. Default root missing AND `~/seamly2d` is a directory → adopt it in place,
-   nothing moved or copied (normal case-B outcome).
-4. Otherwise → `<Documents>/Seamly`.
+3. Default root missing AND a legacy root is a directory → adopt it in place,
+   nothing moved or copied (normal case-B outcome). Probes newest first:
+   `<Documents>/Seamly` (pre-SettingsFiles.7 default), then `~/seamly2d`.
+4. Otherwise → `<Documents>/SeamlyData`.
 
-Then `ensureDataRootTree` creates the 9 subfolders (additive only). If
-`~/seamly2d` exists, isn't the chosen root, and holds no files anywhere,
+Then `ensureDataRootTree` creates the 9 subfolders (additive only). If a
+legacy root exists, isn't the chosen root, and holds no files anywhere,
 remove the empty skeleton (`rmdir` only, deepest first) — never deletes a
 file, never touches a non-empty directory, never `removeRecursively()`.
 

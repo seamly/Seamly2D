@@ -196,8 +196,8 @@ namespace
  * place with a MIGRATED-TO-SEAMLY.txt marker; the .zip this function adds is a second,
  * portable backup beside it, not a replacement for it.
  *
- * @param legacyRoot the adopted tree, normally ~/seamly2d.
- * @param newRoot where it should live now, normally <Documents>/Seamly.
+ * @param legacyRoot the adopted tree, normally ~/seamly2d or <Documents>/Seamly.
+ * @param newRoot where it should live now, normally <Documents>/SeamlyData.
  * @return the data root actually in force afterwards.
  */
 QString LegacyDataMigration::run(const QString &legacyRoot, const QString &newRoot)

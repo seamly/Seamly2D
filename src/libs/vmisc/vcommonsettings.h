@@ -106,10 +106,13 @@ public:
 
     static QString       getDefaultDataRoot();
     static QString       getLegacyDataRoot();
+    // Task 60's <Documents>/Seamly default, superseded by <Documents>/SeamlyData
+    // (Task SettingsFiles.7). Probed by first-run resolution so that era's tree is adopted.
+    static QString       getLegacyDocumentsDataRoot();
     static QString       dataRoot();
     static QString       dataSubdirPath(const QString &subdirectory);
     static QString       initializeDataRoot(bool *adoptedLegacyTree = nullptr);
-    static QString       chooseFirstRunDataRoot(const QString &defaultRoot, const QString &legacyRoot,
+    static QString       chooseFirstRunDataRoot(const QString &defaultRoot, const QStringList &legacyRoots,
                                                 bool *adoptedLegacyTree = nullptr);
     static bool          ensureDataRootTree(const QString &root = QString());
     // Task 60: copy a whole legacy tree to the new root. Takes both paths as arguments so

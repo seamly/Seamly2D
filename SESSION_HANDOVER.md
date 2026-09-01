@@ -19,6 +19,28 @@ re-accumulate finished-session narrative in this file.
 
 ## Current Status
 
+### SettingsFiles.7 DONE — default data root leaf is SeamlyData (2026-09-01)
+
+Loop step 7: implemented Task SettingsFiles.7, moved to `TODO_COMPLETED.md`.
+`getDefaultDataRoot()` now returns `<Documents>/SeamlyData`; new
+`getLegacyDocumentsDataRoot()` (`<Documents>/Seamly`) joined `~/seamly2d`
+in the first-run legacy probes (`chooseFirstRunDataRoot()` takes a list,
+newest first); the apps migrate whichever root was adopted and prune both
+legacy skeletons. Docs swept (`README-BUILDS.md`, `README_MSI_WORKFLOW.md`,
+`smsi_check_authoring.ps1` comment).
+
+Verified: `build/qmake-test` incremental qmake/nmake release build clean;
+`Seamly2DTests.exe` 25/25 suites pass, `TST_DataRoot` 50/0/1-skip.
+
+Next: loop to step 1 — rebuild the MSI
+(`packaging/windows/test_build_msi_local.ps1`), reset, install, re-run
+`TEST_MSI_WIN_X64_Test_Case_1b-i.md`. On the fresh pass B checks that
+touch the fallback root should now show `SeamlyData` everywhere.
+
+Open queue after this: SettingsFiles.4, SettingsFiles.6, Seamly2D.2.1,
+Seamly2D.3, Seamly2D.5/Layout.9, SeamlyMe.3/Layout.7, SeamlyMe.5,
+Layout.10.
+
 ### Test Case 1b-i second pass COMPLETE for scripted items (2026-09-01, ~10:05)
 
 Full reset → quiet install → scripted verification on the same MSI

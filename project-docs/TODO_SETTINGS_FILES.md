@@ -94,20 +94,8 @@ but only the preferences JSON is skipped — the settings JSON is still written.
 - [ ] SettingsFiles.6.2 Implement; add a test pinning both JSON files after first run on a seeded ini.
 - [ ] SettingsFiles.6.3 Re-run MSI Test Case 1b-i item B.0a to confirm.
 
-## Task SettingsFiles.7 — getDefaultDataRoot() leaf disagrees with the MSI default
-
-Found 2026-09-01 while fixing Task Layout.11. `VCommonSettings::getDefaultDataRoot()`
-(`src/libs/vmisc/vcommonsettings.cpp:630`) returns `<Documents>/Seamly` (the Task 60
-decision), but the MSI's default `SEAMLYDATAROOT` is `<Documents>\SeamlyData`
-(`smsi.wxs`), and SeamlyLayout's no-installer fallback now uses `<Documents>/SeamlyData`
-(Layout.11). A no-installer run of Seamly2D/SeamlyMe therefore uses a different root than
-the installer and SeamlyLayout.
-
-- [ ] SettingsFiles.7.1 Change the `getDefaultDataRoot()` leaf from `Seamly` to `SeamlyData`; rewrite the Task 60 doc comment to record the new decision (align with the MSI and Layout.11).
-- [ ] SettingsFiles.7.2 Keep existing users' data reachable: add `<Documents>/Seamly` to the legacy-root probes (beside `getLegacyDataRoot()`) so first-run resolution adopts an existing `<Documents>/Seamly` tree instead of stranding it.
-- [ ] SettingsFiles.7.3 Update `TST_DataRoot` to pin the new default and the `<Documents>/Seamly` adoption path.
-- [ ] SettingsFiles.7.4 Sweep for other hardcoded `<Documents>/Seamly` references (code, packaging scripts, docs) and align them.
-
 Task SettingsFiles.5 (one-shot fresh-install data notice) is complete — moved to `TODO_COMPLETED.md` (2026-08-31).
+
+Task SettingsFiles.7 (getDefaultDataRoot() leaf → SeamlyData) is complete — moved to `TODO_COMPLETED.md` (2026-09-01).
 
 CI: Task SettingsFiles.1 pushes with the skip token. Tasks SettingsFiles.2/3/4 touch `packaging/**` — push without it.
