@@ -102,6 +102,7 @@ $(document).ready(function(){initNavTree('de/dbc/classStartupOptions.html','../.
 <a href="#pub-types">Public Types</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
 <a href="#pub-static-methods">Static Public Member Functions</a> &#124;
+<a href="#pri-static-methods">Static Private Member Functions</a> &#124;
 <a href="#pri-attribs">Private Attributes</a> &#124;
 <a href="../../d0/de4/classStartupOptions-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">StartupOptions Class Reference</div></div>
@@ -112,16 +113,20 @@ $(document).ready(function(){initNavTree('de/dbc/classStartupOptions.html','../.
 <div class="dynheader">
 Collaboration diagram for StartupOptions:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../dd/dc1/classStartupOptions__coll__graph.svg" width="130" height="191"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../dd/dc1/classStartupOptions__coll__graph.svg" width="179" height="294"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
 </div>
 </div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-types" name="pub-types"></a>
 Public Types</h2></td></tr>
-<tr class="memitem:a59a21068e0024d002cac7a56833ce9f0"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0">Status</a> { <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0a1c29c318f3931e96ff5db707251c550a">NoFile</a>
+<tr class="memitem:a59a21068e0024d002cac7a56833ce9f0"><td class="memItemLeft" align="right" valign="top">enum class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0">Status</a> { <br />
+&#160;&#160;<a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0a1c29c318f3931e96ff5db707251c550a">NoFile</a>
 , <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0a4b858349a1b8bb15bf3d67787d51fb86">OpenFile</a>
+, <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0a02ec378f114fd4cc5355ce6f5879adc0">OpenDocument</a>
 , <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0a2f880f57250b513d1f458b95c04aa799">ShowInformation</a>
-, <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0ad7c8c85bf79bbe1b7188497c32c3b0ca">Failed</a>
+, <br />
+&#160;&#160;<a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0ad7c8c85bf79bbe1b7188497c32c3b0ca">Failed</a>
+<br />
  }</td></tr>
 <tr class="separator:a59a21068e0024d002cac7a56833ce9f0"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -131,10 +136,16 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a55e75679519f1006e7a5f0e0aff63d70"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a28dc1d90537a98bfc286ba0880b7d0cc"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#a28dc1d90537a98bfc286ba0880b7d0cc">filePath</a> () const</td></tr>
 <tr class="separator:a28dc1d90537a98bfc286ba0880b7d0cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0ddf395171dce38d019f78977d56e847"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#a0ddf395171dce38d019f78977d56e847">svgDocument</a> () const</td></tr>
+<tr class="separator:a0ddf395171dce38d019f78977d56e847"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af930ad0b4d94b7b679c5727e9025d1c4"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#af930ad0b4d94b7b679c5727e9025d1c4">documentName</a> () const</td></tr>
+<tr class="separator:af930ad0b4d94b7b679c5727e9025d1c4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a4302c6357bbcf9cbfbad42b8c466ae72"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#a4302c6357bbcf9cbfbad42b8c466ae72">message</a> () const</td></tr>
 <tr class="separator:a4302c6357bbcf9cbfbad42b8c466ae72"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e628ea717532b590de898e9a961069f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#a8e628ea717532b590de898e9a961069f">hasFile</a> () const</td></tr>
 <tr class="separator:a8e628ea717532b590de898e9a961069f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a87ea4e2612be4c5442c0fd71e76481aa"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#a87ea4e2612be4c5442c0fd71e76481aa">hasDocument</a> () const</td></tr>
+<tr class="separator:a87ea4e2612be4c5442c0fd71e76481aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8ba929d6b4f5541a8d2c00fe36371137"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#a8ba929d6b4f5541a8d2c00fe36371137">hasError</a> () const</td></tr>
 <tr class="separator:a8ba929d6b4f5541a8d2c00fe36371137"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -142,6 +153,13 @@ Public Member Functions</h2></td></tr>
 Static Public Member Functions</h2></td></tr>
 <tr class="memitem:a1e555cda9527db2236ed4a0c232a999c"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../de/dbc/classStartupOptions.html">StartupOptions</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#a1e555cda9527db2236ed4a0c232a999c">parse</a> (const QStringList &amp;arguments)</td></tr>
 <tr class="separator:a1e555cda9527db2236ed4a0c232a999c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a83bfb287a03b347a022f2bcb7a5e1154"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../de/dbc/classStartupOptions.html">StartupOptions</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#a83bfb287a03b347a022f2bcb7a5e1154">parse</a> (const QStringList &amp;arguments, QIODevice *standardInput)</td></tr>
+<tr class="separator:a83bfb287a03b347a022f2bcb7a5e1154"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-static-methods" name="pri-static-methods"></a>
+Static Private Member Functions</h2></td></tr>
+<tr class="memitem:adbf5c45ba3e47a03af2c781b7f368d97"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../de/dbc/classStartupOptions.html">StartupOptions</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#adbf5c45ba3e47a03af2c781b7f368d97">parseStandardInput</a> (const QString &amp;<a class="el" href="../../de/dbc/classStartupOptions.html#af930ad0b4d94b7b679c5727e9025d1c4">documentName</a>, QIODevice *standardInput)</td></tr>
+<tr class="separator:adbf5c45ba3e47a03af2c781b7f368d97"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-attribs" name="pri-attribs"></a>
 Private Attributes</h2></td></tr>
@@ -149,12 +167,16 @@ Private Attributes</h2></td></tr>
 <tr class="separator:ad4c85502c343f45dac8905b509ab9728"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8702b3573e2fd19277390cac51aeb14a"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#a8702b3573e2fd19277390cac51aeb14a">m_filePath</a></td></tr>
 <tr class="separator:a8702b3573e2fd19277390cac51aeb14a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a45e9f787a85cf0ae2a9090e803835e83"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#a45e9f787a85cf0ae2a9090e803835e83">m_svgDocument</a></td></tr>
+<tr class="separator:a45e9f787a85cf0ae2a9090e803835e83"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a20f8b8df192f12e4d49081a6ebd1d999"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#a20f8b8df192f12e4d49081a6ebd1d999">m_documentName</a></td></tr>
+<tr class="separator:a20f8b8df192f12e4d49081a6ebd1d999"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e414ace2f050fd8ea47459c102344fa"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../de/dbc/classStartupOptions.html#a8e414ace2f050fd8ea47459c102344fa">m_message</a></td></tr>
 <tr class="separator:a8e414ace2f050fd8ea47459c102344fa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00044">44</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00066">66</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
 </div><h2 class="groupheader">Member Enumeration Documentation</h2>
 <a id="a59a21068e0024d002cac7a56833ce9f0" name="a59a21068e0024d002cac7a56833ce9f0"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a59a21068e0024d002cac7a56833ce9f0">&#9670;&#160;</a></span>Status</h2>
@@ -178,15 +200,47 @@ Private Attributes</h2></td></tr>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="a59a21068e0024d002cac7a56833ce9f0a1c29c318f3931e96ff5db707251c550a" name="a59a21068e0024d002cac7a56833ce9f0a1c29c318f3931e96ff5db707251c550a"></a>NoFile&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a59a21068e0024d002cac7a56833ce9f0a4b858349a1b8bb15bf3d67787d51fb86" name="a59a21068e0024d002cac7a56833ce9f0a4b858349a1b8bb15bf3d67787d51fb86"></a>OpenFile&#160;</td><td class="fielddoc"></td></tr>
+<tr><td class="fieldname"><a id="a59a21068e0024d002cac7a56833ce9f0a02ec378f114fd4cc5355ce6f5879adc0" name="a59a21068e0024d002cac7a56833ce9f0a02ec378f114fd4cc5355ce6f5879adc0"></a>OpenDocument&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a59a21068e0024d002cac7a56833ce9f0a2f880f57250b513d1f458b95c04aa799" name="a59a21068e0024d002cac7a56833ce9f0a2f880f57250b513d1f458b95c04aa799"></a>ShowInformation&#160;</td><td class="fielddoc"></td></tr>
 <tr><td class="fieldname"><a id="a59a21068e0024d002cac7a56833ce9f0ad7c8c85bf79bbe1b7188497c32c3b0ca" name="a59a21068e0024d002cac7a56833ce9f0ad7c8c85bf79bbe1b7188497c32c3b0ca"></a>Failed&#160;</td><td class="fielddoc"></td></tr>
 </table>
 
-<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00048">48</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00070">70</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="af930ad0b4d94b7b679c5727e9025d1c4" name="af930ad0b4d94b7b679c5727e9025d1c4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af930ad0b4d94b7b679c5727e9025d1c4">&#9670;&#160;</a></span>documentName()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">QString StartupOptions::documentName </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00115">115</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00148">m_documentName</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00234">parseStandardInput()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00392">StartupOptionsTests::svgStdin_documentNameIsCarried()</a>, and <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00410">StartupOptionsTests::svgStdin_withoutDocumentName_nameIsEmpty()</a>.</p>
+
+</div>
+</div>
 <a id="a28dc1d90537a98bfc286ba0880b7d0cc" name="a28dc1d90537a98bfc286ba0880b7d0cc"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a28dc1d90537a98bfc286ba0880b7d0cc">&#9670;&#160;</a></span>filePath()</h2>
 
@@ -210,11 +264,42 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00072">72</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00107">107</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00088">m_filePath</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00142">m_filePath</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00139">StartupOptionsTests::existingSvg_filePathIsAbsolute()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00326">StartupOptionsTests::helpOption_statusIsShowInformation()</a>, <a class="el" href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp_source.html#l00170">main()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00208">StartupOptionsTests::missingFile_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00099">StartupOptionsTests::noArgument_statusIsNoFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00153">StartupOptionsTests::piecesSvgDoubleExtension_isAccepted()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00180">StartupOptionsTests::relativePath_isResolvedToAbsolute()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00295">StartupOptionsTests::twoPositionalArguments_statusIsFailed()</a>, and <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00348">StartupOptionsTests::versionOption_statusIsShowInformation()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00172">StartupOptionsTests::existingSvg_filePathIsAbsolute()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00504">StartupOptionsTests::helpOption_statusIsShowInformation()</a>, <a class="el" href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp_source.html#l00172">main()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00241">StartupOptionsTests::missingFile_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00132">StartupOptionsTests::noArgument_statusIsNoFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00186">StartupOptionsTests::piecesSvgDoubleExtension_isAccepted()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00213">StartupOptionsTests::relativePath_isResolvedToAbsolute()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00359">StartupOptionsTests::svgStdin_statusIsOpenDocument()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00328">StartupOptionsTests::twoPositionalArguments_statusIsFailed()</a>, and <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00526">StartupOptionsTests::versionOption_statusIsShowInformation()</a>.</p>
+
+</div>
+</div>
+<a id="a87ea4e2612be4c5442c0fd71e76481aa" name="a87ea4e2612be4c5442c0fd71e76481aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a87ea4e2612be4c5442c0fd71e76481aa">&#9670;&#160;</a></span>hasDocument()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool StartupOptions::hasDocument </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00124">124</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00139">m_status</a>, and <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0a02ec378f114fd4cc5355ce6f5879adc0">OpenDocument</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp_source.html#l00172">main()</a>, and <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00359">StartupOptionsTests::svgStdin_statusIsOpenDocument()</a>.</p>
 
 </div>
 </div>
@@ -241,11 +326,11 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00081">81</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00127">127</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0ad7c8c85bf79bbe1b7188497c32c3b0ca">Failed</a>, and <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00085">m_status</a>.</p>
+<p class="reference">References <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0ad7c8c85bf79bbe1b7188497c32c3b0ca">Failed</a>, and <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00139">m_status</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00122">StartupOptionsTests::existingSvg_statusIsOpenFile()</a>, <a class="el" href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp_source.html#l00170">main()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00208">StartupOptionsTests::missingFile_statusIsFailed()</a>, and <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00099">StartupOptionsTests::noArgument_statusIsNoFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00155">StartupOptionsTests::existingSvg_statusIsOpenFile()</a>, <a class="el" href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp_source.html#l00172">main()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00241">StartupOptionsTests::missingFile_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00132">StartupOptionsTests::noArgument_statusIsNoFile()</a>, and <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00359">StartupOptionsTests::svgStdin_statusIsOpenDocument()</a>.</p>
 
 </div>
 </div>
@@ -272,11 +357,11 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00078">78</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00121">121</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00085">m_status</a>, and <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0a4b858349a1b8bb15bf3d67787d51fb86">OpenFile</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00139">m_status</a>, and <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0a4b858349a1b8bb15bf3d67787d51fb86">OpenFile</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00122">StartupOptionsTests::existingSvg_statusIsOpenFile()</a>, <a class="el" href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp_source.html#l00170">main()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00208">StartupOptionsTests::missingFile_statusIsFailed()</a>, and <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00099">StartupOptionsTests::noArgument_statusIsNoFile()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00155">StartupOptionsTests::existingSvg_statusIsOpenFile()</a>, <a class="el" href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp_source.html#l00172">main()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00241">StartupOptionsTests::missingFile_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00132">StartupOptionsTests::noArgument_statusIsNoFile()</a>, and <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00359">StartupOptionsTests::svgStdin_statusIsOpenDocument()</a>.</p>
 
 </div>
 </div>
@@ -303,16 +388,16 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00075">75</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00118">118</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00091">m_message</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00151">m_message</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00238">StartupOptionsTests::directoryArgument_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00110">StartupOptionsTests::emptyArgumentList_statusIsNoFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00122">StartupOptionsTests::existingSvg_statusIsOpenFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00326">StartupOptionsTests::helpOption_statusIsShowInformation()</a>, <a class="el" href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp_source.html#l00170">main()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00225">StartupOptionsTests::missingFile_messageNamesTheFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00099">StartupOptionsTests::noArgument_statusIsNoFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00281">StartupOptionsTests::nonSvgSuffix_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00295">StartupOptionsTests::twoPositionalArguments_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00311">StartupOptionsTests::unknownOption_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00254">StartupOptionsTests::unreadableFile_statusIsFailed()</a>, and <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00358">StartupOptionsTests::versionOption_messageCarriesTheVersion()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00271">StartupOptionsTests::directoryArgument_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00143">StartupOptionsTests::emptyArgumentList_statusIsNoFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00155">StartupOptionsTests::existingSvg_statusIsOpenFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00504">StartupOptionsTests::helpOption_statusIsShowInformation()</a>, <a class="el" href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp_source.html#l00172">main()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00258">StartupOptionsTests::missingFile_messageNamesTheFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00132">StartupOptionsTests::noArgument_statusIsNoFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00314">StartupOptionsTests::nonSvgSuffix_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00359">StartupOptionsTests::svgStdin_statusIsOpenDocument()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00435">StartupOptionsTests::svgStdin_withEmptyInput_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00425">StartupOptionsTests::svgStdin_withNoDevice_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00449">StartupOptionsTests::svgStdin_withNonSvgInput_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00463">StartupOptionsTests::svgStdin_withPositionalFile_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00328">StartupOptionsTests::twoPositionalArguments_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00344">StartupOptionsTests::unknownOption_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00287">StartupOptionsTests::unreadableFile_statusIsFailed()</a>, and <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00536">StartupOptionsTests::versionOption_messageCarriesTheVersion()</a>.</p>
 
 </div>
 </div>
 <a id="a1e555cda9527db2236ed4a0c232a999c" name="a1e555cda9527db2236ed4a0c232a999c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1e555cda9527db2236ed4a0c232a999c">&#9670;&#160;</a></span>parse()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1e555cda9527db2236ed4a0c232a999c">&#9670;&#160;</a></span>parse() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -335,11 +420,93 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00060">60</a> of file <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html">StartupOptions.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00077">77</a> of file <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html">StartupOptions.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0ad7c8c85bf79bbe1b7188497c32c3b0ca">Failed</a>, <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00088">m_filePath</a>, <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00091">m_message</a>, <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00085">m_status</a>, <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0a4b858349a1b8bb15bf3d67787d51fb86">OpenFile</a>, and <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0a2f880f57250b513d1f458b95c04aa799">ShowInformation</a>.</p>
+<p class="reference">References <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00077">parse()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00238">StartupOptionsTests::directoryArgument_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00110">StartupOptionsTests::emptyArgumentList_statusIsNoFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00139">StartupOptionsTests::existingSvg_filePathIsAbsolute()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00122">StartupOptionsTests::existingSvg_statusIsOpenFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00326">StartupOptionsTests::helpOption_statusIsShowInformation()</a>, <a class="el" href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp_source.html#l00170">main()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00225">StartupOptionsTests::missingFile_messageNamesTheFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00208">StartupOptionsTests::missingFile_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00099">StartupOptionsTests::noArgument_statusIsNoFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00281">StartupOptionsTests::nonSvgSuffix_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00153">StartupOptionsTests::piecesSvgDoubleExtension_isAccepted()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00180">StartupOptionsTests::relativePath_isResolvedToAbsolute()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00339">StartupOptionsTests::shortHelpOption_statusIsShowInformation()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00295">StartupOptionsTests::twoPositionalArguments_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00311">StartupOptionsTests::unknownOption_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00254">StartupOptionsTests::unreadableFile_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00167">StartupOptionsTests::upperCaseSvgSuffix_isAccepted()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00358">StartupOptionsTests::versionOption_messageCarriesTheVersion()</a>, and <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00348">StartupOptionsTests::versionOption_statusIsShowInformation()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00271">StartupOptionsTests::directoryArgument_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00143">StartupOptionsTests::emptyArgumentList_statusIsNoFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00172">StartupOptionsTests::existingSvg_filePathIsAbsolute()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00155">StartupOptionsTests::existingSvg_statusIsOpenFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00504">StartupOptionsTests::helpOption_statusIsShowInformation()</a>, <a class="el" href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp_source.html#l00172">main()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00258">StartupOptionsTests::missingFile_messageNamesTheFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00241">StartupOptionsTests::missingFile_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00132">StartupOptionsTests::noArgument_statusIsNoFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00314">StartupOptionsTests::nonSvgSuffix_statusIsFailed()</a>, <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00077">parse()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00186">StartupOptionsTests::piecesSvgDoubleExtension_isAccepted()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00213">StartupOptionsTests::relativePath_isResolvedToAbsolute()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00517">StartupOptionsTests::shortHelpOption_statusIsShowInformation()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00378">StartupOptionsTests::svgStdin_documentIsTheWholeInput()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00392">StartupOptionsTests::svgStdin_documentNameIsCarried()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00485">StartupOptionsTests::svgStdin_isNotReadWithoutTheOption()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00359">StartupOptionsTests::svgStdin_statusIsOpenDocument()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00435">StartupOptionsTests::svgStdin_withEmptyInput_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00425">StartupOptionsTests::svgStdin_withNoDevice_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00449">StartupOptionsTests::svgStdin_withNonSvgInput_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00410">StartupOptionsTests::svgStdin_withoutDocumentName_nameIsEmpty()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00463">StartupOptionsTests::svgStdin_withPositionalFile_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00328">StartupOptionsTests::twoPositionalArguments_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00344">StartupOptionsTests::unknownOption_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00287">StartupOptionsTests::unreadableFile_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00200">StartupOptionsTests::upperCaseSvgSuffix_isAccepted()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00536">StartupOptionsTests::versionOption_messageCarriesTheVersion()</a>, and <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00526">StartupOptionsTests::versionOption_statusIsShowInformation()</a>.</p>
+
+</div>
+</div>
+<a id="a83bfb287a03b347a022f2bcb7a5e1154" name="a83bfb287a03b347a022f2bcb7a5e1154"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a83bfb287a03b347a022f2bcb7a5e1154">&#9670;&#160;</a></span>parse() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../de/dbc/classStartupOptions.html">StartupOptions</a> StartupOptions::parse </td>
+          <td>(</td>
+          <td class="paramtype">const QStringList &amp;&#160;</td>
+          <td class="paramname"><em>arguments</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">QIODevice *&#160;</td>
+          <td class="paramname"><em>standardInput</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00088">88</a> of file <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html">StartupOptions.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0ad7c8c85bf79bbe1b7188497c32c3b0ca">Failed</a>, <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00142">m_filePath</a>, <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00151">m_message</a>, <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00139">m_status</a>, <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0a4b858349a1b8bb15bf3d67787d51fb86">OpenFile</a>, <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00234">parseStandardInput()</a>, and <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0a2f880f57250b513d1f458b95c04aa799">ShowInformation</a>.</p>
+
+</div>
+</div>
+<a id="adbf5c45ba3e47a03af2c781b7f368d97" name="adbf5c45ba3e47a03af2c781b7f368d97"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#adbf5c45ba3e47a03af2c781b7f368d97">&#9670;&#160;</a></span>parseStandardInput()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="../../de/dbc/classStartupOptions.html">StartupOptions</a> StartupOptions::parseStandardInput </td>
+          <td>(</td>
+          <td class="paramtype">const QString &amp;&#160;</td>
+          <td class="paramname"><em>documentName</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">QIODevice *&#160;</td>
+          <td class="paramname"><em>standardInput</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">static</span><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00234">234</a> of file <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html">StartupOptions.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00115">documentName()</a>, <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0ad7c8c85bf79bbe1b7188497c32c3b0ca">Failed</a>, <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00148">m_documentName</a>, <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00151">m_message</a>, <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00139">m_status</a>, <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00145">m_svgDocument</a>, and <a class="el" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0a02ec378f114fd4cc5355ce6f5879adc0">OpenDocument</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00088">parse()</a>.</p>
 
 </div>
 </div>
@@ -366,15 +533,72 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00069">69</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00104">104</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00085">m_status</a>.</p>
+<p class="reference">References <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00139">m_status</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00238">StartupOptionsTests::directoryArgument_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00110">StartupOptionsTests::emptyArgumentList_statusIsNoFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00122">StartupOptionsTests::existingSvg_statusIsOpenFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00326">StartupOptionsTests::helpOption_statusIsShowInformation()</a>, <a class="el" href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp_source.html#l00170">main()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00208">StartupOptionsTests::missingFile_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00099">StartupOptionsTests::noArgument_statusIsNoFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00281">StartupOptionsTests::nonSvgSuffix_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00153">StartupOptionsTests::piecesSvgDoubleExtension_isAccepted()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00180">StartupOptionsTests::relativePath_isResolvedToAbsolute()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00339">StartupOptionsTests::shortHelpOption_statusIsShowInformation()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00295">StartupOptionsTests::twoPositionalArguments_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00311">StartupOptionsTests::unknownOption_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00254">StartupOptionsTests::unreadableFile_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00167">StartupOptionsTests::upperCaseSvgSuffix_isAccepted()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00358">StartupOptionsTests::versionOption_messageCarriesTheVersion()</a>, and <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00348">StartupOptionsTests::versionOption_statusIsShowInformation()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00271">StartupOptionsTests::directoryArgument_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00143">StartupOptionsTests::emptyArgumentList_statusIsNoFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00155">StartupOptionsTests::existingSvg_statusIsOpenFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00504">StartupOptionsTests::helpOption_statusIsShowInformation()</a>, <a class="el" href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp_source.html#l00172">main()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00241">StartupOptionsTests::missingFile_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00132">StartupOptionsTests::noArgument_statusIsNoFile()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00314">StartupOptionsTests::nonSvgSuffix_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00186">StartupOptionsTests::piecesSvgDoubleExtension_isAccepted()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00213">StartupOptionsTests::relativePath_isResolvedToAbsolute()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00517">StartupOptionsTests::shortHelpOption_statusIsShowInformation()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00392">StartupOptionsTests::svgStdin_documentNameIsCarried()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00485">StartupOptionsTests::svgStdin_isNotReadWithoutTheOption()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00359">StartupOptionsTests::svgStdin_statusIsOpenDocument()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00435">StartupOptionsTests::svgStdin_withEmptyInput_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00425">StartupOptionsTests::svgStdin_withNoDevice_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00449">StartupOptionsTests::svgStdin_withNonSvgInput_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00410">StartupOptionsTests::svgStdin_withoutDocumentName_nameIsEmpty()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00463">StartupOptionsTests::svgStdin_withPositionalFile_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00328">StartupOptionsTests::twoPositionalArguments_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00344">StartupOptionsTests::unknownOption_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00287">StartupOptionsTests::unreadableFile_statusIsFailed()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00200">StartupOptionsTests::upperCaseSvgSuffix_isAccepted()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00536">StartupOptionsTests::versionOption_messageCarriesTheVersion()</a>, and <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00526">StartupOptionsTests::versionOption_statusIsShowInformation()</a>.</p>
+
+</div>
+</div>
+<a id="a0ddf395171dce38d019f78977d56e847" name="a0ddf395171dce38d019f78977d56e847"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0ddf395171dce38d019f78977d56e847">&#9670;&#160;</a></span>svgDocument()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">QString StartupOptions::svgDocument </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00111">111</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00145">m_svgDocument</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00378">StartupOptionsTests::svgStdin_documentIsTheWholeInput()</a>, <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00485">StartupOptionsTests::svgStdin_isNotReadWithoutTheOption()</a>, and <a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp_source.html#l00435">StartupOptionsTests::svgStdin_withEmptyInput_statusIsFailed()</a>.</p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Data Documentation</h2>
+<a id="a20f8b8df192f12e4d49081a6ebd1d999" name="a20f8b8df192f12e4d49081a6ebd1d999"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a20f8b8df192f12e4d49081a6ebd1d999">&#9670;&#160;</a></span>m_documentName</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">QString StartupOptions::m_documentName</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00148">148</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00115">documentName()</a>, and <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00234">parseStandardInput()</a>.</p>
+
+</div>
+</div>
 <a id="a8702b3573e2fd19277390cac51aeb14a" name="a8702b3573e2fd19277390cac51aeb14a"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a8702b3573e2fd19277390cac51aeb14a">&#9670;&#160;</a></span>m_filePath</h2>
 
@@ -395,9 +619,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00088">88</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00142">142</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00072">filePath()</a>, and <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00060">parse()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00107">filePath()</a>, and <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00088">parse()</a>.</p>
 
 </div>
 </div>
@@ -421,9 +645,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00091">91</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00151">151</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00075">message()</a>, and <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00060">parse()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00118">message()</a>, <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00088">parse()</a>, and <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00234">parseStandardInput()</a>.</p>
 
 </div>
 </div>
@@ -447,9 +671,35 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00085">85</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00139">139</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00081">hasError()</a>, <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00078">hasFile()</a>, <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00060">parse()</a>, and <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00069">status()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00124">hasDocument()</a>, <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00127">hasError()</a>, <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00121">hasFile()</a>, <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00088">parse()</a>, <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00234">parseStandardInput()</a>, and <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00104">status()</a>.</p>
+
+</div>
+</div>
+<a id="a45e9f787a85cf0ae2a9090e803835e83" name="a45e9f787a85cf0ae2a9090e803835e83"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a45e9f787a85cf0ae2a9090e803835e83">&#9670;&#160;</a></span>m_svgDocument</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">QString StartupOptions::m_svgDocument</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00145">145</a> of file <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html">StartupOptions.h</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d2/dcc/StartupOptions_8cpp_source.html#l00234">parseStandardInput()</a>, and <a class="el" href="../../d8/dd0/StartupOptions_8h_source.html#l00111">svgDocument()</a>.</p>
 
 </div>
 </div>

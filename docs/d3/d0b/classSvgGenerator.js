@@ -10,6 +10,7 @@ var classSvgGenerator =
     [ "removeEmptyOriginPath", "d3/d0b/classSvgGenerator.html#a0e5d4cc5d4b9618c8f78361809fa3191", null ],
     [ "renderSceneToDom", "d3/d0b/classSvgGenerator.html#ada44cf415f6c41dd6fb228734c963318", null ],
     [ "setAttribute", "d3/d0b/classSvgGenerator.html#a94d8d61e45968f7c9ee2c4157b84fa5f", null ],
+    [ "toSvgString", "d3/d0b/classSvgGenerator.html#ad46609ca8ec293184f236aa4a5d7973d", null ],
     [ "m_description", "d3/d0b/classSvgGenerator.html#a62e09365c5f102e8052cffd268018eec", null ],
     [ "m_domList", "d3/d0b/classSvgGenerator.html#a8fec17258843c927687e4b9035d06ef3", null ],
     [ "m_filepath", "d3/d0b/classSvgGenerator.html#ad034307c9a3e07b696335e0a5a7b4a63", null ],

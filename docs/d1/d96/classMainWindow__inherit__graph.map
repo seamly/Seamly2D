@@ -1,6 +1,6 @@
 <map id="MainWindow" name="MainWindow">
-<area shape="rect" id="node1" title="The MainWindow class main windows." alt="" coords="13,1291,231,2219"/>
-<area shape="rect" id="node2" href="$de/d1a/classMainWindowsNoGUI.html" title=" " alt="" coords="5,403,239,1243"/>
-<area shape="rect" id="node3" href="$dc/d59/classVAbstractMainWindow.html" title=" " alt="" coords="16,131,228,355"/>
-<area shape="rect" id="node4" title=" " alt="" coords="64,5,180,83"/>
+<area shape="rect" id="node1" title="The MainWindow class main windows." alt="" coords="16,1291,233,2219"/>
+<area shape="rect" id="node2" href="$de/d1a/classMainWindowsNoGUI.html" title=" " alt="" coords="5,403,244,1243"/>
+<area shape="rect" id="node3" href="$dc/d59/classVAbstractMainWindow.html" title=" " alt="" coords="19,131,231,355"/>
+<area shape="rect" id="node4" title=" " alt="" coords="67,5,183,83"/>
 </map>

@@ -118,15 +118,16 @@ Functions</h2></td></tr>
 <tr class="memitem:a8147aac96b8024022a49ea6c4798ed06"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d5f/namespaceSeamlySuitePaths.html#a8147aac96b8024022a49ea6c4798ed06">locateSeamlyLayoutDevBuild</a> (const QString &amp;startDirectory)</td></tr>
 <tr class="memdesc:a8147aac96b8024022a49ea6c4798ed06"><td class="mdescLeft">&#160;</td><td class="mdescRight">locateSeamlyLayoutDevBuild looks for a SeamlyLayout executable built from the same source checkout as the running application.  <br /></td></tr>
 <tr class="separator:a8147aac96b8024022a49ea6c4798ed06"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0397777496948588c84dedac9589c868"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d5f/namespaceSeamlySuitePaths.html#a0397777496948588c84dedac9589c868">piecesSvgFilePath</a> (const QString &amp;patternFilePath)</td></tr>
-<tr class="memdesc:a0397777496948588c84dedac9589c868"><td class="mdescLeft">&#160;</td><td class="mdescRight">piecesSvgFilePath returns the path of the handoff SVG that Layout Mode writes for a pattern.  <br /></td></tr>
-<tr class="separator:a0397777496948588c84dedac9589c868"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a315f5743f9e141cbeb6e4e270d42080f"><td class="memItemLeft" align="right" valign="top">QStringList&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d5f/namespaceSeamlySuitePaths.html#a315f5743f9e141cbeb6e4e270d42080f">seamlyLayoutLaunchArguments</a> (const QString &amp;piecesSvgPath)</td></tr>
-<tr class="memdesc:a315f5743f9e141cbeb6e4e270d42080f"><td class="mdescLeft">&#160;</td><td class="mdescRight">seamlyLayoutLaunchArguments builds the argument vector seamly2d passes to the SeamlyLayout executable.  <br /></td></tr>
-<tr class="separator:a315f5743f9e141cbeb6e4e270d42080f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a92f951284ea05b36e0a6092d1f84110a"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d5f/namespaceSeamlySuitePaths.html#a92f951284ea05b36e0a6092d1f84110a">patternDocumentName</a> (const QString &amp;patternFilePath)</td></tr>
+<tr class="memdesc:a92f951284ea05b36e0a6092d1f84110a"><td class="mdescLeft">&#160;</td><td class="mdescRight">patternDocumentName returns the name Layout Mode gives the piece-mode document it hands to SeamlyLayout.  <br /></td></tr>
+<tr class="separator:a92f951284ea05b36e0a6092d1f84110a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad11fa4832ede66822b56fa5e197ab42e"><td class="memItemLeft" align="right" valign="top">QStringList&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d5f/namespaceSeamlySuitePaths.html#ad11fa4832ede66822b56fa5e197ab42e">seamlyLayoutLaunchArguments</a> (const QString &amp;documentName)</td></tr>
+<tr class="memdesc:ad11fa4832ede66822b56fa5e197ab42e"><td class="mdescLeft">&#160;</td><td class="mdescRight">seamlyLayoutLaunchArguments builds the argument vector seamly2d passes to the SeamlyLayout executable.  <br /></td></tr>
+<tr class="separator:ad11fa4832ede66822b56fa5e197ab42e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="../../d2/d5f/namespaceSeamlySuitePaths.html" title="SeamlySuitePaths groups filesystem lookups shared by the Seamly app suite (seamly2d,...">SeamlySuitePaths</a> groups filesystem lookups shared by the Seamly app suite (seamly2d, seamlyme, SeamlyLayout), together with the launch contract seamly2d uses to hand a pattern over to SeamlyLayout. </p>
+<p>The handoff itself is not a file: Layout Mode sends the piece-mode document as one stringified SVG on the SeamlyLayout process's standard input (Seamly2D.5). <a class="el" href="../../d2/d5f/namespaceSeamlySuitePaths.html#ad11fa4832ede66822b56fa5e197ab42e" title="seamlyLayoutLaunchArguments builds the argument vector seamly2d passes to the SeamlyLayout executable...">seamlyLayoutLaunchArguments()</a> builds the arguments that tell SeamlyLayout to read it, and <a class="el" href="../../d2/d5f/namespaceSeamlySuitePaths.html#a92f951284ea05b36e0a6092d1f84110a" title="patternDocumentName returns the name Layout Mode gives the piece-mode document it hands to SeamlyLayo...">patternDocumentName()</a> supplies the name that document is known by.</p>
 <p>The functions live in vmisc (not in the seamly2d app target) so they can be exercised by the Seamly2DTests suite, which links the static libraries but not the application sources. </p>
 </div><h2 class="groupheader">Function Documentation</h2>
 <a id="af679b3efdaa31e7f49398e6254d54b96" name="af679b3efdaa31e7f49398e6254d54b96"></a>
@@ -159,9 +160,9 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>absolute path of the SeamlyLayout executable, or an empty string when neither layout contains it. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00125">125</a> of file <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html">seamly_suite_paths.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00115">115</a> of file <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html">seamly_suite_paths.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00086">seamlyLayoutExeName()</a>.</p>
+<p class="reference">References <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00076">seamlyLayoutExeName()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00182">TST_SeamlySuitePaths::DirectoryNamedLikeExecutableIsIgnored()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00088">TST_SeamlySuitePaths::EmptyDirectoryFindsNothing()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00101">TST_SeamlySuitePaths::FindsFlatExecutable()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00122">TST_SeamlySuitePaths::FindsSubdirectoryExecutable()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00151">TST_SeamlySuitePaths::FlatLayoutTakesPrecedence()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00478">Application2D::seamlyLayoutFilePath()</a>.</p>
 
@@ -196,22 +197,22 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>absolute path of the SeamlyLayout development build, or an empty string when no checkout above <code>startDirectory</code> contains one. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00182">182</a> of file <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html">seamly_suite_paths.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00172">172</a> of file <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html">seamly_suite_paths.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00086">seamlyLayoutExeName()</a>.</p>
+<p class="reference">References <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00076">seamlyLayoutExeName()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00351">TST_SeamlySuitePaths::DevBuildDirectoryNamedLikeExecutableIsIgnored()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00209">TST_SeamlySuitePaths::DevBuildEmptyStartDirectoryFindsNothing()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00324">TST_SeamlySuitePaths::DevBuildFindsDebugWhenReleaseAbsent()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00269">TST_SeamlySuitePaths::DevBuildFoundFromDebugShadowBuild()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00242">TST_SeamlySuitePaths::DevBuildFoundFromReleaseShadowBuild()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00222">TST_SeamlySuitePaths::DevBuildNoCheckoutFindsNothing()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00297">TST_SeamlySuitePaths::DevBuildReleaseTakesPrecedenceOverDebug()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00386">TST_SeamlySuitePaths::DevBuildStopsBeforeUnboundedWalk()</a>, and <a class="el" href="../../df/d3e/application__2d_8cpp_source.html#l00478">Application2D::seamlyLayoutFilePath()</a>.</p>
 
 </div>
 </div>
-<a id="a0397777496948588c84dedac9589c868" name="a0397777496948588c84dedac9589c868"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0397777496948588c84dedac9589c868">&#9670;&#160;</a></span>piecesSvgFilePath()</h2>
+<a id="a92f951284ea05b36e0a6092d1f84110a" name="a92f951284ea05b36e0a6092d1f84110a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a92f951284ea05b36e0a6092d1f84110a">&#9670;&#160;</a></span>patternDocumentName()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">QString SeamlySuitePaths::piecesSvgFilePath </td>
+          <td class="memname">QString SeamlySuitePaths::patternDocumentName </td>
           <td>(</td>
           <td class="paramtype">const QString &amp;&#160;</td>
           <td class="paramname"><em>patternFilePath</em></td><td>)</td>
@@ -220,21 +221,20 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>piecesSvgFilePath returns the path of the handoff SVG that Layout Mode writes for a pattern. </p>
-<p>The handoff file is written <em>beside the pattern file</em>, named after it with ::piecesSvgSuffix appended to the complete base name: </p><pre class="fragment">/patterns/richmond-shirt.sm2d  -&gt;  /patterns/richmond-shirt.pieces.svg
-</pre><p> Keeping the rule here rather than inline in <a class="el" href="../../d6/d1a/classMainWindow.html" title="The MainWindow class main windows.">MainWindow</a> means SeamlyLayout's documented input file name has exactly one definition in this codebase, and one the test suite can pin (<a class="el" href="../../dc/daf/classTST__SeamlySuitePaths.html" title="TST_SeamlySuitePaths tests the two lookups seamly2d uses to find the SeamlyLayout executable.">TST_SeamlySuitePaths</a>).</p>
-<p>QFileInfo::completeBaseName() is used deliberately — it keeps everything up to the <em>last</em> dot, so a pattern called "shirt.v2.sm2d" yields "shirt.v2.pieces.svg" rather than losing the version segment.</p>
+<p>patternDocumentName returns the name Layout Mode gives the piece-mode document it hands to SeamlyLayout. </p>
+<p>The handoff carries no file, so SeamlyLayout has no file name to build its default export names from. This is that name: the pattern's complete base name, so "shirt.v2.sm2d" hands over "shirt.v2" and a later SVG export in SeamlyLayout still defaults to a name the user recognises.</p>
+<p>completeBaseName() is used deliberately — it keeps everything up to the <em>last</em> dot, so a version segment in the pattern name survives.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">patternFilePath</td><td>path of the open pattern file; may be relative, in which case the result is made absolute against the working directory. </td></tr>
+    <tr><td class="paramname">patternFilePath</td><td>path of the open pattern file; may be relative. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>absolute path of the pieces SVG, or an empty string when <code>patternFilePath</code> is empty (no pattern has been saved yet). </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the pattern's complete base name, or an empty string when <code>patternFilePath</code> is empty (no pattern has been saved yet). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00245">245</a> of file <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html">seamly_suite_paths.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00229">229</a> of file <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html">seamly_suite_paths.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04153">MainWindow::exportPiecesToSeamlyLayout()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00441">TST_SeamlySuitePaths::PiecesSvgKeepsDotsInThePatternName()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00476">TST_SeamlySuitePaths::PiecesSvgOfEmptyPatternPathIsEmpty()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00461">TST_SeamlySuitePaths::PiecesSvgPathIsAbsolute()</a>, and <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00420">TST_SeamlySuitePaths::PiecesSvgSitsBesideThePattern()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00421">TST_SeamlySuitePaths::DocumentNameIsThePatternBaseName()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00441">TST_SeamlySuitePaths::DocumentNameKeepsDotsInThePatternName()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00460">TST_SeamlySuitePaths::DocumentNameOfEmptyPatternPathIsEmpty()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04164">MainWindow::exportPiecesToSeamlyLayout()</a>.</p>
 
 </div>
 </div>
@@ -256,14 +256,14 @@ Functions</h2></td></tr>
 <p>seamlyLayoutExeName returns the platform-specific file name of the SeamlyLayout executable. </p>
 <dl class="section return"><dt>Returns</dt><dd>"SeamlyLayout.exe" on Windows, "SeamlyLayout" elsewhere. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00086">86</a> of file <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html">seamly_suite_paths.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00076">76</a> of file <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html">seamly_suite_paths.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00351">TST_SeamlySuitePaths::DevBuildDirectoryNamedLikeExecutableIsIgnored()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00324">TST_SeamlySuitePaths::DevBuildFindsDebugWhenReleaseAbsent()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00269">TST_SeamlySuitePaths::DevBuildFoundFromDebugShadowBuild()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00242">TST_SeamlySuitePaths::DevBuildFoundFromReleaseShadowBuild()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00297">TST_SeamlySuitePaths::DevBuildReleaseTakesPrecedenceOverDebug()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00386">TST_SeamlySuitePaths::DevBuildStopsBeforeUnboundedWalk()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00182">TST_SeamlySuitePaths::DirectoryNamedLikeExecutableIsIgnored()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00101">TST_SeamlySuitePaths::FindsFlatExecutable()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00122">TST_SeamlySuitePaths::FindsSubdirectoryExecutable()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00151">TST_SeamlySuitePaths::FlatLayoutTakesPrecedence()</a>, <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00125">locateSeamlyLayout()</a>, and <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00182">locateSeamlyLayoutDevBuild()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00351">TST_SeamlySuitePaths::DevBuildDirectoryNamedLikeExecutableIsIgnored()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00324">TST_SeamlySuitePaths::DevBuildFindsDebugWhenReleaseAbsent()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00269">TST_SeamlySuitePaths::DevBuildFoundFromDebugShadowBuild()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00242">TST_SeamlySuitePaths::DevBuildFoundFromReleaseShadowBuild()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00297">TST_SeamlySuitePaths::DevBuildReleaseTakesPrecedenceOverDebug()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00386">TST_SeamlySuitePaths::DevBuildStopsBeforeUnboundedWalk()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00182">TST_SeamlySuitePaths::DirectoryNamedLikeExecutableIsIgnored()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00101">TST_SeamlySuitePaths::FindsFlatExecutable()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00122">TST_SeamlySuitePaths::FindsSubdirectoryExecutable()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00151">TST_SeamlySuitePaths::FlatLayoutTakesPrecedence()</a>, <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00115">locateSeamlyLayout()</a>, and <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00172">locateSeamlyLayoutDevBuild()</a>.</p>
 
 </div>
 </div>
-<a id="a315f5743f9e141cbeb6e4e270d42080f" name="a315f5743f9e141cbeb6e4e270d42080f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a315f5743f9e141cbeb6e4e270d42080f">&#9670;&#160;</a></span>seamlyLayoutLaunchArguments()</h2>
+<a id="ad11fa4832ede66822b56fa5e197ab42e" name="ad11fa4832ede66822b56fa5e197ab42e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad11fa4832ede66822b56fa5e197ab42e">&#9670;&#160;</a></span>seamlyLayoutLaunchArguments()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -272,26 +272,28 @@ Functions</h2></td></tr>
           <td class="memname">QStringList SeamlySuitePaths::seamlyLayoutLaunchArguments </td>
           <td>(</td>
           <td class="paramtype">const QString &amp;&#160;</td>
-          <td class="paramname"><em>piecesSvgPath</em></td><td>)</td>
+          <td class="paramname"><em>documentName</em></td><td>)</td>
           <td></td>
         </tr>
       </table>
 </div><div class="memdoc">
 
 <p>seamlyLayoutLaunchArguments builds the argument vector seamly2d passes to the SeamlyLayout executable. </p>
-<p>This is the seamly2d side of the two-app launch contract (Task 49): <b>SeamlyLayout accepts exactly one positional argument, the path of the SVG to open</b>, and nothing else. Its <code><a class="el" href="../../de/dbc/classStartupOptions.html">StartupOptions</a></code> class (<code><a class="el" href="../../d2/dcc/StartupOptions_8cpp.html">src/app/seamlylayout/qt_frontend/src/StartupOptions.cpp</a></code>) rejects a second positional argument, so this function must never grow one silently; both halves are pinned by tests.</p>
-<p>The path is passed as a single list element rather than being embedded in a command string, so QProcess quotes it and a pattern directory containing spaces needs no special handling.</p>
+<p>This is the seamly2d side of the two-app launch contract. Layout Mode does not write a handoff file: it serialises piece mode to one stringified SVG and sends that document on the child process's standard input (Seamly2D.5). The arguments only say how to read it: </p><pre class="fragment">SeamlyLayout --svg-stdin --document-name &lt;pattern base name&gt;
+</pre><p> SeamlyLayout's <code><a class="el" href="../../de/dbc/classStartupOptions.html">StartupOptions</a></code> class (<code><a class="el" href="../../d2/dcc/StartupOptions_8cpp.html">src/app/seamlylayout/qt_frontend/src/StartupOptions.cpp</a></code>) parses exactly these two options, and rejects a positional file alongside them; both halves are pinned by tests. This function must never grow an argument silently.</p>
+<p>&ndash;document-name is omitted for an unsaved pattern rather than passed empty, so SeamlyLayout keeps its own default export name instead of an empty one.</p>
+<p>The name is passed as its own list element rather than embedded in a command string, so QProcess quotes it and a pattern name containing spaces needs no special handling.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">piecesSvgPath</td><td>absolute path of the handoff SVG, as returned by <a class="el" href="../../d2/d5f/namespaceSeamlySuitePaths.html#a0397777496948588c84dedac9589c868" title="piecesSvgFilePath returns the path of the handoff SVG that Layout Mode writes for a pattern.">piecesSvgFilePath()</a>. </td></tr>
+    <tr><td class="paramname">documentName</td><td>pattern base name, as returned by <a class="el" href="../../d2/d5f/namespaceSeamlySuitePaths.html#a92f951284ea05b36e0a6092d1f84110a" title="patternDocumentName returns the name Layout Mode gives the piece-mode document it hands to SeamlyLayo...">patternDocumentName()</a>; may be empty. </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a one-element argument list, or an empty list when <code>piecesSvgPath</code> is empty — launching with no argument would open an empty canvas, which is not what Layout Mode was asked to do. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>the argument list for QProcess::start(). </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00279">279</a> of file <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html">seamly_suite_paths.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html#l00267">267</a> of file <a class="el" href="../../dc/de6/seamly__suite__paths_8cpp_source.html">seamly_suite_paths.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04153">MainWindow::exportPiecesToSeamlyLayout()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00490">TST_SeamlySuitePaths::LaunchArgumentsAreTheSvgPathAlone()</a>, and <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00508">TST_SeamlySuitePaths::LaunchArgumentsOfEmptySvgPathAreEmpty()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04164">MainWindow::exportPiecesToSeamlyLayout()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00475">TST_SeamlySuitePaths::LaunchArgumentsAskForStandardInput()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00491">TST_SeamlySuitePaths::LaunchArgumentsCarryTheDocumentName()</a>, <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00525">TST_SeamlySuitePaths::LaunchArgumentsNameNoFile()</a>, and <a class="el" href="../../dd/df0/tst__seamlysuitepaths_8cpp_source.html#l00511">TST_SeamlySuitePaths::LaunchArgumentsOmitAnEmptyDocumentName()</a>.</p>
 
 </div>
 </div>

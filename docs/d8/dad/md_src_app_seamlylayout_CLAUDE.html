@@ -126,24 +126,28 @@ Key Conventions</h1>
 <li><b>UI work must consult <code>crates/cxxqt_bridge/</code> and <code>qt_frontend/</code>.</b> The active UI is QML in <code>qt_frontend/qml/</code> with the Rust↔Qt bridge in <code>crates/cxxqt_bridge/</code>.</li>
 </ul>
 <h1><a class="anchor" id="autotoc_md22"></a>
-Command Line — the Seamly2D handoff contract (Task 49)</h1>
-<p>Seamly2D's Layout Mode writes <code>&lt;pattern&gt;.pieces.svg</code> beside the pattern file and launches this app <b>detached</b> with that path. The contract is implemented in <code>qt_frontend/src/StartupOptions.{h,cpp}</code> and pinned by <code><a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp.html">src/test/SeamlyLayoutTest/StartupOptionsTests.cpp</a></code>; the producing half lives in <code><a class="el" href="../../dc/de6/seamly__suite__paths_8cpp.html">src/libs/vmisc/seamly_suite_paths.cpp</a></code> and is pinned by <code><a class="el" href="../../dc/daf/classTST__SeamlySuitePaths.html" title="TST_SeamlySuitePaths tests the two lookups seamly2d uses to find the SeamlyLayout executable.">TST_SeamlySuitePaths</a></code>. <b>Change one side and you must change the other</b> — see <code>project-docs/SVG-DATA-ATTRIBUTES.md</code> for the full statement.</p>
+Command Line — the Seamly2D handoff contract (Task 49, revised by Seamly2D.5)</h1>
+<p>Seamly2D's Layout Mode builds the tagged pieces SVG in memory, launches this app with <code>--svg-stdin</code>, then writes the document to the new process's standard input and closes the channel. <b>No file is written</b> — the earlier <code>&lt;pattern&gt;.pieces.svg</code> handoff is gone. The contract is implemented in <code>qt_frontend/src/StartupOptions.{h,cpp}</code> and pinned by <code><a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp.html">src/test/SeamlyLayoutTest/StartupOptionsTests.cpp</a></code>; the producing half lives in <code><a class="el" href="../../dc/de6/seamly__suite__paths_8cpp.html">src/libs/vmisc/seamly_suite_paths.cpp</a></code> and is pinned by <code><a class="el" href="../../dc/daf/classTST__SeamlySuitePaths.html" title="TST_SeamlySuitePaths tests the two lookups seamly2d uses to find the SeamlyLayout executable.">TST_SeamlySuitePaths</a></code>. <b>Change one side and you must change the other</b> — see <code>project-docs/SVG-DATA-ATTRIBUTES.md</code> for the full statement.</p>
 <table class="markdownTable">
 <tr class="markdownTableHead">
 <th class="markdownTableHeadNone">Invocation   </th><th class="markdownTableHeadNone">Behaviour    </th></tr>
 <tr class="markdownTableRowOdd">
 <td class="markdownTableBodyNone"><code>SeamlyLayout</code>   </td><td class="markdownTableBodyNone">Empty canvas — the double-clicked-icon case    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone"><code>SeamlyLayout &lt;file.svg&gt;</code>   </td><td class="markdownTableBodyNone">Opens that file through the same path as the <b>Import SVG</b> button (<code>Main.qml</code>'s <code>openSvgFile()</code> → <code>AppController::importSvg</code>)    </td></tr>
+<td class="markdownTableBodyNone"><code>SeamlyLayout --svg-stdin [--document-name &lt;name&gt;]</code>   </td><td class="markdownTableBodyNone">The Seamly2D handoff: reads the SVG document from standard input (<code>Main.qml</code>'s <code>openSvgDocument()</code> → <code>AppController::importSvgDocument</code>)    </td></tr>
 <tr class="markdownTableRowOdd">
-<td class="markdownTableBodyNone"><code>SeamlyLayout -h</code> / <code>--help</code>, <code>-v</code> / <code>--version</code>   </td><td class="markdownTableBodyNone">Text in a dialog (no console on Windows: this is a WIN32-subsystem binary), exit 0    </td></tr>
+<td class="markdownTableBodyNone"><code>SeamlyLayout &lt;file.svg&gt;</code>   </td><td class="markdownTableBodyNone">Opens that file through the same path as the <b>Import SVG</b> button (<code>Main.qml</code>'s <code>openSvgFile()</code> → <code>AppController::importSvg</code>)    </td></tr>
 <tr class="markdownTableRowEven">
-<td class="markdownTableBodyNone">Two or more files, unknown option, missing / unreadable / non-<code>.svg</code> file   </td><td class="markdownTableBodyNone">Error dialog naming the problem, then an empty canvas — never a silent no-op   </td></tr>
+<td class="markdownTableBodyNone"><code>SeamlyLayout -h</code> / <code>--help</code>, <code>-v</code> / <code>--version</code>   </td><td class="markdownTableBodyNone">Text in a dialog (no console on Windows: this is a WIN32-subsystem binary), exit 0    </td></tr>
+<tr class="markdownTableRowOdd">
+<td class="markdownTableBodyNone"><code>--svg-stdin</code> plus a file, empty or non-SVG standard input, two or more files, unknown option, missing / unreadable / non-<code>.svg</code> file   </td><td class="markdownTableBodyNone">Error dialog naming the problem, then an empty canvas — never a silent no-op   </td></tr>
 </table>
 <ul>
-<li><b>Absolute paths only</b> — a relative argument is resolved with <code>QFileInfo::absoluteFilePath()</code> at parse time, because the detached launch inherits SeamlyLayout's own working directory, not the user's.</li>
+<li><b>Standard input is read only for <code>--svg-stdin</code>.</b> <code>main.cpp</code> opens stdin on every launch, so reading it unasked would hang a shell or icon launch waiting for input that never comes.</li>
+<li><b>Both transports end in the same import.</b> <code>import_svg</code> (a path) and <code>import_svg_document</code> (a string) share <code>reset_import_state()</code> and <code>finish_import()</code> in <code>crates/cxxqt_bridge/src/lib.rs</code>, so the canvas cannot behave differently depending on where the SVG came from.</li>
+<li><b>Absolute paths only</b> — a relative positional argument is resolved with <code>QFileInfo::absoluteFilePath()</code> at parse time, because a launched process inherits SeamlyLayout's own working directory, not the user's.</li>
 <li><b>No single-instance handling</b> — each launch is its own process and window. One document per process; there are no tabs, which is also why a second positional argument is rejected rather than queued.</li>
-<li><b>Untagged SVGs are opened, not refused.</b> Every top-level <code>&lt;g&gt;</code> with geometry is treated as a piece, so an ordinary drawing still lays out. When the file carries no <code>data-type="piece"</code> group, <code>import_svg</code> emits <code>import_warning</code> and QML shows a non-blocking popup (<code>piece_extractor::count_tagged_pieces</code> does the counting).</li>
+<li><b>Untagged SVGs are opened, not refused.</b> Every top-level <code>&lt;g&gt;</code> with geometry is treated as a piece, so an ordinary drawing still lays out. When the document carries no <code>data-type="piece"</code> group, <code>finish_import</code> emits <code>import_warning</code> and QML shows a non-blocking popup (<code>piece_extractor::count_tagged_pieces</code> does the counting).</li>
 <li><b>A tagged handoff is read from its <code>data-type="piece"</code> groups, and only those</b> (Task 59). The handoff nests all pieces inside one <code>&lt;g data-type="pattern"&gt;</code>, but every stage of the layout pipeline — <code>svg_dom::verticalize_dom</code>, <code>svg_dom::translate_dom</code>, <code>piece_extractor</code>, <code>layout_assembler</code>, <code>oversized</code>, <code>remaining</code>, <code>sheets</code> — assumes a piece is a <b>direct <code>&lt;g&gt;</code> child of the SVG root</b>. <code>piece_extractor::hoist_tagged_pieces</code> re-parents the tagged pieces to the root once, composing any wrapper <code>transform</code> onto each, and the rest of the pipeline is unchanged. <b>Call it from any new pre-processing entry point</b> (today: <code>layout_utils::do_process_layout</code> and <code>sheets::build_sheet_export_inputs</code>) — without it the packer receives the whole pattern as one sheet-sized object.</li>
 <li>**<code>id</code> is identity, <code>data-name</code> is what a user reads.** <code>PieceRect::label()</code> resolves <code>data-name</code> → <code>data-letter</code> → <code>id</code>; use it for warnings, error text and the Adjust overlay, never for element lookup.</li>
 <li>Dispatch happens from <code>main.cpp</code> on a <code>QTimer::singleShot(0, …)</code>, <b>after</b> the event loop starts — the QML window and its WebEngine canvases must exist before an SVG can be pushed into them.</li>
@@ -154,7 +158,9 @@ Platform Support</h1>
 <h1><a class="anchor" id="autotoc_md24"></a>
 Build Commands</h1>
 <ul>
-<li>Qt debug build + launch from the app root (<code>src/app/seamlylayout/</code> in the Seamly2D repo): <code>qd.ps1</code></li>
+<li><b>Build with <code>packaging\windows\test_build_msi_local.ps1</code> from the repository root.</b> It builds all three apps, runs the Qt unit tests, and packages the Windows x64 MSI.</li>
+<li>Do <b>not</b> use <code>build.ps1</code> or <code>qd.ps1</code> any more (user decision, 2026-09-02). They build SeamlyLayout alone, which is not what the install-and-test loop needs. Both files still exist; treat them as unsupported.</li>
+<li>Tests stay where they are: <code>ctest --preset debug</code> for the Qt frontend suites, <code>cargo test --workspace</code> for the Rust crates.</li>
 </ul>
 <h1><a class="anchor" id="autotoc_md25"></a>
 Search &amp; Update Policy</h1>

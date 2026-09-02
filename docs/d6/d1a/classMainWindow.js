@@ -275,6 +275,8 @@ var classMainWindow =
     [ "m_measurements", "d6/d1a/classMainWindow.html#a857adfe7ab492d997102f9db3f12086b", null ],
     [ "m_penReset", "d6/d1a/classMainWindow.html#a98e04c2354e77c45ca479817b9d53478", null ],
     [ "m_penToolBar", "d6/d1a/classMainWindow.html#a77643494265991ec1ec783285b2b86a7", null ],
+    [ "m_seamlyLayoutPriorStageWasDraft", "d6/d1a/classMainWindow.html#a052f5a379541807fdc84f5f94b0dff07", null ],
+    [ "m_seamlyLayoutProcess", "d6/d1a/classMainWindow.html#a764034acae4dc3b3c989ddce5879e767", null ],
     [ "m_statusMessage", "d6/d1a/classMainWindow.html#a488925f7adaf0aa622bb2c1eea53df7d", null ],
     [ "m_watcher", "d6/d1a/classMainWindow.html#a5858be1f5a77a4b44361ef55a9d7fab3", null ],
     [ "m_zoomToPointComboBox", "d6/d1a/classMainWindow.html#a8d014931694bf46833dc9923bb9de9e2", null ],

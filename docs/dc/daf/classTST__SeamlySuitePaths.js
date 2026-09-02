@@ -10,14 +10,15 @@ var classTST__SeamlySuitePaths =
     [ "DevBuildReleaseTakesPrecedenceOverDebug", "dc/daf/classTST__SeamlySuitePaths.html#ac83cb0fcb1ebc2cc704d77e732861938", null ],
     [ "DevBuildStopsBeforeUnboundedWalk", "dc/daf/classTST__SeamlySuitePaths.html#afaa476cfc14cee854942aeae28e0525f", null ],
     [ "DirectoryNamedLikeExecutableIsIgnored", "dc/daf/classTST__SeamlySuitePaths.html#a764955bf58210c2ae173238823c5a7d1", null ],
+    [ "DocumentNameIsThePatternBaseName", "dc/daf/classTST__SeamlySuitePaths.html#af68c2e1eefdc5f2fd014916ca5ee2fbf", null ],
+    [ "DocumentNameKeepsDotsInThePatternName", "dc/daf/classTST__SeamlySuitePaths.html#a9d67e2f9c6432183bfb51813e42600cd", null ],
+    [ "DocumentNameOfEmptyPatternPathIsEmpty", "dc/daf/classTST__SeamlySuitePaths.html#aee4cdb6ab9234515f226e0d5ed485fae", null ],
     [ "EmptyDirectoryFindsNothing", "dc/daf/classTST__SeamlySuitePaths.html#a52d9e2009ba3eb51336fa9caaf73e0a5", null ],
     [ "FindsFlatExecutable", "dc/daf/classTST__SeamlySuitePaths.html#aef9b2144c167a63c46781775eeb5cd2b", null ],
     [ "FindsSubdirectoryExecutable", "dc/daf/classTST__SeamlySuitePaths.html#a33fd5d2b50a717a4cfe4ede4bcbf0194", null ],
     [ "FlatLayoutTakesPrecedence", "dc/daf/classTST__SeamlySuitePaths.html#a3dcaabb2124af4843f960f1aec05c7bb", null ],
-    [ "LaunchArgumentsAreTheSvgPathAlone", "dc/daf/classTST__SeamlySuitePaths.html#a20bfc7f46c19f81b6a120d368bfb4576", null ],
-    [ "LaunchArgumentsOfEmptySvgPathAreEmpty", "dc/daf/classTST__SeamlySuitePaths.html#a58e4ad3696ced980b17b3014abd0ebe6", null ],
-    [ "PiecesSvgKeepsDotsInThePatternName", "dc/daf/classTST__SeamlySuitePaths.html#a0d033458633d0748585e9391060c9d2f", null ],
-    [ "PiecesSvgOfEmptyPatternPathIsEmpty", "dc/daf/classTST__SeamlySuitePaths.html#a8e38eb84052989849992de268c274cd9", null ],
-    [ "PiecesSvgPathIsAbsolute", "dc/daf/classTST__SeamlySuitePaths.html#a52503d88381bcebb84b4eb222bec699e", null ],
-    [ "PiecesSvgSitsBesideThePattern", "dc/daf/classTST__SeamlySuitePaths.html#a7182cca20392443089308194630d7682", null ]
+    [ "LaunchArgumentsAskForStandardInput", "dc/daf/classTST__SeamlySuitePaths.html#a9aa14a0052e046fc8ab4f5a865d14f1f", null ],
+    [ "LaunchArgumentsCarryTheDocumentName", "dc/daf/classTST__SeamlySuitePaths.html#a3e877ba578c0438b6577c3dc0a312cef", null ],
+    [ "LaunchArgumentsNameNoFile", "dc/daf/classTST__SeamlySuitePaths.html#aa9bdd4b3cc54cf1b2e9c0f8f578c92b0", null ],
+    [ "LaunchArgumentsOmitAnEmptyDocumentName", "dc/daf/classTST__SeamlySuitePaths.html#ae94a06cec173584a78fdf5d6e9562c24", null ]
 ];

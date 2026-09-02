@@ -111,7 +111,7 @@ $(document).ready(function(){initNavTree('d3/d0b/classSvgGenerator.html','../../
 <div class="dynheader">
 Collaboration diagram for SvgGenerator:</div>
 <div class="dyncontent">
-<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d05/classSvgGenerator__coll__graph.svg" width="211" height="434"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d4/d05/classSvgGenerator__coll__graph.svg" width="211" height="448"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe>
 </div>
 </div>
 <table class="memberdecls">
@@ -126,6 +126,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:af27ac7cbc5cbbda05dbcf3cfad9d4038"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d0b/classSvgGenerator.html#af27ac7cbc5cbbda05dbcf3cfad9d4038">generate</a> ()</td></tr>
 <tr class="memdesc:af27ac7cbc5cbbda05dbcf3cfad9d4038"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate the merged SVG where each previously given scene is grouped separately.  <br /></td></tr>
 <tr class="separator:af27ac7cbc5cbbda05dbcf3cfad9d4038"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad46609ca8ec293184f236aa4a5d7973d"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d0b/classSvgGenerator.html#ad46609ca8ec293184f236aa4a5d7973d">toSvgString</a> ()</td></tr>
+<tr class="memdesc:ad46609ca8ec293184f236aa4a5d7973d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Generate the merged SVG and return it as text instead of writing a file.  <br /></td></tr>
+<tr class="separator:ad46609ca8ec293184f236aa4a5d7973d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pri-methods" name="pri-methods"></a>
 Private Member Functions</h2></td></tr>
@@ -344,9 +347,9 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00359">359</a> of file <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html">svg_generator.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00289">addComponentGroups()</a>, <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00062">m_domList</a>, <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00060">m_pieceCount</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00086">PieceItemData::ObjectName</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00088">PieceItemData::PieceLetter</a>, <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00234">renderSceneToDom()</a>, and <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00216">setAttribute()</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00289">addComponentGroups()</a>, <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00063">m_domList</a>, <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00061">m_pieceCount</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00086">PieceItemData::ObjectName</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00088">PieceItemData::PieceLetter</a>, <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00234">renderSceneToDom()</a>, and <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00216">setAttribute()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00174">TST_SvgComponentTags::ExportedSvgTagsCutPathGroups()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00960">MainWindowsNoGUI::exportSVG()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00998">MainWindowsNoGUI::buildPiecesSvgString()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00174">TST_SvgComponentTags::ExportedSvgTagsCutPathGroups()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00959">MainWindowsNoGUI::exportSVG()</a>.</p>
 
 </div>
 </div>
@@ -407,9 +410,9 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00413">413</a> of file <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html">svg_generator.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00056">m_filepath</a>, and <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00071">mergeSvgDoms()</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00057">m_filepath</a>, and <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00440">toSvgString()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00174">TST_SvgComponentTags::ExportedSvgTagsCutPathGroups()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00960">MainWindowsNoGUI::exportSVG()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00174">TST_SvgComponentTags::ExportedSvgTagsCutPathGroups()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00959">MainWindowsNoGUI::exportSVG()</a>.</p>
 
 </div>
 </div>
@@ -442,9 +445,9 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00071">71</a> of file <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html">svg_generator.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00200">cleanSvg()</a>, <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00062">m_domList</a>, <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00057">m_patternName</a>, <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00060">m_pieceCount</a>, and <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00216">setAttribute()</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00200">cleanSvg()</a>, <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00063">m_domList</a>, <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00058">m_patternName</a>, <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00061">m_pieceCount</a>, and <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00216">setAttribute()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00413">generate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00440">toSvgString()</a>.</p>
 
 </div>
 </div>
@@ -552,7 +555,7 @@ Private Attributes</h2></td></tr>
 
 <p class="definition">Definition at line <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00234">234</a> of file <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html">svg_generator.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00055">m_paper</a>, and <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00059">m_resolution</a>.</p>
+<p class="reference">References <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00056">m_paper</a>, and <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00060">m_resolution</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00289">addComponentGroups()</a>, and <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00359">addSvgFromScene()</a>.</p>
 
@@ -616,6 +619,33 @@ Private Attributes</h2></td></tr>
 
 </div>
 </div>
+<a id="ad46609ca8ec293184f236aa4a5d7973d" name="ad46609ca8ec293184f236aa4a5d7973d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ad46609ca8ec293184f236aa4a5d7973d">&#9670;&#160;</a></span>toSvgString()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">QString SvgGenerator::toSvgString </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Generate the merged SVG and return it as text instead of writing a file. </p>
+<dl class="section return"><dt>Returns</dt><dd>the merged SVG document, or an empty string when no scene was added.</dd></dl>
+<p>Same merge as <a class="el" href="../../d3/d0b/classSvgGenerator.html#af27ac7cbc5cbbda05dbcf3cfad9d4038" title="Generate the merged SVG where each previously given scene is grouped separately.">generate()</a>, for callers that need the document in memory: Layout Mode hands the pattern pieces to SeamlyLayout as one stringified SVG on the child process's standard input, so no handoff file is created (Seamly2D.5). </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00440">440</a> of file <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html">svg_generator.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00071">mergeSvgDoms()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00998">MainWindowsNoGUI::buildPiecesSvgString()</a>, and <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00413">generate()</a>.</p>
+
+</div>
+</div>
 <h2 class="groupheader">Member Data Documentation</h2>
 <a id="a62e09365c5f102e8052cffd268018eec" name="a62e09365c5f102e8052cffd268018eec"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a62e09365c5f102e8052cffd268018eec">&#9670;&#160;</a></span>m_description</h2>
@@ -637,7 +667,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00058">58</a> of file <a class="el" href="../../d0/d67/svg__generator_8h_source.html">svg_generator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00059">59</a> of file <a class="el" href="../../d0/d67/svg__generator_8h_source.html">svg_generator.h</a>.</p>
 
 </div>
 </div>
@@ -661,7 +691,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00062">62</a> of file <a class="el" href="../../d0/d67/svg__generator_8h_source.html">svg_generator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00063">63</a> of file <a class="el" href="../../d0/d67/svg__generator_8h_source.html">svg_generator.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00359">addSvgFromScene()</a>, and <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00071">mergeSvgDoms()</a>.</p>
 
@@ -687,7 +717,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00056">56</a> of file <a class="el" href="../../d0/d67/svg__generator_8h_source.html">svg_generator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00057">57</a> of file <a class="el" href="../../d0/d67/svg__generator_8h_source.html">svg_generator.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00413">generate()</a>.</p>
 
@@ -713,7 +743,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00055">55</a> of file <a class="el" href="../../d0/d67/svg__generator_8h_source.html">svg_generator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00056">56</a> of file <a class="el" href="../../d0/d67/svg__generator_8h_source.html">svg_generator.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00234">renderSceneToDom()</a>.</p>
 
@@ -740,7 +770,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 <p>pattern name, written as data-name on the pattern group </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00057">57</a> of file <a class="el" href="../../d0/d67/svg__generator_8h_source.html">svg_generator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00058">58</a> of file <a class="el" href="../../d0/d67/svg__generator_8h_source.html">svg_generator.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00071">mergeSvgDoms()</a>.</p>
 
@@ -767,7 +797,7 @@ Private Attributes</h2></td></tr>
 </div><div class="memdoc">
 <p>number of pieces added so far; provides data-type-number for pieces </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00060">60</a> of file <a class="el" href="../../d0/d67/svg__generator_8h_source.html">svg_generator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00061">61</a> of file <a class="el" href="../../d0/d67/svg__generator_8h_source.html">svg_generator.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00359">addSvgFromScene()</a>, and <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00071">mergeSvgDoms()</a>.</p>
 
@@ -793,7 +823,7 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00059">59</a> of file <a class="el" href="../../d0/d67/svg__generator_8h_source.html">svg_generator.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d67/svg__generator_8h_source.html#l00060">60</a> of file <a class="el" href="../../d0/d67/svg__generator_8h_source.html">svg_generator.h</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00234">renderSceneToDom()</a>.</p>
 

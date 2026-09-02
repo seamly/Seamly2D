@@ -99,7 +99,8 @@ $(document).ready(function(){initNavTree('d8/dd0/application__me_8cpp.html','../
 
 <div class="header">
   <div class="summary">
-<a href="#func-members">Functions</a>  </div>
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">application_me.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -118,7 +119,9 @@ $(document).ready(function(){initNavTree('d8/dd0/application__me_8cpp.html','../
 <code>#include &quot;../vmisc/diagnostic.h&quot;</code><br />
 <code>#include &quot;../qmuparser/qmuparsererror.h&quot;</code><br />
 <code>#include &lt;Qt&gt;</code><br />
+<code>#include &lt;QDateTime&gt;</code><br />
 <code>#include &lt;QDir&gt;</code><br />
+<code>#include &lt;QFileInfo&gt;</code><br />
 <code>#include &lt;QFileOpenEvent&gt;</code><br />
 <code>#include &lt;QLocalSocket&gt;</code><br />
 <code>#include &lt;QResource&gt;</code><br />
@@ -144,12 +147,17 @@ Include dependency graph for application_me.cpp:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ab63bcab707162d189352c194b213dd31"><td class="memItemLeft" align="right" valign="top">QT_WARNING_PUSH QT_WARNING_POP void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/dd0/application__me_8cpp.html#ab63bcab707162d189352c194b213dd31">noisyFailureMsgHandler</a> (QtMsgType type, const QMessageLogContext &amp;context, const QString &amp;msg)</td></tr>
-<tr class="separator:ab63bcab707162d189352c194b213dd31"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac1c6657d17ee680cf99fb509cd9b2cbd"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/dd0/application__me_8cpp.html#ac1c6657d17ee680cf99fb509cd9b2cbd">noisyFailureMsgHandler</a> (QtMsgType type, const QMessageLogContext &amp;context, const QString &amp;msg)</td></tr>
+<tr class="separator:ac1c6657d17ee680cf99fb509cd9b2cbd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a2c61bda0169dd389fcf7787d7da30cb5"><td class="memItemLeft" align="right" valign="top">QT_WARNING_PUSH QT_WARNING_POP constexpr auto&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d8/dd0/application__me_8cpp.html#a2c61bda0169dd389fcf7787d7da30cb5">DAYS_TO_KEEP_LOGS</a> = 3</td></tr>
+<tr class="separator:a2c61bda0169dd389fcf7787d7da30cb5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="ab63bcab707162d189352c194b213dd31" name="ab63bcab707162d189352c194b213dd31"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab63bcab707162d189352c194b213dd31">&#9670;&#160;</a></span>noisyFailureMsgHandler()</h2>
+<a id="ac1c6657d17ee680cf99fb509cd9b2cbd" name="ac1c6657d17ee680cf99fb509cd9b2cbd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac1c6657d17ee680cf99fb509cd9b2cbd">&#9670;&#160;</a></span>noisyFailureMsgHandler()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -158,7 +166,7 @@ Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">QT_WARNING_PUSH QT_WARNING_POP void noisyFailureMsgHandler </td>
+          <td class="memname">void noisyFailureMsgHandler </td>
           <td>(</td>
           <td class="paramtype">QtMsgType&#160;</td>
           <td class="paramname"><em>type</em>, </td>
@@ -188,9 +196,34 @@ Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/dd0/application__me_8cpp_source.html#l00095">95</a> of file <a class="el" href="../../d8/dd0/application__me_8cpp_source.html">application_me.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/application__me_8cpp_source.html#l00100">100</a> of file <a class="el" href="../../d8/dd0/application__me_8cpp_source.html">application_me.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, <a class="el" href="../../dd/d3c/vsysexits_8h_source.html#l00106">vStdErr()</a>, and <a class="el" href="../../dd/d3c/vsysexits_8h_source.html#l00114">vStdOut()</a>.</p>
+
+</div>
+</div>
+<h2 class="groupheader">Variable Documentation</h2>
+<a id="a2c61bda0169dd389fcf7787d7da30cb5" name="a2c61bda0169dd389fcf7787d7da30cb5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2c61bda0169dd389fcf7787d7da30cb5">&#9670;&#160;</a></span>DAYS_TO_KEEP_LOGS</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">QT_WARNING_PUSH QT_WARNING_POP constexpr auto DAYS_TO_KEEP_LOGS = 3</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">constexpr</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p class="definition">Definition at line <a class="el" href="../../d8/dd0/application__me_8cpp_source.html#l00097">97</a> of file <a class="el" href="../../d8/dd0/application__me_8cpp_source.html">application_me.cpp</a>.</p>
 
 </div>
 </div>

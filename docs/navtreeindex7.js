@@ -1,5 +1,14 @@
 var NAVTREEINDEX7 =
 {
+"d0/d91/measurements__def_8h.html#a2f9c6f43d84f91b0c130c7ec8f9aecdc":[10,0,0,1,10,5,164],
+"d0/d91/measurements__def_8h.html#a30129ab2a58164f95d61d773035338b8":[10,0,0,1,10,5,113],
+"d0/d91/measurements__def_8h.html#a30554504eba8f7203c3bd50e6e52cddb":[10,0,0,1,10,5,208],
+"d0/d91/measurements__def_8h.html#a30a6e7133d4decc045661801cb16471c":[10,0,0,1,10,5,9],
+"d0/d91/measurements__def_8h.html#a313cfe37946c0a7123c7dfb91cb24bb2":[10,0,0,1,10,5,93],
+"d0/d91/measurements__def_8h.html#a317afef71e691f0673e1b47e00d4bd3f":[10,0,0,1,10,5,199],
+"d0/d91/measurements__def_8h.html#a3221ced1c8e60b5729199259021880b3":[10,0,0,1,10,5,150],
+"d0/d91/measurements__def_8h.html#a331b73153e5ab6c1d153df4888026648":[10,0,0,1,10,5,85],
+"d0/d91/measurements__def_8h.html#a33d802b2b4ec7454f780f6fbd25730f4":[10,0,0,1,10,5,104],
 "d0/d91/measurements__def_8h.html#a354a4f7818a95f43545b80fe19b6fdbb":[10,0,0,1,10,5,243],
 "d0/d91/measurements__def_8h.html#a358b97f53368787e4c76df63a4aa7fa0":[10,0,0,1,10,5,166],
 "d0/d91/measurements__def_8h.html#a35a4aecfa3af84e74d353314d20fa9b9":[10,0,0,1,10,5,50],
@@ -240,14 +249,5 @@ var NAVTREEINDEX7 =
 "d0/d9e/macx_2include_2xercesc_2framework_2psvi_2XSIDCDefinition_8hpp_source.html":[10,0,0,1,15,0,0,0,1,0,13],
 "d0/d9f/mingw_2include_2xercesc_2validators_2DTD_2DTDElementDecl_8hpp.html":[10,0,0,1,15,1,0,0,7,2,3],
 "d0/d9f/mingw_2include_2xercesc_2validators_2DTD_2DTDElementDecl_8hpp_source.html":[10,0,0,1,15,1,0,0,7,2,3],
-"d0/da0/classDialogPointFromArcAndTangent.html":[9,0,129],
-"d0/da0/classDialogPointFromArcAndTangent.html#a412f9dd97eacfef904d0e8ab9d012607":[9,0,129,1],
-"d0/da0/classDialogPointFromArcAndTangent.html#a5843eb7312469bc78e4aecf94e2e85e4":[9,0,129,11],
-"d0/da0/classDialogPointFromArcAndTangent.html#a84dcadaa296bf4f56f2419664ac36718":[9,0,129,8],
-"d0/da0/classDialogPointFromArcAndTangent.html#a947e9f868c11a95f941c2ca16b15932a":[9,0,129,4],
-"d0/da0/classDialogPointFromArcAndTangent.html#a9a45a4b149a661489c41c0252b4117f4":[9,0,129,0],
-"d0/da0/classDialogPointFromArcAndTangent.html#aa52a688882aa859c3df9a57717039a8e":[9,0,129,6],
-"d0/da0/classDialogPointFromArcAndTangent.html#abb9684a08e12da83645f927fc2681a4c":[9,0,129,3],
-"d0/da0/classDialogPointFromArcAndTangent.html#ac22fe26b8c75b82c7739512042e4ece4":[9,0,129,9],
-"d0/da0/classDialogPointFromArcAndTangent.html#ad47ab211c19e3cb5da7ceb2998c41f2f":[9,0,129,12]
+"d0/da0/classDialogPointFromArcAndTangent.html":[9,0,129]
 };

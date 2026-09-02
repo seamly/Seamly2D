@@ -72,12 +72,14 @@ var namespaces_dup =
       [ "referencesChanged", "dd/da8/namespaceanonymous__namespace_02savetooloptions_8cpp_03.html#a37fef8eec386cdf9b1548406ee1b6175", null ]
     ] ],
     [ "anonymous_namespace{seamly_suite_paths.cpp}", "dc/d0b/namespaceanonymous__namespace_02seamly__suite__paths_8cpp_03.html", [
-      [ "piecesSvgSuffix", "dc/d0b/namespaceanonymous__namespace_02seamly__suite__paths_8cpp_03.html#a1f71734be3fc03f81e8bed32f98f65af", null ],
       [ "sourceTreeBuildSubPath", "dc/d0b/namespaceanonymous__namespace_02seamly__suite__paths_8cpp_03.html#a004294aa7b379f52e0e8bd1955ba88af", null ],
       [ "maxUpwardLevels", "dc/d0b/namespaceanonymous__namespace_02seamly__suite__paths_8cpp_03.html#ac1dc10ab6133d809128d6d24e6953f8b", null ]
     ] ],
     [ "anonymous_namespace{SettingsModel.cpp}", "d2/dc7/namespaceanonymous__namespace_02SettingsModel_8cpp_03.html", "d2/dc7/namespaceanonymous__namespace_02SettingsModel_8cpp_03" ],
     [ "anonymous_namespace{StartupOptions.cpp}", "d6/d61/namespaceanonymous__namespace_02StartupOptions_8cpp_03.html", [
+      [ "documentNameOptionName", "d6/d61/namespaceanonymous__namespace_02StartupOptions_8cpp_03.html#afa2924bb959160d83d325e7061e07f9e", null ],
+      [ "svgRootElement", "d6/d61/namespaceanonymous__namespace_02StartupOptions_8cpp_03.html#a4765c90bd27ef5e77f3e2a462a2ca8c3", null ],
+      [ "svgStdinOptionName", "d6/d61/namespaceanonymous__namespace_02StartupOptions_8cpp_03.html#ab5e872038cfa7f007877d8eb394cc6fc", null ],
       [ "svgSuffix", "d6/d61/namespaceanonymous__namespace_02StartupOptions_8cpp_03.html#a33a46bf1d3ce24cf0f9994f1ba3b8335", null ],
       [ "versionText", "d6/d61/namespaceanonymous__namespace_02StartupOptions_8cpp_03.html#ad409c49545bf4ca89716fbfae1922562", null ]
     ] ],
@@ -430,9 +432,9 @@ var namespaces_dup =
     [ "SeamlySuitePaths", "d2/d5f/namespaceSeamlySuitePaths.html", [
       [ "locateSeamlyLayout", "d2/d5f/namespaceSeamlySuitePaths.html#af679b3efdaa31e7f49398e6254d54b96", null ],
       [ "locateSeamlyLayoutDevBuild", "d2/d5f/namespaceSeamlySuitePaths.html#a8147aac96b8024022a49ea6c4798ed06", null ],
-      [ "piecesSvgFilePath", "d2/d5f/namespaceSeamlySuitePaths.html#a0397777496948588c84dedac9589c868", null ],
+      [ "patternDocumentName", "d2/d5f/namespaceSeamlySuitePaths.html#a92f951284ea05b36e0a6092d1f84110a", null ],
       [ "seamlyLayoutExeName", "d2/d5f/namespaceSeamlySuitePaths.html#a51ab6af75bd10c154be72d4e42ceee66", null ],
-      [ "seamlyLayoutLaunchArguments", "d2/d5f/namespaceSeamlySuitePaths.html#a315f5743f9e141cbeb6e4e270d42080f", null ]
+      [ "seamlyLayoutLaunchArguments", "d2/d5f/namespaceSeamlySuitePaths.html#ad11fa4832ede66822b56fa5e197ab42e", null ]
     ] ],
     [ "SeamlyTheme", "d2/dd7/namespaceSeamlyTheme.html", [
       [ "makeSeamlyPalette", "d2/dd7/namespaceSeamlyTheme.html#ad2e8a009530c1b2cdb45c292db776cd6", null ],
