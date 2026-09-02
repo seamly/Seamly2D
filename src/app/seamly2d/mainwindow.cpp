@@ -4199,6 +4199,7 @@ bool MainWindow::exportPiecesToSeamlyLayout()
     // The argument vector is built by SeamlySuitePaths so the contract stays in
     // step with what SeamlyLayout's StartupOptions accepts: exactly one
     // positional argument, the absolute path of the SVG to open (Task 49).
+    // TODO: pass seamly piece mode data to seamlylayout as a variable object, not as an svg file
     const QString workingDirectory = QFileInfo(seamlyLayout).absoluteDir().absolutePath();
 
     if (m_seamlyLayoutProcess != nullptr)
