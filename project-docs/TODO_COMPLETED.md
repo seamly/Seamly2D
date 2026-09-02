@@ -28,6 +28,23 @@ File Open now opens in `%DATAROOT%\patterns`). 2.2 confirmed by code trace,
 a live run at the time of the fix, and the 26.9.1.778 human walkthrough
 (B.2b-i..iv, all three SeamlyMe dialogs opened in their correct folders).
 
+## Task Seamly2D.3 — Restore Piece Mode focus after closing SeamlyLayout (completed 2026-09-01)
+
+Found during MSI Test Case 1, step 7b-iv: closing SeamlyLayout returned focus
+to Seamly2D's Layout Mode, not the mode active before SeamlyLayout launched.
+
+- 3.1 `MainWindow::showLayoutMode()` (`src/app/seamly2d/mainwindow.cpp:4102`)
+  now records the prior stage in the new `m_seamlyLayoutPriorStageWasDraft`
+  member (it already computed a local `priorStage` for the existing
+  failed-handoff revert). `MainWindow::exportPiecesToSeamlyLayout()` launches
+  SeamlyLayout as a tracked `QProcess` (new `m_seamlyLayoutProcess` member)
+  instead of `QProcess::startDetached()`, and its `finished` signal calls
+  `showDraftMode(true)`/`showPieceMode(true)` per the recorded flag.
+  `~MainWindow()` disconnects (does not delete) a still-running
+  `m_seamlyLayoutProcess`, since `QProcess`'s destructor kills a running
+  child — deleting it there would take SeamlyLayout down solely because
+  Seamly2D closed first.
+
 ## Task SettingsFiles.7 — getDefaultDataRoot() leaf aligned to SeamlyData (completed 2026-09-01)
 
 `VCommonSettings::getDefaultDataRoot()` returned `<Documents>/Seamly` (Task 60), but the

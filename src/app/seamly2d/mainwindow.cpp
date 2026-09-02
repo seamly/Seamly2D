@@ -192,6 +192,8 @@ MainWindow::MainWindow(QWidget *parent)
     , isLayoutsDockVisible(false)
     , isToolboxDockVisible(true)
     , drawMode(true)
+    , m_seamlyLayoutProcess(nullptr)
+    , m_seamlyLayoutPriorStageWasDraft(false)
     , recentFileActs()
     , separatorAct(nullptr)
     , leftGoToStage(nullptr)
@@ -4095,8 +4097,10 @@ void MainWindow::showLayoutMode(bool checked)
         emit ui->view->itemClicked(nullptr);  // Clear Property Editor with non valid tool selection
         ui->view->setScene(currentScene);
 
-        // Remember the stage we came from so a failed SeamlyLayout handoff can revert to it.
+        // Remember the stage we came from: a failed handoff reverts to it immediately
+        // below, and a successful one restores it when SeamlyLayout closes (Seamly2D.3).
         const Draw priorStage = doc->getDraftStage();
+        m_seamlyLayoutPriorStageWasDraft = (priorStage == Draw::Calculation);
         if (priorStage == Draw::Calculation)
         {
             currentToolBoxIndex = ui->layout_ToolBox->currentIndex();
@@ -4142,10 +4146,11 @@ void MainWindow::showLayoutMode(bool checked)
  * Workflow: write the tagged pieces SVG (data-type / data-type-number / data-parent /
  * data-name / data-letter attributes on every group, see generatePiecesSvg()) as
  * "<pattern-basename>.pieces.svg" next to the pattern file, then launch the
- * SeamlyLayout application detached with that file as its argument. The user
- * enters layout settings, generates, adjusts, saves, views and prints the layout
- * inside SeamlyLayout. Any problem (unsaved pattern, failed SVG generation,
- * missing SeamlyLayout executable) is reported in a message box.
+ * SeamlyLayout application with that file as its argument, tracked via
+ * m_seamlyLayoutProcess so its exit can restore the prior mode (Seamly2D.3).
+ * The user enters layout settings, generates, adjusts, saves, views and prints
+ * the layout inside SeamlyLayout. Any problem (unsaved pattern, failed SVG
+ * generation, missing SeamlyLayout executable) is reported in a message box.
  *
  * @return true when the SVG was written and SeamlyLayout was launched; false on
  *         any failure so the caller can stay in (revert to) the prior mode.
@@ -4188,13 +4193,39 @@ bool MainWindow::exportPiecesToSeamlyLayout()
         return false;
     }
 
-    // Launch SeamlyLayout as a detached process, the same way SeamlyMe is launched.
+    // Launch SeamlyLayout. Unlike SeamlyMe's detached launch, this process is
+    // tracked so its exit can restore the mode active before the handoff
+    // instead of leaving Seamly2D showing Layout Mode (Seamly2D.3).
     // The argument vector is built by SeamlySuitePaths so the contract stays in
     // step with what SeamlyLayout's StartupOptions accepts: exactly one
     // positional argument, the absolute path of the SVG to open (Task 49).
     const QString workingDirectory = QFileInfo(seamlyLayout).absoluteDir().absolutePath();
-    return QProcess::startDetached(seamlyLayout, SeamlySuitePaths::seamlyLayoutLaunchArguments(svgPath),
-                                   workingDirectory);
+
+    if (m_seamlyLayoutProcess != nullptr)
+    {
+        // A previous session's process object is only disconnected, never
+        // deleted (see ~MainWindow()), so it can't be tracked twice.
+        m_seamlyLayoutProcess->disconnect(this);
+        m_seamlyLayoutProcess = nullptr;
+    }
+
+    m_seamlyLayoutProcess = new QProcess();
+    m_seamlyLayoutProcess->setWorkingDirectory(workingDirectory);
+    connect(m_seamlyLayoutProcess, &QProcess::finished, this, [this](int, QProcess::ExitStatus)
+    {
+        m_seamlyLayoutPriorStageWasDraft ? showDraftMode(true) : showPieceMode(true);
+        m_seamlyLayoutProcess->deleteLater();
+        m_seamlyLayoutProcess = nullptr;
+    });
+
+    m_seamlyLayoutProcess->start(seamlyLayout, SeamlySuitePaths::seamlyLayoutLaunchArguments(svgPath));
+    if (!m_seamlyLayoutProcess->waitForStarted())
+    {
+        m_seamlyLayoutProcess->deleteLater();
+        m_seamlyLayoutProcess = nullptr;
+        return false;
+    }
+    return true;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -6579,6 +6610,16 @@ MainWindow::~MainWindow()
 {
     CancelTool();
     CleanLayout();
+
+    if (m_seamlyLayoutProcess != nullptr)
+    {
+        // Not deleted: QProcess kills a still-running child process in its
+        // destructor, which would take SeamlyLayout down just because
+        // Seamly2D closed first. Disconnect so the (about to be dangling)
+        // lambda can't fire, and let the object leak — the app is exiting.
+        m_seamlyLayoutProcess->disconnect(this);
+        m_seamlyLayoutProcess = nullptr;
+    }
 
     delete m_statusMessage;
     delete doc;
