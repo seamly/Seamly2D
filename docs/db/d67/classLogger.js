@@ -1,7 +1,7 @@
 var classLogger =
 [
     [ "Logger", "db/d67/classLogger.html#aefffc02e0c6c0ab09ec1f77fe35f6439", null ],
-    [ "clearOutputDirectory", "db/d67/classLogger.html#ac037cdddd6fb233e0b7065ff15e79e51", null ],
+    [ "clearLogDirectory", "db/d67/classLogger.html#a633a3b0a3b5f0266c8163217ec5ea900", null ],
     [ "init", "db/d67/classLogger.html#ad9f38f9cc2d75a6207f4972427aa74f1", null ],
     [ "log", "db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804", null ],
     [ "messageHandler", "db/d67/classLogger.html#aaa6abe88083fd5b539ef22698143cade", null ],

@@ -412,6 +412,7 @@ var annotated_dup =
     [ "LocalFileInputSource", "dd/d30/classLocalFileInputSource.html", "dd/d30/classLocalFileInputSource" ],
     [ "Locator", "d3/d50/classLocator.html", "d3/d50/classLocator" ],
     [ "Logger", "db/d67/classLogger.html", "db/d67/classLogger" ],
+    [ "LoggerTests", "d9/d9b/classLoggerTests.html", "d9/d9b/classLoggerTests" ],
     [ "MacOSLCPTranscoder", "dd/d92/classMacOSLCPTranscoder.html", "dd/d92/classMacOSLCPTranscoder" ],
     [ "MacOSTranscoder", "d6/d04/classMacOSTranscoder.html", "d6/d04/classMacOSTranscoder" ],
     [ "MacOSUnicodeConverter", "d1/d0d/classMacOSUnicodeConverter.html", "d1/d0d/classMacOSUnicodeConverter" ],

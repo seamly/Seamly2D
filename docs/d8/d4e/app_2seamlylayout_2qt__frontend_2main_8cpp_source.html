@@ -136,7 +136,7 @@ $(document).ready(function(){initNavTree('d8/d4e/app_2seamlylayout_2qt__frontend
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="comment">// generate a duplicate moc file when this header is included here.</span></div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#include &lt;cxxqt_bridge/src/lib.cxxqt.h&gt;</span></div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span> </div>
-<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment">// Logger — singleton debug logger; writes [unix_sec] DEBUG: lines to output/log_{ts}.txt</span></div>
+<div class="line"><a id="l00036" name="l00036"></a><span class="lineno">   36</span><span class="comment">// Logger — singleton debug logger; writes [unix_sec] DEBUG: lines to logs/log_{ts}.txt</span></div>
 <div class="line"><a id="l00037" name="l00037"></a><span class="lineno">   37</span><span class="preprocessor">#include &quot;<a class="code" href="../../dd/da4/Logger_8h.html">src/Logger.h</a>&quot;</span></div>
 <div class="line"><a id="l00038" name="l00038"></a><span class="lineno">   38</span> </div>
 <div class="line"><a id="l00039" name="l00039"></a><span class="lineno">   39</span><span class="comment">// Platform — detect host OS once at startup; use Platform::os throughout the application</span></div>
@@ -285,216 +285,222 @@ $(document).ready(function(){initNavTree('d8/d4e/app_2seamlylayout_2qt__frontend
 <div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    <span class="comment">// Detect host OS once — use Platform::os throughout the application</span></div>
 <div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span>    <a class="code hl_function" href="../../df/d1e/classPlatform.html#aa5050217c75ef259917d280cff41c648">Platform::init</a>();</div>
 <div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span> </div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>    <span class="comment">// Enable and open debug log file.</span></div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    <span class="comment">// Set debugEnabled = true to write debug lines to logs/log_{YYMMDDHHMM}.txt.</span></div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>    <span class="comment">// Set to false (default) to disable all logging with zero overhead.</span></div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>    <a class="code hl_variable" href="../../db/d67/classLogger.html#a651107ec179fb76959e685d162274c5e">Logger::debugEnabled</a> = <span class="keyword">true</span>;</div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#ad9f38f9cc2d75a6207f4972427aa74f1">Logger::init</a>();</div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>    qInstallMessageHandler(<a class="code hl_function" href="../../db/d67/classLogger.html#aaa6abe88083fd5b539ef22698143cade">Logger::messageHandler</a>);</div>
-<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span> </div>
-<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    <span class="comment">// Application metadata — used by QSettings, About dialogs, OS task managers</span></div>
-<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    <span class="comment">// Task 15: organization renamed from &quot;Seamly Systems&quot; to &quot;Seamly&quot; so</span></div>
-<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    <span class="comment">// QStandardPaths::AppConfigLocation resolves under the same shared &quot;Seamly&quot;</span></div>
-<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    <span class="comment">// organization folder as seamly2d/seamlyme (AppData/Local/Seamly/SeamlyLayout</span></div>
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    <span class="comment">// on Windows). PreferencesModel::appConfigRootPath()&#39;s first-run migration</span></div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    <span class="comment">// bridges data forward from the old &quot;Seamly Systems&quot; folder automatically.</span></div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    app.setOrganizationName(<span class="stringliteral">&quot;Seamly&quot;</span>);</div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>    app.setOrganizationDomain(<span class="stringliteral">&quot;seamly.io&quot;</span>);</div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    app.setApplicationName(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>);</div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>    app.setApplicationVersion(<span class="stringliteral">&quot;0.1.0&quot;</span>);</div>
-<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span> </div>
-<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>    <span class="comment">// -----------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>    <span class="comment">// Command line — the Seamly2D Layout Mode handoff and the plain CLI.</span></div>
-<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>    <span class="comment">// Two transports, one parser (StartupOptions):</span></div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>    <span class="comment">//   • a positional &lt;svg-file&gt; — the CLI and the file association (Task 49);</span></div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span>    <span class="comment">//   • --svg-stdin — Seamly2D&#39;s Layout Mode, which sends the piece-mode</span></div>
-<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>    <span class="comment">//     document as one stringified SVG on standard input and writes no file</span></div>
-<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    <span class="comment">//     (Seamly2D.5).</span></div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span>    <span class="comment">// Application metadata — used by QSettings, About dialogs, OS task managers</span></div>
+<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>    <span class="comment">//</span></div>
+<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span>    <span class="comment">// Task 15: organization renamed from &quot;Seamly Systems&quot; to &quot;Seamly&quot; so</span></div>
+<div class="line"><a id="l00188" name="l00188"></a><span class="lineno">  188</span>    <span class="comment">// QStandardPaths::AppConfigLocation resolves under the same shared &quot;Seamly&quot;</span></div>
+<div class="line"><a id="l00189" name="l00189"></a><span class="lineno">  189</span>    <span class="comment">// organization folder as seamly2d/seamlyme (AppData/Local/Seamly/SeamlyLayout</span></div>
+<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span>    <span class="comment">// on Windows). PreferencesModel::appConfigRootPath()&#39;s first-run migration</span></div>
+<div class="line"><a id="l00191" name="l00191"></a><span class="lineno">  191</span>    <span class="comment">// bridges data forward from the old &quot;Seamly Systems&quot; folder automatically.</span></div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno">  192</span>    <span class="comment">//</span></div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span>    <span class="comment">// Layout.10: this MUST stay ahead of Logger::init(). AppConfigLocation is</span></div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno">  194</span>    <span class="comment">// built from the organization and application names, so an empty</span></div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span>    <span class="comment">// organization sent the session log to %LOCALAPPDATA%\SeamlyLayout\ instead</span></div>
+<div class="line"><a id="l00196" name="l00196"></a><span class="lineno">  196</span>    <span class="comment">// of %LOCALAPPDATA%\Seamly\SeamlyLayout\.</span></div>
+<div class="line"><a id="l00197" name="l00197"></a><span class="lineno">  197</span>    app.setOrganizationName(<span class="stringliteral">&quot;Seamly&quot;</span>);</div>
+<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    app.setOrganizationDomain(<span class="stringliteral">&quot;seamly.io&quot;</span>);</div>
+<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    app.setApplicationName(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>);</div>
+<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span>    app.setApplicationVersion(<span class="stringliteral">&quot;0.1.0&quot;</span>);</div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span> </div>
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span>    <span class="comment">// Enable and open debug log file.</span></div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    <span class="comment">// Set debugEnabled = true to write debug lines to logs/log_{YYMMDDHHMMSS}.txt</span></div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span>    <span class="comment">// under the AppConfigLocation root set by the metadata above.</span></div>
+<div class="line"><a id="l00205" name="l00205"></a><span class="lineno">  205</span>    <span class="comment">// Set to false (default) to disable all logging with zero overhead.</span></div>
+<div class="line"><a id="l00206" name="l00206"></a><span class="lineno">  206</span>    <a class="code hl_variable" href="../../db/d67/classLogger.html#a651107ec179fb76959e685d162274c5e">Logger::debugEnabled</a> = <span class="keyword">true</span>;</div>
+<div class="line"><a id="l00207" name="l00207"></a><span class="lineno">  207</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#ad9f38f9cc2d75a6207f4972427aa74f1">Logger::init</a>();</div>
+<div class="line"><a id="l00208" name="l00208"></a><span class="lineno">  208</span>    qInstallMessageHandler(<a class="code hl_function" href="../../db/d67/classLogger.html#aaa6abe88083fd5b539ef22698143cade">Logger::messageHandler</a>);</div>
+<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span> </div>
+<div class="line"><a id="l00210" name="l00210"></a><span class="lineno">  210</span>    <span class="comment">// -----------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    <span class="comment">// Command line — the Seamly2D Layout Mode handoff and the plain CLI.</span></div>
 <div class="line"><a id="l00212" name="l00212"></a><span class="lineno">  212</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    <span class="comment">// Parsing happens here, AFTER the metadata above, so --version can report</span></div>
-<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    <span class="comment">// the application name and version set there, and BEFORE the QML engine is</span></div>
-<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    <span class="comment">// built, so --help / --version cost no startup.</span></div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>    <span class="comment">// Standard input is opened unconditionally but read only when --svg-stdin</span></div>
-<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>    <span class="comment">// is set, so a launch from a shell or a desktop icon never blocks waiting</span></div>
-<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>    <span class="comment">// for input that will not come.</span></div>
-<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>    <span class="comment">// The parsed result is only dispatched once the event loop is running (see</span></div>
-<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>    <span class="comment">// the QTimer::singleShot below): the QML window and its WebEngine canvases</span></div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>    <span class="comment">// must exist before an SVG can be pushed into them.</span></div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    <span class="comment">// -----------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    QFile standardInput;</div>
-<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    <span class="comment">// A failed open is not fatal here: only --svg-stdin needs the channel, and</span></div>
-<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    <span class="comment">// StartupOptions reports the unreadable device for that case itself.</span></div>
-<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    <span class="keywordflow">if</span> (!standardInput.open(stdin, QIODevice::ReadOnly)) {</div>
-<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>        <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): standard input could not be opened&quot;</span>));</div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    } <span class="comment">// if standard input is unavailable</span></div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span> </div>
-<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    <span class="keyword">const</span> <a class="code hl_class" href="../../de/dbc/classStartupOptions.html">StartupOptions</a> startupOptions = <a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a1e555cda9527db2236ed4a0c232a999c">StartupOptions::parse</a>(app.arguments(), &amp;standardInput);</div>
-<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span> </div>
-<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    <span class="keywordflow">if</span> (startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a55e75679519f1006e7a5f0e0aff63d70">status</a>() == <a class="code hl_enumvalue" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0a2f880f57250b513d1f458b95c04aa799">StartupOptions::Status::ShowInformation</a>) {</div>
-<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <span class="comment">// --help / --version. This is a WIN32-subsystem binary with no console</span></div>
-<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>        <span class="comment">// to print to, so the text goes in a dialog on every platform.</span></div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span>        QMessageBox::information(<span class="keyword">nullptr</span>, QStringLiteral(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>), startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a4302c6357bbcf9cbfbad42b8c466ae72">message</a>());</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>        <span class="keywordflow">return</span> 0;</div>
-<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span>    } <span class="comment">// if information requested</span></div>
-<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span> </div>
-<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): startup file = &#39;%1&#39;, message = &#39;%2&#39;&quot;</span>)</div>
-<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>                    .arg(startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a28dc1d90537a98bfc286ba0880b7d0cc">filePath</a>(), startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a4302c6357bbcf9cbfbad42b8c466ae72">message</a>()));</div>
-<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span> </div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>    <span class="comment">// Application icon — SeamlyLayout logo (SVG scales to all resolutions)</span></div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    app.setWindowIcon(QIcon(QStringLiteral(<span class="stringliteral">&quot;:/icons/seamly-layout.svg&quot;</span>)));</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>    <span class="comment">// Two transports, one parser (StartupOptions):</span></div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>    <span class="comment">//   • a positional &lt;svg-file&gt; — the CLI and the file association (Task 49);</span></div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    <span class="comment">//   • --svg-stdin — Seamly2D&#39;s Layout Mode, which sends the piece-mode</span></div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span>    <span class="comment">//     document as one stringified SVG on standard input and writes no file</span></div>
+<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span>    <span class="comment">//     (Seamly2D.5).</span></div>
+<div class="line"><a id="l00218" name="l00218"></a><span class="lineno">  218</span>    <span class="comment">//</span></div>
+<div class="line"><a id="l00219" name="l00219"></a><span class="lineno">  219</span>    <span class="comment">// Parsing happens here, AFTER the metadata above, so --version can report</span></div>
+<div class="line"><a id="l00220" name="l00220"></a><span class="lineno">  220</span>    <span class="comment">// the application name and version set there, and BEFORE the QML engine is</span></div>
+<div class="line"><a id="l00221" name="l00221"></a><span class="lineno">  221</span>    <span class="comment">// built, so --help / --version cost no startup.</span></div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno">  222</span>    <span class="comment">//</span></div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span>    <span class="comment">// Standard input is opened unconditionally but read only when --svg-stdin</span></div>
+<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span>    <span class="comment">// is set, so a launch from a shell or a desktop icon never blocks waiting</span></div>
+<div class="line"><a id="l00225" name="l00225"></a><span class="lineno">  225</span>    <span class="comment">// for input that will not come.</span></div>
+<div class="line"><a id="l00226" name="l00226"></a><span class="lineno">  226</span>    <span class="comment">//</span></div>
+<div class="line"><a id="l00227" name="l00227"></a><span class="lineno">  227</span>    <span class="comment">// The parsed result is only dispatched once the event loop is running (see</span></div>
+<div class="line"><a id="l00228" name="l00228"></a><span class="lineno">  228</span>    <span class="comment">// the QTimer::singleShot below): the QML window and its WebEngine canvases</span></div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno">  229</span>    <span class="comment">// must exist before an SVG can be pushed into them.</span></div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span>    <span class="comment">// -----------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span>    QFile standardInput;</div>
+<div class="line"><a id="l00232" name="l00232"></a><span class="lineno">  232</span>    <span class="comment">// A failed open is not fatal here: only --svg-stdin needs the channel, and</span></div>
+<div class="line"><a id="l00233" name="l00233"></a><span class="lineno">  233</span>    <span class="comment">// StartupOptions reports the unreadable device for that case itself.</span></div>
+<div class="line"><a id="l00234" name="l00234"></a><span class="lineno">  234</span>    <span class="keywordflow">if</span> (!standardInput.open(stdin, QIODevice::ReadOnly)) {</div>
+<div class="line"><a id="l00235" name="l00235"></a><span class="lineno">  235</span>        <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): standard input could not be opened&quot;</span>));</div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno">  236</span>    } <span class="comment">// if standard input is unavailable</span></div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span> </div>
+<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span>    <span class="keyword">const</span> <a class="code hl_class" href="../../de/dbc/classStartupOptions.html">StartupOptions</a> startupOptions = <a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a1e555cda9527db2236ed4a0c232a999c">StartupOptions::parse</a>(app.arguments(), &amp;standardInput);</div>
+<div class="line"><a id="l00239" name="l00239"></a><span class="lineno">  239</span> </div>
+<div class="line"><a id="l00240" name="l00240"></a><span class="lineno">  240</span>    <span class="keywordflow">if</span> (startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a55e75679519f1006e7a5f0e0aff63d70">status</a>() == <a class="code hl_enumvalue" href="../../de/dbc/classStartupOptions.html#a59a21068e0024d002cac7a56833ce9f0a2f880f57250b513d1f458b95c04aa799">StartupOptions::Status::ShowInformation</a>) {</div>
+<div class="line"><a id="l00241" name="l00241"></a><span class="lineno">  241</span>        <span class="comment">// --help / --version. This is a WIN32-subsystem binary with no console</span></div>
+<div class="line"><a id="l00242" name="l00242"></a><span class="lineno">  242</span>        <span class="comment">// to print to, so the text goes in a dialog on every platform.</span></div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno">  243</span>        QMessageBox::information(<span class="keyword">nullptr</span>, QStringLiteral(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>), startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a4302c6357bbcf9cbfbad42b8c466ae72">message</a>());</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>        <span class="keywordflow">return</span> 0;</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>    } <span class="comment">// if information requested</span></div>
 <div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span> </div>
-<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>    <span class="comment">// Quick Controls 2 style — Fusion as cross-platform base;</span></div>
-<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>    <span class="comment">// branding colours are applied via Theme.qml overrides in QML</span></div>
-<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span>    QQuickStyle::setStyle(QStringLiteral(<span class="stringliteral">&quot;Fusion&quot;</span>));</div>
-<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span> </div>
-<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>    <span class="comment">// Register CXX-Qt bridge types with the QML engine before loading any QML.</span></div>
-<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span>    <span class="comment">// qmltyperegistrar cannot process AppController&#39;s generated header through</span></div>
-<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>    <span class="comment">// CXX-Qt&#39;s template include chain, so registration is done here at runtime.</span></div>
-<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>    <span class="comment">// The QMetaObject used here comes from the moc output already compiled into</span></div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>    <span class="comment">// the cxxqt_bridge staticlib — no duplicate moc output is generated.</span></div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>    qmlRegisterType&lt;AppController&gt;(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>, 1, 0, <span class="stringliteral">&quot;AppController&quot;</span>);</div>
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): registered AppController with QML engine&quot;</span>));</div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span> </div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>    <span class="comment">// Register SettingsModel with the QML engine.</span></div>
-<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    <span class="comment">// qmltyperegistrar cannot resolve SettingsModel through cmake SOURCES</span></div>
-<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    <span class="comment">// automatically, so registration is done here at runtime.</span></div>
-<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>    qmlRegisterType&lt;SettingsModel&gt;(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>, 1, 0, <span class="stringliteral">&quot;SettingsModel&quot;</span>);</div>
-<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): registered SettingsModel with QML engine&quot;</span>));</div>
+<div class="line"><a id="l00247" name="l00247"></a><span class="lineno">  247</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): startup file = &#39;%1&#39;, message = &#39;%2&#39;&quot;</span>)</div>
+<div class="line"><a id="l00248" name="l00248"></a><span class="lineno">  248</span>                    .arg(startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a28dc1d90537a98bfc286ba0880b7d0cc">filePath</a>(), startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a4302c6357bbcf9cbfbad42b8c466ae72">message</a>()));</div>
+<div class="line"><a id="l00249" name="l00249"></a><span class="lineno">  249</span> </div>
+<div class="line"><a id="l00250" name="l00250"></a><span class="lineno">  250</span>    <span class="comment">// Application icon — SeamlyLayout logo (SVG scales to all resolutions)</span></div>
+<div class="line"><a id="l00251" name="l00251"></a><span class="lineno">  251</span>    app.setWindowIcon(QIcon(QStringLiteral(<span class="stringliteral">&quot;:/icons/seamly-layout.svg&quot;</span>)));</div>
+<div class="line"><a id="l00252" name="l00252"></a><span class="lineno">  252</span> </div>
+<div class="line"><a id="l00253" name="l00253"></a><span class="lineno">  253</span>    <span class="comment">// Quick Controls 2 style — Fusion as cross-platform base;</span></div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>    <span class="comment">// branding colours are applied via Theme.qml overrides in QML</span></div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>    QQuickStyle::setStyle(QStringLiteral(<span class="stringliteral">&quot;Fusion&quot;</span>));</div>
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span> </div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>    <span class="comment">// Register CXX-Qt bridge types with the QML engine before loading any QML.</span></div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>    <span class="comment">// qmltyperegistrar cannot process AppController&#39;s generated header through</span></div>
+<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span>    <span class="comment">// CXX-Qt&#39;s template include chain, so registration is done here at runtime.</span></div>
+<div class="line"><a id="l00260" name="l00260"></a><span class="lineno">  260</span>    <span class="comment">// The QMetaObject used here comes from the moc output already compiled into</span></div>
+<div class="line"><a id="l00261" name="l00261"></a><span class="lineno">  261</span>    <span class="comment">// the cxxqt_bridge staticlib — no duplicate moc output is generated.</span></div>
+<div class="line"><a id="l00262" name="l00262"></a><span class="lineno">  262</span>    qmlRegisterType&lt;AppController&gt;(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>, 1, 0, <span class="stringliteral">&quot;AppController&quot;</span>);</div>
+<div class="line"><a id="l00263" name="l00263"></a><span class="lineno">  263</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): registered AppController with QML engine&quot;</span>));</div>
 <div class="line"><a id="l00264" name="l00264"></a><span class="lineno">  264</span> </div>
-<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    <span class="comment">// Register PreferencesModel with the QML engine.</span></div>
-<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>    qmlRegisterType&lt;PreferencesModel&gt;(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>, 1, 0, <span class="stringliteral">&quot;PreferencesModel&quot;</span>);</div>
-<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): registered PreferencesModel with QML engine&quot;</span>));</div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span> </div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>    <span class="comment">// Register AdjustController with the QML engine.</span></div>
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>    <span class="comment">// Owns the QtWidgets AdjustWindow; QML calls launchAdjustWindow() to open it.</span></div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>    qmlRegisterType&lt;AdjustController&gt;(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>, 1, 0, <span class="stringliteral">&quot;AdjustController&quot;</span>);</div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): registered AdjustController with QML engine&quot;</span>));</div>
-<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span> </div>
-<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span>    <span class="comment">// Register PreferencesController with the QML engine.</span></div>
-<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    <span class="comment">// Owns the QtWidgets PreferencesWindow; QML calls openPreferences() to show it.</span></div>
-<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>    qmlRegisterType&lt;PreferencesController&gt;(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>, 1, 0, <span class="stringliteral">&quot;PreferencesController&quot;</span>);</div>
-<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): registered PreferencesController with QML engine&quot;</span>));</div>
-<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span> </div>
-<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span>    <span class="comment">// QML application engine — loads the SeamlyLayout QML module</span></div>
-<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>    QQmlApplicationEngine engine;</div>
-<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span> </div>
-<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>    <span class="comment">// Abort if the root QML object fails to load</span></div>
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>    QObject::connect(</div>
-<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>        &amp;engine,</div>
-<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>        &amp;QQmlApplicationEngine::objectCreationFailed,</div>
-<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>        &amp;app,</div>
-<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span>        []() { QCoreApplication::exit(-1); },</div>
-<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>        Qt::QueuedConnection</div>
-<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>    );</div>
-<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span> </div>
-<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>    <span class="comment">// Load the root QML component from the registered SeamlyLayout module.</span></div>
-<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>    <span class="comment">// Note: QQmlApplicationEngine internally creates a QQuickWindow as part of</span></div>
-<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>    <span class="comment">// loading Main.qml, and Main.qml itself declares ApplicationWindow (which</span></div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>    <span class="comment">// is a QQuickWindowQmlImpl subclass of QQuickWindow).  This means</span></div>
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>    <span class="comment">// xChanged(int) and yChanged(int) are registered once on QQuickWindow by Qt</span></div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>    <span class="comment">// and again on QQuickWindowQmlImpl — producing four console messages at startup:</span></div>
+<div class="line"><a id="l00265" name="l00265"></a><span class="lineno">  265</span>    <span class="comment">// Register SettingsModel with the QML engine.</span></div>
+<div class="line"><a id="l00266" name="l00266"></a><span class="lineno">  266</span>    <span class="comment">// qmltyperegistrar cannot resolve SettingsModel through cmake SOURCES</span></div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>    <span class="comment">// automatically, so registration is done here at runtime.</span></div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>    qmlRegisterType&lt;SettingsModel&gt;(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>, 1, 0, <span class="stringliteral">&quot;SettingsModel&quot;</span>);</div>
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): registered SettingsModel with QML engine&quot;</span>));</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span> </div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>    <span class="comment">// Register PreferencesModel with the QML engine.</span></div>
+<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span>    qmlRegisterType&lt;PreferencesModel&gt;(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>, 1, 0, <span class="stringliteral">&quot;PreferencesModel&quot;</span>);</div>
+<div class="line"><a id="l00273" name="l00273"></a><span class="lineno">  273</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): registered PreferencesModel with QML engine&quot;</span>));</div>
+<div class="line"><a id="l00274" name="l00274"></a><span class="lineno">  274</span> </div>
+<div class="line"><a id="l00275" name="l00275"></a><span class="lineno">  275</span>    <span class="comment">// Register AdjustController with the QML engine.</span></div>
+<div class="line"><a id="l00276" name="l00276"></a><span class="lineno">  276</span>    <span class="comment">// Owns the QtWidgets AdjustWindow; QML calls launchAdjustWindow() to open it.</span></div>
+<div class="line"><a id="l00277" name="l00277"></a><span class="lineno">  277</span>    qmlRegisterType&lt;AdjustController&gt;(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>, 1, 0, <span class="stringliteral">&quot;AdjustController&quot;</span>);</div>
+<div class="line"><a id="l00278" name="l00278"></a><span class="lineno">  278</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): registered AdjustController with QML engine&quot;</span>));</div>
+<div class="line"><a id="l00279" name="l00279"></a><span class="lineno">  279</span> </div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>    <span class="comment">// Register PreferencesController with the QML engine.</span></div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>    <span class="comment">// Owns the QtWidgets PreferencesWindow; QML calls openPreferences() to show it.</span></div>
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>    qmlRegisterType&lt;PreferencesController&gt;(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>, 1, 0, <span class="stringliteral">&quot;PreferencesController&quot;</span>);</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): registered PreferencesController with QML engine&quot;</span>));</div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span> </div>
+<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span>    <span class="comment">// QML application engine — loads the SeamlyLayout QML module</span></div>
+<div class="line"><a id="l00286" name="l00286"></a><span class="lineno">  286</span>    QQmlApplicationEngine engine;</div>
+<div class="line"><a id="l00287" name="l00287"></a><span class="lineno">  287</span> </div>
+<div class="line"><a id="l00288" name="l00288"></a><span class="lineno">  288</span>    <span class="comment">// Abort if the root QML object fails to load</span></div>
+<div class="line"><a id="l00289" name="l00289"></a><span class="lineno">  289</span>    QObject::connect(</div>
+<div class="line"><a id="l00290" name="l00290"></a><span class="lineno">  290</span>        &amp;engine,</div>
+<div class="line"><a id="l00291" name="l00291"></a><span class="lineno">  291</span>        &amp;QQmlApplicationEngine::objectCreationFailed,</div>
+<div class="line"><a id="l00292" name="l00292"></a><span class="lineno">  292</span>        &amp;app,</div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>        []() { QCoreApplication::exit(-1); },</div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>        Qt::QueuedConnection</div>
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>    );</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span> </div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>    <span class="comment">// Load the root QML component from the registered SeamlyLayout module.</span></div>
 <div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>    <span class="comment">//   QMetaObject::indexOfSignal: signal xChanged(int) from QQuickWindow</span></div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>    <span class="comment">//     redefined in QQuickWindowQmlImpl</span></div>
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>    <span class="comment">//   QMetaObject::indexOfSignal: signal yChanged(int) from QQuickWindow</span></div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>    <span class="comment">//     redefined in QQuickWindowQmlImpl</span></div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>    <span class="comment">//   (repeated once more for the second engine pass)</span></div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span>    <span class="comment">// Note: QQmlApplicationEngine internally creates a QQuickWindow as part of</span></div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>    <span class="comment">// loading Main.qml, and Main.qml itself declares ApplicationWindow (which</span></div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>    <span class="comment">// is a QQuickWindowQmlImpl subclass of QQuickWindow).  This means</span></div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span>    <span class="comment">// xChanged(int) and yChanged(int) are registered once on QQuickWindow by Qt</span></div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span>    <span class="comment">// and again on QQuickWindowQmlImpl — producing four console messages at startup:</span></div>
 <div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>    <span class="comment">// These messages are Qt-internal noise from the QML meta-object system; they</span></div>
-<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>    <span class="comment">// do not indicate a bug and have no effect on behaviour.  They will disappear</span></div>
-<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    <span class="comment">// if Qt ever deduplicates the signal declarations between the two classes.</span></div>
-<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>    <span class="comment">// Safe to ignore.</span></div>
-<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): loading QML module SeamlyLayout::Main&quot;</span>));</div>
-<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>    engine.loadFromModule(QStringLiteral(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>), QStringLiteral(<span class="stringliteral">&quot;Main&quot;</span>));</div>
-<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span> </div>
-<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span><span class="preprocessor">#ifdef Q_OS_WIN</span></div>
-<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>    <span class="comment">// Set Windows title bar color to violetMedium (#7351ad)</span></div>
-<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>    <span class="comment">// COLORREF format is 0x00BBGGRR, so #7351ad becomes 0x00ad5173</span></div>
-<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>    QObject::connect(&amp;engine, &amp;QQmlApplicationEngine::objectCreated, &amp;app,</div>
-<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>        [](QObject *obj, <span class="keyword">const</span> QUrl &amp;) {</div>
-<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span>            <span class="keywordflow">if</span> (<span class="keyword">auto</span> *window = qobject_cast&lt;QQuickWindow *&gt;(obj)) {</div>
-<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span>                setWindowsTitleBarColor(window, 0x00ad5173);</div>
-<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>            } <span class="comment">// if window cast succeeded</span></div>
-<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>        }, Qt::QueuedConnection);</div>
-<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span> </div>
-<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span><span class="preprocessor">#ifdef Q_OS_MACOS</span></div>
-<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>    <span class="comment">// Set macOS title bar color to violetMedium (#7351ad = RGB 115, 81, 173)</span></div>
-<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>    QObject::connect(&amp;engine, &amp;QQmlApplicationEngine::objectCreated, &amp;app,</div>
-<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>        [](QObject *obj, <span class="keyword">const</span> QUrl &amp;) {</div>
-<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span>            <span class="keywordflow">if</span> (<span class="keyword">auto</span> *window = qobject_cast&lt;QQuickWindow *&gt;(obj)) {</div>
-<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span>                setMacOSTitleBarColor(window, 115, 81, 173);</div>
-<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span>            } <span class="comment">// if window cast succeeded</span></div>
-<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>        }, Qt::QueuedConnection);</div>
-<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span> </div>
-<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>    <span class="comment">// -----------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>    <span class="comment">// Task 49 — act on the command line once the event loop is running.</span></div>
-<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>    <span class="comment">// A zero-delay single shot fires on the first pass of the event loop, by</span></div>
-<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span>    <span class="comment">// which time Main.qml&#39;s root ApplicationWindow (and the two SvgCanvas</span></div>
-<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span>    <span class="comment">// WebEngineViews inside it) have been constructed and shown. Calling the</span></div>
-<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>    <span class="comment">// QML functions directly after loadFromModule() would push the SVG into a</span></div>
-<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>    <span class="comment">// canvas whose web view has not yet been realised.</span></div>
+<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span>    <span class="comment">//   QMetaObject::indexOfSignal: signal xChanged(int) from QQuickWindow</span></div>
+<div class="line"><a id="l00306" name="l00306"></a><span class="lineno">  306</span>    <span class="comment">//     redefined in QQuickWindowQmlImpl</span></div>
+<div class="line"><a id="l00307" name="l00307"></a><span class="lineno">  307</span>    <span class="comment">//   QMetaObject::indexOfSignal: signal yChanged(int) from QQuickWindow</span></div>
+<div class="line"><a id="l00308" name="l00308"></a><span class="lineno">  308</span>    <span class="comment">//     redefined in QQuickWindowQmlImpl</span></div>
+<div class="line"><a id="l00309" name="l00309"></a><span class="lineno">  309</span>    <span class="comment">//   (repeated once more for the second engine pass)</span></div>
+<div class="line"><a id="l00310" name="l00310"></a><span class="lineno">  310</span>    <span class="comment">//</span></div>
+<div class="line"><a id="l00311" name="l00311"></a><span class="lineno">  311</span>    <span class="comment">// These messages are Qt-internal noise from the QML meta-object system; they</span></div>
+<div class="line"><a id="l00312" name="l00312"></a><span class="lineno">  312</span>    <span class="comment">// do not indicate a bug and have no effect on behaviour.  They will disappear</span></div>
+<div class="line"><a id="l00313" name="l00313"></a><span class="lineno">  313</span>    <span class="comment">// if Qt ever deduplicates the signal declarations between the two classes.</span></div>
+<div class="line"><a id="l00314" name="l00314"></a><span class="lineno">  314</span>    <span class="comment">// Safe to ignore.</span></div>
+<div class="line"><a id="l00315" name="l00315"></a><span class="lineno">  315</span>    <a class="code hl_function" href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a>(QStringLiteral(<span class="stringliteral">&quot;main(): loading QML module SeamlyLayout::Main&quot;</span>));</div>
+<div class="line"><a id="l00316" name="l00316"></a><span class="lineno">  316</span>    engine.loadFromModule(QStringLiteral(<span class="stringliteral">&quot;SeamlyLayout&quot;</span>), QStringLiteral(<span class="stringliteral">&quot;Main&quot;</span>));</div>
+<div class="line"><a id="l00317" name="l00317"></a><span class="lineno">  317</span> </div>
+<div class="line"><a id="l00318" name="l00318"></a><span class="lineno">  318</span><span class="preprocessor">#ifdef Q_OS_WIN</span></div>
+<div class="line"><a id="l00319" name="l00319"></a><span class="lineno">  319</span>    <span class="comment">// Set Windows title bar color to violetMedium (#7351ad)</span></div>
+<div class="line"><a id="l00320" name="l00320"></a><span class="lineno">  320</span>    <span class="comment">// COLORREF format is 0x00BBGGRR, so #7351ad becomes 0x00ad5173</span></div>
+<div class="line"><a id="l00321" name="l00321"></a><span class="lineno">  321</span>    QObject::connect(&amp;engine, &amp;QQmlApplicationEngine::objectCreated, &amp;app,</div>
+<div class="line"><a id="l00322" name="l00322"></a><span class="lineno">  322</span>        [](QObject *obj, <span class="keyword">const</span> QUrl &amp;) {</div>
+<div class="line"><a id="l00323" name="l00323"></a><span class="lineno">  323</span>            <span class="keywordflow">if</span> (<span class="keyword">auto</span> *window = qobject_cast&lt;QQuickWindow *&gt;(obj)) {</div>
+<div class="line"><a id="l00324" name="l00324"></a><span class="lineno">  324</span>                setWindowsTitleBarColor(window, 0x00ad5173);</div>
+<div class="line"><a id="l00325" name="l00325"></a><span class="lineno">  325</span>            } <span class="comment">// if window cast succeeded</span></div>
+<div class="line"><a id="l00326" name="l00326"></a><span class="lineno">  326</span>        }, Qt::QueuedConnection);</div>
+<div class="line"><a id="l00327" name="l00327"></a><span class="lineno">  327</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00328" name="l00328"></a><span class="lineno">  328</span> </div>
+<div class="line"><a id="l00329" name="l00329"></a><span class="lineno">  329</span><span class="preprocessor">#ifdef Q_OS_MACOS</span></div>
+<div class="line"><a id="l00330" name="l00330"></a><span class="lineno">  330</span>    <span class="comment">// Set macOS title bar color to violetMedium (#7351ad = RGB 115, 81, 173)</span></div>
+<div class="line"><a id="l00331" name="l00331"></a><span class="lineno">  331</span>    QObject::connect(&amp;engine, &amp;QQmlApplicationEngine::objectCreated, &amp;app,</div>
+<div class="line"><a id="l00332" name="l00332"></a><span class="lineno">  332</span>        [](QObject *obj, <span class="keyword">const</span> QUrl &amp;) {</div>
+<div class="line"><a id="l00333" name="l00333"></a><span class="lineno">  333</span>            <span class="keywordflow">if</span> (<span class="keyword">auto</span> *window = qobject_cast&lt;QQuickWindow *&gt;(obj)) {</div>
+<div class="line"><a id="l00334" name="l00334"></a><span class="lineno">  334</span>                setMacOSTitleBarColor(window, 115, 81, 173);</div>
+<div class="line"><a id="l00335" name="l00335"></a><span class="lineno">  335</span>            } <span class="comment">// if window cast succeeded</span></div>
+<div class="line"><a id="l00336" name="l00336"></a><span class="lineno">  336</span>        }, Qt::QueuedConnection);</div>
+<div class="line"><a id="l00337" name="l00337"></a><span class="lineno">  337</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00338" name="l00338"></a><span class="lineno">  338</span> </div>
+<div class="line"><a id="l00339" name="l00339"></a><span class="lineno">  339</span>    <span class="comment">// -----------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00340" name="l00340"></a><span class="lineno">  340</span>    <span class="comment">// Task 49 — act on the command line once the event loop is running.</span></div>
 <div class="line"><a id="l00341" name="l00341"></a><span class="lineno">  341</span>    <span class="comment">//</span></div>
-<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>    <span class="comment">// The lambda captures `engine` by reference: it lives on this stack frame</span></div>
-<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>    <span class="comment">// for the whole of app.exec(), which is the only time the timer can fire.</span></div>
-<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>    <span class="comment">// -----------------------------------------------------------------------</span></div>
-<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>    <span class="comment">// Task SettingsFiles.5 — show the fresh-install notice on the first pass</span></div>
-<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>    <span class="comment">// of the event loop, after Main.qml&#39;s window is up, so the dialog has a</span></div>
-<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>    <span class="comment">// visible application behind it.</span></div>
-<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>    QTimer::singleShot(0, &amp;app, []() { <a class="code hl_function" href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp.html#a3c0755013c092c6a43980aa0f7c12749">showFirstRunDataNoticeIfPending</a>(); });</div>
-<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span> </div>
-<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>    <span class="keywordflow">if</span> (startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a8e628ea717532b590de898e9a961069f">hasFile</a>() || startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a87ea4e2612be4c5442c0fd71e76481aa">hasDocument</a>() || startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a8ba929d6b4f5541a8d2c00fe36371137">hasError</a>()) {</div>
-<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>        QTimer::singleShot(0, &amp;app, [&amp;engine, startupOptions]() {</div>
-<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>            <span class="keyword">const</span> <a class="code hl_class" href="../../d1/d4a/classQList.html">QList&lt;QObject *&gt;</a> rootObjects = engine.rootObjects();</div>
-<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>            <span class="keywordflow">if</span> (rootObjects.isEmpty()) {</div>
-<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>                <span class="comment">// QML failed to load; objectCreationFailed above is already</span></div>
-<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span>                <span class="comment">// tearing the application down. Nothing to hand the SVG to.</span></div>
-<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>                Logger::log(QStringLiteral(<span class="stringliteral">&quot;main(): no QML root object — startup SVG dropped&quot;</span>));</div>
-<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>                return;</div>
-<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>            } <span class="comment">// if rootObjects.isEmpty()</span></div>
-<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span> </div>
-<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>            QObject *<span class="keyword">const</span> window = rootObjects.constFirst();</div>
-<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span> </div>
-<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>            if (startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a8e628ea717532b590de898e9a961069f">hasFile</a>()) {</div>
-<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>                <span class="comment">// Main.qml: function openSvgFile(localPath) — the same entry</span></div>
-<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>                <span class="comment">// point the Import SVG file dialog uses, so the command line and</span></div>
-<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span>                <span class="comment">// a manual import cannot diverge.</span></div>
-<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>                Logger::log(QStringLiteral(<span class="stringliteral">&quot;main(): opening startup file %1&quot;</span>).arg(startupOptions.filePath()));</div>
-<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span>                QMetaObject::invokeMethod(window,</div>
-<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>                                          <span class="stringliteral">&quot;openSvgFile&quot;</span>,</div>
-<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>                                          Q_ARG(QVariant, QVariant(startupOptions.filePath())));</div>
-<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>            } <span class="keywordflow">else</span> if (startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a87ea4e2612be4c5442c0fd71e76481aa">hasDocument</a>()) {</div>
-<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>                <span class="comment">// Main.qml: function openSvgDocument(svgText, documentName) —</span></div>
-<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>                <span class="comment">// the Seamly2D piece-mode handoff (Seamly2D.5). The document</span></div>
-<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>                <span class="comment">// came in on standard input; nothing was written to disk.</span></div>
-<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>                Logger::log(QStringLiteral(<span class="stringliteral">&quot;main(): opening startup document &#39;%1&#39; of %2 characters&quot;</span>)</div>
-<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>                                .arg(startupOptions.documentName())</div>
-<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>                                .arg(startupOptions.svgDocument().size()));</div>
-<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>                QMetaObject::invokeMethod(window,</div>
-<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>                                          <span class="stringliteral">&quot;openSvgDocument&quot;</span>,</div>
-<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>                                          Q_ARG(QVariant, QVariant(startupOptions.svgDocument())),</div>
-<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>                                          Q_ARG(QVariant, QVariant(startupOptions.documentName())));</div>
-<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>            } <span class="keywordflow">else</span> {</div>
-<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>                <span class="comment">// Main.qml: function reportStartupError(message) — shows the</span></div>
-<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>                <span class="comment">// error dialog over the empty canvas instead of leaving the</span></div>
-<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>                <span class="comment">// user to guess why nothing opened.</span></div>
-<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>                Logger::log(QStringLiteral(<span class="stringliteral">&quot;main(): startup error: %1&quot;</span>).arg(startupOptions.message()));</div>
-<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>                QMetaObject::invokeMethod(window,</div>
-<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>                                          <span class="stringliteral">&quot;reportStartupError&quot;</span>,</div>
-<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>                                          Q_ARG(QVariant, QVariant(startupOptions.message())));</div>
-<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>            } <span class="comment">// if hasFile</span></div>
-<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>        }); <span class="comment">// QTimer::singleShot</span></div>
-<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>    } <span class="comment">// if a startup file, document or error is pending</span></div>
-<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span> </div>
-<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>    <span class="keywordflow">return</span> app.exec();</div>
-<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>} <span class="comment">// main</span></div>
+<div class="line"><a id="l00342" name="l00342"></a><span class="lineno">  342</span>    <span class="comment">// A zero-delay single shot fires on the first pass of the event loop, by</span></div>
+<div class="line"><a id="l00343" name="l00343"></a><span class="lineno">  343</span>    <span class="comment">// which time Main.qml&#39;s root ApplicationWindow (and the two SvgCanvas</span></div>
+<div class="line"><a id="l00344" name="l00344"></a><span class="lineno">  344</span>    <span class="comment">// WebEngineViews inside it) have been constructed and shown. Calling the</span></div>
+<div class="line"><a id="l00345" name="l00345"></a><span class="lineno">  345</span>    <span class="comment">// QML functions directly after loadFromModule() would push the SVG into a</span></div>
+<div class="line"><a id="l00346" name="l00346"></a><span class="lineno">  346</span>    <span class="comment">// canvas whose web view has not yet been realised.</span></div>
+<div class="line"><a id="l00347" name="l00347"></a><span class="lineno">  347</span>    <span class="comment">//</span></div>
+<div class="line"><a id="l00348" name="l00348"></a><span class="lineno">  348</span>    <span class="comment">// The lambda captures `engine` by reference: it lives on this stack frame</span></div>
+<div class="line"><a id="l00349" name="l00349"></a><span class="lineno">  349</span>    <span class="comment">// for the whole of app.exec(), which is the only time the timer can fire.</span></div>
+<div class="line"><a id="l00350" name="l00350"></a><span class="lineno">  350</span>    <span class="comment">// -----------------------------------------------------------------------</span></div>
+<div class="line"><a id="l00351" name="l00351"></a><span class="lineno">  351</span>    <span class="comment">// Task SettingsFiles.5 — show the fresh-install notice on the first pass</span></div>
+<div class="line"><a id="l00352" name="l00352"></a><span class="lineno">  352</span>    <span class="comment">// of the event loop, after Main.qml&#39;s window is up, so the dialog has a</span></div>
+<div class="line"><a id="l00353" name="l00353"></a><span class="lineno">  353</span>    <span class="comment">// visible application behind it.</span></div>
+<div class="line"><a id="l00354" name="l00354"></a><span class="lineno">  354</span>    QTimer::singleShot(0, &amp;app, []() { <a class="code hl_function" href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp.html#a3c0755013c092c6a43980aa0f7c12749">showFirstRunDataNoticeIfPending</a>(); });</div>
+<div class="line"><a id="l00355" name="l00355"></a><span class="lineno">  355</span> </div>
+<div class="line"><a id="l00356" name="l00356"></a><span class="lineno">  356</span>    <span class="keywordflow">if</span> (startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a8e628ea717532b590de898e9a961069f">hasFile</a>() || startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a87ea4e2612be4c5442c0fd71e76481aa">hasDocument</a>() || startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a8ba929d6b4f5541a8d2c00fe36371137">hasError</a>()) {</div>
+<div class="line"><a id="l00357" name="l00357"></a><span class="lineno">  357</span>        QTimer::singleShot(0, &amp;app, [&amp;engine, startupOptions]() {</div>
+<div class="line"><a id="l00358" name="l00358"></a><span class="lineno">  358</span>            <span class="keyword">const</span> <a class="code hl_class" href="../../d1/d4a/classQList.html">QList&lt;QObject *&gt;</a> rootObjects = engine.rootObjects();</div>
+<div class="line"><a id="l00359" name="l00359"></a><span class="lineno">  359</span>            <span class="keywordflow">if</span> (rootObjects.isEmpty()) {</div>
+<div class="line"><a id="l00360" name="l00360"></a><span class="lineno">  360</span>                <span class="comment">// QML failed to load; objectCreationFailed above is already</span></div>
+<div class="line"><a id="l00361" name="l00361"></a><span class="lineno">  361</span>                <span class="comment">// tearing the application down. Nothing to hand the SVG to.</span></div>
+<div class="line"><a id="l00362" name="l00362"></a><span class="lineno">  362</span>                Logger::log(QStringLiteral(<span class="stringliteral">&quot;main(): no QML root object — startup SVG dropped&quot;</span>));</div>
+<div class="line"><a id="l00363" name="l00363"></a><span class="lineno">  363</span>                return;</div>
+<div class="line"><a id="l00364" name="l00364"></a><span class="lineno">  364</span>            } <span class="comment">// if rootObjects.isEmpty()</span></div>
+<div class="line"><a id="l00365" name="l00365"></a><span class="lineno">  365</span> </div>
+<div class="line"><a id="l00366" name="l00366"></a><span class="lineno">  366</span>            QObject *<span class="keyword">const</span> window = rootObjects.constFirst();</div>
+<div class="line"><a id="l00367" name="l00367"></a><span class="lineno">  367</span> </div>
+<div class="line"><a id="l00368" name="l00368"></a><span class="lineno">  368</span>            if (startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a8e628ea717532b590de898e9a961069f">hasFile</a>()) {</div>
+<div class="line"><a id="l00369" name="l00369"></a><span class="lineno">  369</span>                <span class="comment">// Main.qml: function openSvgFile(localPath) — the same entry</span></div>
+<div class="line"><a id="l00370" name="l00370"></a><span class="lineno">  370</span>                <span class="comment">// point the Import SVG file dialog uses, so the command line and</span></div>
+<div class="line"><a id="l00371" name="l00371"></a><span class="lineno">  371</span>                <span class="comment">// a manual import cannot diverge.</span></div>
+<div class="line"><a id="l00372" name="l00372"></a><span class="lineno">  372</span>                Logger::log(QStringLiteral(<span class="stringliteral">&quot;main(): opening startup file %1&quot;</span>).arg(startupOptions.filePath()));</div>
+<div class="line"><a id="l00373" name="l00373"></a><span class="lineno">  373</span>                QMetaObject::invokeMethod(window,</div>
+<div class="line"><a id="l00374" name="l00374"></a><span class="lineno">  374</span>                                          <span class="stringliteral">&quot;openSvgFile&quot;</span>,</div>
+<div class="line"><a id="l00375" name="l00375"></a><span class="lineno">  375</span>                                          Q_ARG(QVariant, QVariant(startupOptions.filePath())));</div>
+<div class="line"><a id="l00376" name="l00376"></a><span class="lineno">  376</span>            } <span class="keywordflow">else</span> if (startupOptions.<a class="code hl_function" href="../../de/dbc/classStartupOptions.html#a87ea4e2612be4c5442c0fd71e76481aa">hasDocument</a>()) {</div>
+<div class="line"><a id="l00377" name="l00377"></a><span class="lineno">  377</span>                <span class="comment">// Main.qml: function openSvgDocument(svgText, documentName) —</span></div>
+<div class="line"><a id="l00378" name="l00378"></a><span class="lineno">  378</span>                <span class="comment">// the Seamly2D piece-mode handoff (Seamly2D.5). The document</span></div>
+<div class="line"><a id="l00379" name="l00379"></a><span class="lineno">  379</span>                <span class="comment">// came in on standard input; nothing was written to disk.</span></div>
+<div class="line"><a id="l00380" name="l00380"></a><span class="lineno">  380</span>                Logger::log(QStringLiteral(<span class="stringliteral">&quot;main(): opening startup document &#39;%1&#39; of %2 characters&quot;</span>)</div>
+<div class="line"><a id="l00381" name="l00381"></a><span class="lineno">  381</span>                                .arg(startupOptions.documentName())</div>
+<div class="line"><a id="l00382" name="l00382"></a><span class="lineno">  382</span>                                .arg(startupOptions.svgDocument().size()));</div>
+<div class="line"><a id="l00383" name="l00383"></a><span class="lineno">  383</span>                QMetaObject::invokeMethod(window,</div>
+<div class="line"><a id="l00384" name="l00384"></a><span class="lineno">  384</span>                                          <span class="stringliteral">&quot;openSvgDocument&quot;</span>,</div>
+<div class="line"><a id="l00385" name="l00385"></a><span class="lineno">  385</span>                                          Q_ARG(QVariant, QVariant(startupOptions.svgDocument())),</div>
+<div class="line"><a id="l00386" name="l00386"></a><span class="lineno">  386</span>                                          Q_ARG(QVariant, QVariant(startupOptions.documentName())));</div>
+<div class="line"><a id="l00387" name="l00387"></a><span class="lineno">  387</span>            } <span class="keywordflow">else</span> {</div>
+<div class="line"><a id="l00388" name="l00388"></a><span class="lineno">  388</span>                <span class="comment">// Main.qml: function reportStartupError(message) — shows the</span></div>
+<div class="line"><a id="l00389" name="l00389"></a><span class="lineno">  389</span>                <span class="comment">// error dialog over the empty canvas instead of leaving the</span></div>
+<div class="line"><a id="l00390" name="l00390"></a><span class="lineno">  390</span>                <span class="comment">// user to guess why nothing opened.</span></div>
+<div class="line"><a id="l00391" name="l00391"></a><span class="lineno">  391</span>                Logger::log(QStringLiteral(<span class="stringliteral">&quot;main(): startup error: %1&quot;</span>).arg(startupOptions.message()));</div>
+<div class="line"><a id="l00392" name="l00392"></a><span class="lineno">  392</span>                QMetaObject::invokeMethod(window,</div>
+<div class="line"><a id="l00393" name="l00393"></a><span class="lineno">  393</span>                                          <span class="stringliteral">&quot;reportStartupError&quot;</span>,</div>
+<div class="line"><a id="l00394" name="l00394"></a><span class="lineno">  394</span>                                          Q_ARG(QVariant, QVariant(startupOptions.message())));</div>
+<div class="line"><a id="l00395" name="l00395"></a><span class="lineno">  395</span>            } <span class="comment">// if hasFile</span></div>
+<div class="line"><a id="l00396" name="l00396"></a><span class="lineno">  396</span>        }); <span class="comment">// QTimer::singleShot</span></div>
+<div class="line"><a id="l00397" name="l00397"></a><span class="lineno">  397</span>    } <span class="comment">// if a startup file, document or error is pending</span></div>
+<div class="line"><a id="l00398" name="l00398"></a><span class="lineno">  398</span> </div>
+<div class="line"><a id="l00399" name="l00399"></a><span class="lineno">  399</span>    <span class="keywordflow">return</span> app.exec();</div>
+<div class="line"><a id="l00400" name="l00400"></a><span class="lineno">  400</span>} <span class="comment">// main</span></div>
 <div class="ttc" id="aAdjustController_8h_html"><div class="ttname"><a href="../../d5/d77/AdjustController_8h.html">AdjustController.h</a></div></div>
 <div class="ttc" id="aLogger_8h_html"><div class="ttname"><a href="../../dd/da4/Logger_8h.html">Logger.h</a></div></div>
 <div class="ttc" id="aPlatform_8h_html"><div class="ttname"><a href="../../d9/dd0/Platform_8h.html">Platform.h</a></div></div>
@@ -504,10 +510,10 @@ $(document).ready(function(){initNavTree('d8/d4e/app_2seamlylayout_2qt__frontend
 <div class="ttc" id="aStartupOptions_8h_html"><div class="ttname"><a href="../../d8/dd0/StartupOptions_8h.html">StartupOptions.h</a></div></div>
 <div class="ttc" id="aapp_2seamly2d_2main_8cpp_html_a0ddf1224851353fc92bfbff6f499fa97"><div class="ttname"><a href="../../dc/d14/app_2seamly2d_2main_8cpp.html#a0ddf1224851353fc92bfbff6f499fa97">main</a></div><div class="ttdeci">int main(int argc, char *argv[])</div><div class="ttdoc">entry point of Seamly2D application</div><div class="ttdef"><b>Definition:</b> <a href="../../dc/d14/app_2seamly2d_2main_8cpp_source.html#l00068">main.cpp:68</a></div></div>
 <div class="ttc" id="aapp_2seamlylayout_2qt__frontend_2main_8cpp_html_a3c0755013c092c6a43980aa0f7c12749"><div class="ttname"><a href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp.html#a3c0755013c092c6a43980aa0f7c12749">showFirstRunDataNoticeIfPending</a></div><div class="ttdeci">static void showFirstRunDataNoticeIfPending()</div><div class="ttdef"><b>Definition:</b> <a href="../../d8/d4e/app_2seamlylayout_2qt__frontend_2main_8cpp_source.html#l00136">main.cpp:136</a></div></div>
-<div class="ttc" id="aclassLogger_html_a651107ec179fb76959e685d162274c5e"><div class="ttname"><a href="../../db/d67/classLogger.html#a651107ec179fb76959e685d162274c5e">Logger::debugEnabled</a></div><div class="ttdeci">static bool debugEnabled</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/da4/Logger_8h_source.html#l00034">Logger.h:34</a></div></div>
-<div class="ttc" id="aclassLogger_html_aaa6abe88083fd5b539ef22698143cade"><div class="ttname"><a href="../../db/d67/classLogger.html#aaa6abe88083fd5b539ef22698143cade">Logger::messageHandler</a></div><div class="ttdeci">static void messageHandler(QtMsgType type, const QMessageLogContext &amp;context, const QString &amp;msg)</div><div class="ttdef"><b>Definition:</b> <a href="../../d9/df5/Logger_8cpp_source.html#l00155">Logger.cpp:155</a></div></div>
-<div class="ttc" id="aclassLogger_html_ad9f38f9cc2d75a6207f4972427aa74f1"><div class="ttname"><a href="../../db/d67/classLogger.html#ad9f38f9cc2d75a6207f4972427aa74f1">Logger::init</a></div><div class="ttdeci">static void init()</div><div class="ttdef"><b>Definition:</b> <a href="../../d9/df5/Logger_8cpp_source.html#l00062">Logger.cpp:62</a></div></div>
-<div class="ttc" id="aclassLogger_html_adf7b20018fc772b0b7e376b0899ea804"><div class="ttname"><a href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a></div><div class="ttdeci">static void log(const QString &amp;message)</div><div class="ttdef"><b>Definition:</b> <a href="../../d9/df5/Logger_8cpp_source.html#l00137">Logger.cpp:137</a></div></div>
+<div class="ttc" id="aclassLogger_html_a651107ec179fb76959e685d162274c5e"><div class="ttname"><a href="../../db/d67/classLogger.html#a651107ec179fb76959e685d162274c5e">Logger::debugEnabled</a></div><div class="ttdeci">static bool debugEnabled</div><div class="ttdef"><b>Definition:</b> <a href="../../dd/da4/Logger_8h_source.html#l00035">Logger.h:35</a></div></div>
+<div class="ttc" id="aclassLogger_html_aaa6abe88083fd5b539ef22698143cade"><div class="ttname"><a href="../../db/d67/classLogger.html#aaa6abe88083fd5b539ef22698143cade">Logger::messageHandler</a></div><div class="ttdeci">static void messageHandler(QtMsgType type, const QMessageLogContext &amp;context, const QString &amp;msg)</div><div class="ttdef"><b>Definition:</b> <a href="../../d9/df5/Logger_8cpp_source.html#l00161">Logger.cpp:161</a></div></div>
+<div class="ttc" id="aclassLogger_html_ad9f38f9cc2d75a6207f4972427aa74f1"><div class="ttname"><a href="../../db/d67/classLogger.html#ad9f38f9cc2d75a6207f4972427aa74f1">Logger::init</a></div><div class="ttdeci">static void init()</div><div class="ttdef"><b>Definition:</b> <a href="../../d9/df5/Logger_8cpp_source.html#l00068">Logger.cpp:68</a></div></div>
+<div class="ttc" id="aclassLogger_html_adf7b20018fc772b0b7e376b0899ea804"><div class="ttname"><a href="../../db/d67/classLogger.html#adf7b20018fc772b0b7e376b0899ea804">Logger::log</a></div><div class="ttdeci">static void log(const QString &amp;message)</div><div class="ttdef"><b>Definition:</b> <a href="../../d9/df5/Logger_8cpp_source.html#l00143">Logger.cpp:143</a></div></div>
 <div class="ttc" id="aclassPlatform_html_aa5050217c75ef259917d280cff41c648"><div class="ttname"><a href="../../df/d1e/classPlatform.html#aa5050217c75ef259917d280cff41c648">Platform::init</a></div><div class="ttdeci">static void init()</div><div class="ttdef"><b>Definition:</b> <a href="../../d9/dd0/Platform_8h_source.html#l00036">Platform.h:36</a></div></div>
 <div class="ttc" id="aclassQList_html"><div class="ttname"><a href="../../d1/d4a/classQList.html">QList</a></div><div class="ttdef"><b>Definition:</b> <a href="../../d1/d07/vlayoutpaper_8h_source.html#l00069">vlayoutpaper.h:69</a></div></div>
 <div class="ttc" id="aclassStartupOptions_html"><div class="ttname"><a href="../../de/dbc/classStartupOptions.html">StartupOptions</a></div><div class="ttdef"><b>Definition:</b> <a href="../../d8/dd0/StartupOptions_8h_source.html#l00066">StartupOptions.h:67</a></div></div>

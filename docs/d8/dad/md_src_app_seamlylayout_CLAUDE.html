@@ -107,7 +107,7 @@ $(document).ready(function(){initNavTree('d8/dad/md_src_app_seamlylayout_CLAUDE.
 <li><b>Copyright:</b> 2026</li>
 <li><b>Prompts are requirements, not suggestions.</b></li>
 </ul>
-<h1><a class="anchor" id="autotoc_md20"></a>
+<h1><a class="anchor" id="autotoc_md27"></a>
 Architecture</h1>
 <ul>
 <li><b>Frontend:</b> Qt 6.11 + QML and QtWidgets (LGPL-3.0)</li>
@@ -115,7 +115,7 @@ Architecture</h1>
 <li><b>Bridge:</b> CXX-Qt 0.7.3 — generates C++ glue from Rust</li>
 <li><b>Dual license:</b> Qt frontend LGPL-3.0, Rust core MIT (de-linkable)</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md21"></a>
+<h1><a class="anchor" id="autotoc_md28"></a>
 Key Conventions</h1>
 <ul>
 <li>Always use absolute file paths, never relative paths</li>
@@ -125,7 +125,7 @@ Key Conventions</h1>
 <li>Read docs in <code>docs/</code> regularly and update them to reflect code changes</li>
 <li><b>UI work must consult <code>crates/cxxqt_bridge/</code> and <code>qt_frontend/</code>.</b> The active UI is QML in <code>qt_frontend/qml/</code> with the Rust↔Qt bridge in <code>crates/cxxqt_bridge/</code>.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md22"></a>
+<h1><a class="anchor" id="autotoc_md29"></a>
 Command Line — the Seamly2D handoff contract (Task 49, revised by Seamly2D.5)</h1>
 <p>Seamly2D's Layout Mode builds the tagged pieces SVG in memory, launches this app with <code>--svg-stdin</code>, then writes the document to the new process's standard input and closes the channel. <b>No file is written</b> — the earlier <code>&lt;pattern&gt;.pieces.svg</code> handoff is gone. The contract is implemented in <code>qt_frontend/src/StartupOptions.{h,cpp}</code> and pinned by <code><a class="el" href="../../d0/d3a/StartupOptionsTests_8cpp.html">src/test/SeamlyLayoutTest/StartupOptionsTests.cpp</a></code>; the producing half lives in <code><a class="el" href="../../dc/de6/seamly__suite__paths_8cpp.html">src/libs/vmisc/seamly_suite_paths.cpp</a></code> and is pinned by <code><a class="el" href="../../dc/daf/classTST__SeamlySuitePaths.html" title="TST_SeamlySuitePaths tests the two lookups seamly2d uses to find the SeamlyLayout executable.">TST_SeamlySuitePaths</a></code>. <b>Change one side and you must change the other</b> — see <code>project-docs/SVG-DATA-ATTRIBUTES.md</code> for the full statement.</p>
 <table class="markdownTable">
@@ -152,23 +152,23 @@ Command Line — the Seamly2D handoff contract (Task 49, revised by Seamly2D.5)<
 <li>**<code>id</code> is identity, <code>data-name</code> is what a user reads.** <code>PieceRect::label()</code> resolves <code>data-name</code> → <code>data-letter</code> → <code>id</code>; use it for warnings, error text and the Adjust overlay, never for element lookup.</li>
 <li>Dispatch happens from <code>main.cpp</code> on a <code>QTimer::singleShot(0, …)</code>, <b>after</b> the event loop starts — the QML window and its WebEngine canvases must exist before an SVG can be pushed into them.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md23"></a>
+<h1><a class="anchor" id="autotoc_md30"></a>
 Platform Support</h1>
 <p>Windows 11, Linux (all flavors), macOS (latest 3 versions)</p>
-<h1><a class="anchor" id="autotoc_md24"></a>
+<h1><a class="anchor" id="autotoc_md31"></a>
 Build Commands</h1>
 <ul>
 <li><b>Build with <code>packaging\windows\test_build_msi_local.ps1</code> from the repository root.</b> It builds all three apps, runs the Qt unit tests, and packages the Windows x64 MSI.</li>
 <li>Do <b>not</b> use <code>build.ps1</code> or <code>qd.ps1</code> any more (user decision, 2026-09-02). They build SeamlyLayout alone, which is not what the install-and-test loop needs. Both files still exist; treat them as unsupported.</li>
 <li>Tests stay where they are: <code>ctest --preset debug</code> for the Qt frontend suites, <code>cargo test --workspace</code> for the Rust crates.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md25"></a>
+<h1><a class="anchor" id="autotoc_md32"></a>
 Search &amp; Update Policy</h1>
 <ul>
 <li>When making changes, always search and update all code files ending in <code>.rs</code>, <code>.cpp</code>, <code>.cxx.cpp</code>, <code>.h</code>, and <code>.qml</code>.</li>
 <li>Always search and update all text files ending in <code>.md</code> and <code>.txt</code>.</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md26"></a>
+<h1><a class="anchor" id="autotoc_md33"></a>
 Rules</h1>
 <p>Detailed guidelines are in <code>.claude/rules/</code>:</p>
 <ul>
@@ -181,7 +181,7 @@ Rules</h1>
 <li><a href="../.././.claude/rules/svg-processing.mdc">svg-processing.mdc</a> — SVG/DOM manipulation guidelines</li>
 <li><a href="../.././.claude/rules/testing.mdc">testing.mdc</a> — Testing frameworks and commands</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md27"></a>
+<h1><a class="anchor" id="autotoc_md34"></a>
 Workflow Guidelines</h1>
 <ul>
 <li><a href="../.././.claude/rules/Guidelines_Export_DXF.mdc">Guidelines_Export_DXF.mdc</a> — DXF export pipeline</li>
@@ -189,7 +189,7 @@ Workflow Guidelines</h1>
 <li><a href="../.././.claude/rules/Guidelines_Settings.mdc">Guidelines_Settings.mdc</a> — Settings workflow and defaults</li>
 <li><a href="../.././.claude/rules/Guidelines_Tiling.mdc">Guidelines_Tiling.mdc</a> — Tiling calculation and reduction</li>
 </ul>
-<h1><a class="anchor" id="autotoc_md28"></a>
+<h1><a class="anchor" id="autotoc_md35"></a>
 Seamly Application Suite</h1>
 <table class="markdownTable">
 <tr class="markdownTableHead">

@@ -669,6 +669,7 @@ var hierarchy =
       [ "GraphicsViewZoom", "da/d19/classGraphicsViewZoom.html", null ],
       [ "ImageItem", "d6/da8/classImageItem.html", null ],
       [ "ImageTool", "df/d5b/classImageTool.html", null ],
+      [ "LoggerTests", "d9/d9b/classLoggerTests.html", null ],
       [ "PreferencesController", "d2/d34/classPreferencesController.html", null ],
       [ "PreferencesModel", "d9/d4e/classPreferencesModel.html", null ],
       [ "PreferencesModelTests", "d7/d0f/classPreferencesModelTests.html", null ],

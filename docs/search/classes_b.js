@@ -12,5 +12,6 @@ var searchData=
   ['localfileformattarget_9',['LocalFileFormatTarget',['../dc/d8f/classLocalFileFormatTarget.html',1,'']]],
   ['localfileinputsource_10',['LocalFileInputSource',['../dd/d30/classLocalFileInputSource.html',1,'']]],
   ['locator_11',['Locator',['../d3/d50/classLocator.html',1,'']]],
-  ['logger_12',['Logger',['../db/d67/classLogger.html',1,'']]]
+  ['logger_12',['Logger',['../db/d67/classLogger.html',1,'']]],
+  ['loggertests_13',['LoggerTests',['../d9/d9b/classLoggerTests.html',1,'']]]
 ];
