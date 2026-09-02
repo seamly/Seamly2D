@@ -120,23 +120,7 @@ These options in the Export menu will remain invisible to the user until these f
 - [ ] Layout.6.1 Export G-Code
 - [ ] Layout.6.2 Export 3DMesh
 
-## [ ] Task Layout.7 — Installer: write SeamlyLayout's desktop-shortcut flag to its own registry key
-
-Found during MSI Test Case verification, step 5c (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`). `SeamlyLayoutDesktopShortcutComponent`'s `RegistryValue` (`packaging/windows/smsi_shortcuts.wxs:95-100`) writes `DesktopShortcutSeamlyLayout` under `HKLM\SOFTWARE\Seamly\Seamly2D` instead of `HKLM\SOFTWARE\Seamly\SeamlyLayout`.
-
-- [ ] Layout.7.1 Change the SeamlyLayout's `RegistryValue`'s `Key` at `smsi_shortcuts.wxs:96` from `SOFTWARE\Seamly\Seamly2D` to `SOFTWARE\Seamly\SeamlyLayout`
-- [ ] Layout.7.2 Confirm `smsi_check_authoring.ps1:562` and `test_msi_install.ps1` still pass, and update either script if it asserts the old key
-- [ ] Layout.7.3 Re-run MSI Test Case verification step 5c to confirm `HKLM\SOFTWARE\Seamly\SeamlyLayout` carries `DesktopShortcutSeamlyLayout`
-
 ## [x] Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 
 ## [x] Task Layout.9 — Piece-mode handoff passes a file, not a stringified SVG document
 
-## [ ] Task Layout.10 — Move SeamlyLayout logs to %LOCALAPPDATA%\Seamly\SeamlyLayout\logs
-
-Found during MSI Test Case verification, step 7f (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`). `Logger::init()` writes session logs to `%LOCALAPPDATA%\SeamlyLayout\output\log_<timestamp>.txt` — outside the `Seamly` organization folder every other app-config file uses. Confirmed live on the 2026-08-31 pass: `log_260831204937.txt` written there during the app run. Seamly2D's pattern is `%LOCALAPPDATA%\Seamly\Seamly2D\logs`.
-
-- [ ] Layout.10.1 Change the log directory to `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` (AppConfigLocation + `logs`, same root as `qt6_seamlylayout.ini`).
-- [ ] Layout.10.2 Stop creating `%LOCALAPPDATA%\SeamlyLayout\` and its `output` subdirectory.
-- [ ] Layout.10.3 Add the new `logs` directory to `test_reset_environment.ps1` coverage if needed (removing `%LOCALAPPDATA%\Seamly` already covers it) and remove the stray `%LOCALAPPDATA%\SeamlyLayout` there too.
-- [ ] Layout.10.4 Re-run MSI Test Case verification step 7f to confirm.

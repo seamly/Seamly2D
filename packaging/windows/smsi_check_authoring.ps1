@@ -662,6 +662,16 @@ foreach ($app in @('SeamlyMe', 'SeamlyLayout')) {
             $_.Name -in @('InstallPath', 'DisplayVersion', 'DataRoot', 'DataParent') }).Count -eq 4)
 }
 
+# Layout.7 / SeamlyMe.3. Every desktop-shortcut breadcrumb used to land in the
+# Seamly2D key, so a reader could not tell which app a shortcut belonged to.
+# Each one now goes under its own app key.
+foreach ($app in @('Seamly2D', 'SeamlyMe', 'SeamlyLayout')) {
+    Assert-That -Name "DesktopShortcut$app is recorded under HKLM\SOFTWARE\Seamly\$app" `
+        -Succeeded (@($registry | Where-Object {
+            $_.Root -eq '2' -and $_.Key -eq "SOFTWARE\Seamly\$app" -and
+            $_.Name -eq "DesktopShortcut$app" }).Count -eq 1)
+}
+
 # --- 9. program folder and user-data root (Task InstWinX64.1.1 / 1.2) ----------
 # The program folder name is asserted here because three documents and the
 # migration authoring all name it; renaming it silently would leave them out of

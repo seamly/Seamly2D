@@ -12,7 +12,8 @@
 # **  Seamly product, %PROGRAMDIR%, %DATAROOT% and its contents,
 # **  %LOCALAPPDATA%\Seamly, %APPDATA%\Seamly, leftover
 # **  %APPDATA%\Unknown Organization(.ini) from the empty-organization-name
-# **  defect, and the Seamly registry keys under both HKLM and HKCU.
+# **  defect, the stray %LOCALAPPDATA%\SeamlyLayout tree left by builds
+# **  before 26.9.2, and the Seamly registry keys under both HKLM and HKCU.
 # **
 # **  This is test-support only. It is deliberately more destructive than the
 # **  shipped uninstall (packaging/windows/smsi_registry.wxs), which
@@ -168,6 +169,10 @@ Remove-PathIfPresent (Join-Path $env:APPDATA 'Seamly')
 Write-Host '=== 5. Removing leftover "Unknown Organization" artifacts (empty-organization-name defect) ==='
 Remove-PathIfPresent (Join-Path $env:APPDATA 'Unknown Organization.ini')
 Remove-PathIfPresent (Join-Path $env:APPDATA 'Unknown Organization')
+# Layout.10: builds before 26.9.2 opened the log file before main() set the
+# organization name, so SeamlyLayout wrote %LOCALAPPDATA%\SeamlyLayout\output.
+# Section 4 does not reach it, because it sits outside the Seamly folder.
+Remove-PathIfPresent (Join-Path $env:LOCALAPPDATA 'SeamlyLayout')
 
 Write-Host '=== 6. Removing Seamly registry keys ==='
 Remove-RegistryKeyIfPresent 'HKLM:\SOFTWARE\Seamly'

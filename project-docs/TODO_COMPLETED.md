@@ -2,6 +2,30 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task Layout.10 — SeamlyLayout logs moved to `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` (completed 2026-09-02)
+
+Found during MSI Test Case verification (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step B.3). SeamlyLayout wrote its session log to `%LOCALAPPDATA%\SeamlyLayout\output\log_<timestamp>.txt` — outside the shared `Seamly` organization folder that holds `qt6_seamlylayout.ini`, and under a directory named `output` rather than `logs`. Seamly2D's pattern is `%LOCALAPPDATA%\Seamly\Seamly2D\logs`.
+
+Two independent causes, both fixed:
+
+- `main()` called `Logger::init()` BEFORE `setOrganizationName()`/`setApplicationName()`. `QStandardPaths::AppConfigLocation` is built from those two names, so an empty organization put the root at `%LOCALAPPDATA%\SeamlyLayout\`. The metadata block now sits ahead of `Logger::init()` (`src/app/seamlylayout/qt_frontend/main.cpp`), with a comment stating the ordering requirement.
+- `Logger::init()` appended `/output`. It now appends `/logs` on every platform branch, and `clearOutputDirectory()` is renamed `clearLogDirectory()` (`src/app/seamlylayout/qt_frontend/src/Logger.cpp`, `Logger.h`).
+
+- [x] Layout.10.1 Log directory is `AppConfigLocation + /logs`, the same root as `qt6_seamlylayout.ini`.
+- [x] Layout.10.2 `%LOCALAPPDATA%\SeamlyLayout\output` is no longer created.
+- [x] Layout.10.3 `test_reset_environment.ps1` now removes the stray `%LOCALAPPDATA%\SeamlyLayout` tree. Section 4 does not reach it, because it sits outside the `Seamly` folder.
+- [x] Layout.10.4 Verified 2026-09-02 on build 26.9.2.996. A fresh wizard install, then SeamlyLayout launched from Seamly2D, wrote `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs\log_260902170116.txt` (2010 bytes). `%LOCALAPPDATA%\SeamlyLayout` does not exist. The reset run before the install deleted a real leftover of that directory, so the new coverage was exercised.
+
+New Qt suite `src/test/SeamlyLayoutTest/LoggerTests.cpp` with its own CMake target locks the path: it asserts the `logs` leaf, the organization and application segments, the absence of an `output` segment, the `log_YYMMDDHHMMSS.txt` name, and the startup clean-up. It runs under `QStandardPaths::setTestModeEnabled(true)`, so it never touches the real user configuration. 7 checks, all passing.
+
+## Task Layout.7 and Task SeamlyMe.3 — desktop-shortcut flags moved to their own registry keys (completed 2026-09-02)
+
+Found during MSI Test Case verification (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step B.1c). `smsi_shortcuts.wxs` wrote all three `DesktopShortcut*` values into `HKLM\SOFTWARE\Seamly\Seamly2D`, so a reader could not tell which app a shortcut belonged to. Fixed together, because it was one defect in one file.
+
+- [x] Layout.7.1 / SeamlyMe.3.1 `DesktopShortcutSeamlyMe` now writes to `SOFTWARE\Seamly\SeamlyMe` and `DesktopShortcutSeamlyLayout` to `SOFTWARE\Seamly\SeamlyLayout`. Both keys already existed, authored by `smsi_registry.wxs`, so no new key had to be created or removed on uninstall.
+- [x] Layout.7.2 / SeamlyMe.3.2 Neither check script asserted the old key, so neither broke. `smsi_check_authoring.ps1` had no assertion at all on these values — which is why the defect survived every earlier pass — and gained three, one per app. `test_msi_install.ps1` read all three breadcrumbs out of the Seamly2D key and never checked SeamlyLayout; it now reads each from its own key and covers all three.
+- [x] Layout.7.3 / SeamlyMe.3.3 Verified 2026-09-02 on build 26.9.2.996. After a fresh wizard install each key carries exactly its own flag: `Seamly2D\DesktopShortcutSeamly2D`, `SeamlyMe\DesktopShortcutSeamlyMe`, `SeamlyLayout\DesktopShortcutSeamlyLayout`, all `1`. All three desktop shortcuts exist with correct targets.
+
 ## Task SeamlyMe.5 — write SeamlyMe log files to `%LOCALAPPDATA%\Seamly\SeamlyMe\logs` (completed 2026-09-02)
 
 Found during MSI Test Case verification, step B.2b-v (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, 2026-09-01). SeamlyMe writes no log files and creates no logs directory — `ApplicationME` has no equivalent of `Application2D::logDirPath()`/`beginLogging()` (`src/app/seamly2d/core/application_2d.cpp:605`). Seamly2D writes to `%LOCALAPPDATA%\Seamly\Seamly2D\logs`; SeamlyMe must mirror that pattern.

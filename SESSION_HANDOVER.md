@@ -31,53 +31,120 @@ Some modifications predate this session and are not mine:
 `project-docs/TEST_MSI_WIN_X64_Test_Case_template.md`, `scripts/prompt.txt`,
 and the deletion of `project-docs/TODO_SETTINGS_FILES.md`.
 
-Two new untracked files to add:
-`project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md` and
-`scripts/prompt_testing.txt`.
+New untracked files to add:
+`project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md`,
+`scripts/prompt_testing.txt` and
+`src/test/SeamlyLayoutTest/LoggerTests.cpp`.
 
-Changed this session:
-`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md` (steps 0 and 1b),
-`project-docs/TODO_SEAMLYME.md` and `project-docs/TODO_COMPLETED.md`
-(`SeamlyMe.5` moved), `scripts/prompt_testing.txt` (step 5),
-and this file.
+Changed for the three tasks:
+`src/app/seamlylayout/qt_frontend/main.cpp`,
+`src/app/seamlylayout/qt_frontend/src/Logger.cpp` and `Logger.h`,
+`src/app/seamlylayout/qt_frontend/CMakeLists.txt`,
+`packaging/windows/smsi_shortcuts.wxs`,
+`packaging/windows/smsi_check_authoring.ps1`,
+`packaging/windows/test_msi_install.ps1`,
+`packaging/windows/test_reset_environment.ps1`,
+`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`,
+`project-docs/TODO_SEAMLYLAYOUT.md`, `project-docs/TODO_SEAMLYME.md`,
+`project-docs/TODO_COMPLETED.md`,
+`project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md`.
+
+Changed earlier in the session:
+`project-docs/TODO_COMPLETED.md` (`SeamlyMe.5` moved),
+`scripts/prompt_testing.txt` (step 5), and this file.
 
 ## Machine state
 
-- Installed: Seamly **26.9.2.664** in `C:\Program Files\SeamlyApps`
-  (seamly2d.exe, seamlyme.exe, SeamlyLayout.exe). MSI ProductVersion `26.9.2104`.
-- Installed 2026-09-02 by `msiexec /i ... /quiet /norestart` from an elevated
-  shell, onto a machine reset by `test_reset_environment.ps1`.
+- Installed: Seamly **26.9.2.996** in `C:\Program Files\SeamlyApps`
+  (seamly2d.exe, seamlyme.exe, SeamlyLayout.exe). MSI ProductVersion `26.9.2436`.
+- Installed 2026-09-02 through the **wizard** from an elevated shell, onto a
+  machine reset by `test_reset_environment.ps1`. Install log:
+  `%TEMP%\seamly_install.log`.
 - `%DATAROOT%` = `C:\Users\susan\Documents\SeamlyData`, seeded and populated:
-  9 subdirectories, 8 patterns, 4 measurement files.
+  8 subdirectories, 8 patterns, 3 individual measurement files.
 - All three apps have been run once, so every first-run artifact exists.
 
-**Elevation trap.** The VS Code integrated terminal is not elevated, and a
-UAC prompt raised from it fails at once with "The operation was canceled by the
-user". An unelevated `msiexec /i` fails at `InstallFinalize` with `Error 1925`
-and exit 1603 — after every earlier action returned 1, so the log looks healthy
-until the last page. Use a separate Administrator PowerShell window.
+**Elevation.** The VS Code integrated terminal is not elevated, but
+`Start-Process -Verb RunAs` DOES work when someone is present to accept the UAC
+prompt. It fails at once with "The operation was canceled by the user" when the
+prompt goes unanswered — that message means unanswered, not refused by policy.
+An unelevated `msiexec /i` fails at `InstallFinalize` with `Error 1925` and exit
+1603, after every earlier action returned 1, so the log looks healthy until the
+last page.
 
 ## Done this session
 
-### Test Case 1b-i walked end to end — PASS
+### Tasks Layout.10, Layout.7 and SeamlyMe.3 implemented, verified and closed
 
-Fresh install of 26.9.2.664. Section A and section B both complete. Every check
-passed except B.3, which is `Layout.10` and already filed.
+All three moved to `project-docs/TODO_COMPLETED.md`, with the full write-up
+there. Verified on a fresh wizard install of 26.9.2.996, 2026-09-02.
+
+**Layout.10 — SeamlyLayout logs move to `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs`.**
+Two separate causes, both fixed:
+
+- `main()` called `Logger::init()` BEFORE it set the organization and
+  application names. `AppConfigLocation` is built from those two names, so the
+  root resolved to `%LOCALAPPDATA%\SeamlyLayout\`. The metadata block now sits
+  ahead of `Logger::init()` (`main.cpp`), with a comment saying why the order
+  matters.
+- `Logger::init()` appended `/output`. It now appends `/logs`, on every
+  platform branch. `clearOutputDirectory()` is renamed `clearLogDirectory()`.
+
+`test_reset_environment.ps1` gained a removal for the stray
+`%LOCALAPPDATA%\SeamlyLayout` tree that older builds left behind; section 4
+does not reach it, because it sits outside the `Seamly` folder.
+
+New Qt suite `src/test/SeamlyLayoutTest/LoggerTests.cpp` plus its CMake target
+locks the path. It runs under `QStandardPaths::setTestModeEnabled(true)`, so it
+never touches the real user configuration. 7 checks, all passing.
+
+**Layout.7 + SeamlyMe.3 — each desktop-shortcut flag goes under its own key.**
+`smsi_shortcuts.wxs` wrote all three `DesktopShortcut*` values into
+`HKLM\SOFTWARE\Seamly\Seamly2D`. `DesktopShortcutSeamlyMe` now goes to
+`...\SeamlyMe` and `DesktopShortcutSeamlyLayout` to `...\SeamlyLayout`. Both
+keys already existed, authored by `smsi_registry.wxs`.
+
+- `smsi_check_authoring.ps1` gained three assertions, one per app. It had none
+  before, which is why the defect survived every earlier pass.
+- `test_msi_install.ps1` read all three breadcrumbs out of the Seamly2D key and
+  never checked SeamlyLayout at all. It now reads each from its own key and
+  covers all three.
+
+**Test Case 1b-i updated to match.** B.1c no longer says Seamly2D carries the
+three flags; new B.1d checks the per-app keys. B.3 changed from "file a task if
+the stray directory exists" to a two-part check: `%LOCALAPPDATA%\SeamlyLayout`
+absent, session log under `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs`.
+
+Verification on 26.9.2.996: each key carries exactly its own flag, and
+SeamlyLayout's session log is
+`%LOCALAPPDATA%\Seamly\SeamlyLayout\logs\log_260902170116.txt` with no
+`%LOCALAPPDATA%\SeamlyLayout` anywhere.
+
+### Test Case 1b-i walked end to end on 26.9.2.996 — PASS, no failures
+
+First pass with **no failing check**. Section A and section B both complete.
 
 | Group | Result |
 | --- | --- |
-| A.1a / 1a-i reset | pass |
-| A.1b install | pass, status 0 |
+| A.1a / 1a-i reset | pass; the run deleted a real `%LOCALAPPDATA%\SeamlyLayout` leftover |
+| A.1b wizard install | pass, exit 0 |
 | B.0 directories, files, ini contents | pass |
-| B.1 registry | pass |
+| B.1 registry, including new B.1d per-app flags | pass |
 | B.2 apps a-d, human at the keyboard | pass |
-| B.3 stray `%LOCALAPPDATA%\SeamlyLayout\output` | fail — `Layout.10` |
-| B.4 desktop shortcuts | pass |
+| B.3 SeamlyLayout log directory | pass — `Layout.10` closed |
+| B.4 desktop shortcuts | pass, all three, correct targets |
 | B.5 log errors | pass, none |
 
+**B.2a-i did not show the "Seamly data moved" notice.** There was no legacy data
+to migrate, so there was nothing to announce. `qt6_common.ini` still records
+`firstRunDataNotice=shown`, so B.2a-ii passes.
+
 **B.2c-ii has independent proof.** SeamlyLayout's own session log records
-`main(): opening startup document 'male_shirt' of 50362 characters`. The SVG
+`main(): opening startup document 'male_shirt' of 50370 characters`. The SVG
 arrived as a string. No `.pieces.svg` exists under `%DATAROOT%` or `%TEMP%`.
+
+**MSI1b.1 reproduced from the wizard** — exactly 15 `Error 2826` lines, all 7 px.
+No other error in the install log.
 
 **Two B.0a items are seeded on first app run, not by the MSI** — the
 `%DATAROOT%` tree (task `Seamly2D.2`) and SeamlyLayout's
@@ -150,52 +217,53 @@ deleted. Deleting them was not asked for.
 | Suite | How | Result |
 | --- | --- | --- |
 | Seamly2DTest, CollectionTest, ParserTest, TranslationsTest | `nmake check` inside `test_build_msi_local.ps1` | pass |
-| `TST_SeamlySuitePaths` alone | per-suite log via `SEAMLY_TEST_LOG_DIR` | 22 passed, 0 failed |
-| SeamlyLayout Qt tests | `ctest --preset debug` | 5/5; `StartupOptionsTests` 28 passed |
+| SeamlyLayout Qt tests | `ctest --preset debug` | 6/6, including the new `LoggerTests` |
+| `LoggerTests` alone | per-suite log via `-o <file>,txt` | 7 passed, 0 failed |
 | SeamlyLayout Rust | `cargo test --workspace` | pass |
-| MSI | `test_build_msi_local.ps1` | MSI OK, 164.6 MB; authoring check and 17 installer self-tests pass |
-| Test Case 1b-i, fresh install of 26.9.2.664 | manual walkthrough, 2026-09-02 | pass; only B.3 fails, and that is `Layout.10` |
+| MSI 26.9.2.996 | `test_build_msi_local.ps1` | MSI OK, 164.6 MB; authoring check and 17 installer self-tests pass |
+| Test Case 1b-i, fresh wizard install of 26.9.2.996 | manual walkthrough, 2026-09-02 | **pass, no failures** |
 
 To read a single Qt suite's output, set `SEAMLY_TEST_LOG_DIR` and run the
-binary through its own `target_wrapper.bat` — three of the four suites are
+binary through its own `target_wrapper.bat` — three of the four qmake suites are
 GUI-subsystem binaries that print nothing to a console, and a shared `-o` target
-is overwritten by each `qExec()` call.
+is overwritten by each `qExec()` call. The CMake SeamlyLayout suites are
+GUI-subsystem too; run one with `-o <file>,txt` to read its result.
+
+**`cargo test` needs MSVC's `link.exe` first on PATH.** `C:\Program Files\Git\usr\bin`
+holds a GNU `link` that shadows it, and the failure names the Visual Studio
+installer, not the shadowing. `vcvars64.bat` alone does not fix it, and a
+`vcvars && set PATH=...%PATH%...` one-liner cannot: cmd expands the whole line
+before `vcvars` runs. Put the commands in a `.cmd` file and prepend
+`%VCToolsInstallDir%bin\Hostx64\x64`.
 
 ## Open — next steps
 
-1. **`Layout.10` — implement it, do not verify it again.** Second confirmed
-   failure (2026-09-02, build 26.9.2.664): SeamlyLayout wrote
-   `%LOCALAPPDATA%\SeamlyLayout\output\log_260902143926.txt`. Logs belong in
-   `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs`.
-2. **`Layout.7` — implement it, do not verify it again.** Third confirmed
-   failure (2026-09-02, build 26.9.2.664): `DesktopShortcutSeamlyLayout` is
-   still written to `HKLM\SOFTWARE\Seamly\Seamly2D` instead of
-   `HKLM\SOFTWARE\Seamly\SeamlyLayout`. `SeamlyMe.3` is the same defect for
-   `DesktopShortcutSeamlyMe`; fix both together.
-3. **`MSI1b.1`** — in `project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md`.
-   Error 2826: 15 controls across 10 installer dialogs overflow their dialog by
-   7 px. Cosmetic; both `wix msi validate` and `smsi_check_authoring.ps1` miss
-   it. Measure the cause first — our custom dialogs are only 3 px over
-   (`Width="373"` on a 370 dialog) and that does not explain the stock WixUI
-   dialogs, so subtracting 7 from each width would be a guess.
-   **Still unverified on 26.9.2.664** — that pass installed with `/quiet`, which
-   builds no dialogs. Test Case 1b-i step 1b now mandates the wizard.
-4. **Four test-document defects in
+1. **`MSI1b.1`** — the only open entry in
+   `project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md`. Error 2826: 15 controls
+   across 10 installer dialogs overflow their dialog by 7 px. Cosmetic; both
+   `wix msi validate` and `smsi_check_authoring.ps1` miss it. Now confirmed from
+   a wizard install, so it is no longer unverified. Measure the cause first —
+   our custom dialogs are only 3 px over (`Width="373"` on a 370 dialog) and
+   that does not explain the stock WixUI dialogs, so subtracting 7 from each
+   width would be a guess.
+2. **Three test-document defects in
    `TEST_MSI_WIN_X64_Test_Case_1b-i.md`, agreed but not yet fixed.** Each makes
    correct behaviour read as a failure:
    - B.0a is ordered wrong. Split it into a post-install part and a
-     post-first-run part. It also omits `label templates`, which
+     post-first-run part. Confirmed again on this pass: right after the install
+     `%DATAROOT%` is an empty directory and SeamlyLayout's
+     `default_preferences.json` / `default_settings.json` are absent; both
+     appear after B.2. It also omits `label templates`, which
      `qt6_seamly2d.ini` requires.
-   - B.2c-iii expects `%DATAROOT%\SeamlyLayout\cache` and `\logs`. Neither
-     exists, and neither should — `%DATAROOT%` holds user data. The real cache
-     is `%LOCALAPPDATA%\Seamly\SeamlyLayout\cache`. The logs expectation also
-     contradicts `Layout.10`.
+   - B.2c-iii expects `%DATAROOT%\SeamlyLayout\cache`. That does not exist and
+     should not — `%DATAROOT%` holds user data. The real cache is
+     `%LOCALAPPDATA%\Seamly\SeamlyLayout\cache`, and it was present on this pass.
    - B.2b-v names `%LOCALAPPDATA%\SeamlyMe\logs`. The correct path is
      `%LOCALAPPDATA%\Seamly\SeamlyMe\logs`.
    - Placeholder typos: `%DATAROOT%\SeamlyData`, `%PROGRAMDIR%\SeamlyApps`,
      `%DATAROOTT%`, `%DATAROOTROOT%`. B.0b-iii says `qt6_seamly2d.ini` should be
      empty; it means `qt6_seamlyme.ini`.
-5. **Commit the working tree** — nothing is committed yet.
+3. **Commit the working tree** — nothing is committed yet.
 
 ## Still to do — the SeamlyLayout return path
 
