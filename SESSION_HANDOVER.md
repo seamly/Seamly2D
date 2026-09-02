@@ -41,15 +41,15 @@ Results recorded in the test doc.
   `mainwindow.cpp:4153-4168` (Seamly2D.5/Layout.9). 2c-iii SeamlyLayout
   `logs` still missing, stray `%LOCALAPPDATA%\SeamlyLayout\output`
   still created (Layout.10).
-- The pass is COMPLETE — no items pending. Open queue now:
-  Seamly2D.3, Seamly2D.5/Layout.9, SeamlyMe.3/Layout.7, Layout.10,
-  Installer.5.
+- The pass is COMPLETE — no items pending. Task Seamly2D.2 (both
+  subtasks 2.1/2.2) moved to `TODO_COMPLETED.md`, commit `70c03b067e`.
 - Machine state: fresh 26.9.1.778 install, all three apps exercised
   via the full in-app launch chain (Seamly2D -> SeamlyMe, Seamly2D ->
   SeamlyLayout), data seeded, pattern opened with measurement file.
 
-Next: mark Seamly2D.2.1 done in `TODO_SEAMLY2D.md` (live-verified);
-pick up the remaining open app-defect queue.
+Open queue: Seamly2D.3, Seamly2D.5/Layout.9, SeamlyMe.3/Layout.7,
+Layout.10, Installer.5. Next: pick one, implement, then loop to step 1
+(rebuild MSI) above.
 
 ### SettingsFiles queue EXHAUSTED — loop complete (2026-09-01, ~12:40)
 
