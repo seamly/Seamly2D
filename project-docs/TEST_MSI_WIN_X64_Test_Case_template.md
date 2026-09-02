@@ -49,7 +49,7 @@ Run this suite after every test case in section A.
     |  |_qt6_seamlyLayout.ini
     |_SeamlyMe
     |  |_qt6_seamlyme.ini
-    %DATADIR%\SeamlyData
+    %DATAROOT%\SeamlyData
     |_backups
     |_bodyscans
     |_images
@@ -64,25 +64,25 @@ Run this suite after every test case in section A.
   - [ ] 0b. Check the contents of the .ini files:
     - [ ] 0b-i. qt6_common.ini should contain:
       - [ ] 0b-i1. "[paths]
-dataRoot=%DATADIR%
-individual_size_measurements=%DATADIR%/measurements/individual
-multi_size_measurements=%DATADIR%/measurements/multisize
-templates=%DATADIRT%/templates
-bodyscans=%DATADIR%/bodyscans"
+dataRoot=%DATAROOT%
+individual_size_measurements=%DATAROOT%/measurements/individual
+multi_size_measurements=%DATAROOT%/measurements/multisize
+templates=%DATAROOTT%/templates
+bodyscans=%DATAROOT%/bodyscans"
       - [ ] 0b-i2. "[notices] firstRunDataNotice=pending"
     - [ ] 0b-ii. qt6_seamly2d.ini should contain:
     "[paths]
-pattern=%DATADIR%/patterns
-layout=%DATADIR%/layouts
-labels=%DATADIR%/label templates
-images=%DATADIR%/images
-backups=%DATADIR%/backups
+pattern=%DATAROOT%/patterns
+layout=%DATAROOT%/layouts
+labels=%DATAROOT%/label templates
+images=%DATAROOT%/images
+backups=%DATAROOT%/backups
 seamlyLayoutApp=%PROGRAMDIR%/SeamlyApps/SeamlyLayout.exe"
     - [ ] 0b-iii. qt6_seamly2d.ini should be empty
     - [ ] ob-iv. qt6_seamlylayout.ini should contain:
     "[General]
-input_directory=%DATADIRROOT%/layouts
-layout_directory=%DATADIRROOT%/layouts
+input_directory=%DATAROOTROOT%/layouts
+layout_directory=%DATAROOTROOT%/layouts
 preferences_directory=%LOCALAPPDATA%/Seamly/SeamlyLayout/preferences
 settings_directory=%LOCALAPPDATA%/Seamly/SeamlyLayout/settings
 settings_file=%LOCALAPPDATA%/Seamly/SeamlyLayout/settings/default_settings.json
@@ -91,7 +91,7 @@ dxf_viewer_path=https://sharecad.org
 pdf_viewer_path=
 png_viewer_path=
 projector_path=https://patternprojector.com
-data_root=%DATADIRROOT%"
+data_root=%DATAROOT%"
   - [ ] 0c. Check the program directory `%PROGRAMDIR%` exists (default `C:\Program Files\SeamlyApps`) contains `seamly2d.exe`, `seamlyme.exe`, `SeamlyLayout.exe`, `pdftops.exe`, `QtWebEngineProcess.exe`, `vc_redist.x64.exe`.
   - [ ] 0d. Confirm no duplicate directories.
   - [ ] 0e. if upgrading from previous non-SeamlyLayout version then:
@@ -105,20 +105,20 @@ data_root=%DATADIRROOT%"
   - [ ] 2a. Run Seamly2D
     - [ ] 2a-i. first run scripted: the "Seamly data moved" notice appears once, closes, then the main window appears
     - [ ] 2a-ii. check if `qt6_common.ini` contains  "[notices] firstRunDataNotice=shown";
-    - [ ] 2a-iii. Select 'file open' -- the dialog should open in the `%DATADIR\patterns` directory.
-    - [ ] 2a-iv. Open `%DATADIR%\patterns\male_shirt.sm2d` pattern file with `%DATADIR%\measurements\individual\male_chest_102cm.smis` individual measurement file.
+    - [ ] 2a-iii. Select 'file open' -- the dialog should open in the `%DATAROOT\patterns` directory.
+    - [ ] 2a-iv. Open `%DATAROOT%\patterns\male_shirt.sm2d` pattern file with `%DATAROOT%\measurements\individual\male_chest_102cm.smis` individual measurement file.
     - [ ] 2a-v. Check if directory exists: `%LOCALAPPDATA%\Seamly\Seamly2D\logs`
   - [ ] 2b. Check SeamlyMe from within Seamly2D
-  - [ ] 2b-i. Select 'File Open Individual' - the dialog should open in the `%DATADIR\measurements\individual` directory.
-    - [ ] 2b-ii. Select 'File Open Multisize' - the dialog should open in the `%DATADIR\measurements\multisize` directory.
-    - [ ] 2b-iii. Select 'File Open Templates' - the dialog should open in the `%DATADIR\templates` directory.
-    - [ ] 2b-iv. Select 'Edit Current' from the Measurements menu - the `%DATADIR%\measurements\individual\male_chest_102cm.smis` file should open.
-    - [ ] 2b-v. Check if directory exists: `%DATADIR%\SeamlyMe\logs`
+  - [ ] 2b-i. Select 'File Open Individual' - the dialog should open in the `%DATAROOT\measurements\individual` directory.
+    - [ ] 2b-ii. Select 'File Open Multisize' - the dialog should open in the `%DATAROOT\measurements\multisize` directory.
+    - [ ] 2b-iii. Select 'File Open Templates' - the dialog should open in the `%DATAROOT\templates` directory.
+    - [ ] 2b-iv. Select 'Edit Current' from the Measurements menu - the `%DATAROOT%\measurements\individual\male_chest_102cm.smis` file should open.
+    - [ ] 2b-v. Check if directory exists: `%LOCALAPPDATA%\SeamlyMe\logs`
     - [ ] 2b-vi. Close SeamlyMe, returning focus to Seamly2D.
   - [ ] 2c. Run SeamlyLayout from within Seamly2D.
     - [ ] 2c-i. Visually confirm that the current pattern's `Piece mode` data is opened in the left canvas.
     - [ ] 2c-ii. Check if `MainWindow::exportPiecesToSeamlyLayout()` passes 'piece mode' data to SeamlyLayout as a stringified SVG document in a variable, not as a svg file from harddrive.
-    - [ ] 2c-iii. Check if directories exist: `%DATADIR%\SeamlyLayout\cache`, `%DATADIR%\SeamlyLayout\logs`
+    - [ ] 2c-iii. Check if directories exist: `%DATAROOT%\SeamlyLayout\cache`, `%DATAROOT%\SeamlyLayout\logs`
     - [ ] 2c-iv. Close SeamlyLayout, returning focus to Seamly2D.
   - [ ] 2d. Close Seamly2D.
 - [ ] 3. Check if `%LOCALAPPDATA%\SeamlyLayout\output` directory was created. If exists add a task to stop creating the `%LOCALAPPDATA%\SeamlyLayout\` directory and its `output` subdirectory that stores log files, and start creating the `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` directory to store SeamlyLayout log files (similar to the `%LOCALAPPDATA\Seamly\Seamly2D\logs` directory)

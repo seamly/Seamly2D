@@ -19,6 +19,35 @@ re-accumulate finished-session narrative in this file.
 
 ## Current Status
 
+### Test Case 1b-i pass on build 26.9.1.778 COMPLETE for scripted items (2026-09-01, ~23:25)
+
+Ran the loop's step 4 (test doc) on the MSI built after Seamly2D.2.1 +
+SeamlyMe.5 landed (`e51ba452f8`, merged `6f6b4124f1`). Full reset →
+quiet install → three scripted first runs → verify. Results recorded
+in the test doc.
+
+- Case 1 steps 0/1a/1a-i/1b PASS. Elevated launch was auto-denied by
+  the permission classifier on the first attempt; user approved a
+  retry, then approved the UAC prompt. `%LOCALAPPDATA%\SeamlyLayout`
+  (no `\Seamly\` prefix) still survives reset — known, Layout.10.
+- B.0a/0b/0c/0d, 1, 2a-i, 2a-ii, 2a-v, 3, 4, 5 PASS. B.0e/1a N/A (fresh).
+- NEW live confirmation: 2b-v PASS — SeamlyMe.5 fix verified for the
+  first time on a real install; `%LOCALAPPDATA%\Seamly\SeamlyMe\logs\`
+  now exists with a clean log (was FAIL every prior pass).
+- Fails, ALL already filed, no new tasks: 2c-ii `.pieces.svg` still at
+  `mainwindow.cpp:4153-4168` (Seamly2D.5/Layout.9); 2c-iii SeamlyLayout
+  `logs` still missing, stray `%LOCALAPPDATA%\SeamlyLayout\output`
+  still created (Layout.10).
+- PENDING THE HUMAN: 2a-iii (Seamly2D.2.1 walkthrough — the dialog-dir
+  fix itself was not re-verified interactively this pass), 2a-iv,
+  2b-i..iv, 2b-vi, 2c-i, 2c-iv, 2d.
+- Machine state: fresh 26.9.1.778 install, all three apps ran once
+  standalone (not the in-app launch chain 2b/2c expect), data seeded.
+
+Next: pick up the open app-defect queue — Seamly2D.2.1 (needs the
+human walkthrough to confirm live), Seamly2D.3, Seamly2D.5/Layout.9,
+SeamlyMe.3/Layout.7, Layout.10, Installer.5.
+
 ### SettingsFiles queue EXHAUSTED — loop complete (2026-09-01, ~12:40)
 
 Three loop iterations this session shipped and live-verified
