@@ -2,6 +2,32 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task Seamly2D.2 — Fix File Open dialog default directory (completed 2026-09-01)
+
+Found during MSI Test Case 1 (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`,
+steps 7a-ii and 7a-v).
+
+- 2.1 `MainWindow::Open()` (`src/app/seamly2d/mainwindow.cpp:4403`) ignored
+  `VSettings::getPatternPath()`: it opened the dialog in the last-opened file's
+  folder, or `QDir::homePath()` when the recent-files list was empty. Fixed:
+  `Open()` falls back to `qApp->Seamly2DSettings()->getPatternPath()` when there
+  is no recent file or its folder no longer exists.
+- 2.2 SeamlyMe's `OpenIndividual()`, `OpenMultisize()`, and `OpenTemplate()`
+  already read the correct per-purpose path settings — the setting itself was
+  not the bug. Root cause: Windows' native Open dialog keeps one process-wide
+  "last visited folder" and silently overrides the app-supplied start folder
+  after the first native dialog use in the process. Fixed in `TMainWindow::Open()`
+  (`src/app/seamlyme/tmainwindow.cpp:3059`, the shared helper behind all three
+  actions) by forcing `QFileDialog::DontUseNativeDialog`, so Qt's own dialog
+  (no such history) is always used for these three actions.
+
+Verified live twice for 2.1 (2026-09-01, test doc B.2a-iii, fresh installs
+26.9.1.687 and 26.9.1.737 — dialog opened in the wrong folder before the fix
+shipped) and once more after the fix (build 26.9.1.778, human walkthrough,
+File Open now opens in `%DATAROOT%\patterns`). 2.2 confirmed by code trace,
+a live run at the time of the fix, and the 26.9.1.778 human walkthrough
+(B.2b-i..iv, all three SeamlyMe dialogs opened in their correct folders).
+
 ## Task SettingsFiles.7 — getDefaultDataRoot() leaf aligned to SeamlyData (completed 2026-09-01)
 
 `VCommonSettings::getDefaultDataRoot()` returned `<Documents>/Seamly` (Task 60), but the

@@ -24,13 +24,6 @@ Current label text handling (all outline-font based, and staying available): the
 - [ ] Seamly2D.1.7 Verify: canvas single-stroke labels legible at typical zooms with correct placement, mirroring, and rotation; outline-font behavior unchanged everywhere; tagged pieces SVG / `.pieces.svg` / `--text2paths` / DXF / PDF / PNG correct in both font modes
 - [ ] Seamly2D.1.8 Doxygen briefs + inline comments on all touched functions; document the font architecture in the repo docs
 
-## Task Seamly2D.2 — Fix File Open dialog default directory
-
-Found during MSI Test Case 1 (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, steps 7a-ii and 7a-v).
-
-- [x] Seamly2D.2.1 `MainWindow::Open()` (`src/app/seamly2d/mainwindow.cpp:4403`) ignored `VSettings::getPatternPath()`: it opened the dialog in the last-opened file's folder, or `QDir::homePath()` when the recent-files list was empty. CONFIRMED live twice (2026-09-01, test doc B.2a-iii, fresh installs 26.9.1.687 and 26.9.1.737). FIXED 2026-09-01: `Open()` falls back to `qApp->Seamly2DSettings()->getPatternPath()` when there is no recent file or its folder no longer exists. Re-test B.2a-iii on the next installed build needs the human.
-- [x] Seamly2D.2.2 SeamlyMe's `OpenIndividual()`, `OpenMultisize()`, and `OpenTemplate()` already read the correct per-purpose path settings — confirmed by code trace and by a live run, so the setting itself is not the bug. Root cause: Windows' native Open dialog keeps one process-wide "last visited folder" and silently overrides the app-supplied start folder after the first native dialog use in the process, so a later Open call lands in whichever Seamly folder a prior dialog last visited instead of its own purpose-specific default. Fixed in `TMainWindow::Open()` (`src/app/seamlyme/tmainwindow.cpp:3059`, the shared helper behind all three actions) by forcing `QFileDialog::DontUseNativeDialog` there, so Qt's own dialog (which has no such history) is always used for these three actions, regardless of the user's native-dialog preference.
-
 ## Task Seamly2D.3 — Restore Piece Mode focus after closing SeamlyLayout
 
 Found during MSI Test Case 1, step 7b-iv: closing SeamlyLayout returns focus to Seamly2D's Layout Mode, not the Piece Mode that was active before SeamlyLayout launched.
