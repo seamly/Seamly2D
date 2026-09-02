@@ -1086,6 +1086,33 @@ Assert-That -Name 'the seeding runs on first install only, with a recorded root'
                 $seedSequence[0].Condition -match 'SEAMLYDATAROOTRECORDED' -and
                 $seedSequence[0].Condition -match 'NOT Installed')
 
+# --- 10. dialog control geometry (task MSI1b.1) -------------------------------
+# A control that ends past the edge of its dialog makes Windows Installer log
+# Error 2826 while it builds the page. Nothing caught that before: the overflow
+# appears only at run time, `wix msi validate` passes, and a shipped build wrote
+# 15 of these lines into every install log. WixUI is the source of most of them,
+# so smsi.ps1 runs smsi_fix_dialog_lines.ps1 over the built MSI; this check
+# proves that pass ran and that no new dialog authoring brings the defect back.
+$dialogSize = @{}
+foreach ($row in (Get-MsiRows -Sql "SELECT ``Dialog``, ``Width``, ``Height`` FROM ``Dialog``" `
+                              -Columns 'Dialog', 'Width', 'Height')) {
+    $dialogSize[$row.Dialog] = @{ Width = [int]$row.Width; Height = [int]$row.Height }
+}
+$geometry = Get-MsiRows -Sql "SELECT ``Dialog_``, ``Control``, ``X``, ``Y``, ``Width``, ``Height`` FROM ``Control``" `
+    -Columns 'Dialog', 'Control', 'X', 'Y', 'Width', 'Height'
+# A Control row can name a dialog this package does not define. Skip it rather
+# than read a missing size as zero and report every control on it.
+$overflowing = @($geometry |
+    Where-Object { $dialogSize.ContainsKey($_.Dialog) } |
+    Where-Object {
+        ([int]$_.X + [int]$_.Width)  -gt $dialogSize[$_.Dialog].Width -or
+        ([int]$_.Y + [int]$_.Height) -gt $dialogSize[$_.Dialog].Height
+    } |
+    ForEach-Object { "$($_.Dialog).$($_.Control)" })
+Assert-That -Name 'every control fits inside its dialog (no Error 2826)' `
+    -Succeeded ($overflowing.Count -eq 0) `
+    -Detail "$($overflowing.Count) overflow: $($overflowing -join ', ')"
+
 # --- report --------------------------------------------------------------------
 [System.Runtime.InteropServices.Marshal]::ReleaseComObject($script:database) | Out-Null
 

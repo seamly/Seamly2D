@@ -413,6 +413,19 @@ if (-not (Test-Path $msi)) {
     throw "wix build reported success but '$msi' is missing."
 }
 
+# --- Trim overflowing dialog lines (task MSI1b.1) ------------------------------
+# WixUI's own dialogs give every BannerLine and BottomLine a width 3 installer
+# units past the right edge of the dialog, so Windows Installer logs an
+# Error 2826 per control as it builds each page. The rows come from
+# WixToolset.UI.wixext and cannot be changed from the .wxs, so the correction is
+# made on the built package. It runs BEFORE validation, so the ICE pass and the
+# authoring check both see the package that ships.
+Write-Host "trimming overflowing dialog lines..."
+& (Join-Path $PSScriptRoot 'smsi_fix_dialog_lines.ps1') -Msi $msi
+if ($LASTEXITCODE -ne 0) {
+    throw "dialog line trim failed (exit code $LASTEXITCODE) - see output above."
+}
+
 # --- Validate (ICE checks) -----------------------------------------------------
 # Two ICEs are suppressed, both raised by the optional desktop-shortcut
 # components and both false positives for this package:

@@ -25,7 +25,11 @@ Known defect to watch for: `MainWindow::exportPiecesToSeamlyLayout()` (`mainwind
 - [ ] 0. Relaunch this shell elevated (Administrator) before any step below.
 - [ ] 1a. Uninstall Seamly (any and all versions detected) using `packaging\windows\test_reset_environment.ps1`.
   - [ ] 1a-i. Confirm that the %PROGRAMROOT, %DATAROOT, AppData\Roaming\Seamly, AppData\Local\Seamly\Seamly2D, AppData\Local\Seamly\SeamlyMe, AppData\Local\Seamly\SeamlyLayout, desktop shortcuts, and registry keys have been removed.
-- [ ] 1b. Install Seamly apps using `packaging\windows\seamly-msi\x64\seamly-x64.msi` with Default settings via `msiexec /i seamly-x64.msi /quiet /norestart`.
+- [ ] 1b. Install Seamly apps from `packaging\windows\seamly-msi\x64\seamly-x64.msi` with Default settings, through the **wizard**, from the elevated shell:
+  `msiexec /i seamly-x64.msi /norestart /l*v "%TEMP%\seamly_install.log"`
+  - [ ] 1b-i. Do **not** pass `/quiet`. A silent install builds no dialogs, so it cannot show a dialog defect (`MSI1b.1`).
+  - [ ] 1b-ii. Accept every default page: program directory, user-data folder, desktop shortcuts on.
+  - [ ] 1b-iii. Confirm the log ends with `Installation success or error status: 0` and carries no `Error 2826` line.
 
 ## B. Verification Suite
 

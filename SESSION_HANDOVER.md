@@ -17,6 +17,14 @@ re-accumulate finished-session narrative in this file.
 5. add tasks for additional errors to `project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md`
 6. implement a task from `project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md`, then loop to step 1; repeat until that file is empty
 
+**Where this loop stands, 2026-09-02.** One full turn ran on build
+**26.9.2.1059** (MSI ProductVersion 26.9.2499): built, machine reset, installed
+through the wizard from an elevated shell, and walked end to end against the
+test case. Steps 1-4 pass with no failing check. Steps 5 and 6 have nothing to
+do — `project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md` holds no open task, and
+this pass found no new defect. **The loop is finished unless a new defect turns
+up.**
+
 `project-docs/TODO_SETTINGS_FILES.md` is deleted; the old steps that named it
 are gone. Build only with `test_build_msi_local.ps1` — do **not** use
 `src\app\seamlylayout\build.ps1` or `qd.ps1` any more. Both `CLAUDE.md` files and
@@ -33,16 +41,33 @@ Committed on `run-seamlyLayout`, **not pushed**. Two commits ahead of
 **No skip-ci token on either.** `packaging/**` and `CMakeLists.txt` changed
 functionally, so the next push must run the full `ci.yml` suite.
 
+**The `MSI1b.1` work is not committed.** Changed, on `run-seamlyLayout`:
+
+- `packaging/windows/smsi_fix_dialog_lines.ps1` — new;
+- `packaging/windows/smsi_ui.wxs`, `smsi.ps1`, `smsi_check_authoring.ps1`;
+- `project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md`, `SESSION_HANDOVER.md`.
+
+`scripts/prompt_testing.txt` was already modified before this session, and the
+build rewrites `projectversion.cpp/.h` and `Info.plist` every time. `packaging/**`
+changed functionally again, so the skip-ci token still must not be used.
+
 ## Machine state
 
-- Installed: Seamly **26.9.2.996** in `C:\Program Files\SeamlyApps`
-  (seamly2d.exe, seamlyme.exe, SeamlyLayout.exe). MSI ProductVersion `26.9.2436`.
+- Installed: Seamly **26.9.2.1059** in `C:\Program Files\SeamlyApps`
+  (seamly2d.exe, seamlyme.exe, SeamlyLayout.exe). MSI ProductVersion `26.9.2499`.
 - Installed 2026-09-02 through the **wizard** from an elevated shell, onto a
   machine reset by `test_reset_environment.ps1`. Install log:
   `%TEMP%\seamly_install.log`.
-- `%DATAROOT%` = `C:\Users\susan\Documents\SeamlyData`, seeded and populated:
-  8 subdirectories, 8 patterns, 3 individual measurement files.
+- `%DATAROOT%` = `C:\Users\susan\Documents\SeamlyData`. Right after the install
+  it is an **empty** directory: the MSI creates it, and the first app run seeds
+  it. Same for SeamlyLayout's `default_preferences.json` /
+  `default_settings.json`.
 - All three apps have been run once, so every first-run artifact exists.
+  `%DATAROOT%` now holds 8 subdirectories, 8 patterns, 3 individual and 1
+  multisize measurement file.
+- `packaging/windows/test_msi_install.ps1` cannot check this pass. It needs
+  `-Phase Baseline` captured BEFORE the install, and the install is already
+  done. Capture the baseline first next time.
 
 **Elevation.** The VS Code integrated terminal is not elevated, but
 `Start-Process -Verb RunAs` DOES work when someone is present to accept the UAC
@@ -53,6 +78,86 @@ An unelevated `msiexec /i` fails at `InstallFinalize` with `Error 1925` and exit
 last page.
 
 ## Done this session
+
+### Task MSI1b.1 — Error 2826 dialog overflow: fixed, verified, closed
+
+**The cause, measured from the MSI `Dialog` and `Control` tables of build
+26.9.2.996.** 37 `Line` controls carried `Width="373"` inside a 370-unit dialog.
+WixUI authors its own `BannerLine`/`BottomLine` rows exactly the way our five
+custom dialogs did, so one cause covers every dialog. The overflow is 3
+**installer units**, not pixels: Windows Installer converts to display pixels
+before it writes the message, and this 144 DPI screen prints 7. The log carries
+15 lines and the table 37 rows because only the dialogs a wizard install builds
+are ever created.
+
+The fix has two halves, because the WixUI rows cannot be edited from the `.wxs`
+and WiX cannot move past 6 (v7 is behind the OSMF EULA):
+
+- `smsi_ui.wxs` — our ten `Line` controls are now `Width="370"`.
+- New `packaging/windows/smsi_fix_dialog_lines.ps1` — trims any `Line` control
+  that ends past its dialog edge in the built MSI. It **fails the build** when a
+  non-`Line` control overflows, because shortening one of those would clip text
+  or a button. `smsi.ps1` runs it after `wix build` and before
+  `wix msi validate`, so the ICE pass and the authoring check both see the
+  package that ships.
+- `smsi_check_authoring.ps1` — new section 10 asserts every control fits its
+  dialog, bottom edge as well as right (`MSI1b.1.3`).
+
+On build 26.9.2.1059 the trim reported **27** controls, not 37: the ten that are
+ours are now correct at source, which is the proof that both halves work. 0
+overflowing controls remain, `wix msi validate` is clean apart from the expected
+ICE61, and all authoring checks pass.
+
+**Verified at run time and closed.** A fresh wizard install of 26.9.2.1059 from
+an elevated shell finished with `Installation success or error status: 0`, and
+its `/l*v` log carries no `Error 2826` line and no `extends beyond` line across
+the 9 dialogs the install created. The task moved to
+`project-docs/TODO_COMPLETED.md`, which leaves
+`project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md` with no open task.
+
+**Test Case 1b-i step 1b was rewritten at the same time.** The file on disk still
+said `msiexec /i seamly-x64.msi /quiet /norestart`, even though an earlier
+session recorded the wizard rewrite as done. A silent install builds no dialogs,
+so that step could never have found this defect. It now runs the wizard with
+`/l*v` and carries 1b-i, 1b-ii and 1b-iii. Treat the older handover claim as
+wrong, not the file.
+
+### Test Case 1b-i walked end to end on 26.9.2.1059 — PASS, no failures
+
+Second consecutive pass with no failing check.
+
+| Step | Result |
+| --- | --- |
+| A.1a reset | pass, exit 0; uninstalled 26.9.2436, removed `%DATAROOT%` and `%LOCALAPPDATA%\Seamly` |
+| A.1b wizard install | pass, exit 0, **no `Error 2826`** — `MSI1b.1` closed |
+| B.0a directories and files | pass |
+| B.0b ini contents | pass, all four files |
+| B.0c program directory contents | pass, all six named files |
+| B.1b / 1c / 1d registry | pass; each app's key carries its own `DesktopShortcut*` flag |
+| B.2 apps a-d, human at the keyboard | pass |
+| B.3a / 3b SeamlyLayout log directory | pass |
+| B.4 desktop shortcuts | pass, all three, correct targets |
+| B.5 log errors | pass, none |
+
+Evidence from the app runs:
+
+- `qt6_common.ini` records `firstRunDataNotice=shown` (B.2a-ii).
+- Session logs: `Seamly2D\logs\seamly2d-pid29216.log`,
+  `SeamlyMe\logs\seamlyme-pid8280.log`,
+  `SeamlyLayout\logs\log_260902181015.txt`. No error, critical or fatal line in
+  any of them (B.5).
+- `%LOCALAPPDATA%\Seamly\SeamlyLayout\cache` exists, `%LOCALAPPDATA%\SeamlyLayout`
+  does not (B.2c-iii, B.3a).
+- **B.2c-ii has independent proof again.** SeamlyLayout's log records
+  `main(): opening startup document 'male_shirt' of 50366 characters`, and no
+  `.pieces.svg` exists under `%DATAROOT%` or `%TEMP%`.
+- `%DATAROOT%` is seeded after the app runs: 8 subdirectories, 8 patterns, 3
+  individual and 1 multisize measurement file, plus two backups the run made.
+
+`%DATAROOT%` is empty right after the install, and SeamlyLayout's two JSON
+defaults are absent until the first app run. That is correct. B.0a still lists
+them as post-install checks, so it reads as a failure on every pass — see
+"Open — next steps".
 
 ### Tasks Layout.10, Layout.7 and SeamlyMe.3 implemented, verified and closed
 
@@ -218,31 +323,26 @@ before `vcvars` runs. Put the commands in a `.cmd` file and prepend
 
 ## Open — next steps
 
-1. **`MSI1b.1`** — the only open entry in
-   `project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md`. Error 2826: 15 controls
-   across 10 installer dialogs overflow their dialog by 7 px. Cosmetic; both
-   `wix msi validate` and `smsi_check_authoring.ps1` miss it. Now confirmed from
-   a wizard install, so it is no longer unverified. Measure the cause first —
-   our custom dialogs are only 3 px over (`Width="373"` on a 370 dialog) and
-   that does not explain the stock WixUI dialogs, so subtracting 7 from each
-   width would be a guess.
-2. **Three test-document defects in
-   `TEST_MSI_WIN_X64_Test_Case_1b-i.md`, agreed but not yet fixed.** Each makes
-   correct behaviour read as a failure:
+1. **Nothing is open in the MSI test loop.** Test Case 1b-i passed end to end on
+   26.9.2.1059 and its TODO file is empty. The next MSI work is either a new
+   defect from a later pass, or test cases 2, 3 and 4 of section A, which have
+   never been walked.
+2. **Test-document defects in `TEST_MSI_WIN_X64_Test_Case_1b-i.md`, agreed but
+   not yet fixed.** Each makes correct behaviour read as a failure. This list
+   was re-checked against the file on 2026-09-02, and it is shorter than the
+   older handover said — B.2b-v and B.2c-iii already name the right paths, and
+   B.0a does list `label templates`. What is left:
    - B.0a is ordered wrong. Split it into a post-install part and a
      post-first-run part. Confirmed again on this pass: right after the install
      `%DATAROOT%` is an empty directory and SeamlyLayout's
-     `default_preferences.json` / `default_settings.json` are absent; both
-     appear after B.2. It also omits `label templates`, which
-     `qt6_seamly2d.ini` requires.
-   - B.2c-iii expects `%DATAROOT%\SeamlyLayout\cache`. That does not exist and
-     should not — `%DATAROOT%` holds user data. The real cache is
-     `%LOCALAPPDATA%\Seamly\SeamlyLayout\cache`, and it was present on this pass.
-   - B.2b-v names `%LOCALAPPDATA%\SeamlyMe\logs`. The correct path is
-     `%LOCALAPPDATA%\Seamly\SeamlyMe\logs`.
-   - Placeholder typos: `%DATAROOT%\SeamlyData`, `%PROGRAMDIR%\SeamlyApps`,
-     `%DATAROOTT%`, `%DATAROOTROOT%`. B.0b-iii says `qt6_seamly2d.ini` should be
-     empty; it means `qt6_seamlyme.ini`.
+     `default_preferences.json` / `default_settings.json` are absent; all three
+     appear after B.2.
+   - Doubled leaf in a placeholder: `%DATAROOT%\SeamlyData` (line 56) and
+     `%PROGRAMDIR%\SeamlyApps` (lines 40, 85). Both placeholders already end in
+     that leaf.
+   - `%DATAROOTROOT%` (lines 89, 90) should be `%DATAROOT%`.
+   - B.0b-iii says `qt6_seamly2d.ini` should be empty; it means
+     `qt6_seamlyme.ini`, which is the file that is empty.
 3. **Commit the working tree** — nothing is committed yet.
 
 ## Still to do — the SeamlyLayout return path

@@ -91,6 +91,14 @@
       Geometry, fonts and the banner bitmap of the four Seamly pages mirror the
       stock dialogs (370x270, WixUI_Font_Title, WixUI_Bmp_Banner) so the pages
       look like part of the same wizard.
+
+      One deliberate difference: every BannerLine and BottomLine here is
+      Width="370", the dialog width, not the Width="373" WixUI uses. A control
+      that ends past the dialog edge makes Windows Installer log Error 2826 as
+      it builds the dialog (task MSI1b.1). WixUI's own dialogs carry the same
+      defect and cannot be edited from here, so smsi.ps1 runs
+      smsi_fix_dialog_lines.ps1 over the built MSI to correct them; keeping our
+      own source right means that pass has nothing of ours to change.
     -->
     <!-- One source for the condition that decides whether the previous-install
          page appears. It is needed three times - the two License Next rows and
@@ -166,8 +174,8 @@
 
         <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
                  TabSkip="no" Text="WixUI_Bmp_Banner" />
-        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="373" Height="0" />
-        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
 
         <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
                  Transparent="yes" NoPrefix="yes"
@@ -220,8 +228,8 @@
 
         <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
                  TabSkip="no" Text="WixUI_Bmp_Banner" />
-        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="373" Height="0" />
-        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
 
         <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
                  Transparent="yes" NoPrefix="yes"
@@ -265,8 +273,8 @@
 
         <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
                  TabSkip="no" Text="WixUI_Bmp_Banner" />
-        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="373" Height="0" />
-        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
 
         <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
                  Transparent="yes" NoPrefix="yes"
@@ -345,8 +353,8 @@
 
         <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
                  TabSkip="no" Text="WixUI_Bmp_Banner" />
-        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="373" Height="0" />
-        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
 
         <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
                  Transparent="yes" NoPrefix="yes"
@@ -412,8 +420,8 @@
 
         <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
                  TabSkip="no" Text="WixUI_Bmp_Banner" />
-        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="373" Height="0" />
-        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="373" Height="0" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
 
         <Control Id="Title" Type="Text" X="15" Y="6" Width="340" Height="15"
                  Transparent="yes" NoPrefix="yes"
