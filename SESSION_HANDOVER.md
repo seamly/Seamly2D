@@ -22,36 +22,16 @@ are gone. Build only with `test_build_msi_local.ps1` — do **not** use
 `src\app\seamlylayout\build.ps1` or `qd.ps1` any more. Both `CLAUDE.md` files and
 `src/app/seamlylayout/.claude/rules/testing.mdc` were corrected to say so.
 
-## Nothing is committed
+## Commit state
 
-Every change below is in the working tree only. No commit, no branch, no push.
-Branch is still `run-seamlyLayout`.
+Committed on `run-seamlyLayout`, **not pushed**. Two commits ahead of
+`origin/run-seamlyLayout`:
 
-Some modifications predate this session and are not mine:
-`project-docs/TEST_MSI_WIN_X64_Test_Case_template.md`, `scripts/prompt.txt`,
-and the deletion of `project-docs/TODO_SETTINGS_FILES.md`.
+- `71505f97ec` — the task work, made on `task-log-path-and-shortcut-keys`;
+- `86881a6173` — the `--no-ff` merge. The branch is deleted.
 
-New untracked files to add:
-`project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md`,
-`scripts/prompt_testing.txt` and
-`src/test/SeamlyLayoutTest/LoggerTests.cpp`.
-
-Changed for the three tasks:
-`src/app/seamlylayout/qt_frontend/main.cpp`,
-`src/app/seamlylayout/qt_frontend/src/Logger.cpp` and `Logger.h`,
-`src/app/seamlylayout/qt_frontend/CMakeLists.txt`,
-`packaging/windows/smsi_shortcuts.wxs`,
-`packaging/windows/smsi_check_authoring.ps1`,
-`packaging/windows/test_msi_install.ps1`,
-`packaging/windows/test_reset_environment.ps1`,
-`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`,
-`project-docs/TODO_SEAMLYLAYOUT.md`, `project-docs/TODO_SEAMLYME.md`,
-`project-docs/TODO_COMPLETED.md`,
-`project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md`.
-
-Changed earlier in the session:
-`project-docs/TODO_COMPLETED.md` (`SeamlyMe.5` moved),
-`scripts/prompt_testing.txt` (step 5), and this file.
+**No skip-ci token on either.** `packaging/**` and `CMakeLists.txt` changed
+functionally, so the next push must run the full `ci.yml` suite.
 
 ## Machine state
 
