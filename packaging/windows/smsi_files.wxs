@@ -146,10 +146,10 @@
                        Type="string" />
       </Component>
 
-      <!-- SeamlyLayout: Start Menu shortcut. Its input can be a .svg file (from Seamly2D)
-           or the .pieces.svg handoff written by seamly2d's Layout Mode, and a
-           double ".pieces.svg" extension cannot be registered distinctly from
-           plain .svg (which must stay with the user's SVG viewer).
+      <!-- SeamlyLayout: Start Menu shortcut. No file association is registered:
+           its only file input is a plain .svg, which must stay with the user's
+           SVG viewer. The seamly2d Layout Mode handoff needs no association at
+           all — it sends the document on standard input (Seamly2D.5).
            Task 30: installed into INSTALLFOLDER beside the parent apps now
            that all three share one Qt runtime (it used to live in its own
            SeamlyLayout\ subdirectory with a second, private Qt copy). -->

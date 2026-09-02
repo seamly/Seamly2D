@@ -2,6 +2,14 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task SeamlyMe.5 — write SeamlyMe log files to `%LOCALAPPDATA%\Seamly\SeamlyMe\logs` (completed 2026-09-02)
+
+Found during MSI Test Case verification, step B.2b-v (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, 2026-09-01). SeamlyMe writes no log files and creates no logs directory — `ApplicationME` has no equivalent of `Application2D::logDirPath()`/`beginLogging()` (`src/app/seamly2d/core/application_2d.cpp:605`). Seamly2D writes to `%LOCALAPPDATA%\Seamly\Seamly2D\logs`; SeamlyMe must mirror that pattern.
+
+- [x] SeamlyMe.5.1 Implemented 2026-09-01: `ApplicationME` gains `startLogging()`/`logFile()` plus the private `logDirPath()`/`logPath()`/`createLogDir()`/`beginLogging()`/`clearOldLogs()`, mirroring `Application2D`. `initOptions()` starts logging before installing the message handler; the handler now writes every message to the per-pid log (`seamlyme-pid<pid>.log`), null-guarded so console output survives a failed open. Windows dir: `%LOCALAPPDATA%\Seamly\SeamlyMe\logs`. 3-day retention, same as Seamly2D.
+- [x] SeamlyMe.5.2 Verified 2026-09-02 on build 26.9.2.664, Test Case 1b-i step B.2b-v. A fresh `/quiet` install then a SeamlyMe run from Seamly2D created `%LOCALAPPDATA%\Seamly\SeamlyMe\logs\seamlyme-pid30712.log` (2417 bytes). The log opens with the `ApplicationME::initOptions()` version, build-revision, Qt, command-line and pid lines, matching the Seamly2D format.
+- [x] SeamlyMe.5.3 Doxygen briefs on `logDirPath()`/`logFile()`; inline comments at the handler write and `initOptions()` ordering
+
 ## Task Seamly2D.2 — Fix File Open dialog default directory (completed 2026-09-01)
 
 Found during MSI Test Case 1 (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`,
@@ -666,3 +674,69 @@ fallback must be `%DATAROOT%\layouts` with the default data root
 Note: `VCommonSettings::getDefaultDataRoot()` (Seamly2D/SeamlyMe) still returns
 `<Documents>/Seamly` — a different leaf than the MSI default `<Documents>\SeamlyData`.
 Not changed here; SeamlyLayout does not link vmisc.
+
+## Task Seamly2D.5 / Layout.9 — Piece-mode handoff passes a stringified SVG, not a file (completed 2026-09-02)
+
+Found during MSI Test Case 1 verification
+(`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step 6b-ii). The two halves
+were tracked as `Seamly2D.5` (producer) and `Layout.9` (consumer); they are one
+change and are recorded together here.
+
+**The defect.** `MainWindow::exportPiecesToSeamlyLayout()` wrote
+`<pattern-basename>.pieces.svg` next to the pattern file and launched
+SeamlyLayout with that path. That left a file the user did not ask for, refused
+to lay out an unsaved pattern, and failed on a read-only pattern directory.
+
+**Layout.9.1 — the design decision.** The stringified-SVG handoff is required;
+the file-based handoff is not the accepted design. The transport is the child
+process's **standard input**, chosen over a temp file (same litter problem) and
+over an argument (a pattern SVG is far past the Windows command-line limit).
+
+**What changed.**
+
+- `SvgGenerator::toSvgString()` (`src/libs/vformat/svg_generator.cpp`) returns
+  the merged document; `generate()` now writes what it returns, so the file and
+  in-memory paths cannot produce different SVG.
+- `MainWindowsNoGUI::generatePiecesSvg(const QString &)` became
+  `generatePiecesSvgDocument()`, returning the document as a `QString` through
+  the new `buildPiecesSvgString()` helper. No file variant remains.
+- `MainWindow::exportPiecesToSeamlyLayout()` starts SeamlyLayout, writes the
+  UTF-8 document to its standard input, and closes the write channel. The
+  "please save the pattern first" guard is gone — nothing is written to disk, so
+  an unsaved pattern lays out. The tracked `QProcess` from Seamly2D.3 is
+  unchanged and is what makes the write channel possible.
+- `SeamlySuitePaths::piecesSvgFilePath()` became `patternDocumentName()` (the
+  pattern's complete base name), and `seamlyLayoutLaunchArguments()` now builds
+  `--svg-stdin [--document-name <name>]` instead of a file path.
+- SeamlyLayout: `StartupOptions` gained `Status::OpenDocument`, the
+  `--svg-stdin` and `--document-name` options, and a
+  `parse(arguments, QIODevice *)` overload so the standard-input read is
+  testable with a `QBuffer`. `main.cpp` opens stdin but reads it only for
+  `--svg-stdin`, then invokes `Main.qml`'s new `openSvgDocument()`.
+- Rust bridge: new `import_svg_document(&QString)` invokable beside
+  `import_svg`; both now share `reset_import_state()` and `finish_import()`, and
+  `app_core::parse_svg(data, resources_dir)` is the one parse both go through.
+- The positional `<file.svg>` transport is untouched: the CLI, the Import SVG
+  button and any file association still work. `--svg-stdin` together with a file
+  is refused rather than silently resolved.
+
+**Tests.** `TST_SeamlySuitePaths` replaces its four `PiecesSvg*` cases with
+`DocumentName*` cases and pins the new argument vector (including that no
+argument ends in `.svg`). `StartupOptionsTests` adds nine cases for the
+standard-input transport, including that stdin is *not* read without the option
+— `main.cpp` opens it on every launch, so an unasked read would hang a shell or
+icon launch.
+
+**Docs.** `project-docs/SVG-DATA-ATTRIBUTES.md` and its
+`src/app/seamlylayout/docs/status-docs/` mirror, `src/app/seamlylayout/CLAUDE.md`,
+and the two WiX comments that described the `.pieces.svg` association.
+
+**Not in this task.** The return path — SeamlyLayout handing its layout back to
+Seamly2D's right canvas on Save, and refreshing the previous data on Cancel — is
+not part of `Seamly2D.5`/`Layout.9`. It is still open; see `SESSION_HANDOVER.md`.
+
+**Verification.** SeamlyLayout debug build and `ctest --preset debug` pass;
+`cargo test --workspace` passes. Seamly2D and SeamlyMe have no local build — the
+`mainwindow.cpp`, `mainwindowsnogui.cpp`, `svg_generator.cpp`,
+`seamly_suite_paths.cpp` and `TST_SeamlySuitePaths` changes are verified by
+`ci.yml` only, and that verification is deferred until the next full CI run.

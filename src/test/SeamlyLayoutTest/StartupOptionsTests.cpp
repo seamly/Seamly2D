@@ -5,24 +5,32 @@
 // @file StartupOptionsTests.cpp
 // @brief Qt tests for StartupOptions — SeamlyLayout's command-line contract.
 //
-// This suite locks the SeamlyLayout half of the Seamly2D Layout Mode handoff
-// (Task 49). Seamly2D launches
+// This suite locks the SeamlyLayout half of two startup transports.
 //
-//     SeamlyLayout <absolute path to <pattern>.pieces.svg>
+// A file path (Task 49) — the CLI and the file association:
 //
-// detached, and until Task 49 that argument was read by nobody: the daughter
-// app opened an empty canvas. The seamly2d half of the same contract — that
-// the launch really is "one positional argument, the .pieces.svg path" — is
-// locked by TST_SeamlySuitePaths in the Seamly2DTest suite.
+//     SeamlyLayout <absolute path to some.svg>
+//
+// An SVG document on standard input (Seamly2D.5) — the Layout Mode handoff:
+//
+//     SeamlyLayout --svg-stdin --document-name <pattern base name>
+//
+// Seamly2D used to write "<pattern>.pieces.svg" beside the pattern and pass its
+// path; it now sends the document itself and writes no file. The seamly2d half
+// of the contract is locked by TST_SeamlySuitePaths in the Seamly2DTest suite.
 //
 // Covers:
 //   • No argument / empty argument list → start with an empty canvas
-//   • A real .svg (including the ".pieces.svg" double extension and an
+//   • A real .svg (including a ".pieces.svg" double extension and an
 //     upper-case ".SVG") → Status::OpenFile with an ABSOLUTE path
 //   • A relative argument resolved against the working directory
 //   • Missing file, directory, unreadable file, non-SVG suffix → Status::Failed
 //     with a message naming the file
 //   • More than one positional argument → Status::Failed
+//   • --svg-stdin with an SVG document → Status::OpenDocument carrying the text
+//   • --document-name carried through, and absent when not given
+//   • --svg-stdin with no device, an empty device, or a non-SVG payload, and
+//     --svg-stdin alongside a file → Status::Failed
 //   • Unknown option → Status::Failed carrying the parser's own text
 //   • --help / -h / --version / -v → Status::ShowInformation
 //
@@ -31,6 +39,7 @@
 
 #include "StartupOptions.h"
 
+#include <QBuffer>
 #include <QCoreApplication>
 #include <QDir>
 #include <QFile>
@@ -64,6 +73,17 @@ private slots:
     void twoPositionalArguments_statusIsFailed();
     void unknownOption_statusIsFailed();
 
+    // The Layout Mode handoff: an SVG document on standard input
+    void svgStdin_statusIsOpenDocument();
+    void svgStdin_documentIsTheWholeInput();
+    void svgStdin_documentNameIsCarried();
+    void svgStdin_withoutDocumentName_nameIsEmpty();
+    void svgStdin_withNoDevice_statusIsFailed();
+    void svgStdin_withEmptyInput_statusIsFailed();
+    void svgStdin_withNonSvgInput_statusIsFailed();
+    void svgStdin_withPositionalFile_statusIsFailed();
+    void svgStdin_isNotReadWithoutTheOption();
+
     // --help / --version
     void helpOption_statusIsShowInformation();
     void shortHelpOption_statusIsShowInformation();
@@ -76,6 +96,10 @@ private:
     // @param fileName  Name of the file to create.
     // @return Absolute path of the created file.
     static QString makeFile(const QTemporaryDir &directory, const QString &fileName);
+
+    // @brief The smallest valid SVG document, used as the piped payload.
+    // @return An SVG document with one identifiable element.
+    static QByteArray svgDocumentBytes();
 }; // class StartupOptionsTests
 
 //----------------------------------------------------------------------------
@@ -90,6 +114,15 @@ QString StartupOptionsTests::makeFile(const QTemporaryDir &directory, const QStr
     file.close();
     return QFileInfo(path).absoluteFilePath();
 } // StartupOptionsTests::makeFile
+
+//----------------------------------------------------------------------------
+QByteArray StartupOptionsTests::svgDocumentBytes()
+{
+    return QByteArrayLiteral(
+        "<svg xmlns=\"http://www.w3.org/2000/svg\">"
+        "<g id=\"piece-1\" data-type=\"piece\"/>"
+        "</svg>");
+} // StartupOptionsTests::svgDocumentBytes
 
 // ---------------------------------------------------------------------------
 // Nothing asked of us
@@ -135,7 +168,7 @@ void StartupOptionsTests::existingSvg_statusIsOpenFile()
 } // existingSvg_statusIsOpenFile()
 
 // @brief The stored path is absolute — the app-wide rule, and required because
-// the detached launch runs with SeamlyLayout's own working directory.
+// a launched process runs with SeamlyLayout's own working directory.
 void StartupOptionsTests::existingSvg_filePathIsAbsolute()
 {
     QTemporaryDir directory;
@@ -149,7 +182,7 @@ void StartupOptionsTests::existingSvg_filePathIsAbsolute()
     QCOMPARE(options.filePath(), svgPath);
 } // existingSvg_filePathIsAbsolute()
 
-// @brief "<pattern>.pieces.svg" — the exact file name Seamly2D writes — is accepted.
+// @brief A ".pieces.svg" double extension is accepted; QFileInfo::suffix() is "svg".
 void StartupOptionsTests::piecesSvgDoubleExtension_isAccepted()
 {
     QTemporaryDir directory;
@@ -317,6 +350,151 @@ void StartupOptionsTests::unknownOption_statusIsFailed()
     QVERIFY(!options.message().isEmpty());
     QVERIFY(options.message().contains(QStringLiteral("not-an-option")));
 } // unknownOption_statusIsFailed()
+
+// ---------------------------------------------------------------------------
+// The Layout Mode handoff: an SVG document on standard input (Seamly2D.5)
+// ---------------------------------------------------------------------------
+
+// @brief --svg-stdin with an SVG document opens it, and names no file.
+void StartupOptionsTests::svgStdin_statusIsOpenDocument()
+{
+    QBuffer input;
+    input.setData(svgDocumentBytes());
+    QVERIFY(input.open(QIODevice::ReadOnly));
+
+    const StartupOptions options = StartupOptions::parse(
+        QStringList{QStringLiteral("SeamlyLayout"), QStringLiteral("--svg-stdin")}, &input);
+
+    QCOMPARE(options.status(), StartupOptions::Status::OpenDocument);
+    QVERIFY(options.hasDocument());
+    QVERIFY(!options.hasFile());
+    QVERIFY(!options.hasError());
+    QVERIFY(options.filePath().isEmpty());
+    QVERIFY(options.message().isEmpty());
+} // svgStdin_statusIsOpenDocument()
+
+// @brief The document reaches the caller whole — this is the pattern data, so a
+// truncated read would silently lose pieces.
+void StartupOptionsTests::svgStdin_documentIsTheWholeInput()
+{
+    QBuffer input;
+    input.setData(svgDocumentBytes());
+    QVERIFY(input.open(QIODevice::ReadOnly));
+
+    const StartupOptions options = StartupOptions::parse(
+        QStringList{QStringLiteral("SeamlyLayout"), QStringLiteral("--svg-stdin")}, &input);
+
+    QCOMPARE(options.svgDocument(), QString::fromUtf8(svgDocumentBytes()));
+} // svgStdin_documentIsTheWholeInput()
+
+// @brief --document-name is carried through; it is all the default export file
+// names have to go on, because the document has no file.
+void StartupOptionsTests::svgStdin_documentNameIsCarried()
+{
+    QBuffer input;
+    input.setData(svgDocumentBytes());
+    QVERIFY(input.open(QIODevice::ReadOnly));
+
+    const StartupOptions options = StartupOptions::parse(
+        QStringList{QStringLiteral("SeamlyLayout"),
+                    QStringLiteral("--svg-stdin"),
+                    QStringLiteral("--document-name"),
+                    QStringLiteral("richmond shirt")},
+        &input);
+
+    QCOMPARE(options.status(), StartupOptions::Status::OpenDocument);
+    QCOMPARE(options.documentName(), QStringLiteral("richmond shirt"));
+} // svgStdin_documentNameIsCarried()
+
+// @brief An unsaved pattern sends no --document-name, and the document still opens.
+void StartupOptionsTests::svgStdin_withoutDocumentName_nameIsEmpty()
+{
+    QBuffer input;
+    input.setData(svgDocumentBytes());
+    QVERIFY(input.open(QIODevice::ReadOnly));
+
+    const StartupOptions options = StartupOptions::parse(
+        QStringList{QStringLiteral("SeamlyLayout"), QStringLiteral("--svg-stdin")}, &input);
+
+    QCOMPARE(options.status(), StartupOptions::Status::OpenDocument);
+    QVERIFY(options.documentName().isEmpty());
+} // svgStdin_withoutDocumentName_nameIsEmpty()
+
+// @brief --svg-stdin without a device fails instead of opening an empty canvas
+// with no explanation.
+void StartupOptionsTests::svgStdin_withNoDevice_statusIsFailed()
+{
+    const StartupOptions options = StartupOptions::parse(
+        QStringList{QStringLiteral("SeamlyLayout"), QStringLiteral("--svg-stdin")}, nullptr);
+
+    QCOMPARE(options.status(), StartupOptions::Status::Failed);
+    QVERIFY(options.message().contains(QStringLiteral("svg-stdin")));
+} // svgStdin_withNoDevice_statusIsFailed()
+
+// @brief An empty pipe is reported as an empty pipe — not as an XML syntax error.
+void StartupOptionsTests::svgStdin_withEmptyInput_statusIsFailed()
+{
+    QBuffer input;
+    QVERIFY(input.open(QIODevice::ReadOnly));
+
+    const StartupOptions options = StartupOptions::parse(
+        QStringList{QStringLiteral("SeamlyLayout"), QStringLiteral("--svg-stdin")}, &input);
+
+    QCOMPARE(options.status(), StartupOptions::Status::Failed);
+    QVERIFY(options.svgDocument().isEmpty());
+    QVERIFY(options.message().contains(QStringLiteral("empty")));
+} // svgStdin_withEmptyInput_statusIsFailed()
+
+// @brief A payload with no <svg> element is refused before it reaches the parser.
+void StartupOptionsTests::svgStdin_withNonSvgInput_statusIsFailed()
+{
+    QBuffer input;
+    input.setData(QByteArrayLiteral("this is not a drawing"));
+    QVERIFY(input.open(QIODevice::ReadOnly));
+
+    const StartupOptions options = StartupOptions::parse(
+        QStringList{QStringLiteral("SeamlyLayout"), QStringLiteral("--svg-stdin")}, &input);
+
+    QCOMPARE(options.status(), StartupOptions::Status::Failed);
+    QVERIFY(options.message().contains(QStringLiteral("SVG")));
+} // svgStdin_withNonSvgInput_statusIsFailed()
+
+// @brief Two sources for one canvas is refused rather than resolved silently.
+void StartupOptionsTests::svgStdin_withPositionalFile_statusIsFailed()
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    const QString svgPath = makeFile(directory, QStringLiteral("pattern.svg"));
+
+    QBuffer input;
+    input.setData(svgDocumentBytes());
+    QVERIFY(input.open(QIODevice::ReadOnly));
+
+    const StartupOptions options = StartupOptions::parse(
+        QStringList{QStringLiteral("SeamlyLayout"), QStringLiteral("--svg-stdin"), svgPath},
+        &input);
+
+    QCOMPARE(options.status(), StartupOptions::Status::Failed);
+    QVERIFY(options.message().contains(QStringLiteral("pattern.svg")));
+} // svgStdin_withPositionalFile_statusIsFailed()
+
+// @brief Standard input is left untouched without the option.
+//
+// main.cpp opens stdin on every launch, so a shell or icon launch would hang
+// waiting for input that never comes if the parser read it unasked.
+void StartupOptionsTests::svgStdin_isNotReadWithoutTheOption()
+{
+    QBuffer input;
+    input.setData(svgDocumentBytes());
+    QVERIFY(input.open(QIODevice::ReadOnly));
+
+    const StartupOptions options =
+        StartupOptions::parse(QStringList{QStringLiteral("SeamlyLayout")}, &input);
+
+    QCOMPARE(options.status(), StartupOptions::Status::NoFile);
+    QVERIFY(options.svgDocument().isEmpty());
+    QCOMPARE(input.pos(), qint64(0));   // nothing was consumed
+} // svgStdin_isNotReadWithoutTheOption()
 
 // ---------------------------------------------------------------------------
 // --help / --version

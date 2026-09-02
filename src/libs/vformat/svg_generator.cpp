@@ -412,17 +412,32 @@ void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item)
 */
 void SvgGenerator::generate()
 {
-    QDomDocument mergedSvg = mergeSvgDoms();
+    const QString mergedSvg = toSvgString();
 
     QFile outputFile(m_filepath);
+
     if (!outputFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qDebug() << "Error : Couldn't write the output file.";
         return;
     }
 
     QTextStream stream(&outputFile);
-    stream << mergedSvg.toString();
+    stream << mergedSvg;
     outputFile.close();
 
     qDebug() << "Merged SVG Generated!";
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Generate the merged SVG and return it as text instead of writing a file.
+ * @return the merged SVG document, or an empty string when no scene was added.
+ * @details Same merge as generate(), for callers that need the document in
+ *          memory: Layout Mode hands the pattern pieces to SeamlyLayout as one
+ *          stringified SVG on the child process's standard input, so no handoff
+ *          file is created (Seamly2D.5).
+*/
+QString SvgGenerator::toSvgString()
+{
+    return mergeSvgDoms().toString();
 }

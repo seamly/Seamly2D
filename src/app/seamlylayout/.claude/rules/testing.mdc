@@ -23,7 +23,7 @@
 
 ### `cargo test` needs Qt in the environment (Windows)
 
-`build.ps1` sets this up. A bare shell does not, and `cargo test --workspace`
+Set this up yourself; a bare shell does not have it, and `cargo test --workspace`
 then fails **twice, for two different reasons**:
 
 ```powershell

@@ -64,15 +64,18 @@ ApplicationWindow {
     property string importedBaseName: ""
 
     // -----------------------------------------------------------------------
-    // SVG import entry point
+    // SVG import entry points
     //
-    // Both ways of opening a file funnel through openSvgFile():
-    //   - the Import SVG file dialog (importDialog.onAccepted), and
-    //   - the Seamly2D Layout Mode handoff, invoked from main.cpp by
-    //     QMetaObject::invokeMethod(window, "openSvgFile", ...) once the event
-    //     loop starts (Task 49).
-    // Keeping one entry point is what stops the two paths from drifting apart
-    // — before Task 49 the command-line path did not exist at all.
+    // Two of them, one per transport:
+    //   - openSvgFile() takes a path — the Import SVG file dialog
+    //     (importDialog.onAccepted) and the SeamlyLayout command line
+    //     (main.cpp, Task 49).
+    //   - openSvgDocument() takes SVG text — the Seamly2D Layout Mode handoff,
+    //     which sends the piece-mode document on standard input and never
+    //     writes a file (Seamly2D.5).
+    // Both are invoked from main.cpp with QMetaObject::invokeMethod once the
+    // event loop starts, and both end in the same AppController import, so the
+    // canvas cannot behave differently depending on where the SVG came from.
     // -----------------------------------------------------------------------
 
     // @brief Open an SVG file: remember its base name, then hand it to Rust.
@@ -89,6 +92,20 @@ ApplicationWindow {
         // both are handled by the AppController block above.
         appController.importSvg(localPath);
     } // openSvgFile
+
+    // @brief Open an SVG document held in memory (the Seamly2D handoff).
+    // @param svgText      Complete stringified SVG document.
+    // @param documentName Pattern base name, used for default export file
+    //        names. There is no file name to derive one from; an empty value
+    //        leaves the previous name in place.
+    function openSvgDocument(svgText, documentName) {
+        if (!svgText || svgText === "") return;   // nothing to open
+        if (documentName && documentName !== "")
+            root.importedBaseName = documentName
+        // importSvgDocument emits importFinished on success, errorOccurred on
+        // failure; both are handled by the AppController block above.
+        appController.importSvgDocument(svgText);
+    } // openSvgDocument
 
     // @brief Report a command-line problem detected before the window existed.
     // Called from main.cpp when the positional <svg-file> argument is missing,

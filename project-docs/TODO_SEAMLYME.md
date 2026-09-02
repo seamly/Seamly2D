@@ -4,7 +4,7 @@ Tasks that add features to the SeamlyMe measurements app.
 
 Check off subtasks as they are accomplished; when every subtask of a task is complete, move the task to `project-docs/TODO_COMPLETED.md`.
 
-## Task SeamlyMe.1: confirm Open Individual/Multisize/Template pickers default to the corresponding user measurement directories
+## [ ] Task SeamlyMe.1: confirm Open Individual/Multisize/Template pickers default to the corresponding user measurement directories
 
 Requested: the **Open Individual**, **Open Multisize**, and **Open Template** pickers should open to `<seamly_user_directory>\measurements\individual`, `…\measurements\multisize`, and the templates directory respectively. `<seamly_user_directory>` = the shared relocatable data root (Task 34).
 
@@ -21,9 +21,9 @@ Requested: the **Open Individual**, **Open Multisize**, and **Open Template** pi
 - [ ] SeamlyMe.1.3 Ensure all three paths derive from the shared relocatable data root (Task 34) so they follow a user-configured/renamed `<seamly_user_directory>` instead of the hardcoded `~/seamly2d`
 - [ ] SeamlyMe.1.4 Doxygen briefs + inline comments on any touched function(s)
 
-## Task SeamlyMe.2 — SeamlyMe: default the Open dialog to the user measurements/individual directory
+## [x] Task SeamlyMe.2 — SeamlyMe: default the Open dialog to the user measurements/individual directory
 
-## Task SeamlyMe.3 — Installer: write SeamlyMe's desktop-shortcut flag to its own registry key
+## [ ] Task SeamlyMe.3 — Installer: write SeamlyMe's desktop-shortcut flag to its own registry key
 
 Found during MSI Test Case verification, step 5c (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`). `SeamlyMeDesktopShortcutComponent`'s `RegistryValue` (`packaging/windows/smsi_shortcuts.wxs:75-80`) writes `DesktopShortcutSeamlyMe` under `HKLM\SOFTWARE\Seamly\Seamly2D` instead of `HKLM\SOFTWARE\Seamly\SeamlyMe`.
 
@@ -31,15 +31,7 @@ Found during MSI Test Case verification, step 5c (`project-docs/TEST_MSI_WIN_X64
 - [ ] SeamlyMe.3.2 Confirm `smsi_check_authoring.ps1:562` and `test_msi_install.ps1` still pass, and update either script if it asserts the old key
 - [ ] SeamlyMe.3.3 Re-run MSI Test Case verification step 5c to confirm `HKLM\SOFTWARE\Seamly\SeamlyMe` carries `DesktopShortcutSeamlyMe`
 
-## Task SeamlyMe.5 — write SeamlyMe log files to `%LOCALAPPDATA%\Seamly\SeamlyMe\logs`
-
-Found during MSI Test Case verification, step B.2b-v (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, 2026-09-01). SeamlyMe writes no log files and creates no logs directory — `ApplicationME` has no equivalent of `Application2D::logDirPath()`/`beginLogging()` (`src/app/seamly2d/core/application_2d.cpp:605`). Seamly2D writes to `%LOCALAPPDATA%\Seamly\Seamly2D\logs`; SeamlyMe must mirror that pattern.
-
-- [x] SeamlyMe.5.1 Implemented 2026-09-01: `ApplicationME` gains `startLogging()`/`logFile()` plus the private `logDirPath()`/`logPath()`/`createLogDir()`/`beginLogging()`/`clearOldLogs()`, mirroring `Application2D`. `initOptions()` starts logging before installing the message handler; the handler now writes every message to the per-pid log (`seamlyme-pid<pid>.log`), null-guarded so console output survives a failed open. Windows dir: `%LOCALAPPDATA%\Seamly\SeamlyMe\logs`. 3-day retention, same as Seamly2D.
-- [ ] SeamlyMe.5.2 Re-run MSI Test Case verification step B.2b-v to confirm the directory and a log file appear after a SeamlyMe run
-- [x] SeamlyMe.5.3 Doxygen briefs on `logDirPath()`/`logFile()`; inline comments at the handler write and `initOptions()` ordering
-
-## Task SeamlyMe.4 — write a persisted `[paths]` section to `qt6_seamlyme.ini`
+## [ ] Task SeamlyMe.4 — write a persisted `[paths]` section to `qt6_seamlyme.ini`
 
 Found during MSI Test Case verification, step 6b (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`). `qt6_seamlyme.ini` has no `[paths]` section. `VCommonSettings` (shared with Seamly2D) already exposes `getIndividualSizePath()`/`getMultisizePath()`/`getTemplatePath()` under the `paths/individual_size_measurements`, `paths/multi_size_measurements`, and `paths/templates` keys (`src/libs/vmisc/vcommonsettings.cpp:86-93`), but nothing in SeamlyMe ever calls the matching setters, so QSettings never writes the section — the paths only resolve correctly at runtime through each getter's default fallback. Related to Task SeamlyMe.1 (same getters, dialog defaults).
 

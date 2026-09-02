@@ -53,6 +53,7 @@ Run this suite after every test case in section A.
     |_backups
     |_bodyscans
     |_images
+    |_label templates
     |_layouts
     |_measurements
     |_measurements\individual
@@ -67,7 +68,7 @@ Run this suite after every test case in section A.
 dataRoot=%DATAROOT%
 individual_size_measurements=%DATAROOT%/measurements/individual
 multi_size_measurements=%DATAROOT%/measurements/multisize
-templates=%DATAROOTT%/templates
+templates=%DATAROOT%/templates
 bodyscans=%DATAROOT%/bodyscans"
       - [ ] 0b-i2. "[notices] firstRunDataNotice=pending"
     - [ ] 0b-ii. qt6_seamly2d.ini should contain:
@@ -109,18 +110,18 @@ data_root=%DATAROOT%"
     - [ ] 2a-iv. Open `%DATAROOT%\patterns\male_shirt.sm2d` pattern file with `%DATAROOT%\measurements\individual\male_chest_102cm.smis` individual measurement file.
     - [ ] 2a-v. Check if directory exists: `%LOCALAPPDATA%\Seamly\Seamly2D\logs`
   - [ ] 2b. Check SeamlyMe from within Seamly2D
-  - [ ] 2b-i. Select 'File Open Individual' - the dialog should open in the `%DATAROOT\measurements\individual` directory.
+    - [ ] 2b-i. Select 'File Open Individual' - the dialog should open in the `%DATAROOT\measurements\individual` directory.
     - [ ] 2b-ii. Select 'File Open Multisize' - the dialog should open in the `%DATAROOT\measurements\multisize` directory.
     - [ ] 2b-iii. Select 'File Open Templates' - the dialog should open in the `%DATAROOT\templates` directory.
     - [ ] 2b-iv. Select 'Edit Current' from the Measurements menu - the `%DATAROOT%\measurements\individual\male_chest_102cm.smis` file should open.
-    - [ ] 2b-v. Check if directory exists: `%LOCALAPPDATA%\SeamlyMe\logs`
+    - [ ] 2b-v. Check if directory exists: `%LOCALAPPDATA%\Seamly\SeamlyMe\logs`
     - [ ] 2b-vi. Close SeamlyMe, returning focus to Seamly2D.
   - [ ] 2c. Run SeamlyLayout from within Seamly2D.
     - [ ] 2c-i. Visually confirm that the current pattern's `Piece mode` data is opened in the left canvas.
     - [ ] 2c-ii. Check if `MainWindow::exportPiecesToSeamlyLayout()` passes 'piece mode' data to SeamlyLayout as a stringified SVG document in a variable, not as a svg file from harddrive.
-    - [ ] 2c-iii. Check if directories exist: `%DATAROOT%\SeamlyLayout\cache`, `%DATAROOT%\SeamlyLayout\logs`
+    - [ ] 2c-iii. Check if directories exist: `%LOCALAPPDATA%\Seamly\SeamlyLayout\cache`, `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs`
     - [ ] 2c-iv. Close SeamlyLayout, returning focus to Seamly2D.
   - [ ] 2d. Close Seamly2D.
-- [ ] 3. Check if `%LOCALAPPDATA%\SeamlyLayout\output` directory was created. If exists add a task to stop creating the `%LOCALAPPDATA%\SeamlyLayout\` directory and its `output` subdirectory that stores log files, and start creating the `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` directory to store SeamlyLayout log files (similar to the `%LOCALAPPDATA\Seamly\Seamly2D\logs` directory)
+- [ ] 3. Check if the incorrect `%LOCALAPPDATA%\SeamlyLayout\output` directory was created. If exists add a task to stop creating the `%LOCALAPPDATA%\SeamlyLayout\` directory and its `output` subdirectory that stores log files, and start creating the `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` directory to store SeamlyLayout log files (similar to the `%LOCALAPPDATA\Seamly\Seamly2D\logs` directory)
 - [ ] 4. Check Desktop shortcuts `Seamly2D.lnk`, `SeamlyMe.lnk`, `SeamlyLayout.lnk` for all three apps in `C:\Users\Public\Desktop` (default settings, `SEAMLYDESKTOPSHORTCUTS` on).
 - [ ] 5. Check the logs in `%LOCALAPPDATA%\Seamly\Seamly2D\logs\` for additional errors.

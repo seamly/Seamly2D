@@ -3,7 +3,8 @@
 // LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
 //
 // @file StartupOptions.cpp
-// @brief Implementation of the SeamlyLayout command-line contract.
+// @brief Implementation of the SeamlyLayout startup contract — a positional
+//        <svg-file>, or an SVG document on standard input.
 //
 // Control flow of parse():
 //   1. Reject an empty argument list outright (nothing to parse).
@@ -12,10 +13,14 @@
 //      application behind main()'s back.
 //   3. Honour --help / --version by handing their text back as
 //      Status::ShowInformation; main() displays it and exits 0.
-//   4. Require at most one positional argument.
-//   5. Validate that argument as an existing, readable .svg file and store its
-//      ABSOLUTE path (the app-wide rule: never pass relative paths around, the
-//      working directory of a detached launch is not the user's).
+//   4. Reject --svg-stdin together with a positional file: one document per
+//      process, and two sources would silently pick a winner.
+//   5. With --svg-stdin, read standard input to end and validate it as an SVG
+//      document (Seamly2D.5).
+//   6. Otherwise require at most one positional argument, and validate it as an
+//      existing, readable .svg file, storing its ABSOLUTE path (the app-wide
+//      rule: never pass relative paths around, the working directory of a
+//      launched process is not the user's).
 //
 // Every failure produces a sentence the user can act on, because the only thing
 // worse than the old behaviour (silently ignoring the argument) is silently
@@ -27,12 +32,25 @@
 #include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QFileInfo>
+#include <QIODevice>
 
 namespace
 {
 // @brief Extension SeamlyLayout accepts, compared case-insensitively.
-// Seamly2D hands over "<pattern>.pieces.svg", whose QFileInfo::suffix() is "svg".
 const QLatin1String svgSuffix("svg");
+
+// @brief Option name that switches the input transport to standard input.
+// Seamly2D passes it for the Layout Mode handoff; SeamlySuitePaths::
+// seamlyLayoutLaunchArguments() is the one place that spells it on that side.
+const QLatin1String svgStdinOptionName("svg-stdin");
+
+// @brief Option name carrying the pattern base name of a piped document.
+const QLatin1String documentNameOptionName("document-name");
+
+// @brief Smallest thing that can still be an SVG document: the root element.
+// Checked so an empty pipe, or a stray non-SVG payload, is reported as such
+// rather than as an XML syntax error from deep inside the Rust parser.
+const QLatin1String svgRootElement("<svg");
 
 // @brief Build the text shown for --version.
 // Falls back to the product name alone when the caller has not set the
@@ -53,11 +71,21 @@ QString versionText()
 } // versionText
 } // namespace
 
+// @brief Parse and validate a command line that cannot use standard input.
+// @param arguments Full argument list including the program name at index 0.
+// @return A fully populated StartupOptions; never throws, never exits.
+StartupOptions StartupOptions::parse(const QStringList &arguments)
+{
+    return parse(arguments, nullptr);
+} // StartupOptions::parse
+
 // @brief Parse and validate a SeamlyLayout command line.
 // @param arguments Full argument list including the program name at index 0,
 //        as returned by QCoreApplication::arguments().
+// @param standardInput Device the SVG document is read from when --svg-stdin is
+//        set; nullptr when the caller offers no such channel.
 // @return A fully populated StartupOptions; never throws, never exits.
-StartupOptions StartupOptions::parse(const QStringList &arguments)
+StartupOptions StartupOptions::parse(const QStringList &arguments, QIODevice *standardInput)
 {
     StartupOptions options;
 
@@ -70,11 +98,24 @@ StartupOptions StartupOptions::parse(const QStringList &arguments)
     QCommandLineParser parser;
     parser.setApplicationDescription(QStringLiteral(
         "SeamlyLayout — pattern layout application of the Seamly Application Suite.\n"
-        "Opens the tagged pieces SVG that Seamly2D's Layout Mode writes beside "
-        "the pattern file."));
+        "Opens an SVG file, or the SVG document Seamly2D's Layout Mode sends on "
+        "standard input."));
 
     const QCommandLineOption helpOption    = parser.addHelpOption();
     const QCommandLineOption versionOption = parser.addVersionOption();
+
+    const QCommandLineOption svgStdinOption(
+        QStringList() << svgStdinOptionName,
+        QStringLiteral("Read the SVG document to open from standard input. "
+                       "Used by Seamly2D's Layout Mode handoff."));
+    parser.addOption(svgStdinOption);
+
+    const QCommandLineOption documentNameOption(
+        QStringList() << documentNameOptionName,
+        QStringLiteral("Name of the document read from standard input; used for "
+                       "default export file names."),
+        QStringLiteral("name"));
+    parser.addOption(documentNameOption);
 
     parser.addPositionalArgument(
         QStringLiteral("svg-file"),
@@ -105,6 +146,22 @@ StartupOptions StartupOptions::parse(const QStringList &arguments)
     } // if help requested
 
     const QStringList positional = parser.positionalArguments();
+    const bool readStandardInput = parser.isSet(svgStdinOption);
+
+    if (readStandardInput && !positional.isEmpty()) {
+        // Two sources for one canvas. Refuse rather than pick a winner the
+        // caller cannot predict.
+        options.m_status  = Status::Failed;
+        options.m_message = QStringLiteral(
+            "--%1 reads the document from standard input, so no file may be given as well:\n%2")
+            .arg(svgStdinOptionName)
+            .arg(positional.join(QStringLiteral("\n")));
+        return options;
+    } // if both transports requested
+
+    if (readStandardInput) {
+        return parseStandardInput(parser.value(documentNameOption), standardInput);
+    } // if the document arrives on standard input
 
     if (positional.isEmpty()) {
         // Plain launch — the double-clicked-icon case. Empty canvas, no message.
@@ -125,7 +182,7 @@ StartupOptions StartupOptions::parse(const QStringList &arguments)
     // ---------------------------------------------------------------------
     // Validate the one positional argument.
     //
-    // Each branch names the file, because a detached launch gives the user no
+    // Each branch names the file, because a launched process gives the user no
     // console output to correlate the message with.
     // ---------------------------------------------------------------------
     const QFileInfo file(positional.constFirst());
@@ -163,3 +220,48 @@ StartupOptions StartupOptions::parse(const QStringList &arguments)
     options.m_filePath = absolutePath;
     return options;
 } // StartupOptions::parse
+
+// @brief Read and validate the SVG document offered on standard input.
+//
+// Split out of parse() so the standard-input transport (Seamly2D.5) has one
+// place that decides what a usable document is, and so a test can drive it with
+// a QBuffer instead of the real stdin of the test runner.
+//
+// @param documentName Value of --document-name; empty when it was not given.
+// @param standardInput Device to read to end; nullptr when the caller offers
+//        none, which is itself a failure because --svg-stdin was requested.
+// @return OpenDocument with svgDocument() set, or Failed with a message.
+StartupOptions StartupOptions::parseStandardInput(const QString &documentName,
+                                                  QIODevice *standardInput)
+{
+    StartupOptions options;
+
+    if (standardInput == nullptr || !standardInput->isReadable()) {
+        options.m_status  = Status::Failed;
+        options.m_message = QStringLiteral(
+            "--%1 was given, but standard input is not readable.").arg(svgStdinOptionName);
+        return options;
+    } // if no readable channel
+
+    // Read to end: Seamly2D writes the whole document, then closes the channel.
+    const QString document = QString::fromUtf8(standardInput->readAll());
+
+    if (document.trimmed().isEmpty()) {
+        options.m_status  = Status::Failed;
+        options.m_message = QStringLiteral(
+            "--%1 was given, but standard input was empty.").arg(svgStdinOptionName);
+        return options;
+    } // if nothing arrived
+
+    if (!document.contains(svgRootElement, Qt::CaseInsensitive)) {
+        options.m_status  = Status::Failed;
+        options.m_message = QStringLiteral(
+            "The document on standard input is not an SVG — it has no <svg> element.");
+        return options;
+    } // if not an SVG document
+
+    options.m_status       = Status::OpenDocument;
+    options.m_svgDocument  = document;
+    options.m_documentName = documentName;
+    return options;
+} // StartupOptions::parseStandardInput

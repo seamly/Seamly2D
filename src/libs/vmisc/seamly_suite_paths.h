@@ -39,6 +39,12 @@
  * suite (seamly2d, seamlyme, SeamlyLayout), together with the launch contract
  * seamly2d uses to hand a pattern over to SeamlyLayout.
  *
+ * The handoff itself is not a file: Layout Mode sends the piece-mode document
+ * as one stringified SVG on the SeamlyLayout process's standard input
+ * (Seamly2D.5). seamlyLayoutLaunchArguments() builds the arguments that tell
+ * SeamlyLayout to read it, and patternDocumentName() supplies the name that
+ * document is known by.
+ *
  * The functions live in vmisc (not in the seamly2d app target) so they can be
  * exercised by the Seamly2DTests suite, which links the static libraries but
  * not the application sources.
@@ -49,8 +55,8 @@ namespace SeamlySuitePaths
     QString locateSeamlyLayout(const QString &directory);
     QString locateSeamlyLayoutDevBuild(const QString &startDirectory);
 
-    QString piecesSvgFilePath(const QString &patternFilePath);
-    QStringList seamlyLayoutLaunchArguments(const QString &piecesSvgPath);
+    QString patternDocumentName(const QString &patternFilePath);
+    QStringList seamlyLayoutLaunchArguments(const QString &documentName);
 }
 
 #endif // SEAMLY_SUITE_PATHS_H

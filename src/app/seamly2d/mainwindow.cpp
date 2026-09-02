@@ -4123,7 +4123,7 @@ void MainWindow::showLayoutMode(bool checked)
         showLayoutPages(ui->listWidget->currentRow());
 
         // SeamlyLayout handoff: instead of running the built-in layout engine,
-        // write the tagged pieces SVG and open it in the SeamlyLayout application.
+        // send the tagged pieces SVG to the SeamlyLayout application.
         // On failure (error already reported in a dialog) return to the prior mode.
         if (!exportPiecesToSeamlyLayout())
         {
@@ -4143,40 +4143,33 @@ void MainWindow::showLayoutMode(bool checked)
 /**
  * @brief exportPiecesToSeamlyLayout hands the pattern pieces over to the SeamlyLayout application.
  *
- * Workflow: write the tagged pieces SVG (data-type / data-type-number / data-parent /
- * data-name / data-letter attributes on every group, see generatePiecesSvg()) as
- * "<pattern-basename>.pieces.svg" next to the pattern file, then launch the
- * SeamlyLayout application with that file as its argument, tracked via
- * m_seamlyLayoutProcess so its exit can restore the prior mode (Seamly2D.3).
- * The user enters layout settings, generates, adjusts, saves, views and prints
- * the layout inside SeamlyLayout. Any problem (unsaved pattern, failed SVG
- * generation, missing SeamlyLayout executable) is reported in a message box.
+ * Workflow: build the tagged pieces SVG (data-type / data-type-number /
+ * data-parent / data-name / data-letter attributes on every group, see
+ * generatePiecesSvgDocument()) as one string, launch the SeamlyLayout
+ * application with --svg-stdin, then write that string to its standard input
+ * and close the channel. No file is created, so nothing is left beside the
+ * pattern and an unsaved or read-only pattern no longer blocks Layout Mode
+ * (Seamly2D.5). The process is tracked via m_seamlyLayoutProcess so its exit
+ * can restore the prior mode (Seamly2D.3).
  *
- * @return true when the SVG was written and SeamlyLayout was launched; false on
- *         any failure so the caller can stay in (revert to) the prior mode.
+ * The user enters layout settings, generates, adjusts, saves, views and prints
+ * the layout inside SeamlyLayout. Any problem (no pieces, failed SVG
+ * generation, missing SeamlyLayout executable, failed launch) is reported in a
+ * message box.
+ *
+ * @return true when the document was generated and handed to a running
+ *         SeamlyLayout; false on any failure so the caller can revert to the
+ *         prior mode.
  */
 bool MainWindow::exportPiecesToSeamlyLayout()
 {
-    // The handoff SVG is written beside the pattern file, so the pattern must be saved first.
-    if (qApp->getFilePath().isEmpty())
-    {
-        QMessageBox::information(this, tr("Layout mode"),
-                                 tr("Please save the pattern file before creating a layout. "
-                                    "The layout file is stored next to the pattern file."),
-                                 QMessageBox::Ok, QMessageBox::Ok);
-        return false;
-    }
-
-    // Build "<pattern directory>/<pattern basename>.pieces.svg". The naming rule
-    // lives in vmisc so the daughter app's documented input file name has one
-    // definition and one test (TST_SeamlySuitePaths).
-    const QString svgPath = SeamlySuitePaths::piecesSvgFilePath(qApp->getFilePath());
-
-    // Render the pieces (pieceList was prepared by showLayoutMode) into the tagged SVG.
-    if (!generatePiecesSvg(svgPath))
+    // Render the pieces (pieceList was prepared by showLayoutMode) into the
+    // tagged SVG document. Empty means there was nothing to lay out.
+    const QString piecesSvg = generatePiecesSvgDocument();
+    if (piecesSvg.isEmpty())
     {
         QMessageBox::warning(this, tr("Layout mode"),
-                             tr("Could not create the layout file:\n%1").arg(svgPath),
+                             tr("Could not create the layout document from the pattern pieces."),
                              QMessageBox::Ok, QMessageBox::Ok);
         return false;
     }
@@ -4186,21 +4179,21 @@ bool MainWindow::exportPiecesToSeamlyLayout()
     if (seamlyLayout.isEmpty())
     {
         QMessageBox::warning(this, tr("Layout mode"),
-                             tr("The SeamlyLayout application could not be found.\n"
-                                "The layout file was saved as:\n%1\n\n"
-                                "Set the SeamlyLayout path in the application preferences.").arg(svgPath),
+                             tr("The SeamlyLayout application could not be found.\n\n"
+                                "Set the SeamlyLayout path in the application preferences."),
                              QMessageBox::Ok, QMessageBox::Ok);
         return false;
     }
 
     // Launch SeamlyLayout. Unlike SeamlyMe's detached launch, this process is
     // tracked so its exit can restore the mode active before the handoff
-    // instead of leaving Seamly2D showing Layout Mode (Seamly2D.3).
+    // instead of leaving Seamly2D showing Layout Mode (Seamly2D.3). A detached
+    // launch could not be used here in any case: the document is written to the
+    // child's standard input, which needs a live QProcess.
     // The argument vector is built by SeamlySuitePaths so the contract stays in
-    // step with what SeamlyLayout's StartupOptions accepts: exactly one
-    // positional argument, the absolute path of the SVG to open (Task 49).
-    // TODO: pass seamly piece mode data to seamlylayout as a variable object, not as an svg file
+    // step with what SeamlyLayout's StartupOptions accepts.
     const QString workingDirectory = QFileInfo(seamlyLayout).absoluteDir().absolutePath();
+    const QString documentName     = SeamlySuitePaths::patternDocumentName(qApp->getFilePath());
 
     if (m_seamlyLayoutProcess != nullptr)
     {
@@ -4219,13 +4212,39 @@ bool MainWindow::exportPiecesToSeamlyLayout()
         m_seamlyLayoutProcess = nullptr;
     });
 
-    m_seamlyLayoutProcess->start(seamlyLayout, SeamlySuitePaths::seamlyLayoutLaunchArguments(svgPath));
+    m_seamlyLayoutProcess->start(seamlyLayout,
+                                 SeamlySuitePaths::seamlyLayoutLaunchArguments(documentName));
     if (!m_seamlyLayoutProcess->waitForStarted())
     {
         m_seamlyLayoutProcess->deleteLater();
         m_seamlyLayoutProcess = nullptr;
         return false;
     }
+
+    // Send the document, then close the write channel: SeamlyLayout reads
+    // standard input to end, so without the close it would wait forever.
+    m_seamlyLayoutProcess->write(piecesSvg.toUtf8());
+    m_seamlyLayoutProcess->closeWriteChannel();
+
+    // Drain the write buffer here rather than leaving it to the event loop.
+    // A pattern SVG is far larger than the pipe buffer, so it takes several
+    // passes; each waitForBytesWritten() call reports only that *some* bytes
+    // moved. The wait is bounded (30 s per call by default) and SeamlyLayout
+    // starts reading before it builds its window, so this blocks Seamly2D for
+    // the length of a pipe write, not for the daughter app's startup.
+    // A failure means the child died between start and write; report it like
+    // any other failed handoff.
+    while (m_seamlyLayoutProcess->bytesToWrite() > 0)
+    {
+        if (!m_seamlyLayoutProcess->waitForBytesWritten())
+        {
+            QMessageBox::warning(this, tr("Layout mode"),
+                                 tr("The layout document could not be sent to SeamlyLayout."),
+                                 QMessageBox::Ok, QMessageBox::Ok);
+            return false;
+        }
+    }
+
     return true;
 }
 

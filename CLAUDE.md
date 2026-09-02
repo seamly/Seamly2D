@@ -72,7 +72,7 @@ All apps use Qt 6.11.1.
 * Purpose: Creates layouts of Seamly2D pattern pieces for cutting and downstream software.
 * Code: Rust converted to C++ with `cxx-qt`.
 * GUI: Qt 6.11 / QML / QtWidgets.
-* Build: local - `src/app/seamlylayout/qd.ps1`; GitHub - ci.yml
+* Build: local - `packaging\windows\test_build_msi_local.ps1`; GitHub - ci.yml
 * Merge its local `CLAUDE.md` and `rules.md` requirements into the project-level files.
 * File header:
 
@@ -104,23 +104,34 @@ All three applications build against **Qt 6.11.1**.
 
 ### Local Windows Build
 
-`packaging\windows\test_build_msi_local.ps1` builds Seamly2D, SeamlyMe, and
-SeamlyLayout release binaries locally, then packages them into the Windows x64
-MSI via `smsi.ps1`. It runs the same steps as `ci.yml`'s `windows-msi` job:
-qmake + nmake for Seamly2D/SeamlyMe, CMake + Ninja + Cargo for SeamlyLayout.
-Requires VS 18 Community, a Qt 6.11.1+ `msvc2022_64` kit, and Rust on PATH.
-Treat its output as a local dev build, not a release artifact — releases still
-go through `gh workflow run ci.yml`.
+**`packaging\windows\test_build_msi_local.ps1` is the build.** Use it for every
+local build. Do **not** use `src\app\seamlylayout\build.ps1` or `qd.ps1` any
+more (user decision, 2026-09-02): they build SeamlyLayout alone, which is not
+what the install-and-test loop needs.
 
-`ci.yml` remains the verification path for Seamly2D and SeamlyMe unit tests;
-this script does not run them.
+It builds Seamly2D, SeamlyMe and SeamlyLayout release binaries, runs the Qt unit
+tests, then packages the Windows **x64** MSI via `smsi.ps1`:
 
-SeamlyLayout keeps its own local scripts:
+* `qmake Seamly.pro -r -config release` + `nmake` for Seamly2D/SeamlyMe **and**
+  the four Qt test suites;
+* `nmake check` — Seamly2DTest, CollectionTest, ParserTest, TranslationsTest.
+  A failing suite stops the build, so a broken test never reaches an MSI;
+* CMake + Ninja + Cargo for SeamlyLayout;
+* `smsi.ps1` to stage and `wix build`.
 
-* `src/app/seamlylayout/qd.ps1` — debug build.
-* `src/app/seamlylayout/build.ps1` — CMake + Ninja + Cargo. **Local only.**
-  `ci.yml` runs `cmake --preset release` directly and never calls this script,
-  so a change here needs no CI run.
+Steps 1-2 mirror `ci.yml`'s `windows-test` job; the rest mirrors its
+`windows-msi` (x64) job. Requires VS 18 Community, a Qt 6.11.1+ `msvc2022_64`
+kit, and Rust on PATH. Treat its output as a local dev build, not a release
+artifact — releases still go through `gh workflow run ci.yml`.
+
+Switches:
+
+* `-SkipTests` — build with `CONFIG+=noTests` and skip `nmake check`. Only for a
+  packaging-only change; the Qt suites have no other local runner.
+* `-SkipValidation` — passed to `smsi.ps1`, skips the `wix msi validate` ICE pass.
+
+A build script for the Windows **arm64** MSI is planned and does not exist yet.
+Do not assume this script covers arm64.
 
 Use Qt 6.11.1 `msvc2022_64` with the VS 18 Community MSVC environment.
 
@@ -302,11 +313,13 @@ Implement only the required task scope.
 For code changes:
 
 * add or update unit tests;
-* run the tests that still run locally — SeamlyLayout `ctest --preset debug` and
-  `cargo test --workspace`.
+* run the local tests:
+  * Seamly2D/SeamlyMe Qt suites — `packaging\windows\test_build_msi_local.ps1`
+    runs them via `nmake check`;
+  * SeamlyLayout — `ctest --preset debug` and `cargo test --workspace`.
 
-Both need Qt and Rust in the shell first. `build.ps1` sets this up; a bare
-shell does not:
+The two SeamlyLayout commands need Qt and Rust in the shell first; a bare shell
+does not have them:
 
 ```powershell
 $env:PATH  = "C:\Qt\6.11.1\msvc2022_64\bin;$env:USERPROFILE\.cargo\bin;$env:PATH"
@@ -316,6 +329,11 @@ $env:QMAKE = 'C:/Qt/6.11.1/msvc2022_64/bin/qmake.exe'
 Without them the failures name the wrong cause: a missing `cargo`, a
 `QtMissing` panic, or `STATUS_DLL_NOT_FOUND`. See
 `.github/README-BUILDS.md`.
+
+Three of the four Qt suites are GUI-subsystem binaries and print nothing to a
+console, and one shared `-o` target is overwritten by each `qExec()` call. To
+read a single suite, set `SEAMLY_TEST_LOG_DIR` to a directory and run the binary
+through its own generated `target_wrapper.bat`, which supplies `QT_PLUGIN_PATH`.
 
 Seamly2D and SeamlyMe have no local build or test script. `ci.yml` verifies
 them. A skip-ci push defers that verification. See CI Cost Control.

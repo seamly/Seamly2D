@@ -188,8 +188,13 @@ $RECYCLE.BIN/
 # Understand IDE file
 *.udb
 
-# target_wrapper.sh files are generated/updated automatically
+# target_wrapper.sh / .bat files are generated/updated automatically.
+# qmake writes one per test target next to its .pro when CONFIG += testcase
+# supplies the `check` rule: .sh on Unix, .bat on Windows. The .bat appears
+# only when the Qt suites are built on Windows, which
+# packaging/windows/test_build_msi_local.ps1 now does.
 target_wrapper.sh
+target_wrapper.bat
 *.bak
 
 # Allow xerces lib

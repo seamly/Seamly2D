@@ -45,11 +45,13 @@
  * (Task 50): an upward walk from the running executable's directory looking for
  * a SeamlyLayout build inside the source checkout, Release before Debug.
  *
- * SeamlySuitePaths::piecesSvgFilePath() and seamlyLayoutLaunchArguments() are
- * the seamly2d half of the Layout Mode launch contract (Task 49): the handoff
- * file is "<pattern>.pieces.svg" beside the pattern, and it is passed as the
- * single positional argument of the SeamlyLayout process. The daughter app's
- * half — that it accepts exactly that and rejects anything else — is locked by
+ * SeamlySuitePaths::patternDocumentName() and seamlyLayoutLaunchArguments()
+ * are the seamly2d half of the Layout Mode launch contract (Seamly2D.5): no
+ * handoff file is written — the piece-mode document goes to the SeamlyLayout
+ * process on its standard input, and the arguments say only that
+ * ("--svg-stdin"), plus the name the document is known by
+ * ("--document-name <pattern base name>"). The daughter app's half — that it
+ * accepts exactly that and rejects anything else — is locked by
  * StartupOptionsTests in src/test/SeamlyLayoutTest.
  *
  * Every case runs against a QTemporaryDir populated with dummy files, so the
@@ -78,12 +80,13 @@ private slots:
     void DevBuildDirectoryNamedLikeExecutableIsIgnored() const;
     void DevBuildStopsBeforeUnboundedWalk() const;
 
-    void PiecesSvgSitsBesideThePattern() const;
-    void PiecesSvgKeepsDotsInThePatternName() const;
-    void PiecesSvgPathIsAbsolute() const;
-    void PiecesSvgOfEmptyPatternPathIsEmpty() const;
-    void LaunchArgumentsAreTheSvgPathAlone() const;
-    void LaunchArgumentsOfEmptySvgPathAreEmpty() const;
+    void DocumentNameIsThePatternBaseName() const;
+    void DocumentNameKeepsDotsInThePatternName() const;
+    void DocumentNameOfEmptyPatternPathIsEmpty() const;
+    void LaunchArgumentsAskForStandardInput() const;
+    void LaunchArgumentsCarryTheDocumentName() const;
+    void LaunchArgumentsOmitAnEmptyDocumentName() const;
+    void LaunchArgumentsNameNoFile() const;
 };
 
 #endif // TST_SEAMLYSUITEPATHS_H

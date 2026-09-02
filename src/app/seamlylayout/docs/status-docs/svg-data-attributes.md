@@ -7,10 +7,31 @@
 
 ## When tagged SVGs are produced
 
-1. **Layout Mode handoff** — clicking Layout Mode in Seamly2D writes `<pattern-basename>.pieces.svg` next to the saved pattern file, then launches SeamlyLayout with that path as its single command-line argument.
+1. **Layout Mode handoff** — clicking Layout Mode in Seamly2D builds the tagged pieces SVG in memory, launches SeamlyLayout with `--svg-stdin`, and writes that document to the new process's standard input. No file is written.
 2. **Manual piece exports** — Piece mode → Export Pieces → SVG carries the same attributes (with or without "text as paths").
 
 Whole-scene exports (draft blocks) keep the legacy untagged single-group structure; only piece-based exports are tagged.
+
+## Launch contract (Task 49, revised by Seamly2D.5)
+
+The handoff in (1) is a process launch, and both halves of it are pinned by tests so they cannot drift apart.
+
+| | Producer — Seamly2D | Consumer — SeamlyLayout |
+|---|---|---|
+| Code | `MainWindow::exportPiecesToSeamlyLayout()` via `MainWindowsNoGUI::generatePiecesSvgDocument()`, `SeamlySuitePaths::patternDocumentName()` and `SeamlySuitePaths::seamlyLayoutLaunchArguments()` (`src/libs/vmisc/seamly_suite_paths.cpp`) | `StartupOptions::parse()` (`src/app/seamlylayout/qt_frontend/src/StartupOptions.cpp`), dispatched from `main.cpp` into `Main.qml`'s `openSvgDocument()` |
+| Tests | `TST_SeamlySuitePaths` (`src/test/Seamly2DTest`) | `StartupOptionsTests` (`src/test/SeamlyLayoutTest`) |
+
+**The contract:**
+
+- **Transport** — the piece-mode document is a **stringified SVG on standard input**, not a file. Seamly2D builds it with `generatePiecesSvgDocument()`, starts SeamlyLayout, writes the UTF-8 bytes to the child's standard input and closes the write channel; SeamlyLayout reads to end. Nothing is written to disk, so no handoff file is left beside the pattern and an unsaved or read-only pattern no longer blocks Layout Mode. Until Seamly2D.5 the handoff wrote `<pattern-basename>.pieces.svg` and passed its path.
+- **Command line** — `SeamlyLayout --svg-stdin [--document-name <pattern base name>]`, launched with the SeamlyLayout executable's own directory as the working directory. The launch is *not* detached: the standard-input channel needs a live `QProcess`, which is also what lets Seamly2D restore the prior mode when SeamlyLayout exits (Seamly2D.3).
+- **Document name** — `--document-name` carries the pattern's complete base name (`shirt.v2.sm2d` → `shirt.v2`), because a document with no file has no name for SeamlyLayout's default export file names. It is omitted, never passed empty, for an unsaved pattern.
+- **Still accepted** — a single positional `<file.svg>` (the CLI and any file association), `-h` / `--help` and `-v` / `--version` (shown in a dialog, exit 0), and no argument at all (empty canvas). Anything else — `--svg-stdin` with a file as well, `--svg-stdin` with empty or non-SVG input, a second positional argument, an unknown option, a missing/unreadable/non-`.svg` file — is reported to the user in SeamlyLayout's error dialog, and the application then continues with an empty canvas rather than exiting.
+- **Exit codes** — `0` for `--help` / `--version` and for a normal session; `-1` when the QML root object fails to load. A rejected argument is *not* an exit code: the window is already the place the message has to appear, because this is a WIN32-subsystem binary with no console.
+- **Already running** — no single-instance handling: every launch is a new process with its own window, so a second Layout Mode handoff opens a second SeamlyLayout. This is deliberate — the app holds one document with no tabs, and comparing two layouts side by side is useful. Seamly2D does not track or reuse a previously launched instance.
+- **Untagged input** — the `data-*` tagging is *not* required to open a file. SeamlyLayout treats every top-level `<g>` with geometry as a piece, so an ordinary SVG still lays out. When an imported file contains no `data-type="piece"` group at all, SeamlyLayout shows a non-blocking warning saying so (`AppController::finish_import` → the `import_warning` signal, reached from both `import_svg` and `import_svg_document`), because a file that did not come from Layout Mode will usually not lay out the way the user expects.
+- **Piece discovery (Task 59)** — for a *tagged* file the pieces are the `data-type="piece"` groups and nothing else; the untagged "every top-level `<g>`" rule applies only to files with no tagging anywhere. Because this document nests all pieces inside `<g data-type="pattern">` and SeamlyLayout's layout pipeline is built around pieces being direct children of the SVG root, `piece_extractor::hoist_tagged_pieces` re-parents the tagged pieces up to the root (composing any wrapper `transform` onto each one) before the pipeline runs. **A producer-side change that adds another wrapper level, or that stops tagging pieces, silently changes what SeamlyLayout packs** — before this normalisation existed, the whole pattern packed as one sheet-sized "piece".
+- **Piece identity in the layout** — `id`, `data-name` and `data-letter` are carried through packing into the layout SVG, the piece bbox JSON and the Adjust overlay. Anything a user reads is labelled `data-name` → `data-letter` → `id` (`PieceRect::label()`), so a warning names "Front Bodice" rather than `piece-7`. `id` remains the identity key for element lookup and must stay unique.
 
 ## Document shape
 

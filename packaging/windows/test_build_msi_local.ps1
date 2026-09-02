@@ -5,8 +5,8 @@
 # **
 # **  @brief
 # **  Local, developer-machine build of the Windows x64 MSI: builds seamly2d,
-# **  seamlyme and SeamlyLayout release binaries, then runs smsi.ps1 against
-# **  them. packaging\windows\README.md records the project's
+# **  seamlyme and SeamlyLayout release binaries, runs the Qt unit tests, then
+# **  runs smsi.ps1 against the binaries. packaging\windows\README.md records the project's
 # **  documented "CI builds the MSI" decision (a dev-machine default can carry
 # **  the wrong Qt/CRT runtime); this script exists because the local Qt kit is
 # **  the same 6.11.1 release CI installs, so that risk does not apply here.
@@ -31,14 +31,24 @@
          the version this build was made with, same as every ci.yml build
          job (linux-test, appimage, macos, windows-msi all run this
          unconditionally, not only on release builds).
-      2. qmake Seamly.pro -config release CONFIG+=noTests && nmake - builds
-         seamly2d.exe and seamlyme.exe with windeployqt already run as a
-         post-link step.
-      3. cmake --preset release && cmake --build --preset release in
+      2. qmake Seamly.pro -config release && nmake - builds seamly2d.exe and
+         seamlyme.exe with windeployqt already run as a post-link step, and
+         the four Qt unit-test binaries alongside them.
+      3. nmake check - runs Seamly2DTest, CollectionTest, ParserTest and
+         TranslationsTest, the same way ci.yml's windows-test job does. This
+         is the only local run those suites get; every other local script
+         passes CONFIG+=noTests and never compiles src\test at all. A failure
+         here stops the build, so a broken test never reaches an MSI.
+      4. cmake --preset release && cmake --build --preset release in
          src\app\seamlylayout\qt_frontend - builds SeamlyLayout.exe.
     Then packaging\windows\smsi.ps1 stages all three and runs
     `wix build`, carrying -Version as the MSI's DisplayVersion/ProductVersion
     too, so the MSI and the binaries it contains agree.
+
+    Steps 2 and 3 together mirror ci.yml's windows-test job; the rest mirrors
+    its windows-msi (x64) job. The test binaries are built into
+    src\test\*\bin and are never staged: smsi.ps1 is given the two app bin
+    directories by name, so nothing from src\test can reach the MSI.
 
     The version stamp touches git-tracked files
     (src\libs\vmisc\projectversion.{h,cpp}, dist\macx\seamly2d\Info.plist,
@@ -62,14 +72,24 @@
 .PARAMETER SkipValidation
     Passed through to smsi.ps1 - skip the `wix msi validate` ICE pass.
 
+.PARAMETER SkipTests
+    Build with CONFIG+=noTests and do not run `nmake check`. Use it only when
+    you need the MSI itself and the code under test has not changed - the Qt
+    suites have no other local runner, so skipping defers them to CI.
+
 .EXAMPLE
     .\packaging\windows\test_build_msi_local.ps1
-    Full local x64 MSI build with an auto-computed version.
+    Full local x64 MSI build with an auto-computed version, unit tests included.
+
+.EXAMPLE
+    .\packaging\windows\test_build_msi_local.ps1 -SkipTests
+    Same build without the unit tests, for a packaging-only change.
 #>
 
 param(
     [string]$Version,
-    [switch]$SkipValidation
+    [switch]$SkipValidation,
+    [switch]$SkipTests
 )
 
 $ErrorActionPreference = 'Stop'
@@ -189,6 +209,49 @@ $smsiArgs = @('-Arch', 'x64', '-Version', $Version,
 if ($SkipValidation) { $smsiArgs += '-SkipValidation' }
 $smsiArgsQuoted = ($smsiArgs | ForEach-Object { "`"$_`"" }) -join ' '
 
+# `qmake -r` regenerates every subdirectory Makefile, not just the top one.
+# This matters only locally: a generated subdirs Makefile recreates its child
+# Makefiles with `if not exist Makefile`, so a tree left over from an earlier
+# CONFIG+=noTests run keeps its old src\Makefile - one without the `test`
+# subdirectory - and the tests below would never be built. CI never sees this
+# because every job starts from a fresh checkout.
+#
+# Without CONFIG+=noTests, src.pro adds the `test` subdirectory - that is the
+# whole reason the unit tests get built here. `CONFIG += testcase` in each test
+# .pro is what then supplies the `check` target nmake runs below.
+#
+# QT_QPA_PLATFORM=offscreen matches ci.yml's windows-test job, so a local run
+# and a CI run exercise the widget tests under the same platform plugin, and no
+# test window steals focus on the developer's desktop.
+#
+# NoDefaultCurrentDirectoryInExePath is cleared for the same reason. qmake's
+# generated `check` target is `cd /d bin && call target_wrapper.bat <exe>` - a
+# BARE executable name resolved from the current directory. When that variable
+# is set in the calling shell, cmd refuses to resolve it and every suite fails
+# with "'ParserTest.exe' is not recognized" even though the binary is right
+# there. Clearing it restores the resolution rule Qt's test runner and CI both
+# assume, and only for this build's cmd.exe process.
+if ($SkipTests) {
+    $QmakeConfig = '-config release CONFIG+=noTests'
+    $TestSection = @'
+
+echo.
+echo === unit tests: SKIPPED (-SkipTests) ===
+'@
+} else {
+    $QmakeConfig = '-config release'
+    $TestSection = @'
+
+echo.
+echo === nmake check: Seamly2D, Collection, Parser, Translations unit tests ===
+set "QT_QPA_PLATFORM=offscreen"
+set "NoDefaultCurrentDirectoryInExePath="
+nmake check
+if errorlevel 1 exit /b 1
+set "QT_QPA_PLATFORM="
+'@
+}
+
 $TempBat = [System.IO.Path]::GetTempFileName() + '.bat'
 $BatchContent = @"
 @echo off
@@ -204,11 +267,12 @@ set "PATH=$QtBin;%PATH%"
 cd /d "$repoRoot"
 
 echo.
-echo === qmake / nmake: seamly2d + seamlyme ===
-qmake Seamly.pro -config release CONFIG+=noTests
+echo === qmake / nmake: seamly2d + seamlyme$(if (-not $SkipTests) { ' + unit tests' }) ===
+qmake Seamly.pro -r $QmakeConfig
 if errorlevel 1 exit /b 1
 nmake
 if errorlevel 1 exit /b 1
+$TestSection
 
 echo.
 echo === cmake: SeamlyLayout ===
@@ -236,6 +300,11 @@ try {
 }
 
 Write-Host ''
+if ($SkipTests) {
+    Write-Host "unit tests: SKIPPED (-SkipTests) - Seamly2DTest, CollectionTest, ParserTest and TranslationsTest are deferred to CI."
+} else {
+    Write-Host "unit tests: PASSED (nmake check)"
+}
 Write-Host "MSI OK: packaging\windows\seamly-msi\x64\seamly-x64.msi"
 if ($versionFilesWereClean) {
     Write-Host "reverting the version stamp (projectversion.cpp/.h, both Info.plist) - scripts\version.sh regenerates it on demand, nothing to keep..."

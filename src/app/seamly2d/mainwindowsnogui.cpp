@@ -425,23 +425,26 @@ void MainWindowsNoGUI::exportPiecesAsFlatLayout(const ExportLayoutDialog &dialog
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief generatePiecesSvg writes the tagged pieces SVG consumed by SeamlyLayout.
+ * @brief generatePiecesSvgDocument builds the tagged pieces SVG consumed by SeamlyLayout.
  *
  * Renders every piece in pieceList (prepared by preparePiecesForLayout()) into
- * one SVG file where the pattern, each piece and each piece component carry the
- * SVG data-* attributes (data-type, data-type-number, data-parent, data-name,
- * data-letter). This is the automatic handoff file created when the user enters
- * Layout Mode; no export dialog is involved. Text is kept as real text so the
- * layout application can still read the label contents.
+ * one SVG document where the pattern, each piece and each piece component carry
+ * the SVG data-* attributes (data-type, data-type-number, data-parent,
+ * data-name, data-letter). This is the automatic handoff created when the user
+ * enters Layout Mode; no export dialog is involved. Text is kept as real text so
+ * the layout application can still read the label contents.
  *
- * @param filePath absolute path of the SVG file to write.
- * @return true when the file was written successfully.
+ * The document is returned as a string and never written to disk: Layout Mode
+ * sends it to SeamlyLayout on that process's standard input (Seamly2D.5).
+ *
+ * @return the complete SVG document, or an empty string when there are no
+ *         pieces to hand over.
  */
-bool MainWindowsNoGUI::generatePiecesSvg(const QString &filePath)
+QString MainWindowsNoGUI::generatePiecesSvgDocument()
 {
     if (pieceList.isEmpty())
     {
-        return false;
+        return QString();
     }
 
     // Arrange all pieces on one flat sheet, exactly like the manual pieces export.
@@ -451,11 +454,7 @@ bool MainWindowsNoGUI::generatePiecesSvg(const QString &filePath)
     // The paper rectangle only defines the SVG size and view box; it is never shown.
     QScopedPointer<QGraphicsRectItem> paper(new QGraphicsRectItem(scene->itemsBoundingRect().toRect()));
 
-    exportSVG(filePath, paper.data(), list);
-
-    // SvgGenerator reports errors on qDebug only, so verify the file on disk.
-    const QFileInfo checkFile(filePath);
-    return checkFile.exists() && checkFile.size() > 0;
+    return buildPiecesSvgString(paper.data(), list);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -982,6 +981,36 @@ void MainWindowsNoGUI::exportSVG(const QString &name, QGraphicsRectItem *paper, 
     }
 
     svgGenerator.generate();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief buildPiecesSvgString renders piece items into one tagged SVG document in memory.
+ *
+ * Same merge and tagging as the exportSVG() overload above; it returns the
+ * document instead of writing it, so Layout Mode can hand the pieces to
+ * SeamlyLayout without creating a file (Seamly2D.5).
+ *
+ * @param paper  paper rectangle defining the SVG size.
+ * @param pieces piece root items to render; each is rendered in its own scene.
+ * @return the complete SVG document as text.
+ */
+QString MainWindowsNoGUI::buildPiecesSvgString(QGraphicsRectItem *paper,
+                                               const QList<QGraphicsItem *> &pieces) const
+{
+    // The generator takes an output path in its constructor; this caller never
+    // writes a file, so the name is only carried, never used.
+    SvgGenerator svgGenerator(paper, QString(), doc->GetPatternName(), doc->GetDescription(),
+                              static_cast<int>(PrintDPI));
+
+    for (int piece = 0; piece < pieces.size(); piece++)
+    {
+        QGraphicsScene *scene = new VMainGraphicsScene();
+        scene->addItem(pieces.at(piece));
+        svgGenerator.addSvgFromScene(scene, pieces.at(piece));
+    }
+
+    return svgGenerator.toSvgString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------

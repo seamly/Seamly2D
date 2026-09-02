@@ -213,8 +213,8 @@
       <!-- ========== optional desktop shortcuts =========================== -->
       <!-- ONE checkbox for all three apps, not one per app: it is a choice a
            user makes once. SeamlyLayout gets a desktop shortcut like the other
-           two, because it opens without a .svg input file (a standalone launch)
-           as well as with the .pieces.svg argument seamly2d gives it. -->
+           two, because it opens without any input (a standalone launch) as well
+           as from seamly2d's Layout Mode handoff. -->
       <Dialog Id="SeamlyShortcutsDlg" Width="370" Height="270"
               Title="[ProductName] Setup">
 

@@ -411,101 +411,124 @@ void TST_SeamlySuitePaths::DevBuildStopsBeforeUnboundedWalk() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief PiecesSvgSitsBesideThePattern verifies the handoff SVG is named after
- * the pattern and written into the same directory.
+ * @brief DocumentNameIsThePatternBaseName verifies the handed-over document is
+ * named after the pattern.
  *
- * This is the file name SeamlyLayout is launched with, so it is part of the
- * two-app contract rather than an implementation detail of Layout Mode.
+ * The handoff carries no file, so this name is all SeamlyLayout has to build
+ * its default export file names from — it is part of the two-app contract, not
+ * an implementation detail of Layout Mode.
  */
-void TST_SeamlySuitePaths::PiecesSvgSitsBesideThePattern() const
+void TST_SeamlySuitePaths::DocumentNameIsThePatternBaseName() const
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
 
     const QString patternFile = dir.path() + QLatin1String("/richmond-shirt.sm2d");
-    const QString expected    = dir.path() + QLatin1String("/richmond-shirt.pieces.svg");
 
-    QCOMPARE(SeamlySuitePaths::piecesSvgFilePath(patternFile),
-             QFileInfo(expected).absoluteFilePath());
+    QCOMPARE(SeamlySuitePaths::patternDocumentName(patternFile),
+             QStringLiteral("richmond-shirt"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief PiecesSvgKeepsDotsInThePatternName verifies only the final extension is
- * replaced.
+ * @brief DocumentNameKeepsDotsInThePatternName verifies only the final extension
+ * is dropped.
  *
  * completeBaseName() keeps everything up to the last dot, so a pattern named
  * "shirt.v2.sm2d" keeps its version segment. baseName() would have produced
- * "shirt.pieces.svg" and quietly collided with a different pattern's handoff.
+ * "shirt" and lost it.
  */
-void TST_SeamlySuitePaths::PiecesSvgKeepsDotsInThePatternName() const
+void TST_SeamlySuitePaths::DocumentNameKeepsDotsInThePatternName() const
 {
     QTemporaryDir dir;
     QVERIFY(dir.isValid());
 
     const QString patternFile = dir.path() + QLatin1String("/shirt.v2.sm2d");
-    const QString expected    = dir.path() + QLatin1String("/shirt.v2.pieces.svg");
 
-    QCOMPARE(SeamlySuitePaths::piecesSvgFilePath(patternFile),
-             QFileInfo(expected).absoluteFilePath());
+    QCOMPARE(SeamlySuitePaths::patternDocumentName(patternFile),
+             QStringLiteral("shirt.v2"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief PiecesSvgPathIsAbsolute verifies a relative pattern path still produces
- * an absolute handoff path.
+ * @brief DocumentNameOfEmptyPatternPathIsEmpty verifies an unsaved pattern
+ * yields no name.
  *
- * SeamlyLayout is started detached with its own working directory, so a relative
- * argument would resolve against the wrong directory in the daughter app.
+ * An unsaved pattern still lays out — the handoff writes no file, so there is
+ * nothing to name. SeamlyLayout keeps its own default export name instead.
  */
-void TST_SeamlySuitePaths::PiecesSvgPathIsAbsolute() const
+void TST_SeamlySuitePaths::DocumentNameOfEmptyPatternPathIsEmpty() const
 {
-    const QString svgPath = SeamlySuitePaths::piecesSvgFilePath(QStringLiteral("relative.sm2d"));
-
-    QVERIFY(!svgPath.isEmpty());
-    QVERIFY(QFileInfo(svgPath).isAbsolute());
-    QVERIFY(svgPath.endsWith(QLatin1String("/relative.pieces.svg")));
+    QVERIFY(SeamlySuitePaths::patternDocumentName(QString()).isEmpty());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief PiecesSvgOfEmptyPatternPathIsEmpty verifies an unsaved pattern yields
- * no path, so Layout Mode can ask the user to save instead of writing a file
- * named after nothing.
- */
-void TST_SeamlySuitePaths::PiecesSvgOfEmptyPatternPathIsEmpty() const
-{
-    QVERIFY(SeamlySuitePaths::piecesSvgFilePath(QString()).isEmpty());
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief LaunchArgumentsAreTheSvgPathAlone pins the launch contract: SeamlyLayout
- * is started with exactly one positional argument, the SVG path.
+ * @brief LaunchArgumentsAskForStandardInput pins the launch contract:
+ * SeamlyLayout is told to read the document from standard input.
  *
- * Its StartupOptions parser rejects a second positional argument, so a change
- * here without the matching change there breaks the handoff — this case is what
- * makes that break visible in CI rather than in a user's Layout Mode.
+ * Its StartupOptions parser accepts "--svg-stdin" and nothing else for this
+ * transport, so a change here without the matching change there breaks the
+ * handoff — this case is what makes that break visible in CI rather than in a
+ * user's Layout Mode.
  */
-void TST_SeamlySuitePaths::LaunchArgumentsAreTheSvgPathAlone() const
+void TST_SeamlySuitePaths::LaunchArgumentsAskForStandardInput() const
 {
-    const QString svgPath = QStringLiteral("/patterns/richmond shirt.pieces.svg");
-
-    const QStringList arguments = SeamlySuitePaths::seamlyLayoutLaunchArguments(svgPath);
+    const QStringList arguments = SeamlySuitePaths::seamlyLayoutLaunchArguments(QString());
 
     QCOMPARE(arguments.size(), 1);
-    // Passed unquoted and unsplit: QProcess quotes list elements itself, which
-    // is what keeps a directory containing spaces working.
-    QCOMPARE(arguments.first(), svgPath);
+    QCOMPARE(arguments.first(), QStringLiteral("--svg-stdin"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief LaunchArgumentsOfEmptySvgPathAreEmpty verifies no argument list is built
- * for an empty path — launching SeamlyLayout bare would open an empty canvas,
- * which is exactly the Task 49 defect this contract exists to prevent.
+ * @brief LaunchArgumentsCarryTheDocumentName verifies the name is passed as its
+ * own list element.
+ *
+ * Unsplit and unquoted here: QProcess quotes list elements itself, which is
+ * what keeps a pattern name containing spaces working.
  */
-void TST_SeamlySuitePaths::LaunchArgumentsOfEmptySvgPathAreEmpty() const
+void TST_SeamlySuitePaths::LaunchArgumentsCarryTheDocumentName() const
 {
-    QVERIFY(SeamlySuitePaths::seamlyLayoutLaunchArguments(QString()).isEmpty());
+    const QString documentName = QStringLiteral("richmond shirt");
+
+    const QStringList arguments = SeamlySuitePaths::seamlyLayoutLaunchArguments(documentName);
+
+    QCOMPARE(arguments.size(), 3);
+    QCOMPARE(arguments.at(0), QStringLiteral("--svg-stdin"));
+    QCOMPARE(arguments.at(1), QStringLiteral("--document-name"));
+    QCOMPARE(arguments.at(2), documentName);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief LaunchArgumentsOmitAnEmptyDocumentName verifies an unsaved pattern
+ * produces no --document-name at all.
+ *
+ * Passing it empty would give SeamlyLayout an empty default export name, which
+ * is worse than letting it keep its own.
+ */
+void TST_SeamlySuitePaths::LaunchArgumentsOmitAnEmptyDocumentName() const
+{
+    QVERIFY(!SeamlySuitePaths::seamlyLayoutLaunchArguments(QString())
+                 .contains(QStringLiteral("--document-name")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief LaunchArgumentsNameNoFile verifies the handoff passes no path.
+ *
+ * The defect this contract exists to prevent (Seamly2D.5) was handing over a
+ * written ".pieces.svg" file. StartupOptions rejects a positional argument
+ * alongside --svg-stdin, so a path creeping back in must fail here first.
+ */
+void TST_SeamlySuitePaths::LaunchArgumentsNameNoFile() const
+{
+    const QStringList arguments =
+        SeamlySuitePaths::seamlyLayoutLaunchArguments(QStringLiteral("richmond-shirt"));
+
+    for (const QString &argument : arguments)
+    {
+        QVERIFY(!argument.endsWith(QLatin1String(".svg"), Qt::CaseInsensitive));
+    }
 }

@@ -61,16 +61,6 @@ const QLatin1String sourceTreeBuildSubPath("/src/app/seamlylayout/qt_frontend/bu
  */
 const int maxUpwardLevels = 8;
 
-/**
- * @brief piecesSvgSuffix is what Layout Mode appends to a pattern's complete
- * base name to build the handoff SVG written beside it.
- *
- * `richmond-shirt.sm2d` becomes `richmond-shirt.pieces.svg`. The ".pieces"
- * segment keeps the handoff file recognisable next to any plain ".svg" the user
- * exported themselves, and QFileInfo::suffix() still reports "svg" — which is
- * what SeamlyLayout's StartupOptions validates.
- */
-const QLatin1String piecesSvgSuffix(".pieces.svg");
 } // namespace
 
 namespace SeamlySuitePaths
@@ -221,37 +211,29 @@ QString locateSeamlyLayoutDevBuild(const QString &startDirectory)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief piecesSvgFilePath returns the path of the handoff SVG that Layout Mode
- * writes for a pattern.
+ * @brief patternDocumentName returns the name Layout Mode gives the piece-mode
+ * document it hands to SeamlyLayout.
  *
- * The handoff file is written *beside the pattern file*, named after it with
- * ::piecesSvgSuffix appended to the complete base name:
+ * The handoff carries no file, so SeamlyLayout has no file name to build its
+ * default export names from. This is that name: the pattern's complete base
+ * name, so "shirt.v2.sm2d" hands over "shirt.v2" and a later SVG export in
+ * SeamlyLayout still defaults to a name the user recognises.
  *
- *     /patterns/richmond-shirt.sm2d  ->  /patterns/richmond-shirt.pieces.svg
+ * completeBaseName() is used deliberately — it keeps everything up to the *last*
+ * dot, so a version segment in the pattern name survives.
  *
- * Keeping the rule here rather than inline in MainWindow means SeamlyLayout's
- * documented input file name has exactly one definition in this codebase, and
- * one the test suite can pin (TST_SeamlySuitePaths).
- *
- * QFileInfo::completeBaseName() is used deliberately — it keeps everything up to
- * the *last* dot, so a pattern called "shirt.v2.sm2d" yields "shirt.v2.pieces.svg"
- * rather than losing the version segment.
- *
- * @param patternFilePath path of the open pattern file; may be relative, in
- *        which case the result is made absolute against the working directory.
- * @return absolute path of the pieces SVG, or an empty string when
+ * @param patternFilePath path of the open pattern file; may be relative.
+ * @return the pattern's complete base name, or an empty string when
  *         @p patternFilePath is empty (no pattern has been saved yet).
  */
-QString piecesSvgFilePath(const QString &patternFilePath)
+QString patternDocumentName(const QString &patternFilePath)
 {
     if (patternFilePath.isEmpty())
     {
-        return QString(); // Unsaved pattern; the caller asks the user to save first.
+        return QString(); // Unsaved pattern; SeamlyLayout falls back to its own default.
     }
 
-    const QFileInfo patternFile(patternFilePath);
-    return patternFile.absolutePath() + QLatin1Char('/') + patternFile.completeBaseName()
-           + piecesSvgSuffix;
+    return QFileInfo(patternFilePath).completeBaseName();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -259,31 +241,39 @@ QString piecesSvgFilePath(const QString &patternFilePath)
  * @brief seamlyLayoutLaunchArguments builds the argument vector seamly2d passes
  * to the SeamlyLayout executable.
  *
- * This is the seamly2d side of the two-app launch contract (Task 49):
- * **SeamlyLayout accepts exactly one positional argument, the path of the SVG
- * to open**, and nothing else. Its `StartupOptions` class
- * (`src/app/seamlylayout/qt_frontend/src/StartupOptions.cpp`) rejects a second
- * positional argument, so this function must never grow one silently; both
- * halves are pinned by tests.
+ * This is the seamly2d side of the two-app launch contract. Layout Mode does not
+ * write a handoff file: it serialises piece mode to one stringified SVG and
+ * sends that document on the child process's standard input (Seamly2D.5). The
+ * arguments only say how to read it:
  *
- * The path is passed as a single list element rather than being embedded in a
- * command string, so QProcess quotes it and a pattern directory containing
- * spaces needs no special handling.
+ *     SeamlyLayout --svg-stdin --document-name <pattern base name>
  *
- * @param piecesSvgPath absolute path of the handoff SVG, as returned by
- *        piecesSvgFilePath().
- * @return a one-element argument list, or an empty list when @p piecesSvgPath is
- *         empty — launching with no argument would open an empty canvas, which
- *         is not what Layout Mode was asked to do.
+ * SeamlyLayout's `StartupOptions` class
+ * (`src/app/seamlylayout/qt_frontend/src/StartupOptions.cpp`) parses exactly
+ * these two options, and rejects a positional file alongside them; both halves
+ * are pinned by tests. This function must never grow an argument silently.
+ *
+ * --document-name is omitted for an unsaved pattern rather than passed empty, so
+ * SeamlyLayout keeps its own default export name instead of an empty one.
+ *
+ * The name is passed as its own list element rather than embedded in a command
+ * string, so QProcess quotes it and a pattern name containing spaces needs no
+ * special handling.
+ *
+ * @param documentName pattern base name, as returned by patternDocumentName();
+ *        may be empty.
+ * @return the argument list for QProcess::start().
  */
-QStringList seamlyLayoutLaunchArguments(const QString &piecesSvgPath)
+QStringList seamlyLayoutLaunchArguments(const QString &documentName)
 {
-    if (piecesSvgPath.isEmpty())
+    QStringList arguments(QStringLiteral("--svg-stdin"));
+
+    if (!documentName.isEmpty())
     {
-        return QStringList(); // Nothing to hand over.
+        arguments << QStringLiteral("--document-name") << documentName;
     }
 
-    return QStringList(piecesSvgPath);
+    return arguments;
 }
 
 } // namespace SeamlySuitePaths

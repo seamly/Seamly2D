@@ -40,6 +40,7 @@ public:
     SvgGenerator(QGraphicsRectItem *paper, QString name, QString patternName, QString description, int resolution);
     void addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item = nullptr);
     void generate();
+    QString toSvgString();
 
 private:
     QDomDocument renderSceneToDom(QGraphicsScene *scene);

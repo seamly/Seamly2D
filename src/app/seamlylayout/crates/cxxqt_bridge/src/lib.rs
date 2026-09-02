@@ -543,6 +543,11 @@ pub mod qobject {
         #[qinvokable]
         fn import_svg(self: Pin<&mut AppController>, path: &QString) -> bool;
 
+        // Import an SVG that never touched the filesystem (Seamly2D.5): the
+        // piece-mode document Seamly2D hands over as one stringified SVG.
+        #[qinvokable]
+        fn import_svg_document(self: Pin<&mut AppController>, svg: &QString) -> bool;
+
         #[qinvokable]
         fn get_import_dom_string(self: &AppController) -> QString;
 
@@ -868,12 +873,63 @@ impl qobject::AppController {
     // phase may offload this to a worker thread via std::thread + Qt signal.
     // Called by:
     // 'Import SVG' menu action in QML: onTriggered: appController.importSvg(fileDialog.fileUrl.toLocalFile())
+    // and by the SeamlyLayout command line, which still accepts an SVG file path.
     fn import_svg(mut self: std::pin::Pin<&mut Self>, path: &cxx_qt_lib::QString) -> bool {
         let path_str = path.to_string();
         log_to_file(&format!("==========IMPORT SVG=========="));
         log_to_file(&format!("[import_svg] begin import filepath={path_str}"));
 
-        // Reset all downstream state — new import invalidates settings, layout, and export.
+        self.as_mut().reset_import_state();
+
+        // Load SVG from disk: parse into editable DOM + usvg tree for geometry.
+        // The file's own directory resolves any external reference it carries.
+        let loaded = app_core::load_svg(std::path::Path::new(&path_str));
+        self.finish_import(loaded)
+    } // fn import_svg
+
+    // Import an SVG document held in memory — the Seamly2D piece-mode handoff
+    // (Seamly2D.5).  Seamly2D serialises piece mode to one stringified SVG and
+    // writes it to this process's standard input, so no handoff file is created
+    // and a read-only pattern directory no longer blocks Layout Mode.
+    //
+    // Everything after the parse is identical to `import_svg`, so both entry
+    // points share `reset_import_state()` and `finish_import()` and cannot
+    // drift apart.
+    //
+    // Emits `import_finished()` on success or `error_occurred(msg)` on failure.
+    fn import_svg_document(mut self: std::pin::Pin<&mut Self>, svg: &cxx_qt_lib::QString) -> bool {
+        let svg_text = svg.to_string();
+        log_to_file(&format!("==========IMPORT SVG DOCUMENT=========="));
+        log_to_file(&format!(
+            "[import_svg_document] begin import of {} characters",
+            svg_text.len()
+        ));
+
+        if svg_text.trim().is_empty() {
+            // An empty handoff means Seamly2D produced nothing. Say that,
+            // instead of letting the XML parser report a syntax error at line 1.
+            let msg = cxx_qt_lib::QString::from(
+                "Seamly2D sent an empty layout document. Nothing was imported.",
+            );
+            self.as_mut().error_occurred(msg);
+            return false;
+        } // if svg_text is blank
+
+        self.as_mut().reset_import_state();
+
+        // No resources directory: the document never lived on disk, so a
+        // relative external reference in it has nothing to resolve against.
+        let loaded = app_core::parse_svg(&svg_text, None);
+        self.finish_import(loaded)
+    } // fn import_svg_document
+
+    // Clear every piece of state a previous import produced.
+    //
+    // A new import invalidates the layout, the preprocessing DOMs, the bbox
+    // snapshots and the export readiness. It deliberately keeps `input_dom` and
+    // the settings: the current canvas stays visible until the new document is
+    // parsed, and settings the user already entered survive a re-import.
+    fn reset_import_state(mut self: std::pin::Pin<&mut Self>) {
         self.as_mut().set_is_svg_imported(false);
         self.as_mut().set_is_layout_ready(false);
         self.as_mut().set_is_layout_in_progress(false);
@@ -898,12 +954,21 @@ impl qobject::AppController {
         } // rust borrow dropped
         // Disable 'Create Layout' button until the user submits settings, so they don't run an invalid layout.
         self.as_mut().set_is_create_layout_enabled(false); // disabled until next Settings Submit
+    } // fn reset_import_state
 
-        // Load SVG from disk: parse into editable DOM + usvg tree for geometry
-        match app_core::load_svg(std::path::Path::new(&path_str)) {
+    // Finish an import once the SVG is parsed, whatever its source.
+    //
+    // @param loaded parse result from `app_core::load_svg` (a file) or from
+    //        `app_core::parse_svg` (the Seamly2D in-memory handoff).
+    // @return true when the document was stored and `import_finished()` emitted.
+    fn finish_import(
+        mut self: std::pin::Pin<&mut Self>,
+        loaded: app_core::CoreResult<(svg_dom::Document, usvg::Tree)>,
+    ) -> bool {
+        match loaded {
             Ok((mut doc, _tree)) => {
                 // Count the Seamly2D piece tagging BEFORE the DOM is moved into
-                // `input_dom`.  Zero means this is not a Layout Mode handoff file.
+                // `input_dom`.  Zero means this is not a Layout Mode handoff.
                 let tagged_pieces = crate::piece_extractor::count_tagged_pieces(&doc);
 
                 // Add a white background rectangle so the canvas has a visible background.
@@ -924,9 +989,9 @@ impl qobject::AppController {
                 // Warn — but do not fail — when the SVG carries no piece tagging.
                 // Layout still works (every top-level <g> with geometry is packed),
                 // so this is a non-blocking popup shown after the canvas has the
-                // file, never an error dialog instead of it.
+                // document, never an error dialog instead of it.
                 if tagged_pieces == 0 {
-                    log_to_file("[import_svg] no data-type=\"piece\" groups — not a Seamly2D handoff file");
+                    log_to_file("[finish_import] no data-type=\"piece\" groups — not a Seamly2D handoff");
                     let msg = cxx_qt_lib::QString::from(
                         "This SVG carries no tagged pattern pieces \
                          (data-type=\"piece\").\n\n\
@@ -936,7 +1001,7 @@ impl qobject::AppController {
                     );
                     self.as_mut().import_warning(msg); // QML: onImportWarning → warning popup
                 } else {
-                    log_to_file(&format!("[import_svg] {tagged_pieces} tagged pattern piece(s) found"));
+                    log_to_file(&format!("[finish_import] {tagged_pieces} tagged pattern piece(s) found"));
                 } // if tagged_pieces == 0
 
                 true // success
@@ -951,8 +1016,8 @@ impl qobject::AppController {
                 } // rust borrow dropped
                 false // failure
             }
-        } // match app_core::load_svg
-    } // fn import_svg
+        } // match loaded
+    } // fn finish_import
 
     // Serialize `input_dom` to an SVG XML string and return it.
     //

@@ -43,13 +43,25 @@ pub fn load_svg(path: impl AsRef<Path>) -> CoreResult<(Document, usvg::Tree)> {
     // Read file as UTF-8 text.
     let data = fs::read_to_string(&path)?;
 
+    // One parse path for both entry points, so a file import and the Seamly2D
+    // in-memory handoff cannot diverge.
+    parse_svg(&data, path.as_ref().parent())
+}
+
+// @brief Parse SVG text into both the editable DOM wrapper and a usvg tree.
+// @param data SVG document text.
+// @param resources_dir Directory used to resolve external references (images,
+//        fonts). `None` when the SVG did not come from disk — the Seamly2D
+//        piece-mode handoff, which arrives as a string with no home directory.
+// @return Tuple of (Document, usvg::Tree) ready for mutation and rendering.
+pub fn parse_svg(data: &str, resources_dir: Option<&Path>) -> CoreResult<(Document, usvg::Tree)> {
     // Parse editable DOM (xmltree-based) for attribute edits.
-    let doc = Document::parse(&data)?;
+    let doc = Document::parse(data)?;
 
     // Parse into usvg tree for rendering/geometry tasks.
     let mut opt = usvg::Options::default();
     opt.fontdb_mut().load_system_fonts();
-    opt.resources_dir = path.as_ref().parent().map(Path::to_path_buf);
+    opt.resources_dir = resources_dir.map(Path::to_path_buf);
     let tree = usvg::Tree::from_data(data.as_bytes(), &opt)?;
 
     Ok((doc, tree))

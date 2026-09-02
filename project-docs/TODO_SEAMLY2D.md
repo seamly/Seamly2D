@@ -4,7 +4,7 @@ Tasks that add features to the Seamly2D pattern-drafting app.
 
 Tasks in this file begin with `Seamly2D.`
 
-## Task Seamly2D.1 — Seamly2D: optional single-stroke (Hershey) label display and export
+## [ ] Task Seamly2D.1 — Seamly2D: optional single-stroke (Hershey) label display and export
 
 **Scope decision (2026-07-18):** outline fonts remain fully acceptable in Seamly2D — the existing outline-font canvas display and exports stay the default and are NOT removed or locked out. This task adds single-stroke (Hershey-style) label support as an *option*, so a designer targeting a cutter/plotter can preview labels on the canvas the way the machine will draw them and export matching single-stroke output.
 
@@ -24,17 +24,4 @@ Current label text handling (all outline-font based, and staying available): the
 - [ ] Seamly2D.1.7 Verify: canvas single-stroke labels legible at typical zooms with correct placement, mirroring, and rotation; outline-font behavior unchanged everywhere; tagged pieces SVG / `.pieces.svg` / `--text2paths` / DXF / PDF / PNG correct in both font modes
 - [ ] Seamly2D.1.8 Doxygen briefs + inline comments on all touched functions; document the font architecture in the repo docs
 
-## Task Seamly2D.4 — Preferences > Paths has no row for bodyscans
-
-Found during MSI Test Case 1 verification (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step 7a).
-
-`PreferencesPathPage::Apply()` (`src/app/seamly2d/dialogs/configpages/preferencespathpage.cpp:100-119`) reads table rows 0–9 (data root, pattern, template, individual, multisize, layout, label template, image, backup, SeamlyLayout app path) but has no row for bodyscans. `VCommonSettings::setBodyScansPath()`/`getBodyScansPath()` (`src/libs/vmisc/vcommonsettings.cpp:1311-1323`) exist and target `qt6_common.ini`'s `paths/bodyscans` key, but nothing in the UI ever calls the setter, so that key never gets written — even after visiting Preferences and clicking Apply/OK.
-
-- [x] Seamly2D.4.1 Add a "My Body Scans" row to the Preferences > Paths table (`preferencespathpage.cpp`, alongside the existing Patterns/Templates/Measurements/Layouts/Label Templates/Images/Backups rows) and wire it to `getBodyScansPath()`/`setBodyScansPath()`.
-- [ ] Seamly2D.4.2 Re-run MSI Test Case verification step 7a to confirm a `bodyscans` key appears in `qt6_common.ini` after visiting Preferences > Paths.
-
-## Task Seamly2D.5 — Piece-mode handoff passes a file, not a stringified SVG document
-
-Found during MSI Test Case 1 verification (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step 6b-ii). Cross-reference: `Layout.9` in `TODO_SEAMLYLAYOUT.md` is the SeamlyLayout-side half of this same task.
-
-`MainWindow::exportPiecesToSeamlyLayout()` (`mainwindow.cpp:4153`) writes the pieces to `<pattern-basename>.pieces.svg` next to the pattern file and launches SeamlyLayout detached with that file path as its one positional argument (`StartupOptions.{h,cpp}`, `SeamlySuitePaths::seamlyLayoutLaunchArguments()`). The MSI test plan's expectation is that piece-mode data reaches SeamlyLayout as a stringified SVG document, not as a file — so either the test expectation is stale or this handoff needs to change to pass the SVG content directly instead of a file path. See `Layout.9` for the resolution subtasks; do not duplicate work between the two.
+## [x] Task Seamly2D.4 — Preferences > Paths has no row for bodyscans

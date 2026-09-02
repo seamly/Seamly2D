@@ -13,6 +13,7 @@
 // windows and QtWidgets windows in the same process (required for AdjustWindow).
 #include <QApplication>
 #include <QDir>
+#include <QFile>
 #include <QMessageBox>
 #include <QMetaObject>
 #include <QQmlApplicationEngine>
@@ -52,8 +53,9 @@
 // PreferencesController — QML-accessible bridge that owns the QtWidgets PreferencesWindow.
 #include "src/PreferencesController.h"
 
-// StartupOptions — parses and validates the optional positional <svg-file>
-// argument that Seamly2D's Layout Mode hands over (Task 49).
+// StartupOptions — parses and validates the two startup transports: the
+// optional positional <svg-file> (Task 49) and the --svg-stdin SVG document
+// Seamly2D's Layout Mode sends on standard input (Seamly2D.5).
 #include "src/StartupOptions.h"
 
 // ---------------------------------------------------------------------------
@@ -200,19 +202,34 @@ int main(int argc, char *argv[])
     app.setApplicationVersion("0.1.0");
 
     // -----------------------------------------------------------------------
-    // Command line — Task 49: the Seamly2D Layout Mode handoff.
+    // Command line — the Seamly2D Layout Mode handoff and the plain CLI.
     //
-    // Seamly2D writes "<pattern>.pieces.svg" beside the pattern file and then
-    // launches this application detached with that path as its single
-    // positional argument. Parsing happens here, AFTER the metadata above, so
-    // --version can report the application name and version set there, and
-    // BEFORE the QML engine is built, so --help / --version cost no startup.
+    // Two transports, one parser (StartupOptions):
+    //   • a positional <svg-file> — the CLI and the file association (Task 49);
+    //   • --svg-stdin — Seamly2D's Layout Mode, which sends the piece-mode
+    //     document as one stringified SVG on standard input and writes no file
+    //     (Seamly2D.5).
+    //
+    // Parsing happens here, AFTER the metadata above, so --version can report
+    // the application name and version set there, and BEFORE the QML engine is
+    // built, so --help / --version cost no startup.
+    //
+    // Standard input is opened unconditionally but read only when --svg-stdin
+    // is set, so a launch from a shell or a desktop icon never blocks waiting
+    // for input that will not come.
     //
     // The parsed result is only dispatched once the event loop is running (see
     // the QTimer::singleShot below): the QML window and its WebEngine canvases
     // must exist before an SVG can be pushed into them.
     // -----------------------------------------------------------------------
-    const StartupOptions startupOptions = StartupOptions::parse(app.arguments());
+    QFile standardInput;
+    // A failed open is not fatal here: only --svg-stdin needs the channel, and
+    // StartupOptions reports the unreadable device for that case itself.
+    if (!standardInput.open(stdin, QIODevice::ReadOnly)) {
+        Logger::log(QStringLiteral("main(): standard input could not be opened"));
+    } // if standard input is unavailable
+
+    const StartupOptions startupOptions = StartupOptions::parse(app.arguments(), &standardInput);
 
     if (startupOptions.status() == StartupOptions::Status::ShowInformation) {
         // --help / --version. This is a WIN32-subsystem binary with no console
@@ -330,13 +347,13 @@ int main(int argc, char *argv[])
     // visible application behind it.
     QTimer::singleShot(0, &app, []() { showFirstRunDataNoticeIfPending(); });
 
-    if (startupOptions.hasFile() || startupOptions.hasError()) {
+    if (startupOptions.hasFile() || startupOptions.hasDocument() || startupOptions.hasError()) {
         QTimer::singleShot(0, &app, [&engine, startupOptions]() {
             const QList<QObject *> rootObjects = engine.rootObjects();
             if (rootObjects.isEmpty()) {
                 // QML failed to load; objectCreationFailed above is already
-                // tearing the application down. Nothing to hand the file to.
-                Logger::log(QStringLiteral("main(): no QML root object — startup file dropped"));
+                // tearing the application down. Nothing to hand the SVG to.
+                Logger::log(QStringLiteral("main(): no QML root object — startup SVG dropped"));
                 return;
             } // if rootObjects.isEmpty()
 
@@ -344,12 +361,23 @@ int main(int argc, char *argv[])
 
             if (startupOptions.hasFile()) {
                 // Main.qml: function openSvgFile(localPath) — the same entry
-                // point the Import SVG file dialog uses, so the handoff and a
-                // manual import cannot diverge.
+                // point the Import SVG file dialog uses, so the command line and
+                // a manual import cannot diverge.
                 Logger::log(QStringLiteral("main(): opening startup file %1").arg(startupOptions.filePath()));
                 QMetaObject::invokeMethod(window,
                                           "openSvgFile",
                                           Q_ARG(QVariant, QVariant(startupOptions.filePath())));
+            } else if (startupOptions.hasDocument()) {
+                // Main.qml: function openSvgDocument(svgText, documentName) —
+                // the Seamly2D piece-mode handoff (Seamly2D.5). The document
+                // came in on standard input; nothing was written to disk.
+                Logger::log(QStringLiteral("main(): opening startup document '%1' of %2 characters")
+                                .arg(startupOptions.documentName())
+                                .arg(startupOptions.svgDocument().size()));
+                QMetaObject::invokeMethod(window,
+                                          "openSvgDocument",
+                                          Q_ARG(QVariant, QVariant(startupOptions.svgDocument())),
+                                          Q_ARG(QVariant, QVariant(startupOptions.documentName())));
             } else {
                 // Main.qml: function reportStartupError(message) — shows the
                 // error dialog over the empty canvas instead of leaving the
@@ -360,7 +388,7 @@ int main(int argc, char *argv[])
                                           Q_ARG(QVariant, QVariant(startupOptions.message())));
             } // if hasFile
         }); // QTimer::singleShot
-    } // if a startup file or error is pending
+    } // if a startup file, document or error is pending
 
     return app.exec();
 } // main
