@@ -10,13 +10,19 @@
 //
 // The log file is opened once by Logger::init() and kept open for the
 // duration of the process.  All writes go to a file named:
-//   {appDir}/output/log_{YYMMDDHHMM}.txt
-// {appDir} is the writable AppConfigLocation root, not the install directory,
+//   {appConfigRoot}/logs/log_{YYMMDDHHMMSS}.txt
+// {appConfigRoot} is the writable AppConfigLocation root, not the install directory,
 // wherever the install directory is read-only or needs administrator rights:
 // on macOS (a notarized .app bundle — Task 16), on Windows (C:\Program Files),
 // inside a mounted Linux AppImage (Platform::isAppImage() — Task 17), and
 // inside a Flatpak sandbox (Platform::isFlatpak() — Task 18). Only an ordinary
 // Linux install still writes beside the executable.
+//
+// Layout.10: the directory is "logs", not "output", and it sits inside the same
+// Seamly/SeamlyLayout tree as qt6_seamlylayout.ini — matching Seamly2D's
+// %LOCALAPPDATA%\Seamly\Seamly2D\logs. main() therefore sets the organization
+// and application names BEFORE it calls init(); without them AppConfigLocation
+// resolves to %LOCALAPPDATA%\SeamlyLayout\.
 
 #include "Logger.h"
 
@@ -37,28 +43,28 @@ QFile      Logger::s_file;
 QTextStream Logger::s_stream;
 
 // ---------------------------------------------------------------------------
-// clearOutputDirectory
+// clearLogDirectory
 // ---------------------------------------------------------------------------
 
-void Logger::clearOutputDirectory(const QString &outputDirPath)
+void Logger::clearLogDirectory(const QString &logsDirPath)
 {
-    QDir outputDir(outputDirPath);
+    QDir logsDir(logsDirPath);
     const QFileInfoList existingFiles =
-        outputDir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
+        logsDir.entryInfoList(QDir::Files | QDir::NoDotAndDotDot);
 
     for (const QFileInfo &fileInfo : existingFiles) {
-        outputDir.remove(fileInfo.fileName());
+        logsDir.remove(fileInfo.fileName());
     }
-} // Logger::clearOutputDirectory
+} // Logger::clearLogDirectory
 
 // ---------------------------------------------------------------------------
 // init
 // ---------------------------------------------------------------------------
 
 // @brief Open the log file.
-// The logs/ directory is created under the application binary directory
-// if it does not already exist.  The file name encodes the startup time
-// as YYMMDDHHMM so each run gets its own file.
+// The logs/ directory is created under the AppConfigLocation root if it does
+// not already exist.  The file name encodes the startup time as YYMMDDHHMMSS so
+// each run gets its own file.
 void Logger::init()
 {
     if (!debugEnabled) return; // logging disabled — do not create files
@@ -71,13 +77,13 @@ void Logger::init()
     // macOS (Task 16): a signed, notarized .app bundle is read-only.
     // Windows: the MSI installs into C:\Program Files\SeamlyApps, which a
     // standard user cannot write. The exe-relative path appeared to work only
-    // for administrators, and left an output\ directory inside Program Files
+    // for administrators, and left a logs\ directory inside Program Files
     // that no uninstall removes, because the installer does not own it.
     QString logsDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     if (logsDir.isEmpty()) {
         logsDir = QCoreApplication::applicationDirPath();
     } // if AppConfigLocation unavailable
-    logsDir += QStringLiteral("/output");
+    logsDir += QStringLiteral("/logs");
 #else
     // Task 17: a mounted Linux AppImage is read-only for the same reason a macOS bundle is
     // — detect it at runtime (Platform::isAppImage(), since unlike macOS this can't be known
@@ -91,14 +97,14 @@ void Logger::init()
         if (logsDir.isEmpty()) {
             logsDir = QCoreApplication::applicationDirPath();
         } // if AppConfigLocation unavailable
-        logsDir += QStringLiteral("/output");
+        logsDir += QStringLiteral("/logs");
     } else {
-        // Write log files to the output/ directory next to the executable
-        logsDir = QCoreApplication::applicationDirPath() + QStringLiteral("/output");
+        // Write log files to the logs/ directory next to the executable
+        logsDir = QCoreApplication::applicationDirPath() + QStringLiteral("/logs");
     } // if running from a mounted AppImage
 #endif
     QDir().mkpath(logsDir);
-    clearOutputDirectory(logsDir);
+    clearLogDirectory(logsDir);
 
     // Build the file name: log_{YYMMDDHHmmss}.txt
     const QString timestamp =
@@ -123,7 +129,7 @@ void Logger::init()
     s_stream << QStringLiteral("[") << QString::number(unixSec)
              << QStringLiteral("] DEBUG: Logger::init(): SeamlyLayout session started\n");
     s_stream << QStringLiteral("[") << QString::number(unixSec)
-             << QStringLiteral("] DEBUG: Logger::init(): cleared existing debug files from output/\n");
+             << QStringLiteral("] DEBUG: Logger::init(): cleared existing debug files from logs/\n");
     s_stream.flush();
 } // Logger::init
 

@@ -11,6 +11,10 @@ under "Already filed, seen again" with the date it recurred.
 ## [ ] Task MSI1b.1 — installer dialogs log Error 2826: controls overflow the dialog by 7 pixels
 
 Found on the 2026-09-02 pass, step 1b (fresh install of build 26.9.2.635).
+Reproduced 2026-09-02 on build 26.9.2.996, this time from a **wizard**
+install rather than `/quiet`: exactly 15 `Error 2826` lines, every one 7
+pixels to the right. A silent install builds no dialogs, so that earlier
+pass could not have seen them. The count and the offset are stable.
 
 Every `BannerLine` and `BottomLine` control in the installer UI is 7 pixels
 wider than the dialog that holds it. Windows Installer logs one Error 2826 per
@@ -50,4 +54,7 @@ at run time.
 
 | Task | Where | Last seen | Note |
 | --- | --- | --- | --- |
-| `Layout.7` | `TODO_SEAMLYLAYOUT.md` | 2026-09-02, build 26.9.2.635 | `DesktopShortcutSeamlyLayout` is still written to `HKLM\SOFTWARE\Seamly\Seamly2D`, not `HKLM\SOFTWARE\Seamly\SeamlyLayout`. Second confirmed failure — implement it, do not re-verify it again. |
+
+Nothing outstanding. `Layout.7`, `Layout.10` and `SeamlyMe.3` were implemented
+and verified on build 26.9.2.996 (2026-09-02); all three moved to
+`TODO_COMPLETED.md`.

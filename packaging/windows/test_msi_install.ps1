@@ -675,13 +675,24 @@ function Invoke-InstalledChecks {
         }
     }
 
-    $breadcrumbs = @('DesktopShortcutSeamly2D', 'DesktopShortcutSeamlyMe')
-    foreach ($breadcrumb in $breadcrumbs) {
-        $present = $null -ne $InstallInfo.PSObject.Properties[$breadcrumb]
+    # Each desktop-shortcut breadcrumb lives under its own app key, not all
+    # three under Seamly2D (Layout.7, SeamlyMe.3).
+    $breadcrumbs = [ordered]@{
+        'Seamly2D'     = 'DesktopShortcutSeamly2D'
+        'SeamlyMe'     = 'DesktopShortcutSeamlyMe'
+        'SeamlyLayout' = 'DesktopShortcutSeamlyLayout'
+    }
+    foreach ($app in $breadcrumbs.Keys) {
+        $breadcrumb = $breadcrumbs[$app]
+        $appKey = "HKLM:\SOFTWARE\Seamly\$app"
+        $appValues = if (Test-Path -LiteralPath $appKey) {
+            Get-ItemProperty -LiteralPath $appKey -ErrorAction SilentlyContinue
+        } else { $null }
+        $present = ($null -ne $appValues) -and ($null -ne $appValues.PSObject.Properties[$breadcrumb])
         if ($NoDesktopShortcuts) {
-            Assert-That -Name "$breadcrumb is absent (desktop shortcuts declined)" -Succeeded (-not $present)
+            Assert-That -Name "$app\$breadcrumb is absent (desktop shortcuts declined)" -Succeeded (-not $present)
         } else {
-            Assert-That -Name "$breadcrumb records that the desktop shortcut was created" -Succeeded $present
+            Assert-That -Name "$app\$breadcrumb records that the desktop shortcut was created" -Succeeded $present
         }
     }
 

@@ -281,7 +281,7 @@ target_link_libraries(SeamlyLayout PRIVATE
 # sit beside the crate's `Cargo.toml`. They remain under `crates/*/src/`, run
 # by `cargo test --workspace`.
 #
-# SEAMLYLAYOUT_TEST_DIR is resolved once, as an absolute path, so the four
+# SEAMLYLAYOUT_TEST_DIR is resolved once, as an absolute path, so the test
 # targets below never repeat a fragile `../../../` literal.
 #   qt_frontend -> seamlylayout -> app -> src, then down into test/
 # ---------------------------------------------------------------------------
@@ -405,6 +405,31 @@ target_link_libraries(SettingsModelTests PRIVATE
 
 add_test(NAME SettingsModelTests COMMAND SettingsModelTests)
 
+# Layout.10 — where the session log file is written. Logger touches the file
+# system, so the suite runs under QStandardPaths test mode and never reaches the
+# real user configuration.
+add_executable(LoggerTests
+    ${SEAMLYLAYOUT_TEST_DIR}/LoggerTests.cpp
+    src/Logger.cpp
+    src/Platform.cpp
+)
+
+target_include_directories(LoggerTests PRIVATE
+    src/
+)
+
+target_link_libraries(LoggerTests PRIVATE
+    Qt6::Core
+    Qt6::Gui
+    Qt6::Test
+)
+
+if(WIN32)
+    target_link_libraries(LoggerTests PRIVATE dwmapi)
+endif()
+
+add_test(NAME LoggerTests COMMAND LoggerTests)
+
 # Task 49 — the command-line contract with Seamly2D's Layout Mode handoff.
 # StartupOptions is a plain value type with no QObject and no GUI, so this
 # suite needs neither the offscreen platform nor a window.
@@ -443,6 +468,7 @@ if(WIN32)
         PreferencesModelTests
         SettingsModelTests
         StartupOptionsTests
+        LoggerTests
         PROPERTIES ENVIRONMENT_MODIFICATION
         "PATH=path_list_prepend:$<TARGET_FILE_DIR:Qt6::Core>"
     )

@@ -9,9 +9,7 @@ This document uses two placeholders as shorthand. Neither is a real environment 
 
 Non-default settings means at least: a non-default `%PROGRAMDIR%`, a non-default `%DATAROOT%` parent, and desktop shortcuts turned off (`SEAMLYDESKTOPSHORTCUTS=0`).
 
-Fixed on 2026-09-02 (tasks Seamly2D.5 / Layout.9, now in `TODO_COMPLETED.md`): `MainWindow::exportPiecesToSeamlyLayout()` no longer writes a `.pieces.svg` file. It builds the piece-mode SVG in memory, launches SeamlyLayout with `--svg-stdin`, and sends the document on that process's standard input. Verify on each pass that no `.pieces.svg` appears beside the pattern file.
-
-Defects found on a pass go in `project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md`, unless a task for them already exists elsewhere.
+Known defect to watch for: `MainWindow::exportPiecesToSeamlyLayout()` (`mainwindow.cpp`) writes the pattern's pieces to a `.pieces.svg` file next to the pattern file and launches SeamlyLayout with that file path as an argument. This contradicts the intended design: the piece-mode SVG should be passed to SeamlyLayout as a stringified SVG document, not as a file. Check for this on every verification pass until fixed. Tasks filed: Seamly2D.5, Layout.9.
 
 ## A. MSI Test Case Matrix
 
@@ -24,26 +22,10 @@ Defects found on a pass go in `project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md`,
 
 ### Case 1 — Fresh install
 
-- [ ] 0. Relaunch this shell elevated (Administrator) before any step below. Confirm it:
-
-  ```powershell
-  $p = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
-  "Elevated: $($p.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))"
-  ```
-
-  It must print `Elevated: True`. A VS Code integrated terminal is **not** elevated. An unelevated install fails at `InstallFinalize` with `Error 1925` and exit code 1603, after every earlier action has already returned 1.
+- [ ] 0. Relaunch this shell elevated (Administrator) before any step below.
 - [ ] 1a. Uninstall Seamly (any and all versions detected) using `packaging\windows\test_reset_environment.ps1`.
   - [ ] 1a-i. Confirm that the %PROGRAMROOT, %DATAROOT, AppData\Roaming\Seamly, AppData\Local\Seamly\Seamly2D, AppData\Local\Seamly\SeamlyMe, AppData\Local\Seamly\SeamlyLayout, desktop shortcuts, and registry keys have been removed.
-- [ ] 1b. Install Seamly apps using `packaging\windows\seamly-msi\x64\seamly-x64.msi` with Default settings. Run the **wizard**, not a silent install:
-
-  ```powershell
-  msiexec /i "<repo>\packaging\windows\seamly-msi\x64\seamly-x64.msi" /norestart /l*v "$env:TEMP\seamly_install.log"
-  ```
-
-  Accept every default page. Do **not** pass `/quiet`. A silent install builds no dialogs, so it cannot verify step 1b-ii or 1b-iii, and task `MSI1b.1` stays unverified.
-  - [ ] 1b-i. Confirm the install log ends with `Installation success or error status: 0`.
-  - [ ] 1b-ii. Confirm every wizard page is readable: no control overlaps another, and no text is clipped.
-  - [ ] 1b-iii. Confirm the install log holds **no** `Error 2826` line (`extends beyond the boundaries of the dialog`). This is task `MSI1b.1`.
+- [ ] 1b. Install Seamly apps using `packaging\windows\seamly-msi\x64\seamly-x64.msi` with Default settings via `msiexec /i seamly-x64.msi /quiet /norestart`.
 
 ## B. Verification Suite
 
@@ -86,7 +68,7 @@ Run this suite after every test case in section A.
 dataRoot=%DATAROOT%
 individual_size_measurements=%DATAROOT%/measurements/individual
 multi_size_measurements=%DATAROOT%/measurements/multisize
-templates=%DATAROOTT%/templates
+templates=%DATAROOT%/templates
 bodyscans=%DATAROOT%/bodyscans"
       - [ ] 0b-i2. "[notices] firstRunDataNotice=pending"
     - [ ] 0b-ii. qt6_seamly2d.ini should contain:
@@ -119,7 +101,8 @@ data_root=%DATAROOT%"
 - [ ] 1. Check the registry keys:
   - [ ] 1a. If not a fresh install then confirm old-version entries were removed.
   - [ ] 1b. Confirm that the installed-version program entries were added for each app under `HKLM\SOFTWARE\Seamly\<application>`, each with matching `InstallPath` and `DisplayVersion`.
-  - [ ] 1c. Confirm that installed-version data entries were added with matching `DataRoot` and `DataParent` values; `Seamly2D` also carries the three `DesktopShortcut*` flags (this should be fixed in the future; tasks filed: SeamlyMe.3, Layout.7)
+  - [ ] 1c. Confirm that installed-version data entries were added with matching `DataRoot` and `DataParent` values.
+  - [ ] 1d. Confirm that each app's desktop-shortcut flag sits under its OWN key: `DesktopShortcutSeamly2D` in `HKLM\SOFTWARE\Seamly\Seamly2D`, `DesktopShortcutSeamlyMe` in `HKLM\SOFTWARE\Seamly\SeamlyMe`, `DesktopShortcutSeamlyLayout` in `HKLM\SOFTWARE\Seamly\SeamlyLayout` (SeamlyMe.3, Layout.7).
 - [ ] 2. Check apps - **needs a human at the keyboard for most steps**
   - [ ] 2a. Run Seamly2D
     - [ ] 2a-i. first run scripted: the "Seamly data moved" notice appears once, closes, then the main window appears
@@ -132,14 +115,16 @@ data_root=%DATAROOT%"
     - [ ] 2b-ii. Select 'File Open Multisize' - the dialog should open in the `%DATAROOT\measurements\multisize` directory.
     - [ ] 2b-iii. Select 'File Open Templates' - the dialog should open in the `%DATAROOT\templates` directory.
     - [ ] 2b-iv. Select 'Edit Current' from the Measurements menu - the `%DATAROOT%\measurements\individual\male_chest_102cm.smis` file should open.
-    - [ ] 2b-v. Check if directory exists: `%LOCALAPPDATA%\SeamlyMe\logs`
+    - [ ] 2b-v. Check if directory exists: `%LOCALAPPDATA%\Seamly\SeamlyMe\logs`
     - [ ] 2b-vi. Close SeamlyMe, returning focus to Seamly2D.
   - [ ] 2c. Run SeamlyLayout from within Seamly2D.
     - [ ] 2c-i. Visually confirm that the current pattern's `Piece mode` data is opened in the left canvas.
     - [ ] 2c-ii. Check if `MainWindow::exportPiecesToSeamlyLayout()` passes 'piece mode' data to SeamlyLayout as a stringified SVG document in a variable, not as a svg file from harddrive.
-    - [ ] 2c-iii. Check if directories exist: `%LOCALAPPDATA%\SeamlyLayout\cache`, `%LOCALAPPDATA%\SeamlyLayout\logs`
+    - [ ] 2c-iii. Check if directories exist: `%LOCALAPPDATA%\Seamly\SeamlyLayout\cache`, `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs`
     - [ ] 2c-iv. Close SeamlyLayout, returning focus to Seamly2D.
   - [ ] 2d. Close Seamly2D.
-- [ ] 3. Check if `%LOCALAPPDATA%\SeamlyLayout\output` directory was created. If exists add a task to stop creating the `%LOCALAPPDATA%\SeamlyLayout\` directory and its `output` subdirectory that stores log files, and start creating the `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` directory to store SeamlyLayout log files (similar to the `%LOCALAPPDATA\Seamly\Seamly2D\logs` directory)
+- [ ] 3. Check SeamlyLayout's log directory (Layout.10):
+  - [ ] 3a. Confirm `%LOCALAPPDATA%\SeamlyLayout` does NOT exist.
+  - [ ] 3b. Confirm the session log is `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs\log_<timestamp>.txt`, matching `%LOCALAPPDATA%\Seamly\Seamly2D\logs`.
 - [ ] 4. Check Desktop shortcuts `Seamly2D.lnk`, `SeamlyMe.lnk`, `SeamlyLayout.lnk` for all three apps in `C:\Users\Public\Desktop` (default settings, `SEAMLYDESKTOPSHORTCUTS` on).
 - [ ] 5. Check the logs in `%LOCALAPPDATA%\Seamly\Seamly2D\logs\` for additional errors.

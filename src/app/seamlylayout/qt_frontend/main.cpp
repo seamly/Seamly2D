@@ -33,7 +33,7 @@
 // generate a duplicate moc file when this header is included here.
 #include <cxxqt_bridge/src/lib.cxxqt.h>
 
-// Logger — singleton debug logger; writes [unix_sec] DEBUG: lines to output/log_{ts}.txt
+// Logger — singleton debug logger; writes [unix_sec] DEBUG: lines to logs/log_{ts}.txt
 #include "src/Logger.h"
 
 // Platform — detect host OS once at startup; use Platform::os throughout the application
@@ -182,13 +182,6 @@ int main(int argc, char *argv[])
     // Detect host OS once — use Platform::os throughout the application
     Platform::init();
 
-    // Enable and open debug log file.
-    // Set debugEnabled = true to write debug lines to logs/log_{YYMMDDHHMM}.txt.
-    // Set to false (default) to disable all logging with zero overhead.
-    Logger::debugEnabled = true;
-    Logger::init();
-    qInstallMessageHandler(Logger::messageHandler);
-
     // Application metadata — used by QSettings, About dialogs, OS task managers
     //
     // Task 15: organization renamed from "Seamly Systems" to "Seamly" so
@@ -196,10 +189,23 @@ int main(int argc, char *argv[])
     // organization folder as seamly2d/seamlyme (AppData/Local/Seamly/SeamlyLayout
     // on Windows). PreferencesModel::appConfigRootPath()'s first-run migration
     // bridges data forward from the old "Seamly Systems" folder automatically.
+    //
+    // Layout.10: this MUST stay ahead of Logger::init(). AppConfigLocation is
+    // built from the organization and application names, so an empty
+    // organization sent the session log to %LOCALAPPDATA%\SeamlyLayout\ instead
+    // of %LOCALAPPDATA%\Seamly\SeamlyLayout\.
     app.setOrganizationName("Seamly");
     app.setOrganizationDomain("seamly.io");
     app.setApplicationName("SeamlyLayout");
     app.setApplicationVersion("0.1.0");
+
+    // Enable and open debug log file.
+    // Set debugEnabled = true to write debug lines to logs/log_{YYMMDDHHMMSS}.txt
+    // under the AppConfigLocation root set by the metadata above.
+    // Set to false (default) to disable all logging with zero overhead.
+    Logger::debugEnabled = true;
+    Logger::init();
+    qInstallMessageHandler(Logger::messageHandler);
 
     // -----------------------------------------------------------------------
     // Command line — the Seamly2D Layout Mode handoff and the plain CLI.

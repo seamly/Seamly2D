@@ -44,7 +44,12 @@
          advertised like the Start Menu ones: an advertised shortcut has to sit
          in the component that holds its target file, which would tie it to the
          executable's component and make it impossible to condition
-         separately. -->
+         separately.
+
+         Each breadcrumb goes under its OWN app key - SOFTWARE\Seamly\Seamly2D,
+         \SeamlyMe, \SeamlyLayout. All three used to write into the Seamly2D
+         key, so a reader could not tell which app a shortcut belonged to
+         (Layout.7, SeamlyMe.3). -->
 
     <StandardDirectory Id="DesktopFolder" />
     <ComponentGroup Id="OptionalDesktopShortcuts" Directory="INSTALLFOLDER">
@@ -73,7 +78,7 @@
                   WorkingDirectory="INSTALLFOLDER"
                   Icon="seamlyme.ico" />
         <RegistryValue Root="HKLM"
-                       Key="SOFTWARE\Seamly\Seamly2D"
+                       Key="SOFTWARE\Seamly\SeamlyMe"
                        Name="DesktopShortcutSeamlyMe"
                        Type="integer"
                        Value="1"
@@ -93,7 +98,7 @@
                   WorkingDirectory="INSTALLFOLDER"
                   Icon="seamlylayout.ico" />
         <RegistryValue Root="HKLM"
-                       Key="SOFTWARE\Seamly\Seamly2D"
+                       Key="SOFTWARE\Seamly\SeamlyLayout"
                        Name="DesktopShortcutSeamlyLayout"
                        Type="integer"
                        Value="1"

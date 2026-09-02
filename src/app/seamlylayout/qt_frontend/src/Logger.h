@@ -6,7 +6,8 @@
 // @brief Singleton debug logger — writes timestamped lines to a rolling log file.
 //
 // Format: [unix_seconds] DEBUG: ClassName::methodName(): message
-// Log file: {appDir}/output/log_{YYMMDDHHMM}.txt
+// Log file: {appConfigRoot}/logs/log_{YYMMDDHHMMSS}.txt
+// On Windows that is %LOCALAPPDATA%\Seamly\SeamlyLayout\logs (Layout.10).
 //
 // Usage:
 //   Logger::debugEnabled = true;   // enable at startup (default: false)
@@ -34,8 +35,9 @@ public:
     static bool debugEnabled;
 
     // @brief Open the log file.  Must be called once from main() after QGuiApplication
-    // is constructed (so applicationDirPath() is available).
-    // Creates the output/ directory if it does not exist.
+    // is constructed AND after the organization and application names are set,
+    // because AppConfigLocation is derived from them (Layout.10).
+    // Creates the logs/ directory if it does not exist.
     // Sets the SEAMLY_LOG_FILE environment variable so Rust can append to the
     // same file via log_to_file().
     static void init();
@@ -55,8 +57,8 @@ private:
     // Non-instantiable — all members are static.
     Logger() = delete;
 
-    // @brief Remove stale debug files from the output/ directory at startup.
-    static void clearOutputDirectory(const QString &outputDirPath);
+    // @brief Remove stale debug files from the logs/ directory at startup.
+    static void clearLogDirectory(const QString &logsDirPath);
 
     // @brief Open log file handle.  Stays open for the process lifetime.
     static QFile   s_file;
