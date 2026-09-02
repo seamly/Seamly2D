@@ -2,6 +2,21 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task MSI1b.1 — installer dialogs logged Error 2826: controls overflowed their dialog (completed 2026-09-02)
+
+Found while walking `project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step 1b. A `/l*v` wizard install of build 26.9.2.996 wrote exactly 15 `Error 2826` lines, every one "to the right by 7 pixels". Cosmetic — the install completed and every verified result was correct — but it was noise in every install log, and noise hides the next real failure.
+
+**The cause, measured from the MSI `Dialog` and `Control` tables rather than guessed.** 37 `Line` controls carried `Width="373"` inside a 370-unit dialog. WixUI authors its own `BannerLine`/`BottomLine` rows exactly the way the five custom Seamly dialogs did, so one cause covered all ten dialogs in the log. The overflow is 3 **installer units**, not pixels: Windows Installer converts to display pixels before it writes the message, and the test machine's 144 DPI screen printed 7. The log carried 15 lines and the table 37 rows because only the dialogs a wizard install builds are ever created.
+
+- [x] MSI1b.1.1 Cause measured, one cause for every dialog. See above.
+- [x] MSI1b.1.2 Fixed in two halves, because the WixUI rows cannot be edited from the `.wxs` and WiX cannot move past 6 (v7 is behind the Open Source Maintenance Fee EULA):
+  - `packaging/windows/smsi_ui.wxs` — the ten Seamly `Line` controls are now `Width="370"`.
+  - New `packaging/windows/smsi_fix_dialog_lines.ps1` — trims any `Line` control that ends past its dialog edge in the built MSI. It fails the build when a **non**-`Line` control overflows, because shortening one of those would clip text or a button. `smsi.ps1` runs it after `wix build` and before `wix msi validate`, so the ICE pass and the authoring check both see the package that ships.
+- [x] MSI1b.1.3 `smsi_check_authoring.ps1` gained section 10: every control must fit inside its dialog, bottom edge as well as right. Neither `wix msi validate` nor the authoring check saw this defect before, which is why it reached a shipped build.
+- [x] MSI1b.1.4 Verified 2026-09-02 on build 26.9.2.1059. The trim reported **27** controls, not 37 — the ten that are ours are now correct at source, which proves both halves work. A fresh wizard install from an elevated shell finished with `Installation success or error status: 0` and its `/l*v` log carries **no** `Error 2826` line and no `extends beyond` line, across the 9 dialogs the install created. `wix msi validate` is clean apart from the expected ICE61.
+
+`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md` step 1b was rewritten at the same time. It specified `msiexec /i seamly-x64.msi /quiet /norestart`, and a silent install builds no dialogs, so the step it belongs to could never have found this defect. It now runs the wizard with `/l*v` and gains 1b-i, 1b-ii and 1b-iii.
+
 ## Task Layout.10 — SeamlyLayout logs moved to `%LOCALAPPDATA%\Seamly\SeamlyLayout\logs` (completed 2026-09-02)
 
 Found during MSI Test Case verification (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step B.3). SeamlyLayout wrote its session log to `%LOCALAPPDATA%\SeamlyLayout\output\log_<timestamp>.txt` — outside the shared `Seamly` organization folder that holds `qt6_seamlylayout.ini`, and under a directory named `output` rather than `logs`. Seamly2D's pattern is `%LOCALAPPDATA%\Seamly\Seamly2D\logs`.
