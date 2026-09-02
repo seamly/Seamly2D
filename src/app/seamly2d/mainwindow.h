@@ -88,6 +88,7 @@ class LayoutToolBox;
 class QToolButton;
 class QDoubleSpinBox;
 class QFontComboBox;
+class QProcess;
 
 struct DraftImage;
 class ImageItem;
@@ -313,6 +314,9 @@ private:
     bool                              isLayoutsDockVisible;
     bool                              isToolboxDockVisible;
     bool                              drawMode;            /// @brief drawMode true if draft scene active.
+
+    QProcess                         *m_seamlyLayoutProcess;            /// @brief tracked SeamlyLayout child process; restores the prior mode when it exits (Seamly2D.3).
+    bool                              m_seamlyLayoutPriorStageWasDraft; /// @brief true if Draft mode (not Piece mode) was active before the SeamlyLayout handoff.
 
     enum { MaxRecentFiles = 5 };
     QAction                          *recentFileActs[MaxRecentFiles];

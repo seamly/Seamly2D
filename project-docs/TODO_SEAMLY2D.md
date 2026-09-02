@@ -24,12 +24,6 @@ Current label text handling (all outline-font based, and staying available): the
 - [ ] Seamly2D.1.7 Verify: canvas single-stroke labels legible at typical zooms with correct placement, mirroring, and rotation; outline-font behavior unchanged everywhere; tagged pieces SVG / `.pieces.svg` / `--text2paths` / DXF / PDF / PNG correct in both font modes
 - [ ] Seamly2D.1.8 Doxygen briefs + inline comments on all touched functions; document the font architecture in the repo docs
 
-## Task Seamly2D.3 — Restore Piece Mode focus after closing SeamlyLayout
-
-Found during MSI Test Case 1, step 7b-iv: closing SeamlyLayout returns focus to Seamly2D's Layout Mode, not the Piece Mode that was active before SeamlyLayout launched.
-
-- [ ] Seamly2D.3.1 Record the Seamly2D mode active when SeamlyLayout launches, and restore that mode (not Layout Mode) when SeamlyLayout closes.
-
 ## Task Seamly2D.4 — Preferences > Paths has no row for bodyscans
 
 Found during MSI Test Case 1 verification (`project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md`, step 7a).

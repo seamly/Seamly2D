@@ -19,6 +19,26 @@ re-accumulate finished-session narrative in this file.
 
 ## Current Status
 
+### Seamly2D.3 DONE — restore prior mode when SeamlyLayout closes (2026-09-01)
+
+Implemented on branch `task-restore-piece-mode-focus`. `MainWindow::showLayoutMode()`
+(`mainwindow.cpp:4102`) now records the pre-handoff stage in new member
+`m_seamlyLayoutPriorStageWasDraft`. `exportPiecesToSeamlyLayout()` launches
+SeamlyLayout as a tracked `QProcess` (new member `m_seamlyLayoutProcess`)
+instead of `QProcess::startDetached()`; its `finished` signal calls
+`showDraftMode(true)`/`showPieceMode(true)` per the recorded flag, so closing
+SeamlyLayout returns Seamly2D to the mode active before the handoff instead of
+Layout Mode. `~MainWindow()` disconnects (never deletes) a still-running
+`m_seamlyLayoutProcess` — `QProcess`'s destructor kills a running child, which
+would take SeamlyLayout down solely because Seamly2D closed first; the object
+is left to leak since the whole app process is exiting anyway.
+
+Task Seamly2D.3 (subtask 3.1) moved to `TODO_COMPLETED.md`. **Not yet
+build-verified or live-tested** — no `cl.exe` on PATH outside a VS Developer
+shell this session; `ci.yml` is the verification path for Seamly2D per
+`CLAUDE.md`. Next: merge to `run-seamlyLayout`, push, then re-run MSI Test
+Case 1b-i step 7b-iv on a rebuilt install to confirm live.
+
 ### Test Case 1b-i pass on build 26.9.1.778 COMPLETE, incl. human walkthrough (2026-09-01, ~23:40)
 
 Ran the loop's step 4 (test doc) on the MSI built after Seamly2D.2.1 +
