@@ -32,24 +32,18 @@ are gone. Build only with `test_build_msi_local.ps1` — do **not** use
 
 ## Commit state
 
-Committed on `run-seamlyLayout`, **not pushed**. Two commits ahead of
-`origin/run-seamlyLayout`:
+`run-seamlyLayout` is **pushed and level with `origin/run-seamlyLayout`**
+(`ff7d8c441b`). Nothing is waiting to commit except three files that are not
+task work:
 
-- `71505f97ec` — the task work, made on `task-log-path-and-shortcut-keys`;
-- `86881a6173` — the `--no-ff` merge. The branch is deleted.
+- `scripts/prompt_testing.txt` — the user's own edit, made before this session;
+- `src/libs/vmisc/projectversion.cpp` / `.h` and the two `dist/macx` `Info.plist`
+  files — the version stamp, which every local build rewrites.
 
-**No skip-ci token on either.** `packaging/**` and `CMakeLists.txt` changed
-functionally, so the next push must run the full `ci.yml` suite.
-
-**The `MSI1b.1` work is not committed.** Changed, on `run-seamlyLayout`:
-
-- `packaging/windows/smsi_fix_dialog_lines.ps1` — new;
-- `packaging/windows/smsi_ui.wxs`, `smsi.ps1`, `smsi_check_authoring.ps1`;
-- `project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md`, `SESSION_HANDOVER.md`.
-
-`scripts/prompt_testing.txt` was already modified before this session, and the
-build rewrites `projectversion.cpp/.h` and `Info.plist` every time. `packaging/**`
-changed functionally again, so the skip-ci token still must not be used.
+The push carried `ff7d8c441b` (the `--no-ff` merge) and `3efd1017ed` (the
+`MSI1b.1` task work), and **no skip-ci token**: `packaging/**` changed
+functionally, so the full `ci.yml` suite runs on it. That run is the only
+verification Seamly2D and SeamlyMe get — check it.
 
 ## Machine state
 
@@ -343,7 +337,9 @@ before `vcvars` runs. Put the commands in a `.cmd` file and prepend
    - `%DATAROOTROOT%` (lines 89, 90) should be `%DATAROOT%`.
    - B.0b-iii says `qt6_seamly2d.ini` should be empty; it means
      `qt6_seamlyme.ini`, which is the file that is empty.
-3. **Commit the working tree** — nothing is committed yet.
+3. **Watch the `ci.yml` run on `ff7d8c441b`.** It is the first full CI run since
+   the last three pushes, and the only verification the Seamly2D and SeamlyMe
+   Qt code gets.
 
 ## Still to do — the SeamlyLayout return path
 
