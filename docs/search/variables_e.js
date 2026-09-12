@@ -27,11 +27,12 @@ var searchData=
   ['optionsindex_24',['optionsIndex',['../dc/d3e/classVCommandLine.html#af81799ac36c307795352e9591799e1a2',1,'VCommandLine']]],
   ['optionsused_25',['optionsUsed',['../dc/d3e/classVCommandLine.html#a029b6fb4ed6697d7b7e414e55ffe63c4',1,'VCommandLine']]],
   ['order_26',['order',['../d3/df8/structDraftImage.html#a9bd9fc0975913b1fb8ceecdaaeb5f8c6',1,'DraftImage']]],
-  ['originpointitem_27',['originPointItem',['../dd/d50/classVisToolMove.html#a5c4b9911bc13eae4563c46945ebd38b6',1,'VisToolMove']]],
-  ['origins_28',['origins',['../d7/df5/classVMainGraphicsScene.html#a659293dd786e55a8b236cbb8cf18c025',1,'VMainGraphicsScene']]],
-  ['os_29',['os',['../df/d1e/classPlatform.html#a84f9c79ac254b31b0f9fca8f3289f57a',1,'Platform']]],
-  ['out_5fdir_30',['OUT_DIR',['../d9/df1/Globals_8h.html#a5f50d896358f6e5cc29b2139b3d8b657',1,'Globals.h']]],
-  ['outputdevice_31',['outputDevice',['../d3/d1d/classVObjEngine.html#aaf061c06cda3145d37aa440b33cb338e',1,'VObjEngine']]],
-  ['owned_32',['OWNED',['../de/d86/classDOMNodeImpl.html#a881c6a25529c2cceb1c7fd7757980b8c',1,'DOMNodeImpl']]],
-  ['owns_5fiodevice_33',['owns_iodevice',['../dd/d3b/classVObjPaintDevice.html#a8d8cc3c7801db38d06894637e223a9e2',1,'VObjPaintDevice']]]
+  ['originpointid_27',['originPointId',['../d7/d5d/namespaceanonymous__namespace_02tst__vtoolmove_8cpp_03.html#aa949404902611af605071ffc44a760f4',1,'anonymous_namespace{tst_vtoolmove.cpp}']]],
+  ['originpointitem_28',['originPointItem',['../dd/d50/classVisToolMove.html#a5c4b9911bc13eae4563c46945ebd38b6',1,'VisToolMove']]],
+  ['origins_29',['origins',['../d7/df5/classVMainGraphicsScene.html#a659293dd786e55a8b236cbb8cf18c025',1,'VMainGraphicsScene']]],
+  ['os_30',['os',['../df/d1e/classPlatform.html#a84f9c79ac254b31b0f9fca8f3289f57a',1,'Platform']]],
+  ['out_5fdir_31',['OUT_DIR',['../d9/df1/Globals_8h.html#a5f50d896358f6e5cc29b2139b3d8b657',1,'Globals.h']]],
+  ['outputdevice_32',['outputDevice',['../d3/d1d/classVObjEngine.html#aaf061c06cda3145d37aa440b33cb338e',1,'VObjEngine']]],
+  ['owned_33',['OWNED',['../de/d86/classDOMNodeImpl.html#a881c6a25529c2cceb1c7fd7757980b8c',1,'DOMNodeImpl']]],
+  ['owns_5fiodevice_34',['owns_iodevice',['../dd/d3b/classVObjPaintDevice.html#a8d8cc3c7801db38d06894637e223a9e2',1,'VObjPaintDevice']]]
 ];

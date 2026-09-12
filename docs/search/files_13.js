@@ -14,7 +14,7 @@ var searchData=
   ['tools_2eh_11',['tools.h',['../d5/da5/tools_8h.html',1,'']]],
   ['transcodingexception_2ehpp_12',['TranscodingException.hpp',['../d7/d86/macx_2include_2xercesc_2util_2TranscodingException_8hpp.html',1,'(Global Namespace)'],['../db/d4c/mingw_2include_2xercesc_2util_2TranscodingException_8hpp.html',1,'(Global Namespace)'],['../d8/d00/msvc-arm64_2include_2xercesc_2util_2TranscodingException_8hpp.html',1,'(Global Namespace)'],['../d9/dcc/msvc_2include_2xercesc_2util_2TranscodingException_8hpp.html',1,'(Global Namespace)']]],
   ['transenamemap_2ec_13',['TransENameMap.c',['../d3/ddd/macx_2include_2xercesc_2util_2TransENameMap_8c.html',1,'(Global Namespace)'],['../d8/d13/mingw_2include_2xercesc_2util_2TransENameMap_8c.html',1,'(Global Namespace)'],['../de/d6e/msvc-arm64_2include_2xercesc_2util_2TransENameMap_8c.html',1,'(Global Namespace)'],['../d7/d0d/msvc_2include_2xercesc_2util_2TransENameMap_8c.html',1,'(Global Namespace)']]],
-  ['transenamemap_2ehpp_14',['TransENameMap.hpp',['../dd/dd4/macx_2include_2xercesc_2util_2TransENameMap_8hpp.html',1,'(Global Namespace)'],['../d6/dbb/msvc_2include_2xercesc_2util_2TransENameMap_8hpp.html',1,'(Global Namespace)'],['../d6/dbb/msvc-arm64_2include_2xercesc_2util_2TransENameMap_8hpp.html',1,'(Global Namespace)'],['../d9/d66/mingw_2include_2xercesc_2util_2TransENameMap_8hpp.html',1,'(Global Namespace)']]],
+  ['transenamemap_2ehpp_14',['TransENameMap.hpp',['../d9/d66/mingw_2include_2xercesc_2util_2TransENameMap_8hpp.html',1,'(Global Namespace)'],['../d6/dbb/msvc_2include_2xercesc_2util_2TransENameMap_8hpp.html',1,'(Global Namespace)'],['../d6/dbb/msvc-arm64_2include_2xercesc_2util_2TransENameMap_8hpp.html',1,'(Global Namespace)'],['../dd/dd4/macx_2include_2xercesc_2util_2TransENameMap_8hpp.html',1,'(Global Namespace)']]],
   ['transservice_2ehpp_15',['TransService.hpp',['../da/d36/msvc-arm64_2include_2xercesc_2util_2TransService_8hpp.html',1,'(Global Namespace)'],['../db/de8/msvc_2include_2xercesc_2util_2TransService_8hpp.html',1,'(Global Namespace)'],['../db/d99/macx_2include_2xercesc_2util_2TransService_8hpp.html',1,'(Global Namespace)'],['../d9/d14/mingw_2include_2xercesc_2util_2TransService_8hpp.html',1,'(Global Namespace)']]],
   ['traverseschema_2ehpp_16',['TraverseSchema.hpp',['../d0/d3a/macx_2include_2xercesc_2validators_2schema_2TraverseSchema_8hpp.html',1,'(Global Namespace)'],['../de/d87/mingw_2include_2xercesc_2validators_2schema_2TraverseSchema_8hpp.html',1,'(Global Namespace)'],['../d9/d85/msvc-arm64_2include_2xercesc_2validators_2schema_2TraverseSchema_8hpp.html',1,'(Global Namespace)'],['../dc/df6/msvc_2include_2xercesc_2validators_2schema_2TraverseSchema_8hpp.html',1,'(Global Namespace)']]],
   ['tst_5fabstractregexp_2ecpp_17',['tst_abstractregexp.cpp',['../db/db5/tst__abstractregexp_8cpp.html',1,'']]],
@@ -79,6 +79,8 @@ var searchData=
   ['tst_5fvspline_2eh_76',['tst_vspline.h',['../d8/d07/tst__vspline_8h.html',1,'']]],
   ['tst_5fvsplinepath_2ecpp_77',['tst_vsplinepath.cpp',['../d2/dba/tst__vsplinepath_8cpp.html',1,'']]],
   ['tst_5fvsplinepath_2eh_78',['tst_vsplinepath.h',['../d8/d23/tst__vsplinepath_8h.html',1,'']]],
-  ['tst_5fvtranslatevars_2ecpp_79',['tst_vtranslatevars.cpp',['../d4/d1d/tst__vtranslatevars_8cpp.html',1,'']]],
-  ['tst_5fvtranslatevars_2eh_80',['tst_vtranslatevars.h',['../db/de1/tst__vtranslatevars_8h.html',1,'']]]
+  ['tst_5fvtoolmove_2ecpp_79',['tst_vtoolmove.cpp',['../da/d26/tst__vtoolmove_8cpp.html',1,'']]],
+  ['tst_5fvtoolmove_2eh_80',['tst_vtoolmove.h',['../d5/d13/tst__vtoolmove_8h.html',1,'']]],
+  ['tst_5fvtranslatevars_2ecpp_81',['tst_vtranslatevars.cpp',['../d4/d1d/tst__vtranslatevars_8cpp.html',1,'']]],
+  ['tst_5fvtranslatevars_2eh_82',['tst_vtranslatevars.h',['../db/de1/tst__vtranslatevars_8h.html',1,'']]]
 ];

@@ -696,6 +696,7 @@ var hierarchy =
       [ "TST_VPointF", "d5/d29/classTST__VPointF.html", null ],
       [ "TST_VPoster", "db/d56/classTST__VPoster.html", null ],
       [ "TST_VSplinePath", "d8/d25/classTST__VSplinePath.html", null ],
+      [ "TST_VToolMove", "d4/df1/classTST__VToolMove.html", null ],
       [ "TST_VTranslateVars", "da/d3d/classTST__VTranslateVars.html", null ],
       [ "UrlCapture", "d3/d35/classUrlCapture.html", null ],
       [ "VAbstractPattern", "d8/dba/classVAbstractPattern.html", null ],

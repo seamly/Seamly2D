@@ -7,7 +7,9 @@ var namespacemembers_vars =
     [ "k", "namespacemembers_vars_k.html", null ],
     [ "m", "namespacemembers_vars_m.html", null ],
     [ "n", "namespacemembers_vars_n.html", null ],
+    [ "o", "namespacemembers_vars_o.html", null ],
     [ "p", "namespacemembers_vars_p.html", null ],
+    [ "r", "namespacemembers_vars_r.html", null ],
     [ "s", "namespacemembers_vars_s.html", null ],
     [ "t", "namespacemembers_vars_t.html", null ]
 ];
