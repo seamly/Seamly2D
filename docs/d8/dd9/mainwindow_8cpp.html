@@ -128,6 +128,7 @@ $(document).ready(function(){initNavTree('d8/dd9/mainwindow_8cpp.html','../../')
 <code>#include &quot;../vmisc/def.h&quot;</code><br />
 <code>#include &quot;../vmisc/logging.h&quot;</code><br />
 <code>#include &quot;../vmisc/qxtcsvmodel.h&quot;</code><br />
+<code>#include &quot;../vmisc/seamly_suite_paths.h&quot;</code><br />
 <code>#include &quot;../vmisc/vsettings.h&quot;</code><br />
 <code>#include &quot;../vmisc/dialogs/dialogexporttocsv.h&quot;</code><br />
 <code>#include &quot;../vpatterndb/vpiecepath.h&quot;</code><br />
@@ -147,7 +148,6 @@ $(document).ready(function(){initNavTree('d8/dd9/mainwindow_8cpp.html','../../')
 <code>#include &quot;../vwidgets/mouse_coordinates.h&quot;</code><br />
 <code>#include &quot;../vwidgets/vmaingraphicsscene.h&quot;</code><br />
 <code>#include &quot;../vwidgets/vwidgetpopup.h&quot;</code><br />
-<code>#include &lt;QAbstractItemModel&gt;</code><br />
 <code>#include &lt;QInputDialog&gt;</code><br />
 <code>#include &lt;QtDebug&gt;</code><br />
 <code>#include &lt;QMessageBox&gt;</code><br />
@@ -164,9 +164,9 @@ $(document).ready(function(){initNavTree('d8/dd9/mainwindow_8cpp.html','../../')
 <code>#include &lt;thread&gt;</code><br />
 <code>#include &lt;QComboBox&gt;</code><br />
 <code>#include &lt;QDateTime&gt;</code><br />
+<code>#include &lt;QFontComboBox&gt;</code><br />
 <code>#include &lt;QDoubleSpinBox&gt;</code><br />
 <code>#include &lt;QFileSystemWatcher&gt;</code><br />
-<code>#include &lt;QFontComboBox&gt;</code><br />
 <code>#include &lt;QImageReader&gt;</code><br />
 <code>#include &lt;QLabel&gt;</code><br />
 <code>#include &lt;QSharedPointer&gt;</code><br />
@@ -199,9 +199,9 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00152">152</a> of file <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html">mainwindow.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00153">153</a> of file <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html">mainwindow.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05282">MainWindow::AutoSavePattern()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04490">MainWindow::FileClosedCorrect()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07464">MainWindow::reopenFilesAfterCrash()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04259">MainWindow::Save()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04158">MainWindow::SaveAs()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l05382">MainWindow::AutoSavePattern()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04590">MainWindow::FileClosedCorrect()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l07578">MainWindow::reopenFilesAfterCrash()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04357">MainWindow::Save()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l04256">MainWindow::SaveAs()</a>.</p>
 
 </div>
 </div>
@@ -217,9 +217,9 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00156">156</a> of file <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html">mainwindow.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00157">157</a> of file <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html">mainwindow.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01544">MainWindow::handleGroupTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01748">MainWindow::handleInsertNodesTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01623">MainWindow::handleMirrorByAxisTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01604">MainWindow::handleMirrorByLineTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01643">MainWindow::handleMoveTool()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01584">MainWindow::handleRotationTool()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01547">MainWindow::handleGroupTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01751">MainWindow::handleInsertNodesTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01626">MainWindow::handleMirrorByAxisTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01607">MainWindow::handleMirrorByLineTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01646">MainWindow::handleMoveTool()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01587">MainWindow::handleRotationTool()</a>.</p>
 
 </div>
 </div>
@@ -235,9 +235,9 @@ Variables</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00155">155</a> of file <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html">mainwindow.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l00156">156</a> of file <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html">mainwindow.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01544">MainWindow::handleGroupTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01748">MainWindow::handleInsertNodesTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01623">MainWindow::handleMirrorByAxisTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01604">MainWindow::handleMirrorByLineTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01643">MainWindow::handleMoveTool()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01584">MainWindow::handleRotationTool()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01547">MainWindow::handleGroupTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01751">MainWindow::handleInsertNodesTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01626">MainWindow::handleMirrorByAxisTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01607">MainWindow::handleMirrorByLineTool()</a>, <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01646">MainWindow::handleMoveTool()</a>, and <a class="el" href="../../d8/dd9/mainwindow_8cpp_source.html#l01587">MainWindow::handleRotationTool()</a>.</p>
 
 </div>
 </div>
