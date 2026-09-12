@@ -1,5 +1,5 @@
 #******************************************************************************
-# **  @file   test_reset_environment.ps1
+# **  @file   local_reset_environment.ps1
 # **  @author slspencer
 # **  @date   August 24, 2026
 # **
@@ -166,12 +166,7 @@ Write-Host '=== 4. Removing %LOCALAPPDATA%\Seamly and %APPDATA%\Seamly ==='
 Remove-PathIfPresent (Join-Path $env:LOCALAPPDATA 'Seamly')
 Remove-PathIfPresent (Join-Path $env:APPDATA 'Seamly')
 
-Write-Host '=== 5. Removing leftover "Unknown Organization" artifacts (empty-organization-name defect) ==='
-Remove-PathIfPresent (Join-Path $env:APPDATA 'Unknown Organization.ini')
-Remove-PathIfPresent (Join-Path $env:APPDATA 'Unknown Organization')
-# Layout.10: builds before 26.9.2 opened the log file before main() set the
-# organization name, so SeamlyLayout wrote %LOCALAPPDATA%\SeamlyLayout\output.
-# Section 4 does not reach it, because it sits outside the Seamly folder.
+Write-Host '=== 5. Removing leftover "SeamlyLayout"==='
 Remove-PathIfPresent (Join-Path $env:LOCALAPPDATA 'SeamlyLayout')
 
 Write-Host '=== 6. Removing Seamly registry keys ==='
@@ -180,4 +175,8 @@ Remove-RegistryKeyIfPresent 'HKCU:\Software\Seamly'
 
 Write-Host '=== Done. Verify with: ==='
 Write-Host '  Test-Path "C:\Program Files\SeamlyApps"'
+Test-Path "C:\Program Files\SeamlyApps"
+Write-Host '  Test-Path "C:\Program Files (x86)\Seamly2D"'
+Test-Path "C:\Program Files (x86)\Seamly2D"
 Write-Host '  Test-Path "HKLM:\SOFTWARE\Seamly"'
+Test-Path "HKLM:\SOFTWARE\Seamly"

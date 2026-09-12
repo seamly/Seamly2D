@@ -1,4 +1,6 @@
-message("Entering Seamly.pro")
+message(" ")
+message("===== Entering Seamly.pro =====")
+message(" ")
 
 #Check if spaces are in directory names
 LIST = $$split(PWD,' ')

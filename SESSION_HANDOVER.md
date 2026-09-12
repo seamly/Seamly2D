@@ -8,8 +8,8 @@ re-accumulate finished-session narrative in this file.
 
 ## Current steps
 
-1. build .msi with `packaging\windows\test_build_msi_local.ps1`
-2. clear environment with `packaging\windows\test_reset_environment.ps1` — needs
+1. build .msi with `packaging\windows\local_build_msi.ps1`
+2. clear environment with `packaging\windows\local_reset_environment.ps1` — needs
    an elevated shell
 3. install MSI with `packaging\windows\seamly-msi\x64\seamly-x64.msi` — elevated
    shell, run the wizard, do **not** pass `/quiet`
@@ -26,7 +26,7 @@ this pass found no new defect. **The loop is finished unless a new defect turns
 up.**
 
 `project-docs/TODO_SETTINGS_FILES.md` is deleted; the old steps that named it
-are gone. Build only with `test_build_msi_local.ps1` — do **not** use
+are gone. Build only with `local_build_msi.ps1` — do **not** use
 `src\app\seamlylayout\build.ps1` or `qd.ps1` any more. Both `CLAUDE.md` files and
 `src/app/seamlylayout/.claude/rules/testing.mdc` were corrected to say so.
 
@@ -50,7 +50,7 @@ verification Seamly2D and SeamlyMe get — check it.
 - Installed: Seamly **26.9.2.1059** in `%ProgramFiles%\SeamlyApps`
   (seamly2d.exe, seamlyme.exe, SeamlyLayout.exe). MSI ProductVersion `26.9.2499`.
 - Installed 2026-09-02 through the **wizard** from an elevated shell, onto a
-  machine reset by `test_reset_environment.ps1`. Install log:
+  machine reset by `local_reset_environment.ps1`. Install log:
   `%TEMP%\seamly_install.log`.
 - `%DATAROOT%` = `C:\Users\susan\Documents\SeamlyData`. Right after the install
   it is an **empty** directory: the MSI creates it, and the first app run seeds
@@ -59,7 +59,7 @@ verification Seamly2D and SeamlyMe get — check it.
 - All three apps have been run once, so every first-run artifact exists.
   `%DATAROOT%` now holds 8 subdirectories, 8 patterns, 3 individual and 1
   multisize measurement file.
-- `packaging/windows/test_msi_install.ps1` cannot check this pass. It needs
+- `packaging/windows/local_install_msi.ps1` cannot check this pass. It needs
   `-Phase Baseline` captured BEFORE the install, and the install is already
   done. Capture the baseline first next time.
 
@@ -169,7 +169,7 @@ Two separate causes, both fixed:
 - `Logger::init()` appended `/output`. It now appends `/logs`, on every
   platform branch. `clearOutputDirectory()` is renamed `clearLogDirectory()`.
 
-`test_reset_environment.ps1` gained a removal for the stray
+`local_reset_environment.ps1` gained a removal for the stray
 `%LOCALAPPDATA%\SeamlyLayout` tree that older builds left behind; section 4
 does not reach it, because it sits outside the `Seamly` folder.
 
@@ -185,7 +185,7 @@ keys already existed, authored by `smsi_registry.wxs`.
 
 - `smsi_check_authoring.ps1` gained three assertions, one per app. It had none
   before, which is why the defect survived every earlier pass.
-- `test_msi_install.ps1` read all three breadcrumbs out of the Seamly2D key and
+- `local_install_msi.ps1` read all three breadcrumbs out of the Seamly2D key and
   never checked SeamlyLayout at all. It now reads each from its own key and
   covers all three.
 
@@ -246,7 +246,7 @@ failure on every pass. See "Open — next steps".
   used to specify could never verify `MSI1b.1`. `scripts/prompt_testing.txt`
   step 5 says the same.
 
-`test_reset_environment.ps1` keeps `/quiet` on its `msiexec /x`. Uninstall UI is
+`local_reset_environment.ps1` keeps `/quiet` on its `msiexec /x`. Uninstall UI is
 not under test.
 
 ### Task Seamly2D.5 / Layout.9 — stringified-SVG handoff (closed)
@@ -256,7 +256,7 @@ standard input. No `.pieces.svg` file is written. Full write-up, including the
 `Layout.9.1` design decision and the file-by-file change list, is in
 `project-docs/TODO_COMPLETED.md`.
 
-### `test_build_msi_local.ps1` now builds and runs the Qt unit tests
+### `local_build_msi.ps1` now builds and runs the Qt unit tests
 
 It previously passed `CONFIG+=noTests`, so `src\test` never compiled locally and
 `TST_SeamlySuitePaths` had no local runner at all. Now:
@@ -283,7 +283,7 @@ It previously passed `CONFIG+=noTests`, so `src\test` never compiled locally and
 `CLAUDE.md`, `src/app/seamlylayout/CLAUDE.md` and
 `src/app/seamlylayout/.claude/rules/testing.mdc` all told a future session to
 build with `build.ps1` / `qd.ps1`. They now name
-`packaging\windows\test_build_msi_local.ps1` and retire the other two. The
+`packaging\windows\local_build_msi.ps1` and retire the other two. The
 project `CLAUDE.md` also documents the four build stages, the `-SkipTests` and
 `-SkipValidation` switches, that arm64 is not covered, and how to read a single
 Qt suite's output.
@@ -295,11 +295,11 @@ deleted. Deleting them was not asked for.
 
 | Suite | How | Result |
 | --- | --- | --- |
-| Seamly2DTest, CollectionTest, ParserTest, TranslationsTest | `nmake check` inside `test_build_msi_local.ps1` | pass |
+| Seamly2DTest, CollectionTest, ParserTest, TranslationsTest | `nmake check` inside `local_build_msi.ps1` | pass |
 | SeamlyLayout Qt tests | `ctest --preset debug` | 6/6, including the new `LoggerTests` |
 | `LoggerTests` alone | per-suite log via `-o <file>,txt` | 7 passed, 0 failed |
 | SeamlyLayout Rust | `cargo test --workspace` | pass |
-| MSI 26.9.2.996 | `test_build_msi_local.ps1` | MSI OK, 164.6 MB; authoring check and 17 installer self-tests pass |
+| MSI 26.9.2.996 | `local_build_msi.ps1` | MSI OK, 164.6 MB; authoring check and 17 installer self-tests pass |
 | Test Case 1b-i, fresh wizard install of 26.9.2.996 | manual walkthrough, 2026-09-02 | **pass, no failures** |
 
 To read a single Qt suite's output, set `SEAMLY_TEST_LOG_DIR` and run the

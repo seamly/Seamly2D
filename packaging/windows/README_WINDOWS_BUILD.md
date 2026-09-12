@@ -79,7 +79,7 @@ msiexec /a seamly-x64.msi /qn TARGETDIR=C:\extract                   # extract w
 - Moving an installed Seamly is **not supported** — location is fixed at install time. Uninstall/reinstall, or run a major upgrade (prefills the program-directory page from `HKLM\SOFTWARE\Seamly\Seamly2D\InstallPath`).
 - Data migration on update runs only when `SEAMLYCOPYUSERDATA=1` or the data location changed. Non-path settings are always preserved.
 - Interactive pages: welcome → license → install folder → data root → copy existing work? (off) → shortcuts (on) → ready → install. A warning page precedes welcome if a prior install (this MSI or the old NSIS installer) is found. `/qn` skips all pages.
-- Real-install verification (clean machine — **not yet run**; Task 13/51): [`README.md`](README.md#installing--testing). `smsi_check_authoring.ps1` checks package contents; [`test_msi_install.ps1`](test_msi_install.ps1) checks install effects, incl. launching each app. Only the UAC prompt, wizard wording, and icons need a human.
+- Real-install verification (clean machine — **not yet run**; Task 13/51): [`README.md`](README.md#installing--testing). `smsi_check_authoring.ps1` checks package contents; [`local_install_msi.ps1`](local_install_msi.ps1) checks install effects, incl. launching each app. Only the UAC prompt, wizard wording, and icons need a human.
 
 ## 4. arm64
 

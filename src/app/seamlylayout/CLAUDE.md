@@ -49,7 +49,7 @@ Windows 11, Linux (all flavors), macOS (latest 3 versions)
 
 ## Build Commands
 
-- **Build with `packaging\windows\test_build_msi_local.ps1` from the repository
+- **Build with `packaging\windows\local_build_msi.ps1` from the repository
   root.** It builds all three apps, runs the Qt unit tests, and packages the
   Windows x64 MSI.
 - Do **not** use `build.ps1` or `qd.ps1` any more (user decision, 2026-09-02).

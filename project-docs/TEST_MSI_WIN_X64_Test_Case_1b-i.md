@@ -23,7 +23,7 @@ Known defect to watch for: `MainWindow::exportPiecesToSeamlyLayout()` (`mainwind
 ### Case 1 — Fresh install
 
 - [ ] 0. Relaunch this shell elevated (Administrator) before any step below.
-- [ ] 1a. Uninstall Seamly (any and all versions detected) using `packaging\windows\test_reset_environment.ps1`.
+- [ ] 1a. Uninstall Seamly (any and all versions detected) using `packaging\windows\local_reset_environment.ps1`.
   - [ ] 1a-i. Confirm that the %PROGRAMROOT, %DATAROOT, AppData\Roaming\Seamly, AppData\Local\Seamly\Seamly2D, AppData\Local\Seamly\SeamlyMe, AppData\Local\Seamly\SeamlyLayout, desktop shortcuts, and registry keys have been removed.
 - [ ] 1b. Install Seamly apps from `packaging\windows\seamly-msi\x64\seamly-x64.msi` with Default settings, through the **wizard**, from the elevated shell:
   `msiexec /i seamly-x64.msi /norestart /l*v "%TEMP%\seamly_install.log"`

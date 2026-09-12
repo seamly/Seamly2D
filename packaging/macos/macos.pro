@@ -1,3 +1,7 @@
+message(" ")
+message("===== Entering macos.pro =====")
+message(" ")
+
 TEMPLATE = aux
 
 macx{
@@ -31,4 +35,6 @@ macx{
 
     QMAKE_EXTRA_TARGETS += seamly2ddmg seamlymedmg first
     QMAKE_CLEAN += Seamly2D.dmg SeamlyME.dmg Seamly2D-macos.zip
+
+    message("+++++ Exiting macos.pro +++++")
 }

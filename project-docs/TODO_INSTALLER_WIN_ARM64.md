@@ -88,7 +88,7 @@ but nothing here has ever been installed or run on an arm64 machine — the job
 only inspects the package it built. Overlaps Installer.2.2.
 
 - [ ] InstWinArm64.2.1 Install `seamly-arm64.msi` on a Windows 11 arm64 machine
-  and run `packaging/windows/test_msi_install.ps1` through all four
+  and run `packaging/windows/local_install_msi.ps1` through all four
   phases (`Baseline`/`Installed`/`Upgraded`/`Removed`)
 - [ ] InstWinArm64.2.2 Confirm each app starts and stays running natively (not
   under x64 emulation) and that the file associations resolve

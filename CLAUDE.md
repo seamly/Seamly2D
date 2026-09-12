@@ -72,7 +72,7 @@ All apps use Qt 6.11.1.
 * Purpose: Creates layouts of Seamly2D pattern pieces for cutting and downstream software.
 * Code: Rust converted to C++ with `cxx-qt`.
 * GUI: Qt 6.11 / QML / QtWidgets.
-* Build: local - `packaging\windows\test_build_msi_local.ps1`; GitHub - ci.yml
+* Build: local - `packaging\windows\local_build_msi.ps1`; GitHub - ci.yml
 * Merge its local `CLAUDE.md` and `rules.md` requirements into the project-level files.
 * File header:
 
@@ -104,7 +104,7 @@ All three applications build against **Qt 6.11.1**.
 
 ### Local Windows Build
 
-**`packaging\windows\test_build_msi_local.ps1` is the build.** Use it for every
+**`packaging\windows\local_build_msi.ps1` is the build.** Use it for every
 local build. Do **not** use `src\app\seamlylayout\build.ps1` or `qd.ps1` any
 more (user decision, 2026-09-02): they build SeamlyLayout alone, which is not
 what the install-and-test loop needs.
@@ -314,7 +314,7 @@ For code changes:
 
 * add or update unit tests;
 * run the local tests:
-  * Seamly2D/SeamlyMe Qt suites — `packaging\windows\test_build_msi_local.ps1`
+  * Seamly2D/SeamlyMe Qt suites — `packaging\windows\local_build_msi.ps1`
     runs them via `nmake check`;
   * SeamlyLayout — `ctest --preset debug` and `cargo test --workspace`.
 

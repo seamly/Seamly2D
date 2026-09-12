@@ -4,20 +4,22 @@
 #
 #-------------------------------------------------
 
-# Compilation main binary file
-message("Entering seamly2D.pro")
+# Compile main binary file
+
+message(" ")
+message("========== Entering seamly2D.pro ==========")
+message(" ")
 
 # File with common stuff for whole project
 include(../../../common.pri)
 
-# Here we don't see "network" library, but, i think, "printsupport" depend on this library, so we still need this
-# library in installer.
+# Note: "printsupport" depends on network library 
 QT       += core gui widgets xml svg printsupport network multimedia
 
-# We want create executable file
+# Create executable file
 TEMPLATE = app
 
-# Name of binary file
+# Binary file name
 macx{
     TARGET = Seamly2D
 } else {
@@ -27,41 +29,43 @@ macx{
 # Directory for executable file
 DESTDIR = bin
 
-# Directory for files created moc
+# Directory for moc files
 MOC_DIR = moc
 
 # Directory for objects files
 OBJECTS_DIR = obj
 
-# Directory for files created rcc
+# Directory for rcc files
 RCC_DIR = rcc
 
-# Directory for files created uic
+# Directory for uic files
 UI_DIR = uic
 
-# Support subdirectories. Just better project code tree.
+# Support subdirectories.
 include(seamly2d.pri)
 
-# Resource files. This files will be included in binary.
+# Resource files included in binary.
 RESOURCES += \
-    share/resources/cursor.qrc \ # Tools cursor icons.
+    share/resources/cursor.qrc \ # Tool cursor icons.
     share/resources/toolicon.qrc
     share/resources/sounds.qrc
 
-# Compilation will fail without this files after we added them to this section.
+# Logo file, compilation will fail without it.
 OTHER_FILES += \
     share/resources/icon/64x64/icon64x64.ico # Seamly2D's logo.
 
+# Warnings
 include(warnings.pri)
 
-# precompiled headers clash with the BUILD_REVISION define, thus disable here
+# Disable precompiled headers, they clash with the BUILD_REVISION defines
 CONFIG -= precompile_header
 
+# build version
 DVCS_HESH=$$FindBuildRevision()
 message("seamly2d.pro: Build revision:" $${DVCS_HESH})
 DEFINES += "BUILD_REVISION=$${DVCS_HESH}" # Make available build revision number in sources.
 
-# Some extra information about Qt. Can be useful.
+# Useful information about Qt.
 message(seamly2d.pro: Qt version: $$[QT_VERSION])
 message(seamly2d.pro: Qt is installed in $$[QT_INSTALL_PREFIX])
 message(seamly2d.pro: Qt resources can be found in the following locations:)
@@ -78,16 +82,15 @@ message(seamly2d.pro: Examples: $$[QT_INSTALL_EXAMPLES])
 # Path to resource file.
 win32:RC_FILE = share/resources/seamly2d.rc
 
-# INSTALL_MULTISIZE_MEASUREMENTS and INSTALL_STANDARD_TEMPLATES and INSTALL_LABEL_TEMPLATES inside samples.pri
+# Include sample files via INSTALL_MULTISIZE_MEASUREMENTS, INSTALL_STANDARD_TEMPLATES, and INSTALL_LABEL_TEMPLATES
 include(../samples.pri)
 
-# Utility pdftops needed to save a layout to PS and EPS. The win32 block below
-# copies it next to seamly2d.exe, where convertPdfToPs() runs it. The macOS twin
-# stays in dist/macx/bin64 until the macOS pass moves it to share/bin/macx.
+# Directory for utility pdftops, required to export layouts in PS and EPS formats.
 win32 {
     INSTALL_PDFTOPS += share/bin/win/pdftops.exe
 }
 
+# translations
 include(../translations.pri)
 
 # Set "make install" command for Unix-like systems.
@@ -99,7 +102,7 @@ unix{
 
     unix:!macx{
         QMAKE_RPATHDIR += $$[QT_INSTALL_LIBS]
-        DATADIR =$$PREFIX/share
+        DATADIR = $$PREFIX/share
         DEFINES += DATADIR=\\\"$$DATADIR\\\" PKGDATADIR=\\\"$$PKGDATADIR\\\"
 
         # Path to bin file after installation
@@ -143,6 +146,7 @@ unix{
             templates \
             label
     }
+    
     macx{
         message(seamly2d.pro: mac deployment target: $$QMAKE_MACOSX_DEPLOYMENT_TARGET)
 
@@ -159,7 +163,7 @@ unix{
         seamlyme.path = $$MACOS_DIR
         seamlyme.files += $${OUT_PWD}/../seamlyme/$${DESTDIR}/seamlyme.app/$${MACOS_DIR}/seamlyme
 
-        # Utility pdftops need for saving a layout image to PS and EPS formats.
+        # Utility pdftops required for exporting layout image to PS and EPS formats.
         xpdf.path = $$MACOS_DIR
         xpdf.files += $${PWD}/../../../dist/macx/bin64/pdftops
 
@@ -195,19 +199,20 @@ unix{
     }
 }
 
+# Copy pdftops files to the Windows destination directory.
 win32 {
     for(DIR, INSTALL_PDFTOPS) {
         #add these absolute paths to a variable which
-        #ends up as 'mkcommands = path1 path2 path3 ...'
+        #ends up as 'mkcommands = path1 path2 path3 ..z.'
         pdftops_path += $${PWD}/$$DIR
     }
     copyToDestdir($$pdftops_path, $$shell_path($${OUT_PWD}/$$DESTDIR))
 }
 
 # When the GNU linker sees a library, it discards all symbols that it doesn't need.
-# Dependent library go first.
+# Dependent libraries go first.
 
-#Tools static library (depend on VWidgets, VMisc, VPatternDB)
+# == Tools static library (depend on VWidgets, VMisc, VPatternDB)
 unix|win32: LIBS += -L$$OUT_PWD/../../libs/tools/$${DESTDIR}/ -ltools
 
 INCLUDEPATH += $$PWD/../../libs/tools
@@ -217,7 +222,7 @@ DEPENDPATH += $$PWD/../../libs/tools
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/tools/$${DESTDIR}/tools.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/tools/$${DESTDIR}/libtools.a
 
-#VTools static library (depend on VWidgets, VMisc, VPatternDB)
+# == VTools static library (depend on VWidgets, VMisc, VPatternDB)
 unix|win32: LIBS += -L$$OUT_PWD/../../libs/vtools/$${DESTDIR}/ -lvtools
 
 INCLUDEPATH += $$PWD/../../libs/vtools
@@ -227,7 +232,7 @@ DEPENDPATH += $$PWD/../../libs/vtools
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vtools/$${DESTDIR}/vtools.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vtools/$${DESTDIR}/libvtools.a
 
-#VWidgets static library
+# == VWidgets static library
 unix|win32: LIBS += -L$$OUT_PWD/../../libs/vwidgets/$${DESTDIR}/ -lvwidgets
 
 INCLUDEPATH += $$PWD/../../libs/vwidgets
@@ -236,7 +241,7 @@ DEPENDPATH += $$PWD/../../libs/vwidgets
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vwidgets/$${DESTDIR}/vwidgets.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vwidgets/$${DESTDIR}/libvwidgets.a
 
-# VFormat static library (depend on VPatternDB, IFC)
+# == VFormat static library (depend on VPatternDB, IFC)
 unix|win32: LIBS += -L$$OUT_PWD/../../libs/vformat/$${DESTDIR}/ -lvformat
 
 INCLUDEPATH += $$PWD/../../libs/vformat
@@ -245,7 +250,7 @@ DEPENDPATH += $$PWD/../../libs/vformat
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vformat/$${DESTDIR}/vformat.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vformat/$${DESTDIR}/libvformat.a
 
-#VPatternDB static library (depend on vgeometry, vmisc, VLayout)
+# == VPatternDB static library (depend on vgeometry, vmisc, VLayout)
 unix|win32: LIBS += -L$$OUT_PWD/../../libs/vpatterndb/$${DESTDIR} -lvpatterndb
 
 INCLUDEPATH += $$PWD/../../libs/vpatterndb
@@ -254,7 +259,7 @@ DEPENDPATH += $$PWD/../../libs/vpatterndb
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vpatterndb/$${DESTDIR}/vpatterndb.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vpatterndb/$${DESTDIR}/libvpatterndb.a
 
-# VGeometry static library (depend on ifc)
+# == VGeometry static library (depend on ifc)
 unix|win32: LIBS += -L$$OUT_PWD/../../libs/vgeometry/$${DESTDIR}/ -lvgeometry
 
 INCLUDEPATH += $$PWD/../../libs/vgeometry
@@ -263,7 +268,7 @@ DEPENDPATH += $$PWD/../../libs/vgeometry
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vgeometry/$${DESTDIR}/vgeometry.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vgeometry/$${DESTDIR}/libvgeometry.a
 
-# Fervor static library (depend on VMisc, IFC)
+# == Fervor static library (depend on VMisc, IFC)
 unix|win32: LIBS += -L$$OUT_PWD/../../libs/fervor/$${DESTDIR}/ -lfervor
 
 INCLUDEPATH += $$PWD/../../libs/fervor
@@ -272,7 +277,7 @@ DEPENDPATH += $$PWD/../../libs/fervor
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/fervor/$${DESTDIR}/fervor.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/fervor/$${DESTDIR}/libfervor.a
 
-# IFC static library (depend on QMuParser, VMisc)
+# == IFC static library (depend on QMuParser, VMisc)
 unix|win32: LIBS += -L$$OUT_PWD/../../libs/ifc/$${DESTDIR}/ -lifc
 
 INCLUDEPATH += $$PWD/../../libs/ifc
@@ -281,7 +286,7 @@ DEPENDPATH += $$PWD/../../libs/ifc
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/ifc/$${DESTDIR}/ifc.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/ifc/$${DESTDIR}/libifc.a
 
-#VMisc static library
+# == VMisc static library
 unix|win32: LIBS += -L$$OUT_PWD/../../libs/vmisc/$${DESTDIR}/ -lvmisc
 
 INCLUDEPATH += $$PWD/../../libs/vmisc
@@ -290,7 +295,7 @@ DEPENDPATH += $$PWD/../../libs/vmisc
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vmisc/$${DESTDIR}/vmisc.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vmisc/$${DESTDIR}/libvmisc.a
 
-# VObj static library
+# == VObj static library
 unix|win32: LIBS += -L$$OUT_PWD/../../libs/vobj/$${DESTDIR}/ -lvobj
 
 INCLUDEPATH += $$PWD/../../libs/vobj
@@ -299,7 +304,7 @@ DEPENDPATH += $$PWD/../../libs/vobj
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vobj/$${DESTDIR}/vobj.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vobj/$${DESTDIR}/libvobj.a
 
-# VDxf static library
+# == VDxf static library
 unix|win32: LIBS += -L$$OUT_PWD/../../libs/vdxf/$${DESTDIR}/ -lvdxf
 
 INCLUDEPATH += $$PWD/../../libs/vdxf
@@ -308,7 +313,7 @@ DEPENDPATH += $$PWD/../../libs/vdxf
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vdxf/$${DESTDIR}/vdxf.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vdxf/$${DESTDIR}/libvdxf.a
 
-# VLayout static library
+# == VLayout static library
 unix|win32: LIBS += -L$$OUT_PWD/../../libs/vlayout/$${DESTDIR}/ -lvlayout
 
 INCLUDEPATH += $$PWD/../../libs/vlayout
@@ -317,7 +322,7 @@ DEPENDPATH += $$PWD/../../libs/vlayout
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vlayout/$${DESTDIR}/vlayout.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vlayout/$${DESTDIR}/libvlayout.a
 
-# QMuParser library
+# == QMuParser library
 unix|win32: LIBS += -L$${OUT_PWD}/../../libs/qmuparser/$${DESTDIR} -lqmuparser
 
 INCLUDEPATH += $${PWD}/../../libs/qmuparser
@@ -326,7 +331,7 @@ DEPENDPATH += $${PWD}/../../libs/qmuparser
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/qmuparser/$${DESTDIR}/qmuparser.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/qmuparser/$${DESTDIR}/libqmuparser.a
 
-# VPropertyExplorer library
+# == VPropertyExplorer library
 unix|win32: LIBS += -L$${OUT_PWD}/../../libs/vpropertyexplorer/$${DESTDIR} -lvpropertyexplorer
 
 INCLUDEPATH += $${PWD}/../../libs/vpropertyexplorer
@@ -335,21 +340,22 @@ DEPENDPATH += $${PWD}/../../libs/vpropertyexplorer
 win32:!win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vpropertyexplorer/$${DESTDIR}/vpropertyexplorer.lib
 else:unix|win32-g++: PRE_TARGETDEPS += $$OUT_PWD/../../libs/vpropertyexplorer/$${DESTDIR}/libvpropertyexplorer.a
 
-# xerces library
+# == Link against Xerces-C on macOS and other Unix platforms.
 macx: LIBS += -L$${PWD}/../../libs/xerces-c/macx/lib -lxerces-c
 else:unix: LIBS += -lxerces-c
 win32-msvc: LIBS += -L$${PWD}/../../libs/xerces-c/msvc/lib -lxerces-c_3
 win32-arm64-msvc: LIBS += -L$${PWD}/../../libs/xerces-c/msvc-arm64/lib -lxerces-c_3
 win32-g++: LIBS += -L$${PWD}/../../libs/xerces-c/mingw/lib -lxerces-c
 
+# == Copy xerces library to destination directory on Windows
 win32 {
     copyToDestdir($${PWD}/$$INSTALL_XERCES, $$shell_path($${OUT_PWD}/$$DESTDIR))
 }
 
-macx{
+# == Configure macOS deployment and code signing
+macx {
     APPLE_SIGN_IDENTITY_UNQUOTED = $(APPLE_SIGN_IDENTITY)
     APPLE_SIGN_IDENTITY = $$shell_quote($(APPLE_SIGN_IDENTITY))
-
     !macSign {
         # run macdeployqt to include all qt libraries in packet
         QMAKE_POST_LINK += $$[QT_INSTALL_BINS]/macdeployqt $${OUT_PWD}/$${DESTDIR}/$${TARGET}.app
@@ -362,7 +368,7 @@ macx{
     }
 }
 
-# run windeployqt to include all qt libraries and vc_redist in $${DESTDIR}.
+# == run windeployqt to include all qt libraries and vc_redist in $${DESTDIR}.
 # deployQtRuntime() lives in common.pri and is shared with seamlyme.pro and
 # Seamly2DTest.pro — see the comment block there for why the tool is resolved
 # through qtPrepareTool() and why x64 and arm64 need no per-arch handling.

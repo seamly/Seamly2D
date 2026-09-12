@@ -143,6 +143,6 @@ tests call that directly).
 | Registry rows, per-user settings removal | `smsi_registry.wxs` |
 | Staging, version mapping, `wix build` | `smsi.ps1` |
 | Only invocation | `.github/workflows/ci.yml`, job `windows-msi` |
-| Built-package / real-install assertions | `smsi_check_authoring.ps1`, `test_msi_install.ps1` |
+| Built-package / real-install assertions | `smsi_check_authoring.ps1`, `local_install_msi.ps1` |
 | Data root resolution/seeding/pruning | `src/libs/vmisc/vcommonsettings.cpp` |
 | App call sites | `application_2d.cpp`, `application_me.cpp` |

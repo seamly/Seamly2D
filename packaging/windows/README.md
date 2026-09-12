@@ -17,11 +17,11 @@ Related docs: [`.github/README-BUILDS.md`](../../.github/README-BUILDS.md) (KB r
 | `../assets/*.ico` | Shortcut/ARP icons; `<Icon Id>` must equal file name |
 | `license.rtf` | License text shown in installer UI |
 | `smsi.ps1` | Stage + `wix build` driver. CI-only, no local mode |
-| `test_build_msi_local.ps1` | Local x64 dev build: builds all 3 apps, calls `smsi.ps1` |
+| `local_build_msi.ps1` | Local x64 dev build: builds all 3 apps, calls `smsi.ps1` |
 | `smsi_check_authoring.ps1` | Asserts built MSI contents; runs every build |
 | `smsi_migrate_user_data.ps1` / `..._test.ps1` | Deferred action migrating user data during install/upgrade, + its unit tests |
-| `test_msi_install.ps1` | Asserts an installed MSI's effect on a real machine |
-| `test_reset_environment.ps1` | Test-support: wipes a machine past uninstall |
+| `local_install_msi.ps1` | Asserts an installed MSI's effect on a real machine |
+| `local_reset_environment.ps1` | Test-support: wipes a machine past uninstall |
 | `ci.yml` | Only CI route to a Windows package |
 
 Editing any file here triggers full CI (no `paths-ignore` match).
@@ -64,7 +64,7 @@ Fresh install: Welcome → License → Existing-install warning (if found) → P
 
 **Release (CI only):** `gh workflow run ci.yml --ref run-seamlyLayout`. `windows-msi` matrix: x64 on `windows-latest`, arm64 (native) on `windows-11-arm`.
 
-**Local x64 dev build:** `.\packaging\windows\test_build_msi_local.ps1`. Builds all 3 apps release, auto-detects Qt kit, installs WiX v6 if missing. Not a release artifact.
+**Local x64 dev build:** `.\packaging\windows\local_build_msi.ps1`. Builds all 3 apps release, auto-detects Qt kit, installs WiX v6 if missing. Not a release artifact.
 
 Full param reference: [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md).
 
@@ -88,25 +88,25 @@ msiexec /i seamly-x64.msi /qn SEAMLYDATAPARENT=E:\                # silent, data
 msiexec /x seamly-x64.msi /qn                                     # silent uninstall
 ```
 
-### `test_msi_install.ps1`
+### `local_install_msi.ps1`
 
 4 phases sharing a state file, so later phases assert against earlier ones. Standalone — copy beside the `.msi`, run elevated.
 
 ```powershell
-.\test_msi_install.ps1 -Phase Baseline
+.\local_install_msi.ps1 -Phase Baseline
 msiexec /i seamly-x64-older.msi
-.\test_msi_install.ps1 -Phase Installed -ExpectSeamlyLayout -PatternFile .\sample.sm2d
+.\local_install_msi.ps1 -Phase Installed -ExpectSeamlyLayout -PatternFile .\sample.sm2d
 msiexec /i seamly-x64-newer.msi
-.\test_msi_install.ps1 -Phase Upgraded -ExpectSeamlyLayout -PatternFile .\sample.sm2d
+.\local_install_msi.ps1 -Phase Upgraded -ExpectSeamlyLayout -PatternFile .\sample.sm2d
 msiexec /x seamly-x64-newer.msi
-.\test_msi_install.ps1 -Phase Removed
+.\local_install_msi.ps1 -Phase Removed
 ```
 
 Params: `-Phase <Baseline|Installed|Upgraded|Removed>` (required), `-ExpectSeamlyLayout`, `-NoDesktopShortcuts`, `-PatternFile <path>`, `-SkipLaunch`, `-StateFile <path>`.
 
 Upgrade test needs 2 packages with different `-Version` values (2 CI runs).
 
-`test_reset_environment.ps1` resets a test machine past what uninstall leaves — test-support only, more destructive than the shipped uninstall by design.
+`local_reset_environment.ps1` resets a test machine past what uninstall leaves — test-support only, more destructive than the shipped uninstall by design.
 
 ### Needs human verification
 

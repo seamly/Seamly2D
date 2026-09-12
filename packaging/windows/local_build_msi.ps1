@@ -1,5 +1,5 @@
 #******************************************************************************
-# **  @file   test_build_msi_local.ps1
+# **  @file   local_build_msi.ps1
 # **  @author slspencer
 # **  @date   August 28, 2026
 # **
@@ -23,6 +23,10 @@
 <#
 .SYNOPSIS
     Build the Windows x64 MSI locally, without CI.
+    Uses jom instead of nmake for parallel compilation, with 4 CPUs by default.
+    Requires jom to be installed and available in PATH.
+    jom is typically found at Qt\Tools\jom within the Qt installation directory.
+    Currently this script is set to use 4 CPUs for jom.
 
 .DESCRIPTION
     Runs the same steps as ci.yml's windows-msi (x64) job, in the same order:
@@ -78,11 +82,11 @@
     suites have no other local runner, so skipping defers them to CI.
 
 .EXAMPLE
-    .\packaging\windows\test_build_msi_local.ps1
+    .\packaging\windows\local_build_msi.ps1
     Full local x64 MSI build with an auto-computed version, unit tests included.
 
 .EXAMPLE
-    .\packaging\windows\test_build_msi_local.ps1 -SkipTests
+    .\packaging\windows\local_build_msi.ps1 -SkipTests
     Same build without the unit tests, for a packaging-only change.
 #>
 
@@ -243,7 +247,7 @@ echo === unit tests: SKIPPED (-SkipTests) ===
     $TestSection = @'
 
 echo.
-echo === nmake check: Seamly2D, Collection, Parser, Translations unit tests ===
+echo === run nmake check: Seamly2D, Collection, Parser, Translations unit tests ===
 set "QT_QPA_PLATFORM=offscreen"
 set "NoDefaultCurrentDirectoryInExePath="
 nmake check
@@ -267,23 +271,25 @@ set "PATH=$QtBin;%PATH%"
 cd /d "$repoRoot"
 
 echo.
-echo === qmake / nmake: seamly2d + seamlyme$(if (-not $SkipTests) { ' + unit tests' }) ===
+echo === run qmake : seamly2d + seamlyme$(if (-not $SkipTests) { ' + unit tests' }) 
 qmake Seamly.pro -r $QmakeConfig
 if errorlevel 1 exit /b 1
+echo === run nmake : build seamly2d.exe & seamlyme.exe ===
 nmake
 if errorlevel 1 exit /b 1
 $TestSection
 
 echo.
-echo === cmake: SeamlyLayout ===
+echo === run cmake : set SeamlyLayout release type & cmake path ===
 cd /d "$layoutFrontendDir"
 cmake --preset release -DCMAKE_PREFIX_PATH="$QtPath"
 if errorlevel 1 exit /b 1
+echo === run cmake : build seamlyLayout.exe ===
 cmake --build --preset release
 if errorlevel 1 exit /b 1
 
 echo.
-echo === smsi.ps1: stage + wix build ===
+echo === smsi.ps1: stage + wix --> build MSI ===
 cd /d "$repoRoot"
 powershell -NoProfile -ExecutionPolicy Bypass -File "$smsiScript" $smsiArgsQuoted
 if errorlevel 1 exit /b 1

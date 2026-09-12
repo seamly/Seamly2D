@@ -1,4 +1,6 @@
-message("Entering app.pro")
+message(" ")
+message(" ===== Entering app.pro =====")
+message(" ")
 
 TEMPLATE = subdirs
 SUBDIRS = \

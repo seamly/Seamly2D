@@ -1,5 +1,5 @@
 #******************************************************************************
-# **  @file   test_msi_install.ps1
+# **  @file   local_install_msi.ps1
 # **  @author slspencer
 # **  @date   July 29, 2026
 # **
@@ -24,13 +24,13 @@
 # **    Four phases, run in order around the msiexec commands, sharing a state
 # **    file so each phase can compare against the ones before it:
 # **
-# **      .\test_msi_install.ps1 -Phase Baseline      <- BEFORE installing
+# **      .\local_install_msi.ps1 -Phase Baseline      <- BEFORE installing
 # **      msiexec /i Seamly-x64-older.msi
-# **      .\test_msi_install.ps1 -Phase Installed -ExpectSeamlyLayout
+# **      .\local_install_msi.ps1 -Phase Installed -ExpectSeamlyLayout
 # **      msiexec /i Seamly-x64-newer.msi           <- upgrade over the top
-# **      .\test_msi_install.ps1 -Phase Upgraded -ExpectSeamlyLayout
+# **      .\local_install_msi.ps1 -Phase Upgraded -ExpectSeamlyLayout
 # **      msiexec /x Seamly-x64-newer.msi
-# **      .\test_msi_install.ps1 -Phase Removed
+# **      .\local_install_msi.ps1 -Phase Removed
 # **
 # **    Run it elevated. Reading HKLM and enumerating Program Files works
 # **    unelevated, but the phases are run either side of msiexec, which is
@@ -107,7 +107,7 @@
     %LOCALAPPDATA%\Seamly, which is one of the trees being checked.
 
 .EXAMPLE
-    .\test_msi_install.ps1 -Phase Installed -ExpectSeamlyLayout -PatternFile C:\test\shirt.sm2d
+    .\local_install_msi.ps1 -Phase Installed -ExpectSeamlyLayout -PatternFile C:\test\shirt.sm2d
 #>
 
 param(
