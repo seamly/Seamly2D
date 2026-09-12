@@ -4,7 +4,7 @@ Test plan for the Windows x64 Seamly MSI. Covers `packaging/windows/smsi.wxs`.
 
 This document uses two placeholders as shorthand. Neither is a real environment variable.
 
-- `%PROGRAMDIR%` stands for the resolved `INSTALLFOLDER`; always `C:\Program Files\SeamlyApps` — it is fixed, not a wizard page, and not overridable.
+- `%PROGRAMDIR%` stands for the resolved `INSTALLFOLDER`; always `%ProgramFiles%\SeamlyApps` — it is fixed, not a wizard page, and not overridable.
 - `%DATAROOT%` stands for the resolved `SEAMLYDATAROOTRECORDED`; default is `C:\Users\<user>\Documents\SeamlyData`.
 
 Non-default settings means at least: a non-default `%DATAROOT%` parent, and desktop shortcuts turned off (`SEAMLYDESKTOPSHORTCUTS=0`).
@@ -97,7 +97,7 @@ pdf_viewer_path=
 png_viewer_path=
 projector_path=https://patternprojector.com
 data_root=%DATAROOT%"
-  - [ ] 0c. Check the program directory `%PROGRAMDIR%` exists (always `C:\Program Files\SeamlyApps`) contains `seamly2d.exe`, `seamlyme.exe`, `SeamlyLayout.exe`, `pdftops.exe`, `QtWebEngineProcess.exe`, `vc_redist.x64.exe`.
+  - [ ] 0c. Check the program directory `%PROGRAMDIR%` exists (always `%ProgramFiles%\SeamlyApps`) contains `seamly2d.exe`, `seamlyme.exe`, `SeamlyLayout.exe`, `pdftops.exe`, `QtWebEngineProcess.exe`, `vc_redist.x64.exe`.
   - [ ] 0d. Confirm no duplicate directories.
   - [ ] 0e. if upgrading from previous non-SeamlyLayout version then:
     - [ ] 0e-i. confirm `%DATAROOT%\seamly2d.zip` exists.

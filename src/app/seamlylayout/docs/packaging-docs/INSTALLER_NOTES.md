@@ -142,7 +142,7 @@ will happen at first launch.  No files are moved by the installer itself.
 
 Prerequisites:
 - Qt 6.11.1 msvc2022_64 at `C:\Qt\6.11.1\msvc2022_64`
-- Inno Setup 6 at `C:\Program Files (x86)\Inno Setup 6\iscc.exe`
+- Inno Setup 6 at `%ProgramFiles(x86)%\Inno Setup 6\iscc.exe`
 - `packaging/licenses/LGPL-3.0.txt` (download from gnu.org, not committed)
 
 Output: `packaging/windows/Output/SeamlyLayout-0.1.0-win64.exe`

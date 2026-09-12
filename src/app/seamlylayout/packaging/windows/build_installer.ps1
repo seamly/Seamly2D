@@ -37,7 +37,7 @@ $RepoRoot   = (Resolve-Path (Join-Path $ScriptDir "..\..\..")).Path
 $BuildDir   = Join-Path $RepoRoot "qt_frontend\build\Release"
 $ExePath    = Join-Path $BuildDir "SeamlyLayout.exe"
 $QtBin      = "C:\Qt\6.11.1\msvc2022_64\bin"
-$IsccPath   = "C:\Program Files (x86)\Inno Setup 6\iscc.exe"
+$IsccPath   = "%ProgramFiles(x86)%\Inno Setup 6\iscc.exe"
 $IssScript  = Join-Path $ScriptDir "SeamlyLayout.iss"
 $LgplFile   = Join-Path $ScriptDir "..\licenses\LGPL-3.0.txt"
 

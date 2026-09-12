@@ -54,7 +54,7 @@ Fresh install: Welcome → License → Existing-install warning (if found) → P
 
 | Property | Default | Notes |
 |---|---|---|
-| `INSTALLFOLDER` | always `C:\Program Files\SeamlyApps` | fixed; not a wizard page and not overridable, even under `/qn` |
+| `INSTALLFOLDER` | always `%ProgramFiles%\SeamlyApps` | fixed; not a wizard page and not overridable, even under `/qn` |
 | `SEAMLYDATAPARENT` | `C:\Users\<user>\Documents` | no default under `/qn` — pass explicitly or apps use their own default |
 | `SEAMLYDATAROOT` | `[SEAMLYDATAPARENT]\SeamlyData` | overrides the composed path |
 | `SEAMLYCOPYUSERDATA` | `0` | `1` migrates existing work; never overwrites existing files |

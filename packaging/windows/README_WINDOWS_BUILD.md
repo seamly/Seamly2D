@@ -69,7 +69,7 @@ msiexec /a seamly-x64.msi /qn TARGETDIR=C:\extract                   # extract w
 
 | Property | Default | Notes |
 |---|---|---|
-| `INSTALLFOLDER` | always `C:\Program Files\SeamlyApps` | Fixed; not a wizard page and not overridable, even under `/qn`. |
+| `INSTALLFOLDER` | always `%ProgramFiles%\SeamlyApps` | Fixed; not a wizard page and not overridable, even under `/qn`. |
 | `SEAMLYDATAPARENT` | `C:\Users\<user>\Documents` | `SeamlyData` leaf always appended. **No `/qn` default** — pass it explicitly. |
 | `SEAMLYDATAROOT` | `[SEAMLYDATAPARENT]\SeamlyData` | Set directly to override, e.g. `SEAMLYDATAROOT=E:\Patterns`. |
 | `SEAMLYCOPYUSERDATA` | `0` | Set `1` on update to archive/migrate work into `SEAMLYDATAROOT`. Never overwrites existing files. |

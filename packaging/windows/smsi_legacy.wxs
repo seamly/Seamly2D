@@ -162,7 +162,7 @@
          Its complete footprint, transcribed from dist\seamly2d-installer.nsi
          before that file was deleted (Task InstWinX64.11.1). This list is
          now the record - it cannot be re-derived, so do not trim it:
-           - $INSTDIR, default C:\Program Files (x86)\Seamly2D (File /r *)
+           - $INSTDIR, default %ProgramFiles(x86)%\Seamly2D (File /r *)
            - HKLM\SOFTWARE\NSIS_Seamly2D
            - HKLM\...\Uninstall\Seamly2D
            - Start Menu folder "Seamly2D" with 3 shortcuts

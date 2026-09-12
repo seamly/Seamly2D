@@ -98,13 +98,13 @@ Option C selected, applied app-wide. All observability file writes are gated by 
 `Logger::init()` writes to the `AppConfigLocation` root on Windows, not beside
 the executable. macOS, the Linux AppImage and Flatpak already did.
 
-**Why:** the MSI installs into `C:\Program Files\SeamlyApps`, which a standard
+**Why:** the MSI installs into `%ProgramFiles%\SeamlyApps`, which a standard
 user cannot write. An installed build with `--debug` therefore either failed to
 log or was silently redirected to `VirtualStore`. Running as an administrator
 hid the fault and left an `output\` directory inside Program Files that no
 uninstall removes — the installer does not own it, so no component rule
 applies. One was found on a test machine on 2026-08-15, left by an earlier
-install at `C:\Program Files\Seamly2D\output\`.
+install at `%ProgramFiles%\Seamly2D\output\`.
 
 Only an ordinary Linux install still logs next to the executable.
 

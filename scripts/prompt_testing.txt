@@ -1,7 +1,6 @@
 1. Read cleaned-up `SESSION_HANDOVER.md` and <additional files> --
 Do not run git commands or read other MD files; 
-2. Implement task Layout.10;
-3. Implement tasks Layout.7 + SeamlyMe.3 together;
+2. Implement task MSI1b.1
 4.uild with packaging/windows/test_build_msi_local.ps1; 
 5.Setup up installation environment with `packaging/windows/test_reset_environment.ps1`; 
 6.Run installer `packaging\windows\seamly-msi\x64\seamly-x64.msi` from an elevated shell, as the wizard -- do not pass /quiet, or the dialog checks cannot run;

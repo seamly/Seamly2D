@@ -8,7 +8,7 @@ The three names in the request are not real environment variables. Corrected bel
 
 | Requested name | Status | Correct reference |
 | --- | --- | --- |
-| `%SEAMLYPROGRAMDIR%` | Not real | `INSTALLFOLDER` — MSI property. Default `C:\Program Files\SeamlyApps`. Recorded at `HKLM\SOFTWARE\Seamly\Seamly2D\InstallPath`. |
+| `%SEAMLYPROGRAMDIR%` | Not real | `INSTALLFOLDER` — MSI property. Default `%ProgramFiles%\SeamlyApps`. Recorded at `HKLM\SOFTWARE\Seamly\Seamly2D\InstallPath`. |
 | `%SEAMLYUSERDATAROOT%` | Not real | `SEAMLYDATAROOT` — MSI property (raw path chosen). Default `<Documents>\SeamlyData`. Recorded value is `SEAMLYDATAROOTRECORDED`, stored at `HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot`. Apps read it through `InstallerRecord::dataRoot()`. |
 | `%SEAMLYAPPLICATIONDIR%` | Not real | `%LOCALAPPDATA%\Seamly\<AppName>\` — a real Windows variable plus a fixed subpath, from `QStandardPaths::AppConfigLocation`. `<AppName>` is `Seamly2D`, `SeamlyMe`, or `SeamlyLayout`. |
 
@@ -42,7 +42,7 @@ parent, and desktop shortcuts turned off (`SEAMLYDESKTOPSHORTCUTS=0`).
 
 Run this suite after every test case in section A.
 
-- [ ] 1. Check the `%PROGRAMDIR%` location (default `C:\Program Files\SeamlyApps`).
+- [ ] 1. Check the `%PROGRAMDIR%` location (default `%ProgramFiles%\SeamlyApps`).
 - [ ] 2. Check the `%DATAROOT%` location (default `C:\Users\<user>\Documents\SeamlyData`).
 - [ ] 3. Check the `%LOCALAPPDATA%\Seamly\<AppName>\` and `%APPDATA%\Seamly\<AppName>\` locations for Seamly2D, SeamlyMe, and SeamlyLayout.
 - [ ] 4. Check the registry.

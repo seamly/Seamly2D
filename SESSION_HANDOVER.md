@@ -47,7 +47,7 @@ verification Seamly2D and SeamlyMe get — check it.
 
 ## Machine state
 
-- Installed: Seamly **26.9.2.1059** in `C:\Program Files\SeamlyApps`
+- Installed: Seamly **26.9.2.1059** in `%ProgramFiles%\SeamlyApps`
   (seamly2d.exe, seamlyme.exe, SeamlyLayout.exe). MSI ProductVersion `26.9.2499`.
 - Installed 2026-09-02 through the **wizard** from an elevated shell, onto a
   machine reset by `test_reset_environment.ps1`. Install log:
@@ -308,7 +308,7 @@ GUI-subsystem binaries that print nothing to a console, and a shared `-o` target
 is overwritten by each `qExec()` call. The CMake SeamlyLayout suites are
 GUI-subsystem too; run one with `-o <file>,txt` to read its result.
 
-**`cargo test` needs MSVC's `link.exe` first on PATH.** `C:\Program Files\Git\usr\bin`
+**`cargo test` needs MSVC's `link.exe` first on PATH.** `%ProgramFiles%Git\usr\bin`
 holds a GNU `link` that shadows it, and the failure names the Visual Studio
 installer, not the shadowing. `vcvars64.bat` alone does not fix it, and a
 `vcvars && set PATH=...%PATH%...` one-liner cannot: cmd expands the whole line
