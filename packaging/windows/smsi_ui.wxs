@@ -52,7 +52,7 @@
       one defined successor and one defined predecessor.
 
       REUSED UNCHANGED, one DialogRef each: WelcomeDlg, LicenseAgreementDlg,
-      InstallDirDlg, BrowseDlg, InvalidDirDlg, VerifyReadyDlg, ProgressDlg,
+      BrowseDlg, VerifyReadyDlg, ProgressDlg,
       ExitDialog, CancelDlg, ErrorDlg, FilesInUse, MsiRMFilesInUse, PrepareDlg,
       ResumeDlg, UserExit, DiskCostDlg, OutOfDiskDlg, OutOfRbDiskDlg,
       MaintenanceWelcomeDlg, FatalError. A stock dialog brings its own
@@ -72,8 +72,8 @@
         WelcomeDlg
           -> LicenseAgreementDlg
           -> SeamlyPreviousInstallDlg   only when an earlier install was found
-          -> InstallDirDlg              program directory
-          -> SeamlyDataDirDlg           user-data root
+          -> SeamlyDataDirDlg           user-data root (program directory is
+                                        fixed - see smsi.wxs - and never asked)
           -> SeamlyDataMigrateDlg       copy existing work?
           -> SeamlyShortcutsDlg         desktop shortcuts
           -> VerifyReadyDlg
@@ -102,7 +102,7 @@
     -->
     <!-- One source for the condition that decides whether the previous-install
          page appears. It is needed three times - the two License Next rows and
-         the two InstallDirDlg Back rows - and the four must not drift apart,
+         the two SeamlyDataDirDlg Back rows - and the four must not drift apart,
          because a gap or an overlap between them strands the wizard on a page
          with no working button. -->
     <?define PreviousInstallFound = "((SEAMLYOLDS2DEXE AND SEAMLYOLDMEEXE AND NOT SEAMLYOLDLAYOUTEXE) OR SEAMLYNEWLAYOUTEXE) AND NOT Installed" ?>
@@ -117,11 +117,6 @@
       <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
       <TextStyle Id="WixUI_Font_Title" FaceName="Tahoma" Size="9" Bold="yes" />
       <Property Id="DefaultUIFont" Value="WixUI_Font_Normal" />
-
-      <!-- InstallDirDlg's PathEdit and its CheckTargetPath/SetTargetPath events
-           all address the directory NAMED by this property. WixUI_InstallDir
-           set it from its InstallDirectory attribute; we set it directly. -->
-      <Property Id="WIXUI_INSTALLDIR" Value="INSTALLFOLDER" />
 
       <!-- Carried over from WixUI_InstallDir: the package has one feature, so
            Apps and features offers Repair and Uninstall but no Change. -->
@@ -150,10 +145,8 @@
       <!-- Order below is irrelevant: these are reached by a button, not by a
            sequence number. -->
       <DialogRef Id="LicenseAgreementDlg" />
-      <DialogRef Id="InstallDirDlg" />
       <DialogRef Id="VerifyReadyDlg" />
       <DialogRef Id="BrowseDlg" />
-      <DialogRef Id="InvalidDirDlg" />
       <DialogRef Id="CancelDlg" />
       <DialogRef Id="DiskCostDlg" />
       <DialogRef Id="ErrorDlg" />
@@ -210,7 +203,7 @@
         </Control>
         <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
                  Default="yes" Text="&amp;Next">
-          <Publish Event="NewDialog" Value="InstallDirDlg" />
+          <Publish Event="NewDialog" Value="SeamlyDataDirDlg" />
         </Control>
         <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
                  Cancel="yes" Text="Cancel">
@@ -266,8 +259,7 @@
       <!-- Mirrors the stock InstallDirDlg layout: a PathEdit bound to the
            directory property, and a Change button that spawns WixUI's own
            BrowseDlg. BrowseDlg edits whatever _BrowseProperty names, so the
-           Change button sets that first (Order 1) and spawns second (Order 2)
-           - the identical mechanism InstallDirDlg uses for INSTALLFOLDER. -->
+           Change button sets that first (Order 1) and spawns second (Order 2). -->
       <Dialog Id="SeamlyDataDirDlg" Width="370" Height="270"
               Title="[ProductName] Setup">
 
@@ -320,7 +312,10 @@
 
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
                  Text="&amp;Back">
-          <Publish Event="NewDialog" Value="InstallDirDlg" />
+          <Publish Event="NewDialog" Value="SeamlyPreviousInstallDlg"
+                   Condition="$(var.PreviousInstallFound)" />
+          <Publish Event="NewDialog" Value="LicenseAgreementDlg"
+                   Condition="NOT ($(var.PreviousInstallFound))" />
         </Control>
         <!-- The PathEdit writes the property; SetTargetPath commits it to the
              Directory table, which is what recomposes [SEAMLYDATAROOT] for the
@@ -529,45 +524,19 @@
                Value="SeamlyPreviousInstallDlg"
                Condition="LicenseAccepted = &quot;1&quot; AND ($(var.PreviousInstallFound))" />
       <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog"
-               Value="InstallDirDlg"
+               Value="SeamlyDataDirDlg"
                Condition="LicenseAccepted = &quot;1&quot; AND NOT ($(var.PreviousInstallFound))" />
 
-      <!-- Program directory. CheckTargetPath validates what the user typed and
-           SetTargetPath commits it; both address the directory named by
-           WIXUI_INSTALLDIR. The NewDialog runs last, as in the stock set, so
-           the path is committed before the next page reads it. -->
-      <Publish Dialog="InstallDirDlg" Control="Next" Event="CheckTargetPath"
-               Value="[WIXUI_INSTALLDIR]" Order="1" />
-      <Publish Dialog="InstallDirDlg" Control="Next" Event="SetTargetPath"
-               Value="[WIXUI_INSTALLDIR]" Order="2" />
-      <Publish Dialog="InstallDirDlg" Control="Next" Event="NewDialog"
-               Value="SeamlyDataDirDlg" Order="3" />
-      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog"
-               Value="SeamlyPreviousInstallDlg"
-               Condition="$(var.PreviousInstallFound)" />
-      <Publish Dialog="InstallDirDlg" Control="Back" Event="NewDialog"
-               Value="LicenseAgreementDlg"
-               Condition="NOT ($(var.PreviousInstallFound))" />
-      <Publish Dialog="InstallDirDlg" Control="ChangeFolder"
-               Property="_BrowseProperty" Value="[WIXUI_INSTALLDIR]" Order="1" />
-      <Publish Dialog="InstallDirDlg" Control="ChangeFolder" Event="SpawnDialog"
-               Value="BrowseDlg" Order="2" />
-
-      <!-- BrowseDlg is shared by the program-directory page and the data-root
-           page, and it edits whatever _BrowseProperty names. Its OK button
-           carries no rows of its own, so all three are ours.
-
-           CheckTargetPath is limited to the program directory. The data root is
-           allowed on removable and cloud-synced drives (InstWinX64.2.7), and
-           validating it against the program-directory rules would reject paths
-           the task requires us to accept. -->
-      <Publish Dialog="BrowseDlg" Control="OK" Event="CheckTargetPath"
-               Value="[WIXUI_INSTALLDIR]" Order="1"
-               Condition="_BrowseProperty = &quot;INSTALLFOLDER&quot;" />
+      <!-- BrowseDlg serves only the data-root page now: the program directory
+           is fixed (smsi.wxs) and never asked about, so nothing else spawns
+           BrowseDlg or sets _BrowseProperty. Its OK button carries no rows of
+           its own, so both of these are ours. No CheckTargetPath here: the
+           data root is allowed on removable and cloud-synced drives
+           (InstWinX64.2.7), unlike a program directory. -->
       <Publish Dialog="BrowseDlg" Control="OK" Event="SetTargetPath"
-               Value="[_BrowseProperty]" Order="2" />
+               Value="[_BrowseProperty]" Order="1" />
       <Publish Dialog="BrowseDlg" Control="OK" Event="EndDialog"
-               Value="Return" Order="3" />
+               Value="Return" Order="2" />
 
       <!-- Ready page. Back returns to the last question asked, which on a fresh
            install is the shortcuts page. The two maintenance rows are the stock
