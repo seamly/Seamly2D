@@ -400,9 +400,9 @@ if ($toPrevious.Count -eq 1 -and $toDataDir.Count -eq 1) {
 # comment above). Two actions are expected - one per sequence, like the
 # SEAMLYDATAPARENT ui/execute pair - both pinning the same fixed value, so no
 # AppSearch result or command-line value can survive.
-$installFolderPin = @(Get-MsiRows `
+$installFolderPin = Get-MsiRows `
     -Sql "SELECT ``Action``, ``Target`` FROM ``CustomAction`` WHERE ``Source``='INSTALLFOLDER'" `
-    -Columns 'Action', 'Target')
+    -Columns 'Action', 'Target'
 Assert-That -Name 'the program directory is pinned, not chosen' `
     -Succeeded ($installFolderPin.Count -eq 2 -and
                 (@($installFolderPin | Where-Object { $_.Target -eq '[ProgramFiles64Folder]SeamlyApps' }).Count -eq 2)) `
