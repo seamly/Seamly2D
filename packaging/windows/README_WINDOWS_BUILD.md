@@ -59,7 +59,6 @@ All three apps ship in every package — no switch to omit SeamlyLayout.
 ```powershell
 msiexec /i seamly-x64.msi                                          # interactive
 msiexec /i seamly-x64.msi /qn                                       # silent, defaults (needs elevation)
-msiexec /i seamly-x64.msi /qn INSTALLFOLDER=D:\SeamlyApps            # silent, custom program dir
 msiexec /i seamly-x64.msi /qn SEAMLYDATAPARENT=E:\                   # silent, data root E:\SeamlyData
 msiexec /i seamly-x64.msi /qn SEAMLYDESKTOPSHORTCUTS=0                # silent, no desktop shortcuts
 msiexec /x seamly-x64.msi /qn                                       # silent uninstall
@@ -70,7 +69,7 @@ msiexec /a seamly-x64.msi /qn TARGETDIR=C:\extract                   # extract w
 
 | Property | Default | Notes |
 |---|---|---|
-| `INSTALLFOLDER` | previous path, else `C:\Program Files\SeamlyApps` | Rejected if under a sync-client folder (OneDrive/Dropbox/Google Drive/iCloud/Box Sync), even under `/qn`. |
+| `INSTALLFOLDER` | always `C:\Program Files\SeamlyApps` | Fixed; not a wizard page and not overridable, even under `/qn`. |
 | `SEAMLYDATAPARENT` | `C:\Users\<user>\Documents` | `SeamlyData` leaf always appended. **No `/qn` default** — pass it explicitly. |
 | `SEAMLYDATAROOT` | `[SEAMLYDATAPARENT]\SeamlyData` | Set directly to override, e.g. `SEAMLYDATAROOT=E:\Patterns`. |
 | `SEAMLYCOPYUSERDATA` | `0` | Set `1` on update to archive/migrate work into `SEAMLYDATAROOT`. Never overwrites existing files. |

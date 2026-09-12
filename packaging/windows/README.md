@@ -54,7 +54,7 @@ Fresh install: Welcome → License → Existing-install warning (if found) → P
 
 | Property | Default | Notes |
 |---|---|---|
-| `INSTALLFOLDER` | prior path, else `C:\Program Files\SeamlyApps` | rejected if under OneDrive/Dropbox/Google Drive/iCloud/Box Sync |
+| `INSTALLFOLDER` | always `C:\Program Files\SeamlyApps` | fixed; not a wizard page and not overridable, even under `/qn` |
 | `SEAMLYDATAPARENT` | `C:\Users\<user>\Documents` | no default under `/qn` — pass explicitly or apps use their own default |
 | `SEAMLYDATAROOT` | `[SEAMLYDATAPARENT]\SeamlyData` | overrides the composed path |
 | `SEAMLYCOPYUSERDATA` | `0` | `1` migrates existing work; never overwrites existing files |
@@ -84,7 +84,6 @@ Take it from a **release**, not the Actions page (build artifacts download as `.
 ```powershell
 msiexec /i seamly-x64.msi                                        # interactive
 msiexec /i seamly-x64.msi /qn                                     # silent, defaults
-msiexec /i seamly-x64.msi /qn INSTALLFOLDER=D:\SeamlyApps         # silent, custom program dir
 msiexec /i seamly-x64.msi /qn SEAMLYDATAPARENT=E:\                # silent, data root E:\SeamlyData
 msiexec /x seamly-x64.msi /qn                                     # silent uninstall
 ```

@@ -89,8 +89,12 @@
  **    so it owns every page transition. Fresh-install order:
  **
  **      WelcomeDlg -> LicenseAgreementDlg -> SeamlyPreviousInstallDlg ->
- **      InstallDirDlg -> SeamlyDataDirDlg -> SeamlyDataMigrateDlg ->
+ **      SeamlyDataDirDlg -> SeamlyDataMigrateDlg ->
  **      SeamlyShortcutsDlg -> VerifyReadyDlg -> ProgressDlg -> ExitDialog
+ **
+ **      There is no program-directory page. INSTALLFOLDER is fixed to
+ **      [ProgramFiles64Folder]SeamlyApps by the SetProperty above and is
+ **      never asked about or overridable.
  **
  **    SeamlyPreviousInstallDlg  shown only when an earlier install is detected
  **                              — either old Seamly2D plus SeamlyMe without
@@ -293,36 +297,27 @@
          advertise. A real unattended deployment that cares should already
          pass SEAMLYDATAPARENT or SEAMLYDATAROOT explicitly - documented in
          README_WINDOWS_BUILD.md - which this computation never overrides. -->
-    <!-- ====== keep the program directory across an upgrade (2.11) ======= -->
-    <!-- Without this a major upgrade offers C:\Program Files\SeamlyApps again, even
-         to somebody who installed to E:\Programs\SeamlyApps. Press Next and the
-         apps move drive. The recorded InstallPath is the same value
-         InstallInfoRegistry writes, so it round-trips exactly, trailing
-         backslash included.
-
-         AppSearch runs at 50, before CostFinalize resolves the Directory
-         table, so the found value wins over the authored default - and
-         AppSearch never overwrites a property already set, so
-         INSTALLFOLDER= on the command line still wins over both.
-
-         Nothing here can MOVE an installed product. Windows Installer fixes a
-         product's location at install time and registers every component
-         against it, so a maintenance run ignores this value. Relocating means
-         uninstall and reinstall, or a major upgrade - which is exactly the
-         case this prefill serves.
-
-         Secure="yes" because the wizard sets INSTALLFOLDER on the client side
-         and a perMachine package runs its execute sequence elevated. A public
-         property has to be in SecureCustomProperties to cross that boundary.
-         It was not there before. -->
-    <Property Id="INSTALLFOLDER" Secure="yes">
-      <RegistrySearch Id="RecordedInstallPathSearch"
-                      Root="HKLM"
-                      Key="SOFTWARE\Seamly\Seamly2D"
-                      Name="InstallPath"
-                      Type="raw"
-                      Bitness="always64" />
-    </Property>
+    <!-- ====== program directory is fixed, not user-chosen (InstWinX64) === -->
+    <!-- The wizard no longer asks where to install: these unconditionally pin
+         INSTALLFOLDER to [ProgramFiles64Folder]SeamlyApps before CostFinalize
+         resolves the Directory table, in both sequences (mirrors the
+         SEAMLYDATAPARENT ui/execute pair above - one Action name per
+         sequence, since the same Id cannot be authored twice in one
+         sequence). SetProperty runs every time it fires regardless of any
+         prior value, so this overrides any AppSearch result and any
+         INSTALLFOLDER= passed on the command line - unlike a plain
+         Property/RegistrySearch pair, there is no way for anything else to
+         win. -->
+    <SetProperty Id="INSTALLFOLDER"
+                 Action="SetINSTALLFOLDER"
+                 Value="[ProgramFiles64Folder]SeamlyApps"
+                 Sequence="ui"
+                 Before="CostFinalize" />
+    <SetProperty Id="INSTALLFOLDER"
+                 Action="SetINSTALLFOLDERExecute"
+                 Value="[ProgramFiles64Folder]SeamlyApps"
+                 Sequence="execute"
+                 Before="CostFinalize" />
     <Property Id="SEAMLYDATAROOT" Secure="yes" />
     <Property Id="SEAMLYDATAPARENT" Secure="yes">
       <RegistrySearch Id="RecordedDataParentSearch"
@@ -474,27 +469,6 @@
          copy nothing. The copy is opt-in: it is the user's data, and an
          unattended install must not start moving files nobody asked about. -->
     <Property Id="SEAMLYCOPYUSERDATA" Value="0" Secure="yes" />
-
-    <!-- ================= reject cloud-synced program folders =============== -->
-    <!-- InstWinX64.1.1.3. Program files must not live in a folder a sync client
-         owns. OneDrive, Dropbox and Google Drive all rename, lock, or replace a
-         file with a placeholder while an app has it mapped, which corrupts a
-         running install and breaks repair and uninstall. `><` is the Windows
-         Installer substring operator, so this matches the sync root anywhere in
-         the path.
-
-         This is a Launch condition, not a dialog button check, because it is
-         the only mechanism that also blocks a silent install - where no dialog
-         exists to press. LaunchConditions runs in both sequences: in the UI
-         sequence INSTALLFOLDER still holds the default (no match, no message),
-         and in the execute sequence it holds whatever the user chose or passed
-         on the command line, which is the value that has to be rejected.
-
-         The user-data root is deliberately NOT checked: InstWinX64.1.2.2
-         requires it to accept OneDrive, Google Drive, Dropbox and USB media,
-         because syncing your patterns between machines is the point. -->
-    <Launch Condition="NOT ((INSTALLFOLDER &gt;&lt; &quot;OneDrive&quot;) OR (INSTALLFOLDER &gt;&lt; &quot;Dropbox&quot;) OR (INSTALLFOLDER &gt;&lt; &quot;Google Drive&quot;) OR (INSTALLFOLDER &gt;&lt; &quot;GoogleDrive&quot;) OR (INSTALLFOLDER &gt;&lt; &quot;iCloud&quot;) OR (INSTALLFOLDER &gt;&lt; &quot;Box Sync&quot;))"
-            Message="Seamly cannot be installed in a cloud-synced folder. OneDrive, Dropbox and Google Drive replace files that are in use, which breaks the program and its uninstall. Choose a local or removable drive." />
 
     <!-- The wizard dialog set and every transition between its pages lives in
          smsi_ui.wxs. This reference is what links it: a WiX fragment nothing

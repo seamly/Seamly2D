@@ -237,8 +237,11 @@ foreach ($property in @('SEAMLYDESKTOPSHORTCUTS', 'SEAMLYLEGACYUNINSTALLSTRING',
 # arrow is a NewDialog row it authors itself.
 #
 #   WelcomeDlg -> LicenseAgreementDlg -> [SeamlyPreviousInstallDlg] ->
-#   InstallDirDlg -> SeamlyDataDirDlg -> SeamlyDataMigrateDlg ->
+#   SeamlyDataDirDlg -> SeamlyDataMigrateDlg ->
 #   SeamlyShortcutsDlg -> VerifyReadyDlg
+#
+# There is no program-directory page: INSTALLFOLDER is fixed and never asked
+# about (see smsi.wxs).
 #
 # This replaced SpawnDialog wiring that WiX 6.0.2 never ran, so the three Seamly
 # question pages were in the package and never displayed. A missing arrow leaves
@@ -277,9 +280,8 @@ Assert-Transition -From 'WelcomeDlg' -Control 'Next' -To 'LicenseAgreementDlg' -
 $previousInstallCondition = 'SEAMLYOLDS2DEXE.*SEAMLYOLDMEEXE.*SEAMLYOLDLAYOUTEXE.*SEAMLYNEWLAYOUTEXE.*NOT Installed'
 Assert-Transition -From 'LicenseAgreementDlg' -Control 'Next' -To 'SeamlyPreviousInstallDlg' `
     -ConditionMatch $previousInstallCondition
-Assert-Transition -From 'LicenseAgreementDlg' -Control 'Next' -To 'InstallDirDlg' -ConditionMatch 'NOT \('
-Assert-Transition -From 'SeamlyPreviousInstallDlg' -Control 'Next' -To 'InstallDirDlg'
-Assert-Transition -From 'InstallDirDlg' -Control 'Next' -To 'SeamlyDataDirDlg'
+Assert-Transition -From 'LicenseAgreementDlg' -Control 'Next' -To 'SeamlyDataDirDlg' -ConditionMatch 'NOT \('
+Assert-Transition -From 'SeamlyPreviousInstallDlg' -Control 'Next' -To 'SeamlyDataDirDlg'
 Assert-Transition -From 'SeamlyDataDirDlg' -Control 'Next' -To 'SeamlyDataMigrateDlg' `
     -ConditionMatch $previousInstallCondition
 Assert-Transition -From 'SeamlyDataDirDlg' -Control 'Next' -To 'SeamlyShortcutsDlg' -ConditionMatch 'NOT \('
@@ -288,10 +290,9 @@ Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Next' -To 'VerifyReadyDlg
 
 Assert-Transition -From 'LicenseAgreementDlg' -Control 'Back' -To 'WelcomeDlg'
 Assert-Transition -From 'SeamlyPreviousInstallDlg' -Control 'Back' -To 'LicenseAgreementDlg'
-Assert-Transition -From 'InstallDirDlg' -Control 'Back' -To 'SeamlyPreviousInstallDlg' `
+Assert-Transition -From 'SeamlyDataDirDlg' -Control 'Back' -To 'SeamlyPreviousInstallDlg' `
     -ConditionMatch $previousInstallCondition
-Assert-Transition -From 'InstallDirDlg' -Control 'Back' -To 'LicenseAgreementDlg' -ConditionMatch 'NOT \('
-Assert-Transition -From 'SeamlyDataDirDlg' -Control 'Back' -To 'InstallDirDlg'
+Assert-Transition -From 'SeamlyDataDirDlg' -Control 'Back' -To 'LicenseAgreementDlg' -ConditionMatch 'NOT \('
 Assert-Transition -From 'SeamlyDataMigrateDlg' -Control 'Back' -To 'SeamlyDataDirDlg'
 Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyDataMigrateDlg' `
     -ConditionMatch $previousInstallCondition
@@ -383,25 +384,40 @@ Assert-That -Name 'AppSearch fills SEAMLYINSTALLEDVERSION' `
 $licenseNext = @($script:controlEvents | Where-Object {
     $_.Dialog -eq 'LicenseAgreementDlg' -and $_.Control -eq 'Next' -and $_.Event -eq 'NewDialog' })
 $toPrevious = @($licenseNext | Where-Object { $_.Argument -eq 'SeamlyPreviousInstallDlg' })
-$toInstallDir = @($licenseNext | Where-Object { $_.Argument -eq 'InstallDirDlg' })
+$toDataDir = @($licenseNext | Where-Object { $_.Argument -eq 'SeamlyDataDirDlg' })
 Assert-That -Name 'the license page has exactly two exits' -Succeeded ($licenseNext.Count -eq 2)
-if ($toPrevious.Count -eq 1 -and $toInstallDir.Count -eq 1) {
+if ($toPrevious.Count -eq 1 -and $toDataDir.Count -eq 1) {
     $found = [regex]::Escape('((SEAMLYOLDS2DEXE AND SEAMLYOLDMEEXE AND NOT SEAMLYOLDLAYOUTEXE) OR SEAMLYNEWLAYOUTEXE) AND NOT Installed')
     Assert-That -Name 'the previous-install page is skipped on a clean machine' `
         -Succeeded ($toPrevious[0].Condition -match $found -and
-                    $toInstallDir[0].Condition -match "NOT \($found\)") `
-        -Detail "conditions '$($toPrevious[0].Condition)' and '$($toInstallDir[0].Condition)'"
+                    $toDataDir[0].Condition -match "NOT \($found\)") `
+        -Detail "conditions '$($toPrevious[0].Condition)' and '$($toDataDir[0].Condition)'"
 }
 
-# The install directory must be committed before the next page reads it.
-$installDirNext = @($script:controlEvents | Where-Object {
-    $_.Dialog -eq 'InstallDirDlg' -and $_.Control -eq 'Next' })
-$setTargetPath = @($installDirNext | Where-Object { $_.Event -eq 'SetTargetPath' })
-$leaveInstallDir = @($installDirNext | Where-Object { $_.Event -eq 'NewDialog' })
-Assert-That -Name 'the chosen program directory is committed before the wizard moves on' `
-    -Succeeded ($setTargetPath.Count -eq 1 -and $leaveInstallDir.Count -eq 1 -and
-                [int]$setTargetPath[0].Ordering -lt [int]$leaveInstallDir[0].Ordering) `
-    -Detail "SetTargetPath at $(if ($setTargetPath.Count) { $setTargetPath[0].Ordering } else { '<nothing>' }), NewDialog at $(if ($leaveInstallDir.Count) { $leaveInstallDir[0].Ordering } else { '<nothing>' })"
+# The program directory is fixed, not chosen, so nothing commits INSTALLFOLDER
+# from a dialog. A SetProperty compiles to a type-51 custom action: Source is
+# the property it sets, Target is the value (see the SEAMLYLEGACYSTARTMENU
+# comment above). Two actions are expected - one per sequence, like the
+# SEAMLYDATAPARENT ui/execute pair - both pinning the same fixed value, so no
+# AppSearch result or command-line value can survive.
+$installFolderPin = @(Get-MsiRows `
+    -Sql "SELECT ``Action``, ``Target`` FROM ``CustomAction`` WHERE ``Source``='INSTALLFOLDER'" `
+    -Columns 'Action', 'Target')
+Assert-That -Name 'the program directory is pinned, not chosen' `
+    -Succeeded ($installFolderPin.Count -eq 2 -and
+                (@($installFolderPin | Where-Object { $_.Target -eq '[ProgramFiles64Folder]SeamlyApps' }).Count -eq 2)) `
+    -Detail "$($installFolderPin.Count) action(s), target(s) '$(($installFolderPin | ForEach-Object { $_.Target }) -join ', ')'"
+foreach ($pin in @(@('InstallUISequence', 'SetINSTALLFOLDER'), @('InstallExecuteSequence', 'SetINSTALLFOLDERExecute'))) {
+    $sequenceRows = Get-MsiRows -Sql "SELECT ``Action``, ``Sequence``, ``Condition`` FROM ``$($pin[0])``" `
+        -Columns 'Action', 'Sequence', 'Condition'
+    $pinAt = @($sequenceRows | Where-Object { $_.Action -eq $pin[1] })
+    $costFinalizeAt = @($sequenceRows | Where-Object { $_.Action -eq 'CostFinalize' })
+    Assert-That -Name "$($pin[1]) pins INSTALLFOLDER unconditionally before CostFinalize in $($pin[0])" `
+        -Succeeded ($pinAt.Count -eq 1 -and $costFinalizeAt.Count -eq 1 -and
+                    -not $pinAt[0].Condition -and
+                    [int]$pinAt[0].Sequence -lt [int]$costFinalizeAt[0].Sequence) `
+        -Detail "$($pin[1]) at $(if ($pinAt.Count) { $pinAt[0].Sequence } else { '<nothing>' }) (condition '$(if ($pinAt.Count) { $pinAt[0].Condition } else { '' })'), CostFinalize at $(if ($costFinalizeAt.Count) { $costFinalizeAt[0].Sequence } else { '<nothing>' })"
+}
 
 # The three sequenced dialogs decide which page opens the wizard, and the first
 # one whose condition holds wins. A resumed install must reach ResumeDlg, not
@@ -685,17 +701,10 @@ Assert-That -Name 'the program folder is SeamlyApps under the 64-bit Program Fil
                 $installFolder[0].Parent -eq 'ProgramFiles64Folder') `
     -Detail "DefaultDir '$(if ($installFolder.Count) { $installFolder[0].DefaultDir } else { '<nothing>' })', parent '$(if ($installFolder.Count) { $installFolder[0].Parent } else { '<nothing>' })'"
 
-# InstWinX64.1.1.3. A Launch condition, not a dialog check, because a silent
-# install has no dialog to press - so this is the only place the rule holds for
-# /qn as well as for the wizard.
-$launchConditions = @(Get-MsiRows -Sql "SELECT ``Condition`` FROM ``LaunchCondition``" -Columns 'Condition' |
-    ForEach-Object { $_.Condition })
-$cloudCondition = @($launchConditions | Where-Object { $_ -match 'INSTALLFOLDER' -and $_ -match 'OneDrive' })
-Assert-That -Name 'a cloud-synced program folder is rejected' -Succeeded ($cloudCondition.Count -eq 1)
-foreach ($service in @('OneDrive', 'Dropbox', 'Google Drive', 'iCloud')) {
-    Assert-That -Name "the cloud-folder check covers $service" `
-        -Succeeded ($cloudCondition.Count -eq 1 -and $cloudCondition[0] -match [regex]::Escape($service))
-}
+# InstWinX64.1.1.3 is moot now: the program folder is fixed to
+# [ProgramFiles64Folder]SeamlyApps, which is never itself a sync-client
+# folder, so the cloud-sync Launch condition that used to guard a
+# user-chosen INSTALLFOLDER was removed along with the prompt.
 
 # InstWinX64.1.2.1 - 1.2.3. The data root is a directory id so it can be browsed
 # in the UI and set on the command line for an unattended install. The user
@@ -842,32 +851,14 @@ $dataParentValue = @($registry | Where-Object {
 Assert-That -Name 'the recorded data parent is the guarded property, not the raw directory' `
     -Succeeded ($dataParentValue.Count -eq 1 -and $dataParentValue[0].Value -eq '[SEAMLYDATAPARENTRECORDED]') `
     -Detail "value '$(if ($dataParentValue.Count) { $dataParentValue[0].Value } else { '<nothing>' })'"
-# InstWinX64.2.11. A major upgrade is a fresh install of a new ProductCode, so it
-# re-asks every question - including the program directory. Without a prefill it
-# offers the default, and somebody who installed to E:\Programs\SeamlyApps moves
-# drive by pressing Next. Both halves of the prefill are asserted here: the
-# program directory from InstallPath, the data root from the recorded DataParent.
-#
-# Type 18 is a raw registry value read from the 64-bit view (2 + 16).
-$installPathSearch = Get-MsiRows `
-    -Sql "SELECT ``Signature_``, ``Root``, ``Key``, ``Name``, ``Type`` FROM ``RegLocator`` WHERE ``Signature_``='RecordedInstallPathSearch'" `
-    -Columns 'Signature', 'Root', 'Key', 'Name', 'Type'
-Assert-That -Name 'the program directory is read back from the Seamly install key' `
-    -Succeeded ($installPathSearch.Count -eq 1 -and
-                $installPathSearch[0].Root -eq '2' -and
-                $installPathSearch[0].Key -eq 'SOFTWARE\Seamly\Seamly2D' -and
-                $installPathSearch[0].Name -eq 'InstallPath' -and
-                $installPathSearch[0].Type -eq '18')
-Assert-That -Name 'AppSearch prefills INSTALLFOLDER for an upgrade' `
-    -Succeeded ((Get-MsiRows -Sql "SELECT ``Property`` FROM ``AppSearch`` WHERE ``Property``='INSTALLFOLDER'" `
-        -Columns 'Property').Count -eq 1)
+# InstWinX64.2.11. A major upgrade is a fresh install of a new ProductCode, so
+# it re-asks every question - except the program directory, which is fixed
+# (see the SetINSTALLFOLDER assertions above) and is never re-asked. Only the
+# data root needs a prefill, from the recorded DataParent, so an upgrade does
+# not silently reset a customised location.
 Assert-That -Name 'AppSearch prefills SEAMLYDATAPARENT for an upgrade' `
     -Succeeded ((Get-MsiRows -Sql "SELECT ``Property`` FROM ``AppSearch`` WHERE ``Property``='SEAMLYDATAPARENT'" `
         -Columns 'Property').Count -eq 1)
-# The wizard sets INSTALLFOLDER client-side; a perMachine package runs its
-# execute sequence elevated. A public property must be in SecureCustomProperties
-# to cross that boundary, and INSTALLFOLDER was not listed before this task.
-Assert-That -Name 'INSTALLFOLDER is a secure custom property' -Succeeded ($secure -like '*INSTALLFOLDER*')
 # The prefill only wins because AppSearch is earlier than the directory
 # resolution that would otherwise compose the authored default.
 foreach ($sequence in @('InstallUISequence', 'InstallExecuteSequence')) {
@@ -879,9 +870,8 @@ foreach ($sequence in @('InstallUISequence', 'InstallExecuteSequence')) {
                     [int]$appSearchAt[0].Sequence -lt [int]$costFinalizeAt[0].Sequence)
 }
 # The program folder must still be authored as a directory under the 64-bit
-# Program Files. A Property row of the same name overrides the resolved path; it
-# must not replace the Directory row, or a fresh machine gets no default at all.
-Assert-That -Name 'the prefill did not replace the program directory row' `
+# Program Files, matching the fixed value the SetProperty pins pass above.
+Assert-That -Name 'the program directory is still authored under the 64-bit Program Files' `
     -Succeeded (@($directories | Where-Object {
         $_.Directory -eq 'INSTALLFOLDER' -and $_.Parent -eq 'ProgramFiles64Folder' }).Count -eq 1)
 # Order is the whole mechanism. SEAMLYDATACHOSEN must be decided AFTER the
@@ -979,14 +969,16 @@ Assert-That -Name 'the data-root page commits the path before it advances' `
                 @($dataDirAdvance | Where-Object {
                     [int]$dataDirCommit[0].Ordering -ge [int]$_.Ordering }).Count -eq 0) `
     -Detail "SetTargetPath at $(if ($dataDirCommit.Count) { $dataDirCommit[0].Ordering } else { '<nothing>' }), NewDialog rows at $(($dataDirAdvance | ForEach-Object { $_.Ordering }) -join ', ')"
-# BrowseDlg's OK must close the dialog and commit the path it browsed to, and it
-# must validate only the program directory: the data root is allowed on cloud
-# and removable drives that the program-directory rules reject.
+# BrowseDlg's OK must close the dialog and commit the path it browsed to. It
+# validates nothing: the only page that still spawns it is the data-root page,
+# and the data root is allowed on cloud and removable drives that program-
+# directory rules would reject - there is no program directory left to browse
+# to, so no CheckTargetPath row belongs on this button any more.
 $browseOk = @($script:controlEvents | Where-Object { $_.Dialog -eq 'BrowseDlg' -and $_.Control -eq 'OK' })
 Assert-That -Name 'browsing commits the folder it was given' `
     -Succeeded (@($browseOk | Where-Object { $_.Event -eq 'SetTargetPath' -and $_.Argument -eq '[_BrowseProperty]' }).Count -eq 1)
-Assert-That -Name 'browsing validates the program directory only' `
-    -Succeeded (@($browseOk | Where-Object { $_.Event -eq 'CheckTargetPath' -and $_.Condition -match 'INSTALLFOLDER' }).Count -eq 1)
+Assert-That -Name 'browsing does not validate against program-directory rules' `
+    -Succeeded (@($browseOk | Where-Object { $_.Event -eq 'CheckTargetPath' }).Count -eq 0)
 
 # InstWinX64.1.2.4. The copy must be deferred (it needs the script on disk),
 # impersonated (SYSTEM cannot read the user's own folders) and non-fatal (a

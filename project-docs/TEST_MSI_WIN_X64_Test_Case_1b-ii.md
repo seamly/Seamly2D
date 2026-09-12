@@ -14,7 +14,7 @@ The three names in the request are not real environment variables. Corrected bel
 
 This document uses two placeholders as shorthand. Neither is a real environment variable.
 
-- `%PROGRAMDIR%` stands for the resolved `INSTALLFOLDER`.
+- `%PROGRAMDIR%` stands for the resolved `INSTALLFOLDER`; always `C:Program FilesSeamlyApps`.
 - `%DATAROOT%` stands for the resolved `SEAMLYDATAROOTRECORDED`.
 
 Known defect to watch for: an empty organization name can make Qt write settings under
@@ -35,7 +35,7 @@ Known defect to watch for: an empty organization name can make Qt write settings
 - [ ] 1a. Run latest windows x64 installation .msi (with SeamlyLayout)
   - [ ] 1a-ii. Non-default settings.
 
-Non-default settings means at least: a non-default `%PROGRAMDIR%`, a non-default `%DATAROOT%`
+Non-default settings means at least: a non-default `%DATAROOT%`
 parent, and desktop shortcuts turned off (`SEAMLYDESKTOPSHORTCUTS=0`).
 
 ### B. Verification Suite

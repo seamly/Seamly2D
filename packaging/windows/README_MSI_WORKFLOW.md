@@ -63,8 +63,10 @@ machine. Parameter table: [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md).
 2. Downgrade detected → abort (`DowngradeErrorMessage`).
 3. Old app without Layout, or new Layout found → `SeamlyPreviousInstallDlg`
    (upgrade and/or NSIS paragraph); case A / repair skips straight to 4.
-4. Wizard: `InstallDirDlg` → `SeamlyDataDirDlg` → migrate dialog (if a prior
-   install exists) → `SeamlyShortcutsDlg` → `VerifyReadyDlg`.
+4. Wizard: `SeamlyDataDirDlg` → migrate dialog (if a prior
+   install exists) → `SeamlyShortcutsDlg` → `VerifyReadyDlg`. No
+   program-directory page: `INSTALLFOLDER` is fixed to
+   `C:\Program Files\SeamlyApps` and never asked about.
 5. Install files; write HKLM per-app keys ×3, shortcuts, 3 associations, ARP.
 6. Upgrade detected → `RemoveExistingProducts` (removes older MSI + its dir).
 7. NSIS present → remove its dir, Start Menu folder, registry keys.
