@@ -78,6 +78,7 @@
 #include "tst_svgcomponenttags.h"
 #include "tst_seamlysuitepaths.h"
 #include "tst_dataroot.h"
+#include "tst_vtoolmove.h"
 
 #include "../vmisc/def.h"
 #include "../qmuparser/qmudef.h"
@@ -237,6 +238,7 @@ int main(int argc, char** argv)
     ASSERT_TEST(new TST_SvgComponentTags());
     ASSERT_TEST(new TST_SeamlySuitePaths());
     ASSERT_TEST(new TST_DataRoot());
+    ASSERT_TEST(new TST_VToolMove());
 
     return status;
 }
