@@ -230,7 +230,8 @@ win32 {
 macx{
     APPLE_SIGN_IDENTITY = $$shell_quote($(APPLE_SIGN_IDENTITY))
 
-    QMAKE_POST_LINK += $$[QT_INSTALL_BINS]/macdeployqt $${OUT_PWD}/$${DESTDIR}/$${TARGET}.app
+    # -verbose=3 so a CI failure prints its cause instead of exiting silently
+    QMAKE_POST_LINK += $$[QT_INSTALL_BINS]/macdeployqt $${OUT_PWD}/$${DESTDIR}/$${TARGET}.app -verbose=3
 
     macSign {
         QMAKE_POST_LINK += && codesign --deep --timestamp --options runtime --force -s $${APPLE_SIGN_IDENTITY} $${OUT_PWD}/$${DESTDIR}/$${TARGET}.app
