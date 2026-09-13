@@ -4,6 +4,7 @@ name: CI
 
 on:
   workflow_dispatch:
+  pull_request:
   push:
     branches:
     - run-seamlyLayout
@@ -31,11 +32,9 @@ on:
       # the MSI, but it sits outside `project-docs/` and is not `**.md`.
       - '.claude/**'
       - '.vscode/**'
-  pull_request:
 
-# A session that merges several task branches used to queue one full ~50-minute
-# run per push. Only the newest run per ref is meaningful, so supersede the
-# older ones instead of paying for all of them.
+
+# Keep only the newest run for each ref to avoid redundant ~50-minute builds.
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -64,7 +63,8 @@ jobs:
           echo "version_number=$((10#$year - 2000)).$((10#$month)).$((10#$day)).$((10#$hour * 60 + 10#$minute))" >> $GITHUB_OUTPUT
 
   # ---------------------------------------------------------------------------
-  # Linux unit tests run only on pull requests
+  # Linux unit tests. 
+  # Runs only on pull requests.
   # Uses xvfb-run to simulate a display for GUI tests.
   linux-test:
     if: github.event_name == 'pull_request'
@@ -104,7 +104,6 @@ jobs:
   # Runs on non-pull request events and non-Weblate events. 
   # Gates publishing jobs without blocking MSI builds -- runs in parallel with package jobs. 
   # `qtmultimedia` is sufficient for testing, and `xerces-c` is provided in the repo.
-  # ---------------------------------------------------------------------------
   windows-test:
     if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate'
     name: 'Windows: Run unit tests'
@@ -143,9 +142,9 @@ jobs:
 
 
   # ---------------------------------------------------------------------------
-  # Build Linux APPIMAGE
-  # For x64 arch
-  # TODO: implement for arm64 arch
+  # Build Linux APPIMAGE.
+  # For x64 arch.
+  # TODO: implement for arm64 arch.
   linux:
     if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate'
     name: 'Linux: Build AppImage'
@@ -203,7 +202,7 @@ jobs:
 
 
   # ---------------------------------------------------------------------------
-  # Build MacOS DMGs
+  # Build MacOS DMGs.
   macos:
     if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate'
     name: 'macOS: Build'
@@ -292,8 +291,8 @@ jobs:
 
 
   # ---------------------------------------------------------------------------
-  # Build Windows MSIs 
-  # For x64 and arm64 arches
+  # Build Windows MSIs. 
+  # For x64 and arm64 arches.
   windows-msi:
     if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate'
     name: 'Windows: Build MSI (${{ matrix.arch }})'
@@ -415,7 +414,7 @@ jobs:
             -SeamlyLayoutBin src\app\seamlylayout\qt_frontend\build\Release `
             -WinDeployQt "$env:QT_ROOT_DIR\bin\windeployqt.exe"
 
-      # Sign MSI file
+      # ----- Sign MSI file -----
       - name: Authenticate to Google Cloud (for signing)
         uses: google-github-actions/auth@v3
         env:
@@ -459,7 +458,7 @@ jobs:
           --tsaurl http://timestamp.sectigo.com \
           packaging/windows/seamly-msi/${{ matrix.arch }}/seamly-${{ matrix.arch }}.msi
 
-      # Upload MSI
+      # ----- Upload MSI -----
       # Both publish jobs need the extracted MSI file; the artifact name must match the file name.
       - uses: actions/upload-artifact@v7
         with:
@@ -469,7 +468,7 @@ jobs:
 
 
   # ---------------------------------------------------------------------------
-  # Publish artifacts
+  # Publish artifacts.
     
   # ----- Publish ONLY MSIs to PRE-RELEASE (for testing) for any branch on push events
   publish-windows-dev:
@@ -600,8 +599,8 @@ jobs:
 
 
   # ---------------------------------------------------------------------------
-  # Update doxygen files
-  # Deploy to gh-pages for specified branches on scheduled or manual events
+  # Update doxygen files.
+  # Deploy to gh-pages for specified branches on scheduled or manual events.
   document:
     if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref_name == 'run-seamlyLayout'
     runs-on: ubuntu-latest

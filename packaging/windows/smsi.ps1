@@ -115,41 +115,34 @@
 #>
 
 param(
-    # Target MSI architecture; must match the architecture of the staged binaries.
+    # Target MSI architecture. Must match the staged binaries.
     [ValidateSet('x64', 'arm64')]
     [string]$Arch = 'x64',
 
-    # Project version YY.M.D.MMMM; the MSI ProductVersion is derived from it.
-    # The package must carry the version of the run that produced it, so the
-    # caller states it.
+    # Project version YY.M.D.MMMM. Derives the MSI ProductVersion.
     [Parameter(Mandatory = $true)]
     [string]$Version,
 
-    # Built app trees (windeployqt output included). The job that built them
-    # names them.
+    # Built seamly2d tree, windeployqt output included.
     [Parameter(Mandatory = $true)]
     [string]$Seamly2DBin,
 
+    # Built seamlyme tree, windeployqt output included.
     [Parameter(Mandatory = $true)]
     [string]$SeamlyMeBin,
 
-    # SeamlyLayout's CMake release output; the default is the path ci.yml
-    # builds into.
+    # SeamlyLayout's CMake release output. Defaults to ci.yml's build path.
     [string]$SeamlyLayoutBuildDir,
 
-    # windeployqt.exe of the Qt kit SeamlyLayout was built against. Use the
-    # unsuffixed name, matching ci.yml and the .pro post-link steps.
+    # windeployqt.exe from the Qt kit that built SeamlyLayout.
     [Parameter(Mandatory = $true)]
     [string]$WinDeployQt,
 
     # Skip the ICE validation pass.
     [switch]$SkipValidation,
 
-    # Name of the staging/output directory created under packaging\windows\.
-    # It lives here rather than as a literal, because three other places have
-    # to agree with it: the .gitignore entry that keeps the staged package
-    # out of git, and the artifact and signing paths in ci.yml's windows-msi
-    # job, which publishes packaging/windows/<this>/<arch>/seamly-<arch>.msi.
+    # Staging/output directory name under packaging\windows\. Keep in sync
+    # with .gitignore and ci.yml's windows-msi artifact/signing paths.
     [string]$OutputDirName = 'seamly-msi'
 )
 
@@ -174,13 +167,9 @@ function Invoke-Tool {
         [string]$Exe,
         [string[]]$Arguments
     )
-    # Native tools (windeployqt, wix) legitimately write warnings to stderr —
-    # e.g. windeployqt warning about the optional Qt6SerialPort dependency of
-    # the NMEA positioning plugin. Under $ErrorActionPreference='Stop',
-    # Windows PowerShell 5.1 turns captured stderr lines into terminating
-    # errors even when the tool exits 0, so the preference is relaxed for the
-    # call (function-local, dynamic scope) and every output line is
-    # stringified; success is judged by the exit code alone.
+    # Native tools can write stderr on success (e.g. windeployqt's optional
+    # Qt6SerialPort warning). PS 5.1 would turn that into a terminating error
+    # under 'Stop', so relax it here and judge success by exit code alone.
     $ErrorActionPreference = 'Continue'
     & $Exe @Arguments 2>&1 | ForEach-Object { "$_" }
     $ErrorActionPreference = 'Stop'
@@ -192,15 +181,14 @@ function Invoke-Tool {
 #------------------------------------------------------------------------------
 # @brief  Derive the numeric MSI ProductVersion from the project version.
 #
-# MSI ProductVersion fields are limited to major<=255, minor<=255,
-# build<=65535, and the 4th field is ignored for upgrade comparisons - the
-# project's 4-part YY.M.D.MMMM scheme therefore cannot be used directly.
-# Mapping: YY.M.((D-1)*1440 + MMMM). The third field encodes day+time as
-# minutes-of-month (max 44639 < 65535), so the result increases strictly with
-# every build and MajorUpgrade always sees newer builds as newer.
+# MSI ProductVersion allows major<=255, minor<=255, build<=65535, and ignores
+# the 4th field for upgrade comparisons. The project's YY.M.D.MMMM scheme
+# needs a 3-part mapping: YY.M.((D-1)*1440 + MMMM). The third field encodes
+# day+time as minutes-of-month (max 44639 < 65535), so it strictly increases
+# build over build and MajorUpgrade always sees newer builds as newer.
 #
-# The derived value is unchanged from the earlier YYYY.M.D.HHMM scheme, so
-# packages built before and after that change still upgrade each other.
+# This mapping matches the earlier YYYY.M.D.HHMM scheme, so old and new
+# packages still upgrade each other.
 #
 # @param  ProjectVersion  version string YY.M.D.MMMM
 # @return the derived x.y.z MSI version string
@@ -230,13 +218,12 @@ function ConvertTo-MsiVersion {
 #------------------------------------------------------------------------------
 # @brief  Locate the MSVC CRT redistributable DLL directory for an architecture.
 #
-# The only source is VCToolsRedistDir, set by the MSVC developer environment
-# (vcvars, or ilammy/msvc-dev-cmd in ci.yml). The returned directory is the
-# Microsoft.VC*.CRT folder holding msvcp140.dll, vcruntime140.dll, etc., which
-# the script copies app-locally (decision recorded in
-# packaging\windows\README.md: no merge modules, no vc_redist.exe
-# chaining). Taking the redist from the developer environment and from nowhere
-# else keeps the shipped CRT the toolset that compiled the exes.
+# Reads VCToolsRedistDir, set by the MSVC developer environment (vcvars, or
+# ilammy/msvc-dev-cmd in ci.yml). Returns the Microsoft.VC*.CRT folder holding
+# msvcp140.dll, vcruntime140.dll, etc., which the script copies app-locally
+# (no merge modules, no vc_redist.exe chaining — see
+# packaging\windows\README.md). This keeps the shipped CRT matched to the
+# toolset that compiled the exes.
 #
 # @param  Architecture  'x64' or 'arm64'
 # @return Full path of the CRT DLL directory.
@@ -271,11 +258,10 @@ if (-not (Test-Path (Join-Path $SeamlyLayoutBuildDir 'seamlylayout.exe'))) {
     throw "Missing seamlylayout.exe in '$SeamlyLayoutBuildDir' - run the CMake release build first, or point -SeamlyLayoutBuildDir at its output."
 }
 
-# WiX .NET tool + UI extension (the .wxs builds its dialog set on the stock
-# dialogs and WixUI_Common, all of which the extension supplies). Pinned to v6:
-# WiX v7 refuses to run until its Open Source Maintenance Fee EULA is accepted
-# (error WIX7015); v6 is the newest line without that gate. The UI extension
-# version must match the installed core tool version.
+# The .wxs builds its dialogs on WixUI_Common, from the WiX UI extension.
+# Pinned to v6: WiX v7 refuses to run until its Open Source Maintenance Fee
+# EULA is accepted (error WIX7015). The UI extension version must match the
+# installed core tool version.
 if (-not (Get-Command wix -ErrorAction SilentlyContinue)) {
     throw "The WiX toolset is not installed - run: dotnet tool install --global wix --version '6.*'"
 }
@@ -283,10 +269,9 @@ $installedExtensions = (& wix extension list --global 2>$null)
 if (-not ($installedExtensions -match 'WixToolset\.UI\.wixext')) {
     throw "The WiX UI extension is missing - run: wix extension add --global WixToolset.UI.wixext/<wix version, e.g. 6.0.2>"
 }
-# Util provides RemoveFolderEx, which is what removes the old NSIS installation's
-# directory tree and Start Menu folder: both paths come from properties resolved
-# at install time, so the fixed RemoveFile/RemoveFolder rows cannot express them,
-# and neither can delete a tree recursively.
+# Util provides RemoveFolderEx, used to remove the old NSIS install's directory
+# tree and Start Menu folder. Both paths resolve at install time, so the fixed
+# RemoveFile/RemoveFolder rows can't express them or delete recursively.
 if (-not ($installedExtensions -match 'WixToolset\.Util\.wixext')) {
     throw "The WiX Util extension is missing - run: wix extension add --global WixToolset.Util.wixext/<wix version, e.g. 6.0.2>"
 }
@@ -306,13 +291,11 @@ Write-Host "windeployqt : $WinDeployQt"
 Write-Host "msvc crt    : $crtDir"
 
 # --- Stage ---------------------------------------------------------------------
-# Fresh staging tree per run:
+# Fresh staging tree per run, anchored under $PSScriptRoot:
 # <repo>\packaging\windows\<OutputDirName>\<arch>\{parent,exes}
 # 'parent' is the one shared runtime tree for every app in the package.
-# .gitignore lists that directory by name, so a new -OutputDirName needs a new
-# .gitignore entry and the CI workflow's artifact path updated with it - a
-# 165 MB package is otherwise committable. The output is anchored beside this
-# script, under $PSScriptRoot.
+# A new -OutputDirName needs a matching .gitignore entry and CI artifact-path
+# update, or the ~165 MB package becomes committable.
 $stageRoot = Join-Path $PSScriptRoot (Join-Path $OutputDirName $Arch)
 if (Test-Path $stageRoot) {
     Remove-Item $stageRoot -Recurse -Force
@@ -321,21 +304,21 @@ $parentDir = Join-Path $stageRoot 'parent'
 $exesDir   = Join-Path $stageRoot 'exes'
 New-Item -ItemType Directory -Force -Path $parentDir, $exesDir | Out-Null
 
-# seamly2d + seamlyme runtimes merged into one tree: they share the same Qt
-# release, so the overlapping DLLs are identical.
+# seamly2d + seamlyme merge into one tree; they share the same Qt release,
+# so the overlapping DLLs are identical.
 Write-Host "staging seamly2d + seamlyme runtime..."
 Copy-Item -Path (Join-Path $Seamly2DBin '*') -Destination $parentDir -Recurse
 Copy-Item -Path (Join-Path $SeamlyMeBin '*') -Destination $parentDir -Recurse -Force
 
-# The executables are authored explicitly in the .wxs (shortcuts/associations
-# reference them), so move them out of the wildcard-harvested tree.
+# Exes are authored explicitly in the .wxs (shortcuts/associations reference
+# them), so move them out of the wildcard-harvested tree.
 Move-Item -Path (Join-Path $parentDir 'seamly2d.exe') -Destination $exesDir
 Move-Item -Path (Join-Path $parentDir 'seamlyme.exe') -Destination $exesDir
 
 Write-Host "staging SeamlyLayout runtime (windeployqt) into the shared tree..."
 
-# Deploy SeamlyLayout's Qt runtime into the shared tree. Use a staged exe to
-# keep the build tree pristine; --qmldir resolves the app's QML imports.
+# Deploy against a staged copy to keep the build tree pristine.
+# --qmldir resolves the app's QML imports.
 Copy-Item -Path (Join-Path $SeamlyLayoutBuildDir 'seamlylayout.exe') -Destination $parentDir
 $qmlDir = Join-Path $repoRoot 'src\app\seamlylayout\qt_frontend\qml'
 Invoke-Tool -Description 'windeployqt' -Exe $WinDeployQt -Arguments @(
@@ -360,19 +343,18 @@ if (Test-Path $licensesSrc) {
 
 Move-Item -Path (Join-Path $parentDir 'seamlylayout.exe') -Destination $exesDir
 
-# MSVC CRT app-local deployment: the directory holding the exes gets the runtime
-# DLLs, since PATH-independent DLL resolution is per-directory. With one shared
-# install directory that is a single copy for all three apps.
+# App-local CRT deployment: DLL resolution is per-directory, so the shared
+# install directory needs only one copy for all three apps.
 Write-Host "staging MSVC CRT runtime..."
 Copy-Item -Path (Join-Path $crtDir '*.dll') -Destination $parentDir -Force
 
 # --- Build the MSI -------------------------------------------------------------
-# EVERY .wxs in this directory, not just smsi.wxs. The authoring is split into
-# smsi.wxs (the Package) plus one fragment per area - smsi_ui, smsi_legacy,
-# smsi_files, smsi_shortcuts, smsi_registry. Omit a source file and `wix build` still succeeds:
-# it links whatever it was given, and a fragment it never saw is simply absent.
-# The MSI would install and be wrong. Globbing keeps a newly added fragment
-# working without a change here.
+# Build EVERY .wxs in this directory, not just smsi.wxs. Authoring is split
+# into smsi.wxs (the Package) plus one fragment per area — smsi_ui,
+# smsi_legacy, smsi_files, smsi_shortcuts, smsi_registry. `wix build` links
+# whatever it is given and stays silent about a missing fragment, so the MSI
+# would install wrong without complaint. Globbing picks up new fragments with
+# no change here.
 $wxsFiles = @(Get-ChildItem -Path $PSScriptRoot -Filter '*.wxs' | Sort-Object Name | ForEach-Object { $_.FullName })
 if ($wxsFiles.Count -eq 0) {
     throw "No .wxs source files found in '$PSScriptRoot'."
@@ -382,17 +364,16 @@ $msi = Join-Path $stageRoot "seamly-$Arch.msi"
 
 $wixArguments = @('build') + $wxsFiles + @(
     '-arch', $Arch,
-    # Suppress the .wixpdb symbol database: it is only used for wix patch/melt
-    # diffing and post-build inspection, not by the shipped installer, so the
-    # build output stays just the .msi.
+    # Suppress the .wixpdb symbol database: only used for patch/melt diffing,
+    # not by the shipped installer.
     '-pdbtype', 'none',
     '-ext', 'WixToolset.UI.wixext',
     '-ext', 'WixToolset.Util.wixext',
     '-d', "ProductVersion=$msiVersion",
     '-d', "DisplayVersion=$Version",
     '-d', "RepoRoot=$repoRoot",
-    # One runtime tree and one exe tree: SeamlyLayout's runtime is merged into
-    # ParentStagingDir, so the .wxs harvests a single tree.
+    # SeamlyLayout's runtime is merged into ParentStagingDir, so the .wxs
+    # harvests one runtime tree plus one exe tree.
     '-d', "ParentStagingDir=$parentDir",
     '-d', "ExeStagingDir=$exesDir",
     '-o', $msi
@@ -405,13 +386,12 @@ if (-not (Test-Path $msi)) {
     throw "wix build reported success but '$msi' is missing."
 }
 
-# --- Trim overflowing dialog lines (task MSI1b.1) ------------------------------
-# WixUI's own dialogs give every BannerLine and BottomLine a width 3 installer
-# units past the right edge of the dialog, so Windows Installer logs an
-# Error 2826 per control as it builds each page. The rows come from
-# WixToolset.UI.wixext and cannot be changed from the .wxs, so the correction is
-# made on the built package. It runs BEFORE validation, so the ICE pass and the
-# authoring check both see the package that ships.
+# --- Trim overflowing dialog lines ---------------------------------------------
+# WixUI's stock dialogs give every BannerLine/BottomLine a width 3 installer
+# units past the dialog's right edge, so Windows Installer logs Error 2826 per
+# control. These rows come from WixToolset.UI.wixext and can't be changed from
+# the .wxs, so the fix runs on the built package — before validation, so the
+# ICE pass and authoring check both see the shipped package.
 Write-Host "trimming overflowing dialog lines..."
 & (Join-Path $PSScriptRoot 'smsi_fix_dialog_lines.ps1') -Msi $msi
 if ($LASTEXITCODE -ne 0) {
@@ -419,24 +399,23 @@ if ($LASTEXITCODE -ne 0) {
 }
 
 # --- Validate (ICE checks) -----------------------------------------------------
-# Two ICEs are suppressed, both raised by the optional desktop-shortcut
-# components and both false positives for this package:
+# Two ICEs are suppressed, both false positives from the optional
+# desktop-shortcut components:
 #
 #   ICE43  "non-advertised shortcut ... KeyPath should fall under HKCU"
 #   ICE57  "per-user and per-machine data with a per-machine KeyPath"
 #
-# Each assumes DesktopFolder is inside the installing user's profile, which is
-# only true of a per-user install. This package is Scope="perMachine" with
-# ALLUSERS=1, so DesktopFolder always resolves to the common (All Users)
-# desktop and the HKLM key path is the correct one. Doing what the ICEs ask
-# would actively break the package: the server-side sequence of a per-machine
-# install runs elevated as LocalSystem, so an HKCU key path would be written
-# into the SYSTEM account's hive, where component detection can never find it
-# again - every launch would then trigger installer self-repair. The shortcuts
-# cannot be advertised instead (an advertised shortcut has to live in the
-# component that owns its target file, which would stop them being optional).
+# Both assume DesktopFolder sits in the installing user's profile, true only
+# for a per-user install. This package is Scope="perMachine" with ALLUSERS=1,
+# so DesktopFolder resolves to the common desktop and the HKLM key path is
+# correct. Following the ICEs would break the package: the per-machine install
+# runs elevated as LocalSystem, so an HKCU key path would land in the SYSTEM
+# hive, where component detection can never find it again, and every launch
+# would trigger installer self-repair. The shortcuts can't be advertised
+# instead — an advertised shortcut must live in the component owning its
+# target file, which would stop them being optional.
 #
-# ICE61 stays visible and is expected: it is a known consequence of
+# ICE61 stays visible and is expected: a known consequence of
 # MajorUpgrade/@AllowSameVersionUpgrades.
 if (-not $SkipValidation) {
     Write-Host "running wix msi validate (ICE checks)..."
@@ -445,12 +424,11 @@ if (-not $SkipValidation) {
 }
 
 # --- Check the install-time authoring  --------------------------------
-# The ICE checks say the package is well formed; this says it still contains the
+# ICE checks say the package is well formed; this checks it still has the
 # shortcuts, associations, registry rows, elevation, upgrade detection and
-# install-time dialogs the project expects. Runs on every build, including CI,
-# because the failure mode it guards against is silent - a WixUI or WiX change
-# that drops a row produces an MSI that installs perfectly and does the wrong
-# thing.
+# dialogs the project expects. Runs on every build: a WixUI or WiX change
+# that drops a row would otherwise produce an MSI that installs cleanly and
+# silently does the wrong thing.
 Write-Host "checking install-time authoring..."
 # A hashtable, not an array: @array splats positionally, @hashtable by name.
 $checkArguments = @{ Msi = $msi; Arch = $Arch }
