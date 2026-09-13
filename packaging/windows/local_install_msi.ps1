@@ -4,7 +4,7 @@
 # **  @date   July 29, 2026
 # **
 # **  @brief
-# **  Verify an installed Seamly2D MSI on a real machine (Task 51), including
+# **  Verify an installed Seamly2D MSI on a real machine, including
 # **  files, shortcuts, registry entries, file associations, application startup,
 # **  and cleanup after uninstall while preserving user data.
 # **
@@ -204,9 +204,6 @@ function Get-TreeInventory {
 # @return absolute path of the data root
 #------------------------------------------------------------------------------
 function Get-DataRootPath {
-    # Task SettingsFiles.1 moved the shared common settings file to Local; the
-    # Roaming path is checked second, for a machine the apps last ran on before
-    # the move.
     $commonIniCandidates = @(
         (Join-Path $env:LOCALAPPDATA 'Seamly\qt6_common.ini'),
         (Join-Path $env:APPDATA 'Seamly\qt6_common.ini')
@@ -225,7 +222,7 @@ function Get-DataRootPath {
     if (-not [string]::IsNullOrWhiteSpace($recorded)) {
         return $recorded.TrimEnd('\')
     }
-    return (Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'Seamly')
+    return (Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'SeamlyData')
 }
 
 #------------------------------------------------------------------------------
@@ -250,9 +247,8 @@ function Get-UserDataInventory {
 
     $paths = @(
         (Get-DataRootPath),
-        (Join-Path $documents 'Seamly'),          # the Task 60 built-in default
         (Join-Path $documents 'SeamlyData'),      # what the MSI offers (InstWinX64.00)
-        (Join-Path $env:USERPROFILE 'seamlyData'), # Task 53's root
+        (Join-Path $env:USERPROFILE 'seamlyData'), 
         (Join-Path $env:USERPROFILE 'seamly2d'),   # the original, still the source of a migration
         (Join-Path $env:LOCALAPPDATA 'Seamly'),
         (Join-Path $env:APPDATA 'Seamly')
@@ -622,7 +618,7 @@ function Invoke-InstalledChecks {
         foreach ($key in @('dataRoot', 'individual_size_measurements', 'multi_size_measurements', 'templates', 'bodyscans')) {
             Assert-That -Name "qt6_common.ini holds the $key path" -Succeeded ($commonContent -match "(?m)^$key=")
         }
-        # Task SettingsFiles.5: on a fresh machine the seeder marks the one-shot
+        # On a fresh machine the seeder marks the one-shot
         # first-run data notice pending; the first app run rewrites it as shown.
         Assert-That -Name 'qt6_common.ini holds the first-run data notice flag' `
             -Succeeded ($commonContent -match '(?m)^firstRunDataNotice=(pending|shown)$')

@@ -4,22 +4,16 @@
 # **  @date   July 28, 2026
 # **
 # **  @brief
-# **  Assert that a built Seamly2D MSI carries the install-time authoring the
-# **  project expects (Task 51): elevation, the ARP entry, Start Menu and
-# **  optional desktop shortcuts, file associations, the install-info registry
-# **  rows, the previous-installation detection and its warning dialog.
+# **  Check that a built Seamly2D MSI includes the expected install-time
+# **  authoring: elevation, ARP metadata, shortcuts, file
+# **  associations, registry rows, and previous-install detection.
 # **
-# **  This is the automated half of Task 51's verification. It reads the MSI
-# **  database with the Windows Installer COM API, so it checks what the package
-# **  actually contains rather than what the .wxs appears to say - it catches a
-# **  WiX or WixUI change that silently drops a row. What it CANNOT check is
-# **  runtime behaviour on a real machine (does the shortcut launch, does
-# **  Explorer show the icon, does Apps & features list the product); that is
-# **  the clean-machine checklist in README.md, and it still has to be walked
-# **  through by a human.
+# **  This script inspects the MSI database directly via the Windows Installer
+# **  COM API, so it validates what the package actually contains. It does not
+# **  verify runtime behavior on a real machine; that remains a manual checklist.
 # **
-# **  Run automatically by smsi.ps1 after `wix msi validate`, so it also runs in
-# **  CI for both architectures via ci.yml's windows-msi job.
+# **  Run automatically by smsi.ps1 after `wix msi validate`, and in CI for
+# **  both architectures.
 # **
 # **  @copyright
 # **  This source code is part of the Seamly project, a suite of apparel CAD
@@ -46,7 +40,7 @@
 
 <#
 .SYNOPSIS
-    Check the install-time authoring of a built Seamly2D MSI (Task 51).
+    Check the install-time authoring of a built Seamly2D MSI.
 
 .DESCRIPTION
     Opens the MSI database read-only and asserts one expectation at a time,
@@ -437,10 +431,8 @@ Assert-That -Name 'the previous-installation page is not sequenced separately' `
 
 # --- 5a. the "existing installation" warning text -----------------------------
 
-# The wording is load-bearing: Task 51 requires the dialog to tell the user what
-# happens to their own work. It no longer names a fixed folder - Task
-# InstWinX64.1.2 made the data root a choice made later in Setup, so the page
-# points forward to that question instead of naming a path that may be wrong.
+# The wording is load-bearing: dialog should tell the user what
+# happens to their own work. It no longer names a fixed folder.
 $warningText = Get-MsiRows -Sql "SELECT ``Control``, ``Text`` FROM ``Control`` WHERE ``Dialog_``='SeamlyPreviousInstallDlg'" `
     -Columns 'Control', 'Text'
 $userDataText = @($warningText | Where-Object { $_.Control -eq 'UserDataText' })
@@ -763,10 +755,8 @@ Assert-That -Name 'the data-root default is ALSO computed in the elevated sequen
                 $executeActions -contains 'SetSEAMLYDATAPARENTExecuteFallback')
 Assert-That -Name 'the chosen data root is recorded for the apps to read' `
     -Succeeded (@($registry | Where-Object { $_.Root -eq '2' -and $_.Key -eq 'SOFTWARE\Seamly\Seamly2D' -and $_.Name -eq 'DataRoot' }).Count -eq 1)
-# InstWinX64.00. Three things went wrong together before this: the wizard
-# offered C:\Users\<user>\SeamlyData, the apps created <Documents>\Seamly, and
-# nothing read what the wizard recorded. Pin all three. (Task SettingsFiles.7
-# later aligned the apps' own default to <Documents>\SeamlyData too.)
+# InstWinX64.00. The wizard offered C:\Users\<user>\SeamlyData, but nothing
+# read what the wizard recorded, so the apps fell back to their own default.
 #
 # The default parent is the Documents folder, because that is where users go to
 # find the files other applications write. PersonalFolder is preferred over

@@ -37,9 +37,7 @@
 
            2. the old NSIS installation, which is a DIFFERENT product with its
               own ARP entry and its own uninstall.exe. The MSI neither upgrades
-              nor removes it. Its authoring file, dist\seamly2d-installer.nsi,
-              was deleted in Task InstWinX64.11.1; the footprint list further
-              down this file is now the only record of what it left on disk.
+              nor removes it. 
 
          The NSIS installer is a 32-bit executable that does not switch the
          registry view, so on x64 both of its keys land under WOW6432Node -
@@ -144,7 +142,7 @@
          name it below. It holds no files; see that component for why. -->
     <StandardDirectory Id="ProgramFilesFolder" />
 
-    <!-- ========== remove the old NSIS installation (Task 51 step 2) ====== -->
+    <!-- ========== remove the old NSIS installation ====== -->
     <!-- The NSIS product installs seamly2d and seamlyme; this package
          installs both of those PLUS SeamlyLayout, so it is a strict superset
          and leaving the old product behind means two copies of each parent
@@ -159,9 +157,7 @@
          the things it created ourselves has none of those problems, and it is
          undone by the standard RemoveFiles rollback if the install aborts.
 
-         Its complete footprint, transcribed from dist\seamly2d-installer.nsi
-         before that file was deleted (Task InstWinX64.11.1). This list is
-         now the record - it cannot be re-derived, so do not trim it:
+        This list is now the record - it cannot be re-derived, so do not trim it:
            - $INSTDIR, default %ProgramFiles(x86)%\Seamly2D (File /r *)
            - HKLM\SOFTWARE\NSIS_Seamly2D
            - HKLM\...\Uninstall\Seamly2D

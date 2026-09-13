@@ -76,13 +76,11 @@ private slots:
 
     void DefaultDataRootIsSeamlyDataUnderDocuments() const;
     void LegacyDataRootIsTheOldSeamly2dFolder() const;
-    void LegacyDocumentsDataRootIsTheTask60Folder() const;
     void UnconfiguredRootFallsBackToTheDefault() const;
     void EveryDefaultPathDerivesFromTheDataRoot() const;
     void DataRootAcceptsAnyDriveOrPath() const;
     void FirstRunWithoutLegacyTreeUsesTheDefault() const;
     void FirstRunAdoptsAnExistingLegacyTree() const;
-    void FirstRunPrefersTheNewestLegacyRoot() const;
     void FirstRunPrefersAnExistingNewRoot() const;
     void AdoptionNeverRemovesTheLegacyTree() const;
     void AConfiguredRootIsNeverOverwritten() const;

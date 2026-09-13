@@ -310,11 +310,10 @@ void TST_DataRoot::FirstRunNoticePendingOnlyWhileSeeded() const
  * @brief DefaultDataRootIsSeamlyDataUnderDocuments checks the built-in default.
  *
  * The lineage: ~/seamly2d (original) → ~/seamly (Task 34) → ~/seamlyData (Task 53) →
- * <Documents>/Seamly (Task 60) → <Documents>/SeamlyData (Task SettingsFiles.7). Documents
- * is the principled half — these are documents the user creates, opens and backs up, so
- * they belong where every other application puts documents. The SeamlyData leaf matches
- * the MSI's default SEAMLYDATAROOT and SeamlyLayout's no-installer fallback, so every
- * entry point composes the same folder.
+ * <Documents>/SeamlyData (Task 60). Documents is the principled half — these are documents
+ * the user creates, opens and backs up, so they belong where every other application puts
+ * documents. The SeamlyData leaf matches the MSI's default SEAMLYDATAROOT and
+ * SeamlyLayout's no-installer fallback, so every entry point composes the same folder.
  *
  * The expected value is built from QStandardPaths rather than hard-coded, deliberately:
  * hard-coding "Documents" would pass on this machine and fail on a localized Linux system
@@ -334,7 +333,6 @@ void TST_DataRoot::DefaultDataRootIsSeamlyDataUnderDocuments() const
     QVERIFY(!root.endsWith(QStringLiteral("seamly2d")));
     QVERIFY(!root.endsWith(QStringLiteral("seamlyData")));
     QVERIFY(!root.endsWith(QStringLiteral("/seamly")));
-    // The Task 60 leaf is now the legacy Documents root, not the default.
     QVERIFY(!root.endsWith(QStringLiteral("/Seamly")));
 }
 
@@ -346,24 +344,6 @@ void TST_DataRoot::DefaultDataRootIsSeamlyDataUnderDocuments() const
 void TST_DataRoot::LegacyDataRootIsTheOldSeamly2dFolder() const
 {
     QCOMPARE(VCommonSettings::getLegacyDataRoot(), QDir::homePath() + QStringLiteral("/seamly2d"));
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief LegacyDocumentsDataRootIsTheTask60Folder checks the second legacy location:
- * <Documents>/Seamly, the default from Task 60 until Task SettingsFiles.7 renamed the
- * leaf to SeamlyData. It must resolve through DocumentsLocation exactly like the default,
- * so both roots move together on a redirected profile.
- */
-void TST_DataRoot::LegacyDocumentsDataRootIsTheTask60Folder() const
-{
-    QString documents = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-    if (documents.isEmpty())
-    {
-        documents = QDir::homePath();
-    }
-    QCOMPARE(VCommonSettings::getLegacyDocumentsDataRoot(),
-             QDir::cleanPath(documents) + QStringLiteral("/Seamly"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -446,15 +426,13 @@ void TST_DataRoot::DataRootAcceptsAnyDriveOrPath() const
  */
 void TST_DataRoot::FirstRunWithoutLegacyTreeUsesTheDefault() const
 {
-    const QString defaultRoot   = scratchPath(QStringLiteral("fresh/SeamlyData"));
-    const QString documentsRoot = scratchPath(QStringLiteral("fresh/Seamly"));
-    const QString legacyRoot    = scratchPath(QStringLiteral("fresh/seamly2d"));
+    const QString defaultRoot = scratchPath(QStringLiteral("fresh/SeamlyData"));
+    const QString legacyRoot  = scratchPath(QStringLiteral("fresh/seamly2d"));
     QVERIFY(!QFileInfo::exists(defaultRoot));
     QVERIFY(!QFileInfo::exists(legacyRoot));
 
     bool adopted = true;
-    QCOMPARE(VCommonSettings::chooseFirstRunDataRoot(defaultRoot, { documentsRoot, legacyRoot }, &adopted),
-             defaultRoot);
+    QCOMPARE(VCommonSettings::chooseFirstRunDataRoot(defaultRoot, { legacyRoot }, &adopted), defaultRoot);
     QVERIFY(!adopted);
 }
 
@@ -466,40 +444,17 @@ void TST_DataRoot::FirstRunWithoutLegacyTreeUsesTheDefault() const
  */
 void TST_DataRoot::FirstRunAdoptsAnExistingLegacyTree() const
 {
-    const QString defaultRoot   = scratchPath(QStringLiteral("upgrade/SeamlyData"));
-    const QString documentsRoot = scratchPath(QStringLiteral("upgrade/Seamly"));
-    const QString legacyRoot    = scratchPath(QStringLiteral("upgrade/seamly2d"));
+    const QString defaultRoot = scratchPath(QStringLiteral("upgrade/SeamlyData"));
+    const QString legacyRoot  = scratchPath(QStringLiteral("upgrade/seamly2d"));
     QVERIFY(QDir().mkpath(legacyRoot + QStringLiteral("/measurements/individual")));
     QVERIFY(!QFileInfo::exists(defaultRoot));
 
     bool adopted = false;
-    QCOMPARE(VCommonSettings::chooseFirstRunDataRoot(defaultRoot, { documentsRoot, legacyRoot }, &adopted),
-             legacyRoot);
+    QCOMPARE(VCommonSettings::chooseFirstRunDataRoot(defaultRoot, { legacyRoot }, &adopted), legacyRoot);
     QVERIFY(adopted);
 
     // A file lying in a directory is enough; the tree does not have to look like anything.
     QVERIFY(QFileInfo(legacyRoot + QStringLiteral("/measurements/individual")).isDir());
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief FirstRunPrefersTheNewestLegacyRoot covers a user who upgraded through several
- * eras: the Task 60 <Documents>/Seamly tree holds the live data — the older ~/seamly2d
- * was migrated into it and holds only markers — so it must win the probe.
- */
-void TST_DataRoot::FirstRunPrefersTheNewestLegacyRoot() const
-{
-    const QString defaultRoot   = scratchPath(QStringLiteral("eras/SeamlyData"));
-    const QString documentsRoot = scratchPath(QStringLiteral("eras/Seamly"));
-    const QString legacyRoot    = scratchPath(QStringLiteral("eras/seamly2d"));
-    QVERIFY(QDir().mkpath(documentsRoot + QStringLiteral("/patterns")));
-    QVERIFY(QDir().mkpath(legacyRoot + QStringLiteral("/patterns")));
-    QVERIFY(!QFileInfo::exists(defaultRoot));
-
-    bool adopted = false;
-    QCOMPARE(VCommonSettings::chooseFirstRunDataRoot(defaultRoot, { documentsRoot, legacyRoot }, &adopted),
-             documentsRoot);
-    QVERIFY(adopted);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -509,16 +464,13 @@ void TST_DataRoot::FirstRunPrefersTheNewestLegacyRoot() const
  */
 void TST_DataRoot::FirstRunPrefersAnExistingNewRoot() const
 {
-    const QString defaultRoot   = scratchPath(QStringLiteral("both/SeamlyData"));
-    const QString documentsRoot = scratchPath(QStringLiteral("both/Seamly"));
-    const QString legacyRoot    = scratchPath(QStringLiteral("both/seamly2d"));
+    const QString defaultRoot = scratchPath(QStringLiteral("both/SeamlyData"));
+    const QString legacyRoot  = scratchPath(QStringLiteral("both/seamly2d"));
     QVERIFY(QDir().mkpath(legacyRoot + QStringLiteral("/templates")));
-    QVERIFY(QDir().mkpath(documentsRoot + QStringLiteral("/templates")));
     QVERIFY(QDir().mkpath(defaultRoot + QStringLiteral("/templates")));
 
     bool adopted = true;
-    QCOMPARE(VCommonSettings::chooseFirstRunDataRoot(defaultRoot, { documentsRoot, legacyRoot }, &adopted),
-             defaultRoot);
+    QCOMPARE(VCommonSettings::chooseFirstRunDataRoot(defaultRoot, { legacyRoot }, &adopted), defaultRoot);
     QVERIFY(!adopted);
 }
 
@@ -675,18 +627,11 @@ void TST_DataRoot::EnsureDataRootTreeKeepsExistingFiles() const
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief StartupResolvesThenSeedsTheConfiguredRoot locks the two-step start-up sequence
- * both applications perform in openSettings(), and the split between its halves.
+ * both applications perform in openSettings().
  *
- * Task 51's clean-machine install verification found that a fresh installation recorded the
- * data root but never created it: initializeDataRoot() writes the setting directly instead
- * of going through setDataRoot(), which was the only caller of ensureDataRootTree(). Nothing
- * seeded the tree, so Preferences → Paths listed nine folders that did not exist.
- *
- * The fix is a second call in each application's openSettings(), and this case pins both
- * halves of it. The first assertion is as important as the second: resolution must stay
- * free of side effects on disk, because these tests call initializeDataRoot() while on a
- * real run its default root is ~/seamlyData — seeding from inside it would create folders
- * in the developer's home directory during every test run.
+ * Resolution must stay free of side effects on disk because these tests call
+ * initializeDataRoot(), while on a real run its default root is ~/seamlyData — seeding
+ * from inside it would create folders in the developer's home directory during every test run.
  */
 void TST_DataRoot::StartupResolvesThenSeedsTheConfiguredRoot() const
 {

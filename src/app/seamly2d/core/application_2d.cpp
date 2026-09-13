@@ -705,7 +705,7 @@ void Application2D::initOptions()
     VSettings::SeedSampleMeasurements(VSettings::getSampleMeasurementsMultisizePath(),
                                        settings->getDefaultMultisizePath(), QStringLiteral("*.smms"));
 
-    // Task 15: only tell the user their settings moved once command-line parsing (done in
+    // Only tell the user their settings moved once command-line parsing (done in
     // the constructor, before initOptions() runs) has determined real GUI-vs-console mode —
     // showing a modal dialog during a headless/CLI export would hang a scripted caller.
     if (m_settingsMigrated && Application2D::isGUIMode())
@@ -810,22 +810,21 @@ bool Application2D::event(QEvent *event)
 /// folder.
 void Application2D::openSettings()
 {
-    // Task SettingsFiles.1: the shared common settings moved from %APPDATA%\Seamly to
+    // The shared common settings moved from %APPDATA%\Seamly to
     // %LOCALAPPDATA%\Seamly. Bring an existing file forward before anything reads it.
     VCommonSettings::migrateCommonSettingsLocation();
 
-    // Task 34: settle the one shared user-data root before any data path is read. Resolves
+    // Settle the one shared user-data root before any data path is read. Resolves
     // and records a path only — it touches no files, which is what keeps it safe for the
     // unit tests to call.
     bool adoptedLegacyTree = false;
     const QString resolvedDataRoot = VCommonSettings::initializeDataRoot(&adoptedLegacyTree);
 
-    // Task 60: when that resolution adopted a legacy tree — ~/seamly2d, or Task 60's own
-    // <Documents>/Seamly since Task SettingsFiles.7 — copy it out to the current default
-    // root instead of using it where it stands. The whole tree is copied, including any
-    // folders the user added themselves; nothing is moved or deleted, and the legacy tree
-    // is left in place with a marker so a rollback stays possible. On any failure the
-    // legacy root simply stays configured and in use.
+    // When that resolution adopted a legacy tree — ~/seamly2d — copy it out to the
+    // current default root instead of using it where it stands. The whole tree is
+    // copied, including any folders the user added themselves; nothing is moved or
+    // deleted, and the legacy tree is left in place with a marker so a rollback stays
+    // possible. On any failure the legacy root simply stays configured and in use.
     //
     // LegacyDataMigration::run() also packs the legacy tree into a .zip beside the new root,
     // as a second backup alongside the marker file, and shows a splash screen while a large
@@ -839,12 +838,12 @@ void Application2D::openSettings()
         LegacyDataMigration::run(resolvedDataRoot, VCommonSettings::getDefaultDataRoot());
     }
 
-    // Task 51: create the nine standard subfolders under that root. initializeDataRoot()
+    // Create the nine standard subfolders under that root. initializeDataRoot()
     // only resolves and records the path — it deliberately writes the setting directly
     // rather than through setDataRoot(), which is the only other caller of
     // ensureDataRootTree() — so without this a fresh install left the data root recorded
     // but never created, and Preferences → Paths pointed at nine folders that did not
-    // exist. Found by the Task 51 clean-machine install verification.
+    // exist.
     //
     // Called here rather than inside initializeDataRoot() for the same reason as the prune
     // below: this is the only place the real home directory reaches it, so the unit tests,
@@ -852,15 +851,13 @@ void Application2D::openSettings()
     // directories. Purely additive — existing files and folders are left untouched.
     VCommonSettings::ensureDataRootTree(VCommonSettings::dataRoot());
 
-    // Task 53: clear away the empty legacy skeletons a rename leaves behind — ~/seamly2d,
-    // and <Documents>/Seamly since Task SettingsFiles.7. Kept here in the application
-    // rather than inside initializeDataRoot() on purpose — this is the only place the real
-    // home directory is fed to it, so the unit tests, which do call initializeDataRoot(),
-    // can never reach outside their temporary directories. Each call is a no-op unless
-    // that root exists, is not the configured root, and holds no files at all.
+    // Clear away the empty legacy skeleton a rename leaves behind — ~/seamly2d. Kept here
+    // in the application rather than inside initializeDataRoot() on purpose — this is the
+    // only place the real home directory is fed to it, so the unit tests, which do call
+    // initializeDataRoot(), can never reach outside their temporary directories. The call
+    // is a no-op unless that root exists, is not the configured root, and holds no files
+    // at all.
     VCommonSettings::pruneEmptyLegacyDataRoot(VCommonSettings::getLegacyDataRoot(),
-                                              VCommonSettings::dataRoot());
-    VCommonSettings::pruneEmptyLegacyDataRoot(VCommonSettings::getLegacyDocumentsDataRoot(),
                                               VCommonSettings::dataRoot());
 
     // seamly2d's own settings: new per-app directory under "Seamly", migrated forward

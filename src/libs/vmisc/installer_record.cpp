@@ -72,8 +72,8 @@ namespace InstallerRecord
  *
  * Setup asks "Where do you keep your work?" and writes the answer to the DataRoot value.
  * Without this the answer was inert: every app resolved its own default instead, so a user
- * who was promised C:\Users\<user>\Documents\SeamlyData got <Documents>/Seamly
- * (Task InstWinX64.00).
+ * who chose a non-default root in Setup got the built-in default instead (Task
+ * InstWinX64.00).
  *
  * The value is machine-wide, so each user adopts it once, on that user's first run, into
  * their own settings file. A user who later changes the root in Preferences keeps that

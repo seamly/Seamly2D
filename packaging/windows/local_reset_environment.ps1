@@ -127,8 +127,7 @@ if ($installKey -and $installKey.DataRoot)
 {
     $recordedDataRoots += $installKey.DataRoot
 }
-# Task SettingsFiles.1 moved the shared common settings file to Local; the
-# Roaming file may still exist on a machine the apps last ran on before the move.
+# Shared common settings file is in LocalAppData
 $commonIniCandidates = @(
     (Join-Path $env:LOCALAPPDATA 'Seamly\qt6_common.ini'),
     (Join-Path $env:APPDATA 'Seamly\qt6_common.ini')

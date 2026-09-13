@@ -93,7 +93,7 @@ QT_WARNING_POP
 
 #include <QCommandLineParser>
 
-// Task SeamlyMe.5: same retention as Seamly2D's logs.
+// Same retention as Seamly2D's logs.
 constexpr auto DAYS_TO_KEEP_LOGS = 3;
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -115,7 +115,7 @@ inline void noisyFailureMsgHandler(QtMsgType type, const QMessageLogContext &con
     }
 
 #if defined(V_NO_ASSERT)
-    // I have decided to hide this annoing message for release builds.
+    // I have decided to hide this annoying message for release builds.
     if ((type == QtWarningMsg) && msg.contains(QStringLiteral("QSslSocket: cannot resolve")))
     {
         type = QtDebugMsg;
@@ -143,8 +143,8 @@ inline void noisyFailureMsgHandler(QtMsgType type, const QMessageLogContext &con
     }
 #endif
 
-    // this is another one that doesn't make sense as just a debug message.  pretty serious
-    // sign of a problem
+    // this is another one that doesn't make sense as just a debug message.  
+    // pretty serious sign of a problem
     // http://www.developer.nokia.com/Community/Wiki/QPainter::begin:Paint_device_returned_engine_%3D%3D_0_(Known_Issue)
     if ((type == QtDebugMsg) && msg.contains(QStringLiteral("QPainter::begin"))
         && msg.contains(QStringLiteral("Paint device returned engine")))
@@ -167,39 +167,34 @@ inline void noisyFailureMsgHandler(QtMsgType type, const QMessageLogContext &con
     QCoreApplication *instance = QCoreApplication::instance();
     const bool isGuiThread = instance && (QThread::currentThread() == instance->thread());
 
-    // Task SeamlyMe.5: write every message into the per-pid log file, in the same
+    // Write every message into the per-pid log file, in the same
     // timestamped format Seamly2D uses. logFile() is null until startLogging() has
     // opened the file, and stays null if opening failed — console output above still
     // happens either way.
     if (QTextStream *log = qApp->logFile())
     {
-        QString debugdate = "[" + QDateTime::currentDateTime().toString(QStringLiteral("yyyy.MM.dd hh:mm:ss"));
-        switch (type)
-        {
-            case QtDebugMsg:
-                debugdate += QString(":DEBUG:%1(%2)] %3: %4: %5").arg(context.file).arg(context.line)
-                             .arg(context.function).arg(context.category).arg(msg);
-                break;
-            case QtWarningMsg:
-                debugdate += QString(":WARNING:%1(%2)] %3: %4: %5").arg(context.file).arg(context.line)
-                             .arg(context.function).arg(context.category).arg(msg);
-                break;
-            case QtCriticalMsg:
-                debugdate += QString(":CRITICAL:%1(%2)] %3: %4: %5").arg(context.file).arg(context.line)
-                             .arg(context.function).arg(context.category).arg(msg);
-                break;
-            case QtFatalMsg:
-                debugdate += QString(":FATAL:%1(%2)] %3: %4: %5").arg(context.file).arg(context.line)
-                             .arg(context.function).arg(context.category).arg(msg);
-                break;
-            case QtInfoMsg:
-                debugdate += QString(":INFO:%1(%2)] %3: %4: %5").arg(context.file).arg(context.line)
-                             .arg(context.function).arg(context.category).arg(msg);
-                break;
-            default:
-                break;
-        }
-        *log << debugdate << Qt::endl;
+        const QString level = [type]() {
+            switch (type)
+            {
+                case QtDebugMsg:   return QStringLiteral("DEBUG");
+                case QtWarningMsg: return QStringLiteral("WARNING");
+                case QtCriticalMsg:return QStringLiteral("CRITICAL");
+                case QtFatalMsg:   return QStringLiteral("FATAL");
+                case QtInfoMsg:    return QStringLiteral("INFO");
+                default:           return QStringLiteral("UNKNOWN");
+            }
+        }();
+
+        const QString logEntry = QStringLiteral("[%1:%2:%3(%4)] %5: %6: %7")
+            .arg(QDateTime::currentDateTime().toString(QStringLiteral("yyyy.MM.dd hh:mm:ss")))
+            .arg(level)
+            .arg(context.file)
+            .arg(context.line)
+            .arg(context.function)
+            .arg(context.category)
+            .arg(msg);
+
+        *log << logEntry << Qt::endl;
     }
 
     switch (type)
@@ -227,8 +222,7 @@ inline void noisyFailureMsgHandler(QtMsgType type, const QMessageLogContext &con
 
     if (isGuiThread)
     {
-        //fixme: trying to make sure there are no save/load dialogs are opened, because error message during them will
-        //lead to crash
+        // TODO: Avoid showing error messages while a save or load dialog is open to prevent crashes.
         const bool topWinAllowsPop = (QApplication::activeModalWidget() == nullptr) ||
                 !QApplication::activeModalWidget()->inherits("QFileDialog");
         QMessageBox messageBox;
@@ -312,9 +306,9 @@ ApplicationME::ApplicationME(int &argc, char **argv)
     // Setting the Application version
     setApplicationVersion(APP_VERSION_STR);
 
-    // We have been running SeamlyMe in two different cases on macOS.
-    // The first inside own bundle where info.plist is works fine, but the second,
-    // when we run inside Seamly2D's bundle, require direct setting the icon.
+    // SeamlyMe runs in two different ways on macOS.
+    // The first is inside its own bundle, where the info.plist works fine.
+    // The second is when it runs inside Seamly2D's bundle, which requires setting the icon directly.
 #if defined(Q_OS_MAC)
     setWindowIcon(QIcon(":/seamlymeicon/1024x1024/logo_mac.png"));
 #else //defined(Q_OS_MAC)
@@ -451,8 +445,8 @@ bool ApplicationME::notify(QObject *receiver, QEvent *event)
                    qUtf8Printable(error.ErrorMessage()), qUtf8Printable(error.DetailedInformation()));
         return true;
     }
-    // These last two cases special. I found that we can't show here modal dialog with error message.
-    // Somehow program doesn't waite untile an error dialog will be closed. But if ignore this program will hang.
+    // We cannot show a modal error dialog in these last two cases because the program
+    // does not wait for it to close and may hang.
     catch (const qmu::QmuParserError &error)
     {
         qCCritical(mApp, "%s", qUtf8Printable(tr("Parser error: %1. Program will be terminated.").arg(error.GetMsg())));
@@ -507,7 +501,7 @@ QList<TMainWindow *> ApplicationME::mainWindows()
 //---------------------------------------------------------------------------------------------------------------------
 void ApplicationME::initOptions()
 {
-    // Task SeamlyMe.5: open the per-pid log file first, so the handler below writes
+    // Open the per-pid log file first, so the handler below writes
     // every following message into %LOCALAPPDATA%\Seamly\SeamlyMe\logs.
     startLogging();
     qInstallMessageHandler(noisyFailureMsgHandler);
@@ -550,8 +544,8 @@ const VTranslateVars *ApplicationME::translateVariables()
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief Returns the directory that stores SeamlyMe log files.
 ///
-/// Task SeamlyMe.5: mirrors Application2D::logDirPath(), so on Windows the logs land in
-/// %LOCALAPPDATA%\Seamly\SeamlyMe\logs — beside qt6_seamlyme.ini, never in the data root.
+/// Mirrors Application2D::logDirPath(), so on Windows the logs land in
+/// %LOCALAPPDATA%\Seamly\SeamlyMe\logs
 QString ApplicationME::logDirPath() const
 {
 #if defined(Q_OS_WIN)
@@ -715,66 +709,36 @@ bool ApplicationME::event(QEvent *event)
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief openSettings get access to application settings.
 ///
-/// Task 15: SeamlyMe's own settings now live in their own directory nested under the
-/// shared "Seamly" organization (AppData/Local/Seamly/SeamlyMe on Windows) instead of a
-/// flat .ini file sharing a folder with Seamly2D's. The "common" settings (shared across
-/// Seamly apps via VCommonSettings) live beside that directory in
-/// AppData/Local/Seamly/qt6_common.ini; migrateCommonSettingsLocation() bridges them
-/// forward here too, since a user might run SeamlyMe before ever launching Seamly2D
-/// after an upgrade.
+/// Keep SeamlyMe settings in the shared Seamly data folder and migrate older
+/// common settings before they are read.
 void ApplicationME::openSettings()
 {
-    // Task SettingsFiles.1: the shared common settings moved from %APPDATA%\Seamly to
+    // The shared common settings moved from %APPDATA%\Seamly to
     // %LOCALAPPDATA%\Seamly. Bring an existing file forward before anything reads it.
     VCommonSettings::migrateCommonSettingsLocation();
 
-    // Task 34: settle the one shared user-data root before any data path is read. Resolves
+    // Settle the one shared user-data root before any data path is read. Resolves
     // and records a path only — it touches no files, which is what keeps it safe for the
     // unit tests to call.
     bool adoptedLegacyTree = false;
     const QString resolvedDataRoot = VCommonSettings::initializeDataRoot(&adoptedLegacyTree);
 
-    // Task 60: when that resolution adopted a legacy tree — ~/seamly2d, or Task 60's own
-    // <Documents>/Seamly since Task SettingsFiles.7 — copy it out to the current default
-    // root instead of using it where it stands. The whole tree is copied, including any
-    // folders the user added themselves; nothing is moved or deleted, and the legacy tree
-    // is left in place with a marker so a rollback stays possible. On any failure the
-    // legacy root simply stays configured and in use.
-    //
-    // LegacyDataMigration::run() also packs the legacy tree into a .zip beside the new root,
-    // as a second backup alongside the marker file, and shows a splash screen while a large
-    // collection of patterns copies and hashes.
-    //
-    // Here rather than inside initializeDataRoot() for the same reason as the prune below:
-    // this is the only place the real home directory reaches it, so the unit tests cannot
-    // copy anything into the developer's home.
+    // If a legacy data tree was adopted, copy it to the current default root.
+    // The legacy tree is kept in place with a marker so it can be rolled back if needed.
+    // This happens here rather than in initializeDataRoot(), so tests stay confined to temp directories.
     if (adoptedLegacyTree)
     {
         LegacyDataMigration::run(resolvedDataRoot, VCommonSettings::getDefaultDataRoot());
     }
 
-    // Task 51: create the nine standard subfolders under that root. initializeDataRoot()
-    // only resolves and records the path — it deliberately writes the setting directly
-    // rather than through setDataRoot(), which is the only other caller of
-    // ensureDataRootTree() — so without this a fresh install left the data root recorded
-    // but never created, and Preferences → Paths pointed at nine folders that did not
-    // exist. Found by the Task 51 clean-machine install verification.
-    //
-    // Called here rather than inside initializeDataRoot() for the same reason as the prune
-    // below: this is the only place the real home directory reaches it, so the unit tests,
-    // which do call initializeDataRoot(), can never create folders outside their temporary
-    // directories. Purely additive — existing files and folders are left untouched.
+    // Create the standard data-root folders. initializeDataRoot() only resolves the path;
+    // without this, a fresh install leaves the root recorded without its folders.
+    // Keep it here so tests only write under temp directories. Existing files are left alone.
     VCommonSettings::ensureDataRootTree(VCommonSettings::dataRoot());
 
-    // Task 53: clear away the empty legacy skeletons a rename leaves behind — ~/seamly2d,
-    // and <Documents>/Seamly since Task SettingsFiles.7. Kept here in the application
-    // rather than inside initializeDataRoot() on purpose — this is the only place the real
-    // home directory is fed to it, so the unit tests, which do call initializeDataRoot(),
-    // can never reach outside their temporary directories. Each call is a no-op unless
-    // that root exists, is not the configured root, and holds no files at all.
+    // Remove empty legacy data roots left behind by a rename. This stays here so tests
+    // calling initializeDataRoot() cannot reach outside their temporary directories.
     VCommonSettings::pruneEmptyLegacyDataRoot(VCommonSettings::getLegacyDataRoot(),
-                                              VCommonSettings::dataRoot());
-    VCommonSettings::pruneEmptyLegacyDataRoot(VCommonSettings::getLegacyDocumentsDataRoot(),
                                               VCommonSettings::dataRoot());
 
     bool migratedThisCall = false;
