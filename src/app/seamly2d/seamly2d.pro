@@ -113,17 +113,17 @@ unix{
 
         # .desktop file
         desktop.path = $$PREFIX/share/applications/
-        desktop.files += ../../../dist/$${TARGET}.desktop \
-        desktop.files += ../../../dist/seamlyme.desktop
+        desktop.files += ../../../packaging/assets/$${TARGET}.desktop \
+        desktop.files += ../../../packaging/assets/seamlyme.desktop
 
         # logo
         pixmaps.path = $$PREFIX/share/pixmaps/
         pixmaps.files += \
-            ../../../dist/$${TARGET}.png \
-            ../../../dist/seamlyme.png \
-            ../../../dist/application-x-seamly2d-2d_file.png \
-            ../../../dist/application-x-seamlyme-individual_size_file.png \
-            ../../../dist/application-x-seamlyme-multi_size_file.png \
+            ../../../packaging/assets/$${TARGET}.png \
+            ../../../packaging/assets/seamlyme.png \
+            ../../../packaging/assets/application-x-seamly2d-2d_file.png \
+            ../../../packaging/assets/application-x-seamlyme-individual_size_file.png \
+            ../../../packaging/assets/application-x-seamlyme-multi_size_file.png \
 
         # Path to multisize measurement after installation
         multisize.path = $$PREFIX/share/$${TARGET}/tables/multisize/
