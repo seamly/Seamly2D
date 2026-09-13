@@ -31,6 +31,16 @@
          against THIS file now, and both live in the same directory. -->
     <WixVariable Id="WixUILicenseRtf" Value="$(sys.SOURCEFILEDIR)license.rtf" />
 
+    <!-- Seamly logo replaces the stock WiX banner and dialog bitmaps.
+         packaging\assets\generate_wix_images.ps1 built both files from
+         src\libs\vmisc\share\resources\icon\logos\seamly_logo_192.png.
+         The banner keeps its left ~350px clear for our Title/Description
+         text (X=15/25 in every custom dialog); the dialog bitmap keeps its
+         left 180px clear of the stock WelcomeDlg/ExitDialog text, which
+         starts at dialog-unit X=135. -->
+    <WixVariable Id="WixUIBannerBmp" Value="$(var.RepoRoot)\packaging\assets\wix_banner.bmp" />
+    <WixVariable Id="WixUIDialogBmp" Value="$(var.RepoRoot)\packaging\assets\wix_dialog.bmp" />
+
     <!-- WixUI_Common carries the shared bitmaps and icons the stock dialogs
          draw with (WixUI_Bmp_Banner, WixUI_Bmp_Dialog, WixUI_Ico_Info, ...).
          It defines no page order, so the chain below is entirely ours. Each

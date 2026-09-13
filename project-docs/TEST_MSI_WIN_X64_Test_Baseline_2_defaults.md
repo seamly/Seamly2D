@@ -15,12 +15,12 @@ Known defect to watch for: `MainWindow::exportPiecesToSeamlyLayout()` (`mainwind
 
 | Case | Seamly state | Repair | Uninstall | Install |
 | --- | --- | --- | --- | --- |
-| 1 | Fresh install | disabled | disabled | enabled |
+| 1 | Baseline - Fresh install | disabled | disabled | enabled |
 | 2 | Previous version installed, no SeamlyLayout | disabled | disabled | enabled |
 | 3 | Previous version installed, with SeamlyLayout | disabled | enabled | enabled |
 | 4 | Same version installed, with SeamlyLayout | enabled | enabled | disabled |
 
-### Case 1 — Fresh install
+### Case 1 — Baseline - Fresh install
 
 - [ ] 0. Relaunch this shell elevated (Administrator) before any step below.
 - [ ] 1a. Uninstall Seamly (any and all versions detected) using `packaging\windows\local_reset_environment.ps1`.

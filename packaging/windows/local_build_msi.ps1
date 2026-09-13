@@ -96,6 +96,8 @@ param(
     [switch]$SkipTests
 )
 
+Write-Host " ===== running local_build_msi.ps1 ====="
+
 $ErrorActionPreference = 'Stop'
 # The script lives in <repo-root>\packaging\windows\, so the repo root
 # is two directories up.
