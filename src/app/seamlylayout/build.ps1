@@ -257,7 +257,7 @@ if errorlevel 1 (
 
 echo.
 echo === Build successful ===
-echo Executable: $BuildDir\SeamlyLayout.exe
+echo Executable: $BuildDir\seamlylayout.exe
 "@
 
 Set-Content -Path $TempBat -Value $BatchContent -Encoding ASCII
@@ -277,7 +277,7 @@ try {
     }
 
     # Verify the executable landed, then launch it unless the caller opted out.
-    $Exe = "$BuildDir\SeamlyLayout.exe"
+    $Exe = "$BuildDir\seamlylayout.exe"
     if (-not (Test-Path $Exe)) {
         Write-Error "Executable not found: $Exe"
         exit 1

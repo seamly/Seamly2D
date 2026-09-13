@@ -252,7 +252,7 @@ try {
         'labels'          = "$root/label templates"
         'images'          = "$root/images"
         'backups'         = "$root/backups"
-        'seamlyLayoutApp' = "$install/SeamlyLayout.exe"
+        'seamlyLayoutApp' = "$install/seamlylayout.exe"
     }
     Add-IniKey -Path (Join-Path $seamlyRoot 'Seamly2D\qt6_seamly2d.ini') -Section 'paths' -Pairs $seamly2dKeys
 

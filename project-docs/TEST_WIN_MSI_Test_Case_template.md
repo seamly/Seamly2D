@@ -78,7 +78,7 @@ layout=%DATAROOT%/layouts
 labels=%DATAROOT%/label templates
 images=%DATAROOT%/images
 backups=%DATAROOT%/backups
-seamlyLayoutApp=%PROGRAMDIR%/SeamlyApps/SeamlyLayout.exe"
+seamlyLayoutApp=%PROGRAMDIR%/SeamlyApps/seamlylayout.exe"
     - [ ] 0b-iii. qt6_seamly2d.ini should be empty
     - [ ] ob-iv. qt6_seamlylayout.ini should contain:
     "[General]
@@ -93,7 +93,7 @@ pdf_viewer_path=
 png_viewer_path=
 projector_path=https://patternprojector.com
 data_root=%DATAROOT%"
-  - [ ] 0c. Check the program directory `%PROGRAMDIR%` exists (always `%ProgramFiles%\SeamlyApps`) contains `seamly2d.exe`, `seamlyme.exe`, `SeamlyLayout.exe`, `pdftops.exe`, `QtWebEngineProcess.exe`, `vc_redist.x64.exe`.
+  - [ ] 0c. Check the program directory `%PROGRAMDIR%` exists (always `%ProgramFiles%\SeamlyApps`) contains `seamly2d.exe`, `seamlyme.exe`, `seamlylayout.exe`, `pdftops.exe`, `QtWebEngineProcess.exe`, `vc_redist.x64.exe`.
   - [ ] 0d. Confirm no duplicate directories.
   - [ ] 0e. if upgrading from previous non-SeamlyLayout version then:
     - [ ] 0e-i. confirm `%DATAROOT%\seamly2d.zip` exists.

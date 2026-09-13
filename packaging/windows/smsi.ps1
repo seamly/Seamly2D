@@ -86,7 +86,7 @@
     Directory holding seamlyme.exe plus its windeployqt output. Required.
 
 .PARAMETER SeamlyLayoutBuildDir
-    Directory holding the release SeamlyLayout.exe.
+    Directory holding the release seamlylayout.exe.
     Default: <repo>\src\app\seamlylayout\qt_frontend\build\Release — where
     ci.yml's `cmake --build --preset release` step writes it.
 
@@ -267,8 +267,8 @@ foreach ($required in @(
         throw "Missing $($required.What): '$($required.Path)'."
     }
 }
-if (-not (Test-Path (Join-Path $SeamlyLayoutBuildDir 'SeamlyLayout.exe'))) {
-    throw "Missing SeamlyLayout.exe in '$SeamlyLayoutBuildDir' - run the CMake release build first, or point -SeamlyLayoutBuildDir at its output."
+if (-not (Test-Path (Join-Path $SeamlyLayoutBuildDir 'seamlylayout.exe'))) {
+    throw "Missing seamlylayout.exe in '$SeamlyLayoutBuildDir' - run the CMake release build first, or point -SeamlyLayoutBuildDir at its output."
 }
 
 # WiX .NET tool + UI extension (the .wxs builds its dialog set on the stock
@@ -334,23 +334,15 @@ Move-Item -Path (Join-Path $parentDir 'seamlyme.exe') -Destination $exesDir
 
 Write-Host "staging SeamlyLayout runtime (windeployqt) into the shared tree..."
 
-# Deploy SeamlyLayout's Qt runtime into the SAME tree as the parent apps'. All
-# three are built against Qt 6.11.1, so wherever two windeployqt runs produce
-# the same DLL it is the same file — what SeamlyLayout adds on top is the QML
-# module tree, Qt Quick/WebEngine DLLs and QtWebEngineProcess.exe. Deploying
-# against a staged copy of the exe keeps the build tree pristine; --qmldir
-# points windeployqt at the QML sources so it can resolve the app's QML module
-# imports.
+# Deploy SeamlyLayout's Qt runtime into the shared tree. Use a staged exe to
+# keep the build tree pristine; --qmldir resolves the app's QML imports.
 Copy-Item -Path (Join-Path $SeamlyLayoutBuildDir 'seamlylayout.exe') -Destination $parentDir
 $qmlDir = Join-Path $repoRoot 'src\app\seamlylayout\qt_frontend\qml'
 Invoke-Tool -Description 'windeployqt' -Exe $WinDeployQt -Arguments @(
     '--qmldir', $qmlDir, '--release', (Join-Path $parentDir 'seamlylayout.exe'))
 
-# Packaged default settings (read-only legacy-migration source / first-run
-# seed), read by SeamlyLayout from <exeDir>\settings\. preferences.json is
-# deliberately excluded: it contains per-user paths (same exclusion as the
-# Inno Setup script SeamlyLayout.iss). The parent apps ship no settings\
-# directory, so nothing collides in the shared tree.
+# Package default settings for SeamlyLayout's first run and legacy migration.
+# Exclude preferences.json because it contains user-specific paths.
 $settingsSrc = Join-Path $repoRoot 'src\app\seamlylayout\qt_frontend\settings'
 $settingsDst = Join-Path $parentDir 'settings'
 New-Item -ItemType Directory -Force -Path $settingsDst | Out-Null

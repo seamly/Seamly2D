@@ -28,7 +28,7 @@ gh workflow run ci.yml --ref run-seamlyLayout
 | `-Seamly2DBin` | yes | — | Dir with `seamly2d.exe` + windeployqt output. |
 | `-SeamlyMeBin` | yes | — | Dir with `seamlyme.exe` + windeployqt output. |
 | `-WinDeployQt` | yes | — | `windeployqt.exe` from the kit SeamlyLayout built against. |
-| `-SeamlyLayoutBuildDir` | no | `src\app\seamlylayout\qt_frontend\build\Release` | Where `cmake --build --preset release` writes `SeamlyLayout.exe`. |
+| `-SeamlyLayoutBuildDir` | no | `src\app\seamlylayout\qt_frontend\build\Release` | Where `cmake --build --preset release` writes `seamlylayout.exe`. |
 | `-SkipValidation` | no | off | Skips `wix msi validate` only. |
 | `-OutputDirName` | no | `seamly-msi` | Rename needs matching `.gitignore` and `ci.yml` changes. |
 
@@ -76,7 +76,7 @@ releases still go through `gh workflow run ci.yml`.
 
 ## 2. What the script does
 
-Checks first, fails on the first missing item: both exes, `seamly2d`'s `platforms\` dir, `SeamlyLayout.exe`, `wix`, the WiX UI/Util extensions, `-WinDeployQt`, and a `Microsoft.VC*.CRT` dir under `VCToolsRedistDir\<arch>`.
+Checks first, fails on the first missing item: both exes, `seamly2d`'s `platforms\` dir, `seamlylayout.exe`, `wix`, the WiX UI/Util extensions, `-WinDeployQt`, and a `Microsoft.VC*.CRT` dir under `VCToolsRedistDir\<arch>`.
 
 1. **Derives `ProductVersion`**: `YY.M.((D−1)·1440 + MMMM)` — MSI ignores the 4th field for upgrade comparisons; this always increases. Full version is stored as `DisplayVersion`.
 2. **Stages** `packaging\windows\seamly-msi\<arch>\`: `parent\` (shared Qt runtime + `windeployqt --qmldir …\qml --release` for SeamlyLayout, its `settings\`/`licenses\`, MSVC CRT DLLs) and `exes\` (the three exes, moved out of `parent\` after deployment so `.wxs` can author them explicitly for shortcuts/associations).

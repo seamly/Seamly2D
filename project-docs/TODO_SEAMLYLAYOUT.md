@@ -6,9 +6,9 @@ Check off subtasks as they are accomplished; when every subtask of a task is com
 
 Tasks in this file are numbered and are prefixed with `Layout.`
 
-## [ ] Task Layout.000 - Open SeamlyLayout.exe
+## [ ] Task Layout.000 - Open seamlylayout.exe
 
-- [ ] Layout.000.1 While in 'Piece Mode' in Seamly2D, pressing the 'Layout' button on the menu should immediately run SeamlyLayout.exe without displaying the old Seamly2D layout canvas or calling vlayout which has been superceded by the SeamlyLayout.exe application. The old vlayout code has been superceded by seamlylayout.exe
+- [ ] Layout.000.1 While in 'Piece Mode' in Seamly2D, pressing the 'Layout' button on the menu should immediately run seamlylayout.exe without displaying the old Seamly2D layout canvas or calling vlayout which has been superceded by the seamlylayout.exe application. The old vlayout code has been superceded by seamlylayout.exe
 
 ## [ ] Task Layout.00 - Layout Settings
 

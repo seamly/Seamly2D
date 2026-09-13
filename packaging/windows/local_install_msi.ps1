@@ -76,7 +76,7 @@
     Removed    after uninstalling.
 
 .PARAMETER ExpectSeamlyLayout
-    Assert SeamlyLayout.exe and its Start Menu shortcut are part of the install.
+    Assert seamlylayout.exe and its Start Menu shortcut are part of the install.
     Omit for the arm64 package, which ships the two parent apps only.
 
 .PARAMETER NoDesktopShortcuts
@@ -561,13 +561,13 @@ function Invoke-InstalledChecks {
     Write-Note "install directory: $installFolder"
 
     $expectedExes = @('seamly2d.exe', 'seamlyme.exe')
-    if ($ExpectSeamlyLayout) { $expectedExes += 'SeamlyLayout.exe' }
+    if ($ExpectSeamlyLayout) { $expectedExes += 'seamlylayout.exe' }
     foreach ($exe in $expectedExes) {
         Assert-That -Name "$exe is installed" -Succeeded (Test-Path -LiteralPath (Join-Path $installFolder $exe))
     }
     if (-not $ExpectSeamlyLayout) {
-        Assert-That -Name 'SeamlyLayout.exe is absent from this package' `
-            -Succeeded (-not (Test-Path -LiteralPath (Join-Path $installFolder 'SeamlyLayout.exe')))
+        Assert-That -Name 'seamlylayout.exe is absent from this package' `
+            -Succeeded (-not (Test-Path -LiteralPath (Join-Path $installFolder 'seamlylayout.exe')))
     }
 
     # A representative slice of the runtime rather than a full file list: the Qt
@@ -587,8 +587,8 @@ function Invoke-InstalledChecks {
     # seamly2d resolves its daughter app flat-beside-itself first
     # (SeamlySuitePaths::locateSeamlyLayout), so this is what Layout Mode needs.
     if ($ExpectSeamlyLayout) {
-        Assert-That -Name 'SeamlyLayout.exe sits beside seamly2d.exe, where Layout Mode looks for it' `
-            -Succeeded ((Test-Path -LiteralPath (Join-Path $installFolder 'SeamlyLayout.exe')) -and
+        Assert-That -Name 'seamlylayout.exe sits beside seamly2d.exe, where Layout Mode looks for it' `
+            -Succeeded ((Test-Path -LiteralPath (Join-Path $installFolder 'seamlylayout.exe')) -and
                         (Test-Path -LiteralPath (Join-Path $installFolder 'seamly2d.exe')))
     }
 
@@ -735,14 +735,14 @@ function Invoke-InstalledChecks {
 
     # The checkbox covers all three apps. SeamlyLayout opens standalone with no
     # argument, so a desktop launch is a supported way to start it.
-    # The file name is not the lower-cased shortcut name: SeamlyLayout.exe keeps
-    # its camel case on disk, and PowerShell's -eq compares strings case
-    # sensitively, so each shortcut names its own executable here.
+    # Each shortcut names its own executable rather than lower-casing Name:
+    # the Start Menu display name stays TitleCase for all three apps, but the
+    # file on disk is lowercase.
     $desktopShortcuts = @(
         @{ Name = 'Seamly2D'; Exe = 'seamly2d.exe' },
         @{ Name = 'SeamlyMe'; Exe = 'seamlyme.exe' })
     if ($ExpectSeamlyLayout) {
-        $desktopShortcuts += @{ Name = 'SeamlyLayout'; Exe = 'SeamlyLayout.exe' }
+        $desktopShortcuts += @{ Name = 'SeamlyLayout'; Exe = 'seamlylayout.exe' }
     }
     foreach ($shortcut in $desktopShortcuts) {
         $name = $shortcut.Name
