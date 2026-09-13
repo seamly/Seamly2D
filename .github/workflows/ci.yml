@@ -411,7 +411,7 @@ jobs:
           .\packaging\windows\smsi.ps1 -Arch ${{ matrix.arch }} -Version $env:VERSION_NUMBER `
             -Seamly2DBin src\app\seamly2d\bin `
             -SeamlyMeBin src\app\seamlyme\bin `
-            -SeamlyLayoutBin src\app\seamlylayout\qt_frontend\build\Release `
+            -SeamlyLayoutBuildDir src\app\seamlylayout\qt_frontend\build\Release `
             -WinDeployQt "$env:QT_ROOT_DIR\bin\windeployqt.exe"
 
       # ----- Sign MSI file -----
