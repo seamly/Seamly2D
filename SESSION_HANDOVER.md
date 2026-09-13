@@ -6,6 +6,35 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-13 — CI: parallel Windows compile with jom
+
+Job `Build SeamlyLayout Release` (run `34784858753`) failed at
+`smsi.ps1 -SeamlyLayoutBin` — a stale parameter name from before commit
+`794d13092e` (already fixed on `run-seamlyLayout`, so no action needed there).
+
+Analyzing that job's log surfaced a real slowdown: `qmake`/`nmake` compiles
+Seamly2D + SeamlyMe single-threaded and takes ~20 of the job's ~27 minutes.
+Branch `task-jom-parallel-nmake` swaps `nmake` for `jom -j
+$env:NUMBER_OF_PROCESSORS` (Qt's parallel nmake clone) in both
+`windows-test`'s and `windows-msi`'s build steps in `ci.yml`. `nmake check`
+(test execution) is left alone on purpose — the four Qt suites share one `-o`
+log target and would clobber each other if run concurrently.
+
+jom ships x86/x64 only; the `windows-msi` matrix's `arm64` leg
+(`windows-11-arm`) runs it too, on the assumption Windows 11 ARM's x64
+emulation handles it — user's explicit call, unverified until that leg's CI
+run is watched.
+
+`packaging\windows\local_build_msi.ps1`'s docstring (lines 26-29) already
+claims "Uses jom instead of nmake" but its body still calls plain `nmake` /
+`nmake check` (lines 222, 247) — a pre-existing mismatch, not touched by this
+task. Worth a follow-up.
+
+**Next step:** merge `task-jom-parallel-nmake` into `run-seamlyLayout`, push
+without the skip-ci token (`.github/workflows/**` changed functionally), and
+watch the `ci.yml` run — this is the only way to confirm both the timing win
+and the arm64 leg.
+
 ## Current steps
 
 1. build .msi with `packaging\windows\local_build_msi.ps1`
