@@ -457,21 +457,8 @@ bool Application2D::notify(QObject *receiver, QEvent *event)
 /**
  * @brief seamlyLayoutFilePath locates the SeamlyLayout executable.
  *
- * Lookup order: (1) the user-configured path from the application settings,
- * (2) the install-directory lookup via SeamlySuitePaths::locateSeamlyLayout()
- * — the executable directly beside seamly2d (the flat layout used where all
- * apps share one Qt runtime, e.g. the Linux Flatpak's /app/bin) or in the
- * "SeamlyLayout" subdirectory the Windows MSI installer uses (Task 13; there
- * SeamlyLayout carries its own Qt runtime, which cannot share a flat directory
- * with the parent apps' differently-versioned Qt DLLs) — and (3) a SeamlyLayout
- * development build inside the source checkout this executable was built from,
- * located relative to the running executable by
- * SeamlySuitePaths::locateSeamlyLayoutDevBuild() (Release preferred over
- * Debug), so that Layout Mode works during development without any
- * configuration and without naming any one developer's machine (Task 50).
- *
- * The order matters: the development build is tried last, so it can never
- * shadow a configured path or an installed copy.
+ * Lookup order: configured path, installed copy, then a development build
+ * relative to the running executable (Release preferred over Debug).
  *
  * @return absolute path of the SeamlyLayout executable, or an empty string when it cannot be found.
  */

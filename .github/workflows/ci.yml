@@ -250,17 +250,40 @@ jobs:
 
       - name: install build dependencies
         run: |
-          brew install xerces-c
+          brew install xerces-c ninja
 
+      # qtwebengine/qtwebchannel/qtpositioning are for SeamlyLayout's
+      # WebEngineView (SvgCanvas.qml); qtmultimedia is for the parent apps.
+      # Matches the windows-msi job's module list.
       - uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
           cache: true
-          modules: qtmultimedia
+          modules: qtmultimedia qtwebengine qtwebchannel qtpositioning
 
       - name: update version
         run: |
           ./packaging/version.sh ${VERSION_NUMBER}
+
+      # ------------------- SeamlyLayout ------------------------------------
+      # Built the same way as the windows-msi job: CMake/Ninja drives Corrosion
+      # to cargo-build the cxxqt_bridge crate, then links the Qt/QML app
+      # against it. MACOS_BUNDLE_POST_BUILD (qt_frontend/CMakeLists.txt) runs
+      # the Qt macOS deploy step right after the build, so the resulting
+      # build/Release/SeamlyLayout.app is already self-contained.
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src/app/seamlylayout
+
+      - name: Build SeamlyLayout release
+        working-directory: src/app/seamlylayout/qt_frontend
+        run: |
+          cmake --preset release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+          cmake --build --preset release
 
       - name: setup signing and notarization
         env:
