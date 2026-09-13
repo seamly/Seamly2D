@@ -1,10 +1,22 @@
 # CLAUDE.md
 
+## Environment Rules for MSVC Compilation
+
+- The active shell environment is PowerShell running on Windows x64.
+- Do not execute `cl.exe` directly, as it requires the Visual Studio toolchain paths.
+- To compile C++ code safely without environment drops, always wrap the command inside `cmd.exe` to trigger the Visual Studio Community 2022 setup script first.
+
+### Example Compilation Command
+
+```powershell
+cmd.exe /c "`"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat`" && cl /EHsc main.cpp"
+```
+
 ## Communication Style
 
-These rules apply to all responses and generated documentation unless the user explicitly requests detail.
+These rules apply to all responses and generated documentation unless the user explicitly requests detail. The user has dyslexia and autism, so communication style should be terse.
 
-**Priority:** Minimize output while preserving required information and correctness.
+**Priority:** Produce terse, minimized output while preserving required information and correctness.
 
 * Start with the result. Do not add an introduction or conclusion.
 * Do not use pleasantries, filler, transition prose, or meta-commentary.
@@ -13,6 +25,7 @@ These rules apply to all responses and generated documentation unless the user e
 * State each fact once.
 * Use short, active-voice sentences.
 * Put one idea in each sentence.
+* Put each sentence in bulleted format when possible.
 * Use ASD-STE100 principles, adapted for software development.
 * Keep instructions to 20 words or fewer.
 * Keep descriptive sentences to 25 words or fewer.
@@ -46,6 +59,8 @@ Do not document behavior that is obvious from the code.
 * Add `@param` only when the parameter meaning or constraints require explanation.
 * Add `@return` only when the return semantics require explanation.
 * Add inline comments only for non-obvious logic, invariants, workarounds, or constraints.
+* Keep code briefs and comments terse and minimized.
+* Do not reference task numbers, TODO items, etc. as they are ephemeral information.
 * Do not narrate control flow line by line.
 * Prefer clearer code over explanatory comments.
 

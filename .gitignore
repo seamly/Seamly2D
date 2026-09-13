@@ -1,3 +1,5 @@
+# TODO: remove entries related to testing after SeamlyLayout is fully tested
+
 # Ignore temporary files
 *~
 
@@ -9,6 +11,10 @@
 
 # Seamly2D lock files
 *.locked
+
+# log files
+*.log
+*log.txt
 
 # test key files
 *seamly-signing-key.json
@@ -46,6 +52,7 @@ uic/
 rcc/
 man/
 build/
+logs/
 .vscode/*
 .codex/
 
@@ -91,6 +98,9 @@ cov-int/
 *.i*86
 *.x86_64
 *.hex
+*.AppImage
+*.dmg
+*.zip
 
 # Debug files
 *.dSYM/
@@ -208,13 +218,17 @@ target_wrapper.bat
 # (Was "!.claude/settings.local.json" — force-tracked — until 2026-07-27.)
 .claude/settings.local.json
 
-# track claude Session handover file
-!SESSION_HANDOVER.md
-
-# documents
+# Ignore doxygen directory
 docs/
 
-# seamlylayout daughter app (absorbed from the former nested seamlyLayout repo).
+# Ignore build outputs and local state (also covered by src/app/seamlylayout/.gitignore,
+src/app/seamlylayout/target/
+src/app/seamlylayout/logs/
+src/app/seamlylayout/qt_frontend/build/
+
+# track claude Session handover file 
+!SESSION_HANDOVER.md
+# track seamlylayout daughter app docs (absorbed from the former nested seamlyLayout repo).
 # Its docs tree stays tracked despite the global docs/ rule above.
 !src/app/seamlylayout/docs/
 # track seamlylayout .claude & .vs files for testing
@@ -222,14 +236,14 @@ docs/
 !src/app/seamlylayout/.vs/
 # track seamlylayout input * output files for testing
 !src/app/seamlylayout/input/
-src/app/seamlylayout/output/
-# Ignore build outputs and local state (also covered by src/app/seamlylayout/.gitignore,
-src/app/seamlylayout/target/
-src/app/seamlylayout/logs/
-src/app/seamlylayout/qt_frontend/build/
+!src/app/seamlylayout/output/
 # track seamlylayout local build files for testing
 !src/app/seamlylayout/qt_frontend/CMakeFiles/
 !src/app/seamlylayout/qt_frontend/CMakeCache.txt
 !src/app/seamlylayout/qt_frontend/.cmake/
 !src/app/seamlylayout/qt_frontend/.qt/
 !src/app/seamlylayout/qt_frontend/*.user
+
+
+
+

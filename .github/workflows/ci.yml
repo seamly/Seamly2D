@@ -51,24 +51,21 @@ jobs:
   version:
     runs-on: ubuntu-latest
     outputs:
+      # Version: YY.M.D.mmmm (YY=year-2000, mmmm=minute of day 0-1439).
+      # No leading zeros. For pull requests, keep static version. 
       version_number: ${{ steps.create-version.outputs.version_number }}
-
-    # The version number is YY.M.D.MMMM, a simple, easy-to-read "rolling release"
-    # scheme. For pull requests before merge, keep a static version number.
-    # YY is the year minus 2000. MMMM is the minute of the day (HH*60+MM,
-    # 0-1439) - the same minutes-based encoding smsi.ps1 uses to derive the MSI
-    # ProductVersion.
-    # No component keeps a leading zero. A leading zero is an octal literal in
-    # projectversion.cpp, and it makes the MSI DisplayVersion and the release tag
-    # disagree with the version the binary reports.
     steps:
       - name: create version number
         id: create-version
         run: |
-          # One date call: two calls can straddle a minute boundary.
+          # get year month day hour minutes
           read -r year month day hour minute <<< "$(date +'%Y %m %d %H %M')"
+          # convert to year month day minutes (matches semantic versioning scheme Major.Minor.Patch.Qualifier)
           echo "version_number=$((10#$year - 2000)).$((10#$month)).$((10#$day)).$((10#$hour * 60 + 10#$minute))" >> $GITHUB_OUTPUT
 
+  # ---------------------------------------------------------------------------
+  # Linux unit tests run only on pull requests
+  # Uses xvfb-run to simulate a display for GUI tests.
   linux-test:
     if: github.event_name == 'pull_request'
     name: 'Linux: Run unit tests'
@@ -103,37 +100,10 @@ jobs:
           xvfb-run -a make check
 
   # ---------------------------------------------------------------------------
-  # Windows: build and RUN the unit tests, and gate both pre-releases on them.
-  #
-  # WHY THIS JOB EXISTS
-  # Nothing else compiles src/test on a push. Every build job passes
-  # CONFIG+=noTests, and linux-test is gated on pull_request, so a compile error
-  # in a test file reached the branch and two CI runs went green over it
-  # (tst_dataroot.cpp carried QLatin1Char('\'), an unterminated character
-  # literal, 2026-08-17).
-  #
-  # WHAT IT GATES
-  # publish-windows-dev and publish both list this job in `needs`, so a failing
-  # Windows test stops the rolling dev-latest MSIs and the versioned
-  # pre-release. It does NOT stop windows-msi: the packages still build and stay
-  # downloadable as run artifacts, which is what you want when diagnosing the
-  # failure that blocked the publish.
-  #
-  # WHY IT IS SEPARATE, NOT FOLDED INTO windows-msi
-  # Folding it in would save a Qt install and an app build, but it would put the
-  # tests on the package-critical path instead of the publish-critical path, and
-  # it would run them twice - once per architecture. Separate, it runs in
-  # PARALLEL with the package legs, so it adds almost nothing to wall-clock
-  # time.
-  #
-  # x64 only. Nothing in the tests is architecture-specific, and the arm64
-  # runner is the scarcer resource.
-  #
-  # qtmultimedia only - no qtwebengine. The qmake tree does not build
-  # SeamlyLayout, so the WebEngine modules the windows-msi job installs are not
-  # needed here, which makes this the cheapest Qt install in the workflow.
-  # xerces-c needs no install step: the MSVC import library is vendored under
-  # src/libs/xerces-c/msvc/lib.
+  # Windows x64 unit tests. 
+  # Runs on non-pull request events and non-Weblate events. 
+  # Gates publishing jobs without blocking MSI builds -- runs in parallel with package jobs. 
+  # `qtmultimedia` is sufficient for testing, and `xerces-c` is provided in the repo.
   # ---------------------------------------------------------------------------
   windows-test:
     if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate'
@@ -154,34 +124,28 @@ jobs:
           arch: win64_msvc2022_64
           cache: true
           modules: qtmultimedia
-          aqtsource: git+https://github.com/miurahr/aqtinstall.git  # Remove once aqtinstall 3.4.0 is released, see https://github.com/miurahr/aqtinstall/issues/1007
+          aqtsource: git+https://github.com/miurahr/aqtinstall.git  # TODO: Remove once aqtinstall 3.4.0 is released, see https://github.com/miurahr/aqtinstall/issues/1007
 
-      # No CONFIG+=noTests, which is the entire point: src.pro then adds the
-      # test subdirectory. `-config release` is not optional - the MSVC default
-      # is debug_and_release, which would build the whole tree twice.
+      # Build with tests enabled. MSVC requires explicit parameter
+      # `-config release` to avoid the `debug_and_release` double build.
       - name: build Seamly2D, SeamlyMe and the unit tests
         run: |
           qmake Seamly.pro -config release
           nmake
-      # Runs all four test binaries — Seamly2DTest, CollectionTest, ParserTest,
-      # TranslationsTest. `CONFIG += testcase` in each .pro is what supplies the
-      # `check` target.
-      #
-      # QT_QPA_PLATFORM=offscreen because a GitHub Windows runner has no
-      # interactive desktop the widget tests can rely on. The Linux job reaches
-      # the same place with xvfb-run.
-      #
-      # DIAGNOSING A FAILURE HERE IS AWKWARD, so read this before assuming the
-      # log is broken: only ParserTest.pro sets `CONFIG += console`. The other
-      # three link as GUI-subsystem binaries on MSVC, so a failure can arrive as
-      # a bare non-zero exit code with no message. If that happens, re-run the
-      # binary by hand with `-o <file>,txt` and print the file — the same trick
-      # SESSION_HANDOVER.md records for SeamlyLayout's Qt frontend tests.
+      # Run the four test binaries: Seamly2DTest, CollectionTest, ParserTest,
+      # and TranslationsTest. `CONFIG += testcase` in each .pro adds the `check` target.
+      # `QT_QPA_PLATFORM: offscreen` avoids needing a desktop on GitHub Windows
+      # runners (linux job uses `xvfb-run`).
       - name: run the unit tests
         env:
           QT_QPA_PLATFORM: offscreen
         run: nmake check
 
+
+  # ---------------------------------------------------------------------------
+  # Build Linux APPIMAGE
+  # For x64 arch
+  # TODO: implement for arm64 arch
   linux:
     if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate'
     name: 'Linux: Build AppImage'
@@ -237,6 +201,9 @@ jobs:
           path: Seamly2D-x86_64.AppImage
           if-no-files-found: error
 
+
+  # ---------------------------------------------------------------------------
+  # Build MacOS DMGs
   macos:
     if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate'
     name: 'macOS: Build'
@@ -253,8 +220,8 @@ jobs:
           brew install xerces-c ninja
 
       # qtwebengine/qtwebchannel/qtpositioning are for SeamlyLayout's
-      # WebEngineView (SvgCanvas.qml); qtmultimedia is for the parent apps.
-      # Matches the windows-msi job's module list.
+      # WebEngineView provides SvgCanvas.qml; qtmultimedia is for the 
+      # parent apps. Matches the windows-msi job's module list.
       - uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
@@ -265,12 +232,9 @@ jobs:
         run: |
           ./packaging/version.sh ${VERSION_NUMBER}
 
-      # ------------------- SeamlyLayout ------------------------------------
-      # Built the same way as the windows-msi job: CMake/Ninja drives Corrosion
-      # to cargo-build the cxxqt_bridge crate, then links the Qt/QML app
-      # against it. MACOS_BUNDLE_POST_BUILD (qt_frontend/CMakeLists.txt) runs
-      # the Qt macOS deploy step right after the build, so the resulting
-      # build/Release/SeamlyLayout.app is already self-contained.
+      # Build SeamlyLayout with CMake/Ninja and Rust's Corrosion, then 
+      # package the Qt app. The macOS deploy step runs automatically 
+      # after the build.
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
@@ -326,22 +290,10 @@ jobs:
           path: packaging/macos/Seamly2D-macos.zip
           if-no-files-found: error
 
+
   # ---------------------------------------------------------------------------
-  # Windows MSI for x64 and arm64 
-  #
-  # Each WiX MSI is built by 'packaging/windows/smsi.ps1' from
-  # smsi.wxs with WiX v6.
-  #
-  # EACH MSI shipsall three apps — seamly2d + seamlyme (qmake) and
-  # SeamlyLayout (Rust + CMake/Ninja) — against ONE Qt 6.11.1 runtime.
-  #
-  # EACH ARCH BUILDS NATIVELY ON ITS OWN RUNNER : x64 on windows-latest 
-  # with the win64_msvc2022_64 kit, arm64 on windows-11-arm with
-  # the windows_arm64 host and the win64_msvc2022_arm64 kit. NOTHING IS
-  # CROSS-COMPILED. Both run the same plain `qmake`, the same cargo host 
-  # toolchain, and the same smsi.ps1 invocation — each differs only in the 
-  # runner, the MSVC arch, and the Qt host/arch names.
-  # ---------------------------------------------------------------------------
+  # Build Windows MSIs 
+  # For x64 and arm64 arches
   windows-msi:
     if: github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate'
     name: 'Windows: Build MSI (${{ matrix.arch }})'
@@ -350,17 +302,14 @@ jobs:
     env:
       VERSION_NUMBER: ${{ needs.version.outputs.version_number }}
     strategy:
-      # One arch failing must not cancel the other: the publish job needs to
-      # know whether BOTH packages are broken or only one.
+      # Matrix for MSI builds by architecture.
+      # Keep all arch jobs running; the publish job needs both results.
       fail-fast: false
       matrix:
         include:
-          # qt-modules is IDENTICAL for both arches: qtmultimedia for the
-          # parent apps, and qtwebengine (SvgCanvas.qml's WebEngineView) plus
-          # its dependencies qtwebchannel/qtpositioning for SeamlyLayout —
-          # aqtinstall does not auto-resolve a module's Qt dependencies, and
-          # without them find_package(Qt6 ... WebEngineQuick) fails at
-          # configure time.
+          # qt-modules are identical for both arches. Include qtmultimedia,
+          # qtwebengine, qtwebchannel, and qtpositioning since aqtinstall
+          # does not auto-resolve Qt module dependencies.
           - arch: x64
             runner: windows-latest
             msvc-arch: x64
@@ -381,7 +330,8 @@ jobs:
         with:
           arch: ${{ matrix.msvc-arch }}
 
-      # ONE Qt install for every app in the package. 
+      # ----- Install Qt -----
+      # two separate Qt kit installs, one per arch
       - uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
@@ -389,23 +339,26 @@ jobs:
           arch: ${{ matrix.qt-arch }}
           cache: true
           modules: ${{ matrix.qt-modules }}
-          aqtsource: git+https://github.com/miurahr/aqtinstall.git  # Remove once aqtinstall 3.4.0 is released, see https://github.com/miurahr/aqtinstall/issues/1007
+          # TODO: Remove next line once aqtinstall 3.4.0 is released
+          # see https://github.com/miurahr/aqtinstall/issues/1007
+          aqtsource: git+https://github.com/miurahr/aqtinstall.git  
 
       - name: update version
         shell: bash
         run: |
           ./packaging/version.sh ${VERSION_NUMBER}
 
-      # The .pro post-link runs windeployqt, so each app's bin\ ends up
-      # install-ready and smsi.ps1 can stage it directly. 
+      # ----- Build Seamly2D & SeamlyMe -----
+      # Uses qmake with Seamly.pro plus src/app/seamly2d & 
+      # src/app/seamlyme subdirectory .pro files. 
       - name: make seamly2d.exe and seamlyme.exe
         run: |
           qmake Seamly.pro -config release CONFIG+=noTests
           nmake
 
-      # ------------------- SeamlyLayout (both arches) ----------------------
-      # No `targets:` and no explicit cargo target: each runner's default host 
-      # toolchain already matches the package it is building.
+      # ----- Build SeamlyLayout -----
+      # Install Rust build tools, Cargo package manager (includes CXX-Qt 
+      # to create bridge from Rust to C++/QML), and Ninja.
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
@@ -413,14 +366,13 @@ jobs:
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: src/app/seamlylayout
-          # Keeps the two legs from sharing one cache key across architectures.
+          # Separate arch keys prevent the two arches from sharing cache data.
           key: ${{ matrix.arch }}
 
       - name: Install Ninja
         run: choco install ninja -y
 
-      # One CMake build produces both the Rust bridge (Corrosion/cxx-qt) and the
-      # C++/QML app, against the same Qt kit installed above.
+      # Build the Rust bridge and C++/QML app executable with CMakeLists.txt.
       - name: Build SeamlyLayout release
         working-directory: src/app/seamlylayout/qt_frontend
         shell: pwsh
@@ -430,12 +382,15 @@ jobs:
           cmake --build --preset release
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      # ------------------- package ------------------------------------------
-      # Pinned to WiX v6: v7 (July 2026) refuses to run until an Open Source
-      # Maintenance Fee (OSMF) EULA is accepted (error WIX7015). 
-      # Extension versions must match the core tool: 
-      # UI supplies the directory chooser, 
-      # Util supplies RemoveFolderEx (removes a previous NSIS installation).
+      # ----- Create MSI installer -----
+      # TODO: upgrade to WiX v7 (July 2026) when feasible; v7 refuses to run 
+      # until an Open Source Maintenance Fee (OSMF) EULA is accepted (error WIX7015). 
+      # Applicable when we exceed $10K in annual sales + donations.
+      # TODO: when v7 is adopted, upgrade the WiX extensions: 
+      #     UI - provides the directory chooser.
+      #     Util - provides RemoveFolderEx which removes a previous NSIS installation.
+
+      # Install WIX
       - name: Install WiX toolset (v6)
         shell: pwsh
         run: |
@@ -447,18 +402,20 @@ jobs:
           wix extension add --global WixToolset.Util.wixext/$wixVer
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
-      # smsi.ps1 stages the shared Qt runtime, builds the MSI, runs the ICE
-      # checks and the install-time authoring test, and fails the job on any of
-      # them. Output: 'packaging\windows\seamly-msi\<arch>\seamly-<arch>.msi'
+      # Build MSI file 
+      # Uses `packaging/windows/smsi.ps1` -- stages Qt, builds & tests the MSI, 
+      # and outputs the installer MSI file to `packaging/windows/seamly-msi/x64/seamly-x64.msi`
+      # and `packaging/windows/seamly-msi/arm64/seamly-arm64.msi`.
       - name: Build MSI (all three apps)
         shell: pwsh
         run: |
           .\packaging\windows\smsi.ps1 -Arch ${{ matrix.arch }} -Version $env:VERSION_NUMBER `
             -Seamly2DBin src\app\seamly2d\bin `
             -SeamlyMeBin src\app\seamlyme\bin `
+            -SeamlyLayoutBin src\app\seamlylayout\qt_frontend\build\Release `
             -WinDeployQt "$env:QT_ROOT_DIR\bin\windeployqt.exe"
 
-      # ------------------- sign (main builds only) --------------------------
+      # Sign MSI file
       - name: Authenticate to Google Cloud (for signing)
         uses: google-github-actions/auth@v3
         env:
@@ -502,20 +459,21 @@ jobs:
           --tsaurl http://timestamp.sectigo.com \
           packaging/windows/seamly-msi/${{ matrix.arch }}/seamly-${{ matrix.arch }}.msi
 
-      # download-artifact extracts the archive, so both publish jobs get
-      # seamly-<arch>.msi. The artifact name repeats the file name only so the
-      # two match.
-      # GitHub workflow artifacts are downloadable as a zip file.
-      # Releases are downloadable as .msi (not msi.zip)
+      # Upload MSI
+      # Both publish jobs need the extracted MSI file; the artifact name must match the file name.
       - uses: actions/upload-artifact@v7
         with:
           name: seamly-${{ matrix.arch }}.msi
           path: packaging/windows/seamly-msi/${{ matrix.arch }}/seamly-${{ matrix.arch }}.msi
           if-no-files-found: error
 
-  # Publish the Windows MSIs to one rolling pre-release for testing..
+
+  # ---------------------------------------------------------------------------
+  # Publish artifacts
+    
+  # ----- Publish ONLY MSIs to PRE-RELEASE (for testing) for any branch on push events
   publish-windows-dev:
-    if: github.event_name == 'push' && github.ref_name == 'run-seamlyLayout'
+    if: (github.event_name == 'push')
     runs-on: ubuntu-latest
     needs: [version, windows-msi, windows-test]
     env:
@@ -529,9 +487,11 @@ jobs:
         with:
           name: seamly-arm64.msi
 
-      # Replace the windows rolling pre-release instead of editing it.
-      # The delete leaves a gap of a few seconds with no dev-latest. A run
-      # cancelled inside that gap leaves none until the next push.
+      # Replace the rolling pre-release MSI files so dev-latest always contains
+      # the newest Windows MSIs. The delete leaves a gap of a few seconds with 
+      # no dev-latest. A run cancelled inside that gap leaves none until the next 
+      # push. This risk is acceptable as pre-release is only for development and 
+      # testing purposes.
       - name: Replace the rolling Windows pre-release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -555,9 +515,58 @@ jobs:
             --notes-file notes.md \
             seamly-x64.msi seamly-arm64.msi
 
-  # Publish the installer artifacts
+
+  # ----- Publish ALL ARTIFACTS to PRE-RELEASE (for testing) for any branch on manual events
+  publish-all-dev:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    needs: [version, linux, macos, windows-msi, windows-test]
+    env:
+      VERSION_NUMBER: ${{ needs.version.outputs.version_number }}
+
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          name: Seamly2D-x86_64.AppImage
+      - uses: actions/download-artifact@v8
+        with:
+          name: Seamly2D-macos.zip
+      - uses: actions/download-artifact@v8
+        with:
+          name: seamly-x64.msi
+      - uses: actions/download-artifact@v8
+        with:
+          name: seamly-arm64.msi
+
+      # Separate rolling tag from publish-windows-dev's dev-latest (Windows-only,
+      # every push). This tag covers all platforms and only runs on manual dispatch.
+      - name: Replace the rolling all-platform pre-release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release delete dev-latest-full --repo "$GITHUB_REPOSITORY" --yes --cleanup-tag || true
+
+          cat > notes.md <<EOF
+          All-platform installers built from the newest \`run-seamlyLayout\` commit.
+
+          - Version: ${VERSION_NUMBER}
+          - Commit: ${GITHUB_SHA}
+
+          Manually triggered via workflow_dispatch. Replaces the previous all-platform pre-release.
+          EOF
+
+          gh release create dev-latest-full \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "$GITHUB_SHA" \
+            --prerelease \
+            --title "All-platform development build ${VERSION_NUMBER}" \
+            --notes-file notes.md \
+            Seamly2D-x86_64.AppImage Seamly2D-macos.zip seamly-x64.msi seamly-arm64.msi
+
+
+  # ----- Publish ALL ARTIFACTS to RELEASE for specified branches on scheduled events 
   publish:
-    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref_name == 'run-seamlyLayout'
+    if: (github.event_name == 'schedule' && github.ref_name == 'run-seamlyLayout')
     runs-on: ubuntu-latest
     needs: [version, linux, macos, windows-msi, windows-test]
     env:
@@ -582,16 +591,19 @@ jobs:
           name: ${{ env.VERSION_NUMBER }}
           generate_release_notes: true
           fail_on_unmatched_files: true
-          prerelease: true
+          prerelease: false
           files: |
             Seamly2D-x86_64.AppImage
             Seamly2D-macos.zip
             seamly-x64.msi
             seamly-arm64.msi
 
-  # update doxygen files and deploy to gh-pages branch 
+
+  # ---------------------------------------------------------------------------
+  # Update doxygen files
+  # Deploy to gh-pages for specified branches on scheduled or manual events
   document:
-    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || github.event_name == 'push')
+    if: (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && github.ref_name == 'run-seamlyLayout'
     runs-on: ubuntu-latest
 
     steps:
@@ -603,5 +615,6 @@ jobs:
           # folder where docs are built, must match OUTPUT_DIRECTORY in Doxyfile + html
           folder: docs/html
           config_file: Doxyfile
-          # target_folder must match pages config in https://github.com/FashionFreedom/Seamly2D/settings/pages
+          # target_folder must match pages config at `https://github.com/seamly/Seamly2D/settings/pages
           target_folder: docs/
+          # see doxygen site at https://seamly.github.io/Seamly2D/doxygen/
