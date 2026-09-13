@@ -125,16 +125,23 @@ jobs:
           modules: qtmultimedia
           aqtsource: git+https://github.com/miurahr/aqtinstall.git  # TODO: Remove once aqtinstall 3.4.0 is released, see https://github.com/miurahr/aqtinstall/issues/1007
 
+      - name: Install jom
+        run: choco install jom -y
+
       # Build with tests enabled. MSVC requires explicit parameter
       # `-config release` to avoid the `debug_and_release` double build.
+      # jom is nmake-compatible and compiles object files in parallel across
+      # all runner cores; nmake itself never parallelizes a single build.
       - name: build Seamly2D, SeamlyMe and the unit tests
         run: |
           qmake Seamly.pro -config release
-          nmake
+          jom -j $env:NUMBER_OF_PROCESSORS
       # Run the four test binaries: Seamly2DTest, CollectionTest, ParserTest,
       # and TranslationsTest. `CONFIG += testcase` in each .pro adds the `check` target.
       # `QT_QPA_PLATFORM: offscreen` avoids needing a desktop on GitHub Windows
       # runners (linux job uses `xvfb-run`).
+      # Stays on nmake (serial): the four suites share one -o log target, so
+      # running them concurrently under jom would let them clobber each other.
       - name: run the unit tests
         env:
           QT_QPA_PLATFORM: offscreen
@@ -348,12 +355,17 @@ jobs:
           ./packaging/version.sh ${VERSION_NUMBER}
 
       # ----- Build Seamly2D & SeamlyMe -----
-      # Uses qmake with Seamly.pro plus src/app/seamly2d & 
-      # src/app/seamlyme subdirectory .pro files. 
+      # Uses qmake with Seamly.pro plus src/app/seamly2d &
+      # src/app/seamlyme subdirectory .pro files.
+      - name: Install jom
+        run: choco install jom -y
+
+      # jom is nmake-compatible and compiles object files in parallel across
+      # all runner cores; nmake itself never parallelizes a single build.
       - name: make seamly2d.exe and seamlyme.exe
         run: |
           qmake Seamly.pro -config release CONFIG+=noTests
-          nmake
+          jom -j $env:NUMBER_OF_PROCESSORS
 
       # ----- Build SeamlyLayout -----
       # Install Rust build tools, Cargo package manager (includes CXX-Qt 
