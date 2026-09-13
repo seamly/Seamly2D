@@ -192,7 +192,7 @@ jobs:
           cp /usr/bin/pdftops AppDir/usr/bin
           mkdir -p AppDir/usr/share/X11/xkb
           cp -r /usr/share/X11/xkb/* AppDir/usr/share/X11/xkb
-          linuxdeploy-x86_64.AppImage --appdir AppDir --desktop-file=dist/seamly2d.desktop --plugin qt --output appimage
+          linuxdeploy-x86_64.AppImage --appdir AppDir --desktop-file=packaging/assets/seamly2d.desktop --plugin qt --output appimage
 
       - uses: actions/upload-artifact@v7
         with:
