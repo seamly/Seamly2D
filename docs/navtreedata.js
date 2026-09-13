@@ -46,19 +46,19 @@ var NAVTREE =
       [ "Architecture", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md20", null ],
       [ "Key Conventions", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md21", null ],
       [ "Command Line — the Seamly2D handoff contract (Task 49, revised by Seamly2D.5)", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md22", null ],
-      [ "Platform Support", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md23", null ],
-      [ "Build Commands", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md24", null ],
-      [ "Search & Update Policy", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md25", null ],
-      [ "Rules", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md26", null ],
-      [ "Workflow Guidelines", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md27", null ],
-      [ "Seamly Application Suite", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md28", null ]
+      [ "Platform Support", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md24", null ],
+      [ "Build Commands", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md25", null ],
+      [ "Search & Update Policy", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md26", null ],
+      [ "Rules", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md27", null ],
+      [ "Workflow Guidelines", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md30", null ],
+      [ "Seamly Application Suite", "d8/dad/md_src_app_seamlylayout_CLAUDE.html#autotoc_md33", null ]
     ] ],
     [ "Fonts for SeamlyLayout", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html", [
-      [ "Required Fonts", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md30", [
-        [ "Comfortaa", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md31", null ],
-        [ "Inter Tight", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md32", null ]
+      [ "Required Fonts", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md28", [
+        [ "Comfortaa", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md29", null ],
+        [ "Inter Tight", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md31", null ]
       ] ],
-      [ "How to Download", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md33", null ],
+      [ "How to Download", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md32", null ],
       [ "Font Pairing Strategy", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md34", null ],
       [ "Alternative: Using Google Fonts Package", "d6/d55/md_src_app_seamlylayout_qt_frontend_assets_fonts_README_FONTS.html#autotoc_md35", null ]
     ] ],
