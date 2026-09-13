@@ -35,8 +35,8 @@
      src\test\*\bin and are not staged.
 
     The version stamp touches git-tracked files
-    (src\libs\vmisc\projectversion.{h,cpp}, dist\macx\seamly2d\Info.plist,
-    dist\macx\seamlyme\Info.plist). A successful build reverts them via
+    (src\libs\vmisc\projectversion.{h,cpp}, packaging\macos\seamly2d\Info.plist,
+    packaging\macos\seamlyme\Info.plist). A successful build reverts them via
     `git checkout`, unless those files already carried uncommitted changes
     before the run, in which case they are left alone so unrelated work is
     not discarded.
@@ -108,8 +108,8 @@ Write-Host "version: $Version"
 $versionStampedFiles = @(
     'src\libs\vmisc\projectversion.cpp',
     'src\libs\vmisc\projectversion.h',
-    'dist\macx\seamly2d\Info.plist',
-    'dist\macx\seamlyme\Info.plist'
+    'packaging\macos\seamly2d\Info.plist',
+    'packaging\macos\seamlyme\Info.plist'
 )
 
 $bash = Get-Command bash -ErrorAction SilentlyContinue

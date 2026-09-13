@@ -12,7 +12,7 @@ Tasks in this file may overlap in scope with other tasks -- analyze tasks to con
 
 Fix the casing, update references to these files
 
-- [ ] ICON = ../../../dist/seamly2d.icns — the file is Seamly2D.icns
+- [ ] ICON = ../../../packaging/assets/seamly2d.icns — the file is Seamly2D.icns
 - [ ] QMAKE_INFO_PLIST = .../seamly2d/info.plist — the file is Info.plist
 
 ## Task InstMacOS.0 — macOS installer (.pkg) for the Seamly suite (parity with the Windows MSI)

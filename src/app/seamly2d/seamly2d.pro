@@ -165,12 +165,12 @@ unix{
 
         # Utility pdftops required for exporting layout image to PS and EPS formats.
         xpdf.path = $$MACOS_DIR
-        xpdf.files += $${PWD}/../../../dist/macx/bin64/pdftops
+        xpdf.files += $${PWD}/../../../packaging/macos/bin64/pdftops
 
         # logo on macx.
-        ICON = ../../../dist/seamly2d.icns
+        ICON = ../../../packaging/assets/seamly2d.icns
 
-        QMAKE_INFO_PLIST = $${PWD}/../../../dist/macx/seamly2d/info.plist
+        QMAKE_INFO_PLIST = $${PWD}/../../../packaging/macos/seamly2d/info.plist
 
         # Copy to bundle multisize measurements files
         multisize.path = $${RESOURCES_DIR}/tables/multisize
@@ -185,9 +185,9 @@ unix{
         label.files = $$INSTALL_LABEL_TEMPLATES
 
         icns_resources.path = $${RESOURCES_DIR}
-        icns_resources.files += $$PWD/../../../dist/macx/individual_size_file.icns
-        icns_resources.files += $$PWD/../../../dist/macx/multi_size_file.icns
-        icns_resources.files += $$PWD/../../../dist/macx/2d_file.icns
+        icns_resources.files += $$PWD/../../../packaging/assets/individual_size_file.icns
+        icns_resources.files += $$PWD/../../../packaging/assets/multi_size_file.icns
+        icns_resources.files += $$PWD/../../../packaging/assets/2d_file.icns
 
         QMAKE_BUNDLE_DATA += \
             templates \

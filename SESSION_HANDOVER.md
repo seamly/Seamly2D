@@ -37,7 +37,7 @@ are gone. Build only with `local_build_msi.ps1` — do **not** use
 task work:
 
 - `scripts/prompt_testing.txt` — the user's own edit, made before this session;
-- `src/libs/vmisc/projectversion.cpp` / `.h` and the two `dist/macx` `Info.plist`
+- `src/libs/vmisc/projectversion.cpp` / `.h` and the two `packaging/macos` `Info.plist`
   files — the version stamp, which every local build rewrites.
 
 The push carried `ff7d8c441b` (the `--no-ff` merge) and `3efd1017ed` (the

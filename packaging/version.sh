@@ -10,8 +10,8 @@
 # Updates these files, unconditionally:
 #   src/libs/vmisc/projectversion.cpp -- compiles `extern cost in` constants read by the About dialog 
 #   src/libs/vmisc/projectversion.h 
-#   dist/macx/seamly2d/Info.plist -- macos metadata read by Finder, Launch Services, and Gatekeeper
-#   dist/macx/seamlyme/Info.plist -- macos metadata read by Finder, Launch Services, and Gatekeeper
+#   packaging/macos/seamly2d/Info.plist -- macos metadata read by Finder, Launch Services, and Gatekeeper
+#   packaging/macos/seamlyme/Info.plist -- macos metadata read by Finder, Launch Services, and Gatekeeper
 
 if [ $# -eq 1 ]; then
 	VERSIONSTR="${1}"
@@ -60,8 +60,8 @@ perl -pi -e "s,extern const int SUPER_MINOR__VERSION = .*;,extern const int SUPE
 perl -pi -e "s/#define VER_FILEVERSION .*/#define VER_FILEVERSION ${VERSIONARR[0]},${VERSIONARR[1]},${VERSIONARR[2]},${VERSIONARR[3]}/g" src/libs/vmisc/projectversion.h
 perl -pi -e "s,#define VER_FILEVERSION_STR \".*\",#define VER_FILEVERSION_STR \"$VERSIONSTR\",g" src/libs/vmisc/projectversion.h
 
-perl -pi -e "s,<key>CFBundleShortVersionString</key><string>.*</string>,<key>CFBundleShortVersionString</key><string>${VERSIONARR[0]}.${VERSIONARR[1]}.${VERSIONARR[2]}</string>,g" dist/macx/seamly2d/Info.plist
-perl -pi -e "s,<key>CFBundleVersion</key><string>.*</string>,<key>CFBundleVersion</key><string>${VERSIONARR[0]}.${VERSIONARR[1]}.${VERSIONARR[2]}</string>,g" dist/macx/seamly2d/Info.plist
+perl -pi -e "s,<key>CFBundleShortVersionString</key><string>.*</string>,<key>CFBundleShortVersionString</key><string>${VERSIONARR[0]}.${VERSIONARR[1]}.${VERSIONARR[2]}</string>,g" packaging/macos/seamly2d/Info.plist
+perl -pi -e "s,<key>CFBundleVersion</key><string>.*</string>,<key>CFBundleVersion</key><string>${VERSIONARR[0]}.${VERSIONARR[1]}.${VERSIONARR[2]}</string>,g" packaging/macos/seamly2d/Info.plist
 
-perl -pi -e "s,<key>CFBundleShortVersionString</key><string>.*</string>,<key>CFBundleShortVersionString</key><string>${VERSIONARR[0]}.${VERSIONARR[1]}.${VERSIONARR[2]}</string>,g" dist/macx/seamlyme/Info.plist
-perl -pi -e "s,<key>CFBundleVersion</key><string>.*</string>,<key>CFBundleVersion</key><string>${VERSIONARR[0]}.${VERSIONARR[1]}.${VERSIONARR[2]}</string>,g" dist/macx/seamlyme/Info.plist
+perl -pi -e "s,<key>CFBundleShortVersionString</key><string>.*</string>,<key>CFBundleShortVersionString</key><string>${VERSIONARR[0]}.${VERSIONARR[1]}.${VERSIONARR[2]}</string>,g" packaging/macos/seamlyme/Info.plist
+perl -pi -e "s,<key>CFBundleVersion</key><string>.*</string>,<key>CFBundleVersion</key><string>${VERSIONARR[0]}.${VERSIONARR[1]}.${VERSIONARR[2]}</string>,g" packaging/macos/seamlyme/Info.plist
