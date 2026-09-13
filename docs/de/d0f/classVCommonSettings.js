@@ -94,7 +94,6 @@ var classVCommonSettings =
     [ "GetLabelTimeFormat", "de/d0f/classVCommonSettings.html#a8df816bdb249b62b675085c22a669edc", null ],
     [ "GetLatestSkippedVersion", "de/d0f/classVCommonSettings.html#ae06eafdb43b7559876df330a4d3c97c8", null ],
     [ "getLegacyDataRoot", "de/d0f/classVCommonSettings.html#ade48845b214d3bf4d45a254e56183774", null ],
-    [ "getLegacyDocumentsDataRoot", "de/d0f/classVCommonSettings.html#a829483f8b65f46665f1c190932f44251", null ],
     [ "getLocale", "de/d0f/classVCommonSettings.html#a3cb6e2478da792e54118c2cfcbb9a712", null ],
     [ "getMaxBackups", "de/d0f/classVCommonSettings.html#a80d75d297a40d61c0719195d8c746de7", null ],
     [ "getMirrorByAxisSuffix", "de/d0f/classVCommonSettings.html#a74fe921528a0db7ead35800ce389ea04", null ],
