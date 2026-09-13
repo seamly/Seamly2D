@@ -78,7 +78,7 @@
     <Property Id="ARPCOMMENTS" Value="Seamly $(var.DisplayVersion) - apparel CAD pattern drafting (Seamly2D), measurements/sizing (SeamlyMe), and layout (SeamlyLayout)" />
 
     <!-- The full version of whatever is installed now, for the maintenance
-         page to name (InstWinX64.7.10). Read from the same HKLM value
+         page to name. Read from the same HKLM value
          InstallInfoRegistry writes, because Apps and features stores only the
          numeric MSI ProductVersion and that is not the version a user sees in
          the apps.
@@ -113,57 +113,14 @@
          conditions. -->
     <Property Id="SEAMLYDESKTOPSHORTCUTS" Value="1" Secure="yes" />
 
-    <!-- ================= user-data root (Task InstWinX64.1.2) ============== -->
-    <!-- Where the apps keep patterns, measurements and templates. TWO
-         identifiers, because the user picks a place and Setup names the folder:
-
-           SEAMLYDATAPARENT  what the user chooses. Default the user's
-                             Documents folder.
-           SEAMLYDATAROOT    SEAMLYDATAPARENT plus the fixed leaf SeamlyData,
-                             so the default is
-                             C:\Users\<user>\Documents\SeamlyData.
-
-         Both are DIRECTORY ids rather than plain properties, for three reasons:
-         WixUI's BrowseDlg edits a directory (it browses whatever
-         _BrowseProperty names), a public uppercase directory id can be set on
-         the msiexec command line for unattended installs, and CostFinalize
-         resolves them so [SEAMLYDATAROOT] expands everywhere below.
-
-             msiexec /i seamly-x64.msi /qn SEAMLYDATAPARENT="E:\"
-                 -> E:\SeamlyData
-             msiexec /i seamly-x64.msi /qn SEAMLYDATAROOT="E:\Patterns"
-                 -> exactly that; overrides the composition, leaf and all
-
-         The UI sequence computes the default for an interactive install.
-         Secure="yes" carries the value the user actually chose across to the
-         elevated execute sequence.
-
-         The execute sequence ALSO computes the same default now (2026-08-24),
-         so a bare `/qn` install with no properties creates and records
-         `<Documents>\SeamlyData` too, instead of silently deferring to each
-         app's own first-run default - Case 1b-i of
-         TEST_INSTALLER_WIN_X64.md found the two disagreeing. Accepted
-         tradeoff: a perMachine package's execute sequence normally runs
-         impersonating the installing user, but a genuinely unattended
-         SYSTEM-context deployment (SCCM/Intune, no logged-in user) has no user
-         to impersonate, so PersonalFolder there resolves to SYSTEM's own
-         profile - a data root nobody can see. Decided (2026-08-24): accept
-         that risk rather than leave a bare `/qn` install landing patterns in a
-         differently-named folder than the one Setup and the wizard both
-         advertise. A real unattended deployment that cares should already
-         pass SEAMLYDATAPARENT or SEAMLYDATAROOT explicitly - documented in
-         README_WINDOWS_BUILD.md - which this computation never overrides. -->
-    <!-- ====== program directory is fixed, not user-chosen (InstWinX64) === -->
-    <!-- The wizard no longer asks where to install: these unconditionally pin
-         INSTALLFOLDER to [ProgramFiles64Folder]SeamlyApps before CostFinalize
-         resolves the Directory table, in both sequences (mirrors the
-         SEAMLYDATAPARENT ui/execute pair above - one Action name per
-         sequence, since the same Id cannot be authored twice in one
-         sequence). SetProperty runs every time it fires regardless of any
-         prior value, so this overrides any AppSearch result and any
-         INSTALLFOLDER= passed on the command line - unlike a plain
-         Property/RegistrySearch pair, there is no way for anything else to
-         win. -->
+    <!-- ================= user-data root ============== -->
+    <!-- User data folder. SEAMLYDATAPARENT is the chosen parent; the final
+         data root is SEAMLYDATAROOT (parent + \SeamlyData). Both are
+         Directory ids so the wizard, BrowseDlg, and command-line installs all
+         work consistently. -->
+    <!-- Install location is fixed to [ProgramFiles64Folder]SeamlyApps. The
+         SetProperty entries in both UI and execute sequences override any prior
+         value, including INSTALLFOLDER passed on the command line. -->
     <SetProperty Id="INSTALLFOLDER"
                  Action="SetINSTALLFOLDER"
                  Value="[ProgramFiles64Folder]SeamlyApps"
@@ -183,28 +140,12 @@
                       Type="raw"
                       Bitness="always64" />
     </Property>
-    <!-- The default parent is the user's Documents folder (InstWinX64.00), so
-         the data root lands beside the documents every other application
-         writes, and so Setup and the apps agree on one place. The apps derive
-         their own default from QStandardPaths::DocumentsLocation, which reads
-         the same known folder.
-
-         PersonalFolder first, %USERPROFILE%\Documents second. PersonalFolder
-         is the known-folder value, so it follows a redirected Documents -
-         OneDrive Known Folder Move being the common case, where
-         %USERPROFILE%\Documents no longer exists at all. It is a system folder
-         property, set by CostInitialize, so it is readable here but NOT as
-         early as AppSearch. Should it ever be empty, the second action still
-         gives a usable path: an empty SEAMLYDATAPARENT makes the page's
-         PathEdit abort the install with error 2343.
-
-         Two actions need two Action names. WiX names a SetProperty action
-         after its property, so the two would otherwise collide.
-
-         The trailing backslash is required, not cosmetic: Windows Installer
-         composes a child directory onto the parent's value verbatim, so
-         "C:\Users\me" without it gives C:\Users\meSeamlyData. A resolved
-         folder property already ends in one. -->
+    <!-- The default parent is the user's Documents folder, so the data root
+         sits beside other app data and matches the app defaults. Use
+         PersonalFolder first because it follows redirected Documents folders,
+         such as OneDrive. If it is empty, fall back to %USERPROFILE%\Documents.
+         The trailing backslash matters: Windows appends the child folder to the
+         parent verbatim, so a missing slash would create a wrong path. -->
     <SetProperty Id="SEAMLYDATAPARENT"
                  Action="SetSEAMLYDATAPARENT"
                  Value="[PersonalFolder]"
@@ -237,51 +178,17 @@
                  Sequence="execute"
                  Condition="NOT SEAMLYDATAPARENT AND NOT Installed" />
 
-    <!-- ============ the value the apps actually read (InstWinX64.00) ===== -->
-    <!-- SEAMLYDATAROOTRECORDED, not SEAMLYDATAROOT, is what reaches
-         HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot. The apps trust that value and
-         adopt it on first run, so it must hold a folder somebody actually
-         chose - never a fallback the Directory table composed on its own.
-         SEAMLYDATAPARENTRECORDED protects HKLM\...\DataParent the same way -
-         it is read only by a future upgrade's wizard prefill, but the same
-         directory-table trap applies to it, so it gets the same guard.
+    <!-- ============ the value the apps actually read ===== -->
+    <!-- Record the chosen data path, not the raw directory ID. CostFinalize
+         resolves directory IDs to a machine path like C:\SeamlyData or C:\,
+         which is not what the app should persist. This value is what the app
+         reads from HKLM\SOFTWARE\Seamly\Seamly2D and is only set when the
+         user or this install actually chose a location.
 
-         SEAMLYDATAROOT and SEAMLYDATAPARENT cannot be used directly. Both are
-         directory ids, so CostFinalize always resolves them to something:
-         with no parent given, SEAMLYDATAROOT composes onto TARGETDIR and
-         yields ROOTDRIVE\SeamlyData, e.g. C:\SeamlyData - a per-machine
-         folder a standard user cannot write to, and SEAMLYDATAPARENT composes
-         onto TARGETDIR alone, e.g. bare C:\. Writing either raw property to
-         the registry after CostFinalize records that composed garbage, not
-         emptiness, even on a run that chose nothing.
-
-         Three cases, and each needs a different answer:
-
-           this run chose a root   record the resolved SEAMLYDATAROOT /
-                                   SEAMLYDATAPARENT. SEAMLYDATACHOSEN spots it
-                                   after the UI or execute default above has
-                                   run, but still BEFORE CostFinalize resolves
-                                   the directories - at that point both
-                                   properties are non-empty only if the
-                                   wizard, this run's own execute-sequence
-                                   default, or the command line set them.
-                                   The wizard's value crosses into the
-                                   elevated sequence because both are Secure.
-           repair or maintenance   keep what is already in the registry. The
-                                   RegistrySearch prefills the property, and
-                                   both UI and execute defaults carry
-                                   AND NOT Installed, so SEAMLYDATACHOSEN
-                                   reflects only what AppSearch found.
-           silent, no arguments    the execute-sequence default above now
-                                   fills SEAMLYDATAPARENT before this is
-                                   checked, so this case merges into the
-                                   first one - see the accepted-risk comment
-                                   above SEAMLYDATAPARENT.
-
-         Repair depends on the UI and execute defaults above carrying
-         AND NOT Installed: without it a maintenance run would recompute
-         SEAMLYDATAPARENT, SEAMLYDATACHOSEN would follow, and a repair would
-         silently move a customised data root back to the default. -->
+         During repair or maintenance, keep the registry value already present.
+         During a fresh install or silent run, prefer the resolved path chosen
+         this run. The UI and execute defaults must guard with AND NOT
+         Installed so a repair does not silently reset a custom data root. -->
     <Property Id="SEAMLYDATAROOTRECORDED" Secure="yes">
       <RegistrySearch Id="RecordedDataRootSearch"
                       Root="HKLM"
@@ -333,47 +240,18 @@
     <UIRef Id="SeamlyUI" />
 
     <!-- ================= migrate existing user data ====================== -->
-    <!-- The legacy installer identifies old Seamly. A major upgrade identifies
-         new Seamly. The helper reads the source tree from application settings,
-         archives it, extracts it below the selected parent, and updates only
-         path settings after the copy verifies.
+    <!-- Copy existing user data into the selected data root.
+         The helper script archives the old tree, restores it under the new
+         parent, and only updates the stored data paths after validation.
 
-         Old archives contain seamly2d. The helper renames that extracted root
-         to SeamlyData. New archives contain SeamlyData as their top-level root.
+         This runs as the logged-on user so OneDrive and mapped drives work, and
+         it is best-effort: it never overwrites data and a failure does not roll
+         back the install.
 
-         WHY A SCRIPT AND NOT THE MoveFile TABLE
-         MSI's CopyFile and MoveFile rows cannot create or extract an archive.
-         The deferred action runs the installed PowerShell helper.
-
-         Impersonate="yes" is required, not cosmetic. A deferred action defaults
-         to running as SYSTEM in a perMachine package, and SYSTEM cannot read a
-         user's OneDrive or mapped drive. Impersonating puts the copy back in
-         the account whose files these are, with exactly that account's rights.
-
-         Return="ignore" is deliberate. The copy is a convenience, and the
-         source files are never modified, so a failure mid-copy leaves the
-         user's originals untouched and the new folder partly filled - harmless,
-         and the apps read whatever is there. Failing the install instead would
-         roll back a perfectly good program installation over a file-copy
-         problem.
-
-         THERE IS NO ROLLBACK ACTION, ON PURPOSE. A rollback would have to
-         delete files out of a folder that may already have held the user's own
-         work before this install ran, and no rollback action can reliably tell
-         which files it put there from which were already present. Deleting user
-         data to tidy up a failed install is a worse outcome than leaving a few
-         copied files behind. The copy is additive-only and never overwrites, so
-         there is nothing whose absence would leave the machine inconsistent.
-
-         Deferred actions cannot read properties, so the command line is handed
-         over through the CustomActionData property of the SAME name - the
-         standard pattern, and why the SetProperty below is sequenced
-         immediately before the action it feeds. -->
-    <!-- The space before each closing quote is load-bearing (SettingsFiles.4):
-         these properties can end with a backslash, and backslash-quote is an
-         escaped quote to PowerShell's command-line parser - without the space
-         the arguments run together into one mangled value. The script trims
-         each path parameter. -->
+         Deferred actions cannot read MSI properties directly, so the command is
+         passed through CustomActionData before it runs. -->
+    <!-- Keep the trailing space before each closing quote. PowerShell trims
+         each argument; without the space, adjacent quoted paths can merge. -->
     <SetProperty Id="SeamlyCopyUserData"
                  Action="SetSeamlyOldDataMigration"
                  Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]smsi_migrate_user_data.ps1&quot; -Mode Old -Destination &quot;[SEAMLYDATAROOT] &quot; -InstallFolder &quot;[INSTALLFOLDER] &quot;"
@@ -404,23 +282,11 @@
               Condition="SEAMLYCOPYUSERDATA = &quot;1&quot; AND SEAMLYDATAROOT AND ((SEAMLYOLDS2DEXE AND SEAMLYOLDMEEXE AND NOT SEAMLYOLDLAYOUTEXE) OR SEAMLYNEWLAYOUTEXE) AND NOT Installed" />
     </InstallExecuteSequence>
 
-    <!-- SettingsFiles.2: seed the per-user settings directories and ini files,
-         so a fresh install works without a Preferences > Paths visit. Deferred
-         and impersonated for the same reasons as SeamlyCopyUserData, and
-         non-fatal: the apps still supply every default at runtime, so a
-         seeding failure costs convenience, not correctness.
-
-         Add-only: the script writes a file only when absent and adds only
-         missing keys, so it runs safely after SeamlyCopyUserData carried a
-         previous install's configuration forward - migrated values always
-         win. SEAMLYDATAROOTRECORDED gates it: a run that never chose a data
-         root (an unattended install that skipped the default computation)
-         has nothing trustworthy to seed.
-
-         The space before each closing quote is load-bearing. Both properties
-         can end with a backslash, and backslash-quote is an escaped quote to
-         PowerShell's command-line parser - without the space the arguments
-         run together into one mangled value. The script trims each value. -->
+    <!-- Seed the per-user settings directories and INI files so a fresh install
+         works without a manual Preferences > Paths visit. Deferred and
+         impersonated like SeamlyCopyUserData; non-fatal because the apps fill
+         missing defaults at runtime. The script is add-only, so it preserves
+         migrated values and only runs when a data root was recorded. -->
     <SetProperty Id="SeamlySeedUserSettings"
                  Action="SetSeamlySeedUserSettings"
                  Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]smsi_seed_user_settings.ps1&quot; -DataRoot &quot;[SEAMLYDATAROOTRECORDED] &quot; -InstallFolder &quot;[INSTALLFOLDER] &quot;"
@@ -441,21 +307,9 @@
               Condition="SEAMLYDATAROOTRECORDED AND NOT Installed" />
     </InstallExecuteSequence>
 
-    <!-- ================= launch Seamly2D from the Finish page (InstWinX64.3.7) =
-         The ExitDialog checkbox authored in smsi_ui.wxs fires this action through
-         a plain DoAction Publish - never added to any sequence table, exactly how
-         WixUI_InstallDir's own LaunchApplication action works.
-
-         WixShellExec, NOT a plain ExeCommand CustomAction: this package installs
-         elevated (see the LUA-bit check in smsi_check_authoring.ps1), and the
-         Finish button runs in that same elevated context. A plain ExeCommand
-         action would hand Seamly2D the installer's elevated token, so it would
-         start running as admin. WixShellExec instead asks the running Explorer
-         process to start the target, which runs it with the signed-in user's own
-         rights - the same as double-clicking the desktop shortcut.
-
-         [#Seamly2DExe] resolves to seamly2d.exe's installed path - the same file
-         reference the .sm2d file-association command uses in smsi_files.wxs. -->
+    <!-- Launch Seamly2D from the Finish page.
+         Uses WixShellExec to run as the signed-in user, not elevated.
+         [#Seamly2DExe] = seamly2d.exe installed path. -->
     <Property Id="WixShellExecTarget" Value="[#Seamly2DExe]" />
     <CustomAction Id="LaunchApplication"
                   BinaryRef="Wix4UtilCA_X64"

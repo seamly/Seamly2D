@@ -226,7 +226,7 @@ foreach ($property in @('SEAMLYDESKTOPSHORTCUTS', 'SEAMLYLEGACYUNINSTALLSTRING',
     Assert-That -Name "$property is a secure custom property" -Succeeded ($secure -like "*$property*")
 }
 
-# --- 5. the wizard dialog chain (Task InstWinX64.1) ---------------------------
+# --- 5. the wizard dialog chain ---------------------------
 # The package defines its own dialog set, so it owns every page transition. Each
 # arrow is a NewDialog row it authors itself.
 #
@@ -292,7 +292,7 @@ Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyDataMigr
     -ConditionMatch $previousInstallCondition
 Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyDataDirDlg' -ConditionMatch 'NOT \('
 Assert-Transition -From 'VerifyReadyDlg' -Control 'Back' -To 'SeamlyShortcutsDlg' -ConditionMatch 'NOT Installed'
-# InstWinX64.7.10. The maintenance page is ours, not the stock MaintenanceTypeDlg,
+# The maintenance page is customized, not the stock MaintenanceTypeDlg,
 # because WiX cannot add a control to a dialog another fragment defines and the
 # page has to name the installed version. Replacing a stock dialog means owning
 # every row it used to bring, so assert the ones that fail silently.
@@ -670,7 +670,7 @@ foreach ($app in @('SeamlyMe', 'SeamlyLayout')) {
             $_.Name -in @('InstallPath', 'DisplayVersion', 'DataRoot', 'DataParent') }).Count -eq 4)
 }
 
-# Layout.7 / SeamlyMe.3. Every desktop-shortcut breadcrumb used to land in the
+# Every desktop-shortcut breadcrumb used to land in the
 # Seamly2D key, so a reader could not tell which app a shortcut belonged to.
 # Each one now goes under its own app key.
 foreach ($app in @('Seamly2D', 'SeamlyMe', 'SeamlyLayout')) {
@@ -680,7 +680,7 @@ foreach ($app in @('Seamly2D', 'SeamlyMe', 'SeamlyLayout')) {
             $_.Name -eq "DesktopShortcut$app" }).Count -eq 1)
 }
 
-# --- 9. program folder and user-data root (Task InstWinX64.1.1 / 1.2) ----------
+# --- 9. program folder and user-data root ----------
 # The program folder name is asserted here because three documents and the
 # migration authoring all name it; renaming it silently would leave them out of
 # step, which is exactly what happened in 546e9d5def.
@@ -693,12 +693,8 @@ Assert-That -Name 'the program folder is SeamlyApps under the 64-bit Program Fil
                 $installFolder[0].Parent -eq 'ProgramFiles64Folder') `
     -Detail "DefaultDir '$(if ($installFolder.Count) { $installFolder[0].DefaultDir } else { '<nothing>' })', parent '$(if ($installFolder.Count) { $installFolder[0].Parent } else { '<nothing>' })'"
 
-# InstWinX64.1.1.3 is moot now: the program folder is fixed to
-# [ProgramFiles64Folder]SeamlyApps, which is never itself a sync-client
-# folder, so the cloud-sync Launch condition that used to guard a
-# user-chosen INSTALLFOLDER was removed along with the prompt.
 
-# InstWinX64.1.2.1 - 1.2.3. The data root is a directory id so it can be browsed
+# The data root is a directory id so it can be browsed
 # in the UI and set on the command line for an unattended install. The user
 # picks the PARENT and Setup appends a fixed SeamlyData leaf, so choosing E:\
 # yields E:\SeamlyData rather than E:\ — the same shape as SeamlyApps under
@@ -734,16 +730,11 @@ Assert-That -Name 'the folder component creates SEAMLYDATAROOT' `
 foreach ($property in @('SEAMLYDATAROOT', 'SEAMLYDATAPARENT', 'SEAMLYCOPYUSERDATA')) {
     Assert-That -Name "$property is a secure custom property" -Succeeded ($secure -like "*$property*")
 }
-# The default is computed in BOTH sequences (2026-08-24): the UI sequence for
-# an interactive install, and the execute sequence too, so a bare `/qn` install
-# with no properties also gets <Documents>\SeamlyData instead of silently
-# deferring to each app's own first-run default (Case 1b-i of
-# TEST_INSTALLER_WIN_X64.md found the two disagreeing). Accepted tradeoff: a
-# genuinely unattended SYSTEM-context deployment (SCCM/Intune, no logged-in
-# user) has no user to impersonate, so PersonalFolder there resolves to
-# SYSTEM's own profile - see the long comment above SEAMLYDATAPARENT in
-# smsi.wxs. A real unattended deployment that cares should pass
-# SEAMLYDATAPARENT or SEAMLYDATAROOT explicitly, which this never overrides.
+# The default is computed in both UI and execute sequences, so a bare /qn
+# install also gets <Documents>\SeamlyData instead of falling back to each
+# app's own first-run default. In SYSTEM context there is no logged-in user,
+# so PersonalFolder resolves to the SYSTEM profile; unattended deployments that
+# care should pass SEAMLYDATAPARENT or SEAMLYDATAROOT explicitly.
 $uiActions = @(Get-MsiRows -Sql "SELECT ``Action`` FROM ``InstallUISequence``" -Columns 'Action' |
     ForEach-Object { $_.Action })
 $executeActions = @(Get-MsiRows -Sql "SELECT ``Action`` FROM ``InstallExecuteSequence``" -Columns 'Action' |
@@ -755,7 +746,7 @@ Assert-That -Name 'the data-root default is ALSO computed in the elevated sequen
                 $executeActions -contains 'SetSEAMLYDATAPARENTExecuteFallback')
 Assert-That -Name 'the chosen data root is recorded for the apps to read' `
     -Succeeded (@($registry | Where-Object { $_.Root -eq '2' -and $_.Key -eq 'SOFTWARE\Seamly\Seamly2D' -and $_.Name -eq 'DataRoot' }).Count -eq 1)
-# InstWinX64.00. The wizard offered C:\Users\<user>\SeamlyData, but nothing
+# The wizard offered C:\Users\<user>\SeamlyData, but nothing
 # read what the wizard recorded, so the apps fell back to their own default.
 #
 # The default parent is the Documents folder, because that is where users go to
@@ -841,11 +832,8 @@ $dataParentValue = @($registry | Where-Object {
 Assert-That -Name 'the recorded data parent is the guarded property, not the raw directory' `
     -Succeeded ($dataParentValue.Count -eq 1 -and $dataParentValue[0].Value -eq '[SEAMLYDATAPARENTRECORDED]') `
     -Detail "value '$(if ($dataParentValue.Count) { $dataParentValue[0].Value } else { '<nothing>' })'"
-# InstWinX64.2.11. A major upgrade is a fresh install of a new ProductCode, so
-# it re-asks every question - except the program directory, which is fixed
-# (see the SetINSTALLFOLDER assertions above) and is never re-asked. Only the
-# data root needs a prefill, from the recorded DataParent, so an upgrade does
-# not silently reset a customised location.
+# A major upgrade uses a new ProductCode and re-asks questions, except for the
+# fixed program directory. Prefill the data root from the recorded DataParent.
 Assert-That -Name 'AppSearch prefills SEAMLYDATAPARENT for an upgrade' `
     -Succeeded ((Get-MsiRows -Sql "SELECT ``Property`` FROM ``AppSearch`` WHERE ``Property``='SEAMLYDATAPARENT'" `
         -Columns 'Property').Count -eq 1)
@@ -864,14 +852,8 @@ foreach ($sequence in @('InstallUISequence', 'InstallExecuteSequence')) {
 Assert-That -Name 'the program directory is still authored under the 64-bit Program Files' `
     -Succeeded (@($directories | Where-Object {
         $_.Directory -eq 'INSTALLFOLDER' -and $_.Parent -eq 'ProgramFiles64Folder' }).Count -eq 1)
-# Order is the whole mechanism. SEAMLYDATACHOSEN must be decided AFTER the
-# execute-sequence defaults run (2026-08-24 - previously BEFORE CostInitialize,
-# when only the wizard or the command line could have set SEAMLYDATAPARENT/
-# SEAMLYDATAROOT), but still BEFORE CostFinalize resolves the Directory table -
-# afterwards a directory id always resolves to something and the test cannot
-# tell a real choice from a fallback. The recorded value itself must be
-# composed AFTER CostFinalize, when [SEAMLYDATAROOT]/[SEAMLYDATAPARENT] are
-# actually resolved.
+# Sequence matters: SEAMLYDATACHOSEN after execute defaults, before CostFinalize.
+# The recorded value must be composed after CostFinalize when paths are resolved.
 $executeSequence = Get-MsiRows `
     -Sql "SELECT ``Action``, ``Sequence`` FROM ``InstallExecuteSequence``" -Columns 'Action', 'Sequence'
 function Get-SequenceNumber {
@@ -910,10 +892,8 @@ foreach ($dialog in @('SeamlyDataDirDlg', 'SeamlyDataMigrateDlg', 'SeamlyShortcu
     Assert-That -Name "dialog '$dialog' is present" -Succeeded ($dialogs -contains $dialog)
 }
 # Where each question sits in the wizard is asserted in section 5.
-
-# The data-root page browses with the shared BrowseDlg, which edits whatever
-# _BrowseProperty names. Setting that property must come first, or Change
-# browses the previous page's directory.
+# BrowseDlg edits the property named by _BrowseProperty, so it must be set
+# before Change or it will target the previous page.
 $changeFolder = @($script:controlEvents | Where-Object {
     $_.Dialog -eq 'SeamlyDataDirDlg' -and $_.Control -eq 'ChangeFolder' })
 $browseProperty = @($changeFolder | Where-Object { $_.Event -eq '[_BrowseProperty]' -and $_.Argument -eq 'SEAMLYDATAPARENT' })
@@ -922,11 +902,8 @@ Assert-That -Name 'the data-root page browses the data-root parent' `
     -Succeeded ($browseProperty.Count -eq 1 -and $browseSpawn.Count -eq 1 -and
                 [int]$browseProperty[0].Ordering -lt [int]$browseSpawn[0].Ordering) `
     -Detail "_BrowseProperty at $(if ($browseProperty.Count) { $browseProperty[0].Ordering } else { '<nothing>' }), SpawnDialog at $(if ($browseSpawn.Count) { $browseSpawn[0].Ordering } else { '<nothing>' })"
-# The path box must bind DIRECTLY. An indirect PathEdit reads its property to
-# get the NAME of the property holding the path, so an indirect
-# SEAMLYDATAPARENT asks for a property named "C:\Users\<user>\" and aborts the
-# install with error 2343 as the page is created. Stock InstallDirDlg is
-# indirect only because WIXUI_INSTALLDIR holds the string "INSTALLFOLDER".
+# PathEdit binds directly; indirect binding would read the property name from
+# the value itself and fail.
 $folderControl = @(Get-MsiRows `
     -Sql "SELECT ``Control``, ``Attributes``, ``Property`` FROM ``Control`` WHERE ``Dialog_``='SeamlyDataDirDlg' AND ``Control``='Folder'" `
     -Columns 'Control', 'Attributes', 'Property')
@@ -959,18 +936,16 @@ Assert-That -Name 'the data-root page commits the path before it advances' `
                 @($dataDirAdvance | Where-Object {
                     [int]$dataDirCommit[0].Ordering -ge [int]$_.Ordering }).Count -eq 0) `
     -Detail "SetTargetPath at $(if ($dataDirCommit.Count) { $dataDirCommit[0].Ordering } else { '<nothing>' }), NewDialog rows at $(($dataDirAdvance | ForEach-Object { $_.Ordering }) -join ', ')"
-# BrowseDlg's OK must close the dialog and commit the path it browsed to. It
-# validates nothing: the only page that still spawns it is the data-root page,
-# and the data root is allowed on cloud and removable drives that program-
-# directory rules would reject - there is no program directory left to browse
-# to, so no CheckTargetPath row belongs on this button any more.
+# BrowseDlg OK must commit the browsed folder without validating it. This
+# button is only used by the data-root page, whose path may be on cloud or
+# removable drives, so it should not trigger CheckTargetPath.
 $browseOk = @($script:controlEvents | Where-Object { $_.Dialog -eq 'BrowseDlg' -and $_.Control -eq 'OK' })
 Assert-That -Name 'browsing commits the folder it was given' `
     -Succeeded (@($browseOk | Where-Object { $_.Event -eq 'SetTargetPath' -and $_.Argument -eq '[_BrowseProperty]' }).Count -eq 1)
 Assert-That -Name 'browsing does not validate against program-directory rules' `
     -Succeeded (@($browseOk | Where-Object { $_.Event -eq 'CheckTargetPath' }).Count -eq 0)
 
-# InstWinX64.1.2.4. The copy must be deferred (it needs the script on disk),
+# The copy must be deferred (it needs the script on disk),
 # impersonated (SYSTEM cannot read the user's own folders) and non-fatal (a
 # file-copy problem must not roll back a good program install).
 $copyAction = @(Get-MsiRows -Sql "SELECT ``Action``, ``Type`` FROM ``CustomAction`` WHERE ``Action``='SeamlyCopyUserData'" `
@@ -1016,7 +991,7 @@ Assert-That -Name 'old Seamly requires both parent apps and no SeamlyLayout' `
 Assert-That -Name 'new Seamly requires an existing SeamlyLayout executable' `
     -Succeeded ($newMigrationCondition.Count -eq 1 -and
                 $newMigrationCondition[0].Condition -match 'SEAMLYNEWLAYOUTEXE')
-# SettingsFiles.4. Both migration commands carry path properties that can
+# Both migration commands carry path properties that can
 # resolve with a trailing backslash. Backslash-quote is an escaped quote to
 # PowerShell's command-line parser, so each closing quote needs a space before
 # it; smsi_migrate_user_data.ps1 trims the values.
@@ -1030,7 +1005,7 @@ Assert-That -Name 'the new-migration command quotes its path arguments quote-saf
                 $newMigrationCommand[0].Target -match '-PreviousDataRoot "\[SEAMLYPREVIOUSDATAROOT\] "' -and
                 $newMigrationCommand[0].Target -match '-InstallFolder "\[INSTALLFOLDER\] "')
 
-# SettingsFiles.2. The seeding action mirrors the copy action's contract:
+# The seeding action mirrors the copy action's contract:
 # deferred (needs the script on disk), impersonated (writes the user's own
 # %LOCALAPPDATA%), non-fatal (the apps supply defaults at runtime anyway).
 $seedAction = @(Get-MsiRows -Sql "SELECT ``Action``, ``Type`` FROM ``CustomAction`` WHERE ``Action``='SeamlySeedUserSettings'" `
@@ -1068,13 +1043,10 @@ Assert-That -Name 'the seeding runs on first install only, with a recorded root'
                 $seedSequence[0].Condition -match 'SEAMLYDATAROOTRECORDED' -and
                 $seedSequence[0].Condition -match 'NOT Installed')
 
-# --- 10. dialog control geometry (task MSI1b.1) -------------------------------
-# A control that ends past the edge of its dialog makes Windows Installer log
-# Error 2826 while it builds the page. Nothing caught that before: the overflow
-# appears only at run time, `wix msi validate` passes, and a shipped build wrote
-# 15 of these lines into every install log. WixUI is the source of most of them,
-# so smsi.ps1 runs smsi_fix_dialog_lines.ps1 over the built MSI; this check
-# proves that pass ran and that no new dialog authoring brings the defect back.
+# --- 10. dialog control geometry -------------------------------
+# Check that no control extends beyond its dialog, which causes Windows Installer
+# Error 2826. WixUI is fixed by smsi_fix_dialog_lines.ps1; this catches any new
+# overflowing controls.
 $dialogSize = @{}
 foreach ($row in (Get-MsiRows -Sql "SELECT ``Dialog``, ``Width``, ``Height`` FROM ``Dialog``" `
                               -Columns 'Dialog', 'Width', 'Height')) {
@@ -1095,7 +1067,7 @@ Assert-That -Name 'every control fits inside its dialog (no Error 2826)' `
     -Succeeded ($overflowing.Count -eq 0) `
     -Detail "$($overflowing.Count) overflow: $($overflowing -join ', ')"
 
-# --- 11. launch Seamly2D from the Finish page (InstWinX64.3.7) ----------------
+# --- 11. launch Seamly2D from the Finish page ----------------
 # The stock ExitDialog carries an OptionalCheckBox control already; only these
 # two properties are ours. Checked by default and offered only on a fresh
 # install, matching the checkbox's own ShowCondition.

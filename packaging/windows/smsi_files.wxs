@@ -24,55 +24,28 @@
   <Fragment>
 
     <!-- ================= directory tree + harvested runtimes ============= -->
-    <!-- ProgramFiles64Folder, not ProgramFiles6432Folder or the x86 tree: every
-         binary in this package is x64 (or arm64), so the 32-bit tree would be
-         wrong even though the OLD NSIS installer lives there because
-         it was a 32-bit installer. "SeamlyApps" rather than "Seamly2D"
-         because the folder holds the whole suite - Seamly2D, SeamlyMe, and
-         SeamlyLayout - and naming it after one member misdescribes it and
-         collides confusingly with the NSIS product's own folder name.
-         The name is asserted by smsi_check_authoring.ps1 and documented in
-         README-BUILDS.md, packaging/windows/README.md and
-         README_MSI_WORKFLOW.md - change all of them together or not at
-         all. It was briefly "Seamly" (546e9d5def, 2026-08-03), which left
-         every one of those out of step and failed the authoring check. -->
+    <!-- Install under ProgramFiles64Folder because every binary here is x64 or
+         arm64. We use "SeamlyApps" for the shared suite folder instead of
+         "Seamly2D" so the product name matches the whole bundle and avoids
+         collisions with the older NSIS install. The name is enforced by
+         smsi_check_authoring.ps1 and must stay in sync with the build docs. -->
     <StandardDirectory Id="ProgramFiles64Folder">
       <Directory Id="INSTALLFOLDER" Name="SeamlyApps">
-        <!-- The single Qt runtime shared by all apps in this package (Qt DLLs,
-             plugins, QML modules, QtWebEngineProcess.exe, MSVC CRT, xerces-c,
-             SeamlyLayout's packaged settings\ and licenses\, ...), harvested
-             recursively from the one staging tree smsi.ps1 merges everything
-             into. The executables themselves are authored explicitly below so
-             shortcuts and file associations can reference them. -->
+           <!-- Shared Qt runtime and support files, harvested from the staging
+             tree. Executables are authored below for shortcuts and associations. -->
         <Files Include="$(var.ParentStagingDir)\**" />
       </Directory>
     </StandardDirectory>
 
-    <!-- The user-data root, as a "SeamlyData" leaf under a parent the user
-         picks - the same shape as INSTALLFOLDER being "SeamlyApps" under
-         ProgramFiles64Folder.
+    <!-- The user-data root is a fixed "SeamlyData" leaf under a user-selected
+         parent. This keeps the final location predictable while letting the
+         user choose only the parent folder.
 
-         WHY THE LEAF IS FIXED RATHER THAN PART OF WHAT THE USER TYPES
-         The user chooses the PARENT (SEAMLYDATAPARENT, default their profile
-         folder) and Setup always appends SeamlyData. Picking E:\ therefore
-         gives E:\SeamlyData, not E:\. Letting the user type the whole path
-         instead invited the opposite mistake: typing E:\SeamlyData when the
-         leaf is auto-appended would yield E:\SeamlyData\SeamlyData. A fixed
-         leaf cannot produce either surprise, and it guarantees every install
-         is recognisable on disk by the same folder name.
-
-         Both identifiers are public, so an unattended install can set either:
-           SEAMLYDATAPARENT=E:\        -> E:\SeamlyData
-           SEAMLYDATAROOT=E:\Patterns  -> exactly that, leaf and all
-         Setting SEAMLYDATAROOT overrides the composition entirely, which is
-         the escape hatch for anyone who wants a name of their own.
-
-         Parented to TARGETDIR so the whole path is replaceable: any drive is
-         allowed, including removable and cloud-synced ones (InstWinX64.1.2.2).
-         A permanent component creates the selected root during installation.
-         It creates no files and uninstall never removes it. The condition
-         prevents an unattended install without a selected root from creating
-         the Directory table fallback at C:\SeamlyData. -->
+         Both SEAMLYDATAPARENT and SEAMLYDATAROOT are supported for unattended
+         installs; setting SEAMLYDATAROOT overrides the composed path entirely.
+         The root is created by a permanent component, and the condition keeps
+         Setup from creating the fallback C:\SeamlyData path when no root was
+         chosen. -->
     <StandardDirectory Id="TARGETDIR">
       <Directory Id="SEAMLYDATAPARENT">
         <Directory Id="SEAMLYDATAROOT" Name="SeamlyData" />
@@ -149,8 +122,8 @@
       <!-- SeamlyLayout: Start Menu shortcut. No file association is registered:
            its only file input is a plain .svg, which must stay with the user's
            SVG viewer. The seamly2d Layout Mode handoff needs no association at
-           all — it sends the document on standard input (Seamly2D.5).
-           Task 30: installed into INSTALLFOLDER beside the parent apps now
+           all — it sends the document on standard input.
+           Installed into INSTALLFOLDER beside the parent apps now
            that all three share one Qt runtime (it used to live in its own
            SeamlyLayout\ subdirectory with a second, private Qt copy). -->
       <Component Id="SeamlyLayoutExeComponent">

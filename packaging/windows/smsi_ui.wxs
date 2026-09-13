@@ -47,87 +47,21 @@
          stock dialog is its own fragment, pulled in by DialogRef. -->
     <UIRef Id="WixUI_Common" />
 
-    <!-- ================= wizard dialog set (Task InstWinX64.1) ============= -->
+    <!-- ================= wizard dialog set ============= -->
     <!--
-      THE DIALOG SET IS OURS, NOT WixUI_InstallDir's.
+      This installer uses a custom wizard flow instead of WixUI_InstallDir.
+      We reuse the stock WiX dialogs by DialogRef and replace the ownable
+      pages (PrepareDlg and MaintenanceTypeDlg) with Seamly versions.
 
-      WixUI_InstallDir owned every transition out of its own pages. Its
-      InstallDirDlg Next row is `NewDialog VerifyReadyDlg` at Order 4 with the
-      condition `1`, so no page of ours could take that slot and no condition
-      could exclude it. SpawnDialog was the only mechanism left, and SpawnDialog
-      does not fire from that chain in WiX 6.0.2 - which is why the shortcuts,
-      data-root and migration pages never displayed.
+      Fresh install flow: PrepareDlg -> WelcomeDlg -> LicenseAgreementDlg ->
+      PreviousInstallDlg -> DataDirDlg -> DataMigrateDlg -> ShortcutsDlg ->
+      VerifyReadyDlg -> ProgressDlg -> ExitDialog.
 
-      This set replaces it. Every NewDialog row below is ours, so each page has
-      one defined successor and one defined predecessor.
+      Maintenance flow: MaintenanceWelcomeDlg -> SeamlyMaintenanceTypeDlg ->
+      VerifyReadyDlg. Back and Cancel follow the stock wizard behavior.
 
-      REUSED UNCHANGED, one DialogRef each: WelcomeDlg, LicenseAgreementDlg,
-      BrowseDlg, VerifyReadyDlg, ProgressDlg,
-      ExitDialog, CancelDlg, ErrorDlg, FilesInUse, MsiRMFilesInUse,
-      ResumeDlg, UserExit, DiskCostDlg, OutOfDiskDlg, OutOfRbDiskDlg,
-      MaintenanceWelcomeDlg, FatalError. A stock dialog brings its own
-      controls, its own control conditions and its own internal events
-      (Cancel -> CancelDlg, VerifyReadyDlg's Install -> EndDialog). It brings
-      no NewDialog row at all.
-
-      REPLACED, not reused: MaintenanceTypeDlg and PrepareDlg.
-      SeamlyMaintenanceTypeDlg transcribes MaintenanceTypeDlg and adds the
-      installed-version note. WiX cannot add a control to a dialog another
-      fragment defines, so naming the version on that page means owning the
-      whole page.
-
-      SeamlyPrepareDlg replaces stock PrepareDlg for the same reason, plus one
-      more: stock PrepareDlg's Next/Back are permanently Disabled="yes"
-      placeholders, and the dialog is Modeless="yes", so it never blocks
-      InstallUISequence - AppSearch and the cost actions run underneath it and
-      WelcomeDlg's own baked-in Show row (from its stock fragment, pulled in
-      by the DialogRef below) pops up the instant they finish, typically under
-      a second. Both pages carry the same title, so the result reads as a
-      glitch, not as two pages. SeamlyPrepareDlg takes PrepareDlg's own
-      InstallUISequence slot (see the Show row near the end of this file) but
-      is Modeless="no" (the default), so AppSearch does not even start until
-      Continue is clicked. Continue does not NewDialog anywhere - it just
-      EndDialogs, and the sequence carries on into AppSearch -> CostFinalize
-      -> WelcomeDlg exactly as it does today. That is why this page has no
-      route of its own into the chain below: it is not part of that chain, it
-      is the gate in front of it.
-
-      Six Seamly pages are authored here.
-
-      PAGE ORDER, fresh install:
-
-        SeamlyPrepareDlg                gate in front of AppSearch/CostFinalize,
-                                         not part of the chain below - see above
-          -> WelcomeDlg
-          -> LicenseAgreementDlg
-          -> SeamlyPreviousInstallDlg   only when an earlier install was found
-          -> SeamlyDataDirDlg           user-data root (program directory is
-                                        fixed - see smsi.wxs - and never asked)
-          -> SeamlyDataMigrateDlg       copy existing work?
-          -> SeamlyShortcutsDlg         desktop shortcuts
-          -> VerifyReadyDlg
-          -> ProgressDlg                InstallUISequence 1299
-          -> ExitDialog                 InstallUISequence -1
-
-      Maintenance: MaintenanceWelcomeDlg -> SeamlyMaintenanceTypeDlg ->
-      VerifyReadyDlg. The middle page replaces the stock MaintenanceTypeDlg
-      and is otherwise identical to it. A patch keeps the stock shortcut
-      WelcomeDlg -> VerifyReadyDlg.
-
-      Back reverses every arrow. Cancel spawns the stock CancelDlg on every
-      page.
-
-      Geometry, fonts and the banner bitmap of the four Seamly pages mirror the
-      stock dialogs (370x270, WixUI_Font_Title, WixUI_Bmp_Banner) so the pages
-      look like part of the same wizard.
-
-      One deliberate difference: every BannerLine and BottomLine here is
-      Width="370", the dialog width, not the Width="373" WixUI uses. A control
-      that ends past the dialog edge makes Windows Installer log Error 2826 as
-      it builds the dialog (task MSI1b.1). WixUI's own dialogs carry the same
-      defect and cannot be edited from here, so smsi.ps1 runs
-      smsi_fix_dialog_lines.ps1 over the built MSI to correct them; keeping our
-      own source right means that pass has nothing of ours to change.
+      The custom pages match the stock dialog styling and use the same banner
+      and dialog bitmaps so they look like the rest of the installer.
     -->
     <!-- One source for the condition that decides whether the previous-install
          page appears. It is needed three times - the two License Next rows and
@@ -151,21 +85,16 @@
            Apps and features offers Repair and Uninstall but no Change. -->
       <Property Id="ARPNOMODIFY" Value="1" />
 
-      <!-- THE ORDER OF THE NEXT FOUR LINES IS LOAD-BEARING.
-           A dialog that InstallUISequence shows carries no absolute sequence
-           number of its own; the linker numbers these four from the order they
-           are referenced here, and they land on 1296, 1297, 1298 and 1299. The
-           first one whose condition is true is the first page the user sees, so
-           this order is the stock order and must stay:
+      <!-- Keep this order as-is: the linker assigns the sequence numbers in the
+           order these four dialogs are referenced, and the first matching one is
+           shown first. This is the stock order and must stay:
 
              ResumeDlg              1296  Installed AND (RESUME OR Preselected)
              WelcomeDlg             1297  NOT Installed OR PATCH
              MaintenanceWelcomeDlg  1298  Installed, not resuming, not a patch
              ProgressDlg            1299
 
-           Reversing ResumeDlg and WelcomeDlg would show the welcome page to a
-           user resuming a suspended patch install. The authoring test asserts
-           the resulting numbers. -->
+           Changing the order would make the wrong page appear during resume. -->
       <DialogRef Id="ResumeDlg" />
       <DialogRef Id="WelcomeDlg" />
       <DialogRef Id="MaintenanceWelcomeDlg" />
@@ -320,7 +249,7 @@
         </Control>
       </Dialog>
 
-      <!-- ========== user-data directory (InstWinX64.1.2.1 - 1.2.3) ======== -->
+      <!-- ========== user-data directory ======== -->
       <!-- Mirrors the stock InstallDirDlg layout: a PathEdit bound to the
            directory property, and a Change button that spawns WixUI's own
            BrowseDlg. BrowseDlg edits whatever _BrowseProperty names, so the
@@ -351,13 +280,9 @@
              parsing, so an "&" in this text prints as a literal character. -->
         <Control Id="FolderLabel" Type="Text" X="20" Y="110" Width="330" Height="10"
                  NoPrefix="yes" Text="Put the SeamlyData folder in:" />
-        <!-- NOT Indirect. An indirect PathEdit reads its property to get the
-             NAME of the property that holds the path - which is why stock
-             InstallDirDlg is indirect through WIXUI_INSTALLDIR, whose value is
-             the string "INSTALLFOLDER". SEAMLYDATAPARENT holds the path itself,
-             so an indirect lookup here asks for a property named
-             "C:\Users\<user>\", finds nothing, and fails the install with
-             error 2343 the moment this page is created. -->
+        <!-- Not indirect. PathEdit reads the property value directly. SEAMLYDATAPARENT
+             holds the actual folder path, so an indirect lookup would look for a
+             property named "C:\Users\<user>\" and fail. -->
         <Control Id="Folder" Type="PathEdit" X="20" Y="122" Width="255" Height="18"
                  Property="SEAMLYDATAPARENT" />
         <Control Id="ChangeFolder" Type="PushButton" X="285" Y="122" Width="66" Height="18"
@@ -382,12 +307,11 @@
           <Publish Event="NewDialog" Value="LicenseAgreementDlg"
                    Condition="NOT ($(var.PreviousInstallFound))" />
         </Control>
-        <!-- The PathEdit writes the property; SetTargetPath commits it to the
-             Directory table, which is what recomposes [SEAMLYDATAROOT] for the
-             next page and for the registry value. No CheckTargetPath: the data
-             root may live on a cloud or removable drive (InstWinX64.2.7). The
-             condition guards SetTargetPath against an empty property, which is
-             the other way to reach error 2343. -->
+        <!-- The PathEdit writes SEAMLYDATAPARENT. SetTargetPath commits it to
+             the Directory table, which rebuilds [SEAMLYDATAROOT]. No
+             CheckTargetPath because the data root may live on removable or cloud
+             storage. Guard SetTargetPath against an empty property to avoid
+             error 2343. -->
         <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
                  Default="yes" Text="&amp;Next">
           <Publish Event="SetTargetPath" Value="SEAMLYDATAPARENT" Order="1"
@@ -403,10 +327,9 @@
         </Control>
       </Dialog>
 
-      <!-- ========== copy existing work? (InstWinX64.1.2.4) ================ -->
-      <!-- 1.2.4.1 explain, 1.2.4.2 require confirmation. The checkbox defaults
-           to 0, so the copy happens only when the user actively asks for it.
-           1.2.4.3 (copy only missing files, never overwrite) is enforced by the
+      <!-- ========== copy existing work? ================ -->
+      <!-- The checkbox defaults to 0, so the copy happens only when the user actively asks for it.
+           Copy only missing files, never overwrite, is enforced by the
            script the deferred action runs, not by this dialog. -->
       <Dialog Id="SeamlyDataMigrateDlg" Width="370" Height="270"
               Title="[ProductName] Setup">
@@ -431,9 +354,7 @@
                  Property="SEAMLYCOPYUSERDATA" CheckBoxValue="1"
                  Text="&amp;Yes, copy my existing patterns and measurements" />
 
-        <!-- InstWinX64.1.2.4.3 requires the user to be told, in as many words,
-             that the old copy survives as a backup AND that their work is
-             reachable at the new location. Both halves are stated here. -->
+        <!-- The old copy stays as a backup, and the same work is available in the new location. -->
         <Control Id="Caveat" Type="Text" X="20" Y="166" Width="330" Height="60"
                  NoPrefix="yes"
                  Text="Afterwards your work is in both places: everything stays exactly where it is today, which is your backup, and the same files are also available in [SEAMLYDATAROOT], which is where the apps will look. Leave the box unticked to record the folder without copying anything - you can copy the files yourself at any time." />
@@ -454,27 +375,19 @@
 
 
       <!-- ========== change, repair or remove ============================== -->
-      <!-- A REPLACEMENT for the stock MaintenanceTypeDlg, not a reuse of it,
-           because a stock dialog cannot be extended: WiX has no way to add a
-           control to a <Dialog> another fragment defines. Everything below the
-           version note is transcribed from the stock dialog - the same
-           geometry, the same texts, the same three Disable/Show conditions and
-           the same WixUI_InstallMode values VerifyReadyDlg keys its action
-           buttons on. Change one of those and the wizard silently does nothing
-           when the user presses Repair or Remove.
+      <!-- Replacement for the stock MaintenanceTypeDlg. WiX cannot extend a
+           stock dialog defined elsewhere, so this dialog is copied and kept in
+           sync with the original behavior.
 
-           WHY THE VERSION NOTE EXISTS
-           This page appears only when THIS ProductCode is already installed,
-           and smsi.ps1 generates a fresh ProductCode per build. So reaching
-           this page means the user re-ran the very package that is installed,
-           which is easy to do by accident with a rolling dev-latest download
-           and gives no clue on screen. The note says which version is
-           installed and whether this installer holds the same one.
+           This page appears only when this build's ProductCode is already
+           installed. smsi.ps1 creates a new ProductCode for each build, so a
+           re-run can look like a duplicate install. The version note helps the
+           user see which version is installed and whether this installer matches
+           it.
 
-           SEAMLYINSTALLEDVERSION comes from AppSearch reading the
-           DisplayVersion the last install wrote. The "different version" line
-           is unreachable while ProductCode is per-build, and is kept because
-           the alternative to a wrong-looking screen is a blank one. -->
+           SEAMLYINSTALLEDVERSION comes from AppSearch reading the last install's
+           DisplayVersion. The same Disable/Show conditions and WixUI_InstallMode
+           values are kept so Repair and Remove still behave like the stock dialog. -->
       <Dialog Id="SeamlyMaintenanceTypeDlg" Width="370" Height="270"
               Title="[ProductName] Setup">
 
@@ -565,11 +478,9 @@
       </Dialog>
 
       <!-- ========== the chain ============================================ -->
-      <!-- Every row here is a transition BETWEEN pages. A stock dialog's own
-           buttons (Cancel, Print, the VerifyReadyDlg action buttons) already
-           work without us; what a stock dialog never carries is a NewDialog
-           row, because the page order belongs to the dialog set. That is why
-           this block is the whole wizard, and why nothing competes with it. -->
+      <!-- Every row here is a page transition. Stock dialogs already handle
+           their own buttons; this block defines the wizard order, so nothing
+           else competes with it. -->
 
       <!-- Welcome. The patch route is the stock one: a patch has nothing to
            choose, so it goes straight to the ready page. -->
@@ -596,8 +507,8 @@
            is fixed (smsi.wxs) and never asked about, so nothing else spawns
            BrowseDlg or sets _BrowseProperty. Its OK button carries no rows of
            its own, so both of these are ours. No CheckTargetPath here: the
-           data root is allowed on removable and cloud-synced drives
-           (InstWinX64.2.7), unlike a program directory. -->
+           data root is allowed on removable and cloud-synced drives,
+           unlike a program directory. -->
       <Publish Dialog="BrowseDlg" Control="OK" Event="SetTargetPath"
                Value="[_BrowseProperty]" Order="1" />
       <Publish Dialog="BrowseDlg" Control="OK" Event="EndDialog"
@@ -614,25 +525,16 @@
                Value="SeamlyMaintenanceTypeDlg" Condition="Installed AND NOT PATCH" Order="2" />
 
       <!-- Maintenance, repair and uninstall. The route is the stock one; only
-           the middle page is ours, so that it can name the installed version
-           (InstWinX64.7.10). None of the install-time Seamly pages appear,
+           the middle page is ours, so that it can name the installed version.
+           None of the install-time Seamly pages appear,
            because none of their answers apply to a product already installed.
            SeamlyMaintenanceTypeDlg carries its own Back, Repair and Remove
            rows, so only the entry transition is authored here. -->
       <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog"
                Value="SeamlyMaintenanceTypeDlg" />
 
-      <!-- Exit. The stock ExitDialog (WixToolset.UI.wixext) already carries an
-           OptionalCheckBox control, hidden until WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT
-           holds text - so the checkbox itself needs no authoring here, only these
-           two properties. Its own ShowCondition is
-           "WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT AND NOT Installed", so it is
-           already hidden on the maintenance/repair/remove/patch path; the launch
-           below repeats NOT Installed so a "1" left over from an earlier run can
-           never fire it there either. Checked by default (Value="1"): most people
-           who just finished Setup want to see the app they installed.
-           LaunchApplication is defined in smsi.wxs, next to the other actions this
-           wizard fires from a Publish row. -->
+      <!-- Configure the stock exit checkbox and launch the application after a
+           fresh install. LaunchApplication is defined in smsi.wxs. -->
       <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch Seamly2D now" />
       <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
 

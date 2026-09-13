@@ -29,26 +29,18 @@
 
     <ComponentGroup Id="InstallInfo" Directory="INSTALLFOLDER">
 
-      <!-- Install breadcrumbs: read by upgrades and by the Task 14 installer
-           prompts; removed on uninstall automatically (component rules).
-           Seamly2D is the canonical copy - InstallerRecord::dataRoot() and
-           the SEAMLYINSTALLEDVERSION / InstalledDisplayVersionSearch upgrade
-           check in smsi.wxs both read this key specifically. Do not repoint
-           either of those at SeamlyMe or SeamlyLayout. -->
+      <!-- Install breadcrumbs used by upgrades and installer prompts. This is
+           the canonical Seamly2D key; InstallerRecord::dataRoot() and the
+           upgrade checks in smsi.wxs read it. Do not point them at SeamlyMe
+           or SeamlyLayout. -->
       <Component Id="InstallInfoRegistry">
         <RegistryKey Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D">
           <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
           <RegistryValue Name="DisplayVersion" Type="string" Value="$(var.DisplayVersion)" />
-          <!-- InstWinX64.1.2: the data root the user chose. Every app reads it
-               on first run and adopts it, so the value must name a folder
-               somebody chose. SEAMLYDATAROOTRECORDED is what guarantees that -
-               see the long note beside it in smsi.wxs. Do NOT put
-               [SEAMLYDATAROOT] here: a directory id always resolves, so a
-               silent install with no arguments would record C:\SeamlyData.
-
-               Written even when the user declined the copy - recording the
-               folder and filling it are separate decisions. Empty when nothing
-               chose a root, which the apps read as "use your own default". -->
+          <!-- The user-selected data root. Every app reads it on first run and
+               adopts it. It must name a folder someone chose, not a directory
+               id like [SEAMLYDATAROOT]. Record it even if the user declined the
+               copy; empty means "use the app's default". -->
           <RegistryValue Name="DataRoot" Type="string" Value="[SEAMLYDATAROOTRECORDED]" />
           <!-- Same guard as DataRoot above, and for the same reason: raw
                [SEAMLYDATAPARENT] is a directory id, so it always resolves by
@@ -86,34 +78,11 @@
 
     </ComponentGroup>
 
-    <!-- ============ per-user settings cleanup on uninstall ================ -->
-    <!-- Each app's AppConfigLocation settings and the shared qt6_common.ini
-         (both under %LOCALAPPDATA%\Seamly since Task SettingsFiles.1; the
-         %APPDATA%\Seamly folder is the pre-move location, still removed here
-         for installs that predate the move) are per-user, so a
-         perMachine uninstall cannot reach every user's profile - only the one
-         it runs as. See the same limitation already documented for
-         SEAMLYLEGACYSTARTMENU in smsi_legacy.wxs.
-
-         The user-data root (patterns, measurements) is deliberately NOT
-         touched here - that is CreateUserDataRoot's Permanent="yes" component
-         in smsi_files.wxs, and stays untouched on purpose.
-
-         NOT UPGRADINGPRODUCTCODE matters: RemoveExistingProducts also
-         "uninstalls" the old product's ProductCode partway through a major
-         upgrade, and Windows Installer sets UPGRADINGPRODUCTCODE for exactly
-         that case. Without the guard, every version bump would wipe the
-         settings the new version is about to read forward on its own first
-         run. A genuine standalone uninstall (Programs & Features, or
-         msiexec /x with no newer package mid-install) leaves it unset.
-
-         Properties, not directory ids: RemoveFolderEx resolves at sequence
-         799, before CostFinalize resolves the Directory table, so a directory
-         id would read empty there - the same trap documented at length in
-         smsi.wxs for SEAMLYDATAROOT/SEAMLYDATAPARENT. [%LOCALAPPDATA] and
-         [%APPDATA] are environment properties instead, set at session start,
-         and resolve to the user this immediate action runs as - the
-         installing user in the normal interactive-elevation case. -->
+        <!-- Remove per-user settings on genuine uninstall. This affects only the
+          user running the uninstall; user data is preserved. The upgrade guard
+          prevents RemoveExistingProducts from deleting settings during a major
+          upgrade. Properties are used because RemoveFolderEx runs before
+          directory resolution. -->
     <SetProperty Id="SEAMLYLOCALAPPDATA"
                  Value="[%LOCALAPPDATA]\Seamly"
                  After="AppSearch" Sequence="both" />

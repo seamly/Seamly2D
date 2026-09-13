@@ -247,7 +247,7 @@ function Get-UserDataInventory {
 
     $paths = @(
         (Get-DataRootPath),
-        (Join-Path $documents 'SeamlyData'),      # what the MSI offers (InstWinX64.00)
+        (Join-Path $documents 'SeamlyData'),      # what the MSI offers
         (Join-Path $env:USERPROFILE 'seamlyData'), 
         (Join-Path $env:USERPROFILE 'seamly2d'),   # the original, still the source of a migration
         (Join-Path $env:LOCALAPPDATA 'Seamly'),

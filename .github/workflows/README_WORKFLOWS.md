@@ -35,30 +35,31 @@ Each leg installs one Qt 6.11.1 kit, builds the apps, then runs [`smsi.ps1`](../
 
 **arm64 ships all three apps as of 2026-08-11** (commit `fba962c4d8`). It previously shipped the two parents only (`qtmultimedia` alone, via the since-removed `-NoSeamlyLayout` switch), on the belief that Qt publishes no arm64 Windows WebEngine — true of Qt 6.8, **false for 6.11.1**. Re-check this at every Qt bump before re-asserting the claim: `aqt list-qt windows_arm64 desktop --modules <version> <arch>` (and the same for the `windows` host) lists what Qt actually publishes. A `qt-arm64-module-probe.yml` workflow ran that check here until 2026-08-11; it was deleted once the question was settled.
 
-**These steps live here and nowhere else.** The `publish` job releases these `.msi` files, so they must be built from the same commit, in the same run, as every other release artifact. A second packaging-only workflow, `windows-msi.yml`, used to carry a duplicate of these steps on a `packaging/windows/**` path trigger; it was deleted on 2026-08-11 (Task InstWinX64.1.3.2) because it built both packages a second time on every packaging edit and its copy drifted. A `.wxs` or `smsi.ps1` change now runs the full CI suite — that is the trade, and it is the only copy to maintain.
+**These steps live here and nowhere else.** The `publish` job releases these `.msi` files, so they must be built from the same commit, in the same run, as every other release artifact.  A `.wxs` or `smsi.ps1` change now runs the full CI suite — that is the trade, and it is the only copy to maintain.
 
-### SeamlyLayout CI — removed 2026-08-12
+### SeamlyLayout CI
 
-`seamlylayout-ci.yml` built the SeamlyLayout daughter app (Rust core + Qt QML frontend) on `ubuntu-latest` and ran its `ctest` and `cargo test --workspace` suites. It was deleted on 2026-08-12: **`ci.yml` is the only workflow that builds the suite on GitHub.** `ci.yml`'s `windows-msi` job already builds SeamlyLayout on both arches with the same CMake/Ninja + Cargo toolchain, so the second workflow duplicated the build and added a second `QT_VERSION` to keep in step.
-
-**What CI no longer does:** SeamlyLayout's unit tests do not run on GitHub any more, and SeamlyLayout is not built on Linux there. Run both locally — `ctest --preset debug` in `src/app/seamlylayout/qt_frontend/`, and `cargo test --workspace` in `src/app/seamlylayout/`. Add the two test steps to `ci.yml` if that coverage is wanted back.
+**What CI no longer does:** SeamlyLayout's unit tests do not run on GitHub any more. Run both locally — `ctest --preset debug` in `src/app/seamlylayout/qt_frontend/`, and `cargo test --workspace` in `src/app/seamlylayout/`. Add the two test steps to `ci.yml` if that coverage is wanted back.
 
 ### Windows MSI — removed 2026-08-11
 
-`windows-msi.yml` built the same two `.msi` packages on a `packaging/windows/**` path trigger. Task InstWinX64.1.3.2 deleted it: `ci.yml`'s `windows-msi` job (described above) already builds both arches and feeds `publish`, so the file only duplicated the work and gave the build steps a second copy to drift out of step. The Windows packaging description now lives in the [CI](ci.yml) section above.
+`windows-msi.yml` built the same two `.msi` packages on a `packaging/windows/**` path trigger. `ci.yml`'s `windows-msi` job (described above) already builds both arches and feeds `publish`, so the file only duplicated the work and gave the build steps a second copy to drift out of step. The Windows packaging description now lives in the [CI](ci.yml) section above.
 
 ## Code Signing Workflow
 
 ### Integrated Signing Process
+
 The main CI workflow includes integrated code signing for Windows and Mac executables.
 
 ### Signing Requirements
+
 - **Branch**: Only runs on `develop` branch
 - **Secrets**: Requires Google Cloud KMS secrets and Mac Developer ID certificate and notarize API key configured
 
 ## Emergency Procedures
 
 ### Skip Code Signing (Emergency Override)
+
 When signing infrastructure fails (certificate expiration, KMS issues, etc.):
 
 1. Go to repository **Settings** → **Secrets and variables** → **Actions**
@@ -71,6 +72,7 @@ When signing infrastructure fails (certificate expiration, KMS issues, etc.):
 **⚠️ Warning**: Unsigned executables will trigger security warnings and should only be used for testing or emergency releases.
 
 ### Re-enable Code Signing
+
 To restore normal signing after emergency:
 
 1. Add the **Secrets** back in
@@ -78,8 +80,9 @@ To restore normal signing after emergency:
 3. Normal signing workflow will resume with approval required
 
 ## External Github Actions
+
 - [Install Qt](https://github.com/marketplace/actions/install-qt). Referenced as `jurplel/install-qt-action`, installs the Qt platform across all the three different runners (ubuntu-18.04, macos-latest, windows-2022) consistently. Internally it uses the [aqtinstall](https://github.com/miurahr/aqtinstall/) installer written in Python. Worth knowing if those errors propagate up through the GitHub action.
 - [Enable Developer Command Prompt](https://github.com/marketplace/actions/enable-developer-command-prompt) Referenced as `ilammy/msvc-dev-cmd`, sets up the command line environment on the windows-2022 runner (`PATH` and such) to expose Microsoft Visual C++.
 - [softprops/action-gh-release](https://github.com/marketplace/actions/gh-release). Referenced as `softprops/action-gh-release`, creates a release and uploads all artifacts to that release.
 - [WiX Toolset](https://wixtoolset.org/) Not an action — installed in [ci.yml](ci.yml) as the `wix` .NET global tool (pinned to `6.*`; v7 is gated behind an Open Source Maintenance Fee EULA, error `WIX7015`). It builds the bundled Seamly suite MSI from [`packaging/windows/smsi.wxs`](../../packaging/windows/smsi.wxs); the `WixToolset.UI.wixext` extension (version-matched to the core tool) supplies the directory-chooser installer UI, and `WixToolset.Util.wixext` supplies the `RemoveFolderEx` used to clear a pre-MSI installation.
-- **NSIS is retired** (Task Installer.1.2, 2026-08-11). No workflow runs `makensis` any more; Windows ships `seamly-x64.msi` and `seamly-arm64.msi` only. `dist/seamly2d-installer.nsi` was deleted (Task InstWinX64.11.1). Its on-disk footprint is transcribed into [`packaging/windows/smsi.wxs`](/packaging/windows/smsi.wxs), above the `RemoveLegacyProgramFiles` component, and that comment is now the only record of what the MSI's removal authoring has to clean up.
+- **NSIS is retired**. No workflow runs `makensis` any more; Windows ships `seamly-x64.msi` and `seamly-arm64.msi` only. Its on-disk footprint is transcribed into [`packaging/windows/smsi.wxs`](/packaging/windows/smsi.wxs), above the `RemoveLegacyProgramFiles` component, and that comment is now the only record of what the MSI's removal authoring has to clean up.

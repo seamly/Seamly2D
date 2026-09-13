@@ -12,7 +12,7 @@
 
 Whole-scene exports (draft blocks) keep the legacy untagged single-group structure; only piece-based exports are tagged.
 
-## Launch contract (Task 49, revised by Seamly2D.5)
+## Launch contract
 
 The handoff in (1) is a process launch, and both halves of it are pinned by tests so they cannot drift apart.
 
@@ -30,7 +30,7 @@ The handoff in (1) is a process launch, and both halves of it are pinned by test
 - **Exit codes** — `0` for `--help` / `--version` and for a normal session; `-1` when the QML root object fails to load. A rejected argument is *not* an exit code: the window is already the place the message has to appear, because this is a WIN32-subsystem binary with no console.
 - **Already running** — no single-instance handling: every launch is a new process with its own window, so a second Layout Mode handoff opens a second SeamlyLayout. This is deliberate — the app holds one document with no tabs, and comparing two layouts side by side is useful. Seamly2D does not track or reuse a previously launched instance.
 - **Untagged input** — the `data-*` tagging is *not* required to open a file. SeamlyLayout treats every top-level `<g>` with geometry as a piece, so an ordinary SVG still lays out. When an imported file contains no `data-type="piece"` group at all, SeamlyLayout shows a non-blocking warning saying so (`AppController::finish_import` → the `import_warning` signal, reached from both `import_svg` and `import_svg_document`), because a file that did not come from Layout Mode will usually not lay out the way the user expects.
-- **Piece discovery (Task 59)** — for a *tagged* file the pieces are the `data-type="piece"` groups and nothing else; the untagged "every top-level `<g>`" rule applies only to files with no tagging anywhere. Because this document nests all pieces inside `<g data-type="pattern">` and SeamlyLayout's layout pipeline is built around pieces being direct children of the SVG root, `piece_extractor::hoist_tagged_pieces` re-parents the tagged pieces up to the root (composing any wrapper `transform` onto each one) before the pipeline runs. **A producer-side change that adds another wrapper level, or that stops tagging pieces, silently changes what SeamlyLayout packs** — before this normalisation existed, the whole pattern packed as one sheet-sized "piece".
+- **Piece discovery** — for a *tagged* file the pieces are the `data-type="piece"` groups and nothing else; the untagged "every top-level `<g>`" rule applies only to files with no tagging anywhere. Because this document nests all pieces inside `<g data-type="pattern">` and SeamlyLayout's layout pipeline is built around pieces being direct children of the SVG root, `piece_extractor::hoist_tagged_pieces` re-parents the tagged pieces up to the root (composing any wrapper `transform` onto each one) before the pipeline runs. **A producer-side change that adds another wrapper level, or that stops tagging pieces, silently changes what SeamlyLayout packs** — before this normalisation existed, the whole pattern packed as one sheet-sized "piece".
 - **Piece identity in the layout** — `id`, `data-name` and `data-letter` are carried through packing into the layout SVG, the piece bbox JSON and the Adjust overlay. Anything a user reads is labelled `data-name` → `data-letter` → `id` (`PieceRect::label()`), so a warning names "Front Bodice" rather than `piece-7`. `id` remains the identity key for element lookup and must stay unique.
 
 ## Document shape

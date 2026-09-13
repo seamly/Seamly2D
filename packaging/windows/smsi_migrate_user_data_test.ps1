@@ -131,7 +131,7 @@ try {
         "dataRoot=$($newRoot.Replace('\', '/'))"
     )
 
-    # Task SettingsFiles.1: the live common settings file is <Local>\Seamly\qt6_common.ini.
+    # The live common settings file is <Local>\Seamly\qt6_common.ini.
     $newLocalCommonDirectory = Join-Path $newLocal 'Seamly'
     $newLocalCommon = Join-Path $newLocalCommonDirectory 'qt6_common.ini'
     New-Item -ItemType Directory -Path $newLocalCommonDirectory -Force | Out-Null

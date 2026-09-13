@@ -145,8 +145,7 @@ machine. Parameter table: [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md).
     (`PreferencesModel::load()` takes an existing ini as authoritative, so a
     partial one must never be written). Add-only: migrated or existing values
     always win. No app needs a Preferences > Paths visit, and no app seeds
-    its own ini on an installed machine (app-side first-run seeding is
-    deprecated — Task SettingsFiles.3).
+    its own ini on an installed machine.
 
 **Maintenance (repair/uninstall, `Installed` true):**
 `MaintenanceWelcomeDlg` → `SeamlyMaintenanceTypeDlg` → `VerifyReadyDlg`.
@@ -154,7 +153,7 @@ The middle page replaces stock `MaintenanceTypeDlg` to add the installed
 `SEAMLYINSTALLEDVERSION` note; otherwise identical. A patch keeps the stock
 shortcut `WelcomeDlg` → `VerifyReadyDlg`. None of steps 3-5 run on this path.
 
-- Own dialog set (Task InstWinX64.1) — every transition self-authored;
+- Own dialog set — every transition self-authored;
   stock `WixUI_InstallDir` can't be extended this way.
 - Previous-install page skips repair/uninstall (`AND NOT Installed`).
 - `/qn` shows no page — pass `SEAMLYDATAPARENT`/`SEAMLYDATAROOT`,
