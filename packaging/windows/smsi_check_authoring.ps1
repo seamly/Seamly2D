@@ -1105,6 +1105,51 @@ Assert-That -Name 'every control fits inside its dialog (no Error 2826)' `
     -Succeeded ($overflowing.Count -eq 0) `
     -Detail "$($overflowing.Count) overflow: $($overflowing -join ', ')"
 
+# --- 11. launch Seamly2D from the Finish page (InstWinX64.3.7) ----------------
+# The stock ExitDialog carries an OptionalCheckBox control already; only these
+# two properties are ours. Checked by default and offered only on a fresh
+# install, matching the checkbox's own ShowCondition.
+Assert-That -Name 'the launch checkbox text names Seamly2D' `
+    -Succeeded ((Get-MsiProperty -Name 'WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT') -match 'Seamly2D')
+Assert-That -Name 'the launch checkbox defaults to checked' `
+    -Succeeded ((Get-MsiProperty -Name 'WIXUI_EXITDIALOGOPTIONALCHECKBOX') -eq '1')
+
+# BinaryData custom action (msidbCustomActionTypeBinaryData = 1): Source names
+# the Binary row, Target names the DLL entry point it calls.
+$launchAction = @(Get-MsiRows -Sql "SELECT ``Action``, ``Type``, ``Source``, ``Target`` FROM ``CustomAction`` WHERE ``Action``='LaunchApplication'" `
+    -Columns 'Action', 'Type', 'Source', 'Target')
+Assert-That -Name 'the LaunchApplication action exists and calls WixShellExec' `
+    -Succeeded ($launchAction.Count -eq 1 -and
+                (([int]$launchAction[0].Type) -band 1) -eq 1 -and
+                $launchAction[0].Source -eq 'Wix4UtilCA_X64' -and
+                $launchAction[0].Target -eq 'WixShellExec') `
+    -Detail "$(if ($launchAction.Count) { "type $($launchAction[0].Type), source '$($launchAction[0].Source)', target '$($launchAction[0].Target)'" } else { '<nothing>' })"
+if ($launchAction.Count -eq 1) {
+    # NoImpersonate = 2048. WixShellExec must run as the signed-in user, or the
+    # de-elevation it exists to provide never happens and Seamly2D starts as
+    # admin - see the long comment in smsi.wxs.
+    Assert-That -Name 'LaunchApplication runs impersonated, not as SYSTEM' `
+        -Succeeded ((([int]$launchAction[0].Type) -band 2048) -eq 0) -Detail "type $($launchAction[0].Type)"
+}
+Assert-That -Name 'WixShellExecTarget points at the installed Seamly2D executable' `
+    -Succeeded ((Get-MsiProperty -Name 'WixShellExecTarget') -eq '[#Seamly2DExe]')
+
+# The Finish button must fire the launch BEFORE EndDialog closes the wizard,
+# and only when the box is ticked on a fresh install - repeating the
+# checkbox's own ShowCondition guards against a stale checked value surviving
+# into a repair or removal, where the box is never even shown.
+$finishEvents = @($script:controlEvents | Where-Object { $_.Dialog -eq 'ExitDialog' -and $_.Control -eq 'Finish' })
+$launchPublish = @($finishEvents | Where-Object { $_.Event -eq 'DoAction' -and $_.Argument -eq 'LaunchApplication' })
+$endDialogPublish = @($finishEvents | Where-Object { $_.Event -eq 'EndDialog' })
+Assert-That -Name 'Finish launches Seamly2D only when the box is checked on a fresh install' `
+    -Succeeded ($launchPublish.Count -eq 1 -and $launchPublish[0].Condition -match 'WIXUI_EXITDIALOGOPTIONALCHECKBOX' -and
+                $launchPublish[0].Condition -match 'NOT Installed') `
+    -Detail "condition '$(if ($launchPublish.Count) { $launchPublish[0].Condition } else { '<nothing>' })'"
+Assert-That -Name 'Finish launches Seamly2D before the wizard closes' `
+    -Succeeded ($launchPublish.Count -eq 1 -and $endDialogPublish.Count -eq 1 -and
+                [int]$launchPublish[0].Ordering -lt [int]$endDialogPublish[0].Ordering) `
+    -Detail "DoAction at $(if ($launchPublish.Count) { $launchPublish[0].Ordering } else { '<nothing>' }), EndDialog at $(if ($endDialogPublish.Count) { $endDialogPublish[0].Ordering } else { '<nothing>' })"
+
 # --- report --------------------------------------------------------------------
 [System.Runtime.InteropServices.Marshal]::ReleaseComObject($script:database) | Out-Null
 

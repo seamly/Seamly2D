@@ -567,9 +567,25 @@
       <Publish Dialog="MaintenanceWelcomeDlg" Control="Next" Event="NewDialog"
                Value="SeamlyMaintenanceTypeDlg" />
 
-      <!-- Exit. Order 999 leaves room for a later row to run before the wizard
-           closes - the slot the stock sets reserve for "launch the application
-           now" (InstWinX64.3.7). -->
+      <!-- Exit. The stock ExitDialog (WixToolset.UI.wixext) already carries an
+           OptionalCheckBox control, hidden until WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT
+           holds text - so the checkbox itself needs no authoring here, only these
+           two properties. Its own ShowCondition is
+           "WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT AND NOT Installed", so it is
+           already hidden on the maintenance/repair/remove/patch path; the launch
+           below repeats NOT Installed so a "1" left over from an earlier run can
+           never fire it there either. Checked by default (Value="1"): most people
+           who just finished Setup want to see the app they installed.
+           LaunchApplication is defined in smsi.wxs, next to the other actions this
+           wizard fires from a Publish row. -->
+      <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOXTEXT" Value="Launch Seamly2D now" />
+      <Property Id="WIXUI_EXITDIALOGOPTIONALCHECKBOX" Value="1" />
+
+      <!-- Order 1: run before EndDialog closes the wizard. Order 999 leaves room
+           for any further row that still needs to run first. -->
+      <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction"
+               Value="LaunchApplication" Order="1"
+               Condition="WIXUI_EXITDIALOGOPTIONALCHECKBOX = &quot;1&quot; AND NOT Installed" />
       <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog"
                Value="Return" Order="999" />
     </UI>

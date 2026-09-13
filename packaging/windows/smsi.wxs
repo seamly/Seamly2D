@@ -585,6 +585,27 @@
               Condition="SEAMLYDATAROOTRECORDED AND NOT Installed" />
     </InstallExecuteSequence>
 
+    <!-- ================= launch Seamly2D from the Finish page (InstWinX64.3.7) =
+         The ExitDialog checkbox authored in smsi_ui.wxs fires this action through
+         a plain DoAction Publish - never added to any sequence table, exactly how
+         WixUI_InstallDir's own LaunchApplication action works.
+
+         WixShellExec, NOT a plain ExeCommand CustomAction: this package installs
+         elevated (see the LUA-bit check in smsi_check_authoring.ps1), and the
+         Finish button runs in that same elevated context. A plain ExeCommand
+         action would hand Seamly2D the installer's elevated token, so it would
+         start running as admin. WixShellExec instead asks the running Explorer
+         process to start the target, which runs it with the signed-in user's own
+         rights - the same as double-clicking the desktop shortcut.
+
+         [#Seamly2DExe] resolves to seamly2d.exe's installed path - the same file
+         reference the .sm2d file-association command uses in smsi_files.wxs. -->
+    <Property Id="WixShellExecTarget" Value="[#Seamly2DExe]" />
+    <CustomAction Id="LaunchApplication"
+                  BinaryRef="Wix4UtilCA_X64"
+                  DllEntry="WixShellExec"
+                  Impersonate="yes" />
+
     <!-- The directory tree, the three executables, their Start Menu shortcuts
          and their file associations are in smsi_files.wxs. The optional
          desktop shortcuts are in smsi_shortcuts.wxs. The install-info
