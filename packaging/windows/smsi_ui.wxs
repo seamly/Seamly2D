@@ -63,23 +63,42 @@
 
       REUSED UNCHANGED, one DialogRef each: WelcomeDlg, LicenseAgreementDlg,
       BrowseDlg, VerifyReadyDlg, ProgressDlg,
-      ExitDialog, CancelDlg, ErrorDlg, FilesInUse, MsiRMFilesInUse, PrepareDlg,
+      ExitDialog, CancelDlg, ErrorDlg, FilesInUse, MsiRMFilesInUse,
       ResumeDlg, UserExit, DiskCostDlg, OutOfDiskDlg, OutOfRbDiskDlg,
       MaintenanceWelcomeDlg, FatalError. A stock dialog brings its own
       controls, its own control conditions and its own internal events
       (Cancel -> CancelDlg, VerifyReadyDlg's Install -> EndDialog). It brings
       no NewDialog row at all.
 
-      REPLACED, not reused: MaintenanceTypeDlg. SeamlyMaintenanceTypeDlg
-      transcribes it and adds the installed-version note. WiX cannot add a
-      control to a dialog another fragment defines, so naming the version on
-      that page means owning the whole page.
+      REPLACED, not reused: MaintenanceTypeDlg and PrepareDlg.
+      SeamlyMaintenanceTypeDlg transcribes MaintenanceTypeDlg and adds the
+      installed-version note. WiX cannot add a control to a dialog another
+      fragment defines, so naming the version on that page means owning the
+      whole page.
 
-      Five Seamly pages are authored here.
+      SeamlyPrepareDlg replaces stock PrepareDlg for the same reason, plus one
+      more: stock PrepareDlg's Next/Back are permanently Disabled="yes"
+      placeholders, and the dialog is Modeless="yes", so it never blocks
+      InstallUISequence - AppSearch and the cost actions run underneath it and
+      WelcomeDlg's own baked-in Show row (from its stock fragment, pulled in
+      by the DialogRef below) pops up the instant they finish, typically under
+      a second. Both pages carry the same title, so the result reads as a
+      glitch, not as two pages. SeamlyPrepareDlg takes PrepareDlg's own
+      InstallUISequence slot (see the Show row near the end of this file) but
+      is Modeless="no" (the default), so AppSearch does not even start until
+      Continue is clicked. Continue does not NewDialog anywhere - it just
+      EndDialogs, and the sequence carries on into AppSearch -> CostFinalize
+      -> WelcomeDlg exactly as it does today. That is why this page has no
+      route of its own into the chain below: it is not part of that chain, it
+      is the gate in front of it.
+
+      Six Seamly pages are authored here.
 
       PAGE ORDER, fresh install:
 
-        WelcomeDlg
+        SeamlyPrepareDlg                gate in front of AppSearch/CostFinalize,
+                                         not part of the chain below - see above
+          -> WelcomeDlg
           -> LicenseAgreementDlg
           -> SeamlyPreviousInstallDlg   only when an earlier install was found
           -> SeamlyDataDirDlg           user-data root (program directory is
@@ -163,11 +182,47 @@
       <DialogRef Id="FatalError" />
       <DialogRef Id="FilesInUse" />
       <DialogRef Id="MsiRMFilesInUse" />
+      <!-- No DialogRef Id="PrepareDlg": SeamlyPrepareDlg below replaces it. -->
       <DialogRef Id="OutOfDiskDlg" />
       <DialogRef Id="OutOfRbDiskDlg" />
-      <DialogRef Id="PrepareDlg" />
       <DialogRef Id="UserExit" />
       <DialogRef Id="ExitDialog" />
+
+      <!-- ========== preparing (replaces stock PrepareDlg) ================= -->
+      <!-- Same geometry and bitmap as stock WelcomeDlg/PrepareDlg (the big
+           left-side WixUIDialogBmp, not the banner strip the five pages below
+           use) so this looks like the same wizard opening, not a new style.
+           See the REPLACED-not-reused note above for why this page exists and
+           how Continue hands off to AppSearch/WelcomeDlg. -->
+      <Dialog Id="SeamlyPrepareDlg" Width="370" Height="270"
+              Title="[ProductName] Setup">
+
+        <Control Id="Bitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="234"
+                 TabSkip="no" Disabled="yes" Text="WixUI_Bmp_Dialog" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0"
+                 Disabled="yes" TabSkip="yes" />
+
+        <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60"
+                 Transparent="yes" NoPrefix="yes" TabSkip="yes"
+                 Text="{\WixUI_Font_Bigger}Welcome to the [ProductName] Setup Wizard" />
+        <Control Id="Description" Type="Text" X="135" Y="80" Width="220" Height="60"
+                 Transparent="yes" NoPrefix="yes" TabSkip="yes"
+                 Text="Click Continue to let Setup get ready to install [ProductName]. Click Cancel to exit without installing." />
+
+        <!-- Disabled placeholder, matching stock WelcomeDlg: keeps the button
+             row aligned with every later page without offering a route
+             backward from the first page. -->
+        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
+                 Disabled="yes" TabSkip="no" Text="&amp;Back" />
+        <Control Id="Continue" Type="PushButton" X="236" Y="243" Width="56" Height="17"
+                 Default="yes" TabSkip="no" Text="&amp;Continue">
+          <Publish Event="EndDialog" Value="Return" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
+                 Cancel="yes" TabSkip="no" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
+        </Control>
+      </Dialog>
 
       <!-- ========== "an existing installation was found" ================= -->
       <!-- No NoMinimize: the stock WixUI dialogs allow minimizing (Attributes
@@ -589,5 +644,14 @@
       <Publish Dialog="ExitDialog" Control="Finish" Event="EndDialog"
                Value="Return" Order="999" />
     </UI>
+
+    <!-- SeamlyPrepareDlg's slot: exactly where stock PrepareDlg's own
+         fragment would have put it (Before="AppSearch"), just naming our
+         dialog instead. Everything after AppSearch - ResumeDlg/WelcomeDlg/
+         MaintenanceWelcomeDlg's own baked-in Show rows, asserted at 1296-1298
+         by smsi_check_authoring.ps1 - is untouched. -->
+    <InstallUISequence>
+      <Show Dialog="SeamlyPrepareDlg" Before="AppSearch" />
+    </InstallUISequence>
   </Fragment>
 </Wix>
