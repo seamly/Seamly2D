@@ -9,8 +9,8 @@ Copyright: 2026
 
 ### Added
 
-- **Installer packaging** — Windows Inno Setup script (`packaging/windows/SeamlyLayout.iss`)
-  and build script (`packaging/windows/build_installer.ps1`); macOS DMG script
+- **Installer packaging** — Windows Inno Setup script (`packaging/windows/SeamlyLayout.iss`,
+  at the repo root) and build script (`packaging/windows/build_installer.ps1`); macOS DMG script
   (`packaging/macos/build_dmg.sh`); Linux desktop entry
   (`packaging/linux/seamlylayout.desktop`).
 - **Packaged default settings** — `qt_frontend/settings/default_settings.json` and

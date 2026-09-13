@@ -4,25 +4,17 @@
 # **  @date   July 29, 2026
 # **
 # **  @brief
-# **  Verify an INSTALLED Seamly2D MSI on a real machine (Task 51): the files
-# **  that landed, the Start Menu and desktop shortcuts, the install-info
-# **  registry rows, the Add/Remove Programs entry, the file associations, that
-# **  each app actually starts, and — after uninstall — that every one of those
-# **  is gone while the user's own data is still there.
+# **  Verify an installed Seamly2D MSI on a real machine (Task 51), including
+# **  files, shortcuts, registry entries, file associations, application startup,
+# **  and cleanup after uninstall while preserving user data.
 # **
-# **  This is the runtime half of Task 51's verification. Its sibling
-# **  smsi_check_authoring.ps1 reads the .msi database and checks what the PACKAGE
-# **  CONTAINS; this script checks what a real elevated install actually DID.
-# **  Neither can replace the other: authoring passes on a package whose exes
-# **  cannot start, and this one cannot run without a machine to install on.
-# **
-# **  The script is deliberately standalone — no repository files, no modules,
-# **  no build tree — so it can be copied to a clean test machine beside the
-# **  .msi and run there. Windows PowerShell 5.1 is enough.
+# **  This is the runtime counterpart to smsi_check_authoring.ps1, which checks
+# **  the MSI database. This script checks the results of an actual installation.
+# **  It is standalone and runs on Windows PowerShell 5.1.
 # **
 # **  HOW IT IS USED
-# **    Four phases, run in order around the msiexec commands, sharing a state
-# **    file so each phase can compare against the ones before it:
+# **    Run these phases in order around the msiexec commands. They share a state
+# **    file for comparison:
 # **
 # **      .\local_install_msi.ps1 -Phase Baseline      <- BEFORE installing
 # **      msiexec /i Seamly-x64-older.msi
@@ -66,7 +58,7 @@
 
 <#
 .SYNOPSIS
-    Check what an installed Seamly2D MSI actually did to the machine (Task 51).
+    Check what an installed Seamly2D MSI actually did to the machine.
 
 .DESCRIPTION
     Asserts one expectation at a time, printing "ok", "FAILED" or "note" per
@@ -239,19 +231,10 @@ function Get-DataRootPath {
 #------------------------------------------------------------------------------
 # @brief  Take an inventory of every tree the installer promises not to touch.
 #
-# The set is deliberately FIXED rather than derived solely from the live
-# configuration, for two reasons found during the Task 51 laptop run:
-#
-#  - On a machine upgrading from the old NSIS build, ~/seamly2d already exists,
-#    so VCommonSettings::chooseFirstRunDataRoot() ADOPTS it as the data root
-#    instead of using the default. The user's patterns then live in ~/seamly2d
-#    and an inventory of the default root alone watches an empty directory -
-#    exactly the case this check exists to cover.
-#  - Get-DataRootPath follows the configured root, which CHANGES the moment the
-#    apps first run and write paths/dataRoot. Baseline would then inventory one
-#    directory and a later phase a different one; because Assert-UserDataIntact
-#    matches on Path, the baseline entry would find no counterpart and report a
-#    failure that means nothing.
+# Keep this inventory fixed instead of using only the current data root. An
+# upgrade may reuse ~/seamly2d, while the configured root can change after the
+# apps run. Tracking both legacy and candidate roots, plus the settings folders,
+# keeps the baseline stable and ensures existing user data is covered.
 #
 # Listing the configured root, both candidate roots and both settings folders
 # keeps the comparison stable across phases whichever root ends up live.
@@ -421,25 +404,17 @@ public static extern int MsiGetComponentPath(string szProduct,
 #------------------------------------------------------------------------------
 # @brief  Resolve an advertised shortcut through the Windows Installer.
 #
-# The Start Menu shortcuts are advertised: smsi.wxs nests each one
-# inside its <File KeyPath="yes">, with no Target attribute, which is WiX's
-# standard pattern for a shortcut that carries a Darwin descriptor (product,
-# feature and component GUIDs) instead of a path. The desktop shortcuts set
-# Target="[INSTALLFOLDER]..." explicitly and are ordinary path shortcuts.
+# Start Menu shortcuts are advertised: smsi.wxs places each inside a
+# <File KeyPath="yes"> without a Target, so it stores product, feature, and
+# component GUIDs instead of a path. Desktop shortcuts use explicit targets.
 #
-# The distinction matters because WScript.Shell does NOT report an advertised
-# shortcut's target. It hands back the icon Windows Installer extracted to
-# %WINDIR%\Installer\{ProductCode}\<name>.ico - a real, non-empty path that
-# points nowhere near the install directory. Asserting on it fails every time,
-# which is exactly what this script used to do; it assumed an unresolvable
-# advertised shortcut would come back EMPTY, and nothing here ever hit that
-# branch. Found by the Task 51 install run, where all three Start Menu
-# shortcuts "failed" while being perfectly correct.
+# WScript.Shell does not return an advertised shortcut's target. It returns
+# the non-empty path to Windows Installer's extracted icon instead, so checking
+# that path incorrectly makes valid Start Menu shortcuts appear to fail.
 #
-# MsiGetShortcutTarget reads the descriptor, and MsiGetComponentPath turns the
-# component GUID into the installed file it currently resolves to - which is
-# the thing worth asserting: not merely that a .lnk exists, but that clicking
-# it reaches an executable inside this install.
+# MsiGetShortcutTarget reads the descriptor, and MsiGetComponentPath resolves
+# the component GUID to the installed file. That verifies the shortcut reaches
+# an executable in this installation.
 #
 # @param  LinkPath  full path of the .lnk
 # @return PSCustomObject with ProductCode, ComponentPath and InstallState, or
@@ -929,13 +904,8 @@ switch ($Phase) {
             $installFolder = Invoke-InstalledChecks -InstallInfo $installInfo
         }
 
-        # The installer must not have disturbed the separate NSIS product.
-        # Task 51 step 2a INVERTED this expectation. The MSI used to detect the
-        # old NSIS product and leave it alone; it now removes it, because the
-        # MSI is a strict superset - NSIS ships seamly2d and seamlyme, this
-        # package ships both plus SeamlyLayout - so leaving it behind means two
-        # copies of each parent app and Start Menu shortcuts that launch the old
-        # binaries. All four things the .nsi created must be gone.
+        # The MSI detects the old NSIS product and removes it, because the new        # MSI is a strict superset - NSIS ships seamly2d and seamlyme, this
+        # package ships both seamly2d & seamlyme (same names as before) + seamlylayout
         if ($state.LegacyInstallDir) {
             Assert-That -Name "the old NSIS install directory was removed" `
                 -Succeeded (-not (Test-Path -LiteralPath $state.LegacyInstallDir)) `

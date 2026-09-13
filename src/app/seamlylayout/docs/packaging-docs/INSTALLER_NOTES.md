@@ -132,11 +132,11 @@ will happen at first launch.  No files are moved by the installer itself.
 
 ### Windows — Inno Setup
 
-**Script:** `packaging/windows/SeamlyLayout.iss`  
-**Build script:** `packaging/windows/build_installer.ps1`
+**Script:** `packaging/windows/SeamlyLayout.iss` (repo root)
+**Build script:** `packaging/windows/build_installer.ps1` (repo root)
 
 ```powershell
-# One-liner (from repo root):
+# One-liner (from the repo root, not src/app/seamlylayout):
 .\packaging\windows\build_installer.ps1
 ```
 

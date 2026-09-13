@@ -28,7 +28,7 @@ Notes:
 
 ## Installer.1 — Create .msi/.pkg/.appimage/flatpak artifacts as pre-releases in github workflow ci.yml file
 
-- [x] Task Installer.1.1 - Windows x64 .msi - refer to tasks in project-docs\TODO_INSTALLER_WIN_X64.md to define the .msi capabilities and options
+- [x] Task Installer.1.1 - Windows x64 .msi - refer to tasks in project-docs\TODO.md to define the .msi capabilities and options
 
 - [x] Task Installer.1.2 - Windows arm64 .msi - should re-implement the Windows x64 .msi capabilities - track tasks in project-docs\TODO_INSTALLER_WIN_ARM64.md
   - `ci.yml`'s `windows-msi` job is now a **matrix over `arch`** (`x64`, `arm64`, `fail-fast: false`) — `windows-msi.yml`'s `msi` job verbatim, minus its own version step. 
@@ -42,7 +42,7 @@ Notes:
 
 ## Installer.2 - Test Seamly pre-releases installation for 3 use cases: a. where Seamly is not previously installed, b. where Seamly version without SeamlyLayout is installed, c. where Seamly version with SeamlyLayout is installed
 
-- Installer.2.1 - Windows x64 .msi
+- [x] Installer.2.1 - Windows x64 .msi
 - Installer.2.2 - Windows arm64 .msi
 - Installer.2.3 - MacOS .pkg
 - Installer.2.4 - Linux .appimage

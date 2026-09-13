@@ -17,7 +17,7 @@ Goal: get `Seamly2DTeam` and `Seamly Systems` out of the codebase without breaki
 - [ ] Team.6 Release-note it beforehand: upgrading from a pre-Task-15 build requires an intermediate release first, or settings start fresh
 - [ ] Team.7 Delete `VAbstractApplication::MigrateSeamlySettingsLocation()` / `NotifySeamlySettingsMigrated()` and their call sites in `Application2D::openSettings()` / `ApplicationME::openSettings()`
 - [ ] Team.8 Delete seamlyLayout's `migrateLegacyOrganizationTree()` and the legacy branches in `PreferencesModel::appConfigRootPath()` / `SettingsModel::defaultSettingsFilePath()`
-- [ ] Team.9 Delete the legacy probe and upgrade-guard text in `src/app/seamlylayout/packaging/windows/SeamlyLayout.iss`
+- [ ] Team.9 Delete the legacy probe and upgrade-guard text in `packaging/windows/SeamlyLayout.iss`
 - [ ] Team.10 Delete the migration tests and the `kLegacyOrganizationName` fixture in `src/test/Seamly2DTest/qttestmainlambda.cpp`
 - [ ] Team.11 Strip the now-obsolete legacy-org paragraphs from `.github/README-BUILDS.md` (Windows/macOS/AppImage/Flatpak settings sections) and `project-docs/TODO_MIGRATE.md` Tasks 17/18
 - [ ] Team.12 Verify: `ci.yml` green (it runs `Seamly2DTests`), `ctest --preset debug` green, and a clean-profile first run still lands in `%LOCALAPPDATA%\Seamly\<app>\` with no legacy lookup attempted

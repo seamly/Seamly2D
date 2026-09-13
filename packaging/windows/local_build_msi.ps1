@@ -29,30 +29,10 @@
     Currently this script is set to use 4 CPUs for jom.
 
 .DESCRIPTION
-    Runs the same steps as ci.yml's windows-msi (x64) job, in the same order:
-      1. scripts\version.sh <Version> - stamps the build's version into
-         src\libs\vmisc\projectversion.{h,cpp}, so seamly2d/seamlyme report
-         the version this build was made with, same as every ci.yml build
-         job (linux-test, appimage, macos, windows-msi all run this
-         unconditionally, not only on release builds).
-      2. qmake Seamly.pro -config release && nmake - builds seamly2d.exe and
-         seamlyme.exe with windeployqt already run as a post-link step, and
-         the four Qt unit-test binaries alongside them.
-      3. nmake check - runs Seamly2DTest, CollectionTest, ParserTest and
-         TranslationsTest, the same way ci.yml's windows-test job does. This
-         is the only local run those suites get; every other local script
-         passes CONFIG+=noTests and never compiles src\test at all. A failure
-         here stops the build, so a broken test never reaches an MSI.
-      4. cmake --preset release && cmake --build --preset release in
-         src\app\seamlylayout\qt_frontend - builds SeamlyLayout.exe.
-    Then packaging\windows\smsi.ps1 stages all three and runs
-    `wix build`, carrying -Version as the MSI's DisplayVersion/ProductVersion
-    too, so the MSI and the binaries it contains agree.
-
-    Steps 2 and 3 together mirror ci.yml's windows-test job; the rest mirrors
-    its windows-msi (x64) job. The test binaries are built into
-    src\test\*\bin and are never staged: smsi.ps1 is given the two app bin
-    directories by name, so nothing from src\test can reach the MSI.
+     Stamps the version, builds seamly2d, seamlyme, and SeamlyLayout, runs the
+     Qt tests unless -SkipTests is specified, and packages the three apps into
+     an MSI with packaging\windows\smsi.ps1. Test binaries remain in
+     src\test\*\bin and are not staged.
 
     The version stamp touches git-tracked files
     (src\libs\vmisc\projectversion.{h,cpp}, dist\macx\seamly2d\Info.plist,
@@ -104,12 +84,7 @@ $ErrorActionPreference = 'Stop'
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 
 #------------------------------------------------------------------------------
-# @brief  Run a native program without letting stderr abort the script.
-#
-# Windows PowerShell 5.1 wraps a native program's stderr lines in a
-# terminating ErrorRecord under $ErrorActionPreference = 'Stop', even when the
-# program exits 0 (nmake, cargo and windeployqt all write ordinary progress to
-# stderr). Judge success by exit code only.
+# @brief Run a native program and judge success by its exit code.
 #------------------------------------------------------------------------------
 function Invoke-NativeCommand {
     param([Parameter(Mandatory = $true)][scriptblock]$Command)
@@ -125,7 +100,7 @@ if (-not $Version) {
 }
 Write-Host "version: $Version"
 
-# scripts\version.sh writes the version into these git-tracked files, the
+# scripts\version.sh writes the version YY.MM.DD.mmmm into these git-tracked files, the
 # same way every ci.yml build job does. The stamp is reverted (via
 # `git checkout`) once the build succeeds, unless one of these files already
 # carried uncommitted changes before this run (then it is left alone, to not
@@ -147,9 +122,9 @@ Invoke-NativeCommand { & bash 'packaging/version.sh' $Version }
 if ($LASTEXITCODE -ne 0) { throw "packaging/version.sh failed (exit code $LASTEXITCODE)." }
 
 # --- Locate the Qt kit ---------------------------------------------------------
-# Same kit selection as src\app\seamlylayout\build.ps1: newest msvc2022_64 kit
-# under C:\Qt at or above 6.11.1, so seamly2d/seamlyme/SeamlyLayout all deploy
-# against the one Qt runtime the MSI ships.
+# Newest msvc2022_64 kit under C:\Qt at or above 6.11.1, so 
+# seamly2d/seamlyme/SeamlyLayout all deploy # against the one Qt runtime 
+# the MSI ships.
 $QtMinimumVersion = [version]'6.11.1'
 $QtRoot = 'C:\Qt'
 $QtPath = $null
@@ -196,10 +171,10 @@ foreach ($ext in @('WixToolset.UI.wixext', 'WixToolset.Util.wixext')) {
     }
 }
 
-# --- Build seamly2d, seamlyme and SeamlyLayout under vcvars64 -------------------
-# One cmd.exe batch, the same shape as build.ps1's temp-batch approach: vcvars64
-# sets VCToolsRedistDir (which smsi.ps1 needs) in this process's environment, so
-# smsi.ps1 must run as a child of the SAME batch, not a separate PowerShell.
+# --- Build seamly2d, seamlyme and seamlyLayout under vcvars64 -------------------
+# One cmd.exe batch: vcvars64 sets VCToolsRedistDir (which smsi.ps1 needs) in 
+# this process's environment, so smsi.ps1 must run as a child of the SAME batch, 
+# not a separate PowerShell.
 $VsPath = 'C:\Program Files\Microsoft Visual Studio\18\Community'
 $VcVarsAll = "$VsPath\VC\Auxiliary\Build\vcvars64.bat"
 if (-not (Test-Path $VcVarsAll)) {
@@ -216,27 +191,19 @@ if ($SkipValidation) { $smsiArgs += '-SkipValidation' }
 $smsiArgsQuoted = ($smsiArgs | ForEach-Object { "`"$_`"" }) -join ' '
 
 # `qmake -r` regenerates every subdirectory Makefile, not just the top one.
-# This matters only locally: a generated subdirs Makefile recreates its child
-# Makefiles with `if not exist Makefile`, so a tree left over from an earlier
-# CONFIG+=noTests run keeps its old src\Makefile - one without the `test`
-# subdirectory - and the tests below would never be built. CI never sees this
-# because every job starts from a fresh checkout.
+# This matters only locally: leftover generated Makefiles can keep an old
+# src\Makefile without the `test` subdirectory, so unit tests would never be
+# built. CI starts from a fresh checkout, so it avoids this issue.
 #
-# Without CONFIG+=noTests, src.pro adds the `test` subdirectory - that is the
-# whole reason the unit tests get built here. `CONFIG += testcase` in each test
-# .pro is what then supplies the `check` target nmake runs below.
+# Without CONFIG+=noTests, src.pro adds the `test` subdirectory; `CONFIG +=
+# testcase` in each test .pro provides the `check` target nmake uses below.
 #
-# QT_QPA_PLATFORM=offscreen matches ci.yml's windows-test job, so a local run
-# and a CI run exercise the widget tests under the same platform plugin, and no
-# test window steals focus on the developer's desktop.
+# QT_QPA_PLATFORM=offscreen matches the CI Windows test job, so local and CI
+# runs exercise the same widget-test backend without stealing focus.
 #
-# NoDefaultCurrentDirectoryInExePath is cleared for the same reason. qmake's
-# generated `check` target is `cd /d bin && call target_wrapper.bat <exe>` - a
-# BARE executable name resolved from the current directory. When that variable
-# is set in the calling shell, cmd refuses to resolve it and every suite fails
-# with "'ParserTest.exe' is not recognized" even though the binary is right
-# there. Clearing it restores the resolution rule Qt's test runner and CI both
-# assume, and only for this build's cmd.exe process.
+# NoDefaultCurrentDirectoryInExePath is cleared so qmake's generated `check`
+# target can resolve test executables from the build directory correctly in this
+# cmd.exe process.
 if ($SkipTests) {
     $QmakeConfig = '-config release CONFIG+=noTests'
     $TestSection = @'

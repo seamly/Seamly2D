@@ -35,17 +35,58 @@ gh workflow run ci.yml --ref run-seamlyLayout
 - `VCToolsRedistDir` must be set by `ilammy/msvc-dev-cmd` — the only CRT redist source.
 - Use `windeployqt`, not `windeployqt6` (matches `.pro` files' `qtPrepareTool(WINDEPLOYQT, windeployqt)`).
 
+## arm64 
+
+Native build on `windows-11-arm`, nothing cross-compiled. Re-check Qt arm64 WebEngine availability at any Qt bump.
+
+## Code signing (ci.yml)
+
+CI signs with jsign + Google Cloud KMS, gated on `SEAMLY_SIGNING_*` secrets (skipped when absent). See `.github/workflows/CODE_SIGNING.md`.
+
+### Local dev build
+
+[`local_build_msi.ps1`](local_build_msi.ps1) runs the same `smsi.ps1` call on a
+dev machine. It is the only local build script — do not use
+`src\app\seamlylayout\build.ps1` or `qd.ps1`; they build SeamlyLayout alone.
+
+```powershell
+.\packaging\windows\local_build_msi.ps1
+```
+
+1. Stamps `-Version` (default: computed from the current local time) into
+   `projectversion.{h,cpp}` and both `Info.plist` files, via `packaging\version.sh`.
+   Reverts the stamp after a successful build, unless those files already
+   carried uncommitted changes before the run.
+2. Finds the newest `msvc2022_64` Qt kit at or above 6.11.1 under `C:\Qt`;
+   installs WiX v6 and its UI/Util extensions if missing.
+3. Under one `vcvars64.bat` environment: `qmake Seamly.pro -r -config release`
+   and `nmake` build seamly2d and seamlyme; `nmake check` runs the four Qt
+   test suites; `cmake --preset release` and `cmake --build --preset release`
+   build SeamlyLayout.
+4. Calls `smsi.ps1` with the built binaries — see "What the script does" below.
+
+| Parameter | Required | Default | Notes |
+|---|---|---|---|
+| `-Version` | no | computed from local time | Same `YY.M.D.MMMM` form `smsi.ps1` expects. |
+| `-SkipTests` | no | off | Builds with `CONFIG+=noTests`; skips `nmake check`. Only for a packaging-only change — CI is the only other runner for these suites. |
+| `-SkipValidation` | no | off | Passed through to `smsi.ps1`. |
+
+Treat the MSI it produces as a local dev build, not a release artifact —
+releases still go through `gh workflow run ci.yml`.
+
 ## 2. What the script does
 
 Checks first, fails on the first missing item: both exes, `seamly2d`'s `platforms\` dir, `SeamlyLayout.exe`, `wix`, the WiX UI/Util extensions, `-WinDeployQt`, and a `Microsoft.VC*.CRT` dir under `VCToolsRedistDir\<arch>`.
 
 1. **Derives `ProductVersion`**: `YY.M.((D−1)·1440 + MMMM)` — MSI ignores the 4th field for upgrade comparisons; this always increases. Full version is stored as `DisplayVersion`.
 2. **Stages** `packaging\windows\seamly-msi\<arch>\`: `parent\` (shared Qt runtime + `windeployqt --qmldir …\qml --release` for SeamlyLayout, its `settings\`/`licenses\`, MSVC CRT DLLs) and `exes\` (the three exes, moved out of `parent\` after deployment so `.wxs` can author them explicitly for shortcuts/associations).
-3. **`wix build`** on `smsi.wxs` → `seamly-<arch>.msi` (`-pdbtype none`, no `.wixpdb`).
-4. **`wix msi validate`** (skip with `-SkipValidation`), suppressing ICE43/57 — false positives from optional desktop-shortcut components.
-5. **[`smsi_check_authoring.ps1`](smsi_check_authoring.ps1)** — asserts elevation, ARP properties, upgrade/NSIS detection, dialogs, shortcuts, associations, registry rows. Always runs, even with `-SkipValidation`.
+3. **`wix build`** on every `*.wxs` file in this directory (globbed, not hard-coded — `smsi.wxs` plus its five fragments) → `seamly-<arch>.msi` (`-pdbtype none`, no `.wixpdb`).
+4. **[`smsi_fix_dialog_lines.ps1`](smsi_fix_dialog_lines.ps1)** — trims WixUI's stock banner/bottom line controls back inside the dialog width (they overflow by 3 installer units, logging Error 2826). Runs on the built package, before validation.
+5. **`wix msi validate`** (skip with `-SkipValidation`), suppressing ICE43/57 — false positives from optional desktop-shortcut components.
+6. **[`smsi_check_authoring.ps1`](smsi_check_authoring.ps1)** — asserts elevation, ARP properties, upgrade/NSIS detection, dialogs, shortcuts, associations, registry rows. Always runs, even with `-SkipValidation`.
+7. **[`smsi_migrate_user_data_test.ps1`](smsi_migrate_user_data_test.ps1)** — unit tests for the data-migration deferred action. Always runs.
 
-All three apps ship in every package — no switch to omit SeamlyLayout.
+All three apps ship in every package
 
 ### Benign warnings
 
@@ -78,7 +119,7 @@ msiexec /a seamly-x64.msi /qn TARGETDIR=C:\extract                   # extract w
 - `SEAMLYDATAROOT` has no `/qn` default: the execute sequence runs elevated as SYSTEM, so a computed default would misplace user data. Setup records the answer at `HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot` on first run; unset stays empty and apps use their own default. Repair keeps the recorded value.
 - Moving an installed Seamly is **not supported** — location is fixed at install time. Uninstall/reinstall, or run a major upgrade (prefills the program-directory page from `HKLM\SOFTWARE\Seamly\Seamly2D\InstallPath`).
 - Data migration on update runs only when `SEAMLYCOPYUSERDATA=1` or the data location changed. Non-path settings are always preserved.
-- Interactive pages: welcome → license → install folder → data root → copy existing work? (off) → shortcuts (on) → ready → install. A warning page precedes welcome if a prior install (this MSI or the old NSIS installer) is found. `/qn` skips all pages.
+- Interactive pages: a gate dialog (Continue) → welcome → license → data root → copy existing work? (off) → shortcuts (on) → ready → install → finish. The gate holds the wizard until Continue, so detection never flashes under the welcome page. No install-folder page — `INSTALLFOLDER` is fixed and never asked about. A warning page precedes data root if a prior install (this MSI or the old NSIS installer) is found. The finish page offers a "Launch Seamly2D now" checkbox, checked by default; it starts seamly2d.exe as the signed-in user, not elevated. `/qn` skips all pages and never launches an app.
 - Real-install verification (clean machine — **not yet run**; Task 13/51): [`README.md`](README.md#installing--testing). `smsi_check_authoring.ps1` checks package contents; [`local_install_msi.ps1`](local_install_msi.ps1) checks install effects, incl. launching each app. Only the UAC prompt, wizard wording, and icons need a human.
 
 ## 4. arm64

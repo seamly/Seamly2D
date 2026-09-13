@@ -4,22 +4,19 @@
 # **  @date   August 24, 2026
 # **
 # **  @brief
-# **  Return this machine to Case 1 of TEST_INSTALLER_WIN_X64.md ("Not
-# **  installed") before running an installer test case (1a/2a/3a/4a).
+# **  Return the machine to the pre-install state before running an installer
+# **  test case.
 # **
-# **  Removes everything the product MSI's own uninstall deliberately leaves
-# **  behind, plus everything a fresh test run needs gone: every detected
-# **  Seamly product, %PROGRAMDIR%, %DATAROOT% and its contents,
+# **  Removes the product's uninstall leftovers and all test-run artifacts:
+# **  installed Seamly products, %PROGRAMDIR%, %DATAROOT% and contents,
 # **  %LOCALAPPDATA%\Seamly, %APPDATA%\Seamly, leftover
-# **  %APPDATA%\Unknown Organization(.ini) from the empty-organization-name
-# **  defect, the stray %LOCALAPPDATA%\SeamlyLayout tree left by builds
-# **  before 26.9.2, and the Seamly registry keys under both HKLM and HKCU.
+# **  %APPDATA%\Unknown Organization(.ini), the stray
+# **  %LOCALAPPDATA%\SeamlyLayout tree from older builds, and the Seamly
+# **  registry keys under HKLM and HKCU.
 # **
-# **  This is test-support only. It is deliberately more destructive than the
-# **  shipped uninstall (packaging/windows/smsi_registry.wxs), which
-# **  keeps %DATAROOT% on purpose - a real user's uninstall must never delete
-# **  their patterns and measurements. This script exists precisely to undo
-# **  that safety for a test machine between test-matrix runs.
+# **  This is test-support only. It is intentionally more destructive than the
+# **  shipped uninstall, which keeps %DATAROOT% to protect user data. This
+# **  script removes that safety for test machines between runs.
 # **
 # **  @copyright
 # **  This source code is part of the Seamly project, a suite of apparel CAD
