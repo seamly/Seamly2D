@@ -153,6 +153,10 @@ if(WIN32)
     target_sources(SeamlyLayout PRIVATE
         "${CMAKE_CURRENT_SOURCE_DIR}/app_icon.rc"
     )
+    # seamly2d.pro/seamlyme.pro both build lowercase on Windows (Seamly2D
+    # is TitleCase only in its macOS bundle); match that here so the exe
+    # doesn't need a rename step after the build.
+    set_target_properties(SeamlyLayout PROPERTIES OUTPUT_NAME "seamlylayout")
 elseif(APPLE)
     target_sources(SeamlyLayout PRIVATE
         "${SEAMLY_ICON_ICNS}"
@@ -214,7 +218,7 @@ set_source_files_properties(qml/Theme.qml PROPERTIES
 # OUTPUT_DIRECTORY: the QML module URI ("SeamlyLayout") equals the executable
 # target name. By default Qt materialises the module (qmldir, .qmltypes, cached
 # qml) in a directory named after the URI directly under the binary dir —
-# i.e. <build>/SeamlyLayout/. On Windows the executable is SeamlyLayout.exe, so
+# i.e. <build>/SeamlyLayout/. On Windows the executable is seamlylayout.exe, so
 # that directory and the binary never clash; but on Linux/macOS the executable
 # is just "SeamlyLayout", which collides with the module directory and makes the
 # final link fail with "cannot open output file SeamlyLayout: Is a directory".

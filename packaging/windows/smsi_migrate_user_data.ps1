@@ -412,7 +412,7 @@ function Update-PathSettings {
 
     $qtRoot = $Root.Replace('\', '/')
     $layoutExecutable = if ($InstallFolder) {
-        (Join-Path $InstallFolder 'SeamlyLayout.exe').Replace('\', '/')
+        (Join-Path $InstallFolder 'seamlylayout.exe').Replace('\', '/')
     } else {
         ''
     }

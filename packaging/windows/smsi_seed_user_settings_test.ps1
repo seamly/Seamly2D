@@ -103,7 +103,7 @@ try {
                     ((Get-IniValue -Path $s2d -Section 'paths' -Key 'images') -eq 'C:/Users/test/Documents/SeamlyData/images') -and
                     ((Get-IniValue -Path $s2d -Section 'paths' -Key 'backups') -eq 'C:/Users/test/Documents/SeamlyData/backups'))
     Assert-That -Name 'the seamlyLayoutApp key points into the install folder' `
-        -Succeeded ((Get-IniValue -Path $s2d -Section 'paths' -Key 'seamlyLayoutApp') -eq 'C:/Program Files/SeamlyApps/SeamlyLayout.exe')
+        -Succeeded ((Get-IniValue -Path $s2d -Section 'paths' -Key 'seamlyLayoutApp') -eq 'C:/Program Files/SeamlyApps/seamlylayout.exe')
 
     $layoutRoot = 'C:/Users/test/Documents/SeamlyData'
     $layoutConfig = ((Join-Path $freshLocal 'Seamly\SeamlyLayout') -replace '\\', '/')
