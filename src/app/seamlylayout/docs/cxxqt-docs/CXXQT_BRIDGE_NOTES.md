@@ -112,7 +112,7 @@ The headers exist but no source files. Let me check what the qml_modules directo
 
 * **`crates/cxxqt_bridge/src/lib.rs`** — removed `#[qml_element]` from the bridge (not needed)
 * **`qt_frontend/CMakeLists.txt`** — `qt_add_qml_module` has NO SOURCES (no generated headers, no shim)
-* **`qt_frontend/main.cpp`** — register at runtime before creating the engine:
+* **`qt_frontend/seamlyLayout_main.mm`** — register at runtime before creating the engine:
   ```cpp
   #include <cxxqt_bridge/src/lib.cxxqt.h>  // include only; do NOT add to cmake SOURCES
   // ...
@@ -149,7 +149,7 @@ The Rust-side API (setters, getters, method names in `impl qobject::AppControlle
 **Key rules going forward:**
 
 1. **Never use `#[qml_element]`** for staticlib CXX-Qt crates — use `qmlRegisterType` at runtime.
-2. **Never add `lib.cxxqt.h` to cmake SOURCES** — include it only from `main.cpp` (or other non-SOURCE C++ files) to avoid AUTOMOC duplicate moc.
+2. **Never add `lib.cxxqt.h` to cmake SOURCES** — include it only from `seamlyLayout_main.mm` (or other non-SOURCE C++ files) to avoid AUTOMOC duplicate moc.
 3. **Always add `#[auto_cxx_name]`** to `extern "RustQt"` blocks so QML sees camelCase names.
 4. **Keep `edition = "2021"`** in `cxxqt_bridge/Cargo.toml` — `cxx-qt-build 0.7.3` is not compatible with Rust 2024 edition.
 5. **Use `//` comments** inside `#[cxx_qt::bridge]` — `///` doc comments desugar to `#[doc]` attributes which are rejected by the bridge macro.

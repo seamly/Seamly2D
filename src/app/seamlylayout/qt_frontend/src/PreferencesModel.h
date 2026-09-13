@@ -15,7 +15,7 @@
 //   dxf_viewer_path, pdf_viewer_path, png_viewer_path, data_root
 //
 // Registration:
-//   Registered at runtime in main.cpp:
+//   Registered at runtime in seamlyLayout_main.mm:
 //     qmlRegisterType<PreferencesModel>("SeamlyLayout", 1, 0, "PreferencesModel");
 //
 // Usage in QML:

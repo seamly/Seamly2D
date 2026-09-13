@@ -69,11 +69,11 @@ ApplicationWindow {
     // Two of them, one per transport:
     //   - openSvgFile() takes a path — the Import SVG file dialog
     //     (importDialog.onAccepted) and the SeamlyLayout command line
-    //     (main.cpp, Task 49).
+    //     (seamlyLayout_main.mm, Task 49).
     //   - openSvgDocument() takes SVG text — the Seamly2D Layout Mode handoff,
     //     which sends the piece-mode document on standard input and never
     //     writes a file (Seamly2D.5).
-    // Both are invoked from main.cpp with QMetaObject::invokeMethod once the
+    // Both are invoked from seamlyLayout_main.mm with QMetaObject::invokeMethod once the
     // event loop starts, and both end in the same AppController import, so the
     // canvas cannot behave differently depending on where the SVG came from.
     // -----------------------------------------------------------------------
@@ -108,7 +108,7 @@ ApplicationWindow {
     } // openSvgDocument
 
     // @brief Report a command-line problem detected before the window existed.
-    // Called from main.cpp when the positional <svg-file> argument is missing,
+    // Called from seamlyLayout_main.mm when the positional <svg-file> argument is missing,
     // unreadable, a folder, or not an SVG. The application stays open with an
     // empty canvas so the user can pick a file themselves.
     // @param message Complete sentence naming the file and the problem.

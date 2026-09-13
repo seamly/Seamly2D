@@ -10,6 +10,19 @@ cmake_minimum_required(VERSION 3.28)
 
 project(SeamlyLayout VERSION 0.1.0 LANGUAGES CXX)
 
+# ---------------------------------------------------------------------------
+# macOS: enable Objective-C++ for seamlyLayout_main.mm.
+#
+# main.cpp included <Cocoa/Cocoa.h> directly to set the macOS title bar
+# color. A plain C++ translation unit cannot include an Objective-C header,
+# which broke the macOS CI build. The file is now seamlyLayout_main.mm and
+# compiles as Objective-C++ here; on Windows/Linux its LANGUAGE is forced
+# back to CXX below, since MSVC and GCC have no Objective-C++ front end.
+# ---------------------------------------------------------------------------
+if(APPLE)
+    enable_language(OBJCXX)
+endif() # APPLE
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -116,7 +129,7 @@ FetchContent_MakeAvailable(CxxQt)
 # ---------------------------------------------------------------------------
 qt_add_executable(SeamlyLayout
     WIN32
-    main.cpp
+    seamlyLayout_main.mm
     src/Logger.cpp
     src/Platform.cpp
     src/SettingsModel.cpp
@@ -129,6 +142,12 @@ qt_add_executable(SeamlyLayout
     src/adjust/AdjustScene.cpp
     src/adjust/AdjustWindow.cpp
 )
+
+if(NOT APPLE)
+    # MSVC and GCC have no Objective-C++ front end; without this, cmake
+    # picks OBJCXX from the .mm extension and the compile fails.
+    set_source_files_properties(seamlyLayout_main.mm PROPERTIES LANGUAGE CXX)
+endif() # NOT APPLE
 
 if(WIN32)
     target_sources(SeamlyLayout PRIVATE
@@ -144,7 +163,7 @@ elseif(APPLE)
     # Task 16: give the bundle a stable identifier (previously unset, so CMake fell back
     # to an auto-generated placeholder). This does not affect settings storage — Qt's
     # QStandardPaths::AppConfigLocation resolution is driven by organizationName/
-    # applicationName (see main.cpp), not CFBundleIdentifier — but a real identifier is
+    # applicationName (see seamlyLayout_main.mm), not CFBundleIdentifier — but a real identifier is
     # still required for a well-formed, signable/notarizable bundle.
     set_target_properties(SeamlyLayout PROPERTIES
         MACOSX_BUNDLE TRUE
@@ -219,7 +238,7 @@ qt_add_qml_module(SeamlyLayout
         qml/DxfTeachingDialog.qml
         qml/ViewDxfTeachingDialog.qml
 )
-# AppController is registered at runtime via qmlRegisterType in main.cpp.
+# AppController is registered at runtime via qmlRegisterType in seamlyLayout_main.mm.
 # QML_FOREIGN (AppControllerForeign.h) was tried first but qmltyperegistrar
 # cannot resolve AppController through CXX-Qt's complex template include chain,
 # producing "cannot be found" warnings and no actual registration.

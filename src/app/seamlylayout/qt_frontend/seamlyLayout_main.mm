@@ -2,8 +2,14 @@
 // author: slspencer, copyright 2026
 // LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
 
-// @file main.cpp
+// @file seamlyLayout_main.mm
 // @brief Application entry point for the SeamlyLayout Qt 6.11 + QML frontend.
+//
+// Built as Objective-C++ on every platform (LANGUAGE forced back to CXX in
+// CMakeLists.txt on Windows/Linux) so the macOS title bar block below can
+// include <Cocoa/Cocoa.h> directly. A plain .cpp file cannot include an
+// Objective-C header; wrapping the whole translation unit in Objective-C++
+// avoids a separate forwarding header for one small platform block.
 //
 // Initialises QApplication (supports both QML and QtWidgets windows),
 // sets application metadata and icon, configures the Quick Controls 2 style,

@@ -34,14 +34,14 @@ Seamly2D's Layout Mode builds the tagged pieces SVG in memory, launches this app
 | `SeamlyLayout -h` / `--help`, `-v` / `--version` | Text in a dialog (no console on Windows: this is a WIN32-subsystem binary), exit 0 |
 | `--svg-stdin` plus a file, empty or non-SVG standard input, two or more files, unknown option, missing / unreadable / non-`.svg` file | Error dialog naming the problem, then an empty canvas — never a silent no-op |
 
-- **Standard input is read only for `--svg-stdin`.** `main.cpp` opens stdin on every launch, so reading it unasked would hang a shell or icon launch waiting for input that never comes.
+- **Standard input is read only for `--svg-stdin`.** `seamlyLayout_main.mm` opens stdin on every launch, so reading it unasked would hang a shell or icon launch waiting for input that never comes.
 - **Both transports end in the same import.** `import_svg` (a path) and `import_svg_document` (a string) share `reset_import_state()` and `finish_import()` in `crates/cxxqt_bridge/src/lib.rs`, so the canvas cannot behave differently depending on where the SVG came from.
 - **Absolute paths only** — a relative positional argument is resolved with `QFileInfo::absoluteFilePath()` at parse time, because a launched process inherits SeamlyLayout's own working directory, not the user's.
 - **No single-instance handling** — each launch is its own process and window. One document per process; there are no tabs, which is also why a second positional argument is rejected rather than queued.
 - **Untagged SVGs are opened, not refused.** Every top-level `<g>` with geometry is treated as a piece, so an ordinary drawing still lays out. When the document carries no `data-type="piece"` group, `finish_import` emits `import_warning` and QML shows a non-blocking popup (`piece_extractor::count_tagged_pieces` does the counting).
 - **A tagged handoff is read from its `data-type="piece"` groups, and only those** (Task 59). The handoff nests all pieces inside one `<g data-type="pattern">`, but every stage of the layout pipeline — `svg_dom::verticalize_dom`, `svg_dom::translate_dom`, `piece_extractor`, `layout_assembler`, `oversized`, `remaining`, `sheets` — assumes a piece is a **direct `<g>` child of the SVG root**. `piece_extractor::hoist_tagged_pieces` re-parents the tagged pieces to the root once, composing any wrapper `transform` onto each, and the rest of the pipeline is unchanged. **Call it from any new pre-processing entry point** (today: `layout_utils::do_process_layout` and `sheets::build_sheet_export_inputs`) — without it the packer receives the whole pattern as one sheet-sized object.
 - **`id` is identity, `data-name` is what a user reads.** `PieceRect::label()` resolves `data-name` → `data-letter` → `id`; use it for warnings, error text and the Adjust overlay, never for element lookup.
-- Dispatch happens from `main.cpp` on a `QTimer::singleShot(0, …)`, **after** the event loop starts — the QML window and its WebEngine canvases must exist before an SVG can be pushed into them.
+- Dispatch happens from `seamlyLayout_main.mm` on a `QTimer::singleShot(0, …)`, **after** the event loop starts — the QML window and its WebEngine canvases must exist before an SVG can be pushed into them.
 
 ## Platform Support
 

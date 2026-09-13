@@ -18,7 +18,7 @@ The handoff in (1) is a process launch, and both halves of it are pinned by test
 
 | | Producer — Seamly2D | Consumer — SeamlyLayout |
 |---|---|---|
-| Code | `MainWindow::exportPiecesToSeamlyLayout()` via `MainWindowsNoGUI::generatePiecesSvgDocument()`, `SeamlySuitePaths::patternDocumentName()` and `SeamlySuitePaths::seamlyLayoutLaunchArguments()` (`src/libs/vmisc/seamly_suite_paths.cpp`) | `StartupOptions::parse()` (`src/app/seamlylayout/qt_frontend/src/StartupOptions.cpp`), dispatched from `main.cpp` into `Main.qml`'s `openSvgDocument()` |
+| Code | `MainWindow::exportPiecesToSeamlyLayout()` via `MainWindowsNoGUI::generatePiecesSvgDocument()`, `SeamlySuitePaths::patternDocumentName()` and `SeamlySuitePaths::seamlyLayoutLaunchArguments()` (`src/libs/vmisc/seamly_suite_paths.cpp`) | `StartupOptions::parse()` (`src/app/seamlylayout/qt_frontend/src/StartupOptions.cpp`), dispatched from `seamlyLayout_main.mm` into `Main.qml`'s `openSvgDocument()` |
 | Tests | `TST_SeamlySuitePaths` (`src/test/Seamly2DTest`) | `StartupOptionsTests` (`src/test/SeamlyLayoutTest`) |
 
 **The contract:**

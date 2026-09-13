@@ -103,7 +103,7 @@ any targets to match Rust's non-debug DLL runtime and avoid LNK2038 errors.
 
 ## QML Type Registration (Phase 2f)
 
-**The correct approach: `qmlRegisterType` at runtime in `main.cpp`.**
+**The correct approach: `qmlRegisterType` at runtime in `seamlyLayout_main.mm`.**
 
 CXX-Qt's staticlib crates compile moc output for `AppController` into the `.lib`. Adding the
 generated header to cmake SOURCES causes AUTOMOC to generate a duplicate moc → LNK2005.
@@ -112,7 +112,7 @@ through CXX-Qt's `rust/cxx.h` template include chain.
 
 **Solution:**
 ```cpp
-// main.cpp — include ONLY from here; do NOT add to cmake SOURCES
+// seamlyLayout_main.mm — include ONLY from here; do NOT add to cmake SOURCES
 #include <cxxqt_bridge/src/lib.cxxqt.h>
 
 // Before creating QQmlApplicationEngine:

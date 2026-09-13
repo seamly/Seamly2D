@@ -10,7 +10,7 @@
 // JSON load/save, unit conversion, and paper/tile size lookup.
 //
 // Registration:
-//   Registered at runtime in main.cpp:
+//   Registered at runtime in seamlyLayout_main.mm:
 //     qmlRegisterType<SettingsModel>("SeamlyLayout", 1, 0, "SettingsModel");
 //
 // Usage in QML:

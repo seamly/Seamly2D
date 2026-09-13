@@ -48,7 +48,7 @@ Every app in the suite builds against the **same Qt release, 6.11.1** — CI and
 
 ### Windows
 
-`VER_COMPANYNAME_STR` (`src/libs/vmisc/projectversion.h`) and seamlyLayout's `app.setOrganizationName(...)` (`src/app/seamlylayout/qt_frontend/main.cpp`) are both `"Seamly"`, so every app gets its own directory nested under one shared organization folder:
+`VER_COMPANYNAME_STR` (`src/libs/vmisc/projectversion.h`) and seamlyLayout's `app.setOrganizationName(...)` (`src/app/seamlylayout/qt_frontend/seamlyLayout_main.mm`) are both `"Seamly"`, so every app gets its own directory nested under one shared organization folder:
 
 | App | Windows location | How it gets there |
 |---|---|---|

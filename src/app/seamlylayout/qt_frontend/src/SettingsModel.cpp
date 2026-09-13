@@ -106,7 +106,7 @@ bool copyIfMissing(const QString &sourcePath, const QString &destPath)
 // new one, skipping anything the destination already has.
 //
 // Task 15: seamlyLayout's organization name changed from "Seamly Systems" to the shared
-// "Seamly" (see main.cpp), so QStandardPaths::AppConfigLocation resolves to a brand new,
+// "Seamly" (see seamlyLayout_main.mm), so QStandardPaths::AppConfigLocation resolves to a brand new,
 // empty directory. This bridges the settings file(s) forward from the old organization
 // folder the first time the new one is resolved. Safe to call unconditionally — once
 // everything has been copied across it is a cheap no-op.
