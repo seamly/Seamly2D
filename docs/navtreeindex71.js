@@ -1,5 +1,9 @@
 var NAVTREEINDEX71 =
 {
+"d4/d36/classVInteractiveTool.html#af9b3bf3bcbcfa2ed5a0f570e5c607627":[9,0,662,4],
+"d4/d36/classVSimpleCurve.html":[9,0,750],
+"d4/d36/classVSimpleCurve.html#a04a5a9accc2905255f862445c4b75ca8":[9,0,750,9],
+"d4/d36/classVSimpleCurve.html#a09b0d76b35fc7f8adc25a95bd37b1c3e":[9,0,750,5],
 "d4/d36/classVSimpleCurve.html#a0d48cf2090c8d391d626de00d4c7c3d0":[9,0,750,4],
 "d4/d36/classVSimpleCurve.html#a204deaeb39f3d690d29700397f9c8f9f":[9,0,750,3],
 "d4/d36/classVSimpleCurve.html#a2a49d08b4aeb14e79426a5eedece1f85":[9,0,750,2],
@@ -245,9 +249,5 @@ var NAVTREEINDEX71 =
 "d4/d43/classVPattern.html#afa7d926ebf2b67fdc0e8c3010d536d41":[9,0,727,8],
 "d4/d43/classVPattern.html#afc90021710966ad3421abfe33a23fd26":[9,0,727,79],
 "d4/d43/classVPattern.html#afe3cb10fbcfb0ef0e97b16d96d07cfd0":[9,0,727,52],
-"d4/d43/classVPattern.html#affe684902ad78e05ca4af9bd15869a67":[9,0,727,72],
-"d4/d46/msvc_2include_2xercesc_2dom_2DOMEntity_8hpp.html":[10,0,0,1,15,2,0,0,0,13],
-"d4/d46/msvc_2include_2xercesc_2dom_2DOMEntity_8hpp_source.html":[10,0,0,1,15,2,0,0,0,13],
-"d4/d48/classEndOfEntityException.html":[9,0,269],
-"d4/d48/classEndOfEntityException.html#a0562c85235a2e1998b7fe743b6798be2":[9,0,269,20]
+"d4/d43/classVPattern.html#affe684902ad78e05ca4af9bd15869a67":[9,0,727,72]
 };

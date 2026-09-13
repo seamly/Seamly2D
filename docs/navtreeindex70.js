@@ -1,5 +1,9 @@
 var NAVTREEINDEX70 =
 {
+"d4/d21/classRefArrayOf.html#ab7def8e554e25ad44d3f91b7ca27770c":[9,0,447,55],
+"d4/d21/classRefArrayOf.html#ab7def8e554e25ad44d3f91b7ca27770c":[9,0,447,54],
+"d4/d21/classRefArrayOf.html#ab7def8e554e25ad44d3f91b7ca27770c":[9,0,447,53],
+"d4/d21/classRefArrayOf.html#ab7def8e554e25ad44d3f91b7ca27770c":[9,0,447,52],
 "d4/d21/classRefArrayOf.html#ab8481064fe0d1a1d8764ea5d0f99b6cf":[9,0,447,12],
 "d4/d21/classRefArrayOf.html#ab8481064fe0d1a1d8764ea5d0f99b6cf":[9,0,447,8],
 "d4/d21/classRefArrayOf.html#ab8481064fe0d1a1d8764ea5d0f99b6cf":[9,0,447,4],
@@ -245,9 +249,5 @@ var NAVTREEINDEX70 =
 "d4/d36/classVInteractiveTool.html#abe7c4ba7a7bbccc369663a8fca6d085a":[9,0,662,0],
 "d4/d36/classVInteractiveTool.html#ac4b82e4601a204eb28d402f6229a7beb":[9,0,662,1],
 "d4/d36/classVInteractiveTool.html#ad039d030b4cc44b00004133f138a61c2":[9,0,662,6],
-"d4/d36/classVInteractiveTool.html#af661a7de516c1936b7cb9c2aff9e78b8":[9,0,662,7],
-"d4/d36/classVInteractiveTool.html#af9b3bf3bcbcfa2ed5a0f570e5c607627":[9,0,662,4],
-"d4/d36/classVSimpleCurve.html":[9,0,750],
-"d4/d36/classVSimpleCurve.html#a04a5a9accc2905255f862445c4b75ca8":[9,0,750,9],
-"d4/d36/classVSimpleCurve.html#a09b0d76b35fc7f8adc25a95bd37b1c3e":[9,0,750,5]
+"d4/d36/classVInteractiveTool.html#af661a7de516c1936b7cb9c2aff9e78b8":[9,0,662,7]
 };
