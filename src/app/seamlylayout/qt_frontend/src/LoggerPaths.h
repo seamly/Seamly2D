@@ -14,24 +14,24 @@
 
 namespace LoggerPaths
 {
+inline QString appConfigOrApplicationDirectory()
+{
+    QString dir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    if (dir.isEmpty()) {
+        dir = QCoreApplication::applicationDirPath();
+    }
+    return dir;
+}
+
 inline QString resolveLogsDirectoryForCurrentPlatform()
 {
 #if defined(Q_OS_MACOS) || defined(Q_OS_WIN)
-    QString logsDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-    if (logsDir.isEmpty()) {
-        logsDir = QCoreApplication::applicationDirPath();
-    }
-    return logsDir + QStringLiteral("/logs");
+    return appConfigOrApplicationDirectory() + QStringLiteral("/logs");
 #else
     if (Platform::isAppImage() || Platform::isFlatpak()) {
-        QString logsDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-        if (logsDir.isEmpty()) {
-            logsDir = QCoreApplication::applicationDirPath();
-        }
-        return logsDir + QStringLiteral("/logs");
+        return appConfigOrApplicationDirectory() + QStringLiteral("/logs");
     }
     return QCoreApplication::applicationDirPath() + QStringLiteral("/logs");
 #endif
 }
 }
-
