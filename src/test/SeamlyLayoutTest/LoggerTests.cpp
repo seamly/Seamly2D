@@ -129,7 +129,13 @@ void LoggerTests::logDirectory_carriesTheOrganizationAndApplication()
         QVERIFY2(path.contains(QStringLiteral("/Seamly/SeamlyLayout/logs/")),
                  qPrintable(QStringLiteral("log path was '%1'").arg(path)));
     } else {
-        QVERIFY2(path.startsWith(expectedDirectory + QStringLiteral("/")),
+        const Qt::CaseSensitivity caseSensitivity =
+#ifdef Q_OS_WIN
+            Qt::CaseInsensitive;
+#else
+            Qt::CaseSensitive;
+#endif
+        QVERIFY2(path.startsWith(expectedDirectory + QStringLiteral("/"), caseSensitivity),
                  qPrintable(QStringLiteral("log path was '%1'").arg(path)));
     }
 } // logDirectory_carriesTheOrganizationAndApplication()
