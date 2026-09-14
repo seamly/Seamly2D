@@ -33,6 +33,7 @@ env:
 jobs:
 
   version:
+    name: 'Generate version YY.M.D.mmmm'
     runs-on: ubuntu-latest
     outputs:
       # Version: YY.M.D.mmmm (YY=year-2000, M=month, D=day, mmmm=minutes of day 0-1439). No leading zeros.
@@ -40,7 +41,7 @@ jobs:
       # For pull requests, keep static version. 
       version_number: ${{ steps.create-version.outputs.version_number }}
     steps:
-      - name: create version number
+      - name: 'create version number'
         id: create-version
         run: |
           # get Year Month Day Hour Minutes from system time
@@ -57,30 +58,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v7
+      - name: 'checkout repository'
+        uses: actions/checkout@v7
 
-      - uses: jurplel/install-qt-action@v4
+      - name: 'install Qt'
+        uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
           cache: true
           modules: qtmultimedia
 
-      - name: install build dependencies
+      - name: 'install build dependencies'       
         run: |
           sudo apt update && sudo apt install -y libxerces-c-dev
 
-      - name: build Seamly2D & SeamlyMe for tests
+      - name: 'build Seamly2D & SeamlyMe for tests'
         run: |
           qmake Seamly.pro
           make -j$(nproc)
 
-      - name: install test dependencies
+      - name: 'install test dependencies'
         # xvfb use to test built application within a framebuffer
         run: |
           sudo apt update
           sudo apt install -y xvfb gstreamer1.0-plugins-base libgstreamer-plugins-base1.0-0
 
-      - name: run Seamly2D tests
+      - name: 'run Seamly2D tests'
         run: |
           xvfb-run -a make check
 
@@ -99,9 +102,10 @@ jobs:
       VERSION_NUMBER: ${{ needs.version.outputs.version_number }}
 
     steps:
-      - uses: actions/checkout@v7
+      - name: 'checkout repository'
+        uses: actions/checkout@v7
 
-      - name: install appimage dependencies
+      - name: 'install appimage dependencies'
         run: |
           sudo apt update && sudo apt install -y libfuse2
           sudo wget -q https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage -O /usr/local/bin/linuxdeploy-x86_64.AppImage
@@ -109,7 +113,7 @@ jobs:
           sudo wget -q https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage -O /usr/local/bin/linuxdeploy-plugin-qt-x86_64.AppImage
           sudo chmod +x /usr/local/bin/linuxdeploy-plugin-qt-x86_64.AppImage
 
-      - name: install build dependencies
+      - name: 'install build dependencies'
         run: |
           sudo apt update
           # install poppler-utils for pdftops, gstreamer1.0-plugins-base for QtMultimedia
@@ -122,11 +126,11 @@ jobs:
           cache: true
           modules: qtmultimedia
 
-      - name: update version
+      - name: 'update version'
         run: |
           ./packaging/version.sh ${VERSION_NUMBER}
 
-      - name: build Seamly2D appimage
+      - name: 'build Seamly2D appimage'
         env:
           OUTPUT: Seamly2D-x86_64.AppImage  # linuxdeploy-x86_64.AppImage uses this env var as name for AppImage
         run: |
@@ -139,7 +143,8 @@ jobs:
           cp -r /usr/share/X11/xkb/* AppDir/usr/share/X11/xkb
           linuxdeploy-x86_64.AppImage --appdir AppDir --desktop-file=packaging/assets/seamly2d.desktop --plugin qt --output appimage
 
-      - uses: actions/upload-artifact@v7
+      - name: 'upload AppImage artifact'
+        uses: actions/upload-artifact@v7
         with:
           name: Seamly2D-x86_64.AppImage
           path: Seamly2D-x86_64.AppImage
@@ -151,36 +156,38 @@ jobs:
   # Runs on non-push events, for non-weblate users, on any branch
   macos:
     if: github.event_name != 'push' && github.event.pull_request.user.login != 'weblate'
-    name: 'macOS: Build'
+    name: 'macOS: Build DMGs'
     runs-on: macos-26
     needs: [version, linux-test]
     env:
       VERSION_NUMBER: ${{ needs.version.outputs.version_number }}
 
     steps:
-      - uses: actions/checkout@v7
+      - name: 'checkout repository'
+        uses: actions/checkout@v7
 
-      - name: install build dependencies
+      - name: 'install build dependencies'
         run: |
           brew install xerces-c ninja
 
       # qtwebengine/qtwebchannel/qtpositioning are for SeamlyLayout's
       # WebEngineView provides SvgCanvas.qml; qtmultimedia is for the 
       # parent apps. Matches the windows-msi job's module list.
-      - uses: jurplel/install-qt-action@v4
+      - name: 'install Qt'
+        uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
           cache: true
           modules: qtmultimedia qtwebengine qtwebchannel qtpositioning
 
-      - name: update version
+      - name: 'update version'
         run: |
           ./packaging/version.sh ${VERSION_NUMBER}
 
       # Build SeamlyLayout with CMake/Ninja and Rust's Corrosion, then 
       # package the Qt app. The macOS deploy step runs automatically 
       # after the build.
-      - name: Install Rust toolchain
+      - name: 'Install Rust toolchain'
         uses: dtolnay/rust-toolchain@stable
 
       - name: Cache cargo build
@@ -188,13 +195,13 @@ jobs:
         with:
           workspaces: src/app/seamlylayout
 
-      - name: Build SeamlyLayout release
+      - name: 'Build SeamlyLayout release'
         working-directory: src/app/seamlylayout/qt_frontend
         run: |
           cmake --preset release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
           cmake --build --preset release
 
-      - name: setup signing and notarization
+      - name: 'setup signing and notarization'
         env:
           KEYCHAIN_FILE: ~/seamly2d.keychain
           APPLE_SIGN_IDENTITY: ${{ secrets.apple_sign_identity }}
@@ -215,7 +222,7 @@ jobs:
           echo "APPLE_NOTARIZE_KEY_ID=${{ secrets.apple_notarize_key_id }}" >> $GITHUB_ENV
           echo "APPLE_NOTARIZE_ISSUER_ID=${{ secrets.apple_notarize_issuer_id }}" >> $GITHUB_ENV
 
-      - name: make Seamly2D for macos
+      - name: 'make Seamly2D for macos'
         env:
           APPLE_SIGN_IDENTITY: ${{ secrets.apple_sign_identity }}
         run: |
@@ -242,7 +249,7 @@ jobs:
   # For x64 and arm64 arches
   windows-msi:
     if: github.event_name != 'push' && github.event.pull_request.user.login != 'weblate'
-    name: 'Windows: Build MSI (${{ matrix.arch }})'
+    name: 'Windows: Build MSI - (${{ matrix.arch }})'
     runs-on: ${{ matrix.runner }}
     needs: [version, linux-test]
     env:
@@ -270,15 +277,18 @@ jobs:
             qt-modules: qtmultimedia qtwebengine qtwebchannel qtpositioning
 
     steps:
-      - uses: actions/checkout@v7
+      - name: 'Checkout repository - ${{ matrix.arch }}'
+        uses: actions/checkout@v7
 
-      - uses: ilammy/msvc-dev-cmd@v1.13.0
+      - name: 'Install MSVC dev tools - ${{ matrix.arch }}'
+        uses: ilammy/msvc-dev-cmd@v1.13.0
         with:
           arch: ${{ matrix.msvc-arch }}
 
       # ----- Install Qt -----
       # two separate Qt kit installs, one per arch
-      - uses: jurplel/install-qt-action@v4
+      - name: 'Install Qt - ${{ matrix.arch }}'
+        uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
           host: ${{ matrix.qt-host }}
@@ -289,7 +299,7 @@ jobs:
           # see https://github.com/miurahr/aqtinstall/issues/1007
           aqtsource: git+https://github.com/miurahr/aqtinstall.git  
 
-      - name: update version
+      - name: 'update version - ${{ matrix.arch }}'
         shell: bash
         run: |
           ./packaging/version.sh ${VERSION_NUMBER}
@@ -297,12 +307,12 @@ jobs:
       # ----- Build Seamly2D & SeamlyMe -----
       # Uses qmake with Seamly.pro plus src/app/seamly2d &
       # src/app/seamlyme subdirectory .pro files.
-      - name: Install jom
+      - name: 'Install jom - ${{ matrix.arch }}'
         run: choco install jom -y
 
       # jom is nmake-compatible and compiles object files in parallel across
       # all runner cores; nmake itself never parallelizes a single build.
-      - name: make seamly2d.exe and seamlyme.exe
+      - name: 'qmake/jom build forseamly2d.exe and seamlyme.exe - ${{ matrix.arch }}'
         run: |
           qmake Seamly.pro -config release CONFIG+=noTests
           jom -j $env:NUMBER_OF_PROCESSORS
@@ -310,21 +320,21 @@ jobs:
       # ----- Build SeamlyLayout -----
       # Install Rust build tools, Cargo package manager (includes CXX-Qt 
       # to create bridge from Rust to C++/QML), and Ninja.
-      - name: Install Rust toolchain
+      - name: 'Install Rust toolchain - ${{ matrix.arch }}'
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache cargo build
+      - name: 'Cache cargo build'
         uses: Swatinem/rust-cache@v2
         with:
           workspaces: src/app/seamlylayout
           # Separate arch keys prevent the two arches from sharing cache data.
           key: ${{ matrix.arch }}
 
-      - name: Install Ninja
+      - name: 'Install Ninja - ${{ matrix.arch }}'
         run: choco install ninja -y
 
       # Build the Rust bridge and C++/QML app executable with CMakeLists.txt.
-      - name: Build SeamlyLayout release
+      - name: 'Build SeamlyLayout - ${{ matrix.arch }}'
         working-directory: src/app/seamlylayout/qt_frontend
         shell: pwsh
         run: |
@@ -342,7 +352,7 @@ jobs:
       #     Util - provides RemoveFolderEx which removes a previous NSIS installation.
 
       # Install WIX
-      - name: Install WiX toolset (v6)
+      - name: 'Install WiX toolset (v6) - ${{ matrix.arch }}'
         shell: pwsh
         run: |
           dotnet tool install --global wix --version '6.*'
@@ -357,7 +367,7 @@ jobs:
       # Uses `packaging/windows/smsi.ps1` -- stages Qt, builds & tests the MSI, 
       # and outputs the installer MSI file to `packaging/windows/seamly-msi/x64/seamly-x64.msi`
       # and `packaging/windows/seamly-msi/arm64/seamly-arm64.msi`.
-      - name: Build MSI (all three apps)
+      - name: 'Build MSI (all three apps) ${{ matrix.arch }}'
         shell: pwsh
         run: |
           .\packaging\windows\smsi.ps1 -Arch ${{ matrix.arch }} -Version $env:VERSION_NUMBER `
@@ -367,7 +377,7 @@ jobs:
             -WinDeployQt "$env:QT_ROOT_DIR\bin\windeployqt.exe"
 
       # ----- Sign MSI file -----
-      - name: Authenticate to Google Cloud (for signing)
+      - name: 'Authenticate to Google Cloud (for signing) - ${{ matrix.arch }}'
         uses: google-github-actions/auth@v3
         env:
           SEAMLY_SIGNING_PROJECT_ID: ${{ secrets.SEAMLY_SIGNING_PROJECT_ID }}
@@ -377,14 +387,14 @@ jobs:
           credentials_json: ${{ secrets.SEAMLY_SIGNING_SA_KEY }}
           project_id: ${{ secrets.SEAMLY_SIGNING_PROJECT_ID }}
 
-      - name: Setup Google Cloud CLI (for signing)
+      - name: 'Setup Google Cloud CLI (for signing) ${{ matrix.arch }}'
         uses: google-github-actions/setup-gcloud@v3
         env:
           SEAMLY_SIGNING_PROJECT_ID: ${{ secrets.SEAMLY_SIGNING_PROJECT_ID }}
         # run signing part if secrets are available (main builds), otherwise skip
         if: ${{ env.SEAMLY_SIGNING_PROJECT_ID }}
 
-      - name: Set up Java (for signing)
+      - name: 'Set up Java (for signing) - ${{ matrix.arch }}'
         env:
           SEAMLY_SIGNING_PROJECT_ID: ${{ secrets.SEAMLY_SIGNING_PROJECT_ID }}
         if: ${{ env.SEAMLY_SIGNING_PROJECT_ID }}
@@ -394,7 +404,7 @@ jobs:
           distribution: 'temurin'
 
       # jsign signs an MSI the same way it used to sign the NSIS exe.
-      - name: Sign the MSI
+      - name: 'Sign the MSI ${{ matrix.arch }}'
         env:
           SEAMLY_SIGNING_PROJECT_ID: ${{ secrets.SEAMLY_SIGNING_PROJECT_ID }}
         # run signing part if secrets are available (main builds), otherwise skip
@@ -412,7 +422,8 @@ jobs:
 
       # ----- Upload MSI -----
       # Both publish jobs need the extracted MSI file; the artifact name must match the file name.
-      - uses: actions/upload-artifact@v7
+      - name: 'Upload MSI artifact - ${{ matrix.arch }}'
+        uses: actions/upload-artifact@v7
         with:
           name: seamly-${{ matrix.arch }}.msi
           path: packaging/windows/seamly-msi/${{ matrix.arch }}/seamly-${{ matrix.arch }}.msi
@@ -425,6 +436,7 @@ jobs:
   # Runs on non-push events, and non-schedule events, for non-weblate users, for any branch
   publish-all-dev:
     if: github.event_name != 'push' && github.event_name != 'schedule' && github.event.pull_request.user.login != 'weblate'
+    name: 'Publish Pre-releases'
     runs-on: ubuntu-latest
     needs: [version, linux-test, linux, macos, windows-msi]
     env:
@@ -474,6 +486,7 @@ jobs:
   # Runs on scheduled events (scheduled events run only on the default branch)
   publish:
     if: github.event_name == 'schedule'
+    name: 'Publish Releases'
     runs-on: ubuntu-latest
     needs: [version, linux-test, linux, macos, windows-msi]
     env:
@@ -511,6 +524,7 @@ jobs:
   # Runs on scheduled events
   document:
     if: github.event_name == 'schedule'
+    name: 'Update Doxygen Documentation'
     runs-on: ubuntu-latest
     needs: [version, linux-test, linux, macos, windows-msi]
 
