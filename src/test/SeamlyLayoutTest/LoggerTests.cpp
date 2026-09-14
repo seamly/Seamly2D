@@ -122,8 +122,8 @@ void LoggerTests::logDirectory_carriesTheOrganizationAndApplication()
     const QString path = QDir::fromNativeSeparators(m_logFilePath);
     const QString expectedDirectory = QDir::fromNativeSeparators(
         QDir(expectedLogsDirectory()).absolutePath());
-    const QString appConfigPath = QDir::fromNativeSeparators(
-        QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation));
+    const QString appConfigPath = QDir::fromNativeSeparators(QDir(
+        QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)).absolutePath());
     const Qt::CaseSensitivity caseSensitivity =
 #ifdef Q_OS_WIN
         Qt::CaseInsensitive;
@@ -134,7 +134,7 @@ void LoggerTests::logDirectory_carriesTheOrganizationAndApplication()
              qPrintable(QStringLiteral("log path was '%1'").arg(path)));
 
     if (!appConfigPath.isEmpty()
-        && expectedDirectory.startsWith(appConfigPath + QStringLiteral("/"))) {
+        && expectedDirectory.startsWith(appConfigPath, caseSensitivity)) {
         QVERIFY2(expectedDirectory.endsWith(QStringLiteral("/Seamly/SeamlyLayout/logs"),
                                             caseSensitivity),
                  qPrintable(QStringLiteral("expected directory was '%1'")
