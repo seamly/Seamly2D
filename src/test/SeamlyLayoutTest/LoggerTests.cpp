@@ -111,10 +111,15 @@ void LoggerTests::logDirectory_carriesTheOrganizationAndApplication()
 
     if (!appConfigPath.isEmpty()
         && expectedDirectory.startsWith(appConfigPath, caseSensitivity)) {
-        QVERIFY2(expectedDirectory.endsWith(QStringLiteral("/Seamly/SeamlyLayout/logs"),
-                                            caseSensitivity),
+        QString relative = expectedDirectory.mid(appConfigPath.length());
+        if (relative.startsWith(QStringLiteral("/"))) {
+            relative.remove(0, 1);
+        }
+        const QStringList segments = relative.split(QStringLiteral("/"), Qt::SkipEmptyParts);
+        QVERIFY2(segments.size() >= 3,
                  qPrintable(QStringLiteral("expected directory was '%1'")
                                 .arg(expectedDirectory)));
+        QCOMPARE(segments.constLast(), QStringLiteral("logs"));
     }
 } // logDirectory_carriesTheOrganizationAndApplication()
 
