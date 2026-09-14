@@ -374,7 +374,11 @@ endif()
 
 add_test(NAME AdjustControllerTests COMMAND AdjustControllerTests)
 
-set_tests_properties(AdjustSceneTests AdjustControllerTests PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+set_tests_properties(
+    AdjustSceneTests
+    AdjustControllerTests
+    PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+)
 
 add_executable(PreferencesModelTests
     ${SEAMLYLAYOUT_TEST_DIR}/PreferencesModelTests.cpp
@@ -427,6 +431,12 @@ target_link_libraries(SettingsModelTests PRIVATE
 )
 
 add_test(NAME SettingsModelTests COMMAND SettingsModelTests)
+
+set_tests_properties(
+    PreferencesModelTests
+    SettingsModelTests
+    PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen"
+)
 
 # Layout.10 — where the session log file is written. Logger touches the file
 # system, so the suite runs under QStandardPaths test mode and never reaches the
