@@ -65,7 +65,7 @@ class LoggerTests : public QObject
 
 private slots:
     void initTestCase();
-    void logDirectory_isLogsUnderTheAppConfigRoot();
+    void logDirectory_matchesExpectedPlatformLocation();
     void logDirectory_carriesTheOrganizationAndApplication();
     void logDirectory_isNotTheLegacyOutputDirectory();
     void logFileName_isTimestamped();
@@ -107,13 +107,13 @@ void LoggerTests::initTestCase()
     QVERIFY2(!m_logFilePath.isEmpty(), "Logger::init() published no SEAMLY_LOG_FILE");
 } // initTestCase()
 
-void LoggerTests::logDirectory_isLogsUnderTheAppConfigRoot()
+void LoggerTests::logDirectory_matchesExpectedPlatformLocation()
 {
     const QString expected = expectedLogsDirectory();
 
     QCOMPARE(QFileInfo(m_logFilePath).absolutePath(), QDir(expected).absolutePath());
     QVERIFY2(QFile::exists(m_logFilePath), "the log file was not created");
-} // logDirectory_isLogsUnderTheAppConfigRoot()
+} // logDirectory_matchesExpectedPlatformLocation()
 
 // The organization folder is what the defect lost: without it the path was
 // .../SeamlyLayout/logs, not .../Seamly/SeamlyLayout/logs.
@@ -122,7 +122,7 @@ void LoggerTests::logDirectory_carriesTheOrganizationAndApplication()
     const QString path = QDir::fromNativeSeparators(m_logFilePath);
     const QString appConfigPath = QDir::fromNativeSeparators(
         QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation));
-    if (path.startsWith(appConfigPath + QStringLiteral("/"))) {
+    if (!appConfigPath.isEmpty() && path.startsWith(appConfigPath + QStringLiteral("/"))) {
         QVERIFY2(path.contains(QStringLiteral("/Seamly/SeamlyLayout/logs/")),
                  qPrintable(QStringLiteral("log path was '%1'").arg(path)));
     } else {
