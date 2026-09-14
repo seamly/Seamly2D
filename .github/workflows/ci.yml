@@ -9,7 +9,7 @@ on:
     - cron: '0 0 * * 1' # Runs Monday 00:00 UTC
   push:
     # Limit to branches of record. A PR branch push then fires pull_request
-    # only, not push too, so Linux tests do not run twice per commit.
+    # only, not push too, so Linux tests, version, etc. do not run twice per commit.
     branches:
       - develop
       - run-seamlyLayout
@@ -93,7 +93,7 @@ jobs:
           qmake Seamly.pro
           make -j$(nproc)
 
-      - name: 'configure and build SeamlyLayout'
+      - name: 'build SeamlyLayout for tests'
         working-directory: src/app/seamlylayout/qt_frontend
         run: |
           cmake --preset debug -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
@@ -105,7 +105,7 @@ jobs:
           sudo apt update
           sudo apt install -y xvfb gstreamer1.0-plugins-base libgstreamer-plugins-base1.0-0
 
-      - name: 'run Seamly2D tests'
+      - name: 'run Seamly2D & SeamlyMe tests'
         run: |
           xvfb-run -a make check
 
@@ -149,31 +149,66 @@ jobs:
         run: |
           sudo apt update
           # install poppler-utils for pdftops, gstreamer1.0-plugins-base for QtMultimedia
-          # install libxerces for xml manipulation
-          sudo apt install -y poppler-utils gstreamer1.0-plugins-base libxerces-c-dev
+          # install libxerces for xml manipulation, ninja-build for SeamlyLayout's CMake build
+          sudo apt install -y poppler-utils gstreamer1.0-plugins-base libxerces-c-dev ninja-build
 
+      # qtwebengine/qtwebchannel/qtpositioning are for SeamlyLayout's
+      # WebEngineView provides SvgCanvas.qml; qtmultimedia is for the
+      # parent apps. Matches the linux-test job's module list.
       - uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
           cache: true
-          modules: qtmultimedia
+          modules: qtmultimedia qtwebengine qtwebchannel qtpositioning
+
+      - name: 'Install Rust toolchain'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: 'Cache cargo build'
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src/app/seamlylayout
 
       - name: 'update version'
         run: |
           ./packaging/version.sh ${VERSION_NUMBER}
 
       - name: 'build Seamly2D appimage'
-        env:
-          OUTPUT: Seamly2D-x86_64.AppImage  # linuxdeploy-x86_64.AppImage uses this env var as name for AppImage
         run: |
           qmake -config release CONFIG+=noTests
           make -j$(nproc)
           make INSTALL_ROOT=`pwd`/AppDir install
 
+      # SeamlyLayout is kept out of the qmake build (see src/app/app.pro) and
+      # built/installed separately here, into the SAME AppDir as Seamly2D.
+      # src/libs/vmisc/seamly_suite_paths.cpp's locateSeamlyLayout() only finds
+      # SeamlyLayout beside seamly2d's own executable (the "flat" layout), so it
+      # cannot ship as a second, separate AppImage.
+      - name: 'build SeamlyLayout for appimage'
+        working-directory: src/app/seamlylayout/qt_frontend
+        run: |
+          cmake --preset release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+          cmake --build --preset release
+
+      - name: 'install SeamlyLayout into AppDir'
+        working-directory: src/app/seamlylayout/qt_frontend
+        run: |
+          cmake --install build/Release --prefix "$GITHUB_WORKSPACE/AppDir/usr"
+
+      - name: 'package Seamly2D appimage'
+        env:
+          OUTPUT: Seamly2D-x86_64.AppImage  # linuxdeploy-x86_64.AppImage uses this env var as name for AppImage
+          # linuxdeploy-plugin-qt cannot detect QML module imports from a
+          # compiled Quick binary on its own; this tells it where to scan.
+          QML_SOURCES_PATHS: src/app/seamlylayout/qt_frontend/qml
+        run: |
           cp /usr/bin/pdftops AppDir/usr/bin
           mkdir -p AppDir/usr/share/X11/xkb
           cp -r /usr/share/X11/xkb/* AppDir/usr/share/X11/xkb
-          linuxdeploy-x86_64.AppImage --appdir AppDir --desktop-file=packaging/assets/seamly2d.desktop --plugin qt --output appimage
+          linuxdeploy-x86_64.AppImage --appdir AppDir \
+            --desktop-file=packaging/assets/seamly2d.desktop \
+            --desktop-file=src/app/seamlylayout/packaging/linux/seamlylayout.desktop \
+            --plugin qt --output appimage
 
       - name: 'upload AppImage artifact'
         uses: actions/upload-artifact@v7
