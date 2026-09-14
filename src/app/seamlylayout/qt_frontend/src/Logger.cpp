@@ -65,10 +65,8 @@ void Logger::clearLogDirectory(const QString &logsDirPath)
 // The logs/ directory is created under the AppConfigLocation root if it does
 // not already exist.  The file name encodes the startup time as YYMMDDHHMMSS so
 // each run gets its own file.
-void Logger::init()
+QString Logger::resolveLogsDirectoryForCurrentPlatform()
 {
-    if (!debugEnabled) return; // logging disabled — do not create files
-
 #if defined(Q_OS_MACOS) || defined(Q_OS_WIN)
     // The install root is not writable, so logs go under the writable
     // AppConfigLocation root - the same "Seamly/SeamlyLayout" tree the settings
@@ -83,7 +81,7 @@ void Logger::init()
     if (logsDir.isEmpty()) {
         logsDir = QCoreApplication::applicationDirPath();
     } // if AppConfigLocation unavailable
-    logsDir += QStringLiteral("/logs");
+    return logsDir + QStringLiteral("/logs");
 #else
     // Task 17: a mounted Linux AppImage is read-only for the same reason a macOS bundle is
     // — detect it at runtime (Platform::isAppImage(), since unlike macOS this can't be known
@@ -97,12 +95,19 @@ void Logger::init()
         if (logsDir.isEmpty()) {
             logsDir = QCoreApplication::applicationDirPath();
         } // if AppConfigLocation unavailable
-        logsDir += QStringLiteral("/logs");
+        return logsDir + QStringLiteral("/logs");
     } else {
         // Write log files to the logs/ directory next to the executable
-        logsDir = QCoreApplication::applicationDirPath() + QStringLiteral("/logs");
+        return QCoreApplication::applicationDirPath() + QStringLiteral("/logs");
     } // if running from a mounted AppImage
 #endif
+}
+
+void Logger::init()
+{
+    if (!debugEnabled) return; // logging disabled — do not create files
+
+    const QString logsDir = resolveLogsDirectoryForCurrentPlatform();
     QDir().mkpath(logsDir);
     clearLogDirectory(logsDir);
 
