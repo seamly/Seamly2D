@@ -98,7 +98,10 @@ void Logger::init()
     // AppImage mounts, Flatpak /app), so runtime platform checks choose between
     // AppConfigLocation/logs and executable-dir/logs.
     const QString logsDir = resolveLogsDirectoryForCurrentPlatform();
-    QDir().mkpath(logsDir);
+    if (!QDir().mkpath(logsDir)) {
+        debugEnabled = false;
+        return;
+    }
     clearLogDirectory(logsDir);
 
     // Build the file name: log_{YYMMDDHHmmss}.txt
