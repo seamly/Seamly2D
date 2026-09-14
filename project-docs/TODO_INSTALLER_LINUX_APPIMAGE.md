@@ -6,10 +6,8 @@ Check off all completed tasks & subtasks and move completed tasks to TODO_COMPLE
 
 Tasks in this file begin with `InstLinuxAppimage.`
 
-## Task InstLinuxAppimage.1 — Update the ci.yml file and associated files and scripts to create a linux appimage containing seamly2d, seamlylayout, and seamlyme apps in a single qt runtime, with settings and config files in the same location; 
-
-- [x] ci.yml `linux` job builds SeamlyLayout (CMake release) and installs it into the same `AppDir` as seamly2d/seamlyme (`locateSeamlyLayout()` in `src/libs/vmisc/seamly_suite_paths.cpp` requires the flat, same-directory layout — a separate AppImage would not work), then bundles all three through one `linuxdeploy --plugin qt` pass. Settings/config land alongside the binary via SeamlyLayout's existing CMake install rules.
-- [ ] Confirmed by a passing CI run (WebEngineQuick bundling via `linuxdeploy-plugin-qt` is unverified — no local Linux build available). Do not move this task to TODO_COMPLETED.md until CI passes.
+Task InstLinuxAppimage.1 (bundle SeamlyLayout into the AppImage) is done —
+see `project-docs/TODO_COMPLETED.md`.
 
 ## Task InstLinuxAppimage.2 — Linux AppImage: create a plan for migrating existing seamly2d user data to the new seamly user data directory to let the user choose the `seamlyData` user-data directory (default `~/seamlyData`); update subtasks to implement this plan
 

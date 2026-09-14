@@ -779,3 +779,41 @@ not part of `Seamly2D.5`/`Layout.9`. It is still open; see `SESSION_HANDOVER.md`
 `mainwindow.cpp`, `mainwindowsnogui.cpp`, `svg_generator.cpp`,
 `seamly_suite_paths.cpp` and `TST_SeamlySuitePaths` changes are verified by
 `ci.yml` only, and that verification is deferred until the next full CI run.
+
+## Task InstLinuxAppimage.1 — Linux AppImage now bundles SeamlyLayout (completed 2026-09-14)
+
+`ci.yml`'s `linux` job built and packaged only Seamly2D (SeamlyMe rides along
+via the qmake install, no separate build step); SeamlyLayout was never built
+or included. `src/libs/vmisc/seamly_suite_paths.cpp`'s `locateSeamlyLayout()`
+only finds SeamlyLayout in the *same* directory as `seamly2d` (the flat
+layout), so it has to ship inside the one AppImage, not as a second, separate
+one.
+
+- [x] InstLinuxAppimage.1.1 The `linux` job now builds SeamlyLayout with
+  CMake/Ninja (release preset), installs it with
+  `cmake --install --prefix "$GITHUB_WORKSPACE/AppDir/usr"` so it lands beside
+  `seamly2d` in the same `AppDir`, and adds a second `--desktop-file` plus
+  `QML_SOURCES_PATHS` to the `linuxdeploy`/`linuxdeploy-plugin-qt` call so the
+  QML/WebEngine modules it needs get detected and bundled from source, not the
+  compiled binary. Settings/config land alongside the binary through
+  SeamlyLayout's existing CMake install rules — no new packaging code needed
+  there.
+- [x] InstLinuxAppimage.1.2 First CI run (push) never reached the `linux` job
+  at all — it's gated `if: github.event_name != 'push'`, and `linux-test`
+  failed first anyway, on three pre-existing SeamlyLayout Qt suite failures
+  unrelated to this change (missing `QT_QPA_PLATFORM=offscreen` for
+  `PreferencesModelTests`/`SettingsModelTests`; `LoggerTests` locking an
+  `AppConfigLocation` path that `Logger::init()`'s Linux branch didn't use).
+  Fixed in `CMakeLists.txt` and `Logger.cpp` (removed the Linux-only "log
+  beside the executable" carve-out — every platform now uses
+  `AppConfigLocation`, matching Windows/macOS and the locked test). Verified
+  locally: `ctest --preset debug` 6/6, `cargo test --workspace` all green.
+- [x] InstLinuxAppimage.1.3 First `workflow_dispatch` run that actually
+  reached the `linux` job failed: `linuxdeploy-plugin-qt` — "Could not find
+  dependency: libQt6SerialPort.so.6" (a transitive `qtpositioning` dependency;
+  Windows's `windeployqt` only warns about the same thing, per `smsi.ps1`'s
+  `Invoke-Tool` comment). Fixed by adding `qtserialport` to the `linux` job's
+  installed Qt modules.
+- [x] InstLinuxAppimage.1.4 Verified 2026-09-14: full `ci.yml` `workflow_dispatch`
+  run on `run-seamlyLayout` passed — `linux-test`, `linux` (AppImage), `macos`,
+  both `windows-msi` arches, and `Publish Pre-releases` all succeeded.
