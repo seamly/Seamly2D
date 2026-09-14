@@ -132,8 +132,7 @@ void LoggerTests::logDirectory_matchesExpectedPlatformLocation()
 // .../SeamlyLayout/logs, not .../Seamly/SeamlyLayout/logs.
 void LoggerTests::logDirectory_carriesTheOrganizationAndApplication()
 {
-    const QString path = QDir::fromNativeSeparators(m_logFilePath);
-    const QString expectedDirectory = QDir::fromNativeSeparators(
+    const QString actualDirectory = QDir::fromNativeSeparators(
         QFileInfo(m_logFilePath).absolutePath());
     const QString appConfigPath = QDir::fromNativeSeparators(QDir(
         QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)).absolutePath());
@@ -143,23 +142,20 @@ void LoggerTests::logDirectory_carriesTheOrganizationAndApplication()
 #else
         Qt::CaseSensitive;
 #endif
-    QVERIFY2(path.startsWith(expectedDirectory + QStringLiteral("/"), caseSensitivity),
-             qPrintable(QStringLiteral("log path was '%1'").arg(path)));
-
     if (!appConfigPath.isEmpty()
-        && expectedDirectory.startsWith(appConfigPath, caseSensitivity)) {
+        && actualDirectory.startsWith(appConfigPath, caseSensitivity)) {
         const QString expectedAppConfigDir = QDir::fromNativeSeparators(
             QDir(appConfigPath)
                 .absoluteFilePath(QCoreApplication::organizationName()
                                   + QStringLiteral("/")
                                   + QCoreApplication::applicationName()
                                   + QStringLiteral("/logs")));
-        QCOMPARE(expectedDirectory, expectedAppConfigDir);
+        QCOMPARE(actualDirectory, expectedAppConfigDir);
     } else {
         const QString appDirLogs = QDir::fromNativeSeparators(
             QDir(QCoreApplication::applicationDirPath())
                 .absoluteFilePath(QStringLiteral("logs")));
-        QCOMPARE(expectedDirectory, appDirLogs);
+        QCOMPARE(actualDirectory, appDirLogs);
     }
 } // logDirectory_carriesTheOrganizationAndApplication()
 
