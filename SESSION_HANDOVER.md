@@ -6,34 +6,35 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## 2026-09-13 — CI: parallel Windows compile with jom
+## 2026-09-13 — CI: Linux AppImage now bundles SeamlyLayout
 
-Job `Build SeamlyLayout Release` (run `34784858753`) failed at
-`smsi.ps1 -SeamlyLayoutBin` — a stale parameter name from before commit
-`794d13092e` (already fixed on `run-seamlyLayout`, so no action needed there).
+`ci.yml`'s `linux` job built and packaged only Seamly2D (SeamlyMe rides
+along via the qmake install, no separate build step); SeamlyLayout was never
+built or included. `src/libs/vmisc/seamly_suite_paths.cpp`'s
+`locateSeamlyLayout()` only finds SeamlyLayout in the *same* directory as
+`seamly2d` (flat layout) — so it has to ship inside the one AppImage, not as
+a second, separate one.
 
-Analyzing that job's log surfaced a real slowdown: `qmake`/`nmake` compiles
-Seamly2D + SeamlyMe single-threaded and takes ~20 of the job's ~27 minutes.
-Branch `task-jom-parallel-nmake` swaps `nmake` for `jom -j
-$env:NUMBER_OF_PROCESSORS` (Qt's parallel nmake clone) in both
-`windows-test`'s and `windows-msi`'s build steps in `ci.yml`. `nmake check`
-(test execution) is left alone on purpose — the four Qt suites share one `-o`
-log target and would clobber each other if run concurrently.
+Branch `task-linux-appimage-seamlylayout` (off `run-seamlyLayout`) adds to the
+`linux` job: Rust toolchain + cache, `qtwebengine`/`qtwebchannel`/
+`qtpositioning` Qt modules, a CMake release build of SeamlyLayout, a
+`cmake --install --prefix "$GITHUB_WORKSPACE/AppDir/usr"` step so it lands
+beside `seamly2d` in the same `AppDir`, and a second `--desktop-file` on the
+`linuxdeploy` call plus `QML_SOURCES_PATHS` so `linuxdeploy-plugin-qt` bundles
+the QML/WebEngine modules it can't detect from the compiled binary alone.
+Tracked as `project-docs/TODO_INSTALLER_LINUX_APPIMAGE.md` task
+`InstLinuxAppimage.1`.
 
-jom ships x86/x64 only; the `windows-msi` matrix's `arm64` leg
-(`windows-11-arm`) runs it too, on the assumption Windows 11 ARM's x64
-emulation handles it — user's explicit call, unverified until that leg's CI
-run is watched.
+**Unverified:** no Linux build is possible on this Windows dev machine.
+Bundling `WebEngineQuick` via `linuxdeploy-plugin-qt` is known to be fragile
+(helper process, locales, resources) — this may need more than one CI
+iteration.
 
-`packaging\windows\local_build_msi.ps1`'s docstring (lines 26-29) already
-claims "Uses jom instead of nmake" but its body still calls plain `nmake` /
-`nmake check` (lines 222, 247) — a pre-existing mismatch, not touched by this
-task. Worth a follow-up.
-
-**Next step:** merge `task-jom-parallel-nmake` into `run-seamlyLayout`, push
-without the skip-ci token (`.github/workflows/**` changed functionally), and
-watch the `ci.yml` run — this is the only way to confirm both the timing win
-and the arm64 leg.
+**Next step:** watch the `linux` job on the push to `run-seamlyLayout` (full
+CI runs — this change touches `.github/workflows/**`). If it fails, read the
+`linuxdeploy`/`linuxdeploy-plugin-qt` log for the missing piece before
+re-editing. Once it passes, check off `InstLinuxAppimage.1`'s second box and
+move the task to `TODO_COMPLETED.md`.
 
 ## Current steps
 
