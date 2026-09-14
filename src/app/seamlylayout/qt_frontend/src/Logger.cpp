@@ -11,12 +11,12 @@
 // The log file is opened once by Logger::init() and kept open for the
 // duration of the process.  All writes go to a file named:
 //   {appConfigRoot}/logs/log_{YYMMDDHHMMSS}.txt
-// {appConfigRoot} is the writable AppConfigLocation root, not the install directory,
-// wherever the install directory is read-only or needs administrator rights:
-// on macOS (a notarized .app bundle — Task 16), on Windows (C:\Program Files),
-// inside a mounted Linux AppImage (Platform::isAppImage() — Task 17), and
-// inside a Flatpak sandbox (Platform::isFlatpak() — Task 18). Only an ordinary
-// Linux install still writes beside the executable.
+// {appConfigRoot} is the writable AppConfigLocation root, not the install
+// directory, on every platform — the install directory cannot be relied on to
+// be writable: a notarized .app bundle on macOS, C:\Program Files on Windows,
+// a mounted (read-only) Linux AppImage, or a Flatpak's /app sandbox. Using one
+// rule everywhere also means a debug log is always at the same, predictable
+// path regardless of how SeamlyLayout was launched.
 //
 // Layout.10: the directory is "logs", not "output", and it sits inside the same
 // Seamly/SeamlyLayout tree as qt6_seamlylayout.ini — matching Seamly2D's
@@ -25,8 +25,6 @@
 // resolves to %LOCALAPPDATA%\SeamlyLayout\.
 
 #include "Logger.h"
-
-#include "Platform.h"
 
 #include <QCoreApplication>
 #include <QDateTime>
@@ -69,40 +67,17 @@ void Logger::init()
 {
     if (!debugEnabled) return; // logging disabled — do not create files
 
-#if defined(Q_OS_MACOS) || defined(Q_OS_WIN)
-    // The install root is not writable, so logs go under the writable
-    // AppConfigLocation root - the same "Seamly/SeamlyLayout" tree the settings
-    // and preferences files already use.
-    //
-    // macOS (Task 16): a signed, notarized .app bundle is read-only.
-    // Windows: the MSI installs into C:\Program Files\SeamlyApps, which a
-    // standard user cannot write. The exe-relative path appeared to work only
-    // for administrators, and left a logs\ directory inside Program Files
-    // that no uninstall removes, because the installer does not own it.
+    // The install root is not writable on macOS (a notarized .app bundle), on
+    // Windows (C:\Program Files), on a mounted Linux AppImage, or inside a
+    // Flatpak sandbox — so every platform uses the same writable
+    // AppConfigLocation root, the "Seamly/SeamlyLayout" tree the settings and
+    // preferences files already use.
     QString logsDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
     if (logsDir.isEmpty()) {
         logsDir = QCoreApplication::applicationDirPath();
     } // if AppConfigLocation unavailable
     logsDir += QStringLiteral("/logs");
-#else
-    // Task 17: a mounted Linux AppImage is read-only for the same reason a macOS bundle is
-    // — detect it at runtime (Platform::isAppImage(), since unlike macOS this can't be known
-    // at compile time) and fall back to the same writable AppConfigLocation root. A normal
-    // (non-AppImage) Linux install keeps writing logs next to the executable.
-    // Task 18: a Flatpak's /app prefix is read-only in the same way, so Platform::isFlatpak()
-    // (also runtime-only) is treated identically and writes logs under AppConfigLocation too.
-    QString logsDir;
-    if (Platform::isAppImage() || Platform::isFlatpak()) {
-        logsDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-        if (logsDir.isEmpty()) {
-            logsDir = QCoreApplication::applicationDirPath();
-        } // if AppConfigLocation unavailable
-        logsDir += QStringLiteral("/logs");
-    } else {
-        // Write log files to the logs/ directory next to the executable
-        logsDir = QCoreApplication::applicationDirPath() + QStringLiteral("/logs");
-    } // if running from a mounted AppImage
-#endif
+
     QDir().mkpath(logsDir);
     clearLogDirectory(logsDir);
 
