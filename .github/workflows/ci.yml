@@ -8,8 +8,13 @@ on:
   schedule:
     - cron: '0 0 * * 1' # Runs Monday 00:00 UTC
   push:
-    # Skip docs-only pushes. `CMakeLists.txt` is a build input, so do 
-    # not ignore all `.txt` files. If any file does not match `paths-ignore`, 
+    # Limit to branches of record. A PR branch push then fires pull_request
+    # only, not push too, so Linux tests do not run twice per commit.
+    branches:
+      - develop
+      - run-seamlyLayout
+    # Skip docs-only pushes. `CMakeLists.txt` is a build input, so do
+    # not ignore all `.txt` files. If any file does not match `paths-ignore`,
     # the full run still starts.
     paths-ignore:
       - 'LICENSE'
