@@ -50,7 +50,7 @@ jobs:
           echo "version_number=$((10#$year - 2000)).$((10#$month)).$((10#$day)).$((10#$hour * 60 + 10#$minute))" >> $GITHUB_OUTPUT
 
   # ---------------------------------------------------------------------------
-  # Linux unit tests. 
+  # Linux unit tests, all three apps: Seamly2D, SeamlyMe, SeamlyLayout.
   # Runs on all events, for any user, on any branch
   # Uses xvfb-run to simulate a display for GUI tests.
   linux-test:
@@ -61,21 +61,38 @@ jobs:
       - name: 'checkout repository'
         uses: actions/checkout@v7
 
+      # qtwebengine/qtwebchannel/qtpositioning are for SeamlyLayout's
+      # WebEngineView provides SvgCanvas.qml; qtmultimedia is for the
+      # parent apps. Matches the windows-msi job's module list.
       - name: 'install Qt'
         uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
           cache: true
-          modules: qtmultimedia
+          modules: qtmultimedia qtwebengine qtwebchannel qtpositioning
 
-      - name: 'install build dependencies'       
+      - name: 'install build dependencies'
         run: |
-          sudo apt update && sudo apt install -y libxerces-c-dev
+          sudo apt update && sudo apt install -y libxerces-c-dev ninja-build
+
+      - name: 'Install Rust toolchain'
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: 'Cache cargo build'
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src/app/seamlylayout
 
       - name: 'build Seamly2D & SeamlyMe for tests'
         run: |
           qmake Seamly.pro
           make -j$(nproc)
+
+      - name: 'configure and build SeamlyLayout'
+        working-directory: src/app/seamlylayout/qt_frontend
+        run: |
+          cmake --preset debug -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+          cmake --build --preset debug
 
       - name: 'install test dependencies'
         # xvfb use to test built application within a framebuffer
@@ -86,6 +103,16 @@ jobs:
       - name: 'run Seamly2D tests'
         run: |
           xvfb-run -a make check
+
+      - name: 'run SeamlyLayout Qt tests'
+        working-directory: src/app/seamlylayout/qt_frontend
+        run: |
+          ctest --preset debug
+
+      - name: 'run SeamlyLayout Rust tests'
+        working-directory: src/app/seamlylayout
+        run: |
+          cargo test --workspace
 
 
   # ---------------------------------------------------------------------------
