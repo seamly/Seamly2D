@@ -148,18 +148,13 @@ void LoggerTests::logDirectory_carriesTheOrganizationAndApplication()
 
     if (!appConfigPath.isEmpty()
         && expectedDirectory.startsWith(appConfigPath, caseSensitivity)) {
-        QString relative = expectedDirectory.mid(appConfigPath.length());
-        if (relative.startsWith(QStringLiteral("/"))) {
-            relative.remove(0, 1);
-        }
-        const QStringList segments = relative.split(QStringLiteral("/"), Qt::SkipEmptyParts);
-        QVERIFY2(segments.size() >= 3,
-                 qPrintable(QStringLiteral("expected directory was '%1'")
-                                .arg(expectedDirectory)));
-        const qsizetype logsIndex = segments.size() - 1;
-        QCOMPARE(segments.at(logsIndex - 2), QCoreApplication::organizationName());
-        QCOMPARE(segments.at(logsIndex - 1), QCoreApplication::applicationName());
-        QCOMPARE(segments.at(logsIndex), QStringLiteral("logs"));
+        const QString expectedAppConfigDir = QDir::fromNativeSeparators(
+            QDir(appConfigPath)
+                .absoluteFilePath(QCoreApplication::organizationName()
+                                  + QStringLiteral("/")
+                                  + QCoreApplication::applicationName()
+                                  + QStringLiteral("/logs")));
+        QCOMPARE(expectedDirectory, expectedAppConfigDir);
     } else {
         const QString appDirLogs = QDir::fromNativeSeparators(
             QDir(QCoreApplication::applicationDirPath())

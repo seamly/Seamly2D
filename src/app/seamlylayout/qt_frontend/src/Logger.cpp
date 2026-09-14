@@ -98,15 +98,7 @@ void Logger::init()
     // AppImage mounts, Flatpak /app), so runtime platform checks choose between
     // AppConfigLocation/logs and executable-dir/logs.
     const QString logsDir = resolveLogsDirectoryForCurrentPlatform();
-    if (!QDir().mkpath(logsDir)) {
-        if (s_file.isOpen()) {
-            s_file.close();
-        }
-        s_stream.setDevice(nullptr);
-        s_file.setFileName(QString());
-        qunsetenv("SEAMLY_LOG_FILE");
-        return;
-    }
+    QDir().mkpath(logsDir);
     clearLogDirectory(logsDir);
 
     // Build the file name: log_{YYMMDDHHmmss}.txt
