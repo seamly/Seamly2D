@@ -26,6 +26,7 @@
 // guiless — QTEST_GUILESS_MAIN, not QTEST_MAIN.
 
 #include "Logger.h"
+#include "Platform.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -66,14 +67,33 @@ void LoggerTests::initTestCase()
     QCoreApplication::setOrganizationName(QStringLiteral("Seamly"));
     QCoreApplication::setApplicationName(QStringLiteral("SeamlyLayout"));
 
-    // Plant a stale file so init_removesStaleLogFiles() has something to find.
-    const QString logsDir = Logger::resolveLogsDirectoryForCurrentPlatform();
-    QVERIFY(QDir().mkpath(logsDir));
-    m_staleFilePath = logsDir + QStringLiteral("/log_240101000000.txt");
-    QFile staleFile(m_staleFilePath);
-    QVERIFY(staleFile.open(QIODevice::WriteOnly | QIODevice::Text));
-    staleFile.write("stale\n");
-    staleFile.close();
+    const QString appConfigRoot =
+        QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    const QString appConfigLogsDir = appConfigRoot.isEmpty()
+        ? QString()
+        : appConfigRoot + QStringLiteral("/logs");
+    const QString appDirLogsDir =
+        QCoreApplication::applicationDirPath() + QStringLiteral("/logs");
+
+    if (!appConfigLogsDir.isEmpty()) {
+        QVERIFY(QDir().mkpath(appConfigLogsDir));
+        m_staleFilePath = appConfigLogsDir + QStringLiteral("/log_240101000000.txt");
+        QFile staleConfigFile(m_staleFilePath);
+        QVERIFY(staleConfigFile.open(QIODevice::WriteOnly | QIODevice::Text));
+        staleConfigFile.write("stale\n");
+        staleConfigFile.close();
+    }
+
+    if (appConfigLogsDir.isEmpty()
+        || QDir(appConfigLogsDir).absolutePath() != QDir(appDirLogsDir).absolutePath()) {
+        const QString appDirStaleFilePath =
+            appDirLogsDir + QStringLiteral("/log_240101000000.txt");
+        QVERIFY(QDir().mkpath(appDirLogsDir));
+        QFile staleAppDirFile(appDirStaleFilePath);
+        QVERIFY(staleAppDirFile.open(QIODevice::WriteOnly | QIODevice::Text));
+        staleAppDirFile.write("stale\n");
+        staleAppDirFile.close();
+    }
 
     Logger::debugEnabled = true;
     Logger::init();
@@ -81,13 +101,30 @@ void LoggerTests::initTestCase()
 
     m_logFilePath = QString::fromUtf8(qgetenv("SEAMLY_LOG_FILE"));
     QVERIFY2(!m_logFilePath.isEmpty(), "Logger::init() published no SEAMLY_LOG_FILE");
+
+    m_staleFilePath =
+        QFileInfo(m_logFilePath).absolutePath() + QStringLiteral("/log_240101000000.txt");
 } // initTestCase()
 
 void LoggerTests::logDirectory_matchesExpectedPlatformLocation()
 {
-    const QString expected = Logger::resolveLogsDirectoryForCurrentPlatform();
+    const QString actual = QFileInfo(m_logFilePath).absolutePath();
+    const QString appConfigRoot =
+        QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+    const QString appConfigExpected = QDir(appConfigRoot + QStringLiteral("/logs")).absolutePath();
+    const QString appDirExpected =
+        QDir(QCoreApplication::applicationDirPath() + QStringLiteral("/logs")).absolutePath();
 
-    QCOMPARE(QFileInfo(m_logFilePath).absolutePath(), QDir(expected).absolutePath());
+#if defined(Q_OS_MACOS) || defined(Q_OS_WIN)
+    const QString expected = appConfigRoot.isEmpty() ? appDirExpected : appConfigExpected;
+#else
+    const bool useAppConfig = Platform::isAppImage() || Platform::isFlatpak();
+    const QString expected = (useAppConfig && !appConfigRoot.isEmpty())
+        ? appConfigExpected
+        : appDirExpected;
+#endif
+
+    QCOMPARE(actual, expected);
     QVERIFY2(QFile::exists(m_logFilePath), "the log file was not created");
 } // logDirectory_matchesExpectedPlatformLocation()
 
@@ -97,7 +134,7 @@ void LoggerTests::logDirectory_carriesTheOrganizationAndApplication()
 {
     const QString path = QDir::fromNativeSeparators(m_logFilePath);
     const QString expectedDirectory = QDir::fromNativeSeparators(
-        QDir(Logger::resolveLogsDirectoryForCurrentPlatform()).absolutePath());
+        QFileInfo(m_logFilePath).absolutePath());
     const QString appConfigPath = QDir::fromNativeSeparators(QDir(
         QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation)).absolutePath());
     const Qt::CaseSensitivity caseSensitivity =

@@ -42,9 +42,6 @@ public:
     // same file via log_to_file().
     static void init();
 
-    // @brief Resolve the logs directory path for the current platform/runtime.
-    static QString resolveLogsDirectoryForCurrentPlatform();
-
     // @brief Write one line to the log file if debugEnabled is true.
     // @param message  Text appended after "[unix_seconds] DEBUG: ".
     static void log(const QString &message);
