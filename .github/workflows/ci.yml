@@ -154,12 +154,15 @@ jobs:
 
       # qtwebengine/qtwebchannel/qtpositioning are for SeamlyLayout's
       # WebEngineView provides SvgCanvas.qml; qtmultimedia is for the
-      # parent apps. Matches the linux-test job's module list.
+      # parent apps. qtserialport is qtpositioning's optional NMEA GPS
+      # backend: not used, but linuxdeploy-plugin-qt (unlike windeployqt)
+      # treats a plugin's missing dependency as fatal rather than a warning,
+      # so the library has to actually be present to bundle.
       - uses: jurplel/install-qt-action@v4
         with:
           version: ${{ env.QT_VERSION }}
           cache: true
-          modules: qtmultimedia qtwebengine qtwebchannel qtpositioning
+          modules: qtmultimedia qtwebengine qtwebchannel qtpositioning qtserialport
 
       - name: 'Install Rust toolchain'
         uses: dtolnay/rust-toolchain@stable
