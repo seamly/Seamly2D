@@ -120,16 +120,16 @@ void LoggerTests::logDirectory_matchesExpectedPlatformLocation()
 void LoggerTests::logDirectory_carriesTheOrganizationAndApplication()
 {
     const QString path = QDir::fromNativeSeparators(m_logFilePath);
+    const QString expectedDirectory = QDir::fromNativeSeparators(
+        QDir(expectedLogsDirectory()).absolutePath());
     const QString appConfigPath = QDir::fromNativeSeparators(
         QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation));
-    if (!appConfigPath.isEmpty() && path.startsWith(appConfigPath + QStringLiteral("/"))) {
+    if (!appConfigPath.isEmpty()
+        && expectedDirectory.startsWith(appConfigPath + QStringLiteral("/"))) {
         QVERIFY2(path.contains(QStringLiteral("/Seamly/SeamlyLayout/logs/")),
                  qPrintable(QStringLiteral("log path was '%1'").arg(path)));
     } else {
-        const QString expected = QDir::fromNativeSeparators(
-            QDir(QCoreApplication::applicationDirPath())
-                .absoluteFilePath(QStringLiteral("logs/")));
-        QVERIFY2(path.startsWith(expected),
+        QVERIFY2(path.startsWith(expectedDirectory + QStringLiteral("/")),
                  qPrintable(QStringLiteral("log path was '%1'").arg(path)));
     }
 } // logDirectory_carriesTheOrganizationAndApplication()
