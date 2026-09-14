@@ -25,14 +25,12 @@
 // resolves to %LOCALAPPDATA%\SeamlyLayout\.
 
 #include "Logger.h"
-
-#include "Platform.h"
+#include "LoggerPaths.h"
 
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
-#include <QStandardPaths>
 
 // ---------------------------------------------------------------------------
 // Static member definitions
@@ -41,31 +39,6 @@
 bool       Logger::debugEnabled = false;
 QFile      Logger::s_file;
 QTextStream Logger::s_stream;
-
-namespace
-{
-QString resolveLogsDirectoryForCurrentPlatform()
-{
-#if defined(Q_OS_MACOS) || defined(Q_OS_WIN)
-    QString logsDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-    if (logsDir.isEmpty()) {
-        logsDir = QCoreApplication::applicationDirPath();
-    } // if AppConfigLocation unavailable
-    return logsDir + QStringLiteral("/logs");
-#else
-    QString logsDir;
-    if (Platform::isAppImage() || Platform::isFlatpak()) {
-        logsDir = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-        if (logsDir.isEmpty()) {
-            logsDir = QCoreApplication::applicationDirPath();
-        } // if AppConfigLocation unavailable
-        return logsDir + QStringLiteral("/logs");
-    } else {
-        return QCoreApplication::applicationDirPath() + QStringLiteral("/logs");
-    } // if running from a mounted AppImage
-#endif
-}
-}
 
 // ---------------------------------------------------------------------------
 // clearLogDirectory
@@ -97,7 +70,7 @@ void Logger::init()
     // The install root is not always writable (macOS bundles, Program Files,
     // AppImage mounts, Flatpak /app), so runtime platform checks choose between
     // AppConfigLocation/logs and executable-dir/logs.
-    const QString logsDir = resolveLogsDirectoryForCurrentPlatform();
+    const QString logsDir = LoggerPaths::resolveLogsDirectoryForCurrentPlatform();
     QDir().mkpath(logsDir);
     clearLogDirectory(logsDir);
 
