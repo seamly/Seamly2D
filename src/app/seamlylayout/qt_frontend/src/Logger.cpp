@@ -115,6 +115,7 @@ void Logger::init()
     s_file.setFileName(filePath);
 
     if (!s_file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
+        debugEnabled = false;
         return;
     } // if !open
 
