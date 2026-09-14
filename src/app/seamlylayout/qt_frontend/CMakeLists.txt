@@ -428,13 +428,17 @@ target_link_libraries(SettingsModelTests PRIVATE
 
 add_test(NAME SettingsModelTests COMMAND SettingsModelTests)
 
+# Both use QTEST_MAIN (a real QGuiApplication) and link Qt6::Widgets, so like
+# AdjustSceneTests/AdjustControllerTests above they need a platform plugin
+# that works without a display on a CI runner.
+set_tests_properties(PreferencesModelTests SettingsModelTests PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen")
+
 # Layout.10 — where the session log file is written. Logger touches the file
 # system, so the suite runs under QStandardPaths test mode and never reaches the
 # real user configuration.
 add_executable(LoggerTests
     ${SEAMLYLAYOUT_TEST_DIR}/LoggerTests.cpp
     src/Logger.cpp
-    src/Platform.cpp
 )
 
 target_include_directories(LoggerTests PRIVATE

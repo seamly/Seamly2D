@@ -93,10 +93,10 @@ Option C selected, applied app-wide. All observability file writes are gated by 
 - Aligns with Rust idiom (`#[cfg(debug_assertions)]`) and Qt idiom (`#ifdef QT_DEBUG`).
 - App-wide scope ensures no observability path is accidentally left ungated.
 
-## Log files never go in the install directory (2026-08-15)
+## Log files never go in the install directory (2026-08-15, revised 2026-09-14)
 
-`Logger::init()` writes to the `AppConfigLocation` root on Windows, not beside
-the executable. macOS, the Linux AppImage and Flatpak already did.
+`Logger::init()` writes to the `AppConfigLocation` root on every platform, not
+beside the executable — Windows, macOS, the Linux AppImage and Flatpak alike.
 
 **Why:** the MSI installs into `%ProgramFiles%\SeamlyApps`, which a standard
 user cannot write. An installed build with `--debug` therefore either failed to
@@ -106,7 +106,12 @@ uninstall removes — the installer does not own it, so no component rule
 applies. One was found on a test machine on 2026-08-15, left by an earlier
 install at `%ProgramFiles%\Seamly2D\output\`.
 
-Only an ordinary Linux install still logs next to the executable.
+An ordinary (non-packaged) Linux install used to log next to the executable
+instead. `LoggerTests` locked one `AppConfigLocation`-rooted path on every
+platform; the Linux exception never actually ran under CI until SeamlyLayout's
+Qt suites were wired into `ci.yml`'s `linux-test` job (2026-09-13), and failed
+against that lock — removed rather than special-cased, since a stable,
+predictable log path beats matching the install directory either way.
 
 This is separate from the DG.1–DG.5 gate above: that decides *whether* debug
 files are written, this decides *where*.
