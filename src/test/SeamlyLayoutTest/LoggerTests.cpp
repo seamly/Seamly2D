@@ -160,6 +160,11 @@ void LoggerTests::logDirectory_carriesTheOrganizationAndApplication()
         QCOMPARE(segments.at(logsIndex - 2), QCoreApplication::organizationName());
         QCOMPARE(segments.at(logsIndex - 1), QCoreApplication::applicationName());
         QCOMPARE(segments.at(logsIndex), QStringLiteral("logs"));
+    } else {
+        const QString appDirLogs = QDir::fromNativeSeparators(
+            QDir(QCoreApplication::applicationDirPath())
+                .absoluteFilePath(QStringLiteral("logs")));
+        QCOMPARE(expectedDirectory, appDirLogs);
     }
 } // logDirectory_carriesTheOrganizationAndApplication()
 
