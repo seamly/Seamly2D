@@ -124,19 +124,21 @@ void LoggerTests::logDirectory_carriesTheOrganizationAndApplication()
         QDir(expectedLogsDirectory()).absolutePath());
     const QString appConfigPath = QDir::fromNativeSeparators(
         QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation));
+    const Qt::CaseSensitivity caseSensitivity =
+#ifdef Q_OS_WIN
+        Qt::CaseInsensitive;
+#else
+        Qt::CaseSensitive;
+#endif
+    QVERIFY2(path.startsWith(expectedDirectory + QStringLiteral("/"), caseSensitivity),
+             qPrintable(QStringLiteral("log path was '%1'").arg(path)));
+
     if (!appConfigPath.isEmpty()
         && expectedDirectory.startsWith(appConfigPath + QStringLiteral("/"))) {
-        QVERIFY2(path.contains(QStringLiteral("/Seamly/SeamlyLayout/logs/")),
-                 qPrintable(QStringLiteral("log path was '%1'").arg(path)));
-    } else {
-        const Qt::CaseSensitivity caseSensitivity =
-#ifdef Q_OS_WIN
-            Qt::CaseInsensitive;
-#else
-            Qt::CaseSensitive;
-#endif
-        QVERIFY2(path.startsWith(expectedDirectory + QStringLiteral("/"), caseSensitivity),
-                 qPrintable(QStringLiteral("log path was '%1'").arg(path)));
+        QVERIFY2(expectedDirectory.endsWith(QStringLiteral("/Seamly/SeamlyLayout/logs"),
+                                            caseSensitivity),
+                 qPrintable(QStringLiteral("expected directory was '%1'")
+                                .arg(expectedDirectory)));
     }
 } // logDirectory_carriesTheOrganizationAndApplication()
 
