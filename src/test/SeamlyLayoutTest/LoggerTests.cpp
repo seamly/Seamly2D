@@ -119,7 +119,10 @@ void LoggerTests::logDirectory_carriesTheOrganizationAndApplication()
         QVERIFY2(segments.size() >= 3,
                  qPrintable(QStringLiteral("expected directory was '%1'")
                                 .arg(expectedDirectory)));
-        QCOMPARE(segments.constLast(), QStringLiteral("logs"));
+        const qsizetype logsIndex = segments.size() - 1;
+        QCOMPARE(segments.at(logsIndex - 2), QCoreApplication::organizationName());
+        QCOMPARE(segments.at(logsIndex - 1), QCoreApplication::applicationName());
+        QCOMPARE(segments.at(logsIndex), QStringLiteral("logs"));
     }
 } // logDirectory_carriesTheOrganizationAndApplication()
 
