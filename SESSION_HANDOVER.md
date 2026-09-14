@@ -25,16 +25,41 @@ the QML/WebEngine modules it can't detect from the compiled binary alone.
 Tracked as `project-docs/TODO_INSTALLER_LINUX_APPIMAGE.md` task
 `InstLinuxAppimage.1`.
 
-**Unverified:** no Linux build is possible on this Windows dev machine.
-Bundling `WebEngineQuick` via `linuxdeploy-plugin-qt` is known to be fragile
-(helper process, locales, resources) — this may need more than one CI
-iteration.
+**First push (`ca2ce5ad45`) never reached the `linux` job** — `linux-test`
+failed first, on three pre-existing SeamlyLayout Qt suite failures unrelated
+to the AppImage edit (confirmed: the prior commit `1502faae8c` failed the
+same way). `linux`/`windows-msi`/`macos`/both publish jobs all skipped
+because they `needs: [version, linux-test]`.
 
-**Next step:** watch the `linux` job on the push to `run-seamlyLayout` (full
-CI runs — this change touches `.github/workflows/**`). If it fails, read the
-`linuxdeploy`/`linuxdeploy-plugin-qt` log for the missing piece before
-re-editing. Once it passes, check off `InstLinuxAppimage.1`'s second box and
-move the task to `TODO_COMPLETED.md`.
+Branch `task-fix-linux-seamlylayout-tests` (off `run-seamlyLayout`) fixed all
+three, verified locally (`ctest --preset debug` 6/6, `cargo test --workspace`
+all green):
+
+- `PreferencesModelTests`/`SettingsModelTests` (`QTEST_MAIN`, link
+  `Qt6::Widgets`) had no platform plugin on a display-less CI runner —
+  added them to the `QT_QPA_PLATFORM=offscreen` `set_tests_properties` call
+  in `CMakeLists.txt` (same fix already applied to `AdjustSceneTests`/
+  `AdjustControllerTests`).
+- `LoggerTests` locks one `AppConfigLocation`-rooted log path on every
+  platform; `Logger::init()` only did that for Windows/macOS/AppImage/
+  Flatpak — an ordinary Linux build (what a plain `ctest` binary is) wrote
+  beside the executable instead. Removed that carve-out; every platform now
+  uses `AppConfigLocation` unconditionally. Updated
+  `src/app/seamlylayout/docs/status-docs/SEAMLYLAYOUT_DECISIONS.md` to match.
+
+**Not yet pushed.** Both branches (`task-linux-appimage-seamlylayout`,
+already merged, and `task-fix-linux-seamlylayout-tests`, pending) land on
+`run-seamlyLayout`; the AppImage change still hasn't been exercised by CI.
+
+**Next step:** merge `task-fix-linux-seamlylayout-tests` `--no-ff` into
+`run-seamlyLayout`, push (no skip-ci — touches `CMakeLists.txt`), and watch
+the run. Once `linux-test` passes, the `linux` job finally gets to run and
+is the first real test of the AppImage/SeamlyLayout bundling itself —
+`WebEngineQuick` via `linuxdeploy-plugin-qt` is known-fragile and may still
+need another iteration. Once `linux` passes, check off
+`InstLinuxAppimage.1`'s second box in
+`project-docs/TODO_INSTALLER_LINUX_APPIMAGE.md` and move the task to
+`TODO_COMPLETED.md`.
 
 ## Current steps
 
