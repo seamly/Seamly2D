@@ -61,6 +61,7 @@ jobs:
   linux-test:
     name: 'Linux: Run unit tests'
     runs-on: ubuntu-latest
+    needs: version
 
     steps:
       - name: 'checkout repository'
