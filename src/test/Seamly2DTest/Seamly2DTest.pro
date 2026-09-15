@@ -10,7 +10,7 @@ message(" ")
 
 # widgets: QGraphicsScene in tst_svgtextitem; svg: QSvgGenerator in tst_svgtextitem
 # core-private: tst_dataroot reads a .zip back with QZipReader, Qt private API in QtCore.
-QT       += core testlib gui widgets svg printsupport xml core-privatemultimedia
+QT       += core testlib gui widgets svg printsupport xml core-private multimedia
 
 TARGET = Seamly2DTests
 
