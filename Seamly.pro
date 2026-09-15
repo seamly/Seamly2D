@@ -32,8 +32,9 @@ count(LIST, 1, >): error("The build will fail. Path '$${OUT_PWD}' contains space
 # - FlatPak packaging is not yet implemented (see TODO_INSTALLER_LINUX_FLATPAK.md); see ci.yml,
 # No SUBDIRS entry needed for linux FLATPAK packaging.
 #
-# - The macos build DOES use qmake -- Seamly2D.dmg, SeamlyME.dmg, and SeamlyLayout.dmg are built
-# using `hdiutil` via qmake rules defined in `packaging/macos/macos.pro`. The `packaging_macos` tree
+# - The macos build DOES use qmake -- Seamly2D-macos.dmg, containing Seamly2D.app, seamlyme.app,
+# and SeamlyLayout.app, is built using `hdiutil` via qmake rules defined in
+# `packaging/macos/macos.pro`. The `packaging_macos` tree
 # is a peer of `src` (not nested inside it) so it can set `.depends = src` and will run only after the
 # whole src tree finishes building.
 TEMPLATE = subdirs

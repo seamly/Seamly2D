@@ -222,11 +222,11 @@ jobs:
 
 
   # ---------------------------------------------------------------------------
-  # Build MacOS DMGs.
+  # Build the MacOS DMG.
   # Runs on non-push events, for non-weblate users, on any branch
   macos:
     if: github.event_name != 'push' && github.event.pull_request.user.login != 'weblate'
-    name: 'macOS: Build DMGs'
+    name: 'macOS: Build DMG'
     runs-on: macos-26
     needs: [version, linux-test]
     env:
@@ -308,8 +308,8 @@ jobs:
 
       - uses: actions/upload-artifact@v7
         with:
-          name: Seamly2D-macos.zip
-          path: packaging/macos/Seamly2D-macos.zip
+          name: Seamly2D-macos.dmg
+          path: packaging/macos/Seamly2D-macos.dmg
           if-no-files-found: error
 
 
@@ -518,7 +518,7 @@ jobs:
           name: Seamly2D-x86_64.AppImage
       - uses: actions/download-artifact@v8
         with:
-          name: Seamly2D-macos.zip
+          name: Seamly2D-macos.dmg
       - uses: actions/download-artifact@v8
         with:
           name: seamly-x64.msi
@@ -549,7 +549,7 @@ jobs:
             --prerelease \
             --title "All-platform development build ${VERSION_NUMBER}" \
             --notes-file notes.md \
-            Seamly2D-x86_64.AppImage Seamly2D-macos.zip seamly-x64.msi seamly-arm64.msi
+            Seamly2D-x86_64.AppImage Seamly2D-macos.dmg seamly-x64.msi seamly-arm64.msi
 
 
   # ----- Publish ALL ARTIFACTS to LATEST as release
@@ -568,7 +568,7 @@ jobs:
           name: Seamly2D-x86_64.AppImage
       - uses: actions/download-artifact@v8
         with:
-          name: Seamly2D-macos.zip
+          name: Seamly2D-macos.dmg
       - uses: actions/download-artifact@v8
         with:
           name: seamly-x64.msi
@@ -584,7 +584,7 @@ jobs:
           prerelease: false
           files: |
             Seamly2D-x86_64.AppImage
-            Seamly2D-macos.zip
+            Seamly2D-macos.dmg
             seamly-x64.msi
             seamly-arm64.msi
 
