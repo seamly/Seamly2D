@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['name_0',['name',['../da/d35/structRowData.html#a267a4d5ec4a89547842f4fdcb29d1c25',1,'RowData::name()'],['../d3/dcb/structanonymous__namespace_02SettingsModel_8cpp_03_1_1SizeEntry.html#a6a222e5f9b95b1a90b8f2e8af20e7527',1,'anonymous_namespace{SettingsModel.cpp}::SizeEntry::name()'],['../d9/d43/classVExceptionEmptyParameter.html#acf08401da745b6fcfaf3aca013589bbb',1,'VExceptionEmptyParameter::name()'],['../d8/d6b/structGroupAttributes.html#a0c1c4f04e9d565df4f54605370cd2f29',1,'GroupAttributes::name()'],['../d3/df8/structDraftImage.html#aab851b86248ac80c65b4c0d9fec966ee',1,'DraftImage::name()'],['../d4/da3/classVInternalVariableData.html#ab7aedad6932745a07b55155413fafe2d',1,'VInternalVariableData::name()'],['../d7/d55/structNodeInfo.html#a099414f044f611bb9fe5a4b95fcab934',1,'NodeInfo::name()']]],
+  ['name_0',['name',['../da/d35/structRowData.html#a267a4d5ec4a89547842f4fdcb29d1c25',1,'RowData::name()'],['../d9/d43/classVExceptionEmptyParameter.html#acf08401da745b6fcfaf3aca013589bbb',1,'VExceptionEmptyParameter::name()'],['../d8/d6b/structGroupAttributes.html#a0c1c4f04e9d565df4f54605370cd2f29',1,'GroupAttributes::name()'],['../d3/df8/structDraftImage.html#aab851b86248ac80c65b4c0d9fec966ee',1,'DraftImage::name()'],['../d4/da3/classVInternalVariableData.html#ab7aedad6932745a07b55155413fafe2d',1,'VInternalVariableData::name()'],['../d7/d55/structNodeInfo.html#a099414f044f611bb9fe5a4b95fcab934',1,'NodeInfo::name()']]],
   ['name_1',['Name',['../db/d53/classVPE_1_1VPropertyPrivate.html#a5bb9f61d5af5607b429f5c83b7154de4',1,'VPE::VPropertyPrivate']]],
   ['namedraw_2',['nameDraw',['../de/da8/classVToolRecord.html#a2dc8bfad3804484e0a69850cd577820c',1,'VToolRecord']]],
   ['neckarcb_5fm_3',['neckArcB_M',['../dd/de9/measurements__def_8cpp.html#a83ee941b575892ef86b979be5e91646e',1,'neckArcB_M():&#160;measurements_def.cpp'],['../d0/d91/measurements__def_8h.html#a83ee941b575892ef86b979be5e91646e',1,'neckArcB_M():&#160;measurements_def.cpp']]],
@@ -13,7 +13,7 @@ var searchData=
   ['neckbacktoarmfoldfronttoneckback_5fm_10',['neckBackToArmfoldFrontToNeckBack_M',['../d0/d91/measurements__def_8h.html#a1571ddcd7c353370f9abac750a17db4e',1,'neckBackToArmfoldFrontToNeckBack_M():&#160;measurements_def.cpp'],['../dd/de9/measurements__def_8cpp.html#a1571ddcd7c353370f9abac750a17db4e',1,'neckBackToArmfoldFrontToNeckBack_M():&#160;measurements_def.cpp']]],
   ['neckbacktoarmfoldfronttowaistside_5fm_11',['neckBackToArmfoldFrontToWaistSide_M',['../d0/d91/measurements__def_8h.html#a63db2cc7cc391e5a6204f970f17d34f6',1,'neckBackToArmfoldFrontToWaistSide_M():&#160;measurements_def.cpp'],['../dd/de9/measurements__def_8cpp.html#a63db2cc7cc391e5a6204f970f17d34f6',1,'neckBackToArmfoldFrontToWaistSide_M():&#160;measurements_def.cpp']]],
   ['neckbacktobustb_5fm_12',['neckBackToBustB_M',['../dd/de9/measurements__def_8cpp.html#ac6bdaea5f06e69ccf04cb8c97773eaf2',1,'neckBackToBustB_M():&#160;measurements_def.cpp'],['../d0/d91/measurements__def_8h.html#ac6bdaea5f06e69ccf04cb8c97773eaf2',1,'neckBackToBustB_M():&#160;measurements_def.cpp']]],
-  ['neckbacktobustfront_5fm_13',['neckBackToBustFront_M',['../dd/de9/measurements__def_8cpp.html#a28ad9e199ac4e8bf2923e4d8bacab009',1,'neckBackToBustFront_M():&#160;measurements_def.cpp'],['../d0/d91/measurements__def_8h.html#a28ad9e199ac4e8bf2923e4d8bacab009',1,'neckBackToBustFront_M():&#160;measurements_def.cpp']]],
+  ['neckbacktobustfront_5fm_13',['neckBackToBustFront_M',['../d0/d91/measurements__def_8h.html#a28ad9e199ac4e8bf2923e4d8bacab009',1,'neckBackToBustFront_M():&#160;measurements_def.cpp'],['../dd/de9/measurements__def_8cpp.html#a28ad9e199ac4e8bf2923e4d8bacab009',1,'neckBackToBustFront_M():&#160;measurements_def.cpp']]],
   ['neckbacktohighbustb_5fm_14',['neckBackToHighbustB_M',['../dd/de9/measurements__def_8cpp.html#a4abb547225e769d516ce1347d9e15f74',1,'neckBackToHighbustB_M():&#160;measurements_def.cpp'],['../d0/d91/measurements__def_8h.html#a4abb547225e769d516ce1347d9e15f74',1,'neckBackToHighbustB_M():&#160;measurements_def.cpp']]],
   ['neckbacktoshouldertipb_5fm_15',['neckBackToShoulderTipB_M',['../d0/d91/measurements__def_8h.html#ac37b1afca5659174132d2cb169de8229',1,'neckBackToShoulderTipB_M():&#160;measurements_def.cpp'],['../dd/de9/measurements__def_8cpp.html#ac37b1afca5659174132d2cb169de8229',1,'neckBackToShoulderTipB_M():&#160;measurements_def.cpp']]],
   ['neckbacktowaistb_5fm_16',['neckBackToWaistB_M',['../d0/d91/measurements__def_8h.html#ad723268e2777168f14100cc36c950ac1',1,'neckBackToWaistB_M():&#160;measurements_def.cpp'],['../dd/de9/measurements__def_8cpp.html#ad723268e2777168f14100cc36c950ac1',1,'neckBackToWaistB_M():&#160;measurements_def.cpp']]],
@@ -64,14 +64,12 @@ var searchData=
   ['nodetypecontour_61',['NodeTypeContour',['../d4/dd5/classUnionTool.html#a51fc774bfd24de24df6012581879f5f4',1,'UnionTool']]],
   ['nodetypemodeling_62',['NodeTypeModeling',['../d4/dd5/classUnionTool.html#aa6814c24495c19ebf6041eb051c47fa7',1,'UnionTool']]],
   ['notches_63',['notches',['../d7/dcf/classVLayoutPieceData.html#af69c440f98e3d5b22adcf16bec749d08',1,'VLayoutPieceData']]],
-  ['noticestatepending_64',['noticeStatePending',['../d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#a24cf882297c47d9b474847a34e9095ff',1,'anonymous_namespace{vcommonsettings.cpp}']]],
-  ['noticestateshown_65',['noticeStateShown',['../d5/dc3/namespaceanonymous__namespace_02vcommonsettings_8cpp_03.html#abf82afea97129e6eb05c2611113c6567',1,'anonymous_namespace{vcommonsettings.cpp}']]],
-  ['null_5fid_66',['null_id',['../d3/da5/ifcdef_8h.html#a68a1cce1b2e34bf8a1fa67b2dd045b64',1,'ifcdef.h']]],
-  ['num_5ffaces_67',['num_faces',['../d6/da5/structdelaunay2d__t.html#ad411607311feeedf3e43955a782b100c',1,'delaunay2d_t::num_faces()'],['../de/d32/structdelaunay__s.html#aff43139d0d9eeb9c445577a3f27da270',1,'delaunay_s::num_faces()']]],
-  ['num_5fpoints_68',['num_points',['../d6/da5/structdelaunay2d__t.html#ad40d999651b7db64910a0b6030a7ab30',1,'delaunay2d_t']]],
-  ['num_5fverts_69',['num_verts',['../d3/d07/structface__s.html#a36e758cd059915e6a3b53a32aebf5ba8',1,'face_s']]],
-  ['number_70',['number',['../d2/d7b/classDialogTool.html#a6f583a6003585697d9b06234fd1ace14',1,'DialogTool']]],
-  ['numberd_71',['numberD',['../d0/dc3/classUnionDialog.html#a3db03871b1f4d700120d4b3c0d08422c',1,'UnionDialog']]],
-  ['numberp_72',['numberP',['../d0/dc3/classUnionDialog.html#a172c21bafdd0d977b9a180ffa087b72c',1,'UnionDialog']]],
-  ['numericsign_73',['numericSign',['../de/dcf/classXSValue.html#a2e374ca45b0e3e75efb9e629d5b1e1da',1,'XSValue']]]
+  ['null_5fid_64',['null_id',['../d3/da5/ifcdef_8h.html#a68a1cce1b2e34bf8a1fa67b2dd045b64',1,'ifcdef.h']]],
+  ['num_5ffaces_65',['num_faces',['../d6/da5/structdelaunay2d__t.html#ad411607311feeedf3e43955a782b100c',1,'delaunay2d_t::num_faces()'],['../de/d32/structdelaunay__s.html#aff43139d0d9eeb9c445577a3f27da270',1,'delaunay_s::num_faces()']]],
+  ['num_5fpoints_66',['num_points',['../d6/da5/structdelaunay2d__t.html#ad40d999651b7db64910a0b6030a7ab30',1,'delaunay2d_t']]],
+  ['num_5fverts_67',['num_verts',['../d3/d07/structface__s.html#a36e758cd059915e6a3b53a32aebf5ba8',1,'face_s']]],
+  ['number_68',['number',['../d2/d7b/classDialogTool.html#a6f583a6003585697d9b06234fd1ace14',1,'DialogTool']]],
+  ['numberd_69',['numberD',['../d0/dc3/classUnionDialog.html#a3db03871b1f4d700120d4b3c0d08422c',1,'UnionDialog']]],
+  ['numberp_70',['numberP',['../d0/dc3/classUnionDialog.html#a172c21bafdd0d977b9a180ffa087b72c',1,'UnionDialog']]],
+  ['numericsign_71',['numericSign',['../de/dcf/classXSValue.html#a2e374ca45b0e3e75efb9e629d5b1e1da',1,'XSValue']]]
 ];
