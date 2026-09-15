@@ -55,9 +55,9 @@ jobs:
           echo "version_number=$((10#$year - 2000)).$((10#$month)).$((10#$day)).$((10#$hour * 60 + 10#$minute))" >> $GITHUB_OUTPUT
 
   # ---------------------------------------------------------------------------
-  # Linux unit tests, all three apps: Seamly2D, SeamlyMe, SeamlyLayout.
+  # Test Linux builds
   # Runs on all events, for any user, on any branch
-  # Uses xvfb-run to simulate a display for GUI tests.
+  # Tests all three apps using xvfb-run to simulate a display for GUI tests.
   linux-test:
     name: 'Linux: Run unit tests'
     runs-on: ubuntu-latest
@@ -88,15 +88,20 @@ jobs:
         with:
           workspaces: src/app/seamlylayout
 
+      - name: 'Cache ccache (C++ compiler cache)'
+        uses: hendrikmuhs/ccache-action@v1.2.24
+        with:
+          key: linux-test
+
       - name: 'build Seamly2D & SeamlyMe for tests'
         run: |
-          qmake Seamly.pro
+          qmake Seamly.pro QMAKE_CXX="ccache g++" QMAKE_CC="ccache gcc"
           make -j$(nproc)
 
       - name: 'build SeamlyLayout for tests'
         working-directory: src/app/seamlylayout/qt_frontend
         run: |
-          cmake --preset debug -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+          cmake --preset debug -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake --build --preset debug
 
       - name: 'install test dependencies'
@@ -112,7 +117,7 @@ jobs:
       - name: 'run SeamlyLayout Qt tests'
         working-directory: src/app/seamlylayout/qt_frontend
         run: |
-          ctest --preset debug
+          ctest --preset debug -j$(nproc)
 
       - name: 'run SeamlyLayout Rust tests'
         working-directory: src/app/seamlylayout
@@ -121,7 +126,7 @@ jobs:
 
 
   # ---------------------------------------------------------------------------
-  # Build Linux APPIMAGE.
+  # Create Linux APPIMAGE.
   # Runs on non-push events, for non-weblate users, on any branch
   # For x64 arch.
   # TODO: implement for arm64 arch.
@@ -172,13 +177,18 @@ jobs:
         with:
           workspaces: src/app/seamlylayout
 
+      - name: 'Cache ccache (C++ compiler cache)'
+        uses: hendrikmuhs/ccache-action@v1.2.24
+        with:
+          key: linux-appimage
+
       - name: 'update version'
         run: |
           ./packaging/version.sh ${VERSION_NUMBER}
 
       - name: 'build Seamly2D appimage'
         run: |
-          qmake -config release CONFIG+=noTests
+          qmake -config release CONFIG+=noTests QMAKE_CXX="ccache g++" QMAKE_CC="ccache gcc"
           make -j$(nproc)
           make INSTALL_ROOT=`pwd`/AppDir install
 
@@ -190,7 +200,7 @@ jobs:
       - name: 'build SeamlyLayout for appimage'
         working-directory: src/app/seamlylayout/qt_frontend
         run: |
-          cmake --preset release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+          cmake --preset release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake --build --preset release
 
       - name: 'install SeamlyLayout into AppDir'
@@ -265,10 +275,15 @@ jobs:
         with:
           workspaces: src/app/seamlylayout
 
+      - name: 'Cache ccache (C++ compiler cache)'
+        uses: hendrikmuhs/ccache-action@v1.2.24
+        with:
+          key: macos
+
       - name: 'Build SeamlyLayout release'
         working-directory: src/app/seamlylayout/qt_frontend
         run: |
-          cmake --preset release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR"
+          cmake --preset release -DCMAKE_PREFIX_PATH="$QT_ROOT_DIR" -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER_LAUNCHER=ccache
           cmake --build --preset release
 
       - name: 'setup signing and notarization'
@@ -300,9 +315,9 @@ jobs:
           echo killing XProtect...; sudo pkill -9 XProtect >/dev/null || true;
           # run signing part if secrets are available (main builds), otherwise (3rd party PRs etc) skip
           if [ -n "$APPLE_SIGN_IDENTITY" ] ; then
-            qmake Seamly.pro -config release CONFIG+=noTests CONFIG+=macSign
+            qmake Seamly.pro -config release CONFIG+=noTests CONFIG+=macSign QMAKE_CXX="ccache clang++" QMAKE_CC="ccache clang"
           else
-            qmake Seamly.pro -config release CONFIG+=noTests
+            qmake Seamly.pro -config release CONFIG+=noTests QMAKE_CXX="ccache clang++" QMAKE_CC="ccache clang"
           fi
           make -j$(sysctl -n hw.logicalcpu)
 
@@ -380,11 +395,23 @@ jobs:
       - name: 'Install jom - ${{ matrix.arch }}'
         run: choco install jom -y
 
+      # sccache wraps cl.exe (via QMAKE_CXX/QMAKE_CC below and the CMake
+      # launcher vars further down) and rustc (via RUSTC_WRAPPER), caching
+      # compiled objects across runs the same way ccache does on Linux/macOS.
+      - name: 'Run sccache (compiler cache for MSVC and Rust) - ${{ matrix.arch }}'
+        uses: mozilla-actions/sccache-action@v0.0.11
+
+      - name: 'Set sccache env vars - ${{ matrix.arch }}'
+        shell: pwsh
+        run: |
+          echo "SCCACHE_GHA_ENABLED=true" >> $env:GITHUB_ENV
+          echo "RUSTC_WRAPPER=sccache" >> $env:GITHUB_ENV
+
       # jom is nmake-compatible and compiles object files in parallel across
       # all runner cores; nmake itself never parallelizes a single build.
       - name: 'qmake/jom build forseamly2d.exe and seamlyme.exe - ${{ matrix.arch }}'
         run: |
-          qmake Seamly.pro -config release CONFIG+=noTests
+          qmake Seamly.pro -config release CONFIG+=noTests QMAKE_CXX="sccache cl" QMAKE_CC="sccache cl"
           jom -j $env:NUMBER_OF_PROCESSORS
 
       # ----- Build SeamlyLayout -----
@@ -401,14 +428,14 @@ jobs:
           key: ${{ matrix.arch }}
 
       - name: 'Install Ninja - ${{ matrix.arch }}'
-        run: choco install ninja -y
+        uses: seanmiddleditch/gha-setup-ninja@v6
 
       # Build the Rust bridge and C++/QML app executable with CMakeLists.txt.
       - name: 'Build SeamlyLayout - ${{ matrix.arch }}'
         working-directory: src/app/seamlylayout/qt_frontend
         shell: pwsh
         run: |
-          cmake --preset release -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR"
+          cmake --preset release -DCMAKE_PREFIX_PATH="$env:QT_ROOT_DIR" -DCMAKE_C_COMPILER_LAUNCHER=sccache -DCMAKE_CXX_COMPILER_LAUNCHER=sccache
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           cmake --build --preset release
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
