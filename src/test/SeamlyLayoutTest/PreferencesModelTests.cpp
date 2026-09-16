@@ -612,8 +612,7 @@ void PreferencesModelTests::layout8_resetToDefaults_seedsAppConfigPreferencesAnd
 // separate "input"/"output" pair — so a fresh install nests both under one shared folder
 // name (matching the `layouts` subfolder Seamly2D's ensureDataRootTree() already creates
 // under %DATAROOT%). Layout.11: the folder must sit under a data root — the installer's
-// recorded DataRoot or the <Documents>/SeamlyData fallback — never directly under the
-// home directory.
+// recorded DataRoot or the ~/seamly2d fallback — never directly under the home directory.
 void PreferencesModelTests::layout8_resetToDefaults_seedsSharedLayoutsFolderForInputAndLayout()
 {
     QTemporaryDir tempDir;

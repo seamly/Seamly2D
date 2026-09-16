@@ -59,7 +59,6 @@
 #include "../ifc/exception/vexceptionemptyparameter.h"
 #include "../ifc/exception/vexceptionwrongid.h"
 #include "../vmisc/def.h"
-#include "../vmisc/legacy_data_migration.h"
 #include "../vmisc/logging.h"
 #include "../vmisc/vsysexits.h"
 #include "../vmisc/diagnostic.h"
@@ -717,29 +716,13 @@ void ApplicationME::openSettings()
     // %LOCALAPPDATA%\Seamly. Bring an existing file forward before anything reads it.
     VCommonSettings::migrateCommonSettingsLocation();
 
-    // Settle the one shared user-data root before any data path is read. Resolves
-    // and records a path only — it touches no files, which is what keeps it safe for the
-    // unit tests to call.
-    bool adoptedLegacyTree = false;
-    const QString resolvedDataRoot = VCommonSettings::initializeDataRoot(&adoptedLegacyTree);
-
-    // If a legacy data tree was adopted, copy it to the current default root.
-    // The legacy tree is kept in place with a marker so it can be rolled back if needed.
-    // This happens here rather than in initializeDataRoot(), so tests stay confined to temp directories.
-    if (adoptedLegacyTree)
-    {
-        LegacyDataMigration::run(resolvedDataRoot, VCommonSettings::getDefaultDataRoot());
-    }
+    // Settle the one shared user-data root before any data path is read.
+    VCommonSettings::initializeDataRoot();
 
     // Create the standard data-root folders. initializeDataRoot() only resolves the path;
     // without this, a fresh install leaves the root recorded without its folders.
-    // Keep it here so tests only write under temp directories. Existing files are left alone.
+    // Existing files are left alone.
     VCommonSettings::ensureDataRootTree(VCommonSettings::dataRoot());
-
-    // Remove empty legacy data roots left behind by a rename. This stays here so tests
-    // calling initializeDataRoot() cannot reach outside their temporary directories.
-    VCommonSettings::pruneEmptyLegacyDataRoot(VCommonSettings::getLegacyDataRoot(),
-                                              VCommonSettings::dataRoot());
 
     bool migratedThisCall = false;
     const QString qt6Settings = MigrateSeamlySettingsLocation(

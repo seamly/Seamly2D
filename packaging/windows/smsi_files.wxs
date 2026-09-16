@@ -37,25 +37,22 @@
       </Directory>
     </StandardDirectory>
 
-    <!-- The user-data root is a fixed "SeamlyData" leaf under a user-selected
-         parent. This keeps the final location predictable while letting the
-         user choose only the parent folder.
-
-         Both SEAMLYDATAPARENT and SEAMLYDATAROOT are supported for unattended
-         installs; setting SEAMLYDATAROOT overrides the composed path entirely.
-         The root is created by a permanent component, and the condition keeps
-         Setup from creating the fallback C:\SeamlyData path when no root was
-         chosen. -->
+    <!-- The user-data root is fixed, not composed from a chosen parent: it is
+         [%USERPROFILE]\seamly2d on a fresh install, or whatever directory an
+         earlier install already recorded (smsi.wxs). SEAMLYDATAROOT doubles
+         as this Directory's Id, the same technique INSTALLFOLDER above does
+         not need but SEAMLYDATAPARENT used to: WiX resolves a Directory whose
+         Id matches a Property to that property's value, as long as the
+         property is set before CostFinalize. The root is created by a
+         permanent component so uninstall never removes it (D2). -->
     <StandardDirectory Id="TARGETDIR">
-      <Directory Id="SEAMLYDATAPARENT">
-        <Directory Id="SEAMLYDATAROOT" Name="SeamlyData" />
-      </Directory>
+      <Directory Id="SEAMLYDATAROOT" />
     </StandardDirectory>
 
     <ComponentGroup Id="UserDataRootFolder" Directory="SEAMLYDATAROOT">
       <Component Id="CreateUserDataRoot"
                  Guid="51C0B456-2C35-48CB-A3C5-3EFC4A9EF2D5"
-                 Condition="SEAMLYDATACHOSEN"
+                 Condition="SEAMLYDATAROOT"
                  Permanent="yes">
         <CreateFolder />
       </Component>
@@ -138,25 +135,15 @@
         </File>
       </Component>
 
-      <!-- The copy helper the deferred action runs. It ships inside
-           INSTALLFOLDER rather than being embedded as a binary custom action so
-           it is readable on disk: a script that touches a user's own files
-           should be one they can open and check. It stays after uninstall only
-           as long as the rest of the program does - ordinary component rules
-           remove it. -->
-      <Component Id="UserDataCopyScript">
-        <File Id="smsi_migrate_user_data.ps1"
-              Source="$(sys.SOURCEFILEDIR)smsi_migrate_user_data.ps1"
-              KeyPath="yes" />
-      </Component>
-
-      <!-- SettingsFiles.2: seeds the per-user settings directories and ini
-           files after install, so no app needs a Preferences > Paths visit
-           to get working path settings. Same on-disk reasoning as the
-           migration script above. -->
-      <Component Id="UserSettingsSeedScript">
-        <File Id="smsi_seed_user_settings.ps1"
-              Source="$(sys.SOURCEFILEDIR)smsi_seed_user_settings.ps1"
+      <!-- Creates the standard data subfolders and seeds the per-user settings
+           ini files after install, so no app needs a Preferences > Paths
+           visit to get working path settings. It ships inside INSTALLFOLDER
+           rather than being embedded as a binary custom action so it is
+           readable on disk: a script that touches a user's own files should
+           be one they can open and check. -->
+      <Component Id="UserDataEnsureScript">
+        <File Id="smsi_ensure_user_data.ps1"
+              Source="$(sys.SOURCEFILEDIR)smsi_ensure_user_data.ps1"
               KeyPath="yes" />
       </Component>
 

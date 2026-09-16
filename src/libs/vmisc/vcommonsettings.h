@@ -99,33 +99,13 @@ public:
     // Test seam: redirect the base directory so the suite never touches the real
     // per-user configuration. Pass an empty string to restore the platform location.
     static void          setCommonSettingsBaseDir(const QString &baseDir);
-    // One-shot first-run data notice, seeded as "pending" by the Windows installer
-    // on a fresh machine. The first app to run shows it and marks it shown.
-    static bool          firstRunNoticePending();
-    static void          markFirstRunNoticeShown();
 
     static QString       getDefaultDataRoot();
-    static QString       getLegacyDataRoot();
     static QString       dataRoot();
     static QString       dataSubdirPath(const QString &subdirectory);
-    static QString       initializeDataRoot(bool *adoptedLegacyTree = nullptr);
-    static QString       chooseFirstRunDataRoot(const QString &defaultRoot, const QStringList &legacyRoots,
-                                                bool *adoptedLegacyTree = nullptr);
+    static QString       initializeDataRoot();
     static bool          ensureDataRootTree(const QString &root = QString());
-    // Task 60: copy a whole legacy tree to the new root. Takes both paths as arguments so
-    // it can be tested against throwaway directories; never moves, renames or deletes.
-    static bool          migrateDataTree(const QString &sourceRoot, const QString &destinationRoot,
-                                         int *filesCopied = nullptr, int *filesSkipped = nullptr,
-                                         QString *errorMessage = nullptr);
-    static bool          markDataTreeMigrated(const QString &legacyRoot, const QString &newRoot);
-    static bool          dataTreeWasMigrated(const QString &root);
-    // Called ONLY from the applications' openSettings(), never from initializeDataRoot():
-    // it copies files, and the unit tests call initializeDataRoot() with real home paths.
-    static QString       migrateAdoptedLegacyTree(const QString &legacyRoot, const QString &newRoot);
     static QString       rebaseOntoDataRoot(const QString &path, const QString &oldRoot, const QString &newRoot);
-    // Task 53: takes both roots as arguments so it can be tested against throwaway
-    // directories — never a path under QDir::homePath(), which cannot be faked on Windows.
-    static bool          pruneEmptyLegacyDataRoot(const QString &legacyRoot, const QString &configuredRoot);
     QString              getDataRoot() const;
     void                 setDataRoot(const QString &value);
 

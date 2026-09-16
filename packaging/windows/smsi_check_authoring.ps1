@@ -222,7 +222,7 @@ foreach ($searched in @('SEAMLYLEGACYUNINSTALLSTRING', 'SEAMLYLEGACYINSTALLDIR',
 $secure = Get-MsiProperty -Name 'SecureCustomProperties'
 foreach ($property in @('SEAMLYDESKTOPSHORTCUTS', 'SEAMLYLEGACYUNINSTALLSTRING', 'SEAMLYLEGACYINSTALLDIR',
                         'SEAMLYOLDS2DEXE', 'SEAMLYOLDMEEXE', 'SEAMLYOLDLAYOUTEXE',
-                        'SEAMLYNEWLAYOUTEXE', 'SEAMLYPREVIOUSDATAROOT')) {
+                        'SEAMLYNEWLAYOUTEXE')) {
     Assert-That -Name "$property is a secure custom property" -Succeeded ($secure -like "*$property*")
 }
 
@@ -231,11 +231,14 @@ foreach ($property in @('SEAMLYDESKTOPSHORTCUTS', 'SEAMLYLEGACYUNINSTALLSTRING',
 # arrow is a NewDialog row it authors itself.
 #
 #   WelcomeDlg -> LicenseAgreementDlg -> [SeamlyPreviousInstallDlg] ->
-#   SeamlyDataDirDlg -> SeamlyDataMigrateDlg ->
-#   SeamlyShortcutsDlg -> VerifyReadyDlg
+#   [SeamlyDataLocationDlg] -> SeamlyShortcutsDlg -> VerifyReadyDlg
 #
-# There is no program-directory page: INSTALLFOLDER is fixed and never asked
-# about (see smsi.wxs).
+# SeamlyPreviousInstallDlg appears only when an earlier program install is
+# found. SeamlyDataLocationDlg appears only when an earlier install already
+# recorded a data root (SEAMLYDATAROOTRECORDED) - a data root is otherwise
+# fixed at [%USERPROFILE]\seamly2d and created silently, with no page ever
+# asking about it. There is no program-directory page either: INSTALLFOLDER
+# is fixed and never asked about (see smsi.wxs).
 #
 # This replaced SpawnDialog wiring that WiX 6.0.2 never ran, so the three Seamly
 # question pages were in the package and never displayed. A missing arrow leaves
@@ -274,23 +277,28 @@ Assert-Transition -From 'WelcomeDlg' -Control 'Next' -To 'LicenseAgreementDlg' -
 $previousInstallCondition = 'SEAMLYOLDS2DEXE.*SEAMLYOLDMEEXE.*SEAMLYOLDLAYOUTEXE.*SEAMLYNEWLAYOUTEXE.*NOT Installed'
 Assert-Transition -From 'LicenseAgreementDlg' -Control 'Next' -To 'SeamlyPreviousInstallDlg' `
     -ConditionMatch $previousInstallCondition
-Assert-Transition -From 'LicenseAgreementDlg' -Control 'Next' -To 'SeamlyDataDirDlg' -ConditionMatch 'NOT \('
-Assert-Transition -From 'SeamlyPreviousInstallDlg' -Control 'Next' -To 'SeamlyDataDirDlg'
-Assert-Transition -From 'SeamlyDataDirDlg' -Control 'Next' -To 'SeamlyDataMigrateDlg' `
-    -ConditionMatch $previousInstallCondition
-Assert-Transition -From 'SeamlyDataDirDlg' -Control 'Next' -To 'SeamlyShortcutsDlg' -ConditionMatch 'NOT \('
-Assert-Transition -From 'SeamlyDataMigrateDlg' -Control 'Next' -To 'SeamlyShortcutsDlg'
+Assert-Transition -From 'LicenseAgreementDlg' -Control 'Next' -To 'SeamlyDataLocationDlg' `
+    -ConditionMatch 'NOT \(.*SEAMLYDATAROOTRECORDED'
+Assert-Transition -From 'LicenseAgreementDlg' -Control 'Next' -To 'SeamlyShortcutsDlg' `
+    -ConditionMatch 'NOT SEAMLYDATAROOTRECORDED'
+Assert-Transition -From 'SeamlyPreviousInstallDlg' -Control 'Next' -To 'SeamlyDataLocationDlg' `
+    -ConditionMatch 'SEAMLYDATAROOTRECORDED'
+Assert-Transition -From 'SeamlyPreviousInstallDlg' -Control 'Next' -To 'SeamlyShortcutsDlg' `
+    -ConditionMatch 'NOT SEAMLYDATAROOTRECORDED'
+Assert-Transition -From 'SeamlyDataLocationDlg' -Control 'Next' -To 'SeamlyShortcutsDlg'
 Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Next' -To 'VerifyReadyDlg'
 
 Assert-Transition -From 'LicenseAgreementDlg' -Control 'Back' -To 'WelcomeDlg'
 Assert-Transition -From 'SeamlyPreviousInstallDlg' -Control 'Back' -To 'LicenseAgreementDlg'
-Assert-Transition -From 'SeamlyDataDirDlg' -Control 'Back' -To 'SeamlyPreviousInstallDlg' `
+Assert-Transition -From 'SeamlyDataLocationDlg' -Control 'Back' -To 'SeamlyPreviousInstallDlg' `
     -ConditionMatch $previousInstallCondition
-Assert-Transition -From 'SeamlyDataDirDlg' -Control 'Back' -To 'LicenseAgreementDlg' -ConditionMatch 'NOT \('
-Assert-Transition -From 'SeamlyDataMigrateDlg' -Control 'Back' -To 'SeamlyDataDirDlg'
-Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyDataMigrateDlg' `
+Assert-Transition -From 'SeamlyDataLocationDlg' -Control 'Back' -To 'LicenseAgreementDlg' -ConditionMatch 'NOT \('
+Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyDataLocationDlg' `
+    -ConditionMatch 'SEAMLYDATAROOTRECORDED'
+Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyPreviousInstallDlg' `
     -ConditionMatch $previousInstallCondition
-Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyDataDirDlg' -ConditionMatch 'NOT \('
+Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'LicenseAgreementDlg' `
+    -ConditionMatch 'NOT SEAMLYDATAROOTRECORDED AND NOT \('
 Assert-Transition -From 'VerifyReadyDlg' -Control 'Back' -To 'SeamlyShortcutsDlg' -ConditionMatch 'NOT Installed'
 # The maintenance page is customized, not the stock MaintenanceTypeDlg,
 # because WiX cannot add a control to a dialog another fragment defines and the
@@ -371,29 +379,37 @@ Assert-That -Name 'AppSearch fills SEAMLYINSTALLEDVERSION' `
     -Succeeded ((Get-MsiRows -Sql "SELECT ``Property`` FROM ``AppSearch`` WHERE ``Property``='SEAMLYINSTALLEDVERSION'" `
         -Columns 'Property').Count -eq 1)
 
-# The two License Next rows must not both be true and must not both be false,
-# or the button either picks an undefined winner or does nothing at all. They
-# come from one preprocessor variable, so the test is that the second is the
-# negation of the first.
+# The three License Next rows must be mutually exclusive and between them
+# cover every case, or the button either picks an undefined winner or does
+# nothing at all.
 $licenseNext = @($script:controlEvents | Where-Object {
     $_.Dialog -eq 'LicenseAgreementDlg' -and $_.Control -eq 'Next' -and $_.Event -eq 'NewDialog' })
 $toPrevious = @($licenseNext | Where-Object { $_.Argument -eq 'SeamlyPreviousInstallDlg' })
-$toDataDir = @($licenseNext | Where-Object { $_.Argument -eq 'SeamlyDataDirDlg' })
-Assert-That -Name 'the license page has exactly two exits' -Succeeded ($licenseNext.Count -eq 2)
-if ($toPrevious.Count -eq 1 -and $toDataDir.Count -eq 1) {
+$toDataLocation = @($licenseNext | Where-Object { $_.Argument -eq 'SeamlyDataLocationDlg' })
+$toShortcuts = @($licenseNext | Where-Object { $_.Argument -eq 'SeamlyShortcutsDlg' })
+Assert-That -Name 'the license page has exactly three exits' -Succeeded ($licenseNext.Count -eq 3)
+if ($toPrevious.Count -eq 1 -and $toDataLocation.Count -eq 1 -and $toShortcuts.Count -eq 1) {
     $found = [regex]::Escape('((SEAMLYOLDS2DEXE AND SEAMLYOLDMEEXE AND NOT SEAMLYOLDLAYOUTEXE) OR SEAMLYNEWLAYOUTEXE) AND NOT Installed')
     Assert-That -Name 'the previous-install page is skipped on a clean machine' `
         -Succeeded ($toPrevious[0].Condition -match $found -and
-                    $toDataDir[0].Condition -match "NOT \($found\)") `
-        -Detail "conditions '$($toPrevious[0].Condition)' and '$($toDataDir[0].Condition)'"
+                    $toDataLocation[0].Condition -match "NOT \($found\)" -and
+                    $toShortcuts[0].Condition -match "NOT \($found\)") `
+        -Detail "conditions '$($toPrevious[0].Condition)', '$($toDataLocation[0].Condition)', '$($toShortcuts[0].Condition)'"
+    # The remaining two rows split on whether an earlier install already
+    # recorded a data root - the same signal the data-location page itself is
+    # conditioned on (section 5's dialog-chain block).
+    Assert-That -Name 'the data-location page is skipped when no root was ever recorded' `
+        -Succeeded ($toDataLocation[0].Condition -match 'AND SEAMLYDATAROOTRECORDED' -and
+                    $toShortcuts[0].Condition -match 'AND NOT SEAMLYDATAROOTRECORDED') `
+        -Detail "conditions '$($toDataLocation[0].Condition)' and '$($toShortcuts[0].Condition)'"
 }
 
 # The program directory is fixed, not chosen, so nothing commits INSTALLFOLDER
 # from a dialog. A SetProperty compiles to a type-51 custom action: Source is
 # the property it sets, Target is the value (see the SEAMLYLEGACYSTARTMENU
 # comment above). Two actions are expected - one per sequence, like the
-# SEAMLYDATAPARENT ui/execute pair - both pinning the same fixed value, so no
-# AppSearch result or command-line value can survive.
+# SEAMLYDATAROOT ui/execute pairs below - both pinning the same fixed value, so
+# no AppSearch result or command-line value can survive.
 $installFolderPin = Get-MsiRows `
     -Sql "SELECT ``Action``, ``Target`` FROM ``CustomAction`` WHERE ``Source``='INSTALLFOLDER'" `
     -Columns 'Action', 'Target'
@@ -519,7 +535,7 @@ Assert-That -Name 'per-user settings removal is skipped during a major upgrade' 
 # The data root itself must never be in this removal list - a real uninstall
 # must not delete a user's patterns and measurements.
 Assert-That -Name 'the user-data root is never scheduled for removal' `
-    -Succeeded (@($removeFolderEx | Where-Object { $_.Property -eq 'SEAMLYDATAROOT' -or $_.Property -eq 'SEAMLYDATAPARENT' }).Count -eq 0)
+    -Succeeded (@($removeFolderEx | Where-Object { $_.Property -eq 'SEAMLYDATAROOT' }).Count -eq 0)
 
 # Wix4RemoveFoldersEx runs BEFORE CostInitialize, because the RemoveFile rows it
 # adds must exist in time for costing. Any property it reads therefore has to be
@@ -667,7 +683,7 @@ foreach ($app in @('SeamlyMe', 'SeamlyLayout')) {
     Assert-That -Name "the install breadcrumbs are also recorded in HKLM\SOFTWARE\Seamly\$app" `
         -Succeeded (@($registry | Where-Object {
             $_.Root -eq '2' -and $_.Key -eq "SOFTWARE\Seamly\$app" -and
-            $_.Name -in @('InstallPath', 'DisplayVersion', 'DataRoot', 'DataParent') }).Count -eq 4)
+            $_.Name -in @('InstallPath', 'DisplayVersion', 'DataRoot') }).Count -eq 3)
 }
 
 # Every desktop-shortcut breadcrumb used to land in the
@@ -694,29 +710,24 @@ Assert-That -Name 'the program folder is SeamlyApps under the 64-bit Program Fil
     -Detail "DefaultDir '$(if ($installFolder.Count) { $installFolder[0].DefaultDir } else { '<nothing>' })', parent '$(if ($installFolder.Count) { $installFolder[0].Parent } else { '<nothing>' })'"
 
 
-# The data root is a directory id so it can be browsed
-# in the UI and set on the command line for an unattended install. The user
-# picks the PARENT and Setup appends a fixed SeamlyData leaf, so choosing E:\
-# yields E:\SeamlyData rather than E:\ — the same shape as SeamlyApps under
-# ProgramFiles64Folder. Assert the composition, not just the presence: if the
-# leaf is ever folded back into the parent, a user who picks a drive root gets
-# their patterns loose in the root of that drive.
+# The data root is a directory id so it can double as the property Setup
+# resolves it through (smsi_files.wxs) - the same technique INSTALLFOLDER
+# does not need but the old SEAMLYDATAPARENT used to. It sits directly under
+# TARGETDIR: there is no longer a chosen parent to nest it under, since the
+# root itself is now either the recorded value from an earlier install or the
+# fixed [%USERPROFILE]\seamly2d default (smsi.wxs).
 $dataRoot = @($directories | Where-Object { $_.Directory -eq 'SEAMLYDATAROOT' })
 Assert-That -Name 'the user-data root is a settable directory' -Succeeded ($dataRoot.Count -eq 1)
-Assert-That -Name 'the data root appends a fixed SeamlyData leaf to a user-chosen parent' `
-    -Succeeded ($dataRoot.Count -eq 1 -and
-                $dataRoot[0].DefaultDir -match 'SeamlyData' -and
-                $dataRoot[0].Parent -eq 'SEAMLYDATAPARENT') `
-    -Detail "DefaultDir '$(if ($dataRoot.Count) { $dataRoot[0].DefaultDir } else { '<nothing>' })', parent '$(if ($dataRoot.Count) { $dataRoot[0].Parent } else { '<nothing>' })'"
-Assert-That -Name 'the data-root parent is itself replaceable' `
-    -Succeeded (@($directories | Where-Object { $_.Directory -eq 'SEAMLYDATAPARENT' -and $_.Parent -eq 'TARGETDIR' }).Count -eq 1)
+Assert-That -Name 'the data root sits directly under TARGETDIR, with no chosen parent' `
+    -Succeeded ($dataRoot.Count -eq 1 -and $dataRoot[0].Parent -eq 'TARGETDIR') `
+    -Detail "parent '$(if ($dataRoot.Count) { $dataRoot[0].Parent } else { '<nothing>' })'"
 $dataRootComponent = Get-MsiRows `
     -Sql "SELECT ``Component``, ``Directory_``, ``Condition``, ``Attributes`` FROM ``Component`` WHERE ``Component``='CreateUserDataRoot'" `
     -Columns 'Component', 'Directory', 'Condition', 'Attributes'
-Assert-That -Name 'Setup creates the selected user-data root' `
+Assert-That -Name 'Setup creates the resolved user-data root' `
     -Succeeded ($dataRootComponent.Count -eq 1 -and
                 $dataRootComponent[0].Directory -eq 'SEAMLYDATAROOT' -and
-                $dataRootComponent[0].Condition -eq 'SEAMLYDATACHOSEN')
+                $dataRootComponent[0].Condition -eq 'SEAMLYDATAROOT')
 # msidbComponentAttributesPermanent = 16. User data must survive uninstall.
 Assert-That -Name 'the user-data root component is permanent' `
     -Succeeded ($dataRootComponent.Count -eq 1 -and
@@ -727,66 +738,67 @@ $createdDataRoots = Get-MsiRows `
     -Columns 'Directory', 'Component'
 Assert-That -Name 'the folder component creates SEAMLYDATAROOT' `
     -Succeeded ($createdDataRoots.Count -eq 1 -and $createdDataRoots[0].Directory -eq 'SEAMLYDATAROOT')
-foreach ($property in @('SEAMLYDATAROOT', 'SEAMLYDATAPARENT', 'SEAMLYCOPYUSERDATA')) {
-    Assert-That -Name "$property is a secure custom property" -Succeeded ($secure -like "*$property*")
-}
-# The default is computed in both UI and execute sequences, so a bare /qn
-# install also gets <Documents>\SeamlyData instead of falling back to each
-# app's own first-run default. In SYSTEM context there is no logged-in user,
-# so PersonalFolder resolves to the SYSTEM profile; unattended deployments that
-# care should pass SEAMLYDATAPARENT or SEAMLYDATAROOT explicitly.
+Assert-That -Name 'SEAMLYDATAROOT is a secure custom property' -Succeeded ($secure -like '*SEAMLYDATAROOT*')
+# SEAMLYDATAROOT is resolved one of two ways, in both UI and execute
+# sequences so a bare /qn install also gets a value: copied from
+# SEAMLYDATAROOTRECORDED when an earlier install recorded one, otherwise
+# defaulted to [%USERPROFILE]\seamly2d on a fresh install only. Unlike the old
+# SEAMLYDATAPARENT default, this needs no known-folder API and no fallback -
+# %USERPROFILE% is an environment property, always available.
 $uiActions = @(Get-MsiRows -Sql "SELECT ``Action`` FROM ``InstallUISequence``" -Columns 'Action' |
     ForEach-Object { $_.Action })
 $executeActions = @(Get-MsiRows -Sql "SELECT ``Action`` FROM ``InstallExecuteSequence``" -Columns 'Action' |
     ForEach-Object { $_.Action })
-Assert-That -Name 'the data-root default is computed in the UI sequence' `
-    -Succeeded ($uiActions -contains 'SetSEAMLYDATAPARENT')
-Assert-That -Name 'the data-root default is ALSO computed in the elevated sequence, for a bare /qn install' `
-    -Succeeded ($executeActions -contains 'SetSEAMLYDATAPARENTExecute' -and
-                $executeActions -contains 'SetSEAMLYDATAPARENTExecuteFallback')
-Assert-That -Name 'the chosen data root is recorded for the apps to read' `
+Assert-That -Name 'the recorded root is copied over in the UI sequence' `
+    -Succeeded ($uiActions -contains 'SetSEAMLYDATAROOTRecorded')
+Assert-That -Name 'the recorded root is ALSO copied over in the elevated sequence, for a bare /qn install' `
+    -Succeeded ($executeActions -contains 'SetSEAMLYDATAROOTRecordedExecute')
+Assert-That -Name 'the fresh-install default is computed in the UI sequence' `
+    -Succeeded ($uiActions -contains 'SetSEAMLYDATAROOTDefault')
+Assert-That -Name 'the fresh-install default is ALSO computed in the elevated sequence, for a bare /qn install' `
+    -Succeeded ($executeActions -contains 'SetSEAMLYDATAROOTDefaultExecute')
+Assert-That -Name 'the data root is recorded for the apps to read' `
     -Succeeded (@($registry | Where-Object { $_.Root -eq '2' -and $_.Key -eq 'SOFTWARE\Seamly\Seamly2D' -and $_.Name -eq 'DataRoot' }).Count -eq 1)
-# The wizard offered C:\Users\<user>\SeamlyData, but nothing
-# read what the wizard recorded, so the apps fell back to their own default.
-#
-# The default parent is the Documents folder, because that is where users go to
-# find the files other applications write. PersonalFolder is preferred over
-# %USERPROFILE%\Documents so a redirected Documents - OneDrive Known Folder Move
-# - is followed, which is what QStandardPaths::DocumentsLocation does app-side.
-$dataParentActions = Get-MsiRows `
-    -Sql "SELECT ``Action``, ``Target`` FROM ``CustomAction`` WHERE ``Source``='SEAMLYDATAPARENT'" `
+# The two SetProperty pairs that resolve SEAMLYDATAROOT share Source
+# (the property id being set); Target tells them apart. Count 2, not 1: the
+# UI and execute-sequence pair share the same Source/Target.
+$dataRootActions = Get-MsiRows `
+    -Sql "SELECT ``Action``, ``Target`` FROM ``CustomAction`` WHERE ``Source``='SEAMLYDATAROOT'" `
     -Columns 'Action', 'Target'
-# Count 2, not 1: the UI and execute-sequence pairs (2026-08-24) share the same
-# Source/Target - one PersonalFolder action and one %USERPROFILE% fallback in
-# each sequence.
-Assert-That -Name 'the data-root default prefers the Documents known folder' `
-    -Succeeded (@($dataParentActions | Where-Object { $_.Target -eq '[PersonalFolder]' }).Count -eq 2)
-Assert-That -Name 'the data-root default falls back to %USERPROFILE%\Documents' `
-    -Succeeded (@($dataParentActions | Where-Object { $_.Target -eq '[%USERPROFILE]\Documents\' }).Count -eq 2) `
-    -Detail 'an empty SEAMLYDATAPARENT aborts the wizard with error 2343'
-# All four default-computing actions must stand down on a maintenance run.
-# Without this a repair recomputes the default parent, SEAMLYDATACHOSEN
-# follows, and a user who moved their data root loses it silently.
-$uiDataParent = Get-MsiRows `
-    -Sql "SELECT ``Action``, ``Condition`` FROM ``InstallUISequence`` WHERE ``Action``='SetSEAMLYDATAPARENT' OR ``Action``='SetSEAMLYDATAPARENTFallback'" `
+Assert-That -Name 'the recorded root is copied verbatim from SEAMLYDATAROOTRECORDED' `
+    -Succeeded (@($dataRootActions | Where-Object { $_.Target -eq '[SEAMLYDATAROOTRECORDED]' }).Count -eq 2)
+Assert-That -Name 'the fresh-install default is %USERPROFILE%\seamly2d' `
+    -Succeeded (@($dataRootActions | Where-Object { $_.Target -eq '[%USERPROFILE]\seamly2d' }).Count -eq 2)
+# The fresh-install default must stand down on a maintenance run - without
+# NOT Installed a repair would recompute it and a user who moved their data
+# root would lose it silently. The recorded-root copy carries no such guard:
+# a repair has to be able to fill in anything missing too (B1-B3/C1-C2 in
+# TODO_INSTALLER.md).
+$uiDataRootDefault = Get-MsiRows `
+    -Sql "SELECT ``Action``, ``Condition`` FROM ``InstallUISequence`` WHERE ``Action``='SetSEAMLYDATAROOTDefault'" `
     -Columns 'Action', 'Condition'
-Assert-That -Name 'both UI data-root defaults are skipped on a maintenance run' `
-    -Succeeded ($uiDataParent.Count -eq 2 -and
-                @($uiDataParent | Where-Object { $_.Condition -match 'NOT Installed' }).Count -eq 2)
-$executeDataParent = Get-MsiRows `
-    -Sql "SELECT ``Action``, ``Condition`` FROM ``InstallExecuteSequence`` WHERE ``Action``='SetSEAMLYDATAPARENTExecute' OR ``Action``='SetSEAMLYDATAPARENTExecuteFallback'" `
+Assert-That -Name 'the UI fresh-install default is skipped on a maintenance run' `
+    -Succeeded ($uiDataRootDefault.Count -eq 1 -and $uiDataRootDefault[0].Condition -match 'NOT Installed')
+$executeDataRootDefault = Get-MsiRows `
+    -Sql "SELECT ``Action``, ``Condition`` FROM ``InstallExecuteSequence`` WHERE ``Action``='SetSEAMLYDATAROOTDefaultExecute'" `
     -Columns 'Action', 'Condition'
-Assert-That -Name 'both execute-sequence data-root defaults are skipped on a maintenance run' `
-    -Succeeded ($executeDataParent.Count -eq 2 -and
-                @($executeDataParent | Where-Object { $_.Condition -match 'NOT Installed' }).Count -eq 2)
-# What reaches the registry is SEAMLYDATAROOTRECORDED, never SEAMLYDATAROOT. A
-# directory id always resolves, so [SEAMLYDATAROOT] in a silent install with no
-# arguments composes onto TARGETDIR and records C:\SeamlyData - which every app
-# would then adopt as the user's data root.
+Assert-That -Name 'the execute-sequence fresh-install default is skipped on a maintenance run' `
+    -Succeeded ($executeDataRootDefault.Count -eq 1 -and $executeDataRootDefault[0].Condition -match 'NOT Installed')
+$uiDataRootRecorded = Get-MsiRows `
+    -Sql "SELECT ``Action``, ``Condition`` FROM ``InstallUISequence`` WHERE ``Action``='SetSEAMLYDATAROOTRecorded'" `
+    -Columns 'Action', 'Condition'
+Assert-That -Name 'the recorded-root copy is NOT skipped on a repair' `
+    -Succeeded ($uiDataRootRecorded.Count -eq 1 -and $uiDataRootRecorded[0].Condition -notmatch 'NOT Installed') `
+    -Detail "condition '$(if ($uiDataRootRecorded.Count) { $uiDataRootRecorded[0].Condition } else { '<nothing>' })'"
+# SEAMLYDATAROOT is now the property everything else reads directly - it is
+# always resolved by one of the two SetProperty pairs above before
+# CostFinalize, so writing it straight to the registry is safe. SEAMLYDATAROOT
+# no longer needs a separate guarded copy the way the old raw SEAMLYDATAPARENT
+# directory-property did.
 $dataRootValue = @($registry | Where-Object {
     $_.Root -eq '2' -and $_.Key -eq 'SOFTWARE\Seamly\Seamly2D' -and $_.Name -eq 'DataRoot' })
-Assert-That -Name 'the recorded data root is the guarded property, not the raw directory' `
-    -Succeeded ($dataRootValue.Count -eq 1 -and $dataRootValue[0].Value -eq '[SEAMLYDATAROOTRECORDED]') `
+Assert-That -Name 'the recorded data root reads the resolved SEAMLYDATAROOT property' `
+    -Succeeded ($dataRootValue.Count -eq 1 -and $dataRootValue[0].Value -eq '[SEAMLYDATAROOT]') `
     -Detail "value '$(if ($dataRootValue.Count) { $dataRootValue[0].Value } else { '<nothing>' })'"
 Assert-That -Name 'SEAMLYDATAROOTRECORDED is a secure custom property' `
     -Succeeded ($secure -like '*SEAMLYDATAROOTRECORDED*')
@@ -805,38 +817,6 @@ $recordedAppSearch = Get-MsiRows `
     -Sql "SELECT ``Property``, ``Signature_`` FROM ``AppSearch`` WHERE ``Property``='SEAMLYDATAROOTRECORDED'" `
     -Columns 'Property', 'Signature_'
 Assert-That -Name 'AppSearch fills SEAMLYDATAROOTRECORDED' -Succeeded ($recordedAppSearch.Count -eq 1)
-# SEAMLYDATAPARENTRECORDED protects HKLM\...\DataParent the same way
-# SEAMLYDATAROOTRECORDED protects DataRoot above - SEAMLYDATAPARENT is also a
-# directory id and always resolves once CostFinalize runs, garbage included.
-$recordedParentSearch = Get-MsiRows `
-    -Sql "SELECT ``Signature_``, ``Root``, ``Key``, ``Name``, ``Type`` FROM ``RegLocator`` WHERE ``Signature_``='RecordedDataParentRecordedSearch'" `
-    -Columns 'Signature_', 'Root', 'Key', 'Name', 'Type'
-Assert-That -Name 'the recorded data parent is prefilled from the existing install' `
-    -Succeeded ($recordedParentSearch.Count -eq 1 -and
-                $recordedParentSearch[0].Root -eq '2' -and
-                $recordedParentSearch[0].Key -eq 'SOFTWARE\Seamly\Seamly2D' -and
-                $recordedParentSearch[0].Type -eq '18')
-$recordedParentAppSearch = Get-MsiRows `
-    -Sql "SELECT ``Property``, ``Signature_`` FROM ``AppSearch`` WHERE ``Property``='SEAMLYDATAPARENTRECORDED'" `
-    -Columns 'Property', 'Signature_'
-Assert-That -Name 'AppSearch fills SEAMLYDATAPARENTRECORDED' -Succeeded ($recordedParentAppSearch.Count -eq 1)
-Assert-That -Name 'SEAMLYDATAPARENTRECORDED is a secure custom property' `
-    -Succeeded ($secure -like '*SEAMLYDATAPARENTRECORDED*')
-$previousRootSearch = Get-MsiRows `
-    -Sql "SELECT ``Property``, ``Signature_`` FROM ``AppSearch`` WHERE ``Property``='SEAMLYPREVIOUSDATAROOT'" `
-    -Columns 'Property', 'Signature_'
-Assert-That -Name 'AppSearch preserves the previous data root for relocation' `
-    -Succeeded ($previousRootSearch.Count -eq 1)
-$dataParentValue = @($registry | Where-Object {
-    $_.Root -eq '2' -and $_.Key -eq 'SOFTWARE\Seamly\Seamly2D' -and $_.Name -eq 'DataParent' })
-Assert-That -Name 'the recorded data parent is the guarded property, not the raw directory' `
-    -Succeeded ($dataParentValue.Count -eq 1 -and $dataParentValue[0].Value -eq '[SEAMLYDATAPARENTRECORDED]') `
-    -Detail "value '$(if ($dataParentValue.Count) { $dataParentValue[0].Value } else { '<nothing>' })'"
-# A major upgrade uses a new ProductCode and re-asks questions, except for the
-# fixed program directory. Prefill the data root from the recorded DataParent.
-Assert-That -Name 'AppSearch prefills SEAMLYDATAPARENT for an upgrade' `
-    -Succeeded ((Get-MsiRows -Sql "SELECT ``Property`` FROM ``AppSearch`` WHERE ``Property``='SEAMLYDATAPARENT'" `
-        -Columns 'Property').Count -eq 1)
 # The prefill only wins because AppSearch is earlier than the directory
 # resolution that would otherwise compose the authored default.
 foreach ($sequence in @('InstallUISequence', 'InstallExecuteSequence')) {
@@ -852,8 +832,10 @@ foreach ($sequence in @('InstallUISequence', 'InstallExecuteSequence')) {
 Assert-That -Name 'the program directory is still authored under the 64-bit Program Files' `
     -Succeeded (@($directories | Where-Object {
         $_.Directory -eq 'INSTALLFOLDER' -and $_.Parent -eq 'ProgramFiles64Folder' }).Count -eq 1)
-# Sequence matters: SEAMLYDATACHOSEN after execute defaults, before CostFinalize.
-# The recorded value must be composed after CostFinalize when paths are resolved.
+# Sequence matters: both SEAMLYDATAROOT SetProperty pairs run before
+# CostFinalize, when the directory that shares its id resolves - and
+# SeamlyEnsureUserData (below) has to run after WriteRegistryValues, so the
+# recorded root it reads is already correct.
 $executeSequence = Get-MsiRows `
     -Sql "SELECT ``Action``, ``Sequence`` FROM ``InstallExecuteSequence``" -Columns 'Action', 'Sequence'
 function Get-SequenceNumber {
@@ -862,62 +844,58 @@ function Get-SequenceNumber {
     if ($row.Count -ne 1) { return -1 }
     return [int]$row[0].Sequence
 }
-$parentDefaultAt = Get-SequenceNumber -Action 'SetSEAMLYDATAPARENTExecuteFallback'
-$chosenAt = Get-SequenceNumber -Action 'SetSEAMLYDATACHOSEN'
-$recordedAt = Get-SequenceNumber -Action 'SetSEAMLYDATAROOTRECORDED'
-$parentRecordedAt = Get-SequenceNumber -Action 'SetSEAMLYDATAPARENTRECORDED'
-$costInitializeAt = Get-SequenceNumber -Action 'CostInitialize'
+$recordedCopyAt = Get-SequenceNumber -Action 'SetSEAMLYDATAROOTRecordedExecute'
+$defaultAt = Get-SequenceNumber -Action 'SetSEAMLYDATAROOTDefaultExecute'
 $costFinalizeAt = Get-SequenceNumber -Action 'CostFinalize'
 $writeRegistryAt = Get-SequenceNumber -Action 'WriteRegistryValues'
-Assert-That -Name 'the execute-sequence default runs after CostInitialize (needs PersonalFolder)' `
-    -Succeeded ($parentDefaultAt -gt 0 -and $costInitializeAt -gt 0 -and $parentDefaultAt -gt $costInitializeAt) `
-    -Detail "SetSEAMLYDATAPARENTExecuteFallback at $parentDefaultAt, CostInitialize at $costInitializeAt"
-Assert-That -Name 'a chosen data root is detected after the execute-sequence default, before the directories resolve' `
-    -Succeeded ($chosenAt -gt 0 -and $parentDefaultAt -gt 0 -and $costFinalizeAt -gt 0 -and
-                $chosenAt -gt $parentDefaultAt -and $chosenAt -lt $costFinalizeAt) `
-    -Detail "SetSEAMLYDATAPARENTExecuteFallback at $parentDefaultAt, SetSEAMLYDATACHOSEN at $chosenAt, CostFinalize at $costFinalizeAt"
-Assert-That -Name 'the recorded data root is composed after the directories resolve' `
-    -Succeeded ($recordedAt -gt 0 -and $costFinalizeAt -gt 0 -and $recordedAt -gt $costFinalizeAt) `
-    -Detail "SetSEAMLYDATAROOTRECORDED at $recordedAt, CostFinalize at $costFinalizeAt"
-Assert-That -Name 'the recorded data parent is composed after the directories resolve' `
-    -Succeeded ($parentRecordedAt -gt 0 -and $costFinalizeAt -gt 0 -and $parentRecordedAt -gt $costFinalizeAt) `
-    -Detail "SetSEAMLYDATAPARENTRECORDED at $parentRecordedAt, CostFinalize at $costFinalizeAt"
-Assert-That -Name 'the recorded data root is composed before it is written' `
-    -Succeeded ($recordedAt -gt 0 -and $writeRegistryAt -gt 0 -and $recordedAt -lt $writeRegistryAt)
-Assert-That -Name 'the recorded data parent is composed before it is written' `
-    -Succeeded ($parentRecordedAt -gt 0 -and $writeRegistryAt -gt 0 -and $parentRecordedAt -lt $writeRegistryAt)
+Assert-That -Name 'the recorded-root copy runs before the directories resolve' `
+    -Succeeded ($recordedCopyAt -gt 0 -and $costFinalizeAt -gt 0 -and $recordedCopyAt -lt $costFinalizeAt) `
+    -Detail "SetSEAMLYDATAROOTRecordedExecute at $recordedCopyAt, CostFinalize at $costFinalizeAt"
+Assert-That -Name 'the fresh-install default runs before the directories resolve' `
+    -Succeeded ($defaultAt -gt 0 -and $costFinalizeAt -gt 0 -and $defaultAt -lt $costFinalizeAt) `
+    -Detail "SetSEAMLYDATAROOTDefaultExecute at $defaultAt, CostFinalize at $costFinalizeAt"
 
 $dialogs = @(Get-MsiRows -Sql "SELECT ``Dialog`` FROM ``Dialog``" -Columns 'Dialog' | ForEach-Object { $_.Dialog })
-foreach ($dialog in @('SeamlyDataDirDlg', 'SeamlyDataMigrateDlg', 'SeamlyShortcutsDlg')) {
+foreach ($dialog in @('SeamlyDataLocationDlg', 'SeamlyShortcutsDlg')) {
     Assert-That -Name "dialog '$dialog' is present" -Succeeded ($dialogs -contains $dialog)
 }
-# Where each question sits in the wizard is asserted in section 5.
-# BrowseDlg edits the property named by _BrowseProperty, so it must be set
-# before Change or it will target the previous page.
-$changeFolder = @($script:controlEvents | Where-Object {
-    $_.Dialog -eq 'SeamlyDataDirDlg' -and $_.Control -eq 'ChangeFolder' })
-$browseProperty = @($changeFolder | Where-Object { $_.Event -eq '[_BrowseProperty]' -and $_.Argument -eq 'SEAMLYDATAPARENT' })
-$browseSpawn = @($changeFolder | Where-Object { $_.Event -eq 'SpawnDialog' -and $_.Argument -eq 'BrowseDlg' })
-Assert-That -Name 'the data-root page browses the data-root parent' `
-    -Succeeded ($browseProperty.Count -eq 1 -and $browseSpawn.Count -eq 1 -and
-                [int]$browseProperty[0].Ordering -lt [int]$browseSpawn[0].Ordering) `
-    -Detail "_BrowseProperty at $(if ($browseProperty.Count) { $browseProperty[0].Ordering } else { '<nothing>' }), SpawnDialog at $(if ($browseSpawn.Count) { $browseSpawn[0].Ordering } else { '<nothing>' })"
-# PathEdit binds directly; indirect binding would read the property name from
-# the value itself and fail.
+Assert-That -Name 'the old data-parent and migration pages are gone' `
+    -Succeeded (($dialogs -notcontains 'SeamlyDataDirDlg') -and ($dialogs -notcontains 'SeamlyDataMigrateDlg'))
+Assert-That -Name 'BrowseDlg is not part of the package any more' `
+    -Succeeded ((Get-MsiRows -Sql "SELECT ``Dialog`` FROM ``Dialog`` WHERE ``Dialog``='BrowseDlg'" -Columns 'Dialog').Count -eq 0)
+# Where the page sits in the wizard is asserted in section 5.
+
+# The page is read-only: it shows the already-resolved SEAMLYDATAROOT and
+# nothing spawns a browse dialog for it any more (B2 in TODO_INSTALLER.md -
+# Setup never relocates existing data).
 $folderControl = @(Get-MsiRows `
-    -Sql "SELECT ``Control``, ``Attributes``, ``Property`` FROM ``Control`` WHERE ``Dialog_``='SeamlyDataDirDlg' AND ``Control``='Folder'" `
-    -Columns 'Control', 'Attributes', 'Property')
-# msidbControlAttributesIndirect 8.
-Assert-That -Name 'the data-root path box binds directly, not indirectly' `
-    -Succeeded ($folderControl.Count -eq 1 -and
-                $folderControl[0].Property -eq 'SEAMLYDATAPARENT' -and
-                ([int]$folderControl[0].Attributes -band 8) -eq 0) `
-    -Detail "property '$(if ($folderControl.Count) { $folderControl[0].Property } else { '<nothing>' })', attributes $(if ($folderControl.Count) { $folderControl[0].Attributes } else { '<nothing>' })"
+    -Sql "SELECT ``Control``, ``Type``, ``Text`` FROM ``Control`` WHERE ``Dialog_``='SeamlyDataLocationDlg' AND ``Control``='Folder'" `
+    -Columns 'Control', 'Type', 'Text')
+Assert-That -Name 'the data-location page shows SEAMLYDATAROOT as plain read-only text' `
+    -Succeeded ($folderControl.Count -eq 1 -and $folderControl[0].Type -eq 'Text' -and
+                $folderControl[0].Text -eq '[SEAMLYDATAROOT]') `
+    -Detail "type '$(if ($folderControl.Count) { $folderControl[0].Type } else { '<nothing>' })', text '$(if ($folderControl.Count) { $folderControl[0].Text } else { '<nothing>' })'"
+Assert-That -Name 'the data-location page has no editable path box' `
+    -Succeeded ((Get-MsiRows -Sql "SELECT ``Control`` FROM ``Control`` WHERE ``Dialog_``='SeamlyDataLocationDlg' AND ``Type``='PathEdit'" `
+        -Columns 'Control').Count -eq 0)
+Assert-That -Name 'the data-location page has no Change button' `
+    -Succeeded ((Get-MsiRows -Sql "SELECT ``Control`` FROM ``Control`` WHERE ``Dialog_``='SeamlyDataLocationDlg' AND ``Control``='ChangeFolder'" `
+        -Columns 'Control').Count -eq 0)
+Assert-That -Name 'nothing spawns BrowseDlg from the data-location page' `
+    -Succeeded (@($script:controlEvents | Where-Object {
+        $_.Dialog -eq 'SeamlyDataLocationDlg' -and $_.Event -eq 'SpawnDialog' -and $_.Argument -eq 'BrowseDlg' }).Count -eq 0)
+# Its Next button reads "Continue" - there is nothing left to confirm after
+# it, unlike the stock wizard's "Next".
+$dataLocationNext = @(Get-MsiRows `
+    -Sql "SELECT ``Control``, ``Text`` FROM ``Control`` WHERE ``Dialog_``='SeamlyDataLocationDlg' AND ``Control``='Next'" `
+    -Columns 'Control', 'Text')
+Assert-That -Name 'the data-location page''s Next button reads Continue' `
+    -Succeeded ($dataLocationNext.Count -eq 1 -and $dataLocationNext[0].Text -match 'Continue') `
+    -Detail "text '$(if ($dataLocationNext.Count) { $dataLocationNext[0].Text } else { '<nothing>' })'"
 # NoPrefix turns accelerator parsing off, so any '&' in a label prints as a
-# literal character. The data-root label used to read "Put the &SeamlyData
-# folder in:" on screen. msidbControlAttributesNoPrefix is 0x20000.
+# literal character. msidbControlAttributesNoPrefix is 0x20000.
 $labelControls = Get-MsiRows `
-    -Sql "SELECT ``Control``, ``Attributes``, ``Text`` FROM ``Control`` WHERE ``Dialog_``='SeamlyDataDirDlg' AND ``Type``='Text'" `
+    -Sql "SELECT ``Control``, ``Attributes``, ``Text`` FROM ``Control`` WHERE ``Dialog_``='SeamlyDataLocationDlg' AND ``Type``='Text'" `
     -Columns 'Control', 'Attributes', 'Text'
 $literalAmpersands = @($labelControls | Where-Object {
     $controlAttributes = [int]$_.Attributes
@@ -925,123 +903,61 @@ $literalAmpersands = @($labelControls | Where-Object {
 Assert-That -Name 'no NoPrefix label prints a literal ampersand' `
     -Succeeded ($labelControls.Count -gt 0 -and $literalAmpersands.Count -eq 0) `
     -Detail "$($labelControls.Count) text control(s), offending: $(if ($literalAmpersands.Count) { ($literalAmpersands | ForEach-Object { $_.Control }) -join ', ' } else { 'none' })"
-# A typed path reaches the Directory table only through SetTargetPath, and it
-# has to happen before the next page reads [SEAMLYDATAROOT].
-$dataDirNext = @($script:controlEvents | Where-Object {
-    $_.Dialog -eq 'SeamlyDataDirDlg' -and $_.Control -eq 'Next' })
-$dataDirCommit = @($dataDirNext | Where-Object { $_.Event -eq 'SetTargetPath' -and $_.Argument -eq 'SEAMLYDATAPARENT' })
-$dataDirAdvance = @($dataDirNext | Where-Object { $_.Event -eq 'NewDialog' })
-Assert-That -Name 'the data-root page commits the path before it advances' `
-    -Succeeded ($dataDirCommit.Count -eq 1 -and $dataDirAdvance.Count -eq 2 -and
-                @($dataDirAdvance | Where-Object {
-                    [int]$dataDirCommit[0].Ordering -ge [int]$_.Ordering }).Count -eq 0) `
-    -Detail "SetTargetPath at $(if ($dataDirCommit.Count) { $dataDirCommit[0].Ordering } else { '<nothing>' }), NewDialog rows at $(($dataDirAdvance | ForEach-Object { $_.Ordering }) -join ', ')"
-# BrowseDlg OK must commit the browsed folder without validating it. This
-# button is only used by the data-root page, whose path may be on cloud or
-# removable drives, so it should not trigger CheckTargetPath.
-$browseOk = @($script:controlEvents | Where-Object { $_.Dialog -eq 'BrowseDlg' -and $_.Control -eq 'OK' })
-Assert-That -Name 'browsing commits the folder it was given' `
-    -Succeeded (@($browseOk | Where-Object { $_.Event -eq 'SetTargetPath' -and $_.Argument -eq '[_BrowseProperty]' }).Count -eq 1)
-Assert-That -Name 'browsing does not validate against program-directory rules' `
-    -Succeeded (@($browseOk | Where-Object { $_.Event -eq 'CheckTargetPath' }).Count -eq 0)
 
-# The copy must be deferred (it needs the script on disk),
-# impersonated (SYSTEM cannot read the user's own folders) and non-fatal (a
-# file-copy problem must not roll back a good program install).
-$copyAction = @(Get-MsiRows -Sql "SELECT ``Action``, ``Type`` FROM ``CustomAction`` WHERE ``Action``='SeamlyCopyUserData'" `
+# One action now, not a copy/seed pair: SeamlyEnsureUserData creates the
+# standard data subfolders and seeds the per-user settings ini files, so no
+# app needs a manual Preferences > Paths visit. It must be deferred (it needs
+# the script on disk), impersonated (SYSTEM cannot read the user's own
+# folders and %LOCALAPPDATA%) and non-fatal (the apps fill missing defaults
+# at runtime anyway).
+$ensureAction = @(Get-MsiRows -Sql "SELECT ``Action``, ``Type`` FROM ``CustomAction`` WHERE ``Action``='SeamlyEnsureUserData'" `
     -Columns 'Action', 'Type')
-Assert-That -Name 'the user-data copy action exists' -Succeeded ($copyAction.Count -eq 1)
-if ($copyAction.Count -eq 1) {
-    $type = [int]$copyAction[0].Type
+Assert-That -Name 'the user-data ensure action exists' -Succeeded ($ensureAction.Count -eq 1)
+if ($ensureAction.Count -eq 1) {
+    $type = [int]$ensureAction[0].Type
     # msidbCustomActionTypeInScript 1024, NoImpersonate 2048, ContinueOnError 64.
-    Assert-That -Name 'the copy runs deferred' -Succeeded (($type -band 1024) -ne 0) -Detail "type $type"
-    Assert-That -Name 'the copy runs as the user, not SYSTEM' -Succeeded (($type -band 2048) -eq 0) -Detail "type $type"
-    Assert-That -Name 'a failed copy does not fail the install' -Succeeded (($type -band 64) -ne 0) -Detail "type $type"
+    Assert-That -Name 'ensuring user data runs deferred' -Succeeded (($type -band 1024) -ne 0) -Detail "type $type"
+    Assert-That -Name 'ensuring user data runs as the user, not SYSTEM' -Succeeded (($type -band 2048) -eq 0) -Detail "type $type"
+    Assert-That -Name 'a failed ensure does not fail the install' -Succeeded (($type -band 64) -ne 0) -Detail "type $type"
 }
-# There is deliberately no rollback action: it could only "undo" the copy by
-# deleting files out of a folder that may have held the user's work already.
+# There is deliberately no rollback action: it could only "undo" by deleting
+# files out of a folder that may already hold the user's own work.
 $customActions = @(Get-MsiRows -Sql "SELECT ``Action`` FROM ``CustomAction``" -Columns 'Action' |
     ForEach-Object { $_.Action })
-Assert-That -Name 'no rollback action deletes copied user data' `
-    -Succeeded (-not ($customActions -contains 'SeamlyCopyUserDataRollback'))
-Assert-That -Name 'the copy helper script is packaged' `
-    -Succeeded (@(Get-MsiRows -Sql "SELECT ``FileName`` FROM ``File`` WHERE ``Component_``='UserDataCopyScript'" -Columns 'FileName' |
-                  Where-Object { $_.FileName -match 'smsi_migrate_user_data\.ps1' }).Count -eq 1)
-$migrationCommands = Get-MsiRows `
-    -Sql "SELECT ``Action``, ``Target`` FROM ``CustomAction`` WHERE ``Action``='SetSeamlyOldDataMigration' OR ``Action``='SetSeamlyNewDataMigration'" `
-    -Columns 'Action', 'Target'
-$oldMigrationCommand = @($migrationCommands | Where-Object { $_.Action -eq 'SetSeamlyOldDataMigration' })
-$newMigrationCommand = @($migrationCommands | Where-Object { $_.Action -eq 'SetSeamlyNewDataMigration' })
-Assert-That -Name 'old Seamly uses the archive migration mode' `
-    -Succeeded ($oldMigrationCommand.Count -eq 1 -and $oldMigrationCommand[0].Target -match '-Mode Old')
-Assert-That -Name 'new Seamly uses the relocation migration mode' `
-    -Succeeded ($newMigrationCommand.Count -eq 1 -and
-                $newMigrationCommand[0].Target -match '-Mode New' -and
-                $newMigrationCommand[0].Target -match 'SEAMLYPREVIOUSDATAROOT')
-$migrationConditions = Get-MsiRows `
-    -Sql "SELECT ``Action``, ``Condition`` FROM ``InstallExecuteSequence`` WHERE ``Action``='SetSeamlyOldDataMigration' OR ``Action``='SetSeamlyNewDataMigration'" `
-    -Columns 'Action', 'Condition'
-$oldMigrationCondition = @($migrationConditions | Where-Object { $_.Action -eq 'SetSeamlyOldDataMigration' })
-$newMigrationCondition = @($migrationConditions | Where-Object { $_.Action -eq 'SetSeamlyNewDataMigration' })
-Assert-That -Name 'old Seamly requires both parent apps and no SeamlyLayout' `
-    -Succeeded ($oldMigrationCondition.Count -eq 1 -and
-                $oldMigrationCondition[0].Condition -match 'SEAMLYOLDS2DEXE' -and
-                $oldMigrationCondition[0].Condition -match 'SEAMLYOLDMEEXE' -and
-                $oldMigrationCondition[0].Condition -match 'NOT SEAMLYOLDLAYOUTEXE')
-Assert-That -Name 'new Seamly requires an existing SeamlyLayout executable' `
-    -Succeeded ($newMigrationCondition.Count -eq 1 -and
-                $newMigrationCondition[0].Condition -match 'SEAMLYNEWLAYOUTEXE')
-# Both migration commands carry path properties that can
-# resolve with a trailing backslash. Backslash-quote is an escaped quote to
-# PowerShell's command-line parser, so each closing quote needs a space before
-# it; smsi_migrate_user_data.ps1 trims the values.
-Assert-That -Name 'the old-migration command quotes its path arguments quote-safely' `
-    -Succeeded ($oldMigrationCommand.Count -eq 1 -and
-                $oldMigrationCommand[0].Target -match '-Destination "\[SEAMLYDATAROOT\] "' -and
-                $oldMigrationCommand[0].Target -match '-InstallFolder "\[INSTALLFOLDER\] "')
-Assert-That -Name 'the new-migration command quotes its path arguments quote-safely' `
-    -Succeeded ($newMigrationCommand.Count -eq 1 -and
-                $newMigrationCommand[0].Target -match '-Destination "\[SEAMLYDATAROOT\] "' -and
-                $newMigrationCommand[0].Target -match '-PreviousDataRoot "\[SEAMLYPREVIOUSDATAROOT\] "' -and
-                $newMigrationCommand[0].Target -match '-InstallFolder "\[INSTALLFOLDER\] "')
-
-# The seeding action mirrors the copy action's contract:
-# deferred (needs the script on disk), impersonated (writes the user's own
-# %LOCALAPPDATA%), non-fatal (the apps supply defaults at runtime anyway).
-$seedAction = @(Get-MsiRows -Sql "SELECT ``Action``, ``Type`` FROM ``CustomAction`` WHERE ``Action``='SeamlySeedUserSettings'" `
-    -Columns 'Action', 'Type')
-Assert-That -Name 'the settings-seeding action exists' -Succeeded ($seedAction.Count -eq 1)
-if ($seedAction.Count -eq 1) {
-    $type = [int]$seedAction[0].Type
-    # msidbCustomActionTypeInScript 1024, NoImpersonate 2048, ContinueOnError 64.
-    Assert-That -Name 'the seeding runs deferred' -Succeeded (($type -band 1024) -ne 0) -Detail "type $type"
-    Assert-That -Name 'the seeding runs as the user, not SYSTEM' -Succeeded (($type -band 2048) -eq 0) -Detail "type $type"
-    Assert-That -Name 'a failed seeding does not fail the install' -Succeeded (($type -band 64) -ne 0) -Detail "type $type"
-}
-Assert-That -Name 'the seeding helper script is packaged' `
-    -Succeeded (@(Get-MsiRows -Sql "SELECT ``FileName`` FROM ``File`` WHERE ``Component_``='UserSettingsSeedScript'" -Columns 'FileName' |
-                  Where-Object { $_.FileName -match 'smsi_seed_user_settings\.ps1' }).Count -eq 1)
-$seedCommand = @(Get-MsiRows -Sql "SELECT ``Action``, ``Target`` FROM ``CustomAction`` WHERE ``Action``='SetSeamlySeedUserSettings'" `
+Assert-That -Name 'the old copy and seed actions are gone' `
+    -Succeeded (-not ($customActions -contains 'SeamlyCopyUserData') -and
+                -not ($customActions -contains 'SeamlySeedUserSettings'))
+Assert-That -Name 'no rollback action deletes user data' `
+    -Succeeded (-not ($customActions -contains 'SeamlyEnsureUserDataRollback'))
+Assert-That -Name 'the ensure-user-data helper script is packaged' `
+    -Succeeded (@(Get-MsiRows -Sql "SELECT ``FileName`` FROM ``File`` WHERE ``Component_``='UserDataEnsureScript'" -Columns 'FileName' |
+                  Where-Object { $_.FileName -match 'smsi_ensure_user_data\.ps1' }).Count -eq 1)
+$ensureCommand = @(Get-MsiRows -Sql "SELECT ``Action``, ``Target`` FROM ``CustomAction`` WHERE ``Action``='SetSeamlyEnsureUserData'" `
     -Columns 'Action', 'Target')
-# SEAMLYDATAROOTRECORDED, not SEAMLYDATAROOT: a directory id always resolves,
-# so only the recorded property proves this run actually chose a root.
-Assert-That -Name 'the seeding command passes the recorded data root' `
-    -Succeeded ($seedCommand.Count -eq 1 -and
-                $seedCommand[0].Target -match 'SEAMLYDATAROOTRECORDED' -and
-                $seedCommand[0].Target -match '-InstallFolder')
+Assert-That -Name 'the ensure command passes the resolved data root and install folder' `
+    -Succeeded ($ensureCommand.Count -eq 1 -and
+                $ensureCommand[0].Target -match '-DataRoot' -and
+                $ensureCommand[0].Target -match '-InstallFolder')
 # Both path properties can resolve with a trailing backslash. Backslash-quote
 # is an escaped quote to PowerShell's command-line parser, so each closing
 # quote needs a space before it; the script trims the values.
-Assert-That -Name 'the seeding command quotes its path arguments quote-safely' `
-    -Succeeded ($seedCommand.Count -eq 1 -and
-                $seedCommand[0].Target -match '-DataRoot "\[SEAMLYDATAROOTRECORDED\] "' -and
-                $seedCommand[0].Target -match '-InstallFolder "\[INSTALLFOLDER\] "')
-$seedSequence = @(Get-MsiRows -Sql "SELECT ``Action``, ``Condition`` FROM ``InstallExecuteSequence`` WHERE ``Action``='SeamlySeedUserSettings'" `
-    -Columns 'Action', 'Condition')
-Assert-That -Name 'the seeding runs on first install only, with a recorded root' `
-    -Succeeded ($seedSequence.Count -eq 1 -and
-                $seedSequence[0].Condition -match 'SEAMLYDATAROOTRECORDED' -and
-                $seedSequence[0].Condition -match 'NOT Installed')
+Assert-That -Name 'the ensure command quotes its path arguments quote-safely' `
+    -Succeeded ($ensureCommand.Count -eq 1 -and
+                $ensureCommand[0].Target -match '-DataRoot "\[SEAMLYDATAROOT\] "' -and
+                $ensureCommand[0].Target -match '-InstallFolder "\[INSTALLFOLDER\] "')
+$ensureSequence = @(Get-MsiRows -Sql "SELECT ``Action``, ``Condition``, ``Sequence`` FROM ``InstallExecuteSequence`` WHERE ``Action``='SeamlyEnsureUserData'" `
+    -Columns 'Action', 'Condition', 'Sequence')
+Assert-That -Name 'ensuring user data runs whenever a data root is resolved' `
+    -Succeeded ($ensureSequence.Count -eq 1 -and $ensureSequence[0].Condition -eq 'SEAMLYDATAROOT')
+# Unlike the old copy/seed actions, this one must NOT be guarded by
+# NOT Installed: a repair has to be able to fill in anything missing too.
+Assert-That -Name 'ensuring user data is NOT skipped on a repair' `
+    -Succeeded ($ensureSequence.Count -eq 1 -and $ensureSequence[0].Condition -notmatch 'NOT Installed') `
+    -Detail "condition '$(if ($ensureSequence.Count) { $ensureSequence[0].Condition } else { '<nothing>' })'"
+Assert-That -Name 'ensuring user data runs after the recorded root is written to the registry' `
+    -Succeeded ($ensureSequence.Count -eq 1 -and $writeRegistryAt -gt 0 -and
+                [int]$ensureSequence[0].Sequence -gt $writeRegistryAt) `
+    -Detail "SeamlyEnsureUserData at $(if ($ensureSequence.Count) { $ensureSequence[0].Sequence } else { '<nothing>' }), WriteRegistryValues at $writeRegistryAt"
 
 # --- 10. dialog control geometry -------------------------------
 # Check that no control extends beyond its dialog, which causes Windows Installer

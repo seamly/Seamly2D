@@ -1,11 +1,12 @@
 <#
  ******************************************************************************
- **  @file   smsi_seed_user_settings_test.ps1
+ **  @file   smsi_ensure_user_data_test.ps1
  **  @author slspencer
- **  @date   August 31, 2026
+ **  @date   September 15, 2026
  **
  **  @brief
- **  Tests the install-time seeding of the per-user settings files.
+ **  Tests the install-time creation of the data-root subfolders and the
+ **  seeding of the per-user settings files.
  **
  **  @copyright
  **  Copyright (C) 2026 Seamly2D Project
@@ -22,8 +23,8 @@ param()
 $ErrorActionPreference = 'Stop'
 $script:passed = 0
 $script:failed = 0
-$seedScript = Join-Path $PSScriptRoot 'smsi_seed_user_settings.ps1'
-$testRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('seamly-msi-seed-' + [guid]::NewGuid().ToString('N'))
+$ensureScript = Join-Path $PSScriptRoot 'smsi_ensure_user_data.ps1'
+$testRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('seamly-msi-ensure-' + [guid]::NewGuid().ToString('N'))
 
 <#
 .SYNOPSIS
@@ -70,10 +71,23 @@ function Get-IniValue {
 try {
     New-Item -ItemType Directory -Path $testRoot -Force | Out-Null
 
-    # --- Fresh seeding -----------------------------------------------------
-    $freshLocal = Join-Path $testRoot 'fresh'
-    & $seedScript -DataRoot 'C:\Users\test\Documents\SeamlyData\' `
+    # --- Fresh install: standard subfolders and settings files -------------
+    $freshData = Join-Path $testRoot 'fresh-data\seamly2d'
+    $freshLocal = Join-Path $testRoot 'fresh-local'
+    & $ensureScript -DataRoot $freshData `
         -InstallFolder 'C:\Program Files\SeamlyApps\' -LocalSettingsRoot $freshLocal | Out-Null
+
+    $expectedSubdirectories = @(
+        'measurements\individual', 'measurements\multisize', 'templates',
+        'bodyscans', 'label templates', 'images', 'backups', 'patterns', 'layouts'
+    )
+    $allSubdirectoriesCreated = $true
+    foreach ($subdirectory in $expectedSubdirectories) {
+        if (-not (Test-Path -LiteralPath (Join-Path $freshData $subdirectory))) {
+            $allSubdirectoriesCreated = $false
+        }
+    }
+    Assert-That -Name 'the nine standard data subfolders are created' -Succeeded $allSubdirectoriesCreated
 
     $common = Join-Path $freshLocal 'Seamly\qt6_common.ini'
     $s2d = Join-Path $freshLocal 'Seamly\Seamly2D\qt6_seamly2d.ini'
@@ -89,28 +103,28 @@ try {
         -Succeeded ((Test-Path -LiteralPath (Join-Path $freshLocal 'Seamly\SeamlyLayout\settings')) -and
                     (Test-Path -LiteralPath (Join-Path $freshLocal 'Seamly\SeamlyLayout\preferences')))
 
+    $dataRootQt = ($freshData -replace '\\', '/')
     Assert-That -Name 'the data root key uses the / separator form without a trailing slash' `
-        -Succeeded ((Get-IniValue -Path $common -Section 'paths' -Key 'dataRoot') -eq 'C:/Users/test/Documents/SeamlyData')
+        -Succeeded ((Get-IniValue -Path $common -Section 'paths' -Key 'dataRoot') -eq $dataRootQt)
     Assert-That -Name 'the shared measurement and template keys sit under the data root' `
-        -Succeeded (((Get-IniValue -Path $common -Section 'paths' -Key 'individual_size_measurements') -eq 'C:/Users/test/Documents/SeamlyData/measurements/individual') -and
-                    ((Get-IniValue -Path $common -Section 'paths' -Key 'multi_size_measurements') -eq 'C:/Users/test/Documents/SeamlyData/measurements/multisize') -and
-                    ((Get-IniValue -Path $common -Section 'paths' -Key 'templates') -eq 'C:/Users/test/Documents/SeamlyData/templates') -and
-                    ((Get-IniValue -Path $common -Section 'paths' -Key 'bodyscans') -eq 'C:/Users/test/Documents/SeamlyData/bodyscans'))
+        -Succeeded (((Get-IniValue -Path $common -Section 'paths' -Key 'individual_size_measurements') -eq "$dataRootQt/measurements/individual") -and
+                    ((Get-IniValue -Path $common -Section 'paths' -Key 'multi_size_measurements') -eq "$dataRootQt/measurements/multisize") -and
+                    ((Get-IniValue -Path $common -Section 'paths' -Key 'templates') -eq "$dataRootQt/templates") -and
+                    ((Get-IniValue -Path $common -Section 'paths' -Key 'bodyscans') -eq "$dataRootQt/bodyscans"))
     Assert-That -Name 'the Seamly2D per-app path keys sit under the data root' `
-        -Succeeded (((Get-IniValue -Path $s2d -Section 'paths' -Key 'pattern') -eq 'C:/Users/test/Documents/SeamlyData/patterns') -and
-                    ((Get-IniValue -Path $s2d -Section 'paths' -Key 'layout') -eq 'C:/Users/test/Documents/SeamlyData/layouts') -and
-                    ((Get-IniValue -Path $s2d -Section 'paths' -Key 'labels') -eq 'C:/Users/test/Documents/SeamlyData/label templates') -and
-                    ((Get-IniValue -Path $s2d -Section 'paths' -Key 'images') -eq 'C:/Users/test/Documents/SeamlyData/images') -and
-                    ((Get-IniValue -Path $s2d -Section 'paths' -Key 'backups') -eq 'C:/Users/test/Documents/SeamlyData/backups'))
+        -Succeeded (((Get-IniValue -Path $s2d -Section 'paths' -Key 'pattern') -eq "$dataRootQt/patterns") -and
+                    ((Get-IniValue -Path $s2d -Section 'paths' -Key 'layout') -eq "$dataRootQt/layouts") -and
+                    ((Get-IniValue -Path $s2d -Section 'paths' -Key 'labels') -eq "$dataRootQt/label templates") -and
+                    ((Get-IniValue -Path $s2d -Section 'paths' -Key 'images') -eq "$dataRootQt/images") -and
+                    ((Get-IniValue -Path $s2d -Section 'paths' -Key 'backups') -eq "$dataRootQt/backups"))
     Assert-That -Name 'the seamlyLayoutApp key points into the install folder' `
         -Succeeded ((Get-IniValue -Path $s2d -Section 'paths' -Key 'seamlyLayoutApp') -eq 'C:/Program Files/SeamlyApps/seamlylayout.exe')
 
-    $layoutRoot = 'C:/Users/test/Documents/SeamlyData'
     $layoutConfig = ((Join-Path $freshLocal 'Seamly\SeamlyLayout') -replace '\\', '/')
     Assert-That -Name 'the SeamlyLayout data keys sit under the data root' `
-        -Succeeded (((Get-IniValue -Path $slay -Section 'General' -Key 'input_directory') -eq "$layoutRoot/layouts") -and
-                    ((Get-IniValue -Path $slay -Section 'General' -Key 'layout_directory') -eq "$layoutRoot/layouts") -and
-                    ((Get-IniValue -Path $slay -Section 'General' -Key 'data_root') -eq $layoutRoot))
+        -Succeeded (((Get-IniValue -Path $slay -Section 'General' -Key 'input_directory') -eq "$dataRootQt/layouts") -and
+                    ((Get-IniValue -Path $slay -Section 'General' -Key 'layout_directory') -eq "$dataRootQt/layouts") -and
+                    ((Get-IniValue -Path $slay -Section 'General' -Key 'data_root') -eq $dataRootQt))
     Assert-That -Name 'the SeamlyLayout app-config keys sit under its settings directory' `
         -Succeeded (((Get-IniValue -Path $slay -Section 'General' -Key 'settings_directory') -eq "$layoutConfig/settings") -and
                     ((Get-IniValue -Path $slay -Section 'General' -Key 'preferences_directory') -eq "$layoutConfig/preferences") -and
@@ -122,14 +136,25 @@ try {
                     ((Get-IniValue -Path $slay -Section 'General' -Key 'png_viewer_path') -eq '') -and
                     ((Get-IniValue -Path $slay -Section 'General' -Key 'projector_path') -eq 'https://patternprojector.com'))
 
-    Assert-That -Name 'fresh seeding marks the first-run data notice pending' `
-        -Succeeded ((Get-IniValue -Path $common -Section 'notices' -Key 'firstRunDataNotice') -eq 'pending')
-
     $commonBytes = [System.IO.File]::ReadAllBytes($common)
     Assert-That -Name 'the seeded files carry no UTF-8 BOM' `
         -Succeeded (-not ($commonBytes.Length -ge 3 -and $commonBytes[0] -eq 0xEF -and $commonBytes[1] -eq 0xBB -and $commonBytes[2] -eq 0xBF))
 
-    # --- Merging into existing files ---------------------------------------
+    # --- Repair: an existing populated data root is never touched ----------
+    $repairData = Join-Path $testRoot 'repair-data\seamly2d'
+    New-Item -ItemType Directory -Path (Join-Path $repairData 'patterns') -Force | Out-Null
+    $existingPattern = Join-Path $repairData 'patterns\shirt.sm2d'
+    [System.IO.File]::WriteAllText($existingPattern, '<pattern/>')
+
+    $repairLocal = Join-Path $testRoot 'repair-local'
+    & $ensureScript -DataRoot $repairData -InstallFolder 'C:\Program Files\SeamlyApps' -LocalSettingsRoot $repairLocal | Out-Null
+
+    Assert-That -Name 'an existing data file is never touched' `
+        -Succeeded ((Get-Content -LiteralPath $existingPattern -Raw) -eq '<pattern/>')
+    Assert-That -Name 'a repair still fills in the missing standard subfolders' `
+        -Succeeded (Test-Path -LiteralPath (Join-Path $repairData 'templates'))
+
+    # --- Merging into existing settings files -------------------------------
     $mergeLocal = Join-Path $testRoot 'merge'
     $mergeCommonDirectory = Join-Path $mergeLocal 'Seamly'
     New-Item -ItemType Directory -Path $mergeCommonDirectory -Force | Out-Null
@@ -143,34 +168,29 @@ dataRoot=D:/CustomRoot
 templates=D:/CustomRoot/my templates
 '@, [System.Text.UTF8Encoding]::new($false))
 
-    & $seedScript -DataRoot 'C:\Users\test\Documents\SeamlyData' `
-        -InstallFolder 'C:\Program Files\SeamlyApps' -LocalSettingsRoot $mergeLocal | Out-Null
+    $mergeData = Join-Path $testRoot 'merge-data\seamly2d'
+    & $ensureScript -DataRoot $mergeData -InstallFolder 'C:\Program Files\SeamlyApps' -LocalSettingsRoot $mergeLocal | Out-Null
 
     Assert-That -Name 'merging keeps an existing dataRoot value' `
         -Succeeded ((Get-IniValue -Path $mergeCommon -Section 'paths' -Key 'dataRoot') -eq 'D:/CustomRoot')
     Assert-That -Name 'merging keeps an existing templates value' `
         -Succeeded ((Get-IniValue -Path $mergeCommon -Section 'paths' -Key 'templates') -eq 'D:/CustomRoot/my templates')
     Assert-That -Name 'merging adds the missing bodyscans key' `
-        -Succeeded ((Get-IniValue -Path $mergeCommon -Section 'paths' -Key 'bodyscans') -eq 'C:/Users/test/Documents/SeamlyData/bodyscans')
+        -Succeeded ((Get-IniValue -Path $mergeCommon -Section 'paths' -Key 'bodyscans') -eq (($mergeData -replace '\\', '/') + '/bodyscans'))
     Assert-That -Name 'merging leaves other sections alone' `
         -Succeeded ((Get-IniValue -Path $mergeCommon -Section 'configuration' -Key 'theme') -eq 'dark')
-    Assert-That -Name 'an existing qt6_common.ini gets no first-run data notice' `
-        -Succeeded ($null -eq (Get-IniValue -Path $mergeCommon -Section 'notices' -Key 'firstRunDataNotice'))
 
     $mergeLayoutDirectory = Join-Path $mergeLocal 'Seamly\SeamlyLayout'
     $mergeLayout = Join-Path $mergeLayoutDirectory 'qt6_seamlylayout.ini'
-    Assert-That -Name 'merging keeps an existing SeamlyLayout value and adds the missing keys' `
-        -Succeeded ((Get-IniValue -Path $mergeLayout -Section 'General' -Key 'data_root') -eq 'C:/Users/test/Documents/SeamlyData')
     [System.IO.File]::WriteAllText($mergeLayout, @'
 [General]
 layout_directory=E:/MyLayouts
 '@, [System.Text.UTF8Encoding]::new($false))
-    & $seedScript -DataRoot 'C:\Users\test\Documents\SeamlyData' `
-        -InstallFolder 'C:\Program Files\SeamlyApps' -LocalSettingsRoot $mergeLocal | Out-Null
+    & $ensureScript -DataRoot $mergeData -InstallFolder 'C:\Program Files\SeamlyApps' -LocalSettingsRoot $mergeLocal | Out-Null
     Assert-That -Name 'merging keeps an existing layout_directory value' `
         -Succeeded ((Get-IniValue -Path $mergeLayout -Section 'General' -Key 'layout_directory') -eq 'E:/MyLayouts')
     Assert-That -Name 'merging completes a partial SeamlyLayout ini' `
-        -Succeeded ((Get-IniValue -Path $mergeLayout -Section 'General' -Key 'input_directory') -eq 'C:/Users/test/Documents/SeamlyData/layouts')
+        -Succeeded ((Get-IniValue -Path $mergeLayout -Section 'General' -Key 'input_directory') -eq (($mergeData -replace '\\', '/') + '/layouts'))
 
     # --- A file without the section gets the section appended ---------------
     $sectionLocal = Join-Path $testRoot 'section'
@@ -182,18 +202,17 @@ layout_directory=E:/MyLayouts
 unit=inch
 '@, [System.Text.UTF8Encoding]::new($false))
 
-    & $seedScript -DataRoot 'C:\Users\test\Documents\SeamlyData' `
-        -InstallFolder 'C:\Program Files\SeamlyApps' -LocalSettingsRoot $sectionLocal | Out-Null
+    $sectionData = Join-Path $testRoot 'section-data\seamly2d'
+    & $ensureScript -DataRoot $sectionData -InstallFolder 'C:\Program Files\SeamlyApps' -LocalSettingsRoot $sectionLocal | Out-Null
 
     Assert-That -Name 'a file without a paths section gains one' `
-        -Succeeded ((Get-IniValue -Path $sectionIni -Section 'paths' -Key 'pattern') -eq 'C:/Users/test/Documents/SeamlyData/patterns')
+        -Succeeded ((Get-IniValue -Path $sectionIni -Section 'paths' -Key 'pattern') -eq (($sectionData -replace '\\', '/') + '/patterns'))
     Assert-That -Name 'the existing configuration section survives' `
         -Succeeded ((Get-IniValue -Path $sectionIni -Section 'configuration' -Key 'unit') -eq 'inch')
 
     # --- A complete file stays byte-identical --------------------------------
     $repeatBefore = [System.IO.File]::ReadAllBytes($common)
-    & $seedScript -DataRoot 'C:\Users\test\Documents\SeamlyData' `
-        -InstallFolder 'C:\Program Files\SeamlyApps' -LocalSettingsRoot $freshLocal | Out-Null
+    & $ensureScript -DataRoot $freshData -InstallFolder 'C:\Program Files\SeamlyApps' -LocalSettingsRoot $freshLocal | Out-Null
     $repeatAfter = [System.IO.File]::ReadAllBytes($common)
     Assert-That -Name 'a second run leaves a complete file byte-identical' `
         -Succeeded ([System.Linq.Enumerable]::SequenceEqual($repeatBefore, $repeatAfter))
@@ -204,14 +223,13 @@ unit=inch
     New-Item -ItemType Directory -Path $meDirectory -Force | Out-Null
     $meIni = Join-Path $meDirectory 'qt6_seamlyme.ini'
     [System.IO.File]::WriteAllText($meIni, "[configuration]`r`nunit=cm`r`n", [System.Text.UTF8Encoding]::new($false))
-    & $seedScript -DataRoot 'C:\Users\test\Documents\SeamlyData' `
-        -InstallFolder 'C:\Program Files\SeamlyApps' -LocalSettingsRoot $meLocal | Out-Null
+    & $ensureScript -DataRoot (Join-Path $testRoot 'me-data\seamly2d') -InstallFolder 'C:\Program Files\SeamlyApps' -LocalSettingsRoot $meLocal | Out-Null
     Assert-That -Name 'an existing qt6_seamlyme.ini keeps its content' `
         -Succeeded ((Get-IniValue -Path $meIni -Section 'configuration' -Key 'unit') -eq 'cm')
 
-    # --- An empty data root seeds nothing, still exit 0 ----------------------
+    # --- An empty data root does nothing, still exit 0 -----------------------
     $emptyLocal = Join-Path $testRoot 'empty'
-    & $seedScript -DataRoot ' ' -InstallFolder 'C:\Program Files\SeamlyApps' -LocalSettingsRoot $emptyLocal | Out-Null
+    & $ensureScript -DataRoot ' ' -InstallFolder 'C:\Program Files\SeamlyApps' -LocalSettingsRoot $emptyLocal | Out-Null
     Assert-That -Name 'an empty data root exits 0' -Succeeded ($LASTEXITCODE -eq 0)
     Assert-That -Name 'an empty data root seeds no files' `
         -Succeeded (-not (Test-Path -LiteralPath (Join-Path $emptyLocal 'Seamly\qt6_common.ini')))

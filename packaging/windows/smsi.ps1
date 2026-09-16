@@ -437,10 +437,10 @@ if ($LASTEXITCODE -ne 0) {
     throw "install-time authoring check failed (exit code $LASTEXITCODE) - see output above."
 }
 
-Write-Host "checking user-data migration..."
-& (Join-Path $PSScriptRoot 'smsi_migrate_user_data_test.ps1')
+Write-Host "checking user-data seeding..."
+& (Join-Path $PSScriptRoot 'smsi_ensure_user_data_test.ps1')
 if ($LASTEXITCODE -ne 0) {
-    throw "user-data migration check failed (exit code $LASTEXITCODE) - see output above."
+    throw "user-data seeding check failed (exit code $LASTEXITCODE) - see output above."
 }
 
 $msiSize = [math]::Round((Get-Item $msi).Length / 1MB, 1)

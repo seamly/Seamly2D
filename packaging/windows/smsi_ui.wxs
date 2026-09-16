@@ -54,8 +54,12 @@
       pages (PrepareDlg and MaintenanceTypeDlg) with Seamly versions.
 
       Fresh install flow: PrepareDlg -> WelcomeDlg -> LicenseAgreementDlg ->
-      PreviousInstallDlg -> DataDirDlg -> DataMigrateDlg -> ShortcutsDlg ->
-      VerifyReadyDlg -> ProgressDlg -> ExitDialog.
+      [PreviousInstallDlg] -> [DataLocationDlg] -> ShortcutsDlg ->
+      VerifyReadyDlg -> ProgressDlg -> ExitDialog. PreviousInstallDlg appears
+      only when an earlier program install is found; DataLocationDlg appears
+      only when an earlier install already recorded a data root
+      (SEAMLYDATAROOTRECORDED) - a data root is otherwise fixed and created
+      silently, with no page asking about it at all.
 
       Maintenance flow: MaintenanceWelcomeDlg -> SeamlyMaintenanceTypeDlg ->
       VerifyReadyDlg. Back and Cancel follow the stock wizard behavior.
@@ -64,10 +68,10 @@
       and dialog bitmaps so they look like the rest of the installer.
     -->
     <!-- One source for the condition that decides whether the previous-install
-         page appears. It is needed three times - the two License Next rows and
-         the two SeamlyDataDirDlg Back rows - and the four must not drift apart,
-         because a gap or an overlap between them strands the wizard on a page
-         with no working button. -->
+         page appears. It is needed several times - the License Next rows, the
+         SeamlyDataLocationDlg Back rows, and the SeamlyShortcutsDlg Back row -
+         and they must not drift apart, because a gap or an overlap between
+         them strands the wizard on a page with no working button. -->
     <?define PreviousInstallFound = "((SEAMLYOLDS2DEXE AND SEAMLYOLDMEEXE AND NOT SEAMLYOLDLAYOUTEXE) OR SEAMLYNEWLAYOUTEXE) AND NOT Installed" ?>
 
     <!-- The Id is what smsi.wxs's UIRef names. An unnamed <UI> in a fragment
@@ -104,7 +108,6 @@
            sequence number. -->
       <DialogRef Id="LicenseAgreementDlg" />
       <DialogRef Id="VerifyReadyDlg" />
-      <DialogRef Id="BrowseDlg" />
       <DialogRef Id="CancelDlg" />
       <DialogRef Id="DiskCostDlg" />
       <DialogRef Id="ErrorDlg" />
@@ -189,7 +192,7 @@
         <!-- Always shown: the point of the whole dialog. -->
         <Control Id="UserDataText" Type="Text" X="20" Y="150" Width="330" Height="76"
                  NoPrefix="yes"
-                 Text="Your own work is not touched. Patterns, measurements and templates stay in your user data folder - Setup asks you for it on a later page, and never deletes or overwrites what is already there. Your settings stay in AppData\Local\Seamly and AppData\Roaming\Seamly. Neither installing nor uninstalling Seamly removes any of them." />
+                 Text="Your own work is not touched. Patterns, measurements and templates stay in your user data folder - if Setup already knows that folder, it shows it on the next page; Setup never deletes or overwrites what is already there. Your settings stay in AppData\Local\Seamly and AppData\Roaming\Seamly. Neither installing nor uninstalling Seamly removes any of them." />
 
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
                  Text="&amp;Back">
@@ -197,7 +200,10 @@
         </Control>
         <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
                  Default="yes" Text="&amp;Next">
-          <Publish Event="NewDialog" Value="SeamlyDataDirDlg" />
+          <Publish Event="NewDialog" Value="SeamlyDataLocationDlg" Order="1"
+                   Condition="SEAMLYDATAROOTRECORDED" />
+          <Publish Event="NewDialog" Value="SeamlyShortcutsDlg" Order="2"
+                   Condition="NOT SEAMLYDATAROOTRECORDED" />
         </Control>
         <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
                  Cancel="yes" Text="Cancel">
@@ -234,10 +240,12 @@
 
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
                  Text="&amp;Back">
-          <Publish Event="NewDialog" Value="SeamlyDataMigrateDlg" Order="1"
-                   Condition="$(var.PreviousInstallFound)" />
-          <Publish Event="NewDialog" Value="SeamlyDataDirDlg" Order="2"
-                   Condition="NOT ($(var.PreviousInstallFound))" />
+          <Publish Event="NewDialog" Value="SeamlyDataLocationDlg" Order="1"
+                   Condition="SEAMLYDATAROOTRECORDED" />
+          <Publish Event="NewDialog" Value="SeamlyPreviousInstallDlg" Order="2"
+                   Condition="NOT SEAMLYDATAROOTRECORDED AND $(var.PreviousInstallFound)" />
+          <Publish Event="NewDialog" Value="LicenseAgreementDlg" Order="3"
+                   Condition="NOT SEAMLYDATAROOTRECORDED AND NOT ($(var.PreviousInstallFound))" />
         </Control>
         <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
                  Default="yes" Text="&amp;Next">
@@ -249,12 +257,14 @@
         </Control>
       </Dialog>
 
-      <!-- ========== user-data directory ======== -->
-      <!-- Mirrors the stock InstallDirDlg layout: a PathEdit bound to the
-           directory property, and a Change button that spawns WixUI's own
-           BrowseDlg. BrowseDlg edits whatever _BrowseProperty names, so the
-           Change button sets that first (Order 1) and spawns second (Order 2). -->
-      <Dialog Id="SeamlyDataDirDlg" Width="370" Height="270"
+      <!-- ========== user-data directory (read-only) ======== -->
+      <!-- Shown only when an earlier install already recorded a data root
+           (SEAMLYDATAROOTRECORDED, smsi.wxs) - an update or a repair reached
+           through the wizard. The location is fixed and cannot be edited:
+           Setup never relocates existing data (B2 in TODO_INSTALLER.md). A
+           fresh install skips this page entirely, since there is nothing yet
+           to confirm - the fixed default is created silently. -->
+      <Dialog Id="SeamlyDataLocationDlg" Width="370" Height="270"
               Title="[ProductName] Setup">
 
         <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
@@ -264,107 +274,29 @@
 
         <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
                  Transparent="yes" NoPrefix="yes"
-                 Text="{\WixUI_Font_Title}Where do you keep your work?" />
+                 Text="{\WixUI_Font_Title}Your data location" />
         <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15"
                  Transparent="yes" NoPrefix="yes"
-                 Text="Choose the folder for your patterns and measurements." />
+                 Text="Setup found where your patterns and measurements are kept." />
 
-        <Control Id="Explain" Type="Text" X="20" Y="60" Width="330" Height="40"
+        <Control Id="Explain" Type="Text" X="20" Y="60" Width="330" Height="48"
                  NoPrefix="yes"
-                 Text="This folder may be on any drive, including a USB stick or a synced folder such as OneDrive, Google Drive or Dropbox. Syncing your own work is supported - only the program files have to stay on a local drive." />
+                 Text="Your existing patterns and measurements stay exactly where they are. Setup only adds anything missing there - it never moves, copies or deletes your work." />
 
-        <!-- The user edits the PARENT; the SeamlyData leaf is fixed and shown
-             read-only below, so the full path is visible before they continue
-             and E:\ can never be mistaken for the data root itself. -->
-        <!-- No accelerator ampersand. NoPrefix="yes" turns off accelerator
-             parsing, so an "&" in this text prints as a literal character. -->
-        <Control Id="FolderLabel" Type="Text" X="20" Y="110" Width="330" Height="10"
-                 NoPrefix="yes" Text="Put the SeamlyData folder in:" />
-        <!-- Not indirect. PathEdit reads the property value directly. SEAMLYDATAPARENT
-             holds the actual folder path, so an indirect lookup would look for a
-             property named "C:\Users\<user>\" and fail. -->
-        <Control Id="Folder" Type="PathEdit" X="20" Y="122" Width="255" Height="18"
-                 Property="SEAMLYDATAPARENT" />
-        <Control Id="ChangeFolder" Type="PushButton" X="285" Y="122" Width="66" Height="18"
-                 Text="Ch&amp;ange...">
-          <Publish Property="_BrowseProperty" Value="SEAMLYDATAPARENT" Order="1" />
-          <Publish Event="SpawnDialog" Value="BrowseDlg" Order="2" />
-        </Control>
-
-        <Control Id="FullPathLabel" Type="Text" X="20" Y="148" Width="330" Height="10"
-                 NoPrefix="yes" Text="Your work will be kept in:" />
-        <Control Id="FullPath" Type="Text" X="20" Y="160" Width="330" Height="12"
+        <Control Id="FolderLabel" Type="Text" X="20" Y="118" Width="330" Height="10"
+                 NoPrefix="yes" Text="Your work is kept in:" />
+        <Control Id="Folder" Type="Text" X="20" Y="130" Width="330" Height="12"
                  NoPrefix="yes" Text="[SEAMLYDATAROOT]" />
 
-        <Control Id="Note" Type="Text" X="20" Y="180" Width="330" Height="44"
-                 NoPrefix="yes"
-                 Text="Setup creates this folder. The apps add their standard folders on first run. Your existing work is never deleted or moved out of where it is today." />
-
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
                  Text="&amp;Back">
-          <Publish Event="NewDialog" Value="SeamlyPreviousInstallDlg"
+          <Publish Event="NewDialog" Value="SeamlyPreviousInstallDlg" Order="1"
                    Condition="$(var.PreviousInstallFound)" />
-          <Publish Event="NewDialog" Value="LicenseAgreementDlg"
+          <Publish Event="NewDialog" Value="LicenseAgreementDlg" Order="2"
                    Condition="NOT ($(var.PreviousInstallFound))" />
         </Control>
-        <!-- The PathEdit writes SEAMLYDATAPARENT. SetTargetPath commits it to
-             the Directory table, which rebuilds [SEAMLYDATAROOT]. No
-             CheckTargetPath because the data root may live on removable or cloud
-             storage. Guard SetTargetPath against an empty property to avoid
-             error 2343. -->
         <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
-                 Default="yes" Text="&amp;Next">
-          <Publish Event="SetTargetPath" Value="SEAMLYDATAPARENT" Order="1"
-                   Condition="SEAMLYDATAPARENT" />
-          <Publish Event="NewDialog" Value="SeamlyDataMigrateDlg" Order="2"
-                   Condition="$(var.PreviousInstallFound)" />
-          <Publish Event="NewDialog" Value="SeamlyShortcutsDlg" Order="3"
-                   Condition="NOT ($(var.PreviousInstallFound))" />
-        </Control>
-        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
-                 Cancel="yes" Text="Cancel">
-          <Publish Event="SpawnDialog" Value="CancelDlg" />
-        </Control>
-      </Dialog>
-
-      <!-- ========== copy existing work? ================ -->
-      <!-- The checkbox defaults to 0, so the copy happens only when the user actively asks for it.
-           Copy only missing files, never overwrite, is enforced by the
-           script the deferred action runs, not by this dialog. -->
-      <Dialog Id="SeamlyDataMigrateDlg" Width="370" Height="270"
-              Title="[ProductName] Setup">
-
-        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
-                 TabSkip="no" Text="WixUI_Bmp_Banner" />
-        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
-        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
-
-        <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
-                 Transparent="yes" NoPrefix="yes"
-                 Text="{\WixUI_Font_Title}Copy your existing work?" />
-        <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15"
-                 Transparent="yes" NoPrefix="yes"
-                 Text="Setup can copy what you already have into the new folder." />
-
-        <Control Id="Explain" Type="Text" X="20" Y="60" Width="330" Height="72"
-                 NoPrefix="yes"
-                 Text="Setup can copy your existing patterns and measurements into [SEAMLYDATAROOT]. Nothing is deleted or moved: every file stays where it is now, and you keep a complete second copy. A file that already exists in the new folder is left exactly as it is - Setup never overwrites your work." />
-
-        <Control Id="CopyCheckBox" Type="CheckBox" X="20" Y="140" Width="330" Height="18"
-                 Property="SEAMLYCOPYUSERDATA" CheckBoxValue="1"
-                 Text="&amp;Yes, copy my existing patterns and measurements" />
-
-        <!-- The old copy stays as a backup, and the same work is available in the new location. -->
-        <Control Id="Caveat" Type="Text" X="20" Y="166" Width="330" Height="60"
-                 NoPrefix="yes"
-                 Text="Afterwards your work is in both places: everything stays exactly where it is today, which is your backup, and the same files are also available in [SEAMLYDATAROOT], which is where the apps will look. Leave the box unticked to record the folder without copying anything - you can copy the files yourself at any time." />
-
-        <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
-                 Text="&amp;Back">
-          <Publish Event="NewDialog" Value="SeamlyDataDirDlg" />
-        </Control>
-        <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17"
-                 Default="yes" Text="&amp;Next">
+                 Default="yes" Text="&amp;Continue">
           <Publish Event="NewDialog" Value="SeamlyShortcutsDlg" />
         </Control>
         <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
@@ -372,7 +304,6 @@
           <Publish Event="SpawnDialog" Value="CancelDlg" />
         </Control>
       </Dialog>
-
 
       <!-- ========== change, repair or remove ============================== -->
       <!-- Replacement for the stock MaintenanceTypeDlg. WiX cannot extend a
@@ -492,27 +423,20 @@
       <!-- License. LicenseAgreementDlg disables its own Next until the radio
            button is accepted, so the LicenseAccepted test only repeats what the
            control condition already enforces - the stock sets carry it too.
-           The two rows are mutually exclusive: the previous-install page is
-           skipped on a clean machine. -->
+           The three rows are mutually exclusive: the previous-install page is
+           skipped on a clean machine, and the data-location page is skipped
+           whenever nothing was recorded yet. -->
       <Publish Dialog="LicenseAgreementDlg" Control="Back" Event="NewDialog"
                Value="WelcomeDlg" />
       <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog"
-               Value="SeamlyPreviousInstallDlg"
+               Value="SeamlyPreviousInstallDlg" Order="1"
                Condition="LicenseAccepted = &quot;1&quot; AND ($(var.PreviousInstallFound))" />
       <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog"
-               Value="SeamlyDataDirDlg"
-               Condition="LicenseAccepted = &quot;1&quot; AND NOT ($(var.PreviousInstallFound))" />
-
-      <!-- BrowseDlg serves only the data-root page now: the program directory
-           is fixed (smsi.wxs) and never asked about, so nothing else spawns
-           BrowseDlg or sets _BrowseProperty. Its OK button carries no rows of
-           its own, so both of these are ours. No CheckTargetPath here: the
-           data root is allowed on removable and cloud-synced drives,
-           unlike a program directory. -->
-      <Publish Dialog="BrowseDlg" Control="OK" Event="SetTargetPath"
-               Value="[_BrowseProperty]" Order="1" />
-      <Publish Dialog="BrowseDlg" Control="OK" Event="EndDialog"
-               Value="Return" Order="2" />
+               Value="SeamlyDataLocationDlg" Order="2"
+               Condition="LicenseAccepted = &quot;1&quot; AND NOT ($(var.PreviousInstallFound)) AND SEAMLYDATAROOTRECORDED" />
+      <Publish Dialog="LicenseAgreementDlg" Control="Next" Event="NewDialog"
+               Value="SeamlyShortcutsDlg" Order="3"
+               Condition="LicenseAccepted = &quot;1&quot; AND NOT ($(var.PreviousInstallFound)) AND NOT SEAMLYDATAROOTRECORDED" />
 
       <!-- Ready page. Back returns to the last question asked, which on a fresh
            install is the shortcuts page. The two maintenance rows are the stock

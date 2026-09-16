@@ -114,10 +114,6 @@
     <Property Id="SEAMLYDESKTOPSHORTCUTS" Value="1" Secure="yes" />
 
     <!-- ================= user-data root ============== -->
-    <!-- User data folder. SEAMLYDATAPARENT is the chosen parent; the final
-         data root is SEAMLYDATAROOT (parent + \SeamlyData). Both are
-         Directory ids so the wizard, BrowseDlg, and command-line installs all
-         work consistently. -->
     <!-- Install location is fixed to [ProgramFiles64Folder]SeamlyApps. The
          SetProperty entries in both UI and execute sequences override any prior
          value, including INSTALLFOLDER passed on the command line. -->
@@ -131,64 +127,17 @@
                  Value="[ProgramFiles64Folder]SeamlyApps"
                  Sequence="execute"
                  Before="CostFinalize" />
-    <Property Id="SEAMLYDATAROOT" Secure="yes" />
-    <Property Id="SEAMLYDATAPARENT" Secure="yes">
-      <RegistrySearch Id="RecordedDataParentSearch"
-                      Root="HKLM"
-                      Key="SOFTWARE\Seamly\Seamly2D"
-                      Name="DataParent"
-                      Type="raw"
-                      Bitness="always64" />
-    </Property>
-    <!-- The default parent is the user's Documents folder, so the data root
-         sits beside other app data and matches the app defaults. Use
-         PersonalFolder first because it follows redirected Documents folders,
-         such as OneDrive. If it is empty, fall back to %USERPROFILE%\Documents.
-         The trailing backslash matters: Windows appends the child folder to the
-         parent verbatim, so a missing slash would create a wrong path. -->
-    <SetProperty Id="SEAMLYDATAPARENT"
-                 Action="SetSEAMLYDATAPARENT"
-                 Value="[PersonalFolder]"
-                 Before="CostFinalize"
-                 Sequence="ui"
-                 Condition="NOT SEAMLYDATAPARENT AND PersonalFolder AND NOT Installed" />
-    <SetProperty Id="SEAMLYDATAPARENT"
-                 Action="SetSEAMLYDATAPARENTFallback"
-                 Value="[%USERPROFILE]\Documents\"
-                 After="SetSEAMLYDATAPARENT"
-                 Sequence="ui"
-                 Condition="NOT SEAMLYDATAPARENT AND NOT Installed" />
 
-    <!-- Same two defaults, computed again in the execute sequence, for a
-         `/qn` install that ran no UI sequence at all. See the accepted
-         SYSTEM-profile tradeoff in the comment above SEAMLYDATAPARENT.
-         Mirrors the UI pair exactly: PersonalFolder first, %USERPROFILE%
-         second, both skipped on a maintenance run so a repair never
-         recomputes a customised root. -->
-    <SetProperty Id="SEAMLYDATAPARENT"
-                 Action="SetSEAMLYDATAPARENTExecute"
-                 Value="[PersonalFolder]"
-                 Before="CostFinalize"
-                 Sequence="execute"
-                 Condition="NOT SEAMLYDATAPARENT AND PersonalFolder AND NOT Installed" />
-    <SetProperty Id="SEAMLYDATAPARENT"
-                 Action="SetSEAMLYDATAPARENTExecuteFallback"
-                 Value="[%USERPROFILE]\Documents\"
-                 After="SetSEAMLYDATAPARENTExecute"
-                 Sequence="execute"
-                 Condition="NOT SEAMLYDATAPARENT AND NOT Installed" />
+    <!-- The data root is fixed, not chosen. A fresh install always uses
+         [%USERPROFILE]\seamly2d. An update or repair instead reuses whatever
+         directory an earlier install already recorded here, so existing data
+         is never relocated - see B1-B3/C1-C2 in TODO_INSTALLER.md.
 
-    <!-- ============ the value the apps actually read ===== -->
-    <!-- Record the chosen data path, not the raw directory ID. CostFinalize
-         resolves directory IDs to a machine path like C:\SeamlyData or C:\,
-         which is not what the app should persist. This value is what the app
-         reads from HKLM\SOFTWARE\Seamly\Seamly2D and is only set when the
-         user or this install actually chose a location.
-
-         During repair or maintenance, keep the registry value already present.
-         During a fresh install or silent run, prefer the resolved path chosen
-         this run. The UI and execute defaults must guard with AND NOT
-         Installed so a repair does not silently reset a custom data root. -->
+         Two properties, not one: SEAMLYDATAROOTRECORDED holds only what the
+         registry search actually found - nothing else ever writes it - so
+         smsi_ui.wxs can use it as the "an earlier install exists" signal.
+         SEAMLYDATAROOT is the value everything else uses: the recorded root
+         when there is one, otherwise the fresh-install default. -->
     <Property Id="SEAMLYDATAROOTRECORDED" Secure="yes">
       <RegistrySearch Id="RecordedDataRootSearch"
                       Root="HKLM"
@@ -197,41 +146,35 @@
                       Type="raw"
                       Bitness="always64" />
     </Property>
-    <Property Id="SEAMLYDATAPARENTRECORDED" Secure="yes">
-      <RegistrySearch Id="RecordedDataParentRecordedSearch"
-                      Root="HKLM"
-                      Key="SOFTWARE\Seamly\Seamly2D"
-                      Name="DataParent"
-                      Type="raw"
-                      Bitness="always64" />
-    </Property>
-    <Property Id="SEAMLYPREVIOUSDATAROOT" Secure="yes">
-      <RegistrySearch Id="PreviousDataRootSearch"
-                      Root="HKLM"
-                      Key="SOFTWARE\Seamly\Seamly2D"
-                      Name="DataRoot"
-                      Type="raw"
-                      Bitness="always64" />
-    </Property>
-    <SetProperty Id="SEAMLYDATACHOSEN"
-                 Value="1"
-                 After="SetSEAMLYDATAPARENTExecuteFallback"
+    <Property Id="SEAMLYDATAROOT" Secure="yes" />
+    <SetProperty Id="SEAMLYDATAROOT"
+                 Action="SetSEAMLYDATAROOTRecorded"
+                 Value="[SEAMLYDATAROOTRECORDED]"
+                 Before="CostFinalize"
+                 Sequence="ui"
+                 Condition="SEAMLYDATAROOTRECORDED" />
+    <SetProperty Id="SEAMLYDATAROOT"
+                 Action="SetSEAMLYDATAROOTRecordedExecute"
+                 Value="[SEAMLYDATAROOTRECORDED]"
+                 Before="CostFinalize"
                  Sequence="execute"
-                 Condition="SEAMLYDATAPARENT OR SEAMLYDATAROOT" />
-    <SetProperty Id="SEAMLYDATAROOTRECORDED"
-                 Value="[SEAMLYDATAROOT]"
-                 After="CostFinalize"
+                 Condition="SEAMLYDATAROOTRECORDED" />
+    <!-- Fresh install only: nothing recorded, and this is not a repair or
+         maintenance run. The NOT Installed guard is what keeps a repair from
+         ever overriding the recorded root. Computed in both sequences so an
+         unattended /qn install, which runs no UI sequence, still gets a value. -->
+    <SetProperty Id="SEAMLYDATAROOT"
+                 Action="SetSEAMLYDATAROOTDefault"
+                 Value="[%USERPROFILE]\seamly2d"
+                 Before="CostFinalize"
+                 Sequence="ui"
+                 Condition="NOT SEAMLYDATAROOTRECORDED AND NOT Installed" />
+    <SetProperty Id="SEAMLYDATAROOT"
+                 Action="SetSEAMLYDATAROOTDefaultExecute"
+                 Value="[%USERPROFILE]\seamly2d"
+                 Before="CostFinalize"
                  Sequence="execute"
-                 Condition="SEAMLYDATACHOSEN" />
-    <SetProperty Id="SEAMLYDATAPARENTRECORDED"
-                 Value="[SEAMLYDATAPARENT]"
-                 After="CostFinalize"
-                 Sequence="execute"
-                 Condition="SEAMLYDATACHOSEN" />
-    <!-- Set by SeamlyDataMigrateDlg's confirmation. 0 = record the folder but
-         copy nothing. The copy is opt-in: it is the user's data, and an
-         unattended install must not start moving files nobody asked about. -->
-    <Property Id="SEAMLYCOPYUSERDATA" Value="0" Secure="yes" />
+                 Condition="NOT SEAMLYDATAROOTRECORDED AND NOT Installed" />
 
     <!-- The wizard dialog set and every transition between its pages lives in
          smsi_ui.wxs. This reference is what links it: a WiX fragment nothing
@@ -239,34 +182,27 @@
          shows the wrong pages. Do not remove it. -->
     <UIRef Id="SeamlyUI" />
 
-    <!-- ================= migrate existing user data ====================== -->
-    <!-- Copy existing user data into the selected data root.
-         The helper script archives the old tree, restores it under the new
-         parent, and only updates the stored data paths after validation.
+    <!-- ================= ensure the user-data tree ======================= -->
+    <!-- Creates the standard data subfolders and seeds the per-user settings
+         ini files under SEAMLYDATAROOT, so no app needs a manual Preferences >
+         Paths visit to get working path settings. Add-only and non-fatal: the
+         apps fill missing defaults at runtime. Runs on every install that has
+         a resolved data root - fresh, update, AND repair - so a repair can
+         fill in anything missing without disturbing existing files (C2).
+         Deferred and impersonated so it runs as the logged-on user, which
+         matters for OneDrive and mapped drives.
 
-         This runs as the logged-on user so OneDrive and mapped drives work, and
-         it is best-effort: it never overwrites data and a failure does not roll
-         back the install.
-
-         Deferred actions cannot read MSI properties directly, so the command is
-         passed through CustomActionData before it runs. -->
-    <!-- Keep the trailing space before each closing quote. PowerShell trims
-         each argument; without the space, adjacent quoted paths can merge. -->
-    <SetProperty Id="SeamlyCopyUserData"
-                 Action="SetSeamlyOldDataMigration"
-                 Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]smsi_migrate_user_data.ps1&quot; -Mode Old -Destination &quot;[SEAMLYDATAROOT] &quot; -InstallFolder &quot;[INSTALLFOLDER] &quot;"
-                 Before="SeamlyCopyUserData"
+         Keep the trailing space before the closing quote of each argument:
+         PowerShell trims each one, and without the space a trailing backslash
+         in a property value could otherwise escape the quote. -->
+    <SetProperty Id="SeamlyEnsureUserData"
+                 Action="SetSeamlyEnsureUserData"
+                 Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]smsi_ensure_user_data.ps1&quot; -DataRoot &quot;[SEAMLYDATAROOT] &quot; -InstallFolder &quot;[INSTALLFOLDER] &quot;"
+                 Before="SeamlyEnsureUserData"
                  Sequence="execute"
-                 Condition="SEAMLYCOPYUSERDATA = &quot;1&quot; AND SEAMLYDATAROOT AND SEAMLYOLDS2DEXE AND SEAMLYOLDMEEXE AND NOT SEAMLYOLDLAYOUTEXE AND NOT Installed" />
+                 Condition="SEAMLYDATAROOT" />
 
-    <SetProperty Id="SeamlyCopyUserData"
-                 Action="SetSeamlyNewDataMigration"
-                 Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]smsi_migrate_user_data.ps1&quot; -Mode New -Destination &quot;[SEAMLYDATAROOT] &quot; -PreviousDataRoot &quot;[SEAMLYPREVIOUSDATAROOT] &quot; -InstallFolder &quot;[INSTALLFOLDER] &quot;"
-                 Before="SeamlyCopyUserData"
-                 Sequence="execute"
-                 Condition="SEAMLYCOPYUSERDATA = &quot;1&quot; AND SEAMLYDATAROOT AND SEAMLYNEWLAYOUTEXE AND NOT Installed" />
-
-    <CustomAction Id="SeamlyCopyUserData"
+    <CustomAction Id="SeamlyEnsureUserData"
                   DllEntry="WixQuietExec64"
                   BinaryRef="Wix4UtilCA_X64"
                   Execute="deferred"
@@ -274,37 +210,11 @@
                   Return="ignore" />
 
     <!-- After InstallFiles, so the helper script exists on disk; after
-         WriteRegistryValues so the recorded DataRoot is already correct even if
-         the copy is skipped or fails. -->
+         WriteRegistryValues so the recorded DataRoot is already correct. -->
     <InstallExecuteSequence>
-      <Custom Action="SeamlyCopyUserData"
+      <Custom Action="SeamlyEnsureUserData"
               After="WriteRegistryValues"
-              Condition="SEAMLYCOPYUSERDATA = &quot;1&quot; AND SEAMLYDATAROOT AND ((SEAMLYOLDS2DEXE AND SEAMLYOLDMEEXE AND NOT SEAMLYOLDLAYOUTEXE) OR SEAMLYNEWLAYOUTEXE) AND NOT Installed" />
-    </InstallExecuteSequence>
-
-    <!-- Seed the per-user settings directories and INI files so a fresh install
-         works without a manual Preferences > Paths visit. Deferred and
-         impersonated like SeamlyCopyUserData; non-fatal because the apps fill
-         missing defaults at runtime. The script is add-only, so it preserves
-         migrated values and only runs when a data root was recorded. -->
-    <SetProperty Id="SeamlySeedUserSettings"
-                 Action="SetSeamlySeedUserSettings"
-                 Value="&quot;powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[INSTALLFOLDER]smsi_seed_user_settings.ps1&quot; -DataRoot &quot;[SEAMLYDATAROOTRECORDED] &quot; -InstallFolder &quot;[INSTALLFOLDER] &quot;"
-                 Before="SeamlySeedUserSettings"
-                 Sequence="execute"
-                 Condition="SEAMLYDATAROOTRECORDED AND NOT Installed" />
-
-    <CustomAction Id="SeamlySeedUserSettings"
-                  DllEntry="WixQuietExec64"
-                  BinaryRef="Wix4UtilCA_X64"
-                  Execute="deferred"
-                  Impersonate="yes"
-                  Return="ignore" />
-
-    <InstallExecuteSequence>
-      <Custom Action="SeamlySeedUserSettings"
-              After="SeamlyCopyUserData"
-              Condition="SEAMLYDATAROOTRECORDED AND NOT Installed" />
+              Condition="SEAMLYDATAROOT" />
     </InstallExecuteSequence>
 
     <!-- Launch Seamly2D from the Finish page.

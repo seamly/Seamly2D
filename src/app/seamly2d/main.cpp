@@ -125,11 +125,6 @@ int main(int argc, char *argv[])
     {
         window.show();
         msec = 15; // set delay for correct initial zoom
-
-        // one-shot fresh-install notice about newly migrated data
-        // locations and backups. Shows only while the installer-seeded flag
-        // is pending; whichever Seamly app runs first clears it.
-        app.NotifySeamlyDataLocation();
     }
 
     // Process command line arguments after a delay

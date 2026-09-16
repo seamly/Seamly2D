@@ -9,11 +9,12 @@ Marks: **[settled]** built. **[undecided]** open question. **[known defect]** op
 | | Installer (`seamly-x64.msi`) | Application |
 |---|---|---|
 | Runs | once at install time as **LocalSystem** | every launch, per user |
-| Owns | program files, data root choice, migration, HKLM rows, shortcuts, associations, ARP | data directories, runtime settings |
+| Owns | program files, the fixed data root, HKLM rows, shortcuts, associations, ARP | data directories, runtime settings |
 
-Fresh Setup creates the chosen `SeamlyData` root; first launch adds its 9
-subdirectories. Uninstall keeps the root; migration runs impersonated as the
-installing user.
+Fresh Setup creates the fixed `%USERPROFILE%\seamly2d` root and seeds its 9
+subdirectories; an update or repair reuses whatever root an earlier install
+already recorded, adding only what's missing. Uninstall keeps the root either
+way. The seeding step runs impersonated as the installing user.
 
 ### Getting the MSI
 
@@ -31,7 +32,7 @@ Take it from a **release** to download as `*.msi`, not the Actions page where bu
 ```powershell
 msiexec /i seamly-x64.msi                                         # interactive
 msiexec /i seamly-x64.msi /qn                                     # silent, defaults
-msiexec /i seamly-x64.msi /qn SEAMLYDATAPARENT=E:\                # silent, data root E:\SeamlyData
+msiexec /i seamly-x64.msi /qn SEAMLYDATAROOT=E:\seamly2d          # silent, explicit data root
 msiexec /x seamly-x64.msi /qn                                     # silent uninstall
 ```
 
@@ -83,14 +84,14 @@ x64 search finds nothing.
 
 [`smsi.wxs`](smsi.wxs) is the hub: it holds `<Package>` and everything the
 linker needs to see there — identity, upgrade, ARP, the properties the
-dialogs read, the launch conditions, the user-data copy action. It pulls in
+dialogs read, the launch conditions, the user-data-ensure action. It pulls in
 five fragment files by reference (`UIRef`/`ComponentGroupRef`); a fragment
 nothing refers to is dropped without error, so the MSI still builds and
 quietly lacks that whole area.
 
 | File | Owns |
 |---|---|
-| `smsi.wxs` | `<Package>`, upgrade/ARP, data-root properties, migration and seeding custom actions |
+| `smsi.wxs` | `<Package>`, upgrade/ARP, data-root properties, the user-data-ensure custom action |
 | `smsi_ui.wxs` | the wizard: every dialog and transition |
 | `smsi_legacy.wxs` | detection (`RegistrySearch`/`FileSearch`) and removal of the pre-MSI install |
 | `smsi_files.wxs` | directory tree, the three executables, Start Menu shortcuts, file associations |
@@ -127,37 +128,45 @@ machine. Parameter table: [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md).
 3. Fresh install or repair-from-nothing: `WelcomeDlg` → `LicenseAgreementDlg`.
 4. Old app without Layout, or new Layout found → `SeamlyPreviousInstallDlg`
    (upgrade and/or NSIS paragraph); case A / repair skips straight to 5.
-5. Wizard: `SeamlyDataDirDlg` → `SeamlyDataMigrateDlg` (if a prior
-   install exists) → `SeamlyShortcutsDlg` → `VerifyReadyDlg`. No
-   program-directory page: `INSTALLFOLDER` is fixed to
-   `%ProgramFiles%\SeamlyApps` and never asked about.
+5. Wizard: [`SeamlyPreviousInstallDlg` →] [`SeamlyDataLocationDlg` →]
+   `SeamlyShortcutsDlg` → `VerifyReadyDlg`. `SeamlyDataLocationDlg` is a
+   read-only page — it appears only when an earlier install already
+   recorded a `DataRoot`, shows that fixed path, and offers only Back,
+   Continue, or Cancel. On a true fresh install neither bracketed page
+   appears: the data root is created silently. No program-directory page
+   either: `INSTALLFOLDER` is fixed to `%ProgramFiles%\SeamlyApps` and never
+   asked about.
 6. Install files; write HKLM per-app keys ×3, shortcuts, 3 associations, ARP.
 7. Upgrade detected → `RemoveExistingProducts` (removes older MSI + its dir).
 8. NSIS present → remove its dir, Start Menu folder, registry keys.
    `uninstall.exe` never run (interactive, `RMDir /r`, no rollback).
-9. Migration selected → archive+extract into `SeamlyData`, merge settings
-   (retain non-path settings, replace path settings).
-10. Root recorded → `smsi_seed_user_settings.ps1` (deferred, impersonated,
-    non-fatal, after migration) seeds `%LOCALAPPDATA%\Seamly`: `qt6_common.ini`
-    and `Seamly2D\qt6_seamly2d.ini` get every missing `[paths]` key,
-    `SeamlyMe\qt6_seamlyme.ini` is created empty,
-    `SeamlyLayout\qt6_seamlylayout.ini` gets the complete 11-key set
-    (`PreferencesModel::load()` takes an existing ini as authoritative, so a
-    partial one must never be written). Add-only: migrated or existing values
-    always win. No app needs a Preferences > Paths visit, and no app seeds
-    its own ini on an installed machine.
+9. Data root resolved → `smsi_ensure_user_data.ps1` (deferred, impersonated,
+   non-fatal, after `WriteRegistryValues`) creates the 9 standard
+   subdirectories under the data root if missing, then seeds
+   `%LOCALAPPDATA%\Seamly`: `qt6_common.ini` and `Seamly2D\qt6_seamly2d.ini`
+   get every missing `[paths]` key, `SeamlyMe\qt6_seamlyme.ini` is created
+   empty, `SeamlyLayout\qt6_seamlylayout.ini` gets the complete 11-key set
+   (`PreferencesModel::load()` takes an existing ini as authoritative, so a
+   partial one must never be written). Add-only throughout: an existing
+   directory, file or key is never touched. Runs on every install with a
+   resolved data root — fresh, update, **and repair** — so a repair can fill
+   in anything missing. No app needs a Preferences > Paths visit, and no app
+   seeds its own ini on an installed machine.
 
 **Maintenance (repair/uninstall, `Installed` true):**
 `MaintenanceWelcomeDlg` → `SeamlyMaintenanceTypeDlg` → `VerifyReadyDlg`.
 The middle page replaces stock `MaintenanceTypeDlg` to add the installed
 `SEAMLYINSTALLEDVERSION` note; otherwise identical. A patch keeps the stock
-shortcut `WelcomeDlg` → `VerifyReadyDlg`. None of steps 3-5 run on this path.
+shortcut `WelcomeDlg` → `VerifyReadyDlg`. None of steps 3-5 run on this path;
+step 9 (ensure user data) still runs, silently, so a repair can fill in
+anything missing from the data root without showing any page.
 
 - Own dialog set — every transition self-authored;
   stock `WixUI_InstallDir` can't be extended this way.
-- Previous-install page skips repair/uninstall (`AND NOT Installed`).
-- `/qn` shows no page — pass `SEAMLYDATAPARENT`/`SEAMLYDATAROOT`,
-  `SEAMLYCOPYUSERDATA`, `SEAMLYDESKTOPSHORTCUTS` to override defaults.
+- Previous-install and data-location pages both skip repair/uninstall
+  (`AND NOT Installed` / `Installed` guards).
+- `/qn` shows no page — pass `SEAMLYDATAROOT`, `SEAMLYDESKTOPSHORTCUTS` to
+  override defaults.
 
 ## Application flow — user-data root, first launch
 
@@ -166,16 +175,11 @@ independent of install method. First match wins:
 
 1. `paths/dataRoot` already set in `qt6_common.ini` → use unchanged.
 2. Setup recorded a root in the registry → use that (normal MSI outcome).
-3. Default root missing AND the legacy root is a directory → adopt it in
-   place, nothing moved or copied (normal case-B outcome). Probes `~/seamly2d`.
-4. Otherwise → `<Documents>/SeamlyData`.
+3. Otherwise → the built-in default, `~/seamly2d`.
 
-Then `ensureDataRootTree` creates the 9 subfolders (additive only). If a
-legacy root exists, isn't the chosen root, and holds no files anywhere,
-remove the empty skeleton (`rmdir` only, deepest first) — never deletes a
-file, never touches a non-empty directory, never `removeRecursively()`.
+Then `ensureDataRootTree` creates the 9 subfolders (additive only).
 
-Setup's promise (`InstallerRecord::dataRoot()`) outranks built-in defaults
+Setup's promise (`InstallerRecord::dataRoot()`) outranks the built-in default
 but sits below `paths/dataRoot`, so later Preferences changes still win.
 Seeding happens only in the apps, never inside `initializeDataRoot()` (unit
 tests call that directly).
@@ -184,7 +188,7 @@ tests call that directly).
 
 | Concern | File |
 |---|---|
-| Package identity, upgrade, ARP, data-root properties, migration/seeding actions | `smsi.wxs` |
+| Package identity, upgrade, ARP, data-root properties, the ensure-user-data action | `smsi.wxs` |
 | Wizard dialogs and transitions | `smsi_ui.wxs` |
 | Legacy-NSIS detection and removal | `smsi_legacy.wxs` |
 | Directory tree, executables, Start Menu shortcuts, file associations | `smsi_files.wxs` |
@@ -193,5 +197,5 @@ tests call that directly).
 | Staging, version mapping, `wix build` over every `*.wxs` | `smsi.ps1` |
 | Only invocation | `.github/workflows/ci.yml`, job `windows-msi` |
 | Built-package / real-install assertions | `smsi_check_authoring.ps1`, `local_install_msi.ps1` |
-| Data root resolution/seeding/pruning | `src/libs/vmisc/vcommonsettings.cpp` |
+| Data root resolution/seeding | `src/libs/vmisc/vcommonsettings.cpp` |
 | App call sites | `application_2d.cpp`, `application_me.cpp` |
