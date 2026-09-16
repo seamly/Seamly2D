@@ -55,9 +55,7 @@
 #include <QApplication>
 #include <QCoreApplication>
 #include <QDate>
-#include <QDateTime>
 #include <QDir>
-#include <QDirIterator>
 #include <QFile>
 #include <QFileInfo>
 #include <QColorDialog>
@@ -69,11 +67,8 @@
 #include <QStandardPaths>
 #include <QString>
 #include <QStringConverter>
-#include <QTextStream>
 #include <QVariant>
 #include <QtDebug>
-
-#include <algorithm>
 
 #include "../ifc/ifcdef.h"
 #include "../vmisc/def.h"
@@ -91,13 +86,6 @@ const QString settingPathsTemplates                      = QStringLiteral("paths
 const QString settingPathsBodyScans                      = QStringLiteral("paths/bodyscans");
 const QString settingPathsLabelTemplate                  = QStringLiteral("paths/labels");
 const QString settingBackupPath                          = QStringLiteral("paths/backups");
-
-// One-shot cross-application notice flags. The Windows installer seeds
-// "pending" on a fresh machine; the first Seamly app to run shows the notice
-// and writes "shown". Absent on dev builds and non-installer platforms.
-const QString settingNoticesFirstRunData                 = QStringLiteral("notices/firstRunDataNotice");
-const QString noticeStatePending                         = QStringLiteral("pending");
-const QString noticeStateShown                           = QStringLiteral("shown");
 
 const QString settingConfigurationCompanyName            = QStringLiteral("graphicsview/companyName");
 const QString settingConfigurationContact                = QStringLiteral("graphicsview/contact");
@@ -518,35 +506,6 @@ void VCommonSettings::setCommonSettingsBaseDir(const QString &baseDir)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief firstRunNoticePending reports whether the one-shot first-run data notice is due.
- *
- * The Windows installer writes notices/firstRunDataNotice=pending into qt6_common.ini
- * when it creates that file on a fresh machine. The first Seamly application to run
- * shows the notice and calls markFirstRunNoticeShown(). When the key is absent — dev
- * builds, platforms without an installer, upgrades — no notice is due.
- *
- * @return true only while the key holds "pending".
- */
-bool VCommonSettings::firstRunNoticePending()
-{
-    const QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
-    return settings.value(settingNoticesFirstRunData).toString() == noticeStatePending;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief markFirstRunNoticeShown records that the first-run data notice was shown.
- *
- * Sets the flag to "shown" so no later application run repeats the notice.
- */
-void VCommonSettings::markFirstRunNoticeShown()
-{
-    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
-    settings.setValue(settingNoticesFirstRunData, noticeStateShown);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
  * @brief migrateCommonSettingsLocation brings an existing common settings file forward
  * into commonSettingsFilePath().
  *
@@ -608,39 +567,13 @@ QString VCommonSettings::migrateCommonSettingsLocation()
 /**
  * @brief getDefaultDataRoot returns the built-in default root of the user's data tree.
  *
- * The root is <Documents>/SeamlyData: Documents, not the home directory, because these
- * are files the user creates, opens, saves and backs up, so they belong where every
- * other application puts documents. Internal state — settings, caches, logs — stays in
- * the platform's application-data locations and is deliberately NOT mixed in here.
+ * The root is ~/seamly2d, directly under the user's home directory, matching the fixed
+ * location the Windows installer creates on a fresh install (Setup no longer offers a
+ * choice of folder).
  *
- * QStandardPaths::DocumentsLocation is used rather than a hand-built path because it
- * resolves the Windows known-folder API (so a redirected or OneDrive-backed Documents is
- * honoured) and XDG_DOCUMENTS_DIR on Linux, where a localized system may not call the
- * folder "Documents" at all. It falls back to the home directory on the rare system that
- * reports no documents location, which keeps the result absolute in every case.
- *
- * @return absolute path of the default user-data root, e.g. C:/Users/<user>/Documents/SeamlyData.
+ * @return absolute path of the default user-data root, e.g. C:/Users/<user>/seamly2d.
  */
 QString VCommonSettings::getDefaultDataRoot()
-{
-    QString documents = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-    if (documents.isEmpty())
-    {
-        documents = QDir::homePath();
-    }
-    return QDir::cleanPath(documents) + QLatin1String("/SeamlyData");
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief getLegacyDataRoot returns the pre-Task-34 default root of the user's data tree.
- *
- * Kept so first-run resolution can spot an existing installation's data and adopt it
- * instead of stranding the user's patterns and measurements at the old location.
- *
- * @return absolute path of the legacy user-data root, e.g. C:/Users/<user>/seamly2d.
- */
-QString VCommonSettings::getLegacyDataRoot()
 {
     return QDir::homePath() + QLatin1String("/seamly2d");
 }
@@ -751,264 +684,6 @@ bool VCommonSettings::ensureDataRootTree(const QString &root)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief migrationMarkerFileName names the breadcrumb left in a tree that has been migrated.
- */
-static const QString migrationMarkerFileName = QStringLiteral("MIGRATED-TO-SEAMLY.txt");
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief dataTreeWasMigrated reports whether a legacy tree already carries the marker.
- *
- * @param root tree to test.
- * @return true when the marker file is present.
- */
-bool VCommonSettings::dataTreeWasMigrated(const QString &root)
-{
-    if (root.isEmpty())
-    {
-        return false;
-    }
-    return QFileInfo::exists(root + QLatin1Char('/') + migrationMarkerFileName);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief migrateDataTree copies a whole user-data tree to a new root (Task 60).
- *
- * Copies EVERY file and directory found under sourceRoot, not a known list of subfolders.
- * That is deliberate and is the single most important property of this function: users add
- * their own directories to the data tree — Projects, bodyscans and others have been seen in
- * the wild — so migrating a fixed list would silently strand whatever the list did not
- * mention. The structure is reproduced exactly; only the root's name changes.
- *
- * The safety rules, each of which exists because the alternative loses data:
- *
- *  - **Never a rename or a move.** The source tree is left completely intact so a user can
- *    roll back to an earlier release, which is why the caller can also mark it rather than
- *    delete it. Nothing here removes anything, ever.
- *  - **Merge, never overwrite.** An existing destination file is skipped and counted, not
- *    clobbered — the destination may be an already-populated folder.
- *  - **Verify every copy.** Sizes are compared after each file, because a cloud-synced
- *    target (Google Drive, OneDrive, Dropbox) can report a write complete before it is
- *    durable. A file that does not verify aborts the migration.
- *  - **Fail safe.** On any error the function stops, removes only the partial file it was
- *    writing at that moment, and returns false with the source untouched. A half-copied
- *    destination must never become the configured root, so the caller must not record the
- *    new root unless this returned true.
- *
- * @param sourceRoot      tree to copy from; must exist.
- * @param destinationRoot tree to copy to; created if missing.
- * @param filesCopied     optional out-parameter, number of files actually copied.
- * @param filesSkipped    optional out-parameter, number already present at the destination.
- * @param errorMessage    optional out-parameter, human-readable reason for a false return.
- * @return true when every file is present and verified at the destination.
- */
-bool VCommonSettings::migrateDataTree(const QString &sourceRoot, const QString &destinationRoot,
-                                      int *filesCopied, int *filesSkipped, QString *errorMessage)
-{
-    const auto fail = [errorMessage](const QString &reason)
-    {
-        if (errorMessage != nullptr)
-        {
-            *errorMessage = reason;
-        }
-        qWarning() << "Data-tree migration failed:" << reason;
-        return false;
-    };
-
-    if (filesCopied != nullptr)  { *filesCopied = 0; }
-    if (filesSkipped != nullptr) { *filesSkipped = 0; }
-    if (errorMessage != nullptr) { errorMessage->clear(); }
-
-    const QString source = QDir::cleanPath(QDir::fromNativeSeparators(sourceRoot.trimmed()));
-    const QString destination = QDir::cleanPath(QDir::fromNativeSeparators(destinationRoot.trimmed()));
-
-    if (source.isEmpty() || destination.isEmpty())
-    {
-        return fail(QStringLiteral("source or destination path is empty"));
-    }
-    if (!QFileInfo(source).isDir())
-    {
-        return fail(QStringLiteral("source '%1' is not a directory").arg(source));
-    }
-#ifdef Q_OS_WIN
-    const Qt::CaseSensitivity caseSensitivity = Qt::CaseInsensitive;
-#else
-    const Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive;
-#endif
-    if (source.compare(destination, caseSensitivity) == 0)
-    {
-        return fail(QStringLiteral("source and destination are the same directory"));
-    }
-    // Copying a tree into its own subdirectory would recurse without end.
-    if (destination.startsWith(source + QLatin1Char('/'), caseSensitivity))
-    {
-        return fail(QStringLiteral("destination '%1' lies inside the source tree").arg(destination));
-    }
-
-    QDir destinationDir(destination);
-    if (!destinationDir.mkpath(QStringLiteral(".")))
-    {
-        return fail(QStringLiteral("could not create '%1'").arg(destination));
-    }
-
-    const QDir sourceDir(source);
-    int copied = 0;
-    int skipped = 0;
-
-    QDirIterator iterator(source, QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden,
-                          QDirIterator::Subdirectories);
-    while (iterator.hasNext())
-    {
-        const QString entryPath = iterator.next();
-        const QFileInfo entry(entryPath);
-        const QString relative = sourceDir.relativeFilePath(entryPath);
-        const QString target = destination + QLatin1Char('/') + relative;
-
-        if (entry.isDir())
-        {
-            if (!destinationDir.mkpath(relative))
-            {
-                return fail(QStringLiteral("could not create '%1'").arg(target));
-            }
-            continue;
-        }
-
-        if (QFileInfo::exists(target))
-        {
-            // Merge, never overwrite. Reported so a collision is visible rather than silent.
-            ++skipped;
-            qDebug() << "Data-tree migration skipped existing file" << QDir::toNativeSeparators(target);
-            continue;
-        }
-
-        // The parent may not exist yet: QDirIterator does not guarantee a directory is
-        // visited before the files inside it.
-        const QString targetParent = QFileInfo(target).absolutePath();
-        if (!QDir().mkpath(targetParent))
-        {
-            return fail(QStringLiteral("could not create '%1'").arg(targetParent));
-        }
-
-        if (!QFile::copy(entryPath, target))
-        {
-            return fail(QStringLiteral("could not copy '%1' to '%2'").arg(entryPath, target));
-        }
-
-        // Verify, because a cloud-synced destination can report success early.
-        if (QFileInfo(target).size() != entry.size())
-        {
-            QFile::remove(target);
-            return fail(QStringLiteral("copy of '%1' did not verify (expected %2 bytes)")
-                            .arg(entryPath)
-                            .arg(entry.size()));
-        }
-        ++copied;
-    }
-
-    if (filesCopied != nullptr)  { *filesCopied = copied; }
-    if (filesSkipped != nullptr) { *filesSkipped = skipped; }
-    return true;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief migrateAdoptedLegacyTree turns a first-run adoption into a Task 60 migration.
- *
- * initializeDataRoot() still *adopts* a legacy tree — it resolves and records a path and
- * touches no files, which is what keeps it safe for the unit tests to call. This function
- * is the second half, and it is deliberately called only from the applications'
- * openSettings(), the one place the real home directory is fed in. The tests therefore
- * cannot copy anything into the developer's home no matter what they resolve, which is the
- * same rule pruneEmptyLegacyDataRoot() and ensureDataRootTree() follow.
- *
- * Fail-safe by construction: the configured root is only repointed at newRoot after the
- * copy has completed and verified. If anything goes wrong the legacy tree stays configured
- * and in use, so the worst case is that the user carries on exactly as before.
- *
- * @param legacyRoot the adopted tree, e.g. ~/seamly2d.
- * @param newRoot    where it should live now, e.g. <Documents>/SeamlyData.
- * @return the root actually in force afterwards — newRoot on success, legacyRoot on failure.
- */
-QString VCommonSettings::migrateAdoptedLegacyTree(const QString &legacyRoot, const QString &newRoot)
-{
-    if (legacyRoot.isEmpty() || newRoot.isEmpty() || !QFileInfo(legacyRoot).isDir())
-    {
-        return legacyRoot;
-    }
-
-    // Already dealt with on an earlier run: leave the marked tree alone.
-    if (dataTreeWasMigrated(legacyRoot))
-    {
-        return legacyRoot;
-    }
-
-    int copied = 0;
-    int skipped = 0;
-    QString errorMessage;
-    if (!migrateDataTree(legacyRoot, newRoot, &copied, &skipped, &errorMessage))
-    {
-        qWarning() << "Keeping the existing data root" << QDir::toNativeSeparators(legacyRoot)
-                   << "because migration failed:" << errorMessage;
-        return legacyRoot;
-    }
-
-    qInfo() << "Migrated the user-data tree from" << QDir::toNativeSeparators(legacyRoot) << "to"
-            << QDir::toNativeSeparators(newRoot) << '-' << copied << "file(s) copied," << skipped
-            << "already present";
-
-    // Only now is it safe to repoint the configured root.
-    QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
-    settings.setValue(settingPathsDataRoot, newRoot);
-    settings.sync();
-
-    markDataTreeMigrated(legacyRoot, newRoot);
-    return newRoot;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief markDataTreeMigrated writes the breadcrumb that retires a migrated legacy tree.
- *
- * The legacy tree is deliberately kept — a user may need to roll back to an earlier release
- * — so it needs to be obvious to both the code and a human that it is no longer live. The
- * marker stops initializeDataRoot() offering the same tree again on the next run, and its
- * contents tell a person opening the folder where their files went and when.
- *
- * A failure here is not fatal to the migration that preceded it: the files are already
- * copied and verified. It is reported and ignored.
- *
- * @param legacyRoot tree that was migrated away from.
- * @param newRoot    where its contents now live.
- * @return true when the marker was written.
- */
-bool VCommonSettings::markDataTreeMigrated(const QString &legacyRoot, const QString &newRoot)
-{
-    if (legacyRoot.isEmpty() || !QFileInfo(legacyRoot).isDir())
-    {
-        return false;
-    }
-
-    QFile marker(legacyRoot + QLatin1Char('/') + migrationMarkerFileName);
-    if (!marker.open(QIODevice::WriteOnly | QIODevice::Text))
-    {
-        qWarning() << "Could not write the migration marker in" << QDir::toNativeSeparators(legacyRoot);
-        return false;
-    }
-
-    QTextStream stream(&marker);
-    stream << "This folder has been migrated and is no longer used by the Seamly "
-              "applications.\r\n\r\n"
-           << "Your files were copied to:\r\n    " << QDir::toNativeSeparators(newRoot) << "\r\n\r\n"
-           << "Date: " << QDateTime::currentDateTime().toString(Qt::ISODate) << "\r\n\r\n"
-           << "Nothing here was deleted. Once you are satisfied that everything is present "
-              "at the new location, this folder can be removed.\r\n";
-    marker.close();
-    return true;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
  * @brief rebaseOntoDataRoot follows a path from an old data root into a new one.
  *
  * Preferences → Paths writes every row back as an explicit absolute override, so without
@@ -1056,39 +731,23 @@ QString VCommonSettings::rebaseOntoDataRoot(const QString &path, const QString &
 /**
  * @brief initializeDataRoot resolves the user-data root once, at application start-up.
  *
- * Called before any data path is read, from every application's openSettings(). Four cases:
+ * Called before any data path is read, from every application's openSettings(). Three cases:
  *
  *  1. A root is already configured — honour it untouched.
- *  2. Nothing configured, and the Windows installer recorded one — adopt it. The user
- *     chose that folder on Setup's "Where do you keep your work?" page and was told the
- *     apps would use it, so it outranks every default below.
- *  3. Nothing configured or recorded, and a populated legacy ~/seamly2d tree exists while
- *     the default root does not — adopt the legacy tree *in place* as the root. Adoption
- *     rather than copying is deliberate: an upgrading user's patterns and measurements can
- *     be many gigabytes and may sit on a cloud-synced drive, so nothing is moved, copied
- *     or deleted and the data keeps working from the moment the app starts.
- *  4. Otherwise — a fresh install — use the built-in default.
+ *  2. Nothing configured, and the Windows installer recorded one — adopt it. The MSI seeds
+ *     paths/dataRoot at install time (smsi_ensure_user_data.ps1), so an installed Windows
+ *     machine normally takes case 1 on every run after the first; this is the bridge for
+ *     that first run.
+ *  3. Otherwise — no installer record, e.g. the macOS dmg, the Linux AppImage, a dev build,
+ *     or another Windows account on a shared machine — use the built-in default.
  *
  * The resolved root is written back so later runs take case 1 and the value is visible to
  * the other applications and to Preferences → Paths.
  *
- * Cases 2–4 are DEPRECATED first-run seeding (Task SettingsFiles.3, 2026-08-31). The
- * Windows MSI seeds paths/dataRoot at install time (smsi_seed_user_settings.ps1), so an
- * installed Windows machine takes case 1. The fallbacks stay only for packages with no
- * install hook — the macOS dmg, the Linux AppImage, dev builds — and for other Windows
- * accounts on a shared machine. Remove them when those packages gain install-time seeding.
- *
- * @param adoptedLegacyTree optional out-parameter, set to true when case 3 applied; pass
- * null when the caller does not care.
  * @return absolute path of the resolved user-data root.
  */
-QString VCommonSettings::initializeDataRoot(bool *adoptedLegacyTree)
+QString VCommonSettings::initializeDataRoot()
 {
-    if (adoptedLegacyTree != nullptr)
-    {
-        *adoptedLegacyTree = false;
-    }
-
     QSettings settings(commonSettingsFilePath(), QSettings::IniFormat);
 
     const QString configured = settings.value(settingPathsDataRoot).toString().trimmed();
@@ -1098,10 +757,9 @@ QString VCommonSettings::initializeDataRoot(bool *adoptedLegacyTree)
         return QDir::cleanPath(QDir::fromNativeSeparators(configured));
     }
 
-    // Case 2: the Windows installer recorded the folder the user chose. It outranks both the
-    // legacy tree and the built-in default, because the user was shown that path and told the
-    // apps would use it. Recorded here, so later runs take case 1 and a change made in
-    // Preferences is never overridden by the installer.
+    // Case 2: the Windows installer recorded the fixed data root it created or found.
+    // Recorded here, so later runs take case 1 and a change made in Preferences is never
+    // overridden by the installer.
     const QString fromInstaller = InstallerRecord::dataRoot();
     if (!fromInstaller.isEmpty())
     {
@@ -1110,145 +768,13 @@ QString VCommonSettings::initializeDataRoot(bool *adoptedLegacyTree)
         return fromInstaller;
     }
 
-    const QString resolved = chooseFirstRunDataRoot(
-        getDefaultDataRoot(), { getLegacyDataRoot() }, adoptedLegacyTree);
+    // Case 3: no installer record — use the built-in default.
+    const QString resolved = getDefaultDataRoot();
 
     settings.setValue(settingPathsDataRoot, resolved);
     settings.sync();
 
     return resolved;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief chooseFirstRunDataRoot picks between the new and the legacy data roots.
- *
- * Split out of initializeDataRoot() so the decision can be exercised against throwaway
- * directories: it takes every candidate root as an argument and reads no settings and no
- * home directory of its own. Nothing here creates, moves or deletes anything — the choice
- * is a settings value, and an adopted legacy tree stays exactly where it is.
- *
- * @param defaultRoot the built-in default root, normally <Documents>/SeamlyData.
- * @param legacyRoots superseded roots in probe order, newest first — normally the
- * pre-Task-34 ~/seamly2d. The first that is an existing directory wins, because a user
- * who upgraded through several eras has live data at the newest location and migration
- * markers at the older ones.
- * @param adoptedLegacyTree optional out-parameter, set to true when a legacy tree was
- * adopted; pass null when the caller does not care.
- * @return the first legacyRoots entry that is an existing directory, when defaultRoot does
- * not exist yet; otherwise defaultRoot.
- */
-QString VCommonSettings::chooseFirstRunDataRoot(const QString &defaultRoot, const QStringList &legacyRoots,
-                                                bool *adoptedLegacyTree)
-{
-    if (adoptedLegacyTree != nullptr)
-    {
-        *adoptedLegacyTree = false;
-    }
-
-    if (!QFileInfo::exists(defaultRoot))
-    {
-        for (const QString &legacyRoot : legacyRoots)
-        {
-            if (QFileInfo(legacyRoot).isDir())
-            {
-                // Upgrading from a build with an older default: adopt that tree in place.
-                if (adoptedLegacyTree != nullptr)
-                {
-                    *adoptedLegacyTree = true;
-                }
-                return legacyRoot;
-            }
-        }
-    }
-
-    return defaultRoot;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief pruneEmptyLegacyDataRoot removes the abandoned legacy data root when it holds no files.
- *
- * Renaming the default root leaves the old ~/seamly2d behind, and ensureDataRootTree() will
- * have stocked it with the nine standard subfolders, so what remains after the move is an
- * empty skeleton that looks like data but is not. This deletes that skeleton.
- *
- * Two conditions gate it, and both matter:
- *
- *  - the legacy root must not be the configured root. Task 34's first-run rule *adopts* an
- *    existing ~/seamly2d in place, so for an upgrading user that directory is the live data
- *    tree. Deleting it there would destroy exactly the patterns adoption set out to preserve.
- *  - the tree must contain no files at any depth. One stray file and nothing is removed.
- *
- * Only empty directories are then removed, deepest first, via QDir::rmdir() — which cannot
- * delete a file and refuses a non-empty directory. removeRecursively() is never used: this
- * function must not be capable of deleting anything it has not counted.
- *
- * @param legacyRoot the legacy root to prune, normally getLegacyDataRoot().
- * @param configuredRoot the data root actually in use; pruning is skipped when they match.
- * @return true when the legacy root was removed, false when it was kept for any reason.
- */
-bool VCommonSettings::pruneEmptyLegacyDataRoot(const QString &legacyRoot, const QString &configuredRoot)
-{
-    // Windows path comparison is case-insensitive; POSIX filesystems are not.
-#ifdef Q_OS_WIN
-    const Qt::CaseSensitivity caseSensitivity = Qt::CaseInsensitive;
-#else
-    const Qt::CaseSensitivity caseSensitivity = Qt::CaseSensitive;
-#endif
-
-    const QString legacy     = QDir::cleanPath(QDir::fromNativeSeparators(legacyRoot.trimmed()));
-    const QString configured = QDir::cleanPath(QDir::fromNativeSeparators(configuredRoot.trimmed()));
-
-    if (legacy.isEmpty() || !QFileInfo(legacy).isDir())
-    {
-        return false;
-    }
-
-    // The live data tree of an upgrading user — never touch it.
-    if (legacy.compare(configured, caseSensitivity) == 0)
-    {
-        return false;
-    }
-
-    // A configured root *inside* the legacy root (e.g. ~/seamly2d/patterns) would be taken
-    // down with its parent, so treat that as occupied too.
-    if (configured.startsWith(legacy + QLatin1Char('/'), caseSensitivity))
-    {
-        return false;
-    }
-
-    QDirIterator files(legacy, QDir::Files | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot,
-                       QDirIterator::Subdirectories);
-    if (files.hasNext())
-    {
-        return false;
-    }
-
-    // Deepest first, so each rmdir() sees an already-emptied directory.
-    QStringList directories;
-    QDirIterator subdirectories(legacy, QDir::Dirs | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot,
-                                QDirIterator::Subdirectories);
-    while (subdirectories.hasNext())
-    {
-        directories.append(subdirectories.next());
-    }
-
-    std::sort(directories.begin(), directories.end(),
-              [](const QString &first, const QString &second) { return first.length() > second.length(); });
-
-    for (const QString &directory : qAsConst(directories))
-    {
-        QDir().rmdir(directory);
-    }
-
-    if (!QDir().rmdir(legacy))
-    {
-        qWarning() << "Could not remove the empty legacy data root" << QDir::toNativeSeparators(legacy);
-        return false;
-    }
-
-    return true;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

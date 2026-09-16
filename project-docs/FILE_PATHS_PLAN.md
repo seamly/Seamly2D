@@ -4,9 +4,7 @@ I recommend using **`Seamly` as the suite-level directory**, with separate subdi
 
 - Notes:
   - Application data includes settings, configuration, caches, logs, downloaded resources, recovery files, and other files managed internally by the software. Internal configuration and caches should remain in the operating system’s application-data locations.
-  - User Data means files the user creates, opens, saves, manages, backs up, or transfers: patterns, measurement files, layouts, exports, templates, and projects. Users should see and manage `Documents/SeamlyData` or similar.
-
-For the transition, the new build should detect the legacy `seamly2d` directory and migrate or adopt it automatically. It should not simply rename the folder, because users may need to roll back to an earlier release. A copy-and-verify migration, followed by leaving the legacy directory intact or clearly marking it as migrated, would be safer.
+  - User Data means files the user creates, opens, saves, manages, backs up, or transfers: patterns, measurement files, layouts, exports, templates, and projects. Users should see and manage `~/seamly2d`, the fixed default the Windows installer creates and every app's `getDefaultDataRoot()` returns.
 
 ### Windows
 
@@ -50,7 +48,7 @@ For the transition, the new build should detect the legacy `seamly2d` directory 
   | Logs                 | `%LOCALAPPDATA%\seamly\<application>\logs\`     |
   | Recovery/autosave    | `%LOCALAPPDATA%\seamly\<application>\recovery\` |
   | Shared internal data | `%LOCALAPPDATA%\seamly\shared\`                 |
-  | User data            | `%HOME\Documents\SeamlyData\                                 |
+  | User data            | `%USERPROFILE%\seamly2d\`                       |
 
 ### Linux
 
@@ -73,7 +71,7 @@ For the transition, the new build should detect the legacy `seamly2d` directory 
 | Logs                 | `~/.local/state//seamly/<application>/logs`      |
 | Recovery/autosave    | `~/.local/state//seamly/<application>/recovery/` |
 | Shared internal data | `~/.local/share/seamly/`                         |
-| User data            | `~/Documents/SeamlyData/`                        |
+| User data            | `~/seamly2d/`                                    |
 
 ### macOS
 
@@ -89,7 +87,7 @@ For the transition, the new build should detect the legacy `seamly2d` directory 
 | Logs                 | `~/Library/Logs/seamly/<application>/`                         |
 | Recovery/autosave    | `~/Library/Application/seamly/<application>/recovery/`         |
 | Shared internal data | `~/Library/Application/seamly/shared/`                         |
-| User data            | `~/Documents/SeamlyData/`                                      |
+| User data            | `~/seamly2d/`                                                  |
 
 Persistent application data:
 

@@ -126,19 +126,12 @@ void TestApplication2D::openSettings()
     // common settings file forward to its new location — it never modifies or deletes.
     VCommonSettings::migrateCommonSettingsLocation();
 
-    // Task 34 called VCommonSettings::initializeDataRoot() here to mirror
-    // Application2D::openSettings(). Task 53 removed it, along with the matching
-    // pruneEmptyLegacyDataRoot() call the real application makes after it.
-    //
-    // This constructor runs before any test's initTestCase(), so whatever it calls executes
-    // against the developer's REAL settings and home directory, not a QTemporaryDir. That was
-    // tolerable while those functions only copied values forward. It stopped being tolerable
-    // once they delete: pruning removes an empty ~/seamly2d. Running the test suite must not
-    // mutate the machine it runs on.
-    //
-    // Nothing is lost by leaving them out — TST_DataRoot calls both directly, with QSettings
-    // redirected at a temporary directory and throwaway roots passed as arguments. Do not
-    // "restore" these calls for symmetry with the application.
+    // VCommonSettings::initializeDataRoot() is deliberately not called here, even though
+    // Application2D::openSettings() calls it. This constructor runs before any test's
+    // initTestCase(), so whatever it calls executes against the developer's REAL settings and
+    // home directory, not a QTemporaryDir. TST_DataRoot exercises data-root resolution
+    // directly, with QSettings redirected at a temporary directory and throwaway roots passed
+    // as arguments. Do not "restore" this call for symmetry with the application.
 
     const QString qt6Settings = MigrateSeamlySettingsLocation(
         QStringLiteral("qt6_seamly2d.ini"),

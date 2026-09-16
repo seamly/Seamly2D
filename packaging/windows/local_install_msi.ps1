@@ -222,34 +222,24 @@ function Get-DataRootPath {
     if (-not [string]::IsNullOrWhiteSpace($recorded)) {
         return $recorded.TrimEnd('\')
     }
-    return (Join-Path ([Environment]::GetFolderPath('MyDocuments')) 'SeamlyData')
+    return (Join-Path $env:USERPROFILE 'seamly2d')
 }
 
 #------------------------------------------------------------------------------
 # @brief  Take an inventory of every tree the installer promises not to touch.
 #
-# Keep this inventory fixed instead of using only the current data root. An
-# upgrade may reuse ~/seamly2d, while the configured root can change after the
-# apps run. Tracking both legacy and candidate roots, plus the settings folders,
+# Keep this inventory fixed instead of using only the current data root: the
+# configured root can change after the apps run, and an upgrade or repair
+# reuses whatever an earlier install already recorded, which may differ from
+# the fixed fresh-install default. Tracking both, plus the settings folders,
 # keeps the baseline stable and ensures existing user data is covered.
-#
-# Listing the configured root, both candidate roots and both settings folders
-# keeps the comparison stable across phases whichever root ends up live.
 #
 # @return array of inventory objects, de-duplicated by path
 #------------------------------------------------------------------------------
 function Get-UserDataInventory {
-    # Documents is resolved through the shell rather than assumed to be
-    # %USERPROFILE%\Documents: it is routinely redirected, and a OneDrive-backed
-    # profile puts it somewhere else entirely - which is exactly why the app
-    # resolves it through QStandardPaths rather than building the path by hand.
-    $documents = [Environment]::GetFolderPath('MyDocuments')
-
     $paths = @(
         (Get-DataRootPath),
-        (Join-Path $documents 'SeamlyData'),      # what the MSI offers
-        (Join-Path $env:USERPROFILE 'seamlyData'), 
-        (Join-Path $env:USERPROFILE 'seamly2d'),   # the original, still the source of a migration
+        (Join-Path $env:USERPROFILE 'seamly2d'),   # the fixed fresh-install default
         (Join-Path $env:LOCALAPPDATA 'Seamly'),
         (Join-Path $env:APPDATA 'Seamly')
     )
@@ -618,10 +608,6 @@ function Invoke-InstalledChecks {
         foreach ($key in @('dataRoot', 'individual_size_measurements', 'multi_size_measurements', 'templates', 'bodyscans')) {
             Assert-That -Name "qt6_common.ini holds the $key path" -Succeeded ($commonContent -match "(?m)^$key=")
         }
-        # On a fresh machine the seeder marks the one-shot
-        # first-run data notice pending; the first app run rewrites it as shown.
-        Assert-That -Name 'qt6_common.ini holds the first-run data notice flag' `
-            -Succeeded ($commonContent -match '(?m)^firstRunDataNotice=(pending|shown)$')
     }
     if (Test-Path -LiteralPath $seamly2dIni) {
         $seamly2dContent = Get-Content -LiteralPath $seamly2dIni -Raw

@@ -1,11 +1,12 @@
 <#
  ******************************************************************************
- **  @file   smsi_seed_user_settings.ps1
+ **  @file   smsi_ensure_user_data.ps1
  **  @author slspencer
- **  @date   August 31, 2026
+ **  @date   September 15, 2026
  **
  **  @brief
- **  Seeds the per-user Seamly settings directories and ini files at install time.
+ **  Ensures the fixed Seamly data root and per-user settings exist and are
+ **  complete, without ever touching a user's existing files.
  **
  **  @copyright
  **  Copyright (C) 2026 Seamly2D Project
@@ -18,36 +19,40 @@
 
 <#
 .SYNOPSIS
-    Creates the per-user settings directories and seeds the path settings.
+    Creates the standard data subfolders under DataRoot and seeds the
+    per-user settings ini files.
 
 .DESCRIPTION
-    Tasks SettingsFiles.2 and SettingsFiles.3. After this script runs,
-    %LOCALAPPDATA%\Seamly holds qt6_common.ini, Seamly2D\qt6_seamly2d.ini,
-    SeamlyMe\qt6_seamlyme.ini, and SeamlyLayout\qt6_seamlylayout.ini with
-    every path key present, so no app requires a Preferences > Paths visit
-    and no app has to seed its own ini on first run.
+    Runs on every install that has a resolved data root - fresh, update, and
+    repair alike. DataRoot is never chosen here: smsi.wxs resolves it to
+    either the fixed fresh-install default ([%USERPROFILE]\seamly2d) or
+    whatever an earlier install already recorded, so this script only ever
+    fills in what is missing.
 
-    The script writes a file only when it is absent. In an existing file it
-    adds only missing keys. It never changes an existing value, so an
-    upgrade keeps the configuration smsi_migrate_user_data.ps1 carried over.
+    Two things, both purely additive:
 
-    SeamlyLayout's ini must be COMPLETE — all 11 keys. PreferencesModel::
+    1. The nine standard subfolders under DataRoot (measurements/individual,
+       measurements/multisize, templates, bodyscans, label templates,
+       images, backups, patterns, layouts) - created if absent, left alone
+       if present.
+    2. %LOCALAPPDATA%\Seamly's ini files: qt6_common.ini,
+       Seamly2D\qt6_seamly2d.ini, SeamlyMe\qt6_seamlyme.ini, and
+       SeamlyLayout\qt6_seamlylayout.ini. A file is created only when
+       absent; an existing file only gets missing keys added, so an update
+       or repair never overwrites a value already there - including one the
+       user changed in Preferences.
+
+    SeamlyLayout's ini must be COMPLETE - all 11 keys. PreferencesModel::
     load() treats an existing ini as fully authoritative: a partial ini
-    would suppress the app's own (now deprecated) first-run seeding and
-    leave the missing keys empty. The values below mirror what
+    would leave the missing keys empty. The values below mirror what
     seedFromBundledDefaults() derives from default_preferences.json with
-    ${DATAROOT} resolved to the recorded data root.
+    ${DATAROOT} resolved to DataRoot.
 
     Values use Qt's '/' separator form. The folder names match the English
-    defaults the MSI itself creates under the data root.
-
-    Task SettingsFiles.5: when qt6_common.ini is newly created (a fresh
-    machine), the script also seeds [notices] firstRunDataNotice=pending.
-    The first Seamly app to run shows a one-shot notice about the data
-    locations and backups, then rewrites the value as 'shown'.
+    defaults this script creates under the data root.
 
 .PARAMETER DataRoot
-    The recorded user-data root, e.g. C:\Users\name\Documents\SeamlyData.
+    The resolved user-data root, e.g. C:\Users\name\seamly2d.
 
 .PARAMETER InstallFolder
     The resolved INSTALLFOLDER, used for the seamlyLayoutApp key.
@@ -70,16 +75,22 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# The MSI custom-action command line pads each path argument with a space
+# before the closing quote, so a property's trailing backslash cannot escape
+# that quote. Trim the padding off here.
+$DataRoot = $DataRoot.Trim()
+$InstallFolder = $InstallFolder.Trim()
+
 if (-not $LocalSettingsRoot) {
     $LocalSettingsRoot = $env:LOCALAPPDATA
 }
 if (-not $LogPath) {
-    $LogPath = Join-Path $LocalSettingsRoot 'Seamly\smsi_seed_user_settings.log'
+    $LogPath = Join-Path $LocalSettingsRoot 'Seamly\smsi_ensure_user_data.log'
 }
 
 <#
 .SYNOPSIS
-    Writes one log entry without stopping the seeding.
+    Writes one log entry without stopping the rest of the script.
 #>
 function Write-Log {
     param([string]$Message)
@@ -93,7 +104,7 @@ function Write-Log {
         }
         Add-Content -LiteralPath $LogPath -Value $line -Encoding utf8
     } catch {
-        Write-Output "Could not write the seeding log: $_"
+        Write-Output "Could not write the log: $_"
     }
 }
 
@@ -105,6 +116,33 @@ function ConvertTo-QtPath {
     param([Parameter(Mandatory = $true)][string]$Path)
 
     return ($Path.Trim() -replace '\\', '/').TrimEnd('/')
+}
+
+<#
+.SYNOPSIS
+    Adds the standard data-root directories without changing existing objects.
+#>
+function Add-StandardDirectory {
+    param([Parameter(Mandatory = $true)][string]$Root)
+
+    $directories = @(
+        'measurements\individual',
+        'measurements\multisize',
+        'templates',
+        'bodyscans',
+        'label templates',
+        'images',
+        'backups',
+        'patterns',
+        'layouts'
+    )
+    foreach ($directory in $directories) {
+        $path = Join-Path $Root $directory
+        if (-not (Test-Path -LiteralPath $path)) {
+            New-Item -ItemType Directory -Path $path -Force | Out-Null
+            Write-Log "created directory '$path'"
+        }
+    }
 }
 
 <#
@@ -199,12 +237,14 @@ function Add-IniKey {
 }
 
 try {
-    Write-Log "seeding user settings: DataRoot='$DataRoot' InstallFolder='$InstallFolder'"
+    Write-Log "ensuring user data: DataRoot='$DataRoot' InstallFolder='$InstallFolder'"
 
-    if (-not $DataRoot.Trim()) {
-        Write-Log 'no data root given; nothing to seed'
+    if (-not $DataRoot) {
+        Write-Log 'no data root given; nothing to do'
         exit 0
     }
+
+    Add-StandardDirectory -Root $DataRoot
 
     $root = ConvertTo-QtPath $DataRoot
     $install = ConvertTo-QtPath $InstallFolder
@@ -229,19 +269,7 @@ try {
         'templates'                    = "$root/templates"
         'bodyscans'                    = "$root/bodyscans"
     }
-    $commonIni = Join-Path $seamlyRoot 'qt6_common.ini'
-    # Task SettingsFiles.5: an absent qt6_common.ini marks a fresh machine.
-    # Only then is the one-shot first-run data notice due — an existing file
-    # means a previous install already ran here.
-    $freshMachine = -not (Test-Path -LiteralPath $commonIni)
-    Add-IniKey -Path $commonIni -Section 'paths' -Pairs $commonKeys
-    if ($freshMachine) {
-        # The first Seamly app to run shows the data-location notice, then
-        # rewrites this value as 'shown'.
-        Add-IniKey -Path $commonIni -Section 'notices' -Pairs ([ordered]@{
-            'firstRunDataNotice' = 'pending'
-        })
-    }
+    Add-IniKey -Path (Join-Path $seamlyRoot 'qt6_common.ini') -Section 'paths' -Pairs $commonKeys
 
     # Per-app keys. labels/images/backups are per-app, not shared: their
     # setters call QSettings::setValue on the app's own settings object
@@ -293,10 +321,10 @@ try {
     }
     Add-IniKey -Path (Join-Path $seamlyRoot 'SeamlyLayout\qt6_seamlylayout.ini') -Section 'General' -Pairs $layoutKeys
 
-    Write-Log 'seeding completed'
+    Write-Log 'ensure completed'
 } catch {
-    Write-Log "seeding failed: $_"
+    Write-Log "ensure failed: $_"
 }
 
-# A seeding problem must never fail or roll back the install.
+# A problem here must never fail or roll back the install.
 exit 0

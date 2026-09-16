@@ -4,9 +4,8 @@
  **  @date   July 26, 2026
  **
  **  @brief
- **  Unit tests for the relocatable user-data root (Task 34): its default and
- **  legacy locations, the derivation of every data subfolder from it, first-run
- **  resolution of an existing ~/seamly2d tree, and the Preferences rebase rule.
+ **  Unit tests for the relocatable user-data root: its default location, the
+ **  derivation of every data subfolder from it, and the Preferences rebase rule.
  **
  **  @copyright
  **  This source code is part of the Seamly2D project, a pattern making
@@ -39,9 +38,9 @@
 class QTemporaryDir;
 
 /**
- * @brief TST_DataRoot tests VCommonSettings' user-data root (Task 34) — the single
- * settings-backed root that patterns, measurements, templates, bodyscans, label
- * templates, images, backups and layouts are all derived from.
+ * @brief TST_DataRoot tests VCommonSettings' user-data root — the single settings-backed
+ * root that patterns, measurements, templates, bodyscans, label templates, images,
+ * backups and layouts are all derived from.
  *
  * The suite is hermetic, and deliberately so: every case works inside a QTemporaryDir or
  * on plain strings, and initTestCase() additionally redirects QSettings' IniFormat/
@@ -52,10 +51,7 @@ class QTemporaryDir;
  * No test may touch a path under QDir::homePath(). The home directory CANNOT be faked on
  * Windows — QFileSystemEngine::homePath() asks the OS through GetUserProfileDirectory()
  * and only falls back to the USERPROFILE/HOME environment variables when that fails — so
- * a test that created or removed ~/seamly or ~/seamly2d would be operating on the real
- * user's data. First-run resolution is therefore tested through
- * VCommonSettings::chooseFirstRunDataRoot(), which takes every candidate root as an
- * argument and can be pointed at throwaway directories.
+ * a test that created or removed ~/seamly2d would be operating on the real user's data.
  */
 class TST_DataRoot : public QObject
 {
@@ -72,17 +68,11 @@ private slots:
     void CommonSettingsFileLivesUnderLocalConfig() const;
     void CommonSettingsBridgeCopiesRoamingFileForward() const;
     void CommonSettingsBridgeNeverOverwritesTheLocalFile() const;
-    void FirstRunNoticePendingOnlyWhileSeeded() const;
 
-    void DefaultDataRootIsSeamlyDataUnderDocuments() const;
-    void LegacyDataRootIsTheOldSeamly2dFolder() const;
+    void DefaultDataRootIsSeamly2dUnderHome() const;
     void UnconfiguredRootFallsBackToTheDefault() const;
     void EveryDefaultPathDerivesFromTheDataRoot() const;
     void DataRootAcceptsAnyDriveOrPath() const;
-    void FirstRunWithoutLegacyTreeUsesTheDefault() const;
-    void FirstRunAdoptsAnExistingLegacyTree() const;
-    void FirstRunPrefersAnExistingNewRoot() const;
-    void AdoptionNeverRemovesTheLegacyTree() const;
     void AConfiguredRootIsNeverOverwritten() const;
     void InstallerDataRootIsCleanOrEmpty() const;
     void AConfiguredRootOutranksTheInstaller() const;
@@ -99,29 +89,9 @@ private slots:
     void SeedSampleMeasurementsIsANoOpWhenSourceIsMissing() const;
     void SeedSampleMeasurementsHonoursTheNameFilter() const;
 
-    void MigrationCopiesTheWholeTreeIncludingUnknownFolders() const;
-    void MigrationNeverOverwritesAnExistingFile() const;
-    void MigrationLeavesTheSourceTreeIntact() const;
-    void MigrationRefusesADestinationInsideTheSource() const;
-    void MigrationMarksTheLegacyTree() const;
     void RebaseMovesPathsInsideTheOldRoot() const;
     void RebaseLeavesPathsOutsideTheOldRootAlone() const;
-
-    void PruneRemovesAnEmptyLegacyTree() const;
-    void PruneKeepsALegacyTreeHoldingFiles() const;
-    void PruneNeverRemovesTheConfiguredRoot() const;
-    void PruneKeepsALegacyRootHoldingTheConfiguredRoot() const;
-    void PruneIgnoresAMissingLegacyRoot() const;
     void PerAppPathsPersistToTheOwnSettingsFile() const;
-
-    void ArchiveHoldsEveryFileAndFolder() const;
-    void ArchiveVerifiesAgainstTheTreeItCameFrom() const;
-    void ArchiveVerificationCatchesAMissingFile() const;
-    void ArchiveVerificationCatchesAlteredContents() const;
-    void ArchiveNamesDoNotCollide() const;
-    void ArchiveRefusesATreeHoldingASymbolicLink() const;
-    void ArchiveRefusesADestinationInsideTheSource() const;
-    void ArchiveLeavesTheSourceTreeInPlace() const;
 
 private:
     /** Scratch directory holding every root, tree and file the suite creates. */

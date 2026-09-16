@@ -84,7 +84,7 @@ Checks first, fails on the first missing item: both exes, `seamly2d`'s `platform
 4. **[`smsi_fix_dialog_lines.ps1`](smsi_fix_dialog_lines.ps1)** — trims WixUI's stock banner/bottom line controls back inside the dialog width (they overflow by 3 installer units, logging Error 2826). Runs on the built package, before validation.
 5. **`wix msi validate`** (skip with `-SkipValidation`), suppressing ICE43/57 — false positives from optional desktop-shortcut components.
 6. **[`smsi_check_authoring.ps1`](smsi_check_authoring.ps1)** — asserts elevation, ARP properties, upgrade/NSIS detection, dialogs, shortcuts, associations, registry rows. Always runs, even with `-SkipValidation`.
-7. **[`smsi_migrate_user_data_test.ps1`](smsi_migrate_user_data_test.ps1)** — unit tests for the data-migration deferred action. Always runs.
+7. **[`smsi_ensure_user_data_test.ps1`](smsi_ensure_user_data_test.ps1)** — unit tests for the data-root/settings-seeding deferred action. Always runs.
 
 All three apps ship in every package
 
@@ -100,7 +100,7 @@ All three apps ship in every package
 ```powershell
 msiexec /i seamly-x64.msi                                          # interactive
 msiexec /i seamly-x64.msi /qn                                       # silent, defaults (needs elevation)
-msiexec /i seamly-x64.msi /qn SEAMLYDATAPARENT=E:\                   # silent, data root E:\SeamlyData
+msiexec /i seamly-x64.msi /qn SEAMLYDATAROOT=E:\seamly2d             # silent, explicit data root
 msiexec /i seamly-x64.msi /qn SEAMLYDESKTOPSHORTCUTS=0                # silent, no desktop shortcuts
 msiexec /x seamly-x64.msi /qn                                       # silent uninstall
 msiexec /a seamly-x64.msi /qn TARGETDIR=C:\extract                   # extract without installing
@@ -111,15 +111,12 @@ msiexec /a seamly-x64.msi /qn TARGETDIR=C:\extract                   # extract w
 | Property | Default | Notes |
 |---|---|---|
 | `INSTALLFOLDER` | always `%ProgramFiles%\SeamlyApps` | Fixed; not a wizard page and not overridable, even under `/qn`. |
-| `SEAMLYDATAPARENT` | `C:\Users\<user>\Documents` | `SeamlyData` leaf always appended. **No `/qn` default** — pass it explicitly. |
-| `SEAMLYDATAROOT` | `[SEAMLYDATAPARENT]\SeamlyData` | Set directly to override, e.g. `SEAMLYDATAROOT=E:\Patterns`. |
-| `SEAMLYCOPYUSERDATA` | `0` | Set `1` on update to archive/migrate work into `SEAMLYDATAROOT`. Never overwrites existing files. |
+| `SEAMLYDATAROOT` | `%USERPROFILE%\seamly2d` on a fresh install; the recorded root on an update/repair | Fixed, not chosen. Set explicitly on the command line only to override the fresh-install default. |
 | `SEAMLYDESKTOPSHORTCUTS` | `1` | Desktop shortcuts for Seamly2D/SeamlyMe. |
 
-- `SEAMLYDATAROOT` has no `/qn` default: the execute sequence runs elevated as SYSTEM, so a computed default would misplace user data. Setup records the answer at `HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot` on first run; unset stays empty and apps use their own default. Repair keeps the recorded value.
+- The data root is never asked about on a fresh install — Setup creates `%USERPROFILE%\seamly2d` and fills it in silently. Setup records the value at `HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot`. An update or repair reuses that recorded value verbatim and only adds anything missing; existing data is never moved, copied, or overwritten.
 - Moving an installed Seamly is **not supported** — location is fixed at install time. Uninstall/reinstall, or run a major upgrade (prefills the program-directory page from `HKLM\SOFTWARE\Seamly\Seamly2D\InstallPath`).
-- Data migration on update runs only when `SEAMLYCOPYUSERDATA=1` or the data location changed. Non-path settings are always preserved.
-- Interactive pages: a gate dialog (Continue) → welcome → license → data root → copy existing work? (off) → shortcuts (on) → ready → install → finish. The gate holds the wizard until Continue, so detection never flashes under the welcome page. No install-folder page — `INSTALLFOLDER` is fixed and never asked about. A warning page precedes data root if a prior install (this MSI or the old NSIS installer) is found. The finish page offers a "Launch Seamly2D now" checkbox, checked by default; it starts seamly2d.exe as the signed-in user, not elevated. `/qn` skips all pages and never launches an app.
+- Interactive pages: a gate dialog (Continue) → welcome → license → [previous-install warning] → [data location, read-only] → shortcuts (on) → ready → install → finish. The gate holds the wizard until Continue, so detection never flashes under the welcome page. No install-folder page — `INSTALLFOLDER` is fixed and never asked about. The previous-install page appears only when a prior install (this MSI or the old NSIS installer) is found; the data-location page appears only when an earlier install already recorded a `DataRoot` — a true fresh install shows neither. The finish page offers a "Launch Seamly2D now" checkbox, checked by default; it starts seamly2d.exe as the signed-in user, not elevated. `/qn` skips all pages and never launches an app.
 - Real-install verification: [`README.md`](README.md#installing--testing). `smsi_check_authoring.ps1` checks package contents; [`local_install_msi.ps1`](local_install_msi.ps1) checks install effects, incl. launching each app. Only the UAC prompt, wizard wording, and icons need a human.
 
 ## 4. arm64

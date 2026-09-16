@@ -156,19 +156,14 @@ QString platformDefaultsKey()
 // Layout.8.3: only input_directory/layout_directory (user data, shared with the rest of
 // the suite) go through this. ${DATAROOT} resolves to the Windows installer's recorded
 // DataRoot when one exists, so a fresh MSI install nests those two under %DATAROOT%.
-// Layout.11: without an installer record (dev builds, Linux, macOS) the fallback is
-// <Documents>/SeamlyData — the suite's data-storage pattern — never the raw home
-// directory. preferences/settings paths are app-config, not user data, and are seeded
-// straight from appConfigRootPath() in seedFromBundledDefaults() below — never through
-// this function — so they carry no dependency on the installer registry key or MSI
-// custom-action ordering.
+// Without an installer record (dev builds, Linux, macOS) the fallback is ~/seamly2d,
+// matching VCommonSettings::getDefaultDataRoot(). preferences/settings paths are
+// app-config, not user data, and are seeded straight from appConfigRootPath() in
+// seedFromBundledDefaults() below — never through this function — so they carry no
+// dependency on the installer registry key or MSI custom-action ordering.
 QString expandDefaultPathTokens(const QString &value)
 {
-    QString documents = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-    if (documents.isEmpty()) {
-        documents = QDir::homePath();
-    } // if the platform reports no documents location
-    QString dataRootBase = QDir::cleanPath(documents) + QStringLiteral("/SeamlyData");
+    QString dataRootBase = QDir::cleanPath(QDir::homePath()) + QStringLiteral("/seamly2d");
 #ifdef Q_OS_WIN
     const QString installedDataRoot = installerDataRoot();
     if (!installedDataRoot.isEmpty()) {
@@ -422,7 +417,7 @@ bool PreferencesModel::load(const QString &path)
     if (!QFileInfo::exists(absolutePath)) {
         // DEPRECATED first-run seeding (Task SettingsFiles.3, 2026-08-31). The
         // Windows MSI seeds a complete qt6_seamlylayout.ini at install time
-        // (packaging/windows/smsi_seed_user_settings.ps1), so on an installed
+        // (packaging/windows/smsi_ensure_user_data.ps1), so on an installed
         // Windows machine this branch never runs. It stays only for packages
         // with no install hook — the macOS dmg, the Linux AppImage/Flatpak,
         // dev builds. Remove it when those packages gain install-time seeding.

@@ -44,7 +44,7 @@ separate `/input`/`/output` trees, and directly under the data root rather than 
 under a `seamlyLayout` subfolder, matching the `layouts` subfolder Seamly2D's
 `ensureDataRootTree()` (`src/libs/vmisc/vcommonsettings.cpp`) already creates under
 `%DATAROOT%` — nested under the installer-recorded `%DATAROOT%` when one was recorded, or
-under `<Documents>/SeamlyData` otherwise (Layout.11; never the raw home directory). If either field is later cleared back to empty,
+under `~/seamly2d` otherwise (never the raw home directory). If either field is later cleared back to empty,
 the runtime fallback in
 `resolvedInputDirectory()`/`resolvedLayoutDirectory()` takes over instead and nests them
 separately as `<DataRoot>/input`/`<DataRoot>/output`, falling back further to

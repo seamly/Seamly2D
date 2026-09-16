@@ -68,6 +68,22 @@ inconsistent (`DataParent` is not the parent of `DataRoot`).
 - [ ] Installer.5.1 Guard the `SetSEAMLYDATAPARENTExecute*` actions so an explicitly passed `SEAMLYDATAPARENT` wins, or derive the recorded `DataParent` from the recorded `DataRoot`.
 - [ ] Installer.5.2 Add an authoring assertion; re-verify with a property-driven quiet install.
 
+## Installer.6 - [2026-09-15] Revert the Windows data directory to a fixed `C:\Users\<user>\seamly2d` — no picker, no migration
+
+User feedback: do not change the data directory from `C:\Users\<user>\seamly2d` to
+`C:\Users\<user>\Documents\SeamlyData`. This reverts the `Documents\SeamlyData`
+design completed under `SettingsFiles.7`/`Layout.11` (see `TODO_COMPLETED.md`) and
+simplifies the whole workflow:
+
+- [x] Installer.6.1 Fresh install: `SEAMLYDATAROOT` fixed to `[%USERPROFILE]\seamly2d`, no wizard page asks for it.
+- [x] Installer.6.2 Update install: read the current data directory from the registry (`HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot`); show it read-only in a new `SeamlyDataLocationDlg` (Cancel or Continue, no edit); install only new subdirectories/files, never touch existing data.
+- [x] Installer.6.3 Repair install: same directory re-read; missing subdirectories/files added silently, no dialog.
+- [x] Installer.6.4 Uninstall: data directory and its contents left untouched (already true — verified, not changed).
+- [x] Installer.6.5 Remove the picker (`SeamlyDataDirDlg`, `SEAMLYDATAPARENT`, `BrowseDlg` wiring) and the copy-my-data prompt (`SeamlyDataMigrateDlg`, `SEAMLYCOPYUSERDATA`) from `smsi_ui.wxs`/`smsi.wxs`. Drop `DataParent` from the registry rows (`smsi_registry.wxs`).
+- [x] Installer.6.6 Replace `smsi_migrate_user_data.ps1` (cross-directory archive/merge) with `smsi_ensure_user_data.ps1` (creates standard subdirectories + seeds settings ini files only, in the current root — fresh, update, and repair alike).
+- [x] Installer.6.7 App side: `VCommonSettings::getDefaultDataRoot()` returns `~/seamly2d` on every platform (matches the old `getLegacyDataRoot()`, now removed). Delete the now-dead legacy-migration subsystem: `legacy_data_migration.{h,cpp}`, `legacy_data_archive.{h,cpp}`, `migrateAdoptedLegacyTree()`, `pruneEmptyLegacyDataRoot()`, `chooseFirstRunDataRoot()`, the `firstRunNoticePending`/`markFirstRunNoticeShown` one-shot notice, and `VAbstractApplication::NotifySeamlyDataLocation()`.
+- [ ] Installer.6.8 Manual install-matrix verification on the test laptop (fresh / update-with-custom-root / repair / uninstall) — see `project-docs/TEST_WIN_MSI_Test_Case_template.md`, updated for this task.
+
 ## Installer.4 - Re-organize all directories, files, and scripts needed to build the Seamly executables with the GitHub CI/CD ci.yml file so that all CI/CD build information is under the .github directory tree; remove unnecessary and unused CI/CD files; copy files to new location if the original file is under the src/ or share/ directories; update the CI/CD files with the new locations of moved files; build & test the updated CI/CD workflow and artifacts
 
 - Installer.4.1 - Re-organize files; Update ci.yml and related files to reflect new file locations

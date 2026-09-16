@@ -6,6 +6,63 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-15 — Installer.6: revert data directory to fixed `~/seamly2d` (in progress)
+
+User feedback: stop moving the Windows data directory to
+`Documents\SeamlyData` — keep it at `C:\Users\<user>\seamly2d`, fixed, no
+picker, no copy-my-data step. Task `Installer.6` in `project-docs/TODO_INSTALLER.md`;
+supersedes `SettingsFiles.7`/`Layout.11` in `TODO_COMPLETED.md` (left as
+history there, marked superseded).
+
+On branch `task-fixed-data-dir` off `run-seamlyLayout`. Implemented so far:
+
+- **C++**: `VCommonSettings::getDefaultDataRoot()` → `~/seamly2d` on every
+  platform. Deleted the now-dead legacy-migration subsystem:
+  `legacy_data_migration.{h,cpp}`, `legacy_data_archive.{h,cpp}`,
+  `migrateAdoptedLegacyTree()`, `pruneEmptyLegacyDataRoot()`,
+  `chooseFirstRunDataRoot()`, `getLegacyDataRoot()`, the
+  `firstRunNoticePending`/`markFirstRunNoticeShown` notice, and
+  `VAbstractApplication::NotifySeamlyDataLocation()` (plus call sites in
+  both apps' `main.cpp`/`openSettings()`). `tst_dataroot.{h,cpp}` trimmed to
+  match (~25 surviving tests; migration/prune/archive/adoption groups
+  removed). `vmisc.pro`/`vmisc.pri`/`Seamly2DTest.pro` no longer need
+  `core-private` (was only for the deleted zip-archive code).
+  SeamlyLayout's `PreferencesModel.cpp` no-installer fallback matches.
+- **MSI**: `smsi.wxs`/`smsi_files.wxs`/`smsi_registry.wxs`/`smsi_ui.wxs`
+  rewritten — one `SEAMLYDATAROOT` (plus `SEAMLYDATAROOTRECORDED` as the
+  "earlier install exists" signal), no `SEAMLYDATAPARENT`/`SEAMLYDATACHOSEN`/
+  `SEAMLYCOPYUSERDATA`, no `DataParent` registry value. `SeamlyDataDirDlg`
+  (picker) and `SeamlyDataMigrateDlg` (copy prompt) replaced by one read-only
+  `SeamlyDataLocationDlg`, shown only when an earlier install recorded a
+  root. `smsi_migrate_user_data.ps1` + `smsi_seed_user_settings.ps1` replaced
+  by one `smsi_ensure_user_data.ps1` (standard subdirs + ini seeding,
+  add-only, runs on fresh/update/repair alike) with a consolidated
+  `smsi_ensure_user_data_test.ps1`.
+- **Docs**: `.github/README-BUILDS.md`, `packaging/windows/README_WINDOWS_BUILD.md`,
+  `README_WINDOWS_INSTALLER.md`, `project-docs/FILE_PATHS_PLAN.md`,
+  `TEST_WIN_MSI_Test_Case_template.md` updated.
+
+**Still open:**
+
+- `packaging/windows/smsi_check_authoring.ps1` — being updated by a
+  background agent (the old script asserts the picker/migrate dialogs and
+  `SEAMLYDATAPARENT`* properties by name; needs its data-root assertion
+  blocks rewritten to match the new dialog/property set). Check its result
+  before trusting a build.
+- No local build/test run yet this session — `packaging\windows\local_build_msi.ps1`
+  still needs to run (builds all three apps, `nmake check`, packages the
+  MSI, runs `smsi_check_authoring.ps1` + `smsi_ensure_user_data_test.ps1`).
+- Not yet committed, merged, or pushed. Not yet done: task-workflow steps
+  5 (verify/build) through 10 (report+cleanup) in `CLAUDE.md`.
+- Manual install-matrix pass (fresh / update-with-custom-root / repair /
+  uninstall) — `Installer.6.8`, still unchecked.
+
+**Stale note below:** the "Machine state" section further down records
+`%DATAROOT%` = `C:\Users\susan\Documents\SeamlyData` from the 2026-09-02
+pass — that was the *previous* (now-reverted) design. Do not treat it as
+current; a fresh install after this task lands creates
+`C:\Users\<user>\seamly2d` instead.
+
 ## 2026-09-14 — CI: Linux AppImage now bundles SeamlyLayout (done)
 
 Task `InstLinuxAppimage.1` closed — see `project-docs/TODO_COMPLETED.md` for

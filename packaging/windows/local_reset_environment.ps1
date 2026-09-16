@@ -46,8 +46,8 @@
     Wipe every trace of Seamly from this machine, for a clean installer test run.
 .DESCRIPTION
     Reads HKLM\SOFTWARE\Seamly\Seamly2D\DataRoot before removing it, so a data
-    root outside the two default names (SeamlyData, Seamly) is still found and
-    removed. Requires elevation for the product uninstall and for HKLM.
+    root outside the default names (seamly2d, and the superseded SeamlyData/Seamly)
+    is still found and removed. Requires elevation for the product uninstall and for HKLM.
 .PARAMETER WhatIf
     List what would be removed without removing anything.
 #>
@@ -150,6 +150,7 @@ Remove-PathIfPresent 'C:\Program Files\SeamlyApps'
 Remove-PathIfPresent 'C:\Program Files (x86)\Seamly2D'
 
 Write-Host '=== 3. Removing %DATAROOT% (default names and any recorded/configured location) ==='
+Remove-PathIfPresent (Join-Path $env:USERPROFILE 'seamly2d')
 $documents = [Environment]::GetFolderPath('MyDocuments')
 Remove-PathIfPresent (Join-Path $documents 'SeamlyData')
 Remove-PathIfPresent (Join-Path $documents 'Seamly')

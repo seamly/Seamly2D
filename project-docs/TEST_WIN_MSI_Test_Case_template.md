@@ -5,7 +5,7 @@ Test plan for the Windows x64 Seamly MSI. Covers `packaging/windows/smsi.wxs`.
 This document uses two placeholders as shorthand. Neither is a real environment variable.
 
 - `%PROGRAMDIR%` stands for the resolved `INSTALLFOLDER`; always `%ProgramFiles%\SeamlyApps` — it is fixed, not a wizard page, and not overridable.
-- `%DATAROOT%` stands for the resolved `SEAMLYDATAROOTRECORDED`; default is `C:\Users\<user>\Documents\SeamlyData`.
+- `%DATAROOT%` stands for the resolved `SEAMLYDATAROOT`; default on a fresh install is `%USERPROFILE%\seamly2d`, fixed and not a wizard page. An update or repair instead shows and reuses whatever root an earlier install already recorded.
 
 Non-default settings means at least: a non-default `%DATAROOT%` parent, and desktop shortcuts turned off (`SEAMLYDESKTOPSHORTCUTS=0`).
 
@@ -49,7 +49,7 @@ Run this suite after every test case in section A.
     |  |_qt6_seamlyLayout.ini
     |_SeamlyMe
     |  |_qt6_seamlyme.ini
-    %DATAROOT%\SeamlyData
+    %DATAROOT%
     |_backups
     |_bodyscans
     |_images
@@ -70,7 +70,6 @@ individual_size_measurements=%DATAROOT%/measurements/individual
 multi_size_measurements=%DATAROOT%/measurements/multisize
 templates=%DATAROOT%/templates
 bodyscans=%DATAROOT%/bodyscans"
-      - [ ] 0b-i2. "[notices] firstRunDataNotice=pending"
     - [ ] 0b-ii. qt6_seamly2d.ini should contain:
     "[paths]
 pattern=%DATAROOT%/patterns
@@ -82,8 +81,8 @@ seamlyLayoutApp=%PROGRAMDIR%/SeamlyApps/seamlylayout.exe"
     - [ ] 0b-iii. qt6_seamly2d.ini should be empty
     - [ ] ob-iv. qt6_seamlylayout.ini should contain:
     "[General]
-input_directory=%DATAROOTROOT%/layouts
-layout_directory=%DATAROOTROOT%/layouts
+input_directory=%DATAROOT%/layouts
+layout_directory=%DATAROOT%/layouts
 preferences_directory=%LOCALAPPDATA%/Seamly/SeamlyLayout/preferences
 settings_directory=%LOCALAPPDATA%/Seamly/SeamlyLayout/settings
 settings_file=%LOCALAPPDATA%/Seamly/SeamlyLayout/settings/default_settings.json
@@ -95,17 +94,14 @@ projector_path=https://patternprojector.com
 data_root=%DATAROOT%"
   - [ ] 0c. Check the program directory `%PROGRAMDIR%` exists (always `%ProgramFiles%\SeamlyApps`) contains `seamly2d.exe`, `seamlyme.exe`, `seamlylayout.exe`, `pdftops.exe`, `QtWebEngineProcess.exe`, `vc_redist.x64.exe`.
   - [ ] 0d. Confirm no duplicate directories.
-  - [ ] 0e. if upgrading from previous non-SeamlyLayout version then:
-    - [ ] 0e-i. confirm `%DATAROOT%\seamly2d.zip` exists.
-    - [ ] 0e-ii. confirm that `seamly2d.zip` files were extracted into the correct subdirectories.
+  - [ ] 0e. if updating or repairing an existing install then confirm `%DATAROOT%` is unchanged from before this run, and that only missing subdirectories/files were added — no existing file touched.
 - [ ] 1. Check the registry keys:
   - [ ] 1a. If not a fresh install then confirm old-version entries were removed.
   - [ ] 1b. Confirm that the installed-version program entries were added for each app under `HKLM\SOFTWARE\Seamly\<application>`, each with matching `InstallPath` and `DisplayVersion`.
-  - [ ] 1c. Confirm that installed-version data entries were added with matching `DataRoot` and `DataParent` values; `Seamly2D` also carries the three `DesktopShortcut*` flags (this should be fixed in the future; tasks filed: SeamlyMe.3, Layout.7)
+  - [ ] 1c. Confirm that installed-version data entries were added with a matching `DataRoot` value (no `DataParent` value exists any more); `Seamly2D` also carries the three `DesktopShortcut*` flags (this should be fixed in the future; tasks filed: SeamlyMe.3, Layout.7)
 - [ ] 2. Check apps - **needs a human at the keyboard for most steps**
   - [ ] 2a. Run Seamly2D
-    - [ ] 2a-i. first run scripted: the "Seamly data moved" notice appears once, closes, then the main window appears
-    - [ ] 2a-ii. check if `qt6_common.ini` contains  "[notices] firstRunDataNotice=shown";
+    - [ ] 2a-i. no first-run data-location notice appears; the main window appears directly.
     - [ ] 2a-iii. Select 'file open' -- the dialog should open in the `%DATAROOT\patterns` directory.
     - [ ] 2a-iv. Open `%DATAROOT%\patterns\male_shirt.sm2d` pattern file with `%DATAROOT%\measurements\individual\male_chest_102cm.smis` individual measurement file.
     - [ ] 2a-v. Check if directory exists: `%LOCALAPPDATA%\Seamly\Seamly2D\logs`

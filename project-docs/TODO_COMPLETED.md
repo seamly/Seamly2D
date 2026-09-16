@@ -94,6 +94,11 @@ to Seamly2D's Layout Mode, not the mode active before SeamlyLayout launched.
 
 ## Task SettingsFiles.7 — getDefaultDataRoot() leaf aligned to SeamlyData (completed 2026-09-01)
 
+**Superseded 2026-09-15 by `Installer.6`** (`project-docs/TODO_INSTALLER.md`): user
+feedback asked to keep the data directory at `C:\Users\<user>\seamly2d`, so
+`getDefaultDataRoot()` reverted to that fixed path on every platform, and the
+`Documents\SeamlyData` design this task built is gone. Left as history below.
+
 `VCommonSettings::getDefaultDataRoot()` returned `<Documents>/Seamly` (Task 60), but the
 MSI's default `SEAMLYDATAROOT` is `<Documents>\SeamlyData` (`smsi.wxs`) and SeamlyLayout's
 no-installer fallback is `<Documents>/SeamlyData` (Task Layout.11). A no-installer run of
@@ -686,6 +691,11 @@ Mechanism: the seeder writes `[notices] firstRunDataNotice=pending` into `qt6_co
 Shipped in merge `4ded2549d0` (task-first-run-notice into run-seamlyLayout), pushed without the skip token.
 
 ## Task Layout.11 — layouts fallback resolves under <Documents>/SeamlyData, not the home directory (completed 2026-09-01)
+
+**Superseded 2026-09-15 by `Installer.6`** (`project-docs/TODO_INSTALLER.md`): the
+no-installer fallback is now `~/seamly2d/layouts`, matching the reverted
+`VCommonSettings::getDefaultDataRoot()`. Left as history below — the core point (the
+fallback must sit under a data root, never the raw home directory) still holds.
 
 User request 2026-09-01 (recorded earlier as a SESSION_HANDOVER note on the Layout.8.2 fix):
 the `input_directory`/`layout_directory` default template resolved `${HOME}` to the raw
