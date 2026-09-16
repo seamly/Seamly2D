@@ -6,15 +6,20 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## 2026-09-15 — Installer.6: revert data directory to fixed `~/seamly2d` (in progress)
+## 2026-09-15 — Installer.6: revert data directory to fixed `~/seamly2d` (done, merged, pushed)
 
 User feedback: stop moving the Windows data directory to
 `Documents\SeamlyData` — keep it at `C:\Users\<user>\seamly2d`, fixed, no
-picker, no copy-my-data step. Task `Installer.6` in `project-docs/TODO_INSTALLER.md`;
-supersedes `SettingsFiles.7`/`Layout.11` in `TODO_COMPLETED.md` (left as
-history there, marked superseded).
+picker, no copy-my-data step. Task `Installer.6` in `project-docs/TODO_INSTALLER.md`
+(6.1-6.7 checked off; 6.8, the manual install-matrix pass, is the only item
+left open); supersedes `SettingsFiles.7`/`Layout.11` in `TODO_COMPLETED.md`
+(left as history there, marked superseded).
 
-On branch `task-fixed-data-dir` off `run-seamlyLayout`. Implemented so far:
+`task-fixed-data-dir` merged into `run-seamlyLayout` with `--no-ff`
+(`8d47c97fe8`) and pushed to `origin/run-seamlyLayout` — no skip-ci token,
+since this touches `packaging/**` functionally, so the full `ci.yml` suite
+is running on it; check that run before relying on this as release-verified.
+Local task branch deleted. Implemented:
 
 - **C++**: `VCommonSettings::getDefaultDataRoot()` → `~/seamly2d` on every
   platform. Deleted the now-dead legacy-migration subsystem:
@@ -42,20 +47,22 @@ On branch `task-fixed-data-dir` off `run-seamlyLayout`. Implemented so far:
   `README_WINDOWS_INSTALLER.md`, `project-docs/FILE_PATHS_PLAN.md`,
   `TEST_WIN_MSI_Test_Case_template.md` updated.
 
+**Verified this session** (`packaging\windows\local_build_msi.ps1`, full run):
+all four Qt test suites passed via `nmake check` (a failing suite stops the
+build before it reaches an MSI, so this is a hard pass/fail gate, not just
+"nothing printed"); SeamlyLayout's Rust crates and `seamlylayout.exe` built
+clean; `smsi_check_authoring.ps1` — every assertion including the rewritten
+data-root/dialog ones — passed; the new `smsi_ensure_user_data_test.ps1`
+passed 28/28; final MSI packaged at 165.1 MB. Version-stamp files
+(`projectversion.{h,cpp}`, the two `Info.plist`) were left clean afterward,
+as expected.
+
 **Still open:**
 
-- `packaging/windows/smsi_check_authoring.ps1` — being updated by a
-  background agent (the old script asserts the picker/migrate dialogs and
-  `SEAMLYDATAPARENT`* properties by name; needs its data-root assertion
-  blocks rewritten to match the new dialog/property set). Check its result
-  before trusting a build.
-- No local build/test run yet this session — `packaging\windows\local_build_msi.ps1`
-  still needs to run (builds all three apps, `nmake check`, packages the
-  MSI, runs `smsi_check_authoring.ps1` + `smsi_ensure_user_data_test.ps1`).
-- Not yet committed, merged, or pushed. Not yet done: task-workflow steps
-  5 (verify/build) through 10 (report+cleanup) in `CLAUDE.md`.
 - Manual install-matrix pass (fresh / update-with-custom-root / repair /
-  uninstall) — `Installer.6.8`, still unchecked.
+  uninstall) — `Installer.6.8`, still unchecked. Needs the test laptop.
+- The `ci.yml` run triggered by this push (full suite, no skip-ci) — watch
+  it before treating this as verified beyond the local build.
 
 **Stale note below:** the "Machine state" section further down records
 `%DATAROOT%` = `C:\Users\susan\Documents\SeamlyData` from the 2026-09-02
