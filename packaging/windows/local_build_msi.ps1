@@ -43,8 +43,8 @@
 
     Requires an elevated-free MSVC + Qt + Rust dev machine: Visual Studio 18
     Community (VC\Auxiliary\Build\vcvars64.bat), a Qt 6.11.1+ msvc2022_64 kit
-    under C:\Qt with qtmultimedia, qtwebengine, qtwebchannel and qtpositioning
-    installed, and a stable Rust toolchain on PATH. WiX v6 is installed
+    under C:\Qt with qtmultimedia, qtwebengine, qtwebchannel, qtpositioning and
+    qtserialport installed, and a stable Rust toolchain on PATH. WiX v6 is installed
     automatically if missing.
 
 .PARAMETER Version
@@ -148,7 +148,7 @@ $WinDeployQt = Join-Path $QtBin 'windeployqt.exe'
 if (-not (Test-Path $WinDeployQt)) {
     throw "windeployqt.exe not found at '$WinDeployQt'."
 }
-$MissingQtModules = @('Qt6WebEngineQuick', 'Qt6WebChannel', 'Qt6Positioning') |
+$MissingQtModules = @('Qt6WebEngineQuick', 'Qt6WebChannel', 'Qt6Positioning', 'Qt6SerialPort') |
     Where-Object { -not (Test-Path (Join-Path $QtPath "lib\cmake\$_")) }
 if ($MissingQtModules) {
     throw "Qt kit at '$QtPath' is missing required module(s): $($MissingQtModules -join ', ') - install them via the Qt Maintenance Tool (Add or remove components -> Additional Libraries)."
