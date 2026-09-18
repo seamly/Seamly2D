@@ -6,6 +6,38 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-18 — installer "flash" on the first page: fixed, needs re-test on the laptop
+
+`Installer.6.8`'s manual laptop pass caught the wizard's first page
+(`SeamlyPrepareDlg`) flashing by with no visible Cancel/Continue before
+`WelcomeDlg` appeared — the same defect commit `c791039af3` (2026-09-12) was
+supposed to have fixed.
+
+Inspected the actual built MSI's `Dialog`/`InstallUISequence` tables via the
+Windows Installer COM API: the September fix was already correct
+(`SeamlyPrepareDlg` Attributes=7, Modal bit set, sequenced before `AppSearch`,
+Continue/Cancel both wired). The real defect: its title text was "Welcome to
+the [ProductName] Setup Wizard", identical to `WelcomeDlg`'s own title one
+click later — two separate working pages read as one broken flash.
+
+Committed `3169a9b045` (pushed to `origin/run-seamlyLayout`, full CI running —
+no skip-ci token, this touches `packaging/**`):
+- `smsi_ui.wxs` — reworded `SeamlyPrepareDlg`'s title to "Preparing to install
+  [ProductName]".
+- `smsi_check_authoring.ps1` — new assertions that `SeamlyPrepareDlg` stays
+  Modal, stays sequenced before `AppSearch`, stock `PrepareDlg` stays absent,
+  and its title never re-duplicates `WelcomeDlg`'s.
+
+Verified locally: packaging-only rebuild (`local_build_msi.ps1 -SkipTests`),
+`smsi_check_authoring.ps1` passed including the six new checks. Fresh MSI at
+`packaging\windows\seamly-msi\x64\seamly-x64.msi`.
+
+**Still open:** `Installer.6.8`'s manual install-matrix pass needs a repeat
+with this build — specifically re-check the first page reads as its own step
+now, not a flash. No TODO_INSTALLER.md line item exists for the flash defect
+itself (it was tracked only via the 2026-09-12 commit and this handover); it
+does not need one unless it recurs again.
+
 ## 2026-09-15 — Installer.6: revert data directory to fixed `~/seamly2d` (done, merged, pushed)
 
 User feedback: stop moving the Windows data directory to
