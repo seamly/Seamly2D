@@ -452,9 +452,8 @@ Assert-That -Name 'the previous-installation page is not sequenced separately' `
 # design. SeamlyPrepareDlg fixes that by staying Modal (Attributes bit 2, the
 # WiX default when Modeless is omitted): the sequence engine keeps control
 # with it until Continue or Cancel actually fires. Losing that bit, or letting
-# stock PrepareDlg's DialogRef sneak back in, silently reintroduces the flash
-# a laptop test caught on 2026-09-18 - assert both so a rebuild is the only
-# way to find out again.
+# stock PrepareDlg's DialogRef sneak back in, silently reintroduces the flash -
+# assert both so a rebuild is the only way to find out.
 $dialogRows = Get-MsiRows -Sql "SELECT ``Dialog``, ``Attributes`` FROM ``Dialog``" -Columns 'Dialog', 'Attributes'
 Assert-That -Name 'stock PrepareDlg is not present (SeamlyPrepareDlg replaces it)' `
     -Succeeded ((@($dialogRows | Where-Object { $_.Dialog -eq 'PrepareDlg' })).Count -eq 0)

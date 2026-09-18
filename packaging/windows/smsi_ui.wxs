@@ -139,7 +139,7 @@
              work (this one blocks on Modal="yes" by default, Continue and
              Cancel both fire), but sharing WelcomeDlg's exact wording reads as
              one Welcome page flashing by broken, not two working pages in a
-             row - that is what the 2026-09-18 laptop test actually saw. -->
+             row. -->
         <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60"
                  Transparent="yes" NoPrefix="yes" TabSkip="yes"
                  Text="{\WixUI_Font_Bigger}Preparing to install [ProductName]" />
