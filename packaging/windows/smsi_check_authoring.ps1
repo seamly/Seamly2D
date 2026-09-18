@@ -445,6 +445,49 @@ foreach ($entry in @(@('ResumeDlg', 1296), @('WelcomeDlg', 1297), @('Maintenance
 Assert-That -Name 'the previous-installation page is not sequenced separately' `
     -Succeeded (@($uiSequence | Where-Object { $_.Action -eq 'SeamlyPreviousInstallDlg' }).Count -eq 0)
 
+# --- 5aa. the preparing page (SeamlyPrepareDlg replaces stock PrepareDlg) -----
+# Stock PrepareDlg is Modeless="yes" with Next permanently disabled: it never
+# blocks InstallUISequence, so AppSearch/CostFinalize run underneath it and
+# WelcomeDlg's own baked-in Show row replaces it within a second - a flash, by
+# design. SeamlyPrepareDlg fixes that by staying Modal (Attributes bit 2, the
+# WiX default when Modeless is omitted): the sequence engine keeps control
+# with it until Continue or Cancel actually fires. Losing that bit, or letting
+# stock PrepareDlg's DialogRef sneak back in, silently reintroduces the flash
+# a laptop test caught on 2026-09-18 - assert both so a rebuild is the only
+# way to find out again.
+$dialogRows = Get-MsiRows -Sql "SELECT ``Dialog``, ``Attributes`` FROM ``Dialog``" -Columns 'Dialog', 'Attributes'
+Assert-That -Name 'stock PrepareDlg is not present (SeamlyPrepareDlg replaces it)' `
+    -Succeeded ((@($dialogRows | Where-Object { $_.Dialog -eq 'PrepareDlg' })).Count -eq 0)
+$prepareDlg = @($dialogRows | Where-Object { $_.Dialog -eq 'SeamlyPrepareDlg' })
+Assert-That -Name 'SeamlyPrepareDlg is present' -Succeeded ($prepareDlg.Count -eq 1)
+if ($prepareDlg.Count -eq 1) {
+    Assert-That -Name 'SeamlyPrepareDlg is Modal, not Modeless (blocks for a real click)' `
+        -Succeeded (([int]$prepareDlg[0].Attributes -band 2) -ne 0) `
+        -Detail "Attributes = $($prepareDlg[0].Attributes)"
+}
+$prepareSequence = @($uiSequence | Where-Object { $_.Action -eq 'SeamlyPrepareDlg' })
+$appSearchSequence = @($uiSequence | Where-Object { $_.Action -eq 'AppSearch' })
+Assert-That -Name 'SeamlyPrepareDlg is sequenced before AppSearch' `
+    -Succeeded ($prepareSequence.Count -eq 1 -and $appSearchSequence.Count -eq 1 -and
+                [int]$prepareSequence[0].Sequence -lt [int]$appSearchSequence[0].Sequence) `
+    -Detail "SeamlyPrepareDlg at $(if ($prepareSequence.Count) { $prepareSequence[0].Sequence } else { '<nothing>' }), AppSearch at $(if ($appSearchSequence.Count) { $appSearchSequence[0].Sequence } else { '<nothing>' })"
+# Both pages genuinely work (Continue ends this one, WelcomeDlg's own Next
+# carries on), but identical wording between them is what read as one broken
+# flash rather than two working pages - assert the titles stay distinct.
+$titleControls = Get-MsiRows `
+    -Sql "SELECT ``Dialog_``, ``Text`` FROM ``Control`` WHERE ``Control``='Title' AND (``Dialog_``='SeamlyPrepareDlg' OR ``Dialog_``='WelcomeDlg')" `
+    -Columns 'Dialog', 'Text'
+$prepareTitle = @($titleControls | Where-Object { $_.Dialog -eq 'SeamlyPrepareDlg' })
+$welcomeTitle = @($titleControls | Where-Object { $_.Dialog -eq 'WelcomeDlg' })
+Assert-That -Name "SeamlyPrepareDlg's title does not repeat WelcomeDlg's title" `
+    -Succeeded ($prepareTitle.Count -eq 1 -and $welcomeTitle.Count -eq 1 -and $prepareTitle[0].Text -ne $welcomeTitle[0].Text) `
+    -Detail "'$(if ($prepareTitle.Count) { $prepareTitle[0].Text } else { '<nothing>' })' vs '$(if ($welcomeTitle.Count) { $welcomeTitle[0].Text } else { '<nothing>' })'"
+$prepareEvents = @($script:controlEvents | Where-Object { $_.Dialog -eq 'SeamlyPrepareDlg' })
+Assert-That -Name 'SeamlyPrepareDlg Continue ends the dialog and lets the sequence carry on' `
+    -Succeeded (@($prepareEvents | Where-Object { $_.Control -eq 'Continue' -and $_.Event -eq 'EndDialog' -and $_.Argument -eq 'Return' }).Count -eq 1)
+Assert-That -Name 'SeamlyPrepareDlg Cancel spawns CancelDlg' `
+    -Succeeded (@($prepareEvents | Where-Object { $_.Control -eq 'Cancel' -and $_.Event -eq 'SpawnDialog' -and $_.Argument -eq 'CancelDlg' }).Count -eq 1)
+
 # --- 5a. the "existing installation" warning text -----------------------------
 
 # The wording is load-bearing: dialog should tell the user what

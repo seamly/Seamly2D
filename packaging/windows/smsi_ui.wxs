@@ -134,9 +134,15 @@
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0"
                  Disabled="yes" TabSkip="yes" />
 
+        <!-- Deliberately NOT "Welcome to the [ProductName] Setup Wizard" - that
+             is WelcomeDlg's own title, one click later. Both dialogs really do
+             work (this one blocks on Modal="yes" by default, Continue and
+             Cancel both fire), but sharing WelcomeDlg's exact wording reads as
+             one Welcome page flashing by broken, not two working pages in a
+             row - that is what the 2026-09-18 laptop test actually saw. -->
         <Control Id="Title" Type="Text" X="135" Y="20" Width="220" Height="60"
                  Transparent="yes" NoPrefix="yes" TabSkip="yes"
-                 Text="{\WixUI_Font_Bigger}Welcome to the [ProductName] Setup Wizard" />
+                 Text="{\WixUI_Font_Bigger}Preparing to install [ProductName]" />
         <Control Id="Description" Type="Text" X="135" Y="80" Width="220" Height="60"
                  Transparent="yes" NoPrefix="yes" TabSkip="yes"
                  Text="Click Continue to let Setup get ready to install [ProductName]. Click Cancel to exit without installing." />
