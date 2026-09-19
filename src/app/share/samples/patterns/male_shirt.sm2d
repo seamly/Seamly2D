@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pattern>
-    <!--Pattern created with Seamly2D v0.6.0.1 (https://seamly.io).-->
-    <version>0.6.8</version>
+    <!--Pattern created with Seamly2D v26.9.18.1279 (https://seamly.io).-->
+    <version>0.7.4</version>
     <unit>cm</unit>
     <description>This a male shirt pattern.
 All the values are increment values in the table of the variables.
@@ -13,62 +13,62 @@ Delete layouts which are not needed.</description>
     <patternLabel>
         <line alignment="0" bold="true" italic="false" sfIncrement="4" text="Timo Virtaneva"/>
     </patternLabel>
-    <measurements>../measurements/individual/male_shirt.smis</measurements>
-    <increments>
-        <increment description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#ToBeVerified"/>
-        <increment description="Calculation&#10;&#10;(1/4 Height )+ Ease&#10;&#10;+3,0 cm Slim Fit Ease &#10;+3,0 cm Normal Fit Ease&#10;+3,0 cm Loose Fit Ease" formula="neck_back_to_waist_b" name="#BackHeight"/>
-        <increment description="Calculate:&#10;(1/10 BustGirth + 12cm) + ease&#10;&#10;+3,0 cm Slim Fit Ease &#10;+4,0 cm Normal Fit Ease&#10;+5,0 cm Loose Fit Ease" formula="(bust_circ/10+12)+5" name="#ArmSkyeHeightBack"/>
-        <increment description="" formula="bust_circ+4" name="#BustCircumfence"/>
-        <increment description="Calculation&#10;&#10;2/10 BustGirth - 1cm+Ease, when BustGirth &lt; 112 cm&#10;1/2 BustGirth - (ArmSkyeWidth + BackWidth)+ Ease, when BustGirth &gt; 112 cm&#10;&#10;+0,75 cm Slim Fit Ease &#10;+1,0 cm   Normal Fit Ease&#10;+1,5 cm   Loose Fit Ease&#10;&#10;&#10;" formula="(#BustCircumfence &lt; 112 ? #BustCircumfence/5-1 : #BustCircumfence/2-(#BustCircumfence/10+2+#BustCircumfence/10+10.5))+1.5" name="#FrontWidth"/>
-        <increment description="Calculation&#10;&#10;2/10 BustGirth - 1cm+Ease, when BustGirth &lt; 100 cm&#10;1/10 BustGirth + 10.5+Ease, when BustGirth &gt; 100 cm&#10;&#10;+1,25 cm Slim Fit Ease &#10;+2,0 cm   Normal Fit Ease&#10;+3.0 cm   Loose Fit Ease&#10;&#10;&#10;" formula="(#BustCircumfence &lt; 100 ? #BustCircumfence/5-1: #BustCircumfence/10+10.5)+3" name="#BackWidth"/>
-        <increment description="Calculation&#10;&#10;ArmSkyeWidth - 1 cm + Ease = (bust_circ/10+12-1) + Ease&#10;&#10;+3,0 cm Slim Fit Ease &#10;+4,0 cm Normal Fit Ease&#10;+5,0 cm Loose Fit Ease" formula="(#BustCircumfence/10+12-1)+5" name="#ArmSkyeHeightFront"/>
-        <increment description="Calculation:&#10;(1/10 BustGirth + 2cm) + Ease&#10;&#10;+3,5 cm Slim Fit Ease &#10;+4,5 cm Normal Fit Ease&#10;+5,5 cm Loose Fit Ease" formula="(bust_circ/10+2)+5.5" name="#ArmSkyeWidth"/>
-        <increment description="Calculation&#10;1/2 Height - 10 cm" formula="height/2-10" name="#Hemline"/>
-        <increment description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0 " name="#Modifications"/>
-        <increment description="The amount of drop of the arm skye" formula="1" name="#ArmSkyeDrop"/>
-        <increment description="The height of the neckline" formula="neck_circ/6+1" name="#NeckLineHeightFront"/>
-        <increment description="The drop of the back neckline" formula="1" name="#NeckLineDropBack"/>
-        <increment description="Height of the yoke" formula="8 " name="#YokeHeight"/>
-        <increment description="" formula="5" name="#HemlineCurve"/>
-        <increment description="The amount intake in the side.&#10;Can be adjusted manually." formula="(bust_circ-waist_circ)/2/2/2&lt;0?0:(bust_circ-waist_circ)/2/2/2" name="#SideIntake"/>
-        <increment description="The amount intake in the side of the hemline.&#10;Can be adjusted manually." formula="(bust_circ-hip_circ)/8" name="#SideIntakeWaist"/>
-        <increment description="The amount intake in the back.&#10;Can be adjusted manually." formula="(bust_circ-waist_circ)/2/2/2&lt;0?0:(bust_circ-waist_circ)/2/2/2" name="#BackIntake"/>
-        <increment description="The amount intake in the back in the hemline.&#10;Can be adjusted manually." formula="(bust_circ-hip_circ)/8" name="#BackIntakeWaist"/>
-        <increment description="Pleat on the center of the back" formula="3" name="#BackPleat"/>
-        <increment description="The side intake amount" formula="1.5" name="#YokeIntake"/>
-        <increment description="Amount of fabric needed for button panel. The seam allowance will be added." formula="5.5" name="#ButtonPanelWidth"/>
-        <increment description="Length of the sleeve" formula="32" name="#ShortSleeveLength"/>
-        <increment description="Height of the pocket" formula="13" name="#PocketHeight"/>
-        <increment description="Width of the pocket" formula="9" name="#PocketWidth"/>
-        <increment description="How much the pocekt bottom is dopped in the center. Value 0 means flat bottom." formula="1" name="#PocketBottomForm"/>
-        <increment description="Pocket upper part fold amount" formula="3" name="#PocketFold"/>
-        <increment description="Pocket center form; Value 0 is flat center" formula="1" name="#PocketFoldCenter"/>
-        <increment description="Height of the pocket flap" formula="3" name="#PocketFlap"/>
-        <increment description="Pocket flap center form; Value 0 is flat center" formula="1" name="#PocketFlapCenter"/>
-        <increment description="" formula="6 " name="#CuffWidth"/>
-        <increment description="" formula="3 " name="#PlacketWidth"/>
-        <increment description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#CanBeAdjusted"/>
-        <increment description="The placket depth" formula="15" name="#PlacketDepth"/>
-        <increment description="Collar top height on the back" formula="3.8" name="#CollarHeight"/>
-        <increment description="The angle of the collar" formula="120" name="#CollarAngle"/>
-        <increment description="Collar front height" formula="7" name="#CollarFrontHeight"/>
-        <increment description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#CalculationsMeasurements"/>
-        <increment description="Calculation&#10;&#10;1/6 Neck Girth" formula="neck_circ/6" name="#NecWidth"/>
-        <increment description="Calculation:&#10;Shoulder length + ease" formula="shoulder_length+5" name="#ShoulderWidth"/>
-        <increment description="Shoulder point drop on back" formula="2" name="#ShoulderDropBack"/>
-        <increment description="Shoulder point drop on front&#10;" formula="4" name="#ShoulderDropFront"/>
-        <increment description="Amount of the shift of the shoulder seam from back to front" formula="1.5 " name="#ShoulderShilft"/>
-        <increment description="Adjusting sleeve cap  heights" formula="6" name="#SleeveCapHeightAdjust"/>
-        <increment description="The amount of the dart in the sleeve" formula="2" name="#SleeveDart"/>
-        <increment description="Hand wristcircumfence + ease + darts" formula="hand_circ+3+2*#SleeveDart" name="#SleeveWristGirth"/>
-        <increment description="Short sleeve hemline turn amount" formula="2" name="#SleeveHemLineTurn"/>
-        <increment description="Length of the arm" formula="arm_shoulder_tip_to_wrist_bent+3" name="#ArmLength"/>
-        <increment description="Cuff circumfence" formula="#SleeveWristGirth-2*#SleeveDart" name="#CuffGirth"/>
-        <increment description="The is a value to control Seamly2D to print inside of the of the piece" formula="0.01" name="#PrintingFix"/>
-        <increment description="The amount needed to be added to the collar for the button panel" formula="1.5" name="#CollarButton"/>
-        <increment description="Collabase height at the front" formula="2" name="#CollarFrontBaseHeight"/>
-        <increment description="The length of the Collar Top from button" formula="#CollarButton+1" name="#CollarUpperButtonLength"/>
-    </increments>
+    <measurements>../../../../../../../seamly2d/measurements/individual/male_chest_102cm.smis</measurements>
+    <variables>
+        <variable description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#ToBeVerified"/>
+        <variable description="Calculation&#10;&#10;(1/4 Height )+ Ease&#10;&#10;+3,0 cm Slim Fit Ease &#10;+3,0 cm Normal Fit Ease&#10;+3,0 cm Loose Fit Ease" formula="neck_back_to_waist_b" name="#BackHeight"/>
+        <variable description="Calculate:&#10;(1/10 BustGirth + 12cm) + ease&#10;&#10;+3,0 cm Slim Fit Ease &#10;+4,0 cm Normal Fit Ease&#10;+5,0 cm Loose Fit Ease" formula="(bust_circ/10+12)+5" name="#ArmSkyeHeightBack"/>
+        <variable description="" formula="bust_circ+4" name="#BustCircumfence"/>
+        <variable description="Calculation&#10;&#10;2/10 BustGirth - 1cm+Ease, when BustGirth &lt; 112 cm&#10;1/2 BustGirth - (ArmSkyeWidth + BackWidth)+ Ease, when BustGirth &gt; 112 cm&#10;&#10;+0,75 cm Slim Fit Ease &#10;+1,0 cm   Normal Fit Ease&#10;+1,5 cm   Loose Fit Ease&#10;&#10;&#10;" formula="(#BustCircumfence &lt; 112 ? #BustCircumfence/5-1 : #BustCircumfence/2-(#BustCircumfence/10+2+#BustCircumfence/10+10.5))+1.5" name="#FrontWidth"/>
+        <variable description="Calculation&#10;&#10;2/10 BustGirth - 1cm+Ease, when BustGirth &lt; 100 cm&#10;1/10 BustGirth + 10.5+Ease, when BustGirth &gt; 100 cm&#10;&#10;+1,25 cm Slim Fit Ease &#10;+2,0 cm   Normal Fit Ease&#10;+3.0 cm   Loose Fit Ease&#10;&#10;&#10;" formula="(#BustCircumfence &lt; 100 ? #BustCircumfence/5-1: #BustCircumfence/10+10.5)+3" name="#BackWidth"/>
+        <variable description="Calculation&#10;&#10;ArmSkyeWidth - 1 cm + Ease = (bust_circ/10+12-1) + Ease&#10;&#10;+3,0 cm Slim Fit Ease &#10;+4,0 cm Normal Fit Ease&#10;+5,0 cm Loose Fit Ease" formula="(#BustCircumfence/10+12-1)+5" name="#ArmSkyeHeightFront"/>
+        <variable description="Calculation:&#10;(1/10 BustGirth + 2cm) + Ease&#10;&#10;+3,5 cm Slim Fit Ease &#10;+4,5 cm Normal Fit Ease&#10;+5,5 cm Loose Fit Ease" formula="(bust_circ/10+2)+5.5" name="#ArmSkyeWidth"/>
+        <variable description="Calculation&#10;1/2 Height - 10 cm" formula="height/2-10" name="#Hemline"/>
+        <variable description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0 " name="#Modifications"/>
+        <variable description="The amount of drop of the arm skye" formula="1" name="#ArmSkyeDrop"/>
+        <variable description="The height of the neckline" formula="neck_circ/6+1" name="#NeckLineHeightFront"/>
+        <variable description="The drop of the back neckline" formula="1" name="#NeckLineDropBack"/>
+        <variable description="Height of the yoke" formula="8 " name="#YokeHeight"/>
+        <variable description="" formula="5" name="#HemlineCurve"/>
+        <variable description="The amount intake in the side.&#10;Can be adjusted manually." formula="(bust_circ-waist_circ)/2/2/2&lt;0?0:(bust_circ-waist_circ)/2/2/2" name="#SideIntake"/>
+        <variable description="The amount intake in the side of the hemline.&#10;Can be adjusted manually." formula="(bust_circ-hip_circ)/8" name="#SideIntakeWaist"/>
+        <variable description="The amount intake in the back.&#10;Can be adjusted manually." formula="(bust_circ-waist_circ)/2/2/2&lt;0?0:(bust_circ-waist_circ)/2/2/2" name="#BackIntake"/>
+        <variable description="The amount intake in the back in the hemline.&#10;Can be adjusted manually." formula="(bust_circ-hip_circ)/8" name="#BackIntakeWaist"/>
+        <variable description="Pleat on the center of the back" formula="3" name="#BackPleat"/>
+        <variable description="The side intake amount" formula="1.5" name="#YokeIntake"/>
+        <variable description="Amount of fabric needed for button panel. The seam allowance will be added." formula="5.5" name="#ButtonPanelWidth"/>
+        <variable description="Length of the sleeve" formula="32" name="#ShortSleeveLength"/>
+        <variable description="Height of the pocket" formula="13" name="#PocketHeight"/>
+        <variable description="Width of the pocket" formula="9" name="#PocketWidth"/>
+        <variable description="How much the pocekt bottom is dopped in the center. Value 0 means flat bottom." formula="1" name="#PocketBottomForm"/>
+        <variable description="Pocket upper part fold amount" formula="3" name="#PocketFold"/>
+        <variable description="Pocket center form; Value 0 is flat center" formula="1" name="#PocketFoldCenter"/>
+        <variable description="Height of the pocket flap" formula="3" name="#PocketFlap"/>
+        <variable description="Pocket flap center form; Value 0 is flat center" formula="1" name="#PocketFlapCenter"/>
+        <variable description="" formula="6 " name="#CuffWidth"/>
+        <variable description="" formula="3 " name="#PlacketWidth"/>
+        <variable description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#CanBeAdjusted"/>
+        <variable description="The placket depth" formula="15" name="#PlacketDepth"/>
+        <variable description="Collar top height on the back" formula="3.8" name="#CollarHeight"/>
+        <variable description="The angle of the collar" formula="120" name="#CollarAngle"/>
+        <variable description="Collar front height" formula="7" name="#CollarFrontHeight"/>
+        <variable description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#CalculationsMeasurements"/>
+        <variable description="Calculation&#10;&#10;1/6 Neck Girth" formula="neck_circ/6" name="#NecWidth"/>
+        <variable description="Calculation:&#10;Shoulder length + ease" formula="shoulder_length+5" name="#ShoulderWidth"/>
+        <variable description="Shoulder point drop on back" formula="2" name="#ShoulderDropBack"/>
+        <variable description="Shoulder point drop on front&#10;" formula="4" name="#ShoulderDropFront"/>
+        <variable description="Amount of the shift of the shoulder seam from back to front" formula="1.5 " name="#ShoulderShilft"/>
+        <variable description="Adjusting sleeve cap  heights" formula="6" name="#SleeveCapHeightAdjust"/>
+        <variable description="The amount of the dart in the sleeve" formula="2" name="#SleeveDart"/>
+        <variable description="Hand wristcircumfence + ease + darts" formula="hand_circ+3+2*#SleeveDart" name="#SleeveWristGirth"/>
+        <variable description="Short sleeve hemline turn amount" formula="2" name="#SleeveHemLineTurn"/>
+        <variable description="Length of the arm" formula="arm_shoulder_tip_to_wrist_bent+3" name="#ArmLength"/>
+        <variable description="Cuff circumfence" formula="#SleeveWristGirth-2*#SleeveDart" name="#CuffGirth"/>
+        <variable description="The is a value to control Seamly2D to print inside of the of the piece" formula="0.01" name="#PrintingFix"/>
+        <variable description="The amount needed to be added to the collar for the button panel" formula="1.5" name="#CollarButton"/>
+        <variable description="Collabase height at the front" formula="2" name="#CollarFrontBaseHeight"/>
+        <variable description="The length of the Collar Top from button" formula="#CollarButton+1" name="#CollarUpperButtonLength"/>
+    </variables>
     <draftBlock name="Men shirt">
         <calculation>
             <point id="1" mx="0.201702" my="-1.01083" name="ShoulderLine" type="single" x="0.0130144" y="3.58763"/>

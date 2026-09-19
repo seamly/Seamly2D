@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pattern>
-    <!--Pattern created with Seamly2D v0.6.0.1 (https://seamly.io).-->
-    <version>0.6.8</version>
+    <!--Pattern created with Seamly2D v26.9.18.1279 (https://seamly.io).-->
+    <version>0.7.4</version>
     <unit>cm</unit>
     <description>This trouser pattern is suitable for women and men for short and long trousers.
 There are 2 pleats possible.
 No back pockets.
-
 All needed parameters are in variable table.
 Check and adjust *** CHECK *** increments
 </description>
@@ -17,59 +16,59 @@ Pockets are adjustable.</notes>
         <line alignment="0" bold="true" italic="false" sfIncrement="4" text="Timo Virtaneva"/>
     </patternLabel>
     <measurements>../measurements/individual/trousers.smis</measurements>
-    <increments>
-        <increment description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Size_Length"/>
-        <increment description="*** CHECK ***&#10;Waist Circumference + Ease" formula="waist_circ+2" name="#WaistCircumference"/>
-        <increment description="*** CHECK ***&#10;Hip Circumference + Ease" formula="hip_circ" name="#HipCircumference"/>
-        <increment description="Waist Height" formula="height_waist_side" name="#WaistHeight"/>
-        <increment description="Crotch height " formula="leg_crotch_to_floor" name="#CrotchHeight"/>
-        <increment description="*** CHECK ***&#10;Knee Circumference + Ease" formula="52 " name="#KneeCircumference"/>
-        <increment description="Knee Height or CrotchHeight * 0,6&#10;" formula="height_knee" name="#KneeHeight"/>
-        <increment description="*** CHECK ***&#10;Ankle level circumference of full length trouser&#10;&#10;Calculateted&#10;leg_ankle_circ + ease&#10;leg_ankle_high_circ+ ease&#10;" formula="42" name="#AnkleCircumfence"/>
-        <increment description="* DO NOT CHANGE *&#10;Calculated:&#10;HipCircumference/20+3 + CrotchHeight&#10;&#10;&#10;" formula="hip_circ/20+3 + leg_crotch_to_floor" name="#HipLineHeight"/>
-        <increment description="* DO NOT CHANGE *&#10;&#10;Front panel front side width at Waist line&#10;Calculated:&#10;&#10;WaistGirth/10 or FrontPanelWidthFront - 0,5..1&#10;&#10;" formula="waist_circ/10" name="#FrontPanelWaistFront"/>
-        <increment description="* DO NOT CHANGE *&#10;&#10;Total Front panel width at Hip line&#10;&#10;Calculated:&#10;HipCircumference/4" formula="hip_circ/4" name="#FrontPanelWidth"/>
-        <increment description="* DO NOT CHANGE *&#10;&#10;Front panel front side width at Hip line&#10;&#10;Calculated:&#10;1/10 WaistCircumfence+1,5" formula="waist_circ/10+1.5" name="#FrontPanelWidthFront"/>
-        <increment description="* DO NOT CHANGE *&#10;&#10;Front Crotch hook guidance point at Hip line&#10;&#10;Calculated:&#10;HipCircumference/20 + 0,5...1&#10;" formula="hip_circ/20+1" name="#FrontCrotchHookWidth"/>
-        <increment description="*** CHECK ***&#10;Calculated:&#10;HipCircumference/4 + ease (0...4)" formula="hip_circ/4+2" name="#BackPanelWidth"/>
-        <increment description="*** CHECK ***&#10;Buttock shape&#10;Square &#9;H-shape &#9;(hip_circ/4+2)/4+0,5 &#9;&#10;Round&#9;O-shape&#9;(hip_circ/4+2)/4-0,5&#10;Pear&#9;A-shape&#9;(hip_circ/4+2)/4+1…1,5 cm&#10;Inverted&#9;V-shape&#9;(hip_circ/4+2)/4&#10;" formula="(hip_circ/4+2)/4" name="#BackPanelWidthBack"/>
-        <increment description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Hemline_Side"/>
-        <increment description="*** CHECK ***&#10;Height of the hemline from heel&#10;&#10;This defines the length of trousers" formula="2" name="#HemlineHeight"/>
-        <increment description="*** CHECK ***&#10;Additional length to hemline for turns, cuffs etc." formula="3" name="#HemlineAddition"/>
-        <increment description="*** CHECK ***&#10;Streigth part  in the hemline for shortening etc." formula="4" name="#HemLineStreightHeight"/>
-        <increment description="*** CHECK ***&#10;Shifting side seam from back to front in knee and ankle&#10;Men &#9;1&#10;Women &#9;2" formula="1" name="#HemLineFrontBackDiffrence"/>
-        <increment description="* SPECIAL CASE *&#10;Width of the stripe&#10;The difference between front and back panels for trousers with stripe in the side seam." formula="0" name="#SideShift"/>
-        <increment description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Waist_Back_Center"/>
-        <increment description="*** CHECK ***&#10;Shifting back panel center 0 ... 2&#10;&#10;Change shape of the back panel" formula="2" name="#BackPanelCenterShift"/>
-        <increment description="*** CHECK ***&#10;Changes the straightness of the back center&#10;&#10;Back panel form 2...5&#10;2..3 Round buttocks&#10;4 normal&#10;5 slim&#10;" formula="3" name="#BackPanelForm"/>
-        <increment description="Increment to back center seam to make 90 angle" formula="0 " name="#BackCenterInc"/>
-        <increment description="*** CHECK ***&#10;Fitting addition to the back seam&#10;Reservation for further resizing of waistline. Mainly in men trousers" formula="4" name="#BackPanelFittingInc"/>
-        <increment description="Shifting Center&#10;Adjust for body shape" formula="0" name="#BackCenterShift"/>
-        <increment description="Dropping +value or rising  -value the back center seam from waistline" formula="0" name="#BackCenterDrop"/>
-        <increment description="Depth of dart in the middle of the back panel" formula="11" name="#BackDartDepth_1"/>
-        <increment description="Depth of dart in 1/4 panel width from back center seam" formula="8" name="#BackDartDepth_2"/>
-        <increment description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Waist_Front_Center"/>
-        <increment description="Dropping +value or rising -value the front center seam from waistline" formula="0" name="#FronCenterDrop"/>
-        <increment description="Shifting Center seam&#10;Adjust for body shape" formula="0" name="#FrontCenterShift"/>
-        <increment description="Depth of the front dart" formula="6" name="#FrontDartDepth"/>
-        <increment description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Waist_Side"/>
-        <increment description="*** CHECK ***&#10;Side curvature at Waist line&#10;How much is the side seam curving in" formula="1.5 " name="#SideCurve"/>
-        <increment description="Dropping the side from the waistline" formula="0" name="#SideDrop"/>
-        <increment description="* DO NOT CHANGE *&#10;The distance to create 90 degree seams&#10;" formula="2" name="#WaistLineCurve"/>
-        <increment description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Pleats"/>
-        <increment description="*** CHECK ***&#10;&#10;Front panet pleat amount. &#10;Pleat widens the whole front panel" formula="4" name="#Pleat1"/>
-        <increment description="*** CHECK ***&#10;Front panet pleat amount. &#10;Pleat widens the front panel to knee level " formula="2 " name="#Pleat2"/>
-        <increment description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Pocket"/>
-        <increment description="*** CHECK ***&#10;The pocket mouth distance from the side seam" formula="4" name="#PocketOpeningWidth"/>
-        <increment description="*** CHECK ***&#10;The height of the pocket mount from the waistline" formula="17" name="#PocketOpeningHeight"/>
-        <increment description="*** CHECK ***&#10;The width of the pocket in the waistline" formula="14" name="#PocketWidth"/>
-        <increment description="*** CHECK ***&#10;Depth of the pocket in the front" formula="28" name="#PocketDepth"/>
-        <increment description="The width of the panel in the pocket mouth" formula="5" name="#PocketPanelWidth"/>
-        <increment description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Additional_Parts"/>
-        <increment description="The width of the zipper panel" formula="4" name="#ZipperPanelWidth"/>
-        <increment description="*** CHECK ***&#10;Waist band width" formula="4" name="#WaistBandWidth"/>
-        <increment description="*** CHECK ***&#10;The width of the additional button panel in the waistband" formula="8" name="#ButtonPanelWidth"/>
-    </increments>
+    <variables>
+        <variable description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Size_Length"/>
+        <variable description="*** CHECK ***&#10;Waist Circumference + Ease" formula="waist_circ+2" name="#WaistCircumference"/>
+        <variable description="*** CHECK ***&#10;Hip Circumference + Ease" formula="hip_circ" name="#HipCircumference"/>
+        <variable description="Waist Height" formula="height_waist_side" name="#WaistHeight"/>
+        <variable description="Crotch height " formula="leg_crotch_to_floor" name="#CrotchHeight"/>
+        <variable description="*** CHECK ***&#10;Knee Circumference + Ease" formula="52 " name="#KneeCircumference"/>
+        <variable description="Knee Height or CrotchHeight * 0,6&#10;" formula="height_knee" name="#KneeHeight"/>
+        <variable description="*** CHECK ***&#10;Ankle level circumference of full length trouser&#10;&#10;Calculateted&#10;leg_ankle_circ + ease&#10;leg_ankle_high_circ+ ease&#10;" formula="42" name="#AnkleCircumfence"/>
+        <variable description="* DO NOT CHANGE *&#10;Calculated:&#10;HipCircumference/20+3 + CrotchHeight&#10;&#10;&#10;" formula="hip_circ/20+3 + leg_crotch_to_floor" name="#HipLineHeight"/>
+        <variable description="* DO NOT CHANGE *&#10;&#10;Front panel front side width at Waist line&#10;Calculated:&#10;&#10;WaistGirth/10 or FrontPanelWidthFront - 0,5..1&#10;&#10;" formula="waist_circ/10" name="#FrontPanelWaistFront"/>
+        <variable description="* DO NOT CHANGE *&#10;&#10;Total Front panel width at Hip line&#10;&#10;Calculated:&#10;HipCircumference/4" formula="hip_circ/4" name="#FrontPanelWidth"/>
+        <variable description="* DO NOT CHANGE *&#10;&#10;Front panel front side width at Hip line&#10;&#10;Calculated:&#10;1/10 WaistCircumfence+1,5" formula="waist_circ/10+1.5" name="#FrontPanelWidthFront"/>
+        <variable description="* DO NOT CHANGE *&#10;&#10;Front Crotch hook guidance point at Hip line&#10;&#10;Calculated:&#10;HipCircumference/20 + 0,5...1&#10;" formula="hip_circ/20+1" name="#FrontCrotchHookWidth"/>
+        <variable description="*** CHECK ***&#10;Calculated:&#10;HipCircumference/4 + ease (0...4)" formula="hip_circ/4+2" name="#BackPanelWidth"/>
+        <variable description="*** CHECK ***&#10;Buttock shape&#10;Square &#9;H-shape &#9;(hip_circ/4+2)/4+0,5 &#9;&#10;Round&#9;O-shape&#9;(hip_circ/4+2)/4-0,5&#10;Pear&#9;A-shape&#9;(hip_circ/4+2)/4+1…1,5 cm&#10;Inverted&#9;V-shape&#9;(hip_circ/4+2)/4&#10;" formula="(hip_circ/4+2)/4" name="#BackPanelWidthBack"/>
+        <variable description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Hemline_Side"/>
+        <variable description="*** CHECK ***&#10;Height of the hemline from heel&#10;&#10;This defines the length of trousers" formula="2" name="#HemlineHeight"/>
+        <variable description="*** CHECK ***&#10;Additional length to hemline for turns, cuffs etc." formula="3" name="#HemlineAddition"/>
+        <variable description="*** CHECK ***&#10;Streigth part  in the hemline for shortening etc." formula="4" name="#HemLineStreightHeight"/>
+        <variable description="*** CHECK ***&#10;Shifting side seam from back to front in knee and ankle&#10;Men &#9;1&#10;Women &#9;2" formula="1" name="#HemLineFrontBackDiffrence"/>
+        <variable description="* SPECIAL CASE *&#10;Width of the stripe&#10;The difference between front and back panels for trousers with stripe in the side seam." formula="0" name="#SideShift"/>
+        <variable description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Waist_Back_Center"/>
+        <variable description="*** CHECK ***&#10;Shifting back panel center 0 ... 2&#10;&#10;Change shape of the back panel" formula="2" name="#BackPanelCenterShift"/>
+        <variable description="*** CHECK ***&#10;Changes the straightness of the back center&#10;&#10;Back panel form 2...5&#10;2..3 Round buttocks&#10;4 normal&#10;5 slim&#10;" formula="3" name="#BackPanelForm"/>
+        <variable description="Increment to back center seam to make 90 angle" formula="0 " name="#BackCenterInc"/>
+        <variable description="*** CHECK ***&#10;Fitting addition to the back seam&#10;Reservation for further resizing of waistline. Mainly in men trousers" formula="4" name="#BackPanelFittingInc"/>
+        <variable description="Shifting Center&#10;Adjust for body shape" formula="0" name="#BackCenterShift"/>
+        <variable description="Dropping +value or rising  -value the back center seam from waistline" formula="0" name="#BackCenterDrop"/>
+        <variable description="Depth of dart in the middle of the back panel" formula="11" name="#BackDartDepth_1"/>
+        <variable description="Depth of dart in 1/4 panel width from back center seam" formula="8" name="#BackDartDepth_2"/>
+        <variable description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Waist_Front_Center"/>
+        <variable description="Dropping +value or rising -value the front center seam from waistline" formula="0" name="#FronCenterDrop"/>
+        <variable description="Shifting Center seam&#10;Adjust for body shape" formula="0" name="#FrontCenterShift"/>
+        <variable description="Depth of the front dart" formula="6" name="#FrontDartDepth"/>
+        <variable description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Waist_Side"/>
+        <variable description="*** CHECK ***&#10;Side curvature at Waist line&#10;How much is the side seam curving in" formula="1.5 " name="#SideCurve"/>
+        <variable description="Dropping the side from the waistline" formula="0" name="#SideDrop"/>
+        <variable description="* DO NOT CHANGE *&#10;The distance to create 90 degree seams&#10;" formula="2" name="#WaistLineCurve"/>
+        <variable description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Pleats"/>
+        <variable description="*** CHECK ***&#10;&#10;Front panet pleat amount. &#10;Pleat widens the whole front panel" formula="4" name="#Pleat1"/>
+        <variable description="*** CHECK ***&#10;Front panet pleat amount. &#10;Pleat widens the front panel to knee level " formula="2 " name="#Pleat2"/>
+        <variable description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Pocket"/>
+        <variable description="*** CHECK ***&#10;The pocket mouth distance from the side seam" formula="4" name="#PocketOpeningWidth"/>
+        <variable description="*** CHECK ***&#10;The height of the pocket mount from the waistline" formula="17" name="#PocketOpeningHeight"/>
+        <variable description="*** CHECK ***&#10;The width of the pocket in the waistline" formula="14" name="#PocketWidth"/>
+        <variable description="*** CHECK ***&#10;Depth of the pocket in the front" formula="28" name="#PocketDepth"/>
+        <variable description="The width of the panel in the pocket mouth" formula="5" name="#PocketPanelWidth"/>
+        <variable description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#Additional_Parts"/>
+        <variable description="The width of the zipper panel" formula="4" name="#ZipperPanelWidth"/>
+        <variable description="*** CHECK ***&#10;Waist band width" formula="4" name="#WaistBandWidth"/>
+        <variable description="*** CHECK ***&#10;The width of the additional button panel in the waistband" formula="8" name="#ButtonPanelWidth"/>
+    </variables>
     <draftBlock name="Trousers">
         <calculation>
             <point id="1" mx="0.214454" my="-1.84962" name="HeelLine" type="single" x="-0.286555" y="-5.33536"/>
