@@ -56,7 +56,7 @@ CONFIG(debug, debug|release){
     DEFINES += V_NO_ASSERT V_NO_DEBUG
 }
 
-# set cpp compatability
+# Qt6 requires C++17 minimum
 CONFIG += c++17
 
 # Prevent building both debug and release builds
