@@ -84,6 +84,19 @@ simplifies the whole workflow:
 - [x] Installer.6.7 App side: `VCommonSettings::getDefaultDataRoot()` returns `~/seamly2d` on every platform (matches the old `getLegacyDataRoot()`, now removed). Delete the now-dead legacy-migration subsystem: `legacy_data_migration.{h,cpp}`, `legacy_data_archive.{h,cpp}`, `migrateAdoptedLegacyTree()`, `pruneEmptyLegacyDataRoot()`, `chooseFirstRunDataRoot()`, the `firstRunNoticePending`/`markFirstRunNoticeShown` one-shot notice, and `VAbstractApplication::NotifySeamlyDataLocation()`.
 - [ ] Installer.6.8 Manual install-matrix verification on the test laptop (fresh / update-with-custom-root / repair / uninstall) — see `project-docs/TEST_WIN_MSI_Test_Case_template.md`, updated for this task.
 
+**[2026-09-18] Partial reversal of Installer.6.5:** user feedback now asks for
+the opposite on a fresh install only — see them the default location and let
+them Change it. `SeamlyDataLocationDlg` shows read-only text when
+`SEAMLYDATAROOTRECORDED` (6.2 unchanged: update/repair still never edit an
+existing root), or an editable path box plus a Change button (stock
+`BrowseDlg`, re-added) when nothing is recorded yet. `SEAMLYDATAROOT` stays a
+Directory table entry so `BrowseDlg`'s stock `SetTargetPath`/indirect
+controls have something real to browse. Verified: `wix build` compiles,
+`smsi_check_authoring.ps1` passes (assertions rewritten for the new
+two-variant page), `smsi_fix_dialog_lines.ps1` finds no non-Line overflow.
+Not yet verified: an actual click-through on Windows (Change → BrowseDlg →
+OK), and a full `local_build_msi.ps1` run.
+
 ## Installer.4 - Re-organize all directories, files, and scripts needed to build the Seamly executables with the GitHub CI/CD ci.yml file so that all CI/CD build information is under the .github directory tree; remove unnecessary and unused CI/CD files; copy files to new location if the original file is under the src/ or share/ directories; update the CI/CD files with the new locations of moved files; build & test the updated CI/CD workflow and artifacts
 
 - Installer.4.1 - Re-organize files; Update ci.yml and related files to reflect new file locations

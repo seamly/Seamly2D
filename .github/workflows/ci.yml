@@ -410,9 +410,15 @@ jobs:
 
       # jom is nmake-compatible and compiles object files in parallel across
       # all runner cores; nmake itself never parallelizes a single build.
+      #
+      # CONFIG+=deferDeploy skips seamly2d.pro/seamlyme.pro's own windeployqt
+      # post-link step (see common.pri's deployQtRuntime()), so this job does
+      # not deploy either exe's Qt runtime before SeamlyLayout is even built
+      # below. smsi.ps1 deploys all three exes together, once, after every
+      # exe exists.
       - name: 'qmake/jom build forseamly2d.exe and seamlyme.exe - ${{ matrix.arch }}'
         run: |
-          qmake Seamly.pro -config release CONFIG+=noTests QMAKE_CXX="sccache cl" QMAKE_CC="sccache cl"
+          qmake Seamly.pro -config release CONFIG+=noTests CONFIG+=deferDeploy QMAKE_CXX="sccache cl" QMAKE_CC="sccache cl"
           jom -j $env:NUMBER_OF_PROCESSORS
 
       # ----- Build SeamlyLayout -----

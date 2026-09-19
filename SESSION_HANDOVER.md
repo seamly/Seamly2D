@@ -6,6 +6,39 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-18 — fresh-install data location: now shown and editable (needs laptop click-through)
+
+User feedback contradicts `Installer.6.5` (2026-09-15, "no picker"): on a
+fresh install they got no notice of the default data location and no way to
+change it. Re-added a Change button + browse dialog, but only for the
+fresh-install case — an update/repair still shows its recorded root
+read-only, never editable (`Installer.6.2` unchanged). See the dated note
+under `Installer.6` in `TODO_INSTALLER.md` for the full picture.
+
+Changed, uncommitted on `run-seamlyLayout`:
+
+- `packaging/windows/smsi_ui.wxs` — `SeamlyDataLocationDlg` now has two
+  ShowCondition/HideCondition variants on `SEAMLYDATAROOTRECORDED`: the
+  existing read-only text, or a `PathEdit` bound to `SEAMLYDATAROOT` plus a
+  `ChangeFolder` button that spawns the stock `BrowseDlg`. `BrowseDlg` is
+  DialogRef'd back in. Its Change/Previous-install/License routing collapsed
+  from three-way splits on `SEAMLYDATAROOTRECORDED` to one, since the page
+  now always appears and picks its own variant.
+  Also fixed a separate bug found along the way: `WixToolset.UI.wixext`
+  6.0.2's stock `BrowseDlg` ships with Cancel wired but OK wired to nothing —
+  added `<Publish Dialog="BrowseDlg" Control="OK" Event="EndDialog" .../>` or
+  its Change button would never actually confirm a folder.
+- `packaging/windows/smsi_check_authoring.ps1` — assertions rewritten for the
+  two-variant page and the new BrowseDlg wiring (was asserting the *absence*
+  of a picker before).
+- `project-docs/TODO_INSTALLER.md` — dated note under `Installer.6`.
+
+Verified: `wix build` (direct, dummy staging — no full app rebuild) compiles
+clean; `smsi_check_authoring.ps1` passes end to end; `smsi_fix_dialog_lines.ps1`
+finds no non-Line control overflow. **Not verified**: `local_build_msi.ps1`
+end to end, or an actual click of Change → Browse → OK on Windows — GUI
+dialog behavior only shows up on a real run.
+
 ## 2026-09-18 — installer "flash" on the first page: fixed, needs re-test on the laptop
 
 `Installer.6.8`'s manual laptop pass caught the wizard's first page
@@ -32,11 +65,12 @@ Verified locally: packaging-only rebuild (`local_build_msi.ps1 -SkipTests`),
 `smsi_check_authoring.ps1` passed including the six new checks. Fresh MSI at
 `packaging\windows\seamly-msi\x64\seamly-x64.msi`.
 
-**Still open:** `Installer.6.8`'s manual install-matrix pass needs a repeat
-with this build — specifically re-check the first page reads as its own step
-now, not a flash. No TODO_INSTALLER.md line item exists for the flash defect
-itself (it was tracked only via the 2026-09-12 commit and this handover); it
-does not need one unless it recurs again.
+**Progress on `Installer.6.8`'s manual install-matrix pass:** fresh install and
+update-over-existing-install (SeamlyLayout already present) both verified
+working. Still open: repair and uninstall cases, per the matrix in
+`TEST_WIN_MSI_Test_Case_template.md`. No TODO_INSTALLER.md line item exists
+for the flash defect itself (it was tracked only via the 2026-09-12 commit and
+this handover); it does not need one unless it recurs again.
 
 ## 2026-09-15 — Installer.6: revert data directory to fixed `~/seamly2d` (done, merged, pushed)
 

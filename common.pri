@@ -120,6 +120,14 @@ defineTest(forceCopyToDestdir) {
 # @param  1  Path of the executable to deploy beside, e.g. $$DESTDIR/$${TARGET}.exe
 # @return true (always) — a no-op on every non-MSVC mkspec.
 #
+# This helper always deploys; it does not know about CONFIG+=deferDeploy.
+# seamly2d.pro and seamlyme.pro guard their own call site with
+# !CONFIG(deferDeploy) so the MSI build can defer deployment until
+# smsi.ps1 runs it once, after seamly2d, seamlyme and SeamlyLayout are all
+# built. Seamly2DTest.pro calls this unconditionally — a test binary must
+# have its Qt runtime deployed immediately, since nmake check runs it
+# standalone and never goes through smsi.ps1.
+#
 # Why this is a shared helper rather than a block copied into each .pro: the
 # three MSVC targets (seamly2d, seamlyme, Seamly2DTests) each kept their own
 # copy of this step, and they drifted — the arm64 MSI build broke because one

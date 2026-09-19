@@ -243,4 +243,11 @@ macx{
 # deployQtRuntime() lives in common.pri and is shared with seamly2d.pro and
 # Seamly2DTest.pro — see the comment block there for why the tool is resolved
 # through qtPrepareTool() and why x64 and arm64 need no per-arch handling.
-deployQtRuntime($$DESTDIR/$${TARGET}.exe)
+#
+# CONFIG+=deferDeploy skips this: the MSI build passes it so windeployqt runs
+# once, in smsi.ps1, only after seamly2d, seamlyme AND SeamlyLayout are all
+# built - not here, mid-nmake, before SeamlyLayout's cmake build has even
+# started.
+!CONFIG(deferDeploy) {
+    deployQtRuntime($$DESTDIR/$${TARGET}.exe)
+}
