@@ -106,9 +106,9 @@ include(warnings.pri)
 # precompiled headers clash with the BUILD_REVISION define, thus disable here
 CONFIG -= precompile_header
 
-DVCS_HESH=$$FindBuildRevision()
-message("seamlyme.pro: Build revision:" $${DVCS_HESH})
-DEFINES += "BUILD_REVISION=$${DVCS_HESH}" # Make available build revision number in sources.
+DVCS_HASH=$$FindBuildRevision()
+message("seamlyme.pro: Build revision:" $${DVCS_HASH})
+DEFINES += "BUILD_REVISION=$${DVCS_HASH}" # Make available build revision number in sources.
 
 # Path to resource file.
 win32:RC_FILE = share/resources/seamlyme.rc

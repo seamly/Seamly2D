@@ -61,9 +61,9 @@ include(warnings.pri)
 CONFIG -= precompile_header
 
 # build version
-DVCS_HESH=$$FindBuildRevision()
-message("seamly2d.pro: Build revision:" $${DVCS_HESH})
-DEFINES += "BUILD_REVISION=$${DVCS_HESH}" # Make available build revision number in sources.
+DVCS_HASH=$$FindBuildRevision()
+message("seamly2d.pro: Build revision:" $${DVCS_HASH})
+DEFINES += "BUILD_REVISION=$${DVCS_HASH}" # Make available build revision number in sources.
 
 # Useful information about Qt.
 message(seamly2d.pro: Qt version: $$[QT_VERSION])
@@ -85,12 +85,12 @@ win32:RC_FILE = share/resources/seamly2d.rc
 # Include sample files via INSTALL_MULTISIZE_MEASUREMENTS, INSTALL_STANDARD_TEMPLATES, and INSTALL_LABEL_TEMPLATES
 include(../samples.pri)
 
-# Directory for utility pdftops, required to export layouts in PS and EPS formats.
+# Directory for pdftops utility, required to export layouts in PS and EPS formats.
 win32 {
     INSTALL_PDFTOPS += share/bin/win/pdftops.exe
 }
 
-# translations
+# Include translations
 include(../translations.pri)
 
 # Set "make install" command for Unix-like systems.

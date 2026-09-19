@@ -47,20 +47,22 @@ win32:!win32-g++: QMAKE_CXXFLAGS += /utf-8
 
 CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 
+
 CONFIG(debug, debug|release){
-    # Debug mode, intentionally left empty
+    # Debug builds do not define release-only macros.
 } else {
-    # Release mode
+    # Release builds disable assertions and debug-only behavior.
     message("Release mode: V_NO_ASSERT V_NO_DEBUG defined")
     DEFINES += V_NO_ASSERT V_NO_DEBUG
 }
 
-CONFIG += c++14
+# set cpp compatability
+CONFIG += c++17
 
-# Only do debug or release builds also on windows
+# Prevent building both debug and release builds
 CONFIG -= debug_and_release debug_and_release_target
 
-# Since Qt 5.4.0 the source code location is recorded only in debug builds.
+# Source code location is recorded only for debug builds.
 # We need this information also in release builds. For this need define QT_MESSAGELOGCONTEXT.
 DEFINES += QT_MESSAGELOGCONTEXT
 
@@ -116,45 +118,21 @@ defineTest(forceCopyToDestdir) {
     export(QMAKE_CLEAN)
 }
 
-# @brief  Append a windeployqt post-link step for the given executable (MSVC only).
-# @param  1  Path of the executable to deploy beside, e.g. $$DESTDIR/$${TARGET}.exe
-# @return true (always) — a no-op on every non-MSVC mkspec.
+# @brief Add a windeployqt post-link step for an executable (MSVC only).
+# @param 1 Executable path, for example $$DESTDIR/$${TARGET}.exe.
+# @return true. Does nothing for non-MSVC builds.
 #
-# This helper always deploys; it does not know about CONFIG+=deferDeploy.
-# seamly2d.pro and seamlyme.pro guard their own call site with
-# !CONFIG(deferDeploy) so the MSI build can defer deployment until
-# smsi.ps1 runs it once, after seamly2d, seamlyme and SeamlyLayout are all
-# built. Seamly2DTest.pro calls this unconditionally — a test binary must
-# have its Qt runtime deployed immediately, since nmake check runs it
-# standalone and never goes through smsi.ps1.
+# This helper always deploys. Callers handle CONFIG+=deferDeploy.
+# The main applications defer deployment for MSI packaging; the test target
+# deploys immediately because nmake check runs it independently.
 #
-# Why this is a shared helper rather than a block copied into each .pro: the
-# three MSVC targets (seamly2d, seamlyme, Seamly2DTests) each kept their own
-# copy of this step, and they drifted — the arm64 MSI build broke because one
-# copy passed a --qtpaths wrapper that the arm64 kit does not ship.
+# qtPrepareTool() selects windeployqt from this qmake's Qt installation instead
+# of using the first version found on PATH. This prevents deploying incompatible
+# Qt libraries from another installation.
 #
-# qtPrepareTool() resolves windeployqt out of $$[QT_INSTALL_BINS] — the Qt that
-# *this* qmake belongs to — instead of letting the shell find the first
-# windeployqt on PATH. That matters because an unrelated Qt earlier on PATH
-# (e.g. Qt Design Studio's reduced 6.8.x kit) would otherwise deploy its own,
-# older Qt DLLs beside an exe linked against the build kit. Qt's binary
-# compatibility is forward-only, so that mismatch produces a build tree whose
-# exes cannot start — and which the MSI packaging script would ship verbatim.
-#
-# x64 and arm64 are handled IDENTICALLY, with no --qtpaths flag, because every
-# Windows build is NATIVE: ci.yml's windows-msi job builds x64 on
-# windows-latest and arm64 on windows-11-arm, each installing its own host kit
-# (win64_msvc2022_64 / win64_msvc2022_arm64). Nothing is cross-compiled, so the
-# windeployqt qtPrepareTool() picks is always an executable the runner can run
-# and always belongs to the kit being deployed — it resolves its own paths.
-#
-# --qtpaths is only needed by a CROSS-COMPILED kit
-# (win64_msvc2022_arm64_cross_compiled), whose windeployqt is an x64 binary that
-# cannot infer the arm64 target's paths and must be pointed at the
-# host-qtpaths.bat wrapper install-qt-action generates. Passing the flag anyway
-# is what broke the arm64 MSI build — the native kit ships no such wrapper, and
-# windeployqt fails with '"...\bin\host-qtpaths.bat" does not exist'. Restore
-# the flag only if a cross-compiled kit is ever reintroduced.
+# Native x64 and arm64 builds use the same command and do not need --qtpaths.
+# That option is only for cross-compiled kits, whose windeployqt needs the
+# host-qtpaths.bat wrapper to find the target Qt installation.
 defineTest(deployQtRuntime) {
     EXE = $$shell_path($$1)
 
@@ -167,11 +145,14 @@ defineTest(deployQtRuntime) {
     return(true)
 }
 
+
 CONFIG(debug, debug|release){
     # Debug mode, intentionally left empty
 } else {
-    CONFIG += precompile_header # Turn on creation precompiled headers (PCH).
-    PRECOMPILED_HEADER = stable.h # Header file with all all static headers: libraries, static local headers.
+    # Release mode - Turn on creating precompiled headers (PCH).
+    CONFIG += precompile_header 
+    # Header file with all all static headers: libraries, static local headers.
+    PRECOMPILED_HEADER = stable.h 
     *msvc*{
         PRECOMPILED_SOURCE = stable.cpp # MSVC need also cpp file.
     }
@@ -182,23 +163,22 @@ CONFIG(debug, debug|release){
     # Debug mode
     return(\\\"unknown\\\")
 }else{
-    # Release mode
-    #build revision number for using in version
-    #get the short form of the latest commit's changeset hash, i.e. a 12-character hexadecimal string
-    DVCS_HESH=$$system("git rev-parse --short=12 HEAD") #get SHA1 commit hash
-    message("common.pri: Latest commit hash:" $${DVCS_HESH})
+    # Release mode - build revision number for using in version
+    # get short form of latest commit's changeset hash, i.e. a 12-character hexadecimal string
+    DVCS_HASH=$$system("git rev-parse --short=12 HEAD") #get SHA1 commit hash
+    message("common.pri: Latest commit hash:" $${DVCS_HASH})
 
-    isEmpty(DVCS_HESH){
-       DVCS_HESH = \\\"unknown\\\" # if we can't find build revision left unknown.
+    isEmpty(DVCS_HASH){
+       DVCS_HASH = \\\"unknown\\\" # if we can't find build revision left unknown.
     } else {
-       DVCS_HESH=\\\"Git:$${DVCS_HESH}\\\"
+       DVCS_HASH=\\\"Git:$${DVCS_HASH}\\\"
     }
 
-    return($${DVCS_HESH})
+    return($${DVCS_HASH})
 }
 }
 
-# Default prefix. Use for creation install path.
+# Default prefix. Use for creating the binary installation path.
 DEFAULT_PREFIX = /usr
 
 # In debug mode we use all usefull for us compilers keys for checking errors.
