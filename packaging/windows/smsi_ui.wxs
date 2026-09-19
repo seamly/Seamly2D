@@ -325,11 +325,17 @@
                  NoPrefix="yes"
                  ShowCondition="NOT SEAMLYDATAROOTRECORDED" HideCondition="SEAMLYDATAROOTRECORDED"
                  Text="Your work will be kept in:" />
-        <Control Id="FolderEdit" Type="PathEdit" X="20" Y="130" Width="330" Height="18"
+        <Control Id="FolderEdit" Type="PathEdit" X="20" Y="130" Width="308" Height="18"
                  Property="SEAMLYDATAROOT"
                  ShowCondition="NOT SEAMLYDATAROOTRECORDED" HideCondition="SEAMLYDATAROOTRECORDED" />
-        <Control Id="ChangeFolder" Type="PushButton" X="20" Y="154" Width="66" Height="17"
-                 Text="&amp;Change..."
+        <!-- Icon button at the field's right end, not a labeled "Change..." button
+             below it - the standard Windows browse-for-folder placement. Image is
+             the Binary "folder.ico" declared in smsi.wxs (extracted from
+             shell32.dll), referenced by Id through Text per the Control table's
+             icon-button convention. -->
+        <Control Id="ChangeFolder" Type="PushButton" X="328" Y="130" Width="22" Height="18"
+                 Icon="yes" FixedSize="yes" IconSize="16" Text="folder.ico"
+                 ToolTip="Change..."
                  ShowCondition="NOT SEAMLYDATAROOTRECORDED" HideCondition="SEAMLYDATAROOTRECORDED">
           <Publish Property="_BrowseProperty" Value="SEAMLYDATAROOT" Order="1" />
           <Publish Event="SpawnDialog" Value="BrowseDlg" Order="2" />

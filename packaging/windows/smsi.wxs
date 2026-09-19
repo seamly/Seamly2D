@@ -65,6 +65,10 @@
     <Icon Id="seamlyme.ico" SourceFile="$(var.RepoRoot)\packaging\assets\seamlyme.ico" />
     <Icon Id="seamlylayout.ico" SourceFile="$(var.RepoRoot)\packaging\assets\seamlylayout.ico" />
 
+    <!-- Image for the SeamlyDataLocationDlg browse button (a Control, not a
+         shortcut), so it lives in the Binary table, not the Icon table above. -->
+    <Binary Id="folder.ico" SourceFile="$(var.RepoRoot)\packaging\assets\folder.ico" />
+
     <Property Id="ARPPRODUCTICON" Value="seamly2d.ico" />
     <Property Id="ARPHELPLINK" Value="https://seamly.io" />
     <Property Id="ARPURLINFOABOUT" Value="https://seamly.io" />
