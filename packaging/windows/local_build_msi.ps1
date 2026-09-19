@@ -204,15 +204,21 @@ $smsiArgsQuoted = ($smsiArgs | ForEach-Object { "`"$_`"" }) -join ' '
 # NoDefaultCurrentDirectoryInExePath is cleared so qmake's generated `check`
 # target can resolve test executables from the build directory correctly in this
 # cmd.exe process.
+#
+# CONFIG+=deferDeploy skips seamly2d.pro/seamlyme.pro's own windeployqt
+# post-link step (see common.pri's deployQtRuntime()), so nmake below does not
+# deploy seamly2d.exe/seamlyme.exe before SeamlyLayout's cmake build even
+# starts. smsi.ps1 deploys all three exes together, once, after every exe below
+# exists.
 if ($SkipTests) {
-    $QmakeConfig = '-config release CONFIG+=noTests'
+    $QmakeConfig = '-config release CONFIG+=noTests CONFIG+=deferDeploy'
     $TestSection = @'
 
 echo.
 echo === unit tests: SKIPPED (-SkipTests) ===
 '@
 } else {
-    $QmakeConfig = '-config release'
+    $QmakeConfig = '-config release CONFIG+=deferDeploy'
     $TestSection = @'
 
 echo.

@@ -1,7 +1,6 @@
 #******************************************************************************
 # **  @file   smsi_check_authoring.ps1
 # **  @author slspencer
-# **  @date   July 28, 2026
 # **
 # **  @brief
 # **  Check that a built Seamly2D MSI includes the expected install-time
@@ -231,13 +230,13 @@ foreach ($property in @('SEAMLYDESKTOPSHORTCUTS', 'SEAMLYLEGACYUNINSTALLSTRING',
 # arrow is a NewDialog row it authors itself.
 #
 #   WelcomeDlg -> LicenseAgreementDlg -> [SeamlyPreviousInstallDlg] ->
-#   [SeamlyDataLocationDlg] -> SeamlyShortcutsDlg -> VerifyReadyDlg
+#   SeamlyDataLocationDlg -> SeamlyShortcutsDlg -> VerifyReadyDlg
 #
 # SeamlyPreviousInstallDlg appears only when an earlier program install is
-# found. SeamlyDataLocationDlg appears only when an earlier install already
-# recorded a data root (SEAMLYDATAROOTRECORDED) - a data root is otherwise
-# fixed at [%USERPROFILE]\seamly2d and created silently, with no page ever
-# asking about it. There is no program-directory page either: INSTALLFOLDER
+# found. SeamlyDataLocationDlg always appears: read-only when an earlier
+# install already recorded a data root (SEAMLYDATAROOTRECORDED), editable
+# with a Change button (BrowseDlg) otherwise, defaulting to
+# [%USERPROFILE]\seamly2d. There is no program-directory page: INSTALLFOLDER
 # is fixed and never asked about (see smsi.wxs).
 #
 # This replaced SpawnDialog wiring that WiX 6.0.2 never ran, so the three Seamly
@@ -278,13 +277,8 @@ $previousInstallCondition = 'SEAMLYOLDS2DEXE.*SEAMLYOLDMEEXE.*SEAMLYOLDLAYOUTEXE
 Assert-Transition -From 'LicenseAgreementDlg' -Control 'Next' -To 'SeamlyPreviousInstallDlg' `
     -ConditionMatch $previousInstallCondition
 Assert-Transition -From 'LicenseAgreementDlg' -Control 'Next' -To 'SeamlyDataLocationDlg' `
-    -ConditionMatch 'NOT \(.*SEAMLYDATAROOTRECORDED'
-Assert-Transition -From 'LicenseAgreementDlg' -Control 'Next' -To 'SeamlyShortcutsDlg' `
-    -ConditionMatch 'NOT SEAMLYDATAROOTRECORDED'
-Assert-Transition -From 'SeamlyPreviousInstallDlg' -Control 'Next' -To 'SeamlyDataLocationDlg' `
-    -ConditionMatch 'SEAMLYDATAROOTRECORDED'
-Assert-Transition -From 'SeamlyPreviousInstallDlg' -Control 'Next' -To 'SeamlyShortcutsDlg' `
-    -ConditionMatch 'NOT SEAMLYDATAROOTRECORDED'
+    -ConditionMatch 'NOT \('
+Assert-Transition -From 'SeamlyPreviousInstallDlg' -Control 'Next' -To 'SeamlyDataLocationDlg'
 Assert-Transition -From 'SeamlyDataLocationDlg' -Control 'Next' -To 'SeamlyShortcutsDlg'
 Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Next' -To 'VerifyReadyDlg'
 
@@ -293,12 +287,7 @@ Assert-Transition -From 'SeamlyPreviousInstallDlg' -Control 'Back' -To 'LicenseA
 Assert-Transition -From 'SeamlyDataLocationDlg' -Control 'Back' -To 'SeamlyPreviousInstallDlg' `
     -ConditionMatch $previousInstallCondition
 Assert-Transition -From 'SeamlyDataLocationDlg' -Control 'Back' -To 'LicenseAgreementDlg' -ConditionMatch 'NOT \('
-Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyDataLocationDlg' `
-    -ConditionMatch 'SEAMLYDATAROOTRECORDED'
-Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyPreviousInstallDlg' `
-    -ConditionMatch $previousInstallCondition
-Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'LicenseAgreementDlg' `
-    -ConditionMatch 'NOT SEAMLYDATAROOTRECORDED AND NOT \('
+Assert-Transition -From 'SeamlyShortcutsDlg' -Control 'Back' -To 'SeamlyDataLocationDlg'
 Assert-Transition -From 'VerifyReadyDlg' -Control 'Back' -To 'SeamlyShortcutsDlg' -ConditionMatch 'NOT Installed'
 # The maintenance page is customized, not the stock MaintenanceTypeDlg,
 # because WiX cannot add a control to a dialog another fragment defines and the
@@ -379,29 +368,23 @@ Assert-That -Name 'AppSearch fills SEAMLYINSTALLEDVERSION' `
     -Succeeded ((Get-MsiRows -Sql "SELECT ``Property`` FROM ``AppSearch`` WHERE ``Property``='SEAMLYINSTALLEDVERSION'" `
         -Columns 'Property').Count -eq 1)
 
-# The three License Next rows must be mutually exclusive and between them
-# cover every case, or the button either picks an undefined winner or does
-# nothing at all.
+# The two License Next rows must be mutually exclusive and between them cover
+# every case, or the button either picks an undefined winner or does nothing
+# at all. SeamlyDataLocationDlg is the sole destination when the
+# previous-install page is skipped - it shows its own read-only or editable
+# variant depending on SEAMLYDATAROOTRECORDED (section 5's dialog-chain
+# block), so the License page itself no longer needs to split on that.
 $licenseNext = @($script:controlEvents | Where-Object {
     $_.Dialog -eq 'LicenseAgreementDlg' -and $_.Control -eq 'Next' -and $_.Event -eq 'NewDialog' })
 $toPrevious = @($licenseNext | Where-Object { $_.Argument -eq 'SeamlyPreviousInstallDlg' })
 $toDataLocation = @($licenseNext | Where-Object { $_.Argument -eq 'SeamlyDataLocationDlg' })
-$toShortcuts = @($licenseNext | Where-Object { $_.Argument -eq 'SeamlyShortcutsDlg' })
-Assert-That -Name 'the license page has exactly three exits' -Succeeded ($licenseNext.Count -eq 3)
-if ($toPrevious.Count -eq 1 -and $toDataLocation.Count -eq 1 -and $toShortcuts.Count -eq 1) {
+Assert-That -Name 'the license page has exactly two exits' -Succeeded ($licenseNext.Count -eq 2)
+if ($toPrevious.Count -eq 1 -and $toDataLocation.Count -eq 1) {
     $found = [regex]::Escape('((SEAMLYOLDS2DEXE AND SEAMLYOLDMEEXE AND NOT SEAMLYOLDLAYOUTEXE) OR SEAMLYNEWLAYOUTEXE) AND NOT Installed')
     Assert-That -Name 'the previous-install page is skipped on a clean machine' `
         -Succeeded ($toPrevious[0].Condition -match $found -and
-                    $toDataLocation[0].Condition -match "NOT \($found\)" -and
-                    $toShortcuts[0].Condition -match "NOT \($found\)") `
-        -Detail "conditions '$($toPrevious[0].Condition)', '$($toDataLocation[0].Condition)', '$($toShortcuts[0].Condition)'"
-    # The remaining two rows split on whether an earlier install already
-    # recorded a data root - the same signal the data-location page itself is
-    # conditioned on (section 5's dialog-chain block).
-    Assert-That -Name 'the data-location page is skipped when no root was ever recorded' `
-        -Succeeded ($toDataLocation[0].Condition -match 'AND SEAMLYDATAROOTRECORDED' -and
-                    $toShortcuts[0].Condition -match 'AND NOT SEAMLYDATAROOTRECORDED') `
-        -Detail "conditions '$($toDataLocation[0].Condition)' and '$($toShortcuts[0].Condition)'"
+                    $toDataLocation[0].Condition -match "NOT \($found\)") `
+        -Detail "conditions '$($toPrevious[0].Condition)', '$($toDataLocation[0].Condition)'"
 }
 
 # The program directory is fixed, not chosen, so nothing commits INSTALLFOLDER
@@ -903,13 +886,14 @@ foreach ($dialog in @('SeamlyDataLocationDlg', 'SeamlyShortcutsDlg')) {
 }
 Assert-That -Name 'the old data-parent and migration pages are gone' `
     -Succeeded (($dialogs -notcontains 'SeamlyDataDirDlg') -and ($dialogs -notcontains 'SeamlyDataMigrateDlg'))
-Assert-That -Name 'BrowseDlg is not part of the package any more' `
-    -Succeeded ((Get-MsiRows -Sql "SELECT ``Dialog`` FROM ``Dialog`` WHERE ``Dialog``='BrowseDlg'" -Columns 'Dialog').Count -eq 0)
+Assert-That -Name 'BrowseDlg is part of the package, for the Change button' `
+    -Succeeded ((Get-MsiRows -Sql "SELECT ``Dialog`` FROM ``Dialog`` WHERE ``Dialog``='BrowseDlg'" -Columns 'Dialog').Count -eq 1)
 # Where the page sits in the wizard is asserted in section 5.
 
-# The page is read-only: it shows the already-resolved SEAMLYDATAROOT and
-# nothing spawns a browse dialog for it any more (B2 in TODO_INSTALLER.md -
-# Setup never relocates existing data).
+# The page has two mutually-exclusive variants, split on SEAMLYDATAROOTRECORDED:
+# read-only (an earlier install already recorded a root - Setup never
+# relocates existing data, B2 in TODO_INSTALLER.md) or editable with a Change
+# button that spawns BrowseDlg (a true fresh install).
 $folderControl = @(Get-MsiRows `
     -Sql "SELECT ``Control``, ``Type``, ``Text`` FROM ``Control`` WHERE ``Dialog_``='SeamlyDataLocationDlg' AND ``Control``='Folder'" `
     -Columns 'Control', 'Type', 'Text')
@@ -917,15 +901,30 @@ Assert-That -Name 'the data-location page shows SEAMLYDATAROOT as plain read-onl
     -Succeeded ($folderControl.Count -eq 1 -and $folderControl[0].Type -eq 'Text' -and
                 $folderControl[0].Text -eq '[SEAMLYDATAROOT]') `
     -Detail "type '$(if ($folderControl.Count) { $folderControl[0].Type } else { '<nothing>' })', text '$(if ($folderControl.Count) { $folderControl[0].Text } else { '<nothing>' })'"
-Assert-That -Name 'the data-location page has no editable path box' `
-    -Succeeded ((Get-MsiRows -Sql "SELECT ``Control`` FROM ``Control`` WHERE ``Dialog_``='SeamlyDataLocationDlg' AND ``Type``='PathEdit'" `
-        -Columns 'Control').Count -eq 0)
-Assert-That -Name 'the data-location page has no Change button' `
+$folderEditControl = @(Get-MsiRows `
+    -Sql "SELECT ``Control``, ``Type``, ``Property`` FROM ``Control`` WHERE ``Dialog_``='SeamlyDataLocationDlg' AND ``Control``='FolderEdit'" `
+    -Columns 'Control', 'Type', 'Property')
+Assert-That -Name 'the data-location page has an editable path box bound to SEAMLYDATAROOT' `
+    -Succeeded ($folderEditControl.Count -eq 1 -and $folderEditControl[0].Type -eq 'PathEdit' -and
+                $folderEditControl[0].Property -eq 'SEAMLYDATAROOT') `
+    -Detail "type '$(if ($folderEditControl.Count) { $folderEditControl[0].Type } else { '<nothing>' })', property '$(if ($folderEditControl.Count) { $folderEditControl[0].Property } else { '<nothing>' })'"
+Assert-That -Name 'the data-location page has a Change button' `
     -Succeeded ((Get-MsiRows -Sql "SELECT ``Control`` FROM ``Control`` WHERE ``Dialog_``='SeamlyDataLocationDlg' AND ``Control``='ChangeFolder'" `
-        -Columns 'Control').Count -eq 0)
-Assert-That -Name 'nothing spawns BrowseDlg from the data-location page' `
-    -Succeeded (@($script:controlEvents | Where-Object {
-        $_.Dialog -eq 'SeamlyDataLocationDlg' -and $_.Event -eq 'SpawnDialog' -and $_.Argument -eq 'BrowseDlg' }).Count -eq 0)
+        -Columns 'Control').Count -eq 1)
+$browseSpawn = @($script:controlEvents | Where-Object {
+    $_.Dialog -eq 'SeamlyDataLocationDlg' -and $_.Control -eq 'ChangeFolder' -and
+    $_.Event -eq 'SpawnDialog' -and $_.Argument -eq 'BrowseDlg' })
+Assert-That -Name 'the Change button spawns BrowseDlg' -Succeeded ($browseSpawn.Count -eq 1)
+$browseProperty = @($script:controlEvents | Where-Object {
+    $_.Dialog -eq 'SeamlyDataLocationDlg' -and $_.Control -eq 'ChangeFolder' -and
+    $_.Event -eq '[_BrowseProperty]' -and $_.Argument -eq 'SEAMLYDATAROOT' })
+Assert-That -Name 'the Change button points BrowseDlg at SEAMLYDATAROOT' -Succeeded ($browseProperty.Count -eq 1)
+# BrowseDlg ships with Cancel wired but OK wired to nothing (WixToolset.UI.wixext
+# 6.0.2) - without this row, OK just sits there and the folder is never confirmed.
+$browseOk = @($script:controlEvents | Where-Object {
+    $_.Dialog -eq 'BrowseDlg' -and $_.Control -eq 'OK' -and
+    $_.Event -eq 'EndDialog' -and $_.Argument -eq 'Return' })
+Assert-That -Name 'BrowseDlg''s OK button closes the dialog' -Succeeded ($browseOk.Count -eq 1)
 # Its Next button reads "Continue" - there is nothing left to confirm after
 # it, unlike the stock wizard's "Next".
 $dataLocationNext = @(Get-MsiRows `

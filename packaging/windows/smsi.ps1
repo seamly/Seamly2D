@@ -57,8 +57,9 @@
     All three apps build against Qt 6.11.1, so one Qt runtime serves them all.
 
     PREREQUISITES (the script fails early naming whatever is missing):
-      * release builds of seamly2d/seamlyme with windeployqt output in the
-        bin directories named by -Seamly2DBin / -SeamlyMeBin
+      * release builds of seamly2d.exe/seamlyme.exe in the bin directories
+        named by -Seamly2DBin / -SeamlyMeBin. Built with CONFIG+=deferDeploy,
+        so this script - not qmake - runs windeployqt for them.
       * a release build of seamlylayout (src\app\seamlylayout\qt_frontend\
         build\Release)
       * the WiX .NET tool:      dotnet tool install --global wix
@@ -80,10 +81,12 @@
     minute of the day. Required.
 
 .PARAMETER Seamly2DBin
-    Directory holding seamly2d.exe plus its windeployqt output. Required.
+    Directory holding seamly2d.exe, built with CONFIG+=deferDeploy so no Qt
+    runtime is deployed beside it yet - this script deploys it. Required.
 
 .PARAMETER SeamlyMeBin
-    Directory holding seamlyme.exe plus its windeployqt output. Required.
+    Directory holding seamlyme.exe, built with CONFIG+=deferDeploy so no Qt
+    runtime is deployed beside it yet - this script deploys it. Required.
 
 .PARAMETER SeamlyLayoutBuildDir
     Directory holding the release seamlylayout.exe.
@@ -244,18 +247,20 @@ function Find-CrtDirectory {
 }
 
 # --- Resolve inputs and tools (fail early with clear messages) ----------------
+# All three exes must exist before anything below runs windeployqt: qmake
+# builds seamly2d/seamlyme with CONFIG+=deferDeploy, so this script is the
+# only place any of the three gets deployed. Checking all three up front - not
+# just the two qmake exes - keeps that guarantee: a partial build never gets a
+# partial deploy.
 if (-not $SeamlyLayoutBuildDir) { $SeamlyLayoutBuildDir = Join-Path $repoRoot 'src\app\seamlylayout\qt_frontend\build\Release' }
 
 foreach ($required in @(
         @{ Path = (Join-Path $Seamly2DBin 'seamly2d.exe'); What = 'seamly2d.exe (-Seamly2DBin must name a completed release build)' },
-        @{ Path = (Join-Path $Seamly2DBin 'platforms');    What = "seamly2d's windeployqt output (platforms\ plugin dir)" },
-        @{ Path = (Join-Path $SeamlyMeBin 'seamlyme.exe'); What = 'seamlyme.exe (-SeamlyMeBin must name a completed release build)' })) {
+        @{ Path = (Join-Path $SeamlyMeBin 'seamlyme.exe'); What = 'seamlyme.exe (-SeamlyMeBin must name a completed release build)' },
+        @{ Path = (Join-Path $SeamlyLayoutBuildDir 'seamlylayout.exe'); What = 'seamlylayout.exe (run the CMake release build first, or point -SeamlyLayoutBuildDir at its output)' })) {
     if (-not (Test-Path $required.Path)) {
         throw "Missing $($required.What): '$($required.Path)'."
     }
-}
-if (-not (Test-Path (Join-Path $SeamlyLayoutBuildDir 'seamlylayout.exe'))) {
-    throw "Missing seamlylayout.exe in '$SeamlyLayoutBuildDir' - run the CMake release build first, or point -SeamlyLayoutBuildDir at its output."
 }
 
 # The .wxs builds its dialogs on WixUI_Common, from the WiX UI extension.
@@ -309,6 +314,18 @@ New-Item -ItemType Directory -Force -Path $parentDir, $exesDir | Out-Null
 Write-Host "staging seamly2d + seamlyme runtime..."
 Copy-Item -Path (Join-Path $Seamly2DBin '*') -Destination $parentDir -Recurse
 Copy-Item -Path (Join-Path $SeamlyMeBin '*') -Destination $parentDir -Recurse -Force
+
+# qmake built both exes with CONFIG+=deferDeploy, so neither has a Qt runtime
+# beside it yet - deploy against the staged copies now that seamlylayout.exe
+# (checked above) also exists, instead of at link time in seamly2d.pro/
+# seamlyme.pro. Running windeployqt against seamly2d.exe first and seamlyme.exe
+# second is safe: the second call only adds seamlyme-specific plugins, since
+# the two apps' overlapping Qt DLLs are already identical.
+Write-Host "deploying seamly2d + seamlyme Qt runtime (windeployqt)..."
+Invoke-Tool -Description 'windeployqt (seamly2d)' -Exe $WinDeployQt -Arguments @(
+    '--release', (Join-Path $parentDir 'seamly2d.exe'))
+Invoke-Tool -Description 'windeployqt (seamlyme)' -Exe $WinDeployQt -Arguments @(
+    '--release', (Join-Path $parentDir 'seamlyme.exe'))
 
 # Exes are authored explicitly in the .wxs (shortcuts/associations reference
 # them), so move them out of the wildcard-harvested tree.
