@@ -118,8 +118,16 @@ if (-not $bash) {
 }
 $versionFilesWereClean = -not (& git -C $repoRoot status --porcelain -- $versionStampedFiles)
 Write-Host "stamping version into projectversion.cpp/.h and Info.plist..."
-Invoke-NativeCommand { & bash 'packaging/version.sh' $Version }
-if ($LASTEXITCODE -ne 0) { throw "packaging/version.sh failed (exit code $LASTEXITCODE)." }
+# version.sh writes its targets with paths relative to the repo root (src/libs/...,
+# packaging/macos/...), so bash needs that as its working directory - not wherever
+# this script was invoked from.
+Push-Location $repoRoot
+try {
+    Invoke-NativeCommand { & bash 'packaging/version.sh' $Version }
+    if ($LASTEXITCODE -ne 0) { throw "packaging/version.sh failed (exit code $LASTEXITCODE)." }
+} finally {
+    Pop-Location
+}
 
 # --- Locate the Qt kit ---------------------------------------------------------
 # Newest msvc2022_64 kit under C:\Qt at or above 6.11.1, so 
