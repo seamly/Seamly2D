@@ -229,11 +229,8 @@ src/app/seamlylayout/target/
 src/app/seamlylayout/logs/
 src/app/seamlylayout/qt_frontend/build/
 
-# track claude Session handover file 
+# track claude Session handover file
 !SESSION_HANDOVER.md
-# track seamlylayout daughter app docs (absorbed from the former nested seamlyLayout repo).
-# Its docs tree stays tracked despite the global docs/ rule above.
-!src/app/seamlylayout/docs/
 # track seamlylayout .claude & .vs files for testing
 !src/app/seamlylayout/.claude/
 !src/app/seamlylayout/.vs/

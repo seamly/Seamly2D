@@ -43,7 +43,7 @@ For more information, see: https://docs.brew.sh/Tap-Trust"
 - [ ] InstMacOS.0.1.5 - installation use case #2 : If a standalone Seamly2D/SeamlyMe is already installed but SeamlyLayout is not --> copy old user data files to the new user data root, create only new directories and files to the new user data root; copy user preference and application preference files to new location; remove the old program application files; install new program files
 - [ ] InstMacOS.0.1.6 - installation user case #3 : If a standalone Seamly2D/SeamlyMe/SeamlyLayout is already installed --> copy old user data files to the new user data root if the user data root has been changed, create only new directories and files to the new user data root whether or not the user data root has been changed; preserve user preference and application preference files; update program application files
 - [ ] InstMacOS.0.1.7 - Verify on macOS: `.pkg` installs all three apps (executable), install-location and data-location choices honored, old standalone removed when SeamlyLayout absent, user data preserved and not overwritten — real-hardware caveat as in Tasks 16/35
-- [ ] InstMacOS.0.1.8 - Document the macOS installer (build, sign/notarize, choices, uninstall-old behavior) in the repo docs (`.github/README-BUILDS.md`, `src/app/seamlylayout/docs/packaging-docs/INSTALLER_NOTES.md`)
+- [ ] InstMacOS.0.1.8 - Document the macOS installer (build, sign/notarize, choices, uninstall-old behavior) in the repo docs (`.github/README-BUILDS.md`, `project-docs/seamlylayout-docs/packaging-docs/seamlylayout_INSTALLER_NOTES.md`)
 
 ## Task InstMacOS.1 — Unify settings directories: macOS build
 

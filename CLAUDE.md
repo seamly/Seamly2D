@@ -116,7 +116,7 @@ Merged from SeamlyLayout's own former `CLAUDE.md` and `.claude/rules/` (2026-09-
 
 ### General Rules
 
-- Read the `.md`, `.txt`, and `.rtf` files in `src/app/seamlylayout/docs/` regularly.
+- Read the `.md`, `.txt`, and `.rtf` files in `project-docs/seamlylayout-docs/` regularly.
 - Update docs to reflect code changes.
 - Use "flatten" only for baking in transforms. Use "interpolation" for converting curves to polylines.
 - Always use absolute file paths, never relative paths. Resolve via `QFileInfo::absoluteFilePath()` (C++) or `std::path::Path::canonicalize()` (Rust).
