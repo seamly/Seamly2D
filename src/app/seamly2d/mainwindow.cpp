@@ -4030,14 +4030,13 @@ void MainWindow::showPieceMode(bool checked)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief showLayoutMode show layout scene.
+ * @brief showLayoutMode hands the pattern pieces off to SeamlyLayout.
  * @param checked true - button checked.
  */
 void MainWindow::showLayoutMode(bool checked)
 {
     if (checked)
     {
-        ui->toolbox_StackedWidget->setCurrentIndex(2);
         handleArrowTool(true);
 
         if(drawMode)
@@ -4053,11 +4052,6 @@ void MainWindow::showLayoutMode(bool checked)
         ui->showDraftMode->setChecked(false);
         ui->pieceMode_Action->setChecked(false);
         ui->layoutMode_Action->setChecked(true);
-
-        ui->groups_DockWidget->setVisible(false);
-        ui->pieces_DockWidget->setVisible(false);
-        ui->toolProperties_DockWidget->setVisible(false);
-        ui->layoutPages_DockWidget->setVisible(true);
 
         QHash<quint32, VPiece> pieces;
         if(!qApp->getOpeningPattern())
@@ -4096,7 +4090,7 @@ void MainWindow::showLayoutMode(bool checked)
 
         draftBlockComboBox->setCurrentIndex(-1);// Hide pattern pieces
 
-        qCDebug(vMainWindow, "Show layout scene");
+        qCDebug(vMainWindow, "Hand off layout to SeamlyLayout");
 
         SaveCurrentScene();
 
@@ -4115,12 +4109,12 @@ void MainWindow::showLayoutMode(bool checked)
             return;
         }
 
-        currentScene = tempSceneLayout;
         emit ui->view->itemClicked(nullptr);  // Clear Property Editor with non valid tool selection
-        ui->view->setScene(currentScene);
 
         // Remember the stage we came from: a failed handoff reverts to it immediately
         // below, and a successful one restores it when SeamlyLayout closes (Seamly2D.3).
+        // The view keeps showing that prior scene throughout: SeamlyLayout is the only
+        // layout canvas now, so Seamly2D never switches to its own (superseded) one.
         const Draw priorStage = doc->getDraftStage();
         m_seamlyLayoutPriorStageWasDraft = (priorStage == Draw::Calculation);
         if (priorStage == Draw::Calculation)
@@ -4130,7 +4124,6 @@ void MainWindow::showLayoutMode(bool checked)
         doc->setDraftStage(Draw::Layout);
         setToolsEnabled(true);
         setWidgetsEnabled(true);
-        ui->layout_ToolBox->setCurrentIndex(ui->layout_ToolBox->indexOf(ui->layout_Page));
 
         mouseCoordinates->updateCoordinates(QPointF());
 
@@ -4141,8 +4134,6 @@ void MainWindow::showLayoutMode(bool checked)
             gradationSizesLabel->setVisible(false);
             gradationSizes->setVisible(false);
         }
-
-        showLayoutPages(ui->listWidget->currentRow());
 
         // SeamlyLayout handoff: instead of running the built-in layout engine,
         // send the tagged pieces SVG to the SeamlyLayout application.
