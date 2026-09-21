@@ -16,6 +16,8 @@ var classVAbstractApplication =
     [ "isAppInGUIMode", "db/dda/classVAbstractApplication.html#a823b7e97a16df7584127a53635ecc3fa", null ],
     [ "loadTranslations", "db/dda/classVAbstractApplication.html#a92886d256c5e9be89659da9dcc191107", null ],
     [ "LocaleToString", "db/dda/classVAbstractApplication.html#a63c2326cbf6b742e49a9005a60d29206", null ],
+    [ "MigrateSeamlySettingsLocation", "db/dda/classVAbstractApplication.html#a3e414d029ec861ecafbbd3d8d9654359", null ],
+    [ "NotifySeamlySettingsMigrated", "db/dda/classVAbstractApplication.html#a45c0d86a724548a095a807084c044fc4", null ],
     [ "openSettings", "db/dda/classVAbstractApplication.html#a36ebaef6c70a1e6ead6d2ffcb476fa2e", null ],
     [ "patternType", "db/dda/classVAbstractApplication.html#ab354e58700c474ae6d0ea167419e1c9c", null ],
     [ "patternUnit", "db/dda/classVAbstractApplication.html#ad4fb122e68296fcc616f36f75e67fc1e", null ],
