@@ -3008,7 +3008,6 @@ void MainWindow::initializeToolButtons()
     connect(ui->mirrorByAxis_ToolButton,   &QToolButton::clicked, this, &MainWindow::handleMirrorByAxisTool);
     connect(ui->move_ToolButton,           &QToolButton::clicked, this, &MainWindow::handleMoveTool);
     connect(ui->midpoint_ToolButton,       &QToolButton::clicked, this, &MainWindow::handleMidpointTool);
-    connect(ui->exportLayout_ToolButton,   &QToolButton::clicked, this, &MainWindow::exportLayoutAs);
     connect(ui->exportPiecesAs_ToolButton, &QToolButton::clicked, this, &MainWindow::exportPiecesAs);
     connect(ui->ellipticalArc_ToolButton,  &QToolButton::clicked, this, &MainWindow::handleEllipticalArcTool);
     connect(ui->anchorPoint_ToolButton,    &QToolButton::clicked, this, &MainWindow::handleAnchorPointTool);
@@ -3429,8 +3428,7 @@ void MainWindow::handleLayoutMenu()
 
     QMenu menu;
 
-    QAction *action_NewLayout    = menu.addAction(QIcon(":/toolicon/32x32/layout_settings.png"), tr("New Print Layout") + "\tN, L");
-    QAction *action_ExportLayout = menu.addAction(QIcon(":/toolicon/32x32/export.png"), tr("Export Layout") + "\tE, L");
+    QAction *action_NewLayout = menu.addAction(QIcon(":/toolicon/32x32/layout_settings.png"), tr("New Print Layout") + "\tN, L");
 
     QAction *selectedAction = menu.exec(QCursor::pos());
 
@@ -3443,11 +3441,6 @@ void MainWindow::handleLayoutMenu()
         ui->layout_ToolBox->setCurrentWidget(ui->layout_Page);
         ui->layoutSettings_ToolButton->setChecked(true);
         handleNewLayout(true);
-    }
-    else if (selectedAction == action_ExportLayout)
-    {
-        ui->layout_ToolBox->setCurrentWidget(ui->layout_Page);
-        exportLayoutAs();
     }
 }
 
@@ -5318,7 +5311,6 @@ void MainWindow::setToolsEnabled(bool enable)
 
     //Layout
     ui->newPrintLayout_Action->setEnabled(layoutTools);
-    ui->exportLayout_Action->setEnabled(layoutTools);
     ui->lastTool_Action->setEnabled(draftTools);
 
     ui->arrowPointer_ToolButton->setEnabled(draftTools || pieceTools);
@@ -5331,7 +5323,6 @@ void MainWindow::SetLayoutModeActions()
 {
     const bool enabled = not scenes.isEmpty();
 
-    ui->exportLayout_ToolButton->setEnabled(enabled);
     ui->exportAs_Action->setEnabled(enabled);
     ui->printPreview_Action->setEnabled(enabled);
     ui->printPreviewTiled_Action->setEnabled(enabled);
@@ -6422,12 +6413,6 @@ void MainWindow::createActions()
         handleNewLayout(true);
     });
 
-    connect(ui->exportLayout_Action, &QAction::triggered, this, [this]
-    {
-        ui->layout_ToolBox->setCurrentWidget(ui->layout_Page);
-        exportLayoutAs();
-    });
-
     connect(ui->lastTool_Action, &QAction::triggered, this, &MainWindow::LastUsedTool);
 
     //Measurements menu
@@ -7085,13 +7070,10 @@ void MainWindow::CreateMeasurements()
 //---------------------------------------------------------------------------------------------------------------------
 void MainWindow::exportLayoutAs()
 {
-    ui->exportLayout_ToolButton->setChecked(true);
-
     if (isLayoutStale)
     {
         if (ContinueIfLayoutStale() == QMessageBox::No)
         {
-            ui->exportLayout_ToolButton->setChecked(false);
             return;
         }
     }
@@ -7109,7 +7091,6 @@ void MainWindow::exportLayoutAs()
 
         if (dialog.exec() == QDialog::Rejected)
         {
-            ui->exportLayout_ToolButton->setChecked(false);
             return;
         }
 
@@ -7278,12 +7259,10 @@ void MainWindow::exportLayoutAs()
 
     catch (const VException &exception)
     {
-        ui->exportLayout_ToolButton->setChecked(false);
         qCritical("%s\n\n%s\n\n%s", qUtf8Printable(tr("Export exception.")),
                   qUtf8Printable(exception.ErrorMessage()), qUtf8Printable(exception.DetailedInformation()));
         return;
     }
-    ui->exportLayout_ToolButton->setChecked(false);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

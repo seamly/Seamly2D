@@ -308,7 +308,6 @@
        <normaloff>:/toolicon/32x32/layout_toolbox.png</normaloff>:/toolicon/32x32/layout_toolbox.png</iconset>
      </property>
      <addaction name="newPrintLayout_Action"/>
-     <addaction name="exportLayout_Action"/>
     </widget>
     <widget class="QMenu" name="images_Menu">
      <property name="title">
@@ -759,7 +758,6 @@
     <bool>false</bool>
    </attribute>
    <addaction name="newPrintLayout_Action"/>
-   <addaction name="exportLayout_Action"/>
   </widget>
   <widget class="QToolBar" name="pointName_ToolBar">
    <property name="enabled">
@@ -2575,32 +2573,6 @@
                </property>
               </widget>
              </item>
-             <item row="0" column="1">
-              <widget class="QToolButton" name="exportLayout_ToolButton">
-               <property name="enabled">
-                <bool>false</bool>
-               </property>
-               <property name="toolTip">
-                <string>Export Layout (E, L)</string>
-               </property>
-               <property name="text">
-                <string notr="true">...</string>
-               </property>
-               <property name="icon">
-                <iconset resource="share/resources/toolicon.qrc">
-                 <normaloff>:/toolicon/32x32/export.png</normaloff>:/toolicon/32x32/export.png</iconset>
-               </property>
-               <property name="iconSize">
-                <size>
-                 <width>32</width>
-                 <height>32</height>
-                </size>
-               </property>
-               <property name="checkable">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
             </layout>
            </widget>
           </widget>
@@ -4356,24 +4328,6 @@
    </property>
    <property name="shortcut">
     <string notr="true">N, L</string>
-   </property>
-  </action>
-  <action name="exportLayout_Action">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="icon">
-    <iconset resource="share/resources/toolicon.qrc">
-     <normaloff>:/toolicon/32x32/export.png</normaloff>:/toolicon/32x32/export.png</iconset>
-   </property>
-   <property name="text">
-    <string>Export Layout</string>
-   </property>
-   <property name="toolTip">
-    <string>Export Layout (E, L)</string>
-   </property>
-   <property name="shortcut">
-    <string notr="true">E, L</string>
    </property>
   </action>
   <action name="anchorPoint_Action">
