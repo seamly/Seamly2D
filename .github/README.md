@@ -52,7 +52,13 @@ ___________________________________________________
 ___________________________________________________
 ### LICENSING
 
+This repository is dual-licensed:
+
+* **Seamly2D** and **SeamlyMe** — GPL-3.0-or-later. See [LICENSE](../LICENSE).
+* **SeamlyLayout**'s Rust core — MIT. See [LICENSE-MIT](../LICENSE-MIT).
+
 ![GPLv3](./img/GPLv3_Logo-121x60px.png)
+[![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](../LICENSE-MIT)
 
 See [https://www.gnu.org/licenses/gpl-3.0.html](https://www.gnu.org/licenses/gpl-3.0.html) for more information.
 
