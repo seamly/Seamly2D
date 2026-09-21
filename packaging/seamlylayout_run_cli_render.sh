@@ -13,5 +13,4 @@ input="$1"
 output="$2"
 
 # Delegate to the CLI wrapper with a fixed scale of 1.0.
-"$(dirname "$0")/run_cli.sh" render --input "$input" --output "$output" --scale 1.0
-
+"$(dirname "$0")/../run_cli.sh" render --input "$input" --output "$output" --scale 1.0
