@@ -15,6 +15,7 @@ win32{
     VCOPY = $$QMAKE_COPY /D
 }
 
+# Use platform-appropriate copy commands when staging runtime files into the target directory.
 unix{
     macx{
         VCOPY = $$QMAKE_COPY
@@ -94,7 +95,7 @@ defineTest(copyToDestdir) {
     export(QMAKE_CLEAN)
 }
 
-# Alwayse copies the given files to the destination directory
+# Always copies the given files to the destination directory.
 defineTest(forceCopyToDestdir) {
     files = $$1
     DDIR = $$2
@@ -118,7 +119,7 @@ defineTest(forceCopyToDestdir) {
     export(QMAKE_CLEAN)
 }
 
-# @brief Add a windeployqt post-link step for an executable (MSVC only).
+# @brief Adds a windeployqt post-link step for an executable on MSVC.
 # @param 1 Executable path, for example $$DESTDIR/$${TARGET}.exe.
 # @return true. Does nothing for non-MSVC builds.
 #
@@ -146,6 +147,7 @@ defineTest(deployQtRuntime) {
 }
 
 
+# Release builds enable the shared precompiled header used for the project-wide stable includes.
 CONFIG(debug, debug|release){
     # Debug mode, intentionally left empty
 } else {
@@ -158,6 +160,7 @@ CONFIG(debug, debug|release){
     }
 }
 
+# Release builds name the binary with the current Git short SHA; debug builds return unknown.
 defineReplace(FindBuildRevision){
 CONFIG(debug, debug|release){
     # Debug mode
@@ -181,7 +184,7 @@ CONFIG(debug, debug|release){
 # Default prefix. Use for creating the binary installation path.
 DEFAULT_PREFIX = /usr
 
-# In debug mode we use all usefull for us compilers keys for checking errors.
+# Debug builds enable compiler warnings; release builds disable them.
 CONFIG(debug, debug|release){
     # Debug mode
     message("Normal mode: compiler warnings enabled")
