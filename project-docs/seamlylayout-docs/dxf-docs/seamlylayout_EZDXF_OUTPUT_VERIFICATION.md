@@ -99,7 +99,7 @@ use seamly_svg2ezdxf::{svg_to_ezdxf, SvgToEzdxfOptions, write_drawing_to_output}
 use svg_dom::Document;
 
 // Load SVG file
-let svg_content = fs::read_to_string("input/richmond-shirt_v1_v061-02.svg")?;
+let svg_content = fs::read_to_string("test-seamly-layout-input/richmond-shirt_v1_v061-02.svg")?;
 let doc = Document::parse(&svg_content)?;
 
 // Convert

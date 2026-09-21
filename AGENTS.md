@@ -442,5 +442,5 @@ Do not use it as a session transcript.
 * `.github/README-BUILDS.md` — build, toolchain, packaging, and platform details.
 * `project-docs/PROJECT_PLAN.md` — approved implementation plan.
 * `project-docs/NEW-ATTRIBUTES.csv` — SVG `data-*` attribute specification.
-* `src/app/seamlylayout/input/richmond-shirt_v1_v061-test.sm2d` — test pattern.
+* `test-seamly-layout-input/richmond-shirt_v1_v061-test.sm2d` — test pattern.
 * `SESSION_HANDOVER.md` — current cross-session state.

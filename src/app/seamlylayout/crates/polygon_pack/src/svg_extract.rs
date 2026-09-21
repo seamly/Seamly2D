@@ -511,10 +511,11 @@ mod tests {
             "AABB too small ({dx:.2}×{dy:.2}) — notch may have been selected instead of seamline");
     } // find_outline_group_skips_notch_at_structural_position_1
 
-    // @brief Resolve a workspace-relative fixture path from the crate root.
+    // @brief Resolve a repo-root-relative fixture path from the crate root.
     fn fixture_path(rel: &str) -> std::path::PathBuf {
         std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
-            .join("..").join("..")
+            .join("..").join("..").join("..").join("..").join("..")
+            .join("test-seamly-layout-input")
             .join(rel)
     } // fn fixture_path
 
@@ -544,18 +545,18 @@ mod tests {
     } // fn span
 
     // @brief End-to-end against the real Seamly2D export
-    // `qt_frontend/input/MyMullerShirt_pieces_sleeve.svg`.  This exercises
+    // `test-seamly-layout-input/MyMullerShirt_pieces_sleeve.svg`.  This exercises
     // the relative-`l` path command (the file's cutline is mostly lowercase),
     // verifies a sleeve-shaped polygon comes out (110+ vertices, plausible
     // AABB), and confirms notch siblings are ignored end-to-end.
     //
     // Path resolution: `CARGO_MANIFEST_DIR` points at this crate's root, so
-    // we walk up two levels to reach the workspace root and then into
-    // `qt_frontend/input/`.  Skips with a message if the fixture isn't
+    // we walk up to the repo root and then into
+    // `test-seamly-layout-input/`.  Skips with a message if the fixture isn't
     // present (e.g. on a clean clone before the user adds inputs).
     #[test]
     fn extracts_real_sleeve_svg() {
-        let Some(xml) = read_fixture("qt_frontend/input/MyMullerShirt_pieces_sleeve.svg") else {
+        let Some(xml) = read_fixture("MyMullerShirt_pieces_sleeve.svg") else {
             return;
         };
         let root = Element::parse(xml.as_bytes()).expect("svg parses");
@@ -579,7 +580,7 @@ mod tests {
     } // extracts_real_sleeve_svg
 
     // @brief End-to-end against the multi-piece export
-    // `qt_frontend/input/richmond-shirt_pieces.svg` — 12 pattern pieces
+    // `test-seamly-layout-input/richmond-shirt_pieces.svg` — 12 pattern pieces
     // (Sleeve, Front, Back, Yoke, Collar, Collar Stand, Cuff, Sleeve Placket,
     // Front Placket, Pocket, Pocket Flap, Two Inch Gauge).  Verifies the
     // extractor handles a real production-shape pattern with mixed piece
@@ -588,7 +589,7 @@ mod tests {
     // must not mangle them.
     #[test]
     fn extracts_richmond_shirt_pieces_svg() {
-        let Some(xml) = read_fixture("qt_frontend/input/richmond-shirt_pieces.svg") else {
+        let Some(xml) = read_fixture("richmond-shirt_pieces.svg") else {
             return;
         };
         let root = Element::parse(xml.as_bytes()).expect("svg parses");
@@ -624,7 +625,7 @@ mod tests {
         }
     } // extracts_richmond_shirt_pieces_svg
 
-    // @brief End-to-end against `qt_frontend/input/richmond-shirt_this_one.svg`,
+    // @brief End-to-end against `test-seamly-layout-input/richmond-shirt_this_one.svg`,
     // a pattern with 11 pieces and several piece-level transforms
     // (rotations, translations).  The extractor reads vertices straight from
     // the path `d` attribute and intentionally ignores group transforms —
@@ -639,7 +640,7 @@ mod tests {
     // `richmond-shirt_pieces.svg` fixture above.
     #[test]
     fn extracts_richmond_shirt_this_one_svg() {
-        let Some(xml) = read_fixture("qt_frontend/input/richmond-shirt_this_one.svg") else {
+        let Some(xml) = read_fixture("richmond-shirt_this_one.svg") else {
             return;
         };
         let root = Element::parse(xml.as_bytes()).expect("svg parses");

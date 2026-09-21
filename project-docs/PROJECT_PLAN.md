@@ -124,7 +124,7 @@ Keep the existing guards (zero pieces / zero in-layout pieces, 3993–4020) and 
 
 1. Build on branch `svg-update` (targets `vlayout`, `vformat`, `seamly2d` recompile).
 2. Export a baseline SVG (Export Pieces) before changes for visual diffing.
-3. **Test pattern**: `src\app\seamlylayout\input\richmond-shirt_v1_v061-test.sm2d` (should exercise multiple pieces, internal paths, notches, grainline, piece + pattern labels):
+3. **Test pattern**: `test-seamly-layout-input\richmond-shirt_v1_v061-test.sm2d` (should exercise multiple pieces, internal paths, notches, grainline, piece + pattern labels):
    - **Layout Mode click**: verify `<basename>.pieces.svg` appears next to the pattern file; SeamlyLayout launches (or, until it's installed, point the preferences path at a stub executable and verify it receives the SVG path argument; verify the missing-executable error dialog otherwise).
    - **Manual exports**: Piece mode → Export Pieces → SVG (text-as-paths on and off); Export Layout → SVG on an existing saved layout if applicable.
 4. Inspect the SVG: every group under `pattern-1` has `data-type`/`data-type-number`/`data-parent`; ids unique; pattern/piece groups carry `data-name` (+ `data-letter`); no empty groups or `M0,0` paths.

@@ -43,7 +43,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  ✓ Drawing written to: {:?}\n", file_path1);
 
     // Example 2: Real SVG file (if available)
-    let test_svg_path = Path::new("../../input/richmond-shirt_v1_v061-02.svg");
+    let test_svg_path = Path::new("../../../../../test-seamly-layout-input/richmond-shirt_v1_v061-02.svg");
     if test_svg_path.exists() {
         println!("Example 2: Converting real SVG file");
         let svg_content = fs::read_to_string(test_svg_path)?;
