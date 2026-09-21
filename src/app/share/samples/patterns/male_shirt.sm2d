@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pattern>
-    <!--Pattern created with Seamly2D v26.9.18.1279 (https://seamly.io).-->
+    <!--Pattern created with Seamly2D v26.9.20.1223 (https://seamly.io).-->
     <version>0.7.4</version>
     <unit>cm</unit>
     <description>This a male shirt pattern.
@@ -13,7 +13,7 @@ Delete layouts which are not needed.</description>
     <patternLabel>
         <line alignment="0" bold="true" italic="false" sfIncrement="4" text="Timo Virtaneva"/>
     </patternLabel>
-    <measurements>../../../../../../../seamly2d/measurements/individual/male_chest_102cm.smis</measurements>
+    <measurements>../measurements/individual/male_chest_102cm.smis</measurements>
     <variables>
         <variable description="" formula="0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0-0" name="#ToBeVerified"/>
         <variable description="Calculation&#10;&#10;(1/4 Height )+ Ease&#10;&#10;+3,0 cm Slim Fit Ease &#10;+3,0 cm Normal Fit Ease&#10;+3,0 cm Loose Fit Ease" formula="neck_back_to_waist_b" name="#BackHeight"/>
@@ -195,7 +195,10 @@ Delete layouts which are not needed.</description>
             <point id="440" idObject="55" inUse="true" mx="0.132292" my="0.264583" type="modeling"/>
         </modeling>
         <pieces>
-            <piece closed="1" id="174" mx="-8.05221" my="3.27846" name="Yoke" seamAllowance="1" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="174" inLayout="true" locked="false" mx="-4.0013" my="2.7721" name="Yoke" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="1" arrows="0" length="Line_A28_A25" mx="-391.534" my="361.355" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="167" type="NodePoint"/>
                     <node idObject="168" reverse="0" type="NodeSplinePath"/>
@@ -206,7 +209,10 @@ Delete layouts which are not needed.</description>
                     <node idObject="173" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="401" mx="-11.0934" my="6.43098" name="FrontPanel" seamAllowance="1" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="401" inLayout="true" locked="false" mx="-11.0934" my="6.43098" name="FrontPanel" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="2" arrows="0" length="Line_BustLine_Hemline * 0.75" mx="-2060.73" my="2368.4" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="389" type="NodePoint"/>
                     <node idObject="390" type="NodePoint"/>
@@ -222,7 +228,10 @@ Delete layouts which are not needed.</description>
                     <node idObject="400" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="441" mx="-7.55641" my="6.27021" name="BackPanel" seamAllowance="1" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="441" inLayout="true" locked="false" mx="-8.35324" my="6.27021" name="BackPanel" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="2" arrows="0" length="Line_BustLine_Hemline * 0.75" mx="-233.402" my="2330.55" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="422" type="NodePoint"/>
                     <node idObject="423" type="NodePoint"/>
@@ -314,7 +323,10 @@ Delete layouts which are not needed.</description>
             <spline id="331" idObject="312" inUse="true" type="modelingPath"/>
         </modeling>
         <pieces>
-            <piece closed="1" id="182" mx="68.0595" my="45.4124" name="Pocket" seamAllowance="1" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="182" inLayout="true" locked="false" mx="68.0595" my="45.4124" name="Pocket" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="1" arrows="0" length="Line_P5_P" mx="862.082" my="675.441" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="175" type="NodePoint"/>
                     <node idObject="176" type="NodePoint"/>
@@ -325,7 +337,10 @@ Delete layouts which are not needed.</description>
                     <node idObject="181" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="320" mx="81.7244" my="45.8357" name="PocketRound" seamAllowance="1" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="320" inLayout="true" locked="false" mx="81.7244" my="45.8357" name="PocketRound" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="1" arrows="0" length="Line_P5_P" mx="885.167" my="640.463" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="314" type="NodePoint"/>
                     <node idObject="315" type="NodePoint"/>
@@ -335,7 +350,10 @@ Delete layouts which are not needed.</description>
                     <node idObject="319" reverse="1" type="NodeSplinePath"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="326" mx="67.876" my="32.9628" name="PocketFlap" seamAllowance="1" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="326" inLayout="true" locked="false" mx="67.876" my="32.9628" name="PocketFlap" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="1" arrows="0" length="Line_P1_B4  * 0.75" mx="818.798" my="336.358" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="321" type="NodePoint"/>
                     <node idObject="322" type="NodePoint"/>
@@ -344,7 +362,10 @@ Delete layouts which are not needed.</description>
                     <node idObject="325" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="332" mx="81.7244" my="32.9627" name="PocketFlapRound" seamAllowance="1" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="332" inLayout="true" locked="false" mx="81.7244" my="32.9627" name="PocketFlapRound" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="1" arrows="0" length="Line_P_B3" mx="850.54" my="370.476" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="327" type="NodePoint"/>
                     <node idObject="328" type="NodePoint"/>
@@ -459,7 +480,10 @@ Delete layouts which are not needed.</description>
             <point id="299" idObject="97" inUse="true" mx="-0.222289" my="0.696084" type="modeling"/>
         </modeling>
         <pieces>
-            <piece closed="1" id="204" mx="27.4551" my="0.587081" name="Cuff" seamAllowance="1" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="204" inLayout="true" locked="false" mx="27.4551" my="0.587081" name="Cuff" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="1" arrows="0" length="Line_C1_C14 * 0.75" mx="2103.93" my="3283.54" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="200" type="NodePoint"/>
                     <node idObject="201" type="NodePoint"/>
@@ -475,7 +499,10 @@ Delete layouts which are not needed.</description>
                     <node idObject="208" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="217" mx="-16.9664" my="-23.4126" name="ShortSleeve" seamAllowance="1" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="217" inLayout="true" locked="false" mx="-16.9664" my="-23.4126" name="ShortSleeve" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="2" arrows="0" length="Line_C4_C34" mx="1983.27" my="1594.24" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="210" type="NodePoint"/>
                     <node idObject="211" type="NodePoint"/>
@@ -486,7 +513,10 @@ Delete layouts which are not needed.</description>
                     <node idObject="216" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="300" mx="-16.0896" my="15.2013" name="FullSleeve" seamAllowance="1" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="300" inLayout="true" locked="false" mx="-16.488" my="15.4005" name="FullSleeve" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="2" arrows="0" length="Line_C5_C29 * 0.75" mx="1975.74" my="2414.19" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="283" type="NodePoint"/>
                     <node idObject="284" reverse="1" type="NodeSpline"/>
@@ -563,7 +593,10 @@ Delete layouts which are not needed.</description>
             <spline id="254" idObject="248" inUse="true" type="modelingSpline"/>
         </modeling>
         <pieces>
-            <piece closed="1" id="224" mx="28.4767" my="21.6501" name="CollarBase" seamAllowance="1" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="224" inLayout="true" locked="false" mx="28.4767" my="21.6501" name="CollarBase" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="1" arrows="0" length="Line_D1_D4" mx="2137.96" my="337.591" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="218" type="NodePoint"/>
                     <node idObject="219" reverse="1" type="NodeSplinePath"/>
@@ -583,7 +616,10 @@ Delete layouts which are not needed.</description>
                     <node idObject="230" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="238" mx="28.0866" my="9.53729" name="CollarTop" seamAllowance="1" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="238" inLayout="true" locked="false" mx="28.0866" my="9.53729" name="CollarTop" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="1" arrows="0" length="Line_D1_D4" mx="2094.99" my="138.71" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="232" type="NodePoint"/>
                     <node idObject="233" reverse="0" type="NodeSpline"/>
@@ -637,7 +673,10 @@ Delete layouts which are not needed.</description>
             <point id="281" idObject="260" inUse="true" mx="0.132292" my="0.264583" type="modeling"/>
         </modeling>
         <pieces>
-            <piece closed="1" id="274" mx="27.725" my="-0.179464" name="PlacketUnder" seamAllowance="1" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="274" inLayout="true" locked="false" mx="27.725" my="-0.179464" name="PlacketUnder" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="1" arrows="0" length="Line_E_E2 * 0.75" mx="2074.16" my="3732.55" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="270" type="NodePoint"/>
                     <node idObject="271" type="NodePoint"/>
@@ -645,7 +684,10 @@ Delete layouts which are not needed.</description>
                     <node idObject="273" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="282" mx="46.1968" my="-5.58778" name="PlacketTop" seamAllowance="1" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="282" inLayout="true" locked="false" mx="46.1968" my="-5.58778" name="PlacketTop" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="1" arrows="0" length="Line_E_E4 * 0.8" mx="2037.48" my="3943.66" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="275" type="NodePoint"/>
                     <node idObject="276" type="NodePoint"/>

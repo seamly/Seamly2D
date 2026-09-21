@@ -16,7 +16,6 @@
 #include <QJsonObject>
 #include <QtTest/QSignalSpy>
 #include <QStringList>
-#include <QTemporaryDir>
 #include <QtTest/QtTest>
 #include <cmath>
 
@@ -57,23 +56,14 @@ QString buildBboxJson()
     return QString::fromUtf8(QJsonDocument(root).toJson(QJsonDocument::Compact));
 }
 
-/// @brief Write a minimal SVG with a contentRect id for outside-content checks.
-QString writeLayoutSvg(const QString& directoryPath)
+/// @brief Build a minimal SVG with a contentRect id for outside-content checks.
+/// @return SVG content in memory — AdjustScene::loadLayout() takes SVG content, not a file path.
+QString buildLayoutSvg()
 {
-    const QString svgPath = directoryPath + QStringLiteral("/layout.svg");
-    QFile svgFile(svgPath);
-    if (!svgFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        return QString();
-    }
-
-    const QByteArray svg =
+    return QStringLiteral(
         "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"200\" viewBox=\"0 0 200 200\">"
         "<rect id=\"contentRect\" x=\"0\" y=\"0\" width=\"200\" height=\"200\" fill=\"none\" stroke=\"none\"/>"
-        "</svg>";
-
-    svgFile.write(svg);
-    svgFile.close();
-    return svgPath;
+        "</svg>");
 }
 
 /// @brief Find a piece overlay by id in the scene.
@@ -178,14 +168,10 @@ private slots:
 
 void AdjustSceneTests::detectsOverlappingPieces()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     PieceOverlayItem* pieceA = findPiece(scene, QStringLiteral("pieceA"));
     PieceOverlayItem* pieceB = findPiece(scene, QStringLiteral("pieceB"));
@@ -201,14 +187,10 @@ void AdjustSceneTests::detectsOverlappingPieces()
 
 void AdjustSceneTests::togglesConflictHighlightOutline()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     PieceOverlayItem* pieceA = findPiece(scene, QStringLiteral("pieceA"));
     QVERIFY(pieceA);
@@ -228,14 +210,10 @@ void AdjustSceneTests::togglesConflictHighlightOutline()
 
 void AdjustSceneTests::emitsOperationConflictsDetectedSignal()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     PieceOverlayItem* pieceA = findPiece(scene, QStringLiteral("pieceA"));
     PieceOverlayItem* pieceB = findPiece(scene, QStringLiteral("pieceB"));
@@ -261,14 +239,10 @@ void AdjustSceneTests::emitsOperationConflictsDetectedSignal()
 
 void AdjustSceneTests::flipHorizontalTogglesScaleX()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     PieceOverlayItem* pieceA = findPiece(scene, QStringLiteral("pieceA"));
     QVERIFY(pieceA);
@@ -294,14 +268,10 @@ void AdjustSceneTests::flipHorizontalTogglesScaleX()
 
 void AdjustSceneTests::flipVerticalTogglesScaleY()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     PieceOverlayItem* pieceA = findPiece(scene, QStringLiteral("pieceA"));
     QVERIFY(pieceA);
@@ -327,14 +297,10 @@ void AdjustSceneTests::flipVerticalTogglesScaleY()
 
 void AdjustSceneTests::alignLeftEdgeMovesToContentRectLeft()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     QVERIFY2(scene.hasContentRect(), "Scene must have contentRect");
     const QRectF contentRect = scene.contentRect();
@@ -354,14 +320,10 @@ void AdjustSceneTests::alignLeftEdgeMovesToContentRectLeft()
 
 void AdjustSceneTests::alignRightEdgeMovesToContentRectRight()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     QVERIFY2(scene.hasContentRect(), "Scene must have contentRect");
     const QRectF contentRect = scene.contentRect();
@@ -381,14 +343,10 @@ void AdjustSceneTests::alignRightEdgeMovesToContentRectRight()
 
 void AdjustSceneTests::alignTopEdgeMovesToContentRectTop()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     QVERIFY2(scene.hasContentRect(), "Scene must have contentRect");
     const QRectF contentRect = scene.contentRect();
@@ -408,14 +366,10 @@ void AdjustSceneTests::alignTopEdgeMovesToContentRectTop()
 
 void AdjustSceneTests::alignBottomEdgeMovesToContentRectBottom()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     QVERIFY2(scene.hasContentRect(), "Scene must have contentRect");
     const QRectF contentRect = scene.contentRect();
@@ -435,14 +389,10 @@ void AdjustSceneTests::alignBottomEdgeMovesToContentRectBottom()
 
 void AdjustSceneTests::findNearestPieceLeftReturnsCorrectPiece()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     // pieceA is at (10, 10), pieceB is at (90, 10).
     // From pieceB's perspective, pieceA is to the left.
@@ -461,14 +411,10 @@ void AdjustSceneTests::findNearestPieceLeftReturnsCorrectPiece()
 
 void AdjustSceneTests::findNearestPieceRightReturnsCorrectPiece()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     // pieceA is at (10, 10), pieceB is at (90, 10).
     // From pieceA's perspective, pieceB is to the right.
@@ -487,14 +433,10 @@ void AdjustSceneTests::findNearestPieceRightReturnsCorrectPiece()
 
 void AdjustSceneTests::abutLeftMovesToTouchNearestPiece()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     // pieceA is at (10, 10) with width 30, so right edge at 40.
     // pieceB is at (90, 10) with width 30, so left edge at 90.
@@ -515,14 +457,10 @@ void AdjustSceneTests::abutLeftMovesToTouchNearestPiece()
 
 void AdjustSceneTests::abutRightMovesToTouchNearestPiece()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     // pieceA is at (10, 10) with width 30, so right edge at 40.
     // pieceB is at (90, 10) with width 30, so left edge at 90.
@@ -543,14 +481,10 @@ void AdjustSceneTests::abutRightMovesToTouchNearestPiece()
 
 void AdjustSceneTests::raiseToTopSetsHighestZValue()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     PieceOverlayItem* pieceA = findPiece(scene, QStringLiteral("pieceA"));
     PieceOverlayItem* pieceB = findPiece(scene, QStringLiteral("pieceB"));
@@ -572,14 +506,10 @@ void AdjustSceneTests::raiseToTopSetsHighestZValue()
 
 void AdjustSceneTests::lowerToBottomSetsLowestZValue()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     PieceOverlayItem* pieceA = findPiece(scene, QStringLiteral("pieceA"));
     PieceOverlayItem* pieceB = findPiece(scene, QStringLiteral("pieceB"));
@@ -602,11 +532,7 @@ void AdjustSceneTests::lowerToBottomSetsLowestZValue()
 
 void AdjustSceneTests::findNearestPieceAboveReturnsCorrectPiece()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     // Build a bbox JSON with pieces stacked vertically.
     // pieceA at (10, 10), pieceB at (10, 90) — pieceA is above pieceB.
@@ -641,7 +567,7 @@ void AdjustSceneTests::findNearestPieceAboveReturnsCorrectPiece()
     const QString bboxJson = QString::fromUtf8(QJsonDocument(root).toJson(QJsonDocument::Compact));
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, bboxJson);
+    scene.loadLayout(svgContent,bboxJson);
 
     // pieceA is at (10, 10), pieceB is at (10, 90).
     // From pieceB's perspective, pieceA is above it (lower y value).
@@ -660,11 +586,7 @@ void AdjustSceneTests::findNearestPieceAboveReturnsCorrectPiece()
 
 void AdjustSceneTests::findNearestPieceBelowReturnsCorrectPiece()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     // pieceA at (10, 10), pieceB at (10, 90) — pieceB is below pieceA.
     QJsonArray pieces;
@@ -698,7 +620,7 @@ void AdjustSceneTests::findNearestPieceBelowReturnsCorrectPiece()
     const QString bboxJson = QString::fromUtf8(QJsonDocument(root).toJson(QJsonDocument::Compact));
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, bboxJson);
+    scene.loadLayout(svgContent,bboxJson);
 
     // From pieceA's perspective, pieceB is below it (higher y value).
     PieceOverlayItem* pieceAItem = findPiece(scene, QStringLiteral("pieceA"));
@@ -716,14 +638,10 @@ void AdjustSceneTests::findNearestPieceBelowReturnsCorrectPiece()
 
 void AdjustSceneTests::checkOverlapsDetectsOverlappingPieces()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     PieceOverlayItem* pieceA = findPiece(scene, QStringLiteral("pieceA"));
     PieceOverlayItem* pieceB = findPiece(scene, QStringLiteral("pieceB"));
@@ -740,14 +658,10 @@ void AdjustSceneTests::checkOverlapsDetectsOverlappingPieces()
 
 void AdjustSceneTests::checkOverlapsReturnsEmptyForNonOverlapping()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     // Default positions: pieceA at (10,10) and pieceB at (90,10) — no overlap.
     const QStringList overlaps = scene.checkOverlaps();
@@ -761,14 +675,10 @@ void AdjustSceneTests::checkOverlapsReturnsEmptyForNonOverlapping()
 
 void AdjustSceneTests::rotationPivotIsBoundingBoxCenter()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     PieceOverlayItem* pieceA = findPiece(scene, QStringLiteral("pieceA"));
     QVERIFY(pieceA);
@@ -780,14 +690,10 @@ void AdjustSceneTests::rotationPivotIsBoundingBoxCenter()
 
 void AdjustSceneTests::rotatingAboutCenterKeepsCenterFixed()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     PieceOverlayItem* pieceA = findPiece(scene, QStringLiteral("pieceA"));
     QVERIFY(pieceA);
@@ -866,14 +772,10 @@ void AdjustSceneTests::buildTransformRoundTripsMoveAndRotationAroundCenter()
 void AdjustSceneTests::dg4_debugDumpOverlayDataCompilesAndIsCallable()
 {
     // Set up a minimal scene with two non-overlapping pieces.
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     // In debug builds this exercises the real file-writing implementation.
     // In release builds this exercises the inline no-op stub.
@@ -893,14 +795,10 @@ void AdjustSceneTests::dg4_debugDumpOverlayDataCompilesAndIsCallable()
 void AdjustSceneTests::dg4_releaseStubCompilesAndIsCallable()
 {
     // Set up a minimal scene with two non-overlapping pieces.
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustScene scene;
-    scene.loadLayout(svgPath, buildBboxJson());
+    scene.loadLayout(svgContent,buildBboxJson());
 
     // In release builds the inline empty-body stub must compile and be callable.
     // In debug builds the real implementation is already tested above; skip here.

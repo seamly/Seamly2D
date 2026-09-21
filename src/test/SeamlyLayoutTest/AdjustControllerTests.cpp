@@ -14,12 +14,10 @@
 
 #include "adjust/AdjustController.h"
 
-#include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QMetaObject>
-#include <QTemporaryDir>
 #include <QtTest/QSignalSpy>
 #include <QtTest/QtTest>
 
@@ -59,24 +57,14 @@ QString buildBboxJson()
     return QString::fromUtf8(QJsonDocument(root).toJson(QJsonDocument::Compact));
 }
 
-/// @brief Write a minimal SVG with a contentRect element to a temporary directory.
-/// @return Absolute path to the written SVG file, or empty string on failure.
-QString writeLayoutSvg(const QString& directoryPath)
+/// @brief Build a minimal SVG with a contentRect element.
+/// @return SVG content in memory — AdjustController::launchAdjustWindow() takes SVG content, not a file path.
+QString buildLayoutSvg()
 {
-    const QString svgPath = directoryPath + QStringLiteral("/layout.svg");
-    QFile svgFile(svgPath);
-    if (!svgFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        return QString();
-    }
-
-    const QByteArray svg =
+    return QStringLiteral(
         "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"200\" viewBox=\"0 0 200 200\">"
         "<rect id=\"contentRect\" x=\"0\" y=\"0\" width=\"200\" height=\"200\" fill=\"none\" stroke=\"none\"/>"
-        "</svg>";
-
-    svgFile.write(svg);
-    svgFile.close();
-    return svgPath;
+        "</svg>");
 }
 
 } // namespace
@@ -160,16 +148,12 @@ void AdjustControllerTests::signalSpiesAreValid()
 
 void AdjustControllerTests::launchWindowWithValidSvgDoesNotCrash()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
+    const QString svgContent = buildLayoutSvg();
 
     AdjustController controller;
 
     // First call — creates AdjustWindow, connects signals, and calls show().
-    controller.launchAdjustWindow(svgPath, buildBboxJson());
+    controller.launchAdjustWindow(svgContent, buildBboxJson());
 
     // Immediately close to avoid interactive UI in the test runner.
     controller.closeAdjustWindow();
@@ -180,20 +164,15 @@ void AdjustControllerTests::launchWindowWithValidSvgDoesNotCrash()
 
 void AdjustControllerTests::launchWindowTwiceDoesNotCrash()
 {
-    QTemporaryDir tempDir;
-    QVERIFY2(tempDir.isValid(), "Temporary directory must be created");
-
-    const QString svgPath = writeLayoutSvg(tempDir.path());
-    QVERIFY2(!svgPath.isEmpty(), "Test SVG file must be written");
-
+    const QString svgContent = buildLayoutSvg();
     const QString bboxJson = buildBboxJson();
     AdjustController controller;
 
     // First launch creates the window.
-    controller.launchAdjustWindow(svgPath, bboxJson);
+    controller.launchAdjustWindow(svgContent, bboxJson);
 
     // Second launch must call reload() on the existing window instead of creating a new one.
-    controller.launchAdjustWindow(svgPath, bboxJson);
+    controller.launchAdjustWindow(svgContent, bboxJson);
 
     // Clean up.
     controller.closeAdjustWindow();

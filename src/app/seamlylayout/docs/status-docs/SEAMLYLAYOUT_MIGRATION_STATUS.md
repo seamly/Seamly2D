@@ -44,7 +44,7 @@ Current docs should use the **DOM-string API names** below.
 | -------------------------- | ------------------------ | ---------- |
 | `getImportedSvgString()` | `getImportDomString()` | Renamed    |
 | `getLayoutSvgString()`   | `getLayoutDomString()` | Renamed    |
-| `writeAdjustSvgTemp()`   | `getAdjustSvgString()` | Superseded |
+| `writeAdjustSvgTemp()`   | `saveAdjustDom()` (now returns the adjust_dom SVG string in memory, no temp file) | Renamed |
 
 ## Verification Buckets
 

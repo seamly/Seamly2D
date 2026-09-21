@@ -11,7 +11,7 @@ Xfn process_layout(): creates layout_dom, piece_bboxes_json
 //these functions are converted to appController bridge in camelcase//
 Xfn import_svg(): clears all doms, layout meta data, piece_bboxes_json
 Xfn get_piece_bboxes():  stringifies layout_dom's piece_bboxes_json{"ml_px":0,"mt_px":0,"pieces":[{"id":"piece1","x":0,"y":0,"w":100,"h":100,"origin_x_px":50,"origin_y_px":50},...]}
-Xfn save_adjust_dom(): save adjust_dom to output/adjust_canvas.svg
+Xfn save_adjust_dom(): return adjust_dom serialized as an SVG string (in memory, no file I/O); also writes a numbered debug snapshot in debug builds only
 
 A
 Xfn enter_adjust_mode(): creates adjust_dom, adjust_canvas.svg, piece_bboxes_json_snapshot

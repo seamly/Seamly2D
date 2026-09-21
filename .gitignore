@@ -12,6 +12,9 @@
 # Seamly2D lock files
 *.locked
 
+# bundle files
+*.bundle
+
 # log files
 *.log
 *log.txt

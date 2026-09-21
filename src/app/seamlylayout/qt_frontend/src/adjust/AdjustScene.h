@@ -61,9 +61,9 @@ public:
     ///  - A non-interactive QGraphicsSvgItem as the static background.
     ///  - One PieceOverlayItem per entry in the @a bboxJson pieces array.
     ///
-    /// @param svgPath  Absolute path to the layout SVG file.
-    /// @param bboxJson JSON string with margin and pieces array (see project context).
-    void loadLayout(const QString& svgPath, const QString& bboxJson);
+    /// @param svgContent Layout SVG XML, in memory (no file I/O).
+    /// @param bboxJson   JSON string with margin and pieces array (see project context).
+    void loadLayout(const QString& svgContent, const QString& bboxJson);
 
     /// @brief Collect the current SVG transform string for every piece.
     ///

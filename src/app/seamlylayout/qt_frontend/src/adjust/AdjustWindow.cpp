@@ -35,19 +35,19 @@
 /**
  * @brief Constructs an AdjustWindow object.
  *
- * Initializes the AdjustWindow with the provided SVG file path and bounding box JSON,
+ * Initializes the AdjustWindow with the provided SVG content and bounding box JSON,
  * and sets up the user interface. The window is created as a child of the given parent widget.
  *
- * @param svgPath   The file path to the SVG file to be displayed or adjusted.
- * @param bboxJson  A JSON string containing bounding box information for the SVG.
- * @param parent    The parent widget of this window (optional).
+ * @param svgContent The layout SVG XML, in memory.
+ * @param bboxJson   A JSON string containing bounding box information for the SVG.
+ * @param parent     The parent widget of this window (optional).
  */
-AdjustWindow::AdjustWindow(const QString& svgPath,
+AdjustWindow::AdjustWindow(const QString& svgContent,
                            const QString& bboxJson,
                            QWidget*       parent)
     : QMainWindow(parent)
 {
-    buildUi(svgPath, bboxJson);
+    buildUi(svgContent, bboxJson);
 } // constructor AdjustWindow object
 
 // ---------------------------------------------------------------------------
@@ -55,9 +55,9 @@ AdjustWindow::AdjustWindow(const QString& svgPath,
 // ---------------------------------------------------------------------------
 
 /// @brief Reload the scene with a new SVG and bbox JSON (reuses this window).
-void AdjustWindow::reload(const QString& svgPath, const QString& bboxJson)
+void AdjustWindow::reload(const QString& svgContent, const QString& bboxJson)
 {
-    qDebug() << "[AdjustWindow] reload() — reloading scene from" << svgPath;
+    qDebug() << "[AdjustWindow] reload() — reloading scene, content length" << svgContent.size();
 
     // Capture current viewport state before reloading so piece operations do not
     // force a zoom reset.  This preserves the user's current zoom/pan context.
@@ -67,7 +67,7 @@ void AdjustWindow::reload(const QString& svgPath, const QString& bboxJson)
     // Reset flag so the next close (Save/Cancel/×) is handled correctly.
     m_closeHandled = false;
     // Load the new layout into the scene; this clears all existing items and creates new ones.
-    m_scene->loadLayout(svgPath, bboxJson);
+    m_scene->loadLayout(svgContent, bboxJson);
     // Dump overlay state after reload for debugging.
     m_scene->dumpOverlayData();
 
@@ -208,7 +208,7 @@ void AdjustWindow::fitToView()
 // ---------------------------------------------------------------------------
 
 /// @brief Build all widgets, toolbar, and instructions panel; load the initial layout.
-void AdjustWindow::buildUi(const QString& svgPath, const QString& bboxJson)
+void AdjustWindow::buildUi(const QString& svgContent, const QString& bboxJson)
 {
     // Window basics.
     setWindowTitle(QStringLiteral("Adjust Mode \xe2\x80\x94 move and rotate pieces"));
@@ -374,7 +374,7 @@ void AdjustWindow::buildUi(const QString& svgPath, const QString& bboxJson)
 
     // --- Load layout and fit view ----------------------------------------
 
-    m_scene->loadLayout(svgPath, bboxJson);
+    m_scene->loadLayout(svgContent, bboxJson);
     // Dump overlay state after initial load for debugging.
     m_scene->dumpOverlayData();
     updateUndoRedoActions(m_scene->canUndo(), m_scene->canRedo());

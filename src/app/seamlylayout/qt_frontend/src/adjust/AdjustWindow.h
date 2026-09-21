@@ -33,7 +33,7 @@ class QGraphicsView;
 ///
 /// @par Typical usage from QML / C++:
 /// @code
-///   auto* win = new AdjustWindow(svgPath, bboxJson);
+///   auto* win = new AdjustWindow(svgContent, bboxJson);
 ///   connect(win, &AdjustWindow::accepted, this, [](const QString& json){ ... });
 ///   connect(win, &AdjustWindow::cancelled, win, &AdjustWindow::close);
 ///   win->show();
@@ -44,17 +44,17 @@ class AdjustWindow : public QMainWindow
 
 public:
     /// @brief Construct and wire up the adjust window.
-    /// @param svgPath  Absolute path to the layout SVG.
-    /// @param bboxJson JSON string with piece bounding boxes (see project context).
-    /// @param parent   Optional parent widget (nullptr for top-level).
-    explicit AdjustWindow(const QString& svgPath,
+    /// @param svgContent Layout SVG XML, in memory.
+    /// @param bboxJson   JSON string with piece bounding boxes (see project context).
+    /// @param parent     Optional parent widget (nullptr for top-level).
+    explicit AdjustWindow(const QString& svgContent,
                           const QString& bboxJson,
                           QWidget*       parent = nullptr);
 
     /// @brief Reload the scene with a new SVG and bbox JSON (reuses this window).
-    /// @param svgPath  Absolute path to the updated layout SVG.
-    /// @param bboxJson Updated piece bbox JSON string.
-    void reload(const QString& svgPath, const QString& bboxJson);
+    /// @param svgContent Updated layout SVG XML, in memory.
+    /// @param bboxJson   Updated piece bbox JSON string.
+    void reload(const QString& svgContent, const QString& bboxJson);
 
 signals:
     /// @brief Emitted when the user clicks Apply.
@@ -115,7 +115,7 @@ protected:
 
 private:
     /// @brief Build all UI widgets, toolbar, and layout.
-    void buildUi(const QString& svgPath, const QString& bboxJson);
+    void buildUi(const QString& svgContent, const QString& bboxJson);
 
     /// @brief The graphics scene holding background and PieceOverlayItems.
     AdjustScene* m_scene = nullptr;

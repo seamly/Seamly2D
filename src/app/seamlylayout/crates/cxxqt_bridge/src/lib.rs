@@ -599,18 +599,14 @@ pub mod qobject {
         #[qinvokable]
         fn get_piece_bboxes(self: &AppController) -> QString;
 
-        /// Returns JSON array of {id, x, y, w, h, ox, oy, transform_str} for all pieces in adjust_dom.svg.
+        // Returns JSON array of {id, x, y, w, h, ox, oy, transform_str} for
+        // all pieces in adjust_dom, read directly from the in-memory DOM.
+        // Returns "[]" when not in AdjustMode.
         #[qinvokable]
-        fn get_adjust_piece_boxes(self: &AppController, filename: &QString) -> QString;
+        fn get_adjust_piece_boxes(self: &AppController) -> QString;
 
-        // Serialize adjust_dom to an SVG XML string and return it.
-        // Called from QML / AdjustWindow to display the adjust canvas inline
-        // without file I/O.  Returns empty string when not in AdjustMode.
-        #[qinvokable]
-        fn get_adjust_dom_string(self: &AppController) -> QString;
-
-        // Write adjust_dom to <exe_dir>/output/adjust_dom.svg and return
-        // the absolute native path (for AdjustWindow file-based loading).
+        // Serialize adjust_dom to an SVG XML string and return it, for
+        // AdjustWindow to load directly with no file I/O.
         // Returns empty string when no adjust DOM is available.
         #[qinvokable]
         fn save_adjust_dom(self: &AppController) -> QString;
@@ -1211,112 +1207,86 @@ impl qobject::AppController {
         cxx_qt_lib::QString::from(self.rust().piece_bboxes_json.as_str())
     } // fn get_piece_bboxes
 
-    /// @brief Returns JSON array of {id, x, y, w, h, ox, oy, transform_str} for all pieces in adjust_dom.svg.
+    /// @brief Returns JSON array of {id, x, y, w, h, ox, oy, transform_str} for all pieces in adjust_dom.
     /// transform_str is the SVG transform attribute or "" if none.
-    /// TODO: fix — uses NodeExt and Document::from_str which don't exist in svg_dom yet
-    /// Returns JSON array of {id, x, y, w, h, ox, oy, transform_str} for all pieces in the specified adjust_dom SVG file.
-    /// Pass the filename (e.g., "adjust_dom.svg" or "adjust_dom_3.svg") as a QString from QML/C++.
-    fn get_adjust_piece_boxes(self: &Self, filename: &cxx_qt_lib::QString) -> cxx_qt_lib::QString {
-        // debug message to verify function is called and which file is being read
-        let message = format!("[lib.rs AppController] get_adjust_piece_boxes() called. filename: {}", filename.to_string());
-        log_to_file(&message);
-        // Read and parse the specified adjust_dom SVG file from disk
-        let path = get_out_dir().join(filename.to_string());
-        let svg_str = match std::fs::read_to_string(&path) {
-            Ok(s) => s,
-            Err(_) => return cxx_qt_lib::QString::from("[]"),
+    /// Reads directly from the in-memory `adjust_dom` DOM — no file I/O.
+    fn get_adjust_piece_boxes(self: &Self) -> cxx_qt_lib::QString {
+        log_to_file("[lib.rs AppController] get_adjust_piece_boxes() called.");
+        let rust = self.rust();
+        let doc = match &rust.adjust_dom {
+            Some(d) => d,
+            None => return cxx_qt_lib::QString::from("[]"), // not in AdjustMode
         };
-    let doc = match svg_dom::Document::parse(&svg_str) {
-        Ok(d) => d,
-        Err(_) => return cxx_qt_lib::QString::from("[]"),
-    };
-    // Build JSON array from top-level pattern-piece <g> elements.
-    let mut arr = vec![];
-    for child in &doc.root.children {
-        if let Some(el) = child.as_element() {
-            if el.name != "g" { continue; }
-            let id = el.attributes.get("id").map(String::as_str).unwrap_or("");
-            if id.is_empty() || id == "Rectangles" {
-                continue;
+        // Build JSON array from top-level pattern-piece <g> elements.
+        let mut arr = vec![];
+        for child in &doc.root.children {
+            if let Some(el) = child.as_element() {
+                if el.name != "g" { continue; }
+                let id = el.attributes.get("id").map(String::as_str).unwrap_or("");
+                if id.is_empty() || id == "Rectangles" {
+                    continue;
+                }
+
+                let Some(bbox) = bbox_from_group_geometry(el) else {
+                    continue; // skip non-piece / non-geometric groups
+                };
+
+                let x = bbox.min.x as f64;
+                let y = bbox.min.y as f64;
+                let w = bbox.width() as f64;
+                let h = bbox.height() as f64;
+                let ox = 0.0;
+                let oy = 0.0;
+                let transform_str = el.attributes.get("transform").map(String::as_str).unwrap_or("");
+                // Piece identity survives into the saved adjust_dom because
+                // `create_layout` clones the whole piece <g> — attributes included —
+                // so the human-readable name can be read straight back off it here.
+                let name   = el.attributes.get("data-name").map(String::as_str).unwrap_or("");
+                let letter = el.attributes.get("data-letter").map(String::as_str).unwrap_or("");
+                // Same precedence as PieceRect::label(): name → letter → id.
+                let label  = if !name.is_empty() { name } else if !letter.is_empty() { letter } else { id };
+                arr.push(serde_json::json!({
+                    "id": id,
+                    "name": name,
+                    "letter": letter,
+                    "label": label,
+                    "x": x,
+                    "y": y,
+                    "w": w,
+                    "h": h,
+                    "origin_x_px": ox,
+                    "origin_y_px": oy,
+                    "transform_str": transform_str
+                }));
             }
-
-            let Some(bbox) = bbox_from_group_geometry(el) else {
-                continue; // skip non-piece / non-geometric groups
-            };
-
-            let x = bbox.min.x as f64;
-            let y = bbox.min.y as f64;
-            let w = bbox.width() as f64;
-            let h = bbox.height() as f64;
-            let ox = 0.0;
-            let oy = 0.0;
-            let transform_str = el.attributes.get("transform").map(String::as_str).unwrap_or("");
-            // Piece identity survives into the saved adjust_dom because
-            // `create_layout` clones the whole piece <g> — attributes included —
-            // so the human-readable name can be read straight back off it here.
-            let name   = el.attributes.get("data-name").map(String::as_str).unwrap_or("");
-            let letter = el.attributes.get("data-letter").map(String::as_str).unwrap_or("");
-            // Same precedence as PieceRect::label(): name → letter → id.
-            let label  = if !name.is_empty() { name } else if !letter.is_empty() { letter } else { id };
-            arr.push(serde_json::json!({
-                "id": id,
-                "name": name,
-                "letter": letter,
-                "label": label,
-                "x": x,
-                "y": y,
-                "w": w,
-                "h": h,
-                "origin_x_px": ox,
-                "origin_y_px": oy,
-                "transform_str": transform_str
-            }));
         }
-    }
-    let meta = serde_json::json!({
-        "pieces": arr,
-    });
-    let json = serde_json::to_string(&meta)
-        .unwrap_or_else(|_| r#"{"pieces":[]}"#.to_string());
-    cxx_qt_lib::QString::from(json.as_str())
-} // fn get_adjust_piece_boxes
+        let meta = serde_json::json!({
+            "pieces": arr,
+        });
+        let json = serde_json::to_string(&meta)
+            .unwrap_or_else(|_| r#"{"pieces":[]}"#.to_string());
+        cxx_qt_lib::QString::from(json.as_str())
+    } // fn get_adjust_piece_boxes
 
-    // Serialize `adjust_dom` to an SVG XML string and return it.
+    // Serialize `adjust_dom` to an SVG XML string and return it, for
+    // AdjustWindow (QtWidgets) to load directly — no file I/O.
     //
-    // Called from QML / AdjustWindow to display the adjust canvas inline
-    // without file I/O.  Returns empty string when not in AdjustMode
-    // (i.e. when adjust_dom is None).
-    // Called by onAdjustModeEntered: adjustCanvas.reloadSvg(appController.getAdjustSvgString())
-    fn get_adjust_dom_string(self: &Self) -> cxx_qt_lib::QString {
-        match &self.rust().adjust_dom {
-            Some(doc) => cxx_qt_lib::QString::from(doc.to_string().as_str()),
-            None => cxx_qt_lib::QString::default(), // not in AdjustMode
-        } // match adjust_dom
-    } // fn get_adjust_dom_string
-
-    // Write adjust_dom to <exe_dir>/output/adjust_dom.svg for AdjustWindow.
-    //
-    // Called from QML as saveAdjustDom() when entering AdjustMode or after accept_adjustments.
-    // The returned native file path is used by AdjustWindow (QtWidgets) to load
-    // the SVG.  Returns empty string when adjust_dom is None or the write fails.
+    // Called from QML as saveAdjustDom() when entering AdjustMode or after
+    // accept_adjustments. Also writes a numbered debug snapshot alongside
+    // (debug builds only; see save_debug_dom).
+    // Returns empty string when adjust_dom is None.
     // Called by the adjust-mode UI when opening or refreshing AdjustWindow.
     fn save_adjust_dom(self: &Self) -> cxx_qt_lib::QString {
-        // Save adjust_dom to <exe_dir>/output/adjust_dom.svg using app_core::save_svg.
-
         let doc = match &self.rust().adjust_dom {
             Some(d) => d,
             None => return cxx_qt_lib::QString::default(), // not in AdjustMode
         };
 
-        // Save a numbered debug copy alongside the canonical file.
-        log_to_file(&format!("[lib.rs AppController] save_adjust_dom(): 1 saving adjust_dom_nn.svg with {} pieces", self.rust().piece_bboxes_json));
+        // Save a numbered debug copy alongside the in-memory handoff.
+        log_to_file(&format!("[lib.rs AppController] save_adjust_dom(): 1 serializing adjust_dom with {} pieces", self.rust().piece_bboxes_json));
         save_debug_dom(doc, "adjust_dom.svg");
 
-        let out_path = get_out_dir().join("adjust_dom.svg");
-        match app_core::save_svg(doc, &out_path) {
-            Ok(_)  => cxx_qt_lib::QString::from(out_path.to_string_lossy().as_ref()),
-            Err(_) => cxx_qt_lib::QString::default(), // write failed
-        }
+        cxx_qt_lib::QString::from(doc.to_string().as_str())
     } // fn save_adjust_dom
 
     // -----------------------------------------------------------------------

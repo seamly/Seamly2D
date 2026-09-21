@@ -32,7 +32,7 @@ class AdjustWindow;
 ///       onApplyRequested: function(transformsJson) { ... }
 ///       onCancelRequested: { ... }
 ///   }
-///   adjustController.launchAdjustWindow(svgPath, bboxJson)
+///   adjustController.launchAdjustWindow(svgContent, bboxJson)
 /// @endcode
 class AdjustController : public QObject
 {
@@ -49,9 +49,9 @@ public:
     /// On subsequent calls, reloads the scene with the new SVG and bbox JSON
     /// so the window reflects the latest layout state.
     ///
-    /// @param svgPath  Absolute native path to the layout SVG file.
-    /// @param bboxJson Piece bounding-box JSON string from appController.getPieceBboxes().
-    Q_INVOKABLE void launchAdjustWindow(const QString& svgPath,
+    /// @param svgContent Layout SVG XML, in memory (appController.saveAdjustDom()).
+    /// @param bboxJson   Piece bounding-box JSON string from appController.getAdjustPieceBoxes().
+    Q_INVOKABLE void launchAdjustWindow(const QString& svgContent,
                                         const QString& bboxJson);
 
     /// @brief Close the AdjustWindow on demand (called from QML after canvas reload).

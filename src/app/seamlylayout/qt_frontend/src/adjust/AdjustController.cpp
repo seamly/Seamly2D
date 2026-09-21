@@ -32,12 +32,12 @@ void AdjustController::closeAdjustWindow()
     } // if window exists
 } // closeAdjustWindow
 
-/// @brief Open or reload the AdjustWindow with the provided output/adjust_dom.svg file.
+/// @brief Open or reload the AdjustWindow with the in-memory adjust_dom SVG.
 //    - On first call, creates the window, connects its signals, and shows it.
 //    - On subsequent calls, reloads the scene with the new SVG and bbox JSON
 //      so the window reflects the latest layout state.
 
-void AdjustController::launchAdjustWindow(const QString& svgPath,
+void AdjustController::launchAdjustWindow(const QString& svgContent,
                                           const QString& bboxJson)
 {
     if (!m_window) {
@@ -45,7 +45,7 @@ void AdjustController::launchAdjustWindow(const QString& svgPath,
         Logger::log(QStringLiteral("===========ENTER ADJUST MODE=========="));
         Logger::log(QStringLiteral("AdjustController::launchAdjustWindow(): creating AdjustWindow"));
 
-        m_window = new AdjustWindow(svgPath, bboxJson);
+        m_window = new AdjustWindow(svgContent, bboxJson);
 
         // When user applies/enters, Forward AdjustWindow::accepted() as applyRequested().
         connect(m_window, &AdjustWindow::accepted,
@@ -74,7 +74,7 @@ void AdjustController::launchAdjustWindow(const QString& svgPath,
         // Subsequent call — reload scene without destroying the window.
         Logger::log(QStringLiteral("AdjustController::launchAdjustWindow(): reloading AdjustWindow"));
         // Note: AdjustWindow::reload() clears all existing items and creates new ones, so the window reflects the latest layout state.
-        m_window->reload(svgPath, bboxJson);
+        m_window->reload(svgContent, bboxJson);
     } // if no window yet
 
     m_window->show();

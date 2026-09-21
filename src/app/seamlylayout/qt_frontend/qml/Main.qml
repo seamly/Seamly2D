@@ -370,10 +370,10 @@ ApplicationWindow {
 
         onAdjustLayoutClicked: {
             appController.enterAdjustMode()
-            var adjustDomPath = appController.saveAdjustDom()
+            var adjustSvgContent = appController.saveAdjustDom()
             adjustController.launchAdjustWindow(
-                adjustDomPath,
-                appController.getAdjustPieceBoxes("adjust_dom.svg")
+                adjustSvgContent,
+                appController.getAdjustPieceBoxes()
             )
         } // onAdjustLayoutClicked
 
@@ -737,7 +737,7 @@ ApplicationWindow {
                 function onAdjustApplied() {
                     adjustController.launchAdjustWindow(
                         appController.saveAdjustDom(),
-                        appController.getAdjustPieceBoxes("adjust_dom.svg")
+                        appController.getAdjustPieceBoxes()
                     )
                 } // onAdjustApplied
             } // Connections

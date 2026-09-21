@@ -23,6 +23,7 @@
 #include <QRectF>
 #include <QStringList>
 #include <QRegularExpression>
+#include <QSvgRenderer>
 #include <limits>
 
 // Static counter for sequentially numbered overlay debug dumps (GUI-thread only).
@@ -358,8 +359,8 @@ bool AdjustScene::redoLastOperation()
 // loadLayout
 // ---------------------------------------------------------------------------
 
-/// @brief Clear and reload the scene from an SVG path and bbox JSON string.
-void AdjustScene::loadLayout(const QString& svgPath, const QString& bboxJson)
+/// @brief Clear and reload the scene from in-memory SVG content and bbox JSON string.
+void AdjustScene::loadLayout(const QString& svgContent, const QString& bboxJson)
 {
     saveHistorySnapshots();
 
@@ -372,15 +373,14 @@ void AdjustScene::loadLayout(const QString& svgPath, const QString& bboxJson)
     m_contentRect = QRectF();
     m_hasContentRect = false;
 
-    // Parse contentRect bounds from the current SVG so operation-time validation
+    // Parse contentRect bounds from the SVG content so operation-time validation
     // can catch pieces moved outside printable/content margins.
-    QFile svgFile(svgPath);
-    if (svgFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+    {
         QDomDocument doc;
         QString parseError;
         int parseLine = 0;
         int parseColumn = 0;
-        if (doc.setContent(&svgFile, &parseError, &parseLine, &parseColumn)) {
+        if (doc.setContent(svgContent, &parseError, &parseLine, &parseColumn)) {
             const QDomElement root = doc.documentElement();
             const QDomElement contentRect = findElementById(root, QStringLiteral("contentRect"));
             if (!contentRect.isNull()) {
@@ -397,15 +397,14 @@ void AdjustScene::loadLayout(const QString& svgPath, const QString& bboxJson)
             qWarning() << "[AdjustScene] loadLayout(): SVG parse failed for contentRect at"
                        << parseLine << ":" << parseColumn << parseError;
         }
-        svgFile.close();
-    } else {
-        qWarning() << "[AdjustScene] loadLayout(): could not open SVG for contentRect:" << svgPath;
     }
 
     // --- SVG background --------------------------------------------------
 
-    // Create a non-interactive SVG background at z=0.
-    QGraphicsSvgItem* bg = new QGraphicsSvgItem(svgPath);
+    // Create a non-interactive SVG background at z=0, rendered directly from
+    // the in-memory SVG content — no temp file involved.
+    QGraphicsSvgItem* bg = new QGraphicsSvgItem();
+    bg->renderer()->load(svgContent.toUtf8());
     bg->setFlag(QGraphicsItem::ItemIsMovable,   false);
     bg->setFlag(QGraphicsItem::ItemIsSelectable, false);
     bg->setZValue(0.0);
