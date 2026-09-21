@@ -62,17 +62,17 @@ Design Studio. CI also runs none of these tests — run them locally.
 
 ### Run Build Validation Suite (includes 3MF validation)
 ```bash
-pwsh -File scripts/run_build_suite.ps1
+pwsh -File scripts/seamlylayout/run_build_suite.ps1
 ```
 
 ### Run Build Validation Suite (Release)
 ```bash
-pwsh -File scripts/run_build_suite.ps1 -Release
+pwsh -File scripts/seamlylayout/run_build_suite.ps1 -Release
 ```
 
 ### Run Build Validation Suite with Custom 3MF
 ```bash
-pwsh -File scripts/run_build_suite.ps1 -ThreeMfPath output/your_file.3mf
+pwsh -File scripts/seamlylayout/run_build_suite.ps1 -ThreeMfPath output/your_file.3mf
 ```
 
 ### Run All Tests in Workspace
