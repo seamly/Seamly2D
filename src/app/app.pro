@@ -34,12 +34,17 @@ SUBDIRS = \
 #      parent apps and never installs Rust.
 #
 # How SeamlyLayout is built instead:
-#   * locally  - src/app/seamlylayout/qd.ps1 (debug) or build.ps1 (CMake+Cargo)
-#   * in CI    - .github/workflows/ci.yml, 'windows-msi' job (CMake/Ninja + Cargo);
-#                the 'macos' job also builds it via CMake/Ninja + Cargo, as a
-#                separate step BEFORE qmake runs, then packages it into the
-#                same DMG as the other two apps
-#                (packaging/macos/macos.pro's seamlysuitedmg target)
+#   * locally  - packaging/windows/local_build_msi.ps1 (Windows),
+#                packaging/linux/local_build_appimage.sh (Linux),
+#                packaging/macos/local_build_dmg.sh (macOS) - each builds
+#                all three apps with CMake/Ninja + Cargo for SeamlyLayout
+#                and packages them together
+#   * in CI    - .github/workflows/ci.yml builds and tests it on Linux in the
+#                'linux-test' job, then packages it in the 'windows-msi',
+#                'linux' (AppImage) and 'macos' (DMG) jobs; the 'macos' job
+#                builds it via CMake/Ninja + Cargo as a separate step BEFORE
+#                qmake runs, then packages it into the same DMG as the other
+#                two apps (packaging/macos/macos.pro's seamlysuitedmg target)
 #
 # The three apps are integrated at PACKAGING time, not compile time. All three
 # apps build against the same Qt release (currently 6.11.1), so

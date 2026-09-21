@@ -46,8 +46,10 @@ CI signs with jsign + Google Cloud KMS, gated on `SEAMLY_SIGNING_*` secrets (ski
 ### Local dev build
 
 [`local_build_msi.ps1`](local_build_msi.ps1) runs the same `smsi.ps1` call on a
-dev machine. It is the only local build script — do not use
-`src\app\seamlylayout\build.ps1` or `qd.ps1`; they build SeamlyLayout alone.
+dev machine. It is the only local Windows build script. `src\app\seamlylayout\build.ps1`
+and `qd.ps1`, which built SeamlyLayout alone, are removed (see
+`packaging\linux\local_build_appimage.sh` and `packaging\macos\local_build_dmg.sh`
+for the Linux/macOS equivalents of this script).
 
 ```powershell
 .\packaging\windows\local_build_msi.ps1

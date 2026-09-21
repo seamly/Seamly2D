@@ -49,12 +49,18 @@ Windows 11, Linux (all flavors), macOS (latest 3 versions)
 
 ## Build Commands
 
-- **Build with `packaging\windows\local_build_msi.ps1` from the repository
-  root.** It builds all three apps, runs the Qt unit tests, and packages the
+- **Windows** - `packaging\windows\local_build_msi.ps1` from the repository
+  root. Builds all three apps, runs the Qt unit tests, and packages the
   Windows x64 MSI.
-- Do **not** use `build.ps1` or `qd.ps1` any more (user decision, 2026-09-02).
-  They build SeamlyLayout alone, which is not what the install-and-test loop
-  needs. Both files still exist; treat them as unsupported.
+- **Linux** - `packaging/linux/local_build_appimage.sh` from the repository
+  root. Builds all three apps, runs the Qt and Rust test suites, and
+  packages the Linux x86_64 AppImage.
+- **macOS** - `packaging/macos/local_build_dmg.sh` from the repository root.
+  Builds all three apps, runs the Qt and Rust test suites, and packages the
+  macOS DMG (unsigned, not notarized).
+- `build.ps1`, `qd.ps1`, `qr.ps1`, `run_debug.ps1`, `run_release.ps1` are
+  removed (user decision, 2026-09-02). They built SeamlyLayout alone, which
+  is not what the install-and-test loop needs.
 - Tests stay where they are: `ctest --preset debug` for the Qt frontend suites,
   `cargo test --workspace` for the Rust crates.
 
