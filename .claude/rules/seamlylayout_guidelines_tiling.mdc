@@ -8,7 +8,7 @@ Calculate tile size without margins. Required while processing layout when `pape
 
 ### Reference
 
-- [`docs/tiling-docs/TILING_CALCULATION_WORKFLOW.md`](../../docs/tiling-docs/TILING_CALCULATION_WORKFLOW.md)
+- [`docs/tiling-docs/TILING_CALCULATION_WORKFLOW.md`](../../src/app/seamlylayout/docs/tiling-docs/TILING_CALCULATION_WORKFLOW.md)
 
 ### Inputs
 
@@ -43,7 +43,7 @@ Remove empty tiled rows from processed layout.
 
 ### Reference
 
-- [`docs/tiling-docs/TILING_REDUCTION_WORKFLOW.txt`](../../docs/tiling-docs/TILING_REDUCTION_WORKFLOW.txt)
+- [`docs/tiling-docs/TILING_REDUCTION_WORKFLOW.txt`](../../src/app/seamlylayout/docs/tiling-docs/TILING_REDUCTION_WORKFLOW.txt)
 
 ### When to Apply
 

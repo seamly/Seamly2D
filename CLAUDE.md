@@ -90,7 +90,7 @@ All apps use Qt 6.11.1.
 - Code: Rust converted to C++ with `cxx-qt`.
 - GUI: Qt 6.11 / QML / QtWidgets.
 - Build: local - `packaging\windows\local_build_msi.ps1`; GitHub - ci.yml
-- Merge its local `CLAUDE.md` and `rules.md` requirements into the project-level files.
+- Detailed rules: see "SeamlyLayout Rules" below.
 - File header:
 
   - Author: `slspencer`
@@ -109,6 +109,69 @@ All apps use Qt 6.11.1.
   - Author: `slspencer`
   - Copyright: `2026 Seamly2D Project`
   - License: `GPL-3.0-or-later`
+
+## SeamlyLayout Rules
+
+Merged from SeamlyLayout's own former `CLAUDE.md` and `.claude/rules/` (2026-09-21).
+
+### General Rules
+
+- Read the `.md`, `.txt`, and `.rtf` files in `src/app/seamlylayout/docs/` regularly.
+- Update docs to reflect code changes.
+- Use "flatten" only for baking in transforms. Use "interpolation" for converting curves to polylines.
+- Always use absolute file paths, never relative paths. Resolve via `QFileInfo::absoluteFilePath()` (C++) or `std::path::Path::canonicalize()` (Rust).
+- When making code changes, search and update files with `.rs`, `.cpp`, `.h`, and `.qml` extensions.
+- When making text updates, search and update files with `.md` and `.txt` extensions.
+- Ignore markdown linting errors (MD001, MD004, MD013, etc.) in SeamlyLayout docs — they are editor diagnostic noise, not blocking issues.
+- Move as much application functionality as possible into `.rs` files.
+- Add Doxygen briefs to all functions, methods, wrappers, controllers.
+- Add inline comments to all new code to describe workflow, control flow, and data flow, so an intermediate-level programmer can follow it.
+
+### Shell Commands Policy
+
+The following Bash and PowerShell commands are pre-allowed in `.claude/settings.json` and run without permission prompts:
+
+**Bash (Git Bash / POSIX):**
+
+- File discovery: `ls *`, `ls`, `find *`
+- Navigation: `cd *`, `pwd`, `chdir *`
+- File ops: `cp *`, `mv *`, `rm *`, `cat *`, `mkdir *`
+- Inspection: `grep *`, `which *`, `where *`, `type *`, `env`, `env *`, `date`, `set`, `set *`, `whoami`, `hostname`
+- Scripting: `echo *`, `PATH=*`
+- Version control: `git *`, `gh *`
+
+**PowerShell:**
+
+- File discovery: `ls *`, `find *`, `dir *`
+- Navigation: `cd *`, `pwd`
+- File ops: `cp *`, `copy *`, `mv *`, `rm *`, `cat *`, `mkdir *`
+- Inspection: `where *`, `date`, `whoami`, `hostname`
+- Scripting: `echo *`, `$env:*`, `$*`
+- Version control: `git *`, `gh *`
+
+### Regex Policy
+
+- Do not introduce new regex in SeamlyLayout code. Use proper parsing libraries instead.
+- Existing regex in Rust code is acceptable.
+- SVG processing must use `xmltree`/`svg_dom`, never regex, for SVG manipulation.
+
+### Detailed Rule Files
+
+Rule files live in the project-level `.claude/rules/`, prefixed `seamlylayout_`:
+
+- [seamlylayout_dependencies.mdc](.claude/rules/seamlylayout_dependencies.mdc) — Crate versions, workspace structure, Qt modules
+- [seamlylayout_ffi-bridge.mdc](.claude/rules/seamlylayout_ffi-bridge.mdc) — `extern "C"` conventions, memory ownership, error codes
+- [seamlylayout_licensing.mdc](.claude/rules/seamlylayout_licensing.mdc) — License requirements: Qt LGPL-3.0, Rust MIT
+- [seamlylayout_qt-style.mdc](.claude/rules/seamlylayout_qt-style.mdc) — C++/QML coding conventions and file headers
+- [seamlylayout_rust-style.mdc](.claude/rules/seamlylayout_rust-style.mdc) — Rust coding conventions and file headers
+- [seamlylayout_svg-processing.mdc](.claude/rules/seamlylayout_svg-processing.mdc) — SVG/DOM manipulation guidelines
+- [seamlylayout_testing.mdc](.claude/rules/seamlylayout_testing.mdc) — Testing frameworks and commands
+- [seamlylayout_guidelines_export_dxf.mdc](.claude/rules/seamlylayout_guidelines_export_dxf.mdc) — DXF export pipeline
+- [seamlylayout_guidelines_layout.mdc](.claude/rules/seamlylayout_guidelines_layout.mdc) — Layout processing pipeline
+- [seamlylayout_guidelines_settings.mdc](.claude/rules/seamlylayout_guidelines_settings.mdc) — Settings workflow and defaults
+- [seamlylayout_guidelines_tiling.mdc](.claude/rules/seamlylayout_guidelines_tiling.mdc) — Tiling calculation and reduction
+
+`branding.mdc` was referenced by the old files but never existed. No branding rule file exists yet.
 
 ## Build Rules
 

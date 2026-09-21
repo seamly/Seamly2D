@@ -65,23 +65,22 @@ Windows 11, Linux (all flavors), macOS (latest 3 versions)
 
 ## Rules
 
-Detailed guidelines are in `.claude/rules/`:
+Detailed guidelines live in the project-level `.claude/rules/` (see the root `CLAUDE.md`'s "SeamlyLayout Rules" section):
 
-- [branding.mdc](./.claude/rules/branding.mdc) — Color palette and UI styling
-- [dependencies.mdc](./.claude/rules/dependencies.mdc) — Crate versions, workspace structure, Qt modules
-- [ffi-bridge.mdc](./.claude/rules/ffi-bridge.mdc) — extern "C" conventions, memory ownership, error codes
-- [licensing.mdc](./.claude/rules/licensing.mdc) — License requirements: Qt LGPL-3.0, Rust MIT
-- [qt-style.mdc](./.claude/rules/qt-style.mdc) — C++/QML coding conventions and file headers
-- [rust-style.mdc](./.claude/rules/rust-style.mdc) — Rust coding conventions and file headers
-- [svg-processing.mdc](./.claude/rules/svg-processing.mdc) — SVG/DOM manipulation guidelines
-- [testing.mdc](./.claude/rules/testing.mdc) — Testing frameworks and commands
+- [seamlylayout_dependencies.mdc](../../../.claude/rules/seamlylayout_dependencies.mdc) — Crate versions, workspace structure, Qt modules
+- [seamlylayout_ffi-bridge.mdc](../../../.claude/rules/seamlylayout_ffi-bridge.mdc) — extern "C" conventions, memory ownership, error codes
+- [seamlylayout_licensing.mdc](../../../.claude/rules/seamlylayout_licensing.mdc) — License requirements: Qt LGPL-3.0, Rust MIT
+- [seamlylayout_qt-style.mdc](../../../.claude/rules/seamlylayout_qt-style.mdc) — C++/QML coding conventions and file headers
+- [seamlylayout_rust-style.mdc](../../../.claude/rules/seamlylayout_rust-style.mdc) — Rust coding conventions and file headers
+- [seamlylayout_svg-processing.mdc](../../../.claude/rules/seamlylayout_svg-processing.mdc) — SVG/DOM manipulation guidelines
+- [seamlylayout_testing.mdc](../../../.claude/rules/seamlylayout_testing.mdc) — Testing frameworks and commands
 
 ## Workflow Guidelines
 
-- [Guidelines_Export_DXF.mdc](./.claude/rules/Guidelines_Export_DXF.mdc) — DXF export pipeline
-- [Guidelines_Layout.mdc](./.claude/rules/Guidelines_Layout.mdc) — Layout processing pipeline
-- [Guidelines_Settings.mdc](./.claude/rules/Guidelines_Settings.mdc) — Settings workflow and defaults
-- [Guidelines_Tiling.mdc](./.claude/rules/Guidelines_Tiling.mdc) — Tiling calculation and reduction
+- [seamlylayout_guidelines_export_dxf.mdc](../../../.claude/rules/seamlylayout_guidelines_export_dxf.mdc) — DXF export pipeline
+- [seamlylayout_guidelines_layout.mdc](../../../.claude/rules/seamlylayout_guidelines_layout.mdc) — Layout processing pipeline
+- [seamlylayout_guidelines_settings.mdc](../../../.claude/rules/seamlylayout_guidelines_settings.mdc) — Settings workflow and defaults
+- [seamlylayout_guidelines_tiling.mdc](../../../.claude/rules/seamlylayout_guidelines_tiling.mdc) — Tiling calculation and reduction
 
 ## Seamly Application Suite
 
