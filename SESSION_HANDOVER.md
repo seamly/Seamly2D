@@ -6,6 +6,39 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-20 — Layout Mode canvas flash fixed; GUI "Export Layout" removed (`TODO_REMOVE_DEAD_LAYOUT_CODE.md` Dead.1, build verifying)
+
+Branch `task-remove-export-layout-gui`, not yet merged into `run-seamlyLayout`.
+Two commits so far:
+
+1. `showLayoutMode()` (mainwindow.cpp) no longer switches the view to the old
+   built-in layout scene (`tempSceneLayout`) before launching SeamlyLayout.exe
+   — that was the flash of the superseded canvas users saw every time Layout
+   Mode opened. The view now keeps showing Draft/Piece until the handoff
+   succeeds; SeamlyLayout is the only canvas shown afterward.
+2. Removed the GUI "Export Layout" feature entirely (Tools -> Layout ->
+   Export Layout menu, `layout_ToolBar`'s entry, the `layout_Page` toolbox
+   button, and the "Layout" toolbar dropdown's option) — `exportLayoutAs()`
+   itself stays, now reachable only via File -> Export As... (kept per user
+   decision, to repoint or remove later). Investigation (see
+   `project-docs/TODO_REMOVE_DEAD_LAYOUT_CODE.md` Dead.1.1 for the full
+   file:line map) found the CLI `-e`/`--export` path (`vcmdexport.cpp`,
+   `MainWindow::DoExport()`) and "New Print Layout" share the same dialogs/
+   helpers (`ExportLayoutDialog`, `LayoutSettingsDialog`,
+   `AbstractLayoutDialog`, `DialogLayoutProgress`, `LayoutSettings()`,
+   `ExportData()`, `preparePiecesForLayout()`) and all of `src/libs/vlayout`
+   — none of that is removable yet. CLI export is kept deliberately until
+   SeamlyLayout's `crates/cli` reaches parity.
+
+**Verification: `packaging\windows\local_build_msi.ps1` (full run, no
+switches) was still running in the background when this was written** — not
+yet confirmed pass/fail. Do not merge or push until it passes.
+
+Next steps: check the build result; if it passes, merge `--no-ff` into
+`run-seamlyLayout` and push with the skip-ci token (only `src/app/seamly2d/**`
+changed — not in the "run full CI" trigger list); if it fails, fix and
+re-verify before merging.
+
 ## 2026-09-18 — fresh-install data location: now shown and editable (needs laptop click-through)
 
 User feedback contradicts `Installer.6.5` (2026-09-15, "no picker"): on a

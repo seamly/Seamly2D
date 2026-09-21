@@ -3008,7 +3008,6 @@ void MainWindow::initializeToolButtons()
     connect(ui->mirrorByAxis_ToolButton,   &QToolButton::clicked, this, &MainWindow::handleMirrorByAxisTool);
     connect(ui->move_ToolButton,           &QToolButton::clicked, this, &MainWindow::handleMoveTool);
     connect(ui->midpoint_ToolButton,       &QToolButton::clicked, this, &MainWindow::handleMidpointTool);
-    connect(ui->exportLayout_ToolButton,   &QToolButton::clicked, this, &MainWindow::exportLayoutAs);
     connect(ui->exportPiecesAs_ToolButton, &QToolButton::clicked, this, &MainWindow::exportPiecesAs);
     connect(ui->ellipticalArc_ToolButton,  &QToolButton::clicked, this, &MainWindow::handleEllipticalArcTool);
     connect(ui->anchorPoint_ToolButton,    &QToolButton::clicked, this, &MainWindow::handleAnchorPointTool);
@@ -3429,8 +3428,7 @@ void MainWindow::handleLayoutMenu()
 
     QMenu menu;
 
-    QAction *action_NewLayout    = menu.addAction(QIcon(":/toolicon/32x32/layout_settings.png"), tr("New Print Layout") + "\tN, L");
-    QAction *action_ExportLayout = menu.addAction(QIcon(":/toolicon/32x32/export.png"), tr("Export Layout") + "\tE, L");
+    QAction *action_NewLayout = menu.addAction(QIcon(":/toolicon/32x32/layout_settings.png"), tr("New Print Layout") + "\tN, L");
 
     QAction *selectedAction = menu.exec(QCursor::pos());
 
@@ -3443,11 +3441,6 @@ void MainWindow::handleLayoutMenu()
         ui->layout_ToolBox->setCurrentWidget(ui->layout_Page);
         ui->layoutSettings_ToolButton->setChecked(true);
         handleNewLayout(true);
-    }
-    else if (selectedAction == action_ExportLayout)
-    {
-        ui->layout_ToolBox->setCurrentWidget(ui->layout_Page);
-        exportLayoutAs();
     }
 }
 
@@ -4030,14 +4023,13 @@ void MainWindow::showPieceMode(bool checked)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief showLayoutMode show layout scene.
+ * @brief showLayoutMode hands the pattern pieces off to SeamlyLayout.
  * @param checked true - button checked.
  */
 void MainWindow::showLayoutMode(bool checked)
 {
     if (checked)
     {
-        ui->toolbox_StackedWidget->setCurrentIndex(2);
         handleArrowTool(true);
 
         if(drawMode)
@@ -4053,11 +4045,6 @@ void MainWindow::showLayoutMode(bool checked)
         ui->showDraftMode->setChecked(false);
         ui->pieceMode_Action->setChecked(false);
         ui->layoutMode_Action->setChecked(true);
-
-        ui->groups_DockWidget->setVisible(false);
-        ui->pieces_DockWidget->setVisible(false);
-        ui->toolProperties_DockWidget->setVisible(false);
-        ui->layoutPages_DockWidget->setVisible(true);
 
         QHash<quint32, VPiece> pieces;
         if(!qApp->getOpeningPattern())
@@ -4096,7 +4083,7 @@ void MainWindow::showLayoutMode(bool checked)
 
         draftBlockComboBox->setCurrentIndex(-1);// Hide pattern pieces
 
-        qCDebug(vMainWindow, "Show layout scene");
+        qCDebug(vMainWindow, "Hand off layout to SeamlyLayout");
 
         SaveCurrentScene();
 
@@ -4115,12 +4102,12 @@ void MainWindow::showLayoutMode(bool checked)
             return;
         }
 
-        currentScene = tempSceneLayout;
         emit ui->view->itemClicked(nullptr);  // Clear Property Editor with non valid tool selection
-        ui->view->setScene(currentScene);
 
         // Remember the stage we came from: a failed handoff reverts to it immediately
         // below, and a successful one restores it when SeamlyLayout closes (Seamly2D.3).
+        // The view keeps showing that prior scene throughout: SeamlyLayout is the only
+        // layout canvas now, so Seamly2D never switches to its own (superseded) one.
         const Draw priorStage = doc->getDraftStage();
         m_seamlyLayoutPriorStageWasDraft = (priorStage == Draw::Calculation);
         if (priorStage == Draw::Calculation)
@@ -4130,7 +4117,6 @@ void MainWindow::showLayoutMode(bool checked)
         doc->setDraftStage(Draw::Layout);
         setToolsEnabled(true);
         setWidgetsEnabled(true);
-        ui->layout_ToolBox->setCurrentIndex(ui->layout_ToolBox->indexOf(ui->layout_Page));
 
         mouseCoordinates->updateCoordinates(QPointF());
 
@@ -4141,8 +4127,6 @@ void MainWindow::showLayoutMode(bool checked)
             gradationSizesLabel->setVisible(false);
             gradationSizes->setVisible(false);
         }
-
-        showLayoutPages(ui->listWidget->currentRow());
 
         // SeamlyLayout handoff: instead of running the built-in layout engine,
         // send the tagged pieces SVG to the SeamlyLayout application.
@@ -5327,7 +5311,6 @@ void MainWindow::setToolsEnabled(bool enable)
 
     //Layout
     ui->newPrintLayout_Action->setEnabled(layoutTools);
-    ui->exportLayout_Action->setEnabled(layoutTools);
     ui->lastTool_Action->setEnabled(draftTools);
 
     ui->arrowPointer_ToolButton->setEnabled(draftTools || pieceTools);
@@ -5340,7 +5323,6 @@ void MainWindow::SetLayoutModeActions()
 {
     const bool enabled = not scenes.isEmpty();
 
-    ui->exportLayout_ToolButton->setEnabled(enabled);
     ui->exportAs_Action->setEnabled(enabled);
     ui->printPreview_Action->setEnabled(enabled);
     ui->printPreviewTiled_Action->setEnabled(enabled);
@@ -6431,12 +6413,6 @@ void MainWindow::createActions()
         handleNewLayout(true);
     });
 
-    connect(ui->exportLayout_Action, &QAction::triggered, this, [this]
-    {
-        ui->layout_ToolBox->setCurrentWidget(ui->layout_Page);
-        exportLayoutAs();
-    });
-
     connect(ui->lastTool_Action, &QAction::triggered, this, &MainWindow::LastUsedTool);
 
     //Measurements menu
@@ -7094,13 +7070,10 @@ void MainWindow::CreateMeasurements()
 //---------------------------------------------------------------------------------------------------------------------
 void MainWindow::exportLayoutAs()
 {
-    ui->exportLayout_ToolButton->setChecked(true);
-
     if (isLayoutStale)
     {
         if (ContinueIfLayoutStale() == QMessageBox::No)
         {
-            ui->exportLayout_ToolButton->setChecked(false);
             return;
         }
     }
@@ -7118,7 +7091,6 @@ void MainWindow::exportLayoutAs()
 
         if (dialog.exec() == QDialog::Rejected)
         {
-            ui->exportLayout_ToolButton->setChecked(false);
             return;
         }
 
@@ -7287,12 +7259,10 @@ void MainWindow::exportLayoutAs()
 
     catch (const VException &exception)
     {
-        ui->exportLayout_ToolButton->setChecked(false);
         qCritical("%s\n\n%s\n\n%s", qUtf8Printable(tr("Export exception.")),
                   qUtf8Printable(exception.ErrorMessage()), qUtf8Printable(exception.DetailedInformation()));
         return;
     }
-    ui->exportLayout_ToolButton->setChecked(false);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
