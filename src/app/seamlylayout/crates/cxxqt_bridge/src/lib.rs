@@ -1595,7 +1595,7 @@ impl qobject::AppController {
     // Called at the start of every export method before releasing self borrow.
     // Returns Err(QString) if no layout DOM is available.
     // -----------------------------------------------------------------------
-    // Called by export_dxf(), export_pdf(), and export_pdf_tiled() to get a clean copy of the layout DOM with display-only colored fill blocks and backgroundRect, contentRect, and tiledRect rectangles removed.
+    // Called by export_dxf(), export_pdf(), export_pdf_tiled(), and export_svg() to get a clean copy of the layout DOM with display-only colored fill blocks and backgroundRect, contentRect, and tiledRect rectangles removed.
     fn clone_stripped_layout_doc(&self) -> Result<svg_dom::Document, cxx_qt_lib::QString> {
         match &self.rust().layout_dom {
             Some(doc) => {
@@ -1610,23 +1610,6 @@ impl qobject::AppController {
             )), // None
         } // match layout_dom
     } // fn clone_stripped_layout_doc
-
-    // -----------------------------------------------------------------------
-    // Export helper — clone layout_dom UNCHANGED (no stripping).
-    // Unlike clone_stripped_layout_doc(), this keeps the piece fills/styles,
-    // the <g> group structure, every id attribute, and the
-    // backgroundRect/contentRect/tiledRects.  Used by SVG export so the saved
-    // file is a faithful, fully-styled copy of the on-screen layout.
-    // Returns Err(QString) if no layout DOM is available.
-    // -----------------------------------------------------------------------
-    fn clone_layout_doc(&self) -> Result<svg_dom::Document, cxx_qt_lib::QString> {
-        match &self.rust().layout_dom {
-            Some(doc) => Ok(doc.clone()), // full fidelity — styles, groups, ids kept
-            None => Err(cxx_qt_lib::QString::from(
-                "No layout available. Run Create Layout before exporting.",
-            )), // None
-        } // match layout_dom
-    } // fn clone_layout_doc
 
     // -----------------------------------------------------------------------
     // DXF-ASTM export
@@ -1889,10 +1872,12 @@ impl qobject::AppController {
 
     // Export the assembled layout as an SVG file.
     //
-    // Uses the UNSTRIPPED layout DOM (clone_layout_doc) so the saved file keeps
-    // its piece fills/styles, <g> group structure, id names, and the
-    // background/content/tiled rectangles — a faithful copy of the on-screen
-    // layout.  Delegates serialization to exports::do_export_svg.
+    // Uses the STRIPPED layout DOM (clone_stripped_layout_doc) so the saved
+    // file drops the piece-fill overlay rects and the <g id="Rectangles">
+    // group (backgroundRect/contentRect/tiledRects) — those exist only to
+    // support process_layout() and Adjust mode on screen, not as permanent
+    // content in an exported file.  Delegates serialization to
+    // exports::do_export_svg.
     // Called by QML 'Export SVG' menu handler: onExportSvgRequested → appController.exportSvg(path)
     fn export_svg(
         mut self: std::pin::Pin<&mut Self>,
@@ -1901,8 +1886,7 @@ impl qobject::AppController {
         let path_str = path.to_string();
         log_to_file(&format!("[lib.rs AppController] export_svg(): 1 requested path='{path_str}'"));
 
-        // Full-fidelity clone — do NOT strip fills/styles/groups/ids/rects.
-        let layout_doc = match self.clone_layout_doc() {
+        let layout_doc = match self.clone_stripped_layout_doc() {
             Ok(d)  => d,
             Err(m) => {
                 log_to_file("[lib.rs AppController] export_svg(): 2 no layout_dom available");

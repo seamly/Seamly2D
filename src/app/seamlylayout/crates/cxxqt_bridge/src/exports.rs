@@ -1475,11 +1475,13 @@ pub fn do_export_png(
 
 // @brief Export the layout document to an SVG file, preserving it verbatim.
 //
-// Serializes the DOM directly to disk; no rasterisation, stripping, or
-// conversion.  Because the document is written as-is, all styles, <g> groups,
-// id attributes, and rectangles are preserved in the output file.
+// Serializes the DOM directly to disk; no rasterisation or conversion.
+// Because the document is written as-is, all styles, <g> groups, and id
+// attributes on it are preserved in the output file. The caller
+// (AppController::export_svg) passes a piece-fill/Rectangles-stripped clone,
+// so this function's own output has neither.
 //
-// @param doc   Full (unstripped) layout DOM to serialize.
+// @param doc   Layout DOM to serialize, as-is.
 // @param path  Destination file path.
 // @return Ok(()) on success; Err(message) on any failure.
 pub fn do_export_svg(
@@ -1564,10 +1566,10 @@ mod tests {
         );
     } // build_tiled_pdf_tile_doc_adds_explicit_clip
 
-    // @brief SVG export must preserve the document verbatim — styles, <g>
-    // groups, id names, and child geometry survive the round trip.  This is
-    // the load-bearing guarantee for SVG export (it is a faithful copy, not a
-    // stripped/rasterised derivative like DXF/PNG).
+    // @brief do_export_svg must preserve the DOM it is given verbatim — styles,
+    // <g> groups, id names, and child geometry survive the round trip. Any
+    // stripping (piece-fill overlays, the Rectangles group) is the caller's
+    // job, done on the clone before it reaches this function.
     #[test]
     fn svg_export_preserves_styles_groups_and_ids() {
         let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><g id="piece1" class="cut"><path d="M 0 0 L 10 0 L 10 10 L 0 10 Z" style="fill:#aabbcc;stroke:#000000"/></g></svg>"#;
