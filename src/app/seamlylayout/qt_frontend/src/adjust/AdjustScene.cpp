@@ -403,8 +403,14 @@ void AdjustScene::loadLayout(const QString& svgContent, const QString& bboxJson)
 
     // Create a non-interactive SVG background at z=0, rendered directly from
     // the in-memory SVG content — no temp file involved.
+    // Loading through renderer()->load() leaves QGraphicsSvgItem::boundingRect()
+    // stuck at (0,0,0,0) even though the renderer itself is valid, so the
+    // background paints into a zero-size rect and never appears. setSharedRenderer()
+    // is the call that actually refreshes boundingRect() from the loaded content.
     QGraphicsSvgItem* bg = new QGraphicsSvgItem();
-    bg->renderer()->load(svgContent.toUtf8());
+    QSvgRenderer* bgRenderer = new QSvgRenderer(bg);
+    bgRenderer->load(svgContent.toUtf8());
+    bg->setSharedRenderer(bgRenderer);
     bg->setFlag(QGraphicsItem::ItemIsMovable,   false);
     bg->setFlag(QGraphicsItem::ItemIsSelectable, false);
     bg->setZValue(0.0);

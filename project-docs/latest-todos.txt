@@ -1,10 +1,10 @@
 installer:
-- close existing instances of seamly2d, seamlyme, and seamlylayout
+- DONE - close existing instances of seamly2d, seamlyme, and seamlylayout
 
 seamly2d:
 - DONE - When the user assigns a piece name to a pattern piece through the properties dialog, the piece name should be unique and its svg id should be updated.
 - DONE - The <rect> element within each pattern piece should be named id="rect_<piecename>"
 
 seamlylayout:
-- Export to SVG incorrectly retains the "Rectangles" group <g id="Rectangles"> and the <rect> element withing rectangle within each pattern piece. 
-- Fix: View's file picker doesn't highlight the selected file - it's unclear which file is being selected. It should highlight the file currently selected. 
+- DONE - Export to SVG incorrectly retains the "Rectangles" group <g id="Rectangles"> and the <rect> element withing rectangle within each pattern piece. 
+- DONE - Fix: View's file picker doesn't highlight the selected file - it's unclear which file is being selected. It should highlight the file currently selected. 
