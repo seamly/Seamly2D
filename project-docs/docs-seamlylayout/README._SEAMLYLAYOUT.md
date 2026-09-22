@@ -86,7 +86,7 @@ only bare `cargo` invocations in a plain shell need the export above.
 ## CLI
 
 - `./run_cli.sh -- --help` — release-builds and forwards args to the CLI.
-- `./run_cli_render.sh input.svg output.png` — render helper at fixed scale 1.0.
+- `./packaging/seamlylayout_run_cli_render.sh input.svg output.png` — render helper at fixed scale 1.0.
 
 ## Platform support
 

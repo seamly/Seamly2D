@@ -67,7 +67,7 @@ cargo test -p seamly_svg2ezdxf
 
 ### 2. Integration Tests with Real SVG Files
 
-Test with actual SVG files from your `input/` directory:
+Test with actual SVG files from the top-level `test-seamly-layout-input/` directory:
 
 ```rust
 #[test]
@@ -75,7 +75,7 @@ fn test_convert_real_svg_file() {
     use std::fs;
     use std::path::Path;
     
-    let svg_path = Path::new("input/richmond-shirt_v1_v061-02.svg");
+    let svg_path = Path::new("test-seamly-layout-input/richmond-shirt_v1_v061-02.svg");
     let svg_content = fs::read_to_string(svg_path).expect("Read SVG file");
     let doc = Document::parse(&svg_content).expect("Parse SVG");
     

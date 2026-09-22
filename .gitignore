@@ -56,6 +56,7 @@ rcc/
 man/
 build/
 logs/
+.vs
 .vscode/*
 .codex/
 
@@ -229,13 +230,15 @@ src/app/seamlylayout/target/
 src/app/seamlylayout/logs/
 src/app/seamlylayout/qt_frontend/build/
 
+# -------------------------------------------
+# TODO: Remove these after testing is cocmplete
 # track claude Session handover file
 !SESSION_HANDOVER.md
 # track seamlylayout .claude & .vs files for testing
 !src/app/seamlylayout/.claude/
 !src/app/seamlylayout/.vs/
-# track seamlylayout input * output files for testing
-!src/app/seamlylayout/input/
+# track seamlylayout output files, and top-level test input, for testing
+!test-seamly-layout-input/
 !src/app/seamlylayout/output/
 # track seamlylayout local build files for testing
 !src/app/seamlylayout/qt_frontend/CMakeFiles/
@@ -243,6 +246,7 @@ src/app/seamlylayout/qt_frontend/build/
 !src/app/seamlylayout/qt_frontend/.cmake/
 !src/app/seamlylayout/qt_frontend/.qt/
 !src/app/seamlylayout/qt_frontend/*.user
+!src/app/seamlylayout//qt_frontend/*.user.*
 
 
 

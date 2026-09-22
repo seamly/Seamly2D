@@ -90,6 +90,14 @@ All apps use Qt 6.11.1.
 - Code: Rust converted to C++ with `cxx-qt`.
 - GUI: Qt 6.11 / QML / QtWidgets.
 - Build: local - `packaging\windows\local_build_msi.ps1`; GitHub - ci.yml
+- Platform support: Windows 11, Linux (all flavors), macOS (latest 3 versions).
+- Architecture:
+
+  - Frontend: Qt 6.11 QML and QtWidgets.
+  - Core: Rust crates under `crates/`.
+  - Bridge: CXX-Qt 0.7.3 generates the C++ glue from Rust.
+  - License split: see [seamlylayout_licensing.mdc](.claude/rules/seamlylayout_licensing.mdc).
+
 - Detailed rules: see "SeamlyLayout Rules" below.
 - File header:
 
@@ -120,7 +128,8 @@ Merged from SeamlyLayout's own former `CLAUDE.md` and `.claude/rules/` (2026-09-
 - Update docs to reflect code changes.
 - Use "flatten" only for baking in transforms. Use "interpolation" for converting curves to polylines.
 - Always use absolute file paths, never relative paths. Resolve via `QFileInfo::absoluteFilePath()` (C++) or `std::path::Path::canonicalize()` (Rust).
-- When making code changes, search and update files with `.rs`, `.cpp`, `.h`, and `.qml` extensions.
+- UI work must consult `crates/cxxqt_bridge/` and `qt_frontend/`. The active UI is QML in `qt_frontend/qml/`, with the Rust↔Qt bridge in `crates/cxxqt_bridge/`.
+- When making code changes, search and update files with `.rs`, `.cpp`, `.cxx.cpp`, `.h`, and `.qml` extensions.
 - When making text updates, search and update files with `.md` and `.txt` extensions.
 - Ignore markdown linting errors (MD001, MD004, MD013, etc.) in SeamlyLayout docs — they are editor diagnostic noise, not blocking issues.
 - Move as much application functionality as possible into `.rs` files.
@@ -159,6 +168,7 @@ The following Bash and PowerShell commands are pre-allowed in `.claude/settings.
 
 Rule files live in the project-level `.claude/rules/`, prefixed `seamlylayout_`:
 
+- [seamlylayout-architecture.mdc](.claude/rules/seamlylayout-architecture.mdc) — Cross-module design, frontend/core/bridge boundaries
 - [seamlylayout_dependencies.mdc](.claude/rules/seamlylayout_dependencies.mdc) — Crate versions, workspace structure, Qt modules
 - [seamlylayout_ffi-bridge.mdc](.claude/rules/seamlylayout_ffi-bridge.mdc) — `extern "C"` conventions, memory ownership, error codes
 - [seamlylayout_licensing.mdc](.claude/rules/seamlylayout_licensing.mdc) — License requirements: Qt LGPL-3.0, Rust MIT
@@ -172,6 +182,27 @@ Rule files live in the project-level `.claude/rules/`, prefixed `seamlylayout_`:
 - [seamlylayout_guidelines_tiling.mdc](.claude/rules/seamlylayout_guidelines_tiling.mdc) — Tiling calculation and reduction
 
 `branding.mdc` was referenced by the old files but never existed. No branding rule file exists yet.
+
+### Command Line — Seamly2D Handoff Contract (Task 49)
+
+Seamly2D's Layout Mode builds the tagged pieces SVG in memory, launches SeamlyLayout with `--svg-stdin`, then writes the document to the new process's standard input and closes the channel. **No file is written** — the earlier `<pattern>.pieces.svg` handoff is gone. The contract is implemented in `qt_frontend/src/StartupOptions.{h,cpp}` and pinned by `src/test/SeamlyLayoutTest/StartupOptionsTests.cpp`; the producing half lives in `src/libs/vmisc/seamly_suite_paths.cpp` and is pinned by `TST_SeamlySuitePaths`. **Change one side and you must change the other** — see `project-docs/SVG-DATA-ATTRIBUTES.md` for the full statement.
+
+| Invocation | Behaviour |
+| ---------- | --------- |
+| `SeamlyLayout` | Empty canvas — the double-clicked-icon case |
+| `SeamlyLayout --svg-stdin [--document-name <name>]` | The Seamly2D handoff: reads the SVG document from standard input (`Main.qml`'s `openSvgDocument()` → `AppController::importSvgDocument`) |
+| `SeamlyLayout <file.svg>` | Opens that file through the same path as the **Import SVG** button (`Main.qml`'s `openSvgFile()` → `AppController::importSvg`) |
+| `SeamlyLayout -h` / `--help`, `-v` / `--version` | Text in a dialog (no console on Windows: this is a WIN32-subsystem binary), exit 0 |
+| `--svg-stdin` plus a file, empty or non-SVG standard input, two or more files, unknown option, missing / unreadable / non-`.svg` file | Error dialog naming the problem, then an empty canvas — never a silent no-op |
+
+- **Standard input is read only for `--svg-stdin`.** `seamlyLayout_main.mm` opens stdin on every launch, so reading it unasked would hang a shell or icon launch waiting for input that never comes.
+- **Both transports end in the same import.** `import_svg` (a path) and `import_svg_document` (a string) share `reset_import_state()` and `finish_import()` in `crates/cxxqt_bridge/src/lib.rs`, so the canvas cannot behave differently depending on where the SVG came from.
+- **Absolute paths only** — a relative positional argument is resolved with `QFileInfo::absoluteFilePath()` at parse time, because a launched process inherits SeamlyLayout's own working directory, not the user's.
+- **No single-instance handling** — each launch is its own process and window. One document per process; there are no tabs, which is also why a second positional argument is rejected rather than queued.
+- **Untagged SVGs are opened, not refused.** Every top-level `<g>` with geometry is treated as a piece, so an ordinary drawing still lays out. When the document carries no `data-type="piece"` group, `finish_import` emits `import_warning` and QML shows a non-blocking popup (`piece_extractor::count_tagged_pieces` does the counting).
+- **A tagged handoff is read from its `data-type="piece"` groups, and only those** (Task 59). The handoff nests all pieces inside one `<g data-type="pattern">`, but every stage of the layout pipeline — `svg_dom::verticalize_dom`, `svg_dom::translate_dom`, `piece_extractor`, `layout_assembler`, `oversized`, `remaining`, `sheets` — assumes a piece is a **direct `<g>` child of the SVG root**. `piece_extractor::hoist_tagged_pieces` re-parents the tagged pieces to the root once, composing any wrapper `transform` onto each, and the rest of the pipeline is unchanged. **Call it from any new pre-processing entry point** (today: `layout_utils::do_process_layout` and `sheets::build_sheet_export_inputs`) — without it the packer receives the whole pattern as one sheet-sized object.
+- **`id` is identity, `data-name` is what a user reads.** `PieceRect::label()` resolves `data-name` → `data-letter` → `id`; use it for warnings, error text and the Adjust overlay, never for element lookup.
+- Dispatch happens from `seamlyLayout_main.mm` on a `QTimer::singleShot(0, …)`, **after** the event loop starts — the QML window and its WebEngine canvases must exist before an SVG can be pushed into them.
 
 ## Build Rules
 
@@ -188,9 +219,10 @@ All three applications build against **Qt 6.11.1**.
 ### Local Windows Build
 
 **`packaging\windows\local_build_msi.ps1` is the build.*- Use it for every
-local build. Do **not*- use `src\app\seamlylayout\build.ps1` or `qd.ps1` any
-more (user decision, 2026-09-02): they build SeamlyLayout alone, which is not
-what the install-and-test loop needs.
+local Windows build. `src\app\seamlylayout\build.ps1`, `qd.ps1`, `qr.ps1`,
+`run_debug.ps1` and `run_release.ps1` are removed (user decision,
+2026-09-02): they built SeamlyLayout alone, which is not what the
+install-and-test loop needs.
 
 It builds Seamly2D, SeamlyMe and SeamlyLayout release binaries, runs the Qt unit
 tests, then packages the Windows **x64*- MSI via `smsi.ps1`:
@@ -230,6 +262,40 @@ The local Qt kit must include:
 - `WebEngineView`
 - `QtWebEngineQuick`
 - `Qt6WebEngineCore`
+
+### Local Linux Build
+
+`packaging/linux/local_build_appimage.sh` is the build. It builds Seamly2D,
+SeamlyMe and SeamlyLayout release binaries, runs the Qt and Rust unit tests,
+then packages the Linux x86_64 AppImage via `linuxdeploy` (auto-downloaded
+into `packaging/linux/tools/` on first run).
+
+Requires `qmake`, `cmake`, `ninja`, `cargo`, `ctest`, `xvfb-run`, `pdftops`
+(`poppler-utils`) and `libxerces-c-dev` already installed — the script fails
+with an install hint rather than running `sudo apt install` itself. A Qt
+6.11.1+ `gcc_64` kit under `~/Qt` is required, with the same modules as the
+Windows kit.
+
+Switch: `--skip-tests` — skip `make check`, `ctest`, and `cargo test`. Only
+for a packaging-only change; these suites have no other local runner on
+Linux besides `ci.yml`'s `linux-test` job.
+
+### Local macOS Build
+
+`packaging/macos/local_build_dmg.sh` is the build. It builds Seamly2D,
+SeamlyMe and SeamlyLayout release binaries, runs the Qt and Rust unit tests,
+then packages the macOS DMG via `packaging/macos/macos.pro`'s
+`seamlysuitedmg` target (the same `hdiutil` step `ci.yml`'s `macos` job
+uses). The output is unsigned and not notarized — signing needs CI secrets.
+
+`ci.yml`'s `macos` job does not run its own tests; it gates on the
+`linux-test` job's coverage. This script runs the Qt and Rust suites anyway
+for a safer local loop — pass `--skip-tests` to match CI's behavior exactly.
+
+Requires `qmake`, `cmake`, `ninja`, `cargo`, `ctest`, `hdiutil`, `xcrun`, and
+Xcode command-line tools (`xcode-select --install`) already installed, plus
+`xerces-c` via Homebrew. A Qt 6.11.1+ `macos` kit under `~/Qt` is required,
+with the same modules as the Windows kit (except `qtserialport`).
 
 See `.github/README-BUILDS.md` for detailed build and packaging knowledge.
 
@@ -559,5 +625,5 @@ Do not use it as a session transcript.
 - `.github/README-BUILDS.md` — build, toolchain, packaging, and platform details.
 - `project-docs/PROJECT_PLAN.md` — approved implementation plan.
 - `project-docs/NEW-ATTRIBUTES.csv` — SVG `data-*` attribute specification.
-- `src/app/seamlylayout/input/richmond-shirt_v1_v061-test.sm2d` — test pattern.
+- `test-seamly-layout-input/richmond-shirt_v1_v061-test.sm2d` — test pattern.
 - `SESSION_HANDOVER.md` — current cross-session state.

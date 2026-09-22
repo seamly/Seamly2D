@@ -72,7 +72,7 @@ All apps use Qt 6.11.1.
 * Purpose: Creates layouts of Seamly2D pattern pieces for cutting and downstream software.
 * Code: Rust converted to C++ with `cxx-qt`.
 * GUI: Qt 6.11 / QML / QtWidgets.
-* Build: local - `src/app/seamlylayout/qd.ps1`; GitHub - ci.yml
+* Build: local - `packaging/<platform>/local_build_*.ps1|.sh`; GitHub - ci.yml
 * Merge its local `AGENTS.md` and `rules.md` requirements into the project-level files.
 * File header:
 
@@ -108,12 +108,11 @@ The repository has no local build or test script for Seamly2D and SeamlyMe.
 `ci.yml` builds and tests them. Build them by hand with qmake + jom if you need
 a local tree.
 
-SeamlyLayout keeps its own local scripts:
-
-* `src/app/seamlylayout/qd.ps1` — debug build.
-* `src/app/seamlylayout/build.ps1` — CMake + Ninja + Cargo. **Local only.**
-  `ci.yml` runs `cmake --preset release` directly and never calls this script,
-  so a change here needs no CI run.
+SeamlyLayout builds as part of the per-platform suite script, not standalone:
+`packaging/windows/local_build_msi.ps1`, `packaging/linux/local_build_appimage.sh`,
+`packaging/macos/local_build_dmg.sh`. Each builds all three apps and packages
+them together. `ci.yml` runs `cmake --preset release`/`debug` directly and
+never calls these scripts, so a change to one needs no CI run.
 
 Use Qt 6.11.1 `msvc2022_64` with the VS 18 Community MSVC environment.
 
@@ -443,5 +442,5 @@ Do not use it as a session transcript.
 * `.github/README-BUILDS.md` — build, toolchain, packaging, and platform details.
 * `project-docs/PROJECT_PLAN.md` — approved implementation plan.
 * `project-docs/NEW-ATTRIBUTES.csv` — SVG `data-*` attribute specification.
-* `src/app/seamlylayout/input/richmond-shirt_v1_v061-test.sm2d` — test pattern.
+* `test-seamly-layout-input/richmond-shirt_v1_v061-test.sm2d` — test pattern.
 * `SESSION_HANDOVER.md` — current cross-session state.
