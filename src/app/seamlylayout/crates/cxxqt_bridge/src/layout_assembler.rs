@@ -310,6 +310,17 @@ pub fn create_layout(
         };
 
         // update fill_rect attributes
+        // Mirror the piece's own id (piece_<name> or piece-<n>) so the rect is
+        // identifiable the same way as the piece's other tagged children.
+        if let Some(piece_id) = group_clone.attributes.get("id") {
+            let rect_id = piece_id
+                .strip_prefix("piece_")
+                .map(|suffix| format!("rect_{suffix}"))
+                .or_else(|| piece_id.strip_prefix("piece-").map(|suffix| format!("rect-{suffix}")));
+            if let Some(rect_id) = rect_id {
+                fill_rect.attributes.insert("id".to_string(), rect_id);
+            }
+        }
         fill_rect.attributes.insert("class".to_string(),          "piece-fill".to_string());
         // x/y = piece bbox origin in local pixel coords (≈ 0 after translate_dom).
         fill_rect.attributes.insert("x".to_string(),              format!("{orig_x:.4}"));
@@ -474,6 +485,31 @@ mod tests {
         // No scale() anywhere in the output — layout_dom is pixel-pure.
         assert!(!svg_str.contains("scale("), "unexpected scale: {svg_str}");
     } // assembler_sets_pixel_translate
+
+    // @brief The piece-fill rect's id mirrors the piece group's own id, for
+    // both the name-based and legacy numeric-fallback forms.
+    #[test]
+    fn fill_rect_id_mirrors_piece_id() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500">
+  <g id="piece_Yoke"><path d="M 0 0 L 96 0 L 96 96 L 0 96 Z"/></g>
+  <g id="piece-3"><path d="M 0 0 L 48 0 L 48 48 L 0 48 Z"/></g>
+</svg>"#;
+        let input_doc = svg_dom::Document::parse(svg).expect("parse ok");
+        let pieces = extract_piece_rects(&input_doc);
+        assert_eq!(pieces.len(), 2);
+
+        let rects: Vec<packing::Rect> = pieces.iter().map(|p| p.rect).collect();
+        let bin_w = 300u32;
+        let bin_h = 300u32;
+        let placements = packing::pack_shelves(bin_w, bin_h, &rects).expect("pack ok");
+
+        let mut base_doc = make_base_doc(bin_w, bin_h);
+        create_layout(&mut base_doc, &input_doc, &pieces, &placements, 0, 0);
+        let svg_str = base_doc.to_string();
+
+        assert!(svg_str.contains("id=\"rect_Yoke\""), "missing rect_Yoke: {svg_str}");
+        assert!(svg_str.contains("id=\"rect-3\""), "missing rect-3: {svg_str}");
+    } // fill_rect_id_mirrors_piece_id
 
     // @brief remove_color_blocks removes piece-fill rects from export copies.
     #[test]
