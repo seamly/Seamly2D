@@ -531,22 +531,37 @@ fn piece_identity(elem: &Element) -> (String, String, String) {
 // Private helpers
 // ---------------------------------------------------------------------------
 
-// @brief Returns true when the element is a `<g>` whose id marks it as a
-// non-outline decoration group that must not contribute points to the piece
-// bounding box.
+// @brief Returns true when the element is a `<g>` marking a non-outline
+// decoration group that must not contribute points to the piece bounding box.
 //
-// Recognised id prefixes (compared lower-case):
-//   • notch      — V-notch / tick-mark registration points
-//   • tuck       — dart / tuck construction lines (e.g. `tuck_1_a_Back`)
-//   • grainline / grain_ — grain direction arrow
-//   • ip_        — internal path (pocket placement lines, etc.)
-//   • drill / hole — drill-hole markers
+// Two signals are checked, because real Seamly2D handoffs and hand-built test
+// fixtures use different naming:
+//   1. `data-type` attribute, exact match against a known decoration type
+//      (`notch`, `tuck`, `grainline`, `internal_path`, `drill`, `hole`,
+//      `piece_label`, `pattern_label`). This is what Seamly2D actually emits
+//      on every decoration group (see `project-docs/SVG-DATA-ATTRIBUTES.md`);
+//      real ids are namespaced as `piece-<N>-<type>-<M>`, so an id-prefix
+//      check alone never matches them.
+//   2. `id` prefix (compared lower-case) — kept for older exports and
+//      hand-written fixtures that set no `data-type`: `notch`, `tuck`,
+//      `grainline` / `grain_`, `ip_`, `drill`, `hole`.
 //
-// Matches the same prefix set as `polygon_pack::svg_extract::is_non_outline_group`
+// Matches the same two-signal check as `polygon_pack::svg_extract::is_non_outline_group`
 // so the bounding-box calculation and the cutline resolver agree on which groups
 // to skip.
 fn is_non_outline_group(e: &xmltree::Element) -> bool {
     if e.name != "g" { return false; }
+
+    if let Some(data_type) = e.attributes.get("data-type") {
+        if matches!(
+            data_type.as_str(),
+            "notch" | "tuck" | "grainline" | "internal_path" | "drill" | "hole"
+                | "piece_label" | "pattern_label"
+        ) {
+            return true;
+        } // if known decoration type
+    } // if data-type present
+
     let Some(id) = e.attributes.get("id") else { return false; };
     let id_lower = id.to_lowercase();
     id_lower.starts_with("notch")
@@ -1012,6 +1027,42 @@ mod tests {
         assert_eq!(pieces[0].rect.h, 20,
             "height inflated by notch: got {} expected 20", pieces[0].rect.h);
     } // notch_sibling_bbox_not_inflated
+
+    // @brief Real Seamly2D exports namespace every sibling id with the piece's
+    // own id (`piece-3-notch-1`, `piece-3-internal_path-1`, …), not the bare
+    // prefixes (`notch_1`, `ip_1`) the two tests above use. An id-prefix-only
+    // filter never matches that real naming — `data-type` is the attribute
+    // that actually identifies the group. This reproduces the real handoff
+    // shape (data-type + piece-namespaced id) for notch and internal_path,
+    // pinning the bug found against `richmond-shirt-handoff_pieces.svg`: a
+    // stray notch point at a distant coordinate stretched a piece's packed
+    // box to several times the cutline's real size.
+    #[test]
+    fn real_id_format_notch_and_internal_path_not_inflated() {
+        // cutline is a 40x20 rectangle. The notch point sits far outside the
+        // piece (x=900) and the internal_path line runs from x=-50 — either
+        // one alone would inflate the box if not filtered.
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="2000" height="2000">
+  <g id="piece-3" data-type="piece" data-name="Collar">
+    <g id="piece-3-cutline-1" data-type="cutline" data-parent="piece-3">
+      <path d="M 0 0 L 40 0 L 40 20 L 0 20 L 0 0"/>
+    </g>
+    <g id="piece-3-notch-1" data-type="notch" data-parent="piece-3">
+      <path d="M 900 5 Z"/>
+    </g>
+    <g id="piece-3-internal_path-1" data-type="internal_path" data-parent="piece-3">
+      <path d="M -50 10 L 20 10"/>
+    </g>
+  </g>
+</svg>"#;
+        let doc = svg_dom::Document::parse(svg).expect("parse ok");
+        let pieces = extract_piece_rects(&doc);
+        assert_eq!(pieces.len(), 1, "expected 1 piece");
+        assert_eq!(pieces[0].rect.w, 40,
+            "width inflated by real-format notch/internal_path siblings: got {} expected 40", pieces[0].rect.w);
+        assert_eq!(pieces[0].rect.h, 20,
+            "height inflated by real-format notch/internal_path siblings: got {} expected 20", pieces[0].rect.h);
+    } // real_id_format_notch_and_internal_path_not_inflated
 
     // -----------------------------------------------------------------------
     // Task 59 — the Seamly2D handoff shape: pieces nested in a pattern wrapper

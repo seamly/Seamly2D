@@ -172,21 +172,32 @@ pub fn extract_piece_outline(piece_g: &Element) -> Option<Polygon> {
 // Private helpers
 // ---------------------------------------------------------------------------
 
-// @brief Returns true when the group's id marks it as a known non-outline type.
+// @brief Returns true when the group is a known non-outline decoration type.
 //
 // Non-outline groups must not be selected as the cutline / seamline candidate
-// by the structural fallback in `find_outline_group`.  The recognised prefixes
-// are (compared in lower-case):
-//   • notch    — V-notch / tick-mark registration points
-//   • tuck     — dart or tuck construction lines (e.g. `tuck_1_a_Back`)
-//   • grainline / grain_ — grain direction arrow
-//   • ip_      — internal path (pocket placement lines, etc.)
-//   • drill / hole — drill-hole markers
-//
-// `starts_with` is intentional: a piece named "notch" would produce an id
-// `cutline_notch` which still passes the primary `contains("cutline")` check
-// and is NOT excluded here.
+// by the structural fallback in `find_outline_group`.  Two signals are
+// checked, because real Seamly2D handoffs and hand-built test fixtures use
+// different naming:
+//   1. `data-type` attribute, exact match (`notch`, `tuck`, `grainline`,
+//      `internal_path`, `drill`, `hole`). Real ids are namespaced as
+//      `piece-<N>-<type>-<M>`, so an id-prefix check alone never matches them
+//      — `data-type` is the attribute Seamly2D actually sets per group.
+//   2. `id` prefix (compared lower-case), for exports/fixtures with no
+//      `data-type`: `notch`, `tuck`, `grainline` / `grain_`, `ip_`, `drill`,
+//      `hole`. `starts_with` is intentional here: a piece named "notch"
+//      would produce an id `cutline_notch` which still passes the primary
+//      `contains("cutline")` check in `find_outline_group` and is NOT
+//      excluded by this prefix check.
 fn is_non_outline_group(e: &Element) -> bool {
+    if let Some(data_type) = e.attributes.get("data-type") {
+        if matches!(
+            data_type.as_str(),
+            "notch" | "tuck" | "grainline" | "internal_path" | "drill" | "hole"
+        ) {
+            return true;
+        } // if known decoration type
+    } // if data-type present
+
     let Some(id) = e.attributes.get("id") else { return false; };
     let id_lower = id.to_lowercase();
     id_lower.starts_with("notch")
@@ -510,6 +521,33 @@ mod tests {
         assert!(dx > 7.0 && dy > 5.0,
             "AABB too small ({dx:.2}×{dy:.2}) — notch may have been selected instead of seamline");
     } // find_outline_group_skips_notch_at_structural_position_1
+
+    // @brief Real Seamly2D exports namespace every sibling id with the piece's
+    // own id (`piece-3-notch-1`), not the bare `notch_1_Piece` prefix the test
+    // above uses — `data-type="notch"` is the attribute that actually marks
+    // the group. Without it, an id-prefix-only filter lets the structural
+    // fallback land on the notch instead of the seamline.
+    #[test]
+    fn find_outline_group_skips_notch_with_real_id_namespacing() {
+        let svg = r#"<?xml version="1.0"?>
+            <svg xmlns="http://www.w3.org/2000/svg">
+                <g id="piece-3">
+                    <g id="piece-3-seamline-1" data-type="seamline">
+                        <path d="M 0,0 L 8,0 L 8,6 L 0,6 L 0,0"/>
+                    </g>
+                    <g id="piece-3-notch-1" data-type="notch">
+                        <path d="M 4,0 L 4,1 L 5,0"/>
+                    </g>
+                </g>
+            </svg>"#;
+        let root = parse_svg(svg);
+        let pieces = extract_cutline_polygons(&root);
+
+        assert_eq!(pieces.len(), 1);
+        let (dx, dy) = span(&pieces[0].polygon);
+        assert!(dx > 7.0 && dy > 5.0,
+            "AABB too small ({dx:.2}×{dy:.2}) — real-id-format notch may have been selected instead of seamline");
+    } // find_outline_group_skips_notch_with_real_id_namespacing
 
     // @brief Resolve a workspace-relative fixture path from the crate root.
     fn fixture_path(rel: &str) -> std::path::PathBuf {
