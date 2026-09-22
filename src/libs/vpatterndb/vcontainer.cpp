@@ -48,9 +48,34 @@
 //  along with Valentina.  If not, see <http://www.gnu.org/licenses/>.
 //---------------------------------------------------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------------------------------------------------
+//  @file   vcontainer.cpp
+//  @author slspencer
+//  @date   21 Sep, 2026
+//
+//  @copyright
+//  Copyright (C) 2026 Seamly2D Project
+//  https://github.com/fashionfreedom/seamly2d
+//
+//  @brief
+//  Seamly2D is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  Seamly2D is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with Seamly2D. If not, see <http://www.gnu.org/licenses/>.
+//---------------------------------------------------------------------------------------------------------------------
+
 #include "vcontainer.h"
 
 #include <limits.h>
+#include <QRegularExpression>
 #include <QVector>
 #include <QtDebug>
 
@@ -358,15 +383,51 @@ quint32 VContainer::AddGObject(VGObject *obj)
  * @return quint32 The ID of the new piece in the container.
  *
  * @details
+ * - A piece with no explicit name gets a fallback name, "Piece N", so it
+ *   stays distinguishable from every other unnamed piece in the pattern.
  * - The method generates a new unique ID for the piece by calling `getNextId()`.
  * - It inserts the piece into the internal hash map of pieces using the generated ID.
  * - The method returns the ID assigned to the new piece.
  */
 quint32 VContainer::AddPiece(const VPiece &piece)
 {
+    VPiece newPiece = piece;
+    if (newPiece.GetName().trimmed().isEmpty() || newPiece.GetName() == tr("Piece"))
+    {
+        newPiece.SetName(NextPieceName());
+    }
+
     const quint32 id = getNextId();
-    d->pieces->insert(id, piece);
+    d->pieces->insert(id, newPiece);
     return id;
+}
+
+/**
+ * @brief Builds the next fallback piece name, "Piece N".
+ * @return "Piece " followed by one more than the highest N already used by
+ *         an existing "Piece N" piece, or "Piece 1" if none exist.
+ *
+ * @details
+ * Scans existing piece names instead of keeping a running counter, because
+ * a full document re-parse rebuilds VContainer from scratch. A counter
+ * field would reset mid-session and could reissue a number still in use.
+ */
+QString VContainer::NextPieceName() const
+{
+    const QRegularExpression pieceNameRx(QStringLiteral("^%1 (\\d+)$").arg(QRegularExpression::escape(tr("Piece"))));
+
+    quint32 maxN = 0;
+    const QList<VPiece> pieces = d->pieces->values();
+    for (const VPiece &existingPiece : pieces)
+    {
+        const QRegularExpressionMatch match = pieceNameRx.match(existingPiece.GetName());
+        if (match.hasMatch())
+        {
+            maxN = qMax(maxN, match.captured(1).toUInt());
+        }
+    }
+
+    return QStringLiteral("%1 %2").arg(tr("Piece")).arg(maxN + 1);
 }
 
 /**

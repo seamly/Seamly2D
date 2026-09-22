@@ -63,6 +63,11 @@ public:
 private slots:
     void ClearLoop();
     void Issue620();
+    void AutoNameFirstUnnamedPiece();
+    void AutoNameSecondUnnamedPiece();
+    void KeepExplicitPieceName();
+    void AutoNameAvoidsNumberStillInUse();
+    void AutoNameReusesNumberFreedByDeletion();
 
 private:
     Q_DISABLE_COPY(TST_VPiece)
