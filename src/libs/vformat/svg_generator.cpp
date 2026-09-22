@@ -9,7 +9,7 @@
  **  @copyright
  **  This source code is part of the Seamly2D project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
- **  Copyright (C) 2013-2022 Seamly2D project
+ **  Copyright (C) 2013-2026 Seamly2D project
  **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
  **
  **  Seamly2D is free software: you can redistribute it and/or modify
@@ -37,6 +37,40 @@
 #include <QGraphicsItem>
 #include <QPainter>
 #include <QBuffer>
+#include <QRegularExpression>
+
+namespace
+{
+    //-----------------------------------------------------------------------------
+    /// @brief Turn a piece name into a valid, CSS-selector-safe SVG id fragment.
+    /// @param name raw piece name; may contain spaces, punctuation, or be empty.
+    /// @return name with every run of characters outside [A-Za-z0-9_.-] replaced by
+    ///         '_', stray leading/trailing '_' trimmed, and a leading '_' added when
+    ///         the result would otherwise start with a digit. Empty when nothing
+    ///         sanitizable remains (callers must supply a fallback id in that case).
+    //-----------------------------------------------------------------------------
+    QString sanitizeForId(const QString &name)
+    {
+        QString sanitized = name;
+        sanitized.replace(QRegularExpression(QStringLiteral("[^A-Za-z0-9_.-]+")), QStringLiteral("_"));
+        sanitized.remove(QRegularExpression(QStringLiteral("^_+|_+$")));
+        if (!sanitized.isEmpty() && sanitized.at(0).isDigit())
+        {
+            sanitized.prepend(QLatin1Char('_'));
+        }
+        return sanitized;
+    }
+
+    //-----------------------------------------------------------------------------
+    /// @brief Component types that can repeat per piece, so their id keeps a
+    ///        counter (`<type>_<n>_<name>`) instead of a bare `<type>_<name>`.
+    //-----------------------------------------------------------------------------
+    bool componentIdIsNumbered(const QString &type)
+    {
+        return type == QLatin1String("internal_path") || type == QLatin1String("cut_path")
+            || type == QLatin1String("piece_label") || type == QLatin1String("pattern_label");
+    }
+} // namespace
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
@@ -278,13 +312,17 @@ QDomDocument SvgGenerator::renderSceneToDom(QGraphicsScene *scene)
  * every sibling hidden. Each pass therefore produces exactly one <g> that belongs
  * to one known component, which is tagged with the SVG data-* attributes:
  * data-type, data-type-number (per-type counter within the piece), data-parent
- * (the piece id) and a structured unique id ("<pieceId>-<type>-<n>").
+ * (the piece name) and a name-based id ("<type>_<pieceName>", or
+ * "<type>_<n>_<pieceName>" for types that can repeat per piece). A piece with
+ * no usable name falls back to the legacy "<pieceId>-<type>-<n>" id, and a
+ * name-based id colliding with one already emitted (piece names aren't
+ * guaranteed unique) is disambiguated with the piece's data-type-number.
  *
  * @param scene      scene containing (only) this piece's item tree.
  * @param item       piece root item whose children are the components.
  * @param pieceDoc   DOM document of the piece; receives the component groups.
  * @param pieceGroup piece <g> element the component groups are appended to.
- * @param pieceId    SVG id of the piece group, used to build data-parent and component ids.
+ * @param pieceId    SVG id of the piece group; the id/data-parent fallback when the piece has no name.
  */
 void SvgGenerator::addComponentGroups(QGraphicsScene *scene, QGraphicsItem *item, QDomDocument &pieceDoc,
                                       QDomElement &pieceGroup, const QString &pieceId)
@@ -327,10 +365,29 @@ void SvgGenerator::addComponentGroups(QGraphicsScene *scene, QGraphicsItem *item
             type = QStringLiteral("unknown");
         }
         const int typeNumber = ++typeCounters[type];
-        componentGroup.setAttribute("id", QString("%1-%2-%3").arg(pieceId, type).arg(typeNumber));
+
+        // Name-based id (e.g. "grainline_Sleeve") when the piece has a usable
+        // name; falls back to the legacy numeric id, which is unique by
+        // construction, when it does not. A name-based id that collides with
+        // one already emitted (piece names aren't guaranteed unique — see
+        // data-letter) is disambiguated with the piece's own data-type-number.
+        const QString pieceName = pieceGroup.attribute(QStringLiteral("data-name"));
+        const QString sanitizedName = sanitizeForId(pieceName);
+        QString componentId = sanitizedName.isEmpty()
+            ? QString("%1-%2-%3").arg(pieceId, type).arg(typeNumber)
+            : (componentIdIsNumbered(type)
+                   ? QString("%1_%2_%3").arg(type).arg(typeNumber).arg(sanitizedName)
+                   : QString("%1_%2").arg(type, sanitizedName));
+        if (m_usedIds.contains(componentId))
+        {
+            componentId += QLatin1Char('-') + pieceGroup.attribute(QStringLiteral("data-type-number"));
+        }
+        m_usedIds.insert(componentId);
+
+        componentGroup.setAttribute("id", componentId);
         componentGroup.setAttribute("data-type", type);
         componentGroup.setAttribute("data-type-number", QString::number(typeNumber));
-        componentGroup.setAttribute("data-parent", pieceId);
+        componentGroup.setAttribute("data-parent", pieceName.isEmpty() ? pieceId : pieceName);
 
         pieceGroup.appendChild(pieceDoc.importNode(componentGroup, true));
     }

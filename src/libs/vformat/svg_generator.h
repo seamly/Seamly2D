@@ -9,7 +9,7 @@
  **  @copyright
  **  This source code is part of the Seamly2D project, a pattern making
  **  program, whose allow create and modeling patterns of clothing.
- **  Copyright (C) 2013-2022 Seamly2D project
+ **  Copyright (C) 2013-2026 Seamly2D project
  **  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
  **
  **  Seamly2D is free software: you can redistribute it and/or modify
@@ -32,6 +32,7 @@
 
 #include <QDomDocument>
 #include <QGraphicsScene>
+#include <QSet>
 
 
 class SvgGenerator
@@ -59,6 +60,7 @@ private:
     QString m_description;
     int m_resolution;
     int m_pieceCount;         /**< number of pieces added so far; provides data-type-number for pieces */
+    QSet<QString> m_usedIds;  /**< every component id emitted so far; guards uniqueness across pieces */
 
     QList<QDomDocument> m_domList;
 };

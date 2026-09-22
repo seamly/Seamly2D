@@ -1,0 +1,15 @@
+********* Start testing of TST_SvgComponentTags *********
+Config: Using QtTest library 6.11.1, Qt 6.11.1 (x86_64-little_endian-llp64 shared (dynamic) release build; by MSVC 2022), windows 11
+PASS   : TST_SvgComponentTags::initTestCase()
+PASS   : TST_SvgComponentTags::CutoutTaggedAsCutPath()
+PASS   : TST_SvgComponentTags::ExportedSvgTagsCutPathGroups()
+PASS   : TST_SvgComponentTags::ExportedSvgNamesSeamlineCutlineAndNotchGroups()
+PASS   : TST_SvgComponentTags::PieceNameSanitizedForIdButNotForDataParent()
+FAIL!  : TST_SvgComponentTags::PieceWithNoNameFallsBackToNumericId() Compared values are not the same
+   Actual   (seamlines.at(0).attribute(QStringLiteral("id"))): "seamline_Piece"
+   Expected (QStringLiteral("piece-1-seamline-1"))           : "piece-1-seamline-1"
+.\tst_svgcomponenttags.cpp(336) : failure location
+PASS   : TST_SvgComponentTags::CollidingPieceNamesGetDisambiguatingSuffix()
+PASS   : TST_SvgComponentTags::cleanupTestCase()
+Totals: 7 passed, 1 failed, 0 skipped, 0 blacklisted, 95ms
+********* Finished testing of TST_SvgComponentTags *********

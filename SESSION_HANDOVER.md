@@ -6,55 +6,44 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## 2026-09-21 — SeamlyLayout: pattern piece boxes were oversized on real exports; fixed
+## 2026-09-21 — Seamly2D: tagged component groups renamed to name-based ids (e.g. `grainline_Sleeve`)
 
-Branch `task-seamlylayout-piece-bbox-filter`, committed (`4eb1116b07`), not yet
-merged into `run-seamlyLayout`.
+Branch `task-grainline-name-ids`, off `run-seamlyLayout`. Full write-up moved
+to `project-docs/TODO_COMPLETED.md`. Summary: `SvgGenerator::addComponentGroups()`
+(`src/libs/vformat/svg_generator.cpp`) now builds `<type>_<pieceName>` /
+`<type>_<n>_<pieceName>` component ids instead of `<pieceId>-<type>-<n>`,
+piece names sanitized for XML validity, with a no-name fallback and a
+cross-piece collision suffix. Piece/pattern ids (`piece-<n>`, `pattern-1`)
+are deliberately unchanged. `project-docs/data-docs/SVG-DATA-ATTRIBUTES.md`
+and `NEW-ATTRIBUTES.csv` updated; `TST_SvgComponentTags` extended.
 
-User report: pieces placed in boxes bigger than the piece, on straight-edge
-and curved-edge pieces alike. Root cause: `piece_extractor::is_non_outline_group`
-and `polygon_pack::svg_extract::is_non_outline_group` (the filters that keep
-notch/tuck/grainline/internal_path/drill/hole decoration out of a piece's
-packing box) matched by `id` prefix only (`starts_with("notch")`, etc.). Real
-Seamly2D exports namespace every sibling id with the piece's own id
-(`piece-3-notch-1`), which never starts with the bare word — so the filter
-never matched anything on real files, only on the hand-written test fixtures
-that use bare ids. A stray notch point (or other decoration geometry) far
-outside the cutline dragged the whole piece's bounding box out with it —
-confirmed on the `richmond-shirt-handoff_pieces.svg` fixture, where packed
-boxes were up to ~10x the true cutline size on 7 of 12 real pieces.
+While starting this task, found (and applied) a leftover stash on
+`task-seamlylayout-local-build-scripts` from the *previous* task below: the
+`piece_extractor.rs`/`svg_extract.rs` `data-type`-based fix was already
+merged, but one trivial comment-wording hunk in `svg_extract.rs` was still
+sitting uncommitted in a stash. Folded in; stash dropped.
 
-Fix: both filters now check the `data-type` attribute (`notch`, `tuck`,
-`grainline`, `internal_path`, `drill`, `hole` — what Seamly2D actually sets
-per group) first, falling back to the existing id-prefix check for older
-exports and the existing test fixtures. No production call site changed.
-
-Two new regression tests use the real `piece-<N>-<type>-<M>` id format:
-`piece_extractor::tests::real_id_format_notch_and_internal_path_not_inflated`
-and `svg_extract::tests::find_outline_group_skips_notch_with_real_id_namespacing`.
-Full `cxxqt_bridge` (96) and `polygon_pack` (58) suites pass.
-
-Blind alley investigated and reverted before finding the real cause: tried
-wiring the existing-but-unused NFP-tight polygon placer (`polygon_pack`'s
-`pack_polygons_with_progress`) into the live packing dispatcher, on the
-theory that AABB rectangle packing itself was the regression. It compiled
-and unit-tested fine on toy shapes but took 743s and dropped 5/12 pieces on
-the real richmond-shirt fixture — not production-ready. Fully reverted
-(no trace left on this branch). The project's own
-`seamlylayout_PROCESS LAYOUT WORKFLOW.md` doc confirms AABB/MaxRects is the
-documented, intended packer; that avenue is closed unless someone invests in
-the NFP placer's performance separately.
-
-Next steps: `git merge --no-ff task-seamlylayout-piece-bbox-filter` into
-`run-seamlyLayout`, push with `[skip ci]` (only `.rs` files touched — not on
-the run-full-CI trigger list), delete the task branch.
+Next steps: verify (`packaging\windows\local_build_msi.ps1`), commit, merge
+`--no-ff` into `run-seamlyLayout`, push, delete the task branch.
 
 Not mine, found mid-session and stashed rather than touched: an uncommitted
 edit to `project-docs/seamlylayout-docs/layout-docs/seamlylayout_PROCESS LAYOUT WORKFLOW.md`
 existed on `task-seamlylayout-local-build-scripts` before I started. It's in
-`git stash list` on that branch, unresolved — the user knows and referenced
-its content mid-session, so it may already be intentional; not evaluated
-further here.
+`git stash list` on that branch (`stash@{0}` now, after the drop above),
+unresolved — the user knows and referenced its content mid-session, so it
+may already be intentional; not evaluated further here.
+
+## 2026-09-21 — SeamlyLayout: pattern piece boxes were oversized on real exports; fixed and merged
+
+Branch `task-seamlylayout-piece-bbox-filter`, merged into `run-seamlyLayout`
+(`627d53d921`); task branch deleted. Full write-up in
+`project-docs/TODO_COMPLETED.md`. Summary: `is_non_outline_group()` in both
+`piece_extractor.rs` and `polygon_pack::svg_extract.rs` matched decoration
+groups (notch/tuck/grainline/internal_path/drill/hole) by `id` prefix only,
+which never matches real Seamly2D ids (`piece-3-notch-1`) — only hand-built
+test fixtures. Both now check `data-type` first. Confirmed on
+`richmond-shirt-handoff_pieces.svg`: packed boxes had been up to ~10x the
+true cutline size on 7 of 12 real pieces.
 
 ## 2026-09-20 — Layout Mode canvas flash fixed; GUI "Export Layout" removed (`TODO_REMOVE_DEAD_LAYOUT_CODE.md` Dead.1, build verifying)
 

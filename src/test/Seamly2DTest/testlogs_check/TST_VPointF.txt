@@ -1,0 +1,9 @@
+********* Start testing of TST_VPointF *********
+Config: Using QtTest library 6.11.1, Qt 6.11.1 (x86_64-little_endian-llp64 shared (dynamic) release build; by MSVC 2022), windows 11
+PASS   : TST_VPointF::initTestCase()
+PASS   : TST_VPointF::TestFlip(Vertical axis)
+PASS   : TST_VPointF::TestFlip(Horizontal axis)
+PASS   : TST_VPointF::TestFlip(Diagonal axis)
+PASS   : TST_VPointF::cleanupTestCase()
+Totals: 5 passed, 0 failed, 0 skipped, 0 blacklisted, 2ms
+********* Finished testing of TST_VPointF *********
