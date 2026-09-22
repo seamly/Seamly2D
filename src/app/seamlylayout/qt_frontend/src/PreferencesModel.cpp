@@ -26,9 +26,11 @@
 #include <QStyleFactory>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QListView>
 #include <QProcess>
 #include <QSettings>
 #include <QStandardPaths>
+#include <QTreeView>
 #include <QUrl>
 
 namespace {
@@ -294,6 +296,39 @@ QString migrateLegacyFolderName(const QString &path,
 
     return path;
 } // migrateLegacyFolderName
+
+// @brief Apply Seamly branding to a QFileDialog, including a visible selection highlight.
+// Sets the Seamly violet palette and Fusion style, forces black text on entry/combo/button
+// widgets, and adds an explicit stylesheet rule for the file list so the selected row stays
+// visibly highlighted (Fusion's default selection rendering washes out under this palette,
+// and disappears entirely once the dialog loses focus).
+// @param dlg The file dialog to style, already constructed.
+void applySeamlyFileDialogStyle(QFileDialog &dlg)
+{
+    dlg.setPalette(SeamlyTheme::makeSeamlyPalette());
+    dlg.setStyle(QStyleFactory::create(QStringLiteral("Fusion")));
+
+    for (QLineEdit *le : dlg.findChildren<QLineEdit *>())
+        le->setStyleSheet(QStringLiteral("color: black;"));
+    for (QComboBox *cb : dlg.findChildren<QComboBox *>())
+        cb->setStyleSheet(QStringLiteral("QComboBox { color: black; } QComboBox QAbstractItemView { color: black; }"));
+    for (QPushButton *btn : dlg.findChildren<QPushButton *>())
+        btn->setStyleSheet(QStringLiteral("color: black;"));
+
+    // The file list (QListView) and detail view (QTreeView) must show the selected row with
+    // an explicit stylesheet rule — QPalette::Highlight alone does not survive the dialog
+    // losing focus (e.g. to the viewer app being configured), so ":!active" is set to match.
+    const QString selectionStyle = QStringLiteral(
+        "QListView::item:selected, QTreeView::item:selected,"
+        "QListView::item:selected:!active, QTreeView::item:selected:!active {"
+        "  background-color: #8f65d8;"
+        "  color: #f3f3f3;"
+        "}");
+    for (QListView *view : dlg.findChildren<QListView *>())
+        view->setStyleSheet(selectionStyle);
+    for (QTreeView *view : dlg.findChildren<QTreeView *>())
+        view->setStyleSheet(selectionStyle);
+} // applySeamlyFileDialogStyle
 
 } // namespace
 
@@ -965,17 +1000,9 @@ QString PreferencesModel::getOpenFilePath(const QString &title,
     dlg.setFileMode(QFileDialog::ExistingFile);
     dlg.setDirectory(absDir);
 
-    // Apply Seamly violet palette + Fusion style (per-window, does not affect QML)
-    dlg.setPalette(SeamlyTheme::makeSeamlyPalette());
-    dlg.setStyle(QStyleFactory::create(QStringLiteral("Fusion")));
-
-    // Set black text on input fields, combo boxes, and buttons
-    for (QLineEdit *le : dlg.findChildren<QLineEdit *>())
-        le->setStyleSheet(QStringLiteral("color: black;"));
-    for (QComboBox *cb : dlg.findChildren<QComboBox *>())
-        cb->setStyleSheet(QStringLiteral("QComboBox { color: black; } QComboBox QAbstractItemView { color: black; }"));
-    for (QPushButton *btn : dlg.findChildren<QPushButton *>())
-        btn->setStyleSheet(QStringLiteral("color: black;"));
+    // Apply Seamly violet palette + Fusion style, and a visible selection highlight
+    // (per-window, does not affect QML).
+    applySeamlyFileDialogStyle(dlg);
 
     QString path;
     if (dlg.exec() == QDialog::Accepted) {
@@ -1022,17 +1049,9 @@ QString PreferencesModel::getSaveFilePath(const QString &title,
     if (!defaultName.isEmpty())
         dlg.selectFile(defaultName);
 
-    // Apply Seamly violet palette + Fusion style (per-window, does not affect QML)
-    dlg.setPalette(SeamlyTheme::makeSeamlyPalette());
-    dlg.setStyle(QStyleFactory::create(QStringLiteral("Fusion")));
-
-    // Set black text on input fields, combo boxes, and buttons
-    for (QLineEdit *le : dlg.findChildren<QLineEdit *>())
-        le->setStyleSheet(QStringLiteral("color: black;"));
-    for (QComboBox *cb : dlg.findChildren<QComboBox *>())
-        cb->setStyleSheet(QStringLiteral("QComboBox { color: black; } QComboBox QAbstractItemView { color: black; }"));
-    for (QPushButton *btn : dlg.findChildren<QPushButton *>())
-        btn->setStyleSheet(QStringLiteral("color: black;"));
+    // Apply Seamly violet palette + Fusion style, and a visible selection highlight
+    // (per-window, does not affect QML).
+    applySeamlyFileDialogStyle(dlg);
 
     QString path;
     if (dlg.exec() == QDialog::Accepted) {
