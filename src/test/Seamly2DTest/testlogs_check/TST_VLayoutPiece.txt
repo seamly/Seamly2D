@@ -1,0 +1,7 @@
+********* Start testing of TST_VLayoutPiece *********
+Config: Using QtTest library 6.11.1, Qt 6.11.1 (x86_64-little_endian-llp64 shared (dynamic) release build; by MSVC 2022), windows 11
+PASS   : TST_VLayoutPiece::initTestCase()
+PASS   : TST_VLayoutPiece::RemoveDublicates()
+PASS   : TST_VLayoutPiece::cleanupTestCase()
+Totals: 3 passed, 0 failed, 0 skipped, 0 blacklisted, 2ms
+********* Finished testing of TST_VLayoutPiece *********

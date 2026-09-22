@@ -1,0 +1,26 @@
+********* Start testing of TST_SeamlySuitePaths *********
+Config: Using QtTest library 6.11.1, Qt 6.11.1 (x86_64-little_endian-llp64 shared (dynamic) release build; by MSVC 2022), windows 11
+PASS   : TST_SeamlySuitePaths::initTestCase()
+PASS   : TST_SeamlySuitePaths::EmptyDirectoryFindsNothing()
+PASS   : TST_SeamlySuitePaths::FindsFlatExecutable()
+PASS   : TST_SeamlySuitePaths::FindsSubdirectoryExecutable()
+PASS   : TST_SeamlySuitePaths::FlatLayoutTakesPrecedence()
+PASS   : TST_SeamlySuitePaths::DirectoryNamedLikeExecutableIsIgnored()
+PASS   : TST_SeamlySuitePaths::DevBuildEmptyStartDirectoryFindsNothing()
+PASS   : TST_SeamlySuitePaths::DevBuildNoCheckoutFindsNothing()
+PASS   : TST_SeamlySuitePaths::DevBuildFoundFromReleaseShadowBuild()
+PASS   : TST_SeamlySuitePaths::DevBuildFoundFromDebugShadowBuild()
+PASS   : TST_SeamlySuitePaths::DevBuildReleaseTakesPrecedenceOverDebug()
+PASS   : TST_SeamlySuitePaths::DevBuildFindsDebugWhenReleaseAbsent()
+PASS   : TST_SeamlySuitePaths::DevBuildDirectoryNamedLikeExecutableIsIgnored()
+PASS   : TST_SeamlySuitePaths::DevBuildStopsBeforeUnboundedWalk()
+PASS   : TST_SeamlySuitePaths::DocumentNameIsThePatternBaseName()
+PASS   : TST_SeamlySuitePaths::DocumentNameKeepsDotsInThePatternName()
+PASS   : TST_SeamlySuitePaths::DocumentNameOfEmptyPatternPathIsEmpty()
+PASS   : TST_SeamlySuitePaths::LaunchArgumentsAskForStandardInput()
+PASS   : TST_SeamlySuitePaths::LaunchArgumentsCarryTheDocumentName()
+PASS   : TST_SeamlySuitePaths::LaunchArgumentsOmitAnEmptyDocumentName()
+PASS   : TST_SeamlySuitePaths::LaunchArgumentsNameNoFile()
+PASS   : TST_SeamlySuitePaths::cleanupTestCase()
+Totals: 22 passed, 0 failed, 0 skipped, 0 blacklisted, 103ms
+********* Finished testing of TST_SeamlySuitePaths *********

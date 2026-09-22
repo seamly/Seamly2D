@@ -1,0 +1,22 @@
+********* Start testing of TST_FindPoint *********
+Config: Using QtTest library 6.11.1, Qt 6.11.1 (x86_64-little_endian-llp64 shared (dynamic) release build; by MSVC 2022), windows 11
+PASS   : TST_FindPoint::initTestCase()
+PASS   : TST_FindPoint::TestPointOfIntersectionCurves(Empty lists of points)
+PASS   : TST_FindPoint::TestPointOfIntersectionCurves(No intersections)
+PASS   : TST_FindPoint::TestPointOfIntersectionCurves(One intersection point)
+PASS   : TST_FindPoint::TestPointOfIntersectionCurves(Two intersection points (highest point, leftmost point))
+PASS   : TST_FindPoint::TestPointOfIntersectionCurves(Two intersection points (highest point, rightmost point))
+PASS   : TST_FindPoint::TestPointOfIntersectionCurves(Two intersection points (lowest point, leftmost point))
+PASS   : TST_FindPoint::TestPointOfIntersectionCurves(Two intersection points (lowest point, rightmost point))
+PASS   : TST_FindPoint::TestPointOfIntersectionCurves(Two intersection points (leftmost point, highest point))
+PASS   : TST_FindPoint::TestPointOfIntersectionCurves(Two intersection points (leftmost point, lowest point))
+PASS   : TST_FindPoint::TestPointOfIntersectionCurves(Two intersection points (rightmost point, highest point))
+PASS   : TST_FindPoint::TestPointOfIntersectionCurves(Two intersection points (rightmost point, lowest point))
+PASS   : TST_FindPoint::TestTrueDarts(Real case)
+PASS   : TST_FindPoint::TestLineIntersectAxis(Parallel lines)
+PASS   : TST_FindPoint::TestTriangle(Parallel lines)
+PASS   : TST_FindPoint::TestShoulderPoint(Value found)
+PASS   : TST_FindPoint::TestShoulderPoint(Value not found)
+PASS   : TST_FindPoint::cleanupTestCase()
+Totals: 18 passed, 0 failed, 0 skipped, 0 blacklisted, 2ms
+********* Finished testing of TST_FindPoint *********

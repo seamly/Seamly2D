@@ -5,7 +5,8 @@
  **
  **  @brief
  **  Unit tests for the SVG component data-type tagging of piece items
- **  (internal_path vs cut_path).
+ **  (internal_path vs cut_path) and for the name-based component id scheme
+ **  (SvgGenerator::addComponentGroups()).
  **
  **  @copyright
  **  This source code is part of the Seamly2D project, a pattern making
@@ -36,7 +37,9 @@
 /**
  * @brief TST_SvgComponentTags tests the SVG data-type tagging contract of the
  * piece component item tree (VLayoutPiece::GetItem()) and of the tagged SVG
- * produced by SvgGenerator, with focus on the internal_path / cut_path split.
+ * produced by SvgGenerator: the internal_path / cut_path split, the
+ * name-based component id scheme, and its piece-name sanitization,
+ * no-name fallback, and cross-piece collision handling.
  */
 class TST_SvgComponentTags : public QObject
 {
@@ -47,6 +50,10 @@ public:
 private slots:
     void CutoutTaggedAsCutPath() const;
     void ExportedSvgTagsCutPathGroups() const;
+    void ExportedSvgNamesSeamlineCutlineAndNotchGroups() const;
+    void PieceNameSanitizedForIdButNotForDataParent() const;
+    void PieceWithNoNameFallsBackToNumericId() const;
+    void CollidingPieceNamesGetDisambiguatingSuffix() const;
 };
 
 #endif // TST_SVGCOMPONENTTAGS_H

@@ -1,0 +1,8 @@
+********* Start testing of TST_VPoster *********
+Config: Using QtTest library 6.11.1, Qt 6.11.1 (x86_64-little_endian-llp64 shared (dynamic) release build; by MSVC 2022), windows 11
+PASS   : TST_VPoster::initTestCase()
+PASS   : TST_VPoster::BigPoster()
+PASS   : TST_VPoster::SmallPoster()
+PASS   : TST_VPoster::cleanupTestCase()
+Totals: 4 passed, 0 failed, 0 skipped, 0 blacklisted, 562ms
+********* Finished testing of TST_VPoster *********

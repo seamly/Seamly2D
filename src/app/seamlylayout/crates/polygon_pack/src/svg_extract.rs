@@ -549,7 +549,7 @@ mod tests {
             "AABB too small ({dx:.2}×{dy:.2}) — real-id-format notch may have been selected instead of seamline");
     } // find_outline_group_skips_notch_with_real_id_namespacing
 
-    // @brief Resolve a workspace-relative fixture path from the crate root.
+    // @brief Resolve a repo-root-relative fixture path from the crate root.
     fn fixture_path(rel: &str) -> std::path::PathBuf {
         std::path::Path::new(env!("CARGO_MANIFEST_DIR"))
             .join("..").join("..")

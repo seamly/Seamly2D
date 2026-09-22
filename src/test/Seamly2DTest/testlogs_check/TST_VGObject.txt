@@ -1,0 +1,19 @@
+********* Start testing of TST_VGObject *********
+Config: Using QtTest library 6.11.1, Qt 6.11.1 (x86_64-little_endian-llp64 shared (dynamic) release build; by MSVC 2022), windows 11
+PASS   : TST_VGObject::initTestCase()
+PASS   : TST_VGObject::TestIsPointOnLineviaPDP(Point is on line, but not on segment.)
+PASS   : TST_VGObject::TestIsPointOnLineviaPDP(Point is on segment. On middle.)
+PASS   : TST_VGObject::TestIsPointOnLineviaPDP(Point is on segment. The end of segment.)
+PASS   : TST_VGObject::TestIsPointOnLineviaPDP(Min accuracy gap. On middle.)
+PASS   : TST_VGObject::TestIsPointOnLineviaPDP(Min accuracy gap. The end of segment.)
+PASS   : TST_VGObject::TestIsPointOnLineviaPDP(Min accuracy gap + 1%. On middle.)
+PASS   : TST_VGObject::TestIsPointOnLineviaPDP(Min accuracy gap + 1%. The end of segment.)
+PASS   : TST_VGObject::TestIsPointOnLineviaPDP(Less than min accuracy gap. On middle.)
+PASS   : TST_VGObject::TestIsPointOnLineviaPDP(Less than min accuracy gap. The end of segment.)
+PASS   : TST_VGObject::TestIsPointOnLineviaPDP(Issue 534 - 3 cm gap. On middle.)
+PASS   : TST_VGObject::TestIsPointOnLineviaPDP(Issue 534 - 3 cm gap. The end of segment.)
+PASS   : TST_VGObject::TestIsPointOnLineviaPDP(Issue 534 - 2 cm gap. On middle.)
+PASS   : TST_VGObject::TestIsPointOnLineviaPDP(Issue 534 - 2 cm gap. The end of segment.)
+PASS   : TST_VGObject::cleanupTestCase()
+Totals: 15 passed, 0 failed, 0 skipped, 0 blacklisted, 2ms
+********* Finished testing of TST_VGObject *********
