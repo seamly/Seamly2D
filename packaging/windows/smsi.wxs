@@ -53,6 +53,37 @@
     <!-- Single embedded cab: one self-contained .msi file. -->
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
 
+    <!-- ================= close running instances ========================= -->
+    <!-- Install, upgrade, repair, and uninstall all need each app's files
+         unlocked. WixCloseApplications sends WM_CLOSE to a running target
+         first, and only force-terminates a process that ignores it.
+         PromptToContinue="yes" warns the user before that happens, so a CAD
+         app holding unsaved pattern or measurement data is not force-closed
+         without notice. ElevatedCloseMessage="yes" is required because
+         msiexec itself runs elevated and needs it to reach a non-elevated
+         app's windows. -->
+    <util:CloseApplication Id="CloseSeamly2D"
+                           Target="seamly2d.exe"
+                           Description="Seamly2D is running. Setup will close it to continue."
+                           CloseMessage="yes"
+                           ElevatedCloseMessage="yes"
+                           RebootPrompt="no"
+                           PromptToContinue="yes" />
+    <util:CloseApplication Id="CloseSeamlyMe"
+                           Target="seamlyme.exe"
+                           Description="SeamlyMe is running. Setup will close it to continue."
+                           CloseMessage="yes"
+                           ElevatedCloseMessage="yes"
+                           RebootPrompt="no"
+                           PromptToContinue="yes" />
+    <util:CloseApplication Id="CloseSeamlyLayout"
+                           Target="SeamlyLayout.exe"
+                           Description="SeamlyLayout is running. Setup will close it to continue."
+                           CloseMessage="yes"
+                           ElevatedCloseMessage="yes"
+                           RebootPrompt="no"
+                           PromptToContinue="yes" />
+
     <!-- Icons for shortcuts and Apps &amp; Features. MSI requires Icon table
          ids used by advertised shortcuts to carry the matching extension, so
          each Id is the icon's own file name — and each Id must be UNIQUE and
