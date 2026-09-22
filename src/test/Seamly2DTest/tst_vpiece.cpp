@@ -275,3 +275,74 @@ void TST_VPiece::Issue620()
     // Begin comparison
     Comparison(pointsEkv, origPoints);
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::AutoNameFirstUnnamedPiece()
+{
+    const Unit unit = Unit::Cm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+
+    VPiece piece;
+    const quint32 id = data->AddPiece(piece);
+
+    QCOMPARE(data->GetPiece(id).GetName(), QStringLiteral("Piece 1"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::AutoNameSecondUnnamedPiece()
+{
+    const Unit unit = Unit::Cm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+
+    data->AddPiece(VPiece());
+    const quint32 secondId = data->AddPiece(VPiece());
+
+    QCOMPARE(data->GetPiece(secondId).GetName(), QStringLiteral("Piece 2"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::KeepExplicitPieceName()
+{
+    const Unit unit = Unit::Cm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+
+    VPiece piece;
+    piece.SetName(QStringLiteral("Bodice Front"));
+    const quint32 id = data->AddPiece(piece);
+
+    QCOMPARE(data->GetPiece(id).GetName(), QStringLiteral("Bodice Front"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::AutoNameAvoidsNumberStillInUse()
+{
+    const Unit unit = Unit::Cm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+
+    const quint32 firstId = data->AddPiece(VPiece());
+    data->AddPiece(VPiece());
+    data->RemovePiece(firstId);
+
+    const quint32 thirdId = data->AddPiece(VPiece());
+
+    // "Piece 1" was removed, but "Piece 2" is still in use, so the next
+    // fallback name must not collide with it.
+    QCOMPARE(data->GetPiece(thirdId).GetName(), QStringLiteral("Piece 3"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::AutoNameReusesNumberFreedByDeletion()
+{
+    const Unit unit = Unit::Cm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+
+    data->AddPiece(VPiece());
+    const quint32 secondId = data->AddPiece(VPiece());
+    data->RemovePiece(secondId);
+
+    const quint32 thirdId = data->AddPiece(VPiece());
+
+    // Numbering is derived from names currently in the container, not a
+    // running total, so a number freed by deletion is available again.
+    QCOMPARE(data->GetPiece(thirdId).GetName(), QStringLiteral("Piece 2"));
+}

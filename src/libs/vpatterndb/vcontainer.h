@@ -48,6 +48,30 @@
 //  along with Valentina.  If not, see <http://www.gnu.org/licenses/>.
 //---------------------------------------------------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------------------------------------------------
+//  @file   vcontainer.h
+//  @author slspencer
+//  @date   21 Sep, 2026
+//
+//  @copyright
+//  Copyright (C) 2026 Seamly2D Project
+//  https://github.com/fashionfreedom/seamly2d
+//
+//  @brief
+//  Seamly2D is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//
+//  Seamly2D is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//
+//  You should have received a copy of the GNU General Public License
+//  along with Seamly2D. If not, see <http://www.gnu.org/licenses/>.
+//---------------------------------------------------------------------------------------------------------------------
+
 #ifndef VCONTAINER_H
 #define VCONTAINER_H
 
@@ -357,6 +381,7 @@ private:
     QSharedDataPointer<VContainerData> d;
 
     void AddCurve(const QSharedPointer<VAbstractCurve> &curve, const quint32 &id, quint32 parentId = NULL_ID);
+    QString NextPieceName() const;
 
     template <class T>
     uint qHash( const QSharedPointer<T> &p );

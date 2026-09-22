@@ -6,6 +6,49 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-21 — Seamly2D: unnamed pieces now get a unique "Piece N" fallback name
+
+Branch `task-piece-auto-name`, built and `nmake check`-verified (MSI OK),
+ready to merge into `run-seamlyLayout`.
+
+User report: a piece with no explicit `SetName()` call isn't blank — it
+defaults to the literal, non-unique `"Piece"` (`VAbstractPieceData` default,
+`src/libs/vlayout/vabstractpiece_p.h:70`). Two such pieces are
+indistinguishable in the pieces list, layout export, and labels.
+
+Traced every way a `VPiece` enters a document: `VContainer::AddPiece()`
+(`src/libs/vpatterndb/vcontainer.cpp`) is the only chokepoint hit for a
+genuinely new piece — file load and undo/redo replay always go through
+`Source::FromFile` / `UpdatePiece()`, never `AddPiece()`. Fix: `AddPiece()`
+now detects an empty or still-default name and assigns `"Piece N"`, where N
+is one more than the highest `"Piece <n>"` number currently in the
+container (scanned via `NextPieceName()`, not a persisted counter — a full
+re-parse rebuilds `VContainer` from scratch, so a counter field would reset
+mid-session). Numbering is derived from names currently present, so a
+number freed by deleting a piece is available again; it does not collide
+with a number still in use.
+
+Four new `TST_VPiece` cases in `src/test/Seamly2DTest/tst_vpiece.cpp` cover:
+first/second auto-named piece, an explicit name staying untouched, avoiding
+a number still in use, and reusing a number freed by deletion.
+
+Not mine, found mid-session and stashed rather than touched: uncommitted
+work-in-progress on `task-grainline-name-ids` (the branch this session
+started on) — `SESSION_HANDOVER.md`, `Info.plist` (macOS x2),
+`TODO_COMPLETED.md`, `NEW-ATTRIBUTES.csv`, `SVG-DATA-ATTRIBUTES.md`,
+`svg_extract.rs`, `male_shirt.sm2d`, `svg_generator.cpp/.h`,
+`projectversion.cpp/.h`, `tst_svgcomponenttags.cpp/.h`, plus an untracked
+`src/test/Seamly2DTest/testlogs_check/` directory. Stashed as `stash@{0}`
+("WIP task-grainline-name-ids before starting task-piece-auto-name") on top
+of the pre-existing, also-unresolved `stash@{1}` from
+`task-seamlylayout-tight-packing`. Neither stash was touched or evaluated
+further — restore with `git stash pop` on `task-grainline-name-ids` to
+resume that work.
+
+Next steps: `git merge --no-ff task-piece-auto-name` into `run-seamlyLayout`,
+push with `[skip ci]` (only `src/libs` and `src/test` C++ touched — not on
+the run-full-CI trigger list), delete the task branch.
+
 ## 2026-09-21 — SeamlyLayout: pattern piece boxes were oversized on real exports; fixed
 
 Branch `task-seamlylayout-piece-bbox-filter`, committed (`4eb1116b07`), not yet
