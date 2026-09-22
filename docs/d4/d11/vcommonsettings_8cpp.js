@@ -2,10 +2,8 @@ var vcommonsettings_8cpp =
 [
     [ "ClearFormats", "d4/d11/vcommonsettings_8cpp.html#ad33f2f0b5106c172dee047d0af12ebc6", null ],
     [ "PrepareStandardFiles", "d4/d11/vcommonsettings_8cpp.html#a3abe77374f88330d2dce8aa3fc77479c", null ],
-    [ "readDataRoot", "d4/d11/vcommonsettings_8cpp.html#a208659b4f4fef7ab8a1cb8c5eea94a10", null ],
     [ "SymlinkCopyDirRecursive", "d4/d11/vcommonsettings_8cpp.html#a8dd613aa76590f88f4a60fee8b89ae13", null ],
     [ "commonIniFilename", "d4/d11/vcommonsettings_8cpp.html#a9474e9c5c20683cf4a411eb51f84f3da", null ],
-    [ "commonSettingsBaseDirOverride", "d4/d11/vcommonsettings_8cpp.html#a3295063fe877a3e18073b9ba00f3f75b", null ],
     [ "pointNameSize", "d4/d11/vcommonsettings_8cpp.html#a7136b7a2ed9ead08f0f849054160457b", null ],
     [ "settingBackupPath", "d4/d11/vcommonsettings_8cpp.html#a33d50aa96456f560a5ac1845a77a682c", null ],
     [ "settingConfigurationAddress", "d4/d11/vcommonsettings_8cpp.html#a7308b7a66e0e6d69b9b7aab47d4253d3", null ],
@@ -135,7 +133,6 @@ var vcommonsettings_8cpp =
     [ "settingLabelUserTimeFormats", "d4/d11/vcommonsettings_8cpp.html#a963422ce8f013135de5d22a96c0ef172", null ],
     [ "settingLatestSkippedVersion", "d4/d11/vcommonsettings_8cpp.html#a057fa48d101cde9aa147dd59534486e8", null ],
     [ "settingPathsBodyScans", "d4/d11/vcommonsettings_8cpp.html#ade216e15a69dff3a6e8c9786c180d592", null ],
-    [ "settingPathsDataRoot", "d4/d11/vcommonsettings_8cpp.html#a8db1bb6eaf2ed89b9f9ebe4710fcd21b", null ],
     [ "settingPathsIndividualMeasurements", "d4/d11/vcommonsettings_8cpp.html#a2637561a27c415fd5d43d96cc585ba2e", null ],
     [ "settingPathsLabelTemplate", "d4/d11/vcommonsettings_8cpp.html#acfd4254aeddc1d40c0425558b4f0b42f", null ],
     [ "settingPathsMultisizeMeasurements", "d4/d11/vcommonsettings_8cpp.html#a71547d95fb3ded7735c8d75fda092ad2", null ],
