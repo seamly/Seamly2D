@@ -808,9 +808,29 @@ void PatternPieceDialog::pieceNameChanged()
         }
         else
         {
-            flagName = true;
-            ChangeColor(ui->editName_Label, okColor);
-            clearErrorText(TabOrder::Properties, tr("Properties "));
+            bool duplicate = false;
+            const QHash<quint32, VPiece> *pieces = data->DataPieces();
+            for (auto it = pieces->constBegin(); it != pieces->constEnd(); ++it)
+            {
+                if (it.key() != toolId && it.value().GetName() == name->text())
+                {
+                    duplicate = true;
+                    break;
+                }
+            }
+
+            if (duplicate)
+            {
+                flagName = false;
+                ChangeColor(ui->editName_Label, Qt::red);
+                setErrorText(TabOrder::Properties, tr("Properties"));
+            }
+            else
+            {
+                flagName = true;
+                ChangeColor(ui->editName_Label, okColor);
+                clearErrorText(TabOrder::Properties, tr("Properties "));
+            }
         }
     }
     CheckState();

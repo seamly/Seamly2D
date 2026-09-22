@@ -61,6 +61,7 @@ private:
     int m_resolution;
     int m_pieceCount;         /**< number of pieces added so far; provides data-type-number for pieces */
     QSet<QString> m_usedIds;  /**< every component id emitted so far; guards uniqueness across pieces */
+    QSet<QString> m_usedPieceIds; /**< every piece id emitted so far; guards uniqueness across pieces */
 
     QList<QDomDocument> m_domList;
 };

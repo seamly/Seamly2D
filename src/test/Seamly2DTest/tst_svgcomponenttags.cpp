@@ -338,16 +338,39 @@ void TST_SvgComponentTags::PieceWithNoNameFallsBackToNumericId() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief NamedPieceGetsNameBasedId checks that the piece's own <g> id follows
+ * the same name-based scheme as its components ("piece_<pieceName>"), not
+ * the legacy numeric "piece-<n>" form.
+ */
+void TST_SvgComponentTags::NamedPieceGetsNameBasedId() const
+{
+    const QDomDocument doc = exportPieceSvg(makeTestPiece(QStringLiteral("Yoke")));
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+
+    const QVector<QDomElement> pieces = groupsOfType(doc, QStringLiteral("piece"));
+    QCOMPARE(pieces.size(), 1);
+    QCOMPARE(pieces.at(0).attribute(QStringLiteral("id")), QStringLiteral("piece_Yoke"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief CollidingPieceNamesGetDisambiguatingSuffix checks that two pieces
  * sharing a name (piece names aren't guaranteed unique; data-letter is the
  * user-facing disambiguator) still get unique, XML-valid ids: the second
- * occurrence's id is suffixed with its own piece data-type-number.
+ * occurrence's id is suffixed with its own piece data-type-number, for both
+ * the piece's own <g> id and its components' ids.
  */
 void TST_SvgComponentTags::CollidingPieceNamesGetDisambiguatingSuffix() const
 {
     const QDomDocument doc = exportTwoPiecesSvg(makeTestPiece(QStringLiteral("Facing")),
                                                  makeTestPiece(QStringLiteral("Facing")));
     QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+
+    // Piece ids themselves get the same collision suffix as component ids.
+    const QVector<QDomElement> pieces = groupsOfType(doc, QStringLiteral("piece"));
+    QCOMPARE(pieces.size(), 2);
+    QCOMPARE(pieces.at(0).attribute(QStringLiteral("id")), QStringLiteral("piece_Facing"));
+    QCOMPARE(pieces.at(1).attribute(QStringLiteral("id")), QStringLiteral("piece_Facing-2"));
 
     const QVector<QDomElement> seamlines = groupsOfType(doc, QStringLiteral("seamline"));
     QCOMPARE(seamlines.size(), 2);

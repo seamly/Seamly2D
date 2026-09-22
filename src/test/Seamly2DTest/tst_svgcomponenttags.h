@@ -38,8 +38,8 @@
  * @brief TST_SvgComponentTags tests the SVG data-type tagging contract of the
  * piece component item tree (VLayoutPiece::GetItem()) and of the tagged SVG
  * produced by SvgGenerator: the internal_path / cut_path split, the
- * name-based component id scheme, and its piece-name sanitization,
- * no-name fallback, and cross-piece collision handling.
+ * name-based piece and component id schemes, and their piece-name
+ * sanitization, no-name fallback, and cross-piece collision handling.
  */
 class TST_SvgComponentTags : public QObject
 {
@@ -53,6 +53,7 @@ private slots:
     void ExportedSvgNamesSeamlineCutlineAndNotchGroups() const;
     void PieceNameSanitizedForIdButNotForDataParent() const;
     void PieceWithNoNameFallsBackToNumericId() const;
+    void NamedPieceGetsNameBasedId() const;
     void CollidingPieceNamesGetDisambiguatingSuffix() const;
 };
 

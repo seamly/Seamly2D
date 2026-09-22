@@ -426,7 +426,7 @@ void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item)
         return;
     }
 
-    // One piece: build "<g id='piece-<n>' data-type='piece' ...>" holding one tagged group per component.
+    // One piece: build "<g id='piece_<name>' data-type='piece' ...>" holding one tagged group per component.
     ++m_pieceCount;
     const QString pieceId = QString("piece-%1").arg(m_pieceCount);
 
@@ -445,12 +445,28 @@ void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item)
         rootGroups.at(0).parentNode().removeChild(rootGroups.at(0));
     }
 
+    // Name-based id (e.g. "piece_Yoke") when the piece has a usable name;
+    // falls back to the legacy numeric pieceId, which is unique by
+    // construction, when it does not. A name-based id that collides with
+    // one already emitted (piece names aren't guaranteed unique — see
+    // data-letter) is disambiguated with the piece's own data-type-number.
+    const QString pieceName = item->data(PieceItemData::ObjectName).toString();
+    const QString sanitizedPieceName = sanitizeForId(pieceName);
+    QString svgPieceId = sanitizedPieceName.isEmpty()
+        ? pieceId
+        : QStringLiteral("piece_%1").arg(sanitizedPieceName);
+    if (m_usedPieceIds.contains(svgPieceId))
+    {
+        svgPieceId += QLatin1Char('-') + QString::number(m_pieceCount);
+    }
+    m_usedPieceIds.insert(svgPieceId);
+
     QDomElement pieceGroup = pieceDoc.createElement("g");
-    pieceGroup.setAttribute("id", pieceId);
+    pieceGroup.setAttribute("id", svgPieceId);
     pieceGroup.setAttribute("data-type", "piece");
     pieceGroup.setAttribute("data-type-number", QString::number(m_pieceCount));
     pieceGroup.setAttribute("data-parent", "pattern-1");
-    setAttribute(pieceGroup, "data-name", item->data(PieceItemData::ObjectName).toString());
+    setAttribute(pieceGroup, "data-name", pieceName);
     setAttribute(pieceGroup, "data-letter", item->data(PieceItemData::PieceLetter).toString());
     svgRoot.appendChild(pieceGroup);
 

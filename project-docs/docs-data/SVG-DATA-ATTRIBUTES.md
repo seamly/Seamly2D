@@ -38,8 +38,9 @@ The handoff in (1) is a process launch, and both halves of it are pinned by test
 ```xml
 <svg width="..." height="..." viewBox="..." xmlns="http://www.w3.org/2000/svg" ...>
   <g id="pattern-1" data-type="pattern" data-type-number="1" data-name="Pattern Name">
-    <g id="piece-1" data-type="piece" data-type-number="1" data-parent="pattern-1"
+    <g id="piece_Front_Bodice" data-type="piece" data-type-number="1" data-parent="pattern-1"
        data-name="Front Bodice" data-letter="A">
+      <rect class="piece-fill" id="rect_Front_Bodice" .../>
       <g id="seamline_Front_Bodice" data-type="seamline" data-type-number="1" data-parent="Front Bodice">…</g>
       <g id="cutline_Front_Bodice"  data-type="cutline"  data-type-number="1" data-parent="Front Bodice">…</g>
       <g id="notch_Front_Bodice"    data-type="notch"    data-type-number="1" data-parent="Front Bodice">…</g>
@@ -49,10 +50,15 @@ The handoff in (1) is a process launch, and both halves of it are pinned by test
       <g id="piece_label_1_Front_Bodice"   data-type="piece_label"   data-type-number="1" data-parent="Front Bodice">…</g>
       <g id="pattern_label_1_Front_Bodice" data-type="pattern_label" data-type-number="1" data-parent="Front Bodice">…</g>
     </g>
-    <g id="piece-2" data-type="piece" data-type-number="2" data-parent="pattern-1" data-name="Back Bodice">…</g>
+    <g id="piece_Back_Bodice" data-type="piece" data-type-number="2" data-parent="pattern-1" data-name="Back Bodice">…</g>
   </g>
 </svg>
 ```
+
+The `piece-fill` `<rect>` is not part of the C++ handoff — SeamlyLayout inserts it as the
+first child of each piece group when it places the piece into a layout sheet
+(`layout_assembler.rs::create_layout()`). Its `id` mirrors the piece's own id
+(`rect_<name-or-n>`), derived from the piece group's `id` at insertion time.
 
 ## Attributes
 
@@ -60,19 +66,21 @@ The handoff in (1) is a process launch, and both halves of it are pinned by test
 |---|---|---|
 | `data-type` | every tagged `<g>` | One of `pattern`, `piece`, `seamline`, `cutline`, `internal_path`, `cut_path`, `grainline`, `notch`, `piece_label`, `pattern_label`. More types may be added later; consumers must ignore unknown types gracefully. |
 | `data-type-number` | every tagged `<g>` | Per-scope 1-based counter for that `data-type`. The pattern is always `1`; pieces count up across the file; component counters reset per piece and per type. |
-| `data-parent` | `piece` and component groups | For a piece: the pattern group's `id` (`pattern-1`). For a component: the owning piece's `data-name` (e.g. `Front Bodice`), or the piece's `id` (e.g. `piece-3`) when the piece has no name. The pattern group has no `data-parent` (it is the root). Not read by any SeamlyLayout code today — true parent/child identity is the DOM nesting — so this is a documentation-level cross-reference, not a lookup key. |
+| `data-parent` | `piece` and component groups | For a piece: the pattern group's `id` (`pattern-1`). For a component: the owning piece's `data-name` (e.g. `Front Bodice`), or the piece's numeric fallback `id` (e.g. `piece-3`) when the piece has no name. The pattern group has no `data-parent` (it is the root). Not read by any SeamlyLayout code today — true parent/child identity is the DOM nesting — so this is a documentation-level cross-reference, not a lookup key. |
 | `data-name` | `pattern`, `piece` | Pattern name, or piece name. Omitted when empty. |
 | `data-letter` | `piece` | The piece letter, only when one is set on the piece. |
 
 ## `id` scheme
 
 - Pattern: `pattern-1` (one pattern per file).
-- Piece *n*: `piece-<n>` (n = `data-type-number` of the piece). **Deliberately not name-based** — piece names aren't guaranteed unique (`data-letter` is the disambiguator for that), and a prior version of this contract used the raw name as the piece `id` and had to revert it for exactly that reason.
+- Piece *n*: `piece_<pieceName>` (e.g. `piece_Front_Bodice`) when the piece has a usable name. Falls back to the legacy numeric `piece-<n>` (n = `data-type-number` of the piece) when the name is empty or entirely non-sanitizable. Piece names are not guaranteed unique by the SVG format itself (`data-letter` is a separate disambiguator), so a name collision between two pieces gets the later piece's `data-type-number` appended (e.g. `piece_Facing-2`) to stay unique — see **Name collision** below.
+  - **This id was name-based once before and was reverted** for exactly the uniqueness reason above. It is safe to reintroduce now because Seamly2D's Piece Properties dialog (`PatternPieceDialog::pieceNameChanged()`) blocks entering a piece name already used by another piece in the same pattern — the collision suffix here is defense in depth, not the primary guard.
+- `piece-fill` `<rect>` (SeamlyLayout-side, not part of the C++ handoff): `rect_<pieceName>` or `rect-<n>`, mirroring whichever form the piece's own `id` took.
 - Component, one per piece today (`seamline`, `cutline`, `grainline`, `notch`): `<type>_<pieceName>` (e.g. `grainline_Front_Bodice`).
 - Component, can repeat per piece (`internal_path`, `cut_path`, `piece_label`, `pattern_label`): `<type>_<m>_<pieceName>` (e.g. `internal_path_3_Front_Bodice`), where *m* is that type's counter within the piece.
 - `pieceName` is the piece's `data-name`, sanitized to a valid XML id: every run of characters outside `[A-Za-z0-9_.-]` becomes `_`, and a leading digit gets a `_` prefix (e.g. piece name `2" Front/Bodice` → id fragment `_2_Front_Bodice`).
 - **No usable piece name** (empty or entirely non-sanitizable) — the component falls back to the legacy `<pieceId>-<type>-<m>` id (e.g. `piece-3-seamline-1`), which is unique by construction.
-- **Name collision** — two pieces sharing a (sanitized) name would otherwise produce colliding component ids; the later one gets its piece's `data-type-number` appended (e.g. `grainline_Facing-2`) to stay unique.
+- **Name collision** — two pieces sharing a (sanitized) name would otherwise produce colliding ids; the later one gets its piece's `data-type-number` appended (e.g. `grainline_Facing-2`, `piece_Facing-2`) to stay unique.
 
 All ids are unique and XML-valid by construction. **Breaking change vs. pre-contract exports:** the piece `id` was previously the raw piece name; the name now lives in `data-name`. Component ids changed again from the counter-based `<pieceId>-<type>-<m>` scheme to the name-based scheme above; SeamlyLayout's decoration-exclusion matchers (`is_non_outline_group()` in `piece_extractor.rs` and `svg_extract.rs`) already recognize both forms via a `data-type` exact-match check, so this is not a breaking change for that consumer.
 
