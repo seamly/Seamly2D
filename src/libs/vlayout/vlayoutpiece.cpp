@@ -1393,6 +1393,11 @@ void VLayoutPiece::createAllowanceItem(QGraphicsItem *parent) const
  */
 void VLayoutPiece::createNotchesItem(QGraphicsItem *parent) const
 {
+    if (getNotches().isEmpty())
+    {
+        return;
+    }
+
     QColor color      = QColor(qApp->Settings()->getDefaultNotchColor());
     qreal  lineWeight = ToPixel(qApp->Settings()->getDefaultCutLineweight(), Unit::Mm);
 

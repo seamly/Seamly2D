@@ -8,3 +8,4 @@ seamly2d:
 seamlylayout:
 - DONE - Export to SVG incorrectly retains the "Rectangles" group <g id="Rectangles"> and the <rect> element withing rectangle within each pattern piece. 
 - DONE - Fix: View's file picker doesn't highlight the selected file - it's unclear which file is being selected. It should highlight the file currently selected. 
+- DONE - Fix: Adjust mode displays the piece overlays but not the pieces. 

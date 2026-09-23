@@ -38,9 +38,12 @@
 #include <QDomDocument>
 #include <QDomElement>
 #include <QGraphicsItem>
+#include <QGraphicsPathItem>
 #include <QGraphicsRectItem>
 #include <QGraphicsScene>
 #include <QLineF>
+#include <QPainterPath>
+#include <QPen>
 #include <QScopedPointer>
 #include <QTemporaryDir>
 
@@ -107,22 +110,22 @@ VLayoutPiece makeTestPiece(const QString &name = QStringLiteral("Test Piece"))
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief exportPieceSvg renders a piece through the real export pipeline
- * (SvgGenerator) into a temporary file and parses the result back.
- * @param piece piece to export.
+ * @brief exportItemSvg renders a piece item tree through the real export
+ * pipeline (SvgGenerator) into a temporary file and parses the result back.
+ * @param item piece root item; the function takes ownership.
  * @return the parsed SVG document; null if export or parsing failed.
  */
-QDomDocument exportPieceSvg(const VLayoutPiece &piece)
+QDomDocument exportItemSvg(QGraphicsItem *item)
 {
     QTemporaryDir tempDir;
     if (!tempDir.isValid())
     {
+        delete item;
         return QDomDocument();
     }
     const QString filePath = tempDir.filePath(QStringLiteral("component_tags.svg"));
 
     QGraphicsScene scene;
-    QGraphicsItem *item = piece.GetItem(true);
     scene.addItem(item); // scene takes ownership
 
     QGraphicsRectItem paper(QRectF(0, 0, 400, 400));
@@ -137,6 +140,17 @@ QDomDocument exportPieceSvg(const VLayoutPiece &piece)
         doc.setContent(&file);
     }
     return doc;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief exportPieceSvg renders a piece through the real export pipeline.
+ * @param piece piece to export.
+ * @return the parsed SVG document; null if export or parsing failed.
+ */
+QDomDocument exportPieceSvg(const VLayoutPiece &piece)
+{
+    return exportItemSvg(piece.GetItem(true));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -380,4 +394,51 @@ void TST_SvgComponentTags::CollidingPieceNamesGetDisambiguatingSuffix() const
     // data-parent, is the user-facing disambiguator for same-named pieces.
     QCOMPARE(seamlines.at(0).attribute(QStringLiteral("data-parent")), QStringLiteral("Facing"));
     QCOMPARE(seamlines.at(1).attribute(QStringLiteral("data-parent")), QStringLiteral("Facing"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PieceWithoutNotchesEmitsNoNotchGroup checks that a piece without
+ * notches gets no notch item and no notch group, also when the piece is
+ * moved away from the scene origin.
+ */
+void TST_SvgComponentTags::PieceWithoutNotchesEmitsNoNotchGroup() const
+{
+    VLayoutPiece piece = makeTestPiece(QStringLiteral("Front"));
+    piece.setNotches({});
+
+    QGraphicsItem *item = piece.GetItem(true);
+    const QList<QGraphicsItem *> components = item->childItems();
+    for (int i = 0; i < components.size(); ++i)
+    {
+        QVERIFY(components.at(i)->data(PieceItemData::ItemType).toString() != QLatin1String("notch"));
+    }
+
+    item->setPos(50, 60);
+    const QDomDocument doc = exportItemSvg(item);
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+    QCOMPARE(groupsOfType(doc, QStringLiteral("notch")).size(), 0);
+    QCOMPARE(groupsOfType(doc, QStringLiteral("seamline")).size(), 1);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief EmptyComponentAwayFromOriginEmitsNoGroup checks that the export drops
+ * a component with an empty path when the item's scene position moves the
+ * path's implicit origin point away from (0,0).
+ */
+void TST_SvgComponentTags::EmptyComponentAwayFromOriginEmitsNoGroup() const
+{
+    QGraphicsItem *item = makeTestPiece(QStringLiteral("Back")).GetItem(true);
+
+    QGraphicsPathItem *empty = new QGraphicsPathItem(item);
+    empty->setData(PieceItemData::ItemType, QStringLiteral("empty_component"));
+    empty->setPen(QPen(Qt::black, 1));
+    empty->setPath(QPainterPath());
+    item->setPos(50, 60);
+
+    const QDomDocument doc = exportItemSvg(item);
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+    QCOMPARE(groupsOfType(doc, QStringLiteral("empty_component")).size(), 0);
+    QCOMPARE(groupsOfType(doc, QStringLiteral("seamline")).size(), 1);
 }

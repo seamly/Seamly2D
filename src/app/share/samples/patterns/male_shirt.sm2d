@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pattern>
-    <!--Pattern created with Seamly2D v26.9.20.1223 (https://seamly.io).-->
+    <!--Pattern created with Seamly2D v26.9.22.1071 (https://seamly.io).-->
     <version>0.7.4</version>
     <unit>cm</unit>
     <description>This a male shirt pattern.
@@ -106,7 +106,7 @@ Delete layouts which are not needed.</description>
             </spline>
             <point firstPoint="1" id="30" length="#YokeHeight" lineColor="black" lineType="none" mx="-1.73432" my="0.151455" name="A25" secondPoint="3" type="alongLine"/>
             <point angle="180" basePoint="30" curve="29" id="31" lineColor="black" lineType="solidLine" mx="-1.95438" my="-0.618638" name="A26" type="curveIntersectAxis"/>
-            <point angle="180+180/3.14*atan(#YokeIntake/Line_A25_A26)" basePoint="30" curve="29" id="32" lineColor="black" lineType="none" mx="-1.883" my="-0.409598" name="A27" type="curveIntersectAxis"/>
+            <point angle="asinD(#YokeIntake/Line_A25_A26)" basePoint="30" curve="29" id="32" lineColor="black" lineType="none" lineWeight="0.35" mx="-1.883" my="-0.409598" name="A27" type="curveIntersectAxis"/>
             <point firstPoint="1" id="33" length="#NeckLineDropBack" lineColor="black" lineType="none" mx="-1.79088" my="0.208019" name="A28" secondPoint="30" type="alongLine"/>
             <point firstPoint="14" id="34" length="#HemlineCurve" lineColor="black" lineType="none" mx="-0.729616" my="-2.88874" name="A29" secondPoint="15" type="alongLine"/>
             <point firstPoint="15" id="35" length="#SideIntake" lineColor="black" lineType="none" mx="-1.83561" my="0.41596" name="A30" secondPoint="13" type="alongLine"/>
@@ -383,8 +383,8 @@ Delete layouts which are not needed.</description>
             <point angle="270" basePoint="72" id="73" length="#ArmLength" lineColor="black" lineType="solidLine" mx="0.500641" my="-0.472115" name="C1" type="endLine"/>
             <point firstPoint="72" id="74" length="(SplPath_A23_A27+SplPath_A26_A17)/3-#SleeveCapHeightAdjust" lineColor="black" lineType="none" mx="0.132292" my="0.264583" name="C2" secondPoint="73" type="alongLine"/>
             <point angle="0" firstPoint="74" id="75" length="5" lineColor="black" lineType="none" mx="0.132292" my="0.264583" name="C3" secondPoint="72" type="normal"/>
-            <point id="76" length="(SplPath_A23_A27+SplPath_A26_A17)/2-0.5" lineColor="black" lineType="solidLine" mx="0.132292" my="0.264583" name="C4" p1Line="74" p2Line="75" pShoulder="72" type="shoulder"/>
-            <point angle="180" firstPoint="74" id="77" length="Line_C2_C4" lineColor="black" lineType="solidLine" mx="0.132292" my="0.264583" name="C5" secondPoint="72" type="normal"/>
+            <point id="76" length="SplPath_A23_A17_Seg_1" lineColor="black" lineType="solidLine" lineWeight="0.35" mx="0.132292" my="0.264583" name="C4" p1Line="74" p2Line="75" pShoulder="72" type="shoulder"/>
+            <point angle="180" firstPoint="74" id="77" length="sqrt((SplPath_A23_A17_Seg_2 - #YokeIntake)^2 - (Line_C_C2)^2)" lineColor="black" lineType="solidLine" lineWeight="0.35" mx="0.132292" my="0.126543" name="C5" secondPoint="72" type="normal"/>
             <line firstPoint="76" id="78" lineColor="green" lineType="dotLine" secondPoint="72"/>
             <line firstPoint="72" id="79" lineColor="green" lineType="dotLine" secondPoint="77"/>
             <point firstPoint="76" id="80" length="Line_C4_C/2" lineColor="black" lineType="none" mx="0.132292" my="0.264583" name="C6" secondPoint="72" type="alongLine"/>
@@ -392,9 +392,9 @@ Delete layouts which are not needed.</description>
             <point firstPoint="76" id="82" length="Line_C4_C/4*3" lineColor="black" lineType="none" mx="0.132292" my="0.264583" name="C8" secondPoint="72" type="alongLine"/>
             <point angle="180" firstPoint="81" id="83" length="1" lineColor="black" lineType="none" mx="0.371565" my="0.623487" name="C9" secondPoint="80" type="normal"/>
             <point angle="0" firstPoint="82" id="84" length="1" lineColor="black" lineType="none" mx="-0.824785" my="-1.4103" name="C10" secondPoint="72" type="normal"/>
-            <point firstPoint="72" id="85" length="Line_C_C5/3" lineColor="black" lineType="none" mx="0.132292" my="0.264583" name="C11" secondPoint="77" type="alongLine"/>
-            <point firstPoint="72" id="86" length="Line_C_C5/3*2" lineColor="black" lineType="none" mx="0.132292" my="0.264583" name="C12" secondPoint="77" type="alongLine"/>
-            <point angle="180" firstPoint="85" id="87" length="2" lineColor="black" lineType="none" mx="0.132292" my="0.264583" name="C13" secondPoint="72" type="normal"/>
+            <point firstPoint="72" id="85" length="Line_C_C5/3" lineColor="black" lineType="none" mx="-1.48198" my="0.399105" name="C11" secondPoint="77" type="alongLine"/>
+            <point firstPoint="72" id="86" length="Line_C_C5 * 0.85" lineColor="black" lineType="none" lineWeight="0.35" mx="-2.22185" my="0.130061" name="C12" secondPoint="77" type="alongLine"/>
+            <point angle="180" firstPoint="85" id="87" length="Line_C_C2/7" lineColor="black" lineType="none" lineWeight="0.35" mx="0.0650308" my="-1.95504" name="C13" secondPoint="72" type="normal"/>
             <spline color="black" id="88" type="pathInteractive">
                 <pathPoint angle1="133.043" angle2="313.043" length1="0" length2="0.0815231" pSpline="76"/>
                 <pathPoint angle1="211.702" angle2="31.7019" length1="2.95142" length2="3.07339" pSpline="83"/>
@@ -419,7 +419,7 @@ Delete layouts which are not needed.</description>
             <point firstPoint="92" id="100" length="#PrintingFix" lineColor="black" lineType="none" mx="-1.95634" my="-1.45592" name="C25" secondPoint="90" type="alongLine"/>
             <line firstPoint="76" id="101" lineColor="black" lineType="solidLine" secondPoint="91"/>
             <line firstPoint="77" id="102" lineColor="black" lineType="solidLine" secondPoint="90"/>
-            <point firstPoint="91" id="103" length="Line_C14_C16/6" lineColor="black" lineType="none" mx="-0.236057" my="-1.39299" name="C26" secondPoint="89" type="alongLine"/>
+            <point firstPoint="91" id="103" length="Line_C14_C16/6" lineColor="black" lineType="none" mx="0.316103" my="-1.94515" name="C26" secondPoint="89" type="alongLine"/>
             <point basePoint="103" id="104" lineColor="black" lineType="solidLine" mx="-0.0518825" my="0.57154" name="C27" p1Line="76" p2Line="91" type="height"/>
             <point firstPoint="90" id="105" length="Line_C14_C15/6" lineColor="black" lineType="none" mx="0.439249" my="-1.45438" name="C28" secondPoint="89" type="alongLine"/>
             <point basePoint="105" id="106" lineColor="black" lineType="solidLine" mx="-2.0778" my="0.0190171" name="C29" p1Line="77" p2Line="90" type="height"/>
@@ -513,7 +513,7 @@ Delete layouts which are not needed.</description>
                     <node idObject="216" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="300" inLayout="true" locked="false" mx="-16.488" my="15.4005" name="FullSleeve" seamAllowance="true" united="false" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="300" inLayout="true" locked="false" mx="-15.7285" my="15.9069" name="FullSleeve" seamAllowance="true" united="false" version="2" width="1">
                 <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="2" arrows="0" length="Line_C5_C29 * 0.75" mx="1975.74" my="2414.19" rotation="90" visible="true"/>

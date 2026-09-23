@@ -70,6 +70,34 @@ namespace
         return type == QLatin1String("internal_path") || type == QLatin1String("cut_path")
             || type == QLatin1String("piece_label") || type == QLatin1String("pattern_label");
     }
+
+    //-----------------------------------------------------------------------------
+    /// @brief Check whether path data draws nothing: empty, or one moveto with an optional closepath.
+    /// @details An empty QPainterPath still carries an implicit MoveTo(0,0). The
+    ///          item's scene position moves that point, so QSvgGenerator can emit
+    ///          e.g. "M -1121.38,5595.73 Z" instead of "M0,0".
+    //-----------------------------------------------------------------------------
+    bool isMoveToOnly(const QString &d)
+    {
+        int moveToCount = 0;
+        for (const QChar c : d)
+        {
+            // 'e'/'E' can appear as a number exponent, not a command.
+            if (!c.isLetter() || c == QLatin1Char('e') || c == QLatin1Char('E'))
+            {
+                continue;
+            }
+            if (c == QLatin1Char('M') || c == QLatin1Char('m'))
+            {
+                ++moveToCount;
+            }
+            else if (c != QLatin1Char('Z') && c != QLatin1Char('z'))
+            {
+                return false;
+            }
+        }
+        return moveToCount <= 1;
+    }
 } // namespace
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -198,13 +226,14 @@ void SvgGenerator::removeEmptyGroups(QDomElement &mainGroup)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief Remove the M0,0 origin paths from the SVG
+ * @brief Remove the origin-only paths from the SVG
  * @return void
- * @details This function removes every empty "M0,0" path from the SVG. Qt's SVG
- *          generator emits such a path for each QGraphicsPathItem with an empty
- *          path (e.g. the invisible piece container and label group items). If
- *          these paths are not removed, the bounding box of the exported pattern
- *          piece when opened in a svg editing software can be wrong.
+ * @details This function removes every path that draws nothing (see isMoveToOnly()).
+ *          Qt's SVG generator emits such a path for each QGraphicsPathItem with an
+ *          empty path (e.g. the invisible piece container and label group items).
+ *          If these paths are not removed, the bounding box of the exported pattern
+ *          piece when opened in a svg editing software can be wrong, and an empty
+ *          component still gets a tagged group.
  */
 void SvgGenerator::removeEmptyOriginPath(QDomElement &mainGroup)
 {
@@ -213,7 +242,7 @@ void SvgGenerator::removeEmptyOriginPath(QDomElement &mainGroup)
     for (int i = paths.size() - 1; i >= 0; --i) {
         QDomElement path = paths.at(i).toElement();
         const QString d = path.attribute("d");
-        if (d.isEmpty() || d == "M0,0") {
+        if (isMoveToOnly(d)) {
             QDomElement parentGroup = path.parentNode().toElement();
             parentGroup.removeChild(path);
             // Drop the wrapping group as well when the path was its only content.

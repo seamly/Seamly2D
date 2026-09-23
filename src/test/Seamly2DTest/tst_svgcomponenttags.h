@@ -55,6 +55,8 @@ private slots:
     void PieceWithNoNameFallsBackToNumericId() const;
     void NamedPieceGetsNameBasedId() const;
     void CollidingPieceNamesGetDisambiguatingSuffix() const;
+    void PieceWithoutNotchesEmitsNoNotchGroup() const;
+    void EmptyComponentAwayFromOriginEmitsNoGroup() const;
 };
 
 #endif // TST_SVGCOMPONENTTAGS_H
