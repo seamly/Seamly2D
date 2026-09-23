@@ -120,12 +120,69 @@
       <DialogRef Id="ErrorDlg" />
       <DialogRef Id="FatalError" />
       <DialogRef Id="FilesInUse" />
-      <DialogRef Id="MsiRMFilesInUse" />
+      <!-- No DialogRef Id="MsiRMFilesInUse": the dialog of that name below
+           replaces it. -->
       <!-- No DialogRef Id="PrepareDlg": SeamlyPrepareDlg below replaces it. -->
       <DialogRef Id="OutOfDiskDlg" />
       <DialogRef Id="OutOfRbDiskDlg" />
       <DialogRef Id="UserExit" />
       <DialogRef Id="ExitDialog" />
+
+      <!-- ========== apps in use (replaces stock MsiRMFilesInUse) ========== -->
+      <!-- Windows Installer shows the dialog with this exact Id when Restart
+           Manager finds a running Seamly app during InstallValidate. That is
+           before WixCloseApplications (smsi.wxs) runs, so this page is what an
+           interactive user sees. The stock page offered "attempt to restart
+           them", but no Seamly app registers for restart, and "a reboot will
+           be required", which leaves a half-installed product. This page offers
+           close-and-continue or cancel instead. -->
+      <Property Id="SeamlyRMOption" Value="Close" />
+      <Dialog Id="MsiRMFilesInUse" Width="370" Height="270" KeepModeless="yes"
+              Title="[ProductName] Setup">
+
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
+                 TabSkip="no" Disabled="yes" Text="WixUI_Bmp_Banner" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0"
+                 Disabled="yes" TabSkip="yes" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0"
+                 Disabled="yes" TabSkip="yes" />
+
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
+                 Transparent="yes" NoPrefix="yes" TabSkip="yes"
+                 Text="{\WixUI_Font_Title}Seamly apps are running" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15"
+                 Transparent="yes" NoPrefix="yes" TabSkip="yes"
+                 Text="Setup cannot replace the files of a running app." />
+        <Control Id="Text" Type="Text" X="20" Y="52" Width="330" Height="20"
+                 NoPrefix="yes" TabSkip="yes"
+                 Text="Save your work in these apps first. Setup closes them only if you choose the first option." />
+        <!-- Windows Installer fills FileInUseProcess with the running apps. -->
+        <Control Id="List" Type="ListBox" X="20" Y="74" Width="330" Height="76"
+                 Sunken="yes" TabSkip="yes" Property="FileInUseProcess" />
+
+        <Control Id="ShutdownOption" Type="RadioButtonGroup" X="20" Y="156" Width="330" Height="74"
+                 TabSkip="no" Property="SeamlyRMOption">
+          <RadioButtonGroup>
+            <RadioButton Value="Close" X="0" Y="0" Width="325" Height="28"
+                         Text="Close any currently running Seamly2D / SeamlyMe / SeamlyLayout apps, then continue Seamly installation." />
+            <RadioButton Value="Cancel" X="0" Y="32" Width="325" Height="40"
+                         Text="Cancel installation. I will close any currently running Seamly2D / SeamlyMe / SeamlyLayout apps, then re-run this Seamly installation." />
+          </RadioButtonGroup>
+        </Control>
+
+        <!-- RMShutdownAndRestart tells Restart Manager to close the apps.
+             It restarts none of them, because none registers for restart. -->
+        <Control Id="OK" Type="PushButton" X="240" Y="243" Width="56" Height="17"
+                 Default="yes" TabSkip="no" Text="OK">
+          <Publish Event="EndDialog" Value="Return" Condition="SeamlyRMOption = &quot;Close&quot;" />
+          <Publish Event="RMShutdownAndRestart" Value="0" Condition="SeamlyRMOption = &quot;Close&quot;" />
+          <Publish Event="EndDialog" Value="Exit" Condition="SeamlyRMOption = &quot;Cancel&quot;" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
+                 Cancel="yes" TabSkip="no" Text="Cancel">
+          <Publish Event="EndDialog" Value="Exit" />
+        </Control>
+      </Dialog>
 
       <!-- ========== preparing (replaces stock PrepareDlg) ================= -->
       <!-- Same geometry and bitmap as stock WelcomeDlg/PrepareDlg (the big
