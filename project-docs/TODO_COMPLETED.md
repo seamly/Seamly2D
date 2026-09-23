@@ -839,3 +839,11 @@ one.
 - [x] InstLinuxAppimage.1.4 Verified 2026-09-14: full `ci.yml` `workflow_dispatch`
   run on `run-seamlyLayout` passed — `linux-test`, `linux` (AppImage), `macos`,
   both `windows-msi` arches, and `Publish Pre-releases` all succeeded.
+
+## Adjust mode — Lower to Bottom lost on the next right-click (completed 2026-09-23)
+
+- [x] Cause: every mouse press set z = 10. A right press propagates to every piece under the cursor, so all went to z = 10 and insertion order put the lowered piece back on top. Release also reset z to 1.0.
+- [x] `PieceOverlayItem`: only a left press lifts the piece; release restores its saved z.
+- [x] `AdjustScene::raisePieceToTop` / `lowerPieceToBottom` renumber pieces z = 1..N, so no ties.
+- [x] `~AdjustScene` disconnects `selectionChanged`; a selected piece at scene destruction called a slot on a dead object.
+- [x] Tests: `AdjustSceneTests` — lower two pieces, right press after lower, left click after lower.
