@@ -34,6 +34,9 @@ public:
     /// @param parent Optional QObject parent.
     explicit AdjustScene(QObject* parent = nullptr);
 
+    /// @brief Disconnect selection tracking before QGraphicsScene clears its items.
+    ~AdjustScene() override;
+
     /// @brief Update all overlay piece transform strings after Apply/Enter.
     void updateAllTransforms();
 
@@ -121,6 +124,12 @@ public:
     /// @return The lowest z-value, or 1.0 if no pieces exist.
     qreal minPieceZValue() const;
 
+    /// @brief Move a piece to the top of the stacking order.
+    void raisePieceToTop(PieceOverlayItem* piece);
+
+    /// @brief Move a piece to the bottom of the stacking order.
+    void lowerPieceToBottom(PieceOverlayItem* piece);
+
 #ifdef QT_DEBUG
     /// @brief Dump all overlay piece data to output/adjust_overlay_<counter>.json.
     void dumpOverlayData() const;
@@ -146,6 +155,12 @@ private:
 
     /// @brief All interactive piece items currently in the scene.
     QList<PieceOverlayItem*> m_pieces;
+
+    /// @brief Return the pieces bottom-to-top, as Qt stacks them.
+    QList<PieceOverlayItem*> piecesInStackingOrder() const;
+
+    /// @brief Assign z = 1, 2, 3, ... in list order, so no two pieces tie.
+    void assignStackingOrder(const QList<PieceOverlayItem*>& bottomToTop);
 
     /// @brief Saved per-piece histories reused after overlay reloads.
     QHash<QString, PieceOverlayItem::HistorySnapshot> m_pieceHistorySnapshots;

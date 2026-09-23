@@ -224,6 +224,12 @@ private:
     /// @brief True once the mouse has moved beyond DRAG_THRESHOLD pixels.
     bool m_dragging = false;
 
+    /// @brief Stacking z to restore on release; the drag lifts the piece above all others.
+    qreal m_restingZValue = 1.0;
+
+    /// @brief True while a left press has lifted this piece above the stack.
+    bool m_zLifted = false;
+
     /// @brief Full-state history for this overlay, newest state at m_historyIndex.
     QVector<TransformState> m_transformHistory;
 

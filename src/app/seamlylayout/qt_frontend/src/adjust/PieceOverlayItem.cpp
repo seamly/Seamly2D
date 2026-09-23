@@ -383,8 +383,15 @@ void PieceOverlayItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
     m_dragStartItemPos  = pos();
     m_dragging          = false;
 
-    // Bring this piece to the top of the z-order while dragging.
-    setZValue(10.0);
+    // Lift the piece above the stack for a left-button drag only. A right
+    // press is ignored by the base class and propagates to every piece
+    // below the cursor, so lifting on it would reorder the whole stack.
+    if (event->button() == Qt::LeftButton) {
+        m_restingZValue = zValue();
+        m_zLifted = true;
+        const AdjustScene* adjustScene = dynamic_cast<AdjustScene*>(scene());
+        setZValue((adjustScene ? adjustScene->maxPieceZValue() : zValue()) + 1.0);
+    }
 
     QGraphicsRectItem::mousePressEvent(event);
 }
@@ -418,8 +425,11 @@ void PieceOverlayItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     const bool wasDragging = m_dragging;
 
-    // Return item to its normal z-layer.
-    setZValue(1.0);
+    // Return the piece to its place in the stack, keeping any Raise/Lower.
+    if (m_zLifted) {
+        setZValue(m_restingZValue);
+        m_zLifted = false;
+    }
     m_dragging = false;
 
     if (wasDragging) {
@@ -611,21 +621,10 @@ void PieceOverlayItem::contextMenuEvent(QGraphicsSceneContextMenuEvent* event)
         setPos(pos().x(), pos().y() + dy);
         stateChanged = true;
     } else if (chosen == raiseToTop && adjustScene) {
-        // Raise piece to top of z-order stack.
-        const qreal maxZ = adjustScene->maxPieceZValue();
-        if (zValue() < maxZ + 1.0) {
-            setZValue(maxZ + 1.0);
-        }
-        // Z-order change doesn't need state recording (visual only).
+        // Z-order is visual only; no history entry.
+        adjustScene->raisePieceToTop(this);
     } else if (chosen == lowerToBottom && adjustScene) {
-        // Lower piece to bottom of z-order stack.
-        const qreal minZ = adjustScene->minPieceZValue();
-        // Keep above background (z=0), so use minZ - 0.5 but not below 0.5.
-        const qreal newZ = qMax(0.5, minZ - 0.5);
-        if (zValue() > newZ) {
-            setZValue(newZ);
-        }
-        // Z-order change doesn't need state recording (visual only).
+        adjustScene->lowerPieceToBottom(this);
     }
 
     // Check if rotation changed.

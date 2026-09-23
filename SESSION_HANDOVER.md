@@ -6,6 +6,12 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-23 — SeamlyLayout Adjust: Lower to Bottom fix
+
+Merged `task-adjust-z-order` into `run-seamlyLayout`. See `TODO_COMPLETED.md`.
+`ctest --preset debug` 6/6, `cargo test --workspace` green. CI skipped.
+User's staged edits (`packaging/**`, `projectversion.*`, `latest-todos.txt`) were left uncommitted.
+
 ## 2026-09-21 — Seamly2D: unnamed pieces now get a unique "Piece N" fallback name
 
 Branch `task-piece-auto-name`, built and `nmake check`-verified (MSI OK),

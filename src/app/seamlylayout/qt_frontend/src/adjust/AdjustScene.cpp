@@ -24,6 +24,7 @@
 #include <QStringList>
 #include <QRegularExpression>
 #include <QSvgRenderer>
+#include <algorithm>
 #include <limits>
 
 // Static counter for sequentially numbered overlay debug dumps (GUI-thread only).
@@ -78,6 +79,14 @@ AdjustScene::AdjustScene(QObject* parent)
 {
     connect(this, &QGraphicsScene::selectionChanged,
             this, &AdjustScene::emitUndoRedoAvailability);
+}
+
+AdjustScene::~AdjustScene()
+{
+    // ~QGraphicsScene removes a selected item and emits selectionChanged after
+    // this subclass is gone; the connected slot would run on a dead object.
+    disconnect(this, &QGraphicsScene::selectionChanged,
+               this, &AdjustScene::emitUndoRedoAvailability);
 }
 
 bool AdjustScene::canUndo() const
@@ -875,4 +884,51 @@ qreal AdjustScene::minPieceZValue() const
         }
     }
     return minZ;
+}
+
+QList<PieceOverlayItem*> AdjustScene::piecesInStackingOrder() const
+{
+    // m_pieces is in insertion order. Qt stacks equal-z items by insertion
+    // order, so a stable sort by z reproduces the visible stack.
+    QList<PieceOverlayItem*> order;
+    for (PieceOverlayItem* item : m_pieces) {
+        if (item) {
+            order.append(item);
+        }
+    }
+    std::stable_sort(order.begin(), order.end(),
+                     [](const PieceOverlayItem* a, const PieceOverlayItem* b) {
+                         return a->zValue() < b->zValue();
+                     });
+    return order;
+}
+
+void AdjustScene::assignStackingOrder(const QList<PieceOverlayItem*>& bottomToTop)
+{
+    // Start at 1.0 to stay above the SVG background at z = 0.
+    qreal z = 1.0;
+    for (PieceOverlayItem* item : bottomToTop) {
+        item->setZValue(z);
+        z += 1.0;
+    }
+}
+
+void AdjustScene::raisePieceToTop(PieceOverlayItem* piece)
+{
+    QList<PieceOverlayItem*> order = piecesInStackingOrder();
+    if (!order.removeOne(piece)) {
+        return;
+    }
+    order.append(piece);
+    assignStackingOrder(order);
+}
+
+void AdjustScene::lowerPieceToBottom(PieceOverlayItem* piece)
+{
+    QList<PieceOverlayItem*> order = piecesInStackingOrder();
+    if (!order.removeOne(piece)) {
+        return;
+    }
+    order.prepend(piece);
+    assignStackingOrder(order);
 }

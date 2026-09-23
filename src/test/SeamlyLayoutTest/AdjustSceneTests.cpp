@@ -11,6 +11,7 @@
 #include <QCoreApplication>
 #include <QFile>
 #include <QGraphicsItem>
+#include <QGraphicsSceneMouseEvent>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -79,6 +80,66 @@ PieceOverlayItem* findPiece(AdjustScene& scene, const QString& id)
     return nullptr;
 }
 
+/// @brief Build bbox JSON where a large piece, added last, fully covers a small piece.
+/// @details Insertion order matters: Qt stacks equal-z items by insertion, so the
+///          large piece starts on top.
+QString buildCoveringBboxJson()
+{
+    QJsonArray pieces;
+
+    QJsonObject small;
+    small["id"] = QStringLiteral("small");
+    small["x"] = 50.0;
+    small["y"] = 50.0;
+    small["w"] = 20.0;
+    small["h"] = 20.0;
+    small["origin_x_px"] = 0.0;
+    small["origin_y_px"] = 0.0;
+    small["rotation_deg"] = 0.0;
+    small["transform_str"] = QString();
+    pieces.append(small);
+
+    QJsonObject large;
+    large["id"] = QStringLiteral("large");
+    large["x"] = 20.0;
+    large["y"] = 20.0;
+    large["w"] = 100.0;
+    large["h"] = 100.0;
+    large["origin_x_px"] = 0.0;
+    large["origin_y_px"] = 0.0;
+    large["rotation_deg"] = 0.0;
+    large["transform_str"] = QString();
+    pieces.append(large);
+
+    QJsonObject root;
+    root["pieces"] = pieces;
+
+    return QString::fromUtf8(QJsonDocument(root).toJson(QJsonDocument::Compact));
+}
+
+/// @brief Send a mouse press or release to the scene at a scene position.
+void sendMouse(AdjustScene& scene, QEvent::Type type, Qt::MouseButton button, const QPointF& scenePos)
+{
+    QGraphicsSceneMouseEvent event(type);
+    event.setScenePos(scenePos);
+    event.setButtonDownScenePos(button, scenePos);
+    event.setButton(button);
+    event.setButtons(type == QEvent::GraphicsSceneMousePress ? button : Qt::NoButton);
+    event.setAccepted(false);
+    QCoreApplication::sendEvent(&scene, &event);
+}
+
+/// @brief Return the topmost piece at a scene position; this piece receives the context menu.
+PieceOverlayItem* topPieceAt(AdjustScene& scene, const QPointF& scenePos)
+{
+    for (QGraphicsItem* graphicsItem : scene.items(scenePos, Qt::IntersectsItemShape, Qt::DescendingOrder)) {
+        if (PieceOverlayItem* piece = qgraphicsitem_cast<PieceOverlayItem*>(graphicsItem)) {
+            return piece;
+        }
+    }
+    return nullptr;
+}
+
 } // namespace
 
 /// @class AdjustSceneTests
@@ -132,6 +193,15 @@ private slots:
 
     /// @brief Verify lower to bottom sets z-value below all other pieces.
     void lowerToBottomSetsLowestZValue();
+
+    /// @brief Lowering two pieces in turn leaves distinct z-values, no tie.
+    void lowerTwoPiecesKeepsDistinctOrder();
+
+    /// @brief A right press on a covered piece does not restack the pieces under the cursor.
+    void rightPressAfterLowerKeepsSmallPieceOnTop();
+
+    /// @brief A left click on a lowered piece keeps it at the bottom.
+    void leftClickAfterLowerKeepsPieceAtBottom();
 
     /// @brief Verify findNearestPieceAbove returns the correct piece.
     void findNearestPieceAboveReturnsCorrectPiece();
@@ -491,17 +561,11 @@ void AdjustSceneTests::raiseToTopSetsHighestZValue()
     QVERIFY(pieceA);
     QVERIFY(pieceB);
 
-    // Initially both should have same z-value (1.0).
-    QCOMPARE(pieceA->zValue(), 1.0);
-    QCOMPARE(pieceB->zValue(), 1.0);
+    scene.raisePieceToTop(pieceA);
 
-    // Raise pieceB to top.
-    const qreal maxZ = scene.maxPieceZValue();
-    pieceB->setZValue(maxZ + 1.0);
-
-    // pieceB should now be above pieceA.
-    QVERIFY(pieceB->zValue() > pieceA->zValue());
-    QCOMPARE(scene.maxPieceZValue(), pieceB->zValue());
+    QVERIFY(pieceA->zValue() > pieceB->zValue());
+    QCOMPARE(scene.maxPieceZValue(), pieceA->zValue());
+    QVERIFY(pieceB->zValue() > 0.0);
 }
 
 void AdjustSceneTests::lowerToBottomSetsLowestZValue()
@@ -516,18 +580,72 @@ void AdjustSceneTests::lowerToBottomSetsLowestZValue()
     QVERIFY(pieceA);
     QVERIFY(pieceB);
 
-    // Raise pieceB first so they have different z-values.
-    pieceB->setZValue(2.0);
-    QVERIFY(pieceB->zValue() > pieceA->zValue());
+    scene.lowerPieceToBottom(pieceB);
 
-    // Lower pieceB to bottom.
-    const qreal minZ = scene.minPieceZValue();
-    const qreal newZ = qMax(0.5, minZ - 0.5);
-    pieceB->setZValue(newZ);
-
-    // pieceB should now be below pieceA.
     QVERIFY(pieceB->zValue() < pieceA->zValue());
     QCOMPARE(scene.minPieceZValue(), pieceB->zValue());
+    // The background sits at z = 0; pieces must stay above it.
+    QVERIFY(pieceB->zValue() > 0.0);
+}
+
+void AdjustSceneTests::lowerTwoPiecesKeepsDistinctOrder()
+{
+    AdjustScene scene;
+    scene.loadLayout(buildLayoutSvg(), buildBboxJson());
+
+    PieceOverlayItem* pieceA = findPiece(scene, QStringLiteral("pieceA"));
+    PieceOverlayItem* pieceB = findPiece(scene, QStringLiteral("pieceB"));
+    QVERIFY(pieceA);
+    QVERIFY(pieceB);
+
+    scene.lowerPieceToBottom(pieceA);
+    scene.lowerPieceToBottom(pieceB);
+
+    QVERIFY(pieceB->zValue() < pieceA->zValue());
+    QVERIFY(pieceB->zValue() > 0.0);
+}
+
+void AdjustSceneTests::rightPressAfterLowerKeepsSmallPieceOnTop()
+{
+    AdjustScene scene;
+    scene.loadLayout(buildLayoutSvg(), buildCoveringBboxJson());
+
+    PieceOverlayItem* small = findPiece(scene, QStringLiteral("small"));
+    PieceOverlayItem* large = findPiece(scene, QStringLiteral("large"));
+    QVERIFY(small);
+    QVERIFY(large);
+
+    const QPointF smallCenter(60.0, 60.0);
+    QCOMPARE(topPieceAt(scene, smallCenter), large);
+
+    scene.lowerPieceToBottom(large);
+    QCOMPARE(topPieceAt(scene, smallCenter), small);
+
+    // A right press precedes every context menu. It must not restack the pieces.
+    sendMouse(scene, QEvent::GraphicsSceneMousePress, Qt::RightButton, smallCenter);
+    QCOMPARE(topPieceAt(scene, smallCenter), small);
+    QVERIFY(large->zValue() < small->zValue());
+}
+
+void AdjustSceneTests::leftClickAfterLowerKeepsPieceAtBottom()
+{
+    AdjustScene scene;
+    scene.loadLayout(buildLayoutSvg(), buildCoveringBboxJson());
+
+    PieceOverlayItem* small = findPiece(scene, QStringLiteral("small"));
+    PieceOverlayItem* large = findPiece(scene, QStringLiteral("large"));
+    QVERIFY(small);
+    QVERIFY(large);
+
+    scene.lowerPieceToBottom(large);
+
+    // Click the part of the large piece that the small piece does not cover.
+    const QPointF largeOnly(30.0, 30.0);
+    sendMouse(scene, QEvent::GraphicsSceneMousePress, Qt::LeftButton, largeOnly);
+    sendMouse(scene, QEvent::GraphicsSceneMouseRelease, Qt::LeftButton, largeOnly);
+
+    QVERIFY(large->zValue() < small->zValue());
+    QCOMPARE(topPieceAt(scene, QPointF(60.0, 60.0)), small);
 }
 
 void AdjustSceneTests::findNearestPieceAboveReturnsCorrectPiece()
