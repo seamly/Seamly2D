@@ -1,3 +1,4 @@
+# Windows copy commands need xcopy because the standard copy command cannot handle filenames with '+' characters.
 win32{
     # Because "copy" doesn't support files that contain plus sign (+) in name we will use xcopy instead.
     unset(QMAKE_COPY)
