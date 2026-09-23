@@ -51,10 +51,11 @@
       >> marginTop=selvedgeWidth.
       >> marginBottom=selvedgeWidth.
 # Layout Settings
-- layoutMode -- 'alongGrainline' or 'withNap' radio buttons; default is 'alongGrainline'.
+- layoutMode -- 'alongGrainline', 'withNap' or 'any' radio buttons; default is 'alongGrainline'.
   All modes orient each pattern piece so the grainline points "up" (preprocessing).
   - alongGrainline: trial set {0°, 180°} — head-up or head-down.
   - withNap:        trial set is a singleton — every piece points the same direction.
+  - any:            trial set {0°, 90°, 180°, 270°} — grainline ignored; packer picks the best quarter turn.
 - if layoutMode='withNap':
   >> Nap Direction -- 'Pieces point Up' (rotationStep=0) | 'Pieces point Down' (rotationStep=180);
      default is 'Pieces point Up'.

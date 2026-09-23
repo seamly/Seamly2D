@@ -268,6 +268,16 @@ void AdjustWindow::buildUi(const QString& svgContent, const QString& bboxJson)
     QToolBar* toolbar = addToolBar(QStringLiteral("Adjust"));
     toolbar->setMovable(false);
     toolbar->setIconSize(QSize(20, 20));
+    // setStyle() does not propagate to child widgets, so the platform style
+    // draws the tool buttons and ignores the palette. A style sheet forces
+    // light text on the violet toolbar.
+    toolbar->setStyleSheet(QStringLiteral(
+        "QToolBar { background-color: %1; border: none; }"
+        "QToolButton { color: %2; }"
+        "QToolButton:disabled { color: %3; }")
+        .arg(SeamlyTheme::SEAMLY_VIOLET_DARK.name(),
+             SeamlyTheme::SEAMLY_GRAY_LIGHT.name(),
+             SeamlyTheme::SEAMLY_GRAY_MEDIUM.name()));
 
     // Left spacer — pushes actions to center.
     QWidget* leftSpacer = new QWidget(this);

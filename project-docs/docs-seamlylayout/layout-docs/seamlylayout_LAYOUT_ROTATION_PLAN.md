@@ -4,10 +4,11 @@ Author: slspencer — revised 2026-05-21
 
 ## Current status
 
-Layout mode in Settings now supports two options only:
+Layout mode in Settings supports three options:
 
 - `alongGrainline` (default)
 - `withNap`
+- `any`
 
 The previous free-angle mode has been removed from the Settings dialog and the
 mode parser. Legacy values are coerced safely to `alongGrainline`.
@@ -30,11 +31,17 @@ All pieces are preprocessed so the grainline points upward.
   - Meaning: all pieces point the same direction.
   - `0` = Pieces point Up, `180` = Pieces point Down.
 
+- `any`
+  - Trial set: `{0°, 90°, 180°, 270°}`
+  - Meaning: grainline ignored; packer picks the quarter turn that packs best.
+  - Only quarter turns: the packer places axis-aligned bboxes, so other angles only enlarge a bbox.
+  - Routed to `layout_engine::pack_maxrects_multi_angle`.
+
 ## Settings model
 
 ### UI
 
-- **Layout Mode**: `alongGrainline` | `withNap`
+- **Layout Mode**: `alongGrainline` | `withNap` | `any`
 - **Nap Direction** (visible only when mode is `withNap`):
   - Pieces point Up (`rotationStep = 0`)
   - Pieces point Down (`rotationStep = 180`)
@@ -60,6 +67,7 @@ On load:
 - `alongGrainline` → `[0, 180]`
 - `withNap` + step≈0   → `[0]`
 - `withNap` + step≈180 → `[180]`
+- `any`                → `[0, 90, 180, 270]`
 - unknown/legacy       → `[0, 180]`
 
 ## Packing and assembly notes

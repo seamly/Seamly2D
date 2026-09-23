@@ -343,12 +343,15 @@ impl LayoutSettings {
     // | "alongGrainline" | unused              | [0, 180]                 |
     // | "withNap"        | 0                   | [0]                      |
     // | "withNap"        | 180                 | [180]                    |
+    // | "any"            | unused              | [0, 90, 180, 270]        |
     // | unknown/legacy    | —                   | [0, 180]                 |
     //
-    // Note: this returns only orthogonal trial sets ({0}, {180}, {0,180}).
+    // "any" ignores grainline direction.  It stays on quarter turns because
+    // the packer places axis-aligned bboxes: other angles only enlarge a bbox.
     pub fn rotation_trial_set_deg(&self) -> Vec<u16> {
         match self.layout_mode.as_str() {
             "alongGrainline" => vec![0, 180],
+            "any" => vec![0, 90, 180, 270],
             "withNap" => {
                 // rotation_step is the fixed offset (head-up vs head-down).
                 // Snap to {0, 180}; any other value defaults to 0 (head-up).
@@ -677,6 +680,15 @@ mod tests {
         s.rotation_step = 180.0;
         assert_eq!(s.rotation_trial_set_deg(), vec![180]);
     } // trial_set_with_nap_down
+
+    // @brief any → all quarter turns regardless of rotation_step.
+    #[test]
+    fn trial_set_any() {
+        let mut s = LayoutSettings::default_for_test();
+        s.layout_mode = "any".to_string();
+        s.rotation_step = 180.0;
+        assert_eq!(s.rotation_trial_set_deg(), vec![0, 90, 180, 270]);
+    } // trial_set_any
 
     // @brief Unknown layout_mode falls back to alongGrainline trial set.
     #[test]

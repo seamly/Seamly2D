@@ -113,6 +113,7 @@ pub fn pack_shelves(bin_w: u32, bin_h: u32, rects: &[Rect]) -> PackResult<Vec<Pl
 //   alongGrainline → trial set [0, 180] → rotation_deg = 0
 //   withNap, step=0   → [0]   → 0
 //   withNap, step=180 → [180] → 180
+//   any               → [0, 90, 180, 270] → routed to `pack_maxrects_multi_angle`
 // Non-orthogonal trial sets MUST be routed to `polygon_pack::pack`, not here.
 //
 // @param bin_w             Content rectangle width in pixels.

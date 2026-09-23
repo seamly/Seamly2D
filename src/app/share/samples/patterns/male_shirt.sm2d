@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pattern>
-    <!--Pattern created with Seamly2D v26.9.22.1071 (https://seamly.io).-->
+    <!--Pattern created with Seamly2D v26.9.22.1381 (https://seamly.io).-->
     <version>0.7.4</version>
     <unit>cm</unit>
     <description>This a male shirt pattern.
@@ -392,16 +392,16 @@ Delete layouts which are not needed.</description>
             <point firstPoint="76" id="82" length="Line_C4_C/4*3" lineColor="black" lineType="none" mx="0.132292" my="0.264583" name="C8" secondPoint="72" type="alongLine"/>
             <point angle="180" firstPoint="81" id="83" length="1" lineColor="black" lineType="none" mx="0.371565" my="0.623487" name="C9" secondPoint="80" type="normal"/>
             <point angle="0" firstPoint="82" id="84" length="1" lineColor="black" lineType="none" mx="-0.824785" my="-1.4103" name="C10" secondPoint="72" type="normal"/>
-            <point firstPoint="72" id="85" length="Line_C_C5/3" lineColor="black" lineType="none" mx="-1.48198" my="0.399105" name="C11" secondPoint="77" type="alongLine"/>
+            <point firstPoint="72" id="85" length="Line_C_C5/3" lineColor="black" lineType="none" lineWeight="0.35" mx="-1.48198" my="0.399105" name="C11" secondPoint="77" type="alongLine"/>
             <point firstPoint="72" id="86" length="Line_C_C5 * 0.85" lineColor="black" lineType="none" lineWeight="0.35" mx="-2.22185" my="0.130061" name="C12" secondPoint="77" type="alongLine"/>
-            <point angle="180" firstPoint="85" id="87" length="Line_C_C2/7" lineColor="black" lineType="none" lineWeight="0.35" mx="0.0650308" my="-1.95504" name="C13" secondPoint="72" type="normal"/>
-            <spline color="black" id="88" type="pathInteractive">
+            <point angle="180" firstPoint="85" id="87" length="Line_C_C2/5" lineColor="black" lineType="none" lineWeight="0.35" mx="0.0650308" my="-1.95504" name="C13" secondPoint="72" type="normal"/>
+            <spline color="black" id="88" lineWeight="0.35" penStyle="solidLine" type="pathInteractive">
                 <pathPoint angle1="133.043" angle2="313.043" length1="0" length2="0.0815231" pSpline="76"/>
-                <pathPoint angle1="211.702" angle2="31.7019" length1="2.95142" length2="3.07339" pSpline="83"/>
-                <pathPoint angle1="218.231" angle2="38.2306" length1="1.59834" length2="1.82572" pSpline="80"/>
-                <pathPoint angle1="215.201" angle2="35.2008" length1="1.35994" length2="2.51616" pSpline="84"/>
+                <pathPoint angle1="211.702" angle2="31.702" length1="2.95142" length2="3.07339" pSpline="83"/>
+                <pathPoint angle1="218.231" angle2="38.231" length1="1.59834" length2="1.82572" pSpline="80"/>
+                <pathPoint angle1="215.201" angle2="35.201" length1="1.35994" length2="2.51616" pSpline="84"/>
                 <pathPoint angle1="179.166" angle2="359.166" length1="3.23621" length2="3.36832" pSpline="72"/>
-                <pathPoint angle1="145.801" angle2="325.801" length1="3.96393" length2="4.07466" pSpline="87"/>
+                <pathPoint angle1="AngleLine_C_C5 - 180" angle2="334.642" length1="3.96393" length2="4.07466" pSpline="87"/>
                 <pathPoint angle1="146.371" angle2="326.371" length1="0.882877" length2="1.41727" pSpline="86"/>
                 <pathPoint angle1="167.341" angle2="347.341" length1="0.0924647" length2="0.567883" pSpline="77"/>
             </spline>

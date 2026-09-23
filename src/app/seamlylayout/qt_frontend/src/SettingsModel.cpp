@@ -206,6 +206,7 @@ QStringList SettingsModel::layoutModeNames() const
     return {
         QStringLiteral("alongGrainline"),
         QStringLiteral("withNap"),
+        QStringLiteral("any"),
     };
 } // layoutModeNames()
 
@@ -321,7 +322,8 @@ void SettingsModel::setLayoutMode(const QString &v)
 {
     QString normalized = v;
     if (normalized != QStringLiteral("alongGrainline")
-        && normalized != QStringLiteral("withNap")) {
+        && normalized != QStringLiteral("withNap")
+        && normalized != QStringLiteral("any")) {
         normalized = QStringLiteral("alongGrainline");
     } // if unsupported layout mode
 
@@ -341,6 +343,7 @@ void SettingsModel::setLayoutMode(const QString &v)
 // @brief Set the rotation step (degrees).  Semantics depend on layoutMode:
 //   layoutMode == "withNap" → fixed offset in { 0, 180 } (head-up vs head-down)
 //   layoutMode == "alongGrainline" → unused (trial set is fixed at {0, 180})
+//   layoutMode == "any" → unused (trial set is fixed at {0, 90, 180, 270})
 // Does not validate the value — QML radio binding enforces the per-mode set.
 void SettingsModel::setRotationStep(double v)
 {
@@ -592,10 +595,10 @@ bool SettingsModel::load(const QString &path)
     //   rotationStep    : double  (any value)
     //
     // New schema:
-    //   layoutMode      ∈ { "alongGrainline", "withNap" }
+    //   layoutMode      ∈ { "alongGrainline", "withNap", "any" }
     //   rotationStep    : double — semantics depend on layoutMode:
     //                       "withNap" → fixed offset ∈ { 0, 180 }
-    //                       "alongGrainline" → unused
+    //                       "alongGrainline", "any" → unused
     //
     // Migration mapping:
     //   withGrain    + rotationEnabled=false → withNap        (head-up: rotationStep=0)

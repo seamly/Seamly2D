@@ -39,6 +39,7 @@ class SettingsModel : public QObject
     // @brief Piece-arrangement mode: "alongGrainline" | "withNap".
     //   alongGrainline → grain-up baseline, allow {0°, 180°}
     //   withNap        → grain-up baseline, {0°} only (no flip)
+    //   any            → grainline ignored, allow {0°, 90°, 180°, 270°}
     //
     Q_PROPERTY(QString layoutMode    READ layoutMode    WRITE setLayoutMode    NOTIFY layoutModeChanged)
 

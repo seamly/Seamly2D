@@ -9,3 +9,5 @@ seamlylayout:
 - DONE - Export to SVG incorrectly retains the "Rectangles" group <g id="Rectangles"> and the <rect> element withing rectangle within each pattern piece. 
 - DONE - Fix: View's file picker doesn't highlight the selected file - it's unclear which file is being selected. It should highlight the file currently selected. 
 - DONE - Fix: Adjust mode displays the piece overlays but not the pieces. 
+- Settings > Layout options > Layout mode section --> add option "Any" where process_layout() does not care about grainline direction when placing the pattern pieces efficiently. 
+- Adjust mode --> the menu with Fit, Zoom In, Zoom Out, etc should have white text, not black text so that the user can read it. 

@@ -53,6 +53,7 @@ private slots:
     void roundtrip_preservesMargins();
     void roundtrip_preservesMediaType();
     void roundtrip_preservesLayoutMode();
+    void roundtrip_preservesLayoutModeAny();
     void roundtrip_preservesRotationStep();
 
     // resetToDefaults
@@ -251,6 +252,23 @@ void SettingsModelTests::roundtrip_preservesLayoutMode()
     SettingsModel reader;
     QVERIFY(reader.load(path));
     QCOMPARE(reader.layoutMode(), QStringLiteral("withNap"));
+}
+
+// @brief layoutMode "any" is accepted and survives a save/load cycle.
+void SettingsModelTests::roundtrip_preservesLayoutModeAny()
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("settings.json"));
+
+    SettingsModel writer;
+    writer.setLayoutMode(QStringLiteral("any"));
+    QCOMPARE(writer.layoutMode(), QStringLiteral("any"));
+    QVERIFY(writer.save(path));
+
+    SettingsModel reader;
+    QVERIFY(reader.load(path));
+    QCOMPARE(reader.layoutMode(), QStringLiteral("any"));
 }
 
 // @brief rotationStep=180 (head-down withNap) survives a save/load cycle.

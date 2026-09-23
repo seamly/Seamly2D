@@ -142,9 +142,9 @@ Dialog {
                 rowSpacing:    8
 
                 // -----------------------------------------------------------
-                // Layout mode — two radio buttons (mutually exclusive):
-                //   Along Grainline | With Nap
-                // Bound to root.model.layoutMode ∈ {"alongGrainline","withNap"}.
+                // Layout mode — three radio buttons (mutually exclusive):
+                //   Along Grainline | With Nap | Any
+                // Bound to root.model.layoutMode ∈ {"alongGrainline","withNap","any"}.
                 // -----------------------------------------------------------
                 Text {
                     text:           "Layout Mode:"
@@ -190,6 +190,23 @@ Dialog {
                             verticalAlignment: Text.AlignVCenter
                         } // contentItem Text
                     } // RadioButton withNap
+
+                    // Any: grainline ignored; the packer tries every quarter turn.
+                    RadioButton {
+                        id:      layoutModeAny
+                        text:    "Any"
+                        ButtonGroup.group: layoutModeGroup
+                        checked: root.model ? root.model.layoutMode === "any" : false
+                        onToggled: if (checked && root.model) root.model.layoutMode = "any"
+
+                        contentItem: Text {
+                            text:           layoutModeAny.text
+                            color:          Theme.textOnDark
+                            font.pixelSize: Theme.fontSizeNormal
+                            leftPadding:    layoutModeAny.indicator.width + layoutModeAny.spacing
+                            verticalAlignment: Text.AlignVCenter
+                        } // contentItem Text
+                    } // RadioButton any
 
                 } // RowLayout layoutModeButtons
 
@@ -863,6 +880,7 @@ Dialog {
             // Layout-mode radio buttons
             layoutModeAlongGrain.checked = (root.model.layoutMode === "alongGrainline")
             layoutModeWithNap.checked    = (root.model.layoutMode === "withNap")
+            layoutModeAny.checked        = (root.model.layoutMode === "any")
 
             // Nap-direction radio buttons
             napUp.checked   = (Math.abs(root.model.rotationStep - 0.0)   < 0.001)

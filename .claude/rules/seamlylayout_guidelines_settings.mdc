@@ -37,7 +37,7 @@ See full documentation in [`settings-docs/SETTINGS_WORKFLOW.md`](../../project-d
 |------|-------------|-----------|
 | `alongGrainline` | Default. Grain-up baseline; allows head-up or head-down. | `{0°, 180°}` |
 | `withNap` | Strict no-flip — every piece points the same direction (napped or directional fabric). | `{rotationStep°}` (singleton) |
-| `rotate` | Free rotation in fixed steps; uses `rotationStep`. | `{0°, k·rotationStep mod 360°}` |
+| `any` | Grainline ignored; packer picks the best quarter turn per piece. | `{0°, 90°, 180°, 270°}` |
 
 `rotationStep` semantics depend on `layoutMode`:
 
@@ -45,7 +45,7 @@ See full documentation in [`settings-docs/SETTINGS_WORKFLOW.md`](../../project-d
 |------|----------------|------------------------|---------|
 | `alongGrainline` | _(no sub-radio)_ | unused | — |
 | `withNap` | **Nap Direction** — Pieces point Up / Pieces point Down | `{ 0, 180 }` | `0` (head-up) |
-| `rotate` | **Rotation Step** — 10° / 22.5° / 45° / 90° | `{ 10, 22.5, 45, 90 }` | `22.5` |
+| `any` | _(no sub-radio)_ | unused | — |
 
 ## Viewer Preferences
 
