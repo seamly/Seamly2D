@@ -6,6 +6,14 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-23 — MSI finds running Seamly apps at wizard start
+
+Merged `task-msi-running-apps` into `run-seamlyLayout` without skip-ci (packaging change). See `TODO_COMPLETED.md`.
+
+- Verified: `smsi.ps1` build, ICE, authoring check, `installer_running_apps_test.ps1` find checks.
+- Close check skipped locally: a real `seamly2d.exe` ran. Close logic verified separately with a stand-in window.
+- Not yet seen on screen: `SeamlyAppsRunningDlg`. Test MSI: `packaging/windows/seamly-msi-dev/x64/seamly-x64.msi` (untracked; delete after the test).
+
 ## 2026-09-23 — Version scheme YY.M.DDHH + MSI newer-version page
 
 Branch `task-msi-version`, merged into `run-seamlyLayout` without skip-ci (full CI runs).

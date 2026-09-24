@@ -1110,6 +1110,54 @@ Assert-That -Name 'Finish launches Seamly2D before the wizard closes' `
                 [int]$launchPublish[0].Ordering -lt [int]$endDialogPublish[0].Ordering) `
     -Detail "DoAction at $(if ($launchPublish.Count) { $launchPublish[0].Ordering } else { '<nothing>' }), EndDialog at $(if ($endDialogPublish.Count) { $endDialogPublish[0].Ordering } else { '<nothing>' })"
 
+# --- 12. running apps found at wizard start ------------------------------------
+# SeamlyFindRunningApps looks up the Seamly process names before the first
+# wizard page. Without it, the user waits for the Restart Manager scan in
+# InstallValidate before MsiRMFilesInUse appears.
+# installer_running_apps_test.ps1 runs the actions themselves.
+foreach ($action in @('SeamlyFindRunningApps', 'SeamlyCloseRunningApps')) {
+    $row = @(Get-MsiRows -Sql "SELECT ``Type``, ``Source``, ``Target`` FROM ``CustomAction`` WHERE ``Action``='$action'" `
+        -Columns 'Type', 'Source', 'Target')
+    # msidbCustomActionTypeDll 1, InScript 1024.
+    Assert-That -Name "$action is an immediate DLL action in SeamlyRunningAppsDll" `
+        -Succeeded ($row.Count -eq 1 -and (([int]$row[0].Type) -band 1) -eq 1 -and (([int]$row[0].Type) -band 1024) -eq 0 -and
+                    $row[0].Source -eq 'SeamlyRunningAppsDll' -and $row[0].Target -eq $action) `
+        -Detail "$(if ($row.Count) { "type $($row[0].Type), source '$($row[0].Source)', target '$($row[0].Target)'" } else { '<nothing>' })"
+}
+$findAt = @($uiRows | Where-Object { $_.Action -eq 'SeamlyFindRunningApps' })
+$runningDialogAt = @($uiRows | Where-Object { $_.Action -eq 'SeamlyAppsRunningDlg' })
+$uiCostFinalize = @($uiRows | Where-Object { $_.Action -eq 'CostFinalize' })
+$firstPages = @($uiRows | Where-Object { $_.Action -in @('ResumeDlg', 'WelcomeDlg', 'MaintenanceWelcomeDlg') })
+Assert-That -Name 'the running-app page follows the check, before every first wizard page' `
+    -Succeeded ($findAt.Count -eq 1 -and $runningDialogAt.Count -eq 1 -and $uiCostFinalize.Count -eq 1 -and
+                $firstPages.Count -eq 3 -and
+                [int]$findAt[0].Sequence -gt [int]$uiCostFinalize[0].Sequence -and
+                [int]$runningDialogAt[0].Sequence -gt [int]$findAt[0].Sequence -and
+                @($firstPages | Where-Object { [int]$_.Sequence -le [int]$runningDialogAt[0].Sequence }).Count -eq 0 -and
+                $runningDialogAt[0].Condition -eq 'SEAMLYRUNNINGAPPS') `
+    -Detail "check at $(if ($findAt.Count) { $findAt[0].Sequence } else { '<nothing>' }), page at $(if ($runningDialogAt.Count) { "$($runningDialogAt[0].Sequence) '$($runningDialogAt[0].Condition)'" } else { '<nothing>' })"
+foreach ($button in @(@{ Control = 'Retry'; Action = 'SeamlyFindRunningApps' },
+                      @{ Control = 'CloseApps'; Action = 'SeamlyCloseRunningApps' })) {
+    $events = @($script:controlEvents | Where-Object { $_.Dialog -eq 'SeamlyAppsRunningDlg' -and $_.Control -eq $button.Control })
+    $doAction = @($events | Where-Object { $_.Event -eq 'DoAction' -and $_.Argument -eq $button.Action })
+    $refresh = @($events | Where-Object { $_.Event -eq '[SeamlyAppsChecked]' })
+    $leave = @($events | Where-Object { $_.Event -eq 'EndDialog' -and $_.Argument -eq 'Return' })
+    Assert-That -Name "$($button.Control) runs $($button.Action), then leaves only when no app runs" `
+        -Succeeded ($doAction.Count -eq 1 -and $refresh.Count -eq 1 -and $leave.Count -eq 1 -and
+                    [int]$doAction[0].Ordering -lt [int]$refresh[0].Ordering -and
+                    [int]$refresh[0].Ordering -lt [int]$leave[0].Ordering -and
+                    $leave[0].Condition -eq 'NOT SEAMLYRUNNINGAPPS')
+}
+foreach ($app in @(@{ Control = 'Seamly2DRunning'; Property = 'SEAMLYRUNNING2D' },
+                   @{ Control = 'SeamlyMeRunning'; Property = 'SEAMLYRUNNINGME' },
+                   @{ Control = 'SeamlyLayoutRunning'; Property = 'SEAMLYRUNNINGLAYOUT' })) {
+    $conditions = @(Get-MsiRows -Sql "SELECT ``Action``, ``Condition`` FROM ``ControlCondition`` WHERE ``Dialog_``='SeamlyAppsRunningDlg' AND ``Control_``='$($app.Control)'" `
+        -Columns 'Action', 'Condition')
+    Assert-That -Name "the running-app page shows $($app.Control) on $($app.Property)" `
+        -Succeeded (@($conditions | Where-Object { $_.Action -eq 'Show' -and $_.Condition -eq $app.Property }).Count -eq 1 -and
+                    @($conditions | Where-Object { $_.Action -eq 'Hide' -and $_.Condition -eq "NOT $($app.Property)" }).Count -eq 1)
+}
+
 # --- report --------------------------------------------------------------------
 [System.Runtime.InteropServices.Marshal]::ReleaseComObject($script:database) | Out-Null
 

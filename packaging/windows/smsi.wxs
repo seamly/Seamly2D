@@ -102,6 +102,18 @@
                            RebootPrompt="no"
                            PromptToContinue="yes" />
 
+    <!-- Early running-app check for the wizard (SeamlyAppsRunningDlg in
+         smsi_ui.wxs). Restart Manager finds running apps only in
+         InstallValidate, after a slow scan of every packaged file. These
+         actions look up the three process names at once. smsi.ps1 builds the
+         DLL from installer_running_apps.cpp. Immediate, UI-only actions: they
+         set properties and run as the signed-in user. -->
+    <Binary Id="SeamlyRunningAppsDll" SourceFile="$(var.RunningAppsDll)" />
+    <CustomAction Id="SeamlyFindRunningApps" BinaryRef="SeamlyRunningAppsDll"
+                  DllEntry="SeamlyFindRunningApps" Execute="immediate" Return="ignore" />
+    <CustomAction Id="SeamlyCloseRunningApps" BinaryRef="SeamlyRunningAppsDll"
+                  DllEntry="SeamlyCloseRunningApps" Execute="immediate" Return="ignore" />
+
     <!-- Icons for shortcuts and Apps &amp; Features. MSI requires Icon table
          ids used by advertised shortcuts to carry the matching extension, so
          each Id is the icon's own file name — and each Id must be UNIQUE and
