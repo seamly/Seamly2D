@@ -365,7 +365,9 @@ if ($vsTargetArch -and $vsTargetArch -ne $Arch) {
 if (-not (Get-Command cl.exe -ErrorAction SilentlyContinue)) {
     throw "cl.exe is not on PATH - run this script inside the MSVC developer environment for '$Arch'."
 }
-$customActionDir = Join-Path $stageRoot 'custom-actions'
+# Build files go to a temporary folder, not the output folder: the MSI carries
+# its own copy of the DLL. The folder is deleted after the custom action test.
+$customActionDir = Join-Path ([System.IO.Path]::GetTempPath()) ('seamly-msi-custom-actions-' + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Force -Path $customActionDir | Out-Null
 $runningAppsDll = Join-Path $customActionDir 'installer_running_apps.dll'
 Write-Host "building running-app custom action DLL..."
@@ -472,8 +474,10 @@ if ($LASTEXITCODE -ne 0) {
 
 Write-Host "checking the running-app custom actions..."
 & (Join-Path $PSScriptRoot 'installer_running_apps_test.ps1') -Msi $msi -WorkDirectory $customActionDir
-if ($LASTEXITCODE -ne 0) {
-    throw "running-app custom action check failed (exit code $LASTEXITCODE) - see output above."
+$runningAppsTestExit = $LASTEXITCODE
+Remove-Item $customActionDir -Recurse -Force -ErrorAction SilentlyContinue
+if ($runningAppsTestExit -ne 0) {
+    throw "running-app custom action check failed (exit code $runningAppsTestExit) - see output above."
 }
 
 $msiSize = [math]::Round((Get-Item $msi).Length / 1MB, 1)
