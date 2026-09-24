@@ -178,20 +178,62 @@ Assert-That -Name 'package installs per machine (ALLUSERS=1)' -Succeeded ((Get-M
 foreach ($arp in @('ARPPRODUCTICON', 'ARPHELPLINK', 'ARPURLINFOABOUT', 'ARPCOMMENTS')) {
     Assert-That -Name "$arp is set" -Succeeded ((Get-MsiProperty -Name $arp) -ne '')
 }
-# ARP shows the numeric MSI ProductVersion and that cannot be overridden, so the
-# full YY.M.D.MMMM project version has to reach the user another way: the ARP
-# comment, and the install-info registry key.
+# ProductVersion is the full YY.M.DDHH project version, so Apps and features
+# shows the same string as Help > About. The ARP comment and the install-info
+# registry key carry it too.
+Assert-That -Name 'ProductVersion is the full project version' `
+    -Succeeded ((Get-MsiProperty -Name 'ProductVersion') -match '^\d{2}\.\d+\.\d+$') `
+    -Detail "found '$(Get-MsiProperty -Name 'ProductVersion')'"
 $displayVersion = @(Get-MsiRows -Sql "SELECT ``Value`` FROM ``Registry`` WHERE ``Name``='DisplayVersion'" -Columns 'Value')
 Assert-That -Name 'full project version recorded in HKLM\SOFTWARE\Seamly\Seamly2D' `
-    -Succeeded ($displayVersion.Count -eq 1 -and $displayVersion[0].Value -match '^\d{2}\.\d+\.\d+\.\d+$') `
+    -Succeeded ($displayVersion.Count -eq 1 -and $displayVersion[0].Value -match '^\d{2}\.\d+\.\d+$') `
     -Detail "found '$(if ($displayVersion.Count) { $displayVersion[0].Value } else { '<nothing>' })'"
 Assert-That -Name 'ARPCOMMENTS carries the full project version' `
-    -Succeeded ((Get-MsiProperty -Name 'ARPCOMMENTS') -match '\d{2}\.\d+\.\d+\.\d+')
+    -Succeeded ((Get-MsiProperty -Name 'ARPCOMMENTS') -match '\d{2}\.\d+\.\d+')
 
 # --- 3. upgrade behaviour ------------------------------------------------------
 $upgrade = Get-MsiRows -Sql "SELECT ``UpgradeCode``, ``ActionProperty`` FROM ``Upgrade``" -Columns 'UpgradeCode', 'ActionProperty'
 Assert-That -Name 'MajorUpgrade keyed on the fixed suite UpgradeCode' `
     -Succeeded (@($upgrade | Where-Object { $_.UpgradeCode -eq '{CBF4B5F1-C32C-4DBB-B385-3EE4A7B30658}' -and $_.ActionProperty -eq 'WIX_UPGRADE_DETECTED' }).Count -eq 1)
+# A newer installed version is detected by its own row, then the user chooses:
+# SeamlyNewerVersionDlg offers uninstall-and-continue or cancel. Without the
+# user's choice, SeamlyBlockDowngrade stops the install, silent ones included.
+$newerRow = @($upgrade | Where-Object { $_.ActionProperty -eq 'SEAMLYNEWERINSTALLED' })
+Assert-That -Name 'a newer installed version is detected' -Succeeded ($newerRow.Count -eq 1)
+$uiRows = Get-MsiRows -Sql "SELECT ``Action``, ``Sequence``, ``Condition`` FROM ``InstallUISequence``" -Columns 'Action', 'Sequence', 'Condition'
+$execRows = Get-MsiRows -Sql "SELECT ``Action``, ``Sequence``, ``Condition`` FROM ``InstallExecuteSequence``" -Columns 'Action', 'Sequence', 'Condition'
+$newerDialog = @($uiRows | Where-Object { $_.Action -eq 'SeamlyNewerVersionDlg' })
+$uiAppSearch = @($uiRows | Where-Object { $_.Action -eq 'AppSearch' })
+$uiFindRelated = @($uiRows | Where-Object { $_.Action -eq 'FindRelatedProducts' })
+Assert-That -Name 'the newer-version page is shown after AppSearch and FindRelatedProducts' `
+    -Succeeded ($newerDialog.Count -eq 1 -and $uiAppSearch.Count -eq 1 -and $uiFindRelated.Count -eq 1 -and
+                $newerDialog[0].Condition -match 'SEAMLYNEWERINSTALLED' -and
+                [int]$newerDialog[0].Sequence -gt [int]$uiAppSearch[0].Sequence -and
+                [int]$newerDialog[0].Sequence -gt [int]$uiFindRelated[0].Sequence) `
+    -Detail "found $(if ($newerDialog.Count) { "$($newerDialog[0].Sequence) '$($newerDialog[0].Condition)'" } else { '<nothing>' })"
+$newerOptions = Get-MsiRows -Sql "SELECT ``Value``, ``Text`` FROM ``RadioButton`` WHERE ``Property``='SeamlyNewerOption'" -Columns 'Value', 'Text'
+Assert-That -Name 'the newer-version page offers uninstall and cancel' `
+    -Succeeded ($newerOptions.Count -eq 2 -and
+                @($newerOptions | Where-Object { $_.Value -eq 'Uninstall' }).Count -eq 1 -and
+                @($newerOptions | Where-Object { $_.Value -eq 'Cancel' }).Count -eq 1)
+$confirm = Get-MsiRows -Sql "SELECT ``Event``, ``Argument``, ``Condition`` FROM ``ControlEvent`` WHERE ``Dialog_``='SeamlyNewerVersionDlg' AND ``Control_``='OK'" -Columns 'Event', 'Argument', 'Condition'
+Assert-That -Name 'OK with uninstall confirms the downgrade' `
+    -Succeeded (@($confirm | Where-Object { $_.Event -eq '[SEAMLYDOWNGRADECONFIRMED]' -and $_.Argument -eq '1' -and $_.Condition -match 'Uninstall' }).Count -eq 1)
+Assert-That -Name 'the downgrade confirmation reaches the execute sequence' `
+    -Succeeded ((Get-MsiProperty -Name 'SecureCustomProperties') -match '(^|;)SEAMLYDOWNGRADECONFIRMED(;|$)')
+$block = @($execRows | Where-Object { $_.Action -eq 'SeamlyBlockDowngrade' })
+$execAppSearch = @($execRows | Where-Object { $_.Action -eq 'AppSearch' })
+Assert-That -Name 'an unconfirmed downgrade is stopped after AppSearch' `
+    -Succeeded ($block.Count -eq 1 -and $execAppSearch.Count -eq 1 -and
+                $block[0].Condition -match 'SEAMLYNEWERINSTALLED' -and
+                $block[0].Condition -match 'NOT SEAMLYDOWNGRADECONFIRMED' -and
+                [int]$block[0].Sequence -gt [int]$execAppSearch[0].Sequence) `
+    -Detail "found $(if ($block.Count) { "$($block[0].Sequence) '$($block[0].Condition)'" } else { '<nothing>' })"
+$blockText = Get-MsiRows -Sql "SELECT ``Target``, ``Type`` FROM ``CustomAction`` WHERE ``Action``='SeamlyBlockDowngrade'" -Columns 'Target', 'Type'
+Assert-That -Name 'the stop message names the installed and the new version' `
+    -Succeeded ($blockText.Count -eq 1 -and
+                $blockText[0].Target -match '\[SEAMLYINSTALLEDVERSION\]' -and
+                $blockText[0].Target -match '\[ProductVersion\]')
 
 # --- 4. previous-installation detection ---------------------------------------
 # The old NSIS installer is 32-bit and never switches the registry view, so both
@@ -344,18 +386,17 @@ foreach ($line in @('SameVersionText', 'OtherVersionText', 'UnknownVersionText')
     Assert-That -Name "$line is shown by condition" -Succeeded ($shown.Count -eq 1)
     Assert-That -Name "$line names a version" `
         -Succeeded (@($maintenanceControls | Where-Object {
-            $_.Control -eq $line -and $_.Text -match '\d+\.\d+\.\d+\.\d+' }).Count -eq 1)
+            $_.Control -eq $line -and $_.Text -match '\d+\.\d+\.\d+' }).Count -eq 1)
 }
 $sameVersion = @($maintenanceConditions | Where-Object { $_.Control -eq 'SameVersionText' })
 Assert-That -Name 'the same-version line compares against the built version' `
-    -Succeeded ($sameVersion.Count -eq 1 -and $sameVersion[0].Condition -match 'SEAMLYINSTALLEDVERSION = "\d+\.\d+\.\d+\.\d+"') `
+    -Succeeded ($sameVersion.Count -eq 1 -and $sameVersion[0].Condition -match 'SEAMLYINSTALLEDVERSION = "\d+\.\d+\.\d+"') `
     -Detail "condition '$(if ($sameVersion.Count) { $sameVersion[0].Condition } else { '<nothing>' })'"
 $unknownVersion = @($maintenanceConditions | Where-Object { $_.Control -eq 'UnknownVersionText' })
 Assert-That -Name 'a machine with no recorded version still gets a line' `
     -Succeeded ($unknownVersion.Count -eq 1 -and $unknownVersion[0].Condition -match 'NOT SEAMLYINSTALLEDVERSION')
 # Read from the same HKLM value InstallInfoRegistry writes, 64-bit view, raw
-# (type 2 + 16). Apps and features stores only the numeric MSI ProductVersion,
-# which is not the version the apps show.
+# (type 2 + 16).
 $versionSearch = Get-MsiRows `
     -Sql "SELECT ``Signature_``, ``Root``, ``Key``, ``Name``, ``Type`` FROM ``RegLocator`` WHERE ``Name``='DisplayVersion'" `
     -Columns 'Signature', 'Root', 'Key', 'Name', 'Type'

@@ -67,18 +67,17 @@
       * the MSVC developer environment, which sets VCToolsRedistDir (ci.yml
         uses ilammy/msvc-dev-cmd)
 
-    The MSI ProductVersion cannot carry the project's 4-part YY.M.D.MMMM
-    scheme (MSI ignores the 4th field for upgrade comparisons), so the script
-    derives a monotonic 3-part numeric version:  YY.M.((D-1)*1440 + MMMM)  —
-    strictly increasing across builds, so MajorUpgrade always upgrades in
-    place. The full project version is embedded as DisplayVersion.
+    The MSI ProductVersion is the project version YY.M.DDHH, unchanged, so
+    Apps and features, Help > About and the release tag all show one string.
+    Windows Installer compares all three fields, so builds sort by hour; two
+    builds of one hour compare equal and replace each other.
 
 .PARAMETER Arch
     Target architecture of the MSI: x64 (default) or arm64.
 
 .PARAMETER Version
-    Project version as YY.M.D.MMMM (the ci.yml scheme), where MMMM is the
-    minute of the day. Required.
+    Project version as YY.M.DDHH (the ci.yml scheme), where DDHH is
+    day * 100 + hour (0-23). Required.
 
 .PARAMETER Seamly2DBin
     Directory holding seamly2d.exe, built with CONFIG+=deferDeploy so no Qt
@@ -122,7 +121,7 @@ param(
     [ValidateSet('x64', 'arm64')]
     [string]$Arch = 'x64',
 
-    # Project version YY.M.D.MMMM. Derives the MSI ProductVersion.
+    # Project version YY.M.DDHH. Used unchanged as the MSI ProductVersion.
     [Parameter(Mandatory = $true)]
     [string]$Version,
 
@@ -182,40 +181,30 @@ function Invoke-Tool {
 }
 
 #------------------------------------------------------------------------------
-# @brief  Derive the numeric MSI ProductVersion from the project version.
+# @brief  Reject a project version that is malformed or outside MSI limits.
 #
-# MSI ProductVersion allows major<=255, minor<=255, build<=65535, and ignores
-# the 4th field for upgrade comparisons. The project's YY.M.D.MMMM scheme
-# needs a 3-part mapping: YY.M.((D-1)*1440 + MMMM). The third field encodes
-# day+time as minutes-of-month (max 44639 < 65535), so it strictly increases
-# build over build and MajorUpgrade always sees newer builds as newer.
+# MSI ProductVersion allows major<=255, minor<=255, build<=65535. The
+# YY.M.DDHH ranges below stay inside those limits (DDHH is at most 3123).
 #
-# This mapping matches the earlier YYYY.M.D.HHMM scheme, so old and new
-# packages still upgrade each other.
-#
-# @param  ProjectVersion  version string YY.M.D.MMMM
-# @return the derived x.y.z MSI version string
+# @param  ProjectVersion  version string YY.M.DDHH
 #------------------------------------------------------------------------------
-function ConvertTo-MsiVersion {
+function Assert-ProjectVersion {
     param([string]$ProjectVersion)
 
     $parts = $ProjectVersion.Split('.')
-    if ($parts.Count -ne 4 -or ($parts | Where-Object { $_ -notmatch '^\d+$' })) {
-        throw "Version '$ProjectVersion' is not in the expected YY.M.D.MMMM form."
+    if ($parts.Count -ne 3 -or ($parts | Where-Object { $_ -notmatch '^\d+$' })) {
+        throw "Version '$ProjectVersion' is not in the expected YY.M.DDHH form."
     }
-    $year    = [int]$parts[0]
-    $month   = [int]$parts[1]
-    $day     = [int]$parts[2]
-    $minutes = [int]$parts[3]
+    $year  = [int]$parts[0]
+    $month = [int]$parts[1]
+    $day   = [math]::Floor([int]$parts[2] / 100)
+    $hour  = [int]$parts[2] % 100
     if ($year -gt 255 -or $month -lt 1 -or $month -gt 12 -or $day -lt 1 -or $day -gt 31) {
         throw "Version '$ProjectVersion' has out-of-range date fields."
     }
-    if ($minutes -gt 1439) {
-        throw "Version '$ProjectVersion' has an out-of-range minute-of-day field."
+    if ($hour -gt 23) {
+        throw "Version '$ProjectVersion' has an out-of-range hour field."
     }
-
-    $minutesOfMonth = (($day - 1) * 1440) + $minutes
-    return "$year.$month.$minutesOfMonth"
 }
 
 #------------------------------------------------------------------------------
@@ -285,10 +274,10 @@ if (-not (Test-Path $WinDeployQt)) {
     throw "windeployqt not found at '$WinDeployQt'."
 }
 $crtDir = Find-CrtDirectory -Architecture $Arch
-$msiVersion = ConvertTo-MsiVersion -ProjectVersion $Version
+Assert-ProjectVersion -ProjectVersion $Version
 
 Write-Host "arch        : $Arch"
-Write-Host "version     : $Version  (MSI ProductVersion $msiVersion)"
+Write-Host "version     : $Version"
 Write-Host "seamly2d    : $Seamly2DBin"
 Write-Host "seamlyme    : $SeamlyMeBin"
 Write-Host "seamlylayout: $SeamlyLayoutBuildDir"
@@ -386,8 +375,7 @@ $wixArguments = @('build') + $wxsFiles + @(
     '-pdbtype', 'none',
     '-ext', 'WixToolset.UI.wixext',
     '-ext', 'WixToolset.Util.wixext',
-    '-d', "ProductVersion=$msiVersion",
-    '-d', "DisplayVersion=$Version",
+    '-d', "ProductVersion=$Version",
     '-d', "RepoRoot=$repoRoot",
     # SeamlyLayout's runtime is merged into ParentStagingDir, so the .wxs
     # harvests one runtime tree plus one exe tree.
@@ -433,7 +421,7 @@ if ($LASTEXITCODE -ne 0) {
 # target file, which would stop them being optional.
 #
 # ICE61 stays visible and is expected: a known consequence of
-# MajorUpgrade/@AllowSameVersionUpgrades.
+# MajorUpgrade/@AllowDowngrades.
 if (-not $SkipValidation) {
     Write-Host "running wix msi validate (ICE checks)..."
     Invoke-Tool -Description 'wix msi validate' -Exe 'wix' -Arguments @(

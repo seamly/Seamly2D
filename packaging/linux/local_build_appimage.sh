@@ -19,7 +19,7 @@
 #******************************************************************************
 #
 # Usage:
-#   packaging/linux/local_build_appimage.sh [--version YY.M.D.mmmm] [--qt-root DIR] [--skip-tests]
+#   packaging/linux/local_build_appimage.sh [--version YY.M.DDHH] [--qt-root DIR] [--skip-tests]
 #
 # Requires on PATH: qmake, cmake, ninja, cargo, ctest, xvfb-run, pdftops
 # (poppler-utils), and the libxerces-c-dev headers. Auto-downloads
@@ -66,10 +66,10 @@ version_ge() {
 }
 
 # --- Version --------------------------------------------------------------------
-# Same YY.M.D.mmmm formula ci.yml's version job uses.
+# Same YY.M.DDHH formula ci.yml's version job uses.
 if [ -z "${VERSION}" ]; then
     read -r YEAR MONTH DAY HOUR MINUTE <<< "$(date +'%Y %m %d %H %M')"
-    VERSION="$((10#${YEAR} - 2000)).$((10#${MONTH})).$((10#${DAY})).$((10#${HOUR} * 60 + 10#${MINUTE}))"
+    VERSION="$((10#${YEAR} - 2000)).$((10#${MONTH})).$((10#${DAY} * 100 + 10#${HOUR}))"
 fi
 echo "version: ${VERSION}"
 

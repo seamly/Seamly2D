@@ -56,15 +56,11 @@ class QString;
 
 extern const int MAJOR_VERSION;
 extern const int MINOR_VERSION;
+// Version YY.M.DDHH: DEBUG_VERSION is day * 100 + hour, so it fits the
+// 3-part MSI ProductVersion and sorts by build hour.
 extern const int DEBUG_VERSION;
-extern const int SUPER_MINOR__VERSION;
 
 extern const QString APP_VERSION_STR;
-
-/*
-   APP_VERSION is (major << 16) + (minor << 8) + patch.
-*/
-#define APP_VERSION ((MAJOR_VERSION << 16) + (MINOR_VERSION << 8) + DEBUG_VERSION)
 
 /*
    WINDOW_STATE_VERSION keys the blob that QMainWindow::saveState() writes and
@@ -72,15 +68,15 @@ extern const QString APP_VERSION_STR;
    Bump it by hand only when a toolbar or a dock widget is added, removed or
    renamed, so that restoreState() rejects state that no longer fits.
 
-   Do not use APP_VERSION here. APP_VERSION carries the build date (year,
-   month and day), so it changes with every rolling release, and restoreState()
-   would discard the user's toolbar and dock layout on every update.
+   Do not use the app version here. It carries the build date and hour, so it
+   changes with every rolling release, and restoreState() would discard the
+   user's toolbar and dock layout on every update.
 */
 #define WINDOW_STATE_VERSION 1
 
 // Start: Do not edit here, use packaging/version.sh to update
-#define VER_FILEVERSION 26,9,23,609
-#define VER_FILEVERSION_STR "26.9.23.609"
+#define VER_FILEVERSION 26,9,2319,0
+#define VER_FILEVERSION_STR "26.9.2319"
 // End: Do not edit here
 
 #define V_PRERELEASE // Mark prerelease builds

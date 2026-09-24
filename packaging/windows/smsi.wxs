@@ -11,10 +11,7 @@
 
 <!-- Fail fast with a clear message when the build script forgot a define. -->
 <?ifndef var.ProductVersion ?>
-  <?error ProductVersion is not defined - build via packaging\windows\smsi.ps1, which passes -d ProductVersion=x.y.z ?>
-<?endif?>
-<?ifndef var.DisplayVersion ?>
-  <?error DisplayVersion is not defined - build via packaging\windows\smsi.ps1, which passes -d DisplayVersion=YY.M.D.MMMM ?>
+  <?error ProductVersion is not defined - build via packaging\windows\smsi.ps1, which passes -d ProductVersion=YY.M.DDHH ?>
 <?endif?>
 <?ifndef var.RepoRoot ?>
   <?error RepoRoot is not defined - build via packaging\windows\smsi.ps1, which passes -d RepoRoot=<repo root> ?>
@@ -42,13 +39,34 @@
            Compressed="yes"
            Scope="perMachine">
 
-    <SummaryInformation Description="Seamly $(var.DisplayVersion) - apparel CAD for drafting, measurements/sizing, and layout" />
+    <SummaryInformation Description="Seamly $(var.ProductVersion) - apparel CAD for drafting, measurements/sizing, and layout" />
 
-    <!-- Newer versions upgrade in place: the old product (any architecture,
-         same UpgradeCode) is removed before the new files are installed.
-         AllowSameVersionUpgrades keeps rolling same-minute rebuilds working. -->
-    <MajorUpgrade AllowSameVersionUpgrades="yes"
-                  DowngradeErrorMessage="A newer version of [ProductName] is already installed. Uninstall it first to install this older version." />
+    <!-- Any installed version (any architecture, same UpgradeCode) is removed
+         before the new files are installed. AllowDowngrades includes a newer
+         installed version, so SeamlyNewerVersionDlg (smsi_ui.wxs) must ask
+         first. Two builds of one hour have the same YY.M.DDHH version, so they
+         replace each other without the question. -->
+    <MajorUpgrade AllowDowngrades="yes" />
+
+    <!-- Detect-only row: sets SEAMLYNEWERINSTALLED when the installed version
+         is newer than this package. MajorUpgrade's own row cannot tell a newer
+         product from an older one once downgrades are allowed. -->
+    <Upgrade Id="cbf4b5f1-c32c-4dbb-b385-3ee4a7b30658">
+      <UpgradeVersion Minimum="$(var.ProductVersion)" IncludeMinimum="no"
+                      OnlyDetect="yes" Property="SEAMLYNEWERINSTALLED" />
+    </Upgrade>
+
+    <!-- Set by SeamlyNewerVersionDlg when the user chooses to uninstall the
+         newer version. A silent install must pass SEAMLYDOWNGRADECONFIRMED=1
+         on the msiexec command line, or SeamlyBlockDowngrade stops it. -->
+    <Property Id="SEAMLYDOWNGRADECONFIRMED" Secure="yes" />
+    <CustomAction Id="SeamlyBlockDowngrade"
+                  Error="Seamly [SEAMLYINSTALLEDVERSION] is installed. It is newer than this installer, Seamly [ProductVersion]. Uninstall Seamly first to install this version." />
+    <!-- After AppSearch, so the message can name the installed version. -->
+    <InstallExecuteSequence>
+      <Custom Action="SeamlyBlockDowngrade" After="AppSearch"
+              Condition="SEAMLYNEWERINSTALLED AND NOT SEAMLYDOWNGRADECONFIRMED AND NOT Installed" />
+    </InstallExecuteSequence>
 
     <!-- Single embedded cab: one self-contained .msi file. -->
     <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
@@ -103,20 +121,14 @@
     <Property Id="ARPPRODUCTICON" Value="seamly2d.ico" />
     <Property Id="ARPHELPLINK" Value="https://seamly.io" />
     <Property Id="ARPURLINFOABOUT" Value="https://seamly.io" />
-    <!-- Apps &amp; features shows the numeric MSI ProductVersion (26.y.z) as its
-         DisplayVersion, and that cannot be overridden: the RegisterProduct
-         standard action writes that value into the Uninstall key *after*
-         WriteRegistryValues, so any component-authored override is overwritten.
-         The full YY.M.D.MMMM project version therefore reaches the user two
-         other ways — the ARP comment here, and HKLM\SOFTWARE\Seamly\Seamly2D
-         (DisplayVersion) written by InstallInfoRegistry below. -->
-    <Property Id="ARPCOMMENTS" Value="Seamly $(var.DisplayVersion) - apparel CAD pattern drafting (Seamly2D), measurements/sizing (SeamlyMe), and layout (SeamlyLayout)" />
+    <!-- Apps &amp; features shows ProductVersion, the full YY.M.DDHH project
+         version. The ARP comment and HKLM\SOFTWARE\Seamly\Seamly2D
+         (DisplayVersion, written by InstallInfoRegistry) carry it too. -->
+    <Property Id="ARPCOMMENTS" Value="Seamly $(var.ProductVersion) - apparel CAD pattern drafting (Seamly2D), measurements/sizing (SeamlyMe), and layout (SeamlyLayout)" />
 
     <!-- The full version of whatever is installed now, for the maintenance
-         page to name. Read from the same HKLM value
-         InstallInfoRegistry writes, because Apps and features stores only the
-         numeric MSI ProductVersion and that is not the version a user sees in
-         the apps.
+         page and the newer-version page to name. Read from the same HKLM value
+         InstallInfoRegistry writes.
 
          AppSearch runs at 50, long before any dialog, and does NOT overwrite a
          property already set on the command line. Empty when nothing is

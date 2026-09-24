@@ -184,6 +184,56 @@
         </Control>
       </Dialog>
 
+      <!-- ========== a newer version is installed ========================== -->
+      <!-- Shown when SEAMLYNEWERINSTALLED is set (Upgrade row in smsi.wxs).
+           Uninstall sets SEAMLYDOWNGRADECONFIRMED, so SeamlyBlockDowngrade does
+           not stop the install and MajorUpgrade removes the newer version. -->
+      <Property Id="SeamlyNewerOption" Value="Uninstall" />
+      <Dialog Id="SeamlyNewerVersionDlg" Width="370" Height="270"
+              Title="[ProductName] Setup">
+
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
+                 TabSkip="no" Disabled="yes" Text="WixUI_Bmp_Banner" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0"
+                 Disabled="yes" TabSkip="yes" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0"
+                 Disabled="yes" TabSkip="yes" />
+
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
+                 Transparent="yes" NoPrefix="yes" TabSkip="yes"
+                 Text="{\WixUI_Font_Title}A newer Seamly is installed" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15"
+                 Transparent="yes" NoPrefix="yes" TabSkip="yes"
+                 Text="This installer holds an older version." />
+        <Control Id="Text" Type="Text" X="20" Y="60" Width="330" Height="30"
+                 NoPrefix="yes" TabSkip="yes"
+                 Text="Seamly [SEAMLYINSTALLEDVERSION] is installed. It is newer than this installer, Seamly [ProductVersion]." />
+
+        <Control Id="NewerOption" Type="RadioButtonGroup" X="20" Y="100" Width="330" Height="50"
+                 TabSkip="no" Property="SeamlyNewerOption">
+          <RadioButtonGroup>
+            <RadioButton Value="Uninstall" X="0" Y="0" Width="325" Height="20"
+                         Text="Uninstall Seamly, then continue with this installation?" />
+            <RadioButton Value="Cancel" X="0" Y="26" Width="325" Height="20"
+                         Text="Cancel this installation" />
+          </RadioButtonGroup>
+        </Control>
+
+        <Control Id="OK" Type="PushButton" X="240" Y="243" Width="56" Height="17"
+                 Default="yes" TabSkip="no" Text="OK">
+          <Publish Property="SEAMLYDOWNGRADECONFIRMED" Value="1" Order="1"
+                   Condition="SeamlyNewerOption = &quot;Uninstall&quot;" />
+          <Publish Event="EndDialog" Value="Return" Order="2"
+                   Condition="SeamlyNewerOption = &quot;Uninstall&quot;" />
+          <Publish Event="EndDialog" Value="Exit" Order="3"
+                   Condition="SeamlyNewerOption = &quot;Cancel&quot;" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
+                 Cancel="yes" TabSkip="no" Text="Cancel">
+          <Publish Event="EndDialog" Value="Exit" />
+        </Control>
+      </Dialog>
+
       <!-- ========== preparing (replaces stock PrepareDlg) ================= -->
       <!-- Same geometry and bitmap as stock WelcomeDlg/PrepareDlg (the big
            left-side WixUIDialogBmp, not the banner strip the five pages below
@@ -491,16 +541,16 @@
              BottomLine. Their conditions are disjoint, so exactly one shows. -->
         <Control Id="SameVersionText" Type="Text" X="25" Y="214" Width="320" Height="18"
                  Hidden="yes" NoPrefix="yes"
-                 ShowCondition="SEAMLYINSTALLEDVERSION = &quot;$(var.DisplayVersion)&quot;"
-                 Text="Seamly $(var.DisplayVersion) is installed. This installer holds that same version." />
+                 ShowCondition="SEAMLYINSTALLEDVERSION = &quot;$(var.ProductVersion)&quot;"
+                 Text="Seamly $(var.ProductVersion) is installed. This installer holds that same version." />
         <Control Id="OtherVersionText" Type="Text" X="25" Y="214" Width="320" Height="18"
                  Hidden="yes" NoPrefix="yes"
-                 ShowCondition="SEAMLYINSTALLEDVERSION AND SEAMLYINSTALLEDVERSION &lt;&gt; &quot;$(var.DisplayVersion)&quot;"
-                 Text="Seamly [SEAMLYINSTALLEDVERSION] is installed. This installer holds $(var.DisplayVersion)." />
+                 ShowCondition="SEAMLYINSTALLEDVERSION AND SEAMLYINSTALLEDVERSION &lt;&gt; &quot;$(var.ProductVersion)&quot;"
+                 Text="Seamly [SEAMLYINSTALLEDVERSION] is installed. This installer holds $(var.ProductVersion)." />
         <Control Id="UnknownVersionText" Type="Text" X="25" Y="214" Width="320" Height="18"
                  Hidden="yes" NoPrefix="yes"
                  ShowCondition="NOT SEAMLYINSTALLEDVERSION"
-                 Text="This installer holds Seamly $(var.DisplayVersion)." />
+                 Text="This installer holds Seamly $(var.ProductVersion)." />
 
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17"
                  Text="&amp;Back">
@@ -597,6 +647,10 @@
          by smsi_check_authoring.ps1 - is untouched. -->
     <InstallUISequence>
       <Show Dialog="SeamlyPrepareDlg" Before="AppSearch" />
+      <!-- After AppSearch, so the page can name the installed version, and
+           after FindRelatedProducts, which sets SEAMLYNEWERINSTALLED. -->
+      <Show Dialog="SeamlyNewerVersionDlg" After="AppSearch"
+            Condition="SEAMLYNEWERINSTALLED AND NOT Installed" />
     </InstallUISequence>
   </Fragment>
 </Wix>

@@ -60,8 +60,9 @@ Upgrade test needs 2 packages with different `-Version` values (2 CI runs).
 
 | Property | Source | Meaning |
 |---|---|---|
-| `WIX_UPGRADE_DETECTED` | `FindRelatedProducts` | older MSI of this suite installed |
-| `WIX_DOWNGRADE_DETECTED` | same | newer MSI installed |
+| `WIX_UPGRADE_DETECTED` | `FindRelatedProducts` | any MSI of this suite installed (`AllowDowngrades`) |
+| `SEAMLYNEWERINSTALLED` | same, detect-only `Upgrade` row | newer MSI installed |
+| `SEAMLYDOWNGRADECONFIRMED` | `SeamlyNewerVersionDlg`, or msiexec command line | user chose to uninstall the newer MSI |
 | `SEAMLYLEGACYUNINSTALLSTRING` | `RegistrySearch`, `always32` | old NSIS product installed |
 | `SEAMLYOLD{S2D,ME,LAYOUT}EXE` | `RegistrySearch`+`FileSearch`, legacy dir | old exe exists |
 | `SEAMLYNEWLAYOUTEXE` | `RegistrySearch`+`FileSearch`, suite dir | new SeamlyLayout exists |
@@ -105,8 +106,9 @@ runs it. Every input is a named parameter — nothing inherited from the build
 machine. Parameter table: [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md).
 
 1. Check exes/wix/windeployqt/CRT present; throw naming what's missing.
-2. Derive `ProductVersion` (`YY.M.((D-1)*1440+MMMM)`) — strictly increasing
-   per build, so cases C/D upgrade correctly; same-minute builds tie.
+2. Use `-Version` unchanged as `ProductVersion` (`YY.M.DDHH`). Builds sort
+   by hour; two builds of one hour tie and upgrade each other; a build from
+   an earlier hour is a downgrade.
 3. Stage: merge bins into `parent\`, `windeployqt` SeamlyLayout, add
    settings/licenses/CRT; move 3 exes into `exes\` (authored explicitly, not
    wildcard-harvested, so shortcuts/associations can reference them).
@@ -124,7 +126,11 @@ machine. Parameter table: [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md).
    never flashes under the Welcome page (replaces stock `PrepareDlg`, which
    is modeless and does not gate). Continue → `AppSearch` sets detection
    properties.
-2. Downgrade detected → abort (`DowngradeErrorMessage`).
+2. Newer MSI installed → `SeamlyNewerVersionDlg` names both versions and
+   offers "Uninstall Seamly, then continue" or "Cancel this installation".
+   Uninstall → `MajorUpgrade` removes the newer MSI. Without that choice,
+   `SeamlyBlockDowngrade` stops the install; a silent install passes
+   `SEAMLYDOWNGRADECONFIRMED=1`. Same-day builds skip the page.
 3. Fresh install or repair-from-nothing: `WelcomeDlg` → `LicenseAgreementDlg`.
 4. Old app without Layout, or new Layout found → `SeamlyPreviousInstallDlg`
    (upgrade and/or NSIS paragraph); case A / repair skips straight to 5.

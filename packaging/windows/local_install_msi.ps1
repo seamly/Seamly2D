@@ -584,7 +584,7 @@ function Invoke-InstalledChecks {
 
     # --- install-info registry rows -------------------------------------------
     Assert-That -Name 'the full project version is recorded in HKLM\SOFTWARE\Seamly\Seamly2D' `
-        -Succeeded ([string]$InstallInfo.DisplayVersion -match '^\d{2}\.\d+\.\d+\.\d+$') `
+        -Succeeded ([string]$InstallInfo.DisplayVersion -match '^\d{2}\.\d+\.\d+$') `
         -Detail "DisplayVersion = '$($InstallInfo.DisplayVersion)'"
 
     $dataRoot = [string]$InstallInfo.DataRoot
@@ -662,14 +662,12 @@ function Invoke-InstalledChecks {
         Assert-That -Name 'ARP DisplayName is Seamly2D' -Succeeded ($arp.DisplayName -eq 'Seamly2D')
         Assert-That -Name 'ARP Publisher is set' -Succeeded (-not [string]::IsNullOrWhiteSpace($arp.Publisher)) `
             -Detail "Publisher = '$($arp.Publisher)'"
-        # ARP can only ever show the numeric MSI ProductVersion (26.y.z): the
-        # RegisterProduct standard action rewrites this value after the
-        # component-authored registry rows are written.
-        Assert-That -Name 'ARP DisplayVersion is the numeric MSI version' `
-            -Succeeded ([string]$arp.DisplayVersion -match '^\d+\.\d+\.\d+$') `
+        # ARP shows ProductVersion, the full YY.M.DDHH project version.
+        Assert-That -Name 'ARP DisplayVersion is the full project version' `
+            -Succeeded ([string]$arp.DisplayVersion -match '^\d{2}\.\d+\.\d+$') `
             -Detail "DisplayVersion = '$($arp.DisplayVersion)'"
         Assert-That -Name 'ARP Comments carry the full project version' `
-            -Succeeded ([string]$arp.Comments -match '\d{2}\.\d+\.\d+\.\d+') `
+            -Succeeded ([string]$arp.Comments -match '\d{2}\.\d+\.\d+') `
             -Detail "Comments = '$($arp.Comments)'"
         Assert-That -Name 'ARP estimated size is plausible (> 50 MB)' `
             -Succeeded ([int]$arp.EstimatedSize -gt 51200) `

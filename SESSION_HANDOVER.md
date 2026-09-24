@@ -6,11 +6,22 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-23 — Version scheme YY.M.DDHH + MSI newer-version page
+
+Branch `task-msi-version`, merged into `run-seamlyLayout` without skip-ci (full CI runs).
+
+- Cause: a hand-typed `smsi.ps1 -Version 26.9.23.1200` (= 20:00) made the installed MSI outrank later builds; Windows showed "newer version installed".
+- Version is now 3-part `YY.M.DDHH` (DDHH = day*100 + hour): `version.sh`, `ci.yml`, the 3 local build scripts, `projectversion.{h,cpp}` (`SUPER_MINOR__VERSION` and unused `APP_VERSION` removed).
+- `smsi.ps1` passes `-Version` unchanged as MSI `ProductVersion`; the `YY.M.((D-1)*1440+MMMM)` mapping is gone.
+- `smsi.wxs`: `MajorUpgrade AllowDowngrades`, detect-only `SEAMLYNEWERINSTALLED` row, `SeamlyBlockDowngrade` stops unconfirmed downgrades (silent: pass `SEAMLYDOWNGRADECONFIRMED=1`).
+- `smsi_ui.wxs`: `SeamlyNewerVersionDlg` — radio "Uninstall Seamly, then continue…" / "Cancel this installation", OK/Cancel. User saw it on screen with 4-part test MSIs; not yet re-seen with 3-part.
+- `fvupdater.cpp` `releaseIsNewer` now uses `QVersionNumber` (old loop indexed past a shorter version and ignored field order).
+- Open: Trousers `TestOpenCollection` timed out once under load (passes alone, 20–44 s). If it recurs, raise the timeout at `tst_seamly2dcommandline.cpp:306` to 300 s.
+
 ## 2026-09-23 — SeamlyLayout Adjust: Lower to Bottom fix
 
 Merged `task-adjust-z-order` into `run-seamlyLayout`. See `TODO_COMPLETED.md`.
 `ctest --preset debug` 6/6, `cargo test --workspace` green. CI skipped.
-User's staged edits (`packaging/**`, `projectversion.*`, `latest-todos.txt`) were left uncommitted.
 
 ## 2026-09-21 — Seamly2D: unnamed pieces now get a unique "Piece N" fallback name
 
