@@ -82,11 +82,12 @@ Checks first, fails on the first missing item: both exes, `seamly2d`'s `platform
 
 1. **Checks `-Version`** and uses it unchanged as `ProductVersion` (`YY.M.DDHH`). Builds sort by hour; two builds of one hour tie and replace each other. `MajorUpgrade` has `AllowDowngrades`; `SeamlyNewerVersionDlg` asks before it removes a newer version.
 2. **Stages** `packaging\windows\seamly-msi\<arch>\`: `parent\` (shared Qt runtime + `windeployqt --qmldir …\qml --release` for SeamlyLayout, its `settings\`/`licenses\`, MSVC CRT DLLs) and `exes\` (the three exes, moved out of `parent\` after deployment so `.wxs` can author them explicitly for shortcuts/associations).
-3. **`wix build`** on every `*.wxs` file in this directory (globbed, not hard-coded — `smsi.wxs` plus its five fragments) → `seamly-<arch>.msi` (`-pdbtype none`, no `.wixpdb`).
+3. **`cl`** builds `installer_running_apps.dll` (static CRT) from [`installer_running_apps.cpp`](installer_running_apps.cpp). `cl.exe` must target `-Arch`. Then **`wix build`** on every `*.wxs` file in this directory (globbed, not hard-coded — `smsi.wxs` plus its five fragments) → `seamly-<arch>.msi` (`-pdbtype none`, no `.wixpdb`).
 4. **[`smsi_fix_dialog_lines.ps1`](smsi_fix_dialog_lines.ps1)** — trims WixUI's stock banner/bottom line controls back inside the dialog width (they overflow by 3 installer units, logging Error 2826). Runs on the built package, before validation.
 5. **`wix msi validate`** (skip with `-SkipValidation`), suppressing ICE43/57 — false positives from optional desktop-shortcut components.
 6. **[`smsi_check_authoring.ps1`](smsi_check_authoring.ps1)** — asserts elevation, ARP properties, upgrade/NSIS detection, dialogs, shortcuts, associations, registry rows. Always runs, even with `-SkipValidation`.
 7. **[`smsi_ensure_user_data_test.ps1`](smsi_ensure_user_data_test.ps1)** — unit tests for the data-root/settings-seeding deferred action. Always runs.
+8. **[`installer_running_apps_test.ps1`](installer_running_apps_test.ps1)** — runs the running-app custom actions in the built MSI against a stand-in `seamlyme.exe`. Skips the close check while a real Seamly app runs.
 
 All three apps ship in every package
 

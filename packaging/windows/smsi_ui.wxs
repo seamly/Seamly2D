@@ -135,7 +135,10 @@
            interactive user sees. The stock page offered "attempt to restart
            them", but no Seamly app registers for restart, and "a reboot will
            be required", which leaves a half-installed product. This page offers
-           close-and-continue or cancel instead. -->
+           close-and-continue or cancel instead.
+           SeamlyAppsRunningDlg below normally catches running apps first. This
+           page remains for an app started later in the wizard, or run by
+           another signed-in user. -->
       <Property Id="SeamlyRMOption" Value="Close" />
       <Dialog Id="MsiRMFilesInUse" Width="370" Height="270" KeepModeless="yes"
               Title="[ProductName] Setup">
@@ -181,6 +184,70 @@
         <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
                  Cancel="yes" TabSkip="no" Text="Cancel">
           <Publish Event="EndDialog" Value="Exit" />
+        </Control>
+      </Dialog>
+
+      <!-- ========== apps running at wizard start =========================== -->
+      <!-- Shown before WelcomeDlg when SeamlyFindRunningApps (smsi.wxs) finds a
+           running Seamly app. It is the fast check: MsiRMFilesInUse above
+           appears only after the Restart Manager scan in InstallValidate.
+           Retry and Close Apps run the check again. The page stays open until
+           no app runs, or until the user cancels. -->
+      <Dialog Id="SeamlyAppsRunningDlg" Width="370" Height="270"
+              Title="[ProductName] Setup">
+
+        <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44"
+                 TabSkip="no" Disabled="yes" Text="WixUI_Bmp_Banner" />
+        <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0"
+                 Disabled="yes" TabSkip="yes" />
+        <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0"
+                 Disabled="yes" TabSkip="yes" />
+
+        <Control Id="Title" Type="Text" X="15" Y="6" Width="280" Height="15"
+                 Transparent="yes" NoPrefix="yes" TabSkip="yes"
+                 Text="{\WixUI_Font_Title}Seamly apps are running" />
+        <Control Id="Description" Type="Text" X="25" Y="23" Width="340" Height="15"
+                 Transparent="yes" NoPrefix="yes" TabSkip="yes"
+                 Text="Setup cannot replace the files of a running app." />
+        <Control Id="Text" Type="Text" X="20" Y="56" Width="330" Height="12"
+                 NoPrefix="yes" TabSkip="yes"
+                 Text="Save your work, then close these apps:" />
+
+        <!-- One line for each app. A property set inside a DoAction does not
+             refresh the control conditions by itself; the Property event on
+             SeamlyAppsChecked after it does. -->
+        <Control Id="Seamly2DRunning" Type="Text" X="30" Y="74" Width="320" Height="12"
+                 NoPrefix="yes" TabSkip="yes" Hidden="yes"
+                 ShowCondition="SEAMLYRUNNING2D" HideCondition="NOT SEAMLYRUNNING2D"
+                 Text="Seamly2D" />
+        <Control Id="SeamlyMeRunning" Type="Text" X="30" Y="88" Width="320" Height="12"
+                 NoPrefix="yes" TabSkip="yes" Hidden="yes"
+                 ShowCondition="SEAMLYRUNNINGME" HideCondition="NOT SEAMLYRUNNINGME"
+                 Text="SeamlyMe" />
+        <Control Id="SeamlyLayoutRunning" Type="Text" X="30" Y="102" Width="320" Height="12"
+                 NoPrefix="yes" TabSkip="yes" Hidden="yes"
+                 ShowCondition="SEAMLYRUNNINGLAYOUT" HideCondition="NOT SEAMLYRUNNINGLAYOUT"
+                 Text="SeamlyLayout" />
+
+        <Control Id="Explain" Type="Text" X="20" Y="126" Width="330" Height="60"
+                 NoPrefix="yes" TabSkip="yes"
+                 Text="Click Retry after you close them. Click Close Apps to let Setup close them. Setup asks each app to close, so an app with unsaved work asks you to save it first." />
+
+        <Control Id="Retry" Type="PushButton" X="164" Y="243" Width="64" Height="17"
+                 TabSkip="no" Text="&amp;Retry">
+          <Publish Event="DoAction" Value="SeamlyFindRunningApps" Order="1" />
+          <Publish Property="SeamlyAppsChecked" Value="1" Order="2" />
+          <Publish Event="EndDialog" Value="Return" Order="3" Condition="NOT SEAMLYRUNNINGAPPS" />
+        </Control>
+        <Control Id="CloseApps" Type="PushButton" X="232" Y="243" Width="68" Height="17"
+                 Default="yes" TabSkip="no" Text="Close &amp;Apps">
+          <Publish Event="DoAction" Value="SeamlyCloseRunningApps" Order="1" />
+          <Publish Property="SeamlyAppsChecked" Value="1" Order="2" />
+          <Publish Event="EndDialog" Value="Return" Order="3" Condition="NOT SEAMLYRUNNINGAPPS" />
+        </Control>
+        <Control Id="Cancel" Type="PushButton" X="304" Y="243" Width="56" Height="17"
+                 Cancel="yes" TabSkip="no" Text="Cancel">
+          <Publish Event="SpawnDialog" Value="CancelDlg" />
         </Control>
       </Dialog>
 
@@ -651,6 +718,11 @@
            after FindRelatedProducts, which sets SEAMLYNEWERINSTALLED. -->
       <Show Dialog="SeamlyNewerVersionDlg" After="AppSearch"
             Condition="SEAMLYNEWERINSTALLED AND NOT Installed" />
+      <!-- Before WelcomeDlg and MaintenanceWelcomeDlg (1297-1298), so every
+           wizard route checks for running apps. -->
+      <Custom Action="SeamlyFindRunningApps" After="CostFinalize" />
+      <Show Dialog="SeamlyAppsRunningDlg" After="SeamlyFindRunningApps"
+            Condition="SEAMLYRUNNINGAPPS" />
     </InstallUISequence>
   </Fragment>
 </Wix>

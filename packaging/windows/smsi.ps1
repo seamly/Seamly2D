@@ -354,6 +354,27 @@ Move-Item -Path (Join-Path $parentDir 'seamlylayout.exe') -Destination $exesDir
 Write-Host "staging MSVC CRT runtime..."
 Copy-Item -Path (Join-Path $crtDir '*.dll') -Destination $parentDir -Force
 
+# --- Build the running-app custom action DLL ------------------------------------
+# The cl.exe of the MSVC developer environment targets one architecture, so it
+# must match -Arch. /MT links the CRT statically: Windows Installer runs the DLL
+# from a temporary folder, where the app-local CRT DLLs are not present.
+$vsTargetArch = $env:VSCMD_ARG_TGT_ARCH
+if ($vsTargetArch -and $vsTargetArch -ne $Arch) {
+    throw "The MSVC developer environment targets '$vsTargetArch', but -Arch is '$Arch'."
+}
+if (-not (Get-Command cl.exe -ErrorAction SilentlyContinue)) {
+    throw "cl.exe is not on PATH - run this script inside the MSVC developer environment for '$Arch'."
+}
+$customActionDir = Join-Path $stageRoot 'custom-actions'
+New-Item -ItemType Directory -Force -Path $customActionDir | Out-Null
+$runningAppsDll = Join-Path $customActionDir 'installer_running_apps.dll'
+Write-Host "building running-app custom action DLL..."
+Invoke-Tool -Description 'cl (installer_running_apps.dll)' -Exe 'cl.exe' -Arguments @(
+    '/nologo', '/LD', '/MT', '/O2', '/W4', '/WX', '/EHsc', '/DUNICODE', '/D_UNICODE',
+    "/Fo$(Join-Path $customActionDir 'installer_running_apps.obj')", "/Fe$runningAppsDll",
+    (Join-Path $PSScriptRoot 'installer_running_apps.cpp'),
+    '/link', '/NOLOGO', 'msi.lib', 'user32.lib')
+
 # --- Build the MSI -------------------------------------------------------------
 # Build EVERY .wxs in this directory, not just smsi.wxs. Authoring is split
 # into smsi.wxs (the Package) plus one fragment per area — smsi_ui,
@@ -381,6 +402,7 @@ $wixArguments = @('build') + $wxsFiles + @(
     # harvests one runtime tree plus one exe tree.
     '-d', "ParentStagingDir=$parentDir",
     '-d', "ExeStagingDir=$exesDir",
+    '-d', "RunningAppsDll=$runningAppsDll",
     '-o', $msi
 )
 
@@ -446,6 +468,12 @@ Write-Host "checking user-data seeding..."
 & (Join-Path $PSScriptRoot 'smsi_ensure_user_data_test.ps1')
 if ($LASTEXITCODE -ne 0) {
     throw "user-data seeding check failed (exit code $LASTEXITCODE) - see output above."
+}
+
+Write-Host "checking the running-app custom actions..."
+& (Join-Path $PSScriptRoot 'installer_running_apps_test.ps1') -Msi $msi -WorkDirectory $customActionDir
+if ($LASTEXITCODE -ne 0) {
+    throw "running-app custom action check failed (exit code $LASTEXITCODE) - see output above."
 }
 
 $msiSize = [math]::Round((Get-Item $msi).Length / 1MB, 1)

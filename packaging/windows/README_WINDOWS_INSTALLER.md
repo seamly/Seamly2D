@@ -92,7 +92,7 @@ quietly lacks that whole area.
 
 | File | Owns |
 |---|---|
-| `smsi.wxs` | `<Package>`, upgrade/ARP, data-root properties, the user-data-ensure custom action |
+| `smsi.wxs` | `<Package>`, upgrade/ARP, data-root properties, the user-data-ensure and running-app custom actions |
 | `smsi_ui.wxs` | the wizard: every dialog and transition |
 | `smsi_legacy.wxs` | detection (`RegistrySearch`/`FileSearch`) and removal of the pre-MSI install |
 | `smsi_files.wxs` | directory tree, the three executables, Start Menu shortcuts, file associations |
@@ -116,8 +116,13 @@ machine. Parameter table: [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md).
    hard-coded) — `smsi.wxs` plus its five fragments. Every package carries
    all 3 apps — no switch to omit SeamlyLayout.
 5. Unless `-SkipValidation`: `wix msi validate -sice ICE43 -sice ICE57`.
+   Before `wix build`: `cl` builds `installer_running_apps.dll` from
+   `installer_running_apps.cpp`, with a static CRT.
 6. `smsi_check_authoring.ps1` — always runs, fails the build; the only check
    `-SkipValidation` doesn't skip.
+7. `installer_running_apps_test.ps1` — runs the running-app actions in the
+   built MSI against a stand-in `seamlyme.exe`. It skips the close check while
+   a real Seamly app runs.
 
 ## Installer flow
 
@@ -131,6 +136,12 @@ machine. Parameter table: [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md).
    Uninstall → `MajorUpgrade` removes the newer MSI. Without that choice,
    `SeamlyBlockDowngrade` stops the install; a silent install passes
    `SEAMLYDOWNGRADECONFIRMED=1`. Same-day builds skip the page.
+   Seamly app running in this Windows session → `SeamlyAppsRunningDlg`
+   lists it. `SeamlyFindRunningApps` (`installer_running_apps.dll`) checks
+   process names at once. Retry checks again. Close Apps sends `WM_CLOSE`,
+   so an app with unsaved work asks to save it. The page stays until no app
+   runs, or Cancel. `MsiRMFilesInUse` stays as the backstop: Restart Manager
+   finds apps in `InstallValidate`, but only after a slow scan of every file.
 3. Fresh install or repair-from-nothing: `WelcomeDlg` → `LicenseAgreementDlg`.
 4. Old app without Layout, or new Layout found → `SeamlyPreviousInstallDlg`
    (upgrade and/or NSIS paragraph); case A / repair skips straight to 5.

@@ -2,6 +2,18 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task — MSI finds running Seamly apps at wizard start (completed 2026-09-23)
+
+User report: "Validating install" paused a long time before "Seamly apps are running" appeared.
+
+- Cause: `MsiRMFilesInUse` appears only after Restart Manager checks ~1,600 packaged files against every process in `InstallValidate`.
+- New `packaging/windows/installer_running_apps.cpp` → `installer_running_apps.dll`, built by `smsi.ps1` with `cl /MT`.
+  - `SeamlyFindRunningApps`: process-name lookup in the installer's Windows session. Sets `SEAMLYRUNNINGAPPS`, `SEAMLYRUNNING2D`, `SEAMLYRUNNINGME`, `SEAMLYRUNNINGLAYOUT`.
+  - `SeamlyCloseRunningApps`: `WM_CLOSE` to each app window, waits up to 5 s, checks again.
+- `smsi_ui.wxs`: `SeamlyAppsRunningDlg` after `CostFinalize`, before every first wizard page. Retry / Close Apps / Cancel.
+- `MsiRMFilesInUse` and `util:CloseApplication` stay as the backstop.
+- Tests: `smsi_check_authoring.ps1` section 12; new `installer_running_apps_test.ps1` runs both actions in the built MSI against a stand-in `seamlyme.exe`.
+
 ## Task — SeamlyLayout piece bbox/outline filter matched real Seamly2D group ids (completed 2026-09-21)
 
 User report: packed pieces were placed in boxes bigger than the piece itself, on straight-edge and curved-edge pieces alike. Root cause: `piece_extractor::is_non_outline_group` and `polygon_pack::svg_extract::is_non_outline_group` (the filters that keep notch/tuck/grainline/internal_path/drill/hole decoration out of a piece's packing box and out of cutline/outline candidacy) matched by `id` prefix only (`starts_with("notch")`, etc.). Real Seamly2D tagged exports namespace every sibling id with the piece's own id (`piece-3-notch-1`), which never starts with the bare word, so the filter never matched anything on real files — only on hand-written test fixtures using bare ids. A stray notch point (or other decoration geometry) far outside the cutline dragged the whole piece's bounding box out with it, confirmed on `richmond-shirt-handoff_pieces.svg` (packed boxes up to ~10x the true cutline size on 7 of 12 real pieces).
