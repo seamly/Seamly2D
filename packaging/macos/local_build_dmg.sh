@@ -24,7 +24,7 @@
 #******************************************************************************
 #
 # Usage:
-#   packaging/macos/local_build_dmg.sh [--version YY.M.D.mmmm] [--qt-root DIR] [--skip-tests]
+#   packaging/macos/local_build_dmg.sh [--version YY.M.DDHH] [--qt-root DIR] [--skip-tests]
 #
 # Requires on PATH: qmake, cmake, ninja, cargo, ctest, hdiutil, and Xcode
 # command-line tools (xcode-select --install). System packages (xerces-c,
@@ -70,10 +70,10 @@ version_ge() {
 }
 
 # --- Version --------------------------------------------------------------------
-# Same YY.M.D.mmmm formula ci.yml's version job uses.
+# Same YY.M.DDHH formula ci.yml's version job uses.
 if [ -z "${VERSION}" ]; then
     read -r YEAR MONTH DAY HOUR MINUTE <<< "$(date +'%Y %m %d %H %M')"
-    VERSION="$((10#${YEAR} - 2000)).$((10#${MONTH})).$((10#${DAY})).$((10#${HOUR} * 60 + 10#${MINUTE}))"
+    VERSION="$((10#${YEAR} - 2000)).$((10#${MONTH})).$((10#${DAY} * 100 + 10#${HOUR}))"
 fi
 echo "version: ${VERSION}"
 

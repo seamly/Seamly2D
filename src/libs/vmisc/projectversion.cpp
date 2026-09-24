@@ -63,12 +63,11 @@
 // Start: Do not edit here, use packaging/version.sh to update
 extern const int MAJOR_VERSION = 26;
 extern const int MINOR_VERSION = 9;
-extern const int DEBUG_VERSION = 23;
-extern const int SUPER_MINOR__VERSION = 609;
+extern const int DEBUG_VERSION = 2319;
 // End: Do not edit here
 
-extern const QString APP_VERSION_STR(QStringLiteral("%1.%2.%3.%4").arg(MAJOR_VERSION).arg(MINOR_VERSION)
-                                 .arg(DEBUG_VERSION).arg(SUPER_MINOR__VERSION));
+extern const QString APP_VERSION_STR(QStringLiteral("%1.%2.%3").arg(MAJOR_VERSION).arg(MINOR_VERSION)
+                                 .arg(DEBUG_VERSION));
 
 //---------------------------------------------------------------------------------------------------------------------
 QString compilerString()

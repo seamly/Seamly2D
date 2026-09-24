@@ -61,6 +61,7 @@
 #include <QString>
 #include <QStringList>
 #include <QVariant>
+#include <QVersionNumber>
 #include <QtDebug>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -497,17 +498,17 @@ void FvUpdater::showMessageBox(QMessageBox::Icon icon, const QString &text,
 	messageBox.exec();
 }
 
+// QVersionNumber compares field by field and stops at the first difference, so
+// a 3-part tag (v26.9.2317) and an older 4-part one (v26.9.21.9) compare safely.
 bool FvUpdater::releaseIsNewer(const QString &releaseTag)
 {
-	const auto releaseVersion = releaseTag.mid(1).split('.');
-	const auto currentVersion = QCoreApplication::applicationVersion().split('.');
+	const QVersionNumber releaseVersion = QVersionNumber::fromString(releaseTag.mid(1));
+	const QVersionNumber currentVersion = QVersionNumber::fromString(QCoreApplication::applicationVersion());
 
-	for (int i = 0; i < releaseVersion.length(); i++)
+	if (releaseVersion > currentVersion)
     {
-		if (releaseVersion[i].toInt() > currentVersion[i].toInt())
-        {
-			return (m_releaseName = releaseTag), true;
-        }
+		m_releaseName = releaseTag;
+		return true;
 	}
 	return false;
 }

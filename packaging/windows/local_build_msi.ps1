@@ -48,8 +48,8 @@
     automatically if missing.
 
 .PARAMETER Version
-    Project version as YY.M.D.MMMM, stamped into seamly2d/seamlyme via
-    scripts\version.sh and used as the MSI's DisplayVersion/ProductVersion.
+    Project version as YY.M.DDHH, stamped into seamly2d/seamlyme via
+    scripts\version.sh and used as the MSI's ProductVersion.
     Default: computed from the current local time, the same formula ci.yml's
     version job uses.
 
@@ -96,11 +96,11 @@ function Invoke-NativeCommand {
 # --- Version ------------------------------------------------------------------
 if (-not $Version) {
     $now = Get-Date
-    $Version = "$($now.Year - 2000).$($now.Month).$($now.Day).$($now.Hour * 60 + $now.Minute)"
+    $Version = "$($now.Year - 2000).$($now.Month).$($now.Day * 100 + $now.Hour)"
 }
 Write-Host "version: $Version"
 
-# scripts\version.sh writes the version YY.MM.DD.mmmm into these git-tracked files, the
+# scripts\version.sh writes the version YY.M.DDHH into these git-tracked files, the
 # same way every ci.yml build job does. The stamp is reverted (via
 # `git checkout`) once the build succeeds, unless one of these files already
 # carried uncommitted changes before this run (then it is left alone, to not

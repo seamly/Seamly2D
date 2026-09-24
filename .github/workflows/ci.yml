@@ -38,11 +38,11 @@ env:
 jobs:
 
   version:
-    name: 'Generate version YY.M.D.mmmm'
+    name: 'Generate version YY.M.DDHH'
     runs-on: ubuntu-latest
     outputs:
-      # Version: YY.M.D.mmmm (YY=year-2000, M=month, D=day, mmmm=minutes of day 0-1439). No leading zeros.
-      # Matches semantic versioning scheme Major.Minor.Patch.Qualifier.
+      # Version: YY.M.DDHH (YY=year-2000, M=month, DDHH=day*100+hour 0-23). No leading zeros.
+      # Three parts, because the MSI ProductVersion compares only three fields.
       # For pull requests, keep static version. 
       version_number: ${{ steps.create-version.outputs.version_number }}
     steps:
@@ -51,8 +51,8 @@ jobs:
         run: |
           # get Year Month Day Hour Minutes from system time
           read -r year month day hour minute <<< "$(date +'%Y %m %d %H %M')"
-          # convert to YY.M.D.mmmm 
-          echo "version_number=$((10#$year - 2000)).$((10#$month)).$((10#$day)).$((10#$hour * 60 + 10#$minute))" >> $GITHUB_OUTPUT
+          # convert to YY.M.DDHH
+          echo "version_number=$((10#$year - 2000)).$((10#$month)).$((10#$day * 100 + 10#$hour))" >> $GITHUB_OUTPUT
 
   # ---------------------------------------------------------------------------
   # Test Linux builds

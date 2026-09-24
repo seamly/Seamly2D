@@ -36,7 +36,7 @@
       <Component Id="InstallInfoRegistry">
         <RegistryKey Root="HKLM" Key="SOFTWARE\Seamly\Seamly2D">
           <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
-          <RegistryValue Name="DisplayVersion" Type="string" Value="$(var.DisplayVersion)" />
+          <RegistryValue Name="DisplayVersion" Type="string" Value="$(var.ProductVersion)" />
           <!-- The fixed data root: [%USERPROFILE]\seamly2d on a fresh install,
                or the directory an earlier install already recorded here on an
                update or repair (smsi.wxs). Every app reads it on first run and
@@ -55,7 +55,7 @@
       <Component Id="InstallInfoRegistrySeamlyMe">
         <RegistryKey Root="HKLM" Key="SOFTWARE\Seamly\SeamlyMe">
           <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
-          <RegistryValue Name="DisplayVersion" Type="string" Value="$(var.DisplayVersion)" />
+          <RegistryValue Name="DisplayVersion" Type="string" Value="$(var.ProductVersion)" />
           <RegistryValue Name="DataRoot" Type="string" Value="[SEAMLYDATAROOT]" />
         </RegistryKey>
       </Component>
@@ -63,7 +63,7 @@
       <Component Id="InstallInfoRegistrySeamlyLayout">
         <RegistryKey Root="HKLM" Key="SOFTWARE\Seamly\SeamlyLayout">
           <RegistryValue Name="InstallPath" Type="string" Value="[INSTALLFOLDER]" KeyPath="yes" />
-          <RegistryValue Name="DisplayVersion" Type="string" Value="$(var.DisplayVersion)" />
+          <RegistryValue Name="DisplayVersion" Type="string" Value="$(var.ProductVersion)" />
           <RegistryValue Name="DataRoot" Type="string" Value="[SEAMLYDATAROOT]" />
         </RegistryKey>
       </Component>

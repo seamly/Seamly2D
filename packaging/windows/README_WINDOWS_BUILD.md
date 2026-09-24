@@ -24,7 +24,7 @@ gh workflow run ci.yml --ref run-seamlyLayout
 | Parameter | Required | Default | Notes |
 |---|---|---|---|
 | `-Arch` | no | `x64` | `x64` or `arm64`; must match staged binaries. |
-| `-Version` | yes | — | `YY.M.D.MMMM` (`MMMM` = minute of day). |
+| `-Version` | yes | — | `YY.M.DDHH` (`DDHH` = day × 100 + hour). |
 | `-Seamly2DBin` | yes | — | Dir with `seamly2d.exe` + windeployqt output. |
 | `-SeamlyMeBin` | yes | — | Dir with `seamlyme.exe` + windeployqt output. |
 | `-WinDeployQt` | yes | — | `windeployqt.exe` from the kit SeamlyLayout built against. |
@@ -69,7 +69,7 @@ for the Linux/macOS equivalents of this script).
 
 | Parameter | Required | Default | Notes |
 |---|---|---|---|
-| `-Version` | no | computed from local time | Same `YY.M.D.MMMM` form `smsi.ps1` expects. |
+| `-Version` | no | computed from local time | Same `YY.M.DDHH` form `smsi.ps1` expects. |
 | `-SkipTests` | no | off | Builds with `CONFIG+=noTests`; skips `nmake check`. Only for a packaging-only change — CI is the only other runner for these suites. |
 | `-SkipValidation` | no | off | Passed through to `smsi.ps1`. |
 
@@ -80,7 +80,7 @@ releases still go through `gh workflow run ci.yml`.
 
 Checks first, fails on the first missing item: both exes, `seamly2d`'s `platforms\` dir, `seamlylayout.exe`, `wix`, the WiX UI/Util extensions, `-WinDeployQt`, and a `Microsoft.VC*.CRT` dir under `VCToolsRedistDir\<arch>`.
 
-1. **Derives `ProductVersion`**: `YY.M.((D−1)·1440 + MMMM)` — MSI ignores the 4th field for upgrade comparisons; this always increases. Full version is stored as `DisplayVersion`.
+1. **Checks `-Version`** and uses it unchanged as `ProductVersion` (`YY.M.DDHH`). Builds sort by hour; two builds of one hour tie and replace each other. `MajorUpgrade` has `AllowDowngrades`; `SeamlyNewerVersionDlg` asks before it removes a newer version.
 2. **Stages** `packaging\windows\seamly-msi\<arch>\`: `parent\` (shared Qt runtime + `windeployqt --qmldir …\qml --release` for SeamlyLayout, its `settings\`/`licenses\`, MSVC CRT DLLs) and `exes\` (the three exes, moved out of `parent\` after deployment so `.wxs` can author them explicitly for shortcuts/associations).
 3. **`wix build`** on every `*.wxs` file in this directory (globbed, not hard-coded — `smsi.wxs` plus its five fragments) → `seamly-<arch>.msi` (`-pdbtype none`, no `.wixpdb`).
 4. **[`smsi_fix_dialog_lines.ps1`](smsi_fix_dialog_lines.ps1)** — trims WixUI's stock banner/bottom line controls back inside the dialog width (they overflow by 3 installer units, logging Error 2826). Runs on the built package, before validation.
@@ -95,7 +95,7 @@ All three apps ship in every package
 - `qtposition_nmea.dll` dependency warning — unused NMEA plugin.
 - `dxcompiler.dll`/`dxil.dll` not found — Direct3D 12 only.
 - `VCINSTALLDIR is not set` — expected; script deploys CRT app-locally.
-- `ICE61: Maximum version is not less than the current product` — expected with `AllowSameVersionUpgrades`.
+- `ICE61: Maximum version is not less than the current product` — expected with `AllowDowngrades`.
 
 ## 3. Installing / testing
 
