@@ -45,6 +45,13 @@ ToolBar {
     // Bound by Main.qml from settingsModel.paperType === "tiled".
     required property bool pdfTiledExportEnabled
 
+    // @brief Label text of the imported SVG: "text", "pathsOnly" or "noLabels".
+    // Bound by Main.qml from appController.labelTextState.
+    property string labelTextState: "noLabels"
+
+    // @brief Last SVG text mode used; marked in the SVG submenu.
+    property string lastSvgTextMode: ""
+
     // -----------------------------------------------------------------------
     // Signals — parent wires these to open dialogs / toggle panels
     // -----------------------------------------------------------------------
@@ -77,8 +84,9 @@ ToolBar {
     // @brief User selected PNG from the Export dropdown.
     signal exportPngRequested()
 
-    // @brief User selected SVG from the Export dropdown.
-    signal exportSvgRequested()
+    // @brief User selected an SVG text mode from the Export dropdown.
+    // @param mode "designerFont", "singleLineFont", "hersheyStrokes" or "asSupplied".
+    signal exportSvgRequested(string mode)
 
     // @brief User selected DXF-ASTM from the View dropdown.
     signal viewDxfAstmRequested()
@@ -164,11 +172,14 @@ ToolBar {
             id: exportMenu
             layoutReady: root.layoutReady
             pdfTiledEnabled: root.pdfTiledExportEnabled
+            svgModeSubmenu:  true
+            labelTextState:  root.labelTextState
+            lastSvgTextMode: root.lastSvgTextMode
             onExportDxfAstmRequested:  root.exportDxfAstmRequested()
             onExportPdfRequested:      root.exportPdfRequested()
             onExportPdfTiledRequested: root.exportPdfTiledRequested()
             onExportPngRequested:      root.exportPngRequested()
-            onExportSvgRequested:      root.exportSvgRequested()
+            onExportSvgModeRequested:  function(mode) { root.exportSvgRequested(mode) }
         } // ExportMenu exportMenu
 
         // View button — opens exported files in configured viewer applications

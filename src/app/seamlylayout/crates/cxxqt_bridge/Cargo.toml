@@ -24,6 +24,7 @@ cxx-qt = "=0.7.3"
 cxx-qt-lib = "=0.7.3"
 app_core      = { path = "../app_core" }
 svg_dom       = { path = "../svg_dom"  }
+svg_label_text = { path = "../svg_label_text" }
 packing       = { path = "../packing" }
 polygon_pack  = { path = "../polygon_pack" }
 layout_tiling = { path = "../layout_tiling" }

@@ -93,6 +93,34 @@ Option C selected, applied app-wide. All observability file writes are gated by 
 - Aligns with Rust idiom (`#[cfg(debug_assertions)]`) and Qt idiom (`#ifdef QT_DEBUG`).
 - App-wide scope ensures no observability path is accidentally left ungated.
 
+### Decision-003 — SVG label text modes: bundled fonts
+
+- **Status:** Accepted
+- **Owner:** Product
+- **Related TODO item:** Task Layout.2 (`TODO_SEAMLYLAYOUT.md`)
+
+**Mode 2 font: Relief SingleLine (SIL OFL 1.1)**
+
+- Source: `github.com/isdat-type/Relief-SingleLine`. No Reserved Font Name.
+- OFL allows bundling with MIT software and embedding in documents.
+- The CAD TTF stores strokes as open contours. TrueType closes every contour, so browsers draw "C" as "O" and "2" as "8". Rejected for display.
+- Bundled: `ReliefSingleLineOutline-Regular.otf`, the same strokes as thin filled shapes. Every SVG viewer renders it correctly.
+- Label text names `Relief SingleLine CAD`; `@font-face` declares that name with the Outline data.
+- Result: a CAD/CAM tool that resolves text by installed font draws true single strokes; a viewer that honours `@font-face` draws the Outline shapes.
+- Mode 3 stays the guaranteed single-stroke choice for cutters.
+
+**Mode 3 glyphs: Hershey Roman Simplex (`futural.jhf`)**
+
+- Source: `github.com/kamalmostafa/hershey-fonts`. The Hershey notice permits any use, with its acknowledgements shipped.
+- Parser: `hershey` crate 0.1.2 (Apache-2.0 OR LGPL-3.0; used under Apache-2.0).
+- Scale: 32 Hershey units per em; baseline at Hershey y = 9.
+
+**License notices**
+
+- `crates/svg_label_text/assets/fonts/OFL.txt`, `crates/svg_label_text/assets/hershey/HERSHEY_LICENSE.txt`.
+- Copies in `src/app/seamlylayout/packaging/licenses/`; `smsi.ps1` installs them to `licenses\` on Windows.
+- Linux AppImage and macOS DMG do not ship these notices yet.
+
 ## Log files never go in the install directory (2026-08-15, revised 2026-09-14)
 
 `Logger::init()` writes to the `AppConfigLocation` root on every platform, not
@@ -128,3 +156,4 @@ files are written, this decides *where*.
 - 2026-05-23: Marked Decision-001 as `Accepted` and aligned wording with finalized Submit behavior (immediate `layout_dom` display).
 - 2026-06-29: Marked Decision-002 as `Accepted` — Option C selected (compile-time gate: debug writes allowed, release builds enforce no disk I/O).
 - 2026-06-29: Expanded Decision-002 scope from AdjustMode to all observability file I/O app-wide (DG.5 verification gate closed); added Scope, Verification, and updated Rationale sections.
+- 2026-09-24: Added Decision-003 (SVG label text modes: bundled fonts).

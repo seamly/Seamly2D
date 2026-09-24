@@ -1,0 +1,22 @@
+# project: SeamlyLayout
+# author: slspencer, copyright 2026
+# MIT License: https://opensource.org/licenses/MIT
+#
+# Label text modes for SVG export: designer font, single-line font, Hershey strokes.
+# Bundled data keeps its own license: assets/fonts/OFL.txt, assets/hershey/HERSHEY_LICENSE.txt.
+[package]
+name = "svg_label_text"
+version = "0.1.0"
+edition = "2021"
+authors = ["slspencer"]
+license = "MIT"
+description = "Rewrites Seamly2D label text in an SVG export as embedded-font text or single-stroke paths"
+
+[dependencies]
+svg_dom    = { path = "../svg_dom" }
+xmltree    = { version = "0.10", features = ["attribute-order"] }
+hershey    = "0.1.2"
+fontdb     = "0.18"
+ttf-parser = "0.21"
+subsetter  = "0.1"
+base64     = "0.22"

@@ -102,3 +102,19 @@ All ids are unique and XML-valid by construction. **Breaking change vs. pre-cont
 - **`grainline`** — grainline arrow geometry.
 - **`piece_label` / `pattern_label`** — the on-piece label text blocks. One `<text>` element per label line (or one `<path>` per line in text-as-paths mode); per-line bold/italic, alignment, middle-eliding to the label width, mirroring and rotation are preserved in either mode.
 - Counters are per SvgGenerator instance: one instance = one file = one pattern.
+
+## SeamlyLayout SVG export — label text modes
+
+Export > SVG offers three label text modes. They change only the `<text>` inside
+`piece_label` and `pattern_label` groups. Group `id`, `data-*` attributes and
+group structure are the same in every mode. Code: `crates/svg_label_text/`.
+
+| Mode (QML name) | Label line in the exported file |
+|---|---|
+| Text: designer font (`designerFont`) | `<text>` unchanged. Root `<defs><style>` holds a subset `@font-face` per used face. |
+| Text: single-line font (`singleLineFont`) | `<text>` with `font-family="Relief SingleLine CAD"`, weight 400, normal style. `@font-face` embeds the bundled font. |
+| Paths: single-stroke (`hersheyStrokes`) | `<g data-type="label_text" data-text="…">` with a `<desc>` and one stroked, unfilled `<path>` of Hershey polylines. |
+
+- `label_text` is new and export-only. Seamly2D never writes it. It sits inside a label group and keeps the text's `id` and `transform`.
+- `data-text` holds the label string, so machines can still read it.
+- Labels that are already paths (`--text2paths`) disable all three modes. The menu then offers "As supplied", which exports the layout unchanged.

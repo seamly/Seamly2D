@@ -130,7 +130,7 @@ ApplicationWindow {
     // Populated by each export handler; consumed by exportStartTimer.onTriggered.
     property string pendingExportPath: ""
     property string pendingExportFormat: ""        // "dxf"|"png"|"pdf"|"pdf-tiled"|"svg"
-    property string pendingExportSettings: ""      // settings JSON for pdf / pdf-tiled
+    property string pendingExportSettings: ""      // settings JSON for pdf / pdf-tiled; text mode for svg
     property bool   pendingExportTeachingVersion: false  // teaching flag for DXF
 
     // Wait one short tick after opening the popup so it can paint before the
@@ -153,7 +153,7 @@ ApplicationWindow {
             } else if (fmt === "pdf-tiled") {
                 appController.exportPdfTiled(path, root.pendingExportSettings)
             } else if (fmt === "svg") {
-                appController.exportSvg(path)
+                appController.exportSvg(path, root.pendingExportSettings) // settings = SVG text mode
             } // if fmt
         } // onTriggered
     } // Timer exportStartTimer
@@ -217,6 +217,13 @@ ApplicationWindow {
             warningDialog.warningText = message;
             warningDialog.open();
         } // onImportWarning
+
+        // Export warning — the export succeeded with caveats (e.g. a font that
+        // could not be embedded). Arrives before onExportFinished; the success
+        // dialog shows it under the file path.
+        onExportWarning: function(message) {
+            exportSuccessDialog.warningText = message;
+        } // onExportWarning
 
         // Load the input SVG in the left canvas after self.input_dom is successfully created.
         // Clear the right canvas — the old layout is no longer valid for the new SVG.
@@ -339,6 +346,8 @@ ApplicationWindow {
         createLayoutEnabled:  appController.isCreateLayoutEnabled
         adjustMode:           appController.isAdjustMode
         pdfTiledExportEnabled: settingsModel.paperType === "tiled"
+        labelTextState:       appController.labelTextState
+        lastSvgTextMode:      preferencesModel.svgTextMode
 
         onImportClicked: {
             // Open the file picker in the configured Input SVG Directory.
@@ -407,7 +416,7 @@ ApplicationWindow {
                 exportStartTimer.restart()
             } // if path
         } // onExportPngRequested
-        onExportSvgRequested: {
+        onExportSvgRequested: function(mode) {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
             var name = root.makeExportFileName("svg") // default name: <importedBaseName>_YYYYMMDDHHSS.svg
             var path = preferencesModel.getSaveFilePath(
@@ -417,6 +426,12 @@ ApplicationWindow {
                 // Stage export, show progress popup, then start after one paint tick.
                 root.pendingExportPath = path
                 root.pendingExportFormat = "svg"
+                root.pendingExportSettings = mode
+                if (mode !== "asSupplied") {
+                    // Remember the text mode; the submenu marks it next time.
+                    preferencesModel.saveSvgTextMode(preferencesModel.defaultPreferencesFilePath(), mode)
+                } // if text mode
+                exportSuccessDialog.warningText = "" // clear caveats of a previous export
                 exportProgressPopup.open()
                 exportStartTimer.restart()
             } // if path
@@ -845,6 +860,12 @@ ApplicationWindow {
 
         property string exportPath: ""
 
+        // @brief Caveats from the export (appController.exportWarning); empty when none.
+        property string warningText: ""
+
+        // Caveats belong to one export; never show them with the next one.
+        onClosed: warningText = ""
+
         title:    "Export Complete"
         modal:    true
         width:    420
@@ -877,6 +898,15 @@ ApplicationWindow {
                 wrapMode:       Text.WrapAnywhere
                 width:          360
             } // Text path
+
+            Text {
+                visible:        exportSuccessDialog.warningText !== ""
+                text:           exportSuccessDialog.warningText
+                color:          Theme.textOnDark
+                font.pixelSize: Theme.fontSizeSmall
+                wrapMode:       Text.WordWrap
+                width:          360
+            } // Text warning
         } // Column contentItem
 
         footer: DialogButtonBox {

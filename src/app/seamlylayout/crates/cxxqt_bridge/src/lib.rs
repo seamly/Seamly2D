@@ -502,6 +502,9 @@ pub mod qobject {
         // Short status text for the in-progress export overlay.
         // Empty when idle; updated at the start of each export with the format name.
         #[qproperty(QString, export_status_message)]
+        // Label text of the imported SVG: "text", "pathsOnly" or "noLabels".
+        // Gates the three SVG text modes in the Export menu.
+        #[qproperty(QString, label_text_state)]
         type AppController = super::AppControllerRust;
 
         #[qsignal]
@@ -529,6 +532,12 @@ pub mod qobject {
         // silent failure.
         #[qsignal]
         fn import_warning(self: Pin<&mut AppController>, message: QString);
+
+        // Emitted before export_finished when an export succeeded with caveats,
+        // such as a font that could not be embedded. QML adds `message` to the
+        // export success dialog.
+        #[qsignal]
+        fn export_warning(self: Pin<&mut AppController>, message: QString);
 
         #[qsignal]
         fn progress_updated(self: Pin<&mut AppController>, percent: i32);
@@ -637,8 +646,10 @@ pub mod qobject {
             settings_json: &QString,
         ) -> bool;
 
+        // `text_mode`: "designerFont", "singleLineFont", "hersheyStrokes" or
+        // "asSupplied" (the layout DOM unchanged).
         #[qinvokable]
-        fn export_svg(self: Pin<&mut AppController>, path: &QString) -> bool;
+        fn export_svg(self: Pin<&mut AppController>, path: &QString, text_mode: &QString) -> bool;
 
         #[qinvokable]
         fn export_png(self: Pin<&mut AppController>, path: &QString, scale: f32) -> bool;
@@ -810,6 +821,11 @@ pub struct AppControllerRust {
     // Empty when idle; set to a format-specific label at the start of each export.
     export_status_message: cxx_qt_lib::QString,
 
+    // Label text of the imported SVG, from `svg_label_text::label_text_state`.
+    //
+    // "noLabels" until an import finishes; set by `finish_import`.
+    label_text_state: cxx_qt_lib::QString,
+
 } // struct AppControllerRust
 
 impl Default for AppControllerRust {
@@ -847,6 +863,7 @@ impl Default for AppControllerRust {
             layout_progress:           -1,                             // -1 = idle; 0–100 during compute
             export_progress:           -1,                             // -1 = idle; 0–100 during export
             export_status_message:     cxx_qt_lib::QString::default(), // no active export status
+            label_text_state:          cxx_qt_lib::QString::from(svg_label_text::LabelTextState::NoLabels.as_str()), // no SVG yet
         } // Self
     } // fn default
 
@@ -930,6 +947,9 @@ impl qobject::AppController {
         self.as_mut().set_is_layout_ready(false);
         self.as_mut().set_is_layout_in_progress(false);
         self.as_mut().set_layout_progress(-1);
+        self.as_mut().set_label_text_state(cxx_qt_lib::QString::from(
+            svg_label_text::LabelTextState::NoLabels.as_str(),
+        )); // recomputed by finish_import
         {
             let mut rust = self.as_mut().rust_mut();
             // don't clear input_dom yet - keep the current input_dom displayed (if any)
@@ -966,6 +986,10 @@ impl qobject::AppController {
                 // Count the Seamly2D piece tagging BEFORE the DOM is moved into
                 // `input_dom`.  Zero means this is not a Layout Mode handoff.
                 let tagged_pieces = crate::piece_extractor::count_tagged_pieces(&doc);
+                // Label text kind decides which SVG text modes the Export menu offers.
+                let label_state = svg_label_text::label_text_state(&doc);
+                self.as_mut().set_label_text_state(cxx_qt_lib::QString::from(label_state.as_str()));
+                log_to_file(&format!("[finish_import] label text state: {}", label_state.as_str()));
 
                 // Add a white background rectangle so the canvas has a visible background.
                 doc.add_background_rect();
@@ -1878,15 +1902,29 @@ impl qobject::AppController {
     // support process_layout() and Adjust mode on screen, not as permanent
     // content in an exported file.  Delegates serialization to
     // exports::do_export_svg.
-    // Called by QML 'Export SVG' menu handler: onExportSvgRequested → appController.exportSvg(path)
+    // `text_mode` picks how label text is written (see svg_label_text); an
+    // unknown mode is an error, never a silent fallback.
+    // Called by QML 'Export SVG' submenu handler: onExportSvgRequested(mode) → appController.exportSvg(path, mode)
     fn export_svg(
         mut self: std::pin::Pin<&mut Self>,
         path: &cxx_qt_lib::QString,
+        text_mode: &cxx_qt_lib::QString,
     ) -> bool {
         let path_str = path.to_string();
-        log_to_file(&format!("[lib.rs AppController] export_svg(): 1 requested path='{path_str}'"));
+        let mode_str = text_mode.to_string();
+        log_to_file(&format!("[lib.rs AppController] export_svg(): 1 requested path='{path_str}' mode='{mode_str}'"));
 
-        let layout_doc = match self.clone_stripped_layout_doc() {
+        // Resolve the mode before any work; "asSupplied" means no text rewrite.
+        let mode = match (mode_str.as_str(), svg_label_text::SvgTextMode::from_name(&mode_str)) {
+            ("asSupplied", _) => None,  // export the layout DOM unchanged
+            (_, Some(m))      => Some(m), // one of the three text modes
+            (_, None)         => {
+                self.as_mut().error_occurred(cxx_qt_lib::QString::from(&format!("Unknown SVG text mode '{mode_str}'.")));
+                return false; // if unknown mode
+            } // unknown
+        }; // match mode
+
+        let mut layout_doc = match self.clone_stripped_layout_doc() {
             Ok(d)  => d,
             Err(m) => {
                 log_to_file("[lib.rs AppController] export_svg(): 2 no layout_dom available");
@@ -1900,10 +1938,22 @@ impl qobject::AppController {
         self.as_mut().set_export_status_message(cxx_qt_lib::QString::from("Exporting SVG…"));
         self.as_mut().progress_updated(0);
 
+        // Rewrite label text on the export copy only; the canvas DOM is untouched.
+        let warnings = match mode {
+            Some(m) => svg_label_text::apply_text_mode(&mut layout_doc, m).warnings,
+            None    => Vec::new(), // asSupplied: nothing rewritten
+        }; // match mode
+
         // Serialize the styled DOM to the chosen path.
         match do_export_svg(&layout_doc, &path_str) {
             Ok(()) => {
                 log_to_file(&format!("[lib.rs AppController] export_svg(): 3 wrote SVG to '{path_str}'"));
+                if !warnings.is_empty() {
+                    // Caveats reach the success dialog, so the user sees them with the file path.
+                    log_to_file(&format!("[lib.rs AppController] export_svg(): 4 warnings: {warnings:?}"));
+                    self.as_mut().export_warning(cxx_qt_lib::QString::from(&warnings.join("
+")));
+                } // if warnings
                 self.as_mut().progress_updated(100);
                 self.as_mut().set_export_progress(-1); // reset to idle (-1 = idle contract)
                 self.as_mut().set_export_status_message(cxx_qt_lib::QString::default()); // clear
