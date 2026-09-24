@@ -19,6 +19,9 @@
 *.log
 *log.txt
 
+# text files
+*.txt
+
 # test key files
 *seamly-signing-key.json
 
@@ -32,6 +35,10 @@
 
 # Linux trash folder which might appear on any partition or disk
 .Trash-*
+
+# Test files and directories
+test*.*
+Test*.*
 
 # Lock files used by the Emacs editor.
 # Notice that the "#" character is quoted with a backslash.

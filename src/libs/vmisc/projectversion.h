@@ -75,8 +75,8 @@ extern const QString APP_VERSION_STR;
 #define WINDOW_STATE_VERSION 1
 
 // Start: Do not edit here, use packaging/version.sh to update
-#define VER_FILEVERSION 26,9,2319,0
-#define VER_FILEVERSION_STR "26.9.2319"
+#define VER_FILEVERSION 26,9,2320,0
+#define VER_FILEVERSION_STR "26.9.2320"
 // End: Do not edit here
 
 #define V_PRERELEASE // Mark prerelease builds

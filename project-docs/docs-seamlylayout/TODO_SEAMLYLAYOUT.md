@@ -6,70 +6,70 @@ Check off subtasks as they are accomplished; when every subtask of a task is com
 
 Tasks in this file are numbered and are prefixed with `Layout.`
 
-## [ ] Task Layout.000 - Open seamlylayout.exe
+## [x] Task Layout.01 - Open seamlylayout.exe
 
-- [ ] Layout.000.1 While in 'Piece Mode' in Seamly2D, pressing the 'Layout' button on the menu should immediately run seamlylayout.exe without displaying the old Seamly2D layout canvas or calling vlayout which has been superceded by the seamlylayout.exe application. The old vlayout code has been superceded by seamlylayout.exe
+- [x] Layout.01 While in 'Piece Mode' in Seamly2D, pressing the 'Layout' button on the menu should immediately run seamlylayout.exe without displaying the old Seamly2D layout canvas or calling vlayout which has been superceded by the seamlylayout.exe application. The old vlayout code has been superceded by seamlylayout.exe
 
-## [ ] Task Layout.00 - Layout Settings
+## [x] Task Layout.02 - Layout Settings
 
-- [ ] Layout.00.1 - In the settings dialog, section 'Layout Mode', add a checkbox for 'None'; when 'None' is checked the layout algorithm should ignore the grainline direction when placing the pieces efficiently.
+- [x] Layout.02 - In the settings dialog, section 'Layout Mode', add a checkbox for 'Any'; when 'Any' is checked the layout algorithm should ignore the grainline direction when placing the pieces efficiently.
 
-## [ ] Task Layout.0 - layout algorithm improvement
+## [ ] Task Layout.03 - layout algorithm improvement
 
-- [ ] Layout.0.1 - The layout algorithm has suffered regression - the pieces are nested sub-optimally (there is a lot of space between the pieces). Fix the layout algorithm so that the pieces only have the gap specified between them.
+- [x] Layout.031 - The layout algorithm has suffered regression - the pieces are nested sub-optimally (there is a lot of space between the pieces). Fix the layout algorithm so that the pieces only have the gap specified between them.
 
-- [ ] Layout.0.2 - Implement the 'Layout Mode' == 'None' option so that the grainline direction is ignored while the pieces are efficiently arranged. 
+- [ ] Layout.032 - Implement the 'Layout Mode' == 'None' option so that the grainline direction is ignored while the pieces are efficiently arranged.
 
 ## [ ] Task Layout.1 - 'Adjust Mode' improvement
 
-- [ ] Layout.1.1 - The 'Adjust Layout' feature has suffered regression - when 'Adjust Layout' opens there are no pattern pieces to adjust - the pieces from the main SeamlyLayout canvas should be available in 'Adjust Layout', otherwise there is nothing to adjust and save back to the main SeamlyLayout canvas.
+- [x] Layout.11 - The 'Adjust Layout' feature has suffered regression - when 'Adjust Layout' opens there are no pattern pieces to adjust - the pieces from the main SeamlyLayout canvas should be available in 'Adjust Layout', otherwise there is nothing to adjust and save back to the main SeamlyLayout canvas.
 
-- [ ] Layout.1.2 - When Adjust Mode closes it should return focus to SeamlyLayout's right canvas
+- [ ] Layout.12 - When Adjust Mode closes it should return focus to SeamlyLayout's right canvas
 
-- [ ] Layout.1.3 - When focus returns to the right canvas after 'adjust mode' closes, the right canvas should contain either:
-  - [ ] Layout.1.3.1 - the layout with updates from 'adjust mode' ('adjust mode' closed via 'Save')
-  - [ ] Layout.1.3.2 - the layout without updates from 'adjust mode' ('adjust mode' closed via 'Cancel')
+- [ ] Layout.13 - When focus returns to the right canvas after 'adjust mode' closes, the right canvas should contain either:
+  - [ ] Layout.13.1 - the layout with updates from 'adjust mode' ('adjust mode' closed via 'Save')
+  - [ ] Layout.13.2 - the layout without updates from 'adjust mode' ('adjust mode' closed via 'Cancel')
 
 ## [ ] Task Layout.2 - in 'Export SVG' menu selection, create three options for text mode
 
 Replace the single "SVG" item in the SeamlyLayout Exports menu (`src/app/seamlylayout/qt_frontend/qml/ExportMenu.qml`, `exportSvgRequested()` wired through `Main.qml` to the Rust backend in `src/app/seamlylayout/crates/cxxqt_bridge/src/exports.rs`) with three SVG export modes differing in how label text is written.
 
-- [ ] Layout.2.1 - **Text as `<text>` in the designer's selected (outline) font** — searchable, editable, re-stylable, human- and machine-readable; embeds the font via `@font-face` so it renders correctly on machines without it; supports tech-pack generation. Smallest file size.
-- [ ] Layout.2.2 - **Text as `<text>` in a Hershey/single-line font** — same searchable/editable/machine-readable intent as mode 1, but using a bundled single-line font so the result is also friendly to CAD/CAM tools that resolve text. **Implementation note:** true Hershey fonts are stroke data, not installable outline fonts — for `<text>` + `font-family` to work this mode needs a "hairline" single-line TTF/OTF (an engineered font whose outline doubles back on itself to look like one stroke) embedded via `@font-face`. Known candidates: CamBam Stick Fonts (free, 9 variants, designed for CNC/plotting), MecSoft/Rhino single-stroke fonts, commercial single-line TTF bundles — verify redistribution/embedding license compatibility with the MIT Rust core before bundling. Caveats: hairline TTFs are still doubled-back outlines (stroke width not controllable via the font), and consumers that ignore embedded fonts will substitute — so mode 3 remains the guaranteed-fidelity choice for cutters. Record the font choice and rationale in `DECISIONS.md`.
-- [ ] Layout.2.3 - **Text converted to paths (single-stroke)** — each label rendered as single-stroke `<path>` polylines from Hershey glyph data (**decision:** the path conversion uses the Hershey font, not the designer's outline font — a plotter then draws each character in one pen pass instead of tracing hollow glyph contours). Compatible with CAD/CAM/cutters/plotters/engravers with no font dependency in the consumer. Keep the original string machine-readable via `data-*`/`<desc>` on the label group (text is no longer searchable/editable as SVG text).
+- [ ] Layout.21 - **Text as `<text>` in the designer's selected (outline) font** — searchable, editable, re-stylable, human- and machine-readable; embeds the font via `@font-face` so it renders correctly on machines without it; supports tech-pack generation. Smallest file size.
+- [ ] Layout.22 - **Text as `<text>` in a Hershey/single-line font** — same searchable/editable/machine-readable intent as mode 1, but using a bundled single-line font so the result is also friendly to CAD/CAM tools that resolve text. **Implementation note:** true Hershey fonts are stroke data, not installable outline fonts — for `<text>` + `font-family` to work this mode needs a "hairline" single-line TTF/OTF (an engineered font whose outline doubles back on itself to look like one stroke) embedded via `@font-face`. Known candidates: CamBam Stick Fonts (free, 9 variants, designed for CNC/plotting), MecSoft/Rhino single-stroke fonts, commercial single-line TTF bundles — verify redistribution/embedding license compatibility with the MIT Rust core before bundling. Caveats: hairline TTFs are still doubled-back outlines (stroke width not controllable via the font), and consumers that ignore embedded fonts will substitute — so mode 3 remains the guaranteed-fidelity choice for cutters. Record the font choice and rationale in `DECISIONS.md`.
+- [ ] Layout.23 - **Text converted to paths (single-stroke)** — each label rendered as single-stroke `<path>` polylines from Hershey glyph data (**decision:** the path conversion uses the Hershey font, not the designer's outline font — a plotter then draws each character in one pen pass instead of tracing hollow glyph contours). Compatible with CAD/CAM/cutters/plotters/engravers with no font dependency in the consumer. Keep the original string machine-readable via `data-*`/`<desc>` on the label group (text is no longer searchable/editable as SVG text).
 
 **Dependency:** all three modes need real `<text>` elements in the incoming svg file or stringified svg variable (Task 10) — even mode 3 needs the label *strings* to re-render them in stroke glyphs. Already-outlined input (Seamly2D `--text2paths`) can only be passed through as-is; the UI must handle path-only input (disable the text modes with an explanatory tooltip, or export the existing paths with a warning). Optional Hershey display/export on the Seamly2D side is Task 22.
 
-- [ ] Layout.2.4 - Replace the single "SVG" `MenuItem` with a three-entry submenu (or dialog choice) in `ExportMenu.qml`; add per-mode tooltips summarizing the compatibility/editability trade-off; wire new signals through `TopMenuBar.qml`/`Main.qml` to the bridge
-- [ ] Layout.2.5 - Mode 1: pass `<text>` through in the designer's font and embed the font as a subsetted `@font-face` data-URI (WOFF/TTF); document the font-licensing caveat (embedding rights vary by font license) in the export docs
-- [ ] Layout.2.6 -  Mode 2: emit `<text>` styled with the bundled single-line font, embedded via `@font-face`, per the `DECISIONS.md` decision
-- [ ] Layout.2.7 -  Mode 3: implement single-stroke text rendering in the Rust core — shape each label string into Hershey glyph strokes and emit stroked (fill-less) `<path>` polylines via `svg_dom`; keep the original label string on the group via `data-*`/`<desc>`
-- [ ] Layout.2.7 - Bundle Hershey/single-line glyph data under a permissive license compatible with the MIT Rust core (evaluate existing crates, e.g. a Hershey-font crate, before hand-rolling)
-- [ ] Layout.2.8 - Preserve the `data-*` tagging contract (`piece_label`/`pattern_label` groups, ids, `data-parent`) identically in all three modes
-- [ ] Layout.2.9 - Detect path-only input (no `<text>` in labels) and gate all three text modes accordingly
-- [ ] Layout.2.10 - Persist the last chosen SVG text mode in preferences (`PreferencesModel`)
-- [ ] Layout.2.11 - Tests: Rust unit tests for each conversion mode (mode 3 output is stroked polylines, not filled contours), plus the path-only-input case; frontend test for menu gating; end-to-end check with the richmond test pattern
-- [ ] Layout.2.11 - Update `project-docs/seamlylayout-docs/status-docs/seamlylayout_svg-data-attributes.md`, the root `project-docs/SVG-DATA-ATTRIBUTES.md` mirror, and `project-docs/seamlylayout-docs` export docs
-- [ ] Layout.2.13 - Doxygen briefs + inline comments on all touched functions
+- [ ] Layout.24 - Replace the single "SVG" `MenuItem` with a three-entry submenu (or dialog choice) in `ExportMenu.qml`; add per-mode tooltips summarizing the compatibility/editability trade-off; wire new signals through `TopMenuBar.qml`/`Main.qml` to the bridge
+- [ ] Layout.25 - Mode 1: pass `<text>` through in the designer's font and embed the font as a subsetted `@font-face` data-URI (WOFF/TTF); document the font-licensing caveat (embedding rights vary by font license) in the export docs
+- [ ] Layout.26 -  Mode 2: emit `<text>` styled with the bundled single-line font, embedded via `@font-face`, per the `DECISIONS.md` decision
+- [ ] Layout.27 -  Mode 3: implement single-stroke text rendering in the Rust core — shape each label string into Hershey glyph strokes and emit stroked (fill-less) `<path>` polylines via `svg_dom`; keep the original label string on the group via `data-*`/`<desc>`
+- [ ] Layout.28 - Bundle Hershey/single-line glyph data under a permissive license compatible with the MIT Rust core (evaluate existing crates, e.g. a Hershey-font crate, before hand-rolling)
+- [ ] Layout.29 - Preserve the `data-*` tagging contract (`piece_label`/`pattern_label` groups, ids, `data-parent`) identically in all three modes
+- [ ] Layout.210 - Detect path-only input (no `<text>` in labels) and gate all three text modes accordingly
+  - [ ] Layout.210.1 - Persist the last chosen SVG text mode in preferences (`PreferencesModel`)
+  - [ ] Layout.210.2 - Tests: Rust unit tests for each conversion mode (mode 3 output is stroked polylines, not filled contours), plus the path-only-input case; frontend test for menu gating; end-to-end check with the richmond test pattern
+  - [ ] Layout.210.3 - Update `project-docs/seamlylayout-docs/status-docs/seamlylayout_svg-data-attributes.md`, the root `project-docs/SVG-DATA-ATTRIBUTES.md` mirror, and `project-docs/seamlylayout-docs` export docs
+  - [ ] Layout.210.4 - Doxygen briefs + inline comments on all touched functions
 
 ## [ ] Task Layout 3 — if current pattern is 'multisize', create three multisize options ('nested' / 'marker' / 'sized-layout-set') that is required before user can select the export file format
 
 Add a layout export option for multisize patterns — svg files or stringified svg variables that contain a measurement file reference to a `.smms` multisize file (multiple sizes; the CLI already exposes per-size gradation via `--gradationsize`/`--gradationheight`). The user chooses one of three multisize layout products in the settings dialog; all products orient every piece with its grainline pointing up.
 
-- [ ] Layout.3.0 on Import of svg file or stringified svg variable, detect if .sm2d file reference an .smis measurement file (individual measurements) or .smms measurement file (multisize measurements), this variable should be readable (not writable) by the Export menu, layout algorithm, 'Adjust mode', and other code.
-- [ ] Layout.3.1 Settings dialog: user chooses "nested layout", "marker layout", or "set of sized layouts" for multisize export
-- [ ] Layout.3.2 Generate a "size layout" for each size in the `.smms` file, all grainlines pointing up (per-size piece generation via the existing gradation machinery)
-- [ ] Layout.3.3 Nested layout:
-  - [ ] Layout.3.3.1 For each piece in the largest size, create a layout with all grainlines pointing up
-  - [ ] Layout.3.3.2 For the remaining sizes in descending order: place each piece on top of its matching largest-size piece, grainline up, centering its center point on the largest piece's center point — each large piece becomes the base of a "pyramid" of matching pieces with the smallest on top
-  - [ ] Layout.3.3.3 Apply transforms so all pieces are placed in global space
-  - [ ] Layout.3.3.4 Group all pieces of each size together, so upstream tools (Pattern Projector, Inkscape, Illustrator, ...) can toggle each size's visibility
-- [ ] Layout.3.4 Marker layout: copy all pieces from the size layouts and arrange them into a single marker layout, all grainlines pointing up
-- [ ]  Layout 3.5 Set of sized layouts:
-  - [ ] Layout.3.5.1 Let the user view each size's layout in the canvas — UI design open: per-size tabs across the top of the canvas is the working idea, to be settled during implementation
-  - [ ] Layout.3.5.2 Export the set to a single multi-page PDF, or to individual files of any export type
-- [ ] Layout.3.6 Tests with a multisize test pattern (need a `.sm2d` + `.smms` fixture); verify grouping/grainline orientation in the exported SVG/PDF
-- [ ] Layout.3.7 Doxygen briefs + inline comments on all touched functions; document the three products in the repo docs
+- [ ] Layout.30 on Import of svg file or stringified svg variable, detect if .sm2d file reference an .smis measurement file (individual measurements) or .smms measurement file (multisize measurements), this variable should be readable (not writable) by the Export menu, layout algorithm, 'Adjust mode', and other code.
+- [ ] Layout.31 Settings dialog: user chooses "nested layout", "marker layout", or "set of sized layouts" for multisize export
+- [ ] Layout.32 Generate a "size layout" for each size in the `.smms` file, all grainlines pointing up (per-size piece generation via the existing gradation machinery)
+- [ ] Layout.33 Nested layout:
+  - [ ] Layout.33.1 For each piece in the largest size, create a layout with all grainlines pointing up
+  - [ ] Layout.33.2 For the remaining sizes in descending order: place each piece on top of its matching largest-size piece, grainline up, centering its center point on the largest piece's center point — each large piece becomes the base of a "pyramid" of matching pieces with the smallest on top
+  - [ ] Layout.33.3 Apply transforms so all pieces are placed in global space
+  - [ ] Layout.33.4 Group all pieces of each size together, so upstream tools (Pattern Projector, Inkscape, Illustrator, ...) can toggle each size's visibility
+- [ ] Layout.34 Marker layout: copy all pieces from the size layouts and arrange them into a single marker layout, all grainlines pointing up
+- [ ]  Layout 35 Set of sized layouts:
+  - [ ] Layout.35.1 Let the user view each size's layout in the canvas — UI design open: per-size tabs across the top of the canvas is the working idea, to be settled during implementation
+  - [ ] Layout.35.2 Export the set to a single multi-page PDF, or to individual files of any export type
+- [ ] Layout.36 Tests with a multisize test pattern (need a `.sm2d` + `.smms` fixture); verify grouping/grainline orientation in the exported SVG/PDF
+- [ ] Layout.37 Doxygen briefs + inline comments on all touched functions; document the three products in the repo docs
 
 ## [ ] Task Layout.4 — One writer for the SeamlyLayout debug log
 
@@ -88,37 +88,37 @@ side's flush can land on top of the other's bytes. Until this is fixed: do not
 conclude a log line is absent because it looks truncated — grep for a
 distinctive fragment instead.
 
-- [ ] Layout.4.1 Decide the single owner of the file and record it in
+- [ ] Layout.41 Decide the single owner of the file and record it in
   `DECISIONS.md` — either the Rust side logs through the C++ `Logger` across the
   cxx-qt bridge, or `Logger` stops holding the file open and both sides
   append-and-close per line. Prefer one writer over trying to interleave two
-- [ ] Layout.4.2 Implement the chosen design; keep the existing line format
+- [ ] Layout.42 Implement the chosen design; keep the existing line format
   (`[unix_seconds] DEBUG: message`) so current logs stay readable and both call
   sites' signatures stay unchanged (~20 Rust call sites in `lib.rs`,
   `layout_utils.rs` and `exports.rs`; `Logger::log()` on the C++ side)
-- [ ] Layout.4.3 Serialize concurrent writes — the Rust bridge can be called from
+- [ ] Layout.43 Serialize concurrent writes — the Rust bridge can be called from
   a non-GUI thread, so whatever owns the file needs a mutex or an equivalent
   guarantee
-- [ ] Layout.4.4 Keep the release-build behaviour: `log_to_file()` is a no-op
+- [ ] Layout.44 Keep the release-build behaviour: `log_to_file()` is a no-op
   when `debug_assertions` is off, and that must not regress
-- [ ] Layout.4.5 Test: write interleaved lines from both sides (and from two
+- [ ] Layout.45 Test: write interleaved lines from both sides (and from two
   threads) and assert every line arrives whole and in order
-- [ ] Layout.4.6 Doxygen briefs + inline comments on all touched functions
+- [ ] Layout.46 Doxygen briefs + inline comments on all touched functions
 
 ## [ ] Task Layout.5 - Implement additional export formats
 
-- [ ] Layout.5.1 DXF-AAMA — biggest install base in apparel PLM, reference implementation already in the repo
-- [ ] Layout.5.2 HPGL — unlocks the whole plotter and cutter class
-- [ ] Layout.5.3 PS/EPS — one writer covers both and retires pdftops
-- [ ] Layout.5.4 JPG — trivial, fit it anywhere
-- [ ] Layout.5.5 DXF-ASTM - improve current export so that it meets the DXF-ASTM standard
+- [ ] Layout.51 DXF-AAMA — biggest install base in apparel PLM, reference implementation already in the repo
+- [ ] Layout.52 HPGL — unlocks the whole plotter and cutter class
+- [ ] Layout.53 PS/EPS — one writer covers both and retires pdftops
+- [ ] Layout.54 JPG — trivial, fit it anywhere
+- [ ] Layout.55 DXF-ASTM - improve current export so that it meets the DXF-ASTM standard
 
 ## [ ] Task Layout.6 - Implement export stubs for paid export modules (To be developed)
 
 These options in the Export menu will remain invisible to the user until these features are developed. Put stubs in the code now to mark where they will go.
 
-- [ ] Layout.6.1 Export G-Code
-- [ ] Layout.6.2 Export 3DMesh
+- [ ] Layout.61 Export G-Code
+- [ ] Layout.62 Export 3DMesh
 
 ## [x] Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 
