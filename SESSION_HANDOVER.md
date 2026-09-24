@@ -6,6 +6,18 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-24 — SeamlyLayout Task Layout.2: three SVG label text modes
+
+Branch `task-svg-text-modes`, merged into `run-seamlyLayout` without skip-ci (`Cargo.toml` changed).
+Plan: `project-docs/docs-seamlylayout/export-docs/PLAN_LAYOUT_2_SVG_TEXT_MODES.md`. Font decision: Decision-003.
+
+- New crate `crates/svg_label_text`: designer font (subset `@font-face`), single-line font (Relief SingleLine), Hershey strokes.
+- Bridge: `exportSvg(path, mode)`, `labelTextState` property, `exportWarning` signal.
+- QML: Export > SVG submenu with tooltips and last-mode check mark; View menu keeps one SVG item.
+- `PreferencesModel.svgTextMode`, saved alone by `saveSvgTextMode` (INI key `svg_text_mode`).
+- License notices: `src/app/seamlylayout/packaging/licenses/` (Windows MSI only; `*.txt` is gitignored, files force-added).
+- Open (Layout.210.2): in-app check of Export > SVG with the richmond pattern. Linux/macOS packages do not ship the notices yet.
+
 ## 2026-09-23 — MSI finds running Seamly apps at wizard start
 
 Merged `task-msi-running-apps` into `run-seamlyLayout` without skip-ci (packaging change). See `TODO_COMPLETED.md`.

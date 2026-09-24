@@ -30,3 +30,36 @@ ExportMenu.MenuItem("PNG").onTriggered
                 → preferencesModel.openInViewer(pngViewerPath, path)  C++ static
                   → QProcess::startDetached(viewerPath, [filePath])
                   → (fallback) QDesktopServices::openUrl(filePath)
+
+## SVG export — label text modes
+
+```
+ExportMenu SvgModeItem.onTriggered → chosen(mode) → exportSvgModeRequested(mode)
+  → TopMenuBar.exportSvgRequested(mode)
+    → Main.qml onExportSvgRequested(mode)
+      → preferencesModel.saveSvgTextMode(iniPath, mode)   last mode, marked next time
+      → pendingExportSettings = mode; exportStartTimer
+        → appController.exportSvg(path, mode)
+          → clone_stripped_layout_doc()
+          → svg_label_text::apply_text_mode(doc, mode)    skipped for "asSupplied"
+          → do_export_svg(doc, path)
+          → export_warning(message)                       only when caveats exist
+          → export_finished(path)                         success dialog shows caveats
+```
+
+| Mode | Use | Font dependency |
+|---|---|---|
+| Text: designer font | Tech packs, editing in Inkscape/Illustrator | Embedded subset when the font license allows |
+| Text: single-line font | CAD/CAM tools that resolve text by font name | Embedded Relief SingleLine (OFL-1.1) |
+| Paths: single-stroke (Hershey) | Plotters, cutters, engravers | None |
+
+- `labelTextState` (`AppController`) gates the modes: `pathsOnly` disables them and shows "As supplied".
+- The View menu keeps one SVG item.
+
+### Font licensing caveat
+
+- Mode 1 embeds the designer's font. Font licenses set embedding rights.
+- Mode 1 never embeds a font whose OS/2 `fsType` is "restricted" or forbids subsetting. The text then names the font but does not carry it; the success dialog says so.
+- A font that is not installed is not embedded either; the dialog names it.
+- The subset keeps all glyph slots and the full `cmap`, so a large font (for example a CJK UI font) still adds hundreds of KB.
+- Check the font license before you share a mode 1 file.

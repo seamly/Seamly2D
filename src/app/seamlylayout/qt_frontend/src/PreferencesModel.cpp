@@ -426,6 +426,37 @@ void PreferencesModel::setProjectorPath(const QString &v)
     emit projectorPathChanged();
 } // setProjectorPath
 
+// @brief Set the SVG label text mode; ignores unknown names; emits svgTextModeChanged if changed.
+void PreferencesModel::setSvgTextMode(const QString &v)
+{
+    if (!isSvgTextMode(v) || m_svgTextMode == v) return;
+    m_svgTextMode = v;
+    emit svgTextModeChanged();
+} // setSvgTextMode
+
+// @brief True when mode names one of the three SVG label text modes.
+bool PreferencesModel::isSvgTextMode(const QString &mode)
+{
+    return mode == QLatin1String("designerFont")
+        || mode == QLatin1String("singleLineFont")
+        || mode == QLatin1String("hersheyStrokes");
+} // isSvgTextMode
+
+// @brief Set svgTextMode and persist only that key.
+bool PreferencesModel::saveSvgTextMode(const QString &path, const QString &mode)
+{
+    if (!isSvgTextMode(mode)) {
+        Logger::log(QStringLiteral("PreferencesModel::saveSvgTextMode(): rejected mode=") + mode);
+        return false;
+    } // if unknown mode
+    setSvgTextMode(mode);
+
+    QSettings settings(QFileInfo(path).absoluteFilePath(), QSettings::IniFormat);
+    settings.setValue(QStringLiteral("svg_text_mode"), m_svgTextMode);
+    settings.sync();
+    return settings.status() == QSettings::NoError;
+} // saveSvgTextMode
+
 // @brief Set the installer-recorded data root; emits dataRootChanged if changed.
 void PreferencesModel::setDataRoot(const QString &v)
 {
@@ -487,6 +518,7 @@ bool PreferencesModel::load(const QString &path)
     setPngViewerPath(settings.value(QStringLiteral("png_viewer_path"), m_pngViewerPath).toString());
     setProjectorPath(settings.value(QStringLiteral("projector_path"), m_projectorPath).toString());
     setDataRoot(settings.value(QStringLiteral("data_root"), m_dataRoot).toString());
+    setSvgTextMode(settings.value(QStringLiteral("svg_text_mode"), m_svgTextMode).toString());
 
     if (settings.status() != QSettings::NoError) {
         Logger::log(QStringLiteral("PreferencesModel::load(): QSettings reported an error"));
@@ -671,6 +703,7 @@ bool PreferencesModel::save(const QString &path)
     settings.setValue(QStringLiteral("png_viewer_path"), m_pngViewerPath);
     settings.setValue(QStringLiteral("projector_path"), m_projectorPath);
     settings.setValue(QStringLiteral("data_root"), m_dataRoot);
+    settings.setValue(QStringLiteral("svg_text_mode"), m_svgTextMode);
     settings.sync();
 
     const bool saved = settings.status() == QSettings::NoError;

@@ -3,6 +3,7 @@
 members = [
     "crates/app_core",
     "crates/svg_dom",
+    "crates/svg_label_text",
     "crates/geometry",
     "crates/pack_types",
     "crates/layout_engine",

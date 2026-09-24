@@ -76,6 +76,10 @@ class PreferencesModel : public QObject
     // never overwritten by a later installer read (see load()/adoptInstallerDataRootIfEmpty()).
     Q_PROPERTY(QString dataRoot        READ dataRoot        WRITE setDataRoot        NOTIFY dataRootChanged)
 
+    // @brief Last SVG label text mode used: "designerFont", "singleLineFont" or "hersheyStrokes".
+    // The Export > SVG submenu marks it. Not reset by resetToDefaults(): it records a choice, not a path.
+    Q_PROPERTY(QString svgTextMode     READ svgTextMode     WRITE setSvgTextMode     NOTIFY svgTextModeChanged)
+
 public:
     explicit PreferencesModel(QObject *parent = nullptr);
 
@@ -91,6 +95,7 @@ public:
     QString pngViewerPath()   const { return m_pngViewerPath;   }
     QString projectorPath()   const { return m_projectorPath;   }
     QString dataRoot()        const { return m_dataRoot;        }
+    QString svgTextMode()     const { return m_svgTextMode;     }
 
     // Setters
     void setInputDirectory(const QString &v);
@@ -104,6 +109,17 @@ public:
     void setPngViewerPath(const QString &v);
     void setProjectorPath(const QString &v);
     void setDataRoot(const QString &v);
+    void setSvgTextMode(const QString &v);
+
+    // @brief True when `mode` is one of the three SVG label text mode names.
+    static bool isSvgTextMode(const QString &mode);
+
+    // @brief Set svgTextMode and write only that key to the INI file.
+    // Writing one key keeps unapplied Preferences edits out of the file.
+    // @param path Application preferences INI file path.
+    // @param mode SVG label text mode name; other values are rejected.
+    // @return true when the mode is valid and the INI file was written.
+    Q_INVOKABLE bool saveSvgTextMode(const QString &path, const QString &mode);
 
     // @brief Load preferences from an INI file or a legacy JSON defaults file.
     // @param path Absolute or relative file path.
@@ -261,6 +277,7 @@ signals:
     void pngViewerPathChanged();
     void projectorPathChanged();
     void dataRootChanged();
+    void svgTextModeChanged();
 
 private:
     /// @brief Load a JSON defaults file or a legacy preferences file.
@@ -294,4 +311,5 @@ private:
     QString m_pngViewerPath   = QStringLiteral("");
     QString m_projectorPath   = QStringLiteral("");
     QString m_dataRoot        = QStringLiteral("");
+    QString m_svgTextMode     = QStringLiteral("designerFont");
 }; // PreferencesModel
