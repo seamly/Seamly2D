@@ -13,6 +13,7 @@ User report: "Validating install" paused a long time before "Seamly apps are run
 - `smsi_ui.wxs`: `SeamlyAppsRunningDlg` after `CostFinalize`, before every first wizard page. Retry / Close Apps / Cancel.
 - `MsiRMFilesInUse` and `util:CloseApplication` stay as the backstop.
 - Tests: `smsi_check_authoring.ps1` section 12; new `installer_running_apps_test.ps1` runs both actions in the built MSI against a stand-in `seamlyme.exe`.
+- Verified on screen 2026-09-23 by the user: the page appears at once; Retry, Close Apps and Cancel work.
 
 ## Task — SeamlyLayout piece bbox/outline filter matched real Seamly2D group ids (completed 2026-09-21)
 

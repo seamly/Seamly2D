@@ -12,7 +12,7 @@ Merged `task-msi-running-apps` into `run-seamlyLayout` without skip-ci (packagin
 
 - Verified: `smsi.ps1` build, ICE, authoring check, `installer_running_apps_test.ps1` find checks.
 - Close check skipped locally: a real `seamly2d.exe` ran. Close logic verified separately with a stand-in window.
-- Not yet seen on screen: `SeamlyAppsRunningDlg`.
+- Verified on screen 2026-09-23 (user): `SeamlyAppsRunningDlg` appears at once; Retry, Close Apps, Cancel work.
 - DLL build files stay in `seamly-msi\<arch>\custom-actions\` (user decision; a temporary-folder variant was reverted).
 
 ## 2026-09-23 — Version scheme YY.M.DDHH + MSI newer-version page
