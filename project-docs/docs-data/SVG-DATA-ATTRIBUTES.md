@@ -70,7 +70,7 @@ first child of each piece group when it places the piece into a layout sheet
 | `data-parent` | `piece` and component groups | For a piece: the pattern group's `id` (`pattern-1`). For a component: the owning piece's `data-name` (e.g. `Front Bodice`), or the piece's numeric fallback `id` (e.g. `piece-3`) when the piece has no name. The pattern group has no `data-parent` (it is the root). Not read by any SeamlyLayout code today — true parent/child identity is the DOM nesting — so this is a documentation-level cross-reference, not a lookup key. |
 | `data-name` | `pattern`, `piece` | Pattern name, or piece name. Omitted when empty. |
 | `data-letter` | `piece` | The piece letter, only when one is set on the piece. |
-| `data-grainline-angle` | `piece` | Grain direction in degrees, counter-clockwise as seen on screen (Qt `QLineF::angle()`); `90` = grain points up. Written with 4 decimals. Present whenever the piece has a grain rotation, **also when the grainline is hidden**, so SeamlyLayout can still orient the piece. Includes any Seamly2D layout transform (rotation, mirror). Omitted when the piece has no grain rotation. |
+| `data-grainline-angle` | `piece` | Grain direction in degrees, counter-clockwise as seen on screen (Qt `QLineF::angle()`); `90` = grain points up. Written with 4 decimals. Present whenever the piece has a grain rotation, **also when the grainline is hidden**, so SeamlyLayout can still orient the piece. Before that transform, a grainline without top and bottom anchor points always points up: an angle in (180°, 360°) is written as the angle 180° less. Includes any Seamly2D layout transform (rotation, mirror). Omitted when the piece has no grain rotation. |
 
 ## `id` scheme
 

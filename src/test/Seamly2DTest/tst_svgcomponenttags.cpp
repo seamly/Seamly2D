@@ -561,3 +561,74 @@ void TST_SvgComponentTags::PieceWithoutGrainHasNoGrainlineAngle() const
     QCOMPARE(pieces.size(), 1);
     QVERIFY(!pieces.at(0).hasAttribute(QStringLiteral("data-grainline-angle")));
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief UpwardAngleFlipsDownwardGrainline_data lists grainline angles and their upward form.
+ */
+void TST_SvgComponentTags::UpwardAngleFlipsDownwardGrainline_data() const
+{
+    QTest::addColumn<qreal>("angle");
+    QTest::addColumn<qreal>("expected");
+
+    QTest::newRow("up") << qreal(90) << qreal(90);
+    QTest::newRow("horizontal right") << qreal(0) << qreal(0);
+    QTest::newRow("horizontal left") << qreal(180) << qreal(180);
+    QTest::newRow("down") << qreal(270) << qreal(90);
+    QTest::newRow("down right") << qreal(315) << qreal(135);
+    QTest::newRow("negative down") << qreal(-90) << qreal(90);
+    QTest::newRow("full turn") << qreal(450) << qreal(90);
+    QTest::newRow("360 is horizontal") << qreal(360) << qreal(0);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief UpwardAngleFlipsDownwardGrainline checks that only angles pointing down are turned by 180 degrees.
+ */
+void TST_SvgComponentTags::UpwardAngleFlipsDownwardGrainline() const
+{
+    QFETCH(qreal, angle);
+    QFETCH(qreal, expected);
+
+    QVERIFY2(qAbs(VGrainlineData::upwardAngle(angle) - expected) < 1e-9,
+             qPrintable(QString::number(VGrainlineData::upwardAngle(angle))));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief CenteredStartPutsMidpointOnCenter checks the start point of a centered grainline, and that its start
+ * point lies below its end point.
+ */
+void TST_SvgComponentTags::CenteredStartPutsMidpointOnCenter() const
+{
+    const QPointF center(100, 200);
+    const qreal length = 40;
+
+    const QPointF vertical = VGrainlineData::centeredStart(center, 90, length);
+    QVERIFY(qAbs(vertical.x() - 100) < 1e-9);
+    QVERIFY(qAbs(vertical.y() - 220) < 1e-9);
+
+    const qreal angle = 60;
+    const QPointF start = VGrainlineData::centeredStart(center, angle, length);
+    const QPointF end(start.x() + length * qCos(qDegreesToRadians(angle)),
+                      start.y() - length * qSin(qDegreesToRadians(angle)));
+    const QPointF midpoint = (start + end) / 2.0;
+    QVERIFY(qAbs(midpoint.x() - center.x()) < 1e-9);
+    QVERIFY(qAbs(midpoint.y() - center.y()) < 1e-9);
+    QVERIFY(start.y() > end.y());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief DownwardGrainAxisPointsUp checks that a grainline without top and bottom anchors exports an upward
+ * grain direction.
+ */
+void TST_SvgComponentTags::DownwardGrainAxisPointsUp() const
+{
+    VLayoutPiece piece = makeTestPiece();
+    setHiddenGrain(piece, QStringLiteral("270"));
+
+    qreal angle = 0;
+    QVERIFY(piece.grainlineAngle(angle));
+    QVERIFY2(qAbs(normalizedDegrees(angle) - 90.0) < 1e-6, qPrintable(QString::number(angle)));
+}

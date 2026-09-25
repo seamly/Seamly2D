@@ -294,6 +294,7 @@ private:
                                          qreal notchWidth, int notchCount);
     void                        setCurrentText(QComboBox *box, const QString &text) const;
     qreal                       getFormulaValue(QPlainTextEdit *text) const;
+    void                        placeGrainline(VGrainlineData &grainline, const VPiecePath &path) const;
 };
 
 #endif // PATTERN_PIECE_DIALOG

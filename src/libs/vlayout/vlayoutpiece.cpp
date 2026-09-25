@@ -729,6 +729,12 @@ void VLayoutPiece::setGrainAxis(const VGrainlineData &data, const VContainer *pa
         return;
     }
 
+    // Without top and bottom anchors the grain points up, so SeamlyLayout sees one direction per axis.
+    if (data.topAnchorPoint() == NULL_ID || data.bottomAnchorPoint() == NULL_ID)
+    {
+        rotationAngle = qDegreesToRadians(VGrainlineData::upwardAngle(qRadiansToDegrees(rotationAngle)));
+    }
+
     // Only the direction is used, so a zero or invalid length must not hide it.
     const QPointF pt2(pt1.x() + qCos(rotationAngle), pt1.y() - qSin(rotationAngle));
     d->grainAxis << pt1 << pt2;
