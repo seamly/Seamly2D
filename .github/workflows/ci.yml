@@ -365,13 +365,9 @@ jobs:
     steps:
       - name: 'Checkout repository - ${{ matrix.arch }}'
         uses: actions/checkout@v7
-      - name: Checkout code
-        uses: actions/checkout@v7
 
-      - name: Setup MSVC Developer Command Prompt
+      - name: 'Setup MSVC Developer Command Prompt - ${{ matrix.arch }}'
         uses: TheMrMilchmann/setup-msvc-dev@v4.1.0
-      - name: 'Install MSVC dev tools - ${{ matrix.arch }}'
-        uses: ilammy/msvc-dev-cmd@v1.13.0
         with:
           arch: ${{ matrix.msvc-arch }}
 
