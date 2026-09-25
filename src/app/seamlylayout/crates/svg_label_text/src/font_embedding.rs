@@ -5,9 +5,10 @@
 // @file font_embedding.rs
 // @brief Modes 1 and 2: keep label `<text>` and embed its font as a subset `@font-face`.
 //
-// The subset keeps every glyph slot and the full `cmap`, and zeroes the
-// outlines of unused glyphs, so glyph ids never change. Layout tables such as
-// GSUB/GPOS are dropped: kerning and ligatures are lost, plain text is not.
+// The subset holds only the glyphs the labels use, renumbered, with a new
+// Unicode `cmap` for them; browsers need that `cmap` to map text to glyphs.
+// Hinting and layout tables such as GSUB/GPOS are dropped: kerning and
+// ligatures are lost, plain text is not.
 //
 // Font licenses decide embedding. A font whose OS/2 `fsType` is "restricted",
 // or that forbids subsetting, is not embedded; its text stays and names the
@@ -105,6 +106,22 @@ fn css_string(value: &str) -> String {
     value.replace('\\', "\\\\").replace('"', "\\\"")
 } // fn css_string
 
+/// @brief Subset face `index` of `data` to `glyphs`, with a Unicode `cmap`.
+/// @param glyphs sorted, unique glyph ids; the first must be 0 (.notdef).
+fn subset_font(data: &[u8], index: u32, glyphs: &[u16]) -> Result<Vec<u8>, String> {
+    let font = allsorts::binary::read::ReadScope::new(data)
+        .read::<allsorts::font_data::FontData<'_>>()
+        .map_err(|e| e.to_string())?;
+    let provider = font.table_provider(index as usize).map_err(|e| e.to_string())?;
+    allsorts::subset::subset(
+        &provider,
+        glyphs,
+        &allsorts::subset::SubsetProfile::Minimal,
+        allsorts::subset::CmapTarget::Unicode,
+    )
+    .map_err(|e| e.to_string())
+} // fn subset_font
+
 /// @brief Build one `@font-face` rule holding a subset of the face in `data`.
 /// @return The rule, or a user-facing reason why the face cannot be embedded.
 fn font_face_rule(
@@ -128,7 +145,7 @@ fn font_face_rule(
     glyphs.extend(chars.iter().filter_map(|c| face.glyph_index(*c)).map(|g| g.0));
     glyphs.sort_unstable();
     glyphs.dedup();
-    let subset = subsetter::subset(data, index, subsetter::Profile::pdf(&glyphs))
+    let subset = subset_font(data, index, &glyphs)
         .map_err(|e| format!("Font '{}' could not be subset ({e}); its label text is not embedded.", key.family))?;
 
     // CFF outlines are OpenType; glyf outlines are TrueType.

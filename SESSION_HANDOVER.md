@@ -6,6 +6,14 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-24 — SVG designer-font export: true font subsets
+
+Merged `task-font-subset-allsorts` without skip-ci (`Cargo.toml` changed).
+
+- `font_embedding.rs` subsets with `allsorts` (only used glyphs, Unicode `cmap`) instead of `subsetter`.
+- Trousers with Yu Gothic UI Light: export 615 KB → 65 KB. Both font modes checked in Edge.
+- Test `embedded_font_is_a_true_subset_with_a_unicode_cmap` pins glyph count, `cmap` and size.
+
 ## 2026-09-24 — SeamlyLayout Task Layout.2: three SVG label text modes
 
 Branch `task-svg-text-modes`, merged into `run-seamlyLayout` without skip-ci (`Cargo.toml` changed).

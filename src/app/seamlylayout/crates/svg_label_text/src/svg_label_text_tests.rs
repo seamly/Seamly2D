@@ -285,3 +285,25 @@ fn trousers_fixture_converts_every_label_line() {
     assert_eq!(label_text_state(&reparsed), LabelTextState::PathsOnly);
 } // trousers_fixture_converts_every_label_line
 
+
+#[test]
+fn embedded_font_is_a_true_subset_with_a_unicode_cmap() {
+    use base64::Engine;
+    let mut doc = sample(&relief_family());
+    apply_text_mode_with_fonts(&mut doc, SvgTextMode::DesignerFont, &relief_db());
+    let mut styles = Vec::new();
+    find_all(&doc.root, "style", &mut styles);
+    let css = text_content(styles[0]);
+    let b64 = css.split("base64,").nth(1).unwrap().split(')').next().unwrap();
+    let font = base64::engine::general_purpose::STANDARD.decode(b64).unwrap();
+
+    // Only .notdef plus the distinct characters of "Front" and "Size 12" remain.
+    let face = ttf_parser::Face::parse(&font, 0).expect("subset parses");
+    let used: std::collections::BTreeSet<char> = "FrontSize 12".chars().collect();
+    assert!(usize::from(face.number_of_glyphs()) <= used.len() + 1, "{} glyphs", face.number_of_glyphs());
+    // Browsers map text through the cmap: every used character must resolve.
+    for c in used.iter().filter(|c| !c.is_whitespace()) {
+        assert!(face.glyph_index(*c).is_some(), "no glyph for {c:?}");
+    } // for c
+    assert!(font.len() * 4 < RELIEF.len(), "subset {} bytes of {}", font.len(), RELIEF.len());
+} // embedded_font_is_a_true_subset_with_a_unicode_cmap

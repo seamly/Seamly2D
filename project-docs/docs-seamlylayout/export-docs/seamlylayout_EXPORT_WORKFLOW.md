@@ -61,5 +61,5 @@ ExportMenu SvgModeItem.onTriggered → chosen(mode) → exportSvgModeRequested(m
 - Mode 1 embeds the designer's font. Font licenses set embedding rights.
 - Mode 1 never embeds a font whose OS/2 `fsType` is "restricted" or forbids subsetting. The text then names the font but does not carry it; the success dialog says so.
 - A font that is not installed is not embedded either; the dialog names it.
-- The subset keeps all glyph slots and the full `cmap`, so a large font (for example a CJK UI font) still adds hundreds of KB.
+- The subset keeps only the used glyphs, with a new Unicode `cmap` (`allsorts`). Trousers with Yu Gothic UI Light: 55 KB input, 65 KB export.
 - Check the font license before you share a mode 1 file.

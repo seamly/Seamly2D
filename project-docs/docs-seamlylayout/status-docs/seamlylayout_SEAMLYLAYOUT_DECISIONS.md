@@ -115,6 +115,12 @@ Option C selected, applied app-wide. All observability file writes are gated by 
 - Parser: `hershey` crate 0.1.2 (Apache-2.0 OR LGPL-3.0; used under Apache-2.0).
 - Scale: 32 Hershey units per em; baseline at Hershey y = 9.
 
+**Font subsetting: `allsorts` 0.17 (Apache-2.0)**
+
+- `subsetter` 0.1 kept every glyph slot and the full `cmap`: a CJK UI font added about 560 KB per export.
+- `allsorts` keeps only the used glyphs and writes a new Unicode `cmap`, which browsers need.
+- Profile `Minimal`: hinting and GSUB/GPOS are dropped. Built with `flate2_rust`, so no C zlib is needed.
+
 **License notices**
 
 - `crates/svg_label_text/assets/fonts/OFL.txt`, `crates/svg_label_text/assets/hershey/HERSHEY_LICENSE.txt`.
@@ -157,3 +163,4 @@ files are written, this decides *where*.
 - 2026-06-29: Marked Decision-002 as `Accepted` — Option C selected (compile-time gate: debug writes allowed, release builds enforce no disk I/O).
 - 2026-06-29: Expanded Decision-002 scope from AdjustMode to all observability file I/O app-wide (DG.5 verification gate closed); added Scope, Verification, and updated Rationale sections.
 - 2026-09-24: Added Decision-003 (SVG label text modes: bundled fonts).
+- 2026-09-24: Decision-003 — font subsetting moved from `subsetter` to `allsorts`.
