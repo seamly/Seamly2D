@@ -520,8 +520,7 @@ pub fn do_process_layout(
 
     if blank_bottom > MIN_THRESHOLD_PX {
         // trim roll and fabric layouts
-        let is_roll = settings.media_type == "fabric" || settings.paper_type == "roll";
-        if is_roll {
+        if settings.is_roll_form() {
             // 7a. trim blank space below last piece for fabric or roll media
             trim_bottom(&mut output_doc, max_bin_bottom, work_mt_px, work_mb_px);
             work_layout_h_px = max_bin_bottom.saturating_add(work_mb_px);

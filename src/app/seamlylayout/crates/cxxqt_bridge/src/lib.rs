@@ -310,6 +310,63 @@ fn parse_tiled_row_top_y(path_elem: &XmlElement) -> Option<u32> {
         .and_then(|y| y.parse::<u32>().ok())
 } // fn parse_tiled_row_top_y
 
+// @brief Return the lowest piece bottom edge in canvas pixels, or 0 when no piece has geometry.
+//
+// Reads geometry only and ignores `transform` attributes, so the caller
+// must pass a flattened DOM.
+fn max_piece_bottom_px(doc: &svg_dom::Document) -> u32 {
+    doc.root
+        .children
+        .iter()
+        .filter_map(|node| node.as_element())
+        .filter(|el| el.name == "g")
+        .filter(|el| {
+            let id = el.attributes.get("id").map(String::as_str).unwrap_or("");
+            !id.is_empty() && id != "Rectangles"
+        })
+        .filter_map(bbox_from_group_geometry)
+        .map(|bbox| bbox.max.y.max(0.0).ceil() as u32)
+        .max()
+        .unwrap_or(0)
+} // fn max_piece_bottom_px
+
+// @brief Trim unused space below the lowest piece of a roll-form adjust DOM.
+//
+// Measures a flattened clone, because adjust_dom keeps pending piece
+// transforms until Done. The bottom margin (backgroundRect bottom minus
+// contentRect bottom) is kept. The layout only shrinks, never grows.
+//
+// @param doc  Mutable adjust DOM; root, backgroundRect and contentRect heights change.
+// @return New root height in pixels, or None when nothing was trimmed.
+fn trim_roll_bottom_in_adjust_dom(doc: &mut svg_dom::Document) -> Option<u32> {
+    let attr_px = |d: &svg_dom::Document, id: &str, name: &str| -> Option<f64> {
+        d.get_attr_by_id(id, name).and_then(|v| v.trim().parse::<f64>().ok())
+    };
+
+    // Read the current frame: contentRect top/height and the bottom margin.
+    let content_y = attr_px(doc, "contentRect", "y")?;
+    let content_h = attr_px(doc, "contentRect", "height")?;
+    let background_h = attr_px(doc, "backgroundRect", "height")?;
+    let content_bottom = content_y + content_h;
+    let margin_bottom = (background_h - content_bottom).max(0.0);
+
+    // Bake pending transforms on a clone to measure where the pieces really are.
+    let mut measured = doc.clone();
+    svg_dom::flatten_dom(&mut measured);
+    let lowest = max_piece_bottom_px(&measured) as f64;
+
+    // Guard: no pieces, or no unused space below the lowest piece.
+    if lowest <= content_y || lowest >= content_bottom {
+        return None;
+    }
+
+    let new_content_h = (lowest - content_y).ceil() as u32;
+    let top_px = content_y.round() as u32;
+    let bottom_px = margin_bottom.round() as u32;
+    trim_bottom(doc, new_content_h, top_px, bottom_px);
+    Some(top_px + new_content_h + bottom_px)
+} // fn trim_roll_bottom_in_adjust_dom
+
 // @brief Remove blank bottom tile rows from an adjusted tiled layout DOM.
 //
 // A tile row is considered blank when the row's top y is at or below the
@@ -324,23 +381,9 @@ fn trim_empty_tiled_rows_in_adjust_dom(doc: &mut svg_dom::Document) -> u32 {
         return 0;
     };
 
-    // Compute max piece bottom in absolute canvas coordinates.
-    // `exit_adjust_mode` now flattens and persists adjust_dom before calling
-    // this helper, so we can measure directly from the real DOM.
-    let max_piece_bottom: u32 = doc
-        .root
-        .children
-        .iter()
-        .filter_map(|node| node.as_element())
-        .filter(|el| el.name == "g")
-        .filter(|el| {
-            let id = el.attributes.get("id").map(String::as_str).unwrap_or("");
-            !id.is_empty() && id != "Rectangles"
-        })
-        .filter_map(|el| bbox_from_group_geometry(el))
-        .map(|bbox| bbox.max.y.max(0.0).ceil() as u32)
-        .max()
-        .unwrap_or(0);
+    // `exit_adjust_mode` flattens adjust_dom before calling this helper,
+    // so geometry is already in absolute canvas coordinates.
+    let max_piece_bottom = max_piece_bottom_px(doc);
 
     // Snapshot row geometry before mutation.
     let (original_row_count, trim_tile_h_px) = {
@@ -782,6 +825,11 @@ pub struct AppControllerRust {
     // Reset to 0 on new import.
     layout_mt_px: u32,
 
+    // True when the current layout uses roll-form media (see `LayoutSettings::is_roll_form`).
+    // Set by process_layout; read by accept_adjustments to trim the bottom on Apply.
+    // Reset to false on new import.
+    is_roll_layout: bool,
+
     // JSON object with layout metadata and piece bounding boxes, built during process_layout.
     // Format: {ml_px, mt_px, pieces: [{id, x, y, w, h, origin_x_px, origin_y_px}, ...]}
     // All coordinates are in layout pixels (piece.x/y are absolute canvas-pixel positions).
@@ -856,6 +904,7 @@ impl Default for AppControllerRust {
             layout_h_px:               0,                              // set by initialize_layout
             layout_ml_px:              0,                              // default until first layout
             layout_mt_px:              0,                              // default until first layout
+            is_roll_layout:            false,                          // set by process_layout
             piece_bboxes_json:         String::new(),                  // no layout computed yet
             piece_bboxes_json_snapshot: String::new(),                  // no snapshot until adjust mode
             error_message:             cxx_qt_lib::QString::default(), // no active error
@@ -963,6 +1012,7 @@ impl qobject::AppController {
             rust.layout_h_px        = 0;    // reset until next initialize_layout
             rust.layout_ml_px       = 0;    // reset until next layout
             rust.layout_mt_px       = 0;    // reset until next layout
+            rust.is_roll_layout     = false; // reset until next layout
             // don't clear settings - keep the current settings (if any)
             // clear layout bbox data
             rust.piece_bboxes_json  = String::new(); // clear stale bbox data
@@ -1138,6 +1188,12 @@ impl qobject::AppController {
             (input, initial, rust.layout_h_px)
         }; // rust borrow dropped
 
+        // Remember the media form so Adjust Apply knows whether to trim the bottom.
+        // Invalid JSON fails inside do_process_layout, which reports the error.
+        let is_roll_layout = LayoutSettings::from_json(&json_str)
+            .map(|settings| settings.is_roll_form())
+            .unwrap_or(false);
+
         // Delegate to pure-logic function in layout_utils.rs
         let args = ProcessLayoutArgs {
             settings_json: &json_str,
@@ -1166,6 +1222,7 @@ impl qobject::AppController {
                     rust.layout_h_px       = result.layout_h_px;
                     rust.layout_ml_px      = result.ml_px;
                     rust.layout_mt_px      = result.mt_px;
+                    rust.is_roll_layout    = is_roll_layout;
                     rust.piece_bboxes_json = result.bbox_json;
                     // Persist the pre-processing stage snapshots so AdjustMode and
                     // other steps can read them from memory instead of the debug SVGs.
@@ -1400,6 +1457,7 @@ impl qobject::AppController {
 
         {
             let mut rust = self.as_mut().rust_mut();
+            let is_roll_layout = rust.is_roll_layout; // read before the mutable DOM borrow
             let doc = match rust.adjust_dom.as_mut() {
                 Some(d) => d,
                 None => {
@@ -1429,6 +1487,15 @@ impl qobject::AppController {
             } // for entry in entries
             // NOTE: Do NOT update piece_bboxes_json (x, y) here. Overlay positions remain canonical until adjustments are finalized.
 
+            // Roll-form media has no fixed length: drop unused space below the
+            // lowest piece so the reloaded Adjust canvas shows the trimmed frame.
+            if is_roll_layout {
+                if let Some(new_h) = trim_roll_bottom_in_adjust_dom(doc) {
+                    log_to_file(&format!(
+                        "[lib.rs-AppController] accept_adjustments(): 4a trimmed roll layout bottom, new height={new_h}px"
+                    ));
+                } // if trimmed
+            } // if is_roll_layout
         } // rust borrow dropped
 
         // Debug: save adjust_dom after transforms have been applied.
@@ -2323,6 +2390,69 @@ mod adjust_bbox_tests {
         assert_bbox(&piece_bbox(&promoted, "A"), 60.0, 50.0, 20.0, 40.0);
     } // done_bakes_transform_into_geometry
 } // mod adjust_bbox_tests
+
+// ---------------------------------------------------------------------------
+// Roll-form bottom trim on Adjust Apply
+// ---------------------------------------------------------------------------
+#[cfg(test)]
+mod adjust_roll_trim_tests {
+    use super::trim_roll_bottom_in_adjust_dom;
+
+    // Roll canvas: 24 px margins, content 200 x 1000, one 20 x 40 piece at (30, 30).
+    const ROLL_SVG: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="248" height="1048"><g id="Rectangles"><rect id="backgroundRect" x="0" y="0" width="248" height="1048" fill="white" stroke="none"/><rect id="contentRect" x="24" y="24" width="200" height="1000" fill="none" stroke="black"/></g><g id="A"><path d="M 30,30 L 50,30 L 50,70 L 30,70 Z"/></g></svg>"#;
+
+    fn parse() -> svg_dom::Document {
+        svg_dom::Document::parse(ROLL_SVG).expect("parse svg")
+    }
+
+    fn heights(doc: &svg_dom::Document) -> (String, String, String) {
+        (
+            doc.root.attributes.get("height").cloned().unwrap_or_default(),
+            doc.get_attr_by_id("backgroundRect", "height").unwrap_or_default().to_string(),
+            doc.get_attr_by_id("contentRect", "height").unwrap_or_default().to_string(),
+        )
+    }
+
+    // @brief Trim keeps the bottom margin and ends contentRect at the lowest piece.
+    #[test]
+    fn trims_to_lowest_piece_and_keeps_margin() {
+        let mut doc = parse();
+        // Piece bottom 70 → content height 70 - 24 = 46; root = 24 + 46 + 24 = 94.
+        assert_eq!(trim_roll_bottom_in_adjust_dom(&mut doc), Some(94));
+        assert_eq!(heights(&doc), ("94".into(), "94".into(), "46".into()));
+    } // trims_to_lowest_piece_and_keeps_margin
+
+    // @brief Pending Apply transforms count: the moved position sets the new bottom.
+    #[test]
+    fn measures_pending_transform() {
+        let mut doc = parse();
+        assert!(doc.set_attr_by_id("A", "transform", "translate(0 100)"));
+        // Piece bottom 170 → content height 146; root = 194.
+        assert_eq!(trim_roll_bottom_in_adjust_dom(&mut doc), Some(194));
+        assert_eq!(heights(&doc), ("194".into(), "194".into(), "146".into()));
+        // The transform stays pending; only the frame changed.
+        assert_eq!(doc.get_attr_by_id("A", "transform"), Some("translate(0 100)"));
+    } // measures_pending_transform
+
+    // @brief A piece at or past the content bottom leaves the frame unchanged.
+    #[test]
+    fn never_grows() {
+        let mut doc = parse();
+        assert!(doc.set_attr_by_id("A", "transform", "translate(0 990)"));
+        assert_eq!(trim_roll_bottom_in_adjust_dom(&mut doc), None);
+        assert_eq!(heights(&doc), ("1048".into(), "1048".into(), "1000".into()));
+    } // never_grows
+
+    // @brief No pieces: nothing to measure, so the frame stays unchanged.
+    #[test]
+    fn no_pieces_is_noop() {
+        let mut doc = parse();
+        doc.root.children.retain(|n| {
+            n.as_element().and_then(|e| e.attributes.get("id")).map(String::as_str) != Some("A")
+        });
+        assert_eq!(trim_roll_bottom_in_adjust_dom(&mut doc), None);
+    } // no_pieces_is_noop
+} // mod adjust_roll_trim_tests
 
 // ---------------------------------------------------------------------------
 // Export progress infrastructure tests

@@ -173,6 +173,15 @@ impl LayoutSettings {
         serde_json::from_str(json)
     } // fn from_json
 
+    // @brief True for roll-form media: fabric, or paper with paper_type "roll".
+    //
+    // Roll-form layouts have no fixed length, so unused space below the
+    // lowest piece is trimmed after packing and after each Adjust Apply.
+    pub fn is_roll_form(&self) -> bool {
+        self.media_type == "fabric"
+            || (self.media_type == "paper" && self.paper_type == "roll")
+    } // fn is_roll_form
+
     // @brief Convert a value from the active unit system to inches.
     //
     // @param value Value in the active unit system.
@@ -711,6 +720,24 @@ mod tests {
         s.rotation_step = 180.0;
         assert_eq!(s.rotation_trial_set_deg(), vec![0, 90, 180, 270]);
     } // trial_set_any
+
+    // @brief is_roll_form: fabric, or paper roll; never paper sheet or tiled.
+    #[test]
+    fn is_roll_form_truth_table() {
+        let cases = [
+            ("fabric", "sheet", true),
+            ("fabric", "roll",  true),
+            ("paper",  "roll",  true),
+            ("paper",  "sheet", false),
+            ("paper",  "tiled", false),
+        ];
+        for (media, paper, expected) in cases {
+            let mut s = LayoutSettings::default_for_test();
+            s.media_type = media.to_string();
+            s.paper_type = paper.to_string();
+            assert_eq!(s.is_roll_form(), expected, "media={media} paper={paper}");
+        }
+    } // is_roll_form_truth_table
 
     // @brief noGrainlineRotation: default "upright"; only "free" allows quarter turns.
     #[test]
