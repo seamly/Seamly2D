@@ -102,3 +102,16 @@ These options in the Export menu will remain invisible to the user until these f
 
 ## [x] Task Layout.9 — Piece-mode handoff passes a file, not a stringified SVG document
 
+## [ ] Task Layout.14 — Ship third-party license notices in every installer
+
+No installer ships license notices for the Rust crates linked into SeamlyLayout (163 crates at 2026-09-24).
+Apache-2.0 and BSD licenses require the notice with every binary distribution. The Windows MSI ships only the
+Relief SingleLine and Hershey notices; the Linux AppImage and macOS DMG ship none. `smsi.ps1` also expects Qt
+LGPL notices in `src/app/seamlylayout/packaging/licenses/`, but none exist.
+
+- [ ] Layout.14.1 - Generate `rust_crate_notices.txt` with `cargo-about` (MIT OR Apache-2.0): one entry per crate linked into `seamlylayout`, with its full license text; no dev or build-only crates
+- [ ] Layout.14.2 - `about.toml` lists the accepted licenses; a crate with any other license stops the build
+- [ ] Layout.14.3 - Generate at package time in `local_build_msi.ps1`/`smsi.ps1`, `local_build_appimage.sh`, `local_build_dmg.sh` and `ci.yml`, so the notices always match `Cargo.lock`
+- [ ] Layout.14.4 - Linux AppImage and macOS DMG ship the `licenses` folder, as the MSI does
+- [ ] Layout.14.5 - Qt LGPL-3.0 notices for the bundled Qt runtime (decision: this task or a separate one)
+- [ ] Layout.14.6 - Docs: `.github/README-BUILDS.md`, Decision-003; verify each package contains the notices
