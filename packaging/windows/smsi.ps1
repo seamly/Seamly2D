@@ -340,7 +340,7 @@ foreach ($file in @('default_settings.json', 'B0.json', 'roll_36in.json', 'roll_
 }
 
 # Third-party license notices: Qt runtime (LGPL-3.0), Rust crates, bundled fonts.
-$licensesSrc = Join-Path $repoRoot 'src\app\seamlylayout\packaging\licenses'
+$licensesSrc = Join-Path $repoRoot 'packaging\licenses'
 if (Test-Path $licensesSrc) {
     $licensesDst = Join-Path $parentDir 'licenses'
     New-Item -ItemType Directory -Force -Path $licensesDst | Out-Null

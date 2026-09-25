@@ -5,7 +5,7 @@
 // @file license_notices_tests.rs
 // @brief Fails while the committed license notices no longer match Cargo.lock or the Qt version.
 //
-// The installers ship packaging/licenses/rust_crate_notices.txt and qt_notices.txt as committed
+// The installers ship <repo>/packaging/licenses/rust_crate_notices.txt and qt_notices.txt as committed
 // files. Regenerate both with packaging/licenses/generate_license_notices.py when this test fails.
 
 use std::path::PathBuf;
@@ -30,7 +30,7 @@ fn header_value(text: &str, key: &str) -> Option<String> {
     text.lines().find_map(|line| line.strip_prefix(key)).map(|v| v.trim().to_string())
 } // fn header_value
 
-const REGENERATE: &str = "run: python src/app/seamlylayout/packaging/licenses/generate_license_notices.py --qt-root <Qt kit>";
+const REGENERATE: &str = "run: python packaging/licenses/generate_license_notices.py --qt-root <Qt kit>";
 
 #[test]
 fn rust_crate_notices_match_cargo_lock() {
@@ -39,7 +39,7 @@ fn rust_crate_notices_match_cargo_lock() {
     let lock = String::from_utf8_lossy(&lock).replace("\r\n", "\n");
     let expected = format!("fnv1a64:{}", fnv1a64(lock.as_bytes()));
 
-    let notices = std::fs::read_to_string(workspace_path("packaging/licenses/rust_crate_notices.txt"))
+    let notices = std::fs::read_to_string(workspace_path("../../../packaging/licenses/rust_crate_notices.txt"))
         .expect("rust_crate_notices.txt readable");
     let recorded = header_value(&notices, "Cargo.lock fingerprint:");
     assert_eq!(recorded.as_deref(), Some(expected.as_str()), "rust_crate_notices.txt is stale; {REGENERATE}");
@@ -56,7 +56,7 @@ fn qt_notices_match_ci_qt_version() {
         .map(str::to_string)
         .expect("QT_VERSION in ci.yml");
 
-    let notices = std::fs::read_to_string(workspace_path("packaging/licenses/qt_notices.txt"))
+    let notices = std::fs::read_to_string(workspace_path("../../../packaging/licenses/qt_notices.txt"))
         .expect("qt_notices.txt readable");
     let recorded = header_value(&notices, "Qt version:");
     assert_eq!(recorded, Some(ci_version), "qt_notices.txt is stale; {REGENERATE}");
