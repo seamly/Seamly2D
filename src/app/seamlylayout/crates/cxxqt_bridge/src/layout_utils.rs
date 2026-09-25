@@ -757,4 +757,51 @@ mod tests {
         positions.dedup();
         assert_eq!(positions.len(), 12, "each piece should occupy its own slot");
     } // richmond_shirt_handoff_packs_twelve_individual_pieces
+
+    // @brief Seamly2D handoff for the trousers sample: 12 pieces, of which the
+    // four trouser legs carry no grainline.  Produced like HANDOFF_SVG.
+    const TROUSERS_HANDOFF_SVG: &str = include_str!("../test_data/trousers-handoff_pieces.svg");
+
+    // @brief Pieces without a grainline keep their drafted orientation.
+    //
+    // Each trouser leg is about 36 cm wide and 110 cm long.  A leg turned on its
+    // side is wider than a 36 in roll, so it would be left out of the layout.
+    #[test]
+    fn trousers_handoff_fits_36_inch_roll() {
+        let input_dom = Document::parse(TROUSERS_HANDOFF_SVG).expect("trousers fixture should parse");
+        let settings_json = r#"{
+            "unit": "in",
+            "mediaType": "fabric",
+            "paperType": "roll",
+            "pageWidth": 36.0,
+            "pageHeight": 500.0,
+            "marginLeft": 0.5,
+            "marginRight": 0.5,
+            "marginTop": 0.5,
+            "marginBottom": 0.5,
+            "pieceGap": 0.125,
+            "layoutMode": "alongGrainline",
+            "rotationStep": 180,
+            "tileSize": "Letter",
+            "tileOrientation": "Portrait"
+        }"#;
+        let init = do_initialize_layout(settings_json, Some(&input_dom))
+            .expect("initialize_layout should succeed");
+
+        let mut progress = |_pct: i32, _status: Option<&str>| {};
+        let result = do_process_layout(
+            ProcessLayoutArgs {
+                settings_json,
+                input_dom: &input_dom,
+                initial_layout_dom: &init.initial_dom,
+                layout_h_px: init.h_px,
+            },
+            &mut progress,
+        ).expect("process_layout should succeed on the trousers handoff");
+
+        assert!(
+            result.unplaced_labels.is_empty(),
+            "no piece should be left unplaced, got {:?}", result.unplaced_labels
+        );
+    } // trousers_handoff_fits_36_inch_roll
 } // mod tests

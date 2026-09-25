@@ -1,0 +1,410 @@
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<svg baseProfile="tiny" height="1517.91mm" version="1.2" viewBox="0 0 7993 5737" width="2114.81mm" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs/>
+ <g data-type="pattern" data-type-number="1" id="pattern-1">
+  <g data-letter="A" data-name="Front_no_pocket" data-parent="pattern-1" data-type="piece" data-type-number="1" id="piece-1">
+   <g data-parent="piece-1" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-1-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="5.29134,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,1731.82,4357.29)">
+     <path d="M-396.55,-163.856 L-396.55,-277.242 L-396.55,-428.423 L-398.645,-481.038 L-404.665,-618.15 L-415.162,-839.996 L-431.048,-1151.8 L-447.379,-1456.54 L-462.46,-1728.51 L-479.716,-2030.98 L-483.271,-2091.42 L-484.022,-2103.23 L-486.237,-2131.02 L-490.959,-2180.87 L-499.851,-2262.56 L-511.119,-2358.28 L-531.282,-2521.4 L-562.333,-2764.8 L-594.274,-3015.91 L-616.33,-3195.42 L-629.379,-3306.58 L-640.498,-3407.56 L-649.207,-3495.67 L-653.769,-3551.13 L-655.868,-3583.01 L-657.096,-3610.15 L-657.392,-3632.22 L-657.13,-3641.02 L-654.661,-3701.7 L-649.482,-3811.71 L-644.748,-3891.17 L-640.206,-3952.64 L-636.683,-3993.89 L-632.69,-4035.03 L-628.186,-4075.76 L-623.129,-4115.77 L-617.477,-4154.78 L-611.188,-4192.46 L-604.22,-4228.51 L-600.437,-4245.75 L-600.584,-4249.33 L-587.123,-4248.08 L-562.875,-4246.09 L-536.114,-4244.67 L-500.481,-4243.75 L-449.621,-4243.27 L-377.175,-4243.18 L-218.81,-4243.61 L-61.8526,-4244.25 L-10.8304,-4017.69 L36.4133,-4244.65 L103.323,-4244.92 L188.953,-4245.58 L228.269,-4246.61 L249.514,-4247.68 L280.252,-4250.05 L306.02,-4252.47 L363.343,-3641.02 L363.866,-3639.36 L364.707,-3635.06 L365.636,-3626.74 L366.868,-3603.89 L368.709,-3573.58 L370.977,-3550.9 L373.612,-3532.85 L375.865,-3520.51 L378.604,-3507.99 L381.886,-3495.37 L385.769,-3482.71 L390.307,-3470.1 L395.56,-3457.61 L401.582,-3445.31 L408.431,-3433.28 L416.164,-3421.59 L424.837,-3410.32 L434.507,-3399.55 L445.231,-3389.35 L457.065,-3379.8 L470.067,-3370.96 L484.293,-3362.92 L499.799,-3355.75 L516.643,-3349.53 L534.881,-3344.33 L554.57,-3340.23 L565.041,-3338.66 L560.789,-3321.28 L552.697,-3284.68 L545.085,-3246.02 L537.938,-3205.49 L531.239,-3163.3 L524.973,-3119.64 L519.123,-3074.69 L513.674,-3028.64 L508.611,-2981.7 L503.916,-2934.06 L497.49,-2861.72 L490.125,-2764.5 L483.95,-2667.93 L478.84,-2573.54 L474.666,-2482.88 L469.807,-2356.3 L465.559,-2215.81 L462.774,-2117.96 L461.611,-2091.42 L457.134,-2024.66 L436.387,-1723.02 L418.901,-1454.5 L405.295,-1230.38 L396.538,-1076.66 L388.365,-922.472 L381.07,-770.84 L374.949,-624.773 L370.296,-487.283 L368.883,-428.423 L368.883,-277.242 L368.883,-163.856 L-396.55,-163.856 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-1" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-1-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,1731.82,4357.29)">
+     <path d="M-434.345,-126.061 L-434.345,-277.242 L-434.345,-427.671 L-436.407,-479.457 L-442.421,-616.428 L-452.911,-838.142 L-468.792,-1149.83 L-485.118,-1454.48 L-500.196,-1726.39 L-517.449,-2028.79 L-520.996,-2089.11 L-521.722,-2100.53 L-523.891,-2127.74 L-528.561,-2177.04 L-537.406,-2258.3 L-548.642,-2353.76 L-568.783,-2516.69 L-599.825,-2760.02 L-631.777,-3011.22 L-653.855,-3190.92 L-666.933,-3302.31 L-678.089,-3403.63 L-686.85,-3492.26 L-691.462,-3548.34 L-693.607,-3580.91 L-694.88,-3609.04 L-695.195,-3632.53 L-694.902,-3642.35 L-692.42,-3703.35 L-687.224,-3813.73 L-682.46,-3893.68 L-677.882,-3955.64 L-674.322,-3997.32 L-670.284,-4038.93 L-665.72,-4080.2 L-660.583,-4120.85 L-654.824,-4160.6 L-648.388,-4199.15 L-641.238,-4236.15 L-638.401,-4249.07 L-640.128,-4290.96 L-583.83,-4285.73 L-560.326,-4283.8 L-534.621,-4282.44 L-499.817,-4281.54 L-449.421,-4281.07 L-377.203,-4280.98 L-218.938,-4281.41 L-31.6499,-4282.17 L-12.2832,-4196.17 L5.64924,-4282.32 L103.1,-4282.72 L188.314,-4283.37 L226.825,-4284.38 L247.11,-4285.4 L277.035,-4287.71 L340.122,-4293.62 L400.6,-3648.53 L402.096,-3640.8 L403.318,-3629.85 L404.602,-3606.05 L406.39,-3576.61 L408.5,-3555.51 L410.913,-3538.98 L412.927,-3527.95 L415.368,-3516.79 L418.26,-3505.67 L421.637,-3494.66 L425.534,-3483.83 L429.981,-3473.25 L435.009,-3462.98 L440.65,-3453.08 L446.937,-3443.57 L453.915,-3434.51 L461.636,-3425.91 L470.168,-3417.79 L479.597,-3410.18 L490.02,-3403.1 L501.549,-3396.58 L514.3,-3390.69 L528.391,-3385.48 L543.932,-3381.05 L561.23,-3377.45 L611.597,-3369.91 L597.602,-3312.71 L589.696,-3276.95 L582.241,-3239.08 L575.215,-3199.25 L568.611,-3157.65 L562.42,-3114.51 L556.631,-3070.03 L551.231,-3024.4 L546.207,-2977.82 L541.547,-2930.53 L535.159,-2858.62 L527.829,-2761.87 L521.68,-2665.7 L516.588,-2571.65 L512.428,-2481.29 L507.581,-2355 L503.338,-2214.7 L500.546,-2116.59 L499.35,-2089.32 L494.843,-2022.1 L474.098,-1720.5 L456.622,-1452.13 L443.025,-1228.16 L434.276,-1074.58 L426.112,-920.564 L418.828,-769.141 L412.718,-623.343 L408.076,-486.19 L406.678,-427.969 L406.678,-277.242 L406.678,-126.061 L-434.345,-126.061 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-1" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-1-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,1731.82,4357.29)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="WaistBand1" data-parent="pattern-1" data-type="piece" data-type-number="2" id="piece-2">
+   <g data-parent="piece-2" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-2-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="5.29134,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,7789.79,4806.05)">
+     <path d="M-1815.24,279.749 L150.114,279.749 L150.114,430.93 L-1815.24,430.93 L-1815.24,279.749 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-2" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-2-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,7789.79,4806.05)">
+     <path d="M-1853.04,241.954 L187.91,241.954 L187.91,468.726 L-1853.04,468.726 L-1853.04,241.954 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-2" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-2-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,7789.79,4806.05)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-2" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-2-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6224.23,5109.28)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6224.23,5126.28)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6203.23,5143.28)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">09-24-2026</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6216.23,5160.28)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6202.23,5177.28)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156"> WaistBand1</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6240.23,5194.28)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="piece-2" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-2-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7789.79,4806.05)">
+     <path d="M-1193.87,334.211 L-1176.11,327.748 L-1176.11,340.674 L-1193.87,334.211 L-1080.48,334.211 L-1098.24,340.674 L-1098.24,327.748 L-1080.48,334.211 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-letter="B" data-name="Front_with_pocket" data-parent="pattern-1" data-type="piece" data-type-number="3" id="piece-3">
+   <g data-parent="piece-3" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-3-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="5.29134,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3398.23,4352.63)">
+     <path d="M-396.55,-163.856 L-396.55,-277.242 L-396.55,-428.423 L-398.645,-481.038 L-404.665,-618.15 L-415.162,-839.996 L-431.048,-1151.8 L-447.379,-1456.54 L-462.46,-1728.51 L-479.716,-2030.98 L-483.271,-2091.42 L-484.022,-2103.23 L-486.237,-2131.02 L-490.959,-2180.87 L-499.851,-2262.56 L-511.119,-2358.28 L-531.282,-2521.4 L-562.333,-2764.8 L-594.274,-3015.91 L-616.33,-3195.42 L-629.379,-3306.58 L-640.498,-3407.56 L-649.207,-3495.67 L-653.769,-3551.13 L-655.868,-3583.01 L-656.947,-3606.62 L-655.744,-3607.12 L-654.13,-3609.06 L-651.315,-3613.94 L-647.821,-3621.21 L-641.47,-3636.03 L-630.924,-3663.23 L-618.447,-3697.5 L-604.387,-3737.73 L-581.189,-3806.46 L-547.794,-3909.52 L-514.389,-4016.64 L-491.172,-4093.99 L-477.095,-4142.34 L-464.594,-4186.75 L-454.021,-4226.12 L-449.67,-4243.29 L-377.175,-4243.18 L-218.81,-4243.61 L-58.0741,-4244.27 L-10.8304,-4017.69 L36.4133,-4244.65 L103.323,-4244.92 L188.953,-4245.58 L228.269,-4246.61 L249.514,-4247.68 L280.252,-4250.05 L306.02,-4252.47 L363.343,-3641.02 L363.866,-3639.36 L364.707,-3635.06 L365.636,-3626.74 L366.868,-3603.89 L368.709,-3573.58 L370.977,-3550.9 L373.612,-3532.85 L375.865,-3520.51 L378.604,-3507.99 L381.886,-3495.37 L385.769,-3482.71 L390.307,-3470.1 L395.56,-3457.61 L401.582,-3445.31 L408.431,-3433.28 L416.164,-3421.59 L424.837,-3410.32 L434.507,-3399.55 L445.231,-3389.35 L457.065,-3379.8 L470.067,-3370.96 L484.293,-3362.92 L499.799,-3355.75 L516.643,-3349.53 L534.881,-3344.33 L554.57,-3340.23 L565.041,-3338.66 L560.789,-3321.28 L552.697,-3284.68 L545.085,-3246.02 L537.938,-3205.49 L531.239,-3163.3 L524.973,-3119.64 L519.123,-3074.69 L513.674,-3028.64 L508.611,-2981.7 L503.916,-2934.06 L497.49,-2861.72 L490.125,-2764.5 L483.95,-2667.93 L478.84,-2573.54 L474.666,-2482.88 L469.807,-2356.3 L465.559,-2215.81 L462.774,-2117.96 L461.611,-2091.42 L457.134,-2024.66 L436.387,-1723.02 L418.901,-1454.5 L405.295,-1230.38 L396.538,-1076.66 L388.365,-922.472 L381.07,-770.84 L374.949,-624.773 L370.296,-487.283 L368.883,-428.423 L368.883,-277.242 L368.883,-163.856 L-396.55,-163.856 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-3" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-3-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3398.23,4352.63)">
+     <path d="M-434.345,-126.061 L-434.345,-277.242 L-434.345,-427.671 L-436.407,-479.457 L-442.421,-616.428 L-452.911,-838.142 L-468.792,-1149.83 L-485.118,-1454.48 L-500.196,-1726.39 L-517.449,-2028.79 L-520.996,-2089.11 L-521.722,-2100.53 L-523.891,-2127.74 L-528.561,-2177.04 L-537.406,-2258.3 L-548.642,-2353.76 L-568.783,-2516.69 L-599.825,-2760.02 L-631.777,-3011.22 L-653.855,-3190.92 L-666.933,-3302.31 L-678.089,-3403.63 L-686.85,-3492.26 L-691.462,-3548.34 L-693.607,-3580.9 L-695.906,-3631.24 L-685.239,-3630.77 L-684.767,-3631.59 L-682.239,-3636.85 L-676.471,-3650.31 L-666.305,-3676.53 L-654.045,-3710.2 L-640.133,-3750.01 L-617.073,-3818.33 L-583.813,-3920.97 L-550.531,-4027.7 L-527.416,-4104.7 L-513.43,-4152.74 L-501.037,-4196.77 L-490.593,-4235.66 L-479.072,-4281.13 L-377.198,-4280.98 L-218.938,-4281.41 L-27.3727,-4282.19 L-10.8617,-4203 L5.64924,-4282.32 L103.1,-4282.72 L188.314,-4283.37 L226.825,-4284.38 L247.11,-4285.4 L277.035,-4287.71 L340.122,-4293.62 L400.6,-3648.53 L402.096,-3640.8 L403.318,-3629.85 L404.602,-3606.05 L406.39,-3576.61 L408.5,-3555.51 L410.913,-3538.98 L412.927,-3527.95 L415.368,-3516.79 L418.26,-3505.67 L421.637,-3494.66 L425.534,-3483.83 L429.981,-3473.25 L435.009,-3462.98 L440.65,-3453.08 L446.937,-3443.57 L453.915,-3434.51 L461.636,-3425.91 L470.168,-3417.79 L479.597,-3410.18 L490.02,-3403.1 L501.549,-3396.58 L514.3,-3390.69 L528.391,-3385.48 L543.932,-3381.05 L561.23,-3377.45 L611.597,-3369.91 L597.602,-3312.71 L589.696,-3276.95 L582.241,-3239.08 L575.215,-3199.25 L568.611,-3157.65 L562.42,-3114.51 L556.631,-3070.03 L551.231,-3024.4 L546.207,-2977.82 L541.547,-2930.53 L535.159,-2858.62 L527.829,-2761.87 L521.68,-2665.7 L516.588,-2571.65 L512.428,-2481.29 L507.581,-2355 L503.338,-2214.7 L500.546,-2116.59 L499.35,-2089.32 L494.843,-2022.1 L474.098,-1720.5 L456.622,-1452.13 L443.025,-1228.16 L434.276,-1074.58 L426.112,-920.564 L418.828,-769.141 L412.718,-623.343 L408.076,-486.19 L406.678,-427.969 L406.678,-277.242 L406.678,-126.061 L-434.345,-126.061 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-3" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-3-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3398.23,4352.63)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-letter="C" data-name="Front_Pleats" data-parent="pattern-1" data-type="piece" data-type-number="4" id="piece-4">
+   <g data-parent="piece-4" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-4-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="5.29134,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,5300.71,4310.29)">
+     <path d="M-394.868,-149.466 L-399.105,-262.772 L-404.756,-413.848 L-408.198,-458.319 L-421.851,-620.584 L-452.598,-973.481 L-502.179,-1527.67 L-534.2,-1875.23 L-549.243,-2031.68 L-553.573,-2072.44 L-555.166,-2086.11 L-559.297,-2116.57 L-564.496,-2150.55 L-570.685,-2187.79 L-581.557,-2248.89 L-598.956,-2339.95 L-618.935,-2439.56 L-640.881,-2545.73 L-676.093,-2712.69 L-724.424,-2940.33 L-758.643,-3104.82 L-779.506,-3208.28 L-798.041,-3304.29 L-809.939,-3369.86 L-816.886,-3410.4 L-822.905,-3447.95 L-827.921,-3482.26 L-831.856,-3513.08 L-834.634,-3540.17 L-835.512,-3552.06 L-674.883,-4202.07 L-602.57,-4207.21 L-444.652,-4219.1 L-284.385,-4231.39 L-58.0741,-4244.27 L-10.8304,-4017.69 L36.4133,-4244.65 L103.323,-4244.92 L188.953,-4245.58 L228.269,-4246.61 L249.514,-4247.68 L280.252,-4250.05 L306.02,-4252.47 L363.343,-3641.02 L363.866,-3639.36 L364.707,-3635.06 L365.636,-3626.74 L366.868,-3603.89 L368.709,-3573.58 L370.977,-3550.9 L373.612,-3532.85 L375.865,-3520.51 L378.604,-3507.99 L381.886,-3495.37 L385.769,-3482.71 L390.307,-3470.1 L395.56,-3457.61 L401.582,-3445.31 L408.431,-3433.28 L416.164,-3421.59 L424.837,-3410.32 L434.507,-3399.55 L445.231,-3389.35 L457.065,-3379.8 L470.067,-3370.96 L484.293,-3362.92 L499.799,-3355.75 L516.643,-3349.53 L534.881,-3344.33 L554.57,-3340.23 L565.041,-3338.66 L560.789,-3321.28 L552.697,-3284.68 L545.085,-3246.02 L537.938,-3205.49 L531.239,-3163.3 L524.973,-3119.64 L519.123,-3074.69 L513.674,-3028.64 L508.611,-2981.7 L503.916,-2934.06 L497.49,-2861.72 L490.125,-2764.5 L483.95,-2667.93 L478.84,-2573.54 L474.666,-2482.88 L469.807,-2356.3 L465.559,-2215.81 L462.774,-2117.96 L461.611,-2091.42 L457.134,-2024.66 L436.387,-1723.02 L418.901,-1454.5 L405.295,-1230.38 L396.538,-1076.66 L388.365,-922.472 L381.07,-770.84 L374.949,-624.773 L370.296,-487.283 L368.883,-428.423 L368.883,-277.242 L368.883,-163.856 L-394.868,-149.466 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-4" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-4-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,5300.71,4310.29)">
+     <path d="M-431.25,-110.978 L-436.874,-261.36 L-442.497,-411.682 L-445.871,-455.276 L-459.509,-617.359 L-490.247,-970.156 L-539.819,-1524.25 L-571.829,-1871.69 L-586.846,-2027.88 L-591.137,-2068.25 L-592.666,-2081.38 L-596.706,-2111.17 L-601.82,-2144.59 L-607.933,-2181.38 L-618.726,-2242.03 L-636.047,-2332.69 L-655.971,-2432.02 L-677.879,-2538 L-713.069,-2704.87 L-761.411,-2932.56 L-795.669,-3097.23 L-816.586,-3200.96 L-835.191,-3297.34 L-847.161,-3363.3 L-854.173,-3404.22 L-860.265,-3442.23 L-865.368,-3477.13 L-869.406,-3508.76 L-872.287,-3536.85 L-873.648,-3555.28 L-704.98,-4237.82 L-605.329,-4244.9 L-447.517,-4256.79 L-286.903,-4269.11 L-27.7193,-4283.85 L-10.8617,-4203 L5.64924,-4282.32 L103.1,-4282.72 L188.314,-4283.37 L226.825,-4284.38 L247.11,-4285.4 L277.035,-4287.71 L340.122,-4293.62 L400.6,-3648.53 L402.096,-3640.8 L403.318,-3629.85 L404.602,-3606.05 L406.39,-3576.61 L408.5,-3555.51 L410.913,-3538.98 L412.927,-3527.95 L415.368,-3516.79 L418.26,-3505.67 L421.637,-3494.66 L425.534,-3483.83 L429.981,-3473.25 L435.009,-3462.98 L440.65,-3453.08 L446.937,-3443.57 L453.915,-3434.51 L461.636,-3425.91 L470.168,-3417.79 L479.597,-3410.18 L490.02,-3403.1 L501.549,-3396.58 L514.3,-3390.69 L528.391,-3385.48 L543.932,-3381.05 L561.23,-3377.45 L611.597,-3369.91 L597.602,-3312.71 L589.696,-3276.95 L582.241,-3239.08 L575.215,-3199.25 L568.611,-3157.65 L562.42,-3114.51 L556.631,-3070.03 L551.231,-3024.4 L546.207,-2977.82 L541.547,-2930.53 L535.159,-2858.62 L527.829,-2761.87 L521.68,-2665.7 L516.588,-2571.65 L512.428,-2481.29 L507.581,-2355 L503.338,-2214.7 L500.546,-2116.59 L499.35,-2089.32 L494.843,-2022.1 L474.098,-1720.5 L456.622,-1452.13 L443.025,-1228.16 L434.276,-1074.58 L426.112,-920.564 L418.828,-769.141 L412.718,-623.343 L408.076,-486.19 L406.678,-427.969 L406.678,-277.242 L406.678,-126.766 L-431.25,-110.978 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-4" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-4-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,5300.71,4310.29)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="PocketPanel" data-parent="pattern-1" data-type="piece" data-type-number="5" id="piece-5">
+   <g data-parent="piece-5" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-5-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="5.29134,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2696.31,8771.07)">
+     <path d="M-250.869,-3531.21 L-652.207,-3531.21 L-653.769,-3551.13 L-655.868,-3583.01 L-657.096,-3610.15 L-657.392,-3632.22 L-657.13,-3641.02 L-654.661,-3701.7 L-649.482,-3811.71 L-644.748,-3891.17 L-640.206,-3952.64 L-636.683,-3993.89 L-632.69,-4035.03 L-628.186,-4075.76 L-623.129,-4115.77 L-617.477,-4154.78 L-611.188,-4192.46 L-604.22,-4228.51 L-600.437,-4245.75 L-600.584,-4249.33 L-587.123,-4248.08 L-562.875,-4246.09 L-536.114,-4244.67 L-500.481,-4243.75 L-449.621,-4243.27 L-377.175,-4243.18 L-250.869,-4243.48 L-250.869,-3531.21 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-5" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-5-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2696.31,8771.07)">
+     <path d="M-213.074,-3493.42 L-687.154,-3493.42 L-691.467,-3548.41 L-693.607,-3580.91 L-694.88,-3609.04 L-695.195,-3632.53 L-694.902,-3642.35 L-692.42,-3703.35 L-687.224,-3813.73 L-682.46,-3893.68 L-677.882,-3955.64 L-674.322,-3997.32 L-670.284,-4038.93 L-665.72,-4080.2 L-660.583,-4120.85 L-654.824,-4160.6 L-648.388,-4199.15 L-641.238,-4236.15 L-638.401,-4249.07 L-640.128,-4290.96 L-583.83,-4285.73 L-560.326,-4283.8 L-534.621,-4282.44 L-499.817,-4281.54 L-449.421,-4281.07 L-377.197,-4280.98 L-213.074,-4281.37 L-213.074,-3493.42 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-5" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-5-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2379.41,4802.85)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2379.41,4819.85)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2358.41,4836.85)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">09-24-2026</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2371.41,4853.85)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2353.41,4870.85)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156"> PocketPanel</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2395.41,4887.85)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="piece-5" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-5-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2696.31,8771.07)">
+     <path d="M-458.351,-3841.17 L-464.814,-3858.93 L-451.888,-3858.93 L-458.351,-3841.17 L-458.351,-3992.35 L-451.888,-3974.59 L-464.814,-3974.59 L-458.351,-3992.35 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-letter="D" data-name="Back" data-parent="pattern-1" data-type="piece" data-type-number="6" id="piece-6">
+   <g data-parent="piece-6" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-6-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="5.29134,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,7170.8,4427.59)">
+     <path d="M-437.419,-163.856 L-437.419,-277.242 L-437.419,-428.423 L-439.202,-465.085 L-458.752,-855.15 L-488.891,-1448.13 L-514.143,-1948.04 L-521.067,-2091.42 L-521.557,-2100.82 L-523.216,-2123.72 L-527.04,-2166.16 L-534.663,-2238.04 L-544.66,-2324.31 L-563.063,-2474.44 L-592.522,-2704.66 L-624.31,-2949.4 L-655.244,-3189.52 L-675.767,-3353.88 L-687.608,-3452.53 L-697.444,-3539.26 L-704.877,-3611.68 L-707.443,-3641.02 L-712.074,-3696.56 L-721.445,-3820.56 L-727.427,-3913.74 L-731.06,-3984.95 L-732.899,-4031.46 L-734.107,-4076.22 L-734.56,-4118.38 L-734.134,-4157.06 L-732.705,-4191.42 L-730.863,-4213.64 L-729.28,-4226.76 L-727.377,-4238.31 L-725.139,-4248.19 L-723.874,-4252.39 L-725.751,-4253.57 L-712.234,-4253.97 L-688.698,-4254.86 L-665.081,-4256.29 L-636.626,-4258.78 L-576.559,-4265.31 L-433.55,-4282.71 L-319.897,-4296.79 L-193.742,-3893.5 L-169.864,-4315.39 L-5.80858,-4335.72 L32.6413,-4035.81 L-3.2913,-4336.03 L160.764,-4356.37 L235.78,-4365.67 L385.813,-4384.26 L365.147,-3695.17 L364.873,-3666.67 L365.126,-3627.14 L365.72,-3602.41 L366.737,-3579.02 L368.229,-3556.94 L370.251,-3536.13 L372.854,-3516.55 L376.093,-3498.15 L380.021,-3480.92 L384.692,-3464.79 L390.158,-3449.74 L396.473,-3435.72 L403.69,-3422.71 L411.863,-3410.65 L421.045,-3399.51 L431.289,-3389.26 L442.649,-3379.85 L455.178,-3371.24 L468.93,-3363.4 L483.956,-3356.28 L500.312,-3349.86 L518.05,-3344.08 L537.224,-3338.92 L557.887,-3334.33 L580.092,-3330.27 L603.893,-3326.71 L629.343,-3323.61 L656.495,-3320.92 L685.403,-3318.61 L716.12,-3316.65 L748.699,-3314.98 L765.784,-3314.26 L762.389,-3306.17 L755.117,-3286.64 L747.312,-3263.3 L739.019,-3236.42 L730.286,-3206.26 L721.16,-3173.08 L706.872,-3118.51 L686.829,-3037.14 L666.063,-2948.36 L644.951,-2854.24 L623.87,-2756.85 L603.199,-2658.28 L583.313,-2560.6 L564.59,-2465.89 L547.407,-2376.21 L532.141,-2293.66 L519.17,-2220.3 L508.87,-2158.2 L501.619,-2109.45 L499.406,-2091.42 L498.403,-2082.25 L496.146,-2057.59 L492.274,-2008.17 L486.225,-1918.98 L479.389,-1808.11 L468.113,-1611.27 L451.995,-1306.79 L436.141,-986.54 L422.067,-682.027 L413.731,-485.143 L411.542,-428.423 L411.542,-277.242 L411.542,-163.856 L-437.419,-163.856 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-6" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-6-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,7170.8,4427.59)">
+     <path d="M-475.215,-126.061 L-475.215,-277.242 L-475.215,-427.505 L-476.952,-463.221 L-496.499,-853.245 L-526.638,-1446.22 L-551.893,-1946.18 L-558.814,-2089.52 L-559.281,-2098.47 L-560.888,-2120.65 L-564.656,-2162.47 L-572.228,-2233.87 L-582.19,-2319.84 L-600.565,-2469.74 L-630.007,-2699.83 L-661.793,-2944.55 L-692.739,-3184.77 L-713.283,-3349.28 L-725.149,-3448.15 L-735.021,-3535.2 L-742.504,-3608.1 L-745.102,-3637.81 L-749.751,-3693.57 L-759.149,-3817.93 L-765.161,-3911.56 L-768.817,-3983.24 L-770.674,-4030.2 L-771.897,-4075.51 L-772.358,-4118.38 L-771.921,-4158.06 L-770.436,-4193.77 L-768.471,-4217.47 L-766.706,-4232.1 L-764.487,-4245.57 L-761.708,-4257.83 L-769.561,-4236.39 L-754.903,-4290.51 L-713.509,-4291.74 L-690.555,-4292.61 L-667.875,-4293.99 L-640.317,-4296.4 L-580.884,-4302.86 L-438.156,-4320.22 L-293.242,-4338.18 L-219.73,-4103.18 L-205.816,-4349.02 L26.8938,-4377.86 L-45.2915,-4368.91 L150.63,-4393.2 L186.121,-4397.6 L424.913,-4427.19 L402.937,-3694.43 L402.67,-3666.61 L402.918,-3627.72 L403.496,-3603.68 L404.477,-3581.12 L405.901,-3560.04 L407.804,-3540.45 L410.215,-3522.32 L413.153,-3505.64 L416.629,-3490.38 L420.646,-3476.51 L425.199,-3463.97 L430.287,-3452.68 L435.924,-3442.51 L442.153,-3433.33 L449.06,-3424.95 L456.772,-3417.23 L465.453,-3410.04 L475.275,-3403.29 L486.402,-3396.94 L498.97,-3390.99 L513.084,-3385.45 L528.823,-3380.32 L546.242,-3375.63 L565.385,-3371.38 L586.287,-3367.56 L608.979,-3364.17 L633.492,-3361.17 L659.859,-3358.57 L688.113,-3356.31 L718.29,-3354.38 L750.458,-3352.74 L821.665,-3349.74 L797.539,-3292.26 L790.76,-3274.05 L783.296,-3251.73 L775.231,-3225.59 L766.66,-3195.99 L757.664,-3163.28 L743.504,-3109.21 L723.58,-3028.32 L702.904,-2939.92 L681.861,-2846.1 L660.836,-2748.98 L640.212,-2650.63 L620.37,-2553.17 L601.689,-2458.67 L584.55,-2369.22 L569.333,-2286.93 L556.423,-2213.91 L546.208,-2152.33 L539.074,-2104.37 L536.95,-2087.06 L536.01,-2078.47 L533.806,-2054.39 L529.97,-2005.42 L523.942,-1916.53 L517.118,-1805.86 L505.852,-1609.19 L489.741,-1304.86 L473.893,-984.733 L459.825,-680.355 L451.495,-483.615 L449.337,-427.694 L449.337,-277.242 L449.337,-126.061 L-475.215,-126.061 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-6" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-6-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,7170.8,4427.59)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="Waistband2" data-parent="pattern-1" data-type="piece" data-type-number="7" id="piece-7">
+   <g data-parent="piece-7" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-7-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="5.29134,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,6102.24,4500.84)">
+     <path d="M1813.11,430.93 L-303.429,430.93 L-303.429,279.749 L1813.11,279.749 L1813.11,430.93 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-7" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-7-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,6102.24,4500.84)">
+     <path d="M1850.9,468.726 L-341.224,468.726 L-341.224,241.954 L1850.9,241.954 L1850.9,468.726 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-7" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-7-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,6102.24,4500.84)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-7" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-7-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6203.6,4790)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6203.6,4807)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6182.6,4824)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">09-24-2026</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6195.6,4841)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6179.6,4858)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156"> Waistband2</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6219.6,4875)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="piece-7" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-7-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6102.24,4500.84)">
+     <path d="M492.752,351.863 L510.51,345.4 L510.51,358.326 L492.752,351.863 L606.138,351.863 L588.38,358.326 L588.38,345.4 L606.138,351.863 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="PocketFront" data-parent="pattern-1" data-type="piece" data-type-number="8" id="piece-8">
+   <g data-parent="piece-8" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-8-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="5.29134,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4638.48,8657.99)">
+     <path d="M214.473,-3222.69 L214.733,-3220.51 L213.244,-3218.24 L210.503,-3215.38 L204.279,-3210.15 L191.782,-3201.4 L175.019,-3191.04 L154.319,-3179.39 L130.01,-3166.78 L102.423,-3153.53 L71.8849,-3139.96 L38.7259,-3126.4 L3.27466,-3113.19 L-34.1398,-3100.63 L-63.3345,-3091.88 L-83.2057,-3086.41 L-103.383,-3081.28 L-123.824,-3076.55 L-144.49,-3072.24 L-165.337,-3068.4 L-186.326,-3065.08 L-207.415,-3062.31 L-228.563,-3060.13 L-249.729,-3058.58 L-270.871,-3057.71 L-291.95,-3057.55 L-312.922,-3058.15 L-333.749,-3059.55 L-354.387,-3061.78 L-374.797,-3064.89 L-394.937,-3068.92 L-414.765,-3073.91 L-434.242,-3079.89 L-453.325,-3086.92 L-471.973,-3095.03 L-490.147,-3104.26 L-507.803,-3114.65 L-524.901,-3126.25 L-541.401,-3139.09 L-557.261,-3153.21 L-572.439,-3168.66 L-586.895,-3185.48 L-600.588,-3203.7 L-613.476,-3223.37 L-625.518,-3244.52 L-636.674,-3267.21 L-646.901,-3291.46 L-656.16,-3317.33 L-664.408,-3344.84 L-671.605,-3374.05 L-677.71,-3404.99 L-682.681,-3437.7 L-686.478,-3472.22 L-689.059,-3508.6 L-689.827,-3527.58 L-449.67,-4243.29 L-377.175,-4243.18 L-218.81,-4243.61 L-58.0741,-4244.27 L214.473,-3222.69 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-8" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-8-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4638.48,8657.99)">
+     <path d="M251.686,-3229.83 L253.889,-3211.29 L242.929,-3194.59 L236.376,-3187.76 L227.323,-3180.15 L212.569,-3169.82 L194.231,-3158.49 L172.297,-3146.14 L146.902,-3132.96 L118.282,-3119.21 L86.7116,-3105.19 L52.482,-3091.2 L15.8919,-3077.55 L-22.7012,-3064.6 L-52.8897,-3055.56 L-73.5314,-3049.87 L-94.4622,-3044.55 L-115.702,-3039.63 L-137.213,-3035.15 L-158.96,-3031.15 L-180.906,-3027.67 L-203.014,-3024.76 L-225.249,-3022.47 L-247.573,-3020.84 L-269.952,-3019.92 L-292.349,-3019.75 L-314.726,-3020.39 L-337.046,-3021.89 L-359.268,-3024.29 L-381.354,-3027.66 L-403.258,-3032.04 L-424.934,-3037.49 L-446.334,-3044.07 L-467.402,-3051.83 L-488.081,-3060.82 L-508.308,-3071.09 L-528.016,-3082.69 L-547.138,-3095.66 L-565.602,-3110.03 L-583.338,-3125.82 L-600.28,-3143.07 L-616.364,-3161.78 L-631.534,-3181.97 L-645.737,-3203.64 L-658.93,-3226.82 L-671.074,-3251.51 L-682.133,-3277.74 L-692.078,-3305.52 L-700.881,-3334.89 L-708.515,-3365.87 L-714.951,-3398.49 L-720.165,-3432.79 L-724.127,-3468.82 L-726.8,-3506.5 L-727.873,-3533.01 L-476.84,-4281.13 L-377.198,-4280.98 L-218.938,-4281.41 L-29.0719,-4282.18 L251.686,-3229.83 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-8" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-8-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4565.07,4933.41)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4565.07,4950.41)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4544.07,4967.41)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">09-24-2026</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4557.07,4984.41)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4541.07,5001.41)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156"> PocketFront</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4581.07,5018.41)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="piece-8" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-8-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4638.48,8657.99)">
+     <path d="M-245.301,-3598.51 L-251.764,-3616.27 L-238.838,-3616.27 L-245.301,-3598.51 L-245.301,-3749.69 L-238.838,-3731.93 L-251.764,-3731.93 L-245.301,-3749.69 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="PocketMouth" data-parent="pattern-1" data-type="piece" data-type-number="9" id="piece-9">
+   <g data-parent="piece-9" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-9-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="5.29134,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,1815.82,8794.73)">
+     <path d="M-449.67,-4243.29 L-377.175,-4243.18 L-250.869,-4243.48 L-477.253,-3548.12 L-576.967,-3538.48 L-576.967,-3606.62 L-656.947,-3606.62 L-655.744,-3607.12 L-654.13,-3609.06 L-651.315,-3613.94 L-647.821,-3621.21 L-641.47,-3636.03 L-630.924,-3663.23 L-618.447,-3697.5 L-604.387,-3737.73 L-581.189,-3806.46 L-547.794,-3909.52 L-514.389,-4016.64 L-491.172,-4093.99 L-477.095,-4142.34 L-464.594,-4186.75 L-454.021,-4226.12 L-449.67,-4243.29 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-9" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-9-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,1815.82,8794.73)">
+     <path d="M-479.072,-4281.13 L-377.191,-4280.98 L-198.776,-4281.4 L-448.978,-3512.88 L-614.762,-3496.86 L-614.762,-3568.82 L-687.884,-3568.82 L-700.109,-3629.48 L-685.239,-3630.77 L-684.767,-3631.59 L-682.239,-3636.85 L-676.471,-3650.31 L-666.305,-3676.53 L-654.045,-3710.2 L-640.133,-3750.01 L-617.073,-3818.33 L-583.813,-3920.97 L-550.531,-4027.7 L-527.416,-4104.7 L-513.43,-4152.74 L-501.037,-4196.77 L-490.593,-4235.66 L-479.072,-4281.13 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-9" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-9-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,1308.27,5034.85)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,1308.27,5051.85)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,1287.27,5068.85)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">09-24-2026</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,1300.27,5085.85)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,1276.27,5102.85)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156"> PocketMouth</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,1324.27,5119.85)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="piece-9" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-9-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,1815.82,8794.73)">
+     <path d="M-444.054,-3858.28 L-450.517,-3876.04 L-437.591,-3876.04 L-444.054,-3858.28 L-444.054,-4009.46 L-437.591,-3991.7 L-450.517,-3991.7 L-444.054,-4009.46 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="Detail" data-parent="pattern-1" data-type="piece" data-type-number="10" id="piece-10">
+   <g data-parent="piece-10" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-10-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="5.29134,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,5235.65,4493.24)">
+     <path d="M-1.06661,1204.18 L-1.06661,279.749 L150.114,279.749 L150.114,1053 L149.802,1061.25 L148.33,1077.2 L145.82,1092.45 L142.251,1106.94 L137.599,1120.63 L131.842,1133.46 L124.957,1145.39 L119.004,1153.69 L114.694,1158.93 L110.09,1163.92 L105.189,1168.65 L99.9872,1173.11 L94.4824,1177.3 L88.6717,1181.21 L82.5523,1184.84 L76.1213,1188.18 L69.3759,1191.22 L62.3133,1193.96 L54.9306,1196.39 L47.2251,1198.5 L39.194,1200.29 L30.8343,1201.75 L22.1432,1202.88 L8.5216,1203.98 L-1.06661,1204.18 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-10" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-10-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,5235.65,4493.24)">
+     <path d="M-38.8619,1242.81 L-38.8619,241.954 L187.91,241.954 L187.91,1053.72 L187.532,1063.71 L185.842,1082.01 L182.873,1100.05 L178.56,1117.56 L172.812,1134.47 L165.54,1150.68 L156.756,1165.91 L148.987,1176.73 L143.204,1183.77 L137.122,1190.36 L130.638,1196.61 L123.76,1202.51 L116.503,1208.04 L108.881,1213.17 L100.909,1217.9 L92.604,1222.21 L83.9813,1226.09 L75.0551,1229.55 L65.8378,1232.58 L56.3395,1235.19 L46.5678,1237.37 L36.5281,1239.12 L26.096,1240.48 L10.4493,1241.74 L-38.8619,1242.81 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-10" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-10-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,5235.65,4493.24)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-10" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-10-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,5319.68,4875.52)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,5319.68,4892.52)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,5298.68,4909.52)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">09-24-2026</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,5311.68,4926.52)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,5328.68,4943.52)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156"> Detail</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,5335.68,4960.52)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="piece-10" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-10-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,5235.65,4493.24)">
+     <path d="M63.6753,769.977 L57.2119,752.219 L70.1387,752.219 L63.6753,769.977 L63.6753,618.796 L70.1387,636.554 L57.2119,636.554 L63.6753,618.796 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="PatternPiece" data-parent="pattern-1" data-type="piece" data-type-number="11" id="piece-11">
+   <g data-parent="piece-11" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-11-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="5.29134,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,508.983,4398.12)">
+     <path d="M-483.271,-2091.42 L-10.8304,-2091.42 L461.611,-2091.42 L457.134,-2024.66 L436.387,-1723.02 L418.901,-1454.5 L405.295,-1230.38 L396.538,-1076.66 L388.365,-922.472 L381.07,-770.84 L374.949,-624.773 L370.296,-487.283 L368.009,-392.039 L367.059,-332.552 L366.642,-276.903 L366.795,-225.47 L367.122,-201.651 L-10.8304,-201.651 L-388.783,-201.651 L-390.011,-248.086 L-393.69,-356.613 L-398.645,-481.038 L-404.665,-618.15 L-415.162,-839.996 L-431.048,-1151.8 L-447.379,-1456.54 L-462.46,-1728.51 L-479.716,-2030.98 L-483.271,-2091.42 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-11-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,508.983,4398.12)">
+     <path d="M-508.725,-2115.42 L-10.8304,-2115.42 L487.274,-2115.42 L481.079,-2023.03 L460.334,-1721.42 L442.854,-1453 L429.254,-1228.97 L420.502,-1075.34 L412.334,-921.26 L405.046,-769.761 L398.932,-623.865 L394.287,-486.589 L392.004,-391.56 L391.058,-332.27 L390.643,-276.849 L390.794,-225.671 L391.454,-177.651 L-10.8304,-177.651 L-412.157,-177.651 L-414,-247.362 L-417.674,-355.729 L-422.624,-480.034 L-428.64,-617.056 L-439.133,-838.819 L-455.015,-1150.55 L-471.344,-1455.23 L-486.423,-1727.17 L-503.676,-2029.59 L-508.725,-2115.42 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="notch" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-11-notch-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,508.983,4398.12)">
+     <path d="M0,0 Z " fill-rule="nonzero" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-11-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,761.066,3213.79)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9.70313">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,761.066,3225.79)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9.70313">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,747.066,3237.79)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9.70313">09-24-2026</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,756.066,3249.79)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9.70313">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,742.066,3261.79)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9.70313"> PatternPiece</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,772.066,3273.79)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9.70313">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="pattern_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-11-pattern_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,288.625,3213.79)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9.70313">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,288.625,3225.79)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9.70313">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,274.625,3237.79)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9.70313">09-24-2026</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,283.625,3249.79)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9.70313">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,316.625,3261.79)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9.70313"/>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,302.625,3273.79)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="9" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9.70313">Cut </text>
+    </g>
+   </g>
+   <g data-parent="piece-11" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-11-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,508.983,4398.12)">
+     <path d="M-10.8304,-1070.94 L-27.2474,-1116.05 L5.58657,-1116.05 L-10.8304,-1070.94 L-10.8304,-1222.12 L5.58657,-1177.02 L-27.2474,-1177.02 L-10.8304,-1222.12 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+  <g data-name="PocketBack" data-parent="pattern-1" data-type="piece" data-type-number="12" id="piece-12">
+   <g data-parent="piece-12" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-12-seamline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#6495ed" stroke-dasharray="5.29134,2.64567" stroke-dashoffset="0" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3407.81,8724.51)">
+     <path d="M214.473,-3222.69 L214.733,-3220.51 L213.244,-3218.24 L210.503,-3215.38 L204.279,-3210.15 L191.782,-3201.4 L175.019,-3191.04 L154.319,-3179.39 L130.01,-3166.78 L102.423,-3153.53 L71.8849,-3139.96 L38.7259,-3126.4 L3.27466,-3113.19 L-34.1398,-3100.63 L-63.3345,-3091.88 L-83.2057,-3086.41 L-103.383,-3081.28 L-123.824,-3076.55 L-144.49,-3072.24 L-165.337,-3068.4 L-186.326,-3065.08 L-207.415,-3062.31 L-228.563,-3060.13 L-249.729,-3058.58 L-270.871,-3057.71 L-291.95,-3057.55 L-312.922,-3058.15 L-333.749,-3059.55 L-354.387,-3061.78 L-374.797,-3064.89 L-394.937,-3068.92 L-414.765,-3073.91 L-434.242,-3079.89 L-453.325,-3086.92 L-471.973,-3095.03 L-490.147,-3104.26 L-507.803,-3114.65 L-524.901,-3126.25 L-541.401,-3139.09 L-557.261,-3153.21 L-572.439,-3168.66 L-586.895,-3185.48 L-600.588,-3203.7 L-613.476,-3223.37 L-625.518,-3244.52 L-636.674,-3267.21 L-646.901,-3291.46 L-656.16,-3317.33 L-664.408,-3344.84 L-671.605,-3374.05 L-677.71,-3404.99 L-682.681,-3437.7 L-686.478,-3472.22 L-689.059,-3508.6 L-689.827,-3527.58 L-690.525,-3548.83 L-691.529,-3590.42 L-692.088,-3630.88 L-692.23,-3670.21 L-691.764,-3727.19 L-689.873,-3798.86 L-686.807,-3865.73 L-682.786,-3927.67 L-678.031,-3984.56 L-672.762,-4036.3 L-667.197,-4082.76 L-661.558,-4123.83 L-656.065,-4159.38 L-650.937,-4189.3 L-644.297,-4224.11 L-638.875,-4248.75 L-638.35,-4250.84 L-637.105,-4250.59 L-624.408,-4249.96 L-586.745,-4248.89 L-506.774,-4247.77 L-432.781,-4247.62 L-380.45,-4247.98 L-327.325,-4248.84 L-275.066,-4250.29 L-225.334,-4252.43 L-179.789,-4255.34 L-149.598,-4258.13 L-131.522,-4260.27 L-115.427,-4262.65 L-101.52,-4265.29 L-90.0085,-4268.2 L-81.1007,-4271.4 L-76.3458,-4274.01 L-74.0389,-4275.83 L-72.4996,-4277.73 L-71.7539,-4279.71 L-71.7213,-4280.73 L214.473,-3222.69 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-12" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-12-cutline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,3407.81,8724.51)">
+     <path d="M251.678,-3229.9 L253.889,-3211.29 L242.929,-3194.59 L236.376,-3187.76 L227.323,-3180.15 L212.569,-3169.82 L194.231,-3158.49 L172.297,-3146.14 L146.902,-3132.96 L118.282,-3119.21 L86.7116,-3105.19 L52.482,-3091.2 L15.8919,-3077.55 L-22.7012,-3064.6 L-52.8897,-3055.56 L-73.5314,-3049.87 L-94.4622,-3044.55 L-115.702,-3039.63 L-137.213,-3035.15 L-158.96,-3031.15 L-180.906,-3027.67 L-203.014,-3024.76 L-225.249,-3022.47 L-247.573,-3020.84 L-269.952,-3019.92 L-292.349,-3019.75 L-314.726,-3020.39 L-337.046,-3021.89 L-359.268,-3024.29 L-381.354,-3027.66 L-403.258,-3032.04 L-424.934,-3037.49 L-446.334,-3044.07 L-467.402,-3051.83 L-488.081,-3060.82 L-508.308,-3071.09 L-528.016,-3082.69 L-547.138,-3095.66 L-565.602,-3110.03 L-583.338,-3125.82 L-600.28,-3143.07 L-616.364,-3161.78 L-631.534,-3181.97 L-645.737,-3203.64 L-658.93,-3226.82 L-671.074,-3251.51 L-682.133,-3277.74 L-692.078,-3305.52 L-700.881,-3334.89 L-708.515,-3365.87 L-714.951,-3398.49 L-720.165,-3432.79 L-724.127,-3468.82 L-726.8,-3506.5 L-727.597,-3526.2 L-728.305,-3547.76 L-729.318,-3589.7 L-729.883,-3630.56 L-730.026,-3670.3 L-729.555,-3727.85 L-727.645,-3800.23 L-724.546,-3867.82 L-720.48,-3930.47 L-715.667,-3988.05 L-710.328,-4040.46 L-704.686,-4087.58 L-698.959,-4129.28 L-693.37,-4165.46 L-688.129,-4196.03 L-681.324,-4231.71 L-675.668,-4257.41 L-666.225,-4295.04 L-632.392,-4288.2 L-622.933,-4287.73 L-585.947,-4286.68 L-506.47,-4285.56 L-432.873,-4285.42 L-380.886,-4285.77 L-328.155,-4286.63 L-276.402,-4288.06 L-227.354,-4290.17 L-182.735,-4293.03 L-153.551,-4295.72 L-136.505,-4297.73 L-121.724,-4299.92 L-109.693,-4302.21 L-101.673,-4304.24 L-108.463,-4314.5 L-43.744,-4322.05 L251.678,-3229.9 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="piece-12" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-12-piece_label-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,3102.46,4724.41)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,3102.46,4741.41)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">trousers</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,3081.46,4758.41)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">09-24-2026</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,3094.46,4775.41)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,3080.46,4792.41)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156"> PocketBack</text>
+    </g>
+    <g fill="none" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,3118.46,4809.41)">
+     <text fill="#000000" fill-opacity="1" font-family="Yu Gothic UI Light" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14.0156">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="piece-12" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="piece-12-grainline-1" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,3407.81,8724.51)">
+     <path d="M-457.72,-3709.09 L-464.183,-3726.85 L-451.257,-3726.85 L-457.72,-3709.09 L-457.72,-3860.27 L-451.257,-3842.51 L-464.183,-3842.51 L-457.72,-3860.27 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>
