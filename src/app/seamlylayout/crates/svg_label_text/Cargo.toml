@@ -18,5 +18,5 @@ xmltree    = { version = "0.10", features = ["attribute-order"] }
 hershey    = "0.1.2"
 fontdb     = "0.18"
 ttf-parser = "0.21"
-subsetter  = "0.1"
+allsorts   = { version = "0.17", default-features = false, features = ["flate2_rust"] }
 base64     = "0.22"
