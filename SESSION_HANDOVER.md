@@ -6,6 +6,15 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-24 — Export > SVG in-app check; menu fixes
+
+Merged `task-svg-menu-check` into `run-seamlyLayout`.
+
+- Checked in the running app: three modes, "As supplied" gating, tooltips, check mark, missing-font warning, View menu.
+- Fixed `ExportMenu.qml`: hidden Projector items left a blank row in the Export menu; tooltips now wrap; "As supplied" label shortened (was cut off).
+- Rust crate licenses for `svg_label_text` checked: all permissive (MIT, Apache-2.0, BSD-3-Clause, Unlicense). See Decision-003.
+- Open: no installer ships Rust crate license notices (BSD-3-Clause and Apache-2.0 require them). Pre-existing gap across all crates.
+
 ## 2026-09-24 — SVG designer-font export: true font subsets
 
 Merged `task-font-subset-allsorts` without skip-ci (`Cargo.toml` changed).
@@ -24,7 +33,7 @@ Plan: `project-docs/docs-seamlylayout/export-docs/PLAN_LAYOUT_2_SVG_TEXT_MODES.m
 - QML: Export > SVG submenu with tooltips and last-mode check mark; View menu keeps one SVG item.
 - `PreferencesModel.svgTextMode`, saved alone by `saveSvgTextMode` (INI key `svg_text_mode`).
 - License notices: `src/app/seamlylayout/packaging/licenses/` (Windows MSI only; `*.txt` is gitignored, files force-added).
-- Open (Layout.210.2): in-app check of Export > SVG with the richmond pattern. Linux/macOS packages do not ship the notices yet.
+- In-app check done 2026-09-24 (UI Automation, trousers SVG); task moved to `TODO_COMPLETED.md`. Linux/macOS packages do not ship the notices yet.
 
 ## 2026-09-23 — MSI finds running Seamly apps at wizard start
 
