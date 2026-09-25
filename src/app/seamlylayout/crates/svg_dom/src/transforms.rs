@@ -602,9 +602,8 @@ fn col_rms_norm(m: &Matrix2D) -> f32 {
 ///          1. Locates the grainline element — the first descendant whose `id` contains
 ///             the token "grainline" (case-insensitive).  Searches that element for a
 ///             `<path>` or `<line>`, extracts its first→last-point direction.
-///          2. Falls back to the longest chord across all segment types (LineTo, QuadTo,
-///             CubicTo, ArcTo) from all `<path>` and `<line>` descendants if no labelled
-///             grainline is found.
+///          2. Skips the piece if no labelled grainline is found, so the piece keeps
+///             its drafted orientation.
 ///          3. Computes θ = atan2(dy, dx) for the grainline direction vector.
 ///          4. Computes rotation_angle = 90° − θ, normalised to [−180, 180].
 ///          5. Adds `transform="rotate(rotation_angle, cx, cy)"` to the `<g>`, where
@@ -644,7 +643,7 @@ pub fn verticalize_dom(doc: &mut Document) {
 
         // Locate the grainline angle (θ in degrees from the X axis).
         let Some(theta_deg) = grainline_angle(elem) else {
-            continue; // no grainline and no fallback segment — skip
+            continue; // no grainline — keep drafted orientation
         }; // grainline_angle
 
         // Compute rotation needed to make the grainline vertical (90° in SVG).
@@ -779,18 +778,12 @@ pub fn translate_dom(doc: &mut Document) {
 // ---------------------------------------------------------------------------
 
 /// @brief Return the grainline angle θ (degrees from X axis) for a pattern piece.
-/// @details Searches for a labelled grainline first; falls back to the longest
-///          segment chord.  Returns `None` only if no geometry is found at all.
+/// @details A piece without a grainline keeps its drafted orientation.  A guessed
+///          direction, such as the longest edge, often turns a long piece sideways.
 /// @param group  `<g>` element to inspect.
-/// @return Angle in degrees, or `None`.
+/// @return Angle in degrees, or `None` when the piece has no labelled grainline.
 fn grainline_angle(group: &Element) -> Option<f64> {
-    // Try the labelled grainline first (id contains "grainline", case-insensitive).
-    if let Some(theta) = labelled_grainline_angle(group) {
-        return Some(theta); // labelled grainline found
-    } // if labelled
-
-    // Fall back to the longest segment chord in the subtree.
-    longest_segment_angle(group) // None if no geometry exists
+    labelled_grainline_angle(group)
 } // fn grainline_angle
 
 /// @brief Find the grainline angle from the first descendant whose id contains "grainline".
@@ -932,104 +925,6 @@ fn first_last_angle(element: &Element) -> Option<f64> {
 
     Some(dy.atan2(dx).to_degrees()) // angle in degrees from X axis
 } // fn first_last_angle
-
-/// @brief Find the angle of the longest chord across all segment types in the subtree.
-/// @details Considers LineTo, QuadTo, CubicTo, ArcTo chords and `<line>` elements.
-///          Mirrors the original `calculate_longest_edge_angle` + `collect_path_segments`
-///          fallback logic.
-/// @param element  Root element to search recursively.
-/// @return Angle in degrees, or `None` if no geometry found.
-fn longest_segment_angle(element: &Element) -> Option<f64> {
-    let mut max_len_sq = 0.0_f64;
-    let mut best_start: Option<Point> = None;
-    let mut best_end: Option<Point> = None;
-    collect_longest_chord(element, &mut max_len_sq, &mut best_start, &mut best_end);
-
-    if let (Some(s), Some(e)) = (best_start, best_end) {
-        let dx = (e.x - s.x) as f64;
-        let dy = (e.y - s.y) as f64;
-        Some(dy.atan2(dx).to_degrees()) // angle of the longest chord
-    } else {
-        None // no chord found
-    } // if best found
-} // fn longest_segment_angle
-
-/// @brief Recursive worker: update (max_len_sq, best_start, best_end) with the longest
-///        chord (consecutive segment start→end) found in `element` and descendants.
-/// @details Considers ALL segment types: LineTo, QuadTo, CubicTo, ArcTo, and `<line>`.
-///          Mirrors the original `calculate_longest_edge_angle` traversal.
-/// @param element    Element to inspect.
-/// @param max_len_sq Running maximum of chord length²; updated in-place.
-/// @param best_start Start point of the current longest chord; updated in-place.
-/// @param best_end   End point of the current longest chord; updated in-place.
-fn collect_longest_chord(
-    element: &Element,
-    max_len_sq: &mut f64,
-    best_start: &mut Option<Point>,
-    best_end: &mut Option<Point>,
-) {
-    match element.name.as_str() {
-        "line" => {
-            // A <line> is always a straight chord.
-            let x1 = get_f32(element, "x1") as f64;
-            let y1 = get_f32(element, "y1") as f64;
-            let x2 = get_f32(element, "x2") as f64;
-            let y2 = get_f32(element, "y2") as f64;
-            let dx = x2 - x1;
-            let dy = y2 - y1;
-            let len_sq = dx * dx + dy * dy;
-            if len_sq > *max_len_sq {
-                *max_len_sq = len_sq;
-                *best_start = Some(Point::new(x1 as f32, y1 as f32));
-                *best_end   = Some(Point::new(x2 as f32, y2 as f32));
-            } // if longer
-        } // "line"
-
-        "path" => {
-            if let Some(d) = element.attributes.get("d") {
-                if let Ok(path) = Path::parse_path_attribute(d) {
-                    let mut current: Option<Point> = None;
-                    for seg in &path.segments {
-                        let end: Option<Point> = match seg {
-                            PathSegment::MoveTo(p) => {
-                                current = Some(*p); // update position, no chord
-                                None
-                            } // MoveTo
-                            PathSegment::LineTo(p)          => Some(*p),
-                            PathSegment::QuadTo { to, .. }  => Some(*to),
-                            PathSegment::CubicTo { to, .. } => Some(*to),
-                            PathSegment::ArcTo { to, .. }   => Some(*to),
-                            PathSegment::Close              => None, // no chord for close
-                        }; // match seg
-
-                        if let (Some(from), Some(to)) = (current, end) {
-                            let dx = (to.x - from.x) as f64;
-                            let dy = (to.y - from.y) as f64;
-                            let len_sq = dx * dx + dy * dy;
-                            if len_sq > *max_len_sq {
-                                *max_len_sq = len_sq;
-                                *best_start = Some(from);
-                                *best_end   = Some(to); // new longest chord
-                            } // if longer
-                            current = end; // advance position
-                        } else if end.is_some() {
-                            current = end; // advance even if no chord yet
-                        } // if from and to
-                    } // for seg
-                } // if let Ok(path)
-            } // if let Some(d)
-        } // "path"
-
-        _ => {} // other elements carry no direct segment data
-    } // match element.name
-
-    // Recurse into children.
-    for child in &element.children {
-        if let XMLNode::Element(child_elem) = child {
-            collect_longest_chord(child_elem, max_len_sq, best_start, best_end);
-        } // if XMLNode::Element
-    } // for child
-} // fn collect_longest_chord
 
 /// @brief Compute the AABB centre of a pattern piece `<g>`.
 /// @details Collects all coordinate points from `<path>` and `<line>` descendants
@@ -1357,29 +1252,26 @@ mod tests {
         );
     } // grainline_already_vertical_unchanged
 
-    // @brief When no labelled grainline exists, the longest chord is used.
-    // Path has a short horizontal L(10,0) and a longer 45° L(30,30).
-    // Longest chord: (0,0)→(30,30), θ=45° → rotation = 90°-45° = 45°.
-    const NO_LABEL_FALLBACK: &str = r#"<svg width="200" height="200">
+    // @brief When no labelled grainline exists, the piece is not rotated, even
+    // when its longest edge is diagonal.
+    const NO_GRAINLINE: &str = r#"<svg width="200" height="200">
   <g id="piece-3">
     <path d="M 0,0 L 10,0 M 0,0 L 30,30"/>
   </g>
 </svg>"#;
 
     #[test]
-    fn no_grainline_fallback_uses_longest_segment() {
-        let mut doc = Document::parse(NO_LABEL_FALLBACK).unwrap();
+    fn no_grainline_keeps_drafted_orientation() {
+        let mut doc = Document::parse(NO_GRAINLINE).unwrap();
         verticalize_dom(&mut doc);
 
-        // Longest chord (0,0)→(30,30): θ=45° → rotation = +45°.
-        let transform = doc
-            .get_attr_by_id("piece-3", "transform")
-            .expect("piece-3 missing transform after verticalize_dom");
+        let transform = doc.get_attr_by_id("piece-3", "transform");
         assert!(
-            transform.starts_with("rotate(45"),
-            "expected rotate(45...) for 45° longest chord, got '{transform}'"
+            transform.is_none(),
+            "piece without a grainline should not receive a transform, got {:?}",
+            transform
         );
-    } // no_grainline_fallback_uses_longest_segment
+    } // no_grainline_keeps_drafted_orientation
 
     // @brief A group with a grainline identified by id token "grainline" inside a <g>.
     // Seamly2D SVGs typically wrap grainlines in <g id="grainline-..."><path .../></g>.

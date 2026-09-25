@@ -6,6 +6,15 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-24 — Layout fix: pieces without a grainline keep drafted orientation
+
+Merged `task-no-grainline-orientation` with skip-ci (Rust-only change).
+
+- Cause: `svg_dom::verticalize_dom` fell back to the longest edge when a piece had no grainline. Trouser legs (no grainline) turned 90°, 110 cm wide on a 36" roll → unplaced.
+- Fix: no labelled grainline → no rotation. Fallback removed from `svg_dom/src/transforms.rs`.
+- Test: `trousers_handoff_fits_36_inch_roll` (`cxxqt_bridge/test_data/trousers-handoff_pieces.svg`).
+- Units were correct: handoff is 96 px/in; not a unit bug.
+
 ## 2026-09-24 — Task Layout.14: third-party license notices in every installer
 
 Branch `task-license-notices`, merged without skip-ci (packaging, CMake, .pro changed).
