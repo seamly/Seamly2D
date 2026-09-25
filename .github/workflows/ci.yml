@@ -221,7 +221,7 @@ jobs:
           cp -r /usr/share/X11/xkb/* AppDir/usr/share/X11/xkb
           linuxdeploy-x86_64.AppImage --appdir AppDir \
             --desktop-file=packaging/assets/seamly2d.desktop \
-            --desktop-file=src/app/seamlylayout/packaging/linux/seamlylayout.desktop \
+            --desktop-file=packaging/linux/seamlylayout.desktop \
             --plugin qt --output appimage
 
       - name: 'upload AppImage artifact'
