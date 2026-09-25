@@ -252,6 +252,29 @@ $env:QMAKE = 'C:/Qt/6.11.1/msvc2022_64/bin/qmake.exe'
   - seamlyLayout's read-only-`/app` writable-path fallbacks now detect the sandbox at runtime via `Platform::isFlatpak()` (alongside `Platform::isAppImage()`), writing to the sandbox `Seamly` paths instead of `/app/bin`; packaged defaults are read-only Qt resources / `/app` files.
   - **Remaining, in the Flathub manifest repo (not this repo):** add seamlyLayout to the existing single-app-id package so it ships in the same sandbox for the handoff, fix any stale references to the old dir names, and bump to the new source release. No build restructuring.
 
+## Third-party license notices
+
+All installers ship the committed files in `src/app/seamlylayout/packaging/licenses/`:
+
+| File | Content |
+|---|---|
+| `rust_crate_notices.txt` | Every Rust crate linked into SeamlyLayout, with its license text (`cargo-about`) |
+| `qt_notices.txt` | Qt runtime under LGPL-3.0, source link, Qt modules and bundled third-party components, license texts (from the Qt kit SBOMs) |
+| `relief_singleline_OFL.txt`, `hershey_fonts_notice.txt` | Fonts bundled for SVG export |
+
+| Package | Location |
+|---|---|
+| Windows MSI | `<install dir>\licenses\` (`smsi.ps1`) |
+| Linux AppImage | `usr/share/licenses/seamly/` (CMake install rule) |
+| macOS DMG | `SeamlyLayout.app/Contents/Resources/licenses/`; `qt_notices.txt` also in `Seamly2D.app` and `seamlyme.app` |
+
+- Regenerate after any `Cargo.lock` change or Qt version change:
+  `python src/app/seamlylayout/packaging/licenses/generate_license_notices.py --qt-root C:/Qt/6.11.1/msvc2022_64`
+- The script needs `cargo-about` (`cargo install cargo-about --locked --features cli`) and network access for SPDX license texts.
+- `cargo test --workspace` fails while a file is stale (`license_notices_tests`: `Cargo.lock` fingerprint, `ci.yml` `QT_VERSION`).
+- `about.toml` lists the accepted Rust licenses. A crate under any other license stops generation; review it before adding the license.
+- Not covered yet: xerces-c, pdftops (Poppler) and the MSVC runtime that Seamly2D ships.
+
 ## Related records
 
 - `project-docs/TODO_MIGRATE.md` — holds the current actionable subtasks for everything marked "planned" above; completed tasks move to `project-docs/TODO_COMPLETED.md`.

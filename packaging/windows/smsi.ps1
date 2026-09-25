@@ -339,7 +339,7 @@ foreach ($file in @('default_settings.json', 'B0.json', 'roll_36in.json', 'roll_
     Copy-Item -Path (Join-Path $settingsSrc $file) -Destination $settingsDst
 }
 
-# LGPL compliance notices for the bundled Qt runtime.
+# Third-party license notices: Qt runtime (LGPL-3.0), Rust crates, bundled fonts.
 $licensesSrc = Join-Path $repoRoot 'src\app\seamlylayout\packaging\licenses'
 if (Test-Path $licensesSrc) {
     $licensesDst = Join-Path $parentDir 'licenses'

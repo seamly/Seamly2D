@@ -2542,3 +2542,7 @@ mod dg5_verification_tests {
         );
     } // release_save_debug_dom_and_log_to_file_produce_no_filesystem_artifacts
 } // mod dg5_verification_tests
+
+// Fails while packaging/licenses notices no longer match Cargo.lock or ci.yml's Qt version.
+#[cfg(test)]
+mod license_notices_tests;

@@ -1,0 +1,33 @@
+# project: SeamlyLayout
+# author: slspencer, copyright 2026
+# MIT License: https://opensource.org/licenses/MIT
+#
+# cargo-about configuration for rust_crate_notices.txt (generate_license_notices.py).
+# A crate under any license not listed here stops generation: review it before adding it.
+accepted = [
+    "0BSD",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "BSL-1.0",
+    "ISC",
+    "MIT",
+    "MIT-0",
+    "MPL-2.0",
+    "Unicode-3.0",
+    "Unicode-DFS-2016",
+    "Unlicense",
+    "Zlib",
+]
+# Every platform a SeamlyLayout package ships on.
+targets = [
+    "x86_64-pc-windows-msvc",
+    "aarch64-pc-windows-msvc",
+    "x86_64-unknown-linux-gnu",
+    "x86_64-apple-darwin",
+    "aarch64-apple-darwin",
+]
+# Only crates linked into the shipped binary need a notice.
+ignore-build-dependencies = true
+ignore-dev-dependencies = true
