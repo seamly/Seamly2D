@@ -462,6 +462,9 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
 
     // Disable grainlines in exports and layouts
     const VGrainlineData& grainlineGeom = piece.GetGrainlineGeometry();
+    // The grain direction is kept even when the grainline is not drawn, so
+    // SeamlyLayout can still orient the piece.
+    layoutPiece.setGrainAxis(grainlineGeom, pattern);
     if (grainlineGeom.IsVisible() & qApp->Settings()->showGrainlines())
     {
         layoutPiece.setGrainline(grainlineGeom, pattern);
@@ -703,6 +706,56 @@ void VLayoutPiece::setGrainline(const VGrainlineData& data, const VContainer* pa
 QVector<QPointF> VLayoutPiece::getGrainline() const
 {
     return Map(d->grainlinePoints);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setGrainAxis stores the grain direction, whether or not the grainline is visible.
+ * @param data    grainline data of the piece.
+ * @param pattern pattern container used to evaluate the grainline formulas.
+ */
+void VLayoutPiece::setGrainAxis(const VGrainlineData &data, const VContainer *pattern)
+{
+    SCASSERT(pattern != nullptr)
+
+    d->grainAxis.clear();
+
+    QPointF pt1;
+    qreal rotationAngle = 0;
+    qreal length = 0;
+    qreal arrowLength = 0;
+    if (!findGrainlineGeometry(data, pattern, length, rotationAngle, arrowLength, pt1))
+    {
+        return;
+    }
+
+    // Only the direction is used, so a zero or invalid length must not hide it.
+    const QPointF pt2(pt1.x() + qCos(rotationAngle), pt1.y() - qSin(rotationAngle));
+    d->grainAxis << pt1 << pt2;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief grainlineAngle returns the grain direction after the piece transform.
+ * @param angle receives the direction in degrees, counter-clockwise on screen (QLineF::angle()).
+ * @return false when the piece has no grain direction.
+ */
+bool VLayoutPiece::grainlineAngle(qreal &angle) const
+{
+    if (d->grainAxis.size() != 2)
+    {
+        return false;
+    }
+
+    const QVector<QPointF> axis = Map(d->grainAxis);
+    const QLineF line(axis.at(0), axis.at(1));
+    if (qFuzzyIsNull(line.length()))
+    {
+        return false;
+    }
+
+    angle = line.angle();
+    return true;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1132,6 +1185,12 @@ QGraphicsItem *VLayoutPiece::GetItem(bool textAsPaths) const
     QGraphicsPathItem *item = new QGraphicsPathItem();
     item->setData(PieceItemData::ObjectName, GetName());
     item->setData(PieceItemData::PieceLetter, getPieceLetter());
+
+    qreal grainAngle = 0;
+    if (grainlineAngle(grainAngle))
+    {
+        item->setData(PieceItemData::GrainlineAngle, grainAngle);
+    }
 
     // Child components, one taggable item (or item group) each.
     createSeamlineItem(item);

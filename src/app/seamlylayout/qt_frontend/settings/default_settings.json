@@ -16,6 +16,7 @@
     "rollSize": "48 in",
     "rollWidth": 48,
     "rotationStep": 180,
+    "noGrainlineRotation": "upright",
     "selvedgeWidth": 0,
     "sheetName": "B0",
     "tileOrientation": "portrait",

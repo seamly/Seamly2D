@@ -593,7 +593,11 @@ pub fn widest_piece_tile_cols(
     } // if pieces empty
 
     // Find the widest piece, then pad by gap so a placement at x=0 still leaves clearance.
-    let widest = pieces.iter().map(|r| r.w).max().unwrap_or(0);
+    // A free-rotation piece can be turned, so its narrower side counts.
+    let widest = pieces.iter()
+        .map(|r| if r.free_rotation { r.w.min(r.h) } else { r.w })
+        .max()
+        .unwrap_or(0);
     let needed = widest.saturating_add(gap_px);
 
     // Ceiling division: smallest whole-tile count that covers `needed` pixels.

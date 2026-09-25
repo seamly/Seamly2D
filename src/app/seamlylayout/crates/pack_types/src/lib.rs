@@ -17,15 +17,24 @@ pub struct Rect {
     pub w: u32,
     // Height in units.
     pub h: u32,
+    // True when the packer may also try quarter turns (90°, 270°) for this
+    // rectangle, in addition to the layout mode's trial set.  Set for pieces
+    // without a grain direction when the user allows free rotation.
+    pub free_rotation: bool,
 }
 
 impl Rect {
-    // @brief Construct a rectangle.
+    // @brief Construct a rectangle limited to the layout mode's trial set.
     // @param w Width.
     // @param h Height.
     // @return New rectangle.
     pub const fn new(w: u32, h: u32) -> Self {
-        Self { w, h }
+        Self { w, h, free_rotation: false }
+    }
+
+    // @brief Return a copy with the given free-rotation flag.
+    pub const fn with_free_rotation(self, free_rotation: bool) -> Self {
+        Self { free_rotation, ..self }
     }
 }
 

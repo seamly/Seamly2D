@@ -265,6 +265,66 @@ Dialog {
                 } // RowLayout napDirectionButtons
 
                 // -----------------------------------------------------------
+                // Pieces without a grainline — hidden in "Any" mode, where
+                // every piece may already turn.
+                //   Keep upright  → drafted orientation (noGrainlineRotation="upright")
+                //   Rotate freely → packer may turn the piece 90° or 270° ("free")
+                // -----------------------------------------------------------
+                Text {
+                    visible:        root.model ? root.model.layoutMode !== "any" : true
+                    text:           "No Grainline:"
+                    color:          Theme.fieldLabel
+                    font.pixelSize: Theme.fontSizeNormal
+                    Layout.preferredWidth: scrollView.labelWidth
+                    verticalAlignment: Text.AlignVCenter
+                } // Text noGrainlineLabel
+                RowLayout {
+                    visible:           root.model ? root.model.layoutMode !== "any" : true
+                    Layout.fillWidth:  true
+                    spacing: 16
+
+                    ButtonGroup { id: noGrainlineGroup }
+
+                    RadioButton {
+                        id:      noGrainlineUpright
+                        text:    "Keep upright"
+                        ButtonGroup.group: noGrainlineGroup
+                        checked: root.model ? root.model.noGrainlineRotation !== "free" : true
+                        onToggled: if (checked && root.model) root.model.noGrainlineRotation = "upright"
+
+                        ToolTip.visible: hovered
+                        ToolTip.text:    "Pieces without a grainline keep their drafted orientation."
+
+                        contentItem: Text {
+                            text:           noGrainlineUpright.text
+                            color:          Theme.textOnDark
+                            font.pixelSize: Theme.fontSizeNormal
+                            leftPadding:    noGrainlineUpright.indicator.width + noGrainlineUpright.spacing
+                            verticalAlignment: Text.AlignVCenter
+                        } // contentItem Text
+                    } // RadioButton noGrainlineUpright
+
+                    RadioButton {
+                        id:      noGrainlineFree
+                        text:    "Rotate freely"
+                        ButtonGroup.group: noGrainlineGroup
+                        checked: root.model ? root.model.noGrainlineRotation === "free" : false
+                        onToggled: if (checked && root.model) root.model.noGrainlineRotation = "free"
+
+                        ToolTip.visible: hovered
+                        ToolTip.text:    "Pieces without a grainline may turn 90° to fit."
+
+                        contentItem: Text {
+                            text:           noGrainlineFree.text
+                            color:          Theme.textOnDark
+                            font.pixelSize: Theme.fontSizeNormal
+                            leftPadding:    noGrainlineFree.indicator.width + noGrainlineFree.spacing
+                            verticalAlignment: Text.AlignVCenter
+                        } // contentItem Text
+                    } // RadioButton noGrainlineFree
+                } // RowLayout noGrainlineButtons
+
+                // -----------------------------------------------------------
                 // Piece gap — minimum clearance between adjacent placed
                 // pieces, expressed in the active unit (in/cm/mm).  Stored
                 // as `pieceGap` and projected to pixels via `pieceGapPx`
@@ -885,6 +945,10 @@ Dialog {
             // Nap-direction radio buttons
             napUp.checked   = (Math.abs(root.model.rotationStep - 0.0)   < 0.001)
             napDown.checked = (Math.abs(root.model.rotationStep - 180.0) < 0.001)
+
+            // No-grainline radio buttons
+            noGrainlineUpright.checked = (root.model.noGrainlineRotation !== "free")
+            noGrainlineFree.checked    = (root.model.noGrainlineRotation === "free")
 
             // Fabric-folded checkbox
             fabricFoldedCheck.checked = root.model.fabricFolded

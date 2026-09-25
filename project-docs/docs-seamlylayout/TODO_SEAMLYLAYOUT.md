@@ -18,17 +18,17 @@ Tasks in this file are numbered and are prefixed with `Layout.`
 
 - [x] Layout.031 - The layout algorithm has suffered regression - the pieces are nested sub-optimally (there is a lot of space between the pieces). Fix the layout algorithm so that the pieces only have the gap specified between them.
 
-- [ ] Layout.032 - Implement the 'Layout Mode' == 'None' option so that the grainline direction is ignored while the pieces are efficiently arranged.
+- [x] Layout.032 - Implement the 'Layout Mode' == 'None' option so that the grainline direction is ignored while the pieces are efficiently arranged.
 
-## [ ] Task Layout.1 - 'Adjust Mode' improvement
+## [x] Task Layout.1 - 'Adjust Mode' improvement
 
 - [x] Layout.11 - The 'Adjust Layout' feature has suffered regression - when 'Adjust Layout' opens there are no pattern pieces to adjust - the pieces from the main SeamlyLayout canvas should be available in 'Adjust Layout', otherwise there is nothing to adjust and save back to the main SeamlyLayout canvas.
 
-- [ ] Layout.12 - When Adjust Mode closes it should return focus to SeamlyLayout's right canvas
+- [x] Layout.12 - When Adjust Mode closes it should return focus to SeamlyLayout's right canvas
 
-- [ ] Layout.13 - When focus returns to the right canvas after 'adjust mode' closes, the right canvas should contain either:
-  - [ ] Layout.13.1 - the layout with updates from 'adjust mode' ('adjust mode' closed via 'Save')
-  - [ ] Layout.13.2 - the layout without updates from 'adjust mode' ('adjust mode' closed via 'Cancel')
+- [x] Layout.13 - When focus returns to the right canvas after 'adjust mode' closes, the right canvas should contain either:
+  - [x] Layout.13.1 - the layout with updates from 'adjust mode' ('adjust mode' closed via 'Save')
+  - [x] Layout.13.2 - the layout without updates from 'adjust mode' ('adjust mode' closed via 'Cancel')
 
 ## [ ] Task Layout 3 — if current pattern is 'multisize', create three multisize options ('nested' / 'marker' / 'sized-layout-set') that is required before user can select the export file format
 

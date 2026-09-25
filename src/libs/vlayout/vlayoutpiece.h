@@ -129,6 +129,8 @@ public:
 
     void                      setGrainline(const VGrainlineData& geom, const VContainer *pattern);
     QVector<QPointF>          getGrainline() const;
+    void                      setGrainAxis(const VGrainlineData& geom, const VContainer *pattern);
+    bool                      grainlineAngle(qreal &angle) const;
 
     QTransform                getTransform() const;
     void                      setTransform(const QTransform &transform);

@@ -232,6 +232,14 @@ fn pack_maxrects_collect(
     );
 
     let trial: &[u16] = if trial_angles_deg.is_empty() { &[0] } else { trial_angles_deg };
+    // Trial set for a free-rotation piece: the mode's angles first, so ties
+    // keep the mode's preferred orientation, then any missing quarter turns.
+    let mut free_trial: Vec<u16> = trial.to_vec();
+    for deg in [0u16, 90, 180, 270] {
+        if !free_trial.contains(&deg) {
+            free_trial.push(deg);
+        }
+    }
 
     // Sort by area descending, preserving original indices.
     let mut order: Vec<usize> = (0..rects.len()).collect();
@@ -249,6 +257,7 @@ fn pack_maxrects_collect(
         }
 
         let r = rects[id];
+        let trial: &[u16] = if r.free_rotation { &free_trial } else { trial };
 
         // Any orientation physically fits in empty bin?
         let mut any_fit_in_empty = false;
@@ -495,6 +504,31 @@ mod tests {
         let (placed, _) = pack_maxrects(16, 16, 0, &rects, &[0, 180]).expect("pack ok");
         assert!(placed.iter().all(|p| p.rotation_deg == 0));
     } // maxrects_along_grainline_records_zero
+
+    // @brief A free-rotation piece too wide for the bin is turned 90°; a
+    // piece without the flag stays in the mode's trial set and is left out.
+    #[test]
+    fn free_rotation_piece_turns_to_fit() {
+        let rects = [Rect::new(20, 8).with_free_rotation(true)];
+        let (placed, _free, unplaced) =
+            pack_maxrects_multi_angle_lenient(10, 30, 0, &rects, &[0, 180], None);
+        assert!(unplaced.is_empty());
+        assert!(placed[0].rotation_deg == 90 || placed[0].rotation_deg == 270);
+        assert_eq!((placed[0].w, placed[0].h), (8, 20));
+
+        let fixed = [Rect::new(20, 8)];
+        let (_placed, _free, unplaced) =
+            pack_maxrects_multi_angle_lenient(10, 30, 0, &fixed, &[0, 180], None);
+        assert_eq!(unplaced, vec![0]);
+    } // free_rotation_piece_turns_to_fit
+
+    // @brief A free-rotation piece that fits upright keeps the mode's angle.
+    #[test]
+    fn free_rotation_piece_prefers_mode_angle_on_tie() {
+        let rects = [Rect::new(4, 4).with_free_rotation(true)];
+        let (placed, _) = pack_maxrects(16, 16, 0, &rects, &[0, 180]).expect("pack ok");
+        assert_eq!(placed[0].rotation_deg, 0);
+    } // free_rotation_piece_prefers_mode_angle_on_tie
 
     // @brief Lenient pack with everything fitting: all pieces placed, no
     // unplaced ids — identical placements to the strict packer.

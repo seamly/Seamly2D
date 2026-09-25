@@ -49,6 +49,11 @@ class SettingsModel : public QObject
     //   180.0 = pieces point down
     Q_PROPERTY(double  rotationStep  READ rotationStep  WRITE setRotationStep  NOTIFY rotationStepChanged)
 
+    // @brief Placement of pieces without a grain direction: "upright" | "free".
+    //   upright → drafted orientation; layoutMode's trial set only
+    //   free    → the packer may also turn the piece 90° or 270°
+    Q_PROPERTY(QString noGrainlineRotation READ noGrainlineRotation WRITE setNoGrainlineRotation NOTIFY noGrainlineRotationChanged)
+
     // @brief Whether fabric is cut on the fold (doubles usable width).
     Q_PROPERTY(bool    fabricFolded  READ fabricFolded  WRITE setFabricFolded  NOTIFY fabricFoldedChanged)
 
@@ -192,6 +197,7 @@ public:
     // Getters
     QString    layoutMode()    const { return m_layoutMode;    }
     double     rotationStep()  const { return m_rotationStep;  }
+    QString    noGrainlineRotation() const { return m_noGrainlineRotation; }
     bool       fabricFolded()  const { return m_fabricFolded;  }
     double     pieceGap()      const { return m_pieceGap;      }
     int        pieceGapPx()    const;
@@ -229,6 +235,7 @@ public:
     // Setters
     void setLayoutMode(const QString &v);
     void setRotationStep(double v);
+    void setNoGrainlineRotation(const QString &v);
     void setFabricFolded(bool v);
     void setPieceGap(double v);
     void setUnit(const QString &v);
@@ -305,6 +312,7 @@ public:
 signals:
     void layoutModeChanged();
     void rotationStepChanged();
+    void noGrainlineRotationChanged();
     void fabricFoldedChanged();
     void pieceGapChanged();
     void pieceGapPxChanged();
@@ -347,6 +355,7 @@ private:
     // Fields — defaults match LayoutSettings::default() in Rust
     QString m_layoutMode    = QStringLiteral("alongGrainline");
     double  m_rotationStep  = 0.0;  // degrees; used by withNap (0 up, 180 down)
+    QString m_noGrainlineRotation = QStringLiteral("upright");
     bool    m_fabricFolded  = false;
     double  m_pieceGap      = 0.05;  // active-unit clearance between adjacent pieces (default ≈ 5 px @ 96 dpi)
     QString m_unit          = QStringLiteral("in");

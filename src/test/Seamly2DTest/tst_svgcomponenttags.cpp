@@ -33,6 +33,8 @@
 #include "../vlayout/vlayoutdef.h"
 #include "../vlayout/vlayoutpiece.h"
 #include "../vlayout/vlayoutpiecepath.h"
+#include "../vpatterndb/floatItemData/vgrainlinedata.h"
+#include "../vpatterndb/vcontainer.h"
 
 #include <QtTest>
 #include <QDomDocument>
@@ -46,6 +48,9 @@
 #include <QPen>
 #include <QScopedPointer>
 #include <QTemporaryDir>
+#include <QTransform>
+
+#include <cmath>
 
 namespace
 {
@@ -106,6 +111,38 @@ VLayoutPiece makeTestPiece(const QString &name = QStringLiteral("Test Piece"))
     piece.setCutoutPaths(cutoutPaths);
 
     return piece;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setHiddenGrain gives a piece a grainline that is not drawn.
+ * @param piece    piece that receives the grain direction.
+ * @param rotation grainline rotation formula in degrees.
+ */
+void setHiddenGrain(VLayoutPiece &piece, const QString &rotation)
+{
+    const Unit unit = Unit::Cm;
+    const VContainer pattern(nullptr, &unit);
+
+    VGrainlineData grainline;
+    grainline.SetVisible(false);
+    grainline.setRotation(rotation);
+    grainline.setLength(QStringLiteral("10"));
+    grainline.setArrowLength(QStringLiteral("0.5"));
+
+    piece.setGrainAxis(grainline, &pattern);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief normalizedDegrees maps an angle into [0, 360).
+ * @param degrees angle in degrees.
+ * @return the equivalent angle in [0, 360).
+ */
+qreal normalizedDegrees(qreal degrees)
+{
+    const qreal result = std::fmod(degrees, 360.0);
+    return result < 0 ? result + 360.0 : result;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -441,4 +478,86 @@ void TST_SvgComponentTags::EmptyComponentAwayFromOriginEmitsNoGroup() const
     QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
     QCOMPARE(groupsOfType(doc, QStringLiteral("empty_component")).size(), 0);
     QCOMPARE(groupsOfType(doc, QStringLiteral("seamline")).size(), 1);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief HiddenGrainlineKeepsGrainAngle checks that a grainline that is not
+ * drawn still gives the piece a grain direction.
+ */
+void TST_SvgComponentTags::HiddenGrainlineKeepsGrainAngle() const
+{
+    VLayoutPiece piece = makeTestPiece();
+    setHiddenGrain(piece, QStringLiteral("90"));
+
+    qreal angle = 0;
+    QVERIFY(piece.grainlineAngle(angle));
+    QVERIFY(qFuzzyCompare(normalizedDegrees(angle), 90.0));
+
+    const QScopedPointer<QGraphicsItem> root(piece.GetItem(true));
+    QVERIFY(!root->childItems().isEmpty());
+    for (QGraphicsItem *component : root->childItems())
+    {
+        QVERIFY(component->data(PieceItemData::ItemType).toString() != QLatin1String("grainline"));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief GrainAngleFollowsPieceTransform checks that a piece turned by the
+ * Seamly2D layout reports the turned grain direction.
+ */
+void TST_SvgComponentTags::GrainAngleFollowsPieceTransform() const
+{
+    VLayoutPiece piece = makeTestPiece();
+    setHiddenGrain(piece, QStringLiteral("90"));
+
+    // QTransform::rotate(90) turns clockwise on screen: grain up becomes grain right.
+    QTransform transform;
+    transform.rotate(90);
+    piece.setTransform(transform);
+
+    qreal angle = -1;
+    QVERIFY(piece.grainlineAngle(angle));
+    const qreal normalized = normalizedDegrees(angle);
+    QVERIFY2(normalized < 0.001 || normalized > 359.999, qPrintable(QString::number(angle)));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ExportedPieceCarriesGrainlineAngle checks the exported piece group
+ * carries data-grainline-angle.
+ */
+void TST_SvgComponentTags::ExportedPieceCarriesGrainlineAngle() const
+{
+    VLayoutPiece piece = makeTestPiece();
+    setHiddenGrain(piece, QStringLiteral("45"));
+
+    const QDomDocument doc = exportPieceSvg(piece);
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+
+    const QVector<QDomElement> pieces = groupsOfType(doc, QStringLiteral("piece"));
+    QCOMPARE(pieces.size(), 1);
+    QCOMPARE(pieces.at(0).attribute(QStringLiteral("data-grainline-angle")), QStringLiteral("45.0000"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PieceWithoutGrainHasNoGrainlineAngle checks that a piece without a
+ * grain rotation gets no data-grainline-angle attribute.
+ */
+void TST_SvgComponentTags::PieceWithoutGrainHasNoGrainlineAngle() const
+{
+    VLayoutPiece piece = makeTestPiece();
+    setHiddenGrain(piece, QString());
+
+    qreal angle = 0;
+    QVERIFY(!piece.grainlineAngle(angle));
+
+    const QDomDocument doc = exportPieceSvg(piece);
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+
+    const QVector<QDomElement> pieces = groupsOfType(doc, QStringLiteral("piece"));
+    QCOMPARE(pieces.size(), 1);
+    QVERIFY(!pieces.at(0).hasAttribute(QStringLiteral("data-grainline-angle")));
 }

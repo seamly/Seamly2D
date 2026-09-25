@@ -64,6 +64,9 @@ pub struct PieceRect {
     // Used by `layout_assembler` to retrieve the original element even when
     // some `<g>` elements were skipped (empty paths, degenerate size).
     pub group_index: usize,
+    // True when the piece has a grain direction: a drawn grainline or a
+    // `data-grainline-angle` attribute (see `svg_dom::has_grain_direction`).
+    pub has_grainline: bool,
 }
 
 impl PieceRect {
@@ -85,6 +88,18 @@ impl PieceRect {
         self.id.as_str() // last resort: the machine id
     } // fn label
 } // impl PieceRect
+
+// @brief Let the packer quarter-turn pieces that have no grain direction.
+//
+// Pieces with a grain direction always stay in the layout mode's trial set.
+//
+// @param pieces  Extracted pieces; their `rect.free_rotation` flags are set here.
+// @param allow   The user's "Rotate freely" choice for pieces without a grainline.
+pub fn set_free_rotation_without_grainline(pieces: &mut [PieceRect], allow: bool) {
+    for piece in pieces.iter_mut() {
+        piece.rect.free_rotation = allow && !piece.has_grainline;
+    }
+} // fn set_free_rotation_without_grainline
 
 // @brief Extract bounding boxes for every pattern piece in `doc`.
 //
@@ -168,6 +183,7 @@ pub fn extract_piece_rects(doc: &svg_dom::Document) -> Vec<PieceRect> {
             origin_x: bbox.min.x as f64,
             origin_y: bbox.min.y as f64,
             group_index: this_g_idx,
+            has_grainline: svg_dom::has_grain_direction(elem),
         });
     } // for child in doc.root.children
 
@@ -283,6 +299,7 @@ pub fn extract_piece_rects_and_polygons(
             origin_x,
             origin_y,
             group_index: this_g_idx,
+            has_grainline: svg_dom::has_grain_direction(elem),
         });
         polygons.push(polygon);
     } // for child in doc.root.children

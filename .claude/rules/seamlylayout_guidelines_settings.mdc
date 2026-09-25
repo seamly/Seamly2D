@@ -47,6 +47,15 @@ See full documentation in [`settings-docs/SETTINGS_WORKFLOW.md`](../../project-d
 | `withNap` | **Nap Direction** — Pieces point Up / Pieces point Down | `{ 0, 180 }` | `0` (head-up) |
 | `any` | _(no sub-radio)_ | unused | — |
 
+`noGrainlineRotation` (radio group, hidden in `any` mode) — pieces with no grain direction.
+
+| Value | Label | Behavior |
+|-------|-------|----------|
+| `upright` | Keep upright | Default. Drafted orientation; mode trial set only. |
+| `free` | Rotate freely | Packer may also try 90° and 270° for these pieces. |
+
+Grain direction sources, in order: drawn `grainline` group, then `data-grainline-angle`. No guess from the outline.
+
 ## Viewer Preferences
 
 - DXF/PDF viewers: Use OS default if path empty

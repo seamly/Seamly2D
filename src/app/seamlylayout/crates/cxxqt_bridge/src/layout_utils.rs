@@ -20,7 +20,9 @@ use layout_tiling::{
     pick_best_tiled_candidate, widest_piece_tile_cols, LayoutSettings, TileDimensions,
 };
 
-use crate::piece_extractor::{extract_piece_rects_and_polygons, hoist_tagged_pieces};
+use crate::piece_extractor::{
+    extract_piece_rects_and_polygons, hoist_tagged_pieces, set_free_rotation_without_grainline,
+};
 use crate::layout_assembler::{create_layout, create_initial_layout_dom, trim_bottom};
 use crate::save_debug_dom;
 use crate::log_to_file;
@@ -273,7 +275,8 @@ pub fn do_process_layout(
     // Polygons are used by the non-orthogonal trial-set branch inside
     // `pack_polygons`; for orthogonal trial sets the polygons are ignored
     // and the call routes to MaxRects on `rects` alone.
-    let (pieces, polygons) = extract_piece_rects_and_polygons(&flat_dom);
+    let (mut pieces, polygons) = extract_piece_rects_and_polygons(&flat_dom);
+    set_free_rotation_without_grainline(&mut pieces, settings.free_rotation_without_grainline());
     if pieces.is_empty() {
         return Err(
             "[ERROR] layout_utils::do_process_layout(): 8 No pattern pieces found in the imported SVG. \
@@ -768,13 +771,50 @@ mod tests {
     // side is wider than a 36 in roll, so it would be left out of the layout.
     #[test]
     fn trousers_handoff_fits_36_inch_roll() {
+        let result = process_trousers(36.0, 500.0, "upright");
+        assert!(
+            result.unplaced_labels.is_empty(),
+            "no piece should be left unplaced, got {:?}", result.unplaced_labels
+        );
+    } // trousers_handoff_fits_36_inch_roll
+
+    // @brief On fabric 42 in long a 43 in trouser leg fits only when turned.
+    // "upright" leaves the four legs (no grainline) out; "free" turns them to fit.
+    // Pieces with a grainline never turn, so some of them stay unplaced in both runs.
+    #[test]
+    fn trousers_legs_turn_only_with_free_rotation() {
+        const LEGS: [&str; 4] = ["Back", "Front_Pleats", "Front_no_pocket", "Front_with_pocket"];
+
+        let upright = process_trousers(100.0, 42.0, "upright");
+        for leg in LEGS {
+            assert!(
+                upright.unplaced_labels.iter().any(|l| l == leg),
+                "{leg} should not fit upright, unplaced: {:?}", upright.unplaced_labels
+            );
+        }
+
+        let free = process_trousers(100.0, 42.0, "free");
+        for leg in LEGS {
+            assert!(
+                !free.unplaced_labels.iter().any(|l| l == leg),
+                "{leg} should fit when turned, unplaced: {:?}", free.unplaced_labels
+            );
+        }
+        assert!(
+            free.unplaced_labels.iter().any(|l| l == "WaistBand1"),
+            "a piece with a grainline must not turn, unplaced: {:?}", free.unplaced_labels
+        );
+    } // trousers_legs_turn_only_with_free_rotation
+
+    // @brief Lay out the trousers handoff on fabric of the given size (inches).
+    fn process_trousers(width_in: f64, length_in: f64, no_grainline_rotation: &str) -> ProcessLayoutResult {
         let input_dom = Document::parse(TROUSERS_HANDOFF_SVG).expect("trousers fixture should parse");
-        let settings_json = r#"{
+        let settings_json = serde_json::json!({
             "unit": "in",
             "mediaType": "fabric",
             "paperType": "roll",
-            "pageWidth": 36.0,
-            "pageHeight": 500.0,
+            "pageWidth": width_in,
+            "pageHeight": length_in,
             "marginLeft": 0.5,
             "marginRight": 0.5,
             "marginTop": 0.5,
@@ -782,26 +822,22 @@ mod tests {
             "pieceGap": 0.125,
             "layoutMode": "alongGrainline",
             "rotationStep": 180,
+            "noGrainlineRotation": no_grainline_rotation,
             "tileSize": "Letter",
             "tileOrientation": "Portrait"
-        }"#;
-        let init = do_initialize_layout(settings_json, Some(&input_dom))
+        }).to_string();
+        let init = do_initialize_layout(&settings_json, Some(&input_dom))
             .expect("initialize_layout should succeed");
 
         let mut progress = |_pct: i32, _status: Option<&str>| {};
-        let result = do_process_layout(
+        do_process_layout(
             ProcessLayoutArgs {
-                settings_json,
+                settings_json: &settings_json,
                 input_dom: &input_dom,
                 initial_layout_dom: &init.initial_dom,
                 layout_h_px: init.h_px,
             },
             &mut progress,
-        ).expect("process_layout should succeed on the trousers handoff");
-
-        assert!(
-            result.unplaced_labels.is_empty(),
-            "no piece should be left unplaced, got {:?}", result.unplaced_labels
-        );
-    } // trousers_handoff_fits_36_inch_roll
+        ).expect("process_layout should succeed on the trousers handoff")
+    } // fn process_trousers
 } // mod tests

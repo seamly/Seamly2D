@@ -59,6 +59,12 @@
 - if layoutMode='withNap':
   >> Nap Direction -- 'Pieces point Up' (rotationStep=0) | 'Pieces point Down' (rotationStep=180);
      default is 'Pieces point Up'.
+- if layoutMode is not 'any':
+  >> No Grainline -- 'Keep upright' (noGrainlineRotation='upright') | 'Rotate freely' ('free');
+     default is 'Keep upright'.
+     Applies only to pieces with no drawn grainline and no data-grainline-angle.
+     'Keep upright' keeps the drafted orientation and the layoutMode trial set.
+     'Rotate freely' also lets the packer try 90° and 270° for those pieces.
 # Save/Load Settings
 - settingSavepath -- opens a file-save dialog in the /settings directorywhen the user clicks the 'Save Settings' button, saves parameters to a file, can be a relative filepath, extension must be '.settings'.
 - settingOpenpath -- opens a file-open dialog in the /settings directory when the user clicks the 'Load Settigs' button, loads parameters from a file, can be a relative filepath, extension must be '.settings'.

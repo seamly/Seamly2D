@@ -6,6 +6,16 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-24 — Pieces without a grainline: setting + handoff grain angle
+
+Branch `task-no-grainline-rotation`. User decisions: a setting with default "Keep upright"; the handoff carries the grain angle.
+
+- Setting `noGrainlineRotation` ("upright" | "free"): `SettingsModel`, `SettingsDialog.qml` ("No Grainline:", hidden in Any mode), `LayoutSettings`.
+- `pack_types::Rect.free_rotation`: packer adds 90°/270° for that piece only. Set by `piece_extractor::set_free_rotation_without_grainline`.
+- Seamly2D: `VLayoutPiece::setGrainAxis` keeps the grain direction even when the grainline is hidden; `SvgGenerator` writes `data-grainline-angle`.
+- `svg_dom::verticalize_dom` reads drawn grainline, then `data-grainline-angle`.
+- Open: `verticalize_dom` turns grain to point **down** (θ = 90° in SVG). Seamly2D grainlines point up, so those pieces get rotate(180). Not changed; ask the user.
+
 ## 2026-09-24 — Layout fix: pieces without a grainline keep drafted orientation
 
 Merged `task-no-grainline-orientation` with skip-ci (Rust-only change).

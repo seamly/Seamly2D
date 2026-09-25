@@ -116,6 +116,13 @@ pub struct LayoutSettings {
     #[serde(default = "default_rotation_step")]
     pub rotation_step: f64,
 
+    // Placement of pieces without a grain direction: "upright" | "free".
+    //   upright → drafted orientation, layout mode's trial set only
+    //   free    → the packer may also quarter-turn the piece (90°, 270°)
+    // Unknown values behave as "upright".
+    #[serde(default = "default_no_grainline_rotation")]
+    pub no_grainline_rotation: String,
+
     #[serde(default)]
     pub sheet_name: String,
     #[serde(default)]
@@ -145,6 +152,7 @@ fn default_roll_width()    -> f64    { 0.0                      } // 0" roll wid
 fn default_margin()        -> f64    { 0.25                     } // 0.25 in default margin
 fn default_layout_mode()   -> String { "alongGrainline".to_string() } // default piece-arrangement mode
 fn default_rotation_step() -> f64    { 0.0                      } // default withNap direction: head-up
+fn default_no_grainline_rotation() -> String { "upright".to_string() } // keep no-grainline pieces as drafted
 fn default_tile_orientation() -> String { "landscape".to_string() } // default tiled-paper orientation
 fn default_piece_gap()     -> f64    { 0.05                     } // 0.05 in ≈ 5 px @ 96 dpi (historic GAP_PX)
 
@@ -365,6 +373,13 @@ impl LayoutSettings {
         } // match layout_mode
     } // fn rotation_trial_set_deg
 
+    // @brief True when pieces without a grain direction may be quarter-turned.
+    //
+    // Pieces with a grain direction always use `rotation_trial_set_deg`.
+    pub fn free_rotation_without_grainline(&self) -> bool {
+        self.no_grainline_rotation == "free"
+    } // fn free_rotation_without_grainline
+
 } // impl LayoutSettings
 
 // ---------------------------------------------------------------------------
@@ -395,6 +410,7 @@ impl LayoutSettings {
             fabric_height:  0.0,
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
+            no_grainline_rotation: "upright".to_string(),
             sheet_name:     "".to_string(),
             roll_size:      "".to_string(),
             tile_size:      "Letter".to_string(),
@@ -433,6 +449,7 @@ mod tests {
             fabric_height:  0.0,
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
+            no_grainline_rotation: "upright".to_string(),
             sheet_name:     "ARCH E".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
@@ -467,6 +484,7 @@ mod tests {
             fabric_height:  0.0,
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
+            no_grainline_rotation: "upright".to_string(),
             sheet_name:     "none".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "none".to_string(),
@@ -505,6 +523,7 @@ mod tests {
             fabric_height:  0.0,
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
+            no_grainline_rotation: "upright".to_string(),
             sheet_name:     "ARCH E".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
@@ -541,6 +560,7 @@ mod tests {
             fabric_height:  0.0,
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
+            no_grainline_rotation: "upright".to_string(),
             sheet_name:     "ARCH E".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
@@ -573,6 +593,7 @@ mod tests {
             fabric_height:  0.0,
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
+            no_grainline_rotation: "upright".to_string(),
             sheet_name:     "ARCH E".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
@@ -605,6 +626,7 @@ mod tests {
             fabric_height:  0.0,
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
+            no_grainline_rotation: "upright".to_string(),
             sheet_name:     "ARCH E".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
@@ -689,6 +711,20 @@ mod tests {
         s.rotation_step = 180.0;
         assert_eq!(s.rotation_trial_set_deg(), vec![0, 90, 180, 270]);
     } // trial_set_any
+
+    // @brief noGrainlineRotation: default "upright"; only "free" allows quarter turns.
+    #[test]
+    fn no_grainline_rotation_parses_and_defaults() {
+        let s = LayoutSettings::from_json(r#"{"unit":"in"}"#).unwrap();
+        assert_eq!(s.no_grainline_rotation, "upright");
+        assert!(!s.free_rotation_without_grainline());
+
+        let s = LayoutSettings::from_json(r#"{"unit":"in","noGrainlineRotation":"free"}"#).unwrap();
+        assert!(s.free_rotation_without_grainline());
+
+        let s = LayoutSettings::from_json(r#"{"unit":"in","noGrainlineRotation":"x"}"#).unwrap();
+        assert!(!s.free_rotation_without_grainline());
+    } // no_grainline_rotation_parses_and_defaults
 
     // @brief Unknown layout_mode falls back to alongGrainline trial set.
     #[test]

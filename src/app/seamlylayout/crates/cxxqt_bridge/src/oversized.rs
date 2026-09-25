@@ -40,7 +40,8 @@ const OVERSIZED_HEIGHT_SENTINEL_PX: u32 = (500.0 * LAYOUT_PPI as f64) as u32; //
 // @brief Split pieces into oversized and remaining by comparing to sheet contentRect.
 //
 // A piece is oversized if its width exceeds `content_w_px` OR its height exceeds
-// `content_h_px`.  Both returned vectors hold indices into the `pieces` slice.
+// `content_h_px`, and a quarter turn (allowed only for `rect.free_rotation`)
+// does not make it fit.  Both returned vectors hold indices into the `pieces` slice.
 // Relative order within each partition is preserved.
 //
 // @param pieces         All extracted PieceRect entries after preprocessing.
@@ -56,8 +57,12 @@ pub fn partition_oversized_pieces(
     let mut oversized: Vec<usize> = Vec::new();
     let mut remaining: Vec<usize> = Vec::new();
     for (i, p) in pieces.iter().enumerate() {
-        // A piece is oversized when it exceeds the sheet contentRect on either axis.
-        if p.rect.w > content_w_px || p.rect.h > content_h_px {
+        // A piece is oversized when it exceeds the sheet contentRect on either
+        // axis, in every orientation the packer may try.
+        let fits_upright = p.rect.w <= content_w_px && p.rect.h <= content_h_px;
+        let fits_turned  = p.rect.free_rotation
+            && p.rect.h <= content_w_px && p.rect.w <= content_h_px;
+        if !fits_upright && !fits_turned {
             oversized.push(i);
         } else {
             remaining.push(i);
@@ -431,6 +436,7 @@ mod tests {
             origin_x:    0.0,
             origin_y:    0.0,
             group_index,
+            has_grainline: true,
         }
     } // fn piece
 
@@ -455,6 +461,19 @@ mod tests {
     } // fn flat_dom_with_n_groups
 
     // -----------------------------------------------------------------------
+    // partition_oversized_pieces: a free-rotation piece that fits only when
+    // turned is not oversized.
+    #[test]
+    fn partition_keeps_free_rotation_piece_that_fits_turned() {
+        let mut wide = piece(700, 300, "wide", 0);
+        let (over, _rem) = partition_oversized_pieces(&[wide.clone()], 500, 800);
+        assert_eq!(over, vec![0]);
+        wide.rect.free_rotation = true;
+        let (over, rem) = partition_oversized_pieces(&[wide], 500, 800);
+        assert!(over.is_empty());
+        assert_eq!(rem, vec![0]);
+    } // partition_keeps_free_rotation_piece_that_fits_turned
+
     // partition_oversized_pieces
     // -----------------------------------------------------------------------
 

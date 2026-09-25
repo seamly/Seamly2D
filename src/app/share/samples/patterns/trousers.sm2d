@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pattern>
-    <!--Pattern created with Seamly2D v26.9.18.1279 (https://seamly.io).-->
+    <!--Pattern created with Seamly2D v26.9.2320 (https://seamly.io).-->
     <version>0.7.4</version>
     <unit>cm</unit>
     <description>This trouser pattern is suitable for women and men for short and long trousers.
@@ -13,7 +13,12 @@ Check and adjust *** CHECK *** increments
 Delete the unneeded layouts.
 Pockets are adjustable.</notes>
     <patternLabel>
-        <line alignment="0" bold="true" italic="false" sfIncrement="4" text="Timo Virtaneva"/>
+        <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+        <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+        <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+        <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+        <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+        <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
     </patternLabel>
     <measurements>../measurements/individual/trousers.smis</measurements>
     <variables>
@@ -287,6 +292,7 @@ Pockets are adjustable.</notes>
                 <pathPoint angle1="273.825" angle2="93.825" length1="6.53204" length2="86.278" pSpline="406"/>
             </spline>
             <line firstPoint="406" id="415" lineColor="black" lineType="solidLine" secondPoint="410"/>
+            <line firstPoint="120" id="456" lineColor="black" lineType="solidLine" lineWeight="0.35" secondPoint="25"/>
         </calculation>
         <modeling>
             <point id="173" idObject="148" inUse="true" mx="-0.0487997" my="-2.0896" type="modeling"/>
@@ -391,12 +397,26 @@ Pockets are adjustable.</notes>
             <point id="433" idObject="54" inUse="true" mx="-2.63494" my="-1.7186" type="modeling"/>
             <point id="434" idObject="64" inUse="true" mx="-2.68106" my="-1.81084" type="modeling"/>
             <point id="435" idObject="150" inUse="true" mx="-2.7199" my="-2.04433" type="modeling"/>
+            <point id="448" idObject="10" inUse="true" mx="0.409015" my="-0.79619" showPointName="true" type="modeling"/>
+            <point id="449" idObject="5" inUse="true" mx="0.132292" my="0.264583" showPointName="true" type="modeling"/>
+            <point id="450" idObject="12" inUse="true" mx="-2.17374" my="-0.79619" showPointName="true" type="modeling"/>
+            <spline id="451" idObject="45" inUse="true" type="modelingPath"/>
+            <point id="452" idObject="8" inUse="true" mx="-1.89701" my="-1.76472" showPointName="true" type="modeling"/>
+            <point id="453" idObject="1" inUse="true" mx="0.214454" my="-1.84962" showPointName="true" type="modeling"/>
+            <spline id="454" idObject="37" inUse="true" type="modelingPath"/>
         </modeling>
         <pieces>
-            <piece closed="1" id="191" mx="-50.8578" my="8.26261" name="Front_no_pocket" seamAllowance="1" version="2" width="1">
-                <data annotation="" foldPosition="" fontSize="0" height="" letter="" mx="0" my="0" onFold="false" orientation="" quantity="1" rotation="" rotationWay="" tilt="" visible="false" width=""/>
-                <patternInfo fontSize="0" height="" mx="0" my="0" rotation="" visible="false" width=""/>
-                <grainline arrows="0" length="" mx="0" my="0" rotation="" visible="false"/>
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="191" inLayout="true" locked="false" mx="-50.8578" my="8.26261" name="Front_no_pocket" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="6" letter="A" mx="-97.868" my="-2935.89" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="6">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text=""/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="0.5" arrows="0" length="20" mx="-166.376" my="-2327.43" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="173" type="NodePoint"/>
                     <node idObject="174" type="NodePoint"/>
@@ -418,10 +438,17 @@ Pockets are adjustable.</notes>
                     <node idObject="190" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="212" mx="-6.76727" my="8.36919" name="Front_with_pocket" seamAllowance="1" version="2" width="1">
-                <data annotation="" foldPosition="" fontSize="0" height="" letter="" mx="0" my="0" onFold="false" orientation="" quantity="1" rotation="" rotationWay="" tilt="" visible="false" width=""/>
-                <patternInfo fontSize="0" height="" mx="0" my="0" rotation="" visible="false" width=""/>
-                <grainline arrows="0" length="" mx="0" my="0" rotation="" visible="false"/>
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="212" inLayout="true" locked="false" mx="-6.76727" my="8.13946" name="Front_with_pocket" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="6" letter="B" mx="-107.655" my="-3121.84" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="6">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text=""/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="0.5" arrows="0" length="20" mx="-195.736" my="-2552.53" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="192" type="NodePoint"/>
                     <node idObject="193" type="NodePoint"/>
@@ -445,10 +472,10 @@ Pockets are adjustable.</notes>
                     <node idObject="211" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="257" mx="93.0486" my="10.1228" name="Back" seamAllowance="1" version="2" width="1">
-                <data annotation="" foldPosition="" fontSize="0" height="" letter="" mx="0" my="0" onFold="false" orientation="" quantity="1" rotation="" rotationWay="" tilt="" visible="false" width=""/>
-                <patternInfo fontSize="0" height="" mx="0" my="0" rotation="" visible="false" width=""/>
-                <grainline arrows="0" length="" mx="0" my="0" rotation="" visible="false"/>
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="257" inLayout="true" locked="false" mx="91.7322" my="8.80639" name="Back" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="D" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="0.5" arrows="0" length="1" mx="0" my="0" rotation="90" visible="false"/>
                 <nodes>
                     <node idObject="235" type="NodePoint"/>
                     <node idObject="236" type="NodePoint"/>
@@ -474,10 +501,17 @@ Pockets are adjustable.</notes>
                     <node idObject="256" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="265" mx="-48.6353" my="125.67" name="PocketMouth" seamAllowance="1" version="2" width="1">
-                <data annotation="" foldPosition="" fontSize="0" height="" letter="" mx="0" my="0" onFold="false" orientation="" quantity="1" rotation="" rotationWay="" tilt="" visible="false" width=""/>
-                <patternInfo fontSize="0" height="" mx="0" my="0" rotation="" visible="false" width=""/>
-                <grainline arrows="0" length="" mx="0" my="0" rotation="" visible="false"/>
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="265" inLayout="true" locked="false" mx="-48.6353" my="125.67" name="PocketMouth" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="3" letter="" mx="-577.934" my="-3759.88" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="3">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="0.5" arrows="0" length="4" mx="-444.054" my="-3858.28" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="259" type="NodePoint"/>
                     <node idObject="260" reverse="1" type="NodeSpline"/>
@@ -488,10 +522,17 @@ Pockets are adjustable.</notes>
                     <node idObject="258" reverse="0" type="NodeSpline"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="272" mx="-25.339" my="125.044" name="PocketPanel" seamAllowance="1" version="2" width="1">
-                <data annotation="" foldPosition="" fontSize="0" height="" letter="" mx="0" my="0" onFold="false" orientation="" quantity="1" rotation="" rotationWay="" tilt="" visible="false" width=""/>
-                <patternInfo fontSize="0" height="" mx="0" my="0" rotation="" visible="false" width=""/>
-                <grainline arrows="0" length="" mx="0" my="0" rotation="" visible="false"/>
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="272" inLayout="true" locked="false" mx="-25.339" my="125.044" name="PocketPanel" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="3" letter="" mx="-387.283" my="-3968.22" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="3">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="0.5" arrows="0" length="4" mx="-458.351" my="-3841.17" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="266" type="NodePoint"/>
                     <node idObject="267" type="NodePoint"/>
@@ -501,20 +542,34 @@ Pockets are adjustable.</notes>
                     <node idObject="271" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="276" mx="-6.33298" my="123.812" name="PocketBack" seamAllowance="1" version="2" width="1">
-                <data annotation="" foldPosition="" fontSize="0" height="" letter="" mx="0" my="0" onFold="false" orientation="" quantity="1" rotation="" rotationWay="" tilt="" visible="false" width=""/>
-                <patternInfo fontSize="0" height="" mx="0" my="0" rotation="" visible="false" width=""/>
-                <grainline arrows="0" length="" mx="0" my="0" rotation="" visible="false"/>
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="276" inLayout="true" locked="false" mx="-6.51373" my="123.812" name="PocketBack" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="3" letter="" mx="-375.74" my="-4000.1" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="3">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="0.5" arrows="0" length="4" mx="-457.72" my="-3709.09" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="273" type="NodePoint"/>
                     <node idObject="274" reverse="0" type="NodeSplinePath"/>
                     <node idObject="275" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="303" mx="26.0478" my="122.052" name="PocketFront" seamAllowance="1" version="2" width="1">
-                <data annotation="" foldPosition="" fontSize="0" height="" letter="" mx="0" my="0" onFold="false" orientation="" quantity="1" rotation="" rotationWay="" tilt="" visible="false" width=""/>
-                <patternInfo fontSize="0" height="" mx="0" my="0" rotation="" visible="false" width=""/>
-                <grainline arrows="0" length="" mx="0" my="0" rotation="" visible="false"/>
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="303" inLayout="true" locked="false" mx="26.0478" my="122.052" name="PocketFront" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="3" letter="" mx="-143.797" my="-3724.58" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="3">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="0.5" arrows="0" length="4" mx="-245.301" my="-3598.51" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="297" type="NodePoint"/>
                     <node idObject="298" reverse="0" type="NodeSplinePath"/>
@@ -524,10 +579,17 @@ Pockets are adjustable.</notes>
                     <node idObject="302" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="436" mx="43.5691" my="7.01902" name="Front_Pleats" seamAllowance="1" version="2" width="1">
-                <data annotation="" foldPosition="" fontSize="0" height="" letter="" mx="0" my="0" onFold="false" orientation="" quantity="1" rotation="" rotationWay="" tilt="" visible="false" width=""/>
-                <patternInfo fontSize="0" height="" mx="0" my="0" rotation="" visible="false" width=""/>
-                <grainline arrows="0" length="" mx="0" my="0" rotation="" visible="false"/>
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="436" inLayout="true" locked="false" mx="43.5691" my="7.01902" name="Front_Pleats" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="6" letter="C" mx="-103" my="-3148.38" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="6">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text=""/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="0.5" arrows="0" length="20" mx="-225.096" my="-2586.38" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="416" type="NodePoint"/>
                     <node idObject="417" type="NodePoint"/>
@@ -549,6 +611,27 @@ Pockets are adjustable.</notes>
                     <node idObject="433" type="NodePoint"/>
                     <node idObject="434" type="NodePoint"/>
                     <node idObject="435" type="NodePoint"/>
+                </nodes>
+            </piece>
+            <piece color="#ffffff" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="455" inLayout="true" locked="false" mx="-83.2119" my="9.34309" name="PatternPiece" seamAllowance="true" united="false" version="2" width="0.635">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="2" letter="" mx="168.697" my="-1184.33" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="3">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
+                <patternInfo fontSize="0" height="2" mx="-303.744" my="-1184.33" rotation="0" visible="true" width="3"/>
+                <grainline arrowLength="1.27" arrows="0" length="4" mx="-10.8304" my="-1070.94" rotation="90" visible="true"/>
+                <nodes>
+                    <node idObject="448" type="NodePoint"/>
+                    <node idObject="449" type="NodePoint"/>
+                    <node idObject="450" type="NodePoint"/>
+                    <node idObject="451" reverse="0" type="NodeSplinePath"/>
+                    <node idObject="452" type="NodePoint"/>
+                    <node idObject="453" type="NodePoint"/>
+                    <node idObject="454" reverse="1" type="NodeSplinePath"/>
                 </nodes>
             </piece>
         </pieces>
@@ -636,10 +719,17 @@ Pockets are adjustable.</notes>
             <point id="318" idObject="167" inUse="true" mx="0.132292" my="0.264583" type="modeling"/>
         </modeling>
         <pieces>
-            <piece closed="1" id="309" mx="41.8477" my="11.8596" name="Detail" seamAllowance="1" version="2" width="1">
-                <data annotation="" foldPosition="" fontSize="0" height="" letter="" mx="0" my="0" onFold="false" orientation="" quantity="1" rotation="" rotationWay="" tilt="" visible="false" width=""/>
-                <patternInfo fontSize="0" height="" mx="0" my="0" rotation="" visible="false" width=""/>
-                <grainline arrows="0" length="" mx="0" my="0" rotation="" visible="false"/>
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="309" inLayout="true" locked="false" mx="41.8477" my="11.8596" name="Detail" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="3" letter="" mx="13.6447" my="382.288" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="3">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text=""/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="0.5" arrows="0" length="4" mx="63.6753" my="769.977" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="304" type="NodePoint"/>
                     <node idObject="305" type="NodePoint"/>
@@ -648,10 +738,17 @@ Pockets are adjustable.</notes>
                     <node idObject="308" reverse="1" type="NodeSpline"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="314" mx="109.426" my="20.136" name="WaistBand1" seamAllowance="1" version="2" width="1">
-                <data annotation="" foldPosition="" fontSize="0" height="" letter="" mx="0" my="0" onFold="false" orientation="" quantity="1" rotation="" rotationWay="" tilt="" visible="false" width=""/>
-                <patternInfo fontSize="0" height="" mx="0" my="0" rotation="" visible="false" width=""/>
-                <grainline arrows="0" length="" mx="0" my="0" rotation="" visible="false"/>
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="314" inLayout="true" locked="false" mx="109.426" my="20.136" name="WaistBand1" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="3" letter="" mx="-1635.94" my="303.239" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="3">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text=""/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="0.5" arrows="0" length="3" mx="-1193.87" my="334.211" rotation="0" visible="true"/>
                 <nodes>
                     <node idObject="310" type="NodePoint"/>
                     <node idObject="311" type="NodePoint"/>
@@ -659,10 +756,17 @@ Pockets are adjustable.</notes>
                     <node idObject="313" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" id="319" mx="64.7019" my="12.0607" name="Waistband2" seamAllowance="1" version="2" width="1">
-                <data annotation="" foldPosition="" fontSize="0" height="" letter="" mx="0" my="0" onFold="false" orientation="" quantity="1" rotation="" rotationWay="" tilt="" visible="false" width=""/>
-                <patternInfo fontSize="0" height="" mx="0" my="0" rotation="" visible="false" width=""/>
-                <grainline arrows="0" length="" mx="0" my="0" rotation="" visible="false"/>
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="319" inLayout="true" locked="false" mx="64.7764" my="12.0607" name="Waistband2" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="3" letter="" mx="30.973" my="289.16" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="3">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text=""/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
+                <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
+                <grainline arrowLength="0.5" arrows="0" length="3" mx="492.752" my="351.863" rotation="0" visible="true"/>
                 <nodes>
                     <node idObject="315" type="NodePoint"/>
                     <node idObject="316" type="NodePoint"/>
