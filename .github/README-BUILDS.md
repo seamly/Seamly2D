@@ -254,7 +254,7 @@ $env:QMAKE = 'C:/Qt/6.11.1/msvc2022_64/bin/qmake.exe'
 
 ## Third-party license notices
 
-All installers ship the committed files in `src/app/seamlylayout/packaging/licenses/`:
+All installers ship the committed files in `packaging/licenses/`:
 
 | File | Content |
 |---|---|
@@ -269,7 +269,7 @@ All installers ship the committed files in `src/app/seamlylayout/packaging/licen
 | macOS DMG | `SeamlyLayout.app/Contents/Resources/licenses/`; `qt_notices.txt` also in `Seamly2D.app` and `seamlyme.app` |
 
 - Regenerate after any `Cargo.lock` change or Qt version change:
-  `python src/app/seamlylayout/packaging/licenses/generate_license_notices.py --qt-root C:/Qt/6.11.1/msvc2022_64`
+  `python packaging/licenses/generate_license_notices.py --qt-root C:/Qt/6.11.1/msvc2022_64`
 - The script needs `cargo-about` (`cargo install cargo-about --locked --features cli`) and network access for SPDX license texts.
 - `cargo test --workspace` fails while a file is stale (`license_notices_tests`: `Cargo.lock` fingerprint, `ci.yml` `QT_VERSION`).
 - `about.toml` lists the accepted Rust licenses. A crate under any other license stops generation; review it before adding the license.

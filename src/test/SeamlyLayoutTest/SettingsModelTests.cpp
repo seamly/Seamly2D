@@ -56,6 +56,11 @@ private slots:
     void roundtrip_preservesLayoutModeAny();
     void roundtrip_preservesRotationStep();
 
+    // Pieces without a grainline
+    void noGrainlineRotation_defaultsToUpright();
+    void noGrainlineRotation_roundtripAndJson();
+    void noGrainlineRotation_unknownValueIsUpright();
+
     // resetToDefaults
     void resetToDefaults_restoresUnit();
     void resetToDefaults_restoresLayoutMode();
@@ -269,6 +274,42 @@ void SettingsModelTests::roundtrip_preservesLayoutModeAny()
     SettingsModel reader;
     QVERIFY(reader.load(path));
     QCOMPARE(reader.layoutMode(), QStringLiteral("any"));
+}
+
+// @brief noGrainlineRotation defaults to "upright" and resetToDefaults restores it.
+void SettingsModelTests::noGrainlineRotation_defaultsToUpright()
+{
+    SettingsModel m;
+    QCOMPARE(m.noGrainlineRotation(), QStringLiteral("upright"));
+    m.setNoGrainlineRotation(QStringLiteral("free"));
+    m.resetToDefaults();
+    QCOMPARE(m.noGrainlineRotation(), QStringLiteral("upright"));
+}
+
+// @brief "free" survives a save/load cycle and reaches the Rust settings JSON.
+void SettingsModelTests::noGrainlineRotation_roundtripAndJson()
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("settings.json"));
+
+    SettingsModel writer;
+    writer.setNoGrainlineRotation(QStringLiteral("free"));
+    QVERIFY(writer.save(path));
+    QVERIFY(writer.toJson().contains(QStringLiteral("\"noGrainlineRotation\":\"free\"")));
+
+    SettingsModel reader;
+    QVERIFY(reader.load(path));
+    QCOMPARE(reader.noGrainlineRotation(), QStringLiteral("free"));
+}
+
+// @brief An unknown value is coerced to "upright".
+void SettingsModelTests::noGrainlineRotation_unknownValueIsUpright()
+{
+    SettingsModel m;
+    m.setNoGrainlineRotation(QStringLiteral("free"));
+    m.setNoGrainlineRotation(QStringLiteral("sideways"));
+    QCOMPARE(m.noGrainlineRotation(), QStringLiteral("upright"));
 }
 
 // @brief rotationStep=180 (head-down withNap) survives a save/load cycle.
@@ -633,9 +674,10 @@ void SettingsModelTests::bc2_saveAfterLoad_savedJsonContainsAllKeys()
     QCOMPARE(err.error, QJsonParseError::NoError);
     const QJsonObject savedObj = doc.object();
 
-    // All 22 keys that save() is contractually required to write.
+    // All 23 keys that save() is contractually required to write.
     const QStringList expectedKeys = {
         QStringLiteral("layoutMode"),    QStringLiteral("rotationStep"),
+        QStringLiteral("noGrainlineRotation"),
         QStringLiteral("fabricFolded"),  QStringLiteral("unit"),
         QStringLiteral("mediaType"),     QStringLiteral("paperType"),
         QStringLiteral("sheetName"),     QStringLiteral("pageWidth"),

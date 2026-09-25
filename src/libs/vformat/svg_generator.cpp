@@ -434,7 +434,7 @@ void SvgGenerator::addComponentGroups(QGraphicsScene *scene, QGraphicsItem *item
  *
  * When a piece item is given, the piece becomes a <g> element carrying the SVG
  * data-* attributes (data-type="piece", data-type-number, data-parent,
- * data-name and data-letter) and each of the piece's components is rendered
+ * data-name, data-letter and data-grainline-angle) and each of the piece's components is rendered
  * and tagged individually (see addComponentGroups()). Without an item the
  * scene is rendered as-is in a single untagged group (whole-scene exports,
  * e.g. draft blocks).
@@ -497,6 +497,11 @@ void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item)
     pieceGroup.setAttribute("data-parent", "pattern-1");
     setAttribute(pieceGroup, "data-name", pieceName);
     setAttribute(pieceGroup, "data-letter", item->data(PieceItemData::PieceLetter).toString());
+    const QVariant grainAngle = item->data(PieceItemData::GrainlineAngle);
+    if (grainAngle.isValid())
+    {
+        pieceGroup.setAttribute("data-grainline-angle", QString::number(grainAngle.toDouble(), 'f', 4));
+    }
     svgRoot.appendChild(pieceGroup);
 
     addComponentGroups(scene, item, pieceDoc, pieceGroup, pieceId);

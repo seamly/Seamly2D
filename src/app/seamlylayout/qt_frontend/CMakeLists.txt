@@ -166,7 +166,7 @@ elseif(APPLE)
     )
     # Third-party license notices (Rust crates, Qt, bundled fonts) ship inside the bundle;
     # the DMG packages this build-tree bundle directly.
-    file(GLOB SEAMLY_LICENSE_NOTICES "${CMAKE_CURRENT_SOURCE_DIR}/../packaging/licenses/*.txt")
+    file(GLOB SEAMLY_LICENSE_NOTICES "${CMAKE_CURRENT_SOURCE_DIR}/../../../../packaging/licenses/*.txt")
     target_sources(SeamlyLayout PRIVATE ${SEAMLY_LICENSE_NOTICES})
     set_source_files_properties(${SEAMLY_LICENSE_NOTICES} PROPERTIES
         MACOSX_PACKAGE_LOCATION "Resources/licenses"
@@ -560,7 +560,7 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/settings/"
 
 if(UNIX AND NOT APPLE)
     # Third-party license notices (Rust crates, Qt, bundled fonts) for the AppImage.
-    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../packaging/licenses/"
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../../../packaging/licenses/"
         DESTINATION share/licenses/seamly
         FILES_MATCHING PATTERN "*.txt"
     )

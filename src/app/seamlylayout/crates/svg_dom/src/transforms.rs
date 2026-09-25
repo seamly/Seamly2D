@@ -602,8 +602,9 @@ fn col_rms_norm(m: &Matrix2D) -> f32 {
 ///          1. Locates the grainline element — the first descendant whose `id` contains
 ///             the token "grainline" (case-insensitive).  Searches that element for a
 ///             `<path>` or `<line>`, extracts its first→last-point direction.
-///          2. Skips the piece if no labelled grainline is found, so the piece keeps
-///             its drafted orientation.
+///          2. Otherwise reads the piece's `data-grainline-angle` attribute.
+///          3. Skips the piece if neither source exists, so the piece keeps its
+///             drafted orientation.
 ///          3. Computes θ = atan2(dy, dx) for the grainline direction vector.
 ///          4. Computes rotation_angle = 90° − θ, normalised to [−180, 180].
 ///          5. Adds `transform="rotate(rotation_angle, cx, cy)"` to the `<g>`, where
@@ -778,13 +779,32 @@ pub fn translate_dom(doc: &mut Document) {
 // ---------------------------------------------------------------------------
 
 /// @brief Return the grainline angle θ (degrees from X axis) for a pattern piece.
-/// @details A piece without a grainline keeps its drafted orientation.  A guessed
-///          direction, such as the longest edge, often turns a long piece sideways.
+/// @details Sources, in order: a drawn grainline (descendant id contains
+///          "grainline"), then the piece's `data-grainline-angle` attribute.
+///          No guess is made from the outline: a guessed direction, such as the
+///          longest edge, often turns a long piece sideways.
 /// @param group  `<g>` element to inspect.
-/// @return Angle in degrees, or `None` when the piece has no labelled grainline.
+/// @return Angle in degrees, or `None` when the piece has no grain direction.
 fn grainline_angle(group: &Element) -> Option<f64> {
-    labelled_grainline_angle(group)
+    labelled_grainline_angle(group).or_else(|| grainline_angle_attribute(group))
 } // fn grainline_angle
+
+/// @brief Return true when `grainline_angle` finds a grain direction for the piece.
+/// @param group  Top-level piece `<g>` element.
+pub fn has_grain_direction(group: &Element) -> bool {
+    grainline_angle(group).is_some()
+} // fn has_grain_direction
+
+/// @brief Read the piece's `data-grainline-angle` attribute as an SVG angle.
+/// @details The attribute holds the grain direction in degrees, counter-clockwise
+///          as seen on screen (Qt `QLineF::angle()`).  SVG angles run clockwise
+///          because the Y axis points down, so θ = −attribute.
+/// @param group  Top-level piece `<g>` element.
+/// @return θ in degrees, or `None` when the attribute is absent or not a finite number.
+fn grainline_angle_attribute(group: &Element) -> Option<f64> {
+    let degrees: f64 = group.attributes.get("data-grainline-angle")?.trim().parse().ok()?;
+    degrees.is_finite().then_some(-degrees)
+} // fn grainline_angle_attribute
 
 /// @brief Find the grainline angle from the first descendant whose id contains "grainline".
 /// @details Matches the original `find_first_descendant_with_id_token(piece, "grainline")`
@@ -1272,6 +1292,50 @@ mod tests {
             transform
         );
     } // no_grainline_keeps_drafted_orientation
+
+    // @brief data-grainline-angle="90" (grain up on screen) → θ = −90° →
+    // rotation = 90° − (−90°) = 180°, the same result a drawn upward grainline gives.
+    const GRAINLINE_ATTRIBUTE: &str = r#"<svg width="200" height="200">
+  <g id="piece-5" data-grainline-angle="90">
+    <path d="M 0,0 L 100,0 L 100,80 L 0,80 Z"/>
+  </g>
+</svg>"#;
+
+    #[test]
+    fn grainline_attribute_sets_rotation() {
+        let mut doc = Document::parse(GRAINLINE_ATTRIBUTE).unwrap();
+        verticalize_dom(&mut doc);
+
+        let transform = doc
+            .get_attr_by_id("piece-5", "transform")
+            .expect("piece-5 missing transform after verticalize_dom");
+        assert!(transform.starts_with("rotate(180"), "expected rotate(180...) in '{transform}'");
+    } // grainline_attribute_sets_rotation
+
+    // @brief A drawn grainline wins over the attribute.
+    #[test]
+    fn drawn_grainline_wins_over_attribute() {
+        let svg = GRAINLINE_VERTICAL.replace(r#"id="piece-2""#, r#"id="piece-2" data-grainline-angle="0""#);
+        let mut doc = Document::parse(&svg).unwrap();
+        verticalize_dom(&mut doc);
+        assert!(doc.get_attr_by_id("piece-2", "transform").is_none());
+    } // drawn_grainline_wins_over_attribute
+
+    // @brief has_grain_direction: true for a drawn grainline or the attribute, false otherwise.
+    #[test]
+    fn has_grain_direction_sources() {
+        let root_child = |svg: &str| -> Element {
+            let doc = Document::parse(svg).unwrap();
+            doc.root.children.iter()
+                .find_map(|c| c.as_element().filter(|e| e.name == "g").cloned())
+                .unwrap()
+        };
+        assert!(has_grain_direction(&root_child(GRAINLINE_VERTICAL)));
+        assert!(has_grain_direction(&root_child(GRAINLINE_ATTRIBUTE)));
+        assert!(!has_grain_direction(&root_child(NO_GRAINLINE)));
+        let bad = GRAINLINE_ATTRIBUTE.replace(r#""90""#, r#""abc""#);
+        assert!(!has_grain_direction(&root_child(&bad)));
+    } // has_grain_direction_sources
 
     // @brief A group with a grainline identified by id token "grainline" inside a <g>.
     // Seamly2D SVGs typically wrap grainlines in <g id="grainline-..."><path .../></g>.

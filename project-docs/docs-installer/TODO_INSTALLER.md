@@ -118,4 +118,4 @@ Task Layout.14 ships notices for the Rust crates, the Qt runtime and the SVG exp
 - [ ] Installer.7.1 - xerces-c (Apache-2.0): `xerces-c_3_3.dll` (Windows), system/Homebrew library bundled on Linux and macOS
 - [ ] Installer.7.2 - pdftops (Poppler, GPL-2.0-or-later): bundled on all three platforms; GPL also requires a source offer
 - [ ] Installer.7.3 - MSVC runtime DLLs (Microsoft redistributable terms), Windows only
-- [ ] Installer.7.4 - Add the notices to `src/app/seamlylayout/packaging/licenses/` (all three installers pick up that folder); document in `.github/README-BUILDS.md`
+- [ ] Installer.7.4 - Add the notices to `packaging/licenses/` (all three installers pick up that folder); document in `.github/README-BUILDS.md`

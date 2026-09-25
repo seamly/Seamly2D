@@ -39,7 +39,8 @@
  * piece component item tree (VLayoutPiece::GetItem()) and of the tagged SVG
  * produced by SvgGenerator: the internal_path / cut_path split, the
  * name-based piece and component id schemes, and their piece-name
- * sanitization, no-name fallback, and cross-piece collision handling.
+ * sanitization, no-name fallback, and cross-piece collision handling, and the
+ * data-grainline-angle attribute.
  */
 class TST_SvgComponentTags : public QObject
 {
@@ -57,6 +58,10 @@ private slots:
     void CollidingPieceNamesGetDisambiguatingSuffix() const;
     void PieceWithoutNotchesEmitsNoNotchGroup() const;
     void EmptyComponentAwayFromOriginEmitsNoGroup() const;
+    void HiddenGrainlineKeepsGrainAngle() const;
+    void GrainAngleFollowsPieceTransform() const;
+    void ExportedPieceCarriesGrainlineAngle() const;
+    void PieceWithoutGrainHasNoGrainlineAngle() const;
 };
 
 #endif // TST_SVGCOMPONENTTAGS_H

@@ -4,11 +4,23 @@ installer:
 seamly2d:
 - DONE - When the user assigns a piece name to a pattern piece through the properties dialog, the piece name should be unique and its svg id should be updated.
 - DONE - The <rect> element within each pattern piece should be named id="rect_<piecename>"
+- In 'Application Settings > Pattern > Grainlines', add an option for 'angle' and set the default value to '90'. 
+- Create a plan: In 'Draft mode > Toolbox > Piece tool group > Add New Pattern Piece', read the 'Application settings > Pattern' values to automatically create labels and grainlines, and populate the context menu for each new pattern piece; discuss plan with me; if I approve then implement plan without asking me for permission.  
+- In Piece Mode, the grainline should start at the bottom and point 'Up' so that seamlyLayout can arrange pattern pieces correctly based on the grainline direction. Currently it appears that piece mode's grainline elements start at at the top (with a lower y value) and end at the bottom (with with a higher y value), so switch this so the grainline starts at the low y value and ends at the high y value. This rule does not apply for grainlines created with user-selected start point and end point, but applies to all other methods of creating grainlines. 
+- In Piece Mode, create grainlines centered at the center of the piece bounding box then moved 1cm left (to avoid co-location with piece labels), location expressed in local space not global space).
+- In Piece Mode, create labels centered at the center of the bounding box then moved 1cm right (to avoid co-location with grainlines), location expressed in local space not in global space)  
 
-seamlylayout:
+seamlylayout:	
 - DONE - Export to SVG incorrectly retains the "Rectangles" group <g id="Rectangles"> and the <rect> element withing rectangle within each pattern piece. 
 - DONE - Fix: View's file picker doesn't highlight the selected file - it's unclear which file is being selected. It should highlight the file currently selected. 
 - DONE - Fix: Adjust mode displays the piece overlays but not the pieces. 
 - DONE - Settings > Layout options > Layout mode section --> add option "Any" where process_layout() does not care about grainline direction when placing the pattern pieces efficiently. 
 - DONE - Adjust mode --> the menu with Fit, Zoom In, Zoom Out, etc should have white text, not black text so that the user can read it. 
-- In adjust mode, the 'Lower to Bottom' operation isn't correct: When I move a large piece completely over a small piece, then select the large piece apply the 'lower to bottom' operation to it, then select the small piece and select any operation with the context menu, then the operation is applied to the large piece (incorrect) when it should be applied to the small piece (correct). Explain why then create a plan to fix this problem, discuss with me, if I approve then implement the plan. 
+- DONE - In adjust mode, the 'Lower to Bottom' operation isn't correct: When I move a large piece completely over a small piece, then select the large piece apply the 'lower to bottom' operation to it, then select the small piece and select any operation with the context menu, then the operation is applied to the large piece (incorrect) when it should be applied to the small piece (correct). Explain why then create a plan to fix this problem, discuss with me, if I approve then implement the plan. 
+- Fix process_layout(): Screenshot 2026-09-24 141047.png for trousers.sm2d the media is 36" wide and 500" long but the trouser front and back pieces  could not be placed by the algorithm - each of these patterns are about 36cm wide (pieces are in centimeters, not in inches; the media is expressed in inches -- this is probably where the problem occurs -- it's probably the NASA rover problem!). All pattern pieces in the trouser pattern obviously can fit within media that is 36" wide and 500" long (yes the length will be trimmed later as you already know.)
+
+- Create a plan for comparing our DXF-ASTM output with the analysis reports provided by Apparel Werks
+1. read the seamly DXF file 'male_shirt_202609241936.dxf' and its report 'male_shirt_202609241936-dxf-report.pdf', then read the apparel werks DXF file 'MYRA SHIRT_astm.dxf' and its report 'MYRA SHIRT_astm-dxf-report.pdf';
+2. Analyze how our DXF-ASTM export is not providing required data, and determine how this data could be included in our DXF-ASTM export files.
+3. Analyze how our DXF-ASTM export is not providing additional data, and determine how this data could be included in our DXF-ASTM export files.
+4. create the plan; discuss with me; if I approve implement plan without asking permissions.

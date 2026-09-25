@@ -41,10 +41,12 @@ use crate::exports::{
 // sequence used by `do_process_layout`: flatten → verticalize → flatten →
 // translate → flatten.
 //
-// @param input_dom Raw imported SVG DOM.
+// @param input_dom            Raw imported SVG DOM.
+// @param free_rotation_allowed  The user's "Rotate freely" choice for pieces without a grainline.
 // @return Tuple of `(flat_dom, pieces)` ready for L.2.1/L.2.2 export logic.
 pub(crate) fn build_sheet_export_inputs(
     input_dom: &Document,
+    free_rotation_allowed: bool,
 ) -> Result<(Document, Vec<PieceRect>), String> {
     let mut flat_dom = input_dom.clone();
 
@@ -58,7 +60,8 @@ pub(crate) fn build_sheet_export_inputs(
     svg_dom::translate_dom(&mut flat_dom);
     svg_dom::flatten_dom(&mut flat_dom);
 
-    let pieces = crate::extract_piece_rects(&flat_dom);
+    let mut pieces = crate::extract_piece_rects(&flat_dom);
+    crate::piece_extractor::set_free_rotation_without_grainline(&mut pieces, free_rotation_allowed);
     if pieces.is_empty() {
         return Err(
             "Sheets PDF: no pattern pieces found in the imported SVG after preprocessing."
@@ -302,7 +305,7 @@ fn flat_dom_and_pieces_for_dims(dims: &[(u32, u32)]) -> (Document, Vec<PieceRect
         groups.join("")
     );
     let input = Document::parse(&svg).expect("test SVG should parse");
-    build_sheet_export_inputs(&input).expect("sheet export inputs should build")
+    build_sheet_export_inputs(&input, false).expect("sheet export inputs should build")
 } // fn flat_dom_and_pieces_for_dims
 
 #[cfg(test)]

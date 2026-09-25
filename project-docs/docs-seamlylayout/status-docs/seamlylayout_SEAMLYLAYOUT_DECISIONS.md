@@ -132,7 +132,7 @@ Option C selected, applied app-wide. All observability file writes are gated by 
 **License notices**
 
 - `crates/svg_label_text/assets/fonts/OFL.txt`, `crates/svg_label_text/assets/hershey/HERSHEY_LICENSE.txt`.
-- Copies in `src/app/seamlylayout/packaging/licenses/`; `smsi.ps1` installs them to `licenses\` on Windows.
+- Copies in `packaging/licenses/`; `smsi.ps1` installs them to `licenses\` on Windows.
 - Linux AppImage and macOS DMG do not ship these notices yet.
 
 ## Log files never go in the install directory (2026-08-15, revised 2026-09-14)

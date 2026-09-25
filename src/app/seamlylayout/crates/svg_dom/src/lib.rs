@@ -3,7 +3,7 @@
 // MIT License: https://opensource.org/licenses/MIT
 
 mod transforms;
-pub use transforms::{flatten_dom, parse_svg_transform, serialize_path, translate_dom, verticalize_dom};
+pub use transforms::{flatten_dom, has_grain_direction, parse_svg_transform, serialize_path, translate_dom, verticalize_dom};
 
 use std::io::Cursor;
 use xmltree::{Element, XMLNode};

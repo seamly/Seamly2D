@@ -491,6 +491,7 @@ mod tests {
             origin_x:    0.0,
             origin_y:    0.0,
             group_index,
+            has_grainline: true,
         }
     } // fn piece
 

@@ -1773,7 +1773,7 @@ impl qobject::AppController {
                 } // None
             }; // input_dom
 
-            let (flat_dom, pieces) = match build_sheet_export_inputs(&input_dom) {
+            let (flat_dom, pieces) = match build_sheet_export_inputs(&input_dom, settings.free_rotation_without_grainline()) {
                 Ok(v) => v,
                 Err(e) => {
                     log_to_file(&format!("[lib.rs AppController] export_pdf(): 4 build_sheet_export_inputs failed: {e}"));

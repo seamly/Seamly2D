@@ -84,6 +84,7 @@ public:
           pieceLabel(),
           patternInfo(),
           grainlinePoints(),
+          grainAxis(),
           m_tmPiece(),
           m_tmPattern(),
           m_pieceLetter()
@@ -103,6 +104,7 @@ public:
           pieceLabel(piece.pieceLabel),
           patternInfo(piece.patternInfo),
           grainlinePoints(piece.grainlinePoints),
+          grainAxis(piece.grainAxis),
           m_tmPiece(piece.m_tmPiece),
           m_tmPattern(piece.m_tmPattern),
           m_pieceLetter(piece.m_pieceLetter)
@@ -122,6 +124,7 @@ public:
     QVector<QPointF>           pieceLabel;         /// @brief pieceLabel piece label rectangle
     QVector<QPointF>           patternInfo;        /// @brief patternInfo pattern info rectangle
     QVector<QPointF>           grainlinePoints;    /// @brief grainlineInfo line
+    QVector<QPointF>           grainAxis;          /// @brief grain direction, bottom to top; set even when the grainline is hidden
     VTextManager               m_tmPiece;          /// @brief m_tmPiece text manager for laying out piece info
     VTextManager               m_tmPattern;        /// @brief m_tmPattern text manager for laying out pattern info */
     QString                    m_pieceLetter;      /// @brief m_pieceLetter piece letter, exported as the SVG data-letter attribute

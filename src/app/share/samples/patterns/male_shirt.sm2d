@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pattern>
-    <!--Pattern created with Seamly2D v26.9.22.1381 (https://seamly.io).-->
+    <!--Pattern created with Seamly2D v26.9.2320 (https://seamly.io).-->
     <version>0.7.4</version>
     <unit>cm</unit>
     <description>This a male shirt pattern.
@@ -196,7 +196,14 @@ Delete layouts which are not needed.</description>
         </modeling>
         <pieces>
             <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="174" inLayout="true" locked="false" mx="-4.0013" my="2.7721" name="Yoke" seamAllowance="true" united="false" version="2" width="1">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="5" letter="" mx="-647.856" my="160.016" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="5">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="1" arrows="0" length="Line_A28_A25" mx="-391.534" my="361.355" rotation="90" visible="true"/>
                 <nodes>
@@ -210,7 +217,14 @@ Delete layouts which are not needed.</description>
                 </nodes>
             </piece>
             <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="401" inLayout="true" locked="false" mx="-11.0934" my="6.43098" name="FrontPanel" seamAllowance="true" united="false" version="2" width="1">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="5" letter="" mx="-1978.87" my="1374.66" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="5">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="2" arrows="0" length="Line_BustLine_Hemline * 0.75" mx="-2060.73" my="2368.4" rotation="90" visible="true"/>
                 <nodes>
@@ -229,7 +243,14 @@ Delete layouts which are not needed.</description>
                 </nodes>
             </piece>
             <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="441" inLayout="true" locked="false" mx="-8.35324" my="6.27021" name="BackPanel" seamAllowance="true" united="false" version="2" width="1">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="5" letter="" mx="-196.658" my="1386.27" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="5">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="2" arrows="0" length="Line_BustLine_Hemline * 0.75" mx="-233.402" my="2330.55" rotation="90" visible="true"/>
                 <nodes>
@@ -324,7 +345,14 @@ Delete layouts which are not needed.</description>
         </modeling>
         <pieces>
             <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="182" inLayout="true" locked="false" mx="68.0595" my="45.4124" name="Pocket" seamAllowance="true" united="false" version="2" width="1">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="3" letter="" mx="900.964" my="309.018" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="3">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="1" arrows="0" length="Line_P5_P" mx="862.082" my="675.441" rotation="90" visible="true"/>
                 <nodes>
@@ -337,10 +365,17 @@ Delete layouts which are not needed.</description>
                     <node idObject="181" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="320" inLayout="true" locked="false" mx="81.7244" my="45.8357" name="PocketRound" seamAllowance="true" united="false" version="2" width="1">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="320" inLayout="true" locked="false" mx="81.7244" my="45.5445" name="PocketRound" seamAllowance="true" united="false" version="2" width="1">
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="5" letter="" mx="834.922" my="298.671" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="5">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
-                <grainline arrowLength="1" arrows="0" length="Line_P5_P" mx="885.167" my="640.463" rotation="90" visible="true"/>
+                <grainline arrowLength="1" arrows="0" length="Line_P5_P" mx="797.111" my="695.498" rotation="90" visible="true"/>
                 <nodes>
                     <node idObject="314" type="NodePoint"/>
                     <node idObject="315" type="NodePoint"/>
@@ -351,7 +386,14 @@ Delete layouts which are not needed.</description>
                 </nodes>
             </piece>
             <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="326" inLayout="true" locked="false" mx="67.876" my="32.9628" name="PocketFlap" seamAllowance="true" united="false" version="2" width="1">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="2" letter="" mx="906.292" my="250.517" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="2">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="1" arrows="0" length="Line_P1_B4  * 0.75" mx="818.798" my="336.358" rotation="90" visible="true"/>
                 <nodes>
@@ -363,7 +405,14 @@ Delete layouts which are not needed.</description>
                 </nodes>
             </piece>
             <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="332" inLayout="true" locked="false" mx="81.7244" my="32.9627" name="PocketFlapRound" seamAllowance="true" united="false" version="2" width="1">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="2" letter="" mx="882.165" my="274.644" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="2">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="1" arrows="0" length="Line_P_B3" mx="850.54" my="370.476" rotation="90" visible="true"/>
                 <nodes>
@@ -389,7 +438,7 @@ Delete layouts which are not needed.</description>
             <line firstPoint="72" id="79" lineColor="green" lineType="dotLine" secondPoint="77"/>
             <point firstPoint="76" id="80" length="Line_C4_C/2" lineColor="black" lineType="none" mx="0.132292" my="0.264583" name="C6" secondPoint="72" type="alongLine"/>
             <point firstPoint="76" id="81" length="Line_C4_C/4" lineColor="black" lineType="none" mx="-1.30332" my="-0.931763" name="C7" secondPoint="72" type="alongLine"/>
-            <point firstPoint="76" id="82" length="Line_C4_C/4*3" lineColor="black" lineType="none" mx="0.132292" my="0.264583" name="C8" secondPoint="72" type="alongLine"/>
+            <point firstPoint="76" id="82" length="Line_C4_C/4*3" lineColor="black" lineType="none" lineWeight="0.35" mx="0.132292" my="0.264583" name="C8" secondPoint="72" type="alongLine"/>
             <point angle="180" firstPoint="81" id="83" length="1" lineColor="black" lineType="none" mx="0.371565" my="0.623487" name="C9" secondPoint="80" type="normal"/>
             <point angle="0" firstPoint="82" id="84" length="1" lineColor="black" lineType="none" mx="-0.824785" my="-1.4103" name="C10" secondPoint="72" type="normal"/>
             <point firstPoint="72" id="85" length="Line_C_C5/3" lineColor="black" lineType="none" lineWeight="0.35" mx="-1.48198" my="0.399105" name="C11" secondPoint="77" type="alongLine"/>
@@ -399,11 +448,11 @@ Delete layouts which are not needed.</description>
                 <pathPoint angle1="133.043" angle2="313.043" length1="0" length2="0.0815231" pSpline="76"/>
                 <pathPoint angle1="211.702" angle2="31.702" length1="2.95142" length2="3.07339" pSpline="83"/>
                 <pathPoint angle1="218.231" angle2="38.231" length1="1.59834" length2="1.82572" pSpline="80"/>
-                <pathPoint angle1="215.201" angle2="35.201" length1="1.35994" length2="2.51616" pSpline="84"/>
-                <pathPoint angle1="179.166" angle2="359.166" length1="3.23621" length2="3.36832" pSpline="72"/>
+                <pathPoint angle1="215.201" angle2="35.201" length1="1.35994" length2="2.25" pSpline="84"/>
+                <pathPoint angle1="180" angle2="360" length1="3.23621" length2="3.36832" pSpline="72"/>
                 <pathPoint angle1="AngleLine_C_C5 - 180" angle2="334.642" length1="3.96393" length2="4.07466" pSpline="87"/>
                 <pathPoint angle1="146.371" angle2="326.371" length1="0.882877" length2="1.41727" pSpline="86"/>
-                <pathPoint angle1="167.341" angle2="347.341" length1="0.0924647" length2="0.567883" pSpline="77"/>
+                <pathPoint angle1="167.341" angle2="347.341" length1="0" length2="0.567883" pSpline="77"/>
             </spline>
             <point firstPoint="73" id="89" length="#CuffWidth" lineColor="black" lineType="none" mx="-1.72168" my="0.903625" name="C14" secondPoint="72" type="alongLine"/>
             <point angle="0" firstPoint="89" id="90" length="#SleeveWristGirth/2" lineColor="black" lineType="none" mx="0.807598" my="-1.45438" name="C15" secondPoint="73" type="normal"/>
@@ -481,7 +530,14 @@ Delete layouts which are not needed.</description>
         </modeling>
         <pieces>
             <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="204" inLayout="true" locked="false" mx="27.4551" my="0.587081" name="Cuff" seamAllowance="true" united="false" version="2" width="1">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="5" letter="" mx="2206.47" my="3088.23" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="5">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="1" arrows="0" length="Line_C1_C14 * 0.75" mx="2103.93" my="3283.54" rotation="90" visible="true"/>
                 <nodes>
@@ -500,7 +556,14 @@ Delete layouts which are not needed.</description>
                 </nodes>
             </piece>
             <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="217" inLayout="true" locked="false" mx="-16.9664" my="-23.4126" name="ShortSleeve" seamAllowance="true" united="false" version="2" width="1">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="5" letter="" mx="2051.15" my="1207.19" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="5">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="2" arrows="0" length="Line_C4_C34" mx="1983.27" my="1594.24" rotation="90" visible="true"/>
                 <nodes>
@@ -514,7 +577,14 @@ Delete layouts which are not needed.</description>
                 </nodes>
             </piece>
             <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="300" inLayout="true" locked="false" mx="-15.7285" my="15.9069" name="FullSleeve" seamAllowance="true" united="false" version="2" width="1">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="5" letter="" mx="2060.04" my="1545" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="5">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="2" arrows="0" length="Line_C5_C29 * 0.75" mx="1975.74" my="2414.19" rotation="90" visible="true"/>
                 <nodes>
@@ -594,7 +664,14 @@ Delete layouts which are not needed.</description>
         </modeling>
         <pieces>
             <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="224" inLayout="true" locked="false" mx="28.4767" my="21.6501" name="CollarBase" seamAllowance="true" united="false" version="2" width="1">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="3" letter="" mx="2159.3" my="203.911" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="3">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="1" arrows="0" length="Line_D1_D4" mx="2137.96" my="337.591" rotation="90" visible="true"/>
                 <nodes>
@@ -617,7 +694,14 @@ Delete layouts which are not needed.</description>
                 </nodes>
             </piece>
             <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="238" inLayout="true" locked="false" mx="28.0866" my="9.53729" name="CollarTop" seamAllowance="true" united="false" version="2" width="1">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="3" letter="" mx="2148.45" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="3">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="1" arrows="0" length="Line_D1_D4" mx="2094.99" my="138.71" rotation="90" visible="true"/>
                 <nodes>
@@ -664,7 +748,7 @@ Delete layouts which are not needed.</description>
             <point id="271" idObject="258" inUse="true" mx="0.132292" my="0.264583" type="modeling"/>
             <point id="272" idObject="259" inUse="true" mx="0.132292" my="0.264583" type="modeling"/>
             <point id="273" idObject="257" inUse="true" mx="0.132292" my="0.264583" type="modeling"/>
-            <point id="275" idObject="256" inUse="true" mx="0.132292" my="0.984589" type="modeling"/>
+            <point id="275" idObject="256" inUse="true" mx="-0.741387" my="-0.0347036" type="modeling"/>
             <point id="276" idObject="257" inUse="true" mx="0.132292" my="0.264583" type="modeling"/>
             <point id="277" idObject="261" inUse="true" mx="0.132292" my="0.264583" type="modeling"/>
             <point id="278" idObject="262" inUse="true" mx="0.132292" my="0.264583" type="modeling"/>
@@ -674,7 +758,14 @@ Delete layouts which are not needed.</description>
         </modeling>
         <pieces>
             <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="274" inLayout="true" locked="false" mx="27.725" my="-0.179464" name="PlacketUnder" seamAllowance="true" united="false" version="2" width="1">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="2.5" letter="" mx="2107.27" my="3640.2" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="2.5">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="1" arrows="0" length="Line_E_E2 * 0.75" mx="2074.16" my="3732.55" rotation="90" visible="true"/>
                 <nodes>
@@ -685,7 +776,14 @@ Delete layouts which are not needed.</description>
                 </nodes>
             </piece>
             <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="282" inLayout="true" locked="false" mx="46.1968" my="-5.58778" name="PlacketTop" seamAllowance="true" united="false" version="2" width="1">
-                <data annotation="" foldPosition="Undefined" fontSize="0" height="1" letter="" mx="0" my="0" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="false" width="1"/>
+                <data annotation="" foldPosition="Undefined" fontSize="0" height="5" letter="" mx="2206.33" my="3764.59" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="5">
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%date%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="&lt;empty&gt;"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pLetter% %pName%"/>
+                    <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%wCut% %pQuantity%"/>
+                </data>
                 <patternInfo fontSize="0" height="1" mx="0" my="0" rotation="0" visible="false" width="1"/>
                 <grainline arrowLength="1" arrows="0" length="Line_E_E4 * 0.8" mx="2037.48" my="3943.66" rotation="90" visible="true"/>
                 <nodes>

@@ -124,8 +124,6 @@ Use Qt 6.11.1 `msvc2022_64` with the VS 18 Community MSVC environment.
 * Put shadow builds in `build/`.
 * `build/` is gitignored.
 
-
-
 See `.github/README-BUILDS.md` for detailed build and packaging knowledge.
 
 ## Coding Rules

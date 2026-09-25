@@ -31,6 +31,7 @@ The handoff in (1) is a process launch, and both halves of it are pinned by test
 - **Already running** — no single-instance handling: every launch is a new process with its own window, so a second Layout Mode handoff opens a second SeamlyLayout. This is deliberate — the app holds one document with no tabs, and comparing two layouts side by side is useful. Seamly2D does not track or reuse a previously launched instance.
 - **Untagged input** — the `data-*` tagging is *not* required to open a file. SeamlyLayout treats every top-level `<g>` with geometry as a piece, so an ordinary SVG still lays out. When an imported file contains no `data-type="piece"` group at all, SeamlyLayout shows a non-blocking warning saying so (`AppController::finish_import` → the `import_warning` signal, reached from both `import_svg` and `import_svg_document`), because a file that did not come from Layout Mode will usually not lay out the way the user expects.
 - **Piece discovery** — for a *tagged* file the pieces are the `data-type="piece"` groups and nothing else; the untagged "every top-level `<g>`" rule applies only to files with no tagging anywhere. Because this document nests all pieces inside `<g data-type="pattern">` and SeamlyLayout's layout pipeline is built around pieces being direct children of the SVG root, `piece_extractor::hoist_tagged_pieces` re-parents the tagged pieces up to the root (composing any wrapper `transform` onto each one) before the pipeline runs. **A producer-side change that adds another wrapper level, or that stops tagging pieces, silently changes what SeamlyLayout packs** — before this normalisation existed, the whole pattern packed as one sheet-sized "piece".
+- **Grain direction** — `svg_dom::verticalize_dom` turns each piece so its grain runs vertically. Source order: a drawn `grainline` group, then `data-grainline-angle`. A piece with neither keeps its drafted orientation; no direction is guessed from the outline. The **No Grainline** layout setting (`noGrainlineRotation`) decides whether the packer may turn such a piece 90° or 270° to fit.
 - **Piece identity in the layout** — `id`, `data-name` and `data-letter` are carried through packing into the layout SVG, the piece bbox JSON and the Adjust overlay. Anything a user reads is labelled `data-name` → `data-letter` → `id` (`PieceRect::label()`), so a warning names "Front Bodice" rather than `piece-7`. `id` remains the identity key for element lookup and must stay unique.
 
 ## Document shape
@@ -39,7 +40,7 @@ The handoff in (1) is a process launch, and both halves of it are pinned by test
 <svg width="..." height="..." viewBox="..." xmlns="http://www.w3.org/2000/svg" ...>
   <g id="pattern-1" data-type="pattern" data-type-number="1" data-name="Pattern Name">
     <g id="piece_Front_Bodice" data-type="piece" data-type-number="1" data-parent="pattern-1"
-       data-name="Front Bodice" data-letter="A">
+       data-name="Front Bodice" data-letter="A" data-grainline-angle="90.0000">
       <rect class="piece-fill" id="rect_Front_Bodice" .../>
       <g id="seamline_Front_Bodice" data-type="seamline" data-type-number="1" data-parent="Front Bodice">…</g>
       <g id="cutline_Front_Bodice"  data-type="cutline"  data-type-number="1" data-parent="Front Bodice">…</g>
@@ -69,6 +70,7 @@ first child of each piece group when it places the piece into a layout sheet
 | `data-parent` | `piece` and component groups | For a piece: the pattern group's `id` (`pattern-1`). For a component: the owning piece's `data-name` (e.g. `Front Bodice`), or the piece's numeric fallback `id` (e.g. `piece-3`) when the piece has no name. The pattern group has no `data-parent` (it is the root). Not read by any SeamlyLayout code today — true parent/child identity is the DOM nesting — so this is a documentation-level cross-reference, not a lookup key. |
 | `data-name` | `pattern`, `piece` | Pattern name, or piece name. Omitted when empty. |
 | `data-letter` | `piece` | The piece letter, only when one is set on the piece. |
+| `data-grainline-angle` | `piece` | Grain direction in degrees, counter-clockwise as seen on screen (Qt `QLineF::angle()`); `90` = grain points up. Written with 4 decimals. Present whenever the piece has a grain rotation, **also when the grainline is hidden**, so SeamlyLayout can still orient the piece. Includes any Seamly2D layout transform (rotation, mirror). Omitted when the piece has no grain rotation. |
 
 ## `id` scheme
 
