@@ -14,8 +14,8 @@ Merged `task-adjust-roll-trim`, then `task-adjust-roll-fit`, with skip-ci (Rust-
 - `AppControllerRust.is_roll_layout`: set by `process_layout`.
 - `accept_adjustments` calls `fit_roll_frame_to_pieces_in_adjust_dom` (user decision: trim top, grow bottom).
   - Measures a flattened clone.
-  - Top white space: all pieces move so the top piece sits on contentRect top. Shift is pre-multiplied into each piece `matrix(...)`.
-  - contentRect ends at the lowest piece: shrinks or grows. Margins kept.
+  - All pieces move so the top piece sits 1 px below contentRect top (user decision: 1 px gap, top and bottom). Shift is pre-multiplied into each piece `matrix(...)`.
+  - contentRect ends 1 px below the lowest piece: shrinks or grows. Margins kept.
 - Not tested in the GUI.
 
 ## 2026-09-24 — Pieces without a grainline: setting + handoff grain angle
