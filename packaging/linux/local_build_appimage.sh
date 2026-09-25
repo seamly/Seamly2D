@@ -202,7 +202,7 @@ OUTPUT="Seamly2D-x86_64.AppImage" \
 QML_SOURCES_PATHS="src/app/seamlylayout/qt_frontend/qml" \
     "${LINUXDEPLOY}" --appdir AppDir \
     --desktop-file=packaging/assets/seamly2d.desktop \
-    --desktop-file=src/app/seamlylayout/packaging/linux/seamlylayout.desktop \
+    --desktop-file=packaging/linux/seamlylayout.desktop \
     --plugin qt --output appimage
 
 echo ""
