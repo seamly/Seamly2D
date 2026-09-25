@@ -110,3 +110,12 @@ OK), and a full `local_build_msi.ps1` run.
 - Installer.4.3.5 - Linux FlatPak
 
   ## Installer.5 - `.github/README.md`'s "Windows 64-bit" download badge still points at upstream's `Seamly2D-windows.zip` and must become the `.msi` — tracked as **Task M.12** in `TODO_MIGRATE.md`. Do it only when the migration is pushed upstream; changing it earlier breaks the live public download link
+
+## [ ] Installer.7 - Ship license notices for the non-Qt, non-Rust components in every installer
+
+Task Layout.14 ships notices for the Rust crates, the Qt runtime and the SVG export fonts. These shipped components still have none:
+
+- [ ] Installer.7.1 - xerces-c (Apache-2.0): `xerces-c_3_3.dll` (Windows), system/Homebrew library bundled on Linux and macOS
+- [ ] Installer.7.2 - pdftops (Poppler, GPL-2.0-or-later): bundled on all three platforms; GPL also requires a source offer
+- [ ] Installer.7.3 - MSVC runtime DLLs (Microsoft redistributable terms), Windows only
+- [ ] Installer.7.4 - Add the notices to `src/app/seamlylayout/packaging/licenses/` (all three installers pick up that folder); document in `.github/README-BUILDS.md`
