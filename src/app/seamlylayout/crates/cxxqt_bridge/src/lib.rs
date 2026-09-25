@@ -319,26 +319,39 @@ fn max_piece_bottom_px(doc: &svg_dom::Document) -> u32 {
         .children
         .iter()
         .filter_map(|node| node.as_element())
-        .filter(|el| el.name == "g")
-        .filter(|el| {
-            let id = el.attributes.get("id").map(String::as_str).unwrap_or("");
-            !id.is_empty() && id != "Rectangles"
-        })
+        .filter(|el| is_top_level_piece_group(el))
         .filter_map(bbox_from_group_geometry)
         .map(|bbox| bbox.max.y.max(0.0).ceil() as u32)
         .max()
         .unwrap_or(0)
 } // fn max_piece_bottom_px
 
-// @brief Trim unused space below the lowest piece of a roll-form adjust DOM.
+// @brief Return true for a top-level piece group: a `<g>` with an id other than "Rectangles".
+fn is_top_level_piece_group(el: &XmlElement) -> bool {
+    let id = el.attributes.get("id").map(String::as_str).unwrap_or("");
+    el.name == "g" && !id.is_empty() && id != "Rectangles"
+} // fn is_top_level_piece_group
+
+// @brief Fit the frame of a roll-form adjust DOM to its pieces, top and bottom.
 //
-// Measures a flattened clone, because adjust_dom keeps pending piece
-// transforms until Done. The bottom margin (backgroundRect bottom minus
-// contentRect bottom) is kept. The layout only shrinks, never grows.
+// Roll-form media has no fixed length, so after each Apply:
+//   - space above the top piece is removed: all pieces move up to contentRect top;
+//   - a piece above contentRect top moves all pieces down to contentRect top;
+//   - contentRect ends at the lowest piece: the frame shrinks or grows to fit.
+// Top and bottom margins, and all widths, are kept.
 //
-// @param doc  Mutable adjust DOM; root, backgroundRect and contentRect heights change.
-// @return New root height in pixels, or None when nothing was trimmed.
-fn trim_roll_bottom_in_adjust_dom(doc: &mut svg_dom::Document) -> Option<u32> {
+// adjust_dom keeps pending piece transforms until Done, so pieces are measured
+// on a flattened clone. The vertical shift is pre-multiplied into each piece's
+// transform and written as one `matrix(...)`, the same form AdjustWindow writes.
+//
+// @param doc  Mutable adjust DOM; piece transforms and root, backgroundRect and
+//             contentRect heights change.
+// @return New root height in pixels, or None when the frame already fits or
+//         the DOM has no pieces or frame rects.
+fn fit_roll_frame_to_pieces_in_adjust_dom(doc: &mut svg_dom::Document) -> Option<u32> {
+    // Changes smaller than this are rounding noise, not white space.
+    const TOLERANCE_PX: f64 = 0.5;
+
     let attr_px = |d: &svg_dom::Document, id: &str, name: &str| -> Option<f64> {
         d.get_attr_by_id(id, name).and_then(|v| v.trim().parse::<f64>().ok())
     };
@@ -347,25 +360,59 @@ fn trim_roll_bottom_in_adjust_dom(doc: &mut svg_dom::Document) -> Option<u32> {
     let content_y = attr_px(doc, "contentRect", "y")?;
     let content_h = attr_px(doc, "contentRect", "height")?;
     let background_h = attr_px(doc, "backgroundRect", "height")?;
-    let content_bottom = content_y + content_h;
-    let margin_bottom = (background_h - content_bottom).max(0.0);
+    let margin_bottom = (background_h - content_y - content_h).max(0.0);
 
     // Bake pending transforms on a clone to measure where the pieces really are.
     let mut measured = doc.clone();
     svg_dom::flatten_dom(&mut measured);
-    let lowest = max_piece_bottom_px(&measured) as f64;
+    let (top, bottom) = measured
+        .root
+        .children
+        .iter()
+        .filter_map(|node| node.as_element())
+        .filter(|el| is_top_level_piece_group(el))
+        .filter_map(bbox_from_group_geometry)
+        .fold(None, |acc: Option<(f64, f64)>, bbox| {
+            let (y0, y1) = (bbox.min.y as f64, bbox.max.y as f64);
+            Some(match acc {
+                Some((t, b)) => (t.min(y0), b.max(y1)),
+                None => (y0, y1),
+            })
+        })?; // no pieces: nothing to fit
 
-    // Guard: no pieces, or no unused space below the lowest piece.
-    if lowest <= content_y || lowest >= content_bottom {
+    // Vertical shift that puts the top piece on contentRect top (negative = up).
+    let shift = content_y - top;
+    let new_content_h = (bottom - top).ceil();
+
+    // Guard: frame already fits the pieces.
+    if shift.abs() < TOLERANCE_PX && (new_content_h - content_h).abs() < TOLERANCE_PX {
         return None;
     }
 
-    let new_content_h = (lowest - content_y).ceil() as u32;
+    // Move every piece by `shift`. Pre-multiplying a translation changes only
+    // the matrix translation terms, so rotation and flip are kept exactly.
+    if shift.abs() >= TOLERANCE_PX {
+        for node in doc.root.children.iter_mut() {
+            let Some(el) = node.as_mut_element() else { continue };
+            if !is_top_level_piece_group(el) {
+                continue;
+            }
+            let existing = el.attributes.get("transform").map(String::as_str).unwrap_or("");
+            let m = svg_dom::parse_svg_transform(existing);
+            let moved = format!(
+                "matrix({:.6} {:.6} {:.6} {:.6} {:.6} {:.6})",
+                m.a, m.b, m.c, m.d, m.e, m.f as f64 + shift
+            );
+            el.attributes.insert("transform".to_string(), moved);
+        } // for top-level node
+    } // if shift
+
     let top_px = content_y.round() as u32;
     let bottom_px = margin_bottom.round() as u32;
-    trim_bottom(doc, new_content_h, top_px, bottom_px);
-    Some(top_px + new_content_h + bottom_px)
-} // fn trim_roll_bottom_in_adjust_dom
+    let height_px = new_content_h.max(1.0) as u32;
+    trim_bottom(doc, height_px, top_px, bottom_px);
+    Some(top_px + height_px + bottom_px)
+} // fn fit_roll_frame_to_pieces_in_adjust_dom
 
 // @brief Remove blank bottom tile rows from an adjusted tiled layout DOM.
 //
@@ -1487,14 +1534,14 @@ impl qobject::AppController {
             } // for entry in entries
             // NOTE: Do NOT update piece_bboxes_json (x, y) here. Overlay positions remain canonical until adjustments are finalized.
 
-            // Roll-form media has no fixed length: drop unused space below the
-            // lowest piece so the reloaded Adjust canvas shows the trimmed frame.
+            // Roll-form media has no fixed length: fit the frame to the pieces
+            // so the reloaded Adjust canvas shows no white space above or below.
             if is_roll_layout {
-                if let Some(new_h) = trim_roll_bottom_in_adjust_dom(doc) {
+                if let Some(new_h) = fit_roll_frame_to_pieces_in_adjust_dom(doc) {
                     log_to_file(&format!(
-                        "[lib.rs-AppController] accept_adjustments(): 4a trimmed roll layout bottom, new height={new_h}px"
+                        "[lib.rs-AppController] accept_adjustments(): 4a fitted roll layout frame, new height={new_h}px"
                     ));
-                } // if trimmed
+                } // if fitted
             } // if is_roll_layout
         } // rust borrow dropped
 
@@ -2392,14 +2439,14 @@ mod adjust_bbox_tests {
 } // mod adjust_bbox_tests
 
 // ---------------------------------------------------------------------------
-// Roll-form bottom trim on Adjust Apply
+// Roll-form frame fit on Adjust Apply
 // ---------------------------------------------------------------------------
 #[cfg(test)]
-mod adjust_roll_trim_tests {
-    use super::trim_roll_bottom_in_adjust_dom;
+mod adjust_roll_fit_tests {
+    use super::{bbox_from_group_geometry, fit_roll_frame_to_pieces_in_adjust_dom};
 
-    // Roll canvas: 24 px margins, content 200 x 1000, one 20 x 40 piece at (30, 30).
-    const ROLL_SVG: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="248" height="1048"><g id="Rectangles"><rect id="backgroundRect" x="0" y="0" width="248" height="1048" fill="white" stroke="none"/><rect id="contentRect" x="24" y="24" width="200" height="1000" fill="none" stroke="black"/></g><g id="A"><path d="M 30,30 L 50,30 L 50,70 L 30,70 Z"/></g></svg>"#;
+    // Roll canvas: 24 px margins, content 200 x 1000, one 20 x 40 piece at (30, 24).
+    const ROLL_SVG: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="248" height="1048"><g id="Rectangles"><rect id="backgroundRect" x="0" y="0" width="248" height="1048" fill="white" stroke="none"/><rect id="contentRect" x="24" y="24" width="200" height="1000" fill="none" stroke="black"/></g><g id="A"><path d="M 30,24 L 50,24 L 50,64 L 30,64 Z"/></g></svg>"#;
 
     fn parse() -> svg_dom::Document {
         svg_dom::Document::parse(ROLL_SVG).expect("parse svg")
@@ -2413,35 +2460,90 @@ mod adjust_roll_trim_tests {
         )
     }
 
-    // @brief Trim keeps the bottom margin and ends contentRect at the lowest piece.
-    #[test]
-    fn trims_to_lowest_piece_and_keeps_margin() {
-        let mut doc = parse();
-        // Piece bottom 70 → content height 70 - 24 = 46; root = 24 + 46 + 24 = 94.
-        assert_eq!(trim_roll_bottom_in_adjust_dom(&mut doc), Some(94));
-        assert_eq!(heights(&doc), ("94".into(), "94".into(), "46".into()));
-    } // trims_to_lowest_piece_and_keeps_margin
+    // Top/bottom of piece A after baking its transform.
+    fn piece_a_y(doc: &svg_dom::Document) -> (f32, f32) {
+        let mut flat = doc.clone();
+        svg_dom::flatten_dom(&mut flat);
+        let el = flat.root.children.iter()
+            .filter_map(|n| n.as_element())
+            .find(|e| e.attributes.get("id").map(String::as_str) == Some("A"))
+            .expect("piece A");
+        let b = bbox_from_group_geometry(el).expect("geometry");
+        (b.min.y, b.max.y)
+    }
 
-    // @brief Pending Apply transforms count: the moved position sets the new bottom.
+    fn approx(actual: f32, expected: f32) {
+        assert!((actual - expected).abs() < 0.01, "expected {expected}, got {actual}");
+    }
+
+    // @brief Bottom trim keeps the bottom margin and ends contentRect at the lowest piece.
     #[test]
-    fn measures_pending_transform() {
+    fn trims_bottom_and_keeps_margin() {
+        let mut doc = parse();
+        // Piece 24..64 → content height 40; root = 24 + 40 + 24 = 88.
+        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), Some(88));
+        assert_eq!(heights(&doc), ("88".into(), "88".into(), "40".into()));
+        // Piece already on contentRect top: no transform written.
+        assert_eq!(doc.get_attr_by_id("A", "transform"), None);
+    } // trims_bottom_and_keeps_margin
+
+    // @brief White space at the top: the piece moves up to contentRect top.
+    #[test]
+    fn trims_top_by_moving_pieces_up() {
         let mut doc = parse();
         assert!(doc.set_attr_by_id("A", "transform", "translate(0 100)"));
-        // Piece bottom 170 → content height 146; root = 194.
-        assert_eq!(trim_roll_bottom_in_adjust_dom(&mut doc), Some(194));
-        assert_eq!(heights(&doc), ("194".into(), "194".into(), "146".into()));
-        // The transform stays pending; only the frame changed.
-        assert_eq!(doc.get_attr_by_id("A", "transform"), Some("translate(0 100)"));
-    } // measures_pending_transform
+        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), Some(88));
+        assert_eq!(heights(&doc), ("88".into(), "88".into(), "40".into()));
+        let (top, bottom) = piece_a_y(&doc);
+        approx(top, 24.0);
+        approx(bottom, 64.0);
+    } // trims_top_by_moving_pieces_up
 
-    // @brief A piece at or past the content bottom leaves the frame unchanged.
+    // @brief A rotated piece keeps its rotation; only its vertical position changes.
     #[test]
-    fn never_grows() {
+    fn shift_keeps_rotation() {
         let mut doc = parse();
-        assert!(doc.set_attr_by_id("A", "transform", "translate(0 990)"));
-        assert_eq!(trim_roll_bottom_in_adjust_dom(&mut doc), None);
-        assert_eq!(heights(&doc), ("1048".into(), "1048".into(), "1000".into()));
-    } // never_grows
+        // 90° about the piece center (40, 44): bbox becomes 40 wide x 20 high.
+        assert!(doc.set_attr_by_id("A", "transform", "translate(0 200) rotate(90 40 44)"));
+        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), Some(68));
+        let (top, bottom) = piece_a_y(&doc);
+        approx(top, 24.0);
+        approx(bottom, 44.0);
+    } // shift_keeps_rotation
+
+    // @brief A piece below contentRect bottom grows the frame.
+    #[test]
+    fn grows_bottom() {
+        let mut doc = parse();
+        // Second piece B at y 1100..1140 → content 24..1140 → height 1116; root 1164.
+        let b = svg_dom::Document::parse(
+            r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="B"><path d="M 30,1100 L 50,1100 L 50,1140 L 30,1140 Z"/></g></svg>"#,
+        ).expect("parse B");
+        let b_node = b.root.children.iter()
+            .find(|n| n.as_element().is_some())
+            .cloned()
+            .expect("B element");
+        doc.root.children.push(b_node);
+        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), Some(1164));
+        assert_eq!(heights(&doc), ("1164".into(), "1164".into(), "1116".into()));
+    } // grows_bottom
+
+    // @brief A piece above contentRect top moves all pieces down onto it.
+    #[test]
+    fn piece_above_top_moves_down() {
+        let mut doc = parse();
+        assert!(doc.set_attr_by_id("A", "transform", "translate(0 -20)"));
+        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), Some(88));
+        approx(piece_a_y(&doc).0, 24.0);
+    } // piece_above_top_moves_down
+
+    // @brief Frame already fits: nothing changes.
+    #[test]
+    fn already_fitted_is_noop() {
+        let mut doc = parse();
+        assert!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc).is_some());
+        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), None);
+    } // already_fitted_is_noop
 
     // @brief No pieces: nothing to measure, so the frame stays unchanged.
     #[test]
@@ -2450,9 +2552,10 @@ mod adjust_roll_trim_tests {
         doc.root.children.retain(|n| {
             n.as_element().and_then(|e| e.attributes.get("id")).map(String::as_str) != Some("A")
         });
-        assert_eq!(trim_roll_bottom_in_adjust_dom(&mut doc), None);
+        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), None);
+        assert_eq!(heights(&doc), ("1048".into(), "1048".into(), "1000".into()));
     } // no_pieces_is_noop
-} // mod adjust_roll_trim_tests
+} // mod adjust_roll_fit_tests
 
 // ---------------------------------------------------------------------------
 // Export progress infrastructure tests
