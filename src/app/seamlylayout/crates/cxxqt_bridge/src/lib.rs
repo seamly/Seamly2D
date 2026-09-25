@@ -335,9 +335,11 @@ fn is_top_level_piece_group(el: &XmlElement) -> bool {
 // @brief Fit the frame of a roll-form adjust DOM to its pieces, top and bottom.
 //
 // Roll-form media has no fixed length, so after each Apply:
-//   - space above the top piece is removed: all pieces move up to contentRect top;
-//   - a piece above contentRect top moves all pieces down to contentRect top;
-//   - contentRect ends at the lowest piece: the frame shrinks or grows to fit.
+//   - space above the top piece is removed: all pieces move up;
+//   - a piece above contentRect top moves all pieces down;
+//   - contentRect ends below the lowest piece: the frame shrinks or grows to fit.
+// A FIT_GAP_PX gap separates pieces from the contentRect top and bottom edges,
+// so no piece edge touches the contentRect line.
 // Top and bottom margins, and all widths, are kept.
 //
 // adjust_dom keeps pending piece transforms until Done, so pieces are measured
@@ -351,6 +353,8 @@ fn is_top_level_piece_group(el: &XmlElement) -> bool {
 fn fit_roll_frame_to_pieces_in_adjust_dom(doc: &mut svg_dom::Document) -> Option<u32> {
     // Changes smaller than this are rounding noise, not white space.
     const TOLERANCE_PX: f64 = 0.5;
+    // Gap between the pieces and the contentRect top and bottom edges.
+    const FIT_GAP_PX: f64 = 1.0;
 
     let attr_px = |d: &svg_dom::Document, id: &str, name: &str| -> Option<f64> {
         d.get_attr_by_id(id, name).and_then(|v| v.trim().parse::<f64>().ok())
@@ -380,9 +384,9 @@ fn fit_roll_frame_to_pieces_in_adjust_dom(doc: &mut svg_dom::Document) -> Option
             })
         })?; // no pieces: nothing to fit
 
-    // Vertical shift that puts the top piece on contentRect top (negative = up).
-    let shift = content_y - top;
-    let new_content_h = (bottom - top).ceil();
+    // Vertical shift that puts the top piece FIT_GAP_PX below contentRect top (negative = up).
+    let shift = content_y + FIT_GAP_PX - top;
+    let new_content_h = (bottom - top).ceil() + 2.0 * FIT_GAP_PX;
 
     // Guard: frame already fits the pieces.
     if shift.abs() < TOLERANCE_PX && (new_content_h - content_h).abs() < TOLERANCE_PX {
@@ -2445,8 +2449,9 @@ mod adjust_bbox_tests {
 mod adjust_roll_fit_tests {
     use super::{bbox_from_group_geometry, fit_roll_frame_to_pieces_in_adjust_dom};
 
-    // Roll canvas: 24 px margins, content 200 x 1000, one 20 x 40 piece at (30, 24).
-    const ROLL_SVG: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="248" height="1048"><g id="Rectangles"><rect id="backgroundRect" x="0" y="0" width="248" height="1048" fill="white" stroke="none"/><rect id="contentRect" x="24" y="24" width="200" height="1000" fill="none" stroke="black"/></g><g id="A"><path d="M 30,24 L 50,24 L 50,64 L 30,64 Z"/></g></svg>"#;
+    // Roll canvas: 24 px margins, content 200 x 1000, one 20 x 40 piece at (30, 25):
+    // 1 px below the contentRect top edge.
+    const ROLL_SVG: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="248" height="1048"><g id="Rectangles"><rect id="backgroundRect" x="0" y="0" width="248" height="1048" fill="white" stroke="none"/><rect id="contentRect" x="24" y="24" width="200" height="1000" fill="none" stroke="black"/></g><g id="A"><path d="M 30,25 L 50,25 L 50,65 L 30,65 Z"/></g></svg>"#;
 
     fn parse() -> svg_dom::Document {
         svg_dom::Document::parse(ROLL_SVG).expect("parse svg")
@@ -2480,10 +2485,10 @@ mod adjust_roll_fit_tests {
     #[test]
     fn trims_bottom_and_keeps_margin() {
         let mut doc = parse();
-        // Piece 24..64 → content height 40; root = 24 + 40 + 24 = 88.
-        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), Some(88));
-        assert_eq!(heights(&doc), ("88".into(), "88".into(), "40".into()));
-        // Piece already on contentRect top: no transform written.
+        // Piece 25..65 → content height 40 + 2 gaps = 42; root = 24 + 42 + 24 = 90.
+        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), Some(90));
+        assert_eq!(heights(&doc), ("90".into(), "90".into(), "42".into()));
+        // Piece already 1 px below contentRect top: no transform written.
         assert_eq!(doc.get_attr_by_id("A", "transform"), None);
     } // trims_bottom_and_keeps_margin
 
@@ -2492,30 +2497,31 @@ mod adjust_roll_fit_tests {
     fn trims_top_by_moving_pieces_up() {
         let mut doc = parse();
         assert!(doc.set_attr_by_id("A", "transform", "translate(0 100)"));
-        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), Some(88));
-        assert_eq!(heights(&doc), ("88".into(), "88".into(), "40".into()));
+        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), Some(90));
+        assert_eq!(heights(&doc), ("90".into(), "90".into(), "42".into()));
         let (top, bottom) = piece_a_y(&doc);
-        approx(top, 24.0);
-        approx(bottom, 64.0);
+        approx(top, 25.0);
+        approx(bottom, 65.0);
     } // trims_top_by_moving_pieces_up
 
     // @brief A rotated piece keeps its rotation; only its vertical position changes.
     #[test]
     fn shift_keeps_rotation() {
         let mut doc = parse();
-        // 90° about the piece center (40, 44): bbox becomes 40 wide x 20 high.
-        assert!(doc.set_attr_by_id("A", "transform", "translate(0 200) rotate(90 40 44)"));
-        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), Some(68));
+        // 90° about the piece center (40, 45): bbox becomes 40 wide x 20 high.
+        assert!(doc.set_attr_by_id("A", "transform", "translate(0 200) rotate(90 40 45)"));
+        // Content 20 + 2 gaps = 22; root = 24 + 22 + 24 = 70.
+        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), Some(70));
         let (top, bottom) = piece_a_y(&doc);
-        approx(top, 24.0);
-        approx(bottom, 44.0);
+        approx(top, 25.0);
+        approx(bottom, 45.0);
     } // shift_keeps_rotation
 
     // @brief A piece below contentRect bottom grows the frame.
     #[test]
     fn grows_bottom() {
         let mut doc = parse();
-        // Second piece B at y 1100..1140 → content 24..1140 → height 1116; root 1164.
+        // Second piece B at y 1100..1140 → pieces 25..1140 → content 1115 + 2 = 1117; root 1165.
         let b = svg_dom::Document::parse(
             r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="B"><path d="M 30,1100 L 50,1100 L 50,1140 L 30,1140 Z"/></g></svg>"#,
         ).expect("parse B");
@@ -2524,8 +2530,8 @@ mod adjust_roll_fit_tests {
             .cloned()
             .expect("B element");
         doc.root.children.push(b_node);
-        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), Some(1164));
-        assert_eq!(heights(&doc), ("1164".into(), "1164".into(), "1116".into()));
+        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), Some(1165));
+        assert_eq!(heights(&doc), ("1165".into(), "1165".into(), "1117".into()));
     } // grows_bottom
 
     // @brief A piece above contentRect top moves all pieces down onto it.
@@ -2533,8 +2539,8 @@ mod adjust_roll_fit_tests {
     fn piece_above_top_moves_down() {
         let mut doc = parse();
         assert!(doc.set_attr_by_id("A", "transform", "translate(0 -20)"));
-        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), Some(88));
-        approx(piece_a_y(&doc).0, 24.0);
+        assert_eq!(fit_roll_frame_to_pieces_in_adjust_dom(&mut doc), Some(90));
+        approx(piece_a_y(&doc).0, 25.0);
     } // piece_above_top_moves_down
 
     // @brief Frame already fits: nothing changes.
