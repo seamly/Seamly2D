@@ -21,6 +21,8 @@
 
 # text files
 *.txt
+# Third-party license notices shipped in every installer are committed text files.
+!src/app/seamlylayout/packaging/licenses/*.txt
 
 # test key files
 *seamly-signing-key.json

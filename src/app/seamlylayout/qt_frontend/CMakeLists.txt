@@ -164,6 +164,13 @@ elseif(APPLE)
     set_source_files_properties("${SEAMLY_ICON_ICNS}" PROPERTIES
         MACOSX_PACKAGE_LOCATION "Resources"
     )
+    # Third-party license notices (Rust crates, Qt, bundled fonts) ship inside the bundle;
+    # the DMG packages this build-tree bundle directly.
+    file(GLOB SEAMLY_LICENSE_NOTICES "${CMAKE_CURRENT_SOURCE_DIR}/../packaging/licenses/*.txt")
+    target_sources(SeamlyLayout PRIVATE ${SEAMLY_LICENSE_NOTICES})
+    set_source_files_properties(${SEAMLY_LICENSE_NOTICES} PROPERTIES
+        MACOSX_PACKAGE_LOCATION "Resources/licenses"
+    )
     # Task 16: give the bundle a stable identifier (previously unset, so CMake fell back
     # to an auto-generated placeholder). This does not affect settings storage — Qt's
     # QStandardPaths::AppConfigLocation resolution is driven by organizationName/
@@ -552,6 +559,11 @@ install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/settings/"
 )
 
 if(UNIX AND NOT APPLE)
+    # Third-party license notices (Rust crates, Qt, bundled fonts) for the AppImage.
+    install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../packaging/licenses/"
+        DESTINATION share/licenses/seamly
+        FILES_MATCHING PATTERN "*.txt"
+    )
     install(FILES "${SEAMLY_ICON_PNG}"
         DESTINATION share/icons/hicolor/512x512/apps
         RENAME SeamlyLayout.png

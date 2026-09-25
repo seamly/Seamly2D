@@ -6,6 +6,16 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-24 — Task Layout.14: third-party license notices in every installer
+
+Branch `task-license-notices`, merged without skip-ci (packaging, CMake, .pro changed).
+
+- `src/app/seamlylayout/packaging/licenses/`: `generate_license_notices.py`, `about.toml`, `rust_crate_notices.hbs`; committed `rust_crate_notices.txt` (174 crates) and `qt_notices.txt` (Qt 6.11.1, LGPL-3.0, from Qt SBOMs).
+- Shipped: MSI `licenses\`, AppImage `usr/share/licenses/seamly/`, DMG app bundles `Contents/Resources/licenses/`.
+- `license_notices_tests` (cxxqt_bridge) fails when the files are stale.
+- Machine state: `cargo-about` 0.9.2 installed in `~/.cargo/bin`.
+- Open: notices for xerces-c, pdftops (Poppler), MSVC runtime. Linux/macOS packages not verified locally (CI only).
+
 ## 2026-09-24 — Export > SVG in-app check; menu fixes
 
 Merged `task-svg-menu-check` into `run-seamlyLayout`.

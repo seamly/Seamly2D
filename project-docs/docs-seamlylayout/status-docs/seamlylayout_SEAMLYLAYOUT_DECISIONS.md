@@ -125,7 +125,9 @@ Option C selected, applied app-wide. All observability file writes are gated by 
 
 - New crates for `svg_label_text` are MIT, Apache-2.0, BSD-3-Clause or Unlicense; all compatible with the MIT core.
 - Linked into the binary with notice duties: `allsorts`, `hershey`, `unicode-*` (Apache-2.0); `glyph-names`, `alloc-*`, `brotli-decompressor` (BSD-3-Clause).
-- No installer ships Rust crate notices yet. This gap predates these crates.
+- All installers now ship `rust_crate_notices.txt` and `qt_notices.txt` (Task Layout.14).
+- Committed files, not generated at package time (user decision 2026-09-24): no build machine needs `cargo-about`.
+  `license_notices_tests` fails `cargo test` when `Cargo.lock` or the Qt version changes, so a stale file cannot ship unseen.
 
 **License notices**
 
@@ -170,3 +172,4 @@ files are written, this decides *where*.
 - 2026-06-29: Expanded Decision-002 scope from AdjustMode to all observability file I/O app-wide (DG.5 verification gate closed); added Scope, Verification, and updated Rationale sections.
 - 2026-09-24: Added Decision-003 (SVG label text modes: bundled fonts).
 - 2026-09-24: Decision-003 — font subsetting moved from `subsetter` to `allsorts`.
+- 2026-09-24: Decision-003 — license notices committed and shipped in all installers.

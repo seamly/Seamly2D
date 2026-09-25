@@ -189,7 +189,12 @@ unix{
         icns_resources.files += $$PWD/../../../packaging/assets/multi_size_file.icns
         icns_resources.files += $$PWD/../../../packaging/assets/2d_file.icns
 
+        # Qt runtime license notice (LGPL-3.0) for the Qt frameworks in this bundle.
+        qt_notices.path = $${RESOURCES_DIR}/licenses
+        qt_notices.files += $$PWD/../seamlylayout/packaging/licenses/qt_notices.txt
+
         QMAKE_BUNDLE_DATA += \
+            qt_notices \
             templates \
             multisize \
             label \
