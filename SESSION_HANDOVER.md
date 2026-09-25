@@ -13,7 +13,7 @@ Merged `task-grainline-default-angle` with skip-ci. Local build + all Qt suites 
 - Setting `pattern/defaultGrainlineAngle` (default 90), Preferences > Pattern > Grainlines > Angle.
 - `VGrainlineData::upwardAngle` / `centeredStart`: used by `PatternPieceDialog::placeGrainline`, `union_tool`, `PatternPieceTool::SaveRotateGrainline`, `VLayoutPiece::setGrainAxis`.
 - Not tested in the GUI.
-- Open (from 2026-09-24 entry): `verticalize_dom` turns grain down; all non-anchored grainlines now point up, so every piece gets rotate(180). Ask the user.
+- `verticalize_dom` now turns grain to point up (θ = −90° in SVG), user decision. Upward grainlines get no rotation. Merged `task-verticalize-grain-up` with skip-ci.
 
 ## 2026-09-25 — Adjust Apply fits roll-form frame to pieces
 
@@ -35,7 +35,7 @@ Branch `task-no-grainline-rotation`. User decisions: a setting with default "Kee
 - `pack_types::Rect.free_rotation`: packer adds 90°/270° for that piece only. Set by `piece_extractor::set_free_rotation_without_grainline`.
 - Seamly2D: `VLayoutPiece::setGrainAxis` keeps the grain direction even when the grainline is hidden; `SvgGenerator` writes `data-grainline-angle`.
 - `svg_dom::verticalize_dom` reads drawn grainline, then `data-grainline-angle`.
-- Open: `verticalize_dom` turns grain to point **down** (θ = 90° in SVG). Seamly2D grainlines point up, so those pieces get rotate(180). Not changed; ask the user.
+- Resolved 2026-09-25: `verticalize_dom` now turns grain to point **up** (user decision).
 
 ## 2026-09-24 — Layout fix: pieces without a grainline keep drafted orientation
 
