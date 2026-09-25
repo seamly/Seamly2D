@@ -23,6 +23,7 @@ Xfn enter_adjust_mode(): creates adjust_dom, adjust_canvas.svg, piece_bboxes_jso
 fn accept_adjustments(self, transformsJson): updates piece_bboxes_json
 ->doc from rust.adjust_dom
 ->doc."<piece>".transform=transformsJson  (updates adjust_dom)
+->if rust.is_roll_layout (fabric, or paper roll): trim_roll_bottom_in_adjust_dom(doc) -- trims space below lowest piece; keeps bottom margin; never grows
 ->rust.set_is_adjust_dirty=false
 ->rust.adjust_applied() -> 
 ->return true to onReplyRequested()

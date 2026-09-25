@@ -6,6 +6,15 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-25 — Adjust Apply trims roll-form bottom
+
+Merged `task-adjust-roll-trim` with skip-ci (Rust-only change).
+
+- `LayoutSettings::is_roll_form()`: fabric, or paper + roll. Also used by `process_layout` trim.
+- `AppControllerRust.is_roll_layout`: set by `process_layout`.
+- `accept_adjustments` calls `trim_roll_bottom_in_adjust_dom`: measures a flattened clone, keeps bottom margin, shrinks only.
+- Not tested in the GUI.
+
 ## 2026-09-24 — Pieces without a grainline: setting + handoff grain angle
 
 Branch `task-no-grainline-rotation`. User decisions: a setting with default "Keep upright"; the handoff carries the grain angle.
