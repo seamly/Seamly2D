@@ -6,6 +6,15 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-25 — Grainline default angle, centered, pointing up
+
+Merged `task-grainline-default-angle` with skip-ci. Local build + all Qt suites passed.
+
+- Setting `pattern/defaultGrainlineAngle` (default 90), Preferences > Pattern > Grainlines > Angle.
+- `VGrainlineData::upwardAngle` / `centeredStart`: used by `PatternPieceDialog::placeGrainline`, `union_tool`, `PatternPieceTool::SaveRotateGrainline`, `VLayoutPiece::setGrainAxis`.
+- Not tested in the GUI.
+- Open (from 2026-09-24 entry): `verticalize_dom` turns grain down; all non-anchored grainlines now point up, so every piece gets rotate(180). Ask the user.
+
 ## 2026-09-25 — Adjust Apply fits roll-form frame to pieces
 
 Merged `task-adjust-roll-trim`, then `task-adjust-roll-fit`, with skip-ci (Rust-only changes).

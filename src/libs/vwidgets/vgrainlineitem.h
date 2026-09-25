@@ -66,6 +66,7 @@ public:
 
     virtual void         paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     void                 updateGeometry(const QPointF& pos, qreal rotation, qreal length, ArrowType type, qreal arrowLength);
+    qreal                length() const { return m_length; } ///< Grainline length in scene pixels.
 
     virtual int          type() const override {return Type;}
     enum                 {Type = UserType + static_cast<int>(Vis::GrainlineItem)};

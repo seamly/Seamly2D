@@ -1354,10 +1354,14 @@ void createUnion(quint32 id, const UnionToolInitData &initData, qreal dx, qreal 
 
     newPiece.GetGrainlineGeometry().SetVisible(qApp->Settings()->getDefaultGrainlineVisibilty());
     newPiece.GetGrainlineGeometry().setLength(QString::number(qApp->Settings()->getDefaultGrainlineLength()));
-    qreal length =  newPiece.GetGrainlineGeometry().getLength().toDouble();
-    xPos = rect.center().x();
-    yPos = rect.center().y();
-    newPiece.GetGrainlineGeometry().SetPos(QPointF(xPos, yPos + length/2.0));
+    const qreal grainlineAngle = VGrainlineData::upwardAngle(qApp->Settings()->getDefaultGrainlineAngle());
+    newPiece.GetGrainlineGeometry().setRotation(QString::number(grainlineAngle));
+    const qreal arrowLength = FromPixel(qApp->Settings()->getDefaultArrowLength(), *initData.data->GetPatternUnit());
+    newPiece.GetGrainlineGeometry().setArrowLength(QString::number(arrowLength));
+    const qreal grainlineLength = ToPixel(qApp->Settings()->getDefaultGrainlineLength(),
+                                          *initData.data->GetPatternUnit());
+    newPiece.GetGrainlineGeometry().SetPos(VGrainlineData::centeredStart(rect.center(), grainlineAngle,
+                                                                          grainlineLength));
 
     QString formulaSAWidth = piece1.getSeamAllowanceWidthFormula();
     newPiece.setSeamAllowanceWidthFormula(formulaSAWidth, piece1.GetSAWidth());

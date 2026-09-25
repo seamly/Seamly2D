@@ -49,6 +49,9 @@
 //---------------------------------------------------------------------------------------------------------------------
 
 #include <QPointF>
+#include <QtMath>
+
+#include <cmath>
 
 #include "vgrainlinedata.h"
 #include "vgrainlinedata_p.h"
@@ -170,4 +173,39 @@ quint32 VGrainlineData::bottomAnchorPoint() const
 void VGrainlineData::setBottomAnchorPoint(quint32 bottomAnchorPoint)
 {
     d->m_bottomAnchorPoint = bottomAnchorPoint;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief upwardAngle maps a grainline angle so that its end point lies above its start point.
+ * @param degrees angle in degrees, counter-clockwise from 3 o'clock.
+ * @return the angle in [0, 180]. 0 and 180 stay horizontal; (180, 360) turns by 180 degrees.
+ */
+qreal VGrainlineData::upwardAngle(qreal degrees)
+{
+    qreal angle = std::fmod(degrees, 360.0);
+    if (angle < 0)
+    {
+        angle += 360.0;
+    }
+
+    // Scene y grows downward, so an angle in (180, 360) puts the end point below the start point.
+    if (angle > 180.0)
+    {
+        angle -= 180.0;
+    }
+    return angle;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief centeredStart returns the start point of a grainline whose midpoint is center.
+ * @param center  grainline midpoint in scene pixels.
+ * @param degrees grainline angle in degrees, counter-clockwise from 3 o'clock.
+ * @param length  grainline length in scene pixels.
+ */
+QPointF VGrainlineData::centeredStart(const QPointF &center, qreal degrees, qreal length)
+{
+    const qreal radians = qDegreesToRadians(degrees);
+    return QPointF(center.x() - length / 2.0 * qCos(radians), center.y() + length / 2.0 * qSin(radians));
 }

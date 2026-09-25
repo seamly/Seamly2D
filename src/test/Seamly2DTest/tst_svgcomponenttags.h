@@ -62,6 +62,10 @@ private slots:
     void GrainAngleFollowsPieceTransform() const;
     void ExportedPieceCarriesGrainlineAngle() const;
     void PieceWithoutGrainHasNoGrainlineAngle() const;
+    void UpwardAngleFlipsDownwardGrainline_data() const;
+    void UpwardAngleFlipsDownwardGrainline() const;
+    void CenteredStartPutsMidpointOnCenter() const;
+    void DownwardGrainAxisPointsUp() const;
 };
 
 #endif // TST_SVGCOMPONENTTAGS_H

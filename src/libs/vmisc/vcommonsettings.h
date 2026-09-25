@@ -494,6 +494,9 @@ public:
     qreal                getDefaultGrainlineLength() const;
     void                 setDefaultGrainlineLength(const qreal &value);
 
+    qreal                getDefaultGrainlineAngle() const;
+    void                 setDefaultGrainlineAngle(const qreal &value);
+
     QString              getDefaultGrainlineColor() const;
     void                 setDefaultGrainlineColor(const QString &value);
 

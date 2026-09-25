@@ -211,6 +211,7 @@ const QString settingDefaultSeamAllowanceVisibilty       = QStringLiteral("patte
 const QString settingShowGrainlines                      = QStringLiteral("pattern/showGrainlines");
 const QString settingDefaultGrainlineVisibilty           = QStringLiteral("pattern/defaultGrainlineVisibilty");
 const QString settingDefaultGrainlineLength              = QStringLiteral("pattern/defaultGrainlineLength");
+const QString settingDefaultGrainlineAngle               = QStringLiteral("pattern/defaultGrainlineAngle");
 const QString settingDefaultGrainlineColor               = QStringLiteral("pattern/defaultGrainlineColor");
 const QString settingDefaultGrainlineLineweight          = QStringLiteral("pattern/defaultGrainlineLineweight");
 const QString settingDefaultArrowLength                  = QStringLiteral("pattern/defaultArrowLength");
@@ -2504,6 +2505,19 @@ qreal VCommonSettings::getDefaultGrainlineLength() const
 void VCommonSettings::setDefaultGrainlineLength(const qreal &value)
 {
     setValue(settingDefaultGrainlineLength, value);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief getDefaultGrainlineAngle returns the new-piece grainline angle in degrees, counter-clockwise from 3 o'clock.
+qreal VCommonSettings::getDefaultGrainlineAngle() const
+{
+   return value(settingDefaultGrainlineAngle, 90).toReal();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void VCommonSettings::setDefaultGrainlineAngle(const qreal &value)
+{
+    setValue(settingDefaultGrainlineAngle, value);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

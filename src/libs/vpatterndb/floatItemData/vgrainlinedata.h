@@ -100,6 +100,9 @@ public:
     quint32         bottomAnchorPoint() const;
     void            setBottomAnchorPoint(quint32 bottomAnchorPoint);
 
+    static qreal    upwardAngle(qreal degrees);
+    static QPointF  centeredStart(const QPointF &center, qreal degrees, qreal length);
+
 private:
     QSharedDataPointer<VGrainlineDataPrivate> d;
 };

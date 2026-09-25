@@ -848,8 +848,13 @@ void PatternPieceTool::SaveRotateGrainline(qreal dRot, const QPointF &ptPos)
     VPiece oldPiece = VAbstractTool::data.GetPiece(m_id);
     VPiece newPiece = oldPiece;
 
-    newPiece.GetGrainlineGeometry().setRotation(QString().setNum(qRadiansToDegrees(dRot)));
-    newPiece.GetGrainlineGeometry().SetPos(ptPos);
+    // A grainline turned past horizontal flips end for end, so it keeps pointing up around the same midpoint.
+    const qreal length = m_grainLine->length();
+    const QPointF midpoint = ptPos + QPointF(length / 2.0 * qCos(dRot), -length / 2.0 * qSin(dRot));
+    const qreal angle = VGrainlineData::upwardAngle(qRadiansToDegrees(dRot));
+
+    newPiece.GetGrainlineGeometry().setRotation(QString().setNum(angle));
+    newPiece.GetGrainlineGeometry().SetPos(VGrainlineData::centeredStart(midpoint, angle, length));
     SavePieceOptions *rotateCommand = new SavePieceOptions(oldPiece, newPiece, doc, m_id);
     rotateCommand->setText(tr("rotate grainline"));
     qApp->getUndoStack()->push(rotateCommand);

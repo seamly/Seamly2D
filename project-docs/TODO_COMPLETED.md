@@ -901,3 +901,12 @@ LGPL notices in `src/app/seamlylayout/packaging/licenses/`, but none exist.
   - Done: docs; Windows MSI verified locally.
   - Verified 2026-09-25, CI run 36088119655 (and 36085587682): MSI File table lists all 4 notices; DMG holds the Qt notice in all 3 bundles and the Rust notices once; AppImage `cmake --install` placed all 4 in `usr/share/licenses/seamly/`.
   - Fixed on the way: Windows MSI MSVC setup step (develop merge residue) and the AppImage `.desktop` path.
+
+## Grainline default angle, centered and pointing up (completed 2026-09-25)
+
+- [x] `Application Settings > Pattern > Grainlines > Angle`, default 90 (`pattern/defaultGrainlineAngle`)
+- [x] New piece (dialog and Union tool): grainline midpoint = bounding box center; angle, length, arrow length from settings
+- [x] Grainline without top and bottom anchors points up: numeric angle in (180, 360) becomes angle - 180, midpoint kept — dialog OK/Apply, scene rotate
+- [x] Rotation expressions are not rewritten; `data-grainline-angle` still exports the upward direction
+- [x] Union tool: grainline length converted to pixels before placement; it used pattern units
+- [x] Tests: `TST_SvgComponentTags` — `UpwardAngleFlipsDownwardGrainline`, `CenteredStartPutsMidpointOnCenter`, `DownwardGrainAxisPointsUp`

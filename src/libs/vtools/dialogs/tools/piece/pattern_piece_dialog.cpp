@@ -2715,10 +2715,9 @@ VPiece PatternPieceDialog::CreatePiece() const
         yPos = rect.center().y() - height/2.0;
         piece.GetPatternInfo().SetPos(QPointF(xPos, yPos));
 
-        xPos = rect.center().x();
-        yPos = rect.center().y() + getFormulaValue(ui->lengthFormula_LineEdit)/2.0;
-        piece.GetGrainlineGeometry().SetPos(QPointF(xPos, yPos));
     }
+
+    placeGrainline(piece.GetGrainlineGeometry(), piece.GetPath());
     return piece;
 }
 
@@ -3390,6 +3389,9 @@ void PatternPieceDialog::initializeGrainlineTab()
     }
     ui->lengthFormula_LineEdit->setPlainText(qApp->LocaleToString(grainlineLength));
 
+    const qreal grainlineAngle = VGrainlineData::upwardAngle(qApp->Settings()->getDefaultGrainlineAngle());
+    ui->rotationFormula_LineEdit->setPlainText(qApp->LocaleToString(grainlineAngle));
+
     connect(ui->showGrainline_CheckBox, &QCheckBox::stateChanged, this, &PatternPieceDialog::enabledGrainline);
     connect(ui->rotation_PushButton,    &QPushButton::clicked,    this, &PatternPieceDialog::editGrainlineFormula);
     connect(ui->length_PushButton,      &QPushButton::clicked,    this, &PatternPieceDialog::editGrainlineFormula);
@@ -3837,4 +3839,59 @@ qreal PatternPieceDialog::getFormulaValue(QPlainTextEdit *text) const
     formula.replace("\n", " ");
     formula = qApp->translateVariables()->FormulaFromUser(formula, qApp->Settings()->getOsSeparator());
     return ToPixel(calculation.EvalFormula(data->DataVariables(), formula), *data->GetPatternUnit());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief placeGrainline makes a grainline without top and bottom anchors point up, and centers a new piece's grainline.
+ * @param grainline grainline of the piece being built; its rotation and length formulas are already set.
+ * @param path      main path of the piece, used for the bounding box of a new piece.
+ *
+ * A numeric angle in (180, 360) is rewritten as the angle 180 degrees less, and the start point moves so that
+ * the midpoint stays put. A rotation expression is not rewritten.
+ */
+void PatternPieceDialog::placeGrainline(VGrainlineData &grainline, const VPiecePath &path) const
+{
+    if (grainline.topAnchorPoint() != NULL_ID && grainline.bottomAnchorPoint() != NULL_ID)
+    {
+        return;
+    }
+
+    qreal angle = 0;
+    qreal length = 0;
+    try
+    {
+        Calculator angleCalculation;
+        angle = angleCalculation.EvalFormula(data->DataVariables(), grainline.getRotation());
+        Calculator lengthCalculation;
+        length = ToPixel(lengthCalculation.EvalFormula(data->DataVariables(), grainline.getLength()),
+                         *data->GetPatternUnit());
+    }
+    catch (qmu::QmuParserError &error)
+    {
+        Q_UNUSED(error)
+        return;
+    }
+
+    // The midpoint is the bounding box center for a new piece, and the current midpoint for an existing one.
+    QPointF midpoint;
+    if (applyAllowed == false)
+    {
+        midpoint = QPolygonF(path.PathPoints(data)).boundingRect().center();
+    }
+    else
+    {
+        const qreal radians = qDegreesToRadians(angle);
+        midpoint = grainline.GetPos() + QPointF(length / 2.0 * qCos(radians), -length / 2.0 * qSin(radians));
+    }
+
+    bool isNumber = false;
+    grainline.getRotation().toDouble(&isNumber);
+    if (isNumber)
+    {
+        angle = VGrainlineData::upwardAngle(angle);
+        grainline.setRotation(QString::number(angle));
+    }
+
+    grainline.SetPos(VGrainlineData::centeredStart(midpoint, angle, length));
 }

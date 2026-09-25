@@ -144,6 +144,7 @@ void PreferencesPatternPage::Apply()
     settings->setDefaultSeamAllowanceVisibilty(ui->showSeamAllowances_CheckBox->isChecked());
     settings->setDefaultGrainlineVisibilty(ui->showGrainlines_CheckBox->isChecked());
     settings->setDefaultGrainlineLength(ui->defaultGrainlineLength_DoubleSpinBox->value());
+    settings->setDefaultGrainlineAngle(ui->defaultGrainlineAngle_DoubleSpinBox->value());
     settings->setDefaultGrainlineColor(ui->defaultGrainlineColor_ComboBox->currentData().toString());
     settings->setDefaultGrainlineLineweight(ui->defaultGrainlineLineweight_ComboBox->currentData().toReal());
     settings->setDefaultArrowLength(ui->defaultArrowLength_DoubleSpinBox->value());
@@ -358,6 +359,8 @@ void PreferencesPatternPage::initGrainlines()
     ui->defaultGrainlineLength_DoubleSpinBox->setSuffix(" " + UnitsToStr(StrToUnits(qApp->Seamly2DSettings()->getUnit()), true));
     setMaxByUnits(ui->defaultGrainlineLength_DoubleSpinBox, 40.000);
     grainlineLengthChanged();
+
+    ui->defaultGrainlineAngle_DoubleSpinBox->setValue(qApp->Seamly2DSettings()->getDefaultGrainlineAngle());
 
     int index = ui->defaultGrainlineColor_ComboBox->findData(qApp->Seamly2DSettings()->getDefaultGrainlineColor());
     if (index != -1)
