@@ -19,6 +19,7 @@ seamlylayout:
 - DONE - In adjust mode, the 'Lower to Bottom' operation isn't correct: When I move a large piece completely over a small piece, then select the large piece apply the 'lower to bottom' operation to it, then select the small piece and select any operation with the context menu, then the operation is applied to the large piece (incorrect) when it should be applied to the small piece (correct). Explain why then create a plan to fix this problem, discuss with me, if I approve then implement the plan. 
 - DONE - Fix process_layout(): Screenshot 2026-09-24 141047.png for trousers.sm2d the media is 36" wide and 500" long but the trouser front and back pieces  could not be placed by the algorithm - each of these patterns are about 36cm wide.
 - DONE - In Adjust Mode, when 'Apply' is clicked, if (media is paper and paper type is roll) or (media is fabric) then trim unused white space from the bottom of the layout, adjusting the contect rect and background rect to remove white space, and display results in adjust mode canvas.
+- DONE - Adjust Apply for roll forms: also remove white space at the top, and grow the layout when a piece is below the content bottom.
 
 
 - Create a plan for comparing our DXF-ASTM output with the analysis reports provided by Apparel Werks

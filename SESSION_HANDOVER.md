@@ -6,13 +6,16 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## 2026-09-25 — Adjust Apply trims roll-form bottom
+## 2026-09-25 — Adjust Apply fits roll-form frame to pieces
 
-Merged `task-adjust-roll-trim` with skip-ci (Rust-only change).
+Merged `task-adjust-roll-trim`, then `task-adjust-roll-fit`, with skip-ci (Rust-only changes).
 
 - `LayoutSettings::is_roll_form()`: fabric, or paper + roll. Also used by `process_layout` trim.
 - `AppControllerRust.is_roll_layout`: set by `process_layout`.
-- `accept_adjustments` calls `trim_roll_bottom_in_adjust_dom`: measures a flattened clone, keeps bottom margin, shrinks only.
+- `accept_adjustments` calls `fit_roll_frame_to_pieces_in_adjust_dom` (user decision: trim top, grow bottom).
+  - Measures a flattened clone.
+  - Top white space: all pieces move so the top piece sits on contentRect top. Shift is pre-multiplied into each piece `matrix(...)`.
+  - contentRect ends at the lowest piece: shrinks or grows. Margins kept.
 - Not tested in the GUI.
 
 ## 2026-09-24 — Pieces without a grainline: setting + handoff grain angle
