@@ -14,7 +14,9 @@ Branch `task-license-notices`, merged without skip-ci (packaging, CMake, .pro ch
 - Shipped: MSI `licenses\`, AppImage `usr/share/licenses/seamly/`, DMG app bundles `Contents/Resources/licenses/`.
 - `license_notices_tests` (cxxqt_bridge) fails when the files are stale.
 - Machine state: `cargo-about` 0.9.2 installed in `~/.cargo/bin`.
-- Open: notices for xerces-c, pdftops (Poppler), MSVC runtime. Linux/macOS packages not verified locally (CI only).
+- Verified 2026-09-25 in CI run 36088119655: MSI, DMG (all 3 bundles) and AppImage carry the notices. Task moved to `TODO_COMPLETED.md`.
+- Also fixed: Windows MSI MSVC setup step (merge residue) and AppImage `.desktop` path (`packaging/linux/`).
+- Open: Installer.7 (xerces-c, pdftops, MSVC runtime notices).
 
 ## 2026-09-24 — Export > SVG in-app check; menu fixes
 
