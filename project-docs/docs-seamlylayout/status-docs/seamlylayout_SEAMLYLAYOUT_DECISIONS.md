@@ -121,6 +121,12 @@ Option C selected, applied app-wide. All observability file writes are gated by 
 - `allsorts` keeps only the used glyphs and writes a new Unicode `cmap`, which browsers need.
 - Profile `Minimal`: hinting and GSUB/GPOS are dropped. Built with `flate2_rust`, so no C zlib is needed.
 
+**Rust crate licenses (checked 2026-09-24)**
+
+- New crates for `svg_label_text` are MIT, Apache-2.0, BSD-3-Clause or Unlicense; all compatible with the MIT core.
+- Linked into the binary with notice duties: `allsorts`, `hershey`, `unicode-*` (Apache-2.0); `glyph-names`, `alloc-*`, `brotli-decompressor` (BSD-3-Clause).
+- No installer ships Rust crate notices yet. This gap predates these crates.
+
 **License notices**
 
 - `crates/svg_label_text/assets/fonts/OFL.txt`, `crates/svg_label_text/assets/hershey/HERSHEY_LICENSE.txt`.

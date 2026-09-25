@@ -143,7 +143,7 @@ Menu {
             enabled: root.svgTextModesEnabled
             isLast: root.lastSvgTextMode === "designerFont"
             onChosen: function(textMode) { root.exportSvgModeRequested(textMode) }
-            hint: "Labels stay searchable, editable text in the label font. "
+            hint: "Labels stay searchable, editable text in the label font.\n"
                 + "The font is embedded when its license allows."
         } // SvgModeItem designerFont
 
@@ -153,7 +153,7 @@ Menu {
             enabled: root.svgTextModesEnabled
             isLast: root.lastSvgTextMode === "singleLineFont"
             onChosen: function(textMode) { root.exportSvgModeRequested(textMode) }
-            hint: "Labels stay text, in the single-line font Relief SingleLine CAD. "
+            hint: "Labels stay text, in the single-line font Relief SingleLine CAD.\n"
                 + "CAD/CAM tools with that font installed draw one-stroke letters."
         } // SvgModeItem singleLineFont
 
@@ -163,17 +163,17 @@ Menu {
             enabled: root.svgTextModesEnabled
             isLast: root.lastSvgTextMode === "hersheyStrokes"
             onChosen: function(textMode) { root.exportSvgModeRequested(textMode) }
-            hint: "Labels become single-stroke paths for plotters, cutters and engravers. "
+            hint: "Labels become single-stroke paths for plotters, cutters and engravers.\n"
                 + "No font needed. The text is kept in data-text but is not editable."
         } // SvgModeItem hersheyStrokes
 
         MenuItem {
             // Only for labels that are already paths: the three modes need <text>.
-            text: "As supplied (labels are already paths)"
+            text: "As supplied"
             visible: !root.svgTextModesEnabled
             height: visible ? implicitHeight : 0
             ToolTip.visible: hovered
-            ToolTip.text:    "The labels in this file are paths, not text, so no text mode applies. "
+            ToolTip.text:    "The labels in this file are paths, not text, so no text mode applies.\n"
                            + "Exports the layout unchanged."
             ToolTip.delay:   500
             onTriggered: root.exportSvgModeRequested("asSupplied")
@@ -189,13 +189,16 @@ Menu {
         } // if svgModeSubmenu
     } // Component.onCompleted
 
+    // Hidden Menu items keep their height; collapse them so the Export menu has no blank row.
     MenuSeparator {
         visible: root.showProjector
+        height: visible ? implicitHeight : 0
     } // MenuSeparator projector divider
 
     MenuItem {
         text:    "Projector"
         visible: root.showProjector
+        height:  visible ? implicitHeight : 0
         enabled: root.layoutReady
         onTriggered: root.projectorRequested()
     } // MenuItem Projector
