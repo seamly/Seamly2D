@@ -26,7 +26,7 @@ import urllib.request
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-WORKSPACE = HERE.parents[1]  # src/app/seamlylayout
+WORKSPACE = HERE.parents[1] / "src" / "app" / "seamlylayout"
 CARGO_LOCK = WORKSPACE / "Cargo.lock"
 BRIDGE_MANIFEST = WORKSPACE / "crates" / "cxxqt_bridge" / "Cargo.toml"
 
