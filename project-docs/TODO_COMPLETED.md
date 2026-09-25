@@ -910,3 +910,4 @@ LGPL notices in `src/app/seamlylayout/packaging/licenses/`, but none exist.
 - [x] Rotation expressions are not rewritten; `data-grainline-angle` still exports the upward direction
 - [x] Union tool: grainline length converted to pixels before placement; it used pattern units
 - [x] Tests: `TST_SvgComponentTags` — `UpwardAngleFlipsDownwardGrainline`, `CenteredStartPutsMidpointOnCenter`, `DownwardGrainAxisPointsUp`
+- [x] SeamlyLayout `svg_dom::verticalize_dom` turns grain to point up, not down (user decision)

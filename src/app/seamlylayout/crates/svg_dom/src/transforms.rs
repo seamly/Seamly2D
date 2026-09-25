@@ -597,7 +597,9 @@ fn col_rms_norm(m: &Matrix2D) -> f32 {
 // ---------------------------------------------------------------------------
 
 /// @brief Rotate each top-level pattern piece `<g>` so its grainline runs vertically
-///        (at 90° in SVG coordinates — parallel to the Y axis, pointing down).
+///        (at −90° in SVG coordinates — parallel to the Y axis, pointing up).
+/// @details Seamly2D grainlines without top and bottom anchors point up, so those
+///          pieces keep their drafted orientation.
 /// @details For each direct `<g>` child of `doc.root` that carries an `id` attribute:
 ///          1. Locates the grainline element — the first descendant whose `id` contains
 ///             the token "grainline" (case-insensitive).  Searches that element for a
@@ -606,7 +608,7 @@ fn col_rms_norm(m: &Matrix2D) -> f32 {
 ///          3. Skips the piece if neither source exists, so the piece keeps its
 ///             drafted orientation.
 ///          3. Computes θ = atan2(dy, dx) for the grainline direction vector.
-///          4. Computes rotation_angle = 90° − θ, normalised to [−180, 180].
+///          4. Computes rotation_angle = −90° − θ, normalised to [−180, 180].
 ///          5. Adds `transform="rotate(rotation_angle, cx, cy)"` to the `<g>`, where
 ///             (cx, cy) is the piece's axis-aligned bounding-box centre.
 ///          Groups with no geometry, no id, or whose rotation is < 0.1° are skipped.
@@ -618,7 +620,7 @@ pub fn verticalize_dom(doc: &mut Document) {
     struct RotParams {
         // Index within doc.root.children where the <g> element lives.
         child_idx: usize,
-        // Rotation angle in degrees: 90° - θ, normalised to [-180, 180].
+        // Rotation angle in degrees: -90° - θ, normalised to [-180, 180].
         angle_deg: f64,
         // Bounding-box centre of the piece — used as the rotation pivot.
         cx: f32,
@@ -647,9 +649,8 @@ pub fn verticalize_dom(doc: &mut Document) {
             continue; // no grainline — keep drafted orientation
         }; // grainline_angle
 
-        // Compute rotation needed to make the grainline vertical (90° in SVG).
-        // Mirrors the original get_rotation_angle() function.
-        let mut angle_deg = 90.0 - theta_deg;
+        // Compute rotation needed to make the grainline point up (-90° in SVG, Y axis down).
+        let mut angle_deg = -90.0 - theta_deg;
         // Normalise to [-180, 180] to choose the shortest rotation.
         while angle_deg > 180.0 {
             angle_deg -= 360.0;
@@ -1219,7 +1220,7 @@ mod tests {
     // -----------------------------------------------------------------------
 
     // @brief A grainline <line id="grainline"> at 45° (θ=45°) should produce
-    //        rotate(+45°, cx, cy) on the <g> — 90° - 45° = 45°, makes it vertical.
+    //        rotate(-135°, cx, cy) on the <g> — -90° - 45° = -135°, makes it point up.
     const GRAINLINE_45: &str = r#"<svg width="200" height="200">
   <g id="piece-1">
     <path d="M 0,0 L 100,0 L 100,80 L 0,80 Z"/>
@@ -1236,24 +1237,23 @@ mod tests {
         let svg = doc.to_string();
         assert!(svg.contains("rotate("), "expected rotate() transform: {svg}");
 
-        // rotation_angle = 90° - 45° = +45°.
         // The grainline (dx=10, dy=10) has θ = atan2(10,10) = 45°.
-        // To make it vertical (90°): rotate piece by 90° - 45° = +45°.
+        // To make it point up (-90°): rotate piece by -90° - 45° = -135°.
         let transform = doc
             .get_attr_by_id("piece-1", "transform")
             .expect("piece-1 missing transform after verticalize_dom");
         assert!(
-            transform.starts_with("rotate(45"),
-            "expected rotate(45...) in '{transform}'"
+            transform.starts_with("rotate(-135"),
+            "expected rotate(-135...) in '{transform}'"
         );
     } // grainline_at_45_gets_rotate_transform
 
-    // @brief A grainline already vertical (θ=90°, pointing down) must not be rotated.
-    // rotation_angle = 90° - 90° = 0° → skip.
+    // @brief A grainline already pointing up (θ=-90°) must not be rotated.
+    // rotation_angle = -90° - (-90°) = 0° → skip.
     const GRAINLINE_VERTICAL: &str = r#"<svg width="200" height="200">
   <g id="piece-2">
     <path d="M 0,0 L 100,0 L 100,80 L 0,80 Z"/>
-    <line id="grainline" x1="50" y1="0" x2="50" y2="100"/>
+    <line id="grainline" x1="50" y1="100" x2="50" y2="0"/>
   </g>
 </svg>"#;
 
@@ -1262,7 +1262,7 @@ mod tests {
         let mut doc = Document::parse(GRAINLINE_VERTICAL).unwrap();
         verticalize_dom(&mut doc);
 
-        // Grainline (dx=0, dy=100) → θ = 90° → rotation = 0° → skip.
+        // Grainline (dx=0, dy=-100) → θ = -90° → rotation = 0° → skip.
         // No transform attribute should be added.
         let transform = doc.get_attr_by_id("piece-2", "transform");
         assert!(
@@ -1293,10 +1293,10 @@ mod tests {
         );
     } // no_grainline_keeps_drafted_orientation
 
-    // @brief data-grainline-angle="90" (grain up on screen) → θ = −90° →
-    // rotation = 90° − (−90°) = 180°, the same result a drawn upward grainline gives.
+    // @brief data-grainline-angle="270" (grain down on screen) → θ = −270° →
+    // rotation = −90° − (−270°) = 180°, the same result a drawn downward grainline gives.
     const GRAINLINE_ATTRIBUTE: &str = r#"<svg width="200" height="200">
-  <g id="piece-5" data-grainline-angle="90">
+  <g id="piece-5" data-grainline-angle="270">
     <path d="M 0,0 L 100,0 L 100,80 L 0,80 Z"/>
   </g>
 </svg>"#;
@@ -1311,6 +1311,27 @@ mod tests {
             .expect("piece-5 missing transform after verticalize_dom");
         assert!(transform.starts_with("rotate(180"), "expected rotate(180...) in '{transform}'");
     } // grainline_attribute_sets_rotation
+
+    // @brief data-grainline-angle="90" (grain up on screen) needs no rotation.
+    #[test]
+    fn upward_grainline_attribute_unchanged() {
+        let svg = GRAINLINE_ATTRIBUTE.replace(r#""270""#, r#""90""#);
+        let mut doc = Document::parse(&svg).unwrap();
+        verticalize_dom(&mut doc);
+        assert!(doc.get_attr_by_id("piece-5", "transform").is_none());
+    } // upward_grainline_attribute_unchanged
+
+    // @brief A drawn grainline pointing down (θ=90°) turns 180° to point up.
+    #[test]
+    fn downward_grainline_turns_to_point_up() {
+        let svg = GRAINLINE_VERTICAL.replace(r#"y1="100" x2="50" y2="0""#, r#"y1="0" x2="50" y2="100""#);
+        let mut doc = Document::parse(&svg).unwrap();
+        verticalize_dom(&mut doc);
+        let transform = doc
+            .get_attr_by_id("piece-2", "transform")
+            .expect("piece-2 missing transform after verticalize_dom");
+        assert!(transform.starts_with("rotate(-180"), "expected rotate(-180...) in '{transform}'");
+    } // downward_grainline_turns_to_point_up
 
     // @brief A drawn grainline wins over the attribute.
     #[test]
@@ -1333,7 +1354,7 @@ mod tests {
         assert!(has_grain_direction(&root_child(GRAINLINE_VERTICAL)));
         assert!(has_grain_direction(&root_child(GRAINLINE_ATTRIBUTE)));
         assert!(!has_grain_direction(&root_child(NO_GRAINLINE)));
-        let bad = GRAINLINE_ATTRIBUTE.replace(r#""90""#, r#""abc""#);
+        let bad = GRAINLINE_ATTRIBUTE.replace(r#""270""#, r#""abc""#);
         assert!(!has_grain_direction(&root_child(&bad)));
     } // has_grain_direction_sources
 
@@ -1354,13 +1375,13 @@ mod tests {
         verticalize_dom(&mut doc);
 
         // id "grainline-arrow" contains "grainline"; path direction (30,30) → θ=45°
-        // → rotation = +45°.
+        // → rotation = -135°.
         let transform = doc
             .get_attr_by_id("piece-4", "transform")
             .expect("piece-4 missing transform");
         assert!(
-            transform.starts_with("rotate(45"),
-            "expected rotate(45...) from grainline child group, got '{transform}'"
+            transform.starts_with("rotate(-135"),
+            "expected rotate(-135...) from grainline child group, got '{transform}'"
         );
     } // grainline_in_child_group_found
 
