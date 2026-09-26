@@ -8,7 +8,7 @@ re-accumulate finished-session narrative in this file.
 
 ## 2026-09-26 — New pieces read Preferences > Pattern defaults
 
-Merged `task-new-piece-defaults` with skip-ci.
+Merged `task-new-piece-defaults`. Full CI: the change touches `vmisc.pro` and `tools.pri`. Local build + all Qt suites passed.
 
 - `NewPieceDefaults` (`vtools/tools/new_piece_defaults.{h,cpp}`): label size, grainline and arrow length in pattern units; label templates.
 - Missing user template → built-in resource `:/labels/*.xml`. `ensureDataRootTree` seeds both templates at startup.
