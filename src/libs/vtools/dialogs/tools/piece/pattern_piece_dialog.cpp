@@ -64,6 +64,7 @@
 #include "../vpatterndb/vpiecepath.h"
 #include "../../support/edit_formula_dialog.h"
 #include "../../support/editlabeltemplate_dialog.h"
+#include "../../../tools/new_piece_defaults.h"
 #include "../../../tools/pattern_piece_tool.h"
 #include "../../../undocommands/savepiecepathoptions.h"
 
@@ -3282,8 +3283,10 @@ void PatternPieceDialog::initializeLabelsTab()
     //Piece label
     ui->pieceLabel_GroupBox->setChecked(qApp->Settings()->showPieceLabels());
 
-    ui->pieceLabelWidthFormula_LineEdit->setPlainText(qApp->LocaleToString(qApp->Settings()->getDefaultLabelWidth()));
-    ui->pieceLabelHeightFormula_LineEdit->setPlainText(qApp->LocaleToString(qApp->Settings()->getDefaultLabelHeight()));
+    ui->pieceLabelWidthFormula_LineEdit->setPlainText(
+        qApp->LocaleToString(NewPieceDefaults::labelWidth(qApp->patternUnit())));
+    ui->pieceLabelHeightFormula_LineEdit->setPlainText(
+        qApp->LocaleToString(NewPieceDefaults::labelHeight(qApp->patternUnit())));
 
     connect(ui->pieceLabel_GroupBox, &QGroupBox::toggled, this, &PatternPieceDialog::enabledPieceLabel);
     initAnchorPoint(ui->pieceLabelCenterAnchor_ComboBox);
@@ -3314,13 +3317,7 @@ void PatternPieceDialog::initializeLabelsTab()
 
     if (m_pieceLabelLines.isEmpty())
     {
-        VLabelTemplate labelTemplate;
-        QString filename = qApp->Settings()->getDefaultPieceTemplate();
-        if (QFileInfo::exists(filename))
-        {
-            labelTemplate.setXMLContent(VLabelTemplateConverter(filename).Convert());
-            m_pieceLabelLines = labelTemplate.ReadLines();
-        }
+        m_pieceLabelLines = NewPieceDefaults::pieceLabelTemplate();
     }
 
     enabledPieceLabel();
@@ -3328,8 +3325,10 @@ void PatternPieceDialog::initializeLabelsTab()
     //Pattern label
     ui->patternLabel_GroupBox->setChecked(qApp->Settings()->showPatternLabels());
 
-    ui->patternLabelWidthFormula_LineEdit->setPlainText(qApp->LocaleToString(qApp->Settings()->getDefaultLabelWidth()));
-    ui->patternLabelHeightFormula_LineEdit->setPlainText(qApp->LocaleToString(qApp->Settings()->getDefaultLabelHeight()));
+    ui->patternLabelWidthFormula_LineEdit->setPlainText(
+        qApp->LocaleToString(NewPieceDefaults::labelWidth(qApp->patternUnit())));
+    ui->patternLabelHeightFormula_LineEdit->setPlainText(
+        qApp->LocaleToString(NewPieceDefaults::labelHeight(qApp->patternUnit())));
 
     connect(ui->patternLabel_GroupBox, &QGroupBox::toggled, this, &PatternPieceDialog::enabledPatternLabel);
     initAnchorPoint(ui->patternLabelCenterAnchor_ComboBox);
@@ -3360,14 +3359,12 @@ void PatternPieceDialog::initializeLabelsTab()
 
     m_patternLabelLines = qApp->getCurrentDocument()->getPatternLabelTemplate();
 
+    // The pattern label text belongs to the document. Give a document without one the default text.
     if (m_patternLabelLines.isEmpty())
     {
-        VLabelTemplate labelTemplate;
-        QString filename = qApp->Settings()->getDefaultPatternTemplate();
-        if (QFileInfo(filename).exists())
+        m_patternLabelLines = NewPieceDefaults::patternLabelTemplate();
+        if (!m_patternLabelLines.isEmpty())
         {
-            labelTemplate.setXMLContent(VLabelTemplateConverter(filename).Convert());
-            m_patternLabelLines = labelTemplate.ReadLines();
             qApp->getCurrentDocument()->setPatternLabelTemplate(m_patternLabelLines);
         }
     }
@@ -3386,15 +3383,9 @@ void PatternPieceDialog::initializeGrainlineTab()
     ui->anchorPoints_GroupBox->setEnabled(enabled);
     ui->arrows_GroupBox->setEnabled(enabled);
 
-    qreal arrowLength = FromPixel(qApp->Settings()->getDefaultArrowLength(), *data->GetPatternUnit());
-    ui->arrowlLengthFormula_LineEdit->setPlainText(qApp->LocaleToString(arrowLength));
-
-    qreal grainlineLength = qApp->Settings()->getDefaultGrainlineLength();
-    if (grainlineLength < arrowLength * 2)
-    {
-        grainlineLength = arrowLength * 2.1;
-    }
-    ui->lengthFormula_LineEdit->setPlainText(qApp->LocaleToString(grainlineLength));
+    const Unit patternUnit = *data->GetPatternUnit();
+    ui->arrowlLengthFormula_LineEdit->setPlainText(qApp->LocaleToString(NewPieceDefaults::arrowLength(patternUnit)));
+    ui->lengthFormula_LineEdit->setPlainText(qApp->LocaleToString(NewPieceDefaults::grainlineLength(patternUnit)));
 
     const qreal grainlineAngle = VGrainlineData::upwardAngle(qApp->Settings()->getDefaultGrainlineAngle());
     ui->rotationFormula_LineEdit->setPlainText(qApp->LocaleToString(grainlineAngle));

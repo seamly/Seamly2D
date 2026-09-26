@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
     Q_INIT_RESOURCE(schema);
     Q_INIT_RESOURCE(flags);
     Q_INIT_RESOURCE(diagrams);
+    Q_INIT_RESOURCE(label_templates);
 
     // Check if the Qt version is at least 6.2.4
     QT_REQUIRE_VERSION(argc, argv, "6.2.4");

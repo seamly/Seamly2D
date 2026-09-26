@@ -55,8 +55,11 @@
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
 #include "../vgeometry/vsplinepath.h"
 #include "../vmisc/vabstractapplication.h"
+#include "../vmisc/vcommonsettings.h"
+#include "../vtools/tools/new_piece_defaults.h"
 
 #include <QtTest>
+#include <QTemporaryDir>
 
 //---------------------------------------------------------------------------------------------------------------------
 TST_VPiece::TST_VPiece(QObject *parent)
@@ -383,4 +386,65 @@ void TST_VPiece::PatternLabelTakesPieceLabelPlaceWithoutPieceLabel() const
     const QRectF patternLabel(VPatternLabelData::defaultPatternLabelPos(pieceRect, labelSize, QRectF()), labelSize);
 
     QCOMPARE(patternLabel.center(), pieceRect.center() + QPointF(ToPixel(1, Unit::Cm), 0));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::GrainlineKeepsLengthLongerThanTwoArrows() const
+{
+    QCOMPARE(NewPieceDefaults::fitGrainlineLength(2.0, 0.5), 2.0);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::GrainlineGrowsToFitTwoArrows() const
+{
+    QCOMPARE(NewPieceDefaults::fitGrainlineLength(0.5, 0.5), 1.05);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::LabelTemplateReadsUserFile() const
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+
+    const QString userFile = directory.filePath(QStringLiteral("user_piece_label.xml"));
+    QFile file(userFile);
+    QVERIFY(file.open(QIODevice::WriteOnly));
+    file.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
+               "<template><version>1.0.0</version><lines>"
+               "<line alignment=\"4\" bold=\"false\" italic=\"false\" sfIncrement=\"0\" text=\"user line\"/>"
+               "</lines></template>");
+    file.close();
+
+    const QVector<VLabelTemplateLine> lines =
+        NewPieceDefaults::readLabelTemplate(userFile, VCommonSettings::builtInPieceLabelTemplate());
+
+    QCOMPARE(lines.size(), 1);
+    QCOMPARE(lines.at(0).line, QStringLiteral("user line"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::LabelTemplateFallsBackToBuiltIn() const
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+
+    const QVector<VLabelTemplateLine> lines =
+        NewPieceDefaults::readLabelTemplate(directory.filePath(QStringLiteral("missing.xml")),
+                                            VCommonSettings::builtInPieceLabelTemplate());
+
+    QCOMPARE(lines.size(), 3);
+    QCOMPARE(lines.at(0).line, QStringLiteral("%pLetter%"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::LabelTemplateEmptyWithoutAnyFile() const
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+
+    const QVector<VLabelTemplateLine> lines =
+        NewPieceDefaults::readLabelTemplate(directory.filePath(QStringLiteral("missing.xml")),
+                                            directory.filePath(QStringLiteral("also_missing.xml")));
+
+    QVERIFY(lines.isEmpty());
 }

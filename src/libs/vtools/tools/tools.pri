@@ -11,6 +11,7 @@ HEADERS += \
     $$PWD/drawTools/toolpoint/toolsinglepoint/intersect_circletangent_tool.h \
     $$PWD/nodeDetails/anchorpoint_tool.h \
     $$PWD/nodeDetails/internal_path_tool.h \
+    $$PWD/new_piece_defaults.h \
     $$PWD/pattern_piece_tool.h \
     $$PWD/vdatatool.h \
     $$PWD/vabstracttool.h \
@@ -73,6 +74,7 @@ SOURCES += \
     $$PWD/drawTools/toolpoint/toolsinglepoint/intersect_circletangent_tool.cpp \
     $$PWD/nodeDetails/anchorpoint_tool.cpp \
     $$PWD/nodeDetails/internal_path_tool.cpp \
+    $$PWD/new_piece_defaults.cpp \
     $$PWD/pattern_piece_tool.cpp \
     $$PWD/union_tool.cpp \
     $$PWD/vdatatool.cpp \

@@ -26,7 +26,8 @@ RESOURCES += \
     share/resources/sounds.qrc \
     share/resources/theme.qrc \ # Windows theme icons.
     share/resources/icon.qrc \ # All other icons except cursors and Windows theme.
-    share/resources/flags.qrc
+    share/resources/flags.qrc \
+    share/resources/label_templates.qrc # Built-in label templates, the fallback for a missing user file.
 
 # This is static library so no need in "make install"
 

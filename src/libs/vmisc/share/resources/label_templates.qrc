@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="labels/default_piece_label.xml">../../../../app/share/labels/default_piece_label.xml</file>
+        <file alias="labels/default_pattern_label.xml">../../../../app/share/labels/default_pattern_label.xml</file>
+    </qresource>
+</RCC>

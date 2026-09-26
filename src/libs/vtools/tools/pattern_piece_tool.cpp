@@ -628,7 +628,6 @@ void PatternPieceTool::updatePieceLabel()
 {
 
     const VPiece piece = VAbstractTool::data.GetPiece(m_id);
-    qDebug() << "Update Piece label: " << piece.GetName();
     const VPieceLabelData &labelData = piece.GetPatternPieceData();
 
     if (labelData.IsVisible() & qApp->Settings()->showLabels())
@@ -654,7 +653,6 @@ void PatternPieceTool::updatePieceLabel()
 void PatternPieceTool::updatePatternLabel()
 {
     const VPiece piece = VAbstractTool::data.GetPiece(m_id);
-    qDebug() << "Update Pattern label: " << piece.GetName();
     const VPatternLabelData &data = piece.GetPatternInfo();
 
     if (data.IsVisible() & qApp->Settings()->showLabels())
@@ -682,7 +680,6 @@ void PatternPieceTool::updateGrainline()
     const VPiece piece = VAbstractTool::data.GetPiece(m_id);
     const VGrainlineData &data = piece.GetGrainlineGeometry();
 
-    qDebug() << "Update Grainline IsVisible() = " << data.IsVisible();
 
     if (data.IsVisible() & qApp->Settings()->showGrainlines())
     {
@@ -821,7 +818,6 @@ void PatternPieceTool::SaveMoveGrainline(const QPointF &ptPos)
     VPiece oldPiece = VAbstractTool::data.GetPiece(m_id);
     VPiece newPiece = oldPiece;
     newPiece.GetGrainlineGeometry().SetPos(ptPos);
-    qDebug() << "******* new grainline pos" << ptPos;
 
     SavePieceOptions *moveCommand = new SavePieceOptions(oldPiece, newPiece, doc, m_id);
     moveCommand->setText(tr("move grainline"));
@@ -1197,7 +1193,6 @@ void PatternPieceTool::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
 
     QAction *showGrainline = menu.addAction(QIcon("://icon/32x32/grainline.png"), tr("Show Grainline") + "\tG");
     showGrainline->setCheckable(true);
-    qDebug() << "Grainline IsVisible() = " << piece.GetGrainlineGeometry().IsVisible();
     showGrainline->setChecked(piece.GetGrainlineGeometry().IsVisible());
 
     QAction *showPatternLabel = menu.addAction(QIcon("://icon/32x32/pattern_label.png"), tr("Show Pattern Label") + "\t[");
@@ -1769,7 +1764,6 @@ void PatternPieceTool::nodeDeleted(quint32 id)
 VPieceItem::MoveTypes PatternPieceTool::findLabelGeometry(const VPatternLabelData &labelData, qreal &rotationAngle,
                                                             qreal &labelWidth, qreal &labelHeight, QPointF &pos)
 {
-    qDebug() << "Find label Geometery";
     VPieceItem::MoveTypes restrictions = VPieceItem::AllModifications;
     try
     {
@@ -2148,7 +2142,6 @@ bool PatternPieceTool::PrepareLabelData(const VPatternLabelData &labelData, VTex
 {
     SCASSERT(labelItem != nullptr)
 
-    qDebug() << "Prepare Label Data";
 
     qreal labelWidth = 0;
     qreal labelHeight = 0;
@@ -2163,15 +2156,7 @@ bool PatternPieceTool::PrepareLabelData(const VPatternLabelData &labelData, VTex
     QFont fnt = qApp->Settings()->getLabelFont();
     {
         const int iFS = labelData.getFontSize();
-        qDebug() << " Label Font Size = " << iFS;
         iFS < MIN_FONT_SIZE ? fnt.setPixelSize(MIN_FONT_SIZE) : fnt.setPixelSize(iFS);
-        if (iFS < MIN_FONT_SIZE)
-        {
-        qDebug() << " Label Font Pixel Size = " << MIN_FONT_SIZE;
-        }
-        else {
-        qDebug() << " Label Font Pixel Size = " << iFS;
-        }
     }
     labelItem->setFont(fnt);
     labelItem->setSize(ToPixel(labelWidth, *VDataTool::data.GetPatternUnit()),

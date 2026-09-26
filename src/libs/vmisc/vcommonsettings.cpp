@@ -637,6 +637,33 @@ void VCommonSettings::setDataRoot(const QString &value)
     ensureDataRootTree(root);
 }
 
+namespace
+{
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief seedLabelTemplate copies one built-in label template into a folder when that folder lacks it.
+ * @param builtInFile resource path of the template.
+ * @param directory   folder that receives the copy.
+ */
+void seedLabelTemplate(const QString &builtInFile, const QString &directory)
+{
+    const QString target = directory + QLatin1Char('/') + QFileInfo(builtInFile).fileName();
+    if (QFileInfo::exists(target))
+    {
+        return;
+    }
+
+    if (!QFile::copy(builtInFile, target))
+    {
+        qWarning() << "Could not seed the label template" << QDir::toNativeSeparators(target);
+        return;
+    }
+
+    // A copy from a resource is read-only. The user must be able to edit the seeded template.
+    QFile::setPermissions(target, QFile::permissions(target) | QFileDevice::WriteOwner | QFileDevice::WriteUser);
+}
+}
+
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief ensureDataRootTree creates the data root and its standard subfolders if missing.
@@ -680,7 +707,26 @@ bool VCommonSettings::ensureDataRootTree(const QString &root)
         directory.mkpath(subdirectory);
     }
 
+    // New pieces read their label text from these files. Seed them so the defaults work without a Preferences visit.
+    const QString labelDirectory = target + QLatin1Char('/') + tr("label templates");
+    seedLabelTemplate(builtInPieceLabelTemplate(), labelDirectory);
+    seedLabelTemplate(builtInPatternLabelTemplate(), labelDirectory);
+
     return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief builtInPieceLabelTemplate returns the resource path of the default piece label template.
+QString VCommonSettings::builtInPieceLabelTemplate()
+{
+    return QStringLiteral(":/labels/default_piece_label.xml");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief builtInPatternLabelTemplate returns the resource path of the default pattern label template.
+QString VCommonSettings::builtInPatternLabelTemplate()
+{
+    return QStringLiteral(":/labels/default_pattern_label.xml");
 }
 
 //---------------------------------------------------------------------------------------------------------------------
