@@ -911,3 +911,14 @@ LGPL notices in `src/app/seamlylayout/packaging/licenses/`, but none exist.
 - [x] Union tool: grainline length converted to pixels before placement; it used pattern units
 - [x] Tests: `TST_SvgComponentTags` — `UpwardAngleFlipsDownwardGrainline`, `CenteredStartPutsMidpointOnCenter`, `DownwardGrainAxisPointsUp`
 - [x] SeamlyLayout `svg_dom::verticalize_dom` turns grain to point up, not down (user decision)
+
+## Piece and pattern labels placed beside the grainline (completed 2026-09-25)
+
+- [x] New piece (dialog and Union tool): piece label center = bounding box center + 1 cm right, piece local space
+- [x] Pattern label: vertically centered; left edge 1 cm right of the piece label
+- [x] No piece label at its default place (hidden or anchored): pattern label takes the piece label place
+- [x] Labels with top left and bottom right anchors keep the anchor geometry; stored position is not used
+- [x] Dialog: pattern label size read from the pattern label fields; it used the piece label fields
+- [x] Union tool: default label size converted to pixels before placement; it used pattern units
+- [x] `VPatternLabelData::defaultPieceLabelPos`, `defaultPatternLabelPos`, `hasCornerAnchors`
+- [x] Tests: `TST_VPiece` — `PieceLabelCenteredRightOfBoundingBoxCenter`, `PatternLabelRightOfPieceLabel`, `PatternLabelTakesPieceLabelPlaceWithoutPieceLabel`

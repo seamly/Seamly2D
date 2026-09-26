@@ -30,6 +30,8 @@
 #define VPATTERNINFOGEOMETRY_H
 
 #include <QPointF>
+#include <QRectF>
+#include <QSizeF>
 
 #include "vabstractfloatitemdata.h"
 
@@ -74,6 +76,12 @@ public:
 
     quint32 bottomRightAnchorPoint() const;
     void    setBottomRightAnchorPoint(const quint32 &bottomRightAnchorPoint);
+
+    bool    hasCornerAnchors() const;
+
+    static QPointF defaultPieceLabelPos(const QRectF &pieceRect, const QSizeF &labelSize);
+    static QPointF defaultPatternLabelPos(const QRectF &pieceRect, const QSizeF &labelSize,
+                                          const QRectF &pieceLabelRect);
 
 private:
     QSharedDataPointer<VPatternLabelDataPrivate> d;

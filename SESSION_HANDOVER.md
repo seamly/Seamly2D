@@ -6,6 +6,14 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-25 — Piece and pattern labels beside the grainline
+
+Merged `task-label-placement` with skip-ci.
+
+- New piece (dialog, Union tool): piece label centered 1 cm right of bounding box center; pattern label 1 cm right of piece label.
+- Only new pieces. Existing pieces keep stored label positions.
+- Not tested in the GUI.
+
 ## 2026-09-25 — Grainline default angle, centered, pointing up
 
 Merged `task-grainline-default-angle` with skip-ci. Local build + all Qt suites passed.

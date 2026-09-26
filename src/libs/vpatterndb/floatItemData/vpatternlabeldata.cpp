@@ -29,6 +29,7 @@
 #include "vpatternlabeldata.h"
 #include "vpatternlabeldata_p.h"
 #include "../ifc/ifcdef.h"
+#include "../vmisc/def.h"
 
 #ifdef Q_COMPILER_RVALUE_REFS
 VPatternLabelData &VPatternLabelData::operator=(VPatternLabelData &&data) noexcept
@@ -148,4 +149,45 @@ quint32 VPatternLabelData::bottomRightAnchorPoint() const
 void VPatternLabelData::setBottomRightAnchorPoint(const quint32 &bottomRightAnchorPoint)
 {
     d->m_bottomRightAnchorPoint = bottomRightAnchorPoint;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief hasCornerAnchors returns true when both the top left and the bottom right anchor points are set.
+bool VPatternLabelData::hasCornerAnchors() const
+{
+    return d->m_topLeftAnchorPoint != NULL_ID && d->m_bottomRightAnchorPoint != NULL_ID;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief defaultPieceLabelPos returns the top left of a new piece label.
+ * @param pieceRect bounding box of the piece main path, in piece local pixels.
+ * @param labelSize label size in pixels.
+ *
+ * The label center is 1 cm right of the bounding box center, so the label does not sit on the grainline midpoint.
+ */
+QPointF VPatternLabelData::defaultPieceLabelPos(const QRectF &pieceRect, const QSizeF &labelSize)
+{
+    const QPointF center = pieceRect.center() + QPointF(ToPixel(1, Unit::Cm), 0);
+    return center - QPointF(labelSize.width() / 2.0, labelSize.height() / 2.0);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief defaultPatternLabelPos returns the top left of a new pattern label.
+ * @param pieceRect      bounding box of the piece main path, in piece local pixels.
+ * @param labelSize      label size in pixels.
+ * @param pieceLabelRect piece label at its default place, or a null rect when the piece has no such label.
+ *
+ * The label is vertically centered on the bounding box. Its left edge is 1 cm right of the piece label.
+ * Without a piece label it takes the piece label place.
+ */
+QPointF VPatternLabelData::defaultPatternLabelPos(const QRectF &pieceRect, const QSizeF &labelSize,
+                                                  const QRectF &pieceLabelRect)
+{
+    if (pieceLabelRect.isNull())
+    {
+        return defaultPieceLabelPos(pieceRect, labelSize);
+    }
+    return QPointF(pieceLabelRect.right() + ToPixel(1, Unit::Cm), pieceRect.center().y() - labelSize.height() / 2.0);
 }

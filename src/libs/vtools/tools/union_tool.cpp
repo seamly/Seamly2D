@@ -1329,11 +1329,6 @@ void createUnion(quint32 id, const UnionToolInitData &initData, qreal dx, qreal 
     newPiece.GetPatternInfo().SetVisible(qApp->Settings()->showPatternLabels());
     newPiece.GetPatternInfo().SetLabelWidth(QString::number(qApp->Settings()->getDefaultLabelWidth()));
     newPiece.GetPatternInfo().SetLabelHeight(QString::number(qApp->Settings()->getDefaultLabelHeight()));
-    qreal width =  newPiece.GetPatternInfo().GetLabelWidth().toDouble();
-    qreal height = newPiece.GetPatternInfo().GetLabelHeight().toDouble();
-    qreal xPos = rect.left() + (rect.width()/2.0 - width)/2.0;
-    qreal yPos = rect.center().y() - height/2.0;
-    newPiece.GetPatternInfo().SetPos(QPointF(xPos, yPos));
 
     newPiece.GetPatternPieceData().SetVisible(qApp->Settings()->showPieceLabels());
     newPiece.GetPatternPieceData().SetLabelWidth(QString::number(qApp->Settings()->getDefaultLabelWidth()));
@@ -1346,11 +1341,16 @@ void createUnion(quint32 id, const UnionToolInitData &initData, qreal dx, qreal 
         newPiece.GetPatternPieceData().SetLabelTemplate(labelTemplate.ReadLines());
     }
 
-    width = newPiece.GetPatternPieceData().GetLabelWidth().toDouble();
-    height = newPiece.GetPatternPieceData().GetLabelHeight().toDouble();
-    xPos = rect.center().x() + (rect.width()/2.0 - width)/2.0;
-    yPos = rect.center().y() - height/2.0;
-    newPiece.GetPatternPieceData().SetPos(QPointF(xPos, yPos));
+    // Both labels share the default size, set in pattern units.
+    const Unit unit = *initData.data->GetPatternUnit();
+    const QSizeF labelSize(ToPixel(qApp->Settings()->getDefaultLabelWidth(), unit),
+                           ToPixel(qApp->Settings()->getDefaultLabelHeight(), unit));
+    const QPointF pieceLabelPos = VPatternLabelData::defaultPieceLabelPos(rect, labelSize);
+    newPiece.GetPatternPieceData().SetPos(pieceLabelPos);
+
+    const QRectF pieceLabelRect = newPiece.GetPatternPieceData().IsVisible() ? QRectF(pieceLabelPos, labelSize)
+                                                                             : QRectF();
+    newPiece.GetPatternInfo().SetPos(VPatternLabelData::defaultPatternLabelPos(rect, labelSize, pieceLabelRect));
 
     newPiece.GetGrainlineGeometry().SetVisible(qApp->Settings()->getDefaultGrainlineVisibilty());
     newPiece.GetGrainlineGeometry().setLength(QString::number(qApp->Settings()->getDefaultGrainlineLength()));

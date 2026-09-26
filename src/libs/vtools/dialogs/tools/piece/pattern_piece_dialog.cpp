@@ -2705,16 +2705,23 @@ VPiece PatternPieceDialog::CreatePiece() const
         VPiecePath path = piece.GetPath();
         const QRectF rect = QPolygonF(path.PathPoints(data)).boundingRect();
 
-        qreal width = getFormulaValue(ui->pieceLabelWidthFormula_LineEdit);
-        qreal height = getFormulaValue(ui->pieceLabelHeightFormula_LineEdit);
-        qreal xPos = rect.center().x() + (rect.width()/2.0 - width)/2.0;
-        qreal yPos = rect.center().y() - height/2.0;
-        piece.GetPatternPieceData().SetPos(QPointF(xPos, yPos));
+        const QSizeF pieceLabelSize(getFormulaValue(ui->pieceLabelWidthFormula_LineEdit),
+                                    getFormulaValue(ui->pieceLabelHeightFormula_LineEdit));
+        const QPointF pieceLabelPos = VPatternLabelData::defaultPieceLabelPos(rect, pieceLabelSize);
+        piece.GetPatternPieceData().SetPos(pieceLabelPos);
 
-        xPos = rect.left() + (rect.width()/2.0 - width)/2.0;
-        yPos = rect.center().y() - height/2.0;
-        piece.GetPatternInfo().SetPos(QPointF(xPos, yPos));
+        // Only a visible piece label without anchors sits at its default place and pushes the pattern label right.
+        const VPieceLabelData &pieceLabel = piece.GetPatternPieceData();
+        QRectF pieceLabelRect;
+        if (pieceLabel.IsVisible() && !pieceLabel.hasCornerAnchors() && pieceLabel.centerAnchorPoint() == NULL_ID)
+        {
+            pieceLabelRect = QRectF(pieceLabelPos, pieceLabelSize);
+        }
 
+        const QSizeF patternLabelSize(getFormulaValue(ui->patternLabelWidthFormula_LineEdit),
+                                      getFormulaValue(ui->patternLabelHeightFormula_LineEdit));
+        piece.GetPatternInfo().SetPos(VPatternLabelData::defaultPatternLabelPos(rect, patternLabelSize,
+                                                                                pieceLabelRect));
     }
 
     placeGrainline(piece.GetGrainlineGeometry(), piece.GetPath());

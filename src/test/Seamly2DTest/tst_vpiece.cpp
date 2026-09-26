@@ -52,6 +52,7 @@
 #include "../vpatterndb/vpiece.h"
 #include "../vpatterndb/vpiecenode.h"
 #include "../vpatterndb/vpiecepath.h"
+#include "../vpatterndb/floatItemData/vpatternlabeldata.h"
 #include "../vgeometry/vsplinepath.h"
 #include "../vmisc/vabstractapplication.h"
 
@@ -345,4 +346,41 @@ void TST_VPiece::AutoNameReusesNumberFreedByDeletion()
     // Numbering is derived from names currently in the container, not a
     // running total, so a number freed by deletion is available again.
     QCOMPARE(data->GetPiece(thirdId).GetName(), QStringLiteral("Piece 2"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::PieceLabelCenteredRightOfBoundingBoxCenter() const
+{
+    const QRectF pieceRect(100, 200, 400, 600);
+    const QSizeF labelSize(120, 80);
+
+    const QRectF label(VPatternLabelData::defaultPieceLabelPos(pieceRect, labelSize), labelSize);
+
+    QCOMPARE(label.center(), pieceRect.center() + QPointF(ToPixel(1, Unit::Cm), 0));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::PatternLabelRightOfPieceLabel() const
+{
+    const QRectF pieceRect(100, 200, 400, 600);
+    const QSizeF pieceLabelSize(120, 80);
+    const QSizeF patternLabelSize(150, 60);
+    const QRectF pieceLabel(VPatternLabelData::defaultPieceLabelPos(pieceRect, pieceLabelSize), pieceLabelSize);
+
+    const QRectF patternLabel(VPatternLabelData::defaultPatternLabelPos(pieceRect, patternLabelSize, pieceLabel),
+                              patternLabelSize);
+
+    QCOMPARE(patternLabel.left(), pieceLabel.right() + ToPixel(1, Unit::Cm));
+    QCOMPARE(patternLabel.center().y(), pieceRect.center().y());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::PatternLabelTakesPieceLabelPlaceWithoutPieceLabel() const
+{
+    const QRectF pieceRect(100, 200, 400, 600);
+    const QSizeF labelSize(150, 60);
+
+    const QRectF patternLabel(VPatternLabelData::defaultPatternLabelPos(pieceRect, labelSize, QRectF()), labelSize);
+
+    QCOMPARE(patternLabel.center(), pieceRect.center() + QPointF(ToPixel(1, Unit::Cm), 0));
 }

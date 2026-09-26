@@ -4,11 +4,15 @@ installer:
 seamly2d:
 - DONE - When the user assigns a piece name to a pattern piece through the properties dialog, the piece name should be unique and its svg id should be updated.
 - DONE - The <rect> element within each pattern piece should be named id="rect_<piecename>"
-- In 'Application Settings > Pattern > Grainlines', add an option for 'angle' and set the default value to '90'. 
+- DONE - In Piece Mode, grainline paths that are (not created using top and bottom anchor points) should 
+a) be created relative to the piece's bounding box's center point (cx, cy);
+b) grainline midpoint (x,y) = (cx, cy)
+c) use 'application settings > pattern > grainlines' values for angle, length, and length of arrows;
+d) point "Up" if angle != (180 or 0) such that its start coordinate has a higher y value and its end coordinate has a lower y value --> so seamlyLayout can arrange pieces based on consistent grainline directions.
+- DONE - In Piece Mode, create labels centered at the center of the bounding box then moved 1cm right (to avoid co-location with grainlines), location expressed in local space not in global space)  
+- DONE - In 'Application Settings > Pattern > Grainlines', add an option for 'angle' and set the default value to '90'. 
+
 - Create a plan: In 'Draft mode > Toolbox > Piece tool group > Add New Pattern Piece', read the 'Application settings > Pattern' values to automatically create labels and grainlines, and populate the context menu for each new pattern piece; discuss plan with me; if I approve then implement plan without asking me for permission.  
-- In Piece Mode, the grainline should start at the bottom and point 'Up' so that seamlyLayout can arrange pattern pieces correctly based on the grainline direction. Currently it appears that piece mode's grainline elements start at at the top (with a lower y value) and end at the bottom (with with a higher y value), so switch this so the grainline starts at the low y value and ends at the high y value. This rule does not apply for grainlines created with user-selected start point and end point, but applies to all other methods of creating grainlines. 
-- In Piece Mode, create grainlines centered at the center of the piece bounding box then moved 1cm left (to avoid co-location with piece labels), location expressed in local space not global space).
-- In Piece Mode, create labels centered at the center of the bounding box then moved 1cm right (to avoid co-location with grainlines), location expressed in local space not in global space)  
 
 seamlylayout:	
 - DONE - Export to SVG incorrectly retains the "Rectangles" group <g id="Rectangles"> and the <rect> element withing rectangle within each pattern piece. 

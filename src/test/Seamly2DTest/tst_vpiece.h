@@ -68,6 +68,9 @@ private slots:
     void KeepExplicitPieceName();
     void AutoNameAvoidsNumberStillInUse();
     void AutoNameReusesNumberFreedByDeletion();
+    void PieceLabelCenteredRightOfBoundingBoxCenter() const;
+    void PatternLabelRightOfPieceLabel() const;
+    void PatternLabelTakesPieceLabelPlaceWithoutPieceLabel() const;
 
 private:
     Q_DISABLE_COPY(TST_VPiece)
