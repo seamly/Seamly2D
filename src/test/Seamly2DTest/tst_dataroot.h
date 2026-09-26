@@ -79,6 +79,8 @@ private slots:
     void EnsureDataRootTreeCreatesTheSubfolders() const;
     void EnsureDataRootTreeKeepsExistingFiles() const;
     void StartupResolvesThenSeedsTheConfiguredRoot() const;
+    void EnsureDataRootTreeSeedsLabelTemplates() const;
+    void EnsureDataRootTreeKeepsUserLabelTemplate() const;
 
     void SeedSamplePatternsCopiesBundledFiles() const;
     void SeedSamplePatternsNeverOverwritesAnExistingFile() const;

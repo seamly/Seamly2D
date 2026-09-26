@@ -173,6 +173,7 @@ void TestApplication2D::initTranslateVariables()
 int main(int argc, char** argv)
 {
     Q_INIT_RESOURCE(schema);
+    Q_INIT_RESOURCE(label_templates);
 
     TestApplication2D app( argc, argv );// For QPrinter
 

@@ -71,6 +71,7 @@
 #include <QtDebug>
 #include <new>
 
+#include "new_piece_defaults.h"
 #include "pattern_piece_tool.h"
 #include "vdatatool.h"
 #include "vnodedetail.h"
@@ -1324,27 +1325,33 @@ void createUnion(quint32 id, const UnionToolInitData &initData, qreal dx, qreal 
     VPiecePath path = newPiece.GetPath();
     const QRectF rect = QPolygonF(path.PathPoints(initData.data)).boundingRect();
 
+    // Both labels share the default size, in pattern units.
+    const Unit unit = *initData.data->GetPatternUnit();
+    const qreal labelWidth = NewPieceDefaults::labelWidth(unit);
+    const qreal labelHeight = NewPieceDefaults::labelHeight(unit);
+
     newPiece.SetName(QObject::tr("Union piece"));
     newPiece.SetSeamAllowance(qApp->Settings()->getDefaultSeamAllowanceVisibilty());
     newPiece.GetPatternInfo().SetVisible(qApp->Settings()->showPatternLabels());
-    newPiece.GetPatternInfo().SetLabelWidth(QString::number(qApp->Settings()->getDefaultLabelWidth()));
-    newPiece.GetPatternInfo().SetLabelHeight(QString::number(qApp->Settings()->getDefaultLabelHeight()));
+    newPiece.GetPatternInfo().SetLabelWidth(QString::number(labelWidth));
+    newPiece.GetPatternInfo().SetLabelHeight(QString::number(labelHeight));
 
-    newPiece.GetPatternPieceData().SetVisible(qApp->Settings()->showPieceLabels());
-    newPiece.GetPatternPieceData().SetLabelWidth(QString::number(qApp->Settings()->getDefaultLabelWidth()));
-    newPiece.GetPatternPieceData().SetLabelHeight(QString::number(qApp->Settings()->getDefaultLabelHeight()));
-    QString filename = qApp->Settings()->getDefaultPieceTemplate();
-    if (QFileInfo(filename).exists())
+    // The pattern label text belongs to the document. Give a document without one the default text.
+    if (initData.doc->getPatternLabelTemplate().isEmpty())
     {
-        VLabelTemplate labelTemplate;
-        labelTemplate.setXMLContent(VLabelTemplateConverter(filename).Convert());
-        newPiece.GetPatternPieceData().SetLabelTemplate(labelTemplate.ReadLines());
+        const QVector<VLabelTemplateLine> patternLines = NewPieceDefaults::patternLabelTemplate();
+        if (!patternLines.isEmpty())
+        {
+            initData.doc->setPatternLabelTemplate(patternLines);
+        }
     }
 
-    // Both labels share the default size, set in pattern units.
-    const Unit unit = *initData.data->GetPatternUnit();
-    const QSizeF labelSize(ToPixel(qApp->Settings()->getDefaultLabelWidth(), unit),
-                           ToPixel(qApp->Settings()->getDefaultLabelHeight(), unit));
+    newPiece.GetPatternPieceData().SetVisible(qApp->Settings()->showPieceLabels());
+    newPiece.GetPatternPieceData().SetLabelWidth(QString::number(labelWidth));
+    newPiece.GetPatternPieceData().SetLabelHeight(QString::number(labelHeight));
+    newPiece.GetPatternPieceData().SetLabelTemplate(NewPieceDefaults::pieceLabelTemplate());
+
+    const QSizeF labelSize(ToPixel(labelWidth, unit), ToPixel(labelHeight, unit));
     const QPointF pieceLabelPos = VPatternLabelData::defaultPieceLabelPos(rect, labelSize);
     newPiece.GetPatternPieceData().SetPos(pieceLabelPos);
 
@@ -1352,16 +1359,14 @@ void createUnion(quint32 id, const UnionToolInitData &initData, qreal dx, qreal 
                                                                              : QRectF();
     newPiece.GetPatternInfo().SetPos(VPatternLabelData::defaultPatternLabelPos(rect, labelSize, pieceLabelRect));
 
-    newPiece.GetGrainlineGeometry().SetVisible(qApp->Settings()->getDefaultGrainlineVisibilty());
-    newPiece.GetGrainlineGeometry().setLength(QString::number(qApp->Settings()->getDefaultGrainlineLength()));
+    const qreal grainlineLength = NewPieceDefaults::grainlineLength(unit);
     const qreal grainlineAngle = VGrainlineData::upwardAngle(qApp->Settings()->getDefaultGrainlineAngle());
+    newPiece.GetGrainlineGeometry().SetVisible(qApp->Settings()->getDefaultGrainlineVisibilty());
+    newPiece.GetGrainlineGeometry().setLength(QString::number(grainlineLength));
     newPiece.GetGrainlineGeometry().setRotation(QString::number(grainlineAngle));
-    const qreal arrowLength = FromPixel(qApp->Settings()->getDefaultArrowLength(), *initData.data->GetPatternUnit());
-    newPiece.GetGrainlineGeometry().setArrowLength(QString::number(arrowLength));
-    const qreal grainlineLength = ToPixel(qApp->Settings()->getDefaultGrainlineLength(),
-                                          *initData.data->GetPatternUnit());
+    newPiece.GetGrainlineGeometry().setArrowLength(QString::number(NewPieceDefaults::arrowLength(unit)));
     newPiece.GetGrainlineGeometry().SetPos(VGrainlineData::centeredStart(rect.center(), grainlineAngle,
-                                                                          grainlineLength));
+                                                                          ToPixel(grainlineLength, unit)));
 
     QString formulaSAWidth = piece1.getSeamAllowanceWidthFormula();
     newPiece.setSeamAllowanceWidthFormula(formulaSAWidth, piece1.GetSAWidth());

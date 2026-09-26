@@ -2,6 +2,20 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task — New pattern pieces read Preferences > Pattern defaults (completed 2026-09-26)
+
+User report: new pieces from Add New Pattern Piece got no usable labels.
+
+- Cause 1: the user data root had no `default_piece_label.xml` / `default_pattern_label.xml`. New labels got no text.
+- Cause 2: label width/height and grainline length skipped the conversion from application units to pattern units.
+- New `src/libs/vtools/tools/new_piece_defaults.{h,cpp}`: one source for label size, arrow length, grainline length, label templates. Used by `PatternPieceDialog` and the Union tool.
+- Template fallback (user decision: both):
+  - `vmisc/share/resources/label_templates.qrc` embeds both templates. Read when the user file is missing.
+  - `VCommonSettings::ensureDataRootTree` seeds both templates into `label templates`. Never overwrites a user file.
+- Scope: new pieces only (user decision). The context menu reads the piece data, so it follows the new defaults.
+- Removed label/grainline `qDebug()` trace lines from `pattern_piece_tool.cpp`.
+- Tests: `TST_VPiece` (grainline fit, template fallback), `TST_DataRoot` (seeding, no overwrite).
+
 ## Task — MSI finds running Seamly apps at wizard start (completed 2026-09-23)
 
 User report: "Validating install" paused a long time before "Seamly apps are running" appeared.

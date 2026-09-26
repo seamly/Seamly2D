@@ -105,6 +105,9 @@ public:
     static QString       dataSubdirPath(const QString &subdirectory);
     static QString       initializeDataRoot();
     static bool          ensureDataRootTree(const QString &root = QString());
+    // Resource copies of the default label templates, used when the user's file is missing.
+    static QString       builtInPieceLabelTemplate();
+    static QString       builtInPatternLabelTemplate();
     static QString       rebaseOntoDataRoot(const QString &path, const QString &oldRoot, const QString &newRoot);
     QString              getDataRoot() const;
     void                 setDataRoot(const QString &value);

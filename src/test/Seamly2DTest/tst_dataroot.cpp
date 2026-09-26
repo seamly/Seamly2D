@@ -513,6 +513,49 @@ void TST_DataRoot::StartupResolvesThenSeedsTheConfiguredRoot() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief EnsureDataRootTreeSeedsLabelTemplates checks that new pieces find their default label templates.
+ */
+void TST_DataRoot::EnsureDataRootTreeSeedsLabelTemplates() const
+{
+    const QString root = scratchPath(QStringLiteral("label-seed-tree"));
+    QVERIFY(VCommonSettings::ensureDataRootTree(root));
+
+    const QStringList templates
+    {
+        QStringLiteral("label templates/default_piece_label.xml"),
+        QStringLiteral("label templates/default_pattern_label.xml")
+    };
+
+    for (const QString &relative : templates)
+    {
+        const QFileInfo info(root + QLatin1Char('/') + relative);
+        QVERIFY2(info.isFile(), qPrintable(QStringLiteral("'%1' was not seeded").arg(relative)));
+        QVERIFY2(info.isWritable(), qPrintable(QStringLiteral("'%1' is read-only").arg(relative)));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief EnsureDataRootTreeKeepsUserLabelTemplate checks that seeding never replaces a template the user edited.
+ */
+void TST_DataRoot::EnsureDataRootTreeKeepsUserLabelTemplate() const
+{
+    const QString root = scratchPath(QStringLiteral("label-keep-tree"));
+    QVERIFY(QDir().mkpath(root + QStringLiteral("/label templates")));
+
+    const QString existing = root + QStringLiteral("/label templates/default_piece_label.xml");
+    QFile file(existing);
+    QVERIFY(file.open(QIODevice::WriteOnly));
+    file.write("<template/>");
+    file.close();
+
+    QVERIFY(VCommonSettings::ensureDataRootTree(root));
+
+    QCOMPARE(QFileInfo(existing).size(), qint64(11));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief writeTestFile creates a file with known contents, making any parent directories.
  *
  * @param path     file to write.

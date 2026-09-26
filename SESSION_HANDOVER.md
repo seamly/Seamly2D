@@ -6,6 +6,15 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-26 — New pieces read Preferences > Pattern defaults
+
+Merged `task-new-piece-defaults` with skip-ci.
+
+- `NewPieceDefaults` (`vtools/tools/new_piece_defaults.{h,cpp}`): label size, grainline and arrow length in pattern units; label templates.
+- Missing user template → built-in resource `:/labels/*.xml`. `ensureDataRootTree` seeds both templates at startup.
+- New pieces only. Existing pieces with empty label text stay as they are.
+- Not tested in the GUI. Check: new piece shows piece + pattern label text; cm pattern with inch settings gets correctly sized labels.
+
 ## 2026-09-25 — Piece and pattern labels beside the grainline
 
 Merged `task-label-placement` with skip-ci.

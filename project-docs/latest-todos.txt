@@ -12,7 +12,7 @@ d) point "Up" if angle != (180 or 0) such that its start coordinate has a higher
 - DONE - In Piece Mode, create labels centered at the center of the bounding box then moved 1cm right (to avoid co-location with grainlines), location expressed in local space not in global space)  
 - DONE - In 'Application Settings > Pattern > Grainlines', add an option for 'angle' and set the default value to '90'. 
 
-- Create a plan: In 'Draft mode > Toolbox > Piece tool group > Add New Pattern Piece', read the 'Application settings > Pattern' values to automatically create labels and grainlines, and populate the context menu for each new pattern piece; discuss plan with me; if I approve then implement plan without asking me for permission.  
+- DONE - Create a plan: In 'Draft mode > Toolbox > Piece tool group > Add New Pattern Piece', read the 'Application settings > Pattern' values to automatically create labels and grainlines, and populate the context menu for each new pattern piece; discuss plan with me; if I approve then implement plan without asking me for permission.  
 
 seamlylayout:	
 - DONE - Export to SVG incorrectly retains the "Rectangles" group <g id="Rectangles"> and the <rect> element withing rectangle within each pattern piece. 

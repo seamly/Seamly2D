@@ -71,6 +71,11 @@ private slots:
     void PieceLabelCenteredRightOfBoundingBoxCenter() const;
     void PatternLabelRightOfPieceLabel() const;
     void PatternLabelTakesPieceLabelPlaceWithoutPieceLabel() const;
+    void GrainlineKeepsLengthLongerThanTwoArrows() const;
+    void GrainlineGrowsToFitTwoArrows() const;
+    void LabelTemplateReadsUserFile() const;
+    void LabelTemplateFallsBackToBuiltIn() const;
+    void LabelTemplateEmptyWithoutAnyFile() const;
 
 private:
     Q_DISABLE_COPY(TST_VPiece)
