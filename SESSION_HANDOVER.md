@@ -6,6 +6,14 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-27 — One writer for the SeamlyLayout debug log
+
+Merged `task-single-log-writer` with skip-ci. `cargo test --workspace`, `cargo test --release -p cxxqt_bridge log_sink`, `ctest --preset debug` passed.
+
+- C++ `Logger` is the only writer; Rust `log_to_file()` sends lines through `seamly_layout_set_log_sink()` (registered in `seamlyLayout_main.mm`).
+- `SEAMLY_LOG_FILE` removed; use `Logger::filePath()`.
+- Not checked in a running app. Check: one debug session log holds both C++ and Rust lines, none clipped.
+
 ## 2026-09-26 — New pieces read Preferences > Pattern defaults
 
 Merged `task-new-piece-defaults`. Full CI: the change touches `vmisc.pro` and `tools.pri`. Local build + all Qt suites passed.

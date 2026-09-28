@@ -158,6 +158,36 @@ predictable log path beats matching the install directory either way.
 This is separate from the DG.1–DG.5 gate above: that decides *whether* debug
 files are written, this decides *where*.
 
+## One writer for the SeamlyLayout debug log (2026-09-27)
+
+The C++ `Logger` is the only writer of the log file. Rust debug lines go to it
+through a sink function; Rust never opens the file.
+
+- `crates/cxxqt_bridge/src/log_sink.rs`: `log_to_file()` forwards each message
+  to the sink registered by `seamly_layout_set_log_sink()` (C ABI, pointer +
+  byte length). No sink registered: the line is dropped.
+- `qt_frontend/src/Logger.cpp`: `seamly_logger_write_utf8()` is the sink. It
+  calls `Logger::log()`. A `QMutex` serializes `init()`, `log()` and
+  `messageHandler()`, so writes from any thread stay whole.
+- `seamlyLayout_main.mm` registers the sink right after `Logger::init()`.
+- `SEAMLY_LOG_FILE` is removed. `Logger::filePath()` returns the log path.
+- Release builds: `log_to_file()` stays a no-op.
+
+**Why:** two handles on one file, one of them buffered, overwrote each other's
+bytes and clipped lines.
+
+Rejected:
+
+- Rust calls `Logger` through an `extern "C++"` bridge function: `cargo test`
+  builds the crate without the C++ code and fails to link.
+- Both sides append and close per line: still two writers, and `QFile` Append
+  on Windows seeks to the end instead of appending atomically.
+
+The sink is a run-time function pointer, so neither side links against the
+other: `cargo test` and the C++ test executables build alone. `LoggerTests`
+calls `seamly_logger_write_utf8()` directly in place of Rust; there is no
+cross-language test (user decision).
+
 ## Accepted Architectural Decisions (snapshot)
 
 - CXX-Qt bridge is the Rust↔Qt integration boundary.
@@ -173,3 +203,4 @@ files are written, this decides *where*.
 - 2026-09-24: Added Decision-003 (SVG label text modes: bundled fonts).
 - 2026-09-24: Decision-003 — font subsetting moved from `subsetter` to `allsorts`.
 - 2026-09-24: Decision-003 — license notices committed and shipped in all installers.
+- 2026-09-27: Added "One writer for the SeamlyLayout debug log".

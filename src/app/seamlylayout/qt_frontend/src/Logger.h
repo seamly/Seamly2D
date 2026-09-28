@@ -15,17 +15,23 @@
 //   Logger::log("ClassName::method(): message");
 //
 // When debugEnabled is false all Logger::log() calls are no-ops.
+//
+// Logger is the only writer of the log file. Rust debug lines reach it through
+// seamly_logger_write_utf8(), which main() registers with the Rust bridge.
 
 #pragma once
 
 #include <QString>
 #include <QFile>
+#include <QMutex>
 #include <QTextStream>
+
+#include <cstddef>
 
 // @brief Static-only debug logger.
 //
-// Thread safety: Logger is designed for Qt-main-thread logging only.
-// For background-thread messages, route via Qt::QueuedConnection signal.
+// Thread safety: log(), messageHandler() and seamly_logger_write_utf8() may be
+// called from any thread. s_mutex serializes every write, so lines never interleave.
 class Logger
 {
 public:
@@ -38,9 +44,11 @@ public:
     // is constructed AND after the organization and application names are set,
     // because AppConfigLocation is derived from them (Layout.10).
     // Creates the logs/ directory if it does not exist.
-    // Sets the SEAMLY_LOG_FILE environment variable so Rust can append to the
-    // same file via log_to_file().
     static void init();
+
+    // @brief Absolute path of the open log file, or an empty string before init()
+    // or when logging is disabled.
+    static QString filePath();
 
     // @brief Write one line to the log file if debugEnabled is true.
     // @param message  Text appended after "[unix_seconds] DEBUG: ".
@@ -66,4 +74,12 @@ private:
     // @brief Text stream writing to s_file.
     static QTextStream s_stream;
 
+    // @brief Guards s_file and s_stream against concurrent writers.
+    static QMutex s_mutex;
+
 }; // class Logger
+
+// @brief C ABI entry point for the Rust bridge: writes one message through Logger::log().
+// @param text    UTF-8 bytes, not NUL-terminated. Copied before the function returns.
+// @param length  Number of bytes in text.
+extern "C" void seamly_logger_write_utf8(const char *text, std::size_t length);
