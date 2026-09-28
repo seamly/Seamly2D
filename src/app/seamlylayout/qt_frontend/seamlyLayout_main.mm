@@ -39,6 +39,10 @@
 // Logger — singleton debug logger; writes [unix_sec] DEBUG: lines to logs/log_{ts}.txt
 #include "src/Logger.h"
 
+// Defined in crates/cxxqt_bridge/src/log_sink.rs. Registers the function that
+// receives every Rust debug log line, so Logger stays the only writer of the file.
+extern "C" bool seamly_layout_set_log_sink(void (*sink)(const char *text, std::size_t length));
+
 // Platform — detect host OS once at startup; use Platform::os throughout the application
 #include "src/Platform.h"
 
@@ -166,6 +170,10 @@ int main(int argc, char *argv[])
     Logger::debugEnabled = true;
     Logger::init();
     qInstallMessageHandler(Logger::messageHandler);
+
+    // Route Rust debug lines through Logger before any AppController exists,
+    // so no Rust line is dropped.
+    seamly_layout_set_log_sink(&seamly_logger_write_utf8);
 
     // -----------------------------------------------------------------------
     // Command line — the Seamly2D Layout Mode handoff and the plain CLI.

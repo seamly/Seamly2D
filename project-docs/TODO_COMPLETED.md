@@ -936,3 +936,13 @@ LGPL notices in `src/app/seamlylayout/packaging/licenses/`, but none exist.
 - [x] Union tool: default label size converted to pixels before placement; it used pattern units
 - [x] `VPatternLabelData::defaultPieceLabelPos`, `defaultPatternLabelPos`, `hasCornerAnchors`
 - [x] Tests: `TST_VPiece` — `PieceLabelCenteredRightOfBoundingBoxCenter`, `PatternLabelRightOfPieceLabel`, `PatternLabelTakesPieceLabelPlaceWithoutPieceLabel`
+
+## Task Layout.4 — One writer for the SeamlyLayout debug log (completed 2026-09-27)
+
+- [x] Layout.41 Owner recorded in `seamlylayout_SEAMLYLAYOUT_DECISIONS.md`: C++ `Logger`; Rust sends lines through a registered sink
+- [x] Layout.42 `crates/cxxqt_bridge/src/log_sink.rs`, `seamly_logger_write_utf8()`; line format and call-site signatures unchanged
+- [x] Layout.43 `QMutex` in `Logger` serializes all writes
+- [x] Layout.44 Release `log_to_file()` still a no-op; `cargo test --release` checks the sink gets nothing
+- [x] Layout.45 Tests: `log_sink::tests` (2 threads), `LoggerTests::concurrentWriters_lineArrivesWholeAndInOrder` (2 threads x 3 sources)
+- [x] Layout.46 Briefs and comments on touched functions
+- `SEAMLY_LOG_FILE` removed; `Logger::filePath()` added

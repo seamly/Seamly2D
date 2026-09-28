@@ -9,7 +9,8 @@
 //   [unix_seconds] DEBUG: message
 //
 // The log file is opened once by Logger::init() and kept open for the
-// duration of the process.  All writes go to a file named:
+// duration of the process.  Logger is its only writer: Rust debug lines arrive
+// through seamly_logger_write_utf8().  All writes go to a file named:
 //   {appConfigRoot}/logs/log_{YYMMDDHHMMSS}.txt
 // {appConfigRoot} is the writable AppConfigLocation root, not the install
 // directory, on every platform — the install directory cannot be relied on to
@@ -30,6 +31,7 @@
 #include <QDateTime>
 #include <QDebug>
 #include <QDir>
+#include <QMutexLocker>
 #include <QStandardPaths>
 
 // ---------------------------------------------------------------------------
@@ -39,6 +41,7 @@
 bool       Logger::debugEnabled = false;
 QFile      Logger::s_file;
 QTextStream Logger::s_stream;
+QMutex     Logger::s_mutex;
 
 // ---------------------------------------------------------------------------
 // clearLogDirectory
@@ -84,13 +87,11 @@ void Logger::init()
     // Build the file name: log_{YYMMDDHHmmss}.txt
     const QString timestamp =
         QDateTime::currentDateTime().toString(QStringLiteral("yyMMddHHmmss"));
-    const QString filePath =
+    const QString logFilePath =
         logsDir + QStringLiteral("/log_") + timestamp + QStringLiteral(".txt");
 
-    // Publish the path so Rust log_to_file() can append to the same file.
-    qputenv("SEAMLY_LOG_FILE", filePath.toUtf8());
-
-    s_file.setFileName(filePath);
+    QMutexLocker locker(&s_mutex);
+    s_file.setFileName(logFilePath);
 
     if (!s_file.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) {
         debugEnabled = false;
@@ -109,6 +110,16 @@ void Logger::init()
 } // Logger::init
 
 // ---------------------------------------------------------------------------
+// filePath
+// ---------------------------------------------------------------------------
+
+QString Logger::filePath()
+{
+    QMutexLocker locker(&s_mutex);
+    return s_file.isOpen() ? s_file.fileName() : QString();
+} // Logger::filePath
+
+// ---------------------------------------------------------------------------
 // log
 // ---------------------------------------------------------------------------
 
@@ -118,6 +129,8 @@ void Logger::init()
 void Logger::log(const QString &message)
 {
     if (!debugEnabled) return;     // logging disabled
+
+    QMutexLocker locker(&s_mutex);
     if (!s_file.isOpen()) return;  // file not open (init() not called or failed)
 
     const qint64 unixSec = QDateTime::currentSecsSinceEpoch();
@@ -137,7 +150,7 @@ void Logger::messageHandler(QtMsgType type,
                             const QMessageLogContext &context,
                             const QString &msg)
 {
-    if (!debugEnabled || !s_file.isOpen()) return;
+    if (!debugEnabled) return;
 
     const qint64 unixSec = QDateTime::currentSecsSinceEpoch();
     QString level;
@@ -157,11 +170,28 @@ void Logger::messageHandler(QtMsgType type,
                  + QStringLiteral(")");
     }
 
-    s_stream << QStringLiteral("[") << QString::number(unixSec)
-             << QStringLiteral("] ") << level << QStringLiteral(": ")
-             << msg << location << QStringLiteral("\n");
-    s_stream.flush();
+    {
+        // Scope the lock so abort() below never runs while the mutex is held.
+        QMutexLocker locker(&s_mutex);
+        if (!s_file.isOpen()) return;
+        s_stream << QStringLiteral("[") << QString::number(unixSec)
+                 << QStringLiteral("] ") << level << QStringLiteral(": ")
+                 << msg << location << QStringLiteral("\n");
+        s_stream.flush();
+    }
 
     if (type == QtFatalMsg)
         abort();
 } // Logger::messageHandler
+
+// ---------------------------------------------------------------------------
+// seamly_logger_write_utf8
+// ---------------------------------------------------------------------------
+
+// Called by the Rust bridge, possibly from a worker thread. QString::fromUtf8
+// copies the bytes, so Rust may free them as soon as this returns.
+extern "C" void seamly_logger_write_utf8(const char *text, std::size_t length)
+{
+    if (text == nullptr) return;
+    Logger::log(QString::fromUtf8(text, static_cast<qsizetype>(length)));
+} // seamly_logger_write_utf8

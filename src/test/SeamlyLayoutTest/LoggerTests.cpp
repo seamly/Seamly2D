@@ -22,18 +22,28 @@
 // QStandardPaths test mode redirects AppConfigLocation into a throwaway tree,
 // so the suite never touches the real user configuration.
 //
+// Logger is the only writer of the log file. Rust lines arrive through
+// seamly_logger_write_utf8(), so concurrentWriters_lineArrivesWholeAndInOrder()
+// calls that entry point directly in place of the Rust bridge.
+//
 // Logger needs no QObject, no window and no event loop, so this suite runs
 // guiless — QTEST_GUILESS_MAIN, not QTEST_MAIN.
 
 #include "Logger.h"
 
 #include <QCoreApplication>
+#include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
+#include <QHash>
 #include <QRegularExpression>
 #include <QStandardPaths>
 #include <QTest>
+#include <QThread>
+
+#include <memory>
+#include <vector>
 
 class LoggerTests : public QObject
 {
@@ -46,11 +56,11 @@ private slots:
     void logDirectory_isNotTheLegacyOutputDirectory();
     void logFileName_isTimestamped();
     void init_removesStaleLogFiles();
+    void concurrentWriters_lineArrivesWholeAndInOrder();
     void cleanupTestCase();
 
 private:
-    // Path of the log file opened by initTestCase(), read back from the
-    // SEAMLY_LOG_FILE variable Logger::init() publishes for the Rust side.
+    // Path of the log file opened by initTestCase(), read back from Logger::filePath().
     QString m_logFilePath;
 
     // Stale file planted before init() so the startup clean-up can be observed.
@@ -83,8 +93,8 @@ void LoggerTests::initTestCase()
     Logger::init();
     QVERIFY2(Logger::debugEnabled, "Logger::init() failed to open the log file");
 
-    m_logFilePath = QString::fromUtf8(qgetenv("SEAMLY_LOG_FILE"));
-    QVERIFY2(!m_logFilePath.isEmpty(), "Logger::init() published no SEAMLY_LOG_FILE");
+    m_logFilePath = Logger::filePath();
+    QVERIFY2(!m_logFilePath.isEmpty(), "Logger::filePath() is empty after init()");
 } // initTestCase()
 
 void LoggerTests::logDirectory_isLogsUnderTheAppConfigRoot()
@@ -127,6 +137,65 @@ void LoggerTests::init_removesStaleLogFiles()
 {
     QVERIFY2(!QFile::exists(m_staleFilePath), "the stale log file survived Logger::init()");
 } // init_removesStaleLogFiles()
+
+// All three write paths run at the same time from two threads: Logger::log(),
+// the Qt message handler, and the Rust entry point. Every line must arrive
+// whole, and each (thread, source) pair must keep its order. The order between
+// threads is not defined, so the test does not check it.
+void LoggerTests::concurrentWriters_lineArrivesWholeAndInOrder()
+{
+    const QtMessageHandler previousHandler = qInstallMessageHandler(Logger::messageHandler);
+
+    constexpr int threadCount = 2;
+    constexpr int linesPerSource = 300;
+    const QString marker = QStringLiteral("[concurrent_writers]");
+
+    // Each thread cycles through the three sources, so the sources interleave too.
+    std::vector<std::unique_ptr<QThread>> writers;
+    for (int threadId = 0; threadId < threadCount; ++threadId) {
+        writers.emplace_back(QThread::create([threadId, marker]() {
+            for (int index = 0; index < linesPerSource; ++index) {
+                const QString body = QStringLiteral(" thread=%1 index=%2 end").arg(threadId).arg(index);
+                Logger::log(marker + QStringLiteral(" source=cpp") + body);
+                qDebug().noquote() << marker + QStringLiteral(" source=qt") + body;
+                const QByteArray rustLine = (marker + QStringLiteral(" source=rust") + body).toUtf8();
+                seamly_logger_write_utf8(rustLine.constData(),
+                                         static_cast<std::size_t>(rustLine.size()));
+            }
+        }));
+    }
+    for (auto &writer : writers) writer->start();
+    for (auto &writer : writers) QVERIFY(writer->wait(30000));
+
+    qInstallMessageHandler(previousHandler);
+
+    QFile logFile(m_logFilePath);
+    QVERIFY(logFile.open(QIODevice::ReadOnly | QIODevice::Text));
+    const QStringList lines = QString::fromUtf8(logFile.readAll()).split(QLatin1Char('\n'));
+
+    // A whole line: timestamp prefix, one source, and the "end" sentinel. The Qt
+    // handler may append " (file:line)" when the build carries message context.
+    const QRegularExpression wholeLine(QStringLiteral(
+        R"(^\[\d+\] DEBUG: \[concurrent_writers\] source=(cpp|qt|rust) )"
+        R"(thread=(\d+) index=(\d+) end( \(.+:\d+\))?$)"));
+
+    QHash<QString, int> nextIndex; // key: "<source>/<thread>"
+    int matched = 0;
+    for (const QString &line : lines) {
+        if (!line.contains(marker)) continue;
+        const QRegularExpressionMatch match = wholeLine.match(line);
+        QVERIFY2(match.hasMatch(), qPrintable(QStringLiteral("clipped line: '%1'").arg(line)));
+
+        const QString key = match.captured(1) + QLatin1Char('/') + match.captured(2);
+        const int index = match.captured(3).toInt();
+        QVERIFY2(index == nextIndex.value(key, 0),
+                 qPrintable(QStringLiteral("out of order: '%1'").arg(line)));
+        nextIndex[key] = index + 1;
+        ++matched;
+    }
+
+    QCOMPARE(matched, threadCount * linesPerSource * 3);
+} // concurrentWriters_lineArrivesWholeAndInOrder()
 
 void LoggerTests::cleanupTestCase()
 {

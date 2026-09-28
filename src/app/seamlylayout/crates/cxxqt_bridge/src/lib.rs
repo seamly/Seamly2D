@@ -45,15 +45,16 @@ pub use remaining::build_remaining_svgs;
 // combines Phase A tiled pages and Phase B sheet pages into one merged PDF.
 mod sheets;
 use sheets::{build_sheet_export_inputs, do_export_sheets_pdf};
+
+// Debug log lines go to the C++ Logger, the only writer of the log file.
+mod log_sink;
+pub(crate) use log_sink::log_to_file;
+pub use log_sink::{seamly_layout_set_log_sink, LogSink};
 use std::sync::OnceLock;
 
 // Global output directory anchored to the executable — initialized once, shared everywhere.
 static EXE_DIR: OnceLock<std::path::PathBuf> = OnceLock::new();
 static OUT_DIR: OnceLock<std::path::PathBuf> = OnceLock::new();
-// Log file path — shared with C++ Logger via the SEAMLY_LOG_FILE environment variable.
-// Only compiled in debug builds; the release no-op log_to_file stub never opens a file.
-#[cfg(debug_assertions)]
-static LOG_PATH: OnceLock<std::path::PathBuf> = OnceLock::new();
 // Global counter for sequential adjust_dom debug saves — only compiled in debug builds.
 #[cfg(debug_assertions)]
 static ADJUST_DOM_COUNTER: AtomicUsize = AtomicUsize::new(0);
@@ -78,7 +79,7 @@ impl log::Log for FileLogger {
         log_to_file(&format!("{}", record.args()));
     } // fn log
 
-    fn flush(&self) { /* log_to_file opens + appends + drops per call */ }
+    fn flush(&self) { /* the C++ Logger flushes after every line */ }
 } // impl log::Log for FileLogger
 
 static FILE_LOGGER: FileLogger = FileLogger;
@@ -527,49 +528,6 @@ fn trim_empty_tiled_rows_in_adjust_dom(doc: &mut svg_dom::Document) -> u32 {
 
     rows_removed
 } // fn trim_empty_tiled_rows_in_adjust_dom
-
-// @brief Returns the path to the shared log file.
-// Reads from the SEAMLY_LOG_FILE environment variable set by Logger::init() (C++).
-// Falls back to output/debug_log.txt if the env var is not set.
-// Only compiled in debug builds alongside LOG_PATH.
-#[cfg(debug_assertions)]
-fn get_log_path() -> &'static std::path::PathBuf {
-    LOG_PATH.get_or_init(|| {
-        match std::env::var("SEAMLY_LOG_FILE") {
-            Ok(p) => std::path::PathBuf::from(p),
-            Err(_) => get_out_dir().join("debug_log.txt"),
-        }
-    })
-} // fn get_log_path
-
-// @brief Append a timestamped debug line to the shared log file.
-// Format matches C++ Logger: [unix_seconds] DEBUG: message
-// The file is opened in append mode for each call and flushed immediately.
-// Only compiled in debug builds; all ~20 call sites in lib.rs, layout_utils.rs,
-// and exports.rs compile unchanged because the no-op stub below has the same signature.
-#[cfg(debug_assertions)]
-pub(crate) fn log_to_file(message: &str) {
-    use std::io::Write;
-    let path = get_log_path();
-    if let Ok(mut file) = std::fs::OpenOptions::new()
-        .create(true)
-        .append(true)
-        .open(path)
-    {
-        let secs = std::time::SystemTime::now()
-            .duration_since(std::time::UNIX_EPOCH)
-            .map(|d| d.as_secs())
-            .unwrap_or(0);
-        let _ = writeln!(file, "[{}] DEBUG: {}", secs, message);
-    }
-} // fn log_to_file (debug build)
-
-// @brief No-op log stub compiled only when debug_assertions is disabled — writes nothing.
-// Note: this guarantees no file I/O in that configuration, but argument expressions at call
-// sites may still be evaluated unless optimized away by the compiler.
-#[cfg(not(debug_assertions))]
-#[inline(always)]
-pub(crate) fn log_to_file(_message: &str) {} // fn log_to_file (no-op when debug_assertions is disabled)
 
 #[cxx_qt::bridge]
 pub mod qobject {
@@ -2153,7 +2111,7 @@ impl qobject::AppController {
 // Verifies that the dual #[cfg(debug_assertions)] / #[cfg(not(debug_assertions))]
 // split on log_to_file() is correct in both build modes:
 //
-//   debug build  (`cargo test`):  the real file-writing impl is compiled and
+//   debug build  (`cargo test`):  the sink-forwarding impl is compiled and
 //                                 callable without panicking.
 //   release build (`cargo test --release`): the no-op stub is compiled,
 //                                 callable, and does nothing.
@@ -2166,10 +2124,8 @@ impl qobject::AppController {
 mod dg1_log_gate_tests {
     use super::log_to_file;
 
-    // @brief In debug builds log_to_file opens/appends the log file without panicking.
-    // We cannot pin the exact path (LOG_PATH is a OnceLock shared across all tests),
-    // but a successful return proves the function exists, has the right signature,
-    // and does not unwrap-panic on a writeable filesystem.
+    // @brief In debug builds log_to_file runs without panicking, with or without a
+    // registered sink. log_sink.rs tests what reaches the sink.
     #[cfg(debug_assertions)]
     #[test]
     fn debug_log_to_file_does_not_panic() {
@@ -2683,7 +2639,7 @@ mod dg5_verification_tests {
     #[cfg(debug_assertions)]
     #[test]
     fn debug_all_rust_observability_gates_compile_and_run_without_panic() {
-        // DG.1 — log_to_file (debug: real file-append impl)
+        // DG.1 — log_to_file (debug: forwards to the registered sink)
         log_to_file("[dg5_test] combined gate check — DG.1 log_to_file");
 
         // DG.2 — save_debug_dom + get_out_dir (debug: SVG write + output/ path)
