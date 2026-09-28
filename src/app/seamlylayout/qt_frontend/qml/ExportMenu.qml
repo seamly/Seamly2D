@@ -20,6 +20,9 @@
 //
 // With svgModeSubmenu true (Export menu), "SVG" is a submenu of label text
 // modes; otherwise (View menu) it is one item.
+//
+// G-Code and 3D Mesh (3MF) are paid formats. Each item stays hidden until
+// AppController.isPaidExportAvailable() reports its module as usable.
 
 import QtQuick 6.11
 import QtQuick.Controls 6.11
@@ -50,6 +53,12 @@ Menu {
     // @brief True when the three text modes apply; false when labels are already paths.
     readonly property bool svgTextModesEnabled: root.labelTextState !== "pathsOnly"
 
+    // @brief True when the paid G-Code module is usable; shows the G-Code item.
+    property bool gcodeExportAvailable: false
+
+    // @brief True when the paid 3D mesh module is usable; shows the 3D Mesh item.
+    property bool meshExportAvailable: false
+
     // @brief Emitted when the user selects DXF-ASTM export (Phase 9).
     signal exportDxfAstmRequested()
 
@@ -71,6 +80,12 @@ Menu {
 
     // @brief Emitted when the user selects Projector (View menu only).
     signal projectorRequested()
+
+    // @brief Emitted when the user selects G-Code export (paid module).
+    signal exportGcodeRequested()
+
+    // @brief Emitted when the user selects 3D mesh export (paid module).
+    signal exportMeshRequested()
 
     MenuItem {
         text: "DXF-ASTM"
@@ -179,6 +194,23 @@ Menu {
             onTriggered: root.exportSvgModeRequested("asSupplied")
         } // MenuItem asSupplied
     } // Menu svgSubmenu
+
+    // Paid formats: hidden Menu items keep their height, so collapse them when hidden.
+    MenuItem {
+        text:    "G-Code"
+        visible: root.gcodeExportAvailable
+        height:  visible ? implicitHeight : 0
+        enabled: root.layoutReady
+        onTriggered: root.exportGcodeRequested()
+    } // MenuItem G-Code
+
+    MenuItem {
+        text:    "3D Mesh (3MF)"
+        visible: root.meshExportAvailable
+        height:  visible ? implicitHeight : 0
+        enabled: root.layoutReady
+        onTriggered: root.exportMeshRequested()
+    } // MenuItem 3D Mesh
 
     // Keep one SVG entry: the submenu (Export menu) or the single item (View menu).
     Component.onCompleted: {

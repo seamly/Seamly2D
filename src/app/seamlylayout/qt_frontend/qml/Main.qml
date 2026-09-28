@@ -129,7 +129,7 @@ ApplicationWindow {
     // Staged payload for deferred export start — shared across all formats.
     // Populated by each export handler; consumed by exportStartTimer.onTriggered.
     property string pendingExportPath: ""
-    property string pendingExportFormat: ""        // "dxf"|"png"|"pdf"|"pdf-tiled"|"svg"
+    property string pendingExportFormat: ""        // "dxf"|"png"|"pdf"|"pdf-tiled"|"svg"|"gcode"|"3mf"
     property string pendingExportSettings: ""      // settings JSON for pdf / pdf-tiled; text mode for svg
     property bool   pendingExportTeachingVersion: false  // teaching flag for DXF
 
@@ -154,6 +154,10 @@ ApplicationWindow {
                 appController.exportPdfTiled(path, root.pendingExportSettings)
             } else if (fmt === "svg") {
                 appController.exportSvg(path, root.pendingExportSettings) // settings = SVG text mode
+            } else if (fmt === "gcode") {
+                appController.exportGcode(path)
+            } else if (fmt === "3mf") {
+                appController.exportMesh(path)
             } // if fmt
         } // onTriggered
     } // Timer exportStartTimer
@@ -348,6 +352,9 @@ ApplicationWindow {
         pdfTiledExportEnabled: settingsModel.paperType === "tiled"
         labelTextState:       appController.labelTextState
         lastSvgTextMode:      preferencesModel.svgTextMode
+        // Paid formats stay hidden until the Rust gate reports their module as usable.
+        gcodeExportAvailable: appController.isPaidExportAvailable("gcode")
+        meshExportAvailable:  appController.isPaidExportAvailable("3mf")
 
         onImportClicked: {
             // Open the file picker in the configured Input SVG Directory.
@@ -416,6 +423,34 @@ ApplicationWindow {
                 exportStartTimer.restart()
             } // if path
         } // onExportPngRequested
+        onExportGcodeRequested: {
+            var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
+            var name = root.makeExportFileName("gcode") // default name: <importedBaseName>_YYYYMMDDHHSS.gcode
+            var path = preferencesModel.getSaveFilePath(
+                "Save G-Code File", dir, name,
+                "G-Code Files (*.gcode);;All Files (*)")
+            if (path !== "") {
+                // Stage export, show progress popup, then start after one paint tick.
+                root.pendingExportPath = path
+                root.pendingExportFormat = "gcode"
+                exportProgressPopup.open()
+                exportStartTimer.restart()
+            } // if path
+        } // onExportGcodeRequested
+        onExportMeshRequested: {
+            var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
+            var name = root.makeExportFileName("3mf") // default name: <importedBaseName>_YYYYMMDDHHSS.3mf
+            var path = preferencesModel.getSaveFilePath(
+                "Save 3D Mesh File", dir, name,
+                "3MF Files (*.3mf);;All Files (*)")
+            if (path !== "") {
+                // Stage export, show progress popup, then start after one paint tick.
+                root.pendingExportPath = path
+                root.pendingExportFormat = "3mf"
+                exportProgressPopup.open()
+                exportStartTimer.restart()
+            } // if path
+        } // onExportMeshRequested
         onExportSvgRequested: function(mode) {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
             var name = root.makeExportFileName("svg") // default name: <importedBaseName>_YYYYMMDDHHSS.svg

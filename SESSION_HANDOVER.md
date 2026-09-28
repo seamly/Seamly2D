@@ -6,6 +6,13 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-27 — Paid export stubs: G-Code and 3D mesh (3MF)
+
+Merged `task-paid-export-stubs` with skip-ci. `cargo test --workspace`, `ctest --preset debug` passed.
+
+- Gate `exports::paid_export_available()` returns `false`; the Export menu hides both items.
+- Not checked in a running app. Check: Export menu shows no G-Code or 3D Mesh row and no blank row.
+
 ## 2026-09-27 — One writer for the SeamlyLayout debug log
 
 Merged `task-single-log-writer` with skip-ci. `cargo test --workspace`, `cargo test --release -p cxxqt_bridge log_sink`, `ctest --preset debug` passed.

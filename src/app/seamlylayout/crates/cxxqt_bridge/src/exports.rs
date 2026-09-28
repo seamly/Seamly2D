@@ -18,6 +18,9 @@
 //   (doc, path, tile_dims)         -> Result<(), String>
 //   do_export_png(doc, path, scale)                   -> Result<(), String>
 //   do_export_svg(doc, path)                          -> Result<(), String>
+//   do_export_gcode(doc, path)                        -> Result<(), String> (stub)
+//   do_export_mesh(doc, path)                         -> Result<(), String> (stub)
+//   paid_export_available(format)                     -> bool
 //
 // Internal helpers:
 //   merge_single_page_pdfs(page_bytes) -> Result<Vec<u8>, String>
@@ -1498,6 +1501,74 @@ pub fn do_export_svg(
 } // fn do_export_svg
 
 // ---------------------------------------------------------------------------
+// Paid export modules (G-Code, 3D mesh)
+// ---------------------------------------------------------------------------
+
+// @brief Format key for G-Code export.
+pub const PAID_EXPORT_GCODE: &str = "gcode";
+
+// @brief Format key for 3D mesh export, written as a .3mf file.
+pub const PAID_EXPORT_MESH: &str = "3mf";
+
+// @brief Report whether a paid export module is installed and usable.
+//
+// The Export menu shows a paid format only when this returns true.
+// No paid module exists yet, so every format returns false.
+// Replace the body with the module or license check when a module ships.
+//
+// @param format PAID_EXPORT_GCODE or PAID_EXPORT_MESH; any other key returns false.
+pub fn paid_export_available(format: &str) -> bool {
+    match format {
+        PAID_EXPORT_GCODE | PAID_EXPORT_MESH => false, // no module installed
+        _ => false,                                    // unknown format
+    } // match format
+} // fn paid_export_available
+
+// @brief Export the layout document as G-Code (stub).
+//
+// Writes no file. Returns Err until a G-Code module is available.
+//
+// @param doc  Cloned, stripped layout DOM.
+// @param path Destination .gcode file path.
+// @return Err(message) while no G-Code module is available.
+pub fn do_export_gcode(
+    _doc: &svg_dom::Document,
+    path: &str,
+) -> Result<(), String> {
+    crate::log_to_file(&format!("[exports.rs] do_export_gcode(): 1 requested '{path}'"));
+
+    // Guard: the menu hides this format, so a call here means a caller skipped the gate.
+    if !paid_export_available(PAID_EXPORT_GCODE) {
+        crate::log_to_file("[exports.rs] do_export_gcode(): 2 module not available");
+        return Err("G-Code export is not available.".to_string());
+    } // if not available
+
+    Err("G-Code export is not implemented.".to_string())
+} // fn do_export_gcode
+
+// @brief Export the layout document as a 3D mesh in 3MF format (stub).
+//
+// Writes no file. Returns Err until a 3D mesh module is available.
+//
+// @param doc  Cloned, stripped layout DOM.
+// @param path Destination .3mf file path.
+// @return Err(message) while no 3D mesh module is available.
+pub fn do_export_mesh(
+    _doc: &svg_dom::Document,
+    path: &str,
+) -> Result<(), String> {
+    crate::log_to_file(&format!("[exports.rs] do_export_mesh(): 1 requested '{path}'"));
+
+    // Guard: the menu hides this format, so a call here means a caller skipped the gate.
+    if !paid_export_available(PAID_EXPORT_MESH) {
+        crate::log_to_file("[exports.rs] do_export_mesh(): 2 module not available");
+        return Err("3D mesh export is not available.".to_string());
+    } // if not available
+
+    Err("3D mesh export is not implemented.".to_string())
+} // fn do_export_mesh
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
@@ -2040,4 +2111,34 @@ mod tests {
         assert_eq!(ticks[0], 10, "first tick must be 10% (SVG parse start)");
         assert_eq!(ticks[1], 90, "second tick must be 90% (PNG file written)");
     } // do_export_png_emits_intermediate_progress
+
+    // @brief No paid export module ships, so the gate hides both formats.
+    #[test]
+    fn paid_export_available_is_false_for_all_formats() {
+        assert!(!paid_export_available(PAID_EXPORT_GCODE));
+        assert!(!paid_export_available(PAID_EXPORT_MESH));
+        assert!(!paid_export_available("unknown"));
+    } // paid_export_available_is_false_for_all_formats
+
+    // @brief The G-Code stub returns Err and writes no file.
+    #[test]
+    fn do_export_gcode_stub_returns_err_and_writes_no_file() {
+        let doc = Document::parse(r#"<svg xmlns="http://www.w3.org/2000/svg"/>"#)
+            .expect("minimal SVG should parse");
+        let path = std::env::temp_dir().join("seamlylayout_stub_test.gcode");
+        let _ = std::fs::remove_file(&path);
+        assert!(do_export_gcode(&doc, path.to_str().unwrap()).is_err());
+        assert!(!path.exists(), "stub must not write a file");
+    } // do_export_gcode_stub_returns_err_and_writes_no_file
+
+    // @brief The 3D mesh stub returns Err and writes no file.
+    #[test]
+    fn do_export_mesh_stub_returns_err_and_writes_no_file() {
+        let doc = Document::parse(r#"<svg xmlns="http://www.w3.org/2000/svg"/>"#)
+            .expect("minimal SVG should parse");
+        let path = std::env::temp_dir().join("seamlylayout_stub_test.3mf");
+        let _ = std::fs::remove_file(&path);
+        assert!(do_export_mesh(&doc, path.to_str().unwrap()).is_err());
+        assert!(!path.exists(), "stub must not write a file");
+    } // do_export_mesh_stub_returns_err_and_writes_no_file
 } // mod tests
