@@ -625,7 +625,7 @@ function Invoke-InstalledChecks {
             foreach ($key in @('input_directory', 'layout_directory', 'preferences_directory',
                                'settings_directory', 'settings_file', 'preferences_file',
                                'dxf_viewer_path', 'pdf_viewer_path', 'png_viewer_path',
-                               'projector_path', 'data_root')) {
+                               'projector_path', 'hpgl_viewer_path', 'data_root')) {
                 Assert-That -Name "qt6_seamlylayout.ini holds the $key key" `
                     -Succeeded ($seamlyLayoutContent -match "(?m)^$key=")
             }

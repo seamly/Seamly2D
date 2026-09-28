@@ -5,6 +5,7 @@
         "dxf_viewer_path": "https://sharecad.org",
         "pdf_viewer_path": "",
         "png_viewer_path": "",
+        "hpgl_viewer_path": "https://tiny-online.tools/embroidery-cnc-tools/hpgl-plt-viewer",
         "projector_path": "https://patternprojector.com"
     },
     "linux": {
@@ -13,6 +14,7 @@
         "dxf_viewer_path": "https://sharecad.org",
         "pdf_viewer_path": "",
         "png_viewer_path": "",
+        "hpgl_viewer_path": "https://tiny-online.tools/embroidery-cnc-tools/hpgl-plt-viewer",
         "projector_path": "https://patternprojector.com"
     },
     "macos": {
@@ -21,6 +23,7 @@
         "dxf_viewer_path": "https://sharecad.org",
         "pdf_viewer_path": "",
         "png_viewer_path": "",
+        "hpgl_viewer_path": "https://tiny-online.tools/embroidery-cnc-tools/hpgl-plt-viewer",
         "projector_path": "https://patternprojector.com"
     }
 }

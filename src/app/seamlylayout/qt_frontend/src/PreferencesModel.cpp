@@ -42,6 +42,9 @@ constexpr auto kLegacyPreferencesFolderName = "layout-preferences";
 constexpr auto kLegacyOrganizationName = "Seamly Systems";
 constexpr auto kPreferencesFileName = "qt6_seamlylayout.ini";
 
+// Online HPGL viewer; the fallback for a missing hpgl_viewer_path key.
+constexpr auto kDefaultHpglViewerPath = "https://tiny-online.tools/embroidery-cnc-tools/hpgl-plt-viewer";
+
 #ifdef Q_OS_WIN
 // @brief Read the DataRoot value the Windows installer recorded for SeamlyLayout.
 //
@@ -240,6 +243,8 @@ bool seedFromBundledDefaults(const QString &destPath)
     out[QStringLiteral("pdf_viewer_path")] = source.value(QStringLiteral("pdf_viewer_path")).toString(QStringLiteral(""));
     out[QStringLiteral("png_viewer_path")] = source.value(QStringLiteral("png_viewer_path")).toString(QStringLiteral(""));
     out[QStringLiteral("projector_path")]  = source.value(QStringLiteral("projector_path")).toString(QStringLiteral(""));
+    out[QStringLiteral("hpgl_viewer_path")] = source.value(QStringLiteral("hpgl_viewer_path"))
+                                                  .toString(QString::fromUtf8(kDefaultHpglViewerPath));
 
     // Ensure default folders exist at first run.
     QDir().mkpath(defaultSettingsDir);
@@ -426,6 +431,14 @@ void PreferencesModel::setProjectorPath(const QString &v)
     emit projectorPathChanged();
 } // setProjectorPath
 
+// @brief Set the HPGL viewer path / URL; emits hpglViewerPathChanged if changed.
+void PreferencesModel::setHpglViewerPath(const QString &v)
+{
+    if (m_hpglViewerPath == v) return;
+    m_hpglViewerPath = v;
+    emit hpglViewerPathChanged();
+} // setHpglViewerPath
+
 // @brief Set the SVG label text mode; ignores unknown names; emits svgTextModeChanged if changed.
 void PreferencesModel::setSvgTextMode(const QString &v)
 {
@@ -605,6 +618,8 @@ bool PreferencesModel::load(const QString &path)
     setPdfViewerPath(settings.value(QStringLiteral("pdf_viewer_path"), m_pdfViewerPath).toString());
     setPngViewerPath(settings.value(QStringLiteral("png_viewer_path"), m_pngViewerPath).toString());
     setProjectorPath(settings.value(QStringLiteral("projector_path"), m_projectorPath).toString());
+    setHpglViewerPath(settings.value(QStringLiteral("hpgl_viewer_path"),
+                                     QString::fromUtf8(kDefaultHpglViewerPath)).toString());
     setDataRoot(settings.value(QStringLiteral("data_root"), m_dataRoot).toString());
     setSvgTextMode(settings.value(QStringLiteral("svg_text_mode"), m_svgTextMode).toString());
     setHpglCutPen(settings.value(QStringLiteral("hpgl_cut_pen"), m_hpglCutPen).toInt());
@@ -662,6 +677,8 @@ bool PreferencesModel::loadJsonPreferences(const QString &path)
     setPdfViewerPath(object.value(QStringLiteral("pdf_viewer_path")).toString(m_pdfViewerPath));
     setPngViewerPath(object.value(QStringLiteral("png_viewer_path")).toString(m_pngViewerPath));
     setProjectorPath(object.value(QStringLiteral("projector_path")).toString(m_projectorPath));
+    setHpglViewerPath(object.value(QStringLiteral("hpgl_viewer_path"))
+                          .toString(QString::fromUtf8(kDefaultHpglViewerPath)));
     setDataRoot(object.value(QStringLiteral("data_root")).toString(m_dataRoot));
 
     migrateLegacyPreferencePaths();
@@ -794,6 +811,7 @@ bool PreferencesModel::save(const QString &path)
     settings.setValue(QStringLiteral("pdf_viewer_path"), m_pdfViewerPath);
     settings.setValue(QStringLiteral("png_viewer_path"), m_pngViewerPath);
     settings.setValue(QStringLiteral("projector_path"), m_projectorPath);
+    settings.setValue(QStringLiteral("hpgl_viewer_path"), m_hpglViewerPath);
     settings.setValue(QStringLiteral("data_root"), m_dataRoot);
     settings.setValue(QStringLiteral("svg_text_mode"), m_svgTextMode);
     settings.setValue(QStringLiteral("hpgl_cut_pen"), m_hpglCutPen);

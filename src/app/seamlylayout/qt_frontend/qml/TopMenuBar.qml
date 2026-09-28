@@ -131,6 +131,9 @@ ToolBar {
     // @brief User selected SVG from the View dropdown.
     signal viewSvgRequested()
 
+    // @brief User selected HPGL from the View dropdown.
+    signal viewHpglRequested()
+
     // @brief User selected Projector from the View dropdown.
     signal viewProjectorRequested()
 
@@ -242,6 +245,7 @@ ToolBar {
             onExportPdfTiledRequested: root.viewPdfTiledRequested()
             onExportPngRequested:      root.viewPngRequested()
             onExportSvgRequested:      root.viewSvgRequested()
+            onViewHpglRequested:       root.viewHpglRequested()
             onProjectorRequested:      root.viewProjectorRequested()
         } // ExportMenu viewMenu
 

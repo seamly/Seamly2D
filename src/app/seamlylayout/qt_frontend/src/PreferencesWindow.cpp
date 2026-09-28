@@ -19,6 +19,9 @@
 //   │  § Viewer Applications                           │
 //   │    DXF Viewer:               [__________] Browse  │
 //   │    PDF Viewer:               [__________] Browse  │
+//   │    PNG Viewer:               [__________] Browse  │
+//   │    HPGL Viewer:              [__________] Browse  │
+//   │    Projector:                [__________] Browse  │
 //   ├──────────────────────────────────────────────────┤
 //   │          [ Reset to Defaults ] [ Save ] [ Discard ] │
 //   └──────────────────────────────────────────────────┘
@@ -505,7 +508,44 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
         box.exec();
     }); // pngHelpBtn clicked
 
-    // Row 3: Projector (label + "?" help icon; editable; Browse picks an .exe)
+    // Row 3: HPGL Viewer (editable; "?" help icon explains the online default)
+    auto *hpglLabelRow = new QWidget;
+    hpglLabelRow->setFixedWidth(160);
+    auto *hpglLabelLayout = new QHBoxLayout(hpglLabelRow);
+    hpglLabelLayout->setContentsMargins(0, 0, 0, 0);
+    hpglLabelLayout->setSpacing(4);
+    auto *hpglViewerLabel = new QLabel(QStringLiteral("HPGL Viewer:"));
+    hpglViewerLabel->setStyleSheet(labelStyle);
+    auto *hpglHelpBtn = makeHelpIcon();
+    hpglLabelLayout->addWidget(hpglViewerLabel);
+    hpglLabelLayout->addWidget(hpglHelpBtn);
+    hpglLabelLayout->addStretch(1);
+
+    m_hpglViewerField = makeEditableField(QStringLiteral("https:// URL  or  local exe + args"));
+    auto *hpglViewerBrowse = makeBrowseButton();
+    viewerGrid->addWidget(hpglLabelRow,       3, 0);
+    viewerGrid->addWidget(m_hpglViewerField,  3, 1);
+    viewerGrid->addWidget(hpglViewerBrowse,   3, 2);
+
+    // An online viewer cannot receive a local file, so the user opens it there.
+    connect(hpglHelpBtn, &QPushButton::clicked, this, [this]() {
+        QMessageBox box(this);
+        box.setWindowTitle(QStringLiteral("HPGL Viewer"));
+        box.setIcon(QMessageBox::Information);
+        box.setText(QStringLiteral(
+            "Views .plt and .hpgl files written by Export > HPGL.\n\n"
+            "The default is an online viewer:\n"
+            "      https://tiny-online.tools/embroidery-cnc-tools/hpgl-plt-viewer\n\n"
+            "A web page cannot receive a local file. After the page opens, "
+            "load the exported file into it.\n\n"
+            "To use a desktop viewer, set this field to its executable path "
+            "(use Browse... or paste the full path).\n\n")
+            + taskMgrInstructions(QStringLiteral("HPGL Viewer")));
+        box.setStandardButtons(QMessageBox::Close);
+        box.exec();
+    }); // hpglHelpBtn clicked
+
+    // Row 4: Projector (label + "?" help icon; editable; Browse picks an .exe)
     auto *projectorLabelRow = new QWidget;
     projectorLabelRow->setFixedWidth(160);
     auto *projectorLabelLayout = new QHBoxLayout(projectorLabelRow);
@@ -521,9 +561,9 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
     m_projectorField = makeEditableField(
         QStringLiteral("https://patternprojector.com  or  local exe + args"));
     auto *projectorBrowse = makeBrowseButton();
-    viewerGrid->addWidget(projectorLabelRow,  3, 0);
-    viewerGrid->addWidget(m_projectorField,   3, 1);
-    viewerGrid->addWidget(projectorBrowse,    3, 2);
+    viewerGrid->addWidget(projectorLabelRow,  4, 0);
+    viewerGrid->addWidget(m_projectorField,   4, 1);
+    viewerGrid->addWidget(projectorBrowse,    4, 2);
 
     viewerGrid->setColumnStretch(1, 1);
     mainLayout->addLayout(viewerGrid);
@@ -556,6 +596,9 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
     });
     connect(m_pngViewerField, &QLineEdit::editingFinished, this, [this]() {
         m_model->setPngViewerPath(m_pngViewerField->text());
+    });
+    connect(m_hpglViewerField, &QLineEdit::editingFinished, this, [this]() {
+        m_model->setHpglViewerPath(m_hpglViewerField->text());
     });
     connect(m_projectorField, &QLineEdit::editingFinished, this, [this]() {
         m_model->setProjectorPath(m_projectorField->text());
@@ -655,6 +698,17 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
                    &PreferencesModel::setPngViewerPath);
     }); // pngViewerBrowse clicked
 
+    connect(hpglViewerBrowse, &QPushButton::clicked, this, [this]() {
+#ifdef Q_OS_WIN
+        QString filter = QStringLiteral("Executables (*.exe);;All Files (*)");
+#else
+        QString filter = QStringLiteral("All Files (*)");
+#endif
+        browseFile(QStringLiteral("Select HPGL Viewer Executable"),
+                   filter, m_hpglViewerField,
+                   &PreferencesModel::setHpglViewerPath);
+    }); // hpglViewerBrowse clicked
+
     connect(projectorBrowse, &QPushButton::clicked, this, [this]() {
 #ifdef Q_OS_WIN
         QString filter = QStringLiteral("Executables (*.exe);;All Files (*)");
@@ -725,6 +779,7 @@ void PreferencesWindow::populateFields()
     m_dxfViewerField->setText(m_model->dxfViewerPath());
     m_pdfViewerField->setText(m_model->pdfViewerPath());
     m_pngViewerField->setText(m_model->pngViewerPath());
+    m_hpglViewerField->setText(m_model->hpglViewerPath());
     m_projectorField->setText(m_model->projectorPath());
 } // populateFields
 

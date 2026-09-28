@@ -83,6 +83,9 @@ private slots:
     void hpglOptions_rejectInvalidValues();
     void saveHpglPen_writesOnlyThatKey();
     void saveHpglExtension_writesOnlyThatKey();
+    void hpglViewerPath_defaultsToOnlineViewer();
+    void hpglViewerPath_roundTripsThroughIni();
+    void hpglViewerPath_missingKeyFallsBackToOnlineViewer();
 
     void dataRoot_roundTripsThroughIni();
     void dataRoot_emitsSignalOnChange();
@@ -425,6 +428,50 @@ void PreferencesModelTests::saveHpglExtension_writesOnlyThatKey()
     PreferencesModel reader;
     QVERIFY(reader.load(path));
     QCOMPARE(reader.hpglExtension(), QStringLiteral("hpgl"));
+}
+
+void PreferencesModelTests::hpglViewerPath_defaultsToOnlineViewer()
+{
+    PreferencesModel m;
+    QCOMPARE(m.hpglViewerPath(),
+             QStringLiteral("https://tiny-online.tools/embroidery-cnc-tools/hpgl-plt-viewer"));
+}
+
+void PreferencesModelTests::hpglViewerPath_roundTripsThroughIni()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString path = tempDir.filePath(QStringLiteral("preferences.ini"));
+
+    PreferencesModel writer;
+    QSignalSpy spy(&writer, &PreferencesModel::hpglViewerPathChanged);
+    writer.setHpglViewerPath(QStringLiteral("C:/Tools/ViewCompanion/vc.exe"));
+    QCOMPARE(spy.count(), 1);
+    QVERIFY(writer.save(path));
+
+    PreferencesModel reader;
+    QVERIFY(reader.load(path));
+    QCOMPARE(reader.hpglViewerPath(), QStringLiteral("C:/Tools/ViewCompanion/vc.exe"));
+}
+
+void PreferencesModelTests::hpglViewerPath_missingKeyFallsBackToOnlineViewer()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString path = tempDir.filePath(QStringLiteral("preferences.ini"));
+
+    // An INI written before the key existed.
+    {
+        QSettings settings(path, QSettings::IniFormat);
+        settings.setValue(QStringLiteral("projector_path"), QStringLiteral("https://patternprojector.com"));
+        settings.sync();
+    }
+
+    PreferencesModel reader;
+    reader.setHpglViewerPath(QStringLiteral("stale"));
+    QVERIFY(reader.load(path));
+    QCOMPARE(reader.hpglViewerPath(),
+             QStringLiteral("https://tiny-online.tools/embroidery-cnc-tools/hpgl-plt-viewer"));
 }
 
 // ---------------------------------------------------------------------------
