@@ -126,8 +126,8 @@ enum class LayoutExportFormat : char
     BMP = 5,
     PPM = 6,
     OBJ = 7,              /* Wavefront OBJ*/
-    PS  = 8,
-    EPS = 9,
+    PS  = 8,              /* Not exported; kept so later format numbers stay the same. */
+    EPS = 9,              /* Not exported; kept so later format numbers stay the same. */
     DXF_AC1006_Flat = 10,  /* R10. */
     DXF_AC1009_Flat = 11,  /* R11 & R12. */
     DXF_AC1012_Flat = 12,  /* R13. */

@@ -92,7 +92,7 @@ pdf_viewer_path=
 png_viewer_path=
 projector_path=https://patternprojector.com
 data_root=%DATAROOT%"
-  - [ ] 0c. Check the program directory `%PROGRAMDIR%` exists (always `%ProgramFiles%\SeamlyApps`) contains `seamly2d.exe`, `seamlyme.exe`, `seamlylayout.exe`, `pdftops.exe`, `QtWebEngineProcess.exe`, `vc_redist.x64.exe`.
+  - [ ] 0c. Check the program directory `%PROGRAMDIR%` exists (always `%ProgramFiles%\SeamlyApps`) contains `seamly2d.exe`, `seamlyme.exe`, `seamlylayout.exe`, `QtWebEngineProcess.exe`, `vc_redist.x64.exe`.
   - [ ] 0d. Confirm no duplicate directories.
   - [ ] 0e. if updating or repairing an existing install then confirm `%DATAROOT%` is unchanged from before this run, and that only missing subdirectories/files were added — no existing file touched.
 - [ ] 1. Check the registry keys:

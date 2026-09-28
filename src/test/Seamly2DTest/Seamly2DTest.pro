@@ -59,6 +59,7 @@ SOURCES += \
     tst_svgtextitem.cpp \
     tst_svgcomponenttags.cpp \
     tst_seamlysuitepaths.cpp \
+    tst_exportformatcombobox.cpp \
     tst_dataroot.cpp
 
 *msvc*:SOURCES += stable.cpp
@@ -90,6 +91,7 @@ HEADERS += \
     tst_svgtextitem.h \
     tst_svgcomponenttags.h \
     tst_seamlysuitepaths.h \
+    tst_exportformatcombobox.h \
     tst_dataroot.h
 
 include(warnings.pri)

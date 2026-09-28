@@ -1,0 +1,16 @@
+# project: SeamlyLayout
+# author: slspencer, copyright 2026
+# MIT License: https://opensource.org/licenses/MIT
+#
+# Writes a layout SVG as a PostScript (.ps) or Encapsulated PostScript (.eps) file.
+[package]
+name = "ps_writer"
+version = "0.1.0"
+edition = "2021"
+authors = ["slspencer"]
+license = "MIT"
+description = "Writes a SeamlyLayout layout SVG as PostScript or Encapsulated PostScript"
+
+[dependencies]
+svg_dom = { path = "../svg_dom" }
+usvg    = "0.42"

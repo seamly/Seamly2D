@@ -273,7 +273,7 @@ All installers ship the committed files in `packaging/licenses/`:
 - The script needs `cargo-about` (`cargo install cargo-about --locked --features cli`) and network access for SPDX license texts.
 - `cargo test --workspace` fails while a file is stale (`license_notices_tests`: `Cargo.lock` fingerprint, `ci.yml` `QT_VERSION`).
 - `about.toml` lists the accepted Rust licenses. A crate under any other license stops generation; review it before adding the license.
-- Not covered yet: xerces-c, pdftops (Poppler) and the MSVC runtime that Seamly2D ships.
+- Not covered yet: xerces-c and the MSVC runtime that Seamly2D ships.
 
 ## Related records
 

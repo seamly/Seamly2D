@@ -270,8 +270,8 @@ SeamlyMe and SeamlyLayout release binaries, runs the Qt and Rust unit tests,
 then packages the Linux x86_64 AppImage via `linuxdeploy` (auto-downloaded
 into `packaging/linux/tools/` on first run).
 
-Requires `qmake`, `cmake`, `ninja`, `cargo`, `ctest`, `xvfb-run`, `pdftops`
-(`poppler-utils`) and `libxerces-c-dev` already installed — the script fails
+Requires `qmake`, `cmake`, `ninja`, `cargo`, `ctest`, `xvfb-run` and
+`libxerces-c-dev` already installed — the script fails
 with an install hint rather than running `sudo apt install` itself. A Qt
 6.11.1+ `gcc_64` kit under `~/Qt` is required, with the same modules as the
 Windows kit.

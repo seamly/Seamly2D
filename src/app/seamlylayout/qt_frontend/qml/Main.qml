@@ -129,7 +129,7 @@ ApplicationWindow {
     // Staged payload for deferred export start — shared across all formats.
     // Populated by each export handler; consumed by exportStartTimer.onTriggered.
     property string pendingExportPath: ""
-    property string pendingExportFormat: ""        // "dxf"|"png"|"pdf"|"pdf-tiled"|"svg"|"hpgl"|"gcode"|"3mf"
+    property string pendingExportFormat: ""        // "dxf"|"png"|"pdf"|"pdf-tiled"|"svg"|"hpgl"|"ps"|"eps"|"gcode"|"3mf"
     property string pendingExportSettings: ""      // settings JSON for pdf / pdf-tiled; text mode for svg; options JSON for hpgl
     property bool   pendingExportTeachingVersion: false  // teaching flag for DXF
 
@@ -156,6 +156,8 @@ ApplicationWindow {
                 appController.exportSvg(path, root.pendingExportSettings) // settings = SVG text mode
             } else if (fmt === "hpgl") {
                 appController.exportHpgl(path, root.pendingExportSettings) // settings = HPGL options JSON
+            } else if (fmt === "ps" || fmt === "eps") {
+                appController.exportPostscript(path, fmt) // the format name is the PostScript flavor
             } else if (fmt === "gcode") {
                 appController.exportGcode(path)
             } else if (fmt === "3mf") {
@@ -479,6 +481,22 @@ ApplicationWindow {
                 exportStartTimer.restart()
             } // if path
         } // onExportHpglRequested
+        onExportPostscriptRequested: function(flavor) {
+            var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
+            var name = root.makeExportFileName(flavor) // default name: <importedBaseName>_YYYYMMDDHHSS.<ps|eps>
+            var filter = flavor === "eps"
+                ? "EPS Files (*.eps);;All Files (*)"
+                : "PostScript Files (*.ps);;All Files (*)"
+            var path = preferencesModel.getSaveFilePath(
+                flavor === "eps" ? "Save EPS File" : "Save PostScript File", dir, name, filter)
+            if (path !== "") {
+                // Stage export, show progress popup, then start after one paint tick.
+                root.pendingExportPath = path
+                root.pendingExportFormat = flavor
+                exportProgressPopup.open()
+                exportStartTimer.restart()
+            } // if path
+        } // onExportPostscriptRequested
         onHpglPenChosen: function(lineClass, pen) {
             // Remember the pen; the pen submenu marks it and the next export uses it.
             preferencesModel.saveHpglPen(preferencesModel.defaultPreferencesFilePath(), lineClass, pen)

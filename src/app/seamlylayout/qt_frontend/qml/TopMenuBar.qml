@@ -104,6 +104,10 @@ ToolBar {
     // @param mode "plot" or "cut".
     signal exportHpglRequested(string mode)
 
+    // @brief User selected EPS or PostScript (PS) from the Export dropdown.
+    // @param flavor "ps" or "eps".
+    signal exportPostscriptRequested(string flavor)
+
     // @brief User picked an HPGL pen for one line class ("cut", "mark" or "label").
     signal hpglPenChosen(string lineClass, int pen)
 
@@ -211,6 +215,8 @@ ToolBar {
             onExportPdfTiledRequested: root.exportPdfTiledRequested()
             onExportPngRequested:      root.exportPngRequested()
             onExportSvgModeRequested:  function(mode) { root.exportSvgRequested(mode) }
+            showPostScript:            true
+            onExportPostscriptRequested: function(flavor) { root.exportPostscriptRequested(flavor) }
             showHpgl:                  true
             hpglCutPen:                root.hpglCutPen
             hpglMarkPen:               root.hpglMarkPen

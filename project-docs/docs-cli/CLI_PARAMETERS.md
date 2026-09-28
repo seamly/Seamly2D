@@ -46,10 +46,6 @@ Usage:<br/>
 
 <div style="color:#000000;"><nowiki>* Wavefront OBJ (*.obj) = 3,</nowiki></div>
 
-<div style="color:#000000;"><nowiki>* PS files (*.ps) = 4,</nowiki></div>
-
-<div style="color:#000000;"><nowiki>* EPS files (*.eps) = 5,</nowiki></div>
-
 <div style="color:#000000;"><nowiki>* AutoCAD DXF R10 (flat) files (*.dxf) = 6,</nowiki></div>
 
 <div style="color:#000000;"><nowiki>* AutoCAD DXF R11/12 (flat) files (*.dxf) = 7,</nowiki></div>

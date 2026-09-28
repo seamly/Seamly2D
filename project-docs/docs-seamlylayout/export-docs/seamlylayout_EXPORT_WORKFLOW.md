@@ -113,6 +113,48 @@ ExportMenu HPGL submenu → exportHpglRequested("plot" | "cut")
 - A missing `hpgl_viewer_path` key (INI or defaults JSON) falls back to that URL. The installer also seeds the key.
 - Not covered: HP-GL/2, a rotate option for the roll axis, sheet-mode pages.
 
+## PostScript export — PS and EPS
+
+```
+ExportMenu EPS / PostScript (PS) → exportPostscriptRequested("eps" | "ps")
+  → TopMenuBar.exportPostscriptRequested(flavor)
+    → Main.qml onExportPostscriptRequested(flavor)
+      → save dialog (*.eps or *.ps)
+      → pendingExportFormat = flavor; exportStartTimer
+        → appController.exportPostscript(path, flavor)
+          → clone_stripped_layout_doc()
+          → exports::do_export_postscript(doc, path, PsFlavor)
+            → ps_writer::svg_to_postscript(doc, flavor)
+          → export_warning(message)                    caveats only
+          → export_finished(path)
+```
+
+- One writer serves both flavors. Only the header and the page setup differ.
+- Units: 96 px per inch → 72 pt per inch (× 0.75). The page matrix flips Y.
+- Each path keeps its own transform (`concat`), so stroke widths scale as in SVG.
+- Curves stay curves: cubic → `curveto`, quadratic → the equal cubic.
+- Text is written as glyph outlines. The file needs no fonts.
+- Level 2. 7-bit ASCII. Path operators `m l c h` live in `SeamlyLayoutDict`, not `userdict`.
+
+| Item | PS | EPS |
+|---|---|---|
+| First line | `%!PS-Adobe-3.0` | `%!PS-Adobe-3.0 EPSF-3.0` |
+| `%%BoundingBox`, `%%HiResBoundingBox` | layout page | layout page |
+| `setpagedevice` page size | yes | no (the importing program owns the page) |
+
+| SVG feature | Written as | Warning |
+|---|---|---|
+| Opacity < 1 | opaque | yes |
+| Gradient | first stop color | yes |
+| Pattern fill | black | yes |
+| Raster image | not written | yes |
+| Clip path, mask, filter | ignored | yes |
+
+- An empty layout is an error. No file is written.
+- The View menu has no PS or EPS item. The system viewer opens the file.
+- Not covered: tiled multi-page PS.
+- Seamly2D exports no PS or EPS, and ships no `pdftops`. CLI formats 8 and 9 are rejected; other format numbers do not change.
+
 ## Paid formats — G-Code and 3D mesh (3MF)
 
 Stubs only. No module ships yet.

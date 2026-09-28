@@ -21,8 +21,8 @@
 # Usage:
 #   packaging/linux/local_build_appimage.sh [--version YY.M.DDHH] [--qt-root DIR] [--skip-tests]
 #
-# Requires on PATH: qmake, cmake, ninja, cargo, ctest, xvfb-run, pdftops
-# (poppler-utils), and the libxerces-c-dev headers. Auto-downloads
+# Requires on PATH: qmake, cmake, ninja, cargo, ctest, xvfb-run, and the
+# libxerces-c-dev headers. Auto-downloads
 # linuxdeploy + linuxdeploy-plugin-qt into packaging/linux/tools/ if missing
 # (user-space download, no sudo). System packages are never installed by
 # this script - it fails with an install hint instead.
@@ -119,9 +119,9 @@ export PATH="${QT_ROOT}/bin:${PATH}"
 export QMAKE="${QT_ROOT}/bin/qmake"
 
 # --- Check required tools ----------------------------------------------------------
-for tool in ninja cmake cargo ctest qmake xvfb-run pdftops; do
+for tool in ninja cmake cargo ctest qmake xvfb-run; do
     command -v "${tool}" >/dev/null 2>&1 || {
-        echo "required tool '${tool}' not found on PATH - install it first (apt install ninja-build cmake xvfb poppler-utils; cargo via rustup)." >&2
+        echo "required tool '${tool}' not found on PATH - install it first (apt install ninja-build cmake xvfb; cargo via rustup)." >&2
         exit 1
     }
 done
@@ -191,7 +191,6 @@ echo "=== cmake --install: stage SeamlyLayout into AppDir ==="
 
 echo "=== linuxdeploy: package AppImage ==="
 mkdir -p AppDir/usr/bin
-cp "$(command -v pdftops)" AppDir/usr/bin
 if [ -d /usr/share/X11/xkb ]; then
     mkdir -p AppDir/usr/share/X11/xkb
     cp -r /usr/share/X11/xkb/* AppDir/usr/share/X11/xkb

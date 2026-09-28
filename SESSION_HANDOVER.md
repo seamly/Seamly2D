@@ -6,6 +6,18 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-27 — PS/EPS export (Layout.53); pdftops retired
+
+Merged `task-ps-eps-writer`. Full CI: changes `ci.yml`, `*.pro`, `packaging/**`, `Cargo.toml`.
+
+- New crate `crates/ps_writer`: one writer, PS and EPS headers. Bridge `AppController::export_postscript`; Export > EPS, Export > PostScript (PS).
+- Seamly2D (user decision, option B): PS/EPS removed from every export path and the CLI. PDF and SVG stay. `LayoutExportFormat::PS`/`EPS` enum values kept so CLI numbers do not move.
+- `pdftops` removed: both tracked binaries, `seamly2d.pro`, `ci.yml`, `local_build_appimage.sh`, READMEs, MSI test template. Installer.7.2 closed.
+- New Qt test `TST_ExportFormatCombobox` (Seamly2DTest).
+- `rust_crate_notices.txt` regenerated.
+- Output checked structurally only (no Ghostscript on this machine). Check: export a layout to EPS and PS; open in Ghostscript, Illustrator or Inkscape.
+- Deferred (user decision): tiled multi-page PS, now Layout.56.
+
 ## 2026-09-27 — View > HPGL and HPGL viewer preference
 
 Merged `task-hpgl-viewer`. Full CI: touches `packaging/**`. `ctest --preset debug` and `smsi_ensure_user_data_test.ps1` passed.

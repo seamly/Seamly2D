@@ -58,10 +58,6 @@ signals:
 
 private:
     static QVector<std::pair<QString, LayoutExportFormat> > initFormats();
-    static bool         supportPSTest();
-    static bool         testPdf();
-    static bool         havePdf;
-    static bool         tested;
     LayoutExportFormat  m_currentFormat;
 };
 

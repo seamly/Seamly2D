@@ -7501,16 +7501,6 @@ void MainWindow::exportDraftBlocksAs()
                 }
             case LayoutExportFormat::PDFTiled:
             case LayoutExportFormat::OBJ:
-            case LayoutExportFormat::PS:
-                {
-                    exportPS(filename, paper, draftScene, true, margins);
-                    break;
-                }
-            case LayoutExportFormat::EPS:
-                {
-                    exportEPS(filename, paper, draftScene, true, margins);
-                    break;
-                }
             case LayoutExportFormat::DXF_AC1006_Flat:
             case LayoutExportFormat::DXF_AC1009_Flat:
             case LayoutExportFormat::DXF_AC1012_Flat:

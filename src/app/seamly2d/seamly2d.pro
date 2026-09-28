@@ -85,11 +85,6 @@ win32:RC_FILE = share/resources/seamly2d.rc
 # Include sample files via INSTALL_MULTISIZE_MEASUREMENTS, INSTALL_STANDARD_TEMPLATES, and INSTALL_LABEL_TEMPLATES
 include(../samples.pri)
 
-# Directory for pdftops utility, required to export layouts in PS and EPS formats.
-win32 {
-    INSTALL_PDFTOPS += share/bin/win/pdftops.exe
-}
-
 # Include translations
 include(../translations.pri)
 
@@ -163,10 +158,6 @@ unix{
         seamlyme.path = $$MACOS_DIR
         seamlyme.files += $${OUT_PWD}/../seamlyme/$${DESTDIR}/seamlyme.app/$${MACOS_DIR}/seamlyme
 
-        # Utility pdftops required for exporting layout image to PS and EPS formats.
-        xpdf.path = $$MACOS_DIR
-        xpdf.files += $${PWD}/../../../packaging/macos/bin64/pdftops
-
         # logo on macx.
         ICON = ../../../packaging/assets/seamly2d.icns
 
@@ -199,19 +190,8 @@ unix{
             multisize \
             label \
             seamlyme \
-            xpdf \
             icns_resources
     }
-}
-
-# Copy pdftops files to the Windows destination directory.
-win32 {
-    for(DIR, INSTALL_PDFTOPS) {
-        #add these absolute paths to a variable which
-        #ends up as 'mkcommands = path1 path2 path3 ..z.'
-        pdftops_path += $${PWD}/$$DIR
-    }
-    copyToDestdir($$pdftops_path, $$shell_path($${OUT_PWD}/$$DESTDIR))
 }
 
 # When the GNU linker sees a library, it discards all symbols that it doesn't need.
@@ -366,7 +346,7 @@ macx {
         # -verbose=3 so a CI failure prints its cause instead of exiting silently
         QMAKE_POST_LINK += $$[QT_INSTALL_BINS]/macdeployqt $${OUT_PWD}/$${DESTDIR}/$${TARGET}.app -verbose=3
     } else {
-        # we need to manually sign with codesign --deep as pdftops otherwise will not get signed by macdeployqt
+        # codesign --deep signs the nested seamlyme binary, which macdeployqt does not sign
         # we need --force as seamlyme is already signed, but we need to resign it
         QMAKE_POST_LINK += $$[QT_INSTALL_BINS]/macdeployqt $${OUT_PWD}/$${DESTDIR}/$${TARGET}.app -verbose=3 &&
         QMAKE_POST_LINK += codesign --deep --timestamp --options runtime --force -s $${APPLE_SIGN_IDENTITY} $${OUT_PWD}/$${DESTDIR}/$${TARGET}.app &&

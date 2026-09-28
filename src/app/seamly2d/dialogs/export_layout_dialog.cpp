@@ -146,9 +146,6 @@ ExportLayoutDialog::ExportLayoutDialog(int count, Draw mode, const QString &file
         removeFormatFromList(LayoutExportFormat::DXF_AC1021_ASTM);
         removeFormatFromList(LayoutExportFormat::DXF_AC1024_ASTM);
         removeFormatFromList(LayoutExportFormat::DXF_AC1027_ASTM);
-        //removeFormatFromList(LayoutExportFormat::PS);
-        //removeFormatFromList(LayoutExportFormat::PDF);
-        //removeFormatFromList(LayoutExportFormat::EPS);
 
         ui->binaryDXF_CheckBox->hide();
     }
@@ -304,8 +301,6 @@ void ExportLayoutDialog::setBinaryDXFFormat(bool binary)
         case LayoutExportFormat::BMP:
         case LayoutExportFormat::PPM:
         case LayoutExportFormat::OBJ:
-        case LayoutExportFormat::PS:
-        case LayoutExportFormat::EPS:
         case LayoutExportFormat::TIF:
         default:
             ui->binaryDXF_CheckBox->setChecked(false);
@@ -354,8 +349,6 @@ bool ExportLayoutDialog::isBinaryDXFFormat() const
         case LayoutExportFormat::BMP:
         case LayoutExportFormat::PPM:
         case LayoutExportFormat::OBJ:
-        case LayoutExportFormat::PS:
-        case LayoutExportFormat::EPS:
         case LayoutExportFormat::TIF:
         default:
             return false;
@@ -406,8 +399,6 @@ void ExportLayoutDialog::enableBinaryDXFFormatCheckbox()
     case LayoutExportFormat::BMP:
     case LayoutExportFormat::PPM:
     case LayoutExportFormat::OBJ:
-    case LayoutExportFormat::PS:
-    case LayoutExportFormat::EPS:
     case LayoutExportFormat::TIF:
     default:
         ui->binaryDXF_CheckBox->setEnabled(false);
@@ -468,10 +459,6 @@ QString ExportLayoutDialog::exportFormatSuffix(LayoutExportFormat format)
             return ".ppm";
         case LayoutExportFormat::OBJ:
             return ".obj";
-        case LayoutExportFormat::PS:
-            return ".ps";
-        case LayoutExportFormat::EPS:
-            return ".eps";
         case LayoutExportFormat::TIF:
             return ".tif";
         case LayoutExportFormat::DXF_AC1006_Flat:
@@ -749,8 +736,6 @@ void ExportLayoutDialog::showExportFiles()
         case LayoutExportFormat::BMP:
         case LayoutExportFormat::PPM:
         case LayoutExportFormat::OBJ:
-        case LayoutExportFormat::PS:
-        case LayoutExportFormat::EPS:
         case LayoutExportFormat::TIF:
         default:
             ui->binaryDXF_CheckBox->setEnabled(false);
