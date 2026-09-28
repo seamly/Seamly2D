@@ -134,7 +134,8 @@ try {
         -Succeeded (((Get-IniValue -Path $slay -Section 'General' -Key 'dxf_viewer_path') -eq 'https://sharecad.org') -and
                     ((Get-IniValue -Path $slay -Section 'General' -Key 'pdf_viewer_path') -eq '') -and
                     ((Get-IniValue -Path $slay -Section 'General' -Key 'png_viewer_path') -eq '') -and
-                    ((Get-IniValue -Path $slay -Section 'General' -Key 'projector_path') -eq 'https://patternprojector.com'))
+                    ((Get-IniValue -Path $slay -Section 'General' -Key 'projector_path') -eq 'https://patternprojector.com') -and
+                    ((Get-IniValue -Path $slay -Section 'General' -Key 'hpgl_viewer_path') -eq 'https://tiny-online.tools/embroidery-cnc-tools/hpgl-plt-viewer'))
 
     $commonBytes = [System.IO.File]::ReadAllBytes($common)
     Assert-That -Name 'the seeded files carry no UTF-8 BOM' `

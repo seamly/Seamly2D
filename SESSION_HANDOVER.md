@@ -6,6 +6,15 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-27 — View > HPGL and HPGL viewer preference
+
+Merged `task-hpgl-viewer`. Full CI: touches `packaging/**`. `ctest --preset debug` and `smsi_ensure_user_data_test.ps1` passed.
+
+- `hpgl_viewer_path` preference; default `https://tiny-online.tools/embroidery-cnc-tools/hpgl-plt-viewer`. Missing key falls back to it.
+- Seeded by `smsi_ensure_user_data.ps1`, `default_preferences.json`, and `seedFromBundledDefaults()`.
+- Preferences window: HPGL Viewer row above Projector. `PreferencesPanel.qml` (not used) unchanged.
+- Not checked in the running app.
+
 ## 2026-09-27 — HPGL export (Layout.52)
 
 Merged `task-hpgl-export`. Full CI: new crate changes `Cargo.toml`. `cargo test --workspace`, `ctest --preset debug` passed. `local_build_msi.ps1` not run: no Seamly2D or SeamlyMe code changed.

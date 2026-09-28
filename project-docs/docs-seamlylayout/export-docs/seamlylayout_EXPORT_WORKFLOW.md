@@ -108,7 +108,9 @@ ExportMenu HPGL submenu → exportHpglRequested("plot" | "cut")
 - A file without `data-type`: the group id decides (`cutline_*`, `*-notch-*`, ...).
 - No hint at all: a closed path is a cut line, an open path is a mark.
 - usvg drops `data-*`. `line_classes::tag_line_classes` wraps each classified group's children in `<g id="hpgl-class-<class>-<n>">`, which usvg keeps. Original ids do not change.
-- The View menu has no HPGL item: no HPGL viewer is configured.
+- View > HPGL: file picker (`*.plt *.hpgl`), then `openInViewer(hpglViewerPath, file)`.
+- Preferences > HPGL Viewer: default `https://tiny-online.tools/embroidery-cnc-tools/hpgl-plt-viewer`. A web viewer opens its page only; the user loads the file there.
+- A missing `hpgl_viewer_path` key (INI or defaults JSON) falls back to that URL. The installer also seeds the key.
 - Not covered: HP-GL/2, a rotate option for the roll axis, sheet-mode pages.
 
 ## Paid formats — G-Code and 3D mesh (3MF)

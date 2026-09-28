@@ -106,6 +106,9 @@ Menu {
     // @brief Emitted when the user picks the HPGL file extension ("plt" or "hpgl").
     signal hpglExtensionChosen(string extension)
 
+    // @brief Emitted when the user selects HPGL in the View menu.
+    signal viewHpglRequested()
+
     // @brief Emitted when the user selects Projector (View menu only).
     signal projectorRequested()
 
@@ -342,6 +345,14 @@ Menu {
         } // Menu file extension
     } // Menu hpglSubmenu
 
+    // View menu only: the Export menu has the HPGL submenu instead.
+    MenuItem {
+        id:      viewHpglItem
+        text:    "HPGL"
+        enabled: root.layoutReady
+        onTriggered: root.viewHpglRequested()
+    } // MenuItem viewHpglItem
+
     // Paid formats: hidden Menu items keep their height, so collapse them when hidden.
     MenuItem {
         text:    "G-Code"
@@ -366,9 +377,12 @@ Menu {
         } else {
             root.removeMenu(svgSubmenu)
         } // if svgModeSubmenu
-        if (!root.showHpgl) {
-            root.removeMenu(hpglSubmenu) // the View menu has no HPGL viewer
-        } // if not showHpgl
+        // Keep one HPGL entry: the submenu (Export menu) or the view item (View menu).
+        if (root.showHpgl) {
+            root.removeItem(viewHpglItem)
+        } else {
+            root.removeMenu(hpglSubmenu)
+        } // if showHpgl
     } // Component.onCompleted
 
     // Hidden Menu items keep their height; collapse them so the Export menu has no blank row.

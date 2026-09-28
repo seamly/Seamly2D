@@ -571,6 +571,22 @@ ApplicationWindow {
                 console.log("[Main.qml TopMenuBar] onViewDxfAstmRequested(): 4 no DXF viewer configured")
             } // if path && viewer
         } // onViewDxfAstmRequested
+        onViewHpglRequested: {
+            console.log("[Main.qml TopMenuBar] onViewHpglRequested(): 1 triggered")
+            var dir  = preferencesModel.resolvedLayoutDirectory() // default directory is the resolved Layout Output Directory
+            var path = preferencesModel.getOpenFilePath(
+                "Open HPGL File", dir,
+                "HPGL Files (*.plt *.hpgl);;All Files (*)")
+            console.log("[Main.qml TopMenuBar] onViewHpglRequested(): 2 path=" + path + " hpglViewerPath=" + preferencesModel.hpglViewerPath)
+            if (path !== "" && preferencesModel.hpglViewerPath !== "") {
+                // Open the file in the configured viewer; an online viewer opens its page only.
+                preferencesModel.openInViewer(preferencesModel.hpglViewerPath, path)
+            } else if (path === "") {
+                console.log("[Main.qml TopMenuBar] onViewHpglRequested(): 3 file pick cancelled")
+            } else {
+                console.log("[Main.qml TopMenuBar] onViewHpglRequested(): 3 no HPGL viewer configured")
+            } // if path && viewer
+        } // onViewHpglRequested
         onViewPdfRequested: {
             console.log("[Main.qml TopMenuBar] onViewPdfRequested(): 1 triggered")
             var dir  = preferencesModel.resolvedLayoutDirectory() // default directory is the resolved Layout Output Directory

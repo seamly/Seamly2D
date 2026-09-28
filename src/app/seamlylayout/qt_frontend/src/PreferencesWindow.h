@@ -83,6 +83,7 @@ private:
     QLineEdit *m_dxfViewerField   = nullptr;
     QLineEdit *m_pdfViewerField   = nullptr;
     QLineEdit *m_pngViewerField   = nullptr;
+    QLineEdit *m_hpglViewerField  = nullptr;
     QLineEdit *m_projectorField   = nullptr;
 
 }; // PreferencesWindow

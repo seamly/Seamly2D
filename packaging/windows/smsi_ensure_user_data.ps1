@@ -317,6 +317,7 @@ try {
         'pdf_viewer_path'        = ''
         'png_viewer_path'        = ''
         'projector_path'         = 'https://patternprojector.com'
+        'hpgl_viewer_path'       = 'https://tiny-online.tools/embroidery-cnc-tools/hpgl-plt-viewer'
         'data_root'              = $root
     }
     Add-IniKey -Path (Join-Path $seamlyRoot 'SeamlyLayout\qt6_seamlylayout.ini') -Section 'General' -Pairs $layoutKeys

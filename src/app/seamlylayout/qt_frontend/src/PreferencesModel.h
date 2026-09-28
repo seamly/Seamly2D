@@ -12,7 +12,7 @@
 // INI keys use snake_case for compatibility with legacy preferences JSON:
 //   input_directory, layout_directory, preferences_directory,
 //   settings_directory, settings_file, preferences_file,
-//   dxf_viewer_path, pdf_viewer_path, png_viewer_path, data_root
+//   dxf_viewer_path, pdf_viewer_path, png_viewer_path, hpgl_viewer_path, data_root
 //
 // Registration:
 //   Registered at runtime in seamlyLayout_main.mm:
@@ -63,6 +63,11 @@ class PreferencesModel : public QObject
     // @brief Path to the PNG viewer executable.
     Q_PROPERTY(QString pngViewerPath   READ pngViewerPath   WRITE setPngViewerPath   NOTIFY pngViewerPathChanged)
 
+    // @brief Path or https:// URL of the HPGL (.plt / .hpgl) viewer.
+    // A missing INI or defaults key falls back to the online viewer, so an
+    // install that predates this key still gets a working View > HPGL.
+    Q_PROPERTY(QString hpglViewerPath  READ hpglViewerPath  WRITE setHpglViewerPath  NOTIFY hpglViewerPathChanged)
+
     // @brief Path/URL to the projector application (e.g. Pattern Projector).
     // Accepts an https:// URL (https://patternprojector.com) or a local
     // executable path optionally followed by arguments (e.g. Chrome PWA shortcut:
@@ -102,6 +107,7 @@ public:
     QString pdfViewerPath()   const { return m_pdfViewerPath;   }
     QString pngViewerPath()   const { return m_pngViewerPath;   }
     QString projectorPath()   const { return m_projectorPath;   }
+    QString hpglViewerPath()  const { return m_hpglViewerPath;  }
     QString dataRoot()        const { return m_dataRoot;        }
     QString svgTextMode()     const { return m_svgTextMode;     }
     int hpglCutPen()          const { return m_hpglCutPen;      }
@@ -120,6 +126,7 @@ public:
     void setPdfViewerPath(const QString &v);
     void setPngViewerPath(const QString &v);
     void setProjectorPath(const QString &v);
+    void setHpglViewerPath(const QString &v);
     void setDataRoot(const QString &v);
     void setSvgTextMode(const QString &v);
     void setHpglCutPen(int v);
@@ -311,6 +318,7 @@ signals:
     void pdfViewerPathChanged();
     void pngViewerPathChanged();
     void projectorPathChanged();
+    void hpglViewerPathChanged();
     void dataRootChanged();
     void svgTextModeChanged();
     void hpglCutPenChanged();
@@ -349,6 +357,7 @@ private:
     QString m_pdfViewerPath   = QStringLiteral("");
     QString m_pngViewerPath   = QStringLiteral("");
     QString m_projectorPath   = QStringLiteral("");
+    QString m_hpglViewerPath  = QStringLiteral("https://tiny-online.tools/embroidery-cnc-tools/hpgl-plt-viewer");
     QString m_dataRoot        = QStringLiteral("");
     QString m_svgTextMode     = QStringLiteral("designerFont");
     int m_hpglCutPen          = 1;
