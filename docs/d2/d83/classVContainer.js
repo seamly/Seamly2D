@@ -46,6 +46,7 @@ var classVContainer =
     [ "IsUnique", "d2/d83/classVContainer.html#a64f2ef99d6306c96b350649de15cb8ec", null ],
     [ "lineAnglesData", "d2/d83/classVContainer.html#a10a3da038590e6ee972c6bdbdfd7f195", null ],
     [ "lineLengthsData", "d2/d83/classVContainer.html#a8369f3f12c26e803eadaed76bb5c4fc9", null ],
+    [ "NextPieceName", "d2/d83/classVContainer.html#a62dde60a957d79e7a40b7c455167343c", null ],
     [ "operator=", "d2/d83/classVContainer.html#a2f26d4b8875f74d17f39ad204d529d04", null ],
     [ "pieceIdOfPath", "d2/d83/classVContainer.html#addf058654d0ec02f3e0955ce12e8c5c2", null ],
     [ "qHash", "d2/d83/classVContainer.html#ac6f2ed98892ad74c1e248a1c9b61dfda", null ],

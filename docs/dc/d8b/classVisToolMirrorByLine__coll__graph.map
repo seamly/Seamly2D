@@ -1,12 +1,12 @@
 <map id="VisToolMirrorByLine" name="VisToolMirrorByLine">
-<area shape="rect" id="node1" title=" " alt="" coords="325,1903,512,2053"/>
-<area shape="rect" id="node2" href="$d7/dba/classVisOperation.html" title=" " alt="" coords="221,1572,419,1825"/>
-<area shape="rect" id="node3" href="$de/d0e/classVisLine.html" title=" " alt="" coords="255,1299,385,1523"/>
-<area shape="rect" id="node4" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,644,297,1249"/>
-<area shape="rect" id="node5" title=" " alt="" coords="5,255,80,332"/>
-<area shape="rect" id="node6" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,581"/>
-<area shape="rect" id="node7" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="335,864,489,1029"/>
-<area shape="rect" id="node8" title=" " alt="" coords="352,255,499,332"/>
-<area shape="rect" id="node9" href="$d8/dbf/classVScaledEllipse.html" title=" " alt="" coords="443,1638,597,1759"/>
-<area shape="rect" id="node10" title=" " alt="" coords="439,1372,601,1449"/>
+<area shape="rect" id="node1" title=" " alt="" coords="325,1917,512,2068"/>
+<area shape="rect" id="node2" href="$d7/dba/classVisOperation.html" title=" " alt="" coords="221,1587,419,1840"/>
+<area shape="rect" id="node3" href="$de/d0e/classVisLine.html" title=" " alt="" coords="255,1313,385,1537"/>
+<area shape="rect" id="node4" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,659,297,1264"/>
+<area shape="rect" id="node5" title=" " alt="" coords="5,262,80,339"/>
+<area shape="rect" id="node6" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,596"/>
+<area shape="rect" id="node7" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="335,879,489,1044"/>
+<area shape="rect" id="node8" title=" " alt="" coords="352,262,499,339"/>
+<area shape="rect" id="node9" href="$d8/dbf/classVScaledEllipse.html" title=" " alt="" coords="443,1653,597,1774"/>
+<area shape="rect" id="node10" title=" " alt="" coords="439,1387,601,1464"/>
 </map>

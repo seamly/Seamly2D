@@ -46,7 +46,7 @@ if (edges && edges.length) {
         </defs>
 
 <script type="text/javascript">
-var viewWidth = 490;
+var viewWidth = 492;
 var viewHeight = 848;
 var sectionId = 'dynsection-0';
 </script>
@@ -58,39 +58,39 @@ var sectionId = 'dynsection-0';
 <g id="node1" class="node">
 <title>Node1</title>
 <g id="a_node1"><a xlink:title=" ">
-<polygon fill="#999999" stroke="#666666" points="169.5,-391.5 169.5,-745.5 314.5,-745.5 314.5,-391.5 169.5,-391.5"/>
-<text text-anchor="middle" x="242" y="-733.5" font-family="Helvetica,sans-Serif" font-size="10.00">VAbstractApplication</text>
-<polyline fill="none" stroke="#666666" points="169.5,-726.5 314.5,-726.5 "/>
-<text text-anchor="start" x="177.5" y="-714.5" font-family="Helvetica,sans-Serif" font-size="10.00"># undoStack</text>
-<text text-anchor="start" x="177.5" y="-703.5" font-family="Helvetica,sans-Serif" font-size="10.00"># mainWindow</text>
-<text text-anchor="start" x="177.5" y="-692.5" font-family="Helvetica,sans-Serif" font-size="10.00"># m_settings</text>
-<text text-anchor="start" x="177.5" y="-681.5" font-family="Helvetica,sans-Serif" font-size="10.00"># qtTranslator</text>
-<text text-anchor="start" x="177.5" y="-670.5" font-family="Helvetica,sans-Serif" font-size="10.00"># qtxmlTranslator</text>
-<text text-anchor="start" x="177.5" y="-659.5" font-family="Helvetica,sans-Serif" font-size="10.00"># qtBaseTranslator</text>
-<text text-anchor="start" x="177.5" y="-648.5" font-family="Helvetica,sans-Serif" font-size="10.00"># appTranslator</text>
-<text text-anchor="start" x="177.5" y="-637.5" font-family="Helvetica,sans-Serif" font-size="10.00"># pmsTranslator</text>
-<text text-anchor="start" x="177.5" y="-626.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; _patternUnit</text>
-<text text-anchor="start" x="177.5" y="-615.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; _patternType</text>
-<text text-anchor="start" x="177.5" y="-604.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; patternFilePath</text>
-<text text-anchor="start" x="177.5" y="-593.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; currentScene</text>
-<text text-anchor="start" x="177.5" y="-582.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; sceneView</text>
-<text text-anchor="start" x="177.5" y="-571.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; doc</text>
-<text text-anchor="start" x="177.5" y="-560.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; data</text>
-<text text-anchor="start" x="177.5" y="-549.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; openingPattern</text>
-<polyline fill="none" stroke="#666666" points="169.5,-542.5 314.5,-542.5 "/>
-<text text-anchor="start" x="177.5" y="-530.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ VAbstractApplication()</text>
-<text text-anchor="start" x="177.5" y="-519.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ ~VAbstractApplication()</text>
-<text text-anchor="start" x="177.5" y="-508.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ translateVariables()</text>
-<text text-anchor="start" x="177.5" y="-497.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ translationsPath()</text>
-<text text-anchor="start" x="177.5" y="-486.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ loadTranslations()</text>
-<text text-anchor="start" x="177.5" y="-475.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ patternUnit()</text>
-<text text-anchor="start" x="177.5" y="-464.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ patternUnitP()</text>
-<text text-anchor="start" x="177.5" y="-453.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setPatternUnit()</text>
-<text text-anchor="start" x="177.5" y="-442.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ patternType()</text>
-<text text-anchor="start" x="177.5" y="-431.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setPatternType()</text>
-<text text-anchor="start" x="177.5" y="-420.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 21 more...</text>
-<text text-anchor="start" x="177.5" y="-409.5" font-family="Helvetica,sans-Serif" font-size="10.00"># initTranslateVariables()</text>
-<text text-anchor="start" x="177.5" y="-398.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; ClearTranslation()</text>
+<polygon fill="#999999" stroke="#666666" points="171,-391.5 171,-745.5 316,-745.5 316,-391.5 171,-391.5"/>
+<text text-anchor="middle" x="243.5" y="-733.5" font-family="Helvetica,sans-Serif" font-size="10.00">VAbstractApplication</text>
+<polyline fill="none" stroke="#666666" points="171,-726.5 316,-726.5 "/>
+<text text-anchor="start" x="179" y="-714.5" font-family="Helvetica,sans-Serif" font-size="10.00"># undoStack</text>
+<text text-anchor="start" x="179" y="-703.5" font-family="Helvetica,sans-Serif" font-size="10.00"># mainWindow</text>
+<text text-anchor="start" x="179" y="-692.5" font-family="Helvetica,sans-Serif" font-size="10.00"># m_settings</text>
+<text text-anchor="start" x="179" y="-681.5" font-family="Helvetica,sans-Serif" font-size="10.00"># qtTranslator</text>
+<text text-anchor="start" x="179" y="-670.5" font-family="Helvetica,sans-Serif" font-size="10.00"># qtxmlTranslator</text>
+<text text-anchor="start" x="179" y="-659.5" font-family="Helvetica,sans-Serif" font-size="10.00"># qtBaseTranslator</text>
+<text text-anchor="start" x="179" y="-648.5" font-family="Helvetica,sans-Serif" font-size="10.00"># appTranslator</text>
+<text text-anchor="start" x="179" y="-637.5" font-family="Helvetica,sans-Serif" font-size="10.00"># pmsTranslator</text>
+<text text-anchor="start" x="179" y="-626.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; _patternUnit</text>
+<text text-anchor="start" x="179" y="-615.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; _patternType</text>
+<text text-anchor="start" x="179" y="-604.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; patternFilePath</text>
+<text text-anchor="start" x="179" y="-593.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; currentScene</text>
+<text text-anchor="start" x="179" y="-582.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; sceneView</text>
+<text text-anchor="start" x="179" y="-571.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; doc</text>
+<text text-anchor="start" x="179" y="-560.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; data</text>
+<text text-anchor="start" x="179" y="-549.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; openingPattern</text>
+<polyline fill="none" stroke="#666666" points="171,-542.5 316,-542.5 "/>
+<text text-anchor="start" x="179" y="-530.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ VAbstractApplication()</text>
+<text text-anchor="start" x="179" y="-519.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ ~VAbstractApplication()</text>
+<text text-anchor="start" x="179" y="-508.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ translateVariables()</text>
+<text text-anchor="start" x="179" y="-497.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ translationsPath()</text>
+<text text-anchor="start" x="179" y="-486.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ loadTranslations()</text>
+<text text-anchor="start" x="179" y="-475.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ patternUnit()</text>
+<text text-anchor="start" x="179" y="-464.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ patternUnitP()</text>
+<text text-anchor="start" x="179" y="-453.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setPatternUnit()</text>
+<text text-anchor="start" x="179" y="-442.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ patternType()</text>
+<text text-anchor="start" x="179" y="-431.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setPatternType()</text>
+<text text-anchor="start" x="179" y="-420.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 23 more...</text>
+<text text-anchor="start" x="179" y="-409.5" font-family="Helvetica,sans-Serif" font-size="10.00"># initTranslateVariables()</text>
+<text text-anchor="start" x="179" y="-398.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; ClearTranslation()</text>
 </a>
 </g>
 </g>
@@ -98,128 +98,133 @@ var sectionId = 'dynsection-0';
 <g id="node3" class="node">
 <title>Node3</title>
 <g id="a_node3"><a xlink:href="../../da/db1/classApplication2D.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="0,-0.5 0,-354.5 142,-354.5 142,-0.5 0,-0.5"/>
-<text text-anchor="middle" x="71" y="-342.5" font-family="Helvetica,sans-Serif" font-size="10.00">Application2D</text>
-<polyline fill="none" stroke="#666666" points="0,-335.5 142,-335.5 "/>
-<text text-anchor="start" x="8" y="-323.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_trVars</text>
-<text text-anchor="start" x="8" y="-312.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_autoSaveTimer</text>
-<text text-anchor="start" x="8" y="-301.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_lockLog</text>
-<text text-anchor="start" x="8" y="-290.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_out</text>
-<polyline fill="none" stroke="#666666" points="0,-283.5 142,-283.5 "/>
-<text text-anchor="start" x="8" y="-271.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ Application2D()</text>
-<text text-anchor="start" x="8" y="-260.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ ~Application2D()</text>
-<text text-anchor="start" x="8" y="-249.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setTheme()</text>
-<text text-anchor="start" x="8" y="-238.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ notify()</text>
-<text text-anchor="start" x="8" y="-227.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ initOptions()</text>
-<text text-anchor="start" x="8" y="-216.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ seamlyMeFilePath()</text>
-<text text-anchor="start" x="8" y="-205.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getAutoSaveTimer()</text>
-<text text-anchor="start" x="8" y="-194.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setAutoSaveTimer()</text>
-<text text-anchor="start" x="8" y="-183.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ startLogging()</text>
-<text text-anchor="start" x="8" y="-172.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ logFile()</text>
-<text text-anchor="start" x="8" y="-161.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ translateVariables()</text>
-<text text-anchor="start" x="8" y="-150.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ isAppInGUIMode()</text>
-<text text-anchor="start" x="8" y="-139.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ openSettings()</text>
-<text text-anchor="start" x="8" y="-128.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ Seamly2DSettings()</text>
-<text text-anchor="start" x="8" y="-117.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ commandLine()</text>
-<text text-anchor="start" x="8" y="-106.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ startNewSeamly2D()</text>
-<text text-anchor="start" x="8" y="-95.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ pointNameLanguages()</text>
-<text text-anchor="start" x="8" y="-84.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ isGUIMode()</text>
-<text text-anchor="start" x="8" y="-73.5" font-family="Helvetica,sans-Serif" font-size="10.00"># initTranslateVariables()</text>
-<text text-anchor="start" x="8" y="-62.5" font-family="Helvetica,sans-Serif" font-size="10.00"># event()</text>
-<text text-anchor="start" x="8" y="-51.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; logDirPath()</text>
-<text text-anchor="start" x="8" y="-40.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; logPath()</text>
-<text text-anchor="start" x="8" y="-29.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; createLogDir()</text>
-<text text-anchor="start" x="8" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; beginLogging()</text>
-<text text-anchor="start" x="8" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; clearOldLogs()</text>
+<polygon fill="white" stroke="#666666" points="0,-17 0,-338 143,-338 143,-17 0,-17"/>
+<text text-anchor="middle" x="71.5" y="-326" font-family="Helvetica,sans-Serif" font-size="10.00">Application2D</text>
+<polyline fill="none" stroke="#666666" points="0,-319 143,-319 "/>
+<text text-anchor="start" x="8" y="-307" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_trVars</text>
+<text text-anchor="start" x="8" y="-296" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_autoSaveTimer</text>
+<text text-anchor="start" x="8" y="-285" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_lockLog</text>
+<text text-anchor="start" x="8" y="-274" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_out</text>
+<text text-anchor="start" x="8" y="-263" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_settingsMigrated</text>
+<polyline fill="none" stroke="#666666" points="0,-256 143,-256 "/>
+<text text-anchor="start" x="8" y="-244" font-family="Helvetica,sans-Serif" font-size="10.00">+ Application2D()</text>
+<text text-anchor="start" x="8" y="-233" font-family="Helvetica,sans-Serif" font-size="10.00">+ ~Application2D()</text>
+<text text-anchor="start" x="8" y="-222" font-family="Helvetica,sans-Serif" font-size="10.00">+ setTheme()</text>
+<text text-anchor="start" x="8" y="-211" font-family="Helvetica,sans-Serif" font-size="10.00">+ notify()</text>
+<text text-anchor="start" x="8" y="-200" font-family="Helvetica,sans-Serif" font-size="10.00">+ initOptions()</text>
+<text text-anchor="start" x="8" y="-189" font-family="Helvetica,sans-Serif" font-size="10.00">+ seamlyMeFilePath()</text>
+<text text-anchor="start" x="8" y="-178" font-family="Helvetica,sans-Serif" font-size="10.00">+ seamlyLayoutFilePath()</text>
+<text text-anchor="start" x="8" y="-167" font-family="Helvetica,sans-Serif" font-size="10.00">+ getAutoSaveTimer()</text>
+<text text-anchor="start" x="8" y="-156" font-family="Helvetica,sans-Serif" font-size="10.00">+ setAutoSaveTimer()</text>
+<text text-anchor="start" x="8" y="-145" font-family="Helvetica,sans-Serif" font-size="10.00">+ startLogging()</text>
+<text text-anchor="start" x="8" y="-134" font-family="Helvetica,sans-Serif" font-size="10.00">and 6 more...</text>
+<text text-anchor="start" x="8" y="-123" font-family="Helvetica,sans-Serif" font-size="10.00">+ startNewSeamly2D()</text>
+<text text-anchor="start" x="8" y="-112" font-family="Helvetica,sans-Serif" font-size="10.00">+ pointNameLanguages()</text>
+<text text-anchor="start" x="8" y="-101" font-family="Helvetica,sans-Serif" font-size="10.00">+ isGUIMode()</text>
+<text text-anchor="start" x="8" y="-90" font-family="Helvetica,sans-Serif" font-size="10.00"># initTranslateVariables()</text>
+<text text-anchor="start" x="8" y="-79" font-family="Helvetica,sans-Serif" font-size="10.00"># event()</text>
+<text text-anchor="start" x="8" y="-68" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; logDirPath()</text>
+<text text-anchor="start" x="8" y="-57" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; logPath()</text>
+<text text-anchor="start" x="8" y="-46" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; createLogDir()</text>
+<text text-anchor="start" x="8" y="-35" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; beginLogging()</text>
+<text text-anchor="start" x="8" y="-24" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; clearOldLogs()</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node3 -->
 <g id="edge2" class="edge">
 <title>Node1&#45;&gt;Node3</title>
-<path fill="none" stroke="#63b8ff" d="M165.44,-393.33C157.68,-375.69 149.83,-357.82 142.13,-340.31"/>
-<polygon fill="none" stroke="#63b8ff" points="162.25,-394.78 169.48,-402.53 168.66,-391.97 162.25,-394.78"/>
+<path fill="none" stroke="#63b8ff" d="M166.78,-393.99C158.57,-375.42 150.25,-356.6 142.11,-338.2"/>
+<polygon fill="none" stroke="#63b8ff" points="163.69,-395.64 170.93,-403.37 170.09,-392.81 163.69,-395.64"/>
 </g>
 <!-- Node4 -->
 <g id="node4" class="node">
 <title>Node4</title>
 <g id="a_node4"><a xlink:href="../../d0/d17/classApplicationME.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="160,-44.5 160,-310.5 324,-310.5 324,-44.5 160,-44.5"/>
-<text text-anchor="middle" x="242" y="-298.5" font-family="Helvetica,sans-Serif" font-size="10.00">ApplicationME</text>
-<polyline fill="none" stroke="#666666" points="160,-291.5 324,-291.5 "/>
-<text text-anchor="start" x="168" y="-279.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_mainWindows</text>
-<text text-anchor="start" x="168" y="-268.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_localServer</text>
-<text text-anchor="start" x="168" y="-257.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_trVars</text>
-<text text-anchor="start" x="168" y="-246.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_dataBase</text>
-<text text-anchor="start" x="168" y="-235.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_testMode</text>
-<polyline fill="none" stroke="#666666" points="160,-228.5 324,-228.5 "/>
-<text text-anchor="start" x="168" y="-216.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ ApplicationME()</text>
-<text text-anchor="start" x="168" y="-205.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ ~ApplicationME()</text>
-<text text-anchor="start" x="168" y="-194.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setTheme()</text>
-<text text-anchor="start" x="168" y="-183.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ notify()</text>
-<text text-anchor="start" x="168" y="-172.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ isTestMode()</text>
-<text text-anchor="start" x="168" y="-161.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ isAppInGUIMode()</text>
-<text text-anchor="start" x="168" y="-150.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ mainWindow()</text>
-<text text-anchor="start" x="168" y="-139.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ mainWindows()</text>
-<text text-anchor="start" x="168" y="-128.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ newMainWindow()</text>
-<text text-anchor="start" x="168" y="-117.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ initOptions()</text>
-<text text-anchor="start" x="168" y="-106.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 7 more...</text>
-<text text-anchor="start" x="168" y="-95.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ processCommandLine()</text>
-<text text-anchor="start" x="168" y="-84.5" font-family="Helvetica,sans-Serif" font-size="10.00"># initTranslateVariables()</text>
-<text text-anchor="start" x="168" y="-73.5" font-family="Helvetica,sans-Serif" font-size="10.00"># event()</text>
-<text text-anchor="start" x="168" y="-62.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; clean()</text>
-<text text-anchor="start" x="168" y="-51.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; newLocalSocketConnection()</text>
+<polygon fill="white" stroke="#666666" points="161.5,-0.5 161.5,-354.5 325.5,-354.5 325.5,-0.5 161.5,-0.5"/>
+<text text-anchor="middle" x="243.5" y="-342.5" font-family="Helvetica,sans-Serif" font-size="10.00">ApplicationME</text>
+<polyline fill="none" stroke="#666666" points="161.5,-335.5 325.5,-335.5 "/>
+<text text-anchor="start" x="169.5" y="-323.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_mainWindows</text>
+<text text-anchor="start" x="169.5" y="-312.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_localServer</text>
+<text text-anchor="start" x="169.5" y="-301.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_trVars</text>
+<text text-anchor="start" x="169.5" y="-290.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_dataBase</text>
+<text text-anchor="start" x="169.5" y="-279.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_testMode</text>
+<text text-anchor="start" x="169.5" y="-268.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_settingsMigrated</text>
+<text text-anchor="start" x="169.5" y="-257.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_lockLog</text>
+<text text-anchor="start" x="169.5" y="-246.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_out</text>
+<polyline fill="none" stroke="#666666" points="161.5,-239.5 325.5,-239.5 "/>
+<text text-anchor="start" x="169.5" y="-227.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ ApplicationME()</text>
+<text text-anchor="start" x="169.5" y="-216.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ ~ApplicationME()</text>
+<text text-anchor="start" x="169.5" y="-205.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setTheme()</text>
+<text text-anchor="start" x="169.5" y="-194.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ notify()</text>
+<text text-anchor="start" x="169.5" y="-183.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ isTestMode()</text>
+<text text-anchor="start" x="169.5" y="-172.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ isAppInGUIMode()</text>
+<text text-anchor="start" x="169.5" y="-161.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ mainWindow()</text>
+<text text-anchor="start" x="169.5" y="-150.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ mainWindows()</text>
+<text text-anchor="start" x="169.5" y="-139.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ newMainWindow()</text>
+<text text-anchor="start" x="169.5" y="-128.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ initOptions()</text>
+<text text-anchor="start" x="169.5" y="-117.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 10 more...</text>
+<text text-anchor="start" x="169.5" y="-106.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ processCommandLine()</text>
+<text text-anchor="start" x="169.5" y="-95.5" font-family="Helvetica,sans-Serif" font-size="10.00"># initTranslateVariables()</text>
+<text text-anchor="start" x="169.5" y="-84.5" font-family="Helvetica,sans-Serif" font-size="10.00"># event()</text>
+<text text-anchor="start" x="169.5" y="-73.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; logDirPath()</text>
+<text text-anchor="start" x="169.5" y="-62.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; logPath()</text>
+<text text-anchor="start" x="169.5" y="-51.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; createLogDir()</text>
+<text text-anchor="start" x="169.5" y="-40.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; beginLogging()</text>
+<text text-anchor="start" x="169.5" y="-29.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; clearOldLogs()</text>
+<text text-anchor="start" x="169.5" y="-18.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; clean()</text>
+<text text-anchor="start" x="169.5" y="-7.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; newLocalSocketConnection()</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node4 -->
 <g id="edge3" class="edge">
 <title>Node1&#45;&gt;Node4</title>
-<path fill="none" stroke="#63b8ff" d="M242,-381.29C242,-357.45 242,-333.44 242,-310.7"/>
-<polygon fill="none" stroke="#63b8ff" points="238.5,-381.49 242,-391.49 245.5,-381.49 238.5,-381.49"/>
+<path fill="none" stroke="#63b8ff" d="M243.5,-381.41C243.5,-372.46 243.5,-363.5 243.5,-354.58"/>
+<polygon fill="none" stroke="#63b8ff" points="240,-381.49 243.5,-391.49 247,-381.49 240,-381.49"/>
 </g>
 <!-- Node5 -->
 <g id="node5" class="node">
 <title>Node5</title>
 <g id="a_node5"><a xlink:href="../../d8/dd6/classTestApplication2D.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="342,-121.5 342,-233.5 482,-233.5 482,-121.5 342,-121.5"/>
-<text text-anchor="middle" x="412" y="-221.5" font-family="Helvetica,sans-Serif" font-size="10.00">TestApplication2D</text>
-<polyline fill="none" stroke="#666666" points="342,-214.5 482,-214.5 "/>
-<text text-anchor="middle" x="412" y="-202.5" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
-<polyline fill="none" stroke="#666666" points="342,-195.5 482,-195.5 "/>
-<text text-anchor="start" x="350" y="-183.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ TestApplication2D()</text>
-<text text-anchor="start" x="350" y="-172.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ ~TestApplication2D()</text>
-<text text-anchor="start" x="350" y="-161.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ translateVariables()</text>
-<text text-anchor="start" x="350" y="-150.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ openSettings()</text>
-<text text-anchor="start" x="350" y="-139.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ isAppInGUIMode()</text>
-<text text-anchor="start" x="350" y="-128.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ initTranslateVariables()</text>
+<polygon fill="white" stroke="#666666" points="343.5,-121.5 343.5,-233.5 483.5,-233.5 483.5,-121.5 343.5,-121.5"/>
+<text text-anchor="middle" x="413.5" y="-221.5" font-family="Helvetica,sans-Serif" font-size="10.00">TestApplication2D</text>
+<polyline fill="none" stroke="#666666" points="343.5,-214.5 483.5,-214.5 "/>
+<text text-anchor="middle" x="413.5" y="-202.5" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
+<polyline fill="none" stroke="#666666" points="343.5,-195.5 483.5,-195.5 "/>
+<text text-anchor="start" x="351.5" y="-183.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ TestApplication2D()</text>
+<text text-anchor="start" x="351.5" y="-172.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ ~TestApplication2D()</text>
+<text text-anchor="start" x="351.5" y="-161.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ translateVariables()</text>
+<text text-anchor="start" x="351.5" y="-150.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ openSettings()</text>
+<text text-anchor="start" x="351.5" y="-139.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ isAppInGUIMode()</text>
+<text text-anchor="start" x="351.5" y="-128.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ initTranslateVariables()</text>
 </a>
 </g>
 </g>
 <!-- Node1&#45;&gt;Node5 -->
 <g id="edge4" class="edge">
 <title>Node1&#45;&gt;Node5</title>
-<path fill="none" stroke="#63b8ff" d="M318.6,-392.22C343.66,-334.88 369.7,-275.29 387.9,-233.65"/>
-<polygon fill="none" stroke="#63b8ff" points="315.39,-390.84 314.59,-401.4 321.8,-393.64 315.39,-390.84"/>
+<path fill="none" stroke="#63b8ff" d="M320.1,-392.22C345.16,-334.88 371.2,-275.29 389.4,-233.65"/>
+<polygon fill="none" stroke="#63b8ff" points="316.89,-390.84 316.09,-401.4 323.3,-393.64 316.89,-390.84"/>
 </g>
 <!-- Node2 -->
 <g id="node2" class="node">
 <title>Node2</title>
 <g id="a_node2"><a xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="202.5,-782.5 202.5,-839.5 281.5,-839.5 281.5,-782.5 202.5,-782.5"/>
-<text text-anchor="middle" x="242" y="-827.5" font-family="Helvetica,sans-Serif" font-size="10.00">QApplication</text>
-<polyline fill="none" stroke="#666666" points="202.5,-820.5 281.5,-820.5 "/>
-<text text-anchor="middle" x="242" y="-808.5" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
-<polyline fill="none" stroke="#666666" points="202.5,-801.5 281.5,-801.5 "/>
-<text text-anchor="middle" x="242" y="-789.5" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
+<polygon fill="white" stroke="#666666" points="204,-782.5 204,-839.5 283,-839.5 283,-782.5 204,-782.5"/>
+<text text-anchor="middle" x="243.5" y="-827.5" font-family="Helvetica,sans-Serif" font-size="10.00">QApplication</text>
+<polyline fill="none" stroke="#666666" points="204,-820.5 283,-820.5 "/>
+<text text-anchor="middle" x="243.5" y="-808.5" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
+<polyline fill="none" stroke="#666666" points="204,-801.5 283,-801.5 "/>
+<text text-anchor="middle" x="243.5" y="-789.5" font-family="Helvetica,sans-Serif" font-size="10.00"> </text>
 </a>
 </g>
 </g>
 <!-- Node2&#45;&gt;Node1 -->
 <g id="edge1" class="edge">
 <title>Node2&#45;&gt;Node1</title>
-<path fill="none" stroke="#63b8ff" d="M242,-772.18C242,-764.22 242,-755.35 242,-745.87"/>
-<polygon fill="none" stroke="#63b8ff" points="238.5,-772.41 242,-782.41 245.5,-772.41 238.5,-772.41"/>
+<path fill="none" stroke="#63b8ff" d="M243.5,-772.18C243.5,-764.22 243.5,-755.35 243.5,-745.87"/>
+<polygon fill="none" stroke="#63b8ff" points="240,-772.41 243.5,-782.41 247,-772.41 240,-772.41"/>
 </g>
 </g>
 </svg>

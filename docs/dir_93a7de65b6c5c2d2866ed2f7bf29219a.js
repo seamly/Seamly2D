@@ -2,6 +2,8 @@ var dir_93a7de65b6c5c2d2866ed2f7bf29219a =
 [
     [ "drawTools", "dir_9b6bd0170ff56259d331a59e6a9c04fc.html", "dir_9b6bd0170ff56259d331a59e6a9c04fc" ],
     [ "nodeDetails", "dir_0ca6ab6f29ec27907e8ee4f6aad54e41.html", "dir_0ca6ab6f29ec27907e8ee4f6aad54e41" ],
+    [ "new_piece_defaults.cpp", "d9/dbf/new__piece__defaults_8cpp.html", "d9/dbf/new__piece__defaults_8cpp" ],
+    [ "new_piece_defaults.h", "d6/d0b/new__piece__defaults_8h.html", "d6/d0b/new__piece__defaults_8h" ],
     [ "pattern_piece_tool.cpp", "d8/dea/pattern__piece__tool_8cpp.html", null ],
     [ "pattern_piece_tool.h", "d1/d19/pattern__piece__tool_8h.html", "d1/d19/pattern__piece__tool_8h" ],
     [ "tools.h", "d5/da5/tools_8h.html", null ],

@@ -1,6 +1,8 @@
 <map id="src/libs/vpatterndb/floatItemData/vpatternlabeldata.h" name="src/libs/vpatterndb/floatItemData/vpatternlabeldata.h">
 <area shape="rect" id="node1" title=" " alt="" coords="5,5,253,45"/>
-<area shape="rect" id="node2" title=" " alt="" coords="29,167,102,192"/>
-<area shape="rect" id="node3" href="$db/dc1/vabstractfloatitemdata_8h.html" title=" " alt="" coords="103,93,286,119"/>
-<area shape="rect" id="node4" title=" " alt="" coords="127,167,281,192"/>
+<area shape="rect" id="node2" title=" " alt="" coords="63,167,137,192"/>
+<area shape="rect" id="node3" title=" " alt="" coords="49,93,119,119"/>
+<area shape="rect" id="node4" title=" " alt="" coords="143,93,209,119"/>
+<area shape="rect" id="node5" href="$db/dc1/vabstractfloatitemdata_8h.html" title=" " alt="" coords="234,93,417,119"/>
+<area shape="rect" id="node6" title=" " alt="" coords="248,167,403,192"/>
 </map>

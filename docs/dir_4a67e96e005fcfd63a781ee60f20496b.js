@@ -2,6 +2,8 @@ var dir_4a67e96e005fcfd63a781ee60f20496b =
 [
     [ "stable.cpp", "d7/db0/libs_2vlayout_2stable_8cpp.html", null ],
     [ "stable.h", "df/dab/libs_2vlayout_2stable_8h.html", null ],
+    [ "svg_text_item.cpp", "dd/d15/svg__text__item_8cpp.html", null ],
+    [ "svg_text_item.h", "dc/de4/svg__text__item_8h.html", "dc/de4/svg__text__item_8h" ],
     [ "vabstractpiece.cpp", "d9/d15/vabstractpiece_8cpp.html", "d9/d15/vabstractpiece_8cpp" ],
     [ "vabstractpiece.h", "dd/d37/vabstractpiece_8h.html", "dd/d37/vabstractpiece_8h" ],
     [ "vabstractpiece_p.h", "d1/d5d/vabstractpiece__p_8h.html", "d1/d5d/vabstractpiece__p_8h" ],

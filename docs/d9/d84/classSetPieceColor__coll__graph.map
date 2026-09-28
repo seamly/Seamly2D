@@ -1,6 +1,6 @@
 <map id="SetPieceColor" name="SetPieceColor">
-<area shape="rect" id="node1" title=" " alt="" coords="253,2648,401,2857"/>
-<area shape="rect" id="node2" href="$de/d04/classVUndoCommand.html" title=" " alt="" coords="110,2171,309,2424"/>
+<area shape="rect" id="node1" title=" " alt="" coords="253,2663,401,2872"/>
+<area shape="rect" id="node2" href="$de/d04/classVUndoCommand.html" title=" " alt="" coords="110,2178,309,2431"/>
 <area shape="rect" id="node3" title=" " alt="" coords="5,417,80,494"/>
 <area shape="rect" id="node5" href="$d8/dba/classVAbstractPattern.html" title=" " alt="" coords="101,828,317,1947"/>
 <area shape="rect" id="node4" title=" " alt="" coords="341,1349,475,1426"/>
@@ -9,5 +9,5 @@
 <area shape="rect" id="node8" href="$da/da1/classQHash.html" title=" " alt="" coords="193,5,439,83"/>
 <area shape="rect" id="node9" href="$d0/d4c/classQMap.html" title=" " alt="" coords="339,417,560,494"/>
 <area shape="rect" id="node10" href="$da/da1/classQHash.html" title=" " alt="" coords="584,417,813,494"/>
-<area shape="rect" id="node11" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="332,2009,556,2585"/>
+<area shape="rect" id="node11" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="332,2009,556,2600"/>
 </map>

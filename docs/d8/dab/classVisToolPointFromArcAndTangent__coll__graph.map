@@ -1,13 +1,13 @@
 <map id="VisToolPointFromArcAndTangent" name="VisToolPointFromArcAndTangent">
-<area shape="rect" id="node1" title=" " alt="" coords="339,1600,605,1780"/>
-<area shape="rect" id="node2" href="$de/d0e/classVisLine.html" title=" " alt="" coords="233,1299,364,1523"/>
-<area shape="rect" id="node3" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,644,297,1249"/>
-<area shape="rect" id="node4" title=" " alt="" coords="5,255,80,332"/>
-<area shape="rect" id="node5" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,581"/>
-<area shape="rect" id="node6" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="335,864,489,1029"/>
-<area shape="rect" id="node7" title=" " alt="" coords="352,255,499,332"/>
-<area shape="rect" id="node8" href="$d8/dbf/classVScaledEllipse.html" title=" " alt="" coords="531,1350,685,1471"/>
-<area shape="rect" id="node9" title=" " alt="" coords="527,908,689,985"/>
-<area shape="rect" id="node10" href="$d3/d85/classVCurvePathItem.html" title=" " alt="" coords="709,1313,881,1508"/>
-<area shape="rect" id="node11" title=" " alt="" coords="721,908,868,985"/>
+<area shape="rect" id="node1" title=" " alt="" coords="339,1615,605,1795"/>
+<area shape="rect" id="node2" href="$de/d0e/classVisLine.html" title=" " alt="" coords="233,1313,364,1537"/>
+<area shape="rect" id="node3" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,659,297,1264"/>
+<area shape="rect" id="node4" title=" " alt="" coords="5,262,80,339"/>
+<area shape="rect" id="node5" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,596"/>
+<area shape="rect" id="node6" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="335,879,489,1044"/>
+<area shape="rect" id="node7" title=" " alt="" coords="352,262,499,339"/>
+<area shape="rect" id="node8" href="$d8/dbf/classVScaledEllipse.html" title=" " alt="" coords="531,1365,685,1486"/>
+<area shape="rect" id="node9" title=" " alt="" coords="527,923,689,1000"/>
+<area shape="rect" id="node10" href="$d3/d85/classVCurvePathItem.html" title=" " alt="" coords="709,1328,881,1523"/>
+<area shape="rect" id="node11" title=" " alt="" coords="721,923,868,1000"/>
 </map>

@@ -1,17 +1,19 @@
 <map id="src/libs/vmisc/vsettings.cpp" name="src/libs/vmisc/vsettings.cpp">
-<area shape="rect" id="node1" title=" " alt="" coords="1615,5,1818,31"/>
+<area shape="rect" id="node1" title=" " alt="" coords="1694,5,1897,31"/>
 <area shape="rect" id="node2" href="$dd/db2/vsettings_8h.html" title=" " alt="" coords="571,79,665,104"/>
 <area shape="rect" id="node6" title=" " alt="" coords="987,225,1057,251"/>
 <area shape="rect" id="node9" href="$d4/da4/def_8h.html" title=" " alt="" coords="1366,152,1475,177"/>
 <area shape="rect" id="node17" title=" " alt="" coords="2161,225,2235,251"/>
 <area shape="rect" id="node29" title=" " alt="" coords="1550,79,1601,104"/>
-<area shape="rect" id="node30" title=" " alt="" coords="1625,79,1699,104"/>
-<area shape="rect" id="node31" title=" " alt="" coords="1724,79,1819,104"/>
-<area shape="rect" id="node32" title=" " alt="" coords="1843,79,1966,104"/>
-<area shape="rect" id="node33" title=" " alt="" coords="1991,79,2069,104"/>
-<area shape="rect" id="node34" title=" " alt="" coords="2093,79,2193,104"/>
-<area shape="rect" id="node35" title=" " alt="" coords="2217,79,2296,104"/>
-<area shape="rect" id="node36" href="$db/db3/vmath_8h.html" title=" " alt="" coords="2321,79,2451,104"/>
+<area shape="rect" id="node30" title=" " alt="" coords="1625,79,1680,104"/>
+<area shape="rect" id="node31" title=" " alt="" coords="1705,79,1785,104"/>
+<area shape="rect" id="node32" title=" " alt="" coords="1809,79,1883,104"/>
+<area shape="rect" id="node33" title=" " alt="" coords="1908,79,2003,104"/>
+<area shape="rect" id="node34" title=" " alt="" coords="2027,79,2150,104"/>
+<area shape="rect" id="node35" title=" " alt="" coords="2175,79,2253,104"/>
+<area shape="rect" id="node36" title=" " alt="" coords="2277,79,2377,104"/>
+<area shape="rect" id="node37" title=" " alt="" coords="2401,79,2480,104"/>
+<area shape="rect" id="node38" href="$db/db3/vmath_8h.html" title=" " alt="" coords="2505,79,2635,104"/>
 <area shape="rect" id="node3" title=" " alt="" coords="383,225,490,251"/>
 <area shape="rect" id="node4" title=" " alt="" coords="770,225,845,251"/>
 <area shape="rect" id="node5" title=" " alt="" coords="274,225,359,251"/>
@@ -35,5 +37,5 @@
 <area shape="rect" id="node25" title=" " alt="" coords="189,299,263,324"/>
 <area shape="rect" id="node27" title=" " alt="" coords="515,225,612,251"/>
 <area shape="rect" id="node28" title=" " alt="" coords="637,225,695,251"/>
-<area shape="rect" id="node37" title=" " alt="" coords="2351,152,2421,177"/>
+<area shape="rect" id="node39" title=" " alt="" coords="2535,152,2605,177"/>
 </map>

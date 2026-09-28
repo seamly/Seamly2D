@@ -5,6 +5,7 @@ var classVGrainlineData =
     [ "~VGrainlineData", "da/d7f/classVGrainlineData.html#a20fb9200d55ea4dd453d2263980a2db3", null ],
     [ "bottomAnchorPoint", "da/d7f/classVGrainlineData.html#a98e93c6702cad2fe3364e1d23037c5f6", null ],
     [ "centerAnchorPoint", "da/d7f/classVGrainlineData.html#a7cc95dd2a428dda0be1ce351c57ca378", null ],
+    [ "centeredStart", "da/d7f/classVGrainlineData.html#a6ec8a147624f5540c2cb1fc1ca02c9d7", null ],
     [ "getArrowLength", "da/d7f/classVGrainlineData.html#a98fad0c9131750e47631cc74fe1dfa96", null ],
     [ "getArrowType", "da/d7f/classVGrainlineData.html#a36229e13ef57e54e6ce2468e44bb7d92", null ],
     [ "getLength", "da/d7f/classVGrainlineData.html#a607fdda1c64f1ed41c363f5faad4ab2a", null ],
@@ -19,5 +20,6 @@ var classVGrainlineData =
     [ "setTopAnchorPoint", "da/d7f/classVGrainlineData.html#afe86a204b4f9e38b25729106bbbad83c", null ],
     [ "Swap", "da/d7f/classVGrainlineData.html#a02d7fe0c32e20756944517a1682e4c6a", null ],
     [ "topAnchorPoint", "da/d7f/classVGrainlineData.html#ac87f88f9f7aa4ad1cc283616f329daac", null ],
+    [ "upwardAngle", "da/d7f/classVGrainlineData.html#a636c439c1b4f8f757d934cef9dffa804", null ],
     [ "d", "da/d7f/classVGrainlineData.html#a1962af8e258fd39f71a7a0272734c830", null ]
 ];

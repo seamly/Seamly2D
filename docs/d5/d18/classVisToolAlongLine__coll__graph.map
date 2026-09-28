@@ -1,11 +1,11 @@
 <map id="VisToolAlongLine" name="VisToolAlongLine">
-<area shape="rect" id="node1" title=" " alt="" coords="352,1615,520,1780"/>
-<area shape="rect" id="node2" href="$de/d0e/classVisLine.html" title=" " alt="" coords="257,1299,388,1523"/>
-<area shape="rect" id="node3" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,644,297,1249"/>
-<area shape="rect" id="node4" title=" " alt="" coords="5,255,80,332"/>
-<area shape="rect" id="node5" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,581"/>
-<area shape="rect" id="node6" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="335,864,489,1029"/>
-<area shape="rect" id="node7" title=" " alt="" coords="352,255,499,332"/>
-<area shape="rect" id="node8" href="$d8/dbf/classVScaledEllipse.html" title=" " alt="" coords="506,1350,659,1471"/>
-<area shape="rect" id="node9" title=" " alt="" coords="513,908,676,985"/>
+<area shape="rect" id="node1" title=" " alt="" coords="352,1629,520,1795"/>
+<area shape="rect" id="node2" href="$de/d0e/classVisLine.html" title=" " alt="" coords="257,1313,388,1537"/>
+<area shape="rect" id="node3" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,659,297,1264"/>
+<area shape="rect" id="node4" title=" " alt="" coords="5,262,80,339"/>
+<area shape="rect" id="node5" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,596"/>
+<area shape="rect" id="node6" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="335,879,489,1044"/>
+<area shape="rect" id="node7" title=" " alt="" coords="352,262,499,339"/>
+<area shape="rect" id="node8" href="$d8/dbf/classVScaledEllipse.html" title=" " alt="" coords="506,1365,659,1486"/>
+<area shape="rect" id="node9" title=" " alt="" coords="513,923,676,1000"/>
 </map>
