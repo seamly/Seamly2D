@@ -63,3 +63,13 @@ ExportMenu SvgModeItem.onTriggered → chosen(mode) → exportSvgModeRequested(m
 - A font that is not installed is not embedded either; the dialog names it.
 - The subset keeps only the used glyphs, with a new Unicode `cmap` (`allsorts`). Trousers with Yu Gothic UI Light: 55 KB input, 65 KB export.
 - Check the font license before you share a mode 1 file.
+
+## Paid formats — G-Code and 3D mesh (3MF)
+
+Stubs only. No module ships yet.
+
+- `exports::paid_export_available(format)` is the gate. It returns `false` for `"gcode"` and `"3mf"`.
+- The Export menu shows "G-Code" and "3D Mesh (3MF)" only when the gate returns `true`.
+- Chain: `ExportMenu` → `TopMenuBar` → `Main.qml` save dialog → `AppController.exportGcode` / `exportMesh` → `do_export_gcode` / `do_export_mesh`.
+- Both `do_export_*` stubs return `Err` and write no file.
+- To add a module: change the gate, then the stub body. QML needs no change.

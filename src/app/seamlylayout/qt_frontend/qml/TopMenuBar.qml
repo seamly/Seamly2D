@@ -52,6 +52,12 @@ ToolBar {
     // @brief Last SVG text mode used; marked in the SVG submenu.
     property string lastSvgTextMode: ""
 
+    // @brief True when the paid G-Code module is usable; shows G-Code in the Export dropdown.
+    property bool gcodeExportAvailable: false
+
+    // @brief True when the paid 3D mesh module is usable; shows 3D Mesh in the Export dropdown.
+    property bool meshExportAvailable: false
+
     // -----------------------------------------------------------------------
     // Signals — parent wires these to open dialogs / toggle panels
     // -----------------------------------------------------------------------
@@ -87,6 +93,12 @@ ToolBar {
     // @brief User selected an SVG text mode from the Export dropdown.
     // @param mode "designerFont", "singleLineFont", "hersheyStrokes" or "asSupplied".
     signal exportSvgRequested(string mode)
+
+    // @brief User selected G-Code from the Export dropdown (paid module).
+    signal exportGcodeRequested()
+
+    // @brief User selected 3D Mesh (3MF) from the Export dropdown (paid module).
+    signal exportMeshRequested()
 
     // @brief User selected DXF-ASTM from the View dropdown.
     signal viewDxfAstmRequested()
@@ -180,6 +192,10 @@ ToolBar {
             onExportPdfTiledRequested: root.exportPdfTiledRequested()
             onExportPngRequested:      root.exportPngRequested()
             onExportSvgModeRequested:  function(mode) { root.exportSvgRequested(mode) }
+            gcodeExportAvailable:      root.gcodeExportAvailable
+            meshExportAvailable:       root.meshExportAvailable
+            onExportGcodeRequested:    root.exportGcodeRequested()
+            onExportMeshRequested:     root.exportMeshRequested()
         } // ExportMenu exportMenu
 
         // View button — opens exported files in configured viewer applications

@@ -57,13 +57,6 @@ Add a layout export option for multisize patterns — svg files or stringified s
 - [ ] Layout.54 JPG — trivial, fit it anywhere
 - [ ] Layout.55 DXF-ASTM - improve current export so that it meets the DXF-ASTM standard
 
-## [ ] Task Layout.6 - Implement export stubs for paid export modules (To be developed)
-
-These options in the Export menu will remain invisible to the user until these features are developed. Put stubs in the code now to mark where they will go.
-
-- [ ] Layout.61 Export G-Code
-- [ ] Layout.62 Export 3DMesh
-
 ## [x] Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 
 ## [x] Task Layout.9 — Piece-mode handoff passes a file, not a stringified SVG document

@@ -29,7 +29,10 @@ mod layout_helpers;
 use layout_helpers::remove_group_by_id;
 
 mod exports;
-use exports::{do_export_dxf, do_export_pdf, do_export_pdf_tile, do_export_png, do_export_svg};
+use exports::{
+    do_export_dxf, do_export_gcode, do_export_mesh, do_export_pdf, do_export_pdf_tile, do_export_png,
+    do_export_svg, paid_export_available,
+};
 
 // Phase A of the "sheets" paper_type (L.2.1):
 // identifies oversized pieces and assembles the oversized SVG for the tiled-PDF pipeline.
@@ -705,6 +708,19 @@ pub mod qobject {
 
         #[qinvokable]
         fn export_png(self: Pin<&mut AppController>, path: &QString, scale: f32) -> bool;
+
+        // True when the paid module for `format` ("gcode" or "3mf") is usable.
+        // The Export menu hides a paid format while this returns false.
+        #[qinvokable]
+        fn is_paid_export_available(self: &AppController, format: &QString) -> bool;
+
+        // Paid G-Code export. Emits error_occurred until a module is available.
+        #[qinvokable]
+        fn export_gcode(self: Pin<&mut AppController>, path: &QString) -> bool;
+
+        // Paid 3D mesh export to a .3mf file. Emits error_occurred until a module is available.
+        #[qinvokable]
+        fn export_mesh(self: Pin<&mut AppController>, path: &QString) -> bool;
     }
 } // mod qobject
 
@@ -2102,6 +2118,58 @@ impl qobject::AppController {
             } // Err
         } // match do_export_png
     } // fn export_png
+
+    // Report whether the paid export module for `format` is usable.
+    // Delegates to exports::paid_export_available.
+    fn is_paid_export_available(&self, format: &cxx_qt_lib::QString) -> bool {
+        paid_export_available(&format.to_string())
+    } // fn is_paid_export_available
+
+    // Export the assembled layout as G-Code.
+    // Delegates to exports::do_export_gcode, which returns Err until a module is available.
+    fn export_gcode(mut self: std::pin::Pin<&mut Self>, path: &cxx_qt_lib::QString) -> bool {
+        let path_str = path.to_string();
+        log_to_file(&format!("[lib.rs AppController] export_gcode(): 1 requested path='{path_str}'"));
+        self.as_mut().run_paid_export(&path_str, do_export_gcode)
+    } // fn export_gcode
+
+    // Export the assembled layout as a 3D mesh in 3MF format.
+    // Delegates to exports::do_export_mesh, which returns Err until a module is available.
+    fn export_mesh(mut self: std::pin::Pin<&mut Self>, path: &cxx_qt_lib::QString) -> bool {
+        let path_str = path.to_string();
+        log_to_file(&format!("[lib.rs AppController] export_mesh(): 1 requested path='{path_str}'"));
+        self.as_mut().run_paid_export(&path_str, do_export_mesh)
+    } // fn export_mesh
+
+    // Run one paid export: clone the stripped layout DOM, call `export`, then emit
+    // export_finished on Ok or error_occurred on Err.
+    fn run_paid_export(
+        mut self: std::pin::Pin<&mut Self>,
+        path_str: &str,
+        export: fn(&svg_dom::Document, &str) -> Result<(), String>,
+    ) -> bool {
+        let layout_doc = match self.clone_stripped_layout_doc() {
+            Ok(d) => d,
+            Err(m) => {
+                log_to_file("[lib.rs AppController] run_paid_export(): 2 no layout_dom available");
+                self.as_mut().error_occurred(m);
+                return false; // if no layout
+            } // Err
+        }; // layout_doc
+
+        match export(&layout_doc, path_str) {
+            Ok(()) => {
+                log_to_file(&format!("[lib.rs AppController] run_paid_export(): 3 wrote '{path_str}'"));
+                self.as_mut().export_finished(cxx_qt_lib::QString::from(path_str)); // success
+                true // success
+            } // Ok
+            Err(e) => {
+                log_to_file(&format!("[lib.rs AppController] run_paid_export(): 3 failed: {e}"));
+                self.as_mut().error_occurred(cxx_qt_lib::QString::from(&e)); // export failed
+                false // failure
+            } // Err
+        } // match export
+    } // fn run_paid_export
 
 }
 

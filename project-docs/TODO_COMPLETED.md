@@ -2,6 +2,18 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task Layout.6 — Export stubs for paid export modules (completed 2026-09-27)
+
+Hidden Export-menu items and a no-op Rust path for two paid formats.
+
+- [x] Layout.61 Export G-Code — `.gcode`, menu text "G-Code".
+- [x] Layout.62 Export 3DMesh — `.3mf` (user decision), menu text "3D Mesh (3MF)".
+- Gate (user decision: Rust function): `exports::paid_export_available(format)` returns `false` for `"gcode"` and `"3mf"`. QML binds item `visible` to `AppController.isPaidExportAvailable()`.
+- Stubs: `do_export_gcode`, `do_export_mesh` return `Err` and write no file. Bridge: `export_gcode`, `export_mesh` via `run_paid_export`.
+- Export menu only. The View menu has no items for these formats.
+- To ship a module: replace the gate body with the module or license check, then the stub bodies.
+- Tests: 3 new in `exports.rs`. `cargo test --workspace` and `ctest --preset debug` passed.
+
 ## Task — New pattern pieces read Preferences > Pattern defaults (completed 2026-09-26)
 
 User report: new pieces from Add New Pattern Piece got no usable labels.
