@@ -154,9 +154,9 @@ jobs:
       - name: 'install build dependencies'
         run: |
           sudo apt update
-          # install poppler-utils for pdftops, gstreamer1.0-plugins-base for QtMultimedia
+          # install gstreamer1.0-plugins-base for QtMultimedia
           # install libxerces for xml manipulation, ninja-build for SeamlyLayout's CMake build
-          sudo apt install -y poppler-utils gstreamer1.0-plugins-base libxerces-c-dev ninja-build
+          sudo apt install -y gstreamer1.0-plugins-base libxerces-c-dev ninja-build
 
       # qtwebengine/qtwebchannel/qtpositioning are for SeamlyLayout's
       # WebEngineView provides SvgCanvas.qml; qtmultimedia is for the
@@ -216,7 +216,6 @@ jobs:
           # compiled Quick binary on its own; this tells it where to scan.
           QML_SOURCES_PATHS: src/app/seamlylayout/qt_frontend/qml
         run: |
-          cp /usr/bin/pdftops AppDir/usr/bin
           mkdir -p AppDir/usr/share/X11/xkb
           cp -r /usr/share/X11/xkb/* AppDir/usr/share/X11/xkb
           linuxdeploy-x86_64.AppImage --appdir AppDir \

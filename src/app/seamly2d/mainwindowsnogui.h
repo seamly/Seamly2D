@@ -93,10 +93,6 @@ public slots:
     void exportPPM(const QString &name, QGraphicsScene *scene)const;
     void exportPDF(const QString &name, QGraphicsRectItem *paper, QGraphicsScene *scene, bool ignoreMargins,
                    const QMarginsF &margins)const;
-    void exportEPS(const QString &name, QGraphicsRectItem *paper, QGraphicsScene *scene, bool ignoreMargins,
-                   const QMarginsF &margins)const;
-    void exportPS(const QString &name, QGraphicsRectItem *paper, QGraphicsScene *scene, bool ignoreMargins,
-                  const QMarginsF &margins)const;
 
 protected:
     QVector<VLayoutPiece> pieceList;
@@ -161,7 +157,6 @@ private:
 
     void PdfTiledFile(const QString &name);
 
-    void convertPdfToPs(const QStringList &params)const;
     void ObjFile(const QString &name, QGraphicsRectItem *paper, QGraphicsScene *scene)const;
     void FlatDxfFile(const QString &name, int version, bool binary, QGraphicsRectItem *paper, QGraphicsScene *scene,
                      const QList<QList<QGraphicsItem *> > &pieces)const;

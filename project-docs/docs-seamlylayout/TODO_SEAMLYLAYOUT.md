@@ -53,9 +53,10 @@ Add a layout export option for multisize patterns — svg files or stringified s
 
 - [ ] Layout.51 DXF-AAMA — biggest install base in apparel PLM, reference implementation already in the repo
 - [x] Layout.52 HPGL — unlocks the whole plotter and cutter class
-- [ ] Layout.53 PS/EPS — one writer covers both and retires pdftops
+- [x] Layout.53 PS/EPS — one writer covers both and retires pdftops
 - [ ] Layout.54 JPG — trivial, fit it anywhere
 - [ ] Layout.55 DXF-ASTM - improve current export so that it meets the DXF-ASTM standard
+- [ ] Layout.56 Tiled PS — multi-page PostScript with the same tiles as PDF (Tiled); `ps_writer` writes one page today
 
 ## [x] Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 

@@ -24,6 +24,7 @@ This document provides a high-level index of the main components, crates, and mo
 - **hpgl_writer/** — HP-GL/1 export for pen plotters and cutters
   - `src/line_classes.rs` — cut / mark / label classes from `data-type` or id
   - `src/hpgl_commands.rs` — pen order, nearest-first path order, `PU`/`PD` output
+- **ps_writer/** — PostScript (.ps) and EPS (.eps) export; one writer, two DSC headers
 - **layout_engine/** — Layout and packing engine
   - `src/lib.rs` — Main engine logic
 - **layout_tiling/** — Tiling and reduction algorithms

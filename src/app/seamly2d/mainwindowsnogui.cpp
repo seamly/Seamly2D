@@ -73,7 +73,6 @@
 #include <QFileInfo>
 #include <QGraphicsScene>
 #include <QMessageBox>
-#include <QProcess>
 #include <QToolButton>
 #include <QtSvg>
 #include <QPrintPreviewDialog>
@@ -82,12 +81,6 @@
 #include <QImageWriter>
 #include <QSpacerItem>
 #include <QGridLayout>
-
-#ifdef Q_OS_WIN
-#   define PDFTOPS "pdftops.exe"
-#else
-#   define PDFTOPS "pdftops"
-#endif
 
 namespace
 {
@@ -1199,76 +1192,6 @@ void MainWindowsNoGUI::PdfTiledFile(const QString &name)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief exportEPS( save layout to eps file.
- * @param fileName name layout file.
- */
-void MainWindowsNoGUI::exportEPS(const QString &name, QGraphicsRectItem *paper, QGraphicsScene *scene,
-                               bool ignoreMargins, const QMarginsF &margins) const
-{
-    QTemporaryFile tmp;
-    if (tmp.open())
-    {
-        exportPDF(tmp.fileName(), paper, scene, ignoreMargins, margins);
-        QStringList params = QStringList() << "-eps" << tmp.fileName() << name;
-        convertPdfToPs(params);
-    }
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief exportPS save layout to ps file.
- * @param fileName name layout file.
- */
-void MainWindowsNoGUI::exportPS(const QString &name, QGraphicsRectItem *paper, QGraphicsScene *scene, bool
-                              ignoreMargins, const QMarginsF &margins) const
-{
-    QTemporaryFile tmp;
-    if (tmp.open())
-    {
-        exportPDF(tmp.fileName(), paper, scene, ignoreMargins, margins);
-        QStringList params = QStringList() << tmp.fileName() << name;
-        convertPdfToPs(params);
-    }
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief convertPdfToPs use external tool "pdftops" for converting pdf to eps or ps format.
- * @param params string with parameter for tool. Parameters have format: "-eps input_file out_file". Use -eps when
- * need create eps file.
- */
-void MainWindowsNoGUI::convertPdfToPs(const QStringList &params) const
-{
-#ifndef QT_NO_CURSOR
-    QGuiApplication::setOverrideCursor(Qt::WaitCursor);
-#endif
-    QProcess proc;
-#if defined(Q_OS_MAC)
-    // Fix issue #594. Broken export on Mac.
-    proc.setWorkingDirectory(qApp->applicationDirPath());
-    proc.start(QLatin1String("./") + PDFTOPS, params);
-#else
-    proc.start(PDFTOPS, params);
-#endif
-    if (proc.waitForStarted(15000))
-    {
-        proc.waitForFinished(15000);
-    }
-#ifndef QT_NO_CURSOR
-    QGuiApplication::restoreOverrideCursor();
-#endif
-
-    QFile f(params.last());
-    if (f.exists() == false)
-    {
-        const QString msg = tr("Creating file '%1' failed! %2").arg(params.last()).arg(proc.errorString());
-        QMessageBox msgBox(QMessageBox::Critical, tr("Critical error!"), msg, QMessageBox::Ok | QMessageBox::Default);
-        msgBox.exec();
-    }
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 void MainWindowsNoGUI::ObjFile(const QString &name, QGraphicsRectItem *paper, QGraphicsScene *scene) const
 {
     VObjPaintDevice generator;
@@ -1807,12 +1730,6 @@ void MainWindowsNoGUI::ExportScene(const ExportLayoutDialog &dialog, const QList
                     paper->setVisible(false);
                     ObjFile(name, paper, scene);
                     paper->setVisible(true);
-                    break;
-                case LayoutExportFormat::PS:
-                    exportPS(name, paper, scene, ignoreMargins, margins);
-                    break;
-                case LayoutExportFormat::EPS:
-                    exportEPS(name, paper, scene, ignoreMargins, margins);
                     break;
                 case LayoutExportFormat::DXF_AC1006_Flat:
                     paper->setVisible(false);

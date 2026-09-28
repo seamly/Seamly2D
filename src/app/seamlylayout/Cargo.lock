@@ -552,6 +552,7 @@ dependencies = [
  "lopdf",
  "packing",
  "polygon_pack",
+ "ps_writer",
  "seamly_svg2ezdxf",
  "serde",
  "serde_json",
@@ -1301,6 +1302,14 @@ dependencies = [
  "syn 2.0.111",
  "version_check",
  "yansi",
+]
+
+[[package]]
+name = "ps_writer"
+version = "0.1.0"
+dependencies = [
+ "svg_dom",
+ "usvg",
 ]
 
 [[package]]

@@ -20,6 +20,7 @@
 //   do_export_svg(doc, path)                          -> Result<(), String>
 //   parse_hpgl_options(options_json)                  -> Result<HpglOptions, String>
 //   do_export_hpgl(doc, path, options)                -> Result<Vec<String>, String>
+//   do_export_postscript(doc, path, flavor)           -> Result<Vec<String>, String>
 //   do_export_gcode(doc, path)                        -> Result<(), String> (stub)
 //   do_export_mesh(doc, path)                         -> Result<(), String> (stub)
 //   paid_export_available(format)                     -> bool
@@ -34,6 +35,7 @@ use ezdxf2dxfastm::{export_dxf_astm, DxfAstmExportOptions};
 use seamly_svg2ezdxf::{svg_to_ezdxf, SvgToEzdxfOptions};
 
 use hpgl_writer::{HpglMode, HpglOptions, PenMap};
+use ps_writer::PsFlavor;
 use layout_tiling::{compute_tile_dims, measurement_to_px, LayoutSettings, TileDimensions};
 
 // @brief Render an SVG DOM document to a single-page PDF byte buffer.
@@ -1580,6 +1582,43 @@ pub fn do_export_hpgl(
 } // fn do_export_hpgl
 
 // ---------------------------------------------------------------------------
+// PostScript / EPS export
+// ---------------------------------------------------------------------------
+
+// @brief Export the layout document as a PostScript (.ps) or EPS (.eps) file.
+//
+// Label text is written as glyph outlines of the fonts the SVG names, so the
+// file needs no fonts where it is printed or placed.
+//
+// @param doc    Cloned, piece-fill-stripped layout DOM.
+// @param path   Destination .ps or .eps file path.
+// @param flavor PsFlavor::Ps for a printer document, PsFlavor::Eps for a placeable graphic.
+// @return Caveats for the success dialog (for example, transparency written opaque); Err(message) on failure.
+pub fn do_export_postscript(
+    doc: &svg_dom::Document,
+    path: &str,
+    flavor: PsFlavor,
+) -> Result<Vec<String>, String> {
+    crate::log_to_file(&format!("[exports.rs] do_export_postscript(): 1 flavor={flavor:?} path='{path}'"));
+
+    let output = ps_writer::svg_to_postscript(doc, flavor).map_err(|e| {
+        crate::log_to_file(&format!("[exports.rs] do_export_postscript(): 2 conversion failed: {e}"));
+        e
+    })?; // if conversion failed
+
+    std::fs::write(path, output.program.as_bytes()).map_err(|e| {
+        crate::log_to_file(&format!("[exports.rs] do_export_postscript(): 3 write failed: {e}"));
+        format!("{} export: write failed: {e}", flavor.label())
+    })?; // if write failed
+
+    crate::log_to_file(&format!(
+        "[exports.rs] do_export_postscript(): 3 wrote {} bytes to '{path}'",
+        output.program.len()
+    ));
+    Ok(output.warnings)
+} // fn do_export_postscript
+
+// ---------------------------------------------------------------------------
 // Paid export modules (G-Code, 3D mesh)
 // ---------------------------------------------------------------------------
 
@@ -2190,6 +2229,34 @@ mod tests {
         assert_eq!(ticks[0], 10, "first tick must be 10% (SVG parse start)");
         assert_eq!(ticks[1], 90, "second tick must be 90% (PNG file written)");
     } // do_export_png_emits_intermediate_progress
+
+    // @brief PS and EPS exports write their DSC headers to disk.
+    #[test]
+    fn do_export_postscript_writes_ps_and_eps_files() {
+        for (flavor, file, header) in [
+            (PsFlavor::Ps, "seamlylayout_ps_test.ps", "%!PS-Adobe-3.0\n"),
+            (PsFlavor::Eps, "seamlylayout_ps_test.eps", "%!PS-Adobe-3.0 EPSF-3.0\n"),
+        ] {
+            let path = std::env::temp_dir().join(file);
+            let _ = std::fs::remove_file(&path);
+            let warnings = do_export_postscript(&hpgl_test_doc(), path.to_str().unwrap(), flavor)
+                .expect("export should succeed");
+            assert!(warnings.is_empty(), "{warnings:?}");
+            let text = std::fs::read_to_string(&path).expect("file should exist");
+            assert!(text.starts_with(header), "{text}");
+            let _ = std::fs::remove_file(&path);
+        } // for flavor
+    } // do_export_postscript_writes_ps_and_eps_files
+
+    // @brief An empty layout fails and writes no file.
+    #[test]
+    fn do_export_postscript_empty_layout_writes_nothing() {
+        let path = std::env::temp_dir().join("seamlylayout_ps_empty_test.eps");
+        let _ = std::fs::remove_file(&path);
+        let doc = Document::parse(r#"<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96"/>"#).unwrap();
+        assert!(do_export_postscript(&doc, path.to_str().unwrap(), PsFlavor::Eps).is_err());
+        assert!(!path.exists());
+    } // do_export_postscript_empty_layout_writes_nothing
 
     // @brief No paid export module ships, so the gate hides both formats.
     #[test]

@@ -77,6 +77,7 @@
 #include "tst_svgtextitem.h"
 #include "tst_svgcomponenttags.h"
 #include "tst_seamlysuitepaths.h"
+#include "tst_exportformatcombobox.h"
 #include "tst_dataroot.h"
 #include "tst_vtoolmove.h"
 
@@ -231,6 +232,7 @@ int main(int argc, char** argv)
     ASSERT_TEST(new TST_SvgTextItem());
     ASSERT_TEST(new TST_SvgComponentTags());
     ASSERT_TEST(new TST_SeamlySuitePaths());
+    ASSERT_TEST(new TST_ExportFormatCombobox());
     ASSERT_TEST(new TST_DataRoot());
     ASSERT_TEST(new TST_VToolMove());
 

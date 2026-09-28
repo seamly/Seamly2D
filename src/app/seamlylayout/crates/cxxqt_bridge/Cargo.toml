@@ -36,6 +36,7 @@ serde_json         = { version = "1" }
 seamly_svg2ezdxf   = { path = "../seamly_svg2ezdxf" }
 ezdxf2dxfastm      = { path = "../ezdxf2dxfastm" }
 hpgl_writer        = { path = "../hpgl_writer" }
+ps_writer          = { path = "../ps_writer" }
 usvg               = "0.42"
 svg2pdf            = "0.11"
 lopdf = "0.32"

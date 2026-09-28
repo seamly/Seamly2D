@@ -24,6 +24,9 @@
 // With showHpgl true (Export menu), an HPGL submenu offers Plot and Cut, a
 // pen submenu per line class, and the file extension.
 //
+// With showPostScript true (Export menu), EPS and PostScript (PS) items are shown.
+// The View menu has none: a .ps or .eps file opens in the system viewer.
+//
 // G-Code and 3D Mesh (3MF) are paid formats. Each item stays hidden until
 // AppController.isPaidExportAvailable() reports its module as usable.
 
@@ -69,6 +72,9 @@ Menu {
     // @brief HPGL file extension without the dot: "plt" or "hpgl".
     property string hpglExtension: "plt"
 
+    // @brief When true, the EPS and PostScript (PS) items are shown (Export menu only).
+    property bool showPostScript: false
+
     // @brief True when the paid G-Code module is usable; shows the G-Code item.
     property bool gcodeExportAvailable: false
 
@@ -106,6 +112,10 @@ Menu {
     // @brief Emitted when the user picks the HPGL file extension ("plt" or "hpgl").
     signal hpglExtensionChosen(string extension)
 
+    // @brief Emitted when the user selects a PostScript export.
+    // @param flavor "ps" (printer document) or "eps" (placeable graphic).
+    signal exportPostscriptRequested(string flavor)
+
     // @brief Emitted when the user selects HPGL in the View menu.
     signal viewHpglRequested()
 
@@ -141,6 +151,20 @@ Menu {
         enabled: root.layoutReady // enabled when layout is ready
         onTriggered: root.exportPngRequested()
     } // MenuItem PNG
+
+    MenuItem {
+        id: epsItem
+        text: "EPS"
+        enabled: root.layoutReady // enabled when layout is ready
+        onTriggered: root.exportPostscriptRequested("eps")
+    } // MenuItem EPS
+
+    MenuItem {
+        id: psItem
+        text: "PostScript (PS)"
+        enabled: root.layoutReady // enabled when layout is ready
+        onTriggered: root.exportPostscriptRequested("ps")
+    } // MenuItem PS
 
     MenuItem {
         id: svgItem
@@ -383,6 +407,11 @@ Menu {
         } else {
             root.removeMenu(hpglSubmenu)
         } // if showHpgl
+        // PostScript items belong to the Export menu only.
+        if (!root.showPostScript) {
+            root.removeItem(epsItem)
+            root.removeItem(psItem)
+        } // if !showPostScript
     } // Component.onCompleted
 
     // Hidden Menu items keep their height; collapse them so the Export menu has no blank row.

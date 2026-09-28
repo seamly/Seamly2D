@@ -12,7 +12,6 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started on GitFlow, Issues, Branc
 * Compiler :
   * gcc, and g++ are included with QtCreator, and you can add or update them using the Qt Maintenance Tool (Maintenance.exe).
   * Checking MSVC 2022 64-bit in the Qt Maintenance Tool only installs the prebuilt Qt libraries for MSVC 2022. The Microsoft C++ compiler (cl.exe) itself has to be installed separately via Microsoft's official installer.
-* Pdftops (from XpdfReader or poppler) - Required to create PS or EPS layout files.
 * Check the sections below for your operating system to find additional installation requirements.
 
 ## Code Documentation
@@ -76,11 +75,10 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started on GitFlow, Issues, Branc
 * Install Additional libraries
 
   * gnu compiler
-  * poppler (pdftops)
   * Example for Ubuntu 22.04:
 
 ```bash
-sudo apt install -y build-essential git poppler-tools
+sudo apt install -y build-essential git
 ```
 
 #### On MacOSX
@@ -92,16 +90,12 @@ sudo apt install -y build-essential git poppler-tools
   * Switch to Xcode: `sudo xcode-select --switch /Applications/Xcode.app`
   * Validate clang compiler points to Xcode: `xcrun -sdk macosx -find clang`
   * Validate SDK version (macOS 10.15): `xcrun -sdk macosx --show-sdk-path`
-* Install Xpdf: `sudo port install xpdf`
-  * Copy `Program Files\Xpdf\bin64\pdftops.exe` in Windows, or `bin32/pdftops.exe` in MacOS, to the Seamly build directory to enable creation of post script (.ps and .eps) pattern piece layouts.
 
 #### Windows
 
 * Learn more about [Qt for Windows](https://doc.qt.io/qt-5/windows.html).
 * Add Qt and QtCreator directories to the Windows PATH environment variable through Control Panel:
   `[Control Panel | System And Security | System | Advanced Tab | Environment Variables button]`
-
-* Copy `Program Files\Xpdf\bin64\pdftops.exe` in Windows, or `bin32/pdftops.exe` in MacOS, to the Seamly build directory to enable creation of post script (.ps and .eps) pattern piece layouts.
 
 ---
 

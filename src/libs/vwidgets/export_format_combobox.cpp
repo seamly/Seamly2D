@@ -26,22 +26,12 @@
 #include <Qt>
 #include <QPainter>
 #include <QPixmap>
-#include <QProcess>
 #include <QDebug>
 #include <QVariant>
 
 #include "export_format_combobox.h"
 #include "../vmisc/vabstractapplication.h"
 #include "../vmisc/vcommonsettings.h"
-
-#ifdef Q_OS_WIN
-#   define PDFTOPS "pdftops.exe"
-#else
-#   define PDFTOPS "pdftops"
-#endif
-
-bool ExportFormatCombobox::havePdf = false;
-bool ExportFormatCombobox::tested  = false;
 
 /**
  * Constructor with name.
@@ -123,11 +113,6 @@ QVector<std::pair<QString, LayoutExportFormat>> ExportFormatCombobox::initFormat
     InitFormat(LayoutExportFormat::TIF);
     InitFormat(LayoutExportFormat::PPM);
     InitFormat(LayoutExportFormat::OBJ);
-    if (supportPSTest())
-    {
-        InitFormat(LayoutExportFormat::PS);
-        InitFormat(LayoutExportFormat::EPS);
-    }
     InitFormat(LayoutExportFormat::DXF_AC1006_Flat);
     InitFormat(LayoutExportFormat::DXF_AC1009_Flat);
     InitFormat(LayoutExportFormat::DXF_AC1012_Flat);
@@ -161,43 +146,6 @@ QVector<std::pair<QString, LayoutExportFormat>> ExportFormatCombobox::initFormat
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-bool ExportFormatCombobox::supportPSTest()
-{
-    if (!tested)
-    {
-        havePdf = testPdf();
-        tested = true;
-    }
-    return havePdf;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-bool ExportFormatCombobox::testPdf()
-{
-    bool res = false;
-
-    QProcess proc;
-    QStringList args;
-
-#if defined(Q_OS_WIN) || defined(Q_OS_OSX)
-    // Seek pdftops in app bundle or near seamaly2d.exe
-    proc.start(qApp->applicationDirPath() + QLatin1String("/")+ PDFTOPS, QStringList());
-#else
-    proc.start(PDFTOPS, QStringList()); // Seek pdftops in standard path
-#endif
-
-    if (proc.waitForStarted(15000) && (proc.waitForFinished(15000) || proc.state() == QProcess::NotRunning))
-    {
-        res = true;
-    }
-    else
-    {
-        qWarning() << PDFTOPS << "error" << proc.error() << proc.errorString();
-    }
-    return res;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 QString ExportFormatCombobox::exportFormatDescription(LayoutExportFormat format)
 {
     const QString dxfSuffix = QStringLiteral("(*.dxf)");
@@ -222,10 +170,6 @@ QString ExportFormatCombobox::exportFormatDescription(LayoutExportFormat format)
             return QString("PPM %1 (*.ppm)").arg(filesStr);
         case LayoutExportFormat::OBJ:
             return "Wavefront OBJ (*.obj)";
-        case LayoutExportFormat::PS:
-            return QString("PS %1 (*.ps)").arg(filesStr);
-        case LayoutExportFormat::EPS:
-            return QString("EPS %1 (*.eps)").arg(filesStr);
         case LayoutExportFormat::DXF_AC1006_Flat:
             return QString("AutoCAD DXF R10 %1 %2").arg(dxfFlatFilesStr, dxfSuffix);
         case LayoutExportFormat::DXF_AC1009_Flat:
