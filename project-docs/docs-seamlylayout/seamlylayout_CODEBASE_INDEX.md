@@ -21,6 +21,9 @@ This document provides a high-level index of the main components, crates, and mo
 - **cxxqt_bridge/** — Rust↔Qt bridge (CXX-Qt)
 - **ezdxf2dxfastm/** — DXF conversion utilities
 - **geometry/** — Geometric primitives and algorithms
+- **hpgl_writer/** — HP-GL/1 export for pen plotters and cutters
+  - `src/line_classes.rs` — cut / mark / label classes from `data-type` or id
+  - `src/hpgl_commands.rs` — pen order, nearest-first path order, `PU`/`PD` output
 - **layout_engine/** — Layout and packing engine
   - `src/lib.rs` — Main engine logic
 - **layout_tiling/** — Tiling and reduction algorithms

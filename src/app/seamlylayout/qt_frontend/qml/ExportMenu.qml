@@ -21,8 +21,13 @@
 // With svgModeSubmenu true (Export menu), "SVG" is a submenu of label text
 // modes; otherwise (View menu) it is one item.
 //
+// With showHpgl true (Export menu), an HPGL submenu offers Plot and Cut, a
+// pen submenu per line class, and the file extension.
+//
 // G-Code and 3D Mesh (3MF) are paid formats. Each item stays hidden until
 // AppController.isPaidExportAvailable() reports its module as usable.
+
+pragma ComponentBehavior: Bound
 
 import QtQuick 6.11
 import QtQuick.Controls 6.11
@@ -53,6 +58,17 @@ Menu {
     // @brief True when the three text modes apply; false when labels are already paths.
     readonly property bool svgTextModesEnabled: root.labelTextState !== "pathsOnly"
 
+    // @brief When true, the HPGL submenu is shown (Export menu only).
+    property bool showHpgl: false
+
+    // @brief HPGL pens (1-8) for cut lines, marks and labels; the pen submenus mark them.
+    property int hpglCutPen: 1
+    property int hpglMarkPen: 2
+    property int hpglLabelPen: 3
+
+    // @brief HPGL file extension without the dot: "plt" or "hpgl".
+    property string hpglExtension: "plt"
+
     // @brief True when the paid G-Code module is usable; shows the G-Code item.
     property bool gcodeExportAvailable: false
 
@@ -77,6 +93,18 @@ Menu {
     // @brief Emitted when the user selects an SVG text mode (Export menu).
     // @param mode "designerFont", "singleLineFont", "hersheyStrokes" or "asSupplied".
     signal exportSvgModeRequested(string mode)
+
+    // @brief Emitted when the user selects an HPGL export.
+    // @param mode "plot" (all lines) or "cut" (cut lines only).
+    signal exportHpglRequested(string mode)
+
+    // @brief Emitted when the user picks a pen for one line class.
+    // @param lineClass "cut", "mark" or "label".
+    // @param pen Pen number 1-8.
+    signal hpglPenChosen(string lineClass, int pen)
+
+    // @brief Emitted when the user picks the HPGL file extension ("plt" or "hpgl").
+    signal hpglExtensionChosen(string extension)
 
     // @brief Emitted when the user selects Projector (View menu only).
     signal projectorRequested()
@@ -195,6 +223,125 @@ Menu {
         } // MenuItem asSupplied
     } // Menu svgSubmenu
 
+    // @brief Pen submenu for one line class: eight checkable pens, the current one checked.
+    // Self-contained: inline components cannot rely on ids of this file.
+    component PenMenu: Menu {
+        id: penMenu
+
+        // @brief Line class sent with `chosen`: "cut", "mark" or "label".
+        required property string lineClass
+
+        // @brief Pen now used for this line class.
+        property int currentPen: 1
+
+        // @brief Emitted when the user picks a pen.
+        signal chosen(string lineClass, int pen)
+
+        // Menu has no Repeater support; Instantiator inserts the eight items.
+        Instantiator {
+            model: 8
+            delegate: MenuItem {
+                id: penItem
+                required property int index
+                text: "Pen " + (penItem.index + 1)
+                checkable: true
+                checked: penMenu.currentPen === penItem.index + 1
+                onTriggered: {
+                    // A click toggles `checked`; rebind it so the mark follows currentPen.
+                    penItem.checked = Qt.binding(function() { return penMenu.currentPen === penItem.index + 1 })
+                    penMenu.chosen(penMenu.lineClass, penItem.index + 1)
+                } // onTriggered
+            } // MenuItem penItem
+            onObjectAdded: function(index, object) { penMenu.insertItem(index, object) }
+            onObjectRemoved: function(index, object) { penMenu.removeItem(object) }
+        } // Instantiator
+    } // component PenMenu
+
+    // @brief One file-extension choice: checkable, checked when it is the current extension.
+    component ExtensionItem: MenuItem {
+        id: extensionItem
+
+        // @brief Extension without the dot.
+        required property string extension
+
+        // @brief True when this extension is in use.
+        property bool isCurrent: false
+
+        // @brief Emitted when the user picks this extension.
+        signal chosen(string extension)
+
+        text: "." + extensionItem.extension
+        checkable: true
+        checked: extensionItem.isCurrent
+        onTriggered: {
+            // A click toggles `checked`; rebind it so the mark follows isCurrent.
+            extensionItem.checked = Qt.binding(function() { return extensionItem.isCurrent })
+            extensionItem.chosen(extensionItem.extension)
+        } // onTriggered
+    } // component ExtensionItem
+
+    Menu {
+        id: hpglSubmenu
+        title: "HPGL"
+        enabled: root.layoutReady
+
+        MenuItem {
+            text: "Plot (all lines)"
+            ToolTip.visible: hovered
+            ToolTip.text:    "Cut lines, marks and labels, each with its own pen.\n"
+                           + "Labels are drawn as single strokes."
+            ToolTip.delay:   500
+            onTriggered: root.exportHpglRequested("plot")
+        } // MenuItem plot
+
+        MenuItem {
+            text: "Cut (cut lines only)"
+            ToolTip.visible: hovered
+            ToolTip.text:    "Only cut lines, so a cutter does not cut seam lines or labels."
+            ToolTip.delay:   500
+            onTriggered: root.exportHpglRequested("cut")
+        } // MenuItem cut
+
+        MenuSeparator {}
+
+        PenMenu {
+            title: "Cut line pen"
+            lineClass: "cut"
+            currentPen: root.hpglCutPen
+            onChosen: function(lineClass, pen) { root.hpglPenChosen(lineClass, pen) }
+        } // PenMenu cut
+
+        PenMenu {
+            title: "Mark pen"
+            lineClass: "mark"
+            currentPen: root.hpglMarkPen
+            onChosen: function(lineClass, pen) { root.hpglPenChosen(lineClass, pen) }
+        } // PenMenu mark
+
+        PenMenu {
+            title: "Label pen"
+            lineClass: "label"
+            currentPen: root.hpglLabelPen
+            onChosen: function(lineClass, pen) { root.hpglPenChosen(lineClass, pen) }
+        } // PenMenu label
+
+        Menu {
+            title: "File extension"
+
+            ExtensionItem {
+                extension: "plt"
+                isCurrent: root.hpglExtension === "plt"
+                onChosen: function(extension) { root.hpglExtensionChosen(extension) }
+            } // ExtensionItem plt
+
+            ExtensionItem {
+                extension: "hpgl"
+                isCurrent: root.hpglExtension === "hpgl"
+                onChosen: function(extension) { root.hpglExtensionChosen(extension) }
+            } // ExtensionItem hpgl
+        } // Menu file extension
+    } // Menu hpglSubmenu
+
     // Paid formats: hidden Menu items keep their height, so collapse them when hidden.
     MenuItem {
         text:    "G-Code"
@@ -219,6 +366,9 @@ Menu {
         } else {
             root.removeMenu(svgSubmenu)
         } // if svgModeSubmenu
+        if (!root.showHpgl) {
+            root.removeMenu(hpglSubmenu) // the View menu has no HPGL viewer
+        } // if not showHpgl
     } // Component.onCompleted
 
     // Hidden Menu items keep their height; collapse them so the Export menu has no blank row.

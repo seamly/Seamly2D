@@ -64,6 +64,53 @@ ExportMenu SvgModeItem.onTriggered → chosen(mode) → exportSvgModeRequested(m
 - The subset keeps only the used glyphs, with a new Unicode `cmap` (`allsorts`). Trousers with Yu Gothic UI Light: 55 KB input, 65 KB export.
 - Check the font license before you share a mode 1 file.
 
+## HPGL export — plotters and cutters
+
+```
+ExportMenu HPGL submenu → exportHpglRequested("plot" | "cut")
+  → TopMenuBar.exportHpglRequested(mode)
+    → Main.qml onExportHpglRequested(mode)
+      → save dialog, extension = preferencesModel.hpglExtension
+      → pendingExportSettings = {"mode", "cutPen", "markPen", "labelPen"}; exportStartTimer
+        → appController.exportHpgl(path, optionsJson)
+          → exports::parse_hpgl_options(json)
+          → clone_stripped_layout_doc()
+          → exports::do_export_hpgl(doc, path, options)
+            → svg_label_text::apply_text_mode(HersheyStrokes)   plot mode only
+            → hpgl_writer::svg_to_hpgl(doc, options)
+          → export_warning(message)                            missing Hershey glyphs only
+          → export_finished(path)
+```
+
+- Dialect: HP-GL/1. Program: `IN;PA;`, then `SP n;` / `PU x,y;` / `PD x,y,...;`, then `PU;SP0;`.
+- Units: 40 plotter units per mm; 96 px per inch. Y is flipped: HP-GL origin is bottom left.
+- usvg resolves transforms, the viewBox, shapes and arcs. Curves are interpolated within 2 units (0.05 mm).
+- `PD` holds at most 32 points; small plotter buffers reject longer instructions.
+
+| Submenu item | Writes |
+|---|---|
+| Plot (all lines) | Labels, marks, then cut lines, each with its pen |
+| Cut (cut lines only) | Cut lines only |
+| Cut line pen / Mark pen / Label pen | Pen 1-8 per line class. Defaults 1 / 2 / 3 |
+| File extension | `.plt` (default) or `.hpgl` |
+
+- Pens and extension persist in the preferences INI: `hpgl_cut_pen`, `hpgl_mark_pen`, `hpgl_label_pen`, `hpgl_extension`.
+- Cut lines go last, so a cutter frees a piece only at the end.
+- A pen select is written only when the pen changes. Classes that share a pen do not swap pens.
+- Within a class, the next path is the one whose start is nearest the pen.
+
+| Line class | `data-type` |
+|---|---|
+| Cut | `cutline`, `cut_path` |
+| Mark | `seamline`, `internal_path`, `grainline`, `notch`, `tuck`, `drill`, `hole` |
+| Label | `piece_label`, `pattern_label`, `label_text` |
+
+- A file without `data-type`: the group id decides (`cutline_*`, `*-notch-*`, ...).
+- No hint at all: a closed path is a cut line, an open path is a mark.
+- usvg drops `data-*`. `line_classes::tag_line_classes` wraps each classified group's children in `<g id="hpgl-class-<class>-<n>">`, which usvg keeps. Original ids do not change.
+- The View menu has no HPGL item: no HPGL viewer is configured.
+- Not covered: HP-GL/2, a rotate option for the roll axis, sheet-mode pages.
+
 ## Paid formats — G-Code and 3D mesh (3MF)
 
 Stubs only. No module ships yet.

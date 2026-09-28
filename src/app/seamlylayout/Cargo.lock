@@ -546,6 +546,7 @@ dependencies = [
  "cxx-qt-lib",
  "ezdxf2dxfastm",
  "geometry",
+ "hpgl_writer",
  "layout_tiling",
  "log",
  "lopdf",
@@ -768,6 +769,15 @@ checksum = "7d3cafa4047531c5386484c8f03dd90ff59c6dd96f8f011c32e13728692d1bbb"
 dependencies = [
  "itertools 0.14.0",
  "thiserror 2.0.20",
+]
+
+[[package]]
+name = "hpgl_writer"
+version = "0.1.0"
+dependencies = [
+ "svg_dom",
+ "usvg",
+ "xmltree",
 ]
 
 [[package]]

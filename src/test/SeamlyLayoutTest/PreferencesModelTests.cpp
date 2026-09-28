@@ -79,6 +79,11 @@ private slots:
     void svgTextMode_rejectsUnknownName();
     void saveSvgTextMode_writesOnlyThatKey();
 
+    void hpglOptions_haveDefaults();
+    void hpglOptions_rejectInvalidValues();
+    void saveHpglPen_writesOnlyThatKey();
+    void saveHpglExtension_writesOnlyThatKey();
+
     void dataRoot_roundTripsThroughIni();
     void dataRoot_emitsSignalOnChange();
     void dataRoot_load_preservesExistingValue();
@@ -352,6 +357,74 @@ void PreferencesModelTests::saveSvgTextMode_writesOnlyThatKey()
     PreferencesModel reader;
     QVERIFY(reader.load(path));
     QCOMPARE(reader.svgTextMode(), QStringLiteral("singleLineFont"));
+}
+
+void PreferencesModelTests::hpglOptions_haveDefaults()
+{
+    PreferencesModel m;
+    QCOMPARE(m.hpglCutPen(), 1);
+    QCOMPARE(m.hpglMarkPen(), 2);
+    QCOMPARE(m.hpglLabelPen(), 3);
+    QCOMPARE(m.hpglExtension(), QStringLiteral("plt"));
+}
+
+void PreferencesModelTests::hpglOptions_rejectInvalidValues()
+{
+    PreferencesModel m;
+    QSignalSpy spy(&m, &PreferencesModel::hpglCutPenChanged);
+    m.setHpglCutPen(0); // pen 0 is "no pen" in HP-GL
+    m.setHpglCutPen(9);
+    QCOMPARE(m.hpglCutPen(), 1);
+    QCOMPARE(spy.count(), 0);
+
+    m.setHpglCutPen(8);
+    QCOMPARE(m.hpglCutPen(), 8);
+    QCOMPARE(spy.count(), 1);
+
+    m.setHpglExtension(QStringLiteral("dxf"));
+    QCOMPARE(m.hpglExtension(), QStringLiteral("plt"));
+}
+
+void PreferencesModelTests::saveHpglPen_writesOnlyThatKey()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString path = tempDir.filePath(QStringLiteral("preferences.ini"));
+
+    // An unapplied Preferences edit must not reach the file.
+    PreferencesModel writer;
+    writer.setProjectorPath(QStringLiteral("https://unapplied.example/"));
+    QVERIFY(writer.saveHpglPen(path, QStringLiteral("mark"), 5));
+    QVERIFY(!writer.saveHpglPen(path, QStringLiteral("mark"), 9));
+    QVERIFY(!writer.saveHpglPen(path, QStringLiteral("bogus"), 4));
+
+    QSettings settings(path, QSettings::IniFormat);
+    QCOMPARE(settings.value(QStringLiteral("hpgl_mark_pen")).toInt(), 5);
+    QVERIFY(!settings.contains(QStringLiteral("hpgl_cut_pen")));
+    QVERIFY(!settings.contains(QStringLiteral("projector_path")));
+
+    PreferencesModel reader;
+    QVERIFY(reader.load(path));
+    QCOMPARE(reader.hpglMarkPen(), 5);
+    QCOMPARE(reader.hpglCutPen(), 1);
+}
+
+void PreferencesModelTests::saveHpglExtension_writesOnlyThatKey()
+{
+    QTemporaryDir tempDir;
+    QVERIFY(tempDir.isValid());
+    const QString path = tempDir.filePath(QStringLiteral("preferences.ini"));
+
+    PreferencesModel writer;
+    QVERIFY(writer.saveHpglExtension(path, QStringLiteral("hpgl")));
+    QVERIFY(!writer.saveHpglExtension(path, QStringLiteral("dxf")));
+
+    QSettings settings(path, QSettings::IniFormat);
+    QCOMPARE(settings.value(QStringLiteral("hpgl_extension")).toString(), QStringLiteral("hpgl"));
+
+    PreferencesModel reader;
+    QVERIFY(reader.load(path));
+    QCOMPARE(reader.hpglExtension(), QStringLiteral("hpgl"));
 }
 
 // ---------------------------------------------------------------------------

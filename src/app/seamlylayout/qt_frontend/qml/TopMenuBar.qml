@@ -52,6 +52,12 @@ ToolBar {
     // @brief Last SVG text mode used; marked in the SVG submenu.
     property string lastSvgTextMode: ""
 
+    // @brief HPGL pens (1-8) and file extension; marked in the Export > HPGL submenus.
+    property int hpglCutPen: 1
+    property int hpglMarkPen: 2
+    property int hpglLabelPen: 3
+    property string hpglExtension: "plt"
+
     // @brief True when the paid G-Code module is usable; shows G-Code in the Export dropdown.
     property bool gcodeExportAvailable: false
 
@@ -93,6 +99,16 @@ ToolBar {
     // @brief User selected an SVG text mode from the Export dropdown.
     // @param mode "designerFont", "singleLineFont", "hersheyStrokes" or "asSupplied".
     signal exportSvgRequested(string mode)
+
+    // @brief User selected an HPGL export from the Export dropdown.
+    // @param mode "plot" or "cut".
+    signal exportHpglRequested(string mode)
+
+    // @brief User picked an HPGL pen for one line class ("cut", "mark" or "label").
+    signal hpglPenChosen(string lineClass, int pen)
+
+    // @brief User picked the HPGL file extension ("plt" or "hpgl").
+    signal hpglExtensionChosen(string extension)
 
     // @brief User selected G-Code from the Export dropdown (paid module).
     signal exportGcodeRequested()
@@ -192,6 +208,14 @@ ToolBar {
             onExportPdfTiledRequested: root.exportPdfTiledRequested()
             onExportPngRequested:      root.exportPngRequested()
             onExportSvgModeRequested:  function(mode) { root.exportSvgRequested(mode) }
+            showHpgl:                  true
+            hpglCutPen:                root.hpglCutPen
+            hpglMarkPen:               root.hpglMarkPen
+            hpglLabelPen:              root.hpglLabelPen
+            hpglExtension:             root.hpglExtension
+            onExportHpglRequested:     function(mode) { root.exportHpglRequested(mode) }
+            onHpglPenChosen:           function(lineClass, pen) { root.hpglPenChosen(lineClass, pen) }
+            onHpglExtensionChosen:     function(extension) { root.hpglExtensionChosen(extension) }
             gcodeExportAvailable:      root.gcodeExportAvailable
             meshExportAvailable:       root.meshExportAvailable
             onExportGcodeRequested:    root.exportGcodeRequested()
