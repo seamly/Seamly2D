@@ -457,6 +457,94 @@ bool PreferencesModel::saveSvgTextMode(const QString &path, const QString &mode)
     return settings.status() == QSettings::NoError;
 } // saveSvgTextMode
 
+// @brief Set the HPGL cut-line pen; ignores pens outside 1-8.
+void PreferencesModel::setHpglCutPen(int v)
+{
+    if (!isHpglPen(v) || m_hpglCutPen == v) return;
+    m_hpglCutPen = v;
+    emit hpglCutPenChanged();
+} // setHpglCutPen
+
+// @brief Set the HPGL mark pen; ignores pens outside 1-8.
+void PreferencesModel::setHpglMarkPen(int v)
+{
+    if (!isHpglPen(v) || m_hpglMarkPen == v) return;
+    m_hpglMarkPen = v;
+    emit hpglMarkPenChanged();
+} // setHpglMarkPen
+
+// @brief Set the HPGL label pen; ignores pens outside 1-8.
+void PreferencesModel::setHpglLabelPen(int v)
+{
+    if (!isHpglPen(v) || m_hpglLabelPen == v) return;
+    m_hpglLabelPen = v;
+    emit hpglLabelPenChanged();
+} // setHpglLabelPen
+
+// @brief Set the HPGL file extension; ignores values other than "plt" and "hpgl".
+void PreferencesModel::setHpglExtension(const QString &v)
+{
+    if (!isHpglExtension(v) || m_hpglExtension == v) return;
+    m_hpglExtension = v;
+    emit hpglExtensionChanged();
+} // setHpglExtension
+
+// @brief True for pen numbers 1-8; pen 0 means "no pen" in HP-GL.
+bool PreferencesModel::isHpglPen(int pen)
+{
+    return pen >= 1 && pen <= 8;
+} // isHpglPen
+
+// @brief True for the two HPGL file extensions.
+bool PreferencesModel::isHpglExtension(const QString &extension)
+{
+    return extension == QLatin1String("plt") || extension == QLatin1String("hpgl");
+} // isHpglExtension
+
+// @brief Set one HPGL pen and persist only its key.
+bool PreferencesModel::saveHpglPen(const QString &path, const QString &lineClass, int pen)
+{
+    if (!isHpglPen(pen)) {
+        Logger::log(QStringLiteral("PreferencesModel::saveHpglPen(): rejected pen=") + QString::number(pen));
+        return false;
+    } // if pen out of range
+
+    QString key;
+    if (lineClass == QLatin1String("cut")) {
+        setHpglCutPen(pen);
+        key = QStringLiteral("hpgl_cut_pen");
+    } else if (lineClass == QLatin1String("mark")) {
+        setHpglMarkPen(pen);
+        key = QStringLiteral("hpgl_mark_pen");
+    } else if (lineClass == QLatin1String("label")) {
+        setHpglLabelPen(pen);
+        key = QStringLiteral("hpgl_label_pen");
+    } else {
+        Logger::log(QStringLiteral("PreferencesModel::saveHpglPen(): rejected lineClass=") + lineClass);
+        return false;
+    } // if lineClass
+
+    QSettings settings(QFileInfo(path).absoluteFilePath(), QSettings::IniFormat);
+    settings.setValue(key, pen);
+    settings.sync();
+    return settings.status() == QSettings::NoError;
+} // saveHpglPen
+
+// @brief Set the HPGL file extension and persist only its key.
+bool PreferencesModel::saveHpglExtension(const QString &path, const QString &extension)
+{
+    if (!isHpglExtension(extension)) {
+        Logger::log(QStringLiteral("PreferencesModel::saveHpglExtension(): rejected extension=") + extension);
+        return false;
+    } // if unknown extension
+    setHpglExtension(extension);
+
+    QSettings settings(QFileInfo(path).absoluteFilePath(), QSettings::IniFormat);
+    settings.setValue(QStringLiteral("hpgl_extension"), m_hpglExtension);
+    settings.sync();
+    return settings.status() == QSettings::NoError;
+} // saveHpglExtension
+
 // @brief Set the installer-recorded data root; emits dataRootChanged if changed.
 void PreferencesModel::setDataRoot(const QString &v)
 {
@@ -519,6 +607,10 @@ bool PreferencesModel::load(const QString &path)
     setProjectorPath(settings.value(QStringLiteral("projector_path"), m_projectorPath).toString());
     setDataRoot(settings.value(QStringLiteral("data_root"), m_dataRoot).toString());
     setSvgTextMode(settings.value(QStringLiteral("svg_text_mode"), m_svgTextMode).toString());
+    setHpglCutPen(settings.value(QStringLiteral("hpgl_cut_pen"), m_hpglCutPen).toInt());
+    setHpglMarkPen(settings.value(QStringLiteral("hpgl_mark_pen"), m_hpglMarkPen).toInt());
+    setHpglLabelPen(settings.value(QStringLiteral("hpgl_label_pen"), m_hpglLabelPen).toInt());
+    setHpglExtension(settings.value(QStringLiteral("hpgl_extension"), m_hpglExtension).toString());
 
     if (settings.status() != QSettings::NoError) {
         Logger::log(QStringLiteral("PreferencesModel::load(): QSettings reported an error"));
@@ -704,6 +796,10 @@ bool PreferencesModel::save(const QString &path)
     settings.setValue(QStringLiteral("projector_path"), m_projectorPath);
     settings.setValue(QStringLiteral("data_root"), m_dataRoot);
     settings.setValue(QStringLiteral("svg_text_mode"), m_svgTextMode);
+    settings.setValue(QStringLiteral("hpgl_cut_pen"), m_hpglCutPen);
+    settings.setValue(QStringLiteral("hpgl_mark_pen"), m_hpglMarkPen);
+    settings.setValue(QStringLiteral("hpgl_label_pen"), m_hpglLabelPen);
+    settings.setValue(QStringLiteral("hpgl_extension"), m_hpglExtension);
     settings.sync();
 
     const bool saved = settings.status() == QSettings::NoError;

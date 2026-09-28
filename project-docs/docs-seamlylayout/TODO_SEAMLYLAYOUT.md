@@ -52,7 +52,7 @@ Add a layout export option for multisize patterns — svg files or stringified s
 ## [ ] Task Layout.5 - Implement additional export formats
 
 - [ ] Layout.51 DXF-AAMA — biggest install base in apparel PLM, reference implementation already in the repo
-- [ ] Layout.52 HPGL — unlocks the whole plotter and cutter class
+- [x] Layout.52 HPGL — unlocks the whole plotter and cutter class
 - [ ] Layout.53 PS/EPS — one writer covers both and retires pdftops
 - [ ] Layout.54 JPG — trivial, fit it anywhere
 - [ ] Layout.55 DXF-ASTM - improve current export so that it meets the DXF-ASTM standard

@@ -80,6 +80,14 @@ class PreferencesModel : public QObject
     // The Export > SVG submenu marks it. Not reset by resetToDefaults(): it records a choice, not a path.
     Q_PROPERTY(QString svgTextMode     READ svgTextMode     WRITE setSvgTextMode     NOTIFY svgTextModeChanged)
 
+    // @brief HPGL pen (1-8) for cut lines, marks and labels. The Export > HPGL pen submenus mark them.
+    Q_PROPERTY(int hpglCutPen          READ hpglCutPen      WRITE setHpglCutPen      NOTIFY hpglCutPenChanged)
+    Q_PROPERTY(int hpglMarkPen         READ hpglMarkPen     WRITE setHpglMarkPen     NOTIFY hpglMarkPenChanged)
+    Q_PROPERTY(int hpglLabelPen        READ hpglLabelPen    WRITE setHpglLabelPen    NOTIFY hpglLabelPenChanged)
+
+    // @brief HPGL file extension without the dot: "plt" or "hpgl".
+    Q_PROPERTY(QString hpglExtension   READ hpglExtension   WRITE setHpglExtension   NOTIFY hpglExtensionChanged)
+
 public:
     explicit PreferencesModel(QObject *parent = nullptr);
 
@@ -96,6 +104,10 @@ public:
     QString projectorPath()   const { return m_projectorPath;   }
     QString dataRoot()        const { return m_dataRoot;        }
     QString svgTextMode()     const { return m_svgTextMode;     }
+    int hpglCutPen()          const { return m_hpglCutPen;      }
+    int hpglMarkPen()         const { return m_hpglMarkPen;     }
+    int hpglLabelPen()        const { return m_hpglLabelPen;    }
+    QString hpglExtension()   const { return m_hpglExtension;   }
 
     // Setters
     void setInputDirectory(const QString &v);
@@ -110,6 +122,29 @@ public:
     void setProjectorPath(const QString &v);
     void setDataRoot(const QString &v);
     void setSvgTextMode(const QString &v);
+    void setHpglCutPen(int v);
+    void setHpglMarkPen(int v);
+    void setHpglLabelPen(int v);
+    void setHpglExtension(const QString &v);
+
+    // @brief True when `pen` is an HPGL pen number the submenus offer (1-8).
+    static bool isHpglPen(int pen);
+
+    // @brief True when `extension` is "plt" or "hpgl".
+    static bool isHpglExtension(const QString &extension);
+
+    // @brief Set one HPGL pen and write only that key to the INI file.
+    // @param path      Application preferences INI file path.
+    // @param lineClass "cut", "mark" or "label"; other values are rejected.
+    // @param pen       Pen number 1-8; other values are rejected.
+    // @return true when the arguments are valid and the INI file was written.
+    Q_INVOKABLE bool saveHpglPen(const QString &path, const QString &lineClass, int pen);
+
+    // @brief Set the HPGL file extension and write only that key to the INI file.
+    // @param path      Application preferences INI file path.
+    // @param extension "plt" or "hpgl"; other values are rejected.
+    // @return true when the extension is valid and the INI file was written.
+    Q_INVOKABLE bool saveHpglExtension(const QString &path, const QString &extension);
 
     // @brief True when `mode` is one of the three SVG label text mode names.
     static bool isSvgTextMode(const QString &mode);
@@ -278,6 +313,10 @@ signals:
     void projectorPathChanged();
     void dataRootChanged();
     void svgTextModeChanged();
+    void hpglCutPenChanged();
+    void hpglMarkPenChanged();
+    void hpglLabelPenChanged();
+    void hpglExtensionChanged();
 
 private:
     /// @brief Load a JSON defaults file or a legacy preferences file.
@@ -312,4 +351,8 @@ private:
     QString m_projectorPath   = QStringLiteral("");
     QString m_dataRoot        = QStringLiteral("");
     QString m_svgTextMode     = QStringLiteral("designerFont");
+    int m_hpglCutPen          = 1;
+    int m_hpglMarkPen         = 2;
+    int m_hpglLabelPen        = 3;
+    QString m_hpglExtension   = QStringLiteral("plt");
 }; // PreferencesModel

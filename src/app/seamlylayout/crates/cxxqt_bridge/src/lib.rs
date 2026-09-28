@@ -31,7 +31,7 @@ use layout_helpers::remove_group_by_id;
 mod exports;
 use exports::{
     do_export_dxf, do_export_gcode, do_export_mesh, do_export_pdf, do_export_pdf_tile, do_export_png,
-    do_export_svg, paid_export_available,
+    do_export_svg, paid_export_available, do_export_hpgl, parse_hpgl_options,
 };
 
 // Phase A of the "sheets" paper_type (L.2.1):
@@ -708,6 +708,11 @@ pub mod qobject {
 
         #[qinvokable]
         fn export_png(self: Pin<&mut AppController>, path: &QString, scale: f32) -> bool;
+
+        // HP-GL/1 export for pen plotters and cutters.
+        // options_json: {"mode": "plot" | "cut", "cutPen": n, "markPen": n, "labelPen": n}, pens 1-8.
+        #[qinvokable]
+        fn export_hpgl(self: Pin<&mut AppController>, path: &QString, options_json: &QString) -> bool;
 
         // True when the paid module for `format` ("gcode" or "3mf") is usable.
         // The Export menu hides a paid format while this returns false.
@@ -2118,6 +2123,65 @@ impl qobject::AppController {
             } // Err
         } // match do_export_png
     } // fn export_png
+
+    // Export the assembled layout as an HP-GL/1 plotter file.
+    // Delegates to exports::do_export_hpgl; label-text warnings reach the success dialog.
+    // Called by QML Export > HPGL > Plot / Cut: appController.exportHpgl(path, optionsJson)
+    fn export_hpgl(
+        mut self: std::pin::Pin<&mut Self>,
+        path: &cxx_qt_lib::QString,
+        options_json: &cxx_qt_lib::QString,
+    ) -> bool {
+        let path_str = path.to_string();
+        log_to_file(&format!("[lib.rs AppController] export_hpgl(): 1 requested path='{path_str}'"));
+
+        // Resolve the options before any work.
+        let options = match parse_hpgl_options(&options_json.to_string()) {
+            Ok(o) => o,
+            Err(e) => {
+                log_to_file(&format!("[lib.rs AppController] export_hpgl(): 2 bad options: {e}"));
+                self.as_mut().error_occurred(cxx_qt_lib::QString::from(&e));
+                return false; // if bad options
+            } // Err
+        }; // options
+
+        let layout_doc = match self.clone_stripped_layout_doc() {
+            Ok(d) => d,
+            Err(m) => {
+                log_to_file("[lib.rs AppController] export_hpgl(): 2 no layout_dom available");
+                self.as_mut().error_occurred(m);
+                return false; // if no layout
+            } // Err
+        }; // layout_doc
+
+        // Signal export start (0%); QML popup is already open before this call.
+        self.as_mut().set_export_progress(0);
+        self.as_mut().set_export_status_message(cxx_qt_lib::QString::from("Exporting HPGL…"));
+        self.as_mut().progress_updated(0);
+
+        match do_export_hpgl(&layout_doc, &path_str, &options) {
+            Ok(warnings) => {
+                log_to_file(&format!("[lib.rs AppController] export_hpgl(): 3 wrote '{path_str}'"));
+                if !warnings.is_empty() {
+                    // Caveats reach the success dialog, so the user sees them with the file path.
+                    self.as_mut().export_warning(cxx_qt_lib::QString::from(&warnings.join("
+")));
+                } // if warnings
+                self.as_mut().progress_updated(100);
+                self.as_mut().set_export_progress(-1); // reset to idle (-1 = idle contract)
+                self.as_mut().set_export_status_message(cxx_qt_lib::QString::default()); // clear
+                self.as_mut().export_finished(cxx_qt_lib::QString::from(&path_str)); // success
+                true // success
+            } // Ok
+            Err(e) => {
+                log_to_file(&format!("[lib.rs AppController] export_hpgl(): 3 failed: {e}"));
+                self.as_mut().set_export_progress(-1);
+                self.as_mut().set_export_status_message(cxx_qt_lib::QString::default()); // clear
+                self.as_mut().error_occurred(cxx_qt_lib::QString::from(&e)); // export failed
+                false // failure
+            } // Err
+        } // match do_export_hpgl
+    } // fn export_hpgl
 
     // Report whether the paid export module for `format` is usable.
     // Delegates to exports::paid_export_available.

@@ -18,6 +18,8 @@
 //   (doc, path, tile_dims)         -> Result<(), String>
 //   do_export_png(doc, path, scale)                   -> Result<(), String>
 //   do_export_svg(doc, path)                          -> Result<(), String>
+//   parse_hpgl_options(options_json)                  -> Result<HpglOptions, String>
+//   do_export_hpgl(doc, path, options)                -> Result<Vec<String>, String>
 //   do_export_gcode(doc, path)                        -> Result<(), String> (stub)
 //   do_export_mesh(doc, path)                         -> Result<(), String> (stub)
 //   paid_export_available(format)                     -> bool
@@ -31,6 +33,7 @@ use xmltree::{Element as XmlElement, XMLNode};
 use ezdxf2dxfastm::{export_dxf_astm, DxfAstmExportOptions};
 use seamly_svg2ezdxf::{svg_to_ezdxf, SvgToEzdxfOptions};
 
+use hpgl_writer::{HpglMode, HpglOptions, PenMap};
 use layout_tiling::{compute_tile_dims, measurement_to_px, LayoutSettings, TileDimensions};
 
 // @brief Render an SVG DOM document to a single-page PDF byte buffer.
@@ -1501,6 +1504,82 @@ pub fn do_export_svg(
 } // fn do_export_svg
 
 // ---------------------------------------------------------------------------
+// HPGL export
+// ---------------------------------------------------------------------------
+
+// @brief Parse the HPGL options JSON sent by QML.
+//
+// Shape: {"mode": "plot" | "cut", "cutPen": 1, "markPen": 2, "labelPen": 3}.
+// A missing pen takes its default; an unknown mode is an error, never a silent fallback.
+// @param options_json JSON text from Main.qml.
+// @return Parsed options; Err(message) for bad JSON, an unknown mode or a pen outside 1..=8.
+pub fn parse_hpgl_options(options_json: &str) -> Result<HpglOptions, String> {
+    #[derive(serde::Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct HpglOptionsJson {
+        mode: String,
+        cut_pen: Option<u8>,
+        mark_pen: Option<u8>,
+        label_pen: Option<u8>,
+    } // struct HpglOptionsJson
+
+    let parsed: HpglOptionsJson = serde_json::from_str(options_json)
+        .map_err(|e| format!("HPGL export: invalid options: {e}"))?;
+    let mode = HpglMode::from_name(&parsed.mode)
+        .ok_or_else(|| format!("HPGL export: unknown mode '{}'.", parsed.mode))?;
+
+    // Missing pens keep the default pen map.
+    let defaults = PenMap::default();
+    let pens = PenMap {
+        cut: parsed.cut_pen.unwrap_or(defaults.cut),
+        mark: parsed.mark_pen.unwrap_or(defaults.mark),
+        label: parsed.label_pen.unwrap_or(defaults.label),
+    }; // pens
+    pens.validate()?;
+    Ok(HpglOptions { mode, pens })
+} // fn parse_hpgl_options
+
+// @brief Export the layout document as an HP-GL/1 plotter file.
+//
+// Plot mode first rewrites label text as single Hershey strokes, so a pen
+// draws each letter in one pass instead of tracing glyph outlines. Cut mode
+// drops labels, so it skips that step.
+//
+// @param doc     Cloned, piece-fill-stripped layout DOM.
+// @param path    Destination .plt or .hpgl file path.
+// @param options Mode and pen map.
+// @return Label-text warnings (for the success dialog) on success; Err(message) on failure.
+pub fn do_export_hpgl(
+    doc: &svg_dom::Document,
+    path: &str,
+    options: &HpglOptions,
+) -> Result<Vec<String>, String> {
+    crate::log_to_file(&format!("[exports.rs] do_export_hpgl(): 1 mode={:?} pens={:?} path='{path}'", options.mode, options.pens));
+
+    let mut plot_doc = doc.clone();
+    let warnings = match options.mode {
+        HpglMode::Plot => {
+            // Labels are plotted: turn their text into single strokes.
+            svg_label_text::apply_text_mode(&mut plot_doc, svg_label_text::SvgTextMode::HersheyStrokes).warnings
+        } // Plot
+        HpglMode::Cut => Vec::new(), // labels are not written
+    }; // match mode
+
+    let program = hpgl_writer::svg_to_hpgl(&plot_doc, options).map_err(|e| {
+        crate::log_to_file(&format!("[exports.rs] do_export_hpgl(): 2 conversion failed: {e}"));
+        e
+    })?; // if conversion failed
+
+    std::fs::write(path, program.as_bytes()).map_err(|e| {
+        crate::log_to_file(&format!("[exports.rs] do_export_hpgl(): 3 write failed: {e}"));
+        format!("HPGL export: write failed: {e}")
+    })?; // if write failed
+
+    crate::log_to_file(&format!("[exports.rs] do_export_hpgl(): 3 wrote {} bytes to '{path}'", program.len()));
+    Ok(warnings)
+} // fn do_export_hpgl
+
+// ---------------------------------------------------------------------------
 // Paid export modules (G-Code, 3D mesh)
 // ---------------------------------------------------------------------------
 
@@ -2119,6 +2198,52 @@ mod tests {
         assert!(!paid_export_available(PAID_EXPORT_MESH));
         assert!(!paid_export_available("unknown"));
     } // paid_export_available_is_false_for_all_formats
+
+    // @brief A two-line layout: one cut line and one seam line on a 1-inch page.
+    fn hpgl_test_doc() -> Document {
+        Document::parse(
+            r#"<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+                 <g data-type="cutline"><path d="M0 96 L96 96" stroke="black" fill="none"/></g>
+                 <g data-type="seamline"><path d="M0 48 L96 48" stroke="black" fill="none"/></g>
+               </svg>"#,
+        )
+        .expect("HPGL test SVG should parse")
+    } // fn hpgl_test_doc
+
+    // @brief Plot mode writes an HP-GL file with both pens.
+    #[test]
+    fn do_export_hpgl_writes_plot_file() {
+        let path = std::env::temp_dir().join("seamlylayout_hpgl_plot_test.plt");
+        let _ = std::fs::remove_file(&path);
+        let options = parse_hpgl_options(r#"{"mode":"plot"}"#).unwrap();
+        do_export_hpgl(&hpgl_test_doc(), path.to_str().unwrap(), &options).expect("export should succeed");
+        let program = std::fs::read_to_string(&path).expect("file should exist");
+        assert!(program.starts_with("IN;"), "{program}");
+        assert!(program.contains("SP1;") && program.contains("SP2;"), "{program}");
+        let _ = std::fs::remove_file(&path);
+    } // do_export_hpgl_writes_plot_file
+
+    // @brief Cut mode writes the cut pen only.
+    #[test]
+    fn do_export_hpgl_cut_mode_skips_marks() {
+        let path = std::env::temp_dir().join("seamlylayout_hpgl_cut_test.hpgl");
+        let _ = std::fs::remove_file(&path);
+        let options = parse_hpgl_options(r#"{"mode":"cut","cutPen":4}"#).unwrap();
+        do_export_hpgl(&hpgl_test_doc(), path.to_str().unwrap(), &options).expect("export should succeed");
+        let program = std::fs::read_to_string(&path).expect("file should exist");
+        assert!(program.contains("SP4;") && !program.contains("SP2;"), "{program}");
+        let _ = std::fs::remove_file(&path);
+    } // do_export_hpgl_cut_mode_skips_marks
+
+    // @brief Options JSON: pens default, bad mode and bad pen are errors.
+    #[test]
+    fn parse_hpgl_options_defaults_and_errors() {
+        let options = parse_hpgl_options(r#"{"mode":"plot","labelPen":6}"#).unwrap();
+        assert_eq!(options.pens, PenMap { cut: 1, mark: 2, label: 6 });
+        assert!(parse_hpgl_options(r#"{"mode":"engrave"}"#).is_err());
+        assert!(parse_hpgl_options(r#"{"mode":"plot","cutPen":9}"#).is_err());
+        assert!(parse_hpgl_options("not json").is_err());
+    } // parse_hpgl_options_defaults_and_errors
 
     // @brief The G-Code stub returns Err and writes no file.
     #[test]

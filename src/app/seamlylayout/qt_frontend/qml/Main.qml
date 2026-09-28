@@ -129,8 +129,8 @@ ApplicationWindow {
     // Staged payload for deferred export start — shared across all formats.
     // Populated by each export handler; consumed by exportStartTimer.onTriggered.
     property string pendingExportPath: ""
-    property string pendingExportFormat: ""        // "dxf"|"png"|"pdf"|"pdf-tiled"|"svg"|"gcode"|"3mf"
-    property string pendingExportSettings: ""      // settings JSON for pdf / pdf-tiled; text mode for svg
+    property string pendingExportFormat: ""        // "dxf"|"png"|"pdf"|"pdf-tiled"|"svg"|"hpgl"|"gcode"|"3mf"
+    property string pendingExportSettings: ""      // settings JSON for pdf / pdf-tiled; text mode for svg; options JSON for hpgl
     property bool   pendingExportTeachingVersion: false  // teaching flag for DXF
 
     // Wait one short tick after opening the popup so it can paint before the
@@ -154,6 +154,8 @@ ApplicationWindow {
                 appController.exportPdfTiled(path, root.pendingExportSettings)
             } else if (fmt === "svg") {
                 appController.exportSvg(path, root.pendingExportSettings) // settings = SVG text mode
+            } else if (fmt === "hpgl") {
+                appController.exportHpgl(path, root.pendingExportSettings) // settings = HPGL options JSON
             } else if (fmt === "gcode") {
                 appController.exportGcode(path)
             } else if (fmt === "3mf") {
@@ -355,6 +357,10 @@ ApplicationWindow {
         // Paid formats stay hidden until the Rust gate reports their module as usable.
         gcodeExportAvailable: appController.isPaidExportAvailable("gcode")
         meshExportAvailable:  appController.isPaidExportAvailable("3mf")
+        hpglCutPen:           preferencesModel.hpglCutPen
+        hpglMarkPen:          preferencesModel.hpglMarkPen
+        hpglLabelPen:         preferencesModel.hpglLabelPen
+        hpglExtension:        preferencesModel.hpglExtension
 
         onImportClicked: {
             // Open the file picker in the configured Input SVG Directory.
@@ -451,6 +457,36 @@ ApplicationWindow {
                 exportStartTimer.restart()
             } // if path
         } // onExportMeshRequested
+        onExportHpglRequested: function(mode) {
+            var ext  = preferencesModel.hpglExtension // "plt" or "hpgl", chosen in Export > HPGL > File extension
+            var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
+            var name = root.makeExportFileName(ext) // default name: <importedBaseName>_YYYYMMDDHHSS.<ext>
+            var path = preferencesModel.getSaveFilePath(
+                "Save HPGL File", dir, name,
+                "HPGL Files (*." + ext + ");;All Files (*)")
+            if (path !== "") {
+                // Stage export with mode and pens, show progress popup, then start after one paint tick.
+                root.pendingExportPath = path
+                root.pendingExportFormat = "hpgl"
+                root.pendingExportSettings = JSON.stringify({
+                    mode:     mode,
+                    cutPen:   preferencesModel.hpglCutPen,
+                    markPen:  preferencesModel.hpglMarkPen,
+                    labelPen: preferencesModel.hpglLabelPen
+                })
+                exportSuccessDialog.warningText = "" // clear caveats of a previous export
+                exportProgressPopup.open()
+                exportStartTimer.restart()
+            } // if path
+        } // onExportHpglRequested
+        onHpglPenChosen: function(lineClass, pen) {
+            // Remember the pen; the pen submenu marks it and the next export uses it.
+            preferencesModel.saveHpglPen(preferencesModel.defaultPreferencesFilePath(), lineClass, pen)
+        } // onHpglPenChosen
+        onHpglExtensionChosen: function(extension) {
+            // Remember the extension; the next HPGL save dialog uses it.
+            preferencesModel.saveHpglExtension(preferencesModel.defaultPreferencesFilePath(), extension)
+        } // onHpglExtensionChosen
         onExportSvgRequested: function(mode) {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
             var name = root.makeExportFileName("svg") // default name: <importedBaseName>_YYYYMMDDHHSS.svg

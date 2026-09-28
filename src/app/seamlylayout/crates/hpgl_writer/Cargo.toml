@@ -1,0 +1,17 @@
+# project: SeamlyLayout
+# author: slspencer, copyright 2026
+# MIT License: https://opensource.org/licenses/MIT
+#
+# Writes a layout SVG as an HP-GL/1 program for pen plotters and cutters.
+[package]
+name = "hpgl_writer"
+version = "0.1.0"
+edition = "2021"
+authors = ["slspencer"]
+license = "MIT"
+description = "Writes a SeamlyLayout layout SVG as an HP-GL/1 plotter program"
+
+[dependencies]
+svg_dom = { path = "../svg_dom" }
+xmltree = { version = "0.10", features = ["attribute-order"] }
+usvg    = "0.42"

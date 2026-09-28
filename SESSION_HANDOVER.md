@@ -6,6 +6,16 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-27 — HPGL export (Layout.52)
+
+Merged `task-hpgl-export`. Full CI: new crate changes `Cargo.toml`. `cargo test --workspace`, `ctest --preset debug` passed. `local_build_msi.ps1` not run: no Seamly2D or SeamlyMe code changed.
+
+- New crate `crates/hpgl_writer`; bridge `AppController::export_hpgl`; Export > HPGL submenu.
+- Pen per line class (1-8) and extension (`.plt` / `.hpgl`) chosen in submenus, saved in the preferences INI.
+- `rust_crate_notices.txt` regenerated for the new `Cargo.lock`.
+- Menu checked offscreen (`qml.exe`); not checked in the running app or on a plotter. Check: export a layout, open the `.plt` in a HPGL viewer.
+- Workflow: `project-docs/docs-seamlylayout/export-docs/seamlylayout_EXPORT_WORKFLOW.md`.
+
 ## 2026-09-27 — Paid export stubs: G-Code and 3D mesh (3MF)
 
 Merged `task-paid-export-stubs` with skip-ci. `cargo test --workspace`, `ctest --preset debug` passed.
