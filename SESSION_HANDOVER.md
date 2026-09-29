@@ -13,8 +13,8 @@ Merged `task-sized-layout-tabs`. `cargo test --workspace`, `ctest --preset debug
 - Multisize Create Layout: "All sizes" layout first, then each size alone (`do_process_size_layout`, `piece_extractor::keep_size`), one size per QML timer tick.
 - Progress popup names each size: "Laying out size 36 (2 of 5)…". One warning at the end lists layouts that left pieces out.
 - Tabs above the right canvas. `layout_views.rs`: selecting a tab swaps the layout fields, so Adjust Mode and exports use the selected tab. Sheet PDF filters the import to the tab's size.
-- User decisions: pack at Create Layout; first tab "All sizes"; multi-page PDF (37.4) goes with the 36.2 export chooser.
-- Open: 36.2 By size export + 37.4 multi-page PDF; 38.2 real fixture; 38.3 running-app check.
+- User decisions: pack at Create Layout; first tab "All sizes"; 37.4 multi-page PDF dropped: one PDF per tab (2026-09-29).
+- Open: 36.2 By size export; 38.2 real fixture; 38.3 running-app check.
 - Not checked in the running app. Check: multisize pattern → Create Layout → popup names sizes → tabs switch → Adjust on a size tab → export.
 
 ## 2026-09-29 — Multisize handoff: Nested and Marker layouts (Layout.30–35)

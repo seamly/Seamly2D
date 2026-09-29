@@ -59,11 +59,11 @@ Handoff shape: see `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`, "Multisize p
 - [ ] Layout.36 Export: user chooses the multisize export (user, 2026-09-28)
   - [x] Layout.36.1 **Nested**: one file; each piece keeps its `piece-set` group; every piece keeps `data-size`
   - [ ] Layout.36.2 **By size**: one file per size, file name suffixed with the size; each file is that size's own packed layout from Layout.37, not a filter of the Nested layout
-- [ ] Layout.37 Sized layouts. Layout.36.2 depends on this
+- [x] Layout.37 Sized layouts. Layout.36.2 depends on this
   - [x] Layout.37.1 Pack each size again as its own layout: only that size's pieces, same settings; progress popup names each size
   - [x] Layout.37.2 Tabs across the top of the right canvas: "All sizes", then one per size
   - [x] Layout.37.3 Adjust Mode and exports use the selected tab
-  - [ ] Layout.37.4 Multi-page PDF option: one page per size (user decision: part of the Layout.36.2 export chooser)
+  - Layout.37.4 Won't do: one PDF per tab. Select a size tab, then export PDF or PDF (Tiled). One page per size conflicts with sheet and tiled pages (user decision, 2026-09-29)
 - [ ] Layout.38 Tests
   - [x] Layout.38.1 Rust: set hoist, centring, set bbox, set outline, marker count = pieces × sizes (synthetic fixture `MULTISIZE_HANDOFF_SVG`)
   - [ ] Layout.38.2 Real multisize handoff fixture: export from a `.sm2d` + `.smms` pattern in the running app, save to `crates/cxxqt_bridge/test_data/`, add an end-to-end test
