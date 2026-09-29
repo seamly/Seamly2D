@@ -30,24 +30,45 @@ Tasks in this file are numbered and are prefixed with `Layout.`
   - [x] Layout.13.1 - the layout with updates from 'adjust mode' ('adjust mode' closed via 'Save')
   - [x] Layout.13.2 - the layout without updates from 'adjust mode' ('adjust mode' closed via 'Cancel')
 
-## [ ] Task Layout 3 — if current pattern is 'multisize', create three multisize options ('nested' / 'marker' / 'sized-layout-set') that is required before user can select the export file format
+## [ ] Task Layout.3 — Multisize handoff and layout: nested (piece groups) or marker (single pieces)
 
-Add a layout export option for multisize patterns — svg files or stringified svg variables that contain a measurement file reference to a `.smms` multisize file (multiple sizes; the CLI already exposes per-size gradation via `--gradationsize`/`--gradationheight`). The user chooses one of three multisize layout products in the settings dialog; all products orient every piece with its grainline pointing up.
+A pattern with a `.smms` multisize measurement file hands SeamlyLayout every size in one stringified SVG. Each piece is a group that holds that piece in every size. `process_layout()` packs either the groups or the single pieces.
 
-- [ ] Layout.30 on Import of svg file or stringified svg variable, detect if .sm2d file reference an .smis measurement file (individual measurements) or .smms measurement file (multisize measurements), this variable should be readable (not writable) by the Export menu, layout algorithm, 'Adjust mode', and other code.
-- [ ] Layout.31 Settings dialog: user chooses "nested layout", "marker layout", or "set of sized layouts" for multisize export
-- [ ] Layout.32 Generate a "size layout" for each size in the `.smms` file, all grainlines pointing up (per-size piece generation via the existing gradation machinery)
-- [ ] Layout.33 Nested layout:
-  - [ ] Layout.33.1 For each piece in the largest size, create a layout with all grainlines pointing up
-  - [ ] Layout.33.2 For the remaining sizes in descending order: place each piece on top of its matching largest-size piece, grainline up, centering its center point on the largest piece's center point — each large piece becomes the base of a "pyramid" of matching pieces with the smallest on top
-  - [ ] Layout.33.3 Apply transforms so all pieces are placed in global space
-  - [ ] Layout.33.4 Group all pieces of each size together, so upstream tools (Pattern Projector, Inkscape, Illustrator, ...) can toggle each size's visibility
-- [ ] Layout.34 Marker layout: copy all pieces from the size layouts and arrange them into a single marker layout, all grainlines pointing up
-- [ ]  Layout 35 Set of sized layouts:
-  - [ ] Layout.35.1 Let the user view each size's layout in the canvas — UI design open: per-size tabs across the top of the canvas is the working idea, to be settled during implementation
-  - [ ] Layout.35.2 Export the set to a single multi-page PDF, or to individual files of any export type
-- [ ] Layout.36 Tests with a multisize test pattern (need a `.sm2d` + `.smms` fixture); verify grouping/grainline orientation in the exported SVG/PDF
-- [ ] Layout.37 Doxygen briefs + inline comments on all touched functions; document the three products in the repo docs
+Decisions (user, 2026-09-28):
+
+- Sizes: every size in the `.smms` file, at the base height only. No size × height combinations.
+- Stack order in a group: each size centered on the largest size's center, after the grainline is vertical.
+- Individual `.smis` patterns keep today's handoff, unchanged.
+
+Handoff shape (producer: Seamly2D `SvgGenerator`; consumer: `piece_extractor`):
+
+```xml
+<g data-type="pattern" data-measurements="multisize" data-sizes="34,36,38" data-base-size="36" ...>
+  <g id="piece-set_Front" data-type="piece-set" data-name="Front" data-letter="A" data-grainline-angle="90">
+    <g id="piece_Front_s34" data-type="piece" data-size="34" data-name="Front" ...>…components…</g>
+    <g id="piece_Front_s36" data-type="piece" data-size="36" data-name="Front" ...>…</g>
+  </g>
+</g>
+```
+
+- [ ] Layout.30 Seamly2D producer
+  - [ ] Layout.30.1 Multisize pattern: loop over every size, rebuild the pieces, and restore the current size — reuse the per-size loop in `MainWindow::exportPiecesAs()` (`updateMeasurements` + `LiteParseTree` + `preparePiecesForLayout`)
+  - [ ] Layout.30.2 Match a piece across sizes by its `VPiece` id; emit one `data-type="piece-set"` group per piece, one `data-type="piece"` child per size
+  - [ ] Layout.30.3 New attributes: `data-measurements` (`individual` | `multisize`), `data-sizes`, `data-base-size` on the pattern; `data-size` on each piece. Update `NEW-ATTRIBUTES.csv` and `SVG-DATA-ATTRIBUTES.md`
+  - [ ] Layout.30.4 Extend `TST_SvgComponentTags` (`src/test/Seamly2DTest/tst_svgcomponenttags.cpp`): set count, size count, unique ids
+- [ ] Layout.31 SeamlyLayout import: read `data-measurements`; expose a read-only `is_multisize` + size list to Export, layout, and Adjust Mode. Absent attribute = individual
+- [ ] Layout.32 Settings dialog: "Multisize layout" choice, shown only for a multisize import — **Nested** (pack piece groups) or **Marker** (pack every piece alone). Default: Nested
+- [ ] Layout.33 Nested layout (pack the groups)
+  - [ ] Layout.33.1 `hoist_tagged_pieces`: hoist `piece-set` groups to the root as one unit, not their child pieces
+  - [ ] Layout.33.2 Verticalize each set on its grainline angle; center every size on the largest size's center
+  - [ ] Layout.33.3 One `PieceRect` per set: bbox = union of its sizes; outline polygon = largest size
+  - [ ] Layout.33.4 Pack, assemble, and trim as today; placed pieces keep `data-size` so export can toggle sizes
+- [ ] Layout.34 Marker layout (split the groups): hoist every `data-type="piece"` alone; pack all sizes of all pieces as independent pieces. `PieceRect::label()` includes the size
+- [ ] Layout.35 Adjust Mode: Nested moves a set as one item; Marker moves one piece
+- [ ] Layout.36 Export: every format keeps `data-size`; SVG adds one layer per size (`data-type="size-layer"`) so Inkscape / Pattern Projector can toggle a size — open: layer structure vs. piece-set structure, settle in the plan
+- [ ] Layout.37 Later: set of sized layouts — one layout per size, per-size canvas tabs, multi-page PDF or one file per size
+- [ ] Layout.38 Tests: multisize fixture (`.sm2d` + `.smms`) in `test-seamly-layout-input/`; Rust tests for set hoist, centering, set bbox, marker count = pieces × sizes
+- [ ] Layout.39 Doxygen briefs + inline comments on touched functions; document both layouts in the SeamlyLayout docs
 
 ## [ ] Task Layout.5 - Implement additional export formats
 
