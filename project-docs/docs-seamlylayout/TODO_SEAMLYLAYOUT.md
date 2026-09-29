@@ -65,8 +65,10 @@ Handoff shape (producer: Seamly2D `SvgGenerator`; consumer: `piece_extractor`):
   - [ ] Layout.33.4 Pack, assemble, and trim as today; placed pieces keep `data-size` so export can toggle sizes
 - [ ] Layout.34 Marker layout (split the groups): hoist every `data-type="piece"` alone; pack all sizes of all pieces as independent pieces. `PieceRect::label()` includes the size
 - [ ] Layout.35 Adjust Mode: Nested moves a set as one item; Marker moves one piece
-- [ ] Layout.36 Export: every format keeps `data-size`; SVG adds one layer per size (`data-type="size-layer"`) so Inkscape / Pattern Projector can toggle a size — open: layer structure vs. piece-set structure, settle in the plan
-- [ ] Layout.37 Later: set of sized layouts — one layout per size, per-size canvas tabs, multi-page PDF or one file per size
+- [ ] Layout.36 Export: user chooses the multisize export (user, 2026-09-28)
+  - [ ] Layout.36.1 **Nested**: one file; each piece keeps its `piece-set` group; every piece keeps `data-size`
+  - [ ] Layout.36.2 **By size**: one file per size, file name suffixed with the size; each file is that size's own packed layout from Layout.37, not a filter of the Nested layout
+- [ ] Layout.37 Sized layouts: pack each size again as its own layout (only that size's pieces, same settings); per-size canvas tabs; multi-page PDF option. Layout.36.2 depends on this
 - [ ] Layout.38 Tests: multisize fixture (`.sm2d` + `.smms`) in `test-seamly-layout-input/`; Rust tests for set hoist, centering, set bbox, marker count = pieces × sizes
 - [ ] Layout.39 Doxygen briefs + inline comments on touched functions; document both layouts in the SeamlyLayout docs
 
