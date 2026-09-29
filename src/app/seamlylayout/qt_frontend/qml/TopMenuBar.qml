@@ -45,6 +45,12 @@ ToolBar {
     // Bound by Main.qml from settingsModel.paperType === "tiled".
     required property bool pdfTiledExportEnabled
 
+    // @brief True when the layout has tabs; shows Export > "Export all tabs".
+    property bool hasLayoutTabs: false
+
+    // @brief Check state of Export > "Export all tabs".
+    property bool exportAllTabs: false
+
     // @brief Label text of the imported SVG: "text", "pathsOnly" or "noLabels".
     // Bound by Main.qml from appController.labelTextState.
     property string labelTextState: "noLabels"
@@ -83,6 +89,9 @@ ToolBar {
     // @brief User clicked Export (the button itself, not a menu item).
     // The Export dropdown menu is handled internally.
     signal exportClicked()
+
+    // @brief User toggled Export > "Export all tabs".
+    signal exportAllTabsToggled(bool checked)
 
     // @brief User selected DXF-ASTM from the Export dropdown (Phase 9).
     signal exportDxfAstmRequested()
@@ -213,6 +222,9 @@ ToolBar {
             id: exportMenu
             layoutReady: root.layoutReady
             pdfTiledEnabled: root.pdfTiledExportEnabled
+            showExportAllTabs: root.hasLayoutTabs
+            exportAllTabs:   root.exportAllTabs
+            onExportAllTabsToggled: function(checked) { root.exportAllTabsToggled(checked) }
             svgModeSubmenu:  true
             labelTextState:  root.labelTextState
             lastSvgTextMode: root.lastSvgTextMode

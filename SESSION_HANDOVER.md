@@ -6,6 +6,17 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-29 — Export all tabs (Layout.36.2)
+
+Merged `task-export-all-tabs`. `cargo test --workspace`, `ctest --preset debug` passed.
+
+- Export > "Export all tabs": checkable, shown only when the layout has tabs. While checked, every format writes one file per tab.
+- File name: tab label before the extension (`layout_views::tab_file_path`): `shirt_size-36.pdf`.
+- Bridge: `select_export_tab` (silent swap, no canvas reload) and `export_tab_path`. QML: `runExport()`, `exportEachTab()` in `Main.qml`.
+- One "Export Complete" dialog lists every file. First failure stops the run; earlier files stay on disk.
+- Not checked in the running app. Check: multisize layout → check "Export all tabs" → export PDF, Tiled PDF, DXF → one file per tab; shown tab unchanged.
+- Open: default export timestamp `YYYYMMDDHHSS` lacks minutes (`makeExportFileName`); user decision pending.
+
 ## 2026-09-29 — Sized layouts and size tabs (Layout.37.1–37.3)
 
 Merged `task-sized-layout-tabs`. `cargo test --workspace`, `ctest --preset debug` passed.
@@ -14,7 +25,7 @@ Merged `task-sized-layout-tabs`. `cargo test --workspace`, `ctest --preset debug
 - Progress popup names each size: "Laying out size 36 (2 of 5)…". One warning at the end lists layouts that left pieces out.
 - Tabs above the right canvas. `layout_views.rs`: selecting a tab swaps the layout fields, so Adjust Mode and exports use the selected tab. Sheet PDF filters the import to the tab's size.
 - User decisions: pack at Create Layout; first tab "All sizes"; 37.4 multi-page PDF dropped: one PDF per tab (2026-09-29).
-- Open: 36.2 By size export; 38.2 real fixture; 38.3 running-app check.
+- Open: 38.2 real fixture; 38.3 running-app check.
 - Not checked in the running app. Check: multisize pattern → Create Layout → popup names sizes → tabs switch → Adjust on a size tab → export.
 
 ## 2026-09-29 — Multisize handoff: Nested and Marker layouts (Layout.30–35)

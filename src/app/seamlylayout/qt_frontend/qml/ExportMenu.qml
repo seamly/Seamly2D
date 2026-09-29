@@ -30,6 +30,10 @@
 // (View menu) one "PNG/JPG" item opens either format in the image viewer.
 // The View menu has none: a .ps or .eps file opens in the system viewer.
 //
+// With showExportAllTabs true (Export menu, layout with tabs), a checkable
+// "Export all tabs" item leads the menu.  While checked, every format writes
+// one file per tab instead of one file for the selected tab.
+//
 // G-Code and 3D Mesh (3MF) are paid formats. Each item stays hidden until
 // AppController.isPaidExportAvailable() reports its module as usable.
 
@@ -88,6 +92,16 @@ Menu {
     // @brief True when the paid 3D mesh module is usable; shows the 3D Mesh item.
     property bool meshExportAvailable: false
 
+    // @brief When true, the "Export all tabs" item is shown (Export menu, layout with tabs).
+    property bool showExportAllTabs: false
+
+    // @brief Check state of "Export all tabs".
+    property bool exportAllTabs: false
+
+    // @brief Emitted when the user toggles "Export all tabs".
+    // @param checked New check state.
+    signal exportAllTabsToggled(bool checked)
+
     // @brief Emitted when the user selects DXF-ASTM export (Phase 9).
     signal exportDxfAstmRequested()
 
@@ -140,6 +154,30 @@ Menu {
 
     // @brief Emitted when the user selects 3D mesh export (paid module).
     signal exportMeshRequested()
+
+    MenuItem {
+        id: exportAllTabsItem
+        text: "Export all tabs"
+        visible: root.showExportAllTabs
+        height: visible ? implicitHeight : 0
+        checkable: true
+        checked: root.exportAllTabs
+        ToolTip.visible: hovered
+        ToolTip.text:    "Each tab is exported as a separate file.\n"
+                       + "The tab name is added to each file name."
+        ToolTip.delay:   500
+        onTriggered: {
+            // A click toggles `checked`; rebind it so the mark follows exportAllTabs.
+            var wanted = exportAllTabsItem.checked
+            exportAllTabsItem.checked = Qt.binding(function() { return root.exportAllTabs })
+            root.exportAllTabsToggled(wanted)
+        } // onTriggered
+    } // MenuItem exportAllTabsItem
+
+    MenuSeparator {
+        visible: root.showExportAllTabs
+        height: visible ? implicitHeight : 0
+    } // MenuSeparator after exportAllTabsItem
 
     MenuItem {
         text: "DXF-ASTM"

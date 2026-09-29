@@ -56,9 +56,9 @@ Handoff shape: see `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`, "Multisize p
   - [x] Layout.33.4 Placed pieces keep `data-size`
 - [x] Layout.34 Marker layout: every size packs alone; label "Name (size N)"
 - [x] Layout.35 Adjust Mode: moves each placed unit by id, so Nested moves a whole set
-- [ ] Layout.36 Export: user chooses the multisize export (user, 2026-09-28)
+- [x] Layout.36 Export: user chooses the multisize export (user, 2026-09-28)
   - [x] Layout.36.1 **Nested**: one file; each piece keeps its `piece-set` group; every piece keeps `data-size`
-  - [ ] Layout.36.2 **By size**: one file per size, file name suffixed with the size; each file is that size's own packed layout from Layout.37, not a filter of the Nested layout
+  - [x] Layout.36.2 **Export all tabs**: checkable Export menu item; every format writes one file per tab, tab label before the extension; each file is that tab's own packed layout (user decision, 2026-09-29: explicit menu item, no chooser dialog)
 - [x] Layout.37 Sized layouts. Layout.36.2 depends on this
   - [x] Layout.37.1 Pack each size again as its own layout: only that size's pieces, same settings; progress popup names each size
   - [x] Layout.37.2 Tabs across the top of the right canvas: "All sizes", then one per size

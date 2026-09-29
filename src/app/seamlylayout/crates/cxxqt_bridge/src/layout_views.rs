@@ -23,6 +23,28 @@ pub fn size_label(size: &str) -> String {
     format!("Size {size}")
 } // fn size_label
 
+// @brief Export path for one tab: the tab label, made file-safe, before the extension.
+//
+// "C:/out/shirt.pdf" + "Size 40" → "C:/out/shirt_size-40.pdf".  Every character that
+// is not a letter or digit becomes '-', so a size such as "40/42" cannot add a
+// directory.  A path without an extension gets the suffix at the end.
+pub fn tab_file_path(path: &str, label: &str) -> String {
+    let suffix: String = label
+        .chars()
+        .map(|c| if c.is_alphanumeric() { c.to_ascii_lowercase() } else { '-' })
+        .collect();
+
+    // Split at the last '.' of the file name only; a '.' in a directory is not an extension.
+    let name_start = path.rfind(['/', '\\']).map_or(0, |i| i + 1);
+    match path[name_start..].rfind('.') {
+        Some(dot) if dot > 0 => {
+            let dot = name_start + dot;
+            format!("{}_{suffix}{}", &path[..dot], &path[dot..])
+        } // Some extension
+        _ => format!("{path}_{suffix}"),
+    } // match extension
+} // fn tab_file_path
+
 // @brief The per-layout controller fields that change when the tab changes.
 //
 // Fields the layouts share (settings, canvas width, roll form, the imported
@@ -104,6 +126,11 @@ impl LayoutViews {
     pub fn labels(&self) -> Vec<String> {
         self.views.iter().map(|v| v.label.clone()).collect()
     } // fn labels
+
+    // @brief Label of view `index`; `None` when out of range.
+    pub fn label(&self, index: usize) -> Option<&str> {
+        self.views.get(index).map(|v| v.label.as_str())
+    } // fn label
 
     // @brief Index of the active view.
     pub fn active(&self) -> usize {
@@ -189,6 +216,19 @@ mod tests {
         assert_eq!(queue.next_message(), None);
     } // size_queue_messages_count_up
 
+    // @brief Each tab writes its own file: the label goes before the extension, file-safe.
+    #[test]
+    fn tab_file_path_adds_label_before_extension() {
+        assert_eq!(tab_file_path("C:/out/shirt.pdf", "Size 40"), "C:/out/shirt_size-40.pdf");
+        assert_eq!(tab_file_path(r"C:\out\shirt_tiled.pdf", ALL_SIZES_LABEL), r"C:\out\shirt_tiled_all-sizes.pdf");
+        // A '/' in a size name must not create a directory.
+        assert_eq!(tab_file_path("/out/shirt.svg", "Size 40/42"), "/out/shirt_size-40-42.svg");
+        // A '.' in a directory is not an extension.
+        assert_eq!(tab_file_path("/out.v2/shirt", "Size 40"), "/out.v2/shirt_size-40");
+        // A hidden-file style name keeps its leading dot.
+        assert_eq!(tab_file_path("/out/.pdf", "Size 40"), "/out/.pdf_size-40");
+    } // tab_file_path_adds_label_before_extension
+
     // @brief A state whose bbox JSON names it, so a test can tell states apart.
     fn state(name: &str) -> LayoutState {
         LayoutState { piece_bboxes_json: name.to_string(), ..LayoutState::default() }
@@ -203,6 +243,8 @@ mod tests {
         views.push_size("34", state("s34"));
         views.push_size("36", state("s36"));
         assert_eq!(views.labels(), vec!["All sizes", "Size 34", "Size 36"]);
+        assert_eq!(views.label(1), Some("Size 34"));
+        assert_eq!(views.label(3), None);
         assert_eq!(views.active(), 0);
         assert_eq!(views.active_size(), None);
     } // labels_and_active_size
