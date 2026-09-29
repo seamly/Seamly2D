@@ -257,13 +257,13 @@ echo.
 echo === run qmake : seamly2d + seamlyme$(if (-not $SkipTests) { ' + unit tests' }) 
 qmake Seamly.pro -r $QmakeConfig
 if errorlevel 1 exit /b 1
-echo === run nmake : build seamly2d.exe & seamlyme.exe ===
+echo === run nmake : build seamly2d.exe and seamlyme.exe ===
 nmake
 if errorlevel 1 exit /b 1
 $TestSection
 
 echo.
-echo === run cmake : set SeamlyLayout release type & cmake path ===
+echo === run cmake : set SeamlyLayout release type and cmake path ===
 cd /d "$layoutFrontendDir"
 cmake --preset release -DCMAKE_PREFIX_PATH="$QtPath"
 if errorlevel 1 exit /b 1

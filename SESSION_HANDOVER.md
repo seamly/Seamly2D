@@ -6,6 +6,13 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-28 — local_build_msi.ps1 echo fix
+
+Merged `task-build-echo-ampersand`. Full CI: touches `packaging/**`.
+
+- Two `echo` banners had a bare `&`; `cmd.exe` ran the text after it. Caused the `CMake Error: ... "Seamly2D-private/path" does not exist` log line. `&` → "and".
+- Checked: new lines in `cmd.exe`; PowerShell parse. Full local build not rerun.
+
 ## 2026-09-27 — PS/EPS export (Layout.53); pdftops retired
 
 Merged `task-ps-eps-writer`. Full CI: changes `ci.yml`, `*.pro`, `packaging/**`, `Cargo.toml`.
