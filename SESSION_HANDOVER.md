@@ -15,7 +15,7 @@ Merged `task-export-all-tabs`. `cargo test --workspace`, `ctest --preset debug` 
 - Bridge: `select_export_tab` (silent swap, no canvas reload) and `export_tab_path`. QML: `runExport()`, `exportEachTab()` in `Main.qml`.
 - One "Export Complete" dialog lists every file. First failure stops the run; earlier files stay on disk.
 - Not checked in the running app. Check: multisize layout → check "Export all tabs" → export PDF, Tiled PDF, DXF → one file per tab; shown tab unchanged.
-- Open: default export timestamp `YYYYMMDDHHSS` lacks minutes (`makeExportFileName`); user decision pending.
+- Default export name timestamp is now `YYYYMMDDHHMMSS` (`makeExportFileName`); it lacked minutes before.
 
 ## 2026-09-29 — Sized layouts and size tabs (Layout.37.1–37.3)
 

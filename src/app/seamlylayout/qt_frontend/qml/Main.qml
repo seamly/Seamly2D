@@ -138,7 +138,7 @@ ApplicationWindow {
     // @param clo3d true for DXF-ASTM (CLO3D): D6673 content plus CLO3D group 250.
     function requestDxfExport(clo3d) {
         var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-        var name = root.makeExportFileName("dxf") // default name: <importedBaseName>_YYYYMMDDHHSS.dxf
+        var name = root.makeExportFileName("dxf") // default name: <importedBaseName>_YYYYMMDDHHMMSS.dxf
         var title = clo3d ? "Save DXF-ASTM (CLO3D) File" : "Save DXF-ASTM File"
         var path = preferencesModel.getSaveFilePath(title, dir, name, "DXF Files (*.dxf);;All Files (*)")
         if (path === "") return // user cancelled
@@ -275,7 +275,7 @@ ApplicationWindow {
         } // onTriggered
     } // Timer sizeLayoutTimer
 
-    // @brief Build a default export filename: <importedBaseName>_YYYYMMDDHHSS[_tiled].<ext>
+    // @brief Build a default export filename: <importedBaseName>_YYYYMMDDHHMMSS[_tiled].<ext>
     // @param ext File extension without dot (e.g. "dxf", "png").
     // @param tiled If true, appends "_tiled" to the filename. Default is false.
     // @return Full filename string, or empty if no SVG has been imported.
@@ -286,6 +286,7 @@ ApplicationWindow {
                 + ("0" + (now.getMonth() + 1)).slice(-2)
                 + ("0" + now.getDate()).slice(-2)
                 + ("0" + now.getHours()).slice(-2)
+                + ("0" + now.getMinutes()).slice(-2)
                 + ("0" + now.getSeconds()).slice(-2);
         var name = root.importedBaseName + "_" + ts;
         if (tiled === undefined) tiled = false;
@@ -529,7 +530,7 @@ ApplicationWindow {
         onExportDxfAstmClo3dRequested: root.requestDxfExport(true)
         onExportPngRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName("png") // default name: <importedBaseName>_YYYYMMDDHHSS.png
+            var name = root.makeExportFileName("png") // default name: <importedBaseName>_YYYYMMDDHHMMSS.png
             var path = preferencesModel.getSaveFilePath(
                 "Save PNG File", dir, name,
                 "PNG Files (*.png);;All Files (*)")
@@ -543,7 +544,7 @@ ApplicationWindow {
         } // onExportPngRequested
         onExportJpgRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName("jpg") // default name: <importedBaseName>_YYYYMMDDHHSS.jpg
+            var name = root.makeExportFileName("jpg") // default name: <importedBaseName>_YYYYMMDDHHMMSS.jpg
             var path = preferencesModel.getSaveFilePath(
                 "Save JPG File", dir, name,
                 "JPG Files (*.jpg *.jpeg);;All Files (*)")
@@ -558,7 +559,7 @@ ApplicationWindow {
         } // onExportJpgRequested
         onExportGcodeRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName("gcode") // default name: <importedBaseName>_YYYYMMDDHHSS.gcode
+            var name = root.makeExportFileName("gcode") // default name: <importedBaseName>_YYYYMMDDHHMMSS.gcode
             var path = preferencesModel.getSaveFilePath(
                 "Save G-Code File", dir, name,
                 "G-Code Files (*.gcode);;All Files (*)")
@@ -572,7 +573,7 @@ ApplicationWindow {
         } // onExportGcodeRequested
         onExportMeshRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName("3mf") // default name: <importedBaseName>_YYYYMMDDHHSS.3mf
+            var name = root.makeExportFileName("3mf") // default name: <importedBaseName>_YYYYMMDDHHMMSS.3mf
             var path = preferencesModel.getSaveFilePath(
                 "Save 3D Mesh File", dir, name,
                 "3MF Files (*.3mf);;All Files (*)")
@@ -587,7 +588,7 @@ ApplicationWindow {
         onExportHpglRequested: function(mode) {
             var ext  = preferencesModel.hpglExtension // "plt" or "hpgl", chosen in Export > HPGL > File extension
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName(ext) // default name: <importedBaseName>_YYYYMMDDHHSS.<ext>
+            var name = root.makeExportFileName(ext) // default name: <importedBaseName>_YYYYMMDDHHMMSS.<ext>
             var path = preferencesModel.getSaveFilePath(
                 "Save HPGL File", dir, name,
                 "HPGL Files (*." + ext + ");;All Files (*)")
@@ -608,7 +609,7 @@ ApplicationWindow {
         } // onExportHpglRequested
         onExportPostscriptRequested: function(flavor) {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName(flavor) // default name: <importedBaseName>_YYYYMMDDHHSS.<ps|eps>
+            var name = root.makeExportFileName(flavor) // default name: <importedBaseName>_YYYYMMDDHHMMSS.<ps|eps>
             var filter = flavor === "eps"
                 ? "EPS Files (*.eps);;All Files (*)"
                 : "PostScript Files (*.ps);;All Files (*)"
@@ -632,7 +633,7 @@ ApplicationWindow {
         } // onHpglExtensionChosen
         onExportSvgRequested: function(mode) {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName("svg") // default name: <importedBaseName>_YYYYMMDDHHSS.svg
+            var name = root.makeExportFileName("svg") // default name: <importedBaseName>_YYYYMMDDHHMMSS.svg
             var path = preferencesModel.getSaveFilePath(
                 "Save SVG File", dir, name,
                 "SVG Files (*.svg);;All Files (*)")
@@ -652,7 +653,7 @@ ApplicationWindow {
         } // onExportSvgRequested
         onExportPdfRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName("pdf") // default name: <importedBaseName>_YYYYMMDDHHSS.pdf
+            var name = root.makeExportFileName("pdf") // default name: <importedBaseName>_YYYYMMDDHHMMSS.pdf
             var path = preferencesModel.getSaveFilePath(
                 "Save PDF File", dir, name,
                 "PDF Files (*.pdf);;All Files (*)")
@@ -667,7 +668,7 @@ ApplicationWindow {
         } // onExportPdfRequested
         onExportPdfTiledRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // from preferences layout_directory; fallback: <exeDir>/output
-            var name = root.makeExportFileName("pdf", true) // default name: <importedBaseName>_YYYYMMDDHHSS_tiled.pdf
+            var name = root.makeExportFileName("pdf", true) // default name: <importedBaseName>_YYYYMMDDHHMMSS_tiled.pdf
             var path = preferencesModel.getSaveFilePath(
                 "Save Tiled PDF File", dir, name,
                 "PDF Files (*.pdf);;All Files (*)")

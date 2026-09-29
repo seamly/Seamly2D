@@ -4,7 +4,7 @@ ExportMenu.MenuItem("PNG").onTriggered
       → TopMenuBar.exportPngRequested()                      signal
         → Main.qml onExportPngRequested                      handler
           → preferencesModel.layoutDirectory                 getter → "C:/src/seamlyLayout/qt_frontend/output"
-          → root.makeExportFileName("png")                   QML function → "<baseName>_YYYYMMDDHHSS.png"
+          → root.makeExportFileName("png")                   QML function → "<baseName>_YYYYMMDDHHMMSS.png"
           → preferencesModel.getSaveFilePath(title, dir, name, filter)   C++ static
             → QDir(dir).absolutePath()                       resolve dir to absolute
             → QFileDialog.setDirectory(absDir)
@@ -161,7 +161,7 @@ ExportMenu EPS / PostScript (PS) → exportPostscriptRequested("eps" | "ps")
 ExportMenu JPG → exportJpgRequested()
   → TopMenuBar.exportJpgRequested()
     → Main.qml onExportJpgRequested
-      → save dialog (*.jpg *.jpeg), default <baseName>_YYYYMMDDHHSS.jpg
+      → save dialog (*.jpg *.jpeg), default <baseName>_YYYYMMDDHHMMSS.jpg
       → pendingExportFormat = "jpg"; exportStartTimer
         → appController.exportJpeg(path)
           → clone_stripped_layout_doc()
