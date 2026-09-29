@@ -62,6 +62,19 @@ namespace
     }
 
     //-----------------------------------------------------------------------------
+    /// @brief Id suffix for one size of a multisize piece, e.g. "_s34" or "_s13.5".
+    //-----------------------------------------------------------------------------
+    QString sizeIdSuffix(const QString &size)
+    {
+        QString sanitized = sanitizeForId(size);
+        if (sanitized.startsWith(QLatin1Char('_')))
+        {
+            sanitized.remove(0, 1); // the digit guard is not needed after the "_s" prefix
+        }
+        return QStringLiteral("_s") + sanitized;
+    }
+
+    //-----------------------------------------------------------------------------
     /// @brief Component types that can repeat per piece, so their id keeps a
     ///        counter (`<type>_<n>_<name>`) instead of a bare `<type>_<name>`.
     //-----------------------------------------------------------------------------
@@ -122,6 +135,23 @@ SvgGenerator::SvgGenerator(QGraphicsRectItem *paper, QString name, QString patte
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief Mark the export as a multisize pattern.
+ *
+ * The pattern group then carries data-measurements="multisize", data-sizes and
+ * data-base-size. Without this call the pattern group carries
+ * data-measurements="individual".
+ *
+ * @param sizes    every size in the export, in pattern units, in the order the pieces are added.
+ * @param baseSize base size of the multisize measurements, in pattern units.
+ */
+void SvgGenerator::setMultisize(const QStringList &sizes, const QString &baseSize)
+{
+    m_sizes = sizes;
+    m_baseSize = baseSize;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief Merge all the SVGs in the m_domList list into a single SVG
  * @return The merged SVG as a DOM document
  * @details m_domList contains DOM representations of multiple SVGs
@@ -164,9 +194,23 @@ QDomDocument SvgGenerator::mergeSvgDoms()
         patternGroup.setAttribute("data-type", "pattern");
         patternGroup.setAttribute("data-type-number", "1");
         setAttribute(patternGroup, "data-name", m_patternName);
+        if (m_sizes.isEmpty())
+        {
+            patternGroup.setAttribute("data-measurements", "individual");
+        }
+        else
+        {
+            patternGroup.setAttribute("data-measurements", "multisize");
+            patternGroup.setAttribute("data-sizes", m_sizes.join(QLatin1Char(',')));
+            setAttribute(patternGroup, "data-base-size", m_baseSize);
+        }
         mergedSvgRoot.appendChild(patternGroup);
         parentElement = patternGroup;
     }
+
+    // Piece-set groups, created on the first piece of each set; keyed by piece-set key.
+    QHash<QString, QDomElement> pieceSets;
+    int pieceSetCount = 0;
 
     for (int i = 0; i < m_domList.size(); ++i) {
         QDomDocument domSvg = m_domList.at(i);
@@ -182,9 +226,43 @@ QDomDocument SvgGenerator::mergeSvgDoms()
         }
         QDomElement mainGroup = svgGroups.at(0).toElement();
         cleanSvg(mainGroup);
+
+        // A multisize piece goes into the piece-set that holds the same piece in every size.
+        QDomElement targetElement = parentElement;
+        const QString pieceSetKey = m_domPieceSetKeys.value(i);
+        if (!pieceSetKey.isEmpty() && mainGroup.attribute(QStringLiteral("data-type")) == QLatin1String("piece"))
+        {
+            if (!pieceSets.contains(pieceSetKey))
+            {
+                ++pieceSetCount;
+                const QString pieceName = mainGroup.attribute(QStringLiteral("data-name"));
+                const QString sanitizedName = sanitizeForId(pieceName);
+                QString pieceSetId = sanitizedName.isEmpty()
+                    ? QStringLiteral("piece-set-%1").arg(pieceSetCount)
+                    : QStringLiteral("piece-set_%1").arg(sanitizedName);
+                if (m_usedPieceIds.contains(pieceSetId))
+                {
+                    pieceSetId += QLatin1Char('-') + QString::number(pieceSetCount);
+                }
+                m_usedPieceIds.insert(pieceSetId);
+
+                QDomElement pieceSet = mergedSvg.createElement("g");
+                pieceSet.setAttribute("id", pieceSetId);
+                pieceSet.setAttribute("data-type", "piece-set");
+                pieceSet.setAttribute("data-type-number", QString::number(pieceSetCount));
+                pieceSet.setAttribute("data-parent", parentElement.attribute(QStringLiteral("id")));
+                setAttribute(pieceSet, "data-name", pieceName);
+                setAttribute(pieceSet, "data-letter", mainGroup.attribute(QStringLiteral("data-letter")));
+                parentElement.appendChild(pieceSet);
+                pieceSets.insert(pieceSetKey, pieceSet);
+            }
+            targetElement = pieceSets.value(pieceSetKey);
+            mainGroup.setAttribute("data-parent", targetElement.attribute(QStringLiteral("id")));
+        }
+
         // importNode: nodes must be cloned into the target document before appending;
         // appending a node owned by another document is silently ignored by QDom.
-        parentElement.appendChild(mergedSvg.importNode(mainGroup, true));
+        targetElement.appendChild(mergedSvg.importNode(mainGroup, true));
     }
 
     return mergedSvg;
@@ -407,6 +485,12 @@ void SvgGenerator::addComponentGroups(QGraphicsScene *scene, QGraphicsItem *item
             : (componentIdIsNumbered(type)
                    ? QString("%1_%2_%3").arg(type).arg(typeNumber).arg(sanitizedName)
                    : QString("%1_%2").arg(type, sanitizedName));
+        // The same piece repeats once per size in a multisize export.
+        const QString size = pieceGroup.attribute(QStringLiteral("data-size"));
+        if (!size.isEmpty())
+        {
+            componentId += sizeIdSuffix(size);
+        }
         if (m_usedIds.contains(componentId))
         {
             componentId += QLatin1Char('-') + pieceGroup.attribute(QStringLiteral("data-type-number"));
@@ -441,8 +525,13 @@ void SvgGenerator::addComponentGroups(QGraphicsScene *scene, QGraphicsItem *item
  *
  * @param scene the scene that must be converted to SVG.
  * @param item  piece root item the scene contains; nullptr for whole-scene exports.
+ * @param size  multisize size of this piece, written as data-size and appended to the ids; empty for an
+ *              individual pattern.
+ * @param pieceSetKey key shared by the same piece in every size; the merge nests those pieces in one
+ *              data-type="piece-set" group. Empty = no piece-set.
  */
-void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item)
+void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item, const QString &size,
+                                   const QString &pieceSetKey)
 {
     if (item == nullptr)
     {
@@ -451,6 +540,7 @@ void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item)
         if (!domDoc.isNull())
         {
             m_domList.append(domDoc);
+            m_domPieceSetKeys.append(QString());
         }
         return;
     }
@@ -484,6 +574,10 @@ void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item)
     QString svgPieceId = sanitizedPieceName.isEmpty()
         ? pieceId
         : QStringLiteral("piece_%1").arg(sanitizedPieceName);
+    if (!size.isEmpty())
+    {
+        svgPieceId += sizeIdSuffix(size);
+    }
     if (m_usedPieceIds.contains(svgPieceId))
     {
         svgPieceId += QLatin1Char('-') + QString::number(m_pieceCount);
@@ -497,6 +591,7 @@ void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item)
     pieceGroup.setAttribute("data-parent", "pattern-1");
     setAttribute(pieceGroup, "data-name", pieceName);
     setAttribute(pieceGroup, "data-letter", item->data(PieceItemData::PieceLetter).toString());
+    setAttribute(pieceGroup, "data-size", size);
     const QVariant grainAngle = item->data(PieceItemData::GrainlineAngle);
     if (grainAngle.isValid())
     {
@@ -507,6 +602,7 @@ void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item)
     addComponentGroups(scene, item, pieceDoc, pieceGroup, pieceId);
 
     m_domList.append(pieceDoc);
+    m_domPieceSetKeys.append(pieceSetKey);
 }
 
 

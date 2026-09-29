@@ -28,6 +28,9 @@ Dialog {
     // @brief The SettingsModel instance to read/write.  Must be set by the parent.
     required property var model
 
+    // @brief True when the imported pattern is multisize; shows the Multisize Layout choice.
+    property bool isMultisize: false
+
     // @brief File used for Submit (save) and Discard (reload).
     // Set by the parent before open() to the resolved settings file path.
     // Falls back to SettingsModel.defaultSettingsFilePath().
@@ -323,6 +326,65 @@ Dialog {
                         } // contentItem Text
                     } // RadioButton noGrainlineFree
                 } // RowLayout noGrainlineButtons
+
+                // -----------------------------------------------------------
+                // Multisize layout — shown only for a multisize import.
+                //   Nested → each piece packs with all its sizes stacked (multisizeLayout="nested")
+                //   Marker → every size of every piece packs alone ("marker")
+                // -----------------------------------------------------------
+                Text {
+                    visible:        root.isMultisize
+                    text:           "Multisize Layout:"
+                    color:          Theme.fieldLabel
+                    font.pixelSize: Theme.fontSizeNormal
+                    Layout.preferredWidth: scrollView.labelWidth
+                    verticalAlignment: Text.AlignVCenter
+                } // Text multisizeLayoutLabel
+                RowLayout {
+                    visible:           root.isMultisize
+                    Layout.fillWidth:  true
+                    spacing: 16
+
+                    ButtonGroup { id: multisizeLayoutGroup }
+
+                    RadioButton {
+                        id:      multisizeNested
+                        text:    "Nested"
+                        ButtonGroup.group: multisizeLayoutGroup
+                        checked: root.model ? root.model.multisizeLayout !== "marker" : true
+                        onToggled: if (checked && root.model) root.model.multisizeLayout = "nested"
+
+                        ToolTip.visible: hovered
+                        ToolTip.text:    "Each piece keeps all its sizes stacked, largest at the bottom."
+
+                        contentItem: Text {
+                            text:           multisizeNested.text
+                            color:          Theme.textOnDark
+                            font.pixelSize: Theme.fontSizeNormal
+                            leftPadding:    multisizeNested.indicator.width + multisizeNested.spacing
+                            verticalAlignment: Text.AlignVCenter
+                        } // contentItem Text
+                    } // RadioButton multisizeNested
+
+                    RadioButton {
+                        id:      multisizeMarker
+                        text:    "Marker"
+                        ButtonGroup.group: multisizeLayoutGroup
+                        checked: root.model ? root.model.multisizeLayout === "marker" : false
+                        onToggled: if (checked && root.model) root.model.multisizeLayout = "marker"
+
+                        ToolTip.visible: hovered
+                        ToolTip.text:    "Every size of every piece is placed on its own."
+
+                        contentItem: Text {
+                            text:           multisizeMarker.text
+                            color:          Theme.textOnDark
+                            font.pixelSize: Theme.fontSizeNormal
+                            leftPadding:    multisizeMarker.indicator.width + multisizeMarker.spacing
+                            verticalAlignment: Text.AlignVCenter
+                        } // contentItem Text
+                    } // RadioButton multisizeMarker
+                } // RowLayout multisizeLayoutButtons
 
                 // -----------------------------------------------------------
                 // Piece gap — minimum clearance between adjacent placed
@@ -949,6 +1011,10 @@ Dialog {
             // No-grainline radio buttons
             noGrainlineUpright.checked = (root.model.noGrainlineRotation !== "free")
             noGrainlineFree.checked    = (root.model.noGrainlineRotation === "free")
+
+            // Multisize-layout radio buttons
+            multisizeNested.checked = (root.model.multisizeLayout !== "marker")
+            multisizeMarker.checked = (root.model.multisizeLayout === "marker")
 
             // Fabric-folded checkbox
             fabricFoldedCheck.checked = root.model.fabricFolded

@@ -60,6 +60,9 @@ private slots:
     void noGrainlineRotation_defaultsToUpright();
     void noGrainlineRotation_roundtripAndJson();
     void noGrainlineRotation_unknownValueIsUpright();
+    void multisizeLayout_defaultsToNested();
+    void multisizeLayout_roundtripAndJson();
+    void multisizeLayout_unknownValueIsNested();
 
     // resetToDefaults
     void resetToDefaults_restoresUnit();
@@ -310,6 +313,42 @@ void SettingsModelTests::noGrainlineRotation_unknownValueIsUpright()
     m.setNoGrainlineRotation(QStringLiteral("free"));
     m.setNoGrainlineRotation(QStringLiteral("sideways"));
     QCOMPARE(m.noGrainlineRotation(), QStringLiteral("upright"));
+}
+
+// @brief multisizeLayout defaults to "nested" and resetToDefaults restores it.
+void SettingsModelTests::multisizeLayout_defaultsToNested()
+{
+    SettingsModel m;
+    QCOMPARE(m.multisizeLayout(), QStringLiteral("nested"));
+    m.setMultisizeLayout(QStringLiteral("marker"));
+    m.resetToDefaults();
+    QCOMPARE(m.multisizeLayout(), QStringLiteral("nested"));
+}
+
+// @brief "marker" survives a save/load cycle and reaches the Rust settings JSON.
+void SettingsModelTests::multisizeLayout_roundtripAndJson()
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("settings.json"));
+
+    SettingsModel writer;
+    writer.setMultisizeLayout(QStringLiteral("marker"));
+    QVERIFY(writer.save(path));
+    QVERIFY(writer.toJson().contains(QStringLiteral("\"multisizeLayout\":\"marker\"")));
+
+    SettingsModel reader;
+    QVERIFY(reader.load(path));
+    QCOMPARE(reader.multisizeLayout(), QStringLiteral("marker"));
+}
+
+// @brief An unknown value is coerced to "nested".
+void SettingsModelTests::multisizeLayout_unknownValueIsNested()
+{
+    SettingsModel m;
+    m.setMultisizeLayout(QStringLiteral("marker"));
+    m.setMultisizeLayout(QStringLiteral("pyramid"));
+    QCOMPARE(m.multisizeLayout(), QStringLiteral("nested"));
 }
 
 // @brief rotationStep=180 (head-down withNap) survives a save/load cycle.

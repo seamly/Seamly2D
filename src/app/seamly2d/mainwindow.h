@@ -446,6 +446,9 @@ private:
     QSharedPointer<MeasurementDoc> openMeasurementFile(const QString &fileName, bool *usable = nullptr);
     bool               loadMeasurements(const QString &fileName);
     bool               updateMeasurements(const QString &fileName, int size, int height);
+    bool               recalculateAtSize(int size, int height);
+    QHash<quint32, VPiece> currentLayoutPieces() const;
+    void               prepareMultisizePieceLists();
     void               checkRequiredMeasurements(const MeasurementDoc *m);
 
     void               reopenFilesAfterCrash(QStringList &args);

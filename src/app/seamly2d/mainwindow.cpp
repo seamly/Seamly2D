@@ -774,6 +774,92 @@ bool MainWindow::updateMeasurements(const QString &fileName, int size, int heigh
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief recalculateAtSize switches the multisize measurements to one size and height and recalculates the pattern.
+ * @param size   size in pattern units.
+ * @param height height in pattern units.
+ * @return false when the measurement file could not be read.
+ */
+bool MainWindow::recalculateAtSize(int size, int height)
+{
+    if (!updateMeasurements(AbsoluteMPath(qApp->getFilePath(), doc->MPath()), size, height))
+    {
+        return false;
+    }
+    doc->LiteParseTree(Document::LiteParse);
+    return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief currentLayoutPieces returns the pieces marked "in layout", from the current calculation.
+ */
+QHash<quint32, VPiece> MainWindow::currentLayoutPieces() const
+{
+    QHash<quint32, VPiece> inLayout;
+    const QHash<quint32, VPiece> *pieces = pattern->DataPieces();
+    for (auto it = pieces->constBegin(); it != pieces->constEnd(); ++it)
+    {
+        if (it.value().isInLayout())
+        {
+            inLayout.insert(it.key(), it.value());
+        }
+    }
+    return inLayout;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief prepareMultisizePieceLists fills sizePieceLists with the layout pieces of every size.
+ *
+ * Individual pattern: clears sizePieceLists and returns. Multisize pattern: every
+ * size in the size list, at the base height. The size and height in use before
+ * the call are restored, also when an exception leaves the function.
+ *
+ * @throws VException when a size cannot be calculated.
+ */
+void MainWindow::prepareMultisizePieceLists()
+{
+    sizePieceLists.clear();
+    baseSize.clear();
+    if (qApp->patternType() != MeasurementsType::Multisize || m_measurements.isNull())
+    {
+        return;
+    }
+
+    const int originalSize = static_cast<int>(VContainer::size());
+    const int originalHeight = static_cast<int>(VContainer::height());
+    const Unit patternUnit = *pattern->GetPatternUnit();
+    const int baseHeight = qRound(UnitConvertor(m_measurements->BaseHeight(), m_measurements->measurementUnits(),
+                                                patternUnit));
+    baseSize = QString::number(UnitConvertor(m_measurements->BaseSize(), m_measurements->measurementUnits(),
+                                             patternUnit));
+
+    try
+    {
+        for (int i = 0; i < gradationSizes->count(); ++i)
+        {
+            const QString size = gradationSizes->itemText(i);
+            if (!recalculateAtSize(size.toInt(), baseHeight))
+            {
+                throw VException(tr("Couldn't update measurements for size %1.").arg(size));
+            }
+            sizePieceLists.append(prepareSizePieceList(currentLayoutPieces(), size));
+        }
+    }
+    catch (VException &)
+    {
+        sizePieceLists.clear();
+        recalculateAtSize(originalSize, originalHeight);
+        emit pieceScene->DimensionsChanged();
+        throw;
+    }
+
+    recalculateAtSize(originalSize, originalHeight);
+    emit pieceScene->DimensionsChanged();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void MainWindow::checkRequiredMeasurements(const MeasurementDoc *measurements)
 {
     auto tempMeasurements = measurements->ListAll();
@@ -4090,11 +4176,14 @@ void MainWindow::showLayoutMode(bool checked)
         try
         {
             pieceList = preparePiecesForLayout(pieces);
+            // Multisize: the handoff carries every size, grouped by piece.
+            prepareMultisizePieceLists();
         }
 
         catch (VException &exception)
         {
             pieceList.clear();
+            sizePieceLists.clear();
             QMessageBox::warning(this, tr("Layout mode"),
                                  tr("You can't use Layout mode yet.") + QLatin1String(" \n") + exception.ErrorMessage(),
                                  QMessageBox::Ok, QMessageBox::Ok);
@@ -7331,7 +7420,6 @@ void MainWindow::exportPiecesAs()
             const QStringList selectedSizes = dialog.selectedSizes();
             const QString baseName = FileName();
             const qreal originalSize = VContainer::size();
-            const QString measurementPath = AbsoluteMPath(qApp->getFilePath(), doc->MPath());
             int exportCount = 0;
             bool  failed = false;
 
@@ -7341,27 +7429,13 @@ void MainWindow::exportPiecesAs()
 
             for (const QString &size : selectedSizes)
             {
-                const int sizeValue = qRound(UnitConvertor(size.toDouble(), qApp->patternUnit(), Unit::Cm));
-
-                // Switch to this size
-                updateMeasurements(measurementPath, sizeValue, static_cast<int>(VContainer::height()));
-                doc->LiteParseTree(Document::LiteParse);
-
-                // Rebuild piece list for this size
-                const QHash<quint32, VPiece> *pieces = pattern->DataPieces();
-                QHash<quint32, VPiece> inLayout;
-                for (auto it = pieces->constBegin(); it != pieces->constEnd(); ++it)
-                {
-                    if (it.value().isInLayout())
-                    {
-                        inLayout.insert(it.key(), it.value());
-                    }
-                }
+                // Switch to this size. The size list and VContainer::size() are both in pattern units.
+                recalculateAtSize(size.toInt(), static_cast<int>(VContainer::height()));
 
                 QVector<VLayoutPiece> sizePieceList;
                 try
                 {
-                    sizePieceList = preparePiecesForLayout(inLayout);
+                    sizePieceList = preparePiecesForLayout(currentLayoutPieces());
                 }
                 catch (VException &)
                 {
@@ -7393,8 +7467,7 @@ void MainWindow::exportPiecesAs()
             }
 
             // Restore original size
-            updateMeasurements(measurementPath, static_cast<int>(originalSize), static_cast<int>(VContainer::height()));
-            doc->LiteParseTree(Document::LiteParse);
+            recalculateAtSize(static_cast<int>(originalSize), static_cast<int>(VContainer::height()));
         }
         else
         {

@@ -47,6 +47,7 @@
 #include <QPainterPath>
 #include <QPen>
 #include <QScopedPointer>
+#include <QSet>
 #include <QTemporaryDir>
 #include <QTransform>
 
@@ -219,6 +220,54 @@ QDomDocument exportTwoPiecesSvg(const VLayoutPiece &first, const VLayoutPiece &s
     generator.addSvgFromScene(&scene, item1);
     generator.addSvgFromScene(&scene, item2);
     generator.generate();
+
+    QDomDocument doc;
+    QFile file(filePath);
+    if (file.open(QIODevice::ReadOnly))
+    {
+        doc.setContent(&file);
+    }
+    return doc;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief exportMultisizeSvg renders two pieces ("Front", "Back") in two sizes
+ * ("34", "36") through one SvgGenerator, the way Layout Mode hands off a
+ * multisize pattern, and parses the merged result back.
+ * @return the parsed merged SVG document; null if export or parsing failed.
+ */
+QDomDocument exportMultisizeSvg()
+{
+    QTemporaryDir tempDir;
+    if (!tempDir.isValid())
+    {
+        return QDomDocument();
+    }
+    const QString filePath = tempDir.filePath(QStringLiteral("multisize_tags.svg"));
+
+    const QStringList sizes {QStringLiteral("34"), QStringLiteral("36")};
+    const QStringList names {QStringLiteral("Front"), QStringLiteral("Back")};
+
+    QGraphicsRectItem paper(QRectF(0, 0, 400, 400));
+    SvgGenerator generator(&paper, filePath, QStringLiteral("Test Pattern"), QString(), 96);
+    generator.setMultisize(sizes, QStringLiteral("36"));
+
+    // Size-major order, like the Layout Mode handoff: every piece of size 34, then every piece of size 36.
+    QList<QGraphicsScene *> scenes;
+    for (const QString &size : sizes)
+    {
+        for (int i = 0; i < names.size(); ++i)
+        {
+            QGraphicsScene *scene = new QGraphicsScene();
+            QGraphicsItem *item = makeTestPiece(names.at(i)).GetItem(true);
+            scene->addItem(item);
+            generator.addSvgFromScene(scene, item, size, QString::number(i));
+            scenes.append(scene);
+        }
+    }
+    generator.generate();
+    qDeleteAll(scenes);
 
     QDomDocument doc;
     QFile file(filePath);
@@ -631,4 +680,103 @@ void TST_SvgComponentTags::DownwardGrainAxisPointsUp() const
     qreal angle = 0;
     QVERIFY(piece.grainlineAngle(angle));
     QVERIFY2(qAbs(normalizedDegrees(angle) - 90.0) < 1e-6, qPrintable(QString::number(angle)));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief IndividualPatternIsMarkedIndividual checks that an export without
+ * setMultisize() marks the pattern group data-measurements="individual" and
+ * writes no size attributes.
+ */
+void TST_SvgComponentTags::IndividualPatternIsMarkedIndividual() const
+{
+    const QDomDocument doc = exportPieceSvg(makeTestPiece(QStringLiteral("Yoke")));
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+
+    const QVector<QDomElement> patterns = groupsOfType(doc, QStringLiteral("pattern"));
+    QCOMPARE(patterns.size(), 1);
+    QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-measurements")), QStringLiteral("individual"));
+    QVERIFY(!patterns.at(0).hasAttribute(QStringLiteral("data-sizes")));
+    QVERIFY(groupsOfType(doc, QStringLiteral("piece-set")).isEmpty());
+    QVERIFY(!groupsOfType(doc, QStringLiteral("piece")).at(0).hasAttribute(QStringLiteral("data-size")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief MultisizePatternCarriesSizeList checks the pattern group attributes of a multisize export.
+ */
+void TST_SvgComponentTags::MultisizePatternCarriesSizeList() const
+{
+    const QDomDocument doc = exportMultisizeSvg();
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+
+    const QVector<QDomElement> patterns = groupsOfType(doc, QStringLiteral("pattern"));
+    QCOMPARE(patterns.size(), 1);
+    QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-measurements")), QStringLiteral("multisize"));
+    QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-sizes")), QStringLiteral("34,36"));
+    QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-base-size")), QStringLiteral("36"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief MultisizePiecesNestInPieceSets checks that the same piece in every
+ * size is nested in one piece-set group, each size tagged with data-size.
+ */
+void TST_SvgComponentTags::MultisizePiecesNestInPieceSets() const
+{
+    const QDomDocument doc = exportMultisizeSvg();
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+
+    const QVector<QDomElement> sets = groupsOfType(doc, QStringLiteral("piece-set"));
+    QCOMPARE(sets.size(), 2);
+    QCOMPARE(sets.at(0).attribute(QStringLiteral("id")), QStringLiteral("piece-set_Front"));
+    QCOMPARE(sets.at(0).attribute(QStringLiteral("data-name")), QStringLiteral("Front"));
+    QCOMPARE(sets.at(1).attribute(QStringLiteral("id")), QStringLiteral("piece-set_Back"));
+    QCOMPARE(sets.at(0).parentNode().toElement().attribute(QStringLiteral("data-type")), QStringLiteral("pattern"));
+
+    for (const QDomElement &set : sets)
+    {
+        QStringList childSizes;
+        for (QDomElement child = set.firstChildElement(); !child.isNull(); child = child.nextSiblingElement())
+        {
+            QCOMPARE(child.attribute(QStringLiteral("data-type")), QStringLiteral("piece"));
+            QCOMPARE(child.attribute(QStringLiteral("data-name")), set.attribute(QStringLiteral("data-name")));
+            QCOMPARE(child.attribute(QStringLiteral("data-parent")), set.attribute(QStringLiteral("id")));
+            childSizes.append(child.attribute(QStringLiteral("data-size")));
+        }
+        QCOMPARE(childSizes, QStringList({QStringLiteral("34"), QStringLiteral("36")}));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief MultisizeIdsAreUniqueAndSized checks that piece and component ids
+ * carry the size and that no id repeats across sizes.
+ */
+void TST_SvgComponentTags::MultisizeIdsAreUniqueAndSized() const
+{
+    const QDomDocument doc = exportMultisizeSvg();
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+
+    const QVector<QDomElement> pieces = groupsOfType(doc, QStringLiteral("piece"));
+    QCOMPARE(pieces.size(), 4);
+    QCOMPARE(pieces.at(0).attribute(QStringLiteral("id")), QStringLiteral("piece_Front_s34"));
+    QCOMPARE(pieces.at(1).attribute(QStringLiteral("id")), QStringLiteral("piece_Front_s36"));
+
+    const QVector<QDomElement> seamlines = groupsOfType(doc, QStringLiteral("seamline"));
+    QCOMPARE(seamlines.size(), 4);
+    QCOMPARE(seamlines.at(0).attribute(QStringLiteral("id")), QStringLiteral("seamline_Front_s34"));
+
+    QSet<QString> ids;
+    const QDomNodeList groups = doc.elementsByTagName(QStringLiteral("g"));
+    for (int i = 0; i < groups.size(); ++i)
+    {
+        const QString id = groups.at(i).toElement().attribute(QStringLiteral("id"));
+        if (id.isEmpty())
+        {
+            continue;
+        }
+        QVERIFY2(!ids.contains(id), qPrintable(QStringLiteral("duplicate id ") + id));
+        ids.insert(id);
+    }
 }

@@ -21,7 +21,7 @@ use layout_tiling::{
 };
 
 use crate::piece_extractor::{
-    extract_piece_rects_and_polygons, hoist_tagged_pieces, set_free_rotation_without_grainline,
+    extract_piece_rects_and_polygons, hoist_layout_units, set_free_rotation_without_grainline,
 };
 use crate::layout_assembler::{create_layout, create_initial_layout_dom, trim_bottom};
 use crate::save_debug_dom;
@@ -208,7 +208,9 @@ pub fn do_process_layout(
     // without this the packer receives the whole pattern as a single sheet-sized
     // object and places nothing (Task 59).  Untagged drawings are left alone.
     // Done on the clone so the imported document the user sees is untouched.
-    let hoisted = hoist_tagged_pieces(&mut input_dom_clone);
+    // Multisize: Nested keeps each piece-set (one piece in every size) as one
+    // unit; Marker hoists every size of every piece as its own unit.
+    let hoisted = hoist_layout_units(&mut input_dom_clone, settings.nested_multisize());
     if hoisted > 0 {
         log_to_file(&format!(
             "[debug] layout_utils::do_process_layout(): 1a hoisted {} tagged piece(s) out of their pattern wrapper",
@@ -249,6 +251,19 @@ pub fn do_process_layout(
     let mut flat_dom = vertical_dom.clone();
     svg_dom::flatten_dom(&mut flat_dom);
     save_debug_dom(&flat_dom, "flat2_dom.svg");
+
+    // 3d': Nested multisize — stack the sizes of each piece-set on the largest
+    // size's centre, then bake the offsets.  Needs vertical, flattened sizes,
+    // and must run before translate_dom measures each set's bounding box.
+    let piece_sets = svg_dom::center_piece_sets(&mut flat_dom);
+    if piece_sets > 0 {
+        log_to_file(&format!(
+            "[debug] layout_utils::do_process_layout(): 5a centred the sizes of {} piece-set(s)",
+            piece_sets
+        ));
+        svg_dom::flatten_dom(&mut flat_dom);
+        save_debug_dom(&flat_dom, "centred_dom.svg");
+    } // if piece_sets
 
     // 3e: translate — move each piece's axis-aligned bbox (AABB) min corner up to origin (0,0).
     // Move the flatten-2 DOM into translate_dom (no clone) and translate it in place;
@@ -839,4 +854,119 @@ mod tests {
             &mut progress,
         ).expect("process_layout should succeed on the trousers handoff")
     } // fn process_trousers
+    // @brief Lay out the multisize fixture with the given multisize layout.
+    fn process_multisize(multisize_layout: &str) -> ProcessLayoutResult {
+        let input_dom = Document::parse(crate::piece_extractor::tests::MULTISIZE_HANDOFF_SVG)
+            .expect("multisize fixture should parse");
+        let settings_json = serde_json::json!({
+            "unit": "in",
+            "mediaType": "fabric",
+            "paperType": "roll",
+            "pageWidth": 36.0,
+            "pageHeight": 100.0,
+            "marginLeft": 0.5,
+            "marginRight": 0.5,
+            "marginTop": 0.5,
+            "marginBottom": 0.5,
+            "pieceGap": 0.125,
+            "layoutMode": "alongGrainline",
+            "multisizeLayout": multisize_layout,
+            "tileSize": "Letter",
+            "tileOrientation": "Portrait"
+        }).to_string();
+        let init = do_initialize_layout(&settings_json, Some(&input_dom))
+            .expect("initialize_layout should succeed");
+
+        let mut progress = |_pct: i32, _status: Option<&str>| {};
+        do_process_layout(
+            ProcessLayoutArgs {
+                settings_json: &settings_json,
+                input_dom: &input_dom,
+                initial_layout_dom: &init.initial_dom,
+                layout_h_px: init.h_px,
+            },
+            &mut progress,
+        ).expect("process_layout should succeed on the multisize handoff")
+    } // fn process_multisize
+
+    // @brief Number of placed pieces in a layout's bbox JSON.
+    fn placed_count(result: &ProcessLayoutResult) -> usize {
+        let bbox: serde_json::Value =
+            serde_json::from_str(&result.bbox_json).expect("bbox_json should be valid JSON");
+        bbox["pieces"].as_array().expect("pieces array").len()
+    } // fn placed_count
+
+    // @brief Nested packs one unit per piece; Marker packs one unit per piece per size.
+    #[test]
+    fn multisize_nested_packs_sets_and_marker_packs_sizes() {
+        let nested = process_multisize("nested");
+        assert!(nested.unplaced_labels.is_empty(), "unplaced: {:?}", nested.unplaced_labels);
+        assert_eq!(placed_count(&nested), 2, "Nested: one unit per piece");
+        // Adjust Mode moves each bbox entry by id, so a set id moves every size together.
+        let bbox: serde_json::Value = serde_json::from_str(&nested.bbox_json).expect("valid JSON");
+        let mut ids: Vec<&str> = bbox["pieces"].as_array().unwrap().iter()
+            .filter_map(|p| p["id"].as_str())
+            .collect();
+        ids.sort_unstable();
+        assert_eq!(ids, vec!["piece-set_Back", "piece-set_Front"]);
+
+        let marker = process_multisize("marker");
+        assert!(marker.unplaced_labels.is_empty(), "unplaced: {:?}", marker.unplaced_labels);
+        assert_eq!(placed_count(&marker), 4, "Marker: pieces x sizes");
+    } // multisize_nested_packs_sets_and_marker_packs_sizes
+
+    // @brief Nested: the smaller size sits centred on the larger one, largest first,
+    // and each placed piece keeps its data-size.
+    #[test]
+    fn multisize_nested_centres_sizes_on_largest() {
+        let nested = process_multisize("nested");
+        let svg = nested.output_doc.to_string();
+        let big = svg.find(r#"id="piece_Front_s36""#).expect("size 36 in output");
+        let small = svg.find(r#"id="piece_Front_s34""#).expect("size 34 in output");
+        assert!(big < small, "the largest size must come first (drawn at the bottom)");
+        assert!(svg.contains(r#"data-size="34""#), "placed pieces keep data-size");
+
+        let set = nested.flat_dom.root.children.iter()
+            .filter_map(|n| n.as_element())
+            .find(|e| e.attributes.get("id").map(String::as_str) == Some("piece-set_Front"))
+            .expect("Front piece-set in the pre-processed DOM");
+        let centres: Vec<(f32, f32)> = set.children.iter()
+            .filter_map(|n| n.as_element())
+            .map(|member| {
+                let mut points = Vec::new();
+                collect_points_for_test(member, &mut points);
+                let min_x = points.iter().map(|p| p.0).fold(f32::INFINITY, f32::min);
+                let max_x = points.iter().map(|p| p.0).fold(f32::NEG_INFINITY, f32::max);
+                let min_y = points.iter().map(|p| p.1).fold(f32::INFINITY, f32::min);
+                let max_y = points.iter().map(|p| p.1).fold(f32::NEG_INFINITY, f32::max);
+                ((min_x + max_x) / 2.0, (min_y + max_y) / 2.0)
+            })
+            .collect();
+        assert_eq!(centres.len(), 2);
+        assert!(
+            (centres[0].0 - centres[1].0).abs() < 0.01 && (centres[0].1 - centres[1].1).abs() < 0.01,
+            "sizes should share one centre, got {centres:?}"
+        );
+    } // multisize_nested_centres_sizes_on_largest
+
+    // @brief Collect path end points of an element tree, for centre checks.
+    fn collect_points_for_test(element: &xmltree::Element, points: &mut Vec<(f32, f32)>) {
+        if element.name == "path" {
+            if let Some(d) = element.attributes.get("d") {
+                if let Ok(path) = geometry::Path::parse_path_attribute(d) {
+                    for seg in &path.segments {
+                        match seg {
+                            geometry::PathSegment::MoveTo(p) | geometry::PathSegment::LineTo(p) => points.push((p.x, p.y)),
+                            _ => {} // the fixture uses straight lines only
+                        } // match seg
+                    } // for seg
+                } // if parsed
+            } // if d
+        } // if path
+        for child in &element.children {
+            if let xmltree::XMLNode::Element(e) = child {
+                collect_points_for_test(e, points);
+            } // if element
+        } // for child
+    } // fn collect_points_for_test
 } // mod tests

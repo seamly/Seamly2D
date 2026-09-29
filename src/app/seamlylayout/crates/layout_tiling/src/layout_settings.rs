@@ -123,6 +123,13 @@ pub struct LayoutSettings {
     #[serde(default = "default_no_grainline_rotation")]
     pub no_grainline_rotation: String,
 
+    // Multisize pattern layout: "nested" | "marker".
+    //   nested → each piece-set (one piece in every size) packs as one unit
+    //   marker → every size of every piece packs alone
+    // Unknown values behave as "nested".  Ignored for an individual pattern.
+    #[serde(default = "default_multisize_layout")]
+    pub multisize_layout: String,
+
     #[serde(default)]
     pub sheet_name: String,
     #[serde(default)]
@@ -153,6 +160,7 @@ fn default_margin()        -> f64    { 0.25                     } // 0.25 in def
 fn default_layout_mode()   -> String { "alongGrainline".to_string() } // default piece-arrangement mode
 fn default_rotation_step() -> f64    { 0.0                      } // default withNap direction: head-up
 fn default_no_grainline_rotation() -> String { "upright".to_string() } // keep no-grainline pieces as drafted
+fn default_multisize_layout() -> String { "nested".to_string() } // pack piece-sets as units
 fn default_tile_orientation() -> String { "landscape".to_string() } // default tiled-paper orientation
 fn default_piece_gap()     -> f64    { 0.05                     } // 0.05 in ≈ 5 px @ 96 dpi (historic GAP_PX)
 
@@ -389,6 +397,13 @@ impl LayoutSettings {
         self.no_grainline_rotation == "free"
     } // fn free_rotation_without_grainline
 
+    // @brief True when a multisize piece-set packs as one unit (Nested layout).
+    //
+    // Only "marker" splits the piece-sets; any other value is Nested.
+    pub fn nested_multisize(&self) -> bool {
+        self.multisize_layout != "marker"
+    } // fn nested_multisize
+
 } // impl LayoutSettings
 
 // ---------------------------------------------------------------------------
@@ -420,6 +435,7 @@ impl LayoutSettings {
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
             no_grainline_rotation: "upright".to_string(),
+            multisize_layout: "nested".to_string(),
             sheet_name:     "".to_string(),
             roll_size:      "".to_string(),
             tile_size:      "Letter".to_string(),
@@ -459,6 +475,7 @@ mod tests {
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
             no_grainline_rotation: "upright".to_string(),
+            multisize_layout: "nested".to_string(),
             sheet_name:     "ARCH E".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
@@ -494,6 +511,7 @@ mod tests {
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
             no_grainline_rotation: "upright".to_string(),
+            multisize_layout: "nested".to_string(),
             sheet_name:     "none".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "none".to_string(),
@@ -533,6 +551,7 @@ mod tests {
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
             no_grainline_rotation: "upright".to_string(),
+            multisize_layout: "nested".to_string(),
             sheet_name:     "ARCH E".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
@@ -570,6 +589,7 @@ mod tests {
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
             no_grainline_rotation: "upright".to_string(),
+            multisize_layout: "nested".to_string(),
             sheet_name:     "ARCH E".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
@@ -603,6 +623,7 @@ mod tests {
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
             no_grainline_rotation: "upright".to_string(),
+            multisize_layout: "nested".to_string(),
             sheet_name:     "ARCH E".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
@@ -636,6 +657,7 @@ mod tests {
             layout_mode:    "alongGrainline".to_string(),
             rotation_step:  0.0,
             no_grainline_rotation: "upright".to_string(),
+            multisize_layout: "nested".to_string(),
             sheet_name:     "ARCH E".to_string(),
             roll_size:      "36 in".to_string(),
             tile_size:      "Letter".to_string(),
@@ -752,6 +774,20 @@ mod tests {
         let s = LayoutSettings::from_json(r#"{"unit":"in","noGrainlineRotation":"x"}"#).unwrap();
         assert!(!s.free_rotation_without_grainline());
     } // no_grainline_rotation_parses_and_defaults
+
+    // @brief multisizeLayout: default "nested"; only "marker" splits the piece-sets.
+    #[test]
+    fn multisize_layout_parses_and_defaults() {
+        let s = LayoutSettings::from_json(r#"{"unit":"in"}"#).unwrap();
+        assert_eq!(s.multisize_layout, "nested");
+        assert!(s.nested_multisize());
+
+        let s = LayoutSettings::from_json(r#"{"unit":"in","multisizeLayout":"marker"}"#).unwrap();
+        assert!(!s.nested_multisize());
+
+        let s = LayoutSettings::from_json(r#"{"unit":"in","multisizeLayout":"x"}"#).unwrap();
+        assert!(s.nested_multisize());
+    } // multisize_layout_parses_and_defaults
 
     // @brief Unknown layout_mode falls back to alongGrainline trial set.
     #[test]

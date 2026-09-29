@@ -82,6 +82,8 @@
 #include <QSpacerItem>
 #include <QGridLayout>
 
+#include <algorithm>
+
 namespace
 {
 bool CreateLayoutPath(const QString &path)
@@ -435,6 +437,11 @@ void MainWindowsNoGUI::exportPiecesAsFlatLayout(const ExportLayoutDialog &dialog
  */
 QString MainWindowsNoGUI::generatePiecesSvgDocument()
 {
+    if (!sizePieceLists.isEmpty())
+    {
+        return generateMultisizePiecesSvgDocument();
+    }
+
     if (pieceList.isEmpty())
     {
         return QString();
@@ -448,6 +455,58 @@ QString MainWindowsNoGUI::generatePiecesSvgDocument()
     QScopedPointer<QGraphicsRectItem> paper(new QGraphicsRectItem(scene->itemsBoundingRect().toRect()));
 
     return buildPiecesSvgString(paper.data(), list);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief generateMultisizePiecesSvgDocument builds the multisize pieces SVG consumed by SeamlyLayout.
+ *
+ * Every size in sizePieceLists is rendered. Each piece gets data-size, and the
+ * same piece in every size is nested in one data-type="piece-set" group.
+ *
+ * @return the complete SVG document, or an empty string when there are no pieces.
+ */
+QString MainWindowsNoGUI::generateMultisizePiecesSvgDocument()
+{
+    // Flatten every size into one list so all sizes share one flat sheet and one origin.
+    QVector<VLayoutPiece> allPieces;
+    QStringList pieceSizes;
+    QStringList pieceSetKeys;
+    QStringList sizes;
+    for (const SizePieceList &sizeList : std::as_const(sizePieceLists))
+    {
+        sizes.append(sizeList.size);
+        for (int i = 0; i < sizeList.pieces.size(); ++i)
+        {
+            allPieces.append(sizeList.pieces.at(i));
+            pieceSizes.append(sizeList.size);
+            pieceSetKeys.append(QString::number(sizeList.pieceIds.at(i)));
+        }
+    }
+
+    if (allPieces.isEmpty())
+    {
+        return QString();
+    }
+
+    QScopedPointer<QGraphicsScene> scene(new QGraphicsScene());
+    const QList<QGraphicsItem *> list = arrangePieceItemsFlat(scene.data(), allPieces, false);
+
+    // The paper rectangle only defines the SVG size and view box; it is never shown.
+    QScopedPointer<QGraphicsRectItem> paper(new QGraphicsRectItem(scene->itemsBoundingRect().toRect()));
+
+    SvgGenerator svgGenerator(paper.data(), QString(), doc->GetPatternName(), doc->GetDescription(),
+                              static_cast<int>(PrintDPI));
+    svgGenerator.setMultisize(sizes, baseSize);
+
+    for (int piece = 0; piece < list.size(); ++piece)
+    {
+        QGraphicsScene *pieceScene = new VMainGraphicsScene();
+        pieceScene->addItem(list.at(piece));
+        svgGenerator.addSvgFromScene(pieceScene, list.at(piece), pieceSizes.at(piece), pieceSetKeys.at(piece));
+    }
+
+    return svgGenerator.toSvgString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -846,6 +905,36 @@ QVector<VLayoutPiece> MainWindowsNoGUI::preparePiecesForLayout(const QHash<quint
     }
 
     return pieceList;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief prepareSizePieceList creates the layout pieces of one multisize size.
+ *
+ * The pattern must already be recalculated at that size. Pieces are ordered by
+ * VPiece id, so every size lists the same pieces in the same order.
+ *
+ * @param pieces pieces included in the layout, keyed by VPiece id.
+ * @param size   size in pattern units.
+ * @return the size's pieces with their VPiece ids.
+ */
+MainWindowsNoGUI::SizePieceList MainWindowsNoGUI::prepareSizePieceList(const QHash<quint32, VPiece> &pieces,
+                                                                      const QString &size)
+{
+    SizePieceList sizeList;
+    sizeList.size = size;
+
+    QList<quint32> ids = pieces.keys();
+    std::sort(ids.begin(), ids.end());
+    for (const quint32 id : std::as_const(ids))
+    {
+        VAbstractTool *tool = qobject_cast<VAbstractTool*>(VAbstractPattern::getTool(id));
+        SCASSERT(tool != nullptr)
+        sizeList.pieceIds.append(id);
+        sizeList.pieces.append(VLayoutPiece::Create(pieces.value(id), tool->getData()));
+    }
+
+    return sizeList;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

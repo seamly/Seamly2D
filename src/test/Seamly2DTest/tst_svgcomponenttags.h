@@ -40,7 +40,7 @@
  * produced by SvgGenerator: the internal_path / cut_path split, the
  * name-based piece and component id schemes, and their piece-name
  * sanitization, no-name fallback, and cross-piece collision handling, and the
- * data-grainline-angle attribute.
+ * data-grainline-angle attribute, and the multisize piece-set nesting.
  */
 class TST_SvgComponentTags : public QObject
 {
@@ -66,6 +66,10 @@ private slots:
     void UpwardAngleFlipsDownwardGrainline() const;
     void CenteredStartPutsMidpointOnCenter() const;
     void DownwardGrainAxisPointsUp() const;
+    void IndividualPatternIsMarkedIndividual() const;
+    void MultisizePatternCarriesSizeList() const;
+    void MultisizePiecesNestInPieceSets() const;
+    void MultisizeIdsAreUniqueAndSized() const;
 };
 
 #endif // TST_SVGCOMPONENTTAGS_H

@@ -95,7 +95,19 @@ public slots:
                    const QMarginsF &margins)const;
 
 protected:
+    /** @brief Pieces of one multisize size; pieceIds and pieces are index-aligned. */
+    struct SizePieceList
+    {
+        QString size;                 /**< size in pattern units, as listed in the size combo box */
+        QVector<quint32> pieceIds;    /**< VPiece id of each piece; matches one piece across sizes */
+        QVector<VLayoutPiece> pieces;
+    };
+
     QVector<VLayoutPiece> pieceList;
+    QVector<SizePieceList> sizePieceLists; /**< every size of a multisize pattern; empty for an individual pattern */
+    QString baseSize;                      /**< base size of the multisize measurements, in pattern units */
+
+    SizePieceList prepareSizePieceList(const QHash<quint32, VPiece> &pieces, const QString &size);
 
     QGraphicsScene *currentScene;    /** @brief currentScene pointer to current scene. */
     QGraphicsScene *tempSceneLayout; /** @brief pattern container with data (points, arcs, splines, spline paths, variables) */
@@ -207,6 +219,7 @@ private:
 
 public:
     QString generatePiecesSvgDocument();
+    QString generateMultisizePiecesSvgDocument();
 };
 
 #endif // MAINWINDOWSNOGUI_H

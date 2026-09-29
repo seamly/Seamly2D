@@ -6,6 +6,18 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-29 — Multisize handoff: Nested and Marker layouts (Layout.30–35)
+
+Merged `task-multisize-layout`. `cargo test --workspace`, `ctest --preset debug`, `Seamly2DTests` passed. CollectionTest, ParserTest, TranslationsTest not run: no code they cover changed.
+
+- Seamly2D: multisize Layout Mode hands off every size at base height; each piece is a `data-type="piece-set"` group, one `piece` per size (`data-size`).
+- Pattern group: `data-measurements`, `data-sizes`, `data-base-size`. Contract: `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`, "Multisize pattern".
+- `exportPiecesAs()` batch export now uses `recalculateAtSize()`: size in pattern units, as `ChangedSize()` does. Before, it converted the size to cm, which is wrong for a mm pattern.
+- SeamlyLayout: setting `multisizeLayout` (`nested` default | `marker`), shown only when `AppController.isMultisize`.
+- Nested: `hoist_piece_sets`; each size turned on its own grainline; `svg_dom::center_piece_sets` stacks sizes on the largest, largest first. Marker: sets dissolve, label "Name (size N)".
+- Open: Layout.36.2 (By size export) and Layout.37 (sized layouts, per-size tabs); Layout.38.2 real fixture; Layout.38.3 check in the running apps.
+- Not checked in the running apps. Check: open a pattern with a `.smms` file (e.g. `src/app/share/samples/measurements/multisize/gost_man_ru.smms`), enter Layout Mode, run Nested and Marker.
+
 ## 2026-09-29 — DXF-ASTM (CLO3D) export variant (Layout.57)
 
 Merged `task-dxf-astm-clo3d`. `cargo test --workspace`, `ctest --preset debug` passed.

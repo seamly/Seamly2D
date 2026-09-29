@@ -17,7 +17,7 @@ use xmltree::{Element as XmlElement, XMLNode};
 pub use layout_tiling::LayoutSettings;
 
 mod piece_extractor;
-pub use piece_extractor::{extract_piece_rects, hoist_tagged_pieces, PieceRect};
+pub use piece_extractor::{extract_piece_rects, hoist_layout_units, hoist_tagged_pieces, PieceRect};
 
 mod layout_assembler;
 pub use layout_assembler::{create_layout, create_initial_layout_dom, remove_color_blocks, trim_bottom};
@@ -561,6 +561,11 @@ pub mod qobject {
         // Label text of the imported SVG: "text", "pathsOnly" or "noLabels".
         // Gates the three SVG text modes in the Export menu.
         #[qproperty(QString, label_text_state)]
+        // True when the imported pattern uses multisize (.smms) measurements.
+        // Set only by finish_import; QML reads it to show the Multisize Layout choice.
+        #[qproperty(bool, is_multisize)]
+        // Sizes of a multisize import, comma-separated, in handoff order; empty otherwise.
+        #[qproperty(QString, multisize_sizes)]
         type AppController = super::AppControllerRust;
 
         #[qsignal]
@@ -913,6 +918,14 @@ pub struct AppControllerRust {
     // "noLabels" until an import finishes; set by `finish_import`.
     label_text_state: cxx_qt_lib::QString,
 
+    // True when the imported pattern group carries data-measurements="multisize".
+    //
+    // false until an import finishes; set by `finish_import`.
+    is_multisize: bool,
+
+    // `data-sizes` of a multisize import, comma-separated; empty otherwise.
+    multisize_sizes: cxx_qt_lib::QString,
+
 } // struct AppControllerRust
 
 impl Default for AppControllerRust {
@@ -952,6 +965,8 @@ impl Default for AppControllerRust {
             export_progress:           -1,                             // -1 = idle; 0–100 during export
             export_status_message:     cxx_qt_lib::QString::default(), // no active export status
             label_text_state:          cxx_qt_lib::QString::from(svg_label_text::LabelTextState::NoLabels.as_str()), // no SVG yet
+            is_multisize:              false,                          // individual until an import says otherwise
+            multisize_sizes:           cxx_qt_lib::QString::default(), // no sizes until a multisize import
         } // Self
     } // fn default
 
@@ -1038,6 +1053,8 @@ impl qobject::AppController {
         self.as_mut().set_label_text_state(cxx_qt_lib::QString::from(
             svg_label_text::LabelTextState::NoLabels.as_str(),
         )); // recomputed by finish_import
+        self.as_mut().set_is_multisize(false); // recomputed by finish_import
+        self.as_mut().set_multisize_sizes(cxx_qt_lib::QString::default()); // recomputed by finish_import
         {
             let mut rust = self.as_mut().rust_mut();
             // don't clear input_dom yet - keep the current input_dom displayed (if any)
@@ -1079,6 +1096,14 @@ impl qobject::AppController {
                 let label_state = svg_label_text::label_text_state(&doc);
                 self.as_mut().set_label_text_state(cxx_qt_lib::QString::from(label_state.as_str()));
                 log_to_file(&format!("[finish_import] label text state: {}", label_state.as_str()));
+                // Measurement type decides whether Settings offers the Multisize Layout choice.
+                let measurements = crate::piece_extractor::read_measurements_info(&doc);
+                self.as_mut().set_is_multisize(measurements.multisize);
+                self.as_mut().set_multisize_sizes(cxx_qt_lib::QString::from(measurements.sizes.join(",").as_str()));
+                log_to_file(&format!(
+                    "[finish_import] multisize: {} sizes: {:?} base size: {}",
+                    measurements.multisize, measurements.sizes, measurements.base_size
+                ));
 
                 // Add a white background rectangle so the canvas has a visible background.
                 doc.add_background_rect();
@@ -1893,7 +1918,11 @@ impl qobject::AppController {
                 } // None
             }; // input_dom
 
-            let (flat_dom, pieces) = match build_sheet_export_inputs(&input_dom, settings.free_rotation_without_grainline()) {
+            let (flat_dom, pieces) = match build_sheet_export_inputs(
+                &input_dom,
+                settings.free_rotation_without_grainline(),
+                settings.nested_multisize(),
+            ) {
                 Ok(v) => v,
                 Err(e) => {
                     log_to_file(&format!("[lib.rs AppController] export_pdf(): 4 build_sheet_export_inputs failed: {e}"));

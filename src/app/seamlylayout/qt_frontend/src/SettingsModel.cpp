@@ -362,6 +362,16 @@ void SettingsModel::setNoGrainlineRotation(const QString &v)
     emit noGrainlineRotationChanged();
 } // setNoGrainlineRotation()
 
+// @brief Set the multisize pattern layout.
+// Unsupported values are coerced to "nested".
+void SettingsModel::setMultisizeLayout(const QString &v)
+{
+    const QString normalized = (v == QStringLiteral("marker")) ? v : QStringLiteral("nested");
+    if (m_multisizeLayout == normalized) return;
+    m_multisizeLayout = normalized;
+    emit multisizeLayoutChanged();
+} // setMultisizeLayout()
+
 void SettingsModel::setFabricFolded(bool v)
 {
     if (m_fabricFolded == v) return;
@@ -656,6 +666,9 @@ bool SettingsModel::load(const QString &path)
     if (obj.contains(QStringLiteral("noGrainlineRotation")))
         setNoGrainlineRotation(obj[QStringLiteral("noGrainlineRotation")].toString());
 
+    if (obj.contains(QStringLiteral("multisizeLayout")))
+        setMultisizeLayout(obj[QStringLiteral("multisizeLayout")].toString());
+
     if (obj.contains(QStringLiteral("fabricFolded")))
         setFabricFolded(obj[QStringLiteral("fabricFolded")].toBool());
 
@@ -728,6 +741,7 @@ bool SettingsModel::load(const QString &path)
     emit layoutModeChanged();
     emit rotationStepChanged();
     emit noGrainlineRotationChanged();
+    emit multisizeLayoutChanged();
     emit fabricFoldedChanged();
     emit pieceGapChanged();
     emit pieceGapPxChanged();
@@ -773,6 +787,7 @@ bool SettingsModel::save(const QString &path)
     obj[QStringLiteral("layoutMode")]    = m_layoutMode;
     obj[QStringLiteral("rotationStep")]  = m_rotationStep;
     obj[QStringLiteral("noGrainlineRotation")] = m_noGrainlineRotation;
+    obj[QStringLiteral("multisizeLayout")] = m_multisizeLayout;
     obj[QStringLiteral("fabricFolded")]  = m_fabricFolded;
     obj[QStringLiteral("unit")]          = m_unit;
     obj[QStringLiteral("mediaType")]     = m_mediaType;
@@ -815,6 +830,7 @@ QString SettingsModel::toJson() const
     obj[QStringLiteral("layoutMode")]    = m_layoutMode;
     obj[QStringLiteral("rotationStep")]  = m_rotationStep;
     obj[QStringLiteral("noGrainlineRotation")] = m_noGrainlineRotation;
+    obj[QStringLiteral("multisizeLayout")] = m_multisizeLayout;
     obj[QStringLiteral("fabricFolded")]  = m_fabricFolded;
     obj[QStringLiteral("unit")]          = m_unit;
     obj[QStringLiteral("mediaType")]     = m_mediaType;
@@ -845,6 +861,7 @@ void SettingsModel::resetToDefaults()
     setLayoutMode(QStringLiteral("alongGrainline"));
     setRotationStep(0.0);
     setNoGrainlineRotation(QStringLiteral("upright"));
+    setMultisizeLayout(QStringLiteral("nested"));
     setFabricFolded(false);
     setUnit(QStringLiteral("in"));
     setMediaType(QStringLiteral("paper"));

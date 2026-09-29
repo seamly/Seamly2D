@@ -921,6 +921,7 @@ ApplicationWindow {
     SettingsDialog {
         id: settingsDialog
         model: settingsModel
+        isMultisize: appController.isMultisize
 
         // When the user clicks Submit, build the initial canvas (blank page + content
         // rectangle) from the submitted settings and display it in the right canvas.

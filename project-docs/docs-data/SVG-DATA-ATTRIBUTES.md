@@ -56,6 +56,29 @@ The handoff in (1) is a process launch, and both halves of it are pinned by test
 </svg>
 ```
 
+### Multisize pattern
+
+A pattern with a `.smms` measurement file hands off every size in the size list, at the base height.
+Each piece is a `piece-set` group holding that piece once per size.
+
+```xml
+<g id="pattern-1" data-type="pattern" data-type-number="1" data-name="Pattern Name"
+   data-measurements="multisize" data-sizes="34,36,38" data-base-size="36">
+  <g id="piece-set_Front" data-type="piece-set" data-type-number="1" data-parent="pattern-1"
+     data-name="Front" data-letter="A">
+    <g id="piece_Front_s34" data-type="piece" data-size="34" data-parent="piece-set_Front" ...>
+      <g id="seamline_Front_s34" data-type="seamline" data-parent="Front">…</g>
+    </g>
+    <g id="piece_Front_s36" data-type="piece" data-size="36" data-parent="piece-set_Front" ...>…</g>
+  </g>
+</g>
+```
+
+- Producer: `MainWindow::prepareMultisizePieceLists()` → `MainWindowsNoGUI::generateMultisizePiecesSvgDocument()` → `SvgGenerator::setMultisize()` and `addSvgFromScene(..., size, pieceSetKey)`.
+- The same piece is matched across sizes by its `VPiece` id.
+- Each size keeps its drafted position. SeamlyLayout stacks the sizes (`svg_dom::center_piece_sets`).
+- Tests: `TST_SvgComponentTags::Multisize*` (producer), `piece_extractor` and `layout_utils` `multisize` tests (consumer).
+
 The `piece-fill` `<rect>` is not part of the C++ handoff — SeamlyLayout inserts it as the
 first child of each piece group when it places the piece into a layout sheet
 (`layout_assembler.rs::create_layout()`). Its `id` mirrors the piece's own id
@@ -65,11 +88,15 @@ first child of each piece group when it places the piece into a layout sheet
 
 | Attribute | Applies to | Value |
 |---|---|---|
-| `data-type` | every tagged `<g>` | One of `pattern`, `piece`, `seamline`, `cutline`, `internal_path`, `cut_path`, `grainline`, `notch`, `piece_label`, `pattern_label`. More types may be added later; consumers must ignore unknown types gracefully. |
+| `data-type` | every tagged `<g>` | One of `pattern`, `piece-set`, `piece`, `seamline`, `cutline`, `internal_path`, `cut_path`, `grainline`, `notch`, `piece_label`, `pattern_label`. More types may be added later; consumers must ignore unknown types gracefully. |
 | `data-type-number` | every tagged `<g>` | Per-scope 1-based counter for that `data-type`. The pattern is always `1`; pieces count up across the file; component counters reset per piece and per type. |
-| `data-parent` | `piece` and component groups | For a piece: the pattern group's `id` (`pattern-1`). For a component: the owning piece's `data-name` (e.g. `Front Bodice`), or the piece's numeric fallback `id` (e.g. `piece-3`) when the piece has no name. The pattern group has no `data-parent` (it is the root). Not read by any SeamlyLayout code today — true parent/child identity is the DOM nesting — so this is a documentation-level cross-reference, not a lookup key. |
+| `data-parent` | `piece-set`, `piece` and component groups | For a piece: the pattern group's `id` (`pattern-1`), or its piece-set's `id` in a multisize handoff. For a component: the owning piece's `data-name` (e.g. `Front Bodice`), or the piece's numeric fallback `id` (e.g. `piece-3`) when the piece has no name. The pattern group has no `data-parent` (it is the root). Not read by any SeamlyLayout code today — true parent/child identity is the DOM nesting — so this is a documentation-level cross-reference, not a lookup key. |
 | `data-name` | `pattern`, `piece` | Pattern name, or piece name. Omitted when empty. |
-| `data-letter` | `piece` | The piece letter, only when one is set on the piece. |
+| `data-letter` | `piece`, `piece-set` | The piece letter, only when one is set on the piece. |
+| `data-measurements` | `pattern` | `individual` or `multisize`. Absent in older handoffs; SeamlyLayout reads absent as `individual`. |
+| `data-sizes` | `pattern` (multisize) | Every handed-off size, comma-separated, in pattern units (e.g. `34,36,38`). |
+| `data-base-size` | `pattern` (multisize) | Base size of the `.smms` file, in pattern units. |
+| `data-size` | `piece` (multisize) | Size of this copy of the piece. Kept on placed pieces in the layout and its exports. |
 | `data-grainline-angle` | `piece` | Grain direction in degrees, counter-clockwise as seen on screen (Qt `QLineF::angle()`); `90` = grain points up. Written with 4 decimals. Present whenever the piece has a grain rotation, **also when the grainline is hidden**, so SeamlyLayout can still orient the piece. Before that transform, a grainline without top and bottom anchor points always points up: an angle in (180°, 360°) is written as the angle 180° less. Includes any Seamly2D layout transform (rotation, mirror). Omitted when the piece has no grain rotation. |
 
 ## `id` scheme
@@ -77,6 +104,7 @@ first child of each piece group when it places the piece into a layout sheet
 - Pattern: `pattern-1` (one pattern per file).
 - Piece *n*: `piece_<pieceName>` (e.g. `piece_Front_Bodice`) when the piece has a usable name. Falls back to the legacy numeric `piece-<n>` (n = `data-type-number` of the piece) when the name is empty or entirely non-sanitizable. Piece names are not guaranteed unique by the SVG format itself (`data-letter` is a separate disambiguator), so a name collision between two pieces gets the later piece's `data-type-number` appended (e.g. `piece_Facing-2`) to stay unique — see **Name collision** below.
   - **This id was name-based once before and was reverted** for exactly the uniqueness reason above. It is safe to reintroduce now because Seamly2D's Piece Properties dialog (`PatternPieceDialog::pieceNameChanged()`) blocks entering a piece name already used by another piece in the same pattern — the collision suffix here is defense in depth, not the primary guard.
+- Multisize piece-set: `piece-set_<pieceName>` (fallback `piece-set-<n>`). Multisize piece and component ids end in `_s<size>` (e.g. `piece_Front_s34`, `seamline_Front_s34`).
 - `piece-fill` `<rect>` (SeamlyLayout-side, not part of the C++ handoff): `rect_<pieceName>` or `rect-<n>`, mirroring whichever form the piece's own `id` took.
 - Component, one per piece today (`seamline`, `cutline`, `grainline`, `notch`): `<type>_<pieceName>` (e.g. `grainline_Front_Bodice`).
 - Component, can repeat per piece (`internal_path`, `cut_path`, `piece_label`, `pattern_label`): `<type>_<m>_<pieceName>` (e.g. `internal_path_3_Front_Bodice`), where *m* is that type's counter within the piece.
