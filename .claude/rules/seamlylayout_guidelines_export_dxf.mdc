@@ -12,7 +12,7 @@
 - Coordinate transformation: **Y-axis inversion** required
 - Layer choice: component `data-type` first; a piece id never sets a layer
 - Every key-point layer (1, 8, 11, 14) has its validation layer (84, 85, 86, 87)
-- No CLO3D group 250
+- CLO3D group 250 only in the **DXF-ASTM (CLO3D)** variant (`clo3d_group_250`): 0 on layer 1, 2 on layer 14
 - Debug output: Save ezdxf to `output/` folder as `.txt`
 
 ## Export Flow

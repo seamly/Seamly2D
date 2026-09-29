@@ -132,6 +132,21 @@ ApplicationWindow {
     property string pendingExportFormat: ""        // "dxf"|"png"|"jpg"|"pdf"|"pdf-tiled"|"svg"|"hpgl"|"ps"|"eps"|"gcode"|"3mf"
     property string pendingExportSettings: ""      // settings JSON for pdf / pdf-tiled; text mode for svg; options JSON for hpgl
     property bool   pendingExportTeachingVersion: false  // teaching flag for DXF
+    property bool   pendingDxfClo3d: false               // CLO3D group 250 flag for DXF
+
+    // @brief Ask for a DXF save path, then the teaching choice; the export starts from the dialog.
+    // @param clo3d true for DXF-ASTM (CLO3D): D6673 content plus CLO3D group 250.
+    function requestDxfExport(clo3d) {
+        var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
+        var name = root.makeExportFileName("dxf") // default name: <importedBaseName>_YYYYMMDDHHSS.dxf
+        var title = clo3d ? "Save DXF-ASTM (CLO3D) File" : "Save DXF-ASTM File"
+        var path = preferencesModel.getSaveFilePath(title, dir, name, "DXF Files (*.dxf);;All Files (*)")
+        if (path === "") return // user cancelled
+        // Stage path and variant; the teaching dialog collects the last flag before export starts.
+        root.pendingDxfPath  = path
+        root.pendingDxfClo3d = clo3d
+        dxfTeachingDialog.open()
+    } // function requestDxfExport
 
     // Wait one short tick after opening the popup so it can paint before the
     // synchronous export starts and blocks the UI thread.
@@ -148,6 +163,7 @@ ApplicationWindow {
                 var now = new Date()
                 var optJson = JSON.stringify({
                     createTeachingVersion: root.pendingExportTeachingVersion,
+                    clo3dGroup250: root.pendingDxfClo3d,
                     appVersion:   Qt.application.version,
                     creationDate: Qt.formatDateTime(now, "dd-MM-yyyy"),
                     creationTime: Qt.formatDateTime(now, "hh-mm")
@@ -214,6 +230,7 @@ ApplicationWindow {
             root.pendingExportFormat = ""
             root.pendingExportSettings = ""
             root.pendingExportTeachingVersion = false
+            root.pendingDxfClo3d = false
             exportProgressPopup.close()
             errorDialog.errorText = message;
             errorDialog.open();
@@ -259,6 +276,7 @@ ApplicationWindow {
             root.pendingExportFormat = ""
             root.pendingExportSettings = ""
             root.pendingExportTeachingVersion = false
+            root.pendingDxfClo3d = false
             exportProgressPopup.close()
             // Track last exported path per format for View menu
             if (path.endsWith(".dxf"))
@@ -411,21 +429,8 @@ ApplicationWindow {
         } // onAdjustLayoutClicked
 
         onPreferencesClicked:      preferencesController.openPreferences()
-        onExportDxfAstmRequested: {
-            var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName("dxf") // default name: <importedBaseName>_YYYYMMDDHHSS.dxf
-            var path = preferencesModel.getSaveFilePath(
-                // Prompt the user to choose a save location for the DXF file,
-                // with the configured default directory and a suggested filename
-                // based on the imported SVG name and current timestamp.
-                "Save DXF-ASTM File", dir, name,
-                "DXF Files (*.dxf);;All Files (*)")
-            if (path !== "") {
-                // Stage path; teaching dialog collects the teaching-version flag before export starts.
-                root.pendingDxfPath = path
-                dxfTeachingDialog.open()
-            } // if user chose a path
-        } // onExportDxfAstmRequested
+        onExportDxfAstmRequested:      root.requestDxfExport(false)
+        onExportDxfAstmClo3dRequested: root.requestDxfExport(true)
         onExportPngRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
             var name = root.makeExportFileName("png") // default name: <importedBaseName>_YYYYMMDDHHSS.png

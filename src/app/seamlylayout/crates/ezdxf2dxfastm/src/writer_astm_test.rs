@@ -190,6 +190,23 @@ mod tests {
         }
     }
 
+    // @brief The CLO3D variant adds group 250 to the boundary (0) and sew line (2) only.
+    #[test]
+    fn clo3d_variant_marks_boundary_and_sew_line_with_group_250() {
+        let options = DxfAstmExportOptions { clo3d_group_250: true, ..DxfAstmExportOptions::default() };
+        let dxf = parse_dxf(&export_to_string(&sample_drawing(), "clo3d", &options));
+        let (_, body) = &dxf.blocks[0];
+        let marked: Vec<(&str, &str)> = body
+            .iter()
+            .filter(|e| e.kind == "POLYLINE")
+            .filter_map(|e| e.get(250).map(|v| (e.layer(), v)))
+            .collect();
+        assert_eq!(marked, vec![("1", "0"), ("14", "2")]);
+        // Everything else stays D6673: validation layers are still written.
+        assert_eq!(polyline_sizes(body, "84").len(), 1);
+        assert_eq!(polyline_sizes(body, "87").len(), 1);
+    }
+
     // @brief The male shirt handoff SVG exports with every D6673 requirement met.
     #[test]
     fn male_shirt_fixture_exports_complete_astm_file() {

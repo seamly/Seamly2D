@@ -87,6 +87,9 @@ ToolBar {
     // @brief User selected DXF-ASTM from the Export dropdown (Phase 9).
     signal exportDxfAstmRequested()
 
+    // @brief User selected DXF-ASTM (CLO3D) from the Export dropdown.
+    signal exportDxfAstmClo3dRequested()
+
     // @brief User selected PDF from the Export dropdown (Phase 10).
     signal exportPdfRequested()
 
@@ -214,6 +217,7 @@ ToolBar {
             labelTextState:  root.labelTextState
             lastSvgTextMode: root.lastSvgTextMode
             onExportDxfAstmRequested:  root.exportDxfAstmRequested()
+            onExportDxfAstmClo3dRequested: root.exportDxfAstmClo3dRequested()
             onExportPdfRequested:      root.exportPdfRequested()
             onExportPdfTiledRequested: root.exportPdfTiledRequested()
             onExportPngRequested:      root.exportPngRequested()
