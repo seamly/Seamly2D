@@ -60,7 +60,7 @@ class PreferencesModel : public QObject
     // @brief Path to the PDF viewer executable.
     Q_PROPERTY(QString pdfViewerPath   READ pdfViewerPath   WRITE setPdfViewerPath   NOTIFY pdfViewerPathChanged)
 
-    // @brief Path to the PNG viewer executable.
+    // @brief Path to the image viewer executable (opens PNG and JPG files).
     Q_PROPERTY(QString pngViewerPath   READ pngViewerPath   WRITE setPngViewerPath   NOTIFY pngViewerPathChanged)
 
     // @brief Path or https:// URL of the HPGL (.plt / .hpgl) viewer.

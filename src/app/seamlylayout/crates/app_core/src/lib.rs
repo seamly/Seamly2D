@@ -3,8 +3,11 @@
 // MIT License: https://opensource.org/licenses/MIT
 
 use std::fs;
+use std::io::Write;
 use std::path::Path;
 
+use image::codecs::jpeg::JpegEncoder;
+use image::ExtendedColorType;
 use resvg::tiny_skia::{Color, Pixmap, Transform};
 use svg2pdf::{ConversionOptions, PageOptions};
 use svg_dom::Document;
@@ -25,13 +28,25 @@ pub enum CoreError {
     // PNG encoding failed during render output.
     #[error("png encode error: {0}")]
     Png(#[from] png::EncodingError),
+    // JPEG encoding failed during render output.
+    #[error("jpeg encode error: {0}")]
+    Jpeg(#[from] image::ImageError),
     // Rendering failed to produce an image.
     #[error("render failed")]
     RenderFailed,
     // Pixmap could not be allocated for the requested size.
     #[error("invalid output size")]
     InvalidSize,
+    // The image is larger than JPEG allows on one side.
+    #[error("image is {0} x {1} px; JPEG allows at most {JPEG_MAX_SIDE_PX} px per side")]
+    JpegTooLarge(u32, u32),
 }
+
+// @brief Largest width or height, in pixels, that a JPEG file can store.
+pub const JPEG_MAX_SIDE_PX: u32 = 65_535;
+
+// @brief Default JPEG quality (1-100) for layout exports.
+pub const JPEG_DEFAULT_QUALITY: u8 = 90;
 
 // @brief Result alias for app_core operations.
 pub type CoreResult<T> = Result<T, CoreError>;
@@ -154,16 +169,22 @@ pub fn render_pdf(tree: &usvg::Tree, out_path: impl AsRef<Path>) -> CoreResult<(
     Ok(())
 }
 
-// @brief Render a usvg tree to a PNG file using resvg + tiny-skia.
-// @param tree Parsed usvg tree to render.
-// @param out_path Destination PNG path.
+// @brief Pixel dimensions of a tree rendered at the given scale.
+// @param tree Parsed usvg tree.
 // @param scale Scale factor applied to the original SVG size (1.0 = natural size).
-pub fn render_png(tree: &usvg::Tree, out_path: impl AsRef<Path>, scale: f32) -> CoreResult<()> {
-    // Determine target pixel dimensions from the SVG size.
+// @return (width, height) in pixels, each at least 1.
+fn raster_size(tree: &usvg::Tree, scale: f32) -> (u32, u32) {
     let size = tree.size().to_int_size();
     let w = ((size.width() as f32) * scale).max(1.0).round() as u32;
     let h = ((size.height() as f32) * scale).max(1.0).round() as u32;
+    (w, h)
+}
 
+// @brief Render a usvg tree into an opaque pixmap on a white background.
+// @param tree Parsed usvg tree to render.
+// @param w Target width in pixels.
+// @param h Target height in pixels.
+fn render_pixmap(tree: &usvg::Tree, w: u32, h: u32) -> CoreResult<Pixmap> {
     // Allocate a pixel buffer.
     let mut pixmap = Pixmap::new(w, h).ok_or(CoreError::InvalidSize)?;
 
@@ -180,9 +201,51 @@ pub fn render_png(tree: &usvg::Tree, out_path: impl AsRef<Path>, scale: f32) -> 
     // Render into the pixmap.
     let mut pixmap_mut = pixmap.as_mut();
     resvg::render(tree, transform, &mut pixmap_mut);
+    Ok(pixmap)
+}
+
+// @brief Render a usvg tree to a PNG file using resvg + tiny-skia.
+// @param tree Parsed usvg tree to render.
+// @param out_path Destination PNG path.
+// @param scale Scale factor applied to the original SVG size (1.0 = natural size).
+pub fn render_png(tree: &usvg::Tree, out_path: impl AsRef<Path>, scale: f32) -> CoreResult<()> {
+    let (w, h) = raster_size(tree, scale);
+    let pixmap = render_pixmap(tree, w, h)?;
 
     // Persist to PNG.
     pixmap.save_png(out_path)?;
+    Ok(())
+}
+
+// @brief Render a usvg tree to a JPEG file using resvg + tiny-skia.
+// @param tree Parsed usvg tree to render.
+// @param out_path Destination JPEG path.
+// @param scale Scale factor applied to the original SVG size (1.0 = natural size).
+// @param quality JPEG quality, 1-100; out-of-range values are clamped.
+// @return Err(JpegTooLarge) before any rendering when either side exceeds JPEG_MAX_SIDE_PX.
+pub fn render_jpeg(tree: &usvg::Tree, out_path: impl AsRef<Path>, scale: f32, quality: u8) -> CoreResult<()> {
+    // Check the JPEG size limit first, so an oversized layout never allocates its pixmap.
+    let (w, h) = raster_size(tree, scale);
+    if w > JPEG_MAX_SIDE_PX || h > JPEG_MAX_SIDE_PX {
+        return Err(CoreError::JpegTooLarge(w, h));
+    } // if too large
+
+    let pixmap = render_pixmap(tree, w, h)?;
+
+    // The white fill makes every pixel opaque, so premultiplied RGBA equals
+    // straight RGBA and the alpha byte can be dropped.
+    let rgb: Vec<u8> = pixmap
+        .data()
+        .chunks_exact(4)
+        .flat_map(|px| [px[0], px[1], px[2]])
+        .collect();
+
+    // Encode through a buffered writer; the file is created only after the size check.
+    let file = fs::File::create(out_path)?;
+    let mut writer = std::io::BufWriter::new(file);
+    let mut encoder = JpegEncoder::new_with_quality(&mut writer, quality.clamp(1, 100));
+    encoder.encode(&rgb, w, h, ExtendedColorType::Rgb8)?;
+    writer.flush()?;
     Ok(())
 }
 
@@ -225,5 +288,34 @@ mod tests {
 
         let png = fs::read(&out_path).unwrap();
         assert!(!png.is_empty());
+    }
+
+    // @brief Render a simple SVG to JPEG; the file starts with the JPEG SOI marker.
+    #[test]
+    fn render_to_jpeg() {
+        let tmp_dir = env::temp_dir();
+        let input_path = tmp_dir.join("app_core_render_jpeg.svg");
+        fs::write(&input_path, sample_svg()).unwrap();
+
+        let (_doc, tree) = load_svg(&input_path).unwrap();
+        let out_path = tmp_dir.join("app_core_render.jpg");
+        render_jpeg(&tree, &out_path, 1.0, JPEG_DEFAULT_QUALITY).unwrap();
+
+        let jpeg = fs::read(&out_path).unwrap();
+        assert_eq!(&jpeg[..3], &[0xFF, 0xD8, 0xFF], "JPEG must start with the SOI marker");
+    }
+
+    // @brief A layout wider than JPEG allows returns JpegTooLarge and writes no file.
+    #[test]
+    fn render_jpeg_rejects_oversized_image() {
+        let wide = r#"<svg width="70000" height="10" xmlns="http://www.w3.org/2000/svg"><rect width="5" height="5"/></svg>"#;
+        let tree = usvg::Tree::from_str(wide, &usvg::Options::default()).unwrap();
+        let out_path = env::temp_dir().join(format!("app_core_too_wide_{}.jpg", std::process::id()));
+        let _ = fs::remove_file(&out_path);
+
+        let result = render_jpeg(&tree, &out_path, 1.0, JPEG_DEFAULT_QUALITY);
+
+        assert!(matches!(result, Err(CoreError::JpegTooLarge(70000, 10))), "got {result:?}");
+        assert!(!out_path.exists(), "no file may be written for an oversized image");
     }
 }

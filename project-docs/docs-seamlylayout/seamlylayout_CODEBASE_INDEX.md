@@ -15,7 +15,7 @@ This document provides a high-level index of the main components, crates, and mo
 ## Rust Crates (`crates/`)
 
 - **app_core/** — Core application logic
-  - `src/lib.rs` — Main library file
+  - `src/lib.rs` — Main library file; SVG load, PDF / PNG / JPEG render
 - **cli/** — Command-line interface
   - `src/main.rs` — CLI entry point
 - **cxxqt_bridge/** — Rust↔Qt bridge (CXX-Qt)

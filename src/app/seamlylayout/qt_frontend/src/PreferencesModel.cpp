@@ -415,7 +415,7 @@ void PreferencesModel::setPdfViewerPath(const QString &v)
     emit pdfViewerPathChanged();
 } // setPdfViewerPath
 
-// @brief Set the PNG viewer executable path; emits pngViewerPathChanged if changed.
+// @brief Set the image viewer (PNG, JPG) executable path; emits pngViewerPathChanged if changed.
 void PreferencesModel::setPngViewerPath(const QString &v)
 {
     if (m_pngViewerPath == v) return;

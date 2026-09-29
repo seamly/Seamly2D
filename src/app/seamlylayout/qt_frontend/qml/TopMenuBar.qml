@@ -96,6 +96,9 @@ ToolBar {
     // @brief User selected PNG from the Export dropdown.
     signal exportPngRequested()
 
+    // @brief User selected JPG from the Export dropdown.
+    signal exportJpgRequested()
+
     // @brief User selected an SVG text mode from the Export dropdown.
     // @param mode "designerFont", "singleLineFont", "hersheyStrokes" or "asSupplied".
     signal exportSvgRequested(string mode)
@@ -129,7 +132,7 @@ ToolBar {
     // @brief User selected PDF (Tiled) from the View dropdown.
     signal viewPdfTiledRequested()
 
-    // @brief User selected PNG from the View dropdown.
+    // @brief User selected PNG/JPG from the View dropdown.
     signal viewPngRequested()
 
     // @brief User selected SVG from the View dropdown.
@@ -214,6 +217,8 @@ ToolBar {
             onExportPdfRequested:      root.exportPdfRequested()
             onExportPdfTiledRequested: root.exportPdfTiledRequested()
             onExportPngRequested:      root.exportPngRequested()
+            showJpg:                   true
+            onExportJpgRequested:      root.exportJpgRequested()
             onExportSvgModeRequested:  function(mode) { root.exportSvgRequested(mode) }
             showPostScript:            true
             onExportPostscriptRequested: function(flavor) { root.exportPostscriptRequested(flavor) }

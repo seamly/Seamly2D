@@ -19,7 +19,7 @@
 //   │  § Viewer Applications                           │
 //   │    DXF Viewer:               [__________] Browse  │
 //   │    PDF Viewer:               [__________] Browse  │
-//   │    PNG Viewer:               [__________] Browse  │
+//   │    Image Viewer (PNG, JPG):  [__________] Browse  │
 //   │    HPGL Viewer:              [__________] Browse  │
 //   │    Projector:                [__________] Browse  │
 //   ├──────────────────────────────────────────────────┤
@@ -301,7 +301,7 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
 
     // Row 0: Input SVG Directory
     auto *inputDirLabel = new QLabel(QStringLiteral("Input SVG Directory:"));
-    inputDirLabel->setFixedWidth(160);
+    inputDirLabel->setFixedWidth(200);
     inputDirLabel->setStyleSheet(labelStyle);
     m_inputDirField = makeReadOnlyField();
     auto *inputDirBrowse = makeBrowseButton();
@@ -311,7 +311,7 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
 
     // Row 1: Layout Output Directory
     auto *layoutDirLabel = new QLabel(QStringLiteral("Layout Output Directory:"));
-    layoutDirLabel->setFixedWidth(160);
+    layoutDirLabel->setFixedWidth(200);
     layoutDirLabel->setStyleSheet(labelStyle);
     m_layoutDirField = makeReadOnlyField();
     auto *layoutDirBrowse = makeBrowseButton();
@@ -321,7 +321,7 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
 
     // Row 2: Settings Directory
     auto *settingsDirLabel = new QLabel(QStringLiteral("Settings Directory:"));
-    settingsDirLabel->setFixedWidth(160);
+    settingsDirLabel->setFixedWidth(200);
     settingsDirLabel->setStyleSheet(labelStyle);
     m_settingsDirField = makeReadOnlyField();
     auto *settingsDirBrowse = makeBrowseButton();
@@ -331,7 +331,7 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
 
     // Row 3: Default Settings File
     auto *settingsFileLabel = new QLabel(QStringLiteral("Default Settings File:"));
-    settingsFileLabel->setFixedWidth(160);
+    settingsFileLabel->setFixedWidth(200);
     settingsFileLabel->setStyleSheet(labelStyle);
     m_settingsFileField = makeReadOnlyField();
     auto *settingsFileBrowse = makeBrowseButton();
@@ -341,7 +341,7 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
 
     // Row 4: Default Preferences File
     auto *preferencesFileLabel = new QLabel(QStringLiteral("Default Preferences File:"));
-    preferencesFileLabel->setFixedWidth(160);
+    preferencesFileLabel->setFixedWidth(200);
     preferencesFileLabel->setStyleSheet(labelStyle);
     m_preferencesFileField = makeReadOnlyField();
     auto *preferencesFileBrowse = makeBrowseButton();
@@ -369,7 +369,7 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
     // Row 0: DXF Viewer (editable; "?" help icon to the left of the field
     // explains why eDrawings is recommended for the DXF-ASTM multi-layer format).
     auto *dxfLabelRow = new QWidget;
-    dxfLabelRow->setFixedWidth(160);
+    dxfLabelRow->setFixedWidth(200);
     auto *dxfLabelLayout = new QHBoxLayout(dxfLabelRow);
     dxfLabelLayout->setContentsMargins(0, 0, 0, 0);
     dxfLabelLayout->setSpacing(4);
@@ -419,7 +419,7 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
     // Row 1: PDF Viewer (editable; "?" help icon explains how to use
     // LibreOffice Writer's PDF import filter as the viewer).
     auto *pdfLabelRow = new QWidget;
-    pdfLabelRow->setFixedWidth(160);
+    pdfLabelRow->setFixedWidth(200);
     auto *pdfLabelLayout = new QHBoxLayout(pdfLabelRow);
     pdfLabelLayout->setContentsMargins(0, 0, 0, 0);
     pdfLabelLayout->setSpacing(4);
@@ -463,14 +463,15 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
         box.exec();
     }); // pdfHelpBtn clicked
 
-    // Row 2: PNG Viewer (editable; "?" help icon suggests Nomacs / Inkscape
-    // and explains the Task Manager flow for finding install paths on Windows).
+    // Row 2: Image Viewer for PNG and JPG (editable; "?" help icon suggests
+    // Nomacs / Inkscape and explains the Task Manager flow on Windows).
+    // The setting stays png_viewer_path so saved preferences keep working.
     auto *pngLabelRow = new QWidget;
-    pngLabelRow->setFixedWidth(160);
+    pngLabelRow->setFixedWidth(200);
     auto *pngLabelLayout = new QHBoxLayout(pngLabelRow);
     pngLabelLayout->setContentsMargins(0, 0, 0, 0);
     pngLabelLayout->setSpacing(4);
-    auto *pngViewerLabel = new QLabel(QStringLiteral("PNG Viewer:"));
+    auto *pngViewerLabel = new QLabel(QStringLiteral("Image Viewer (PNG, JPG):"));
     pngViewerLabel->setStyleSheet(labelStyle);
     auto *pngHelpBtn = makeHelpIcon();
     pngLabelLayout->addWidget(pngViewerLabel);
@@ -484,18 +485,18 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
     viewerGrid->addWidget(pngViewerBrowse,   2, 2);
 
     // -----------------------------------------------------------------------
-    // Wire PNG "?" icon — suggest Nomacs / Inkscape as free cross-platform
-    // PNG viewers and walk through the Windows Task Manager flow to find
+    // Wire image viewer "?" icon — suggest Nomacs / Inkscape as free cross-platform
+    // image viewers and walk through the Windows Task Manager flow to find
     // the executable path when the user knows the app but not the install path.
     // -----------------------------------------------------------------------
     connect(pngHelpBtn, &QPushButton::clicked, this, [this]() {
         QMessageBox box(this);
-        box.setWindowTitle(QStringLiteral("PNG Viewer recommendation"));
+        box.setWindowTitle(QStringLiteral("Image Viewer recommendation"));
         box.setIcon(QMessageBox::Information);
         box.setText(QStringLiteral(
-            "Any image viewer that handles PNG files works (Windows Photos, "
+            "Any image viewer that handles PNG and JPG files works (Windows Photos, "
             "macOS Preview, eog/feh on Linux, etc.).\n\n"
-            "If you don't have a PNG viewer installed, two free cross-platform "
+            "If you don't have an image viewer installed, two free cross-platform "
             "options:\n\n"
             "  • Nomacs — fast image viewer (Windows / Linux / macOS):\n"
             "      https://nomacs.org/\n\n"
@@ -503,14 +504,14 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
             "      https://sourceforge.net/projects/inkscape/\n\n"
             "After installing, set this field to the executable path (use "
             "Browse… or paste the full path).\n\n")
-            + taskMgrInstructions(QStringLiteral("PNG Viewer")));
+            + taskMgrInstructions(QStringLiteral("Image Viewer")));
         box.setStandardButtons(QMessageBox::Close);
         box.exec();
     }); // pngHelpBtn clicked
 
     // Row 3: HPGL Viewer (editable; "?" help icon explains the online default)
     auto *hpglLabelRow = new QWidget;
-    hpglLabelRow->setFixedWidth(160);
+    hpglLabelRow->setFixedWidth(200);
     auto *hpglLabelLayout = new QHBoxLayout(hpglLabelRow);
     hpglLabelLayout->setContentsMargins(0, 0, 0, 0);
     hpglLabelLayout->setSpacing(4);
@@ -547,7 +548,7 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
 
     // Row 4: Projector (label + "?" help icon; editable; Browse picks an .exe)
     auto *projectorLabelRow = new QWidget;
-    projectorLabelRow->setFixedWidth(160);
+    projectorLabelRow->setFixedWidth(200);
     auto *projectorLabelLayout = new QHBoxLayout(projectorLabelRow);
     projectorLabelLayout->setContentsMargins(0, 0, 0, 0);
     projectorLabelLayout->setSpacing(4);
@@ -693,7 +694,7 @@ PreferencesWindow::PreferencesWindow(PreferencesModel *model, QWidget *parent)
 #else
         QString filter = QStringLiteral("All Files (*)");
 #endif
-        browseFile(QStringLiteral("Select PNG Viewer Executable"),
+        browseFile(QStringLiteral("Select Image Viewer Executable"),
                    filter, m_pngViewerField,
                    &PreferencesModel::setPngViewerPath);
     }); // pngViewerBrowse clicked

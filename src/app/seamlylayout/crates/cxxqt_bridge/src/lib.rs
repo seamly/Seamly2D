@@ -31,6 +31,7 @@ use layout_helpers::remove_group_by_id;
 mod exports;
 use exports::{
     do_export_dxf, do_export_gcode, do_export_mesh, do_export_pdf, do_export_pdf_tile, do_export_png,
+    do_export_jpeg,
     do_export_svg, paid_export_available, do_export_hpgl, parse_hpgl_options, do_export_postscript,
 };
 
@@ -708,6 +709,10 @@ pub mod qobject {
 
         #[qinvokable]
         fn export_png(self: Pin<&mut AppController>, path: &QString, scale: f32) -> bool;
+
+        // JPEG export at 100% scale; quality is fixed (app_core::JPEG_DEFAULT_QUALITY).
+        #[qinvokable]
+        fn export_jpeg(self: Pin<&mut AppController>, path: &QString) -> bool;
 
         // HP-GL/1 export for pen plotters and cutters.
         // options_json: {"mode": "plot" | "cut", "cutPen": n, "markPen": n, "labelPen": n}, pens 1-8.
@@ -2127,6 +2132,55 @@ impl qobject::AppController {
             } // Err
         } // match do_export_png
     } // fn export_png
+
+    // Export the assembled layout as a JPEG image file at 100% scale.
+    // Delegates core logic to exports::do_export_jpeg.
+    // Called by Main.qml's exportStartTimer: appController.exportJpeg(path).
+    fn export_jpeg(
+        mut self: std::pin::Pin<&mut Self>,
+        path: &cxx_qt_lib::QString,
+    ) -> bool {
+        let path_str = path.to_string();
+        log_to_file(&format!("[lib.rs AppController] export_jpeg(): 1 requested path='{path_str}'"));
+
+        let layout_doc = match self.clone_stripped_layout_doc() {
+            Ok(d) => d,
+            Err(m) => {
+                log_to_file("[lib.rs AppController] export_jpeg(): 2 no layout_dom available");
+                self.as_mut().error_occurred(m);
+                return false; // if no layout
+            } // Err
+        }; // layout_doc
+
+        // Signal export start (0%); QML popup is already open before this call.
+        self.as_mut().set_export_progress(0);
+        self.as_mut().set_export_status_message(cxx_qt_lib::QString::from("Exporting JPG…"));
+        self.as_mut().progress_updated(0);
+
+        // Progress closure: drives the QML ProgressBar property and the signal.
+        let mut progress = |pct: i32| {
+            self.as_mut().set_export_progress(pct);
+            self.as_mut().progress_updated(pct);
+        }; // progress
+
+        match do_export_jpeg(&layout_doc, &path_str, &mut progress) {
+            Ok(()) => {
+                log_to_file(&format!("[lib.rs AppController] export_jpeg(): 2 wrote JPEG '{path_str}'"));
+                self.as_mut().progress_updated(100);
+                self.as_mut().set_export_progress(-1); // reset to idle (-1 = idle contract)
+                self.as_mut().set_export_status_message(cxx_qt_lib::QString::default()); // clear
+                self.as_mut().export_finished(cxx_qt_lib::QString::from(&path_str)); // success
+                true // success
+            } // Ok
+            Err(e) => {
+                log_to_file(&format!("[lib.rs AppController] export_jpeg(): 2 failed: {e}"));
+                self.as_mut().set_export_progress(-1);
+                self.as_mut().set_export_status_message(cxx_qt_lib::QString::default()); // clear
+                self.as_mut().error_occurred(cxx_qt_lib::QString::from(&e)); // export failed
+                false // failure
+            } // Err
+        } // match do_export_jpeg
+    } // fn export_jpeg
 
     // Export the assembled layout as an HP-GL/1 plotter file.
     // Delegates to exports::do_export_hpgl; label-text warnings reach the success dialog.

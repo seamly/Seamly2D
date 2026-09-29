@@ -134,6 +134,7 @@ name = "app_core"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "image",
  "png 0.17.16",
  "resvg",
  "svg2pdf",

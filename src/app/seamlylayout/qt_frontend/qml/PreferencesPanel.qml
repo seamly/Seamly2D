@@ -117,7 +117,7 @@ Dialog {
                 text:           "Input SVG Directory:"
                 color:          Theme.fieldLabel
                 font.pixelSize: Theme.fontSizeNormal
-                Layout.preferredWidth: 160
+                Layout.preferredWidth: 200
             } // Text inputDirLabel
             TextField {
                 id:               inputDirField
@@ -139,7 +139,7 @@ Dialog {
                 text:           "Layout Output Directory:"
                 color:          Theme.fieldLabel
                 font.pixelSize: Theme.fontSizeNormal
-                Layout.preferredWidth: 160
+                Layout.preferredWidth: 200
             } // Text layoutDirLabel
             TextField {
                 id:               layoutDirField
@@ -161,7 +161,7 @@ Dialog {
                 text:           "Settings Directory:"
                 color:          Theme.fieldLabel
                 font.pixelSize: Theme.fontSizeNormal
-                Layout.preferredWidth: 160
+                Layout.preferredWidth: 200
             } // Text settingsDirLabel
             TextField {
                 id:               settingsDirField
@@ -183,7 +183,7 @@ Dialog {
                 text:           "Default Settings File:"
                 color:          Theme.fieldLabel
                 font.pixelSize: Theme.fontSizeNormal
-                Layout.preferredWidth: 160
+                Layout.preferredWidth: 200
             } // Text settingsFileLabel
             TextField {
                 id:               settingsFileField
@@ -205,7 +205,7 @@ Dialog {
                 text:           "Default Preferences File:"
                 color:          Theme.fieldLabel
                 font.pixelSize: Theme.fontSizeNormal
-                Layout.preferredWidth: 160
+                Layout.preferredWidth: 200
             } // Text preferencesFileLabel
             TextField {
                 id:               preferencesFileField
@@ -254,7 +254,7 @@ Dialog {
             // Accepts a local executable path OR an https:// URL.
             // The "?" icon opens dxfHelpPopup with the eDrawings recommendation.
             RowLayout {
-                Layout.preferredWidth: 160
+                Layout.preferredWidth: 200
                 spacing: 4
                 Text {
                     text:           "DXF Viewer:"
@@ -302,7 +302,7 @@ Dialog {
             // PDF Viewer label with "?" help icon (opens pdfHelpPopup with
             // LibreOffice Writer recommendation).
             RowLayout {
-                Layout.preferredWidth: 160
+                Layout.preferredWidth: 200
                 spacing: 4
                 Text {
                     text:           "PDF Viewer:"
@@ -346,13 +346,14 @@ Dialog {
                 onClicked:    pdfViewerDialog.open()
             } // SeamlyButton pdfViewerBrowse
 
-            // PNG viewer — label with "?" help icon (opens pngHelpPopup with
-            // Nomacs / Inkscape recommendation and Task Manager flow).
+            // Image viewer (PNG, JPG) — label with "?" help icon (opens pngHelpPopup
+            // with Nomacs / Inkscape recommendation and Task Manager flow).
+            // The setting stays png_viewer_path so saved preferences keep working.
             RowLayout {
-                Layout.preferredWidth: 160
+                Layout.preferredWidth: 200
                 spacing: 4
                 Text {
-                    text:           "PNG Viewer:"
+                    text:           "Image Viewer (PNG, JPG):"
                     color:          Theme.fieldLabel
                     font.pixelSize: Theme.fontSizeNormal
                 } // Text pngViewerLabel
@@ -397,7 +398,7 @@ Dialog {
             // OR a local executable, optionally with command-line arguments
             // (e.g. a Chrome PWA shortcut Target). The "?" icon opens install instructions.
             RowLayout {
-                Layout.preferredWidth: 160
+                Layout.preferredWidth: 200
                 spacing: 4
                 Text {
                     text:           "Projector:"
@@ -497,7 +498,7 @@ Dialog {
     } // Popup dxfHelpPopup
 
     // -----------------------------------------------------------------------
-    // PNG viewer recommendation help popup.
+    // Image viewer recommendation help popup.
     // -----------------------------------------------------------------------
     Popup {
         id:     pngHelpPopup
@@ -516,7 +517,7 @@ Dialog {
             spacing: 8
             Text {
                 Layout.fillWidth: true
-                text:             "PNG Viewer recommendation"
+                text:             "Image Viewer recommendation"
                 color:            Theme.violetLight
                 font.bold:        true
                 font.pixelSize:   Theme.fontSizeNormal + 2
@@ -526,16 +527,16 @@ Dialog {
                 wrapMode:         Text.WordWrap
                 color:            Theme.fieldText
                 font.pixelSize:   Theme.fontSizeNormal
-                text:             "Any image viewer that handles PNG files works " +
+                text:             "Any image viewer that handles PNG and JPG files works " +
                                   "(Windows Photos, macOS Preview, eog/feh on Linux, etc.).\n\n" +
-                                  "If you don't have a PNG viewer installed, two free cross-platform options:\n\n" +
+                                  "If you don't have an image viewer installed, two free cross-platform options:\n\n" +
                                   "  • Nomacs — fast image viewer (Windows / Linux / macOS):\n" +
                                   "      https://nomacs.org/\n\n" +
                                   "  • Inkscape — vector + raster editor (Windows / Linux / macOS):\n" +
                                   "      https://sourceforge.net/projects/inkscape/\n\n" +
                                   "After installing, set this field to the executable path " +
                                   "(use Browse… or paste the full path).\n\n" +
-                                  root.taskMgrInstructions("PNG Viewer")
+                                  root.taskMgrInstructions("Image Viewer")
             }
             Item { Layout.fillHeight: true }
             RowLayout {
@@ -804,11 +805,11 @@ Dialog {
         } // onAccepted
     } // FileDialog pdfViewerDialog
 
-    // @brief Executable picker for the PNG viewer.
+    // @brief Executable picker for the image viewer (PNG, JPG).
     // Windows filter shows *.exe; other platforms show all files.
     FileDialog {
         id: pngViewerDialog
-        title:       "Select PNG Viewer Executable"
+        title:       "Select Image Viewer Executable"
         fileMode:    FileDialog.OpenFile
         nameFilters: Qt.platform.os === "windows"
                      ? ["Executables (*.exe)", "All Files (*)"]

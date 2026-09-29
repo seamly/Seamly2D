@@ -155,6 +155,30 @@ ExportMenu EPS / PostScript (PS) → exportPostscriptRequested("eps" | "ps")
 - Not covered: tiled multi-page PS.
 - Seamly2D exports no PS or EPS, and ships no `pdftops`. CLI formats 8 and 9 are rejected; other format numbers do not change.
 
+## JPG export
+
+```
+ExportMenu JPG → exportJpgRequested()
+  → TopMenuBar.exportJpgRequested()
+    → Main.qml onExportJpgRequested
+      → save dialog (*.jpg *.jpeg), default <baseName>_YYYYMMDDHHSS.jpg
+      → pendingExportFormat = "jpg"; exportStartTimer
+        → appController.exportJpeg(path)
+          → clone_stripped_layout_doc()
+          → exports::do_export_jpeg(doc, path, progress)      progress 10, 90
+            → app_core::document_to_tree(doc, None)
+            → app_core::render_jpeg(tree, path, 1.0, JPEG_DEFAULT_QUALITY)
+          → export_finished(path)                             success dialog
+```
+
+- Same render as PNG: 100% scale (96 px per inch), white background.
+- Encoder: `image` crate, `jpeg` feature only. Quality 90, fixed. No UI.
+- JPEG has no alpha. The white fill makes every pixel opaque, so the alpha byte is dropped.
+- Limit: 65535 px per side (about 17.3 m at 96 px/in). A larger layout is an error before render. No file is written.
+- A finished JPG export shows the success dialog. It does not open a viewer.
+- View > PNG/JPG: file picker (`*.png *.jpg *.jpeg`), then `openInViewer(pngViewerPath, file)`.
+- Preferences label: "Image Viewer (PNG, JPG)". The INI key stays `png_viewer_path`.
+
 ## Paid formats — G-Code and 3D mesh (3MF)
 
 Stubs only. No module ships yet.

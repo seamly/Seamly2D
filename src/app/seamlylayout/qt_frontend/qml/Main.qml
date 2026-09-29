@@ -129,7 +129,7 @@ ApplicationWindow {
     // Staged payload for deferred export start — shared across all formats.
     // Populated by each export handler; consumed by exportStartTimer.onTriggered.
     property string pendingExportPath: ""
-    property string pendingExportFormat: ""        // "dxf"|"png"|"pdf"|"pdf-tiled"|"svg"|"hpgl"|"ps"|"eps"|"gcode"|"3mf"
+    property string pendingExportFormat: ""        // "dxf"|"png"|"jpg"|"pdf"|"pdf-tiled"|"svg"|"hpgl"|"ps"|"eps"|"gcode"|"3mf"
     property string pendingExportSettings: ""      // settings JSON for pdf / pdf-tiled; text mode for svg; options JSON for hpgl
     property bool   pendingExportTeachingVersion: false  // teaching flag for DXF
 
@@ -148,6 +148,8 @@ ApplicationWindow {
                 appController.exportDxf(path, optJson)
             } else if (fmt === "png") {
                 appController.exportPng(path, 1.0)
+            } else if (fmt === "jpg") {
+                appController.exportJpeg(path)
             } else if (fmt === "pdf") {
                 appController.exportPdf(path, root.pendingExportSettings)
             } else if (fmt === "pdf-tiled") {
@@ -260,7 +262,7 @@ ApplicationWindow {
                 root.lastExportedPngPath = path
 
             if (path.endsWith(".png") && preferencesModel.pngViewerPath !== "") {
-                // PNG export: open directly in the configured PNG viewer
+                // PNG export: open directly in the configured image viewer
                 preferencesModel.openInViewer(preferencesModel.pngViewerPath, path)
             } else if (path.endsWith(".pdf") && preferencesModel.pdfViewerPath !== "") {
                 // PDF export: open directly in the configured PDF viewer
@@ -431,6 +433,21 @@ ApplicationWindow {
                 exportStartTimer.restart()
             } // if path
         } // onExportPngRequested
+        onExportJpgRequested: {
+            var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
+            var name = root.makeExportFileName("jpg") // default name: <importedBaseName>_YYYYMMDDHHSS.jpg
+            var path = preferencesModel.getSaveFilePath(
+                "Save JPG File", dir, name,
+                "JPG Files (*.jpg *.jpeg);;All Files (*)")
+            if (path !== "") {
+                // Stage export, show progress popup, then start after one paint tick.
+                // A finished JPG export shows the success dialog; it does not open a viewer.
+                root.pendingExportPath = path
+                root.pendingExportFormat = "jpg"
+                exportProgressPopup.open()
+                exportStartTimer.restart()
+            } // if path
+        } // onExportJpgRequested
         onExportGcodeRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
             var name = root.makeExportFileName("gcode") // default name: <importedBaseName>_YYYYMMDDHHSS.gcode
@@ -646,17 +663,17 @@ ApplicationWindow {
             var dir  = preferencesModel.resolvedLayoutDirectory()
             console.log("[Main.qml TopMenuBar] onViewPngRequested(): 2 dir=" + dir)
             var path = preferencesModel.getOpenFilePath(
-                "Open PNG File", dir,
-                "PNG Files (*.png);;All Files (*)")
+                "Open PNG or JPG File", dir,
+                "Image Files (*.png *.jpg *.jpeg);;PNG Files (*.png);;JPG Files (*.jpg *.jpeg);;All Files (*)")
             console.log("[Main.qml TopMenuBar] onViewPngRequested(): 3 path=" + path + " pngViewerPath=" + preferencesModel.pngViewerPath)
             if (path !== "" && preferencesModel.pngViewerPath !== "") {
-                // Open the selected PNG file in the configured PNG viewer application.
+                // Open the selected PNG or JPG file in the configured image viewer.
                 console.log("[Main.qml TopMenuBar] onViewPngRequested(): 4 opening viewer")
                 preferencesModel.openInViewer(preferencesModel.pngViewerPath, path)
             } else if (path === "") {
                 console.log("[Main.qml TopMenuBar] onViewPngRequested(): 4 file pick cancelled")
             } else {
-                console.log("[Main.qml TopMenuBar] onViewPngRequested(): 4 no PNG viewer configured")
+                console.log("[Main.qml TopMenuBar] onViewPngRequested(): 4 no image viewer configured")
             } // if path && viewer
         } // onViewPngRequested
         onViewSvgRequested: {
