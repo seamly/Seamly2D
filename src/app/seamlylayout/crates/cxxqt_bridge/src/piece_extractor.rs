@@ -759,6 +759,37 @@ fn find_pattern_group(element: &Element) -> Option<&Element> {
     })
 } // fn find_pattern_group
 
+// @brief Remove every tagged piece of another size, so the document holds one size.
+//
+// A piece without `data-size` is kept: it belongs to every size.
+//
+// @param doc  Multisize handoff document; changed in place.
+// @param size The `data-size` value to keep.
+// @return Number of tagged pieces left in the document.
+pub fn keep_size(doc: &mut svg_dom::Document, size: &str) -> usize {
+    remove_other_sizes(&mut doc.root, size);
+    count_tagged_pieces(doc)
+} // fn keep_size
+
+// @brief Recursive worker for `keep_size`.
+// @param element Subtree root; its children are filtered in place.
+// @param size    The `data-size` value to keep.
+fn remove_other_sizes(element: &mut Element, size: &str) {
+    // Drop pieces of other sizes at this level, then descend into what is left.
+    element.children.retain(|node| match node {
+        XMLNode::Element(child) => {
+            !(is_tagged_piece(child)
+                && child.attributes.get("data-size").is_some_and(|s| s != size))
+        } // Element
+        _ => true,
+    }); // retain
+    for node in element.children.iter_mut() {
+        if let XMLNode::Element(child) = node {
+            remove_other_sizes(child, size);
+        } // if Element
+    } // for child
+} // fn remove_other_sizes
+
 // @brief Count the elements tagged as pattern pieces by Seamly2D.
 //
 // Seamly2D's Layout Mode writes one `<g data-type="piece" …>` per pattern
@@ -1602,5 +1633,22 @@ pub(crate) mod tests {
         let doc = svg_dom::Document::parse(nested_handoff_svg()).expect("parse ok");
         assert_eq!(read_measurements_info(&doc), MeasurementsInfo::default());
     } // read_measurements_info_multisize_and_individual
+
+    // @brief `keep_size` leaves one piece per set, all of the chosen size.
+    #[test]
+    fn keep_size_removes_other_sizes() {
+        let mut doc = svg_dom::Document::parse(MULTISIZE_HANDOFF_SVG).expect("parse ok");
+        assert_eq!(keep_size(&mut doc, "34"), 2);
+        hoist_layout_units(&mut doc, false);
+        assert_eq!(root_group_ids(&doc), vec!["piece_Front_s34", "piece_Back_s34"]);
+
+        // A size that is not in the document leaves no pieces.
+        let mut doc = svg_dom::Document::parse(MULTISIZE_HANDOFF_SVG).expect("parse ok");
+        assert_eq!(keep_size(&mut doc, "99"), 0);
+
+        // An individual handoff has no data-size, so nothing is removed.
+        let mut doc = svg_dom::Document::parse(nested_handoff_svg()).expect("parse ok");
+        assert_eq!(keep_size(&mut doc, "34"), 2);
+    } // keep_size_removes_other_sizes
 
 } // mod tests

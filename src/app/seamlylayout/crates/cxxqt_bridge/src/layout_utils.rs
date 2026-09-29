@@ -12,6 +12,7 @@
 // Exports:
 //   do_initialize_layout(settings_json, input_dom) -> Result<InitLayoutResult, String>
 //   do_process_layout(args)                        -> Result<ProcessLayoutResult, String>
+//   do_process_size_layout(args, size)             -> Result<ProcessLayoutResult, String>
 
 use svg_dom::Document;
 
@@ -21,7 +22,7 @@ use layout_tiling::{
 };
 
 use crate::piece_extractor::{
-    extract_piece_rects_and_polygons, hoist_layout_units, set_free_rotation_without_grainline,
+    extract_piece_rects_and_polygons, hoist_layout_units, keep_size, set_free_rotation_without_grainline,
 };
 use crate::layout_assembler::{create_layout, create_initial_layout_dom, trim_bottom};
 use crate::save_debug_dom;
@@ -659,6 +660,48 @@ pub fn do_process_layout(
     })
 } // fn do_process_layout
 
+/// @brief Lay out one size of a multisize handoff as its own layout.
+///
+/// Only that size's pieces are packed, one unit per piece, with the same
+/// settings as the main layout.  The Nested/Marker choice does not apply:
+/// a single size has nothing to nest.
+///
+/// @param args Same arguments as `do_process_layout`; `input_dom` is the full handoff.
+/// @param size The `data-size` value to lay out.
+///
+/// # Errors
+/// Returns an error when the settings do not parse, the size has no pieces,
+/// or `do_process_layout` fails.
+pub fn do_process_size_layout(
+    args: ProcessLayoutArgs<'_>,
+    size: &str,
+    progress_fn: ProgressFn<'_>,
+) -> Result<ProcessLayoutResult, String> {
+    log_to_file(&format!("==========PROCESS SIZE LAYOUT {size}=========="));
+
+    // Keep only this size's pieces.
+    let mut size_dom = args.input_dom.clone();
+    if keep_size(&mut size_dom, size) == 0 {
+        return Err(format!("Size {size}: no pattern pieces of this size in the imported SVG."));
+    } // if no pieces
+
+    // Pack every piece alone: "marker" dissolves the piece-sets.
+    let mut settings: serde_json::Value = serde_json::from_str(args.settings_json)
+        .map_err(|e| format!("Size {size}: failed to parse layout settings: {e}"))?;
+    settings["multisizeLayout"] = serde_json::Value::from("marker");
+    let settings_json = settings.to_string();
+
+    do_process_layout(
+        ProcessLayoutArgs {
+            settings_json: &settings_json,
+            input_dom: &size_dom,
+            initial_layout_dom: args.initial_layout_dom,
+            layout_h_px: args.layout_h_px,
+        },
+        progress_fn,
+    )
+} // fn do_process_size_layout
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -854,11 +897,9 @@ mod tests {
             &mut progress,
         ).expect("process_layout should succeed on the trousers handoff")
     } // fn process_trousers
-    // @brief Lay out the multisize fixture with the given multisize layout.
-    fn process_multisize(multisize_layout: &str) -> ProcessLayoutResult {
-        let input_dom = Document::parse(crate::piece_extractor::tests::MULTISIZE_HANDOFF_SVG)
-            .expect("multisize fixture should parse");
-        let settings_json = serde_json::json!({
+    // @brief Fabric roll settings for the multisize fixture.
+    fn multisize_settings_json(multisize_layout: &str) -> String {
+        serde_json::json!({
             "unit": "in",
             "mediaType": "fabric",
             "paperType": "roll",
@@ -873,7 +914,14 @@ mod tests {
             "multisizeLayout": multisize_layout,
             "tileSize": "Letter",
             "tileOrientation": "Portrait"
-        }).to_string();
+        }).to_string()
+    } // fn multisize_settings_json
+
+    // @brief Lay out the multisize fixture with the given multisize layout.
+    fn process_multisize(multisize_layout: &str) -> ProcessLayoutResult {
+        let input_dom = Document::parse(crate::piece_extractor::tests::MULTISIZE_HANDOFF_SVG)
+            .expect("multisize fixture should parse");
+        let settings_json = multisize_settings_json(multisize_layout);
         let init = do_initialize_layout(&settings_json, Some(&input_dom))
             .expect("initialize_layout should succeed");
 
@@ -948,6 +996,52 @@ mod tests {
             "sizes should share one centre, got {centres:?}"
         );
     } // multisize_nested_centres_sizes_on_largest
+
+    // @brief A size layout packs only that size's pieces, one unit per piece.
+    #[test]
+    fn size_layout_packs_only_that_size() {
+        let input_dom = Document::parse(crate::piece_extractor::tests::MULTISIZE_HANDOFF_SVG)
+            .expect("multisize fixture should parse");
+        // Nested in the settings must not matter for a single size.
+        let settings_json = multisize_settings_json("nested");
+        let init = do_initialize_layout(&settings_json, Some(&input_dom))
+            .expect("initialize_layout should succeed");
+
+        for size in ["34", "36"] {
+            let mut progress = |_pct: i32, _status: Option<&str>| {};
+            let result = do_process_size_layout(
+                ProcessLayoutArgs {
+                    settings_json: &settings_json,
+                    input_dom: &input_dom,
+                    initial_layout_dom: &init.initial_dom,
+                    layout_h_px: init.h_px,
+                },
+                size,
+                &mut progress,
+            ).expect("size layout should succeed");
+            assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
+            assert_eq!(placed_count(&result), 2, "size {size}: one unit per piece");
+
+            let svg = result.output_doc.to_string();
+            assert!(svg.contains(&format!(r#"data-size="{size}""#)), "size {size} pieces placed");
+            let other = if size == "34" { "36" } else { "34" };
+            assert!(!svg.contains(&format!(r#"data-size="{other}""#)), "size {other} must be absent");
+        } // for size
+
+        // A size that is not in the handoff is an error, not an empty layout.
+        let mut progress = |_pct: i32, _status: Option<&str>| {};
+        let missing = do_process_size_layout(
+            ProcessLayoutArgs {
+                settings_json: &settings_json,
+                input_dom: &input_dom,
+                initial_layout_dom: &init.initial_dom,
+                layout_h_px: init.h_px,
+            },
+            "99",
+            &mut progress,
+        );
+        assert!(missing.is_err());
+    } // size_layout_packs_only_that_size
 
     // @brief Collect path end points of an element tree, for centre checks.
     fn collect_points_for_test(element: &xmltree::Element, points: &mut Vec<(f32, f32)>) {

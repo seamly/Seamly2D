@@ -6,6 +6,17 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-29 — Sized layouts and size tabs (Layout.37.1–37.3)
+
+Merged `task-sized-layout-tabs`. `cargo test --workspace`, `ctest --preset debug` passed.
+
+- Multisize Create Layout: "All sizes" layout first, then each size alone (`do_process_size_layout`, `piece_extractor::keep_size`), one size per QML timer tick.
+- Progress popup names each size: "Laying out size 36 (2 of 5)…". One warning at the end lists layouts that left pieces out.
+- Tabs above the right canvas. `layout_views.rs`: selecting a tab swaps the layout fields, so Adjust Mode and exports use the selected tab. Sheet PDF filters the import to the tab's size.
+- User decisions: pack at Create Layout; first tab "All sizes"; multi-page PDF (37.4) goes with the 36.2 export chooser.
+- Open: 36.2 By size export + 37.4 multi-page PDF; 38.2 real fixture; 38.3 running-app check.
+- Not checked in the running app. Check: multisize pattern → Create Layout → popup names sizes → tabs switch → Adjust on a size tab → export.
+
 ## 2026-09-29 — Multisize handoff: Nested and Marker layouts (Layout.30–35)
 
 Merged `task-multisize-layout`. `cargo test --workspace`, `ctest --preset debug`, `Seamly2DTests` passed. CollectionTest, ParserTest, TranslationsTest not run: no code they cover changed.
@@ -15,7 +26,7 @@ Merged `task-multisize-layout`. `cargo test --workspace`, `ctest --preset debug`
 - `exportPiecesAs()` batch export now uses `recalculateAtSize()`: size in pattern units, as `ChangedSize()` does. Before, it converted the size to cm, which is wrong for a mm pattern.
 - SeamlyLayout: setting `multisizeLayout` (`nested` default | `marker`), shown only when `AppController.isMultisize`.
 - Nested: `hoist_piece_sets`; each size turned on its own grainline; `svg_dom::center_piece_sets` stacks sizes on the largest, largest first. Marker: sets dissolve, label "Name (size N)".
-- Open: Layout.36.2 (By size export) and Layout.37 (sized layouts, per-size tabs); Layout.38.2 real fixture; Layout.38.3 check in the running apps.
+- Open items: see the sized-layouts entry above.
 - Not checked in the running apps. Check: open a pattern with a `.smms` file (e.g. `src/app/share/samples/measurements/multisize/gost_man_ru.smms`), enter Layout Mode, run Nested and Marker.
 
 ## 2026-09-29 — DXF-ASTM (CLO3D) export variant (Layout.57)

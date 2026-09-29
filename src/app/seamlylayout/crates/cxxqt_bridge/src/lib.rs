@@ -23,7 +23,10 @@ mod layout_assembler;
 pub use layout_assembler::{create_layout, create_initial_layout_dom, remove_color_blocks, trim_bottom};
 
 mod layout_utils;
-use layout_utils::{do_initialize_layout, do_process_layout, ProcessLayoutArgs};
+use layout_utils::{do_initialize_layout, do_process_layout, do_process_size_layout, ProcessLayoutArgs};
+
+mod layout_views;
+use layout_views::{LayoutState, LayoutViews, SizeLayoutQueue};
 
 mod layout_helpers;
 use layout_helpers::remove_group_by_id;
@@ -538,6 +541,8 @@ pub mod qobject {
     unsafe extern "C++" {
         include!("cxx-qt-lib/qstring.h");
         type QString = cxx_qt_lib::QString;
+        include!("cxx-qt-lib/qstringlist.h");
+        type QStringList = cxx_qt_lib::QStringList;
     }
 
     #[auto_cxx_name]
@@ -566,6 +571,12 @@ pub mod qobject {
         #[qproperty(bool, is_multisize)]
         // Sizes of a multisize import, comma-separated, in handoff order; empty otherwise.
         #[qproperty(QString, multisize_sizes)]
+        // Tab labels of a multisize layout: "All sizes", then "Size <n>"; empty otherwise.
+        #[qproperty(QStringList, layout_view_labels)]
+        // Index of the selected tab in `layout_view_labels`.
+        #[qproperty(i32, active_layout_view)]
+        // True while sizes are still queued for `process_next_size_layout`.
+        #[qproperty(bool, is_size_layout_pending)]
         type AppController = super::AppControllerRust;
 
         #[qsignal]
@@ -631,6 +642,14 @@ pub mod qobject {
 
         #[qinvokable]
         fn get_layout_dom_string(self: &AppController) -> QString;
+
+        // Lay out the next queued size of a multisize import; QML calls it once per tick.
+        #[qinvokable]
+        fn process_next_size_layout(self: Pin<&mut AppController>);
+
+        // Show another tab's layout; false when refused (Adjust Mode, layout running, bad index).
+        #[qinvokable]
+        fn select_layout_view(self: Pin<&mut AppController>, index: i32) -> bool;
 
         // --- Adjust Layout ---
 
@@ -926,6 +945,22 @@ pub struct AppControllerRust {
     // `data-sizes` of a multisize import, comma-separated; empty otherwise.
     multisize_sizes: cxx_qt_lib::QString,
 
+    // Tab labels mirrored from `layout_views` for QML.
+    layout_view_labels: cxx_qt_lib::QStringList,
+
+    // Selected tab, mirrored from `layout_views`.
+    active_layout_view: i32,
+
+    // True while `size_queue` holds sizes.
+    is_size_layout_pending: bool,
+
+    // Inactive tabs of a multisize layout; empty for an individual import.
+    // The active tab's layout lives in the layout fields above.
+    layout_views: LayoutViews,
+
+    // Sizes still to lay out after "All sizes"; `None` when no size run is pending.
+    size_queue: Option<SizeLayoutQueue>,
+
 } // struct AppControllerRust
 
 impl Default for AppControllerRust {
@@ -967,6 +1002,11 @@ impl Default for AppControllerRust {
             label_text_state:          cxx_qt_lib::QString::from(svg_label_text::LabelTextState::NoLabels.as_str()), // no SVG yet
             is_multisize:              false,                          // individual until an import says otherwise
             multisize_sizes:           cxx_qt_lib::QString::default(), // no sizes until a multisize import
+            layout_view_labels:        cxx_qt_lib::QStringList::default(), // no tabs until a multisize layout
+            active_layout_view:        0,                              // first tab
+            is_size_layout_pending:    false,                          // no size run queued
+            layout_views:              LayoutViews::default(),         // no tabs
+            size_queue:                None,                           // no size run queued
         } // Self
     } // fn default
 
@@ -1055,6 +1095,7 @@ impl qobject::AppController {
         )); // recomputed by finish_import
         self.as_mut().set_is_multisize(false); // recomputed by finish_import
         self.as_mut().set_multisize_sizes(cxx_qt_lib::QString::default()); // recomputed by finish_import
+        self.as_mut().clear_layout_views(); // tabs belong to the old document
         {
             let mut rust = self.as_mut().rust_mut();
             // don't clear input_dom yet - keep the current input_dom displayed (if any)
@@ -1185,6 +1226,8 @@ impl qobject::AppController {
 
         match do_initialize_layout(&json_str, input_dom_ref) {
             Ok(result) => {
+                // New settings invalidate every tab.
+                self.as_mut().clear_layout_views();
                 // Store results in rust state
                 {
                     let mut rust = self.as_mut().rust_mut();
@@ -1215,7 +1258,8 @@ impl qobject::AppController {
         mut self: std::pin::Pin<&mut Self>,
         settings_json: &cxx_qt_lib::QString,
     ) -> bool {
-        // Mark layout as in-progress and clear previous result.
+        // Mark layout as in-progress and clear previous result, tabs included.
+        self.as_mut().clear_layout_views();
         self.as_mut().set_is_layout_in_progress(true);
         self.as_mut().set_is_layout_ready(false);
         self.as_mut().set_layout_progress(0);
@@ -1295,6 +1339,38 @@ impl qobject::AppController {
                     rust.translate_dom     = Some(result.translate_dom);
                 } // rust borrow dropped
 
+                // Multisize: show "All sizes" now, then lay out each size on later ticks.
+                let sizes: Vec<String> = if *self.is_multisize() {
+                    self.multisize_sizes().to_string()
+                        .split(',').map(str::trim).filter(|s| !s.is_empty()).map(String::from).collect()
+                } else {
+                    Vec::new()
+                }; // sizes
+                if !sizes.is_empty() {
+                    let mut queue = SizeLayoutQueue::new(json_str.clone(), layout_h_px, sizes);
+                    if !result.unplaced_labels.is_empty() {
+                        queue.problems.push(format!(
+                            "{}: {}", layout_views::ALL_SIZES_LABEL, result.unplaced_labels.join(", ")
+                        ));
+                    } // if unplaced pieces
+                    let message = queue.next_message().unwrap_or_default();
+                    {
+                        let mut rust = self.as_mut().rust_mut();
+                        rust.layout_views.start_all_sizes();
+                        rust.size_queue = Some(queue);
+                    } // rust borrow dropped
+                    self.as_mut().refresh_layout_view_properties();
+
+                    // Keep the progress popup up and name the first size before
+                    // QML's next tick starts packing it.
+                    self.as_mut().set_layout_status_message(cxx_qt_lib::QString::from(message.as_str()));
+                    self.as_mut().set_layout_progress(0);
+                    self.as_mut().set_is_create_layout_enabled(false);
+                    self.as_mut().set_is_size_layout_pending(true);
+                    self.as_mut().layout_finished(); // right canvas shows "All sizes"
+                    return true;
+                } // if multisize
+
                 // Update properties and emit signals
                 self.as_mut().set_is_layout_in_progress(false);    // layout completed
                 self.as_mut().set_layout_progress(-1);             // reset progress bar to idle
@@ -1341,6 +1417,182 @@ impl qobject::AppController {
             None => cxx_qt_lib::QString::default(), // no layout assembled yet
         } // match layout_dom
     } // fn get_layout_dom_string
+
+    // Lay out the next queued size as its own layout and add it as a tab.
+    //
+    // QML calls this once per timer tick while `is_size_layout_pending` is true,
+    // so the progress popup repaints with the size name between sizes.
+    // A size that fails or leaves pieces out is reported once, after the last size.
+    fn process_next_size_layout(mut self: std::pin::Pin<&mut Self>) {
+        // Gather inputs; a cleared queue (new import or settings) makes this a no-op.
+        let inputs = {
+            let mut rust = self.as_mut().rust_mut();
+            let input_dom = rust.input_dom.clone();
+            let initial_dom = rust.initial_layout_dom.clone();
+            let Some(queue) = rust.size_queue.as_mut() else { return; };
+            let Some(size) = queue.pop() else { return; };
+            match (input_dom, initial_dom) {
+                (Some(input), Some(initial)) => {
+                    Some((size, queue.settings_json.clone(), queue.layout_h_px, input, initial))
+                }
+                _ => None, // the import or settings went away mid-run
+            } // match inputs
+        }; // rust borrow dropped
+        let Some((size, settings_json, layout_h_px, input_dom, initial_dom)) = inputs else {
+            self.as_mut().rust_mut().size_queue = None;
+            self.as_mut().finish_size_layouts();
+            return;
+        }; // inputs
+
+        let args = ProcessLayoutArgs {
+            settings_json: &settings_json,
+            input_dom: &input_dom,
+            initial_layout_dom: &initial_dom,
+            layout_h_px,
+        };
+        // Stage messages would hide the size name; only the percentage moves.
+        let mut progress = |percent: i32, _status: Option<&str>| {
+            self.as_mut().set_layout_progress(percent);
+            self.as_mut().progress_updated(percent);
+        };
+        let outcome = do_process_size_layout(args, &size, &mut progress);
+
+        // Store the tab, or note the problem for the final warning.
+        {
+            let mut rust = self.as_mut().rust_mut();
+            let label = layout_views::size_label(&size);
+            match outcome {
+                Ok(result) => {
+                    if !result.unplaced_labels.is_empty() {
+                        let line = format!("{label}: {}", result.unplaced_labels.join(", "));
+                        if let Some(queue) = rust.size_queue.as_mut() { queue.problems.push(line); }
+                    } // if unplaced pieces
+                    rust.layout_views.push_size(&size, LayoutState::from_result(result));
+                } // Ok
+                Err(e) => {
+                    log_to_file(&format!("[process_next_size_layout] {label} failed: {e}"));
+                    let line = format!("{label}: not laid out ({e})");
+                    if let Some(queue) = rust.size_queue.as_mut() { queue.problems.push(line); }
+                } // Err
+            } // match outcome
+        } // rust borrow dropped
+        self.as_mut().refresh_layout_view_properties();
+
+        // Name the next size, or finish.
+        let next_message = self.rust().size_queue.as_ref().and_then(|q| q.next_message());
+        match next_message {
+            Some(message) => {
+                self.as_mut().set_layout_status_message(cxx_qt_lib::QString::from(message.as_str()));
+                self.as_mut().set_layout_progress(0);
+            } // Some
+            None => self.as_mut().finish_size_layouts(),
+        } // match next_message
+    } // fn process_next_size_layout
+
+    // End a size run: close the progress popup, enable export and Adjust,
+    // and report every layout that left pieces out or failed.
+    fn finish_size_layouts(mut self: std::pin::Pin<&mut Self>) {
+        let problems = self.as_mut().rust_mut().size_queue.take()
+            .map(|q| q.problems)
+            .unwrap_or_default();
+
+        self.as_mut().set_is_size_layout_pending(false);
+        self.as_mut().set_is_layout_in_progress(false);
+        self.as_mut().set_layout_progress(-1);
+        self.as_mut().set_layout_status_message(cxx_qt_lib::QString::default());
+        self.as_mut().set_is_layout_ready(true);
+
+        if !problems.is_empty() {
+            let msg = format!(
+                "Some layouts left pieces out:\n\n{}\n\n\
+                 The remaining pieces were laid out. Try a larger sheet size, reduce the piece gap or margins, or remove pieces.",
+                problems.join("\n")
+            );
+            self.as_mut().layout_warning(cxx_qt_lib::QString::from(msg.as_str()));
+        } // if problems
+    } // fn finish_size_layouts
+
+    // Show another tab's layout on the right canvas.
+    //
+    // Swaps the controller's layout fields with the chosen view, so Adjust Mode
+    // and every export then work on that tab.  Emits `layout_finished` so QML
+    // reloads the right canvas.
+    fn select_layout_view(mut self: std::pin::Pin<&mut Self>, index: i32) -> bool {
+        // Switching mid-adjust or mid-layout would split one edit across two layouts.
+        if *self.is_adjust_mode() || *self.is_layout_in_progress() || index < 0 {
+            return false;
+        } // if refused
+        let index = index as usize;
+        if index == self.rust().layout_views.active() {
+            return true;
+        } // if already shown
+
+        let swapped = {
+            let mut rust = self.as_mut().rust_mut();
+            let current = LayoutState {
+                layout_dom:        rust.layout_dom.take(),
+                layout_h_px:       rust.layout_h_px,
+                layout_ml_px:      rust.layout_ml_px,
+                layout_mt_px:      rust.layout_mt_px,
+                piece_bboxes_json: std::mem::take(&mut rust.piece_bboxes_json),
+                flat_dom:          rust.flat_dom.take(),
+                vertical_dom:      rust.vertical_dom.take(),
+                translate_dom:     rust.translate_dom.take(),
+            }; // current
+            let (state, ok) = match rust.layout_views.select(index, current) {
+                Ok(state) => (state, true),
+                Err(state) => (state, false), // unchanged; put it back
+            }; // match select
+            rust.layout_dom        = state.layout_dom;
+            rust.layout_h_px       = state.layout_h_px;
+            rust.layout_ml_px      = state.layout_ml_px;
+            rust.layout_mt_px      = state.layout_mt_px;
+            rust.piece_bboxes_json = state.piece_bboxes_json;
+            rust.flat_dom          = state.flat_dom;
+            rust.vertical_dom      = state.vertical_dom;
+            rust.translate_dom     = state.translate_dom;
+            ok
+        }; // rust borrow dropped
+        if !swapped {
+            return false;
+        } // if bad index
+
+        self.as_mut().refresh_layout_view_properties();
+        self.as_mut().layout_finished(); // right canvas shows the chosen tab
+        true
+    } // fn select_layout_view
+
+    // Remove every tab and any queued size run.
+    //
+    // A size run cut short (new import or new settings) also closes the progress popup.
+    fn clear_layout_views(mut self: std::pin::Pin<&mut Self>) {
+        let was_running = {
+            let mut rust = self.as_mut().rust_mut();
+            rust.layout_views.clear();
+            rust.size_queue.take().is_some()
+        }; // rust borrow dropped
+        if was_running {
+            self.as_mut().set_is_layout_in_progress(false);
+            self.as_mut().set_layout_progress(-1);
+            self.as_mut().set_layout_status_message(cxx_qt_lib::QString::default());
+        } // if a size run was cut short
+        self.as_mut().set_is_size_layout_pending(false);
+        self.as_mut().refresh_layout_view_properties();
+    } // fn clear_layout_views
+
+    // Copy the tab labels and the active index from `layout_views` to the QML properties.
+    fn refresh_layout_view_properties(mut self: std::pin::Pin<&mut Self>) {
+        let (labels, active) = {
+            let views = &self.rust().layout_views;
+            let mut list = cxx_qt_lib::QList::<cxx_qt_lib::QString>::default();
+            for label in views.labels() {
+                list.append(cxx_qt_lib::QString::from(label.as_str()));
+            } // for label
+            (cxx_qt_lib::QStringList::from(&list), views.active() as i32)
+        }; // views borrow dropped
+        self.as_mut().set_layout_view_labels(labels);
+        self.as_mut().set_active_layout_view(active);
+    } // fn refresh_layout_view_properties
 
     // Return the piece bbox JSON array built by process_layout.
     //
@@ -1918,10 +2170,20 @@ impl qobject::AppController {
                 } // None
             }; // input_dom
 
+            // A size tab packs only that size's pieces, one unit per piece.
+            let (input_dom, nested_multisize) = match self.rust().layout_views.active_size() {
+                Some(size) => {
+                    let mut size_dom = input_dom;
+                    crate::piece_extractor::keep_size(&mut size_dom, size);
+                    (size_dom, false)
+                } // Some
+                None => (input_dom, settings.nested_multisize()),
+            }; // input_dom, nested_multisize
+
             let (flat_dom, pieces) = match build_sheet_export_inputs(
                 &input_dom,
                 settings.free_rotation_without_grainline(),
-                settings.nested_multisize(),
+                nested_multisize,
             ) {
                 Ok(v) => v,
                 Err(e) => {

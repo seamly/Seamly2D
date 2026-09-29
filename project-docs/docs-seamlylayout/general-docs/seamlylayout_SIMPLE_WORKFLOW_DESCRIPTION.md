@@ -182,6 +182,16 @@ The application workflow loop consists of:
      * Disable 'Create Layout' button
      * Enable 'Adjust Layout' button
      * Enable 'Export' button
+   * Multisize import (data-measurements='multisize') — sized layouts:
+     * The first layout is the "All sizes" tab (Nested or Marker, from Settings).
+     * Then each size is laid out alone: only that size's pieces, one unit per piece, same settings.
+     * One size per UI tick (`processNextSizeLayout`); the progress popup names the size: "Laying out size 36 (2 of 5)…".
+     * 'Adjust Layout' and 'Export' stay disabled until the last size finishes.
+     * One warning after the last size lists every layout that left pieces out or failed.
+     * Tabs above the right canvas: "All sizes", "Size 34", "Size 36", …
+     * Selecting a tab swaps that layout into the controller's layout fields; Adjust Layout and every export use the selected tab.
+     * Tabs are locked during layout and during Adjust Mode.
+     * An Adjust Save changes only the selected tab. The next Create Layout, Settings Submit or import replaces all tabs.
 5. Adjust Layout --> User clicks 'Adjust Layout' button:
 
    * Activates 'AdjustMode' that:
