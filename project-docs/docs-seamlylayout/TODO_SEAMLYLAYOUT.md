@@ -55,8 +55,19 @@ Add a layout export option for multisize patterns — svg files or stringified s
 - [x] Layout.52 HPGL — unlocks the whole plotter and cutter class
 - [x] Layout.53 PS/EPS — one writer covers both and retires pdftops
 - [x] Layout.54 JPG — trivial, fit it anywhere
-- [ ] Layout.55 DXF-ASTM - improve current export so that it meets the DXF-ASTM standard
+- [x] Layout.55 DXF-ASTM - improve current export so that it meets the DXF-ASTM standard
 - [ ] Layout.56 Tiled PS — multi-page PostScript with the same tiles as PDF (Tiled); `ps_writer` writes one page today
+
+## [ ] Task Layout.6 - DXF-ASTM: D6673 features without a Seamly2D source
+
+See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
+
+- [ ] Layout.61 Grading: grade rule identifiers (`# n` text), graded nests (one block per size, `Size Name:`), grade reference line (layer 5), grade rule table file
+- [ ] Layout.62 Mirror line (layer 6) for pieces cut on the fold
+- [ ] Layout.63 Drill holes (layer 13), with diameter (group 30)
+- [ ] Layout.64 Stripe and plaid reference lines (layers 9, 10)
+- [ ] Layout.65 Seamly2D writes empty notch paths (`M x,y Z`) to the handoff SVG, so no notches reach the DXF — fix the producer
+- [ ] Layout.66 Seamly2D producer attributes: `data-quantity` (right/left), `data-on-fold`, `data-material`, `data-notch-type` — replaces label parsing and notch-shape inference
 
 ## [x] Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 

@@ -631,6 +631,7 @@ name = "ezdxf2dxfastm"
 version = "0.1.0"
 dependencies = [
  "seamly_svg2ezdxf",
+ "svg_dom",
  "thiserror 1.0.69",
 ]
 

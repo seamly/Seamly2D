@@ -2,12 +2,17 @@
 
 ## Reference
 
-See full documentation in [`dxf-docs/DXF_EXPORT_WORKFLOW.md`](../../project-docs/seamlylayout-docs/dxf-docs/seamlylayout_DXF_EXPORT_WORKFLOW.md)
+- Workflow: [`seamlylayout_DXF_EXPORT_WORKFLOW.md`](../../project-docs/docs-seamlylayout/dxf-docs/seamlylayout_DXF_EXPORT_WORKFLOW.md)
+- ASTM D6673-10 rules, layers and decisions: [`seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`](../../project-docs/docs-seamlylayout/dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md)
 
 ## Key Constraints
 
-- DXF format: **DXF R12 (AC1009)**
+- DXF format: **DXF R12 (AC1009)** syntax, ASTM D6673-10 content
+- Units: **METRIC only** — SVG px (96 dpi) × 25.4 / 96 → mm, written with 2 decimals
 - Coordinate transformation: **Y-axis inversion** required
+- Layer choice: component `data-type` first; a piece id never sets a layer
+- Every key-point layer (1, 8, 11, 14) has its validation layer (84, 85, 86, 87)
+- No CLO3D group 250
 - Debug output: Save ezdxf to `output/` folder as `.txt`
 
 ## Export Flow

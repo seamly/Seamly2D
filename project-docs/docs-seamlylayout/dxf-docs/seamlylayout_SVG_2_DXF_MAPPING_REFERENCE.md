@@ -177,16 +177,21 @@ SVG paths are complex and may map to multiple DXF entities:
 
 ### SVG Groups → DXF Layers (ASTM-D6673-10)
 
-**SVG → DXF** (our implementation):
-- Map SVG `<g>` elements with IDs to DXF layers
-- Use predefined ASTM layer names:
-  - `*cutline*` or `*boundary*` → "Piece boundary"
-  - `*notch*` → "Notches"
-  - `*grainline*` or `*grain*` → "Grain line"
-  - `*seamline*` or `*seam*` → "Sew lines"
-  - `*text*` → "Text/Annotations"
-  - `*drill*` or `*hole*` → "Drill holes"
-  - Default → "Internal lines"
+**SVG → DXF** (our implementation): the component `data-type` picks the numeric
+ASTM layer. Untagged SVGs fall back to id hints. A piece id never sets a layer.
+See [seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md](seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md).
+
+| `data-type` | Id hint (untagged) | Layer |
+|---|---|---|
+| `cutline` | `cutline`, `boundary` | 1 (validation 84) |
+| `seamline` | `seam` | 14 (validation 87) |
+| `internal_path` | `internal_path`, `tuck` | 8 (validation 85) |
+| `cut_path` | `cut_path` | 11 (validation 86) |
+| `notch` | `notch` | 4, 80, 81, 83 |
+| `grainline` | `grain` | 7 |
+| `piece_label`, `pattern_label` | `label` | 15 |
+| — | `drill`, `hole` | 13 |
+| other | — | 8 |
 
 ## Block Structure
 
@@ -331,23 +336,23 @@ SEQEND
 
 ### Example 4: Text
 
-**SVG**:
+**SVG** (px, 96 dpi; the page is 960 px high):
 ```xml
-<text x="50" y="50" font-size="12">Pattern Piece A</text>
+<text x="96" y="864" font-size="24">Pattern Piece A</text>
 ```
 
-**DXF** (R12):
+**DXF** (R12, METRIC — Y inverted, px converted to mm):
 ```
 0
 TEXT
 8
-Text/Annotations
+15
 10
-50.0
+25.40
 20
-50.0
+25.40
 40
-12.0
+6.35
 1
 Pattern Piece A
 ```

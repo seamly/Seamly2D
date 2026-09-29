@@ -144,7 +144,14 @@ ApplicationWindow {
             var fmt  = root.pendingExportFormat
             if (path === "" || fmt === "") return  // nothing staged
             if (fmt === "dxf") {
-                var optJson = JSON.stringify({ createTeachingVersion: root.pendingExportTeachingVersion })
+                // Local date/time and version fill the DXF-ASTM style system text.
+                var now = new Date()
+                var optJson = JSON.stringify({
+                    createTeachingVersion: root.pendingExportTeachingVersion,
+                    appVersion:   Qt.application.version,
+                    creationDate: Qt.formatDateTime(now, "dd-MM-yyyy"),
+                    creationTime: Qt.formatDateTime(now, "hh-mm")
+                })
                 appController.exportDxf(path, optJson)
             } else if (fmt === "png") {
                 appController.exportPng(path, 1.0)

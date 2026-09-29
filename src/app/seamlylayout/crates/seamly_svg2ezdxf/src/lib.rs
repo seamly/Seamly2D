@@ -8,6 +8,8 @@
 //!          Drawing object. This intermediate format can then be exported
 //!          to various DXF formats (e.g., DXF-ASTM via ezdxf2dxfastm).
 
+mod astm_contour;
+mod astm_notch;
 mod converter;
 mod drawing;
 mod entities;
@@ -17,12 +19,16 @@ mod utils;
 
 #[cfg(test)]
 mod converter_test;
+#[cfg(test)]
+mod astm_piece_test;
 
 pub use converter::{SvgToEzdxfOptions, svg_to_ezdxf};
-pub use drawing::{Block, Drawing, DxfVersion};
+pub use astm_contour::{build_contour, AstmContour, CURVE_TOLERANCE_MM};
+pub use astm_notch::{build_notches, Notch, NotchKind};
+pub use drawing::{Annotation, Block, Drawing, DxfVersion};
 pub use entities::{Arc, Circle, DxfPoint, Entity, Line, Point, Polyline, Text};
 pub use error::{Result, SvgToEzdxfError};
-pub use utils::{detect_corners, invert_y_axis, parse_float_attr, sanitize_ascii, sanitize_block_name};
+pub use utils::{detect_corners, invert_y_axis, parse_float_attr, parse_length_attr, sanitize_ascii, sanitize_block_name, MM_PER_PX};
 
 // @brief Write Drawing to output directory for inspection.
 // @param drawing The Drawing object to write.

@@ -6,6 +6,19 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-28 — DXF-ASTM to ASTM D6673-10 (Layout.55)
+
+Merged `task-dxf-astm`. Full CI: `Cargo.toml` changed. `cargo test --workspace`, `ctest --preset debug` passed. `local_build_msi.ps1` not run: no Seamly2D or SeamlyMe code changed.
+
+- Rules, layers and decisions: `project-docs/docs-seamlylayout/dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
+- User decisions: METRIC only (px → mm, 2 decimals); keep AC1009; drop CLO3D group 250 and the duplicate L2/L3 set; keep `_M` block names; L1 key points + L84 dense (curve tolerance 0.25 mm); SeamlyLayout-only scope.
+- New: style and piece system text, real seam line on L14, L84–L87, L8/L11/L15, notch POINTs (4/80/81/83), turn/curve classifier.
+- New modules `astm_contour.rs`, `astm_notch.rs`; tests `astm_piece_test.rs`, `writer_astm_test.rs`; fixture `ezdxf2dxfastm/test_data/male_shirt_pieces.svg`.
+- `ezdxf2dxfastm` dev-dependency `svg_dom`; `rust_crate_notices.txt` fingerprint regenerated.
+- QML `Main.qml` sends `appVersion`, local `creationDate`, `creationTime` in the DXF options JSON.
+- Not checked in the running app, nor re-analysed at aw.fyi/dxf. Check: export male_shirt layout to DXF-ASTM; upload to aw.fyi/dxf; compare with `test-seamly-layout-input/male_shirt_202609241936-dxf-report.pdf`.
+- Follow-ups filed as Task Layout.6 (grading, L6, L13, L9/L10, empty notch paths from Seamly2D, producer attributes).
+
 ## 2026-09-28 — JPG export (Layout.54)
 
 Merged `task-jpg-export`. Full CI: `Cargo.toml` changed. `cargo test --workspace`, `ctest --preset debug` passed. `local_build_msi.ps1` not run: no Seamly2D or SeamlyMe code changed.

@@ -43,6 +43,29 @@ pub fn validate_astm_compliance(
             });
         }
 
+        // D6673 §4.3.1.2: Piece Name is required and system text is 7-bit ASCII.
+        if block.piece_name.is_empty() || !block.piece_name.is_ascii() {
+            errors.push(ValidationError {
+                message: format!("Block {} has an empty or non-ASCII piece name: '{}'", block_idx, block.piece_name),
+            });
+        }
+        if block.annotations.iter().any(|a| !a.text.is_ascii()) {
+            errors.push(ValidationError {
+                message: format!("Block {} has non-ASCII annotation text", block_idx),
+            });
+        }
+
+        // D6673 §4.3.3.1: every key-point polyline has a validation polyline
+        // holding all of its vertices, so it can never have fewer vertices.
+        let contours = block.boundary.iter().chain(&block.sew_lines).chain(&block.internal_lines).chain(&block.cutouts);
+        for contour in contours {
+            if contour.reduced.len() > contour.dense.len() || contour.reduced.len() != contour.turn.len() {
+                errors.push(ValidationError {
+                    message: format!("Block {} has an inconsistent contour ({} key points, {} validation points)", block_idx, contour.reduced.len(), contour.dense.len()),
+                });
+            }
+        }
+
         // Validate entities in block.
         for (entity_idx, entity) in block.entities.iter().enumerate() {
             let entity_type = entity.entity_type();

@@ -4,7 +4,7 @@
 
 //! @brief DXF entity encoding using group codes.
 
-use seamly_svg2ezdxf::{Circle, DxfPoint, Entity, Line, Point, Polyline, Text};
+use seamly_svg2ezdxf::{Circle, DxfPoint, Entity, Line, Notch, NotchKind, Point, Polyline, Text};
 use std::any::Any;
 use std::io::Write;
 
@@ -31,13 +31,14 @@ fn write_group_code_int(writer: &mut dyn Write, code: i32, value: i32) -> std::i
 }
 
 // @brief Write a group code with float value.
+// @details D6673 METRIC: decimal millimetres to two places.
 // @param writer The writer to write to.
 // @param code The group code.
 // @param value The float value.
 // @return Result indicating success or error.
 fn write_group_code_float(writer: &mut dyn Write, code: i32, value: f64) -> std::io::Result<()> {
     writeln!(writer, "{}", code)?;
-    writeln!(writer, "{:.6}", value)?;
+    writeln!(writer, "{:.2}", value)?;
     Ok(())
 }
 
@@ -167,53 +168,69 @@ pub fn encode_dxf_point(writer: &mut dyn Write, point: &DxfPoint) -> std::io::Re
     Ok(())
 } // fn encode_dxf_point
 
-// @brief Encode a CLO3D-style POLYLINE with the vertices-follow flag and group-250 marker.
-//
-// Produces the exact POLYLINE + VERTEX + SEQEND sequence used by seamly2clo.py:
-//   POLYLINE / layer / 66=1 / 70=1 / 250=group_250
-//   VERTEX   / layer / 10=x / 20=y   (no 70=32 vertex flag)
-//   ...
-//   SEQEND
-//
-// @param writer     The writer to write to.
-// @param vertices   Ordered list of vertex coordinates.
-// @param layer      DXF layer string for the POLYLINE and its VERTEXes.
-// @param group_250  Value for group code 250 (2 = sewing line, 0 = boundary).
+// @brief Encode an ASTM D6673 POLYLINE: vertices-follow flag, closed flag, VERTEXes, SEQEND.
+// @param writer   The writer to write to.
+// @param vertices Ordered vertices; a closed polyline does not repeat its first vertex.
+// @param layer    DXF layer for the POLYLINE, its VERTEXes and SEQEND.
+// @param closed   Whether the polyline is closed (group 70 = 1).
 // @return Result indicating success or error.
-pub fn encode_clo_polyline(
+pub fn encode_astm_polyline(
     writer: &mut dyn Write,
     vertices: &[Point],
     layer: &str,
-    group_250: i32,
+    closed: bool,
 ) -> std::io::Result<()> {
-    // Entity type.
     write_group_code(writer, 0, "POLYLINE")?;
-
-    // Layer (group code 8).
     write_group_code(writer, 8, layer)?;
-
-    // Vertices-follow flag (group code 66: 1 = vertices follow).
-    write_group_code_int(writer, 66, 1)?;
-
-    // Closed polyline flag (group code 70: 1 = closed).
-    write_group_code_int(writer, 70, 1)?;
-
-    // Group code 250: 2 = sewing line, 0 = boundary.
-    write_group_code_int(writer, 250, group_250)?;
-
-    // Write each vertex as a VERTEX entity (no 70=32 vertex flag, matching seamly2clo.py).
+    write_group_code_int(writer, 66, 1)?; // vertices follow
+    write_group_code_int(writer, 70, if closed { 1 } else { 0 })?;
     for v in vertices {
         write_group_code(writer, 0, "VERTEX")?;
         write_group_code(writer, 8, layer)?;
         write_group_code_float(writer, 10, v.x)?;
         write_group_code_float(writer, 20, v.y)?;
     } // for each vertex
-
-    // End of vertex sequence.
     write_group_code(writer, 0, "SEQEND")?;
-
+    write_group_code(writer, 8, layer)?;
     Ok(())
-} // fn encode_clo_polyline
+} // fn encode_astm_polyline
+
+// @brief Encode a TEXT entity; used for system text (layer 1) and annotation text (layer 15).
+// @param rotation Degrees counter-clockwise; group 50 is omitted when 0.
+pub fn encode_astm_text(
+    writer: &mut dyn Write,
+    layer: &str,
+    position: Point,
+    height: f64,
+    rotation: f64,
+    content: &str,
+) -> std::io::Result<()> {
+    write_group_code(writer, 0, "TEXT")?;
+    write_group_code(writer, 8, layer)?;
+    write_group_code_float(writer, 10, position.x)?;
+    write_group_code_float(writer, 20, position.y)?;
+    write_group_code_float(writer, 40, height)?;
+    write_group_code(writer, 1, content)?;
+    if rotation.abs() >= 0.005 {
+        write_group_code_float(writer, 50, rotation)?;
+    } // if rotated
+    Ok(())
+} // fn encode_astm_text
+
+// @brief Encode a notch as a D6673 §4.3.4 POINT: base point, depth (30), width (39), angle (50).
+// @details Width is omitted for a slit notch, which has none.
+pub fn encode_notch(writer: &mut dyn Write, notch: &Notch) -> std::io::Result<()> {
+    write_group_code(writer, 0, "POINT")?;
+    write_group_code(writer, 8, notch.kind.layer())?;
+    write_group_code_float(writer, 10, notch.base.x)?;
+    write_group_code_float(writer, 20, notch.base.y)?;
+    write_group_code_float(writer, 30, notch.depth)?;
+    if notch.kind != NotchKind::Slit {
+        write_group_code_float(writer, 39, notch.width)?;
+    } // if has width
+    write_group_code_float(writer, 50, notch.angle_deg)?;
+    Ok(())
+} // fn encode_notch
 
 // @brief Encode a generic entity to DXF format.
 // @param writer The writer to write to.
