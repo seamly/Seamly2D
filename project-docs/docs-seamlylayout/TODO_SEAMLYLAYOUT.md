@@ -52,11 +52,11 @@ Add a layout export option for multisize patterns — svg files or stringified s
 ## [ ] Task Layout.5 - Implement additional export formats
 
 - [ ] Layout.51 DXF-AAMA — biggest install base in apparel PLM, reference implementation already in the repo
+  - **On hold** — no AAMA spec on hand. Get the spec, or study sample AAMA `.dxf` files from other CAD systems, before implementing.
 - [x] Layout.52 HPGL — unlocks the whole plotter and cutter class
 - [x] Layout.53 PS/EPS — one writer covers both and retires pdftops
 - [x] Layout.54 JPG — trivial, fit it anywhere
 - [x] Layout.55 DXF-ASTM - improve current export so that it meets the DXF-ASTM standard
-- [ ] Layout.56 Tiled PS — multi-page PostScript with the same tiles as PDF (Tiled); `ps_writer` writes one page today
 - [x] Layout.57 DXF-ASTM (CLO3D) — Export menu item: D6673-10 file plus CLO3D group 250 (0 = boundary, 2 = sew line)
 
 ## [ ] Task Layout.6 - DXF-ASTM: D6673 features without a Seamly2D source
