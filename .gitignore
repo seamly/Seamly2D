@@ -24,6 +24,11 @@
 # Third-party license notices shipped in every installer are committed text files.
 !packaging/licenses/*.txt
 
+# other docs
+*.docx
+*.pdf
+*.tex
+
 # test key files
 *seamly-signing-key.json
 
