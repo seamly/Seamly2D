@@ -17,6 +17,7 @@
 //   do_export_pdf(doc, path)                          -> Result<(), String>
 //   (doc, path, tile_dims)         -> Result<(), String>
 //   do_export_png(doc, path, scale)                   -> Result<(), String>
+//   do_export_jpeg(doc, path, progress)               -> Result<(), String>
 //   do_export_svg(doc, path)                          -> Result<(), String>
 //   parse_hpgl_options(options_json)                  -> Result<HpglOptions, String>
 //   do_export_hpgl(doc, path, options)                -> Result<Vec<String>, String>
@@ -1478,6 +1479,48 @@ pub fn do_export_png(
 } // fn do_export_png
 
 // ---------------------------------------------------------------------------
+// JPEG export
+// ---------------------------------------------------------------------------
+
+// @brief Export a stripped layout document to a JPEG file.
+//
+// Same render as PNG export (100% scale, white background), then JPEG
+// encoding at app_core::JPEG_DEFAULT_QUALITY.
+//
+// @param doc      Cloned, piece-fill-stripped layout DOM.
+// @param path     Destination .jpg or .jpeg file path.
+// @param progress Callback invoked with 10 (parse start) and 90 (file written).
+//                 The caller owns 0% (before call) and 100% (after Ok return).
+// @return Ok(()) on success; Err(message) on any failure, including a layout
+//         larger than JPEG allows on one side.
+pub fn do_export_jpeg(
+    doc: &svg_dom::Document,
+    path: &str,
+    progress: &mut impl FnMut(i32),
+) -> Result<(), String> {
+    crate::log_to_file(&format!("[exports.rs] do_export_jpeg(): 1 parsing SVG DOM to usvg tree for '{path}'"));
+    progress(10);
+
+    // DOM → usvg tree.
+    let tree = app_core::document_to_tree(doc, None).map_err(|e| {
+        crate::log_to_file(&format!("[exports.rs] do_export_jpeg(): 2 SVG parse failed: {e}"));
+        format!("JPG export failed — SVG parse error: {e}")
+    })?; // if parse failed
+
+    crate::log_to_file(&format!("[exports.rs] do_export_jpeg(): 2 SVG parsed; rendering JPEG to '{path}'"));
+
+    // usvg tree → pixmap → JPEG file.
+    app_core::render_jpeg(&tree, Path::new(path), 1.0, app_core::JPEG_DEFAULT_QUALITY).map_err(|e| {
+        crate::log_to_file(&format!("[exports.rs] do_export_jpeg(): 3 render failed: {e}"));
+        format!("JPG export failed — {e}")
+    })?; // if render failed
+
+    progress(90);
+    crate::log_to_file(&format!("[exports.rs] do_export_jpeg(): 3 wrote JPEG '{path}'"));
+    Ok(())
+} // fn do_export_jpeg
+
+// ---------------------------------------------------------------------------
 // SVG export
 // ---------------------------------------------------------------------------
 
@@ -2229,6 +2272,68 @@ mod tests {
         assert_eq!(ticks[0], 10, "first tick must be 10% (SVG parse start)");
         assert_eq!(ticks[1], 90, "second tick must be 90% (PNG file written)");
     } // do_export_png_emits_intermediate_progress
+
+    // @brief do_export_jpeg writes a JPEG file and emits the 10 and 90 progress ticks.
+    #[test]
+    fn do_export_jpeg_writes_valid_jpeg() {
+        let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+            <rect x="10" y="10" width="180" height="180" fill="none" stroke="#000000" stroke-width="1"/>
+        </svg>"##;
+        let doc = Document::parse(svg).expect("fixture SVG should parse");
+
+        // Unique temp path so parallel test runs don't collide.
+        let path_str = std::env::temp_dir()
+            .join(format!("seamly_jpeg_export_test_{}.jpg", std::process::id()))
+            .to_string_lossy()
+            .to_string();
+
+        let mut ticks: Vec<i32> = Vec::new();
+        do_export_jpeg(&doc, &path_str, &mut |pct| ticks.push(pct)).expect("JPG export should succeed");
+
+        let bytes = std::fs::read(&path_str).expect("exported JPEG file should be readable");
+        let _ = std::fs::remove_file(&path_str); // best-effort cleanup
+
+        // JPEG files begin with the SOI marker FF D8 followed by another marker FF.
+        assert!(
+            bytes.starts_with(&[0xFF, 0xD8, 0xFF]),
+            "exported file should start with JPEG SOI marker, got {:?}",
+            &bytes[..bytes.len().min(3)]
+        );
+        assert_eq!(ticks, vec![10, 90], "progress ticks must be 10 then 90");
+    } // do_export_jpeg_writes_valid_jpeg
+
+    // @brief do_export_jpeg returns a 'JPG export failed' error for an unwritable path.
+    #[test]
+    fn do_export_jpeg_returns_err_on_bad_path() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"></svg>"#;
+        let doc = Document::parse(svg).expect("fixture SVG should parse");
+
+        // A path whose parent directory does not exist cannot be written.
+        let bad_path = std::env::temp_dir()
+            .join(format!("nonexistent_dir_seamly_jpeg_{}", std::process::id()))
+            .join("missing")
+            .join("test.jpg")
+            .to_string_lossy()
+            .to_string();
+
+        let msg = do_export_jpeg(&doc, &bad_path, &mut |_| {}).expect_err("unwritable path must fail");
+        assert!(msg.contains("JPG export failed"), "got: {msg}");
+    } // do_export_jpeg_returns_err_on_bad_path
+
+    // @brief do_export_jpeg reports the JPEG size limit instead of writing a file.
+    #[test]
+    fn do_export_jpeg_returns_err_for_oversized_layout() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="70000" height="10"></svg>"#;
+        let doc = Document::parse(svg).expect("fixture SVG should parse");
+        let path_str = std::env::temp_dir()
+            .join(format!("seamly_jpeg_too_wide_{}.jpg", std::process::id()))
+            .to_string_lossy()
+            .to_string();
+
+        let msg = do_export_jpeg(&doc, &path_str, &mut |_| {}).expect_err("oversized layout must fail");
+        assert!(msg.contains("65535"), "error should name the JPEG limit, got: {msg}");
+        assert!(!Path::new(&path_str).exists(), "no file may be written");
+    } // do_export_jpeg_returns_err_for_oversized_layout
 
     // @brief PS and EPS exports write their DSC headers to disk.
     #[test]

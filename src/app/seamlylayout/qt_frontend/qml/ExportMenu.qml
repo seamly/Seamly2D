@@ -25,6 +25,9 @@
 // pen submenu per line class, and the file extension.
 //
 // With showPostScript true (Export menu), EPS and PostScript (PS) items are shown.
+//
+// With showJpg true (Export menu), PNG and JPG are separate items. Otherwise
+// (View menu) one "PNG/JPG" item opens either format in the image viewer.
 // The View menu has none: a .ps or .eps file opens in the system viewer.
 //
 // G-Code and 3D Mesh (3MF) are paid formats. Each item stays hidden until
@@ -75,6 +78,10 @@ Menu {
     // @brief When true, the EPS and PostScript (PS) items are shown (Export menu only).
     property bool showPostScript: false
 
+    // @brief When true, a separate JPG item is shown (Export menu); when false,
+    //        the PNG item reads "PNG/JPG" (View menu).
+    property bool showJpg: false
+
     // @brief True when the paid G-Code module is usable; shows the G-Code item.
     property bool gcodeExportAvailable: false
 
@@ -92,6 +99,9 @@ Menu {
 
     // @brief Emitted when the user selects PNG export (Phase 11).
     signal exportPngRequested()
+
+    // @brief Emitted when the user selects JPG export.
+    signal exportJpgRequested()
 
     // @brief Emitted when the user selects the single SVG item (View menu).
     signal exportSvgRequested()
@@ -147,10 +157,17 @@ Menu {
     } // MenuItem PDF Tiled
 
     MenuItem {
-        text: "PNG"
+        text: root.showJpg ? "PNG" : "PNG/JPG"
         enabled: root.layoutReady // enabled when layout is ready
         onTriggered: root.exportPngRequested()
     } // MenuItem PNG
+
+    MenuItem {
+        id: jpgItem
+        text: "JPG"
+        enabled: root.layoutReady // enabled when layout is ready
+        onTriggered: root.exportJpgRequested()
+    } // MenuItem JPG
 
     MenuItem {
         id: epsItem
@@ -412,6 +429,10 @@ Menu {
             root.removeItem(epsItem)
             root.removeItem(psItem)
         } // if !showPostScript
+        // The View menu opens JPG files through the "PNG/JPG" item.
+        if (!root.showJpg) {
+            root.removeItem(jpgItem)
+        } // if !showJpg
     } // Component.onCompleted
 
     // Hidden Menu items keep their height; collapse them so the Export menu has no blank row.

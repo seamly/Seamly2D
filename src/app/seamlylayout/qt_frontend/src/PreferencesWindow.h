@@ -11,7 +11,7 @@
 // Two sections:
 //   1. Directories — Input SVG Directory, Layout Output Directory,
 //      Settings Directory, Default Settings File
-//   2. Viewer Applications — DXF Viewer, PDF Viewer, PNG Viewer executable paths
+//   2. Viewer Applications — DXF Viewer, PDF Viewer, Image Viewer (PNG, JPG) executable paths
 //
 // Each field: read-only QLineEdit + Browse button opening a native file/folder dialog.
 // Save persists via PreferencesModel::save(); Discard reloads via PreferencesModel::load().

@@ -6,6 +6,17 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-28 — JPG export (Layout.54)
+
+Merged `task-jpg-export`. Full CI: `Cargo.toml` changed. `cargo test --workspace`, `ctest --preset debug` passed. `local_build_msi.ps1` not run: no Seamly2D or SeamlyMe code changed.
+
+- `app_core::render_jpeg` (quality 90, fixed); bridge `AppController::export_jpeg`; Export > JPG.
+- `image` crate, `jpeg` feature only. Already in `Cargo.lock` through `svg2pdf`; `rust_crate_notices.txt` fingerprint regenerated.
+- JPEG limit 65535 px per side: error before render, no file.
+- User decisions: success dialog after export (no viewer); View > PNG becomes View > PNG/JPG; Preferences label "Image Viewer (PNG, JPG)". INI key stays `png_viewer_path`.
+- Preference label column widened 160 → 200 px in `PreferencesWindow.cpp` and `PreferencesPanel.qml`, so the longer label fits.
+- Not checked in the running app. Check: Export > JPG; View > PNG/JPG opens a `.jpg`; Preferences label fits.
+
 ## 2026-09-28 — local_build_msi.ps1 echo fix
 
 Merged `task-build-echo-ampersand`. Full CI: touches `packaging/**`.
