@@ -191,6 +191,18 @@ ApplicationWindow {
         } // onTriggered
     } // Timer exportStartTimer
 
+    // Lays out one queued size of a multisize import per tick.  The pause
+    // between sizes lets the progress popup repaint with the next size name.
+    Timer {
+        id: sizeLayoutTimer
+        interval: 50
+        repeat: false
+        onTriggered: {
+            appController.processNextSizeLayout()
+            if (appController.isSizeLayoutPending) sizeLayoutTimer.restart()
+        } // onTriggered
+    } // Timer sizeLayoutTimer
+
     // @brief Build a default export filename: <importedBaseName>_YYYYMMDDHHSS[_tiled].<ext>
     // @param ext File extension without dot (e.g. "dxf", "png").
     // @param tiled If true, appends "_tiled" to the filename. Default is false.
@@ -267,7 +279,11 @@ ApplicationWindow {
         } // onImportFinished
 
         // Load the layout SVG in the right canvas after self.layout_dom is successfully created.
-        onLayoutFinished: rightCanvas.reloadSvg(appController.getLayoutDomString())
+        // A multisize layout then queues its sizes; the timer lays them out one by one.
+        onLayoutFinished: {
+            rightCanvas.reloadSvg(appController.getLayoutDomString())
+            if (appController.isSizeLayoutPending) sizeLayoutTimer.restart()
+        } // onLayoutFinished
 
         // Export success — store path for View menu; show dialog or open viewer.
         onExportFinished: function(path) {
@@ -769,10 +785,62 @@ ApplicationWindow {
                 border.color: appController.isAdjustMode ? Theme.violetLight : "transparent"
                 border.width: appController.isAdjustMode ? 3 : 0
 
+                // Size tabs of a multisize layout: "All sizes", then one per size.
+                // Hidden when there is only one layout.  Locked while a layout
+                // runs or Adjust Mode is open, so an edit stays on one tab.
+                TabBar {
+                    id: layoutViewTabs
+                    anchors.top:  parent.top
+                    anchors.left: parent.left
+                    visible:      appController.layoutViewLabels.length > 1 && !appController.isAdjustMode
+                    enabled:      !appController.isLayoutInProgress && !appController.isAdjustMode
+                    background:   Rectangle { color: Theme.appBackground }
+
+                    // Follow the controller imperatively: a click assigns
+                    // currentIndex, which would break a declarative binding.
+                    Connections {
+                        target: appController
+                        function onActiveLayoutViewChanged() { layoutViewTabs.currentIndex = appController.activeLayoutView }
+                        function onLayoutViewLabelsChanged() { layoutViewTabs.currentIndex = appController.activeLayoutView }
+                    } // Connections appController
+
+                    Repeater {
+                        model: appController.layoutViewLabels
+                        TabButton {
+                            id: layoutViewTab
+                            required property string modelData
+                            required property int index
+                            text:  modelData
+                            width: implicitWidth
+                            contentItem: Text {
+                                text:  layoutViewTab.text
+                                color: layoutViewTab.checked ? Theme.violetDark : Theme.textOnDark
+                                font.pixelSize: Theme.fontSizeNormal
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment:   Text.AlignVCenter
+                            } // Text contentItem
+                            background: Rectangle {
+                                color: layoutViewTab.checked ? Theme.canvasBackground
+                                     : layoutViewTab.hovered ? Theme.violetMedium : Theme.violet
+                                border.color: Theme.violetLight
+                                border.width: 1
+                            } // Rectangle background
+                            // Refused switches snap back to the tab the controller shows.
+                            onClicked: {
+                                if (!appController.selectLayoutView(index))
+                                    layoutViewTabs.currentIndex = appController.activeLayoutView
+                            } // onClicked
+                        } // TabButton
+                    } // Repeater
+                } // TabBar layoutViewTabs
+
                 // Static layout display — shown when NOT in AdjustMode
                 SvgCanvas {
                     id: rightCanvas
-                    anchors.fill:    parent
+                    anchors.top:     layoutViewTabs.visible ? layoutViewTabs.bottom : parent.top
+                    anchors.left:    parent.left
+                    anchors.right:   parent.right
+                    anchors.bottom:  parent.bottom
                     anchors.margins: 0
 
                     visible:         !appController.isAdjustMode
@@ -796,7 +864,7 @@ ApplicationWindow {
                                       Theme.violetDark.b, 0.82)
                     border.color: Theme.violetLight
                     border.width: 1
-                    anchors.top:   parent.top
+                    anchors.top:   rightCanvas.top
                     anchors.right: parent.right
                     anchors.topMargin:   10
                     anchors.rightMargin: 14

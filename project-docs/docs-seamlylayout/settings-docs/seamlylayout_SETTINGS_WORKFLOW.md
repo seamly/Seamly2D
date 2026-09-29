@@ -64,6 +64,7 @@
      default is 'Nested'.
      'Nested' packs each piece-set as one unit, sizes centred on the largest size.
      'Marker' packs every size of every piece alone.
+     The setting controls the "All sizes" tab only. Each size tab packs that size's pieces alone.
 - if layoutMode is not 'any':
   >> No Grainline -- 'Keep upright' (noGrainlineRotation='upright') | 'Rotate freely' ('free');
      default is 'Keep upright'.
