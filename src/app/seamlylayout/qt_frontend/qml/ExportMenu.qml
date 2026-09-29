@@ -91,6 +91,9 @@ Menu {
     // @brief Emitted when the user selects DXF-ASTM export (Phase 9).
     signal exportDxfAstmRequested()
 
+    // @brief Emitted when the user selects DXF-ASTM (CLO3D) export: D6673 plus CLO3D group 250.
+    signal exportDxfAstmClo3dRequested()
+
     // @brief Emitted when the user selects PDF export (Phase 10).
     signal exportPdfRequested()
 
@@ -143,6 +146,12 @@ Menu {
         enabled: root.layoutReady // Phase 9: enabled when layout is ready
         onTriggered: root.exportDxfAstmRequested()
     } // MenuItem DXF-ASTM
+
+    MenuItem {
+        text: "DXF-ASTM (CLO3D)"
+        enabled: root.layoutReady
+        onTriggered: root.exportDxfAstmClo3dRequested()
+    } // MenuItem DXF-ASTM (CLO3D)
 
     MenuItem {
         text: "PDF"

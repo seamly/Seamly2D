@@ -173,17 +173,23 @@ pub fn encode_dxf_point(writer: &mut dyn Write, point: &DxfPoint) -> std::io::Re
 // @param vertices Ordered vertices; a closed polyline does not repeat its first vertex.
 // @param layer    DXF layer for the POLYLINE, its VERTEXes and SEQEND.
 // @param closed   Whether the polyline is closed (group 70 = 1).
+// @param group_250 CLO3D line type (0 = boundary, 2 = sewing line); None omits it.
+//                  Group 250 is not DXF R12 or D6673: CLO3D reads it, other readers must ignore it.
 // @return Result indicating success or error.
 pub fn encode_astm_polyline(
     writer: &mut dyn Write,
     vertices: &[Point],
     layer: &str,
     closed: bool,
+    group_250: Option<i32>,
 ) -> std::io::Result<()> {
     write_group_code(writer, 0, "POLYLINE")?;
     write_group_code(writer, 8, layer)?;
     write_group_code_int(writer, 66, 1)?; // vertices follow
     write_group_code_int(writer, 70, if closed { 1 } else { 0 })?;
+    if let Some(value) = group_250 {
+        write_group_code_int(writer, 250, value)?;
+    } // if CLO3D line type
     for v in vertices {
         write_group_code(writer, 0, "VERTEX")?;
         write_group_code(writer, 8, layer)?;

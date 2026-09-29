@@ -628,11 +628,13 @@ fn build_tiled_pdf_tile_doc(
 // DXF-ASTM export
 // ---------------------------------------------------------------------------
 
-// @brief Style system text the frontend supplies for a DXF-ASTM export.
+// @brief Frontend choices for a DXF-ASTM export: style system text and the CLO3D variant.
 // @details Local date and time come from Qt, which knows the user's time zone;
 //          absent values fall back to UTC in the writer.
 #[derive(Debug, Clone, Default)]
 pub struct DxfStyleInfo {
+    // CLO3D variant: add group 250 to boundary and sew line polylines.
+    pub clo3d_group_250: bool,
     // SeamlyLayout version for `Author:`.
     pub app_version: Option<String>,
     // `Creation Date:` as dd-mm-yyyy.
@@ -692,6 +694,7 @@ pub fn do_export_dxf(
         author_release: style.app_version.clone().filter(|v| !v.is_empty()).unwrap_or(defaults.author_release.clone()),
         creation_date: style.creation_date.clone(),
         creation_time: style.creation_time.clone(),
+        clo3d_group_250: style.clo3d_group_250,
         ..defaults
     }; // export_opts
     let result = export_dxf_astm(&drawing, Path::new(path), &export_opts)

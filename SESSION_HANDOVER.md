@@ -6,6 +6,14 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-09-29 — DXF-ASTM (CLO3D) export variant (Layout.57)
+
+Merged `task-dxf-astm-clo3d`. `cargo test --workspace`, `ctest --preset debug` passed.
+
+- Export > DXF-ASTM (CLO3D): same D6673 file plus group 250 (0 on layer 1, 2 on layer 14 key-point polylines).
+- Writer option `clo3d_group_250`; bridge JSON `clo3dGroup250`; QML `requestDxfExport(clo3d)` shared by both menu items.
+- Not checked in CLO3D, VStitcher or the running app.
+
 ## 2026-09-28 — DXF-ASTM to ASTM D6673-10 (Layout.55)
 
 Merged `task-dxf-astm`. Full CI: `Cargo.toml` changed. `cargo test --workspace`, `ctest --preset debug` passed. `local_build_msi.ps1` not run: no Seamly2D or SeamlyMe code changed.

@@ -1769,6 +1769,8 @@ impl qobject::AppController {
             creation_date: Option<String>,
             #[serde(default)]
             creation_time: Option<String>,
+            #[serde(default)]
+            clo3d_group_250: bool,
         } // struct DxfExportOptions
         let opts: DxfExportOptions = match serde_json::from_str(&options_json.to_string()) {
             Ok(v) => v,
@@ -1814,6 +1816,7 @@ impl qobject::AppController {
             app_version: opts.app_version.clone(),
             creation_date: opts.creation_date.clone(),
             creation_time: opts.creation_time.clone(),
+            clo3d_group_250: opts.clo3d_group_250,
         }; // style
         match do_export_dxf(&layout_doc, &path_str, opts.create_teaching_version, &style, &mut dxf_progress) {
             Ok(()) => {

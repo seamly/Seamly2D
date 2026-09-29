@@ -57,6 +57,7 @@ Add a layout export option for multisize patterns — svg files or stringified s
 - [x] Layout.54 JPG — trivial, fit it anywhere
 - [x] Layout.55 DXF-ASTM - improve current export so that it meets the DXF-ASTM standard
 - [ ] Layout.56 Tiled PS — multi-page PostScript with the same tiles as PDF (Tiled); `ps_writer` writes one page today
+- [x] Layout.57 DXF-ASTM (CLO3D) — Export menu item: D6673-10 file plus CLO3D group 250 (0 = boundary, 2 = sew line)
 
 ## [ ] Task Layout.6 - DXF-ASTM: D6673 features without a Seamly2D source
 

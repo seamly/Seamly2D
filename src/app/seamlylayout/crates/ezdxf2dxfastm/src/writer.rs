@@ -48,6 +48,8 @@ pub struct DxfAstmExportOptions {
     pub creation_date: Option<String>,
     // `Creation Time:` as hh-mm; None uses the current UTC time.
     pub creation_time: Option<String>,
+    // CLO3D variant: group 250 on boundary (0) and sew line (2) polylines.
+    pub clo3d_group_250: bool,
 }
 
 impl Default for DxfAstmExportOptions {
@@ -62,6 +64,7 @@ impl Default for DxfAstmExportOptions {
             author_release: env!("CARGO_PKG_VERSION").to_string(),
             creation_date: None,
             creation_time: None,
+            clo3d_group_250: false,
         }
     }
 }
@@ -78,6 +81,7 @@ impl std::fmt::Debug for DxfAstmExportOptions {
             .field("author_release", &self.author_release)
             .field("creation_date", &self.creation_date)
             .field("creation_time", &self.creation_time)
+            .field("clo3d_group_250", &self.clo3d_group_250)
             .finish()
     }
 }
@@ -166,9 +170,16 @@ pub fn style_system_text(drawing: &seamly_svg2ezdxf::Drawing, options: &DxfAstmE
 } // fn style_system_text
 
 // @brief Write one contour: key points on `layer`, dense polyline on `validation_layer`.
-fn write_contour(writer: &mut dyn Write, contour: &AstmContour, layer: &str, validation_layer: &str) -> std::io::Result<()> {
-    encode_astm_polyline(writer, &contour.reduced, layer, contour.closed)?;
-    encode_astm_polyline(writer, &contour.dense, validation_layer, contour.closed)
+// @param group_250 CLO3D line type for the key-point polyline only; None omits it.
+fn write_contour(
+    writer: &mut dyn Write,
+    contour: &AstmContour,
+    layer: &str,
+    validation_layer: &str,
+    group_250: Option<i32>,
+) -> std::io::Result<()> {
+    encode_astm_polyline(writer, &contour.reduced, layer, contour.closed, group_250)?;
+    encode_astm_polyline(writer, &contour.dense, validation_layer, contour.closed, None)
 } // fn write_contour
 
 // @brief Write one ASTM piece block body (between BLOCK and ENDBLK).
@@ -176,7 +187,8 @@ fn write_contour(writer: &mut dyn Write, contour: &AstmContour, layer: &str, val
 // Order: piece system text, boundary (1/84), sew lines (14/87), internal
 // lines (8/85), cutouts (11/86), turn/curve points (2/3), grainline (7),
 // notches (4/80/81/83), annotation text (15).
-fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContour) -> std::io::Result<()> {
+// @param clo3d When true, the boundary and sew line polylines carry CLO3D group 250.
+fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContour, clo3d: bool) -> std::io::Result<()> {
     // Piece system text sits at the first boundary vertex.
     let anchor = boundary.reduced[0];
     let mut system_lines = vec![format!("Piece Name:{}", block.piece_name)];
@@ -188,15 +200,17 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
         encode_astm_text(writer, "1", position, SYSTEM_TEXT_HEIGHT_MM, 0.0, line)?;
     } // for each system line
 
-    write_contour(writer, boundary, "1", "84")?;
+    // CLO3D line types: 0 = boundary, 2 = sewing line (seamly2clo.py convention).
+    let (boundary_250, sew_250) = if clo3d { (Some(0), Some(2)) } else { (None, None) };
+    write_contour(writer, boundary, "1", "84", boundary_250)?;
     for c in &block.sew_lines {
-        write_contour(writer, c, "14", "87")?;
+        write_contour(writer, c, "14", "87", sew_250)?;
     } // for each sew line
     for c in &block.internal_lines {
-        write_contour(writer, c, "8", "85")?;
+        write_contour(writer, c, "8", "85", None)?;
     } // for each internal line
     for c in &block.cutouts {
-        write_contour(writer, c, "11", "86")?;
+        write_contour(writer, c, "11", "86", None)?;
     } // for each cutout
 
     // Layers 2 and 3 hold the turn and curve points of layers 1, 8, 11 and 14.
@@ -235,6 +249,7 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
 fn write_blocks_section(
     writer: &mut dyn Write,
     drawing: &seamly_svg2ezdxf::Drawing,
+    options: &DxfAstmExportOptions,
 ) -> std::io::Result<()> {
     write_group_code(writer, 0, "SECTION")?;
     write_group_code(writer, 2, "BLOCKS")?;
@@ -249,7 +264,7 @@ fn write_blocks_section(
         write_group_code(writer, 3, &block.name)?;
 
         match &block.boundary {
-            Some(boundary) => write_astm_block(writer, block, boundary)?,
+            Some(boundary) => write_astm_block(writer, block, boundary, options.clo3d_group_250)?,
             None => {
                 encode_astm_text(writer, "1", Point::new(0.0, 0.0), SYSTEM_TEXT_HEIGHT_MM, 0.0, &format!("Piece Name:{}", block.piece_name))?;
                 for entity in &block.entities {
@@ -393,6 +408,10 @@ fn get_line_comment(line: &str, prev_line: &str, next_line: Option<&str>) -> Str
     else if prev_line.trim() == "39" {
         format!("Value: {} (notch width in millimetres)", line_trimmed)
     }
+    // Group code 250 - CLO3D line type (not DXF R12 or D6673).
+    else if prev_line.trim() == "250" {
+        format!("Value: {} (CLO3D line type: 0 = boundary, 2 = sewing line)", line_trimmed)
+    }
     // Group code 66 - vertices-follow flag.
     else if prev_line.trim() == "66" {
         format!("Value: {} (1 = VERTEX entities follow)", line_trimmed)
@@ -479,6 +498,7 @@ fn get_line_comment(line: &str, prev_line: &str, next_line: Option<&str>) -> Str
             "30" => "Group code 30: Notch depth follows".to_string(),
             "39" => "Group code 39: Notch width follows".to_string(),
             "66" => "Group code 66: Vertices-follow flag follows".to_string(),
+            "250" => "Group code 250: CLO3D line type follows".to_string(),
             "41" => "Group code 41: X scale factor follows".to_string(),
             "42" => "Group code 42: Y scale factor follows".to_string(),
             "50" => "Group code 50: Rotation angle in degrees follows".to_string(),
@@ -630,7 +650,7 @@ pub fn export_dxf_astm(
         .map_err(|e| DxfAstmExportError::Io(e))?;
 
     // 2. BLOCKS section (pattern pieces).
-    write_blocks_section(&mut file, drawing).map_err(|e| DxfAstmExportError::Io(e))?;
+    write_blocks_section(&mut file, drawing, options).map_err(|e| DxfAstmExportError::Io(e))?;
 
     // 3. ENTITIES section (modelspace entities).
     write_entities_section(&mut file, drawing, options).map_err(|e| DxfAstmExportError::Io(e))?;

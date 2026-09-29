@@ -20,7 +20,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | Units | Always `Units:METRIC`: millimetres to 2 decimals | User decision. SVG px (96 dpi) × 25.4 / 96 |
 | DXF version | `$ACADVER` = `AC1009` (R12 syntax) | Widest importer support. D6673 names R13; R13 needs handles and OBJECTS. Gerber AccuMark writes no version at all |
 | Header | `$ACADVER` only | D6673 §4.2: keep the header minimal |
-| CLO3D group 250 | Removed | Not DXF R12, not D6673 |
+| CLO3D group 250 | Off in **DXF-ASTM**; on in **DXF-ASTM (CLO3D)** | Not DXF R12, not D6673. CLO3D reads it: 0 = boundary (layer 1), 2 = sew line (layer 14). Only those key-point polylines carry it |
 | Block names | `<svg id>_M` kept | Existing CLO3D naming. `Piece Name:` carries the real name |
 | Curve tolerance | 0.25 mm | Douglas–Peucker tolerance for layer 1 key points |
 | Quantity | From the "Cut N" label line: even N → `N/2,N/2`, odd N → `N,0` | Seamly2D exports only a total, not right/left counts |
