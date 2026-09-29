@@ -105,3 +105,34 @@ pub fn detect_corners(vertices: &[Point], angle_threshold_degrees: f64) -> Vec<b
 
     is_corner
 } // fn detect_corners
+
+/// @brief Millimetres per SVG user unit (CSS pixel at 96 dpi).
+pub const MM_PER_PX: f64 = 25.4 / 96.0;
+
+/// @brief Parse an SVG length such as "6773", "6773px", "1792.1mm" into user units (px).
+/// @param value Attribute value; a missing or unparseable value gives `default`.
+/// @param default Fallback in user units.
+/// @return Length in user units at 96 dpi.
+pub fn parse_length_attr(value: Option<&String>, default: f64) -> f64 {
+    let Some(raw) = value.map(|v| v.trim()) else {
+        return default;
+    }; // if absent
+    // Split the numeric part from the unit suffix.
+    let split = raw
+        .find(|c: char| !(c.is_ascii_digit() || matches!(c, '.' | '-' | '+' | 'e' | 'E')))
+        .unwrap_or(raw.len());
+    let (number, unit) = raw.split_at(split);
+    let Ok(n) = number.parse::<f64>() else {
+        return default;
+    }; // if not a number
+    let px_per_unit = match unit.trim() {
+        "" | "px" => 1.0,
+        "mm" => 96.0 / 25.4,
+        "cm" => 96.0 / 2.54,
+        "in" => 96.0,
+        "pt" => 96.0 / 72.0,
+        "pc" => 16.0,
+        _ => return default,
+    }; // match unit
+    n * px_per_unit
+} // fn parse_length_attr

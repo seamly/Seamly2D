@@ -28,8 +28,8 @@ mod tests {
         let output = String::from_utf8(buffer).expect("Invalid UTF-8");
         assert!(output.contains("LINE"));
         assert!(output.contains("Piece boundary"));
-        assert!(output.contains("10.000000")); // X coordinate
-        assert!(output.contains("20.000000")); // Y coordinate
+        assert!(output.contains("10.00")); // X coordinate
+        assert!(output.contains("20.00")); // Y coordinate
     }
 
     // @brief Test encoding a CIRCLE entity.
@@ -47,8 +47,8 @@ mod tests {
         let output = String::from_utf8(buffer).expect("Invalid UTF-8");
         assert!(output.contains("CIRCLE"));
         assert!(output.contains("Notches"));
-        assert!(output.contains("100.000000")); // Center X
-        assert!(output.contains("25.000000")); // Radius
+        assert!(output.contains("100.00")); // Center X
+        assert!(output.contains("25.00")); // Radius
     }
 
     // @brief Test encoding a POLYLINE entity.
@@ -93,7 +93,7 @@ mod tests {
         assert!(output.contains("TEXT"));
         assert!(output.contains("Text/Annotations"));
         assert!(output.contains("Test Label"));
-        assert!(output.contains("12.000000")); // Height
+        assert!(output.contains("12.00")); // Height
     }
 
     // @brief Test encoding a generic entity via encode_entity function.
@@ -208,6 +208,7 @@ mod tests {
             sanitize_text: true,
             create_teaching_version: true,
             progress_callback: Some(callback),
+            ..DxfAstmExportOptions::default()
         };
 
         export_dxf_astm(&drawing, test_file, &options)

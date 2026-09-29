@@ -4,6 +4,8 @@
 
 //! @brief Drawing and block structures for ezdxf-like intermediate representation.
 
+use crate::astm_contour::AstmContour;
+use crate::astm_notch::Notch;
 use crate::entities::{Entity, Point};
 
 // @brief DXF version enumeration.
@@ -15,43 +17,66 @@ pub enum DxfVersion {
     R13,
 }
 
-// @brief Block definition containing entities and CLO3D semantic fields.
+// @brief Annotation text of a piece (DXF layer 15), in DXF units.
+#[derive(Debug, Clone, PartialEq)]
+pub struct Annotation {
+    // Insertion point.
+    pub position: Point,
+    // Text height.
+    pub height: f64,
+    // Rotation in degrees counter-clockwise.
+    pub rotation: f64,
+    // Text content (ASCII-only).
+    pub text: String,
+}
+
+// @brief Block definition: one pattern piece.
 //
-// The `entities` vec holds all converted SVG geometry for general-purpose use.
-// The semantic fields (`boundary_vertices`, `corner_flags`, `grainline`, `notches`)
-// are populated by a post-processing pass in the converter and are used by
-// `write_blocks_section` to produce CLO3D-compatible DXF output matching
-// the structure from seamly2clo.py.
+// `entities` holds the generic conversion of every SVG element. The ASTM fields
+// hold the same piece classified by `data-type`, in DXF units; the DXF-ASTM
+// writer uses them whenever `boundary` is present.
 pub struct Block {
     // Block name (ASCII-only, sanitized, with "_M" suffix).
     pub name: String,
     // All converted entities (generic, used for validation and inspection).
     pub entities: Vec<Box<dyn Entity>>,
-    // Boundary / cutline polyline vertices (layer 1).
-    // Populated from the first Polyline on layer "1" in `entities`.
-    pub boundary_vertices: Vec<Point>,
-    // Per-vertex corner classification matching `boundary_vertices`.
-    // `true` → turn point (layer 2), `false` → curve point (layer 3).
-    // Computed by `detect_corners` with a 120° angle threshold.
-    pub corner_flags: Vec<bool>,
+    // `Piece Name:` system text (piece `data-name`, else the block name).
+    pub piece_name: String,
+    // `Quantity:` system text in "R,L" form, when the piece label states it.
+    pub quantity: Option<String>,
+    // Piece boundary (layer 1 / 84).
+    pub boundary: Option<AstmContour>,
+    // Sew lines (layer 14 / 87).
+    pub sew_lines: Vec<AstmContour>,
+    // Internal lines (layer 8 / 85).
+    pub internal_lines: Vec<AstmContour>,
+    // Internal cutouts (layer 11 / 86).
+    pub cutouts: Vec<AstmContour>,
     // Grainline start and end points (layer 7), if present.
     pub grainline: Option<(Point, Point)>,
-    // Notch line segment endpoints (layer 4), one tuple per notch.
-    pub notches: Vec<(Point, Point)>,
+    // Notches (layers 4, 80, 81, 83).
+    pub notches: Vec<Notch>,
+    // Annotation text (layer 15).
+    pub annotations: Vec<Annotation>,
 }
 
 impl Block {
     // @brief Create a new empty block.
     // @param name Block name (should already include "_M" suffix).
-    // @return New block.
+    // @return New block whose piece name is the block name.
     pub fn new(name: String) -> Self {
         Self {
+            piece_name: name.clone(),
             name,
             entities: Vec::new(),
-            boundary_vertices: Vec::new(),
-            corner_flags: Vec::new(),
+            quantity: None,
+            boundary: None,
+            sew_lines: Vec::new(),
+            internal_lines: Vec::new(),
+            cutouts: Vec::new(),
             grainline: None,
             notches: Vec::new(),
+            annotations: Vec::new(),
         }
     } // fn new
 
@@ -70,6 +95,8 @@ pub struct Drawing {
     pub blocks: Vec<Block>,
     // Entities in modelspace (not in blocks).
     pub modelspace_entities: Vec<Box<dyn Entity>>,
+    // Pattern name from the `data-type="pattern"` group, if the SVG has one.
+    pub style_name: Option<String>,
 }
 
 impl Drawing {
@@ -81,6 +108,7 @@ impl Drawing {
             version,
             blocks: Vec::new(),
             modelspace_entities: Vec::new(),
+            style_name: None,
         }
     }
 

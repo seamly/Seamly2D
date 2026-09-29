@@ -13,7 +13,7 @@
 // CXX-Qt macro infrastructure.
 //
 // Exports:
-//   do_export_dxf(doc, path, create_teaching_version) -> Result<(), String>
+//   do_export_dxf(doc, path, create_teaching_version, style, progress) -> Result<(), String>
 //   do_export_pdf(doc, path)                          -> Result<(), String>
 //   (doc, path, tile_dims)         -> Result<(), String>
 //   do_export_png(doc, path, scale)                   -> Result<(), String>
@@ -628,6 +628,19 @@ fn build_tiled_pdf_tile_doc(
 // DXF-ASTM export
 // ---------------------------------------------------------------------------
 
+// @brief Style system text the frontend supplies for a DXF-ASTM export.
+// @details Local date and time come from Qt, which knows the user's time zone;
+//          absent values fall back to UTC in the writer.
+#[derive(Debug, Clone, Default)]
+pub struct DxfStyleInfo {
+    // SeamlyLayout version for `Author:`.
+    pub app_version: Option<String>,
+    // `Creation Date:` as dd-mm-yyyy.
+    pub creation_date: Option<String>,
+    // `Creation Time:` as hh-mm.
+    pub creation_time: Option<String>,
+}
+
 // @brief Export a stripped layout document to a DXF-ASTM file.
 //
 // Pipeline:
@@ -638,6 +651,7 @@ fn build_tiled_pdf_tile_doc(
 // @param doc                    Cloned, piece-fill-stripped layout DOM.
 // @param path                   Destination file path.
 // @param create_teaching_version When true, emits teaching-version DXF annotations.
+// @param style                  Style system text supplied by the frontend.
 // @param progress               Callback invoked with integer percent (0–100) at each stage.
 //                               The caller owns 0% (before call) and 100% (after Ok return).
 // @return Ok(()) on success; Err(message) on any failure.
@@ -645,6 +659,7 @@ pub fn do_export_dxf(
     doc: &svg_dom::Document,
     path: &str,
     create_teaching_version: bool,
+    style: &DxfStyleInfo,
     progress: &mut impl FnMut(i32),
 ) -> Result<(), String> {
     crate::log_to_file(&format!("[exports.rs] do_export_dxf(): 1 converting SVG DOM to ezdxf Drawing for '{path}' teaching_version={create_teaching_version}"));
@@ -669,9 +684,15 @@ pub fn do_export_dxf(
     progress(50);
 
     // Step 2: Drawing → DXF-ASTM file.
+    // The file stem names the style when the SVG carries no pattern name.
+    let defaults = DxfAstmExportOptions::default();
     let export_opts = DxfAstmExportOptions {
         create_teaching_version,
-        ..DxfAstmExportOptions::default()
+        style_name: Path::new(path).file_stem().map(|s| s.to_string_lossy().into_owned()),
+        author_release: style.app_version.clone().filter(|v| !v.is_empty()).unwrap_or(defaults.author_release.clone()),
+        creation_date: style.creation_date.clone(),
+        creation_time: style.creation_time.clone(),
+        ..defaults
     }; // export_opts
     let result = export_dxf_astm(&drawing, Path::new(path), &export_opts)
         .map_err(|e| {
@@ -1862,7 +1883,7 @@ mod tests {
         path.push(format!("seamly_dxf_export_test_{}.dxf", std::process::id()));
         let path_str = path.to_string_lossy().to_string();
 
-        do_export_dxf(&doc, &path_str, false, &mut |_| {}).expect("DXF export should succeed");
+        do_export_dxf(&doc, &path_str, false, &DxfStyleInfo::default(), &mut |_| {}).expect("DXF export should succeed");
 
         let content = std::fs::read_to_string(&path_str).expect("exported DXF file should be readable");
         let _ = std::fs::remove_file(&path_str); // best-effort cleanup
@@ -1919,7 +1940,7 @@ mod tests {
             .to_string_lossy()
             .to_string();
 
-        let result = do_export_dxf(&doc, &bad_path, false, &mut |_| {});
+        let result = do_export_dxf(&doc, &bad_path, false, &DxfStyleInfo::default(), &mut |_| {});
         assert!(result.is_err(), "do_export_dxf should return Err for unwritable path");
         let msg = result.unwrap_err();
         assert!(
@@ -1947,7 +1968,7 @@ mod tests {
         dxf_path.push(format!("seamly_dxf_teaching_test_{}.dxf", std::process::id()));
         let dxf_path_str = dxf_path.to_string_lossy().to_string();
 
-        do_export_dxf(&doc, &dxf_path_str, true, &mut |_| {}).expect("DXF export with teaching version should succeed");
+        do_export_dxf(&doc, &dxf_path_str, true, &DxfStyleInfo::default(), &mut |_| {}).expect("DXF export with teaching version should succeed");
 
         // DXF file must exist.
         assert!(dxf_path.exists(), "DXF file should exist at '{dxf_path_str}'");
@@ -1996,7 +2017,7 @@ mod tests {
 
         // Collect every progress tick emitted during the export.
         let mut ticks: Vec<i32> = Vec::new();
-        do_export_dxf(&doc, &path_str, false, &mut |pct| ticks.push(pct))
+        do_export_dxf(&doc, &path_str, false, &DxfStyleInfo::default(), &mut |pct| ticks.push(pct))
             .expect("DXF export should succeed");
         let _ = std::fs::remove_file(&path_str); // best-effort cleanup
 

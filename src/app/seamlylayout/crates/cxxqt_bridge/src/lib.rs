@@ -1763,6 +1763,12 @@ impl qobject::AppController {
         struct DxfExportOptions {
             #[serde(default)]
             create_teaching_version: bool,
+            #[serde(default)]
+            app_version: Option<String>,
+            #[serde(default)]
+            creation_date: Option<String>,
+            #[serde(default)]
+            creation_time: Option<String>,
         } // struct DxfExportOptions
         let opts: DxfExportOptions = match serde_json::from_str(&options_json.to_string()) {
             Ok(v) => v,
@@ -1804,7 +1810,12 @@ impl qobject::AppController {
             self.as_mut().progress_updated(pct);
         };
 
-        match do_export_dxf(&layout_doc, &path_str, opts.create_teaching_version, &mut dxf_progress) {
+        let style = crate::exports::DxfStyleInfo {
+            app_version: opts.app_version.clone(),
+            creation_date: opts.creation_date.clone(),
+            creation_time: opts.creation_time.clone(),
+        }; // style
+        match do_export_dxf(&layout_doc, &path_str, opts.create_teaching_version, &style, &mut dxf_progress) {
             Ok(()) => {
                 log_to_file(&format!("[lib.rs AppController] export_dxf(): 5 export succeeded '{path_str}'"));
                 self.as_mut().progress_updated(100);
