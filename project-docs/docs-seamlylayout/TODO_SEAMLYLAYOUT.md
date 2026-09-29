@@ -40,37 +40,31 @@ Decisions (user, 2026-09-28):
 - Stack order in a group: each size centered on the largest size's center, after the grainline is vertical.
 - Individual `.smis` patterns keep today's handoff, unchanged.
 
-Handoff shape (producer: Seamly2D `SvgGenerator`; consumer: `piece_extractor`):
+Handoff shape: see `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`, "Multisize pattern".
 
-```xml
-<g data-type="pattern" data-measurements="multisize" data-sizes="34,36,38" data-base-size="36" ...>
-  <g id="piece-set_Front" data-type="piece-set" data-name="Front" data-letter="A" data-grainline-angle="90">
-    <g id="piece_Front_s34" data-type="piece" data-size="34" data-name="Front" ...>…components…</g>
-    <g id="piece_Front_s36" data-type="piece" data-size="36" data-name="Front" ...>…</g>
-  </g>
-</g>
-```
-
-- [ ] Layout.30 Seamly2D producer
-  - [ ] Layout.30.1 Multisize pattern: loop over every size, rebuild the pieces, and restore the current size — reuse the per-size loop in `MainWindow::exportPiecesAs()` (`updateMeasurements` + `LiteParseTree` + `preparePiecesForLayout`)
-  - [ ] Layout.30.2 Match a piece across sizes by its `VPiece` id; emit one `data-type="piece-set"` group per piece, one `data-type="piece"` child per size
-  - [ ] Layout.30.3 New attributes: `data-measurements` (`individual` | `multisize`), `data-sizes`, `data-base-size` on the pattern; `data-size` on each piece. Update `NEW-ATTRIBUTES.csv` and `SVG-DATA-ATTRIBUTES.md`
-  - [ ] Layout.30.4 Extend `TST_SvgComponentTags` (`src/test/Seamly2DTest/tst_svgcomponenttags.cpp`): set count, size count, unique ids
-- [ ] Layout.31 SeamlyLayout import: read `data-measurements`; expose a read-only `is_multisize` + size list to Export, layout, and Adjust Mode. Absent attribute = individual
-- [ ] Layout.32 Settings dialog: "Multisize layout" choice, shown only for a multisize import — **Nested** (pack piece groups) or **Marker** (pack every piece alone). Default: Nested
-- [ ] Layout.33 Nested layout (pack the groups)
-  - [ ] Layout.33.1 `hoist_tagged_pieces`: hoist `piece-set` groups to the root as one unit, not their child pieces
-  - [ ] Layout.33.2 Verticalize each set on its grainline angle; center every size on the largest size's center
-  - [ ] Layout.33.3 One `PieceRect` per set: bbox = union of its sizes; outline polygon = largest size
-  - [ ] Layout.33.4 Pack, assemble, and trim as today; placed pieces keep `data-size` so export can toggle sizes
-- [ ] Layout.34 Marker layout (split the groups): hoist every `data-type="piece"` alone; pack all sizes of all pieces as independent pieces. `PieceRect::label()` includes the size
-- [ ] Layout.35 Adjust Mode: Nested moves a set as one item; Marker moves one piece
+- [x] Layout.30 Seamly2D producer
+  - [x] Layout.30.1 `MainWindow::prepareMultisizePieceLists()`: every size, base height, then restore; shared helpers `recalculateAtSize()` and `currentLayoutPieces()` also serve `exportPiecesAs()`
+  - [x] Layout.30.2 Piece matched across sizes by `VPiece` id; one `piece-set` group per piece, one `piece` child per size
+  - [x] Layout.30.3 `data-measurements`, `data-sizes`, `data-base-size`, `data-size`; `NEW-ATTRIBUTES.csv` and `SVG-DATA-ATTRIBUTES.md` updated
+  - [x] Layout.30.4 `TST_SvgComponentTags`: 4 new tests
+- [x] Layout.31 SeamlyLayout import: `read_measurements_info()`; `AppController.isMultisize`, `multisizeSizes`
+- [x] Layout.32 Settings dialog: "Multisize Layout" — Nested | Marker, shown only for a multisize import; JSON key `multisizeLayout`
+- [x] Layout.33 Nested layout
+  - [x] Layout.33.1 `hoist_piece_sets()`: piece-sets reach the root as one unit
+  - [x] Layout.33.2 `verticalize_dom` turns each size on its own grainline; `center_piece_sets` stacks sizes on the largest size
+  - [x] Layout.33.3 One `PieceRect` per set: bbox = union of sizes; outline polygon = largest size
+  - [x] Layout.33.4 Placed pieces keep `data-size`
+- [x] Layout.34 Marker layout: every size packs alone; label "Name (size N)"
+- [x] Layout.35 Adjust Mode: moves each placed unit by id, so Nested moves a whole set
 - [ ] Layout.36 Export: user chooses the multisize export (user, 2026-09-28)
-  - [ ] Layout.36.1 **Nested**: one file; each piece keeps its `piece-set` group; every piece keeps `data-size`
+  - [x] Layout.36.1 **Nested**: one file; each piece keeps its `piece-set` group; every piece keeps `data-size`
   - [ ] Layout.36.2 **By size**: one file per size, file name suffixed with the size; each file is that size's own packed layout from Layout.37, not a filter of the Nested layout
 - [ ] Layout.37 Sized layouts: pack each size again as its own layout (only that size's pieces, same settings); per-size canvas tabs; multi-page PDF option. Layout.36.2 depends on this
-- [ ] Layout.38 Tests: multisize fixture (`.sm2d` + `.smms`) in `test-seamly-layout-input/`; Rust tests for set hoist, centering, set bbox, marker count = pieces × sizes
-- [ ] Layout.39 Doxygen briefs + inline comments on touched functions; document both layouts in the SeamlyLayout docs
+- [ ] Layout.38 Tests
+  - [x] Layout.38.1 Rust: set hoist, centring, set bbox, set outline, marker count = pieces × sizes (synthetic fixture `MULTISIZE_HANDOFF_SVG`)
+  - [ ] Layout.38.2 Real multisize handoff fixture: export from a `.sm2d` + `.smms` pattern in the running app, save to `crates/cxxqt_bridge/test_data/`, add an end-to-end test
+  - [ ] Layout.38.3 Check in the running apps: Seamly2D Layout Mode with a multisize pattern; SeamlyLayout Nested and Marker
+- [x] Layout.39 Doxygen briefs + inline comments on touched functions; document both layouts in the SeamlyLayout docs
 
 ## [ ] Task Layout.5 - Implement additional export formats
 

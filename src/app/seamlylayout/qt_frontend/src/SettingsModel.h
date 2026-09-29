@@ -53,6 +53,7 @@ class SettingsModel : public QObject
     //   upright → drafted orientation; layoutMode's trial set only
     //   free    → the packer may also turn the piece 90° or 270°
     Q_PROPERTY(QString noGrainlineRotation READ noGrainlineRotation WRITE setNoGrainlineRotation NOTIFY noGrainlineRotationChanged)
+    Q_PROPERTY(QString multisizeLayout READ multisizeLayout WRITE setMultisizeLayout NOTIFY multisizeLayoutChanged)
 
     // @brief Whether fabric is cut on the fold (doubles usable width).
     Q_PROPERTY(bool    fabricFolded  READ fabricFolded  WRITE setFabricFolded  NOTIFY fabricFoldedChanged)
@@ -198,6 +199,7 @@ public:
     QString    layoutMode()    const { return m_layoutMode;    }
     double     rotationStep()  const { return m_rotationStep;  }
     QString    noGrainlineRotation() const { return m_noGrainlineRotation; }
+    QString    multisizeLayout() const { return m_multisizeLayout; }
     bool       fabricFolded()  const { return m_fabricFolded;  }
     double     pieceGap()      const { return m_pieceGap;      }
     int        pieceGapPx()    const;
@@ -236,6 +238,7 @@ public:
     void setLayoutMode(const QString &v);
     void setRotationStep(double v);
     void setNoGrainlineRotation(const QString &v);
+    void setMultisizeLayout(const QString &v);
     void setFabricFolded(bool v);
     void setPieceGap(double v);
     void setUnit(const QString &v);
@@ -313,6 +316,7 @@ signals:
     void layoutModeChanged();
     void rotationStepChanged();
     void noGrainlineRotationChanged();
+    void multisizeLayoutChanged();
     void fabricFoldedChanged();
     void pieceGapChanged();
     void pieceGapPxChanged();
@@ -356,6 +360,8 @@ private:
     QString m_layoutMode    = QStringLiteral("alongGrainline");
     double  m_rotationStep  = 0.0;  // degrees; used by withNap (0 up, 180 down)
     QString m_noGrainlineRotation = QStringLiteral("upright");
+    // Multisize pattern layout: "nested" (piece-sets pack as units) | "marker" (every size packs alone).
+    QString m_multisizeLayout = QStringLiteral("nested");
     bool    m_fabricFolded  = false;
     double  m_pieceGap      = 0.05;  // active-unit clearance between adjacent pieces (default ≈ 5 px @ 96 dpi)
     QString m_unit          = QStringLiteral("in");

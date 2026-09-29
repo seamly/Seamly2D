@@ -43,20 +43,26 @@ use crate::exports::{
 //
 // @param input_dom            Raw imported SVG DOM.
 // @param free_rotation_allowed  The user's "Rotate freely" choice for pieces without a grainline.
+// @param nested_multisize       `true` packs each multisize piece-set as one unit (Nested layout).
 // @return Tuple of `(flat_dom, pieces)` ready for L.2.1/L.2.2 export logic.
 pub(crate) fn build_sheet_export_inputs(
     input_dom: &Document,
     free_rotation_allowed: bool,
+    nested_multisize: bool,
 ) -> Result<(Document, Vec<PieceRect>), String> {
     let mut flat_dom = input_dom.clone();
 
     // Match the layout pipeline so export sees the same normalized piece space.
     // The hoist must come first and must not be skipped: without it a Seamly2D
     // handoff exports as one sheet-sized "piece" (Task 59).
-    crate::piece_extractor::hoist_tagged_pieces(&mut flat_dom);
+    crate::piece_extractor::hoist_layout_units(&mut flat_dom, nested_multisize);
     svg_dom::flatten_dom(&mut flat_dom);
     svg_dom::verticalize_dom(&mut flat_dom);
     svg_dom::flatten_dom(&mut flat_dom);
+    // Nested multisize: stack the sizes of each piece-set on the largest size.
+    if svg_dom::center_piece_sets(&mut flat_dom) > 0 {
+        svg_dom::flatten_dom(&mut flat_dom);
+    } // if piece-sets
     svg_dom::translate_dom(&mut flat_dom);
     svg_dom::flatten_dom(&mut flat_dom);
 
@@ -305,7 +311,7 @@ fn flat_dom_and_pieces_for_dims(dims: &[(u32, u32)]) -> (Document, Vec<PieceRect
         groups.join("")
     );
     let input = Document::parse(&svg).expect("test SVG should parse");
-    build_sheet_export_inputs(&input, false).expect("sheet export inputs should build")
+    build_sheet_export_inputs(&input, false, true).expect("sheet export inputs should build")
 } // fn flat_dom_and_pieces_for_dims
 
 #[cfg(test)]

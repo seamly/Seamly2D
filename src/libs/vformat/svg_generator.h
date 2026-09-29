@@ -33,13 +33,16 @@
 #include <QDomDocument>
 #include <QGraphicsScene>
 #include <QSet>
+#include <QStringList>
 
 
 class SvgGenerator
 {
 public:
     SvgGenerator(QGraphicsRectItem *paper, QString name, QString patternName, QString description, int resolution);
-    void addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item = nullptr);
+    void setMultisize(const QStringList &sizes, const QString &baseSize);
+    void addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item = nullptr, const QString &size = QString(),
+                         const QString &pieceSetKey = QString());
     void generate();
     QString toSvgString();
 
@@ -63,7 +66,11 @@ private:
     QSet<QString> m_usedIds;  /**< every component id emitted so far; guards uniqueness across pieces */
     QSet<QString> m_usedPieceIds; /**< every piece id emitted so far; guards uniqueness across pieces */
 
+    QStringList m_sizes;      /**< multisize sizes in pattern units; empty for an individual pattern */
+    QString m_baseSize;       /**< base size of the multisize measurements, in pattern units */
+
     QList<QDomDocument> m_domList;
+    QList<QString> m_domPieceSetKeys; /**< piece-set key of each m_domList entry; empty = no piece-set */
 };
 
 #endif // SVG_GENERATOR_H

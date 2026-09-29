@@ -143,7 +143,7 @@ pub fn extract_piece_rects(doc: &svg_dom::Document) -> Vec<PieceRect> {
 
         // In tagged mode the pattern's own wrapper leftovers, legend groups and
         // anything else untagged are NOT pieces — only `data-type="piece"` is.
-        if tagged_mode && !is_tagged_piece(elem) {
+        if tagged_mode && !is_layout_unit(elem) {
             continue; // untagged group inside a tagged document — not a piece
         } // if tagged_mode
 
@@ -239,7 +239,7 @@ pub fn extract_piece_rects_and_polygons(
         let this_g_idx = g_idx;
         g_idx += 1;
 
-        if tagged_mode && !is_tagged_piece(elem) {
+        if tagged_mode && !is_layout_unit(elem) {
             continue; // untagged group inside a tagged document — not a piece
         } // if tagged_mode
 
@@ -266,7 +266,17 @@ pub fn extract_piece_rects_and_polygons(
 
         // Try the cutline / seamline polygon; fall back to the rect outline
         // when the piece has no cutline group or its path is degenerate.
-        let polygon = match polygon_pack::svg_extract::extract_piece_outline(elem) {
+        // A piece-set's outline is its first member: `svg_dom::center_piece_sets`
+        // puts the largest size first, and every other size lies inside it.
+        let outline_source = if svg_dom::is_piece_set(elem) {
+            elem.children.iter()
+                .filter_map(|n| n.as_element())
+                .find(|e| e.name == "g")
+                .unwrap_or(elem)
+        } else {
+            elem
+        }; // if piece-set
+        let polygon = match polygon_pack::svg_extract::extract_piece_outline(outline_source) {
             Some(poly) => {
                 // Shift so polygon AABB.min is at (0,0), then scale user-units
                 // → pixels.  After the bridge's translate_dom pass bbox.min is
@@ -347,9 +357,47 @@ pub fn extract_piece_rects_and_polygons(
 // @param doc SVG document to normalise in place.
 // @return Number of pieces re-parented; 0 when the document needed no change.
 pub fn hoist_tagged_pieces(doc: &mut svg_dom::Document) -> usize {
+    hoist_matching_groups(doc, is_tagged_piece)
+} // fn hoist_tagged_pieces
+
+// @brief Re-parent every multisize piece-set, and every piece outside a set, up to the SVG root.
+//
+// The Nested multisize layout packs a piece-set — the same piece in every
+// size — as one unit.  Same mechanism as `hoist_tagged_pieces`, but the hoist
+// stops at a `data-type="piece-set"` group instead of descending into it, so
+// its sizes stay together.  A document without piece-sets hoists exactly as
+// `hoist_tagged_pieces` does.
+//
+// @param doc SVG document to normalise in place.
+// @return Number of units re-parented; 0 when the document needed no change.
+pub fn hoist_piece_sets(doc: &mut svg_dom::Document) -> usize {
+    hoist_matching_groups(doc, is_layout_unit)
+} // fn hoist_piece_sets
+
+// @brief Hoist the layout units a multisize layout mode packs.
+//
+// @param doc    SVG document to normalise in place.
+// @param nested `true` (Nested): a piece-set is one unit.  `false` (Marker):
+//               every piece is its own unit, and piece-sets are dissolved.
+// @return Number of units re-parented.
+pub fn hoist_layout_units(doc: &mut svg_dom::Document, nested: bool) -> usize {
+    if nested {
+        hoist_piece_sets(doc)
+    } else {
+        hoist_tagged_pieces(doc)
+    } // if nested
+} // fn hoist_layout_units
+
+// @brief Shared worker for `hoist_tagged_pieces` and `hoist_piece_sets`.
+//
+// @param doc     SVG document to normalise in place.
+// @param is_unit Predicate for the groups to lift; the hoist does not descend
+//                into a matching group.
+// @return Number of groups re-parented.
+fn hoist_matching_groups(doc: &mut svg_dom::Document, is_unit: fn(&Element) -> bool) -> usize {
     // Cheap guard: only tagged documents whose pieces are actually nested need
     // rewriting.  Keeps the untagged fallback path completely untouched.
-    if !has_nested_tagged_piece(&doc.root) {
+    if !has_nested_unit(&doc.root, is_unit) {
         return 0; // nothing nested — leave the document as it is
     } // if not nested
 
@@ -368,7 +416,7 @@ pub fn hoist_tagged_pieces(doc: &mut svg_dom::Document) -> usize {
             continue;
         }; // XMLNode::Element
 
-        if is_tagged_piece(&elem) {
+        if is_unit(&elem) {
             kept.push(XMLNode::Element(elem)); // already at the root — leave in place
             continue;
         } // if already a top-level piece
@@ -378,7 +426,7 @@ pub fn hoist_tagged_pieces(doc: &mut svg_dom::Document) -> usize {
         let wrapper_transform = elem.attributes.get("transform").cloned().unwrap_or_default();
 
         let before = hoisted.len();
-        take_tagged_pieces(&mut elem, &wrapper_transform, &mut hoisted);
+        take_matching_groups(&mut elem, &wrapper_transform, is_unit, &mut hoisted);
         let took_pieces = hoisted.len() > before;
 
         // A wrapper that existed only to hold pieces is now empty — drop it so
@@ -398,9 +446,9 @@ pub fn hoist_tagged_pieces(doc: &mut svg_dom::Document) -> usize {
     } // for piece
 
     count
-} // fn hoist_tagged_pieces
+} // fn hoist_matching_groups
 
-// @brief Recursive worker for `hoist_tagged_pieces`.
+// @brief Recursive worker for `hoist_matching_groups`.
 //
 // Removes every `data-type="piece"` descendant of `parent` from the tree,
 // prepending `inherited` to each one's own transform, and appends them to `out`
@@ -411,7 +459,12 @@ pub fn hoist_tagged_pieces(doc: &mut svg_dom::Document) -> usize {
 // @param inherited Concatenated `transform` of every ancestor between the SVG
 //                  root and `parent`, inclusive; empty when there is none.
 // @param out       Accumulator receiving the removed piece elements.
-fn take_tagged_pieces(parent: &mut Element, inherited: &str, out: &mut Vec<Element>) {
+fn take_matching_groups(
+    parent: &mut Element,
+    inherited: &str,
+    is_unit: fn(&Element) -> bool,
+    out: &mut Vec<Element>,
+) {
     let children = std::mem::take(&mut parent.children);
     let mut kept: Vec<XMLNode> = Vec::new();
 
@@ -421,7 +474,7 @@ fn take_tagged_pieces(parent: &mut Element, inherited: &str, out: &mut Vec<Eleme
             continue;
         }; // XMLNode::Element
 
-        if is_tagged_piece(&elem) {
+        if is_unit(&elem) {
             // Bake the ancestor chain into the piece so it renders unchanged
             // once it hangs directly off the root.
             let own = elem.attributes.get("transform").cloned().unwrap_or_default();
@@ -440,7 +493,7 @@ fn take_tagged_pieces(parent: &mut Element, inherited: &str, out: &mut Vec<Eleme
         let chained = join_transforms(inherited, &own);
 
         let before = out.len();
-        take_tagged_pieces(&mut elem, &chained, out);
+        take_matching_groups(&mut elem, &chained, is_unit, out);
         let took_pieces = out.len() > before;
 
         if took_pieces && !has_element_child(&elem) {
@@ -451,7 +504,7 @@ fn take_tagged_pieces(parent: &mut Element, inherited: &str, out: &mut Vec<Eleme
     } // for node in children
 
     parent.children = kept;
-} // fn take_tagged_pieces
+} // fn take_matching_groups
 
 // @brief Concatenate two SVG transform lists, outer first.
 //
@@ -479,6 +532,13 @@ fn is_tagged_piece(elem: &Element) -> bool {
     matches!(elem.attributes.get("data-type"), Some(value) if value == "piece")
 } // fn is_tagged_piece
 
+// @brief True when the element is one packable unit of a tagged document:
+//        a piece, or a multisize piece-set.
+// @param elem Element to test.
+fn is_layout_unit(elem: &Element) -> bool {
+    is_tagged_piece(elem) || svg_dom::is_piece_set(elem)
+} // fn is_layout_unit
+
 // @brief True when the document contains a tagged piece **anywhere**.
 //
 // This is the switch between tagged and untagged discovery.  It deliberately
@@ -503,15 +563,26 @@ fn document_has_tagged_pieces(root: &Element) -> bool {
 //
 // @param root The `<svg>` root element.
 // @return `true` when at least one piece is nested two or more levels deep.
-fn has_nested_tagged_piece(root: &Element) -> bool {
+fn has_nested_unit(root: &Element, is_unit: fn(&Element) -> bool) -> bool {
     root.children.iter().any(|node| match node {
-        // A root child that IS a piece is already flat — look inside the others.
-        XMLNode::Element(e) if !is_tagged_piece(e) => subtree_has_tagged_piece(e),
+        // A root child that IS a unit is already flat — look inside the others.
+        XMLNode::Element(e) if !is_unit(e) => subtree_has_unit(e, is_unit),
         _ => false,
     })
-} // fn has_nested_tagged_piece
+} // fn has_nested_unit
 
-// @brief Recursive worker for `has_nested_tagged_piece`.
+// @brief Recursive worker for `has_nested_unit`.
+// @param elem    Subtree root to search below (not counting `elem` itself).
+// @param is_unit Predicate for the groups the hoist lifts.
+// @return `true` when any descendant matches `is_unit`.
+fn subtree_has_unit(elem: &Element, is_unit: fn(&Element) -> bool) -> bool {
+    elem.children.iter().any(|node| match node {
+        XMLNode::Element(child) => is_unit(child) || subtree_has_unit(child, is_unit),
+        _ => false,
+    })
+} // fn subtree_has_unit
+
+// @brief Recursive worker for `document_has_tagged_pieces`.
 // @param elem Subtree root to search below (not counting `elem` itself).
 // @return `true` when any descendant carries `data-type="piece"`.
 fn subtree_has_tagged_piece(elem: &Element) -> bool {
@@ -539,8 +610,14 @@ fn has_element_child(elem: &Element) -> bool {
 // @return `(id, data-name, data-letter)`, each empty when the attribute is absent.
 fn piece_identity(elem: &Element) -> (String, String, String) {
     let id     = elem.attributes.get("id").cloned().unwrap_or_default();
-    let name   = elem.attributes.get("data-name").cloned().unwrap_or_default();
+    let mut name = elem.attributes.get("data-name").cloned().unwrap_or_default();
     let letter = elem.attributes.get("data-letter").cloned().unwrap_or_default();
+    // A Marker layout packs every size of a piece alone; the size tells them apart.
+    if let Some(size) = elem.attributes.get("data-size").filter(|s| !s.is_empty()) {
+        if !name.is_empty() {
+            name = format!("{name} (size {size})");
+        } // if named
+    } // if sized
     (id, name, letter)
 } // fn piece_identity
 
@@ -630,6 +707,57 @@ fn collect_all_path_points(element: &xmltree::Element, points: &mut Vec<Point>) 
         } // if XMLNode::Element
     } // for child
 } // fn collect_all_path_points
+
+// @brief Measurement type of an imported document, read from the pattern group.
+#[derive(Debug, Clone, Default, PartialEq)]
+pub struct MeasurementsInfo {
+    // True when the pattern group carries `data-measurements="multisize"`.
+    pub multisize: bool,
+    // `data-sizes`, in pattern units, in handoff order; empty for an individual pattern.
+    pub sizes: Vec<String>,
+    // `data-base-size`; empty when absent.
+    pub base_size: String,
+}
+
+// @brief Read the measurement type from the `data-type="pattern"` group.
+//
+// A document without the attribute (older handoffs, untagged drawings) is
+// individual.  This is the read-only source for the Export menu, the layout
+// settings and Adjust Mode.
+//
+// @param doc SVG document previously loaded by `app_core::load_svg`.
+// @return The measurement type; `MeasurementsInfo::default()` for individual.
+pub fn read_measurements_info(doc: &svg_dom::Document) -> MeasurementsInfo {
+    let Some(pattern) = find_pattern_group(&doc.root) else {
+        return MeasurementsInfo::default(); // no pattern group — individual
+    }; // find_pattern_group
+
+    let multisize = pattern.attributes.get("data-measurements").map(String::as_str) == Some("multisize");
+    if !multisize {
+        return MeasurementsInfo::default();
+    } // if not multisize
+
+    let sizes = pattern
+        .attributes
+        .get("data-sizes")
+        .map(|list| list.split(',').map(str::trim).filter(|s| !s.is_empty()).map(String::from).collect())
+        .unwrap_or_default();
+    let base_size = pattern.attributes.get("data-base-size").cloned().unwrap_or_default();
+    MeasurementsInfo { multisize, sizes, base_size }
+} // fn read_measurements_info
+
+// @brief Find the first `data-type="pattern"` element, depth first.
+// @param element Subtree root to search (tested itself as well).
+// @return The pattern group, or `None`.
+fn find_pattern_group(element: &Element) -> Option<&Element> {
+    if element.attributes.get("data-type").map(String::as_str) == Some("pattern") {
+        return Some(element);
+    } // if pattern group
+    element.children.iter().find_map(|node| match node {
+        XMLNode::Element(child) => find_pattern_group(child),
+        _ => None,
+    })
+} // fn find_pattern_group
 
 // @brief Count the elements tagged as pattern pieces by Seamly2D.
 //
@@ -727,7 +855,7 @@ fn parse_viewbox_width_px(root: &xmltree::Element) -> Option<u32> {
 // ---------------------------------------------------------------------------
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::*;
 
     // @brief Two <g> pieces with path data are extracted with correct dimensions.
@@ -1360,5 +1488,119 @@ mod tests {
         assert_eq!(pieces[0].rect.h, 40,
             "height inflated by grainline: got {} expected 40", pieces[0].rect.h);
     } // grainline_sibling_bbox_not_inflated
+
+    // @brief Multisize handoff: two pieces ("Front", "Back") in two sizes (34, 36),
+    // each piece nested in a `data-type="piece-set"` group.  Shape pinned by
+    // `TST_SvgComponentTags::MultisizePiecesNestInPieceSets` on the Seamly2D side.
+    pub(crate) const MULTISIZE_HANDOFF_SVG: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1200">
+  <g id="pattern-1" data-type="pattern" data-type-number="1" data-name="Test Pattern"
+     data-measurements="multisize" data-sizes="34,36" data-base-size="36">
+    <g id="piece-set_Front" data-type="piece-set" data-type-number="1" data-parent="pattern-1"
+       data-name="Front" data-letter="A">
+      <g id="piece_Front_s34" data-type="piece" data-type-number="1" data-parent="piece-set_Front"
+         data-name="Front" data-letter="A" data-size="34" data-grainline-angle="90">
+        <g id="cutline_Front_s34" data-type="cutline"><path d="M 0 0 L 90 0 L 90 190 L 0 190 Z"/></g>
+      </g>
+      <g id="piece_Front_s36" data-type="piece" data-type-number="3" data-parent="piece-set_Front"
+         data-name="Front" data-letter="A" data-size="36" data-grainline-angle="90">
+        <g id="cutline_Front_s36" data-type="cutline"><path d="M 0 0 L 100 0 L 100 200 L 0 200 Z"/></g>
+      </g>
+    </g>
+    <g id="piece-set_Back" data-type="piece-set" data-type-number="2" data-parent="pattern-1"
+       data-name="Back" data-letter="B">
+      <g id="piece_Back_s34" data-type="piece" data-type-number="2" data-parent="piece-set_Back"
+         data-name="Back" data-letter="B" data-size="34" data-grainline-angle="90">
+        <g id="cutline_Back_s34" data-type="cutline"><path d="M 300 0 L 380 0 L 380 150 L 300 150 Z"/></g>
+      </g>
+      <g id="piece_Back_s36" data-type="piece" data-type-number="4" data-parent="piece-set_Back"
+         data-name="Back" data-letter="B" data-size="36" data-grainline-angle="90">
+        <g id="cutline_Back_s36" data-type="cutline"><path d="M 300 0 L 390 0 L 390 160 L 300 160 Z"/></g>
+      </g>
+    </g>
+  </g>
+</svg>"#;
+
+    // @brief Ids of the direct `<g>` children of the root, in document order.
+    fn root_group_ids(doc: &svg_dom::Document) -> Vec<String> {
+        doc.root.children.iter()
+            .filter_map(|n| n.as_element())
+            .filter(|e| e.name == "g")
+            .map(|e| e.attributes.get("id").cloned().unwrap_or_default())
+            .collect()
+    } // fn root_group_ids
+
+    // @brief Nested: each piece-set reaches the root as one unit with its sizes inside.
+    #[test]
+    fn hoist_piece_sets_keeps_sizes_together() {
+        let mut doc = svg_dom::Document::parse(MULTISIZE_HANDOFF_SVG).expect("parse ok");
+        assert_eq!(hoist_layout_units(&mut doc, true), 2, "two piece-sets should be hoisted");
+        assert_eq!(root_group_ids(&doc), vec!["piece-set_Front", "piece-set_Back"]);
+
+        // One packable unit per set; its box covers every size (union, not first size).
+        let pieces = extract_piece_rects(&doc);
+        assert_eq!(pieces.len(), 2);
+        assert_eq!(pieces[0].id, "piece-set_Front");
+        assert_eq!(pieces[0].label(), "Front");
+        assert_eq!((pieces[0].rect.w, pieces[0].rect.h), (100, 200));
+        assert!(pieces[0].has_grainline, "a set with sized grainlines has a grain direction");
+    } // hoist_piece_sets_keeps_sizes_together
+
+    // @brief Nested: after centring, the set's outline polygon is the largest size's cutline.
+    #[test]
+    fn piece_set_outline_is_largest_size() {
+        let mut doc = svg_dom::Document::parse(MULTISIZE_HANDOFF_SVG).expect("parse ok");
+        hoist_layout_units(&mut doc, true);
+        svg_dom::center_piece_sets(&mut doc);
+        svg_dom::flatten_dom(&mut doc);
+
+        let (pieces, polygons) = extract_piece_rects_and_polygons(&doc);
+        assert_eq!(pieces.len(), 2);
+        let xs: Vec<f64> = polygons[0].vertices.iter().map(|v| v.0).collect();
+        let width = xs.iter().cloned().fold(f64::NEG_INFINITY, f64::max)
+            - xs.iter().cloned().fold(f64::INFINITY, f64::min);
+        assert!((width - pieces[0].rect.w as f64).abs() < 1.0,
+            "outline width {width} should match the largest size ({})", pieces[0].rect.w);
+    } // piece_set_outline_is_largest_size
+
+    // @brief Marker: the piece-sets dissolve and every size is its own unit,
+    // labelled with its size.
+    #[test]
+    fn hoist_tagged_pieces_dissolves_piece_sets() {
+        let mut doc = svg_dom::Document::parse(MULTISIZE_HANDOFF_SVG).expect("parse ok");
+        assert_eq!(hoist_layout_units(&mut doc, false), 4, "every size should be hoisted");
+        assert_eq!(
+            root_group_ids(&doc),
+            vec!["piece_Front_s34", "piece_Front_s36", "piece_Back_s34", "piece_Back_s36"]
+        );
+
+        let pieces = extract_piece_rects(&doc);
+        assert_eq!(pieces.len(), 4);
+        assert_eq!(pieces[0].label(), "Front (size 34)");
+        assert_eq!((pieces[1].rect.w, pieces[1].rect.h), (100, 200));
+    } // hoist_tagged_pieces_dissolves_piece_sets
+
+    // @brief An individual handoff hoists the same way in both modes.
+    #[test]
+    fn hoist_piece_sets_matches_marker_for_individual_handoff() {
+        let mut nested = svg_dom::Document::parse(nested_handoff_svg()).expect("parse ok");
+        let mut marker = svg_dom::Document::parse(nested_handoff_svg()).expect("parse ok");
+        assert_eq!(hoist_layout_units(&mut nested, true), 2);
+        assert_eq!(hoist_layout_units(&mut marker, false), 2);
+        assert_eq!(root_group_ids(&nested), root_group_ids(&marker));
+    } // hoist_piece_sets_matches_marker_for_individual_handoff
+
+    // @brief The pattern group's measurement attributes reach `MeasurementsInfo`;
+    // a handoff without them is individual.
+    #[test]
+    fn read_measurements_info_multisize_and_individual() {
+        let doc = svg_dom::Document::parse(MULTISIZE_HANDOFF_SVG).expect("parse ok");
+        let info = read_measurements_info(&doc);
+        assert!(info.multisize);
+        assert_eq!(info.sizes, vec!["34", "36"]);
+        assert_eq!(info.base_size, "36");
+
+        let doc = svg_dom::Document::parse(nested_handoff_svg()).expect("parse ok");
+        assert_eq!(read_measurements_info(&doc), MeasurementsInfo::default());
+    } // read_measurements_info_multisize_and_individual
 
 } // mod tests

@@ -613,93 +613,204 @@ fn col_rms_norm(m: &Matrix2D) -> f32 {
 ///             (cx, cy) is the piece's axis-aligned bounding-box centre.
 ///          Groups with no geometry, no id, or whose rotation is < 0.1° are skipped.
 ///          Mirrors the original `verticalize_piece` / `get_rotation_angle` logic.
+///          A `data-type="piece-set"` child is not rotated itself: each member
+///          `<g>` of the set is rotated on its own grainline and centre.
 /// @param doc  SVG document to verticalize in-place.
 pub fn verticalize_dom(doc: &mut Document) {
-    // Collect rotation parameters in a first pass (immutable borrow).
-    // Applied in a second pass (mutable borrow) to satisfy the borrow checker.
-    struct RotParams {
-        // Index within doc.root.children where the <g> element lives.
-        child_idx: usize,
-        // Rotation angle in degrees: -90° - θ, normalised to [-180, 180].
-        angle_deg: f64,
-        // Bounding-box centre of the piece — used as the rotation pivot.
-        cx: f32,
-        cy: f32,
-    } // struct RotParams
+    // Collect rotations in a first pass (immutable borrow) and apply them in a
+    // second pass (mutable borrow) to satisfy the borrow checker.
+    // Each entry: (root child index, member index inside a piece-set, transform).
+    let mut rotations: Vec<(usize, Option<usize>, String)> = Vec::new();
 
-    let mut rotations: Vec<RotParams> = Vec::new();
-
-    // --- First pass: read geometry, compute rotation parameters ---
+    // --- First pass: read geometry, compute rotation transforms ---
     for (i, child) in doc.root.children.iter().enumerate() {
-        // Only process element nodes.
+        // Only direct <g> children with an id attribute are pattern pieces.
         let XMLNode::Element(elem) = child else {
             continue; // skip text nodes, comments, processing instructions
         }; // XMLNode::Element
+        if elem.name != "g" || !elem.attributes.contains_key("id") {
+            continue; // skip defs, rect, title, anonymous groups
+        } // if not a piece group
 
-        // Only direct <g> children with an id attribute are pattern pieces.
-        if elem.name != "g" {
-            continue; // skip defs, rect, title, etc.
-        } // if not <g>
-        if !elem.attributes.contains_key("id") {
-            continue; // skip anonymous groups — not pattern pieces
-        } // if no id
+        // A multisize piece-set turns each size on its own grainline, so every
+        // size ends up vertical even when the grain angles of the sizes differ.
+        if is_piece_set(elem) {
+            for (m, member) in elem.children.iter().enumerate() {
+                let XMLNode::Element(member_elem) = member else {
+                    continue; // non-element node inside the set
+                }; // XMLNode::Element
+                if member_elem.name != "g" {
+                    continue; // only piece groups rotate
+                } // if not <g>
+                if let Some(rotation) = vertical_rotation(member_elem) {
+                    rotations.push((i, Some(m), rotation));
+                } // if rotation needed
+            } // for member
+            continue;
+        } // if piece-set
 
-        // Locate the grainline angle (θ in degrees from the X axis).
-        let Some(theta_deg) = grainline_angle(elem) else {
-            continue; // no grainline — keep drafted orientation
-        }; // grainline_angle
-
-        // Compute rotation needed to make the grainline point up (-90° in SVG, Y axis down).
-        let mut angle_deg = -90.0 - theta_deg;
-        // Normalise to [-180, 180] to choose the shortest rotation.
-        while angle_deg > 180.0 {
-            angle_deg -= 360.0;
-        } // while > 180
-        while angle_deg < -180.0 {
-            angle_deg += 360.0;
-        } // while < -180
-
-        // Skip pieces already vertical — threshold 0.1° matches original.
-        if angle_deg.abs() < 0.1 {
-            continue; // already vertical — no rotation needed
-        } // if negligible rotation
-
-        // Compute the bounding-box centre as the rotation pivot.
-        let Some((cx, cy)) = bbox_centre(elem) else {
-            continue; // no geometry — cannot compute centre
-        }; // bbox_centre
-
-        rotations.push(RotParams { child_idx: i, angle_deg, cx, cy });
+        if let Some(rotation) = vertical_rotation(elem) {
+            rotations.push((i, None, rotation));
+        } // if rotation needed
     } // for (i, child) — first pass
 
     // --- Second pass: write transform attributes ---
-    for rp in &rotations {
-        let XMLNode::Element(ref mut elem) = doc.root.children[rp.child_idx] else {
+    for (child_idx, member_idx, rotation) in rotations {
+        let XMLNode::Element(ref mut elem) = doc.root.children[child_idx] else {
             continue; // should not happen — index was validated in first pass
         }; // XMLNode::Element
-
-        // Build "rotate(angle,cx,cy)" transform string.
-        // SVG rotate(angle, cx, cy) is equivalent to
-        //   translate(cx,cy) rotate(angle) translate(-cx,-cy),
-        // matching the matrix chain in the original apply_rotation_angle_to_piece().
-        let transform_str = format!(
-            "rotate({},{},{})",
-            fmt_f64(rp.angle_deg),
-            fmt_f32(rp.cx),
-            fmt_f32(rp.cy),
-        );
-
-        // Prepend to any existing transform so this rotation is applied first.
-        let existing = elem.attributes.get("transform").cloned().unwrap_or_default();
-        let new_transform = if existing.is_empty() {
-            transform_str // no previous transform — set directly
-        } else {
-            format!("{} {}", transform_str, existing) // prepend before existing
-        }; // if existing transform
-
-        elem.attributes.insert("transform".to_string(), new_transform);
-    } // for rp — second pass
+        let target = match member_idx {
+            Some(m) => match elem.children[m] {
+                XMLNode::Element(ref mut member) => member,
+                _ => continue, // should not happen — index was validated in first pass
+            }, // Some(m)
+            None => elem,
+        }; // match member_idx
+        prepend_transform(target, &rotation);
+    } // for rotation — second pass
 } // fn verticalize_dom
+
+/// @brief Compute the rotation that turns one piece's grainline vertical, pointing up.
+/// @details θ is the grainline angle from the X axis; the rotation is −90° − θ,
+///          normalised to [−180, 180], pivoting on the piece's bounding-box centre.
+/// @param elem  Piece `<g>` element.
+/// @return `rotate(angle,cx,cy)` transform, or `None` when the piece has no grain
+///         direction, no geometry, or is already vertical within 0.1°.
+fn vertical_rotation(elem: &Element) -> Option<String> {
+    // Locate the grainline angle (θ in degrees from the X axis).
+    let theta_deg = grainline_angle(elem)?; // no grainline — keep drafted orientation
+
+    // Compute rotation needed to make the grainline point up (-90° in SVG, Y axis down).
+    let mut angle_deg = -90.0 - theta_deg;
+    // Normalise to [-180, 180] to choose the shortest rotation.
+    while angle_deg > 180.0 {
+        angle_deg -= 360.0;
+    } // while > 180
+    while angle_deg < -180.0 {
+        angle_deg += 360.0;
+    } // while < -180
+
+    // Skip pieces already vertical — threshold 0.1° matches original.
+    if angle_deg.abs() < 0.1 {
+        return None; // already vertical — no rotation needed
+    } // if negligible rotation
+
+    // The bounding-box centre is the rotation pivot.
+    let (cx, cy) = bbox_centre(elem)?; // no geometry — cannot compute centre
+
+    // SVG rotate(angle, cx, cy) is equivalent to
+    //   translate(cx,cy) rotate(angle) translate(-cx,-cy),
+    // matching the matrix chain in the original apply_rotation_angle_to_piece().
+    Some(format!("rotate({},{},{})", fmt_f64(angle_deg), fmt_f32(cx), fmt_f32(cy)))
+} // fn vertical_rotation
+
+/// @brief Prepend a transform to an element's `transform` attribute.
+/// @details Prepending makes the new transform the outermost one, so it applies
+///          after any transform the element already carries.
+/// @param elem       Element to update.
+/// @param transform  SVG transform list to prepend.
+fn prepend_transform(elem: &mut Element, transform: &str) {
+    let existing = elem.attributes.get("transform").cloned().unwrap_or_default();
+    let combined = if existing.is_empty() {
+        transform.to_string() // no previous transform — set directly
+    } else {
+        format!("{} {}", transform, existing) // prepend before existing
+    }; // if existing transform
+    elem.attributes.insert("transform".to_string(), combined);
+} // fn prepend_transform
+
+/// @brief True when the element is a multisize `data-type="piece-set"` group.
+/// @param elem  Element to test.
+pub fn is_piece_set(elem: &Element) -> bool {
+    matches!(elem.attributes.get("data-type"), Some(value) if value == "piece-set")
+} // fn is_piece_set
+
+// ---------------------------------------------------------------------------
+// Public API — center_piece_sets
+// ---------------------------------------------------------------------------
+
+/// @brief Stack the sizes of each top-level piece-set on the largest size's centre.
+/// @details For each direct `data-type="piece-set"` child of `doc.root`:
+///          1. Measures the bounding box of each member `<g>`.
+///          2. Reorders the members largest area first, so the smallest size is
+///             drawn last (on top) and the outline search finds the largest
+///             size's outline first.
+///          3. Prepends `translate(dx,dy)` to every other member so its
+///             bounding-box centre matches the largest member's centre.
+///          Call after the grainlines are vertical and flattened; call
+///          `flatten_dom` afterwards to bake the translations.
+/// @param doc  SVG document to update in place.
+/// @return Number of piece-sets processed.
+pub fn center_piece_sets(doc: &mut Document) -> usize {
+    // Offset below which a member counts as already centred.
+    const TOLERANCE: f32 = 0.001;
+
+    let mut count = 0;
+    for child in doc.root.children.iter_mut() {
+        let XMLNode::Element(set) = child else {
+            continue; // not an element node
+        }; // XMLNode::Element
+        if !is_piece_set(set) {
+            continue; // an ordinary piece or a non-piece group
+        } // if not piece-set
+        count += 1;
+
+        // Split the children: measurable member groups, and everything else.
+        // Members without geometry sort last and do not move.
+        let children = std::mem::take(&mut set.children);
+        let mut members: Vec<(f32, Option<(f32, f32)>, XMLNode)> = Vec::new();
+        let mut others: Vec<XMLNode> = Vec::new();
+        for node in children {
+            let measured = match &node {
+                XMLNode::Element(e) if e.name == "g" => Some(bbox_area_centre(e)),
+                _ => None, // text, comments, non-group elements stay in front
+            }; // match node
+            match measured {
+                Some(Some((area, centre))) => members.push((area, Some(centre), node)),
+                Some(None) => members.push((-1.0, None, node)),
+                None => others.push(node),
+            } // match measured
+        } // for node
+
+        // Largest area first; the stable sort keeps equal-area members in size order.
+        members.sort_by(|a, b| b.0.partial_cmp(&a.0).unwrap_or(std::cmp::Ordering::Equal));
+        let anchor = members.first().and_then(|m| m.1);
+
+        for (_, centre, mut node) in members {
+            if let (Some((ax, ay)), Some((cx, cy)), XMLNode::Element(ref mut e)) = (anchor, centre, &mut node) {
+                let dx = ax - cx;
+                let dy = ay - cy;
+                if dx.abs() > TOLERANCE || dy.abs() > TOLERANCE {
+                    prepend_transform(e, &format!("translate({},{})", fmt_f32(dx), fmt_f32(dy)));
+                } // if not centred
+            } // if measurable
+            others.push(node);
+        } // for member
+
+        set.children = others;
+    } // for child
+
+    count
+} // fn center_piece_sets
+
+/// @brief Compute the AABB area and centre of a `<g>`.
+/// @param group  `<g>` element to measure.
+/// @return (area, (cx, cy)), or `None` if no geometry was found.
+fn bbox_area_centre(group: &Element) -> Option<(f32, (f32, f32))> {
+    let mut points: Vec<Point> = Vec::new();
+    collect_all_points(group, &mut points);
+
+    if points.is_empty() {
+        return None; // no geometry
+    } // if no points
+
+    let min_x = points.iter().map(|p| p.x).fold(f32::INFINITY, f32::min);
+    let max_x = points.iter().map(|p| p.x).fold(f32::NEG_INFINITY, f32::max);
+    let min_y = points.iter().map(|p| p.y).fold(f32::INFINITY, f32::min);
+    let max_y = points.iter().map(|p| p.y).fold(f32::NEG_INFINITY, f32::max);
+
+    Some(((max_x - min_x) * (max_y - min_y), ((min_x + max_x) / 2.0, (min_y + max_y) / 2.0)))
+} // fn bbox_area_centre
 
 // ---------------------------------------------------------------------------
 // Public API — translate_dom
@@ -791,8 +902,15 @@ fn grainline_angle(group: &Element) -> Option<f64> {
 } // fn grainline_angle
 
 /// @brief Return true when `grainline_angle` finds a grain direction for the piece.
+/// @details A piece-set has a grain direction when any of its sizes has one.
 /// @param group  Top-level piece `<g>` element.
 pub fn has_grain_direction(group: &Element) -> bool {
+    if is_piece_set(group) {
+        return group.children.iter().any(|node| match node {
+            XMLNode::Element(member) => grainline_angle(member).is_some(),
+            _ => false,
+        });
+    } // if piece-set
     grainline_angle(group).is_some()
 } // fn has_grain_direction
 
@@ -1656,4 +1774,86 @@ mod tests {
         let p = m.apply_to_point(Point::new(0.0, 1.0));
         assert!((p.x - 1.0).abs() < 1e-4, "skewX");
     } // parse_all_transform_functions
+    // @brief Multisize piece-set: two sizes of one piece, the small size first.
+    //        Both sizes have a horizontal grain (data-grainline-angle="0").
+    const PIECE_SET: &str = r#"<svg width="400" height="400">
+  <g id="piece-set_Front" data-type="piece-set" data-name="Front">
+    <g id="piece_Front_s34" data-type="piece" data-size="34" data-grainline-angle="0">
+      <path d="M 0,0 L 10,0 L 10,10 L 0,10 Z"/>
+    </g>
+    <g id="piece_Front_s36" data-type="piece" data-size="36" data-grainline-angle="0">
+      <path d="M 100,100 L 140,100 L 140,140 L 100,140 Z"/>
+    </g>
+  </g>
+</svg>"#;
+
+    // @brief verticalize_dom turns each size of a piece-set, not the set itself.
+    #[test]
+    fn piece_set_members_rotate_individually() {
+        let mut doc = Document::parse(PIECE_SET).unwrap();
+        verticalize_dom(&mut doc);
+
+        assert!(doc.get_attr_by_id("piece-set_Front", "transform").is_none(), "the set itself must not rotate");
+        for id in ["piece_Front_s34", "piece_Front_s36"] {
+            let transform = doc
+                .get_attr_by_id(id, "transform")
+                .unwrap_or_else(|| panic!("{id} missing transform after verticalize_dom"));
+            assert!(transform.starts_with("rotate(-90"), "expected rotate(-90...) in '{transform}'");
+        } // for id
+    } // piece_set_members_rotate_individually
+
+    // @brief Member ids of the first piece-set in document order.
+    fn piece_set_member_ids(doc: &Document) -> Vec<String> {
+        let set = doc
+            .root
+            .children
+            .iter()
+            .find_map(|n| match n {
+                XMLNode::Element(e) if is_piece_set(e) => Some(e),
+                _ => None,
+            })
+            .expect("piece-set missing");
+        set.children
+            .iter()
+            .filter_map(|n| match n {
+                XMLNode::Element(e) => e.attributes.get("id").cloned(),
+                _ => None,
+            })
+            .collect()
+    } // fn piece_set_member_ids
+
+    // @brief center_piece_sets puts the largest size first and centres the
+    //        other sizes on it: the 10×10 square moves from centre (5,5) to (120,120).
+    #[test]
+    fn center_piece_sets_stacks_on_largest() {
+        let mut doc = Document::parse(PIECE_SET).unwrap();
+        assert_eq!(center_piece_sets(&mut doc), 1);
+
+        assert_eq!(piece_set_member_ids(&doc), vec!["piece_Front_s36", "piece_Front_s34"]);
+        assert!(doc.get_attr_by_id("piece_Front_s36", "transform").is_none(), "the largest size must not move");
+
+        flatten_dom(&mut doc);
+        let set = doc
+            .root
+            .children
+            .iter()
+            .find_map(|n| match n {
+                XMLNode::Element(e) if is_piece_set(e) => Some(e),
+                _ => None,
+            })
+            .unwrap();
+        let XMLNode::Element(small) = &set.children.iter().filter(|n| matches!(n, XMLNode::Element(_))).nth(1).unwrap().clone() else {
+            unreachable!()
+        };
+        let (_, (cx, cy)) = bbox_area_centre(small).expect("small size has geometry");
+        assert!((cx - 120.0).abs() < 1e-3 && (cy - 120.0).abs() < 1e-3, "small size centre ({cx},{cy})");
+    } // center_piece_sets_stacks_on_largest
+
+    // @brief center_piece_sets leaves ordinary pieces alone.
+    #[test]
+    fn center_piece_sets_ignores_plain_pieces() {
+        let mut doc = Document::parse(GRAINLINE_ATTRIBUTE).unwrap();
+        assert_eq!(center_piece_sets(&mut doc), 0);
+        assert!(doc.get_attr_by_id("piece-5", "transform").is_none());
+    } // center_piece_sets_ignores_plain_pieces
 } // mod tests
