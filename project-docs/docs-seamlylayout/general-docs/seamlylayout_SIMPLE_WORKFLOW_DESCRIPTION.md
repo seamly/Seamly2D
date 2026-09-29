@@ -190,6 +190,10 @@ The application workflow loop consists of:
      * One warning after the last size lists every layout that left pieces out or failed.
      * Tabs above the right canvas: "All sizes", "Size 34", "Size 36", …
      * Selecting a tab swaps that layout into the controller's layout fields; Adjust Layout and every export use the selected tab.
+     * Export > "Export all tabs" (checkable, shown only when tabs exist): every format then writes one file per tab.
+       * File name: the save-dialog name with the tab label before the extension: `shirt_all-sizes.pdf`, `shirt_size-36.pdf`.
+       * Each tab is made the export source silently (`selectExportTab`); the shown tab is restored at the end.
+       * One "Export Complete" dialog lists every file. The first failure stops the run.
      * Tabs are locked during layout and during Adjust Mode.
      * An Adjust Save changes only the selected tab. The next Create Layout, Settings Submit or import replaces all tabs.
 5. Adjust Layout --> User clicks 'Adjust Layout' button:

@@ -651,6 +651,15 @@ pub mod qobject {
         #[qinvokable]
         fn select_layout_view(self: Pin<&mut AppController>, index: i32) -> bool;
 
+        // Make a tab's layout the export source without redrawing the canvas or moving the tab bar.
+        // Export all tabs calls it per tab, then again with the shown tab to restore it.
+        #[qinvokable]
+        fn select_export_tab(self: Pin<&mut AppController>, index: i32) -> bool;
+
+        // `path` with the tab label before the extension: "shirt.pdf" → "shirt_size-40.pdf".
+        #[qinvokable]
+        fn export_tab_path(self: &AppController, path: &QString, index: i32) -> QString;
+
         // --- Adjust Layout ---
 
         // Enter AdjustMode: clone layout_dom into adjust_dom, enable interactive canvas.
@@ -1518,49 +1527,75 @@ impl qobject::AppController {
     // and every export then work on that tab.  Emits `layout_finished` so QML
     // reloads the right canvas.
     fn select_layout_view(mut self: std::pin::Pin<&mut Self>, index: i32) -> bool {
+        match self.as_mut().swap_layout_view(index) {
+            Err(())    => false, // refused or bad index
+            Ok(false)  => true,  // already shown
+            Ok(true)   => {
+                self.as_mut().refresh_layout_view_properties();
+                self.as_mut().layout_finished(); // right canvas shows the chosen tab
+                true
+            } // Ok(true)
+        } // match swap_layout_view
+    } // fn select_layout_view
+
+    // Make a tab's layout the export source, silently.
+    //
+    // Same swap as `select_layout_view`, but no canvas reload and no tab-bar
+    // update: Export all tabs visits every tab inside one synchronous QML call,
+    // then selects the shown tab again, so the UI never sees the other tabs.
+    fn select_export_tab(mut self: std::pin::Pin<&mut Self>, index: i32) -> bool {
+        self.as_mut().swap_layout_view(index).is_ok()
+    } // fn select_export_tab
+
+    // Tab-labelled export path; `path` unchanged when `index` names no tab.
+    fn export_tab_path(&self, path: &cxx_qt_lib::QString, index: i32) -> cxx_qt_lib::QString {
+        let path = path.to_string();
+        let label = usize::try_from(index).ok().and_then(|i| self.rust().layout_views.label(i));
+        match label {
+            Some(label) => cxx_qt_lib::QString::from(layout_views::tab_file_path(&path, label).as_str()),
+            None        => cxx_qt_lib::QString::from(path.as_str()),
+        } // match label
+    } // fn export_tab_path
+
+    // Swap the controller's layout fields with tab `index`.
+    //
+    // @return Ok(true) when swapped, Ok(false) when `index` is already active,
+    //         Err(()) when refused: Adjust Mode, layout running, or bad index.
+    fn swap_layout_view(mut self: std::pin::Pin<&mut Self>, index: i32) -> Result<bool, ()> {
         // Switching mid-adjust or mid-layout would split one edit across two layouts.
         if *self.is_adjust_mode() || *self.is_layout_in_progress() || index < 0 {
-            return false;
+            return Err(());
         } // if refused
         let index = index as usize;
         if index == self.rust().layout_views.active() {
-            return true;
-        } // if already shown
+            return Ok(false);
+        } // if already active
 
-        let swapped = {
-            let mut rust = self.as_mut().rust_mut();
-            let current = LayoutState {
-                layout_dom:        rust.layout_dom.take(),
-                layout_h_px:       rust.layout_h_px,
-                layout_ml_px:      rust.layout_ml_px,
-                layout_mt_px:      rust.layout_mt_px,
-                piece_bboxes_json: std::mem::take(&mut rust.piece_bboxes_json),
-                flat_dom:          rust.flat_dom.take(),
-                vertical_dom:      rust.vertical_dom.take(),
-                translate_dom:     rust.translate_dom.take(),
-            }; // current
-            let (state, ok) = match rust.layout_views.select(index, current) {
-                Ok(state) => (state, true),
-                Err(state) => (state, false), // unchanged; put it back
-            }; // match select
-            rust.layout_dom        = state.layout_dom;
-            rust.layout_h_px       = state.layout_h_px;
-            rust.layout_ml_px      = state.layout_ml_px;
-            rust.layout_mt_px      = state.layout_mt_px;
-            rust.piece_bboxes_json = state.piece_bboxes_json;
-            rust.flat_dom          = state.flat_dom;
-            rust.vertical_dom      = state.vertical_dom;
-            rust.translate_dom     = state.translate_dom;
-            ok
-        }; // rust borrow dropped
-        if !swapped {
-            return false;
-        } // if bad index
-
-        self.as_mut().refresh_layout_view_properties();
-        self.as_mut().layout_finished(); // right canvas shows the chosen tab
-        true
-    } // fn select_layout_view
+        let mut rust = self.as_mut().rust_mut();
+        let current = LayoutState {
+            layout_dom:        rust.layout_dom.take(),
+            layout_h_px:       rust.layout_h_px,
+            layout_ml_px:      rust.layout_ml_px,
+            layout_mt_px:      rust.layout_mt_px,
+            piece_bboxes_json: std::mem::take(&mut rust.piece_bboxes_json),
+            flat_dom:          rust.flat_dom.take(),
+            vertical_dom:      rust.vertical_dom.take(),
+            translate_dom:     rust.translate_dom.take(),
+        }; // current
+        let (state, ok) = match rust.layout_views.select(index, current) {
+            Ok(state) => (state, true),
+            Err(state) => (state, false), // unchanged; put it back
+        }; // match select
+        rust.layout_dom        = state.layout_dom;
+        rust.layout_h_px       = state.layout_h_px;
+        rust.layout_ml_px      = state.layout_ml_px;
+        rust.layout_mt_px      = state.layout_mt_px;
+        rust.piece_bboxes_json = state.piece_bboxes_json;
+        rust.flat_dom          = state.flat_dom;
+        rust.vertical_dom      = state.vertical_dom;
+        rust.translate_dom     = state.translate_dom;
+        if ok { Ok(true) } else { Err(()) }
+    } // fn swap_layout_view
 
     // Remove every tab and any queued size run.
     //

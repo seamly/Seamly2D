@@ -148,6 +148,103 @@ ApplicationWindow {
         dxfTeachingDialog.open()
     } // function requestDxfExport
 
+    // Export > "Export all tabs" check state.  Kept across imports; it only
+    // applies while the layout has tabs (exportAllTabsActive).
+    property bool exportAllTabs: false
+
+    // @brief True when the next export writes one file per tab.
+    readonly property bool exportAllTabsActive: root.exportAllTabs && appController.layoutViewLabels.length > 1
+
+    // True while exportEachTab() runs; onExportFinished then collects paths instead of reporting each file.
+    property bool batchExportRunning: false
+
+    // Files written by the running exportEachTab(), in tab order.
+    property var batchExportedPaths: []
+
+    // @brief Start one export of the layout the controller holds now.
+    // @param fmt      pendingExportFormat value.
+    // @param path     Absolute file path to write.
+    // @param settings pendingExportSettings value for this format.
+    // @param teaching DXF teaching-version flag.
+    // @param clo3d    DXF CLO3D group 250 flag.
+    // @return The AppController export result; false after it emitted errorOccurred.
+    function runExport(fmt, path, settings, teaching, clo3d) {
+        if (fmt === "dxf") {
+            // Local date/time and version fill the DXF-ASTM style system text.
+            var now = new Date()
+            var optJson = JSON.stringify({
+                createTeachingVersion: teaching,
+                clo3dGroup250: clo3d,
+                appVersion:   Qt.application.version,
+                creationDate: Qt.formatDateTime(now, "dd-MM-yyyy"),
+                creationTime: Qt.formatDateTime(now, "hh-mm")
+            })
+            return appController.exportDxf(path, optJson)
+        } else if (fmt === "png") {
+            return appController.exportPng(path, 1.0)
+        } else if (fmt === "jpg") {
+            return appController.exportJpeg(path)
+        } else if (fmt === "pdf") {
+            return appController.exportPdf(path, settings)
+        } else if (fmt === "pdf-tiled") {
+            return appController.exportPdfTiled(path, settings)
+        } else if (fmt === "svg") {
+            return appController.exportSvg(path, settings) // settings = SVG text mode
+        } else if (fmt === "hpgl") {
+            return appController.exportHpgl(path, settings) // settings = HPGL options JSON
+        } else if (fmt === "ps" || fmt === "eps") {
+            return appController.exportPostscript(path, fmt) // the format name is the PostScript flavor
+        } else if (fmt === "gcode") {
+            return appController.exportGcode(path)
+        } else if (fmt === "3mf") {
+            return appController.exportMesh(path)
+        } // if fmt
+        return false // unknown format
+    } // function runExport
+
+    // @brief Export every tab to its own file: `path` with the tab name before the extension.
+    //
+    // The staged options are copied first, because onExportFinished clears them.
+    // Each tab becomes the export source in turn, silently; the shown tab is
+    // selected again at the end.  One dialog lists every file.  The first
+    // failure stops the run; its error dialog is already open.
+    // @param fmt  pendingExportFormat value.
+    // @param path File path from the save dialog.
+    function exportEachTab(fmt, path) {
+        var settings = root.pendingExportSettings
+        var teaching = root.pendingExportTeachingVersion
+        var clo3d    = root.pendingDxfClo3d
+        var shown    = appController.activeLayoutView
+        var count    = appController.layoutViewLabels.length
+
+        root.batchExportedPaths = []
+        root.batchExportRunning = true
+        var ok = true
+        for (var i = 0; i < count && ok; ++i) {
+            if (!appController.selectExportTab(i)) {
+                ok = false
+                errorDialog.errorText = "Export all tabs: could not select tab \"" + appController.layoutViewLabels[i] + "\"."
+                errorDialog.open()
+                break
+            } // if tab refused
+            ok = root.runExport(fmt, appController.exportTabPath(path, i), settings, teaching, clo3d)
+        } // for each tab
+        appController.selectExportTab(shown) // the export source matches the shown tab again
+        root.batchExportRunning = false
+
+        // Clear the staged export for both outcomes; a failure already reset the rest.
+        root.pendingExportPath = ""
+        root.pendingExportFormat = ""
+        root.pendingExportSettings = ""
+        root.pendingExportTeachingVersion = false
+        root.pendingDxfClo3d = false
+        exportProgressPopup.close()
+        if (!ok) return
+
+        exportSuccessDialog.exportPath = root.batchExportedPaths.join("\n")
+        exportSuccessDialog.open()
+    } // function exportEachTab
+
     // Wait one short tick after opening the popup so it can paint before the
     // synchronous export starts and blocks the UI thread.
     Timer {
@@ -158,36 +255,11 @@ ApplicationWindow {
             var path = root.pendingExportPath
             var fmt  = root.pendingExportFormat
             if (path === "" || fmt === "") return  // nothing staged
-            if (fmt === "dxf") {
-                // Local date/time and version fill the DXF-ASTM style system text.
-                var now = new Date()
-                var optJson = JSON.stringify({
-                    createTeachingVersion: root.pendingExportTeachingVersion,
-                    clo3dGroup250: root.pendingDxfClo3d,
-                    appVersion:   Qt.application.version,
-                    creationDate: Qt.formatDateTime(now, "dd-MM-yyyy"),
-                    creationTime: Qt.formatDateTime(now, "hh-mm")
-                })
-                appController.exportDxf(path, optJson)
-            } else if (fmt === "png") {
-                appController.exportPng(path, 1.0)
-            } else if (fmt === "jpg") {
-                appController.exportJpeg(path)
-            } else if (fmt === "pdf") {
-                appController.exportPdf(path, root.pendingExportSettings)
-            } else if (fmt === "pdf-tiled") {
-                appController.exportPdfTiled(path, root.pendingExportSettings)
-            } else if (fmt === "svg") {
-                appController.exportSvg(path, root.pendingExportSettings) // settings = SVG text mode
-            } else if (fmt === "hpgl") {
-                appController.exportHpgl(path, root.pendingExportSettings) // settings = HPGL options JSON
-            } else if (fmt === "ps" || fmt === "eps") {
-                appController.exportPostscript(path, fmt) // the format name is the PostScript flavor
-            } else if (fmt === "gcode") {
-                appController.exportGcode(path)
-            } else if (fmt === "3mf") {
-                appController.exportMesh(path)
-            } // if fmt
+            if (root.exportAllTabsActive)
+                root.exportEachTab(fmt, path)
+            else
+                root.runExport(fmt, path, root.pendingExportSettings,
+                               root.pendingExportTeachingVersion, root.pendingDxfClo3d)
         } // onTriggered
     } // Timer exportStartTimer
 
@@ -287,6 +359,11 @@ ApplicationWindow {
 
         // Export success — store path for View menu; show dialog or open viewer.
         onExportFinished: function(path) {
+            // Export all tabs reports every file in one dialog when the run ends.
+            if (root.batchExportRunning) {
+                root.batchExportedPaths = root.batchExportedPaths.concat([path]) // reassign: in-place push on a var property is not reliable
+                return
+            } // if batch
             exportStartTimer.stop()
             root.pendingExportPath = ""
             root.pendingExportFormat = ""
@@ -397,6 +474,9 @@ ApplicationWindow {
         createLayoutEnabled:  appController.isCreateLayoutEnabled
         adjustMode:           appController.isAdjustMode
         pdfTiledExportEnabled: settingsModel.paperType === "tiled"
+        hasLayoutTabs:        appController.layoutViewLabels.length > 1
+        exportAllTabs:        root.exportAllTabs
+        onExportAllTabsToggled: function(checked) { root.exportAllTabs = checked }
         labelTextState:       appController.labelTextState
         lastSvgTextMode:      preferencesModel.svgTextMode
         // Paid formats stay hidden until the Rust gate reports their module as usable.
@@ -1088,7 +1168,7 @@ ApplicationWindow {
             rightPadding:  16
 
             Text {
-                text:           "File saved:"
+                text:           exportSuccessDialog.exportPath.indexOf("\n") >= 0 ? "Files saved:" : "File saved:"
                 color:          Theme.textOnDark
                 font.pixelSize: Theme.fontSizeSmall
                 font.bold:      true
