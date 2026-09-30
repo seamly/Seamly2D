@@ -24,4 +24,40 @@ Current label text handling (all outline-font based, and staying available): the
 - [ ] Seamly2D.1.7 Verify: canvas single-stroke labels legible at typical zooms with correct placement, mirroring, and rotation; outline-font behavior unchanged everywhere; tagged pieces SVG / `.pieces.svg` / `--text2paths` / DXF / PDF / PNG correct in both font modes
 - [ ] Seamly2D.1.8 Doxygen briefs + inline comments on all touched functions; document the font architecture in the repo docs
 
+## [ ] Task Seamly2D.6 — Piece Mode draws cutline notches on the seamline
+
+Pattern settings and the piece node context menu say "notch on cutline". The canvas draws the notch on the seamline.
+
+Fix upstream (`FashionFreedom/Seamly2D`) first, then merge `develop` into `run-seamlyLayout`. Related upstream issues: #1647 (closed: notches missing in layouts and exports), #1231, #818.
+
+- [ ] Seamly2D.6.1 Reproduce with `test-seamly-layout-input/richmond-shirt_v1_v061-test.sm2d`: context menu state vs. drawn position
+- [ ] Seamly2D.6.2 Trace `VPieceNode::showSeamlineNotch()` / `showSeamAllowanceNotch()` through `VPiece::createNotch()` and `createBuiltInSaNotch()` (`src/libs/vpatterndb/vpiece.cpp`)
+- [ ] Seamly2D.6.3 Fix upstream; add a unit test for notch position per flag
+- [ ] Seamly2D.6.4 Check the fix also puts the notch on the correct line in the SeamlyLayout handoff SVG (Layout.65)
+
+## [ ] Task Seamly2D.7 — Per-piece material
+
+Today every piece is laid out on one fabric. Label placeholders `mFabric`, `mLining`, `mInterfacing`, `mInterlining` are fixed words, not piece data.
+
+- [ ] Seamly2D.7.1 Piece data: material type (fabric, lining, interfacing, interlining, user-defined) and cut count per material
+- [ ] Seamly2D.7.2 `.sm2d` schema: new attributes, schema version bump, converter for older files
+- [ ] Seamly2D.7.3 Piece Properties dialog: material list editor
+- [ ] Seamly2D.7.4 Label placeholders read the piece material data
+- [ ] Seamly2D.7.5 Handoff SVG: `data-material` and per-material quantity on the piece `<g>`; update `SVG-DATA-ATTRIBUTES.md` and `NEW-ATTRIBUTES.csv`
+- [ ] Seamly2D.7.6 Unit tests: schema round-trip, handoff attributes
+- [ ] Seamly2D.7.7 SeamlyLayout side: Layout.15
+
+## [ ] Task Seamly2D.8 — Fold lines (mirror lines)
+
+A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. `FoldPosition` is free text.
+
+- [ ] Seamly2D.8.1 Piece data: fold line = two main path nodes that are adjacent on the boundary
+- [ ] Seamly2D.8.2 `.sm2d` schema: fold line node ids, schema version bump, converter for older files
+- [ ] Seamly2D.8.3 Piece Mode UI: pick the fold line from the main path; context menu item; "on fold" flag follows the fold line
+- [ ] Seamly2D.8.4 Canvas: draw the fold line with its own line style
+- [ ] Seamly2D.8.5 Optional full-piece view: mirror the half piece across the fold line
+- [ ] Seamly2D.8.6 Handoff SVG: `data-on-fold` on the piece `<g>`, a `fold_line` component group with the two points; update `SVG-DATA-ATTRIBUTES.md` and `NEW-ATTRIBUTES.csv`
+- [ ] Seamly2D.8.7 Unit tests: schema round-trip, handoff attributes
+- [ ] Seamly2D.8.8 SeamlyLayout side: Layout.16
+
 ## [x] Task Seamly2D.4 — Preferences > Paths has no row for bodyscans

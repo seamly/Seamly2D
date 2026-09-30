@@ -85,11 +85,31 @@ Handoff shape: see `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`, "Multisize p
 See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
 
 - [ ] Layout.61 Grading: grade rule identifiers (`# n` text), graded nests (one block per size, `Size Name:`), grade reference line (layer 5), grade rule table file
-- [ ] Layout.62 Mirror line (layer 6) for pieces cut on the fold
+- Layout.62 Moved to Layout.16: mirror line (layer 6) needs Seamly2D fold lines (Seamly2D.8)
 - [ ] Layout.63 Drill holes (layer 13), with diameter (group 30)
 - [ ] Layout.64 Stripe and plaid reference lines (layers 9, 10)
 - [ ] Layout.65 Seamly2D writes empty notch paths (`M x,y Z`) to the handoff SVG, so no notches reach the DXF — fix the producer
-- [ ] Layout.66 Seamly2D producer attributes: `data-quantity` (right/left), `data-on-fold`, `data-material`, `data-notch-type` — replaces label parsing and notch-shape inference
+- [ ] Layout.66 Seamly2D producer attributes: `data-quantity` (right/left), `data-on-fold`, `data-notch-type` — replaces label parsing and notch-shape inference. `data-material` moved to Seamly2D.7 / Layout.15
+
+## [ ] Task Layout.15 — Layout by material
+
+Depends on Seamly2D.7. Until then every piece is on one fabric.
+
+- [ ] Layout.15.1 Import: read `data-material` and per-material quantity
+- [ ] Layout.15.2 One layout tab per material; each packs only that material's pieces
+- [ ] Layout.15.3 Quantity: place each piece its cut count per material
+- [ ] Layout.15.4 Exports: material in the default file name; DXF-ASTM `Material:` piece text
+- [ ] Layout.15.5 Tests: Rust import, packing per material, export text
+
+## [ ] Task Layout.16 — Fold lines in layout and export
+
+Depends on Seamly2D.8.
+
+- [ ] Layout.16.1 Import: read `data-on-fold` and the `fold_line` component
+- [ ] Layout.16.2 Layout setting: pack the half piece, or unfold it (mirror across the fold line) before packing
+- [ ] Layout.16.3 Adjust Mode: the fold line moves with its piece
+- [ ] Layout.16.4 DXF-ASTM: layer 6 mirror line; boundary starts or ends on the mirror line points (D6673 §4.3.6); unfolded pieces write no layer 6
+- [ ] Layout.16.5 Tests: Rust import, unfold geometry, layer 6 and boundary order
 
 ## [x] Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 
