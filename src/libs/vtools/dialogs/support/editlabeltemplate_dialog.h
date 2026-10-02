@@ -80,6 +80,8 @@ public:
 
     void SetPiece(const VPiece &piece);
 
+    void setTemplateFile(const QString &filePath);
+
 private slots:
     void ShowLineDetails();
     void AddLine();
@@ -99,6 +101,7 @@ private:
     Ui::EditLabelTemplateDialog *ui;
     QMenu               *m_placeholdersMenu;
     VAbstractPattern    *m_doc;
+    QString              m_templateFile;
 
     QMap<QString, QPair<QString, QString>> m_placeholders;
 
@@ -109,6 +112,7 @@ private:
     QString ReplacePlaceholders(QString line) const;
 
     void InitPreviewLines(const QVector<VLabelTemplateLine> &lines);
+    void updateTemplateFileLabel();
 };
 
 #endif // EDITLABELTEMPLATE_DIALOG_H

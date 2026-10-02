@@ -79,9 +79,10 @@ public:
 
     bool    hasCornerAnchors() const;
 
-    static QPointF defaultPieceLabelPos(const QRectF &pieceRect, const QSizeF &labelSize);
+    static QPointF defaultPieceLabelPos(const QRectF &pieceRect, const QSizeF &labelSize,
+                                        const QRectF &grainlineRect);
     static QPointF defaultPatternLabelPos(const QRectF &pieceRect, const QSizeF &labelSize,
-                                          const QRectF &pieceLabelRect);
+                                          const QRectF &pieceLabelRect, const QRectF &grainlineRect);
 
 private:
     QSharedDataPointer<VPatternLabelDataPrivate> d;

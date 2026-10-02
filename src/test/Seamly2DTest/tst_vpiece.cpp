@@ -52,6 +52,7 @@
 #include "../vpatterndb/vpiece.h"
 #include "../vpatterndb/vpiecenode.h"
 #include "../vpatterndb/vpiecepath.h"
+#include "../vpatterndb/floatItemData/vgrainlinedata.h"
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
 #include "../vgeometry/vsplinepath.h"
 #include "../vmisc/vabstractapplication.h"
@@ -352,14 +353,32 @@ void TST_VPiece::AutoNameReusesNumberFreedByDeletion()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VPiece::PieceLabelCenteredRightOfBoundingBoxCenter() const
+void TST_VPiece::PieceLabelRightOfVerticalGrainline() const
 {
     const QRectF pieceRect(100, 200, 400, 600);
     const QSizeF labelSize(120, 80);
+    const QPointF start = VGrainlineData::centeredStart(pieceRect.center(), 90, 300);
+    const QRectF grainline = VGrainlineData::lineRect(start, 90, 300);
 
-    const QRectF label(VPatternLabelData::defaultPieceLabelPos(pieceRect, labelSize), labelSize);
+    const QRectF label(VPatternLabelData::defaultPieceLabelPos(pieceRect, labelSize, grainline), labelSize);
 
-    QCOMPARE(label.center(), pieceRect.center() + QPointF(ToPixel(1, Unit::Cm), 0));
+    QVERIFY(!label.intersects(grainline.adjusted(-1, 0, 1, 0)));
+    QCOMPARE(label.left(), pieceRect.center().x() + ToPixel(1, Unit::Cm));
+    QCOMPARE(label.center().y(), pieceRect.center().y());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::PieceLabelRightOfSlantedGrainline() const
+{
+    const QRectF pieceRect(100, 200, 400, 600);
+    const QSizeF labelSize(120, 80);
+    const QPointF start = VGrainlineData::centeredStart(pieceRect.center(), 45, 300);
+    const QRectF grainline = VGrainlineData::lineRect(start, 45, 300);
+
+    const QRectF label(VPatternLabelData::defaultPieceLabelPos(pieceRect, labelSize, grainline), labelSize);
+
+    QVERIFY(!label.intersects(grainline));
+    QCOMPARE(label.left(), grainline.right() + ToPixel(1, Unit::Cm));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -368,9 +387,13 @@ void TST_VPiece::PatternLabelRightOfPieceLabel() const
     const QRectF pieceRect(100, 200, 400, 600);
     const QSizeF pieceLabelSize(120, 80);
     const QSizeF patternLabelSize(150, 60);
-    const QRectF pieceLabel(VPatternLabelData::defaultPieceLabelPos(pieceRect, pieceLabelSize), pieceLabelSize);
+    const QRectF grainline = VGrainlineData::lineRect(VGrainlineData::centeredStart(pieceRect.center(), 90, 300),
+                                                      90, 300);
+    const QRectF pieceLabel(VPatternLabelData::defaultPieceLabelPos(pieceRect, pieceLabelSize, grainline),
+                            pieceLabelSize);
 
-    const QRectF patternLabel(VPatternLabelData::defaultPatternLabelPos(pieceRect, patternLabelSize, pieceLabel),
+    const QRectF patternLabel(VPatternLabelData::defaultPatternLabelPos(pieceRect, patternLabelSize, pieceLabel,
+                                                                        grainline),
                               patternLabelSize);
 
     QCOMPARE(patternLabel.left(), pieceLabel.right() + ToPixel(1, Unit::Cm));
@@ -382,10 +405,13 @@ void TST_VPiece::PatternLabelTakesPieceLabelPlaceWithoutPieceLabel() const
 {
     const QRectF pieceRect(100, 200, 400, 600);
     const QSizeF labelSize(150, 60);
+    const QRectF grainline = VGrainlineData::lineRect(VGrainlineData::centeredStart(pieceRect.center(), 90, 300),
+                                                      90, 300);
 
-    const QRectF patternLabel(VPatternLabelData::defaultPatternLabelPos(pieceRect, labelSize, QRectF()), labelSize);
+    const QRectF patternLabel(VPatternLabelData::defaultPatternLabelPos(pieceRect, labelSize, QRectF(), grainline),
+                              labelSize);
 
-    QCOMPARE(patternLabel.center(), pieceRect.center() + QPointF(ToPixel(1, Unit::Cm), 0));
+    QCOMPARE(patternLabel.topLeft(), VPatternLabelData::defaultPieceLabelPos(pieceRect, labelSize, grainline));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -447,4 +473,43 @@ void TST_VPiece::LabelTemplateEmptyWithoutAnyFile() const
                                             directory.filePath(QStringLiteral("also_missing.xml")));
 
     QVERIFY(lines.isEmpty());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::LabelTemplateFilePrefersUserFile() const
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+
+    const QString userFile = directory.filePath(QStringLiteral("user_label.xml"));
+    QFile file(userFile);
+    QVERIFY(file.open(QIODevice::WriteOnly));
+    file.close();
+
+    QCOMPARE(NewPieceDefaults::labelTemplateFile(userFile, VCommonSettings::builtInPieceLabelTemplate()), userFile);
+    QCOMPARE(NewPieceDefaults::labelTemplateFile(directory.filePath(QStringLiteral("missing.xml")),
+                                                 VCommonSettings::builtInPieceLabelTemplate()),
+             VCommonSettings::builtInPieceLabelTemplate());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::LabelTemplateFileEmptyWithoutAnyFile() const
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+
+    QVERIFY(NewPieceDefaults::labelTemplateFile(directory.filePath(QStringLiteral("missing.xml")),
+                                                directory.filePath(QStringLiteral("also_missing.xml"))).isEmpty());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::SameLabelLinesComparesFormatting() const
+{
+    const VLabelTemplateLine line{QStringLiteral("%pName%"), true, false, 0, 2};
+    VLabelTemplateLine italic = line;
+    italic.italic = true;
+
+    QVERIFY(NewPieceDefaults::sameLabelLines({line}, {line}));
+    QVERIFY(!NewPieceDefaults::sameLabelLines({line}, {italic}));
+    QVERIFY(!NewPieceDefaults::sameLabelLines({line}, {line, line}));
 }

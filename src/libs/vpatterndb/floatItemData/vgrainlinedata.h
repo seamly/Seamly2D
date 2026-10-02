@@ -53,6 +53,7 @@
 
 #include <QString>
 #include <QPointF>
+#include <QRectF>
 
 #include "vabstractfloatitemdata.h"
 #include "floatitemdef.h"
@@ -102,6 +103,7 @@ public:
 
     static qreal    upwardAngle(qreal degrees);
     static QPointF  centeredStart(const QPointF &center, qreal degrees, qreal length);
+    static QRectF   lineRect(const QPointF &start, qreal degrees, qreal length);
 
 private:
     QSharedDataPointer<VGrainlineDataPrivate> d;

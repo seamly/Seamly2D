@@ -61,6 +61,7 @@
 #include "../vpatterndb/floatItemData/vpiecelabeldata.h"
 
 #include <QDir>
+#include <QFileInfo>
 #include <QMessageBox>
 #include <QFileDialog>
 #include <QMenu>
@@ -72,6 +73,7 @@ EditLabelTemplateDialog::EditLabelTemplateDialog(VAbstractPattern *doc, QWidget 
     , ui(new Ui::EditLabelTemplateDialog)
     , m_placeholdersMenu(new QMenu(this))
     , m_doc(doc)
+    , m_templateFile()
     , m_placeholders()
 {
     ui->setupUi(this);
@@ -99,6 +101,7 @@ EditLabelTemplateDialog::EditLabelTemplateDialog(VAbstractPattern *doc, QWidget 
     InitPlaceholdersMenu();
 
     ui->pushButtonInsert->setMenu(m_placeholdersMenu);
+    updateTemplateFileLabel();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -305,6 +308,7 @@ void EditLabelTemplateDialog::NewTemplate()
     ui->listWidgetEdit->clear();
     ui->listWidgetEdit->blockSignals(false);
     ShowLineDetails();
+    setTemplateFile(QString());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -361,6 +365,10 @@ void EditLabelTemplateDialog::ExportTemplate()
         messageBox.setStandardButtons(QMessageBox::Ok);
         messageBox.exec();
     }
+    else
+    {
+        setTemplateFile(fileName);
+    }
 
     RemoveTempDir();
 }
@@ -394,6 +402,7 @@ void EditLabelTemplateDialog::ImportTemplate()
         VLabelTemplate ltemplate;
         ltemplate.setXMLContent(VLabelTemplateConverter(fileName).Convert());
         SetTemplate(ltemplate.ReadLines());
+        setTemplateFile(fileName);
     }
     catch (VException &error)
     {
@@ -667,4 +676,30 @@ void EditLabelTemplateDialog::InitPreviewLines(const QVector<VLabelTemplateLine>
     {
         ui->listWidgetPreview->setCurrentRow(0);
     }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setTemplateFile shows the template file that the current lines came from.
+ * @param filePath absolute path or resource path; empty when the lines did not come from a file.
+ */
+void EditLabelTemplateDialog::setTemplateFile(const QString &filePath)
+{
+    m_templateFile = filePath;
+    updateTemplateFileLabel();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void EditLabelTemplateDialog::updateTemplateFileLabel()
+{
+    QString text = tr("Template file: none");
+    if (m_templateFile.startsWith(QLatin1Char(':')))
+    {
+        text = tr("Template file: built-in %1").arg(QFileInfo(m_templateFile).fileName());
+    }
+    else if (!m_templateFile.isEmpty())
+    {
+        text = tr("Template file: %1").arg(QDir::toNativeSeparators(QFileInfo(m_templateFile).absoluteFilePath()));
+    }
+    ui->templateFile_Label->setText(text);
 }
