@@ -209,3 +209,17 @@ QPointF VGrainlineData::centeredStart(const QPointF &center, qreal degrees, qrea
     const qreal radians = qDegreesToRadians(degrees);
     return QPointF(center.x() - length / 2.0 * qCos(radians), center.y() + length / 2.0 * qSin(radians));
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief lineRect returns the bounding box of a grainline, without its arrow heads.
+ * @param start   grainline start point in scene pixels.
+ * @param degrees grainline angle in degrees, counter-clockwise from 3 o'clock.
+ * @param length  grainline length in scene pixels.
+ */
+QRectF VGrainlineData::lineRect(const QPointF &start, qreal degrees, qreal length)
+{
+    const qreal radians = qDegreesToRadians(degrees);
+    const QPointF end(start.x() + length * qCos(radians), start.y() - length * qSin(radians));
+    return QRectF(start, end).normalized();
+}

@@ -6,6 +6,17 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-02 — New-piece grainline, label placement, template file name
+
+Merged `task-grainline-defaults`. `local_build_msi.ps1` passed: build, `nmake check`, MSI.
+
+- New piece and Union piece: labels sit 1 cm right of the grainline (`VPatternLabelData::defaultPieceLabelPos` takes `VGrainlineData::lineRect`). A hidden grainline counts too.
+- Existing piece with a hidden grainline: Pattern Piece Tool shows the Preferences length, rotation, arrow length.
+- Preferences > Pattern grainline label "Angle:" is now "Rotation:", to match the Pattern Piece Tool.
+- Edit Label Template shows "Template file: …": the imported or exported file, or the Preferences default when the lines match it (`NewPieceDefaults::pieceLabelTemplateFile`). Else "none": the pattern stores lines, not a file.
+- Not checked in the running app. Check: new piece → labels clear of grainline; open label editor → file name shown.
+- Risk: on a narrow piece the labels can extend past the right edge.
+
 ## 2026-09-29 — Export all tabs (Layout.36.2)
 
 Merged `task-export-all-tabs`. `cargo test --workspace`, `ctest --preset debug` passed.

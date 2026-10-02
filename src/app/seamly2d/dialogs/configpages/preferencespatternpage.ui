@@ -856,7 +856,7 @@
              </font>
             </property>
             <property name="text">
-             <string>Angle:</string>
+             <string>Rotation:</string>
             </property>
             <property name="alignment">
              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>

@@ -354,9 +354,14 @@ void PatternPieceDialog::SetPiece(const VPiece &piece)
     changeCurrentData(ui->grainlineCenterAnchor_ComboBox, m_oldGrainline.centerAnchorPoint());
     changeCurrentData(ui->grainlineTopAnchor_ComboBox, m_oldGrainline.topAnchorPoint());
     changeCurrentData(ui->grainlineBottomAnchor_ComboBox, m_oldGrainline.bottomAnchorPoint());
-    setGrainlineAngle(m_oldGrainline.getRotation());
-    setGrainlineLength(m_oldGrainline.getLength());
-    setGrainlineArrowLength(m_oldGrainline.getArrowLength());
+    // A hidden grainline has no geometry the user chose. Keep the Preferences defaults from
+    // initializeGrainlineTab(), so that showing it creates a new grainline.
+    if (m_oldGrainline.IsVisible())
+    {
+        setGrainlineAngle(m_oldGrainline.getRotation());
+        setGrainlineLength(m_oldGrainline.getLength());
+        setGrainlineArrowLength(m_oldGrainline.getArrowLength());
+    }
 
     validateObjects(isMainPathValid());
     enabledGrainline();
@@ -2619,6 +2624,7 @@ void PatternPieceDialog::editPatternLabel()
     QVector<VLabelTemplateLine> patternLabelLines = qApp->getCurrentDocument()->getPatternLabelTemplate();
     EditLabelTemplateDialog editor(qApp->getCurrentDocument());
     editor.SetTemplate(patternLabelLines);
+    editor.setTemplateFile(NewPieceDefaults::patternLabelTemplateFile(patternLabelLines));
     editor.SetPiece(GetPiece());
 
     if (QDialog::Accepted == editor.exec())
@@ -2634,6 +2640,7 @@ void PatternPieceDialog::editPieceLabel()
 {
     EditLabelTemplateDialog editor(qApp->getCurrentDocument());
     editor.SetTemplate(m_pieceLabelLines);
+    editor.setTemplateFile(NewPieceDefaults::pieceLabelTemplateFile(m_pieceLabelLines));
     editor.SetPiece(GetPiece());
 
     if (QDialog::Accepted == editor.exec())
@@ -2701,6 +2708,9 @@ VPiece PatternPieceDialog::CreatePiece() const
     piece.GetGrainlineGeometry().setTopAnchorPoint(getCurrentObjectId(ui->grainlineTopAnchor_ComboBox));
     piece.GetGrainlineGeometry().setBottomAnchorPoint(getCurrentObjectId(ui->grainlineBottomAnchor_ComboBox));
 
+    // The labels of a new piece are placed beside the grainline, so the grainline goes first.
+    const QRectF grainlineRect = placeGrainline(piece.GetGrainlineGeometry(), piece.GetPath());
+
     if (applyAllowed == false)
     {
         VPiecePath path = piece.GetPath();
@@ -2708,7 +2718,7 @@ VPiece PatternPieceDialog::CreatePiece() const
 
         const QSizeF pieceLabelSize(getFormulaValue(ui->pieceLabelWidthFormula_LineEdit),
                                     getFormulaValue(ui->pieceLabelHeightFormula_LineEdit));
-        const QPointF pieceLabelPos = VPatternLabelData::defaultPieceLabelPos(rect, pieceLabelSize);
+        const QPointF pieceLabelPos = VPatternLabelData::defaultPieceLabelPos(rect, pieceLabelSize, grainlineRect);
         piece.GetPatternPieceData().SetPos(pieceLabelPos);
 
         // Only a visible piece label without anchors sits at its default place and pushes the pattern label right.
@@ -2722,10 +2732,9 @@ VPiece PatternPieceDialog::CreatePiece() const
         const QSizeF patternLabelSize(getFormulaValue(ui->patternLabelWidthFormula_LineEdit),
                                       getFormulaValue(ui->patternLabelHeightFormula_LineEdit));
         piece.GetPatternInfo().SetPos(VPatternLabelData::defaultPatternLabelPos(rect, patternLabelSize,
-                                                                                pieceLabelRect));
+                                                                                pieceLabelRect, grainlineRect));
     }
 
-    placeGrainline(piece.GetGrainlineGeometry(), piece.GetPath());
     return piece;
 }
 
@@ -3844,15 +3853,16 @@ qreal PatternPieceDialog::getFormulaValue(QPlainTextEdit *text) const
  * @brief placeGrainline makes a grainline without top and bottom anchors point up, and centers a new piece's grainline.
  * @param grainline grainline of the piece being built; its rotation and length formulas are already set.
  * @param path      main path of the piece, used for the bounding box of a new piece.
+ * @return the grainline bounding box, or a null rect when anchors place the grainline or a formula fails.
  *
  * A numeric angle in (180, 360) is rewritten as the angle 180 degrees less, and the start point moves so that
  * the midpoint stays put. A rotation expression is not rewritten.
  */
-void PatternPieceDialog::placeGrainline(VGrainlineData &grainline, const VPiecePath &path) const
+QRectF PatternPieceDialog::placeGrainline(VGrainlineData &grainline, const VPiecePath &path) const
 {
     if (grainline.topAnchorPoint() != NULL_ID && grainline.bottomAnchorPoint() != NULL_ID)
     {
-        return;
+        return QRectF();
     }
 
     qreal angle = 0;
@@ -3868,7 +3878,7 @@ void PatternPieceDialog::placeGrainline(VGrainlineData &grainline, const VPieceP
     catch (qmu::QmuParserError &error)
     {
         Q_UNUSED(error)
-        return;
+        return QRectF();
     }
 
     // The midpoint is the bounding box center for a new piece, and the current midpoint for an existing one.
@@ -3892,4 +3902,5 @@ void PatternPieceDialog::placeGrainline(VGrainlineData &grainline, const VPieceP
     }
 
     grainline.SetPos(VGrainlineData::centeredStart(midpoint, angle, length));
+    return VGrainlineData::lineRect(grainline.GetPos(), angle, length);
 }

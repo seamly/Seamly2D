@@ -161,15 +161,23 @@ bool VPatternLabelData::hasCornerAnchors() const
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief defaultPieceLabelPos returns the top left of a new piece label.
- * @param pieceRect bounding box of the piece main path, in piece local pixels.
- * @param labelSize label size in pixels.
+ * @param pieceRect     bounding box of the piece main path, in piece local pixels.
+ * @param labelSize     label size in pixels.
+ * @param grainlineRect bounding box of the grainline, or a null rect when its place is unknown.
  *
- * The label center is 1 cm right of the bounding box center, so the label does not sit on the grainline midpoint.
+ * The label is vertically centered on the bounding box. Its left edge is 1 cm right of the grainline,
+ * and never left of the bounding box center, so the label does not cover the grainline.
+ * The grainline counts even when hidden, so that showing it later does not cover it.
  */
-QPointF VPatternLabelData::defaultPieceLabelPos(const QRectF &pieceRect, const QSizeF &labelSize)
+QPointF VPatternLabelData::defaultPieceLabelPos(const QRectF &pieceRect, const QSizeF &labelSize,
+                                                const QRectF &grainlineRect)
 {
-    const QPointF center = pieceRect.center() + QPointF(ToPixel(1, Unit::Cm), 0);
-    return center - QPointF(labelSize.width() / 2.0, labelSize.height() / 2.0);
+    qreal left = pieceRect.center().x();
+    if (!grainlineRect.isNull())
+    {
+        left = qMax(left, grainlineRect.right());
+    }
+    return QPointF(left + ToPixel(1, Unit::Cm), pieceRect.center().y() - labelSize.height() / 2.0);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -178,16 +186,17 @@ QPointF VPatternLabelData::defaultPieceLabelPos(const QRectF &pieceRect, const Q
  * @param pieceRect      bounding box of the piece main path, in piece local pixels.
  * @param labelSize      label size in pixels.
  * @param pieceLabelRect piece label at its default place, or a null rect when the piece has no such label.
+ * @param grainlineRect  bounding box of the grainline, or a null rect when its place is unknown.
  *
  * The label is vertically centered on the bounding box. Its left edge is 1 cm right of the piece label.
  * Without a piece label it takes the piece label place.
  */
 QPointF VPatternLabelData::defaultPatternLabelPos(const QRectF &pieceRect, const QSizeF &labelSize,
-                                                  const QRectF &pieceLabelRect)
+                                                  const QRectF &pieceLabelRect, const QRectF &grainlineRect)
 {
     if (pieceLabelRect.isNull())
     {
-        return defaultPieceLabelPos(pieceRect, labelSize);
+        return defaultPieceLabelPos(pieceRect, labelSize, grainlineRect);
     }
     return QPointF(pieceLabelRect.right() + ToPixel(1, Unit::Cm), pieceRect.center().y() - labelSize.height() / 2.0);
 }

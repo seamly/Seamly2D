@@ -1351,22 +1351,27 @@ void createUnion(quint32 id, const UnionToolInitData &initData, qreal dx, qreal 
     newPiece.GetPatternPieceData().SetLabelHeight(QString::number(labelHeight));
     newPiece.GetPatternPieceData().SetLabelTemplate(NewPieceDefaults::pieceLabelTemplate());
 
-    const QSizeF labelSize(ToPixel(labelWidth, unit), ToPixel(labelHeight, unit));
-    const QPointF pieceLabelPos = VPatternLabelData::defaultPieceLabelPos(rect, labelSize);
-    newPiece.GetPatternPieceData().SetPos(pieceLabelPos);
-
-    const QRectF pieceLabelRect = newPiece.GetPatternPieceData().IsVisible() ? QRectF(pieceLabelPos, labelSize)
-                                                                             : QRectF();
-    newPiece.GetPatternInfo().SetPos(VPatternLabelData::defaultPatternLabelPos(rect, labelSize, pieceLabelRect));
-
+    // The grainline goes first, so the labels can be placed beside it.
     const qreal grainlineLength = NewPieceDefaults::grainlineLength(unit);
     const qreal grainlineAngle = VGrainlineData::upwardAngle(qApp->Settings()->getDefaultGrainlineAngle());
+    const QPointF grainlineStart = VGrainlineData::centeredStart(rect.center(), grainlineAngle,
+                                                                 ToPixel(grainlineLength, unit));
     newPiece.GetGrainlineGeometry().SetVisible(qApp->Settings()->getDefaultGrainlineVisibilty());
     newPiece.GetGrainlineGeometry().setLength(QString::number(grainlineLength));
     newPiece.GetGrainlineGeometry().setRotation(QString::number(grainlineAngle));
     newPiece.GetGrainlineGeometry().setArrowLength(QString::number(NewPieceDefaults::arrowLength(unit)));
-    newPiece.GetGrainlineGeometry().SetPos(VGrainlineData::centeredStart(rect.center(), grainlineAngle,
-                                                                          ToPixel(grainlineLength, unit)));
+    newPiece.GetGrainlineGeometry().SetPos(grainlineStart);
+    const QRectF grainlineRect = VGrainlineData::lineRect(grainlineStart, grainlineAngle,
+                                                          ToPixel(grainlineLength, unit));
+
+    const QSizeF labelSize(ToPixel(labelWidth, unit), ToPixel(labelHeight, unit));
+    const QPointF pieceLabelPos = VPatternLabelData::defaultPieceLabelPos(rect, labelSize, grainlineRect);
+    newPiece.GetPatternPieceData().SetPos(pieceLabelPos);
+
+    const QRectF pieceLabelRect = newPiece.GetPatternPieceData().IsVisible() ? QRectF(pieceLabelPos, labelSize)
+                                                                             : QRectF();
+    newPiece.GetPatternInfo().SetPos(VPatternLabelData::defaultPatternLabelPos(rect, labelSize, pieceLabelRect,
+                                                                               grainlineRect));
 
     QString formulaSAWidth = piece1.getSeamAllowanceWidthFormula();
     newPiece.setSeamAllowanceWidthFormula(formulaSAWidth, piece1.GetSAWidth());

@@ -75,6 +75,27 @@ QVector<VLabelTemplateLine> pieceLabelTemplate();
 
 /// @brief patternLabelTemplate returns the default pattern label lines.
 QVector<VLabelTemplateLine> patternLabelTemplate();
+
+/**
+ * @brief labelTemplateFile returns the file that readLabelTemplate() reads.
+ * @return @p userFile when it exists, else @p builtInFile when it exists, else an empty string.
+ */
+QString labelTemplateFile(const QString &userFile, const QString &builtInFile);
+
+/// @brief sameLabelLines returns true when both templates have the same lines with the same formatting.
+bool sameLabelLines(const QVector<VLabelTemplateLine> &first, const QVector<VLabelTemplateLine> &second);
+
+/**
+ * @brief pieceLabelTemplateFile returns the default piece label file when @p lines match its lines.
+ * @return the file path, or an empty string when @p lines are empty or differ from the default.
+ */
+QString pieceLabelTemplateFile(const QVector<VLabelTemplateLine> &lines);
+
+/**
+ * @brief patternLabelTemplateFile returns the default pattern label file when @p lines match its lines.
+ * @return the file path, or an empty string when @p lines are empty or differ from the default.
+ */
+QString patternLabelTemplateFile(const QVector<VLabelTemplateLine> &lines);
 }
 
 #endif // NEW_PIECE_DEFAULTS_H

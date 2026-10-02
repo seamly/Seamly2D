@@ -86,17 +86,27 @@ qreal NewPieceDefaults::fitGrainlineLength(qreal length, qreal arrowLength)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<VLabelTemplateLine> NewPieceDefaults::readLabelTemplate(const QString &userFile, const QString &builtInFile)
+QString NewPieceDefaults::labelTemplateFile(const QString &userFile, const QString &builtInFile)
 {
     // The user's file wins. The resource copy covers a data root that was never seeded or a template that was deleted.
-    QString filename = userFile;
-    if (!QFileInfo::exists(filename))
+    if (QFileInfo::exists(userFile))
     {
-        filename = builtInFile;
+        return userFile;
     }
+    if (QFileInfo::exists(builtInFile))
+    {
+        return builtInFile;
+    }
+    return QString();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+QVector<VLabelTemplateLine> NewPieceDefaults::readLabelTemplate(const QString &userFile, const QString &builtInFile)
+{
+    const QString filename = labelTemplateFile(userFile, builtInFile);
 
     QVector<VLabelTemplateLine> lines;
-    if (QFileInfo::exists(filename))
+    if (!filename.isEmpty())
     {
         VLabelTemplate labelTemplate;
         labelTemplate.setXMLContent(VLabelTemplateConverter(filename).Convert());
@@ -116,5 +126,48 @@ QVector<VLabelTemplateLine> NewPieceDefaults::pieceLabelTemplate()
 QVector<VLabelTemplateLine> NewPieceDefaults::patternLabelTemplate()
 {
     return readLabelTemplate(qApp->Settings()->getDefaultPatternTemplate(),
+                             VCommonSettings::builtInPatternLabelTemplate());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+bool NewPieceDefaults::sameLabelLines(const QVector<VLabelTemplateLine> &first,
+                                      const QVector<VLabelTemplateLine> &second)
+{
+    if (first.size() != second.size())
+    {
+        return false;
+    }
+
+    for (int i = 0; i < first.size(); ++i)
+    {
+        const VLabelTemplateLine &a = first.at(i);
+        const VLabelTemplateLine &b = second.at(i);
+        if (a.line != b.line || a.bold != b.bold || a.italic != b.italic || a.alignment != b.alignment
+            || a.fontSizeIncrement != b.fontSizeIncrement)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+QString NewPieceDefaults::pieceLabelTemplateFile(const QVector<VLabelTemplateLine> &lines)
+{
+    if (lines.isEmpty() || !sameLabelLines(lines, pieceLabelTemplate()))
+    {
+        return QString();
+    }
+    return labelTemplateFile(qApp->Settings()->getDefaultPieceTemplate(), VCommonSettings::builtInPieceLabelTemplate());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+QString NewPieceDefaults::patternLabelTemplateFile(const QVector<VLabelTemplateLine> &lines)
+{
+    if (lines.isEmpty() || !sameLabelLines(lines, patternLabelTemplate()))
+    {
+        return QString();
+    }
+    return labelTemplateFile(qApp->Settings()->getDefaultPatternTemplate(),
                              VCommonSettings::builtInPatternLabelTemplate());
 }

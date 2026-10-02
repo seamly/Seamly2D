@@ -68,7 +68,8 @@ private slots:
     void KeepExplicitPieceName();
     void AutoNameAvoidsNumberStillInUse();
     void AutoNameReusesNumberFreedByDeletion();
-    void PieceLabelCenteredRightOfBoundingBoxCenter() const;
+    void PieceLabelRightOfVerticalGrainline() const;
+    void PieceLabelRightOfSlantedGrainline() const;
     void PatternLabelRightOfPieceLabel() const;
     void PatternLabelTakesPieceLabelPlaceWithoutPieceLabel() const;
     void GrainlineKeepsLengthLongerThanTwoArrows() const;
@@ -76,6 +77,9 @@ private slots:
     void LabelTemplateReadsUserFile() const;
     void LabelTemplateFallsBackToBuiltIn() const;
     void LabelTemplateEmptyWithoutAnyFile() const;
+    void LabelTemplateFilePrefersUserFile() const;
+    void LabelTemplateFileEmptyWithoutAnyFile() const;
+    void SameLabelLinesComparesFormatting() const;
 
 private:
     Q_DISABLE_COPY(TST_VPiece)
