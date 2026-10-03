@@ -42,7 +42,7 @@ pub struct DxfAstmExportOptions {
     pub progress_callback: Option<ProgressCallback>,
     // `Style Name:` when the drawing has no pattern name (e.g. the file stem).
     pub style_name: Option<String>,
-    // Seamly2D suite version in `Author:`.
+    // Seamly2D suite version: the release field of `Author:Seamly;Seamly2D;<release>`.
     pub author_release: String,
     // `Creation Date:` as dd-mm-yyyy; None uses today's UTC date.
     pub creation_date: Option<String>,
@@ -160,7 +160,7 @@ pub fn style_system_text(drawing: &seamly_svg2ezdxf::Drawing, options: &DxfAstmE
         format!("Style Name:{}", style_name),
         format!("Creation Date:{}", options.creation_date.clone().unwrap_or(utc_date)),
         format!("Creation Time:{}", options.creation_time.clone().unwrap_or(utc_time)),
-        format!("Author:Seamly2D {}", options.author_release),
+        format!("Author:Seamly;Seamly2D;{}", options.author_release),
         "Sample Size:".to_string(),
         "Grade Rule Table:".to_string(),
         "Units:METRIC".to_string(),
