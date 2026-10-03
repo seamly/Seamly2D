@@ -133,18 +133,21 @@ ApplicationWindow {
     property string pendingExportSettings: ""      // settings JSON for pdf / pdf-tiled; text mode for svg; options JSON for hpgl
     property bool   pendingExportTeachingVersion: false  // teaching flag for DXF
     property bool   pendingDxfClo3d: false               // CLO3D group 250 flag for DXF
+    property string pendingDxfVersion: "R12"             // DXF file version: "R12" or "R13"
 
     // @brief Ask for a DXF save path, then the teaching choice; the export starts from the dialog.
-    // @param clo3d true for DXF-ASTM (CLO3D): D6673 content plus CLO3D group 250.
-    function requestDxfExport(clo3d) {
+    // @param clo3d      true for DXF-ASTM (CLO3D): D6673 content plus CLO3D group 250.
+    // @param dxfVersion "R12" (AC1009) or "R13" (AC1012).
+    function requestDxfExport(clo3d, dxfVersion) {
         var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
         var name = root.makeExportFileName("dxf") // default name: <importedBaseName>_YYYYMMDDHHMM.dxf
-        var title = clo3d ? "Save DXF-ASTM (CLO3D) File" : "Save DXF-ASTM File"
+        var title = clo3d ? "Save DXF-ASTM (CLO3D) File" : "Save DXF-ASTM (" + dxfVersion + ") File"
         var path = preferencesModel.getSaveFilePath(title, dir, name, "DXF Files (*.dxf);;All Files (*)")
         if (path === "") return // user cancelled
         // Stage path and variant; the teaching dialog collects the last flag before export starts.
         root.pendingDxfPath  = path
         root.pendingDxfClo3d = clo3d
+        root.pendingDxfVersion = dxfVersion
         dxfTeachingDialog.open()
     } // function requestDxfExport
 
@@ -167,14 +170,16 @@ ApplicationWindow {
     // @param settings pendingExportSettings value for this format.
     // @param teaching DXF teaching-version flag.
     // @param clo3d    DXF CLO3D group 250 flag.
+    // @param dxfVersion DXF file version: "R12" or "R13".
     // @return The AppController export result; false after it emitted errorOccurred.
-    function runExport(fmt, path, settings, teaching, clo3d) {
+    function runExport(fmt, path, settings, teaching, clo3d, dxfVersion) {
         if (fmt === "dxf") {
             // Local date/time and version fill the DXF-ASTM style system text.
             var now = new Date()
             var optJson = JSON.stringify({
                 createTeachingVersion: teaching,
                 clo3dGroup250: clo3d,
+                dxfVersion:   dxfVersion,
                 appVersion:   Qt.application.version,
                 creationDate: Qt.formatDateTime(now, "dd-MM-yyyy"),
                 creationTime: Qt.formatDateTime(now, "hh-mm")
@@ -214,6 +219,7 @@ ApplicationWindow {
         var settings = root.pendingExportSettings
         var teaching = root.pendingExportTeachingVersion
         var clo3d    = root.pendingDxfClo3d
+        var dxfVersion = root.pendingDxfVersion
         var shown    = appController.activeLayoutView
         var count    = appController.layoutViewLabels.length
 
@@ -227,7 +233,7 @@ ApplicationWindow {
                 errorDialog.open()
                 break
             } // if tab refused
-            ok = root.runExport(fmt, appController.exportTabPath(path, i), settings, teaching, clo3d)
+            ok = root.runExport(fmt, appController.exportTabPath(path, i), settings, teaching, clo3d, dxfVersion)
         } // for each tab
         appController.selectExportTab(shown) // the export source matches the shown tab again
         root.batchExportRunning = false
@@ -238,6 +244,7 @@ ApplicationWindow {
         root.pendingExportSettings = ""
         root.pendingExportTeachingVersion = false
         root.pendingDxfClo3d = false
+        root.pendingDxfVersion = "R12"
         exportProgressPopup.close()
         if (!ok) return
 
@@ -259,7 +266,8 @@ ApplicationWindow {
                 root.exportEachTab(fmt, path)
             else
                 root.runExport(fmt, path, root.pendingExportSettings,
-                               root.pendingExportTeachingVersion, root.pendingDxfClo3d)
+                               root.pendingExportTeachingVersion, root.pendingDxfClo3d,
+                               root.pendingDxfVersion)
         } // onTriggered
     } // Timer exportStartTimer
 
@@ -315,6 +323,7 @@ ApplicationWindow {
             root.pendingExportSettings = ""
             root.pendingExportTeachingVersion = false
             root.pendingDxfClo3d = false
+            root.pendingDxfVersion = "R12"
             exportProgressPopup.close()
             errorDialog.errorText = message;
             errorDialog.open();
@@ -370,6 +379,7 @@ ApplicationWindow {
             root.pendingExportSettings = ""
             root.pendingExportTeachingVersion = false
             root.pendingDxfClo3d = false
+            root.pendingDxfVersion = "R12"
             exportProgressPopup.close()
             // Track last exported path per format for View menu
             if (path.endsWith(".dxf"))
@@ -525,8 +535,9 @@ ApplicationWindow {
         } // onAdjustLayoutClicked
 
         onPreferencesClicked:      preferencesController.openPreferences()
-        onExportDxfAstmRequested:      root.requestDxfExport(false)
-        onExportDxfAstmClo3dRequested: root.requestDxfExport(true)
+        onExportDxfAstmRequested:      root.requestDxfExport(false, "R12")
+        onExportDxfAstmR13Requested:   root.requestDxfExport(false, "R13")
+        onExportDxfAstmClo3dRequested: root.requestDxfExport(true, "R12")
         onExportPngRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
             var name = root.makeExportFileName("png") // default name: <importedBaseName>_YYYYMMDDHHMM.png

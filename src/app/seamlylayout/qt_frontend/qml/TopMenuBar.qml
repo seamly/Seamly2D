@@ -93,8 +93,11 @@ ToolBar {
     // @brief User toggled Export > "Export all tabs".
     signal exportAllTabsToggled(bool checked)
 
-    // @brief User selected DXF-ASTM from the Export dropdown (Phase 9).
+    // @brief User selected DXF-ASTM (R12) from the Export dropdown (Phase 9).
     signal exportDxfAstmRequested()
+
+    // @brief User selected DXF-ASTM (R13) from the Export dropdown.
+    signal exportDxfAstmR13Requested()
 
     // @brief User selected DXF-ASTM (CLO3D) from the Export dropdown.
     signal exportDxfAstmClo3dRequested()
@@ -228,7 +231,9 @@ ToolBar {
             svgModeSubmenu:  true
             labelTextState:  root.labelTextState
             lastSvgTextMode: root.lastSvgTextMode
+            showDxfVariants:           true
             onExportDxfAstmRequested:  root.exportDxfAstmRequested()
+            onExportDxfAstmR13Requested:   root.exportDxfAstmR13Requested()
             onExportDxfAstmClo3dRequested: root.exportDxfAstmClo3dRequested()
             onExportPdfRequested:      root.exportPdfRequested()
             onExportPdfTiledRequested: root.exportPdfTiledRequested()

@@ -245,10 +245,10 @@ mod tests {
         let result = validate_astm_compliance(&drawing);
         assert!(result.is_ok(), "Valid R12 drawing should pass validation");
 
-        // Create an invalid drawing (R13).
+        // D6673 names R13, so an R13 drawing is valid too.
         let drawing_r13 = Drawing::new(DxfVersion::R13);
         let result_r13 = validate_astm_compliance(&drawing_r13);
-        assert!(result_r13.is_err(), "R13 drawing should fail validation");
+        assert!(result_r13.is_ok(), "R13 drawing should pass validation");
     }
 
     // @brief Test DXF file structure (HEADER, BLOCKS, ENTITIES, EOF).

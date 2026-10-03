@@ -15,7 +15,7 @@ Reference: `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
 |---|---|---|
 | Declared points miscategorized: curve points on layer 2 (7 pieces) | departure | DXF.1 (done, see `TODO_COMPLETED.md`) |
 | Reconstruction from layers 2/3 off layer 84 by 0.532 (ShortSleeve_M), layer 87 by 0.942 (FullSleeve_M); limit 0.5 | extension | DXF.2 (done, see `TODO_COMPLETED.md`) |
-| File is AC1009, not R13 (AC1012) | departure | DXF.3 |
+| File is AC1009, not R13 (AC1012) | departure | DXF.3 (code done; CLO3D import check open) |
 | More curve points than the curves need (Yoke_M L14, PocketFlapRound_M L1) | advisory | DXF.4 |
 | Pieces with no `Quantity:`, label, or grainline (CollarTopInterface, CollarBaseInterface, CuffInterface) | report table | DXF.5 |
 | `Style Name:` is the output file stem with timestamp | report header | DXF.6 |
@@ -30,13 +30,15 @@ Report on `male_shirt_202610031615.dxf` (after DXF.1): miscategorized points now
 
 D6673 §1.2 / 4.1 names AutoCAD R13. Today `$ACADVER` is `AC1009` (R12 syntax). R13 needs entity handles, a full TABLES section, CLASSES, and OBJECTS.
 
-- [ ] DXF.3.1 Study a known-good R13 file: required header variables, tables (LTYPE, LAYER, STYLE, BLOCK_RECORD), handles, OBJECTS dictionary
-- [ ] DXF.3.2 `ezdxf2dxfastm/src/writer.rs`: write `$ACADVER` `AC1012`, `$HANDSEED`, handles on every entity, subclass markers (group 100)
-- [ ] DXF.3.3 Write CLASSES, TABLES, BLOCK_RECORD entries, and OBJECTS
-- [ ] DXF.3.4 Keep CLO3D group 250 output working
-- [ ] DXF.3.5 Check import in CLO3D and one other reader (e.g. ezdxf `audit`, LibreCAD)
-- [ ] DXF.3.6 Rust tests: header version, unique handles, required sections present
-- [ ] DXF.3.7 Update the compliance doc "Decisions" row for DXF version
+Menu (user decision): **DXF-ASTM (R12)**, **DXF-ASTM (R13)**, **DXF-ASTM (CLO3D)**. CLO3D stays R12. The View menu keeps one **DXF-ASTM** item.
+
+- [x] DXF.3.1 Study a known-good R13 file: required header variables, tables (LTYPE, LAYER, STYLE, BLOCK_RECORD), handles, OBJECTS dictionary. The repo's `seamlylayout_Skirt_ASTMD6673.dxf` says AC1012 but has no handles; libdxfrw's writer (`src/libs/vdxf/libdxfrw/libdxfrw.cpp`) was the reference
+- [x] DXF.3.2 `ezdxf2dxfastm/src/r13.rs`: write `$ACADVER` `AC1012`, `$HANDSEED`, handles on every entity, subclass markers (group 100). `Drawing::version` selects the version
+- [x] DXF.3.3 Write CLASSES, TABLES, BLOCK_RECORD entries, and OBJECTS
+- [x] DXF.3.4 Keep CLO3D group 250 output working
+- [ ] DXF.3.5 Check import in CLO3D and one other reader (e.g. ezdxf `audit`, LibreCAD). Done: ezdxf 1.4.4 `audit` 0 errors / 0 fixes; libdxfrw reads the same entity counts as R12. Open: user checks a DXF-ASTM (R13) export in CLO3D
+- [x] DXF.3.6 Rust tests: header version, unique handles, required sections present (`writer_r13_test.rs`, `exports.rs` `do_export_dxf_writes_r13_when_asked`)
+- [x] DXF.3.7 Update the compliance doc "Decisions" row for DXF version
 
 ## [ ] Task DXF.4 — Fewer curve points where a spline needs fewer
 

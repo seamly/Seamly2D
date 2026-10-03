@@ -9,11 +9,12 @@ use crate::astm_notch::Notch;
 use crate::entities::{Entity, Point};
 
 // @brief DXF version enumeration.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum DxfVersion {
-    // DXF R12 (AC1009) - Required for ASTM-D6673-10.
+    // DXF R12 (AC1009): the widest importer support.
+    #[default]
     R12,
-    // DXF R13 (AC1012) - Alternative if needed.
+    // DXF R13 (AC1012): the version ASTM D6673 §1.2 names.
     R13,
 }
 

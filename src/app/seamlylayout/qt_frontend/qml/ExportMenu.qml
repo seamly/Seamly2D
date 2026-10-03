@@ -48,6 +48,10 @@ Menu {
     // @brief True when a layout is ready; enables the DXF-ASTM export item.
     required property bool layoutReady
 
+    // @brief When true, DXF-ASTM shows its DXF version, and the R13 and CLO3D items
+    //        are shown (Export menu only). The View menu opens any .dxf with one item.
+    property bool showDxfVariants: false
+
     // @brief When true, a Projector item is appended to the menu (View menu only).
     property bool showProjector: false
 
@@ -102,8 +106,11 @@ Menu {
     // @param checked New check state.
     signal exportAllTabsToggled(bool checked)
 
-    // @brief Emitted when the user selects DXF-ASTM export (Phase 9).
+    // @brief Emitted when the user selects DXF-ASTM (R12) export (Phase 9).
     signal exportDxfAstmRequested()
+
+    // @brief Emitted when the user selects DXF-ASTM (R13) export: DXF R13 (AC1012), the version D6673 names.
+    signal exportDxfAstmR13Requested()
 
     // @brief Emitted when the user selects DXF-ASTM (CLO3D) export: D6673 plus CLO3D group 250.
     signal exportDxfAstmClo3dRequested()
@@ -180,13 +187,24 @@ Menu {
     } // MenuSeparator after exportAllTabsItem
 
     MenuItem {
-        text: "DXF-ASTM"
+        text: root.showDxfVariants ? "DXF-ASTM (R12)" : "DXF-ASTM"
         enabled: root.layoutReady // Phase 9: enabled when layout is ready
         onTriggered: root.exportDxfAstmRequested()
-    } // MenuItem DXF-ASTM
+    } // MenuItem DXF-ASTM (R12)
+
+    // Hidden Menu items keep their height, so collapse them when hidden.
+    MenuItem {
+        text: "DXF-ASTM (R13)"
+        visible: root.showDxfVariants
+        height: visible ? implicitHeight : 0
+        enabled: root.layoutReady
+        onTriggered: root.exportDxfAstmR13Requested()
+    } // MenuItem DXF-ASTM (R13)
 
     MenuItem {
         text: "DXF-ASTM (CLO3D)"
+        visible: root.showDxfVariants
+        height: visible ? implicitHeight : 0
         enabled: root.layoutReady
         onTriggered: root.exportDxfAstmClo3dRequested()
     } // MenuItem DXF-ASTM (CLO3D)

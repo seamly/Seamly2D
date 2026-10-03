@@ -33,7 +33,7 @@ use std::path::Path;
 use xmltree::{Element as XmlElement, XMLNode};
 
 use ezdxf2dxfastm::{export_dxf_astm, DxfAstmExportOptions};
-use seamly_svg2ezdxf::{svg_to_ezdxf, SvgToEzdxfOptions};
+use seamly_svg2ezdxf::{svg_to_ezdxf, DxfVersion, SvgToEzdxfOptions};
 
 use hpgl_writer::{HpglMode, HpglOptions, PenMap};
 use ps_writer::PsFlavor;
@@ -628,13 +628,15 @@ fn build_tiled_pdf_tile_doc(
 // DXF-ASTM export
 // ---------------------------------------------------------------------------
 
-// @brief Frontend choices for a DXF-ASTM export: style system text and the CLO3D variant.
+// @brief Frontend choices for a DXF-ASTM export: style system text, CLO3D variant and DXF version.
 // @details Local date and time come from Qt, which knows the user's time zone;
 //          absent values fall back to UTC in the writer.
 #[derive(Debug, Clone, Default)]
 pub struct DxfStyleInfo {
     // CLO3D variant: add group 250 to boundary and sew line polylines.
     pub clo3d_group_250: bool,
+    // File version: R12 (AC1009) or R13 (AC1012).
+    pub dxf_version: DxfVersion,
     // Seamly2D suite version for `Author:`.
     pub app_version: Option<String>,
     // `Creation Date:` as dd-mm-yyyy.
@@ -664,12 +666,13 @@ pub fn do_export_dxf(
     style: &DxfStyleInfo,
     progress: &mut impl FnMut(i32),
 ) -> Result<(), String> {
-    crate::log_to_file(&format!("[exports.rs] do_export_dxf(): 1 converting SVG DOM to ezdxf Drawing for '{path}' teaching_version={create_teaching_version}"));
+    crate::log_to_file(&format!("[exports.rs] do_export_dxf(): 1 converting SVG DOM to ezdxf Drawing for '{path}' teaching_version={create_teaching_version} version={:?}", style.dxf_version));
 
     // Stage 1 start: SVG DOM → ezdxf Drawing (~10% of total work).
     progress(10);
 
-    let svg_opts = SvgToEzdxfOptions::default();
+    // The drawing's version selects the DXF file version the writer produces.
+    let svg_opts = SvgToEzdxfOptions { dxf_version: style.dxf_version, ..SvgToEzdxfOptions::default() };
     let drawing = svg_to_ezdxf(doc, &svg_opts)
         .map_err(|e| {
             crate::log_to_file(&format!("[exports.rs] do_export_dxf(): 2 SVG→ezdxf conversion failed: {e}"));
@@ -1908,6 +1911,30 @@ mod tests {
             "exported DXF should end with EOF marker"
         );
     } // do_export_dxf_writes_valid_dxf
+
+    // @brief do_export_dxf with dxf_version R13 writes an AC1012 file with handles and OBJECTS.
+    #[test]
+    fn do_export_dxf_writes_r13_when_asked() {
+        let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+            <g id="piece0">
+                <rect x="10" y="10" width="180" height="180" fill="none" stroke="#000000" stroke-width="1"/>
+            </g>
+        </svg>"##;
+        let doc = Document::parse(svg).expect("fixture SVG should parse");
+        let mut path = std::env::temp_dir();
+        path.push(format!("seamly_dxf_r13_test_{}.dxf", std::process::id()));
+        let path_str = path.to_string_lossy().to_string();
+
+        let style = DxfStyleInfo { dxf_version: DxfVersion::R13, ..DxfStyleInfo::default() };
+        do_export_dxf(&doc, &path_str, false, &style, &mut |_| {}).expect("R13 DXF export should succeed");
+
+        let content = std::fs::read_to_string(&path_str).expect("exported DXF file should be readable");
+        let _ = std::fs::remove_file(&path_str);
+        assert!(content.contains("AC1012"), "R13 file names AC1012");
+        assert!(!content.contains("AC1009"), "R13 file does not name AC1009");
+        assert!(content.contains("$HANDSEED"), "R13 file has a handle seed");
+        assert!(content.contains("OBJECTS"), "R13 file has an OBJECTS section");
+    } // do_export_dxf_writes_r13_when_asked
 
     // @brief do_export_dxf returns Err when the path is not writable.
     //
