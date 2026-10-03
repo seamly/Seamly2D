@@ -6,7 +6,7 @@
 
 #[cfg(test)]
 mod tests {
-    use crate::astm_contour::{build_contour, distance_to_segment, CURVE_TOLERANCE_MM};
+    use crate::astm_contour::{build_contour, build_contour_tagged, distance_to_segment, CURVE_TOLERANCE_MM};
     use crate::astm_notch::{build_notches, NotchKind};
     use crate::converter::{svg_to_ezdxf, SvgToEzdxfOptions};
     use crate::entities::Point;
@@ -196,5 +196,90 @@ mod tests {
         let facing = &drawing.blocks[1];
         assert!(facing.boundary.is_some());
         assert!(facing.sew_lines.is_empty());
+    }
+
+    // @brief Box with a coarse curved hem: three corners, then 10 segments of
+    //        20 mm that bend 1.5° each, like Seamly2D's interpolation of a flat curve.
+    // @return (points, tags): tags mark the four corners only.
+    fn box_with_coarse_hem() -> (Vec<Point>, Vec<bool>) {
+        let mut points = vec![Point::new(0.0, 0.0), Point::new(200.0, 0.0), Point::new(200.0, 100.0)];
+        for k in 1..10 {
+            let k = k as f64;
+            points.push(Point::new(200.0 - 20.0 * k, 100.0 + 0.26 * k * (10.0 - k)));
+        } // for each hem vertex
+        points.push(Point::new(0.0, 100.0));
+        let mut tags = vec![false; points.len()];
+        for i in [0, 1, 2, points.len() - 1] {
+            tags[i] = true;
+        } // for each corner
+        (points, tags)
+    }
+
+    #[test]
+    fn coarse_curve_segments_are_not_turn_points_without_tags() {
+        let (points, _) = box_with_coarse_hem();
+        let c = build_contour(&points, true).expect("contour");
+        assert_eq!(c.turn.iter().filter(|&&t| t).count(), 4, "only the four corners: {:?}", c.turn);
+    }
+
+    #[test]
+    fn tags_decide_turn_points() {
+        let (points, tags) = box_with_coarse_hem();
+        let c = build_contour_tagged(&points, true, Some(&tags)).expect("contour");
+        assert_eq!(c.turn.iter().filter(|&&t| t).count(), 4, "tagged corners only: {:?}", c.turn);
+
+        // A tag on a hem vertex makes it a turn point, although the geometry is smooth.
+        let mut tags = tags;
+        tags[6] = true;
+        let c = build_contour_tagged(&points, true, Some(&tags)).expect("contour");
+        let hem_turn = c.reduced.iter().zip(&c.turn).any(|(p, &t)| t && *p == points[6]);
+        assert!(hem_turn, "tagged hem vertex is a turn point");
+    }
+
+    #[test]
+    fn mismatched_tags_fall_back_to_geometry() {
+        let (points, _) = box_with_coarse_hem();
+        let c = build_contour_tagged(&points, true, Some(&[true, false])).expect("contour");
+        assert_eq!(c.turn.iter().filter(|&&t| t).count(), 4);
+    }
+
+    #[test]
+    fn duplicate_vertex_keeps_its_tag() {
+        let p = Point::new;
+        let points = [p(0.0, 0.0), p(50.0, 0.0), p(100.0, 0.0), p(100.0, 0.0), p(100.0, 100.0), p(0.0, 100.0)];
+        let tags = [true, false, false, true, true, true];
+        let c = build_contour_tagged(&points, true, Some(&tags)).expect("contour");
+        assert_eq!(c.dense.len(), 5);
+        assert_eq!(c.reduced.len(), 4);
+        assert!(c.turn.iter().all(|&t| t), "repeat's tag moves to the kept vertex");
+    }
+
+    // Square cut line with a midpoint on the top side. `data-turn-points` marks
+    // the midpoint as a turn point, which the geometry alone never would.
+    const TURN_TAGGED: &str = r#"
+        <svg viewBox="0 0 960 960" width="254mm" height="254mm" xmlns="http://www.w3.org/2000/svg">
+          <g id="piece_Cuff" data-type="piece" data-name="Cuff">
+            <g data-type="cutline" data-turn-points="0 1 2 3 4">
+              <g><path d="M 0,0 L 480,0 L 960,0 L 960,960 L 0,960 L 0,0 Z"/></g>
+            </g>
+            <g data-type="seamline" data-turn-points="0 2 3 4">
+              <path d="M 96,96 L 480,96 L 864,96 L 864,864 L 96,864 L 96,96 Z"/>
+            </g>
+          </g>
+        </svg>"#;
+
+    #[test]
+    fn svg_turn_point_tags_reach_the_contours() {
+        let doc = Document::parse(TURN_TAGGED).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let cuff = &drawing.blocks[0];
+
+        let boundary = cuff.boundary.as_ref().expect("boundary");
+        assert_eq!(boundary.reduced.len(), 5, "tagged midpoint is kept as a key point");
+        assert!(boundary.turn.iter().all(|&t| t));
+
+        let sew = &cuff.sew_lines[0];
+        assert_eq!(sew.reduced.len(), 4, "untagged collinear midpoint is dropped");
+        assert!(sew.turn.iter().all(|&t| t));
     }
 }

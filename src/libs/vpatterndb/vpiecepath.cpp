@@ -4,7 +4,7 @@
 //  @date   Dec 11, 2022
 //
 //  @copyright
-//  Copyright (C) 2017 - 2025 Seamly, LLC
+//  Copyright (C) 2017 - 2026 Seamly, LLC
 //  https://github.com/fashionfreedom/seamly2d
 //
 //  @brief
@@ -52,6 +52,8 @@
 #include "vpiecepath_p.h"
 #include "vcontainer.h"
 #include "../vgeometry/vpointf.h"
+#include "../vgeometry/vabstractcubicbezierpath.h"
+#include "../vgeometry/vsplinepoint.h"
 #include "../vlayout/vabstractpiece.h"
 #include "../vmisc/vabstractapplication.h"
 #include "../ifc/exception/vexceptionobjecterror.h"
@@ -462,6 +464,85 @@ QVector<QPointF> VPiecePath::PathPoints(const VContainer *data, const QVector<QP
         points = extended;
     }
     return points;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief pathNodeVertices returns the PathPoints() vertices that can break the tangent.
+ * @details Node vertices are point nodes, curve segment ends, and spline path knots. All
+ *          other PathPoints() vertices are curve interior points. See VAbstractPiece::turnPointIndices().
+ */
+QVector<QPointF> VPiecePath::pathNodeVertices(const VContainer *data) const
+{
+    QVector<QPointF> vertices;
+    for (int i = 0; i < nodeCount(); ++i)
+    {
+        if (at(i).isExcluded())
+        {
+            continue;
+        }
+
+        switch (at(i).GetTypeTool())
+        {
+            case (Tool::NodePoint):
+                vertices.append(static_cast<QPointF>(*data->GeometricObject<VPointF>(at(i).GetId())));
+                break;
+            case (Tool::NodeArc):
+            case (Tool::NodeElArc):
+            case (Tool::NodeSpline):
+            case (Tool::NodeSplinePath):
+                {
+                    const QSharedPointer<VAbstractCurve> curve = data->GeometricObject<VAbstractCurve>(at(i).GetId());
+                    const QPointF begin = StartSegment(data, i, at(i).GetReverse());
+                    const QPointF end = EndSegment(data, i, at(i).GetReverse());
+                    vertices += curveNodeVertices(curve, curve->GetSegmentPoints(begin, end, at(i).GetReverse()));
+                }
+                break;
+            default:
+                break;
+        }
+    }
+    return vertices;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief curveNodeVertices returns the vertices of one curve segment that can break the tangent.
+ * @param curve   curve the segment was cut from.
+ * @param segment interpolated segment points, from VAbstractCurve::GetSegmentPoints().
+ * @return the segment ends, and the spline path knots that lie on the segment.
+ */
+QVector<QPointF> VPiecePath::curveNodeVertices(const QSharedPointer<VAbstractCurve> &curve,
+                                               const QVector<QPointF> &segment)
+{
+    QVector<QPointF> vertices;
+    if (segment.isEmpty())
+    {
+        return vertices;
+    }
+    vertices.append(segment.first());
+    vertices.append(segment.last());
+
+    // A spline path knot can be a cusp, so it is a node vertex too.
+    const QSharedPointer<VAbstractCubicBezierPath> path = curve.dynamicCast<VAbstractCubicBezierPath>();
+    if (path.isNull())
+    {
+        return vertices;
+    }
+    const QVector<VSplinePoint> knots = path->GetSplinePath();
+    for (const VSplinePoint &knot : knots)
+    {
+        const QPointF p = static_cast<QPointF>(knot.P());
+        for (const QPointF &s : segment)
+        {
+            if (QLineF(p, s).length() < accuracyPointOnLine)
+            {
+                vertices.append(s);
+                break;
+            }
+        }
+    }
+    return vertices;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1023,6 +1104,7 @@ VSAPoint VPiecePath::PreparePointEkv(const VPieceNode &node, const VContainer *d
     p.SetSAAfter(node.GetSAAfter(data, *data->GetPatternUnit()));
     p.SetSABefore(node.GetSABefore(data, *data->GetPatternUnit()));
     p.SetAngleType(node.GetAngleType());
+    p.setNode(true);
 
     return p;
 }
@@ -1109,6 +1191,16 @@ QVector<VSAPoint> VPiecePath::CurveSeamAllowanceSegment(const VContainer *data, 
             }
 
             pointsEkv.append(p);
+        }
+    }
+
+    // pointsEkv holds one point per segment point, in order.
+    const QVector<QPointF> nodeVertices = curveNodeVertices(curve, points);
+    for (int k = 0; k < pointsEkv.size(); ++k)
+    {
+        if (nodeVertices.contains(points.at(k)))
+        {
+            pointsEkv[k].setNode(true);
         }
     }
 

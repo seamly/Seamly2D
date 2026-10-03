@@ -53,6 +53,7 @@
 #include "../vlayout/vabstractpiece.h"
 
 #include <QPointF>
+#include <QtMath>
 #include <QVector>
 
 #include <QtTest>
@@ -1875,6 +1876,117 @@ void TST_VAbstractPiece::sumTrapezoids() const
     Case3();
     Case4();
     Case5();
+}
+
+namespace
+{
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief dShape builds a "D": a straight left side, top and bottom lines, and a half circle joined smoothly.
+ * @param chords chords of the half circle; fewer chords make a coarser interpolation.
+ * @param nodes  receives the node vertices: the four line ends.
+ */
+QVector<QPointF> dShape(int chords, QVector<QPointF> &nodes)
+{
+    QVector<QPointF> points;
+    points << QPointF(0, 0) << QPointF(100, 0);
+    // Half circle around (100, 50) from the top line end to the bottom line end.
+    for (int k = 1; k < chords; ++k)
+    {
+        const qreal a = -M_PI / 2 + M_PI * k / chords;
+        points << QPointF(100 + 50 * qCos(a), 50 + 50 * qSin(a));
+    }
+    points << QPointF(100, 100) << QPointF(0, 100);
+    nodes = {QPointF(0, 0), QPointF(100, 0), QPointF(100, 100), QPointF(0, 100)};
+    return points;
+}
+} // namespace
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VAbstractPiece::TurnPointIndices_data() const
+{
+    QTest::addColumn<QVector<QPointF>>("points");
+    QTest::addColumn<QVector<QPointF>>("nodes");
+    QTest::addColumn<bool>("closed");
+    QTest::addColumn<QVector<int>>("expect");
+
+    QVector<QPointF> nodes;
+    QVector<QPointF> points = dShape(12, nodes);
+    const int last = points.size() - 1;
+    // Smooth line-curve joins are curve points; coarse chords do not read as corners.
+    QTest::newRow("Smooth joins are not turn points") << points << nodes << true << QVector<int>{0, last};
+
+    QVector<QPointF> repeated = points;
+    repeated << points.first();
+    QTest::newRow("Closing repeat follows the first vertex")
+        << repeated << nodes << true << QVector<int>{0, last, last + 1};
+
+    QTest::newRow("No nodes: only sharp corners") << points << QVector<QPointF>() << true << QVector<int>{0, last};
+
+    // A 5 degree kink where two straight lines meet is a turn point.
+    QVector<QPointF> kink;
+    kink << QPointF(0, 0) << QPointF(100, 0) << QPointF(200, qTan(qDegreesToRadians(5.0)) * 100);
+    QTest::newRow("Line-line kink is a turn point") << kink << kink << false << QVector<int>{0, 1, 2};
+
+    // A line meets a curve that leaves 9 or 2 degrees off the line direction.
+    for (const qreal start : {10.0, 3.0})
+    {
+        QVector<QPointF> join;
+        join << QPointF(0, 0) << QPointF(100, 0);
+        for (int k = 0; k < 3; ++k)
+        {
+            const qreal a = qDegreesToRadians(start + 2.0 * k);
+            join << join.last() + QPointF(5 * qCos(a), 5 * qSin(a));
+        }
+        const QVector<QPointF> joinNodes{join.at(0), join.at(1), join.last()};
+        QTest::newRow(start > 5 ? "Line-curve tangent break is a turn point" : "Near-smooth line-curve join is not")
+            << join << joinNodes << false << (start > 5 ? QVector<int>{0, 1, 4} : QVector<int>{0, 4});
+    }
+
+    // The same kink inside a curve interpolation, away from a node, is not.
+    QTest::newRow("Curve interior kink is not a turn point")
+        << kink << QVector<QPointF>{kink.first(), kink.last()} << false << QVector<int>{0, 2};
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief TurnPointIndices checks that only tangent breaks at node vertices, sharp corners
+ * and open ends are turn points.
+ */
+void TST_VAbstractPiece::TurnPointIndices() const
+{
+    QFETCH(QVector<QPointF>, points);
+    QFETCH(QVector<QPointF>, nodes);
+    QFETCH(bool, closed);
+    QFETCH(QVector<int>, expect);
+
+    QCOMPARE(VAbstractPiece::turnPointIndices(points, nodes, closed), expect);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief EquidistantReportsNodeVertices checks that the seam allowance corners built at node
+ * points are reported, and curve interior points are not.
+ */
+void TST_VAbstractPiece::EquidistantReportsNodeVertices() const
+{
+    QVector<VSAPoint> points;
+    points << VSAPoint(0, 0) << VSAPoint(100, 0) << VSAPoint(100, 100) << VSAPoint(0, 100);
+    for (VSAPoint &p : points)
+    {
+        p.setNode(true);
+    }
+    VSAPoint interior(50, 100.5); // slight bow, so the point is not removed as "on line"
+    points.insert(3, interior);
+
+    QVector<QPointF> nodeVertices;
+    const QVector<QPointF> ekv = VAbstractPiece::Equidistant(points, 10, &nodeVertices);
+    QVERIFY(!ekv.isEmpty());
+    QVERIFY(nodeVertices.size() >= 4);
+    for (const QPointF &node : nodeVertices)
+    {
+        QVERIFY2(qAbs(node.x() - 50) > 30, "a node vertex is a seam allowance corner, not the bow point");
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------

@@ -54,6 +54,9 @@
 
 #include <QPointF>
 #include <QSharedDataPointer>
+#include <QVector>
+
+#include <optional>
 
 class VLayoutPiecePathData;
 class QPainterPath;
@@ -91,6 +94,9 @@ public:
 
     bool             isCutPath() const;
     void             setCutPath(bool cut);
+
+    std::optional<QVector<int>> turnPoints() const;
+    void             setTurnPoints(const QVector<int> &indices);
 
 private:
     QSharedDataPointer<VLayoutPiecePathData> d;

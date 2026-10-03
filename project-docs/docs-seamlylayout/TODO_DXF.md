@@ -13,7 +13,7 @@ Reference: `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
 
 | Finding | Severity | Task |
 |---|---|---|
-| Declared points miscategorized: curve points on layer 2 (7 pieces) | departure | DXF.1 |
+| Declared points miscategorized: curve points on layer 2 (7 pieces) | departure | DXF.1 (done, see `TODO_COMPLETED.md`) |
 | Reconstruction from layers 2/3 off layer 84 by 0.532 (ShortSleeve_M), layer 87 by 0.942 (FullSleeve_M); limit 0.5 | extension | DXF.2 |
 | File is AC1009, not R13 (AC1012) | departure | DXF.3 |
 | More curve points than the curves need (Yoke_M L14, PocketFlapRound_M L1) | advisory | DXF.4 |
@@ -22,20 +22,6 @@ Reference: `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
 | Category, Material, Size columns blank | report table | DXF.7 |
 
 Report deviations carry an inch sign but match millimetres. Not verified.
-
-## [ ] Task DXF.1 — Seamly2D marks turn points in the handoff SVG
-
-Cause: `astm_contour.rs` `is_straight_chord` treats one long interpolated segment inside a flat curve as a straight line, so both ends become turn points. Example: FrontPanel hem vertices bend 1–2° but are on layer 2. Geometry cannot tell a coarse curve segment from a real line. Seamly2D knows the node types, so it sends them (user decision: producer tags, not a heuristic).
-
-- [ ] DXF.1.1 Define the attribute: which vertices of `cutline`, `seamline`, `internal_path`, `cut_path` are turn points. Add it to `project-docs/docs-data/NEW-ATTRIBUTES.csv` and `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`
-- [ ] DXF.1.2 Seamly2D: write the attribute in the handoff SVG. Turn point = path start/end node, line–line join, line–curve join with a tangent break, curve node with a tangent break
-- [ ] DXF.1.3 Seamly2D test: `TST_SeamlySuitePaths` (or the handoff writer test) checks the attribute on a piece with lines and curves
-- [ ] DXF.1.4 SeamlyLayout: read the attribute in `seamly_svg2ezdxf`; pass turn-point flags to `astm_contour::build_contour`
-- [ ] DXF.1.5 `build_contour`: tagged vertices are anchors and turn points; all other key points are curve points. Remove the straight-chord rule for tagged input
-- [ ] DXF.1.6 Untagged SVG (ordinary drawing): keep the geometry fallback, but a single dense segment no longer makes its ends turn points
-- [ ] DXF.1.7 Rust tests: tagged FrontPanel hem gives curve points; tagged corners give turn points; untagged fallback test
-- [ ] DXF.1.8 Update the `test_data/male_shirt_pieces.svg` fixture with the attribute
-- [ ] DXF.1.9 Update `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md` "Contour rules" and the handoff contract docs (both sides change)
 
 ## [ ] Task DXF.2 — Reconstructed curves stay within tolerance
 

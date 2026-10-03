@@ -1,542 +1,545 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg height="6773" width="3456" xmlns="http://www.w3.org/2000/svg">
-  <g id="piece_CollarBase" data-name="CollarBase" data-parent="pattern-1" data-type="piece" data-type-number="1">
-    <g id="seamline_CollarBase" data-parent="CollarBase" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 3041.199707,5625.408203 L 3018,5625.149902 L 2972.109863,5625.447266 L 2926.929688,5626.606934 L 2882.580078,5628.503906 L 2839.169922,5631.01416 L 2796.80957,5634.010254 L 2735.359863,5639.120117 L 2621.379883,5650.271973 L 2539.719727,5658.053223 L 2510.009766,5660.418945 L 2482.399414,5662.14209 L 2457,5663.094727 L 2445.269531,5663.204102 L 2436.55957,5663.154785 L 2416.769531,5662.411133 L 2394.709961,5661 L 2371,5659.041016 L 2333.709961,5655.364746 L 2283.859863,5649.581055 L 2217.799805,5640.923828 L 2182.019531,5635.689941 L 2180.599609,5635.380859 L 2189.929688,5636.74707 L 2197.729492,5561.559082 L 2221.379883,5554.484863 L 2255.909668,5544.704102 L 2279.889648,5538.633789 L 2305.709961,5532.962891 L 2334.30957,5527.705078 L 2366.639648,5522.873047 L 2403.639648,5518.479004 L 2446.269531,5514.537109 L 2495.459961,5511.059082 L 2552.169922,5508.058105 L 2617.330078,5505.546875 L 2691.899414,5503.539062 L 2776.830078,5502.047852 L 2873.049805,5501.084961 L 2981.509766,5500.664062 L 3041.199707,5500.684082 L 3041.199707,5625.408203 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+<svg baseProfile="tiny" height="1054.63mm" version="1.2" viewBox="0 0 7503 3986" width="1985.17mm" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <defs/>
+ <g data-measurements="individual" data-type="pattern" data-type-number="1" id="pattern-1">
+  <g data-grainline-angle="90.0000" data-name="Pocket" data-parent="pattern-1" data-type="piece" data-type-number="1" id="piece_Pocket">
+   <g data-parent="Pocket" data-turn-points="1 2 4 5 6" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_Pocket" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,5637.33,1900.37)">
+     <path d="M730.288,240.72 L730.288,127.335 L1070.45,127.335 L1070.45,240.72 L1070.45,732.059 L900.367,769.854 L730.288,732.059 L730.288,240.72 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="cutline_CollarBase" data-parent="CollarBase" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 3079,5663.626953 L 3017.909668,5662.947266 L 2972.719727,5663.239258 L 2928.219727,5664.380859 L 2884.469727,5666.25293 L 2841.589844,5668.731934 L 2799.709961,5671.693848 L 2738.759766,5676.762207 L 2625.009766,5687.89209 L 2543.009766,5695.706055 L 2512.689453,5698.121094 L 2484.279785,5699.893066 L 2457.889648,5700.883789 L 2445.339844,5701 L 2435.739746,5700.945801 L 2414.859863,5700.161133 L 2391.949707,5698.695801 L 2367.589844,5696.683105 L 2329.679688,5692.945801 L 2279.229492,5687.091797 L 2212.609863,5678.362793 L 2175.229492,5672.89502 L 2136.869629,5664.49707 L 2149.969727,5592.69873 L 2156.399902,5593.640137 L 2162.729492,5532.574707 L 2210.80957,5518.195801 L 2246.119629,5508.194824 L 2271.199707,5501.847168 L 2298.229492,5495.907715 L 2328.089844,5490.418945 L 2361.609863,5485.408691 L 2399.669922,5480.890137 L 2443.189453,5476.86377 L 2493.129883,5473.333984 L 2550.439453,5470.30127 L 2616.099609,5467.770996 L 2691.05957,5465.75293 L 2776.30957,5464.255859 L 2872.790039,5463.290039 L 2981.449707,5462.869141 L 3079,5462.902344 L 3079,5663.626953 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+   </g>
+   <g data-parent="Pocket" data-turn-points="1 2 4 5 6" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="cutline_Pocket" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,5637.33,1900.37)">
+     <path d="M692.493,240.72 L692.493,89.5393 L1108.24,89.5393 L1108.24,240.72 L1108.24,762.377 L900.367,808.571 L692.493,762.377 L692.493,240.72 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="piece_label_1_CollarBase" data-parent="CollarBase" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2546.680176 5527.160156)" x="0" y="14.0156">male_shirt</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2497.680176 5544.160156)" x="0" y="14.0156">male_chest_102cm</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2538.680176 5561.160156)" x="0" y="14.0156">09-24-2026</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2550.680176 5578.160156)" x="0" y="14.0156">&lt;empty&gt;</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2541.680176 5595.160156)" x="0" y="14.0156"> CollarBase</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2574.680176 5612.160156)" x="0" y="14.0156">Cut 1</text>
-      </g>
+   </g>
+   <g data-parent="Pocket" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece_label_1_Pocket" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6560.68,2209.39)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14">male_shirt_copy</text>
     </g>
-    <g id="grainline_CollarBase" data-parent="CollarBase" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <path d="M 2469.949707,5660.84082 L 2457.019531,5625.324707 L 2482.879883,5625.325195 L 2469.949707,5660.84082 L 2469.949707,5517.21875 L 2482.879883,5552.734863 L 2457.019531,5552.734863 L 2469.949707,5517.21875" fill-rule="evenodd" vector-effect="none" />
-      </g>
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6545.68,2226.39)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14">male_chest_102cm</text>
     </g>
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6585.68,2243.39)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14">10-03-2026</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6597.68,2260.39)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6609.68,2277.39)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14"> Pocket</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6621.68,2294.39)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="Pocket" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="grainline_Pocket" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,5637.33,1900.37)">
+     <path d="M862.082,675.441 L849.155,639.925 L875.009,639.925 L862.082,675.441 L862.082,184.102 L875.009,219.618 L849.155,219.618 L862.082,184.102 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
   </g>
-  <g id="piece_PocketFlap" data-name="PocketFlap" data-parent="pattern-1" data-type="piece" data-type-number="2">
-    <g id="seamline_PocketFlap" data-parent="PocketFlap" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2950.04834,2481.204834 L 2950.04834,2367.818848 L 3290.209961,2367.818848 L 3290.209961,2481.204834 L 3120.127441,2481.204834 L 2950.04834,2481.204834 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-grainline-angle="90.0000" data-name="Yoke" data-parent="pattern-1" data-type="piece" data-type-number="2" id="piece_Yoke">
+   <g data-parent="Yoke" data-turn-points="0 6 7 40 41" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_Yoke" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2866.9,288.772)">
+     <path d="M-904.934,437.958 L-907.161,429.408 L-926.546,353.584 L-939.361,301.723 L-951.893,248.785 L-963.965,194.808 L-969.743,167.403 L-309.109,4.95203 L-308.879,7.89192 L-307.964,14.0727 L-306.496,20.5792 L-304.473,27.3722 L-301.893,34.4123 L-298.75,41.6604 L-295.043,49.077 L-290.767,56.6228 L-285.92,64.2587 L-280.499,71.9452 L-274.5,79.643 L-267.919,87.3129 L-260.754,94.9155 L-253.001,102.412 L-244.657,109.762 L-235.719,116.927 L-226.184,123.868 L-216.048,130.544 L-205.307,136.918 L-193.959,142.95 L-182.001,148.599 L-169.429,153.828 L-156.239,158.597 L-142.43,162.866 L-127.996,166.596 L-112.936,169.748 L-97.2451,172.282 L-80.921,174.16 L-63.9601,175.341 L-46.3591,175.787 L-28.1149,175.459 L-9.22414,174.316 L0.491883,173.391 L0.491883,437.958 L-904.934,437.958 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="cutline_PocketFlap" data-parent="PocketFlap" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2912.253418,2519 L 2912.253418,2330.023926 L 3328,2330.023926 L 3328,2519 L 3120.127441,2519 L 2912.253418,2519 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+   </g>
+   <g data-parent="Yoke" data-turn-points="0 6 7 40 41 42" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="cutline_Yoke" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2866.9,288.772)">
+     <path d="M-934.146,475.753 L-943.757,438.852 L-963.201,362.798 L-976.097,310.61 L-988.726,257.263 L-1000.9,202.832 L-1014.27,139.43 L-274.89,-42.3837 L-271.3,3.64793 L-270.784,7.13511 L-269.908,11.0175 L-268.584,15.4634 L-266.782,20.3789 L-264.483,25.6818 L-261.675,31.2996 L-258.35,37.1675 L-254.504,43.2267 L-250.133,49.4234 L-245.236,55.7077 L-239.809,62.0329 L-233.851,68.3546 L-227.36,74.6309 L-220.333,80.8213 L-212.766,86.887 L-204.656,92.7902 L-195.997,98.4938 L-186.783,103.962 L-177.008,109.157 L-166.663,114.045 L-155.739,118.588 L-144.226,122.75 L-132.114,126.494 L-119.392,129.782 L-106.048,132.575 L-92.0697,134.833 L-77.4466,136.515 L-62.1671,137.579 L-46.2206,137.983 L-29.5968,137.684 L-12.1573,136.629 L38.2872,131.825 L38.2872,475.753 L-934.146,475.753 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="piece_label_1_PocketFlap" data-parent="PocketFlap" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 3161.640137 2377.618896)" x="0" y="9.70313">male_shirt</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 3127.640137 2389.618896)" x="0" y="9.70313">male_chest_102cm</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 3155.640137 2401.618896)" x="0" y="9.70313">09-24-2026</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 3164.640137 2413.618896)" x="0" y="9.70313">&lt;empty&gt;</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 3156.640137 2425.618896)" x="0" y="9.70313"> PocketFlap</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 3180.640137 2437.618896)" x="0" y="9.70313">Cut 1</text>
-      </g>
+   </g>
+   <g data-parent="Yoke" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece_label_1_Yoke" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2255.02,448.788)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_shirt_copy</text>
     </g>
-    <g id="grainline_PocketFlap" data-parent="PocketFlap" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <path d="M 3038.558105,2463.457031 L 3025.631348,2427.940918 L 3051.485352,2427.940918 L 3038.558105,2463.457031 L 3038.558105,2378.417969 L 3051.485352,2413.933838 L 3025.631348,2413.933838 L 3038.558105,2378.417969" fill-rule="evenodd" vector-effect="none" />
-      </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2228.02,478.788)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_chest_102cm</text>
     </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2294.02,508.788)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">10-03-2026</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2316.02,538.788)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2356.02,568.788)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24"> Yoke</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2357.02,598.788)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="Yoke" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="grainline_Yoke" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2866.9,288.772)">
+     <path d="M-391.534,361.355 L-404.461,325.839 L-378.607,325.839 L-391.534,361.355 L-391.534,96.7881 L-378.607,132.304 L-404.461,132.304 L-391.534,96.7881 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
   </g>
-  <g id="piece_FullSleeve" data-name="FullSleeve" data-parent="pattern-1" data-type="piece" data-type-number="3">
-    <g id="seamline_FullSleeve" data-parent="FullSleeve" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 955.169434,2405.969971 L 933.669434,2405.26001 L 844.009277,2401.820068 L 764.299316,2399.82959 L 697.269531,2399.209473 L 650.939453,2399.389404 L 604.039551,2400.219482 L 557.379883,2401.799561 L 511.759766,2404.279541 L 467.979492,2407.769531 L 436.919922,2411.169434 L 417.15918,2413.789551 L 398.299805,2416.739502 L 380.449219,2420.029541 L 371.989258,2421.80957 L 67.899658,598.089478 L 71.969971,597.549683 L 82.409912,594.739624 L 105.369751,587.499634 L 136.059692,576.809692 L 172.219849,563.059692 L 201.619751,550.90979 L 221.699341,542.119751 L 241.880005,532.789673 L 261.889771,522.969849 L 281.439575,512.709595 L 300.250122,502.059692 L 309.250122,496.599731 L 318.42981,490.859497 L 335.979614,479.279907 L 352.599731,467.629517 L 368.349731,455.959595 L 383.269653,444.309692 L 397.409302,432.759888 L 417.349731,415.679688 L 453.06958,383.049805 L 483.779541,354.279785 L 502.56958,337.629395 L 511.539795,330.379395 L 522.109619,321.972656 L 546.619873,301.837402 L 588.159424,266.95752 L 645.979736,218.188477 L 684.369873,186.679688 L 705.449951,170.220703 L 713.830322,164.163574 L 726.699951,154.945557 L 751.429932,136.56665 L 769.780029,123.2146 L 782.170166,114.642822 L 794.840088,106.440674 L 807.929932,98.689697 L 821.559814,91.471924 L 835.880127,84.869873 L 851.030029,78.96582 L 867.130127,73.8396 L 884.330322,69.575928 L 902.76001,66.254639 L 922.550049,63.95874 L 943.849854,62.769775 L 955.170166,62.667725 L 967.170166,62.701904 L 991.76001,63.13501 L 1016.980225,64.041748 L 1042.76001,65.466797 L 1069.01001,67.452881 L 1095.639893,70.040771 L 1122.570068,73.274658 L 1149.719971,77.196777 L 1177.01001,81.848877 L 1204.360107,87.274658 L 1231.670166,93.515869 L 1258.870361,100.615967 L 1285.870361,108.616943 L 1312.590088,117.560791 L 1338.950439,127.491943 L 1364.870361,138.450928 L 1377.610107,144.375732 L 1384.23999,147.575928 L 1398.599854,155.020752 L 1422.210205,168.226807 L 1457.479736,189.60083 L 1496.080322,214.39502 L 1537.1604,241.885986 L 1579.880127,271.35083 L 1623.400146,302.065918 L 1666.880127,333.309814 L 1730.450439,379.73999 L 1807.050049,436.719971 L 1868.330322,482.800049 L 1907.540161,512.199951 L 1915.42981,517.780029 L 1919.769653,520.599854 L 1929.859985,526.599854 L 1947.469849,536.179932 L 1974.440063,549.559814 L 2002.920044,562.800049 L 2043.779907,580.869873 L 2080.98999,596.51001 L 2084.889893,598.089844 L 1532.899414,2432.909912 L 1522.909668,2430.199951 L 1502.759277,2425.389893 L 1482.599121,2421.26001 L 1462.619629,2417.75 L 1442.999512,2414.820068 L 1423.949707,2412.409912 L 1396.719238,2409.619873 L 1364.339355,2407.340088 L 1337.719238,2406.23999 L 1310.779297,2405.889893 L 1307.049316,2405.969971 L 1231.07959,2405.969971 L 1155.489258,2254.790039 L 1155.489258,2405.969971 L 1060.999512,2405.969971 L 985.40918,2254.790039 L 985.40918,2405.969971 L 955.169434,2405.969971 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-name="CollarBaseInterface" data-parent="pattern-1" data-type="piece" data-type-number="3" id="piece_CollarBaseInterface">
+   <g data-parent="CollarBaseInterface" data-turn-points="0 22 23 24 40" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_CollarBaseInterface" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4148.1,758.666)">
+     <path d="M2709.21,302.158 L2686.01,301.9 L2640.12,302.197 L2594.94,303.357 L2550.59,305.254 L2507.18,307.764 L2464.82,310.76 L2403.37,315.87 L2289.39,327.022 L2207.73,334.803 L2178.02,337.169 L2150.41,338.892 L2125.01,339.845 L2113.28,339.954 L2104.57,339.905 L2084.78,339.161 L2062.72,337.75 L2039.01,335.791 L2001.72,332.115 L1951.87,326.331 L1885.81,317.674 L1850.03,312.44 L1848.61,312.131 L1857.94,313.497 L1865.74,238.309 L1889.39,231.235 L1923.92,221.454 L1947.9,215.384 L1973.72,209.713 L2002.32,204.455 L2034.65,199.623 L2071.65,195.229 L2114.28,191.287 L2163.47,187.809 L2220.18,184.808 L2285.34,182.297 L2359.91,180.289 L2444.84,178.798 L2541.06,177.835 L2649.52,177.414 L2709.21,177.434 L2709.21,302.158 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="cutline_FullSleeve" data-parent="FullSleeve" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 954.539551,2443.77002 L 932.309082,2443.030029 L 842.809082,2439.590088 L 763.649414,2437.619629 L 697.169434,2437.009521 L 651.339844,2437.189453 L 605.019531,2437.999512 L 559.049805,2439.55957 L 514.289551,2441.999512 L 471.529297,2445.409424 L 441.469727,2448.699463 L 422.55957,2451.199463 L 404.639648,2453.999512 L 387.779297,2457.109619 L 341.199219,2466.949463 L 24.204834,565.819336 L 64.524658,560.409546 L 71.81958,558.449585 L 93.469849,551.619751 L 123.119751,541.289673 L 158.279419,527.919556 L 186.829712,516.129517 L 206.189575,507.649536 L 225.630005,498.669556 L 244.779419,489.269653 L 263.349731,479.529907 L 281.119751,469.459595 L 289.420044,464.419556 L 298.009888,459.049927 L 314.719849,448.029907 L 330.500122,436.969849 L 345.460083,425.869629 L 359.67981,414.779785 L 373.149536,403.769531 L 392.309692,387.359375 L 427.399658,355.299805 L 458.31958,326.339355 L 478.149658,308.769531 L 487.889893,300.892578 L 498.349854,292.578613 L 522.469971,272.761719 L 563.81958,238.039551 L 621.809814,189.133545 L 660.750244,157.171387 L 682.739502,140.002441 L 691.750244,133.485352 L 704.429932,124.410645 L 729.040283,106.116699 L 747.909912,92.389893 L 761.139893,83.231689 L 774.929932,74.305908 L 789.440186,65.709717 L 804.800049,57.582764 L 821.090088,50.069824 L 838.420166,43.314697 L 856.840088,37.451904 L 876.420166,32.596924 L 897.219971,28.8479 L 919.320068,26.285889 L 942.620361,24.984619 L 955.059814,24.871826 L 967.559814,24.907959 L 992.770264,25.35083 L 1018.710205,26.283936 L 1045.230225,27.750732 L 1072.26001,29.795654 L 1099.719971,32.4646 L 1127.530029,35.802979 L 1155.599854,39.857666 L 1183.870361,44.677002 L 1212.250244,50.307861 L 1240.650146,56.799805 L 1269.01001,64.201904 L 1297.23999,72.565674 L 1325.26001,81.943604 L 1352.979736,92.388916 L 1380.200439,103.899658 L 1393.790283,110.216797 L 1401.1604,113.772705 L 1416.530029,121.743896 L 1441.229736,135.560791 L 1477.48999,157.534912 L 1516.800049,182.787842 L 1558.400146,210.622803 L 1601.51001,240.352783 L 1645.330322,271.279053 L 1689.059814,302.702881 L 1752.870361,349.319824 L 1829.690186,406.459961 L 1891.019775,452.579834 L 1929.790161,481.639893 L 1936.650024,486.48999 L 1939.739868,488.5 L 1948.559692,493.73999 L 1964.900024,502.629883 L 1990.809692,515.48999 L 2018.529907,528.379883 L 2058.750244,546.159912 L 2095.4104,561.569824 L 2131.000244,576.01001 L 1558.499512,2479 L 1513.569336,2466.830078 L 1494.57959,2462.300049 L 1475.539551,2458.389893 L 1456.549316,2455.060059 L 1437.82959,2452.26001 L 1419.649414,2449.969971 L 1393.469238,2447.280029 L 1362.229004,2445.080078 L 1336.689453,2444.030029 L 1316.839355,2443.77002 L 1207.719238,2443.77002 L 1193.279297,2414.899902 L 1193.279297,2443.77002 L 1037.63916,2443.77002 L 1023.199219,2414.899902 L 1023.199219,2443.77002 L 954.539551,2443.77002 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
-    </g>
-    <g id="piece_label_1_FullSleeve" data-parent="FullSleeve" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 1216.859985 868.743774)" x="0" y="23.7344">male_shirt</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 1133.859985 898.743774)" x="0" y="23.7344">male_chest_102cm</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 1202.859985 928.743774)" x="0" y="23.7344">09-24-2026</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 1222.859985 958.743774)" x="0" y="23.7344">&lt;empty&gt;</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 1212.859985 988.743774)" x="0" y="23.7344"> FullSleeve</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 1263.859985 1018.743774)" x="0" y="23.7344">Cut 1</text>
-      </g>
-    </g>
-    <g id="grainline_FullSleeve" data-parent="FullSleeve" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <path d="M 1041.579712,1737.92981 L 1015.729614,1666.89978 L 1067.429321,1666.89978 L 1041.579712,1737.92981 L 1041.580322,300.889893 L 1067.429932,371.919678 L 1015.730225,371.919678 L 1041.580322,300.889893" fill-rule="evenodd" vector-effect="none" />
-      </g>
-    </g>
+   </g>
   </g>
-  <g id="piece_PocketFlapRound" data-name="PocketFlapRound" data-parent="pattern-1" data-type="piece" data-type-number="4">
-    <g id="seamline_PocketFlapRound" data-parent="PocketFlapRound" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2174.047852,1769.370972 L 2174.047852,1655.984985 L 2514.209961,1655.984985 L 2514.209961,1769.370972 L 2504.939941,1773.427002 L 2485.509766,1780.946045 L 2465.129883,1787.684082 L 2443.989746,1793.561035 L 2422.255859,1798.49707 L 2400.11377,1802.413086 L 2377.736816,1805.22998 L 2355.301758,1806.868042 L 2344.126953,1807.166016 L 2335.208008,1807.20105 L 2315.901855,1806.146973 L 2295.191895,1803.784058 L 2273.477539,1800.159058 L 2251.155762,1795.314941 L 2228.625,1789.297974 L 2206.283691,1782.151001 L 2184.530762,1773.921021 L 2174.047852,1769.370972 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-grainline-angle="90.0000" data-name="FrontPanel" data-parent="pattern-1" data-type="piece" data-type-number="4" id="piece_FrontPanel">
+   <g data-parent="FrontPanel" data-turn-points="0 1 33 34 80 81 82" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_FrontPanel" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2645.72,427.061)">
+     <path d="M-2607.38,3026.93 L-2607.38,454.336 L-2399.51,454.336 L-2389.66,453.837 L-2370.8,452.554 L-2352.91,450.923 L-2335.97,448.937 L-2319.95,446.589 L-2304.83,443.873 L-2290.57,440.783 L-2277.17,437.311 L-2264.58,433.452 L-2252.78,429.198 L-2241.75,424.543 L-2231.47,419.481 L-2221.9,414.004 L-2213.01,408.107 L-2204.8,401.782 L-2197.21,395.023 L-2190.25,387.824 L-2183.86,380.177 L-2178.04,372.077 L-2172.76,363.517 L-2167.98,354.49 L-2163.68,344.989 L-2159.84,335.008 L-2156.44,324.541 L-2153.43,313.58 L-2150.81,302.119 L-2148.54,290.153 L-2146.6,277.673 L-2144.22,258.043 L-2141.99,229.926 L-2141.24,214.966 L-1484.29,391.724 L-1496.98,489.279 L-1513.81,623.11 L-1520.74,685.379 L-1524.66,725.193 L-1527.89,763.533 L-1530.35,800.385 L-1531.95,835.731 L-1532.61,869.557 L-1532.24,901.846 L-1530.77,932.582 L-1528.1,961.749 L-1525.22,982.536 L-1522.91,995.928 L-1520.26,1008.92 L-1517.25,1021.51 L-1513.87,1033.69 L-1510.12,1045.47 L-1505.97,1056.83 L-1501.43,1067.79 L-1496.48,1078.33 L-1491.11,1088.46 L-1485.32,1098.17 L-1479.08,1107.46 L-1472.39,1116.33 L-1465.23,1124.78 L-1457.61,1132.8 L-1449.5,1140.4 L-1440.9,1147.56 L-1431.8,1154.3 L-1422.18,1160.6 L-1412.04,1166.47 L-1401.37,1171.9 L-1390.14,1176.89 L-1378.37,1181.44 L-1366.02,1185.55 L-1353.1,1189.21 L-1339.59,1192.43 L-1325.48,1195.2 L-1310.76,1197.51 L-1295.43,1199.38 L-1279.46,1200.78 L-1262.85,1201.74 L-1245.6,1202.23 L-1227.68,1202.26 L-1209.09,1201.83 L-1199.51,1201.42 L-1246.75,2025.36 L-1212.26,2837.82 L-1217.71,2837.76 L-1249.74,2838.31 L-1277,2839.93 L-1300.02,2842.55 L-1314.71,2845.15 L-1323.52,2847.13 L-1331.57,2849.33 L-1338.91,2851.73 L-1345.61,2854.31 L-1351.74,2857.08 L-1360.06,2861.53 L-1369.67,2868.05 L-1378.16,2875.13 L-1389.91,2886.59 L-1402.13,2899.02 L-1411.35,2907.62 L-1422.07,2916.43 L-1434.8,2925.36 L-1450.06,2934.36 L-1463.58,2941.09 L-1473.6,2945.56 L-1484.54,2950.01 L-1496.47,2954.42 L-1509.46,2958.78 L-1523.57,2963.09 L-1538.87,2967.34 L-1555.41,2971.51 L-1573.28,2975.61 L-1592.53,2979.61 L-1623.94,2985.44 L-1671.51,2992.8 L-1725.78,2999.64 L-1787.28,3005.89 L-1856.51,3011.46 L-1934.02,3016.3 L-2020.31,3020.33 L-2115.91,3023.47 L-2221.33,3025.66 L-2337.11,3026.81 L-2399.51,3026.93 L-2607.38,3026.93 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="cutline_PocketFlapRound" data-parent="PocketFlapRound" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2136.25293,1794.167969 L 2136.25293,1618.190063 L 2552,1618.190063 L 2552,1794.080078 L 2519.349609,1808.379028 L 2498.269531,1816.536011 L 2476.129883,1823.85498 L 2453.239746,1830.217041 L 2429.737793,1835.555054 L 2405.768555,1839.795044 L 2381.476562,1842.853027 L 2357.183594,1844.626953 L 2344.703613,1844.959961 L 2334.249023,1845 L 2312.725586,1843.824951 L 2289.93457,1841.224976 L 2266.353516,1837.288086 L 2242.266602,1832.061035 L 2217.98584,1825.57605 L 2193.830566,1817.849976 L 2170.310547,1808.95105 L 2136.25293,1794.167969 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+   </g>
+   <g data-parent="FrontPanel" data-turn-points="0 1 33 34 80 81 82 123" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="cutline_FrontPanel" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2645.72,427.061)">
+     <path d="M-2645.18,3064.73 L-2645.18,416.54 L-2400.46,416.54 L-2391.9,416.106 L-2373.8,414.875 L-2356.83,413.328 L-2340.91,411.462 L-2326.03,409.281 L-2312.17,406.793 L-2299.32,404.006 L-2287.45,400.932 L-2276.54,397.586 L-2266.55,393.986 L-2257.46,390.148 L-2249.21,386.09 L-2241.76,381.823 L-2235.02,377.35 L-2228.93,372.663 L-2223.41,367.738 L-2218.37,362.537 L-2213.76,357.009 L-2209.5,351.092 L-2205.57,344.725 L-2201.93,337.847 L-2198.57,330.408 L-2195.48,322.367 L-2192.65,313.693 L-2190.1,304.369 L-2187.81,294.382 L-2185.79,283.727 L-2184.05,272.487 L-2181.83,254.27 L-2179.71,227.487 L-2176.64,166.302 L-1442.55,363.816 L-1459.49,494.075 L-1476.28,627.558 L-1483.15,689.319 L-1487.02,728.631 L-1490.2,766.378 L-1492.61,802.498 L-1494.17,836.955 L-1494.81,869.712 L-1494.46,900.726 L-1493.05,929.953 L-1490.54,957.434 L-1487.87,976.733 L-1485.76,988.934 L-1483.35,1000.74 L-1480.65,1012.06 L-1477.64,1022.9 L-1474.34,1033.25 L-1470.74,1043.12 L-1466.85,1052.51 L-1462.66,1061.44 L-1458.17,1069.91 L-1453.38,1077.93 L-1448.28,1085.53 L-1442.85,1092.72 L-1437.09,1099.53 L-1430.97,1105.97 L-1424.46,1112.07 L-1417.55,1117.83 L-1410.19,1123.28 L-1402.35,1128.41 L-1394,1133.24 L-1385.11,1137.77 L-1375.64,1141.98 L-1365.58,1145.86 L-1354.89,1149.42 L-1343.56,1152.63 L-1331.57,1155.49 L-1318.9,1157.97 L-1305.54,1160.07 L-1291.49,1161.78 L-1276.72,1163.08 L-1261.23,1163.97 L-1245.02,1164.44 L-1228.08,1164.47 L-1210.33,1164.05 L-1159.38,1161.88 L-1208.91,2025.64 L-1172.81,2876.05 L-1217.59,2875.56 L-1248.29,2876.09 L-1273.75,2877.6 L-1294.59,2879.97 L-1307.25,2882.21 L-1314.38,2883.82 L-1320.72,2885.55 L-1326.23,2887.35 L-1331.02,2889.19 L-1335.03,2891 L-1340.48,2893.92 L-1346.9,2898.28 L-1352.82,2903.21 L-1363.24,2913.37 L-1375.75,2926.1 L-1386.44,2936.07 L-1399.18,2946.54 L-1414.31,2957.16 L-1432.01,2967.59 L-1447.45,2975.28 L-1458.78,2980.34 L-1470.87,2985.25 L-1483.9,2990.06 L-1497.92,2994.77 L-1512.99,2999.38 L-1529.19,3003.87 L-1546.57,3008.26 L-1565.21,3012.53 L-1585.23,3016.7 L-1617.6,3022.71 L-1666.26,3030.24 L-1721.51,3037.2 L-1783.85,3043.53 L-1853.82,3049.17 L-1931.96,3054.04 L-2018.81,3058.09 L-2114.89,3061.25 L-2220.75,3063.45 L-2336.89,3064.61 L-2399.47,3064.73 L-2645.18,3064.73 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="piece_label_1_PocketFlapRound" data-parent="PocketFlapRound" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2361.509766 1689.915039)" x="0" y="9.70313">male_shirt</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2327.509766 1701.915039)" x="0" y="9.70313">male_chest_102cm</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2355.509766 1713.915039)" x="0" y="9.70313">09-24-2026</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2364.509766 1725.915039)" x="0" y="9.70313">&lt;empty&gt;</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2330.509766 1737.915039)" x="0" y="9.70313"> PocketFlapRound</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="9" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2380.509766 1749.915039)" x="0" y="9.70313">Cut 1</text>
-      </g>
+   </g>
+   <g data-parent="FrontPanel" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece_label_1_FrontPanel" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,702.828,1801.72)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_shirt_copy</text>
     </g>
-    <g id="grainline_PocketFlapRound" data-parent="PocketFlapRound" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <path d="M 2294.299805,1785.740967 L 2281.372559,1750.224976 L 2307.226562,1750.224976 L 2294.299805,1785.740967 L 2294.299805,1672.35498 L 2307.226562,1707.870972 L 2281.372559,1707.870972 L 2294.299805,1672.35498" fill-rule="evenodd" vector-effect="none" />
-      </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,675.828,1831.72)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_chest_102cm</text>
     </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,741.828,1861.72)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">10-03-2026</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,763.828,1891.72)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,747.828,1921.72)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24"> FrontPanel</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,804.828,1951.72)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="FrontPanel" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="grainline_FrontPanel" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2645.72,427.061)">
+     <path d="M-2060.73,2368.4 L-2086.58,2297.37 L-2034.88,2297.37 L-2060.73,2368.4 L-2060.73,970.92 L-2034.88,1041.95 L-2086.58,1041.95 L-2060.73,970.92 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
   </g>
-  <g id="piece_Cuff" data-name="Cuff" data-parent="pattern-1" data-type="piece" data-type-number="5">
-    <g id="seamline_Cuff" data-parent="Cuff" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2174.140137,813.209656 L 2174.140137,586.429688 L 3270.209961,586.429993 L 3270.209961,813.210022 L 2174.140137,813.209656 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-grainline-angle="90.0000" data-name="CollarBase" data-parent="pattern-1" data-type="piece" data-type-number="5" id="piece_CollarBase">
+   <g data-parent="CollarBase" data-turn-points="0 22 23 24 40" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_CollarBase" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4141.28,1002.27)">
+     <path d="M2709.21,302.158 L2686.01,301.9 L2640.12,302.197 L2594.94,303.357 L2550.59,305.254 L2507.18,307.764 L2464.82,310.76 L2403.37,315.87 L2289.39,327.022 L2207.73,334.803 L2178.02,337.169 L2150.41,338.892 L2125.01,339.845 L2113.28,339.954 L2104.57,339.905 L2084.78,339.161 L2062.72,337.75 L2039.01,335.791 L2001.72,332.115 L1951.87,326.331 L1885.81,317.674 L1850.03,312.44 L1848.61,312.131 L1857.94,313.497 L1865.74,238.309 L1889.39,231.235 L1923.92,221.454 L1947.9,215.384 L1973.72,209.713 L2002.32,204.455 L2034.65,199.623 L2071.65,195.229 L2114.28,191.287 L2163.47,187.809 L2220.18,184.808 L2285.34,182.297 L2359.91,180.289 L2444.84,178.798 L2541.06,177.835 L2649.52,177.414 L2709.21,177.434 L2709.21,302.158 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="cutline_Cuff" data-parent="Cuff" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2136.350098,850.999695 L 2136.350098,548.639648 L 3308,548.639954 L 3308,851.000061 L 2136.350098,850.999695 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+   </g>
+   <g data-parent="CollarBase" data-turn-points="0 22 23 24 25 41 42" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="cutline_CollarBase" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4141.28,1002.27)">
+     <path d="M2747.01,340.377 L2685.92,339.697 L2640.73,339.989 L2596.23,341.131 L2552.48,343.003 L2509.6,345.482 L2467.72,348.444 L2406.77,353.512 L2293.02,364.642 L2211.02,372.456 L2180.7,374.871 L2152.29,376.643 L2125.9,377.634 L2113.35,377.75 L2103.75,377.696 L2082.87,376.911 L2059.96,375.446 L2035.6,373.433 L1997.69,369.696 L1947.24,363.842 L1880.62,355.113 L1843.24,349.645 L1804.88,341.247 L1817.98,269.449 L1824.41,270.39 L1830.74,209.325 L1878.82,194.946 L1914.13,184.945 L1939.21,178.597 L1966.24,172.658 L1996.1,167.169 L2029.62,162.159 L2067.68,157.64 L2111.2,153.614 L2161.14,150.084 L2218.45,147.051 L2284.11,144.521 L2359.07,142.503 L2444.32,141.006 L2540.8,140.04 L2649.46,139.619 L2747.01,139.652 L2747.01,340.377 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="piece_label_1_Cuff" data-parent="Cuff" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2582.260254 592.430664)" x="0" y="23.7344">male_shirt</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2499.260254 622.430664)" x="0" y="23.7344">male_chest_102cm</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2568.260254 652.430664)" x="0" y="23.7344">09-24-2026</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2588.260254 682.430664)" x="0" y="23.7344">&lt;empty&gt;</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2634.260254 712.430664)" x="0" y="23.7344"> Cuff</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2629.260254 742.430664)" x="0" y="23.7344">Cut 1</text>
-      </g>
+   </g>
+   <g data-parent="CollarBase" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece_label_1_CollarBase" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6322.97,1206.18)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14">male_shirt_copy</text>
     </g>
-    <g id="grainline_Cuff" data-parent="Cuff" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <path d="M 2388.739746,787.739746 L 2375.810059,752.219727 L 2401.67041,752.219727 L 2388.739746,787.739746 L 2388.739746,617.659668 L 2401.67041,653.179688 L 2375.810059,653.179688 L 2388.739746,617.659668" fill-rule="evenodd" vector-effect="none" />
-      </g>
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6307.97,1223.18)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14">male_chest_102cm</text>
     </g>
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6347.97,1240.18)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14">10-03-2026</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6359.97,1257.18)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6348.97,1274.18)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14"> CollarBase</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6383.97,1291.18)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="CollarBase" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="grainline_CollarBase" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4141.28,1002.27)">
+     <path d="M2137.96,337.591 L2125.03,302.075 L2150.89,302.075 L2137.96,337.591 L2137.96,193.969 L2150.89,229.485 L2125.03,229.485 L2137.96,193.969 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
   </g>
-  <g id="piece_CollarTop" data-name="CollarTop" data-parent="pattern-1" data-type="piece" data-type-number="6">
-    <g id="seamline_CollarTop" data-parent="CollarTop" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 3347.200195,1092.125 L 3313.260254,1092.106079 L 3228.140137,1093.01001 L 3153.830078,1094.808105 L 3101.240234,1096.612061 L 3046.910156,1099.012939 L 2991.610352,1102.084961 L 2936.150391,1105.901978 L 2881.320312,1110.536011 L 2827.919922,1116.061035 L 2776.730469,1122.551025 L 2740.379883,1128.129028 L 2717.200195,1132.166016 L 2695.010254,1136.484863 L 2673.930176,1141.095947 L 2654.040039,1146.008057 L 2635.459961,1151.228882 L 2618.270508,1156.768921 L 2602.580078,1162.637939 L 2595.400391,1165.712891 L 2595.400391,901.14563 L 2595.970215,901.769165 L 2597.94043,903.017334 L 2602.590332,904.89093 L 2612.140137,907.386719 L 2625.120117,909.873779 L 2641.270508,912.345337 L 2660.330078,914.794678 L 2693.550293,918.41748 L 2746.110352,923.103149 L 2805.760254,927.580078 L 2870.450195,931.794556 L 2938.150391,935.693481 L 3041.169922,940.889038 L 3170.25,946.151611 L 3250.69043,948.582336 L 3293.760254,949.464966 L 3325.610352,949.657898 L 3340.44043,949.293335 L 3346.040039,948.822388 L 3347.200195,948.502869 L 3347.200195,1092.125 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-grainline-angle="90.0000" data-name="BackPanel" data-parent="pattern-1" data-type="piece" data-type-number="6" id="piece_BackPanel">
+   <g data-parent="BackPanel" data-turn-points="0 8 9 10 11 12 13 14 49 50 51 95 111" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_BackPanel" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2749.29,420.984)">
+     <path d="M113.878,3026.93 L0.491883,3026.93 L-62.4655,3026.87 L-179.138,3025.89 L-285.206,3023.93 L-381.212,3021.06 L-467.695,3017.34 L-545.198,3012.84 L-594.952,3009.09 L-599.508,2526.15 L-552.264,2025.36 L-599.508,1163.63 L-646.752,2025.36 L-599.886,2526.15 L-604.072,3008.4 L-614.26,3007.64 L-675.424,3001.78 L-729.229,2995.34 L-776.218,2988.39 L-807.127,2982.86 L-826.016,2979.06 L-843.505,2975.17 L-859.661,2971.19 L-874.553,2967.14 L-888.248,2963.02 L-900.813,2958.85 L-912.316,2954.62 L-922.825,2950.35 L-932.408,2946.04 L-941.132,2941.71 L-949.064,2937.36 L-959.705,2930.82 L-971.633,2922.12 L-981.614,2913.49 L-990.187,2905.01 L-1001.6,2892.66 L-1012.88,2881.07 L-1021.23,2873.82 L-1030.88,2867.04 L-1039.37,2862.33 L-1045.68,2859.35 L-1052.61,2856.54 L-1060.25,2853.88 L-1068.64,2851.4 L-1077.87,2849.09 L-1093.3,2845.97 L-1117.55,2842.54 L-1146.36,2839.98 L-1180.24,2838.36 L-1186.77,2838.22 L-1152.26,2025.36 L-1199.51,1201.42 L-1185.61,1200.72 L-1158.82,1198.85 L-1133.24,1196.41 L-1108.84,1193.41 L-1085.59,1189.85 L-1063.48,1185.74 L-1042.48,1181.09 L-1022.58,1175.89 L-1003.75,1170.16 L-985.958,1163.9 L-969.195,1157.11 L-953.435,1149.81 L-938.656,1141.98 L-924.836,1133.65 L-911.952,1124.81 L-899.982,1115.48 L-888.905,1105.65 L-878.697,1095.33 L-869.338,1084.52 L-860.805,1073.24 L-853.075,1061.48 L-846.126,1049.26 L-839.938,1036.57 L-834.486,1023.43 L-829.75,1009.83 L-825.706,995.778 L-822.334,981.288 L-819.61,966.36 L-817.513,951 L-816.02,935.213 L-815.11,919.004 L-814.759,902.378 L-814.947,885.34 L-815.651,867.895 L-816.848,850.049 L-818.518,831.807 L-821.805,803.76 L-827.708,764.961 L-835.098,724.669 L-843.8,682.927 L-853.636,639.775 L-864.428,595.256 L-881.96,526.16 L-890.376,493.849 L-863.926,489.443 L-811.158,481.425 L-758.453,474.306 L-705.704,468.032 L-652.807,462.545 L-599.655,457.791 L-546.143,453.712 L-492.164,450.254 L-437.613,447.359 L-382.385,444.971 L-326.373,443.036 L-269.471,441.495 L-182.364,439.772 L-61.9537,438.391 L0.491883,437.958 L113.878,437.958 L113.878,3026.93 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="cutline_CollarTop" data-parent="CollarTop" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 3385,1129.940063 L 3313.450195,1129.9021 L 3228.800293,1130.800049 L 3154.930176,1132.587036 L 3102.730469,1134.378052 L 3048.790039,1136.761963 L 2993.959961,1139.80896 L 2939.040039,1143.588013 L 2884.860352,1148.166992 L 2832.240234,1153.610962 L 2781.970215,1159.984009 L 2746.490234,1165.430054 L 2724.050293,1169.337036 L 2702.660156,1173.500977 L 2682.5,1177.910889 L 2663.69043,1182.556885 L 2646.370117,1187.421875 L 2630.69043,1192.474976 L 2616.640137,1197.72998 L 2557.600098,1222.999878 L 2557.600098,875.290222 L 2605.800293,856.549438 L 2615.150391,869.109619 L 2620.480469,870.502197 L 2631.540039,872.620667 L 2646.540039,874.91626 L 2664.790039,877.261475 L 2697.280273,880.804565 L 2749.200195,885.433777 L 2808.400391,889.876831 L 2872.760254,894.070068 L 2940.19043,897.953003 L 3042.890137,903.13269 L 3171.590332,908.379517 L 3251.650391,910.798767 L 3294.260254,911.672058 L 3325.260254,911.859802 L 3338.390137,911.536987 L 3339.390137,911.45282 L 3385,898.9245 L 3385,1129.940063 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+   </g>
+   <g data-parent="BackPanel" data-turn-points="0 42 43 44 88 104 105" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="cutline_BackPanel" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2749.29,420.984)">
+     <path d="M151.673,3064.73 L0.473688,3064.73 L-62.6431,3064.67 L-179.647,3063.68 L-286.121,3061.71 L-382.588,3058.83 L-469.601,3055.09 L-547.713,3050.56 L-632.418,3044.17 L-679.47,3039.36 L-734.241,3032.81 L-782.31,3025.7 L-814.182,3020 L-833.851,3016.04 L-852.128,3011.97 L-869.14,3007.78 L-884.959,3003.48 L-899.655,2999.06 L-913.298,2994.52 L-925.955,2989.87 L-937.689,2985.1 L-948.562,2980.22 L-958.627,2975.22 L-968.054,2970.05 L-980.771,2962.24 L-995.171,2951.73 L-1007.29,2941.25 L-1017.37,2931.28 L-1029.02,2918.67 L-1038.85,2908.58 L-1044.54,2903.64 L-1050.98,2899.11 L-1056.63,2895.98 L-1060.86,2893.98 L-1065.94,2891.91 L-1071.82,2889.87 L-1078.58,2887.87 L-1086.2,2885.97 L-1099.7,2883.24 L-1121.87,2880.1 L-1148.94,2877.7 L-1181.54,2876.13 L-1226.17,2875.21 L-1190.11,2025.64 L-1239.42,1165.58 L-1187.87,1162.99 L-1161.93,1161.18 L-1137.34,1158.84 L-1114,1155.97 L-1091.9,1152.58 L-1071.03,1148.7 L-1051.35,1144.34 L-1032.86,1139.51 L-1015.53,1134.24 L-999.332,1128.54 L-984.246,1122.43 L-970.236,1115.94 L-957.268,1109.07 L-945.299,1101.86 L-934.284,1094.3 L-924.172,1086.41 L-914.911,1078.2 L-906.447,1069.64 L-898.726,1060.72 L-891.701,1051.44 L-885.328,1041.74 L-879.574,1031.62 L-874.411,1021.03 L-869.818,1009.96 L-865.783,998.374 L-862.297,986.261 L-859.352,973.608 L-856.943,960.409 L-855.066,946.663 L-853.715,932.373 L-852.882,917.546 L-852.559,902.188 L-852.734,886.31 L-853.395,869.923 L-854.528,853.037 L-856.112,835.73 L-859.268,808.804 L-864.987,771.214 L-872.191,731.936 L-880.728,690.984 L-890.428,648.428 L-901.112,604.356 L-918.565,535.571 L-937.374,463.361 L-869.87,452.117 L-816.527,444.011 L-763.214,436.811 L-709.886,430.467 L-656.44,424.924 L-602.775,420.124 L-548.787,416.009 L-494.374,412.523 L-439.431,409.607 L-383.854,407.204 L-327.537,405.258 L-270.356,403.71 L-182.954,401.981 L-62.3015,400.597 L0.360776,400.162 L151.673,400.162 L151.673,3064.73 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="piece_label_1_CollarTop" data-parent="CollarTop" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2841.830078 952.485962)" x="0" y="14.0156">male_shirt</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2792.830078 969.485962)" x="0" y="14.0156">male_chest_102cm</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2833.830078 986.485962)" x="0" y="14.0156">09-24-2026</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2845.830078 1003.485962)" x="0" y="14.0156">&lt;empty&gt;</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2842.830078 1020.485962)" x="0" y="14.0156"> CollarTop</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2869.830078 1037.485962)" x="0" y="14.0156">Cut 1</text>
-      </g>
+   </g>
+   <g data-parent="BackPanel" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece_label_1_BackPanel" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2588.61,1807.25)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_shirt_copy</text>
     </g>
-    <g id="grainline_CollarTop" data-parent="CollarTop" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <path d="M 2732.980469,1091.196045 L 2720.050293,1055.679932 L 2745.910156,1055.679932 L 2732.980469,1091.196045 L 2732.980469,947.573914 L 2745.910156,983.089844 L 2720.050293,983.089844 L 2732.980469,947.573914" fill-rule="evenodd" vector-effect="none" />
-      </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2561.61,1837.25)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_chest_102cm</text>
     </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2627.61,1867.25)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">10-03-2026</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2649.61,1897.25)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2639.61,1927.25)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24"> BackPanel</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2690.61,1957.25)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="BackPanel" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="grainline_BackPanel" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2749.29,420.984)">
+     <path d="M-233.402,2330.55 L-259.255,2259.52 L-207.549,2259.52 L-233.402,2330.55 L-233.402,933.07 L-207.549,1004.1 L-259.255,1004.1 L-233.402,933.07 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
   </g>
-  <g id="piece_PlacketTop" data-name="PlacketTop" data-parent="pattern-1" data-type="piece" data-type-number="7">
-    <g id="seamline_PlacketTop" data-parent="PlacketTop" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2174.739746,1991.429688 L 2749.470215,1991.429932 L 2749.470215,2104.819824 L 2862.850098,2104.819824 L 2919.549805,2161.51001 L 2862.850098,2218.199951 L 2174.739746,2218.199707 L 2174.739746,1991.429688 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-grainline-angle="90.0000" data-name="PocketRound" data-parent="pattern-1" data-type="piece" data-type-number="7" id="piece_PocketRound">
+   <g data-parent="PocketRound" data-turn-points="0 1 22 23" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_PocketRound" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,6153.8,1905.37)">
+     <path d="M730.288,732.059 L730.288,127.335 L735.29,124.912 L745.699,120.331 L756.517,116.067 L767.661,112.122 L784.791,106.759 L808.032,100.771 L831.073,96.051 L853.247,92.5962 L873.884,90.4056 L892.318,89.4777 L900.367,89.5393 L909.064,89.8414 L929.225,91.6031 L951.752,94.6241 L975.587,98.7606 L999.671,103.869 L1022.94,109.804 L1044.35,116.424 L1058.42,121.765 L1066.73,125.452 L1070.45,127.335 L1070.45,732.059 L1057.3,736.872 L1031.17,745.424 L1005.69,752.689 L981.375,758.674 L958.744,763.385 L938.309,766.825 L920.583,769.001 L906.081,769.918 L900.367,769.854 L894.403,769.545 L878.836,767.675 L859.698,764.479 L837.876,760.156 L814.255,754.904 L789.72,748.92 L765.157,742.403 L741.451,735.551 L730.288,732.059 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="cutline_PlacketTop" data-parent="PlacketTop" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2136.939941,1953.629639 L 2787.260254,1953.629883 L 2787.260254,2067.02002 L 2878.510254,2067.02002 L 2973,2161.51001 L 2878.510254,2256 L 2136.939941,2255.999756 L 2136.939941,1953.629639 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+   </g>
+   <g data-parent="PocketRound" data-turn-points="0 1 22 23 41" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="cutline_PocketRound" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,6153.8,1905.37)">
+     <path d="M692.493,759.838 L692.493,103.646 L719.435,90.596 L731.152,85.4389 L743.277,80.6608 L755.704,76.2612 L774.423,70.4006 L799.519,63.9352 L824.367,58.8445 L848.34,55.1094 L870.937,52.7108 L891.512,51.6751 L901.168,51.749 L911.367,52.1034 L933.384,54.0272 L957.498,57.261 L982.742,61.6421 L1008.27,67.0556 L1033.2,73.4162 L1056.65,80.6667 L1072.8,86.7975 L1082.95,91.2991 L1108.24,104.11 L1108.24,758.469 L1069.68,772.589 L1042.23,781.571 L1015.39,789.224 L989.746,795.537 L965.735,800.535 L943.751,804.236 L924.081,806.651 L907.063,807.727 L899.176,807.639 L891.167,807.224 L873.466,805.097 L852.912,801.664 L830.101,797.146 L805.675,791.714 L780.395,785.549 L755.062,778.828 L730.561,771.745 L692.493,759.838 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="piece_label_1_PlacketTop" data-parent="PlacketTop" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2579.47998 2008.011475)" x="0" y="23.7344">male_shirt</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2496.47998 2038.011475)" x="0" y="23.7344">male_chest_102cm</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2565.47998 2068.011475)" x="0" y="23.7344">09-24-2026</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2585.47998 2098.011475)" x="0" y="23.7344">&lt;empty&gt;</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2567.47998 2128.011475)" x="0" y="23.7344"> PlacketTop</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2626.47998 2158.011475)" x="0" y="23.7344">Cut 1</text>
-      </g>
+   </g>
+   <g data-parent="PocketRound" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece_label_1_PocketRound" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7024.69,2204.04)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_shirt_copy</text>
     </g>
-    <g id="grainline_PlacketTop" data-parent="PlacketTop" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <path d="M 2319.649902,2187.07959 L 2306.720215,2151.55957 L 2332.57959,2151.55957 L 2319.649902,2187.07959 L 2319.649902,2005.659668 L 2332.57959,2041.179688 L 2306.720215,2041.179688 L 2319.649902,2005.659668" fill-rule="evenodd" vector-effect="none" />
-      </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6997.69,2234.04)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_chest_102cm</text>
     </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7063.69,2264.04)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">10-03-2026</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7085.69,2294.04)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7045.69,2324.04)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24"> PocketRound</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7126.69,2354.04)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="PocketRound" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="grainline_PocketRound" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6153.8,1905.37)">
+     <path d="M797.111,695.498 L784.184,659.982 L810.038,659.982 L797.111,695.498 L797.111,204.159 L810.038,239.675 L784.184,239.675 L797.111,204.159 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
   </g>
-  <g id="piece_PocketRound" data-name="PocketRound" data-parent="pattern-1" data-type="piece" data-type-number="8">
-    <g id="seamline_PocketRound" data-parent="PocketRound" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2174.047852,1537.331787 L 2174.047852,932.607849 L 2179.049805,930.184998 L 2189.458984,925.603943 L 2200.276855,921.339783 L 2211.420898,917.39502 L 2228.550781,912.031982 L 2251.791992,906.043945 L 2274.833008,901.323975 L 2297.006836,897.869141 L 2317.643555,895.678711 L 2336.077637,894.750488 L 2344.126953,894.812256 L 2352.82373,895.114258 L 2372.984863,896.875977 L 2395.511719,899.896973 L 2419.34668,904.033691 L 2443.430664,909.14209 L 2466.699707,915.076904 L 2488.109863,921.696777 L 2502.179688,927.038086 L 2510.489746,930.725098 L 2514.209961,932.60791 L 2514.209961,1537.332031 L 2501.05957,1542.14502 L 2474.929688,1550.697021 L 2449.449707,1557.962158 L 2425.134766,1563.947021 L 2402.503906,1568.657959 L 2382.068848,1572.098145 L 2364.342773,1574.27417 L 2349.84082,1575.191162 L 2344.126953,1575.127197 L 2338.162598,1574.818115 L 2322.595703,1572.947998 L 2303.458008,1569.752197 L 2281.635742,1565.428955 L 2258.014648,1560.176758 L 2233.479492,1554.192871 L 2208.916992,1547.675781 L 2185.210938,1540.82373 L 2174.047852,1537.331787 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-name="CollarTopInterface" data-parent="pattern-1" data-type="piece" data-type-number="8" id="piece_CollarTopInterface">
+   <g data-parent="CollarTopInterface" data-turn-points="0 1 21 22" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_CollarTopInterface" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4118.05,132.169)">
+     <path d="M1957.41,251.022 L1957.41,-51.3403 L1957.98,-50.7168 L1959.95,-49.4686 L1964.6,-47.595 L1974.15,-45.0992 L1987.13,-42.6122 L2003.28,-40.1406 L2022.34,-37.6913 L2055.56,-34.0685 L2108.12,-29.3828 L2167.77,-24.9059 L2232.46,-20.6914 L2300.16,-16.7925 L2403.18,-11.5969 L2532.26,-6.33449 L2612.7,-3.90374 L2655.77,-3.02112 L2687.62,-2.82821 L2702.45,-3.19277 L2708.05,-3.66369 L2709.21,-3.98324 L2709.21,177.434 L2681.6,177.391 L2626.89,177.822 L2572.91,178.868 L2519.72,180.525 L2467.42,182.789 L2416.09,185.655 L2365.82,189.119 L2316.69,193.177 L2268.79,197.823 L2222.2,203.054 L2177.01,208.865 L2133.31,215.252 L2091.18,222.21 L2050.7,229.735 L2011.97,237.823 L1975.06,246.468 L1957.41,251.022 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="cutline_PocketRound" data-parent="PocketRound" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2136.25293,1565.11084 L 2136.25293,908.918884 L 2163.194824,895.868835 L 2174.911621,890.711853 L 2187.036621,885.933533 L 2199.463867,881.534119 L 2218.182617,875.673584 L 2243.278809,869.208008 L 2268.126953,864.117432 L 2292.099609,860.382324 L 2314.696777,857.983887 L 2335.271973,856.947998 L 2344.927734,857.021973 L 2355.126953,857.376465 L 2377.143555,859.300293 L 2401.257812,862.533936 L 2426.501953,866.915039 L 2452.029785,872.328613 L 2476.959961,878.688965 L 2500.409668,885.939697 L 2516.55957,892.070312 L 2526.709961,896.572021 L 2552,909.382812 L 2552,1563.741943 L 2513.439941,1577.862061 L 2485.989746,1586.843994 L 2459.149902,1594.49707 L 2433.505859,1600.810059 L 2409.494629,1605.808105 L 2387.510742,1609.509033 L 2367.84082,1611.924072 L 2350.822754,1613 L 2342.935547,1612.912109 L 2334.926758,1612.49707 L 2317.225586,1610.370117 L 2296.671875,1606.937012 L 2273.86084,1602.419189 L 2249.43457,1596.986816 L 2224.154785,1590.821777 L 2198.821777,1584.10083 L 2174.320801,1577.017822 L 2136.25293,1565.11084 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
-    </g>
-    <g id="piece_label_1_PocketRound" data-parent="PocketRound" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2369.649902 1103.943115)" x="0" y="23.7344">male_shirt</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2286.649902 1133.943115)" x="0" y="23.7344">male_chest_102cm</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2355.649902 1163.943115)" x="0" y="23.7344">09-24-2026</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2375.649902 1193.943115)" x="0" y="23.7344">&lt;empty&gt;</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2333.649902 1223.943115)" x="0" y="23.7344"> PocketRound</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2416.649902 1253.943115)" x="0" y="23.7344">Cut 1</text>
-      </g>
-    </g>
-    <g id="grainline_PocketRound" data-parent="PocketRound" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <path d="M 2240.870605,1500.770752 L 2227.943848,1465.254883 L 2253.797852,1465.254883 L 2240.870605,1500.770752 L 2240.870605,1009.431885 L 2253.797852,1044.947754 L 2227.943848,1044.947754 L 2240.870605,1009.431885" fill-rule="evenodd" vector-effect="none" />
-      </g>
-    </g>
+   </g>
   </g>
-  <g id="piece_Pocket" data-name="Pocket" data-parent="pattern-1" data-type="piece" data-type-number="9">
-    <g id="seamline_Pocket" data-parent="Pocket" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2595.047852,1380.14917 L 2595.047852,1266.76416 L 2935.209961,1266.76416 L 2935.209961,1380.14917 L 2935.209961,1871.488037 L 2765.126953,1909.283203 L 2595.047852,1871.488037 L 2595.047852,1380.14917 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-grainline-angle="90.0000" data-name="FullSleeve" data-parent="pattern-1" data-type="piece" data-type-number="9" id="piece_FullSleeve">
+   <g data-parent="FullSleeve" data-turn-points="14 15 99 100 112 113 114 115 116 117" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_FullSleeve" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2457.15,704.857)">
+     <path d="M1889.33,3082.23 L1867.83,3081.52 L1778.17,3078.08 L1698.46,3076.09 L1631.43,3075.47 L1585.1,3075.65 L1538.2,3076.48 L1491.54,3078.06 L1445.92,3080.54 L1402.14,3084.03 L1371.08,3087.43 L1351.32,3090.05 L1332.46,3093 L1314.61,3096.29 L1306.15,3098.07 L1002.06,1274.35 L1006.13,1273.81 L1016.57,1271 L1039.53,1263.76 L1070.22,1253.07 L1106.38,1239.32 L1135.78,1227.17 L1155.86,1218.38 L1176.04,1209.05 L1196.05,1199.23 L1215.6,1188.97 L1234.41,1178.32 L1243.41,1172.86 L1252.59,1167.12 L1270.14,1155.54 L1286.76,1143.89 L1302.51,1132.22 L1317.43,1120.57 L1331.57,1109.02 L1351.51,1091.94 L1387.23,1059.31 L1417.94,1030.54 L1436.73,1013.89 L1445.7,1006.64 L1456.27,998.233 L1480.78,978.098 L1522.32,943.218 L1580.14,894.449 L1618.53,862.94 L1639.61,846.481 L1647.99,840.424 L1660.86,831.206 L1685.59,812.827 L1703.94,799.475 L1716.33,790.903 L1729,782.701 L1742.09,774.95 L1755.72,767.732 L1770.04,761.13 L1785.19,755.226 L1801.29,750.1 L1818.49,745.836 L1836.92,742.515 L1856.71,740.219 L1878.01,739.03 L1889.33,738.928 L1901.33,738.962 L1925.92,739.395 L1951.14,740.302 L1976.92,741.727 L2003.17,743.713 L2029.8,746.301 L2056.73,749.535 L2083.88,753.457 L2111.17,758.109 L2138.52,763.535 L2165.83,769.776 L2193.03,776.876 L2220.03,784.877 L2246.75,793.821 L2273.11,803.752 L2299.03,814.711 L2311.77,820.636 L2318.4,823.836 L2332.76,831.281 L2356.37,844.487 L2391.64,865.861 L2430.24,890.655 L2471.32,918.146 L2514.04,947.611 L2557.56,978.326 L2601.04,1009.57 L2664.61,1056 L2741.21,1112.98 L2802.49,1159.06 L2841.7,1188.46 L2849.59,1194.04 L2853.93,1196.86 L2864.02,1202.86 L2881.63,1212.44 L2908.6,1225.82 L2937.08,1239.06 L2977.94,1257.13 L3015.15,1272.77 L3019.05,1274.35 L2467.06,3109.17 L2457.07,3106.46 L2436.92,3101.65 L2416.76,3097.52 L2396.78,3094.01 L2377.16,3091.08 L2358.11,3088.67 L2330.88,3085.88 L2298.5,3083.6 L2271.88,3082.5 L2244.94,3082.15 L2241.21,3082.23 L2165.24,3082.23 L2089.65,2931.05 L2089.65,3082.23 L1995.16,3082.23 L1919.57,2931.05 L1919.57,3082.23 L1889.33,3082.23 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="cutline_Pocket" data-parent="Pocket" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2557.25293,1380.14917 L 2557.25293,1228.968506 L 2973,1228.968506 L 2973,1380.14917 L 2973,1901.806152 L 2765.126953,1948 L 2557.25293,1901.806152 L 2557.25293,1380.14917 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+   </g>
+   <g data-parent="FullSleeve" data-turn-points="14 15 99 100 111 112 113 114 115 116" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="cutline_FullSleeve" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2457.15,704.857)">
+     <path d="M1888.7,3120.03 L1866.47,3119.29 L1776.97,3115.85 L1697.81,3113.88 L1631.33,3113.27 L1585.5,3113.45 L1539.18,3114.26 L1493.21,3115.82 L1448.45,3118.26 L1405.69,3121.67 L1375.63,3124.96 L1356.72,3127.46 L1338.8,3130.26 L1321.94,3133.37 L1275.36,3143.21 L958.365,1242.08 L998.685,1236.67 L1005.98,1234.71 L1027.63,1227.88 L1057.28,1217.55 L1092.44,1204.18 L1120.99,1192.39 L1140.35,1183.91 L1159.79,1174.93 L1178.94,1165.53 L1197.51,1155.79 L1215.28,1145.72 L1223.58,1140.68 L1232.17,1135.31 L1248.88,1124.29 L1264.66,1113.23 L1279.62,1102.13 L1293.84,1091.04 L1307.31,1080.03 L1326.47,1063.62 L1361.56,1031.56 L1392.48,1002.6 L1412.31,985.03 L1422.05,977.153 L1432.51,968.839 L1456.63,949.022 L1497.98,914.3 L1555.97,865.394 L1594.91,833.432 L1616.9,816.263 L1625.91,809.746 L1638.59,800.671 L1663.2,782.377 L1682.07,768.65 L1695.3,759.492 L1709.09,750.566 L1723.6,741.97 L1738.96,733.843 L1755.25,726.33 L1772.58,719.575 L1791,713.712 L1810.58,708.857 L1831.38,705.108 L1853.48,702.546 L1876.78,701.245 L1889.22,701.132 L1901.72,701.168 L1926.93,701.611 L1952.87,702.544 L1979.39,704.011 L2006.42,706.056 L2033.88,708.725 L2061.69,712.063 L2089.76,716.118 L2118.03,720.937 L2146.41,726.568 L2174.81,733.06 L2203.17,740.462 L2231.4,748.826 L2259.42,758.204 L2287.14,768.649 L2314.36,780.16 L2327.95,786.477 L2335.32,790.033 L2350.69,798.004 L2375.39,811.821 L2411.65,833.795 L2450.96,859.048 L2492.56,886.883 L2535.67,916.613 L2579.49,947.539 L2623.22,978.963 L2687.03,1025.58 L2763.85,1082.72 L2825.18,1128.84 L2863.95,1157.9 L2870.81,1162.75 L2873.9,1164.76 L2882.72,1170 L2899.06,1178.89 L2924.97,1191.75 L2952.69,1204.64 L2992.91,1222.42 L3029.57,1237.83 L3065.16,1252.27 L2492.66,3155.26 L2447.73,3143.09 L2428.74,3138.56 L2409.7,3134.65 L2390.71,3131.32 L2371.99,3128.52 L2353.81,3126.23 L2327.63,3123.54 L2296.39,3121.34 L2270.85,3120.29 L2251,3120.03 L2141.88,3120.03 L2127.44,3091.16 L2127.44,3120.03 L1971.8,3120.03 L1957.36,3091.16 L1957.36,3120.03 L1888.7,3120.03 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="piece_label_1_Pocket" data-parent="Pocket" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2821.109863 1448.448975)" x="0" y="14.0156">male_shirt</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2772.109863 1465.448975)" x="0" y="14.0156">male_chest_102cm</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2813.109863 1482.448975)" x="0" y="14.0156">09-24-2026</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2825.109863 1499.448975)" x="0" y="14.0156">&lt;empty&gt;</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2837.109863 1516.448975)" x="0" y="14.0156"> Pocket</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2849.109863 1533.448975)" x="0" y="14.0156">Cut 1</text>
-      </g>
+   </g>
+   <g data-parent="FullSleeve" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece_label_1_FullSleeve" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4553.16,2249.86)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_shirt_copy</text>
     </g>
-    <g id="grainline_Pocket" data-parent="Pocket" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <path d="M 2726.841797,1814.870117 L 2713.915039,1779.354004 L 2739.768555,1779.354004 L 2726.841797,1814.870117 L 2726.841797,1323.531006 L 2739.768555,1359.047119 L 2713.915039,1359.047119 L 2726.841797,1323.531006" fill-rule="evenodd" vector-effect="none" />
-      </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4526.16,2279.86)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_chest_102cm</text>
     </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4592.16,2309.86)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">10-03-2026</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4614.16,2339.86)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4603.16,2369.86)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24"> FullSleeve</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4655.16,2399.86)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="FullSleeve" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="grainline_FullSleeve" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2457.15,704.857)">
+     <path d="M1975.74,2414.19 L1949.89,2343.16 L2001.59,2343.16 L1975.74,2414.19 L1975.74,977.15 L2001.59,1048.18 L1949.89,1048.18 L1975.74,977.15 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
   </g>
-  <g id="piece_CollarBaseInterface" data-name="CollarBaseInterface" data-parent="pattern-1" data-type="piece" data-type-number="10">
-    <g id="seamline_CollarBaseInterface" data-parent="CollarBaseInterface" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2136.399902,5744.255859 L 2159.599609,5744.513672 L 2205.489746,5744.216797 L 2250.669922,5743.057129 L 2295.019531,5741.160156 L 2338.429688,5738.649902 L 2380.790039,5735.653809 L 2442.239746,5730.543945 L 2556.219727,5719.39209 L 2637.879883,5711.61084 L 2667.589844,5709.245117 L 2695.200195,5707.521973 L 2720.599609,5706.568848 L 2732.330078,5706.459961 L 2741.040039,5706.508789 L 2760.830078,5707.25293 L 2782.889648,5708.664062 L 2806.599609,5710.623047 L 2843.889648,5714.298828 L 2893.739746,5720.083008 L 2959.799805,5728.739746 L 2995.580078,5733.974121 L 2997,5734.283203 L 2987.669922,5732.916992 L 2979.870117,5808.10498 L 2956.219727,5815.179199 L 2921.689941,5824.959961 L 2897.709961,5831.029785 L 2871.889648,5836.701172 L 2843.290039,5841.958984 L 2810.959961,5846.791016 L 2773.959961,5851.185059 L 2731.330078,5855.126953 L 2682.139648,5858.60498 L 2625.429688,5861.605957 L 2560.269531,5864.117188 L 2485.700195,5866.125 L 2400.769531,5867.616211 L 2304.549805,5868.579102 L 2196.089844,5869 L 2136.399902,5868.97998 L 2136.399902,5744.255859 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-grainline-angle="90.0000" data-name="CollarTop" data-parent="pattern-1" data-type="piece" data-type-number="10" id="piece_CollarTop">
+   <g data-parent="CollarTop" data-turn-points="0 19 20 40" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_CollarTop" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4126.54,544.465)">
+     <path d="M2709.21,139.639 L2675.27,139.62 L2590.15,140.524 L2515.84,142.322 L2463.25,144.126 L2408.92,146.527 L2353.62,149.599 L2298.16,153.416 L2243.33,158.05 L2189.93,163.575 L2138.74,170.065 L2102.39,175.643 L2079.21,179.68 L2057.02,183.999 L2035.94,188.61 L2016.05,193.522 L1997.47,198.743 L1980.28,204.283 L1964.59,210.152 L1957.41,213.227 L1957.41,-51.3403 L1957.98,-50.7168 L1959.95,-49.4686 L1964.6,-47.595 L1974.15,-45.0992 L1987.13,-42.6122 L2003.28,-40.1406 L2022.34,-37.6913 L2055.56,-34.0685 L2108.12,-29.3828 L2167.77,-24.9059 L2232.46,-20.6914 L2300.16,-16.7925 L2403.18,-11.5969 L2532.26,-6.33449 L2612.7,-3.90374 L2655.77,-3.02112 L2687.62,-2.82821 L2702.45,-3.19277 L2708.05,-3.66369 L2709.21,-3.98324 L2709.21,139.639 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
+   </g>
+   <g data-parent="CollarTop" data-turn-points="0 19 20 21 22 39 40" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="cutline_CollarTop" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4126.54,544.465)">
+     <path d="M2747.01,177.454 L2675.46,177.416 L2590.81,178.314 L2516.94,180.101 L2464.74,181.892 L2410.8,184.276 L2355.97,187.323 L2301.05,191.102 L2246.87,195.681 L2194.25,201.125 L2143.98,207.498 L2108.5,212.944 L2086.06,216.851 L2064.67,221.015 L2044.51,225.425 L2025.7,230.071 L2008.38,234.936 L1992.7,239.989 L1978.65,245.244 L1919.61,270.514 L1919.61,-77.1957 L1967.81,-95.9365 L1977.16,-83.3763 L1982.49,-81.9838 L1993.55,-79.8653 L2008.55,-77.5697 L2026.8,-75.2245 L2059.29,-71.6814 L2111.21,-67.0522 L2170.41,-62.6091 L2234.77,-58.4159 L2302.2,-54.533 L2404.9,-49.3533 L2533.6,-44.1065 L2613.66,-41.6873 L2656.27,-40.814 L2687.27,-40.6263 L2700.4,-40.9491 L2701.4,-41.0333 L2747.01,-53.5616 L2747.01,177.454 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="CollarTop" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece_label_1_CollarTop" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6297.38,544.465)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14">male_shirt_copy</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6282.38,561.465)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14">male_chest_102cm</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6322.38,578.465)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14">10-03-2026</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6334.38,595.465)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6328.38,612.465)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14"> CollarTop</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6358.38,629.465)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="13" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="14">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="CollarTop" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="grainline_CollarTop" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4126.54,544.465)">
+     <path d="M2094.99,138.71 L2082.06,103.194 L2107.92,103.194 L2094.99,138.71 L2094.99,-4.91205 L2107.92,30.6039 L2082.06,30.6039 L2094.99,-4.91205 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
   </g>
-  <g id="piece_ShortSleeve" data-name="ShortSleeve" data-parent="pattern-1" data-type="piece" data-type-number="11">
-    <g id="seamline_ShortSleeve" data-parent="ShortSleeve" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 167.679688,6711.209473 L 180.290039,6635.619629 L 67.899902,5961.589844 L 71.969727,5961.049805 L 82.410156,5958.239746 L 105.370239,5950.999512 L 136.059692,5940.30957 L 172.219849,5926.55957 L 201.620239,5914.409668 L 221.699829,5905.619629 L 241.880005,5896.289551 L 261.889771,5886.469727 L 281.440063,5876.209473 L 300.250122,5865.55957 L 309.250122,5860.099609 L 318.42981,5854.359863 L 335.980103,5842.779785 L 352.599731,5831.129883 L 368.349731,5819.459473 L 383.270142,5807.80957 L 397.40979,5796.259766 L 417.349731,5779.179688 L 453.069946,5746.549805 L 483.779907,5717.779785 L 502.569946,5701.129883 L 511.540161,5693.879883 L 522.109985,5685.472656 L 546.620239,5665.337891 L 588.15979,5630.458008 L 645.980103,5581.688477 L 684.370239,5550.179688 L 705.449829,5533.720703 L 713.8302,5527.663574 L 726.699829,5518.445801 L 751.42981,5500.066895 L 769.779907,5486.714844 L 782.170044,5478.142578 L 794.839966,5469.94043 L 807.92981,5462.189453 L 821.559692,5454.97168 L 835.880005,5448.369629 L 851.029907,5442.46582 L 867.130005,5437.339844 L 884.3302,5433.075684 L 902.759888,5429.754883 L 922.549927,5427.458984 L 943.849731,5426.269531 L 955.170044,5426.167969 L 967.170044,5426.20166 L 991.759888,5426.634766 L 1016.980103,5427.541992 L 1042.759888,5428.966797 L 1069.009888,5430.952637 L 1095.639771,5433.541016 L 1122.569946,5436.774902 L 1149.719849,5440.696777 L 1177.009888,5445.348633 L 1204.359985,5450.774902 L 1231.670044,5457.015625 L 1258.870239,5464.115723 L 1285.870239,5472.116699 L 1312.589966,5481.060547 L 1338.950317,5490.991699 L 1364.870239,5501.950684 L 1377.609985,5507.875977 L 1384.239868,5511.075684 L 1398.599731,5518.520508 L 1422.210083,5531.726562 L 1457.479614,5553.101074 L 1496.0802,5577.89502 L 1537.160278,5605.385742 L 1579.880005,5634.851074 L 1623.400024,5665.565918 L 1666.880005,5696.810059 L 1730.450317,5743.239746 L 1807.049927,5800.219727 L 1868.3302,5846.299805 L 1907.540161,5875.700195 L 1915.42981,5881.280273 L 1919.769653,5884.100098 L 1929.859985,5890.100098 L 1947.469849,5899.679688 L 1974.440063,5913.060059 L 2002.920044,5926.299805 L 2043.779907,5944.370117 L 2080.989746,5960.009766 L 2084.889648,5961.589844 L 1882.109863,6635.620117 L 1904.849609,6711.209961 L 167.679688,6711.209473 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-grainline-angle="90.0000" data-name="PlacketTop" data-parent="pattern-1" data-type="piece" data-type-number="11" id="piece_PlacketTop">
+   <g data-parent="PlacketTop" data-turn-points="0 1 2 3 4 5 6" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_PlacketTop" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4811.02,-27.1917)">
+     <path d="M1892.57,3748.01 L2467.3,3748.01 L2467.3,3861.4 L2580.68,3861.4 L2637.38,3918.09 L2580.68,3974.78 L1892.57,3974.78 L1892.57,3748.01 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="cutline_ShortSleeve" data-parent="ShortSleeve" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 123.069824,6748.999512 L 141.969727,6635.619629 L 24.205078,5929.319336 L 64.524902,5923.909668 L 71.819824,5921.949707 L 93.469849,5915.119629 L 123.120239,5904.789551 L 158.279907,5891.419922 L 186.8302,5879.629883 L 206.190063,5871.149414 L 225.630005,5862.169922 L 244.779907,5852.769531 L 263.349731,5843.029785 L 281.120239,5832.959473 L 289.420044,5827.919922 L 298.009888,5822.549805 L 314.719849,5811.529785 L 330.500122,5800.469727 L 345.460083,5789.369629 L 359.67981,5778.279785 L 373.150024,5767.269531 L 392.309692,5750.859863 L 427.400024,5718.799805 L 458.319946,5689.839844 L 478.150024,5672.269531 L 487.889771,5664.392578 L 498.349731,5656.078613 L 522.469849,5636.261719 L 563.819946,5601.539551 L 621.809692,5552.633789 L 660.750122,5520.671875 L 682.739868,5503.50293 L 691.750122,5496.98584 L 704.42981,5487.910645 L 729.040161,5469.616699 L 747.90979,5455.889648 L 761.139771,5446.731445 L 774.92981,5437.805664 L 789.440063,5429.209961 L 804.799927,5421.083008 L 821.089966,5413.569824 L 838.420044,5406.814453 L 856.839966,5400.95166 L 876.420044,5396.09668 L 897.219849,5392.347656 L 919.319946,5389.785645 L 942.620239,5388.484863 L 955.059692,5388.37207 L 967.559692,5388.407715 L 992.770142,5388.850586 L 1018.710083,5389.783691 L 1045.230103,5391.250977 L 1072.259888,5393.295898 L 1099.719849,5395.964844 L 1127.529907,5399.302734 L 1155.599731,5403.35791 L 1183.870239,5408.176758 L 1212.250122,5413.807617 L 1240.650024,5420.299805 L 1269.009888,5427.70166 L 1297.239868,5436.065918 L 1325.259888,5445.443848 L 1352.979614,5455.888672 L 1380.200317,5467.399902 L 1393.790161,5473.716797 L 1401.160278,5477.272949 L 1416.529907,5485.243652 L 1441.229614,5499.061035 L 1477.489868,5521.035156 L 1516.799927,5546.288086 L 1558.400024,5574.123047 L 1601.509888,5603.853027 L 1645.3302,5634.778809 L 1689.059692,5666.203125 L 1752.870239,5712.819824 L 1829.690063,5769.959961 L 1891.019653,5816.080078 L 1929.790161,5845.140137 L 1936.650024,5849.990234 L 1939.739868,5852 L 1948.559692,5857.240234 L 1964.900024,5866.129883 L 1990.809692,5878.990234 L 2018.529907,5891.879883 L 2058.75,5909.660156 L 2095.410156,5925.069824 L 2131,5939.509766 L 1921.580078,6635.620117 L 1955.689941,6749 L 123.069824,6748.999512 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+   </g>
+   <g data-parent="PlacketTop" data-turn-points="0 1 2 3 4 5 6 7" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="cutline_PlacketTop" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4811.02,-27.1917)">
+     <path d="M1854.77,3710.21 L2505.09,3710.21 L2505.09,3823.6 L2596.34,3823.6 L2690.83,3918.09 L2596.34,4012.58 L1854.77,4012.58 L1854.77,3710.21 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="piece_label_1_ShortSleeve" data-parent="ShortSleeve" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 1207.969727 5894.428711)" x="0" y="23.7344">male_shirt</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 1124.969727 5924.428711)" x="0" y="23.7344">male_chest_102cm</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 1193.969727 5954.428711)" x="0" y="23.7344">09-24-2026</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 1213.969727 5984.428711)" x="0" y="23.7344">&lt;empty&gt;</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 1185.969727 6014.428711)" x="0" y="23.7344"> ShortSleeve</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 1254.969727 6044.428711)" x="0" y="23.7344">Cut 1</text>
-      </g>
+   </g>
+   <g data-parent="PlacketTop" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece_label_1_PlacketTop" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7053.33,3737.4)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_shirt_copy</text>
     </g>
-    <g id="grainline_ShortSleeve" data-parent="ShortSleeve" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <path d="M 1049.109863,6281.47998 L 1023.259766,6210.449707 L 1074.959961,6210.449707 L 1049.109863,6281.47998 L 1049.109985,5598.148926 L 1074.960083,5669.180664 L 1023.259888,5669.180664 L 1049.109985,5598.148926" fill-rule="evenodd" vector-effect="none" />
-      </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7026.33,3767.4)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_chest_102cm</text>
     </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7092.33,3797.4)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">10-03-2026</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7114.33,3827.4)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7096.33,3857.4)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24"> PlacketTop</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7155.33,3887.4)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="PlacketTop" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="grainline_PlacketTop" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4811.02,-27.1917)">
+     <path d="M2037.48,3943.66 L2024.55,3908.14 L2050.41,3908.14 L2037.48,3943.66 L2037.48,3762.24 L2050.41,3797.76 L2024.55,3797.76 L2037.48,3762.24 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
   </g>
-  <g id="piece_CuffInterface" data-name="CuffInterface" data-parent="pattern-1" data-type="piece" data-type-number="12">
-    <g id="seamline_CuffInterface" data-parent="CuffInterface" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 3205,2325 L 2978.219727,2325 L 2978.219727,1228.930176 L 3205,1228.930176 L 3205,2325 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-grainline-angle="90.0000" data-name="ShortSleeve" data-parent="pattern-1" data-type="piece" data-type-number="12" id="piece_ShortSleeve">
+   <g data-parent="ShortSleeve" data-turn-points="0 1 2 86 87 88" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_ShortSleeve" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2423.75,-700.886)">
+     <path d="M1101.84,2023.97 L1114.45,1948.38 L1002.06,1274.35 L1006.13,1273.81 L1016.57,1271 L1039.53,1263.76 L1070.22,1253.07 L1106.38,1239.32 L1135.78,1227.17 L1155.86,1218.38 L1176.04,1209.05 L1196.05,1199.23 L1215.6,1188.97 L1234.41,1178.32 L1243.41,1172.86 L1252.59,1167.12 L1270.14,1155.54 L1286.76,1143.89 L1302.51,1132.22 L1317.43,1120.57 L1331.57,1109.02 L1351.51,1091.94 L1387.23,1059.31 L1417.94,1030.54 L1436.73,1013.89 L1445.7,1006.64 L1456.27,998.233 L1480.78,978.098 L1522.32,943.218 L1580.14,894.449 L1618.53,862.94 L1639.61,846.481 L1647.99,840.424 L1660.86,831.206 L1685.59,812.827 L1703.94,799.475 L1716.33,790.903 L1729,782.701 L1742.09,774.95 L1755.72,767.732 L1770.04,761.13 L1785.19,755.226 L1801.29,750.1 L1818.49,745.836 L1836.92,742.515 L1856.71,740.219 L1878.01,739.03 L1889.33,738.928 L1901.33,738.962 L1925.92,739.395 L1951.14,740.302 L1976.92,741.727 L2003.17,743.713 L2029.8,746.301 L2056.73,749.535 L2083.88,753.457 L2111.17,758.109 L2138.52,763.535 L2165.83,769.776 L2193.03,776.876 L2220.03,784.877 L2246.75,793.821 L2273.11,803.752 L2299.03,814.711 L2311.77,820.636 L2318.4,823.836 L2332.76,831.281 L2356.37,844.487 L2391.64,865.861 L2430.24,890.655 L2471.32,918.146 L2514.04,947.611 L2557.56,978.326 L2601.04,1009.57 L2664.61,1056 L2741.21,1112.98 L2802.49,1159.06 L2841.7,1188.46 L2849.59,1194.04 L2853.93,1196.86 L2864.02,1202.86 L2881.63,1212.44 L2908.6,1225.82 L2937.08,1239.06 L2977.94,1257.13 L3015.15,1272.77 L3019.05,1274.35 L2816.27,1948.38 L2839.01,2023.97 L1101.84,2023.97 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
+   </g>
+   <g data-parent="ShortSleeve" data-turn-points="0 1 2 86 87 88 89" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="cutline_ShortSleeve" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,2423.75,-700.886)">
+     <path d="M1057.23,2061.76 L1076.13,1948.38 L958.365,1242.08 L998.685,1236.67 L1005.98,1234.71 L1027.63,1227.88 L1057.28,1217.55 L1092.44,1204.18 L1120.99,1192.39 L1140.35,1183.91 L1159.79,1174.93 L1178.94,1165.53 L1197.51,1155.79 L1215.28,1145.72 L1223.58,1140.68 L1232.17,1135.31 L1248.88,1124.29 L1264.66,1113.23 L1279.62,1102.13 L1293.84,1091.04 L1307.31,1080.03 L1326.47,1063.62 L1361.56,1031.56 L1392.48,1002.6 L1412.31,985.03 L1422.05,977.153 L1432.51,968.839 L1456.63,949.022 L1497.98,914.3 L1555.97,865.394 L1594.91,833.432 L1616.9,816.263 L1625.91,809.746 L1638.59,800.671 L1663.2,782.377 L1682.07,768.65 L1695.3,759.492 L1709.09,750.566 L1723.6,741.97 L1738.96,733.843 L1755.25,726.33 L1772.58,719.575 L1791,713.712 L1810.58,708.857 L1831.38,705.108 L1853.48,702.546 L1876.78,701.245 L1889.22,701.132 L1901.72,701.168 L1926.93,701.611 L1952.87,702.544 L1979.39,704.011 L2006.42,706.056 L2033.88,708.725 L2061.69,712.063 L2089.76,716.118 L2118.03,720.937 L2146.41,726.568 L2174.81,733.06 L2203.17,740.462 L2231.4,748.826 L2259.42,758.204 L2287.14,768.649 L2314.36,780.16 L2327.95,786.477 L2335.32,790.033 L2350.69,798.004 L2375.39,811.821 L2411.65,833.795 L2450.96,859.048 L2492.56,886.883 L2535.67,916.613 L2579.49,947.539 L2623.22,978.963 L2687.03,1025.58 L2763.85,1082.72 L2825.18,1128.84 L2863.95,1157.9 L2870.81,1162.75 L2873.9,1164.76 L2882.72,1170 L2899.06,1178.89 L2924.97,1191.75 L2952.69,1204.64 L2992.91,1222.42 L3029.57,1237.83 L3065.16,1252.27 L2855.74,1948.38 L2889.85,2061.76 L1057.23,2061.76 Z " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
+   <g data-parent="ShortSleeve" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece_label_1_ShortSleeve" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4510.88,506.304)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_shirt_copy</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4483.88,536.304)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_chest_102cm</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4549.88,566.304)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">10-03-2026</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4571.88,596.304)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4541.88,626.304)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24"> ShortSleeve</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4612.88,656.304)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="ShortSleeve" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="grainline_ShortSleeve" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,2423.75,-700.886)">
+     <path d="M1983.27,1594.24 L1957.42,1523.21 L2009.12,1523.21 L1983.27,1594.24 L1983.27,910.909 L2009.12,981.941 L1957.42,981.941 L1983.27,910.909 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
   </g>
-  <g id="piece_CollarTopInterface" data-name="CollarTopInterface" data-parent="pattern-1" data-type="piece" data-type-number="13">
-    <g id="seamline_CollarTopInterface" data-parent="CollarTopInterface" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2136.200195,5457 L 2136.200195,5154.637695 L 2136.77002,5155.26123 L 2138.740234,5156.509277 L 2143.390137,5158.382812 L 2152.939941,5160.878906 L 2165.919922,5163.365723 L 2182.070312,5165.837402 L 2201.129883,5168.286621 L 2234.350098,5171.909668 L 2286.910156,5176.595215 L 2346.560059,5181.072266 L 2411.25,5185.286621 L 2478.950195,5189.185547 L 2581.969727,5194.381348 L 2711.049805,5199.643555 L 2791.490234,5202.074219 L 2834.560059,5202.957031 L 2866.410156,5203.149902 L 2881.240234,5202.785156 L 2886.839844,5202.314453 L 2888,5201.994629 L 2888,5383.412109 L 2860.390137,5383.369141 L 2805.679688,5383.800293 L 2751.700195,5384.846191 L 2698.509766,5386.50293 L 2646.209961,5388.76709 L 2594.879883,5391.632812 L 2544.610352,5395.097168 L 2495.47998,5399.154785 L 2447.580078,5403.800781 L 2400.990234,5409.032227 L 2355.799805,5414.842773 L 2312.100098,5421.22998 L 2269.969727,5428.187988 L 2229.490234,5435.712891 L 2190.759766,5443.800781 L 2153.850098,5452.445801 L 2136.200195,5457 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-name="CuffInterface" data-parent="pattern-1" data-type="piece" data-type-number="13" id="piece_CuffInterface">
+   <g data-parent="CuffInterface" data-turn-points="0 1 2 3" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_CuffInterface" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4085.13,-126.732)">
+     <path d="M1889.33,3309.01 L1889.33,3082.23 L2985.4,3082.23 L2985.4,3309.01 L1889.33,3309.01 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
+   </g>
   </g>
-  <g id="piece_Yoke" data-name="Yoke" data-parent="pattern-1" data-type="piece" data-type-number="14">
-    <g id="seamline_Yoke" data-parent="Yoke" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2245.778809,505.204865 L 2243.551758,496.654877 L 2224.166992,420.830902 L 2211.351807,368.969879 L 2198.819824,316.031891 L 2186.747803,262.054901 L 2180.969971,234.649872 L 2841.604004,72.199005 L 2841.833984,75.138885 L 2842.749023,81.319672 L 2844.216797,87.826202 L 2846.23999,94.619171 L 2848.819824,101.659271 L 2851.962891,108.907379 L 2855.669922,116.324005 L 2859.945801,123.869781 L 2864.792969,131.505707 L 2870.213867,139.192169 L 2876.212891,146.890045 L 2882.793945,154.559906 L 2889.958984,162.162506 L 2897.711914,169.659027 L 2906.055908,177.009003 L 2914.993896,184.173981 L 2924.528809,191.115021 L 2934.664795,197.791046 L 2945.405762,204.165009 L 2956.753906,210.196991 L 2968.711914,215.845978 L 2981.283936,221.074982 L 2994.473877,225.844025 L 3008.282959,230.113007 L 3022.716797,233.843018 L 3037.776855,236.995056 L 3053.467773,239.529053 L 3069.791992,241.407043 L 3086.752686,242.588074 L 3104.35376,243.034058 L 3122.5979,242.706055 L 3141.48877,241.563049 L 3151.204834,240.638062 L 3151.204834,505.205017 L 2245.778809,505.204865 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-grainline-angle="90.0000" data-name="PlacketUnder" data-parent="pattern-1" data-type="piece" data-type-number="14" id="piece_PlacketUnder">
+   <g data-parent="PlacketUnder" data-turn-points="0 1 2 3" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_PlacketUnder" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4112.87,177.217)">
+     <path d="M1892.57,3748.01 L1892.57,3634.62 L2467.3,3634.62 L2467.3,3748.01 L1892.57,3748.01 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="cutline_Yoke" data-parent="Yoke" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2216.566895,542.999939 L 2206.955566,506.098907 L 2187.511963,430.044891 L 2174.615967,377.856842 L 2161.986816,324.509918 L 2149.812988,270.078827 L 2136.442871,206.676849 L 2875.822754,24.863342 L 2879.412842,70.894928 L 2879.928955,74.382111 L 2880.804932,78.264496 L 2882.128906,82.710419 L 2883.930908,87.625885 L 2886.22998,92.928802 L 2889.037842,98.5466 L 2892.362793,104.41452 L 2896.208984,110.473724 L 2900.579834,116.670441 L 2905.476807,122.954742 L 2910.903809,129.279938 L 2916.861816,135.601593 L 2923.352783,141.877899 L 2930.379883,148.068268 L 2937.946777,154.134003 L 2946.056885,160.037201 L 2954.71582,165.740814 L 2963.929932,171.209015 L 2973.704834,176.404022 L 2984.049805,181.292023 L 2994.973877,185.834991 L 3006.486816,189.996979 L 3018.598877,193.741028 L 3031.320801,197.029053 L 3044.664795,199.822021 L 3058.643066,202.080017 L 3073.266357,203.762024 L 3088.545898,204.82605 L 3104.492188,205.230042 L 3121.116211,204.93103 L 3138.555664,203.876038 L 3189,199.072021 L 3189,543.000061 L 2216.566895,542.999939 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+   </g>
+   <g data-parent="PlacketUnder" data-turn-points="0 1 2 3 4" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="cutline_PlacketUnder" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4112.87,177.217)">
+     <path d="M1854.77,3785.81 L1854.77,3596.83 L2505.09,3596.83 L2505.09,3785.81 L1854.77,3785.81 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="piece_label_1_Yoke" data-parent="Yoke" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2593.832764 227.262939)" x="0" y="23.7344">male_shirt</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2510.832764 257.262939)" x="0" y="23.7344">male_chest_102cm</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2579.832764 287.262939)" x="0" y="23.7344">09-24-2026</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2599.832764 317.262939)" x="0" y="23.7344">&lt;empty&gt;</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2639.832764 347.262939)" x="0" y="23.7344"> Yoke</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2640.832764 377.262939)" x="0" y="23.7344">Cut 1</text>
-      </g>
+   </g>
+   <g data-parent="PlacketUnder" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece_label_1_PlacketUnder" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6233.63,3817.42)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="12">male_shirt_copy</text>
     </g>
-    <g id="grainline_Yoke" data-parent="Yoke" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <path d="M 2759.178955,428.60202 L 2746.251953,393.085938 L 2772.105957,393.085968 L 2759.178955,428.60202 L 2759.178955,164.035065 L 2772.105957,199.550934 L 2746.251953,199.550934 L 2759.178955,164.035065" fill-rule="evenodd" vector-effect="none" />
-      </g>
+    <g fill="none" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6221.63,3832.42)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="12">male_chest_102cm</text>
     </g>
+    <g fill="none" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6258.63,3847.42)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="12">10-03-2026</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6267.63,3862.42)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="12">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6243.63,3877.42)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="12"> PlacketUnder</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6287.63,3892.42)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="12">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="PlacketUnder" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="grainline_PlacketUnder" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4112.87,177.217)">
+     <path d="M2074.16,3732.55 L2061.23,3697.03 L2087.09,3697.03 L2074.16,3732.55 L2074.16,3647.51 L2087.09,3683.03 L2061.23,3683.03 L2074.16,3647.51 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
   </g>
-  <g id="piece_BackPanel" data-name="BackPanel" data-parent="pattern-1" data-type="piece" data-type-number="15">
-    <g id="seamline_BackPanel" data-parent="BackPanel" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2869.20459,5111.200195 L 2755.818604,5111.200195 L 2692.861084,5111.140137 L 2576.188721,5110.160156 L 2470.120605,5108.200195 L 2374.114746,5105.330078 L 2287.631592,5101.610352 L 2210.128662,5097.110352 L 2160.374512,5093.360352 L 2155.818604,4610.419922 L 2203.062744,4109.629883 L 2155.818848,3247.899902 L 2108.574707,4109.629883 L 2155.440674,4610.419922 L 2151.254639,5092.669922 L 2141.06665,5091.910156 L 2079.902588,5086.050293 L 2026.097656,5079.610352 L 1979.108643,5072.660156 L 1948.199707,5067.130371 L 1929.310791,5063.330078 L 1911.821533,5059.439941 L 1895.665771,5055.459961 L 1880.773682,5051.410156 L 1867.078613,5047.290039 L 1854.513672,5043.120117 L 1843.010742,5038.890137 L 1832.501709,5034.620117 L 1822.918701,5030.310059 L 1814.19458,5025.97998 L 1806.262695,5021.630371 L 1795.621582,5015.090332 L 1783.693604,5006.390137 L 1773.712646,4997.760254 L 1765.139648,4989.280273 L 1753.726807,4976.930176 L 1742.446533,4965.340332 L 1734.09668,4958.090332 L 1724.446533,4951.310059 L 1715.956787,4946.600098 L 1709.646729,4943.620117 L 1702.716553,4940.810059 L 1695.07666,4938.149902 L 1686.686768,4935.669922 L 1677.456787,4933.360352 L 1662.026611,4930.240234 L 1637.776611,4926.810059 L 1608.966553,4924.25 L 1575.08667,4922.630371 L 1568.556641,4922.490234 L 1603.066772,4109.629883 L 1555.816772,3285.689941 L 1569.716919,3284.989746 L 1596.506958,3283.119629 L 1622.086792,3280.679688 L 1646.486938,3277.679688 L 1669.736938,3274.119629 L 1691.847046,3270.009766 L 1712.847046,3265.359863 L 1732.746948,3260.159668 L 1751.577026,3254.429688 L 1769.369019,3248.169922 L 1786.131714,3241.379883 L 1801.891968,3234.080078 L 1816.670776,3226.25 L 1830.491089,3217.919922 L 1843.374878,3209.080078 L 1855.345093,3199.75 L 1866.421753,3189.919922 L 1876.629761,3179.599609 L 1885.989014,3168.790039 L 1894.521973,3157.509766 L 1902.251953,3145.75 L 1909.201172,3133.529785 L 1915.38916,3120.839844 L 1920.84082,3107.699707 L 1925.577148,3094.099854 L 1929.621094,3080.048096 L 1932.993164,3065.557861 L 1935.717041,3050.630127 L 1937.813965,3035.27002 L 1939.307129,3019.483154 L 1940.217041,3003.27417 L 1940.567871,2986.648193 L 1940.379883,2969.610107 L 1939.676025,2952.165039 L 1938.479004,2934.319092 L 1936.809082,2916.076904 L 1933.521973,2888.030029 L 1927.619141,2849.231201 L 1920.229004,2808.939209 L 1911.526855,2767.197021 L 1901.690918,2724.045166 L 1890.898926,2679.526123 L 1873.367188,2610.429932 L 1864.951172,2578.119141 L 1891.400879,2573.713135 L 1944.168945,2565.695068 L 1996.874023,2558.576172 L 2049.623047,2552.302002 L 2102.52002,2546.815186 L 2155.672119,2542.061035 L 2209.184082,2537.982178 L 2263.163086,2534.52417 L 2317.714111,2531.62915 L 2372.942139,2529.240967 L 2428.954102,2527.306152 L 2485.856201,2525.765137 L 2572.963135,2524.042236 L 2693.373535,2522.661133 L 2755.819092,2522.228271 L 2869.205078,2522.228271 L 2869.20459,5111.200195 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-grainline-angle="90.0000" data-name="PocketFlap" data-parent="pattern-1" data-type="piece" data-type-number="15" id="piece_PocketFlap">
+   <g data-parent="PocketFlap" data-turn-points="0 1 2 3" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_PocketFlap" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,5630.39,1429.84)">
+     <path d="M730.288,354.106 L730.288,240.72 L1070.45,240.72 L1070.45,354.106 L900.367,354.106 L730.288,354.106 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="cutline_BackPanel" data-parent="BackPanel" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2906.999756,5149 L 2755.800293,5149 L 2692.683594,5148.939941 L 2575.679688,5147.950195 L 2469.205566,5145.97998 L 2372.73877,5143.100098 L 2285.725586,5139.360352 L 2207.61377,5134.830078 L 2122.908691,5128.439941 L 2075.856689,5123.630371 L 2021.085693,5117.080078 L 1973.016602,5109.970215 L 1941.144775,5104.27002 L 1921.475586,5100.310059 L 1903.19873,5096.240234 L 1886.186768,5092.050293 L 1870.367676,5087.75 L 1855.671631,5083.330078 L 1842.028564,5078.790039 L 1829.371582,5074.140137 L 1817.637695,5069.370117 L 1806.764648,5064.490234 L 1796.699707,5059.490234 L 1787.272705,5054.320312 L 1774.555664,5046.510254 L 1760.155518,5036 L 1748.036621,5025.52002 L 1737.956787,5015.550293 L 1726.306641,5002.939941 L 1716.476807,4992.850098 L 1710.786621,4987.910156 L 1704.34668,4983.380371 L 1698.696533,4980.25 L 1694.466553,4978.25 L 1689.386719,4976.180176 L 1683.506592,4974.140137 L 1676.746826,4972.140137 L 1669.126709,4970.240234 L 1655.626709,4967.510254 L 1633.456787,4964.370117 L 1606.386719,4961.970215 L 1573.786621,4960.399902 L 1529.156494,4959.47998 L 1565.216675,4109.910156 L 1515.90686,3249.849609 L 1567.456909,3247.259766 L 1593.396851,3245.449707 L 1617.986938,3243.109863 L 1641.327026,3240.239746 L 1663.42688,3236.849609 L 1684.296753,3232.969727 L 1703.976929,3228.609863 L 1722.466919,3223.779785 L 1739.796753,3218.509766 L 1755.994995,3212.810059 L 1771.080933,3206.699707 L 1785.090698,3200.209961 L 1798.05896,3193.339844 L 1810.02771,3186.129883 L 1821.042847,3178.569824 L 1831.154907,3170.679688 L 1840.415894,3162.469727 L 1848.879761,3153.909668 L 1856.600952,3144.989746 L 1863.625854,3135.709961 L 1869.998901,3126.009766 L 1875.752808,3115.889648 L 1880.915894,3105.299805 L 1885.509033,3094.230225 L 1889.543945,3082.644043 L 1893.030029,3070.531006 L 1895.975098,3057.878174 L 1898.384033,3044.678955 L 1900.26123,3030.932861 L 1901.611816,3016.642822 L 1902.444824,3001.816162 L 1902.768066,2986.458008 L 1902.593018,2970.579834 L 1901.932129,2954.193115 L 1900.798828,2937.306885 L 1899.214844,2920 L 1896.059082,2893.073975 L 1890.339844,2855.484131 L 1883.13623,2816.205811 L 1874.599121,2775.25415 L 1864.898926,2732.697998 L 1854.214844,2688.626221 L 1836.762207,2619.841064 L 1817.953125,2547.631104 L 1885.457031,2536.386963 L 1938.800049,2528.281006 L 1992.113037,2521.081055 L 2045.440918,2514.737061 L 2098.887207,2509.194092 L 2152.552246,2504.394043 L 2206.540039,2500.279053 L 2260.953125,2496.793213 L 2315.89624,2493.877197 L 2371.473145,2491.474121 L 2427.790039,2489.528076 L 2484.971191,2487.980225 L 2572.373047,2486.251221 L 2693.025635,2484.867188 L 2755.687988,2484.432129 L 2907.000244,2484.432129 L 2906.999756,5149 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+   </g>
+   <g data-parent="PocketFlap" data-turn-points="0 1 2 3 5" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="cutline_PocketFlap" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,5630.39,1429.84)">
+     <path d="M692.493,391.901 L692.493,202.925 L1108.24,202.925 L1108.24,391.901 L900.367,391.901 L692.493,391.901 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="piece_label_1_BackPanel" data-parent="BackPanel" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2649.646973 3470.546143)" x="0" y="23.7344">male_shirt</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2566.646973 3500.546143)" x="0" y="23.7344">male_chest_102cm</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2635.646973 3530.546143)" x="0" y="23.7344">09-24-2026</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2655.646973 3560.546143)" x="0" y="23.7344">&lt;empty&gt;</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2644.646973 3590.546143)" x="0" y="23.7344"> BackPanel</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2696.646973 3620.546143)" x="0" y="23.7344">Cut 1</text>
-      </g>
+   </g>
+   <g data-parent="PocketFlap" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece_label_1_PocketFlap" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6555.27,1680.36)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9">male_shirt_copy</text>
     </g>
-    <g id="grainline_BackPanel" data-parent="BackPanel" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <path d="M 2521.924561,4414.820312 L 2496.071777,4343.790039 L 2547.777588,4343.790039 L 2521.924561,4414.820312 L 2521.925049,3017.340088 L 2547.777832,3088.370117 L 2496.072021,3088.370117 L 2521.925049,3017.340088" fill-rule="evenodd" vector-effect="none" />
-      </g>
+    <g fill="none" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6547.27,1691.36)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9">male_chest_102cm</text>
     </g>
+    <g fill="none" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6574.27,1702.36)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9">10-03-2026</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6579.27,1713.36)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6571.27,1724.36)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9"> PocketFlap</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6593.27,1735.36)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="PocketFlap" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="grainline_PocketFlap" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,5630.39,1429.84)">
+     <path d="M818.798,336.358 L805.871,300.842 L831.725,300.842 L818.798,336.358 L818.798,251.319 L831.725,286.835 L805.871,286.835 L818.798,251.319 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
   </g>
-  <g id="piece_FrontPanel" data-name="FrontPanel" data-parent="pattern-1" data-type="piece" data-type-number="16">
-    <g id="seamline_FrontPanel" data-parent="FrontPanel" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 61.999878,5345.199707 L 62.000244,2772.605713 L 269.870117,2772.605957 L 279.720215,2772.106934 L 298.580078,2770.823975 L 316.470215,2769.192871 L 333.410156,2767.207031 L 349.430176,2764.858887 L 364.550171,2762.143066 L 378.810181,2759.052979 L 392.210327,2755.581055 L 404.800171,2751.722168 L 416.60022,2747.468018 L 427.630249,2742.812988 L 437.910278,2737.750977 L 447.480347,2732.273926 L 456.370239,2726.376953 L 464.5802,2720.052002 L 472.170288,2713.292969 L 479.130249,2706.093994 L 485.520142,2698.447021 L 491.340149,2690.347168 L 496.620178,2681.787109 L 501.400208,2672.76001 L 505.700256,2663.259033 L 509.5401,2653.278076 L 512.940247,2642.811035 L 515.950256,2631.850098 L 518.570129,2620.38916 L 520.840149,2608.423096 L 522.78009,2595.943115 L 525.160217,2576.312988 L 527.390198,2548.196045 L 528.140198,2533.236084 L 1185.090088,2709.994141 L 1172.400146,2807.549072 L 1155.570068,2941.380127 L 1148.640137,3003.64917 L 1144.720093,3043.463135 L 1141.490112,3081.803223 L 1139.030029,3118.655273 L 1137.430176,3154.000977 L 1136.77002,3187.827148 L 1137.140137,3220.116211 L 1138.610107,3250.852051 L 1141.280029,3280.019043 L 1144.160156,3300.806152 L 1146.469971,3314.198242 L 1149.120117,3327.189941 L 1152.130127,3339.780273 L 1155.51001,3351.959961 L 1159.26001,3363.740234 L 1163.410156,3375.100098 L 1167.949951,3386.060059 L 1172.900146,3396.600098 L 1178.27002,3406.72998 L 1184.060059,3416.440186 L 1190.300049,3425.72998 L 1196.98999,3434.600098 L 1204.150146,3443.050293 L 1211.77002,3451.070312 L 1219.880127,3458.670166 L 1228.47998,3465.830078 L 1237.579956,3472.570312 L 1247.199951,3478.870117 L 1257.339966,3484.740234 L 1268.01001,3490.170166 L 1279.23999,3495.160156 L 1291.01001,3499.709961 L 1303.359985,3503.820312 L 1316.280029,3507.47998 L 1329.790039,3510.700195 L 1343.900024,3513.470215 L 1358.619995,3515.780273 L 1373.949951,3517.650146 L 1389.920044,3519.050293 L 1406.530029,3520.010254 L 1423.780029,3520.5 L 1441.699951,3520.530273 L 1460.290039,3520.100098 L 1469.869995,3519.690186 L 1422.629883,4343.629883 L 1457.119751,5156.090332 L 1451.6698,5156.030273 L 1419.639771,5156.580078 L 1392.379761,5158.199707 L 1369.359741,5160.819824 L 1354.6698,5163.419922 L 1345.859741,5165.399902 L 1337.809814,5167.600098 L 1330.469727,5170 L 1323.769775,5172.580078 L 1317.639771,5175.350098 L 1309.319702,5179.799805 L 1299.709717,5186.319824 L 1291.219727,5193.399902 L 1279.469727,5204.859863 L 1267.249756,5217.290039 L 1258.029785,5225.890137 L 1247.309814,5234.699707 L 1234.579712,5243.629883 L 1219.319702,5252.629883 L 1205.799805,5259.359863 L 1195.779785,5263.830078 L 1184.839722,5268.279785 L 1172.90979,5272.689941 L 1159.9198,5277.049805 L 1145.809814,5281.359863 L 1130.509766,5285.609863 L 1113.969727,5289.779785 L 1096.099731,5293.879883 L 1076.849731,5297.879883 L 1045.439697,5303.709961 L 997.86969,5311.069824 L 943.59967,5317.909668 L 882.09967,5324.159668 L 812.86969,5329.72998 L 735.35968,5334.569824 L 649.069641,5338.600098 L 553.469788,5341.739746 L 448.049683,5343.929688 L 332.269653,5345.080078 L 269.869751,5345.199707 L 61.999878,5345.199707 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-grainline-angle="90.0000" data-name="Cuff" data-parent="pattern-1" data-type="piece" data-type-number="16" id="piece_Cuff">
+   <g data-parent="Cuff" data-turn-points="0 1 2 3" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_Cuff" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4102.67,206.189)">
+     <path d="M1889.33,3309.01 L1889.33,3082.23 L2985.4,3082.23 L2985.4,3309.01 L1889.33,3309.01 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="cutline_FrontPanel" data-parent="FrontPanel" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 24.199707,5383 L 24.200195,2734.809814 L 268.920166,2734.810059 L 277.480225,2734.375977 L 295.5802,2733.14502 L 312.550171,2731.598145 L 328.470337,2729.731934 L 343.35022,2727.551025 L 357.210327,2725.062988 L 370.060181,2722.275879 L 381.930298,2719.202148 L 392.84021,2715.855957 L 402.8302,2712.256104 L 411.920288,2708.417969 L 420.170288,2704.360107 L 427.620239,2700.093018 L 434.360229,2695.620117 L 440.450317,2690.933105 L 445.970337,2686.008057 L 451.010132,2680.807129 L 455.620239,2675.279053 L 459.880249,2669.362061 L 463.810181,2662.995117 L 467.450317,2656.116943 L 470.810181,2648.677979 L 473.900269,2640.636963 L 476.730347,2631.963135 L 479.280151,2622.63916 L 481.57019,2612.6521 L 483.59021,2601.99707 L 485.3302,2590.75708 L 487.55011,2572.540039 L 489.670227,2545.75708 L 492.740295,2484.572021 L 1226.830078,2682.086182 L 1209.890137,2812.345215 L 1193.100098,2945.828125 L 1186.230103,3007.589111 L 1182.360107,3046.901123 L 1179.180176,3084.647949 L 1176.77002,3120.768066 L 1175.209961,3155.225098 L 1174.570068,3187.981934 L 1174.920166,3218.996094 L 1176.330078,3248.223145 L 1178.840088,3275.704102 L 1181.51001,3295.00293 L 1183.620117,3307.204102 L 1186.030029,3319.010254 L 1188.72998,3330.330078 L 1191.73999,3341.170166 L 1195.040039,3351.52002 L 1198.640137,3361.390137 L 1202.530029,3370.780273 L 1206.719971,3379.709961 L 1211.209961,3388.180176 L 1216,3396.200195 L 1221.100098,3403.800293 L 1226.530029,3410.990234 L 1232.290039,3417.800293 L 1238.410156,3424.240234 L 1244.920166,3430.340088 L 1251.830078,3436.100098 L 1259.190063,3441.550293 L 1267.030029,3446.680176 L 1275.380005,3451.510254 L 1284.27002,3456.040039 L 1293.73999,3460.25 L 1303.800049,3464.130127 L 1314.48999,3467.690186 L 1325.819946,3470.900146 L 1337.810059,3473.760254 L 1350.47998,3476.240234 L 1363.839966,3478.340088 L 1377.890015,3480.050293 L 1392.660034,3481.350098 L 1408.150024,3482.240234 L 1424.359985,3482.709961 L 1441.300049,3482.740234 L 1459.050049,3482.320312 L 1510,3480.150146 L 1460.469849,4343.910156 L 1496.569702,5194.320312 L 1451.789795,5193.830078 L 1421.089722,5194.360352 L 1395.629761,5195.870117 L 1374.789795,5198.239746 L 1362.129761,5200.47998 L 1354.999756,5202.089844 L 1348.65979,5203.819824 L 1343.14978,5205.620117 L 1338.359741,5207.459961 L 1334.349731,5209.27002 L 1328.89978,5212.189941 L 1322.479736,5216.549805 L 1316.559814,5221.47998 L 1306.139771,5231.640137 L 1293.629761,5244.370117 L 1282.939819,5254.339844 L 1270.199707,5264.810059 L 1255.069702,5275.429688 L 1237.369751,5285.859863 L 1221.92981,5293.549805 L 1210.599731,5298.609863 L 1198.509766,5303.52002 L 1185.479736,5308.330078 L 1171.459717,5313.040039 L 1156.389771,5317.649902 L 1140.189819,5322.140137 L 1122.809814,5326.529785 L 1104.1698,5330.799805 L 1084.14978,5334.969727 L 1051.779785,5340.97998 L 1003.11969,5348.509766 L 947.86969,5355.469727 L 885.529724,5361.799805 L 815.559753,5367.439941 L 737.419739,5372.310059 L 650.569641,5376.359863 L 554.489807,5379.52002 L 448.629761,5381.719727 L 332.489868,5382.879883 L 269.90979,5383 L 24.199707,5383 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+   </g>
+   <g data-parent="Cuff" data-turn-points="0 1 2 3 4" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="cutline_Cuff" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,4102.67,206.189)">
+     <path d="M1851.54,3346.8 L1851.54,3044.44 L3023.19,3044.44 L3023.19,3346.8 L1851.54,3346.8 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="piece_label_1_FrontPanel" data-parent="FrontPanel" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 781.487 3692.929199)" x="0" y="23.7344">male_shirt</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 698.487 3722.928711)" x="0" y="23.7344">male_chest_102cm</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 767.487 3752.929199)" x="0" y="23.7344">09-24-2026</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 787.487 3782.929199)" x="0" y="23.7344">&lt;empty&gt;</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 770.487 3812.929199)" x="0" y="23.7344"> FrontPanel</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 828.487 3842.929199)" x="0" y="23.7344">Cut 1</text>
-      </g>
+   </g>
+   <g data-parent="Cuff" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece_label_1_Cuff" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6345.12,3294.42)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_shirt_copy</text>
     </g>
-    <g id="grainline_FrontPanel" data-parent="FrontPanel" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <path d="M 608.649841,4686.669922 L 582.799744,4615.640137 L 634.499817,4615.640137 L 608.649841,4686.669922 L 608.650085,3289.189941 L 634.500061,3360.219727 L 582.799988,3360.219727 L 608.650085,3289.189941" fill-rule="evenodd" vector-effect="none" />
-      </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6318.12,3324.42)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">male_chest_102cm</text>
     </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6384.12,3354.42)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">10-03-2026</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6406.12,3384.42)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6452.12,3414.42)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24"> Cuff</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6447.12,3444.42)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="22" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="24">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="Cuff" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="grainline_Cuff" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,4102.67,206.189)">
+     <path d="M2103.93,3283.54 L2091,3248.02 L2116.86,3248.02 L2103.93,3283.54 L2103.93,3113.46 L2116.86,3148.98 L2091,3148.98 L2103.93,3113.46 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
   </g>
-  <g id="piece_PlacketUnder" data-name="PlacketUnder" data-parent="pattern-1" data-type="piece" data-type-number="17">
-    <g id="seamline_PlacketUnder" data-parent="PlacketUnder" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2174.47998,2412.199951 L 2174.47998,2298.810059 L 2749.209961,2298.810059 L 2749.209961,2412.199951 L 2174.47998,2412.199951 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+  <g data-grainline-angle="90.0000" data-name="PocketFlapRound" data-parent="pattern-1" data-type="piece" data-type-number="17" id="piece_PocketFlapRound">
+   <g data-parent="PocketFlapRound" data-turn-points="0 1 2 3" data-type="seamline" data-type-number="1" fill="none" fill-rule="evenodd" id="seamline_PocketFlapRound" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,6153.8,1429.83)">
+     <path d="M730.288,354.106 L730.288,240.72 L1070.45,240.72 L1070.45,354.106 L1061.18,358.162 L1041.75,365.681 L1021.37,372.419 L1000.23,378.296 L978.496,383.232 L956.354,387.148 L933.977,389.965 L911.542,391.603 L900.367,391.901 L891.448,391.936 L872.142,390.882 L851.432,388.519 L829.718,384.894 L807.396,380.05 L784.865,374.033 L762.524,366.886 L740.771,358.656 L730.288,354.106 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="cutline_PlacketUnder" data-parent="PlacketUnder" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283">
-        <path d="M 2136.680176,2450 L 2136.680176,2261.02002 L 2787,2261.02002 L 2787,2450 L 2136.680176,2450 Z" fill-rule="evenodd" vector-effect="none" />
-      </g>
+   </g>
+   <g data-parent="PocketFlapRound" data-turn-points="0 1 2 3 21" data-type="cutline" data-type-number="1" fill="none" fill-rule="evenodd" id="cutline_PocketFlapRound" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="1" stroke-width="1.32283" transform="matrix(1,0,0,1,6153.8,1429.83)">
+     <path d="M692.493,378.903 L692.493,202.925 L1108.24,202.925 L1108.24,378.815 L1075.59,393.114 L1054.51,401.271 L1032.37,408.59 L1009.48,414.952 L985.978,420.29 L962.009,424.53 L937.717,427.588 L913.424,429.362 L900.944,429.695 L890.489,429.735 L868.966,428.56 L846.175,425.96 L822.594,422.023 L798.507,416.796 L774.226,410.311 L750.071,402.585 L726.551,393.686 L692.493,378.903 Z " fill-rule="evenodd" vector-effect="none"/>
     </g>
-    <g id="piece_label_1_PlacketUnder" data-parent="PlacketUnder" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="none" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2434.669922 2304.392822)" x="0" y="11.8594">male_shirt</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2393.669922 2319.392822)" x="0" y="11.8594">male_chest_102cm</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2427.669922 2334.392822)" x="0" y="11.8594">09-24-2026</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2437.669922 2349.392822)" x="0" y="11.8594">&lt;empty&gt;</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2416.669922 2364.392822)" x="0" y="11.8594"> PlacketUnder</text>
-      </g>
-      <g fill="none" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="11" font-style="normal" font-weight="400" space="preserve" stroke="none" transform="matrix(1 0 -0 1 2457.669922 2379.392822)" x="0" y="11.8594">Cut 1</text>
-      </g>
+   </g>
+   <g data-parent="PocketFlapRound" data-type="piece_label" data-type-number="1" fill="none" fill-rule="evenodd" id="piece_label_1_PocketFlapRound" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="none" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7054.55,1704.48)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9">male_shirt_copy</text>
     </g>
-    <g id="grainline_PlacketUnder" data-parent="PlacketUnder" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
-      <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1">
-        <path d="M 2356.070312,2396.73999 L 2343.140137,2361.219971 L 2369,2361.219971 L 2356.070312,2396.73999 L 2356.070312,2311.699951 L 2369,2347.219971 L 2343.140137,2347.219971 L 2356.070312,2311.699951" fill-rule="evenodd" vector-effect="none" />
-      </g>
+    <g fill="none" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7046.55,1715.48)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9">male_chest_102cm</text>
     </g>
+    <g fill="none" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7073.55,1726.48)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9">10-03-2026</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7078.55,1737.48)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9">&lt;empty></text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7045.55,1748.48)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9"> PocketFlapRound</text>
+    </g>
+    <g fill="none" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,7092.55,1759.48)">
+     <text fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="8" font-style="normal" font-weight="400" stroke="none" x="0" xml:space="preserve" y="9">Cut 1</text>
+    </g>
+   </g>
+   <g data-parent="PocketFlapRound" data-type="grainline" data-type-number="1" fill="none" fill-rule="evenodd" id="grainline_PocketFlapRound" stroke="black" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="1">
+    <g fill="#000000" fill-opacity="1" font-family="Segoe UI" font-size="10.6667" font-style="normal" font-weight="400" stroke="#000000" stroke-linecap="square" stroke-linejoin="bevel" stroke-opacity="1" stroke-width="1" transform="matrix(1,0,0,1,6153.8,1429.83)">
+     <path d="M850.54,370.476 L837.613,334.96 L863.467,334.96 L850.54,370.476 L850.54,257.09 L863.467,292.606 L837.613,292.606 L850.54,257.09 " fill-rule="evenodd" vector-effect="none"/>
+    </g>
+   </g>
   </g>
+ </g>
 </svg>

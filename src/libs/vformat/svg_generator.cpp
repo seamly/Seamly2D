@@ -419,8 +419,8 @@ QDomDocument SvgGenerator::renderSceneToDom(QGraphicsScene *scene)
  * every sibling hidden. Each pass therefore produces exactly one <g> that belongs
  * to one known component, which is tagged with the SVG data-* attributes:
  * data-type, data-type-number (per-type counter within the piece), data-parent
- * (the piece name) and a name-based id ("<type>_<pieceName>", or
- * "<type>_<n>_<pieceName>" for types that can repeat per piece). A piece with
+ * (the piece name), data-turn-points (path components only) and a name-based
+ * id ("<type>_<pieceName>", or "<type>_<n>_<pieceName>" for types that can repeat per piece). A piece with
  * no usable name falls back to the legacy "<pieceId>-<type>-<n>" id, and a
  * name-based id colliding with one already emitted (piece names aren't
  * guaranteed unique) is disambiguated with the piece's data-type-number.
@@ -501,6 +501,13 @@ void SvgGenerator::addComponentGroups(QGraphicsScene *scene, QGraphicsItem *item
         componentGroup.setAttribute("data-type", type);
         componentGroup.setAttribute("data-type-number", QString::number(typeNumber));
         componentGroup.setAttribute("data-parent", pieceName.isEmpty() ? pieceId : pieceName);
+        // Turn point vertex indices of the component's path. An empty value is valid:
+        // a smooth closed loop has no turn points.
+        const QVariant turnPoints = components.at(i)->data(PieceItemData::TurnPoints);
+        if (turnPoints.isValid())
+        {
+            componentGroup.setAttribute("data-turn-points", turnPoints.toString());
+        }
 
         pieceGroup.appendChild(pieceDoc.importNode(componentGroup, true));
     }

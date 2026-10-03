@@ -119,6 +119,7 @@ QVector<QPointF> VLayoutPiecePath::Points() const
 void VLayoutPiecePath::SetPoints(const QVector<QPointF> &points)
 {
     d->m_points = points;
+    d->m_turnPoints.reset(); // indices into the old points
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -167,4 +168,23 @@ bool VLayoutPiecePath::isCutPath() const
 void VLayoutPiecePath::setCutPath(bool cut)
 {
     d->m_cut = cut;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief turnPoints returns the turn point indices into Points().
+ * @return the indices, or no value when the turn points are unknown.
+ */
+std::optional<QVector<int>> VLayoutPiecePath::turnPoints() const
+{
+    return d->m_turnPoints;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setTurnPoints stores the turn point indices into Points(), from VAbstractPiece::turnPointIndices().
+ */
+void VLayoutPiecePath::setTurnPoints(const QVector<int> &indices)
+{
+    d->m_turnPoints = indices;
 }

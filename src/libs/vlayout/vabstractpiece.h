@@ -89,10 +89,14 @@ public:
     constexpr PieceNodeAngle GetAngleType() const;
                      void           SetAngleType(PieceNodeAngle value);
 
+    constexpr bool isNode() const;
+                     void setNode(bool value);
+
 private:
     qreal          m_before;
     qreal          m_after;
     PieceNodeAngle m_angle;
+    bool           m_node; /// @brief true when the point is a piece node or a curve end, not a curve interior point
 };
 
 Q_DECLARE_METATYPE(VSAPoint)
@@ -103,7 +107,8 @@ constexpr inline VSAPoint::VSAPoint()
     : QPointF(),
       m_before(-1),
       m_after(-1),
-      m_angle(PieceNodeAngle::ByLength)
+      m_angle(PieceNodeAngle::ByLength),
+      m_node(false)
 {}
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -111,7 +116,8 @@ constexpr inline VSAPoint::VSAPoint(qreal xpos, qreal ypos)
     : QPointF(xpos, ypos),
       m_before(-1),
       m_after(-1),
-      m_angle(PieceNodeAngle::ByLength)
+      m_angle(PieceNodeAngle::ByLength),
+      m_node(false)
 {}
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -119,7 +125,8 @@ constexpr inline VSAPoint::VSAPoint(const QPointF &p)
     : QPointF(p),
       m_before(-1),
       m_after(-1),
-      m_angle(PieceNodeAngle::ByLength)
+      m_angle(PieceNodeAngle::ByLength),
+      m_node(false)
 {}
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -156,6 +163,18 @@ constexpr inline PieceNodeAngle VSAPoint::GetAngleType() const
 inline void VSAPoint::SetAngleType(PieceNodeAngle value)
 {
     m_angle = value;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+constexpr inline bool VSAPoint::isNode() const
+{
+    return m_node;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+inline void VSAPoint::setNode(bool value)
+{
+    m_node = value;
 }
 
 QT_WARNING_POP
@@ -207,7 +226,10 @@ public:
     qreal GetMy() const;
     void  SetMy(qreal value);
 
-    static QVector<QPointF> Equidistant(const QVector<VSAPoint> &points, qreal width);
+    static QVector<QPointF> Equidistant(const QVector<VSAPoint> &points, qreal width,
+                                        QVector<QPointF> *nodeVertices = nullptr);
+    static QVector<int>     turnPointIndices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
+                                             bool closed);
     static qreal            sumTrapezoids(const QVector<QPointF> &points);
     static bool             isClockwise(const QVector<QPointF> &points);
     static QVector<QPointF> CheckLoops(const QVector<QPointF> &points);

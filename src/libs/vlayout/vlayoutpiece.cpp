@@ -83,6 +83,25 @@
 namespace
 {
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setTurnPointsData stores turn point indices on a path item for the SVG data-turn-points attribute.
+ * @details No value = unknown: the item gets no data, so SeamlyLayout falls back to its own detection.
+ */
+void setTurnPointsData(QGraphicsItem *item, const std::optional<QVector<int>> &turnPoints)
+{
+    if (!turnPoints.has_value())
+    {
+        return;
+    }
+    QStringList indices;
+    for (int index : turnPoints.value())
+    {
+        indices.append(QString::number(index));
+    }
+    item->setData(PieceItemData::TurnPoints, indices.join(QLatin1Char(' ')));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 QVector<VLayoutPiecePath> convertInternalPaths (const VPiece &piece, const VContainer *pattern, const bool isCut)
 {
     SCASSERT(pattern != nullptr)
@@ -94,19 +113,17 @@ QVector<VLayoutPiecePath> convertInternalPaths (const VPiece &piece, const VCont
     for (int i = 0; i < pathIds.size(); ++i)
     {
         const VPiecePath path = pattern->getPiecePath(pathIds.at(i));
-        if (path.getType() == PiecePathType::InternalPath)
+        if (path.getType() != PiecePathType::InternalPath || isCut != path.isCutPath())
         {
-            if (isCut && path.isCutPath())
-            {
-                paths.append(VLayoutPiecePath(path.PathPoints(pattern, cutPath),
-                path.getLineColor(), path.getLineType(), path.getLineWeight(), path.isCutPath()));
-            }
-            else if (!isCut && !path.isCutPath())
-            {
-                paths.append(VLayoutPiecePath(path.PathPoints(pattern, cutPath),
-                path.getLineColor(), path.getLineType(), path.getLineWeight(), path.isCutPath()));
-            }
+            continue;
         }
+
+        const QVector<QPointF> points = path.PathPoints(pattern, cutPath);
+        VLayoutPiecePath layoutPath(points, path.getLineColor(), path.getLineType(), path.getLineWeight(),
+                                    path.isCutPath());
+        const bool closed = points.size() > 2 && QLineF(points.first(), points.last()).length() < accuracyPointOnLine;
+        layoutPath.setTurnPoints(VAbstractPiece::turnPointIndices(points, path.pathNodeVertices(pattern), closed));
+        paths.append(layoutPath);
     }
     return paths;
 }
@@ -428,10 +445,14 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
 
     layoutPiece.SetMx(piece.GetMx());
     layoutPiece.SetMy(piece.GetMy());
-    layoutPiece.setMainPathPoints(piece.mainPathPoints(pattern), piece.isHideSeamLine());
-    layoutPiece.setSeamAllowancePoints(piece.seamAllowancePoints(pattern),
+    layoutPiece.setMainPathPoints(piece.mainPathPoints(pattern), piece.isHideSeamLine(),
+                                  piece.mainPathNodeVertices(pattern));
+    QVector<QPointF> seamAllowanceNodes;
+    const QVector<QPointF> seamAllowance = piece.seamAllowancePoints(pattern, &seamAllowanceNodes);
+    layoutPiece.setSeamAllowancePoints(seamAllowance,
                                        piece.hasSeamAllowance(),
-                                       piece.hasSeamAllowanceBuiltIn());
+                                       piece.hasSeamAllowanceBuiltIn(),
+                                       seamAllowanceNodes);
     layoutPiece.setInternalPaths(convertInternalPaths (piece, pattern, false));
     layoutPiece.setCutoutPaths(convertInternalPaths (piece, pattern, true));
     layoutPiece.setNotches(piece.createNotchLines(pattern));
@@ -504,9 +525,20 @@ QVector<QPointF> VLayoutPiece::getContourPoints() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VLayoutPiece::setMainPathPoints(const QVector<QPointF> &points, bool hideMainPath)
+/**
+ * @brief setMainPathPoints stores the main path (seam line) polyline.
+ * @param nodeVertices vertices that can break the tangent, from VPiece::mainPathNodeVertices().
+ *        Empty = turn points unknown, so the seam line gets no data-turn-points attribute.
+ */
+void VLayoutPiece::setMainPathPoints(const QVector<QPointF> &points, bool hideMainPath,
+                                     const QVector<QPointF> &nodeVertices)
 {
     d->contour = RemoveDublicates(points, false);
+    d->contourTurnPoints.reset();
+    if (!nodeVertices.isEmpty())
+    {
+        d->contourTurnPoints = turnPointIndices(d->contour, nodeVertices, true);
+    }
     setHideSeamLine(hideMainPath);
 }
 
@@ -518,8 +550,15 @@ QVector<QPointF> VLayoutPiece::getSeamAllowancePoints() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VLayoutPiece::setSeamAllowancePoints(const QVector<QPointF> &points, bool seamAllowance, bool seamAllowanceBuiltIn)
+/**
+ * @brief setSeamAllowancePoints stores the seam allowance (cut line) polyline.
+ * @param nodeVertices vertices that can break the tangent, from VPiece::seamAllowancePoints().
+ *        Empty = turn points unknown, so the cut line gets no data-turn-points attribute.
+ */
+void VLayoutPiece::setSeamAllowancePoints(const QVector<QPointF> &points, bool seamAllowance, bool seamAllowanceBuiltIn,
+                                          const QVector<QPointF> &nodeVertices)
 {
+    d->seamAllowanceTurnPoints.reset();
     if (seamAllowance)
     {
         SetSeamAllowance(seamAllowance);
@@ -528,6 +567,10 @@ void VLayoutPiece::setSeamAllowancePoints(const QVector<QPointF> &points, bool s
         if (!d->seamAllowance.isEmpty())
         {
             d->seamAllowance = RemoveDublicates(d->seamAllowance, false);
+            if (!nodeVertices.isEmpty())
+            {
+                d->seamAllowanceTurnPoints = turnPointIndices(d->seamAllowance, nodeVertices, true);
+            }
         }
         else if (!hasSeamAllowanceBuiltIn())
         {
@@ -1134,6 +1177,7 @@ void VLayoutPiece::createInternalPathItem(int i, QGraphicsItem *parent) const
     QGraphicsPathItem* item = new QGraphicsPathItem(parent);
     item->setData(PieceItemData::ItemType, QStringLiteral("internal_path"));
     item->setPath(d->transform.map(d->m_internalPaths.at(i).GetPainterPath()));
+    setTurnPointsData(item, d->m_internalPaths.at(i).turnPoints());
     item->setPen(QPen(color, lineWeight, lineType, Qt::RoundCap, Qt::RoundJoin));
 }
 
@@ -1153,6 +1197,7 @@ void VLayoutPiece::createCutoutPathItem(int i, QGraphicsItem *parent) const
     QGraphicsPathItem* item = new QGraphicsPathItem(parent);
     item->setData(PieceItemData::ItemType, QStringLiteral("cut_path"));
     item->setPath(d->transform.map(d->m_cutoutPaths.at(i).GetPainterPath()));
+    setTurnPointsData(item, d->m_cutoutPaths.at(i).turnPoints());
     item->setPen(QPen(color, lineWeight, lineType, Qt::RoundCap, Qt::RoundJoin));
 }
 
@@ -1427,6 +1472,7 @@ void VLayoutPiece::createSeamlineItem(QGraphicsItem *parent) const
     item->setData(PieceItemData::ObjectName, QString("seamline"));
     item->setData(PieceItemData::ItemType, QStringLiteral("seamline"));
     item->setPath(createMainPath());
+    setTurnPointsData(item, d->contourTurnPoints);
     item->setPen(QPen(color, lineWeight, lineTypeToPenStyle(lineType), Qt::RoundCap, Qt::RoundJoin));
 }
 
@@ -1447,6 +1493,7 @@ void VLayoutPiece::createAllowanceItem(QGraphicsItem *parent) const
         item->setData(PieceItemData::ObjectName, QString("cutline"));
         item->setData(PieceItemData::ItemType, QStringLiteral("cutline"));
         item->setPath(createAllowancePath());
+        setTurnPointsData(item, d->seamAllowanceTurnPoints);
         item->setPen(QPen(color, lineWeight, lineTypeToPenStyle(lineType), Qt::RoundCap, Qt::RoundJoin));
     }
 }

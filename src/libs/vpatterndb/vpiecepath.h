@@ -118,6 +118,7 @@ public:
 
     QVector<QPointF>    PathPoints(const VContainer *data, const QVector<QPointF> &path = QVector<QPointF>()) const;
     QVector<VPointF>    PathNodePoints(const VContainer *data, bool showExcluded = true) const;
+    QVector<QPointF>    pathNodeVertices(const VContainer *data) const;
     QVector<VSAPoint>   seamAllowancePoints(const VContainer *data, qreal width, bool reverse) const;
 
     QPainterPath        PainterPath(const VContainer *data, const QVector<QPointF> &cutPath) const;
@@ -153,6 +154,9 @@ public:
     static QVector<VSAPoint> CurveSeamAllowanceSegment(const VContainer *data, const QVector<VPieceNode> &nodes,
                                                        const QSharedPointer<VAbstractCurve> &curve,
                                                        int i, bool reverse, qreal width);
+
+    static QVector<QPointF>  curveNodeVertices(const QSharedPointer<VAbstractCurve> &curve,
+                                               const QVector<QPointF> &segment);
 
 private:
     QSharedDataPointer<VPiecePathData> d;

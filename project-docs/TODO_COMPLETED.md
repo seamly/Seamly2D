@@ -2,6 +2,27 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task DXF.1 — Seamly2D marks turn points in the handoff SVG (completed 2026-10-03)
+
+Cause: `astm_contour.rs` `is_straight_chord` treats one long interpolated segment inside a flat curve as a straight line, so both ends become turn points. Example: FrontPanel hem vertices bend 1–2° but are on layer 2. Geometry cannot tell a coarse curve segment from a real line. Seamly2D knows the node types, so it sends them (user decision: producer tags, not a heuristic).
+
+- [x] DXF.1.1 Define the attribute: which vertices of `cutline`, `seamline`, `internal_path`, `cut_path` are turn points. Add it to `project-docs/docs-data/NEW-ATTRIBUTES.csv` and `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`
+- [x] DXF.1.2 Seamly2D: write the attribute in the handoff SVG. Turn point = path start/end node, line–line join, line–curve join with a tangent break, curve node with a tangent break
+- [x] DXF.1.3 Seamly2D test: `TST_SeamlySuitePaths` (or the handoff writer test) checks the attribute on a piece with lines and curves
+- [x] DXF.1.4 SeamlyLayout: read the attribute in `seamly_svg2ezdxf`; pass turn-point flags to `astm_contour::build_contour`
+- [x] DXF.1.5 `build_contour`: tagged vertices are anchors and turn points; all other key points are curve points. Remove the straight-chord rule for tagged input
+- [x] DXF.1.6 Untagged SVG (ordinary drawing): keep the geometry fallback, but a single dense segment no longer makes its ends turn points
+- [x] DXF.1.7 Rust tests: tagged FrontPanel hem gives curve points; tagged corners give turn points; untagged fallback test
+- [x] DXF.1.8 Update the `test_data/male_shirt_pieces.svg` fixture with the attribute
+- [x] DXF.1.9 Update `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md` "Contour rules" and the handoff contract docs (both sides change)
+- Attribute: `data-turn-points` on `seamline`, `cutline`, `internal_path`, `cut_path` groups. Space-separated vertex indices into the path `d`. Absent = unknown.
+- Producer: `VAbstractPiece::turnPointIndices()`. Turn = node vertex with tangent break > 0.5° (line–line) or > 5° (with a curve), any bend > 25°, open end. Curve tangent extrapolated from two chords.
+- Node vertices: point nodes, curve segment ends, spline path knots (`VPiecePath::pathNodeVertices`); seam allowance corners from `VAbstractPiece::Equidistant()` via `VSAPoint::isNode()`.
+- Consumer: `astm_contour::build_contour_tagged`. Tags that do not match the path are ignored.
+- Fixture `ezdxf2dxfastm/test_data/male_shirt_pieces.svg` re-exported with `seamly2d -f 0 --exportOnlyDetails` from the working-copy `male_shirt.sm2d`. FrontPanel: 14 turn points, hem and neckline are curve points.
+- Tests: `TST_VAbstractPiece::TurnPointIndices`, `EquidistantReportsNodeVertices`, `TST_SvgComponentTags::PathComponentsCarryTurnPoints`, `UnknownTurnPointsEmitNoAttribute`; Rust `astm_piece_test.rs`, `writer_astm_test.rs`.
+- Not re-validated on aw.fyi yet (DXF.8).
+
 ## Task Layout.6 — Export stubs for paid export modules (completed 2026-09-27)
 
 Hidden Export-menu items and a no-op Rust path for two paid formats.

@@ -98,6 +98,7 @@ first child of each piece group when it places the piece into a layout sheet
 | `data-base-size` | `pattern` (multisize) | Base size of the `.smms` file, in pattern units. |
 | `data-size` | `piece` (multisize) | Size of this copy of the piece. Kept on placed pieces in the layout and its exports. |
 | `data-grainline-angle` | `piece` | Grain direction in degrees, counter-clockwise as seen on screen (Qt `QLineF::angle()`); `90` = grain points up. Written with 4 decimals. Present whenever the piece has a grain rotation, **also when the grainline is hidden**, so SeamlyLayout can still orient the piece. Before that transform, a grainline without top and bottom anchor points always points up: an angle in (180°, 360°) is written as the angle 180° less. Includes any Seamly2D layout transform (rotation, mirror). Omitted when the piece has no grain rotation. |
+| `data-turn-points` | `seamline`, `cutline`, `internal_path`, `cut_path` | Turn points of the component's path: space-separated, 0-based vertex indices into its `d`, counting each `M` and `L` end point. A turn point is a vertex where the tangent breaks: a piece node or curve end whose tangents differ by more than 0.5° where two straight lines meet, or more than 5° where a curve meets a line or curve, a direction change above 25°, or an open-path end. All other vertices are curve points. Empty value = no turn points (a smooth closed loop). Omitted when Seamly2D does not know the node vertices; SeamlyLayout then detects turn points from the geometry. Read by the DXF-ASTM export (D6673 layers 2 and 3). |
 
 ## `id` scheme
 
@@ -130,6 +131,7 @@ All ids are unique and XML-valid by construction. **Breaking change vs. pre-cont
 - **`internal_path`** — one group per plain (non-cutout) internal path of the piece.
 - **`cut_path`** — one group per internal *cutout* path: a closed path that is cut out of the piece (a hole) and may carry its own seam allowance. Distinguished in the pattern data by `VLayoutPiecePath::isCutPath()`; the nesting algorithm may treat cutout interiors as usable area, unlike `internal_path` markings.
 - **`grainline`** — grainline arrow geometry.
+- **`data-turn-points`** — Seamly2D knows which vertices are nodes; the interpolated polyline alone does not. A coarse curve interpolation has long single segments, so geometry cannot tell them from straight lines. Producer: `VAbstractPiece::turnPointIndices()` (`src/libs/vlayout/vabstractpiece.cpp`), with node vertices from `VPiecePath::pathNodeVertices()` and `VAbstractPiece::Equidistant()`. Consumer: `astm_contour::build_contour_tagged` (`seamly_svg2ezdxf`). The indices stay valid through SeamlyLayout's transform baking, which maps path segments 1:1.
 - **`piece_label` / `pattern_label`** — the on-piece label text blocks. One `<text>` element per label line (or one `<path>` per line in text-as-paths mode); per-line bold/italic, alignment, middle-eliding to the label width, mirroring and rotation are preserved in either mode.
 - Counters are per SvgGenerator instance: one instance = one file = one pattern.
 
