@@ -6,6 +6,15 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — Export name timestamp, Tiled PDF hint
+
+Merged `task-export-name-tiled-hint`. `cargo test --workspace` and `ctest --preset debug` passed.
+
+- Default export name is `<baseName>_YYYYMMDDHHMM[_tiled].<ext>`, e.g. `male_shirt_202609222209.svg` (`makeExportFileName`, user decision). Seconds removed.
+- Two exports in the same minute get the same default name; the save dialog asks before overwrite.
+- Export > PDF (Tiled) stays disabled unless Paper Type is Tiled (user decision: page size comes from tile size). Disabled text reads "PDF (Tiled): set Paper Type to Tiled". Text, not tooltip: a disabled item gets no hover.
+- Not checked in the running app.
+
 ## 2026-10-02 — New-piece grainline, label placement, template file name
 
 Merged `task-grainline-defaults`. `local_build_msi.ps1` passed: build, `nmake check`, MSI.
@@ -26,7 +35,6 @@ Merged `task-export-all-tabs`. `cargo test --workspace`, `ctest --preset debug` 
 - Bridge: `select_export_tab` (silent swap, no canvas reload) and `export_tab_path`. QML: `runExport()`, `exportEachTab()` in `Main.qml`.
 - One "Export Complete" dialog lists every file. First failure stops the run; earlier files stay on disk.
 - Not checked in the running app. Check: multisize layout → check "Export all tabs" → export PDF, Tiled PDF, DXF → one file per tab; shown tab unchanged.
-- Default export name timestamp is now `YYYYMMDDHHMMSS` (`makeExportFileName`); it lacked minutes before.
 
 ## 2026-09-29 — Sized layouts and size tabs (Layout.37.1–37.3)
 

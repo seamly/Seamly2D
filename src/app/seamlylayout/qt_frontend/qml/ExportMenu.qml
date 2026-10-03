@@ -198,7 +198,9 @@ Menu {
     } // MenuItem PDF
 
     MenuItem {
-        text: "PDF (Tiled)"
+        // A disabled item gets no hover events, so the hint is in the text, not a tooltip.
+        // Tiled PDF pages take their size from the tile size, which exists only for tiled paper.
+        text: root.pdfTiledEnabled ? "PDF (Tiled)" : "PDF (Tiled): set Paper Type to Tiled"
         enabled: root.layoutReady && root.pdfTiledEnabled
         onTriggered: root.exportPdfTiledRequested()
     } // MenuItem PDF Tiled
