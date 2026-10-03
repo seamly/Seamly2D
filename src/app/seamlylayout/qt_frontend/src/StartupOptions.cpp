@@ -55,7 +55,7 @@ const QLatin1String svgRootElement("<svg");
 // @brief Build the text shown for --version.
 // Falls back to the product name alone when the caller has not set the
 // application metadata yet (QCoreApplication::setApplicationVersion()).
-// @return e.g. "SeamlyLayout 0.1.0".
+// @return e.g. "SeamlyLayout 26.9.2609".
 QString versionText()
 {
     const QString name    = QCoreApplication::applicationName();

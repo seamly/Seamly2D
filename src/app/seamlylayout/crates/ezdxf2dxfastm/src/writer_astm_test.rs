@@ -134,7 +134,7 @@ mod tests {
                 "Style Name:Test Shirt",
                 "Creation Date:28-09-2026",
                 "Creation Time:14-05",
-                "Author:Seamly2D Project;SeamlyLayout;1.2.3",
+                "Author:Seamly2D 1.2.3",
                 "Sample Size:",
                 "Grade Rule Table:",
                 "Units:METRIC",

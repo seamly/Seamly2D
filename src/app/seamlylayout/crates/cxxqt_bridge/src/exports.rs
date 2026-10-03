@@ -635,7 +635,7 @@ fn build_tiled_pdf_tile_doc(
 pub struct DxfStyleInfo {
     // CLO3D variant: add group 250 to boundary and sew line polylines.
     pub clo3d_group_250: bool,
-    // SeamlyLayout version for `Author:`.
+    // Seamly2D suite version for `Author:`.
     pub app_version: Option<String>,
     // `Creation Date:` as dd-mm-yyyy.
     pub creation_date: Option<String>,
