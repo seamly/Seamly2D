@@ -161,7 +161,8 @@ int main(int argc, char *argv[])
     app.setOrganizationName("Seamly");
     app.setOrganizationDomain("seamly.io");
     app.setApplicationName("SeamlyLayout");
-    app.setApplicationVersion("0.1.0");
+    // Suite version from projectversion.h; DXF `Author:` reads it via Qt.application.version.
+    app.setApplicationVersion(QStringLiteral(SEAMLY_SUITE_VERSION));
 
     // Enable and open debug log file.
     // Set debugEnabled = true to write debug lines to logs/log_{YYMMDDHHMMSS}.txt

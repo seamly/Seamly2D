@@ -6,6 +6,16 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — DXF `Author:` is `Seamly2D <version>`
+
+Merged `task-dxf-author-version`. `cargo test --workspace` and `ctest --preset debug` passed.
+
+- DXF style system text: `Author:Seamly2D 26.9.2609`, was `Author:Seamly2D Project;SeamlyLayout;0.1.0` (user decision). One writer covers DXF-ASTM and CLO3D.
+- SeamlyLayout now reports the suite version: `qt_frontend/CMakeLists.txt` reads `VER_FILEVERSION_STR` from `src/libs/vmisc/projectversion.h` into `SEAMLY_SUITE_VERSION`; `setApplicationVersion` uses it. `--version` shows it too.
+- Rust fallback without the frontend (tests, CLI) stays `CARGO_PKG_VERSION`.
+- Open tasks Layout.17–21: name segments `_cutlines`, `_singlelinefont`, `_hersheyfont`, `_CLO3D`, `_annotated`; rename "teaching" to "annotated".
+- Not checked in the running app.
+
 ## 2026-10-03 — Export name timestamp, Tiled PDF hint
 
 Merged `task-export-name-tiled-hint`. `cargo test --workspace` and `ctest --preset debug` passed.
