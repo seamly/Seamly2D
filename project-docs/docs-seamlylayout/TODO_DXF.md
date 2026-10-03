@@ -1,0 +1,99 @@
+# TODO — DXF-ASTM compliance
+
+Fixes for the ApparelWerks D6673 report on `test-seamly-layout-input/male_shirt_202610031234.dxf`
+(`male_shirt_202610031234-dxf-report.pdf`). Applies to DXF-ASTM and DXF-ASTM (CLO3D); the two files differ only in group 250.
+
+Check off subtasks as they are done. When every subtask of a task is done, move the task to `project-docs/TODO_COMPLETED.md`.
+
+Tasks in this file are prefixed with `DXF.`
+
+Reference: `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
+
+## Report findings
+
+| Finding | Severity | Task |
+|---|---|---|
+| Declared points miscategorized: curve points on layer 2 (7 pieces) | departure | DXF.1 |
+| Reconstruction from layers 2/3 off layer 84 by 0.532 (ShortSleeve_M), layer 87 by 0.942 (FullSleeve_M); limit 0.5 | extension | DXF.2 |
+| File is AC1009, not R13 (AC1012) | departure | DXF.3 |
+| More curve points than the curves need (Yoke_M L14, PocketFlapRound_M L1) | advisory | DXF.4 |
+| Pieces with no `Quantity:`, label, or grainline (CollarTopInterface, CollarBaseInterface, CuffInterface) | report table | DXF.5 |
+| `Style Name:` is the output file stem with timestamp | report header | DXF.6 |
+| Category, Material, Size columns blank | report table | DXF.7 |
+
+Report deviations carry an inch sign but match millimetres. Not verified.
+
+## [ ] Task DXF.1 — Seamly2D marks turn points in the handoff SVG
+
+Cause: `astm_contour.rs` `is_straight_chord` treats one long interpolated segment inside a flat curve as a straight line, so both ends become turn points. Example: FrontPanel hem vertices bend 1–2° but are on layer 2. Geometry cannot tell a coarse curve segment from a real line. Seamly2D knows the node types, so it sends them (user decision: producer tags, not a heuristic).
+
+- [ ] DXF.1.1 Define the attribute: which vertices of `cutline`, `seamline`, `internal_path`, `cut_path` are turn points. Add it to `project-docs/docs-data/NEW-ATTRIBUTES.csv` and `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`
+- [ ] DXF.1.2 Seamly2D: write the attribute in the handoff SVG. Turn point = path start/end node, line–line join, line–curve join with a tangent break, curve node with a tangent break
+- [ ] DXF.1.3 Seamly2D test: `TST_SeamlySuitePaths` (or the handoff writer test) checks the attribute on a piece with lines and curves
+- [ ] DXF.1.4 SeamlyLayout: read the attribute in `seamly_svg2ezdxf`; pass turn-point flags to `astm_contour::build_contour`
+- [ ] DXF.1.5 `build_contour`: tagged vertices are anchors and turn points; all other key points are curve points. Remove the straight-chord rule for tagged input
+- [ ] DXF.1.6 Untagged SVG (ordinary drawing): keep the geometry fallback, but a single dense segment no longer makes its ends turn points
+- [ ] DXF.1.7 Rust tests: tagged FrontPanel hem gives curve points; tagged corners give turn points; untagged fallback test
+- [ ] DXF.1.8 Update the `test_data/male_shirt_pieces.svg` fixture with the attribute
+- [ ] DXF.1.9 Update `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md` "Contour rules" and the handoff contract docs (both sides change)
+
+## [ ] Task DXF.2 — Reconstructed curves stay within tolerance
+
+The validator rebuilds each curve from layers 2/3 and compares it with layers 84–87. Its spline method is unknown; use centripetal Catmull-Rom as a stand-in.
+
+- [ ] DXF.2.1 `astm_contour.rs`: rebuild each span between turn points as a spline through its key points
+- [ ] DXF.2.2 Where the spline is more than `CURVE_TOLERANCE_MM` from `dense`, add the farthest dense vertex as a curve point; repeat until within tolerance
+- [ ] DXF.2.3 Keep `reduced` an ordered subset of `dense` (§4.3.3.1)
+- [ ] DXF.2.4 Rust test: every contour in the male_shirt fixture is within 2× `CURVE_TOLERANCE_MM` on layers 84–87
+- [ ] DXF.2.5 Update the compliance doc
+
+## [ ] Task DXF.3 — Write DXF R13 (AC1012)
+
+D6673 §1.2 / 4.1 names AutoCAD R13. Today `$ACADVER` is `AC1009` (R12 syntax). R13 needs entity handles, a full TABLES section, CLASSES, and OBJECTS.
+
+- [ ] DXF.3.1 Study a known-good R13 file: required header variables, tables (LTYPE, LAYER, STYLE, BLOCK_RECORD), handles, OBJECTS dictionary
+- [ ] DXF.3.2 `ezdxf2dxfastm/src/writer.rs`: write `$ACADVER` `AC1012`, `$HANDSEED`, handles on every entity, subclass markers (group 100)
+- [ ] DXF.3.3 Write CLASSES, TABLES, BLOCK_RECORD entries, and OBJECTS
+- [ ] DXF.3.4 Keep CLO3D group 250 output working
+- [ ] DXF.3.5 Check import in CLO3D and one other reader (e.g. ezdxf `audit`, LibreCAD)
+- [ ] DXF.3.6 Rust tests: header version, unique handles, required sections present
+- [ ] DXF.3.7 Update the compliance doc "Decisions" row for DXF version
+
+## [ ] Task DXF.4 — Fewer curve points where a spline needs fewer
+
+Advisory only. Do after DXF.1 and DXF.2: DXF.2 adds points, so retest first.
+
+- [ ] DXF.4.1 Re-validate; if the advisory remains, drop key points the spline does not need while DXF.2.4 still passes
+- [ ] DXF.4.2 Rust test on the Yoke and PocketFlapRound fixtures
+
+## [ ] Task DXF.5 — Warn about pieces with no Quantity, label, or grainline
+
+A piece with no `Cut N` label gets no `Quantity:`, and a piece with no grainline gets no layer 7. Both make the DXF less usable in downstream CAD.
+
+- [ ] DXF.5.1 Rust: before DXF-ASTM export, list pieces missing `Quantity:` source, piece label, or grainline
+- [ ] DXF.5.2 QML: when the list is not empty, show a dialog naming each piece and what it lacks. State that this affects the usability of the exported DXF file. Buttons: Export anyway, Cancel
+- [ ] DXF.5.3 Tests: Rust detection; QML dialog shown for the three male_shirt interface pieces
+- [ ] DXF.5.4 Update `dxf-docs/seamlylayout_DXF_EXPORT_WORKFLOW.md`
+
+## [ ] Task DXF.6 — Style Name is the input file base name
+
+Today `cxxqt_bridge/src/exports.rs` sets `style_name` from the output path stem (`male_shirt_202610031234`). User decision: use the base name of the input file (`male_shirt`).
+
+- [ ] DXF.6.1 File import: the imported SVG's base name
+- [ ] DXF.6.2 `--svg-stdin` handoff: the `--document-name` value
+- [ ] DXF.6.3 No input name: keep the output file stem
+- [ ] DXF.6.4 Rust test for each case
+- [ ] DXF.6.5 Update the compliance doc "Style Name" row
+
+## [ ] Task DXF.7 — Category, Material, Size piece text
+
+Needs a separate discussion before implementation. Material is tracked as Layout.15.4 in `TODO_SEAMLYLAYOUT.md`.
+
+- [ ] DXF.7.1 Discuss source and format for `Category:`, `Material:`, `Size:`
+- [ ] DXF.7.2 Add subtasks from the decision
+
+## [ ] Task DXF.8 — Re-validate
+
+- [ ] DXF.8.1 Export male_shirt as DXF-ASTM and DXF-ASTM (CLO3D) after each task
+- [ ] DXF.8.2 User: run the files through https://aw.fyi/dxf; save the report in `test-seamly-layout-input/`
+- [ ] DXF.8.3 Record the result in the compliance doc
