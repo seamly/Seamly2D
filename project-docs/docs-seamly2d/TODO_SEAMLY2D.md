@@ -71,4 +71,16 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
 - [ ] Seamly2D.9.5 Tooltip shows the full absolute path
 - [ ] Seamly2D.9.6 Unit test: file name shown for selected, default, and no-file cases
 
+## [ ] Task Seamly2D.10 — New-piece pattern label sits left of the grainline
+
+Piece Mode, new piece: the pattern label overlaps the piece label. Today `VPatternLabelData::defaultPatternLabelPos` (`src/libs/vpatterndb/floatItemData/vpatternlabeldata.cpp`) puts the pattern label 1 cm right of the piece label. The piece label sits 1 cm right of the grainline (`defaultPieceLabelPos`).
+
+- [ ] Seamly2D.10.1 Reproduce with `test-seamly-layout-input/richmond-shirt_v1_v061-test.sm2d`; find why the two labels overlap
+- [ ] Seamly2D.10.2 `defaultPatternLabelPos`: the label's right edge sits 1 cm left of the grainline's left edge; vertically centered on the piece bounding box
+- [ ] Seamly2D.10.3 Pass the grainline rect, not the piece label rect: `pattern_piece_dialog.cpp` (new piece), `union_tool.cpp` (Union piece)
+- [ ] Seamly2D.10.4 The grainline counts even when hidden, as in `defaultPieceLabelPos`
+- [ ] Seamly2D.10.5 No grainline place known: right edge 1 cm left of the piece bounding box center
+- [ ] Seamly2D.10.6 Update the `@brief` and contract text of `defaultPatternLabelPos`
+- [ ] Seamly2D.10.7 Unit test: pattern label right edge = grainline left − 1 cm; no overlap with the piece label; no-grainline case
+
 ## [x] Task Seamly2D.4 — Preferences > Paths has no row for bodyscans
