@@ -1365,13 +1365,8 @@ void createUnion(quint32 id, const UnionToolInitData &initData, qreal dx, qreal 
                                                           ToPixel(grainlineLength, unit));
 
     const QSizeF labelSize(ToPixel(labelWidth, unit), ToPixel(labelHeight, unit));
-    const QPointF pieceLabelPos = VPatternLabelData::defaultPieceLabelPos(rect, labelSize, grainlineRect);
-    newPiece.GetPatternPieceData().SetPos(pieceLabelPos);
-
-    const QRectF pieceLabelRect = newPiece.GetPatternPieceData().IsVisible() ? QRectF(pieceLabelPos, labelSize)
-                                                                             : QRectF();
-    newPiece.GetPatternInfo().SetPos(VPatternLabelData::defaultPatternLabelPos(rect, labelSize, pieceLabelRect,
-                                                                               grainlineRect));
+    newPiece.GetPatternPieceData().SetPos(VPatternLabelData::defaultPieceLabelPos(rect, labelSize, grainlineRect));
+    newPiece.GetPatternInfo().SetPos(VPatternLabelData::defaultPatternLabelPos(rect, labelSize, grainlineRect));
 
     QString formulaSAWidth = piece1.getSeamAllowanceWidthFormula();
     newPiece.setSeamAllowanceWidthFormula(formulaSAWidth, piece1.GetSAWidth());

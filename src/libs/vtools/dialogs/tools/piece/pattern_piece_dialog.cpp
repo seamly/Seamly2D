@@ -2718,21 +2718,13 @@ VPiece PatternPieceDialog::CreatePiece() const
 
         const QSizeF pieceLabelSize(getFormulaValue(ui->pieceLabelWidthFormula_LineEdit),
                                     getFormulaValue(ui->pieceLabelHeightFormula_LineEdit));
-        const QPointF pieceLabelPos = VPatternLabelData::defaultPieceLabelPos(rect, pieceLabelSize, grainlineRect);
-        piece.GetPatternPieceData().SetPos(pieceLabelPos);
-
-        // Only a visible piece label without anchors sits at its default place and pushes the pattern label right.
-        const VPieceLabelData &pieceLabel = piece.GetPatternPieceData();
-        QRectF pieceLabelRect;
-        if (pieceLabel.IsVisible() && !pieceLabel.hasCornerAnchors() && pieceLabel.centerAnchorPoint() == NULL_ID)
-        {
-            pieceLabelRect = QRectF(pieceLabelPos, pieceLabelSize);
-        }
+        piece.GetPatternPieceData().SetPos(VPatternLabelData::defaultPieceLabelPos(rect, pieceLabelSize,
+                                                                                   grainlineRect));
 
         const QSizeF patternLabelSize(getFormulaValue(ui->patternLabelWidthFormula_LineEdit),
                                       getFormulaValue(ui->patternLabelHeightFormula_LineEdit));
         piece.GetPatternInfo().SetPos(VPatternLabelData::defaultPatternLabelPos(rect, patternLabelSize,
-                                                                                pieceLabelRect, grainlineRect));
+                                                                                grainlineRect));
     }
 
     return piece;
