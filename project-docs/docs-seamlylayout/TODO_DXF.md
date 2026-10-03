@@ -20,8 +20,11 @@ Reference: `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
 | Pieces with no `Quantity:`, label, or grainline (CollarTopInterface, CollarBaseInterface, CuffInterface) | report table | DXF.5 |
 | `Style Name:` is the output file stem with timestamp | report header | DXF.6 |
 | Category, Material, Size columns blank | report table | DXF.7 |
+| `Author` not `vendor;application;release #` (got `Seamly2D 26.10.314`; report on `male_shirt_202610031615.dxf`) | departure | DXF.9 (done, see `TODO_COMPLETED.md`) |
 
 Report deviations carry an inch sign but match millimetres. Not verified.
+
+Report on `male_shirt_202610031615.dxf` (after DXF.1): miscategorized points now advisory (3 pieces). DXF.2 still open: FullSleeve_M off layer 84 by 0.5319, layer 87 by 0.9309. New advisory: 5 pieces have no densified points (PlacketUnder_M and 4 others).
 
 ## [ ] Task DXF.2 — Reconstructed curves stay within tolerance
 

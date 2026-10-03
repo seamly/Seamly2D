@@ -6,6 +6,14 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — DXF.9: `Author:Seamly;Seamly2D;<version>`
+
+Merged `task-dxf-author-format`. `cargo test --workspace` passed.
+
+- aw.fyi flagged `Author:Seamly2D 26.10.314` as a departure; D6673 needs `vendor;application;release #`. User chose `Seamly;Seamly2D`.
+- Remaining report items tracked in `TODO_DXF.md`: DXF.2 (tolerance), DXF.3 (R13), DXF.4 (advisory).
+- User action: re-export male_shirt DXF-ASTM, re-run aw.fyi.
+
 ## 2026-10-03 — Seamly2D.10: pattern label left of the grainline
 
 Merged `task-pattern-label-left`. `local_build_msi.ps1` passed: build, `nmake check`, MSI.

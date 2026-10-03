@@ -2,6 +2,13 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task DXF.9 — `Author:` is `vendor;application;release #` (completed 2026-10-03)
+
+D6673 §4.3.1.1 needs three `;`-separated fields. `Seamly2D 26.10.314` failed the aw.fyi check. User decision: `Seamly;Seamly2D;<suite version>`.
+
+- [x] DXF.9.1 `ezdxf2dxfastm/src/writer.rs`: write `Author:Seamly;Seamly2D;<release>`
+- [x] DXF.9.2 `writer_astm_test.rs`: expect `Author:Seamly;Seamly2D;1.2.3`
+
 ## Task DXF.1 — Seamly2D marks turn points in the handoff SVG (completed 2026-10-03)
 
 Cause: `astm_contour.rs` `is_straight_chord` treats one long interpolated segment inside a flat curve as a straight line, so both ends become turn points. Example: FrontPanel hem vertices bend 1–2° but are on layer 2. Geometry cannot tell a coarse curve segment from a real line. Seamly2D knows the node types, so it sends them (user decision: producer tags, not a heuristic).
