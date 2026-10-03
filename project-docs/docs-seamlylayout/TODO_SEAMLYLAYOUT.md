@@ -111,6 +111,17 @@ Depends on Seamly2D.8.
 - [ ] Layout.16.4 DXF-ASTM: layer 6 mirror line; boundary starts or ends on the mirror line points (D6673 §4.3.6); unfolded pieces write no layer 6
 - [ ] Layout.16.5 Tests: Rust import, unfold geometry, layer 6 and boundary order
 
+## [ ] Task Layout.17 — HPGL cut-lines export name has `_cutlines`
+
+Export > HPGL > Cut (cut lines only) uses the same default name as Plot. The user cannot tell the two files apart.
+
+- [ ] Layout.17.1 `Main.qml` `onExportHpglRequested`: mode `"cut"` puts `_cutlines` before the timestamp. Example: `male_shirt_cutlines_202610011721.plt`
+- [ ] Layout.17.2 `makeExportFileName`: add the segment parameter; `_tiled` keeps its place after the timestamp
+- [ ] Layout.17.3 Mode `"plot"` name stays `<importedBaseName>_YYYYMMDDHHMM.<ext>`
+- [ ] Layout.17.4 Export all tabs: tab label still goes before the extension
+- [ ] Layout.17.5 Update `export-docs/seamlylayout_EXPORT_WORKFLOW.md` and the name comments in `Main.qml`
+- [ ] Layout.17.6 Test: cut name has `_cutlines`; plot and tiled names unchanged
+
 ## [x] Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 
 ## [x] Task Layout.9 — Piece-mode handoff passes a file, not a stringified SVG document
