@@ -4,8 +4,6 @@
 
 //! @brief ASTM-D6673-10 compliance validation.
 
-use seamly_svg2ezdxf::DxfVersion;
-
 // @brief Validation error.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ValidationError {
@@ -21,15 +19,7 @@ pub fn validate_astm_compliance(
 ) -> Result<(), Vec<ValidationError>> {
     let mut errors = Vec::new();
 
-    // Validate DXF version (must be R12).
-    if drawing.version != DxfVersion::R12 {
-        errors.push(ValidationError {
-            message: format!(
-                "DXF version must be R12 for ASTM-D6673-10, got: {:?}",
-                drawing.version
-            ),
-        });
-    }
+    // Both DXF versions are valid: D6673 names R13, and R12 has the widest importer support.
 
     // Validate entity types (ASTM-D6673-10 allowed types).
     let allowed_entity_types = ["LINE", "CIRCLE", "POLYLINE", "TEXT", "ARC", "POINT"];

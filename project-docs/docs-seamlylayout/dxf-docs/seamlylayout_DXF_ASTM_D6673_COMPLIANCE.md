@@ -11,6 +11,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | Contours | `seamly_svg2ezdxf/src/astm_contour.rs` | key points + validation polyline |
 | Notches | `seamly_svg2ezdxf/src/astm_notch.rs` | D6673 notch POINTs |
 | Drawing → file | `ezdxf2dxfastm::export_dxf_astm` (`writer.rs`) | `.dxf` (+ teaching `.txt`) |
+| R12 → R13 | `ezdxf2dxfastm::upgrade_to_r13` (`r13.rs`) | R13 file from the R12 group stream |
 | Bridge | `cxxqt_bridge::exports::do_export_dxf` | style text from QML |
 
 ## Decisions
@@ -18,9 +19,10 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | Topic | Decision | Reason |
 |---|---|---|
 | Units | Always `Units:METRIC`: millimetres to 2 decimals | User decision. SVG px (96 dpi) × 25.4 / 96 |
-| DXF version | `$ACADVER` = `AC1009` (R12 syntax) | Widest importer support. D6673 names R13; R13 needs handles and OBJECTS. Gerber AccuMark writes no version at all |
-| Header | `$ACADVER` only | D6673 §4.2: keep the header minimal |
-| CLO3D group 250 | Off in **DXF-ASTM**; on in **DXF-ASTM (CLO3D)** | Not DXF R12, not D6673. CLO3D reads it: 0 = boundary (layer 1), 2 = sew line (layer 14). Only those key-point polylines carry it |
+| DXF version | User picks: **DXF-ASTM (R12)** writes `AC1009`; **DXF-ASTM (R13)** writes `AC1012`. **DXF-ASTM (CLO3D)** writes R12 | D6673 §1.2 / 4.1 names R13. R12 has the widest importer support. Gerber AccuMark writes no version at all |
+| R13 structure | R12 group stream plus handles (5; 105 for DIMSTYLE), subclass markers (100), CLASSES (empty), TABLES (VPORT, LTYPE, LAYER, STYLE, VIEW, UCS, APPID, DIMSTYLE, BLOCK_RECORD), `*MODEL_SPACE` / `*PAPER_SPACE` blocks, OBJECTS (root dictionary + ACAD_GROUP) | One source of D6673 content for both versions. No owner handles (330) on entities and table entries: R14 added them. Checked: ezdxf 1.4.4 `audit` 0 errors, 0 fixes; libdxfrw reads the same entity counts as R12 |
+| Header | R12: `$ACADVER` only. R13: `$ACADVER`, `$DWGCODEPAGE`, `$HANDSEED` | D6673 §4.2: keep the header minimal. R13 needs `$HANDSEED` |
+| CLO3D group 250 | Off in **DXF-ASTM (R12)** and **(R13)**; on in **DXF-ASTM (CLO3D)** | Not DXF R12, not D6673. CLO3D reads it: 0 = boundary (layer 1), 2 = sew line (layer 14). Only those key-point polylines carry it. The R13 rewrite keeps it |
 | Block names | `<svg id>_M` kept | Existing CLO3D naming. `Piece Name:` carries the real name |
 | Curve tolerance | 0.25 mm | Douglas–Peucker tolerance for key points, and limit for the spline through them |
 | Quantity | From the "Cut N" label line: even N → `N/2,N/2`, odd N → `N,0` | Seamly2D exports only a total, not right/left counts |

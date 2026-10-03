@@ -6,6 +6,17 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — DXF.3: DXF-ASTM (R13) export
+
+Merged `task-dxf-r13`. `cargo test --workspace` and `ctest --preset debug` passed.
+
+- Export menu: **DXF-ASTM (R12)** (was **DXF-ASTM**), new **DXF-ASTM (R13)**, **DXF-ASTM (CLO3D)** stays R12 (user decision). View menu: one **DXF-ASTM** item.
+- `ezdxf2dxfastm/src/r13.rs` rewrites the R12 group stream as AC1012; D6673 content is identical in both versions.
+- QML passes `dxfVersion` (`"R12"`/`"R13"`) in the `exportDxf` options JSON.
+- ezdxf `audit` and libdxfrw read the male_shirt R13 file without errors.
+- User action: export DXF-ASTM (R13), import in CLO3D, run aw.fyi (DXF.3.5, DXF.8).
+- Not checked in the running app.
+
 ## 2026-10-03 — DXF.2: spline through key points within tolerance
 
 Merged `task-dxf-spline-tolerance`. `cargo test --workspace` and `ctest --preset debug` passed.

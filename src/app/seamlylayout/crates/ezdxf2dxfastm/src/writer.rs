@@ -2,17 +2,21 @@
 // author: slspencer, copyright 2026
 // MIT License: https://opensource.org/licenses/MIT
 
-//! @brief DXF-ASTM file writer (ASTM D6673-10, METRIC units, DXF R12 syntax).
+//! @brief DXF-ASTM file writer (ASTM D6673-10, METRIC units, DXF R12 or R13).
 //!
-//! File layout:
+//! R12 file layout:
 //! - HEADER: `$ACADVER` only (D6673 §4.2 recommends a minimal header).
 //! - BLOCKS: one block per piece; see `write_astm_block`.
 //! - ENTITIES: style system text on layer 1, then one INSERT per block.
+//!
+//! `Drawing::version` selects the file version. An R13 file is the R12 file
+//! rewritten by `r13::upgrade_to_r13`, so both versions carry the same D6673 content.
 
 use crate::encoder::{encode_astm_polyline, encode_astm_text, encode_dxf_point, encode_entity, encode_notch};
 use crate::error::{DxfAstmExportError, Result};
+use crate::r13::upgrade_to_r13;
 use crate::validator::validate_astm_compliance;
-use seamly_svg2ezdxf::{AstmContour, Block, DxfPoint, Point, CURVE_TOLERANCE_MM};
+use seamly_svg2ezdxf::{AstmContour, Block, DxfPoint, DxfVersion, Point, CURVE_TOLERANCE_MM};
 use std::fs::{File, read_to_string};
 use std::io::Write;
 use std::path::Path;
@@ -335,9 +339,16 @@ fn write_eof(writer: &mut dyn Write) -> std::io::Result<()> {
 // @param line The current line.
 // @param prev_line The previous line (for context).
 // @param next_line The next line (for context, if available).
+// @param is_code True for a group code line, false for a value line.
+//                A value can look like a group code ("0", "70"), so position decides.
 // @return Comment string explaining the line.
-fn get_line_comment(line: &str, prev_line: &str, next_line: Option<&str>) -> String {
+fn get_line_comment(line: &str, prev_line: &str, next_line: Option<&str>, is_code: bool) -> String {
     let line_trimmed = line.trim();
+
+    // Group code line: explain what the next line holds.
+    if is_code {
+        return group_code_comment(line_trimmed);
+    } // if group code line
 
     // Group code 0 - entity or section marker.
     if prev_line.trim() == "0" {
@@ -356,6 +367,9 @@ fn get_line_comment(line: &str, prev_line: &str, next_line: Option<&str>) -> Str
             "SEQEND" => "Entity type: SEQEND (marks the end of the vertex sequence)".to_string(),
             "TEXT" => "Entity type: TEXT (text annotation entity)".to_string(),
             "INSERT" => "Entity type: INSERT (inserts a block into modelspace)".to_string(),
+            "POINT" => "Entity type: POINT (turn point, curve point or notch)".to_string(),
+            "BLOCK_RECORD" => "Table entry: BLOCK_RECORD (one per block, DXF R13)".to_string(),
+            "DICTIONARY" => "Object type: DICTIONARY (named object list, DXF R13)".to_string(),
             "EOF" => "End of File marker (marks the end of the DXF file)".to_string(),
             "0" => "Group code 0: End marker (end of entity or section)".to_string(),
             _ => format!("Entity type: {}", line_trimmed),
@@ -370,9 +384,27 @@ fn get_line_comment(line: &str, prev_line: &str, next_line: Option<&str>) -> Str
                 "Section name: BLOCKS (contains block definitions for pattern pieces)".to_string()
             }
             "ENTITIES" => "Section name: ENTITIES (contains modelspace entities)".to_string(),
+            "CLASSES" => "Section name: CLASSES (custom object classes, DXF R13; empty here)".to_string(),
+            "OBJECTS" => "Section name: OBJECTS (non-graphical objects, DXF R13)".to_string(),
             "LAYER" => "Table name: LAYER (this is the layer table)".to_string(),
             _ => format!("Name: {} (section/table/block name)", line_trimmed),
         }
+    }
+    // Group code 5 - handle; DIMSTYLE entries use group 105.
+    else if prev_line.trim() == "5" || prev_line.trim() == "105" {
+        format!("Handle: {} (unique hexadecimal object id, DXF R13)", line_trimmed)
+    }
+    // Group code 100 - subclass marker.
+    else if prev_line.trim() == "100" {
+        format!("Subclass marker: {} (data of this class follows, DXF R13)", line_trimmed)
+    }
+    // Group code 330 - owner handle.
+    else if prev_line.trim() == "330" {
+        format!("Owner handle: {} (object that owns this one)", line_trimmed)
+    }
+    // Group code 350 - handle of a dictionary entry.
+    else if prev_line.trim() == "350" {
+        format!("Handle: {} (object named by the group 3 before it)", line_trimmed)
     }
     // Group code 8 - layer name.
     else if prev_line.trim() == "8" {
@@ -402,7 +434,7 @@ fn get_line_comment(line: &str, prev_line: &str, next_line: Option<&str>) -> Str
     }
     // Group code 30 - Z value; D6673 uses it for notch depth.
     else if prev_line.trim() == "30" {
-        format!("Value: {} (notch depth in millimetres)", line_trimmed)
+        format!("Value: {} (notch depth in millimetres, or Z coordinate)", line_trimmed)
     }
     // Group code 39 - thickness; D6673 uses it for notch width.
     else if prev_line.trim() == "39" {
@@ -416,9 +448,9 @@ fn get_line_comment(line: &str, prev_line: &str, next_line: Option<&str>) -> Str
     else if prev_line.trim() == "66" {
         format!("Value: {} (1 = VERTEX entities follow)", line_trimmed)
     }
-    // Group code 3 - block name (repeat).
+    // Group code 3 - block name (repeat), code page, or dictionary entry name.
     else if prev_line.trim() == "3" {
-        format!("Block name: {} (repeat of group 2)", line_trimmed)
+        format!("Name: {} (block name repeat, code page, or dictionary entry name)", line_trimmed)
     }
     // Group code 40 - Text height, circle radius, etc.
     else if prev_line.trim() == "40" {
@@ -480,36 +512,7 @@ fn get_line_comment(line: &str, prev_line: &str, next_line: Option<&str>) -> Str
     else if prev_line.trim() == "9" {
         format!("Variable name: {} (header variable)", line_trimmed)
     }
-    // Numeric group codes (0, 2, 8, 9, 10, 11, 20, 21, 40, 41, 42, 50, 62, 70, etc.).
-    else if line_trimmed.parse::<i32>().is_ok() {
-        match line_trimmed {
-            "0" => "Group code 0: Start of entity or section marker".to_string(),
-            "2" => "Group code 2: Section/table/block name, or entity name follows".to_string(),
-            "8" => "Group code 8: Layer name follows".to_string(),
-            "9" => "Group code 9: Variable name follows (header variable)".to_string(),
-            "10" => "Group code 10: X coordinate, insertion point X, or start point X follows"
-                .to_string(),
-            "11" => "Group code 11: End point X coordinate follows".to_string(),
-            "20" => "Group code 20: Y coordinate, insertion point Y, or start point Y follows"
-                .to_string(),
-            "21" => "Group code 21: End point Y coordinate follows".to_string(),
-            "40" => "Group code 40: Text height, radius, or other size value follows".to_string(),
-            "3" => "Group code 3: Block name follows (repeat)".to_string(),
-            "30" => "Group code 30: Notch depth follows".to_string(),
-            "39" => "Group code 39: Notch width follows".to_string(),
-            "66" => "Group code 66: Vertices-follow flag follows".to_string(),
-            "250" => "Group code 250: CLO3D line type follows".to_string(),
-            "41" => "Group code 41: X scale factor follows".to_string(),
-            "42" => "Group code 42: Y scale factor follows".to_string(),
-            "50" => "Group code 50: Rotation angle in degrees follows".to_string(),
-            "62" => "Group code 62: Color number follows".to_string(),
-            "70" => "Group code 70: Flags, counts, or integer value follows".to_string(),
-            "1" => "Group code 1: Text content or string value follows".to_string(),
-            "6" => "Group code 6: Linetype name follows".to_string(),
-            _ => format!("Group code {}: (numeric group code)", line_trimmed),
-        }
-    }
-    // Empty line or other content.
+    // Empty value.
     else if line_trimmed.is_empty() {
         "".to_string()
     }
@@ -518,6 +521,41 @@ fn get_line_comment(line: &str, prev_line: &str, next_line: Option<&str>) -> Str
         format!("Value: {} (data value)", line_trimmed)
     }
 }
+
+// @brief Comment for a group code line: what its value line holds.
+fn group_code_comment(code: &str) -> String {
+    match code {
+        "0" => "Group code 0: Start of entity or section marker".to_string(),
+        "2" => "Group code 2: Section/table/block name, or entity name follows".to_string(),
+        "8" => "Group code 8: Layer name follows".to_string(),
+        "9" => "Group code 9: Variable name follows (header variable)".to_string(),
+        "10" => "Group code 10: X coordinate, insertion point X, or start point X follows"
+            .to_string(),
+        "11" => "Group code 11: End point X coordinate follows".to_string(),
+        "20" => "Group code 20: Y coordinate, insertion point Y, or start point Y follows"
+            .to_string(),
+        "21" => "Group code 21: End point Y coordinate follows".to_string(),
+        "40" => "Group code 40: Text height, radius, or other size value follows".to_string(),
+        "3" => "Group code 3: Block name repeat, code page, or dictionary entry name follows".to_string(),
+        "30" => "Group code 30: Notch depth (POINT) or Z coordinate follows".to_string(),
+        "39" => "Group code 39: Notch width follows".to_string(),
+        "66" => "Group code 66: Vertices-follow flag follows".to_string(),
+        "250" => "Group code 250: CLO3D line type follows".to_string(),
+        "41" => "Group code 41: X scale factor follows".to_string(),
+        "42" => "Group code 42: Y scale factor follows".to_string(),
+        "50" => "Group code 50: Rotation angle in degrees follows".to_string(),
+        "62" => "Group code 62: Color number follows".to_string(),
+        "70" => "Group code 70: Flags, counts, or integer value follows".to_string(),
+        "1" => "Group code 1: Text content or string value follows".to_string(),
+        "6" => "Group code 6: Linetype name follows".to_string(),
+        "5" => "Group code 5: Handle follows".to_string(),
+        "105" => "Group code 105: DIMSTYLE handle follows".to_string(),
+        "100" => "Group code 100: Subclass marker follows".to_string(),
+        "330" => "Group code 330: Owner handle follows".to_string(),
+        "350" => "Group code 350: Dictionary entry handle follows".to_string(),
+        _ => format!("Group code {}: (numeric group code)", code),
+    } // match code
+} // fn group_code_comment
 
 // @brief Meaning of an ASTM D6673 layer number, for teaching comments.
 fn astm_layer_meaning(layer: &str) -> &'static str {
@@ -594,7 +632,7 @@ fn create_teaching_version(
             None
         };
 
-        let comment = get_line_comment(line, prev_line, next_line);
+        let comment = get_line_comment(line, prev_line, next_line, i % 2 == 0);
 
         if comment.is_empty() {
             // Empty line - just write it.
@@ -613,7 +651,7 @@ fn create_teaching_version(
 }
 
 // @brief Export Drawing to DXF-ASTM format.
-// @param drawing The ezdxf Drawing object to export.
+// @param drawing The ezdxf Drawing object to export; its `version` selects DXF R12 or R13.
 // @param output_path Path to write the DXF file.
 // @param options Export options.
 // @return Result indicating success or error.
@@ -622,14 +660,6 @@ pub fn export_dxf_astm(
     output_path: impl AsRef<std::path::Path>,
     options: &DxfAstmExportOptions,
 ) -> Result<()> {
-    // Validate DXF version (must be R12 for ASTM).
-    if drawing.version != seamly_svg2ezdxf::DxfVersion::R12 {
-        return Err(DxfAstmExportError::InvalidVersion(format!(
-            "DXF version must be R12 for ASTM-D6673-10, got: {:?}",
-            drawing.version
-        )));
-    }
-
     // Validate entities if requested.
     if options.validate_entities {
         if let Err(errors) = validate_astm_compliance(drawing) {
@@ -641,22 +671,24 @@ pub fn export_dxf_astm(
         }
     }
 
-    // Create output file.
-    let mut file = File::create(output_path.as_ref()).map_err(|e| DxfAstmExportError::Io(e))?;
-
-    // Write DXF file structure.
+    // Write the R12 file structure to memory; an R13 file is rewritten from it.
+    let mut buffer: Vec<u8> = Vec::new();
     // 1. HEADER section (minimal or empty).
-    write_header_section(&mut file, options.include_header)
-        .map_err(|e| DxfAstmExportError::Io(e))?;
-
+    write_header_section(&mut buffer, options.include_header)?;
     // 2. BLOCKS section (pattern pieces).
-    write_blocks_section(&mut file, drawing, options).map_err(|e| DxfAstmExportError::Io(e))?;
-
+    write_blocks_section(&mut buffer, drawing, options)?;
     // 3. ENTITIES section (modelspace entities).
-    write_entities_section(&mut file, drawing, options).map_err(|e| DxfAstmExportError::Io(e))?;
-
+    write_entities_section(&mut buffer, drawing, options)?;
     // 4. EOF marker.
-    write_eof(&mut file).map_err(|e| DxfAstmExportError::Io(e))?;
+    write_eof(&mut buffer)?;
+
+    let r12 = String::from_utf8(buffer)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
+    let text = match drawing.version {
+        DxfVersion::R12 => r12,
+        DxfVersion::R13 => upgrade_to_r13(&r12)?,
+    }; // match version
+    std::fs::write(output_path.as_ref(), text)?;
 
     // 5. Create teaching version with inline comments (if requested).
     if options.create_teaching_version {

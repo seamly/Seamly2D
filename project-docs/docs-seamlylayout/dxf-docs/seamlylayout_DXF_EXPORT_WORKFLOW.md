@@ -19,7 +19,7 @@ The DXF-ASTM export workflow is fully integrated into the desktop UI (`ui_deskto
 ### Step 2: Initiate Export
 
 1. **Open Export Menu**: Click "Export ▼" button to open the export format dropdown
-2. **Select Format**: Click "DXF-ASTM" from the dropdown menu
+2. **Select Format**: Click "DXF-ASTM (R12)", "DXF-ASTM (R13)" or "DXF-ASTM (CLO3D)" from the dropdown menu. CLO3D writes R12
 3. **File Save Dialog**: A file save dialog opens
    - Default filename: Based on input SVG filename with `.dxf` extension
    - User can change the filename and location
@@ -136,12 +136,13 @@ fn dxf_teaching_dialog() -> Element<'static, Message> {
 ### DXF File (.dxf)
 
 - **Location**: User-selected path
-- **Format**: DXF R12 (AC1009)
-- **Structure**:
+- **Format**: DXF R12 (AC1009) or DXF R13 (AC1012), from the menu item
+- **R12 structure**:
   - HEADER section (minimal/empty)
   - BLOCKS section (pattern piece definitions)
   - ENTITIES section (INSERT entities for blocks)
   - EOF marker
+- **R13 structure**: HEADER, CLASSES, TABLES, BLOCKS, ENTITIES, OBJECTS, EOF; handles on every entity. See `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`
 
 ### Teaching Version File (.txt)
 

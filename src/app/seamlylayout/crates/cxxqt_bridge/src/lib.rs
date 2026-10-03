@@ -2058,7 +2058,8 @@ impl qobject::AppController {
     // -----------------------------------------------------------------------
 
     // Export the assembled layout as a DXF-ASTM file.
-    // options_json: {"createTeachingVersion": true/false}
+    // options_json: {"createTeachingVersion": bool, "clo3dGroup250": bool, "dxfVersion": "R12"|"R13",
+    //                "appVersion", "creationDate", "creationTime"}
     // Delegates core logic to exports::do_export_dxf.
     // Called by QML 'Export DXF' button handler: onExportDXF: appController.exportDxf(path, optionsJson)
     fn export_dxf(
@@ -2083,6 +2084,9 @@ impl qobject::AppController {
             creation_time: Option<String>,
             #[serde(default)]
             clo3d_group_250: bool,
+            // "R12" or "R13"; absent or unknown writes R12.
+            #[serde(default)]
+            dxf_version: Option<String>,
         } // struct DxfExportOptions
         let opts: DxfExportOptions = match serde_json::from_str(&options_json.to_string()) {
             Ok(v) => v,
@@ -2129,6 +2133,10 @@ impl qobject::AppController {
             creation_date: opts.creation_date.clone(),
             creation_time: opts.creation_time.clone(),
             clo3d_group_250: opts.clo3d_group_250,
+            dxf_version: match opts.dxf_version.as_deref() {
+                Some("R13") => seamly_svg2ezdxf::DxfVersion::R13,
+                _ => seamly_svg2ezdxf::DxfVersion::R12,
+            }, // dxf_version
         }; // style
         match do_export_dxf(&layout_doc, &path_str, opts.create_teaching_version, &style, &mut dxf_progress) {
             Ok(()) => {

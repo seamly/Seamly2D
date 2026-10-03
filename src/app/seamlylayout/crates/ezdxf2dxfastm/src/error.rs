@@ -16,7 +16,7 @@ pub enum DxfAstmExportError {
     #[error("I/O error: {0}")]
     Io(#[from] std::io::Error),
 
-    // DXF version mismatch (must be R12 for ASTM).
+    // DXF version the writer cannot produce.
     #[error("Invalid DXF version: {0}")]
     InvalidVersion(String),
 
