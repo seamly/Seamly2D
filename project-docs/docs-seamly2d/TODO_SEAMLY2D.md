@@ -60,4 +60,15 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
 - [ ] Seamly2D.8.7 Unit tests: schema round-trip, handoff attributes
 - [ ] Seamly2D.8.8 SeamlyLayout side: Layout.16
 
+## [ ] Task Seamly2D.9 — Pattern preferences shows the label template file name
+
+`Pattern preferences > Label data > Label template:` has only the `Edit template` button (`pushButtonEditPatternLabel`, `src/app/seamly2d/dialogs/dialogpatternproperties.ui`). The user cannot see which template file the pattern label uses without opening the editor.
+
+- [ ] Seamly2D.9.1 Add a label to the right of `Edit template` that shows `labelbasename.ext` (file name only, no directory)
+- [ ] Seamly2D.9.2 Get the file from `NewPieceDefaults::patternLabelTemplateFile(lines)`, the same call `DialogPatternProperties` passes to `EditLabelTemplateDialog::setTemplateFile`
+- [ ] Seamly2D.9.3 Show the selected file; else the Preferences default; else "none" (the pattern stores lines, not a file), to match the Edit Label Template dialog
+- [ ] Seamly2D.9.4 Refresh the label after `Edit template` closes with new lines (`templateDataChanged`)
+- [ ] Seamly2D.9.5 Tooltip shows the full absolute path
+- [ ] Seamly2D.9.6 Unit test: file name shown for selected, default, and no-file cases
+
 ## [x] Task Seamly2D.4 — Preferences > Paths has no row for bodyscans
