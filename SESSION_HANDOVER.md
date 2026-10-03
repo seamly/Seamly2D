@@ -6,6 +6,16 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — DXF.1: Seamly2D tags turn points (`data-turn-points`)
+
+Merged `task-dxf-turn-points`. `nmake check` (4 Qt suites), `cargo test --workspace`, `ctest --preset debug` passed.
+
+- Plan: `project-docs/docs-seamlylayout/TODO_DXF.md`, from the aw.fyi report `test-seamly-layout-input/male_shirt_202610031234-dxf-report.pdf`. Next: DXF.2 (spline tolerance check).
+- Contract change on both sides: `docs-data/SVG-DATA-ATTRIBUTES.md` `data-turn-points`.
+- Thresholds 0.5° / 5° / 25° are in `vabstractpiece.cpp`; 5° chosen because the FrontPanel neckline join bends about 2°.
+- User action: export male_shirt DXF-ASTM from the app, run it through aw.fyi (DXF.8).
+- Not checked in the running app.
+
 ## 2026-10-03 — DXF `Author:` is `Seamly2D <version>`
 
 Merged `task-dxf-author-version`. `cargo test --workspace` and `ctest --preset debug` passed.

@@ -56,6 +56,8 @@
 #include <QVector>
 #include <QTransform>
 
+#include <optional>
+
 #include "../vpatterndb/floatItemData/vpiecelabeldata.h"
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
 #include "../vpatterndb/floatItemData/vgrainlinedata.h"
@@ -73,7 +75,9 @@ class VLayoutPieceData : public QSharedData
 public:
     VLayoutPieceData()
         : contour(),
+          contourTurnPoints(),
           seamAllowance(),
+          seamAllowanceTurnPoints(),
           layoutAllowance(),
           notches(),
           m_internalPaths(),
@@ -93,7 +97,9 @@ public:
     VLayoutPieceData(const VLayoutPieceData &piece)
         : QSharedData(piece),
           contour(piece.contour),
+          contourTurnPoints(piece.contourTurnPoints),
           seamAllowance(piece.seamAllowance),
+          seamAllowanceTurnPoints(piece.seamAllowanceTurnPoints),
           layoutAllowance(piece.layoutAllowance),
           notches(piece.notches),
           m_internalPaths(piece.m_internalPaths),
@@ -113,7 +119,9 @@ public:
     ~VLayoutPieceData() {}
 
     QVector<QPointF>           contour;            /// @brief contour list of contour points.
+    std::optional<QVector<int>> contourTurnPoints; /// @brief turn point indices into contour; unset = unknown
     QVector<QPointF>           seamAllowance;      /// @brief seamAllowance list of seam allowance points.
+    std::optional<QVector<int>> seamAllowanceTurnPoints; /// @brief turn point indices into seamAllowance; unset = unknown
     QVector<QPointF>           layoutAllowance;    /// @brief layoutAllowance list of layout allowance points.
     QVector<QLineF>            notches;            /// @brief notches list of notches.
     QVector<VLayoutPiecePath>  m_internalPaths;    /// @brief m_internalPaths list of internal paths.

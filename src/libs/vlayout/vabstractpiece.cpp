@@ -204,7 +204,13 @@ void VAbstractPiece::SetSAWidth(qreal value)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> VAbstractPiece::Equidistant(const QVector<VSAPoint> &points, qreal width)
+/**
+ * @brief Equidistant builds the seam allowance polyline around the main path.
+ * @param nodeVertices when not null, receives the seam allowance vertices built at node points
+ *        (VSAPoint::isNode()), for turnPointIndices().
+ */
+QVector<QPointF> VAbstractPiece::Equidistant(const QVector<VSAPoint> &points, qreal width,
+                                             QVector<QPointF> *nodeVertices)
 {
     if (width < 0)
     {
@@ -229,8 +235,12 @@ QVector<QPointF> VAbstractPiece::Equidistant(const QVector<VSAPoint> &points, qr
     {
         if ( i == 0)
         {//first point
-            ekvPoints << EkvPoint(p.at(p.size()-2), p.at(p.size()-1),
-                                  p.at(1), p.at(0), width);
+            const QVector<QPointF> ekv = EkvPoint(p.at(p.size()-2), p.at(p.size()-1), p.at(1), p.at(0), width);
+            if (nodeVertices != nullptr && p.at(0).isNode())
+            {
+                *nodeVertices += ekv;
+            }
+            ekvPoints << ekv;
             continue;
         }
 
@@ -243,13 +253,148 @@ QVector<QPointF> VAbstractPiece::Equidistant(const QVector<VSAPoint> &points, qr
             continue;
         }
         //points in the middle of polyline
-        ekvPoints << EkvPoint(p.at(i-1), p.at(i),
-                              p.at(i+1), p.at(i), width);
+        const QVector<QPointF> ekv = EkvPoint(p.at(i-1), p.at(i), p.at(i+1), p.at(i), width);
+        if (nodeVertices != nullptr && p.at(i).isNode())
+        {
+            *nodeVertices += ekv;
+        }
+        ekvPoints << ekv;
     }
 
     const bool removeFirstAndLast = false;
     ekvPoints = CheckLoops(CorrectEquidistantPoints(ekvPoints, removeFirstAndLast));//Result path can contain loops
     return ekvPoints;
+}
+
+namespace
+{
+// A vertex this close to a node vertex is that node vertex.
+constexpr qreal kNodeMatchTolerance = 0.01;
+// A direction change above this angle where two straight lines meet makes a turn point.
+constexpr qreal kLineJoinAngleDegrees = 0.5;
+// A tangent change above this angle where a curve meets a line or curve makes a turn point.
+// The curve tangent is estimated from chords, so this needs more margin than a line join.
+constexpr qreal kCurveJoinAngleDegrees = 5.0;
+// A direction change above this angle is a corner even away from a node, e.g. a seam allowance loop cut.
+constexpr qreal kSharpAngleDegrees = 25.0;
+
+//---------------------------------------------------------------------------------------------------------------------
+qreal normalizedAngle(qreal degrees)
+{
+    while (degrees > 180.0)
+    {
+        degrees -= 360.0;
+    }
+    while (degrees <= -180.0)
+    {
+        degrees += 360.0;
+    }
+    return degrees;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+qreal directionDegrees(const QPointF &from, const QPointF &to)
+{
+    return QLineF(from, to).angle();
+}
+} // namespace
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief turnPointIndices finds the turn points of a polyline: the vertices where the tangent breaks.
+ *
+ * Only node vertices (piece nodes, curve ends, spline path knots) can break the tangent.
+ * Curve interior vertices are curve points, except where the polyline turns sharper than a
+ * curve interpolation can. A side between two node vertices is a straight line; the tangent
+ * of a curve side is extrapolated from its first two chords, so a coarse curve interpolation
+ * does not read as a corner.
+ *
+ * @param points       polyline vertices; a closed polyline may repeat its first vertex.
+ * @param nodeVertices node vertex positions; vertices within kNodeMatchTolerance of one are nodes.
+ * @param closed       whether the polyline is a closed loop. Open ends are always turn points.
+ * @return ascending indices into @p points.
+ */
+QVector<int> VAbstractPiece::turnPointIndices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
+                                              bool closed)
+{
+    QVector<int> turns;
+    int n = points.size();
+    // A closing repeat vertex takes the turn state of the first vertex.
+    const bool repeatsFirst = closed && n > 1 && QLineF(points.first(), points.last()).length() < kNodeMatchTolerance;
+    if (repeatsFirst)
+    {
+        --n;
+    }
+    if (n < 2)
+    {
+        return turns;
+    }
+
+    QVector<bool> isNode(n, false);
+    for (int i = 0; i < n; ++i)
+    {
+        for (const QPointF &node : nodeVertices)
+        {
+            if (QLineF(points.at(i), node).length() < kNodeMatchTolerance)
+            {
+                isNode[i] = true;
+                break;
+            }
+        }
+    }
+
+    // Neighbour index, or -1 past an open end.
+    auto at = [n, closed](int i) { return closed ? (i % n + n) % n : (i >= 0 && i < n ? i : -1); };
+
+    for (int i = 0; i < n; ++i)
+    {
+        if (!closed && (i == 0 || i == n - 1))
+        {
+            turns.append(i);
+            continue;
+        }
+
+        const int prev = at(i - 1);
+        const int next = at(i + 1);
+        const qreal chordIn = directionDegrees(points.at(prev), points.at(i));
+        const qreal chordOut = directionDegrees(points.at(i), points.at(next));
+        if (qAbs(normalizedAngle(chordOut - chordIn)) > kSharpAngleDegrees)
+        {
+            turns.append(i);
+            continue;
+        }
+        if (!isNode.at(i))
+        {
+            continue;
+        }
+
+        // Curve side: the chord direction lags the tangent by half the turn to the next chord.
+        qreal tangentIn = chordIn;
+        const int prev2 = at(i - 2);
+        if (!isNode.at(prev) && prev2 != -1)
+        {
+            tangentIn = chordIn + normalizedAngle(chordIn - directionDegrees(points.at(prev2), points.at(prev))) / 2.0;
+        }
+        qreal tangentOut = chordOut;
+        const int next2 = at(i + 2);
+        if (!isNode.at(next) && next2 != -1)
+        {
+            tangentOut = chordOut - normalizedAngle(directionDegrees(points.at(next), points.at(next2)) - chordOut) / 2.0;
+        }
+
+        const bool lineJoin = isNode.at(prev) && isNode.at(next);
+        const qreal limit = lineJoin ? kLineJoinAngleDegrees : kCurveJoinAngleDegrees;
+        if (qAbs(normalizedAngle(tangentOut - tangentIn)) > limit)
+        {
+            turns.append(i);
+        }
+    }
+
+    if (repeatsFirst && !turns.isEmpty() && turns.first() == 0)
+    {
+        turns.append(n);
+    }
+    return turns;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

@@ -248,5 +248,13 @@ mod tests {
         let span = |v: &[f64]| v.iter().cloned().fold(f64::MIN, f64::max) - v.iter().cloned().fold(f64::MAX, f64::min);
         assert!((span(&xs) - 1391.09 * 25.4 / 96.0).abs() < 1.0, "width {}", span(&xs));
         assert!((span(&ys) - 2664.57 * 25.4 / 96.0).abs() < 1.0, "length {}", span(&ys));
+
+        // Seamly2D's data-turn-points tags: the front panel's cut line and sew line
+        // each have 7 turn points (corners, shoulder and side seam joins). The hem and
+        // neckline joins are smooth, so they are curve points even where the
+        // interpolation has long single segments.
+        let front = &dxf.blocks.iter().find(|(n, _)| n == "piece_FrontPanel_M").expect("front panel").1;
+        let turn_points = front.iter().filter(|e| e.kind == "POINT" && e.layer() == "2").count();
+        assert_eq!(turn_points, 14, "front panel turn points");
     }
 }

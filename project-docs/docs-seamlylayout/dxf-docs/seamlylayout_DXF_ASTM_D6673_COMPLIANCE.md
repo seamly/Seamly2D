@@ -44,11 +44,12 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 
 ## Contour rules (`astm_contour.rs`)
 
-- Seamly2D sends interpolated polylines; the original curve nodes are lost.
+- Seamly2D sends interpolated polylines; it tags the turn point vertices with `data-turn-points`.
 - `dense` = the full polyline → validation layer (84–87).
 - `reduced` = Douglas–Peucker key points per span between turn points → primary layer (1, 8, 11, 14).
 - `reduced` is an ordered subset of `dense`, and both start at the same vertex (§4.3.3.1).
-- Turn point: direction change > 25°, an open end, or an end of a straight chord ≥ 10 mm.
+- Turn points come from Seamly2D's `data-turn-points` tag on each path component (see `docs-data/SVG-DATA-ATTRIBUTES.md`). Seamly2D marks a node vertex whose tangent breaks by more than 0.5° (line–line) or 5° (with a curve), any vertex that turns more than 25°, and open ends.
+- No tag (untagged SVG, or tags that do not match the path): turn point = direction change > 25°, an open end, or an end of a straight chord ≥ 10 mm with at least one dense vertex on it. A single long segment is not evidence of a straight line: coarse curve interpolation makes them too.
 - All other key points are curve points.
 - Closing repeat vertex removed; group 70 = 1 closes the polyline.
 

@@ -8,7 +8,7 @@ use crate::drawing::{Block, Drawing, DxfVersion};
 use crate::entities::{Circle, Entity, Line, Point, Polyline, Text};
 use crate::error::Result;
 use crate::layers::map_svg_to_astm_layer;
-use crate::astm_contour::{build_contour, AstmContour};
+use crate::astm_contour::{build_contour_tagged, AstmContour};
 use crate::astm_notch::build_notches;
 use crate::drawing::Annotation;
 use crate::layers::{piece_component, PieceComponent};
@@ -298,21 +298,58 @@ fn collect_components<'a>(element: &'a Element, out: &mut Vec<(PieceComponent, &
     } // for each child
 } // fn collect_components
 
+// @brief One polyline of a piece component.
+struct TaggedPolyline {
+    points: Vec<Point>,
+    closed: bool,
+    // Parallel to `points`: `true` = turn point. `None` = no `data-turn-points` tags.
+    turns: Option<Vec<bool>>,
+} // struct TaggedPolyline
+
 // @brief Every polyline drawn under `element`, one per path subpath, in DXF units.
 // @return (vertices, closed) pairs.
 fn element_polylines(element: &Element, options: &SvgToEzdxfOptions, svg_height: f64) -> Vec<(Vec<Point>, bool)> {
-    let mut out = Vec::new();
-    collect_polylines(element, options, svg_height, &mut out);
-    out
+    element_tagged_polylines(element, options, svg_height).into_iter().map(|l| (l.points, l.closed)).collect()
 } // fn element_polylines
 
-// @brief Recursive worker for element_polylines.
-fn collect_polylines(element: &Element, options: &SvgToEzdxfOptions, svg_height: f64, out: &mut Vec<(Vec<Point>, bool)>) {
+// @brief Every polyline drawn under a component group, with the group's `data-turn-points` tags.
+// @details `data-turn-points` lists, space separated, the indices of the turn
+//          point vertices in the component path's `d`, counting each MoveTo and
+//          LineTo end point from 0. An empty value means no turn points. Tags apply
+//          only to a path of straight segments, where vertices map 1:1.
+fn element_tagged_polylines(element: &Element, options: &SvgToEzdxfOptions, svg_height: f64) -> Vec<TaggedPolyline> {
+    // An unparseable value is treated as absent: the geometry fallback is safer than wrong tags.
+    let turn_points: Option<Vec<usize>> = element
+        .attributes
+        .get("data-turn-points")
+        .and_then(|v| v.split_whitespace().map(|t| t.parse::<usize>().ok()).collect());
+    let mut out = Vec::new();
+    collect_polylines(element, options, svg_height, turn_points.as_deref(), &mut out);
+    out
+} // fn element_tagged_polylines
+
+// @brief Recursive worker for element_tagged_polylines.
+fn collect_polylines(
+    element: &Element,
+    options: &SvgToEzdxfOptions,
+    svg_height: f64,
+    turn_points: Option<&[usize]>,
+    out: &mut Vec<TaggedPolyline>,
+) {
     let map = |x: f64, y: f64| to_dxf(Point::new(x, y), options, svg_height);
     match element.name.as_str() {
         "path" => {
             let Some(d) = element.attributes.get("d") else { return; };
             let Ok(path) = Path::parse_path_attribute(d) else { return; };
+            // Tags index the path's vertices, so they need one vertex per segment.
+            let straight = path.segments.iter().all(|s| {
+                matches!(
+                    s,
+                    geometry::PathSegment::MoveTo(_) | geometry::PathSegment::LineTo(_) | geometry::PathSegment::Close
+                )
+            }); // straight
+            let turn_points = turn_points.filter(|_| straight);
+            let mut vertex_index = 0usize;
             // Split at each MoveTo: Seamly2D draws all notches of a piece as one path.
             let mut subpaths: Vec<Vec<geometry::PathSegment>> = Vec::new();
             for seg in &path.segments {
@@ -323,6 +360,22 @@ fn collect_polylines(element: &Element, options: &SvgToEzdxfOptions, svg_height:
             } // for each segment
             for segments in subpaths {
                 let closed = segments.iter().any(|s| matches!(s, geometry::PathSegment::Close));
+                if let Some(indices) = turn_points {
+                    // Straight segments: the vertices are the segment end points.
+                    let mut points = Vec::new();
+                    let mut turns = Vec::new();
+                    for seg in &segments {
+                        if let geometry::PathSegment::MoveTo(p) | geometry::PathSegment::LineTo(p) = seg {
+                            points.push(map(p.x as f64, p.y as f64));
+                            turns.push(indices.contains(&vertex_index));
+                            vertex_index += 1;
+                        } // if vertex
+                    } // for each segment
+                    if points.len() >= 2 {
+                        out.push(TaggedPolyline { points, closed, turns: Some(turns) });
+                    } // if drawable
+                    continue;
+                } // if tagged
                 let mut sub = Path::new();
                 sub.segments = segments;
                 let points: Vec<Point> = sub
@@ -331,26 +384,27 @@ fn collect_polylines(element: &Element, options: &SvgToEzdxfOptions, svg_height:
                     .map(|p| map(p.x as f64, p.y as f64))
                     .collect();
                 if points.len() >= 2 {
-                    out.push((points, closed));
+                    out.push(TaggedPolyline { points, closed, turns: None });
                 } // if drawable
             } // for each subpath
         } // path
         "line" => {
             let a = |k: &str| parse_float_attr(element.attributes.get(k), 0.0);
-            out.push((vec![map(a("x1"), a("y1")), map(a("x2"), a("y2"))], false));
+            let points = vec![map(a("x1"), a("y1")), map(a("x2"), a("y2"))];
+            out.push(TaggedPolyline { points, closed: false, turns: None });
         } // line
         "polyline" | "polygon" => {
             if let Some(pts) = element.attributes.get("points") {
                 let points: Vec<Point> = parse_points_attribute(pts).into_iter().map(|p| map(p.x, p.y)).collect();
                 if points.len() >= 2 {
-                    out.push((points, element.name == "polygon"));
+                    out.push(TaggedPolyline { points, closed: element.name == "polygon", turns: None });
                 } // if drawable
             } // if points
         } // polyline | polygon
         _ => {
             for child in &element.children {
                 if let XMLNode::Element(e) = child {
-                    collect_polylines(e, options, svg_height, out);
+                    collect_polylines(e, options, svg_height, turn_points, out);
                 } // if element
             } // for each child
         } // container
@@ -413,19 +467,19 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
     let mut components = Vec::new();
     collect_components(piece, &mut components);
 
-    let mut cut_lines: Vec<(Vec<Point>, bool)> = Vec::new();
-    let mut seam_lines: Vec<(Vec<Point>, bool)> = Vec::new();
+    let mut cut_lines: Vec<TaggedPolyline> = Vec::new();
+    let mut seam_lines: Vec<TaggedPolyline> = Vec::new();
     let mut notch_lines: Vec<Vec<Point>> = Vec::new();
+    let contour = |l: &TaggedPolyline| build_contour_tagged(&l.points, l.closed, l.turns.as_deref());
     for (component, element) in components {
         let lines = || element_polylines(element, options, svg_height);
+        let tagged = || element_tagged_polylines(element, options, svg_height);
         match component {
-            PieceComponent::Cutline => cut_lines.extend(lines()),
-            PieceComponent::Seamline => seam_lines.extend(lines()),
+            PieceComponent::Cutline => cut_lines.extend(tagged()),
+            PieceComponent::Seamline => seam_lines.extend(tagged()),
             PieceComponent::Notch => notch_lines.extend(lines().into_iter().map(|(p, _)| p)),
-            PieceComponent::InternalPath => {
-                block.internal_lines.extend(lines().iter().filter_map(|(p, c)| build_contour(p, *c)))
-            } // InternalPath
-            PieceComponent::CutPath => block.cutouts.extend(lines().iter().filter_map(|(p, c)| build_contour(p, *c))),
+            PieceComponent::InternalPath => block.internal_lines.extend(tagged().iter().filter_map(contour)),
+            PieceComponent::CutPath => block.cutouts.extend(tagged().iter().filter_map(contour)),
             PieceComponent::Grainline => {
                 if block.grainline.is_none() {
                     // The grainline path runs tip to tip, with arrowheads drawn in between.
@@ -442,15 +496,15 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
     block.quantity = quantity_from_label(&block.annotations);
 
     // Boundary: the longest closed cut line, else the longest closed seam line.
-    let longest_closed = |lines: &[(Vec<Point>, bool)]| {
-        lines.iter().filter(|(p, c)| *c && p.len() >= 3).max_by_key(|(p, _)| p.len()).map(|(p, _)| p.clone())
+    let longest_closed = |lines: &[TaggedPolyline]| -> Option<AstmContour> {
+        let line = lines.iter().filter(|l| l.closed && l.points.len() >= 3).max_by_key(|l| l.points.len())?;
+        build_contour_tagged(&line.points, true, line.turns.as_deref())
     }; // longest_closed
-    let boundary_points = longest_closed(&cut_lines).or_else(|| longest_closed(&seam_lines));
-    block.boundary = boundary_points.and_then(|p| build_contour(&p, true));
+    block.boundary = longest_closed(&cut_lines).or_else(|| longest_closed(&seam_lines));
 
     // Sew lines: every seam line that is not the boundary itself.
-    for (points, closed) in &seam_lines {
-        if let Some(contour) = build_contour(points, *closed) {
+    for line in &seam_lines {
+        if let Some(contour) = contour(line) {
             if block.boundary.as_ref().map_or(true, |b| !same_contour(b, &contour)) {
                 block.sew_lines.push(contour);
             } // if distinct from boundary

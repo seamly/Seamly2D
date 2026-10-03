@@ -56,6 +56,8 @@
 #include <QPointF>
 #include <QVector>
 
+#include <optional>
+
 #include "../vmisc/diagnostic.h"
 #include "../vmisc/vabstractapplication.h"
 #include "../vmisc/vcommonsettings.h"
@@ -73,6 +75,7 @@ public:
         , m_lineType(lineTypeToPenStyle(qApp->Settings()->getDefaultInternalLinetype()))
         , m_lineWeight(QString::number(qApp->Settings()->getDefaultInternalLineweight()))
         , m_cut(false)
+        , m_turnPoints()
     {}
 
     VLayoutPiecePathData(const QVector<QPointF> points, QString color,
@@ -82,6 +85,7 @@ public:
         , m_lineType(lineType)
         , m_lineWeight(lineWeight)
         , m_cut(cut)
+        , m_turnPoints()
     {}
 
     VLayoutPiecePathData(const VLayoutPiecePathData &path)
@@ -91,6 +95,7 @@ public:
         , m_lineType(path.m_lineType)
         , m_lineWeight(path.m_lineWeight)
         , m_cut(path.m_cut)
+        , m_turnPoints(path.m_turnPoints)
     {}
 
     ~VLayoutPiecePathData() Q_DECL_EQ_DEFAULT;
@@ -100,6 +105,7 @@ public:
     Qt::PenStyle     m_lineType; /// @brief m_penStyle path pen style.
     QString          m_lineWeight;
     bool             m_cut;
+    std::optional<QVector<int>> m_turnPoints; /// @brief turn point indices into m_points; unset = unknown
 
 private:
     VLayoutPiecePathData &operator=(const VLayoutPiecePathData &) Q_DECL_EQ_DELETE;

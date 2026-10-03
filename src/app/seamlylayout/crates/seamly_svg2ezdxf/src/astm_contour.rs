@@ -15,6 +15,9 @@
 //!
 //! `reduced` is an ordered subset of `dense` and both start at the same vertex,
 //! as D6673-10 §4.3.3.1 requires.
+//!
+//! Turn points come from Seamly2D's `data-turn-points` tags when present
+//! (`build_contour_tagged`); otherwise they are detected from the geometry.
 
 use crate::entities::Point;
 
@@ -45,23 +48,54 @@ pub struct AstmContour {
     pub closed: bool,
 }
 
-/// @brief Build the ASTM contour for one polyline.
+/// @brief Build the ASTM contour for one polyline, detecting turn points from the geometry.
 /// @param points Polyline vertices in DXF units; a closed loop may repeat its first vertex.
 /// @param closed Whether the polyline is a closed loop.
 /// @return The contour, or None when fewer than 2 (open) or 3 (closed) distinct vertices remain.
 pub fn build_contour(points: &[Point], closed: bool) -> Option<AstmContour> {
+    build_contour_tagged(points, closed, None)
+} // fn build_contour
+
+/// @brief Build the ASTM contour for one polyline.
+/// @param points Polyline vertices in DXF units; a closed loop may repeat its first vertex.
+/// @param closed Whether the polyline is a closed loop.
+/// @param turns  Parallel to `points`: `true` = turn point, from Seamly2D's `data-turn-points`.
+///               `None` = unknown; turn points are then detected from the geometry.
+/// @return The contour, or None when fewer than 2 (open) or 3 (closed) distinct vertices remain.
+pub fn build_contour_tagged(points: &[Point], closed: bool, turns: Option<&[bool]>) -> Option<AstmContour> {
+    // Tags that do not match the vertices are ignored, not trusted.
+    let turns = turns.filter(|t| t.len() == points.len());
+
     // Step 1: remove repeated vertices, including the closing repeat of a loop.
-    let mut dense = remove_duplicates(points);
+    // A removed vertex passes its turn tag to the vertex it repeats.
+    let (mut dense, mut tagged) = remove_duplicates(points, turns);
     if closed && dense.len() > 1 && distance(dense[0], dense[dense.len() - 1]) < DUPLICATE_TOLERANCE_MM {
         dense.pop();
+        if let Some(t) = tagged.as_mut() {
+            let last = t.pop().unwrap_or(false);
+            t[0] |= last;
+        } // if tagged
     } // if closing repeat
     let min_len = if closed { 3 } else { 2 };
     if dense.len() < min_len {
         return None;
     } // if too few vertices
 
-    // Step 2: sharp direction changes are turn points; they anchor the reduction.
-    let sharp = sharp_vertices(&dense, closed);
+    // Step 2: turn points anchor the reduction. Tagged input uses the tags;
+    // untagged input uses sharp direction changes.
+    let turn_flags = |dense: &[Point], tagged: &Option<Vec<bool>>| match tagged {
+        Some(t) => {
+            let mut t = t.clone();
+            if !closed {
+                t[0] = true;
+                let last = t.len() - 1;
+                t[last] = true;
+            } // if open: ends are turn points
+            t
+        } // tagged
+        None => sharp_vertices(dense, closed),
+    }; // turn_flags
+    let sharp = turn_flags(&dense, &tagged);
     let mut anchors: Vec<usize> = (0..dense.len()).filter(|&i| sharp[i]).collect();
     if anchors.is_empty() {
         anchors.push(0); // smooth closed loop: start anywhere
@@ -72,9 +106,12 @@ pub fn build_contour(points: &[Point], closed: bool) -> Option<AstmContour> {
     if closed && anchors[0] != 0 {
         let shift = anchors[0];
         dense.rotate_left(shift);
+        if let Some(t) = tagged.as_mut() {
+            t.rotate_left(shift);
+        } // if tagged
         anchors.iter_mut().for_each(|a| *a -= shift);
     } // if rotate
-    let sharp = sharp_vertices(&dense, closed);
+    let sharp = turn_flags(&dense, &tagged);
 
     // Step 4: reduce each span between consecutive anchors with Douglas-Peucker.
     let n = dense.len();
@@ -94,11 +131,12 @@ pub fn build_contour(points: &[Point], closed: bool) -> Option<AstmContour> {
         kept.push(anchors[anchors.len() - 1]);
     } // if open: keep last vertex
 
-    // Step 5: classify key points. Sharp vertices, open ends, and both ends of a
-    // long straight chord are turn points; everything else is a curve point.
+    // Step 5: classify key points. Tagged input: the tags decide. Untagged input:
+    // sharp vertices, open ends, and both ends of a long straight chord are turn
+    // points. Everything else is a curve point.
     let k = kept.len();
     let mut turn: Vec<bool> = kept.iter().map(|&i| sharp[i]).collect();
-    let chord_count = if closed { k } else { k - 1 };
+    let chord_count = if tagged.is_some() { 0 } else if closed { k } else { k - 1 };
     for c in 0..chord_count {
         let a = kept[c];
         let b = if c + 1 < k { kept[c + 1] } else { n };
@@ -129,14 +167,21 @@ pub fn distance_to_segment(p: Point, a: Point, b: Point) -> f64 {
 } // fn distance_to_segment
 
 // @brief Drop consecutive vertices closer than DUPLICATE_TOLERANCE_MM.
-fn remove_duplicates(points: &[Point]) -> Vec<Point> {
+// @return The kept vertices, and their turn tags when `turns` is given. A dropped
+//         vertex's tag is merged into the kept vertex it repeats.
+fn remove_duplicates(points: &[Point], turns: Option<&[bool]>) -> (Vec<Point>, Option<Vec<bool>>) {
     let mut out: Vec<Point> = Vec::with_capacity(points.len());
-    for &p in points {
+    let mut out_turns: Vec<bool> = Vec::with_capacity(points.len());
+    for (i, &p) in points.iter().enumerate() {
+        let tag = turns.map_or(false, |t| t[i]);
         if out.last().map_or(true, |&q| distance(p, q) >= DUPLICATE_TOLERANCE_MM) {
             out.push(p);
+            out_turns.push(tag);
+        } else if let Some(last) = out_turns.last_mut() {
+            *last |= tag;
         } // if distinct
     } // for each point
-    out
+    (out, turns.map(|_| out_turns))
 } // fn remove_duplicates
 
 // @brief Flag vertices whose direction change exceeds TURN_ANGLE_DEG.
@@ -167,13 +212,15 @@ fn direction_change_deg(prev: Point, p: Point, next: Point) -> f64 {
 } // fn direction_change_deg
 
 // @brief True when the chord dense[a]→dense[b] is long and all dense points between lie on it.
+// @details A chord with no dense point between its ends is not evidence of a
+//          straight line: a coarse curve interpolation has long single segments too.
 // @param b May equal dense.len(), meaning the wrap-around to vertex 0.
 fn is_straight_chord(dense: &[Point], a: usize, b: usize) -> bool {
     let n = dense.len();
     let (pa, pb) = (dense[a], dense[b % n]);
-    if distance(pa, pb) < STRAIGHT_MIN_LENGTH_MM {
+    if b <= a + 1 || distance(pa, pb) < STRAIGHT_MIN_LENGTH_MM {
         return false;
-    } // if short chord
+    } // if single segment or short chord
     (a + 1..b).all(|i| distance_to_segment(dense[i % n], pa, pb) < STRAIGHT_TOLERANCE_MM)
 } // fn is_straight_chord
 

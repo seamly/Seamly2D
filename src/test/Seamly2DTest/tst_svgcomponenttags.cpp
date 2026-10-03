@@ -780,3 +780,57 @@ void TST_SvgComponentTags::MultisizeIdsAreUniqueAndSized() const
         ids.insert(id);
     }
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PathComponentsCarryTurnPoints checks that seam line, cut line, internal path and cut path
+ * groups carry data-turn-points when their node vertices are known.
+ */
+void TST_SvgComponentTags::PathComponentsCarryTurnPoints() const
+{
+    VLayoutPiece piece = makeTestPiece(QStringLiteral("Yoke"));
+    // Square corners are node vertices; the midpoint of the top side is a smooth node.
+    QVector<QPointF> contour = squarePoints(10, 10, 180);
+    contour.insert(1, QPointF(100, 10));
+    piece.setMainPathPoints(contour, false, contour);
+    piece.setSeamAllowancePoints(squarePoints(5, 5, 190), true, false, squarePoints(5, 5, 190));
+
+    VLayoutPiecePath internal = makePath({QPointF(20, 20), QPointF(40, 30), QPointF(60, 20)}, false);
+    internal.setTurnPoints({0, 1, 2});
+    piece.setInternalPaths({internal});
+
+    const QDomDocument doc = exportPieceSvg(piece);
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+
+    const QVector<QDomElement> seamlines = groupsOfType(doc, QStringLiteral("seamline"));
+    QCOMPARE(seamlines.size(), 1);
+    QCOMPARE(seamlines.at(0).attribute(QStringLiteral("data-turn-points")), QStringLiteral("0 2 3 4"));
+
+    const QVector<QDomElement> cutlines = groupsOfType(doc, QStringLiteral("cutline"));
+    QCOMPARE(cutlines.size(), 1);
+    QCOMPARE(cutlines.at(0).attribute(QStringLiteral("data-turn-points")), QStringLiteral("0 1 2 3"));
+
+    const QVector<QDomElement> internals = groupsOfType(doc, QStringLiteral("internal_path"));
+    QCOMPARE(internals.size(), 1);
+    QCOMPARE(internals.at(0).attribute(QStringLiteral("data-turn-points")), QStringLiteral("0 1 2"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief UnknownTurnPointsEmitNoAttribute checks that a path without node vertices gets no
+ * data-turn-points, so SeamlyLayout uses its own detection.
+ */
+void TST_SvgComponentTags::UnknownTurnPointsEmitNoAttribute() const
+{
+    const QDomDocument doc = exportPieceSvg(makeTestPiece(QStringLiteral("Cuff")));
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+
+    const QVector<QDomElement> seamlines = groupsOfType(doc, QStringLiteral("seamline"));
+    QCOMPARE(seamlines.size(), 1);
+    QVERIFY(!seamlines.at(0).hasAttribute(QStringLiteral("data-turn-points")));
+
+    const QVector<QDomElement> cutPaths = groupsOfType(doc, QStringLiteral("cut_path"));
+    QVERIFY(!cutPaths.isEmpty());
+    QVERIFY(!cutPaths.at(0).hasAttribute(QStringLiteral("data-turn-points")));
+}
+

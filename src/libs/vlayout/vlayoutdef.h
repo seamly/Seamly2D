@@ -86,7 +86,9 @@ namespace PieceItemData
         ObjectName  = 0, /**< Piece name on the root item (legacy convention, kept for the SVG group id). */
         ItemType    = 1, /**< SVG data-type string: seamline|cutline|notch|internal_path|cut_path|grainline|piece_label|pattern_label. */
         PieceLetter = 2, /**< Piece letter, exported as the data-letter attribute when set. */
-        GrainlineAngle = 3 /**< Grain direction in degrees (QLineF::angle()), exported as data-grainline-angle. */
+        GrainlineAngle = 3, /**< Grain direction in degrees (QLineF::angle()), exported as data-grainline-angle. */
+        TurnPoints  = 4  /**< Turn point vertex indices of the item's path, space separated, exported as
+                              data-turn-points. Unset when the turn points are unknown. */
     };
 }
 #endif // VLAYOUTDEF_H

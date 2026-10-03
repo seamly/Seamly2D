@@ -184,7 +184,21 @@ QVector<VPointF> VPiece::mainPathNodePoints(const VContainer *data, bool showExc
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QPointF> VPiece::seamAllowancePoints(const VContainer *data) const
+/**
+ * @brief mainPathNodeVertices returns the mainPathPoints() vertices that can break the tangent.
+ * @details See VPiecePath::pathNodeVertices().
+ */
+QVector<QPointF> VPiece::mainPathNodeVertices(const VContainer *data) const
+{
+    return GetPath().pathNodeVertices(data);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief seamAllowancePoints builds the seam allowance (cut line) polyline.
+ * @param nodeVertices when not null, receives the returned vertices that can break the tangent.
+ */
+QVector<QPointF> VPiece::seamAllowancePoints(const VContainer *data, QVector<QPointF> *nodeVertices) const
 {
     SCASSERT(data != nullptr);
 
@@ -267,7 +281,7 @@ QVector<QPointF> VPiece::seamAllowancePoints(const VContainer *data) const
         }
     }
 
-    return Equidistant(pointsEkv, width);
+    return Equidistant(pointsEkv, width, nodeVertices);
 }
 
 QVector<QPointF> VPiece::cutPathPoints(const VContainer *data) const
