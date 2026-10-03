@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pattern>
-    <!--Pattern created with Seamly2D v2026.7.13.214 (https://seamly.io).-->
-    <!--<version>0.7.12</version>-->
+    <!--Pattern created with Seamly2D v26.9.2508 (https://seamly.io).-->
     <version>0.7.4</version>
     <unit>inch</unit>
-    <description>The Richmond Shirt v1.3, foglinefabrics.com</description>
-    <notes/>
+    <description>Shirt</description>
+    <notes></notes>
     <patternName>The Richmond Shirt</patternName>
     <patternNumber>v1.3</patternNumber>
     <company>FoglineFabrics.com</company>
-    <customer/>
+    <customer></customer>
     <patternLabel dateFormat="MM-dd-yyyy" timeFormat="hh:mm:ss">
         <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%patternName%"/>
         <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%patternNumber%"/>
         <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%author%"/>
     </patternLabel>
-    <measurements>./2025-06-08-Sue.smis</measurements>
+    <measurements>2025-06-08-Sue.smis</measurements>
     <variables/>
     <draftBlock name="Torso">
         <calculation>
@@ -130,7 +129,7 @@
             <point firstPoint="781" id="782" lineColor="black" lineType="dashLine" lineWeight="0.35" mx="-0.719824" my="0.803781" name="left_cut_2" secondPoint="78" type="intersectXY"/>
             <line firstPoint="781" id="783" lineColor="black" lineType="solidLine" secondPoint="782"/>
             <point id="836" length="4.5" mx="0.0883897" my="0.249393" name="back_notch_b" spline="365" type="cutSpline"/>
-            <point id="837" length="Spl_A21_A10 - 4.5" mx="0.197309" my="-0.222591" name="front_notch_f" spline="608" type="cutSpline"/>
+            <point id="837" length="Spl_A21_A10 - 4.5" mx="0.27038" my="-0.320019" name="front_notch_f" spline="608" type="cutSpline"/>
             <arc angle1="0" angle2="360" center="836" color="black" id="851" penStyle="solidLine" radius="0.1" type="simple"/>
             <arc angle1="0" angle2="360" center="836" color="black" id="852" penStyle="solidLine" radius="0.2" type="simple"/>
             <arc angle1="0" angle2="360" center="837" color="black" id="853" penStyle="solidLine" radius="0.15" type="simple"/>
@@ -147,7 +146,7 @@
             <spline angle1="0" angle2="190" color="black" id="893" length1="Line_A5_A10 / 2" length2="Line_A5_A10 / 3" penStyle="solidLine" point1="45" point4="887" type="simpleInteractive"/>
             <spline angle1="180" angle2="350" color="black" id="894" length1="Line_A5_A10 / 2" length2="Line_A5_A10 / 3" penStyle="solidLine" point1="19" point4="886" type="simpleInteractive"/>
             <spline angle1="276" angle2="88" color="black" id="895" length1="Line_A10_center_bottom / 8" length2="Line_A10_center_bottom / 6" penStyle="solidLine" point1="15" point4="886" type="simpleInteractive"/>
-            <point direction="forward" id="1006" length="0.25" lineColor="black" mx="0.0520833" my="0.104167" name="ZZZ14" showPointName="true" spline="608" type="cutSpline"/>
+            <point direction="forward" id="1006" length="0.25" lineColor="black" mx="0.344367" my="-0.943182" name="ZZZ14" showPointName="true" spline="608" type="cutSpline"/>
         </calculation>
         <modeling>
             <point id="111" idObject="100" inUse="true" mx="-0.419004" my="-0.470178" type="modeling"/>
@@ -187,11 +186,11 @@
             <point id="927" idObject="31" inUse="true" mx="-0.224357" my="-0.470005" type="modeling"/>
             <spline id="928" idObject="33" inUse="true" type="modelingSpline"/>
             <point id="929" idObject="30" inUse="true" mx="-0.249538" my="-0.552865" type="modeling"/>
-            <point id="930" idObject="41" inUse="true" mx="0.127489" my="-0.197455" type="modeling"/>
+            <point id="930" idObject="41" inUse="true" mx="0.15766" my="-0.559503" type="modeling"/>
             <spline id="931" idObject="609" inUse="true" type="modelingSpline"/>
-            <point id="932" idObject="39" inUse="true" mx="0.113561" my="-0.205038" type="modeling"/>
+            <point id="932" idObject="39" inUse="true" mx="0.54227" my="-0.359645" type="modeling"/>
             <spline id="933" idObject="608" inUse="true" type="modelingSpline"/>
-            <point id="934" idObject="15" inUse="true" mx="0.0520833" my="0.104167" type="modeling"/>
+            <point id="934" idObject="15" inUse="true" mx="-0.35941" my="-0.777605" type="modeling"/>
             <spline id="935" idObject="890" inUse="true" type="modelingSpline"/>
             <point id="936" idObject="887" inUse="true" mx="-0.782259" my="0.191724" type="modeling"/>
             <spline id="937" idObject="893" inUse="true" type="modelingSpline"/>
@@ -225,12 +224,6 @@
                     <node idObject="949" type="NodePoint"/>
                     <node idObject="950" type="NodePoint"/>
                     <node idObject="951" type="NodePoint"/>
-                </nodes>
-            </path>
-            <arc id="953" idObject="853" inUse="true" type="modeling"/>
-            <path cut="false" id="954" inUse="true" lineType="solidLine" name="Notch" type="2">
-                <nodes>
-                    <node idObject="953" reverse="1" type="NodeArc"/>
                 </nodes>
             </path>
             <point id="955" idObject="331" inUse="true" mx="0.0520833" my="0.104167" type="modeling"/>
@@ -276,18 +269,8 @@
                     <node idObject="1000" type="NodePoint"/>
                 </nodes>
             </path>
-            <arc id="1002" idObject="852" inUse="true" type="modeling"/>
-            <path cut="false" id="1003" inUse="true" lineType="solidLine" name="Notch1" type="2">
-                <nodes>
-                    <node idObject="1002" reverse="1" type="NodeArc"/>
-                </nodes>
-            </path>
-            <arc id="1004" idObject="851" inUse="true" type="modeling"/>
-            <path cut="false" id="1005" inUse="true" lineType="solidLine" name="Notch 2" type="2">
-                <nodes>
-                    <node idObject="1004" reverse="1" type="NodeArc"/>
-                </nodes>
-            </path>
+            <point id="1007" idObject="837" inUse="true" mx="0.286663" my="-0.374468" showPointName="true" type="modeling"/>
+            <point id="1008" idObject="836" inUse="true" mx="0.0883897" my="0.249393" showPointName="true" type="modeling"/>
         </modeling>
         <pieces>
             <piece forbidFlipping="false" hideMainPath="false" id="115" mx="-3.11808" my="-3.84334" name="Front Placket" seamAllowance="true" united="false" version="2" width="3/8">
@@ -314,14 +297,14 @@
                     <record>675</record>
                 </anchors>
             </piece>
-            <piece forbidFlipping="false" hideMainPath="false" id="773" mx="3.16235" my="-4.00756" name="Yoke" seamAllowance="true" united="false" version="2" width="3/8">
-                <data annotation="" centerAnchor="775" foldPosition="" fontSize="0" height="1.75" letter="" mx="-327.574" my="128.488" onFold="true" orientation="" quantity="2" rotation="0" rotationWay="" tilt="" visible="true" width="4.5">
+            <piece color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="773" inLayout="true" locked="false" mx="3.16235" my="-4.00756" name="Yoke" seamAllowance="true" united="false" version="2" width="3/8">
+                <data annotation="" centerAnchor="775" foldPosition="Undefined" fontSize="0" height="1.75" letter="C" mx="-327.574" my="128.488" onFold="true" orientation="Undefined" quantity="2" rotation="0" rotationWay="None" tilt="None" visible="true" width="4.5">
                     <line alignment="0" bold="false" italic="false" sfIncrement="10" text="%pName%"/>
                     <line alignment="0" bold="false" italic="false" sfIncrement="1" text="Cut %pQuantity% %wOnFold%"/>
                     <line alignment="0" bold="false" italic="false" sfIncrement="1" text="%pAnnotation%"/>
                 </data>
                 <patternInfo centerAnchor="774" fontSize="33" height="1.75" mx="-670.208" my="262.33" rotation="0" visible="true" width="4.5"/>
-                <grainline arrows="0" centerAnchor="776" length="3" mx="0" my="0" rotation="90" visible="true"/>
+                <grainline arrowLength="0.5" arrows="0" centerAnchor="776" length="3" mx="0" my="0" rotation="90" visible="true"/>
                 <nodes>
                     <node after="0.25" idObject="766" type="NodePoint"/>
                     <node idObject="767" reverse="0" type="NodeSpline"/>
@@ -337,14 +320,14 @@
                     <record>776</record>
                 </anchors>
             </piece>
-            <piece forbidFlipping="false" hideMainPath="false" id="940" inLayout="true" mx="-0.979039" my="-3.76554" name="Front" seamAllowance="true" united="false" version="2" width="3/8">
-                <data annotation="Cut at line on left side" centerAnchor="960" foldPosition="" fontSize="0" height="2.5" letter="" mx="0" my="0" onFold="false" orientation="" quantity="2" rotation="0" rotationWay="" tilt="" visible="true" width="5.5">
+            <piece color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="940" inLayout="true" locked="false" mx="-1.06722" my="-3.76554" name="Front" seamAllowance="true" united="false" version="2" width="3/8">
+                <data annotation="Cut at line on left side" centerAnchor="960" foldPosition="Undefined" fontSize="57" height="2.5" letter="A" mx="0" my="0" onFold="false" orientation="Undefined" quantity="2" rotation="0" rotationWay="None" tilt="None" visible="true" width="5.5">
                     <line alignment="0" bold="false" italic="false" sfIncrement="10" text="%pName%"/>
                     <line alignment="0" bold="false" italic="false" sfIncrement="1" text="Cut %pQuantity% %wOnFold%"/>
                     <line alignment="0" bold="false" italic="false" sfIncrement="1" text="%pAnnotation%"/>
                 </data>
                 <patternInfo centerAnchor="959" fontSize="0" height="1.75" mx="0" my="0" rotation="0" visible="true" width="4.5"/>
-                <grainline arrows="0" centerAnchor="961" length="12" mx="0" my="0" rotation="90" visible="true"/>
+                <grainline arrowLength="0.5" arrows="0" centerAnchor="961" length="12" mx="0" my="0" rotation="90" visible="true"/>
                 <nodes>
                     <node before="0" idObject="926" type="NodePoint"/>
                     <node idObject="927" type="NodePoint"/>
@@ -353,6 +336,8 @@
                     <node after="1/4" idObject="930" type="NodePoint"/>
                     <node idObject="931" reverse="0" type="NodeSpline"/>
                     <node after="1/4" before="1/4" idObject="932" type="NodePoint"/>
+                    <node idObject="933" reverse="0" type="NodeSpline"/>
+                    <node after="0.25" before="0.25" idObject="1007" notch="true" notchAngle="0" notchCount="1" notchLength="0.25" notchSubtype="straightforward" notchType="slit" notchWidth="0.25" showNotch="false" showSecondNotch="false" type="NodePoint"/>
                     <node idObject="933" reverse="0" type="NodeSpline"/>
                     <node after="1/2" before="1/4" idObject="934" type="NodePoint"/>
                     <node idObject="935" reverse="0" type="NodeSpline"/>
@@ -365,7 +350,6 @@
                     <record path="943"/>
                     <record path="946"/>
                     <record path="952"/>
-                    <record path="954"/>
                     <record path="958"/>
                 </iPaths>
                 <anchors>
@@ -374,14 +358,14 @@
                     <record>961</record>
                 </anchors>
             </piece>
-            <piece forbidFlipping="false" hideMainPath="false" id="992" inLayout="true" mx="3.25615" my="-1.04197" name="Back" seamAllowance="true" united="false" version="2" width="3/8">
-                <data annotation="" centerAnchor="994" foldPosition="" fontSize="0" height="1.75" letter="" mx="0" my="0" onFold="true" orientation="" quantity="1" rotation="0" rotationWay="" tilt="" visible="true" width="4.5">
+            <piece color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="992" inLayout="true" locked="false" mx="3.25615" my="-1.04197" name="Back" seamAllowance="true" united="false" version="2" width="3/8">
+                <data annotation="" centerAnchor="994" foldPosition="Undefined" fontSize="0" height="1.75" letter="B" mx="0" my="0" onFold="true" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="4.5">
                     <line alignment="0" bold="false" italic="false" sfIncrement="10" text="%pName%"/>
                     <line alignment="0" bold="false" italic="false" sfIncrement="1" text="Cut %pQuantity% %wOnFold%"/>
                     <line alignment="0" bold="false" italic="false" sfIncrement="1" text="%pAnnotation%"/>
                 </data>
                 <patternInfo centerAnchor="993" fontSize="0" height="1.75" mx="0" my="0" rotation="0" visible="true" width="4.5"/>
-                <grainline arrows="0" centerAnchor="995" length="12" mx="0" my="0" rotation="90" visible="true"/>
+                <grainline arrowLength="0.5" arrows="0" centerAnchor="995" length="12" mx="0" my="0" rotation="90" visible="true"/>
                 <nodes>
                     <node before="1/4" idObject="981" type="NodePoint"/>
                     <node idObject="982" reverse="0" type="NodeSpline"/>
@@ -393,13 +377,13 @@
                     <node idObject="988" reverse="1" type="NodeSpline"/>
                     <node after="1/4" before="1/2" idObject="989" type="NodePoint"/>
                     <node idObject="990" reverse="0" type="NodeSpline"/>
+                    <node after="0.25" before="0.25" idObject="1008" type="NodePoint"/>
+                    <node idObject="990" reverse="0" type="NodeSpline"/>
                     <node after="1/4" before="1/4" idObject="991" type="NodePoint"/>
                 </nodes>
                 <iPaths>
                     <record path="998"/>
                     <record path="1001"/>
-                    <record path="1003"/>
-                    <record path="1005"/>
                 </iPaths>
                 <anchors>
                     <record>993</record>
@@ -551,20 +535,20 @@
             <point id="702" idObject="699" inUse="true" type="anchor"/>
             <point id="703" idObject="700" inUse="true" type="anchor"/>
             <point id="704" idObject="701" inUse="true" type="anchor"/>
-            <arc id="843" idObject="842" inUse="true" type="modeling"/>
-            <path cut="false" id="844" inUse="true" lineType="solidLine" name="Back Notch 1" type="2">
+            <arc id="843" idObject="842" inUse="false" type="modeling"/>
+            <path cut="false" id="844" inUse="false" lineType="solidLine" name="Back Notch 1" type="2">
                 <nodes>
                     <node idObject="843" reverse="1" type="NodeArc"/>
                 </nodes>
             </path>
-            <arc id="846" idObject="845" inUse="true" type="modeling"/>
-            <path cut="false" id="847" inUse="true" lineType="solidLine" name="Back Notch 2" type="2">
+            <arc id="846" idObject="845" inUse="false" type="modeling"/>
+            <path cut="false" id="847" inUse="false" lineType="solidLine" name="Back Notch 2" type="2">
                 <nodes>
                     <node idObject="846" reverse="1" type="NodeArc"/>
                 </nodes>
             </path>
-            <arc id="849" idObject="848" inUse="true" type="modeling"/>
-            <path cut="false" id="850" inUse="true" lineType="solidLine" name="Front Notch" type="2">
+            <arc id="849" idObject="848" inUse="false" type="modeling"/>
+            <path cut="false" id="850" inUse="false" lineType="solidLine" name="Front Notch" type="2">
                 <nodes>
                     <node idObject="849" reverse="1" type="NodeArc"/>
                 </nodes>
@@ -599,14 +583,14 @@
                     <record>704</record>
                 </anchors>
             </piece>
-            <piece forbidFlipping="false" hideMainPath="false" id="422" mx="5.60515" my="-2.9474" name="Sleeve" seamAllowance="true" united="false" version="2" width="0.25">
-                <data annotation="" centerAnchor="695" foldPosition="" fontSize="74" height="1.75" letter="" mx="722.794" my="969.156" onFold="false" orientation="" quantity="2" rotation="0" rotationWay="" tilt="" visible="true" width="4.5">
+            <piece color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="422" inLayout="true" locked="false" mx="3.70931" my="-2.39699" name="Sleeve" seamAllowance="true" united="false" version="2" width="0.25">
+                <data annotation="" centerAnchor="695" foldPosition="Undefined" fontSize="74" height="1.75" letter="" mx="722.794" my="969.156" onFold="false" orientation="Undefined" quantity="2" rotation="0" rotationWay="None" tilt="None" visible="true" width="4.5">
                     <line alignment="0" bold="false" italic="false" sfIncrement="10" text="%pName%"/>
                     <line alignment="0" bold="false" italic="false" sfIncrement="1" text="Cut %pQuantity% %wOnFold%"/>
                     <line alignment="0" bold="false" italic="false" sfIncrement="1" text="%pAnnotation%"/>
                 </data>
                 <patternInfo centerAnchor="694" fontSize="54" height="1.75" mx="727.389" my="772.811" rotation="0" visible="true" width="4.5"/>
-                <grainline arrows="0" centerAnchor="696" length="12" mx="1908.68" my="2346.4" rotation="90" visible="true"/>
+                <grainline arrowLength="0.5" arrows="0" centerAnchor="696" length="12" mx="1908.68" my="2346.4" rotation="90" visible="true"/>
                 <nodes>
                     <node before="1/2" idObject="403" type="NodePoint"/>
                     <node idObject="404" reverse="0" type="NodeSpline"/>
@@ -631,9 +615,6 @@
                 <iPaths>
                     <record path="484"/>
                     <record path="487"/>
-                    <record path="844"/>
-                    <record path="847"/>
-                    <record path="850"/>
                     <record path="867"/>
                 </iPaths>
                 <anchors>

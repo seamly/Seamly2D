@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<smis>
+    <!--Measurements created with SeamlyMe v2026.7.13.214 (https://seamly.io/).-->
+    <version>0.3.4</version>
+    <read-only>false</read-only>
+    <notes/>
+    <unit>cm</unit>
+    <pm_system>998</pm_system>
+    <personal>
+        <family-name/>
+        <given-name>Sue</given-name>
+        <birth-date>1800-01-01</birth-date>
+        <gender>female</gender>
+        <email>sue@seamly.io</email>
+    </personal>
+    <body-measurements>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__HEIGHTS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="height" value="168"/>
+        <m name="height_neck_back" value="142.54"/>
+        <m name="height_bustpoint" value="120.95"/>
+        <m name="height_waist_back" value="105"/>
+        <m name="height_waist_side" value="105"/>
+        <m name="height_waist_side_to_knee" value="58.61"/>
+        <m name="height_highhip" value="97"/>
+        <m name="height_hip" value="84"/>
+        <m full_name="Height: crotch" name="@height_crotch" value="79"/>
+        <m name="height_ankle" value="9.73"/>
+        <m name="height_knee" value="46.2"/>
+        <m name="height_calf" value="35.7"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__HEIGHT_CALCULATED__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m full_name="height_neck_back - height_hip" name="@height_neck_back_to_hip" value="height_neck_back - height_hip"/>
+        <m full_name="height_neck_back - height_hip" name="@height_neck_back_to_crotch" value="height_neck_back - height_hip"/>
+        <m full_name="height_neck_back -@height_crotch - (2.54)" name="@height_neck_side_to_thigh_1_inch_below_crotch" value="height_neck_back -@height_crotch - (2.54)"/>
+        <m full_name="height_neck_back - height_hip" name="@height_neck_side_to_highhip_f" value="height_neck_back - height_hip"/>
+        <m name="height_waist_side_to_hip" value="height_waist_side - height_hip"/>
+        <m full_name="height_highhip - height_hip" name="@height_highhip_side_to_hip" value="height_highhip - height_hip"/>
+        <m full_name="height_highhip - @height_crotch" name="@height_highhip_side_to_crotch" value="height_highhip - @height_crotch"/>
+        <m full_name="@height_crotch - height_ankle" name="@height_crotch_to_ankle" value="@height_crotch - height_ankle"/>
+        <m full_name="(height_knee - height_ankle) + (@height_crotch - height_knee)/4" name="@height_thigh_lower_to_ankle" value="(height_knee - height_ankle) + (@height_crotch - height_knee)/4"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__WIDTHS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="neck_width" value="14"/>
+        <m name="width_waist" value="30.56"/>
+        <m name="@width_highhip" value="38.84"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__DEPTHS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="@depth_waist" value="25.33"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__NECK_GIRTHS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="neck_circ" value="43"/>
+        <m name="neck_mid_circ" value="34.67"/>
+        <m name="@neck_circ_plus_half_inch" value="36.05"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__NECK_LENGTHS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="@neck_length" value="8.74"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__TORSO_GIRTHS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="body_armfold_circ" value="123.18"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__TORSO_LENGTHS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="neck_front_to_waist_f" value="40"/>
+        <m name="neck_back_to_highbust_b" value="25.4"/>
+        <m name="neck_back_to_waist_b" value="44"/>
+        <m name="neck_side_to_waist_f" value="47"/>
+        <m name="neck_side_to_waist_b" value="45.08"/>
+        <m name="neck_side_to_bust_f" value="27.62"/>
+        <m name="neck_side_to_highbust_b" value="23"/>
+        <m name="armscye_length" value="23"/>
+        <m name="shoulder_length" value="15.5"/>
+        <m name="armpit_to_waist_side" value="21"/>
+        <m name="bust_to_waist_f" value="19.92"/>
+        <m name="waist_to_hip_f" value="20.56"/>
+        <m name="waist_to_hip_side" value="20.56 + 2.5"/>
+        <m name="waist_to_hip_b" value="20.56 + 2.5 + 2"/>
+        <m full_name="=height_neck_back - height_knee" name="@neck_side_to_knee" value="height_neck_back - height_knee"/>
+        <m full_name="=height_neck_back - height_highhip" name="@neck_side_to_highhip_f" value="height_neck_back - height_highhip"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__TORSO_WIDTHS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="shoulder_tip_to_shoulder_tip_f" value="43"/>
+        <m name="shoulder_tip_to_shoulder_tip_b" value="44.34"/>
+        <m name="neck_front_to_shoulder_tip_f" value="22"/>
+        <m name="neck_back_to_shoulder_tip_b" value="22"/>
+        <m name="across_chest_f" value="34"/>
+        <m name="across_back_b" value="35"/>
+        <m name="armfold_to_armfold_f" value="42"/>
+        <m name="armfold_to_armfold_b" value="38"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0-0" name="@__BUST_CHEST__@" value="0-0-0-0-0-0-0-0-0"/>
+        <m name="bust_circ" value="101"/>
+        <m name="bust_arc_f" value="0.53 * bust_circ"/>
+        <m name="bust_arc_b" value="bust_circ - bust_arc_f"/>
+        <m name="bustpoint_to_bustpoint" value="20"/>
+        <m name="bustpoint_to_neck_side" value="30"/>
+        <m name="bustpoint_to_shoulder_tip" value="26.51"/>
+        <m name="bustpoint_to_waist" value="18"/>
+        <m name="lowbust_circ" value="89.46"/>
+        <m name="lowbust_arc_f" value="0.48 * lowbust_circ"/>
+        <m name="lowbust_arc_b" value="lowbust_circ - lowbust_arc_f"/>
+        <m name="highbust_circ" value="97.15"/>
+        <m name="highbust_arc_f" value="0.52 * highbust_circ"/>
+        <m name="highbust_arc_b" value="highbust_circ - highbust_arc_f"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__WAIST_GIRTHS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="waist_circ" value="94"/>
+        <m name="waist_arc_f" value="50"/>
+        <m name="waist_arc_b" value="waist_circ - waist_arc_f"/>
+        <m full_name="waist_circ_1_inch_below_waist" name="@waist_circ_1_inch_below_waist" value="94.43"/>
+        <m full_name="waist_circ_widest_midtorso" name="@waist_circ_widest_midtorso" value="98.81"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__HIP_ABDOMEN_GIRTHS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="hip_circ" value="112"/>
+        <m name="hip_arc_f" value="55"/>
+        <m name="hip_arc_b" value="hip_circ - hip_arc_f"/>
+        <m name="hip_circ_with_abdomen" value="114"/>
+        <m name="hip_with_abdomen_arc_f" value="hip_circ_with_abdomen - hip_arc_b"/>
+        <m name="highhip_circ" value="106"/>
+        <m name="highhip_arc_f" value="55"/>
+        <m name="highhip_arc_b" value="highhip_circ - highhip_arc_f"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__RISE_CROTCH_LENGTHS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="crotch_length" value="74.42"/>
+        <m name="rise_length_side" value="32.41"/>
+        <m full_name="belly_button_front_to_crotch_point" name="@belly_button_front_to_crotch_point" value="30.1"/>
+        <m full_name="belly_button_back_to_crotch_point" name="@belly_button_back_to_crotch_point" value="37.6"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__ARM_GIRTHS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="armscye_circ" value="44.18"/>
+        <m name="arm_upper_circ" value="33.94"/>
+        <m full_name="arm_upper_circ_1_inch_below_armpit" name="@arm_upper_circ_1_inch_below_armpit" value="31.42"/>
+        <m name="arm_elbow_circ" value="28.38"/>
+        <m full_name="arm_lower_circ" name="@arm_lower_circ" value="26.86"/>
+        <m name="arm_wrist_circ" value="17.2"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__ARM_LENGTHS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="arm_shoulder_tip_to_wrist" value="60.18"/>
+        <m name="arm_armpit_to_wrist" value="47.44"/>
+        <m name="arm_shoulder_tip_to_elbow" value="34.77"/>
+        <m name="arm_elbow_to_wrist" value="25.39"/>
+        <m full_name="arm_neck_back_to_wrist" name="@arm_neck_back_to_wrist" value="81.42"/>
+        <m full_name="arm_neck_back_to_wrist_plus_1_and_half_inch" name="@arm_neck_back_to_wrist_plus_1_and_half_inch" value="85.23"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__LEG_GIRTHS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="leg_thigh_upper_circ" value="62.13"/>
+        <m full_name="leg_thigh_circ_1_inch_below_crotch" name="@leg_thigh_circ_1_inch_below_crotch" value="66.25"/>
+        <m name="leg_thigh_mid_circ" value="51.0"/>
+        <m name="leg_knee_circ" value="40.19"/>
+        <m name="leg_calf_circ" value="38.8"/>
+        <m name="leg_ankle_circ" value="25.41"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__LEG_LENGTHS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="leg_waist_side_to_floor" value="109"/>
+        <m full_name="=leg_waist_side_to_floor" name="@outseam" value="leg_waist_side_to_floor"/>
+        <m name="leg_crotch_to_floor" value="79"/>
+        <m full_name="=max(leg_crotch_to_floor; @height_crotch)" name="@inseam" value="max(leg_crotch_to_floor; @height_crotch)"/>
+        <m name="@waist_side_to_ankle" value="@outseam - height_ankle"/>
+        <m name="@leg_highhip_side_to_1_inch_below_ankle" value="92.07"/>
+        <m name="@leg_highhip_side_to_knee" value="46.6"/>
+        <m name="@leg_abdomen_side_to_knee" value="44.51"/>
+        <m name="@leg_crotch_to_mid_thigh" value="14.15"/>
+        <m name="@leg_crotch_to_knee" value="27.43"/>
+        <m name="@leg_crotch_to_calf" value="40.75"/>
+        <m name="leg_crotch_to_ankle" value="69.09"/>
+        <m name="@leg_crotch_to_1_inch_above_floor" value="68.56"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__DIAGONALS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="neck_front_to_waist_side" value="45"/>
+        <m name="neck_back_to_waist_side" value="51"/>
+        <m name="neck_side_to_armfold_f" value="26"/>
+        <m name="neck_side_to_armfold_b" value="28"/>
+        <m name="shoulder_tip_to_waist_front" value="48"/>
+        <m name="shoulder_tip_to_waist_back" value="43"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__ANGLES__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="shoulder_slope_neck_side_angle" value="18.65"/>
+        <m full_name="0-0-0-0-0-0-0-0-0-0" name="@__DESIGN_MEASUREMENTS__@" value="0-0-0-0-0-0-0-0-0-0"/>
+        <m name="@jacket_length" value="77.13"/>
+        <m name="@pant_waist" value="95.84"/>
+    </body-measurements>
+</smis>

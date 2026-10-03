@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<smms>
+    <!--Measurements created with SeamlyMe v2026.9.21.146 (https://seamly.io/).-->
+    <version>0.4.5</version>
+    <read-only>false</read-only>
+    <notes>Helen Joseph-Armstrong Sizing Bracket 1: Sizes 6 to 10</notes>
+    <unit>cm</unit>
+    <pm_system>998</pm_system>
+    <size base="38"/>
+    <height base="170"/>
+    <body-measurements>
+        <!-- Circumference Measurements -->
+        <!-- Upper Torso Measurements -->
+        <!-- Lower Torso Measurements -->
+        <!-- Required Standard Error Mappings Additions -->
+        <!-- Required Arc Splits & Breakdowns Additions -->
+        <m base="86.36" height_increase="0" name="bust_circ" size_increase="2.54"/>
+        <m base="64.77" height_increase="0" name="waist_circ" size_increase="2.54"/>
+        <m base="81.28" height_increase="0" name="highhip_circ" size_increase="2.54"/>
+        <m base="90.17" height_increase="0" name="hip_circ" size_increase="2.54"/>
+        <m base="35.88" height_increase="0" name="neck_front_to_waist_f" size_increase="0.32"/>
+        <m base="40.96" height_increase="0" name="neck_back_to_waist_b" size_increase="0.32"/>
+        <m base="42.55" height_increase="0" name="neck_side_to_waist_f" size_increase="0.95"/>
+        <m base="42.55" height_increase="0" name="neck_side_to_waist_b" size_increase="0.63"/>
+        <m base="44.45" height_increase="0" name="shoulder_tip_to_waist_front" size_increase="0.63"/>
+        <m base="40.16" height_increase="0" name="shoulder_tip_to_waist_back" size_increase="0.95"/>
+        <m base="43.18" height_increase="0" name="neck_side_to_waist_side_f" size_increase="0.64"/>
+        <m base="23.81" height_increase="0" name="bustpoint_to_shoulder_tip" size_increase="0.64"/>
+        <m base="7.62" height_increase="0" name="bustpoint_to_lowbust" size_increase="0.0"/>
+        <m base="8.89" height_increase="0" name="bustpoint_to_bustpoint_half" size_increase="0.32"/>
+        <m base="20.96" height_increase="0" name="armpit_to_waist_side" size_increase="0.32"/>
+        <m base="6.03" height_increase="0" name="neck_width" size_increase="0.16"/>
+        <m base="13.02" height_increase="0" name="shoulder_length" size_increase="0.16"/>
+        <m base="19.05" height_increase="0" name="shoulder_tip_to_shoulder_tip_half_f" size_increase="0.64"/>
+        <m base="18.42" height_increase="0" name="shoulder_tip_to_shoulder_tip_half_b" size_increase="0.64"/>
+        <m base="15.88" height_increase="0" name="across_chest_half_f" size_increase="0.64"/>
+        <m base="16.51" height_increase="0" name="across_back_half_b" size_increase="0.64"/>
+        <m base="23.5" height_increase="0" name="bust_arc_half_f" size_increase="0.95"/>
+        <m base="20.96" height_increase="0" name="bust_arc_half_b" size_increase="0.64"/>
+        <m base="16.51" height_increase="0" name="waist_arc_half_f" size_increase="0.64"/>
+        <m base="15.88" height_increase="0" name="waist_arc_half_b" size_increase="0.64"/>
+        <m base="7.62" full_name="Dart Placement Front" height_increase="0" name="@dpf" size_increase="0.32"/>
+        <m base="7.62" full_name="Dart Placement Back" height_increase="0" name="@dpb" size_increase="0.32"/>
+        <m base="19.69" height_increase="0" name="highhip_arc_half_f" size_increase="0.64"/>
+        <m base="20.96" height_increase="0" name="highhip_arc_half_b" size_increase="0.64"/>
+        <m base="22.23" height_increase="0" name="hip_arc_half_f" size_increase="0.64"/>
+        <m base="22.86" height_increase="0" name="hip_arc_half_b" size_increase="0.64"/>
+        <m base="24.13" height_increase="0" name="rise_length_side_sitting" size_increase="0.64"/>
+        <m base="18.42" height_increase="0" name="waist_to_hip_f" size_increase="0.64"/>
+        <m base="19.05" height_increase="0" name="waist_to_hip_b" size_increase="0.64"/>
+        <m base="19.69" height_increase="0" name="waist_to_hip_side" size_increase="0.64"/>
+        <m base="55.88" height_increase="0" name="leg_waist_side_to_knee" size_increase="1.27"/>
+        <m base="93.98" height_increase="0" name="leg_waist_side_to_ankle" size_increase="1.27"/>
+        <m base="99.06" height_increase="0" name="leg_waist_side_to_floor" size_increase="1.27"/>
+        <m base="62.23" height_increase="0" name="crotch_length" size_increase="1.91"/>
+        <m base="149.86" height_increase="0" name="body_torso_circ" size_increase="3.81"/>
+        <m base="50.8" height_increase="0" name="leg_thigh_upper_circ" size_increase="1.91"/>
+        <m base="46.99" height_increase="0" name="leg_thigh_mid_circ" size_increase="1.27"/>
+        <m base="33.02" height_increase="0" name="leg_knee_circ" size_increase="1.27"/>
+        <m base="31.75" height_increase="0" name="leg_calf_circ" size_increase="1.27"/>
+        <m base="22.23" height_increase="0" name="leg_ankle_circ" size_increase="0.32"/>
+        <m base="30.48" height_increase="0" name="leg_ankle_diag_circ" size_increase="0.64"/>
+        <m base="54.61" height_increase="0" name="arm_shoulder_tip_to_wrist_bent" size_increase="0.64"/>
+        <m base="13.97" full_name="Cap Height" height_increase="0" name="@Cap_Height" size_increase="0.32"/>
+        <m base="31.12" height_increase="0" name="arm_upper_circ" size_increase="0.95"/>
+    </body-measurements>
+</smms>

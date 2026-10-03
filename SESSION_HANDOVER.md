@@ -665,3 +665,10 @@ Not implemented, and **no task file entry exists for it yet**. It was outside
 
 Focus already returns to the mode active before the handoff (`Seamly2D.3`). What
 is missing is carrying SeamlyLayout's layout back into the right canvas.
+
+## Still open in DXF-ASTM format
+
+- Drill holes (Layout.63) and stripe/plaid lines (Layout.64) also have no Seamly2D source. Should they become new Seamly2D tasks, like fold lines?
+- D2, Diamond notch: my recommendation is to infer it from its shape.
+- D3, grade reference line: my recommendation is each size's grainline.
+- D4, scope: phases 1–3, one merge per phase. Grading (phase 3) would use the node points above, which adds producer work to phase 3.

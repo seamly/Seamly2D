@@ -16,11 +16,11 @@
 # **    Run these phases in order around the msiexec commands. They share a state
 # **    file for comparison:
 # **
-# **      .\local_install_msi.ps1 -Phase Baseline      <- BEFORE installing
+# **      packaging\windows\local_install_msi.ps1 -Phase Baseline      <- BEFORE installing
 # **      msiexec /i Seamly-x64-older.msi
-# **      .\local_install_msi.ps1 -Phase Installed -ExpectSeamlyLayout
+# **      packaging\windows\local_install_msi.ps1 -Phase Installed -ExpectSeamlyLayout
 # **      msiexec /i Seamly-x64-newer.msi           <- upgrade over the top
-# **      .\local_install_msi.ps1 -Phase Upgraded -ExpectSeamlyLayout
+# **      .\packaging\windows\local_install_msi.ps1 -Phase Upgraded -ExpectSeamlyLayout
 # **      msiexec /x Seamly-x64-newer.msi
 # **      .\local_install_msi.ps1 -Phase Removed
 # **
@@ -28,8 +28,8 @@
 # **    unelevated, but the phases are run either side of msiexec, which is
 # **    elevated anyway, and a non-admin run can silently miss registry rows.
 # **
-# **  WHAT IT STILL CANNOT SEE, and which therefore stays in README.md's manual
-# **  checklist: what the UAC prompt looks like, whether the wizard pages appear
+# **  WHAT IT CANNOT SEE (and so it stays in README.md's manual
+# **  checklist): what the UAC prompt looks like, whether the wizard pages appear
 # **  in the right order with the right wording, and whether Explorer paints the
 # **  right icons. Those need human eyes.
 # **
