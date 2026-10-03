@@ -122,6 +122,17 @@ Export > HPGL > Cut (cut lines only) uses the same default name as Plot. The use
 - [ ] Layout.17.5 Update `export-docs/seamlylayout_EXPORT_WORKFLOW.md` and the name comments in `Main.qml`
 - [ ] Layout.17.6 Test: cut name has `_cutlines`; plot and tiled names unchanged
 
+## [ ] Task Layout.18 — SVG export name shows the label text mode
+
+Export > SVG uses one default name for every text mode. The user cannot tell the files apart. Uses the segment parameter from Layout.17.2.
+
+- [ ] Layout.18.1 `Main.qml` `onExportSvgRequested`: mode `"singleLineFont"` puts `_singlelinefont` before the timestamp. Example: `male_shirt_singlelinefont_202610011721.svg`
+- [ ] Layout.18.2 Mode `"hersheyStrokes"` puts `_hersheyfont` before the timestamp. Example: `male_shirt_hersheyfont_202610011721.svg`
+- [ ] Layout.18.3 Modes `"designerFont"` and `"asSupplied"` name stays `<importedBaseName>_YYYYMMDDHHMM.svg`
+- [ ] Layout.18.4 Export all tabs: tab label still goes before the extension
+- [ ] Layout.18.5 Update `export-docs/seamlylayout_EXPORT_WORKFLOW.md` and the name comments in `Main.qml`
+- [ ] Layout.18.6 Test: each mode gives its name
+
 ## [x] Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 
 ## [x] Task Layout.9 — Piece-mode handoff passes a file, not a stringified SVG document
