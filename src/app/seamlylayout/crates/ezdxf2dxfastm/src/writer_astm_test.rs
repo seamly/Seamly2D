@@ -8,7 +8,7 @@
 mod tests {
     use crate::writer::{export_dxf_astm, DxfAstmExportOptions};
     use seamly_svg2ezdxf::{
-        build_contour, svg_to_ezdxf, Annotation, Block, Drawing, DxfVersion, Notch, NotchKind, Point, SvgToEzdxfOptions,
+        build_contour, spline_deviation, svg_to_ezdxf, Annotation, AstmContour, Block, Drawing, DxfVersion, Notch, NotchKind, Point, SvgToEzdxfOptions, CURVE_TOLERANCE_MM,
     };
     use std::collections::HashMap;
 
@@ -256,5 +256,33 @@ mod tests {
         let front = &dxf.blocks.iter().find(|(n, _)| n == "piece_FrontPanel_M").expect("front panel").1;
         let turn_points = front.iter().filter(|e| e.kind == "POINT" && e.layer() == "2").count();
         assert_eq!(turn_points, 14, "front panel turn points");
+    }
+
+    // @brief A spline through each contour's key points stays near its validation
+    //        polyline (layers 84–87), so a reader's reconstruction passes.
+    // @details A reader accepts 2 × CURVE_TOLERANCE_MM. The sleeves miss
+    //          CURVE_TOLERANCE_MM by about 0.15 mm without added curve points but
+    //          stay inside 2 ×, so the test holds the tighter bound.
+    #[test]
+    fn male_shirt_splines_follow_validation_layers() {
+        let svg = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/test_data/male_shirt_pieces.svg"))
+            .expect("fixture present");
+        let doc = svg_dom::Document::parse(&svg).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let limit = CURVE_TOLERANCE_MM + 1e-9;
+        for block in &drawing.blocks {
+            let groups: Vec<(&str, Vec<&AstmContour>)> = vec![
+                ("84", block.boundary.iter().collect()),
+                ("85", block.internal_lines.iter().collect()),
+                ("86", block.cutouts.iter().collect()),
+                ("87", block.sew_lines.iter().collect()),
+            ];
+            for (layer, contours) in groups {
+                for c in contours {
+                    let d = spline_deviation(c);
+                    assert!(d <= limit, "{} layer {layer}: spline off by {d:.3} mm", block.name);
+                }
+            }
+        }
     }
 }

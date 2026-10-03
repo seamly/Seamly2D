@@ -16,14 +16,19 @@
 //! `reduced` is an ordered subset of `dense` and both start at the same vertex,
 //! as D6673-10 §4.3.3.1 requires.
 //!
+//! A reader rebuilds each curve as a spline through the key points. The
+//! reader's spline method is not known; a centripetal Catmull-Rom spline,
+//! split at turn points, stands in for it. `reduced` keeps enough curve points
+//! that this spline stays within `CURVE_TOLERANCE_MM` of `dense`.
+//!
 //! Turn points come from Seamly2D's `data-turn-points` tags when present
 //! (`build_contour_tagged`); otherwise they are detected from the geometry.
 
 use crate::entities::Point;
 
 /// @brief Curve tolerance in millimetres, written as `Curve Tolerance:` style text.
-/// @details Maximum distance of a dense vertex from the reduced polyline chord
-///          that replaces it.
+/// @details Maximum distance between `dense` and the reduced polyline chords, and
+///          between `dense` and the spline through the key points.
 pub const CURVE_TOLERANCE_MM: f64 = 0.25;
 
 // Vertices closer than this are the same vertex.
@@ -34,6 +39,8 @@ const STRAIGHT_TOLERANCE_MM: f64 = 0.05;
 const STRAIGHT_MIN_LENGTH_MM: f64 = 10.0;
 // A direction change above this angle makes a vertex a turn point.
 const TURN_ANGLE_DEG: f64 = 25.0;
+// Minimum samples per spline segment between two key points.
+const SPLINE_SAMPLES: usize = 32;
 
 /// @brief One contour in the ASTM two-view representation.
 #[derive(Debug, Clone, PartialEq)]
@@ -145,10 +152,44 @@ pub fn build_contour_tagged(points: &[Point], closed: bool, turns: Option<&[bool
             turn[(c + 1) % k] = true;
         } // if straight chord
     } // for each chord
+
+    // Step 6: add curve points until the spline through the key points follows `dense`.
+    let (kept, turn) = refine_to_spline(&dense, kept, turn, closed);
     let reduced = kept.iter().map(|&i| dense[i]).collect();
 
     Some(AstmContour { dense, reduced, turn, closed })
 } // fn build_contour
+
+/// @brief Sample the spline that a reader rebuilds from the key points of `contour`.
+/// @return Polyline through the spline; a closed contour ends at its first key point.
+pub fn spline_points(contour: &AstmContour) -> Vec<Point> {
+    let k = contour.reduced.len();
+    if k < 2 {
+        return contour.reduced.clone();
+    } // if no segment
+    let segment_count = if contour.closed { k } else { k - 1 };
+    let mut out = vec![contour.reduced[0]];
+    for s in 0..segment_count {
+        // Each segment starts where the previous one ends; skip the repeat.
+        let samples = sample_segment(&contour.reduced, &contour.turn, contour.closed, s, SPLINE_SAMPLES);
+        out.extend_from_slice(&samples[1..]);
+    } // for each segment
+    out
+} // fn spline_points
+
+/// @brief Largest distance between the spline through the key points and `dense`, in both directions.
+/// @details Measures each dense vertex to the spline, and each spline sample to the
+///          dense polyline. This is the check a reader makes against layers 84–87.
+pub fn spline_deviation(contour: &AstmContour) -> f64 {
+    let spline = spline_points(contour);
+    let mut dense = contour.dense.clone();
+    if contour.closed {
+        dense.push(dense[0]); // closing edge
+    } // if closed
+    let to_spline = contour.dense.iter().map(|&p| distance_to_polyline(p, &spline)).fold(0.0, f64::max);
+    let to_dense = spline.iter().map(|&p| distance_to_polyline(p, &dense)).fold(0.0, f64::max);
+    to_spline.max(to_dense)
+} // fn spline_deviation
 
 /// @brief Distance between two points.
 pub fn distance(a: Point, b: Point) -> f64 {
@@ -254,3 +295,126 @@ fn dp_recurse(span: &[Point], first: usize, last: usize, tolerance: f64, kept: &
         dp_recurse(span, worst, last, tolerance, kept);
     } // if outside tolerance
 } // fn dp_recurse
+
+// @brief Add dense vertices as curve points until every spline segment is within
+//        CURVE_TOLERANCE_MM of `dense`.
+// @details Each pass adds at most one vertex per failing segment, then rebuilds
+//          the spline, because a new key point also bends its neighbor segments.
+//          Added vertices come from `dense`, so `kept` stays an ordered subset of it.
+// @param kept Ascending indices into `dense`; a closed loop starts at index 0.
+// @param turn Parallel to `kept`; added vertices are curve points.
+fn refine_to_spline(dense: &[Point], mut kept: Vec<usize>, mut turn: Vec<bool>, closed: bool) -> (Vec<usize>, Vec<bool>) {
+    let n = dense.len();
+    loop {
+        let k = kept.len();
+        let key: Vec<Point> = kept.iter().map(|&i| dense[i]).collect();
+        let segment_count = if closed { k } else { k - 1 };
+        let mut added: Vec<usize> = Vec::new();
+        for s in 0..segment_count {
+            let a = kept[s];
+            // The last segment of a loop wraps back to vertex 0 (index n).
+            let b = if s + 1 < k { kept[s + 1] } else { n };
+            if b <= a + 1 {
+                continue; // no dense vertex between the key points
+            } // if adjacent key points
+            let samples = sample_segment(&key, &turn, closed, s, SPLINE_SAMPLES.max(4 * (b - a)));
+            if let Some(i) = worst_vertex(dense, a, b, &samples) {
+                added.push(i);
+            } // if outside tolerance
+        } // for each segment
+        if added.is_empty() {
+            return (kept, turn);
+        } // if every segment within tolerance
+        for i in added {
+            let pos = kept.partition_point(|&j| j < i);
+            kept.insert(pos, i);
+            turn.insert(pos, false);
+        } // for each added vertex
+    } // loop until within tolerance
+} // fn refine_to_spline
+
+// @brief The dense vertex to add when a spline segment strays more than
+//        CURVE_TOLERANCE_MM from the dense vertices a..=b.
+// @param b May equal dense.len(), meaning the wrap-around to vertex 0. Must exceed a + 1.
+// @return The vertex farthest from the spline. When only the spline bulges away
+//         between dense vertices, the vertex nearest the bulge. None when within tolerance.
+fn worst_vertex(dense: &[Point], a: usize, b: usize, samples: &[Point]) -> Option<usize> {
+    let n = dense.len();
+    // Direction 1: dense vertex to spline.
+    let (mut far, mut far_dist) = (a + 1, 0.0);
+    for i in a + 1..b {
+        let d = distance_to_polyline(dense[i], samples);
+        if d > far_dist {
+            far = i;
+            far_dist = d;
+        } // if farther
+    } // for interior vertex
+    if far_dist > CURVE_TOLERANCE_MM {
+        return Some(far);
+    } // if a vertex is off the spline
+
+    // Direction 2: spline sample to dense polyline.
+    let chain: Vec<Point> = (a..=b).map(|i| dense[i % n]).collect();
+    let (mut bulge, mut bulge_dist) = (samples[0], 0.0);
+    for &p in samples {
+        let d = distance_to_polyline(p, &chain);
+        if d > bulge_dist {
+            bulge = p;
+            bulge_dist = d;
+        } // if farther
+    } // for each sample
+    if bulge_dist <= CURVE_TOLERANCE_MM {
+        return None;
+    } // if within tolerance
+    (a + 1..b).min_by(|&i, &j| distance(dense[i], bulge).total_cmp(&distance(dense[j], bulge)))
+} // fn worst_vertex
+
+// @brief Sample the spline segment from key point `s` to the next key point.
+// @details A turn point ends a spline, so the tangent there uses a phantom
+//          neighbor reflected through the turn point. A curve point uses its
+//          real neighbor. The ends of an open contour are always turn points.
+// @return count + 1 points; the first and last are the two key points.
+fn sample_segment(key: &[Point], turn: &[bool], closed: bool, s: usize, count: usize) -> Vec<Point> {
+    let k = key.len();
+    let j = (s + 1) % k;
+    let (p1, p2) = (key[s], key[j]);
+    let reflect = |p: Point, q: Point| Point::new(2.0 * p.x - q.x, 2.0 * p.y - q.y);
+    let p0 = if turn[s] || (!closed && s == 0) { reflect(p1, p2) } else { key[(s + k - 1) % k] };
+    let p3 = if turn[j] || (!closed && j == k - 1) { reflect(p2, p1) } else { key[(j + 1) % k] };
+    catmull_rom([p0, p1, p2, p3], count)
+} // fn sample_segment
+
+// @brief Sample the centripetal Catmull-Rom segment from p[1] to p[2].
+// @details Barry-Goldman evaluation with knot spacing sqrt(chord length).
+// @return count + 1 points from p[1] to p[2].
+fn catmull_rom(p: [Point; 4], count: usize) -> Vec<Point> {
+    // Coincident points would give a zero knot interval.
+    let knot = |a: Point, b: Point| distance(a, b).sqrt().max(1e-9);
+    let t0 = 0.0;
+    let t1 = t0 + knot(p[0], p[1]);
+    let t2 = t1 + knot(p[1], p[2]);
+    let t3 = t2 + knot(p[2], p[3]);
+    let lerp = |a: Point, b: Point, ta: f64, tb: f64, t: f64| {
+        let w = (t - ta) / (tb - ta);
+        Point::new(a.x + w * (b.x - a.x), a.y + w * (b.y - a.y))
+    };
+    (0..=count)
+        .map(|i| {
+            let t = t1 + (t2 - t1) * i as f64 / count as f64;
+            let a1 = lerp(p[0], p[1], t0, t1, t);
+            let a2 = lerp(p[1], p[2], t1, t2, t);
+            let a3 = lerp(p[2], p[3], t2, t3, t);
+            let b1 = lerp(a1, a2, t0, t2, t);
+            let b2 = lerp(a2, a3, t1, t3, t);
+            lerp(b1, b2, t1, t2, t)
+        })
+        .collect()
+} // fn catmull_rom
+
+// @brief Shortest distance from `p` to the polyline through `points`.
+fn distance_to_polyline(p: Point, points: &[Point]) -> f64 {
+    if points.len() == 1 {
+        return distance(p, points[0]);
+    } // if single point
+    points.windows(2).map(|w| distance_to_segment(p, w[0], w[1])).fold(f64::INFINITY, f64::min)
+} // fn distance_to_polyline

@@ -22,7 +22,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | Header | `$ACADVER` only | D6673 §4.2: keep the header minimal |
 | CLO3D group 250 | Off in **DXF-ASTM**; on in **DXF-ASTM (CLO3D)** | Not DXF R12, not D6673. CLO3D reads it: 0 = boundary (layer 1), 2 = sew line (layer 14). Only those key-point polylines carry it |
 | Block names | `<svg id>_M` kept | Existing CLO3D naming. `Piece Name:` carries the real name |
-| Curve tolerance | 0.25 mm | Douglas–Peucker tolerance for layer 1 key points |
+| Curve tolerance | 0.25 mm | Douglas–Peucker tolerance for key points, and limit for the spline through them. A reader accepts 2 × (0.5 mm) |
 | Quantity | From the "Cut N" label line: even N → `N/2,N/2`, odd N → `N,0` | Seamly2D exports only a total, not right/left counts |
 | Style Name | Pattern `data-name`, else the file stem | |
 | Sample Size, Grade Rule Table | Written blank | Required identifiers; export is one ungraded size |
@@ -47,6 +47,9 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 - Seamly2D sends interpolated polylines; it tags the turn point vertices with `data-turn-points`.
 - `dense` = the full polyline → validation layer (84–87).
 - `reduced` = Douglas–Peucker key points per span between turn points → primary layer (1, 8, 11, 14).
+- Spline check: centripetal Catmull-Rom through the key points, split at turn points (reflected end tangent). The reader's method is unknown; this is a stand-in.
+- Where the spline is more than 0.25 mm from `dense` (either direction), the farthest dense vertex becomes a curve point. Repeat until every segment passes. Only a segment with no dense vertex between its key points can stay over.
+- `spline_deviation()` measures the result; `writer_astm_test.rs` checks every male_shirt contour on layers 84–87.
 - `reduced` is an ordered subset of `dense`, and both start at the same vertex (§4.3.3.1).
 - Turn points come from Seamly2D's `data-turn-points` tag on each path component (see `docs-data/SVG-DATA-ATTRIBUTES.md`). Seamly2D marks a node vertex whose tangent breaks by more than 0.5° (line–line) or 5° (with a curve), any vertex that turns more than 25°, and open ends.
 - No tag (untagged SVG, or tags that do not match the path): turn point = direction change > 25°, an open end, or an end of a straight chord ≥ 10 mm with at least one dense vertex on it. A single long segment is not evidence of a straight line: coarse curve interpolation makes them too.

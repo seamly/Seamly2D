@@ -14,7 +14,7 @@ Reference: `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
 | Finding | Severity | Task |
 |---|---|---|
 | Declared points miscategorized: curve points on layer 2 (7 pieces) | departure | DXF.1 (done, see `TODO_COMPLETED.md`) |
-| Reconstruction from layers 2/3 off layer 84 by 0.532 (ShortSleeve_M), layer 87 by 0.942 (FullSleeve_M); limit 0.5 | extension | DXF.2 |
+| Reconstruction from layers 2/3 off layer 84 by 0.532 (ShortSleeve_M), layer 87 by 0.942 (FullSleeve_M); limit 0.5 | extension | DXF.2 (done, see `TODO_COMPLETED.md`) |
 | File is AC1009, not R13 (AC1012) | departure | DXF.3 |
 | More curve points than the curves need (Yoke_M L14, PocketFlapRound_M L1) | advisory | DXF.4 |
 | Pieces with no `Quantity:`, label, or grainline (CollarTopInterface, CollarBaseInterface, CuffInterface) | report table | DXF.5 |
@@ -25,16 +25,6 @@ Reference: `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
 Report deviations carry an inch sign but match millimetres. Not verified.
 
 Report on `male_shirt_202610031615.dxf` (after DXF.1): miscategorized points now advisory (3 pieces). DXF.2 still open: FullSleeve_M off layer 84 by 0.5319, layer 87 by 0.9309. New advisory: 5 pieces have no densified points (PlacketUnder_M and 4 others).
-
-## [ ] Task DXF.2 — Reconstructed curves stay within tolerance
-
-The validator rebuilds each curve from layers 2/3 and compares it with layers 84–87. Its spline method is unknown; use centripetal Catmull-Rom as a stand-in.
-
-- [ ] DXF.2.1 `astm_contour.rs`: rebuild each span between turn points as a spline through its key points
-- [ ] DXF.2.2 Where the spline is more than `CURVE_TOLERANCE_MM` from `dense`, add the farthest dense vertex as a curve point; repeat until within tolerance
-- [ ] DXF.2.3 Keep `reduced` an ordered subset of `dense` (§4.3.3.1)
-- [ ] DXF.2.4 Rust test: every contour in the male_shirt fixture is within 2× `CURVE_TOLERANCE_MM` on layers 84–87
-- [ ] DXF.2.5 Update the compliance doc
 
 ## [ ] Task DXF.3 — Write DXF R13 (AC1012)
 
