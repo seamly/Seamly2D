@@ -274,43 +274,43 @@ Menu {
         enabled: root.layoutReady
 
         SvgModeItem {
-            text: "Text: designer font"
+            text: "Text: use current designer font"
             mode: "designerFont"
             enabled: root.svgTextModesEnabled
             isLast: root.lastSvgTextMode === "designerFont"
             onChosen: function(textMode) { root.exportSvgModeRequested(textMode) }
-            hint: "Labels stay searchable, editable text in the label font.\n"
+            hint: "Labels stay searchable, editable text in the current label font.\n"
                 + "The font is embedded when its license allows."
         } // SvgModeItem designerFont
 
         SvgModeItem {
-            text: "Text: single-line font"
+            text: "Text: convert to single-line font"
             mode: "singleLineFont"
             enabled: root.svgTextModesEnabled
             isLast: root.lastSvgTextMode === "singleLineFont"
             onChosen: function(textMode) { root.exportSvgModeRequested(textMode) }
-            hint: "Labels stay text, in the single-line font Relief SingleLine CAD.\n"
+            hint: "Labels stay searchable, editable text, in the single-line font Relief SingleLine CAD.\n"
                 + "CAD/CAM tools with that font installed draw one-stroke letters."
         } // SvgModeItem singleLineFont
 
         SvgModeItem {
-            text: "Paths: single-stroke (Hershey)"
+            text: "Paths: convert to single-stroke (Hershey)"
             mode: "hersheyStrokes"
             enabled: root.svgTextModesEnabled
             isLast: root.lastSvgTextMode === "hersheyStrokes"
             onChosen: function(textMode) { root.exportSvgModeRequested(textMode) }
             hint: "Labels become single-stroke paths for plotters, cutters and engravers.\n"
-                + "No font needed. The text is kept in data-text but is not editable."
+                + "No font needed. The text is kept in 'data-text' but is not editable."
         } // SvgModeItem hersheyStrokes
 
         MenuItem {
             // Only for labels that are already paths: the three modes need <text>.
-            text: "As supplied"
+            text: "Paths: no conversion - labels are already paths"
             visible: !root.svgTextModesEnabled
             height: visible ? implicitHeight : 0
             ToolTip.visible: hovered
             ToolTip.text:    "The labels in this file are paths, not text, so no text mode applies.\n"
-                           + "Exports the layout unchanged."
+                           + "Exports the layout labels unchanged."
             ToolTip.delay:   500
             onTriggered: root.exportSvgModeRequested("asSupplied")
         } // MenuItem asSupplied

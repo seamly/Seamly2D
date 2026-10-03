@@ -165,7 +165,7 @@ The annotated DXF export uses the same default name as the standard export. The 
 - [ ] Layout.21.2 Rename files and types: `DxfTeachingDialog.qml` → `DxfAnnotatedDialog.qml`, `ViewDxfTeachingDialog.qml` → `ViewDxfAnnotatedDialog.qml`; update `qt_frontend/CMakeLists.txt`
 - [ ] Layout.21.3 QML: `Main.qml` ids, `pendingExportTeachingVersion`, `teaching` parameters, comments, log text
 - [ ] Layout.21.4 C++: `PreferencesModel::dxfTeachingFilePath` → `dxfAnnotatedFilePath`; `PreferencesModelTests.cpp`
-- [ ] Layout.21.5 Rust: `create_teaching_version` → `create_annotated_version` in `cxxqt_bridge/src/exports.rs`, `lib.rs`, `ezdxf2dxfastm/src/writer.rs`, `writer_test.rs`; JSON key `createTeachingVersion` → `createAnnotatedVersion` on both sides
+- [ ] Layout.21.5 Rust: `create_teaching_version` → `create_annotated_version` in `cxxqt_bridge/src/exports.rs`, `lib.rs`, `ezdxf2dxfastm/src/writer.rs`, `writer_test.rs`; JSON key `createTeachingVersion` → `createAnnotatedVersion` on both sides. The key is not saved to any file, so no migration
 - [ ] Layout.21.6 `.txt` header comment: "DXF-ASTM Teaching Version" → "DXF-ASTM Annotated Version"; update the test that checks it
 - [ ] Layout.21.7 Docs: `dxf-docs/*.md`, `status-docs/*.md`. Leave `TODO_COMPLETED.md` and `log.txt` as history
 - [ ] Layout.21.8 Check: `grep -ri teaching` over `src/app/seamlylayout` (without `build/`, `target/`) returns nothing
