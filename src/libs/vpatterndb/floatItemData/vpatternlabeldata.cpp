@@ -183,20 +183,22 @@ QPointF VPatternLabelData::defaultPieceLabelPos(const QRectF &pieceRect, const Q
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief defaultPatternLabelPos returns the top left of a new pattern label.
- * @param pieceRect      bounding box of the piece main path, in piece local pixels.
- * @param labelSize      label size in pixels.
- * @param pieceLabelRect piece label at its default place, or a null rect when the piece has no such label.
- * @param grainlineRect  bounding box of the grainline, or a null rect when its place is unknown.
+ * @param pieceRect     bounding box of the piece main path, in piece local pixels.
+ * @param labelSize     label size in pixels.
+ * @param grainlineRect bounding box of the grainline, or a null rect when its place is unknown.
  *
- * The label is vertically centered on the bounding box. Its left edge is 1 cm right of the piece label.
- * Without a piece label it takes the piece label place.
+ * The label is vertically centered on the bounding box. Its right edge is 1 cm left of the grainline,
+ * and never right of the bounding box center. The piece label sits on the other side of the grainline,
+ * so the two labels cannot overlap. The grainline counts even when hidden.
  */
 QPointF VPatternLabelData::defaultPatternLabelPos(const QRectF &pieceRect, const QSizeF &labelSize,
-                                                  const QRectF &pieceLabelRect, const QRectF &grainlineRect)
+                                                  const QRectF &grainlineRect)
 {
-    if (pieceLabelRect.isNull())
+    qreal right = pieceRect.center().x();
+    if (!grainlineRect.isNull())
     {
-        return defaultPieceLabelPos(pieceRect, labelSize, grainlineRect);
+        right = qMin(right, grainlineRect.left());
     }
-    return QPointF(pieceLabelRect.right() + ToPixel(1, Unit::Cm), pieceRect.center().y() - labelSize.height() / 2.0);
+    return QPointF(right - ToPixel(1, Unit::Cm) - labelSize.width(),
+                   pieceRect.center().y() - labelSize.height() / 2.0);
 }

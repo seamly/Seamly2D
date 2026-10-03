@@ -70,8 +70,9 @@ private slots:
     void AutoNameReusesNumberFreedByDeletion();
     void PieceLabelRightOfVerticalGrainline() const;
     void PieceLabelRightOfSlantedGrainline() const;
-    void PatternLabelRightOfPieceLabel() const;
-    void PatternLabelTakesPieceLabelPlaceWithoutPieceLabel() const;
+    void PatternLabelLeftOfVerticalGrainline() const;
+    void PatternLabelLeftOfSlantedGrainline() const;
+    void PatternLabelLeftOfCenterWithoutGrainline() const;
     void GrainlineKeepsLengthLongerThanTwoArrows() const;
     void GrainlineGrowsToFitTwoArrows() const;
     void LabelTemplateReadsUserFile() const;

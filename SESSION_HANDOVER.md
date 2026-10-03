@@ -6,6 +6,15 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — Seamly2D.10: pattern label left of the grainline
+
+Merged `task-pattern-label-left`. `local_build_msi.ps1` passed: build, `nmake check`, MSI.
+
+- New piece and Union piece: pattern label right edge 1 cm left of grainline; piece label stays 1 cm right.
+- Existing pieces keep their stored label positions; only new pieces change.
+- A piece too narrow for a label left of the grainline still gets shifted inside by `UpdateLabelItem`.
+- Not checked in the running app.
+
 ## 2026-10-03 — DXF.1: Seamly2D tags turn points (`data-turn-points`)
 
 Merged `task-dxf-turn-points`. `nmake check` (4 Qt suites), `cargo test --workspace`, `ctest --preset debug` passed.

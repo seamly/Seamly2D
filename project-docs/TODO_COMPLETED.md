@@ -979,3 +979,13 @@ LGPL notices in `src/app/seamlylayout/packaging/licenses/`, but none exist.
 - [x] Layout.45 Tests: `log_sink::tests` (2 threads), `LoggerTests::concurrentWriters_lineArrivesWholeAndInOrder` (2 threads x 3 sources)
 - [x] Layout.46 Briefs and comments on touched functions
 - `SEAMLY_LOG_FILE` removed; `Logger::filePath()` added
+
+## Task Seamly2D.10 — New-piece pattern label sits left of the grainline (completed 2026-10-03)
+
+- [x] Seamly2D.10.1 Cause, seen on `male_shirt` piece Z: pattern label right of piece label fell outside a narrow piece; `UpdateLabelItem` containment shift moved it back onto the piece label
+- [x] Seamly2D.10.2 `defaultPatternLabelPos`: right edge 1 cm left of grainline left edge; vertically centered
+- [x] Seamly2D.10.3 Dialog and Union tool pass the grainline rect; `pieceLabelRect` parameter removed
+- [x] Seamly2D.10.4 Hidden grainline still counts
+- [x] Seamly2D.10.5 No grainline: right edge 1 cm left of bounding box center
+- [x] Seamly2D.10.6 `@brief` and contract updated
+- [x] Seamly2D.10.7 Tests: `TST_VPiece` — `PatternLabelLeftOfVerticalGrainline`, `PatternLabelLeftOfSlantedGrainline`, `PatternLabelLeftOfCenterWithoutGrainline`

@@ -382,7 +382,7 @@ void TST_VPiece::PieceLabelRightOfSlantedGrainline() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VPiece::PatternLabelRightOfPieceLabel() const
+void TST_VPiece::PatternLabelLeftOfVerticalGrainline() const
 {
     const QRectF pieceRect(100, 200, 400, 600);
     const QSizeF pieceLabelSize(120, 80);
@@ -392,26 +392,41 @@ void TST_VPiece::PatternLabelRightOfPieceLabel() const
     const QRectF pieceLabel(VPatternLabelData::defaultPieceLabelPos(pieceRect, pieceLabelSize, grainline),
                             pieceLabelSize);
 
-    const QRectF patternLabel(VPatternLabelData::defaultPatternLabelPos(pieceRect, patternLabelSize, pieceLabel,
-                                                                        grainline),
+    const QRectF patternLabel(VPatternLabelData::defaultPatternLabelPos(pieceRect, patternLabelSize, grainline),
                               patternLabelSize);
 
-    QCOMPARE(patternLabel.left(), pieceLabel.right() + ToPixel(1, Unit::Cm));
+    QCOMPARE(patternLabel.right(), grainline.left() - ToPixel(1, Unit::Cm));
     QCOMPARE(patternLabel.center().y(), pieceRect.center().y());
+    QVERIFY(!patternLabel.intersects(pieceLabel));
+    QVERIFY(!patternLabel.intersects(grainline.adjusted(-1, 0, 1, 0)));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void TST_VPiece::PatternLabelTakesPieceLabelPlaceWithoutPieceLabel() const
+void TST_VPiece::PatternLabelLeftOfSlantedGrainline() const
 {
     const QRectF pieceRect(100, 200, 400, 600);
     const QSizeF labelSize(150, 60);
-    const QRectF grainline = VGrainlineData::lineRect(VGrainlineData::centeredStart(pieceRect.center(), 90, 300),
-                                                      90, 300);
+    const QRectF grainline = VGrainlineData::lineRect(VGrainlineData::centeredStart(pieceRect.center(), 45, 300),
+                                                      45, 300);
+    const QRectF pieceLabel(VPatternLabelData::defaultPieceLabelPos(pieceRect, labelSize, grainline), labelSize);
 
-    const QRectF patternLabel(VPatternLabelData::defaultPatternLabelPos(pieceRect, labelSize, QRectF(), grainline),
-                              labelSize);
+    const QRectF patternLabel(VPatternLabelData::defaultPatternLabelPos(pieceRect, labelSize, grainline), labelSize);
 
-    QCOMPARE(patternLabel.topLeft(), VPatternLabelData::defaultPieceLabelPos(pieceRect, labelSize, grainline));
+    QCOMPARE(patternLabel.right(), grainline.left() - ToPixel(1, Unit::Cm));
+    QVERIFY(!patternLabel.intersects(grainline));
+    QVERIFY(!patternLabel.intersects(pieceLabel));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::PatternLabelLeftOfCenterWithoutGrainline() const
+{
+    const QRectF pieceRect(100, 200, 400, 600);
+    const QSizeF labelSize(150, 60);
+
+    const QRectF patternLabel(VPatternLabelData::defaultPatternLabelPos(pieceRect, labelSize, QRectF()), labelSize);
+
+    QCOMPARE(patternLabel.right(), pieceRect.center().x() - ToPixel(1, Unit::Cm));
+    QCOMPARE(patternLabel.center().y(), pieceRect.center().y());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
