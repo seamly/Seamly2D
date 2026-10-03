@@ -9,7 +9,7 @@ Stand-in spline: centripetal Catmull-Rom. With Douglas–Peucker alone, the slee
 - [x] DXF.2.1 `astm_contour.rs`: rebuild each span between turn points as a spline through its key points
 - [x] DXF.2.2 Where the spline is more than `CURVE_TOLERANCE_MM` from `dense`, add the farthest dense vertex as a curve point; repeat until within tolerance
 - [x] DXF.2.3 Keep `reduced` an ordered subset of `dense` (§4.3.3.1)
-- [x] DXF.2.4 Rust test: every contour in the male_shirt fixture is within 2× `CURVE_TOLERANCE_MM` on layers 84–87. The test holds 1×: 2× passes without the fix
+- [x] DXF.2.4 Rust test: every contour in the male_shirt fixture is within `CURVE_TOLERANCE_MM` on layers 84–87. User decision: the limit is 0.25 mm, not 2×
 - [x] DXF.2.5 Update the compliance doc
 
 ## Task DXF.9 — `Author:` is `vendor;application;release #` (completed 2026-10-03)

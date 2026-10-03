@@ -260,9 +260,8 @@ mod tests {
 
     // @brief A spline through each contour's key points stays near its validation
     //        polyline (layers 84–87), so a reader's reconstruction passes.
-    // @details A reader accepts 2 × CURVE_TOLERANCE_MM. The sleeves miss
-    //          CURVE_TOLERANCE_MM by about 0.15 mm without added curve points but
-    //          stay inside 2 ×, so the test holds the tighter bound.
+    // @details The limit is CURVE_TOLERANCE_MM. Without added curve points the
+    //          sleeves miss it by about 0.15 mm.
     #[test]
     fn male_shirt_splines_follow_validation_layers() {
         let svg = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/test_data/male_shirt_pieces.svg"))
