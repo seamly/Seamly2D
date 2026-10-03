@@ -23,7 +23,7 @@ mod converter_test;
 mod astm_piece_test;
 
 pub use converter::{SvgToEzdxfOptions, svg_to_ezdxf};
-pub use astm_contour::{build_contour, AstmContour, CURVE_TOLERANCE_MM};
+pub use astm_contour::{build_contour, spline_deviation, spline_points, AstmContour, CURVE_TOLERANCE_MM};
 pub use astm_notch::{build_notches, Notch, NotchKind};
 pub use drawing::{Annotation, Block, Drawing, DxfVersion};
 pub use entities::{Arc, Circle, DxfPoint, Entity, Line, Point, Polyline, Text};

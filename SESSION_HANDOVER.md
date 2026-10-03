@@ -6,6 +6,15 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — DXF.2: spline through key points within tolerance
+
+Merged `task-dxf-spline-tolerance`. `cargo test --workspace` and `ctest --preset debug` passed.
+
+- `astm_contour::refine_to_spline` adds curve points until a centripetal Catmull-Rom spline is within 0.25 mm of `dense`.
+- aw.fyi's spline method is unknown; Catmull-Rom is a guess. Sleeves: 0.40 mm → 0.24 mm under the stand-in.
+- Next in `TODO_DXF.md`: DXF.3 (R13), DXF.4 (fewer points; retest first).
+- User action: re-export male_shirt DXF-ASTM, re-run aw.fyi (DXF.8).
+
 ## 2026-10-03 — DXF.9: `Author:Seamly;Seamly2D;<version>`
 
 Merged `task-dxf-author-format`. `cargo test --workspace` passed.

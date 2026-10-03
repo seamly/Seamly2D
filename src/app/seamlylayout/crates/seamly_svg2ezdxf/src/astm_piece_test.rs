@@ -6,7 +6,9 @@
 
 #[cfg(test)]
 mod tests {
-    use crate::astm_contour::{build_contour, build_contour_tagged, distance_to_segment, CURVE_TOLERANCE_MM};
+    use crate::astm_contour::{
+        build_contour, build_contour_tagged, distance_to_segment, spline_deviation, spline_points, AstmContour, CURVE_TOLERANCE_MM,
+    };
     use crate::astm_notch::{build_notches, NotchKind};
     use crate::converter::{svg_to_ezdxf, SvgToEzdxfOptions};
     use crate::entities::Point;
@@ -53,6 +55,57 @@ mod tests {
         assert!(c.reduced.len() < 60, "reduction removes most vertices, got {}", c.reduced.len());
         assert!(c.turn.iter().all(|&t| !t), "a smooth circle has only curve points");
         assert!(max_deviation(&c.dense, &c.reduced) <= CURVE_TOLERANCE_MM + 1e-9);
+    }
+
+    // @brief True when `reduced` is an ordered subset of `dense` that starts at dense[0].
+    fn reduced_is_ordered_subset(c: &AstmContour) -> bool {
+        let mut next = 0;
+        for p in &c.reduced {
+            match c.dense[next..].iter().position(|q| q == p) {
+                Some(i) => next += i + 1,
+                None => return false,
+            }
+        }
+        c.reduced[0] == c.dense[0]
+    }
+
+    // @brief Open S curve: two half sine waves, 200 mm long and 30 mm high.
+    fn s_curve() -> Vec<Point> {
+        (0..=400).map(|i| {
+            let x = i as f64 * 0.5;
+            Point::new(x, 30.0 * (x * std::f64::consts::TAU / 200.0).sin())
+        }).collect()
+    }
+
+    #[test]
+    fn spline_through_key_points_stays_within_tolerance() {
+        let circle: Vec<Point> = (0..180)
+            .map(|i| {
+                let a = i as f64 * std::f64::consts::TAU / 180.0;
+                Point::new(50.0 * a.cos(), 50.0 * a.sin())
+            })
+            .collect();
+        let (hem, hem_tags) = box_with_coarse_hem();
+        let contours = [
+            build_contour(&circle, true).expect("circle"),
+            build_contour(&s_curve(), false).expect("s curve"),
+            build_contour_tagged(&hem, true, Some(&hem_tags)).expect("hem"),
+        ];
+        for c in &contours {
+            let d = spline_deviation(c);
+            assert!(d <= CURVE_TOLERANCE_MM + 1e-9, "spline deviation {d}");
+            assert!(reduced_is_ordered_subset(c), "reduced is an ordered subset of dense");
+            assert_eq!(c.reduced.len(), c.turn.len());
+        }
+    }
+
+    #[test]
+    fn spline_is_straight_between_two_turn_points() {
+        let c = build_contour(&square_with_midpoints(), true).expect("contour");
+        assert_eq!(c.reduced.len(), 4, "a straight side needs no curve point");
+        let spline = spline_points(&c);
+        assert_eq!(spline.first(), spline.last(), "closed spline ends at its start");
+        assert!(spline.iter().all(|p| p.x.abs() < 1e-9 || p.y.abs() < 1e-9 || (p.x - 100.0).abs() < 1e-9 || (p.y - 100.0).abs() < 1e-9));
     }
 
     #[test]
