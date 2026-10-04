@@ -9,13 +9,16 @@
 // useful when learning DXF-ASTM structure.  A standard version omits those
 // comments and produces a smaller file suitable for production use.
 //
+// Opens before the save dialog: the annotated version's default file name
+// carries "_annotated" before the timestamp.
+//
 // Usage:
 //   DxfAnnotatedDialog {
 //       id: dxfAnnotatedDialog
-//       onAccepted: appController.exportDxf(
-//           savePath,
-//           JSON.stringify({ createAnnotatedVersion: dxfAnnotatedDialog.annotatedVersion })
-//       )
+//       onAccepted: {
+//           root.pendingExportAnnotatedVersion = dxfAnnotatedDialog.annotatedVersion
+//           root.chooseDxfPath()
+//       }
 //   }
 //   // To open: dxfAnnotatedDialog.open()
 

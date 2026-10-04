@@ -24,27 +24,27 @@ The DXF-ASTM export workflow is fully integrated into the desktop UI (`ui_deskto
    - Checks each piece with a boundary for: a "Cut N" label line (`Quantity:`), label text (layer 15), a grainline (layer 7)
    - Names each incomplete piece and what it lacks
    - States that this affects the usability of the exported DXF file
-   - **Export anyway**: continue to the file save dialog
+   - **Export anyway**: continue to the annotated version dialog
    - **Cancel**: stop the export
    - Checks the shown tab only; Export all tabs uses the same pieces for every size
    - Code: `Drawing::missing_piece_data` (`seamly_svg2ezdxf`), `exports::dxf_missing_piece_data_message`, `AppController::dxf_missing_piece_data`, `DxfMissingDataDialog.qml`
    - Example: male_shirt warns about CollarBaseInterface, CollarTopInterface, CuffInterface
-4. **File Save Dialog**: A file save dialog opens
-   - Default filename: Based on input SVG filename with `.dxf` extension
+4. **Annotated Version Dialog** (`DxfAnnotatedDialog.qml`): opens before the save dialog, so the default name can carry the choice
+   - **Annotated Version**: DXF file plus annotated version (`.txt` file)
+   - **Standard**: DXF file only
+   - **Cancel**: stop the export
+5. **File Save Dialog**: opens with a default name
+   - Standard: `<importedBaseName>_<R12|R13|CLO3D>_YYYYMMDDHHMM.dxf`, e.g. `male_shirt_R13_202610011721.dxf`
+   - Annotated: `<importedBaseName>_<R12|R13|CLO3D>_annotated_YYYYMMDDHHMM.dxf`, e.g. `male_shirt_CLO3D_annotated_202610011721.dxf`
+   - Segment code: `exports::dxf_export_name_segment` → `AppController::dxfExportNameSegment`
    - User can change the filename and location
    - File filter: DXF files (*.dxf)
+   - **Cancel**: stop the export
 
-### Step 3: Annotated Version Dialog
+### Step 3: Annotated Version File Name
 
-After selecting the file path, a dialog appears asking about creating an annotated version:
-
-**Dialog Content**:
-- **Question**: "Create annotated version with comments?"
-- **Explanation**: "This will create a .txt file with inline comments explaining each line of the DXF file. This may add a few seconds to the export time."
-- **Buttons**:
-  - **Cancel**: Cancels the export entirely
-  - **No**: Exports only the DXF file (no annotated version)
-  - **Yes**: Exports both DXF file and annotated version (.txt file)
+- The `.txt` file keeps the `.dxf` base name: `male_shirt_R12_annotated_202610011721.dxf` → `male_shirt_R12_annotated_202610011721.txt`
+- Export all tabs: the tab label goes before the extension of both files
 
 ### Step 4: Export Execution
 
@@ -193,13 +193,13 @@ If any step fails:
 
 - **Annotated Version Generation**: Adds 2-5 seconds for large files
 - **File Size**: Annotated version files are typically 2-3x larger than DXF files
-- **Dialog Timing**: Dialog appears immediately after file path selection
+- **Dialog Timing**: Annotated version dialog appears before the file save dialog
 - **Non-blocking**: Export runs synchronously (UI may freeze briefly for large files)
 
 ### File Management
 
 - **Default Location**: User's last used directory (handled by file dialog)
-- **Filename Suggestion**: Based on input SVG filename
+- **Filename Suggestion**: Input base name, variant, `_annotated` for the annotated version, timestamp
 - **Annotated Version**: Automatically named (same as DXF with .txt extension)
 - **Overwrite Warning**: File dialog handles existing file warnings
 

@@ -35,7 +35,7 @@ mod exports;
 use exports::{
     do_export_dxf, dxf_missing_piece_data_message, do_export_gcode, do_export_mesh, do_export_pdf, do_export_pdf_tile, do_export_png,
     do_export_jpeg,
-    do_export_svg, paid_export_available, default_export_file_name, export_name_segment, do_export_hpgl, parse_hpgl_options, do_export_postscript,
+    do_export_svg, paid_export_available, default_export_file_name, export_name_segment, dxf_export_name_segment, do_export_hpgl, parse_hpgl_options, do_export_postscript,
 };
 
 // Phase A of the "sheets" paper_type (L.2.1):
@@ -725,6 +725,10 @@ pub mod qobject {
         // File name segment for an export mode, e.g. ("hpgl", "cut") → "cutlines"; empty for the plain name.
         #[qinvokable]
         fn export_name_segment(self: &AppController, format: &QString, mode: &QString) -> QString;
+
+        // DXF file name segment, e.g. ("R13", true) → "R13_annotated".
+        #[qinvokable]
+        fn dxf_export_name_segment(self: &AppController, variant: &QString, annotated: bool) -> QString;
 
         // Warning text naming pieces that lack Quantity, label or grainline in a
         // DXF-ASTM export; empty when every piece is complete or no layout exists.
@@ -2090,6 +2094,12 @@ impl qobject::AppController {
     fn export_name_segment(&self, format: &cxx_qt_lib::QString, mode: &cxx_qt_lib::QString) -> cxx_qt_lib::QString {
         cxx_qt_lib::QString::from(export_name_segment(&format.to_string(), &mode.to_string()))
     } // fn export_name_segment
+
+    // DXF file name segment; see exports::dxf_export_name_segment.
+    fn dxf_export_name_segment(&self, variant: &cxx_qt_lib::QString, annotated: bool) -> cxx_qt_lib::QString {
+        let segment = dxf_export_name_segment(&variant.to_string(), annotated);
+        cxx_qt_lib::QString::from(segment.as_str())
+    } // fn dxf_export_name_segment
 
     // -----------------------------------------------------------------------
     // DXF-ASTM export

@@ -6,6 +6,15 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — Layout.20: annotated DXF export name has `_annotated`
+
+Merged `task-dxf-annotated-name`. `cargo test --workspace`, `ctest --preset debug` passed.
+
+- DXF flow: missing-data warning → Standard/Annotated dialog → save dialog → export.
+- Annotated name: `male_shirt_R13_annotated_<stamp>.dxf` + `.txt`. Standard name unchanged.
+- Rust `exports::dxf_export_name_segment`; QML `appController.dxfExportNameSegment`.
+- User action: Export each DXF-ASTM variant, Standard and Annotated; check default names and Cancel in both dialogs.
+
 ## 2026-10-03 — Layout.17 + Layout.18: HPGL and SVG export names show the mode
 
 Merged `task-export-name-segments`. `cargo test --workspace`, `ctest --preset debug` passed.
