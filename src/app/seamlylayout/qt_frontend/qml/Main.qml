@@ -157,9 +157,9 @@ ApplicationWindow {
     // @brief Ask for a DXF save path for the staged variant, then open the teaching dialog.
     function chooseDxfPath() {
         var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-        // DXF-ASTM names its version: <importedBaseName>_<R12|R13>_YYYYMMDDHHMM.dxf.
-        // CLO3D adds no version segment.
-        var segment = root.pendingDxfClo3d ? "" : root.pendingDxfVersion
+        // Segment names the variant: <importedBaseName>_<R12|R13|CLO3D>_YYYYMMDDHHMM.dxf.
+        // CLO3D is always R13, so its name needs no version.
+        var segment = root.pendingDxfClo3d ? "CLO3D" : root.pendingDxfVersion
         var name = root.makeExportFileName("dxf", false, segment)
         var title = root.pendingDxfClo3d ? "Save DXF-ASTM (CLO3D) File"
                                          : "Save DXF-ASTM (" + root.pendingDxfVersion + ") File"
@@ -551,7 +551,7 @@ ApplicationWindow {
         onPreferencesClicked:      preferencesController.openPreferences()
         onExportDxfAstmRequested:      root.requestDxfExport(false, "R12")
         onExportDxfAstmR13Requested:   root.requestDxfExport(false, "R13")
-        onExportDxfAstmClo3dRequested: root.requestDxfExport(true, "R12")
+        onExportDxfAstmClo3dRequested: root.requestDxfExport(true, "R13")
         onExportPngRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
             var name = root.makeExportFileName("png") // default name: <importedBaseName>_YYYYMMDDHHMM.png

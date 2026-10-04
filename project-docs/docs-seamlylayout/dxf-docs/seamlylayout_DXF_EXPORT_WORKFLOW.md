@@ -19,7 +19,7 @@ The DXF-ASTM export workflow is fully integrated into the desktop UI (`ui_deskto
 ### Step 2: Initiate Export
 
 1. **Open Export Menu**: Click "Export ▼" button to open the export format dropdown
-2. **Select Format**: Click "DXF-ASTM (R12)", "DXF-ASTM (R13)" or "DXF-ASTM (CLO3D)" from the dropdown menu. CLO3D writes R12
+2. **Select Format**: Click "DXF-ASTM (R12)", "DXF-ASTM (R13)" or "DXF-ASTM (CLO3D)" from the dropdown menu. CLO3D writes R13
 3. **Missing Piece Data Dialog**: Shown only when a piece lacks DXF-ASTM data
    - Checks each piece with a boundary for: a "Cut N" label line (`Quantity:`), label text (layer 15), a grainline (layer 7)
    - Names each incomplete piece and what it lacks

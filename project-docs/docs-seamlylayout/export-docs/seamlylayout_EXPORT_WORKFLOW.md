@@ -198,7 +198,7 @@ Stubs only. No module ships yet.
 | ------ | ------------ |
 | DXF-ASTM (R12) | `male_shirt_R12_202610031234.dxf` |
 | DXF-ASTM (R13) | `male_shirt_R13_202610031234.dxf` |
-| DXF-ASTM (CLO3D) | `male_shirt_202610031234.dxf` |
+| DXF-ASTM (CLO3D), R13 | `male_shirt_CLO3D_202610031234.dxf` |
 | PDF tiled | `male_shirt_202610031234_tiled.pdf` |
 | Other formats | `male_shirt_202610031234.<ext>` |
 

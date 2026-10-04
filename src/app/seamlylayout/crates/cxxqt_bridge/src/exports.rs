@@ -1853,6 +1853,7 @@ mod tests {
     fn default_export_file_name_places_segment_before_stamp() {
         assert_eq!(default_export_file_name("male_shirt", "R12", "202610031234", "dxf", false), "male_shirt_R12_202610031234.dxf");
         assert_eq!(default_export_file_name("male_shirt", "R13", "202610031234", "dxf", false), "male_shirt_R13_202610031234.dxf");
+        assert_eq!(default_export_file_name("male_shirt", "CLO3D", "202610031234", "dxf", false), "male_shirt_CLO3D_202610031234.dxf");
         assert_eq!(default_export_file_name("male_shirt", "", "202610031234", "png", false), "male_shirt_202610031234.png");
         assert_eq!(default_export_file_name("male_shirt", "", "202610031234", "pdf", true), "male_shirt_202610031234_tiled.pdf");
         assert_eq!(default_export_file_name("", "R12", "202610031234", "dxf", false), "");

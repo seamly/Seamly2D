@@ -30,7 +30,7 @@ Report on `male_shirt_202610031615.dxf` (after DXF.1): miscategorized points now
 
 D6673 §1.2 / 4.1 names AutoCAD R13. Today `$ACADVER` is `AC1009` (R12 syntax). R13 needs entity handles, a full TABLES section, CLASSES, and OBJECTS.
 
-Menu (user decision): **DXF-ASTM (R12)**, **DXF-ASTM (R13)**, **DXF-ASTM (CLO3D)**. CLO3D stays R12. The View menu keeps one **DXF-ASTM** item.
+Menu (user decision): **DXF-ASTM (R12)**, **DXF-ASTM (R13)**, **DXF-ASTM (CLO3D)**. CLO3D writes R13: it must be D6673-10 compliant (user decision, reverses "CLO3D stays R12"). The View menu keeps one **DXF-ASTM** item.
 
 - [x] DXF.3.1 Study a known-good R13 file: required header variables, tables (LTYPE, LAYER, STYLE, BLOCK_RECORD), handles, OBJECTS dictionary. The repo's `seamlylayout_Skirt_ASTMD6673.dxf` says AC1012 but has no handles; libdxfrw's writer (`src/libs/vdxf/libdxfrw/libdxfrw.cpp`) was the reference
 - [x] DXF.3.2 `ezdxf2dxfastm/src/r13.rs`: write `$ACADVER` `AC1012`, `$HANDSEED`, handles on every entity, subclass markers (group 100). `Drawing::version` selects the version
