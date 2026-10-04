@@ -2,6 +2,16 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task Layout.19 — DXF-ASTM (CLO3D) export name has `_CLO3D`; CLO3D writes R13 (completed 2026-10-03)
+
+- [x] Layout.19.1 `Main.qml` `chooseDxfPath`: CLO3D puts `_CLO3D` before the timestamp. Example: `male_shirt_CLO3D_202610031234.dxf`
+- [x] Layout.19.2 Uppercase `CLO3D`
+- [x] Layout.19.3 DXF-ASTM names keep their version segment: `_R12`, `_R13`
+- [x] Layout.19.4 Export all tabs: tab label still goes before the extension (`export_tab_path`, unchanged)
+- [x] Layout.19.5 Docs: `seamlylayout_EXPORT_WORKFLOW.md`, compliance doc, DXF export workflow
+- [x] Layout.19.6 Test: `default_export_file_name_places_segment_before_stamp` covers `CLO3D`
+- Decision (user): DXF-ASTM (CLO3D) writes R13 (`AC1012`), not R12, so it is D6673-10 compliant. CLO3D name has no version segment: it is always R13.
+
 ## Task DXF.10 — DXF-ASTM export name shows the DXF version (completed 2026-10-03)
 
 The R12 and R13 exports had the same default name. The user could not tell the files apart.

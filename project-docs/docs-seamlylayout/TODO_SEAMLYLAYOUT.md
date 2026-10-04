@@ -133,20 +133,9 @@ Export > SVG uses one default name for every text mode. The user cannot tell the
 - [ ] Layout.18.5 Update `export-docs/seamlylayout_EXPORT_WORKFLOW.md` and the name comments in `Main.qml`
 - [ ] Layout.18.6 Test: each mode gives its name
 
-## [ ] Task Layout.19 — DXF-ASTM (CLO3D) export name has `_CLO3D`
-
-Export > DXF-ASTM (CLO3D) uses the same default name as DXF-ASTM. The user cannot tell the two files apart. Uses the segment parameter from Layout.17.2.
-
-- [ ] Layout.19.1 `Main.qml` `requestDxfExport(clo3d)`: `clo3d` true puts `_CLO3D` before the timestamp. Example: `male_shirt_CLO3D_202610011721.dxf`
-- [ ] Layout.19.2 Keep the uppercase `CLO3D`; other segments are lowercase
-- [ ] Layout.19.3 DXF-ASTM name keeps its version segment (DXF.10): `<importedBaseName>_<R12|R13>_YYYYMMDDHHMM.dxf`
-- [ ] Layout.19.4 Export all tabs: tab label still goes before the extension
-- [ ] Layout.19.5 Update `export-docs/seamlylayout_EXPORT_WORKFLOW.md` and the name comments in `Main.qml`
-- [ ] Layout.19.6 Test: CLO3D name has `_CLO3D`; DXF-ASTM name unchanged
-
 ## [ ] Task Layout.20 — Annotated DXF export name has `_annotated`
 
-The annotated DXF export uses the same default name as the standard export. The user cannot tell the files apart. Uses the segment parameter from Layout.17.2. Do Layout.21 first or together, so new code uses "annotated".
+The annotated DXF export uses the same default name as the standard export. The user cannot tell the files apart. Uses the segment parameter from Layout.17.2 (done). Do Layout.21 first or together, so new code uses "annotated".
 
 - [ ] Layout.20.1 `Main.qml` `requestDxfExport`: ask Standard or Annotated before the save dialog. Today the save dialog comes first, so the name cannot know the choice
 - [ ] Layout.20.2 Annotated puts `_annotated` before the timestamp. Example: `male_shirt_annotated_202610011721.dxf`

@@ -6,6 +6,14 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — Layout.19: DXF-ASTM (CLO3D) writes R13, name `_CLO3D`
+
+Merged `task-dxf-clo3d-r13`. `cargo test --workspace`, `ctest --preset debug` passed.
+
+- User decision: CLO3D variant must be D6673-10 compliant, so it writes R13 (`AC1012`). Reverses "CLO3D stays R12".
+- Default name: `<base>_CLO3D_YYYYMMDDHHMM.dxf`.
+- Risk: DXF.3.5 still open — no one has imported an R13 file into CLO3D. User action: export DXF-ASTM (CLO3D); import in CLO3D.
+
 ## 2026-10-03 — DXF.10: DXF-ASTM export name shows the DXF version
 
 Merged `task-dxf-version-name`. `cargo test --workspace`, `ctest --preset debug` passed.
