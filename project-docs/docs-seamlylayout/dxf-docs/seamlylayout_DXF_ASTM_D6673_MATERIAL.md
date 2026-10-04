@@ -1,37 +1,51 @@
-# DXF-ASTM `Material:` piece text
+# D6673-10 `Material:` piece text
 
-## D6673-10 definition
+In **ASTM D6673-10, there are no standardized “types of material.”** `Material` is defined simply as a free-form string:
 
-- Identifier: `Material:<string>` in the piece system text (§4.3.1.2). Optional.
-- Meaning: "a string giving the name of the material in which the piece is cut".
-- New in D6673-10. D6673-01 and D6673-04 do not define it.
-- No vocabulary. No rule separates material role from material identity.
+`Material:<string>`
 
-## Material is not Category
+The standard describes it as the **name of the material in which the piece is cut**. It does **not** define an enumeration such as `fabric`, `lining`, `interfacing`, `trim`, etc. [Normsplash](https://www.normsplash.com/Samples/ASTM/191361149/ASTM-D6673-10-en.pdf?utm_source=chatgpt.com)
 
-- `Category:` is a piece classification, inherited from AAMA-era CAD (e.g. AccuMark).
-- D6673 §4.1 names "category"; §4.3.1.2 defines no `Category:` identifier.
-- SeamlyLayout writes `Category:` empty. Seamly2D stores no category.
-- Evidence: `seamlylayout_DXF_ASTM_D6673_INCONSISTENCIES.md`, `seamlylayout_DXF_ASTM_D6673_from_AAMA.md`.
+So all of these could technically be valid values:
 
-## Two concepts in one string
+- `SHELL`
+- `LINING`
+- `INTERFACING`
+- `DENIM`
+- `14 OZ DENIM`
+- `POCKETING`
+- `FUSIBLE`
+- `FABRIC 1`
+- `A`
+- `MAIN`
 
-| Concept | Examples | Seamly2D source |
-|---|---|---|
-| Material role (textile type) | fabric, lining, interfacing, interlining | Seamly2D.7 material type |
-| Material identity | 14 oz denim, fusible tricot | None |
+…but those values would be **application/vendor conventions**, not D6673-10-defined material types.
 
-- D6673-10 `Material:` can hold either. SeamlyLayout writes the material role.
+The significant interoperability problem is that D6673-10 doesn't distinguish between:
 
-## Current output
+**material role/type**  
+such as `fabric`, `lining`, `interfacing`, `trim`
 
-- Every piece: `Material:Fabric`.
-- Source: `seamly_svg2ezdxf::DEFAULT_MATERIAL`, stored in `Block::material`.
+and
+
+**material identity/specification**  
+such as `14 oz cotton denim`, `polyester lining`, `fusible tricot`.
+
+The standard provides only this single free-text field:
+
+```text
+Material:<string>
+```
+
+And only `Piece Name` is mandatory; `Material` is optional. [Antpedia](https://img.antpedia.com/standard/files/pdfs_ora/20221211/astm/ASTM%20D6673-10.pdf?utm_source=chatgpt.com)
+
+So for your D6673 modernization work, I would record this as a semantic gap: **D6673-10 supports material assignment but provides no material taxonomy, controlled vocabulary, identifier scheme, or distinction between material function and material identity.**
+
+This also reinforces our previous finding that **`Category` should not be assumed to mean material type**. `Category` and `Material` appear to be separate historical concepts.
+
+## SeamlyLayout output
+
+- Every piece: `Material:Fabric`. Source: `seamly_svg2ezdxf::DEFAULT_MATERIAL`, stored in `Block::material`.
+- `Category:` is written empty. Seamly2D stores no category.
 - Piece text order: `Piece Name:`, `Size:`, `Category:`, `Quantity:`, `Material:`.
-
-## Planned output
-
-- Seamly2D.7.5: the handoff SVG carries `data-material` and a per-material quantity on each piece `<g>`.
-- Layout.15: one layout tab per material.
-- Layout.15.4: `Material:` takes the piece `data-material`. `Fabric` stays the default when the attribute is absent.
-- A piece cut from two materials is two layout entries, one per material.
+- Planned: Seamly2D.7.5 adds `data-material` to the handoff; Layout.15.4 writes it as `Material:`.
