@@ -153,19 +153,19 @@ private slots:
     void v1_resolvedLayoutDirectory_createsDirectoryIfMissing();
 
     // -----------------------------------------------------------------------
-    // V.2 — teaching-file detection helpers used in View → DXF-ASTM.
+    // V.2 — annotated-file detection helpers used in View → DXF-ASTM.
     // fileExists() guards the prompt: only shown when the companion .txt exists.
-    // dxfTeachingFilePath() derives the expected companion path from the .dxf path.
+    // dxfAnnotatedFilePath() derives the expected companion path from the .dxf path.
     // -----------------------------------------------------------------------
     void v2_fileExists_trueForExistingFile();
     void v2_fileExists_falseForMissingFile();
     void v2_fileExists_falseForEmptyPath();
-    void v2_dxfTeachingFilePath_replacesExtension();
-    void v2_dxfTeachingFilePath_preservesDirectoryAndBaseName();
-    void v2_dxfTeachingFilePath_handlesUppercaseExtension();
-    void v2_dxfTeachingFilePath_handlesMultipleDots();
-    void v2_dxfTeachingFilePath_emptyInputReturnsEmpty();
-    void v2_fileExists_trueForActualTeachingFile();
+    void v2_dxfAnnotatedFilePath_replacesExtension();
+    void v2_dxfAnnotatedFilePath_preservesDirectoryAndBaseName();
+    void v2_dxfAnnotatedFilePath_handlesUppercaseExtension();
+    void v2_dxfAnnotatedFilePath_handlesMultipleDots();
+    void v2_dxfAnnotatedFilePath_emptyInputReturnsEmpty();
+    void v2_fileExists_trueForActualAnnotatedFile();
 
     // -----------------------------------------------------------------------
     // Task 17 — Platform::isAppImage() and its AppImage-aware directory fallbacks.
@@ -1195,12 +1195,12 @@ void PreferencesModelTests::v1_resolvedLayoutDirectory_createsDirectoryIfMissing
 }
 
 // ---------------------------------------------------------------------------
-// V.2 — fileExists and dxfTeachingFilePath tests
+// V.2 — fileExists and dxfAnnotatedFilePath tests
 //
-// These helpers drive the View → DXF-ASTM teaching-file prompt:
-//   1. dxfTeachingFilePath() derives the companion .txt path from the .dxf path.
+// These helpers drive the View → DXF-ASTM annotated-file prompt:
+//   1. dxfAnnotatedFilePath() derives the companion .txt path from the .dxf path.
 //   2. fileExists() checks whether that .txt is present so the prompt is only
-//      shown when a teaching file was actually generated during export.
+//      shown when an annotated file was actually generated during export.
 // ---------------------------------------------------------------------------
 
 // @brief fileExists returns true when the file is present on disk.
@@ -1212,7 +1212,7 @@ void PreferencesModelTests::v2_fileExists_trueForExistingFile()
 
     QFile f(path);
     QVERIFY(f.open(QIODevice::WriteOnly));
-    f.write("teaching file content");
+    f.write("annotated file content");
     f.close();
 
     QVERIFY(PreferencesModel::fileExists(path));
@@ -1236,29 +1236,29 @@ void PreferencesModelTests::v2_fileExists_falseForEmptyPath()
     QVERIFY(!PreferencesModel::fileExists(QStringLiteral("")));
 }
 
-// @brief dxfTeachingFilePath replaces the .dxf extension with .txt.
-void PreferencesModelTests::v2_dxfTeachingFilePath_replacesExtension()
+// @brief dxfAnnotatedFilePath replaces the .dxf extension with .txt.
+void PreferencesModelTests::v2_dxfAnnotatedFilePath_replacesExtension()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
     const QString dxfPath = tempDir.filePath(QStringLiteral("layout.dxf"));
     const QString expected = tempDir.filePath(QStringLiteral("layout.txt"));
 
-    const QString result = PreferencesModel::dxfTeachingFilePath(dxfPath);
+    const QString result = PreferencesModel::dxfAnnotatedFilePath(dxfPath);
 
     // Compare absolute paths so platform-specific separator differences are ignored.
     QCOMPARE(QFileInfo(result).absoluteFilePath(),
              QFileInfo(expected).absoluteFilePath());
 }
 
-// @brief dxfTeachingFilePath preserves the directory and base name exactly.
-void PreferencesModelTests::v2_dxfTeachingFilePath_preservesDirectoryAndBaseName()
+// @brief dxfAnnotatedFilePath preserves the directory and base name exactly.
+void PreferencesModelTests::v2_dxfAnnotatedFilePath_preservesDirectoryAndBaseName()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
     const QString dxfPath = tempDir.filePath(QStringLiteral("jacket_front.dxf"));
 
-    const QString result = PreferencesModel::dxfTeachingFilePath(dxfPath);
+    const QString result = PreferencesModel::dxfAnnotatedFilePath(dxfPath);
     const QFileInfo fi(result);
 
     QCOMPARE(fi.suffix(), QStringLiteral("txt"));
@@ -1267,25 +1267,25 @@ void PreferencesModelTests::v2_dxfTeachingFilePath_preservesDirectoryAndBaseName
              QFileInfo(tempDir.path()).absoluteFilePath());
 }
 
-// @brief dxfTeachingFilePath handles an uppercase .DXF extension by replacing it with .txt.
+// @brief dxfAnnotatedFilePath handles an uppercase .DXF extension by replacing it with .txt.
 // QFileInfo::completeBaseName() strips the last extension regardless of case,
 // so "layout.DXF" → base "layout" → "layout.txt".
-void PreferencesModelTests::v2_dxfTeachingFilePath_handlesUppercaseExtension()
+void PreferencesModelTests::v2_dxfAnnotatedFilePath_handlesUppercaseExtension()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
     const QString dxfPath = tempDir.filePath(QStringLiteral("layout.DXF"));
     const QString expected = tempDir.filePath(QStringLiteral("layout.txt"));
 
-    const QString result = PreferencesModel::dxfTeachingFilePath(dxfPath);
+    const QString result = PreferencesModel::dxfAnnotatedFilePath(dxfPath);
 
     QCOMPARE(QFileInfo(result).absoluteFilePath(),
              QFileInfo(expected).absoluteFilePath());
 }
 
-// @brief dxfTeachingFilePath handles a base name containing dots correctly.
+// @brief dxfAnnotatedFilePath handles a base name containing dots correctly.
 // Only the last extension (.dxf) is replaced; dots in the base name are preserved.
-void PreferencesModelTests::v2_dxfTeachingFilePath_handlesMultipleDots()
+void PreferencesModelTests::v2_dxfAnnotatedFilePath_handlesMultipleDots()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1293,30 +1293,30 @@ void PreferencesModelTests::v2_dxfTeachingFilePath_handlesMultipleDots()
     const QString dxfPath = tempDir.filePath(QStringLiteral("jacket.front.v2.dxf"));
     const QString expected = tempDir.filePath(QStringLiteral("jacket.front.v2.txt"));
 
-    const QString result = PreferencesModel::dxfTeachingFilePath(dxfPath);
+    const QString result = PreferencesModel::dxfAnnotatedFilePath(dxfPath);
 
     QCOMPARE(QFileInfo(result).absoluteFilePath(),
              QFileInfo(expected).absoluteFilePath());
 }
 
-// @brief dxfTeachingFilePath returns empty when given an empty input.
-void PreferencesModelTests::v2_dxfTeachingFilePath_emptyInputReturnsEmpty()
+// @brief dxfAnnotatedFilePath returns empty when given an empty input.
+void PreferencesModelTests::v2_dxfAnnotatedFilePath_emptyInputReturnsEmpty()
 {
-    QVERIFY(PreferencesModel::dxfTeachingFilePath(QString()).isEmpty());
-    QVERIFY(PreferencesModel::dxfTeachingFilePath(QStringLiteral("")).isEmpty());
+    QVERIFY(PreferencesModel::dxfAnnotatedFilePath(QString()).isEmpty());
+    QVERIFY(PreferencesModel::dxfAnnotatedFilePath(QStringLiteral("")).isEmpty());
 }
 
-// @brief Integration: dxfTeachingFilePath + fileExists together detect an actual teaching file.
+// @brief Integration: dxfAnnotatedFilePath + fileExists together detect an actual annotated file.
 // This mirrors the exact runtime sequence in onViewDxfAstmRequested: after the user picks
-// a .dxf file, derive the teaching path and check whether it exists before opening the prompt.
-void PreferencesModelTests::v2_fileExists_trueForActualTeachingFile()
+// a .dxf file, derive the annotated path and check whether it exists before opening the prompt.
+void PreferencesModelTests::v2_fileExists_trueForActualAnnotatedFile()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
 
-    // Simulate a DXF and its companion teaching file written by DXF export.
+    // Simulate a DXF and its companion annotated file written by DXF export.
     const QString dxfPath      = tempDir.filePath(QStringLiteral("layout_output.dxf"));
-    const QString teachingPath = tempDir.filePath(QStringLiteral("layout_output.txt"));
+    const QString annotatedPath = tempDir.filePath(QStringLiteral("layout_output.txt"));
 
     // Create stub DXF (content irrelevant for this test).
     QFile dxf(dxfPath);
@@ -1324,18 +1324,18 @@ void PreferencesModelTests::v2_fileExists_trueForActualTeachingFile()
     dxf.write("0\nSECTION\n");
     dxf.close();
 
-    // Create stub teaching file.
-    QFile txt(teachingPath);
+    // Create stub annotated file.
+    QFile txt(annotatedPath);
     QVERIFY(txt.open(QIODevice::WriteOnly));
-    txt.write("teaching content");
+    txt.write("annotated content");
     txt.close();
 
-    // Derive the teaching path from the DXF path (same as runtime flow).
-    const QString derived = PreferencesModel::dxfTeachingFilePath(dxfPath);
+    // Derive the annotated path from the DXF path (same as runtime flow).
+    const QString derived = PreferencesModel::dxfAnnotatedFilePath(dxfPath);
 
-    // Derived path must resolve to the actual teaching file.
+    // Derived path must resolve to the actual annotated file.
     QCOMPARE(QFileInfo(derived).absoluteFilePath(),
-             QFileInfo(teachingPath).absoluteFilePath());
+             QFileInfo(annotatedPath).absoluteFilePath());
 
     // fileExists must return true — prompt will be shown.
     QVERIFY(PreferencesModel::fileExists(derived));

@@ -6,6 +6,15 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — Layout.21: "teaching version" is now "annotated version"
+
+Merged `task-annotated-rename`. `cargo test --workspace`, `ctest --preset debug` passed.
+
+- Rename only; no behavior change. JSON key `createAnnotatedVersion` is not saved, so no migration.
+- Full CI not skipped: `CMakeLists.txt` changed.
+- Next: Layout.20 (`_annotated` export name).
+- User action: export DXF-ASTM, choose Annotated Version; check dialog text.
+
 ## 2026-10-03 — DXF.14: every real value has 2 decimals
 
 Merged `task-dxf-two-decimals`. `cargo test --workspace`, `ctest --preset debug` passed.

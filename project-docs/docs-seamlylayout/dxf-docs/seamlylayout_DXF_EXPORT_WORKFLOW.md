@@ -5,7 +5,7 @@ This document describes the user interface workflow for exporting SVG layout dat
 
 ## Overview
 
-The DXF-ASTM export workflow is fully integrated into the desktop UI (`ui_desktop` crate) and provides a user-friendly interface for exporting pattern layouts to DXF format with optional teaching version generation.
+The DXF-ASTM export workflow is fully integrated into the desktop UI (`ui_desktop` crate) and provides a user-friendly interface for exporting pattern layouts to DXF format with optional annotated version generation.
 
 ## User Workflow
 
@@ -34,21 +34,21 @@ The DXF-ASTM export workflow is fully integrated into the desktop UI (`ui_deskto
    - User can change the filename and location
    - File filter: DXF files (*.dxf)
 
-### Step 3: Teaching Version Dialog
+### Step 3: Annotated Version Dialog
 
-After selecting the file path, a dialog appears asking about creating a teaching version:
+After selecting the file path, a dialog appears asking about creating an annotated version:
 
 **Dialog Content**:
-- **Question**: "Create teaching version with comments?"
+- **Question**: "Create annotated version with comments?"
 - **Explanation**: "This will create a .txt file with inline comments explaining each line of the DXF file. This may add a few seconds to the export time."
 - **Buttons**:
   - **Cancel**: Cancels the export entirely
-  - **No**: Exports only the DXF file (no teaching version)
-  - **Yes**: Exports both DXF file and teaching version (.txt file)
+  - **No**: Exports only the DXF file (no annotated version)
+  - **Yes**: Exports both DXF file and annotated version (.txt file)
 
 ### Step 4: Export Execution
 
-#### If User Selects "Yes" (Teaching Version):
+#### If User Selects "Yes" (Annotated Version):
 
 1. **Convert SVG to ezdxf**: 
    - Converts layout SVG DOM to ezdxf Drawing object
@@ -66,7 +66,7 @@ After selecting the file path, a dialog appears asking about creating a teaching
    - Writes DXF file to user-selected path
    - Creates INSERT entities for all blocks in ENTITIES section
 
-4. **Generate Teaching Version**:
+4. **Generate Annotated Version**:
    - Reads the exported DXF file
    - Adds inline comments explaining each line
    - Saves as `.txt` file in same directory as DXF file
@@ -76,12 +76,12 @@ After selecting the file path, a dialog appears asking about creating a teaching
    - Status bar shows: "Exported to [filename]"
    - Canvas message shows: "DXF-ASTM saved: [filename]"
 
-#### If User Selects "No" (No Teaching Version):
+#### If User Selects "No" (No Annotated Version):
 
 1. **Convert SVG to ezdxf**: Same as above
 2. **Save ezdxf for Debugging**: Same as above
 3. **Export to DXF-ASTM**: Same as above
-4. **Skip Teaching Version**: No `.txt` file created
+4. **Skip Annotated Version**: No `.txt` file created
 5. **Success Message**: Same as above
 
 #### If User Selects "Cancel":
@@ -98,18 +98,18 @@ After selecting the file path, a dialog appears asking about creating a teaching
 **Message Enum Variants**:
 - `ExportFormatSelected("DXF-ASTM")` - User selected DXF-ASTM from dropdown
 - `DxfAstmSavePathPicked(Option<PathBuf>)` - File save dialog result
-- `DxfTeachingDialogYes` - User wants teaching version
-- `DxfTeachingDialogNo` - User doesn't want teaching version
-- `DxfTeachingDialogCancel` - User cancels export
+- `DxfAnnotatedDialogYes` - User wants annotated version
+- `DxfAnnotatedDialogNo` - User doesn't want annotated version
+- `DxfAnnotatedDialogCancel` - User cancels export
 
 **Shell State Fields**:
-- `dxf_teaching_dialog_open: bool` - Controls dialog visibility
+- `dxf_annotated_dialog_open: bool` - Controls dialog visibility
 - `pending_dxf_path: Option<PathBuf>` - Stores path while dialog is open
 
 ### Export Function Flow
 
 ```rust
-fn export_dxf_astm_to_path(&mut self, path: &Path, create_teaching_version: bool) {
+fn export_dxf_astm_to_path(&mut self, path: &Path, create_annotated_version: bool) {
     // 1. Convert SVG to ezdxf Drawing
     let drawing = self.convert_seamly_svg_2_ezdxf(layout_flat)?;
     
@@ -121,7 +121,7 @@ fn export_dxf_astm_to_path(&mut self, path: &Path, create_teaching_version: bool
         include_header: false,
         validate_entities: true,
         sanitize_text: true,
-        create_teaching_version, // User's choice
+        create_annotated_version, // User's choice
     };
     export_dxf_astm(&drawing, path, &options)?;
 }
@@ -129,10 +129,10 @@ fn export_dxf_astm_to_path(&mut self, path: &Path, create_teaching_version: bool
 
 ### Dialog Implementation
 
-The teaching version dialog is implemented as a modal overlay similar to the PDF export dialog:
+The annotated version dialog is implemented as a modal overlay similar to the PDF export dialog:
 
 ```rust
-fn dxf_teaching_dialog() -> Element<'static, Message> {
+fn dxf_annotated_dialog() -> Element<'static, Message> {
     // Question text
     // Explanation text
     // Three buttons: Cancel, No, Yes
@@ -153,7 +153,7 @@ fn dxf_teaching_dialog() -> Element<'static, Message> {
   - EOF marker
 - **R13 structure**: HEADER, CLASSES, TABLES, BLOCKS, ENTITIES, OBJECTS, EOF; handles on every entity. See `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`
 
-### Teaching Version File (.txt)
+### Annotated Version File (.txt)
 
 - **Location**: Same directory as DXF file
 - **Format**: DXF content with inline comments
@@ -191,8 +191,8 @@ If any step fails:
 
 ### Performance
 
-- **Teaching Version Generation**: Adds 2-5 seconds for large files
-- **File Size**: Teaching version files are typically 2-3x larger than DXF files
+- **Annotated Version Generation**: Adds 2-5 seconds for large files
+- **File Size**: Annotated version files are typically 2-3x larger than DXF files
 - **Dialog Timing**: Dialog appears immediately after file path selection
 - **Non-blocking**: Export runs synchronously (UI may freeze briefly for large files)
 
@@ -200,7 +200,7 @@ If any step fails:
 
 - **Default Location**: User's last used directory (handled by file dialog)
 - **Filename Suggestion**: Based on input SVG filename
-- **Teaching Version**: Automatically named (same as DXF with .txt extension)
+- **Annotated Version**: Automatically named (same as DXF with .txt extension)
 - **Overwrite Warning**: File dialog handles existing file warnings
 
 ## Future Enhancements

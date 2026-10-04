@@ -1,4 +1,4 @@
-// DXF-ASTM Teaching Version with Inline Comments
+// DXF-ASTM Annotated Version with Inline Comments
 // Generated automatically from: test_structure.dxf
 // This file contains the DXF content with explanatory comments for each line.
 // Comments are positioned two tabs to the right of the DXF data.

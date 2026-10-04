@@ -13,7 +13,7 @@
 // CXX-Qt macro infrastructure.
 //
 // Exports:
-//   do_export_dxf(doc, path, create_teaching_version, style, progress) -> Result<(), String>
+//   do_export_dxf(doc, path, create_annotated_version, style, progress) -> Result<(), String>
 //   dxf_missing_piece_data_message(doc)              -> Result<String, String>
 //   do_export_pdf(doc, path)                          -> Result<(), String>
 //   (doc, path, tile_dims)         -> Result<(), String>
@@ -658,11 +658,11 @@ pub struct DxfStyleInfo {
 // Pipeline:
 //   1. SVG DOM → ezdxf Drawing via svg_to_ezdxf.      (progress → 10% then 50%)
 //   2. Drawing → DXF-ASTM file via export_dxf_astm.   (progress → 90%)
-//   3. Optionally generate teaching version (.txt).
+//   3. Optionally generate annotated version (.txt).
 //
 // @param doc                    Cloned, piece-fill-stripped layout DOM.
 // @param path                   Destination file path.
-// @param create_teaching_version When true, emits teaching-version DXF annotations.
+// @param create_annotated_version When true, emits annotated-version DXF annotations.
 // @param style                  Style system text supplied by the frontend.
 // @param progress               Callback invoked with integer percent (0–100) at each stage.
 //                               The caller owns 0% (before call) and 100% (after Ok return).
@@ -670,11 +670,11 @@ pub struct DxfStyleInfo {
 pub fn do_export_dxf(
     doc: &svg_dom::Document,
     path: &str,
-    create_teaching_version: bool,
+    create_annotated_version: bool,
     style: &DxfStyleInfo,
     progress: &mut impl FnMut(i32),
 ) -> Result<(), String> {
-    crate::log_to_file(&format!("[exports.rs] do_export_dxf(): 1 converting SVG DOM to ezdxf Drawing for '{path}' teaching_version={create_teaching_version} version={:?}", style.dxf_version));
+    crate::log_to_file(&format!("[exports.rs] do_export_dxf(): 1 converting SVG DOM to ezdxf Drawing for '{path}' annotated_version={create_annotated_version} version={:?}", style.dxf_version));
 
     // Stage 1 start: SVG DOM → ezdxf Drawing (~10% of total work).
     progress(10);
@@ -710,7 +710,7 @@ pub fn do_export_dxf(
     } // if sample size
     let defaults = DxfAstmExportOptions::default();
     let export_opts = DxfAstmExportOptions {
-        create_teaching_version,
+        create_annotated_version,
         style_name: Path::new(path).file_stem().map(|s| s.to_string_lossy().into_owned()),
         author_release: style.app_version.clone().filter(|v| !v.is_empty()).unwrap_or(defaults.author_release.clone()),
         creation_date: style.creation_date.clone(),
@@ -725,13 +725,13 @@ pub fn do_export_dxf(
         }); // if export_dxf_astm failed
 
     if result.is_ok() {
-        // Stage 2 complete: DXF file written (and teaching version, if requested).
+        // Stage 2 complete: DXF file written (and annotated version, if requested).
         progress(90);
-        if create_teaching_version {
-            crate::log_to_file(&format!("[exports.rs] do_export_dxf(): 3 wrote DXF '{path}' and teaching version (.txt)"));
+        if create_annotated_version {
+            crate::log_to_file(&format!("[exports.rs] do_export_dxf(): 3 wrote DXF '{path}' and annotated version (.txt)"));
         } else {
             crate::log_to_file(&format!("[exports.rs] do_export_dxf(): 3 wrote DXF '{path}'"));
-        } // if teaching version
+        } // if annotated version
     } // if ok
 
     result
@@ -2187,13 +2187,13 @@ mod tests {
         );
     } // do_export_dxf_returns_err_on_bad_path
 
-    // @brief do_export_dxf with teaching version creates a .txt file alongside the .dxf.
+    // @brief do_export_dxf with annotated version creates a .txt file alongside the .dxf.
     //
-    // Exports a minimal layout DOM with create_teaching_version=true and verifies
-    // that both the .dxf file and a .txt teaching version exist and contain the
-    // expected DXF-ASTM teaching header comment.
+    // Exports a minimal layout DOM with create_annotated_version=true and verifies
+    // that both the .dxf file and a .txt annotated version exist and contain the
+    // expected DXF-ASTM annotated header comment.
     #[test]
-    fn do_export_dxf_with_teaching_version_creates_txt() {
+    fn do_export_dxf_with_annotated_version_creates_txt() {
         let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
             <g id="frontPiece">
                 <rect x="10" y="10" width="180" height="180" fill="none" stroke="#000000" stroke-width="1"/>
@@ -2203,36 +2203,36 @@ mod tests {
 
         // Unique temp path so parallel test runs don't collide.
         let mut dxf_path = std::env::temp_dir();
-        dxf_path.push(format!("seamly_dxf_teaching_test_{}.dxf", std::process::id()));
+        dxf_path.push(format!("seamly_dxf_annotated_test_{}.dxf", std::process::id()));
         let dxf_path_str = dxf_path.to_string_lossy().to_string();
 
-        do_export_dxf(&doc, &dxf_path_str, true, &DxfStyleInfo::default(), &mut |_| {}).expect("DXF export with teaching version should succeed");
+        do_export_dxf(&doc, &dxf_path_str, true, &DxfStyleInfo::default(), &mut |_| {}).expect("DXF export with annotated version should succeed");
 
         // DXF file must exist.
         assert!(dxf_path.exists(), "DXF file should exist at '{dxf_path_str}'");
 
-        // Teaching version (.txt) must exist alongside the .dxf file.
+        // Annotated version (.txt) must exist alongside the .dxf file.
         let mut txt_path = dxf_path.clone();
         txt_path.set_extension("txt");
         assert!(
             txt_path.exists(),
-            "teaching version .txt should exist at '{}'",
+            "annotated version .txt should exist at '{}'",
             txt_path.display()
         );
 
-        // Teaching version must contain the teaching header comment.
+        // Annotated version must contain the annotated header comment.
         let txt_content = std::fs::read_to_string(&txt_path)
-            .expect("teaching version .txt should be readable");
+            .expect("annotated version .txt should be readable");
         assert!(
-            txt_content.contains("DXF-ASTM Teaching Version"),
-            "teaching version should contain header comment, got first 200 chars: {:?}",
+            txt_content.contains("DXF-ASTM Annotated Version"),
+            "annotated version should contain header comment, got first 200 chars: {:?}",
             txt_content.get(..200).unwrap_or(&txt_content)
         );
 
         // Cleanup.
         let _ = std::fs::remove_file(&dxf_path);
         let _ = std::fs::remove_file(&txt_path);
-    } // do_export_dxf_with_teaching_version_creates_txt
+    } // do_export_dxf_with_annotated_version_creates_txt
 
     // @brief do_export_dxf fires the progress callback with values 10, 50, and 90.
     //

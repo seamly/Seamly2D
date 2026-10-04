@@ -10,7 +10,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | SVG DOM → drawing | `seamly_svg2ezdxf::svg_to_ezdxf` (`converter.rs`) | `Drawing` in millimetres |
 | Contours | `seamly_svg2ezdxf/src/astm_contour.rs` | key points + validation polyline |
 | Notches | `seamly_svg2ezdxf/src/astm_notch.rs` | D6673 notch POINTs |
-| Drawing → file | `ezdxf2dxfastm::export_dxf_astm` (`writer.rs`) | `.dxf` (+ teaching `.txt`) |
+| Drawing → file | `ezdxf2dxfastm::export_dxf_astm` (`writer.rs`) | `.dxf` (+ annotated `.txt`) |
 | R12 → R13 | `ezdxf2dxfastm::upgrade_to_r13` (`r13.rs`) | R13 file from the R12 group stream |
 | Bridge | `cxxqt_bridge::exports::do_export_dxf` | style text from QML |
 

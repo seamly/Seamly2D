@@ -2103,7 +2103,7 @@ impl qobject::AppController {
     } // fn dxf_missing_piece_data
 
     // Export the assembled layout as a DXF-ASTM file.
-    // options_json: {"createTeachingVersion": bool, "clo3dGroup250": bool, "dxfVersion": "R12"|"R13",
+    // options_json: {"createAnnotatedVersion": bool, "clo3dGroup250": bool, "dxfVersion": "R12"|"R13",
     //                "appVersion", "creationDate", "creationTime"}
     // Delegates core logic to exports::do_export_dxf.
     // Called by QML 'Export DXF' button handler: onExportDXF: appController.exportDxf(path, optionsJson)
@@ -2115,12 +2115,12 @@ impl qobject::AppController {
         let path_str = path.to_string();
         log_to_file(&format!("[lib.rs AppController] export_dxf(): 1 requested path='{path_str}'"));
 
-        // Parse teaching-version flag from options JSON.
+        // Parse annotated-version flag from options JSON.
         #[derive(serde::Deserialize, Default)]
         #[serde(rename_all = "camelCase")]
         struct DxfExportOptions {
             #[serde(default)]
-            create_teaching_version: bool,
+            create_annotated_version: bool,
             #[serde(default)]
             app_version: Option<String>,
             #[serde(default)]
@@ -2147,8 +2147,8 @@ impl qobject::AppController {
         };
 
         log_to_file(&format!(
-            "[lib.rs AppController] export_dxf(): 2 options parsed create_teaching_version={}",
-            opts.create_teaching_version
+            "[lib.rs AppController] export_dxf(): 2 options parsed create_annotated_version={}",
+            opts.create_annotated_version
         ));
         let layout_doc = match self.clone_stripped_layout_doc() {
             Ok(d)  => {
@@ -2195,7 +2195,7 @@ impl qobject::AppController {
                 _ => seamly_svg2ezdxf::DxfVersion::R12,
             }, // dxf_version
         }; // style
-        match do_export_dxf(&layout_doc, &path_str, opts.create_teaching_version, &style, &mut dxf_progress) {
+        match do_export_dxf(&layout_doc, &path_str, opts.create_annotated_version, &style, &mut dxf_progress) {
             Ok(()) => {
                 log_to_file(&format!("[lib.rs AppController] export_dxf(): 5 export succeeded '{path_str}'"));
                 self.as_mut().progress_updated(100);

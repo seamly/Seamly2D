@@ -170,7 +170,7 @@ When `invert_y: true`:
 - Text ASCII sanitization
 - Block name sanitization
 - Block insertion into ENTITIES section (INSERT entities)
-- Teaching version generation with inline comments
+- Annotated version generation with inline comments
 
 ⏳ **Pending**:
 - Arc conversion (`<arc>` element)
@@ -356,7 +356,7 @@ Convert the ezdxf intermediate representation to DXF-ASTM format (R12, constrain
    - Only basic entity types
 4. Encode DXF entities using group codes
 5. Insert blocks into ENTITIES section using INSERT entities (so blocks are visible)
-6. Generate teaching version with inline comments (optional)
+6. Generate annotated version with inline comments (optional)
 7. Handle coordinate system (already transformed in seamly_svg2ezdxf)
 
 ### Data Structures
@@ -379,8 +379,8 @@ pub struct DxfAstmExportOptions {
     pub validate_entities: bool,
     // Whether to sanitize text to ASCII-only.
     pub sanitize_text: bool,
-    // Whether to create a teaching version with inline comments.
-    pub create_teaching_version: bool,
+    // Whether to create an annotated version with inline comments.
+    pub create_annotated_version: bool,
 }
 ```
 
@@ -448,7 +448,7 @@ pub fn export_layout_to_dxf_astm(
         include_header: false,
         validate_entities: true,
         sanitize_text: true,
-        create_teaching_version: false, // Set based on user preference
+        create_annotated_version: false, // Set based on user preference
     };
 
     export_dxf_astm(&drawing, output_path, &export_options)
@@ -583,7 +583,7 @@ The DXF-ASTM export is fully integrated into the desktop UI (`ui_desktop` crate)
 
 - **Export Menu**: Available in the "Export ▼" dropdown
 - **File Dialog**: Standard file save dialog for selecting output path
-- **Teaching Version Dialog**: User prompt to create teaching version with comments
+- **Annotated Version Dialog**: User prompt to create annotated version with comments
 - **Status Updates**: Real-time status messages in the UI
 
 See `docs/DXF_EXPORT_UI_WORKFLOW.md` for detailed UI workflow documentation.

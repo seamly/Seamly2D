@@ -1348,20 +1348,20 @@ bool PreferencesModel::fileExists(const QString &path)
 } // fileExists
 
 // ---------------------------------------------------------------------------
-// dxfTeachingFilePath
+// dxfAnnotatedFilePath
 // ---------------------------------------------------------------------------
 
-// @brief Derive the companion teaching-file (.txt) path from a DXF-ASTM file path.
-// The teaching file shares the same directory and base name as the .dxf file
+// @brief Derive the companion annotated-file (.txt) path from a DXF-ASTM file path.
+// The annotated file shares the same directory and base name as the .dxf file
 // but carries a .txt extension.  It is generated optionally during DXF export
-// when createTeachingVersion is true.
+// when createAnnotatedVersion is true.
 // Uses QFileInfo to extract directory and base name via the Qt path API so
 // the derivation is correct on all supported platforms (Windows backslashes,
 // Unix forward slashes).
 // Example: "C:/output/jacket_front.dxf"  →  "C:/output/jacket_front.txt"
 // @param dxfPath Absolute path to the .dxf file.
-// @return Absolute path of the companion .txt teaching file, or empty if dxfPath is empty.
-QString PreferencesModel::dxfTeachingFilePath(const QString &dxfPath)
+// @return Absolute path of the companion .txt annotated file, or empty if dxfPath is empty.
+QString PreferencesModel::dxfAnnotatedFilePath(const QString &dxfPath)
 {
     if (dxfPath.isEmpty()) {
         return QString();
@@ -1375,7 +1375,7 @@ QString PreferencesModel::dxfTeachingFilePath(const QString &dxfPath)
     const QString baseName = fi.completeBaseName();
     const QString dir      = fi.absolutePath();
     return QDir(dir).filePath(baseName + QStringLiteral(".txt"));
-} // dxfTeachingFilePath
+} // dxfAnnotatedFilePath
 
 // ---------------------------------------------------------------------------
 // parseViewerCommand

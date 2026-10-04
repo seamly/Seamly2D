@@ -267,9 +267,9 @@ qt_add_qml_module(SeamlyLayout
         qml/SvgCanvas.qml
         qml/SettingsDialog.qml
         qml/PreferencesPanel.qml
-        qml/DxfTeachingDialog.qml
+        qml/DxfAnnotatedDialog.qml
         qml/DxfMissingDataDialog.qml
-        qml/ViewDxfTeachingDialog.qml
+        qml/ViewDxfAnnotatedDialog.qml
 )
 # AppController is registered at runtime via qmlRegisterType in seamlyLayout_main.mm.
 # QML_FOREIGN (AppControllerForeign.h) was tried first but qmltyperegistrar
