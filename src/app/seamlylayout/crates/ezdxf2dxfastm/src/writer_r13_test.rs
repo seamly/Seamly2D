@@ -186,7 +186,7 @@ mod tests {
         }
         // R13 POLYLINE: dummy point, no obsolete group 66.
         let poly = recs.iter().find(|(_, r)| r.kind == "POLYLINE").map(|(_, r)| r).unwrap();
-        assert_eq!((poly.get(10), poly.get(20), poly.get(30), poly.get(66)), (Some("0.0"), Some("0.0"), Some("0.0"), None));
+        assert_eq!((poly.get(10), poly.get(20), poly.get(30), poly.get(66)), (Some("0.00"), Some("0.00"), Some("0.00"), None));
     }
 
     // @brief R13 holds the same D6673 entities, layers and values as R12.
@@ -240,6 +240,34 @@ mod tests {
         let recs = parse(&export(&drawing, "shirt", &fixed_options()));
         let records = recs.iter().filter(|(_, r)| r.kind == "BLOCK_RECORD").count();
         assert_eq!(records, 2 + 17, "layout blocks plus one block per piece");
+    }
+
+    // @brief True when `value` is a decimal number with exactly two fraction digits.
+    fn has_two_decimals(value: &str) -> bool {
+        let digits = value.trim().strip_prefix('-').unwrap_or(value.trim());
+        match digits.split_once('.') {
+            Some((whole, frac)) => {
+                !whole.is_empty() && whole.chars().all(|c| c.is_ascii_digit()) && frac.len() == 2 && frac.chars().all(|c| c.is_ascii_digit())
+            }
+            None => false,
+        }
+    }
+
+    #[test]
+    fn every_real_value_has_two_decimals_in_r12_and_r13() {
+        let svg = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/test_data/male_shirt_pieces.svg"))
+            .expect("fixture present");
+        let doc = svg_dom::Document::parse(&svg).expect("fixture parses");
+        for version in [DxfVersion::R12, DxfVersion::R13] {
+            let svg_opts = SvgToEzdxfOptions { dxf_version: version, ..SvgToEzdxfOptions::default() };
+            let drawing = svg_to_ezdxf(&doc, &svg_opts).expect("converts");
+            for (_, rec) in parse(&export(&drawing, "decimals", &fixed_options())) {
+                // Group codes 10-59 carry coordinates, distances, angles and other reals.
+                for (code, value) in rec.groups.iter().filter(|(c, _)| (10..=59).contains(c)) {
+                    assert!(has_two_decimals(value), "{version:?} {} group {code}: {value:?}", rec.kind);
+                }
+            }
+        }
     }
 
     #[test]
