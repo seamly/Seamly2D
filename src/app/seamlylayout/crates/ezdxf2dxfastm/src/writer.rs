@@ -197,7 +197,7 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
     let anchor = boundary.reduced[0];
     let mut system_lines = vec![format!("Piece Name:{}", block.piece_name)];
     if let Some(size) = &block.size {
-        system_lines.push(format!("Size:{}", size));
+        system_lines.push(format!("Size Name:{}", size));
     } // if size
     // Piece classification, not material. Seamly2D stores no category, so the value stays empty.
     system_lines.push("Category:".to_string());

@@ -648,7 +648,7 @@ pub struct DxfStyleInfo {
     // Input base name for `Style Name:`: the imported SVG file's base name, or
     // the `--document-name` value. None or blank when the input has no name.
     pub input_name: Option<String>,
-    // `Size:` of a piece without `data-size`: the individual pattern's
+    // `Size Name:` of a piece without `data-size`: the individual pattern's
     // `data-sample-size`. None or blank when the input has none.
     pub sample_size: Option<String>,
 }
@@ -2030,7 +2030,7 @@ mod tests {
         assert!(content.contains("OBJECTS"), "R13 file has an OBJECTS section");
     } // do_export_dxf_writes_r13_when_asked
 
-    // @brief Export a tagged two-piece SVG with a sample size; return the `Size:` lines in block order.
+    // @brief Export a tagged two-piece SVG with a sample size; return the `Size Name:` lines in block order.
     fn export_piece_sizes(sample_size: Option<&str>) -> Vec<String> {
         let piece = |id: &str, size: &str| {
             format!(r##"<g id="{id}" data-type="piece" data-name="{id}"{size}><g data-type="cutline"><path d="M 10,10 L 190,10 L 190,190 L 10,190 Z" fill="none" stroke="#000000"/></g></g>"##)
@@ -2049,7 +2049,7 @@ mod tests {
         do_export_dxf(&doc, &path_str, false, &style, &mut |_| {}).expect("DXF export should succeed");
         let content = std::fs::read_to_string(&path_str).expect("exported DXF file should be readable");
         let _ = std::fs::remove_file(&path_str);
-        content.lines().filter_map(|l| l.trim_end().strip_prefix("Size:")).map(str::to_string).collect()
+        content.lines().filter_map(|l| l.trim_end().strip_prefix("Size Name:")).map(str::to_string).collect()
     } // fn export_piece_sizes
 
     // @brief A piece keeps its `data-size`; a piece without one takes the sample size.

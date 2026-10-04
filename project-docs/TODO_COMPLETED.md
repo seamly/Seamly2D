@@ -2,6 +2,15 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task DXF.12 — Piece text `Size Name:`, not `Size:` (completed 2026-10-03)
+
+aw.fyi report on `male_shirt_202610032115.dxf`: `Size` is the AAMA-292 identifier; D6673-01 renamed it `Size Name`.
+
+- [x] DXF.12.1 `ezdxf2dxfastm/src/writer.rs`: write `Size Name:<size>`. One writer serves R12, R13 and CLO3D
+- [x] DXF.12.2 Tests: `writer_astm_test.rs` `piece_system_text_writes_size_and_category_before_quantity`; `exports.rs` `dxf_piece_size_falls_back_to_sample_size`
+- [x] DXF.12.3 Docs: compliance doc, `SVG-DATA-ATTRIBUTES.md`, `seamlylayout_DXF_ASTM_D6673_MATERIAL.md`
+- Decision (user): `Size Name:`. `Category:` is unchanged.
+
 ## Task DXF.11 — Key points pass a chord-length reader spline (completed 2026-10-03)
 
 aw.fyi report on `male_shirt_202610032115.dxf`: CollarTopInterface_M layer 84 off by 0.8469, CollarTop_M layer 87 off by 0.8423; limit 0.5. Same span on both: the collar seam line leaves its corner in a tight hook, with chords of 2.15, 15.5, 55.8 and 112 mm. Our centripetal stand-in measured 0.17 mm. A chord-length cubic measured 0.82–0.90 mm. aw.fyi's spline method is still unknown.
