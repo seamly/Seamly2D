@@ -152,7 +152,7 @@ mod tests {
         let dxf = parse_dxf(&export_to_string(&drawing, "size", &DxfAstmExportOptions::default()));
         let (_, body) = &dxf.blocks[0];
         let texts: Vec<&str> = body.iter().filter(|e| e.kind == "TEXT" && e.layer() == "1").map(|e| e.get(1).unwrap()).collect();
-        assert_eq!(texts, vec!["Piece Name:Front", "Size:102", "Category:", "Quantity:1,1", "Material:Fabric"]);
+        assert_eq!(texts, vec!["Piece Name:Front", "Size Name:102", "Category:", "Quantity:1,1", "Material:Fabric"]);
     }
 
     #[test]

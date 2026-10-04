@@ -1113,7 +1113,7 @@ QString MainWindowsNoGUI::buildPiecesSvgString(QGraphicsRectItem *paper,
 /**
  * @brief Size of an individual pattern for the SeamlyLayout handoff.
  *
- * DXF-ASTM `Size:` needs one value. The measurement bust_circ is used, else waist_circ.
+ * DXF-ASTM `Size Name:` needs one value. The measurement bust_circ is used, else waist_circ.
  *
  * @return the measurement value in pattern units; empty when the pattern has neither measurement.
  */

@@ -2169,7 +2169,7 @@ impl qobject::AppController {
 
         log_to_file(&format!("[lib.rs AppController] export_dxf(): 4 delegating to do_export_dxf for '{path_str}'"));
 
-        // `Size:` fallback for pieces without `data-size`; read before the progress closure borrows `self`.
+        // `Size Name:` fallback for pieces without `data-size`; read before the progress closure borrows `self`.
         let sample_size = self
             .rust()
             .input_dom

@@ -48,7 +48,7 @@ pub struct Block {
     pub piece_name: String,
     // `Quantity:` system text in "R,L" form, when the piece label states it.
     pub quantity: Option<String>,
-    // `Size:` system text: the piece `data-size`, else the pattern sample size.
+    // `Size Name:` system text: the piece `data-size`, else the pattern sample size.
     pub size: Option<String>,
     // `Material:` system text: the material the piece is cut from.
     pub material: String,
