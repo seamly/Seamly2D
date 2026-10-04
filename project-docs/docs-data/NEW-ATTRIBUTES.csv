@@ -9,5 +9,6 @@ data-measurements,data-type=pattern,individual | multisize (from the pattern's m
 data-sizes,data-type=pattern,multisize only: every handed-off size in pattern units comma-separated,
 data-base-size,data-type=pattern,multisize only: base size of the .smms file in pattern units,
 data-size,data-type=piece,multisize only: size of this copy of the piece,
+data-sample-size,data-type=pattern,individual only: bust_circ else waist_circ in pattern units; omitted when neither exists,
 piece-set,data-type value,multisize only: group holding one piece in every size; data-name and data-letter as the piece,
 data-turn-points,data-type=seamline | cutline | internal_path | cut_path,"space-separated 0-based indices of the turn point vertices in the component path d (each M and L end point counts); empty = no turn points; omitted when unknown",

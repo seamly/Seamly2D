@@ -31,6 +31,9 @@ pub struct Annotation {
     pub text: String,
 }
 
+// @brief `Material:` value until the handoff SVG carries a per-piece material.
+pub const DEFAULT_MATERIAL: &str = "Fabric";
+
 // @brief Block definition: one pattern piece.
 //
 // `entities` holds the generic conversion of every SVG element. The ASTM fields
@@ -45,6 +48,10 @@ pub struct Block {
     pub piece_name: String,
     // `Quantity:` system text in "R,L" form, when the piece label states it.
     pub quantity: Option<String>,
+    // `Size:` system text: the piece `data-size`, else the pattern sample size.
+    pub size: Option<String>,
+    // `Material:` system text: the material the piece is cut from.
+    pub material: String,
     // Piece boundary (layer 1 / 84).
     pub boundary: Option<AstmContour>,
     // Sew lines (layer 14 / 87).
@@ -71,6 +78,8 @@ impl Block {
             name,
             entities: Vec::new(),
             quantity: None,
+            size: None,
+            material: DEFAULT_MATERIAL.to_string(),
             boundary: None,
             sew_lines: Vec::new(),
             internal_lines: Vec::new(),

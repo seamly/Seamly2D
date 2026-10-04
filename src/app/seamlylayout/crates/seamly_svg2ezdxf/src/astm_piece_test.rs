@@ -272,6 +272,16 @@ mod tests {
     }
 
     #[test]
+    fn piece_size_comes_from_data_size() {
+        let svg = TAGGED.replace(r#"data-name="Front">"#, r#"data-name="Front" data-size=" 36 ">"#);
+        let doc = Document::parse(&svg).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        assert_eq!(drawing.blocks[0].size.as_deref(), Some("36"));
+        assert_eq!(drawing.blocks[1].size, None, "no data-size, no size");
+        assert!(drawing.blocks.iter().all(|b| b.material == "Fabric"));
+    }
+
+    #[test]
     fn missing_piece_data_names_incomplete_pieces() {
         let doc = Document::parse(TAGGED).expect("fixture parses");
         let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");

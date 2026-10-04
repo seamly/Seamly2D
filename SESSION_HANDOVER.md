@@ -6,6 +6,17 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — DXF.7: Size, Category, Material piece text
+
+Merged `task-dxf-piece-size-material`. Local MSI build + `nmake check`, `cargo test --workspace`, `ctest --preset debug` passed.
+
+- Piece text order: `Piece Name:`, `Size:`, `Category:`, `Quantity:`, `Material:`.
+- `Size:` = piece `data-size` (multisize), else new pattern attribute `data-sample-size` (individual: `bust_circ`, else `waist_circ`).
+- `Category:` written empty (piece classification; Seamly2D stores none). `Material:Fabric` until Layout.15.4.
+- Handoff contract changed: Seamly2D `SvgGenerator::setSampleSize`; docs `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`.
+- New docs: `dxf-docs/seamlylayout_DXF_ASTM_D6673_{HISTORY,INCONSISTENCIES,from_AAMA,MATERIAL}.md`.
+- Not checked in the running app. User action: export male_shirt DXF-ASTM; confirm `Size:102`, `Category:`, `Material:Fabric`; re-run aw.fyi (DXF.8).
+
 ## 2026-10-03 — DXF.6: Style Name is the input base name
 
 Merged `task-dxf-style-name`. `cargo test --workspace` and `ctest --preset debug` passed.

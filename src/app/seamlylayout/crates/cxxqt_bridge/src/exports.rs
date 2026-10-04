@@ -647,6 +647,9 @@ pub struct DxfStyleInfo {
     // Input base name for `Style Name:`: the imported SVG file's base name, or
     // the `--document-name` value. None or blank when the input has no name.
     pub input_name: Option<String>,
+    // `Size:` of a piece without `data-size`: the individual pattern's
+    // `data-sample-size`. None or blank when the input has none.
+    pub sample_size: Option<String>,
 }
 
 // @brief Export a stripped layout document to a DXF-ASTM file.
@@ -698,6 +701,12 @@ pub fn do_export_dxf(
     if let Some(name) = style.input_name.as_deref().map(str::trim).filter(|n| !n.is_empty()) {
         drawing.style_name = Some(name.to_string());
     } // if input name
+    // A multisize piece keeps its own `data-size`; any other piece takes the sample size.
+    if let Some(sample) = style.sample_size.as_deref().map(str::trim).filter(|s| !s.is_empty()) {
+        for block in drawing.blocks.iter_mut().filter(|b| b.size.is_none()) {
+            block.size = Some(sample.to_string());
+        } // for each block without a size
+    } // if sample size
     let defaults = DxfAstmExportOptions::default();
     let export_opts = DxfAstmExportOptions {
         create_teaching_version,
@@ -1981,6 +1990,35 @@ mod tests {
         assert!(content.contains("$HANDSEED"), "R13 file has a handle seed");
         assert!(content.contains("OBJECTS"), "R13 file has an OBJECTS section");
     } // do_export_dxf_writes_r13_when_asked
+
+    // @brief Export a tagged two-piece SVG with a sample size; return the `Size:` lines in block order.
+    fn export_piece_sizes(sample_size: Option<&str>) -> Vec<String> {
+        let piece = |id: &str, size: &str| {
+            format!(r##"<g id="{id}" data-type="piece" data-name="{id}"{size}><g data-type="cutline"><path d="M 10,10 L 190,10 L 190,190 L 10,190 Z" fill="none" stroke="#000000"/></g></g>"##)
+        };
+        let svg = format!(
+            r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">{}{}</svg>"#,
+            piece("Front", r#" data-size="36""#),
+            piece("Back", "")
+        );
+        let doc = Document::parse(&svg).expect("fixture SVG should parse");
+        let mut path = std::env::temp_dir();
+        path.push(format!("seamly_dxf_size_test_{}_{}.dxf", sample_size.unwrap_or("none"), std::process::id()));
+        let path_str = path.to_string_lossy().to_string();
+
+        let style = DxfStyleInfo { sample_size: sample_size.map(str::to_string), ..DxfStyleInfo::default() };
+        do_export_dxf(&doc, &path_str, false, &style, &mut |_| {}).expect("DXF export should succeed");
+        let content = std::fs::read_to_string(&path_str).expect("exported DXF file should be readable");
+        let _ = std::fs::remove_file(&path_str);
+        content.lines().filter_map(|l| l.trim_end().strip_prefix("Size:")).map(str::to_string).collect()
+    } // fn export_piece_sizes
+
+    // @brief A piece keeps its `data-size`; a piece without one takes the sample size.
+    #[test]
+    fn dxf_piece_size_falls_back_to_sample_size() {
+        assert_eq!(export_piece_sizes(Some("102")), vec!["36", "102"]);
+        assert_eq!(export_piece_sizes(None), vec!["36"]);
+    } // dxf_piece_size_falls_back_to_sample_size
 
     // @brief Export a one-piece SVG to a temp file named `<stem>_<pid>.dxf` and return the DXF text.
     // @param pattern_name `data-name` of a `data-type="pattern"` wrapper; None writes no wrapper.

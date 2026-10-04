@@ -68,6 +68,7 @@ private slots:
     void CenteredStartPutsMidpointOnCenter() const;
     void DownwardGrainAxisPointsUp() const;
     void IndividualPatternIsMarkedIndividual() const;
+    void IndividualPatternCarriesSampleSize() const;
     void MultisizePatternCarriesSizeList() const;
     void MultisizePiecesNestInPieceSets() const;
     void MultisizeIdsAreUniqueAndSized() const;

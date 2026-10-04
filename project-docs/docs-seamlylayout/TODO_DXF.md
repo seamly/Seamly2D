@@ -19,7 +19,7 @@ Reference: `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
 | More curve points than the curves need (Yoke_M L14, PocketFlapRound_M L1) | advisory | DXF.4 (done, see `TODO_COMPLETED.md`) |
 | Pieces with no `Quantity:`, label, or grainline (CollarTopInterface, CollarBaseInterface, CuffInterface) | report table | DXF.5 (done, see `TODO_COMPLETED.md`) |
 | `Style Name:` is the output file stem with timestamp | report header | DXF.6 (done, see `TODO_COMPLETED.md`) |
-| Category, Material, Size columns blank | report table | DXF.7 |
+| Category, Material, Size columns blank | report table | DXF.7 (done, see `TODO_COMPLETED.md`) |
 | `Author` not `vendor;application;release #` (got `Seamly2D 26.10.314`; report on `male_shirt_202610031615.dxf`) | departure | DXF.9 (done, see `TODO_COMPLETED.md`) |
 
 Report deviations carry an inch sign but match millimetres. Not verified.
@@ -39,13 +39,6 @@ Menu (user decision): **DXF-ASTM (R12)**, **DXF-ASTM (R13)**, **DXF-ASTM (CLO3D)
 - [ ] DXF.3.5 Check import in CLO3D and one other reader (e.g. ezdxf `audit`, LibreCAD). Done: ezdxf 1.4.4 `audit` 0 errors / 0 fixes; libdxfrw reads the same entity counts as R12. Open: user checks a DXF-ASTM (R13) export in CLO3D
 - [x] DXF.3.6 Rust tests: header version, unique handles, required sections present (`writer_r13_test.rs`, `exports.rs` `do_export_dxf_writes_r13_when_asked`)
 - [x] DXF.3.7 Update the compliance doc "Decisions" row for DXF version
-
-## [ ] Task DXF.7 — Category, Material, Size piece text
-
-Needs a separate discussion before implementation. Material is tracked as Layout.15.4 in `TODO_SEAMLYLAYOUT.md`.
-
-- [ ] DXF.7.1 Discuss source and format for `Category:`, `Material:`, `Size:`
-- [ ] DXF.7.2 Add subtasks from the decision
 
 ## [ ] Task DXF.8 — Re-validate
 

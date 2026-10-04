@@ -160,6 +160,12 @@ fn add_piece_block(
             block.piece_name = name;
         } // if non-empty
     } // if name attribute
+    // Multisize pieces carry their size; an individual piece gets the sample size later.
+    block.size = piece
+        .attributes
+        .get("data-size")
+        .map(|s| sanitize_ascii(s).trim().to_string())
+        .filter(|s| !s.is_empty());
 
     // Generic conversion of the piece's children (the piece group itself
     // carries no layer, so its id never leaks into a layer choice).

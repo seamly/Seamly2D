@@ -152,6 +152,19 @@ void SvgGenerator::setMultisize(const QStringList &sizes, const QString &baseSiz
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief Set the size of an individual pattern, written as data-sample-size on the pattern group.
+ *
+ * Ignored for a multisize export: each piece there carries its own data-size.
+ *
+ * @param sampleSize size in pattern units; empty writes no attribute.
+ */
+void SvgGenerator::setSampleSize(const QString &sampleSize)
+{
+    m_sampleSize = sampleSize;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief Merge all the SVGs in the m_domList list into a single SVG
  * @return The merged SVG as a DOM document
  * @details m_domList contains DOM representations of multiple SVGs
@@ -197,6 +210,7 @@ QDomDocument SvgGenerator::mergeSvgDoms()
         if (m_sizes.isEmpty())
         {
             patternGroup.setAttribute("data-measurements", "individual");
+            setAttribute(patternGroup, "data-sample-size", m_sampleSize);
         }
         else
         {

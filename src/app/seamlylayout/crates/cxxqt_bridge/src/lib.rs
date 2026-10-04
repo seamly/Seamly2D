@@ -2145,6 +2145,13 @@ impl qobject::AppController {
 
         log_to_file(&format!("[lib.rs AppController] export_dxf(): 4 delegating to do_export_dxf for '{path_str}'"));
 
+        // `Size:` fallback for pieces without `data-size`; read before the progress closure borrows `self`.
+        let sample_size = self
+            .rust()
+            .input_dom
+            .as_ref()
+            .map(|d| crate::piece_extractor::read_measurements_info(d).sample_size);
+
         // Progress closure: each intermediate tick from do_export_dxf updates both
         // the bindable property (QML ProgressBar) and fires the signal (imperative listeners).
         let mut dxf_progress = |pct: i32| {
@@ -2158,6 +2165,7 @@ impl qobject::AppController {
             creation_time: opts.creation_time.clone(),
             clo3d_group_250: opts.clo3d_group_250,
             input_name: opts.style_name.clone(),
+            sample_size,
             dxf_version: match opts.dxf_version.as_deref() {
                 Some("R13") => seamly_svg2ezdxf::DxfVersion::R13,
                 _ => seamly_svg2ezdxf::DxfVersion::R12,
