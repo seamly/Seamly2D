@@ -98,7 +98,7 @@ Depends on Seamly2D.7. Until then every piece is on one fabric.
 - [ ] Layout.15.1 Import: read `data-material` and per-material quantity
 - [ ] Layout.15.2 One layout tab per material; each packs only that material's pieces
 - [ ] Layout.15.3 Quantity: place each piece its cut count per material
-- [ ] Layout.15.4 Exports: material in the default file name; DXF-ASTM `Material:` piece text
+- [ ] Layout.15.4 Exports: material in the default file name; DXF-ASTM `Material:` piece text from `data-material` (today `Block::material` is `DEFAULT_MATERIAL` = `Fabric`)
 - [ ] Layout.15.5 Tests: Rust import, packing per material, export text
 
 ## [ ] Task Layout.16 — Fold lines in layout and export

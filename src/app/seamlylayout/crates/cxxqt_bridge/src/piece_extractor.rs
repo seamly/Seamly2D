@@ -717,6 +717,9 @@ pub struct MeasurementsInfo {
     pub sizes: Vec<String>,
     // `data-base-size`; empty when absent.
     pub base_size: String,
+    // `data-sample-size` of an individual pattern: `bust_circ`, else `waist_circ`,
+    // in pattern units; empty when absent or multisize.
+    pub sample_size: String,
 }
 
 // @brief Read the measurement type from the `data-type="pattern"` group.
@@ -734,7 +737,8 @@ pub fn read_measurements_info(doc: &svg_dom::Document) -> MeasurementsInfo {
 
     let multisize = pattern.attributes.get("data-measurements").map(String::as_str) == Some("multisize");
     if !multisize {
-        return MeasurementsInfo::default();
+        let sample_size = pattern.attributes.get("data-sample-size").map(|s| s.trim().to_string()).unwrap_or_default();
+        return MeasurementsInfo { sample_size, ..MeasurementsInfo::default() };
     } // if not multisize
 
     let sizes = pattern
@@ -743,7 +747,7 @@ pub fn read_measurements_info(doc: &svg_dom::Document) -> MeasurementsInfo {
         .map(|list| list.split(',').map(str::trim).filter(|s| !s.is_empty()).map(String::from).collect())
         .unwrap_or_default();
     let base_size = pattern.attributes.get("data-base-size").cloned().unwrap_or_default();
-    MeasurementsInfo { multisize, sizes, base_size }
+    MeasurementsInfo { multisize, sizes, base_size, sample_size: String::new() }
 } // fn read_measurements_info
 
 // @brief Find the first `data-type="pattern"` element, depth first.
@@ -1633,6 +1637,20 @@ pub(crate) mod tests {
         let doc = svg_dom::Document::parse(nested_handoff_svg()).expect("parse ok");
         assert_eq!(read_measurements_info(&doc), MeasurementsInfo::default());
     } // read_measurements_info_multisize_and_individual
+
+    // @brief An individual pattern's `data-sample-size` reaches `MeasurementsInfo`.
+    #[test]
+    fn read_measurements_info_individual_sample_size() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg">
+            <g data-type="pattern" data-measurements="individual" data-sample-size="102">
+                <g id="piece_Front" data-type="piece"/>
+            </g>
+        </svg>"#;
+        let doc = svg_dom::Document::parse(svg).expect("parse ok");
+        let info = read_measurements_info(&doc);
+        assert!(!info.multisize);
+        assert_eq!(info.sample_size, "102");
+    } // read_measurements_info_individual_sample_size
 
     // @brief `keep_size` leaves one piece per set, all of the chosen size.
     #[test]

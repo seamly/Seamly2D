@@ -2,6 +2,24 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task DXF.7 — Category, Material, Size piece text (completed 2026-10-03)
+
+The D6673 report showed blank Category, Material and Size columns.
+
+- [x] DXF.7.1 Discuss source and format for `Category:`, `Material:`, `Size:`
+- [x] DXF.7.2 Add subtasks from the decision
+- [x] DXF.7.3 Seamly2D handoff: `data-sample-size` on an individual pattern group: `bust_circ`, else `waist_circ`, in pattern units
+- [x] DXF.7.4 DXF-ASTM `Size:` piece text: piece `data-size`, else `data-sample-size`
+- [x] DXF.7.5 DXF-ASTM `Material:Fabric` on every piece
+- [x] DXF.7.6 `Category:` written empty: a piece classification, not material; Seamly2D stores none
+- [x] DXF.7.7 Tests and docs
+- Decisions (user): multisize Size is the tab's size (`data-size`). `chest_circ` does not exist in Seamly2D; `bust_circ` (G04) is its chest measurement. Category is not Material: AAMA-era CAD (AccuMark) uses it as a piece classification. Written empty until a pattern library supplies one. D6673-10 §4.3.1.2 defines no `Category:` identifier. History in `dxf-docs/seamlylayout_DXF_ASTM_D6673_HISTORY.md`, `seamlylayout_DXF_ASTM_D6673_INCONSISTENCIES.md`, `seamlylayout_DXF_ASTM_D6673_from_AAMA.md`.
+- Order: `Piece Name:`, `Size:`, `Category:`, `Quantity:`, `Material:`.
+- Code: `svg_generator.cpp` `setSampleSize`; `mainwindowsnogui.cpp` `individualSampleSize`; `piece_extractor::MeasurementsInfo::sample_size`; `DxfStyleInfo::sample_size`; `Block::size`, `Block::material`, `DEFAULT_MATERIAL`.
+- Tests: `TST_SvgComponentTags::IndividualPatternCarriesSampleSize`; `astm_piece_test.rs` `piece_size_comes_from_data_size`; `writer_astm_test.rs` `piece_system_text_writes_size_and_category_before_quantity`; `exports.rs` `dxf_piece_size_falls_back_to_sample_size`; `piece_extractor.rs` `read_measurements_info_individual_sample_size`.
+- Layout.15.4 replaces `Fabric` with the piece `data-material`.
+- Not checked in the running app.
+
 ## Task DXF.6 — Style Name is the input file base name (completed 2026-10-03)
 
 Today `cxxqt_bridge/src/exports.rs` sets `style_name` from the output path stem (`male_shirt_202610031234`). User decision: use the base name of the input file (`male_shirt`).

@@ -196,9 +196,15 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
     // Piece system text sits at the first boundary vertex.
     let anchor = boundary.reduced[0];
     let mut system_lines = vec![format!("Piece Name:{}", block.piece_name)];
+    if let Some(size) = &block.size {
+        system_lines.push(format!("Size:{}", size));
+    } // if size
+    // Piece classification, not material. Seamly2D stores no category, so the value stays empty.
+    system_lines.push("Category:".to_string());
     if let Some(q) = &block.quantity {
         system_lines.push(format!("Quantity:{}", q));
     } // if quantity
+    system_lines.push(format!("Material:{}", block.material));
     for (i, line) in system_lines.iter().enumerate() {
         let position = Point::new(anchor.x, anchor.y - (i as f64 + 1.0) * SYSTEM_TEXT_HEIGHT_MM * 1.5);
         encode_astm_text(writer, "1", position, SYSTEM_TEXT_HEIGHT_MM, 0.0, line)?;

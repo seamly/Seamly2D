@@ -1097,6 +1097,7 @@ QString MainWindowsNoGUI::buildPiecesSvgString(QGraphicsRectItem *paper,
     // writes a file, so the name is only carried, never used.
     SvgGenerator svgGenerator(paper, QString(), doc->GetPatternName(), doc->GetDescription(),
                               static_cast<int>(PrintDPI));
+    svgGenerator.setSampleSize(individualSampleSize());
 
     for (int piece = 0; piece < pieces.size(); piece++)
     {
@@ -1106,6 +1107,29 @@ QString MainWindowsNoGUI::buildPiecesSvgString(QGraphicsRectItem *paper,
     }
 
     return svgGenerator.toSvgString();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief Size of an individual pattern for the SeamlyLayout handoff.
+ *
+ * DXF-ASTM `Size:` needs one value. The measurement bust_circ is used, else waist_circ.
+ *
+ * @return the measurement value in pattern units; empty when the pattern has neither measurement.
+ */
+QString MainWindowsNoGUI::individualSampleSize() const
+{
+    const QMap<QString, QSharedPointer<MeasurementVariable>> measurements = pattern->DataMeasurements();
+    for (const QString &name : {bustCirc_M, waistCirc_M})
+    {
+        // A const pointer selects the qreal GetValue() overload, not the qreal* one.
+        const QSharedPointer<const MeasurementVariable> measurement = measurements.value(name);
+        if (!measurement.isNull())
+        {
+            return QString::number(measurement->GetValue());
+        }
+    }
+    return QString();
 }
 
 //---------------------------------------------------------------------------------------------------------------------

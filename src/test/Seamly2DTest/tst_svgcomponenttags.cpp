@@ -151,9 +151,10 @@ qreal normalizedDegrees(qreal degrees)
  * @brief exportItemSvg renders a piece item tree through the real export
  * pipeline (SvgGenerator) into a temporary file and parses the result back.
  * @param item piece root item; the function takes ownership.
+ * @param sampleSize individual pattern size passed to setSampleSize(); empty sets none.
  * @return the parsed SVG document; null if export or parsing failed.
  */
-QDomDocument exportItemSvg(QGraphicsItem *item)
+QDomDocument exportItemSvg(QGraphicsItem *item, const QString &sampleSize = QString())
 {
     QTemporaryDir tempDir;
     if (!tempDir.isValid())
@@ -168,6 +169,7 @@ QDomDocument exportItemSvg(QGraphicsItem *item)
 
     QGraphicsRectItem paper(QRectF(0, 0, 400, 400));
     SvgGenerator generator(&paper, filePath, QStringLiteral("Test Pattern"), QString(), 96);
+    generator.setSampleSize(sampleSize);
     generator.addSvgFromScene(&scene, item);
     generator.generate();
 
@@ -697,7 +699,25 @@ void TST_SvgComponentTags::IndividualPatternIsMarkedIndividual() const
     QCOMPARE(patterns.size(), 1);
     QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-measurements")), QStringLiteral("individual"));
     QVERIFY(!patterns.at(0).hasAttribute(QStringLiteral("data-sizes")));
+    QVERIFY(!patterns.at(0).hasAttribute(QStringLiteral("data-sample-size")));
     QVERIFY(groupsOfType(doc, QStringLiteral("piece-set")).isEmpty());
+    QVERIFY(!groupsOfType(doc, QStringLiteral("piece")).at(0).hasAttribute(QStringLiteral("data-size")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief IndividualPatternCarriesSampleSize checks that setSampleSize() writes
+ * data-sample-size on the pattern group and no data-size on the piece.
+ */
+void TST_SvgComponentTags::IndividualPatternCarriesSampleSize() const
+{
+    const QDomDocument doc = exportItemSvg(makeTestPiece(QStringLiteral("Yoke")).GetItem(true), QStringLiteral("102"));
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+
+    const QVector<QDomElement> patterns = groupsOfType(doc, QStringLiteral("pattern"));
+    QCOMPARE(patterns.size(), 1);
+    QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-measurements")), QStringLiteral("individual"));
+    QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-sample-size")), QStringLiteral("102"));
     QVERIFY(!groupsOfType(doc, QStringLiteral("piece")).at(0).hasAttribute(QStringLiteral("data-size")));
 }
 
