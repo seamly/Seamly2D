@@ -644,6 +644,9 @@ pub struct DxfStyleInfo {
     pub creation_date: Option<String>,
     // `Creation Time:` as hh-mm.
     pub creation_time: Option<String>,
+    // Input base name for `Style Name:`: the imported SVG file's base name, or
+    // the `--document-name` value. None or blank when the input has no name.
+    pub input_name: Option<String>,
 }
 
 // @brief Export a stripped layout document to a DXF-ASTM file.
@@ -674,7 +677,7 @@ pub fn do_export_dxf(
 
     // The drawing's version selects the DXF file version the writer produces.
     let svg_opts = SvgToEzdxfOptions { dxf_version: style.dxf_version, ..SvgToEzdxfOptions::default() };
-    let drawing = svg_to_ezdxf(doc, &svg_opts)
+    let mut drawing = svg_to_ezdxf(doc, &svg_opts)
         .map_err(|e| {
             crate::log_to_file(&format!("[exports.rs] do_export_dxf(): 2 SVG→ezdxf conversion failed: {e}"));
             format!("DXF conversion failed: {e}")
@@ -690,7 +693,11 @@ pub fn do_export_dxf(
     progress(50);
 
     // Step 2: Drawing → DXF-ASTM file.
-    // The file stem names the style when the SVG carries no pattern name.
+    // Style Name precedence: input base name, then the pattern `data-name`,
+    // then the output file stem. The writer prefers the drawing's name.
+    if let Some(name) = style.input_name.as_deref().map(str::trim).filter(|n| !n.is_empty()) {
+        drawing.style_name = Some(name.to_string());
+    } // if input name
     let defaults = DxfAstmExportOptions::default();
     let export_opts = DxfAstmExportOptions {
         create_teaching_version,
@@ -1974,6 +1981,68 @@ mod tests {
         assert!(content.contains("$HANDSEED"), "R13 file has a handle seed");
         assert!(content.contains("OBJECTS"), "R13 file has an OBJECTS section");
     } // do_export_dxf_writes_r13_when_asked
+
+    // @brief Export a one-piece SVG to a temp file named `<stem>_<pid>.dxf` and return the DXF text.
+    // @param pattern_name `data-name` of a `data-type="pattern"` wrapper; None writes no wrapper.
+    fn export_style_name_fixture(stem: &str, pattern_name: Option<&str>, input_name: Option<&str>) -> String {
+        let rect = r##"<g id="piece0" data-type="piece"><rect x="10" y="10" width="180" height="180" fill="none" stroke="#000000"/></g>"##;
+        // Wrap the piece in a named pattern group when the case needs one.
+        let body = match pattern_name {
+            Some(n) => format!(r#"<g data-type="pattern" data-name="{n}">{rect}</g>"#),
+            None => rect.to_string(),
+        }; // body
+        let svg = format!(r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">{body}</svg>"#);
+        let doc = Document::parse(&svg).expect("fixture SVG should parse");
+        let mut path = std::env::temp_dir();
+        path.push(format!("{stem}_{}.dxf", std::process::id()));
+        let path_str = path.to_string_lossy().to_string();
+
+        let style = DxfStyleInfo { input_name: input_name.map(str::to_string), ..DxfStyleInfo::default() };
+        do_export_dxf(&doc, &path_str, false, &style, &mut |_| {}).expect("DXF export should succeed");
+        let content = std::fs::read_to_string(&path_str).expect("exported DXF file should be readable");
+        let _ = std::fs::remove_file(&path_str);
+        content
+    } // fn export_style_name_fixture
+
+    // @brief Value of the `Style Name:` text line in a DXF file.
+    fn style_name_line(content: &str) -> String {
+        content
+            .lines()
+            .find_map(|l| l.trim_end().strip_prefix("Style Name:"))
+            .expect("DXF has a Style Name line")
+            .to_string()
+    } // fn style_name_line
+
+    // @brief A file import's base name is the Style Name, ahead of the pattern name and output stem.
+    #[test]
+    fn dxf_style_name_is_imported_file_base_name() {
+        let content = export_style_name_fixture("male_shirt_202610031234", Some("Men's Shirt"), Some("male_shirt"));
+        assert_eq!(style_name_line(&content), "male_shirt");
+    } // dxf_style_name_is_imported_file_base_name
+
+    // @brief The `--document-name` value is the Style Name of a standard input handoff.
+    #[test]
+    fn dxf_style_name_is_document_name() {
+        let content = export_style_name_fixture("seamly_dxf_style_handoff", None, Some("richmond-shirt_v1"));
+        assert_eq!(style_name_line(&content), "richmond-shirt_v1");
+    } // dxf_style_name_is_document_name
+
+    // @brief No input name, or a blank one, keeps the output file stem.
+    #[test]
+    fn dxf_style_name_without_input_name_is_output_stem() {
+        let pid = std::process::id();
+        for input_name in [None, Some(""), Some("  ")] {
+            let content = export_style_name_fixture("seamly_dxf_style_stem", None, input_name);
+            assert_eq!(style_name_line(&content), format!("seamly_dxf_style_stem_{pid}"), "input_name={input_name:?}");
+        } // for each absent input name
+    } // dxf_style_name_without_input_name_is_output_stem
+
+    // @brief Without an input name, the pattern `data-name` still wins over the output stem.
+    #[test]
+    fn dxf_style_name_without_input_name_keeps_pattern_name() {
+        let content = export_style_name_fixture("seamly_dxf_style_pattern", Some("Men's Shirt"), None);
+        assert_eq!(style_name_line(&content), "Men's Shirt");
+    } // dxf_style_name_without_input_name_keeps_pattern_name
 
     // @brief The male shirt handoff names its three interface pieces, and only those.
     #[test]

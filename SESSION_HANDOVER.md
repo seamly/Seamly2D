@@ -6,6 +6,14 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — DXF.6: Style Name is the input base name
+
+Merged `task-dxf-style-name`. `cargo test --workspace` and `ctest --preset debug` passed.
+
+- `Style Name:` = imported SVG base name, or `--document-name` value. Else pattern `data-name`, else output file stem.
+- QML sends `styleName` (`importedBaseName`) in the `exportDxf` options JSON.
+- Not checked in the running app. User action: export male_shirt DXF-ASTM; confirm `Style Name:male_shirt`.
+
 ## 2026-10-03 — DXF.5: warn about incomplete pieces before DXF-ASTM export
 
 Merged `task-dxf-missing-piece-data`. `cargo test --workspace` and `ctest --preset debug` passed.
