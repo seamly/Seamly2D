@@ -112,7 +112,8 @@ public:
                                                  QVector<QPointF> *nodeVertices = nullptr) const;
     QVector<QPointF>         cutPathPoints(const VContainer *data) const;
     QVector<QLineF>          createNotchLines(const VContainer *data,
-                                              const QVector<QPointF> &seamAllowance = QVector<QPointF>()) const;
+                                              const QVector<QPointF> &seamAllowance = QVector<QPointF>(),
+                                              bool includeCutlineNotches = true) const;
 
     QPainterPath             mainPath(const VContainer *data) const;
     QPainterPath             seamAllowancePath(const VContainer *data) const;
@@ -187,7 +188,8 @@ private:
 
     QVector<QLineF>          createNotch(const QVector<VPieceNode> &path, int previousIndex, int notchIndex,
                                          int nextIndex, const VContainer *data,
-                                         const QVector<QPointF> &pathPoints = QVector<QPointF>()) const;
+                                         const QVector<QPointF> &pathPoints = QVector<QPointF>(),
+                                         bool includeCutlineNotches = true) const;
 
     QVector<QLineF>          createSeamAllowanceNotch(const QVector<VPieceNode> &path, VSAPoint &previousSAPoint,
                                                       const VSAPoint &notchSAPoint, VSAPoint &nextSAPoint,

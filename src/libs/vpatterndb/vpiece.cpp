@@ -297,7 +297,14 @@ QVector<QPointF> VPiece::cutPathPoints(const VContainer *data) const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QVector<QLineF> VPiece::createNotchLines(const VContainer *data, const QVector<QPointF> &seamAllowance) const
+/**
+ * @brief createNotchLines creates the notch lines of every notch node, each on the line its node flags select.
+ * @param data container that resolves the node points.
+ * @param seamAllowance cutline points that clip cutline notches; empty means no clipping.
+ * @param includeCutlineNotches false omits cutline notches; only a view that hides seam allowances passes false.
+ */
+QVector<QLineF> VPiece::createNotchLines(const VContainer *data, const QVector<QPointF> &seamAllowance,
+                                         bool includeCutlineNotches) const
 {
     const QVector<VPieceNode> unitedPath = GetUnitedPath(data);
     if (!notchesPossible(unitedPath))
@@ -318,7 +325,8 @@ QVector<QLineF> VPiece::createNotchLines(const VContainer *data, const QVector<Q
         const int previousIndex = VPiecePath::FindInLoopNotExcludedUp(i, unitedPath);
         const int nextIndex = VPiecePath::FindInLoopNotExcludedDown(i, unitedPath);
 
-        notches += createNotch(unitedPath, previousIndex, i, nextIndex, data, seamAllowance);
+        notches += createNotch(unitedPath, previousIndex, i, nextIndex, data, seamAllowance,
+                               includeCutlineNotches);
     }
 
     return notches;
@@ -376,7 +384,8 @@ QPainterPath VPiece::seamAllowancePath(const QVector<QPointF> &points) const
 //---------------------------------------------------------------------------------------------------------------------
 QPainterPath VPiece::getNotchesPath(const VContainer *data, const QVector<QPointF> &pathPoints) const
 {
-    const QVector<QLineF> notches = createNotchLines(data, pathPoints);
+    // The canvas hides cutline notches together with the seam allowance; exported piece data keeps them.
+    const QVector<QLineF> notches = createNotchLines(data, pathPoints, qApp->Settings()->showSeamAllowances());
     QPainterPath path;
 
     // seam allowence
@@ -946,7 +955,7 @@ bool VPiece::isNotchVisible(const QVector<VPieceNode> &path, int notchIndex) con
 //---------------------------------------------------------------------------------------------------------------------
 QVector<QLineF> VPiece::createNotch(const QVector<VPieceNode> &path, int previousIndex, int notchIndex,
                                        int nextIndex, const VContainer *data,
-                                       const QVector<QPointF> &pathPoints) const
+                                       const QVector<QPointF> &pathPoints, bool includeCutlineNotches) const
 {
     SCASSERT(data != nullptr);
 
@@ -977,7 +986,7 @@ QVector<QLineF> VPiece::createNotch(const QVector<VPieceNode> &path, int previou
     if (!hasSeamAllowanceBuiltIn())
     {
         QVector<QLineF> lines;
-        if (path.at(notchIndex).showNotch() && qApp->Settings()->showSeamAllowances())
+        if (path.at(notchIndex).showNotch() && includeCutlineNotches)
         {
             lines += createSeamAllowanceNotch(path, previousSAPoint, notchSAPoint,  nextSAPoint,
                                               data, notchIndex, pathPoints);

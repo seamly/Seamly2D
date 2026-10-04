@@ -81,6 +81,8 @@ private slots:
     void LabelTemplateFilePrefersUserFile() const;
     void LabelTemplateFileEmptyWithoutAnyFile() const;
     void SameLabelLinesComparesFormatting() const;
+    void NotchFlagsSelectLine_data() const;
+    void NotchFlagsSelectLine() const;
 
 private:
     Q_DISABLE_COPY(TST_VPiece)
