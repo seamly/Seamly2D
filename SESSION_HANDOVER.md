@@ -6,6 +6,14 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — DXF.10: DXF-ASTM export name shows the DXF version
+
+Merged `task-dxf-version-name`. `cargo test --workspace`, `ctest --preset debug` passed.
+
+- Default names: `<base>_R12_YYYYMMDDHHMM.dxf`, `<base>_R13_YYYYMMDDHHMM.dxf`. CLO3D unchanged (Layout.19 adds `_CLO3D`).
+- Rust `exports::default_export_file_name` builds every default name; QML `makeExportFileName(ext, tiled, segment)` calls it. Layout.17.2 done.
+- Not checked in the running app. User action: export R12 and R13; confirm save-dialog names.
+
 ## 2026-10-03 — DXF.7: Size, Category, Material piece text
 
 Merged `task-dxf-piece-size-material`. Local MSI build + `nmake check`, `cargo test --workspace`, `ctest --preset debug` passed.

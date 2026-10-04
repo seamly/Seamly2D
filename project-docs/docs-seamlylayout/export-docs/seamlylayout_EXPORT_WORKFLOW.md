@@ -5,6 +5,7 @@ ExportMenu.MenuItem("PNG").onTriggered
         → Main.qml onExportPngRequested                      handler
           → preferencesModel.layoutDirectory                 getter → "C:/src/seamlyLayout/qt_frontend/output"
           → root.makeExportFileName("png")                   QML function → "<baseName>_YYYYMMDDHHMM.png"
+            → appController.defaultExportFileName(base, segment, stamp, ext, tiled)   Rust exports::default_export_file_name
           → preferencesModel.getSaveFilePath(title, dir, name, filter)   C++ static
             → QDir(dir).absolutePath()                       resolve dir to absolute
             → QFileDialog.setDirectory(absDir)
@@ -188,3 +189,17 @@ Stubs only. No module ships yet.
 - Chain: `ExportMenu` → `TopMenuBar` → `Main.qml` save dialog → `AppController.exportGcode` / `exportMesh` → `do_export_gcode` / `do_export_mesh`.
 - Both `do_export_*` stubs return `Err` and write no file.
 - To add a module: change the gate, then the stub body. QML needs no change.
+
+## Default file names
+
+`makeExportFileName(ext, tiled, segment)` → `<baseName>[_<segment>]_YYYYMMDDHHMM[_tiled].<ext>`.
+
+| Export | Default name |
+| ------ | ------------ |
+| DXF-ASTM (R12) | `male_shirt_R12_202610031234.dxf` |
+| DXF-ASTM (R13) | `male_shirt_R13_202610031234.dxf` |
+| DXF-ASTM (CLO3D) | `male_shirt_202610031234.dxf` |
+| PDF tiled | `male_shirt_202610031234_tiled.pdf` |
+| Other formats | `male_shirt_202610031234.<ext>` |
+
+- Export all tabs: tab label goes before the extension.

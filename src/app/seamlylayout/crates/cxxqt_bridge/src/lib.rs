@@ -35,7 +35,7 @@ mod exports;
 use exports::{
     do_export_dxf, dxf_missing_piece_data_message, do_export_gcode, do_export_mesh, do_export_pdf, do_export_pdf_tile, do_export_png,
     do_export_jpeg,
-    do_export_svg, paid_export_available, do_export_hpgl, parse_hpgl_options, do_export_postscript,
+    do_export_svg, paid_export_available, default_export_file_name, do_export_hpgl, parse_hpgl_options, do_export_postscript,
 };
 
 // Phase A of the "sheets" paper_type (L.2.1):
@@ -710,6 +710,17 @@ pub mod qobject {
         fn save_adjust_dom(self: &AppController) -> QString;
 
         // --- Export Layout ---
+
+        // Default export file name: `<base>[_<segment>]_<stamp>[_tiled].<ext>`; empty when `base` is empty.
+        #[qinvokable]
+        fn default_export_file_name(
+            self: &AppController,
+            base: &QString,
+            segment: &QString,
+            stamp: &QString,
+            ext: &QString,
+            tiled: bool,
+        ) -> QString;
 
         // Warning text naming pieces that lack Quantity, label or grainline in a
         // DXF-ASTM export; empty when every piece is complete or no layout exists.
@@ -2057,6 +2068,19 @@ impl qobject::AppController {
             )), // None
         } // match layout_dom
     } // fn clone_stripped_layout_doc
+
+    // Default export file name; see exports::default_export_file_name.
+    fn default_export_file_name(
+        &self,
+        base: &cxx_qt_lib::QString,
+        segment: &cxx_qt_lib::QString,
+        stamp: &cxx_qt_lib::QString,
+        ext: &cxx_qt_lib::QString,
+        tiled: bool,
+    ) -> cxx_qt_lib::QString {
+        let name = default_export_file_name(&base.to_string(), &segment.to_string(), &stamp.to_string(), &ext.to_string(), tiled);
+        cxx_qt_lib::QString::from(name.as_str())
+    } // fn default_export_file_name
 
     // -----------------------------------------------------------------------
     // DXF-ASTM export
