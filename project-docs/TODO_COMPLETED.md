@@ -1135,3 +1135,23 @@ LGPL notices in `src/app/seamlylayout/packaging/licenses/`, but none exist.
 - [x] Layout.21.6 `.txt` header: "DXF-ASTM Annotated Version with Inline Comments"; tracked `ezdxf2dxfastm/output/*.txt` updated
 - [x] Layout.21.7 Docs: `dxf-docs/*.md`, `status-docs/*.md`, `.claude/rules/seamlylayout_guidelines_export_dxf.mdc`
 - [x] Layout.21.8 `grep -ri teaching` over `src/app/seamlylayout` and `src/test/SeamlyLayoutTest` returns nothing
+
+## Task Layout.17 — HPGL cut-lines export name has `_cutlines` (completed 2026-10-03)
+
+- [x] Layout.17.1 `Main.qml` `onExportHpglRequested`: mode `"cut"` → `male_shirt_cutlines_202610011721.plt`
+- [x] Layout.17.2 `makeExportFileName` segment parameter; `_tiled` stays after the timestamp (done with DXF.10)
+- [x] Layout.17.3 Mode `"plot"` name stays `<importedBaseName>_YYYYMMDDHHMM.<ext>`
+- [x] Layout.17.4 Export all tabs: tab label still before the extension
+- [x] Layout.17.5 `export-docs/seamlylayout_EXPORT_WORKFLOW.md`; `Main.qml` name comments
+- [x] Layout.17.6 Tests: `export_name_segment_names_each_mode`, `default_export_file_name_with_mode_segments`, `tab_file_path_adds_label_before_extension`
+
+## Task Layout.18 — SVG export name shows the label text mode (completed 2026-10-03)
+
+One Rust mapping serves Layout.17 and Layout.18: `exports::export_name_segment(format, mode)`, QML `appController.exportNameSegment`.
+
+- [x] Layout.18.1 `"singleLineFont"` → `male_shirt_singlelinefont_202610011721.svg`
+- [x] Layout.18.2 `"hersheyStrokes"` → `male_shirt_hersheyfont_202610011721.svg`
+- [x] Layout.18.3 `"designerFont"`, `"asSupplied"` name stays `<importedBaseName>_YYYYMMDDHHMM.svg`
+- [x] Layout.18.4 Export all tabs: tab label still before the extension
+- [x] Layout.18.5 `export-docs/seamlylayout_EXPORT_WORKFLOW.md`; `Main.qml` name comments
+- [x] Layout.18.6 Tests: same as Layout.17.6

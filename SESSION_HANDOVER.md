@@ -6,6 +6,15 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — Layout.17 + Layout.18: HPGL and SVG export names show the mode
+
+Merged `task-export-name-segments`. `cargo test --workspace`, `ctest --preset debug` passed.
+
+- HPGL Cut → `_cutlines`; SVG single-line font → `_singlelinefont`; Hershey → `_hersheyfont`. Other modes unchanged.
+- One Rust mapping: `exports::export_name_segment`; QML `appController.exportNameSegment`.
+- Next: Layout.20 (`_annotated` export name).
+- User action: Export > HPGL > Cut, and each SVG text mode; check default names.
+
 ## 2026-10-03 — Layout.21: "teaching version" is now "annotated version"
 
 Merged `task-annotated-rename`. `cargo test --workspace`, `ctest --preset debug` passed.
