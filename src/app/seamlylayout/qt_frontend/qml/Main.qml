@@ -119,7 +119,7 @@ ApplicationWindow {
     } // reportStartupError
 
     // Staging path for the DXF save location chosen in dxfSaveDialog.
-    // Held here across the two-step dialog flow (save path → teaching dialog).
+    // Held here across the two-step dialog flow (save path → annotated dialog).
     property string pendingDxfPath: ""
 
     // Last successfully exported file path per format — used by the View menu.
@@ -132,12 +132,12 @@ ApplicationWindow {
     property string pendingExportPath: ""
     property string pendingExportFormat: ""        // "dxf"|"png"|"jpg"|"pdf"|"pdf-tiled"|"svg"|"hpgl"|"ps"|"eps"|"gcode"|"3mf"
     property string pendingExportSettings: ""      // settings JSON for pdf / pdf-tiled; text mode for svg; options JSON for hpgl
-    property bool   pendingExportTeachingVersion: false  // teaching flag for DXF
+    property bool   pendingExportAnnotatedVersion: false  // annotated flag for DXF
     property bool   pendingDxfClo3d: false               // CLO3D group 250 flag for DXF
     property string pendingDxfVersion: "R12"             // DXF file version: "R12" or "R13"
 
-    // @brief Warn about incomplete pieces, then ask for a DXF save path and the teaching choice.
-    // @details The export starts from the teaching dialog. The warning checks the
+    // @brief Warn about incomplete pieces, then ask for a DXF save path and the annotated choice.
+    // @details The export starts from the annotated dialog. The warning checks the
     //          shown tab's layout; Export all tabs uses the same pieces for every size.
     // @param clo3d      true for DXF-ASTM (CLO3D): D6673 content plus CLO3D group 250.
     // @param dxfVersion "R12" (AC1009) or "R13" (AC1012).
@@ -154,7 +154,7 @@ ApplicationWindow {
         root.chooseDxfPath()
     } // function requestDxfExport
 
-    // @brief Ask for a DXF save path for the staged variant, then open the teaching dialog.
+    // @brief Ask for a DXF save path for the staged variant, then open the annotated dialog.
     function chooseDxfPath() {
         var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
         // Segment names the variant: <importedBaseName>_<R12|R13|CLO3D>_YYYYMMDDHHMM.dxf.
@@ -165,9 +165,9 @@ ApplicationWindow {
                                          : "Save DXF-ASTM (" + root.pendingDxfVersion + ") File"
         var path = preferencesModel.getSaveFilePath(title, dir, name, "DXF Files (*.dxf);;All Files (*)")
         if (path === "") return // user cancelled
-        // Stage the path; the teaching dialog collects the last flag before export starts.
+        // Stage the path; the annotated dialog collects the last flag before export starts.
         root.pendingDxfPath = path
-        dxfTeachingDialog.open()
+        dxfAnnotatedDialog.open()
     } // function chooseDxfPath
 
     // Export > "Export all tabs" check state.  Kept across imports; it only
@@ -187,16 +187,16 @@ ApplicationWindow {
     // @param fmt      pendingExportFormat value.
     // @param path     Absolute file path to write.
     // @param settings pendingExportSettings value for this format.
-    // @param teaching DXF teaching-version flag.
+    // @param annotated DXF annotated-version flag.
     // @param clo3d    DXF CLO3D group 250 flag.
     // @param dxfVersion DXF file version: "R12" or "R13".
     // @return The AppController export result; false after it emitted errorOccurred.
-    function runExport(fmt, path, settings, teaching, clo3d, dxfVersion) {
+    function runExport(fmt, path, settings, annotated, clo3d, dxfVersion) {
         if (fmt === "dxf") {
             // Local date/time and version fill the DXF-ASTM style system text.
             var now = new Date()
             var optJson = JSON.stringify({
-                createTeachingVersion: teaching,
+                createAnnotatedVersion: annotated,
                 clo3dGroup250: clo3d,
                 dxfVersion:   dxfVersion,
                 styleName:    root.importedBaseName, // input base name; empty → output file stem
@@ -237,7 +237,7 @@ ApplicationWindow {
     // @param path File path from the save dialog.
     function exportEachTab(fmt, path) {
         var settings = root.pendingExportSettings
-        var teaching = root.pendingExportTeachingVersion
+        var annotated = root.pendingExportAnnotatedVersion
         var clo3d    = root.pendingDxfClo3d
         var dxfVersion = root.pendingDxfVersion
         var shown    = appController.activeLayoutView
@@ -253,7 +253,7 @@ ApplicationWindow {
                 errorDialog.open()
                 break
             } // if tab refused
-            ok = root.runExport(fmt, appController.exportTabPath(path, i), settings, teaching, clo3d, dxfVersion)
+            ok = root.runExport(fmt, appController.exportTabPath(path, i), settings, annotated, clo3d, dxfVersion)
         } // for each tab
         appController.selectExportTab(shown) // the export source matches the shown tab again
         root.batchExportRunning = false
@@ -262,7 +262,7 @@ ApplicationWindow {
         root.pendingExportPath = ""
         root.pendingExportFormat = ""
         root.pendingExportSettings = ""
-        root.pendingExportTeachingVersion = false
+        root.pendingExportAnnotatedVersion = false
         root.pendingDxfClo3d = false
         root.pendingDxfVersion = "R12"
         exportProgressPopup.close()
@@ -286,7 +286,7 @@ ApplicationWindow {
                 root.exportEachTab(fmt, path)
             else
                 root.runExport(fmt, path, root.pendingExportSettings,
-                               root.pendingExportTeachingVersion, root.pendingDxfClo3d,
+                               root.pendingExportAnnotatedVersion, root.pendingDxfClo3d,
                                root.pendingDxfVersion)
         } // onTriggered
     } // Timer exportStartTimer
@@ -335,7 +335,7 @@ ApplicationWindow {
             root.pendingExportPath = ""
             root.pendingExportFormat = ""
             root.pendingExportSettings = ""
-            root.pendingExportTeachingVersion = false
+            root.pendingExportAnnotatedVersion = false
             root.pendingDxfClo3d = false
             root.pendingDxfVersion = "R12"
             exportProgressPopup.close()
@@ -391,7 +391,7 @@ ApplicationWindow {
             root.pendingExportPath = ""
             root.pendingExportFormat = ""
             root.pendingExportSettings = ""
-            root.pendingExportTeachingVersion = false
+            root.pendingExportAnnotatedVersion = false
             root.pendingDxfClo3d = false
             root.pendingDxfVersion = "R12"
             exportProgressPopup.close()
@@ -720,19 +720,19 @@ ApplicationWindow {
                 // Open the selected DXF file in the configured DXF viewer (primary action).
                 console.log("[Main.qml TopMenuBar] onViewDxfAstmRequested(): 4 opening viewer")
                 preferencesModel.openInViewer(preferencesModel.dxfViewerPath, path)
-                // V.2: check for a companion teaching file (.txt) in the same directory.
-                // Teaching files are generated during DXF export when createTeachingVersion is true.
-                const teachingPath = preferencesModel.dxfTeachingFilePath(path)
-                console.log("[Main.qml TopMenuBar] onViewDxfAstmRequested(): 5 checking teaching file=" + teachingPath)
-                if (preferencesModel.fileExists(teachingPath)) {
-                    // Teaching file found — offer to open it as a secondary affordance.
+                // V.2: check for a companion annotated file (.txt) in the same directory.
+                // Annotated files are generated during DXF export when createAnnotatedVersion is true.
+                const annotatedPath = preferencesModel.dxfAnnotatedFilePath(path)
+                console.log("[Main.qml TopMenuBar] onViewDxfAstmRequested(): 5 checking annotated file=" + annotatedPath)
+                if (preferencesModel.fileExists(annotatedPath)) {
+                    // Annotated file found — offer to open it as a secondary affordance.
                     // The dialog is non-modal so the DXF viewer launch is not blocked.
-                    console.log("[Main.qml TopMenuBar] onViewDxfAstmRequested(): 5 teaching file found, prompting user")
-                    viewDxfTeachingDialog.teachingFilePath = teachingPath
-                    viewDxfTeachingDialog.open()
+                    console.log("[Main.qml TopMenuBar] onViewDxfAstmRequested(): 5 annotated file found, prompting user")
+                    viewDxfAnnotatedDialog.annotatedFilePath = annotatedPath
+                    viewDxfAnnotatedDialog.open()
                 } else {
-                    console.log("[Main.qml TopMenuBar] onViewDxfAstmRequested(): 5 no teaching file found")
-                } // if teaching file exists
+                    console.log("[Main.qml TopMenuBar] onViewDxfAstmRequested(): 5 no annotated file found")
+                } // if annotated file exists
             } else if (path === "") {
                 console.log("[Main.qml TopMenuBar] onViewDxfAstmRequested(): 4 file pick cancelled")
             } else {
@@ -1137,37 +1137,37 @@ ApplicationWindow {
     } // DxfMissingDataDialog dxfMissingDataDialog
 
     // -----------------------------------------------------------------------
-    // Teaching-version dialog — Standard vs. Teaching DXF export (Phase 9)
+    // Annotated-version dialog — Standard vs. Annotated DXF export (Phase 9)
     // -----------------------------------------------------------------------
-    DxfTeachingDialog {
-        id: dxfTeachingDialog
+    DxfAnnotatedDialog {
+        id: dxfAnnotatedDialog
         onAccepted: {
             // Stage the DXF export and show the progress popup.
             // exportStartTimer fires after one paint tick so the popup renders
             // before the synchronous Rust export blocks the UI thread.
             root.pendingExportPath = root.pendingDxfPath
             root.pendingExportFormat = "dxf"
-            root.pendingExportTeachingVersion = dxfTeachingDialog.teachingVersion
+            root.pendingExportAnnotatedVersion = dxfAnnotatedDialog.annotatedVersion
             exportProgressPopup.open()
             exportStartTimer.restart()
         } // onAccepted
-    } // DxfTeachingDialog dxfTeachingDialog
+    } // DxfAnnotatedDialog dxfAnnotatedDialog
 
     // -----------------------------------------------------------------------
-    // View teaching-file dialog — V.2: non-modal prompt shown after opening a
-    // DXF-ASTM file in the viewer when a companion .txt teaching file is found.
+    // View annotated-file dialog — V.2: non-modal prompt shown after opening a
+    // DXF-ASTM file in the viewer when a companion .txt annotated file is found.
     // The dialog is non-modal so the DXF viewer launch is not blocked.
     // -----------------------------------------------------------------------
-    ViewDxfTeachingDialog {
-        id: viewDxfTeachingDialog
+    ViewDxfAnnotatedDialog {
+        id: viewDxfAnnotatedDialog
         onAccepted: {
-            // Open the teaching file in the system default text editor.
+            // Open the annotated file in the system default text editor.
             // localFileToUrl converts the absolute path to a file:// URL so
             // Qt.openUrlExternally can hand it to the OS shell handler.
-            console.log("[Main.qml viewDxfTeachingDialog] onAccepted(): opening teaching file=" + viewDxfTeachingDialog.teachingFilePath)
-            Qt.openUrlExternally(preferencesModel.localFileToUrl(viewDxfTeachingDialog.teachingFilePath))
+            console.log("[Main.qml viewDxfAnnotatedDialog] onAccepted(): opening annotated file=" + viewDxfAnnotatedDialog.annotatedFilePath)
+            Qt.openUrlExternally(preferencesModel.localFileToUrl(viewDxfAnnotatedDialog.annotatedFilePath))
         } // onAccepted
-    } // ViewDxfTeachingDialog viewDxfTeachingDialog
+    } // ViewDxfAnnotatedDialog viewDxfAnnotatedDialog
 
     // -----------------------------------------------------------------------
     // Export success dialog — shown after export_finished signal (Phase 9)

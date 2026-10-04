@@ -283,13 +283,13 @@ public:
     // @return true if the path exists and is a file; false if missing or empty.
     Q_INVOKABLE static bool fileExists(const QString &path);
 
-    // @brief Derive the companion teaching-file path from a DXF-ASTM file path.
-    // The teaching file is a .txt file with the same base name in the same directory,
-    // generated optionally during DXF export when createTeachingVersion is true.
+    // @brief Derive the companion annotated-file path from a DXF-ASTM file path.
+    // The annotated file is a .txt file with the same base name in the same directory,
+    // generated optionally during DXF export when createAnnotatedVersion is true.
     // Example: "/output/layout.dxf" → "/output/layout.txt"
     // @param dxfPath Absolute path to the .dxf file.
-    // @return Absolute path of the companion .txt teaching file, or empty if dxfPath is empty.
-    Q_INVOKABLE static QString dxfTeachingFilePath(const QString &dxfPath);
+    // @return Absolute path of the companion .txt annotated file, or empty if dxfPath is empty.
+    Q_INVOKABLE static QString dxfAnnotatedFilePath(const QString &dxfPath);
 
     // @brief Parse a viewer-path field into (executable, args).
     // Resolution order:

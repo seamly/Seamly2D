@@ -51,7 +51,7 @@ SVG layout_dom → [seamly_svg2ezdxf] → ezdxf::Drawing → [ezdxf2dxfastm] →
 ### Crate: `ezdxf2dxfastm`
 - `crates/ezdxf2dxfastm/Cargo.toml` - Crate configuration
 - `crates/ezdxf2dxfastm/src/lib.rs` - Public API
-- `crates/ezdxf2dxfastm/src/writer.rs` - DXF file writer (fully implemented with teaching version)
+- `crates/ezdxf2dxfastm/src/writer.rs` - DXF file writer (fully implemented with annotated version)
 - `crates/ezdxf2dxfastm/src/encoder.rs` - Entity encoding (fully implemented)
 - `crates/ezdxf2dxfastm/src/validator.rs` - ASTM validation (fully implemented)
 - `crates/ezdxf2dxfastm/src/writer_test.rs` - Comprehensive unit tests
@@ -67,8 +67,8 @@ SVG layout_dom → [seamly_svg2ezdxf] → ezdxf::Drawing → [ezdxf2dxfastm] →
 ✅ **Entity Conversions**: Line, Circle, Text, Polyline, Path, Polygon, Rect, Ellipse
 ✅ **Block System**: Pattern pieces extracted as blocks, inserted into ENTITIES
 ✅ **DXF Writer**: Complete DXF R12 file writer with ASTM compliance
-✅ **Teaching Version**: Automatic generation of commented DXF files for debugging
-✅ **UI Integration**: Full integration with desktop UI including teaching version dialog
+✅ **Annotated Version**: Automatic generation of commented DXF files for debugging
+✅ **UI Integration**: Full integration with desktop UI including annotated version dialog
 
 ## Completed Implementation
 
@@ -87,12 +87,12 @@ SVG layout_dom → [seamly_svg2ezdxf] → ezdxf::Drawing → [ezdxf2dxfastm] →
 3. ✅ ASTM constraint validation
 4. ✅ File structure (HEADER, BLOCKS, ENTITIES, EOF)
 5. ✅ Block insertion into ENTITIES (INSERT entities)
-6. ✅ Teaching version generation with inline comments
+6. ✅ Annotated version generation with inline comments
 
 ### Phase 3: Integration ✅
 1. ✅ Export function integrated in UI
 2. ✅ Full UI integration with file dialogs
-3. ✅ Teaching version dialog (user prompt)
+3. ✅ Annotated version dialog (user prompt)
 4. ✅ Tested with real SVG files
 5. ✅ Validated with DXF parsers (LibreCAD)
 

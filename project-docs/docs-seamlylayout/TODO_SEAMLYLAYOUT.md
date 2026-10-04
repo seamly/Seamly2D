@@ -86,9 +86,9 @@ See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
 
 - [ ] Layout.61 Grading: grade rule identifiers (`# n` text), graded nests (one block per size, `Size Name:`), grade reference line (layer 5), grade rule table file
 - Layout.62 Moved to Layout.16: mirror line (layer 6) needs Seamly2D fold lines (Seamly2D.8)
-- [ ] Layout.63 Drill holes (layer 13), with diameter (group 30)
-- [ ] Layout.64 Stripe and plaid reference lines (layers 9, 10)
-- [ ] Layout.65 Seamly2D writes empty notch paths (`M x,y Z`) to the handoff SVG, so no notches reach the DXF — fix the producer
+- [ ] Layout.63 Drill holes (layer 13), with diameter (group 30) - not implemented in Seamly2D yet so this must wait
+- [ ] Layout.64 Stripe and plaid reference lines (layers 9, 10) - not implemented in Seamly2D yet so this must wait
+- [ ] Layout.65 Seamly2D writes empty notch paths (`M x,y Z`) to the handoff SVG, so no notches reach the DXF — fix the producer in Seamly2D Piece Mode
 - [ ] Layout.66 Seamly2D producer attributes: `data-quantity` (right/left), `data-on-fold`, `data-notch-type` — replaces label parsing and notch-shape inference. `data-material` moved to Seamly2D.7 / Layout.15
 
 ## [ ] Task Layout.15 — Layout by material
@@ -135,7 +135,7 @@ Export > SVG uses one default name for every text mode. The user cannot tell the
 
 ## [ ] Task Layout.20 — Annotated DXF export name has `_annotated`
 
-The annotated DXF export uses the same default name as the standard export. The user cannot tell the files apart. Uses the segment parameter from Layout.17.2 (done). Do Layout.21 first or together, so new code uses "annotated".
+The annotated DXF export uses the same default name as the standard export. The user cannot tell the files apart. Uses the segment parameter from Layout.17.2 (done). Layout.21 renamed "teaching" to "annotated" (done).
 
 - [ ] Layout.20.1 `Main.qml` `requestDxfExport`: ask Standard or Annotated before the save dialog. Today the save dialog comes first, so the name cannot know the choice
 - [ ] Layout.20.2 Annotated puts `_annotated` before the timestamp. Example: `male_shirt_annotated_202610011721.dxf`
@@ -145,19 +145,6 @@ The annotated DXF export uses the same default name as the standard export. The 
 - [ ] Layout.20.6 Export all tabs: tab label still goes before the extension
 - [ ] Layout.20.7 Update `export-docs/seamlylayout_EXPORT_WORKFLOW.md`, `dxf-docs/seamlylayout_DXF_EXPORT_WORKFLOW.md`, and the name comments in `Main.qml`
 - [ ] Layout.20.8 Test: annotated name has `_annotated`; standard name unchanged; `.txt` matches the `.dxf`
-
-## [ ] Task Layout.21 — Rename "teaching version" to "annotated version"
-
-"Teaching" sounds amateur. "Annotated" is the professional term (user decision, 2026-10-03).
-
-- [ ] Layout.21.1 UI text: `DxfTeachingDialog.qml` ("Generate a teaching version?", "Teaching Version" button, help text), `ViewDxfTeachingDialog.qml`
-- [ ] Layout.21.2 Rename files and types: `DxfTeachingDialog.qml` → `DxfAnnotatedDialog.qml`, `ViewDxfTeachingDialog.qml` → `ViewDxfAnnotatedDialog.qml`; update `qt_frontend/CMakeLists.txt`
-- [ ] Layout.21.3 QML: `Main.qml` ids, `pendingExportTeachingVersion`, `teaching` parameters, comments, log text
-- [ ] Layout.21.4 C++: `PreferencesModel::dxfTeachingFilePath` → `dxfAnnotatedFilePath`; `PreferencesModelTests.cpp`
-- [ ] Layout.21.5 Rust: `create_teaching_version` → `create_annotated_version` in `cxxqt_bridge/src/exports.rs`, `lib.rs`, `ezdxf2dxfastm/src/writer.rs`, `writer_test.rs`; JSON key `createTeachingVersion` → `createAnnotatedVersion` on both sides. The key is not saved to any file, so no migration
-- [ ] Layout.21.6 `.txt` header comment: "DXF-ASTM Teaching Version" → "DXF-ASTM Annotated Version"; update the test that checks it
-- [ ] Layout.21.7 Docs: `dxf-docs/*.md`, `status-docs/*.md`. Leave `TODO_COMPLETED.md` and `log.txt` as history
-- [ ] Layout.21.8 Check: `grep -ri teaching` over `src/app/seamlylayout` (without `build/`, `target/`) returns nothing
 
 ## [x] Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 

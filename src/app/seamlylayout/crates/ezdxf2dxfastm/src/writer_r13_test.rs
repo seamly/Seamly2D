@@ -278,18 +278,18 @@ mod tests {
     }
 
     #[test]
-    fn teaching_version_explains_r13_codes() {
+    fn annotated_version_explains_r13_codes() {
         let path = std::env::temp_dir().join(format!("seamly_r13_teach_{}.dxf", std::process::id()));
-        let options = DxfAstmExportOptions { create_teaching_version: true, ..fixed_options() };
+        let options = DxfAstmExportOptions { create_annotated_version: true, ..fixed_options() };
         export_dxf_astm(&sample_drawing(DxfVersion::R13), &path, &options).expect("export succeeds");
         let txt = path.with_extension("txt");
-        let teaching = std::fs::read_to_string(&txt).expect("teaching file");
+        let annotated = std::fs::read_to_string(&txt).expect("annotated file");
         let _ = std::fs::remove_file(&path);
         let _ = std::fs::remove_file(&txt);
-        assert!(teaching.contains("Subclass marker: AcDbEntity"));
-        assert!(teaching.contains("Section name: OBJECTS"));
+        assert!(annotated.contains("Subclass marker: AcDbEntity"));
+        assert!(annotated.contains("Section name: OBJECTS"));
         // A value of "0" (layer 0) is a value, not an entity marker for the next line.
-        assert!(teaching.contains("Layer name: 0 "));
-        assert!(!teaching.contains("Entity type: 5"));
+        assert!(annotated.contains("Layer name: 0 "));
+        assert!(!annotated.contains("Entity type: 5"));
     }
 }

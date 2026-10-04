@@ -167,9 +167,9 @@ mod tests {
         let _ = fs::remove_file(test_file);
     }
 
-    // @brief Test teaching version progress callback.
+    // @brief Test annotated version progress callback.
     #[test]
-    fn test_teaching_version_progress_callback() {
+    fn test_annotated_version_progress_callback() {
         // Create a simple drawing.
         let mut drawing = Drawing::new(DxfVersion::R12);
 
@@ -191,8 +191,8 @@ mod tests {
 
         std::fs::create_dir_all("output").expect("Failed to create output directory");
 
-        let test_file = "output/test_teaching_progress.dxf";
-        let teaching_file = "output/test_teaching_progress.txt";
+        let test_file = "output/test_annotated_progress.dxf";
+        let annotated_file = "output/test_annotated_progress.txt";
 
         let progress_values: Arc<Mutex<Vec<f32>>> = Arc::new(Mutex::new(Vec::new()));
         let progress_capture = progress_values.clone();
@@ -206,21 +206,21 @@ mod tests {
             include_header: false,
             validate_entities: true,
             sanitize_text: true,
-            create_teaching_version: true,
+            create_annotated_version: true,
             progress_callback: Some(callback),
             ..DxfAstmExportOptions::default()
         };
 
         export_dxf_astm(&drawing, test_file, &options)
-            .expect("Failed to export DXF teaching version");
+            .expect("Failed to export DXF annotated version");
 
         assert!(
             std::path::Path::new(test_file).exists(),
             "DXF file should exist"
         );
         assert!(
-            std::path::Path::new(teaching_file).exists(),
-            "Teaching file should exist"
+            std::path::Path::new(annotated_file).exists(),
+            "Annotated file should exist"
         );
 
         let values = progress_values
@@ -234,7 +234,7 @@ mod tests {
         assert!((last - 1.0).abs() < 0.001, "Final progress should be 1.0");
 
         let _ = fs::remove_file(test_file);
-        let _ = fs::remove_file(teaching_file);
+        let _ = fs::remove_file(annotated_file);
     }
 
     // @brief Test ASTM validation.

@@ -28,7 +28,7 @@ pub const ASTM_VERSION: &str = "D6673-10";
 // Height of system text, in millimetres.
 const SYSTEM_TEXT_HEIGHT_MM: f64 = 5.0;
 
-// @brief Progress callback for teaching version generation (0.0 - 1.0).
+// @brief Progress callback for annotated version generation (0.0 - 1.0).
 pub type ProgressCallback = Arc<dyn Fn(f32) + Send + Sync>;
 
 // @brief Export options for DXF-ASTM.
@@ -40,9 +40,9 @@ pub struct DxfAstmExportOptions {
     pub validate_entities: bool,
     // Whether to sanitize text to ASCII-only.
     pub sanitize_text: bool,
-    // Whether to create a teaching version with inline comments.
-    pub create_teaching_version: bool,
-    // Optional progress callback for teaching version generation.
+    // Whether to create an annotated version with inline comments.
+    pub create_annotated_version: bool,
+    // Optional progress callback for annotated version generation.
     pub progress_callback: Option<ProgressCallback>,
     // `Style Name:` when the drawing has no pattern name (e.g. the file stem).
     pub style_name: Option<String>,
@@ -62,7 +62,7 @@ impl Default for DxfAstmExportOptions {
             include_header: false,
             validate_entities: true,
             sanitize_text: true,
-            create_teaching_version: false,
+            create_annotated_version: false,
             progress_callback: None,
             style_name: None,
             author_release: env!("CARGO_PKG_VERSION").to_string(),
@@ -79,7 +79,7 @@ impl std::fmt::Debug for DxfAstmExportOptions {
             .field("include_header", &self.include_header)
             .field("validate_entities", &self.validate_entities)
             .field("sanitize_text", &self.sanitize_text)
-            .field("create_teaching_version", &self.create_teaching_version)
+            .field("create_annotated_version", &self.create_annotated_version)
             .field("progress_callback", &self.progress_callback.is_some())
             .field("style_name", &self.style_name)
             .field("author_release", &self.author_release)
@@ -562,7 +562,7 @@ fn group_code_comment(code: &str) -> String {
     } // match code
 } // fn group_code_comment
 
-// @brief Meaning of an ASTM D6673 layer number, for teaching comments.
+// @brief Meaning of an ASTM D6673 layer number, for annotated comments.
 fn astm_layer_meaning(layer: &str) -> &'static str {
     match layer {
         "1" => "ASTM piece boundary and system text",
@@ -585,10 +585,10 @@ fn astm_layer_meaning(layer: &str) -> &'static str {
     } // match layer
 } // fn astm_layer_meaning
 
-// @brief Create a teaching version of a DXF file with inline comments.
+// @brief Create an annotated version of a DXF file with inline comments.
 // @param dxf_path Path to the DXF file.
 // @return Result indicating success or error.
-fn create_teaching_version(
+fn create_annotated_version(
     dxf_path: &Path,
     progress_callback: Option<&ProgressCallback>,
 ) -> std::io::Result<()> {
@@ -597,20 +597,20 @@ fn create_teaching_version(
     let lines: Vec<&str> = content.lines().collect();
     let total = lines.len().max(1);
 
-    // Create teaching version path (same directory, .txt extension).
-    let mut teaching_path = dxf_path.to_path_buf();
-    teaching_path.set_extension("txt");
+    // Create annotated version path (same directory, .txt extension).
+    let mut annotated_path = dxf_path.to_path_buf();
+    annotated_path.set_extension("txt");
 
-    // Create teaching version file.
-    let mut teaching_file = File::create(&teaching_path)?;
+    // Create annotated version file.
+    let mut annotated_file = File::create(&annotated_path)?;
 
     // Write header comment.
     writeln!(
-        teaching_file,
-        "// DXF-ASTM Teaching Version with Inline Comments"
+        annotated_file,
+        "// DXF-ASTM Annotated Version with Inline Comments"
     )?;
     writeln!(
-        teaching_file,
+        annotated_file,
         "// Generated automatically from: {}",
         dxf_path
             .file_name()
@@ -618,15 +618,15 @@ fn create_teaching_version(
             .unwrap_or("unknown.dxf")
     )?;
     writeln!(
-        teaching_file,
+        annotated_file,
         "// This file contains the DXF content with explanatory comments for each line."
     )?;
     writeln!(
-        teaching_file,
+        annotated_file,
         "// Comments are positioned two tabs to the right of the DXF data."
     )?;
-    writeln!(teaching_file, "//")?;
-    writeln!(teaching_file)?;
+    writeln!(annotated_file, "//")?;
+    writeln!(annotated_file)?;
 
     // Process each line and add comments.
     for (i, line) in lines.iter().enumerate() {
@@ -641,10 +641,10 @@ fn create_teaching_version(
 
         if comment.is_empty() {
             // Empty line - just write it.
-            writeln!(teaching_file, "{}", line)?;
+            writeln!(annotated_file, "{}", line)?;
         } else {
             // Write line with comment (two tabs distance).
-            writeln!(teaching_file, "{}\t\t// {}", line, comment)?;
+            writeln!(annotated_file, "{}\t\t// {}", line, comment)?;
         }
         if let Some(callback) = progress_callback {
             let progress = (i + 1) as f32 / total as f32;
@@ -695,9 +695,9 @@ pub fn export_dxf_astm(
     }; // match version
     std::fs::write(output_path.as_ref(), text)?;
 
-    // 5. Create teaching version with inline comments (if requested).
-    if options.create_teaching_version {
-        create_teaching_version(output_path.as_ref(), options.progress_callback.as_ref())
+    // 5. Create annotated version with inline comments (if requested).
+    if options.create_annotated_version {
+        create_annotated_version(output_path.as_ref(), options.progress_callback.as_ref())
             .map_err(|e| DxfAstmExportError::Io(e))?;
     }
 

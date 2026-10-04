@@ -1122,3 +1122,16 @@ LGPL notices in `src/app/seamlylayout/packaging/licenses/`, but none exist.
 - [x] Seamly2D.10.5 No grainline: right edge 1 cm left of bounding box center
 - [x] Seamly2D.10.6 `@brief` and contract updated
 - [x] Seamly2D.10.7 Tests: `TST_VPiece` — `PatternLabelLeftOfVerticalGrainline`, `PatternLabelLeftOfSlantedGrainline`, `PatternLabelLeftOfCenterWithoutGrainline`
+
+## Task Layout.21 — Rename "teaching version" to "annotated version" (completed 2026-10-03)
+
+"Teaching" sounds amateur. "Annotated" is the professional term (user decision, 2026-10-03).
+
+- [x] Layout.21.1 UI text: "Generate an annotated version?", "Annotated Version" button, "View Annotated File"
+- [x] Layout.21.2 `DxfAnnotatedDialog.qml`, `ViewDxfAnnotatedDialog.qml` (`git mv`); `qt_frontend/CMakeLists.txt`
+- [x] Layout.21.3 QML: `Main.qml` ids, `pendingExportAnnotatedVersion`, parameters, comments, log text
+- [x] Layout.21.4 C++: `PreferencesModel::dxfAnnotatedFilePath`; `PreferencesModelTests.cpp`
+- [x] Layout.21.5 Rust: `create_annotated_version`; JSON key `createAnnotatedVersion`. Also `writer_r13_test.rs`
+- [x] Layout.21.6 `.txt` header: "DXF-ASTM Annotated Version with Inline Comments"; tracked `ezdxf2dxfastm/output/*.txt` updated
+- [x] Layout.21.7 Docs: `dxf-docs/*.md`, `status-docs/*.md`, `.claude/rules/seamlylayout_guidelines_export_dxf.mdc`
+- [x] Layout.21.8 `grep -ri teaching` over `src/app/seamlylayout` and `src/test/SeamlyLayoutTest` returns nothing

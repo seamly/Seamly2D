@@ -20,14 +20,14 @@
 1. Convert SVG DOM → ezdxf Drawing
 2. Save ezdxf to `output/` (debugging)
 3. Export to DXF-ASTM
-4. Optionally generate teaching version
+4. Optionally generate annotated version
 
 ## File Outputs
 
 | File | Location | Purpose |
 |------|----------|---------|
 | `.dxf` | User-selected | DXF R12 export |
-| `.txt` (teaching) | Same as DXF | Commented DXF for learning |
+| `.txt` (annotated) | Same as DXF | Commented DXF for learning |
 | `.txt` (debug) | `output/` | ezdxf debug dump |
 
 ## Related Docs
