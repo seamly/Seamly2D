@@ -6,6 +6,13 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — DXF.13: no `Category:` piece text
+
+Merged `task-dxf-drop-category`. `cargo test --workspace`, `ctest --preset debug` passed.
+
+- `Category:` removed from R12, R13 and CLO3D (one writer). User decision: DXF-AAMA only.
+- User action: export DXF-ASTM (R13); re-run aw.fyi (DXF.8).
+
 ## 2026-10-03 — DXF.12: piece text `Size Name:`
 
 Merged `task-dxf-size-name`. `cargo test --workspace`, `ctest --preset debug` passed.

@@ -46,6 +46,6 @@ This also reinforces our previous finding that **`Category` should not be assume
 ## SeamlyLayout output
 
 - Every piece: `Material:Fabric`. Source: `seamly_svg2ezdxf::DEFAULT_MATERIAL`, stored in `Block::material`.
-- `Category:` is written empty. Seamly2D stores no category.
-- Piece text order: `Piece Name:`, `Size Name:`, `Category:`, `Quantity:`, `Material:`.
+- `Category:` is not written. It is ANSI/AAMA-292 piece text, not valid in any DXF-ASTM edition.
+- Piece text order: `Piece Name:`, `Size Name:`, `Quantity:`, `Material:`.
 - Planned: Seamly2D.7.5 adds `data-material` to the handoff; Layout.15.4 writes it as `Material:`.

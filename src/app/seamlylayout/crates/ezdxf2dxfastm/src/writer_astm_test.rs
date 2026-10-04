@@ -146,13 +146,13 @@ mod tests {
     }
 
     #[test]
-    fn piece_system_text_writes_size_and_category_before_quantity() {
+    fn piece_system_text_writes_size_name_before_quantity_and_no_category() {
         let mut drawing = sample_drawing();
         drawing.blocks[0].size = Some("102".to_string());
         let dxf = parse_dxf(&export_to_string(&drawing, "size", &DxfAstmExportOptions::default()));
         let (_, body) = &dxf.blocks[0];
         let texts: Vec<&str> = body.iter().filter(|e| e.kind == "TEXT" && e.layer() == "1").map(|e| e.get(1).unwrap()).collect();
-        assert_eq!(texts, vec!["Piece Name:Front", "Size Name:102", "Category:", "Quantity:1,1", "Material:Fabric"]);
+        assert_eq!(texts, vec!["Piece Name:Front", "Size Name:102", "Quantity:1,1", "Material:Fabric"]);
     }
 
     #[test]
@@ -162,7 +162,7 @@ mod tests {
         let (_, body) = &dxf.blocks[0];
 
         let texts: Vec<(&str, &str)> = body.iter().filter(|e| e.kind == "TEXT").map(|e| (e.layer(), e.get(1).unwrap())).collect();
-        assert_eq!(texts, vec![("1", "Piece Name:Front"), ("1", "Category:"), ("1", "Quantity:1,1"), ("1", "Material:Fabric"), ("15", "Front")]);
+        assert_eq!(texts, vec![("1", "Piece Name:Front"), ("1", "Quantity:1,1"), ("1", "Material:Fabric"), ("15", "Front")]);
 
         // Every primary layer has a matching validation layer with the same polyline count.
         for (primary, validation) in [("1", "84"), ("14", "87"), ("8", "85"), ("11", "86")] {
