@@ -17,10 +17,11 @@
 //! as D6673-10 §4.3.3.1 requires.
 //!
 //! A reader rebuilds each curve as a spline through the key points. The
-//! reader's spline method is not known; a centripetal Catmull-Rom spline,
-//! split at turn points, stands in for it. `reduced` keeps enough curve points
-//! that this spline stays within `CURVE_TOLERANCE_MM` of `dense`, and no more:
-//! a curve point the spline does not need is dropped.
+//! reader's spline method is not known. Two Catmull-Rom splines, split at turn
+//! points, stand in for it: centripetal and chord-length (`READER_ALPHAS`).
+//! They differ most where neighboring chords differ in length. `reduced` keeps
+//! enough curve points that both splines stay within `CURVE_TOLERANCE_MM` of
+//! `dense`, and no more: a curve point neither spline needs is dropped.
 //!
 //! Turn points come from Seamly2D's `data-turn-points` tags when present
 //! (`build_contour_tagged`); otherwise they are detected from the geometry.
@@ -41,8 +42,13 @@ const STRAIGHT_TOLERANCE_MM: f64 = 0.05;
 const STRAIGHT_MIN_LENGTH_MM: f64 = 10.0;
 // A direction change above this angle makes a vertex a turn point.
 const TURN_ANGLE_DEG: f64 = 25.0;
+// A dense edge shorter than this is never split to pull a spline back.
+const MIN_SPLIT_EDGE_MM: f64 = 1.0;
 // Minimum samples per spline segment between two key points.
 const SPLINE_SAMPLES: usize = 32;
+// Catmull-Rom knot exponents of the stand-in reader splines: 0.5 = centripetal,
+// 1.0 = chord-length. The first one is the spline `spline_points` returns.
+const READER_ALPHAS: [f64; 2] = [0.5, 1.0];
 
 /// @brief One contour in the ASTM two-view representation.
 #[derive(Debug, Clone, PartialEq)]
@@ -156,7 +162,7 @@ pub fn build_contour_tagged(points: &[Point], closed: bool, turns: Option<&[bool
     } // for each chord
 
     // Step 6: add curve points until the spline through the key points follows `dense`.
-    let (kept, turn) = refine_to_spline(&dense, kept, turn, closed);
+    let (kept, turn) = refine_to_spline(&mut dense, kept, turn, closed);
 
     // Step 7: drop curve points the spline does not need.
     let (kept, turn) = prune_to_spline(&dense, kept, turn, closed);
@@ -165,9 +171,14 @@ pub fn build_contour_tagged(points: &[Point], closed: bool, turns: Option<&[bool
     Some(AstmContour { dense, reduced, turn, closed })
 } // fn build_contour
 
-/// @brief Sample the spline that a reader rebuilds from the key points of `contour`.
+/// @brief Sample the centripetal spline that a reader rebuilds from the key points of `contour`.
 /// @return Polyline through the spline; a closed contour ends at its first key point.
 pub fn spline_points(contour: &AstmContour) -> Vec<Point> {
+    spline_points_alpha(contour, READER_ALPHAS[0])
+} // fn spline_points
+
+// @brief Sample the Catmull-Rom spline with knot exponent `alpha` through the key points.
+fn spline_points_alpha(contour: &AstmContour, alpha: f64) -> Vec<Point> {
     let k = contour.reduced.len();
     if k < 2 {
         return contour.reduced.clone();
@@ -176,24 +187,29 @@ pub fn spline_points(contour: &AstmContour) -> Vec<Point> {
     let mut out = vec![contour.reduced[0]];
     for s in 0..segment_count {
         // Each segment starts where the previous one ends; skip the repeat.
-        let samples = sample_segment(&contour.reduced, &contour.turn, contour.closed, s, SPLINE_SAMPLES);
+        let samples = sample_segment(&contour.reduced, &contour.turn, contour.closed, s, SPLINE_SAMPLES, alpha);
         out.extend_from_slice(&samples[1..]);
     } // for each segment
     out
-} // fn spline_points
+} // fn spline_points_alpha
 
-/// @brief Largest distance between the spline through the key points and `dense`, in both directions.
-/// @details Measures each dense vertex to the spline, and each spline sample to the
+/// @brief Largest distance between the stand-in reader splines and `dense`, in both directions.
+/// @details Measures each dense vertex to each spline, and each spline sample to the
 ///          dense polyline. This is the check a reader makes against layers 84–87.
 pub fn spline_deviation(contour: &AstmContour) -> f64 {
-    let spline = spline_points(contour);
     let mut dense = contour.dense.clone();
     if contour.closed {
         dense.push(dense[0]); // closing edge
     } // if closed
-    let to_spline = contour.dense.iter().map(|&p| distance_to_polyline(p, &spline)).fold(0.0, f64::max);
-    let to_dense = spline.iter().map(|&p| distance_to_polyline(p, &dense)).fold(0.0, f64::max);
-    to_spline.max(to_dense)
+    READER_ALPHAS
+        .iter()
+        .map(|&alpha| {
+            let spline = spline_points_alpha(contour, alpha);
+            let to_spline = contour.dense.iter().map(|&p| distance_to_polyline(p, &spline)).fold(0.0, f64::max);
+            let to_dense = spline.iter().map(|&p| distance_to_polyline(p, &dense)).fold(0.0, f64::max);
+            to_spline.max(to_dense)
+        })
+        .fold(0.0, f64::max)
 } // fn spline_deviation
 
 /// @brief Distance between two points.
@@ -301,33 +317,43 @@ fn dp_recurse(span: &[Point], first: usize, last: usize, tolerance: f64, kept: &
     } // if outside tolerance
 } // fn dp_recurse
 
-// @brief Add dense vertices as curve points until every spline segment is within
-//        CURVE_TOLERANCE_MM of `dense`.
+// @brief Add dense vertices as curve points until every segment of every reader
+//        spline is within CURVE_TOLERANCE_MM of `dense`.
 // @details Each pass adds at most one vertex per failing segment, then rebuilds
 //          the spline, because a new key point also bends its neighbor segments.
 //          Added vertices come from `dense`, so `kept` stays an ordered subset of it.
-// @param kept Ascending indices into `dense`; a closed loop starts at index 0.
-// @param turn Parallel to `kept`; added vertices are curve points.
-fn refine_to_spline(dense: &[Point], mut kept: Vec<usize>, mut turn: Vec<bool>, closed: bool) -> (Vec<usize>, Vec<bool>) {
-    let n = dense.len();
+//          A segment between adjacent dense vertices has no vertex to add: when a
+//          spline bulges there, the dense edge is split at the point nearest the
+//          bulge. The new vertex lies on the edge, so the dense polyline keeps its shape.
+// @param dense May gain vertices on its edges.
+// @param kept  Ascending indices into `dense`; a closed loop starts at index 0.
+// @param turn  Parallel to `kept`; added vertices are curve points.
+fn refine_to_spline(dense: &mut Vec<Point>, mut kept: Vec<usize>, mut turn: Vec<bool>, closed: bool) -> (Vec<usize>, Vec<bool>) {
     loop {
+        let n = dense.len();
         let k = kept.len();
         let key: Vec<Point> = kept.iter().map(|&i| dense[i]).collect();
         let segment_count = if closed { k } else { k - 1 };
         let mut added: Vec<usize> = Vec::new();
+        let mut split: Option<(usize, Point)> = None;
         for s in 0..segment_count {
             let a = kept[s];
             // The last segment of a loop wraps back to vertex 0 (index n).
             let b = if s + 1 < k { kept[s + 1] } else { n };
-            if b <= a + 1 {
-                continue; // no dense vertex between the key points
+            let samples_for = |alpha: f64| sample_segment(&key, &turn, closed, s, SPLINE_SAMPLES.max(4 * (b - a)), alpha);
+            if b == a + 1 {
+                // Adjacent key points: only an edge split can pull the spline back.
+                if split.is_none() {
+                    split = READER_ALPHAS.iter().find_map(|&alpha| edge_split_point(dense[a], dense[b % n], &samples_for(alpha))).map(|p| (a, p));
+                } // if no split chosen yet
+                continue;
             } // if adjacent key points
-            let samples = sample_segment(&key, &turn, closed, s, SPLINE_SAMPLES.max(4 * (b - a)));
-            if let Some(i) = worst_vertex(dense, a, b, &samples) {
+            // The first reader spline that strays picks the vertex to add.
+            if let Some(i) = READER_ALPHAS.iter().find_map(|&alpha| worst_vertex(dense, a, b, &samples_for(alpha))) {
                 added.push(i);
             } // if outside tolerance
         } // for each segment
-        if added.is_empty() {
+        if added.is_empty() && split.is_none() {
             return (kept, turn);
         } // if every segment within tolerance
         for i in added {
@@ -335,8 +361,37 @@ fn refine_to_spline(dense: &[Point], mut kept: Vec<usize>, mut turn: Vec<bool>, 
             kept.insert(pos, i);
             turn.insert(pos, false);
         } // for each added vertex
+        // One split per pass: it shifts every later dense index by one.
+        if let Some((a, p)) = split {
+            dense.insert(a + 1, p);
+            kept.iter_mut().filter(|j| **j > a).for_each(|j| *j += 1);
+            let pos = kept.partition_point(|&j| j <= a);
+            kept.insert(pos, a + 1);
+            turn.insert(pos, false);
+        } // if split
     } // loop until within tolerance
 } // fn refine_to_spline
+
+// @brief The point at which to split the dense edge `pa`–`pb` when the spline
+//        samples bulge more than CURVE_TOLERANCE_MM away from it.
+// @return The point on the edge nearest the worst bulge, or None when the spline
+//         is within tolerance or the edge is too short to split.
+fn edge_split_point(pa: Point, pb: Point, samples: &[Point]) -> Option<Point> {
+    if distance(pa, pb) < MIN_SPLIT_EDGE_MM {
+        return None;
+    } // if edge too short
+    let (bulge, bulge_dist) = samples
+        .iter()
+        .map(|&p| (p, distance_to_segment(p, pa, pb)))
+        .fold((pa, 0.0), |best, cur| if cur.1 > best.1 { cur } else { best });
+    if bulge_dist <= CURVE_TOLERANCE_MM {
+        return None;
+    } // if within tolerance
+    // Project the bulge onto the edge, away from its ends.
+    let (dx, dy) = (pb.x - pa.x, pb.y - pa.y);
+    let t = (((bulge.x - pa.x) * dx + (bulge.y - pa.y) * dy) / (dx * dx + dy * dy)).clamp(0.25, 0.75);
+    Some(Point::new(pa.x + t * dx, pa.y + t * dy))
+} // fn edge_split_point
 
 // @brief Remove curve points while every spline segment stays within
 //        CURVE_TOLERANCE_MM of `dense`.
@@ -395,7 +450,8 @@ fn segments_around(r: usize, k: usize, closed: bool) -> impl Iterator<Item = usi
     segments.into_iter()
 } // fn segments_around
 
-// @brief Largest distance between spline segment `s` and the dense vertices it spans, in both directions.
+// @brief Largest distance between segment `s` of any reader spline and the dense
+//        vertices it spans, in both directions.
 // @param kept Ascending indices into `dense`; a closed loop starts at index 0.
 fn segment_deviation(dense: &[Point], kept: &[usize], turn: &[bool], closed: bool, s: usize) -> f64 {
     let (n, k) = (dense.len(), kept.len());
@@ -403,11 +459,16 @@ fn segment_deviation(dense: &[Point], kept: &[usize], turn: &[bool], closed: boo
     // The last segment of a loop wraps back to vertex 0 (index n).
     let b = if s + 1 < k { kept[s + 1] } else { n };
     let key: Vec<Point> = kept.iter().map(|&i| dense[i]).collect();
-    let samples = sample_segment(&key, turn, closed, s, SPLINE_SAMPLES.max(4 * (b - a)));
     let chain: Vec<Point> = (a..=b).map(|i| dense[i % n]).collect();
-    let to_spline = chain.iter().map(|&p| distance_to_polyline(p, &samples)).fold(0.0, f64::max);
-    let to_dense = samples.iter().map(|&p| distance_to_polyline(p, &chain)).fold(0.0, f64::max);
-    to_spline.max(to_dense)
+    READER_ALPHAS
+        .iter()
+        .map(|&alpha| {
+            let samples = sample_segment(&key, turn, closed, s, SPLINE_SAMPLES.max(4 * (b - a)), alpha);
+            let to_spline = chain.iter().map(|&p| distance_to_polyline(p, &samples)).fold(0.0, f64::max);
+            let to_dense = samples.iter().map(|&p| distance_to_polyline(p, &chain)).fold(0.0, f64::max);
+            to_spline.max(to_dense)
+        })
+        .fold(0.0, f64::max)
 } // fn segment_deviation
 
 // @brief The dense vertex to add when a spline segment strays more than
@@ -450,23 +511,24 @@ fn worst_vertex(dense: &[Point], a: usize, b: usize, samples: &[Point]) -> Optio
 // @details A turn point ends a spline, so the tangent there uses a phantom
 //          neighbor reflected through the turn point. A curve point uses its
 //          real neighbor. The ends of an open contour are always turn points.
+// @param alpha Catmull-Rom knot exponent; see READER_ALPHAS.
 // @return count + 1 points; the first and last are the two key points.
-fn sample_segment(key: &[Point], turn: &[bool], closed: bool, s: usize, count: usize) -> Vec<Point> {
+fn sample_segment(key: &[Point], turn: &[bool], closed: bool, s: usize, count: usize, alpha: f64) -> Vec<Point> {
     let k = key.len();
     let j = (s + 1) % k;
     let (p1, p2) = (key[s], key[j]);
     let reflect = |p: Point, q: Point| Point::new(2.0 * p.x - q.x, 2.0 * p.y - q.y);
     let p0 = if turn[s] || (!closed && s == 0) { reflect(p1, p2) } else { key[(s + k - 1) % k] };
     let p3 = if turn[j] || (!closed && j == k - 1) { reflect(p2, p1) } else { key[(j + 1) % k] };
-    catmull_rom([p0, p1, p2, p3], count)
+    catmull_rom([p0, p1, p2, p3], count, alpha)
 } // fn sample_segment
 
-// @brief Sample the centripetal Catmull-Rom segment from p[1] to p[2].
-// @details Barry-Goldman evaluation with knot spacing sqrt(chord length).
+// @brief Sample the Catmull-Rom segment from p[1] to p[2].
+// @details Barry-Goldman evaluation with knot spacing (chord length)^alpha.
 // @return count + 1 points from p[1] to p[2].
-fn catmull_rom(p: [Point; 4], count: usize) -> Vec<Point> {
+fn catmull_rom(p: [Point; 4], count: usize, alpha: f64) -> Vec<Point> {
     // Coincident points would give a zero knot interval.
-    let knot = |a: Point, b: Point| distance(a, b).sqrt().max(1e-9);
+    let knot = |a: Point, b: Point| distance(a, b).powf(alpha).max(1e-9);
     let t0 = 0.0;
     let t1 = t0 + knot(p[0], p[1]);
     let t2 = t1 + knot(p[1], p[2]);

@@ -386,4 +386,36 @@ mod tests {
         assert_eq!(sew.reduced.len(), 4, "untagged collinear midpoint is dropped");
         assert!(sew.turn.iter().all(|&t| t));
     }
+
+    // @brief A long straight line that runs smoothly into a tight curve.
+    // @details One 100 mm dense edge, then a quarter circle of radius 10 mm in
+    //          1 mm steps. Only the two open ends are turn points.
+    fn line_into_tight_curve() -> (Vec<Point>, Vec<bool>) {
+        let mut points = vec![Point::new(0.0, 0.0)];
+        for i in 0..=15 {
+            let a = std::f64::consts::FRAC_PI_2 * i as f64 / 15.0;
+            points.push(Point::new(100.0 + 10.0 * a.sin(), 10.0 - 10.0 * a.cos()));
+        }
+        let mut turns = vec![false; points.len()];
+        turns[0] = true;
+        *turns.last_mut().unwrap() = true;
+        (points, turns)
+    }
+
+    #[test]
+    fn long_edge_next_to_tight_curve_is_split_for_chord_length_reader() {
+        let (points, turns) = line_into_tight_curve();
+        let c = build_contour_tagged(&points, false, Some(&turns)).expect("contour");
+        // The chord-length spline bulges off the 100 mm edge, so the edge gains a vertex.
+        assert!(c.dense.len() > points.len(), "straight edge split");
+        for p in c.dense.iter().filter(|p| p.x > 0.0 && p.x < 100.0) {
+            assert!(p.y.abs() < 1e-9, "split vertex lies on the straight edge");
+        }
+        assert!(spline_deviation(&c) <= CURVE_TOLERANCE_MM + 1e-9);
+        // `reduced` stays an ordered subset of `dense`.
+        let mut from = 0;
+        for k in &c.reduced {
+            from += c.dense[from..].iter().position(|d| d == k).expect("key point in dense");
+        }
+    }
 }

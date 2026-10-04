@@ -2,6 +2,18 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task DXF.11 — Key points pass a chord-length reader spline (completed 2026-10-03)
+
+aw.fyi report on `male_shirt_202610032115.dxf`: CollarTopInterface_M layer 84 off by 0.8469, CollarTop_M layer 87 off by 0.8423; limit 0.5. Same span on both: the collar seam line leaves its corner in a tight hook, with chords of 2.15, 15.5, 55.8 and 112 mm. Our centripetal stand-in measured 0.17 mm. A chord-length cubic measured 0.82–0.90 mm. aw.fyi's spline method is still unknown.
+
+- [x] DXF.11.1 `astm_contour.rs`: check every segment against centripetal and chord-length Catmull-Rom (`READER_ALPHAS`); refine and prune keep both within `CURVE_TOLERANCE_MM`
+- [x] DXF.11.2 A spline that bulges between adjacent dense vertices splits that dense edge (`edge_split_point`). The new vertex lies on the edge. Example: FrontPanel hem, a 64.75 mm straight edge into the hem curve
+- [x] DXF.11.3 Tests: `astm_piece_test.rs` `long_edge_next_to_tight_curve_is_split_for_chord_length_reader`; `writer_astm_test.rs` `male_shirt_splines_follow_validation_layers` now checks both splines
+- [x] DXF.11.4 Update the compliance doc
+- Decision (user): option B, check two splines. Rejected: a chord-ratio limit (A); accepting the deviation (C).
+- male_shirt fixture curve points: 278 → 311. Natural chord-length cubic, worst span: 1.07 → 0.31 mm. Collar spans: 0.91 → 0.30 mm.
+- Not re-validated on aw.fyi yet (DXF.8).
+
 ## Task Layout.19 — DXF-ASTM (CLO3D) export name has `_CLO3D`; CLO3D writes R13 (completed 2026-10-03)
 
 - [x] Layout.19.1 `Main.qml` `chooseDxfPath`: CLO3D puts `_CLO3D` before the timestamp. Example: `male_shirt_CLO3D_202610031234.dxf`

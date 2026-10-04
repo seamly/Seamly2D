@@ -21,6 +21,7 @@ Reference: `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
 | `Style Name:` is the output file stem with timestamp | report header | DXF.6 (done, see `TODO_COMPLETED.md`) |
 | Category, Material, Size columns blank | report table | DXF.7 (done, see `TODO_COMPLETED.md`) |
 | `Author` not `vendor;application;release #` (got `Seamly2D 26.10.314`; report on `male_shirt_202610031615.dxf`) | departure | DXF.9 (done, see `TODO_COMPLETED.md`) |
+| Reconstruction from layers 2/3 off layer 84 by 0.8469 (CollarTopInterface_M), layer 87 by 0.8423 (CollarTop_M); report on `male_shirt_202610032115.dxf` | extension | DXF.11 (done, see `TODO_COMPLETED.md`) |
 
 Report deviations carry an inch sign but match millimetres. Not verified.
 
