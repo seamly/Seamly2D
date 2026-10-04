@@ -157,7 +157,10 @@ ApplicationWindow {
     // @brief Ask for a DXF save path for the staged variant, then open the teaching dialog.
     function chooseDxfPath() {
         var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-        var name = root.makeExportFileName("dxf") // default name: <importedBaseName>_YYYYMMDDHHMM.dxf
+        // DXF-ASTM names its version: <importedBaseName>_<R12|R13>_YYYYMMDDHHMM.dxf.
+        // CLO3D adds no version segment.
+        var segment = root.pendingDxfClo3d ? "" : root.pendingDxfVersion
+        var name = root.makeExportFileName("dxf", false, segment)
         var title = root.pendingDxfClo3d ? "Save DXF-ASTM (CLO3D) File"
                                          : "Save DXF-ASTM (" + root.pendingDxfVersion + ") File"
         var path = preferencesModel.getSaveFilePath(title, dir, name, "DXF Files (*.dxf);;All Files (*)")
@@ -300,22 +303,16 @@ ApplicationWindow {
         } // onTriggered
     } // Timer sizeLayoutTimer
 
-    // @brief Build a default export filename: <importedBaseName>_YYYYMMDDHHMM[_tiled].<ext>
-    // @param ext File extension without dot (e.g. "dxf", "png").
-    // @param tiled If true, appends "_tiled" to the filename. Default is false.
+    // @brief Build a default export filename: <importedBaseName>[_<segment>]_YYYYMMDDHHMM[_tiled].<ext>
+    // @param ext     File extension without dot (e.g. "dxf", "png").
+    // @param tiled   If true, appends "_tiled" after the timestamp. Default is false.
+    // @param segment Variant name put before the timestamp (e.g. "R13"). Default is none.
     // @return Full filename string, or empty if no SVG has been imported.
-    function makeExportFileName(ext, tiled) {
-        if (root.importedBaseName === "") return "";
-        var now = new Date();
-        var ts  = now.getFullYear().toString()
-                + ("0" + (now.getMonth() + 1)).slice(-2)
-                + ("0" + now.getDate()).slice(-2)
-                + ("0" + now.getHours()).slice(-2)
-                + ("0" + now.getMinutes()).slice(-2);
-        var name = root.importedBaseName + "_" + ts;
-        if (tiled === undefined) tiled = false;
-        if (tiled) name += "_tiled";
-        return name + "." + ext;
+    function makeExportFileName(ext, tiled, segment) {
+        var stamp = Qt.formatDateTime(new Date(), "yyyyMMddhhmm");
+        return appController.defaultExportFileName(root.importedBaseName,
+                                                   segment === undefined ? "" : segment,
+                                                   stamp, ext, tiled === true);
     } // makeExportFileName
 
     // Staging area for the transforms JSON received from AdjustController.

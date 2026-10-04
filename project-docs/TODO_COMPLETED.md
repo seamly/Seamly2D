@@ -2,6 +2,16 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task DXF.10 — DXF-ASTM export name shows the DXF version (completed 2026-10-03)
+
+The R12 and R13 exports had the same default name. The user could not tell the files apart.
+
+- [x] DXF.10.1 DXF-ASTM (R12) default name: `<importedBaseName>_R12_YYYYMMDDHHMM.dxf`
+- [x] DXF.10.2 DXF-ASTM (R13) default name: `<importedBaseName>_R13_YYYYMMDDHHMM.dxf`
+- [x] DXF.10.3 Rust `exports::default_export_file_name` builds every default name; `makeExportFileName` calls it through `AppController::defaultExportFileName`
+- [x] DXF.10.4 Test: `default_export_file_name_places_segment_before_stamp`
+- Decisions: CLO3D gets no version segment; Layout.19 gives it `_CLO3D`. Segment case follows the menu text (`R12`, `R13`).
+
 ## Task DXF.7 — Category, Material, Size piece text (completed 2026-10-03)
 
 The D6673 report showed blank Category, Material and Size columns.

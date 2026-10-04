@@ -26,6 +26,7 @@
 //   do_export_gcode(doc, path)                        -> Result<(), String> (stub)
 //   do_export_mesh(doc, path)                         -> Result<(), String> (stub)
 //   paid_export_available(format)                     -> bool
+//   default_export_file_name(base, segment, stamp, ext, tiled) -> String
 //
 // Internal helpers:
 //   merge_single_page_pdfs(page_bytes) -> Result<Vec<u8>, String>
@@ -1767,6 +1768,33 @@ pub fn paid_export_available(format: &str) -> bool {
     } // match format
 } // fn paid_export_available
 
+// @brief Default export file name: `<base>[_<segment>]_<stamp>[_tiled].<ext>`.
+//
+// The segment names the file variant, so two variants of one export cannot share
+// a name. Example: "male_shirt" + "R13" → "male_shirt_R13_202610031234.dxf".
+//
+// @param base    Imported file base name; empty gives an empty name (nothing imported).
+// @param segment Variant name without underscores; empty adds no segment.
+// @param stamp   Local time as YYYYMMDDHHMM.
+// @param ext     File extension without the dot.
+// @param tiled   true appends "_tiled" after the stamp.
+pub fn default_export_file_name(base: &str, segment: &str, stamp: &str, ext: &str, tiled: bool) -> String {
+    if base.is_empty() {
+        return String::new();
+    } // if nothing imported
+    let mut name = base.to_string();
+    if !segment.is_empty() {
+        name.push('_');
+        name.push_str(segment);
+    } // if segment
+    name.push('_');
+    name.push_str(stamp);
+    if tiled {
+        name.push_str("_tiled");
+    } // if tiled
+    format!("{name}.{ext}")
+} // fn default_export_file_name
+
 // @brief Export the layout document as G-Code (stub).
 //
 // Writes no file. Returns Err until a G-Code module is available.
@@ -1819,6 +1847,16 @@ pub fn do_export_mesh(
 mod tests {
     use super::*;
     use svg_dom::Document;
+
+    // @brief The variant segment goes before the stamp; "_tiled" stays after it.
+    #[test]
+    fn default_export_file_name_places_segment_before_stamp() {
+        assert_eq!(default_export_file_name("male_shirt", "R12", "202610031234", "dxf", false), "male_shirt_R12_202610031234.dxf");
+        assert_eq!(default_export_file_name("male_shirt", "R13", "202610031234", "dxf", false), "male_shirt_R13_202610031234.dxf");
+        assert_eq!(default_export_file_name("male_shirt", "", "202610031234", "png", false), "male_shirt_202610031234.png");
+        assert_eq!(default_export_file_name("male_shirt", "", "202610031234", "pdf", true), "male_shirt_202610031234_tiled.pdf");
+        assert_eq!(default_export_file_name("", "R12", "202610031234", "dxf", false), "");
+    } // default_export_file_name_places_segment_before_stamp
 
     // @brief Build a minimal tiled-export settings object for tests.
     fn test_tiled_settings() -> LayoutSettings {

@@ -116,7 +116,7 @@ Depends on Seamly2D.8.
 Export > HPGL > Cut (cut lines only) uses the same default name as Plot. The user cannot tell the two files apart.
 
 - [ ] Layout.17.1 `Main.qml` `onExportHpglRequested`: mode `"cut"` puts `_cutlines` before the timestamp. Example: `male_shirt_cutlines_202610011721.plt`
-- [ ] Layout.17.2 `makeExportFileName`: add the segment parameter; `_tiled` keeps its place after the timestamp
+- [x] Layout.17.2 `makeExportFileName`: add the segment parameter; `_tiled` keeps its place after the timestamp (done with DXF.10)
 - [ ] Layout.17.3 Mode `"plot"` name stays `<importedBaseName>_YYYYMMDDHHMM.<ext>`
 - [ ] Layout.17.4 Export all tabs: tab label still goes before the extension
 - [ ] Layout.17.5 Update `export-docs/seamlylayout_EXPORT_WORKFLOW.md` and the name comments in `Main.qml`
@@ -139,7 +139,7 @@ Export > DXF-ASTM (CLO3D) uses the same default name as DXF-ASTM. The user canno
 
 - [ ] Layout.19.1 `Main.qml` `requestDxfExport(clo3d)`: `clo3d` true puts `_CLO3D` before the timestamp. Example: `male_shirt_CLO3D_202610011721.dxf`
 - [ ] Layout.19.2 Keep the uppercase `CLO3D`; other segments are lowercase
-- [ ] Layout.19.3 DXF-ASTM name stays `<importedBaseName>_YYYYMMDDHHMM.dxf`
+- [ ] Layout.19.3 DXF-ASTM name keeps its version segment (DXF.10): `<importedBaseName>_<R12|R13>_YYYYMMDDHHMM.dxf`
 - [ ] Layout.19.4 Export all tabs: tab label still goes before the extension
 - [ ] Layout.19.5 Update `export-docs/seamlylayout_EXPORT_WORKFLOW.md` and the name comments in `Main.qml`
 - [ ] Layout.19.6 Test: CLO3D name has `_CLO3D`; DXF-ASTM name unchanged
@@ -151,8 +151,8 @@ The annotated DXF export uses the same default name as the standard export. The 
 - [ ] Layout.20.1 `Main.qml` `requestDxfExport`: ask Standard or Annotated before the save dialog. Today the save dialog comes first, so the name cannot know the choice
 - [ ] Layout.20.2 Annotated puts `_annotated` before the timestamp. Example: `male_shirt_annotated_202610011721.dxf`
 - [ ] Layout.20.3 The companion `.txt` keeps the `.dxf` base name: `male_shirt_annotated_202610011721.txt`
-- [ ] Layout.20.4 With CLO3D (Layout.19): `male_shirt_CLO3D_annotated_202610011721.dxf`
-- [ ] Layout.20.5 Standard name stays `<importedBaseName>_YYYYMMDDHHMM.dxf`
+- [ ] Layout.20.4 With CLO3D (Layout.19): `male_shirt_CLO3D_annotated_202610011721.dxf`; with a version (DXF.10): `male_shirt_R13_annotated_202610011721.dxf`
+- [ ] Layout.20.5 Standard name stays `<importedBaseName>_<R12|R13>_YYYYMMDDHHMM.dxf`
 - [ ] Layout.20.6 Export all tabs: tab label still goes before the extension
 - [ ] Layout.20.7 Update `export-docs/seamlylayout_EXPORT_WORKFLOW.md`, `dxf-docs/seamlylayout_DXF_EXPORT_WORKFLOW.md`, and the name comments in `Main.qml`
 - [ ] Layout.20.8 Test: annotated name has `_annotated`; standard name unchanged; `.txt` matches the `.dxf`
