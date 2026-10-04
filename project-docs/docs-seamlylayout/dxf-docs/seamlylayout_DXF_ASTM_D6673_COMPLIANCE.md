@@ -24,7 +24,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | Header | R12: `$ACADVER` only. R13: `$ACADVER`, `$DWGCODEPAGE`, `$HANDSEED` | D6673 §4.2: keep the header minimal. R13 needs `$HANDSEED` |
 | CLO3D group 250 | Off in **DXF-ASTM (R12)** and **(R13)**; on in **DXF-ASTM (CLO3D)** | Not DXF R12, not D6673. CLO3D reads it: 0 = boundary (layer 1), 2 = sew line (layer 14). Only those key-point polylines carry it. The R13 rewrite keeps it |
 | Block names | `<svg id>_M` kept | Existing CLO3D naming. `Piece Name:` carries the real name |
-| Curve tolerance | 0.25 mm | Douglas–Peucker tolerance for key points, and limit for the spline through them |
+| Curve tolerance | 0.25 mm | Douglas–Peucker tolerance for the first key points, and limit for the spline through the final key points. Chords between final key points can be farther off |
 | Quantity | From the "Cut N" label line: even N → `N/2,N/2`, odd N → `N,0` | Seamly2D exports only a total, not right/left counts |
 | Style Name | Pattern `data-name`, else the file stem | |
 | Sample Size, Grade Rule Table | Written blank | Required identifiers; export is one ungraded size |
@@ -51,6 +51,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 - `reduced` = Douglas–Peucker key points per span between turn points → primary layer (1, 8, 11, 14).
 - Spline check: centripetal Catmull-Rom through the key points, split at turn points (reflected end tangent). The reader's method is unknown; this is a stand-in.
 - Where the spline is more than 0.25 mm from `dense` (either direction), the farthest dense vertex becomes a curve point. Repeat until every segment passes. Only a segment with no dense vertex between its key points can stay over.
+- Then each curve point the spline does not need is dropped, least-needed first. Turn points and the first key point stay.
 - `spline_deviation()` measures the result; `writer_astm_test.rs` checks every male_shirt contour on layers 84–87.
 - `reduced` is an ordered subset of `dense`, and both start at the same vertex (§4.3.3.1).
 - Turn points come from Seamly2D's `data-turn-points` tag on each path component (see `docs-data/SVG-DATA-ATTRIBUTES.md`). Seamly2D marks a node vertex whose tangent breaks by more than 0.5° (line–line) or 5° (with a curve), any vertex that turns more than 25°, and open ends.

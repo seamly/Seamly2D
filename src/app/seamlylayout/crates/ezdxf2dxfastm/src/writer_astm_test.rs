@@ -284,4 +284,33 @@ mod tests {
             }
         }
     }
+
+    // @brief Yoke and PocketFlapRound carry no curve point the spline does not need.
+    // @details The aw.fyi report flagged Yoke_M layer 14 (14 curve points) and
+    //          PocketFlapRound_M layer 1. The ceilings hold the dropped points.
+    #[test]
+    fn male_shirt_curves_carry_only_needed_curve_points() {
+        let svg = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/test_data/male_shirt_pieces.svg"))
+            .expect("fixture present");
+        let doc = svg_dom::Document::parse(&svg).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let ceilings = [("piece_Yoke_M", 7, 8), ("piece_PocketFlapRound_M", 4, 5)];
+        for (name, boundary_max, sew_max) in ceilings {
+            let block = drawing.blocks.iter().find(|b| b.name == name).expect("piece present");
+            let boundary = block.boundary.as_ref().expect("boundary");
+            let sew = block.sew_lines.first().expect("sew line");
+            for (layer, c, max) in [("1", boundary, boundary_max), ("14", sew, sew_max)] {
+                let curves = c.turn.iter().filter(|&&t| !t).count();
+                assert!(curves <= max, "{name} layer {layer}: {curves} curve points, ceiling {max}");
+                assert!(spline_deviation(c) <= CURVE_TOLERANCE_MM + 1e-9, "{name} layer {layer}: spline off");
+                // No single curve point can go and keep the spline within tolerance.
+                for r in (1..c.reduced.len()).filter(|&r| !c.turn[r]) {
+                    let mut trial = c.clone();
+                    trial.reduced.remove(r);
+                    trial.turn.remove(r);
+                    assert!(spline_deviation(&trial) > CURVE_TOLERANCE_MM, "{name} layer {layer}: curve point {r} not needed");
+                }
+            }
+        }
+    }
 }
