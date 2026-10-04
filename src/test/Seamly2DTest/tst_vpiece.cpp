@@ -54,6 +54,7 @@
 #include "../vpatterndb/vpiecepath.h"
 #include "../vpatterndb/floatItemData/vgrainlinedata.h"
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
+#include "../vgeometry/vgobject.h"
 #include "../vgeometry/vsplinepath.h"
 #include "../vmisc/vabstractapplication.h"
 #include "../vmisc/vcommonsettings.h"
@@ -527,4 +528,134 @@ void TST_VPiece::SameLabelLinesComparesFormatting() const
     QVERIFY(NewPieceDefaults::sameLabelLines({line}, {line}));
     QVERIFY(!NewPieceDefaults::sameLabelLines({line}, {italic}));
     QVERIFY(!NewPieceDefaults::sameLabelLines({line}, {line, line}));
+}
+
+namespace
+{
+/// Seam allowance width of the notch test square, in millimeters.
+const qreal notchTestSAWidth = 10;
+
+/**
+ * @brief Notch lines of a square piece with one slit notch on its top edge.
+ * @param showCutline  the node's cutline notch flag.
+ * @param showSeamline the node's seamline notch flag.
+ * @param includeCutlineNotches forwarded to VPiece::createNotchLines().
+ * @param seamAllowancePoints receives the piece's cutline points.
+ */
+QVector<QLineF> squareNotchLines(bool showCutline, bool showSeamline, bool includeCutlineNotches,
+                                 QVector<QPointF> &seamAllowancePoints)
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    data->UpdateGObject(1, new VPointF(0, 0, "A1", 0, 0));
+    data->UpdateGObject(2, new VPointF(200, 0, "A2", 0, 0));
+    data->UpdateGObject(3, new VPointF(400, 0, "A3", 0, 0));
+    data->UpdateGObject(4, new VPointF(400, 400, "A4", 0, 0));
+    data->UpdateGObject(5, new VPointF(0, 400, "A5", 0, 0));
+
+    VPieceNode notchNode(2, Tool::NodePoint);
+    notchNode.setNotch(true);
+    notchNode.setNotchType(NotchType::Slit);
+    notchNode.setNotchSubType(NotchSubType::Straightforward);
+    notchNode.setNotchLength(5);
+    notchNode.setNotchWidth(5);
+    notchNode.setNotchCount(1);
+    notchNode.setShowNotch(showCutline);
+    notchNode.setShowSeamlineNotch(showSeamline);
+
+    VPiece piece;
+    piece.SetSeamAllowance(true);
+    piece.SetSAWidth(notchTestSAWidth);
+    piece.GetPath().Append(VPieceNode(1, Tool::NodePoint));
+    piece.GetPath().Append(notchNode);
+    piece.GetPath().Append(VPieceNode(3, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(4, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(5, Tool::NodePoint));
+
+    seamAllowancePoints = piece.seamAllowancePoints(data.data());
+    return piece.createNotchLines(data.data(), seamAllowancePoints, includeCutlineNotches);
+}
+
+/// True when @p point lies on the polyline @p points.
+bool isOnPolyline(const QPointF &point, const QVector<QPointF> &points)
+{
+    for (int i = 1; i < points.size(); ++i)
+    {
+        if (VGObject::IsPointOnLineSegment(point, points.at(i - 1), points.at(i)))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+} // namespace
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::NotchFlagsSelectLine_data() const
+{
+    QTest::addColumn<bool>("showCutline");
+    QTest::addColumn<bool>("showSeamline");
+    QTest::addColumn<bool>("showSeamAllowances");
+    QTest::addColumn<bool>("includeCutlineNotches");
+    QTest::addColumn<int>("cutlineNotches");
+    QTest::addColumn<int>("seamlineNotches");
+
+    QTest::newRow("no flag")                   << false << false << true  << true  << 0 << 0;
+    QTest::newRow("cutline")                   << true  << false << true  << true  << 1 << 0;
+    QTest::newRow("seamline")                  << false << true  << true  << true  << 0 << 1;
+    QTest::newRow("both")                      << true  << true  << true  << true  << 1 << 1;
+    QTest::newRow("cutline, allowance hidden") << true  << false << false << true  << 1 << 0;
+    QTest::newRow("both, cutline omitted")     << true  << true  << true  << false << 0 << 1;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief NotchFlagsSelectLine checks that each notch flag puts its notch on its own line, and that the
+ * seam allowance view setting does not change the notch data.
+ */
+void TST_VPiece::NotchFlagsSelectLine() const
+{
+    QFETCH(bool, showCutline);
+    QFETCH(bool, showSeamline);
+    QFETCH(bool, showSeamAllowances);
+    QFETCH(bool, includeCutlineNotches);
+    QFETCH(int, cutlineNotches);
+    QFETCH(int, seamlineNotches);
+
+    const bool savedShowSeamAllowances = qApp->Settings()->showSeamAllowances();
+    qApp->Settings()->setShowSeamAllowances(showSeamAllowances);
+
+    QVector<QPointF> seamAllowancePoints;
+    const QVector<QLineF> notches = squareNotchLines(showCutline, showSeamline, includeCutlineNotches,
+                                                           seamAllowancePoints);
+
+    qApp->Settings()->setShowSeamAllowances(savedShowSeamAllowances);
+
+    const QVector<QPointF> seamline{QPointF(0, 0), QPointF(400, 0)};
+    const qreal notchLength = ToPixel(5, Unit::Mm);
+
+    int onCutline = 0;
+    int onSeamline = 0;
+    for (const QLineF &notch : notches)
+    {
+        QVERIFY(qAbs(notch.length() - notchLength) < 0.01);
+        const bool p1OnCut  = isOnPolyline(notch.p1(), seamAllowancePoints);
+        const bool p2OnCut  = isOnPolyline(notch.p2(), seamAllowancePoints);
+        const bool p1OnSeam = isOnPolyline(notch.p1(), seamline);
+        const bool p2OnSeam = isOnPolyline(notch.p2(), seamline);
+        if (p1OnCut || p2OnCut)
+        {
+            ++onCutline;
+        }
+        else if (p1OnSeam || p2OnSeam)
+        {
+            ++onSeamline;
+        }
+    }
+
+    QCOMPARE(notches.size(), cutlineNotches + seamlineNotches);
+    QCOMPARE(onCutline, cutlineNotches);
+    QCOMPARE(onSeamline, seamlineNotches);
 }

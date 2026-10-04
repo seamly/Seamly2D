@@ -6,6 +6,18 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-04 — Seamly2D.6: cutline notches no longer depend on the view setting
+
+Merged `task-cutline-notch`. Seamly2DTests, CollectionTest, ParserTest, TranslationsTest passed (run directly; `nmake check` wrapper returns 9009 in this shell).
+
+- User decisions: fix Seamly2D.6 here, not upstream first. Seamly2D.6 comes before Layout.65.
+- Fix: `VPiece::createNotchLines(..., includeCutlineNotches)`. Only the canvas passes `showSeamAllowances()`. Layout and export always get cutline notches.
+- Test: `TST_VPiece::NotchFlagsSelectLine`. Straight edge, slit: each flag puts its notch on the correct line.
+- Reported canvas symptom not reproduced in the unit test. Sample notch nodes have both flags `false`.
+- Layout.65 rule recorded: DXF writes every notch as a slit, length = half the seam allowance width.
+- User action: Seamly2D.6.1.2 — reproduce on the canvas; give notch type, subtype, edge shape, seam allowance view state.
+- Next: Seamly2D.6.3.2 after that report, then Seamly2D.6.4, then Layout.65.
+
 ## 2026-10-03 — Layout.20: annotated DXF export name has `_annotated`
 
 Merged `task-dxf-annotated-name`. `cargo test --workspace`, `ctest --preset debug` passed.
