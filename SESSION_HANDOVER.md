@@ -6,6 +6,13 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — DXF.14: every real value has 2 decimals
+
+Merged `task-dxf-two-decimals`. `cargo test --workspace`, `ctest --preset debug` passed.
+
+- R13 fixed values (`0.0`, `1.0`, …) now `0.00`, `1.00`, …. R12 was already 2 decimals.
+- User action: export DXF-ASTM (R13); re-run aw.fyi (DXF.8).
+
 ## 2026-10-03 — DXF.13: no `Category:` piece text
 
 Merged `task-dxf-drop-category`. `cargo test --workspace`, `ctest --preset debug` passed.

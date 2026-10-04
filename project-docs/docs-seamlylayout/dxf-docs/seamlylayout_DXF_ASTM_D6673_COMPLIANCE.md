@@ -18,7 +18,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 
 | Topic | Decision | Reason |
 |---|---|---|
-| Units | Always `Units:METRIC`: millimetres to 2 decimals | User decision. SVG px (96 dpi) × 25.4 / 96 |
+| Units | Always `Units:METRIC`: millimetres to 2 decimals. Every real value (groups 10–59) has exactly 2 decimals, R13 table and dummy values included (`0.00`) | User decision. SVG px (96 dpi) × 25.4 / 96 |
 | DXF version | User picks: **DXF-ASTM (R12)** writes `AC1009`; **DXF-ASTM (R13)** writes `AC1012`. **DXF-ASTM (CLO3D)** writes R13 (`AC1012`): the CLO3D variant must be D6673-10 compliant (user decision) | D6673 §1.2 / 4.1 names R13. R12 has the widest importer support. Gerber AccuMark writes no version at all |
 | R13 structure | R12 group stream plus handles (5; 105 for DIMSTYLE), subclass markers (100), CLASSES (empty), TABLES (VPORT, LTYPE, LAYER, STYLE, VIEW, UCS, APPID, DIMSTYLE, BLOCK_RECORD), `*MODEL_SPACE` / `*PAPER_SPACE` blocks, OBJECTS (root dictionary + ACAD_GROUP) | One source of D6673 content for both versions. No owner handles (330) on entities and table entries: R14 added them. Checked: ezdxf 1.4.4 `audit` 0 errors, 0 fixes; libdxfrw reads the same entity counts as R12 |
 | Header | R12: `$ACADVER` only. R13: `$ACADVER`, `$DWGCODEPAGE`, `$HANDSEED` | D6673 §4.2: keep the header minimal. R13 needs `$HANDSEED` |

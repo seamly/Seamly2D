@@ -2,6 +2,15 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task DXF.14 — Every real value has 2 decimals (completed 2026-10-03)
+
+aw.fyi finding "Coordinates not full precision" on the R13 export. The R13 upgrade wrote fixed values with 1 decimal: POLYLINE dummy point, VPORT, LTYPE, STYLE and layout BLOCK base points (`0.0`, `1.0`, `10.0`, `1.5`, `50.0`, `2.5`). R12 output already had 2 decimals.
+
+- [x] DXF.14.1 `ezdxf2dxfastm/src/r13.rs`: write those values with 2 decimals
+- [x] DXF.14.2 Test: `writer_r13_test.rs` `every_real_value_has_two_decimals_in_r12_and_r13` (groups 10–59, male_shirt fixture)
+- [x] DXF.14.3 Update the compliance doc "Units" row
+- Decision (user): 2-decimal precision.
+
 ## Task DXF.13 — No `Category:` piece text (completed 2026-10-03)
 
 aw.fyi report on `male_shirt_202610032115.dxf`: `Category` is an ANSI/AAMA-292 identifier, not defined by D6673.

@@ -128,9 +128,9 @@ fn write_entity(out: &mut Out, handles: &mut Handles, record: &Record, default_l
 
     // R13 POLYLINE: a dummy point that is always 0; group 66 is obsolete.
     if record.kind == "POLYLINE" {
-        out.push(10, "0.0");
-        out.push(20, "0.0");
-        out.push(30, "0.0");
+        out.push(10, "0.00");
+        out.push(20, "0.00");
+        out.push(30, "0.00");
     } // if POLYLINE
 
     // Entity data as the R12 writer wrote it, CLO3D group 250 included.
@@ -204,16 +204,16 @@ fn write_tables(out: &mut Out, handles: &mut Handles, layers: &[String], blocks:
     let (cx, cy, height) = (format!("{:.2}", view.0), format!("{:.2}", view.1), format!("{:.2}", view.2));
     let vport = rec(&[
         (2, "*ACTIVE"), (70, "0"),
-        (10, "0.0"), (20, "0.0"), (11, "1.0"), (21, "1.0"),
+        (10, "0.00"), (20, "0.00"), (11, "1.00"), (21, "1.00"),
         (12, cx.as_str()), (22, cy.as_str()),
-        (13, "0.0"), (23, "0.0"), (14, "10.0"), (24, "10.0"), (15, "10.0"), (25, "10.0"),
-        (16, "0.0"), (26, "0.0"), (36, "1.0"), (17, "0.0"), (27, "0.0"), (37, "0.0"),
-        (40, height.as_str()), (41, "1.5"), (42, "50.0"), (43, "0.0"), (44, "0.0"), (50, "0.0"), (51, "0.0"),
+        (13, "0.00"), (23, "0.00"), (14, "10.00"), (24, "10.00"), (15, "10.00"), (25, "10.00"),
+        (16, "0.00"), (26, "0.00"), (36, "1.00"), (17, "0.00"), (27, "0.00"), (37, "0.00"),
+        (40, height.as_str()), (41, "1.50"), (42, "50.00"), (43, "0.00"), (44, "0.00"), (50, "0.00"), (51, "0.00"),
         (71, "0"), (72, "100"), (73, "1"), (74, "3"), (75, "0"), (76, "0"), (77, "0"), (78, "0"),
     ]);
     write_table(out, handles, "VPORT", "AcDbViewportTableRecord", &[vport]);
 
-    let ltype = |name: &str, desc: &str| rec(&[(2, name), (70, "0"), (3, desc), (72, "65"), (73, "0"), (40, "0.0")]);
+    let ltype = |name: &str, desc: &str| rec(&[(2, name), (70, "0"), (3, desc), (72, "65"), (73, "0"), (40, "0.00")]);
     write_table(
         out,
         handles,
@@ -230,7 +230,7 @@ fn write_tables(out: &mut Out, handles: &mut Handles, layers: &[String], blocks:
     write_table(out, handles, "LAYER", "AcDbLayerTableRecord", &layer_records);
 
     let standard_style = rec(&[
-        (2, "STANDARD"), (70, "0"), (40, "0.0"), (41, "1.0"), (50, "0.0"), (71, "0"), (42, "2.5"), (3, "txt"), (4, ""),
+        (2, "STANDARD"), (70, "0"), (40, "0.00"), (41, "1.00"), (50, "0.00"), (71, "0"), (42, "2.50"), (3, "txt"), (4, ""),
     ]);
     write_table(out, handles, "STYLE", "AcDbTextStyleTableRecord", &[standard_style]);
     write_table(out, handles, "VIEW", "AcDbViewTableRecord", &[]);
@@ -306,7 +306,7 @@ pub fn upgrade_to_r13(r12: &str) -> Result<String> {
     for name in ["*MODEL_SPACE", "*PAPER_SPACE"] {
         let begin = Record {
             kind: "BLOCK".to_string(),
-            groups: rec(&[(8, "0"), (2, name), (70, "0"), (10, "0.0"), (20, "0.0"), (30, "0.0"), (3, name)]),
+            groups: rec(&[(8, "0"), (2, name), (70, "0"), (10, "0.00"), (20, "0.00"), (30, "0.00"), (3, name)]),
         };
         write_entity(&mut body, &mut handles, &begin, "0")?;
         write_entity(&mut body, &mut handles, &Record { kind: "ENDBLK".to_string(), groups: Vec::new() }, "0")?;
