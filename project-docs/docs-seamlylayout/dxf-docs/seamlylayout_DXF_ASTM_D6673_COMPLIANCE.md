@@ -29,14 +29,14 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | Style Name | Input base name: the imported SVG's base name, or the `--document-name` value. Else the pattern `data-name`, else the output file stem | User decision. The output stem carries a timestamp |
 | Size | `Size Name:` piece text: piece `data-size` (multisize). Individual: pattern `data-sample-size` = `bust_circ`, else `waist_circ`. Omitted when neither exists | User decision. A multisize layout tab holds one size. Identifier is `Size Name:` (D6673-01 name), not AAMA-292 `Size:` |
 | Material | `Material:Fabric` on every piece | User decision. Layout.15.4 replaces it with `data-material` |
-| Category | `Category:` written empty on every piece | User decision. A piece classification, not material. Seamly2D stores no category; a pattern library could supply one. D6673-10 §4.1 names "category", but §4.3.1.2 defines no `Category:` identifier. See `seamlylayout_DXF_ASTM_D6673_INCONSISTENCIES.md` and `seamlylayout_DXF_ASTM_D6673_from_AAMA.md` |
+| Category | Not written | User decision. `Category:` is ANSI/AAMA-292 piece text, not valid in any DXF-ASTM edition. A piece classification, not material. Seamly2D stores no category; a pattern library could supply one. D6673-10 §4.1 names "category", but §4.3.1.2 defines no `Category:` identifier. See `seamlylayout_DXF_ASTM_D6673_INCONSISTENCIES.md` and `seamlylayout_DXF_ASTM_D6673_from_AAMA.md` |
 | Sample Size, Grade Rule Table | Written blank | Required identifiers; export is one ungraded size |
 
 ## Layers written
 
 | Layer | Content | Entity |
 |---|---|---|
-| 1 | Boundary key points; style text (ENTITIES); `Piece Name:`, `Size Name:`, `Category:`, `Quantity:`, `Material:` (BLOCK) | POLYLINE, TEXT |
+| 1 | Boundary key points; style text (ENTITIES); `Piece Name:`, `Size Name:`, `Quantity:`, `Material:` (BLOCK) | POLYLINE, TEXT |
 | 2 / 3 | Turn / curve points of layers 1, 8, 11, 14 | POINT |
 | 4 | Slit notch (no 39), V-notch | POINT + 30 depth, 39 width, 50 angle |
 | 7 | Grainline | LINE |

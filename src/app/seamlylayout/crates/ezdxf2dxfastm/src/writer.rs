@@ -199,8 +199,7 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
     if let Some(size) = &block.size {
         system_lines.push(format!("Size Name:{}", size));
     } // if size
-    // Piece classification, not material. Seamly2D stores no category, so the value stays empty.
-    system_lines.push("Category:".to_string());
+    // No `Category:`: it is ANSI/AAMA-292 piece text, not defined by any D6673 edition.
     if let Some(q) = &block.quantity {
         system_lines.push(format!("Quantity:{}", q));
     } // if quantity

@@ -2,6 +2,16 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task DXF.13 — No `Category:` piece text (completed 2026-10-03)
+
+aw.fyi report on `male_shirt_202610032115.dxf`: `Category` is an ANSI/AAMA-292 identifier, not defined by D6673.
+
+- [x] DXF.13.1 `ezdxf2dxfastm/src/writer.rs`: drop the `Category:` line. One writer serves R12, R13 and CLO3D
+- [x] DXF.13.2 Tests: `writer_astm_test.rs` `piece_system_text_writes_size_name_before_quantity_and_no_category`, `piece_block_uses_astm_layers_and_entities`
+- [x] DXF.13.3 Docs: compliance doc, `seamlylayout_DXF_ASTM_D6673_MATERIAL.md`
+- Decision (user): `Category:` is DXF-AAMA only; not valid in any DXF-ASTM format. Reverses DXF.7.6.
+- Piece text order: `Piece Name:`, `Size Name:`, `Quantity:`, `Material:`.
+
 ## Task DXF.12 — Piece text `Size Name:`, not `Size:` (completed 2026-10-03)
 
 aw.fyi report on `male_shirt_202610032115.dxf`: `Size` is the AAMA-292 identifier; D6673-01 renamed it `Size Name`.
