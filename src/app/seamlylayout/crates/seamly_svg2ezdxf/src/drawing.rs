@@ -88,6 +88,19 @@ impl Block {
     } // fn add_entity
 } // impl Block
 
+// @brief Downstream CAD data a piece lacks in a DXF-ASTM export.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MissingPieceData {
+    // `Piece Name:` system text of the piece.
+    pub piece_name: String,
+    // No "Cut N" label line, so no `Quantity:` system text.
+    pub quantity: bool,
+    // No label text (layer 15).
+    pub label: bool,
+    // No grainline (layer 7).
+    pub grainline: bool,
+}
+
 // @brief Drawing (ezdxf-like intermediate representation).
 pub struct Drawing {
     // DXF version.
@@ -124,6 +137,24 @@ impl Drawing {
     pub fn add_modelspace_entity(&mut self, entity: Box<dyn Entity>) {
         self.modelspace_entities.push(entity);
     }
+
+    // @brief Pieces that lack a `Quantity:` source, label text, or a grainline.
+    // @details Only pieces with a boundary count: the DXF-ASTM writer writes
+    //          system text, labels and grainlines for those pieces only.
+    // @return One entry per incomplete piece, in block order.
+    pub fn missing_piece_data(&self) -> Vec<MissingPieceData> {
+        self.blocks
+            .iter()
+            .filter(|b| b.boundary.is_some())
+            .map(|b| MissingPieceData {
+                piece_name: b.piece_name.clone(),
+                quantity: b.quantity.is_none(),
+                label: b.annotations.is_empty(),
+                grainline: b.grainline.is_none(),
+            }) // map block
+            .filter(|m| m.quantity || m.label || m.grainline)
+            .collect()
+    } // fn missing_piece_data
 
     // @brief Write drawing to a human-readable text file for inspection.
     // @param file_path Path to write the file.

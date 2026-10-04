@@ -6,6 +6,15 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — DXF.5: warn about incomplete pieces before DXF-ASTM export
+
+Merged `task-dxf-missing-piece-data`. `cargo test --workspace` and `ctest --preset debug` passed.
+
+- Before the DXF save dialog, `DxfMissingDataDialog.qml` names pieces with no `Cut N` line, no label, or no grainline. Buttons: Export anyway, Cancel.
+- Text built in Rust (`exports::dxf_missing_piece_data_message`); male_shirt test pins the three interface pieces.
+- New QML file in `qt_frontend/CMakeLists.txt`, so the merge runs full CI.
+- Not checked in the running app. User action: export male_shirt DXF-ASTM; confirm the dialog lists CollarBaseInterface, CollarTopInterface, CuffInterface.
+
 ## 2026-10-03 — DXF.4: fewer curve points
 
 Merged `task-dxf-fewer-curve-points`. `cargo test --workspace` and `ctest --preset debug` passed.

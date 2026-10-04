@@ -33,7 +33,7 @@ use layout_helpers::remove_group_by_id;
 
 mod exports;
 use exports::{
-    do_export_dxf, do_export_gcode, do_export_mesh, do_export_pdf, do_export_pdf_tile, do_export_png,
+    do_export_dxf, dxf_missing_piece_data_message, do_export_gcode, do_export_mesh, do_export_pdf, do_export_pdf_tile, do_export_png,
     do_export_jpeg,
     do_export_svg, paid_export_available, do_export_hpgl, parse_hpgl_options, do_export_postscript,
 };
@@ -710,6 +710,11 @@ pub mod qobject {
         fn save_adjust_dom(self: &AppController) -> QString;
 
         // --- Export Layout ---
+
+        // Warning text naming pieces that lack Quantity, label or grainline in a
+        // DXF-ASTM export; empty when every piece is complete or no layout exists.
+        #[qinvokable]
+        fn dxf_missing_piece_data(self: &AppController) -> QString;
 
         #[qinvokable]
         fn export_dxf(
@@ -2056,6 +2061,22 @@ impl qobject::AppController {
     // -----------------------------------------------------------------------
     // DXF-ASTM export
     // -----------------------------------------------------------------------
+
+    // Warning text for pieces that lack DXF-ASTM data, from the export source layout.
+    // Empty on no layout or a failed conversion: export_dxf reports those errors.
+    // Called by QML requestDxfExport() before the save dialog.
+    fn dxf_missing_piece_data(&self) -> cxx_qt_lib::QString {
+        let Ok(layout_doc) = self.clone_stripped_layout_doc() else {
+            return cxx_qt_lib::QString::default();
+        }; // if no layout
+        match dxf_missing_piece_data_message(&layout_doc) {
+            Ok(text) => cxx_qt_lib::QString::from(&text),
+            Err(e) => {
+                log_to_file(&format!("[lib.rs AppController] dxf_missing_piece_data(): {e}"));
+                cxx_qt_lib::QString::default()
+            } // Err
+        } // match message
+    } // fn dxf_missing_piece_data
 
     // Export the assembled layout as a DXF-ASTM file.
     // options_json: {"createTeachingVersion": bool, "clo3dGroup250": bool, "dxfVersion": "R12"|"R13",

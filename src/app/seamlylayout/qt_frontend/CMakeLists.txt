@@ -268,6 +268,7 @@ qt_add_qml_module(SeamlyLayout
         qml/SettingsDialog.qml
         qml/PreferencesPanel.qml
         qml/DxfTeachingDialog.qml
+        qml/DxfMissingDataDialog.qml
         qml/ViewDxfTeachingDialog.qml
 )
 # AppController is registered at runtime via qmlRegisterType in seamlyLayout_main.mm.
