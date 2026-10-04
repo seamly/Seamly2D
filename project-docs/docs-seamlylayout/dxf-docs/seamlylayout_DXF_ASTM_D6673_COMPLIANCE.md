@@ -52,9 +52,10 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 - Seamly2D sends interpolated polylines; it tags the turn point vertices with `data-turn-points`.
 - `dense` = the full polyline → validation layer (84–87).
 - `reduced` = Douglas–Peucker key points per span between turn points → primary layer (1, 8, 11, 14).
-- Spline check: centripetal Catmull-Rom through the key points, split at turn points (reflected end tangent). The reader's method is unknown; this is a stand-in.
-- Where the spline is more than 0.25 mm from `dense` (either direction), the farthest dense vertex becomes a curve point. Repeat until every segment passes. Only a segment with no dense vertex between its key points can stay over.
-- Then each curve point the spline does not need is dropped, least-needed first. Turn points and the first key point stay.
+- Spline check: two Catmull-Rom splines through the key points, centripetal and chord-length, split at turn points (reflected end tangent). The reader's method is unknown; these are stand-ins. They differ most where neighboring chords differ in length.
+- Where either spline is more than 0.25 mm from `dense` (either direction), the farthest dense vertex becomes a curve point. Repeat until every segment passes.
+- A segment with no dense vertex between its key points has nothing to add. When a spline bulges there, the dense edge is split at the point nearest the bulge; the new vertex lies on the edge. Edges under 1 mm are not split.
+- Then each curve point neither spline needs is dropped, least-needed first. Turn points and the first key point stay.
 - `spline_deviation()` measures the result; `writer_astm_test.rs` checks every male_shirt contour on layers 84–87.
 - `reduced` is an ordered subset of `dense`, and both start at the same vertex (§4.3.3.1).
 - Turn points come from Seamly2D's `data-turn-points` tag on each path component (see `docs-data/SVG-DATA-ATTRIBUTES.md`). Seamly2D marks a node vertex whose tangent breaks by more than 0.5° (line–line) or 5° (with a curve), any vertex that turns more than 25°, and open ends.

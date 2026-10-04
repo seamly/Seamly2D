@@ -6,6 +6,16 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — DXF.11: key points pass a chord-length reader spline
+
+Merged `task-dxf-reader-neutral-spline`. `cargo test --workspace`, `ctest --preset debug` passed.
+
+- Cause: aw.fyi flagged the CollarTop seam line hook (0.85 mm, limit 0.5). Its spline is not centripetal.
+- `astm_contour.rs` checks centripetal and chord-length Catmull-Rom (`READER_ALPHAS`). A bulge between adjacent dense vertices splits the dense edge.
+- male_shirt curve points 278 → 311.
+- User action: export DXF-ASTM (R13); re-run aw.fyi (DXF.8).
+- `male_shirt.sm2d` sample has uncommitted user edits (TestPiece1, label lines). Not committed.
+
 ## 2026-10-03 — Layout.19: DXF-ASTM (CLO3D) writes R13, name `_CLO3D`
 
 Merged `task-dxf-clo3d-r13`. `cargo test --workspace`, `ctest --preset debug` passed.

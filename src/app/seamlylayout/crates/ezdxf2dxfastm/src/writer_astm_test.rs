@@ -268,10 +268,12 @@ mod tests {
         assert_eq!(turn_points, 14, "front panel turn points");
     }
 
-    // @brief A spline through each contour's key points stays near its validation
-    //        polyline (layers 84–87), so a reader's reconstruction passes.
+    // @brief Both stand-in reader splines through each contour's key points stay
+    //        near its validation polyline (layers 84–87), so a reader's reconstruction passes.
     // @details The limit is CURVE_TOLERANCE_MM. Without added curve points the
-    //          sleeves miss it by about 0.15 mm.
+    //          sleeves miss it by about 0.15 mm. With the centripetal spline alone,
+    //          the chord-length spline missed it on the CollarTop seam line hook
+    //          and on the FrontPanel hem line.
     #[test]
     fn male_shirt_splines_follow_validation_layers() {
         let svg = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/test_data/male_shirt_pieces.svg"))
