@@ -271,6 +271,27 @@ mod tests {
         assert!(facing.sew_lines.is_empty());
     }
 
+    #[test]
+    fn missing_piece_data_names_incomplete_pieces() {
+        let doc = Document::parse(TAGGED).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let missing = drawing.missing_piece_data();
+        // Front has label, "Cut 2" and grainline; Facing has only a seam line.
+        assert_eq!(missing.len(), 1);
+        assert_eq!(missing[0].piece_name, "Facing");
+        assert!(missing[0].quantity && missing[0].label && missing[0].grainline);
+    }
+
+    #[test]
+    fn label_without_cut_line_misses_quantity_only() {
+        let svg = TAGGED.replace("Cut 2", "Self");
+        let doc = Document::parse(&svg).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let front = drawing.missing_piece_data().into_iter().find(|m| m.piece_name == "Front").expect("front listed");
+        assert!(front.quantity);
+        assert!(!front.label && !front.grainline);
+    }
+
     // @brief Box with a coarse curved hem: three corners, then 10 segments of
     //        20 mm that bend 1.5° each, like Seamly2D's interpolation of a flat curve.
     // @return (points, tags): tags mark the four corners only.

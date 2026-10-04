@@ -2,6 +2,19 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task DXF.5 — Warn about pieces with no Quantity, label, or grainline (completed 2026-10-03)
+
+A piece with no `Cut N` label gets no `Quantity:`, and a piece with no grainline gets no layer 7. Both make the DXF less usable in downstream CAD.
+
+- [x] DXF.5.1 Rust: before DXF-ASTM export, list pieces missing `Quantity:` source, piece label, or grainline
+- [x] DXF.5.2 QML: when the list is not empty, show a dialog naming each piece and what it lacks. State that this affects the usability of the exported DXF file. Buttons: Export anyway, Cancel
+- [x] DXF.5.3 Tests: Rust detection; QML dialog shown for the three male_shirt interface pieces
+- [x] DXF.5.4 Update `dxf-docs/seamlylayout_DXF_EXPORT_WORKFLOW.md`
+- Detection: `Drawing::missing_piece_data` (`seamly_svg2ezdxf`), pieces with a boundary only. Text: `exports::dxf_missing_piece_data_message`. QML: `AppController::dxfMissingPieceData()` → `DxfMissingDataDialog.qml`, before the save dialog.
+- Checks the shown tab only; Export all tabs uses the same pieces for every size.
+- Tests: `astm_piece_test.rs` `missing_piece_data_names_incomplete_pieces`, `label_without_cut_line_misses_quantity_only`; `exports.rs` `dxf_missing_piece_data_names_male_shirt_interface_pieces`, `missing_piece_data_text_is_empty_when_complete`.
+- No QML test harness exists. The dialog shows the Rust text unchanged; the male_shirt test pins that text. Dialog not yet checked in the running app.
+
 ## Task DXF.4 — Fewer curve points where a spline needs fewer (completed 2026-10-03)
 
 Re-checked on the fixture after DXF.2: Yoke_M layer 14 still had 14 curve points. `astm_contour::prune_to_spline` now drops each curve point the spline does not need; the least-needed point goes first.

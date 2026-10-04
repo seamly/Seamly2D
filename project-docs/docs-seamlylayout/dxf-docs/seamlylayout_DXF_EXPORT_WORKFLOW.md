@@ -20,7 +20,16 @@ The DXF-ASTM export workflow is fully integrated into the desktop UI (`ui_deskto
 
 1. **Open Export Menu**: Click "Export ▼" button to open the export format dropdown
 2. **Select Format**: Click "DXF-ASTM (R12)", "DXF-ASTM (R13)" or "DXF-ASTM (CLO3D)" from the dropdown menu. CLO3D writes R12
-3. **File Save Dialog**: A file save dialog opens
+3. **Missing Piece Data Dialog**: Shown only when a piece lacks DXF-ASTM data
+   - Checks each piece with a boundary for: a "Cut N" label line (`Quantity:`), label text (layer 15), a grainline (layer 7)
+   - Names each incomplete piece and what it lacks
+   - States that this affects the usability of the exported DXF file
+   - **Export anyway**: continue to the file save dialog
+   - **Cancel**: stop the export
+   - Checks the shown tab only; Export all tabs uses the same pieces for every size
+   - Code: `Drawing::missing_piece_data` (`seamly_svg2ezdxf`), `exports::dxf_missing_piece_data_message`, `AppController::dxf_missing_piece_data`, `DxfMissingDataDialog.qml`
+   - Example: male_shirt warns about CollarBaseInterface, CollarTopInterface, CuffInterface
+4. **File Save Dialog**: A file save dialog opens
    - Default filename: Based on input SVG filename with `.dxf` extension
    - User can change the filename and location
    - File filter: DXF files (*.dxf)

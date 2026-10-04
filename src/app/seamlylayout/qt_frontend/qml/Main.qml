@@ -135,21 +135,36 @@ ApplicationWindow {
     property bool   pendingDxfClo3d: false               // CLO3D group 250 flag for DXF
     property string pendingDxfVersion: "R12"             // DXF file version: "R12" or "R13"
 
-    // @brief Ask for a DXF save path, then the teaching choice; the export starts from the dialog.
+    // @brief Warn about incomplete pieces, then ask for a DXF save path and the teaching choice.
+    // @details The export starts from the teaching dialog. The warning checks the
+    //          shown tab's layout; Export all tabs uses the same pieces for every size.
     // @param clo3d      true for DXF-ASTM (CLO3D): D6673 content plus CLO3D group 250.
     // @param dxfVersion "R12" (AC1009) or "R13" (AC1012).
     function requestDxfExport(clo3d, dxfVersion) {
-        var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-        var name = root.makeExportFileName("dxf") // default name: <importedBaseName>_YYYYMMDDHHMM.dxf
-        var title = clo3d ? "Save DXF-ASTM (CLO3D) File" : "Save DXF-ASTM (" + dxfVersion + ") File"
-        var path = preferencesModel.getSaveFilePath(title, dir, name, "DXF Files (*.dxf);;All Files (*)")
-        if (path === "") return // user cancelled
-        // Stage path and variant; the teaching dialog collects the last flag before export starts.
-        root.pendingDxfPath  = path
         root.pendingDxfClo3d = clo3d
         root.pendingDxfVersion = dxfVersion
-        dxfTeachingDialog.open()
+        var warning = appController.dxfMissingPieceData()
+        if (warning !== "") {
+            // The dialog's Export anyway button continues with chooseDxfPath().
+            dxfMissingDataDialog.warningText = warning
+            dxfMissingDataDialog.open()
+            return
+        } // if pieces incomplete
+        root.chooseDxfPath()
     } // function requestDxfExport
+
+    // @brief Ask for a DXF save path for the staged variant, then open the teaching dialog.
+    function chooseDxfPath() {
+        var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
+        var name = root.makeExportFileName("dxf") // default name: <importedBaseName>_YYYYMMDDHHMM.dxf
+        var title = root.pendingDxfClo3d ? "Save DXF-ASTM (CLO3D) File"
+                                         : "Save DXF-ASTM (" + root.pendingDxfVersion + ") File"
+        var path = preferencesModel.getSaveFilePath(title, dir, name, "DXF Files (*.dxf);;All Files (*)")
+        if (path === "") return // user cancelled
+        // Stage the path; the teaching dialog collects the last flag before export starts.
+        root.pendingDxfPath = path
+        dxfTeachingDialog.open()
+    } // function chooseDxfPath
 
     // Export > "Export all tabs" check state.  Kept across imports; it only
     // applies while the layout has tabs (exportAllTabsActive).
@@ -1112,6 +1127,15 @@ ApplicationWindow {
             appController.initializeLayout(settingsModel.toJson())
         } // onDefaultsReset
     } // PreferencesController preferencesController
+
+    // -----------------------------------------------------------------------
+    // Missing piece data warning — shown before the DXF save dialog when pieces
+    // lack Quantity, label or grainline. Cancel stops the export.
+    // -----------------------------------------------------------------------
+    DxfMissingDataDialog {
+        id: dxfMissingDataDialog
+        onAccepted: root.chooseDxfPath()
+    } // DxfMissingDataDialog dxfMissingDataDialog
 
     // -----------------------------------------------------------------------
     // Teaching-version dialog — Standard vs. Teaching DXF export (Phase 9)

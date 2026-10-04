@@ -14,6 +14,7 @@
 //
 // Exports:
 //   do_export_dxf(doc, path, create_teaching_version, style, progress) -> Result<(), String>
+//   dxf_missing_piece_data_message(doc)              -> Result<String, String>
 //   do_export_pdf(doc, path)                          -> Result<(), String>
 //   (doc, path, tile_dims)         -> Result<(), String>
 //   do_export_png(doc, path, scale)                   -> Result<(), String>
@@ -33,7 +34,7 @@ use std::path::Path;
 use xmltree::{Element as XmlElement, XMLNode};
 
 use ezdxf2dxfastm::{export_dxf_astm, DxfAstmExportOptions};
-use seamly_svg2ezdxf::{svg_to_ezdxf, DxfVersion, SvgToEzdxfOptions};
+use seamly_svg2ezdxf::{svg_to_ezdxf, DxfVersion, MissingPieceData, SvgToEzdxfOptions};
 
 use hpgl_writer::{HpglMode, HpglOptions, PenMap};
 use ps_writer::PsFlavor;
@@ -718,6 +719,44 @@ pub fn do_export_dxf(
 
     result
 } // fn do_export_dxf
+
+// @brief Warning text for pieces that lack DXF-ASTM data, shown before a DXF-ASTM export.
+// @param doc Cloned, piece-fill-stripped layout DOM.
+// @return Ok("") when every piece is complete; Ok(text) naming each piece and
+//         what it lacks; Err(message) when the DOM does not convert.
+pub fn dxf_missing_piece_data_message(doc: &svg_dom::Document) -> Result<String, String> {
+    let drawing = svg_to_ezdxf(doc, &SvgToEzdxfOptions::default()).map_err(|e| format!("DXF conversion failed: {e}"))?;
+    let missing = drawing.missing_piece_data();
+    crate::log_to_file(&format!("[exports.rs] dxf_missing_piece_data_message(): {} incomplete pieces", missing.len()));
+    Ok(missing_piece_data_text(&missing))
+} // fn dxf_missing_piece_data_message
+
+// @brief One line per piece, then the effect on the exported file.
+// @return Empty string when `missing` is empty.
+fn missing_piece_data_text(missing: &[MissingPieceData]) -> String {
+    if missing.is_empty() {
+        return String::new();
+    } // if complete
+
+    let mut lines = vec!["These pieces lack data that DXF-ASTM uses:".to_string(), String::new()];
+    for m in missing {
+        // Each flag names one absent item; Quantity comes from a "Cut N" label line.
+        let mut lacks = Vec::new();
+        if m.quantity {
+            lacks.push("Quantity (no \"Cut N\" label line)");
+        } // if no quantity
+        if m.label {
+            lacks.push("piece label");
+        } // if no label
+        if m.grainline {
+            lacks.push("grainline");
+        } // if no grainline
+        lines.push(format!("\u{2022} {}: no {}", m.piece_name, lacks.join(", no ")));
+    } // for each piece
+    lines.push(String::new());
+    lines.push("This affects the usability of the exported DXF file in downstream CAD systems.".to_string());
+    lines.join("\n")
+} // fn missing_piece_data_text
 
 // ---------------------------------------------------------------------------
 // PDF export (single page)
@@ -1935,6 +1974,29 @@ mod tests {
         assert!(content.contains("$HANDSEED"), "R13 file has a handle seed");
         assert!(content.contains("OBJECTS"), "R13 file has an OBJECTS section");
     } // do_export_dxf_writes_r13_when_asked
+
+    // @brief The male shirt handoff names its three interface pieces, and only those.
+    #[test]
+    fn dxf_missing_piece_data_names_male_shirt_interface_pieces() {
+        let svg = std::fs::read_to_string(concat!(env!("CARGO_MANIFEST_DIR"), "/../ezdxf2dxfastm/test_data/male_shirt_pieces.svg"))
+            .expect("fixture present");
+        let doc = Document::parse(&svg).expect("fixture parses");
+        let text = dxf_missing_piece_data_message(&doc).expect("converts");
+
+        let pieces: Vec<&str> =
+            text.lines().filter_map(|l| l.strip_prefix("\u{2022} ")).map(|l| l.split(':').next().unwrap()).collect();
+        assert_eq!(pieces, vec!["CollarBaseInterface", "CollarTopInterface", "CuffInterface"]);
+        assert!(text.contains("CuffInterface: no Quantity (no \"Cut N\" label line), no piece label, no grainline"), "{text}");
+        assert!(text.contains("usability of the exported DXF file"), "{text}");
+    } // dxf_missing_piece_data_names_male_shirt_interface_pieces
+
+    // @brief No incomplete pieces gives no warning text.
+    #[test]
+    fn missing_piece_data_text_is_empty_when_complete() {
+        assert_eq!(missing_piece_data_text(&[]), "");
+        let only_grain = MissingPieceData { piece_name: "Yoke".into(), quantity: false, label: false, grainline: true };
+        assert!(missing_piece_data_text(&[only_grain]).contains("\u{2022} Yoke: no grainline\n"));
+    } // missing_piece_data_text_is_empty_when_complete
 
     // @brief do_export_dxf returns Err when the path is not writable.
     //
