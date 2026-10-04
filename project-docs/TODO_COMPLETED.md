@@ -1155,3 +1155,16 @@ One Rust mapping serves Layout.17 and Layout.18: `exports::export_name_segment(f
 - [x] Layout.18.4 Export all tabs: tab label still before the extension
 - [x] Layout.18.5 `export-docs/seamlylayout_EXPORT_WORKFLOW.md`; `Main.qml` name comments
 - [x] Layout.18.6 Tests: same as Layout.17.6
+
+## Task Layout.20 — Annotated DXF export name has `_annotated` (completed 2026-10-03)
+
+- [x] Layout.20.1 `Main.qml` `requestDxfExport`: Standard/Annotated dialog opens before the save dialog
+- [x] Layout.20.2 Annotated puts `_annotated` before the timestamp: `male_shirt_R12_annotated_202610011721.dxf`
+- [x] Layout.20.3 Companion `.txt` keeps the `.dxf` base name (writer uses the `.dxf` path with `.txt`)
+- [x] Layout.20.4 `male_shirt_CLO3D_annotated_202610011721.dxf`, `male_shirt_R13_annotated_202610011721.dxf`
+- [x] Layout.20.5 Standard name stays `<importedBaseName>_<R12|R13|CLO3D>_YYYYMMDDHHMM.dxf`
+- [x] Layout.20.6 Export all tabs: tab label still before the extension of both files
+- [x] Layout.20.7 `export-docs/seamlylayout_EXPORT_WORKFLOW.md`, `dxf-docs/seamlylayout_DXF_EXPORT_WORKFLOW.md`, `Main.qml` and `DxfAnnotatedDialog.qml` comments
+- [x] Layout.20.8 Tests: `dxf_export_name_segment_marks_annotated`, `default_export_file_name_with_dxf_segments`, `do_export_dxf_annotated_txt_matches_dxf_name`
+- Code: Rust `exports::dxf_export_name_segment(variant, annotated)`, QML `appController.dxfExportNameSegment`.
+- The TODO example `male_shirt_annotated_…` omits the variant; every DXF name carries R12, R13 or CLO3D.

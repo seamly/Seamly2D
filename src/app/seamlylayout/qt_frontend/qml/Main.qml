@@ -118,10 +118,6 @@ ApplicationWindow {
         errorDialog.open();
     } // reportStartupError
 
-    // Staging path for the DXF save location chosen in dxfSaveDialog.
-    // Held here across the two-step dialog flow (save path → annotated dialog).
-    property string pendingDxfPath: ""
-
     // Last successfully exported file path per format — used by the View menu.
     property string lastExportedDxfPath: ""
     property string lastExportedPdfPath: ""
@@ -136,9 +132,10 @@ ApplicationWindow {
     property bool   pendingDxfClo3d: false               // CLO3D group 250 flag for DXF
     property string pendingDxfVersion: "R12"             // DXF file version: "R12" or "R13"
 
-    // @brief Warn about incomplete pieces, then ask for a DXF save path and the annotated choice.
-    // @details The export starts from the annotated dialog. The warning checks the
-    //          shown tab's layout; Export all tabs uses the same pieces for every size.
+    // @brief Warn about incomplete pieces, ask Standard or Annotated, then ask for a DXF save path.
+    // @details The annotated choice comes before the save dialog, so the default
+    //          name can carry it. The warning checks the shown tab's layout;
+    //          Export all tabs uses the same pieces for every size.
     // @param clo3d      true for DXF-ASTM (CLO3D): D6673 content plus CLO3D group 250.
     // @param dxfVersion "R12" (AC1009) or "R13" (AC1012).
     function requestDxfExport(clo3d, dxfVersion) {
@@ -146,28 +143,37 @@ ApplicationWindow {
         root.pendingDxfVersion = dxfVersion
         var warning = appController.dxfMissingPieceData()
         if (warning !== "") {
-            // The dialog's Export anyway button continues with chooseDxfPath().
+            // The dialog's Export anyway button continues with the annotated dialog.
             dxfMissingDataDialog.warningText = warning
             dxfMissingDataDialog.open()
             return
         } // if pieces incomplete
-        root.chooseDxfPath()
+        dxfAnnotatedDialog.open()
     } // function requestDxfExport
 
-    // @brief Ask for a DXF save path for the staged variant, then open the annotated dialog.
+    // @brief Ask for a DXF save path for the staged variant, then start the export.
     function chooseDxfPath() {
         var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-        // Segment names the variant: <importedBaseName>_<R12|R13|CLO3D>_YYYYMMDDHHMM.dxf.
+        // Default name: <importedBaseName>_<R12|R13|CLO3D>[_annotated]_YYYYMMDDHHMM.dxf.
         // CLO3D is always R13, so its name needs no version.
-        var segment = root.pendingDxfClo3d ? "CLO3D" : root.pendingDxfVersion
+        var variant = root.pendingDxfClo3d ? "CLO3D" : root.pendingDxfVersion
+        var segment = appController.dxfExportNameSegment(variant, root.pendingExportAnnotatedVersion)
         var name = root.makeExportFileName("dxf", false, segment)
         var title = root.pendingDxfClo3d ? "Save DXF-ASTM (CLO3D) File"
                                          : "Save DXF-ASTM (" + root.pendingDxfVersion + ") File"
         var path = preferencesModel.getSaveFilePath(title, dir, name, "DXF Files (*.dxf);;All Files (*)")
-        if (path === "") return // user cancelled
-        // Stage the path; the annotated dialog collects the last flag before export starts.
-        root.pendingDxfPath = path
-        dxfAnnotatedDialog.open()
+        if (path === "") {
+            root.pendingExportAnnotatedVersion = false // user cancelled: drop the staged choice
+            return
+        } // if cancelled
+
+        // Stage the export and show the progress popup. exportStartTimer fires
+        // after one paint tick, so the popup renders before the synchronous
+        // Rust export blocks the UI thread.
+        root.pendingExportPath = path
+        root.pendingExportFormat = "dxf"
+        exportProgressPopup.open()
+        exportStartTimer.restart()
     } // function chooseDxfPath
 
     // Export > "Export all tabs" check state.  Kept across imports; it only
@@ -1132,28 +1138,24 @@ ApplicationWindow {
     } // PreferencesController preferencesController
 
     // -----------------------------------------------------------------------
-    // Missing piece data warning — shown before the DXF save dialog when pieces
+    // Missing piece data warning — shown before the annotated dialog when pieces
     // lack Quantity, label or grainline. Cancel stops the export.
     // -----------------------------------------------------------------------
     DxfMissingDataDialog {
         id: dxfMissingDataDialog
-        onAccepted: root.chooseDxfPath()
+        onAccepted: dxfAnnotatedDialog.open()
     } // DxfMissingDataDialog dxfMissingDataDialog
 
     // -----------------------------------------------------------------------
-    // Annotated-version dialog — Standard vs. Annotated DXF export (Phase 9)
+    // Annotated-version dialog — Standard vs. Annotated DXF export, shown
+    // before the save dialog. Cancel stops the export.
     // -----------------------------------------------------------------------
     DxfAnnotatedDialog {
         id: dxfAnnotatedDialog
         onAccepted: {
-            // Stage the DXF export and show the progress popup.
-            // exportStartTimer fires after one paint tick so the popup renders
-            // before the synchronous Rust export blocks the UI thread.
-            root.pendingExportPath = root.pendingDxfPath
-            root.pendingExportFormat = "dxf"
+            // Stage the choice first: the save dialog's default name depends on it.
             root.pendingExportAnnotatedVersion = dxfAnnotatedDialog.annotatedVersion
-            exportProgressPopup.open()
-            exportStartTimer.restart()
+            root.chooseDxfPath()
         } // onAccepted
     } // DxfAnnotatedDialog dxfAnnotatedDialog
 

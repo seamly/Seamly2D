@@ -111,19 +111,6 @@ Depends on Seamly2D.8.
 - [ ] Layout.16.4 DXF-ASTM: layer 6 mirror line; boundary starts or ends on the mirror line points (D6673 §4.3.6); unfolded pieces write no layer 6
 - [ ] Layout.16.5 Tests: Rust import, unfold geometry, layer 6 and boundary order
 
-## [ ] Task Layout.20 — Annotated DXF export name has `_annotated`
-
-The annotated DXF export uses the same default name as the standard export. The user cannot tell the files apart. Uses the segment parameter from Layout.17.2 and `exports::export_name_segment` from Layout.17/18 (done). Layout.21 renamed "teaching" to "annotated" (done).
-
-- [ ] Layout.20.1 `Main.qml` `requestDxfExport`: ask Standard or Annotated before the save dialog. Today the save dialog comes first, so the name cannot know the choice
-- [ ] Layout.20.2 Annotated puts `_annotated` before the timestamp. Example: `male_shirt_annotated_202610011721.dxf`
-- [ ] Layout.20.3 The companion `.txt` keeps the `.dxf` base name: `male_shirt_annotated_202610011721.txt`
-- [ ] Layout.20.4 With CLO3D (Layout.19): `male_shirt_CLO3D_annotated_202610011721.dxf`; with a version (DXF.10): `male_shirt_R13_annotated_202610011721.dxf`
-- [ ] Layout.20.5 Standard name stays `<importedBaseName>_<R12|R13>_YYYYMMDDHHMM.dxf`
-- [ ] Layout.20.6 Export all tabs: tab label still goes before the extension
-- [ ] Layout.20.7 Update `export-docs/seamlylayout_EXPORT_WORKFLOW.md`, `dxf-docs/seamlylayout_DXF_EXPORT_WORKFLOW.md`, and the name comments in `Main.qml`
-- [ ] Layout.20.8 Test: annotated name has `_annotated`; standard name unchanged; `.txt` matches the `.dxf`
-
 ## [x] Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 
 ## [x] Task Layout.9 — Piece-mode handoff passes a file, not a stringified SVG document

@@ -1812,6 +1812,20 @@ pub fn export_name_segment(format: &str, mode: &str) -> &'static str {
     } // match (format, mode)
 } // fn export_name_segment
 
+// @brief File name segment for a DXF export: the variant, then "_annotated" for the annotated version.
+//
+// Example: ("R13", true) → "R13_annotated". The standard version keeps the variant alone.
+//
+// @param variant   "R12", "R13" or "CLO3D". CLO3D is always R13, so its name carries no version.
+// @param annotated true when the export also writes the annotated `.txt` file.
+pub fn dxf_export_name_segment(variant: &str, annotated: bool) -> String {
+    if annotated {
+        format!("{variant}_annotated")
+    } else {
+        variant.to_string()
+    } // if annotated
+} // fn dxf_export_name_segment
+
 // @brief Export the layout document as G-Code (stub).
 //
 // Writes no file. Returns Err until a G-Code module is available.
@@ -1906,6 +1920,32 @@ mod tests {
         assert_eq!(name("svg", "designerFont", "svg", false), "male_shirt_202610011721.svg");
         assert_eq!(name("svg", "asSupplied", "svg", false), "male_shirt_202610011721.svg");
     } // default_export_file_name_with_mode_segments
+
+    // @brief The annotated version adds "_annotated" after the variant; the standard name does not change.
+    #[test]
+    fn dxf_export_name_segment_marks_annotated() {
+        assert_eq!(dxf_export_name_segment("R12", false), "R12");
+        assert_eq!(dxf_export_name_segment("R13", false), "R13");
+        assert_eq!(dxf_export_name_segment("CLO3D", false), "CLO3D");
+        assert_eq!(dxf_export_name_segment("R12", true), "R12_annotated");
+        assert_eq!(dxf_export_name_segment("R13", true), "R13_annotated");
+        assert_eq!(dxf_export_name_segment("CLO3D", true), "CLO3D_annotated");
+    } // dxf_export_name_segment_marks_annotated
+
+    // @brief DXF segments give the documented default names, with "_annotated" before the stamp.
+    #[test]
+    fn default_export_file_name_with_dxf_segments() {
+        let stamp = "202610011721";
+        let name = |variant: &str, annotated: bool| {
+            default_export_file_name("male_shirt", &dxf_export_name_segment(variant, annotated), stamp, "dxf", false)
+        };
+        assert_eq!(name("R12", false), "male_shirt_R12_202610011721.dxf");
+        assert_eq!(name("R13", false), "male_shirt_R13_202610011721.dxf");
+        assert_eq!(name("CLO3D", false), "male_shirt_CLO3D_202610011721.dxf");
+        assert_eq!(name("R12", true), "male_shirt_R12_annotated_202610011721.dxf");
+        assert_eq!(name("R13", true), "male_shirt_R13_annotated_202610011721.dxf");
+        assert_eq!(name("CLO3D", true), "male_shirt_CLO3D_annotated_202610011721.dxf");
+    } // default_export_file_name_with_dxf_segments
 
     // @brief Build a minimal tiled-export settings object for tests.
     fn test_tiled_settings() -> LayoutSettings {
@@ -2281,6 +2321,31 @@ mod tests {
         let _ = std::fs::remove_file(&dxf_path);
         let _ = std::fs::remove_file(&txt_path);
     } // do_export_dxf_with_annotated_version_creates_txt
+
+    // @brief The annotated .txt file keeps the .dxf base name, "_annotated" segment included.
+    #[test]
+    fn do_export_dxf_annotated_txt_matches_dxf_name() {
+        let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+            <g id="frontPiece">
+                <rect x="10" y="10" width="180" height="180" fill="none" stroke="#000000" stroke-width="1"/>
+            </g>
+        </svg>"##;
+        let doc = Document::parse(svg).expect("fixture SVG should parse");
+
+        // Default annotated name in its own temp directory, so parallel runs cannot collide.
+        let dir = std::env::temp_dir().join(format!("seamly_dxf_annotated_name_{}", std::process::id()));
+        std::fs::create_dir_all(&dir).expect("temp dir should be created");
+        let name = default_export_file_name("male_shirt", &dxf_export_name_segment("R13", true), "202610011721", "dxf", false);
+        let dxf_path = dir.join(&name);
+
+        do_export_dxf(&doc, &dxf_path.to_string_lossy(), true, &DxfStyleInfo::default(), &mut |_| {})
+            .expect("annotated DXF export should succeed");
+
+        assert!(dir.join("male_shirt_R13_annotated_202610011721.dxf").exists(), "DXF should use the annotated name");
+        assert!(dir.join("male_shirt_R13_annotated_202610011721.txt").exists(), ".txt should keep the .dxf base name");
+
+        let _ = std::fs::remove_dir_all(&dir);
+    } // do_export_dxf_annotated_txt_matches_dxf_name
 
     // @brief do_export_dxf fires the progress callback with values 10, 50, and 90.
     //
