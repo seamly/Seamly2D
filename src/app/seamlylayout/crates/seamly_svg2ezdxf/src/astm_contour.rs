@@ -19,7 +19,8 @@
 //! A reader rebuilds each curve as a spline through the key points. The
 //! reader's spline method is not known; a centripetal Catmull-Rom spline,
 //! split at turn points, stands in for it. `reduced` keeps enough curve points
-//! that this spline stays within `CURVE_TOLERANCE_MM` of `dense`.
+//! that this spline stays within `CURVE_TOLERANCE_MM` of `dense`, and no more:
+//! a curve point the spline does not need is dropped.
 //!
 //! Turn points come from Seamly2D's `data-turn-points` tags when present
 //! (`build_contour_tagged`); otherwise they are detected from the geometry.
@@ -27,8 +28,9 @@
 use crate::entities::Point;
 
 /// @brief Curve tolerance in millimetres, written as `Curve Tolerance:` style text.
-/// @details Maximum distance between `dense` and the reduced polyline chords, and
-///          between `dense` and the spline through the key points.
+/// @details Douglas-Peucker tolerance for the first key points, and the maximum
+///          distance between `dense` and the spline through the final key points.
+///          The final key-point chords can be farther from `dense`.
 pub const CURVE_TOLERANCE_MM: f64 = 0.25;
 
 // Vertices closer than this are the same vertex.
@@ -155,6 +157,9 @@ pub fn build_contour_tagged(points: &[Point], closed: bool, turns: Option<&[bool
 
     // Step 6: add curve points until the spline through the key points follows `dense`.
     let (kept, turn) = refine_to_spline(&dense, kept, turn, closed);
+
+    // Step 7: drop curve points the spline does not need.
+    let (kept, turn) = prune_to_spline(&dense, kept, turn, closed);
     let reduced = kept.iter().map(|&i| dense[i]).collect();
 
     Some(AstmContour { dense, reduced, turn, closed })
@@ -332,6 +337,78 @@ fn refine_to_spline(dense: &[Point], mut kept: Vec<usize>, mut turn: Vec<bool>, 
         } // for each added vertex
     } // loop until within tolerance
 } // fn refine_to_spline
+
+// @brief Remove curve points while every spline segment stays within
+//        CURVE_TOLERANCE_MM of `dense`.
+// @details Each pass removes the curve point whose removal leaves the smallest
+//          deviation, so the points that shape the curve go last. Turn points
+//          and the first key point stay: `dense` and `reduced` start together.
+// @param kept Ascending indices into `dense`; a closed loop starts at index 0.
+// @param turn Parallel to `kept`.
+fn prune_to_spline(dense: &[Point], mut kept: Vec<usize>, mut turn: Vec<bool>, closed: bool) -> (Vec<usize>, Vec<bool>) {
+    let min_len = if closed { 3 } else { 2 };
+    loop {
+        let k = kept.len();
+        if k <= min_len {
+            return (kept, turn);
+        } // if no key point to spare
+        let mut best: Option<(usize, f64)> = None;
+        for r in (1..k).filter(|&r| !turn[r]) {
+            // Trial contour without key point r.
+            let mut trial_kept = kept.clone();
+            let mut trial_turn = turn.clone();
+            trial_kept.remove(r);
+            trial_turn.remove(r);
+            let deviation = segments_around(r, k - 1, closed)
+                .map(|s| segment_deviation(dense, &trial_kept, &trial_turn, closed, s))
+                .fold(0.0, f64::max);
+            if deviation <= CURVE_TOLERANCE_MM && best.map_or(true, |(_, d)| deviation < d) {
+                best = Some((r, deviation));
+            } // if removable and best so far
+        } // for each curve point
+        let Some((r, _)) = best else {
+            return (kept, turn);
+        }; // if every curve point is needed
+        kept.remove(r);
+        turn.remove(r);
+    } // loop until no curve point can go
+} // fn prune_to_spline
+
+// @brief Spline segments whose shape depends on a key point removed at position `r`.
+// @details A Catmull-Rom segment uses two key points on each side of it, so the
+//          merged segment r - 1 and its two neighbours change.
+// @param k Key point count after the removal.
+fn segments_around(r: usize, k: usize, closed: bool) -> impl Iterator<Item = usize> {
+    let segment_count = if closed { k } else { k - 1 };
+    let mut segments: Vec<usize> = (0..3)
+        .filter_map(|d| {
+            let s = r as isize - 2 + d;
+            if closed {
+                Some(s.rem_euclid(k as isize) as usize)
+            } else {
+                (0..segment_count as isize).contains(&s).then_some(s as usize)
+            } // if closed: wrap
+        })
+        .collect();
+    segments.sort_unstable();
+    segments.dedup();
+    segments.into_iter()
+} // fn segments_around
+
+// @brief Largest distance between spline segment `s` and the dense vertices it spans, in both directions.
+// @param kept Ascending indices into `dense`; a closed loop starts at index 0.
+fn segment_deviation(dense: &[Point], kept: &[usize], turn: &[bool], closed: bool, s: usize) -> f64 {
+    let (n, k) = (dense.len(), kept.len());
+    let a = kept[s];
+    // The last segment of a loop wraps back to vertex 0 (index n).
+    let b = if s + 1 < k { kept[s + 1] } else { n };
+    let key: Vec<Point> = kept.iter().map(|&i| dense[i]).collect();
+    let samples = sample_segment(&key, turn, closed, s, SPLINE_SAMPLES.max(4 * (b - a)));
+    let chain: Vec<Point> = (a..=b).map(|i| dense[i % n]).collect();
+    let to_spline = chain.iter().map(|&p| distance_to_polyline(p, &samples)).fold(0.0, f64::max);
+    let to_dense = samples.iter().map(|&p| distance_to_polyline(p, &chain)).fold(0.0, f64::max);
+    to_spline.max(to_dense)
+} // fn segment_deviation
 
 // @brief The dense vertex to add when a spline segment strays more than
 //        CURVE_TOLERANCE_MM from the dense vertices a..=b.

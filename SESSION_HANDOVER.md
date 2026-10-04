@@ -6,6 +6,14 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-03 — DXF.4: fewer curve points
+
+Merged `task-dxf-fewer-curve-points`. `cargo test --workspace` and `ctest --preset debug` passed.
+
+- `astm_contour::prune_to_spline` drops curve points the spline does not need. male_shirt: 480 → 278 curve points, all splines ≤ 0.25 mm.
+- Key-point chords can now exceed 0.25 mm; only the spline is held to it.
+- User action: re-export male_shirt DXF-ASTM, re-run aw.fyi (DXF.8). Check the advisory and the reconstruction findings.
+
 ## 2026-10-03 — DXF.3: DXF-ASTM (R13) export
 
 Merged `task-dxf-r13`. `cargo test --workspace` and `ctest --preset debug` passed.

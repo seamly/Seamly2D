@@ -16,7 +16,7 @@ Reference: `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
 | Declared points miscategorized: curve points on layer 2 (7 pieces) | departure | DXF.1 (done, see `TODO_COMPLETED.md`) |
 | Reconstruction from layers 2/3 off layer 84 by 0.532 (ShortSleeve_M), layer 87 by 0.942 (FullSleeve_M); limit 0.5 | extension | DXF.2 (done, see `TODO_COMPLETED.md`) |
 | File is AC1009, not R13 (AC1012) | departure | DXF.3 (code done; CLO3D import check open) |
-| More curve points than the curves need (Yoke_M L14, PocketFlapRound_M L1) | advisory | DXF.4 |
+| More curve points than the curves need (Yoke_M L14, PocketFlapRound_M L1) | advisory | DXF.4 (done, see `TODO_COMPLETED.md`) |
 | Pieces with no `Quantity:`, label, or grainline (CollarTopInterface, CollarBaseInterface, CuffInterface) | report table | DXF.5 |
 | `Style Name:` is the output file stem with timestamp | report header | DXF.6 |
 | Category, Material, Size columns blank | report table | DXF.7 |
@@ -39,13 +39,6 @@ Menu (user decision): **DXF-ASTM (R12)**, **DXF-ASTM (R13)**, **DXF-ASTM (CLO3D)
 - [ ] DXF.3.5 Check import in CLO3D and one other reader (e.g. ezdxf `audit`, LibreCAD). Done: ezdxf 1.4.4 `audit` 0 errors / 0 fixes; libdxfrw reads the same entity counts as R12. Open: user checks a DXF-ASTM (R13) export in CLO3D
 - [x] DXF.3.6 Rust tests: header version, unique handles, required sections present (`writer_r13_test.rs`, `exports.rs` `do_export_dxf_writes_r13_when_asked`)
 - [x] DXF.3.7 Update the compliance doc "Decisions" row for DXF version
-
-## [ ] Task DXF.4 — Fewer curve points where a spline needs fewer
-
-Advisory only. Do after DXF.1 and DXF.2: DXF.2 adds points, so retest first.
-
-- [ ] DXF.4.1 Re-validate; if the advisory remains, drop key points the spline does not need while DXF.2.4 still passes
-- [ ] DXF.4.2 Rust test on the Yoke and PocketFlapRound fixtures
 
 ## [ ] Task DXF.5 — Warn about pieces with no Quantity, label, or grainline
 

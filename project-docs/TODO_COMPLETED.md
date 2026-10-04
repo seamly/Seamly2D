@@ -2,6 +2,17 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task DXF.4 — Fewer curve points where a spline needs fewer (completed 2026-10-03)
+
+Re-checked on the fixture after DXF.2: Yoke_M layer 14 still had 14 curve points. `astm_contour::prune_to_spline` now drops each curve point the spline does not need; the least-needed point goes first.
+
+- [x] DXF.4.1 Re-validate; if the advisory remains, drop key points the spline does not need while DXF.2.4 still passes
+- [x] DXF.4.2 Rust test on the Yoke and PocketFlapRound fixtures
+- male_shirt curve points: 480 → 278. Yoke_M L1 14 → 7, L14 14 → 8; PocketFlapRound_M L1 8 → 4, L14 7 → 5. All splines ≤ 0.25 mm.
+- Key-point chords are no longer held to 0.25 mm; only the spline is. Douglas–Peucker gives the first key points.
+- Tests: `astm_piece_test.rs` `unneeded_curve_points_are_dropped`; `writer_astm_test.rs` `male_shirt_curves_carry_only_needed_curve_points`.
+- Not re-validated on aw.fyi yet (DXF.8).
+
 ## Task DXF.2 — Reconstructed curves stay within tolerance (completed 2026-10-03)
 
 Stand-in spline: centripetal Catmull-Rom. With Douglas–Peucker alone, the sleeves were 0.40 mm off on layers 84 and 87; after, all male_shirt contours are within 0.24 mm.

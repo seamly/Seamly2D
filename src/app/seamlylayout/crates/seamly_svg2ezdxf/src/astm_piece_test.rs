@@ -7,7 +7,7 @@
 #[cfg(test)]
 mod tests {
     use crate::astm_contour::{
-        build_contour, build_contour_tagged, distance_to_segment, spline_deviation, spline_points, AstmContour, CURVE_TOLERANCE_MM,
+        build_contour, build_contour_tagged, spline_deviation, spline_points, AstmContour, CURVE_TOLERANCE_MM,
     };
     use crate::astm_notch::{build_notches, NotchKind};
     use crate::converter::{svg_to_ezdxf, SvgToEzdxfOptions};
@@ -22,15 +22,6 @@ mod tests {
             Point::new(100.0, 100.0), Point::new(50.0, 100.0), Point::new(0.0, 100.0), Point::new(0.0, 50.0),
             Point::new(0.0, 0.0),
         ]
-    }
-
-    // @brief Largest distance from any dense vertex to the reduced polyline.
-    fn max_deviation(dense: &[Point], reduced: &[Point]) -> f64 {
-        let n = reduced.len();
-        dense
-            .iter()
-            .map(|&p| (0..n).map(|i| distance_to_segment(p, reduced[i], reduced[(i + 1) % n])).fold(f64::INFINITY, f64::min))
-            .fold(0.0, f64::max)
     }
 
     #[test]
@@ -54,7 +45,7 @@ mod tests {
         assert_eq!(c.dense.len(), 180);
         assert!(c.reduced.len() < 60, "reduction removes most vertices, got {}", c.reduced.len());
         assert!(c.turn.iter().all(|&t| !t), "a smooth circle has only curve points");
-        assert!(max_deviation(&c.dense, &c.reduced) <= CURVE_TOLERANCE_MM + 1e-9);
+        assert!(spline_deviation(&c) <= CURVE_TOLERANCE_MM + 1e-9);
     }
 
     // @brief True when `reduced` is an ordered subset of `dense` that starts at dense[0].
@@ -67,6 +58,20 @@ mod tests {
             }
         }
         c.reduced[0] == c.dense[0]
+    }
+
+    // @brief Positions in `reduced` of curve points the spline can lose and stay within
+    //        CURVE_TOLERANCE_MM. The first key point is not counted: it must stay.
+    fn removable_curve_points(c: &AstmContour) -> Vec<usize> {
+        (1..c.reduced.len())
+            .filter(|&r| !c.turn[r])
+            .filter(|&r| {
+                let mut trial = c.clone();
+                trial.reduced.remove(r);
+                trial.turn.remove(r);
+                spline_deviation(&trial) <= CURVE_TOLERANCE_MM
+            })
+            .collect()
     }
 
     // @brief Open S curve: two half sine waves, 200 mm long and 30 mm high.
@@ -96,6 +101,21 @@ mod tests {
             assert!(d <= CURVE_TOLERANCE_MM + 1e-9, "spline deviation {d}");
             assert!(reduced_is_ordered_subset(c), "reduced is an ordered subset of dense");
             assert_eq!(c.reduced.len(), c.turn.len());
+        }
+    }
+
+    #[test]
+    fn unneeded_curve_points_are_dropped() {
+        let circle: Vec<Point> = (0..180)
+            .map(|i| {
+                let a = i as f64 * std::f64::consts::TAU / 180.0;
+                Point::new(50.0 * a.cos(), 50.0 * a.sin())
+            })
+            .collect();
+        let c = build_contour(&circle, true).expect("circle");
+        assert!(c.reduced.len() <= 30, "circle keeps {} key points", c.reduced.len());
+        for c in [c, build_contour(&s_curve(), false).expect("s curve")] {
+            assert_eq!(removable_curve_points(&c), Vec::<usize>::new(), "every curve point is needed");
         }
     }
 
