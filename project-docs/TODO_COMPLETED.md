@@ -2,6 +2,20 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task DXF.6 — Style Name is the input file base name (completed 2026-10-03)
+
+Today `cxxqt_bridge/src/exports.rs` sets `style_name` from the output path stem (`male_shirt_202610031234`). User decision: use the base name of the input file (`male_shirt`).
+
+- [x] DXF.6.1 File import: the imported SVG's base name
+- [x] DXF.6.2 `--svg-stdin` handoff: the `--document-name` value
+- [x] DXF.6.3 No input name: keep the output file stem
+- [x] DXF.6.4 Rust test for each case
+- [x] DXF.6.5 Update the compliance doc "Style Name" row
+- QML passes `importedBaseName` as `styleName` in the `exportDxf` options JSON. `exports::do_export_dxf` sets it as the drawing's style name.
+- Precedence: input base name, pattern `data-name`, output file stem. The pattern name stays as a fallback for a named pattern with no input name.
+- Tests: `exports.rs` `dxf_style_name_is_imported_file_base_name`, `dxf_style_name_is_document_name`, `dxf_style_name_without_input_name_is_output_stem`, `dxf_style_name_without_input_name_keeps_pattern_name`.
+- Not checked in the running app.
+
 ## Task DXF.5 — Warn about pieces with no Quantity, label, or grainline (completed 2026-10-03)
 
 A piece with no `Cut N` label gets no `Quantity:`, and a piece with no grainline gets no layer 7. Both make the DXF less usable in downstream CAD.

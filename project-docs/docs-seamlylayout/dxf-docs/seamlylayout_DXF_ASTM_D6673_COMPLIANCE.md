@@ -26,7 +26,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | Block names | `<svg id>_M` kept | Existing CLO3D naming. `Piece Name:` carries the real name |
 | Curve tolerance | 0.25 mm | Douglas–Peucker tolerance for the first key points, and limit for the spline through the final key points. Chords between final key points can be farther off |
 | Quantity | From the "Cut N" label line: even N → `N/2,N/2`, odd N → `N,0` | Seamly2D exports only a total, not right/left counts |
-| Style Name | Pattern `data-name`, else the file stem | |
+| Style Name | Input base name: the imported SVG's base name, or the `--document-name` value. Else the pattern `data-name`, else the output file stem | User decision. The output stem carries a timestamp |
 | Sample Size, Grade Rule Table | Written blank | Required identifiers; export is one ungraded size |
 
 ## Layers written

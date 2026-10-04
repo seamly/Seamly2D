@@ -60,7 +60,8 @@ ApplicationWindow {
     } // Component.onCompleted
 
     // Base filename (without extension) of the most recently imported SVG.
-    // Populated by openSvgFile(); used to build default export filenames.
+    // Populated by openSvgFile() and openSvgDocument(); used to build default
+    // export filenames and the DXF-ASTM Style Name.
     property string importedBaseName: ""
 
     // -----------------------------------------------------------------------
@@ -195,6 +196,7 @@ ApplicationWindow {
                 createTeachingVersion: teaching,
                 clo3dGroup250: clo3d,
                 dxfVersion:   dxfVersion,
+                styleName:    root.importedBaseName, // input base name; empty → output file stem
                 appVersion:   Qt.application.version,
                 creationDate: Qt.formatDateTime(now, "dd-MM-yyyy"),
                 creationTime: Qt.formatDateTime(now, "hh-mm")
