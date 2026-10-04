@@ -200,6 +200,12 @@ Stubs only. No module ships yet.
 | DXF-ASTM (R13) | `male_shirt_R13_202610031234.dxf` |
 | DXF-ASTM (CLO3D), R13 | `male_shirt_CLO3D_202610031234.dxf` |
 | PDF tiled | `male_shirt_202610031234_tiled.pdf` |
+| HPGL Cut (cut lines only) | `male_shirt_cutlines_202610031234.<plt\|hpgl>` |
+| HPGL Plot | `male_shirt_202610031234.<plt\|hpgl>` |
+| SVG single-line font | `male_shirt_singlelinefont_202610031234.svg` |
+| SVG Hershey strokes | `male_shirt_hersheyfont_202610031234.svg` |
+| SVG designer font, as supplied | `male_shirt_202610031234.svg` |
 | Other formats | `male_shirt_202610031234.<ext>` |
 
-- Export all tabs: tab label goes before the extension.
+- HPGL and SVG segments come from `appController.exportNameSegment(format, mode)` → Rust `exports::export_name_segment`.
+- Export all tabs: tab label goes before the extension. Example: `male_shirt_cutlines_202610031234_size-40.plt`.

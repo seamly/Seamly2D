@@ -227,6 +227,9 @@ mod tests {
         assert_eq!(tab_file_path("/out.v2/shirt", "Size 40"), "/out.v2/shirt_size-40");
         // A hidden-file style name keeps its leading dot.
         assert_eq!(tab_file_path("/out/.pdf", "Size 40"), "/out/.pdf_size-40");
+        // A mode segment stays in place; the label still goes before the extension.
+        assert_eq!(tab_file_path("/out/shirt_cutlines_202610011721.plt", "Size 40"), "/out/shirt_cutlines_202610011721_size-40.plt");
+        assert_eq!(tab_file_path("/out/shirt_hersheyfont_202610011721.svg", "Size 40"), "/out/shirt_hersheyfont_202610011721_size-40.svg");
     } // tab_file_path_adds_label_before_extension
 
     // @brief A state whose bbox JSON names it, so a test can tell states apart.

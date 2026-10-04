@@ -27,6 +27,7 @@
 //   do_export_mesh(doc, path)                         -> Result<(), String> (stub)
 //   paid_export_available(format)                     -> bool
 //   default_export_file_name(base, segment, stamp, ext, tiled) -> String
+//   export_name_segment(format, mode)                 -> &'static str
 //
 // Internal helpers:
 //   merge_single_page_pdfs(page_bytes) -> Result<Vec<u8>, String>
@@ -1795,6 +1796,22 @@ pub fn default_export_file_name(base: &str, segment: &str, stamp: &str, ext: &st
     format!("{name}.{ext}")
 } // fn default_export_file_name
 
+// @brief File name segment for an export mode; empty when the mode keeps the plain name.
+//
+// Modes of one format that write different content get different names, so the
+// user can tell the files apart. Example: HPGL "cut" → "cutlines".
+//
+// @param format Export format key: "hpgl" or "svg"; any other key returns "".
+// @param mode   Mode the Export menu passed for that format.
+pub fn export_name_segment(format: &str, mode: &str) -> &'static str {
+    match (format, mode) {
+        ("hpgl", "cut")            => "cutlines",       // cut lines only
+        ("svg", "singleLineFont")  => "singlelinefont", // labels in a single-line font
+        ("svg", "hersheyStrokes")  => "hersheyfont",    // labels as Hershey strokes
+        _                          => "",               // plot, designerFont, asSupplied, unknown
+    } // match (format, mode)
+} // fn export_name_segment
+
 // @brief Export the layout document as G-Code (stub).
 //
 // Writes no file. Returns Err until a G-Code module is available.
@@ -1858,6 +1875,37 @@ mod tests {
         assert_eq!(default_export_file_name("male_shirt", "", "202610031234", "pdf", true), "male_shirt_202610031234_tiled.pdf");
         assert_eq!(default_export_file_name("", "R12", "202610031234", "dxf", false), "");
     } // default_export_file_name_places_segment_before_stamp
+
+    // @brief Each content-changing mode gets its own segment; the other modes keep the plain name.
+    #[test]
+    fn export_name_segment_names_each_mode() {
+        assert_eq!(export_name_segment("hpgl", "cut"), "cutlines");
+        assert_eq!(export_name_segment("hpgl", "plot"), "");
+        assert_eq!(export_name_segment("svg", "singleLineFont"), "singlelinefont");
+        assert_eq!(export_name_segment("svg", "hersheyStrokes"), "hersheyfont");
+        assert_eq!(export_name_segment("svg", "designerFont"), "");
+        assert_eq!(export_name_segment("svg", "asSupplied"), "");
+        // A mode name is only meaningful for its own format.
+        assert_eq!(export_name_segment("svg", "cut"), "");
+        assert_eq!(export_name_segment("pdf", "cut"), "");
+    } // export_name_segment_names_each_mode
+
+    // @brief Mode segments give the documented default names; plot and tiled names do not change.
+    #[test]
+    fn default_export_file_name_with_mode_segments() {
+        let stamp = "202610011721";
+        let name = |format: &str, mode: &str, ext: &str, tiled: bool| {
+            default_export_file_name("male_shirt", export_name_segment(format, mode), stamp, ext, tiled)
+        };
+        assert_eq!(name("hpgl", "cut", "plt", false), "male_shirt_cutlines_202610011721.plt");
+        assert_eq!(name("hpgl", "plot", "plt", false), "male_shirt_202610011721.plt");
+        assert_eq!(name("hpgl", "plot", "hpgl", false), "male_shirt_202610011721.hpgl");
+        assert_eq!(name("pdf", "", "pdf", true), "male_shirt_202610011721_tiled.pdf");
+        assert_eq!(name("svg", "singleLineFont", "svg", false), "male_shirt_singlelinefont_202610011721.svg");
+        assert_eq!(name("svg", "hersheyStrokes", "svg", false), "male_shirt_hersheyfont_202610011721.svg");
+        assert_eq!(name("svg", "designerFont", "svg", false), "male_shirt_202610011721.svg");
+        assert_eq!(name("svg", "asSupplied", "svg", false), "male_shirt_202610011721.svg");
+    } // default_export_file_name_with_mode_segments
 
     // @brief Build a minimal tiled-export settings object for tests.
     fn test_tiled_settings() -> LayoutSettings {

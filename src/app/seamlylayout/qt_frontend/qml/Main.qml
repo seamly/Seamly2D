@@ -612,7 +612,9 @@ ApplicationWindow {
         onExportHpglRequested: function(mode) {
             var ext  = preferencesModel.hpglExtension // "plt" or "hpgl", chosen in Export > HPGL > File extension
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName(ext) // default name: <importedBaseName>_YYYYMMDDHHMM.<ext>
+            // Default name: plot → <importedBaseName>_YYYYMMDDHHMM.<ext>;
+            // cut → <importedBaseName>_cutlines_YYYYMMDDHHMM.<ext>.
+            var name = root.makeExportFileName(ext, false, appController.exportNameSegment("hpgl", mode))
             var path = preferencesModel.getSaveFilePath(
                 "Save HPGL File", dir, name,
                 "HPGL Files (*." + ext + ");;All Files (*)")
@@ -657,7 +659,9 @@ ApplicationWindow {
         } // onHpglExtensionChosen
         onExportSvgRequested: function(mode) {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName("svg") // default name: <importedBaseName>_YYYYMMDDHHMM.svg
+            // Default name: designerFont, asSupplied → <importedBaseName>_YYYYMMDDHHMM.svg;
+            // singleLineFont → _singlelinefont, hersheyStrokes → _hersheyfont, before the timestamp.
+            var name = root.makeExportFileName("svg", false, appController.exportNameSegment("svg", mode))
             var path = preferencesModel.getSaveFilePath(
                 "Save SVG File", dir, name,
                 "SVG Files (*.svg);;All Files (*)")
