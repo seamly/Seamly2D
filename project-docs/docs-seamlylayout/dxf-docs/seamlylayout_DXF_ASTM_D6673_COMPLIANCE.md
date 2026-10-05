@@ -96,7 +96,7 @@ Seamly2D sends no source data for these. Tracked in `TODO_SEAMLYLAYOUT.md`.
 
 ## Known producer gaps
 
-- Notches reach the DXF (report on `male_shirt_R13_202610041815.dxf`: 4 on layer 4, 3 on layer 83), but their depth follows the drawn shape, not half the seam allowance. DXF.17 waits for Seamly2D.6.
+- Notches reach the DXF (report on `male_shirt_R13_202610041815.dxf`: 4 on layer 4, 3 on layer 83), but their depth follows the drawn shape, not half the seam allowance. DXF.17 is next; Seamly2D.6 is done.
 - No `data-quantity`, `data-on-fold`, `data-material` or `data-notch-type` attributes; quantity and notch kind are inferred; material is always `Fabric`.
 
 ## Tests

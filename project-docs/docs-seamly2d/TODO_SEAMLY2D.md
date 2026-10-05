@@ -24,26 +24,6 @@ Current label text handling (all outline-font based, and staying available): the
 - [ ] Seamly2D.1.7 Verify: canvas single-stroke labels legible at typical zooms with correct placement, mirroring, and rotation; outline-font behavior unchanged everywhere; tagged pieces SVG / `.pieces.svg` / `--text2paths` / DXF / PDF / PNG correct in both font modes
 - [ ] Seamly2D.1.8 Doxygen briefs + inline comments on all touched functions; document the font architecture in the repo docs
 
-## [ ] Task Seamly2D.6 — Piece Mode draws cutline notches on the seamline
-
-Pattern settings and the piece node context menu say "notch on cutline". The canvas draws the notch on the seamline.
-
-Fix upstream (`FashionFreedom/Seamly2D`) first, then merge `develop` into `run-seamlyLayout`. Related upstream issues: #1647 (closed: notches missing in layouts and exports), #1231, #818.
-
-User decision (2026-10-04): fix on `run-seamlyLayout`, not upstream first. The user raises it upstream later.
-
-- [x] Seamly2D.6.1 Reproduce with `test-seamly-layout-input/richmond-shirt_v1_v061-test.sm2d`: context menu state vs. drawn position
-  - [x] Seamly2D.6.1.1 Unit test `TST_VPiece::NotchFlagsSelectLine`: straight edge, slit, straightforward. Each flag puts its notch on the correct line.
-  - [x] Seamly2D.6.1.2 User: reproduce on the canvas. Result: not reproduced. `test-seamly-layout-input/male_shirt.sm2d`, Piece Mode: slits drawn on the cutline; "Show notch on cutline" checked.
-  - Note: the user's working copy of `male_shirt.sm2d` has 7 notch nodes (4 slit, 2 diamond, 1 uNotch), all straightforward, `showNotch="true" showSecondNotch="false"`.
-- [x] Seamly2D.6.2 Trace `VPieceNode::showSeamlineNotch()` / `showSeamAllowanceNotch()` through `VPiece::createNotch()` and `createBuiltInSaNotch()` (`src/libs/vpatterndb/vpiece.cpp`)
-  - Defect found: `createNotch()` gated cutline notches on the canvas view setting `showSeamAllowances()`. With the seam allowance view off, cutline notches were missing from layout and export piece data.
-  - `.sm2d` read: a missing `showSecondNotch` attribute defaults to `true` (`VAbstractPattern::ParseSANode`). Old files can show a seamline notch the user never set.
-- [x] Seamly2D.6.3 Fix; add a unit test for notch position per flag
-  - [x] Seamly2D.6.3.1 `VPiece::createNotchLines(..., includeCutlineNotches)`: only the canvas passes the view setting. Layout and export always get cutline notches.
-  - [x] Seamly2D.6.3.2 Closed, not reproduced: the canvas matches the node flags (Seamly2D.6.1.2).
-- [ ] Seamly2D.6.4 Check the fix also puts the notch on the correct line in the SeamlyLayout handoff SVG (Layout.65)
-
 ## [ ] Task Seamly2D.7 — Per-piece material
 
 Today every piece is laid out on one fabric. Label placeholders `mFabric`, `mLining`, `mInterfacing`, `mInterlining` are fixed words, not piece data.

@@ -455,7 +455,8 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
                                        seamAllowanceNodes);
     layoutPiece.setInternalPaths(convertInternalPaths (piece, pattern, false));
     layoutPiece.setCutoutPaths(convertInternalPaths (piece, pattern, true));
-    layoutPiece.setNotches(piece.createNotchLines(pattern));
+    // Clip cutline notches to the cutline, as the canvas does.
+    layoutPiece.setNotches(piece.createNotchLines(pattern, seamAllowance));
     layoutPiece.SetName(piece.GetName());
     // Keep the piece letter so the SVG exporter can emit it as the data-letter attribute.
     layoutPiece.setPieceLetter(piece.GetPatternPieceData().GetLetter());

@@ -89,7 +89,7 @@ See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
 - [ ] Layout.63 Drill holes (layer 13), with diameter (group 30) - not implemented in Seamly2D yet so this must wait
 - [ ] Layout.64 Stripe and plaid reference lines (layers 9, 10) - not implemented in Seamly2D yet so this must wait
 - [ ] Layout.65 Seamly2D writes empty notch paths (`M x,y Z`) to the handoff SVG, so no notches reach the DXF — fix the producer in Seamly2D Piece Mode
-  - Depends on Seamly2D.6 (user decision, 2026-10-04).
+  - Seamly2D.6 done (2026-10-05): handoff cutline notches now clipped to the cutline.
   - Seamly2D builds notch shapes from a notch type template (slit, T, U, V, castle, diamond). The handoff carries the drawn shape.
   - DXF: write every notch as a slit. Slit length = half the seam allowance width (user decision, 2026-10-04).
   - Report on `male_shirt_R13_202610041815.dxf`: notches now reach the DXF, with drawn-shape depths. DXF fix tracked as DXF.17 in `TODO_DXF.md`.
