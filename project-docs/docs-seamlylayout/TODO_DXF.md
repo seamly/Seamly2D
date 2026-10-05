@@ -47,7 +47,7 @@ Menu (user decision): **DXF-ASTM (R12)**, **DXF-ASTM (R13)**, **DXF-ASTM (CLO3D)
 
 ## [ ] Task DXF.17 — Every notch is a slit, half the seam allowance long
 
-Waits for Seamly2D.6 (user decision, 2026-10-04). Part of Layout.65.
+Seamly2D.6 done (2026-10-05). Part of Layout.65.
 
 Report on `male_shirt_R13_202610041815.dxf`: layer 4 has 4 notches, layer 83 (U) has 3; depths 2.5 and 1.25 mm. The seam allowance is 10 mm.
 

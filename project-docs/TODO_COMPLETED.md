@@ -2,6 +2,29 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task Seamly2D.6 — Piece Mode draws cutline notches on the seamline (completed 2026-10-05)
+
+Pattern settings and the piece node context menu say "notch on cutline". The canvas draws the notch on the seamline.
+
+Fix upstream (`FashionFreedom/Seamly2D`) first, then merge `develop` into `run-seamlyLayout`. Related upstream issues: #1647 (closed: notches missing in layouts and exports), #1231, #818.
+
+User decision (2026-10-04): fix on `run-seamlyLayout`, not upstream first. The user raises it upstream later.
+
+- [x] Seamly2D.6.1 Reproduce with `test-seamly-layout-input/richmond-shirt_v1_v061-test.sm2d`: context menu state vs. drawn position
+  - [x] Seamly2D.6.1.1 Unit test `TST_VPiece::NotchFlagsSelectLine`: straight edge, slit, straightforward. Each flag puts its notch on the correct line.
+  - [x] Seamly2D.6.1.2 User: reproduce on the canvas. Result: not reproduced. `test-seamly-layout-input/male_shirt.sm2d`, Piece Mode: slits drawn on the cutline; "Show notch on cutline" checked.
+  - Note: the user's working copy of `male_shirt.sm2d` has 7 notch nodes (4 slit, 2 diamond, 1 uNotch), all straightforward, `showNotch="true" showSecondNotch="false"`.
+- [x] Seamly2D.6.2 Trace `VPieceNode::showSeamlineNotch()` / `showSeamAllowanceNotch()` through `VPiece::createNotch()` and `createBuiltInSaNotch()` (`src/libs/vpatterndb/vpiece.cpp`)
+  - Defect found: `createNotch()` gated cutline notches on the canvas view setting `showSeamAllowances()`. With the seam allowance view off, cutline notches were missing from layout and export piece data.
+  - `.sm2d` read: a missing `showSecondNotch` attribute defaults to `true` (`VAbstractPattern::ParseSANode`). Old files can show a seamline notch the user never set.
+- [x] Seamly2D.6.3 Fix; add a unit test for notch position per flag
+  - [x] Seamly2D.6.3.1 `VPiece::createNotchLines(..., includeCutlineNotches)`: only the canvas passes the view setting. Layout and export always get cutline notches.
+  - [x] Seamly2D.6.3.2 Closed, not reproduced: the canvas matches the node flags (Seamly2D.6.1.2).
+- [x] Seamly2D.6.4 Check the fix also puts the notch on the correct line in the SeamlyLayout handoff SVG (Layout.65)
+  - Defect found: `VLayoutPiece::Create` did not pass the cutline points to `createNotchLines`, so cutline notches were not clipped to the cutline. Diamond, U, V and castle ends were off the cutline at corners and curves. Slits on a straight edge were not affected.
+  - Fix: `vlayoutpiece.cpp` passes the seam allowance points, as the canvas does.
+  - Test: `TST_VPiece::LayoutNotchesMatchCanvas` (diamond notch, concave corner).
+
 ## Task DXF.16 — Straight runs between curves end in turn points (completed 2026-10-05)
 
 aw.fyi departure on `male_shirt_R13_202610041815.dxf`: FullSleeve_M, 10 of 80 declared points miscategorized, on a straight segment. The hem has a straight run with pleat vertices between two curves. Seamly2D tags no turn point there: the tangent breaks are under 5°.

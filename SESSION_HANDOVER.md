@@ -6,17 +6,16 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
-## 2026-10-05 — Next: Seamly2D.6.4 (notches in the handoff SVG)
+## 2026-10-05 — Seamly2D.6.4: handoff cutline notches clipped to the cutline
 
-Seamly2D.6.1–6.3 done. Only Seamly2D.6.4 is open in Seamly2D.6.
+Merged `task-handoff-notch-clip`. Seamly2DTests, CollectionTest, ParserTest, TranslationsTest passed (run directly from each `bin\`).
 
-- Seamly2D.6.1.2 result: canvas correct. `test-seamly-layout-input/male_shirt.sm2d`, Piece Mode: slits on the cutline, "Show notch on cutline" checked.
-- Seamly2D.6.3.2 closed, not reproduced.
-- Test file: user's uncommitted `test-seamly-layout-input/male_shirt.sm2d`. 7 notch nodes: 4 slit, 2 diamond, 1 uNotch; all straightforward; `showNotch="true" showSecondNotch="false"`. Do not commit it unasked.
-- Seamly2D.6.4 goal: the handoff SVG puts all 7 notches on the cutline.
-- Lead: `src/libs/vlayout/vlayoutpiece.cpp:458` calls `piece.createNotchLines(pattern)` with no seam allowance points, so cutline notches are not clipped to the cutline. The canvas (`pattern_piece_tool.cpp:1582`) passes them. Check whether diamond/U shapes cross the cutline in the SVG.
-- Steps: Layout Mode → SeamlyLayout handoff; inspect notch elements per piece; compare to cutline; add a test if a defect is found.
-- After Seamly2D.6.4: DXF.17 / Layout.65. Every notch becomes a layer 4 slit, length = half the seam allowance width.
+- Cause: `VLayoutPiece::Create` called `createNotchLines(pattern)` with no cutline points. Diamond, U, V, castle ends missed the cutline at corners and curves.
+- Fix: pass the seam allowance points, as the canvas does. Task Seamly2D.6 moved to `TODO_COMPLETED.md`.
+- Test: `TST_VPiece::LayoutNotchesMatchCanvas`. Failed before the fix (diamond end ~3 px off).
+- Not checked in the running app. User action: male_shirt Layout Mode handoff; check 7 notches sit on the cutline.
+- Test file: user's uncommitted `test-seamly-layout-input/male_shirt.sm2d`. Do not commit it unasked.
+- Next: DXF.17 / Layout.65. Every notch becomes a layer 4 slit, length = half the seam allowance width.
 - User actions still open: DXF.8 (re-export R13, re-run aw.fyi); DXF.3.5 (CLO3D import).
 
 ## 2026-10-05 — DXF.15 + DXF.16: straight runs end in turn points

@@ -83,6 +83,7 @@ private slots:
     void SameLabelLinesComparesFormatting() const;
     void NotchFlagsSelectLine_data() const;
     void NotchFlagsSelectLine() const;
+    void LayoutNotchesMatchCanvas() const;
 
 private:
     Q_DISABLE_COPY(TST_VPiece)

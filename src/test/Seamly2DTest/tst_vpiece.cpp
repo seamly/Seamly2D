@@ -56,6 +56,7 @@
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
 #include "../vgeometry/vgobject.h"
 #include "../vgeometry/vsplinepath.h"
+#include "../vlayout/vlayoutpiece.h"
 #include "../vmisc/vabstractapplication.h"
 #include "../vmisc/vcommonsettings.h"
 #include "../vtools/tools/new_piece_defaults.h"
@@ -578,6 +579,46 @@ QVector<QLineF> squareNotchLines(bool showCutline, bool showSeamline, bool inclu
     return piece.createNotchLines(data.data(), seamAllowancePoints, includeCutlineNotches);
 }
 
+/**
+ * @brief Piece with one diamond notch on a concave corner of its top edge.
+ *
+ * At a corner the notch ends drawn beside the cutline point are off the cutline, so clipping to the cutline
+ * changes them.
+ */
+VPiece concaveDiamondNotchPiece(VContainer *data)
+{
+    data->UpdateGObject(1, new VPointF(0, 0, "A1", 0, 0));
+    data->UpdateGObject(2, new VPointF(200, 50, "A2", 0, 0));
+    data->UpdateGObject(3, new VPointF(400, 0, "A3", 0, 0));
+    data->UpdateGObject(4, new VPointF(400, 400, "A4", 0, 0));
+    data->UpdateGObject(5, new VPointF(0, 400, "A5", 0, 0));
+
+    VPieceNode notchNode(2, Tool::NodePoint);
+    notchNode.setNotch(true);
+    notchNode.setNotchType(NotchType::Diamond);
+    notchNode.setNotchSubType(NotchSubType::Straightforward);
+    notchNode.setNotchLength(5);
+    notchNode.setNotchWidth(5);
+    notchNode.setNotchCount(1);
+    notchNode.setShowNotch(true);
+    notchNode.setShowSeamlineNotch(false);
+
+    VPiece piece;
+    piece.SetSeamAllowance(true);
+    piece.SetSAWidth(notchTestSAWidth);
+    piece.GetPath().Append(VPieceNode(1, Tool::NodePoint));
+    piece.GetPath().Append(notchNode);
+    piece.GetPath().Append(VPieceNode(3, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(4, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(5, Tool::NodePoint));
+
+    // Labels and grainline are not under test; hidden, they need no pattern document.
+    piece.GetPatternPieceData().SetVisible(false);
+    piece.GetPatternInfo().SetVisible(false);
+    piece.GetGrainlineGeometry().SetVisible(false);
+    return piece;
+}
+
 /// True when @p point lies on the polyline @p points.
 bool isOnPolyline(const QPointF &point, const QVector<QPointF> &points)
 {
@@ -658,4 +699,25 @@ void TST_VPiece::NotchFlagsSelectLine() const
     QCOMPARE(notches.size(), cutlineNotches + seamlineNotches);
     QCOMPARE(onCutline, cutlineNotches);
     QCOMPARE(onSeamline, seamlineNotches);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief LayoutNotchesMatchCanvas checks that layout and export piece data clip cutline notches to the cutline,
+ * as the canvas does.
+ */
+void TST_VPiece::LayoutNotchesMatchCanvas() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    const VPiece piece = concaveDiamondNotchPiece(data.data());
+    const QVector<QPointF> cutline = piece.seamAllowancePoints(data.data());
+    const QVector<QLineF> canvasNotches = piece.createNotchLines(data.data(), cutline);
+
+    // Guard: the geometry must make clipping matter, or the comparison below proves nothing.
+    QVERIFY(canvasNotches != piece.createNotchLines(data.data()));
+
+    QCOMPARE(VLayoutPiece::Create(piece, data.data()).getNotches(), canvasNotches);
 }
