@@ -9,7 +9,7 @@ mod tests {
     use crate::astm_contour::{
         build_contour, build_contour_tagged, spline_deviation, spline_points, AstmContour, CURVE_TOLERANCE_MM,
     };
-    use crate::astm_notch::{build_notches, seam_allowance_width, NotchKind};
+    use crate::astm_notch::{build_notches, seam_allowance_at, NotchKind};
     use crate::converter::{svg_to_ezdxf, SvgToEzdxfOptions};
     use crate::entities::Point;
     use crate::utils::{parse_length_attr, MM_PER_PX};
@@ -181,10 +181,16 @@ mod tests {
         ]
     }
 
+    // @brief Closed sew line inside the 100 mm square: bottom edge `bottom` mm in, other edges 10 mm in.
+    fn sew_line(bottom: f64) -> AstmContour {
+        let p = Point::new;
+        build_contour(&[p(10.0, bottom), p(90.0, bottom), p(90.0, 90.0), p(10.0, 90.0), p(10.0, bottom)], true).expect("sew line")
+    }
+
     #[test]
     fn every_notch_shape_is_a_layer_4_slit_half_the_seam_allowance_deep() {
         let boundary: Vec<Point> = build_contour(&square_with_midpoints(), true).expect("contour").dense;
-        let notches = build_notches(&notch_shape_segments(), &boundary, Some(10.0));
+        let notches = build_notches(&notch_shape_segments(), &boundary, &[sew_line(10.0)]);
         assert_eq!(notches.len(), 5);
         let expected_base_x = [10.0, 30.0, 50.0, 70.0, 90.0];
         for (i, n) in notches.iter().enumerate() {
@@ -198,27 +204,33 @@ mod tests {
     }
 
     #[test]
-    fn slit_depth_follows_seam_allowance_else_drawing() {
+    fn slit_depth_follows_the_seam_allowance_of_its_edge() {
         let boundary: Vec<Point> = build_contour(&square_with_midpoints(), true).expect("contour").dense;
-        let notches = build_notches(&notch_shape_segments(), &boundary, Some(6.0));
-        assert!(notches.iter().all(|n| (n.depth - 3.0).abs() < 1e-6), "depth follows the seam allowance, not the drawing");
-        let notches = build_notches(&notch_shape_segments(), &boundary, None);
+        let p = Point::new;
+        // Bottom edge 6 mm, top edge 10 mm: one slit on each.
+        let segments = [(p(30.0, 0.0), p(30.0, 5.0)), (p(50.0, 100.0), p(50.0, 95.0))];
+        let notches = build_notches(&segments, &boundary, &[sew_line(6.0)]);
+        let depths: Vec<f64> = notches.iter().map(|n| n.depth).collect();
+        assert!((depths[0] - 3.0).abs() < 1e-6 && (depths[1] - 5.0).abs() < 1e-6, "depths {depths:?}");
+    }
+
+    #[test]
+    fn slit_keeps_drawn_depth_without_sew_line() {
+        let boundary: Vec<Point> = build_contour(&square_with_midpoints(), true).expect("contour").dense;
+        let notches = build_notches(&notch_shape_segments(), &boundary, &[]);
         assert!(notches.iter().all(|n| n.kind == NotchKind::Slit && (n.depth - 5.0).abs() < 1e-6));
     }
 
     #[test]
-    fn seam_allowance_width_is_cut_line_to_seam_line() {
-        let boundary: Vec<Point> = build_contour(&square_with_midpoints(), true).expect("contour").dense;
+    fn seam_allowance_at_is_cut_line_to_nearest_sew_line() {
         let p = Point::new;
-        let seam = [p(10.0, 10.0), p(50.0, 10.0), p(90.0, 10.0), p(90.0, 90.0), p(10.0, 90.0)];
-        assert!((seam_allowance_width(&boundary, &[&seam]).expect("width") - 10.0).abs() < 1e-6);
-        // One wider edge (hem) does not move the median.
-        let hem = [p(50.0, 30.0), p(90.0, 50.0), p(90.0, 90.0), p(50.0, 90.0), p(10.0, 90.0), p(10.0, 50.0)];
-        assert!((seam_allowance_width(&boundary, &[&hem]).expect("width") - 10.0).abs() < 1e-6);
-        // Seam allowance built in, or no seam line: none.
-        assert_eq!(seam_allowance_width(&boundary, &[&boundary]), None);
-        assert_eq!(seam_allowance_width(&boundary, &[]), None);
-        assert_eq!(seam_allowance_width(&[], &[&seam]), None);
+        assert!((seam_allowance_at(p(50.0, 0.0), &[sew_line(6.0)]).expect("width") - 6.0).abs() < 1e-6);
+        // Closing edge of a closed sew line counts: left edge, x = 10.
+        assert!((seam_allowance_at(p(0.0, 50.0), &[sew_line(10.0)]).expect("width") - 10.0).abs() < 1e-6);
+        // Seam allowance built in, or no sew line: none.
+        let built_in = build_contour(&square_with_midpoints(), true).expect("contour");
+        assert_eq!(seam_allowance_at(p(50.0, 0.0), &[built_in]), None);
+        assert_eq!(seam_allowance_at(p(50.0, 0.0), &[]), None);
     }
 
     #[test]

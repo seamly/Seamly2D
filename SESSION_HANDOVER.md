@@ -11,8 +11,9 @@ re-accumulate finished-session narrative in this file.
 Merged `task-notch-slit`. `cargo test --workspace`, `ctest --preset debug` passed.
 
 - `astm_notch.rs`: no shape classification. Every notch: `NotchKind::Slit`, layer 4, no width.
-- Depth = half the seam allowance width. `seam_allowance_width`: median distance, sew line vertices → cut line. No cut line or sew line: drawn depth.
-- Seamly2D sends no seam allowance width attribute. Per-edge widths get the most common width. A producer attribute would be exact; not filed.
+- Depth = half the seam allowance width at each notch. `seam_allowance_at`: notch base → nearest sew line. No cut line or sew line: drawn depth.
+- User decision: keep each edge's seam allowance as Seamly2D defines it (piece-wide median replaced, `task-notch-local-sa`).
+- Seamly2D sends no seam allowance width attribute. Where the width changes at the notch node, the measurement can give the narrower width; Seamly2D uses the wider one. A per-notch producer attribute would be exact; not filed.
 - `NotchKind` T/castle/U kept: encoder still writes them; Layout.66 `data-notch-type` may use them.
 - Checked on `test-seamly-layout-input/male_shirt_202610050911.svg`: 7 slits, depth 5.00 mm.
 - DXF.17, Layout.65 moved to `TODO_COMPLETED.md`.

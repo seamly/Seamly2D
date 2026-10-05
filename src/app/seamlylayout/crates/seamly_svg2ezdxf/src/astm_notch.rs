@@ -7,10 +7,12 @@
 //! Seamly2D draws each notch as one or more straight segments and does not tag
 //! the notch type. This module groups touching segments into one notch and
 //! writes every notch as a slit (layer 4), whatever shape Seamly2D drew.
-//! Slit depth is half the piece's seam allowance width (user decision).
-//! Without a seam allowance, the depth is the drawn depth.
+//! Slit depth is half the seam allowance width at the notch (user decision):
+//! the distance from the notch base on the cut line to the sew line. Each
+//! notch keeps the width Seamly2D gave its edge. Without a seam allowance,
+//! the depth is the drawn depth.
 
-use crate::astm_contour::{distance, distance_to_segment};
+use crate::astm_contour::{distance, distance_to_segment, AstmContour};
 use crate::entities::Point;
 
 // Segments closer than this touch and belong to the same notch.
@@ -62,10 +64,10 @@ pub struct Notch {
 /// @brief Rebuild notches from drawn segments, each as a slit.
 /// @param segments Notch line segments in DXF units.
 /// @param boundary Closed piece boundary the notches sit on; may be empty.
-/// @param seam_allowance Piece seam allowance width in DXF units. The slit depth is half of it.
-///        `None` keeps the drawn depth.
+/// @param sew_lines Sew lines inside a cut line boundary. Empty when the boundary is a seam line;
+///        every slit then keeps its drawn depth.
 /// @return One slit notch per group of touching segments.
-pub fn build_notches(segments: &[(Point, Point)], boundary: &[Point], seam_allowance: Option<f64>) -> Vec<Notch> {
+pub fn build_notches(segments: &[(Point, Point)], boundary: &[Point], sew_lines: &[AstmContour]) -> Vec<Notch> {
     let segments: Vec<(Point, Point)> = segments
         .iter()
         .copied()
@@ -76,7 +78,7 @@ pub fn build_notches(segments: &[(Point, Point)], boundary: &[Point], seam_allow
         .map(|group| {
             let group_segments: Vec<(Point, Point)> = group.iter().map(|&i| segments[i]).collect();
             let mut notch = slit_from_drawing(&group_segments, boundary);
-            if let Some(width) = seam_allowance {
+            if let Some(width) = seam_allowance_at(notch.base, sew_lines) {
                 notch.depth = width / 2.0;
             } // if seam allowance known
             notch
@@ -84,24 +86,24 @@ pub fn build_notches(segments: &[(Point, Point)], boundary: &[Point], seam_allow
         .collect()
 } // fn build_notches
 
-/// @brief Seam allowance width of a piece: median distance from the seam line vertices to the cut line.
-/// @param boundary Closed cut line of the piece.
-/// @param seam_lines Seam lines of the piece. Pass none when the boundary is itself a seam line.
-/// @return `None` when there is no seam vertex or the width is under 0.1 mm (seam allowance built in).
-/// @details The median ignores the few vertices where the allowance changes width or a corner is cut.
-pub fn seam_allowance_width(boundary: &[Point], seam_lines: &[&[Point]]) -> Option<f64> {
-    if boundary.len() < 2 {
-        return None;
-    } // if no boundary
-    let mut widths: Vec<f64> =
-        seam_lines.iter().flat_map(|line| line.iter().map(|&p| distance_to_boundary(p, boundary))).collect();
-    if widths.is_empty() {
-        return None;
-    } // if no seam vertex
-    widths.sort_by(f64::total_cmp);
-    let median = widths[widths.len() / 2];
-    (median >= MIN_SEAM_ALLOWANCE_MM).then_some(median)
-} // fn seam_allowance_width
+/// @brief Seam allowance width at a point on the cut line: distance to the nearest sew line.
+/// @param base Point on the cut line.
+/// @param sew_lines Sew lines of the piece.
+/// @return `None` without a sew line, or when the width is under 0.1 mm (seam allowance built in).
+pub fn seam_allowance_at(base: Point, sew_lines: &[AstmContour]) -> Option<f64> {
+    let width = sew_lines
+        .iter()
+        .map(|line| {
+            let n = line.dense.len();
+            // A closed sew line also has the edge from its last vertex back to its first.
+            let edges = if line.closed { n } else { n.saturating_sub(1) };
+            (0..edges)
+                .map(|i| distance_to_segment(base, line.dense[i], line.dense[(i + 1) % n]))
+                .fold(f64::INFINITY, f64::min)
+        })
+        .fold(f64::INFINITY, f64::min);
+    (width.is_finite() && width >= MIN_SEAM_ALLOWANCE_MM).then_some(width)
+} // fn seam_allowance_at
 
 // @brief Group segment indices whose segments touch, transitively (union-find).
 fn group_touching(segments: &[(Point, Point)]) -> Vec<Vec<usize>> {

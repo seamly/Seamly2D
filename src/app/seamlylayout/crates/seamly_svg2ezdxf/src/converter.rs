@@ -9,7 +9,7 @@ use crate::entities::{Circle, Entity, Line, Point, Polyline, Text};
 use crate::error::Result;
 use crate::layers::map_svg_to_astm_layer;
 use crate::astm_contour::{build_contour_tagged, AstmContour};
-use crate::astm_notch::{build_notches, seam_allowance_width};
+use crate::astm_notch::build_notches;
 use crate::drawing::Annotation;
 use crate::layers::{piece_component, PieceComponent};
 use crate::utils::{invert_y_axis, parse_float_attr, parse_length_attr, sanitize_ascii, sanitize_block_name, MM_PER_PX};
@@ -524,9 +524,8 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
         notch_lines.iter().flat_map(|p| p.windows(2).map(|w| (w[0], w[1])).collect::<Vec<_>>()).collect();
     let boundary_dense = block.boundary.as_ref().map(|b| b.dense.clone()).unwrap_or_default();
     // Seam allowance: cut line to sew line. A seam line boundary has none.
-    let sew_dense: Vec<&[Point]> = block.sew_lines.iter().map(|c| c.dense.as_slice()).collect();
-    let seam_allowance = if has_cut_line { seam_allowance_width(&boundary_dense, &sew_dense) } else { None };
-    block.notches = build_notches(&segments, &boundary_dense, seam_allowance);
+    let sew_lines: &[AstmContour] = if has_cut_line { &block.sew_lines } else { &[] };
+    block.notches = build_notches(&segments, &boundary_dense, sew_lines);
 } // fn extract_astm_piece
 
 // @brief Convert SVG <line> element to DXF LINE entity.
