@@ -45,6 +45,17 @@ Menu (user decision): **DXF-ASTM (R12)**, **DXF-ASTM (R13)**, **DXF-ASTM (CLO3D)
 - [x] DXF.3.6 Rust tests: header version, unique handles, required sections present (`writer_r13_test.rs`, `exports.rs` `do_export_dxf_writes_r13_when_asked`)
 - [x] DXF.3.7 Update the compliance doc "Decisions" row for DXF version
 
+## [ ] Task DXF.18 — Notches on a piece with a built-in seam allowance
+
+A built-in seam allowance: Seamly2D's main path is the cut line, sent as the `seamline` group. Seamly2D keeps the seam allowance widths; the sew line inside is not drawn. SeamlyLayout had no width, so the slit kept its drawn depth.
+
+- [x] DXF.18.1 `converter::notch_polylines`: read `data-seam-allowances`, one width per notch subpath; a list of the wrong length is ignored
+- [x] DXF.18.2 `astm_notch::build_notches`: Seamly2D's width first, then the measured width, then the drawn depth. Slit depth = half the width
+- [x] DXF.18.3 Tests: `seamly2d_width_sets_slit_depth_before_the_measured_width`, `built_in_seam_allowance_notches_use_seamly2d_widths`
+- [x] DXF.18.4 Compliance doc "Notch rules"
+- [ ] DXF.18.5 User check: Seamly2D.10.6
+- Depends on Seamly2D.10.
+
 ## [ ] Task DXF.8 — Re-validate
 
 - [ ] DXF.8.1 Export male_shirt as DXF-ASTM and DXF-ASTM (CLO3D) after each task

@@ -76,8 +76,10 @@ Every notch is a slit on layer 4, whatever shape Seamly2D drew (slit, T, U, V, c
 - Touching segments form one notch. Contacts = vertices within 0.5 mm of the boundary.
 - Base = centre of the contacts. Angle = toward the inner vertices, counter-clockwise from +X.
 - Depth = half the seam allowance width at the notch. User decision: keep each edge's width as Seamly2D defines it.
-- Seam allowance width at the notch = distance from the base to the nearest sew line (`seam_allowance_at`).
-- No cut line, no sew line, or width under 0.1 mm: depth = drawn depth (farthest reach along the angle).
+- Width source, first found:
+  1. Seamly2D's width for the notch node, `data-seam-allowances`. The only source for a built-in seam allowance: its main path is the cut line, and it has no sew line.
+  2. Distance from the base to the nearest sew line (`seam_allowance_at`), for an SVG without the attribute.
+  3. None, or width under 0.1 mm: depth = drawn depth (farthest reach along the angle).
 - No width (group 39). Layers 80, 81, 83 are not written.
 
 ## Not exported
@@ -92,7 +94,6 @@ Seamly2D sends no source data for these. Tracked in `TODO_SEAMLYLAYOUT.md`.
 ## Known producer gaps
 
 - No `data-quantity`, `data-on-fold`, `data-material` or `data-notch-type` attributes; quantity is inferred; material is always `Fabric`.
-- No seam allowance width attribute. SeamlyLayout measures it at each notch from the cut and sew lines. Where the width changes at the notch node, the measured width can be the narrower one; Seamly2D uses the wider one.
 
 ## Tests
 

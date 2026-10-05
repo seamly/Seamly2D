@@ -522,6 +522,12 @@ void SvgGenerator::addComponentGroups(QGraphicsScene *scene, QGraphicsItem *item
         {
             componentGroup.setAttribute("data-turn-points", turnPoints.toString());
         }
+        // Notch seam allowance widths, one per notch line.
+        const QVariant seamAllowances = components.at(i)->data(PieceItemData::SeamAllowances);
+        if (seamAllowances.isValid())
+        {
+            componentGroup.setAttribute("data-seam-allowances", seamAllowances.toString());
+        }
 
         pieceGroup.appendChild(pieceDoc.importNode(componentGroup, true));
     }

@@ -80,6 +80,7 @@ public:
           seamAllowanceTurnPoints(),
           layoutAllowance(),
           notches(),
+          notchSeamAllowances(),
           m_internalPaths(),
           m_cutoutPaths(),
           transform(),
@@ -102,6 +103,7 @@ public:
           seamAllowanceTurnPoints(piece.seamAllowanceTurnPoints),
           layoutAllowance(piece.layoutAllowance),
           notches(piece.notches),
+          notchSeamAllowances(piece.notchSeamAllowances),
           m_internalPaths(piece.m_internalPaths),
           m_cutoutPaths(piece.m_cutoutPaths),
           transform(piece.transform),
@@ -124,6 +126,7 @@ public:
     std::optional<QVector<int>> seamAllowanceTurnPoints; /// @brief turn point indices into seamAllowance; unset = unknown
     QVector<QPointF>           layoutAllowance;    /// @brief layoutAllowance list of layout allowance points.
     QVector<QLineF>            notches;            /// @brief notches list of notches.
+    QVector<qreal>             notchSeamAllowances; /// @brief seam allowance width in pixels per notch line; empty = unknown
     QVector<VLayoutPiecePath>  m_internalPaths;    /// @brief m_internalPaths list of internal paths.
     QVector<VLayoutPiecePath>  m_cutoutPaths;      /// @brief m_cutoutPaths list of internal cutout paths.
     QTransform                 transform;          /// @brief transform transformation transform

@@ -456,7 +456,9 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
     layoutPiece.setInternalPaths(convertInternalPaths (piece, pattern, false));
     layoutPiece.setCutoutPaths(convertInternalPaths (piece, pattern, true));
     // Clip cutline notches to the cutline, as the canvas does.
-    layoutPiece.setNotches(piece.createNotchLines(pattern, seamAllowance));
+    QVector<qreal> notchSeamAllowances;
+    const QVector<QLineF> notches = piece.createNotchLines(pattern, seamAllowance, true, &notchSeamAllowances);
+    layoutPiece.setNotches(notches, notchSeamAllowances);
     layoutPiece.SetName(piece.GetName());
     // Keep the piece letter so the SVG exporter can emit it as the data-letter attribute.
     layoutPiece.setPieceLetter(piece.GetPatternPieceData().GetLetter());
@@ -1020,12 +1022,28 @@ QVector<QLineF> VLayoutPiece::getNotches() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VLayoutPiece::setNotches(const QVector<QLineF> &notches)
+/**
+ * @brief setNotches sets the notch lines of a piece with a seam allowance.
+ * @param seamAllowanceWidths seam allowance width in pixels per notch line. Any other count is dropped.
+ */
+void VLayoutPiece::setNotches(const QVector<QLineF> &notches, const QVector<qreal> &seamAllowanceWidths)
 {
     if (hasSeamAllowance())
     {
         d->notches = notches;
+        d->notchSeamAllowances = seamAllowanceWidths.size() == notches.size() ? seamAllowanceWidths
+                                                                               : QVector<qreal>();
     }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getNotchSeamAllowances returns the seam allowance width in pixels per notch line.
+ * @return parallel to getNotches(); empty when unknown.
+ */
+QVector<qreal> VLayoutPiece::getNotchSeamAllowances() const
+{
+    return d->notchSeamAllowances;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1518,6 +1536,17 @@ void VLayoutPiece::createNotchesItem(QGraphicsItem *parent) const
     item->setData(PieceItemData::ObjectName, QString("notches"));
     item->setData(PieceItemData::ItemType, QStringLiteral("notch"));
     item->setPath(createNotchesPath());
+
+    // One width per notch line, in the order createNotchesPath() draws them.
+    if (!d->notchSeamAllowances.isEmpty())
+    {
+        QStringList widths;
+        for (qreal width : d->notchSeamAllowances)
+        {
+            widths.append(QString::number(FromPixel(width, Unit::Mm), 'f', 2));
+        }
+        item->setData(PieceItemData::SeamAllowances, widths.join(QLatin1Char(' ')));
+    }
     item->setPen(QPen(color, lineWeight, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 }
 

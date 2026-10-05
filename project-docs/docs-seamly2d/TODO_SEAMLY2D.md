@@ -49,6 +49,18 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
 - [ ] Seamly2D.8.7 Unit tests: schema round-trip, handoff attributes
 - [ ] Seamly2D.8.8 SeamlyLayout side: Layout.16
 
+## [ ] Task Seamly2D.10 — Handoff: seam allowance width per notch
+
+SeamlyLayout measured the width from the cut and sew lines. Where the width changes at the notch node, it could get the narrower one; Seamly2D uses the wider one. A built-in seam allowance has no sew line, so nothing to measure.
+
+- [x] Seamly2D.10.1 `VPiece::createNotchLines`: width per notch line, `MaxLocalSA` at the notch node; 0 without a seam allowance; built in or not
+- [x] Seamly2D.10.2 `VLayoutPiece` keeps the widths; `createNotchesItem` sets `PieceItemData::SeamAllowances`; `SvgGenerator` writes `data-seam-allowances` (mm, 2 decimals, one per notch subpath)
+- [x] Seamly2D.10.3 `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`
+- [x] Seamly2D.10.4 Tests: `TST_VPiece::NotchSeamAllowanceWidths`, `TST_SvgComponentTags::NotchGroupCarriesSeamAllowances`
+- [x] Seamly2D.10.5 `local_build_msi.ps1` passes (`nmake check`)
+- [ ] Seamly2D.10.6 User: install the MSI; Layout Mode handoff of a piece with a built-in seam allowance; export DXF-ASTM; check slit depths
+- SeamlyLayout side: DXF.18
+
 ## [ ] Task Seamly2D.9 — Pattern preferences shows the label template file name
 
 `Pattern preferences > Label data > Label template:` has only the `Edit template` button (`pushButtonEditPatternLabel`, `src/app/seamly2d/dialogs/dialogpatternproperties.ui`). The user cannot see which template file the pattern label uses without opening the editor.

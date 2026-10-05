@@ -619,6 +619,50 @@ VPiece concaveDiamondNotchPiece(VContainer *data)
     return piece;
 }
 
+/**
+ * @brief Square piece with one slit notch on its top edge.
+ * @param builtIn the seam allowance is built into the main path.
+ * @param afterWidth seam allowance formula after the notch node; empty keeps the piece width.
+ */
+VPiece squareSlitPiece(VContainer *data, bool builtIn, const QString &afterWidth)
+{
+    data->UpdateGObject(1, new VPointF(0, 0, "A1", 0, 0));
+    data->UpdateGObject(2, new VPointF(200, 0, "A2", 0, 0));
+    data->UpdateGObject(3, new VPointF(400, 0, "A3", 0, 0));
+    data->UpdateGObject(4, new VPointF(400, 400, "A4", 0, 0));
+    data->UpdateGObject(5, new VPointF(0, 400, "A5", 0, 0));
+
+    VPieceNode notchNode(2, Tool::NodePoint);
+    notchNode.setNotch(true);
+    notchNode.setNotchType(NotchType::Slit);
+    notchNode.setNotchSubType(NotchSubType::Straightforward);
+    notchNode.setNotchLength(5);
+    notchNode.setNotchWidth(5);
+    notchNode.setNotchCount(1);
+    notchNode.setShowNotch(true);
+    notchNode.setShowSeamlineNotch(false);
+    if (!afterWidth.isEmpty())
+    {
+        notchNode.setAfterSAFormula(afterWidth);
+    }
+
+    VPiece piece;
+    piece.SetSeamAllowance(true);
+    piece.SetSeamAllowanceBuiltIn(builtIn);
+    piece.SetSAWidth(notchTestSAWidth);
+    piece.GetPath().Append(VPieceNode(1, Tool::NodePoint));
+    piece.GetPath().Append(notchNode);
+    piece.GetPath().Append(VPieceNode(3, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(4, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(5, Tool::NodePoint));
+
+    // Labels and grainline are not under test; hidden, they need no pattern document.
+    piece.GetPatternPieceData().SetVisible(false);
+    piece.GetPatternInfo().SetVisible(false);
+    piece.GetGrainlineGeometry().SetVisible(false);
+    return piece;
+}
+
 /// True when @p point lies on the polyline @p points.
 bool isOnPolyline(const QPointF &point, const QVector<QPointF> &points)
 {
@@ -720,4 +764,46 @@ void TST_VPiece::LayoutNotchesMatchCanvas() const
     QVERIFY(canvasNotches != piece.createNotchLines(data.data()));
 
     QCOMPARE(VLayoutPiece::Create(piece, data.data()).getNotches(), canvasNotches);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::NotchSeamAllowanceWidths_data() const
+{
+    QTest::addColumn<bool>("builtIn");
+    QTest::addColumn<QString>("afterWidth");
+    QTest::addColumn<qreal>("expectedWidth");
+
+    QTest::newRow("piece width")      << false << QString()     << notchTestSAWidth;
+    QTest::newRow("built in")         << true  << QString()     << notchTestSAWidth;
+    QTest::newRow("wider after node") << false << QString("20") << qreal(20);
+    QTest::newRow("built in, wider")  << true  << QString("20") << qreal(20);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief NotchSeamAllowanceWidths checks that every notch line gets the seam allowance of its node, built in or
+ * not, and that layout piece data keeps it.
+ */
+void TST_VPiece::NotchSeamAllowanceWidths() const
+{
+    QFETCH(bool, builtIn);
+    QFETCH(QString, afterWidth);
+    QFETCH(qreal, expectedWidth);
+
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    const VPiece piece = squareSlitPiece(data.data(), builtIn, afterWidth);
+    QVector<qreal> widths;
+    const QVector<QLineF> notches = piece.createNotchLines(data.data(), piece.seamAllowancePoints(data.data()),
+                                                           true, &widths);
+
+    QVERIFY(!notches.isEmpty());
+    QCOMPARE(widths.size(), notches.size());
+    for (qreal width : widths)
+    {
+        QVERIFY2(qAbs(width - ToPixel(expectedWidth, unit)) < 0.01, qPrintable(QString::number(width)));
+    }
+    QCOMPARE(VLayoutPiece::Create(piece, data.data()).getNotchSeamAllowances(), widths);
 }

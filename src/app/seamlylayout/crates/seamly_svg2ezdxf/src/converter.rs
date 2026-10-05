@@ -475,7 +475,8 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
 
     let mut cut_lines: Vec<TaggedPolyline> = Vec::new();
     let mut seam_lines: Vec<TaggedPolyline> = Vec::new();
-    let mut notch_lines: Vec<Vec<Point>> = Vec::new();
+    // Each notch subpath, with Seamly2D's seam allowance width for it when known.
+    let mut notch_lines: Vec<(Vec<Point>, Option<f64>)> = Vec::new();
     let contour = |l: &TaggedPolyline| build_contour_tagged(&l.points, l.closed, l.turns.as_deref());
     for (component, element) in components {
         let lines = || element_polylines(element, options, svg_height);
@@ -483,7 +484,7 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
         match component {
             PieceComponent::Cutline => cut_lines.extend(tagged()),
             PieceComponent::Seamline => seam_lines.extend(tagged()),
-            PieceComponent::Notch => notch_lines.extend(lines().into_iter().map(|(p, _)| p)),
+            PieceComponent::Notch => notch_lines.extend(notch_polylines(element, lines())),
             PieceComponent::InternalPath => block.internal_lines.extend(tagged().iter().filter_map(contour)),
             PieceComponent::CutPath => block.cutouts.extend(tagged().iter().filter_map(contour)),
             PieceComponent::Grainline => {
@@ -520,13 +521,31 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
     } // for each seam line
 
     // Notches: each drawn subpath contributes its segments.
-    let segments: Vec<(Point, Point)> =
-        notch_lines.iter().flat_map(|p| p.windows(2).map(|w| (w[0], w[1])).collect::<Vec<_>>()).collect();
+    let (segments, seam_allowances): (Vec<(Point, Point)>, Vec<Option<f64>>) = notch_lines
+        .iter()
+        .flat_map(|(p, width)| p.windows(2).map(move |w| ((w[0], w[1]), *width)))
+        .unzip();
     let boundary_dense = block.boundary.as_ref().map(|b| b.dense.clone()).unwrap_or_default();
     // Seam allowance: cut line to sew line. A seam line boundary has none.
     let sew_lines: &[AstmContour] = if has_cut_line { &block.sew_lines } else { &[] };
-    block.notches = build_notches(&segments, &boundary_dense, sew_lines);
+    block.notches = build_notches(&segments, &seam_allowances, &boundary_dense, sew_lines);
 } // fn extract_astm_piece
+
+// @brief Pair each notch subpath with its `data-seam-allowances` width (mm, one per subpath).
+// @details A missing or unparseable list, or one whose length differs from the
+//          subpath count, gives no widths: a wrong pairing is worse than none.
+fn notch_polylines(element: &Element, lines: Vec<(Vec<Point>, bool)>) -> Vec<(Vec<Point>, Option<f64>)> {
+    let widths: Option<Vec<f64>> = element
+        .attributes
+        .get("data-seam-allowances")
+        .and_then(|v| v.split_whitespace().map(|t| t.parse::<f64>().ok()).collect())
+        .filter(|w: &Vec<f64>| w.len() == lines.len());
+    lines
+        .into_iter()
+        .enumerate()
+        .map(|(i, (p, _))| (p, widths.as_ref().map(|w| w[i])))
+        .collect()
+} // fn notch_polylines
 
 // @brief Convert SVG <line> element to DXF LINE entity.
 // @param element SVG line element.

@@ -30,6 +30,7 @@
 
 #include "tst_svgcomponenttags.h"
 #include "../vformat/svg_generator.h"
+#include "../vmisc/def.h"
 #include "../vlayout/vlayoutdef.h"
 #include "../vlayout/vlayoutpiece.h"
 #include "../vlayout/vlayoutpiecepath.h"
@@ -854,3 +855,25 @@ void TST_SvgComponentTags::UnknownTurnPointsEmitNoAttribute() const
     QVERIFY(!cutPaths.at(0).hasAttribute(QStringLiteral("data-turn-points")));
 }
 
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief NotchGroupCarriesSeamAllowances checks that the notch group lists one seam allowance width in mm per
+ * notch line, and has no attribute when the widths are unknown.
+ */
+void TST_SvgComponentTags::NotchGroupCarriesSeamAllowances() const
+{
+    VLayoutPiece piece = makeTestPiece(QStringLiteral("Placket"));
+    piece.setNotches({QLineF(QPointF(10, 100), QPointF(15, 100)), QLineF(QPointF(100, 10), QPointF(100, 15))},
+                     {ToPixel(10, Unit::Mm), ToPixel(6.5, Unit::Mm)});
+
+    const QDomDocument doc = exportPieceSvg(piece);
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+    const QVector<QDomElement> notches = groupsOfType(doc, QStringLiteral("notch"));
+    QCOMPARE(notches.size(), 1);
+    QCOMPARE(notches.at(0).attribute(QStringLiteral("data-seam-allowances")), QStringLiteral("10.00 6.50"));
+
+    const QDomDocument unknown = exportPieceSvg(makeTestPiece(QStringLiteral("Cuff")));
+    const QVector<QDomElement> unknownNotches = groupsOfType(unknown, QStringLiteral("notch"));
+    QCOMPARE(unknownNotches.size(), 1);
+    QVERIFY(!unknownNotches.at(0).hasAttribute(QStringLiteral("data-seam-allowances")));
+}

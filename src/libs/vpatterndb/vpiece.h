@@ -113,7 +113,8 @@ public:
     QVector<QPointF>         cutPathPoints(const VContainer *data) const;
     QVector<QLineF>          createNotchLines(const VContainer *data,
                                               const QVector<QPointF> &seamAllowance = QVector<QPointF>(),
-                                              bool includeCutlineNotches = true) const;
+                                              bool includeCutlineNotches = true,
+                                              QVector<qreal> *seamAllowanceWidths = nullptr) const;
 
     QPainterPath             mainPath(const VContainer *data) const;
     QPainterPath             seamAllowancePath(const VContainer *data) const;

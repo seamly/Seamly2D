@@ -190,7 +190,7 @@ mod tests {
     #[test]
     fn every_notch_shape_is_a_layer_4_slit_half_the_seam_allowance_deep() {
         let boundary: Vec<Point> = build_contour(&square_with_midpoints(), true).expect("contour").dense;
-        let notches = build_notches(&notch_shape_segments(), &boundary, &[sew_line(10.0)]);
+        let notches = build_notches(&notch_shape_segments(), &[], &boundary, &[sew_line(10.0)]);
         assert_eq!(notches.len(), 5);
         let expected_base_x = [10.0, 30.0, 50.0, 70.0, 90.0];
         for (i, n) in notches.iter().enumerate() {
@@ -209,7 +209,7 @@ mod tests {
         let p = Point::new;
         // Bottom edge 6 mm, top edge 10 mm: one slit on each.
         let segments = [(p(30.0, 0.0), p(30.0, 5.0)), (p(50.0, 100.0), p(50.0, 95.0))];
-        let notches = build_notches(&segments, &boundary, &[sew_line(6.0)]);
+        let notches = build_notches(&segments, &[], &boundary, &[sew_line(6.0)]);
         let depths: Vec<f64> = notches.iter().map(|n| n.depth).collect();
         assert!((depths[0] - 3.0).abs() < 1e-6 && (depths[1] - 5.0).abs() < 1e-6, "depths {depths:?}");
     }
@@ -217,8 +217,50 @@ mod tests {
     #[test]
     fn slit_keeps_drawn_depth_without_sew_line() {
         let boundary: Vec<Point> = build_contour(&square_with_midpoints(), true).expect("contour").dense;
-        let notches = build_notches(&notch_shape_segments(), &boundary, &[]);
+        let notches = build_notches(&notch_shape_segments(), &[], &boundary, &[]);
         assert!(notches.iter().all(|n| n.kind == NotchKind::Slit && (n.depth - 5.0).abs() < 1e-6));
+    }
+
+    #[test]
+    fn seamly2d_width_sets_slit_depth_before_the_measured_width() {
+        let boundary: Vec<Point> = build_contour(&square_with_midpoints(), true).expect("contour").dense;
+        let segments = notch_shape_segments();
+        let given = vec![Some(8.0); segments.len()];
+        // Given width wins over the 10 mm sew line.
+        let notches = build_notches(&segments, &given, &boundary, &[sew_line(10.0)]);
+        assert!(notches.iter().all(|n| (n.depth - 4.0).abs() < 1e-6), "{notches:?}");
+        // Built-in seam allowance: no sew line, the given width alone sets the depth.
+        let notches = build_notches(&segments, &given, &boundary, &[]);
+        assert!(notches.iter().all(|n| n.kind == NotchKind::Slit && (n.depth - 4.0).abs() < 1e-6));
+        // No seam allowance (0) or a list of the wrong length: measured width, else drawn depth.
+        let notches = build_notches(&segments, &vec![Some(0.0); segments.len()], &boundary, &[sew_line(10.0)]);
+        assert!(notches.iter().all(|n| (n.depth - 5.0).abs() < 1e-6));
+        let notches = build_notches(&segments, &[Some(8.0)], &boundary, &[]);
+        assert!(notches.iter().all(|n| (n.depth - 5.0).abs() < 1e-6), "drawn depth is 5");
+    }
+
+    // Built-in seam allowance: the main path is the cut line, sent as `seamline`; no
+    // cut line, no sew line. 96 px = 25.4 mm. Notch widths 10 and 6 mm.
+    const BUILT_IN: &str = r#"
+        <svg viewBox="0 0 960 960" width="254mm" height="254mm" xmlns="http://www.w3.org/2000/svg">
+          <g id="pattern-1" data-type="pattern" data-name="Built In">
+            <g id="piece_Yoke" data-type="piece" data-name="Yoke">
+              <g data-type="seamline"><path d="M 0,0 L 960,0 L 960,960 L 0,960 Z"/></g>
+              <g data-type="notch" data-seam-allowances="10.00 6.00"><path d="M 480,960 L 480,941 M 200,0 L 200,19"/></g>
+            </g>
+          </g>
+        </svg>"#;
+
+    #[test]
+    fn built_in_seam_allowance_notches_use_seamly2d_widths() {
+        let doc = Document::parse(BUILT_IN).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let yoke = &drawing.blocks[0];
+        assert!(yoke.boundary.is_some() && yoke.sew_lines.is_empty());
+        let depths: Vec<f64> = yoke.notches.iter().map(|n| n.depth).collect();
+        assert_eq!(depths.len(), 2);
+        assert!((depths[0] - 5.0).abs() < 1e-6 && (depths[1] - 3.0).abs() < 1e-6, "depths {depths:?}");
+        assert!(yoke.notches.iter().all(|n| n.kind == NotchKind::Slit));
     }
 
     #[test]
