@@ -418,4 +418,63 @@ mod tests {
             from += c.dense[from..].iter().position(|d| d == k).expect("key point in dense");
         }
     }
+
+    // @brief Closed piece tagged at its four corners only, where lines meet curves
+    //        with tangent breaks too small for Seamly2D to tag.
+    // @details Bottom edge: curve, straight run at y = -2 with pleat vertices, curve.
+    //          Top edge, right to left: curve, then a straight line from x = 100 to the
+    //          corner, with one vertex between. The curve leaves the line at about 1°.
+    // @return Vertices and their corner tags.
+    fn lines_meeting_curves() -> (Vec<Point>, Vec<bool>) {
+        let mut points = vec![Point::new(0.0, 0.0)];
+        for x in [10.0, 20.0, 30.0] {
+            let t: f64 = x / 40.0;
+            points.push(Point::new(x, -2.0 * t * (2.0 - t)));
+        } // for each left hem curve vertex
+        for x in [40.0, 70.0, 100.0, 130.0, 160.0] {
+            points.push(Point::new(x, -2.0));
+        } // for each straight hem vertex
+        for x in [170.0, 180.0, 190.0] {
+            let t: f64 = (x - 160.0) / 40.0;
+            points.push(Point::new(x, -2.0 * (1.0 - t * t)));
+        } // for each right hem curve vertex
+        points.push(Point::new(200.0, 0.0));
+        for x in [200.0, 190.0, 180.0, 170.0, 160.0, 150.0, 140.0, 130.0, 120.0, 110.0] {
+            let u: f64 = x - 100.0;
+            points.push(Point::new(x, 100.0 + 0.0006 * u * u + 0.02 * u));
+        } // for each top curve vertex, the first one the top-right corner
+        points.extend([Point::new(100.0, 100.0), Point::new(50.0, 100.0), Point::new(0.0, 100.0)]);
+        let corners = [Point::new(0.0, 0.0), Point::new(200.0, 0.0), Point::new(200.0, 108.0), Point::new(0.0, 100.0)];
+        let tags = points.iter().map(|p| corners.iter().any(|c| (c.x - p.x).abs() < 1e-9 && (c.y - p.y).abs() < 1e-9)).collect();
+        (points, tags)
+    }
+
+    #[test]
+    fn straight_run_ends_are_turn_points_with_tags() {
+        let (points, tags) = lines_meeting_curves();
+        let c = build_contour_tagged(&points, true, Some(&tags)).expect("contour");
+        let turns: Vec<Point> = c.reduced.iter().zip(&c.turn).filter(|(_, &t)| t).map(|(p, _)| *p).collect();
+        let has = |x: f64, y: f64| turns.iter().any(|p| (p.x - x).abs() < 1e-9 && (p.y - y).abs() < 1e-9);
+        assert!(has(40.0, -2.0) && has(160.0, -2.0), "both ends of the hem straight run: {turns:?}");
+        assert!(has(100.0, 100.0), "where the top line meets the curve: {turns:?}");
+        assert_eq!(turns.len(), 7, "four corners and three line ends: {turns:?}");
+        assert!(c.turn.iter().any(|&t| !t), "the curves keep curve points");
+        assert!(spline_deviation(&c) <= CURVE_TOLERANCE_MM + 1e-9);
+    }
+
+    #[test]
+    fn vertex_inserted_on_a_curve_segment_is_not_a_straight_run() {
+        // Circle, radius 500 mm, a vertex every 6 degrees (52 mm chords), with a
+        // notch vertex inserted at the midpoint of one chord.
+        let mut circle: Vec<Point> = (0..60)
+            .map(|i| {
+                let a = (i as f64 * 6.0).to_radians();
+                Point::new(500.0 * a.cos(), 500.0 * a.sin())
+            })
+            .collect();
+        let mid = Point::new((circle[0].x + circle[1].x) / 2.0, (circle[0].y + circle[1].y) / 2.0);
+        circle.insert(1, mid);
+        let c = build_contour_tagged(&circle, true, Some(&vec![false; circle.len()])).expect("contour");
+        assert!(c.turn.iter().all(|&t| !t), "a smooth circle has only curve points: {:?}", c.turn);
+    }
 }
