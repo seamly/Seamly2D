@@ -9,7 +9,7 @@ mod tests {
     use crate::astm_contour::{
         build_contour, build_contour_tagged, spline_deviation, spline_points, AstmContour, CURVE_TOLERANCE_MM,
     };
-    use crate::astm_notch::{build_notches, NotchKind};
+    use crate::astm_notch::{build_notches, seam_allowance_width, NotchKind};
     use crate::converter::{svg_to_ezdxf, SvgToEzdxfOptions};
     use crate::entities::Point;
     use crate::utils::{parse_length_attr, MM_PER_PX};
@@ -156,44 +156,69 @@ mod tests {
         assert!(build_contour(&[Point::new(0.0, 0.0), Point::new(1.0, 0.0), Point::new(0.0, 0.0)], true).is_none());
     }
 
-    // @brief Notch segments drawn on the bottom edge (y = 0) of the square, pointing up.
-    #[test]
-    fn notch_shapes_are_classified_with_depth_width_and_angle() {
-        let boundary: Vec<Point> = build_contour(&square_with_midpoints(), true).expect("contour").dense;
+    // @brief Notch segments drawn on the bottom edge (y = 0) of the square, pointing up, depth 5.
+    // Order: slit, V, T, castle, U.
+    fn notch_shape_segments() -> Vec<(Point, Point)> {
         let p = Point::new;
-        let segments = vec![
-            // Slit at x=10, depth 5.
+        vec![
+            // Slit at x=10.
             (p(10.0, 0.0), p(10.0, 5.0)),
-            // V at x=30: width 4, depth 5.
+            // V at x=30, width 4.
             (p(28.0, 0.0), p(30.0, 5.0)),
             (p(30.0, 5.0), p(32.0, 0.0)),
-            // T at x=50: stem depth 5, bar width 6.
+            // T at x=50: stem, bar width 6.
             (p(50.0, 0.0), p(50.0, 5.0)),
             (p(47.0, 5.0), p(53.0, 5.0)),
-            // Castle at x=70: width 4, depth 5.
+            // Castle at x=70, width 4.
             (p(68.0, 0.0), p(68.0, 5.0)),
             (p(68.0, 5.0), p(72.0, 5.0)),
             (p(72.0, 5.0), p(72.0, 0.0)),
-            // U at x=90: four segments, width 4, depth 5.
+            // U at x=90: four segments, width 4.
             (p(88.0, 0.0), p(88.0, 4.0)),
             (p(88.0, 4.0), p(90.0, 5.0)),
             (p(90.0, 5.0), p(92.0, 4.0)),
             (p(92.0, 4.0), p(92.0, 0.0)),
-        ];
-        let notches = build_notches(&segments, &boundary);
-        let kinds: Vec<NotchKind> = notches.iter().map(|n| n.kind).collect();
-        assert_eq!(kinds, vec![NotchKind::Slit, NotchKind::V, NotchKind::T, NotchKind::Castle, NotchKind::U]);
-        let expected_width = [0.0, 4.0, 6.0, 4.0, 4.0];
+        ]
+    }
+
+    #[test]
+    fn every_notch_shape_is_a_layer_4_slit_half_the_seam_allowance_deep() {
+        let boundary: Vec<Point> = build_contour(&square_with_midpoints(), true).expect("contour").dense;
+        let notches = build_notches(&notch_shape_segments(), &boundary, Some(10.0));
+        assert_eq!(notches.len(), 5);
         let expected_base_x = [10.0, 30.0, 50.0, 70.0, 90.0];
         for (i, n) in notches.iter().enumerate() {
+            assert_eq!(n.kind, NotchKind::Slit, "notch {i}");
+            assert_eq!(n.kind.layer(), "4", "notch {i}");
             assert!((n.depth - 5.0).abs() < 1e-6, "notch {i} depth {}", n.depth);
-            assert!((n.width - expected_width[i]).abs() < 1e-6, "notch {i} width {}", n.width);
+            assert_eq!(n.width, 0.0, "notch {i}");
             assert!((n.base.x - expected_base_x[i]).abs() < 1e-6 && n.base.y.abs() < 1e-6, "notch {i} base {:?}", n.base);
             assert!((n.angle_deg - 90.0).abs() < 1e-6, "notch {i} angle {}", n.angle_deg);
         }
-        assert_eq!(NotchKind::T.layer(), "80");
-        assert_eq!(NotchKind::Castle.layer(), "81");
-        assert_eq!(NotchKind::U.layer(), "83");
+    }
+
+    #[test]
+    fn slit_depth_follows_seam_allowance_else_drawing() {
+        let boundary: Vec<Point> = build_contour(&square_with_midpoints(), true).expect("contour").dense;
+        let notches = build_notches(&notch_shape_segments(), &boundary, Some(6.0));
+        assert!(notches.iter().all(|n| (n.depth - 3.0).abs() < 1e-6), "depth follows the seam allowance, not the drawing");
+        let notches = build_notches(&notch_shape_segments(), &boundary, None);
+        assert!(notches.iter().all(|n| n.kind == NotchKind::Slit && (n.depth - 5.0).abs() < 1e-6));
+    }
+
+    #[test]
+    fn seam_allowance_width_is_cut_line_to_seam_line() {
+        let boundary: Vec<Point> = build_contour(&square_with_midpoints(), true).expect("contour").dense;
+        let p = Point::new;
+        let seam = [p(10.0, 10.0), p(50.0, 10.0), p(90.0, 10.0), p(90.0, 90.0), p(10.0, 90.0)];
+        assert!((seam_allowance_width(&boundary, &[&seam]).expect("width") - 10.0).abs() < 1e-6);
+        // One wider edge (hem) does not move the median.
+        let hem = [p(50.0, 30.0), p(90.0, 50.0), p(90.0, 90.0), p(50.0, 90.0), p(10.0, 90.0), p(10.0, 50.0)];
+        assert!((seam_allowance_width(&boundary, &[&hem]).expect("width") - 10.0).abs() < 1e-6);
+        // Seam allowance built in, or no seam line: none.
+        assert_eq!(seam_allowance_width(&boundary, &[&boundary]), None);
+        assert_eq!(seam_allowance_width(&boundary, &[]), None);
+        assert_eq!(seam_allowance_width(&[], &[&seam]), None);
     }
 
     #[test]
@@ -251,7 +276,8 @@ mod tests {
         assert_eq!(front.sew_lines.len(), 1, "seam line kept as sew line");
         assert_eq!(front.internal_lines.len(), 1);
         assert_eq!(front.notches.len(), 2, "one path, two subpaths, two notches");
-        assert!(front.notches.iter().all(|n| (n.depth - 19.0 * MM_PER_PX).abs() < 1e-3));
+        // Seam allowance 96 px; slit depth is half of it, not the drawn 19 px.
+        assert!(front.notches.iter().all(|n| n.kind == NotchKind::Slit && (n.depth - 48.0 * MM_PER_PX).abs() < 1e-3));
 
         // Grainline: tip to tip, 600 px long.
         let (g1, g2) = front.grainline.expect("grainline");

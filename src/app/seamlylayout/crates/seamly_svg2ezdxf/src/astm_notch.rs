@@ -6,17 +6,9 @@
 //!
 //! Seamly2D draws each notch as one or more straight segments and does not tag
 //! the notch type. This module groups touching segments into one notch and
-//! derives the D6673 §4.3.4 parameters from the shape:
-//!
-//! | Segments | Boundary contacts | Kind   | Layer |
-//! |----------|-------------------|--------|-------|
-//! | 1        | any               | Slit   | 4     |
-//! | 2        | 2                 | V      | 4     |
-//! | 2        | 1                 | T      | 80    |
-//! | 3        | 2                 | Castle | 81    |
-//! | 4 or more| any               | U      | 83    |
-//!
-//! Any other combination is written as a slit.
+//! writes every notch as a slit (layer 4), whatever shape Seamly2D drew.
+//! Slit depth is half the piece's seam allowance width (user decision).
+//! Without a seam allowance, the depth is the drawn depth.
 
 use crate::astm_contour::{distance, distance_to_segment};
 use crate::entities::Point;
@@ -27,8 +19,10 @@ const TOUCH_TOLERANCE_MM: f64 = 0.05;
 const BOUNDARY_TOLERANCE_MM: f64 = 0.5;
 // Segments shorter than this are ignored.
 const MIN_SEGMENT_MM: f64 = 0.01;
+// A narrower seam allowance counts as none.
+const MIN_SEAM_ALLOWANCE_MM: f64 = 0.1;
 
-/// @brief Notch shape, which selects the DXF layer.
+/// @brief Notch shape, which selects the DXF layer. `build_notches` writes only `Slit`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum NotchKind {
     Slit,
@@ -65,11 +59,13 @@ pub struct Notch {
     pub kind: NotchKind,
 }
 
-/// @brief Rebuild notches from drawn segments.
+/// @brief Rebuild notches from drawn segments, each as a slit.
 /// @param segments Notch line segments in DXF units.
 /// @param boundary Closed piece boundary the notches sit on; may be empty.
-/// @return One notch per group of touching segments.
-pub fn build_notches(segments: &[(Point, Point)], boundary: &[Point]) -> Vec<Notch> {
+/// @param seam_allowance Piece seam allowance width in DXF units. The slit depth is half of it.
+///        `None` keeps the drawn depth.
+/// @return One slit notch per group of touching segments.
+pub fn build_notches(segments: &[(Point, Point)], boundary: &[Point], seam_allowance: Option<f64>) -> Vec<Notch> {
     let segments: Vec<(Point, Point)> = segments
         .iter()
         .copied()
@@ -79,10 +75,33 @@ pub fn build_notches(segments: &[(Point, Point)], boundary: &[Point]) -> Vec<Not
         .into_iter()
         .map(|group| {
             let group_segments: Vec<(Point, Point)> = group.iter().map(|&i| segments[i]).collect();
-            classify(&group_segments, boundary)
+            let mut notch = slit_from_drawing(&group_segments, boundary);
+            if let Some(width) = seam_allowance {
+                notch.depth = width / 2.0;
+            } // if seam allowance known
+            notch
         })
         .collect()
 } // fn build_notches
+
+/// @brief Seam allowance width of a piece: median distance from the seam line vertices to the cut line.
+/// @param boundary Closed cut line of the piece.
+/// @param seam_lines Seam lines of the piece. Pass none when the boundary is itself a seam line.
+/// @return `None` when there is no seam vertex or the width is under 0.1 mm (seam allowance built in).
+/// @details The median ignores the few vertices where the allowance changes width or a corner is cut.
+pub fn seam_allowance_width(boundary: &[Point], seam_lines: &[&[Point]]) -> Option<f64> {
+    if boundary.len() < 2 {
+        return None;
+    } // if no boundary
+    let mut widths: Vec<f64> =
+        seam_lines.iter().flat_map(|line| line.iter().map(|&p| distance_to_boundary(p, boundary))).collect();
+    if widths.is_empty() {
+        return None;
+    } // if no seam vertex
+    widths.sort_by(f64::total_cmp);
+    let median = widths[widths.len() / 2];
+    (median >= MIN_SEAM_ALLOWANCE_MM).then_some(median)
+} // fn seam_allowance_width
 
 // @brief Group segment indices whose segments touch, transitively (union-find).
 fn group_touching(segments: &[(Point, Point)]) -> Vec<Vec<usize>> {
@@ -135,8 +154,8 @@ fn distance_to_boundary(p: Point, boundary: &[Point]) -> f64 {
         .fold(f64::INFINITY, f64::min)
 } // fn distance_to_boundary
 
-// @brief Derive the D6673 parameters of one notch from its segments.
-fn classify(segments: &[(Point, Point)], boundary: &[Point]) -> Notch {
+// @brief Slit for one drawn notch: base on the boundary, angle into the piece, drawn depth.
+fn slit_from_drawing(segments: &[(Point, Point)], boundary: &[Point]) -> Notch {
     // Distinct vertices of the notch drawing.
     let mut vertices: Vec<Point> = Vec::new();
     for &(a, b) in segments {
@@ -193,26 +212,9 @@ fn classify(segments: &[(Point, Point)], boundary: &[Point]) -> Notch {
     let len = (dx * dx + dy * dy).sqrt();
     let (ux, uy) = if len > 0.0 { (dx / len, dy / len) } else { (1.0, 0.0) };
 
-    // Depth: farthest reach along the direction. Width: spread across it.
-    let along = |p: Point| (p.x - base.x) * ux + (p.y - base.y) * uy;
-    let across = |p: Point| -(p.x - base.x) * uy + (p.y - base.y) * ux;
-    let depth = vertices.iter().map(|&p| along(p)).fold(0.0, f64::max);
-    let spread = {
-        let lo = vertices.iter().map(|&p| across(p)).fold(f64::INFINITY, f64::min);
-        let hi = vertices.iter().map(|&p| across(p)).fold(f64::NEG_INFINITY, f64::max);
-        hi - lo
-    }; // spread
-
-    let kind = match (segments.len(), contacts.len()) {
-        (1, _) => NotchKind::Slit,
-        (2, 2) => NotchKind::V,
-        (2, 1) => NotchKind::T,
-        (3, 2) => NotchKind::Castle,
-        (s, _) if s >= 4 => NotchKind::U,
-        _ => NotchKind::Slit,
-    }; // kind
-    let width = if kind == NotchKind::Slit { 0.0 } else { spread };
+    // Depth: farthest reach along the direction.
+    let depth = vertices.iter().map(|&p| (p.x - base.x) * ux + (p.y - base.y) * uy).fold(0.0, f64::max);
     let angle_deg = uy.atan2(ux).to_degrees().rem_euclid(360.0);
 
-    Notch { base, angle_deg, depth, width, kind }
-} // fn classify
+    Notch { base, angle_deg, depth, width: 0.0, kind: NotchKind::Slit }
+} // fn slit_from_drawing
