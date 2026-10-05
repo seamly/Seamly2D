@@ -8,8 +8,9 @@ Report on `male_shirt_R13_202610041815.dxf`: layer 4 had 4 notches, layer 83 (U)
 
 - [x] DXF.17.1 `astm_notch.rs`: write every notch as a slit on layer 4, whatever shape Seamly2D drew
 - [x] DXF.17.2 Slit depth = half the piece's seam allowance width (user decision, 2026-10-04)
-  - Seamly2D sends no width. `seam_allowance_width`: median distance from sew line vertices to the cut line. No cut line or no sew line: drawn depth.
-- [x] DXF.17.3 Tests: `astm_piece_test.rs` `every_notch_shape_is_a_layer_4_slit_half_the_seam_allowance_deep`, `slit_depth_follows_seam_allowance_else_drawing`, `seam_allowance_width_is_cut_line_to_seam_line`
+  - Seamly2D sends no width. `seam_allowance_at`: distance from the notch base to the nearest sew line, per notch. No cut line or no sew line: drawn depth.
+  - User decision: keep each edge's seam allowance as Seamly2D defines it. A piece-wide median was replaced.
+- [x] DXF.17.3 Tests: `astm_piece_test.rs` `every_notch_shape_is_a_layer_4_slit_half_the_seam_allowance_deep`, `slit_depth_follows_the_seam_allowance_of_its_edge`, `slit_keeps_drawn_depth_without_sew_line`, `seam_allowance_at_is_cut_line_to_nearest_sew_line`
 - [x] DXF.17.4 Update the compliance doc "Notch rules"
 - Checked on `test-seamly-layout-input/male_shirt_202610050911.svg`: 7 notches, all slits, depth 5.00 mm.
 
