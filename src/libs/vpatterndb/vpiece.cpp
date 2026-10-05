@@ -302,9 +302,11 @@ QVector<QPointF> VPiece::cutPathPoints(const VContainer *data) const
  * @param data container that resolves the node points.
  * @param seamAllowance cutline points that clip cutline notches; empty means no clipping.
  * @param includeCutlineNotches false omits cutline notches; only a view that hides seam allowances passes false.
+ * @param seamAllowanceWidths when not null, receives one width in pixels per returned line: the seam allowance
+ *        at the line's notch node, the wider of its before and after widths. 0 when the piece has no seam allowance.
  */
 QVector<QLineF> VPiece::createNotchLines(const VContainer *data, const QVector<QPointF> &seamAllowance,
-                                         bool includeCutlineNotches) const
+                                         bool includeCutlineNotches, QVector<qreal> *seamAllowanceWidths) const
 {
     const QVector<VPieceNode> unitedPath = GetUnitedPath(data);
     if (!notchesPossible(unitedPath))
@@ -325,8 +327,21 @@ QVector<QLineF> VPiece::createNotchLines(const VContainer *data, const QVector<Q
         const int previousIndex = VPiecePath::FindInLoopNotExcludedUp(i, unitedPath);
         const int nextIndex = VPiecePath::FindInLoopNotExcludedDown(i, unitedPath);
 
+        const int firstLine = notches.size();
         notches += createNotch(unitedPath, previousIndex, i, nextIndex, data, seamAllowance,
                                includeCutlineNotches);
+
+        if (seamAllowanceWidths != nullptr)
+        {
+            // Built in or not, the node keeps the widths it was given.
+            qreal width = 0;
+            VSAPoint notchSAPoint;
+            if (hasSeamAllowance() && getNotchSAPoint(unitedPath, i, data, notchSAPoint))
+            {
+                width = MaxLocalSA(notchSAPoint, ToPixel(GetSAWidth(), *data->GetPatternUnit()));
+            }
+            seamAllowanceWidths->insert(seamAllowanceWidths->size(), notches.size() - firstLine, width);
+        }
     }
 
     return notches;

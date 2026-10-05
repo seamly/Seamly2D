@@ -84,6 +84,8 @@ private slots:
     void NotchFlagsSelectLine_data() const;
     void NotchFlagsSelectLine() const;
     void LayoutNotchesMatchCanvas() const;
+    void NotchSeamAllowanceWidths_data() const;
+    void NotchSeamAllowanceWidths() const;
 
 private:
     Q_DISABLE_COPY(TST_VPiece)

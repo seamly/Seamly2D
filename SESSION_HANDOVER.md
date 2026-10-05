@@ -6,6 +6,17 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-05 — Seamly2D.10 + DXF.18: seam allowance width per notch
+
+Merged `task-notch-seam-allowance`. `local_build_msi.ps1` passed (build, `nmake check`, MSI). New Qt tests checked in the suite logs. `cargo test --workspace`, `ctest --preset debug` passed.
+
+- Producer: `VPiece::createNotchLines` gives a width per notch line (`MaxLocalSA`); `VLayoutPiece` keeps it; notch group gets `data-seam-allowances` (mm per subpath).
+- Consumer: Seamly2D width first, then measured width (`seam_allowance_at`), then drawn depth.
+- Built-in seam allowance: main path is the cut line, sent as `seamline`; no sew line. Depth comes only from the attribute.
+- Open: Seamly2D.10.6 / DXF.18.5 — user installs the MSI, hands off a built-in piece, checks slit depths. Then move both tasks to `TODO_COMPLETED.md`.
+- User edit to `CLAUDE.md` (build command section) left uncommitted.
+- Build rule: build only with `local_build_msi.ps1` (user decision).
+
 ## 2026-10-05 — DXF.17 / Layout.65: every notch is a layer 4 slit
 
 Merged `task-notch-slit`. `cargo test --workspace`, `ctest --preset debug` passed.

@@ -74,6 +74,7 @@ private slots:
     void MultisizeIdsAreUniqueAndSized() const;
     void PathComponentsCarryTurnPoints() const;
     void UnknownTurnPointsEmitNoAttribute() const;
+    void NotchGroupCarriesSeamAllowances() const;
 };
 
 #endif // TST_SVGCOMPONENTTAGS_H

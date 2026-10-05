@@ -107,7 +107,9 @@ public:
     void                      SetLayoutAllowancePoints();
 
     QVector<QLineF>           getNotches() const;
-    void                      setNotches(const QVector<QLineF> &notches);
+    void                      setNotches(const QVector<QLineF> &notches,
+                                         const QVector<qreal> &seamAllowanceWidths = QVector<qreal>());
+    QVector<qreal>            getNotchSeamAllowances() const;
 
     QVector<QVector<QPointF>> internalPathsForCut (bool cut) const;
     QVector<VLayoutPiecePath> getInternalPaths() const;

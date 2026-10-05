@@ -7,10 +7,12 @@
 //! Seamly2D draws each notch as one or more straight segments and does not tag
 //! the notch type. This module groups touching segments into one notch and
 //! writes every notch as a slit (layer 4), whatever shape Seamly2D drew.
-//! Slit depth is half the seam allowance width at the notch (user decision):
-//! the distance from the notch base on the cut line to the sew line. Each
-//! notch keeps the width Seamly2D gave its edge. Without a seam allowance,
-//! the depth is the drawn depth.
+//! Slit depth is half the seam allowance width at the notch (user decision).
+//! Width source, first found:
+//! 1. Seamly2D's width for the notch node (`data-seam-allowances`). The only
+//!    source for a built-in seam allowance, which has no sew line.
+//! 2. Distance from the notch base on the cut line to the nearest sew line.
+//! 3. None: the depth is the drawn depth.
 
 use crate::astm_contour::{distance, distance_to_segment, AstmContour};
 use crate::entities::Point;
@@ -64,21 +66,36 @@ pub struct Notch {
 /// @brief Rebuild notches from drawn segments, each as a slit.
 /// @param segments Notch line segments in DXF units.
 /// @param boundary Closed piece boundary the notches sit on; may be empty.
-/// @param sew_lines Sew lines inside a cut line boundary. Empty when the boundary is a seam line;
-///        every slit then keeps its drawn depth.
+/// @param seam_allowances Seamly2D's seam allowance width per segment, parallel to `segments`.
+///        Empty when unknown.
+/// @param sew_lines Sew lines inside a cut line boundary. Empty when the boundary is a seam line.
 /// @return One slit notch per group of touching segments.
-pub fn build_notches(segments: &[(Point, Point)], boundary: &[Point], sew_lines: &[AstmContour]) -> Vec<Notch> {
-    let segments: Vec<(Point, Point)> = segments
+pub fn build_notches(
+    segments: &[(Point, Point)],
+    seam_allowances: &[Option<f64>],
+    boundary: &[Point],
+    sew_lines: &[AstmContour],
+) -> Vec<Notch> {
+    // Pair each segment with its width; a list of the wrong length is ignored.
+    let widths = |i: usize| if seam_allowances.len() == segments.len() { seam_allowances[i] } else { None };
+    let (segments, widths): (Vec<(Point, Point)>, Vec<Option<f64>>) = segments
         .iter()
-        .copied()
-        .filter(|(a, b)| distance(*a, *b) >= MIN_SEGMENT_MM)
-        .collect();
+        .enumerate()
+        .filter(|(_, (a, b))| distance(*a, *b) >= MIN_SEGMENT_MM)
+        .map(|(i, &s)| (s, widths(i)))
+        .unzip();
     group_touching(&segments)
         .into_iter()
         .map(|group| {
             let group_segments: Vec<(Point, Point)> = group.iter().map(|&i| segments[i]).collect();
             let mut notch = slit_from_drawing(&group_segments, boundary);
-            if let Some(width) = seam_allowance_at(notch.base, sew_lines) {
+            // Every line of one notch carries the same producer width; take the widest to be safe.
+            let given = group
+                .iter()
+                .filter_map(|&i| widths[i])
+                .fold(None, |acc: Option<f64>, w| Some(acc.map_or(w, |a| a.max(w))))
+                .filter(|&w| w >= MIN_SEAM_ALLOWANCE_MM);
+            if let Some(width) = given.or_else(|| seam_allowance_at(notch.base, sew_lines)) {
                 notch.depth = width / 2.0;
             } // if seam allowance known
             notch
