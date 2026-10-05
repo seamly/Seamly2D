@@ -2,6 +2,22 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task DXF.16 — Straight runs between curves end in turn points (completed 2026-10-05)
+
+aw.fyi departure on `male_shirt_R13_202610041815.dxf`: FullSleeve_M, 10 of 80 declared points miscategorized, on a straight segment. The hem has a straight run with pleat vertices between two curves. Seamly2D tags no turn point there: the tangent breaks are under 5°.
+
+- [x] DXF.16.1 `astm_contour.rs` `straight_run_ends`: both ends of a straight run are turn points, for tagged and untagged input
+- [x] DXF.16.2 Run: ≥ 10 mm, vertices within 0.01 mm of the chord, ≥ 2 inner vertices, or 1 when an end is already a turn point. One inner vertex alone is a notch vertex inserted into a curve segment
+- [x] DXF.16.3 Tests: `astm_piece_test.rs` `straight_run_ends_are_turn_points_with_tags`, `vertex_inserted_on_a_curve_segment_is_not_a_straight_run`
+- Checked on the report file's layers 84/87: new turn points at the FullSleeve hem run ends (both lines), the FrontPanel top junction (DXF.15), BackPanel hem start, one CollarBase and one CollarBaseInterface point.
+
+## Task DXF.15 — Line-to-curve junction is a turn point (completed 2026-10-05)
+
+aw.fyi departure on `male_shirt_R13_202610041815.dxf`: FrontPanel_M, layer 2 misses 1 of 14 corners. The top edge runs straight from the corner, through one vertex, then turns into a curve at about 3°. Seamly2D tags it only above 5°.
+
+- [x] DXF.15.1 Same rule as DXF.16: the straight run's far end is a turn point (`astm_contour.rs` `straight_run_ends`)
+- [x] DXF.15.2 Test: `straight_run_ends_are_turn_points_with_tags` (top edge)
+
 ## Task DXF.14 — Every real value has 2 decimals (completed 2026-10-03)
 
 aw.fyi finding "Coordinates not full precision" on the R13 export. The R13 upgrade wrote fixed values with 1 decimal: POLYLINE dummy point, VPORT, LTYPE, STYLE and layout BLOCK base points (`0.0`, `1.0`, `10.0`, `1.5`, `50.0`, `2.5`). R12 output already had 2 decimals.

@@ -59,6 +59,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 - `spline_deviation()` measures the result; `writer_astm_test.rs` checks every male_shirt contour on layers 84–87.
 - `reduced` is an ordered subset of `dense`, and both start at the same vertex (§4.3.3.1).
 - Turn points come from Seamly2D's `data-turn-points` tag on each path component (see `docs-data/SVG-DATA-ATTRIBUTES.md`). Seamly2D marks a node vertex whose tangent breaks by more than 0.5° (line–line) or 5° (with a curve), any vertex that turns more than 25°, and open ends.
+- Tagged or not, both ends of a straight run are turn points: ≥ 10 mm, every vertex within 0.01 mm of the chord, and ≥ 2 inner vertices (1 when an end is already a turn point). A line meets a curve there, even when the tangent breaks under Seamly2D's 5°. One inner vertex alone does not count: a notch vertex inserted into a curve segment lies exactly on it.
 - No tag (untagged SVG, or tags that do not match the path): turn point = direction change > 25°, an open end, or an end of a straight chord ≥ 10 mm with at least one dense vertex on it. A single long segment is not evidence of a straight line: coarse curve interpolation makes them too.
 - All other key points are curve points.
 - Closing repeat vertex removed; group 70 = 1 closes the polyline.
@@ -95,7 +96,7 @@ Seamly2D sends no source data for these. Tracked in `TODO_SEAMLYLAYOUT.md`.
 
 ## Known producer gaps
 
-- Seamly2D writes empty notch paths (`M x,y Z`) in current handoff SVGs, so no notches reach the DXF.
+- Notches reach the DXF (report on `male_shirt_R13_202610041815.dxf`: 4 on layer 4, 3 on layer 83), but their depth follows the drawn shape, not half the seam allowance. DXF.17 waits for Seamly2D.6.
 - No `data-quantity`, `data-on-fold`, `data-material` or `data-notch-type` attributes; quantity and notch kind are inferred; material is always `Fabric`.
 
 ## Tests

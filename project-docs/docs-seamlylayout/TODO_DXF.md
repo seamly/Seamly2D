@@ -22,6 +22,10 @@ Reference: `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
 | Category, Material, Size columns blank | report table | DXF.7 (done, see `TODO_COMPLETED.md`) |
 | `Author` not `vendor;application;release #` (got `Seamly2D 26.10.314`; report on `male_shirt_202610031615.dxf`) | departure | DXF.9 (done, see `TODO_COMPLETED.md`) |
 | Reconstruction from layers 2/3 off layer 84 by 0.8469 (CollarTopInterface_M), layer 87 by 0.8423 (CollarTop_M); report on `male_shirt_202610032115.dxf` | extension | DXF.11 (done, see `TODO_COMPLETED.md`) |
+| FrontPanel_M: layer 2 misses 1 of 14 corners (top edge, where a line meets a curve at ~3°); report on `male_shirt_R13_202610041815.dxf` | departure | DXF.15 (done, see `TODO_COMPLETED.md`) |
+| FullSleeve_M: 10 of 80 points miscategorized, on a straight segment (hem straight run between curves); FrontPanel_M 1 point | departure | DXF.16 (done, see `TODO_COMPLETED.md`) |
+| ShortSleeve_M: 1 point may be miscategorized | advisory | DXF.16; re-check in DXF.8 |
+| Notch depth 2.5 and 1.25 mm; 3 notches on layer 83 (U); rule: every notch a layer 4 slit, half the seam allowance | gap | DXF.17 |
 
 Report deviations carry an inch sign but match millimetres. Not verified.
 
@@ -40,6 +44,17 @@ Menu (user decision): **DXF-ASTM (R12)**, **DXF-ASTM (R13)**, **DXF-ASTM (CLO3D)
 - [ ] DXF.3.5 Check import in CLO3D and one other reader (e.g. ezdxf `audit`, LibreCAD). Done: ezdxf 1.4.4 `audit` 0 errors / 0 fixes; libdxfrw reads the same entity counts as R12. Open: user checks a DXF-ASTM (R13) export in CLO3D
 - [x] DXF.3.6 Rust tests: header version, unique handles, required sections present (`writer_r13_test.rs`, `exports.rs` `do_export_dxf_writes_r13_when_asked`)
 - [x] DXF.3.7 Update the compliance doc "Decisions" row for DXF version
+
+## [ ] Task DXF.17 — Every notch is a slit, half the seam allowance long
+
+Waits for Seamly2D.6 (user decision, 2026-10-04). Part of Layout.65.
+
+Report on `male_shirt_R13_202610041815.dxf`: layer 4 has 4 notches, layer 83 (U) has 3; depths 2.5 and 1.25 mm. The seam allowance is 10 mm.
+
+- [ ] DXF.17.1 `astm_notch.rs`: write every notch as a slit on layer 4, whatever shape Seamly2D drew
+- [ ] DXF.17.2 Slit depth = half the piece's seam allowance width (user decision, 2026-10-04)
+- [ ] DXF.17.3 Tests: kind, layer, and depth per notch shape
+- [ ] DXF.17.4 Update the compliance doc "Notch rules"
 
 ## [ ] Task DXF.8 — Re-validate
 

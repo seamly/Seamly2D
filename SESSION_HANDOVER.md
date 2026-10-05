@@ -6,6 +6,18 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-05 — DXF.15 + DXF.16: straight runs end in turn points
+
+Merged `task-dxf-turn-points`. `cargo test --workspace`, `ctest --preset debug` passed.
+
+- Source: aw.fyi report on `male_shirt_R13_202610041815.dxf` (2 departures, 5 advisories).
+- `astm_contour.rs` `straight_run_ends`: both ends of a straight run are turn points, tagged or not. Covers the FrontPanel top junction and the FullSleeve hem run.
+- Run rule: ≥ 10 mm, within 0.01 mm, ≥ 2 inner vertices (1 if an end is a turn point).
+- Fixture `male_shirt_pieces.svg` is older than the user's current `male_shirt.sm2d`; it has neither junction. Checked against the report file's layers 84/87 instead.
+- New: DXF.17 (every notch a layer 4 slit, half the seam allowance). Waits for Seamly2D.6.
+- User action: export DXF-ASTM (R13); re-run aw.fyi (DXF.8).
+- Still open: Seamly2D.6.1.2 canvas report.
+
 ## 2026-10-04 — Seamly2D.6: cutline notches no longer depend on the view setting
 
 Merged `task-cutline-notch`. Seamly2DTests, CollectionTest, ParserTest, TranslationsTest passed (run directly; `nmake check` wrapper returns 9009 in this shell).

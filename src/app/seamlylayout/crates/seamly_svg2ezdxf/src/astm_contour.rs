@@ -38,7 +38,10 @@ pub const CURVE_TOLERANCE_MM: f64 = 0.25;
 const DUPLICATE_TOLERANCE_MM: f64 = 0.005;
 // A chord whose dense points all lie within this distance is a straight line.
 const STRAIGHT_TOLERANCE_MM: f64 = 0.05;
-// A straight chord at least this long makes both of its ends turn points.
+// A straight run's vertices lie within this distance of its chord. Seamly2D writes
+// lines exactly; a curve sampled this flat would need a radius of kilometres.
+const STRAIGHT_RUN_TOLERANCE_MM: f64 = 0.01;
+// A straight chord or straight run at least this long makes both of its ends turn points.
 const STRAIGHT_MIN_LENGTH_MM: f64 = 10.0;
 // A direction change above this angle makes a vertex a turn point.
 const TURN_ANGLE_DEG: f64 = 25.0;
@@ -97,20 +100,28 @@ pub fn build_contour_tagged(points: &[Point], closed: bool, turns: Option<&[bool
     } // if too few vertices
 
     // Step 2: turn points anchor the reduction. Tagged input uses the tags;
-    // untagged input uses sharp direction changes.
-    let turn_flags = |dense: &[Point], tagged: &Option<Vec<bool>>| match tagged {
-        Some(t) => {
-            let mut t = t.clone();
-            if !closed {
-                t[0] = true;
-                let last = t.len() - 1;
-                t[last] = true;
-            } // if open: ends are turn points
-            t
-        } // tagged
-        None => sharp_vertices(dense, closed),
+    // untagged input uses sharp direction changes. Both add the ends of every
+    // straight run: a line meets a curve there, even when the tangent barely breaks.
+    let turn_flags = |dense: &[Point], tagged: &Option<Vec<bool>>| {
+        let mut flags = match tagged {
+            Some(t) => {
+                let mut t = t.clone();
+                if !closed {
+                    t[0] = true;
+                    let last = t.len() - 1;
+                    t[last] = true;
+                } // if open: ends are turn points
+                t
+            } // tagged
+            None => sharp_vertices(dense, closed),
+        }; // match tagged
+        let run_ends = straight_run_ends(dense, closed, &flags);
+        for (flag, run_end) in flags.iter_mut().zip(run_ends) {
+            *flag |= run_end;
+        } // for each vertex
+        flags
     }; // turn_flags
-    let sharp = turn_flags(&dense, &tagged);
+    let mut sharp = turn_flags(&dense, &tagged);
     let mut anchors: Vec<usize> = (0..dense.len()).filter(|&i| sharp[i]).collect();
     if anchors.is_empty() {
         anchors.push(0); // smooth closed loop: start anywhere
@@ -120,13 +131,15 @@ pub fn build_contour_tagged(points: &[Point], closed: bool, turns: Option<&[bool
     // begin with the same vertex.
     if closed && anchors[0] != 0 {
         let shift = anchors[0];
+        // The flags rotate with the vertices: a straight-run scan from the new
+        // vertex 0 could split a run differently.
         dense.rotate_left(shift);
+        sharp.rotate_left(shift);
         if let Some(t) = tagged.as_mut() {
             t.rotate_left(shift);
         } // if tagged
         anchors.iter_mut().for_each(|a| *a -= shift);
     } // if rotate
-    let sharp = turn_flags(&dense, &tagged);
 
     // Step 4: reduce each span between consecutive anchors with Douglas-Peucker.
     let n = dense.len();
@@ -272,6 +285,47 @@ fn direction_change_deg(prev: Point, p: Point, next: Point) -> f64 {
     } // if degenerate
     ((ax * bx + ay * by) / (la * lb)).clamp(-1.0, 1.0).acos().to_degrees()
 } // fn direction_change_deg
+
+// @brief Flag both ends of every straight run in `points`.
+// @details A straight run is at least STRAIGHT_MIN_LENGTH_MM long; every vertex lies
+//          within STRAIGHT_RUN_TOLERANCE_MM of the chord. It needs two vertices between
+//          its ends, or one when an end is already a turn point. A single long segment
+//          does not count: a coarse curve interpolation has those too. One inner vertex
+//          alone does not count either: a notch vertex inserted into a curve segment
+//          lies exactly on it. Runs are grown greedily, each from the end of the
+//          previous one; a closed loop is scanned once around from vertex 0.
+// @param turns Turn points already known, parallel to `points`.
+fn straight_run_ends(points: &[Point], closed: bool, turns: &[bool]) -> Vec<bool> {
+    let n = points.len();
+    let mut ends = vec![false; n];
+    // Last scan index: a closed loop scans back round to vertex 0 (index n).
+    let last = if closed { n } else { n - 1 };
+    let mut start = 0;
+    while start < last {
+        // Grow the run while every vertex inside stays on the chord.
+        let mut end = start + 1;
+        while end < last && is_on_chord(points, start, end + 1) {
+            end += 1;
+        } // while the run grows
+        let inner = end - start - 1;
+        let anchored = turns[start] || turns[end % n];
+        let is_run = inner >= 2 || (inner == 1 && anchored);
+        if is_run && distance(points[start], points[end % n]) >= STRAIGHT_MIN_LENGTH_MM {
+            ends[start] = true;
+            ends[end % n] = true;
+        } // if long straight run
+        start = end;
+    } // while vertices remain
+    ends
+} // fn straight_run_ends
+
+// @brief True when every vertex strictly between `a` and `b` lies within STRAIGHT_RUN_TOLERANCE_MM
+//        of the chord points[a]→points[b]. Indices wrap round a closed loop.
+fn is_on_chord(points: &[Point], a: usize, b: usize) -> bool {
+    let n = points.len();
+    let (pa, pb) = (points[a % n], points[b % n]);
+    (a + 1..b).all(|i| distance_to_segment(points[i % n], pa, pb) < STRAIGHT_RUN_TOLERANCE_MM)
+} // fn is_on_chord
 
 // @brief True when the chord dense[a]→dense[b] is long and all dense points between lie on it.
 // @details A chord with no dense point between its ends is not evidence of a
