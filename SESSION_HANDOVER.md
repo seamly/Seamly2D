@@ -6,6 +6,19 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-05 — Next: Seamly2D.6.4 (notches in the handoff SVG)
+
+Seamly2D.6.1–6.3 done. Only Seamly2D.6.4 is open in Seamly2D.6.
+
+- Seamly2D.6.1.2 result: canvas correct. `test-seamly-layout-input/male_shirt.sm2d`, Piece Mode: slits on the cutline, "Show notch on cutline" checked.
+- Seamly2D.6.3.2 closed, not reproduced.
+- Test file: user's uncommitted `test-seamly-layout-input/male_shirt.sm2d`. 7 notch nodes: 4 slit, 2 diamond, 1 uNotch; all straightforward; `showNotch="true" showSecondNotch="false"`. Do not commit it unasked.
+- Seamly2D.6.4 goal: the handoff SVG puts all 7 notches on the cutline.
+- Lead: `src/libs/vlayout/vlayoutpiece.cpp:458` calls `piece.createNotchLines(pattern)` with no seam allowance points, so cutline notches are not clipped to the cutline. The canvas (`pattern_piece_tool.cpp:1582`) passes them. Check whether diamond/U shapes cross the cutline in the SVG.
+- Steps: Layout Mode → SeamlyLayout handoff; inspect notch elements per piece; compare to cutline; add a test if a defect is found.
+- After Seamly2D.6.4: DXF.17 / Layout.65. Every notch becomes a layer 4 slit, length = half the seam allowance width.
+- User actions still open: DXF.8 (re-export R13, re-run aw.fyi); DXF.3.5 (CLO3D import).
+
 ## 2026-10-05 — DXF.15 + DXF.16: straight runs end in turn points
 
 Merged `task-dxf-turn-points`. `cargo test --workspace`, `ctest --preset debug` passed.
@@ -16,7 +29,6 @@ Merged `task-dxf-turn-points`. `cargo test --workspace`, `ctest --preset debug` 
 - Fixture `male_shirt_pieces.svg` is older than the user's current `male_shirt.sm2d`; it has neither junction. Checked against the report file's layers 84/87 instead.
 - New: DXF.17 (every notch a layer 4 slit, half the seam allowance). Waits for Seamly2D.6.
 - User action: export DXF-ASTM (R13); re-run aw.fyi (DXF.8).
-- Still open: Seamly2D.6.1.2 canvas report.
 
 ## 2026-10-04 — Seamly2D.6: cutline notches no longer depend on the view setting
 

@@ -32,16 +32,16 @@ Fix upstream (`FashionFreedom/Seamly2D`) first, then merge `develop` into `run-s
 
 User decision (2026-10-04): fix on `run-seamlyLayout`, not upstream first. The user raises it upstream later.
 
-- [ ] Seamly2D.6.1 Reproduce with `test-seamly-layout-input/richmond-shirt_v1_v061-test.sm2d`: context menu state vs. drawn position
+- [x] Seamly2D.6.1 Reproduce with `test-seamly-layout-input/richmond-shirt_v1_v061-test.sm2d`: context menu state vs. drawn position
   - [x] Seamly2D.6.1.1 Unit test `TST_VPiece::NotchFlagsSelectLine`: straight edge, slit, straightforward. Each flag puts its notch on the correct line.
-  - [ ] Seamly2D.6.1.2 User: reproduce on the canvas. Record notch type, subtype, edge shape, and the seam allowance view state.
-  - Note: the one notch node in the richmond and male_shirt sample files has `showNotch="false" showSecondNotch="false"`, so no notch is drawn from it.
+  - [x] Seamly2D.6.1.2 User: reproduce on the canvas. Result: not reproduced. `test-seamly-layout-input/male_shirt.sm2d`, Piece Mode: slits drawn on the cutline; "Show notch on cutline" checked.
+  - Note: the user's working copy of `male_shirt.sm2d` has 7 notch nodes (4 slit, 2 diamond, 1 uNotch), all straightforward, `showNotch="true" showSecondNotch="false"`.
 - [x] Seamly2D.6.2 Trace `VPieceNode::showSeamlineNotch()` / `showSeamAllowanceNotch()` through `VPiece::createNotch()` and `createBuiltInSaNotch()` (`src/libs/vpatterndb/vpiece.cpp`)
   - Defect found: `createNotch()` gated cutline notches on the canvas view setting `showSeamAllowances()`. With the seam allowance view off, cutline notches were missing from layout and export piece data.
   - `.sm2d` read: a missing `showSecondNotch` attribute defaults to `true` (`VAbstractPattern::ParseSANode`). Old files can show a seamline notch the user never set.
-- [ ] Seamly2D.6.3 Fix; add a unit test for notch position per flag
+- [x] Seamly2D.6.3 Fix; add a unit test for notch position per flag
   - [x] Seamly2D.6.3.1 `VPiece::createNotchLines(..., includeCutlineNotches)`: only the canvas passes the view setting. Layout and export always get cutline notches.
-  - [ ] Seamly2D.6.3.2 Fix the canvas symptom after Seamly2D.6.1.2 names the case
+  - [x] Seamly2D.6.3.2 Closed, not reproduced: the canvas matches the node flags (Seamly2D.6.1.2).
 - [ ] Seamly2D.6.4 Check the fix also puts the notch on the correct line in the SeamlyLayout handoff SVG (Layout.65)
 
 ## [ ] Task Seamly2D.7 — Per-piece material
