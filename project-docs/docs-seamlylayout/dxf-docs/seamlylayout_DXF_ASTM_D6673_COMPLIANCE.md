@@ -9,7 +9,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 |---|---|---|
 | SVG DOM → drawing | `seamly_svg2ezdxf::svg_to_ezdxf` (`converter.rs`) | `Drawing` in millimetres |
 | Contours | `seamly_svg2ezdxf/src/astm_contour.rs` | key points + validation polyline |
-| Notches | `seamly_svg2ezdxf/src/astm_notch.rs` | D6673 notch POINTs |
+| Notches | `seamly_svg2ezdxf/src/astm_notch.rs` | Slit notch POINTs (layer 4) |
 | Drawing → file | `ezdxf2dxfastm::export_dxf_astm` (`writer.rs`) | `.dxf` (+ annotated `.txt`) |
 | R12 → R13 | `ezdxf2dxfastm::upgrade_to_r13` (`r13.rs`) | R13 file from the R12 group stream |
 | Bridge | `cxxqt_bridge::exports::do_export_dxf` | style text from QML |
@@ -38,13 +38,12 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 |---|---|---|
 | 1 | Boundary key points; style text (ENTITIES); `Piece Name:`, `Size Name:`, `Quantity:`, `Material:` (BLOCK) | POLYLINE, TEXT |
 | 2 / 3 | Turn / curve points of layers 1, 8, 11, 14 | POINT |
-| 4 | Slit notch (no 39), V-notch | POINT + 30 depth, 39 width, 50 angle |
+| 4 | Every notch, as a slit (no 39) | POINT + 30 depth, 50 angle |
 | 7 | Grainline | LINE |
 | 8 | Internal lines (`internal_path`) | POLYLINE |
 | 11 | Internal cutouts (`cut_path`) | POLYLINE |
 | 14 | Sew lines (`seamline`) | POLYLINE |
 | 15 | Piece and pattern label text | TEXT |
-| 80 / 81 / 83 | T / castle / U notch | POINT |
 | 84 / 85 / 86 / 87 | Validation curves for 1 / 8 / 11 / 14 | POLYLINE |
 
 ## Contour rules (`astm_contour.rs`)
@@ -72,18 +71,14 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 
 ## Notch rules (`astm_notch.rs`)
 
-Touching segments form one notch. Contacts = vertices within 0.5 mm of the boundary.
+Every notch is a slit on layer 4, whatever shape Seamly2D drew (slit, T, U, V, castle, diamond). User decision.
 
-| Segments | Contacts | Kind | Layer |
-|---|---|---|---|
-| 1 | any | Slit | 4 |
-| 2 | 2 | V | 4 |
-| 2 | 1 | T | 80 |
-| 3 | 2 | Castle | 81 |
-| ≥ 4 | any | U | 83 |
-
+- Touching segments form one notch. Contacts = vertices within 0.5 mm of the boundary.
 - Base = centre of the contacts. Angle = toward the inner vertices, counter-clockwise from +X.
-- Depth = farthest reach along the angle. Width = spread across it.
+- Depth = half the piece's seam allowance width. User decision.
+- Seam allowance width = median distance from the sew line vertices to the cut line (`seam_allowance_width`). The median ignores corners and a wider edge.
+- No cut line, no sew line, or width under 0.1 mm: depth = drawn depth (farthest reach along the angle).
+- No width (group 39). Layers 80, 81, 83 are not written.
 
 ## Not exported
 
@@ -96,8 +91,8 @@ Seamly2D sends no source data for these. Tracked in `TODO_SEAMLYLAYOUT.md`.
 
 ## Known producer gaps
 
-- Notches reach the DXF (report on `male_shirt_R13_202610041815.dxf`: 4 on layer 4, 3 on layer 83), but their depth follows the drawn shape, not half the seam allowance. DXF.17 is next; Seamly2D.6 is done.
-- No `data-quantity`, `data-on-fold`, `data-material` or `data-notch-type` attributes; quantity and notch kind are inferred; material is always `Fabric`.
+- No `data-quantity`, `data-on-fold`, `data-material` or `data-notch-type` attributes; quantity is inferred; material is always `Fabric`.
+- No seam allowance width attribute. SeamlyLayout measures it from the cut and sew lines. A piece with per-edge widths gets the most common width.
 
 ## Tests
 

@@ -9,7 +9,7 @@ use crate::entities::{Circle, Entity, Line, Point, Polyline, Text};
 use crate::error::Result;
 use crate::layers::map_svg_to_astm_layer;
 use crate::astm_contour::{build_contour_tagged, AstmContour};
-use crate::astm_notch::build_notches;
+use crate::astm_notch::{build_notches, seam_allowance_width};
 use crate::drawing::Annotation;
 use crate::layers::{piece_component, PieceComponent};
 use crate::utils::{invert_y_axis, parse_float_attr, parse_length_attr, sanitize_ascii, sanitize_block_name, MM_PER_PX};
@@ -506,7 +506,9 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
         let line = lines.iter().filter(|l| l.closed && l.points.len() >= 3).max_by_key(|l| l.points.len())?;
         build_contour_tagged(&line.points, true, line.turns.as_deref())
     }; // longest_closed
-    block.boundary = longest_closed(&cut_lines).or_else(|| longest_closed(&seam_lines));
+    let cut_boundary = longest_closed(&cut_lines);
+    let has_cut_line = cut_boundary.is_some();
+    block.boundary = cut_boundary.or_else(|| longest_closed(&seam_lines));
 
     // Sew lines: every seam line that is not the boundary itself.
     for line in &seam_lines {
@@ -521,7 +523,10 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
     let segments: Vec<(Point, Point)> =
         notch_lines.iter().flat_map(|p| p.windows(2).map(|w| (w[0], w[1])).collect::<Vec<_>>()).collect();
     let boundary_dense = block.boundary.as_ref().map(|b| b.dense.clone()).unwrap_or_default();
-    block.notches = build_notches(&segments, &boundary_dense);
+    // Seam allowance: cut line to sew line. A seam line boundary has none.
+    let sew_dense: Vec<&[Point]> = block.sew_lines.iter().map(|c| c.dense.as_slice()).collect();
+    let seam_allowance = if has_cut_line { seam_allowance_width(&boundary_dense, &sew_dense) } else { None };
+    block.notches = build_notches(&segments, &boundary_dense, seam_allowance);
 } // fn extract_astm_piece
 
 // @brief Convert SVG <line> element to DXF LINE entity.

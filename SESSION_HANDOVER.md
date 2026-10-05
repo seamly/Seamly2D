@@ -6,6 +6,18 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-05 — DXF.17 / Layout.65: every notch is a layer 4 slit
+
+Merged `task-notch-slit`. `cargo test --workspace`, `ctest --preset debug` passed.
+
+- `astm_notch.rs`: no shape classification. Every notch: `NotchKind::Slit`, layer 4, no width.
+- Depth = half the seam allowance width. `seam_allowance_width`: median distance, sew line vertices → cut line. No cut line or sew line: drawn depth.
+- Seamly2D sends no seam allowance width attribute. Per-edge widths get the most common width. A producer attribute would be exact; not filed.
+- `NotchKind` T/castle/U kept: encoder still writes them; Layout.66 `data-notch-type` may use them.
+- Checked on `test-seamly-layout-input/male_shirt_202610050911.svg`: 7 slits, depth 5.00 mm.
+- DXF.17, Layout.65 moved to `TODO_COMPLETED.md`.
+- User actions open: DXF.8 (re-export R13, re-run aw.fyi); DXF.3.5 (CLO3D import); Seamly2D.6.4 handoff check in the running app.
+
 ## 2026-10-05 — Seamly2D.6.4: handoff cutline notches clipped to the cutline
 
 Merged `task-handoff-notch-clip`. Seamly2DTests, CollectionTest, ParserTest, TranslationsTest passed (run directly from each `bin\`).
