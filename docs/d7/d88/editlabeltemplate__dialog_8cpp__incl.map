@@ -1,5 +1,5 @@
 <map id="src/libs/vtools/dialogs/support/editlabeltemplate_dialog.cpp" name="src/libs/vtools/dialogs/support/editlabeltemplate_dialog.cpp">
-<area shape="rect" id="node1" title=" " alt="" coords="1735,5,1929,60"/>
+<area shape="rect" id="node1" title=" " alt="" coords="1847,5,2041,60"/>
 <area shape="rect" id="node2" href="$de/d2d/editlabeltemplate__dialog_8h.html" title=" " alt="" coords="5,115,203,141"/>
 <area shape="rect" id="node5" title=" " alt="" coords="227,108,384,148"/>
 <area shape="rect" id="node6" title=" " alt="" coords="409,115,631,141"/>
@@ -12,10 +12,11 @@
 <area shape="rect" id="node13" title=" " alt="" coords="2063,115,2227,141"/>
 <area shape="rect" id="node14" title=" " alt="" coords="2251,108,2450,148"/>
 <area shape="rect" id="node15" title=" " alt="" coords="2473,115,2524,141"/>
-<area shape="rect" id="node16" title=" " alt="" coords="2548,115,2663,141"/>
-<area shape="rect" id="node17" title=" " alt="" coords="2687,115,2785,141"/>
-<area shape="rect" id="node18" title=" " alt="" coords="2809,115,2877,141"/>
-<area shape="rect" id="node19" title=" " alt="" coords="2901,115,2963,141"/>
+<area shape="rect" id="node16" title=" " alt="" coords="2548,115,2628,141"/>
+<area shape="rect" id="node17" title=" " alt="" coords="2652,115,2767,141"/>
+<area shape="rect" id="node18" title=" " alt="" coords="2791,115,2889,141"/>
+<area shape="rect" id="node19" title=" " alt="" coords="2913,115,2981,141"/>
+<area shape="rect" id="node20" title=" " alt="" coords="3005,115,3067,141"/>
 <area shape="rect" id="node3" title=" " alt="" coords="21,196,96,221"/>
 <area shape="rect" id="node4" title=" " alt="" coords="121,196,181,221"/>
 </map>

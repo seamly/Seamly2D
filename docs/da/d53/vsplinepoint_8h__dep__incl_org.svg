@@ -12,9 +12,9 @@
 <g id="node1" class="node">
 <title>Node1</title>
 <g id="a_node1"><a xlink:title=" ">
-<polygon fill="#999999" stroke="#666666" points="429,-217 322,-217 322,-187 429,-187 429,-217"/>
-<text text-anchor="start" x="330" y="-205" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vgeometry</text>
-<text text-anchor="middle" x="375.5" y="-194" font-family="Helvetica,sans-Serif" font-size="10.00">/vsplinepoint.h</text>
+<polygon fill="#999999" stroke="#666666" points="491,-217 384,-217 384,-187 491,-187 491,-217"/>
+<text text-anchor="start" x="392" y="-205" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vgeometry</text>
+<text text-anchor="middle" x="437.5" y="-194" font-family="Helvetica,sans-Serif" font-size="10.00">/vsplinepoint.h</text>
 </a>
 </g>
 </g>
@@ -31,8 +31,8 @@
 <!-- Node1&#45;&gt;Node2 -->
 <g id="edge1" class="edge">
 <title>Node1&#45;&gt;Node2</title>
-<path fill="none" stroke="#63b8ff" d="M312.05,-187.19C262.99,-176.51 195.32,-161.78 145.99,-151.04"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="311.4,-190.63 321.92,-189.34 312.89,-183.79 311.4,-190.63"/>
+<path fill="none" stroke="#63b8ff" d="M373.71,-189.53C313.68,-178.74 223.66,-162.56 159.41,-151.01"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="373.36,-193.02 383.82,-191.35 374.59,-186.14 373.36,-193.02"/>
 </g>
 <!-- Node3 -->
 <g id="node3" class="node">
@@ -47,8 +47,8 @@
 <!-- Node1&#45;&gt;Node3 -->
 <g id="edge2" class="edge">
 <title>Node1&#45;&gt;Node3</title>
-<path fill="none" stroke="#63b8ff" d="M337.08,-182.51C316.22,-172.47 290.83,-160.26 271.62,-151.01"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="335.78,-185.77 346.31,-186.95 338.82,-179.46 335.78,-185.77"/>
+<path fill="none" stroke="#63b8ff" d="M384.86,-183.72C353.61,-173.47 314.51,-160.63 285.19,-151.01"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="384.11,-187.16 394.71,-186.95 386.3,-180.51 384.11,-187.16"/>
 </g>
 <!-- Node4 -->
 <g id="node4" class="node">
@@ -63,8 +63,8 @@
 <!-- Node1&#45;&gt;Node4 -->
 <g id="edge3" class="edge">
 <title>Node1&#45;&gt;Node4</title>
-<path fill="none" stroke="#63b8ff" d="M411.87,-182.38C431.43,-172.36 455.15,-160.22 473.13,-151.01"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="410.24,-179.28 402.93,-186.95 413.43,-185.51 410.24,-179.28"/>
+<path fill="none" stroke="#63b8ff" d="M458.52,-179.65C467.75,-170.27 478.33,-159.53 486.56,-151.16"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="456,-177.21 451.48,-186.8 460.99,-182.13 456,-177.21"/>
 </g>
 <!-- Node9 -->
 <g id="node9" class="node">
@@ -79,8 +79,8 @@
 <!-- Node1&#45;&gt;Node9 -->
 <g id="edge8" class="edge">
 <title>Node1&#45;&gt;Node9</title>
-<path fill="none" stroke="#63b8ff" d="M375.5,-176.54C375.5,-167.96 375.5,-158.61 375.5,-151.16"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="372,-176.8 375.5,-186.8 379,-176.8 372,-176.8"/>
+<path fill="none" stroke="#63b8ff" d="M416.54,-179.37C407.53,-170.06 397.24,-159.44 389.22,-151.16"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="414.27,-182.05 423.74,-186.8 419.3,-177.18 414.27,-182.05"/>
 </g>
 <!-- Node10 -->
 <g id="node10" class="node">
@@ -95,8 +95,24 @@
 <!-- Node1&#45;&gt;Node10 -->
 <g id="edge10" class="edge">
 <title>Node1&#45;&gt;Node10</title>
-<path fill="none" stroke="#63b8ff" d="M439.04,-184.73C480.13,-174.22 533.01,-160.68 571.96,-150.71"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="437.95,-181.4 429.13,-187.27 439.69,-188.18 437.95,-181.4"/>
+<path fill="none" stroke="#63b8ff" d="M488.25,-183.72C518.37,-173.47 556.08,-160.63 584.34,-151.01"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="487.1,-180.42 478.76,-186.95 489.35,-187.05 487.1,-180.42"/>
+</g>
+<!-- Node11 -->
+<g id="node11" class="node">
+<title>Node11</title>
+<g id="a_node11"><a xlink:href="../../da/de1/vpiecepath_8cpp.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="804,-151 697,-151 697,-121 804,-121 804,-151"/>
+<text text-anchor="start" x="705" y="-139" font-family="Helvetica,sans-Serif" font-size="10.00">src/libs/vpatterndb</text>
+<text text-anchor="middle" x="750.5" y="-128" font-family="Helvetica,sans-Serif" font-size="10.00">/vpiecepath.cpp</text>
+</a>
+</g>
+</g>
+<!-- Node1&#45;&gt;Node11 -->
+<g id="edge11" class="edge">
+<title>Node1&#45;&gt;Node11</title>
+<path fill="none" stroke="#63b8ff" d="M501.29,-188.76C552.08,-178.9 624.94,-164.51 688.5,-151 691.2,-150.43 693.96,-149.83 696.75,-149.23"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="500.59,-185.33 491.44,-190.67 501.92,-192.2 500.59,-185.33"/>
 </g>
 <!-- Node5 -->
 <g id="node5" class="node">

@@ -1,8 +1,8 @@
 <map id="VPosition" name="VPosition">
-<area shape="rect" id="node1" title=" " alt="" coords="181,1137,365,1449"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,829,99,906"/>
-<area shape="rect" id="node3" href="$d3/dd7/classVBestSquare.html" title=" " alt="" coords="123,689,263,1045"/>
-<area shape="rect" id="node4" href="$de/dad/classVContour.html" title=" " alt="" coords="288,748,419,987"/>
-<area shape="rect" id="node5" href="$df/de5/classVLayoutPiece.html" title=" " alt="" coords="443,660,661,1075"/>
-<area shape="rect" id="node6" href="$dd/dfe/classVAbstractPiece.html" title=" " alt="" coords="445,5,659,611"/>
+<area shape="rect" id="node1" title=" " alt="" coords="181,1152,365,1464"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,843,99,921"/>
+<area shape="rect" id="node3" href="$d3/dd7/classVBestSquare.html" title=" " alt="" coords="123,704,263,1060"/>
+<area shape="rect" id="node4" href="$de/dad/classVContour.html" title=" " alt="" coords="288,763,419,1001"/>
+<area shape="rect" id="node5" href="$df/de5/classVLayoutPiece.html" title=" " alt="" coords="443,675,661,1089"/>
+<area shape="rect" id="node6" href="$dd/dfe/classVAbstractPiece.html" title=" " alt="" coords="445,5,659,625"/>
 </map>

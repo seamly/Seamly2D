@@ -56,6 +56,7 @@ var namespaces_dup =
       [ "migrateLegacyOrganizationTree", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a7d869d6881abdbacf84cd639a94eedb1", null ],
       [ "platformDefaultsKey", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#aed4ee8d3fb526b87f1ffd02508da4e65", null ],
       [ "seedFromBundledDefaults", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a5f0581e471b66a21a7125346b3eea91c", null ],
+      [ "kDefaultHpglViewerPath", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a935b8724cd73e129acc6539009570a40", null ],
       [ "kLegacyOrganizationName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a7a720e78cc99c7cb0d97bd6858a2e984", null ],
       [ "kLegacyPreferencesFolderName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#a64ec81db8349d51aad8ab68f2455b972", null ],
       [ "kLegacySettingsFolderName", "d8/db5/namespaceanonymous__namespace_02PreferencesModel_8cpp_03.html#adda8a1508d10549910e55ce5bce5a70d", null ],
@@ -85,7 +86,8 @@ var namespaces_dup =
     [ "anonymous_namespace{svg_generator.cpp}", "d6/d8b/namespaceanonymous__namespace_02svg__generator_8cpp_03.html", [
       [ "componentIdIsNumbered", "d6/d8b/namespaceanonymous__namespace_02svg__generator_8cpp_03.html#ac097037a22fe3197af4729d7309ffe15", null ],
       [ "isMoveToOnly", "d6/d8b/namespaceanonymous__namespace_02svg__generator_8cpp_03.html#a589abd287e31c2a193830a46a913f997", null ],
-      [ "sanitizeForId", "d6/d8b/namespaceanonymous__namespace_02svg__generator_8cpp_03.html#a227a7a61f3e4b70772eef8b298e2e8a1", null ]
+      [ "sanitizeForId", "d6/d8b/namespaceanonymous__namespace_02svg__generator_8cpp_03.html#a227a7a61f3e4b70772eef8b298e2e8a1", null ],
+      [ "sizeIdSuffix", "d6/d8b/namespaceanonymous__namespace_02svg__generator_8cpp_03.html#a0b8193efe65ff524a5636250178322dd", null ]
     ] ],
     [ "anonymous_namespace{tst_dataroot.cpp}", "d9/d48/namespaceanonymous__namespace_02tst__dataroot_8cpp_03.html", [
       [ "commonIniName", "d9/d48/namespaceanonymous__namespace_02tst__dataroot_8cpp_03.html#a664ce00f0e3fc85596851d75b4883b68", null ],
@@ -95,7 +97,8 @@ var namespaces_dup =
       [ "createDummyFile", "d5/d91/namespaceanonymous__namespace_02tst__seamlysuitepaths_8cpp_03.html#acc9bdd3b67830e69cdade3f8fc30411e", null ]
     ] ],
     [ "anonymous_namespace{tst_svgcomponenttags.cpp}", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html", [
-      [ "exportItemSvg", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#ab7c2fdd94025a79b26f1577448cf1671", null ],
+      [ "exportItemSvg", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#a27da0434d7f72bad00d9eeed96ee2bee", null ],
+      [ "exportMultisizeSvg", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#ad47b7ad9b60c1f33b54772c1786e2e78", null ],
       [ "exportPieceSvg", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#a8b59c6ab4d866c88a86bdda091c4f169", null ],
       [ "exportTwoPiecesSvg", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#a15eca5b1d1c23a36c7ed89b0f67b0375", null ],
       [ "groupsOfType", "d5/d26/namespaceanonymous__namespace_02tst__svgcomponenttags_8cpp_03.html#a2d7b69f1bd0c5ecc33e37213be6dcc55", null ],
@@ -108,6 +111,14 @@ var namespaces_dup =
     [ "anonymous_namespace{tst_svgtextitem.cpp}", "db/da3/namespaceanonymous__namespace_02tst__svgtextitem_8cpp_03.html", [
       [ "renderItemToSvg", "db/da3/namespaceanonymous__namespace_02tst__svgtextitem_8cpp_03.html#aa3743175c7e5de4200845ac240a757c5", null ]
     ] ],
+    [ "anonymous_namespace{tst_vabstractpiece.cpp}", "da/db2/namespaceanonymous__namespace_02tst__vabstractpiece_8cpp_03.html", [
+      [ "dShape", "da/db2/namespaceanonymous__namespace_02tst__vabstractpiece_8cpp_03.html#af329a23144139932f4dafe75a93b331c", null ]
+    ] ],
+    [ "anonymous_namespace{tst_vpiece.cpp}", "d3/d07/namespaceanonymous__namespace_02tst__vpiece_8cpp_03.html", [
+      [ "isOnPolyline", "d3/d07/namespaceanonymous__namespace_02tst__vpiece_8cpp_03.html#a6d2672e0b690a01824a36cb4fb94e3eb", null ],
+      [ "squareNotchLines", "d3/d07/namespaceanonymous__namespace_02tst__vpiece_8cpp_03.html#aada76f02efb296c919c96182c4f09224", null ],
+      [ "notchTestSAWidth", "d3/d07/namespaceanonymous__namespace_02tst__vpiece_8cpp_03.html#a38d8530ad86a95563a2fe4059f6e8fdd", null ]
+    ] ],
     [ "anonymous_namespace{tst_vtoolmove.cpp}", "d7/d5d/namespaceanonymous__namespace_02tst__vtoolmove_8cpp_03.html", [
       [ "moveAngle", "d7/d5d/namespaceanonymous__namespace_02tst__vtoolmove_8cpp_03.html#a2513e9612873952810698e97da058004", null ],
       [ "moveLength", "d7/d5d/namespaceanonymous__namespace_02tst__vtoolmove_8cpp_03.html#a3b179851d0f03fa190ba08ac0d583839", null ],
@@ -118,6 +129,14 @@ var namespaces_dup =
     ] ],
     [ "anonymous_namespace{vabstractpattern.cpp}", "d0/d42/namespaceanonymous__namespace_02vabstractpattern_8cpp_03.html", [
       [ "ReadExpressionAttribute", "d0/d42/namespaceanonymous__namespace_02vabstractpattern_8cpp_03.html#a03b1fb578fba1ecb51300ab233820199", null ]
+    ] ],
+    [ "anonymous_namespace{vabstractpiece.cpp}", "d4/d00/namespaceanonymous__namespace_02vabstractpiece_8cpp_03.html", [
+      [ "directionDegrees", "d4/d00/namespaceanonymous__namespace_02vabstractpiece_8cpp_03.html#a6d308123624e51282a7ea3fbcc620ce5", null ],
+      [ "normalizedAngle", "d4/d00/namespaceanonymous__namespace_02vabstractpiece_8cpp_03.html#ab41377c350330777f15daa44f6dbb9ee", null ],
+      [ "kCurveJoinAngleDegrees", "d4/d00/namespaceanonymous__namespace_02vabstractpiece_8cpp_03.html#af8e8d370a4713e94be65194d9db8a4b0", null ],
+      [ "kLineJoinAngleDegrees", "d4/d00/namespaceanonymous__namespace_02vabstractpiece_8cpp_03.html#a37bcfc0e6192fc5095d4cb3a124214a6", null ],
+      [ "kNodeMatchTolerance", "d4/d00/namespaceanonymous__namespace_02vabstractpiece_8cpp_03.html#a398abdfe162c5b954093261b4f4b8e7c", null ],
+      [ "kSharpAngleDegrees", "d4/d00/namespaceanonymous__namespace_02vabstractpiece_8cpp_03.html#ac88aea1eaf4db72469fb6705a1488673", null ]
     ] ],
     [ "anonymous_namespace{vabstracttool.cpp}", "dc/d94/namespaceanonymous__namespace_02vabstracttool_8cpp_03.html", [
       [ "CreateNodeSpline", "dc/d94/namespaceanonymous__namespace_02vabstracttool_8cpp_03.html#a7236e797575617f3512429acf2adee0d", null ],
@@ -296,7 +315,8 @@ var namespaces_dup =
       [ "getLabelText", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#a9bda5a4945f75b8a9ba0278df977eb14", null ],
       [ "isItemContained", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#aafadb68390e27769bbae08816fae07c5", null ],
       [ "prepareAllowance", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#aa81bfa3d30caf5623bb2b64bad5e7ec6", null ],
-      [ "rotatePoint", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#abe938cdf3c612c15f09105c6214a6dc2", null ]
+      [ "rotatePoint", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#abe938cdf3c612c15f09105c6214a6dc2", null ],
+      [ "setTurnPointsData", "d8/dfc/namespaceanonymous__namespace_02vlayoutpiece_8cpp_03.html#aa498787c6b5ae09e9cdc1f7e2ea563ce", null ]
     ] ],
     [ "anonymous_namespace{vnodedetail.cpp}", "d9/d83/namespaceanonymous__namespace_02vnodedetail_8cpp_03.html", [
       [ "ConvertAfter", "d9/d83/namespaceanonymous__namespace_02vnodedetail_8cpp_03.html#a6333f8827e9243cf90c85518487730c6", null ],
@@ -377,17 +397,22 @@ var namespaces_dup =
       [ "fitGrainlineLength", "d6/dc2/namespaceNewPieceDefaults.html#ad610af2bdad44e272a8b097e12e85c9b", null ],
       [ "grainlineLength", "d6/dc2/namespaceNewPieceDefaults.html#a63b832bf68aa225a4cbcf69a2f5905e7", null ],
       [ "labelHeight", "d6/dc2/namespaceNewPieceDefaults.html#a9006d09fbc5dc0f4372af73c2a4a6f20", null ],
+      [ "labelTemplateFile", "d6/dc2/namespaceNewPieceDefaults.html#a04b4d79d66be55bc08270bf0fa0b53e3", null ],
       [ "labelWidth", "d6/dc2/namespaceNewPieceDefaults.html#a17a271ae5697940b4d98dd66320a22dc", null ],
       [ "patternLabelTemplate", "d6/dc2/namespaceNewPieceDefaults.html#aae735a1c73b1b4c0e7f2c377bf1c7cec", null ],
+      [ "patternLabelTemplateFile", "d6/dc2/namespaceNewPieceDefaults.html#ae9b7f4b83a28477afb2e135f6c35f160", null ],
       [ "pieceLabelTemplate", "d6/dc2/namespaceNewPieceDefaults.html#a7373188837b6c068908dc1226d3c1399", null ],
-      [ "readLabelTemplate", "d6/dc2/namespaceNewPieceDefaults.html#ad59a0d113ad4af46cdfc73a00d89874a", null ]
+      [ "pieceLabelTemplateFile", "d6/dc2/namespaceNewPieceDefaults.html#ab2c37436e5ae80d49063aff06395a7b1", null ],
+      [ "readLabelTemplate", "d6/dc2/namespaceNewPieceDefaults.html#ad59a0d113ad4af46cdfc73a00d89874a", null ],
+      [ "sameLabelLines", "d6/dc2/namespaceNewPieceDefaults.html#ac80ca9e01b27f0eebb6070dedbc672fd", null ]
     ] ],
     [ "PieceItemData", "dd/d2f/namespacePieceItemData.html", [
       [ "Key", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52a", [
         [ "ObjectName", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52aa7941596f64d95ae0eb0ce7799abfc1fa", null ],
         [ "ItemType", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52aa789d47dbe06374b0c99c1513bc151cdb", null ],
         [ "PieceLetter", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52aa3cc1357d3e7fb46ec8eaac232f6e6364", null ],
-        [ "GrainlineAngle", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52aa7efc426838564c35ab2c8914ece78397", null ]
+        [ "GrainlineAngle", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52aa7efc426838564c35ab2c8914ece78397", null ],
+        [ "TurnPoints", "dd/d2f/namespacePieceItemData.html#a1ae36dc9572f800a7a19898d3309f52aabf45f513cba3d1b1c7101a22ead0ef63", null ]
       ] ]
     ] ],
     [ "qmu", "da/d92/namespaceqmu.html", "da/d92/namespaceqmu" ],

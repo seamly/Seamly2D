@@ -1,5 +1,6 @@
 var classMainWindowsNoGUI =
 [
+    [ "SizePieceList", "db/d2b/structMainWindowsNoGUI_1_1SizePieceList.html", "db/d2b/structMainWindowsNoGUI_1_1SizePieceList" ],
     [ "PrintType", "de/d1a/classMainWindowsNoGUI.html#aa22aa8c63b30c458a5fe33e486ae1da9", [
       [ "PrintPDF", "de/d1a/classMainWindowsNoGUI.html#aa22aa8c63b30c458a5fe33e486ae1da9a9bc1a90b8be024dee17cdc6f020ad5ab", null ],
       [ "PrintPreview", "de/d1a/classMainWindowsNoGUI.html#aa22aa8c63b30c458a5fe33e486ae1da9acb83fba9c48fd911128ab4d9159d47d2", null ],
@@ -12,14 +13,12 @@ var classMainWindowsNoGUI =
     [ "buildPiecesSvgString", "de/d1a/classMainWindowsNoGUI.html#a4280234830fe56df4638d1223b849190", null ],
     [ "CleanLayout", "de/d1a/classMainWindowsNoGUI.html#a8b59fc83af17e2b954d41fd2d8144990", null ],
     [ "ContinueIfLayoutStale", "de/d1a/classMainWindowsNoGUI.html#a5eb88ed5f22e2720c0ffe08242a496c5", null ],
-    [ "convertPdfToPs", "de/d1a/classMainWindowsNoGUI.html#a30379baa82c346595874708ed13f3a96", null ],
     [ "CreateScenes", "de/d1a/classMainWindowsNoGUI.html#aa590f6124101a4a3e3606d877f5ff70f", null ],
     [ "CreateShadows", "de/d1a/classMainWindowsNoGUI.html#aea4b149e82e466493402dfbe57690887", null ],
     [ "ErrorConsoleMode", "de/d1a/classMainWindowsNoGUI.html#aa15d4973bf51a40271c96990da1f202b", null ],
     [ "ExportApparelLayout", "de/d1a/classMainWindowsNoGUI.html#a06568c2df5c3fc1db02d210c5b584ebf", null ],
     [ "exportBMP", "de/d1a/classMainWindowsNoGUI.html#a76a265f592427bb447ef634dd6f90222", null ],
     [ "ExportData", "de/d1a/classMainWindowsNoGUI.html#a2897c7b1602d15ac0bdde0c50537d9dc", null ],
-    [ "exportEPS", "de/d1a/classMainWindowsNoGUI.html#a439e7e065623a6458f47decab1c8056a", null ],
     [ "ExportFlatLayout", "de/d1a/classMainWindowsNoGUI.html#a5960a82100f1fd581b20ecd08678adc9", null ],
     [ "exportJPG", "de/d1a/classMainWindowsNoGUI.html#a35cbe744d0d2a43448e400c25080e2ca", null ],
     [ "exportPDF", "de/d1a/classMainWindowsNoGUI.html#a8f87fd55206fdfe5d83fae89253fc723", null ],
@@ -27,7 +26,6 @@ var classMainWindowsNoGUI =
     [ "exportPiecesAsFlatLayout", "de/d1a/classMainWindowsNoGUI.html#aa8462e23ba5db6152e26536ad5fdee62", null ],
     [ "exportPNG", "de/d1a/classMainWindowsNoGUI.html#a870e66ec909c0d93480f9132eeef39f3", null ],
     [ "exportPPM", "de/d1a/classMainWindowsNoGUI.html#a10aef447444a6bdf12b83c5206fa303d", null ],
-    [ "exportPS", "de/d1a/classMainWindowsNoGUI.html#a99f9b0c9a35f5d5213b34fe18a16ec2c", null ],
     [ "ExportScene", "de/d1a/classMainWindowsNoGUI.html#af36a453bc068cae275af7e10a80b496a", null ],
     [ "exportSVG", "de/d1a/classMainWindowsNoGUI.html#a510c301d0ed21860bab65c99d969d56e", null ],
     [ "exportSVG", "de/d1a/classMainWindowsNoGUI.html#a19f4cef7661e4d67cd2ef45a5e99fd92", null ],
@@ -35,7 +33,9 @@ var classMainWindowsNoGUI =
     [ "FileName", "de/d1a/classMainWindowsNoGUI.html#af85873aa29a5e5f613df448357ba741b", null ],
     [ "FindQPrinterPageSize", "de/d1a/classMainWindowsNoGUI.html#a5879549e68a45f4022b47924d9eb54d3", null ],
     [ "FlatDxfFile", "de/d1a/classMainWindowsNoGUI.html#a3f34eb6dd032e78416e0dfccbcfccfb7", null ],
+    [ "generateMultisizePiecesSvgDocument", "de/d1a/classMainWindowsNoGUI.html#a1c41a6c4c4ec5303c45160a344be13d9", null ],
     [ "generatePiecesSvgDocument", "de/d1a/classMainWindowsNoGUI.html#a82d286e1b291a7188782a57d475a45a5", null ],
+    [ "individualSampleSize", "de/d1a/classMainWindowsNoGUI.html#a702853f57bea6b16c622eebac78eabd1", null ],
     [ "InitTempLayoutScene", "de/d1a/classMainWindowsNoGUI.html#a4501b81b9030874f8ef9cca242611c9f", null ],
     [ "IsLayoutGrayscale", "de/d1a/classMainWindowsNoGUI.html#a8052f32c34a15bc198c65e3dc9e79d83", null ],
     [ "IsPagesFit", "de/d1a/classMainWindowsNoGUI.html#a1f2c81069fc51d1c06de9872829f7300", null ],
@@ -47,6 +47,7 @@ var classMainWindowsNoGUI =
     [ "PreparePaper", "de/d1a/classMainWindowsNoGUI.html#a4144bf7e65be9eb1137ad3d364b36079", null ],
     [ "preparePiecesForLayout", "de/d1a/classMainWindowsNoGUI.html#a591ebb6ae7c50b0e9ef1be2c099b5f36", null ],
     [ "PrepareSceneList", "de/d1a/classMainWindowsNoGUI.html#a4f5ce26383724f12e1630bcf36a8ce42", null ],
+    [ "prepareSizePieceList", "de/d1a/classMainWindowsNoGUI.html#ad51ca7014989ff90aae0ec63474e9101", null ],
     [ "PrepareTextForDXF", "de/d1a/classMainWindowsNoGUI.html#a142a989f984c187be7418bc958ac82bc", null ],
     [ "PrintOrigin", "de/d1a/classMainWindowsNoGUI.html#aca5df983fd8e6783d122d00878c503cf", null ],
     [ "PrintPages", "de/d1a/classMainWindowsNoGUI.html#aa1cd4015dcfe3ec7f7e6d1582ec62041", null ],
@@ -68,6 +69,7 @@ var classMainWindowsNoGUI =
     [ "actionDockWidgetPieces", "de/d1a/classMainWindowsNoGUI.html#ae988fa0b78b1c0f81768a4da0095cb71", null ],
     [ "actionDockWidgetToolbox", "de/d1a/classMainWindowsNoGUI.html#ab03b6af9e85edcc8a716104db235bd6a", null ],
     [ "actionDockWidgetToolOptions", "de/d1a/classMainWindowsNoGUI.html#a9b5d1f61e06e9163c09c43898b579248", null ],
+    [ "baseSize", "de/d1a/classMainWindowsNoGUI.html#aeb298acb8408e59d00700c8d3172feaa", null ],
     [ "currentScene", "de/d1a/classMainWindowsNoGUI.html#afdb03e326dc643a8d82e8a2c62d78438", null ],
     [ "doc", "de/d1a/classMainWindowsNoGUI.html#ae3f22c733c35fba4130a4a6f8a64cd76", null ],
     [ "ignoreMargins", "de/d1a/classMainWindowsNoGUI.html#a92c8bd4edcaea67313d136035d87171d", null ],
@@ -87,6 +89,7 @@ var classMainWindowsNoGUI =
     [ "redoAction", "de/d1a/classMainWindowsNoGUI.html#ad695679ff6186ab66b71a79e9469e178", null ],
     [ "scenes", "de/d1a/classMainWindowsNoGUI.html#ac710c5b0988a0f9e12523620a7f66d80", null ],
     [ "shadows", "de/d1a/classMainWindowsNoGUI.html#a4c0f1d2b5e02ce25f7dbbd0c8fe963e1", null ],
+    [ "sizePieceLists", "de/d1a/classMainWindowsNoGUI.html#a4acc1c32666aab91a0273c4ece45980d", null ],
     [ "tempSceneLayout", "de/d1a/classMainWindowsNoGUI.html#a0c0046df4a904bc3dab821315203b13f", null ],
     [ "undoAction", "de/d1a/classMainWindowsNoGUI.html#aad38a28c45cbba0bd89053d8430cf1d8", null ]
 ];

@@ -1,5 +1,7 @@
 <map id="src/libs/vlayout/vlayoutpiecepath.h" name="src/libs/vlayout/vlayoutpiecepath.h">
-<area shape="rect" id="node1" title=" " alt="" coords="5,5,256,31"/>
-<area shape="rect" id="node2" title=" " alt="" coords="25,79,98,104"/>
-<area shape="rect" id="node3" title=" " alt="" coords="123,79,277,104"/>
+<area shape="rect" id="node1" title=" " alt="" coords="125,5,375,31"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,79,79,104"/>
+<area shape="rect" id="node3" title=" " alt="" coords="103,79,258,104"/>
+<area shape="rect" id="node4" title=" " alt="" coords="283,79,356,104"/>
+<area shape="rect" id="node5" title=" " alt="" coords="381,79,455,104"/>
 </map>

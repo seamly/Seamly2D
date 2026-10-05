@@ -2,7 +2,7 @@ var dir_58f2c158bf25a81ab5a9a1c3c618662c =
 [
     [ "adjust", "dir_8b6e0e29d8d9e77767472b80079e73d0.html", "dir_8b6e0e29d8d9e77767472b80079e73d0" ],
     [ "Globals.h", "d9/df1/Globals_8h.html", "d9/df1/Globals_8h" ],
-    [ "Logger.cpp", "d9/df5/Logger_8cpp.html", null ],
+    [ "Logger.cpp", "d9/df5/Logger_8cpp.html", "d9/df5/Logger_8cpp" ],
     [ "Logger.h", "dd/da4/Logger_8h.html", "dd/da4/Logger_8h" ],
     [ "Platform.cpp", "d5/d0a/Platform_8cpp.html", null ],
     [ "Platform.h", "d9/dd0/Platform_8h.html", "d9/dd0/Platform_8h" ],

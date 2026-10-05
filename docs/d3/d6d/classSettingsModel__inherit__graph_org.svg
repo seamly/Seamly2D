@@ -18,37 +18,37 @@
 <text text-anchor="start" x="8" y="-422.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ layoutMode</text>
 <text text-anchor="start" x="8" y="-411.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ rotationStep</text>
 <text text-anchor="start" x="8" y="-400.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ noGrainlineRotation</text>
-<text text-anchor="start" x="8" y="-389.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ fabricFolded</text>
-<text text-anchor="start" x="8" y="-378.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ pieceGap</text>
-<text text-anchor="start" x="8" y="-367.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ pieceGapPx</text>
-<text text-anchor="start" x="8" y="-356.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ unit</text>
-<text text-anchor="start" x="8" y="-345.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ mediaType</text>
-<text text-anchor="start" x="8" y="-334.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ paperType</text>
-<text text-anchor="start" x="8" y="-323.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ sheetName</text>
-<text text-anchor="start" x="8" y="-312.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 25 more...</text>
+<text text-anchor="start" x="8" y="-389.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ multisizeLayout</text>
+<text text-anchor="start" x="8" y="-378.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ fabricFolded</text>
+<text text-anchor="start" x="8" y="-367.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ pieceGap</text>
+<text text-anchor="start" x="8" y="-356.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ pieceGapPx</text>
+<text text-anchor="start" x="8" y="-345.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ unit</text>
+<text text-anchor="start" x="8" y="-334.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ mediaType</text>
+<text text-anchor="start" x="8" y="-323.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ paperType</text>
+<text text-anchor="start" x="8" y="-312.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 26 more...</text>
 <text text-anchor="start" x="8" y="-301.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_layoutMode</text>
 <text text-anchor="start" x="8" y="-290.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_rotationStep</text>
 <text text-anchor="start" x="8" y="-279.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_noGrainlineRotation</text>
-<text text-anchor="start" x="8" y="-268.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_fabricFolded</text>
-<text text-anchor="start" x="8" y="-257.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_pieceGap</text>
-<text text-anchor="start" x="8" y="-246.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_unit</text>
-<text text-anchor="start" x="8" y="-235.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_mediaType</text>
-<text text-anchor="start" x="8" y="-224.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_paperType</text>
-<text text-anchor="start" x="8" y="-213.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_sheetName</text>
-<text text-anchor="start" x="8" y="-202.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_pageWidth</text>
-<text text-anchor="start" x="8" y="-191.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 12 more...</text>
+<text text-anchor="start" x="8" y="-268.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_multisizeLayout</text>
+<text text-anchor="start" x="8" y="-257.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_fabricFolded</text>
+<text text-anchor="start" x="8" y="-246.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_pieceGap</text>
+<text text-anchor="start" x="8" y="-235.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_unit</text>
+<text text-anchor="start" x="8" y="-224.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_mediaType</text>
+<text text-anchor="start" x="8" y="-213.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_paperType</text>
+<text text-anchor="start" x="8" y="-202.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_sheetName</text>
+<text text-anchor="start" x="8" y="-191.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 13 more...</text>
 <polyline fill="none" stroke="#666666" points="0,-184.5 191,-184.5 "/>
 <text text-anchor="start" x="8" y="-172.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ SettingsModel()</text>
 <text text-anchor="start" x="8" y="-161.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ layoutMode()</text>
 <text text-anchor="start" x="8" y="-150.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ rotationStep()</text>
 <text text-anchor="start" x="8" y="-139.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ noGrainlineRotation()</text>
-<text text-anchor="start" x="8" y="-128.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ fabricFolded()</text>
-<text text-anchor="start" x="8" y="-117.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ pieceGap()</text>
-<text text-anchor="start" x="8" y="-106.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ pieceGapPx()</text>
-<text text-anchor="start" x="8" y="-95.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ unit()</text>
-<text text-anchor="start" x="8" y="-84.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ mediaType()</text>
-<text text-anchor="start" x="8" y="-73.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ paperType()</text>
-<text text-anchor="start" x="8" y="-62.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 57 more...</text>
+<text text-anchor="start" x="8" y="-128.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ multisizeLayout()</text>
+<text text-anchor="start" x="8" y="-117.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ fabricFolded()</text>
+<text text-anchor="start" x="8" y="-106.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ pieceGap()</text>
+<text text-anchor="start" x="8" y="-95.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ pieceGapPx()</text>
+<text text-anchor="start" x="8" y="-84.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ unit()</text>
+<text text-anchor="start" x="8" y="-73.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ mediaType()</text>
+<text text-anchor="start" x="8" y="-62.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 59 more...</text>
 <text text-anchor="start" x="8" y="-51.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ urlToLocalFile()</text>
 <text text-anchor="start" x="8" y="-40.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ localFileToUrl()</text>
 <text text-anchor="start" x="8" y="-29.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ defaultSettingsFilePath()</text>

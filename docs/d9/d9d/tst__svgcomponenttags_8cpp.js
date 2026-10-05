@@ -1,6 +1,7 @@
 var tst__svgcomponenttags_8cpp =
 [
-    [ "exportItemSvg", "d9/d9d/tst__svgcomponenttags_8cpp.html#ab7c2fdd94025a79b26f1577448cf1671", null ],
+    [ "exportItemSvg", "d9/d9d/tst__svgcomponenttags_8cpp.html#a27da0434d7f72bad00d9eeed96ee2bee", null ],
+    [ "exportMultisizeSvg", "d9/d9d/tst__svgcomponenttags_8cpp.html#ad47b7ad9b60c1f33b54772c1786e2e78", null ],
     [ "exportPieceSvg", "d9/d9d/tst__svgcomponenttags_8cpp.html#a8b59c6ab4d866c88a86bdda091c4f169", null ],
     [ "exportTwoPiecesSvg", "d9/d9d/tst__svgcomponenttags_8cpp.html#a15eca5b1d1c23a36c7ed89b0f67b0375", null ],
     [ "groupsOfType", "d9/d9d/tst__svgcomponenttags_8cpp.html#a2d7b69f1bd0c5ecc33e37213be6dcc55", null ],

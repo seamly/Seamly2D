@@ -1,5 +1,6 @@
 var NAVTREEINDEX7 =
 {
+"d0/d91/measurements__def_8h.html#a2952bf43b8e3537fd93c9b4d2d3df077":[6,0,0,1,10,5,159],
 "d0/d91/measurements__def_8h.html#a2b50f04df6538ee843ab1182c26103b6":[6,0,0,1,10,5,244],
 "d0/d91/measurements__def_8h.html#a2c03ac56dc24195bd585c4bcc11668bc":[6,0,0,1,10,5,186],
 "d0/d91/measurements__def_8h.html#a2cfb572f608268348653770a64832121":[6,0,0,1,10,5,23],
@@ -248,6 +249,5 @@ var NAVTREEINDEX7 =
 "d0/d9b/classAbstractTest.html#af3304a7cc8ca2a0dfbde732ce8961106":[5,0,11,1],
 "d0/d9b/mingw_2include_2xercesc_2framework_2XMLGrammarDescription_8hpp.html":[6,0,0,1,15,1,0,0,1,27],
 "d0/d9b/mingw_2include_2xercesc_2framework_2XMLGrammarDescription_8hpp_source.html":[6,0,0,1,15,1,0,0,1,27],
-"d0/d9e/macx_2include_2xercesc_2framework_2psvi_2XSIDCDefinition_8hpp.html":[6,0,0,1,15,0,0,0,1,0,13],
-"d0/d9e/macx_2include_2xercesc_2framework_2psvi_2XSIDCDefinition_8hpp_source.html":[6,0,0,1,15,0,0,0,1,0,13]
+"d0/d9e/macx_2include_2xercesc_2framework_2psvi_2XSIDCDefinition_8hpp.html":[6,0,0,1,15,0,0,0,1,0,13]
 };

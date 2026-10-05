@@ -1,6 +1,7 @@
 var classLoggerTests =
 [
     [ "cleanupTestCase", "d9/d9b/classLoggerTests.html#a13a11ac107bc26b501e4ddcd7cbf0cdd", null ],
+    [ "concurrentWriters_lineArrivesWholeAndInOrder", "d9/d9b/classLoggerTests.html#a703027e37e814259bee5c1bb48629e97", null ],
     [ "init_removesStaleLogFiles", "d9/d9b/classLoggerTests.html#a63a5f3675dca0e2f153459b1dd79024d", null ],
     [ "initTestCase", "d9/d9b/classLoggerTests.html#a561c860547e23b5dcc6c2f44bbf836f8", null ],
     [ "logDirectory_carriesTheOrganizationAndApplication", "d9/d9b/classLoggerTests.html#af159bd70d66912d58786ba234de0852b", null ],

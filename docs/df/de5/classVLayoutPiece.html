@@ -136,12 +136,14 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a9a28f7a23f8fd55145e0214f8d8355ff"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a312763885cad8574f3d35b13a6be7b57"><td class="memItemLeft" align="right" valign="top">QVector&lt; QPointF &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/de5/classVLayoutPiece.html#a312763885cad8574f3d35b13a6be7b57">getContourPoints</a> () const</td></tr>
 <tr class="separator:a312763885cad8574f3d35b13a6be7b57"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af2efdecc1d0a06c2b9bac4dc56f7c092"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/de5/classVLayoutPiece.html#af2efdecc1d0a06c2b9bac4dc56f7c092">setMainPathPoints</a> (const QVector&lt; QPointF &gt; &amp;points, bool hideMainPath=false)</td></tr>
-<tr class="separator:af2efdecc1d0a06c2b9bac4dc56f7c092"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7ddab4f9503b021beddb01ecbcc4cc8a"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/de5/classVLayoutPiece.html#a7ddab4f9503b021beddb01ecbcc4cc8a">setMainPathPoints</a> (const QVector&lt; QPointF &gt; &amp;points, bool hideMainPath=false, const QVector&lt; QPointF &gt; &amp;nodeVertices=QVector&lt; QPointF &gt;())</td></tr>
+<tr class="memdesc:a7ddab4f9503b021beddb01ecbcc4cc8a"><td class="mdescLeft">&#160;</td><td class="mdescRight">setMainPathPoints stores the main path (seam line) polyline.  <br /></td></tr>
+<tr class="separator:a7ddab4f9503b021beddb01ecbcc4cc8a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a1f2dd2aa6c6cd1338569e12b34fa2dee"><td class="memItemLeft" align="right" valign="top">QVector&lt; QPointF &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/de5/classVLayoutPiece.html#a1f2dd2aa6c6cd1338569e12b34fa2dee">getSeamAllowancePoints</a> () const</td></tr>
 <tr class="separator:a1f2dd2aa6c6cd1338569e12b34fa2dee"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aaaa0520c162fc8a9181b319fd8a52f3f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/de5/classVLayoutPiece.html#aaaa0520c162fc8a9181b319fd8a52f3f">setSeamAllowancePoints</a> (const QVector&lt; QPointF &gt; &amp;points, bool seamAllowance=true, bool seamAllowanceBuiltIn=false)</td></tr>
-<tr class="separator:aaaa0520c162fc8a9181b319fd8a52f3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac36b6ee2ecdfea9d628eb178f4a19274"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/de5/classVLayoutPiece.html#ac36b6ee2ecdfea9d628eb178f4a19274">setSeamAllowancePoints</a> (const QVector&lt; QPointF &gt; &amp;points, bool seamAllowance=true, bool seamAllowanceBuiltIn=false, const QVector&lt; QPointF &gt; &amp;nodeVertices=QVector&lt; QPointF &gt;())</td></tr>
+<tr class="memdesc:ac36b6ee2ecdfea9d628eb178f4a19274"><td class="mdescLeft">&#160;</td><td class="mdescRight">setSeamAllowancePoints stores the seam allowance (cut line) polyline.  <br /></td></tr>
+<tr class="separator:ac36b6ee2ecdfea9d628eb178f4a19274"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9449a4506a87a1f96e0a13d3c4326109"><td class="memItemLeft" align="right" valign="top">QVector&lt; QPointF &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/de5/classVLayoutPiece.html#a9449a4506a87a1f96e0a13d3c4326109">getLayoutAllowancePoints</a> () const</td></tr>
 <tr class="separator:a9449a4506a87a1f96e0a13d3c4326109"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a83c09c5cbdd5bc5367456c667481dbec"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/de5/classVLayoutPiece.html#a83c09c5cbdd5bc5367456c667481dbec">SetLayoutAllowancePoints</a> ()</td></tr>
@@ -300,8 +302,12 @@ Static Public Member Functions</h2></td></tr>
 <tr class="memitem:abe6f5851868f4e1153bd6905ba9a25c7"><td class="memItemLeft" align="right" valign="top">static <a class="el" href="../../df/de5/classVLayoutPiece.html">VLayoutPiece</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/de5/classVLayoutPiece.html#abe6f5851868f4e1153bd6905ba9a25c7">Create</a> (const <a class="el" href="../../d0/dab/classVPiece.html">VPiece</a> &amp;piece, const <a class="el" href="../../d2/d83/classVContainer.html">VContainer</a> *pattern)</td></tr>
 <tr class="separator:abe6f5851868f4e1153bd6905ba9a25c7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_static_methods_classVAbstractPiece"><td colspan="2" onclick="javascript:toggleInherit('pub_static_methods_classVAbstractPiece')"><img src="../../closed.png" alt="-"/>&#160;Static Public Member Functions inherited from <a class="el" href="../../dd/dfe/classVAbstractPiece.html">VAbstractPiece</a></td></tr>
-<tr class="memitem:a292f7d4da418ba3514ae7678cb4d0a79 inherit pub_static_methods_classVAbstractPiece"><td class="memItemLeft" align="right" valign="top">static QVector&lt; QPointF &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/dfe/classVAbstractPiece.html#a292f7d4da418ba3514ae7678cb4d0a79">Equidistant</a> (const QVector&lt; <a class="el" href="../../da/dac/classVSAPoint.html">VSAPoint</a> &gt; &amp;points, qreal width)</td></tr>
-<tr class="separator:a292f7d4da418ba3514ae7678cb4d0a79 inherit pub_static_methods_classVAbstractPiece"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad4e9b39db2de7517b333f824b35dc4f9 inherit pub_static_methods_classVAbstractPiece"><td class="memItemLeft" align="right" valign="top">static QVector&lt; QPointF &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/dfe/classVAbstractPiece.html#ad4e9b39db2de7517b333f824b35dc4f9">Equidistant</a> (const QVector&lt; <a class="el" href="../../da/dac/classVSAPoint.html">VSAPoint</a> &gt; &amp;points, qreal width, QVector&lt; QPointF &gt; *nodeVertices=nullptr)</td></tr>
+<tr class="memdesc:ad4e9b39db2de7517b333f824b35dc4f9 inherit pub_static_methods_classVAbstractPiece"><td class="mdescLeft">&#160;</td><td class="mdescRight">Equidistant builds the seam allowance polyline around the main path.  <br /></td></tr>
+<tr class="separator:ad4e9b39db2de7517b333f824b35dc4f9 inherit pub_static_methods_classVAbstractPiece"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aba2225590933f6770c7244b6ce12101e inherit pub_static_methods_classVAbstractPiece"><td class="memItemLeft" align="right" valign="top">static QVector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/dfe/classVAbstractPiece.html#aba2225590933f6770c7244b6ce12101e">turnPointIndices</a> (const QVector&lt; QPointF &gt; &amp;points, const QVector&lt; QPointF &gt; &amp;nodeVertices, bool closed)</td></tr>
+<tr class="memdesc:aba2225590933f6770c7244b6ce12101e inherit pub_static_methods_classVAbstractPiece"><td class="mdescLeft">&#160;</td><td class="mdescRight">turnPointIndices finds the turn points of a polyline: the vertices where the tangent breaks.  <br /></td></tr>
+<tr class="separator:aba2225590933f6770c7244b6ce12101e inherit pub_static_methods_classVAbstractPiece"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5777b88093be5350bcabe027b5d06843 inherit pub_static_methods_classVAbstractPiece"><td class="memItemLeft" align="right" valign="top">static qreal&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/dfe/classVAbstractPiece.html#a5777b88093be5350bcabe027b5d06843">sumTrapezoids</a> (const QVector&lt; QPointF &gt; &amp;points)</td></tr>
 <tr class="separator:a5777b88093be5350bcabe027b5d06843 inherit pub_static_methods_classVAbstractPiece"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a11d660242b47335f8fed94c19c661e45 inherit pub_static_methods_classVAbstractPiece"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/dfe/classVAbstractPiece.html#a11d660242b47335f8fed94c19c661e45">isClockwise</a> (const QVector&lt; QPointF &gt; &amp;points)</td></tr>
@@ -393,7 +399,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00397">397</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00414">414</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
 </div>
 </div>
@@ -413,7 +419,7 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00403">403</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00420">420</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
 </div>
 </div>
@@ -440,7 +446,7 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00421">421</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00438">438</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
 </div>
 </div>
@@ -479,11 +485,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00425">425</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">442</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01070">createAllowancePath()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01050">createMainPath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00286">VPiece::createNotchLines()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00583">VPiece::GetGrainlineGeometry()</a>, <a class="el" href="../../de/d4a/vpiecelabeldata_8cpp_source.html#l00077">VPieceLabelData::GetLetter()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01081">VAbstractPiece::GetMx()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01093">VAbstractPiece::GetMy()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00098">VAbstractPiece::GetName()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00565">VPiece::GetPatternInfo()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00541">VPiece::GetPatternPieceData()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00195">VAbstractPiece::GetSAWidth()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00147">VAbstractPiece::IsForbidFlipping()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00183">VAbstractPiece::isHideSeamLine()</a>, <a class="el" href="../../d1/d6b/vabstractfloatitemdata_8cpp_source.html#l00101">VAbstractFloatItemData::IsVisible()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00173">VPiece::mainPathPoints()</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00187">VPiece::seamAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01022">setCutoutPaths()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00153">VAbstractPiece::SetForbidFlipping()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00717">setGrainAxis()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00663">setGrainline()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01010">setInternalPaths()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00507">setMainPathPoints()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01087">VAbstractPiece::SetMx()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01099">VAbstractPiece::SetMy()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00104">VAbstractPiece::SetName()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00979">setNotches()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00625">setPatternText()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00494">setPieceLetter()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00566">setPieceText()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00201">VAbstractPiece::SetSAWidth()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00521">setSeamAllowancePoints()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01113">createAllowancePath()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01093">createMainPath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00306">VPiece::createNotchLines()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00606">VPiece::GetGrainlineGeometry()</a>, <a class="el" href="../../de/d4a/vpiecelabeldata_8cpp_source.html#l00077">VPieceLabelData::GetLetter()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01226">VAbstractPiece::GetMx()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01238">VAbstractPiece::GetMy()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00098">VAbstractPiece::GetName()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00588">VPiece::GetPatternInfo()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00564">VPiece::GetPatternPieceData()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00195">VAbstractPiece::GetSAWidth()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00147">VAbstractPiece::IsForbidFlipping()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00183">VAbstractPiece::isHideSeamLine()</a>, <a class="el" href="../../d1/d6b/vabstractfloatitemdata_8cpp_source.html#l00101">VAbstractFloatItemData::IsVisible()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00191">VPiece::mainPathNodeVertices()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00173">VPiece::mainPathPoints()</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00201">VPiece::seamAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01065">setCutoutPaths()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00153">VAbstractPiece::SetForbidFlipping()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00760">setGrainAxis()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00706">setGrainline()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01053">setInternalPaths()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00533">setMainPathPoints()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01232">VAbstractPiece::SetMx()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01244">VAbstractPiece::SetMy()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00104">VAbstractPiece::SetName()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01022">setNotches()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00668">setPatternText()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00515">setPieceLetter()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00609">setPieceText()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00201">VAbstractPiece::SetSAWidth()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00558">setSeamAllowancePoints()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00840">MainWindowsNoGUI::preparePiecesForLayout()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00892">MainWindowsNoGUI::preparePiecesForLayout()</a>, and <a class="el" href="../../d8/de8/mainwindowsnogui_8cpp_source.html#l00921">MainWindowsNoGUI::prepareSizePieceList()</a>.</p>
 
 </div>
 </div>
@@ -519,11 +525,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01438">1438</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01484">1484</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01070">createAllowancePath()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, <a class="el" href="../../de/d31/ifcdef_8cpp_source.html#l00192">lineTypeToPenStyle()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00086">PieceItemData::ObjectName</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01113">createAllowancePath()</a>, <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, <a class="el" href="../../de/d31/ifcdef_8cpp_source.html#l00192">lineTypeToPenStyle()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00086">PieceItemData::ObjectName</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01188">GetItem()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">GetItem()</a>.</p>
 
 </div>
 </div>
@@ -542,11 +548,11 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01070">1070</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01113">1113</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00515">getSeamAllowancePoints()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00547">getSeamAllowancePoints()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00425">Create()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01438">createAllowanceItem()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">Create()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01484">createAllowanceItem()</a>.</p>
 
 </div>
 </div>
@@ -593,11 +599,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01146">1146</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01190">1190</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01188">GetItem()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">GetItem()</a>.</p>
 
 </div>
 </div>
@@ -644,11 +650,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01362">1362</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01407">1407</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00706">getGrainline()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00086">PieceItemData::ObjectName</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00749">getGrainline()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00086">PieceItemData::ObjectName</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01188">GetItem()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">GetItem()</a>.</p>
 
 </div>
 </div>
@@ -695,11 +701,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01127">1127</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01170">1170</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01188">GetItem()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">GetItem()</a>.</p>
 
 </div>
 </div>
@@ -769,11 +775,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01244">1244</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01289">1289</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d7/df6/vtextmanager_8h_source.html#l00054">TextLine::bold</a>, <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, <a class="el" href="../../d8/d70/vtextmanager_8cpp_source.html#l00246">VTextManager::GetFont()</a>, <a class="el" href="../../d8/d70/vtextmanager_8cpp_source.html#l00280">VTextManager::GetSourceLine()</a>, <a class="el" href="../../d8/d70/vtextmanager_8cpp_source.html#l00270">VTextManager::GetSourceLinesCount()</a>, <a class="el" href="../../d8/d70/vtextmanager_8cpp_source.html#l00228">VTextManager::GetSpacing()</a>, <a class="el" href="../../d7/df6/vtextmanager_8h_source.html#l00055">TextLine::italic</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, <a class="el" href="../../d7/df6/vtextmanager_8h_source.html#l00056">TextLine::m_eAlign</a>, <a class="el" href="../../d7/df6/vtextmanager_8h_source.html#l00053">TextLine::m_iFontSize</a>, <a class="el" href="../../d7/df6/vtextmanager_8h_source.html#l00052">TextLine::m_text</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00086">PieceItemData::ObjectName</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>, and <a class="el" href="../../db/d7d/global_8cpp_source.html#l00061">widthHairLine</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/df6/vtextmanager_8h_source.html#l00054">TextLine::bold</a>, <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../d8/d70/vtextmanager_8cpp_source.html#l00246">VTextManager::GetFont()</a>, <a class="el" href="../../d8/d70/vtextmanager_8cpp_source.html#l00280">VTextManager::GetSourceLine()</a>, <a class="el" href="../../d8/d70/vtextmanager_8cpp_source.html#l00270">VTextManager::GetSourceLinesCount()</a>, <a class="el" href="../../d8/d70/vtextmanager_8cpp_source.html#l00228">VTextManager::GetSpacing()</a>, <a class="el" href="../../d7/df6/vtextmanager_8h_source.html#l00055">TextLine::italic</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, <a class="el" href="../../d7/df6/vtextmanager_8h_source.html#l00056">TextLine::m_eAlign</a>, <a class="el" href="../../d7/df6/vtextmanager_8h_source.html#l00053">TextLine::m_iFontSize</a>, <a class="el" href="../../d7/df6/vtextmanager_8h_source.html#l00052">TextLine::m_text</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00086">PieceItemData::ObjectName</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>, and <a class="el" href="../../db/d7d/global_8cpp_source.html#l00061">widthHairLine</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01188">GetItem()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">GetItem()</a>.</p>
 
 </div>
 </div>
@@ -792,11 +798,11 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01050">1050</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01093">1093</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00501">getContourPoints()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00183">VAbstractPiece::isHideSeamLine()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00522">getContourPoints()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00183">VAbstractPiece::isHideSeamLine()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00425">Create()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01408">createSeamlineItem()</a>, and <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00298">VPosition::intersectionType()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">Create()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01453">createSeamlineItem()</a>, and <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00298">VPosition::intersectionType()</a>.</p>
 
 </div>
 </div>
@@ -832,11 +838,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01459">1459</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01506">1506</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01102">createNotchesPath()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00973">getNotches()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00086">PieceItemData::ObjectName</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01145">createNotchesPath()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01016">getNotches()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00086">PieceItemData::ObjectName</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01188">GetItem()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">GetItem()</a>.</p>
 
 </div>
 </div>
@@ -855,11 +861,11 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01102">1102</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01145">1145</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00973">getNotches()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01016">getNotches()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01459">createNotchesItem()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01506">createNotchesItem()</a>.</p>
 
 </div>
 </div>
@@ -896,11 +902,11 @@ Additional Inherited Members</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01408">1408</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01453">1453</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01050">createMainPath()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, <a class="el" href="../../de/d31/ifcdef_8cpp_source.html#l00192">lineTypeToPenStyle()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00086">PieceItemData::ObjectName</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01093">createMainPath()</a>, <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, <a class="el" href="../../de/d31/ifcdef_8cpp_source.html#l00192">lineTypeToPenStyle()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00086">PieceItemData::ObjectName</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>, and <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00223">ToPixel()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01188">GetItem()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">GetItem()</a>.</p>
 
 </div>
 </div>
@@ -919,9 +925,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00904">904</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00947">947</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00896">LayoutBoundingRect()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00939">LayoutBoundingRect()</a>.</p>
 
 </div>
 </div>
@@ -959,11 +965,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01510">1510</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01557">1557</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00861">LayoutEdge()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00855">pieceEdge()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00904">LayoutEdge()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00898">pieceEdge()</a>.</p>
 
 </div>
 </div>
@@ -1001,11 +1007,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01544">1544</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01591">1591</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01029">Map()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01072">Map()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00873">LayoutEdgeByPoint()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00867">pieceEdgeByPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00916">LayoutEdgeByPoint()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00910">pieceEdgeByPoint()</a>.</p>
 
 </div>
 </div>
@@ -1024,11 +1030,11 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00501">501</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00522">522</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01029">Map()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01072">Map()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d7f/tst__vlayoutdetail_8cpp_source.html#l00077">TST_VLayoutPiece::Case1()</a>, <a class="el" href="../../df/d7f/tst__vlayoutdetail_8cpp_source.html#l00140">TST_VLayoutPiece::Case2()</a>, <a class="el" href="../../df/d7f/tst__vlayoutdetail_8cpp_source.html#l00181">TST_VLayoutPiece::Case3()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01050">createMainPath()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00702">VDxfEngine::ExportAAMADraw()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00682">VDxfEngine::ExportAAMAOutline()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01477">getMainPathItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00879">pieceBoundingRect()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00945">SetLayoutAllowancePoints()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d7f/tst__vlayoutdetail_8cpp_source.html#l00077">TST_VLayoutPiece::Case1()</a>, <a class="el" href="../../df/d7f/tst__vlayoutdetail_8cpp_source.html#l00140">TST_VLayoutPiece::Case2()</a>, <a class="el" href="../../df/d7f/tst__vlayoutdetail_8cpp_source.html#l00181">TST_VLayoutPiece::Case3()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01093">createMainPath()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00702">VDxfEngine::ExportAAMADraw()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00682">VDxfEngine::ExportAAMAOutline()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01524">getMainPathItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00922">pieceBoundingRect()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00988">SetLayoutAllowancePoints()</a>.</p>
 
 </div>
 </div>
@@ -1047,9 +1053,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01016">1016</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01059">1059</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
 </div>
 </div>
@@ -1068,11 +1074,11 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00706">706</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00749">749</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01029">Map()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01072">Map()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01362">createGrainlineItem()</a>, and <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00757">VDxfEngine::ExportAAMAGrainline()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01407">createGrainlineItem()</a>, and <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00757">VDxfEngine::ExportAAMAGrainline()</a>.</p>
 
 </div>
 </div>
@@ -1091,9 +1097,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01004">1004</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01047">1047</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
 </div>
 </div>
@@ -1123,11 +1129,11 @@ Additional Inherited Members</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>root QGraphicsItem owning all component child items. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01188">1188</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">1233</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01438">createAllowanceItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01146">createCutoutPathItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01362">createGrainlineItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01127">createInternalPathItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01244">createLabelItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01459">createNotchesItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01408">createSeamlineItem()</a>, <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00098">VAbstractPiece::GetName()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00484">getPieceLetter()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00089">PieceItemData::GrainlineAngle</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00749">grainlineAngle()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00086">PieceItemData::ObjectName</a>, and <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00088">PieceItemData::PieceLetter</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01484">createAllowanceItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01190">createCutoutPathItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01407">createGrainlineItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01170">createInternalPathItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01289">createLabelItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01506">createNotchesItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01453">createSeamlineItem()</a>, <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00098">VAbstractPiece::GetName()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00505">getPieceLetter()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00089">PieceItemData::GrainlineAngle</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00792">grainlineAngle()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00086">PieceItemData::ObjectName</a>, and <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00088">PieceItemData::PieceLetter</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00272">TST_SvgComponentTags::CutoutTaggedAsCutPath()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00467">TST_SvgComponentTags::EmptyComponentAwayFromOriginEmitsNoGroup()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00188">anonymous_namespace{tst_svgcomponenttags.cpp}::exportPieceSvg()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00202">anonymous_namespace{tst_svgcomponenttags.cpp}::exportTwoPiecesSvg()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00488">TST_SvgComponentTags::HiddenGrainlineKeepsGrainAngle()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00442">TST_SvgComponentTags::PieceWithoutNotchesEmitsNoNotchGroup()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00323">TST_SvgComponentTags::CutoutTaggedAsCutPath()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00518">TST_SvgComponentTags::EmptyComponentAwayFromOriginEmitsNoGroup()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00242">anonymous_namespace{tst_svgcomponenttags.cpp}::exportMultisizeSvg()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00191">anonymous_namespace{tst_svgcomponenttags.cpp}::exportPieceSvg()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00205">anonymous_namespace{tst_svgcomponenttags.cpp}::exportTwoPiecesSvg()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00539">TST_SvgComponentTags::HiddenGrainlineKeepsGrainAngle()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00493">TST_SvgComponentTags::PieceWithoutNotchesEmitsNoNotchGroup()</a>.</p>
 
 </div>
 </div>
@@ -1146,11 +1152,11 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00541">541</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00584">584</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01029">Map()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01072">Map()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01160">LayoutAllowancePath()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00896">LayoutBoundingRect()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01205">LayoutAllowancePath()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00939">LayoutBoundingRect()</a>.</p>
 
 </div>
 </div>
@@ -1169,9 +1175,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00780">780</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00823">823</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
 </div>
 </div>
@@ -1198,11 +1204,11 @@ Additional Inherited Members</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01477">1477</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01524">1524</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00501">getContourPoints()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00522">getContourPoints()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00663">setGrainline()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00625">setPatternText()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00566">setPieceText()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00706">setGrainline()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00668">setPatternText()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00609">setPieceText()</a>.</p>
 
 </div>
 </div>
@@ -1221,11 +1227,11 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00973">973</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01016">1016</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01029">Map()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01072">Map()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01459">createNotchesItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01102">createNotchesPath()</a>, and <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00740">VDxfEngine::ExportAAMANotch()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01506">createNotchesItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01145">createNotchesPath()</a>, and <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00740">VDxfEngine::ExportAAMANotch()</a>.</p>
 
 </div>
 </div>
@@ -1244,9 +1250,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00619">619</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00662">662</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
 </div>
 </div>
@@ -1265,9 +1271,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00606">606</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00649">649</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
 </div>
 </div>
@@ -1289,11 +1295,11 @@ Additional Inherited Members</h2></td></tr>
 <p>getPieceLetter returns the piece letter entered in the piece label data. </p>
 <dl class="section return"><dt>Returns</dt><dd>piece letter, or an empty string when none was set. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00484">484</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00505">505</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01188">GetItem()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">GetItem()</a>.</p>
 
 </div>
 </div>
@@ -1312,9 +1318,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00560">560</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00603">603</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00771">VDxfEngine::ExportAAMAText()</a>.</p>
 
@@ -1335,9 +1341,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00547">547</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00590">590</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00771">VDxfEngine::ExportAAMAText()</a>.</p>
 
@@ -1358,11 +1364,11 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00515">515</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00547">547</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01029">Map()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01072">Map()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01070">createAllowancePath()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00682">VDxfEngine::ExportAAMAOutline()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00879">pieceBoundingRect()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00945">SetLayoutAllowancePoints()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01113">createAllowancePath()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00682">VDxfEngine::ExportAAMAOutline()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00922">pieceBoundingRect()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00988">SetLayoutAllowancePoints()</a>.</p>
 
 </div>
 </div>
@@ -1381,9 +1387,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00768">768</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00811">811</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00157">VPosition::saveCandidate()</a>.</p>
 
@@ -1414,11 +1420,11 @@ Additional Inherited Members</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>false when the piece has no grain direction. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00749">749</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00792">792</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01029">Map()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01072">Map()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00626">TST_SvgComponentTags::DownwardGrainAxisPointsUp()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01188">GetItem()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00510">TST_SvgComponentTags::GrainAngleFollowsPieceTransform()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00488">TST_SvgComponentTags::HiddenGrainlineKeepsGrainAngle()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00549">TST_SvgComponentTags::PieceWithoutGrainHasNoGrainlineAngle()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00677">TST_SvgComponentTags::DownwardGrainAxisPointsUp()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">GetItem()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00561">TST_SvgComponentTags::GrainAngleFollowsPieceTransform()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00539">TST_SvgComponentTags::HiddenGrainlineKeepsGrainAngle()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00600">TST_SvgComponentTags::PieceWithoutGrainHasNoGrainlineAngle()</a>.</p>
 
 </div>
 </div>
@@ -1438,9 +1444,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00988">988</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01031">1031</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01029">Map()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01072">Map()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00716">VDxfEngine::ExportAAMAIntcut()</a>.</p>
 
@@ -1461,9 +1467,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01498">1498</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01545">1545</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00157">VPosition::saveCandidate()</a>.</p>
 
@@ -1484,9 +1490,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00911">911</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00954">954</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>.</p>
 
 </div>
 </div>
@@ -1505,9 +1511,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01160">1160</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01205">1205</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00541">getLayoutAllowancePoints()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00584">getLayoutAllowancePoints()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00298">VPosition::intersectionType()</a>.</p>
 
@@ -1528,11 +1534,11 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00896">896</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00939">939</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00541">getLayoutAllowancePoints()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00584">getLayoutAllowancePoints()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00904">Diagonal()</a>, and <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00298">VPosition::intersectionType()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00947">Diagonal()</a>, and <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00298">VPosition::intersectionType()</a>.</p>
 
 </div>
 </div>
@@ -1552,9 +1558,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00861">861</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00904">904</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01510">Edge()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01557">Edge()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d5d/vcontour_8cpp_source.html#l00366">VContour::AppendWhole()</a>, <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00344">VPosition::combineEdges()</a>, <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00383">VPosition::rotateEdges()</a>, and <a class="el" href="../../df/d5d/vcontour_8cpp_source.html#l00158">VContour::UniteWithContour()</a>.</p>
 
@@ -1576,9 +1582,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00873">873</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00916">916</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01544">EdgeByPoint()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01591">EdgeByPoint()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00178">VPosition::edgesIntersect()</a>.</p>
 
@@ -1599,9 +1605,9 @@ Additional Inherited Members</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00849">849</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00892">892</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d1/dd1/vlayoutpaper_8cpp_source.html#l00378">VLayoutPaper::addToSheet()</a>, <a class="el" href="../../df/d5d/vcontour_8cpp_source.html#l00366">VContour::AppendWhole()</a>, <a class="el" href="../../d1/dd1/vlayoutpaper_8cpp_source.html#l00330">VLayoutPaper::arrangePiece()</a>, and <a class="el" href="../../df/d5d/vcontour_8cpp_source.html#l00158">VContour::UniteWithContour()</a>.</p>
 
@@ -1633,11 +1639,11 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01029">1029</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01072">1072</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01544">EdgeByPoint()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00501">getContourPoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00706">getGrainline()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00541">getLayoutAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00973">getNotches()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00515">getSeamAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00749">grainlineAngle()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00988">internalPathsForCut()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01591">EdgeByPoint()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00522">getContourPoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00749">getGrainline()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00584">getLayoutAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01016">getNotches()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00547">getSeamAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00792">grainlineAngle()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01031">internalPathsForCut()</a>.</p>
 
 </div>
 </div>
@@ -1657,9 +1663,9 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00810">810</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00853">853</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00178">VPosition::edgesIntersect()</a>.</p>
 
@@ -1681,9 +1687,9 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00409">409</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">426</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00083">VAbstractPiece::operator=()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00083">VAbstractPiece::operator=()</a>.</p>
 
 </div>
 </div>
@@ -1702,9 +1708,9 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00879">879</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00922">922</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00501">getContourPoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00515">getSeamAllowancePoints()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00522">getContourPoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00547">getSeamAllowancePoints()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00178">VPosition::edgesIntersect()</a>, <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00298">VPosition::intersectionType()</a>, and <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00261">VPosition::rotatedEdgeIntersects()</a>.</p>
 
@@ -1726,9 +1732,9 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00855">855</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00898">898</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01510">Edge()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01387">piecePath()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01557">Edge()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01432">piecePath()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00344">VPosition::combineEdges()</a>, and <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00383">VPosition::rotateEdges()</a>.</p>
 
@@ -1750,9 +1756,9 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00867">867</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00910">910</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01544">EdgeByPoint()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01387">piecePath()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01591">EdgeByPoint()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01432">piecePath()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00178">VPosition::edgesIntersect()</a>.</p>
 
@@ -1773,9 +1779,9 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00843">843</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00886">886</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01387">piecePath()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01432">piecePath()</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d1/dd1/vlayoutpaper_8cpp_source.html#l00378">VLayoutPaper::addToSheet()</a>, and <a class="el" href="../../d1/dd1/vlayoutpaper_8cpp_source.html#l00330">VLayoutPaper::arrangePiece()</a>.</p>
 
@@ -1804,11 +1810,11 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01387">1387</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01432">1432</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00855">pieceEdge()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00867">pieceEdgeByPoint()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00843">pieceEdgesCount()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00898">pieceEdge()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00910">pieceEdgeByPoint()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00886">pieceEdgesCount()</a>.</p>
 
 </div>
 </div>
@@ -1838,9 +1844,9 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00800">800</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00843">843</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00344">VPosition::combineEdges()</a>, and <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00383">VPosition::rotateEdges()</a>.</p>
 
@@ -1862,11 +1868,11 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01022">1022</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01065">1065</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00425">Create()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00093">anonymous_namespace{tst_svgcomponenttags.cpp}::makeTestPiece()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">Create()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00094">anonymous_namespace{tst_svgcomponenttags.cpp}::makeTestPiece()</a>.</p>
 
 </div>
 </div>
@@ -1905,11 +1911,11 @@ template&lt;class T &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00717">717</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00760">760</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../de/d65/vgrainlinedata_8cpp_source.html#l00167">VGrainlineData::bottomAnchorPoint()</a>, <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, <a class="el" href="../../d3/da5/ifcdef_8h_source.html#l00076">NULL_ID</a>, <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>, <a class="el" href="../../de/d65/vgrainlinedata_8cpp_source.html#l00155">VGrainlineData::topAnchorPoint()</a>, and <a class="el" href="../../de/d65/vgrainlinedata_8cpp_source.html#l00184">VGrainlineData::upwardAngle()</a>.</p>
+<p class="reference">References <a class="el" href="../../de/d65/vgrainlinedata_8cpp_source.html#l00167">VGrainlineData::bottomAnchorPoint()</a>, <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../d3/da5/ifcdef_8h_source.html#l00076">NULL_ID</a>, <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>, <a class="el" href="../../de/d65/vgrainlinedata_8cpp_source.html#l00155">VGrainlineData::topAnchorPoint()</a>, and <a class="el" href="../../de/d65/vgrainlinedata_8cpp_source.html#l00184">VGrainlineData::upwardAngle()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00425">Create()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00122">anonymous_namespace{tst_svgcomponenttags.cpp}::setHiddenGrain()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">Create()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00123">anonymous_namespace{tst_svgcomponenttags.cpp}::setHiddenGrain()</a>.</p>
 
 </div>
 </div>
@@ -1939,11 +1945,11 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00663">663</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00706">706</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, <a class="el" href="../../de/d65/vgrainlinedata_8cpp_source.html#l00119">VGrainlineData::getArrowType()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01477">getMainPathItem()</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../de/d65/vgrainlinedata_8cpp_source.html#l00119">VGrainlineData::getArrowType()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01524">getMainPathItem()</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00435">SCASSERT</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00425">Create()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">Create()</a>.</p>
 
 </div>
 </div>
@@ -1963,11 +1969,11 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01010">1010</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01053">1053</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00425">Create()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00093">anonymous_namespace{tst_svgcomponenttags.cpp}::makeTestPiece()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">Create()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00094">anonymous_namespace{tst_svgcomponenttags.cpp}::makeTestPiece()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00809">TST_SvgComponentTags::PathComponentsCarryTurnPoints()</a>.</p>
 
 </div>
 </div>
@@ -1986,9 +1992,9 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00945">945</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00988">988</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00207">VAbstractPiece::Equidistant()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00501">getContourPoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00515">getSeamAllowancePoints()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00212">VAbstractPiece::Equidistant()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00522">getContourPoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00547">getSeamAllowancePoints()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>.</p>
 
 </div>
 </div>
@@ -2008,14 +2014,14 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00786">786</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00829">829</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
 </div>
 </div>
-<a id="af2efdecc1d0a06c2b9bac4dc56f7c092" name="af2efdecc1d0a06c2b9bac4dc56f7c092"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af2efdecc1d0a06c2b9bac4dc56f7c092">&#9670;&#160;</a></span>setMainPathPoints()</h2>
+<a id="a7ddab4f9503b021beddb01ecbcc4cc8a" name="a7ddab4f9503b021beddb01ecbcc4cc8a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7ddab4f9503b021beddb01ecbcc4cc8a">&#9670;&#160;</a></span>setMainPathPoints()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2030,7 +2036,13 @@ template&lt;class T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>hideMainPath</em> = <code>false</code>&#160;</td>
+          <td class="paramname"><em>hideMainPath</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const QVector&lt; QPointF &gt; &amp;&#160;</td>
+          <td class="paramname"><em>nodeVertices</em> = <code>QVector&lt;QPointF&gt;()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2040,11 +2052,19 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00507">507</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p>setMainPathPoints stores the main path (seam line) polyline. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">nodeVertices</td><td>vertices that can break the tangent, from <a class="el" href="../../d0/dab/classVPiece.html#a4611bb471d623de5c666f947a2779fe3" title="mainPathNodeVertices returns the mainPathPoints() vertices that can break the tangent.">VPiece::mainPathNodeVertices()</a>. Empty = turn points unknown, so the seam line gets no data-turn-points attribute. </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00325">VAbstractPiece::RemoveDublicates()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00189">VAbstractPiece::setHideSeamLine()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00533">533</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d7f/tst__vlayoutdetail_8cpp_source.html#l00077">TST_VLayoutPiece::Case1()</a>, <a class="el" href="../../df/d7f/tst__vlayoutdetail_8cpp_source.html#l00140">TST_VLayoutPiece::Case2()</a>, <a class="el" href="../../df/d7f/tst__vlayoutdetail_8cpp_source.html#l00181">TST_VLayoutPiece::Case3()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00425">Create()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00093">anonymous_namespace{tst_svgcomponenttags.cpp}::makeTestPiece()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00347">VAbstractPiece::RemoveDublicates()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00189">VAbstractPiece::setHideSeamLine()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00317">VAbstractPiece::turnPointIndices()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../df/d7f/tst__vlayoutdetail_8cpp_source.html#l00077">TST_VLayoutPiece::Case1()</a>, <a class="el" href="../../df/d7f/tst__vlayoutdetail_8cpp_source.html#l00140">TST_VLayoutPiece::Case2()</a>, <a class="el" href="../../df/d7f/tst__vlayoutdetail_8cpp_source.html#l00181">TST_VLayoutPiece::Case3()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">Create()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00094">anonymous_namespace{tst_svgcomponenttags.cpp}::makeTestPiece()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00809">TST_SvgComponentTags::PathComponentsCarryTurnPoints()</a>.</p>
 
 </div>
 </div>
@@ -2064,9 +2084,9 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01504">1504</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01551">1551</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d1/dd1/vlayoutpaper_8cpp_source.html#l00436">VLayoutPaper::saveResult()</a>.</p>
 
@@ -2088,11 +2108,11 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00979">979</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01022">1022</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">VAbstractPiece::hasSeamAllowance()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00425">Create()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00093">anonymous_namespace{tst_svgcomponenttags.cpp}::makeTestPiece()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00442">TST_SvgComponentTags::PieceWithoutNotchesEmitsNoNotchGroup()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">Create()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00094">anonymous_namespace{tst_svgcomponenttags.cpp}::makeTestPiece()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00493">TST_SvgComponentTags::PieceWithoutNotchesEmitsNoNotchGroup()</a>.</p>
 
 </div>
 </div>
@@ -2134,11 +2154,11 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00625">625</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00668">668</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, <a class="el" href="../../dd/d40/vpatternlabeldata_8cpp_source.html#l00095">VPatternLabelData::getFontSize()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01477">getMainPathItem()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../dd/d40/vpatternlabeldata_8cpp_source.html#l00095">VPatternLabelData::getFontSize()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01524">getMainPathItem()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00425">Create()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">Create()</a>.</p>
 
 </div>
 </div>
@@ -2166,11 +2186,11 @@ template&lt;class T &gt; </div>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00494">494</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00515">515</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00425">Create()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">Create()</a>.</p>
 
 </div>
 </div>
@@ -2212,16 +2232,16 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00566">566</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00609">609</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, <a class="el" href="../../dd/d40/vpatternlabeldata_8cpp_source.html#l00095">VPatternLabelData::getFontSize()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01477">getMainPathItem()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../dd/d40/vpatternlabeldata_8cpp_source.html#l00095">VPatternLabelData::getFontSize()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01524">getMainPathItem()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00425">Create()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">Create()</a>.</p>
 
 </div>
 </div>
-<a id="aaaa0520c162fc8a9181b319fd8a52f3f" name="aaaa0520c162fc8a9181b319fd8a52f3f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aaaa0520c162fc8a9181b319fd8a52f3f">&#9670;&#160;</a></span>setSeamAllowancePoints()</h2>
+<a id="ac36b6ee2ecdfea9d628eb178f4a19274" name="ac36b6ee2ecdfea9d628eb178f4a19274"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac36b6ee2ecdfea9d628eb178f4a19274">&#9670;&#160;</a></span>setSeamAllowancePoints()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -2242,7 +2262,13 @@ template&lt;class T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>seamAllowanceBuiltIn</em> = <code>false</code>&#160;</td>
+          <td class="paramname"><em>seamAllowanceBuiltIn</em> = <code>false</code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const QVector&lt; QPointF &gt; &amp;&#160;</td>
+          <td class="paramname"><em>nodeVertices</em> = <code>QVector&lt;QPointF&gt;()</code>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -2252,11 +2278,19 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00521">521</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p>setSeamAllowancePoints stores the seam allowance (cut line) polyline. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">nodeVertices</td><td>vertices that can break the tangent, from <a class="el" href="../../d0/dab/classVPiece.html#ad719764bec1d2b00d1ed6e34a1e55220" title="seamAllowancePoints builds the seam allowance (cut line) polyline.">VPiece::seamAllowancePoints()</a>. Empty = turn points unknown, so the cut line gets no data-turn-points attribute. </td></tr>
+  </table>
+  </dd>
+</dl>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00325">VAbstractPiece::RemoveDublicates()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00165">VAbstractPiece::SetSeamAllowance()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00177">VAbstractPiece::SetSeamAllowanceBuiltIn()</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00558">558</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00425">Create()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00093">anonymous_namespace{tst_svgcomponenttags.cpp}::makeTestPiece()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">VAbstractPiece::hasSeamAllowanceBuiltIn()</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00347">VAbstractPiece::RemoveDublicates()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00165">VAbstractPiece::SetSeamAllowance()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00177">VAbstractPiece::SetSeamAllowanceBuiltIn()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00317">VAbstractPiece::turnPointIndices()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">Create()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00094">anonymous_namespace{tst_svgcomponenttags.cpp}::makeTestPiece()</a>, and <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00809">TST_SvgComponentTags::PathComponentsCarryTurnPoints()</a>.</p>
 
 </div>
 </div>
@@ -2276,11 +2310,11 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00774">774</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00817">817</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00510">TST_SvgComponentTags::GrainAngleFollowsPieceTransform()</a>, and <a class="el" href="../../d1/dd1/vlayoutpaper_8cpp_source.html#l00436">VLayoutPaper::saveResult()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00561">TST_SvgComponentTags::GrainAngleFollowsPieceTransform()</a>, and <a class="el" href="../../d1/dd1/vlayoutpaper_8cpp_source.html#l00436">VLayoutPaper::saveResult()</a>.</p>
 
 </div>
 </div>
@@ -2299,9 +2333,9 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00931">931</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00974">974</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00256">VAbstractPiece::sumTrapezoids()</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00401">VAbstractPiece::sumTrapezoids()</a>.</p>
 
 </div>
 </div>
@@ -2329,7 +2363,7 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00393">393</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00410">410</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00069">VAbstractPiece::Swap()</a>.</p>
 
@@ -2361,9 +2395,9 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00792">792</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00835">835</a> of file <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html">vlayoutpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">d</a>.</p>
+<p class="reference">References <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">d</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00344">VPosition::combineEdges()</a>, <a class="el" href="../../d3/d39/vlayoutgenerator_8cpp_source.html#l00626">VLayoutGenerator::movePieces()</a>, and <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00383">VPosition::rotateEdges()</a>.</p>
 
@@ -2390,9 +2424,9 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00173">173</a> of file <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html">vlayoutpiece.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html#l00175">175</a> of file <a class="el" href="../../d6/de0/vlayoutpiece_8h_source.html">vlayoutpiece.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01146">createCutoutPathItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01362">createGrainlineItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01127">createInternalPathItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01244">createLabelItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01510">Edge()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00501">getContourPoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01016">getCutoutPaths()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00706">getGrainline()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01004">getInternalPaths()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01188">GetItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00541">getLayoutAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00780">getLayoutGap()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00973">getNotches()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00619">getPatternText()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00606">getPatternTextPosition()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00484">getPieceLetter()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00560">getPieceText()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00547">getPieceTextPosition()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00515">getSeamAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00768">getTransform()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00749">grainlineAngle()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00988">internalPathsForCut()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01498">isMirror()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00911">isNull()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00861">LayoutEdge()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00873">LayoutEdgeByPoint()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00849">LayoutEdgesCount()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01029">Map()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00810">Mirror()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00409">operator=()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01387">piecePath()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00800">Rotate()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01022">setCutoutPaths()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00717">setGrainAxis()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00663">setGrainline()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01010">setInternalPaths()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00945">SetLayoutAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00786">setLayoutGap()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00507">setMainPathPoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01504">setMirror()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00979">setNotches()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00625">setPatternText()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00494">setPieceLetter()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00566">setPieceText()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00521">setSeamAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00774">setTransform()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00931">Square()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00792">Translate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01484">createAllowanceItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01190">createCutoutPathItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01407">createGrainlineItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01170">createInternalPathItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01289">createLabelItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01453">createSeamlineItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01557">Edge()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00522">getContourPoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01059">getCutoutPaths()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00749">getGrainline()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01047">getInternalPaths()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">GetItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00584">getLayoutAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00823">getLayoutGap()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01016">getNotches()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00662">getPatternText()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00649">getPatternTextPosition()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00505">getPieceLetter()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00603">getPieceText()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00590">getPieceTextPosition()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00547">getSeamAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00811">getTransform()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00792">grainlineAngle()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01031">internalPathsForCut()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01545">isMirror()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00954">isNull()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00904">LayoutEdge()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00916">LayoutEdgeByPoint()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00892">LayoutEdgesCount()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01072">Map()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00853">Mirror()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">operator=()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01432">piecePath()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00843">Rotate()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01065">setCutoutPaths()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00760">setGrainAxis()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00706">setGrainline()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01053">setInternalPaths()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00988">SetLayoutAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00829">setLayoutGap()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00533">setMainPathPoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01551">setMirror()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01022">setNotches()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00668">setPatternText()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00515">setPieceLetter()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00609">setPieceText()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00558">setSeamAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00817">setTransform()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00974">Square()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00835">Translate()</a>.</p>
 
 </div>
 </div>

@@ -8,7 +8,8 @@ var vlayoutdef_8h =
       [ "ObjectName", "dd/d4a/vlayoutdef_8h.html#a1ae36dc9572f800a7a19898d3309f52aa7941596f64d95ae0eb0ce7799abfc1fa", null ],
       [ "ItemType", "dd/d4a/vlayoutdef_8h.html#a1ae36dc9572f800a7a19898d3309f52aa789d47dbe06374b0c99c1513bc151cdb", null ],
       [ "PieceLetter", "dd/d4a/vlayoutdef_8h.html#a1ae36dc9572f800a7a19898d3309f52aa3cc1357d3e7fb46ec8eaac232f6e6364", null ],
-      [ "GrainlineAngle", "dd/d4a/vlayoutdef_8h.html#a1ae36dc9572f800a7a19898d3309f52aa7efc426838564c35ab2c8914ece78397", null ]
+      [ "GrainlineAngle", "dd/d4a/vlayoutdef_8h.html#a1ae36dc9572f800a7a19898d3309f52aa7efc426838564c35ab2c8914ece78397", null ],
+      [ "TurnPoints", "dd/d4a/vlayoutdef_8h.html#a1ae36dc9572f800a7a19898d3309f52aabf45f513cba3d1b1c7101a22ead0ef63", null ]
     ] ],
     [ "LayoutErrors", "dd/d4a/vlayoutdef_8h.html#a5f6d2a61316a995217a124144c21e385", [
       [ "NoError", "dd/d4a/vlayoutdef_8h.html#a5f6d2a61316a995217a124144c21e385a70a47cae4eb221930f2663fd244369ea", null ],

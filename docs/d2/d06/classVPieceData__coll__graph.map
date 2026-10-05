@@ -1,9 +1,9 @@
 <map id="VPieceData" name="VPieceData">
-<area shape="rect" id="node1" title=" " alt="" coords="345,1193,520,1403"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,929,113,1006"/>
-<area shape="rect" id="node3" href="$df/de1/classVPiecePath.html" title=" " alt="" coords="137,804,384,1131"/>
-<area shape="rect" id="node4" href="$de/d3b/classVPieceLabelData.html" title="The VPieceLabelData class holds some information about a single piece like letter,..." alt="" coords="575,855,743,1079"/>
+<area shape="rect" id="node1" title=" " alt="" coords="345,1223,520,1432"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,951,113,1028"/>
+<area shape="rect" id="node3" href="$df/de1/classVPiecePath.html" title=" " alt="" coords="137,819,384,1160"/>
+<area shape="rect" id="node4" href="$de/d3b/classVPieceLabelData.html" title="The VPieceLabelData class holds some information about a single piece like letter,..." alt="" coords="575,877,743,1101"/>
 <area shape="rect" id="node5" href="$df/da3/classVPatternLabelData.html" title="The VPatternLabelData class holds the information about pattern info label geometry." alt="" coords="557,249,754,503"/>
 <area shape="rect" id="node6" href="$d4/dc0/classVAbstractFloatItemData.html" title=" " alt="" coords="616,5,831,200"/>
-<area shape="rect" id="node7" href="$da/d7f/classVGrainlineData.html" title="The VGrainlineData class holds information about a grainline like position, size, rotation and visibi..." alt="" coords="713,527,870,780"/>
+<area shape="rect" id="node7" href="$da/d7f/classVGrainlineData.html" title="The VGrainlineData class holds information about a grainline like position, size, rotation and visibi..." alt="" coords="713,527,870,795"/>
 </map>

@@ -9,6 +9,7 @@ var PreferencesModel_8cpp =
     [ "migrateLegacyOrganizationTree", "dd/d74/PreferencesModel_8cpp.html#a7d869d6881abdbacf84cd639a94eedb1", null ],
     [ "platformDefaultsKey", "dd/d74/PreferencesModel_8cpp.html#aed4ee8d3fb526b87f1ffd02508da4e65", null ],
     [ "seedFromBundledDefaults", "dd/d74/PreferencesModel_8cpp.html#a5f0581e471b66a21a7125346b3eea91c", null ],
+    [ "kDefaultHpglViewerPath", "dd/d74/PreferencesModel_8cpp.html#a935b8724cd73e129acc6539009570a40", null ],
     [ "kLegacyOrganizationName", "dd/d74/PreferencesModel_8cpp.html#a7a720e78cc99c7cb0d97bd6858a2e984", null ],
     [ "kLegacyPreferencesFolderName", "dd/d74/PreferencesModel_8cpp.html#a64ec81db8349d51aad8ab68f2455b972", null ],
     [ "kLegacySettingsFolderName", "dd/d74/PreferencesModel_8cpp.html#adda8a1508d10549910e55ce5bce5a70d", null ],

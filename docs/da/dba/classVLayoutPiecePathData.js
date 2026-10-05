@@ -9,5 +9,6 @@ var classVLayoutPiecePathData =
     [ "m_lineColor", "da/dba/classVLayoutPiecePathData.html#a33dc522d13194b445abf2b23e5ab25fb", null ],
     [ "m_lineType", "da/dba/classVLayoutPiecePathData.html#a69448f61b1671d58442c2774e30e6dda", null ],
     [ "m_lineWeight", "da/dba/classVLayoutPiecePathData.html#a2d8498c1c968fb52ec777fc2dbcd9049", null ],
-    [ "m_points", "da/dba/classVLayoutPiecePathData.html#aaf4090e4f14ab85499192cd218fde487", null ]
+    [ "m_points", "da/dba/classVLayoutPiecePathData.html#aaf4090e4f14ab85499192cd218fde487", null ],
+    [ "m_turnPoints", "da/dba/classVLayoutPiecePathData.html#a5aa66d90826d4233748fa264dbaf8830", null ]
 ];

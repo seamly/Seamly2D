@@ -599,6 +599,7 @@ var annotated_dup =
     [ "TST_AbstractRegExp", "d7/d66/classTST__AbstractRegExp.html", "d7/d66/classTST__AbstractRegExp" ],
     [ "TST_BuitInRegExp", "d8/d54/classTST__BuitInRegExp.html", "d8/d54/classTST__BuitInRegExp" ],
     [ "TST_DataRoot", "dd/db9/classTST__DataRoot.html", "dd/db9/classTST__DataRoot" ],
+    [ "TST_ExportFormatCombobox", "de/dcc/classTST__ExportFormatCombobox.html", "de/dcc/classTST__ExportFormatCombobox" ],
     [ "TST_FindPoint", "d6/d30/classTST__FindPoint.html", "d6/d30/classTST__FindPoint" ],
     [ "TST_MeasurementRegExp", "da/d11/classTST__MeasurementRegExp.html", "da/d11/classTST__MeasurementRegExp" ],
     [ "TST_Measurements", "da/d3b/classTST__Measurements.html", "da/d3b/classTST__Measurements" ],

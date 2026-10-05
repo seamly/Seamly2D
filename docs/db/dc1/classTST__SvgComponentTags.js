@@ -11,11 +11,18 @@ var classTST__SvgComponentTags =
     [ "ExportedSvgTagsCutPathGroups", "db/dc1/classTST__SvgComponentTags.html#aa43426ec9944db9936f911a5f13baa72", null ],
     [ "GrainAngleFollowsPieceTransform", "db/dc1/classTST__SvgComponentTags.html#a3d774dc1efe9656b89f28dab8239a7b7", null ],
     [ "HiddenGrainlineKeepsGrainAngle", "db/dc1/classTST__SvgComponentTags.html#ad2c5be67a7896430c02148ad75e760a3", null ],
+    [ "IndividualPatternCarriesSampleSize", "db/dc1/classTST__SvgComponentTags.html#aa2789085d298352d2ad36de1a56ab9d0", null ],
+    [ "IndividualPatternIsMarkedIndividual", "db/dc1/classTST__SvgComponentTags.html#a27d2eeb5b0c30d0b233e79cd76865392", null ],
+    [ "MultisizeIdsAreUniqueAndSized", "db/dc1/classTST__SvgComponentTags.html#a7b9dd05bc62588301c7649e766234390", null ],
+    [ "MultisizePatternCarriesSizeList", "db/dc1/classTST__SvgComponentTags.html#a125e6e7c69ccc9d36fad082720645bd7", null ],
+    [ "MultisizePiecesNestInPieceSets", "db/dc1/classTST__SvgComponentTags.html#a90b7f14598ae43919da17c016af4995e", null ],
     [ "NamedPieceGetsNameBasedId", "db/dc1/classTST__SvgComponentTags.html#a1ee1e25c9f65652d37adfe4e1995500a", null ],
+    [ "PathComponentsCarryTurnPoints", "db/dc1/classTST__SvgComponentTags.html#acb94a4875fd416fc8027db6a7163c38c", null ],
     [ "PieceNameSanitizedForIdButNotForDataParent", "db/dc1/classTST__SvgComponentTags.html#a34ac06bea1191e286e50a40e182332f3", null ],
     [ "PieceWithNoNameFallsBackToNumericId", "db/dc1/classTST__SvgComponentTags.html#a96e1e80c9afdc0b15b0725c4a6de9fe6", null ],
     [ "PieceWithoutGrainHasNoGrainlineAngle", "db/dc1/classTST__SvgComponentTags.html#a099894048bf3f6999898d4cee669e8be", null ],
     [ "PieceWithoutNotchesEmitsNoNotchGroup", "db/dc1/classTST__SvgComponentTags.html#a27beb3c027ef726eb30f847cea681102", null ],
+    [ "UnknownTurnPointsEmitNoAttribute", "db/dc1/classTST__SvgComponentTags.html#a81f2d129ef10a832ccd0a1c2c3682a71", null ],
     [ "UpwardAngleFlipsDownwardGrainline", "db/dc1/classTST__SvgComponentTags.html#a2dbf24d90768fefec9a13d72fbd9f29e", null ],
     [ "UpwardAngleFlipsDownwardGrainline_data", "db/dc1/classTST__SvgComponentTags.html#a7dceb3877391ca6a35345c198f075c75", null ]
 ];

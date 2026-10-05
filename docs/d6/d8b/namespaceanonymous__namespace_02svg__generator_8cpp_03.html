@@ -109,6 +109,9 @@ Functions</h2></td></tr>
 <tr class="memitem:a227a7a61f3e4b70772eef8b298e2e8a1"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d8b/namespaceanonymous__namespace_02svg__generator_8cpp_03.html#a227a7a61f3e4b70772eef8b298e2e8a1">sanitizeForId</a> (const QString &amp;name)</td></tr>
 <tr class="memdesc:a227a7a61f3e4b70772eef8b298e2e8a1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Turn a piece name into a valid, CSS-selector-safe SVG id fragment.  <br /></td></tr>
 <tr class="separator:a227a7a61f3e4b70772eef8b298e2e8a1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0b8193efe65ff524a5636250178322dd"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d8b/namespaceanonymous__namespace_02svg__generator_8cpp_03.html#a0b8193efe65ff524a5636250178322dd">sizeIdSuffix</a> (const QString &amp;size)</td></tr>
+<tr class="memdesc:a0b8193efe65ff524a5636250178322dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Id suffix for one size of a multisize piece, e.g. "_s34" or "_s13.5".  <br /></td></tr>
+<tr class="separator:a0b8193efe65ff524a5636250178322dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac097037a22fe3197af4729d7309ffe15"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/d8b/namespaceanonymous__namespace_02svg__generator_8cpp_03.html#ac097037a22fe3197af4729d7309ffe15">componentIdIsNumbered</a> (const QString &amp;type)</td></tr>
 <tr class="memdesc:ac097037a22fe3197af4729d7309ffe15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Component types that can repeat per piece, so their id keeps a counter (<code>&lt;type&gt;_&lt;n&gt;_&lt;name&gt;</code>) instead of a bare <code>&lt;type&gt;_&lt;name&gt;</code>.  <br /></td></tr>
 <tr class="separator:ac097037a22fe3197af4729d7309ffe15"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -135,7 +138,7 @@ Functions</h2></td></tr>
 
 <p>Component types that can repeat per piece, so their id keeps a counter (<code>&lt;type&gt;_&lt;n&gt;_&lt;name&gt;</code>) instead of a bare <code>&lt;type&gt;_&lt;name&gt;</code>. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00068">68</a> of file <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html">svg_generator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00081">81</a> of file <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html">svg_generator.cpp</a>.</p>
 
 </div>
 </div>
@@ -158,7 +161,7 @@ Functions</h2></td></tr>
 <p>Check whether path data draws nothing: empty, or one moveto with an optional closepath. </p>
 <p>An empty QPainterPath still carries an implicit MoveTo(0,0). The item's scene position moves that point, so QSvgGenerator can emit e.g. "M -1121.38,5595.73 Z" instead of "M0,0". </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00080">80</a> of file <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html">svg_generator.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00093">93</a> of file <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html">svg_generator.cpp</a>.</p>
 
 </div>
 </div>
@@ -188,6 +191,32 @@ Functions</h2></td></tr>
 <dl class="section return"><dt>Returns</dt><dd>name with every run of characters outside [A-Za-z0-9_.-] replaced by '_', stray leading/trailing '_' trimmed, and a leading '_' added when the result would otherwise start with a digit. Empty when nothing sanitizable remains (callers must supply a fallback id in that case). </dd></dl>
 
 <p class="definition">Definition at line <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00052">52</a> of file <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html">svg_generator.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00067">sizeIdSuffix()</a>.</p>
+
+</div>
+</div>
+<a id="a0b8193efe65ff524a5636250178322dd" name="a0b8193efe65ff524a5636250178322dd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0b8193efe65ff524a5636250178322dd">&#9670;&#160;</a></span>sizeIdSuffix()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">QString anonymous_namespace{svg_generator.cpp}::sizeIdSuffix </td>
+          <td>(</td>
+          <td class="paramtype">const QString &amp;&#160;</td>
+          <td class="paramname"><em>size</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Id suffix for one size of a multisize piece, e.g. "_s34" or "_s13.5". </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00067">67</a> of file <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html">svg_generator.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d0/d61/svg__generator_8cpp_source.html#l00052">sanitizeForId()</a>.</p>
 
 </div>
 </div>

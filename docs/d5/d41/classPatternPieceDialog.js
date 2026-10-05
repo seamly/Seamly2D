@@ -85,7 +85,7 @@ var classPatternPieceDialog =
     [ "pieceColorChanged", "d5/d41/classPatternPieceDialog.html#ab2ff91ab989353e3b49025d386cb06ff", null ],
     [ "pieceLabelAnchorChanged", "d5/d41/classPatternPieceDialog.html#aa2e62ff9fefa83ad30138cb9eb57ab29", null ],
     [ "pieceNameChanged", "d5/d41/classPatternPieceDialog.html#a2c6db2c62d15d8d655e31fe8a6489f44", null ],
-    [ "placeGrainline", "d5/d41/classPatternPieceDialog.html#a30e5431cda235801d8e345be4294d2df", null ],
+    [ "placeGrainline", "d5/d41/classPatternPieceDialog.html#a4352ef9cc772ca7f4333f4c10085c97e", null ],
     [ "pointNodesExist", "d5/d41/classPatternPieceDialog.html#a71fecfb244439faa7b88dc2dc3d02357", null ],
     [ "resetGrainlineWarning", "d5/d41/classPatternPieceDialog.html#aebc200c1ff577b369e306d5a2e3e788f", null ],
     [ "resetLabelsWarning", "d5/d41/classPatternPieceDialog.html#abc3e6a042756f4cfc24253884c126c42", null ],

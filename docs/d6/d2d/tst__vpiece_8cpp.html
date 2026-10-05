@@ -98,6 +98,10 @@ $(document).ready(function(){initNavTree('d6/d2d/tst__vpiece_8cpp.html','../../'
 </div>
 
 <div class="header">
+  <div class="summary">
+<a href="#namespaces">Namespaces</a> &#124;
+<a href="#func-members">Functions</a> &#124;
+<a href="#var-members">Variables</a>  </div>
   <div class="headertitle"><div class="title">tst_vpiece.cpp File Reference</div></div>
 </div><!--header-->
 <div class="contents">
@@ -106,7 +110,9 @@ $(document).ready(function(){initNavTree('d6/d2d/tst__vpiece_8cpp.html','../../'
 <code>#include &quot;../vpatterndb/vpiece.h&quot;</code><br />
 <code>#include &quot;../vpatterndb/vpiecenode.h&quot;</code><br />
 <code>#include &quot;../vpatterndb/vpiecepath.h&quot;</code><br />
+<code>#include &quot;../vpatterndb/floatItemData/vgrainlinedata.h&quot;</code><br />
 <code>#include &quot;../vpatterndb/floatItemData/vpatternlabeldata.h&quot;</code><br />
+<code>#include &quot;../vgeometry/vgobject.h&quot;</code><br />
 <code>#include &quot;../vgeometry/vsplinepath.h&quot;</code><br />
 <code>#include &quot;../vmisc/vabstractapplication.h&quot;</code><br />
 <code>#include &quot;../vmisc/vcommonsettings.h&quot;</code><br />
@@ -121,6 +127,27 @@ Include dependency graph for tst_vpiece.cpp:</div>
 </div>
 </div>
 <p><a href="../../d6/d2d/tst__vpiece_8cpp_source.html">Go to the source code of this file.</a></p>
+<table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
+Namespaces</h2></td></tr>
+<tr class="memitem:d3/d07/namespaceanonymous__namespace_02tst__vpiece_8cpp_03"><td class="memItemLeft" align="right" valign="top">namespace &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d07/namespaceanonymous__namespace_02tst__vpiece_8cpp_03.html">anonymous_namespace{tst_vpiece.cpp}</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
+Functions</h2></td></tr>
+<tr class="memitem:aada76f02efb296c919c96182c4f09224"><td class="memItemLeft" align="right" valign="top">QVector&lt; QLineF &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d07/namespaceanonymous__namespace_02tst__vpiece_8cpp_03.html#aada76f02efb296c919c96182c4f09224">anonymous_namespace{tst_vpiece.cpp}::squareNotchLines</a> (bool showCutline, bool showSeamline, bool includeCutlineNotches, QVector&lt; QPointF &gt; &amp;seamAllowancePoints)</td></tr>
+<tr class="memdesc:aada76f02efb296c919c96182c4f09224"><td class="mdescLeft">&#160;</td><td class="mdescRight">Notch lines of a square piece with one slit notch on its top edge.  <br /></td></tr>
+<tr class="separator:aada76f02efb296c919c96182c4f09224"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6d2672e0b690a01824a36cb4fb94e3eb"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d07/namespaceanonymous__namespace_02tst__vpiece_8cpp_03.html#a6d2672e0b690a01824a36cb4fb94e3eb">anonymous_namespace{tst_vpiece.cpp}::isOnPolyline</a> (const QPointF &amp;point, const QVector&lt; QPointF &gt; &amp;points)</td></tr>
+<tr class="memdesc:a6d2672e0b690a01824a36cb4fb94e3eb"><td class="mdescLeft">&#160;</td><td class="mdescRight">True when <code>point</code> lies on the polyline <code>points</code>.  <br /></td></tr>
+<tr class="separator:a6d2672e0b690a01824a36cb4fb94e3eb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="var-members" name="var-members"></a>
+Variables</h2></td></tr>
+<tr class="memitem:a38d8530ad86a95563a2fe4059f6e8fdd"><td class="memItemLeft" align="right" valign="top">const qreal&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d07/namespaceanonymous__namespace_02tst__vpiece_8cpp_03.html#a38d8530ad86a95563a2fe4059f6e8fdd">anonymous_namespace{tst_vpiece.cpp}::notchTestSAWidth</a> = 10</td></tr>
+<tr class="memdesc:a38d8530ad86a95563a2fe4059f6e8fdd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Seam allowance width of the notch test square, in millimeters.  <br /></td></tr>
+<tr class="separator:a38d8530ad86a95563a2fe4059f6e8fdd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

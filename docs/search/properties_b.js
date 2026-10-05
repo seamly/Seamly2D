@@ -1,8 +1,8 @@
 var searchData=
 [
-  ['text_0',['text',['../dd/dc4/classUtils_1_1CheckableMessageBox.html#a2fa5240368beedd12fb217a593410aae',1,'Utils::CheckableMessageBox']]],
-  ['tileorientation_1',['tileOrientation',['../db/d56/classSettingsModel.html#ac20e11d83a0c6f66ab38103196d7ed2d',1,'SettingsModel']]],
-  ['tileorientationnames_2',['tileOrientationNames',['../db/d56/classSettingsModel.html#a5e967906e063efcaea2c6fde1b861609',1,'SettingsModel']]],
-  ['tilesize_3',['tileSize',['../db/d56/classSettingsModel.html#a78b72a61069be044522a446312b6649a',1,'SettingsModel']]],
-  ['tilesizenames_4',['tileSizeNames',['../db/d56/classSettingsModel.html#ad0bee7fd6fb8eca869aa419d35424074',1,'SettingsModel']]]
+  ['selvedgewidth_0',['selvedgeWidth',['../db/d56/classSettingsModel.html#ae603c8d006896033866676acfb99689b',1,'SettingsModel']]],
+  ['settingsdirectory_1',['settingsDirectory',['../d9/d4e/classPreferencesModel.html#ae134ac138e4329031733f5c45b5581f7',1,'PreferencesModel']]],
+  ['settingsfile_2',['settingsFile',['../d9/d4e/classPreferencesModel.html#a71ce4f3eddb2f47ef91dee7dea4a1715',1,'PreferencesModel']]],
+  ['sheetname_3',['sheetName',['../db/d56/classSettingsModel.html#a9d7de2654ad372b31152afd48d82e05f',1,'SettingsModel']]],
+  ['svgtextmode_4',['svgTextMode',['../d9/d4e/classPreferencesModel.html#a8878000e829d13e28b362ecc471367ca',1,'PreferencesModel']]]
 ];

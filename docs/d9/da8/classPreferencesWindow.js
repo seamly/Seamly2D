@@ -9,6 +9,7 @@ var classPreferencesWindow =
     [ "reloadFromModel", "d9/da8/classPreferencesWindow.html#a97c4dd6cc13ae665a7a36969eb3f649e", null ],
     [ "saved", "d9/da8/classPreferencesWindow.html#ad4a7384e29c0824e853662d9c24cd8c6", null ],
     [ "m_dxfViewerField", "d9/da8/classPreferencesWindow.html#a4a417da4cea3078c6267be5be09c82e8", null ],
+    [ "m_hpglViewerField", "d9/da8/classPreferencesWindow.html#abcb204854ffe115ce5478c6a9b67b3a1", null ],
     [ "m_inputDirField", "d9/da8/classPreferencesWindow.html#a3f2b79921fb171ab94f5728040936744", null ],
     [ "m_layoutDirField", "d9/da8/classPreferencesWindow.html#afed0abf78f6bcbd384cb267e9297ea3d", null ],
     [ "m_model", "d9/da8/classPreferencesWindow.html#a6d36dc341415d78da65bd05b45e51284", null ],

@@ -1,4 +1,9 @@
 var searchData=
 [
-  ['nograinlinerotation_0',['noGrainlineRotation',['../db/d56/classSettingsModel.html#ab78084b0558f496071d86449f8d8cc99',1,'SettingsModel']]]
+  ['marginbottom_0',['marginBottom',['../db/d56/classSettingsModel.html#a5de12fcef4c1cfe13198e40fdd9526aa',1,'SettingsModel']]],
+  ['marginleft_1',['marginLeft',['../db/d56/classSettingsModel.html#a4ce801a0fc204a98468146e120c6f289',1,'SettingsModel']]],
+  ['marginright_2',['marginRight',['../db/d56/classSettingsModel.html#a7bfa8d4e8360e8b640dc7f0f163d5012',1,'SettingsModel']]],
+  ['margintop_3',['marginTop',['../db/d56/classSettingsModel.html#a2525f0d8d31c993a51d54aa9cb3d75fb',1,'SettingsModel']]],
+  ['mediatype_4',['mediaType',['../db/d56/classSettingsModel.html#a7a004dd501c5e190d1bc131d0f441438',1,'SettingsModel']]],
+  ['multisizelayout_5',['multisizeLayout',['../db/d56/classSettingsModel.html#a6909b998ffc4fdb31d39b2c388bdcde3',1,'SettingsModel']]]
 ];

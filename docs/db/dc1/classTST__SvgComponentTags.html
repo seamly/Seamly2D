@@ -106,7 +106,7 @@ $(document).ready(function(){initNavTree('db/dc1/classTST__SvgComponentTags.html
 </div><!--header-->
 <div class="contents">
 
-<p><a class="el" href="../../db/dc1/classTST__SvgComponentTags.html" title="TST_SvgComponentTags tests the SVG data-type tagging contract of the piece component item tree (VLayo...">TST_SvgComponentTags</a> tests the SVG data-type tagging contract of the piece component item tree (<a class="el" href="../../df/de5/classVLayoutPiece.html#abb08f31ba49e4b14936c83274f8aab27" title="GetItem builds the graphics item tree for one pattern piece.">VLayoutPiece::GetItem()</a>) and of the tagged SVG produced by <a class="el" href="../../d3/d0b/classSvgGenerator.html">SvgGenerator</a>: the internal_path / cut_path split, the name-based piece and component id schemes, and their piece-name sanitization, no-name fallback, and cross-piece collision handling, and the data-grainline-angle attribute.  
+<p><a class="el" href="../../db/dc1/classTST__SvgComponentTags.html" title="TST_SvgComponentTags tests the SVG data-type tagging contract of the piece component item tree (VLayo...">TST_SvgComponentTags</a> tests the SVG data-type tagging contract of the piece component item tree (<a class="el" href="../../df/de5/classVLayoutPiece.html#abb08f31ba49e4b14936c83274f8aab27" title="GetItem builds the graphics item tree for one pattern piece.">VLayoutPiece::GetItem()</a>) and of the tagged SVG produced by <a class="el" href="../../d3/d0b/classSvgGenerator.html">SvgGenerator</a>: the internal_path / cut_path split, the name-based piece and component id schemes, and their piece-name sanitization, no-name fallback, and cross-piece collision handling, and the data-grainline-angle attribute, the multisize piece-set nesting, and the data-turn-points attribute.  
  <a href="../../db/dc1/classTST__SvgComponentTags.html#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="../../dd/dee/tst__svgcomponenttags_8h_source.html">tst_svgcomponenttags.h</a>&gt;</code></p>
@@ -182,11 +182,32 @@ Private Slots</h2></td></tr>
 <tr class="memitem:ab56c388c483a142b6ce5dd5a8d362533"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dc1/classTST__SvgComponentTags.html#ab56c388c483a142b6ce5dd5a8d362533">DownwardGrainAxisPointsUp</a> () const</td></tr>
 <tr class="memdesc:ab56c388c483a142b6ce5dd5a8d362533"><td class="mdescLeft">&#160;</td><td class="mdescRight">DownwardGrainAxisPointsUp checks that a grainline without top and bottom anchors exports an upward grain direction.  <br /></td></tr>
 <tr class="separator:ab56c388c483a142b6ce5dd5a8d362533"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a27d2eeb5b0c30d0b233e79cd76865392"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dc1/classTST__SvgComponentTags.html#a27d2eeb5b0c30d0b233e79cd76865392">IndividualPatternIsMarkedIndividual</a> () const</td></tr>
+<tr class="memdesc:a27d2eeb5b0c30d0b233e79cd76865392"><td class="mdescLeft">&#160;</td><td class="mdescRight">IndividualPatternIsMarkedIndividual checks that an export without setMultisize() marks the pattern group data-measurements="individual" and writes no size attributes.  <br /></td></tr>
+<tr class="separator:a27d2eeb5b0c30d0b233e79cd76865392"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa2789085d298352d2ad36de1a56ab9d0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dc1/classTST__SvgComponentTags.html#aa2789085d298352d2ad36de1a56ab9d0">IndividualPatternCarriesSampleSize</a> () const</td></tr>
+<tr class="memdesc:aa2789085d298352d2ad36de1a56ab9d0"><td class="mdescLeft">&#160;</td><td class="mdescRight">IndividualPatternCarriesSampleSize checks that setSampleSize() writes data-sample-size on the pattern group and no data-size on the piece.  <br /></td></tr>
+<tr class="separator:aa2789085d298352d2ad36de1a56ab9d0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a125e6e7c69ccc9d36fad082720645bd7"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dc1/classTST__SvgComponentTags.html#a125e6e7c69ccc9d36fad082720645bd7">MultisizePatternCarriesSizeList</a> () const</td></tr>
+<tr class="memdesc:a125e6e7c69ccc9d36fad082720645bd7"><td class="mdescLeft">&#160;</td><td class="mdescRight">MultisizePatternCarriesSizeList checks the pattern group attributes of a multisize export.  <br /></td></tr>
+<tr class="separator:a125e6e7c69ccc9d36fad082720645bd7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a90b7f14598ae43919da17c016af4995e"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dc1/classTST__SvgComponentTags.html#a90b7f14598ae43919da17c016af4995e">MultisizePiecesNestInPieceSets</a> () const</td></tr>
+<tr class="memdesc:a90b7f14598ae43919da17c016af4995e"><td class="mdescLeft">&#160;</td><td class="mdescRight">MultisizePiecesNestInPieceSets checks that the same piece in every size is nested in one piece-set group, each size tagged with data-size.  <br /></td></tr>
+<tr class="separator:a90b7f14598ae43919da17c016af4995e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7b9dd05bc62588301c7649e766234390"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dc1/classTST__SvgComponentTags.html#a7b9dd05bc62588301c7649e766234390">MultisizeIdsAreUniqueAndSized</a> () const</td></tr>
+<tr class="memdesc:a7b9dd05bc62588301c7649e766234390"><td class="mdescLeft">&#160;</td><td class="mdescRight">MultisizeIdsAreUniqueAndSized checks that piece and component ids carry the size and that no id repeats across sizes.  <br /></td></tr>
+<tr class="separator:a7b9dd05bc62588301c7649e766234390"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acb94a4875fd416fc8027db6a7163c38c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dc1/classTST__SvgComponentTags.html#acb94a4875fd416fc8027db6a7163c38c">PathComponentsCarryTurnPoints</a> () const</td></tr>
+<tr class="memdesc:acb94a4875fd416fc8027db6a7163c38c"><td class="mdescLeft">&#160;</td><td class="mdescRight">PathComponentsCarryTurnPoints checks that seam line, cut line, internal path and cut path groups carry data-turn-points when their node vertices are known.  <br /></td></tr>
+<tr class="separator:acb94a4875fd416fc8027db6a7163c38c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a81f2d129ef10a832ccd0a1c2c3682a71"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/dc1/classTST__SvgComponentTags.html#a81f2d129ef10a832ccd0a1c2c3682a71">UnknownTurnPointsEmitNoAttribute</a> () const</td></tr>
+<tr class="memdesc:a81f2d129ef10a832ccd0a1c2c3682a71"><td class="mdescLeft">&#160;</td><td class="mdescRight">UnknownTurnPointsEmitNoAttribute checks that a path without node vertices gets no data-turn-points, so SeamlyLayout uses its own detection.  <br /></td></tr>
+<tr class="separator:a81f2d129ef10a832ccd0a1c2c3682a71"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p><a class="el" href="../../db/dc1/classTST__SvgComponentTags.html" title="TST_SvgComponentTags tests the SVG data-type tagging contract of the piece component item tree (VLayo...">TST_SvgComponentTags</a> tests the SVG data-type tagging contract of the piece component item tree (<a class="el" href="../../df/de5/classVLayoutPiece.html#abb08f31ba49e4b14936c83274f8aab27" title="GetItem builds the graphics item tree for one pattern piece.">VLayoutPiece::GetItem()</a>) and of the tagged SVG produced by <a class="el" href="../../d3/d0b/classSvgGenerator.html">SvgGenerator</a>: the internal_path / cut_path split, the name-based piece and component id schemes, and their piece-name sanitization, no-name fallback, and cross-piece collision handling, and the data-grainline-angle attribute. </p>
+<div class="textblock"><p><a class="el" href="../../db/dc1/classTST__SvgComponentTags.html" title="TST_SvgComponentTags tests the SVG data-type tagging contract of the piece component item tree (VLayo...">TST_SvgComponentTags</a> tests the SVG data-type tagging contract of the piece component item tree (<a class="el" href="../../df/de5/classVLayoutPiece.html#abb08f31ba49e4b14936c83274f8aab27" title="GetItem builds the graphics item tree for one pattern piece.">VLayoutPiece::GetItem()</a>) and of the tagged SVG produced by <a class="el" href="../../d3/d0b/classSvgGenerator.html">SvgGenerator</a>: the internal_path / cut_path split, the name-based piece and component id schemes, and their piece-name sanitization, no-name fallback, and cross-piece collision handling, and the data-grainline-angle attribute, the multisize piece-set nesting, and the data-turn-points attribute. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/dee/tst__svgcomponenttags_8h_source.html#l00045">45</a> of file <a class="el" href="../../dd/dee/tst__svgcomponenttags_8h_source.html">tst_svgcomponenttags.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/dee/tst__svgcomponenttags_8h_source.html#l00046">46</a> of file <a class="el" href="../../dd/dee/tst__svgcomponenttags_8h_source.html">tst_svgcomponenttags.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a7a3fc70e427c4e976ad837477b72b9a8" name="a7a3fc70e427c4e976ad837477b72b9a8"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a7a3fc70e427c4e976ad837477b72b9a8">&#9670;&#160;</a></span>TST_SvgComponentTags()</h2>
@@ -220,7 +241,7 @@ Private Slots</h2></td></tr>
   </dd>
 </dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00261">261</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00312">312</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
 </div>
 </div>
@@ -250,7 +271,7 @@ Private Slots</h2></td></tr>
 
 <p>CenteredStartPutsMidpointOnCenter checks the start point of a centered grainline, and that its start point lies below its end point. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00602">602</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00653">653</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../de/d65/vgrainlinedata_8cpp_source.html#l00207">VGrainlineData::centeredStart()</a>.</p>
 
@@ -281,7 +302,7 @@ Private Slots</h2></td></tr>
 
 <p>CollidingPieceNamesGetDisambiguatingSuffix checks that two pieces sharing a name (piece names aren't guaranteed unique; data-letter is the user-facing disambiguator) still get unique, XML-valid ids: the second occurrence's id is suffixed with its own piece data-type-number, for both the piece's own &lt;g&gt; id and its components' ids. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00414">414</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00465">465</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
 </div>
 </div>
@@ -310,9 +331,9 @@ Private Slots</h2></td></tr>
 
 <p>CutoutTaggedAsCutPath checks the item-tree contract: cutout paths get the dedicated "cut_path" item type while plain internal paths keep "internal_path". </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00272">272</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00323">323</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01188">VLayoutPiece::GetItem()</a>, and <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">VLayoutPiece::GetItem()</a>, and <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>.</p>
 
 </div>
 </div>
@@ -341,9 +362,9 @@ Private Slots</h2></td></tr>
 
 <p>DownwardGrainAxisPointsUp checks that a grainline without top and bottom anchors exports an upward grain direction. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00626">626</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00677">677</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00749">VLayoutPiece::grainlineAngle()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00792">VLayoutPiece::grainlineAngle()</a>.</p>
 
 </div>
 </div>
@@ -372,9 +393,9 @@ Private Slots</h2></td></tr>
 
 <p>EmptyComponentAwayFromOriginEmitsNoGroup checks that the export drops a component with an empty path when the item's scene position moves the path's implicit origin point away from (0,0). </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00467">467</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00518">518</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01188">VLayoutPiece::GetItem()</a>, and <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">VLayoutPiece::GetItem()</a>, and <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>.</p>
 
 </div>
 </div>
@@ -403,7 +424,7 @@ Private Slots</h2></td></tr>
 
 <p>ExportedPieceCarriesGrainlineAngle checks the exported piece group carries data-grainline-angle. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00531">531</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00582">582</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
 </div>
 </div>
@@ -432,7 +453,7 @@ Private Slots</h2></td></tr>
 
 <p>ExportedSvgNamesSeamlineCutlineAndNotchGroups checks the id scheme for the component types that occur once per piece today: no counter infix, just "&lt;type&gt;_&lt;pieceName&gt;". </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00336">336</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00387">387</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
 </div>
 </div>
@@ -461,7 +482,7 @@ Private Slots</h2></td></tr>
 
 <p>ExportedSvgTagsCutPathGroups checks the exported SVG end to end: cutouts become data-type="cut_path" groups with their own per-piece counter and name-based "cut_path_&lt;m&gt;_&lt;pieceName&gt;" ids, plain internal paths keep their independent "internal_path" counter, and every group points back to the piece via data-parent (the piece's name). </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00305">305</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00356">356</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
 </div>
 </div>
@@ -490,9 +511,9 @@ Private Slots</h2></td></tr>
 
 <p>GrainAngleFollowsPieceTransform checks that a piece turned by the Seamly2D layout reports the turned grain direction. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00510">510</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00561">561</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00749">VLayoutPiece::grainlineAngle()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00774">VLayoutPiece::setTransform()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00792">VLayoutPiece::grainlineAngle()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00817">VLayoutPiece::setTransform()</a>.</p>
 
 </div>
 </div>
@@ -521,9 +542,154 @@ Private Slots</h2></td></tr>
 
 <p>HiddenGrainlineKeepsGrainAngle checks that a grainline that is not drawn still gives the piece a grain direction. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00488">488</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00539">539</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01188">VLayoutPiece::GetItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00749">VLayoutPiece::grainlineAngle()</a>, and <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">VLayoutPiece::GetItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00792">VLayoutPiece::grainlineAngle()</a>, and <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>.</p>
+
+</div>
+</div>
+<a id="aa2789085d298352d2ad36de1a56ab9d0" name="aa2789085d298352d2ad36de1a56ab9d0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#aa2789085d298352d2ad36de1a56ab9d0">&#9670;&#160;</a></span>IndividualPatternCarriesSampleSize</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TST_SvgComponentTags::IndividualPatternCarriesSampleSize </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">slot</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>IndividualPatternCarriesSampleSize checks that setSampleSize() writes data-sample-size on the pattern group and no data-size on the piece. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00712">712</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a27d2eeb5b0c30d0b233e79cd76865392" name="a27d2eeb5b0c30d0b233e79cd76865392"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a27d2eeb5b0c30d0b233e79cd76865392">&#9670;&#160;</a></span>IndividualPatternIsMarkedIndividual</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TST_SvgComponentTags::IndividualPatternIsMarkedIndividual </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">slot</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>IndividualPatternIsMarkedIndividual checks that an export without setMultisize() marks the pattern group data-measurements="individual" and writes no size attributes. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00693">693</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a7b9dd05bc62588301c7649e766234390" name="a7b9dd05bc62588301c7649e766234390"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7b9dd05bc62588301c7649e766234390">&#9670;&#160;</a></span>MultisizeIdsAreUniqueAndSized</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TST_SvgComponentTags::MultisizeIdsAreUniqueAndSized </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">slot</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>MultisizeIdsAreUniqueAndSized checks that piece and component ids carry the size and that no id repeats across sizes. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00776">776</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a125e6e7c69ccc9d36fad082720645bd7" name="a125e6e7c69ccc9d36fad082720645bd7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a125e6e7c69ccc9d36fad082720645bd7">&#9670;&#160;</a></span>MultisizePatternCarriesSizeList</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TST_SvgComponentTags::MultisizePatternCarriesSizeList </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">slot</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>MultisizePatternCarriesSizeList checks the pattern group attributes of a multisize export. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00728">728</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+
+</div>
+</div>
+<a id="a90b7f14598ae43919da17c016af4995e" name="a90b7f14598ae43919da17c016af4995e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a90b7f14598ae43919da17c016af4995e">&#9670;&#160;</a></span>MultisizePiecesNestInPieceSets</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TST_SvgComponentTags::MultisizePiecesNestInPieceSets </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">slot</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>MultisizePiecesNestInPieceSets checks that the same piece in every size is nested in one piece-set group, each size tagged with data-size. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00745">745</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
 </div>
 </div>
@@ -552,7 +718,38 @@ Private Slots</h2></td></tr>
 
 <p>NamedPieceGetsNameBasedId checks that the piece's own &lt;g&gt; id follows the same name-based scheme as its components ("piece_&lt;pieceName&gt;"), not the legacy numeric "piece-&lt;n&gt;" form. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00396">396</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00447">447</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+
+</div>
+</div>
+<a id="acb94a4875fd416fc8027db6a7163c38c" name="acb94a4875fd416fc8027db6a7163c38c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acb94a4875fd416fc8027db6a7163c38c">&#9670;&#160;</a></span>PathComponentsCarryTurnPoints</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TST_SvgComponentTags::PathComponentsCarryTurnPoints </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">slot</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>PathComponentsCarryTurnPoints checks that seam line, cut line, internal path and cut path groups carry data-turn-points when their node vertices are known. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00809">809</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01053">VLayoutPiece::setInternalPaths()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00533">VLayoutPiece::setMainPathPoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00558">VLayoutPiece::setSeamAllowancePoints()</a>, and <a class="el" href="../../d9/d61/vlayoutpiecepath_8cpp_source.html#l00187">VLayoutPiecePath::setTurnPoints()</a>.</p>
 
 </div>
 </div>
@@ -581,7 +778,7 @@ Private Slots</h2></td></tr>
 
 <p>PieceNameSanitizedForIdButNotForDataParent checks that a piece name with spaces, punctuation and a leading digit is sanitized for the id (invalid characters become '_', a leading digit gets a '_' prefix) while data-parent keeps the raw, human-readable name. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00362">362</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00413">413</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
 </div>
 </div>
@@ -610,7 +807,7 @@ Private Slots</h2></td></tr>
 
 <p>PieceWithNoNameFallsBackToNumericId checks that a piece with no usable name keeps the legacy "&lt;pieceId&gt;-&lt;type&gt;-&lt;n&gt;" id and data-parent falls back to the piece id, exactly as before this id scheme existed. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00379">379</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00430">430</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
 </div>
 </div>
@@ -639,9 +836,9 @@ Private Slots</h2></td></tr>
 
 <p>PieceWithoutGrainHasNoGrainlineAngle checks that a piece without a grain rotation gets no data-grainline-angle attribute. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00549">549</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00600">600</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00749">VLayoutPiece::grainlineAngle()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00792">VLayoutPiece::grainlineAngle()</a>.</p>
 
 </div>
 </div>
@@ -670,9 +867,38 @@ Private Slots</h2></td></tr>
 
 <p>PieceWithoutNotchesEmitsNoNotchGroup checks that a piece without notches gets no notch item and no notch group, also when the piece is moved away from the scene origin. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00442">442</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00493">493</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01188">VLayoutPiece::GetItem()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00979">VLayoutPiece::setNotches()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">VLayoutPiece::GetItem()</a>, <a class="el" href="../../dd/d4a/vlayoutdef_8h_source.html#l00087">PieceItemData::ItemType</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01022">VLayoutPiece::setNotches()</a>.</p>
+
+</div>
+</div>
+<a id="a81f2d129ef10a832ccd0a1c2c3682a71" name="a81f2d129ef10a832ccd0a1c2c3682a71"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a81f2d129ef10a832ccd0a1c2c3682a71">&#9670;&#160;</a></span>UnknownTurnPointsEmitNoAttribute</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void TST_SvgComponentTags::UnknownTurnPointsEmitNoAttribute </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">private</span><span class="mlabel">slot</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>UnknownTurnPointsEmitNoAttribute checks that a path without node vertices gets no data-turn-points, so SeamlyLayout uses its own detection. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00843">843</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
 </div>
 </div>
@@ -701,7 +927,7 @@ Private Slots</h2></td></tr>
 
 <p>UpwardAngleFlipsDownwardGrainline checks that only angles pointing down are turned by 180 degrees. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00588">588</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00639">639</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../de/d65/vgrainlinedata_8cpp_source.html#l00184">VGrainlineData::upwardAngle()</a>.</p>
 
@@ -732,7 +958,7 @@ Private Slots</h2></td></tr>
 
 <p>UpwardAngleFlipsDownwardGrainline_data lists grainline angles and their upward form. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00569">569</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00620">620</a> of file <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html">tst_svgcomponenttags.cpp</a>.</p>
 
 </div>
 </div>

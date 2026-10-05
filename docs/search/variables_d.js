@@ -65,12 +65,13 @@ var searchData=
   ['nodetypecontour_62',['NodeTypeContour',['../d4/dd5/classUnionTool.html#a51fc774bfd24de24df6012581879f5f4',1,'UnionTool']]],
   ['nodetypemodeling_63',['NodeTypeModeling',['../d4/dd5/classUnionTool.html#aa6814c24495c19ebf6041eb051c47fa7',1,'UnionTool']]],
   ['notches_64',['notches',['../d7/dcf/classVLayoutPieceData.html#af69c440f98e3d5b22adcf16bec749d08',1,'VLayoutPieceData']]],
-  ['null_5fid_65',['null_id',['../d3/da5/ifcdef_8h.html#a68a1cce1b2e34bf8a1fa67b2dd045b64',1,'ifcdef.h']]],
-  ['num_5ffaces_66',['num_faces',['../d6/da5/structdelaunay2d__t.html#ad411607311feeedf3e43955a782b100c',1,'delaunay2d_t::num_faces()'],['../de/d32/structdelaunay__s.html#aff43139d0d9eeb9c445577a3f27da270',1,'delaunay_s::num_faces()']]],
-  ['num_5fpoints_67',['num_points',['../d6/da5/structdelaunay2d__t.html#ad40d999651b7db64910a0b6030a7ab30',1,'delaunay2d_t']]],
-  ['num_5fverts_68',['num_verts',['../d3/d07/structface__s.html#a36e758cd059915e6a3b53a32aebf5ba8',1,'face_s']]],
-  ['number_69',['number',['../d2/d7b/classDialogTool.html#a6f583a6003585697d9b06234fd1ace14',1,'DialogTool']]],
-  ['numberd_70',['numberD',['../d0/dc3/classUnionDialog.html#a3db03871b1f4d700120d4b3c0d08422c',1,'UnionDialog']]],
-  ['numberp_71',['numberP',['../d0/dc3/classUnionDialog.html#a172c21bafdd0d977b9a180ffa087b72c',1,'UnionDialog']]],
-  ['numericsign_72',['numericSign',['../de/dcf/classXSValue.html#a2e374ca45b0e3e75efb9e629d5b1e1da',1,'XSValue']]]
+  ['notchtestsawidth_65',['notchTestSAWidth',['../d3/d07/namespaceanonymous__namespace_02tst__vpiece_8cpp_03.html#a38d8530ad86a95563a2fe4059f6e8fdd',1,'anonymous_namespace{tst_vpiece.cpp}']]],
+  ['null_5fid_66',['null_id',['../d3/da5/ifcdef_8h.html#a68a1cce1b2e34bf8a1fa67b2dd045b64',1,'ifcdef.h']]],
+  ['num_5ffaces_67',['num_faces',['../d6/da5/structdelaunay2d__t.html#ad411607311feeedf3e43955a782b100c',1,'delaunay2d_t::num_faces()'],['../de/d32/structdelaunay__s.html#aff43139d0d9eeb9c445577a3f27da270',1,'delaunay_s::num_faces()']]],
+  ['num_5fpoints_68',['num_points',['../d6/da5/structdelaunay2d__t.html#ad40d999651b7db64910a0b6030a7ab30',1,'delaunay2d_t']]],
+  ['num_5fverts_69',['num_verts',['../d3/d07/structface__s.html#a36e758cd059915e6a3b53a32aebf5ba8',1,'face_s']]],
+  ['number_70',['number',['../d2/d7b/classDialogTool.html#a6f583a6003585697d9b06234fd1ace14',1,'DialogTool']]],
+  ['numberd_71',['numberD',['../d0/dc3/classUnionDialog.html#a3db03871b1f4d700120d4b3c0d08422c',1,'UnionDialog']]],
+  ['numberp_72',['numberP',['../d0/dc3/classUnionDialog.html#a172c21bafdd0d977b9a180ffa087b72c',1,'UnionDialog']]],
+  ['numericsign_73',['numericSign',['../de/dcf/classXSValue.html#a2e374ca45b0e3e75efb9e629d5b1e1da',1,'XSValue']]]
 ];

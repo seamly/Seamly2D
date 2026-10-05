@@ -12,8 +12,15 @@ var classTST__VPiece =
     [ "KeepExplicitPieceName", "db/dbb/classTST__VPiece.html#aa98b0d88389cac808af7190063b09edb", null ],
     [ "LabelTemplateEmptyWithoutAnyFile", "db/dbb/classTST__VPiece.html#a26c48526190de22582a33b6e8dbc6080", null ],
     [ "LabelTemplateFallsBackToBuiltIn", "db/dbb/classTST__VPiece.html#a25aeacee6b04937145f1555a05ae316d", null ],
+    [ "LabelTemplateFileEmptyWithoutAnyFile", "db/dbb/classTST__VPiece.html#a6204ccaa34d7a710eaee6eeaced37f27", null ],
+    [ "LabelTemplateFilePrefersUserFile", "db/dbb/classTST__VPiece.html#a26af6f0cb1facf8cbbef82520a2dc15b", null ],
     [ "LabelTemplateReadsUserFile", "db/dbb/classTST__VPiece.html#afb5a45411ee5469ec886bbab92305a62", null ],
-    [ "PatternLabelRightOfPieceLabel", "db/dbb/classTST__VPiece.html#a01d3a97e2cc74f7af495cc70f21a1148", null ],
-    [ "PatternLabelTakesPieceLabelPlaceWithoutPieceLabel", "db/dbb/classTST__VPiece.html#ab44e1be63ca16aae62108fe4d64c19a9", null ],
-    [ "PieceLabelCenteredRightOfBoundingBoxCenter", "db/dbb/classTST__VPiece.html#a2aed43e824808f5fde0689bd4d556e0f", null ]
+    [ "NotchFlagsSelectLine", "db/dbb/classTST__VPiece.html#a775398adfea6229ab9f4324d7bc77b6f", null ],
+    [ "NotchFlagsSelectLine_data", "db/dbb/classTST__VPiece.html#a3d2d629cf245784b36181780cee01575", null ],
+    [ "PatternLabelLeftOfCenterWithoutGrainline", "db/dbb/classTST__VPiece.html#aa1ef12241e1fe04988c60cfdd822def3", null ],
+    [ "PatternLabelLeftOfSlantedGrainline", "db/dbb/classTST__VPiece.html#a99d6673b533f6cd9772609278bf03151", null ],
+    [ "PatternLabelLeftOfVerticalGrainline", "db/dbb/classTST__VPiece.html#a5d39ae13764417319749440818cc100c", null ],
+    [ "PieceLabelRightOfSlantedGrainline", "db/dbb/classTST__VPiece.html#a5e33219c008ecaaf6ef36d912159fc7c", null ],
+    [ "PieceLabelRightOfVerticalGrainline", "db/dbb/classTST__VPiece.html#a540373d87a58409b3064b35ee1c8d888", null ],
+    [ "SameLabelLinesComparesFormatting", "db/dbb/classTST__VPiece.html#a0c7b5bda52e46886025e4fbab8217645", null ]
 ];

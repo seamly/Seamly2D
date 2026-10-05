@@ -133,6 +133,18 @@ Functions</h2></td></tr>
 <tr class="memitem:aae735a1c73b1b4c0e7f2c377bf1c7cec"><td class="memItemLeft" align="right" valign="top">QVector&lt; <a class="el" href="../../dc/daa/structVLabelTemplateLine.html">VLabelTemplateLine</a> &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/dc2/namespaceNewPieceDefaults.html#aae735a1c73b1b4c0e7f2c377bf1c7cec">patternLabelTemplate</a> ()</td></tr>
 <tr class="memdesc:aae735a1c73b1b4c0e7f2c377bf1c7cec"><td class="mdescLeft">&#160;</td><td class="mdescRight">patternLabelTemplate returns the default pattern label lines.  <br /></td></tr>
 <tr class="separator:aae735a1c73b1b4c0e7f2c377bf1c7cec"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a04b4d79d66be55bc08270bf0fa0b53e3"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/dc2/namespaceNewPieceDefaults.html#a04b4d79d66be55bc08270bf0fa0b53e3">labelTemplateFile</a> (const QString &amp;userFile, const QString &amp;builtInFile)</td></tr>
+<tr class="memdesc:a04b4d79d66be55bc08270bf0fa0b53e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">labelTemplateFile returns the file that <a class="el" href="../../d6/dc2/namespaceNewPieceDefaults.html#ad59a0d113ad4af46cdfc73a00d89874a" title="readLabelTemplate reads the lines of a label template.">readLabelTemplate()</a> reads.  <br /></td></tr>
+<tr class="separator:a04b4d79d66be55bc08270bf0fa0b53e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac80ca9e01b27f0eebb6070dedbc672fd"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/dc2/namespaceNewPieceDefaults.html#ac80ca9e01b27f0eebb6070dedbc672fd">sameLabelLines</a> (const QVector&lt; <a class="el" href="../../dc/daa/structVLabelTemplateLine.html">VLabelTemplateLine</a> &gt; &amp;first, const QVector&lt; <a class="el" href="../../dc/daa/structVLabelTemplateLine.html">VLabelTemplateLine</a> &gt; &amp;second)</td></tr>
+<tr class="memdesc:ac80ca9e01b27f0eebb6070dedbc672fd"><td class="mdescLeft">&#160;</td><td class="mdescRight">sameLabelLines returns true when both templates have the same lines with the same formatting.  <br /></td></tr>
+<tr class="separator:ac80ca9e01b27f0eebb6070dedbc672fd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab2c37436e5ae80d49063aff06395a7b1"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/dc2/namespaceNewPieceDefaults.html#ab2c37436e5ae80d49063aff06395a7b1">pieceLabelTemplateFile</a> (const QVector&lt; <a class="el" href="../../dc/daa/structVLabelTemplateLine.html">VLabelTemplateLine</a> &gt; &amp;lines)</td></tr>
+<tr class="memdesc:ab2c37436e5ae80d49063aff06395a7b1"><td class="mdescLeft">&#160;</td><td class="mdescRight">pieceLabelTemplateFile returns the default piece label file when <code>lines</code> match its lines.  <br /></td></tr>
+<tr class="separator:ab2c37436e5ae80d49063aff06395a7b1"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae9b7f4b83a28477afb2e135f6c35f160"><td class="memItemLeft" align="right" valign="top">QString&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/dc2/namespaceNewPieceDefaults.html#ae9b7f4b83a28477afb2e135f6c35f160">patternLabelTemplateFile</a> (const QVector&lt; <a class="el" href="../../dc/daa/structVLabelTemplateLine.html">VLabelTemplateLine</a> &gt; &amp;lines)</td></tr>
+<tr class="memdesc:ae9b7f4b83a28477afb2e135f6c35f160"><td class="mdescLeft">&#160;</td><td class="mdescRight">patternLabelTemplateFile returns the default pattern label file when <code>lines</code> match its lines.  <br /></td></tr>
+<tr class="separator:ae9b7f4b83a28477afb2e135f6c35f160"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="../../d6/dc2/namespaceNewPieceDefaults.html" title="NewPieceDefaults gives the Add New Pattern Piece dialog and the Union tool one source of default valu...">NewPieceDefaults</a> gives the Add New Pattern Piece dialog and the Union tool one source of default values. </p>
@@ -159,7 +171,7 @@ Functions</h2></td></tr>
 
 <p class="reference">References <a class="el" href="../../d6/d0b/def_8cpp_source.html#l00242">FromPixel()</a>, and <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00078">fitGrainlineLength()</a>, <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00071">grainlineLength()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l03378">PatternPieceDialog::initializeGrainlineTab()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00078">fitGrainlineLength()</a>, <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00071">grainlineLength()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l03379">PatternPieceDialog::initializeGrainlineTab()</a>.</p>
 
 </div>
 </div>
@@ -203,7 +215,7 @@ Functions</h2></td></tr>
 
 <p class="reference">References <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00064">arrowLength()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00398">TST_VPiece::GrainlineGrowsToFitTwoArrows()</a>, <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00392">TST_VPiece::GrainlineKeepsLengthLongerThanTwoArrows()</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00071">grainlineLength()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00440">TST_VPiece::GrainlineGrowsToFitTwoArrows()</a>, <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00434">TST_VPiece::GrainlineKeepsLengthLongerThanTwoArrows()</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00071">grainlineLength()</a>.</p>
 
 </div>
 </div>
@@ -229,7 +241,7 @@ Functions</h2></td></tr>
 
 <p class="reference">References <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00064">arrowLength()</a>, <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00078">fitGrainlineLength()</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00045">anonymous_namespace{new_piece_defaults.cpp}::settingToPatternUnits()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l03378">PatternPieceDialog::initializeGrainlineTab()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l03379">PatternPieceDialog::initializeGrainlineTab()</a>.</p>
 
 </div>
 </div>
@@ -255,7 +267,42 @@ Functions</h2></td></tr>
 
 <p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00045">anonymous_namespace{new_piece_defaults.cpp}::settingToPatternUnits()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l03281">PatternPieceDialog::initializeLabelsTab()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l03282">PatternPieceDialog::initializeLabelsTab()</a>.</p>
+
+</div>
+</div>
+<a id="a04b4d79d66be55bc08270bf0fa0b53e3" name="a04b4d79d66be55bc08270bf0fa0b53e3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a04b4d79d66be55bc08270bf0fa0b53e3">&#9670;&#160;</a></span>labelTemplateFile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">QString NewPieceDefaults::labelTemplateFile </td>
+          <td>(</td>
+          <td class="paramtype">const QString &amp;&#160;</td>
+          <td class="paramname"><em>userFile</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const QString &amp;&#160;</td>
+          <td class="paramname"><em>builtInFile</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>labelTemplateFile returns the file that <a class="el" href="../../d6/dc2/namespaceNewPieceDefaults.html#ad59a0d113ad4af46cdfc73a00d89874a" title="readLabelTemplate reads the lines of a label template.">readLabelTemplate()</a> reads. </p>
+<dl class="section return"><dt>Returns</dt><dd><code>userFile</code> when it exists, else <code>builtInFile</code> when it exists, else an empty string. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00089">89</a> of file <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html">new_piece_defaults.cpp</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00512">TST_VPiece::LabelTemplateFileEmptyWithoutAnyFile()</a>, <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00495">TST_VPiece::LabelTemplateFilePrefersUserFile()</a>, <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00165">patternLabelTemplateFile()</a>, <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00155">pieceLabelTemplateFile()</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00104">readLabelTemplate()</a>.</p>
 
 </div>
 </div>
@@ -281,7 +328,7 @@ Functions</h2></td></tr>
 
 <p class="reference">References <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00045">anonymous_namespace{new_piece_defaults.cpp}::settingToPatternUnits()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l03281">PatternPieceDialog::initializeLabelsTab()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l03282">PatternPieceDialog::initializeLabelsTab()</a>.</p>
 
 </div>
 </div>
@@ -302,11 +349,38 @@ Functions</h2></td></tr>
 
 <p>patternLabelTemplate returns the default pattern label lines. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00116">116</a> of file <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html">new_piece_defaults.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00126">126</a> of file <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html">new_piece_defaults.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00727">VCommonSettings::builtInPatternLabelTemplate()</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00089">readLabelTemplate()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00727">VCommonSettings::builtInPatternLabelTemplate()</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00104">readLabelTemplate()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l03281">PatternPieceDialog::initializeLabelsTab()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l03282">PatternPieceDialog::initializeLabelsTab()</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00165">patternLabelTemplateFile()</a>.</p>
+
+</div>
+</div>
+<a id="ae9b7f4b83a28477afb2e135f6c35f160" name="ae9b7f4b83a28477afb2e135f6c35f160"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae9b7f4b83a28477afb2e135f6c35f160">&#9670;&#160;</a></span>patternLabelTemplateFile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">QString NewPieceDefaults::patternLabelTemplateFile </td>
+          <td>(</td>
+          <td class="paramtype">const QVector&lt; <a class="el" href="../../dc/daa/structVLabelTemplateLine.html">VLabelTemplateLine</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>lines</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>patternLabelTemplateFile returns the default pattern label file when <code>lines</code> match its lines. </p>
+<dl class="section return"><dt>Returns</dt><dd>the file path, or an empty string when <code>lines</code> are empty or differ from the default. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00165">165</a> of file <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html">new_piece_defaults.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00727">VCommonSettings::builtInPatternLabelTemplate()</a>, <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00089">labelTemplateFile()</a>, <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00126">patternLabelTemplate()</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00133">sameLabelLines()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d5/d18/dialogpatternproperties_8cpp_source.html#l00907">DialogPatternProperties::EditLabel()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02622">PatternPieceDialog::editPatternLabel()</a>.</p>
 
 </div>
 </div>
@@ -327,11 +401,38 @@ Functions</h2></td></tr>
 
 <p>pieceLabelTemplate returns the default piece label lines. </p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00109">109</a> of file <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html">new_piece_defaults.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00119">119</a> of file <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html">new_piece_defaults.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00720">VCommonSettings::builtInPieceLabelTemplate()</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00089">readLabelTemplate()</a>.</p>
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00720">VCommonSettings::builtInPieceLabelTemplate()</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00104">readLabelTemplate()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l03281">PatternPieceDialog::initializeLabelsTab()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l03282">PatternPieceDialog::initializeLabelsTab()</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00155">pieceLabelTemplateFile()</a>.</p>
+
+</div>
+</div>
+<a id="ab2c37436e5ae80d49063aff06395a7b1" name="ab2c37436e5ae80d49063aff06395a7b1"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab2c37436e5ae80d49063aff06395a7b1">&#9670;&#160;</a></span>pieceLabelTemplateFile()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">QString NewPieceDefaults::pieceLabelTemplateFile </td>
+          <td>(</td>
+          <td class="paramtype">const QVector&lt; <a class="el" href="../../dc/daa/structVLabelTemplateLine.html">VLabelTemplateLine</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>lines</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>pieceLabelTemplateFile returns the default piece label file when <code>lines</code> match its lines. </p>
+<dl class="section return"><dt>Returns</dt><dd>the file path, or an empty string when <code>lines</code> are empty or differ from the default. </dd></dl>
+
+<p class="definition">Definition at line <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00155">155</a> of file <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html">new_piece_defaults.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d4/d11/vcommonsettings_8cpp_source.html#l00720">VCommonSettings::builtInPieceLabelTemplate()</a>, <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00089">labelTemplateFile()</a>, <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00119">pieceLabelTemplate()</a>, <a class="el" href="../../d7/d61/application__2d_8h_source.html#l00066">qApp</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00133">sameLabelLines()</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02639">PatternPieceDialog::editPieceLabel()</a>.</p>
 
 </div>
 </div>
@@ -371,11 +472,47 @@ Functions</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>the template lines; empty when neither file exists. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00089">89</a> of file <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html">new_piece_defaults.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00104">104</a> of file <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html">new_piece_defaults.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/daf/vlabeltemplate_8cpp_source.html#l00094">VLabelTemplate::ReadLines()</a>, and <a class="el" href="../../d7/d49/vdomdocument_8cpp_source.html#l00678">VDomDocument::setXMLContent()</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00089">labelTemplateFile()</a>, <a class="el" href="../../d9/daf/vlabeltemplate_8cpp_source.html#l00094">VLabelTemplate::ReadLines()</a>, and <a class="el" href="../../d7/d49/vdomdocument_8cpp_source.html#l00678">VDomDocument::setXMLContent()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00440">TST_VPiece::LabelTemplateEmptyWithoutAnyFile()</a>, <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00426">TST_VPiece::LabelTemplateFallsBackToBuiltIn()</a>, <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00404">TST_VPiece::LabelTemplateReadsUserFile()</a>, <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00116">patternLabelTemplate()</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00109">pieceLabelTemplate()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00482">TST_VPiece::LabelTemplateEmptyWithoutAnyFile()</a>, <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00468">TST_VPiece::LabelTemplateFallsBackToBuiltIn()</a>, <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00446">TST_VPiece::LabelTemplateReadsUserFile()</a>, <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00126">patternLabelTemplate()</a>, and <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00119">pieceLabelTemplate()</a>.</p>
+
+</div>
+</div>
+<a id="ac80ca9e01b27f0eebb6070dedbc672fd" name="ac80ca9e01b27f0eebb6070dedbc672fd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac80ca9e01b27f0eebb6070dedbc672fd">&#9670;&#160;</a></span>sameLabelLines()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool NewPieceDefaults::sameLabelLines </td>
+          <td>(</td>
+          <td class="paramtype">const QVector&lt; <a class="el" href="../../dc/daa/structVLabelTemplateLine.html">VLabelTemplateLine</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>first</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const QVector&lt; <a class="el" href="../../dc/daa/structVLabelTemplateLine.html">VLabelTemplateLine</a> &gt; &amp;&#160;</td>
+          <td class="paramname"><em>second</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>sameLabelLines returns true when both templates have the same lines with the same formatting. </p>
+
+<p class="definition">Definition at line <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00133">133</a> of file <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html">new_piece_defaults.cpp</a>.</p>
+
+<p class="reference">References <a class="el" href="../../d3/da5/ifcdef_8h_source.html#l00292">VLabelTemplateLine::alignment</a>, <a class="el" href="../../d3/da5/ifcdef_8h_source.html#l00290">VLabelTemplateLine::bold</a>, <a class="el" href="../../d3/da5/ifcdef_8h_source.html#l00293">VLabelTemplateLine::fontSizeIncrement</a>, <a class="el" href="../../d3/da5/ifcdef_8h_source.html#l00291">VLabelTemplateLine::italic</a>, and <a class="el" href="../../d3/da5/ifcdef_8h_source.html#l00289">VLabelTemplateLine::line</a>.</p>
+
+<p class="reference">Referenced by <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00165">patternLabelTemplateFile()</a>, <a class="el" href="../../d9/dbf/new__piece__defaults_8cpp_source.html#l00155">pieceLabelTemplateFile()</a>, and <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00522">TST_VPiece::SameLabelLinesComparesFormatting()</a>.</p>
 
 </div>
 </div>

@@ -8,10 +8,13 @@ var classVSAPoint =
     [ "GetSAAfter", "da/dac/classVSAPoint.html#aa830982a7091b598a3947128b4ee50d3", null ],
     [ "GetSABefore", "da/dac/classVSAPoint.html#a865e5219530db8bffd7f9a58903f3340", null ],
     [ "GetSABefore", "da/dac/classVSAPoint.html#ab2325d7749707992535c012eed858c28", null ],
+    [ "isNode", "da/dac/classVSAPoint.html#a34f93258f394387dc33128bda995d476", null ],
     [ "SetAngleType", "da/dac/classVSAPoint.html#a480c790c82042a4f89e70332d073863f", null ],
+    [ "setNode", "da/dac/classVSAPoint.html#a881b6f5a26cc6cd373ea4b098a1b5390", null ],
     [ "SetSAAfter", "da/dac/classVSAPoint.html#af7356da69f9e18b980b7f3a94f1b274f", null ],
     [ "SetSABefore", "da/dac/classVSAPoint.html#aa98183dd5316509a9177c33f6a7f7968", null ],
     [ "m_after", "da/dac/classVSAPoint.html#a08638fcac5539a48e2690babeebde960", null ],
     [ "m_angle", "da/dac/classVSAPoint.html#a1f5a23bcc673ece40d70de0578449b27", null ],
-    [ "m_before", "da/dac/classVSAPoint.html#aa8b679a831c134d8b60515540e4f32d0", null ]
+    [ "m_before", "da/dac/classVSAPoint.html#aa8b679a831c134d8b60515540e4f32d0", null ],
+    [ "m_node", "da/dac/classVSAPoint.html#ab0e78a3ea5b6b32fc62532ab8921506e", null ]
 ];

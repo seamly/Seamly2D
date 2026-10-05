@@ -10,6 +10,7 @@ var classVGrainlineData =
     [ "getArrowType", "da/d7f/classVGrainlineData.html#a36229e13ef57e54e6ce2468e44bb7d92", null ],
     [ "getLength", "da/d7f/classVGrainlineData.html#a607fdda1c64f1ed41c363f5faad4ab2a", null ],
     [ "getRotation", "da/d7f/classVGrainlineData.html#a3bfb6fb6d65481ed69a262f66fd9d98b", null ],
+    [ "lineRect", "da/d7f/classVGrainlineData.html#a6421086ce09317ddbaed0d45654be14d", null ],
     [ "operator=", "da/d7f/classVGrainlineData.html#a1a038a9ba6149d8748a6e05058142a81", null ],
     [ "setArrowLength", "da/d7f/classVGrainlineData.html#a29e6ac49390cca398559cd435897f21e", null ],
     [ "setArrowType", "da/d7f/classVGrainlineData.html#a0e6c55ad4d2cb41a4f41e26df3efd87b", null ],

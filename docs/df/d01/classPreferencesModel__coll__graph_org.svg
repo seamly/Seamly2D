@@ -24,33 +24,33 @@
 <text text-anchor="start" x="8" y="-510.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ dxfViewerPath</text>
 <text text-anchor="start" x="8" y="-499.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ pdfViewerPath</text>
 <text text-anchor="start" x="8" y="-488.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ pngViewerPath</text>
-<text text-anchor="start" x="8" y="-477.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ projectorPath</text>
-<text text-anchor="start" x="8" y="-466.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ dataRoot</text>
-<text text-anchor="start" x="8" y="-455.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ svgTextMode</text>
-<text text-anchor="start" x="8" y="-444.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_inputDirectory</text>
-<text text-anchor="start" x="8" y="-433.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_layoutDirectory</text>
-<text text-anchor="start" x="8" y="-422.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_preferencesDirectory</text>
-<text text-anchor="start" x="8" y="-411.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_settingsDirectory</text>
-<text text-anchor="start" x="8" y="-400.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_settingsFile</text>
-<text text-anchor="start" x="8" y="-389.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_preferencesFile</text>
-<text text-anchor="start" x="8" y="-378.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_dxfViewerPath</text>
-<text text-anchor="start" x="8" y="-367.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_pdfViewerPath</text>
-<text text-anchor="start" x="8" y="-356.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_pngViewerPath</text>
-<text text-anchor="start" x="8" y="-345.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_projectorPath</text>
-<text text-anchor="start" x="8" y="-334.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_dataRoot</text>
-<text text-anchor="start" x="8" y="-323.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_svgTextMode</text>
-<polyline fill="none" stroke="#666666" points="0,-316.5 182,-316.5 "/>
-<text text-anchor="start" x="8" y="-304.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ PreferencesModel()</text>
-<text text-anchor="start" x="8" y="-293.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ inputDirectory()</text>
-<text text-anchor="start" x="8" y="-282.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ layoutDirectory()</text>
-<text text-anchor="start" x="8" y="-271.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ preferencesDirectory()</text>
-<text text-anchor="start" x="8" y="-260.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ settingsDirectory()</text>
-<text text-anchor="start" x="8" y="-249.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ settingsFile()</text>
-<text text-anchor="start" x="8" y="-238.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ preferencesFile()</text>
-<text text-anchor="start" x="8" y="-227.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ dxfViewerPath()</text>
-<text text-anchor="start" x="8" y="-216.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ pdfViewerPath()</text>
-<text text-anchor="start" x="8" y="-205.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ pngViewerPath()</text>
-<text text-anchor="start" x="8" y="-194.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 25 more...</text>
+<text text-anchor="start" x="8" y="-477.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ hpglViewerPath</text>
+<text text-anchor="start" x="8" y="-466.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 7 more...</text>
+<text text-anchor="start" x="8" y="-455.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_inputDirectory</text>
+<text text-anchor="start" x="8" y="-444.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_layoutDirectory</text>
+<text text-anchor="start" x="8" y="-433.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_preferencesDirectory</text>
+<text text-anchor="start" x="8" y="-422.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_settingsDirectory</text>
+<text text-anchor="start" x="8" y="-411.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_settingsFile</text>
+<text text-anchor="start" x="8" y="-400.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_preferencesFile</text>
+<text text-anchor="start" x="8" y="-389.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_dxfViewerPath</text>
+<text text-anchor="start" x="8" y="-378.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_pdfViewerPath</text>
+<text text-anchor="start" x="8" y="-367.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_pngViewerPath</text>
+<text text-anchor="start" x="8" y="-356.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; m_projectorPath</text>
+<text text-anchor="start" x="8" y="-345.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 7 more...</text>
+<polyline fill="none" stroke="#666666" points="0,-338.5 182,-338.5 "/>
+<text text-anchor="start" x="8" y="-326.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ PreferencesModel()</text>
+<text text-anchor="start" x="8" y="-315.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ inputDirectory()</text>
+<text text-anchor="start" x="8" y="-304.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ layoutDirectory()</text>
+<text text-anchor="start" x="8" y="-293.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ preferencesDirectory()</text>
+<text text-anchor="start" x="8" y="-282.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ settingsDirectory()</text>
+<text text-anchor="start" x="8" y="-271.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ settingsFile()</text>
+<text text-anchor="start" x="8" y="-260.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ preferencesFile()</text>
+<text text-anchor="start" x="8" y="-249.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ dxfViewerPath()</text>
+<text text-anchor="start" x="8" y="-238.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ pdfViewerPath()</text>
+<text text-anchor="start" x="8" y="-227.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ pngViewerPath()</text>
+<text text-anchor="start" x="8" y="-216.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 37 more...</text>
+<text text-anchor="start" x="8" y="-205.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ isHpglPen()</text>
+<text text-anchor="start" x="8" y="-194.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ isHpglExtension()</text>
 <text text-anchor="start" x="8" y="-183.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ isSvgTextMode()</text>
 <text text-anchor="start" x="8" y="-172.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ urlToLocalFile()</text>
 <text text-anchor="start" x="8" y="-161.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ localFileToUrl()</text>
@@ -60,7 +60,7 @@
 <text text-anchor="start" x="8" y="-117.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ openInViewer()</text>
 <text text-anchor="start" x="8" y="-106.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ isViewerUrl()</text>
 <text text-anchor="start" x="8" y="-95.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ fileExists()</text>
-<text text-anchor="start" x="8" y="-84.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ dxfTeachingFilePath()</text>
+<text text-anchor="start" x="8" y="-84.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ dxfAnnotatedFilePath()</text>
 <text text-anchor="start" x="8" y="-73.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ parseViewerCommand()</text>
 <text text-anchor="start" x="8" y="-62.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; loadJsonPreferences()</text>
 <text text-anchor="start" x="8" y="-51.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; migrateLegacyPreferencePaths()</text>

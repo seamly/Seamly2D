@@ -333,37 +333,38 @@
 <g id="node11" class="node">
 <title>Node11</title>
 <g id="a_node11"><a xlink:href="../../df/de1/classVPiecePath.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="245.5,-292.5 245.5,-536.5 430.5,-536.5 430.5,-292.5 245.5,-292.5"/>
-<text text-anchor="middle" x="338" y="-524.5" font-family="Helvetica,sans-Serif" font-size="10.00">VPiecePath</text>
-<polyline fill="none" stroke="#666666" points="245.5,-517.5 430.5,-517.5 "/>
-<text text-anchor="start" x="253.5" y="-505.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; d</text>
-<polyline fill="none" stroke="#666666" points="245.5,-498.5 430.5,-498.5 "/>
-<text text-anchor="start" x="253.5" y="-486.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ VPiecePath()</text>
-<text text-anchor="start" x="253.5" y="-475.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ VPiecePath()</text>
-<text text-anchor="start" x="253.5" y="-464.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ VPiecePath()</text>
-<text text-anchor="start" x="253.5" y="-453.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ ~VPiecePath()</text>
-<text text-anchor="start" x="253.5" y="-442.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ operator=()</text>
-<text text-anchor="start" x="253.5" y="-431.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ Swap()</text>
-<text text-anchor="start" x="253.5" y="-420.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ Append()</text>
-<text text-anchor="start" x="253.5" y="-409.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ Clear()</text>
-<text text-anchor="start" x="253.5" y="-398.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ nodeCount()</text>
-<text text-anchor="start" x="253.5" y="-387.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ operator[]()</text>
-<text text-anchor="start" x="253.5" y="-376.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 36 more...</text>
-<text text-anchor="start" x="253.5" y="-365.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ indexOfNode()</text>
-<text text-anchor="start" x="253.5" y="-354.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ FindInLoopNotExcludedUp()</text>
-<text text-anchor="start" x="253.5" y="-343.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ FindInLoopNotExcludedDown()</text>
-<text text-anchor="start" x="253.5" y="-332.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ StartSegment()</text>
-<text text-anchor="start" x="253.5" y="-321.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ EndSegment()</text>
-<text text-anchor="start" x="253.5" y="-310.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ PreparePointEkv()</text>
-<text text-anchor="start" x="253.5" y="-299.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ CurveSeamAllowanceSegment()</text>
+<polygon fill="white" stroke="#666666" points="245.5,-287 245.5,-542 430.5,-542 430.5,-287 245.5,-287"/>
+<text text-anchor="middle" x="338" y="-530" font-family="Helvetica,sans-Serif" font-size="10.00">VPiecePath</text>
+<polyline fill="none" stroke="#666666" points="245.5,-523 430.5,-523 "/>
+<text text-anchor="start" x="253.5" y="-511" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; d</text>
+<polyline fill="none" stroke="#666666" points="245.5,-504 430.5,-504 "/>
+<text text-anchor="start" x="253.5" y="-492" font-family="Helvetica,sans-Serif" font-size="10.00">+ VPiecePath()</text>
+<text text-anchor="start" x="253.5" y="-481" font-family="Helvetica,sans-Serif" font-size="10.00">+ VPiecePath()</text>
+<text text-anchor="start" x="253.5" y="-470" font-family="Helvetica,sans-Serif" font-size="10.00">+ VPiecePath()</text>
+<text text-anchor="start" x="253.5" y="-459" font-family="Helvetica,sans-Serif" font-size="10.00">+ ~VPiecePath()</text>
+<text text-anchor="start" x="253.5" y="-448" font-family="Helvetica,sans-Serif" font-size="10.00">+ operator=()</text>
+<text text-anchor="start" x="253.5" y="-437" font-family="Helvetica,sans-Serif" font-size="10.00">+ Swap()</text>
+<text text-anchor="start" x="253.5" y="-426" font-family="Helvetica,sans-Serif" font-size="10.00">+ Append()</text>
+<text text-anchor="start" x="253.5" y="-415" font-family="Helvetica,sans-Serif" font-size="10.00">+ Clear()</text>
+<text text-anchor="start" x="253.5" y="-404" font-family="Helvetica,sans-Serif" font-size="10.00">+ nodeCount()</text>
+<text text-anchor="start" x="253.5" y="-393" font-family="Helvetica,sans-Serif" font-size="10.00">+ operator[]()</text>
+<text text-anchor="start" x="253.5" y="-382" font-family="Helvetica,sans-Serif" font-size="10.00">and 37 more...</text>
+<text text-anchor="start" x="253.5" y="-371" font-family="Helvetica,sans-Serif" font-size="10.00">+ indexOfNode()</text>
+<text text-anchor="start" x="253.5" y="-360" font-family="Helvetica,sans-Serif" font-size="10.00">+ FindInLoopNotExcludedUp()</text>
+<text text-anchor="start" x="253.5" y="-349" font-family="Helvetica,sans-Serif" font-size="10.00">+ FindInLoopNotExcludedDown()</text>
+<text text-anchor="start" x="253.5" y="-338" font-family="Helvetica,sans-Serif" font-size="10.00">+ StartSegment()</text>
+<text text-anchor="start" x="253.5" y="-327" font-family="Helvetica,sans-Serif" font-size="10.00">+ EndSegment()</text>
+<text text-anchor="start" x="253.5" y="-316" font-family="Helvetica,sans-Serif" font-size="10.00">+ PreparePointEkv()</text>
+<text text-anchor="start" x="253.5" y="-305" font-family="Helvetica,sans-Serif" font-size="10.00">+ CurveSeamAllowanceSegment()</text>
+<text text-anchor="start" x="253.5" y="-294" font-family="Helvetica,sans-Serif" font-size="10.00">+ curveNodeVertices()</text>
 </a>
 </g>
 </g>
 <!-- Node11&#45;&gt;Node1 -->
 <g id="edge11" class="edge">
 <title>Node11&#45;&gt;Node1</title>
-<path fill="none" stroke="#404040" d="M338,-292.35C338,-244 338,-189.74 338,-146.74"/>
-<polygon fill="none" stroke="#404040" points="338,-146.64 334,-140.64 338,-134.64 342,-140.64 338,-146.64"/>
+<path fill="none" stroke="#404040" d="M338,-286.99C338,-240.19 338,-188.5 338,-147.16"/>
+<polygon fill="none" stroke="#404040" points="338,-146.96 334,-140.96 338,-134.96 342,-140.96 338,-146.96"/>
 <text text-anchor="middle" x="370" y="-167" font-family="Helvetica,sans-Serif" font-size="10.00"> &#45;m_newPath</text>
 <text text-anchor="middle" x="370" y="-156" font-family="Helvetica,sans-Serif" font-size="10.00">&#45;m_oldPath</text>
 </g>

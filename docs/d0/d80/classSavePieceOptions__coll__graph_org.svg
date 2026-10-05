@@ -348,7 +348,7 @@
 <text text-anchor="start" x="379.94" y="-365.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ SetPath()</text>
 <text text-anchor="start" x="379.94" y="-354.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ mainPathPoints()</text>
 <text text-anchor="start" x="379.94" y="-343.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ mainPathNodePoints()</text>
-<text text-anchor="start" x="379.94" y="-332.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 36 more...</text>
+<text text-anchor="start" x="379.94" y="-332.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 37 more...</text>
 <text text-anchor="start" x="379.94" y="-321.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; GetUnitedPath()</text>
 <text text-anchor="start" x="379.94" y="-310.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; GetValidRecords()</text>
 <text text-anchor="start" x="379.94" y="-299.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; FilterRecords()</text>
@@ -376,56 +376,57 @@
 <g id="node12" class="node">
 <title>Node12</title>
 <g id="a_node12"><a xlink:href="../../dd/dfe/classVAbstractPiece.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="387.44,-733 387.44,-1186 547.44,-1186 547.44,-733 387.44,-733"/>
-<text text-anchor="middle" x="467.44" y="-1174" font-family="Helvetica,sans-Serif" font-size="10.00">VAbstractPiece</text>
-<polyline fill="none" stroke="#666666" points="387.44,-1167 547.44,-1167 "/>
-<text text-anchor="start" x="395.44" y="-1155" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; d</text>
-<polyline fill="none" stroke="#666666" points="387.44,-1148 547.44,-1148 "/>
-<text text-anchor="start" x="395.44" y="-1136" font-family="Helvetica,sans-Serif" font-size="10.00">+ VAbstractPiece()</text>
-<text text-anchor="start" x="395.44" y="-1125" font-family="Helvetica,sans-Serif" font-size="10.00">+ VAbstractPiece()</text>
-<text text-anchor="start" x="395.44" y="-1114" font-family="Helvetica,sans-Serif" font-size="10.00">+ ~VAbstractPiece()</text>
-<text text-anchor="start" x="395.44" y="-1103" font-family="Helvetica,sans-Serif" font-size="10.00">+ operator=()</text>
-<text text-anchor="start" x="395.44" y="-1092" font-family="Helvetica,sans-Serif" font-size="10.00">+ Swap()</text>
-<text text-anchor="start" x="395.44" y="-1081" font-family="Helvetica,sans-Serif" font-size="10.00">+ GetName()</text>
-<text text-anchor="start" x="395.44" y="-1070" font-family="Helvetica,sans-Serif" font-size="10.00">+ SetName()</text>
-<text text-anchor="start" x="395.44" y="-1059" font-family="Helvetica,sans-Serif" font-size="10.00">+ getColor()</text>
-<text text-anchor="start" x="395.44" y="-1048" font-family="Helvetica,sans-Serif" font-size="10.00">+ setColor()</text>
-<text text-anchor="start" x="395.44" y="-1037" font-family="Helvetica,sans-Serif" font-size="10.00">+ getFill()</text>
-<text text-anchor="start" x="395.44" y="-1026" font-family="Helvetica,sans-Serif" font-size="10.00">and 17 more...</text>
-<text text-anchor="start" x="395.44" y="-1015" font-family="Helvetica,sans-Serif" font-size="10.00">+ Equidistant()</text>
-<text text-anchor="start" x="395.44" y="-1004" font-family="Helvetica,sans-Serif" font-size="10.00">+ sumTrapezoids()</text>
-<text text-anchor="start" x="395.44" y="-993" font-family="Helvetica,sans-Serif" font-size="10.00">+ isClockwise()</text>
-<text text-anchor="start" x="395.44" y="-982" font-family="Helvetica,sans-Serif" font-size="10.00">+ CheckLoops()</text>
-<text text-anchor="start" x="395.44" y="-971" font-family="Helvetica,sans-Serif" font-size="10.00">+ EkvPoint()</text>
-<text text-anchor="start" x="395.44" y="-960" font-family="Helvetica,sans-Serif" font-size="10.00">+ createParallelLine()</text>
-<text text-anchor="start" x="395.44" y="-949" font-family="Helvetica,sans-Serif" font-size="10.00">+ createParallelLine()</text>
-<text text-anchor="start" x="395.44" y="-938" font-family="Helvetica,sans-Serif" font-size="10.00">+ CorrectEquidistantPoints()</text>
-<text text-anchor="start" x="395.44" y="-927" font-family="Helvetica,sans-Serif" font-size="10.00"># RemoveDublicates()</text>
-<text text-anchor="start" x="395.44" y="-916" font-family="Helvetica,sans-Serif" font-size="10.00"># MaxLocalSA()</text>
-<text text-anchor="start" x="395.44" y="-905" font-family="Helvetica,sans-Serif" font-size="10.00"># IsEkvPointOnLine()</text>
-<text text-anchor="start" x="395.44" y="-894" font-family="Helvetica,sans-Serif" font-size="10.00"># IsEkvPointOnLine()</text>
-<text text-anchor="start" x="395.44" y="-883" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; CheckIntersection()</text>
-<text text-anchor="start" x="395.44" y="-872" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; ParallelCrossPoint()</text>
-<text text-anchor="start" x="395.44" y="-861" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; Crossing()</text>
-<text text-anchor="start" x="395.44" y="-850" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; SubPath()</text>
-<text text-anchor="start" x="395.44" y="-839" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; PointPosition()</text>
-<text text-anchor="start" x="395.44" y="-828" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; AngleByLength()</text>
-<text text-anchor="start" x="395.44" y="-817" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; AngleByIntersection()</text>
-<text text-anchor="start" x="395.44" y="-806" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; AngleByFirstSymmetry()</text>
-<text text-anchor="start" x="395.44" y="-795" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; AngleBySecondSymmetry()</text>
-<text text-anchor="start" x="395.44" y="-784" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; AngleByFirstRightAngle()</text>
-<text text-anchor="start" x="395.44" y="-773" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; AngleBySecondRightAngle()</text>
-<text text-anchor="start" x="395.44" y="-762" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; SingleParallelPoint()</text>
-<text text-anchor="start" x="395.44" y="-751" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; BisectorLine()</text>
-<text text-anchor="start" x="395.44" y="-740" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; AngleBetweenBisectors()</text>
+<polygon fill="white" stroke="#666666" points="387.44,-727.5 387.44,-1191.5 547.44,-1191.5 547.44,-727.5 387.44,-727.5"/>
+<text text-anchor="middle" x="467.44" y="-1179.5" font-family="Helvetica,sans-Serif" font-size="10.00">VAbstractPiece</text>
+<polyline fill="none" stroke="#666666" points="387.44,-1172.5 547.44,-1172.5 "/>
+<text text-anchor="start" x="395.44" y="-1160.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; d</text>
+<polyline fill="none" stroke="#666666" points="387.44,-1153.5 547.44,-1153.5 "/>
+<text text-anchor="start" x="395.44" y="-1141.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ VAbstractPiece()</text>
+<text text-anchor="start" x="395.44" y="-1130.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ VAbstractPiece()</text>
+<text text-anchor="start" x="395.44" y="-1119.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ ~VAbstractPiece()</text>
+<text text-anchor="start" x="395.44" y="-1108.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ operator=()</text>
+<text text-anchor="start" x="395.44" y="-1097.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ Swap()</text>
+<text text-anchor="start" x="395.44" y="-1086.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ GetName()</text>
+<text text-anchor="start" x="395.44" y="-1075.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ SetName()</text>
+<text text-anchor="start" x="395.44" y="-1064.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getColor()</text>
+<text text-anchor="start" x="395.44" y="-1053.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ setColor()</text>
+<text text-anchor="start" x="395.44" y="-1042.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ getFill()</text>
+<text text-anchor="start" x="395.44" y="-1031.5" font-family="Helvetica,sans-Serif" font-size="10.00">and 17 more...</text>
+<text text-anchor="start" x="395.44" y="-1020.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ Equidistant()</text>
+<text text-anchor="start" x="395.44" y="-1009.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ turnPointIndices()</text>
+<text text-anchor="start" x="395.44" y="-998.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ sumTrapezoids()</text>
+<text text-anchor="start" x="395.44" y="-987.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ isClockwise()</text>
+<text text-anchor="start" x="395.44" y="-976.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ CheckLoops()</text>
+<text text-anchor="start" x="395.44" y="-965.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ EkvPoint()</text>
+<text text-anchor="start" x="395.44" y="-954.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ createParallelLine()</text>
+<text text-anchor="start" x="395.44" y="-943.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ createParallelLine()</text>
+<text text-anchor="start" x="395.44" y="-932.5" font-family="Helvetica,sans-Serif" font-size="10.00">+ CorrectEquidistantPoints()</text>
+<text text-anchor="start" x="395.44" y="-921.5" font-family="Helvetica,sans-Serif" font-size="10.00"># RemoveDublicates()</text>
+<text text-anchor="start" x="395.44" y="-910.5" font-family="Helvetica,sans-Serif" font-size="10.00"># MaxLocalSA()</text>
+<text text-anchor="start" x="395.44" y="-899.5" font-family="Helvetica,sans-Serif" font-size="10.00"># IsEkvPointOnLine()</text>
+<text text-anchor="start" x="395.44" y="-888.5" font-family="Helvetica,sans-Serif" font-size="10.00"># IsEkvPointOnLine()</text>
+<text text-anchor="start" x="395.44" y="-877.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; CheckIntersection()</text>
+<text text-anchor="start" x="395.44" y="-866.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; ParallelCrossPoint()</text>
+<text text-anchor="start" x="395.44" y="-855.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; Crossing()</text>
+<text text-anchor="start" x="395.44" y="-844.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; SubPath()</text>
+<text text-anchor="start" x="395.44" y="-833.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; PointPosition()</text>
+<text text-anchor="start" x="395.44" y="-822.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; AngleByLength()</text>
+<text text-anchor="start" x="395.44" y="-811.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; AngleByIntersection()</text>
+<text text-anchor="start" x="395.44" y="-800.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; AngleByFirstSymmetry()</text>
+<text text-anchor="start" x="395.44" y="-789.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; AngleBySecondSymmetry()</text>
+<text text-anchor="start" x="395.44" y="-778.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; AngleByFirstRightAngle()</text>
+<text text-anchor="start" x="395.44" y="-767.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; AngleBySecondRightAngle()</text>
+<text text-anchor="start" x="395.44" y="-756.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; SingleParallelPoint()</text>
+<text text-anchor="start" x="395.44" y="-745.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; BisectorLine()</text>
+<text text-anchor="start" x="395.44" y="-734.5" font-family="Helvetica,sans-Serif" font-size="10.00">&#45; AngleBetweenBisectors()</text>
 </a>
 </g>
 </g>
 <!-- Node12&#45;&gt;Node11 -->
 <g id="edge12" class="edge">
 <title>Node12&#45;&gt;Node11</title>
-<path fill="none" stroke="#63b8ff" d="M461.67,-722.37C459.79,-645.08 457.74,-561.44 456.06,-492.5"/>
-<polygon fill="none" stroke="#63b8ff" points="458.18,-722.82 461.92,-732.74 465.18,-722.65 458.18,-722.82"/>
+<path fill="none" stroke="#63b8ff" d="M461.55,-717.32C459.7,-641.53 457.71,-560.1 456.07,-492.69"/>
+<polygon fill="none" stroke="#63b8ff" points="458.05,-717.59 461.8,-727.5 465.05,-717.41 458.05,-717.59"/>
 </g>
 </g>
 </svg>
