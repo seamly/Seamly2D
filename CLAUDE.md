@@ -12,6 +12,14 @@
 cmd.exe /c "`"C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Auxiliary\Build\vcvars64.bat`" && cl /EHsc main.cpp"
 ```
 
+### Example build command for seamly2d, seamlyme, and seamlylayout to use during testing
+
+when building after task completion, use this command to enable the developer to install and run tests 
+
+```powershell
+./packaging/windows/local_build_msi.ps1
+```
+
 ## Communication Style
 
 These rules apply to all responses and generated documentation unless the user explicitly requests detail. The user has dyslexia and autism, so communication style should be terse.

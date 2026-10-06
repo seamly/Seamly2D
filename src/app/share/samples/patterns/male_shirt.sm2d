@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <pattern>
-    <!--Pattern created with Seamly2D v26.9.2320 (https://seamly.io).-->
+    <!--Pattern created with Seamly2D v26.10.321 (https://seamly.io).-->
     <version>0.7.4</version>
     <unit>cm</unit>
     <description>This a male shirt pattern.
@@ -11,7 +11,11 @@ Adjust/verify curves after parameter modifications.
 Delete layouts which are not needed.</description>
     <notes/>
     <patternLabel>
-        <line alignment="0" bold="true" italic="false" sfIncrement="4" text="Timo Virtaneva"/>
+        <line alignment="0" bold="true" italic="false" sfIncrement="4" text="%author%"/>
+        <line alignment="0" bold="false" italic="false" sfIncrement="2" text="%patternName%"/>
+        <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%patternNumber%"/>
+        <line alignment="0" bold="false" italic="true" sfIncrement="0" text="%customer%"/>
+        <line alignment="0" bold="false" italic="true" sfIncrement="0" text="%date%"/>
     </patternLabel>
     <measurements>../measurements/individual/male_chest_102cm.smis</measurements>
     <variables>
@@ -178,12 +182,6 @@ Delete layouts which are not needed.</description>
             <point id="423" idObject="2" inUse="true" mx="-2.54342" my="0.539015" type="modeling"/>
             <spline id="424" idObject="50" inUse="true" type="modelingPath"/>
             <point id="425" idObject="405" inUse="true" mx="1.76444" my="-1.62527" type="modeling"/>
-            <point id="426" idObject="335" inUse="true" mx="0.510735" my="-0.492303" type="modeling"/>
-            <point id="427" idObject="336" inUse="true" mx="0.435047" my="-1.24919" type="modeling"/>
-            <point id="428" idObject="334" inUse="true" mx="-0.851661" my="-1.55195" type="modeling"/>
-            <point id="429" idObject="337" inUse="true" mx="-1.83561" my="-1.32488" type="modeling"/>
-            <point id="430" idObject="348" inUse="true" mx="-1.75993" my="-0.416615" type="modeling"/>
-            <point id="431" idObject="402" inUse="true" mx="-3.64741" my="-2.22658" type="modeling"/>
             <spline id="432" idObject="50" inUse="true" type="modelingPath"/>
             <point id="433" idObject="388" inUse="true" mx="0.132292" my="0.264583" type="modeling"/>
             <point id="434" idObject="36" inUse="true" mx="0.510735" my="0.567338" type="modeling"/>
@@ -193,9 +191,23 @@ Delete layouts which are not needed.</description>
             <spline id="438" idObject="47" inUse="true" type="modelingSpline"/>
             <point id="439" idObject="30" inUse="true" mx="-1.73432" my="0.151455" type="modeling"/>
             <point id="440" idObject="55" inUse="true" mx="0.132292" my="0.264583" type="modeling"/>
+            <point id="446" idObject="334" inUse="true" mx="-0.851661" my="-1.55195" showPointName="true" type="modeling"/>
+            <point id="447" idObject="336" inUse="true" mx="0.435047" my="-1.24919" showPointName="true" type="modeling"/>
+            <point id="448" idObject="335" inUse="true" mx="0.510735" my="-0.56461" showPointName="true" type="modeling"/>
+            <point id="449" idObject="337" inUse="true" mx="-1.83561" my="-1.32488" showPointName="true" type="modeling"/>
+            <point id="450" idObject="334" inUse="true" mx="-0.851661" my="-1.55195" showPointName="true" type="modeling"/>
+            <path cut="false" extendEndPoint="false" extendStartPoint="false" id="451" inUse="true" lineColor="black" lineType="solidLine" lineWeight="0.35" name="Back Waist Dart" type="2">
+                <nodes>
+                    <node idObject="446" type="NodePoint"/>
+                    <node idObject="447" type="NodePoint"/>
+                    <node idObject="448" type="NodePoint"/>
+                    <node idObject="449" type="NodePoint"/>
+                    <node idObject="450" type="NodePoint"/>
+                </nodes>
+            </path>
         </modeling>
         <pieces>
-            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="174" inLayout="true" locked="false" mx="-4.0013" my="2.7721" name="Yoke" seamAllowance="true" united="false" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="174" inLayout="true" locked="false" mx="-5.24142" my="2.7721" name="Yoke" seamAllowance="true" united="false" version="2" width="1">
                 <data annotation="" foldPosition="Undefined" fontSize="0" height="5" letter="" mx="-647.856" my="160.016" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="5">
                     <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
                     <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
@@ -236,7 +248,7 @@ Delete layouts which are not needed.</description>
                     <node idObject="394" type="NodePoint"/>
                     <node idObject="395" reverse="0" type="NodeSplinePath"/>
                     <node idObject="396" type="NodePoint"/>
-                    <node idObject="397" type="NodePoint"/>
+                    <node idObject="397" notch="true" notchAngle="0" notchCount="1" notchLength="0.25" notchSubtype="straightforward" notchType="slit" notchWidth="0.25" showNotch="false" showSecondNotch="false" type="NodePoint"/>
                     <node idObject="398" type="NodePoint"/>
                     <node idObject="399" reverse="1" type="NodeSplinePath"/>
                     <node idObject="400" type="NodePoint"/>
@@ -258,15 +270,9 @@ Delete layouts which are not needed.</description>
                     <node idObject="423" type="NodePoint"/>
                     <node idObject="424" reverse="1" type="NodeSplinePath"/>
                     <node idObject="425" type="NodePoint"/>
-                    <node idObject="426" type="NodePoint"/>
-                    <node idObject="427" type="NodePoint"/>
-                    <node idObject="428" type="NodePoint"/>
-                    <node idObject="429" type="NodePoint"/>
-                    <node idObject="430" type="NodePoint"/>
-                    <node idObject="431" type="NodePoint"/>
                     <node idObject="432" reverse="1" type="NodeSplinePath"/>
                     <node idObject="433" type="NodePoint"/>
-                    <node idObject="434" type="NodePoint"/>
+                    <node idObject="434" notch="true" notchAngle="0" notchCount="1" notchLength="0.25" notchSubtype="straightforward" notchType="slit" notchWidth="0.25" showNotch="false" showSecondNotch="false" type="NodePoint"/>
                     <node idObject="435" type="NodePoint"/>
                     <node idObject="436" reverse="0" type="NodeSplinePath"/>
                     <node idObject="437" type="NodePoint"/>
@@ -274,6 +280,9 @@ Delete layouts which are not needed.</description>
                     <node idObject="439" type="NodePoint"/>
                     <node idObject="440" type="NodePoint"/>
                 </nodes>
+                <iPaths>
+                    <record path="451"/>
+                </iPaths>
             </piece>
         </pieces>
         <groups/>
@@ -576,7 +585,7 @@ Delete layouts which are not needed.</description>
                     <node idObject="216" type="NodePoint"/>
                 </nodes>
             </piece>
-            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="300" inLayout="true" locked="false" mx="-15.7285" my="15.9069" name="FullSleeve" seamAllowance="true" united="false" version="2" width="1">
+            <piece closed="1" color="white" fill="nobrush" forbidFlipping="false" hideMainPath="false" id="300" inLayout="true" locked="false" mx="-16.0828" my="13.781" name="FullSleeve" seamAllowance="true" united="false" version="2" width="1">
                 <data annotation="" foldPosition="Undefined" fontSize="0" height="5" letter="" mx="2060.04" my="1545" onFold="false" orientation="Undefined" quantity="1" rotation="0" rotationWay="None" tilt="None" visible="true" width="5">
                     <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%pFileName%"/>
                     <line alignment="0" bold="false" italic="false" sfIncrement="0" text="%mFileName%"/>
