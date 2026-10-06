@@ -74,6 +74,7 @@ class MeasurementDoc;
 class QFileSystemWatcher;
 class QLabel;
 class DialogVariables;
+class FinalMeasurementsDialog;
 class DialogTool;
 class HistoryDialog;
 class CalculatorDialog;
@@ -167,12 +168,15 @@ protected:
     virtual void PrepareSceneList() override;
     virtual void exportToCSVData(const QString &fileName, const DialogExportToCSV &dialog) final;
     void         handleExportToCSV();
+    void         handleExportFinalMeasurementsToCSV();
+    void         exportFinalMeasurementsToCSVData(const QString &fileName, const DialogExportToCSV &dialog);
 
 private slots:
     void zoomScaleChanged(qreal scale);
     void MouseMove(const QPointF &scenePos);
     void Clear();
     void patternChangesWereSaved(bool saved);
+    void disableFutureTools(quint32 cursor_id);
     void LastUsedTool();
     void fullParseFile();
     void setGuiEnabled(bool enabled);
@@ -199,7 +203,7 @@ private slots:
     void handleHeightTool(bool checked);
     void handleTriangleTool(bool checked);
     void handleLineIntersectAxisTool(bool checked);
-    void handlePointOfContactTool(bool checked);
+    void handleIntersectArcLineTool(bool checked);
     void handlePointIntersectXYTool(bool checked);
 
     void handleLineTool(bool checked);
@@ -298,8 +302,13 @@ private:
     bool                              patternReadOnly;
 
     QPointer<DialogVariables>         dialogTable;
+    QPointer<FinalMeasurementsDialog> finalMeasurementsDialog;
+    bool                              m_exportFinalMeasurements;
     QSharedPointer<DialogTool>        dialogTool;
     QPointer<HistoryDialog>           historyDialog;
+    /// @brief ids of tools disabled because the history cursor puts them chronologically after the
+    /// insertion point - see disableFutureTools().
+    QVector<quint32>                  m_disabled_tool_ids;
 
     QComboBox                        *font_combo_box;
     QComboBox                        *font_size_combo_box;

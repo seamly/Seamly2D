@@ -191,9 +191,14 @@ void HistoryDialog::cellClicked(int row, int column)
         // if cursor is at last row set id to 0, else use tool id in row.
         item = ui->tableWidget->item(m_cursorRow, IdColumn);
         const quint32 id = qvariant_cast<quint32>(item->data(Qt::UserRole));
+        const quint32 new_cursor_id = (row == ui->tableWidget->rowCount()-1) ? NULL_ID : id;
         m_doc->blockSignals(true);
-        row == ui->tableWidget->rowCount()-1 ? m_doc->setCursorId(NULL_ID) : m_doc->setCursorId(id);
+        m_doc->setCursorId(new_cursor_id);
         m_doc->blockSignals(false);
+        /// setCursorId() above runs with the document's signals blocked, so VPattern::ChangedCursor
+        /// doesn't fire for this click - emit cursorPositionChanged directly instead so listeners
+        /// still learn about the new cursor position.
+        emit cursorPositionChanged(new_cursor_id);
     }
     else
     {
@@ -505,7 +510,7 @@ RowData HistoryDialog::record(const VToolRecord &tool)
                 break;
             }
 
-            case Tool::PointOfContact:
+            case Tool::IntersectArcLine:
                 rowData.icon = ":/toolicon/32x32/point_intersect_arc_line.png";
                 rowData.name = getName(toolId);
                 rowData.tool = tr("Point Intersect Arc with center %1 & Line %2_%3")

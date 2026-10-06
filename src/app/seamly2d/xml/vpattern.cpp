@@ -178,7 +178,7 @@ void VPattern::Parse(const Document &parse)
     QStringList tags = QStringList() << TagDraftBlock << TagVariables << TagDescription << TagNotes
                                      << TagMeasurements << TagVersion << TagGradation << TagImage << TagUnit
                                      << TagPatternName << TagPatternNum << TagCompanyName << TagCustomerName
-                                     << TagPatternLabel;
+                                     << TagPatternLabel << TagFinalMeasurements;
     PrepareForParse(parse);
     QDomNode domNode = documentElement().firstChild();
     while (domNode.isNull() == false)
@@ -249,6 +249,9 @@ void VPattern::Parse(const Document &parse)
                         break;
                     case 13: // TagPatternLabel
                         qCDebug(vXML, "Pattern label.");
+                        break;
+                    case 14: // TagFinalMeasurements
+                        qCDebug(vXML, "Tag final measurements.");
                         break;
                     default:
                         qCDebug(vXML, "Wrong tag name %s", qUtf8Printable(domElement.tagName()));
@@ -369,7 +372,7 @@ quint32 VPattern::getActiveBasePoint()
             const QDomElement domElement = domNode.toElement();
             if (domElement.isNull() == false)
             {
-                if (domElement.tagName() == TagPoint && domElement.attribute(AttrType, "") == VToolBasePoint::ToolType)
+                if (domElement.tagName() == TagPoint && domElement.attribute(AttrType, "") == BasePointTool::ToolType)
                 {
                     return getParameterId(domElement);
                 }
@@ -714,7 +717,8 @@ void VPattern::parseDraftBlockElement(const QDomNode &node, const Document &pars
                 {
                     case 0: // TagCalculation
                         qCDebug(vXML, "Tag calculation.");
-                        data->ClearCalculationGObjects();
+                        data->ClearCalculationGObjects(getActiveDraftBlockName(),
+                                                        [this](quint32 id){ return getToolDraftBlockName(id); });
                         ParseDraftStage(domElement, parse, Draw::Calculation);
                         break;
                     case 1: // TagModeling
@@ -1160,14 +1164,14 @@ void VPattern::ParsePointElement(VMainGraphicsScene *scene, QDomElement &domElem
     Q_ASSERT_X(not domElement.isNull(), Q_FUNC_INFO, "domElement is null");
     Q_ASSERT_X(not type.isEmpty(), Q_FUNC_INFO, "type of point is empty");
 
-    QStringList points = QStringList() << VToolBasePoint::ToolType                  /*0*/
+    QStringList points = QStringList() << BasePointTool::ToolType                  /*0*/
                                        << VToolEndLine::ToolType                    /*1*/
                                        << VToolAlongLine::ToolType                  /*2*/
                                        << VToolShoulderPoint::ToolType              /*3*/
                                        << VToolNormal::ToolType                     /*4*/
                                        << VToolBisector::ToolType                   /*5*/
                                        << VToolLineIntersect::ToolType              /*6*/
-                                       << VToolPointOfContact::ToolType             /*7*/
+                                       << IntersectArcLineTool::ToolType             /*7*/
                                        << VNodePoint::ToolType                      /*8*/
                                        << VToolHeight::ToolType                     /*9*/
                                        << VToolTriangle::ToolType                   /*10*/
@@ -1186,7 +1190,7 @@ void VPattern::ParsePointElement(VMainGraphicsScene *scene, QDomElement &domElem
                                        << AnchorPointTool::ToolType;                /*23*/
     switch (points.indexOf(type))
     {
-        case 0: //VToolBasePoint::ToolType
+        case 0: //BasePointTool::ToolType
             ParseToolBasePoint(scene, domElement, parse);
             break;
         case 1: //VToolEndLine::ToolType
@@ -1207,8 +1211,8 @@ void VPattern::ParsePointElement(VMainGraphicsScene *scene, QDomElement &domElem
         case 6: //VToolLineIntersect::ToolType
             ParseToolLineIntersect(scene, domElement, parse);
             break;
-        case 7: //VToolPointOfContact::ToolType
-            ParseToolPointOfContact(scene, domElement, parse);
+        case 7: //IntersectArcLineTool::ToolType
+            ParseToolIntersectArcLine(scene, domElement, parse);
             break;
         case 8: //VNodePoint::ToolType
             ParseNodePoint(domElement, parse);
@@ -1396,7 +1400,7 @@ void VPattern::ParseToolBasePoint(VMainGraphicsScene *scene, const QDomElement &
     SCASSERT(scene != nullptr)
     Q_ASSERT_X(not domElement.isNull(), Q_FUNC_INFO, "domElement is null");
 
-    VToolBasePoint *spoint = nullptr;
+    BasePointTool *spoint = nullptr;
     try
     {
         quint32 id = 0;
@@ -1411,7 +1415,7 @@ void VPattern::ParseToolBasePoint(VMainGraphicsScene *scene, const QDomElement &
 
         VPointF *point = new VPointF(x, y, name, mx, my);
         point->setShowPointName(showPointName);
-        spoint = VToolBasePoint::Create(id, m_activeDraftBlock, point, scene, this, data, parse, Source::FromFile);
+        spoint = BasePointTool::Create(id, m_activeDraftBlock, point, scene, this, data, parse, Source::FromFile);
     }
     catch (const VExceptionBadId &error)
     {
@@ -1698,7 +1702,7 @@ void VPattern::ParseToolLineIntersect(VMainGraphicsScene *scene, const QDomEleme
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VPattern::ParseToolPointOfContact(VMainGraphicsScene *scene, QDomElement &domElement, const Document &parse)
+void VPattern::ParseToolIntersectArcLine(VMainGraphicsScene *scene, QDomElement &domElement, const Document &parse)
 {
     SCASSERT(scene != nullptr)
     Q_ASSERT_X(not domElement.isNull(), Q_FUNC_INFO, "domElement is null");
@@ -1718,7 +1722,7 @@ void VPattern::ParseToolPointOfContact(VMainGraphicsScene *scene, QDomElement &d
         const quint32 firstPointId = GetParametrUInt(domElement, AttrFirstPoint, NULL_ID_STR);
         const quint32 secondPointId = GetParametrUInt(domElement, AttrSecondPoint, NULL_ID_STR);
 
-        VToolPointOfContact::Create(id, f, center, firstPointId, secondPointId, name, mx, my, showPointName, scene, this,
+        IntersectArcLineTool::Create(id, f, center, firstPointId, secondPointId, name, mx, my, showPointName, scene, this,
                                     data, parse, Source::FromFile);
         //Rewrite attribute formula. Need for situation when we have wrong formula.
         if (f != radius)
@@ -4181,7 +4185,7 @@ QRectF VPattern::ActiveDrawBoundingRect() const
                     break;
                 case Tool::BasePoint:
                 case Tool::LineIntersect:
-                case Tool::PointOfContact:
+                case Tool::IntersectArcLine:
                 case Tool::Triangle:
                 case Tool::PointOfIntersection:
                 case Tool::CutArc:

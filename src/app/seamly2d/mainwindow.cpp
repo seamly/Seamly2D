@@ -66,10 +66,14 @@
 #include "../ifc/exception/vexceptionconversionerror.h"
 #include "../ifc/exception/vexceptionemptyparameter.h"
 #include "../ifc/exception/vexceptionwrongid.h"
+#include "../ifc/exception/vexceptionbadid.h"
 #include "../ifc/exception/vexceptionundo.h"
 #include "../ifc/xml/individual_size_converter.h"
 #include "../ifc/xml/multi_size_converter.h"
 #include "../ifc/xml/vpatternconverter.h"
+#include "../ifc/xml/vtoolrecord.h"
+#include "../vtools/tools/vdatatool.h"
+#include <QGraphicsItem>
 #include "../tools/images/image_tool.h"
 #include "../vformat/measurements.h"
 #include "../vgeometry/vspline.h"
@@ -178,6 +182,8 @@ MainWindow::MainWindow(QWidget *parent)
     , m_changes(false)
     , patternReadOnly(false)
     , dialogTable(nullptr)
+    , finalMeasurementsDialog(nullptr)
+    , m_exportFinalMeasurements(false)
     , dialogTool()
     , historyDialog(nullptr)
     , font_combo_box(nullptr)
@@ -238,6 +244,7 @@ MainWindow::MainWindow(QWidget *parent)
         connect(doc, &VPattern::UndoCommand,     this, &MainWindow::fullParseFile);
         connect(doc, &VPattern::setGuiEnabled,   this, &MainWindow::setGuiEnabled);
         connect(doc, &VPattern::setStatusMessage, this, &MainWindow::setStatusMessage);
+        connect(doc, &VPattern::ChangedCursor,   this, &MainWindow::disableFutureTools);
 
         // After a pattern is parsed show draft block scene if any draft blocks exist
         // AND the View->Draft menu item is checked.
@@ -392,7 +399,7 @@ void MainWindow::addDraftBlock(const QString &blockName)
     const QString label = doc->GenerateLabel(LabelType::NewPatternPiece);
     const QPointF startPosition = draftBlockStartPosition();
     VPointF *point = new VPointF(startPosition.x(), startPosition.y(), label, 5, 10);
-    auto spoint = VToolBasePoint::Create(0, blockName, point, draftScene, doc, pattern, Document::FullParse,
+    auto spoint = BasePointTool::Create(0, blockName, point, draftScene, doc, pattern, Document::FullParse,
                                         Source::FromGui);
     ui->view->itemClicked(spoint);
 
@@ -1020,8 +1027,10 @@ void MainWindow::ClosedDialogWithApply(int result, VMainGraphicsScene *scene)
     }
     handleArrowTool(true);
     ui->view->itemClicked(vtool);// Don't check for nullptr here
-    // If insert not to the end of file call lite parse
-    if (doc->getCursorId() > NULL_ID)
+    // If cursor not at the bottom of the table call lite parse. vtool is null when the dialog
+    // was cancelled without ever applying - nothing was created, so there's no tool id to move
+    // the cursor to and no new node to lite-parse.
+    if (vtool != nullptr && doc->getCursorId() > NULL_ID)
     {
         const quint32 &toolId = vtool->getId();
         doc->LiteParseTree(Document::LiteParse);
@@ -1212,19 +1221,19 @@ void MainWindow::handleShoulderPointTool(bool checked)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief handlePointOfContactTool handler for pointOfContact tool.
+ * @brief handleIntersectArcLineTool handler for pointOfContact tool.
  * @param checked true - button checked.
  */
-void MainWindow::handlePointOfContactTool(bool checked)
+void MainWindow::handleIntersectArcLineTool(bool checked)
 {
     ToolSelectPointByRelease();
-    SetToolButtonWithApply<DialogPointOfContact>
+    SetToolButtonWithApply<IntersectArcLineDialog>
     (
-        checked, Tool::PointOfContact,
+        checked, Tool::IntersectArcLine,
         ":/cursor/point_intersect_arc_line_cursor.png",
         tr("<b>Tool::Point - Intersect Arc and Line:</b> Select first point of line"),
-        &MainWindow::ClosedDrawDialogWithApply<VToolPointOfContact>,
-        &MainWindow::ApplyDrawDialog<VToolPointOfContact>
+        &MainWindow::ClosedDrawDialogWithApply<IntersectArcLineTool>,
+        &MainWindow::ApplyDrawDialog<IntersectArcLineTool>
     );
 }
 
@@ -2110,6 +2119,12 @@ void MainWindow::PrepareSceneList()
 //---------------------------------------------------------------------------------------------------------------------
 void MainWindow::exportToCSVData(const QString &fileName, const DialogExportToCSV &dialog)
 {
+    if (m_exportFinalMeasurements)
+    {
+        exportFinalMeasurementsToCSVData(fileName, dialog);
+        return;
+    }
+
     QxtCsvModel csv;
 
     csv.insertColumn(0);
@@ -2171,6 +2186,60 @@ void MainWindow::handleExportToCSV()
         file = QFileInfo(filePath).baseName();
     }
     exportToCSV(file);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void MainWindow::handleExportFinalMeasurementsToCSV()
+{
+    QString file = tr("untitled");
+    if(!qApp->getFilePath().isEmpty())
+    {
+        file = QFileInfo(qApp->getFilePath()).baseName();
+    }
+    file += QLatin1String("_final_measurements");
+
+    m_exportFinalMeasurements = true;
+    exportToCSV(file);
+    m_exportFinalMeasurements = false;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void MainWindow::exportFinalMeasurementsToCSVData(const QString &fileName, const DialogExportToCSV &dialog)
+{
+    QxtCsvModel csv;
+
+    csv.insertColumn(0);
+    csv.insertColumn(1);
+    csv.insertColumn(2);
+    csv.insertColumn(3);
+
+    if (dialog.WithHeader())
+    {
+        csv.setHeaderText(0, tr("Name"));
+        csv.setHeaderText(1, tr("The calculated value"));
+        csv.setHeaderText(2, tr("Formula"));
+        csv.setHeaderText(3, tr("Description"));
+    }
+
+    const VContainer evalData = FinalMeasurementsDialog::evaluationData(pattern, doc);
+    const QVector<VFinalMeasurement> measurements = doc->getFinalMeasurements();
+    for (int row = 0; row < measurements.size(); ++row)
+    {
+        const VFinalMeasurement &measurement = measurements.at(row);
+
+        VFormula formula(measurement.formula, &evalData);
+        formula.setCheckZero(false);
+        formula.Eval();
+
+        csv.insertRow(row);
+        csv.setText(row, 0, measurement.name);
+        csv.setText(row, 1, formula.error() ? formula.getStringValue()
+                                            : qApp->LocaleToString(formula.getDoubleValue()));
+        csv.setText(row, 2, formula.GetFormula(FormulaType::ToUser));
+        csv.setText(row, 3, measurement.description);
+    }
+
+    csv.toCSV(fileName, dialog.WithHeader(), dialog.Separator(), dialog.SelectedEncoding());
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -2873,7 +2942,8 @@ void MainWindow::basePointChanged()
     }
     else
     {
-        base_point_combo_box->setStyleSheet("QComboBox {color: black;}");
+        // Force any child line edit to dynamically pull from the current app palette
+        base_point_combo_box->setStyleSheet("QComboBox QLineEdit { color: palette(text); background: palette(base); }");
 
         if (!text.isEmpty() && text != tr("Default"))
         {
@@ -3050,22 +3120,22 @@ void MainWindow::initializeToolButtons()
 
     connect(ui->pointAtDistanceAngle_ToolButton, &QToolButton::clicked,
             this, &MainWindow::handlePointAtDistanceAngleTool);
-    connect(ui->line_ToolButton,           &QToolButton::clicked, this, &MainWindow::handleLineTool);
-    connect(ui->alongLine_ToolButton,      &QToolButton::clicked, this, &MainWindow::handleAlongLineTool);
-    connect(ui->shoulderPoint_ToolButton,  &QToolButton::clicked, this, &MainWindow::handleShoulderPointTool);
-    connect(ui->normal_ToolButton,         &QToolButton::clicked, this, &MainWindow::handleNormalTool);
-    connect(ui->bisector_ToolButton,       &QToolButton::clicked, this, &MainWindow::handleBisectorTool);
-    connect(ui->lineIntersect_ToolButton,  &QToolButton::clicked, this, &MainWindow::handleLineIntersectTool);
-    connect(ui->curve_ToolButton,          &QToolButton::clicked, this, &MainWindow::handleCurveTool);
-    connect(ui->curveWithCPs_ToolButton,   &QToolButton::clicked, this, &MainWindow::handleCurveWithControlPointsTool);
-    connect(ui->arc_ToolButton,            &QToolButton::clicked, this, &MainWindow::handleArcTool);
-    connect(ui->spline_ToolButton,         &QToolButton::clicked, this, &MainWindow::handleSplineTool);
-    connect(ui->splineWithCPs_ToolButton,  &QToolButton::clicked, this, &MainWindow::handleSplineWithControlPointsTool);
-    connect(ui->pointOfContact_ToolButton, &QToolButton::clicked, this, &MainWindow::handlePointOfContactTool);
-    connect(ui->addPatternPiece_ToolButton,&QToolButton::clicked, this, &MainWindow::handlePatternPieceTool);
-    connect(ui->internalPath_ToolButton,   &QToolButton::clicked, this, &MainWindow::handleInternalPathTool);
-    connect(ui->height_ToolButton,         &QToolButton::clicked, this, &MainWindow::handleHeightTool);
-    connect(ui->triangle_ToolButton,       &QToolButton::clicked, this, &MainWindow::handleTriangleTool);
+    connect(ui->line_ToolButton,                &QToolButton::clicked, this, &MainWindow::handleLineTool);
+    connect(ui->alongLine_ToolButton,           &QToolButton::clicked, this, &MainWindow::handleAlongLineTool);
+    connect(ui->shoulderPoint_ToolButton,       &QToolButton::clicked, this, &MainWindow::handleShoulderPointTool);
+    connect(ui->normal_ToolButton,              &QToolButton::clicked, this, &MainWindow::handleNormalTool);
+    connect(ui->bisector_ToolButton,            &QToolButton::clicked, this, &MainWindow::handleBisectorTool);
+    connect(ui->lineIntersect_ToolButton,       &QToolButton::clicked, this, &MainWindow::handleLineIntersectTool);
+    connect(ui->curve_ToolButton,               &QToolButton::clicked, this, &MainWindow::handleCurveTool);
+    connect(ui->curveWithCPs_ToolButton,        &QToolButton::clicked, this, &MainWindow::handleCurveWithControlPointsTool);
+    connect(ui->arc_ToolButton,                 &QToolButton::clicked, this, &MainWindow::handleArcTool);
+    connect(ui->spline_ToolButton,              &QToolButton::clicked, this, &MainWindow::handleSplineTool);
+    connect(ui->splineWithCPs_ToolButton,       &QToolButton::clicked, this, &MainWindow::handleSplineWithControlPointsTool);
+    connect(ui->intersect_arc_line_toolbutton,  &QToolButton::clicked, this, &MainWindow::handleIntersectArcLineTool);
+    connect(ui->addPatternPiece_ToolButton,     &QToolButton::clicked, this, &MainWindow::handlePatternPieceTool);
+    connect(ui->internalPath_ToolButton,        &QToolButton::clicked, this, &MainWindow::handleInternalPathTool);
+    connect(ui->height_ToolButton,              &QToolButton::clicked, this, &MainWindow::handleHeightTool);
+    connect(ui->triangle_ToolButton,            &QToolButton::clicked, this, &MainWindow::handleTriangleTool);
     connect(ui->pointIntersectXY_ToolButton,    &QToolButton::clicked, this, &MainWindow::handlePointIntersectXYTool);
     connect(ui->pointAlongCurve_ToolButton,     &QToolButton::clicked, this, &MainWindow::handlePointAlongCurveTool);
     connect(ui->pointAlongSpline_ToolButton,    &QToolButton::clicked, this, &MainWindow::handlePointAlongSplineTool);
@@ -3113,7 +3183,7 @@ void MainWindow::handlePointsMenu()
     QAction *action_AlongPerpendicular  = menu.addAction(QIcon(":/toolicon/32x32/normal.png"),                 tr("On Perpendicular") + "\tO, P");
     QAction *action_Bisector            = menu.addAction(QIcon(":/toolicon/32x32/bisector.png"),               tr("On Bisector") + "\tO, B");
     QAction *action_Shoulder            = menu.addAction(QIcon(":/toolicon/32x32/shoulder.png"),               tr("Length to Line") + "\tP, S");
-    QAction *action_PointOfContact      = menu.addAction(QIcon(":/toolicon/32x32/point_intersect_arc_line.png"),       tr("Intersect Arc and Line") + "\tA, L");
+    QAction *action_IntersectArcLine      = menu.addAction(QIcon(":/toolicon/32x32/point_intersect_arc_line.png"),       tr("Intersect Arc and Line") + "\tA, L");
     QAction *action_Triangle            = menu.addAction(QIcon(":/toolicon/32x32/triangle.png"),               tr("Intersect Axis and Triangle") + "\tX, T");
     QAction *action_PointIntersectXY    = menu.addAction(QIcon(":/toolicon/32x32/point_intersectxy_icon.png"), tr("Intersect XY") + "\tX, Y");
     QAction *action_PerpendicularPoint  = menu.addAction(QIcon(":/toolicon/32x32/height.png"),                 tr("Intersect Line and Perpendicular") + "\tL, P");
@@ -3161,11 +3231,11 @@ void MainWindow::handlePointsMenu()
         ui->shoulderPoint_ToolButton->setChecked(true);
         handleShoulderPointTool(true);
     }
-    else if (selectedAction == action_PointOfContact)
+    else if (selectedAction == action_IntersectArcLine)
     {
         ui->draft_ToolBox->setCurrentWidget(ui->points_Page);
-        ui->pointOfContact_ToolButton->setChecked(true);
-        handlePointOfContactTool(true);
+        ui->intersect_arc_line_toolbutton->setChecked(true);
+        handleIntersectArcLineTool(true);
     }
     else if (selectedAction == action_Triangle)
     {
@@ -3665,8 +3735,8 @@ void MainWindow::CancelTool()
         case Tool::CubicBezierPath:
             ui->splineWithCPs_ToolButton->setChecked(false);
             break;
-        case Tool::PointOfContact:
-            ui->pointOfContact_ToolButton->setChecked(false);
+        case Tool::IntersectArcLine:
+            ui->intersect_arc_line_toolbutton->setChecked(false);
             break;
         case Tool::Piece:
             ui->addPatternPiece_ToolButton->setChecked(false);
@@ -3873,6 +3943,11 @@ void MainWindow::setSceneBackgroundColor()
     QColor color = QColor(qApp->Seamly2DSettings()->getBackgroundColor());
     draftScene->setBackgroundBrush(color);
     pieceScene->setBackgroundBrush(color);
+    layout_scene->setBackgroundBrush(color);
+    for (auto *scene : scenes)
+    {
+        scene->setBackgroundBrush(color);
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -4191,6 +4266,7 @@ void MainWindow::showLayoutMode(bool checked)
             return;
         }
 
+        currentScene = layout_scene;
         emit ui->view->itemClicked(nullptr);  // Clear Property Editor with non valid tool selection
 
         // Remember the stage we came from: a failed handoff reverts to it immediately
@@ -4638,6 +4714,7 @@ void MainWindow::Clear()
     //disable history menu actions
     ui->history_Action->setEnabled(false);
     ui->table_Action->setEnabled(false);
+    ui->finalMeasurements_Action->setEnabled(false);
 
     ui->lastTool_Action->setEnabled(false);
     ui->increaseSize_Action->setEnabled(false);
@@ -4688,6 +4765,10 @@ void MainWindow::FileClosedCorrect()
     if (dialogTable)
     {
         dialogTable->close();
+    }
+    if (finalMeasurementsDialog)
+    {
+        finalMeasurementsDialog->close();
     }
     if (historyDialog)
     {
@@ -4980,6 +5061,7 @@ void MainWindow::setWidgetsEnabled(bool enable)
     ui->loadMultisize_Action->setEnabled(enable && designStage);
     ui->unloadMeasurements_Action->setEnabled(enable && designStage);
     ui->table_Action->setEnabled(enable && designStage);
+    ui->finalMeasurements_Action->setEnabled(enable && designStage);
 
     //enable history menu actions
     ui->history_Action->setEnabled(enable && draftStage);
@@ -5117,6 +5199,71 @@ void MainWindow::patternChangesWereSaved(bool saved)
         setWindowModified(state);
         not patternReadOnly ? ui->save_Action->setEnabled(state): ui->save_Action->setEnabled(false);
         isLayoutStale = true;
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief disableFutureTools disable the tools that come chronologically after the history cursor, so
+ * the user can't reference an object a tool being inserted there wouldn't actually be able to see yet.
+ * @param cursor_id the tool id the cursor now sits on, or NULL_ID if no cursor is active.
+ */
+void MainWindow::disableFutureTools(quint32 cursor_id)
+{
+    for (auto id : qAsConst(m_disabled_tool_ids))
+    {
+        try
+        {
+            if (auto *item = dynamic_cast<QGraphicsItem *>(VAbstractPattern::getTool(id)))
+            {
+                item->setEnabled(true);
+                item->setOpacity(1);
+            }
+        }
+        catch (const VExceptionBadId &error)
+        {
+            Q_UNUSED(error)
+        }
+    }
+    m_disabled_tool_ids.clear();
+
+    if (cursor_id == NULL_ID)
+    {
+        return;
+    }
+
+    QVector<VToolRecord> *history = doc->getHistory();
+    qint32 cursor_index = -1;
+    for (qint32 i = 0; i < history->size(); ++i)
+    {
+        if (history->at(i).getId() == cursor_id)
+        {
+            cursor_index = i;
+            break;
+        }
+    }
+
+    if (cursor_index == -1)
+    {
+        return;
+    }
+
+    for (qint32 i = cursor_index + 1; i < history->size(); ++i)
+    {
+        const quint32 id = history->at(i).getId();
+        try
+        {
+            if (auto *item = dynamic_cast<QGraphicsItem *>(VAbstractPattern::getTool(id)))
+            {
+                item->setEnabled(false);
+                item->setOpacity(0.35);
+                m_disabled_tool_ids.append(id);
+            }
+        }
+        catch (const VExceptionBadId &error)
+        {
+            Q_UNUSED(error)
+        }
     }
 }
 
@@ -5266,7 +5413,7 @@ void MainWindow::setToolsEnabled(bool enable)
     ui->normal_ToolButton->setEnabled(draftTools);
     ui->bisector_ToolButton->setEnabled(draftTools);
     ui->shoulderPoint_ToolButton->setEnabled(draftTools);
-    ui->pointOfContact_ToolButton->setEnabled(draftTools);
+    ui->intersect_arc_line_toolbutton->setEnabled(draftTools);
     ui->triangle_ToolButton->setEnabled(draftTools);
     ui->pointIntersectXY_ToolButton->setEnabled(draftTools);
     ui->height_ToolButton->setEnabled(draftTools);
@@ -5343,7 +5490,7 @@ void MainWindow::setToolsEnabled(bool enable)
     ui->pointAlongPerpendicular_Action->setEnabled(draftTools);
     ui->bisector_Action->setEnabled(draftTools);
     ui->pointOnShoulder_Action->setEnabled(draftTools);
-    ui->pointOfContact_Action->setEnabled(draftTools);
+    ui->intersect_arc_line_action->setEnabled(draftTools);
     ui->triangle_Action->setEnabled(draftTools);
     ui->pointIntersectXY_Action->setEnabled(draftTools);
     ui->perpendicularPoint_Action->setEnabled(draftTools);
@@ -5410,7 +5557,7 @@ void MainWindow::setToolsEnabled(bool enable)
 //---------------------------------------------------------------------------------------------------------------------
 void MainWindow::SetLayoutModeActions()
 {
-    const bool enabled = not scenes.isEmpty();
+    const bool enabled = !scenes.isEmpty();
 
     ui->exportAs_Action->setEnabled(enabled);
     ui->printPreview_Action->setEnabled(enabled);
@@ -5863,9 +6010,9 @@ void MainWindow::LastUsedTool()
             ui->splineWithCPs_ToolButton->setChecked(true);
             handleSplineWithControlPointsTool(true);
             break;
-        case Tool::PointOfContact:
-            ui->pointOfContact_ToolButton->setChecked(true);
-            handlePointOfContactTool(true);
+        case Tool::IntersectArcLine:
+            ui->intersect_arc_line_toolbutton->setChecked(true);
+            handleIntersectArcLineTool(true);
             break;
         case Tool::Piece:
             ui->addPatternPiece_ToolButton->setChecked(true);
@@ -6239,11 +6386,11 @@ void MainWindow::createActions()
         ui->shoulderPoint_ToolButton->setChecked(true);
         handleShoulderPointTool(true);
     });
-    connect(ui->pointOfContact_Action, &QAction::triggered, this, [this]
+    connect(ui->intersect_arc_line_action, &QAction::triggered, this, [this]
     {
         ui->draft_ToolBox->setCurrentWidget(ui->points_Page);
-        ui->pointOfContact_ToolButton->setChecked(true);
-        handlePointOfContactTool(true);
+        ui->intersect_arc_line_toolbutton->setChecked(true);
+        handleIntersectArcLineTool(true);
     });
     connect(ui->triangle_Action, &QAction::triggered, this, [this]
     {
@@ -6546,7 +6693,31 @@ void MainWindow::createActions()
             dialogTable->activateWindow();
         }
     });
+
+    connect(ui->finalMeasurements_Action, &QAction::triggered, this, [this](bool checked)
+    {
+        if (checked)
+        {
+            finalMeasurementsDialog = new FinalMeasurementsDialog(pattern, doc, this);
+            connect(finalMeasurementsDialog.data(), &FinalMeasurementsDialog::dialogClosed, this, [this]()
+            {
+                ui->finalMeasurements_Action->setChecked(false);
+                if (finalMeasurementsDialog != nullptr)
+                {
+                    finalMeasurementsDialog->deleteLater();
+                }
+            });
+            finalMeasurementsDialog->show();
+        }
+        else
+        {
+            ui->finalMeasurements_Action->setChecked(true);
+            finalMeasurementsDialog->activateWindow();
+        }
+    });
     connect(ui->exportVariablesToCSV_Action, &QAction::triggered, this, &MainWindow::handleExportToCSV);
+    connect(ui->exportFinalMeasurementsToCSV_Action, &QAction::triggered, this,
+            &MainWindow::handleExportFinalMeasurementsToCSV);
 
     //History menu
     connect(ui->history_Action, &QAction::triggered, this, [this](bool checked)
@@ -6555,6 +6726,8 @@ void MainWindow::createActions()
         {
             historyDialog = new HistoryDialog(pattern, doc, this);
             connect(this, &MainWindow::RefreshHistory, historyDialog.data(), &HistoryDialog::updateHistory);
+            connect(historyDialog.data(), &HistoryDialog::cursorPositionChanged,
+                    this, &MainWindow::disableFutureTools);
             connect(historyDialog.data(), &HistoryDialog::DialogClosed, this, [this]()
             {
                 ui->history_Action->setChecked(false);
@@ -7081,7 +7254,7 @@ void MainWindow::showLayoutPages(int index)
 {
     if (index < 0 || index >= scenes.size())
     {
-        ui->view->setScene(tempSceneLayout);
+        ui->view->setScene(layout_scene);
     }
     else
     {

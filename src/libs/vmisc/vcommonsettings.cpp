@@ -237,6 +237,7 @@ const QString settingGeneralToolbarsState                = QStringLiteral("toolb
 const QString settingPreferenceDialogSize                = QStringLiteral("preferenceDialogSize");
 const QString settingToolSeamAllowanceDialogSize         = QStringLiteral("toolSeamAllowanceDialogSize");
 const QString settingVariablesDialogSize                 = QStringLiteral("toolVariablesDialogSize");
+const QString settingFinalMeasurementsDialogSize         = QStringLiteral("finalMeasurementsDialogSize");
 const QString settingHistoryDialogSize                   = QStringLiteral("toolHistoryDialogSize");
 const QString settingFormulaWizardDialogSize             = QStringLiteral("formulaWizardDialogSize");
 const QString settingLatestSkippedVersion                = QStringLiteral("lastestSkippedVersion");
@@ -2035,6 +2036,18 @@ QSize VCommonSettings::getVariablesDialogSize() const
 void VCommonSettings::setVariablesDialogSize(const QSize &sz)
 {
     setValue(settingVariablesDialogSize, sz);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+QSize VCommonSettings::getFinalMeasurementsDialogSize() const
+{
+    return value(settingFinalMeasurementsDialogSize, QSize(0, 0)).toSize();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void VCommonSettings::setFinalMeasurementsDialogSize(const QSize &sz)
+{
+    setValue(settingFinalMeasurementsDialogSize, sz);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

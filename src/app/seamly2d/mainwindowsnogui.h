@@ -111,7 +111,7 @@ protected:
     SizePieceList prepareSizePieceList(const QHash<quint32, VPiece> &pieces, const QString &size);
 
     QGraphicsScene *currentScene;    /** @brief currentScene pointer to current scene. */
-    QGraphicsScene *tempSceneLayout; /** @brief pattern container with data (points, arcs, splines, spline paths, variables) */
+    QGraphicsScene *layout_scene; /** @brief pattern container with data (points, arcs, splines, spline paths, variables) */
     VContainer     *pattern;         /** @brief pattern container with data (points, arcs, splines, spline paths, variables) */
     VPattern       *doc;             /** @brief doc dom document container */
 
