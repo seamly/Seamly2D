@@ -1,13 +1,13 @@
 <map id="PatternPieceVisual" name="PatternPieceVisual">
-<area shape="rect" id="node1" title=" " alt="" coords="509,1805,688,1971"/>
-<area shape="rect" id="node2" href="$db/d76/classVisPath.html" title=" " alt="" coords="353,1453,482,1603"/>
-<area shape="rect" id="node3" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,666,297,1271"/>
-<area shape="rect" id="node4" title=" " alt="" coords="5,262,80,339"/>
-<area shape="rect" id="node5" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,596"/>
-<area shape="rect" id="node6" href="$d3/d85/classVCurvePathItem.html" title=" " alt="" coords="331,871,503,1066"/>
-<area shape="rect" id="node7" title=" " alt="" coords="352,262,499,339"/>
-<area shape="rect" id="node8" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="521,1445,676,1611"/>
-<area shape="rect" id="node9" title=" " alt="" coords="528,930,675,1007"/>
-<area shape="rect" id="node10" href="$d0/dab/classVPiece.html" title=" " alt="" coords="701,1328,915,1728"/>
-<area shape="rect" id="node11" href="$dd/dfe/classVAbstractPiece.html" title=" " alt="" coords="701,659,915,1279"/>
+<area shape="rect" id="node1" title=" " alt="" coords="509,1776,688,1941"/>
+<area shape="rect" id="node2" href="$db/d76/classVisPath.html" title=" " alt="" coords="353,1423,482,1574"/>
+<area shape="rect" id="node3" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,644,297,1249"/>
+<area shape="rect" id="node4" title=" " alt="" coords="5,255,80,332"/>
+<area shape="rect" id="node5" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,581"/>
+<area shape="rect" id="node6" href="$d3/d85/classVCurvePathItem.html" title=" " alt="" coords="331,849,503,1044"/>
+<area shape="rect" id="node7" title=" " alt="" coords="352,255,499,332"/>
+<area shape="rect" id="node8" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="521,1416,676,1581"/>
+<area shape="rect" id="node9" title=" " alt="" coords="528,908,675,985"/>
+<area shape="rect" id="node10" href="$d0/dab/classVPiece.html" title=" " alt="" coords="701,1299,915,1699"/>
+<area shape="rect" id="node11" href="$dd/dfe/classVAbstractPiece.html" title=" " alt="" coords="701,644,915,1249"/>
 </map>

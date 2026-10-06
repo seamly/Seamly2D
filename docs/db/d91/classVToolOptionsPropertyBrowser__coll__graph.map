@@ -1,8 +1,8 @@
 <map id="VToolOptionsPropertyBrowser" name="VToolOptionsPropertyBrowser">
-<area shape="rect" id="node1" title=" " alt="" coords="292,1780,532,2107"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,1383,80,1461"/>
-<area shape="rect" id="node3" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,1127,328,1717"/>
-<area shape="rect" id="node4" href="$d5/d47/classVPE_1_1VPropertyModel.html" title="This is the base model for managing all the properties and passing them to the view." alt="" coords="403,1288,611,1556"/>
+<area shape="rect" id="node1" title=" " alt="" coords="292,1765,532,2092"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,1376,80,1453"/>
+<area shape="rect" id="node3" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,1127,328,1703"/>
+<area shape="rect" id="node4" href="$d5/d47/classVPE_1_1VPropertyModel.html" title="This is the base model for managing all the properties and passing them to the view." alt="" coords="403,1281,611,1549"/>
 <area shape="rect" id="node5" title=" " alt="" coords="403,682,559,759"/>
 <area shape="rect" id="node6" href="$d5/d45/classVPE_1_1VPropertyModelPrivate.html" title=" " alt="" coords="584,675,789,767"/>
 <area shape="rect" id="node7" href="$d9/d51/classVPE_1_1VPropertySet.html" title="VPropertySet is a simple class for managing a set of properties. If you don&#39;t need all the Model&#45;func..." alt="" coords="454,344,661,612"/>
@@ -14,5 +14,5 @@
 <area shape="rect" id="node12" href="$d1/d51/classVPE_1_1VPropertyFormWidget.html" title="Class that displays the sub properties of a property using a form layout." alt="" coords="705,344,948,612"/>
 <area shape="rect" id="node13" title=" " alt="" coords="653,182,749,259"/>
 <area shape="rect" id="node15" href="$d1/d4a/classQList.html" title=" " alt="" coords="783,5,1012,97"/>
-<area shape="rect" id="node16" href="$d0/d4c/classQMap.html" title=" " alt="" coords="762,1376,934,1468"/>
+<area shape="rect" id="node16" href="$d0/d4c/classQMap.html" title=" " alt="" coords="762,1369,934,1461"/>
 </map>

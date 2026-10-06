@@ -1,6 +1,5 @@
 var vsettings_8cpp =
 [
-    [ "copySampleFiles", "db/d28/vsettings_8cpp.html#a876fd9d16934c626d8c81ab40ce1a705", null ],
     [ "settingCommunityProxyAddress", "db/d28/vsettings_8cpp.html#afe08e293ff54709b6b3afa9992665100", null ],
     [ "settingCommunityProxyPass", "db/d28/vsettings_8cpp.html#a4a67c673d60108adfde815b76a0a8874", null ],
     [ "settingCommunityProxyPort", "db/d28/vsettings_8cpp.html#a47f3dfb18c411919a02ac2b84306e326", null ],
@@ -27,7 +26,6 @@ var vsettings_8cpp =
     [ "settingMultiplier", "db/d28/vsettings_8cpp.html#a438399a0cf9605103f6b11d324b91f2b", null ],
     [ "settingPathsLayout", "db/d28/vsettings_8cpp.html#aeeae12a9e716a36285066894137cee19", null ],
     [ "settingPathsPattern", "db/d28/vsettings_8cpp.html#abd078475c23bc1ef0d914344990ee54e", null ],
-    [ "settingPathsSeamlyLayoutApp", "db/d28/vsettings_8cpp.html#af5d4d7f733ae18fa76ed7f61f1744551", null ],
     [ "settingPatternGraphicalOutput", "db/d28/vsettings_8cpp.html#ad09214ea81d66f68b5137cc6c98545aa", null ],
     [ "settingStripOptimization", "db/d28/vsettings_8cpp.html#a0aab5ed79c0e768799ffca56521c62a6", null ],
     [ "settingTextAsPaths", "db/d28/vsettings_8cpp.html#a05f57745d9f819090b29f07e2569fd9e", null ],

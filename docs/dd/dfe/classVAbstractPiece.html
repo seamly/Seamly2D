@@ -182,12 +182,8 @@ Public Member Functions</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
-<tr class="memitem:ad4e9b39db2de7517b333f824b35dc4f9"><td class="memItemLeft" align="right" valign="top">static QVector&lt; QPointF &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/dfe/classVAbstractPiece.html#ad4e9b39db2de7517b333f824b35dc4f9">Equidistant</a> (const QVector&lt; <a class="el" href="../../da/dac/classVSAPoint.html">VSAPoint</a> &gt; &amp;points, qreal width, QVector&lt; QPointF &gt; *nodeVertices=nullptr)</td></tr>
-<tr class="memdesc:ad4e9b39db2de7517b333f824b35dc4f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Equidistant builds the seam allowance polyline around the main path.  <br /></td></tr>
-<tr class="separator:ad4e9b39db2de7517b333f824b35dc4f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aba2225590933f6770c7244b6ce12101e"><td class="memItemLeft" align="right" valign="top">static QVector&lt; int &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/dfe/classVAbstractPiece.html#aba2225590933f6770c7244b6ce12101e">turnPointIndices</a> (const QVector&lt; QPointF &gt; &amp;points, const QVector&lt; QPointF &gt; &amp;nodeVertices, bool closed)</td></tr>
-<tr class="memdesc:aba2225590933f6770c7244b6ce12101e"><td class="mdescLeft">&#160;</td><td class="mdescRight">turnPointIndices finds the turn points of a polyline: the vertices where the tangent breaks.  <br /></td></tr>
-<tr class="separator:aba2225590933f6770c7244b6ce12101e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a292f7d4da418ba3514ae7678cb4d0a79"><td class="memItemLeft" align="right" valign="top">static QVector&lt; QPointF &gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/dfe/classVAbstractPiece.html#a292f7d4da418ba3514ae7678cb4d0a79">Equidistant</a> (const QVector&lt; <a class="el" href="../../da/dac/classVSAPoint.html">VSAPoint</a> &gt; &amp;points, qreal width)</td></tr>
+<tr class="separator:a292f7d4da418ba3514ae7678cb4d0a79"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a5777b88093be5350bcabe027b5d06843"><td class="memItemLeft" align="right" valign="top">static qreal&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/dfe/classVAbstractPiece.html#a5777b88093be5350bcabe027b5d06843">sumTrapezoids</a> (const QVector&lt; QPointF &gt; &amp;points)</td></tr>
 <tr class="separator:a5777b88093be5350bcabe027b5d06843"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a11d660242b47335f8fed94c19c661e45"><td class="memItemLeft" align="right" valign="top">static bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dd/dfe/classVAbstractPiece.html#a11d660242b47335f8fed94c19c661e45">isClockwise</a> (const QVector&lt; QPointF &gt; &amp;points)</td></tr>
@@ -257,7 +253,7 @@ Private Attributes</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock">
-<p class="definition">Definition at line <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00182">182</a> of file <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html">vabstractpiece.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00163">163</a> of file <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html">vabstractpiece.h</a>.</p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a9b1ed15515716448b88bdb013e4c0968" name="a9b1ed15515716448b88bdb013e4c0968"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a9b1ed15515716448b88bdb013e4c0968">&#9670;&#160;</a></span>VAbstractPiece() <span class="overload">[1/2]</span></h2>
@@ -360,11 +356,11 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01054">1054</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00909">909</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d4/da4/def_8h_source.html#l00626">VFuzzyComparePossibleNulls()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00626">EkvPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00481">EkvPoint()</a>.</p>
 
 </div>
 </div>
@@ -426,11 +422,11 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00917">917</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00772">772</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00755">AngleByLength()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00062">maxL</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00610">AngleByLength()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00062">maxL</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00626">EkvPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00481">EkvPoint()</a>.</p>
 
 </div>
 </div>
@@ -492,11 +488,11 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00835">835</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00690">690</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00755">AngleByLength()</a>, <a class="el" href="../../dd/da8/vpointf_8cpp_source.html#l00279">VPointF::FlipPF()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00062">maxL</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00610">AngleByLength()</a>, <a class="el" href="../../dd/da8/vpointf_8cpp_source.html#l00279">VPointF::FlipPF()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00062">maxL</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00626">EkvPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00481">EkvPoint()</a>.</p>
 
 </div>
 </div>
@@ -564,11 +560,11 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00794">794</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00649">649</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00755">AngleByLength()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00062">maxL</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00610">AngleByLength()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00062">maxL</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00626">EkvPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00481">EkvPoint()</a>.</p>
 
 </div>
 </div>
@@ -624,11 +620,11 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00755">755</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00610">610</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00062">maxL</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00917">AngleByFirstRightAngle()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00835">AngleByFirstSymmetry()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00794">AngleByIntersection()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00955">AngleBySecondRightAngle()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00876">AngleBySecondSymmetry()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00626">EkvPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00772">AngleByFirstRightAngle()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00690">AngleByFirstSymmetry()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00649">AngleByIntersection()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00810">AngleBySecondRightAngle()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00731">AngleBySecondSymmetry()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00481">EkvPoint()</a>.</p>
 
 </div>
 </div>
@@ -690,11 +686,11 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00955">955</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00810">810</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00755">AngleByLength()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00062">maxL</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00610">AngleByLength()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00062">maxL</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00626">EkvPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00481">EkvPoint()</a>.</p>
 
 </div>
 </div>
@@ -756,11 +752,11 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00876">876</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00731">731</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00755">AngleByLength()</a>, <a class="el" href="../../dd/da8/vpointf_8cpp_source.html#l00279">VPointF::FlipPF()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00062">maxL</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00610">AngleByLength()</a>, <a class="el" href="../../dd/da8/vpointf_8cpp_source.html#l00279">VPointF::FlipPF()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00062">maxL</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00626">EkvPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00481">EkvPoint()</a>.</p>
 
 </div>
 </div>
@@ -804,9 +800,9 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01030">1030</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00885">885</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00626">EkvPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00481">EkvPoint()</a>.</p>
 
 </div>
 </div>
@@ -868,11 +864,11 @@ Private Attributes</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01081">1081</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00936">936</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00460">CheckLoops()</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00292">CorrectEquidistantPoints()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01137">Crossing()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01180">SubPath()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00401">sumTrapezoids()</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00315">CheckLoops()</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00270">CorrectEquidistantPoints()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00992">Crossing()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01035">SubPath()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00256">sumTrapezoids()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00460">CheckLoops()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00315">CheckLoops()</a>.</p>
 
 </div>
 </div>
@@ -909,11 +905,11 @@ Private Attributes</h2></td></tr>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>vector of points of equidistant. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00460">460</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00315">315</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01081">CheckIntersection()</a>, <a class="el" href="../../da/d37/vgobject_8cpp_source.html#l00516">VGObject::IsPointOnLineviaPDP()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01112">ParallelCrossPoint()</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00936">CheckIntersection()</a>, <a class="el" href="../../da/d37/vgobject_8cpp_source.html#l00516">VGObject::IsPointOnLineviaPDP()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00967">ParallelCrossPoint()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01081">CheckIntersection()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00212">Equidistant()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00173">VPiece::mainPathPoints()</a>, <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l02513">TST_VAbstractPiece::PathLoopsCase()</a>, <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l02301">TST_VAbstractPiece::PathRemoveLoop()</a>, and <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l03218">TST_VAbstractPiece::PossibleInfiniteClearLoops()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00936">CheckIntersection()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00207">Equidistant()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00173">VPiece::mainPathPoints()</a>, <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l02401">TST_VAbstractPiece::PathLoopsCase()</a>, <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l02189">TST_VAbstractPiece::PathRemoveLoop()</a>, and <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l03106">TST_VAbstractPiece::PossibleInfiniteClearLoops()</a>.</p>
 
 </div>
 </div>
@@ -962,11 +958,11 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>corrected list. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00292">292</a> of file <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html">vabstractpiece.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00270">270</a> of file <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html">vabstractpiece.h</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01206">IsEkvPointOnLine()</a>, and <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00347">RemoveDublicates()</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01061">IsEkvPointOnLine()</a>, and <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00325">RemoveDublicates()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01081">CheckIntersection()</a>, <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l02896">TST_VAbstractPiece::CorrectEquidistantPoints()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00212">Equidistant()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00173">VPiece::mainPathPoints()</a>, and <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l03075">TST_VAbstractPiece::TestCorrectEquidistantPoints()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00936">CheckIntersection()</a>, <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l02784">TST_VAbstractPiece::CorrectEquidistantPoints()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00207">Equidistant()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00173">VPiece::mainPathPoints()</a>, and <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l02963">TST_VAbstractPiece::TestCorrectEquidistantPoints()</a>.</p>
 
 </div>
 </div>
@@ -1010,9 +1006,9 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01013">1013</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00868">868</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01021">SingleParallelPoint()</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00876">SingleParallelPoint()</a>.</p>
 
 </div>
 </div>
@@ -1056,11 +1052,11 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00993">993</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00848">848</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00145">VSAPoint::GetSAAfter()</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00133">VSAPoint::GetSABefore()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01021">SingleParallelPoint()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00138">VSAPoint::GetSAAfter()</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00126">VSAPoint::GetSABefore()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00876">SingleParallelPoint()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l01305">VPiece::createCastleNotch()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l01019">VPiece::createSeamAllowanceNotch()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l01152">VPiece::createSlitNotch()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l01167">VPiece::createTNotch()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l01204">VPiece::createUNotch()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l01272">VPiece::createVExternalNotch()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l01235">VPiece::createVInternalNotch()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00626">EkvPoint()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01212">IsEkvPointOnLine()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l01282">VPiece::createCastleNotch()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00996">VPiece::createSeamAllowanceNotch()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l01129">VPiece::createSlitNotch()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l01144">VPiece::createTNotch()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l01181">VPiece::createUNotch()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l01249">VPiece::createVExternalNotch()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l01212">VPiece::createVInternalNotch()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00481">EkvPoint()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01067">IsEkvPointOnLine()</a>.</p>
 
 </div>
 </div>
@@ -1098,9 +1094,9 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01137">1137</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00992">992</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01081">CheckIntersection()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00936">CheckIntersection()</a>.</p>
 
 </div>
 </div>
@@ -1165,16 +1161,16 @@ template&lt;class T &gt; </div>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>seam allowance points. </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00626">626</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00481">481</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01054">AngleBetweenBisectors()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00917">AngleByFirstRightAngle()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00835">AngleByFirstSymmetry()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00794">AngleByIntersection()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00755">AngleByLength()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00955">AngleBySecondRightAngle()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00876">AngleBySecondSymmetry()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01030">BisectorLine()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00993">createParallelLine()</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00157">VSAPoint::GetAngleType()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00602">MaxLocalSA()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00595">PointPosition()</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00626">VFuzzyComparePossibleNulls()</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00909">AngleBetweenBisectors()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00772">AngleByFirstRightAngle()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00690">AngleByFirstSymmetry()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00649">AngleByIntersection()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00610">AngleByLength()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00810">AngleBySecondRightAngle()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00731">AngleBySecondSymmetry()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00885">BisectorLine()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00848">createParallelLine()</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00150">VSAPoint::GetAngleType()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00457">MaxLocalSA()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00450">PointPosition()</a>, and <a class="el" href="../../d4/da4/def_8h_source.html#l00626">VFuzzyComparePossibleNulls()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00212">Equidistant()</a>, and <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00869">VPiece::getSeamNotchSAPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00207">Equidistant()</a>, and <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00846">VPiece::getSeamNotchSAPoint()</a>.</p>
 
 </div>
 </div>
-<a id="ad4e9b39db2de7517b333f824b35dc4f9" name="ad4e9b39db2de7517b333f824b35dc4f9"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad4e9b39db2de7517b333f824b35dc4f9">&#9670;&#160;</a></span>Equidistant()</h2>
+<a id="a292f7d4da418ba3514ae7678cb4d0a79" name="a292f7d4da418ba3514ae7678cb4d0a79"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a292f7d4da418ba3514ae7678cb4d0a79">&#9670;&#160;</a></span>Equidistant()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1192,13 +1188,7 @@ template&lt;class T &gt; </div>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">qreal&#160;</td>
-          <td class="paramname"><em>width</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">QVector&lt; QPointF &gt; *&#160;</td>
-          <td class="paramname"><em>nodeVertices</em> = <code>nullptr</code>&#160;</td>
+          <td class="paramname"><em>width</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1213,19 +1203,11 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Equidistant builds the seam allowance polyline around the main path. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">nodeVertices</td><td>when not null, receives the seam allowance vertices built at node points (<a class="el" href="../../da/dac/classVSAPoint.html#a34f93258f394387dc33128bda995d476">VSAPoint::isNode()</a>), for <a class="el" href="../../dd/dfe/classVAbstractPiece.html#aba2225590933f6770c7244b6ce12101e" title="turnPointIndices finds the turn points of a polyline: the vertices where the tangent breaks.">turnPointIndices()</a>. </td></tr>
-  </table>
-  </dd>
-</dl>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00207">207</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00212">212</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00315">CheckLoops()</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00270">CorrectEquidistantPoints()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00481">EkvPoint()</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00460">CheckLoops()</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00292">CorrectEquidistantPoints()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00626">EkvPoint()</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l02806">TST_VAbstractPiece::BrokenDetailEquidistant()</a>, <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l00123">TST_VAbstractPiece::EquidistantRemoveLoop()</a>, <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l01971">TST_VAbstractPiece::EquidistantReportsNodeVertices()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00201">VPiece::seamAllowancePoints()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00988">VLayoutPiece::SetLayoutAllowancePoints()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l02694">TST_VAbstractPiece::BrokenDetailEquidistant()</a>, <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l00122">TST_VAbstractPiece::EquidistantRemoveLoop()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00187">VPiece::seamAllowancePoints()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00865">VLayoutPiece::SetLayoutAllowancePoints()</a>.</p>
 
 </div>
 </div>
@@ -1246,9 +1228,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00111">111</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../d5/d7b/pieces__widget_8cpp_source.html#l00353">PiecesWidget::fillTable()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00862">PatternPieceTool::paint()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01522">PatternPieceTool::RefreshGeometry()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00262">PatternPieceDialog::SetPiece()</a>, and <a class="el" href="../../d5/d7b/pieces__widget_8cpp_source.html#l00186">PiecesWidget::togglePiece()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../d5/d7b/pieces__widget_8cpp_source.html#l00353">PiecesWidget::fillTable()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00861">PatternPieceTool::paint()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01522">PatternPieceTool::RefreshGeometry()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00261">PatternPieceDialog::SetPiece()</a>, and <a class="el" href="../../d5/d7b/pieces__widget_8cpp_source.html#l00186">PiecesWidget::togglePiece()</a>.</p>
 
 </div>
 </div>
@@ -1269,9 +1251,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00123">123</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00862">PatternPieceTool::paint()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01522">PatternPieceTool::RefreshGeometry()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00262">PatternPieceDialog::SetPiece()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00861">PatternPieceTool::paint()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01522">PatternPieceTool::RefreshGeometry()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00261">PatternPieceDialog::SetPiece()</a>.</p>
 
 </div>
 </div>
@@ -1292,7 +1274,7 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00135">135</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
 </div>
 </div>
@@ -1311,11 +1293,11 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01226">1226</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01081">1081</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">VLayoutPiece::Create()</a>, <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01522">PatternPieceTool::RefreshGeometry()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00262">PatternPieceDialog::SetPiece()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">VLayoutPiece::Create()</a>, <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01308">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01522">PatternPieceTool::RefreshGeometry()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00261">PatternPieceDialog::SetPiece()</a>.</p>
 
 </div>
 </div>
@@ -1334,11 +1316,11 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01238">1238</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01093">1093</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">VLayoutPiece::Create()</a>, <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01522">PatternPieceTool::RefreshGeometry()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00262">PatternPieceDialog::SetPiece()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">VLayoutPiece::Create()</a>, <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01308">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01522">PatternPieceTool::RefreshGeometry()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00261">PatternPieceDialog::SetPiece()</a>.</p>
 
 </div>
 </div>
@@ -1359,9 +1341,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00098">98</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../d6/d46/vcontainer_8cpp_source.html#l00392">VContainer::AddPiece()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">VLayoutPiece::Create()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00629">VDxfEngine::ExportToAAMA()</a>, <a class="el" href="../../d1/db3/dialogtool_8cpp_source.html#l00243">DialogTool::fillComboBoxPiecesList()</a>, <a class="el" href="../../d5/d7b/pieces__widget_8cpp_source.html#l00353">PiecesWidget::fillTable()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01233">VLayoutPiece::GetItem()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l02335">PatternPieceTool::renamePiece()</a>, <a class="el" href="../../df/d81/editlabeltemplate__dialog_8cpp_source.html#l00636">EditLabelTemplateDialog::SetPiece()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00262">PatternPieceDialog::SetPiece()</a>, <a class="el" href="../../d6/d80/anchorpoint__dialog_8cpp_source.html#l00103">AnchorPointDialog::setPieceId()</a>, <a class="el" href="../../de/d8d/internal__path__dialog_8cpp_source.html#l01251">InternalPathDialog::setPieceId()</a>, <a class="el" href="../../d5/d7b/pieces__widget_8cpp_source.html#l00186">PiecesWidget::togglePiece()</a>, and <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00627">PatternPieceTool::updatePieceLabel()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">VLayoutPiece::Create()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00629">VDxfEngine::ExportToAAMA()</a>, <a class="el" href="../../d1/db3/dialogtool_8cpp_source.html#l00245">DialogTool::fillComboBoxPiecesList()</a>, <a class="el" href="../../d5/d7b/pieces__widget_8cpp_source.html#l00353">PiecesWidget::fillTable()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01085">VLayoutPiece::GetItem()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l02345">PatternPieceTool::renamePiece()</a>, <a class="el" href="../../df/d81/editlabeltemplate__dialog_8cpp_source.html#l00627">EditLabelTemplateDialog::SetPiece()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00261">PatternPieceDialog::SetPiece()</a>, <a class="el" href="../../d6/d80/anchorpoint__dialog_8cpp_source.html#l00103">AnchorPointDialog::setPieceId()</a>, <a class="el" href="../../de/d8d/internal__path__dialog_8cpp_source.html#l01251">InternalPathDialog::setPieceId()</a>, <a class="el" href="../../d5/d7b/pieces__widget_8cpp_source.html#l00186">PiecesWidget::togglePiece()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00654">PatternPieceTool::updatePatternLabel()</a>, and <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00627">PatternPieceTool::updatePieceLabel()</a>.</p>
 
 </div>
 </div>
@@ -1382,9 +1364,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00195">195</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">VLayoutPiece::Create()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00144">PatternPieceTool::Create()</a>, <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00758">VPiece::getNodeSAPoints()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00869">VPiece::getSeamNotchSAPoint()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00201">VPiece::seamAllowancePoints()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00262">PatternPieceDialog::SetPiece()</a>, and <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00452">VPiece::setSeamAllowanceWidthFormula()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">VLayoutPiece::Create()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00144">PatternPieceTool::Create()</a>, <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01308">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00735">VPiece::getNodeSAPoints()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00846">VPiece::getSeamNotchSAPoint()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00187">VPiece::seamAllowancePoints()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00261">PatternPieceDialog::SetPiece()</a>, and <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00429">VPiece::setSeamAllowanceWidthFormula()</a>.</p>
 
 </div>
 </div>
@@ -1405,9 +1387,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">159</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01141">PatternPieceTool::contextMenuEvent()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">VLayoutPiece::Create()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01113">VLayoutPiece::createAllowancePath()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01093">VLayoutPiece::createMainPath()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01453">VLayoutPiece::createSeamlineItem()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00287">VPiece::cutPathPoints()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00740">VDxfEngine::ExportAAMANotch()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00682">VDxfEngine::ExportAAMAOutline()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00385">VPiece::getNotchesPath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00621">VPiece::GetUnitedPath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00916">VPiece::isNotchVisible()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00954">VLayoutPiece::isNull()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01282">PatternPieceTool::keyReleaseEvent()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00862">PatternPieceTool::paint()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00922">VLayoutPiece::pieceBoundingRect()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01432">VLayoutPiece::piecePath()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01522">PatternPieceTool::RefreshGeometry()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00362">VPiece::seamAllowancePath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00201">VPiece::seamAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00988">VLayoutPiece::SetLayoutAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01022">VLayoutPiece::setNotches()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00262">PatternPieceDialog::SetPiece()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01140">PatternPieceTool::contextMenuEvent()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">VLayoutPiece::Create()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00990">VLayoutPiece::createAllowancePath()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01249">VLayoutPiece::createMainItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00970">VLayoutPiece::createMainPath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00273">VPiece::cutPathPoints()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00740">VDxfEngine::ExportAAMANotch()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00682">VDxfEngine::ExportAAMAOutline()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00363">VPiece::getNotchesPath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00598">VPiece::GetUnitedPath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00893">VPiece::isNotchVisible()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00831">VLayoutPiece::isNull()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01282">PatternPieceTool::keyReleaseEvent()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00861">PatternPieceTool::paint()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00799">VLayoutPiece::pieceBoundingRect()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01236">VLayoutPiece::piecePath()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01522">PatternPieceTool::RefreshGeometry()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00340">VPiece::seamAllowancePath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00187">VPiece::seamAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00865">VLayoutPiece::SetLayoutAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00899">VLayoutPiece::setNotches()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00261">PatternPieceDialog::SetPiece()</a>.</p>
 
 </div>
 </div>
@@ -1428,9 +1410,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">171</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../d4/d7b/vnodepoint_8cpp_source.html#l00319">VNodePoint::contextMenuEvent()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">VLayoutPiece::Create()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01113">VLayoutPiece::createAllowancePath()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01093">VLayoutPiece::createMainPath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00956">VPiece::createNotch()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01453">VLayoutPiece::createSeamlineItem()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00287">VPiece::cutPathPoints()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00682">VDxfEngine::ExportAAMAOutline()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00621">VPiece::GetUnitedPath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00916">VPiece::isNotchVisible()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00954">VLayoutPiece::isNull()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01657">PatternPieceTool::notchChanged()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00862">PatternPieceTool::paint()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00922">VLayoutPiece::pieceBoundingRect()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01432">VLayoutPiece::piecePath()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01522">PatternPieceTool::RefreshGeometry()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00362">VPiece::seamAllowancePath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00201">VPiece::seamAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00988">VLayoutPiece::SetLayoutAllowancePoints()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00262">PatternPieceDialog::SetPiece()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00558">VLayoutPiece::setSeamAllowancePoints()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00860">PatternPieceDialog::showMainPathContextMenu()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../d4/d7b/vnodepoint_8cpp_source.html#l00319">VNodePoint::contextMenuEvent()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">VLayoutPiece::Create()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00990">VLayoutPiece::createAllowancePath()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01249">VLayoutPiece::createMainItem()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00970">VLayoutPiece::createMainPath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00933">VPiece::createNotch()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00273">VPiece::cutPathPoints()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00682">VDxfEngine::ExportAAMAOutline()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00598">VPiece::GetUnitedPath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00893">VPiece::isNotchVisible()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00831">VLayoutPiece::isNull()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01657">PatternPieceTool::notchChanged()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00861">PatternPieceTool::paint()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00799">VLayoutPiece::pieceBoundingRect()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01236">VLayoutPiece::piecePath()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01522">PatternPieceTool::RefreshGeometry()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00340">VPiece::seamAllowancePath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00187">VPiece::seamAllowancePoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00865">VLayoutPiece::SetLayoutAllowancePoints()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00261">PatternPieceDialog::SetPiece()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00497">VLayoutPiece::setSeamAllowancePoints()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00834">PatternPieceDialog::showMainPathContextMenu()</a>.</p>
 
 </div>
 </div>
@@ -1458,11 +1440,11 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00442">442</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00297">297</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00401">sumTrapezoids()</a>.</p>
+<p class="reference">References <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00256">sumTrapezoids()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00379">PatternPieceDialog::ChosenObject()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02900">PatternPieceDialog::isMainPathClockwise()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00373">PatternPieceDialog::ChosenObject()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02872">PatternPieceDialog::isMainPathClockwise()</a>.</p>
 
 </div>
 </div>
@@ -1506,11 +1488,11 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01206">1206</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01061">1061</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
 <p class="reference">References <a class="el" href="../../da/d37/vgobject_8cpp_source.html#l00516">VGObject::IsPointOnLineviaPDP()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00292">CorrectEquidistantPoints()</a>, and <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00869">VPiece::getSeamNotchSAPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00270">CorrectEquidistantPoints()</a>, and <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00846">VPiece::getSeamNotchSAPoint()</a>.</p>
 
 </div>
 </div>
@@ -1554,9 +1536,9 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01212">1212</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01067">1067</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../d2/d07/vgobject_8h_source.html#l00126">VGObject::accuracyPointOnLine</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00993">createParallelLine()</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00145">VSAPoint::GetSAAfter()</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00133">VSAPoint::GetSABefore()</a>, and <a class="el" href="../../da/d37/vgobject_8cpp_source.html#l00516">VGObject::IsPointOnLineviaPDP()</a>.</p>
+<p class="reference">References <a class="el" href="../../d2/d07/vgobject_8h_source.html#l00126">VGObject::accuracyPointOnLine</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00848">createParallelLine()</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00138">VSAPoint::GetSAAfter()</a>, <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00126">VSAPoint::GetSABefore()</a>, and <a class="el" href="../../da/d37/vgobject_8cpp_source.html#l00516">VGObject::IsPointOnLineviaPDP()</a>.</p>
 
 </div>
 </div>
@@ -1577,9 +1559,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00147">147</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../d1/dd1/vlayoutpaper_8cpp_source.html#l00330">VLayoutPaper::arrangePiece()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01141">PatternPieceTool::contextMenuEvent()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">VLayoutPiece::Create()</a>, <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00178">VPosition::edgesIntersect()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01282">PatternPieceTool::keyReleaseEvent()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00262">PatternPieceDialog::SetPiece()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../d1/dd1/vlayoutpaper_8cpp_source.html#l00330">VLayoutPaper::arrangePiece()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01140">PatternPieceTool::contextMenuEvent()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">VLayoutPiece::Create()</a>, <a class="el" href="../../df/d76/vposition_8cpp_source.html#l00178">VPosition::edgesIntersect()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01282">PatternPieceTool::keyReleaseEvent()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00261">PatternPieceDialog::SetPiece()</a>.</p>
 
 </div>
 </div>
@@ -1600,9 +1582,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00183">183</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../d4/d7b/vnodepoint_8cpp_source.html#l00319">VNodePoint::contextMenuEvent()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01141">PatternPieceTool::contextMenuEvent()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">VLayoutPiece::Create()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l01093">VLayoutPiece::createMainPath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00956">VPiece::createNotch()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00702">VDxfEngine::ExportAAMADraw()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01282">PatternPieceTool::keyReleaseEvent()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01522">PatternPieceTool::RefreshGeometry()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00262">PatternPieceDialog::SetPiece()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00942">PatternPieceTool::shape()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00860">PatternPieceDialog::showMainPathContextMenu()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00253">PatternPieceTool::addAttributes()</a>, <a class="el" href="../../d4/d7b/vnodepoint_8cpp_source.html#l00319">VNodePoint::contextMenuEvent()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01140">PatternPieceTool::contextMenuEvent()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">VLayoutPiece::Create()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00970">VLayoutPiece::createMainPath()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00933">VPiece::createNotch()</a>, <a class="el" href="../../dd/d66/vdxfengine_8cpp_source.html#l00702">VDxfEngine::ExportAAMADraw()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01282">PatternPieceTool::keyReleaseEvent()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01522">PatternPieceTool::RefreshGeometry()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00261">PatternPieceDialog::SetPiece()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l00941">PatternPieceTool::shape()</a>, and <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l00834">PatternPieceDialog::showMainPathContextMenu()</a>.</p>
 
 </div>
 </div>
@@ -1640,11 +1622,11 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00602">602</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00457">457</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00145">VSAPoint::GetSAAfter()</a>, and <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00133">VSAPoint::GetSABefore()</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00138">VSAPoint::GetSAAfter()</a>, and <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00126">VSAPoint::GetSABefore()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00626">EkvPoint()</a>, and <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00869">VPiece::getSeamNotchSAPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00481">EkvPoint()</a>, and <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00846">VPiece::getSeamNotchSAPoint()</a>.</p>
 
 </div>
 </div>
@@ -1666,9 +1648,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00083">83</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">VLayoutPiece::operator=()</a>, and <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00139">VPiece::operator=()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00410">VLayoutPiece::operator=()</a>, and <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00139">VPiece::operator=()</a>.</p>
 
 </div>
 </div>
@@ -1712,9 +1694,9 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01112">1112</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00967">967</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00460">CheckLoops()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00315">CheckLoops()</a>.</p>
 
 </div>
 </div>
@@ -1752,9 +1734,9 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00595">595</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00450">450</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00626">EkvPoint()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00481">EkvPoint()</a>.</p>
 
 </div>
 </div>
@@ -1794,11 +1776,11 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00347">347</a> of file <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html">vabstractpiece.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00325">325</a> of file <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html">vabstractpiece.h</a>.</p>
 
 <p class="reference">References <a class="el" href="../../d2/d07/vgobject_8h_source.html#l00126">VGObject::accuracyPointOnLine</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00292">CorrectEquidistantPoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00533">VLayoutPiece::setMainPathPoints()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00558">VLayoutPiece::setSeamAllowancePoints()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00270">CorrectEquidistantPoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00483">VLayoutPiece::setMainPathPoints()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00497">VLayoutPiece::setSeamAllowancePoints()</a>.</p>
 
 </div>
 </div>
@@ -1820,9 +1802,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00117">117</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02653">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../de/dc5/set__piece__color_8cpp_source.html#l00095">SetPieceColor::doCmd()</a>, and <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00862">VPattern::parsePieceElement()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02625">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../de/dc5/set__piece__color_8cpp_source.html#l00095">SetPieceColor::doCmd()</a>, and <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00866">VPattern::parsePieceElement()</a>.</p>
 
 </div>
 </div>
@@ -1844,9 +1826,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00129">129</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02653">PatternPieceDialog::CreatePiece()</a>, and <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00862">VPattern::parsePieceElement()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02625">PatternPieceDialog::CreatePiece()</a>, and <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00866">VPattern::parsePieceElement()</a>.</p>
 
 </div>
 </div>
@@ -1868,9 +1850,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00153">153</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">VLayoutPiece::Create()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02653">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00862">VPattern::parsePieceElement()</a>, and <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l02234">PatternPieceTool::toggleFlipping()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">VLayoutPiece::Create()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02625">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00866">VPattern::parsePieceElement()</a>, and <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l02244">PatternPieceTool::toggleFlipping()</a>.</p>
 
 </div>
 </div>
@@ -1892,9 +1874,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00189">189</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02653">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00862">VPattern::parsePieceElement()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00533">VLayoutPiece::setMainPathPoints()</a>, and <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l02251">PatternPieceTool::toggleSeamLine()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02625">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00866">VPattern::parsePieceElement()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00483">VLayoutPiece::setMainPathPoints()</a>, and <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l02261">PatternPieceTool::toggleSeamLine()</a>.</p>
 
 </div>
 </div>
@@ -1916,7 +1898,7 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00141">141</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
 </div>
 </div>
@@ -1936,11 +1918,11 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01232">1232</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01087">1087</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">VLayoutPiece::Create()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02653">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01016">PatternPieceTool::itemChange()</a>, and <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00862">VPattern::parsePieceElement()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">VLayoutPiece::Create()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02625">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01308">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01015">PatternPieceTool::itemChange()</a>, and <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00866">VPattern::parsePieceElement()</a>.</p>
 
 </div>
 </div>
@@ -1960,11 +1942,11 @@ template&lt;class T &gt; </div>
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01244">1244</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01099">1099</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">VLayoutPiece::Create()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02653">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01016">PatternPieceTool::itemChange()</a>, and <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00862">VPattern::parsePieceElement()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">VLayoutPiece::Create()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02625">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01308">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l01015">PatternPieceTool::itemChange()</a>, and <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00866">VPattern::parsePieceElement()</a>.</p>
 
 </div>
 </div>
@@ -1986,9 +1968,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00104">104</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d46/vcontainer_8cpp_source.html#l00392">VContainer::AddPiece()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">VLayoutPiece::Create()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02653">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00310">TST_VPiece::KeepExplicitPieceName()</a>, <a class="el" href="../../d9/d9d/tst__svgcomponenttags_8cpp_source.html#l00094">anonymous_namespace{tst_svgcomponenttags.cpp}::makeTestPiece()</a>, <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00862">VPattern::parsePieceElement()</a>, and <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l02335">PatternPieceTool::renamePiece()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">VLayoutPiece::Create()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02625">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01308">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00866">VPattern::parsePieceElement()</a>, and <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l02345">PatternPieceTool::renamePiece()</a>.</p>
 
 </div>
 </div>
@@ -2010,9 +1992,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00201">201</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00073">TST_VPiece::ClearLoop()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00442">VLayoutPiece::Create()</a>, <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00179">TST_VPiece::Issue620()</a>, <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00452">VPiece::setSeamAllowanceWidthFormula()</a>, and <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00545">anonymous_namespace{tst_vpiece.cpp}::squareNotchLines()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00067">TST_VPiece::ClearLoop()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00426">VLayoutPiece::Create()</a>, <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00173">TST_VPiece::Issue620()</a>, and <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00429">VPiece::setSeamAllowanceWidthFormula()</a>.</p>
 
 </div>
 </div>
@@ -2034,9 +2016,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00165">165</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00073">TST_VPiece::ClearLoop()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02653">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01309">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00179">TST_VPiece::Issue620()</a>, <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00862">VPattern::parsePieceElement()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00558">VLayoutPiece::setSeamAllowancePoints()</a>, <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00545">anonymous_namespace{tst_vpiece.cpp}::squareNotchLines()</a>, and <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l02268">PatternPieceTool::toggleSeamAllowance()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00067">TST_VPiece::ClearLoop()</a>, <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02625">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../d4/d9f/union__tool_8cpp_source.html#l01308">QT_WARNING_POP::createUnion()</a>, <a class="el" href="../../d6/d2d/tst__vpiece_8cpp_source.html#l00173">TST_VPiece::Issue620()</a>, <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00866">VPattern::parsePieceElement()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00497">VLayoutPiece::setSeamAllowancePoints()</a>, and <a class="el" href="../../d8/dea/pattern__piece__tool_8cpp_source.html#l02278">PatternPieceTool::toggleSeamAllowance()</a>.</p>
 
 </div>
 </div>
@@ -2058,9 +2040,9 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00177">177</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">d</a>.</p>
+<p class="reference">References <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">d</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02653">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00862">VPattern::parsePieceElement()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00558">VLayoutPiece::setSeamAllowancePoints()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../de/d46/pattern__piece__dialog_8cpp_source.html#l02625">PatternPieceDialog::CreatePiece()</a>, <a class="el" href="../../d3/d49/vpattern_8cpp_source.html#l00866">VPattern::parsePieceElement()</a>, and <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00497">VLayoutPiece::setSeamAllowancePoints()</a>.</p>
 
 </div>
 </div>
@@ -2110,9 +2092,9 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01021">1021</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00876">876</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00993">createParallelLine()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00848">createParallelLine()</a>.</p>
 
 </div>
 </div>
@@ -2156,9 +2138,9 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01180">1180</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01035">1035</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01081">CheckIntersection()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00936">CheckIntersection()</a>.</p>
 
 </div>
 </div>
@@ -2186,9 +2168,9 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00401">401</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00256">256</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l03229">TST_VAbstractPiece::Case3()</a>, <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l03238">TST_VAbstractPiece::Case4()</a>, <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l03247">TST_VAbstractPiece::Case5()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01081">CheckIntersection()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00442">isClockwise()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00974">VLayoutPiece::Square()</a>, <a class="el" href="../../d3/d9d/tst__varc_8cpp_source.html#l00191">TST_VArc::TestGetPoints()</a>, and <a class="el" href="../../dc/d83/tst__vellipticalarc_8cpp_source.html#l00373">TST_VEllipticalArc::TestGetPoints3()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l03117">TST_VAbstractPiece::Case3()</a>, <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l03126">TST_VAbstractPiece::Case4()</a>, <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l03135">TST_VAbstractPiece::Case5()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00936">CheckIntersection()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00297">isClockwise()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00851">VLayoutPiece::Square()</a>, <a class="el" href="../../d3/d9d/tst__varc_8cpp_source.html#l00191">TST_VArc::TestGetPoints()</a>, and <a class="el" href="../../dc/d83/tst__vellipticalarc_8cpp_source.html#l00373">TST_VEllipticalArc::TestGetPoints3()</a>.</p>
 
 </div>
 </div>
@@ -2218,65 +2200,7 @@ template&lt;class T &gt; </div>
 
 <p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00069">69</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00410">VLayoutPiece::Swap()</a>, and <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00123">VPiece::Swap()</a>.</p>
-
-</div>
-</div>
-<a id="aba2225590933f6770c7244b6ce12101e" name="aba2225590933f6770c7244b6ce12101e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aba2225590933f6770c7244b6ce12101e">&#9670;&#160;</a></span>turnPointIndices()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">QVector&lt; int &gt; VAbstractPiece::turnPointIndices </td>
-          <td>(</td>
-          <td class="paramtype">const QVector&lt; QPointF &gt; &amp;&#160;</td>
-          <td class="paramname"><em>points</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const QVector&lt; QPointF &gt; &amp;&#160;</td>
-          <td class="paramname"><em>nodeVertices</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">bool&#160;</td>
-          <td class="paramname"><em>closed</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel">static</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>turnPointIndices finds the turn points of a polyline: the vertices where the tangent breaks. </p>
-<p>Only node vertices (piece nodes, curve ends, spline path knots) can break the tangent. Curve interior vertices are curve points, except where the polyline turns sharper than a curve interpolation can. A side between two node vertices is a straight line; the tangent of a curve side is extrapolated from its first two chords, so a coarse curve interpolation does not read as a corner.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">points</td><td>polyline vertices; a closed polyline may repeat its first vertex. </td></tr>
-    <tr><td class="paramname">nodeVertices</td><td>node vertex positions; vertices within kNodeMatchTolerance of one are nodes. </td></tr>
-    <tr><td class="paramname">closed</td><td>whether the polyline is a closed loop. Open ends are always turn points. </td></tr>
-  </table>
-  </dd>
-</dl>
-<dl class="section return"><dt>Returns</dt><dd>ascending indices into <code>points</code>. </dd></dl>
-
-<p class="definition">Definition at line <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00317">317</a> of file <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html">vabstractpiece.cpp</a>.</p>
-
-<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00105">anonymous_namespace{vlayoutpiece.cpp}::convertInternalPaths()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00533">VLayoutPiece::setMainPathPoints()</a>, <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00558">VLayoutPiece::setSeamAllowancePoints()</a>, and <a class="el" href="../../df/d01/tst__vabstractpiece_8cpp_source.html#l01956">TST_VAbstractPiece::TurnPointIndices()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../dd/d70/vlayoutpiece_8cpp_source.html#l00394">VLayoutPiece::Swap()</a>, and <a class="el" href="../../df/d7a/vpiece_8cpp_source.html#l00123">VPiece::Swap()</a>.</p>
 
 </div>
 </div>
@@ -2301,9 +2225,9 @@ template&lt;class T &gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00252">252</a> of file <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html">vabstractpiece.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html#l00230">230</a> of file <a class="el" href="../../dd/d37/vabstractpiece_8h_source.html">vabstractpiece.h</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00111">getColor()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00123">getFill()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00135">getLock()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01226">GetMx()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01238">GetMy()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00098">GetName()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00195">GetSAWidth()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">hasSeamAllowance()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">hasSeamAllowanceBuiltIn()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00147">IsForbidFlipping()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00183">isHideSeamLine()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00083">operator=()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00117">setColor()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00129">setFill()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00153">SetForbidFlipping()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00189">setHideSeamLine()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00141">setLock()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01232">SetMx()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01244">SetMy()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00104">SetName()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00201">SetSAWidth()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00165">SetSeamAllowance()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00177">SetSeamAllowanceBuiltIn()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00111">getColor()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00123">getFill()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00135">getLock()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01081">GetMx()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01093">GetMy()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00098">GetName()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00195">GetSAWidth()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00159">hasSeamAllowance()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00171">hasSeamAllowanceBuiltIn()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00147">IsForbidFlipping()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00183">isHideSeamLine()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00083">operator=()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00117">setColor()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00129">setFill()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00153">SetForbidFlipping()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00189">setHideSeamLine()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00141">setLock()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01087">SetMx()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l01099">SetMy()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00104">SetName()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00201">SetSAWidth()</a>, <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00165">SetSeamAllowance()</a>, and <a class="el" href="../../d9/d15/vabstractpiece_8cpp_source.html#l00177">SetSeamAllowanceBuiltIn()</a>.</p>
 
 </div>
 </div>

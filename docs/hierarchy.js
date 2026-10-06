@@ -257,7 +257,6 @@ var hierarchy =
     ] ],
     [ "Hash2KeysSetBucketElem", "d7/df4/structHash2KeysSetBucketElem.html", null ],
     [ "HexBin", "dc/d8b/classHexBin.html", null ],
-    [ "PieceOverlayItem::HistorySnapshot", "d8/d66/structPieceOverlayItem_1_1HistorySnapshot.html", null ],
     [ "ICValueHasher", "da/d10/structICValueHasher.html", null ],
     [ "JanitorMemFunCall< T >", "d9/db9/classJanitorMemFunCall.html", null ],
     [ "LexicalHandler", "d6/dad/classLexicalHandler.html", [
@@ -267,7 +266,6 @@ var hierarchy =
       [ "ReaderMgr", "d4/d1c/classReaderMgr.html", null ],
       [ "XSDLocator", "dd/d47/classXSDLocator.html", null ]
     ] ],
-    [ "Logger", "db/d67/classLogger.html", null ],
     [ "MemoryManager", "d6/d9a/classMemoryManager.html", [
       [ "MemoryManagerImpl", "d2/d42/classMemoryManagerImpl.html", null ]
     ] ],
@@ -283,7 +281,6 @@ var hierarchy =
       [ "SAXParser", "da/da7/classSAXParser.html", null ]
     ] ],
     [ "Pen", "d9/de7/classPen.html", null ],
-    [ "Platform", "df/d1e/classPlatform.html", null ],
     [ "point2d_s", "dc/d79/structpoint2d__s.html", null ],
     [ "XMLStringPool::PoolElem", "d9/d93/structXMLStringPool_1_1PoolElem.html", null ],
     [ "PosterData", "d1/dd2/structPosterData.html", null ],
@@ -334,6 +331,7 @@ var hierarchy =
       [ "DialogTool", "d2/d7b/classDialogTool.html", [
         [ "AddToGroupDialog", "d1/dde/classAddToGroupDialog.html", null ],
         [ "AnchorPointDialog", "d6/dfc/classAnchorPointDialog.html", null ],
+        [ "BasePointDialog", "d7/d42/classBasePointDialog.html", null ],
         [ "DialogAlongLine", "dd/d63/classDialogAlongLine.html", null ],
         [ "DialogArc", "db/d4d/classDialogArc.html", null ],
         [ "DialogArcWithLength", "d3/d84/classDialogArcWithLength.html", null ],
@@ -355,12 +353,10 @@ var hierarchy =
         [ "DialogMove", "d0/df1/classDialogMove.html", null ],
         [ "DialogNormal", "de/d67/classDialogNormal.html", null ],
         [ "DialogPointFromArcAndTangent", "d0/da0/classDialogPointFromArcAndTangent.html", null ],
-        [ "DialogPointOfContact", "dd/d08/classDialogPointOfContact.html", null ],
         [ "DialogPointOfIntersectionArcs", "dd/d0c/classDialogPointOfIntersectionArcs.html", null ],
         [ "DialogPointOfIntersectionCurves", "da/d11/classDialogPointOfIntersectionCurves.html", null ],
         [ "DialogRotation", "d5/dc7/classDialogRotation.html", null ],
         [ "DialogShoulderPoint", "d1/dd5/classDialogShoulderPoint.html", null ],
-        [ "DialogSinglePoint", "d5/d44/classDialogSinglePoint.html", null ],
         [ "DialogSpline", "de/d10/classDialogSpline.html", null ],
         [ "DialogSplinePath", "df/d5e/classDialogSplinePath.html", null ],
         [ "DialogTriangle", "d1/d40/classDialogTriangle.html", null ],
@@ -371,6 +367,7 @@ var hierarchy =
         [ "HistoryDialog", "d1/d42/classHistoryDialog.html", null ],
         [ "InsertNodesDialog", "d6/d55/classInsertNodesDialog.html", null ],
         [ "InternalPathDialog", "d9/d71/classInternalPathDialog.html", null ],
+        [ "IntersectArcLineDialog", "d3/dfc/classIntersectArcLineDialog.html", null ],
         [ "IntersectCircleTangentDialog", "dc/dfe/classIntersectCircleTangentDialog.html", null ],
         [ "IntersectCirclesDialog", "d0/d09/classIntersectCirclesDialog.html", null ],
         [ "PatternPieceDialog", "d5/d41/classPatternPieceDialog.html", null ],
@@ -380,11 +377,11 @@ var hierarchy =
       [ "DialogUndo", "de/d7f/classDialogUndo.html", null ],
       [ "EditLabelTemplateDialog", "d7/df1/classEditLabelTemplateDialog.html", null ],
       [ "ExportProgressDialog", "d7/deb/classExportProgressDialog.html", null ],
+      [ "FinalMeasurementsDialog", "db/d14/classFinalMeasurementsDialog.html", null ],
       [ "ImageDialog", "d3/db4/classImageDialog.html", null ],
       [ "MeShortcutsDialog", "dd/d67/classMeShortcutsDialog.html", null ],
       [ "MeasurementDatabaseDialog", "d3/d63/classMeasurementDatabaseDialog.html", null ],
       [ "NewMeasurementsDialog", "dc/da3/classNewMeasurementsDialog.html", null ],
-      [ "PreferencesWindow", "d9/da8/classPreferencesWindow.html", null ],
       [ "SeamlyMeWelcomeDialog", "d5/d64/classSeamlyMeWelcomeDialog.html", null ],
       [ "SeamlyWelcomeDialog", "d4/d8f/classSeamlyWelcomeDialog.html", null ],
       [ "ShortcutsDialog", "de/d8e/classShortcutsDialog.html", null ],
@@ -435,12 +432,13 @@ var hierarchy =
         [ "VNodePoint", "d6/d7a/classVNodePoint.html", null ],
         [ "VSimplePoint", "d1/d6b/classVSimplePoint.html", null ],
         [ "VToolSinglePoint", "da/dbc/classVToolSinglePoint.html", [
+          [ "BasePointTool", "d2/d5d/classBasePointTool.html", null ],
           [ "DoubleLinePointTool", "d0/db5/classDoubleLinePointTool.html", [
             [ "PointIntersectXYTool", "df/d11/classPointIntersectXYTool.html", null ]
           ] ],
+          [ "IntersectArcLineTool", "d6/d01/classIntersectArcLineTool.html", null ],
           [ "IntersectCircleTangentTool", "d9/d63/classIntersectCircleTangentTool.html", null ],
           [ "IntersectCirclesTool", "dc/d9f/classIntersectCirclesTool.html", null ],
-          [ "VToolBasePoint", "de/ddd/classVToolBasePoint.html", null ],
           [ "VToolCut", "d0/d8a/classVToolCut.html", [
             [ "VToolCutArc", "d1/d98/classVToolCutArc.html", null ],
             [ "VToolCutSpline", "d9/d86/classVToolCutSpline.html", null ],
@@ -458,7 +456,6 @@ var hierarchy =
             [ "VToolShoulderPoint", "db/d3d/classVToolShoulderPoint.html", null ]
           ] ],
           [ "VToolPointFromArcAndTangent", "d5/de4/classVToolPointFromArcAndTangent.html", null ],
-          [ "VToolPointOfContact", "d1/da5/classVToolPointOfContact.html", null ],
           [ "VToolPointOfIntersectionArcs", "d4/d0f/classVToolPointOfIntersectionArcs.html", null ],
           [ "VToolPointOfIntersectionCurves", "d5/d68/classVToolPointOfIntersectionCurves.html", null ],
           [ "VToolTriangle", "dd/df1/classVToolTriangle.html", null ]
@@ -482,6 +479,7 @@ var hierarchy =
       [ "VScaledLine", "dd/da2/classVScaledLine.html", [
         [ "VisLine", "de/d0e/classVisLine.html", [
           [ "AnchorPointVisual", "d8/d3d/classAnchorPointVisual.html", null ],
+          [ "IntersectArcLineVisual", "d8/d06/classIntersectArcLineVisual.html", null ],
           [ "IntersectCircleTangentVisual", "d7/d8f/classIntersectCircleTangentVisual.html", null ],
           [ "IntersectCirclesVisual", "dd/d25/classIntersectCirclesVisual.html", null ],
           [ "PointIntersectXYVisual", "d3/d38/classPointIntersectXYVisual.html", null ],
@@ -501,7 +499,6 @@ var hierarchy =
           [ "VisToolLineIntersectAxis", "d9/deb/classVisToolLineIntersectAxis.html", null ],
           [ "VisToolNormal", "de/d5c/classVisToolNormal.html", null ],
           [ "VisToolPointFromArcAndTangent", "d9/d72/classVisToolPointFromArcAndTangent.html", null ],
-          [ "VisToolPointOfContact", "d3/d92/classVisToolPointOfContact.html", null ],
           [ "VisToolPointOfIntersectionArcs", "da/de3/classVisToolPointOfIntersectionArcs.html", null ],
           [ "VisToolShoulderPoint", "d7/df0/classVisToolShoulderPoint.html", null ],
           [ "VisToolTriangle", "d9/d01/classVisToolTriangle.html", null ],
@@ -554,18 +551,15 @@ var hierarchy =
       ] ]
     ] ],
     [ "QGraphicsRectItem", null, [
-      [ "PieceOverlayItem", "d4/dbc/classPieceOverlayItem.html", null ],
       [ "ResizeHandlesItem::HandleItem", "d0/dc5/classResizeHandlesItem_1_1HandleItem.html", null ],
       [ "SceneRect", "d3/db3/classSceneRect.html", [
         [ "VControlPointSpline", "dd/dcb/classVControlPointSpline.html", null ]
       ] ]
     ] ],
     [ "QGraphicsScene", null, [
-      [ "AdjustScene", "d1/d42/classAdjustScene.html", null ],
       [ "VMainGraphicsScene", "d7/df5/classVMainGraphicsScene.html", null ]
     ] ],
     [ "QGraphicsSimpleTextItem", null, [
-      [ "SvgTextItem", "d5/d2f/classSvgTextItem.html", null ],
       [ "VGraphicsSimpleTextItem", "de/dbc/classVGraphicsSimpleTextItem.html", null ]
     ] ],
     [ "QGraphicsView", null, [
@@ -578,7 +572,6 @@ var hierarchy =
     ] ],
     [ "QHash< K, V >", "da/da1/classQHash.html", null ],
     [ "QHash< int, qint64 >", "da/da1/classQHash.html", null ],
-    [ "QHash< QString, PieceOverlayItem::HistorySnapshot >", "da/da1/classQHash.html", null ],
     [ "QHash< QString, QSharedPointer< VInternalVariable > >", "da/da1/classQHash.html", null ],
     [ "QHash< quint32, QDomElement >", "da/da1/classQHash.html", null ],
     [ "QHash< quint32, QSharedPointer< VGObject > >", "da/da1/classQHash.html", null ],
@@ -588,7 +581,6 @@ var hierarchy =
       [ "VLineEdit", "d7/d0f/classVLineEdit.html", null ]
     ] ],
     [ "QList< T >", "d1/d4a/classQList.html", null ],
-    [ "QList< PieceOverlayItem * >", "d1/d4a/classQList.html", null ],
     [ "QList< QCommandLineOption * >", "d1/d4a/classQList.html", null ],
     [ "QList< QDomDocument >", "d1/d4a/classQList.html", null ],
     [ "QList< QGraphicsItem * >", "d1/d4a/classQList.html", null ],
@@ -596,17 +588,14 @@ var hierarchy =
     [ "QList< QList< QGraphicsItem * > >", "d1/d4a/classQList.html", null ],
     [ "QList< QPointer< TMainWindow > >", "d1/d4a/classQList.html", null ],
     [ "QList< QSharedPointer< QTableWidget > >", "d1/d4a/classQList.html", null ],
-    [ "QList< QString >", "d1/d4a/classQList.html", null ],
     [ "QList< QStringList >", "d1/d4a/classQList.html", null ],
     [ "QList< QTableWidgetItem * >", "d1/d4a/classQList.html", null ],
-    [ "QList< QUrl >", "d1/d4a/classQList.html", null ],
     [ "QList< ResizeHandlesItem::HandleItem * >", "d1/d4a/classQList.html", null ],
     [ "QList< TextLine >", "d1/d4a/classQList.html", null ],
     [ "QList< VPE::VProperty * >", "d1/d4a/classQList.html", null ],
     [ "QList< VPE::VPropertyFormWidgetPrivate::SEditorWidget >", "d1/d4a/classQList.html", null ],
     [ "QList< VPE::VSerializedProperty >", "d1/d4a/classQList.html", null ],
     [ "QMainWindow", null, [
-      [ "AdjustWindow", "df/d1d/classAdjustWindow.html", null ],
       [ "VAbstractMainWindow", "dc/d59/classVAbstractMainWindow.html", [
         [ "MainWindowsNoGUI", "de/d1a/classMainWindowsNoGUI.html", [
           [ "MainWindow", "d6/d1a/classMainWindow.html", null ]
@@ -662,35 +651,21 @@ var hierarchy =
         [ "TST_VPiece", "db/dbb/classTST__VPiece.html", null ],
         [ "TST_VSpline", "d7/d3f/classTST__VSpline.html", null ]
       ] ],
-      [ "AdjustController", "d5/d52/classAdjustController.html", null ],
-      [ "AdjustControllerTests", "d3/d44/classAdjustControllerTests.html", null ],
-      [ "AdjustSceneTests", "d1/d4c/classAdjustSceneTests.html", null ],
       [ "FvUpdater", "d5/d23/classFvUpdater.html", null ],
       [ "GraphicsViewZoom", "da/d19/classGraphicsViewZoom.html", null ],
       [ "ImageItem", "d6/da8/classImageItem.html", null ],
       [ "ImageTool", "df/d5b/classImageTool.html", null ],
-      [ "LoggerTests", "d9/d9b/classLoggerTests.html", null ],
-      [ "PreferencesController", "d2/d34/classPreferencesController.html", null ],
-      [ "PreferencesModel", "d9/d4e/classPreferencesModel.html", null ],
-      [ "PreferencesModelTests", "d7/d0f/classPreferencesModelTests.html", null ],
       [ "ResizeHandlesItem", "d0/de9/classResizeHandlesItem.html", null ],
-      [ "SettingsModel", "db/d56/classSettingsModel.html", null ],
-      [ "SettingsModelTests", "d8/dd6/classSettingsModelTests.html", null ],
-      [ "StartupOptionsTests", "db/dba/classStartupOptionsTests.html", null ],
-      [ "TST_DataRoot", "dd/db9/classTST__DataRoot.html", null ],
-      [ "TST_ExportFormatCombobox", "de/dcc/classTST__ExportFormatCombobox.html", null ],
       [ "TST_FindPoint", "d6/d30/classTST__FindPoint.html", null ],
       [ "TST_Measurements", "da/d3b/classTST__Measurements.html", null ],
       [ "TST_Misc", "d5/d79/classTST__Misc.html", null ],
       [ "TST_NameRegExp", "d3/d4d/classTST__NameRegExp.html", null ],
       [ "TST_QmuTokenParser", "d3/df0/classTST__QmuTokenParser.html", null ],
       [ "TST_ReadVal", "dc/d3d/classTST__ReadVal.html", null ],
-      [ "TST_SeamlySuitePaths", "dc/daf/classTST__SeamlySuitePaths.html", null ],
-      [ "TST_SvgComponentTags", "db/dc1/classTST__SvgComponentTags.html", null ],
-      [ "TST_SvgTextItem", "df/de1/classTST__SvgTextItem.html", null ],
       [ "TST_TSTranslation", "d9/dd4/classTST__TSTranslation.html", null ],
       [ "TST_VArc", "df/daf/classTST__VArc.html", null ],
       [ "TST_VCommandLine", "d0/dcb/classTST__VCommandLine.html", null ],
+      [ "TST_VContainer", "d8/d36/classTST__VContainer.html", null ],
       [ "TST_VCubicBezierPath", "de/d02/classTST__VCubicBezierPath.html", null ],
       [ "TST_VGObject", "d4/d53/classTST__VGObject.html", null ],
       [ "TST_VLockGuard", "d7/d69/classTST__VLockGuard.html", null ],
@@ -699,7 +674,6 @@ var hierarchy =
       [ "TST_VSplinePath", "d8/d25/classTST__VSplinePath.html", null ],
       [ "TST_VToolMove", "d4/df1/classTST__VToolMove.html", null ],
       [ "TST_VTranslateVars", "da/d3d/classTST__VTranslateVars.html", null ],
-      [ "UrlCapture", "d3/d35/classUrlCapture.html", null ],
       [ "VAbstractPattern", "d8/dba/classVAbstractPattern.html", null ],
       [ "VAbstractSimple", "dc/de5/classVAbstractSimple.html", [
         [ "VSimpleCurve", "d4/d36/classVSimpleCurve.html", null ],
@@ -971,15 +945,10 @@ var hierarchy =
       ] ],
       [ "SAX2XMLReaderImpl", "d2/daa/classSAX2XMLReaderImpl.html", null ]
     ] ],
-    [ "AdjustScene::SceneOperation", "de/d03/structAdjustScene_1_1SceneOperation.html", null ],
     [ "SchemaSymbols", "d3/d5c/classSchemaSymbols.html", null ],
-    [ "ScopedEnvVar", "d7/de9/classScopedEnvVar.html", null ],
     [ "SecurityManager", "d0/d59/classSecurityManager.html", null ],
     [ "VPE::VPropertyFormWidgetPrivate::SEditorWidget", "d9/d9b/structVPE_1_1VPropertyFormWidgetPrivate_1_1SEditorWidget.html", null ],
-    [ "anonymous_namespace{SettingsModel.cpp}::SizeEntry", "d3/dcb/structanonymous__namespace_02SettingsModel_8cpp_03_1_1SizeEntry.html", null ],
-    [ "MainWindowsNoGUI::SizePieceList", "db/d2b/structMainWindowsNoGUI_1_1SizePieceList.html", null ],
     [ "SourceItem", "d9/d96/structSourceItem.html", null ],
-    [ "StartupOptions", "de/dbc/classStartupOptions.html", null ],
     [ "StDOMNode< T >", "d8/d3c/classStDOMNode.html", null ],
     [ "qmu::SToken", "dc/d14/structqmu_1_1SToken.html", null ],
     [ "StringHasher", "d8/d6a/structStringHasher.html", null ],
@@ -989,7 +958,6 @@ var hierarchy =
     [ "ThrowEOEJanitor", "d6/d5d/classThrowEOEJanitor.html", null ],
     [ "TranscodeFromStr", "d3/d55/classTranscodeFromStr.html", null ],
     [ "TranscodeToStr", "d8/dad/classTranscodeToStr.html", null ],
-    [ "PieceOverlayItem::TransformState", "d4/d83/structPieceOverlayItem_1_1TransformState.html", null ],
     [ "XMLTransService::TransRec", "de/d76/structXMLTransService_1_1TransRec.html", null ],
     [ "UnionToolInitData", "d9/d2d/structUnionToolInitData.html", null ],
     [ "VAbstractFloatItemData", "d4/dc0/classVAbstractFloatItemData.html", [
@@ -1017,6 +985,7 @@ var hierarchy =
     [ "VContainer", "d2/d83/classVContainer.html", null ],
     [ "VContour", "de/dad/classVContour.html", null ],
     [ "VPE::Vector3D", "dc/dcb/structVPE_1_1Vector3D.html", null ],
+    [ "VFinalMeasurement", "da/dc5/structVFinalMeasurement.html", null ],
     [ "VFormula", "d4/de7/classVFormula.html", null ],
     [ "VFormulaField", "d6/d15/structVFormulaField.html", null ],
     [ "VFSplinePoint", "df/d11/classVFSplinePoint.html", null ],

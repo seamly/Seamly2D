@@ -1,26 +1,6 @@
 var classTST__VPiece =
 [
     [ "TST_VPiece", "db/dbb/classTST__VPiece.html#a73549d6dc8f43b8bcc8f7d97d1ea7f03", null ],
-    [ "AutoNameAvoidsNumberStillInUse", "db/dbb/classTST__VPiece.html#a63a778e644c7d8611fce183dcd6fde05", null ],
-    [ "AutoNameFirstUnnamedPiece", "db/dbb/classTST__VPiece.html#a25c294d8ad638c5a3b4a53f45ba988d1", null ],
-    [ "AutoNameReusesNumberFreedByDeletion", "db/dbb/classTST__VPiece.html#a6f0e393bc7b51c9b4fc1682b9ef77240", null ],
-    [ "AutoNameSecondUnnamedPiece", "db/dbb/classTST__VPiece.html#adf65561f677d22dc5c0df7c21ded7125", null ],
     [ "ClearLoop", "db/dbb/classTST__VPiece.html#a4eb6cce081132afd4d7bd4e49afdec68", null ],
-    [ "GrainlineGrowsToFitTwoArrows", "db/dbb/classTST__VPiece.html#aa1bc070641acda3ad4bd075a61f85154", null ],
-    [ "GrainlineKeepsLengthLongerThanTwoArrows", "db/dbb/classTST__VPiece.html#aa3e4b91646936e41510fe96839abe2b9", null ],
-    [ "Issue620", "db/dbb/classTST__VPiece.html#a5dca90ba03e6e4501a6b9eb2db0a8eba", null ],
-    [ "KeepExplicitPieceName", "db/dbb/classTST__VPiece.html#aa98b0d88389cac808af7190063b09edb", null ],
-    [ "LabelTemplateEmptyWithoutAnyFile", "db/dbb/classTST__VPiece.html#a26c48526190de22582a33b6e8dbc6080", null ],
-    [ "LabelTemplateFallsBackToBuiltIn", "db/dbb/classTST__VPiece.html#a25aeacee6b04937145f1555a05ae316d", null ],
-    [ "LabelTemplateFileEmptyWithoutAnyFile", "db/dbb/classTST__VPiece.html#a6204ccaa34d7a710eaee6eeaced37f27", null ],
-    [ "LabelTemplateFilePrefersUserFile", "db/dbb/classTST__VPiece.html#a26af6f0cb1facf8cbbef82520a2dc15b", null ],
-    [ "LabelTemplateReadsUserFile", "db/dbb/classTST__VPiece.html#afb5a45411ee5469ec886bbab92305a62", null ],
-    [ "NotchFlagsSelectLine", "db/dbb/classTST__VPiece.html#a775398adfea6229ab9f4324d7bc77b6f", null ],
-    [ "NotchFlagsSelectLine_data", "db/dbb/classTST__VPiece.html#a3d2d629cf245784b36181780cee01575", null ],
-    [ "PatternLabelLeftOfCenterWithoutGrainline", "db/dbb/classTST__VPiece.html#aa1ef12241e1fe04988c60cfdd822def3", null ],
-    [ "PatternLabelLeftOfSlantedGrainline", "db/dbb/classTST__VPiece.html#a99d6673b533f6cd9772609278bf03151", null ],
-    [ "PatternLabelLeftOfVerticalGrainline", "db/dbb/classTST__VPiece.html#a5d39ae13764417319749440818cc100c", null ],
-    [ "PieceLabelRightOfSlantedGrainline", "db/dbb/classTST__VPiece.html#a5e33219c008ecaaf6ef36d912159fc7c", null ],
-    [ "PieceLabelRightOfVerticalGrainline", "db/dbb/classTST__VPiece.html#a540373d87a58409b3064b35ee1c8d888", null ],
-    [ "SameLabelLinesComparesFormatting", "db/dbb/classTST__VPiece.html#a0c7b5bda52e46886025e4fbab8217645", null ]
+    [ "Issue620", "db/dbb/classTST__VPiece.html#a5dca90ba03e6e4501a6b9eb2db0a8eba", null ]
 ];

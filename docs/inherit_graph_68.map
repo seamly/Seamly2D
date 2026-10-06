@@ -1,4 +1,12 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" title=" " alt="" coords="5,5,161,31"/>
-<area shape="rect" id="node2" href="$d5/d47/classVPE_1_1VPropertyModel.html" title="This is the base model for managing all the properties and passing them to the view." alt="" coords="209,5,368,31"/>
+<area shape="rect" id="node1" title=" " alt="" coords="5,179,101,204"/>
+<area shape="rect" id="node2" href="$de/d09/classVException.html" title="The VException class parent for all exception. Could be use for abstract exception." alt="" coords="183,153,277,179"/>
+<area shape="rect" id="node10" href="$df/ddc/classqmu_1_1QmuParserError.html" title="Error class of the parser." alt="" coords="149,203,311,228"/>
+<area shape="rect" id="node3" href="$de/da9/classVExceptionBadId.html" title="The VExceptionBadId class for exception bad id." alt="" coords="395,5,527,31"/>
+<area shape="rect" id="node4" href="$d1/d99/classVExceptionConversionError.html" title="The VExceptionConversionError class for exception of conversion error." alt="" coords="361,55,560,80"/>
+<area shape="rect" id="node5" href="$d9/d43/classVExceptionEmptyParameter.html" title="The VExceptionEmptyParameter class for exception empty parameter." alt="" coords="359,104,563,129"/>
+<area shape="rect" id="node6" href="$d7/d41/classVExceptionObjectError.html" title="The VExceptionObjectError class for exception object error." alt="" coords="377,153,545,179"/>
+<area shape="rect" id="node7" href="$d3/d58/classVExceptionToolWasDeleted.html" title=" " alt="" coords="361,203,560,228"/>
+<area shape="rect" id="node8" href="$dc/d27/classVExceptionUndo.html" title=" " alt="" coords="396,252,525,277"/>
+<area shape="rect" id="node9" href="$d9/dcf/classVExceptionWrongId.html" title="The VExceptionWrongId class for exception wrong id." alt="" coords="386,301,535,327"/>
 </map>

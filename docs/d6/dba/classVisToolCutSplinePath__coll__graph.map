@@ -1,11 +1,11 @@
 <map id="VisToolCutSplinePath" name="VisToolCutSplinePath">
-<area shape="rect" id="node1" title=" " alt="" coords="329,1527,524,1692"/>
-<area shape="rect" id="node2" href="$db/d76/classVisPath.html" title=" " alt="" coords="249,1313,378,1464"/>
-<area shape="rect" id="node3" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,659,297,1264"/>
-<area shape="rect" id="node4" title=" " alt="" coords="5,262,80,339"/>
-<area shape="rect" id="node5" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,596"/>
-<area shape="rect" id="node6" href="$d3/d85/classVCurvePathItem.html" title=" " alt="" coords="331,864,503,1059"/>
-<area shape="rect" id="node7" title=" " alt="" coords="352,262,499,339"/>
-<area shape="rect" id="node8" href="$d8/dbf/classVScaledEllipse.html" title=" " alt="" coords="527,1328,681,1449"/>
-<area shape="rect" id="node9" title=" " alt="" coords="528,923,691,1000"/>
+<area shape="rect" id="node1" title=" " alt="" coords="329,1512,524,1677"/>
+<area shape="rect" id="node2" href="$db/d76/classVisPath.html" title=" " alt="" coords="249,1299,378,1449"/>
+<area shape="rect" id="node3" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,644,297,1249"/>
+<area shape="rect" id="node4" title=" " alt="" coords="5,255,80,332"/>
+<area shape="rect" id="node5" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,581"/>
+<area shape="rect" id="node6" href="$d3/d85/classVCurvePathItem.html" title=" " alt="" coords="331,849,503,1044"/>
+<area shape="rect" id="node7" title=" " alt="" coords="352,255,499,332"/>
+<area shape="rect" id="node8" href="$d8/dbf/classVScaledEllipse.html" title=" " alt="" coords="527,1313,681,1435"/>
+<area shape="rect" id="node9" title=" " alt="" coords="528,908,691,985"/>
 </map>

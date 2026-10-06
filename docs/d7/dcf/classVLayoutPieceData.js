@@ -5,14 +5,11 @@ var classVLayoutPieceData =
     [ "~VLayoutPieceData", "d7/dcf/classVLayoutPieceData.html#ac29190d92271d73ab4eb318c892a6ea0", null ],
     [ "operator=", "d7/dcf/classVLayoutPieceData.html#a5968ca99d958bb141d9b394d6f700526", null ],
     [ "contour", "d7/dcf/classVLayoutPieceData.html#ae0f394fc4b63cd95e9cd816e0c00d2a1", null ],
-    [ "contourTurnPoints", "d7/dcf/classVLayoutPieceData.html#a690a26b0d0505adbe62fae5f21db571a", null ],
-    [ "grainAxis", "d7/dcf/classVLayoutPieceData.html#a83890e8bc741b41bd538a2e56923afd0", null ],
     [ "grainlinePoints", "d7/dcf/classVLayoutPieceData.html#a38252972145945b9f9169e7b29584b2a", null ],
     [ "layoutAllowance", "d7/dcf/classVLayoutPieceData.html#af36ae32e2c15368c3d268eca26d5f565", null ],
     [ "layoutWidth", "d7/dcf/classVLayoutPieceData.html#a842b3bca7911d0f58292be3ca1776e4e", null ],
     [ "m_cutoutPaths", "d7/dcf/classVLayoutPieceData.html#a3e3548f81f0a787d22a31662d1820821", null ],
     [ "m_internalPaths", "d7/dcf/classVLayoutPieceData.html#a19af223caf54e6cac1bc243e62216edf", null ],
-    [ "m_pieceLetter", "d7/dcf/classVLayoutPieceData.html#aa806206254d1acc07eb25107eb76051f", null ],
     [ "m_tmPattern", "d7/dcf/classVLayoutPieceData.html#a3e6d662f5aa0ab129074cb19d04cb261", null ],
     [ "m_tmPiece", "d7/dcf/classVLayoutPieceData.html#a663d9c5180d765478d8bf504dc2f2dbc", null ],
     [ "mirror", "d7/dcf/classVLayoutPieceData.html#ac028f1955a381593c9c30837720b9f59", null ],
@@ -20,6 +17,5 @@ var classVLayoutPieceData =
     [ "patternInfo", "d7/dcf/classVLayoutPieceData.html#a24e5fd670bea84e7d511f9b9b937194c", null ],
     [ "pieceLabel", "d7/dcf/classVLayoutPieceData.html#a6ec237517ae7e21139f2c4b5b8175b50", null ],
     [ "seamAllowance", "d7/dcf/classVLayoutPieceData.html#a8fa18950be286065806ab2dfb120f361", null ],
-    [ "seamAllowanceTurnPoints", "d7/dcf/classVLayoutPieceData.html#ad898cb11cf5563540e62d020c36b9b20", null ],
     [ "transform", "d7/dcf/classVLayoutPieceData.html#a8ce76b7c3a713569e0a75a89b68b68c6", null ]
 ];

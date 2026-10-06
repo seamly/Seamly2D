@@ -1,13 +1,13 @@
 <map id="VisToolCubicBezier" name="VisToolCubicBezier">
-<area shape="rect" id="node1" title=" " alt="" coords="519,1585,700,1868"/>
-<area shape="rect" id="node2" href="$db/d76/classVisPath.html" title=" " alt="" coords="353,1321,482,1471"/>
-<area shape="rect" id="node3" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,659,297,1264"/>
-<area shape="rect" id="node4" title=" " alt="" coords="5,262,80,339"/>
-<area shape="rect" id="node5" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,596"/>
-<area shape="rect" id="node6" href="$d3/d85/classVCurvePathItem.html" title=" " alt="" coords="331,864,503,1059"/>
-<area shape="rect" id="node7" title=" " alt="" coords="352,262,499,339"/>
-<area shape="rect" id="node8" href="$d8/dbf/classVScaledEllipse.html" title=" " alt="" coords="533,1335,686,1457"/>
-<area shape="rect" id="node9" title=" " alt="" coords="528,923,691,1000"/>
-<area shape="rect" id="node10" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="711,1313,865,1479"/>
-<area shape="rect" id="node11" title=" " alt="" coords="715,923,861,1000"/>
+<area shape="rect" id="node1" title=" " alt="" coords="519,1571,700,1853"/>
+<area shape="rect" id="node2" href="$db/d76/classVisPath.html" title=" " alt="" coords="353,1306,482,1457"/>
+<area shape="rect" id="node3" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,644,297,1249"/>
+<area shape="rect" id="node4" title=" " alt="" coords="5,255,80,332"/>
+<area shape="rect" id="node5" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,581"/>
+<area shape="rect" id="node6" href="$d3/d85/classVCurvePathItem.html" title=" " alt="" coords="331,849,503,1044"/>
+<area shape="rect" id="node7" title=" " alt="" coords="352,255,499,332"/>
+<area shape="rect" id="node8" href="$d8/dbf/classVScaledEllipse.html" title=" " alt="" coords="533,1321,686,1442"/>
+<area shape="rect" id="node9" title=" " alt="" coords="528,908,691,985"/>
+<area shape="rect" id="node10" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="711,1299,865,1464"/>
+<area shape="rect" id="node11" title=" " alt="" coords="715,908,861,985"/>
 </map>

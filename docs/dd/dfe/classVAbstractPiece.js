@@ -18,7 +18,7 @@ var classVAbstractPiece =
     [ "createParallelLine", "dd/dfe/classVAbstractPiece.html#a4f9f76512e6988f3695451acae4427a2", null ],
     [ "Crossing", "dd/dfe/classVAbstractPiece.html#a4fb1f67826507b83bba7a4bb70d9c315", null ],
     [ "EkvPoint", "dd/dfe/classVAbstractPiece.html#a82a226f6158a666575dcfc79070c7e05", null ],
-    [ "Equidistant", "dd/dfe/classVAbstractPiece.html#ad4e9b39db2de7517b333f824b35dc4f9", null ],
+    [ "Equidistant", "dd/dfe/classVAbstractPiece.html#a292f7d4da418ba3514ae7678cb4d0a79", null ],
     [ "getColor", "dd/dfe/classVAbstractPiece.html#a3564e3abe80952e52fe699398598507a", null ],
     [ "getFill", "dd/dfe/classVAbstractPiece.html#ad0d53cc62b26c9b2115fe830e5f082b1", null ],
     [ "getLock", "dd/dfe/classVAbstractPiece.html#a28ca0685609a7983d8bd6b68902ca048", null ],
@@ -53,6 +53,5 @@ var classVAbstractPiece =
     [ "SubPath", "dd/dfe/classVAbstractPiece.html#a9a5200d95094b29d2f1d2f00b6bfe3d7", null ],
     [ "sumTrapezoids", "dd/dfe/classVAbstractPiece.html#a5777b88093be5350bcabe027b5d06843", null ],
     [ "Swap", "dd/dfe/classVAbstractPiece.html#a320f7f7380a9f10c7d141a4528a69baf", null ],
-    [ "turnPointIndices", "dd/dfe/classVAbstractPiece.html#aba2225590933f6770c7244b6ce12101e", null ],
     [ "d", "dd/dfe/classVAbstractPiece.html#a74f7bb0de70b8e99d9b39050469844cd", null ]
 ];

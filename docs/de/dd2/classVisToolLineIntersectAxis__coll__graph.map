@@ -1,11 +1,11 @@
 <map id="VisToolLineIntersectAxis" name="VisToolLineIntersectAxis">
-<area shape="rect" id="node1" title=" " alt="" coords="304,1644,520,1868"/>
-<area shape="rect" id="node2" href="$de/d0e/classVisLine.html" title=" " alt="" coords="233,1313,364,1537"/>
-<area shape="rect" id="node3" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,659,297,1264"/>
-<area shape="rect" id="node4" title=" " alt="" coords="5,262,80,339"/>
-<area shape="rect" id="node5" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,596"/>
-<area shape="rect" id="node6" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="335,879,489,1044"/>
-<area shape="rect" id="node7" title=" " alt="" coords="352,262,499,339"/>
-<area shape="rect" id="node8" href="$d8/dbf/classVScaledEllipse.html" title=" " alt="" coords="550,1365,703,1486"/>
-<area shape="rect" id="node9" title=" " alt="" coords="545,923,708,1000"/>
+<area shape="rect" id="node1" title=" " alt="" coords="304,1629,520,1853"/>
+<area shape="rect" id="node2" href="$de/d0e/classVisLine.html" title=" " alt="" coords="233,1299,364,1523"/>
+<area shape="rect" id="node3" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,644,297,1249"/>
+<area shape="rect" id="node4" title=" " alt="" coords="5,255,80,332"/>
+<area shape="rect" id="node5" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,581"/>
+<area shape="rect" id="node6" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="335,864,489,1029"/>
+<area shape="rect" id="node7" title=" " alt="" coords="352,255,499,332"/>
+<area shape="rect" id="node8" href="$d8/dbf/classVScaledEllipse.html" title=" " alt="" coords="550,1350,703,1471"/>
+<area shape="rect" id="node9" title=" " alt="" coords="545,908,708,985"/>
 </map>

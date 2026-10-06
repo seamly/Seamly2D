@@ -19,14 +19,11 @@ var classEditLabelTemplateDialog =
     [ "SaveTextFormating", "d7/df1/classEditLabelTemplateDialog.html#a0391b073d6576cd3e37ac573a7c7b5b5", null ],
     [ "SetPiece", "d7/df1/classEditLabelTemplateDialog.html#a3989878508ca594d57e8e764188453ac", null ],
     [ "SetTemplate", "d7/df1/classEditLabelTemplateDialog.html#a0a62b7a9366f0ffe3bfe403dcd6459e0", null ],
-    [ "setTemplateFile", "d7/df1/classEditLabelTemplateDialog.html#add144b17fbcc20499d0876ac18d54978", null ],
     [ "SetupControls", "d7/df1/classEditLabelTemplateDialog.html#adf14086781aa51661899167817a587b5", null ],
     [ "ShowLineDetails", "d7/df1/classEditLabelTemplateDialog.html#ab95012e6e237fbc17e4720d240bc687f", null ],
     [ "TabChanged", "d7/df1/classEditLabelTemplateDialog.html#a467532552dbe9b8a35d430f340f6e0ed", null ],
-    [ "updateTemplateFileLabel", "d7/df1/classEditLabelTemplateDialog.html#a553110122c0cd67ee99e356549371e0e", null ],
     [ "m_doc", "d7/df1/classEditLabelTemplateDialog.html#af7cc0fa0ff15e5c70f846d76a7bf3cab", null ],
     [ "m_placeholders", "d7/df1/classEditLabelTemplateDialog.html#a4899fde961c392e5bdbec05c83bac21d", null ],
     [ "m_placeholdersMenu", "d7/df1/classEditLabelTemplateDialog.html#a6ec63028f088239131c9f0e28e9c49e2", null ],
-    [ "m_templateFile", "d7/df1/classEditLabelTemplateDialog.html#adfa9a8f3013e908abcdec98887eec484", null ],
     [ "ui", "d7/df1/classEditLabelTemplateDialog.html#a2d70945148bcb328293bf08221c06939", null ]
 ];

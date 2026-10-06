@@ -1,12 +1,12 @@
 <map id="InternalPathVisual" name="InternalPathVisual">
-<area shape="rect" id="node1" title=" " alt="" coords="505,1717,681,1927"/>
-<area shape="rect" id="node2" href="$db/d76/classVisPath.html" title=" " alt="" coords="353,1409,482,1559"/>
-<area shape="rect" id="node3" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,659,297,1264"/>
-<area shape="rect" id="node4" title=" " alt="" coords="5,262,80,339"/>
-<area shape="rect" id="node5" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,596"/>
-<area shape="rect" id="node6" href="$d3/d85/classVCurvePathItem.html" title=" " alt="" coords="331,864,503,1059"/>
-<area shape="rect" id="node7" title=" " alt="" coords="352,262,499,339"/>
-<area shape="rect" id="node8" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="516,1401,671,1567"/>
-<area shape="rect" id="node9" title=" " alt="" coords="528,923,675,1000"/>
-<area shape="rect" id="node10" href="$df/de1/classVPiecePath.html" title=" " alt="" coords="695,1313,942,1655"/>
+<area shape="rect" id="node1" title=" " alt="" coords="505,1688,681,1897"/>
+<area shape="rect" id="node2" href="$db/d76/classVisPath.html" title=" " alt="" coords="353,1387,482,1537"/>
+<area shape="rect" id="node3" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,644,297,1249"/>
+<area shape="rect" id="node4" title=" " alt="" coords="5,255,80,332"/>
+<area shape="rect" id="node5" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,581"/>
+<area shape="rect" id="node6" href="$d3/d85/classVCurvePathItem.html" title=" " alt="" coords="331,849,503,1044"/>
+<area shape="rect" id="node7" title=" " alt="" coords="352,255,499,332"/>
+<area shape="rect" id="node8" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="516,1379,671,1545"/>
+<area shape="rect" id="node9" title=" " alt="" coords="528,908,675,985"/>
+<area shape="rect" id="node10" href="$df/de1/classVPiecePath.html" title=" " alt="" coords="695,1299,942,1625"/>
 </map>

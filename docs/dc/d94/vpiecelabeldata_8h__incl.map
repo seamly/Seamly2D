@@ -1,12 +1,10 @@
 <map id="src/libs/vpatterndb/floatItemData/vpiecelabeldata.h" name="src/libs/vpatterndb/floatItemData/vpiecelabeldata.h">
-<area shape="rect" id="node1" title=" " alt="" coords="279,5,515,45"/>
-<area shape="rect" id="node2" title=" " alt="" coords="414,167,484,192"/>
-<area shape="rect" id="node3" href="$de/d1f/vpatternlabeldata_8h.html" title=" " alt="" coords="74,93,224,119"/>
-<area shape="rect" id="node9" href="$dc/d76/floatitemdef_8h.html" title=" " alt="" coords="435,93,548,119"/>
-<area shape="rect" id="node4" title=" " alt="" coords="36,240,110,265"/>
-<area shape="rect" id="node5" title=" " alt="" coords="22,167,92,192"/>
-<area shape="rect" id="node6" title=" " alt="" coords="116,167,182,192"/>
-<area shape="rect" id="node7" href="$db/dc1/vabstractfloatitemdata_8h.html" title=" " alt="" coords="207,167,390,192"/>
-<area shape="rect" id="node8" title=" " alt="" coords="221,240,376,265"/>
-<area shape="rect" id="node10" title=" " alt="" coords="508,167,563,192"/>
+<area shape="rect" id="node1" title=" " alt="" coords="181,5,417,45"/>
+<area shape="rect" id="node2" title=" " alt="" coords="287,167,357,192"/>
+<area shape="rect" id="node3" href="$de/d1f/vpatternlabeldata_8h.html" title=" " alt="" coords="96,93,247,119"/>
+<area shape="rect" id="node7" href="$dc/d76/floatitemdef_8h.html" title=" " alt="" coords="337,93,451,119"/>
+<area shape="rect" id="node4" title=" " alt="" coords="5,240,79,265"/>
+<area shape="rect" id="node5" href="$db/dc1/vabstractfloatitemdata_8h.html" title=" " alt="" coords="80,167,263,192"/>
+<area shape="rect" id="node6" title=" " alt="" coords="103,240,258,265"/>
+<area shape="rect" id="node8" title=" " alt="" coords="381,167,436,192"/>
 </map>

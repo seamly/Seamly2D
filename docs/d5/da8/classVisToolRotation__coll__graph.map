@@ -1,14 +1,14 @@
 <map id="VisToolRotation" name="VisToolRotation">
-<area shape="rect" id="node1" title=" " alt="" coords="369,1916,532,2096"/>
-<area shape="rect" id="node2" href="$d7/dba/classVisOperation.html" title=" " alt="" coords="177,1600,375,1853"/>
-<area shape="rect" id="node3" href="$de/d0e/classVisLine.html" title=" " alt="" coords="211,1313,341,1537"/>
-<area shape="rect" id="node4" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,659,297,1264"/>
-<area shape="rect" id="node5" title=" " alt="" coords="5,262,80,339"/>
-<area shape="rect" id="node6" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,596"/>
-<area shape="rect" id="node7" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="335,879,489,1044"/>
-<area shape="rect" id="node8" title=" " alt="" coords="352,262,499,339"/>
-<area shape="rect" id="node9" href="$d8/dbf/classVScaledEllipse.html" title=" " alt="" coords="450,1666,603,1787"/>
-<area shape="rect" id="node10" title=" " alt="" coords="449,1387,612,1464"/>
-<area shape="rect" id="node11" href="$d3/d85/classVCurvePathItem.html" title=" " alt="" coords="627,1629,799,1824"/>
-<area shape="rect" id="node12" title=" " alt="" coords="640,1387,787,1464"/>
+<area shape="rect" id="node1" title=" " alt="" coords="369,1901,532,2081"/>
+<area shape="rect" id="node2" href="$d7/dba/classVisOperation.html" title=" " alt="" coords="177,1585,375,1839"/>
+<area shape="rect" id="node3" href="$de/d0e/classVisLine.html" title=" " alt="" coords="211,1299,341,1523"/>
+<area shape="rect" id="node4" href="$d7/d24/classVisualization.html" title=" " alt="" coords="135,644,297,1249"/>
+<area shape="rect" id="node5" title=" " alt="" coords="5,255,80,332"/>
+<area shape="rect" id="node6" href="$d2/d83/classVContainer.html" title="Manages a collection of geometric objects, pieces, paths, and variables." alt="" coords="104,5,328,581"/>
+<area shape="rect" id="node7" href="$dd/da2/classVScaledLine.html" title=" " alt="" coords="335,864,489,1029"/>
+<area shape="rect" id="node8" title=" " alt="" coords="352,255,499,332"/>
+<area shape="rect" id="node9" href="$d8/dbf/classVScaledEllipse.html" title=" " alt="" coords="450,1651,603,1773"/>
+<area shape="rect" id="node10" title=" " alt="" coords="449,1372,612,1449"/>
+<area shape="rect" id="node11" href="$d3/d85/classVCurvePathItem.html" title=" " alt="" coords="627,1615,799,1809"/>
+<area shape="rect" id="node12" title=" " alt="" coords="640,1372,787,1449"/>
 </map>

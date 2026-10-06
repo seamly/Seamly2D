@@ -10,7 +10,6 @@ var classTST__VAbstractPiece =
     [ "CorrectEquidistantPoints_data", "d6/d89/classTST__VAbstractPiece.html#a1966c29a4719783f27ac64d0c7012e82", null ],
     [ "EquidistantRemoveLoop", "d6/d89/classTST__VAbstractPiece.html#a764ba18746c0fe2d2a5f2c317fb921f5", null ],
     [ "EquidistantRemoveLoop_data", "d6/d89/classTST__VAbstractPiece.html#a9aa245355a7ce712d9b74d3ab4aece74", null ],
-    [ "EquidistantReportsNodeVertices", "d6/d89/classTST__VAbstractPiece.html#afadb68314bbcbe5785f89c44ff9841f6", null ],
     [ "InputPointsCase1", "d6/d89/classTST__VAbstractPiece.html#a5e2398ff68020be204b4b0d4a0a6fc69", null ],
     [ "InputPointsCase2", "d6/d89/classTST__VAbstractPiece.html#adb9a98a85aac65ce6ff5ccbcc908e4b4", null ],
     [ "InputPointsCase3", "d6/d89/classTST__VAbstractPiece.html#a9127589f0687ad70cc34f362413ddb95", null ],
@@ -40,7 +39,5 @@ var classTST__VAbstractPiece =
     [ "PossibleInfiniteClearLoops_data", "d6/d89/classTST__VAbstractPiece.html#a5a90e066f4bb1484a40d2a1dd1694dcf", null ],
     [ "sumTrapezoids", "d6/d89/classTST__VAbstractPiece.html#aad46ddbc436f208067c5898efe4e3117", null ],
     [ "TestCorrectEquidistantPoints", "d6/d89/classTST__VAbstractPiece.html#ab2b698994a0a821eb5fb390dfdd9477f", null ],
-    [ "TestCorrectEquidistantPoints_data", "d6/d89/classTST__VAbstractPiece.html#a84739395df2c3fed69c44b8f7dd91905", null ],
-    [ "TurnPointIndices", "d6/d89/classTST__VAbstractPiece.html#a3b17179d541b42cba326f0418ada316c", null ],
-    [ "TurnPointIndices_data", "d6/d89/classTST__VAbstractPiece.html#ab58c50023ccc93cb030dc73bc7685e11", null ]
+    [ "TestCorrectEquidistantPoints_data", "d6/d89/classTST__VAbstractPiece.html#a84739395df2c3fed69c44b8f7dd91905", null ]
 ];

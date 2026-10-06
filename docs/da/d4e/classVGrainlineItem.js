@@ -12,7 +12,6 @@ var classVGrainlineItem =
     [ "isContained", "da/d4e/classVGrainlineItem.html#a022e04a406a2cb42066bb7d34d879862", null ],
     [ "itemResized", "da/d4e/classVGrainlineItem.html#a097f69aa120a34cb67e15fa0a38fe9e9", null ],
     [ "itemRotated", "da/d4e/classVGrainlineItem.html#a6ae625fa4e74523bbd31a9d95951cf27", null ],
-    [ "length", "da/d4e/classVGrainlineItem.html#a762276830e1f087120c7153b6c02c57f", null ],
     [ "mainLine", "da/d4e/classVGrainlineItem.html#a5c76f6998931920a72c56b9d35481a3b", null ],
     [ "mainShape", "da/d4e/classVGrainlineItem.html#afd4bb22f74283a10facf97a864e9c91c", null ],
     [ "mouseMoveEvent", "da/d4e/classVGrainlineItem.html#ae9d87c2affa5f9add102af357a82c105", null ],
