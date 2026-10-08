@@ -41,8 +41,17 @@ const STRAIGHT_TOLERANCE_MM: f64 = 0.05;
 // A straight run's vertices lie within this distance of its chord. Seamly2D writes
 // lines exactly; a curve sampled this flat would need a radius of kilometres.
 const STRAIGHT_RUN_TOLERANCE_MM: f64 = 0.01;
-// A straight chord or straight run at least this long makes both of its ends turn points.
+// A straight chord or straight run at least this long is a line.
 const STRAIGHT_MIN_LENGTH_MM: f64 = 10.0;
+// A line end is a turn point when its direction change exceeds this many times the
+// change at the next curve vertex. A tangent junction bends about half as much.
+const TANGENT_BREAK_RATIO: f64 = 2.0;
+// A line end is a turn point only above this direction change. On flat curves the
+// vertex angles fall below it, and their ratio is noise.
+const MIN_BREAK_DEG: f64 = 1.0;
+// A single segment shorter than this is a curve chord, not a line. Seamly2D
+// interpolates the start of a tight curve with chords of about 11 mm.
+const SINGLE_SEGMENT_LINE_MM: f64 = 20.0;
 // A direction change above this angle makes a vertex a turn point.
 const TURN_ANGLE_DEG: f64 = 25.0;
 // A dense edge shorter than this is never split to pull a spline back.
@@ -61,6 +70,7 @@ pub struct AstmContour {
     /// Key points, written on the primary layer.
     pub reduced: Vec<Point>,
     /// Parallel to `reduced`: `true` = turn point (layer 2), `false` = curve point (layer 3).
+    /// The ends of an open contour are curve points.
     pub turn: Vec<bool>,
     /// Whether the contour is a closed loop.
     pub closed: bool,
@@ -100,8 +110,9 @@ pub fn build_contour_tagged(points: &[Point], closed: bool, turns: Option<&[bool
     } // if too few vertices
 
     // Step 2: turn points anchor the reduction. Tagged input uses the tags;
-    // untagged input uses sharp direction changes. Both add the ends of every
-    // straight run: a line meets a curve there, even when the tangent barely breaks.
+    // untagged input uses sharp direction changes. Both add each line end where
+    // the tangent breaks, even slightly. The ends of an open polyline anchor it here,
+    // but Step 8 writes them as curve points.
     let turn_flags = |dense: &[Point], tagged: &Option<Vec<bool>>| {
         let mut flags = match tagged {
             Some(t) => {
@@ -178,7 +189,15 @@ pub fn build_contour_tagged(points: &[Point], closed: bool, turns: Option<&[bool
     let (kept, turn) = refine_to_spline(&mut dense, kept, turn, closed);
 
     // Step 7: drop curve points the spline does not need.
-    let (kept, turn) = prune_to_spline(&dense, kept, turn, closed);
+    let (kept, mut turn) = prune_to_spline(&dense, kept, turn, closed);
+
+    // Step 8: an open polyline's ends are curve points. A reader flags a layer 2
+    // point at the end of an internal line as not needed; its spline ends there anyway.
+    if !closed {
+        let last = turn.len() - 1;
+        turn[0] = false;
+        turn[last] = false;
+    } // if open
     let reduced = kept.iter().map(|&i| dense[i]).collect();
 
     Some(AstmContour { dense, reduced, turn, closed })
@@ -286,36 +305,76 @@ fn direction_change_deg(prev: Point, p: Point, next: Point) -> f64 {
     ((ax * bx + ay * by) / (la * lb)).clamp(-1.0, 1.0).acos().to_degrees()
 } // fn direction_change_deg
 
-// @brief Flag both ends of every straight run in `points`.
-// @details A straight run is at least STRAIGHT_MIN_LENGTH_MM long; every vertex lies
-//          within STRAIGHT_RUN_TOLERANCE_MM of the chord. It needs two vertices between
-//          its ends, or one when an end is already a turn point. A single long segment
-//          does not count: a coarse curve interpolation has those too. One inner vertex
-//          alone does not count either: a notch vertex inserted into a curve segment
-//          lies exactly on it. Runs are grown greedily, each from the end of the
-//          previous one; a closed loop is scanned once around from vertex 0.
+// @brief Flag the ends of straight lines where the tangent breaks.
+// @details The contour splits into straight pieces. A piece grows while every vertex
+//          inside stays within STRAIGHT_RUN_TOLERANCE_MM of its chord. A piece at least
+//          STRAIGHT_MIN_LENGTH_MM long is a line; a single segment needs SINGLE_SEGMENT_LINE_MM.
+//          A line end is a turn point when the direction change there exceeds
+//          TANGENT_BREAK_RATIO times the change at the far end of the next piece, and
+//          MIN_BREAK_DEG. A curve that leaves
+//          a line tangentially bends less at the junction than at its next vertex; a corner
+//          bends more. On a coarse curve the two changes are equal, so no curve segment
+//          becomes a line. A next piece with two or more vertices inside is a line, and its
+//          far end says nothing about a curve, so the junction compares against 0.
+//          A closed loop is split from its first known turn point, so no piece starts mid-edge.
 // @param turns Turn points already known, parallel to `points`.
 fn straight_run_ends(points: &[Point], closed: bool, turns: &[bool]) -> Vec<bool> {
     let n = points.len();
     let mut ends = vec![false; n];
-    // Last scan index: a closed loop scans back round to vertex 0 (index n).
+    // Indices below are relative to `first`; a closed loop splits back round to it (index n).
+    let first = if closed { turns.iter().position(|&t| t).unwrap_or(0) } else { 0 };
+    let at = |i: usize| points[(first + i) % n];
     let last = if closed { n } else { n - 1 };
+
+    // Split the contour into straight pieces, each from the end of the previous one.
+    let mut pieces: Vec<(usize, usize)> = Vec::new();
     let mut start = 0;
     while start < last {
-        // Grow the run while every vertex inside stays on the chord.
         let mut end = start + 1;
-        while end < last && is_on_chord(points, start, end + 1) {
+        while end < last && is_on_chord(points, first + start, first + end + 1) {
             end += 1;
-        } // while the run grows
-        let inner = end - start - 1;
-        let anchored = turns[start] || turns[end % n];
-        let is_run = inner >= 2 || (inner == 1 && anchored);
-        if is_run && distance(points[start], points[end % n]) >= STRAIGHT_MIN_LENGTH_MM {
-            ends[start] = true;
-            ends[end % n] = true;
-        } // if long straight run
+        } // while the piece grows
+        pieces.push((start, end));
         start = end;
     } // while vertices remain
+
+    // The piece `step` places after piece j, or None past the end of an open contour.
+    let m = pieces.len() as isize;
+    let piece_at = |j: usize, step: isize| -> Option<(usize, usize)> {
+        let k = j as isize + step;
+        if closed {
+            Some(pieces[k.rem_euclid(m) as usize])
+        } else {
+            (0..m).contains(&k).then(|| pieces[k as usize])
+        } // if closed: wrap
+    };
+
+    for (j, &(a, b)) in pieces.iter().enumerate() {
+        let min_length = if b == a + 1 { SINGLE_SEGMENT_LINE_MM } else { STRAIGHT_MIN_LENGTH_MM };
+        if distance(at(a), at(b)) < min_length {
+            continue;
+        } // if not a line
+        // Each end: (junction, the line's other end, step towards the neighbour piece).
+        for (junction, other, step) in [(a, b, -1), (b, a, 1)] {
+            let Some(next) = piece_at(j, step) else {
+                continue;
+            }; // if open end
+            // The neighbour's far end, and the piece after it.
+            let far = if step > 0 { next.1 } else { next.0 };
+            let break_deg = direction_change_deg(at(other), at(junction), at(far));
+            let next_inner = next.1 - next.0 - 1;
+            let next_deg = match piece_at(j, 2 * step) {
+                Some(after) if next_inner < 2 => {
+                    let beyond = if step > 0 { after.1 } else { after.0 };
+                    direction_change_deg(at(junction), at(far), at(beyond))
+                } // curve neighbour
+                _ => 0.0, // straight neighbour or open end
+            }; // match piece after
+            if break_deg > MIN_BREAK_DEG && break_deg > TANGENT_BREAK_RATIO * next_deg {
+                ends[(first + junction) % n] = true;
+            } // if the tangent breaks
+        } // for each end
+    } // for each piece
     ends
 } // fn straight_run_ends
 

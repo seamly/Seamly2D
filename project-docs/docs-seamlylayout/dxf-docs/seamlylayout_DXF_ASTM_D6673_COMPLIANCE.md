@@ -58,8 +58,14 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 - `spline_deviation()` measures the result; `writer_astm_test.rs` checks every male_shirt contour on layers 84–87.
 - `reduced` is an ordered subset of `dense`, and both start at the same vertex (§4.3.3.1).
 - Turn points come from Seamly2D's `data-turn-points` tag on each path component (see `docs-data/SVG-DATA-ATTRIBUTES.md`). Seamly2D marks a node vertex whose tangent breaks by more than 0.5° (line–line) or 5° (with a curve), any vertex that turns more than 25°, and open ends.
-- Tagged or not, both ends of a straight run are turn points: ≥ 10 mm, every vertex within 0.01 mm of the chord, and ≥ 2 inner vertices (1 when an end is already a turn point). A line meets a curve there, even when the tangent breaks under Seamly2D's 5°. One inner vertex alone does not count: a notch vertex inserted into a curve segment lies exactly on it.
-- No tag (untagged SVG, or tags that do not match the path): turn point = direction change > 25°, an open end, or an end of a straight chord ≥ 10 mm with at least one dense vertex on it. A single long segment is not evidence of a straight line: coarse curve interpolation makes them too.
+- Tagged or not, a line end is a turn point where the tangent breaks, even under Seamly2D's 5°.
+  - Line: every vertex within 0.01 mm of the chord, ≥ 10 mm long. A single segment needs ≥ 20 mm: shorter ones are curve chords (tight curve ends reach about 11 mm).
+  - Break: direction change at the line end > 2 × the change at the next curve vertex, and > 1°. A tangent junction bends about half as much as the next vertex; a coarse curve bends equally at every vertex.
+  - Next piece a line with ≥ 2 inner vertices: compare against 0°.
+  - A closed loop is split into lines from its first known turn point, so no line starts mid-edge.
+  - aw.fyi checks: FrontPanel top edge 2.9° vs 1.0° → turn. FullSleeve hem 1.2° vs 2.0° → curve. Flat curves 0.8° vs 0.2° → curve (below 1°).
+- Open contour ends (internal lines, slits) are curve points, tagged or not. User decision: aw.fyi reports layer 2 points there as not needed. The reader's spline still ends there.
+- No tag (untagged SVG, or tags that do not match the path): turn point = direction change > 25°, or an end of a straight chord ≥ 10 mm with at least one dense vertex on it. A single long segment is not evidence of a straight line: coarse curve interpolation makes them too.
 - All other key points are curve points.
 - Closing repeat vertex removed; group 70 = 1 closes the polyline.
 

@@ -172,10 +172,11 @@ mod tests {
             assert!(p.iter().zip(&v).all(|(a, b)| a <= b));
         }
 
-        // Turn and curve points: 4 + 4 + 2 + 3 key points, all corners or ends here.
+        // Turn and curve points: 4 + 4 + 2 + 3 key points. The corners are turn points;
+        // the two ends of the open internal line are curve points.
         let points_on = |l: &str| body.iter().filter(|e| e.kind == "POINT" && e.layer() == l).count();
-        assert_eq!(points_on("2"), 13);
-        assert_eq!(points_on("3"), 0);
+        assert_eq!(points_on("2"), 11);
+        assert_eq!(points_on("3"), 2);
 
         // Notches: POINT with depth (30) and angle (50); width (39) only when it has one.
         let slit = body.iter().find(|e| e.kind == "POINT" && e.layer() == "4").expect("slit notch");
@@ -259,13 +260,14 @@ mod tests {
         assert!((span(&xs) - 1391.09 * 25.4 / 96.0).abs() < 1.0, "width {}", span(&xs));
         assert!((span(&ys) - 2664.57 * 25.4 / 96.0).abs() < 1.0, "length {}", span(&ys));
 
-        // Seamly2D's data-turn-points tags: the front panel's cut line and sew line
-        // each have 7 turn points (corners, shoulder and side seam joins). The hem and
+        // The front panel's cut line and sew line each have 8 turn points: 7 from
+        // Seamly2D's data-turn-points tags (corners, shoulder and side seam joins), and
+        // the front edge line's end, where the curve leaves it at 2.9°. The hem and
         // neckline joins are smooth, so they are curve points even where the
         // interpolation has long single segments.
         let front = &dxf.blocks.iter().find(|(n, _)| n == "piece_FrontPanel_M").expect("front panel").1;
         let turn_points = front.iter().filter(|e| e.kind == "POINT" && e.layer() == "2").count();
-        assert_eq!(turn_points, 14, "front panel turn points");
+        assert_eq!(turn_points, 16, "front panel turn points");
     }
 
     // @brief Both stand-in reader splines through each contour's key points stay
