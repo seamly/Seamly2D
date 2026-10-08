@@ -144,10 +144,15 @@ mod tests {
     }
 
     #[test]
-    fn open_polyline_ends_are_turn_points() {
-        let c = build_contour(&[Point::new(0.0, 0.0), Point::new(5.0, 0.0), Point::new(10.0, 0.0)], false).expect("contour");
+    fn open_polyline_ends_are_curve_points() {
+        let line = [Point::new(0.0, 0.0), Point::new(5.0, 0.0), Point::new(10.0, 0.0)];
+        let c = build_contour(&line, false).expect("contour");
         assert_eq!(c.reduced, vec![Point::new(0.0, 0.0), Point::new(10.0, 0.0)]);
-        assert_eq!(c.turn, vec![true, true]);
+        assert_eq!(c.turn, vec![false, false]);
+
+        // Seamly2D tags on the ends do not make them turn points.
+        let c = build_contour_tagged(&line, false, Some(&[true, false, true])).expect("contour");
+        assert_eq!(c.turn, vec![false, false]);
     }
 
     #[test]
@@ -499,11 +504,11 @@ mod tests {
         }
     }
 
-    // @brief Closed piece tagged at its four corners only, where lines meet curves
-    //        with tangent breaks too small for Seamly2D to tag.
-    // @details Bottom edge: curve, straight run at y = -2 with pleat vertices, curve.
-    //          Top edge, right to left: curve, then a straight line from x = 100 to the
-    //          corner, with one vertex between. The curve leaves the line at about 1°.
+    // @brief Closed piece tagged at its four corners only.
+    // @details Bottom edge: curve, straight run at y = -2 with pleat vertices, curve. Both
+    //          curves meet the run tangentially. Top edge, right to left: curve, then a
+    //          straight line from x = 100 to the corner, with one vertex between. The curve
+    //          leaves the line at 1.5°, more than twice its next vertex angle of 0.7°.
     // @return Vertices and their corner tags.
     fn lines_meeting_curves() -> (Vec<Point>, Vec<bool>) {
         let mut points = vec![Point::new(0.0, 0.0)];
@@ -530,14 +535,14 @@ mod tests {
     }
 
     #[test]
-    fn straight_run_ends_are_turn_points_with_tags() {
+    fn line_ends_are_turn_points_where_the_tangent_breaks() {
         let (points, tags) = lines_meeting_curves();
         let c = build_contour_tagged(&points, true, Some(&tags)).expect("contour");
         let turns: Vec<Point> = c.reduced.iter().zip(&c.turn).filter(|(_, &t)| t).map(|(p, _)| *p).collect();
         let has = |x: f64, y: f64| turns.iter().any(|p| (p.x - x).abs() < 1e-9 && (p.y - y).abs() < 1e-9);
-        assert!(has(40.0, -2.0) && has(160.0, -2.0), "both ends of the hem straight run: {turns:?}");
+        assert!(!has(40.0, -2.0) && !has(160.0, -2.0), "tangent hem run ends are curve points: {turns:?}");
         assert!(has(100.0, 100.0), "where the top line meets the curve: {turns:?}");
-        assert_eq!(turns.len(), 7, "four corners and three line ends: {turns:?}");
+        assert_eq!(turns.len(), 5, "four corners and one line end: {turns:?}");
         assert!(c.turn.iter().any(|&t| !t), "the curves keep curve points");
         assert!(spline_deviation(&c) <= CURVE_TOLERANCE_MM + 1e-9);
     }
@@ -556,5 +561,33 @@ mod tests {
         circle.insert(1, mid);
         let c = build_contour_tagged(&circle, true, Some(&vec![false; circle.len()])).expect("contour");
         assert!(c.turn.iter().all(|&t| !t), "a smooth circle has only curve points: {:?}", c.turn);
+    }
+
+    // @brief Open polyline: one straight segment of `line_mm` along x, then ten 15 mm
+    //        curve segments. The curve leaves the line at `break_deg` and turns `step_deg`
+    //        at each later vertex.
+    fn single_segment_into_curve(line_mm: f64, break_deg: f64, step_deg: f64) -> Vec<Point> {
+        let mut points = vec![Point::new(0.0, 0.0), Point::new(line_mm, 0.0)];
+        let mut heading = break_deg;
+        for _ in 0..10 {
+            let last = *points.last().unwrap();
+            let h = heading.to_radians();
+            points.push(Point::new(last.x + 15.0 * h.cos(), last.y + 15.0 * h.sin()));
+            heading += step_deg;
+        } // for each curve segment
+        points
+    }
+
+    #[test]
+    fn single_segment_line_end_is_a_turn_point_only_where_the_tangent_breaks() {
+        let junction_turn = |line_mm: f64, break_deg: f64, step_deg: f64| {
+            let points = single_segment_into_curve(line_mm, break_deg, step_deg);
+            let c = build_contour_tagged(&points, false, Some(&vec![false; points.len()])).expect("contour");
+            c.reduced.iter().zip(&c.turn).any(|(p, &t)| t && *p == points[1])
+        };
+        assert!(junction_turn(65.0, 2.9, 1.0), "curve leaves the line at a break");
+        assert!(!junction_turn(65.0, 1.2, 2.0), "curve leaves the line tangentially");
+        assert!(!junction_turn(65.0, 0.8, 0.2), "flat curve: angles below the break floor");
+        assert!(!junction_turn(12.0, 7.4, 2.5), "a short single segment is a curve chord");
     }
 }
