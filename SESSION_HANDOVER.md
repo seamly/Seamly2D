@@ -51,7 +51,7 @@ re-accumulate finished-session narrative in this file.
 
 ### Next steps
 
-1. User: install MSI `packaging\windows\seamly-msid\seamly-x64.msi` (26.10.812); re-export male_shirt DXF-ASTM (R13); run aw.fyi (DXF.19.7, DXF.8).
+1. User: install MSI `packaging\windows\seamly-msi\x64\seamly-x64.msi` (26.10.812); re-export male_shirt DXF-ASTM (R13); run aw.fyi (DXF.19.7, DXF.8).
 2. Still open: Seamly2D.10.6 / DXF.18.5 (built-in SA slit depth check); DXF.3.5 (CLO3D import); DXF.20.
 
 ## 2026-10-05 — Seamly2D.10 + DXF.18: seam allowance width per notch
