@@ -11,7 +11,7 @@ re-accumulate finished-session narrative in this file.
 ### Build break from the `develop` merge
 
 - Merge `9dc09c9e49` restored `MainWindowsNoGUI::exportEPS`, `exportPS`, `convertPdfToPs` bodies (retired in `14e1d8723b`). Build failed C2039.
-- Fix committed: `becb0c7c18` on `run-seamlyLayout`. **Not pushed. Not built.**
+- Fix committed: `becb0c7c18`. Built with `local_build_msi.ps1` (pass) and pushed with DXF.19.
 - `CLAUDE.md`: new section "Merge from Upstream `develop`" (9 steps, retired-code list). Uncommitted; file also holds user edits. User commits it.
 - `git config rerere.enabled true` set in this repo.
 - User decision: no early upstream PR to remove pdftops. Delete the three functions on each merge.
@@ -36,10 +36,11 @@ re-accumulate finished-session narrative in this file.
 
 ### DXF.19 — turn points only where the tangent breaks (implemented)
 
-- Branch `task-dxf-turn-points`, merged into local `run-seamlyLayout`. See `TODO_DXF.md` DXF.19 for rule and checks.
+- Merged `task-dxf-turn-points` (`e2237c75a2`), pushed. See `TODO_DXF.md` DXF.19 for rule and checks.
 - User decision: open contour ends (L8, L11) are curve points, tagged or not.
 - Rule values found on `male_shirt_202610071910.svg`: break > 2 × next vertex angle and > 1°; single segment ≥ 20 mm. A 0.5° floor or 10 mm single segment added 9 false turn points on flat curves and cap chords.
-- `cargo test --workspace`, `ctest --preset debug`: pass.
+- `cargo test --workspace`, `ctest --preset debug`, `local_build_msi.ps1` (`nmake check`, MSI): pass.
+- The build stamped `projectversion.*` and `Info.plist` with 26.10.812. Already dirty before; not committed.
 - DXF.20 filed: Yoke L14 (probably fixed), ShortSleeve pt 31 tag, FullSleeve slit coincidence.
 
 ### Tuck / fold lines (answered, no action)
@@ -50,9 +51,8 @@ re-accumulate finished-session narrative in this file.
 
 ### Next steps
 
-1. `local_build_msi.ps1` on `run-seamlyLayout` (verifies `becb0c7c18` and DXF.19); then push.
-2. User: install MSI; re-export male_shirt DXF-ASTM (R13); run aw.fyi (DXF.19.7, DXF.8).
-3. Still open: Seamly2D.10.6 / DXF.18.5 (built-in SA slit depth check); DXF.3.5 (CLO3D import); DXF.20.
+1. User: install MSI `packaging\windows\seamly-msid\seamly-x64.msi` (26.10.812); re-export male_shirt DXF-ASTM (R13); run aw.fyi (DXF.19.7, DXF.8).
+2. Still open: Seamly2D.10.6 / DXF.18.5 (built-in SA slit depth check); DXF.3.5 (CLO3D import); DXF.20.
 
 ## 2026-10-05 — Seamly2D.10 + DXF.18: seam allowance width per notch
 
