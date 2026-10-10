@@ -70,7 +70,7 @@ PROHIBIT saving dates in the code comments.
 - Add `@return` only when the return semantics require explanation.
 - Add inline comments only for non-obvious logic, invariants, workarounds, or constraints.
 - Keep code briefs and comments terse and minimized.
-- REPEATED INSTRUCTION BECAUSE THIS IS SO IMPORTANT --> PROHIBIT referencing task numbers, TODO items, dates, etc. as they are ephemeral. information.
+- REPEATED INSTRUCTION BECAUSE THIS IS SO IMPORTANT --> PROHIBIT referencing task numbers, TODO items, dates, etc. as they are ephemeral information.
 - Do not narrate control flow line by line.
 - Prefer clearer code over explanatory comments.
 
@@ -85,7 +85,7 @@ All apps use Qt 6.11.1.
 - Code: C++.
 - GUI: Qt 6.11 / QtWidgets.
 - Build: qmake / make / make install.
-- File header:
+- File header (new files only):
 
   - Author: `slspencer`
   - Copyright: `2026 Seamly2D Project`
@@ -120,7 +120,7 @@ All apps use Qt 6.11.1.
 - Code: C++.
 - GUI: Qt 6.11 / QtWidgets.
 - Build: qmake / make / make install.
-- File header:
+- File header (new files only):
 
   - Author: `slspencer`
   - Copyright: `2026 Seamly2D Project`
@@ -404,6 +404,26 @@ Do not leave the fork network.
 - Accumulate all project work here.
 - Merge `develop` into `run-seamlyLayout`.
 - Never merge `run-seamlyLayout` into `develop`.
+
+### Merge from Upstream `develop`
+
+1. `git fetch upstream`; fast-forward `develop` to `upstream/develop`; push `origin develop`.
+2. `git checkout -b task-merge-develop run-seamlyLayout`.
+3. `git merge --no-ff --no-commit develop`.
+4. Review `git diff --cached -- src/` for code this branch removed on purpose.
+5. Resolve conflicts for this branch's intent, not "theirs".
+6. Run `git grep -n "convertPdfToPs\|PDFTOPS"`. Expect no hits.
+7. Build with `packaging\windows\local_build_msi.ps1`. A failure stops the merge.
+8. Commit, merge `--no-ff` into `run-seamlyLayout`, push.
+9. Run full CI: `gh workflow run ci.yml --ref run-seamlyLayout`.
+
+Retired code that `develop` still has:
+
+- `MainWindowsNoGUI::exportEPS`, `exportPS`, `convertPdfToPs` (pdftops), retired in `14e1d8723b`.
+  `develop` restores them whenever it edits nearby lines. Delete them on each merge.
+  Upstream keeps them until the endgame PR (user decision). Do not propose an early upstream PR.
+
+Enable `git config rerere.enabled true` so Git reuses recorded conflict resolutions.
 
 ### Endgame
 

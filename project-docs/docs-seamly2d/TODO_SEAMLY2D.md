@@ -58,8 +58,11 @@ SeamlyLayout measured the width from the cut and sew lines. Where the width chan
 - [x] Seamly2D.10.3 `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`
 - [x] Seamly2D.10.4 Tests: `TST_VPiece::NotchSeamAllowanceWidths`, `TST_SvgComponentTags::NotchGroupCarriesSeamAllowances`
 - [x] Seamly2D.10.5 `local_build_msi.ps1` passes (`nmake check`)
-- [ ] Seamly2D.10.6 User: install the MSI; Layout Mode handoff of a piece with a built-in seam allowance; export DXF-ASTM; check slit depths
-- SeamlyLayout side: DXF.18
+- [ ] Seamly2D.10.6 User: 
+  - [x] install the MSI; 
+  - [x] Layout Mode handoff of a piece with a built-in seam allowance; 
+  - [x] export DXF-ASTM; 
+  - [ ] check slit depths with files generated and checked in SeamlyLayout: DXF.18
 
 ## [ ] Task Seamly2D.9 — Pattern preferences shows the label template file name
 
