@@ -3081,7 +3081,7 @@ Please try to undo the latest operation or fix the broken formula.</source>
     </message>
 </context>
 <context>
-    <name>DialogVariables</name>
+    <name>VariablesDialog</name>
     <message>
         <source>Variables</source>
         <translation>Переменные</translation>
@@ -7130,8 +7130,8 @@ Do you want to save your changes?</source>
         <translation>&lt;b&gt;Инструмент:: — Фиксированный Сплайн:&lt;/b&gt;Выберите первую точку  сплайна</translation>
     </message>
     <message>
-        <source>&lt;b&gt;Tool::Point - On Curve:&lt;/b&gt; Select first point of curve</source>
-        <translation>&lt;b&gt;Инструмент::Точка – На кривой:&lt;/b&gt; Выберите первую точку кривой</translation>
+        <source>&lt;b&gt;Tool::Point - On Curve:&lt;/b&gt; Select curve</source>
+        <translation>&lt;b&gt;Инструмент::Точка – На кривой:&lt;/b&gt; Выберите кривую</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Point - On Spline:&lt;/b&gt; Select spline</source>

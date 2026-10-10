@@ -3066,7 +3066,7 @@ Probeer de laatste bewerking ongedaan te maken of de defecte formule te herstell
     </message>
 </context>
 <context>
-    <name>DialogVariables</name>
+    <name>VariablesDialog</name>
     <message>
         <source>Variables</source>
         <translation>Variabelen</translation>
@@ -7113,8 +7113,8 @@ Wil je de veranderingen opslaan?</translation>
         <translation>&lt;b&gt;Gereedschap::Spline - Vast&lt;/b&gt; Kies eerste punt van spline</translation>
     </message>
     <message>
-        <source>&lt;b&gt;Tool::Point - On Curve:&lt;/b&gt; Select first point of curve</source>
-        <translation>&lt;b&gt;Gereedschap::Punt - Op Kromme:&lt;/b&gt; Kies eerste punt van kromme</translation>
+        <source>&lt;b&gt;Tool::Point - On Curve:&lt;/b&gt; Select curve</source>
+        <translation>&lt;b&gt;Gereedschap::Punt - Op Kromme:&lt;/b&gt; Kies kromme</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Point - On Spline:&lt;/b&gt; Select spline</source>

@@ -3081,7 +3081,7 @@ Silakan coba batalkan operasi terakhir atau perbaiki rumus yang rusak.</translat
     </message>
 </context>
 <context>
-    <name>DialogVariables</name>
+    <name>VariablesDialog</name>
     <message>
         <source>Variables</source>
         <translation>Variabel</translation>
@@ -7130,8 +7130,8 @@ Apakah anda ingin menyimpan perubahan anda?</translation>
         <translation>&lt;b&gt;Tool::Spline - Diperbaiki:&lt;/b&gt; Pilih titik pertama spline</translation>
     </message>
     <message>
-        <source>&lt;b&gt;Tool::Point - On Curve:&lt;/b&gt; Select first point of curve</source>
-        <translation>&lt;b&gt;Tool::Point - Pada Kurva:&lt;/b&gt; Pilih titik pertama kurva</translation>
+        <source>&lt;b&gt;Tool::Point - On Curve:&lt;/b&gt; Select curve</source>
+        <translation>&lt;b&gt;Tool::Point - Pada Kurva:&lt;/b&gt; Pilih kurva</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Point - On Spline:&lt;/b&gt; Select spline</source>

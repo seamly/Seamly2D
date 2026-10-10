@@ -66,7 +66,7 @@ Remove duplicated `static const int ObjectName = 0;` in `svg_generator.cpp:38` a
 - Factor render block of `addSvgFromScene` (195–216) into `QDomDocument renderSceneToDom(QGraphicsScene *scene)`.
 - `addSvgFromScene(scene, item)` with `item != nullptr`: `++m_pieceCount`, `pieceId = "piece-<n>"`. Render once for `<svg>` root attrs; replace its first `<g>` with a fresh piece group: `id=pieceId`, `data-type="piece"`, `data-type-number=m_pieceCount`, `data-parent="pattern-1"`, `data-name` = piece name, `data-letter` if non-empty. Then per direct child of `item`: hide siblings, `renderSceneToDom`, take first `<g>`, `cleanSvg`, skip if empty; `type = child->data(ItemType)`, `n = ++typeCounters[type]` (local `QHash<QString,int>`); set `data-type`, `data-type-number=n`, `data-parent=pieceId`, `id = pieceId+"-"+type+"-"+n`; append via `importNode`. Restore visibility. (`item == nullptr` whole-scene path unchanged.)
 - `mergeSvgDoms()` (59): create `<g id="pattern-1" data-type="pattern" data-type-number="1" data-name=m_patternName>` under the root; append each piece group into it via `importNode` (also fixes current cross-document `appendChild`).
-- Robustness (each pass now has ≥1 empty container): `removeEmptyOriginPath` (141) — remove **all** `M0,0`/empty-`d` paths, remove parent group only if emptied; `removeEmptyGroups` (108) — use `group.parentNode().removeChild(group)` so nested empty groups are removed.
+- Robustness (each pass now has ≥1 empty container): `removeEmptyPaths` (141) — remove **all** `M0,0`/empty-`d` paths, remove parent group only if emptied; `removeEmptyGroups` (108) — use `group.parentNode().removeChild(group)` so nested empty groups are removed.
 
 ### Step 5 — Export callers: `src/app/seamly2d/mainwindowsnogui.cpp`
 

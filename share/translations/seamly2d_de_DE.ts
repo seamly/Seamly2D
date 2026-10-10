@@ -3066,7 +3066,7 @@ Bitte versuchen Sie, den letzten Vorgang rückgängig zu machen oder die fehlerh
     </message>
 </context>
 <context>
-    <name>DialogVariables</name>
+    <name>VariablesDialog</name>
     <message>
         <source>Variables</source>
         <translation>Variablen</translation>
@@ -7109,8 +7109,8 @@ Sollen die Änderungen gespeichert werden?</translation>
         <translation>&lt;b&gt;Werkzeug::Spline - Fixiert:&lt;/b&gt; Wähle den ersten Punkt der Spline</translation>
     </message>
     <message>
-        <source>&lt;b&gt;Tool::Point - On Curve:&lt;/b&gt; Select first point of curve</source>
-        <translation>&lt;b&gt;Werkzeug::Punkt - auf einer Kurve:&lt;/b&gt; Wähle den ersten Punkt der Kurve</translation>
+        <source>&lt;b&gt;Tool::Point - On Curve:&lt;/b&gt; Select curve</source>
+        <translation>&lt;b&gt;Werkzeug::Punkt - auf einer Kurve:&lt;/b&gt; Wähle die Kurve</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Point - On Spline:&lt;/b&gt; Select spline</source>

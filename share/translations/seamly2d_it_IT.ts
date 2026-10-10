@@ -3066,7 +3066,7 @@ Prova ad annullare l&apos;ultima operazione o a correggere la formula non funzio
     </message>
 </context>
 <context>
-    <name>DialogVariables</name>
+    <name>VariablesDialog</name>
     <message>
         <source>Variables</source>
         <translation>Variabili</translation>
@@ -7118,8 +7118,8 @@ Vuoi salvare i cambiamenti?</translation>
         <translation>&lt;b&gt;Strumento::Spline - Corretto:&lt;/b&gt; Seleziona il primo punto della spline</translation>
     </message>
     <message>
-        <source>&lt;b&gt;Tool::Point - On Curve:&lt;/b&gt; Select first point of curve</source>
-        <translation>&lt;b&gt;Strumento::Punto - Sulla curva:&lt;/b&gt; Seleziona il primo punto della curva</translation>
+        <source>&lt;b&gt;Tool::Point - On Curve:&lt;/b&gt; Select curve</source>
+        <translation>&lt;b&gt;Strumento::Punto - Sulla curva:&lt;/b&gt; Seleziona curva</translation>
     </message>
     <message>
         <source>&lt;b&gt;Tool::Point - On Spline:&lt;/b&gt; Select spline</source>
