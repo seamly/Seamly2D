@@ -162,6 +162,7 @@ protected:
     virtual void keyReleaseEvent(QKeyEvent *event) override;
     virtual void showEvent(QShowEvent *event) override;
     virtual void changeEvent(QEvent* event) override;
+    virtual bool eventFilter(QObject *watched, QEvent *event) override;
     virtual void closeEvent(QCloseEvent *event) override;
     virtual void customEvent(QEvent * event) override;
     virtual void CleanLayout() override;
@@ -470,6 +471,7 @@ private:
     QString            GetMeasurementFileName();
 
     void               updateWindowTitle();
+    void               updateHistoryToolTip();
     void               upDateScenes();
     void               updateViewToolbar();
     void               resetPanShortcuts();

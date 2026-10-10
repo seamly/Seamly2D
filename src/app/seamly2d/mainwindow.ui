@@ -142,6 +142,9 @@
     <property name="title">
      <string>History</string>
     </property>
+    <property name="toolTipsVisible">
+     <bool>true</bool>
+    </property>
     <addaction name="history_Action"/>
    </widget>
    <widget class="QMenu" name="view_Menu">

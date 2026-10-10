@@ -137,6 +137,7 @@
 #include <QStringConverter>
 #include <QTimer>
 #include <QToolBar>
+#include <QToolTip>
 #include <QtDebug>
 #include <QtGlobal>
 #include <QUndoStack>
@@ -2048,12 +2049,44 @@ void MainWindow::changeEvent(QEvent *event)
         draftBlockLabel->setText(tr("Draft Block:"));
 
         updateWindowTitle();
+        updateHistoryToolTip();
         initPenToolBar();
         initBasePointComboBox();
         emit pieceScene->LanguageChanged();
     }
     // remember to call base class implementation
     QMainWindow::changeEvent(event);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief eventFilter shows the History tooltip when the user clicks the disabled History menu item.
+ */
+bool MainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    if (watched != ui->history_Menu || event->type() != QEvent::MouseButtonRelease)
+    {
+        return QMainWindow::eventFilter(watched, event);
+    }
+
+    const QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+    const QAction *action = ui->history_Menu->actionAt(mouseEvent->position().toPoint());
+    if (action == ui->history_Action && !action->isEnabled())
+    {
+        QToolTip::showText(mouseEvent->globalPosition().toPoint(), action->toolTip(), ui->history_Menu);
+    }
+    return QMainWindow::eventFilter(watched, event);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief updateHistoryToolTip sets the History tooltip only while History is disabled.
+ */
+void MainWindow::updateHistoryToolTip()
+{
+    ui->history_Action->setToolTip(ui->history_Action->isEnabled()
+                                   ? QString()
+                                   : tr("History is enabled during Draft Mode."));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -6739,6 +6772,11 @@ void MainWindow::createActions()
             &MainWindow::handleExportFinalMeasurementsToCSV);
 
     //History menu
+    updateHistoryToolTip();
+    connect(ui->history_Action, &QAction::enabledChanged, this, &MainWindow::updateHistoryToolTip);
+    // A disabled action emits no signal on click; the filter catches the click to show the tooltip.
+    ui->history_Menu->installEventFilter(this);
+
     connect(ui->history_Action, &QAction::triggered, this, [this](bool checked)
     {
         if (checked)
