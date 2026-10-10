@@ -6,6 +6,16 @@ lives beside the code it governs — for Windows packaging that is
 `packaging/windows/README.md` and `README_MSI_WORKFLOW.md`. Do not
 re-accumulate finished-session narrative in this file.
 
+## 2026-10-10 — `develop` merge
+
+- Merge `000b136737`; fix `62a7ddc069` (`local_build_msi.ps1` text named `scripts\version.sh`).
+- `svg_generator.{h,cpp}`: develop's style taken (snake_case, `///` docs); this branch's logic kept. `removeEmptyOriginPath` → `removeEmptyPaths`.
+- `scripts/version.sh`: deletion kept; `packaging/version.sh` already has develop's #1751 fix.
+- Retired-code grep: no code hits.
+- `local_build_msi.ps1`: pass on 3rd run. Runs 1-2 failed on process timeouts (CollectionTest `jacket2_40-146` stalled 8 min in `applyPatches()`; `windeployqt`'s `qmlimportscanner`). Neither reproduced in direct runs. Passed after reboot. Cause unknown.
+- If a timeout recurs: take a dump of the stuck process while it hangs.
+- Uncommitted user files unchanged: `Info.plist` ×2, `projectversion.*`, `TODO_DXF.md`, `test-seamly-layout-input/*`.
+
 ## 2026-10-08 — Merge-break fix; aw.fyi R13 report review; DXF.19
 
 ### Build break from the `develop` merge
