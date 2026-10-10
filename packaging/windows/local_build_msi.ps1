@@ -49,7 +49,7 @@
 
 .PARAMETER Version
     Project version as YY.M.DDHH, stamped into seamly2d/seamlyme via
-    scripts\version.sh and used as the MSI's ProductVersion.
+    packaging\version.sh and used as the MSI's ProductVersion.
     Default: computed from the current local time, the same formula ci.yml's
     version job uses.
 
@@ -100,7 +100,7 @@ if (-not $Version) {
 }
 Write-Host "version: $Version"
 
-# scripts\version.sh writes the version YY.M.DDHH into these git-tracked files, the
+# packaging\version.sh writes the version YY.M.DDHH into these git-tracked files, the
 # same way every ci.yml build job does. The stamp is reverted (via
 # `git checkout`) once the build succeeds, unless one of these files already
 # carried uncommitted changes before this run (then it is left alone, to not
@@ -114,7 +114,7 @@ $versionStampedFiles = @(
 
 $bash = Get-Command bash -ErrorAction SilentlyContinue
 if (-not $bash) {
-    throw "scripts\version.sh needs bash + perl (Git for Windows ships both) - install Git for Windows."
+    throw "packaging\version.sh needs bash + perl (Git for Windows ships both) - install Git for Windows."
 }
 $versionFilesWereClean = -not (& git -C $repoRoot status --porcelain -- $versionStampedFiles)
 Write-Host "stamping version into projectversion.cpp/.h and Info.plist..."
@@ -296,7 +296,7 @@ if ($SkipTests) {
 }
 Write-Host "MSI OK: packaging\windows\seamly-msi\x64\seamly-x64.msi"
 if ($versionFilesWereClean) {
-    Write-Host "reverting the version stamp (projectversion.cpp/.h, both Info.plist) - scripts\version.sh regenerates it on demand, nothing to keep..."
+    Write-Host "reverting the version stamp (projectversion.cpp/.h, both Info.plist) - packaging\version.sh regenerates it on demand, nothing to keep..."
     & git -C $repoRoot checkout -- $versionStampedFiles
 } else {
     Write-Host "projectversion.cpp/.h and/or Info.plist carried uncommitted changes before this build - not auto-reverting them; check 'git status' for what to keep."
