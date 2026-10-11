@@ -55,6 +55,7 @@
 #include <QLineF>
 #include <QSharedDataPointer>
 #include <QSharedPointer>
+#include <QStringList>
 
 #include "../vlayout/vabstractpiece.h"
 
@@ -114,7 +115,8 @@ public:
     QVector<QLineF>          createNotchLines(const VContainer *data,
                                               const QVector<QPointF> &seamAllowance = QVector<QPointF>(),
                                               bool includeCutlineNotches = true,
-                                              QVector<qreal> *seamAllowanceWidths = nullptr) const;
+                                              QVector<qreal> *seamAllowanceWidths = nullptr,
+                                              QStringList *notchTypes = nullptr) const;
 
     QPainterPath             mainPath(const VContainer *data) const;
     QPainterPath             seamAllowancePath(const VContainer *data) const;

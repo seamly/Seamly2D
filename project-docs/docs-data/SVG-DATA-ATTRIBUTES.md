@@ -56,6 +56,10 @@ The handoff in (1) is a process launch, and both halves of it are pinned by test
 </svg>
 ```
 
+### Capture a handoff
+
+Set `SEAMLYLAYOUT_SAVE_HANDOFF` to an absolute file path before Seamly2D starts. SeamlyLayout inherits Seamly2D's environment and writes the received document there, unchanged, on each `--svg-stdin` import. A relative path or a failed write shows a warning; the import continues. Code: `cxxqt_bridge/src/handoff_capture.rs`. Use: test fixtures from real patterns.
+
 ### Multisize pattern
 
 A pattern with a `.smms` measurement file hands off every size in the size list, at the base height.
@@ -90,9 +94,11 @@ first child of each piece group when it places the piece into a layout sheet
 |---|---|---|
 | `data-type` | every tagged `<g>` | One of `pattern`, `piece-set`, `piece`, `seamline`, `cutline`, `internal_path`, `cut_path`, `grainline`, `notch`, `piece_label`, `pattern_label`. More types may be added later; consumers must ignore unknown types gracefully. |
 | `data-type-number` | every tagged `<g>` | Per-scope 1-based counter for that `data-type`. The pattern is always `1`; pieces count up across the file; component counters reset per piece and per type. |
-| `data-parent` | `piece-set`, `piece` and component groups | For a piece: the pattern group's `id` (`pattern-1`), or its piece-set's `id` in a multisize handoff. For a component: the owning piece's `data-name` (e.g. `Front Bodice`), or the piece's numeric fallback `id` (e.g. `piece-3`) when the piece has no name. The pattern group has no `data-parent` (it is the root). Not read by any SeamlyLayout code today — true parent/child identity is the DOM nesting — so this is a documentation-level cross-reference, not a lookup key. |
+| `data-parent` | `piece-set`, `piece` and component groups | For a piece: the pattern group's `id` (`pattern-1`), or its piece-set's `id` in a multisize handoff. For a component: the owning piece's `data-name` (e.g. `Front Bodice`), or the piece's numeric fallback `id` (e.g. `piece-3`) when the piece has no name. The pattern group has no `data-parent` (it is the root). True parent/child identity is the DOM nesting. The DXF-ASTM graded export reads a piece's value: pieces with the same piece-set id are the sizes of one graded nest. |
 | `data-name` | `pattern`, `piece` | Pattern name, or piece name. Omitted when empty. |
 | `data-letter` | `piece`, `piece-set` | The piece letter, only when one is set on the piece. |
+| `data-quantity` | `piece` | Cut count from the piece label data (Piece Properties > Quantity). Written for every piece. DXF-ASTM `Quantity:` piece text. |
+| `data-on-fold` | `piece` | `true` when the piece label data says the piece is cut on the fold. Omitted otherwise. |
 | `data-measurements` | `pattern` | `individual` or `multisize`. Absent in older handoffs; SeamlyLayout reads absent as `individual`. |
 | `data-sizes` | `pattern` (multisize) | Every handed-off size, comma-separated, in pattern units (e.g. `34,36,38`). |
 | `data-base-size` | `pattern` (multisize) | Base size of the `.smms` file, in pattern units. |
@@ -101,6 +107,7 @@ first child of each piece group when it places the piece into a layout sheet
 | `data-grainline-angle` | `piece` | Grain direction in degrees, counter-clockwise as seen on screen (Qt `QLineF::angle()`); `90` = grain points up. Written with 4 decimals. Present whenever the piece has a grain rotation, **also when the grainline is hidden**, so SeamlyLayout can still orient the piece. Before that transform, a grainline without top and bottom anchor points always points up: an angle in (180°, 360°) is written as the angle 180° less. Includes any Seamly2D layout transform (rotation, mirror). Omitted when the piece has no grain rotation. |
 | `data-turn-points` | `seamline`, `cutline`, `internal_path`, `cut_path` | Turn points of the component's path: space-separated, 0-based vertex indices into its `d`, counting each `M` and `L` end point. A turn point is a vertex where the tangent breaks: a piece node or curve end whose tangents differ by more than 0.5° where two straight lines meet, or more than 5° where a curve meets a line or curve, a direction change above 25°, or an open-path end. All other vertices are curve points. Empty value = no turn points (a smooth closed loop). Omitted when Seamly2D does not know the node vertices; SeamlyLayout then detects turn points from the geometry. Read by the DXF-ASTM export (D6673 layers 2 and 3). |
 | `data-seam-allowances` | `notch` | Seam allowance width in mm at each notch, space-separated, one value per notch subpath in `d` order, 2 decimals. The width is the wider of the notch node's before and after widths, the piece width when the node sets none. Present also for a built-in seam allowance. `0.00` = the piece has no seam allowance. Omitted when unknown. DXF-ASTM slit depth = half the width. |
+| `data-notch-type` | `notch` | Seamly2D notch type at each notch, space-separated, one value per notch subpath in `d` order: `slit`, `tNotch`, `uNotch`, `vInternal`, `vExternal`, `castle`, `diamond`. Omitted when unknown. The drawn shape stays in `d`; DXF-ASTM writes every notch as a slit. |
 
 ## `id` scheme
 
@@ -135,6 +142,8 @@ All ids are unique and XML-valid by construction. **Breaking change vs. pre-cont
 - **`grainline`** — grainline arrow geometry.
 - **`data-turn-points`** — Seamly2D knows which vertices are nodes; the interpolated polyline alone does not. A coarse curve interpolation has long single segments, so geometry cannot tell them from straight lines. Producer: `VAbstractPiece::turnPointIndices()` (`src/libs/vlayout/vabstractpiece.cpp`), with node vertices from `VPiecePath::pathNodeVertices()` and `VAbstractPiece::Equidistant()`. Consumer: `astm_contour::build_contour_tagged` (`seamly_svg2ezdxf`). The indices stay valid through SeamlyLayout's transform baking, which maps path segments 1:1.
 - **`data-seam-allowances`** — a built-in seam allowance has no sew line, so SeamlyLayout cannot measure the width. Producer: `VPiece::createNotchLines()` (width per line, `VAbstractPiece::MaxLocalSA`), `VLayoutPiece::createNotchesItem()`. Consumer: `converter::notch_polylines`, `astm_notch::build_notches` (`seamly_svg2ezdxf`). A list whose length differs from the subpath count is ignored.
+- **`data-quantity` / `data-on-fold`** — piece data, so the DXF-ASTM export no longer parses a "Cut N" label line. Producer: `VPieceLabelData::GetQuantity()` / `IsOnFold()` via `VLayoutPiece::Create()`. Consumer: `converter::quantity_from_piece` (`seamly_svg2ezdxf`): even N → `N/2,N/2`, odd N → `N,0`, on fold → `N,0`. The label line is the fallback for an SVG without `data-quantity`.
+- **`data-notch-type`** — the notch type Seamly2D drew. Producer: `VPiece::createNotchLines()` (type per line), `VLayoutPiece::createNotchesItem()`. SeamlyLayout keeps it on the notch group through layout and export. DXF-ASTM ignores it: every notch is a layer 4 slit.
 - **`piece_label` / `pattern_label`** — the on-piece label text blocks. One `<text>` element per label line (or one `<path>` per line in text-as-paths mode); per-line bold/italic, alignment, middle-eliding to the label width, mirroring and rotation are preserved in either mode.
 - Counters are per SvgGenerator instance: one instance = one file = one pattern.
 

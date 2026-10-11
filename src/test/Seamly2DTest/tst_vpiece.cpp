@@ -807,3 +807,47 @@ void TST_VPiece::NotchSeamAllowanceWidths() const
     }
     QCOMPARE(VLayoutPiece::Create(piece, data.data()).getNotchSeamAllowances(), widths);
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief NotchTypesFollowNodes checks that every notch line gets the type of its node, and that layout piece data
+ * keeps it.
+ */
+void TST_VPiece::NotchTypesFollowNodes() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    const VPiece piece = concaveDiamondNotchPiece(data.data());
+    QStringList types;
+    const QVector<QLineF> notches = piece.createNotchLines(data.data(), piece.seamAllowancePoints(data.data()),
+                                                           true, nullptr, &types);
+
+    QVERIFY(notches.size() > 1);
+    QCOMPARE(types.size(), notches.size());
+    for (const QString &type : std::as_const(types))
+    {
+        QCOMPARE(type, QStringLiteral("diamond"));
+    }
+    QCOMPARE(VLayoutPiece::Create(piece, data.data()).getNotchTypes(), types);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief LayoutPieceKeepsQuantityAndFold checks that the layout piece keeps the label data cut count and fold flag.
+ */
+void TST_VPiece::LayoutPieceKeepsQuantityAndFold() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    VPiece piece = squareSlitPiece(data.data(), false, QString());
+    piece.GetPatternPieceData().SetQuantity(4);
+    piece.GetPatternPieceData().SetOnFold(true);
+
+    const VLayoutPiece layoutPiece = VLayoutPiece::Create(piece, data.data());
+    QCOMPARE(layoutPiece.getQuantity(), 4);
+    QVERIFY(layoutPiece.isOnFold());
+}

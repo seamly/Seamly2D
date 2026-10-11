@@ -2,6 +2,18 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task Layout.66 — Seamly2D producer attributes (completed 2026-10-11)
+
+`data-material` moved to Seamly2D.7 / Layout.15.
+
+- [x] Layout.66.1 Seamly2D: piece `data-quantity` (every piece), `data-on-fold="true"`; notch `data-notch-type`, one type per notch subpath (`VPiece::createNotchLines`, `VLayoutPiece`, `SvgGenerator`)
+- [x] Layout.66.2 SeamlyLayout: `converter::quantity_from_piece`. `data-quantity` first, else the "Cut N" label line. Even N → `N/2,N/2`; odd N or on the fold → `N,0`
+- [x] Layout.66.3 `data-notch-type` kept on the notch group; DXF-ASTM still writes every notch as a slit (user decision)
+- [x] Layout.66.4 Tests: `TST_SvgComponentTags::NotchGroupCarriesNotchTypes`, `PieceCarriesQuantityAndFold`; `TST_VPiece::NotchTypesFollowNodes`, `LayoutPieceKeepsQuantityAndFold`; `data_quantity_comes_before_the_label_line`, `piece_on_fold_counts_every_cut_as_right`
+- [x] Layout.66.5 Docs: `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`, compliance doc "Quantity" and "Known producer gaps"
+- Verified: `cargo test --workspace`, `ctest --preset debug`, `local_build_msi.ps1` (`nmake check`, MSI 26.10.1115).
+- Open question for the user: on-fold quantity `N,0`.
+
 ## Task DXF.20 — Low-priority report advisories (completed 2026-10-10)
 
 From the `male_shirt_R13_202610071908.dxf` report. Checked on the `male_shirt_R13_202610101837.dxf` report.

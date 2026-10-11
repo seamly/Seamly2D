@@ -457,11 +457,15 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
     layoutPiece.setCutoutPaths(convertInternalPaths (piece, pattern, true));
     // Clip cutline notches to the cutline, as the canvas does.
     QVector<qreal> notchSeamAllowances;
-    const QVector<QLineF> notches = piece.createNotchLines(pattern, seamAllowance, true, &notchSeamAllowances);
-    layoutPiece.setNotches(notches, notchSeamAllowances);
+    QStringList notchTypes;
+    const QVector<QLineF> notches = piece.createNotchLines(pattern, seamAllowance, true, &notchSeamAllowances,
+                                                           &notchTypes);
+    layoutPiece.setNotches(notches, notchSeamAllowances, notchTypes);
     layoutPiece.SetName(piece.GetName());
-    // Keep the piece letter so the SVG exporter can emit it as the data-letter attribute.
+    // Keep the piece letter, cut count and fold flag for the SVG exporter's data-* attributes.
     layoutPiece.setPieceLetter(piece.GetPatternPieceData().GetLetter());
+    layoutPiece.setQuantity(piece.GetPatternPieceData().GetQuantity());
+    layoutPiece.setOnFold(piece.GetPatternPieceData().IsOnFold());
 
     // Very important to set main path first!
     if (layoutPiece.createMainPath().isEmpty() && layoutPiece.createAllowancePath().isEmpty())
@@ -518,6 +522,44 @@ QString VLayoutPiece::getPieceLetter() const
 void VLayoutPiece::setPieceLetter(const QString &letter)
 {
     d->m_pieceLetter = letter;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getQuantity returns the cut count from the piece label data.
+ */
+int VLayoutPiece::getQuantity() const
+{
+    return d->m_quantity;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setQuantity stores the cut count for the SVG exporter (data-quantity attribute).
+ * @param quantity cut count from VPieceLabelData::GetQuantity().
+ */
+void VLayoutPiece::setQuantity(int quantity)
+{
+    d->m_quantity = quantity;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief isOnFold returns true when the piece label data says the piece is cut on the fold.
+ */
+bool VLayoutPiece::isOnFold() const
+{
+    return d->m_onFold;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setOnFold stores the fold flag for the SVG exporter (data-on-fold attribute).
+ * @param onFold fold flag from VPieceLabelData::IsOnFold().
+ */
+void VLayoutPiece::setOnFold(bool onFold)
+{
+    d->m_onFold = onFold;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1025,14 +1067,17 @@ QVector<QLineF> VLayoutPiece::getNotches() const
 /**
  * @brief setNotches sets the notch lines of a piece with a seam allowance.
  * @param seamAllowanceWidths seam allowance width in pixels per notch line. Any other count is dropped.
+ * @param notchTypes notch type per notch line (notchTypeToString()). Any other count is dropped.
  */
-void VLayoutPiece::setNotches(const QVector<QLineF> &notches, const QVector<qreal> &seamAllowanceWidths)
+void VLayoutPiece::setNotches(const QVector<QLineF> &notches, const QVector<qreal> &seamAllowanceWidths,
+                              const QStringList &notchTypes)
 {
     if (hasSeamAllowance())
     {
         d->notches = notches;
         d->notchSeamAllowances = seamAllowanceWidths.size() == notches.size() ? seamAllowanceWidths
                                                                                : QVector<qreal>();
+        d->notchTypes = notchTypes.size() == notches.size() ? notchTypes : QStringList();
     }
 }
 
@@ -1044,6 +1089,16 @@ void VLayoutPiece::setNotches(const QVector<QLineF> &notches, const QVector<qrea
 QVector<qreal> VLayoutPiece::getNotchSeamAllowances() const
 {
     return d->notchSeamAllowances;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getNotchTypes returns the notch type per notch line.
+ * @return parallel to getNotches(); empty when unknown.
+ */
+QStringList VLayoutPiece::getNotchTypes() const
+{
+    return d->notchTypes;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1255,6 +1310,8 @@ QGraphicsItem *VLayoutPiece::GetItem(bool textAsPaths) const
     QGraphicsPathItem *item = new QGraphicsPathItem();
     item->setData(PieceItemData::ObjectName, GetName());
     item->setData(PieceItemData::PieceLetter, getPieceLetter());
+    item->setData(PieceItemData::Quantity, getQuantity());
+    item->setData(PieceItemData::OnFold, isOnFold());
 
     qreal grainAngle = 0;
     if (grainlineAngle(grainAngle))
@@ -1546,6 +1603,11 @@ void VLayoutPiece::createNotchesItem(QGraphicsItem *parent) const
             widths.append(QString::number(FromPixel(width, Unit::Mm), 'f', 2));
         }
         item->setData(PieceItemData::SeamAllowances, widths.join(QLatin1Char(' ')));
+    }
+    // One type per notch line, in the same order.
+    if (!d->notchTypes.isEmpty())
+    {
+        item->setData(PieceItemData::NotchTypes, d->notchTypes.join(QLatin1Char(' ')));
     }
     item->setPen(QPen(color, lineWeight, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 }

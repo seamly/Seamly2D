@@ -9,6 +9,7 @@
 //!          to various DXF formats (e.g., DXF-ASTM via ezdxf2dxfastm).
 
 mod astm_contour;
+mod astm_grading;
 mod astm_notch;
 mod converter;
 mod drawing;
@@ -21,11 +22,16 @@ mod utils;
 mod converter_test;
 #[cfg(test)]
 mod astm_piece_test;
+#[cfg(test)]
+mod astm_grading_test;
 
 pub use converter::{SvgToEzdxfOptions, svg_to_ezdxf};
-pub use astm_contour::{build_contour, spline_deviation, spline_points, AstmContour, CURVE_TOLERANCE_MM};
+pub use astm_contour::{build_contour, grade_contours, spline_deviation, spline_points, AstmContour, CURVE_TOLERANCE_MM};
+pub use astm_grading::grade_drawing;
 pub use astm_notch::{build_notches, seam_allowance_at, Notch, NotchKind};
-pub use drawing::{Annotation, Block, Drawing, DxfVersion, MissingPieceData, DEFAULT_MATERIAL};
+pub use drawing::{
+    Annotation, Block, BlockGrading, Drawing, DxfVersion, GradeRule, GradeRuleTable, MissingPieceData, RuleText, DEFAULT_MATERIAL,
+};
 pub use entities::{Arc, Circle, DxfPoint, Entity, Line, Point, Polyline, Text};
 pub use error::{Result, SvgToEzdxfError};
 pub use utils::{detect_corners, invert_y_axis, parse_float_attr, parse_length_attr, sanitize_ascii, sanitize_block_name, MM_PER_PX};

@@ -67,6 +67,8 @@ Handoff shape: see `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`, "Multisize p
 - [ ] Layout.38 Tests
   - [x] Layout.38.1 Rust: set hoist, centring, set bbox, set outline, marker count = pieces × sizes (synthetic fixture `MULTISIZE_HANDOFF_SVG`)
   - [ ] Layout.38.2 Real multisize handoff fixture: export from a `.sm2d` + `.smms` pattern in the running app, save to `crates/cxxqt_bridge/test_data/`, add an end-to-end test
+    - [x] Layout.38.2.1 `SEAMLYLAYOUT_SAVE_HANDOFF=<absolute path>`: `import_svg_document` writes the received SVG there (`handoff_capture.rs`)
+    - [ ] Layout.38.2.2 User: capture the handoff of `HJA.sm2d` + its `.smms`; then add the fixture and an end-to-end test
   - [ ] Layout.38.3 Check in the running apps: Seamly2D Layout Mode with a multisize pattern; SeamlyLayout Nested and Marker
 - [x] Layout.39 Doxygen briefs + inline comments on touched functions; document both layouts in the SeamlyLayout docs
 
@@ -85,11 +87,18 @@ Handoff shape: see `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`, "Multisize p
 See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
 
 - [ ] Layout.61 Grading: grade rule identifiers (`# n` text), graded nests (one block per size, `Size Name:`), grade reference line (layer 5), grade rule table file
+  - [x] Layout.61.1 Trigger: DXF-ASTM export from the "All sizes" tab of a multisize layout; the handoff DOM goes to `do_export_dxf` (`DxfGradingSource`)
+  - [x] Layout.61.2 `astm_contour::grade_contours`: same key points in every size, each size within 0.25 mm
+  - [x] Layout.61.3 `astm_grading::grade_drawing`: nests in size order, rules in draft space, rigid fit into the layout, layer 5 line, `# n` texts; ungradable piece → sample size only + export warning
+  - [x] Layout.61.4 Writer: graded size blocks without layers 2/3/4; `Sample Size:` and `Grade Rule Table:` style text; `.rul` file (`grade_rule_file.rs`)
+  - [x] Layout.61.5 Tests: `astm_grading_test.rs`, `writer_astm_test.rs` graded tests, `multisize_layout_exports_graded_nests`
+  - [x] Layout.61.6 Compliance doc "Grading"
+  - [ ] Layout.61.7 User: export a multisize pattern from "All sizes" as DXF-ASTM; check it in aw.fyi (DXF.8.4) and one CAD reader
 - Layout.62 Moved to Layout.16: mirror line (layer 6) needs Seamly2D fold lines (Seamly2D.8)
 - [ ] Layout.63 Drill holes (layer 13), with diameter (group 30) - not implemented in Seamly2D yet so this must wait
 - [ ] Layout.64 Stripe and plaid reference lines (layers 9, 10) - not implemented in Seamly2D yet so this must wait
 - [x] Layout.65 Notches reach the DXF as layer 4 slits, half the seam allowance deep (done, see `TODO_COMPLETED.md`)
-- [ ] Layout.66 Seamly2D producer attributes: `data-quantity` (right/left), `data-on-fold`, `data-notch-type` — replaces label parsing and notch-shape inference. `data-material` moved to Seamly2D.7 / Layout.15
+- [x] Layout.66 Seamly2D producer attributes (done, see `TODO_COMPLETED.md`)
 
 ## [ ] Task Layout.15 — Layout by material
 

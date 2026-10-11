@@ -34,6 +34,52 @@ pub struct Annotation {
 // @brief `Material:` value until the handoff SVG carries a per-piece material.
 pub const DEFAULT_MATERIAL: &str = "Fabric";
 
+// @brief A `# n` grade rule identifier text (D6673 §4.3.1.4), written in the sample size block.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RuleText {
+    // XY of the graded point or notch base the text belongs to.
+    pub position: Point,
+    // Layer of that point: 1, 4, 8, 11 or 14.
+    pub layer: &'static str,
+    // Grade rule identifier, a key of `GradeRuleTable::rules`.
+    pub rule: i32,
+}
+
+// @brief Grade data of one block in a graded nest (D6673 §4.3.1.5).
+#[derive(Debug, Clone, PartialEq)]
+pub struct BlockGrading {
+    // Grade reference line (layer 5): start and end. Every block of the nest has one.
+    pub reference_line: (Point, Point),
+    // True for the sample size block. Only it carries layers 2, 3 and 4, the full
+    // piece system text, and the `# n` texts.
+    pub sample: bool,
+    // `# n` texts; empty for a graded size block.
+    pub rule_texts: Vec<RuleText>,
+}
+
+// @brief One DELTA grade rule (D6673 §4.4.2).
+#[derive(Debug, Clone, PartialEq)]
+pub struct GradeRule {
+    // Grade rule identifier, written as `# n` text.
+    pub id: i32,
+    // X and Y growth from the sample size, one pair per size in `GradeRuleTable::sizes`
+    // order, in DXF units. The sample size pair is (0, 0).
+    pub deltas: Vec<(f64, f64)>,
+}
+
+// @brief Grade rule table of a graded export, written as the `.rul` file beside the DXF.
+#[derive(Debug, Clone, PartialEq, Default)]
+pub struct GradeRuleTable {
+    // Table name: `Grade Rule Table:` style text and the file's `GRADE RULE TABLE:`.
+    pub name: String,
+    // Sample size name: `Sample Size:` style text.
+    pub sample_size: String,
+    // Every size, in grading order.
+    pub sizes: Vec<String>,
+    // Rules, in identifier order.
+    pub rules: Vec<GradeRule>,
+}
+
 // @brief Block definition: one pattern piece.
 //
 // `entities` holds the generic conversion of every SVG element. The ASTM fields
@@ -46,7 +92,9 @@ pub struct Block {
     pub entities: Vec<Box<dyn Entity>>,
     // `Piece Name:` system text (piece `data-name`, else the block name).
     pub piece_name: String,
-    // `Quantity:` system text in "R,L" form, when the piece label states it.
+    // Piece `data-parent`: the piece-set id in a multisize handoff. Groups the sizes of one piece.
+    pub parent: Option<String>,
+    // `Quantity:` system text in "R,L" form, from `data-quantity` or a "Cut N" label line.
     pub quantity: Option<String>,
     // `Size Name:` system text: the piece `data-size`, else the pattern sample size.
     pub size: Option<String>,
@@ -66,6 +114,8 @@ pub struct Block {
     pub notches: Vec<Notch>,
     // Annotation text (layer 15).
     pub annotations: Vec<Annotation>,
+    // Graded nest data; None for an ungraded piece.
+    pub grading: Option<BlockGrading>,
 }
 
 impl Block {
@@ -75,6 +125,7 @@ impl Block {
     pub fn new(name: String) -> Self {
         Self {
             piece_name: name.clone(),
+            parent: None,
             name,
             entities: Vec::new(),
             quantity: None,
@@ -87,6 +138,7 @@ impl Block {
             grainline: None,
             notches: Vec::new(),
             annotations: Vec::new(),
+            grading: None,
         }
     } // fn new
 
@@ -102,7 +154,7 @@ impl Block {
 pub struct MissingPieceData {
     // `Piece Name:` system text of the piece.
     pub piece_name: String,
-    // No "Cut N" label line, so no `Quantity:` system text.
+    // No `data-quantity` and no "Cut N" label line, so no `Quantity:` system text.
     pub quantity: bool,
     // No label text (layer 15).
     pub label: bool,
@@ -120,6 +172,8 @@ pub struct Drawing {
     pub modelspace_entities: Vec<Box<dyn Entity>>,
     // Pattern name from the `data-type="pattern"` group, if the SVG has one.
     pub style_name: Option<String>,
+    // Grade rule table of a graded export; None for an ungraded export.
+    pub grade_rule_table: Option<GradeRuleTable>,
 }
 
 impl Drawing {
@@ -132,6 +186,7 @@ impl Drawing {
             blocks: Vec::new(),
             modelspace_entities: Vec::new(),
             style_name: None,
+            grade_rule_table: None,
         }
     }
 

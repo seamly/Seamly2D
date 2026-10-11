@@ -86,6 +86,8 @@ private slots:
     void LayoutNotchesMatchCanvas() const;
     void NotchSeamAllowanceWidths_data() const;
     void NotchSeamAllowanceWidths() const;
+    void NotchTypesFollowNodes() const;
+    void LayoutPieceKeepsQuantityAndFold() const;
 
 private:
     Q_DISABLE_COPY(TST_VPiece)

@@ -430,7 +430,8 @@ QDomDocument SvgGenerator::renderSceneToDom(QGraphicsScene *scene)
 ///          every sibling hidden. Each pass therefore produces exactly one <g> that belongs
 ///          to one known component, which is tagged with the SVG data-* attributes:
 ///          data-type, data-type-number (per-type counter within the piece), data-parent
-///          (the piece name), data-turn-points (path components only) and a name-based
+///          (the piece name), data-turn-points (path components only), data-seam-allowances and
+///          data-notch-type (notch component only) and a name-based
 ///          id ("<type>_<pieceName>", or "<type>_<n>_<pieceName>" for types that can repeat per piece). A piece
 ///          with no usable name falls back to the legacy "<pieceId>-<type>-<n>" id, and a
 ///          name-based id colliding with one already emitted (piece names aren't
@@ -518,11 +519,16 @@ void SvgGenerator::addComponentGroups(QGraphicsScene *scene, QGraphicsItem *item
         {
             component_group.setAttribute("data-turn-points", turn_points.toString());
         }
-        // Notch seam allowance widths, one per notch line.
+        // Notch seam allowance widths and notch types, one per notch line.
         const QVariant seam_allowances = components.at(i)->data(PieceItemData::SeamAllowances);
         if (seam_allowances.isValid())
         {
             component_group.setAttribute("data-seam-allowances", seam_allowances.toString());
+        }
+        const QVariant notch_types = components.at(i)->data(PieceItemData::NotchTypes);
+        if (notch_types.isValid())
+        {
+            component_group.setAttribute("data-notch-type", notch_types.toString());
         }
 
         piece_group.appendChild(piece_doc.importNode(component_group, true));
@@ -539,7 +545,8 @@ void SvgGenerator::addComponentGroups(QGraphicsScene *scene, QGraphicsItem *item
 /// @brief Add a new SVG to the list of SVGs to be merged into a single SVG.
 /// @details When a piece item is given, the piece becomes a <g> element carrying the SVG
 ///          data-* attributes (data-type="piece", data-type-number, data-parent,
-///          data-name, data-letter and data-grainline-angle) and each of the piece's components is rendered
+///          data-name, data-letter, data-quantity, data-on-fold and data-grainline-angle) and each of the piece's
+///          components is rendered
 ///          and tagged individually (see addComponentGroups()). Without an item the
 ///          scene is rendered as-is in a single untagged group (whole-scene exports,
 ///          e.g. draft blocks).
@@ -612,6 +619,15 @@ void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item, c
     setAttribute(piece_group, "data-name", piece_name);
     setAttribute(piece_group, "data-letter", item->data(PieceItemData::PieceLetter).toString());
     setAttribute(piece_group, "data-size", size);
+    const QVariant quantity = item->data(PieceItemData::Quantity);
+    if (quantity.isValid())
+    {
+        piece_group.setAttribute("data-quantity", QString::number(quantity.toInt()));
+    }
+    if (item->data(PieceItemData::OnFold).toBool())
+    {
+        piece_group.setAttribute("data-on-fold", QStringLiteral("true"));
+    }
     const QVariant grain_angle = item->data(PieceItemData::GrainlineAngle);
     if (grain_angle.isValid())
     {
