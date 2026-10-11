@@ -172,11 +172,10 @@ mod tests {
             assert!(p.iter().zip(&v).all(|(a, b)| a <= b));
         }
 
-        // Turn and curve points: 4 + 4 + 2 + 3 key points. The corners are turn points;
-        // the two ends of the open internal line are curve points.
+        // Turn points: 4 + 4 + 3 corners. The straight open internal line declares no points.
         let points_on = |l: &str| body.iter().filter(|e| e.kind == "POINT" && e.layer() == l).count();
         assert_eq!(points_on("2"), 11);
-        assert_eq!(points_on("3"), 2);
+        assert_eq!(points_on("3"), 0);
 
         // Notches: POINT with depth (30) and angle (50); width (39) only when it has one.
         let slit = body.iter().find(|e| e.kind == "POINT" && e.layer() == "4").expect("slit notch");
@@ -245,8 +244,15 @@ mod tests {
             assert_eq!(l84.len(), 1, "{name}: one boundary validation polyline");
             assert!(l1[0] < l84[0] || l1[0] == l84[0], "{name}: layer 84 holds every layer 1 vertex");
             assert_eq!(polyline_sizes(body, "14").len(), polyline_sizes(body, "87").len(), "{name}: layer 87 mirrors layer 14");
-            // Turn and curve points equal the key points of every primary polyline.
-            let key_points: usize = ["1", "8", "11", "14"].iter().map(|l| polyline_sizes(body, l).iter().sum::<usize>()).sum();
+            // Turn and curve points equal the key points of every contour that declares them.
+            let block = drawing.blocks.iter().find(|b| &b.name == name).expect("block in drawing");
+            let key_points: usize = block.boundary.iter()
+                .chain(&block.sew_lines)
+                .chain(&block.internal_lines)
+                .chain(&block.cutouts)
+                .filter(|c| c.declares_points())
+                .map(|c| c.reduced.len())
+                .sum();
             let declared = body.iter().filter(|e| e.kind == "POINT" && (e.layer() == "2" || e.layer() == "3")).count();
             assert_eq!(declared, key_points, "{name}: layers 2 and 3 declare every key point once");
         }

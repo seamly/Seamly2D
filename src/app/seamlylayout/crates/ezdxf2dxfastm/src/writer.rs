@@ -226,7 +226,8 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
     let contours = std::iter::once(boundary)
         .chain(&block.sew_lines)
         .chain(&block.internal_lines)
-        .chain(&block.cutouts);
+        .chain(&block.cutouts)
+        .filter(|c| c.declares_points());
     for contour in contours {
         for (p, &turn) in contour.reduced.iter().zip(&contour.turn) {
             encode_dxf_point(writer, &DxfPoint::new(if turn { "2" } else { "3" }, *p))?;

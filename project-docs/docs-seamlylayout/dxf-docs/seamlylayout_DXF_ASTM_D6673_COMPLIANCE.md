@@ -65,6 +65,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
   - A closed loop is split into lines from its first known turn point, so no line starts mid-edge.
   - aw.fyi checks: FrontPanel top edge 2.9° vs 1.0° → turn. FullSleeve hem 1.2° vs 2.0° → curve. Flat curves 0.8° vs 0.2° → curve (below 1°).
 - Open contour ends (internal lines, slits) are curve points, tagged or not. User decision: aw.fyi reports layer 2 points there as not needed. The reader's spline still ends there.
+- A straight open line (2 key points: pleat line, slit) writes nothing on layers 2 and 3. aw.fyi flags its ends as not needed, as turn points and as curve points. Slit ends are never turn points (user decision). `AstmContour::declares_points`.
 - No tag (untagged SVG, or tags that do not match the path): turn point = direction change > 25°, or an end of a straight chord ≥ 10 mm with at least one dense vertex on it. A single long segment is not evidence of a straight line: coarse curve interpolation makes them too.
 - All other key points are curve points.
 - Closing repeat vertex removed; group 70 = 1 closes the polyline.
@@ -100,6 +101,18 @@ Seamly2D sends no source data for these. Tracked in `TODO_SEAMLYLAYOUT.md`.
 ## Known producer gaps
 
 - No `data-quantity`, `data-on-fold`, `data-material` or `data-notch-type` attributes; quantity is inferred; material is always `Fabric`.
+
+## aw.fyi results
+
+Reports live beside the DXF files in `test-seamly-layout-input/`.
+
+| Report | Departures | Open findings |
+|---|---|---|
+| `male_shirt_R13_202610071908.dxf` | 2 | FrontPanel junction missing turn point; FullSleeve open line ends as turn points (DXF.19) |
+| `male_shirt_R13_202610101837.dxf` | 1 | FullSleeve open line ends as curve points (DXF.21); FrontPanel L1 junction "should be curve" while L14 agrees (DXF.22) |
+| `male_shirt_R12_202610101837.dxf` | 2 | As R13, plus "File is not DXF R13" (expected for R12) |
+
+Advisories in the 2026-10-10 report: 4 pieces with no densified points (straight-sided pieces); FullSleeve hem turn point and ShortSleeve L14 pt 31 "maybe". Notch depths, curve tolerance and validation spans pass.
 
 ## Tests
 

@@ -25,38 +25,44 @@ Reference: `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
 | FrontPanel_M: layer 2 misses 1 of 14 corners (top edge, where a line meets a curve at ~3°); report on `male_shirt_R13_202610041815.dxf` | departure | DXF.15 (done, see `TODO_COMPLETED.md`) |
 | FullSleeve_M: 10 of 80 points miscategorized, on a straight segment (hem straight run between curves); FrontPanel_M 1 point | departure | DXF.16 (done, see `TODO_COMPLETED.md`) |
 | ShortSleeve_M: 1 point may be miscategorized | advisory | DXF.16; re-check in DXF.8 |
-| FrontPanel_M L1 + L14: line→curve junction not a turn point (DXF.15 repeat); report on `male_shirt_R13_202610071908.dxf` | departure | DXF.19 |
-| FullSleeve_M: 10 L2 points at pleat (L8) and slit (L11) ends "not needed"; 2 hem run ends "should be curve" (DXF.16 repeat) | departure | DXF.19 |
-| CollarBaseInterface_M, CollarBase_M: turn point on a 1.7° curve | advisory | DXF.19 |
-| Yoke_M L14: turn point mid straight edge | advisory | DXF.20.1 |
-| ShortSleeve_M pt 31: sew-line turn point at hem corner on a straight edge | advisory | DXF.20.2 |
-| FullSleeve_M: slit end 0.21 mm from cut-line turn point | advisory | DXF.20.3 |
+| FrontPanel_M L1 + L14: line→curve junction not a turn point (DXF.15 repeat); report on `male_shirt_R13_202610071908.dxf` | departure | DXF.19 (done, see `TODO_COMPLETED.md`) |
+| FullSleeve_M: 10 L2 points at pleat (L8) and slit (L11) ends "not needed"; 2 hem run ends "should be curve" (DXF.16 repeat) | departure | DXF.19 (done, see `TODO_COMPLETED.md`) |
+| CollarBaseInterface_M, CollarBase_M: turn point on a 1.7° curve | advisory | DXF.19 (done, see `TODO_COMPLETED.md`) |
+| Yoke_M L14: turn point mid straight edge | advisory | DXF.20 (done, see `TODO_COMPLETED.md`) |
+| ShortSleeve_M pt 31: sew-line turn point at hem corner on a straight edge | advisory | DXF.20 (done, see `TODO_COMPLETED.md`) |
+| FullSleeve_M: slit end 0.21 mm from cut-line turn point | advisory | DXF.20 (done, see `TODO_COMPLETED.md`) |
 | Notch depth 2.5 and 1.25 mm; 3 notches on layer 83 (U); rule: every notch a layer 4 slit, half the seam allowance | gap | DXF.17 (done, see `TODO_COMPLETED.md`) |
+| FullSleeve_M: 10 L3 points at pleat (L8) and slit (L11) ends "not needed – definite" (DXF.19 repeat, now as curve points); report on `male_shirt_R13_202610101837.dxf` | departure | DXF.21 |
+| FrontPanel_M L1 pt 3: line→curve junction turn point "should be curve"; L14 pt 39, same geometry, agrees | departure | DXF.22 |
+| FullSleeve_M L1 pt 1 / L14 pt 36: hem turn point "maybe curve"; ShortSleeve_M L14 pt 31 "maybe" | advisory | No action (DXF.20.2) |
 
 Report deviations carry an inch sign but match millimetres. Not verified.
 
 Report on `male_shirt_202610031615.dxf` (after DXF.1): miscategorized points now advisory (3 pieces). DXF.2 still open: FullSleeve_M off layer 84 by 0.5319, layer 87 by 0.9309. New advisory: 5 pieces have no densified points (PlacketUnder_M and 4 others).
 
-## [ ] Task DXF.19 — Turn points only where the tangent breaks
+## [x] Task DXF.21 — A straight internal line declares no turn or curve points
 
-aw.fyi report on `male_shirt_R13_202610071908.dxf` (folder `test-seamly-layout-input/male_shirt_R12_202610071908/`): DXF.15 and DXF.16 repeat. DXF.16 made every straight run end a turn point; a single straight segment did not count as a run.
+aw.fyi report on `male_shirt_R13_202610101837.dxf` (folder `test-seamly-layout-input/male_shirt_202610101837/`): FullSleeve_M, 10 of 80 declared points miscategorized. They are both ends of the 4 pleat lines (L8) and the slit (L11), each a 2-vertex straight line. The 2026-10-07 report flagged the same ends as layer 2 points; this one flags them as layer 3 points. Both "not needed – definite".
 
-- [x] DXF.19.1 `astm_contour.rs` `straight_run_ends`: a line end is a turn point when its direction change > 2 × the next curve vertex's, and > 1°
-- [x] DXF.19.2 A single segment ≥ 20 mm is a line; a run with inner vertices needs ≥ 10 mm
-- [x] DXF.19.3 Closed loop split from its first known turn point
-- [x] DXF.19.4 Open contour ends are curve points (user decision); reverses `open_polyline_ends_are_turn_points`
-- [x] DXF.19.5 Tests: `open_polyline_ends_are_curve_points`, `line_ends_are_turn_points_where_the_tangent_breaks`, `single_segment_line_end_is_a_turn_point_only_where_the_tangent_breaks`; `writer_astm_test.rs` FrontPanel 16 turn points
-- [x] DXF.19.6 Compliance doc "Contour rules"
-- [ ] DXF.19.7 User: re-export male_shirt DXF-ASTM (R13); run aw.fyi (DXF.8)
-- Checked on `male_shirt_202610071910.svg`: FrontPanel junction (71.10 / 71.35) now a turn point; FullSleeve hem end 345.88 / 345.77 now a curve point (252.5 stays a turn point, 1.9° vs 0.3°); L8/L11 ends curve points; one CollarBase and one CollarBaseInterface curve turn point removed; Yoke L14 mid-edge turn point removed. No other change.
+- [x] DXF.21.1 `AstmContour::declares_points`: an open contour with 2 key points writes nothing on layers 2 and 3. Slit ends are never turn points (user decision)
+- [x] DXF.21.2 `writer.rs` `write_astm_block` skips those contours on layers 2 and 3
+- [x] DXF.21.3 Tests: `straight_open_line_declares_no_points`; `writer_astm_test.rs` layer 3 count and male_shirt declared-point count
+- [x] DXF.21.4 Compliance doc "Contour rules"
+- [ ] DXF.21.5 User: re-export male_shirt DXF-ASTM (R13); run aw.fyi (DXF.8)
+- Checked on `male_shirt_202610101837.svg`: FullSleeve_M layer 3 70 → 60 points. No other block changed.
 
-## [ ] Task DXF.20 — Low-priority report advisories
+## [ ] Task DXF.22 — FrontPanel L1 junction: aw.fyi contradicts itself
 
-From the `male_shirt_R13_202610071908.dxf` report.
+Same report. FrontPanel_M top edge, where the straight line meets the curve (L1 71.10, 1068.59; L14 71.35, 1058.59).
 
-- [ ] DXF.20.1 Yoke_M L14 pt 14: turn point mid straight edge. DXF.19 removed the L14 turn point at (588.36, 1680.91); confirm in the next report
-- [ ] DXF.20.2 ShortSleeve_M pt 31: sew-line turn point at the hem corner on a straight edge. Comes from the Seamly2D `data-turn-points` tag; find why Seamly2D tags it
-- [ ] DXF.20.3 FullSleeve_M: slit end (345.67) lies 0.21 mm from the cut-line turn point (345.88); aw.fyi calls them coincident. Seamly2D geometry; decide whether to snap or leave
+| Report | L1 junction | aw.fyi | L14 junction | aw.fyi |
+|---|---|---|---|---|
+| 2026-10-07 | not a key point | turn point missing | curve point | should be turn |
+| 2026-10-10 | turn point | should be curve | turn point | agree |
+
+- Geometry is the same on both lines: tangent break 2.79° (L1) / 2.85° (L14) at the junction, 1.15° / 1.05° at the next dense vertex. Key-point angles 4.86° / 6.29° on both. Arc tangent through the next two key points: 1.57° / 1.62°.
+- No code change: the turn point stays. Any rule that changes L1 also changes L14.
+- [ ] DXF.22.1 User: report the contradiction to ApparelWerks, or accept it as a reader advisory
 
 ## [ ] Task DXF.3 — Write DXF R13 (AC1012)
 
@@ -87,4 +93,5 @@ A built-in seam allowance: Seamly2D's main path is the cut line, sent as the `se
 
 - [x] DXF.8.1 Export male_shirt as DXF-ASTM and DXF-ASTM (CLO3D) after each task
 - [x] DXF.8.2 User: run the files through https://aw.fyi/dxf; save the report in `test-seamly-layout-input/`
-- [ ] DXF.8.3 Record the result in the compliance doc
+- [x] DXF.8.3 Record the result in the compliance doc ("aw.fyi results")
+- [ ] DXF.8.4 User: re-run aw.fyi after DXF.21 and Layout.61

@@ -76,6 +76,15 @@ pub struct AstmContour {
     pub closed: bool,
 }
 
+impl AstmContour {
+    /// @brief Whether the key points go on layers 2 and 3.
+    /// @details A straight open line (two key points) declares none: a reader flags a
+    ///          turn point or a curve point at its ends as not needed. Its ends are never turn points.
+    pub fn declares_points(&self) -> bool {
+        self.closed || self.reduced.len() > 2
+    } // fn declares_points
+} // impl AstmContour
+
 /// @brief Build the ASTM contour for one polyline, detecting turn points from the geometry.
 /// @param points Polyline vertices in DXF units; a closed loop may repeat its first vertex.
 /// @param closed Whether the polyline is a closed loop.
