@@ -18,7 +18,7 @@
 - Grading trigger: `export_dxf` with `layout_views.active_size() == None` and a multisize input with ≥ 2 sizes and a base size.
 - Ungradable piece (turn points, lines or notch counts differ; no rigid fit; mirrored) → sample size block only + warning. Sample size not in the layout → piece ungraded, all sizes, warning.
 - Fixtures: `ezdxf2dxfastm/test_data/multisize_grading_input.svg`, `multisize_grading_layout.svg` (generator script was in the scratchpad, not kept).
-- Docs: compliance doc "Grading" section; `SVG-DATA-ATTRIBUTES.md` "Capture a handoff", `data-parent` now read; QA checklist `project-docs/docs-seamlylayout/TEST_DXF_LAYOUT_QA.md`.
+- Docs: compliance doc "Grading" section; `SVG-DATA-ATTRIBUTES.md` "Capture a handoff", `data-parent` now read; test checklist `project-docs/TEST_CHECKLIST.md`.
 
 ### Risk
 
@@ -41,7 +41,7 @@ Priority sets the handover order. Developer and user identify the work type, not
 
 ### Priority 2 — User: verify the built app
 
-- Follow `project-docs/docs-seamlylayout/TEST_DXF_LAYOUT_QA.md` (sections 0–6).
+- Follow `project-docs/TEST_CHECKLIST.md` (sections 0–6).
 - Check multisize Nested/Marker layouts, size tabs, Adjust Mode, and one export file per tab.
 - Check export names, Annotated text, missing-data warnings, and cancellation in the running app.
 - Check PS/EPS with Ghostscript, Illustrator, or Inkscape; check HPGL in a viewer or on a plotter.
@@ -107,7 +107,7 @@ Layout.66 C++ tests: `NotchGroupCarriesNotchTypes`, `PieceCarriesQuantityAndFold
 - Inspect `git status` and `git stash list` before changing branches or committing.
 - Do not commit or discard user edits without authorization.
 - Protect both macOS `Info.plist` files and `src/libs/vmisc/projectversion.*`; builds rewrite them (now stamped 26.10.1115).
-- `SESSION_HANDOVER.simplified.md` supersedes `SESSION_HANDOVER.md` (user decision). `SESSION_HANDOVER.md` holds uncommitted user edits; do not commit it unasked.
+- `SESSION_HANDOVER_simplified.md` supersedes `SESSION_HANDOVER.md` (user decision). `SESSION_HANDOVER.md` holds uncommitted user edits; do not commit it unasked.
 - Protect user edits in `CLAUDE.md`, `TODO_DXF.md`, `scripts/prompt_testing.txt`, and `test-seamly-layout-input/*`.
 - Keep the copied aw.fyi reports in `male_shirt_202610101837/` untracked. Do not commit them.
 - Inspect older stashes by content. Their recorded `stash@{n}` positions may have changed.
@@ -121,7 +121,7 @@ Links are relative to the project repository. The supplied attachment does not i
 
 - [SeamlyLayout TODO](project-docs/docs-seamlylayout/TODO_SEAMLYLAYOUT.md)
 - [DXF TODO](project-docs/docs-seamlylayout/TODO_DXF.md)
-- [DXF/layout QA checklist](project-docs/docs-seamlylayout/TEST_DXF_LAYOUT_QA.md)
+- [Test checklist](project-docs/TEST_CHECKLIST.md)
 - [DXF compliance](project-docs/docs-seamlylayout/dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md)
 - [SVG attribute contract](project-docs/docs-data/SVG-DATA-ATTRIBUTES.md)
 - [Retired layout code TODO](project-docs/docs-seamlylayout/TODO_REMOVE_DEAD_LAYOUT_CODE.md)
