@@ -53,6 +53,7 @@
 
 #include <QSharedData>
 #include <QPointF>
+#include <QStringList>
 #include <QVector>
 #include <QTransform>
 
@@ -81,6 +82,7 @@ public:
           layoutAllowance(),
           notches(),
           notchSeamAllowances(),
+          notchTypes(),
           m_internalPaths(),
           m_cutoutPaths(),
           transform(),
@@ -92,7 +94,9 @@ public:
           grainAxis(),
           m_tmPiece(),
           m_tmPattern(),
-          m_pieceLetter()
+          m_pieceLetter(),
+          m_quantity(1),
+          m_onFold(false)
     {}
 
     VLayoutPieceData(const VLayoutPieceData &piece)
@@ -104,6 +108,7 @@ public:
           layoutAllowance(piece.layoutAllowance),
           notches(piece.notches),
           notchSeamAllowances(piece.notchSeamAllowances),
+          notchTypes(piece.notchTypes),
           m_internalPaths(piece.m_internalPaths),
           m_cutoutPaths(piece.m_cutoutPaths),
           transform(piece.transform),
@@ -115,7 +120,9 @@ public:
           grainAxis(piece.grainAxis),
           m_tmPiece(piece.m_tmPiece),
           m_tmPattern(piece.m_tmPattern),
-          m_pieceLetter(piece.m_pieceLetter)
+          m_pieceLetter(piece.m_pieceLetter),
+          m_quantity(piece.m_quantity),
+          m_onFold(piece.m_onFold)
     {}
 
     ~VLayoutPieceData() {}
@@ -127,6 +134,7 @@ public:
     QVector<QPointF>           layoutAllowance;    /// @brief layoutAllowance list of layout allowance points.
     QVector<QLineF>            notches;            /// @brief notches list of notches.
     QVector<qreal>             notchSeamAllowances; /// @brief seam allowance width in pixels per notch line; empty = unknown
+    QStringList                notchTypes;         /// @brief notch type per notch line (notchTypeToString()); empty = unknown
     QVector<VLayoutPiecePath>  m_internalPaths;    /// @brief m_internalPaths list of internal paths.
     QVector<VLayoutPiecePath>  m_cutoutPaths;      /// @brief m_cutoutPaths list of internal cutout paths.
     QTransform                 transform;          /// @brief transform transformation transform
@@ -139,6 +147,8 @@ public:
     VTextManager               m_tmPiece;          /// @brief m_tmPiece text manager for laying out piece info
     VTextManager               m_tmPattern;        /// @brief m_tmPattern text manager for laying out pattern info */
     QString                    m_pieceLetter;      /// @brief m_pieceLetter piece letter, exported as the SVG data-letter attribute
+    int                        m_quantity;         /// @brief cut count, exported as the SVG data-quantity attribute
+    bool                       m_onFold;           /// @brief cut on the fold, exported as the SVG data-on-fold attribute
 
 private:
     VLayoutPieceData &operator=(const VLayoutPieceData &) Q_DECL_EQ_DELETE;

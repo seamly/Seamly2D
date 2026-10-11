@@ -877,3 +877,49 @@ void TST_SvgComponentTags::NotchGroupCarriesSeamAllowances() const
     QCOMPARE(unknownNotches.size(), 1);
     QVERIFY(!unknownNotches.at(0).hasAttribute(QStringLiteral("data-seam-allowances")));
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief NotchGroupCarriesNotchTypes checks that the notch group lists one Seamly2D notch type per notch line, and has
+ * no attribute when the types are unknown.
+ */
+void TST_SvgComponentTags::NotchGroupCarriesNotchTypes() const
+{
+    VLayoutPiece piece = makeTestPiece(QStringLiteral("Yoke"));
+    piece.setNotches({QLineF(QPointF(10, 100), QPointF(15, 100)), QLineF(QPointF(100, 10), QPointF(100, 15))},
+                     {}, {QStringLiteral("slit"), QStringLiteral("tNotch")});
+
+    const QDomDocument doc = exportPieceSvg(piece);
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+    const QVector<QDomElement> notches = groupsOfType(doc, QStringLiteral("notch"));
+    QCOMPARE(notches.size(), 1);
+    QCOMPARE(notches.at(0).attribute(QStringLiteral("data-notch-type")), QStringLiteral("slit tNotch"));
+    QVERIFY(!notches.at(0).hasAttribute(QStringLiteral("data-seam-allowances")));
+
+    const QDomDocument unknown = exportPieceSvg(makeTestPiece(QStringLiteral("Cuff")));
+    const QVector<QDomElement> unknownNotches = groupsOfType(unknown, QStringLiteral("notch"));
+    QCOMPARE(unknownNotches.size(), 1);
+    QVERIFY(!unknownNotches.at(0).hasAttribute(QStringLiteral("data-notch-type")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PieceCarriesQuantityAndFold checks that the piece group carries the cut count, and data-on-fold only for a
+ * piece cut on the fold.
+ */
+void TST_SvgComponentTags::PieceCarriesQuantityAndFold() const
+{
+    VLayoutPiece folded = makeTestPiece(QStringLiteral("Collar"));
+    folded.setQuantity(3);
+    folded.setOnFold(true);
+    const QVector<QDomElement> foldedPieces = groupsOfType(exportPieceSvg(folded), QStringLiteral("piece"));
+    QCOMPARE(foldedPieces.size(), 1);
+    QCOMPARE(foldedPieces.at(0).attribute(QStringLiteral("data-quantity")), QStringLiteral("3"));
+    QCOMPARE(foldedPieces.at(0).attribute(QStringLiteral("data-on-fold")), QStringLiteral("true"));
+
+    const QVector<QDomElement> plainPieces = groupsOfType(exportPieceSvg(makeTestPiece(QStringLiteral("Back"))),
+                                                          QStringLiteral("piece"));
+    QCOMPARE(plainPieces.size(), 1);
+    QCOMPARE(plainPieces.at(0).attribute(QStringLiteral("data-quantity")), QStringLiteral("1"));
+    QVERIFY(!plainPieces.at(0).hasAttribute(QStringLiteral("data-on-fold")));
+}

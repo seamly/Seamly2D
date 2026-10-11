@@ -89,8 +89,12 @@ namespace PieceItemData
         GrainlineAngle = 3, /**< Grain direction in degrees (QLineF::angle()), exported as data-grainline-angle. */
         TurnPoints  = 4, /**< Turn point vertex indices of the item's path, space separated, exported as
                               data-turn-points. Unset when the turn points are unknown. */
-        SeamAllowances = 5 /**< Seam allowance width in mm per notch line, space separated, exported as
-                                data-seam-allowances. Unset when unknown. */
+        SeamAllowances = 5, /**< Seam allowance width in mm per notch line, space separated, exported as
+                                 data-seam-allowances. Unset when unknown. */
+        Quantity    = 6, /**< Cut count from the piece label data, exported as data-quantity. */
+        OnFold      = 7, /**< True when the piece is cut on the fold, exported as data-on-fold="true". */
+        NotchTypes  = 8  /**< Notch type per notch line (notchTypeToString()), space separated, exported as
+                              data-notch-type. Unset when unknown. */
     };
 }
 #endif // VLAYOUTDEF_H

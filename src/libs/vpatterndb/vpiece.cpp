@@ -304,9 +304,12 @@ QVector<QPointF> VPiece::cutPathPoints(const VContainer *data) const
  * @param includeCutlineNotches false omits cutline notches; only a view that hides seam allowances passes false.
  * @param seamAllowanceWidths when not null, receives one width in pixels per returned line: the seam allowance
  *        at the line's notch node, the wider of its before and after widths. 0 when the piece has no seam allowance.
+ * @param notchTypes when not null, receives one notchTypeToString() value per returned line: the type of the
+ *        line's notch node.
  */
 QVector<QLineF> VPiece::createNotchLines(const VContainer *data, const QVector<QPointF> &seamAllowance,
-                                         bool includeCutlineNotches, QVector<qreal> *seamAllowanceWidths) const
+                                         bool includeCutlineNotches, QVector<qreal> *seamAllowanceWidths,
+                                         QStringList *notchTypes) const
 {
     const QVector<VPieceNode> unitedPath = GetUnitedPath(data);
     if (!notchesPossible(unitedPath))
@@ -341,6 +344,14 @@ QVector<QLineF> VPiece::createNotchLines(const VContainer *data, const QVector<Q
                 width = MaxLocalSA(notchSAPoint, ToPixel(GetSAWidth(), *data->GetPatternUnit()));
             }
             seamAllowanceWidths->insert(seamAllowanceWidths->size(), notches.size() - firstLine, width);
+        }
+
+        if (notchTypes != nullptr)
+        {
+            for (int line = firstLine; line < notches.size(); ++line)
+            {
+                notchTypes->append(notchTypeToString(node.getNotchType()));
+            }
         }
     }
 

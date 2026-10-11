@@ -59,6 +59,7 @@
 #include <QRectF>
 #include <QSharedDataPointer>
 #include <QString>
+#include <QStringList>
 #include <QTypeInfo>
 #include <QVector>
 #include <QtGlobal>
@@ -108,8 +109,10 @@ public:
 
     QVector<QLineF>           getNotches() const;
     void                      setNotches(const QVector<QLineF> &notches,
-                                         const QVector<qreal> &seamAllowanceWidths = QVector<qreal>());
+                                         const QVector<qreal> &seamAllowanceWidths = QVector<qreal>(),
+                                         const QStringList &notchTypes = QStringList());
     QVector<qreal>            getNotchSeamAllowances() const;
+    QStringList               getNotchTypes() const;
 
     QVector<QVector<QPointF>> internalPathsForCut (bool cut) const;
     QVector<VLayoutPiecePath> getInternalPaths() const;
@@ -120,6 +123,11 @@ public:
 
     QString                   getPieceLetter() const;
     void                      setPieceLetter(const QString &letter);
+
+    int                       getQuantity() const;
+    void                      setQuantity(int quantity);
+    bool                      isOnFold() const;
+    void                      setOnFold(bool onFold);
 
     QPointF                   getPieceTextPosition() const;
     QStringList               getPieceText() const;
