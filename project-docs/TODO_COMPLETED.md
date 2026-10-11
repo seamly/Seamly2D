@@ -2,6 +2,27 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task DXF.20 — Low-priority report advisories (completed 2026-10-10)
+
+From the `male_shirt_R13_202610071908.dxf` report. Checked on the `male_shirt_R13_202610101837.dxf` report.
+
+- [x] DXF.20.1 Yoke_M L14 pt 14: turn point mid straight edge. DXF.19 removed it; the 2026-10-10 report does not flag Yoke_M
+- [x] DXF.20.2 ShortSleeve_M L14 pt 31: still "maybe". No change: the sew line turns 18.9° there, between two straight segments (20.3 mm and 180.8 mm). Seamly2D tags it correctly
+- [x] DXF.20.3 FullSleeve_M slit end 0.21 mm from the cut-line turn point: left as is (user decision). Seamly2D geometry
+
+## Task DXF.19 — Turn points only where the tangent breaks (completed 2026-10-10)
+
+aw.fyi report on `male_shirt_R13_202610071908.dxf` (folder `test-seamly-layout-input/male_shirt_R12_202610071908/`): DXF.15 and DXF.16 repeat. DXF.16 made every straight run end a turn point; a single straight segment did not count as a run.
+
+- [x] DXF.19.1 `astm_contour.rs` `straight_run_ends`: a line end is a turn point when its direction change > 2 × the next curve vertex's, and > 1°
+- [x] DXF.19.2 A single segment ≥ 20 mm is a line; a run with inner vertices needs ≥ 10 mm
+- [x] DXF.19.3 Closed loop split from its first known turn point
+- [x] DXF.19.4 Open contour ends are curve points (user decision); reverses `open_polyline_ends_are_turn_points`
+- [x] DXF.19.5 Tests: `open_polyline_ends_are_curve_points`, `line_ends_are_turn_points_where_the_tangent_breaks`, `single_segment_line_end_is_a_turn_point_only_where_the_tangent_breaks`; `writer_astm_test.rs` FrontPanel 16 turn points
+- [x] DXF.19.6 Compliance doc "Contour rules"
+- [x] DXF.19.7 User: re-export male_shirt DXF-ASTM (R13); run aw.fyi (DXF.8). Report on `male_shirt_R13_202610101837.dxf`: FullSleeve hem end and CollarBase points pass; open line ends follow in DXF.21; FrontPanel L1 junction in DXF.22
+- Checked on `male_shirt_202610071910.svg`: FrontPanel junction (71.10 / 71.35) now a turn point; FullSleeve hem end 345.88 / 345.77 now a curve point (252.5 stays a turn point, 1.9° vs 0.3°); L8/L11 ends curve points; one CollarBase and one CollarBaseInterface curve turn point removed; Yoke L14 mid-edge turn point removed. No other change.
+
 ## Task DXF.17 — Every notch is a slit, half the seam allowance long (completed 2026-10-05)
 
 Report on `male_shirt_R13_202610041815.dxf`: layer 4 had 4 notches, layer 83 (U) had 3; depths 2.5 and 1.25 mm. The seam allowance is 10 mm.

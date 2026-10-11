@@ -155,6 +155,22 @@ mod tests {
         assert_eq!(c.turn, vec![false, false]);
     }
 
+    // @brief A straight open line declares no turn or curve points; a bent one and a loop do.
+    // @details aw.fyi flags a point on layer 2 or 3 at the ends of a straight internal line
+    //          (FullSleeve pleat lines and slit) as not needed, of either kind.
+    #[test]
+    fn straight_open_line_declares_no_points() {
+        let line = [Point::new(0.0, 0.0), Point::new(5.0, 0.0), Point::new(10.0, 0.0)];
+        assert!(!build_contour(&line, false).expect("contour").declares_points());
+
+        let bent = [Point::new(0.0, 0.0), Point::new(10.0, 10.0), Point::new(20.0, 0.0)];
+        let c = build_contour(&bent, false).expect("contour");
+        assert_eq!(c.reduced.len(), 3);
+        assert!(c.declares_points());
+
+        assert!(build_contour(&square_with_midpoints(), true).expect("contour").declares_points());
+    }
+
     #[test]
     fn degenerate_contours_are_rejected() {
         assert!(build_contour(&[Point::new(1.0, 1.0), Point::new(1.0, 1.0)], false).is_none());
