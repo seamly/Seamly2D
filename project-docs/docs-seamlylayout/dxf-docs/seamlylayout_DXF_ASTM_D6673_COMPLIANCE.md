@@ -10,6 +10,8 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | SVG DOM → drawing | `seamly_svg2ezdxf::svg_to_ezdxf` (`converter.rs`) | `Drawing` in millimetres |
 | Contours | `seamly_svg2ezdxf/src/astm_contour.rs` | key points + validation polyline |
 | Notches | `seamly_svg2ezdxf/src/astm_notch.rs` | Slit notch POINTs (layer 4) |
+| Grading | `seamly_svg2ezdxf/src/astm_grading.rs`, `astm_contour::grade_contours` | Graded nests, grade rules |
+| Rule table | `ezdxf2dxfastm/src/grade_rule_file.rs` | `.rul` file beside the DXF |
 | Drawing → file | `ezdxf2dxfastm::export_dxf_astm` (`writer.rs`) | `.dxf` (+ annotated `.txt`) |
 | R12 → R13 | `ezdxf2dxfastm::upgrade_to_r13` (`r13.rs`) | R13 file from the R12 group stream |
 | Bridge | `cxxqt_bridge::exports::do_export_dxf` | style text from QML |
@@ -25,12 +27,13 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | CLO3D group 250 | Off in **DXF-ASTM (R12)** and **(R13)**; on in **DXF-ASTM (CLO3D)** | Not DXF R12, not D6673. CLO3D reads it: 0 = boundary (layer 1), 2 = sew line (layer 14). Only those key-point polylines carry it. The R13 rewrite keeps it |
 | Block names | `<svg id>_M` kept | Existing CLO3D naming. `Piece Name:` carries the real name |
 | Curve tolerance | 0.25 mm | Douglas–Peucker tolerance for the first key points, and limit for the spline through the final key points. Chords between final key points can be farther off |
-| Quantity | From the "Cut N" label line: even N → `N/2,N/2`, odd N → `N,0` | Seamly2D exports only a total, not right/left counts |
+| Quantity | Piece `data-quantity`, else the "Cut N" label line: even N → `N/2,N/2`, odd N → `N,0`. Piece `data-on-fold="true"` → `N,0` | Seamly2D exports only a total, not right/left counts. A folded piece unfolds to one symmetric piece, never a left and right pair |
 | Style Name | Input base name: the imported SVG's base name, or the `--document-name` value. Else the pattern `data-name`, else the output file stem | User decision. The output stem carries a timestamp |
 | Size | `Size Name:` piece text: piece `data-size` (multisize). Individual: pattern `data-sample-size` = `bust_circ`, else `waist_circ`. Omitted when neither exists | User decision. A multisize layout tab holds one size. Identifier is `Size Name:` (D6673-01 name), not AAMA-292 `Size:` |
 | Material | `Material:Fabric` on every piece | User decision. Layout.15.4 replaces it with `data-material` |
 | Category | Not written | User decision. `Category:` is ANSI/AAMA-292 piece text, not valid in any DXF-ASTM edition. A piece classification, not material. Seamly2D stores no category; a pattern library could supply one. D6673-10 §4.1 names "category", but §4.3.1.2 defines no `Category:` identifier. See `seamlylayout_DXF_ASTM_D6673_INCONSISTENCIES.md` and `seamlylayout_DXF_ASTM_D6673_from_AAMA.md` |
-| Sample Size, Grade Rule Table | Written blank | Required identifiers; export is one ungraded size |
+| Sample Size, Grade Rule Table | Graded export: `data-base-size`, and the output file stem (separators → `_`). Otherwise blank | Required identifiers. An individual pattern or a size tab exports one ungraded size |
+| Grading | Only a multisize layout exported from the **All sizes** tab | User decision: graded nest + `# n` identifiers + `.rul` table file. A size tab holds one size |
 
 ## Layers written
 
@@ -39,6 +42,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | 1 | Boundary key points; style text (ENTITIES); `Piece Name:`, `Size Name:`, `Quantity:`, `Material:` (BLOCK) | POLYLINE, TEXT |
 | 2 / 3 | Turn / curve points of layers 1, 8, 11, 14 | POINT |
 | 4 | Every notch, as a slit (no 39) | POINT + 30 depth, 50 angle |
+| 5 | Grade reference line, every block of a graded nest | LINE |
 | 7 | Grainline | LINE |
 | 8 | Internal lines (`internal_path`) | POLYLINE |
 | 11 | Internal cutouts (`cut_path`) | POLYLINE |
@@ -89,18 +93,36 @@ Every notch is a slit on layer 4, whatever shape Seamly2D drew (slit, T, U, V, c
   3. None, or width under 0.1 mm: depth = drawn depth (farthest reach along the angle).
 - No width (group 39). Layers 80, 81, 83 are not written.
 
+## Grading (`astm_grading.rs`)
+
+A multisize layout exported from the **All sizes** tab is graded (D6673 §4.3.1.4, §4.3.1.5, §4.4).
+
+- Input: the layout DOM (every size of every piece, placed) and the handoff DOM (every size at its drafted position).
+- A piece's sizes share the piece `data-parent` (piece-set id). Blocks of one piece are written together, in `data-sizes` order.
+- Key points: `grade_contours` gives every size the same turn points and the same curve points. Curve point j sits at the same arc-length fraction of the same span in every size. Curve points are added until every size passes the 0.25 mm spline check, then dropped where no size needs them.
+- Grading runs in draft space: a size differs from the sample size only by growth there.
+- Rule = growth of one key point or notch from the sample size, per size. Rules equal within 0.01 mm share one identifier. Zero growth is a rule too (§4.3.1.4).
+- Sample size block: every layer, full piece system text, `# n` TEXT on layers 1, 4, 8, 11, 14 at each graded point.
+- Graded size block: `Piece Name:`, `Size Name:`, `Quantity:`; layers 1, 7, 8, 11, 14, 15, 84–87, 5. No layers 2, 3, 4 (§4.3.1.5).
+- Grade reference line (layer 5): one horizontal draft-space line along the bottom of the sample boundary, the same for every size. A rigid fit of each layout block to its handoff block maps it into the block. Stacking the blocks on it gives the rule growths.
+- `.rul` file: same stem as the DXF. Header: version, `AUTHOR:Seamly2D`, date, time (hh:mm), `UNITS:METRIC`, table name, sample size, number of sizes, size list. Then `RULE: DELTA n dx,dy ...`, one growth per size.
+- Not graded, with a warning in the export dialog; only the sample size block is written:
+  - sizes differ in turn points, lines or notch count;
+  - a layout block does not fit its handoff shape (also a mirrored piece).
+- The sample size is not in the layout (unplaced): the piece is written ungraded, every size, with a warning.
+
 ## Not exported
 
 Seamly2D sends no source data for these. Tracked in `TODO_SEAMLYLAYOUT.md`.
 
-- Grading, grade rule identifiers (`# n`), graded nests, grade rule table file.
-- Grade reference line (layer 5), mirror line (layer 6).
+- Alternate grade reference lines (layer 5), mirror line (layer 6).
 - Stripe and plaid reference lines (layers 9, 10), drill holes (layer 13).
 - Check notch (layer 82). Notch dependency (ATTDEF).
 
 ## Known producer gaps
 
-- No `data-quantity`, `data-on-fold`, `data-material` or `data-notch-type` attributes; quantity is inferred; material is always `Fabric`.
+- No `data-material` attribute; material is always `Fabric` (Seamly2D.7 / Layout.15).
+- `data-notch-type` is read by no exporter: DXF-ASTM writes every notch as a slit.
 
 ## aw.fyi results
 
@@ -118,4 +140,7 @@ Advisories in the 2026-10-10 report: 4 pieces with no densified points (straight
 
 - `seamly_svg2ezdxf/src/astm_piece_test.rs` — contours, notches, tagged-SVG extraction.
 - `ezdxf2dxfastm/src/writer_astm_test.rs` — style text, layers, 2-decimal format, and the
-  `test_data/male_shirt_pieces.svg` fixture end to end.
+  `test_data/male_shirt_pieces.svg` fixture end to end. Graded nest blocks, `.rul` file, layer 5 in R13.
+- `seamly_svg2ezdxf/src/astm_grading_test.rs` — shared key points, rules against the stacked nest, fallbacks.
+  Fixtures: `ezdxf2dxfastm/test_data/multisize_grading_input.svg`, `multisize_grading_layout.svg`.
+- `cxxqt_bridge/src/layout_utils.rs` `multisize_layout_exports_graded_nests` — Nested and Marker layouts, end to end.
