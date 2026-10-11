@@ -14,6 +14,7 @@
 
 use crate::encoder::{encode_astm_polyline, encode_astm_text, encode_dxf_point, encode_entity, encode_notch};
 use crate::error::{DxfAstmExportError, Result};
+use crate::grade_rule_file::write_grade_rule_file;
 use crate::r13::upgrade_to_r13;
 use crate::validator::validate_astm_compliance;
 use seamly_svg2ezdxf::{AstmContour, Block, DxfPoint, DxfVersion, Point, CURVE_TOLERANCE_MM};
@@ -27,6 +28,8 @@ pub const ASTM_VERSION: &str = "D6673-10";
 
 // Height of system text, in millimetres.
 const SYSTEM_TEXT_HEIGHT_MM: f64 = 5.0;
+// Height of `# n` grade rule identifier text, in millimetres.
+const RULE_TEXT_HEIGHT_MM: f64 = 1.0;
 
 // @brief Progress callback for annotated version generation (0.0 - 1.0).
 pub type ProgressCallback = Arc<dyn Fn(f32) + Send + Sync>;
@@ -126,7 +129,7 @@ fn write_header_section(writer: &mut dyn Write, include_header: bool) -> std::io
 }
 
 // @brief Today's UTC date and time as (dd-mm-yyyy, hh-mm).
-fn utc_date_time() -> (String, String) {
+pub(crate) fn utc_date_time() -> (String, String) {
     let secs = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_secs() as i64)
@@ -149,8 +152,9 @@ fn utc_date_time() -> (String, String) {
 } // fn utc_date_time
 
 /// @brief Style system text lines (D6673 §4.3.1.1), in writing order.
-/// @details Sample Size and Grade Rule Table stay blank: SeamlyLayout exports
-///          one ungraded size, and the standard requires the identifiers anyway.
+/// @details Sample Size and Grade Rule Table come from the drawing's grade rule
+///          table. An ungraded export leaves them blank: the standard requires
+///          the identifiers anyway.
 pub fn style_system_text(drawing: &seamly_svg2ezdxf::Drawing, options: &DxfAstmExportOptions) -> Vec<String> {
     let style_name = drawing
         .style_name
@@ -160,13 +164,17 @@ pub fn style_system_text(drawing: &seamly_svg2ezdxf::Drawing, options: &DxfAstmE
         .filter(|s| !s.is_empty())
         .unwrap_or_else(|| "Untitled".to_string());
     let (utc_date, utc_time) = utc_date_time();
+    let (sample_size, table_name) = drawing
+        .grade_rule_table
+        .as_ref()
+        .map_or((String::new(), String::new()), |t| (t.sample_size.clone(), t.name.clone()));
     vec![
         format!("Style Name:{}", style_name),
         format!("Creation Date:{}", options.creation_date.clone().unwrap_or(utc_date)),
         format!("Creation Time:{}", options.creation_time.clone().unwrap_or(utc_time)),
         format!("Author:Seamly;Seamly2D;{}", options.author_release),
-        "Sample Size:".to_string(),
-        "Grade Rule Table:".to_string(),
+        format!("Sample Size:{}", sample_size),
+        format!("Grade Rule Table:{}", table_name),
         "Units:METRIC".to_string(),
         format!("Curve Tolerance:{:.2}", CURVE_TOLERANCE_MM),
         format!("ASTM/D13Proposal 1 Version:{}", ASTM_VERSION),
@@ -190,9 +198,13 @@ fn write_contour(
 //
 // Order: piece system text, boundary (1/84), sew lines (14/87), internal
 // lines (8/85), cutouts (11/86), turn/curve points (2/3), grainline (7),
-// notches (4/80/81/83), annotation text (15).
+// notches (4/80/81/83), annotation text (15), grade reference line (5),
+// grade rule identifiers.
+// A graded size block of a nest (D6673 §4.3.1.5) writes no turn, curve or
+// notch points and only the piece name, size name and quantity system text.
 // @param clo3d When true, the boundary and sew line polylines carry CLO3D group 250.
 fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContour, clo3d: bool) -> std::io::Result<()> {
+    let graded_size = block.grading.as_ref().is_some_and(|g| !g.sample);
     // Piece system text sits at the first boundary vertex.
     let anchor = boundary.reduced[0];
     let mut system_lines = vec![format!("Piece Name:{}", block.piece_name)];
@@ -203,7 +215,9 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
     if let Some(q) = &block.quantity {
         system_lines.push(format!("Quantity:{}", q));
     } // if quantity
-    system_lines.push(format!("Material:{}", block.material));
+    if !graded_size {
+        system_lines.push(format!("Material:{}", block.material));
+    } // if not a graded size
     for (i, line) in system_lines.iter().enumerate() {
         let position = Point::new(anchor.x, anchor.y - (i as f64 + 1.0) * SYSTEM_TEXT_HEIGHT_MM * 1.5);
         encode_astm_text(writer, "1", position, SYSTEM_TEXT_HEIGHT_MM, 0.0, line)?;
@@ -223,11 +237,12 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
     } // for each cutout
 
     // Layers 2 and 3 hold the turn and curve points of layers 1, 8, 11 and 14.
+    // A graded size takes them from the sample size block.
     let contours = std::iter::once(boundary)
         .chain(&block.sew_lines)
         .chain(&block.internal_lines)
         .chain(&block.cutouts)
-        .filter(|c| c.declares_points());
+        .filter(|c| !graded_size && c.declares_points());
     for contour in contours {
         for (p, &turn) in contour.reduced.iter().zip(&contour.turn) {
             encode_dxf_point(writer, &DxfPoint::new(if turn { "2" } else { "3" }, *p))?;
@@ -243,13 +258,29 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
         write_group_code_float(writer, 21, p2.y)?;
     } // if grainline
 
-    for notch in &block.notches {
+    // A graded size takes its notches from the sample size block and the grade rules.
+    for notch in block.notches.iter().filter(|_| !graded_size) {
         encode_notch(writer, notch)?;
     } // for each notch
 
     for a in &block.annotations {
         encode_astm_text(writer, "15", a.position, a.height, a.rotation, &a.text)?;
     } // for each annotation
+
+    if let Some(grading) = &block.grading {
+        // Every block of a nest has the grade reference line; stacking on it aligns the sizes.
+        let (p1, p2) = grading.reference_line;
+        write_group_code(writer, 0, "LINE")?;
+        write_group_code(writer, 8, "5")?;
+        write_group_code_float(writer, 10, p1.x)?;
+        write_group_code_float(writer, 20, p1.y)?;
+        write_group_code_float(writer, 11, p2.x)?;
+        write_group_code_float(writer, 21, p2.y)?;
+        // `# n` on the layer of the point it grades, at the same XY (D6673 §4.3.1.4).
+        for t in &grading.rule_texts {
+            encode_astm_text(writer, t.layer, t.position, RULE_TEXT_HEIGHT_MM, 0.0, &format!("# {}", t.rule))?;
+        } // for each rule text
+    } // if graded
     Ok(())
 } // fn write_astm_block
 
@@ -570,6 +601,7 @@ fn astm_layer_meaning(layer: &str) -> &'static str {
         "2" => "ASTM turn point",
         "3" => "ASTM curve point",
         "4" => "ASTM slit or V notch",
+        "5" => "ASTM grade reference line",
         "7" => "ASTM grainline",
         "8" => "ASTM internal line",
         "11" => "ASTM internal cutout",
@@ -695,6 +727,11 @@ pub fn export_dxf_astm(
         DxfVersion::R13 => upgrade_to_r13(&r12)?,
     }; // match version
     std::fs::write(output_path.as_ref(), text)?;
+
+    // A graded export writes its grade rule table beside the DXF, same stem, `.rul`.
+    if let Some(table) = &drawing.grade_rule_table {
+        write_grade_rule_file(table, &output_path.as_ref().with_extension("rul"), options)?;
+    } // if graded
 
     // 5. Create annotated version with inline comments (if requested).
     if options.create_annotated_version {

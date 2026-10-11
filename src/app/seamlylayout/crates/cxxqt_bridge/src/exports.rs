@@ -13,7 +13,7 @@
 // CXX-Qt macro infrastructure.
 //
 // Exports:
-//   do_export_dxf(doc, path, create_annotated_version, style, progress) -> Result<(), String>
+//   do_export_dxf(doc, path, create_annotated_version, style, progress) -> Result<Vec<String>, String>
 //   dxf_missing_piece_data_message(doc)              -> Result<String, String>
 //   do_export_pdf(doc, path)                          -> Result<(), String>
 //   (doc, path, tile_dims)         -> Result<(), String>
@@ -35,8 +35,8 @@
 use std::path::Path;
 use xmltree::{Element as XmlElement, XMLNode};
 
-use ezdxf2dxfastm::{export_dxf_astm, DxfAstmExportOptions};
-use seamly_svg2ezdxf::{svg_to_ezdxf, DxfVersion, MissingPieceData, SvgToEzdxfOptions};
+use ezdxf2dxfastm::{export_dxf_astm, grade_rule_table_name, DxfAstmExportOptions};
+use seamly_svg2ezdxf::{grade_drawing, svg_to_ezdxf, DxfVersion, MissingPieceData, SvgToEzdxfOptions};
 
 use hpgl_writer::{HpglMode, HpglOptions, PenMap};
 use ps_writer::PsFlavor;
@@ -652,6 +652,19 @@ pub struct DxfStyleInfo {
     // `Size Name:` of a piece without `data-size`: the individual pattern's
     // `data-sample-size`. None or blank when the input has none.
     pub sample_size: Option<String>,
+    // Multisize "All sizes" export: grade the pieces into graded nests. None = ungraded.
+    pub grading: Option<DxfGradingSource>,
+}
+
+// @brief What a graded DXF-ASTM export needs beyond the layout.
+#[derive(Debug, Clone)]
+pub struct DxfGradingSource {
+    // Handoff document: every size of every piece at its drafted position.
+    pub input: svg_dom::Document,
+    // `data-sizes`, in grading order.
+    pub sizes: Vec<String>,
+    // `data-base-size`: the sample size.
+    pub base_size: String,
 }
 
 // @brief Export a stripped layout document to a DXF-ASTM file.
@@ -667,14 +680,15 @@ pub struct DxfStyleInfo {
 // @param style                  Style system text supplied by the frontend.
 // @param progress               Callback invoked with integer percent (0–100) at each stage.
 //                               The caller owns 0% (before call) and 100% (after Ok return).
-// @return Ok(()) on success; Err(message) on any failure.
+// @return Ok(warnings) on success: one line per piece a graded export could not grade.
+//         Err(message) on any failure.
 pub fn do_export_dxf(
     doc: &svg_dom::Document,
     path: &str,
     create_annotated_version: bool,
     style: &DxfStyleInfo,
     progress: &mut impl FnMut(i32),
-) -> Result<(), String> {
+) -> Result<Vec<String>, String> {
     crate::log_to_file(&format!("[exports.rs] do_export_dxf(): 1 converting SVG DOM to ezdxf Drawing for '{path}' annotated_version={create_annotated_version} version={:?}", style.dxf_version));
 
     // Stage 1 start: SVG DOM → ezdxf Drawing (~10% of total work).
@@ -693,6 +707,23 @@ pub fn do_export_dxf(
         drawing.blocks.len(),
         drawing.modelspace_entities.len(),
     ));
+
+    // Grading: the handoff document holds every size at its drafted position.
+    // The rule table is named after the output file, and the `.rul` file sits beside it.
+    let mut warnings = Vec::new();
+    if let Some(grading) = &style.grading {
+        let input = svg_to_ezdxf(&grading.input, &svg_opts).map_err(|e| format!("DXF conversion failed: {e}"))?;
+        warnings = grade_drawing(&mut drawing, &input, &grading.sizes, &grading.base_size);
+        if let Some(table) = drawing.grade_rule_table.as_mut() {
+            let stem = Path::new(path).file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
+            table.name = grade_rule_table_name(&stem);
+        } // if graded
+        crate::log_to_file(&format!(
+            "[exports.rs] do_export_dxf(): graded {} rules, {} warnings",
+            drawing.grade_rule_table.as_ref().map_or(0, |t| t.rules.len()),
+            warnings.len()
+        ));
+    } // if grading
 
     // Stage 1 complete / Stage 2 start: write DXF-ASTM file (~50% of total work).
     progress(50);
@@ -735,7 +766,7 @@ pub fn do_export_dxf(
         } // if annotated version
     } // if ok
 
-    result
+    result.map(|()| warnings)
 } // fn do_export_dxf
 
 // @brief Warning text for pieces that lack DXF-ASTM data, shown before a DXF-ASTM export.
@@ -758,10 +789,10 @@ fn missing_piece_data_text(missing: &[MissingPieceData]) -> String {
 
     let mut lines = vec!["These pieces lack data that DXF-ASTM uses:".to_string(), String::new()];
     for m in missing {
-        // Each flag names one absent item; Quantity comes from a "Cut N" label line.
+        // Each flag names one absent item; Quantity comes from data-quantity or a "Cut N" label line.
         let mut lacks = Vec::new();
         if m.quantity {
-            lacks.push("Quantity (no \"Cut N\" label line)");
+            lacks.push("Quantity (no piece quantity or \"Cut N\" label line)");
         } // if no quantity
         if m.label {
             lacks.push("piece label");
@@ -2220,7 +2251,7 @@ mod tests {
         let pieces: Vec<&str> =
             text.lines().filter_map(|l| l.strip_prefix("\u{2022} ")).map(|l| l.split(':').next().unwrap()).collect();
         assert_eq!(pieces, vec!["CollarBaseInterface", "CollarTopInterface", "CuffInterface"]);
-        assert!(text.contains("CuffInterface: no Quantity (no \"Cut N\" label line), no piece label, no grainline"), "{text}");
+        assert!(text.contains("CuffInterface: no Quantity (no piece quantity or \"Cut N\" label line), no piece label, no grainline"), "{text}");
         assert!(text.contains("usability of the exported DXF file"), "{text}");
     } // dxf_missing_piece_data_names_male_shirt_interface_pieces
 

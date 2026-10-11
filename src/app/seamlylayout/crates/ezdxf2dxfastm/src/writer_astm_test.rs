@@ -333,4 +333,138 @@ mod tests {
             }
         }
     }
+
+    // @brief The grading fixtures, graded: layout drawing in `version`, and the grading warnings.
+    fn graded_drawing(version: DxfVersion) -> (Drawing, Vec<String>) {
+        let read = |name: &str| {
+            let path = format!("{}/test_data/{name}", env!("CARGO_MANIFEST_DIR"));
+            svg_dom::Document::parse(&std::fs::read_to_string(path).expect("fixture present")).expect("fixture parses")
+        };
+        let options = SvgToEzdxfOptions { dxf_version: version, ..SvgToEzdxfOptions::default() };
+        let mut layout = svg_to_ezdxf(&read("multisize_grading_layout.svg"), &options).expect("layout converts");
+        let input = svg_to_ezdxf(&read("multisize_grading_input.svg"), &options).expect("input converts");
+        let sizes: Vec<String> = ["34", "36", "38"].iter().map(|s| s.to_string()).collect();
+        let warnings = seamly_svg2ezdxf::grade_drawing(&mut layout, &input, &sizes, "36");
+        layout.grade_rule_table.as_mut().expect("graded").name = "GradingTest".to_string();
+        (layout, warnings)
+    }
+
+    // @brief Fixed date and time, so the rule file text is stable.
+    fn dated_options() -> DxfAstmExportOptions {
+        DxfAstmExportOptions {
+            creation_date: Some("11-10-2026".to_string()),
+            creation_time: Some("14-05".to_string()),
+            ..DxfAstmExportOptions::default()
+        }
+    }
+
+    // @brief Graded nest blocks (D6673 §4.3.1.5): the sample size carries every layer and the
+    //        `# n` texts; a graded size carries no layer 2, 3 or 4 points and no Material.
+    #[test]
+    fn graded_nest_blocks_follow_d6673() {
+        let (drawing, _) = graded_drawing(DxfVersion::R12);
+        let parsed = parse_dxf(&export_to_string(&drawing, "graded_nest", &dated_options()));
+        let names: Vec<&str> = parsed.blocks.iter().map(|(n, _)| n.as_str()).collect();
+        assert_eq!(names, vec!["piece_Front_s34_M", "piece_Front_s36_M", "piece_Front_s38_M", "piece_Back_s36_M"]);
+
+        let texts = |entities: &[DxfEntity], layer: &str| -> Vec<String> {
+            entities.iter().filter(|e| e.kind == "TEXT" && e.layer() == layer).map(|e| e.get(1).unwrap_or("").to_string()).collect()
+        };
+        let count = |entities: &[DxfEntity], kind: &str, layer: &str| entities.iter().filter(|e| e.kind == kind && e.layer() == layer).count();
+        let is_rule_text = |t: &String| t.starts_with("# ");
+        for (name, entities) in &parsed.blocks[..3] {
+            let sample = name == "piece_Front_s36_M";
+            // Every block of the nest has one grade reference line.
+            assert_eq!(count(entities, "LINE", "5"), 1, "{name}: layer 5 line");
+            let system: Vec<String> = texts(entities, "1").into_iter().filter(|t| !is_rule_text(t)).collect();
+            let size = &name["piece_Front_s".len()..name.len() - 2];
+            if sample {
+                assert_eq!(system, vec!["Piece Name:Front", "Size Name:36", "Quantity:1,1", "Material:Fabric"]);
+                assert!(count(entities, "POINT", "2") > 0 && count(entities, "POINT", "4") == 1, "{name}: turn points and notch");
+                assert!(texts(entities, "1").iter().any(is_rule_text), "{name}: rule text on layer 1");
+                assert_eq!(texts(entities, "4").len(), 1, "{name}: rule text on the notch");
+            } else {
+                assert_eq!(system, vec!["Piece Name:Front".to_string(), format!("Size Name:{size}"), "Quantity:1,1".to_string()]);
+                for layer in ["2", "3", "4"] {
+                    assert_eq!(count(entities, "POINT", layer), 0, "{name}: no layer {layer} points in a graded size");
+                }
+                let rule_texts = entities.iter().filter(|e| e.kind == "TEXT" && e.get(1).is_some_and(|t| t.starts_with("# "))).count();
+                assert_eq!(rule_texts, 0, "{name}: no rule text in a graded size");
+            }
+        }
+        // Every block of the nest has the same boundary key point count.
+        let boundaries: Vec<usize> = parsed.blocks[..3].iter().map(|(_, e)| polyline_sizes(e, "1")[0]).collect();
+        assert!(boundaries.windows(2).all(|w| w[0] == w[1]), "{boundaries:?}");
+        // The fallen-back piece is an ordinary ungraded block.
+        assert_eq!(count(&parsed.blocks[3].1, "LINE", "5"), 0);
+    }
+
+    // @brief Style text names the sample size and the grade rule table.
+    #[test]
+    fn graded_style_text_names_sample_size_and_table() {
+        let (drawing, _) = graded_drawing(DxfVersion::R12);
+        let lines = crate::writer::style_system_text(&drawing, &dated_options());
+        assert!(lines.contains(&"Sample Size:36".to_string()), "{lines:?}");
+        assert!(lines.contains(&"Grade Rule Table:GradingTest".to_string()), "{lines:?}");
+    }
+
+    // @brief The `.rul` file (D6673 §4.4) sits beside the DXF: header, then one rule per identifier.
+    #[test]
+    fn graded_export_writes_the_rule_file() {
+        let (drawing, _) = graded_drawing(DxfVersion::R12);
+        let path = std::env::temp_dir().join(format!("seamly_astm_rul_{}.dxf", std::process::id()));
+        export_dxf_astm(&drawing, &path, &dated_options()).expect("export succeeds");
+        let rul_path = path.with_extension("rul");
+        let text = std::fs::read_to_string(&rul_path).expect("rule file beside the DXF");
+        let _ = std::fs::remove_file(&path);
+        let _ = std::fs::remove_file(&rul_path);
+
+        let lines: Vec<&str> = text.lines().collect();
+        assert_eq!(
+            lines[..9],
+            [
+                "ASTM/D13 Proposal 1 VERSION:D6673-10",
+                "AUTHOR:Seamly2D",
+                "CREATION DATE:11-10-2026",
+                "CREATION TIME:14:05",
+                "UNITS:METRIC",
+                "GRADE RULE TABLE:GradingTest",
+                "SAMPLE SIZE:36",
+                "NUMBER OF SIZES:3",
+                "SIZE LIST:34 36 38",
+            ]
+        );
+        let table = drawing.grade_rule_table.as_ref().expect("table");
+        let rules: Vec<&str> = lines[9..].to_vec();
+        assert_eq!(rules.len(), table.rules.len());
+        for (i, rule) in rules.iter().enumerate() {
+            let fields: Vec<&str> = rule.split_whitespace().collect();
+            let id = (i + 1).to_string();
+            assert_eq!(fields[..3], ["RULE:", "DELTA", id.as_str()]);
+            assert_eq!(fields.len(), 3 + 3, "one growth per size: {rule}");
+            assert_eq!(fields[4], "0.00,0.00", "the sample size never grows: {rule}");
+            assert!(!rule.contains("-0.00"), "no signed zero: {rule}");
+        }
+    }
+
+    // @brief Equal growths share one identifier: the texts use fewer rules than points.
+    #[test]
+    fn equal_rules_share_an_identifier() {
+        let (drawing, _) = graded_drawing(DxfVersion::R12);
+        let sample = drawing.blocks.iter().find(|b| b.grading.as_ref().is_some_and(|g| g.sample)).expect("sample block");
+        let texts = &sample.grading.as_ref().unwrap().rule_texts;
+        let table = drawing.grade_rule_table.as_ref().unwrap();
+        assert!(table.rules.len() < texts.len(), "{} rules for {} points", table.rules.len(), texts.len());
+        assert!(texts.iter().all(|t| table.rules.iter().any(|r| r.id == t.rule)));
+    }
+
+    // @brief An R13 graded export lists layer 5 in the LAYER table.
+    #[test]
+    fn graded_r13_export_declares_layer_5() {
+        let (drawing, _) = graded_drawing(DxfVersion::R13);
+        let text = export_to_string(&drawing, "graded_r13", &dated_options());
+        let lines: Vec<&str> = text.lines().map(str::trim).collect();
+        let declared = lines.windows(4).any(|w| w[0] == "100" && w[1] == "AcDbLayerTableRecord" && w[2] == "2" && w[3] == "5");
+        assert!(declared, "layer 5 in the LAYER table");
+    }
 }

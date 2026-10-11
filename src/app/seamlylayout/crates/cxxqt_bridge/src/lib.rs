@@ -53,6 +53,9 @@ pub use remaining::build_remaining_svgs;
 mod sheets;
 use sheets::{build_sheet_export_inputs, do_export_sheets_pdf};
 
+// Optional copy of the Seamly2D handoff document (SEAMLYLAYOUT_SAVE_HANDOFF).
+mod handoff_capture;
+
 // Debug log lines go to the C++ Logger, the only writer of the log file.
 mod log_sink;
 pub(crate) use log_sink::log_to_file;
@@ -1104,12 +1107,31 @@ impl qobject::AppController {
             return false;
         } // if svg_text is blank
 
+        // Copy the document to disk when SEAMLYLAYOUT_SAVE_HANDOFF asks for it.
+        // The copy is written before the parse, so a document that fails to
+        // parse is still captured for diagnosis.
+        let capture = handoff_capture::save_handoff_copy(
+            std::env::var(handoff_capture::SAVE_HANDOFF_VAR).ok().as_deref(),
+            &svg_text,
+        );
+
         self.as_mut().reset_import_state();
 
         // No resources directory: the document never lived on disk, so a
         // relative external reference in it has nothing to resolve against.
         let loaded = app_core::parse_svg(&svg_text, None);
-        self.finish_import(loaded)
+        let imported = self.as_mut().finish_import(loaded);
+
+        // Report the capture after the import, so a warning popup shows over the loaded canvas.
+        match capture {
+            // Copy written: the path goes to the debug log only.
+            Ok(Some(path)) => log_to_file(&format!("[import_svg_document] handoff copy saved to {}", path.display())),
+            // No copy asked for.
+            Ok(None) => {}
+            // Relative path or failed write: tell the user, the copy was asked for.
+            Err(msg) => self.as_mut().import_warning(cxx_qt_lib::QString::from(msg.as_str())),
+        } // match capture
+        imported
     } // fn import_svg_document
 
     // Clear every piece of state a previous import produced.
@@ -2194,6 +2216,17 @@ impl qobject::AppController {
             .input_dom
             .as_ref()
             .map(|d| crate::piece_extractor::read_measurements_info(d).sample_size);
+        // The "All sizes" tab of a multisize layout exports graded nests; a size tab exports one size.
+        let grading = match (self.rust().layout_views.active_size(), self.rust().input_dom.as_ref()) {
+            (None, Some(input)) => {
+                let info = crate::piece_extractor::read_measurements_info(input);
+                // Grading needs two sizes and the sample size.
+                (info.multisize && info.sizes.len() >= 2 && !info.base_size.is_empty()).then(|| {
+                    crate::exports::DxfGradingSource { input: input.clone(), sizes: info.sizes, base_size: info.base_size }
+                })
+            } // All sizes
+            _ => None, // size tab, or nothing imported
+        }; // grading
 
         // Progress closure: each intermediate tick from do_export_dxf updates both
         // the bindable property (QML ProgressBar) and fires the signal (imperative listeners).
@@ -2209,14 +2242,19 @@ impl qobject::AppController {
             clo3d_group_250: opts.clo3d_group_250,
             input_name: opts.style_name.clone(),
             sample_size,
+            grading,
             dxf_version: match opts.dxf_version.as_deref() {
                 Some("R13") => seamly_svg2ezdxf::DxfVersion::R13,
                 _ => seamly_svg2ezdxf::DxfVersion::R12,
             }, // dxf_version
         }; // style
         match do_export_dxf(&layout_doc, &path_str, opts.create_annotated_version, &style, &mut dxf_progress) {
-            Ok(()) => {
+            Ok(warnings) => {
                 log_to_file(&format!("[lib.rs AppController] export_dxf(): 5 export succeeded '{path_str}'"));
+                if !warnings.is_empty() {
+                    // Pieces left ungraded reach the success dialog with the file path.
+                    self.as_mut().export_warning(cxx_qt_lib::QString::from(&warnings.join("\n")));
+                } // if warnings
                 self.as_mut().progress_updated(100);
                 self.as_mut().set_export_progress(-1); // reset to idle (-1 = idle contract)
                 self.as_mut().set_export_status_message(cxx_qt_lib::QString::default()); // clear

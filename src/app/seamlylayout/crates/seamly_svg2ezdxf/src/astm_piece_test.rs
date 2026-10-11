@@ -393,6 +393,37 @@ mod tests {
         assert!(missing[0].quantity && missing[0].label && missing[0].grainline);
     }
 
+    // @brief `Quantity:` of the Front piece after `replace` edits the TAGGED fixture.
+    fn front_quantity(replace: &[(&str, &str)]) -> Option<String> {
+        let svg = replace.iter().fold(TAGGED.to_string(), |s, (from, to)| s.replace(from, to));
+        let doc = Document::parse(&svg).expect("fixture parses");
+        svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts").blocks[0].quantity.clone()
+    }
+
+    #[test]
+    fn data_quantity_comes_before_the_label_line() {
+        let front = r#"data-name="Front">"#;
+        assert_eq!(front_quantity(&[(front, r#"data-name="Front" data-quantity="4">"#)]).as_deref(), Some("2,2"));
+        assert_eq!(front_quantity(&[(front, r#"data-name="Front" data-quantity="3">"#)]).as_deref(), Some("3,0"));
+        // No label line needed.
+        let no_label = [(front, r#"data-name="Front" data-quantity="1">"#), ("Cut 2", "Self")];
+        assert_eq!(front_quantity(&no_label).as_deref(), Some("1,0"));
+        // 0 or junk is no quantity: the label line decides.
+        assert_eq!(front_quantity(&[(front, r#"data-name="Front" data-quantity="0">"#)]).as_deref(), Some("1,1"));
+        assert_eq!(front_quantity(&[(front, r#"data-name="Front" data-quantity="x">"#)]).as_deref(), Some("1,1"));
+    }
+
+    #[test]
+    fn piece_on_fold_counts_every_cut_as_right() {
+        let front = r#"data-name="Front">"#;
+        let folded = [(front, r#"data-name="Front" data-quantity="2" data-on-fold="true">"#)];
+        assert_eq!(front_quantity(&folded).as_deref(), Some("2,0"));
+        // The fold flag also applies to a label line quantity.
+        assert_eq!(front_quantity(&[(front, r#"data-name="Front" data-on-fold="true">"#)]).as_deref(), Some("2,0"));
+        let not_folded = [(front, r#"data-name="Front" data-quantity="2" data-on-fold="false">"#)];
+        assert_eq!(front_quantity(&not_folded).as_deref(), Some("1,1"));
+    }
+
     #[test]
     fn label_without_cut_line_misses_quantity_only() {
         let svg = TAGGED.replace("Cut 2", "Self");

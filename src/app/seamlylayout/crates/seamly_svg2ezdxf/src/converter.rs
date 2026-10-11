@@ -160,6 +160,8 @@ fn add_piece_block(
             block.piece_name = name;
         } // if non-empty
     } // if name attribute
+    // The piece-set id groups the sizes of one piece for a graded nest.
+    block.parent = piece.attributes.get("data-parent").cloned();
     // Multisize pieces carry their size; an individual piece gets the sample size later.
     block.size = piece
         .attributes
@@ -447,16 +449,30 @@ fn collect_annotations(element: &Element, options: &SvgToEzdxfOptions, svg_heigh
     } // for each child
 } // fn collect_annotations
 
-// @brief `Quantity:` value from a "Cut N" label line.
+// @brief `Quantity:` value for a piece: `data-quantity` first, else a "Cut N" label line.
 // @details D6673 quantity is "R,L". Seamly2D states only a total, so an even
-//          total is split into mirrored pairs and an odd total counts as right pieces.
-fn quantity_from_label(annotations: &[Annotation]) -> Option<String> {
+//          total is split into mirrored pairs. An odd total, or a piece cut on
+//          the fold (`data-on-fold="true"`), counts as right pieces: a folded
+//          piece unfolds to one symmetric piece, never a left and right pair.
+// @return None when neither source gives a total above 0.
+fn quantity_from_piece(piece: &Element, annotations: &[Annotation]) -> Option<String> {
+    let attribute_total = piece
+        .attributes
+        .get("data-quantity")
+        .and_then(|v| v.trim().parse::<u32>().ok())
+        .filter(|&n| n > 0);
+    let total = attribute_total.or_else(|| quantity_from_label(annotations))?;
+    let on_fold = piece.attributes.get("data-on-fold").is_some_and(|v| v.trim() == "true");
+    Some(if total % 2 == 0 && !on_fold { format!("{},{}", total / 2, total / 2) } else { format!("{},0", total) })
+} // fn quantity_from_piece
+
+// @brief Cut count from a "Cut N" label line, for an SVG without `data-quantity`.
+fn quantity_from_label(annotations: &[Annotation]) -> Option<u32> {
     annotations.iter().find_map(|a| {
         let text = a.text.trim().to_ascii_lowercase();
         let rest = text.strip_prefix("cut")?.trim_start();
         let digits: String = rest.chars().take_while(|c| c.is_ascii_digit()).collect();
-        let total: u32 = digits.parse().ok().filter(|&n| n > 0)?;
-        Some(if total % 2 == 0 { format!("{},{}", total / 2, total / 2) } else { format!("{},0", total) })
+        digits.parse().ok().filter(|&n| n > 0)
     }) // find_map
 } // fn quantity_from_label
 
@@ -500,7 +516,7 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
 
     // Seamly2D prints "<empty>" for unset label fields; it carries no information.
     block.annotations.retain(|a| !a.text.is_empty() && a.text != "<empty>");
-    block.quantity = quantity_from_label(&block.annotations);
+    block.quantity = quantity_from_piece(piece, &block.annotations);
 
     // Boundary: the longest closed cut line, else the longest closed seam line.
     let longest_closed = |lines: &[TaggedPolyline]| -> Option<AstmContour> {

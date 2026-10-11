@@ -212,6 +212,285 @@ pub fn build_contour_tagged(points: &[Point], closed: bool, turns: Option<&[bool
     Some(AstmContour { dense, reduced, turn, closed })
 } // fn build_contour
 
+// Two arc-length fractions closer than this are the same key point.
+const SAME_FRACTION: f64 = 1e-9;
+// A fraction point closer than this to a dense vertex is that vertex.
+const SAME_VERTEX_MM: f64 = 1e-6;
+// Refinement passes before grade_contours accepts the key points it has.
+const MAX_GRADE_PASSES: usize = 64;
+
+// @brief A key point shared by every size of a graded line.
+#[derive(Debug, Clone, Copy)]
+struct GradeKey {
+    // Span between two anchors that holds the key point.
+    span: usize,
+    // Arc-length fraction along the span: 0 = the anchor at its start.
+    fraction: f64,
+    // Anchors (turn points, open ends, a loop's start) are never pruned.
+    anchor: bool,
+    // Written on layer 2 (true) or layer 3 (false).
+    turn: bool,
+}
+
+// @brief One size of a graded line: its dense polyline and the dense indices of its anchors.
+struct GradeSize {
+    // Grows when a key point falls between two dense vertices; new vertices lie on the polyline.
+    dense: Vec<Point>,
+    // Ascending dense indices. An open line also ends with its last vertex.
+    anchors: Vec<usize>,
+}
+
+impl GradeSize {
+    // @brief Dense vertex indices of one span, first anchor to next anchor; a loop's last span ends at index n.
+    fn span_range(&self, span: usize) -> (usize, usize) {
+        let end = if span + 1 < self.anchors.len() { self.anchors[span + 1] } else { self.dense.len() };
+        (self.anchors[span], end)
+    } // fn span_range
+
+    // @brief Arc length from the span start to each of its vertices.
+    fn span_arcs(&self, span: usize) -> Vec<f64> {
+        let (a, b) = self.span_range(span);
+        let n = self.dense.len();
+        let mut arcs = vec![0.0];
+        for i in a..b {
+            arcs.push(arcs[arcs.len() - 1] + distance(self.dense[i % n], self.dense[(i + 1) % n]));
+        } // for each edge
+        arcs
+    } // fn span_arcs
+
+    // @brief Arc-length fraction of a point at `arc` along `span`.
+    fn fraction(&self, span: usize, arc: f64) -> f64 {
+        let total = self.span_arcs(span).last().copied().unwrap_or(0.0);
+        if total > 0.0 { (arc / total).clamp(0.0, 1.0) } else { 0.0 }
+    } // fn fraction
+
+    // @brief Dense index of the key point, inserting a vertex on the polyline when none is there.
+    fn vertex_at(&mut self, key: &GradeKey) -> usize {
+        // An anchor is already a vertex.
+        if key.fraction <= 0.0 {
+            return self.anchors[key.span];
+        } // if anchor
+        let (a, _) = self.span_range(key.span);
+        let n = self.dense.len();
+        let arcs = self.span_arcs(key.span);
+        let target = key.fraction * arcs[arcs.len() - 1];
+        // Find the edge that holds the target arc length.
+        let edge = arcs.windows(2).position(|w| target <= w[1]).unwrap_or(arcs.len() - 2);
+        let (p, q) = (self.dense[(a + edge) % n], self.dense[(a + edge + 1) % n]);
+        let along = target - arcs[edge];
+        let length = arcs[edge + 1] - arcs[edge];
+        if along <= SAME_VERTEX_MM {
+            return a + edge;
+        } // if at the edge start
+        // A loop's vertex 0 closes the last span; a key point there would sort before every other.
+        if length - along <= SAME_VERTEX_MM && a + edge + 1 < n {
+            return a + edge + 1;
+        } // if at the edge end
+        // Insert the point on the edge; later anchors move one index up.
+        let t = along / length;
+        let at = a + edge + 1;
+        self.dense.insert(at, Point::new(p.x + t * (q.x - p.x), p.y + t * (q.y - p.y)));
+        self.anchors.iter_mut().filter(|i| **i >= at).for_each(|i| *i += 1);
+        at
+    } // fn vertex_at
+
+    // @brief Dense index of every key point, in key order.
+    fn kept(&mut self, keys: &[GradeKey]) -> Vec<usize> {
+        keys.iter().map(|k| self.vertex_at(k)).collect()
+    } // fn kept
+} // impl GradeSize
+
+/// @brief Key points that correspond across the sizes of a graded nest (D6673 §4.3.1.5).
+/// @details Every size gets the same turn points and the same curve points: curve
+///          point j sits at the same arc-length fraction of the same span in every
+///          size. Curve points are added until the reader splines of every size stay
+///          within CURVE_TOLERANCE_MM of that size's `dense`, then a curve point that no
+///          size needs is dropped. A curve point between two dense vertices is inserted
+///          on the dense polyline, so `reduced` stays an ordered subset of `dense`.
+/// @param sizes One contour per size of the same line, from `build_contour_tagged`.
+/// @param sample Index of the sample size in `sizes`; its curve points are the first key points.
+/// @return One contour per size, parallel to `sizes`, with key point i of every size at the
+///         same place on the line. None when the sizes differ in closure, in turn point
+///         count, or in which anchors are turn points.
+pub fn grade_contours(sizes: &[AstmContour], sample: usize) -> Option<Vec<AstmContour>> {
+    let first = sizes.get(sample)?;
+    let closed = first.closed;
+
+    // Step 1: anchors of every size. They must match: same count, same turn flags.
+    let mut graded: Vec<GradeSize> = Vec::with_capacity(sizes.len());
+    let mut anchor_turns: Option<Vec<bool>> = None;
+    for contour in sizes {
+        if contour.closed != closed {
+            return None;
+        } // if closure differs
+        let (size, turns) = grade_anchors(contour)?;
+        match &anchor_turns {
+            Some(t) if *t != turns => return None, // turn points differ
+            Some(_) => {}                          // same turn points
+            None => anchor_turns = Some(turns),    // first size sets them
+        } // match anchor turns
+        graded.push(size);
+    } // for each size
+    let anchor_turns = anchor_turns?;
+
+    // Step 2: anchor keys, then the sample's curve points as fractions of its spans.
+    let mut keys: Vec<GradeKey> = anchor_turns
+        .iter()
+        .enumerate()
+        .map(|(span, &turn)| GradeKey { span, fraction: 0.0, anchor: true, turn })
+        .collect();
+    let seed = &graded[sample];
+    let mut next = 0;
+    for p in &first.reduced {
+        let Some(i) = seed.dense[next..].iter().position(|q| q == p).map(|i| next + i) else {
+            continue;
+        }; // if not found
+        next = i + 1;
+        if seed.anchors.contains(&i) {
+            continue;
+        } // if anchor
+        // Span = last anchor at or before i.
+        let span = seed.anchors.iter().rposition(|&a| a <= i).unwrap_or(0);
+        let (a, _) = seed.span_range(span);
+        let arc = seed.span_arcs(span)[i - a];
+        add_key(&mut keys, span, seed.fraction(span, arc));
+    } // for each sample key point
+
+    // Step 3: add curve points until every size passes the spline check.
+    let segment_count = |k: usize| if closed { k } else { k - 1 };
+    for _ in 0..MAX_GRADE_PASSES {
+        let turn: Vec<bool> = keys.iter().map(|k| k.turn).collect();
+        let mut found: Vec<(usize, f64)> = Vec::new();
+        for size in graded.iter_mut() {
+            let kept = size.kept(&keys);
+            let n = size.dense.len();
+            let key_points: Vec<Point> = kept.iter().map(|&i| size.dense[i]).collect();
+            for s in 0..segment_count(kept.len()) {
+                let a = kept[s];
+                // The last segment of a loop wraps back to vertex 0 (index n).
+                let b = if s + 1 < kept.len() { kept[s + 1] } else { n };
+                let span = keys[s].span;
+                let (start, _) = size.span_range(span);
+                let arcs = size.span_arcs(span);
+                let samples_for =
+                    |alpha: f64| sample_segment(&key_points, &turn, closed, s, SPLINE_SAMPLES.max(4 * (b - a)), alpha);
+                if b == a + 1 {
+                    // Adjacent key points: a point on the edge pulls the spline back.
+                    let split = READER_ALPHAS
+                        .iter()
+                        .find_map(|&alpha| edge_split_point(size.dense[a], size.dense[b % n], &samples_for(alpha)));
+                    if let Some(p) = split {
+                        found.push((span, size.fraction(span, arcs[a - start] + distance(size.dense[a], p))));
+                    } // if split
+                    continue;
+                } // if adjacent key points
+                if let Some(i) = READER_ALPHAS.iter().find_map(|&alpha| worst_vertex(&size.dense, a, b, &samples_for(alpha))) {
+                    found.push((span, size.fraction(span, arcs[i - start])));
+                } // if outside tolerance
+            } // for each segment
+        } // for each size
+        let before = keys.len();
+        for (span, fraction) in found {
+            add_key(&mut keys, span, fraction);
+        } // for each found point
+        if keys.len() == before {
+            break;
+        } // if nothing new
+    } // for each pass
+
+    // Step 4: drop curve points that no size needs, least needed first. A curve
+    // point on the same vertex as the key point before it, in any size, goes first.
+    let min_len = if closed { 3 } else { 2 };
+    let mut kept: Vec<Vec<usize>> = graded.iter_mut().map(|g| g.kept(&keys)).collect();
+    let mut r = 1;
+    while r < keys.len() {
+        if !keys[r].anchor && kept.iter().any(|k| k[r] == k[r - 1]) {
+            keys.remove(r);
+            kept.iter_mut().for_each(|k| {
+                k.remove(r);
+            });
+        } else {
+            r += 1;
+        } // if same vertex
+    } // while key points remain
+    while keys.len() > min_len {
+        let turn: Vec<bool> = keys.iter().map(|k| k.turn).collect();
+        let mut best: Option<(usize, f64)> = None;
+        for r in (1..keys.len()).filter(|&r| !keys[r].anchor) {
+            let mut trial_turn = turn.clone();
+            trial_turn.remove(r);
+            let deviation = graded
+                .iter()
+                .zip(&kept)
+                .map(|(size, kept)| {
+                    let mut trial = kept.clone();
+                    trial.remove(r);
+                    segments_around(r, keys.len() - 1, closed)
+                        .map(|s| segment_deviation(&size.dense, &trial, &trial_turn, closed, s))
+                        .fold(0.0, f64::max)
+                })
+                .fold(0.0, f64::max);
+            if deviation <= CURVE_TOLERANCE_MM && best.map_or(true, |(_, d)| deviation < d) {
+                best = Some((r, deviation));
+            } // if removable and best so far
+        } // for each curve point
+        let Some((r, _)) = best else {
+            break;
+        }; // if every curve point is needed
+        keys.remove(r);
+        kept.iter_mut().for_each(|k| {
+            k.remove(r);
+        });
+    } // while key points remain to try
+
+    // Step 5: one contour per size. An open line's ends are curve points.
+    let last = keys.len() - 1;
+    let turn: Vec<bool> = keys.iter().enumerate().map(|(i, k)| k.turn && (closed || (i != 0 && i != last))).collect();
+    Some(
+        graded
+            .into_iter()
+            .zip(kept)
+            .map(|(size, kept)| AstmContour {
+                reduced: kept.iter().map(|&i| size.dense[i]).collect(),
+                dense: size.dense,
+                turn: turn.clone(),
+                closed,
+            })
+            .collect(),
+    )
+} // fn grade_contours
+
+// @brief Anchors of one size: dense indices of its turn points, a loop's first vertex, an open line's ends.
+// @return The size, and per anchor whether it is a turn point. None when `reduced` is not in `dense`.
+fn grade_anchors(contour: &AstmContour) -> Option<(GradeSize, Vec<bool>)> {
+    let k = contour.reduced.len();
+    let mut anchors = Vec::new();
+    let mut turns = Vec::new();
+    let mut next = 0;
+    for (r, (p, &turn)) in contour.reduced.iter().zip(&contour.turn).enumerate() {
+        let i = next + contour.dense[next..].iter().position(|q| q == p)?;
+        next = i + 1;
+        let end = r == 0 || (!contour.closed && r == k - 1);
+        if turn || end {
+            anchors.push(i);
+            turns.push(turn);
+        } // if anchor
+    } // for each key point
+    Some((GradeSize { dense: contour.dense.clone(), anchors }, turns))
+} // fn grade_anchors
+
+// @brief Insert a curve point key in (span, fraction) order, unless one is already there.
+fn add_key(keys: &mut Vec<GradeKey>, span: usize, fraction: f64) {
+    if fraction <= SAME_FRACTION || fraction >= 1.0 - SAME_FRACTION {
+        return;
+    } // if at an anchor
+    if keys.iter().any(|k| k.span == span && (k.fraction - fraction).abs() < SAME_FRACTION) {
+        return;
+    } // if present
+    let at = keys.partition_point(|k| (k.span, k.fraction) < (span, fraction));
+    keys.insert(at, GradeKey { span, fraction, anchor: false, turn: false });
+} // fn add_key
+
 /// @brief Sample the centripetal spline that a reader rebuilds from the key points of `contour`.
 /// @return Polyline through the spline; a closed contour ends at its first key point.
 pub fn spline_points(contour: &AstmContour) -> Vec<Point> {

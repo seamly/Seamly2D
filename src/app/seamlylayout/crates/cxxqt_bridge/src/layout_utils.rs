@@ -1063,4 +1063,39 @@ mod tests {
             } // if element
         } // for child
     } // fn collect_points_for_test
+
+    // @brief An "All sizes" DXF-ASTM export of a Nested or Marker layout writes graded nests and the `.rul` file.
+    #[test]
+    fn multisize_layout_exports_graded_nests() {
+        for multisize_layout in ["nested", "marker"] {
+            let layout = process_multisize(multisize_layout);
+            let input = Document::parse(crate::piece_extractor::tests::MULTISIZE_HANDOFF_SVG).expect("fixture parses");
+            let style = crate::exports::DxfStyleInfo {
+                grading: Some(crate::exports::DxfGradingSource {
+                    input,
+                    sizes: vec!["34".to_string(), "36".to_string()],
+                    base_size: "36".to_string(),
+                }),
+                ..crate::exports::DxfStyleInfo::default()
+            };
+            let path = std::env::temp_dir().join(format!("graded_{multisize_layout}_{}.dxf", std::process::id()));
+            let warnings = crate::exports::do_export_dxf(&layout.output_doc, &path.to_string_lossy(), false, &style, &mut |_| {})
+                .expect("graded export succeeds");
+            let dxf = std::fs::read_to_string(&path).expect("DXF written");
+            let rul = std::fs::read_to_string(path.with_extension("rul")).expect("rule file beside the DXF");
+            let _ = std::fs::remove_file(&path);
+            let _ = std::fs::remove_file(path.with_extension("rul"));
+
+            assert!(warnings.is_empty(), "{multisize_layout}: {warnings:?}");
+            let table = format!("graded_{multisize_layout}_{}", std::process::id());
+            assert!(dxf.contains("Sample Size:36"), "{multisize_layout}: sample size");
+            assert!(dxf.contains(&format!("Grade Rule Table:{table}")), "{multisize_layout}: table name");
+            assert!(rul.contains(&format!("GRADE RULE TABLE:{table}")) && rul.contains("SIZE LIST:34 36"), "{rul}");
+            // Each size of each piece is one block; one grade reference line per block.
+            let lines: Vec<&str> = dxf.lines().map(str::trim).collect();
+            let reference_lines = lines.windows(4).filter(|w| w[0] == "0" && w[1] == "LINE" && w[2] == "8" && w[3] == "5").count();
+            assert_eq!(reference_lines, 4, "{multisize_layout}: 2 pieces x 2 sizes");
+            assert!(rul.lines().any(|l| l.starts_with("RULE: DELTA 1 ")), "{rul}");
+        } // for each multisize layout
+    } // multisize_layout_exports_graded_nests
 } // mod tests
