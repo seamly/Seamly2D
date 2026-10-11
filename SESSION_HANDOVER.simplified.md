@@ -107,7 +107,7 @@ Layout.66 C++ tests: `NotchGroupCarriesNotchTypes`, `PieceCarriesQuantityAndFold
 - Inspect `git status` and `git stash list` before changing branches or committing.
 - Do not commit or discard user edits without authorization.
 - Protect both macOS `Info.plist` files and `src/libs/vmisc/projectversion.*`; builds rewrite them (now stamped 26.10.1115).
-- `SESSION_HANDOVER.simplified.md` supersedes `SESSION_HANDOVER.md` (user decision). `SESSION_HANDOVER.md` holds uncommitted user edits; do not commit it unasked. `CLAUDE.md` still names the old file.
+- `SESSION_HANDOVER.simplified.md` supersedes `SESSION_HANDOVER.md` (user decision). `SESSION_HANDOVER.md` holds uncommitted user edits; do not commit it unasked.
 - Protect user edits in `CLAUDE.md`, `TODO_DXF.md`, `scripts/prompt_testing.txt`, and `test-seamly-layout-input/*`.
 - Keep the copied aw.fyi reports in `male_shirt_202610101837/` untracked. Do not commit them.
 - Inspect older stashes by content. Their recorded `stash@{n}` positions may have changed.

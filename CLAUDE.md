@@ -519,7 +519,7 @@ Do not proceed after a failing required test or build. Report the failure.
 
 - Update the applicable `TODO_*.md`.
 - Move completed tasks to `TODO_COMPLETED.md`.
-- Update `SESSION_HANDOVER.md`.
+- Update `SESSION_HANDOVER.simplified.md`.
 
 ### 7. Commit
 
@@ -627,7 +627,7 @@ Check the complete pending push before relying on this exception.
 
 ## Session Handover
 
-Keep `SESSION_HANDOVER.md` current.
+Keep `SESSION_HANDOVER.simplified.md` current. It supersedes `SESSION_HANDOVER.md`.
 
 Update it:
 
@@ -654,4 +654,4 @@ Do not use it as a session transcript.
 - `project-docs/PROJECT_PLAN.md` — approved implementation plan.
 - `project-docs/NEW-ATTRIBUTES.csv` — SVG `data-*` attribute specification.
 - `test-seamly-layout-input/richmond-shirt_v1_v061-test.sm2d` — test pattern.
-- `SESSION_HANDOVER.md` — current cross-session state.
+- `SESSION_HANDOVER.simplified.md` — current cross-session state.
