@@ -120,6 +120,88 @@ Depends on Seamly2D.8.
 - [ ] Layout.16.4 DXF-ASTM: layer 6 mirror line; boundary starts or ends on the mirror line points (D6673 §4.3.6); unfolded pieces write no layer 6
 - [ ] Layout.16.5 Tests: Rust import, unfold geometry, layer 6 and boundary order
 
+## [ ] Task Layout.22 — Multisize tab: rename "All sizes" to "All sizes - group"
+
+The tab shows the Nested layout: one piece-set group per piece, every size stacked.
+
+- [ ] Layout.22.1 `layout_views::ALL_SIZES_LABEL` = "All sizes - group"; update the `layout_views` label tests
+- [ ] Layout.22.2 Export all tabs: check the file name with the new label on Windows, Linux, macOS
+- [ ] Layout.22.3 Docs: replace the tab name in the SeamlyLayout docs, the DXF-ASTM compliance doc, `TEST_CHECKLIST.md`
+
+## [ ] Task Layout.23 — Multisize tab: add "All sizes - marker"
+
+Tab order: "All sizes - group", "All sizes - marker", then one tab per size. The new tab shows the Marker layout: each size of each piece packs alone.
+
+Decision (user, 2026-10-11): remove the Settings "Multisize Layout" choice (Nested | Marker). Each all-sizes tab has a fixed mode, so the choice has no effect.
+
+- [ ] Layout.23.1 `layout_views`: second all-sizes view, Marker mode, after "All sizes - group"
+- [ ] Layout.23.2 Remove the "Multisize Layout" setting: `SettingsDialog.qml`, `SettingsModel.{h,cpp}`, `layout_settings.rs`, `layout_utils.rs`. Ignore a stored `multisizeLayout` JSON key
+- [ ] Layout.23.3 Size run: lay out the marker tab, then each size; progress popup names each tab
+- [ ] Layout.23.4 Adjust Mode and exports use the marker tab when it is selected
+- [ ] Layout.23.5 DXF-ASTM from the marker tab: graded nests and `.rul`, same as "All sizes - group"
+- [ ] Layout.23.6 Export all tabs: one file for the marker tab
+- [ ] Layout.23.7 Tests: Rust view labels and order; marker tab piece count = pieces × sizes; settings JSON without `multisizeLayout`
+- [ ] Layout.23.8 Docs: settings workflow, simple workflow, `TEST_CHECKLIST.md`
+
+## [ ] Task Layout.24 — Multisize export file name: tab name before the date stamp
+
+Default name of a multisize export: `<base>[_<segment>]_<tab>_<stamp>[_tiled].<ext>`. Example: `mypatternname_R13_Size220_202610112043.dxf`. An individual pattern keeps `<base>[_<segment>]_<stamp>[_tiled].<ext>`.
+
+- [ ] Layout.24.1 `exports::default_export_file_name`: optional tab segment between `<segment>` and `<stamp>`
+- [ ] Layout.24.2 Tab segment from the tab label: remove spaces; any other character that is not a letter, digit or `-` becomes `-`. "Size 220" → `Size220`, "All sizes - group" → `Allsizes-group`
+- [ ] Layout.24.3 Single export from a multisize layout: the default name uses the selected tab
+- [ ] Layout.24.4 Export all tabs: each file name uses the same rule. Replaces `layout_views::tab_file_path`, which puts `_size-220` after the stamp. A name the user changed in the file dialog gets `_<tab>` before the extension
+- [ ] Layout.24.5 Tests: Rust names with and without a tab, tiled, a label with `/`; Export all tabs names
+- [ ] Layout.24.6 Docs: export file name rule in the SeamlyLayout docs, `TEST_CHECKLIST.md`
+
+## [ ] Task Layout.25 — Multisize Marker layout: extend the media height until every piece fits
+
+Depends on Layout.23. Applies to the "All sizes - marker" tab. Today a piece that does not fit is left out, and a warning names it.
+
+- [ ] Layout.25.1 When the pack leaves pieces out, increase the media height and pack again until every piece fits
+- [ ] Layout.25.2 Media types: paper sheet, paper roll (500 in default length), fabric
+- [ ] Layout.25.3 A piece wider than the media width cannot fit at any height: leave it out and keep the warning
+- [ ] Layout.25.4 Canvas, Adjust Mode and exports use the extended height
+- [ ] Layout.25.5 Tests: Rust pack with more pieces than one sheet holds → every piece placed, height grows; a piece that is too wide stays unplaced
+- [ ] Layout.25.6 Docs: layout workflow, `TEST_CHECKLIST.md`
+
+## [ ] Task Layout.26 — DXF-ASTM Missing Piece Data dialog: one readable line per piece
+
+Found with the installed sample `jacket2_40-146.sm2d` (`gost_man_ru.smms`), "All sizes" tab, Marker. Evidence: `test-seamly-layout-input/DXF_message_screenshot_1.png`. The pattern hides each piece label and grainline (`visible="false"`), so those warnings are correct.
+
+- [ ] Layout.26.1 One line per piece, not one per placed size: group the blocks by `data-parent` (piece-set id)
+- [ ] Layout.26.2 The dialog clips its text: the last line is not visible. Add a scroll area; keep the buttons visible
+- [ ] Layout.26.3 Non-ASCII names: `sanitize_ascii` empties "Подборт" and "Комір", so the dialog shows the block id `piece-201_s720_M`. Show the `data-name` text in dialogs and export warnings
+- [ ] Layout.26.4 DXF `Piece Name:` for a non-ASCII name is the block id today. Open decision: transliterate to ASCII, or write `\U+XXXX` escapes
+- [ ] Layout.26.5 Pieces with the same name (6 × "Detail") cannot be told apart. Add the piece letter, else the piece number: "Detail (3)"
+- [ ] Layout.26.6 Tests: Rust dialog text — one line per piece set, Cyrillic name kept, same names numbered
+
+## [ ] Task Layout.27 — DXF-ASTM grading fails for jacket2_40-146 from the "All sizes" tab
+
+Same export as Layout.26. Evidence: `test-seamly-layout-input/DXF_message_screenshot_2.png`, `test-seamly-layout-input/jacket2_40-146_R13_202610112059.dxf`. 8 pieces in sizes 220–720; the Marker layout placed 25 blocks. No piece graded: no graded nest, no `.rul`.
+
+- [ ] Layout.27.1 "size 500 is not in the layout" (3 pieces): the Marker layout left the sample size block out. Layout.25 fixes this; export again and check
+- [ ] Layout.27.2 When the layout left the sample size block out, the warning says so: "size 500 does not fit the media"
+- [ ] Layout.27.3 "the sizes have different turn points" (4 "Detail" pieces): capture the handoff with `SEAMLYLAYOUT_SAVE_HANDOFF`; find which size differs and why; fix the producer or `astm_contour::grade_contours`. Suspect: the tangent-break turn point test near 1° flips between sizes
+- [ ] Layout.27.4 `grade_anchors` also returns None when a key point is not on the dense line. That case gets its own message
+- [ ] Layout.27.5 The turn point warning names the first size that differs from the sample size
+- [ ] Layout.27.6 Warnings use the piece names from Layout.26.3 and Layout.26.5
+- [ ] Layout.27.7 Fixture: the jacket2 handoff in `crates/cxxqt_bridge/test_data/`; end-to-end test: every piece graded, `.rul` file written
+- [ ] Layout.27.8 No `.rul` file: `astm_grading::grade_drawing` sets a rule table only when one piece or more grades. When no piece grades, "Export Complete" says "No piece graded: no .rul file written"
+
+## [ ] Task Layout.28 — Built-in seam allowance: show the seam line
+
+A piece with a built-in seam allowance has no seam line. Its main path is the cut line, and the handoff sends it as `seamline`. SeamlyLayout draws only that line. Seamly2D draws no seam line for it either.
+
+Seamly2D computes the seam line: only Seamly2D knows the seam allowance width at each node.
+
+- [ ] Layout.28.1 Seamly2D: seam line = main path offset inward by each node's width (wider of before and after; piece width when the node sets none)
+- [ ] Layout.28.2 Handoff of a built-in piece: main path as `cutline`, computed line as `seamline`. Same rule for a hidden seam line as a piece without a built-in seam allowance
+- [ ] Layout.28.3 SeamlyLayout canvas, Adjust Mode and every export draw the seam line. Packing still uses the cut line
+- [ ] Layout.28.4 DXF-ASTM: cut line is the boundary (layer 1); seam line is a sew line (layer 14)
+- [ ] Layout.28.5 Tests: `TST_SvgComponentTags` — a built-in piece has `cutline` and `seamline`; Rust — DXF layers 1 and 14 for a built-in piece
+- [ ] Layout.28.6 Docs: `SVG-DATA-ATTRIBUTES.md` (`cutline`, `seamline`, `data-seam-allowances`), `NEW-ATTRIBUTES.csv`, DXF-ASTM compliance doc, `TEST_CHECKLIST.md`
+
 ## [x] Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 
 ## [x] Task Layout.9 — Piece-mode handoff passes a file, not a stringified SVG document

@@ -2,6 +2,23 @@
 
 ## Current status
 
+### Late 2026-10-11 — tasks filed, docs only
+
+- On `run-seamlyLayout`. No code changed.
+- New in `TODO_SEAMLYLAYOUT.md`:
+  - Layout.22: rename "All sizes" → "All sizes - group".
+  - Layout.23: add "All sizes - marker" tab; remove the "Multisize Layout" setting.
+  - Layout.24: tab name before the stamp in multisize export file names.
+  - Layout.25: Marker layout extends the media height until every piece fits.
+  - Layout.26: Missing Piece Data dialog — one line per piece, scroll, Cyrillic names, same names.
+  - Layout.27: jacket2 grading fails; no `.rul`.
+  - Layout.28: built-in seam allowance — compute and show the seam line.
+- Suggested order: Layout.22 → 23 → 25 → 27, then 24, 26, 28.
+- Layout.26/27 evidence (untracked user files): `test-seamly-layout-input/DXF_message_screenshot_1.png`, `_2.png`, `jacket2_40-146_R13_202610112059.dxf`.
+- Docs: `data-notch-type` and `data-seam-allowances` hold one value per notch line segment, not per notch. `TEST_CHECKLIST.md` env-var lines end in `;`.
+
+### Earlier 2026-10-11
+
 2026-10-11. Branch `task-producer-attributes`, from `run-seamlyLayout` (`035a7a7474`).
 
 - Done in code: Layout.66, Layout.38.2.1, Layout.61.1–61.6.
@@ -30,6 +47,11 @@ Priority sets the handover order. Developer and user identify the work type, not
 
 ### Priority 1 — User: resolve quantity and report questions
 
+- Layout.25: do the size tabs also extend the media height, or only the marker tab?
+- Layout.26.4: DXF `Piece Name:` for a Cyrillic name — transliterate, or `\U+XXXX` escapes?
+- Layout.28: keep in `TODO_SEAMLYLAYOUT.md`, or move to `TODO_SEAMLY2D.md`? Most work is in Seamly2D.
+- File a task? The DXF header writes empty `Sample Size:` and `Grade Rule Table:` when no piece grades.
+- Installed sample `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy in `src/app/share/samples/patterns/` has English. Does the MSI ship a different sample?
 - Confirm the on-fold quantity `N,0`.
 - Decide DXF.22: FrontPanel layer 1 reports “should be curve”; layer 14 agrees with the same geometry. Report to ApparelWerks or accept.
 
@@ -75,6 +97,8 @@ These items have no recorded resolution. Check their TODO documents and reposito
 ## Decisions to retain
 
 - Keep `data-notch-type`. Only DXF export converts every notch to a layer 4 slit.
+- `data-notch-type` and `data-seam-allowances`: one value per notch line segment (user, 2026-10-11). A 14-segment U-notch repeats its value 14 times.
+- Remove the Settings "Multisize Layout" choice when both all-sizes tabs exist (Layout.23; user, 2026-10-11).
 - Slit ends are never turn points. Slit depth uses half the local seam allowance width.
 - Use `test-seamly-layout-input/male_shirt_202610101837/male_shirt_R13_202610101837.dxf` for DXF.20.1. Leave DXF.20.3 unchanged.
 - Layout.61: graded nest + `# n` identifiers + `.rul` table. Grading only from the All sizes tab. The old grainline-reference suggestion is superseded.
