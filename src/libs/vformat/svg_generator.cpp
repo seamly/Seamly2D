@@ -430,8 +430,8 @@ QDomDocument SvgGenerator::renderSceneToDom(QGraphicsScene *scene)
 ///          every sibling hidden. Each pass therefore produces exactly one <g> that belongs
 ///          to one known component, which is tagged with the SVG data-* attributes:
 ///          data-type, data-type-number (per-type counter within the piece), data-parent
-///          (the piece name), data-turn-points (path components only), data-seam-allowances and
-///          data-notch-type (notch component only) and a name-based
+///          (the piece name), data-turn-points (path components only), data-notch-segments,
+///          data-seam-allowances and data-notch-type (notch component only) and a name-based
 ///          id ("<type>_<pieceName>", or "<type>_<n>_<pieceName>" for types that can repeat per piece). A piece
 ///          with no usable name falls back to the legacy "<pieceId>-<type>-<n>" id, and a
 ///          name-based id colliding with one already emitted (piece names aren't
@@ -519,7 +519,12 @@ void SvgGenerator::addComponentGroups(QGraphicsScene *scene, QGraphicsItem *item
         {
             component_group.setAttribute("data-turn-points", turn_points.toString());
         }
-        // Notch seam allowance widths and notch types, one per notch line.
+        // Notch line counts, seam allowance widths and notch types, one per notch.
+        const QVariant notch_segments = components.at(i)->data(PieceItemData::NotchSegments);
+        if (notch_segments.isValid())
+        {
+            component_group.setAttribute("data-notch-segments", notch_segments.toString());
+        }
         const QVariant seam_allowances = components.at(i)->data(PieceItemData::SeamAllowances);
         if (seam_allowances.isValid())
         {

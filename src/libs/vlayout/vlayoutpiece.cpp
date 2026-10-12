@@ -458,9 +458,10 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
     // Clip cutline notches to the cutline, as the canvas does.
     QVector<qreal> notchSeamAllowances;
     QStringList notchTypes;
+    QVector<int> notchLineCounts;
     const QVector<QLineF> notches = piece.createNotchLines(pattern, seamAllowance, true, &notchSeamAllowances,
-                                                           &notchTypes);
-    layoutPiece.setNotches(notches, notchSeamAllowances, notchTypes);
+                                                           &notchTypes, &notchLineCounts);
+    layoutPiece.setNotches(notches, notchLineCounts, notchSeamAllowances, notchTypes);
     layoutPiece.SetName(piece.GetName());
     // Keep the piece letter, cut count and fold flag for the SVG exporter's data-* attributes.
     layoutPiece.setPieceLetter(piece.GetPatternPieceData().GetLetter());
@@ -1066,25 +1067,63 @@ QVector<QLineF> VLayoutPiece::getNotches() const
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief setNotches sets the notch lines of a piece with a seam allowance.
- * @param seamAllowanceWidths seam allowance width in pixels per notch line. Any other count is dropped.
- * @param notchTypes notch type per notch line (notchTypeToString()). Any other count is dropped.
+ * @param notchLineCounts line count per notch, in line order. Dropped, together with the widths and types, unless
+ *        every count is positive and the counts sum to the line count.
+ * @param seamAllowanceWidths seam allowance width in pixels per notch. Any other count is dropped.
+ * @param notchTypes notch type per notch (notchTypeToString()). Any other count is dropped.
  */
-void VLayoutPiece::setNotches(const QVector<QLineF> &notches, const QVector<qreal> &seamAllowanceWidths,
-                              const QStringList &notchTypes)
+void VLayoutPiece::setNotches(const QVector<QLineF> &notches, const QVector<int> &notchLineCounts,
+                              const QVector<qreal> &seamAllowanceWidths, const QStringList &notchTypes)
 {
-    if (hasSeamAllowance())
+    if (!hasSeamAllowance())
     {
-        d->notches = notches;
-        d->notchSeamAllowances = seamAllowanceWidths.size() == notches.size() ? seamAllowanceWidths
-                                                                               : QVector<qreal>();
-        d->notchTypes = notchTypes.size() == notches.size() ? notchTypes : QStringList();
+        return;
+    }
+
+    d->notches = notches;
+    d->notchLineCounts.clear();
+    d->notchSeamAllowances.clear();
+    d->notchTypes.clear();
+
+    int lineCount = 0;
+    for (int count : notchLineCounts)
+    {
+        if (count <= 0)
+        {
+            return;
+        }
+        lineCount += count;
+    }
+    if (notchLineCounts.isEmpty() || lineCount != notches.size())
+    {
+        return;
+    }
+
+    d->notchLineCounts = notchLineCounts;
+    if (seamAllowanceWidths.size() == notchLineCounts.size())
+    {
+        d->notchSeamAllowances = seamAllowanceWidths;
+    }
+    if (notchTypes.size() == notchLineCounts.size())
+    {
+        d->notchTypes = notchTypes;
     }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief getNotchSeamAllowances returns the seam allowance width in pixels per notch line.
- * @return parallel to getNotches(); empty when unknown.
+ * @brief getNotchLineCounts returns the line count per notch.
+ * @return in getNotches() order, summing to its size; empty when unknown.
+ */
+QVector<int> VLayoutPiece::getNotchLineCounts() const
+{
+    return d->notchLineCounts;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getNotchSeamAllowances returns the seam allowance width in pixels per notch.
+ * @return parallel to getNotchLineCounts(); empty when unknown.
  */
 QVector<qreal> VLayoutPiece::getNotchSeamAllowances() const
 {
@@ -1093,8 +1132,8 @@ QVector<qreal> VLayoutPiece::getNotchSeamAllowances() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief getNotchTypes returns the notch type per notch line.
- * @return parallel to getNotches(); empty when unknown.
+ * @brief getNotchTypes returns the notch type per notch.
+ * @return parallel to getNotchLineCounts(); empty when unknown.
  */
 QStringList VLayoutPiece::getNotchTypes() const
 {
@@ -1594,7 +1633,17 @@ void VLayoutPiece::createNotchesItem(QGraphicsItem *parent) const
     item->setData(PieceItemData::ItemType, QStringLiteral("notch"));
     item->setPath(createNotchesPath());
 
-    // One width per notch line, in the order createNotchesPath() draws them.
+    // One line count per notch, in the order createNotchesPath() draws the lines.
+    if (!d->notchLineCounts.isEmpty())
+    {
+        QStringList counts;
+        for (int count : d->notchLineCounts)
+        {
+            counts.append(QString::number(count));
+        }
+        item->setData(PieceItemData::NotchSegments, counts.join(QLatin1Char(' ')));
+    }
+    // One width per notch, in the same order.
     if (!d->notchSeamAllowances.isEmpty())
     {
         QStringList widths;
@@ -1604,7 +1653,7 @@ void VLayoutPiece::createNotchesItem(QGraphicsItem *parent) const
         }
         item->setData(PieceItemData::SeamAllowances, widths.join(QLatin1Char(' ')));
     }
-    // One type per notch line, in the same order.
+    // One type per notch, in the same order.
     if (!d->notchTypes.isEmpty())
     {
         item->setData(PieceItemData::NotchTypes, d->notchTypes.join(QLatin1Char(' ')));

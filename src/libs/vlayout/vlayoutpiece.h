@@ -109,8 +109,10 @@ public:
 
     QVector<QLineF>           getNotches() const;
     void                      setNotches(const QVector<QLineF> &notches,
+                                         const QVector<int> &notchLineCounts = QVector<int>(),
                                          const QVector<qreal> &seamAllowanceWidths = QVector<qreal>(),
                                          const QStringList &notchTypes = QStringList());
+    QVector<int>              getNotchLineCounts() const;
     QVector<qreal>            getNotchSeamAllowances() const;
     QStringList               getNotchTypes() const;
 

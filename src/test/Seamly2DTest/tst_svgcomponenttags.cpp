@@ -303,6 +303,33 @@ QVector<QDomElement> groupsOfType(const QDomDocument &doc, const QString &type)
     }
     return result;
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief subpathCount counts the MoveTo commands of every path under a group.
+ */
+int subpathCount(const QDomElement &group)
+{
+    int count = 0;
+    const QDomNodeList paths = group.elementsByTagName(QStringLiteral("path"));
+    for (int i = 0; i < paths.size(); ++i)
+    {
+        const QString d = paths.at(i).toElement().attribute(QStringLiteral("d"));
+        count += d.count(QLatin1Char('M')) + d.count(QLatin1Char('m'));
+    }
+    return count;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief slitAndTNotchLines returns the lines of two notches: a slit (1 line), then a T notch (2 lines).
+ */
+QVector<QLineF> slitAndTNotchLines()
+{
+    return {QLineF(QPointF(10, 100), QPointF(15, 100)),
+            QLineF(QPointF(100, 10), QPointF(100, 15)),
+            QLineF(QPointF(97, 15), QPointF(103, 15))};
+}
 } // namespace
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -858,13 +885,12 @@ void TST_SvgComponentTags::UnknownTurnPointsEmitNoAttribute() const
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief NotchGroupCarriesSeamAllowances checks that the notch group lists one seam allowance width in mm per
- * notch line, and has no attribute when the widths are unknown.
+ * notch, and has no attribute when the widths are unknown.
  */
 void TST_SvgComponentTags::NotchGroupCarriesSeamAllowances() const
 {
     VLayoutPiece piece = makeTestPiece(QStringLiteral("Placket"));
-    piece.setNotches({QLineF(QPointF(10, 100), QPointF(15, 100)), QLineF(QPointF(100, 10), QPointF(100, 15))},
-                     {ToPixel(10, Unit::Mm), ToPixel(6.5, Unit::Mm)});
+    piece.setNotches(slitAndTNotchLines(), {1, 2}, {ToPixel(10, Unit::Mm), ToPixel(6.5, Unit::Mm)});
 
     const QDomDocument doc = exportPieceSvg(piece);
     QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
@@ -880,25 +906,36 @@ void TST_SvgComponentTags::NotchGroupCarriesSeamAllowances() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief NotchGroupCarriesNotchTypes checks that the notch group lists one Seamly2D notch type per notch line, and has
- * no attribute when the types are unknown.
+ * @brief NotchGroupCarriesNotchTypes checks that the notch group lists one Seamly2D notch type and one line count
+ * per notch, that the counts sum to the subpath count, and that unknown or wrong counts write neither attribute.
  */
 void TST_SvgComponentTags::NotchGroupCarriesNotchTypes() const
 {
+    const QStringList types {QStringLiteral("slit"), QStringLiteral("tNotch")};
     VLayoutPiece piece = makeTestPiece(QStringLiteral("Yoke"));
-    piece.setNotches({QLineF(QPointF(10, 100), QPointF(15, 100)), QLineF(QPointF(100, 10), QPointF(100, 15))},
-                     {}, {QStringLiteral("slit"), QStringLiteral("tNotch")});
+    piece.setNotches(slitAndTNotchLines(), {1, 2}, {}, types);
 
     const QDomDocument doc = exportPieceSvg(piece);
     QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
     const QVector<QDomElement> notches = groupsOfType(doc, QStringLiteral("notch"));
     QCOMPARE(notches.size(), 1);
     QCOMPARE(notches.at(0).attribute(QStringLiteral("data-notch-type")), QStringLiteral("slit tNotch"));
+    QCOMPARE(notches.at(0).attribute(QStringLiteral("data-notch-segments")), QStringLiteral("1 2"));
+    QCOMPARE(subpathCount(notches.at(0)), 3);
     QVERIFY(!notches.at(0).hasAttribute(QStringLiteral("data-seam-allowances")));
+
+    // Counts that do not sum to the line count are dropped together with the types.
+    piece.setNotches(slitAndTNotchLines(), {1, 1}, {}, types);
+    const QDomDocument wrong = exportPieceSvg(piece);
+    const QVector<QDomElement> wrongNotches = groupsOfType(wrong, QStringLiteral("notch"));
+    QCOMPARE(wrongNotches.size(), 1);
+    QVERIFY(!wrongNotches.at(0).hasAttribute(QStringLiteral("data-notch-segments")));
+    QVERIFY(!wrongNotches.at(0).hasAttribute(QStringLiteral("data-notch-type")));
 
     const QDomDocument unknown = exportPieceSvg(makeTestPiece(QStringLiteral("Cuff")));
     const QVector<QDomElement> unknownNotches = groupsOfType(unknown, QStringLiteral("notch"));
     QCOMPARE(unknownNotches.size(), 1);
+    QVERIFY(!unknownNotches.at(0).hasAttribute(QStringLiteral("data-notch-segments")));
     QVERIFY(!unknownNotches.at(0).hasAttribute(QStringLiteral("data-notch-type")));
 }
 

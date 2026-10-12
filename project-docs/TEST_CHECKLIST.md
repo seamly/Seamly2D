@@ -44,7 +44,7 @@ The setting reaches SeamlyLayout only when Seamly2D starts from this PowerShell 
 - [ ] Press Layout. Open the captured SVG in VS Code. Search:
   - [x] `data-quantity` on every `data-type="piece"` group.
   - [x] `data-on-fold="true"` on piece B only.
-  - [ ] `data-notch-type` on each notch group, one word per notch line segment. Word count = `M` count in `d` = `data-seam-allowances` value count.
+  - [ ] `data-notch-type` on each notch group, one word per notch. `data-seam-allowances` and `data-notch-segments` have the same value count. Sum of `data-notch-segments` = `M` count in `d`.
     --> too many words per notch line. Added a task to fix this to TODO_SEAMLYLAYOUT.md
 - [x] SeamlyLayout: Settings > Submit, then Create Layout. Export > DXF-ASTM (R13) > Standard. Open the `.dxf` in VS Code. Search `Quantity:`:
 

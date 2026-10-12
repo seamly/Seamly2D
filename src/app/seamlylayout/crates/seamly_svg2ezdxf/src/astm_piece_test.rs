@@ -284,6 +284,50 @@ mod tests {
         assert!(yoke.notches.iter().all(|n| n.kind == NotchKind::Slit));
     }
 
+    // @brief Built-in piece with a slit (width 10 mm) and a 14-segment U-notch (width 6 mm).
+    // @param segments `data-notch-segments` value.
+    // @details The U-notch is a half circle of radius 10 px into the top edge, centred on x = 600.
+    fn slit_and_u_notch(segments: &str) -> String {
+        // Slit first, then one `M … L …` subpath per U-notch chord.
+        let mut d = String::from("M 480,960 L 480,941");
+        let arc = |i: usize| {
+            let a = std::f64::consts::PI * (1.0 - i as f64 / 14.0);
+            (600.0 + 10.0 * a.cos(), 10.0 * a.sin())
+        }; // arc
+        for i in 0..14 {
+            let ((x0, y0), (x1, y1)) = (arc(i), arc(i + 1));
+            d.push_str(&format!(" M {x0},{y0} L {x1},{y1}"));
+        } // for each chord
+        format!(
+            r#"<svg viewBox="0 0 960 960" width="254mm" height="254mm" xmlns="http://www.w3.org/2000/svg">
+                 <g id="pattern-1" data-type="pattern" data-name="U Notch">
+                   <g id="piece_Yoke" data-type="piece" data-name="Yoke">
+                     <g data-type="seamline"><path d="M 0,0 L 960,0 L 960,960 L 0,960 Z"/></g>
+                     <g data-type="notch" data-notch-type="slit uNotch" data-seam-allowances="10.00 6.00"
+                        data-notch-segments="{segments}"><path d="{d}"/></g>
+                   </g>
+                 </g>
+               </svg>"#
+        )
+    }
+
+    #[test]
+    fn notch_segments_spread_each_notch_width_over_its_subpaths() {
+        let depths = |segments: &str| -> Vec<f64> {
+            let doc = Document::parse(&slit_and_u_notch(segments)).expect("fixture parses");
+            let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+            drawing.blocks[0].notches.iter().map(|n| n.depth).collect()
+        }; // depths
+        // 1 + 14 subpaths: the slit gets 10 mm, all 14 U-notch chords get 6 mm.
+        let paired = depths("1 14");
+        assert_eq!(paired.len(), 2, "touching chords form one notch");
+        assert!((paired[0] - 5.0).abs() < 1e-6 && (paired[1] - 3.0).abs() < 1e-6, "depths {paired:?}");
+        // Counts that do not sum to 15 are ignored: drawn depths, 19 px and 10 px.
+        let ignored = depths("1 13");
+        assert!((ignored[0] - 19.0 * MM_PER_PX).abs() < 1e-6, "depths {ignored:?}");
+        assert!((ignored[1] - 3.0).abs() > 0.1, "depths {ignored:?}");
+    }
+
     #[test]
     fn seam_allowance_at_is_cut_line_to_nearest_sew_line() {
         let p = Point::new;

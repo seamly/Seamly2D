@@ -547,19 +547,32 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
     block.notches = build_notches(&segments, &seam_allowances, &boundary_dense, sew_lines);
 } // fn extract_astm_piece
 
-// @brief Pair each notch subpath with its `data-seam-allowances` width (mm, one per subpath).
-// @details A missing or unparseable list, or one whose length differs from the
-//          subpath count, gives no widths: a wrong pairing is worse than none.
+// @brief Pair each notch subpath with its notch's `data-seam-allowances` width (mm).
+// @details `data-seam-allowances` holds one width per notch; `data-notch-segments`
+//          holds the subpath count of each notch, in `d` order. Without
+//          `data-notch-segments`, each width covers one subpath. Widths and counts
+//          of different lengths, counts that do not sum to the subpath count, or
+//          an unparseable list give no widths: a wrong pairing is worse than none.
 fn notch_polylines(element: &Element, lines: Vec<(Vec<Point>, bool)>) -> Vec<(Vec<Point>, Option<f64>)> {
+    // One width per notch, in mm.
     let widths: Option<Vec<f64>> = element
         .attributes
         .get("data-seam-allowances")
-        .and_then(|v| v.split_whitespace().map(|t| t.parse::<f64>().ok()).collect())
-        .filter(|w: &Vec<f64>| w.len() == lines.len());
+        .and_then(|v| v.split_whitespace().map(|t| t.parse::<f64>().ok()).collect());
+    // Subpath count per notch. An older SVG has no counts: one subpath per width.
+    let counts: Option<Vec<usize>> = match element.attributes.get("data-notch-segments") {
+        Some(v) => v.split_whitespace().map(|t| t.parse::<usize>().ok()).collect(),
+        None => widths.as_ref().map(|w| vec![1; w.len()]),
+    }; // counts
+    // Repeat each notch's width once per subpath, only when both lists fit the path.
+    let per_line: Option<Vec<f64>> = widths
+        .zip(counts)
+        .filter(|(w, c)| w.len() == c.len() && c.iter().sum::<usize>() == lines.len())
+        .map(|(w, c)| w.iter().zip(&c).flat_map(|(&width, &n)| std::iter::repeat(width).take(n)).collect());
     lines
         .into_iter()
         .enumerate()
-        .map(|(i, (p, _))| (p, widths.as_ref().map(|w| w[i])))
+        .map(|(i, (p, _))| (p, per_line.as_ref().map(|w| w[i])))
         .collect()
 } // fn notch_polylines
 

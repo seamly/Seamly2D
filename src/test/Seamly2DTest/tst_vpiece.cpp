@@ -663,6 +663,49 @@ VPiece squareSlitPiece(VContainer *data, bool builtIn, const QString &afterWidth
     return piece;
 }
 
+/**
+ * @brief Square piece with a slit notch on its top edge and a U notch on its right edge.
+ */
+VPiece slitAndUNotchPiece(VContainer *data)
+{
+    data->UpdateGObject(1, new VPointF(0, 0, "A1", 0, 0));
+    data->UpdateGObject(2, new VPointF(200, 0, "A2", 0, 0));
+    data->UpdateGObject(3, new VPointF(400, 0, "A3", 0, 0));
+    data->UpdateGObject(4, new VPointF(400, 200, "A4", 0, 0));
+    data->UpdateGObject(5, new VPointF(400, 400, "A5", 0, 0));
+    data->UpdateGObject(6, new VPointF(0, 400, "A6", 0, 0));
+
+    auto notchNode = [](quint32 id, NotchType type)
+    {
+        VPieceNode node(id, Tool::NodePoint);
+        node.setNotch(true);
+        node.setNotchType(type);
+        node.setNotchSubType(NotchSubType::Straightforward);
+        node.setNotchLength(5);
+        node.setNotchWidth(5);
+        node.setNotchCount(1);
+        node.setShowNotch(true);
+        node.setShowSeamlineNotch(false);
+        return node;
+    };
+
+    VPiece piece;
+    piece.SetSeamAllowance(true);
+    piece.SetSAWidth(notchTestSAWidth);
+    piece.GetPath().Append(VPieceNode(1, Tool::NodePoint));
+    piece.GetPath().Append(notchNode(2, NotchType::Slit));
+    piece.GetPath().Append(VPieceNode(3, Tool::NodePoint));
+    piece.GetPath().Append(notchNode(4, NotchType::UNotch));
+    piece.GetPath().Append(VPieceNode(5, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(6, Tool::NodePoint));
+
+    // Labels and grainline are not under test; hidden, they need no pattern document.
+    piece.GetPatternPieceData().SetVisible(false);
+    piece.GetPatternInfo().SetVisible(false);
+    piece.GetGrainlineGeometry().SetVisible(false);
+    return piece;
+}
+
 /// True when @p point lies on the polyline @p points.
 bool isOnPolyline(const QPointF &point, const QVector<QPointF> &points)
 {
@@ -810,8 +853,8 @@ void TST_VPiece::NotchSeamAllowanceWidths() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief NotchTypesFollowNodes checks that every notch line gets the type of its node, and that layout piece data
- * keeps it.
+ * @brief NotchTypesFollowNodes checks that every notch node gets one type, one width and its line count, and that
+ * layout piece data keeps them.
  */
 void TST_VPiece::NotchTypesFollowNodes() const
 {
@@ -819,18 +862,24 @@ void TST_VPiece::NotchTypesFollowNodes() const
     QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
     qApp->setPatternUnit(unit);
 
-    const VPiece piece = concaveDiamondNotchPiece(data.data());
+    const VPiece piece = slitAndUNotchPiece(data.data());
+    QVector<qreal> widths;
     QStringList types;
+    QVector<int> lineCounts;
     const QVector<QLineF> notches = piece.createNotchLines(data.data(), piece.seamAllowancePoints(data.data()),
-                                                           true, nullptr, &types);
+                                                           true, &widths, &types, &lineCounts);
 
-    QVERIFY(notches.size() > 1);
-    QCOMPARE(types.size(), notches.size());
-    for (const QString &type : std::as_const(types))
-    {
-        QCOMPARE(type, QStringLiteral("diamond"));
-    }
-    QCOMPARE(VLayoutPiece::Create(piece, data.data()).getNotchTypes(), types);
+    QCOMPARE(types, QStringList({QStringLiteral("slit"), QStringLiteral("uNotch")}));
+    QCOMPARE(widths.size(), 2);
+    QCOMPARE(lineCounts.size(), 2);
+    QCOMPARE(lineCounts.at(0), 1);
+    QVERIFY2(lineCounts.at(1) > 1, qPrintable(QString::number(lineCounts.at(1))));
+    QCOMPARE(lineCounts.at(0) + lineCounts.at(1), notches.size());
+
+    const VLayoutPiece layoutPiece = VLayoutPiece::Create(piece, data.data());
+    QCOMPARE(layoutPiece.getNotchTypes(), types);
+    QCOMPARE(layoutPiece.getNotchSeamAllowances(), widths);
+    QCOMPARE(layoutPiece.getNotchLineCounts(), lineCounts);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
