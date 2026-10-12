@@ -62,7 +62,7 @@ Same report. FrontPanel_M top edge, where the straight line meets the curve (L1 
 
 - Geometry is the same on both lines: tangent break 2.79° (L1) / 2.85° (L14) at the junction, 1.15° / 1.05° at the next dense vertex. Key-point angles 4.86° / 6.29° on both. Arc tangent through the next two key points: 1.57° / 1.62°.
 - No code change: the turn point stays. Any rule that changes L1 also changes L14.
-- [ ] DXF.22.1 User: report the contradiction to ApparelWerks (rick@apparelwerks.com). Until he replies, accept it as a reader advisory (user decision)
+- [ ] DXF.22.1 User: report the contradiction to ApparelWerks (rick@apparelwerks.com) after every other open task is complete. Until he replies, accept it as a reader advisory (user decision)
 
 ## [ ] Task DXF.3 — Write DXF R13 (AC1012)
 
