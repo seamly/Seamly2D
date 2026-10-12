@@ -43,6 +43,7 @@ Root causes are in `TODO_SEAMLYLAYOUT.md` under each task. One commit per step. 
 - D5 track `test-seamly-layout/` in git.
 - D6 `CLAUDE.md`: handover name fixed; missing richmond-shirt reference removed.
 - D7 FrontPanel (DXF.22): user reports to ApparelWerks; accept as reader advisory until he replies.
+- Layout.28 stays in `TODO_SEAMLYLAYOUT.md`: it affects the layout program.
 - On-fold quantity `N,0`: keep (checklist §6).
 - Blank `Sample Size:` and `Grade Rule Table:` when nothing grades: accepted (checklist §4).
 
@@ -72,7 +73,6 @@ Kept in the session scratchpad only (lost). To repeat a check: parse DXF group-c
 ### Priority 1 — User
 
 - Report DXF.22 to rick@apparelwerks.com: same FrontPanel corner, L1 "should be curve", L14 "agree"; earlier export the reverse.
-- Layout.28: keep in `TODO_SEAMLYLAYOUT.md`, or move to `TODO_SEAMLY2D.md`? Most work is in Seamly2D.
 
 ### Priority 2 — User: after the next MSI
 

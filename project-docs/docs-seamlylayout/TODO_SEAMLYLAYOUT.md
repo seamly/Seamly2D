@@ -220,6 +220,8 @@ A piece with a built-in seam allowance has no seam line. Its main path is the cu
 
 Seamly2D computes the seam line: only Seamly2D knows the seam allowance width at each node.
 
+The task stays in this file: it changes what SeamlyLayout lays out and exports (user decision).
+
 - [ ] Layout.28.1 Seamly2D: seam line = main path offset inward by each node's width (wider of before and after; piece width when the node sets none)
 - [ ] Layout.28.2 Handoff of a built-in piece: main path as `cutline`, computed line as `seamline`. Same rule for a hidden seam line as a piece without a built-in seam allowance
 - [ ] Layout.28.3 SeamlyLayout canvas, Adjust Mode and every export draw the seam line. Packing still uses the cut line
