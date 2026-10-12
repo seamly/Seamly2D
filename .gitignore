@@ -252,7 +252,7 @@ src/app/seamlylayout/qt_frontend/build/
 !src/app/seamlylayout/.claude/
 !src/app/seamlylayout/.vs/
 # track seamlylayout output files, and top-level test input, for testing
-!test-seamly-layout-input/
+!test-seamly-layout/
 !src/app/seamlylayout/output/
 # track seamlylayout local build files for testing
 !src/app/seamlylayout/qt_frontend/CMakeFiles/
