@@ -2,72 +2,88 @@
 
 ## Current status
 
-### Late 2026-10-11 — tasks filed, docs only
+### 2026-10-12 — checklist reviewed, fix plan approved, no code changed
 
-- On `run-seamlyLayout`. No code changed.
-- New in `TODO_SEAMLYLAYOUT.md`:
-  - Layout.22: rename "All sizes" → "All sizes - group".
-  - Layout.23: add "All sizes - marker" tab; remove the "Multisize Layout" setting.
-  - Layout.24: tab name before the stamp in multisize export file names.
-  - Layout.25: Marker layout extends the media height until every piece fits.
-  - Layout.26: Missing Piece Data dialog — one line per piece, scroll, Cyrillic names, same names.
-  - Layout.27: jacket2 grading fails; no `.rul`.
-  - Layout.28: built-in seam allowance — compute and show the seam line.
-- Suggested order: Layout.22 → 23 → 25 → 27, then 24, 26, 28.
-- Layout.26/27 evidence (untracked user files): `test-seamly-layout-input/DXF_message_screenshot_1.png`, `_2.png`, `jacket2_40-146_R13_202610112059.dxf`.
-- Docs: `data-notch-type` and `data-seam-allowances` hold one value per notch line segment, not per notch. `TEST_CHECKLIST.md` env-var lines end in `;`.
+- Branch `task-checklist-fixes` from `run-seamlyLayout` (`4db974dc60`). Merged `--no-ff` into `run-seamlyLayout` with skip-ci (docs and test data only). Not pushed: the user pushes.
+- Commits on the branch:
+  - Checklist results of the jacket2 test run; handover file renamed to `SESSION_HANDOVER.md`.
+  - Test files moved: `test-seamly-layout-input/` → `test-seamly-layout/`. `.gitignore` tracks the new folder. aw.fyi PDFs force-added. `D6673-10-expired.docx` stays ignored (copyright).
+  - Tracking: `TODO_SEAMLYLAYOUT.md` (decisions, root causes, Layout.27.9, 27.10, 29, 30), `TODO_DXF.md` DXF.22.1, `CLAUDE.md` handover name, this file.
+- `develop` has 2 CI commits (`42fcec04ae`, `05969e1538`) not merged into `run-seamlyLayout`. They touch `.github/workflows/`: merge per `CLAUDE.md` "Merge from Upstream `develop`" before the next code task branch.
 
-### Earlier 2026-10-11
+### Approved plan (user, 2026-10-12)
 
-2026-10-11. Branch `task-producer-attributes`, from `run-seamlyLayout` (`035a7a7474`).
+Root causes are in `TODO_SEAMLYLAYOUT.md` under each task. One commit per step. No task names or dates in code comments, briefs or commits.
 
-- Done in code: Layout.66, Layout.38.2.1, Layout.61.1–61.6.
-- `cargo test --workspace`: pass. `ctest --preset debug`: pass (6/6).
-- `local_build_msi.ps1`: pass. Version 26.10.1115; `nmake check` pass; MSI `packaging/windows/seamly-msi/x64/seamly-x64.msi`. ICE61 warning only (known).
-- Committed, merged `--no-ff` into `run-seamlyLayout` with skip-ci, pushed. The WIP commit was rewritten without task names.
-- Layout.66 moved to `TODO_COMPLETED.md`. Layout.61 and Layout.38.2 stay open in `TODO_SEAMLYLAYOUT.md`: user checks remain.
+| Step | App | Change | Task | Status |
+|---|---|---|---|---|
+| 1 | Seamly2D | Notch attributes: one value per notch + `data-notch-segments` | Layout.29.1–29.2 | open |
+| 2 | Seamly2D | Multisize: a node that is a turn point in any size is one in every size | Layout.27.3 | open |
+| 3 | Build | `copyToDestdir` always copies on Windows | Layout.30 | open |
+| 4 | SeamlyLayout | Read `data-notch-segments` | Layout.29.3 | open |
+| 5 | SeamlyLayout | DXF `Piece Name:` from `data-name`, `\U+XXXX` escapes, same for every size; duplicates numbered `Detail (3)`; dialogs keep the original name | Layout.26.3–26.5 | open |
+| 6 | SeamlyLayout + QML | Missing Piece Data dialog: one line per piece, scroll area | Layout.26.1–26.2 | open |
+| 7 | SeamlyLayout | Grading: snap key points to a vertex within 0.01 mm | Layout.27.9 | open |
+| 8 | SeamlyLayout | Grading warnings | Layout.27.2, 27.4–27.6, 27.8 | open |
+| 9 | SeamlyLayout | Marker: ungradable piece keeps every placed size, `Detail (3) 240` | Layout.27.10 | open |
+| 10 | SeamlyLayout | Extend media height until every piece fits, every multisize tab | Layout.25 | open |
+| 11 | All | C++ and Rust tests | each task | open |
+| 12 | Docs | `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`, compliance doc, new `TEST_CHECKLIST.md` | each task | open |
+| 13 | Verify | `cargo test --workspace`, `ctest --preset debug`, `local_build_msi.ps1`; merge `--no-ff`; full CI (`common.pri` changed) | — | open |
 
-### Changed this session
+- Not in this round: Layout.22, 23, 24, 28. Next round: Layout.22 → 23 → 24.
+- Suggested order: 7 (small, Rust only) → 5 → 6 → 8 → 1 + 4 → 2 → 9 → 10 → 3.
 
-- Layout.66 consumer: `converter::quantity_from_piece` (`data-quantity` first, else "Cut N"; on fold or odd → `N,0`). Missing-data text now says "no piece quantity or "Cut N" label line".
-- Layout.38.2.1: `cxxqt_bridge/src/handoff_capture.rs`; `import_svg_document` writes the received SVG to `SEAMLYLAYOUT_SAVE_HANDOFF`. Relative path or failed write → `import_warning`; import continues.
-- Layout.61: `astm_contour::grade_contours`, `seamly_svg2ezdxf/src/astm_grading.rs` (`grade_drawing`), `ezdxf2dxfastm/src/grade_rule_file.rs` (`.rul`), writer graded blocks + layer 5 + `# n`, bridge `DxfGradingSource`; `do_export_dxf` now returns warnings → `export_warning`.
-- Grading trigger: `export_dxf` with `layout_views.active_size() == None` and a multisize input with ≥ 2 sizes and a base size.
-- Ungradable piece (turn points, lines or notch counts differ; no rigid fit; mirrored) → sample size block only + warning. Sample size not in the layout → piece ungraded, all sizes, warning.
-- Fixtures: `ezdxf2dxfastm/test_data/multisize_grading_input.svg`, `multisize_grading_layout.svg` (generator script was in the scratchpad, not kept).
-- Docs: compliance doc "Grading" section; `SVG-DATA-ATTRIBUTES.md` "Capture a handoff", `data-parent` now read; test checklist `project-docs/TEST_CHECKLIST.md`.
+### User decisions (2026-10-12)
 
-### Risk
+- D1 notch format: one value per notch in `data-notch-type` and `data-seam-allowances`; new `data-notch-segments` = line count per notch.
+- D2 non-ASCII DXF name: AutoCAD `\U+XXXX` escapes, not transliteration.
+- D3 media height extension: every multisize tab (All sizes, Nested or Marker, and each size tab).
+- D4 Marker, piece that cannot grade: write every placed size as its own piece, size in the name.
+- D5 track `test-seamly-layout/` in git.
+- D6 `CLAUDE.md`: handover name fixed; missing richmond-shirt reference removed.
+- D7 FrontPanel (DXF.22): user reports to ApparelWerks; accept as reader advisory until he replies.
+- On-fold quantity `N,0`: keep (checklist §6).
+- Blank `Sample Size:` and `Grade Rule Table:` when nothing grades: accepted (checklist §4).
 
-- Real patterns may differ in turn points between sizes (tangent-break heuristic near 1°). Those pieces fall back to the sample size. Only synthetic fixtures tested; HJA capture will show the real rate.
+### Checklist findings, verified
+
+- §2 notch words per segment → Layout.29.
+- §4 `Piece Name:piece-1_s220_M`: Cyrillic name emptied by `sanitize_ascii` → Layout.26.4.
+- §4 aw.fyi departures and "L5 endpoint mismatch 103.74": 6 pieces named "Detail" merged by aw.fyi. L5 per piece is correct → Layout.26.5.
+- §4 4 "Detail" pieces ungraded: producer turn points flip by size → Layout.27.3.
+- §4 duplicate vertices on layers 84/87 in graded files → Layout.27.9.
+- §4 Marker: 96 of 208 placed; grading dropped 71 placed blocks → Layout.25, 27.10.
+- §4 single size, no `# 1`: expected. `# 1` is in the All sizes file, size 500 blocks only.
+- Installed jacket2 has Cyrillic names: stale local `bin/samples` → Layout.30.
+- Checklist text errors to fix in the next checklist: no `Front` piece in jacket2; §3 "Open the pattern `seamly2d`"; §4 Marker aw.fyi step says "Nested 'Single Size'"; `test-sesamly-layout` ×3.
+
+### Analysis scripts
+
+Kept in the session scratchpad only (lost). To repeat a check: parse DXF group-code pairs; count layer 2 `POINT`s per block (turn points by size); compare consecutive `VERTEX` 10/20 values within 0.01 mm (duplicates); read layer 5 `LINE` 10/20/11/21 (grade reference).
 
 ## TODO by priority and owner
 
-Priority sets the handover order. Developer and user identify the work type, not a named assignee.
+### Priority 1 — Developer: approved plan
 
-### Priority 1 — User: resolve quantity and report questions
+- Merge `develop` (2 CI commits) into `run-seamlyLayout` first.
+- New task branch from `run-seamlyLayout`; implement the plan table above.
 
-- Layout.25: do the size tabs also extend the media height, or only the marker tab?
-- Layout.26.4: DXF `Piece Name:` for a Cyrillic name — transliterate, or `\U+XXXX` escapes?
+### Priority 1 — User
+
+- Report DXF.22 to rick@apparelwerks.com: same FrontPanel corner, L1 "should be curve", L14 "agree"; earlier export the reverse.
 - Layout.28: keep in `TODO_SEAMLYLAYOUT.md`, or move to `TODO_SEAMLY2D.md`? Most work is in Seamly2D.
-- File a task? The DXF header writes empty `Sample Size:` and `Grade Rule Table:` when no piece grades.
-- Installed sample `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy in `src/app/share/samples/patterns/` has English. Does the MSI ship a different sample?
-- Confirm the on-fold quantity `N,0`.
-- Decide DXF.22: FrontPanel layer 1 reports “should be curve”; layer 14 agrees with the same geometry. Report to ApparelWerks or accept.
 
-### Priority 2 — Developer: after user captures
+### Priority 2 — User: after the next MSI
 
-- Layout.38.2.2: add the HJA handoff fixture to `crates/cxxqt_bridge/test_data/`, then an end-to-end layout + graded export test.
-- Fix any piece the HJA graded export leaves ungraded.
+- Capture the jacket2 handoff with `SEAMLYLAYOUT_SAVE_HANDOFF` (fixture for Layout.27.7).
+- Capture the HJA handoff (`test-seamly-layout/patterns/HJA.sm2d`) for Layout.38.2.2.
+- Run the new `TEST_CHECKLIST.md`. CLO3D checks last.
+
+### Priority 2 — Developer: after the user captures
+
+- Layout.27.7 and Layout.38.2.2 fixtures in `crates/cxxqt_bridge/test_data/`, end-to-end graded export tests.
 - Plan **Layout.15** separately.
-
-### Priority 2 — User: verify the built app
-
-- Follow `project-docs/TEST_CHECKLIST.md` (sections 0–6).
-- Check multisize Nested/Marker layouts, size tabs, Adjust Mode, and one export file per tab.
-- Check export names, Annotated text, missing-data warnings, and cancellation in the running app.
-- Check PS/EPS with Ghostscript, Illustrator, or Inkscape; check HPGL in a viewer or on a plotter.
-- Check JPG export/viewing, new-piece labels and grainlines, roll-frame adjustment, and the combined C++/Rust debug log.
 
 ### Priority 3 — Developer: reconcile older unresolved items
 
@@ -80,6 +96,7 @@ These items have no recorded resolution. Check their TODO documents and reposito
 - Correct `TEST_MSI_WIN_X64_Test_Case_1b-i.md`: split post-install and post-first-run checks in B.0a.
 - Remove duplicate path leaves; replace `%DATAROOTROOT%` with `%DATAROOT%`.
 - In B.0b-iii, replace the empty-file reference `qt6_seamly2d.ini` with `qt6_seamlyme.ini`.
+- `CLAUDE.md` Key References names `project-docs/NEW-ATTRIBUTES.csv`; the file is `project-docs/docs-data/NEW-ATTRIBUTES.csv`.
 
 ### Priority 3 — User: finish installer checks
 
@@ -91,19 +108,18 @@ These items have no recorded resolution. Check their TODO documents and reposito
 
 - **Layout.16, Layout.51, Layout.63, Layout.64:** remain blocked. The latest entry gives no release condition.
 - Layout.63 drill holes and Layout.64 stripe/plaid lines have no Seamly2D source.
-- **Layout.38.2.2 fixture/test:** waits for the user-supplied HJA capture.
+- **Layout.27.7, Layout.38.2.2 fixtures:** wait for the user's captures.
 - **Manual checks:** require the user's installed app, CLO3D, aw.fyi reports, or test laptop.
 
 ## Decisions to retain
 
 - Keep `data-notch-type`. Only DXF export converts every notch to a layer 4 slit.
-- `data-notch-type` and `data-seam-allowances`: one value per notch line segment (user, 2026-10-11). A 14-segment U-notch repeats its value 14 times.
-- Remove the Settings "Multisize Layout" choice when both all-sizes tabs exist (Layout.23; user, 2026-10-11).
+- Notch attributes: one value per notch (D1, 2026-10-12). Replaces "one value per segment" (2026-10-11).
 - Slit ends are never turn points. Slit depth uses half the local seam allowance width.
-- Use `test-seamly-layout-input/male_shirt_202610101837/male_shirt_R13_202610101837.dxf` for DXF.20.1. Leave DXF.20.3 unchanged.
-- Layout.61: graded nest + `# n` identifiers + `.rul` table. Grading only from the All sizes tab. The old grainline-reference suggestion is superseded.
+- Remove the Settings "Multisize Layout" choice when both all-sizes tabs exist (Layout.23).
+- Layout.61: graded nest + `# n` identifiers + `.rul` table. Grading only from the All sizes tab.
 - CLO3D export uses R13 (`AC1012`). Piece text uses `Size Name:` and omits `Category:`.
-- Build only with `packaging/windows/local_build_msi.ps1`. Do not use `build.ps1` or `qd.ps1`.
+- Build only with `packaging/windows/local_build_msi.ps1`.
 - Default data root is `~/seamly2d`. Fresh installs allow a change; updates and repairs keep the recorded root read-only.
 - Keep CLI export until SeamlyLayout CLI parity. Keep `exportLayoutAs()` through File → Export As.
 - On upstream merges, follow `CLAUDE.md`. Remove restored retired PS/EPS functions; no early upstream pdftops PR is approved.
@@ -114,15 +130,13 @@ These items have no recorded resolution. Check their TODO documents and reposito
 2. Use VS 18 `vcvars64`, then configure PATH and QMAKE.
 3. From `qt_frontend/`, run `cmake --build --preset debug`, then `ctest --preset debug`.
 4. Run `packaging/windows/local_build_msi.ps1` with tests and validation enabled before each merge.
-5. Run the manual QA checklist against the resulting MSI.
-
-Layout.66 C++ tests: `NotchGroupCarriesNotchTypes`, `PieceCarriesQuantityAndFold`, `NotchTypesFollowNodes`, and `LayoutPieceKeepsQuantityAndFold`.
+5. Run the manual checklist against the resulting MSI.
 
 - Put MSVC `link.exe` before Git's GNU `link` on PATH.
 - Use a `.cmd` file; prepend `%VCToolsInstallDir%bin\Hostx64\x64` after `vcvars64` runs.
 - For qmake suite logs, set `SEAMLY_TEST_LOG_DIR` and use each suite's `target_wrapper.bat`.
 - For a CMake Qt suite, use `-o <file>,txt`. Console silence does not prove a pass.
-- If a build timeout recurs, capture a process dump while the process hangs.
+- Release SeamlyLayout builds write no Rust log lines (`log_to_file` is a no-op).
 - For installer checks, capture `local_install_msi.ps1 -Phase Baseline` before installation.
 - Run the MSI wizard from an elevated shell. Do not use `/quiet` for manual checks.
 
@@ -130,16 +144,12 @@ Layout.66 C++ tests: `NotchGroupCarriesNotchTypes`, `PieceCarriesQuantityAndFold
 
 - Inspect `git status` and `git stash list` before changing branches or committing.
 - Do not commit or discard user edits without authorization.
-- Protect both macOS `Info.plist` files and `src/libs/vmisc/projectversion.*`; builds rewrite them (now stamped 26.10.1115).
-- `SESSION_HANDOVER_simplified.md` supersedes `SESSION_HANDOVER.md` (user decision). `SESSION_HANDOVER.md` holds uncommitted user edits; do not commit it unasked.
-- Protect user edits in `CLAUDE.md`, `TODO_DXF.md`, `scripts/prompt_testing.txt`, and `test-seamly-layout-input/*`.
-- Keep the copied aw.fyi reports in `male_shirt_202610101837/` untracked. Do not commit them.
-- Inspect older stashes by content. Their recorded `stash@{n}` positions may have changed.
-- Older stash notes name `task-grainline-name-ids`, `task-seamlylayout-tight-packing`, and a layout workflow document edit.
+- Protect both macOS `Info.plist` files and `src/libs/vmisc/projectversion.*`; builds rewrite them (stamped 26.10.1115).
+- Protect user edits in `CLAUDE.md`, `TODO_DXF.md`, `scripts/prompt_testing.txt`, and `test-seamly-layout/`.
+- Never commit `test-seamly-layout/D6673-10-expired.docx`.
+- Inspect older stashes by content. `stash@{0}` and `stash@{1}` hold a layout workflow document edit.
 
 ## Authoritative documents
-
-Links are relative to the project repository. The supplied attachment does not include these documents.
 
 ### SeamlyLayout
 
@@ -152,26 +162,24 @@ Links are relative to the project repository. The supplied attachment does not i
 
 ### SeamlyMe
 
--[SeamlyMe TODO](project-docs\docs-seamlyme\TODO_SEAMLYME.md)
+- [SeamlyMe TODO](project-docs/docs-seamlyme/TODO_SEAMLYME.md)
 
 ### Installer
 
-- [Installer TODO](project-docs/docs-installer\TODO_INSTALLER.md)
+- [Installer TODO](project-docs/docs-installer/TODO_INSTALLER.md)
 - [MSI test case TODO](project-docs/TODO_MSI_WIN_X64_Test_Case_1b-i.md)
 - [MSI test case](project-docs/TEST_MSI_WIN_X64_Test_Case_1b-i.md)
 - [Windows packaging instructions](packaging/windows/README.md)
-- [MacOS installer](project-docs\docs-installer\TODO_INSTALLER_MACOSX.md)
-- [Linux installer](project-docs\docs-installer\TODO_INSTALLER_LINUX_APPIMAGE.md)
-
-Consult `README_MSI_WORKFLOW.md` for shipped packaging decisions; the source does not specify its directory.
+- [macOS installer](project-docs/docs-installer/TODO_INSTALLER_MACOSX.md)
+- [Linux installer](project-docs/docs-installer/TODO_INSTALLER_LINUX_APPIMAGE.md)
 
 ### CLI
 
-- [CLI TODO](project-docs\docs-cli\TODO_CLI.md)
+- [CLI TODO](project-docs/docs-cli/TODO_CLI.md)
 
 ### CICD
 
-- [Code Signing](project-docs\docs-cicd\TODO_CODE_SIGNING.md)
+- [Code Signing](project-docs/docs-cicd/TODO_CODE_SIGNING.md)
 
 ### Completed Tasks
 

@@ -156,7 +156,9 @@ Default name of a multisize export: `<base>[_<segment>]_<tab>_<stamp>[_tiled].<e
 
 ## [ ] Task Layout.25 — Multisize Marker layout: extend the media height until every piece fits
 
-Depends on Layout.23. Applies to the "All sizes - marker" tab. Today a piece that does not fit is left out, and a warning names it.
+Applies to every multisize tab: "All sizes" (Nested or Marker), and each size tab (user decision: D3). It does not wait for Layout.23; after Layout.23 the rule covers both all-sizes tabs. Today a piece that does not fit is left out, and a warning names it.
+
+Evidence (jacket2, Marker, 48 in × 500 in paper roll): the pack placed 96 of 208 pieces. `test-seamly-layout/layouts/jacket2/jacket2_marker_screenshot_1.png`.
 
 - [ ] Layout.25.1 When the pack leaves pieces out, increase the media height and pack again until every piece fits
 - [ ] Layout.25.2 Media types: paper sheet, paper roll (500 in default length), fabric
@@ -167,27 +169,50 @@ Depends on Layout.23. Applies to the "All sizes - marker" tab. Today a piece tha
 
 ## [ ] Task Layout.26 — DXF-ASTM Missing Piece Data dialog: one readable line per piece
 
-Found with the installed sample `jacket2_40-146.sm2d` (`gost_man_ru.smms`), "All sizes" tab, Marker. Evidence: `test-seamly-layout-input/DXF_message_screenshot_1.png`. The pattern hides each piece label and grainline (`visible="false"`), so those warnings are correct.
+Found with the installed sample `jacket2_40-146.sm2d` (`gost_man_ru.smms`), "All sizes" tab, Marker. Evidence: `test-seamly-layout/layouts/jacket2/jacket2_marker_screenshot_2.png`, `jacket2_nested_screenshot_1.png`. The installed sample has Cyrillic names because the local MSI ships stale copies (Layout.30). The pattern hides each piece label and grainline (`visible="false"`), so those warnings are correct.
 
 - [ ] Layout.26.1 One line per piece, not one per placed size: group the blocks by `data-parent` (piece-set id)
 - [ ] Layout.26.2 The dialog clips its text: the last line is not visible. Add a scroll area; keep the buttons visible
 - [ ] Layout.26.3 Non-ASCII names: `sanitize_ascii` empties "Подборт" and "Комір", so the dialog shows the block id `piece-201_s720_M`. Show the `data-name` text in dialogs and export warnings
-- [ ] Layout.26.4 DXF `Piece Name:` for a non-ASCII name is the block id today. Open decision: transliterate to ASCII, or write `\U+XXXX` escapes
-- [ ] Layout.26.5 Pieces with the same name (6 × "Detail") cannot be told apart. Add the piece letter, else the piece number: "Detail (3)"
+- [ ] Layout.26.4 DXF `Piece Name:` for a non-ASCII name is the block id today, and it differs per size, so aw.fyi cannot group the sizes. Write each non-ASCII character as an AutoCAD `\U+XXXX` escape: "Комір" → `\U+041A\U+043E\U+043C\U+0456\U+0440` (user decision: D2). Every size of a piece gets the same name
+- [ ] Layout.26.5 Pieces with the same name (6 × "Detail") cannot be told apart. Add the piece letter, else the piece number: "Detail (3)". Applies also to the DXF `Piece Name:`: aw.fyi merges the 6 "Detail" pieces into one. That merge causes the aw.fyi departures "Sample size points incomplete", "Excluded layers present in graded sizes" and "L5 endpoint mismatch 103.74" (checked: per piece, L5 is a pure translation)
 - [ ] Layout.26.6 Tests: Rust dialog text — one line per piece set, Cyrillic name kept, same names numbered
 
 ## [ ] Task Layout.27 — DXF-ASTM grading fails for jacket2_40-146 from the "All sizes" tab
 
-Same export as Layout.26. Evidence: `test-seamly-layout-input/DXF_message_screenshot_2.png`, `test-seamly-layout-input/jacket2_40-146_R13_202610112059.dxf`. 8 pieces in sizes 220–720; the Marker layout placed 25 blocks. No piece graded: no graded nest, no `.rul`.
+Evidence: `test-seamly-layout/layouts/jacket2/` — `jacket2_nested_screenshot_2.png`, `jacket2_marker_screenshot_3.png`, the `nested_allsizes` and `marker_allsizes` DXF files and aw.fyi reports. 8 pieces in sizes 220–720.
+
+- Nested: 4 pieces graded; 4 "Detail" pieces fell back to size 500.
+- Marker: the layout placed 96 of 208 pieces (Layout.25). 4 pieces lost size 500; the other 4 failed the turn point check, so grading removed 71 placed blocks. The file has 25 blocks and no `.rul`.
 
 - [ ] Layout.27.1 "size 500 is not in the layout" (3 pieces): the Marker layout left the sample size block out. Layout.25 fixes this; export again and check
 - [ ] Layout.27.2 When the layout left the sample size block out, the warning says so: "size 500 does not fit the media"
-- [ ] Layout.27.3 "the sizes have different turn points" (4 "Detail" pieces): capture the handoff with `SEAMLYLAYOUT_SAVE_HANDOFF`; find which size differs and why; fix the producer or `astm_contour::grade_contours`. Suspect: the tangent-break turn point test near 1° flips between sizes
+- [ ] Layout.27.3 "the sizes have different turn points" (4 "Detail" pieces). Cause (checked in the per-size Export-all-tabs DXF files, layer 2 counts): Seamly2D's `VAbstractPiece::turnPointIndices` flips at near-limit corners as the size changes. Piece 3: 11 → 10 from size 360; piece 1: 12 → 14/16 at 660–700; piece 6: 8 → 10 from 660; piece 7: 8 ↔ 10 from 520. Fix in the producer: after `prepareMultisizePieceLists`, a piece node that is a turn point in any size is a turn point in every size (seam line, cut line, internal paths). Needs the node vertex indices of each path in `VLayoutPiece` / `VLayoutPiecePath`. Skip a path whose node count differs between sizes
 - [ ] Layout.27.4 `grade_anchors` also returns None when a key point is not on the dense line. That case gets its own message
 - [ ] Layout.27.5 The turn point warning names the first size that differs from the sample size
 - [ ] Layout.27.6 Warnings use the piece names from Layout.26.3 and Layout.26.5
 - [ ] Layout.27.7 Fixture: the jacket2 handoff in `crates/cxxqt_bridge/test_data/`; end-to-end test: every piece graded, `.rul` file written
 - [ ] Layout.27.8 No `.rul` file: `astm_grading::grade_drawing` sets a rule table only when one piece or more grades. When no piece grades, "Export Complete" says "No piece graded: no .rul file written"
+- [ ] Layout.27.9 Duplicate vertices: aw.fyi reports layers 84 (54) and 87 (450) in the graded nested file only. `GradeSize::vertex_at` inserts a key point 0.000001–0.01 mm from a dense vertex (`SAME_VERTEX_MM` = 1e-6). Snap to the vertex within 0.01 mm; drop a curve key point that lands on the vertex of the key point before or after it. Test: no consecutive dense or reduced vertices closer than 0.01 mm
+- [ ] Layout.27.10 Marker layout, piece that cannot grade: write every placed size as its own ungraded piece, size in the piece name: "Detail (3) 240" (user decision: D4). Today only the sample size is written, so placed cut pieces are lost. Nested keeps the sample size only: its sizes overlap
+
+## [ ] Task Layout.29 — Notch attributes: one value per notch, not per line segment
+
+Found in `TEST_CHECKLIST.md` §2: BackPanel `data-notch-type` holds 15 words for 2 notches (`slit` + 14 × `uNotch`). One word per notch (user decision: D1).
+
+- [ ] Layout.29.1 Seamly2D: `VPiece::createNotchLines` returns one type and one width per notch node, and the line count of each notch
+- [ ] Layout.29.2 `VLayoutPiece`: store per-notch types, widths and line counts. `createNotchesItem` writes `data-notch-type` and `data-seam-allowances` (one value per notch) and `data-notch-segments` (line count per notch, `d` order). Sum of `data-notch-segments` = `M` count in `d`
+- [ ] Layout.29.3 SeamlyLayout `converter::notch_polylines`: spread each per-notch width over its segments with `data-notch-segments`. A list of the wrong length is ignored
+- [ ] Layout.29.4 Tests: `TST_SvgComponentTags::NotchGroupCarriesNotchTypes`, `TST_VPiece::NotchTypesFollowNodes`, Rust `notch_polylines` with a 14-segment U-notch
+- [ ] Layout.29.5 Docs: `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`, compliance doc "Notch rules", `TEST_CHECKLIST.md`
+
+## [ ] Task Layout.30 — Local MSI ships stale sample patterns
+
+The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`src/app/share/samples/patterns/`) has English names. `copyToDestdir` in `common.pri` skips a file that exists, so `src/app/seamly2d/bin/samples` and `src/app/seamlyme/bin/samples` keep copies from 2026-08-10. `smsi.ps1` stages those `bin` folders. CI builds from a clean checkout and is not affected.
+
+- [ ] Layout.30.1 `common.pri` `copyToDestdir`: on Windows copy every file on each link, not only a missing one
+- [ ] Layout.30.2 Check: after `local_build_msi.ps1`, `packaging/windows/seamly-msi/x64/parent/samples/patterns/jacket2_40-146.sm2d` matches the repo copy
+- [ ] Layout.30.3 `common.pri` is a `*.pri` change: the merge commit runs full CI (no skip-ci token)
 
 ## [ ] Task Layout.28 — Built-in seam allowance: show the seam line
 
