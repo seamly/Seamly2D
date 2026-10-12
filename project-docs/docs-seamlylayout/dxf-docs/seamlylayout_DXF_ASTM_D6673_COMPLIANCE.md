@@ -100,6 +100,7 @@ A multisize layout exported from the **All sizes** tab is graded (D6673 §4.3.1.
 - Input: the layout DOM (every size of every piece, placed) and the handoff DOM (every size at its drafted position).
 - A piece's sizes share the piece `data-parent` (piece-set id). Blocks of one piece are written together, in `data-sizes` order.
 - Key points: `grade_contours` gives every size the same turn points and the same curve points. Curve point j sits at the same arc-length fraction of the same span in every size. Curve points are added until every size passes the 0.25 mm spline check, then dropped where no size needs them.
+- Duplicate vertices: a key point within 0.01 mm of a dense vertex snaps to that vertex, so grading inserts no vertex within 0.01 mm of another. A curve point within 0.01 mm of a span's turn point, or on the vertex of the key point before or after it, in any size, is dropped.
 - Grading runs in draft space: a size differs from the sample size only by growth there.
 - Rule = growth of one key point or notch from the sample size, per size. Rules equal within 0.01 mm share one identifier. Zero growth is a rule too (§4.3.1.4).
 - Sample size block: every layer, full piece system text, `# n` TEXT on layers 1, 4, 8, 11, 14 at each graded point.
