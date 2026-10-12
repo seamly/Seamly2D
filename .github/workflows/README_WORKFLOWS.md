@@ -45,6 +45,14 @@ Each leg installs one Qt 6.11.1 kit, builds the apps, then runs [`smsi.ps1`](../
 
 `windows-msi.yml` built the same two `.msi` packages on a `packaging/windows/**` path trigger. `ci.yml`'s `windows-msi` job (described above) already builds both arches and feeds `publish`, so the file only duplicated the work and gave the build steps a second copy to drift out of step. The Windows packaging description now lives in the [CI](ci.yml) section above.
 
+### [Weblate](auto-merge-weblate.yml)
+
+- Approves and auto-merges trusted Weblate translation PRs (`*.ts` / `*.pro` only).
+
+### Integration Testing
+
+- See the [PR template](../PULL_REQUEST_TEMPLATE.md).
+
 ## Code Signing Workflow
 
 ### Integrated Signing Process

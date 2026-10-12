@@ -1,6 +1,6 @@
 name: CI
 
-# for a description, see README.md in this folder
+# For a description, see README_WORKFLOWS.md in this folder
 
 on:
   workflow_dispatch:
@@ -30,7 +30,7 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
+  contents: read
 
 env:
   QT_VERSION: '6.11.1' # quotes required or YAML will interpret as float
@@ -65,6 +65,8 @@ jobs:
     steps:
       - name: 'checkout repository'
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       # qtwebengine/qtwebchannel/qtpositioning are for SeamlyLayout's
       # WebEngineView provides SvgCanvas.qml; qtmultimedia is for the
@@ -141,6 +143,8 @@ jobs:
     steps:
       - name: 'checkout repository'
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: 'install appimage dependencies'
         run: |
@@ -244,6 +248,8 @@ jobs:
     steps:
       - name: 'checkout repository'
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: 'install build dependencies'
         run: |
@@ -363,6 +369,8 @@ jobs:
     steps:
       - name: 'Checkout repository - ${{ matrix.arch }}'
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: 'Setup MSVC Developer Command Prompt - ${{ matrix.arch }}'
         uses: TheMrMilchmann/setup-msvc-dev@v4.1.0
@@ -537,6 +545,8 @@ jobs:
   # ----- Publish ALL ARTIFACTS to DEV-LATEST as pre-release
   # Runs on non-push events, and non-schedule events, for non-weblate users, for any branch
   publish-all-dev:
+    permissions:
+      contents: write
     if: github.event_name != 'push' && github.event_name != 'schedule' && github.event.pull_request.user.login != 'weblate'
     name: 'Publish Pre-releases'
     runs-on: ubuntu-latest
@@ -587,6 +597,8 @@ jobs:
   # ----- Publish ALL ARTIFACTS to LATEST as release
   # Runs on scheduled events (scheduled events run only on the default branch)
   publish:
+    permissions:
+      contents: write
     if: github.event_name == 'schedule'
     name: 'Publish Releases'
     runs-on: ubuntu-latest
@@ -625,6 +637,8 @@ jobs:
   # Update doxygen files.
   # Runs on scheduled events
   document:
+    permissions:
+      contents: write
     if: github.event_name == 'schedule'
     name: 'Update Doxygen Documentation'
     runs-on: ubuntu-latest
