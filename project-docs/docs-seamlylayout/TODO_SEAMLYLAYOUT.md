@@ -236,14 +236,20 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
 
 ## [ ] Task Layout.28 — Built-in seam allowance: show the seam line
 
-A piece with a built-in seam allowance has no seam line. Its main path is the cut line, and the handoff sends it as `seamline`. SeamlyLayout draws only that line. Seamly2D draws no seam line for it either.
+Before this task: a piece with a built-in seam allowance had no seam line. Its main path is the cut line, and the handoff sent it as `seamline`. SeamlyLayout drew only that line. Seamly2D drew no seam line for it either.
 
 Seamly2D computes the seam line: only Seamly2D knows the seam allowance width at each node.
 
 The task stays in this file: it changes what SeamlyLayout lays out and exports (user decision).
 
+Status (2026-10-12):
+
+- Code, tests and docs: done. Merged into local `run-seamlyLayout` (`b3bf88c7cf`), not pushed
+- `cargo test --workspace`: 472 passed, 0 failed
+- Open: Qt suites (Layout.28.8) and the user check in the installed apps (Layout.28.7)
+
 - [x] Layout.28.1 Seamly2D: seam line = main path offset inward by each node's width (wider of before and after; piece width when the node sets none)
-  - `VPiece::builtInSeamLinePoints()`. A curve spreads the widths of its ends along its length. Corner types shape only the cut line: seam line corners are plain offset corners
+  - `VPiece::builtInSeamLinePoints()`. A curve spreads the widths of its ends along its length. Corner types shape only the cut line: seam line corners are plain offset corners (user confirmed)
 - [x] Layout.28.2 Handoff of a built-in piece: main path as `cutline`, computed line as `seamline`. Same rule for a hidden seam line as a piece without a built-in seam allowance
   - `VLayoutPiece::createSeamlineItem()`, `createAllowanceItem()`. The built-in `cutline` is sent also when seam allowances are not shown: it is the piece outline
 - [x] Layout.28.3 SeamlyLayout canvas, Adjust Mode and every export draw the seam line. Packing still uses the cut line
@@ -255,7 +261,8 @@ The task stays in this file: it changes what SeamlyLayout lays out and exports (
   - Rust: `built_in_seam_allowance_writes_boundary_and_sew_line`, `built_in_seam_allowance_has_boundary_and_sew_line`, `built_in_seam_allowance_packs_by_its_cut_line`
 - [x] Layout.28.6 Docs: `SVG-DATA-ATTRIBUTES.md` (`cutline`, `seamline`, `data-seam-allowances`), `NEW-ATTRIBUTES.csv`, DXF-ASTM compliance doc, `TEST_CHECKLIST.md`
 - [ ] Layout.28.7 User: on the next MSI, run `TEST_CHECKLIST.md` §5 "Piece with a built-in seam allowance"
-- Not in this task: Seamly2D piece mode still draws no seam line for a built-in piece
+- [ ] Layout.28.8 Verify: Qt suites (`nmake check`) in `local_build_msi.ps1`. The C++ tests of Layout.28.5 have not run yet
+- Not in this task: Seamly2D piece mode draws no seam line for a built-in piece. Filed as Seamly2D.11 in `TODO_SEAMLY2D.md` (user decision)
 
 ## [x] Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 
