@@ -764,7 +764,7 @@ VPiece squareWidthPiece(VContainer *data, bool builtIn, qreal pieceWidth, const 
 /// Distance from @p point to the nearest edge of the closed polyline @p points.
 qreal distanceToClosedPolyline(const QPointF &point, const QVector<QPointF> &points)
 {
-    qreal distance = std::numeric_limits<qreal>::max();
+    qreal distance = std::numeric_limits<qreal>::infinity();
     for (int i = 0; i < points.size(); ++i)
     {
         const QPointF a = points.at(i);
@@ -1055,7 +1055,9 @@ void TST_VPiece::BuiltInSeamLineFollowsCurve() const
 
     const QVector<QPointF> cutLine = piece.mainPathPoints(data.data());
     const QVector<QPointF> seamLine = piece.builtInSeamLinePoints(data.data());
-    QVERIFY(seamLine.size() > 5);
+    QVERIFY2(seamLine.size() > cutLine.size() / 2,
+             qPrintable(QStringLiteral("%1 seam line points, %2 cut line points").arg(seamLine.size())
+                        .arg(cutLine.size())));
 
     const qreal w = ToPixel(10, unit);
     const QPolygonF cutPolygon(cutLine);
