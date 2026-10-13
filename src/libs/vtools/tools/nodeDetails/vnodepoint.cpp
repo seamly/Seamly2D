@@ -546,8 +546,8 @@ void VNodePoint::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
             {
                 notchType    = stringToNotchType(qApp->Settings()->getDefaultNotchType());
                 notchSubType = NotchSubType::Straightforward;
-                notchLength  = qApp->Settings()->getDefaultNotchLength();
-                notchWidth   = qApp->Settings()->getDefaultNotchWidth();
+                notchLength  = qApp->Settings()->getDefaultNotchLength(qApp->patternUnit());
+                notchWidth   = qApp->Settings()->getDefaultNotchWidth(qApp->patternUnit());
                 notchCount   = 1;
                 isNotch      = true;
                 showCutline  = qApp->Settings()->showSeamAllowanceNotch();

@@ -7,7 +7,7 @@
 //  @copyright
 //  This source code is part of the Seamly2D project, a pattern making
 //  program to create and model patterns of clothing.
-//  Copyright (C) 2017-2025 Seamly2D project
+//  Copyright (C) 2017-2026 Seamly2D project
 //  <https://github.com/fashionfreedom/seamly2d> All Rights Reserved.
 //
 //  Seamly2D is free software: you can redistribute it and/or modify
@@ -185,8 +185,11 @@ const QString settingSelectionSound                      = QStringLiteral("patte
 const QString settingPatternForbidFlipping               = QStringLiteral("pattern/forbidFlipping");
 const QString settingPatternHideSeamLine                 = QStringLiteral("pattern/hideMainPath");
 
+// Legacy notch size keys hold the Default Units of their time. The cm keys replace them.
 const QString settingDefaultNotchLength                  = QStringLiteral("pattern/defaultNotchLength");
 const QString settingDefaultNotchWidth                   = QStringLiteral("pattern/defaultNotchWidth");
+const QString settingDefaultNotchLengthCm                = QStringLiteral("pattern/defaultNotchLengthCm");
+const QString settingDefaultNotchWidthCm                 = QStringLiteral("pattern/defaultNotchWidthCm");
 const QString settingDefaultNotchType                    = QStringLiteral("pattern/defaultNotchType");
 const QString settingDefaultNotchColor                   = QStringLiteral("pattern/defaultNotchColor");
 const QString settingSeamlineNotch                       = QStringLiteral("pattern/doubleNotch");
@@ -1167,6 +1170,15 @@ QString VCommonSettings::getUnit() const
 //---------------------------------------------------------------------------------------------------------------------
 void VCommonSettings::SetUnit(const QString &value)
 {
+    // A legacy notch size is in the old Default Units. Store it in cm before the unit changes.
+    if (contains(settingDefaultNotchLength))
+    {
+        setDefaultNotchLength(getDefaultNotchLength());
+    }
+    if (contains(settingDefaultNotchWidth))
+    {
+        setDefaultNotchWidth(getDefaultNotchWidth());
+    }
     setValue(settingConfigurationUnit, value);
 }
 
@@ -2141,61 +2153,109 @@ void VCommonSettings::setShowSeamAllowanceNotch(bool value)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getDefaultNotchLength returns the default notch length in the Default Units.
+ *
+ * The value is stored in cm, so a Default Units change keeps the physical length. A legacy value is already in the
+ * Default Units. With no stored value, the fallback is a round number in the Default Units.
+ */
 qreal VCommonSettings::getDefaultNotchLength() const
 {
-    double maxValue;
-
     const Unit units = StrToUnits(getUnit());
+    if (contains(settingDefaultNotchLengthCm))
+    {
+        return UnitConvertor(value(settingDefaultNotchLengthCm).toReal(), Unit::Cm, units);
+    }
 
+    double fallback;
     switch (units)
     {
         case Unit::Mm:
-            maxValue = 12.5;
+            fallback = 12.5;
             break;
         case Unit::Inch:
-            maxValue = .5;
+            fallback = .5;
             break;
         default:
         case Unit::Cm:
-            maxValue = 1.25;
+            fallback = 1.25;
             break;
-   }
-   return value(settingDefaultNotchLength, maxValue).toReal();
+    }
+    return value(settingDefaultNotchLength, fallback).toReal();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getDefaultNotchLength returns the default notch length converted to @p unit.
+ *
+ * A piece node stores its notch length in the pattern unit.
+ */
+qreal VCommonSettings::getDefaultNotchLength(Unit unit) const
+{
+    return UnitConvertor(getDefaultNotchLength(), StrToUnits(getUnit()), unit);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setDefaultNotchLength stores @p value, given in the Default Units, in cm.
+ */
 void VCommonSettings::setDefaultNotchLength(const qreal &value)
 {
-    setValue(settingDefaultNotchLength, value);
+    setValue(settingDefaultNotchLengthCm, UnitConvertor(value, StrToUnits(getUnit()), Unit::Cm));
+    remove(settingDefaultNotchLength);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getDefaultNotchWidth returns the default notch width in the Default Units.
+ *
+ * The value is stored in cm, so a Default Units change keeps the physical width. A legacy value is already in the
+ * Default Units. With no stored value, the fallback is a round number in the Default Units.
+ */
 qreal VCommonSettings::getDefaultNotchWidth() const
 {
-   double maxValue;
+    const Unit units = StrToUnits(getUnit());
+    if (contains(settingDefaultNotchWidthCm))
+    {
+        return UnitConvertor(value(settingDefaultNotchWidthCm).toReal(), Unit::Cm, units);
+    }
 
-   const Unit units = StrToUnits(getUnit());
-
-   switch (units)
-   {
-       case Unit::Mm:
-           maxValue = 5.0;
-           break;
-       case Unit::Inch:
-           maxValue = 0.25;
-           break;
-       default:
-       case Unit::Cm:
-           maxValue = .5;
-           break;
-   }
-   return value(settingDefaultNotchWidth, maxValue).toReal();
+    double fallback;
+    switch (units)
+    {
+        case Unit::Mm:
+            fallback = 5.0;
+            break;
+        case Unit::Inch:
+            fallback = 0.25;
+            break;
+        default:
+        case Unit::Cm:
+            fallback = .5;
+            break;
+    }
+    return value(settingDefaultNotchWidth, fallback).toReal();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getDefaultNotchWidth returns the default notch width converted to @p unit.
+ *
+ * A piece node stores its notch width in the pattern unit.
+ */
+qreal VCommonSettings::getDefaultNotchWidth(Unit unit) const
+{
+    return UnitConvertor(getDefaultNotchWidth(), StrToUnits(getUnit()), unit);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setDefaultNotchWidth stores @p value, given in the Default Units, in cm.
+ */
 void VCommonSettings::setDefaultNotchWidth(const qreal &value)
 {
-    setValue(settingDefaultNotchWidth, value);
+    setValue(settingDefaultNotchWidthCm, UnitConvertor(value, StrToUnits(getUnit()), Unit::Cm));
+    remove(settingDefaultNotchWidth);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

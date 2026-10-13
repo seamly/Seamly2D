@@ -73,6 +73,7 @@ public:
 
     void          Apply();
     void          initDefaultSeamAllowance();
+    void          initNotchSize();
 
 protected:
     virtual void  changeEvent(QEvent* event) override;

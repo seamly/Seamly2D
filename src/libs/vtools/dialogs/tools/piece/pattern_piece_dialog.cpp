@@ -1051,8 +1051,8 @@ void PatternPieceDialog::showMainPathContextMenu(const QPoint &pos)
             {
                 notchType    = stringToNotchType(qApp->Settings()->getDefaultNotchType());
                 notchSubType = NotchSubType::Straightforward;
-                notchLength  = qApp->Settings()->getDefaultNotchLength();
-                notchWidth   = qApp->Settings()->getDefaultNotchWidth();
+                notchLength  = qApp->Settings()->getDefaultNotchLength(qApp->patternUnit());
+                notchWidth   = qApp->Settings()->getDefaultNotchWidth(qApp->patternUnit());
                 notchCount   = 1;
                 isNotch      = true;
                 showCutline  = qApp->Settings()->showSeamAllowanceNotch();
@@ -1799,7 +1799,7 @@ void PatternPieceDialog::notchLengthChanged(qreal value)
 
 void PatternPieceDialog::resetNotchLength()
 {
-    ui->notchLength_DoubleSpinBox->setValue(qApp->Settings()->getDefaultNotchLength());
+    ui->notchLength_DoubleSpinBox->setValue(qApp->Settings()->getDefaultNotchLength(qApp->patternUnit()));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1823,7 +1823,7 @@ void PatternPieceDialog::notchWidthChanged(qreal value)
 
 void PatternPieceDialog::resetNotchWidth()
 {
-    ui->notchWidth_DoubleSpinBox->setValue(qApp->Settings()->getDefaultNotchWidth());
+    ui->notchWidth_DoubleSpinBox->setValue(qApp->Settings()->getDefaultNotchWidth(qApp->patternUnit()));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -3462,12 +3462,10 @@ void PatternPieceDialog::initializeNotchesTab()
             }
     }
     QString unitStr = QString(" " + UnitsToStr(qApp->patternUnit(), true)).left(3);
-    ui->notchLength_DoubleSpinBox->setValue(UnitConvertor(qApp->Settings()->getDefaultNotchLength(),
-                              StrToUnits(qApp->Settings()->getUnit()), qApp->patternUnit()));
+    ui->notchLength_DoubleSpinBox->setValue(qApp->Settings()->getDefaultNotchLength(qApp->patternUnit()));
 
     ui->notchLength_DoubleSpinBox->setSuffix(unitStr);
-    ui->notchWidth_DoubleSpinBox->setValue(UnitConvertor(qApp->Settings()->getDefaultNotchWidth(),
-                              StrToUnits(qApp->Settings()->getUnit()), qApp->patternUnit()));
+    ui->notchWidth_DoubleSpinBox->setValue(qApp->Settings()->getDefaultNotchWidth(qApp->patternUnit()));
     ui->notchWidth_DoubleSpinBox->setSuffix(unitStr);
     ui->showNotch_CheckBox->setChecked(qApp->Settings()->showSeamAllowanceNotch());
     ui->showSeamlineNotch_CheckBox->setChecked(qApp->Settings()->showSeamlineNotch());
