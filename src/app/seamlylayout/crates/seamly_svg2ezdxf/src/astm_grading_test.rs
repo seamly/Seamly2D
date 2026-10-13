@@ -2,7 +2,7 @@
 // author: slspencer, copyright 2026
 // MIT License: https://opensource.org/licenses/MIT
 
-//! @brief Tests for graded nests: shared key points across sizes, rules, and the reference line.
+//! @brief Tests for grading: shared key points across sizes, rules, and the reference line.
 
 #[cfg(test)]
 mod tests {
@@ -137,14 +137,30 @@ mod tests {
         Document::parse(&std::fs::read_to_string(path).expect("fixture present")).expect("fixture parses")
     }
 
-    // @brief Layout and input drawings of the grading fixtures, graded.
-    fn graded_fixture() -> (Drawing, Vec<String>) {
+    // @brief Sizes of the grading fixtures, in grading order.
+    fn fixture_sizes() -> Vec<String> {
+        ["34", "36", "38"].iter().map(|s| s.to_string()).collect()
+    }
+
+    // @brief Layout drawing of the grading fixture, only the pieces of `size`, and the input drawing.
+    fn fixture_drawings(size: &str) -> (Drawing, Drawing) {
         let options = SvgToEzdxfOptions::default();
         let mut layout = svg_to_ezdxf(&fixture("multisize_grading_layout.svg"), &options).expect("layout converts");
+        layout.blocks.retain(|b| b.size.as_deref() == Some(size));
         let input = svg_to_ezdxf(&fixture("multisize_grading_input.svg"), &options).expect("input converts");
-        let sizes: Vec<String> = ["34", "36", "38"].iter().map(|s| s.to_string()).collect();
-        let warnings = grade_drawing(&mut layout, &input, &sizes, "36");
-        (layout, warnings)
+        (layout, input)
+    }
+
+    // @brief The base size layout of the grading fixtures, graded; also the input drawing.
+    fn graded_fixture() -> (Drawing, Drawing, Vec<String>) {
+        let (mut layout, input) = fixture_drawings("36");
+        let warnings = grade_drawing(&mut layout, &input, &fixture_sizes(), "36");
+        (layout, input, warnings)
+    }
+
+    // @brief The block named `name`.
+    fn block<'a>(drawing: &'a Drawing, name: &str) -> &'a Block {
+        drawing.blocks.iter().find(|b| b.name == name).unwrap_or_else(|| panic!("{name} in the drawing"))
     }
 
     // @brief Points of a block in its grade reference line frame: origin at the line start, X along it.
@@ -161,53 +177,68 @@ mod tests {
             .collect()
     }
 
+    // @brief Distance from `p` to a closed polyline.
+    fn distance_to_loop(p: Point, polyline: &[Point]) -> f64 {
+        (0..polyline.len())
+            .map(|i| {
+                let (a, b) = (polyline[i], polyline[(i + 1) % polyline.len()]);
+                let (ux, uy) = (b.x - a.x, b.y - a.y);
+                let length2 = ux * ux + uy * uy;
+                let t = if length2 == 0.0 { 0.0 } else { (((p.x - a.x) * ux + (p.y - a.y) * uy) / length2).clamp(0.0, 1.0) };
+                distance(p, Point::new(a.x + t * ux, a.y + t * uy))
+            })
+            .fold(f64::INFINITY, f64::min)
+    }
+
     #[test]
-    fn grade_drawing_builds_a_nest_in_size_order() {
-        let (layout, warnings) = graded_fixture();
-        let names: Vec<&str> = layout.blocks.iter().map(|b| b.name.as_str()).collect();
-        assert_eq!(names, vec!["piece_Front_s34_M", "piece_Front_s36_M", "piece_Front_s38_M", "piece_Back_s36_M"]);
-        // Back size 38 has one more notch: only its sample size stays, with a warning.
+    fn grade_drawing_grades_the_sample_size_pieces() {
+        let (layout, _, warnings) = graded_fixture();
+        assert_eq!(layout.blocks.len(), 2, "one block per piece, no other sizes");
+        // Back size 38 has one more notch: it stays ungraded, with a warning.
         assert_eq!(warnings.len(), 1, "{warnings:?}");
         assert!(warnings[0].starts_with("Back:") && warnings[0].contains("notch"), "{}", warnings[0]);
-        assert!(layout.blocks[3].grading.is_none(), "fallen-back piece is ungraded");
+        assert!(!warnings[0].contains("Only size"), "the sample size is the only size written: {}", warnings[0]);
+        assert!(block(&layout, "piece_Back_s36_M").grading.is_none(), "ungradable piece is ungraded");
 
-        let front = &layout.blocks[..3];
-        assert!(front.iter().all(|b| b.piece_name == "Front"), "one piece name per nest");
-        let samples: Vec<bool> = front.iter().map(|b| b.grading.as_ref().expect("graded").sample).collect();
-        assert_eq!(samples, vec![false, true, false]);
-        let key_count = front[1].boundary.as_ref().unwrap().reduced.len();
-        for block in front {
-            assert_eq!(block.boundary.as_ref().unwrap().reduced.len(), key_count, "{}", block.name);
-            assert_eq!(block.sew_lines.len(), 1);
-            let grading = block.grading.as_ref().unwrap();
-            assert!(distance(grading.reference_line.0, grading.reference_line.1) >= 10.0);
-            assert_eq!(grading.rule_texts.is_empty(), !grading.sample, "only the sample block carries # n");
-        }
+        let front = block(&layout, "piece_Front_s36_M");
+        let grading = front.grading.as_ref().expect("Front graded");
+        assert!(distance(grading.reference_line.0, grading.reference_line.1) >= 10.0);
+        assert_eq!(front.sew_lines.len(), 1);
+        let rule_texts = &grading.rule_texts;
+        assert_eq!(rule_texts.iter().filter(|t| t.layer == "1").count(), front.boundary.as_ref().unwrap().reduced.len(), "one # n per boundary key point");
+        assert_eq!(rule_texts.iter().filter(|t| t.layer == "14").count(), front.sew_lines[0].reduced.len(), "one # n per sew line key point");
+        assert_eq!(rule_texts.iter().filter(|t| t.layer == "4").count(), front.notches.len(), "one # n per notch");
+
         let table = layout.grade_rule_table.as_ref().expect("rule table");
         assert_eq!(table.sample_size, "36");
         assert_eq!(table.sizes, vec!["34", "36", "38"]);
     }
 
     #[test]
-    fn stacking_on_the_reference_line_matches_the_rules() {
-        let (layout, _) = graded_fixture();
+    fn rules_move_the_sample_onto_every_size() {
+        let (layout, input, _) = graded_fixture();
         let table = layout.grade_rule_table.as_ref().expect("rule table");
-        let front = &layout.blocks[..3];
-        let sample = &front[1];
-        let rule_texts = &sample.grading.as_ref().unwrap().rule_texts;
-        let boundary_rules: Vec<i32> = rule_texts.iter().filter(|t| t.layer == "1").map(|t| t.rule).collect();
-        assert_eq!(boundary_rules.len(), sample.boundary.as_ref().unwrap().reduced.len(), "one # n per boundary key point");
-        assert_eq!(rule_texts.iter().filter(|t| t.layer == "4").count(), sample.notches.len(), "one # n per notch");
-        assert_eq!(rule_texts.iter().filter(|t| t.layer == "14").count(), sample.sew_lines[0].reduced.len());
-
+        let sample = block(&layout, "piece_Front_s36_M");
+        let boundary_rules: Vec<i32> = sample.grading.as_ref().unwrap().rule_texts.iter().filter(|t| t.layer == "1").map(|t| t.rule).collect();
         let local_sample = in_reference_frame(sample, &sample.boundary.as_ref().unwrap().reduced);
-        for (s, block) in front.iter().enumerate() {
-            let local = in_reference_frame(block, &block.boundary.as_ref().unwrap().reduced);
+
+        // The reference line starts at the bottom left of the drafted sample boundary.
+        let drafted = &block(&input, "piece_Front_s36_M").boundary.as_ref().unwrap().dense;
+        let origin = Point::new(
+            drafted.iter().map(|p| p.x).fold(f64::INFINITY, f64::min),
+            drafted.iter().map(|p| p.y).fold(f64::INFINITY, f64::min),
+        );
+        for (s, size) in table.sizes.iter().enumerate() {
+            let outline: Vec<Point> = block(&input, &format!("piece_Front_s{size}_M")).boundary.as_ref().unwrap().dense
+                .iter()
+                .map(|p| Point::new(p.x - origin.x, p.y - origin.y))
+                .collect();
             for (i, rule_id) in boundary_rules.iter().enumerate() {
                 let rule = table.rules.iter().find(|r| r.id == *rule_id).expect("rule in table");
                 let (dx, dy) = rule.deltas[s];
-                let (gx, gy) = (local[i].x - local_sample[i].x, local[i].y - local_sample[i].y);
-                assert!((gx - dx).abs() < 0.02 && (gy - dy).abs() < 0.02, "size {s} point {i}: nest ({gx}, {gy}) vs rule ({dx}, {dy})");
+                let moved = Point::new(local_sample[i].x + dx, local_sample[i].y + dy);
+                let off = distance_to_loop(moved, &outline);
+                assert!(off < 0.02, "size {size} key point {i}: {off} mm off the drafted outline");
             }
         }
         // The sample size never grows; the drafted corner at the piece offset grows by nothing in any size.
@@ -219,22 +250,34 @@ mod tests {
             table.rules.iter().any(|r| (r.deltas[0].0 + step).abs() < 0.01 && r.deltas[0].1.abs() < 0.01 && (r.deltas[2].0 - step).abs() < 0.01),
             "top right corner rule"
         );
-        // Equal rules share an identifier.
+        // Identifiers count up from 1; equal rules share one.
         for (i, a) in table.rules.iter().enumerate() {
             assert_eq!(a.id, i as i32 + 1);
+        }
+        let texts = &sample.grading.as_ref().unwrap().rule_texts;
+        assert!(table.rules.len() < texts.len(), "{} rules for {} points", table.rules.len(), texts.len());
+    }
+
+    #[test]
+    fn other_sizes_stay_ungraded() {
+        let options = SvgToEzdxfOptions::default();
+        let mut layout = svg_to_ezdxf(&fixture("multisize_grading_layout.svg"), &options).expect("layout converts");
+        let input = svg_to_ezdxf(&fixture("multisize_grading_input.svg"), &options).expect("input converts");
+        let names: Vec<String> = layout.blocks.iter().map(|b| b.name.clone()).collect();
+        grade_drawing(&mut layout, &input, &fixture_sizes(), "36");
+        let after: Vec<String> = layout.blocks.iter().map(|b| b.name.clone()).collect();
+        assert_eq!(after, names, "no block added, dropped or moved");
+        for b in &layout.blocks {
+            assert_eq!(b.grading.is_some(), b.name == "piece_Front_s36_M", "{}", b.name);
         }
     }
 
     #[test]
-    fn missing_sample_size_leaves_the_piece_ungraded() {
-        let options = SvgToEzdxfOptions::default();
-        let mut layout = svg_to_ezdxf(&fixture("multisize_grading_layout.svg"), &options).expect("layout converts");
-        layout.blocks.retain(|b| b.name != "piece_Front_s36_M");
-        let input = svg_to_ezdxf(&fixture("multisize_grading_input.svg"), &options).expect("input converts");
-        let sizes: Vec<String> = ["34", "36", "38"].iter().map(|s| s.to_string()).collect();
-        let warnings = grade_drawing(&mut layout, &input, &sizes, "36");
-        assert!(warnings.iter().any(|w| w.starts_with("Front:") && w.contains("size 36 is not in the layout")), "{warnings:?}");
-        assert!(layout.blocks.iter().filter(|b| b.piece_name == "Front").all(|b| b.grading.is_none()));
+    fn layout_without_the_sample_size_grades_nothing() {
+        let (mut layout, input) = fixture_drawings("34");
+        let warnings = grade_drawing(&mut layout, &input, &fixture_sizes(), "36");
+        assert!(warnings.is_empty(), "{warnings:?}");
+        assert!(layout.blocks.iter().all(|b| b.grading.is_none()));
         assert!(layout.grade_rule_table.is_none(), "no piece graded, no table");
     }
 }

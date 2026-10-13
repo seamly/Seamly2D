@@ -45,15 +45,12 @@ pub struct RuleText {
     pub rule: i32,
 }
 
-// @brief Grade data of one block in a graded nest (D6673 §4.3.1.5).
+// @brief Grade data of one sample size block (D6673 §4.3.1.4).
 #[derive(Debug, Clone, PartialEq)]
 pub struct BlockGrading {
-    // Grade reference line (layer 5): start and end. Every block of the nest has one.
+    // Grade reference line (layer 5): start and end. Gives the X axis of the rules.
     pub reference_line: (Point, Point),
-    // True for the sample size block. Only it carries layers 2, 3 and 4, the full
-    // piece system text, and the `# n` texts.
-    pub sample: bool,
-    // `# n` texts; empty for a graded size block.
+    // `# n` texts, one per graded key point and notch.
     pub rule_texts: Vec<RuleText>,
 }
 
@@ -117,7 +114,7 @@ pub struct Block {
     pub notches: Vec<Notch>,
     // Annotation text (layer 15).
     pub annotations: Vec<Annotation>,
-    // Graded nest data; None for an ungraded piece.
+    // Grade data; None for an ungraded piece.
     pub grading: Option<BlockGrading>,
 }
 

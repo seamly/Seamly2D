@@ -2,22 +2,21 @@
 // author: slspencer, copyright 2026
 // MIT License: https://opensource.org/licenses/MIT
 
-//! @brief Graded nests (D6673 §4.3.1.5) and the grade rule table (§4.4) of a multisize export.
+//! @brief Grade rules (D6673 §4.3.1.4) and the grade rule table (§4.4) of a base size export.
 //!
-//! A multisize layout holds every size of every piece, each at its layout
-//! position. Grading needs the sizes at their drafted positions, where a size
+//! The layout holds the sample size of every piece, each at its layout
+//! position. The rules need every size at its drafted position, where a size
 //! differs from the sample size only by growth. The handoff (input) document has
 //! them there, so:
 //! 1. Each line is graded in input space: `astm_contour::grade_contours` gives
 //!    every size the same key points.
 //! 2. Each rule is the growth of one key point or notch from the sample size,
 //!    in input space. Equal rules share one identifier.
-//! 3. A rigid fit of each layout block to its input block maps the graded
-//!    lines and the grade reference line into the layout.
+//! 3. A rigid fit of the layout block to its input block maps the graded
+//!    sample lines, the `# n` texts and the grade reference line into the layout.
 //!
-//! The grade reference line is one horizontal draft-space line per piece, the
-//! same for every size, so stacking the blocks on it gives the same growth as
-//! the rules.
+//! The grade reference line is one horizontal draft-space line per piece. It
+//! gives the reader the X axis of the rules when the layout turned the piece.
 
 use crate::astm_contour::{distance, grade_contours, AstmContour};
 use crate::drawing::{Block, BlockGrading, Drawing, GradeRule, GradeRuleTable, RuleText};
@@ -85,17 +84,15 @@ impl<'a> PieceLines<'a> {
     } // fn all
 } // impl PieceLines
 
-// @brief Graded lines of one size, in `PieceLines::all` order.
-type GradedLines = Vec<AstmContour>;
-
-/// @brief Turn the pieces of a multisize layout drawing into graded nests.
-/// @details Blocks of one piece share a `parent` (the piece-set id), else a piece
-///          name. A piece is graded when the layout holds its sample size and every
-///          size of the input has the same lines and notches. Otherwise only its
-///          sample size block stays, and a warning names it. Graded nest blocks are
-///          written in size order; `layout.grade_rule_table` gets the rules.
-/// @param layout Drawing of the layout: one block per piece and size, at its layout position.
-/// @param input Drawing of the handoff document: the same block names, at drafted positions.
+/// @brief Give each sample size piece of a layout drawing its grade rules.
+/// @details A piece is graded when every size of the input has the same lines and
+///          notches, and its layout block fits its input block. A graded block gets
+///          the graded key points, a `# n` text on each key point and notch, and a
+///          grade reference line; `layout.grade_rule_table` gets the rules. A piece
+///          that cannot grade keeps its ungraded block, and a warning names it.
+///          Blocks of other sizes are left as they are.
+/// @param layout Drawing of the layout: the sample size pieces at their layout positions.
+/// @param input Drawing of the handoff document: every size of every piece, at drafted positions.
 /// @param sizes Every size, in grading order (`data-sizes`).
 /// @param sample_size Sample size (`data-base-size`).
 /// @return Warnings for the user, one per piece that is not graded.
@@ -110,67 +107,15 @@ pub fn grade_drawing(layout: &mut Drawing, input: &Drawing, sizes: &[String], sa
     } // if one size
 
     let mut table = GradeRuleTable { sample_size: sample_size.to_string(), sizes: sizes.to_vec(), ..Default::default() };
-    // Block indices to drop (graded sizes of a piece that fell back to its sample size).
-    let mut dropped = vec![false; layout.blocks.len()];
-    // Per block: (group, size index) for the nest order.
-    let mut order: Vec<Option<(usize, usize)>> = vec![None; layout.blocks.len()];
-
-    for (group, members) in nest_groups(layout).into_iter().enumerate() {
-        // Size index of each member; a block of an unknown size stays as it is.
-        let sized: Vec<(usize, usize)> = members
-            .iter()
-            .filter_map(|&b| {
-                let size = layout.blocks[b].size.as_deref()?;
-                Some((b, sizes.iter().position(|s| s == size)?))
-            })
-            .collect();
-        // Warnings name the piece as the user wrote it, not its escaped DXF name.
-        let piece_name = layout.blocks[members[0]].display_name.clone();
-        let Some(&(sample_block, _)) = sized.iter().find(|(_, s)| *s == sample) else {
-            warnings.push(format!("{piece_name}: not graded, size {sample_size} is not in the layout."));
+    for b in 0..layout.blocks.len() {
+        if layout.blocks[b].size.as_deref() != Some(sample_size) {
             continue;
-        }; // if no sample block
-
-        match grade_group(layout, input, &sized, sample, sizes, &mut table) {
-            Ok(()) => {
-                // Nest order: this piece's blocks together, in size order.
-                for &(b, s) in &sized {
-                    order[b] = Some((group, s));
-                } // for each member
-            } // Ok
-            Err(reason) => {
-                // Sample size only: a nest with unmatched points would mislead the reader.
-                warnings.push(format!("{piece_name}: not graded, {reason}. Only size {sample_size} is written."));
-                for &(b, _) in sized.iter().filter(|(b, _)| *b != sample_block) {
-                    dropped[b] = true;
-                } // for each graded size
-            } // Err
-        } // match grade_group
-    } // for each piece
-
-    // Rebuild the block list: drop fallen-back sizes, and write each nest in size order
-    // where its first block stood.
-    let mut slots: Vec<(usize, usize, usize)> = Vec::new(); // (position, size index, block)
-    let mut first_position: Vec<Option<usize>> = Vec::new();
-    for (b, slot) in order.iter().enumerate() {
-        let position = match slot {
-            Some((group, _)) => {
-                if first_position.len() <= *group {
-                    first_position.resize(*group + 1, None);
-                } // if new group
-                *first_position[*group].get_or_insert(b)
-            } // nest member
-            None => b, // ungraded block keeps its place
-        }; // position
-        slots.push((position, slot.map_or(0, |(_, s)| s), b));
+        } // if not the sample size
+        if let Err(reason) = grade_block(layout, b, input, sample, sizes, &mut table) {
+            // Warnings name the piece as the user wrote it, not its escaped DXF name.
+            warnings.push(format!("{}: not graded, {reason}.", layout.blocks[b].display_name));
+        } // if not graded
     } // for each block
-    slots.sort_by_key(|&(position, size, block)| (position, size, block));
-    let mut blocks: Vec<Option<Block>> = std::mem::take(&mut layout.blocks).into_iter().map(Some).collect();
-    layout.blocks = slots
-        .into_iter()
-        .filter(|&(_, _, b)| !dropped[b])
-        .filter_map(|(_, _, b)| blocks[b].take())
-        .collect();
 
     if !table.rules.is_empty() {
         layout.grade_rule_table = Some(table);
@@ -178,41 +123,24 @@ pub fn grade_drawing(layout: &mut Drawing, input: &Drawing, sizes: &[String], sa
     warnings
 } // fn grade_drawing
 
-// @brief Layout blocks grouped by piece, in first-appearance order.
-// @details Key: `parent` (the piece-set id), else the piece name. Blocks without a size are left out.
-fn nest_groups(layout: &Drawing) -> Vec<Vec<usize>> {
-    let mut keys: Vec<String> = Vec::new();
-    let mut groups: Vec<Vec<usize>> = Vec::new();
-    for (b, block) in layout.blocks.iter().enumerate().filter(|(_, b)| b.size.is_some()) {
-        let key = nest_key(block);
-        match keys.iter().position(|k| *k == key) {
-            Some(g) => groups[g].push(b), // known piece
-            None => {
-                keys.push(key);
-                groups.push(vec![b]);
-            } // new piece
-        } // match key
-    } // for each sized block
-    groups
-} // fn nest_groups
-
-// @brief Piece key of a block: `parent`, else the piece name.
-fn nest_key(block: &Block) -> String {
+// @brief Piece key of a block: `parent` (the piece-set id), else the piece name.
+fn piece_key(block: &Block) -> String {
     block.parent.clone().unwrap_or_else(|| block.piece_name.clone())
-} // fn nest_key
+} // fn piece_key
 
-// @brief Grade one piece: graded lines and reference line on every member, `# n` texts on the sample.
-// @param sized (layout block index, size index) of every member.
+// @brief Grade one sample size block: graded lines, `# n` texts and the reference line.
+// @param block Index of the sample size block in `layout`.
+// @param sample Index of the sample size in `sizes`.
 // @return Err(reason) when the piece cannot be graded; the layout is then unchanged.
-fn grade_group(
+fn grade_block(
     layout: &mut Drawing,
+    block: usize,
     input: &Drawing,
-    sized: &[(usize, usize)],
     sample: usize,
     sizes: &[String],
     table: &mut GradeRuleTable,
 ) -> Result<(), String> {
-    let key = nest_key(&layout.blocks[sized[0].0]);
+    let key = piece_key(&layout.blocks[block]);
 
     // Step 1: the input block of every size, from the same piece.
     let input_blocks: Vec<&Block> = sizes
@@ -221,7 +149,7 @@ fn grade_group(
             input
                 .blocks
                 .iter()
-                .find(|b| nest_key(b) == key && b.size.as_deref() == Some(size.as_str()))
+                .find(|b| piece_key(b) == key && b.size.as_deref() == Some(size.as_str()))
                 .ok_or_else(|| format!("size {size} is not in the handoff"))
         })
         .collect::<Result<_, _>>()?;
@@ -231,22 +159,21 @@ fn grade_group(
         .collect::<Result<_, _>>()?;
 
     // Step 2: every size needs the same lines and notches.
-    let line_count = input_lines[sample].all().len();
+    let sample_layers: Vec<&str> = input_lines[sample].all().iter().map(|(l, _)| *l).collect();
     let notch_count = input_blocks[sample].notches.len();
-    for (lines, block) in input_lines.iter().zip(&input_blocks) {
+    for (lines, input_block) in input_lines.iter().zip(&input_blocks) {
         let layers: Vec<&str> = lines.all().iter().map(|(l, _)| *l).collect();
-        let sample_layers: Vec<&str> = input_lines[sample].all().iter().map(|(l, _)| *l).collect();
         if layers != sample_layers {
             return Err("the sizes have different internal lines or sew lines".to_string());
         } // if lines differ
-        if block.notches.len() != notch_count {
+        if input_block.notches.len() != notch_count {
             return Err("the sizes have different notch counts".to_string());
         } // if notches differ
     } // for each size
 
     // Step 3: grade each line across the sizes, in input space.
-    let mut graded: Vec<GradedLines> = vec![Vec::with_capacity(line_count); sizes.len()];
-    for line in 0..line_count {
+    let mut graded: Vec<Vec<AstmContour>> = vec![Vec::with_capacity(sample_layers.len()); sizes.len()];
+    for line in 0..sample_layers.len() {
         let per_size: Vec<AstmContour> = input_lines.iter().map(|l| l.all()[line].1.clone()).collect();
         let result = grade_contours(&per_size, sample).ok_or_else(|| "the sizes have different turn points".to_string())?;
         for (size, contour) in result.into_iter().enumerate() {
@@ -254,32 +181,25 @@ fn grade_group(
         } // for each size
     } // for each line
 
-    // Step 4: map each layout block from its input block.
-    let mut fits: Vec<(usize, usize, Rigid)> = Vec::with_capacity(sized.len());
-    for &(b, size) in sized {
-        let layout_boundary = layout.blocks[b].boundary.as_ref().ok_or("a size has no boundary in the layout")?;
-        let fit = fit_rigid(&input_lines[size].boundary.dense, &layout_boundary.dense)
-            .or_else(|| fit_rigid(&input_lines[size].boundary.reduced, &layout_boundary.reduced))
-            .ok_or_else(|| format!("size {} does not match its handoff shape", sizes[size]))?;
-        fits.push((b, size, fit));
-    } // for each member
-    let sample_fit = fits.iter().find(|(_, s, _)| *s == sample).map(|f| f.2).ok_or("no sample size block")?;
-    let sample_block = fits.iter().find(|(_, s, _)| *s == sample).map(|f| f.0).ok_or("no sample size block")?;
-    if layout.blocks[sample_block].notches.len() != notch_count {
+    // Step 4: map the layout block from its input block.
+    let layout_boundary = layout.blocks[block].boundary.as_ref().ok_or("the piece has no boundary in the layout")?;
+    let fit = fit_rigid(&input_lines[sample].boundary.dense, &layout_boundary.dense)
+        .or_else(|| fit_rigid(&input_lines[sample].boundary.reduced, &layout_boundary.reduced))
+        .ok_or("the layout piece does not match its handoff shape")?;
+    if layout.blocks[block].notches.len() != notch_count {
         return Err("the layout notches do not match the handoff".to_string());
     } // if notches differ
 
     // Step 5: rules. One per key point and per notch: growth from the sample size.
-    let layers: Vec<&'static str> = input_lines[sample].all().iter().map(|(l, _)| *l).collect();
     let mut rule_texts = Vec::new();
-    for (line, layer) in layers.iter().enumerate() {
+    for (line, layer) in sample_layers.iter().enumerate() {
         for (i, &p) in graded[sample][line].reduced.iter().enumerate() {
             let deltas: Vec<(f64, f64)> = graded.iter().map(|g| growth(g[line].reduced[i], p)).collect();
             let rule = intern_rule(table, deltas);
-            rule_texts.push(RuleText { position: sample_fit.apply(p), layer, rule });
+            rule_texts.push(RuleText { position: fit.apply(p), layer, rule });
         } // for each key point
     } // for each line
-    for (j, notch) in layout.blocks[sample_block].notches.iter().enumerate() {
+    for (j, notch) in layout.blocks[block].notches.iter().enumerate() {
         let base = input_blocks[sample].notches[j].base;
         let deltas: Vec<(f64, f64)> = input_blocks.iter().map(|b| growth(b.notches[j].base, base)).collect();
         let rule = intern_rule(table, deltas);
@@ -290,22 +210,18 @@ fn grade_group(
     // Step 6: grade reference line, one horizontal draft-space line per piece.
     let reference = reference_line(&input_lines[sample].boundary.dense);
 
-    // Step 7: write the graded lines and grading into each layout block.
-    for (b, size, fit) in fits {
-        let block = &mut layout.blocks[b];
-        let mut lines = graded[size].iter().map(|c| fit.contour(c));
-        block.boundary = lines.next();
-        block.sew_lines = lines.by_ref().take(input_lines[size].sew_lines.len()).collect();
-        block.internal_lines = lines.by_ref().take(input_lines[size].internal_lines.len()).collect();
-        block.cutouts = lines.collect();
-        block.grading = Some(BlockGrading {
-            reference_line: (fit.apply(reference.0), fit.apply(reference.1)),
-            sample: size == sample,
-            rule_texts: if size == sample { std::mem::take(&mut rule_texts) } else { Vec::new() },
-        });
-    } // for each member
+    // Step 7: write the graded sample lines and the grade data into the layout block.
+    let sew_count = input_lines[sample].sew_lines.len();
+    let internal_count = input_lines[sample].internal_lines.len();
+    let target = &mut layout.blocks[block];
+    let mut lines = graded[sample].iter().map(|c| fit.contour(c));
+    target.boundary = lines.next();
+    target.sew_lines = lines.by_ref().take(sew_count).collect();
+    target.internal_lines = lines.by_ref().take(internal_count).collect();
+    target.cutouts = lines.collect();
+    target.grading = Some(BlockGrading { reference_line: (fit.apply(reference.0), fit.apply(reference.1)), rule_texts });
     Ok(())
-} // fn grade_group
+} // fn grade_block
 
 // @brief Growth of a point from its sample size position.
 fn growth(p: Point, sample: Point) -> (f64, f64) {
