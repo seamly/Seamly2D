@@ -66,10 +66,23 @@ Handoff shape: see `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`, "Multisize p
   - Layout.37.4 Won't do: one PDF per tab. Select a size tab, then export PDF or PDF (Tiled). One page per size conflicts with sheet and tiled pages (user decision, 2026-09-29)
 - [ ] Layout.38 Tests
   - [x] Layout.38.1 Rust: set hoist, centring, set bbox, set outline, marker count = pieces × sizes (synthetic fixture `MULTISIZE_HANDOFF_SVG`)
-  - [ ] Layout.38.2 Real multisize handoff fixture: export from a `.sm2d` + `.smms` pattern in the running app, save to `crates/cxxqt_bridge/test_data/`, add an end-to-end test
-    - [x] Layout.38.2.1 `SEAMLYLAYOUT_SAVE_HANDOFF=<absolute path>`: `import_svg_document` writes the received SVG there (`handoff_capture.rs`)
-    - [ ] Layout.38.2.2 User: capture the handoff of `HJA.sm2d` + its `.smms`; then add the fixture and an end-to-end test
-  - [ ] Layout.38.3 Check in the running apps: Seamly2D Layout Mode with a multisize pattern; SeamlyLayout Nested and Marker
+  - [x] Layout.38.2 export SVG from a `.sm2d` + `.smms` pattern, save to `crates/cxxqt_bridge/test_data/':
+    - [x] Layout.38.2.1 save files to `crates/cxxqt_bridge/test_data/':
+      --> src\app\seamlylayout\crates\cxxqt_bridge\test_data\jacket2_40-146_202610121819.svg
+      --> src\app\seamlylayout\crates\cxxqt_bridge\test_data\jacket2_40-146_nested_allsizes_R13_202610121813.dxf
+      - The SVG is committed. The DXF is not used by a test and stays untracked.
+      - The SVG is a SeamlyLayout SVG export, not the raw handoff: the piece-sets sit at the root, and the pattern group with `data-sizes` and `data-base-size` is gone. `layout_utils::tests::jacket2_handoff` puts the pattern group back (sizes from `data-size`, base size 500). A `SEAMLYLAYOUT_SAVE_HANDOFF` copy can replace the file and the rebuild.
+    - [x] Layout.38.2.2 implement an end-to-end test: `layout_utils::tests::jacket2_*` (5 tests)
+  - [x] Layout.38.3 `SEAMLYLAYOUT_SAVE_HANDOFF=<absolute path>`: `import_svg_document` writes the received SVG there (`handoff_capture.rs`)
+  - [x] Layout.38.4 User: capture the SVG of `jacket2_40-146.sm2d` + its `.smms` :  src\app\seamlylayout\crates\cxxqt_bridge\test_data\jacket2_40-146_202610121819.svg
+  - [x] Layout.38.5 add the fixture and an end-to-end test
+    - `jacket2_handoff_is_multisize`: 208 pieces, 26 sizes 220-720, base size 500
+    - `jacket2_nested_packs_eight_piece_sets`: 60 in x 300 in roll, 8 units, 208 pieces placed
+    - `jacket2_marker_places_every_size`: 60 in x 1500 in roll, 208 units; each piece-set number on 26 pieces
+    - `jacket2_missing_piece_data_lists_each_piece_once`: Nested and Marker, 8 lines, Cyrillic names, `Detail (3)` to `Detail (8)`
+    - `jacket2_all_sizes_export_names_every_size_alike`: escaped `Piece Name:`; 4 pieces graded (26 sizes each); `Detail (3)`, `(6)`, `(7)`, `(8)` fall back on turn points (Layout.27.3); `.rul` written
+  - [ ] Layout.38.6 Check in the running apps: Seamly2D Layout Mode with a multisize pattern; SeamlyLayout Nested and Marker
+    - Needs the next MSI. Add to the next `TEST_CHECKLIST.md`.
 - [x] Layout.39 Doxygen briefs + inline comments on touched functions; document both layouts in the SeamlyLayout docs
 
 ## [ ] Task Layout.5 - Implement additional export formats
@@ -94,9 +107,13 @@ See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
   - [x] Layout.61.5 Tests: `astm_grading_test.rs`, `writer_astm_test.rs` graded tests, `multisize_layout_exports_graded_nests`
   - [x] Layout.61.6 Compliance doc "Grading"
   - [ ] Layout.61.7 User: export a multisize pattern from "All sizes" as DXF-ASTM; check it in aw.fyi (DXF.8.4) and one CAD reader
+  --> test-seamly-layout\layouts\jacket2\jacket2_40-146_marker_allsizes_R13_202610121149-dxf-report.pdf
+    - [ ] check results of PDF file
+      - [ ] update this file with completed tasks & update TODO_COMPLETED.md
+      - [ ] update this file with new tasks as needed
 - Layout.62 Moved to Layout.16: mirror line (layer 6) needs Seamly2D fold lines (Seamly2D.8)
-- [ ] Layout.63 Drill holes (layer 13), with diameter (group 30) - not implemented in Seamly2D yet so this must wait
-- [ ] Layout.64 Stripe and plaid reference lines (layers 9, 10) - not implemented in Seamly2D yet so this must wait
+- [ ] Layout.63 Drill holes (layer 13), with diameter (group 30) - not implemented in Seamly2D yet so move this to TODO_SEAMLY2D.md
+- [ ] Layout.64 Stripe and plaid reference lines (layers 9, 10) - not implemented in Seamly2D yet so move this to TODO_SEAMLY2D.md
 - [x] Layout.65 Notches reach the DXF as layer 4 slits, half the seam allowance deep (done, see `TODO_COMPLETED.md`)
 - [x] Layout.66 Seamly2D producer attributes (done, see `TODO_COMPLETED.md`)
 
@@ -171,12 +188,14 @@ Evidence (jacket2, Marker, 48 in × 500 in paper roll): the pack placed 96 of 20
 
 Found with the installed sample `jacket2_40-146.sm2d` (`gost_man_ru.smms`), "All sizes" tab, Marker. Evidence: `test-seamly-layout/layouts/jacket2/jacket2_marker_screenshot_2.png`, `jacket2_nested_screenshot_1.png`. The installed sample has Cyrillic names because the local MSI ships stale copies (Layout.30). The pattern hides each piece label and grainline (`visible="false"`), so those warnings are correct.
 
-- [ ] Layout.26.1 One line per piece, not one per placed size: group the blocks by `data-parent` (piece-set id)
-- [ ] Layout.26.2 The dialog clips its text: the last line is not visible. Add a scroll area; keep the buttons visible
-- [ ] Layout.26.3 Non-ASCII names: `sanitize_ascii` empties "Подборт" and "Комір", so the dialog shows the block id `piece-201_s720_M`. Show the `data-name` text in dialogs and export warnings
-- [ ] Layout.26.4 DXF `Piece Name:` for a non-ASCII name is the block id today, and it differs per size, so aw.fyi cannot group the sizes. Write each non-ASCII character as an AutoCAD `\U+XXXX` escape: "Комір" → `\U+041A\U+043E\U+043C\U+0456\U+0440` (user decision: D2). Every size of a piece gets the same name
-- [ ] Layout.26.5 Pieces with the same name (6 × "Detail") cannot be told apart. Add the piece letter, else the piece number: "Detail (3)". Applies also to the DXF `Piece Name:`: aw.fyi merges the 6 "Detail" pieces into one. That merge causes the aw.fyi departures "Sample size points incomplete", "Excluded layers present in graded sizes" and "L5 endpoint mismatch 103.74" (checked: per piece, L5 is a pure translation)
-- [ ] Layout.26.6 Tests: Rust dialog text — one line per piece set, Cyrillic name kept, same names numbered
+- [x] Layout.26.1 One line per piece, not one per placed size: group the blocks by `data-parent` (piece-set id)
+- [x] Layout.26.2 The dialog clips its text: the last line is not visible. Add a scroll area; keep the buttons visible
+- [x] Layout.26.3 Non-ASCII names: `sanitize_ascii` empties "Подборт" and "Комір", so the dialog shows the block id `piece-201_s720_M`. Show the `data-name` text in dialogs and export warnings
+- [x] Layout.26.4 DXF `Piece Name:` for a non-ASCII name is the block id today -- Piece name does not differ per size -- so aw.fyi cannot group the sizes. Write each non-ASCII character as an AutoCAD `\U+XXXX` escape: "Комір" → `\U+041A\U+043E\U+043C\U+0456\U+0440` (user decision: D2). Every size of a piece gets the same name
+- [x] Layout.26.5 Pieces with the same name (6 × "Detail") cannot be told apart. Add the piece letter, else the piece number: "Detail (3)". Applies also to the DXF `Piece Name:`: aw.fyi merges the 6 "Detail" pieces into one. That merge causes the aw.fyi departures "Sample size points incomplete", "Excluded layers present in graded sizes" and "L5 endpoint mismatch 103.74" (checked: per piece, L5 is a pure translation)
+- [x] Layout.26.6 Tests: Rust dialog text — one line per piece set, Cyrillic name kept, same names numbered
+  - `piece_names_keep_unicode_and_number_shared_names`, `hoist_tagged_pieces_dissolves_piece_sets` (`data-set-number`), `jacket2_missing_piece_data_lists_each_piece_once`, `jacket2_all_sizes_export_names_every_size_alike`
+- [ ] Layout.26.7 User: on the next MSI, check the dialog scrolls and keeps its buttons (jacket2, All sizes, Marker)
 
 ## [ ] Task Layout.27 — DXF-ASTM grading fails for jacket2_40-146 from the "All sizes" tab
 
@@ -193,18 +212,19 @@ Evidence: `test-seamly-layout/layouts/jacket2/` — `jacket2_nested_screenshot_2
 - [ ] Layout.27.6 Warnings use the piece names from Layout.26.3 and Layout.26.5
 - [ ] Layout.27.7 Fixture: the jacket2 handoff in `crates/cxxqt_bridge/test_data/`; end-to-end test: every piece graded, `.rul` file written
 - [ ] Layout.27.8 No `.rul` file: `astm_grading::grade_drawing` sets a rule table only when one piece or more grades. When no piece grades, "Export Complete" says "No piece graded: no .rul file written"
-- [ ] Layout.27.9 Duplicate vertices: aw.fyi reports layers 84 (54) and 87 (450) in the graded nested file only. `GradeSize::vertex_at` inserts a key point 0.000001–0.01 mm from a dense vertex (`SAME_VERTEX_MM` = 1e-6). Snap to the vertex within 0.01 mm; drop a curve key point that lands on the vertex of the key point before or after it. Test: no consecutive dense or reduced vertices closer than 0.01 mm
+- [x] Layout.27.9 Duplicate vertices: aw.fyi reports layers 84 (54) and 87 (450) in the graded nested file only. `GradeSize::vertex_at` inserts a key point 0.000001–0.01 mm from a dense vertex (`SAME_VERTEX_MM` = 1e-6). Snap to the vertex within 0.01 mm; drop a curve key point that lands on the vertex of the key point before or after it. Test: no consecutive dense or reduced vertices closer than 0.01 mm
 - [ ] Layout.27.10 Marker layout, piece that cannot grade: write every placed size as its own ungraded piece, size in the piece name: "Detail (3) 240" (user decision: D4). Today only the sample size is written, so placed cut pieces are lost. Nested keeps the sample size only: its sizes overlap
 
 ## [ ] Task Layout.29 — Notch attributes: one value per notch, not per line segment
 
 Found in `TEST_CHECKLIST.md` §2: BackPanel `data-notch-type` holds 15 words for 2 notches (`slit` + 14 × `uNotch`). One word per notch (user decision: D1).
 
-- [ ] Layout.29.1 Seamly2D: `VPiece::createNotchLines` returns one type and one width per notch node, and the line count of each notch
-- [ ] Layout.29.2 `VLayoutPiece`: store per-notch types, widths and line counts. `createNotchesItem` writes `data-notch-type` and `data-seam-allowances` (one value per notch) and `data-notch-segments` (line count per notch, `d` order). Sum of `data-notch-segments` = `M` count in `d`
-- [ ] Layout.29.3 SeamlyLayout `converter::notch_polylines`: spread each per-notch width over its segments with `data-notch-segments`. A list of the wrong length is ignored
-- [ ] Layout.29.4 Tests: `TST_SvgComponentTags::NotchGroupCarriesNotchTypes`, `TST_VPiece::NotchTypesFollowNodes`, Rust `notch_polylines` with a 14-segment U-notch
-- [ ] Layout.29.5 Docs: `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`, compliance doc "Notch rules", `TEST_CHECKLIST.md`
+- [x] Layout.29.1 Seamly2D: `VPiece::createNotchLines` returns one type and one width per notch node, and the line count of each notch
+- [x] Layout.29.2 `VLayoutPiece`: store per-notch types, widths and line counts. `createNotchesItem` writes `data-notch-type` and `data-seam-allowances` (one value per notch) and `data-notch-segments` (line count per notch, `d` order). Sum of `data-notch-segments` = `M` count in `d`
+- [x] Layout.29.3 SeamlyLayout `converter::notch_polylines`: spread each per-notch width over its segments with `data-notch-segments`. A list of the wrong length is ignored
+- [x] Layout.29.4 Tests: `TST_SvgComponentTags::NotchGroupCarriesNotchTypes`, `TST_VPiece::NotchTypesFollowNodes`, Rust `notch_polylines` with a 14-segment U-notch
+- [x] Layout.29.5 Docs: `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`, compliance doc "Notch rules", `TEST_CHECKLIST.md`
+- [ ] Layout.29.6 Verify: Qt suites (`nmake check`) in the next `local_build_msi.ps1` run. `cargo test --workspace` passed
 
 ## [ ] Task Layout.30 — Local MSI ships stale sample patterns
 

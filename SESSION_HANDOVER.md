@@ -2,14 +2,20 @@
 
 ## Current status
 
-### 2026-10-12 — checklist reviewed, fix plan approved, no code changed
+### 2026-10-12 — branch `task-notch-per-notch`, not merged, not pushed
 
-- Branch `task-checklist-fixes` from `run-seamlyLayout` (`4db974dc60`). Merged `--no-ff` into `run-seamlyLayout` with skip-ci (docs and test data only). Not pushed: the user pushes.
-- Commits on the branch:
-  - Checklist results of the jacket2 test run; handover file renamed to `SESSION_HANDOVER.md`.
-  - Test files moved: `test-seamly-layout-input/` → `test-seamly-layout/`. `.gitignore` tracks the new folder. aw.fyi PDFs force-added. `D6673-10-expired.docx` stays ignored (copyright).
-  - Tracking: `TODO_SEAMLYLAYOUT.md` (decisions, root causes, Layout.27.9, 27.10, 29, 30), `TODO_DXF.md` DXF.22.1, `CLAUDE.md` handover name, this file.
-- `develop` has 2 CI commits (`42fcec04ae`, `05969e1538`) not merged into `run-seamlyLayout`. They touch `.github/workflows/`: merge per `CLAUDE.md` "Merge from Upstream `develop`" before the next code task branch.
+- Commits on the branch (from `run-seamlyLayout` `be2576e9b9`):
+  - `486261aaed` Layout.29: one notch value per notch, `data-notch-segments` (Seamly2D + Rust).
+  - `4bec9b07c4` Layout.27.9: graded key points snap to a vertex within 0.01 mm.
+  - `31714864c8` Layout.26: Unicode display names, `\U+XXXX` Piece Name, `Detail (3)` numbering, Marker `data-set-number`, dialog one line per piece + scroll.
+  - `080278aa65` Layout.38.2.2 / 38.5: jacket2 fixture + 5 end-to-end tests.
+  - Next commit: tracking (`TODO_SEAMLYLAYOUT.md` with the user's own edits, this file).
+- Verified: `cargo test --workspace` 469 passed (before the jacket2 tests; jacket2 tests pass alone, about 25 s each).
+- Not verified (user: build once at the end): `local_build_msi.ps1` (`nmake check` for the Layout.29 C++ tests), `ctest --preset debug`, QML dialog in the app. A started build was stopped in nmake; object files are partial.
+- Next: remaining plan steps 2, 8, 9, 10; then one `local_build_msi.ps1`; then merge `--no-ff` into `run-seamlyLayout`, push. Full CI only if a `*.pri` or `packaging/` change joins the push.
+- Peer session `seamly2d-private-2a` works on Layout.30 in the same tree: branch `task-copy-samples`, `common.pri` uncommitted. Do not stage `common.pri`.
+- Build stamps: `projectversion.*` and both `Info.plist` files now say 26.10.1218. Do not commit.
+- `test_data/jacket2_40-146_nested_allsizes_R13_202610121813.dxf` untracked: no test uses it.
 
 ### Approved plan (user, 2026-10-12)
 
@@ -17,13 +23,13 @@ Root causes are in `TODO_SEAMLYLAYOUT.md` under each task. One commit per step. 
 
 | Step | App | Change | Task | Status |
 |---|---|---|---|---|
-| 1 | Seamly2D | Notch attributes: one value per notch + `data-notch-segments` | Layout.29.1–29.2 | open |
+| 1 | Seamly2D | Notch attributes: one value per notch + `data-notch-segments` | Layout.29.1–29.2 | done, Qt suites not run |
 | 2 | Seamly2D | Multisize: a node that is a turn point in any size is one in every size | Layout.27.3 | open |
-| 3 | Build | `copyToDestdir` always copies on Windows | Layout.30 | open |
-| 4 | SeamlyLayout | Read `data-notch-segments` | Layout.29.3 | open |
-| 5 | SeamlyLayout | DXF `Piece Name:` from `data-name`, `\U+XXXX` escapes, same for every size; duplicates numbered `Detail (3)`; dialogs keep the original name | Layout.26.3–26.5 | open |
-| 6 | SeamlyLayout + QML | Missing Piece Data dialog: one line per piece, scroll area | Layout.26.1–26.2 | open |
-| 7 | SeamlyLayout | Grading: snap key points to a vertex within 0.01 mm | Layout.27.9 | open |
+| 3 | Build | `copyToDestdir` always copies on Windows | Layout.30 | peer session |
+| 4 | SeamlyLayout | Read `data-notch-segments` | Layout.29.3 | done |
+| 5 | SeamlyLayout | DXF `Piece Name:` from `data-name`, `\U+XXXX` escapes, same for every size; duplicates numbered `Detail (3)`; dialogs keep the original name | Layout.26.3–26.5 | done |
+| 6 | SeamlyLayout + QML | Missing Piece Data dialog: one line per piece, scroll area | Layout.26.1–26.2 | done, app check open |
+| 7 | SeamlyLayout | Grading: snap key points to a vertex within 0.01 mm | Layout.27.9 | done |
 | 8 | SeamlyLayout | Grading warnings | Layout.27.2, 27.4–27.6, 27.8 | open |
 | 9 | SeamlyLayout | Marker: ungradable piece keeps every placed size, `Detail (3) 240` | Layout.27.10 | open |
 | 10 | SeamlyLayout | Extend media height until every piece fits, every multisize tab | Layout.25 | open |
@@ -67,7 +73,6 @@ Kept in the session scratchpad only (lost). To repeat a check: parse DXF group-c
 
 ### Priority 1 — Developer: approved plan
 
-- Merge `develop` (2 CI commits) into `run-seamlyLayout` first.
 - New task branch from `run-seamlyLayout`; implement the plan table above.
 
 ### Priority 2 — User: after the next MSI
