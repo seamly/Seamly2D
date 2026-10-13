@@ -215,17 +215,6 @@ Evidence: `test-seamly-layout/layouts/jacket2/` — `jacket2_nested_screenshot_2
 - [x] Layout.27.9 Duplicate vertices: aw.fyi reports layers 84 (54) and 87 (450) in the graded nested file only. `GradeSize::vertex_at` inserts a key point 0.000001–0.01 mm from a dense vertex (`SAME_VERTEX_MM` = 1e-6). Snap to the vertex within 0.01 mm; drop a curve key point that lands on the vertex of the key point before or after it. Test: no consecutive dense or reduced vertices closer than 0.01 mm
 - [ ] Layout.27.10 Marker layout, piece that cannot grade: write every placed size as its own ungraded piece, size in the piece name: "Detail (3) 240" (user decision: D4). Today only the sample size is written, so placed cut pieces are lost. Nested keeps the sample size only: its sizes overlap
 
-## [ ] Task Layout.29 — Notch attributes: one value per notch, not per line segment
-
-Found in `TEST_CHECKLIST.md` §2: BackPanel `data-notch-type` holds 15 words for 2 notches (`slit` + 14 × `uNotch`). One word per notch (user decision: D1).
-
-- [x] Layout.29.1 Seamly2D: `VPiece::createNotchLines` returns one type and one width per notch node, and the line count of each notch
-- [x] Layout.29.2 `VLayoutPiece`: store per-notch types, widths and line counts. `createNotchesItem` writes `data-notch-type` and `data-seam-allowances` (one value per notch) and `data-notch-segments` (line count per notch, `d` order). Sum of `data-notch-segments` = `M` count in `d`
-- [x] Layout.29.3 SeamlyLayout `converter::notch_polylines`: spread each per-notch width over its segments with `data-notch-segments`. A list of the wrong length is ignored
-- [x] Layout.29.4 Tests: `TST_SvgComponentTags::NotchGroupCarriesNotchTypes`, `TST_VPiece::NotchTypesFollowNodes`, Rust `notch_polylines` with a 14-segment U-notch
-- [x] Layout.29.5 Docs: `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`, compliance doc "Notch rules", `TEST_CHECKLIST.md`
-- [ ] Layout.29.6 Verify: Qt suites (`nmake check`) in the next `local_build_msi.ps1` run. `cargo test --workspace` passed
-
 ## [ ] Task Layout.40 — Local MSI ships stale sample patterns
 
 The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`src/app/share/samples/patterns/`) has English names. `copyToDestdir` in `common.pri` skips a file that exists, so `src/app/seamly2d/bin/samples` and `src/app/seamlyme/bin/samples` keep copies from 2026-08-10. `smsi.ps1` stages those `bin` folders. CI builds from a clean checkout and is not affected.

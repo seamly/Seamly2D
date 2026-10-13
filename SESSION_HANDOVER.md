@@ -23,6 +23,7 @@
   - `080278aa65` Layout.38.2.2 / 38.5: jacket2 fixture + 5 end-to-end tests.
 - Verified: `cargo test --workspace` 470 passed, 0 failed (jacket2 tests included, about 25 s each).
 - Verified with Layout.28: `local_build_msi.ps1` (`nmake check` covers the Layout.29 C++ tests). Not verified: `ctest --preset debug`, QML dialog in the app.
+- Layout.29 complete: moved to `project-docs/TODO_COMPLETED.md`. A second run of the 26.10.1220 `Seamly2DTests.exe`: 0 failed. Open: user re-check of `TEST_CHECKLIST.md` §2 notch line.
 - Next: remaining plan steps 2, 8, 9, 10. Merged into `run-seamlyLayout` early (user request); push when the user asks.
 - Merge `3797bf8a6d` (Layout.40, `common.pri`) is on `origin/run-seamlyLayout`. The Layout.40 names merged without a conflict.
 - Build stamps: `projectversion.*` and both `Info.plist` files now say 26.10.1220. Do not commit.
@@ -35,7 +36,7 @@ Root causes are in `TODO_SEAMLYLAYOUT.md` under each task. One commit per step. 
 
 | Step | App | Change | Task | Status |
 |---|---|---|---|---|
-| 1 | Seamly2D | Notch attributes: one value per notch + `data-notch-segments` | Layout.29.1–29.2 | done, Qt suites not run |
+| 1 | Seamly2D | Notch attributes: one value per notch + `data-notch-segments` | Layout.29.1–29.2 | done, Qt suites pass |
 | 2 | Seamly2D | Multisize: a node that is a turn point in any size is one in every size | Layout.27.3 | open |
 | 3 | Build | `copyToDestdir` always copies on Windows | Layout.40 | fix on run-seamlyLayout 3797bf8a6d; MSI check open |
 | 4 | SeamlyLayout | Read `data-notch-segments` | Layout.29.3 | done |

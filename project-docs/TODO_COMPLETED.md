@@ -2,6 +2,20 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task Layout.29 — Notch attributes: one value per notch, not per line segment (completed 2026-10-12)
+
+Found in `TEST_CHECKLIST.md` §2: BackPanel `data-notch-type` holds 15 words for 2 notches (`slit` + 14 × `uNotch`). One word per notch (user decision: D1).
+
+- [x] Layout.29.1 Seamly2D: `VPiece::createNotchLines` returns one type and one width per notch node, and the line count of each notch
+- [x] Layout.29.2 `VLayoutPiece`: store per-notch types, widths and line counts. `createNotchesItem` writes `data-notch-type` and `data-seam-allowances` (one value per notch) and `data-notch-segments` (line count per notch, `d` order). Sum of `data-notch-segments` = `M` count in `d`
+- [x] Layout.29.3 SeamlyLayout `converter::notch_polylines`: spread each per-notch width over its segments with `data-notch-segments`. A list of the wrong length is ignored
+- [x] Layout.29.4 Tests: `TST_SvgComponentTags::NotchGroupCarriesNotchTypes`, `TST_VPiece::NotchTypesFollowNodes`, Rust `notch_polylines` with a 14-segment U-notch
+- [x] Layout.29.5 Docs: `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`, compliance doc "Notch rules", `TEST_CHECKLIST.md`
+- [x] Layout.29.6 Verify: Qt suites (`nmake check`) in `local_build_msi.ps1`
+  - `nmake check` passed in the MSI 26.10.1220 build. A second run of that build's `Seamly2DTests.exe`: 0 failed, both Layout.29 tests pass
+  - `cargo test --workspace`: 472 passed, 0 failed. No SeamlyLayout change since
+- Open: user re-check of `TEST_CHECKLIST.md` §2 `data-notch-type` line on MSI 26.10.1220. The captured `male_shirt_202610121755.svg` predates the fix
+
 ## Task Layout.66 — Seamly2D producer attributes (completed 2026-10-11)
 
 `data-material` moved to Seamly2D.7 / Layout.15.
