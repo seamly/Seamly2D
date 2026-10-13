@@ -64,6 +64,17 @@ SeamlyLayout measured the width from the cut and sew lines. Where the width chan
   - [x] export DXF-ASTM; 
   - [ ] check slit depths with files generated and checked in SeamlyLayout: DXF.18
 
+## [ ] Task Seamly2D.11 — Piece mode: draw the seam line of a built-in seam allowance
+
+A piece with a built-in seam allowance shows only its main path, the cut line. Layout.28 sends the seam line inside it to SeamlyLayout and to piece exports (`VPiece::builtInSeamLinePoints()`). Piece mode does not draw it (user decision: add this task).
+
+- [ ] Seamly2D.11.1 `PatternPieceTool::RefreshGeometry()`: draw `VPiece::builtInSeamLinePoints()` in the seam line style; the main path keeps the cut line style
+- [ ] Seamly2D.11.2 A hidden seam line draws nothing, as for a piece without a built-in seam allowance
+- [ ] Seamly2D.11.3 Piece dialog preview (`PatternPieceVisual`): the same rule
+- [ ] Seamly2D.11.4 Seam line corners stay plain offset corners: node corner types shape only the cut line (user decision, Layout.28)
+- [ ] Seamly2D.11.5 Tests and `local_build_msi.ps1` (`nmake check`)
+- [ ] Seamly2D.11.6 User: piece mode shows the seam line W inside the main path; Hide seam line removes it
+
 ## [ ] Task Seamly2D.9 — Pattern preferences shows the label template file name
 
 `Pattern preferences > Label data > Label template:` has only the `Edit template` button (`pushButtonEditPatternLabel`, `src/app/seamly2d/dialogs/dialogpatternproperties.ui`). The user cannot see which template file the pattern label uses without opening the editor.

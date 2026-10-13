@@ -2,30 +2,29 @@
 
 ## Current status
 
-### 2026-10-12 — `task-builtin-seamline` (Layout.28) and `task-notch-per-notch` merged into local `run-seamlyLayout`, not pushed
+### 2026-10-12 — Layout.28 and the notch work merged into local `run-seamlyLayout` (`b3bf88c7cf`), not pushed
 
 - User asked for Layout.28 outside the approved plan. Branched from `task-notch-per-notch`, not `run-seamlyLayout`: both change the notch and seam line handoff in `vlayoutpiece.cpp` and the DXF converter tests.
-- User asked to merge both branches before the MSI build finished. One `--no-ff` merge of `task-builtin-seamline` carries every `task-notch-per-notch` commit. Merged in a temporary worktree, so the running build kept its sources.
-- Not pushed: push only when the user asks. The task branches are not deleted: the main worktree still has `task-builtin-seamline` checked out.
+- User asked to merge both branches before the MSI build finished. One `--no-ff` merge of `task-builtin-seamline` carries every `task-notch-per-notch` commit. The merge commit was written without a checkout, so the running build kept its sources.
+- Not pushed: the user pushes `run-seamlyLayout` to `origin` (user decision). Both task branches are deleted (user: delete a branch once it is merged).
 - Seamly2D: `VPiece::builtInSeamLinePoints()`; `VLayoutPiece` stores it (`setBuiltInSeamLinePoints()`). Built-in piece: main path → `cutline` (always, also with seam allowances not shown), computed line → `seamline` (omitted when hidden).
-- Seam line corners use `PieceNodeAngle::ByLength`: node corner types shape only the cut line (my decision; report to user).
+- Seam line corners use `PieceNodeAngle::ByLength`: node corner types shape only the cut line (user confirmed).
 - SeamlyLayout: no code change. Tests and comments only (`converter.rs`, `astm_notch.rs`).
 - Verified: `cargo test --workspace` 472 passed, 0 failed.
 - `local_build_msi.ps1` (with `nmake check`) was still running at merge time: `vpiece.cpp` and `vlayoutpiece.cpp` compiled; Qt suites not yet run. Record the result here.
-- Open: Layout.28.7 user check; Seamly2D piece mode still draws no seam line for a built-in piece (not in Layout.28).
+- Open: Layout.28.7 user check. Seamly2D.11 (new, user decision): piece mode draws the built-in seam line.
 
-### 2026-10-12 — branch `task-notch-per-notch`, not merged, not pushed
+### 2026-10-12 — notch work (was branch `task-notch-per-notch`), merged with Layout.28
 
-- Commits on the branch (from `run-seamlyLayout` `be2576e9b9`):
+- Commits (from `run-seamlyLayout` `be2576e9b9`):
   - `486261aaed` Layout.29: one notch value per notch, `data-notch-segments` (Seamly2D + Rust).
   - `4bec9b07c4` Layout.27.9: graded key points snap to a vertex within 0.01 mm.
   - `31714864c8` Layout.26: Unicode display names, `\U+XXXX` Piece Name, `Detail (3)` numbering, Marker `data-set-number`, dialog one line per piece + scroll.
   - `080278aa65` Layout.38.2.2 / 38.5: jacket2 fixture + 5 end-to-end tests.
-  - Next commit: tracking (`TODO_SEAMLYLAYOUT.md` with the user's own edits, this file).
 - Verified: `cargo test --workspace` 470 passed, 0 failed (jacket2 tests included, about 25 s each).
 - Not verified (user: build once at the end): `local_build_msi.ps1` (`nmake check` for the Layout.29 C++ tests), `ctest --preset debug`, QML dialog in the app. A started build was stopped in nmake; object files are partial.
 - Next: remaining plan steps 2, 8, 9, 10. Merged into `run-seamlyLayout` early (user request); push when the user asks.
-- Merge `3797bf8a6d` (Layout.40, `common.pri`) is on `origin/run-seamlyLayout`. The working tree `common.pri` equals it. Before checking out `run-seamlyLayout`, run `git checkout -- common.pri`. The Layout.40 names merged without a conflict.
+- Merge `3797bf8a6d` (Layout.40, `common.pri`) is on `origin/run-seamlyLayout`. The Layout.40 names merged without a conflict.
 - Build stamps: `projectversion.*` and both `Info.plist` files now say 26.10.1218. Do not commit.
 - `test_data/jacket2_40-146_nested_allsizes_R13_202610121813.dxf` untracked: no test uses it.
 
@@ -132,6 +131,8 @@ These items have no recorded resolution. Check their TODO documents and reposito
 
 - Keep `data-notch-type`. Only DXF export converts every notch to a layer 4 slit.
 - Notch attributes: one value per notch (D1, 2026-10-12). Replaces "one value per segment" (2026-10-11).
+- Built-in seam line corners are plain offset corners; node corner types shape only the cut line (user, 2026-10-12).
+- The user pushes `run-seamlyLayout` to `origin`. Delete a task branch once it is merged (user, 2026-10-12).
 - Slit ends are never turn points. Slit depth uses half the local seam allowance width.
 - Remove the Settings "Multisize Layout" choice when both all-sizes tabs exist (Layout.23).
 - Layout.61: graded nest + `# n` identifiers + `.rul` table. Grading only from the All sizes tab.
