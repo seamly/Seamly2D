@@ -195,6 +195,7 @@ Decision (user, 2026-10-13): simplify the multisize tabs and exports. Every tab 
 - [x] Layout.67.6 Tests: Rust `layout_views`, grading, writer, Base Size and size tab exports (jacket2 included); Qt `SettingsModelTests::multisizeLayout_storedKeyIsDropped`
 - [x] Layout.67.7 Docs: DXF-ASTM compliance doc, simple workflow, settings workflow, `SVG-DATA-ATTRIBUTES.md`
 - [ ] Layout.67.8 User: on the next MSI, run `TEST_CHECKLIST.md` §7 "Multisize tabs"
+- [ ] Layout.67.9 "Export Complete" names only the `.dxf`. A Base Size export also writes the `.rul`; name both files (`jacket2_basesize_screenshot_1.png`, MSI 26.10.1311)
 
 ## [ ] Task Layout.24 — Multisize export file name: tab name before the date stamp
 
@@ -212,6 +213,8 @@ Default name of a multisize export: `<base>[_<segment>]_<tab>_<stamp>[_tiled].<e
 Applies to every multisize tab: "All sizes" (Nested or Marker), and each size tab (user decision: D3). It does not wait for Layout.23; after Layout.23 the rule covers both all-sizes tabs. Today a piece that does not fit is left out, and a warning names it.
 
 Evidence (jacket2, Marker, 48 in × 500 in paper roll): the pack placed 96 of 208 pieces. `test-seamly-layout/layouts/jacket2/jacket2_marker_screenshot_1.png`.
+
+Repeat with MSI 26.10.1311, Marker tab: 96 of 208 placed again. The roll is full: pieces use 74 % of its area. The 208 pieces need about 740 in. `jacket2_screenshot_1.png`, `jacket2_40-146_202610131245.svg`.
 
 - [ ] Layout.25.1 When the pack leaves pieces out, increase the media height and pack again until every piece fits
 - [ ] Layout.25.2 Media types: paper sheet, paper roll (500 in default length), fabric
@@ -239,24 +242,28 @@ Evidence: `test-seamly-layout/layouts/jacket2/` — `jacket2_nested_screenshot_2
 
 - Nested: 4 pieces graded; 4 "Detail" pieces fell back to size 500.
 - Marker: the layout placed 96 of 208 pieces (Layout.25). 4 pieces lost size 500; the other 4 failed the turn point check, so grading removed 71 placed blocks. The file has 25 blocks and no `.rul`.
+- MSI 26.10.1311, Base Size 500 tab (`jacket2_40-146_basesize_R13_202610131248.dxf`): 4 pieces graded. Their rules match all 26 sizes within 0.011 mm (cut and sew lines, checked against the Nested SVG). Detail (3), (6), (7), (8) not graded again (Layout.27.3).
 
 - [ ] Layout.27.1 "size 500 is not in the layout" (3 pieces): the Marker layout left the sample size block out. Layout.25 fixes this; export again and check
 - [ ] Layout.27.2 When the layout left the sample size block out, the warning says so: "size 500 does not fit the media"
 - [ ] Layout.27.3 "the sizes have different turn points" (4 "Detail" pieces). Cause (checked in the per-size Export-all-tabs DXF files, layer 2 counts): Seamly2D's `VAbstractPiece::turnPointIndices` flips at near-limit corners as the size changes. Piece 3: 11 → 10 from size 360; piece 1: 12 → 14/16 at 660–700; piece 6: 8 → 10 from 660; piece 7: 8 ↔ 10 from 520. Fix in the producer: after `prepareMultisizePieceLists`, a piece node that is a turn point in any size is a turn point in every size (seam line, cut line, internal paths). Needs the node vertex indices of each path in `VLayoutPiece` / `VLayoutPiecePath`. Skip a path whose node count differs between sizes
 - [ ] Layout.27.4 `grade_anchors` also returns None when a key point is not on the dense line. That case gets its own message
 - [ ] Layout.27.5 The turn point warning names the first size that differs from the sample size
-- [ ] Layout.27.6 Warnings use the piece names from Layout.26.3 and Layout.26.5
+- [x] Layout.27.6 Warnings use the piece names from Layout.26.3 and Layout.26.5
+  - MSI 26.10.1311: "Export Complete" names `Detail (3)`, `Detail (6)`, … (`jacket2_basesize_screenshot_1.png`)
 - [ ] Layout.27.7 Fixture: the jacket2 handoff in `crates/cxxqt_bridge/test_data/`; end-to-end test: every piece graded, `.rul` file written
 - [ ] Layout.27.8 No `.rul` file: `astm_grading::grade_drawing` sets a rule table only when one piece or more grades. When no piece grades, "Export Complete" says "No piece graded: no .rul file written"
 - [x] Layout.27.9 Duplicate vertices: aw.fyi reports layers 84 (54) and 87 (450) in the graded nested file only. `GradeSize::vertex_at` inserts a key point 0.000001–0.01 mm from a dense vertex (`SAME_VERTEX_MM` = 1e-6). Snap to the vertex within 0.01 mm; drop a curve key point that lands on the vertex of the key point before or after it. Test: no consecutive dense or reduced vertices closer than 0.01 mm
 - [ ] Layout.27.10 Marker layout, piece that cannot grade: write every placed size as its own ungraded piece, size in the piece name: "Detail (3) 240" (user decision: D4). Today only the sample size is written, so placed cut pieces are lost. Nested keeps the sample size only: its sizes overlap
+- [ ] Layout.27.11 Near-duplicate vertices remain. Base Size file (MSI 26.10.1311), Подборт, layer 87: `(333.01, 626.21)` then `(333.01, 626.22)`. `SNAP_VERTEX_MM` (0.01) equals the written precision (2 decimals), so a key point 0.01–0.02 mm from a vertex stays a separate vertex. Snap at 0.02 mm, or compare the written coordinates. Test: no two consecutive written vertices 0.01 mm apart or closer
 
 ## [ ] Task Layout.40 — Local MSI ships stale sample patterns
 
 The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`src/app/share/samples/patterns/`) has English names. `copyToDestdir` in `common.pri` skips a file that exists, so `src/app/seamly2d/bin/samples` and `src/app/seamlyme/bin/samples` keep copies from 2026-08-10. `smsi.ps1` stages those `bin` folders. CI builds from a clean checkout and is not affected.
 
 - [x] Layout.40.1 `common.pri` `copyToDestdir`: on Windows copy every file on each link, not only a missing one
-- [ ] Layout.40.2 Check: after `local_build_msi.ps1`, `packaging/windows/seamly-msi/x64/parent/samples/patterns/jacket2_40-146.sm2d` matches the repo copy
+- [x] Layout.40.2 Check: after `local_build_msi.ps1`, `packaging/windows/seamly-msi/x64/parent/samples/patterns/jacket2_40-146.sm2d` matches the repo copy
+  - MSI 26.10.1311: the staged copy and the installed copy (`C:\Program Files\SeamlyApps\samples\patterns\`) match the repo copy
 - [x] Layout.40.3 `common.pri` is a `*.pri` change: the merge commit runs full CI (no skip-ci token)
 
 ## [ ] Task Layout.28 — Built-in seam allowance: show the seam line
@@ -289,6 +296,36 @@ Status (2026-10-12):
 - [x] Layout.28.8 Verify: Qt suites (`nmake check`) in `local_build_msi.ps1`
   - The first run found a bug: a main path that starts at a corner next to a curve lost most of its seam line. The inward offset loops at that corner, and `CheckLoops()` cut the wrong side of a loop at the path start. Fix: the offset starts in the middle of the longest edge
 - Not in this task: Seamly2D piece mode draws no seam line for a built-in piece. Filed as Seamly2D.11 in `TODO_SEAMLY2D.md` (user decision)
+
+## [ ] Task Layout.68 — PDF export: page and pieces 133 % too large
+
+Found with jacket2, MSI 26.10.1311. `svg2pdf` `PageOptions::default()` uses 72 dpi, so 1 SVG px (1/96 in) becomes 1 pt (1/72 in).
+
+- Marker `jacket2_40-146_202610131244.pdf` (48 in × 500 in roll): MediaBox `4608 × 48000` pt = 64 in × 666.7 in. Expected `3456 × 36000` pt.
+- Nested `jacket2_40-nested_146_202610131245.pdf`: `4608 × 5003` pt. Expected `3456 × 3752` pt.
+- EPS and PS of the same tabs are correct: `0.75` scale, BoundingBox `3456 36000`.
+
+- [ ] Layout.68.1 Pass `PageOptions { dpi: 96.0 }` in `app_core::render_pdf` and `exports::render_svg_doc_to_pdf_bytes`
+- [ ] Layout.68.2 PDF (Tiled) uses the same default: each page is the paper size × 4/3 (not checked with a file). Check the page size after Layout.68.1
+- [ ] Layout.68.3 Acrobat limits a page to 200 in (14 400 pt). A 500-in roll page is 36 000 pt. User decision: write `/UserUnit`, or accept
+- [ ] Layout.68.4 Tests: Rust MediaBox of a 48 in × 500 in layout = `3456 × 36000`; tiled Letter page = `612 × 792`
+- [ ] Layout.68.5 User: print one tiled page at 100 %; measure a known length
+
+## [ ] Task Layout.69 — PNG and JPG exports: no resolution metadata
+
+Found with jacket2, MSI 26.10.1311. The pixel size is correct: `jacket2_40-146_202610131243.png` is 4608 × 48000 px, 96 px/in. The PNG has no `pHYs` chunk. The JPG JFIF density unit is 0 (aspect ratio only). A viewer or print dialog then uses its own default resolution, so "actual size" can print at the wrong scale.
+
+- [ ] Layout.69.1 PNG: write `pHYs` 3780 px/m (96 dpi). JPG: JFIF density 96 × 96 dpi
+- [ ] Layout.69.2 Tests: Rust reads the PNG `pHYs` and the JPG JFIF density
+
+## [ ] Task Layout.70 — "Some pieces could not be placed" dialog: piece names and length
+
+Found with jacket2, MSI 26.10.1311, Marker tab: 112 entries such as "Detail (size 240)" (`jacket2_screenshot_1.png`). The 6 "Detail" pieces cannot be told apart. The dialog has no scroll area; it grows past the screen when more pieces are left out.
+
+- [ ] Layout.70.1 Use the numbered display name: "Detail (3)" (same rule as Layout.26.5)
+- [ ] Layout.70.2 One line per piece, then its sizes: "Detail (3): 220, 240, 260". Group by `data-parent` (as Layout.26.1)
+- [ ] Layout.70.3 `Main.qml` `warningDialog`: scroll area; the OK button stays visible (as Layout.26.2)
+- [ ] Layout.70.4 Tests: Rust warning text for a jacket2 Marker layout that leaves pieces out
 
 ## [x] Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 

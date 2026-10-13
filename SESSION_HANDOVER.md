@@ -2,6 +2,25 @@
 
 ## Current status
 
+### 2026-10-13 — jacket2 exports from MSI 26.10.1311 checked
+
+- Files: `test-seamly-layout/layouts/jacket2/*_20261013*`. Marker: SVG ×3, PDF, PNG, JPG, EPS, PS, PLT plot and cut. Nested: SVG, PDF, JPG, EPS, PS. DXF-ASTM R13: Base Size 500 (+ `.rul`), Size 220.
+- Pass:
+  - `Piece Name:`: `\U+XXXX` escapes and `Detail (3)`–`(8)` in both DXF files. The §4 `Piece Name:` item is fixed.
+  - Base Size grading: 4 pieces graded; rules match all 26 sizes within 0.011 mm (checked against the Nested SVG).
+  - Size 220: no `.rul`, no `# n`, blank `Sample Size:`.
+  - PLT, EPS, PS: geometry and scale correct. No overlaps; gaps ≥ 5 px.
+  - Layout.27.6 and Layout.40.2 ticked.
+- New tasks in `TODO_SEAMLYLAYOUT.md`:
+  - Layout.68: PDF 133 % too large (`svg2pdf` default 72 dpi). Highest impact.
+  - Layout.69: PNG and JPG without resolution metadata.
+  - Layout.70: "Some pieces could not be placed" dialog: unnumbered names, no scroll.
+  - Layout.27.11: vertices 0.01 mm apart on layer 87.
+  - Layout.67.9: "Export Complete" does not name the `.rul`.
+- Repeat failures (fix next, do not re-file): Layout.25 (Marker 96 of 208), Layout.27.3 (4 Detail pieces not graded).
+- The three Marker SVGs (plain, Hershey, single-line) are identical: jacket2 has no text. Expected.
+- `TODO_SEAMLYLAYOUT.md`: only these lines committed; the user's other edits stay uncommitted.
+
 ### 2026-10-13 — Layout.67 multisize tabs: merged into local `run-seamlyLayout`, not pushed
 
 - User decision: tabs Marker, Nested, Base Size N, then Size N; no "Multisize Layout" setting. DXF-ASTM: Base Size = base size + `# n` + `.rul`; size tab = one ungraded size; Marker and Nested have none. No graded nests.
@@ -10,24 +29,6 @@
 - `TEST_CHECKLIST.md` §7 "Multisize tabs" added, not committed: the user's 26.10.1115 results are in the same file. It replaces the §4 `# 1` single size check.
 - `TODO_SEAMLYLAYOUT.md`: only Layout.67 committed. The Layout.22 and 23 headings stay in the user's uncommitted edits; the user deletes them.
 - Next: user builds the MSI and runs §7.
-
-### 2026-10-12 — Next item: `TEST_CHECKLIST.md` §4 `Piece Name:` check (lines 104–112)
-
-- Finding: Nested All sizes DXF writes `Piece Name:piece-1_s220_M`, `piece-9_s240_M`, … No `Front`.
-- Cause of `piece-N_sNNN_M`: `sanitize_ascii` empties Комір and Подборт; the writer falls back to the block id (Layout.26.4).
-- Cause of unnumbered `Detail`: Layout.26.5.
-- `Front`: checklist text error. jacket2 has no Front piece.
-- Both exports predate the fix (Layout.26 commit `31714864c8`, 19:01):
-  - `..._202610121136.dxf`: MSI 26.10.1115.
-  - `..._202610121813.dxf`: `Author:Seamly;Seamly2D;26.10.1214`. 52 `piece-N` (2 pieces × 26 sizes), 56 unnumbered `Detail`.
-- Fix in code: `\U+XXXX` escapes, `Detail (n)`. Test `jacket2_all_sizes_export_names_every_size_alike` (`cxxqt_bridge/src/layout_utils.rs`) passed in the 472-test run.
-- Not verified in the installed app. MSI 26.10.1220 (`packaging/windows/seamly-msi/x64/seamly-x64.msi`) has the fix. No export from it yet.
-- Steps:
-  1. User: install MSI 26.10.1220. Export jacket2 Nested All sizes, DXF-ASTM R13 (same as Layout.61.7.2).
-  2. Check `Author:Seamly;Seamly2D;` says 26.10.1220 or later.
-  3. Expect `Piece Name:`: `\U+041A\U+043E\U+043C\U+0456\U+0440` ×26, `\U+041F\U+043E\U+0434\U+0431\U+043E\U+0440\U+0442` ×26, `Detail (4)` ×26, `Detail (5)` ×26, `Detail (3)`, `(6)`, `(7)`, `(8)` ×1 each. No `piece-`.
-  4. Any `piece-` name left: fix it in the next iteration; do not re-file. Start by diffing the installed handoff with `cxxqt_bridge/test_data/jacket2_40-146_202610121819.svg`.
-  5. Checklist line 104: replace `Front` with a jacket2 piece name. `TEST_CHECKLIST.md` has user edits; ask first.
 
 ### 2026-10-12 — Layout.61.7.1: jacket2 aw.fyi reports checked
 
@@ -120,9 +121,10 @@ Kept in the session scratchpad only (lost). To repeat a check: parse DXF group-c
 
 ## TODO by priority and owner
 
-### Next item — User, then Developer
+### Next items — Developer
 
-- `TEST_CHECKLIST.md` §4 `Piece Name:` (lines 104–112). Steps in Current status, first entry.
+- Layout.68 PDF scale. Then Layout.25 and Layout.27.3 (repeat failures). Then Layout.70, 69, 27.11, 67.9.
+- `TEST_CHECKLIST.md` line 104 names a `Front` piece; jacket2 has none. The file has user edits; ask before a change.
 
 ### Priority 1 — Developer: approved plan
 
