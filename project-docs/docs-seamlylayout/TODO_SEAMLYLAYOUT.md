@@ -106,11 +106,27 @@ See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
   - [x] Layout.61.4 Writer: graded size blocks without layers 2/3/4; `Sample Size:` and `Grade Rule Table:` style text; `.rul` file (`grade_rule_file.rs`)
   - [x] Layout.61.5 Tests: `astm_grading_test.rs`, `writer_astm_test.rs` graded tests, `multisize_layout_exports_graded_nests`
   - [x] Layout.61.6 Compliance doc "Grading"
-  - [ ] Layout.61.7 User: export a multisize pattern from "All sizes" as DXF-ASTM; check it in aw.fyi (DXF.8.4) and one CAD reader
-  --> test-seamly-layout\layouts\jacket2\jacket2_40-146_marker_allsizes_R13_202610121149-dxf-report.pdf
-    - [ ] check results of PDF file
-      - [ ] update this file with completed tasks & update TODO_COMPLETED.md
-      - [ ] update this file with new tasks as needed
+  - [ ] Layout.61.7 User: export a multisize pattern from "All sizes" as DXF-ASTM; check it in aw.fyi (DXF.8.4)
+    - [x] Layout.61.7.1 Check the jacket2 reports in `test-seamly-layout/layouts/jacket2/`. Result: grading not verified
+      - Both files: MSI 26.10.1115, before Layout.26 and Layout.27.9
+      - Marker `jacket2_40-146_marker_allsizes_R13_202610121149.dxf`: nothing graded. `Sample Size:` and `Grade Rule Table:` blank, no `.rul`, layer 2 in all 25 blocks (Layout.25, 27.1, 27.3)
+      - Nested `jacket2_40-146_nested_allsizes_R13_202610121136.dxf`: aw.fyi reads sample size 500 and 104 layer 5 lines. 4 pieces graded; Detail (3), (6), (7), (8) sample size only (Layout.27.3)
+    - [ ] Layout.61.7.2 User: install MSI 26.10.1220 or later. Export jacket2 Nested "All sizes" as DXF-ASTM (R13); run aw.fyi
+      - Expect: no "Detail" merge departures, no layer 5 mismatch, no duplicate vertices. Detail (3), (6), (7), (8) stay sample size only until Layout.27.3
+    - [ ] Layout.61.7.3 User: Marker "All sizes" after Layout.25 and Layout.27.10
+
+    | aw.fyi finding | Report | Cause | Task |
+    |---|---|---|---|
+    | Departure "Sample size points incomplete" | both | 6 pieces share `Piece Name:Detail`; aw.fyi reads their blocks as one graded piece | Layout.26.5, done after these files |
+    | Departure "Excluded layers present in graded sizes" | both | Same merge | Layout.26.5 |
+    | "L5 endpoint mismatch up to 103.74; 4 blocks without L5" | Nested | Same merge. The 4 blocks are the ungraded Detail sample sizes | Layout.26.5 |
+    | Duplicate vertices, layers 84 (54) and 87 (450) | Nested | Graded key points 0.000001–0.01 mm from a dense vertex | Layout.27.9, done after these files |
+    | Departure "Corners missing from layer 2": Detail (4) size 240, L1 pt 14 | Marker | 6.5° bend over 10 mm; no tangent break | DXF.23 |
+    | Advisory: no densified points, 13 pieces | Marker | Rectangles (Комір) and triangles (Detail (5)): straight sides | No action |
+    | Advisory: more curve points than the curves need (piece-113 L14, Detail (4) size 500 L1) | Nested | Long gentle curves | No action (advisory) |
+    | Advisory: validation spans, curve tolerance | both | Pass | — |
+    | No finding: `Piece Name:piece-201_s720_M` | both | Cyrillic name emptied by `sanitize_ascii`; aw.fyi cannot group the sizes | Layout.26.4, done after these files |
+
 - Layout.62 Moved to Layout.16: mirror line (layer 6) needs Seamly2D fold lines (Seamly2D.8)
 - [ ] Layout.63 Drill holes (layer 13), with diameter (group 30) - not implemented in Seamly2D yet so move this to TODO_SEAMLY2D.md
 - [ ] Layout.64 Stripe and plaid reference lines (layers 9, 10) - not implemented in Seamly2D yet so move this to TODO_SEAMLY2D.md
