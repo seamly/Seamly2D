@@ -12,8 +12,8 @@
   - Next commit: tracking (`TODO_SEAMLYLAYOUT.md` with the user's own edits, this file).
 - Verified: `cargo test --workspace` 470 passed, 0 failed (jacket2 tests included, about 25 s each).
 - Not verified (user: build once at the end): `local_build_msi.ps1` (`nmake check` for the Layout.29 C++ tests), `ctest --preset debug`, QML dialog in the app. A started build was stopped in nmake; object files are partial.
-- Next: remaining plan steps 2, 8, 9, 10; then one `local_build_msi.ps1`; then merge `--no-ff` into `run-seamlyLayout`, push. Full CI only if a `*.pri` or `packaging/` change joins the push.
-- Peer session `seamly2d-private-2a` works on Layout.30 in the same tree: branch `task-copy-samples`, `common.pri` uncommitted. Do not stage `common.pri`.
+- Next: remaining plan steps 2, 8, 9, 10; then one `local_build_msi.ps1`; then merge `--no-ff` into `run-seamlyLayout`, push. The push carries `common.pri`: run full CI (no skip-ci token).
+- `run-seamlyLayout` has merge `3797bf8a6d` (Layout.40, `common.pri`), not pushed. The working tree `common.pri` equals it. Before checking out `run-seamlyLayout`, run `git checkout -- common.pri`. A merge conflict in `TODO_SEAMLYLAYOUT.md` at Layout.30/40: keep the Layout.40 names.
 - Build stamps: `projectversion.*` and both `Info.plist` files now say 26.10.1218. Do not commit.
 - `test_data/jacket2_40-146_nested_allsizes_R13_202610121813.dxf` untracked: no test uses it.
 
@@ -25,7 +25,7 @@ Root causes are in `TODO_SEAMLYLAYOUT.md` under each task. One commit per step. 
 |---|---|---|---|---|
 | 1 | Seamly2D | Notch attributes: one value per notch + `data-notch-segments` | Layout.29.1–29.2 | done, Qt suites not run |
 | 2 | Seamly2D | Multisize: a node that is a turn point in any size is one in every size | Layout.27.3 | open |
-| 3 | Build | `copyToDestdir` always copies on Windows | Layout.30 | peer session |
+| 3 | Build | `copyToDestdir` always copies on Windows | Layout.40 | fix on run-seamlyLayout 3797bf8a6d; MSI check open |
 | 4 | SeamlyLayout | Read `data-notch-segments` | Layout.29.3 | done |
 | 5 | SeamlyLayout | DXF `Piece Name:` from `data-name`, `\U+XXXX` escapes, same for every size; duplicates numbered `Detail (3)`; dialogs keep the original name | Layout.26.3–26.5 | done |
 | 6 | SeamlyLayout + QML | Missing Piece Data dialog: one line per piece, scroll area | Layout.26.1–26.2 | done, app check open |
