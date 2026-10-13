@@ -9,7 +9,6 @@ use std::path::Path;
 use image::codecs::jpeg::JpegEncoder;
 use image::ExtendedColorType;
 use resvg::tiny_skia::{Color, Pixmap, Transform};
-use svg2pdf::{ConversionOptions, PageOptions};
 use svg_dom::Document;
 use thiserror::Error;
 
@@ -150,23 +149,6 @@ pub fn calculate_preview_scale(tree: &usvg::Tree, max_width: f32) -> f32 {
 pub fn get_tree_size(tree: &usvg::Tree) -> (f32, f32) {
     let size = tree.size();
     (size.width(), size.height())
-}
-
-// @brief Render a usvg tree to a PDF file using svg2pdf.
-// @param tree Parsed usvg tree to render.
-// @param out_path Destination PDF path.
-// Vector content is preserved at full quality; only filtered objects are rasterised.
-pub fn render_pdf(tree: &usvg::Tree, out_path: impl AsRef<Path>) -> CoreResult<()> {
-    // Convert the usvg tree to PDF bytes with default options.
-    let pdf_bytes = svg2pdf::to_pdf(
-        tree,
-        ConversionOptions::default(),
-        PageOptions::default(),
-    );
-
-    // Write the PDF bytes to disk.
-    fs::write(out_path, pdf_bytes)?;
-    Ok(())
 }
 
 // @brief Pixel dimensions of a tree rendered at the given scale.

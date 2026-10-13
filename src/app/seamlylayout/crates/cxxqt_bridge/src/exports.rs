@@ -30,6 +30,7 @@
 //   export_name_segment(format, mode)                 -> &'static str
 //
 // Internal helpers:
+//   render_tree_to_pdf_bytes(tree)      -> Result<Vec<u8>, String>  (every PDF page, true size)
 //   merge_single_page_pdfs(page_bytes) -> Result<Vec<u8>, String>
 
 use std::path::Path;
@@ -40,7 +41,62 @@ use seamly_svg2ezdxf::{grade_drawing, svg_to_ezdxf, DxfVersion, MissingPieceData
 
 use hpgl_writer::{HpglMode, HpglOptions, PenMap};
 use ps_writer::PsFlavor;
-use layout_tiling::{compute_tile_dims, measurement_to_px, LayoutSettings, TileDimensions};
+use layout_tiling::{compute_tile_dims, measurement_to_px, LayoutSettings, TileDimensions, LAYOUT_PPI};
+
+// Points per inch: the default PDF user space unit is 1/72 in.
+const PDF_POINTS_PER_INCH: f32 = 72.0;
+// Longest page side, in user space units, that PDF readers accept (Acrobat: 200 in).
+const PDF_MAX_PAGE_UNITS: f32 = 14_400.0;
+
+// @brief Render a usvg tree to a single-page PDF at true size.
+// @details SVG user units are CSS px, 96 per inch. A page side longer than
+//          200 in gets `/UserUnit` n: the MediaBox shrinks by n, and a reader
+//          scales it back, so the page prints at full length.
+// @param tree  Parsed page content.
+// @return PDF bytes on success; Err(message) when the `/UserUnit` rewrite fails.
+pub(crate) fn render_tree_to_pdf_bytes(tree: &usvg::Tree) -> Result<Vec<u8>, String> {
+    use svg2pdf::{ConversionOptions, PageOptions};
+
+    // Longest page side in points at true size.
+    let size = tree.size();
+    let longest_pt = size.width().max(size.height()) * PDF_POINTS_PER_INCH / LAYOUT_PPI as f32;
+
+    // Smallest whole unit that keeps the MediaBox within the reader limit.
+    let user_unit = (longest_pt / PDF_MAX_PAGE_UNITS).ceil().max(1.0);
+
+    // svg2pdf maps `dpi` px to 72 pt, so 96 px/in times the unit gives MediaBox units of n/72 in.
+    let page_options = PageOptions { dpi: LAYOUT_PPI as f32 * user_unit };
+    let pdf = svg2pdf::to_pdf(tree, ConversionOptions::default(), page_options);
+
+    // A page within 200 in keeps the default unit.
+    if user_unit <= 1.0 {
+        return Ok(pdf);
+    } // if default unit
+    set_pdf_user_unit(&pdf, user_unit)
+} // fn render_tree_to_pdf_bytes
+
+// @brief Write `/UserUnit` into every page dictionary of a PDF.
+// @param pdf        PDF bytes from svg2pdf.
+// @param user_unit  Size of one user space unit, in multiples of 1/72 in.
+// @return Rewritten PDF bytes; Err(message) when lopdf cannot read or write them.
+fn set_pdf_user_unit(pdf: &[u8], user_unit: f32) -> Result<Vec<u8>, String> {
+    use lopdf::{Document, Object};
+
+    let mut doc = Document::load_mem(pdf)
+        .map_err(|e| format!("PDF: cannot read the page to set its unit: {e}"))?;
+
+    // Each page dictionary carries its own unit.
+    for page_id in doc.get_pages().into_values() {
+        doc.get_dictionary_mut(page_id)
+            .map_err(|e| format!("PDF: page dictionary missing: {e}"))?
+            .set("UserUnit", Object::Real(user_unit));
+    } // for each page
+
+    let mut out = Vec::new();
+    doc.save_to(&mut out)
+        .map_err(|e| format!("PDF: cannot write the page unit: {e}"))?;
+    Ok(out)
+} // fn set_pdf_user_unit
 
 // @brief Render an SVG DOM document to a single-page PDF byte buffer.
 // @param doc      SVG DOM page content.
@@ -50,8 +106,6 @@ pub(crate) fn render_svg_doc_to_pdf_bytes(
     doc: &svg_dom::Document,
     context: &str,
 ) -> Result<Vec<u8>, String> {
-    use svg2pdf::{ConversionOptions, PageOptions};
-
     // Serialize page DOM to SVG string for usvg parsing.
     let svg_str = doc.to_string();
 
@@ -61,13 +115,10 @@ pub(crate) fn render_svg_doc_to_pdf_bytes(
     let tree = usvg::Tree::from_data(svg_str.as_bytes(), &opt)
         .map_err(|e| format!("Tiled PDF: SVG parse failed for {context}: {e}"))?;
 
-    // Render to one PDF page.
-    Ok(svg2pdf::to_pdf(
-        &tree,
-        ConversionOptions::default(),
-        PageOptions::default(),
-    ))
-}
+    // Render to one PDF page at true size.
+    render_tree_to_pdf_bytes(&tree)
+        .map_err(|e| format!("Tiled PDF: {context}: {e}"))
+} // fn render_svg_doc_to_pdf_bytes
 
 // @brief Build the tiled-PDF thumbnail page document.
 //
@@ -815,7 +866,7 @@ fn missing_piece_data_text(missing: &[MissingPieceData]) -> String {
 //
 // Pipeline:
 //   1. DOM → usvg::Tree via app_core::document_to_tree.   (progress → 10%)
-//   2. usvg::Tree → PDF bytes via svg2pdf (vector quality preserved).
+//   2. usvg::Tree → true-size PDF bytes via render_tree_to_pdf_bytes.
 //   3. Write bytes to disk.                                (progress → 90%)
 //
 // @param doc       Cloned, piece-fill-stripped layout DOM.
@@ -843,11 +894,12 @@ pub fn do_export_pdf(
     crate::log_to_file(&format!("[exports.rs] do_export_pdf(): 2 SVG parsed; rendering PDF to '{path}'"));
 
     // Step 2–3: usvg tree → PDF bytes → file.
-    let result = app_core::render_pdf(&tree, Path::new(path))
+    let result = render_tree_to_pdf_bytes(&tree)
+        .and_then(|pdf| std::fs::write(path, pdf).map_err(|e| e.to_string()))
         .map_err(|e| {
             crate::log_to_file(&format!("[exports.rs] do_export_pdf(): 3 render failed: {e}"));
             format!("PDF export failed — render error: {e}")
-        }); // if render failed
+        }); // if render or write failed
 
     if result.is_ok() {
         // Stage 3 complete: PDF file written.
@@ -2554,6 +2606,68 @@ mod tests {
         assert_eq!(ticks[0], 10, "first tick must be 10% (SVG parse start)");
         assert_eq!(ticks[1], 90, "second tick must be 90% (PDF file written)");
     } // do_export_pdf_emits_intermediate_progress
+
+    // @brief Page size of each page in a PDF: (MediaBox width, MediaBox height, UserUnit).
+    fn pdf_page_sizes(pdf: &[u8]) -> Vec<(f32, f32, f32)> {
+        let doc = lopdf::Document::load_mem(pdf).expect("PDF bytes should parse");
+        doc.get_pages()
+            .into_values()
+            .map(|id| {
+                let page = doc.get_dictionary(id).expect("page dictionary");
+                let media_box = page.get(b"MediaBox").and_then(lopdf::Object::as_array).expect("MediaBox");
+                let side = |i: usize| media_box[i].as_float().expect("MediaBox number");
+                let unit = page.get(b"UserUnit").and_then(lopdf::Object::as_float).unwrap_or(1.0);
+                (side(2) - side(0), side(3) - side(1), unit)
+            })
+            .collect()
+    } // fn pdf_page_sizes
+
+    // @brief Render an SVG string through the single-page PDF path.
+    fn render_test_pdf(svg: &str) -> Vec<u8> {
+        let doc = Document::parse(svg).expect("fixture SVG should parse");
+        render_svg_doc_to_pdf_bytes(&doc, "test page").expect("PDF render should succeed")
+    } // fn render_test_pdf
+
+    // @brief 96 SVG px make one inch, 72 PDF points: a Letter page in px is 612 × 792 pt.
+    #[test]
+    fn pdf_page_is_true_size() {
+        let pdf = render_test_pdf(r#"<svg xmlns="http://www.w3.org/2000/svg" width="816" height="1056"/>"#);
+        let sizes = pdf_page_sizes(&pdf);
+        assert_eq!(sizes.len(), 1);
+        let (w, h, unit) = sizes[0];
+        assert!((w - 612.0).abs() < 0.01 && (h - 792.0).abs() < 0.01, "Letter page is 612 x 792 pt, got {w} x {h}");
+        assert_eq!(unit, 1.0, "a page within 200 in keeps the default unit");
+    } // pdf_page_is_true_size
+
+    // @brief A 48 in × 500 in roll is 3456 × 36000 pt: the MediaBox stays within 14 400 units.
+    #[test]
+    fn pdf_page_longer_than_200_in_sets_user_unit() {
+        let pdf = render_test_pdf(r#"<svg xmlns="http://www.w3.org/2000/svg" width="4608" height="48000"/>"#);
+        let (w, h, unit) = pdf_page_sizes(&pdf)[0];
+        assert_eq!(unit, 3.0, "36000 pt needs a unit of 3 x 1/72 in");
+        assert!(h <= PDF_MAX_PAGE_UNITS, "MediaBox height {h} within the reader limit");
+        assert!((w * unit - 3456.0).abs() < 0.01, "width at true size is 48 in, got {} pt", w * unit);
+        assert!((h * unit - 36000.0).abs() < 0.01, "height at true size is 500 in, got {} pt", h * unit);
+    } // pdf_page_longer_than_200_in_sets_user_unit
+
+    // @brief Every tiled page, the thumbnail included, is one Letter sheet: 612 × 792 pt in either orientation.
+    #[test]
+    fn tiled_pdf_pages_are_paper_size() {
+        let doc = Document::parse(
+            r#"<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1600">
+                <g id="piece0"><rect x="0" y="0" width="1100" height="1500"/></g>
+            </svg>"#,
+        )
+        .expect("fixture SVG should parse");
+        let pages = collect_tiled_pdf_page_bytes(&doc, &test_tiled_settings()).expect("tiled pages should render");
+        assert!(pages.len() > 1, "thumbnail plus tiles");
+        for page in &pages {
+            let (w, h, unit) = pdf_page_sizes(page)[0];
+            let (short, long) = (w.min(h), w.max(h));
+            assert!((short - 612.0).abs() < 0.5 && (long - 792.0).abs() < 0.5, "tiled page is Letter, got {w} x {h}");
+            assert_eq!(unit, 1.0);
+        } // for each page
+    } // tiled_pdf_pages_are_paper_size
 
     // @brief do_export_png produces a file that begins with the PNG magic bytes.
     //

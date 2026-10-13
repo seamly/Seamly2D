@@ -156,6 +156,17 @@ ExportMenu EPS / PostScript (PS) → exportPostscriptRequested("eps" | "ps")
 - Not covered: tiled multi-page PS.
 - Seamly2D exports no PS or EPS, and ships no `pdftops`. CLI formats 8 and 9 are rejected; other format numbers do not change.
 
+## PDF export — true size
+
+`exports::render_tree_to_pdf_bytes` renders every PDF page: PDF, PDF (Tiled), and sheet pages.
+
+- Units: 96 px per inch → 72 pt per inch. `svg2pdf` gets `PageOptions { dpi: 96 }`; its default (72) prints 4/3 too large.
+- PDF readers limit a page side to 14 400 units (Acrobat: 200 in).
+- A page side longer than 200 in gets `/UserUnit` n, the smallest whole number that keeps the MediaBox within 14 400. A reader multiplies the MediaBox by n / 72 in. A 48 in × 500 in roll: MediaBox `1152 × 12000`, `/UserUnit 3`.
+- Reason: a fabric cut layout can be longer than 500 in (user decision).
+- A reader that ignores `/UserUnit` shows such a page at 1/n size.
+- Tiled pages are the paper size; Letter is `612 × 792` pt.
+
 ## JPG export
 
 ```

@@ -216,6 +216,8 @@ Evidence (jacket2, Marker, 48 in × 500 in paper roll): the pack placed 96 of 20
 
 Repeat with MSI 26.10.1311, Marker tab: 96 of 208 placed again. The roll is full: pieces use 74 % of its area. The 208 pieces need about 740 in. `jacket2_screenshot_1.png`, `jacket2_40-146_202610131245.svg`.
 
+Decision (user, 2026-10-13): a layout cuts fabric, so the media grows past the 500 in roll length when the pieces need it.
+
 - [ ] Layout.25.1 When the pack leaves pieces out, increase the media height and pack again until every piece fits
 - [ ] Layout.25.2 Media types: paper sheet, paper roll (500 in default length), fabric
 - [ ] Layout.25.3 A piece wider than the media width cannot fit at any height: leave it out and keep the warning
@@ -305,11 +307,13 @@ Found with jacket2, MSI 26.10.1311. `svg2pdf` `PageOptions::default()` uses 72 d
 - Nested `jacket2_40-nested_146_202610131245.pdf`: `4608 × 5003` pt. Expected `3456 × 3752` pt.
 - EPS and PS of the same tabs are correct: `0.75` scale, BoundingBox `3456 36000`.
 
-- [ ] Layout.68.1 Pass `PageOptions { dpi: 96.0 }` in `app_core::render_pdf` and `exports::render_svg_doc_to_pdf_bytes`
-- [ ] Layout.68.2 PDF (Tiled) uses the same default: each page is the paper size × 4/3 (not checked with a file). Check the page size after Layout.68.1
-- [ ] Layout.68.3 Acrobat limits a page to 200 in (14 400 pt). A 500-in roll page is 36 000 pt. User decision: write `/UserUnit`, or accept
-- [ ] Layout.68.4 Tests: Rust MediaBox of a 48 in × 500 in layout = `3456 × 36000`; tiled Letter page = `612 × 792`
-- [ ] Layout.68.5 User: print one tiled page at 100 %; measure a known length
+- [x] Layout.68.1 One renderer for every PDF page: `exports::render_tree_to_pdf_bytes` passes `PageOptions { dpi: 96 }`. `app_core::render_pdf` removed
+- [x] Layout.68.2 PDF (Tiled) and sheet pages use the same renderer. A Letter tile page is `612 × 792` pt
+- [x] Layout.68.3 Acrobat limits a page to 200 in (14 400 pt). A 500-in roll page is 36 000 pt. Decision (user): a fabric layout can be longer than 500 in, so a page side longer than 200 in gets `/UserUnit` n (smallest whole number). A reader that ignores `/UserUnit` shows the page at 1/n size
+- [x] Layout.68.4 Tests: Rust MediaBox of a 48 in × 500 in layout = `3456 × 36000`; tiled Letter page = `612 × 792`
+  - `pdf_page_is_true_size`, `pdf_page_longer_than_200_in_sets_user_unit`, `tiled_pdf_pages_are_paper_size`
+- [x] Layout.68.6 Docs: `export-docs/seamlylayout_EXPORT_WORKFLOW.md` "PDF export — true size", simple workflow, codebase index
+- [ ] Layout.68.5 User: on the next MSI, print one tiled page at 100 %; measure a known length. Open the Marker PDF in Acrobat: Document Properties shows 48 × 500 in
 
 ## [ ] Task Layout.69 — PNG and JPG exports: no resolution metadata
 
