@@ -11,9 +11,7 @@ Found in `TEST_CHECKLIST.md` §2: BackPanel `data-notch-type` holds 15 words for
 - [x] Layout.29.3 SeamlyLayout `converter::notch_polylines`: spread each per-notch width over its segments with `data-notch-segments`. A list of the wrong length is ignored
 - [x] Layout.29.4 Tests: `TST_SvgComponentTags::NotchGroupCarriesNotchTypes`, `TST_VPiece::NotchTypesFollowNodes`, Rust `notch_polylines` with a 14-segment U-notch
 - [x] Layout.29.5 Docs: `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`, compliance doc "Notch rules", `TEST_CHECKLIST.md`
-- [x] Layout.29.6 Verify: Qt suites (`nmake check`) in `local_build_msi.ps1`
-  - `nmake check` passed in the MSI 26.10.1220 build. A second run of that build's `Seamly2DTests.exe`: 0 failed, both Layout.29 tests pass
-  - `cargo test --workspace`: 472 passed, 0 failed. No SeamlyLayout change since
+- Verified: `local_build_msi.ps1` `nmake check` (MSI 26.10.1220); a second run of that build's `Seamly2DTests.exe`, 0 failed; `cargo test --workspace`, 472 passed.
 - Open: user re-check of `TEST_CHECKLIST.md` §2 `data-notch-type` line on MSI 26.10.1220. The captured `male_shirt_202610121755.svg` predates the fix
 
 ## Task Layout.66 — Seamly2D producer attributes (completed 2026-10-11)
