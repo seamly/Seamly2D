@@ -104,6 +104,10 @@ public:
                                                      bool seamAllowanceBuiltIn = false,
                                                      const QVector<QPointF> &nodeVertices = QVector<QPointF>());
 
+    QVector<QPointF>          getBuiltInSeamLinePoints() const;
+    void                      setBuiltInSeamLinePoints(const QVector<QPointF> &points,
+                                                       const QVector<QPointF> &nodeVertices = QVector<QPointF>());
+
     QVector<QPointF>          getLayoutAllowancePoints() const;
     void                      SetLayoutAllowancePoints();
 

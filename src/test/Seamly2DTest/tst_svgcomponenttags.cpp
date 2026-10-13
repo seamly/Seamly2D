@@ -31,6 +31,8 @@
 #include "tst_svgcomponenttags.h"
 #include "../vformat/svg_generator.h"
 #include "../vmisc/def.h"
+#include "../vmisc/vabstractapplication.h"
+#include "../vmisc/vcommonsettings.h"
 #include "../vlayout/vlayoutdef.h"
 #include "../vlayout/vlayoutpiece.h"
 #include "../vlayout/vlayoutpiecepath.h"
@@ -47,6 +49,8 @@
 #include <QLineF>
 #include <QPainterPath>
 #include <QPen>
+#include <QRectF>
+#include <QRegularExpression>
 #include <QScopedPointer>
 #include <QSet>
 #include <QTemporaryDir>
@@ -329,6 +333,57 @@ QVector<QLineF> slitAndTNotchLines()
     return {QLineF(QPointF(10, 100), QPointF(15, 100)),
             QLineF(QPointF(100, 10), QPointF(100, 15)),
             QLineF(QPointF(97, 15), QPointF(103, 15))};
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief makeBuiltInPiece builds a square piece with a built-in seam allowance.
+ * @details The main path is the cut line, a 180 square. The seam line is the 160 square inside it.
+ */
+VLayoutPiece makeBuiltInPiece(const QString &name)
+{
+    VLayoutPiece piece;
+    piece.SetName(name);
+    piece.setMainPathPoints(squarePoints(10, 10, 180), false, squarePoints(10, 10, 180));
+    piece.setSeamAllowancePoints(QVector<QPointF>(), true, true);
+    piece.setBuiltInSeamLinePoints(squarePoints(20, 20, 160), squarePoints(20, 20, 160));
+    return piece;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief pathBounds returns the bounding box of every coordinate pair in the path data under a group.
+ */
+QRectF pathBounds(const QDomElement &group)
+{
+    static const QRegularExpression number(QStringLiteral("-?\\d+(?:\\.\\d+)?(?:[eE]-?\\d+)?"));
+    QVector<qreal> values;
+    const QDomNodeList paths = group.elementsByTagName(QStringLiteral("path"));
+    for (int i = 0; i < paths.size(); ++i)
+    {
+        QRegularExpressionMatchIterator it = number.globalMatch(paths.at(i).toElement().attribute(QStringLiteral("d")));
+        while (it.hasNext())
+        {
+            values.append(it.next().captured().toDouble());
+        }
+    }
+
+    if (values.size() < 2)
+    {
+        return QRectF();
+    }
+    qreal left = values.at(0);
+    qreal right = left;
+    qreal top = values.at(1);
+    qreal bottom = top;
+    for (int i = 2; i + 1 < values.size(); i += 2)
+    {
+        left = qMin(left, values.at(i));
+        right = qMax(right, values.at(i));
+        top = qMin(top, values.at(i + 1));
+        bottom = qMax(bottom, values.at(i + 1));
+    }
+    return QRectF(QPointF(left, top), QPointF(right, bottom));
 }
 } // namespace
 
@@ -959,4 +1014,54 @@ void TST_SvgComponentTags::PieceCarriesQuantityAndFold() const
     QCOMPARE(plainPieces.size(), 1);
     QCOMPARE(plainPieces.at(0).attribute(QStringLiteral("data-quantity")), QStringLiteral("1"));
     QVERIFY(!plainPieces.at(0).hasAttribute(QStringLiteral("data-on-fold")));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief BuiltInPieceSendsCutlineAndSeamline checks that a built-in seam allowance sends its main path as the
+ * cutline and the line inside it as the seamline, each with its own turn points. The cutline is the piece outline,
+ * so it is sent also when the seam allowance view setting is off.
+ */
+void TST_SvgComponentTags::BuiltInPieceSendsCutlineAndSeamline() const
+{
+    const bool savedShowSeamAllowances = qApp->Settings()->showSeamAllowances();
+    qApp->Settings()->setShowSeamAllowances(false);
+    const QDomDocument doc = exportPieceSvg(makeBuiltInPiece(QStringLiteral("Facing")));
+    qApp->Settings()->setShowSeamAllowances(savedShowSeamAllowances);
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+
+    const QVector<QDomElement> cutlines = groupsOfType(doc, QStringLiteral("cutline"));
+    QCOMPARE(cutlines.size(), 1);
+    QCOMPARE(cutlines.at(0).attribute(QStringLiteral("id")), QStringLiteral("cutline_Facing"));
+    QCOMPARE(cutlines.at(0).attribute(QStringLiteral("data-turn-points")), QStringLiteral("0 1 2 3"));
+
+    const QVector<QDomElement> seamlines = groupsOfType(doc, QStringLiteral("seamline"));
+    QCOMPARE(seamlines.size(), 1);
+    QCOMPARE(seamlines.at(0).attribute(QStringLiteral("id")), QStringLiteral("seamline_Facing"));
+    QCOMPARE(seamlines.at(0).attribute(QStringLiteral("data-turn-points")), QStringLiteral("0 1 2 3"));
+
+    // The seam line lies inside the cut line: 160 of 180 on each axis.
+    const QRectF cut = pathBounds(cutlines.at(0));
+    const QRectF seam = pathBounds(seamlines.at(0));
+    QVERIFY2(cut.width() > 0 && seam.width() > 0, "both lines have path data");
+    QVERIFY2(cut.contains(seam) && seam.width() < cut.width() && seam.height() < cut.height(),
+             qPrintable(QStringLiteral("cut %1 x %2, seam %3 x %4").arg(cut.width()).arg(cut.height())
+                        .arg(seam.width()).arg(seam.height())));
+    QVERIFY(qAbs(seam.width() / cut.width() - 160.0 / 180.0) < 0.001);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief BuiltInPieceHiddenSeamLineSendsCutlineOnly checks that a hidden seam line is not sent for a built-in seam
+ * allowance, the same as for a seam allowance that is not built in.
+ */
+void TST_SvgComponentTags::BuiltInPieceHiddenSeamLineSendsCutlineOnly() const
+{
+    VLayoutPiece piece = makeBuiltInPiece(QStringLiteral("Facing"));
+    piece.setHideSeamLine(true);
+
+    const QDomDocument doc = exportPieceSvg(piece);
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+    QCOMPARE(groupsOfType(doc, QStringLiteral("cutline")).size(), 1);
+    QCOMPARE(groupsOfType(doc, QStringLiteral("seamline")).size(), 0);
 }

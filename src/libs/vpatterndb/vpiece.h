@@ -111,6 +111,8 @@ public:
     QVector<QPointF>         mainPathNodeVertices(const VContainer *data) const;
     QVector<QPointF>         seamAllowancePoints(const VContainer *data,
                                                  QVector<QPointF> *nodeVertices = nullptr) const;
+    QVector<QPointF>         builtInSeamLinePoints(const VContainer *data,
+                                                   QVector<QPointF> *nodeVertices = nullptr) const;
     QVector<QPointF>         cutPathPoints(const VContainer *data) const;
     QVector<QLineF>          createNotchLines(const VContainer *data,
                                               const QVector<QPointF> &seamAllowance = QVector<QPointF>(),

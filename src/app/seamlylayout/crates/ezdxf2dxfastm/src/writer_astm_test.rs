@@ -217,6 +217,54 @@ mod tests {
         assert_eq!(polyline_sizes(body, "87").len(), 1);
     }
 
+    // @brief Handoff of a piece with a built-in seam allowance: the main path is the
+    //        `cutline`, the line Seamly2D computes 10 mm inside it is the `seamline`.
+    // @details 96 px = 25.4 mm, so 10 mm = 37.795276 px.
+    const BUILT_IN_HANDOFF: &str = r#"
+        <svg viewBox="0 0 960 960" width="254mm" height="254mm" xmlns="http://www.w3.org/2000/svg">
+          <g id="pattern-1" data-type="pattern" data-name="Built In">
+            <g id="piece_Yoke" data-type="piece" data-name="Yoke" data-quantity="1">
+              <g data-type="seamline" data-turn-points="0 1 2 3">
+                <path d="M 37.795276,37.795276 L 922.204724,37.795276 L 922.204724,922.204724 L 37.795276,922.204724 L 37.795276,37.795276 Z"/>
+              </g>
+              <g data-type="cutline" data-turn-points="0 1 2 3">
+                <path d="M 0,0 L 960,0 L 960,960 L 0,960 L 0,0 Z"/>
+              </g>
+              <g data-type="notch" data-notch-type="slit" data-seam-allowances="10.00" data-notch-segments="1">
+                <path d="M 480,960 L 480,941"/>
+              </g>
+            </g>
+          </g>
+        </svg>"#;
+
+    // @brief A built-in seam allowance writes the cut line as the boundary (layer 1)
+    //        and the seam line as a sew line (layer 14), each with its validation layer.
+    #[test]
+    fn built_in_seam_allowance_writes_boundary_and_sew_line() {
+        let doc = svg_dom::Document::parse(BUILT_IN_HANDOFF).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let dxf = parse_dxf(&export_to_string(&drawing, "built_in", &DxfAstmExportOptions::default()));
+        let (_, body) = &dxf.blocks[0];
+
+        for (primary, validation) in [("1", "84"), ("14", "87")] {
+            assert_eq!(polyline_sizes(body, primary).len(), 1, "one polyline on layer {primary}");
+            assert_eq!(polyline_sizes(body, validation).len(), 1, "one polyline on layer {validation}");
+        }
+
+        // Smallest x of the vertices on a layer, in mm.
+        let min_x = |layer: &str| {
+            body.iter()
+                .filter(|e| e.kind == "VERTEX" && e.layer() == layer)
+                .map(|e| e.get(10).unwrap().parse::<f64>().unwrap())
+                .fold(f64::MAX, f64::min)
+        };
+        assert!((min_x("14") - min_x("1") - 10.0).abs() < 0.01, "sew line 10 mm inside the boundary");
+
+        // The slit is half the seam allowance deep.
+        let slit = body.iter().find(|e| e.kind == "POINT" && e.layer() == "4").expect("slit notch");
+        assert_eq!(slit.get(30), Some("5.00"));
+    }
+
     // @brief The male shirt handoff SVG exports with every D6673 requirement met.
     #[test]
     fn male_shirt_fixture_exports_complete_astm_file() {

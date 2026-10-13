@@ -260,31 +260,45 @@ mod tests {
         assert!(notches.iter().all(|n| (n.depth - 5.0).abs() < 1e-6), "drawn depth is 5");
     }
 
-    // Built-in seam allowance: the main path is the cut line, sent as `seamline`; no
-    // cut line, no sew line. 96 px = 25.4 mm. Notch widths 10 and 6 mm.
+    // Built-in seam allowance: the main path is the `cutline`, the line Seamly2D
+    // computes inside it is the `seamline`. 96 px = 25.4 mm. The seam line is 96 px
+    // in; the notch widths are 10 and 6 mm.
     const BUILT_IN: &str = r#"
         <svg viewBox="0 0 960 960" width="254mm" height="254mm" xmlns="http://www.w3.org/2000/svg">
           <g id="pattern-1" data-type="pattern" data-name="Built In">
             <g id="piece_Yoke" data-type="piece" data-name="Yoke">
-              <g data-type="seamline"><path d="M 0,0 L 960,0 L 960,960 L 0,960 Z"/></g>
+              <g data-type="seamline"><path d="M 96,96 L 864,96 L 864,864 L 96,864 Z"/></g>
+              <g data-type="cutline"><path d="M 0,0 L 960,0 L 960,960 L 0,960 Z"/></g>
               <g data-type="notch" data-seam-allowances="10.00 6.00"><path d="M 480,960 L 480,941 M 200,0 L 200,19"/></g>
             </g>
           </g>
         </svg>"#;
 
     #[test]
-    fn built_in_seam_allowance_notches_use_seamly2d_widths() {
-        let doc = Document::parse(BUILT_IN).expect("fixture parses");
-        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
-        let yoke = &drawing.blocks[0];
-        assert!(yoke.boundary.is_some() && yoke.sew_lines.is_empty());
+    fn built_in_seam_allowance_has_boundary_and_sew_line() {
+        let yoke_of = |svg: &str| {
+            let doc = Document::parse(svg).expect("fixture parses");
+            svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts").blocks.remove(0)
+        }; // yoke_of
+        let yoke = yoke_of(BUILT_IN);
+        let max_x = |c: &AstmContour| c.dense.iter().map(|p| p.x).fold(f64::MIN, f64::max);
+        let boundary = yoke.boundary.as_ref().expect("cut line is the boundary");
+        assert!((max_x(boundary) - 960.0 * MM_PER_PX).abs() < 1e-3, "boundary max x {}", max_x(boundary));
+        assert_eq!(yoke.sew_lines.len(), 1, "seam line is the sew line");
+        assert!((max_x(&yoke.sew_lines[0]) - 864.0 * MM_PER_PX).abs() < 1e-3);
+
+        // Seamly2D's widths set the slit depth before the measured 25.4 mm.
         let depths: Vec<f64> = yoke.notches.iter().map(|n| n.depth).collect();
         assert_eq!(depths.len(), 2);
         assert!((depths[0] - 5.0).abs() < 1e-6 && (depths[1] - 3.0).abs() < 1e-6, "depths {depths:?}");
         assert!(yoke.notches.iter().all(|n| n.kind == NotchKind::Slit));
+
+        // Without the widths, the sew line gives the seam allowance.
+        let measured = yoke_of(&BUILT_IN.replace(r#" data-seam-allowances="10.00 6.00""#, ""));
+        assert!(measured.notches.iter().all(|n| (n.depth - 48.0 * MM_PER_PX).abs() < 1e-3), "{:?}", measured.notches);
     }
 
-    // @brief Built-in piece with a slit (width 10 mm) and a 14-segment U-notch (width 6 mm).
+    // @brief Piece without a cut line, with a slit (width 10 mm) and a 14-segment U-notch (width 6 mm).
     // @param segments `data-notch-segments` value.
     // @details The U-notch is a half circle of radius 10 px into the top edge, centred on x = 600.
     fn slit_and_u_notch(segments: &str) -> String {

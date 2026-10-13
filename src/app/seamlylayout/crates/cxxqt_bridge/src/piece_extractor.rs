@@ -1120,6 +1120,26 @@ pub(crate) mod tests {
         assert!((polygons[0].vertices[1].1 -  0.0).abs() < 1e-6);
     } // paired_extractor_aligns_rects_and_polygons
 
+    // @brief A built-in seam allowance hands off its main path as the cutline and
+    // the line inside it as the seamline, seamline first.  The piece packs by its
+    // cutline: the polygon is the 60 x 40 cut line, not the 40 x 20 seam line.
+    #[test]
+    fn built_in_seam_allowance_packs_by_its_cut_line() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+  <g id="piece_Yoke" data-type="piece" data-name="Yoke">
+    <g id="seamline_Yoke" data-type="seamline"><path d="M 10 10 L 50 10 L 50 30 L 10 30 L 10 10"/></g>
+    <g id="cutline_Yoke" data-type="cutline"><path d="M 0 0 L 60 0 L 60 40 L 0 40 L 0 0"/></g>
+  </g>
+</svg>"#;
+        let doc = svg_dom::Document::parse(svg).expect("parse ok");
+        let (pieces, polygons) = extract_piece_rects_and_polygons(&doc);
+        assert_eq!(pieces.len(), 1);
+        assert_eq!((pieces[0].rect.w, pieces[0].rect.h), (60, 40), "bbox is the cut line");
+        let xs: Vec<f64> = polygons[0].vertices.iter().map(|v| v.0).collect();
+        let span = xs.iter().cloned().fold(f64::MIN, f64::max) - xs.iter().cloned().fold(f64::MAX, f64::min);
+        assert!((span - 60.0).abs() < 1e-6, "polygon is the cut line, span {span}");
+    } // built_in_seam_allowance_packs_by_its_cut_line
+
     // @brief When a piece has path geometry but no cutline / seamline group,
     // the polygon falls back to the rect AABB (4 vertices CCW from (0,0)).
     // This preserves "every kept rect is also packable as a polygon" so

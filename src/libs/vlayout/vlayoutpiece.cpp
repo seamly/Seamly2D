@@ -102,6 +102,26 @@ void setTurnPointsData(QGraphicsItem *item, const std::optional<QVector<int>> &t
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief closedPath draws a polyline closed back to its first point; no points give an empty path.
+ */
+QPainterPath closedPath(const QVector<QPointF> &points)
+{
+    QPainterPath path;
+    if (points.isEmpty())
+    {
+        return path;
+    }
+    path.moveTo(points.first());
+    for (int i = 1; i < points.size(); ++i)
+    {
+        path.lineTo(points.at(i));
+    }
+    path.lineTo(points.first());
+    return path;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 QVector<VLayoutPiecePath> convertInternalPaths (const VPiece &piece, const VContainer *pattern, const bool isCut)
 {
     SCASSERT(pattern != nullptr)
@@ -453,6 +473,9 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
                                        piece.hasSeamAllowance(),
                                        piece.hasSeamAllowanceBuiltIn(),
                                        seamAllowanceNodes);
+    QVector<QPointF> builtInSeamLineNodes;
+    const QVector<QPointF> builtInSeamLine = piece.builtInSeamLinePoints(pattern, &builtInSeamLineNodes);
+    layoutPiece.setBuiltInSeamLinePoints(builtInSeamLine, builtInSeamLineNodes);
     layoutPiece.setInternalPaths(convertInternalPaths (piece, pattern, false));
     layoutPiece.setCutoutPaths(convertInternalPaths (piece, pattern, true));
     // Clip cutline notches to the cutline, as the canvas does.
@@ -623,6 +646,33 @@ void VLayoutPiece::setSeamAllowancePoints(const QVector<QPointF> &points, bool s
             qWarning() << "Seam allowance is empty.";
             SetSeamAllowance(false);
         }
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getBuiltInSeamLinePoints returns the seam line inside a main path with a built-in seam allowance.
+ */
+QVector<QPointF> VLayoutPiece::getBuiltInSeamLinePoints() const
+{
+    return Map(d->builtInSeamLine);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setBuiltInSeamLinePoints stores the seam line of a piece whose seam allowance is built into the main path.
+ * @param points from VPiece::builtInSeamLinePoints(). Used only while the seam allowance is built in.
+ * @param nodeVertices vertices that can break the tangent. Empty = turn points unknown, so the seam line gets no
+ *        data-turn-points attribute.
+ */
+void VLayoutPiece::setBuiltInSeamLinePoints(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices)
+{
+    // Stored open, like the contour: closedPath() closes it.
+    d->builtInSeamLine = RemoveDublicates(points, true);
+    d->builtInSeamLineTurnPoints.reset();
+    if (!d->builtInSeamLine.isEmpty() && !nodeVertices.isEmpty())
+    {
+        d->builtInSeamLineTurnPoints = turnPointIndices(d->builtInSeamLine, nodeVertices, true);
     }
 }
 
@@ -1558,10 +1608,12 @@ QVector<QPointF> VLayoutPiece::piecePath() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief createSeamlineItem creates the seamline (main path) child item of a piece.
+ * @brief createSeamlineItem creates the seamline child item of a piece.
  *
  * Replaces the former createMainItem(): the seamline is now an ordinary child
  * of the piece container so the SVG exporter can render it independently.
+ * The seamline is the main path, or the line inside a main path with a
+ * built-in seam allowance. A hidden seam line draws nothing in both cases.
  *
  * @param parent piece root item the seamline item is added to.
  */
@@ -1571,7 +1623,7 @@ void VLayoutPiece::createSeamlineItem(QGraphicsItem *parent) const
     QColor  color;
     QString lineType;
     qreal   lineWeight;
-    if (hasSeamAllowance() && !hasSeamAllowanceBuiltIn())
+    if (hasSeamAllowance())
     {
         color      = QColor(qApp->Settings()->getDefaultSeamColor());
         lineType   = qApp->Settings()->getDefaultSeamLinetype();
@@ -1586,19 +1638,32 @@ void VLayoutPiece::createSeamlineItem(QGraphicsItem *parent) const
     QGraphicsPathItem *item = new QGraphicsPathItem(parent);
     item->setData(PieceItemData::ObjectName, QString("seamline"));
     item->setData(PieceItemData::ItemType, QStringLiteral("seamline"));
-    item->setPath(createMainPath());
-    setTurnPointsData(item, d->contourTurnPoints);
+    if (hasSeamAllowance() && hasSeamAllowanceBuiltIn())
+    {
+        item->setPath(isHideSeamLine() ? QPainterPath() : closedPath(getBuiltInSeamLinePoints()));
+        setTurnPointsData(item, d->builtInSeamLineTurnPoints);
+    }
+    else
+    {
+        item->setPath(createMainPath());
+        setTurnPointsData(item, d->contourTurnPoints);
+    }
     item->setPen(QPen(color, lineWeight, lineTypeToPenStyle(lineType), Qt::RoundCap, Qt::RoundJoin));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief createAllowanceItem creates the seam allowance (cutline) child item of the piece.
+ *
+ * A built-in seam allowance makes the main path the cutline. It is the piece
+ * outline, so it is created whatever the seam allowance view setting.
+ *
  * @param parent piece root item the cutline item is added to.
  */
 void VLayoutPiece::createAllowanceItem(QGraphicsItem *parent) const
 {
-    if (qApp->Settings()->showSeamAllowances())
+    const bool builtIn = hasSeamAllowance() && hasSeamAllowanceBuiltIn();
+    if (builtIn || qApp->Settings()->showSeamAllowances())
     {
         QColor  color      = QColor(qApp->Settings()->getDefaultCutColor());
         QString lineType   = qApp->Settings()->getDefaultCutLinetype();
@@ -1607,8 +1672,8 @@ void VLayoutPiece::createAllowanceItem(QGraphicsItem *parent) const
         QGraphicsPathItem *item = new QGraphicsPathItem(parent);
         item->setData(PieceItemData::ObjectName, QString("cutline"));
         item->setData(PieceItemData::ItemType, QStringLiteral("cutline"));
-        item->setPath(createAllowancePath());
-        setTurnPointsData(item, d->seamAllowanceTurnPoints);
+        item->setPath(builtIn ? createMainPath() : createAllowancePath());
+        setTurnPointsData(item, builtIn ? d->contourTurnPoints : d->seamAllowanceTurnPoints);
         item->setPen(QPen(color, lineWeight, lineTypeToPenStyle(lineType), Qt::RoundCap, Qt::RoundJoin));
     }
 }

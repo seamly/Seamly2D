@@ -577,7 +577,9 @@ fn same_contour(a: &AstmContour, b: &AstmContour) -> bool {
 
 // @brief Fill a block's ASTM fields from the piece's component groups.
 // @details The boundary is the longest closed cut line; a piece without one
-//          (seam allowance hidden or built in) uses its longest closed seam line.
+//          (no seam allowance, or seam allowances not shown) uses its longest
+//          closed seam line. A built-in seam allowance has both lines: the main
+//          path is the cut line.
 fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOptions, svg_height: f64) {
     let mut components = Vec::new();
     collect_components(piece, &mut components);
