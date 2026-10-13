@@ -252,13 +252,19 @@ Decision (user, 2026-10-13): when a piece of an individual pattern is wider or l
 - Make the media bigger: same as a multisize tab (Layout.71, Layout.25).
 - Accepted recommendations (user, 2026-10-13): no seam allowance on the cut edge; n equal parts, n rounded up; label plus 2 match notches per cut edge; fabric is roll-form; the paper-sheet PDF export uses the same split; a piece that fits but runs out of room is still left out with a warning.
 
-- [ ] Layout.72.1 `geometry`: cut a closed or open polyline with a line; keep each vertex's source index; one region per part
-- [ ] Layout.72.2 `piece_divider.rs`: split a piece group into parts. Cut line and cut paths closed; seam line and internal paths open; notches, labels by position; grainline copied into a part without one. New `piece_label` "<name> part i of n, joins j"; 2 match notches per cut edge; `data-split-of`, `data-split-part`, `data-split-count`; ids `<id>_part<i>`
-- [ ] Layout.72.3 Pipeline: find oversized pieces after the pieces turn grain-up; split before they move to the origin. Same split in `sheets::build_sheet_export_inputs`
-- [ ] Layout.72.4 Bridge and QML: oversized-pieces check before the layout, dialog in `Main.qml`, Cancel state
-- [ ] Layout.72.5 DXF-ASTM: a part is its own block, `Piece Name:` "Front (1/2)", not graded, with a warning
-- [ ] Layout.72.6 Tests: Rust clip cases (square, U-shape, vertex on the cut line, open line), trousers leg on a narrow sheet, DXF-ASTM of a split piece
-- [ ] Layout.72.7 Docs: `SVG-DATA-ATTRIBUTES.md`, layout workflows, `TEST_CHECKLIST.md`
+- [x] Layout.72.1 `geometry::half_plane_clip`: cut a closed or open polyline with an axis-parallel line; each vertex keeps its source index; a concave outline gives one polygon per region
+- [x] Layout.72.2 `piece_divider.rs`: split a piece group into parts. Cut line and cut paths closed; seam line and internal paths open; notches and labels whole, to the nearest part; grainline copied into a part without one. New `piece_label` "<name> part i of n, joins j"; 2 match notches per shared cut edge; `data-split-of`, `data-split-part`, `data-split-count`; ids `<id>_part<i>`; `data-name` "<name> (i/n)"
+- [x] Layout.72.3 Pipeline: `do_find_oversized_pieces` before the layout; `split_oversized` splits after the piece-set centring, before `translate_dom`. `sheets::build_sheet_export_inputs` splits the same way (`divide_spec`)
+- [x] Layout.72.4 Bridge and QML: `oversized_pieces_found` signal, `process_layout_oversized`, `cancel_layout`, `is_settings_required`; dialog in `Main.qml`; `TopMenuBar.settingsOnly`
+- [x] Layout.72.5 DXF-ASTM: each part is its own block, `Piece Name:` "Back (1/2)". Individual patterns are never graded, so no grading change
+- [x] Layout.72.6 Tests: `half_plane_clip` (square, U-shape, horizontal, open line), `fits_bin_checks_each_trial_angle`, `piece_divider` (wide piece, long piece, turned piece, U-shape), `trousers_long_pieces_split_on_a_sheet` (DXF-ASTM and sheet PDF inputs), `trousers_long_pieces_extend_a_sheet`
+- [x] Layout.72.7 Docs: `SVG-DATA-ATTRIBUTES.md` "SeamlyLayout split parts", layout workflows. `TEST_CHECKLIST.md` lines are in Layout.72.8: the user's checklist edits are in `stash@{0}`
+- [ ] Layout.72.8 User: on the next MSI, trousers sample, Paper Sheet 36 × 36 in, Create Layout:
+  - [ ] Dialog "Pieces do not fit the media" lists the 4 legs (Back, Front_Pleats, Front_no_pocket, Front_with_pocket) as longer than the media
+  - [ ] Cancel: only Layout Settings, Preferences and Exit are active. Submit settings: Create Layout is active again
+  - [ ] Split the pieces, OK: each leg is 2 parts with a blue label "<name> part i of 2, joins j" at the cut edge and 2 green match notches. Pieces that run out of room are named in a warning
+  - [ ] Make the media bigger, OK: no piece split, the sheet is longer than 36 in, no warning
+  - [ ] Split, Export PDF: the pages hold the parts. Export DXF-ASTM: `Piece Name:Back (1/2)` and `Back (2/2)`
 
 ## [ ] Task Layout.26 — DXF-ASTM Missing Piece Data dialog: one readable line per piece
 

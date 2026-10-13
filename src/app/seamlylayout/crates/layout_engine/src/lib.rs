@@ -266,6 +266,14 @@ pub fn required_bin_width(rects: &[Rect], trial_angles_deg: &[u16]) -> u32 {
         .unwrap_or(0)
 } // fn required_bin_width
 
+// @brief True when the piece fits an empty `bin_w` × `bin_h` bin at one of its trial angles.
+pub fn fits_bin(r: Rect, bin_w: u32, bin_h: u32, trial_angles_deg: &[u16]) -> bool {
+    piece_trial_set(trial_angles_deg, r.free_rotation)
+        .into_iter()
+        .map(|deg| rotated_rect_dims(r.w, r.h, deg))
+        .any(|(rw, rh)| rw <= bin_w && rh <= bin_h)
+} // fn fits_bin
+
 // @brief Trial angles for one piece: the layout mode's set, then, for a
 // free-rotation piece, the quarter turns the set lacks.  Mode angles come
 // first, so ties keep the mode's preferred orientation.
@@ -748,4 +756,14 @@ mod tests {
         assert!(unplaced.is_empty());
         assert!(validate_placements(w, h, &placed));
     } // required_bin_width_uses_narrowest_angle
+
+    // @brief A piece fits when one trial angle fits both sides of the bin.
+    #[test]
+    fn fits_bin_checks_each_trial_angle() {
+        let tall = Rect::new(4, 20);
+        assert!(!fits_bin(tall, 30, 10, &[0, 180]));
+        assert!(fits_bin(tall.with_free_rotation(true), 30, 10, &[0, 180]));
+        assert!(fits_bin(tall, 30, 10, &[0, 90, 180, 270]));
+        assert!(fits_bin(tall, 4, 20, &[0]));
+    } // fits_bin_checks_each_trial_angle
 }

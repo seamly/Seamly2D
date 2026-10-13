@@ -182,6 +182,16 @@ The application workflow loop consists of:
      * Disable 'Create Layout' button
      * Enable 'Adjust Layout' button
      * Enable 'Export' button
+   * Oversized pieces (individual pattern, not tiled paper):
+     * Before the layout, `do_find_oversized_pieces` lists each piece wider than the media, or longer than a sheet, at every trial angle.
+       Paper roll and fabric have no length limit.
+     * None: the layout runs as before. A piece that fits but runs out of room is left out, and a warning names it.
+     * Some: no layout yet. Dialog "Pieces do not fit the media" lists them, with two radio buttons:
+       * "Split the pieces" (default; SVG, PDF, HPGL, EPS, PS, PNG, JPG): each such piece splits into equal parts that fit.
+         Each part gets a label "<name> part i of n, joins j" and 2 match notches per shared cut edge. No seam allowance on a cut edge.
+         The paper-sheet PDF export splits the same way. See `SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout split parts".
+       * "Make the media bigger" (DXF): the media widens and lengthens until every piece is placed whole, as on a multisize tab.
+     * OK lays out with the choice. Cancel: no layout; only 'Layout Settings' (plus Preferences and Exit) stays active until new settings are submitted.
    * Multisize import (data-measurements='multisize') — one tab per layout, every tab from the imported SVG:
      * "Marker": every size of every piece packs as its own piece. Laid out first.
      * "Nested": each piece packs once, as a group of all its sizes, centred on the largest size.
@@ -193,7 +203,7 @@ The application workflow loop consists of:
        * Wider: a piece wider than the media widens it to the right. Both side margins are kept.
        * Longer: the media grows downwards. The canvas ends at the lowest piece. An extended sheet keeps at least its own length.
        * No piece is left out. Tiled paper does not extend.
-       * An individual pattern does not extend: a piece that does not fit is left out, and a warning names it.
+       * An individual pattern: see "Oversized pieces" below.
      * One warning after the last tab lists every layout that left pieces out or failed.
      * Selecting a tab swaps that layout into the controller's layout fields; Adjust Layout and every export use the selected tab.
      * DXF-ASTM exports one size: the Base Size tab (with `# n` grade rule texts and the `.rul` file) or a size tab (ungraded, no `.rul`).

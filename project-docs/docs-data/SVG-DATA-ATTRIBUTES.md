@@ -104,6 +104,9 @@ first child of each piece group when it places the piece into a layout sheet
 | `data-base-size` | `pattern` (multisize) | Base size of the `.smms` file, in pattern units. |
 | `data-size` | `piece` (multisize) | Size of this copy of the piece. Kept on placed pieces in the layout and its exports. DXF-ASTM `Size Name:` piece text. |
 | `data-set-number` | `piece` (multisize, SeamlyLayout only) | `data-type-number` of the piece-set the piece left. SeamlyLayout writes it when the Marker tab or a size tab dissolves the piece-sets, so the piece number survives in the layout and its exports. Not in the Seamly2D handoff. DXF-ASTM uses it to number pieces that share a name: `Detail (3)`. |
+| `data-split-of` | `piece` (SeamlyLayout only) | `id` of the piece this part was split from. SeamlyLayout writes it when the user chose "Split the pieces" for an individual pattern with a piece wider or longer than the media. Not in the Seamly2D handoff. |
+| `data-split-part` | `piece` (SeamlyLayout only) | 1-based number of this part, in reading order (top row first, left to right). |
+| `data-split-count` | `piece` (SeamlyLayout only) | Number of parts the piece was split into. |
 | `data-sample-size` | `pattern` (individual) | Measurement `bust_circ`, else `waist_circ`, in pattern units. Omitted when the pattern has neither. DXF-ASTM `Size Name:` piece text for every piece. |
 | `data-grainline-angle` | `piece` | Grain direction in degrees, counter-clockwise as seen on screen (Qt `QLineF::angle()`); `90` = grain points up. Written with 4 decimals. Present whenever the piece has a grain rotation, **also when the grainline is hidden**, so SeamlyLayout can still orient the piece. Before that transform, a grainline without top and bottom anchor points always points up: an angle in (180°, 360°) is written as the angle 180° less. Includes any Seamly2D layout transform (rotation, mirror). Omitted when the piece has no grain rotation. |
 | `data-turn-points` | `seamline`, `cutline`, `internal_path`, `cut_path` | Turn points of the component's path: space-separated, 0-based vertex indices into its `d`, counting each `M` and `L` end point. A turn point is a vertex where the tangent breaks: a piece node or curve end whose tangents differ by more than 0.5° where two straight lines meet, or more than 5° where a curve meets a line or curve, a direction change above 25°, or an open-path end. All other vertices are curve points. Empty value = no turn points (a smooth closed loop). Omitted when Seamly2D does not know the node vertices; SeamlyLayout then detects turn points from the geometry. Read by the DXF-ASTM export (D6673 layers 2 and 3). |
@@ -150,6 +153,21 @@ All ids are unique and XML-valid by construction. **Breaking change vs. pre-cont
 - **`data-notch-type`** — the notch type Seamly2D drew. Producer: `VPiece::createNotchLines()` (type per notch), `VLayoutPiece::createNotchesItem()`. SeamlyLayout keeps it on the notch group through layout and export. DXF-ASTM ignores it: every notch is a layer 4 slit.
 - **`piece_label` / `pattern_label`** — the on-piece label text blocks. One `<text>` element per label line (or one `<path>` per line in text-as-paths mode); per-line bold/italic, alignment, middle-eliding to the label width, mirroring and rotation are preserved in either mode.
 - Counters are per SvgGenerator instance: one instance = one file = one pattern.
+
+## SeamlyLayout split parts (individual pattern)
+
+When a piece of an individual pattern is wider or longer than the media, the user can split it. Code: `crates/cxxqt_bridge/src/piece_divider.rs`.
+
+- Each part is a `data-type="piece"` group with the piece's attributes, plus `data-split-of`, `data-split-part`, `data-split-count`.
+- Part `id`: `<piece id>_part<i>`. Every id inside the part gets `_part<i>`.
+- Part `data-name`: `<name> (<i>/<n>)`, e.g. `Front (1/2)`. DXF-ASTM `Piece Name:` uses it.
+- `cutline` and `cut_path`: closed, with new edges on the cut lines. No seam allowance on a cut edge.
+- `seamline` (beside a cutline), `internal_path`, `grainline`: open lines that end at the cut lines.
+- `data-turn-points`: kept vertices keep their flag; new vertices on a cut line are turn points.
+- Notches, `piece_label`, `pattern_label`: whole, on the part that holds them.
+- A part without a grainline gets a new vertical one when the piece had one.
+- New `piece_label` per part: `<name> part <i> of <n>, joins <j>`.
+- 2 match notches per shared cut edge, in the part's `notch` group: `data-notch-type` `slit`, `data-seam-allowances` `12.70` (6.35 mm deep).
 
 ## SeamlyLayout SVG export — label text modes
 

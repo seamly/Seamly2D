@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-10-13 — Layout.72 oversized pieces (individual pattern): merged into local `run-seamlyLayout`, not pushed
+
+- User decision: an individual pattern with a piece wider or longer than the media gets a dialog: "Split the pieces" or "Make the media bigger"; OK lays out, Cancel leaves only Layout Settings active.
+- Accepted recommendations: no seam allowance on a cut edge; n equal parts; label + 2 match notches per cut edge; fabric is roll-form; the paper-sheet PDF splits the same way; a piece that fits but runs out of room is still left out.
+- Code: `geometry/src/half_plane_clip.rs`, `cxxqt_bridge/src/piece_divider.rs`, `layout_utils` (`do_find_oversized_pieces`, `split_oversized`, `divide_spec`), `lib.rs` (`process_layout` check, `run_layout`, `process_layout_oversized`, `cancel_layout`, `is_settings_required`), `sheets.rs`, `Main.qml`, `TopMenuBar.qml`.
+- Verified: `cargo test --workspace` 499 passed, 0 failed. `ctest --preset debug` 6 of 6; the QML compiles in the debug build. Split trousers rendered to PNG and checked by eye. Not verified: the dialog in the running app. No MSI.
+- Open: Layout.72.8 user check (steps in `TODO_SEAMLYLAYOUT.md`; `TEST_CHECKLIST.md` is in `stash@{0}`).
+
 ### 2026-10-13 — Layout.71 multisize media widens: merged into local `run-seamlyLayout`, not pushed
 
 - User decision: multisize tabs widen the media to the right for a piece wider than it, and lengthen it downwards (Layout.25). No multisize piece is left out on non-tiled media.

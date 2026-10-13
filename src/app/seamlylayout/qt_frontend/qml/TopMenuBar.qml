@@ -45,6 +45,10 @@ ToolBar {
     // Bound by Main.qml from settingsModel.paperType === "tiled".
     required property bool pdfTiledExportEnabled
 
+    // @brief True after Cancel in the oversized-pieces dialog: only 'Layout Settings'
+    // (plus Preferences and Exit) stays active until new settings are submitted.
+    property bool settingsOnly: false
+
     // @brief True when the layout has tabs; shows Export > "Export all tabs".
     property bool hasLayoutTabs: false
 
@@ -188,7 +192,7 @@ ToolBar {
         SeamlyButton {
             id: importButton
             text: "Import SVG"
-            enabled: !root.adjustMode
+            enabled: !root.adjustMode && !root.settingsOnly
             onClicked: root.importClicked()
         } // SeamlyButton importButton
 
@@ -204,7 +208,7 @@ ToolBar {
         SeamlyButton {
             id: createLayoutButton
             text: "Create Layout"
-            enabled: root.createLayoutEnabled && !root.adjustMode
+            enabled: root.createLayoutEnabled && !root.adjustMode && !root.settingsOnly
             onClicked: root.createLayoutClicked()
         } // SeamlyButton createLayoutButton
 
@@ -212,7 +216,7 @@ ToolBar {
         SeamlyButton {
             id: adjustLayoutButton
             text: "Adjust Layout"
-            enabled: root.layoutReady && !root.adjustMode
+            enabled: root.layoutReady && !root.adjustMode && !root.settingsOnly
             onClicked: root.adjustLayoutClicked()
         } // SeamlyButton adjustLayoutButton
 
@@ -220,7 +224,7 @@ ToolBar {
         SeamlyButton {
             id: exportButton
             text: "Export \u25BC"
-            enabled: root.layoutReady && !root.adjustMode
+            enabled: root.layoutReady && !root.adjustMode && !root.settingsOnly
             onClicked: exportMenu.popup(exportButton, 0, exportButton.height)
         } // SeamlyButton exportButton
 
@@ -266,7 +270,7 @@ ToolBar {
         SeamlyButton {
             id: viewButton
             text: "View \u25BC"
-            enabled: root.layoutReady && !root.adjustMode
+            enabled: root.layoutReady && !root.adjustMode && !root.settingsOnly
             onClicked: viewMenu.popup(viewButton, 0, viewButton.height)
         } // SeamlyButton viewButton
 

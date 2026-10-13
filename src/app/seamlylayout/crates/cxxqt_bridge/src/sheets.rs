@@ -19,7 +19,7 @@
 //   5. Merge all page byte buffers into one PDF and write to `path`.
 //
 // Public API (crate-internal):
-//   build_sheet_export_inputs(input_dom) -> Result<(flat_dom, pieces), String>
+//   build_sheet_export_inputs(input_dom, ..., divide) -> Result<(flat_dom, pieces), String>
 //   do_export_sheets_pdf(flat_dom, all_pieces, path, settings) -> Result<(), String>
 
 use layout_tiling::LayoutSettings;
@@ -44,11 +44,13 @@ use crate::exports::{
 // @param input_dom            Raw imported SVG DOM.
 // @param free_rotation_allowed  The user's "Rotate freely" choice for pieces without a grainline.
 // @param nested_multisize       `true` packs each multisize piece-set as one unit (Nested layout).
+// @param divide                 The media the layout split its pieces for; None when it did not split.
 // @return Tuple of `(flat_dom, pieces)` ready for L.2.1/L.2.2 export logic.
 pub(crate) fn build_sheet_export_inputs(
     input_dom: &Document,
     free_rotation_allowed: bool,
     nested_multisize: bool,
+    divide: Option<&crate::piece_divider::DivideSpec>,
 ) -> Result<(Document, Vec<PieceRect>), String> {
     let mut flat_dom = input_dom.clone();
 
@@ -63,6 +65,10 @@ pub(crate) fn build_sheet_export_inputs(
     if svg_dom::center_piece_sets(&mut flat_dom) > 0 {
         svg_dom::flatten_dom(&mut flat_dom);
     } // if piece-sets
+    // Split the pieces as the layout did, so the pages hold the same parts.
+    if let Some(spec) = divide {
+        crate::piece_divider::divide_oversized_pieces(&mut flat_dom, spec);
+    } // if split
     svg_dom::translate_dom(&mut flat_dom);
     svg_dom::flatten_dom(&mut flat_dom);
 
@@ -311,7 +317,7 @@ fn flat_dom_and_pieces_for_dims(dims: &[(u32, u32)]) -> (Document, Vec<PieceRect
         groups.join("")
     );
     let input = Document::parse(&svg).expect("test SVG should parse");
-    build_sheet_export_inputs(&input, false, true).expect("sheet export inputs should build")
+    build_sheet_export_inputs(&input, false, true, None).expect("sheet export inputs should build")
 } // fn flat_dom_and_pieces_for_dims
 
 #[cfg(test)]

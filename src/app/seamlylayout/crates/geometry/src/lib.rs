@@ -2,6 +2,8 @@
 // author: slspencer, copyright 2026
 // MIT License: https://opensource.org/licenses/MIT
 
+pub mod half_plane_clip;
+
 // @brief Basic 2D point used throughout geometry helpers.
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Point {

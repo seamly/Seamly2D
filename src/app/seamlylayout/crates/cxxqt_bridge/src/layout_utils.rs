@@ -13,6 +13,8 @@
 //   do_initialize_layout(settings_json, input_dom) -> Result<InitLayoutResult, String>
 //   do_process_layout(args)                        -> Result<ProcessLayoutResult, String>
 //   do_process_size_layout(args, size)             -> Result<ProcessLayoutResult, String>
+//   do_find_oversized_pieces(settings_json, input_dom, initial_layout_dom)
+//                                                  -> Result<Vec<OversizedPiece>, String>
 
 use svg_dom::Document;
 
@@ -25,6 +27,7 @@ use crate::piece_extractor::{
     extract_piece_rects_and_polygons, hoist_layout_units, keep_size, set_free_rotation_without_grainline,
 };
 use crate::layout_assembler::{create_layout, create_initial_layout_dom, set_content_width, trim_bottom};
+use crate::piece_divider::{self, DivideSpec, OversizedPiece};
 use crate::save_debug_dom;
 use crate::log_to_file;
 
@@ -67,6 +70,9 @@ pub struct ProcessLayoutResult {
     pub flat_dom: Document,
     pub vertical_dom: Document,
     pub translate_dom: Document,
+    /// The media the pieces were split for; None when no split was asked for.
+    /// The paper-sheet PDF export splits the same way.
+    pub divide_spec: Option<DivideSpec>,
 }
 
 /// @brief Progress callback type for do_process_layout.
@@ -149,6 +155,9 @@ pub struct ProcessLayoutArgs<'a> {
     /// for the widest piece, then longer (multisize tabs).  `false` leaves out a
     /// piece that does not fit.  Tiled paper ignores it.
     pub extend_media: bool,
+    /// `true` splits each piece wider or longer than the media into parts that
+    /// fit (individual pattern, the user's choice).  Tiled paper ignores it.
+    pub split_oversized: bool,
 }
 
 /// @brief Run the full layout pipeline: preprocess, pack, assemble, trim.
@@ -280,6 +289,19 @@ pub fn do_process_layout(
         save_debug_dom(&flat_dom, "centred_dom.svg");
     } // if piece_sets
 
+    // 3d'': the user chose to split each piece wider or longer than the media.
+    // Needs grain-up pieces; must run before translate_dom moves each part to the origin.
+    // Tiled paper never splits: its pages already cover a large piece.
+    let is_tiled = settings.media_type == "paper" && settings.paper_type == "tiled";
+    let divide_spec = (args.split_oversized && !is_tiled).then(|| layout_divide_spec(&settings, bin_w, bin_h));
+    if let Some(spec) = &divide_spec {
+        let divided = piece_divider::divide_oversized_pieces(&mut flat_dom, spec);
+        if !divided.is_empty() {
+            log_to_file(&format!("[debug] layout_utils::do_process_layout(): 5b split pieces: {divided:?}"));
+            save_debug_dom(&flat_dom, "divided_dom.svg");
+        } // if divided
+    } // if split
+
     // 3e: translate — move each piece's axis-aligned bbox (AABB) min corner up to origin (0,0).
     // Move the flatten-2 DOM into translate_dom (no clone) and translate it in place;
     // translate_dom is retained as the stage snapshot.
@@ -334,8 +356,7 @@ pub fn do_process_layout(
     // Tiled paper uses a candidate-width search: several bin widths (in multiples
     // of the trimmed tile width) are packed and the best result by tile-count
     // (then unused area) wins.  Non-tiled paths use a single pack_maxrects call
-    // against the fixed bin from the initial layout DOM.
-    let is_tiled = settings.media_type == "paper" && settings.paper_type == "tiled";
+    // against the fixed bin from the initial layout DOM.  `is_tiled` is set in step 3.
 
     // Extended media widens to the widest piece, so no piece is too wide.
     // Tiled paper never extends: its candidate-width search sets the width.
@@ -722,8 +743,49 @@ pub fn do_process_layout(
         flat_dom,
         vertical_dom,
         translate_dom,
+        divide_spec,
     })
 } // fn do_process_layout
+
+/// @brief The media a piece must fit to stay whole: the content rect, limited in
+/// length only for a sheet.
+pub fn layout_divide_spec(settings: &LayoutSettings, bin_w: u32, bin_h: u32) -> DivideSpec {
+    DivideSpec {
+        bin_w,
+        bin_h,
+        limit_length: !settings.is_roll_form(),
+        trial_angles_deg: settings.rotation_trial_set_deg(),
+        free_rotation_without_grainline: settings.free_rotation_without_grainline(),
+    }
+} // fn layout_divide_spec
+
+/// @brief Pieces of an individual pattern that do not fit the media at any of their trial angles.
+///
+/// Runs the pre-processing up to grain-up pieces, as `do_process_layout` does.
+/// Tiled paper reports none: its pages already cover a large piece.
+///
+/// # Errors
+/// Returns an error when the settings do not parse.
+pub fn do_find_oversized_pieces(
+    settings_json: &str,
+    input_dom: &Document,
+    initial_layout_dom: &Document,
+) -> Result<Vec<OversizedPiece>, String> {
+    let settings = LayoutSettings::from_json(settings_json)
+        .map_err(|e| format!("Failed to parse layout settings: {e}"))?;
+    if settings.media_type == "paper" && settings.paper_type == "tiled" {
+        return Ok(Vec::new());
+    } // if tiled
+    let size = |name: &str| -> u32 {
+        initial_layout_dom.get_attr_by_id("contentRect", name).and_then(|s| s.parse().ok()).unwrap_or(0)
+    };
+    let mut dom = input_dom.clone();
+    hoist_layout_units(&mut dom, false);
+    svg_dom::flatten_dom(&mut dom);
+    svg_dom::verticalize_dom(&mut dom);
+    svg_dom::flatten_dom(&mut dom);
+    Ok(piece_divider::find_oversized_pieces(&dom, &layout_divide_spec(&settings, size("width"), size("height"))))
+} // fn do_find_oversized_pieces
 
 /// @brief Lay out one size of a multisize handoff as its own layout.
 ///
@@ -836,6 +898,7 @@ mod tests {
                 layout_h_px: init.h_px,
                 nested_multisize: false,
                 extend_media: false,
+                split_oversized: false,
             },
             &mut progress,
         ).expect("process_layout should succeed on the tagged handoff");
@@ -951,10 +1014,102 @@ mod tests {
                 layout_h_px: init.h_px,
                 nested_multisize: false,
                 extend_media: false,
+                split_oversized: false,
             },
             &mut progress,
         ).expect("process_layout should succeed on the trousers handoff")
     } // fn process_trousers
+    // @brief Paper sheet settings, in inches, for the oversized-piece tests.
+    fn paper_sheet_settings_json(width_in: f64, height_in: f64) -> String {
+        serde_json::json!({
+            "unit": "in",
+            "mediaType": "paper",
+            "paperType": "sheet",
+            "pageWidth": width_in,
+            "pageHeight": height_in,
+            "marginLeft": 0.25,
+            "marginRight": 0.25,
+            "marginTop": 0.25,
+            "marginBottom": 0.25,
+            "pieceGap": 0.125,
+            "layoutMode": "alongGrainline"
+        }).to_string()
+    } // fn paper_sheet_settings_json
+
+    // @brief Lay out the trousers on a paper sheet, splitting or extending as asked.
+    fn process_trousers_sheet(settings_json: &str, split: bool, extend: bool) -> ProcessLayoutResult {
+        let input_dom = Document::parse(TROUSERS_HANDOFF_SVG).expect("trousers fixture should parse");
+        let init = do_initialize_layout(settings_json, Some(&input_dom)).expect("initialize_layout should succeed");
+        let mut progress = |_pct: i32, _status: Option<&str>| {};
+        do_process_layout(
+            ProcessLayoutArgs {
+                settings_json,
+                input_dom: &input_dom,
+                initial_layout_dom: &init.initial_dom,
+                layout_h_px: init.h_px,
+                nested_multisize: false,
+                extend_media: extend,
+                split_oversized: split,
+            },
+            &mut progress,
+        ).expect("process_layout should succeed on the trousers handoff")
+    } // fn process_trousers_sheet
+
+    // @brief The bbox JSON labels of a layout.
+    fn placed_labels(result: &ProcessLayoutResult) -> Vec<String> {
+        let bbox: serde_json::Value = serde_json::from_str(&result.bbox_json).expect("valid JSON");
+        bbox["pieces"].as_array().expect("pieces array").iter()
+            .filter_map(|p| p["label"].as_str().map(str::to_string))
+            .collect()
+    } // fn placed_labels
+
+    // @brief On a sheet 36 in long the 43 in trouser legs are longer than the media.
+    // Split: each long piece becomes parts that fit; the sheet is wide enough for all.
+    // The DXF-ASTM export writes each part as its own piece.
+    #[test]
+    fn trousers_long_pieces_split_on_a_sheet() {
+        let settings_json = paper_sheet_settings_json(200.0, 36.0);
+        let input_dom = Document::parse(TROUSERS_HANDOFF_SVG).expect("trousers fixture should parse");
+        let init = do_initialize_layout(&settings_json, Some(&input_dom)).expect("initialize_layout should succeed");
+        let oversized = do_find_oversized_pieces(&settings_json, &input_dom, &init.initial_dom).expect("check runs");
+        let long: Vec<&str> = oversized.iter().filter(|p| p.longer && !p.wider).map(|p| p.label.as_str()).collect();
+        for leg in ["Back", "Front_Pleats", "Front_no_pocket", "Front_with_pocket"] {
+            assert!(long.contains(&leg), "{leg} is longer than the sheet: {oversized:?}");
+        }
+
+        let result = process_trousers_sheet(&settings_json, true, false);
+        assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
+        assert!(result.divide_spec.is_some(), "the split media is kept for the PDF export");
+        let labels = placed_labels(&result);
+        for leg in ["Back", "Front_Pleats", "Front_no_pocket", "Front_with_pocket"] {
+            for part in ["(1/2)", "(2/2)"] {
+                assert!(labels.contains(&format!("{leg} {part}")), "{leg} {part} placed: {labels:?}");
+            }
+        } // for each leg
+
+        // The paper-sheet PDF export splits the same way.
+        let (_, sheet_pieces) = crate::sheets::build_sheet_export_inputs(&input_dom, false, false, result.divide_spec.as_ref())
+            .expect("sheet inputs build");
+        assert_eq!(sheet_pieces.len(), labels.len(), "the PDF pages hold the same parts");
+
+        // DXF-ASTM: one block per part, named "<piece> (i/n)".
+        let (_, dxf, _, _) = export_dxf_for_test(&result, "split_trousers", None);
+        let names: Vec<&str> = dxf.lines().map(str::trim).filter_map(|l| l.strip_prefix("Piece Name:")).collect();
+        assert!(names.contains(&"Back (1/2)") && names.contains(&"Back (2/2)"), "{names:?}");
+        assert_eq!(names.len(), labels.len(), "one block per placed part");
+    } // trousers_long_pieces_split_on_a_sheet
+
+    // @brief "Make the media bigger": the sheet grows until every piece is placed whole.
+    #[test]
+    fn trousers_long_pieces_extend_a_sheet() {
+        let settings_json = paper_sheet_settings_json(36.0, 36.0);
+        let result = process_trousers_sheet(&settings_json, false, true);
+        assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);
+        assert!(result.divide_spec.is_none());
+        assert_eq!(placed_count(&result), 12, "no piece split");
+        assert!(result.layout_h_px > 36 * 96, "the sheet grows past 36 in: {} px", result.layout_h_px);
+    } // trousers_long_pieces_extend_a_sheet
+
     // @brief Fabric roll settings for the multisize fixture.
     fn multisize_settings_json() -> String {
         serde_json::json!({
@@ -991,6 +1146,7 @@ mod tests {
                 layout_h_px: init.h_px,
                 nested_multisize: nested,
                 extend_media: false,
+                split_oversized: false,
             },
             &mut progress,
         ).expect("process_layout should succeed on the multisize handoff")
@@ -1013,6 +1169,7 @@ mod tests {
                 layout_h_px: init.h_px,
                 nested_multisize: false,
                 extend_media: false,
+                split_oversized: false,
             },
             size,
             &mut progress,
@@ -1099,6 +1256,7 @@ mod tests {
                     // Nested must not matter for a single size.
                     nested_multisize: true,
                     extend_media: false,
+                    split_oversized: false,
                 },
                 size,
                 &mut progress,
@@ -1122,6 +1280,7 @@ mod tests {
                 layout_h_px: init.h_px,
                 nested_multisize: false,
                 extend_media: false,
+                split_oversized: false,
             },
             "99",
             &mut progress,
@@ -1286,6 +1445,7 @@ mod tests {
                 layout_h_px: init.h_px,
                 nested_multisize: nested,
                 extend_media: false,
+                split_oversized: false,
             },
             &mut progress,
         ).expect("process_layout should succeed on the jacket2 handoff")
@@ -1307,6 +1467,7 @@ mod tests {
                 layout_h_px: init.h_px,
                 nested_multisize: false,
                 extend_media: false,
+                split_oversized: false,
             },
             size,
             &mut progress,
@@ -1362,6 +1523,7 @@ mod tests {
                 layout_h_px: init.h_px,
                 nested_multisize: false,
                 extend_media: true,
+                split_oversized: false,
             },
             &mut progress,
         ).expect("process_layout should succeed on the jacket2 handoff")
