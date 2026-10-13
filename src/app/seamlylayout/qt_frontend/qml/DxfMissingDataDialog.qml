@@ -29,6 +29,10 @@ Dialog {
     modal:  true
     width:  480
     anchors.centerIn: parent
+    topPadding:    16
+    bottomPadding: 8
+    leftPadding:   16
+    rightPadding:  16
 
     background: Rectangle {
         color:        Theme.dialogBackground
@@ -36,23 +40,27 @@ Dialog {
         radius:       4
     } // background Rectangle
 
-    contentItem: Column {
-        spacing: 12
-        topPadding:    16
-        bottomPadding: 8
-        leftPadding:   16
-        rightPadding:  16
+    // A long piece list scrolls. The text area never grows past 60% of the window,
+    // so the title and the buttons stay visible.
+    contentItem: ScrollView {
+        id: scroll
+        implicitWidth:  440
+        implicitHeight: Math.min(warning.implicitHeight,
+                                 root.parent ? root.parent.height * 0.6 : 400)
+        clip: true
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
         // Plain text: piece names come from the SVG and must not render as markup.
         Text {
+            id:             warning
             text:           root.warningText
             color:          Theme.textOnDark
             font.pixelSize: Theme.fontSizeSmall
             textFormat:     Text.PlainText
             wrapMode:       Text.WordWrap
-            width:          440
+            width:          scroll.availableWidth
         } // Text warning
-    } // Column contentItem
+    } // ScrollView contentItem
 
     footer: DialogButtonBox {
         Button {

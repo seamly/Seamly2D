@@ -111,6 +111,55 @@ bool notchesPossible(const QVector<VPieceNode> &path)
 
     return countPointNodes >= 3 || (countPointNodes >= 1 && countOthers >= 1);
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief seamLineWidth returns the wider of a point's before and after widths, @p width when the point sets none.
+ */
+qreal seamLineWidth(const VSAPoint &point, qreal width)
+{
+    return qMax(point.GetSABefore(width), point.GetSAAfter(width));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setSeamLineWidths gives each point of a built-in seam line one width and a plain corner.
+ * @param points one node point, or every point of one curve segment.
+ * @param width piece seam allowance width.
+ *
+ * Every point gets the width of the first point, spread by length to the width of the last point. Corner types
+ * shape only the cut line.
+ */
+void setSeamLineWidths(QVector<VSAPoint> &points, qreal width)
+{
+    if (points.isEmpty())
+    {
+        return;
+    }
+
+    const qreal firstWidth = seamLineWidth(points.first(), width);
+    const qreal lastWidth = seamLineWidth(points.last(), width);
+    QVector<QPointF> polyline;
+    for (const VSAPoint &point : points)
+    {
+        polyline.append(point);
+    }
+    const qreal fullLength = VAbstractCurve::PathLength(polyline);
+
+    qreal length = 0;
+    for (int i = 0; i < points.size(); ++i)
+    {
+        if (i > 0)
+        {
+            length += QLineF(points.at(i - 1), points.at(i)).length();
+        }
+        const qreal localWidth = fullLength > 0 ? firstWidth + (lastWidth - firstWidth) * length / fullLength
+                                                : firstWidth;
+        points[i].SetSABefore(localWidth);
+        points[i].SetSAAfter(localWidth);
+        points[i].SetAngleType(PieceNodeAngle::ByLength);
+    }
+}
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -284,6 +333,71 @@ QVector<QPointF> VPiece::seamAllowancePoints(const VContainer *data, QVector<QPo
     return Equidistant(pointsEkv, width, nodeVertices);
 }
 
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief builtInSeamLinePoints builds the seam line of a piece whose seam allowance is built into the main path.
+ * @param nodeVertices when not null, receives the returned vertices that can break the tangent.
+ * @return the closed seam line in main path direction; empty unless the seam allowance is built in.
+ *
+ * The main path is the cut line. The seam line is the main path offset inward. Each node offsets by the wider of
+ * its before and after widths, the piece width when the node sets none. A curve spreads the widths of its ends
+ * along its length.
+ */
+QVector<QPointF> VPiece::builtInSeamLinePoints(const VContainer *data, QVector<QPointF> *nodeVertices) const
+{
+    SCASSERT(data != nullptr);
+
+    if (!hasSeamAllowance() || !hasSeamAllowanceBuiltIn())
+    {
+        return QVector<QPointF>();
+    }
+
+    const qreal width = ToPixel(GetSAWidth(), *data->GetPatternUnit());
+    const QVector<VPieceNode> nodes = GetPath().getNodes();
+
+    QVector<VSAPoint> points;
+    for (int i = 0; i < nodes.size(); ++i)
+    {
+        const VPieceNode &node = nodes.at(i);
+        if (node.isExcluded())
+        {
+            continue;
+        }
+
+        QVector<VSAPoint> nodePoints;
+        switch (node.GetTypeTool())
+        {
+            case (Tool::NodePoint):
+                nodePoints.append(VPiecePath::PreparePointEkv(node, data));
+                break;
+            case (Tool::NodeArc):
+            case (Tool::NodeElArc):
+            case (Tool::NodeSpline):
+            case (Tool::NodeSplinePath):
+            {
+                const QSharedPointer<VAbstractCurve> curve = data->GeometricObject<VAbstractCurve>(node.GetId());
+                nodePoints = VPiecePath::CurveSeamAllowanceSegment(data, nodes, curve, i, node.GetReverse(), width);
+                break;
+            }
+            default:
+                qWarning() << "Get wrong tool type. Ignore." << static_cast<char>(node.GetTypeTool());
+                break;
+        }
+        setSeamLineWidths(nodePoints, width);
+        points += nodePoints;
+    }
+
+    // Equidistant() offsets to the outside of a clockwise path, so a clockwise main path is offset reversed.
+    const bool clockwise = isClockwise(mainPathPoints(data));
+    if (clockwise)
+    {
+        points = VGObject::GetReversePoints(points);
+    }
+
+    const QVector<QPointF> seamLine = Equidistant(points, width, nodeVertices);
+    return clockwise ? VGObject::GetReversePoints(seamLine) : seamLine;
+}
+
 QVector<QPointF> VPiece::cutPathPoints(const VContainer *data) const
 {
     if (hasSeamAllowance() && !hasSeamAllowanceBuiltIn())
@@ -302,14 +416,16 @@ QVector<QPointF> VPiece::cutPathPoints(const VContainer *data) const
  * @param data container that resolves the node points.
  * @param seamAllowance cutline points that clip cutline notches; empty means no clipping.
  * @param includeCutlineNotches false omits cutline notches; only a view that hides seam allowances passes false.
- * @param seamAllowanceWidths when not null, receives one width in pixels per returned line: the seam allowance
- *        at the line's notch node, the wider of its before and after widths. 0 when the piece has no seam allowance.
- * @param notchTypes when not null, receives one notchTypeToString() value per returned line: the type of the
- *        line's notch node.
+ * @param seamAllowanceWidths when not null, receives one width in pixels per notch: the seam allowance at the
+ *        notch node, the wider of its before and after widths. 0 when the piece has no seam allowance.
+ * @param notchTypes when not null, receives one notchTypeToString() value per notch: the type of the notch node.
+ * @param notchLineCounts when not null, receives the returned line count of each notch, in line order.
+ *
+ * The per-notch lists hold only notches that draw at least one line, so the line counts sum to the line count.
  */
 QVector<QLineF> VPiece::createNotchLines(const VContainer *data, const QVector<QPointF> &seamAllowance,
                                          bool includeCutlineNotches, QVector<qreal> *seamAllowanceWidths,
-                                         QStringList *notchTypes) const
+                                         QStringList *notchTypes, QVector<int> *notchLineCounts) const
 {
     const QVector<VPieceNode> unitedPath = GetUnitedPath(data);
     if (!notchesPossible(unitedPath))
@@ -330,9 +446,13 @@ QVector<QLineF> VPiece::createNotchLines(const VContainer *data, const QVector<Q
         const int previousIndex = VPiecePath::FindInLoopNotExcludedUp(i, unitedPath);
         const int nextIndex = VPiecePath::FindInLoopNotExcludedDown(i, unitedPath);
 
-        const int firstLine = notches.size();
-        notches += createNotch(unitedPath, previousIndex, i, nextIndex, data, seamAllowance,
-                               includeCutlineNotches);
+        const QVector<QLineF> notchLines = createNotch(unitedPath, previousIndex, i, nextIndex, data,
+                                                       seamAllowance, includeCutlineNotches);
+        if (notchLines.isEmpty())
+        {
+            continue;
+        }
+        notches += notchLines;
 
         if (seamAllowanceWidths != nullptr)
         {
@@ -343,15 +463,17 @@ QVector<QLineF> VPiece::createNotchLines(const VContainer *data, const QVector<Q
             {
                 width = MaxLocalSA(notchSAPoint, ToPixel(GetSAWidth(), *data->GetPatternUnit()));
             }
-            seamAllowanceWidths->insert(seamAllowanceWidths->size(), notches.size() - firstLine, width);
+            seamAllowanceWidths->append(width);
         }
 
         if (notchTypes != nullptr)
         {
-            for (int line = firstLine; line < notches.size(); ++line)
-            {
-                notchTypes->append(notchTypeToString(node.getNotchType()));
-            }
+            notchTypes->append(notchTypeToString(node.getNotchType()));
+        }
+
+        if (notchLineCounts != nullptr)
+        {
+            notchLineCounts->append(notchLines.size());
         }
     }
 

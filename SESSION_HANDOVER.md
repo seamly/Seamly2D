@@ -2,14 +2,32 @@
 
 ## Current status
 
-### 2026-10-12 — checklist reviewed, fix plan approved, no code changed
+### 2026-10-12 — `task-builtin-seamline` (Layout.28) and `task-notch-per-notch` merged into local `run-seamlyLayout`, not pushed
 
-- Branch `task-checklist-fixes` from `run-seamlyLayout` (`4db974dc60`). Merged `--no-ff` into `run-seamlyLayout` with skip-ci (docs and test data only). Not pushed: the user pushes.
-- Commits on the branch:
-  - Checklist results of the jacket2 test run; handover file renamed to `SESSION_HANDOVER.md`.
-  - Test files moved: `test-seamly-layout-input/` → `test-seamly-layout/`. `.gitignore` tracks the new folder. aw.fyi PDFs force-added. `D6673-10-expired.docx` stays ignored (copyright).
-  - Tracking: `TODO_SEAMLYLAYOUT.md` (decisions, root causes, Layout.27.9, 27.10, 29, 30), `TODO_DXF.md` DXF.22.1, `CLAUDE.md` handover name, this file.
-- `develop` has 2 CI commits (`42fcec04ae`, `05969e1538`) not merged into `run-seamlyLayout`. They touch `.github/workflows/`: merge per `CLAUDE.md` "Merge from Upstream `develop`" before the next code task branch.
+- User asked for Layout.28 outside the approved plan. Branched from `task-notch-per-notch`, not `run-seamlyLayout`: both change the notch and seam line handoff in `vlayoutpiece.cpp` and the DXF converter tests.
+- User asked to merge both branches before the MSI build finished. One `--no-ff` merge of `task-builtin-seamline` carries every `task-notch-per-notch` commit. Merged in a temporary worktree, so the running build kept its sources.
+- Not pushed: push only when the user asks. The task branches are not deleted: the main worktree still has `task-builtin-seamline` checked out.
+- Seamly2D: `VPiece::builtInSeamLinePoints()`; `VLayoutPiece` stores it (`setBuiltInSeamLinePoints()`). Built-in piece: main path → `cutline` (always, also with seam allowances not shown), computed line → `seamline` (omitted when hidden).
+- Seam line corners use `PieceNodeAngle::ByLength`: node corner types shape only the cut line (my decision; report to user).
+- SeamlyLayout: no code change. Tests and comments only (`converter.rs`, `astm_notch.rs`).
+- Verified: `cargo test --workspace` 472 passed, 0 failed.
+- `local_build_msi.ps1` (with `nmake check`) was still running at merge time: `vpiece.cpp` and `vlayoutpiece.cpp` compiled; Qt suites not yet run. Record the result here.
+- Open: Layout.28.7 user check; Seamly2D piece mode still draws no seam line for a built-in piece (not in Layout.28).
+
+### 2026-10-12 — branch `task-notch-per-notch`, not merged, not pushed
+
+- Commits on the branch (from `run-seamlyLayout` `be2576e9b9`):
+  - `486261aaed` Layout.29: one notch value per notch, `data-notch-segments` (Seamly2D + Rust).
+  - `4bec9b07c4` Layout.27.9: graded key points snap to a vertex within 0.01 mm.
+  - `31714864c8` Layout.26: Unicode display names, `\U+XXXX` Piece Name, `Detail (3)` numbering, Marker `data-set-number`, dialog one line per piece + scroll.
+  - `080278aa65` Layout.38.2.2 / 38.5: jacket2 fixture + 5 end-to-end tests.
+  - Next commit: tracking (`TODO_SEAMLYLAYOUT.md` with the user's own edits, this file).
+- Verified: `cargo test --workspace` 470 passed, 0 failed (jacket2 tests included, about 25 s each).
+- Not verified (user: build once at the end): `local_build_msi.ps1` (`nmake check` for the Layout.29 C++ tests), `ctest --preset debug`, QML dialog in the app. A started build was stopped in nmake; object files are partial.
+- Next: remaining plan steps 2, 8, 9, 10. Merged into `run-seamlyLayout` early (user request); push when the user asks.
+- Merge `3797bf8a6d` (Layout.40, `common.pri`) is on `origin/run-seamlyLayout`. The working tree `common.pri` equals it. Before checking out `run-seamlyLayout`, run `git checkout -- common.pri`. The Layout.40 names merged without a conflict.
+- Build stamps: `projectversion.*` and both `Info.plist` files now say 26.10.1218. Do not commit.
+- `test_data/jacket2_40-146_nested_allsizes_R13_202610121813.dxf` untracked: no test uses it.
 
 ### Approved plan (user, 2026-10-12)
 
@@ -17,13 +35,13 @@ Root causes are in `TODO_SEAMLYLAYOUT.md` under each task. One commit per step. 
 
 | Step | App | Change | Task | Status |
 |---|---|---|---|---|
-| 1 | Seamly2D | Notch attributes: one value per notch + `data-notch-segments` | Layout.29.1–29.2 | open |
+| 1 | Seamly2D | Notch attributes: one value per notch + `data-notch-segments` | Layout.29.1–29.2 | done, Qt suites not run |
 | 2 | Seamly2D | Multisize: a node that is a turn point in any size is one in every size | Layout.27.3 | open |
-| 3 | Build | `copyToDestdir` always copies on Windows | Layout.30 | open |
-| 4 | SeamlyLayout | Read `data-notch-segments` | Layout.29.3 | open |
-| 5 | SeamlyLayout | DXF `Piece Name:` from `data-name`, `\U+XXXX` escapes, same for every size; duplicates numbered `Detail (3)`; dialogs keep the original name | Layout.26.3–26.5 | open |
-| 6 | SeamlyLayout + QML | Missing Piece Data dialog: one line per piece, scroll area | Layout.26.1–26.2 | open |
-| 7 | SeamlyLayout | Grading: snap key points to a vertex within 0.01 mm | Layout.27.9 | open |
+| 3 | Build | `copyToDestdir` always copies on Windows | Layout.40 | fix on run-seamlyLayout 3797bf8a6d; MSI check open |
+| 4 | SeamlyLayout | Read `data-notch-segments` | Layout.29.3 | done |
+| 5 | SeamlyLayout | DXF `Piece Name:` from `data-name`, `\U+XXXX` escapes, same for every size; duplicates numbered `Detail (3)`; dialogs keep the original name | Layout.26.3–26.5 | done |
+| 6 | SeamlyLayout + QML | Missing Piece Data dialog: one line per piece, scroll area | Layout.26.1–26.2 | done, app check open |
+| 7 | SeamlyLayout | Grading: snap key points to a vertex within 0.01 mm | Layout.27.9 | done |
 | 8 | SeamlyLayout | Grading warnings | Layout.27.2, 27.4–27.6, 27.8 | open |
 | 9 | SeamlyLayout | Marker: ungradable piece keeps every placed size, `Detail (3) 240` | Layout.27.10 | open |
 | 10 | SeamlyLayout | Extend media height until every piece fits, every multisize tab | Layout.25 | open |
@@ -31,7 +49,7 @@ Root causes are in `TODO_SEAMLYLAYOUT.md` under each task. One commit per step. 
 | 12 | Docs | `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`, compliance doc, new `TEST_CHECKLIST.md` | each task | open |
 | 13 | Verify | `cargo test --workspace`, `ctest --preset debug`, `local_build_msi.ps1`; merge `--no-ff`; full CI (`common.pri` changed) | — | open |
 
-- Not in this round: Layout.22, 23, 24, 28. Next round: Layout.22 → 23 → 24.
+- Not in this round: Layout.22, 23, 24. Next round: Layout.22 → 23 → 24. Layout.28 done on `task-builtin-seamline` (user request).
 - Suggested order: 7 (small, Rust only) → 5 → 6 → 8 → 1 + 4 → 2 → 9 → 10 → 3.
 
 ### User decisions (2026-10-12)
@@ -67,7 +85,6 @@ Kept in the session scratchpad only (lost). To repeat a check: parse DXF group-c
 
 ### Priority 1 — Developer: approved plan
 
-- Merge `develop` (2 CI commits) into `run-seamlyLayout` first.
 - New task branch from `run-seamlyLayout`; implement the plan table above.
 
 ### Priority 2 — User: after the next MSI

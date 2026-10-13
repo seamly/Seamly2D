@@ -10,7 +10,7 @@
 //! Slit depth is half the seam allowance width at the notch (user decision).
 //! Width source, first found:
 //! 1. Seamly2D's width for the notch node (`data-seam-allowances`). The only
-//!    source for a built-in seam allowance, which has no sew line.
+//!    source for a piece without a cut line.
 //! 2. Distance from the notch base on the cut line to the nearest sew line.
 //! 3. None: the depth is the drawn depth.
 
@@ -106,7 +106,7 @@ pub fn build_notches(
 /// @brief Seam allowance width at a point on the cut line: distance to the nearest sew line.
 /// @param base Point on the cut line.
 /// @param sew_lines Sew lines of the piece.
-/// @return `None` without a sew line, or when the width is under 0.1 mm (seam allowance built in).
+/// @return `None` without a sew line, or when the width is under 0.1 mm (sew line on the cut line).
 pub fn seam_allowance_at(base: Point, sew_lines: &[AstmContour]) -> Option<f64> {
     let width = sew_lines
         .iter()

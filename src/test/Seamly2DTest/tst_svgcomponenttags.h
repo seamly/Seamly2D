@@ -40,8 +40,9 @@
  * produced by SvgGenerator: the internal_path / cut_path split, the
  * name-based piece and component id schemes, and their piece-name
  * sanitization, no-name fallback, and cross-piece collision handling, and the
- * data-grainline-angle attribute, the multisize piece-set nesting, and the
- * data-turn-points attribute.
+ * data-grainline-angle attribute, the multisize piece-set nesting, the
+ * data-turn-points attribute, and the cutline and seamline of a built-in seam
+ * allowance.
  */
 class TST_SvgComponentTags : public QObject
 {
@@ -77,6 +78,8 @@ private slots:
     void NotchGroupCarriesSeamAllowances() const;
     void NotchGroupCarriesNotchTypes() const;
     void PieceCarriesQuantityAndFold() const;
+    void BuiltInPieceSendsCutlineAndSeamline() const;
+    void BuiltInPieceHiddenSeamLineSendsCutlineOnly() const;
 };
 
 #endif // TST_SVGCOMPONENTTAGS_H

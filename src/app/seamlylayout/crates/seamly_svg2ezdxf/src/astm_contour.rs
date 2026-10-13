@@ -214,8 +214,9 @@ pub fn build_contour_tagged(points: &[Point], closed: bool, turns: Option<&[bool
 
 // Two arc-length fractions closer than this are the same key point.
 const SAME_FRACTION: f64 = 1e-9;
-// A fraction point closer than this to a dense vertex is that vertex.
-const SAME_VERTEX_MM: f64 = 1e-6;
+// A key point closer than this to a dense vertex is that vertex. A reader
+// reports two vertices this close as a duplicate on layers 84-87.
+const SNAP_VERTEX_MM: f64 = 0.01;
 // Refinement passes before grade_contours accepts the key points it has.
 const MAX_GRADE_PASSES: usize = 64;
 
@@ -264,6 +265,13 @@ impl GradeSize {
         if total > 0.0 { (arc / total).clamp(0.0, 1.0) } else { 0.0 }
     } // fn fraction
 
+    // @brief Whether the point at `fraction` of `span` lies within SNAP_VERTEX_MM of either span anchor.
+    fn near_anchor(&self, span: usize, fraction: f64) -> bool {
+        let total = self.span_arcs(span).last().copied().unwrap_or(0.0);
+        let arc = fraction * total;
+        arc <= SNAP_VERTEX_MM || total - arc <= SNAP_VERTEX_MM
+    } // fn near_anchor
+
     // @brief Dense index of the key point, inserting a vertex on the polyline when none is there.
     fn vertex_at(&mut self, key: &GradeKey) -> usize {
         // An anchor is already a vertex.
@@ -279,11 +287,13 @@ impl GradeSize {
         let (p, q) = (self.dense[(a + edge) % n], self.dense[(a + edge + 1) % n]);
         let along = target - arcs[edge];
         let length = arcs[edge + 1] - arcs[edge];
-        if along <= SAME_VERTEX_MM {
+        // Snap to a vertex within SNAP_VERTEX_MM, so no inserted vertex sits beside another.
+        if along <= SNAP_VERTEX_MM {
             return a + edge;
         } // if at the edge start
         // A loop's vertex 0 closes the last span; a key point there would sort before every other.
-        if length - along <= SAME_VERTEX_MM && a + edge + 1 < n {
+        // add_key keeps key points away from anchors, so this guard only stops a misplaced key.
+        if length - along <= SNAP_VERTEX_MM && a + edge + 1 < n {
             return a + edge + 1;
         } // if at the edge end
         // Insert the point on the edge; later anchors move one index up.
@@ -353,7 +363,7 @@ pub fn grade_contours(sizes: &[AstmContour], sample: usize) -> Option<Vec<AstmCo
         let span = seed.anchors.iter().rposition(|&a| a <= i).unwrap_or(0);
         let (a, _) = seed.span_range(span);
         let arc = seed.span_arcs(span)[i - a];
-        add_key(&mut keys, span, seed.fraction(span, arc));
+        add_key(&mut keys, &graded, span, seed.fraction(span, arc));
     } // for each sample key point
 
     // Step 3: add curve points until every size passes the spline check.
@@ -391,7 +401,7 @@ pub fn grade_contours(sizes: &[AstmContour], sample: usize) -> Option<Vec<AstmCo
         } // for each size
         let before = keys.len();
         for (span, fraction) in found {
-            add_key(&mut keys, span, fraction);
+            add_key(&mut keys, &graded, span, fraction);
         } // for each found point
         if keys.len() == before {
             break;
@@ -399,12 +409,15 @@ pub fn grade_contours(sizes: &[AstmContour], sample: usize) -> Option<Vec<AstmCo
     } // for each pass
 
     // Step 4: drop curve points that no size needs, least needed first. A curve
-    // point on the same vertex as the key point before it, in any size, goes first.
+    // point on the same vertex as the key point before or after it, in any size, goes first.
     let min_len = if closed { 3 } else { 2 };
     let mut kept: Vec<Vec<usize>> = graded.iter_mut().map(|g| g.kept(&keys)).collect();
+    // Key point after r: a loop wraps to key point 0, an open line's last key point has none.
+    let next_of = |r: usize, len: usize| if r + 1 < len { Some(r + 1) } else if closed { Some(0) } else { None };
     let mut r = 1;
     while r < keys.len() {
-        if !keys[r].anchor && kept.iter().any(|k| k[r] == k[r - 1]) {
+        let on_neighbour = |k: &Vec<usize>| k[r] == k[r - 1] || next_of(r, k.len()).map_or(false, |next| k[r] == k[next]);
+        if !keys[r].anchor && kept.iter().any(on_neighbour) {
             keys.remove(r);
             kept.iter_mut().for_each(|k| {
                 k.remove(r);
@@ -480,10 +493,14 @@ fn grade_anchors(contour: &AstmContour) -> Option<(GradeSize, Vec<bool>)> {
 } // fn grade_anchors
 
 // @brief Insert a curve point key in (span, fraction) order, unless one is already there.
-fn add_key(keys: &mut Vec<GradeKey>, span: usize, fraction: f64) {
+// @details A key point within SNAP_VERTEX_MM of a span anchor, in any size, is that anchor.
+fn add_key(keys: &mut Vec<GradeKey>, graded: &[GradeSize], span: usize, fraction: f64) {
     if fraction <= SAME_FRACTION || fraction >= 1.0 - SAME_FRACTION {
         return;
     } // if at an anchor
+    if graded.iter().any(|g| g.near_anchor(span, fraction)) {
+        return;
+    } // if beside an anchor in some size
     if keys.iter().any(|k| k.span == span && (k.fraction - fraction).abs() < SAME_FRACTION) {
         return;
     } // if present

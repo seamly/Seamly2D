@@ -260,28 +260,86 @@ mod tests {
         assert!(notches.iter().all(|n| (n.depth - 5.0).abs() < 1e-6), "drawn depth is 5");
     }
 
-    // Built-in seam allowance: the main path is the cut line, sent as `seamline`; no
-    // cut line, no sew line. 96 px = 25.4 mm. Notch widths 10 and 6 mm.
+    // Built-in seam allowance: the main path is the `cutline`, the line Seamly2D
+    // computes inside it is the `seamline`. 96 px = 25.4 mm. The seam line is 96 px
+    // in; the notch widths are 10 and 6 mm.
     const BUILT_IN: &str = r#"
         <svg viewBox="0 0 960 960" width="254mm" height="254mm" xmlns="http://www.w3.org/2000/svg">
           <g id="pattern-1" data-type="pattern" data-name="Built In">
             <g id="piece_Yoke" data-type="piece" data-name="Yoke">
-              <g data-type="seamline"><path d="M 0,0 L 960,0 L 960,960 L 0,960 Z"/></g>
+              <g data-type="seamline"><path d="M 96,96 L 864,96 L 864,864 L 96,864 Z"/></g>
+              <g data-type="cutline"><path d="M 0,0 L 960,0 L 960,960 L 0,960 Z"/></g>
               <g data-type="notch" data-seam-allowances="10.00 6.00"><path d="M 480,960 L 480,941 M 200,0 L 200,19"/></g>
             </g>
           </g>
         </svg>"#;
 
     #[test]
-    fn built_in_seam_allowance_notches_use_seamly2d_widths() {
-        let doc = Document::parse(BUILT_IN).expect("fixture parses");
-        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
-        let yoke = &drawing.blocks[0];
-        assert!(yoke.boundary.is_some() && yoke.sew_lines.is_empty());
+    fn built_in_seam_allowance_has_boundary_and_sew_line() {
+        let yoke_of = |svg: &str| {
+            let doc = Document::parse(svg).expect("fixture parses");
+            svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts").blocks.remove(0)
+        }; // yoke_of
+        let yoke = yoke_of(BUILT_IN);
+        let max_x = |c: &AstmContour| c.dense.iter().map(|p| p.x).fold(f64::MIN, f64::max);
+        let boundary = yoke.boundary.as_ref().expect("cut line is the boundary");
+        assert!((max_x(boundary) - 960.0 * MM_PER_PX).abs() < 1e-3, "boundary max x {}", max_x(boundary));
+        assert_eq!(yoke.sew_lines.len(), 1, "seam line is the sew line");
+        assert!((max_x(&yoke.sew_lines[0]) - 864.0 * MM_PER_PX).abs() < 1e-3);
+
+        // Seamly2D's widths set the slit depth before the measured 25.4 mm.
         let depths: Vec<f64> = yoke.notches.iter().map(|n| n.depth).collect();
         assert_eq!(depths.len(), 2);
         assert!((depths[0] - 5.0).abs() < 1e-6 && (depths[1] - 3.0).abs() < 1e-6, "depths {depths:?}");
         assert!(yoke.notches.iter().all(|n| n.kind == NotchKind::Slit));
+
+        // Without the widths, the sew line gives the seam allowance.
+        let measured = yoke_of(&BUILT_IN.replace(r#" data-seam-allowances="10.00 6.00""#, ""));
+        assert!(measured.notches.iter().all(|n| (n.depth - 48.0 * MM_PER_PX).abs() < 1e-3), "{:?}", measured.notches);
+    }
+
+    // @brief Piece without a cut line, with a slit (width 10 mm) and a 14-segment U-notch (width 6 mm).
+    // @param segments `data-notch-segments` value.
+    // @details The U-notch is a half circle of radius 10 px into the top edge, centred on x = 600.
+    fn slit_and_u_notch(segments: &str) -> String {
+        // Slit first, then one `M … L …` subpath per U-notch chord.
+        let mut d = String::from("M 480,960 L 480,941");
+        let arc = |i: usize| {
+            let a = std::f64::consts::PI * (1.0 - i as f64 / 14.0);
+            (600.0 + 10.0 * a.cos(), 10.0 * a.sin())
+        }; // arc
+        for i in 0..14 {
+            let ((x0, y0), (x1, y1)) = (arc(i), arc(i + 1));
+            d.push_str(&format!(" M {x0},{y0} L {x1},{y1}"));
+        } // for each chord
+        format!(
+            r#"<svg viewBox="0 0 960 960" width="254mm" height="254mm" xmlns="http://www.w3.org/2000/svg">
+                 <g id="pattern-1" data-type="pattern" data-name="U Notch">
+                   <g id="piece_Yoke" data-type="piece" data-name="Yoke">
+                     <g data-type="seamline"><path d="M 0,0 L 960,0 L 960,960 L 0,960 Z"/></g>
+                     <g data-type="notch" data-notch-type="slit uNotch" data-seam-allowances="10.00 6.00"
+                        data-notch-segments="{segments}"><path d="{d}"/></g>
+                   </g>
+                 </g>
+               </svg>"#
+        )
+    }
+
+    #[test]
+    fn notch_segments_spread_each_notch_width_over_its_subpaths() {
+        let depths = |segments: &str| -> Vec<f64> {
+            let doc = Document::parse(&slit_and_u_notch(segments)).expect("fixture parses");
+            let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+            drawing.blocks[0].notches.iter().map(|n| n.depth).collect()
+        }; // depths
+        // 1 + 14 subpaths: the slit gets 10 mm, all 14 U-notch chords get 6 mm.
+        let paired = depths("1 14");
+        assert_eq!(paired.len(), 2, "touching chords form one notch");
+        assert!((paired[0] - 5.0).abs() < 1e-6 && (paired[1] - 3.0).abs() < 1e-6, "depths {paired:?}");
+        // Counts that do not sum to 15 are ignored: drawn depths, 19 px and 10 px.
+        let ignored = depths("1 13");
+        assert!((ignored[0] - 19.0 * MM_PER_PX).abs() < 1e-6, "depths {ignored:?}");
+        assert!((ignored[1] - 3.0).abs() > 0.1, "depths {ignored:?}");
     }
 
     #[test]
@@ -391,6 +449,49 @@ mod tests {
         assert_eq!(missing.len(), 1);
         assert_eq!(missing[0].piece_name, "Facing");
         assert!(missing[0].quantity && missing[0].label && missing[0].grainline);
+    }
+
+    // @brief Individual pattern: two pieces named "Detail" with letters, one Cyrillic name, one unnamed.
+    const NAMES: &str = r#"
+        <svg viewBox="0 0 960 960" width="254mm" height="254mm" xmlns="http://www.w3.org/2000/svg">
+          <g id="pattern-1" data-type="pattern" data-name="Names">
+            <g id="piece_Detail" data-type="piece" data-type-number="1" data-name="Detail" data-letter="A">
+              <g data-type="seamline"><path d="M 0,0 L 96,0 L 96,96 L 0,96 Z"/></g>
+            </g>
+            <g id="piece_Detail-2" data-type="piece" data-type-number="2" data-name="Detail" data-letter="B">
+              <g data-type="seamline"><path d="M 200,0 L 296,0 L 296,96 L 200,96 Z"/></g>
+            </g>
+            <g id="piece-3" data-type="piece" data-type-number="3" data-name=" Комір ">
+              <g data-type="seamline"><path d="M 400,0 L 496,0 L 496,96 L 400,96 Z"/></g>
+            </g>
+            <g id="piece-4" data-type="piece" data-type-number="4">
+              <g data-type="seamline"><path d="M 600,0 L 696,0 L 696,96 L 600,96 Z"/></g>
+            </g>
+          </g>
+        </svg>"#;
+
+    #[test]
+    fn piece_names_keep_unicode_and_number_shared_names() {
+        let doc = Document::parse(NAMES).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let names: Vec<(&str, &str)> = drawing.blocks.iter().map(|b| (b.display_name.as_str(), b.piece_name.as_str())).collect();
+        assert_eq!(
+            names,
+            vec![
+                // A shared name ends in the piece letter.
+                ("Detail (A)", "Detail (A)"),
+                ("Detail (B)", "Detail (B)"),
+                // Dialogs keep the name; the DXF name escapes it.
+                ("Комір", r"\U+041A\U+043E\U+043C\U+0456\U+0440"),
+                // No name: the block name.
+                ("piece-4_M", "piece-4_M"),
+            ]
+        );
+        // Without letters, the piece number tells the pieces apart.
+        let doc = Document::parse(&NAMES.replace(r#" data-letter="A""#, "")).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        assert_eq!(drawing.blocks[0].piece_name, "Detail (1)");
+        assert_eq!(drawing.blocks[1].piece_name, "Detail (2)");
     }
 
     // @brief `Quantity:` of the Front piece after `replace` edits the TAGGED fixture.

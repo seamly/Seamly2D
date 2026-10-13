@@ -1098,4 +1098,189 @@ mod tests {
             assert!(rul.lines().any(|l| l.starts_with("RULE: DELTA 1 ")), "{rul}");
         } // for each multisize layout
     } // multisize_layout_exports_graded_nests
+
+    // @brief Real multisize pieces: jacket2_40-146.sm2d with gost_man_ru.smms, 8 pieces
+    // in 26 sizes (220-720), base size 500. Saved from SeamlyLayout, so the piece-sets
+    // sit at the root and the pattern group with the size list is gone; `jacket2_handoff`
+    // puts it back. The pieces carry the names of the installed sample: two Cyrillic
+    // names and six pieces named "Detail".
+    const JACKET2_PIECES_SVG: &str = include_str!("../test_data/jacket2_40-146_202610121819.svg");
+    const JACKET2_BASE_SIZE: &str = "500";
+
+    // @brief The jacket2 pieces as Seamly2D hands them off: one multisize pattern group
+    // around the piece-sets. Sizes come from the pieces' `data-size`, in ascending order.
+    fn jacket2_handoff() -> (Document, Vec<String>) {
+        let mut doc = Document::parse(JACKET2_PIECES_SVG).expect("jacket2 fixture should parse");
+        // Every size the pieces carry, ascending.
+        let mut sizes: Vec<u32> = Vec::new();
+        collect_sizes_for_test(&doc.root, &mut sizes);
+        sizes.sort_unstable();
+        sizes.dedup();
+        let sizes: Vec<String> = sizes.iter().map(u32::to_string).collect();
+
+        // Wrap the root's children in the pattern group Seamly2D writes.
+        let mut pattern = xmltree::Element::new("g");
+        for (name, value) in [
+            ("id", "pattern-1"),
+            ("data-type", "pattern"),
+            ("data-type-number", "1"),
+            ("data-name", "jacket2_40-146"),
+            ("data-measurements", "multisize"),
+        ] {
+            pattern.attributes.insert(name.to_string(), value.to_string());
+        } // for each pattern attribute
+        pattern.attributes.insert("data-sizes".to_string(), sizes.join(","));
+        pattern.attributes.insert("data-base-size".to_string(), JACKET2_BASE_SIZE.to_string());
+        pattern.children = std::mem::take(&mut doc.root.children);
+        doc.root.children.push(xmltree::XMLNode::Element(pattern));
+        (doc, sizes)
+    } // fn jacket2_handoff
+
+    // @brief Collect the `data-size` of every piece below `element`.
+    fn collect_sizes_for_test(element: &xmltree::Element, sizes: &mut Vec<u32>) {
+        if let Some(size) = element.attributes.get("data-size").and_then(|s| s.parse().ok()) {
+            sizes.push(size);
+        } // if sized
+        for child in &element.children {
+            if let xmltree::XMLNode::Element(e) = child {
+                collect_sizes_for_test(e, sizes);
+            } // if element
+        } // for child
+    } // fn collect_sizes_for_test
+
+    // @brief Lay out the jacket2 handoff on a fabric roll of the given size (inches).
+    fn process_jacket2(multisize_layout: &str, width_in: f64, length_in: f64) -> ProcessLayoutResult {
+        let (input_dom, _) = jacket2_handoff();
+        let settings_json = serde_json::json!({
+            "unit": "in",
+            "mediaType": "fabric",
+            "paperType": "roll",
+            "pageWidth": width_in,
+            "pageHeight": length_in,
+            "marginLeft": 0.5,
+            "marginRight": 0.5,
+            "marginTop": 0.5,
+            "marginBottom": 0.5,
+            "pieceGap": 0.125,
+            "layoutMode": "alongGrainline",
+            "multisizeLayout": multisize_layout,
+            "tileSize": "Letter",
+            "tileOrientation": "Portrait"
+        }).to_string();
+        let init = do_initialize_layout(&settings_json, Some(&input_dom))
+            .expect("initialize_layout should succeed");
+
+        let mut progress = |_pct: i32, _status: Option<&str>| {};
+        do_process_layout(
+            ProcessLayoutArgs {
+                settings_json: &settings_json,
+                input_dom: &input_dom,
+                initial_layout_dom: &init.initial_dom,
+                layout_h_px: init.h_px,
+            },
+            &mut progress,
+        ).expect("process_layout should succeed on the jacket2 handoff")
+    } // fn process_jacket2
+
+    // @brief The jacket2 handoff reads as one multisize pattern: 8 piece-sets, 208 pieces, 26 sizes.
+    #[test]
+    fn jacket2_handoff_is_multisize() {
+        let (doc, sizes) = jacket2_handoff();
+        assert_eq!(crate::piece_extractor::count_tagged_pieces(&doc), 208, "8 pieces x 26 sizes");
+        let info = crate::piece_extractor::read_measurements_info(&doc);
+        assert!(info.multisize);
+        assert_eq!(info.sizes, sizes);
+        assert_eq!((info.sizes.len(), info.sizes[0].as_str(), info.sizes[25].as_str()), (26, "220", "720"));
+        assert_eq!(info.base_size, JACKET2_BASE_SIZE);
+    } // jacket2_handoff_is_multisize
+
+    // @brief Nested packs the 8 piece-sets, every size stacked inside its set.
+    #[test]
+    fn jacket2_nested_packs_eight_piece_sets() {
+        let nested = process_jacket2("nested", 60.0, 300.0);
+        assert!(nested.unplaced_labels.is_empty(), "unplaced: {:?}", nested.unplaced_labels);
+        assert_eq!(placed_count(&nested), 8, "Nested: one unit per piece");
+        let svg = nested.output_doc.to_string();
+        assert_eq!(svg.matches(r#"data-type="piece""#).count(), 208, "every size of every piece placed");
+    } // jacket2_nested_packs_eight_piece_sets
+
+    // @brief Marker packs every size of every piece as its own unit, numbered by its piece-set.
+    #[test]
+    fn jacket2_marker_places_every_size() {
+        let marker = process_jacket2("marker", 60.0, 1500.0);
+        assert!(marker.unplaced_labels.is_empty(), "unplaced: {:?}", marker.unplaced_labels);
+        assert_eq!(placed_count(&marker), 208, "Marker: pieces x sizes");
+        let svg = marker.output_doc.to_string();
+        for set in 1..=8 {
+            assert_eq!(svg.matches(&format!(r#"data-set-number="{set}""#)).count(), 26, "piece-set {set}: 26 sizes");
+        } // for each piece-set
+    } // jacket2_marker_places_every_size
+
+    // @brief The DXF-ASTM warning dialog lists each piece once, by the name the user wrote.
+    // The installed jacket2 hides every piece label and grainline, so all 8 pieces are listed.
+    #[test]
+    fn jacket2_missing_piece_data_lists_each_piece_once() {
+        for (multisize_layout, length_in) in [("nested", 300.0), ("marker", 1500.0)] {
+            let layout = process_jacket2(multisize_layout, 60.0, length_in);
+            let text = crate::exports::dxf_missing_piece_data_message(&layout.output_doc).expect("converts");
+            let mut pieces: Vec<&str> =
+                text.lines().filter_map(|l| l.strip_prefix("\u{2022} ")).map(|l| l.split(':').next().unwrap()).collect();
+            pieces.sort_unstable();
+            assert_eq!(
+                pieces,
+                vec!["Detail (3)", "Detail (4)", "Detail (5)", "Detail (6)", "Detail (7)", "Detail (8)", "Комір", "Подборт"],
+                "{multisize_layout}: {text}"
+            );
+        } // for each multisize layout
+    } // jacket2_missing_piece_data_lists_each_piece_once
+
+    // @brief An "All sizes" DXF-ASTM export of the Nested layout: every size of a piece
+    // has one `Piece Name:`, non-ASCII as `\U+XXXX`, and repeated names are numbered.
+    #[test]
+    fn jacket2_all_sizes_export_names_every_size_alike() {
+        let layout = process_jacket2("nested", 60.0, 300.0);
+        let (input, sizes) = jacket2_handoff();
+        let style = crate::exports::DxfStyleInfo {
+            grading: Some(crate::exports::DxfGradingSource { input, sizes, base_size: JACKET2_BASE_SIZE.to_string() }),
+            ..crate::exports::DxfStyleInfo::default()
+        };
+        let path = std::env::temp_dir().join(format!("jacket2_all_sizes_{}.dxf", std::process::id()));
+        let warnings = crate::exports::do_export_dxf(&layout.output_doc, &path.to_string_lossy(), false, &style, &mut |_| {})
+            .expect("all sizes export succeeds");
+        let dxf = std::fs::read_to_string(&path).expect("DXF written");
+        let rul = std::fs::read_to_string(path.with_extension("rul"));
+        let _ = std::fs::remove_file(&path);
+        let _ = std::fs::remove_file(path.with_extension("rul"));
+
+        // Piece Name: system text, one per written block.
+        let lines: Vec<&str> = dxf.lines().map(str::trim).collect();
+        let names: Vec<&str> = lines.iter().filter_map(|l| l.strip_prefix("Piece Name:")).collect();
+        assert!(names.iter().all(|n| n.is_ascii()), "Piece Name: is 7-bit ASCII");
+        let komir = r"\U+041A\U+043E\U+043C\U+0456\U+0440";
+        assert!(names.contains(&komir), "Комір as AutoCAD escapes: {names:?}");
+        assert!(!names.contains(&"Detail"), "no unnumbered Detail: {names:?}");
+        for n in 3..=8 {
+            assert!(names.contains(&format!("Detail ({n})").as_str()), "Detail ({n}) written: {names:?}");
+        } // for each Detail piece
+        assert!(names.iter().all(|n| !n.starts_with("piece-")), "no block id as a piece name: {names:?}");
+
+        // This handoff gives four Detail pieces different turn points in different
+        // sizes, so they fall back to the sample size. Warnings name the piece as
+        // the user wrote it.
+        let fallback = [3, 6, 7, 8];
+        let expected: Vec<String> = fallback
+            .iter()
+            .map(|n| format!("Detail ({n}): not graded, the sizes have different turn points. Only size 500 is written."))
+            .collect();
+        assert_eq!(warnings, expected);
+        // A graded piece writes all 26 sizes under one name; a piece that falls back writes size 500 only.
+        let podbort = r"\U+041F\U+043E\U+0434\U+0431\U+043E\U+0440\U+0442";
+        for (name, count) in [(podbort, 26), (komir, 26), ("Detail (4)", 26), ("Detail (5)", 26)] {
+            assert_eq!(names.iter().filter(|n| **n == name).count(), count, "{name}");
+        } // for each graded piece
+        for n in fallback {
+            assert_eq!(names.iter().filter(|name| **name == format!("Detail ({n})")).count(), 1, "Detail ({n})");
+        } // for each fallen-back piece
+        assert!(rul.is_ok(), "four graded pieces write the rule table");
+    } // jacket2_all_sizes_export_names_every_size_alike
 } // mod tests

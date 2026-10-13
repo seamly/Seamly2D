@@ -30,6 +30,23 @@ pub fn sanitize_ascii(text: &str) -> String {
     text.chars().filter(|c| c.is_ascii()).collect()
 } // fn sanitize_ascii
 
+/// @brief Write text as 7-bit ASCII with AutoCAD `\U+XXXX` escapes for non-ASCII characters.
+/// @details "Комір" becomes `\U+041A\U+043E\U+043C\U+0456\U+0440`. A DXF reader shows the
+///          original text; a reader without escapes still gets one stable ASCII name.
+/// @param text Input text (may contain Unicode).
+/// @return ASCII text; each non-ASCII character is `\U+` and at least 4 uppercase hex digits.
+pub fn dxf_unicode_escape(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    for c in text.chars() {
+        if c.is_ascii() {
+            out.push(c);
+        } else {
+            out.push_str(&format!("\\U+{:04X}", c as u32));
+        } // if ASCII
+    } // for each character
+    out
+} // fn dxf_unicode_escape
+
 /// @brief Sanitize a block name to be valid for DXF (ASCII alphanumeric, `_`, `-`).
 /// @param name Original name.
 /// @return Sanitized name.

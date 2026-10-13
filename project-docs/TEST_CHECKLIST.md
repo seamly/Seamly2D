@@ -41,11 +41,13 @@ The setting reaches SeamlyLayout only when Seamly2D starts from this PowerShell 
 - [x] Piece A (e.g. Yoke): edit piece > Properties: Quantity 3, "on fold" off.
 - [x] Piece B (e.g. CollarTop): Quantity 2, "on fold" on.
 - [x] Piece C (e.g. Sleeve): Quantity 2, "on fold" off.
-- [ ] Press Layout. Open the captured SVG in VS Code. Search:
-  - [x] `data-quantity` on every `data-type="piece"` group.
-  - [x] `data-on-fold="true"` on piece B only.
-  - [ ] `data-notch-type` on each notch group, one word per notch line segment. Word count = `M` count in `d` = `data-seam-allowances` value count.
-    --> too many words per notch line. Added a task to fix this to TODO_SEAMLYLAYOUT.md
+- [ ] Press Layout and export SVG
+  --> 'test-seamly-layout\layouts\male_shirt\male_shirt_202610121755.svg'
+  - [ ] Open the captured SVG 'male_shirt_202610121755.svg' in VS Code. Search:
+    - [x] `data-quantity` on every `data-type="piece"` group.
+    - [x] `data-on-fold="true"` on piece B only.
+    - [ ] `data-notch-type` on each notch group, one word per notch. `data-seam-allowances` and `data-notch-segments` have the same value count. Sum of `data-notch-segments` = `M` count in `d`.
+      --> too many words per notch line. Added a task to fix this to TODO_SEAMLYLAYOUT.md (Layout.29)
 - [x] SeamlyLayout: Settings > Submit, then Create Layout. Export > DXF-ASTM (R13) > Standard. Open the `.dxf` in VS Code. Search `Quantity:`:
 
 | Piece | Expected |
@@ -88,7 +90,7 @@ Pattern: HJA (your multisize pattern), or `C:\Users\susan\seamly2d\patterns\jack
     - [x] Single Size Screenshots: test-seamly-layout\layouts\jacket2\jacket2_marker_size240_screenshot_1.png
   - [x] Export to DXF R13, All Tabs
     - [x] All Tabs DXF files, basename pattern 'jacket2_40-146_marker_alltabs_R13_*.dxf' in 'test-seamly-layout\layouts\jacket2\'
-    - [ ] All Tabs Screenshots: 'test-seamly-layout\layouts\jacket2\jacket2_marker_alltabs_screenshot_1.png'
+    - [x] All Tabs Screenshots: 'test-seamly-layout\layouts\jacket2\jacket2_marker_alltabs_screenshot_1.png'
 
 ## 4. Analyze Layouts
 
@@ -194,9 +196,14 @@ Pattern: HJA (your multisize pattern), or `C:\Users\susan\seamly2d\patterns\jack
   --> test-sesamly-layout\male_shirt_R13_202610112117-dxf-report.pdf
 - [ ] CLO3D: import the DXF-ASTM (R13) and DXF-ASTM (CLO3D) files of `male_shirt`. Pieces, sew lines and notches appear. 
   --> Perform this test after all other tests pass
-- [ ] Piece with a built-in seam allowance of width W:
-  - [ ] Export Layout, Export DXF-ASTM > Annotated.
+- [ ] Piece with a built-in seam allowance of width W (Piece Properties > Seam allowance, Built in):
+  - [ ] Start Seamly2D with handoff capture (step 1). Press Layout. In the captured SVG, the piece has a `cutline` group (the main path) and a `seamline` group W inside it.
+  - [ ] SeamlyLayout canvas and Adjust Mode draw both lines. The packing gap is measured from the cut line.
+  - [ ] Export SVG and PDF: both lines appear.
+  - [ ] Export Layout, Export DXF-ASTM > Annotated. Layer 1 is the cut line. Layer 14 is the seam line.
   - [ ] In the `.txt`, each layer 4 notch has group 30 = W / 2.
+  - [ ] Piece Properties > Hide seam line. Press Layout: the piece has a `cutline` group and no `seamline` group.
+  - Seamly2D piece mode still draws no seam line for this piece: not in Layout.28.
   --> Perform this test after all other tests (except CLO3D test) have passed
 
 ## 6. Decisions

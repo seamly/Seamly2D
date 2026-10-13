@@ -34,7 +34,9 @@ pub use drawing::{
 };
 pub use entities::{Arc, Circle, DxfPoint, Entity, Line, Point, Polyline, Text};
 pub use error::{Result, SvgToEzdxfError};
-pub use utils::{detect_corners, invert_y_axis, parse_float_attr, parse_length_attr, sanitize_ascii, sanitize_block_name, MM_PER_PX};
+pub use utils::{
+    detect_corners, dxf_unicode_escape, invert_y_axis, parse_float_attr, parse_length_attr, sanitize_ascii, sanitize_block_name, MM_PER_PX,
+};
 
 // @brief Write Drawing to output directory for inspection.
 // @param drawing The Drawing object to write.

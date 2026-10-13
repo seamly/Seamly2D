@@ -104,13 +104,19 @@ public:
                                                      bool seamAllowanceBuiltIn = false,
                                                      const QVector<QPointF> &nodeVertices = QVector<QPointF>());
 
+    QVector<QPointF>          getBuiltInSeamLinePoints() const;
+    void                      setBuiltInSeamLinePoints(const QVector<QPointF> &points,
+                                                       const QVector<QPointF> &nodeVertices = QVector<QPointF>());
+
     QVector<QPointF>          getLayoutAllowancePoints() const;
     void                      SetLayoutAllowancePoints();
 
     QVector<QLineF>           getNotches() const;
     void                      setNotches(const QVector<QLineF> &notches,
+                                         const QVector<int> &notchLineCounts = QVector<int>(),
                                          const QVector<qreal> &seamAllowanceWidths = QVector<qreal>(),
                                          const QStringList &notchTypes = QStringList());
+    QVector<int>              getNotchLineCounts() const;
     QVector<qreal>            getNotchSeamAllowances() const;
     QStringList               getNotchTypes() const;
 

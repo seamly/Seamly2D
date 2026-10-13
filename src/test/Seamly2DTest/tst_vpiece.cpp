@@ -62,7 +62,10 @@
 #include "../vtools/tools/new_piece_defaults.h"
 
 #include <QtTest>
+#include <QPolygonF>
 #include <QTemporaryDir>
+
+#include <limits>
 
 //---------------------------------------------------------------------------------------------------------------------
 TST_VPiece::TST_VPiece(QObject *parent)
@@ -663,6 +666,49 @@ VPiece squareSlitPiece(VContainer *data, bool builtIn, const QString &afterWidth
     return piece;
 }
 
+/**
+ * @brief Square piece with a slit notch on its top edge and a U notch on its right edge.
+ */
+VPiece slitAndUNotchPiece(VContainer *data)
+{
+    data->UpdateGObject(1, new VPointF(0, 0, "A1", 0, 0));
+    data->UpdateGObject(2, new VPointF(200, 0, "A2", 0, 0));
+    data->UpdateGObject(3, new VPointF(400, 0, "A3", 0, 0));
+    data->UpdateGObject(4, new VPointF(400, 200, "A4", 0, 0));
+    data->UpdateGObject(5, new VPointF(400, 400, "A5", 0, 0));
+    data->UpdateGObject(6, new VPointF(0, 400, "A6", 0, 0));
+
+    auto notchNode = [](quint32 id, NotchType type)
+    {
+        VPieceNode node(id, Tool::NodePoint);
+        node.setNotch(true);
+        node.setNotchType(type);
+        node.setNotchSubType(NotchSubType::Straightforward);
+        node.setNotchLength(5);
+        node.setNotchWidth(5);
+        node.setNotchCount(1);
+        node.setShowNotch(true);
+        node.setShowSeamlineNotch(false);
+        return node;
+    };
+
+    VPiece piece;
+    piece.SetSeamAllowance(true);
+    piece.SetSAWidth(notchTestSAWidth);
+    piece.GetPath().Append(VPieceNode(1, Tool::NodePoint));
+    piece.GetPath().Append(notchNode(2, NotchType::Slit));
+    piece.GetPath().Append(VPieceNode(3, Tool::NodePoint));
+    piece.GetPath().Append(notchNode(4, NotchType::UNotch));
+    piece.GetPath().Append(VPieceNode(5, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(6, Tool::NodePoint));
+
+    // Labels and grainline are not under test; hidden, they need no pattern document.
+    piece.GetPatternPieceData().SetVisible(false);
+    piece.GetPatternInfo().SetVisible(false);
+    piece.GetGrainlineGeometry().SetVisible(false);
+    return piece;
+}
+
 /// True when @p point lies on the polyline @p points.
 bool isOnPolyline(const QPointF &point, const QVector<QPointF> &points)
 {
@@ -674,6 +720,61 @@ bool isOnPolyline(const QPointF &point, const QVector<QPointF> &points)
         }
     }
     return false;
+}
+
+/**
+ * @brief Square piece, 400 px side, whose four corner nodes set the given seam allowance widths.
+ * @param pieceWidth piece seam allowance width in millimeters.
+ * @param before seam allowance formula before each node; empty keeps the piece width.
+ * @param after seam allowance formula after each node; empty keeps the piece width.
+ */
+VPiece squareWidthPiece(VContainer *data, bool builtIn, qreal pieceWidth, const QString &before,
+                        const QString &after)
+{
+    data->UpdateGObject(1, new VPointF(0, 0, "A1", 0, 0));
+    data->UpdateGObject(2, new VPointF(400, 0, "A2", 0, 0));
+    data->UpdateGObject(3, new VPointF(400, 400, "A3", 0, 0));
+    data->UpdateGObject(4, new VPointF(0, 400, "A4", 0, 0));
+
+    VPiece piece;
+    piece.SetSeamAllowance(true);
+    piece.SetSeamAllowanceBuiltIn(builtIn);
+    piece.SetSAWidth(pieceWidth);
+    for (quint32 id = 1; id <= 4; ++id)
+    {
+        VPieceNode node(id, Tool::NodePoint);
+        if (!before.isEmpty())
+        {
+            node.setBeforeSAFormula(before);
+        }
+        if (!after.isEmpty())
+        {
+            node.setAfterSAFormula(after);
+        }
+        piece.GetPath().Append(node);
+    }
+
+    // Labels and grainline are not under test; hidden, they need no pattern document.
+    piece.GetPatternPieceData().SetVisible(false);
+    piece.GetPatternInfo().SetVisible(false);
+    piece.GetGrainlineGeometry().SetVisible(false);
+    return piece;
+}
+
+/// Distance from @p point to the nearest edge of the closed polyline @p points.
+qreal distanceToClosedPolyline(const QPointF &point, const QVector<QPointF> &points)
+{
+    qreal distance = std::numeric_limits<qreal>::max();
+    for (int i = 0; i < points.size(); ++i)
+    {
+        const QPointF a = points.at(i);
+        const QPointF b = points.at((i + 1) % points.size());
+        const QPointF ab = b - a;
+        const qreal lengthSquared = QPointF::dotProduct(ab, ab);
+        const qreal t = lengthSquared > 0 ? qBound(0.0, QPointF::dotProduct(point - a, ab) / lengthSquared, 1.0) : 0;
+        distance = qMin(distance, QLineF(point, a + t * ab).length());
+    }
+    return distance;
 }
 } // namespace
 
@@ -810,8 +911,8 @@ void TST_VPiece::NotchSeamAllowanceWidths() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief NotchTypesFollowNodes checks that every notch line gets the type of its node, and that layout piece data
- * keeps it.
+ * @brief NotchTypesFollowNodes checks that every notch node gets one type, one width and its line count, and that
+ * layout piece data keeps them.
  */
 void TST_VPiece::NotchTypesFollowNodes() const
 {
@@ -819,18 +920,24 @@ void TST_VPiece::NotchTypesFollowNodes() const
     QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
     qApp->setPatternUnit(unit);
 
-    const VPiece piece = concaveDiamondNotchPiece(data.data());
+    const VPiece piece = slitAndUNotchPiece(data.data());
+    QVector<qreal> widths;
     QStringList types;
+    QVector<int> lineCounts;
     const QVector<QLineF> notches = piece.createNotchLines(data.data(), piece.seamAllowancePoints(data.data()),
-                                                           true, nullptr, &types);
+                                                           true, &widths, &types, &lineCounts);
 
-    QVERIFY(notches.size() > 1);
-    QCOMPARE(types.size(), notches.size());
-    for (const QString &type : std::as_const(types))
-    {
-        QCOMPARE(type, QStringLiteral("diamond"));
-    }
-    QCOMPARE(VLayoutPiece::Create(piece, data.data()).getNotchTypes(), types);
+    QCOMPARE(types, QStringList({QStringLiteral("slit"), QStringLiteral("uNotch")}));
+    QCOMPARE(widths.size(), 2);
+    QCOMPARE(lineCounts.size(), 2);
+    QCOMPARE(lineCounts.at(0), 1);
+    QVERIFY2(lineCounts.at(1) > 1, qPrintable(QString::number(lineCounts.at(1))));
+    QCOMPARE(lineCounts.at(0) + lineCounts.at(1), notches.size());
+
+    const VLayoutPiece layoutPiece = VLayoutPiece::Create(piece, data.data());
+    QCOMPARE(layoutPiece.getNotchTypes(), types);
+    QCOMPARE(layoutPiece.getNotchSeamAllowances(), widths);
+    QCOMPARE(layoutPiece.getNotchLineCounts(), lineCounts);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -850,4 +957,114 @@ void TST_VPiece::LayoutPieceKeepsQuantityAndFold() const
     const VLayoutPiece layoutPiece = VLayoutPiece::Create(piece, data.data());
     QCOMPARE(layoutPiece.getQuantity(), 4);
     QVERIFY(layoutPiece.isOnFold());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::BuiltInSeamLineUsesWiderNodeWidth_data() const
+{
+    QTest::addColumn<qreal>("pieceWidth");
+    QTest::addColumn<QString>("before");
+    QTest::addColumn<QString>("after");
+
+    // Every row offsets the main path by 10 mm.
+    QTest::newRow("piece width")  << qreal(10) << QString()     << QString();
+    QTest::newRow("wider after")  << qreal(30) << QString("5")  << QString("10");
+    QTest::newRow("wider before") << qreal(30) << QString("10") << QString("5");
+    QTest::newRow("after unset")  << qreal(10) << QString("5")  << QString();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief BuiltInSeamLineUsesWiderNodeWidth checks that the seam line of a built-in seam allowance is the main path
+ * offset inward by the wider of each node's before and after widths, the piece width when the node sets none.
+ */
+void TST_VPiece::BuiltInSeamLineUsesWiderNodeWidth() const
+{
+    QFETCH(qreal, pieceWidth);
+    QFETCH(QString, before);
+    QFETCH(QString, after);
+
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    const VPiece piece = squareWidthPiece(data.data(), true, pieceWidth, before, after);
+    QVector<QPointF> nodeVertices;
+    const QVector<QPointF> seamLine = piece.builtInSeamLinePoints(data.data(), &nodeVertices);
+
+    const qreal w = ToPixel(10, unit);
+    const QVector<QPointF> corners {QPointF(w, w), QPointF(400 - w, w), QPointF(400 - w, 400 - w),
+                                    QPointF(w, 400 - w)};
+    auto nearAny = [](const QPointF &p, const QVector<QPointF> &points)
+    {
+        for (const QPointF &q : points)
+        {
+            if (QLineF(p, q).length() < 0.01)
+            {
+                return true;
+            }
+        }
+        return false;
+    };
+    QVERIFY(!seamLine.isEmpty());
+    for (const QPointF &p : seamLine)
+    {
+        QVERIFY2(nearAny(p, corners), qPrintable(QStringLiteral("%1, %2").arg(p.x()).arg(p.y())));
+    }
+    for (const QPointF &corner : corners)
+    {
+        QVERIFY(nearAny(corner, seamLine));
+        QVERIFY(nearAny(corner, nodeVertices));
+    }
+    QCOMPARE(VAbstractPiece::isClockwise(seamLine), VAbstractPiece::isClockwise(piece.mainPathPoints(data.data())));
+
+    QCOMPARE(VLayoutPiece::Create(piece, data.data()).getBuiltInSeamLinePoints().size(), 4);
+    QVERIFY(squareWidthPiece(data.data(), false, pieceWidth, before, after)
+                .builtInSeamLinePoints(data.data()).isEmpty());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief BuiltInSeamLineFollowsCurve checks that the seam line of a built-in seam allowance stays the piece width
+ * inside a main path with a curve.
+ */
+void TST_VPiece::BuiltInSeamLineFollowsCurve() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    data->UpdateGObject(1, new VPointF(0, 0, "A1", 0, 0));
+    data->UpdateGObject(2, new VPointF(400, 0, "A2", 0, 0));
+    VPointF *p3 = new VPointF(400, 400, "A3", 0, 0);
+    data->UpdateGObject(3, p3);
+    VPointF *p4 = new VPointF(0, 400, "A4", 0, 0);
+    data->UpdateGObject(4, p4);
+    // The bottom edge bulges down, away from the piece.
+    data->UpdateGObject(5, new VSpline(*p3, QPointF(300, 550), QPointF(100, 550), *p4));
+
+    VPiece piece;
+    piece.SetSeamAllowance(true);
+    piece.SetSeamAllowanceBuiltIn(true);
+    piece.SetSAWidth(10);
+    piece.GetPath().Append(VPieceNode(1, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(2, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(3, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(5, Tool::NodeSpline));
+    piece.GetPath().Append(VPieceNode(4, Tool::NodePoint));
+
+    const QVector<QPointF> cutLine = piece.mainPathPoints(data.data());
+    const QVector<QPointF> seamLine = piece.builtInSeamLinePoints(data.data());
+    QVERIFY(seamLine.size() > 5);
+
+    const qreal w = ToPixel(10, unit);
+    const QPolygonF cutPolygon(cutLine);
+    for (const QPointF &p : seamLine)
+    {
+        const qreal distance = distanceToClosedPolyline(p, cutLine);
+        QVERIFY2(cutPolygon.containsPoint(p, Qt::OddEvenFill),
+                 qPrintable(QStringLiteral("%1, %2 is outside").arg(p.x()).arg(p.y())));
+        QVERIFY2(qAbs(distance - w) < w * 0.01,
+                 qPrintable(QStringLiteral("%1, %2 is %3 from the cut line").arg(p.x()).arg(p.y()).arg(distance)));
+    }
 }

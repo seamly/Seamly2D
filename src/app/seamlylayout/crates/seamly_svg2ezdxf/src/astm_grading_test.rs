@@ -68,6 +68,39 @@ mod tests {
         }
     }
 
+    // @brief hem_contour(k) with each hem vertex moved `shift` mm along the hem.
+    // @details The sample's key point fractions then land `shift` mm from this size's hem vertices.
+    fn shifted_hem_contour(k: f64, shift: f64) -> AstmContour {
+        let (mut points, tags) = hem_outline(k);
+        for i in 1..40 {
+            // Hem speed at t: d/dt of (200k(1 - t), 300k + 60k sin(pi t)).
+            let t = i as f64 / 40.0;
+            let speed = ((200.0 * k).powi(2) + (60.0 * k * std::f64::consts::PI * (std::f64::consts::PI * t).cos()).powi(2)).sqrt();
+            let t = t + shift / speed;
+            points[2 + i] = Point::new(200.0 * k * (1.0 - t), 300.0 * k + 60.0 * k * (std::f64::consts::PI * t).sin());
+        } // for each hem vertex
+        build_contour_tagged(&points, true, Some(&tags)).expect("contour")
+    }
+
+    // @brief Smallest distance between consecutive vertices of a closed polyline.
+    fn closest_neighbours(points: &[Point]) -> f64 {
+        (0..points.len()).map(|i| distance(points[i], points[(i + 1) % points.len()])).fold(f64::INFINITY, f64::min)
+    }
+
+    #[test]
+    fn graded_key_points_snap_to_nearby_vertices() {
+        // Key points of the sample land 0.005 mm from the hem vertices of the other sizes.
+        let sizes = [shifted_hem_contour(0.9, 0.005), hem_contour(1.0), shifted_hem_contour(1.2, -0.005)];
+        let graded = grade_contours(&sizes, 1).expect("same turn points");
+        for g in &graded {
+            assert_eq!(g.reduced.len(), graded[1].reduced.len(), "same key point count in every size");
+            assert!(ordered_subset(g), "reduced is an ordered subset of dense");
+            assert!(closest_neighbours(&g.dense) >= 0.01, "dense vertices {} mm apart", closest_neighbours(&g.dense));
+            assert!(closest_neighbours(&g.reduced) >= 0.01, "key points {} mm apart", closest_neighbours(&g.reduced));
+            assert!(spline_deviation(g) <= CURVE_TOLERANCE_MM + 1e-9, "spline within tolerance");
+        }
+    }
+
     #[test]
     fn different_turn_points_do_not_grade() {
         let square = build_contour(

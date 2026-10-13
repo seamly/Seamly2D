@@ -26,6 +26,8 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | Header | R12: `$ACADVER` only. R13: `$ACADVER`, `$DWGCODEPAGE`, `$HANDSEED` | D6673 §4.2: keep the header minimal. R13 needs `$HANDSEED` |
 | CLO3D group 250 | Off in **DXF-ASTM (R12)** and **(R13)**; on in **DXF-ASTM (CLO3D)** | Not DXF R12, not D6673. CLO3D reads it: 0 = boundary (layer 1), 2 = sew line (layer 14). Only those key-point polylines carry it. The R13 rewrite keeps it |
 | Block names | `<svg id>_M` kept | Existing CLO3D naming. `Piece Name:` carries the real name |
+| Piece Name | Piece `data-name`, each non-ASCII character as an AutoCAD `\U+XXXX` escape: "Комір" → `\U+041A\U+043E\U+043C\U+0456\U+0440`. A name that several pieces share ends in the piece letter, else the piece number: `Detail (3)`. Every size of a piece gets the same name. Dialogs and warnings show the name as written, with the same number | User decision. System text is 7-bit ASCII (§4.3.1.2). aw.fyi groups the sizes of a piece by name, and merges pieces that share one. Piece number: piece-set `data-type-number`, else the piece `data-set-number` (Marker layout), else the individual piece `data-type-number` |
+| Missing Piece Data dialog | One line per piece, not per placed size. A size that lacks Quantity, label or grainline marks it missing for the piece | A multisize layout places every size |
 | Curve tolerance | 0.25 mm | Douglas–Peucker tolerance for the first key points, and limit for the spline through the final key points. Chords between final key points can be farther off |
 | Quantity | Piece `data-quantity`, else the "Cut N" label line: even N → `N/2,N/2`, odd N → `N,0`. Piece `data-on-fold="true"` → `N,0` | Seamly2D exports only a total, not right/left counts. A folded piece unfolds to one symmetric piece, never a left and right pair |
 | Style Name | Input base name: the imported SVG's base name, or the `--document-name` value. Else the pattern `data-name`, else the output file stem | User decision. The output stem carries a timestamp |
@@ -77,7 +79,8 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 ## Boundary and sew lines
 
 - Boundary = longest closed `cutline` path.
-- No cut line (seam allowance hidden or built in): the longest closed `seamline` is the boundary.
+- No cut line (no seam allowance, or seam allowances not shown): the longest closed `seamline` is the boundary.
+- Built-in seam allowance: the `cutline` is the main path, so it is the boundary (layer 1). The `seamline` is the line Seamly2D computes inside it, a sew line (layer 14).
 - A seam line equal to the boundary is not repeated on layer 14.
 
 ## Notch rules (`astm_notch.rs`)
@@ -88,7 +91,7 @@ Every notch is a slit on layer 4, whatever shape Seamly2D drew (slit, T, U, V, c
 - Base = centre of the contacts. Angle = toward the inner vertices, counter-clockwise from +X.
 - Depth = half the seam allowance width at the notch. User decision: keep each edge's width as Seamly2D defines it.
 - Width source, first found:
-  1. Seamly2D's width for the notch node, `data-seam-allowances`. The only source for a built-in seam allowance: its main path is the cut line, and it has no sew line.
+  1. Seamly2D's width for the notch node, `data-seam-allowances`: one value per notch. `data-notch-segments` gives each notch's segment count, so each segment gets the width of its notch. Without `data-notch-segments`, one value per segment. A list of the wrong length is ignored. The only source for a piece without a cut line.
   2. Distance from the base to the nearest sew line (`seam_allowance_at`), for an SVG without the attribute.
   3. None, or width under 0.1 mm: depth = drawn depth (farthest reach along the angle).
 - No width (group 39). Layers 80, 81, 83 are not written.
@@ -100,6 +103,7 @@ A multisize layout exported from the **All sizes** tab is graded (D6673 §4.3.1.
 - Input: the layout DOM (every size of every piece, placed) and the handoff DOM (every size at its drafted position).
 - A piece's sizes share the piece `data-parent` (piece-set id). Blocks of one piece are written together, in `data-sizes` order.
 - Key points: `grade_contours` gives every size the same turn points and the same curve points. Curve point j sits at the same arc-length fraction of the same span in every size. Curve points are added until every size passes the 0.25 mm spline check, then dropped where no size needs them.
+- Duplicate vertices: a key point within 0.01 mm of a dense vertex snaps to that vertex, so grading inserts no vertex within 0.01 mm of another. A curve point within 0.01 mm of a span's turn point, or on the vertex of the key point before or after it, in any size, is dropped.
 - Grading runs in draft space: a size differs from the sample size only by growth there.
 - Rule = growth of one key point or notch from the sample size, per size. Rules equal within 0.01 mm share one identifier. Zero growth is a rule too (§4.3.1.4).
 - Sample size block: every layer, full piece system text, `# n` TEXT on layers 1, 4, 8, 11, 14 at each graded point.

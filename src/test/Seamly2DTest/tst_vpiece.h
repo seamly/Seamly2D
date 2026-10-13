@@ -88,6 +88,9 @@ private slots:
     void NotchSeamAllowanceWidths() const;
     void NotchTypesFollowNodes() const;
     void LayoutPieceKeepsQuantityAndFold() const;
+    void BuiltInSeamLineUsesWiderNodeWidth_data() const;
+    void BuiltInSeamLineUsesWiderNodeWidth() const;
+    void BuiltInSeamLineFollowsCurve() const;
 
 private:
     Q_DISABLE_COPY(TST_VPiece)
