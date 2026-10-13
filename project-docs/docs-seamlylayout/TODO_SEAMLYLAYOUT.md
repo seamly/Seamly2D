@@ -244,9 +244,9 @@ The task stays in this file: it changes what SeamlyLayout lays out and exports (
 
 Status (2026-10-12):
 
-- Code, tests and docs: done. Merged into local `run-seamlyLayout` (`b3bf88c7cf`), not pushed
-- `cargo test --workspace`: 472 passed, 0 failed
-- Open: Qt suites (Layout.28.8) and the user check in the installed apps (Layout.28.7)
+- Code, tests and docs: done. Merged into local `run-seamlyLayout`, not pushed
+- `cargo test --workspace`: 472 passed, 0 failed. `local_build_msi.ps1`: Qt suites passed, MSI 26.10.1220 built
+- Open: the user check in the installed apps (Layout.28.7)
 
 - [x] Layout.28.1 Seamly2D: seam line = main path offset inward by each node's width (wider of before and after; piece width when the node sets none)
   - `VPiece::builtInSeamLinePoints()`. A curve spreads the widths of its ends along its length. Corner types shape only the cut line: seam line corners are plain offset corners (user confirmed)
@@ -261,7 +261,8 @@ Status (2026-10-12):
   - Rust: `built_in_seam_allowance_writes_boundary_and_sew_line`, `built_in_seam_allowance_has_boundary_and_sew_line`, `built_in_seam_allowance_packs_by_its_cut_line`
 - [x] Layout.28.6 Docs: `SVG-DATA-ATTRIBUTES.md` (`cutline`, `seamline`, `data-seam-allowances`), `NEW-ATTRIBUTES.csv`, DXF-ASTM compliance doc, `TEST_CHECKLIST.md`
 - [ ] Layout.28.7 User: on the next MSI, run `TEST_CHECKLIST.md` §5 "Piece with a built-in seam allowance"
-- [ ] Layout.28.8 Verify: Qt suites (`nmake check`) in `local_build_msi.ps1`. The C++ tests of Layout.28.5 have not run yet
+- [x] Layout.28.8 Verify: Qt suites (`nmake check`) in `local_build_msi.ps1`
+  - The first run found a bug: a main path that starts at a corner next to a curve lost most of its seam line. The inward offset loops at that corner, and `CheckLoops()` cut the wrong side of a loop at the path start. Fix: the offset starts in the middle of the longest edge
 - Not in this task: Seamly2D piece mode draws no seam line for a built-in piece. Filed as Seamly2D.11 in `TODO_SEAMLY2D.md` (user decision)
 
 ## [x] Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%

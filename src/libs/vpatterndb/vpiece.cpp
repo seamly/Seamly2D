@@ -160,6 +160,67 @@ void setSeamLineWidths(QVector<VSAPoint> &points, qreal width)
         points[i].SetAngleType(PieceNodeAngle::ByLength);
     }
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief startAtLongestEdge returns the closed path @p points started at a new point in the middle of its longest
+ * edge.
+ *
+ * The new point is not a node. Its width is the mean of the edge end widths, so the offset edge stays straight.
+ */
+QVector<VSAPoint> startAtLongestEdge(const QVector<VSAPoint> &points)
+{
+    const int count = points.size();
+    int longest = -1;
+    qreal longestLength = 0;
+    for (int i = 0; i < count; ++i)
+    {
+        const qreal length = QLineF(points.at(i), points.at((i + 1) % count)).length();
+        if (length > longestLength)
+        {
+            longestLength = length;
+            longest = i;
+        }
+    }
+    if (longest < 0)
+    {
+        return points;
+    }
+
+    const VSAPoint &first = points.at(longest);
+    const VSAPoint &second = points.at((longest + 1) % count);
+    VSAPoint middle((static_cast<QPointF>(first) + static_cast<QPointF>(second)) / 2.0);
+    const qreal middleWidth = (first.GetSAAfter() + second.GetSABefore()) / 2.0;
+    middle.SetSABefore(middleWidth);
+    middle.SetSAAfter(middleWidth);
+    middle.SetAngleType(PieceNodeAngle::ByLength);
+
+    QVector<VSAPoint> rotated;
+    rotated.append(middle);
+    for (int k = 1; k <= count; ++k)
+    {
+        rotated.append(points.at((longest + k) % count));
+    }
+    return rotated;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief removeStartPoint removes the start point that startAtLongestEdge() added from the closed polyline @p points.
+ *
+ * The point is removed only while it lies on the straight line between its neighbours.
+ */
+void removeStartPoint(QVector<QPointF> &points)
+{
+    if (points.size() < 5 || points.first() != points.last()
+        || !VGObject::IsPointOnLineviaPDP(points.first(), points.at(points.size() - 2), points.at(1)))
+    {
+        return;
+    }
+    points.removeLast();
+    points.removeFirst();
+    points.append(points.first());
+}
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -394,7 +455,10 @@ QVector<QPointF> VPiece::builtInSeamLinePoints(const VContainer *data, QVector<Q
         points = VGObject::GetReversePoints(points);
     }
 
-    const QVector<QPointF> seamLine = Equidistant(points, width, nodeVertices);
+    // An inward offset makes a loop at a corner next to short curve chords. CheckLoops() cuts the wrong side of a
+    // loop that spans the path start, so the offset starts in the middle of the longest edge, where none forms.
+    QVector<QPointF> seamLine = Equidistant(startAtLongestEdge(points), width, nodeVertices);
+    removeStartPoint(seamLine);
     return clockwise ? VGObject::GetReversePoints(seamLine) : seamLine;
 }
 
