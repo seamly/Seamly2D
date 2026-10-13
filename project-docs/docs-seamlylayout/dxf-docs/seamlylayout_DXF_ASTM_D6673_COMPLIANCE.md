@@ -10,7 +10,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | SVG DOM → drawing | `seamly_svg2ezdxf::svg_to_ezdxf` (`converter.rs`) | `Drawing` in millimetres |
 | Contours | `seamly_svg2ezdxf/src/astm_contour.rs` | key points + validation polyline |
 | Notches | `seamly_svg2ezdxf/src/astm_notch.rs` | Slit notch POINTs (layer 4) |
-| Grading | `seamly_svg2ezdxf/src/astm_grading.rs`, `astm_contour::grade_contours` | Graded nests, grade rules |
+| Grading | `seamly_svg2ezdxf/src/astm_grading.rs`, `astm_contour::grade_contours` | Grade rules, `# n` texts on the base size |
 | Rule table | `ezdxf2dxfastm/src/grade_rule_file.rs` | `.rul` file beside the DXF |
 | Drawing → file | `ezdxf2dxfastm::export_dxf_astm` (`writer.rs`) | `.dxf` (+ annotated `.txt`) |
 | R12 → R13 | `ezdxf2dxfastm::upgrade_to_r13` (`r13.rs`) | R13 file from the R12 group stream |
@@ -35,7 +35,8 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | Material | `Material:Fabric` on every piece | User decision. Layout.15.4 replaces it with `data-material` |
 | Category | Not written | User decision. `Category:` is ANSI/AAMA-292 piece text, not valid in any DXF-ASTM edition. A piece classification, not material. Seamly2D stores no category; a pattern library could supply one. D6673-10 §4.1 names "category", but §4.3.1.2 defines no `Category:` identifier. See `seamlylayout_DXF_ASTM_D6673_INCONSISTENCIES.md` and `seamlylayout_DXF_ASTM_D6673_from_AAMA.md` |
 | Sample Size, Grade Rule Table | Graded export: `data-base-size`, and the output file stem (separators → `_`). Otherwise blank | Required identifiers. An individual pattern or a size tab exports one ungraded size |
-| Grading | Only a multisize layout exported from the **All sizes** tab | User decision: graded nest + `# n` identifiers + `.rul` table file. A size tab holds one size |
+| Grading | Only the **Base Size** tab of a multisize layout: the base size block with `# n` identifiers, plus the `.rul` table file. No graded nest | User decision. Every size is drafted in the handoff SVG, so no other tab is built from the rules |
+| Multisize tabs | DXF-ASTM exports the **Base Size** tab (graded) or a size tab (one ungraded size, no `.rul`). The **Marker** and **Nested** tabs have no DXF-ASTM export | User decision. D6673 §5.1 excludes marker-laying data. Other formats export every tab |
 
 ## Layers written
 
@@ -44,7 +45,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | 1 | Boundary key points; style text (ENTITIES); `Piece Name:`, `Size Name:`, `Quantity:`, `Material:` (BLOCK) | POLYLINE, TEXT |
 | 2 / 3 | Turn / curve points of layers 1, 8, 11, 14 | POINT |
 | 4 | Every notch, as a slit (no 39) | POINT + 30 depth, 50 angle |
-| 5 | Grade reference line, every block of a graded nest | LINE |
+| 5 | Grade reference line, every graded base size block | LINE |
 | 7 | Grainline | LINE |
 | 8 | Internal lines (`internal_path`) | POLYLINE |
 | 11 | Internal cutouts (`cut_path`) | POLYLINE |
@@ -98,22 +99,21 @@ Every notch is a slit on layer 4, whatever shape Seamly2D drew (slit, T, U, V, c
 
 ## Grading (`astm_grading.rs`)
 
-A multisize layout exported from the **All sizes** tab is graded (D6673 §4.3.1.4, §4.3.1.5, §4.4).
+A DXF-ASTM export of the **Base Size** tab is graded (D6673 §4.3.1.4, §4.4). The file holds the base size only; no graded nest (§4.3.1.5).
 
-- Input: the layout DOM (every size of every piece, placed) and the handoff DOM (every size at its drafted position).
-- A piece's sizes share the piece `data-parent` (piece-set id). Blocks of one piece are written together, in `data-sizes` order.
+- Input: the layout DOM (the base size of every piece, placed) and the handoff DOM (every size at its drafted position).
+- A piece's sizes share the piece `data-parent` (piece-set id).
 - Key points: `grade_contours` gives every size the same turn points and the same curve points. Curve point j sits at the same arc-length fraction of the same span in every size. Curve points are added until every size passes the 0.25 mm spline check, then dropped where no size needs them.
 - Duplicate vertices: a key point within 0.01 mm of a dense vertex snaps to that vertex, so grading inserts no vertex within 0.01 mm of another. A curve point within 0.01 mm of a span's turn point, or on the vertex of the key point before or after it, in any size, is dropped.
 - Grading runs in draft space: a size differs from the sample size only by growth there.
 - Rule = growth of one key point or notch from the sample size, per size. Rules equal within 0.01 mm share one identifier. Zero growth is a rule too (§4.3.1.4).
-- Sample size block: every layer, full piece system text, `# n` TEXT on layers 1, 4, 8, 11, 14 at each graded point.
-- Graded size block: `Piece Name:`, `Size Name:`, `Quantity:`; layers 1, 7, 8, 11, 14, 15, 84–87, 5. No layers 2, 3, 4 (§4.3.1.5).
-- Grade reference line (layer 5): one horizontal draft-space line along the bottom of the sample boundary, the same for every size. A rigid fit of each layout block to its handoff block maps it into the block. Stacking the blocks on it gives the rule growths.
+- Base size block: every layer, full piece system text, `# n` TEXT on layers 1, 4, 8, 11, 14 at each graded point.
+- Grade reference line (layer 5): one horizontal draft-space line along the bottom of the base size boundary. A rigid fit of the layout block to its handoff block maps it into the block, so it gives the X axis of the rules when the layout turned the piece.
 - `.rul` file: same stem as the DXF. Header: version, `AUTHOR:Seamly2D`, date, time (hh:mm), `UNITS:METRIC`, table name, sample size, number of sizes, size list. Then `RULE: DELTA n dx,dy ...`, one growth per size.
-- Not graded, with a warning in the export dialog; only the sample size block is written:
+- Not graded, with a warning in the export dialog; the base size block is written without `# n` texts:
   - sizes differ in turn points, lines or notch count;
-  - a layout block does not fit its handoff shape (also a mirrored piece).
-- The sample size is not in the layout (unplaced): the piece is written ungraded, every size, with a warning.
+  - the layout block does not fit its handoff shape (also a mirrored piece).
+- Trade-off: without a graded nest, layers 84–87 hold the base size only. The reader builds the other sizes from the rules with its own curve method (§4.3.1.6).
 
 ## Not exported
 
@@ -149,7 +149,8 @@ The jacket2 files come from MSI 26.10.1115, before Layout.26 and Layout.27.9. Ad
 
 - `seamly_svg2ezdxf/src/astm_piece_test.rs` — contours, notches, tagged-SVG extraction.
 - `ezdxf2dxfastm/src/writer_astm_test.rs` — style text, layers, 2-decimal format, and the
-  `test_data/male_shirt_pieces.svg` fixture end to end. Graded nest blocks, `.rul` file, layer 5 in R13.
-- `seamly_svg2ezdxf/src/astm_grading_test.rs` — shared key points, rules against the stacked nest, fallbacks.
+  `test_data/male_shirt_pieces.svg` fixture end to end. Graded base size blocks, `.rul` file, layer 5 in R13.
+- `seamly_svg2ezdxf/src/astm_grading_test.rs` — shared key points, rules that move the base size onto every drafted size, fallbacks.
   Fixtures: `ezdxf2dxfastm/test_data/multisize_grading_input.svg`, `multisize_grading_layout.svg`.
-- `cxxqt_bridge/src/layout_utils.rs` `multisize_layout_exports_graded_nests` — Nested and Marker layouts, end to end.
+- `cxxqt_bridge/src/layout_utils.rs` `base_size_tab_exports_grade_rules`, `jacket2_base_size_export_names_and_grades_each_piece` — Base Size and size tabs, end to end.
+- `cxxqt_bridge/src/layout_views.rs` — tab order, which tabs each format exports.
