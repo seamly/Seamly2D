@@ -39,6 +39,7 @@ pub struct InitLayoutResult {
 }
 
 /// @brief Result returned by do_process_layout on success.
+#[derive(Clone)]
 pub struct ProcessLayoutResult {
     /// The assembled layout DOM with all pieces placed.
     pub output_doc: Document,
@@ -141,6 +142,9 @@ pub struct ProcessLayoutArgs<'a> {
     pub initial_layout_dom: &'a Document,
     /// Current layout height in pixels.
     pub layout_h_px: u32,
+    /// Multisize only: `true` packs each piece-set (one piece in every size) as one
+    /// unit (Nested tab); `false` packs every size of every piece alone (Marker tab).
+    pub nested_multisize: bool,
 }
 
 /// @brief Run the full layout pipeline: preprocess, pack, assemble, trim.
@@ -211,7 +215,7 @@ pub fn do_process_layout(
     // Done on the clone so the imported document the user sees is untouched.
     // Multisize: Nested keeps each piece-set (one piece in every size) as one
     // unit; Marker hoists every size of every piece as its own unit.
-    let hoisted = hoist_layout_units(&mut input_dom_clone, settings.nested_multisize());
+    let hoisted = hoist_layout_units(&mut input_dom_clone, args.nested_multisize);
     if hoisted > 0 {
         log_to_file(&format!(
             "[debug] layout_utils::do_process_layout(): 1a hoisted {} tagged piece(s) out of their pattern wrapper",
@@ -663,15 +667,14 @@ pub fn do_process_layout(
 /// @brief Lay out one size of a multisize handoff as its own layout.
 ///
 /// Only that size's pieces are packed, one unit per piece, with the same
-/// settings as the main layout.  The Nested/Marker choice does not apply:
-/// a single size has nothing to nest.
+/// settings as the main layout.  A single size has nothing to nest, so
+/// `args.nested_multisize` is ignored.
 ///
 /// @param args Same arguments as `do_process_layout`; `input_dom` is the full handoff.
 /// @param size The `data-size` value to lay out.
 ///
 /// # Errors
-/// Returns an error when the settings do not parse, the size has no pieces,
-/// or `do_process_layout` fails.
+/// Returns an error when the size has no pieces, or `do_process_layout` fails.
 pub fn do_process_size_layout(
     args: ProcessLayoutArgs<'_>,
     size: &str,
@@ -685,19 +688,9 @@ pub fn do_process_size_layout(
         return Err(format!("Size {size}: no pattern pieces of this size in the imported SVG."));
     } // if no pieces
 
-    // Pack every piece alone: "marker" dissolves the piece-sets.
-    let mut settings: serde_json::Value = serde_json::from_str(args.settings_json)
-        .map_err(|e| format!("Size {size}: failed to parse layout settings: {e}"))?;
-    settings["multisizeLayout"] = serde_json::Value::from("marker");
-    let settings_json = settings.to_string();
-
+    // Pack every piece alone: the piece-sets of the other sizes are gone.
     do_process_layout(
-        ProcessLayoutArgs {
-            settings_json: &settings_json,
-            input_dom: &size_dom,
-            initial_layout_dom: args.initial_layout_dom,
-            layout_h_px: args.layout_h_px,
-        },
+        ProcessLayoutArgs { input_dom: &size_dom, nested_multisize: false, ..args },
         progress_fn,
     )
 } // fn do_process_size_layout
@@ -780,6 +773,7 @@ mod tests {
                 input_dom: &input_dom,
                 initial_layout_dom: &init.initial_dom,
                 layout_h_px: init.h_px,
+                nested_multisize: false,
             },
             &mut progress,
         ).expect("process_layout should succeed on the tagged handoff");
@@ -893,12 +887,13 @@ mod tests {
                 input_dom: &input_dom,
                 initial_layout_dom: &init.initial_dom,
                 layout_h_px: init.h_px,
+                nested_multisize: false,
             },
             &mut progress,
         ).expect("process_layout should succeed on the trousers handoff")
     } // fn process_trousers
     // @brief Fabric roll settings for the multisize fixture.
-    fn multisize_settings_json(multisize_layout: &str) -> String {
+    fn multisize_settings_json() -> String {
         serde_json::json!({
             "unit": "in",
             "mediaType": "fabric",
@@ -911,17 +906,16 @@ mod tests {
             "marginBottom": 0.5,
             "pieceGap": 0.125,
             "layoutMode": "alongGrainline",
-            "multisizeLayout": multisize_layout,
             "tileSize": "Letter",
             "tileOrientation": "Portrait"
         }).to_string()
     } // fn multisize_settings_json
 
-    // @brief Lay out the multisize fixture with the given multisize layout.
-    fn process_multisize(multisize_layout: &str) -> ProcessLayoutResult {
+    // @brief Lay out the multisize fixture as the Nested tab (`nested`) or the Marker tab.
+    fn process_multisize(nested: bool) -> ProcessLayoutResult {
         let input_dom = Document::parse(crate::piece_extractor::tests::MULTISIZE_HANDOFF_SVG)
             .expect("multisize fixture should parse");
-        let settings_json = multisize_settings_json(multisize_layout);
+        let settings_json = multisize_settings_json();
         let init = do_initialize_layout(&settings_json, Some(&input_dom))
             .expect("initialize_layout should succeed");
 
@@ -932,10 +926,33 @@ mod tests {
                 input_dom: &input_dom,
                 initial_layout_dom: &init.initial_dom,
                 layout_h_px: init.h_px,
+                nested_multisize: nested,
             },
             &mut progress,
         ).expect("process_layout should succeed on the multisize handoff")
     } // fn process_multisize
+
+    // @brief Lay out one size of the multisize fixture, as a size tab or the Base Size tab.
+    fn process_multisize_size(size: &str) -> ProcessLayoutResult {
+        let input_dom = Document::parse(crate::piece_extractor::tests::MULTISIZE_HANDOFF_SVG)
+            .expect("multisize fixture should parse");
+        let settings_json = multisize_settings_json();
+        let init = do_initialize_layout(&settings_json, Some(&input_dom))
+            .expect("initialize_layout should succeed");
+
+        let mut progress = |_pct: i32, _status: Option<&str>| {};
+        do_process_size_layout(
+            ProcessLayoutArgs {
+                settings_json: &settings_json,
+                input_dom: &input_dom,
+                initial_layout_dom: &init.initial_dom,
+                layout_h_px: init.h_px,
+                nested_multisize: false,
+            },
+            size,
+            &mut progress,
+        ).expect("size layout should succeed on the multisize handoff")
+    } // fn process_multisize_size
 
     // @brief Number of placed pieces in a layout's bbox JSON.
     fn placed_count(result: &ProcessLayoutResult) -> usize {
@@ -947,7 +964,7 @@ mod tests {
     // @brief Nested packs one unit per piece; Marker packs one unit per piece per size.
     #[test]
     fn multisize_nested_packs_sets_and_marker_packs_sizes() {
-        let nested = process_multisize("nested");
+        let nested = process_multisize(true);
         assert!(nested.unplaced_labels.is_empty(), "unplaced: {:?}", nested.unplaced_labels);
         assert_eq!(placed_count(&nested), 2, "Nested: one unit per piece");
         // Adjust Mode moves each bbox entry by id, so a set id moves every size together.
@@ -958,7 +975,7 @@ mod tests {
         ids.sort_unstable();
         assert_eq!(ids, vec!["piece-set_Back", "piece-set_Front"]);
 
-        let marker = process_multisize("marker");
+        let marker = process_multisize(false);
         assert!(marker.unplaced_labels.is_empty(), "unplaced: {:?}", marker.unplaced_labels);
         assert_eq!(placed_count(&marker), 4, "Marker: pieces x sizes");
     } // multisize_nested_packs_sets_and_marker_packs_sizes
@@ -967,7 +984,7 @@ mod tests {
     // and each placed piece keeps its data-size.
     #[test]
     fn multisize_nested_centres_sizes_on_largest() {
-        let nested = process_multisize("nested");
+        let nested = process_multisize(true);
         let svg = nested.output_doc.to_string();
         let big = svg.find(r#"id="piece_Front_s36""#).expect("size 36 in output");
         let small = svg.find(r#"id="piece_Front_s34""#).expect("size 34 in output");
@@ -1002,8 +1019,7 @@ mod tests {
     fn size_layout_packs_only_that_size() {
         let input_dom = Document::parse(crate::piece_extractor::tests::MULTISIZE_HANDOFF_SVG)
             .expect("multisize fixture should parse");
-        // Nested in the settings must not matter for a single size.
-        let settings_json = multisize_settings_json("nested");
+        let settings_json = multisize_settings_json();
         let init = do_initialize_layout(&settings_json, Some(&input_dom))
             .expect("initialize_layout should succeed");
 
@@ -1015,6 +1031,8 @@ mod tests {
                     input_dom: &input_dom,
                     initial_layout_dom: &init.initial_dom,
                     layout_h_px: init.h_px,
+                    // Nested must not matter for a single size.
+                    nested_multisize: true,
                 },
                 size,
                 &mut progress,
@@ -1036,6 +1054,7 @@ mod tests {
                 input_dom: &input_dom,
                 initial_layout_dom: &init.initial_dom,
                 layout_h_px: init.h_px,
+                nested_multisize: false,
             },
             "99",
             &mut progress,
@@ -1064,40 +1083,57 @@ mod tests {
         } // for child
     } // fn collect_points_for_test
 
-    // @brief An "All sizes" DXF-ASTM export of a Nested or Marker layout writes graded nests and the `.rul` file.
-    #[test]
-    fn multisize_layout_exports_graded_nests() {
-        for multisize_layout in ["nested", "marker"] {
-            let layout = process_multisize(multisize_layout);
-            let input = Document::parse(crate::piece_extractor::tests::MULTISIZE_HANDOFF_SVG).expect("fixture parses");
-            let style = crate::exports::DxfStyleInfo {
-                grading: Some(crate::exports::DxfGradingSource {
-                    input,
-                    sizes: vec!["34".to_string(), "36".to_string()],
-                    base_size: "36".to_string(),
-                }),
-                ..crate::exports::DxfStyleInfo::default()
-            };
-            let path = std::env::temp_dir().join(format!("graded_{multisize_layout}_{}.dxf", std::process::id()));
-            let warnings = crate::exports::do_export_dxf(&layout.output_doc, &path.to_string_lossy(), false, &style, &mut |_| {})
-                .expect("graded export succeeds");
-            let dxf = std::fs::read_to_string(&path).expect("DXF written");
-            let rul = std::fs::read_to_string(path.with_extension("rul")).expect("rule file beside the DXF");
-            let _ = std::fs::remove_file(&path);
-            let _ = std::fs::remove_file(path.with_extension("rul"));
+    // @brief Write a DXF-ASTM export of `layout` to a temp file named `tag`.
+    // @return (warnings, DXF text, `.rul` text when the export wrote one, file stem).
+    fn export_dxf_for_test(
+        layout: &ProcessLayoutResult,
+        tag: &str,
+        grading: Option<crate::exports::DxfGradingSource>,
+    ) -> (Vec<String>, String, Option<String>, String) {
+        let style = crate::exports::DxfStyleInfo { grading, ..crate::exports::DxfStyleInfo::default() };
+        let stem = format!("{tag}_{}", std::process::id());
+        let path = std::env::temp_dir().join(format!("{stem}.dxf"));
+        let warnings = crate::exports::do_export_dxf(&layout.output_doc, &path.to_string_lossy(), false, &style, &mut |_| {})
+            .expect("DXF export succeeds");
+        let dxf = std::fs::read_to_string(&path).expect("DXF written");
+        let rul = std::fs::read_to_string(path.with_extension("rul")).ok();
+        let _ = std::fs::remove_file(&path);
+        let _ = std::fs::remove_file(path.with_extension("rul"));
+        (warnings, dxf, rul, stem)
+    } // fn export_dxf_for_test
 
-            assert!(warnings.is_empty(), "{multisize_layout}: {warnings:?}");
-            let table = format!("graded_{multisize_layout}_{}", std::process::id());
-            assert!(dxf.contains("Sample Size:36"), "{multisize_layout}: sample size");
-            assert!(dxf.contains(&format!("Grade Rule Table:{table}")), "{multisize_layout}: table name");
-            assert!(rul.contains(&format!("GRADE RULE TABLE:{table}")) && rul.contains("SIZE LIST:34 36"), "{rul}");
-            // Each size of each piece is one block; one grade reference line per block.
-            let lines: Vec<&str> = dxf.lines().map(str::trim).collect();
-            let reference_lines = lines.windows(4).filter(|w| w[0] == "0" && w[1] == "LINE" && w[2] == "8" && w[3] == "5").count();
-            assert_eq!(reference_lines, 4, "{multisize_layout}: 2 pieces x 2 sizes");
-            assert!(rul.lines().any(|l| l.starts_with("RULE: DELTA 1 ")), "{rul}");
-        } // for each multisize layout
-    } // multisize_layout_exports_graded_nests
+    // @brief The Base Size tab exports the base size with `# n` texts and the `.rul` file;
+    // a size tab exports one ungraded size.
+    #[test]
+    fn base_size_tab_exports_grade_rules() {
+        let input = Document::parse(crate::piece_extractor::tests::MULTISIZE_HANDOFF_SVG).expect("fixture parses");
+        let grading = crate::exports::DxfGradingSource {
+            input,
+            sizes: vec!["34".to_string(), "36".to_string()],
+            base_size: "36".to_string(),
+        };
+        let (warnings, dxf, rul, stem) = export_dxf_for_test(&process_multisize_size("36"), "base_size", Some(grading));
+        assert!(warnings.is_empty(), "{warnings:?}");
+        let lines: Vec<&str> = dxf.lines().map(str::trim).collect();
+        assert!(lines.contains(&"Sample Size:36"), "sample size");
+        assert!(lines.contains(&format!("Grade Rule Table:{stem}").as_str()), "table name");
+        // One block per piece, all of the base size; one grade reference line per piece.
+        let sizes: Vec<&str> = lines.iter().filter_map(|l| l.strip_prefix("Size Name:")).collect();
+        assert_eq!(sizes, vec!["36", "36"]);
+        let reference_lines = lines.windows(4).filter(|w| w[0] == "0" && w[1] == "LINE" && w[2] == "8" && w[3] == "5").count();
+        assert_eq!(reference_lines, 2, "one layer 5 line per piece");
+        assert!(lines.contains(&"# 1"), "grade rule identifiers");
+        let rul = rul.expect("rule file beside the DXF");
+        assert!(rul.contains(&format!("GRADE RULE TABLE:{stem}")) && rul.contains("SIZE LIST:34 36"), "{rul}");
+        assert!(rul.lines().any(|l| l.starts_with("RULE: DELTA 1 ")), "{rul}");
+
+        let (warnings, dxf, rul, _) = export_dxf_for_test(&process_multisize_size("34"), "size_tab", None);
+        assert!(warnings.is_empty(), "{warnings:?}");
+        let lines: Vec<&str> = dxf.lines().map(str::trim).collect();
+        assert!(lines.contains(&"Sample Size:") && lines.contains(&"Grade Rule Table:"), "blank grading identifiers");
+        assert!(!lines.iter().any(|l| l.starts_with("# ")), "no grade rule identifiers");
+        assert!(rul.is_none(), "no rule file for a size tab");
+    } // base_size_tab_exports_grade_rules
 
     // @brief Real multisize pieces: jacket2_40-146.sm2d with gost_man_ru.smms, 8 pieces
     // in 26 sizes (220-720), base size 500. Saved from SeamlyLayout, so the piece-sets
@@ -1148,10 +1184,9 @@ mod tests {
         } // for child
     } // fn collect_sizes_for_test
 
-    // @brief Lay out the jacket2 handoff on a fabric roll of the given size (inches).
-    fn process_jacket2(multisize_layout: &str, width_in: f64, length_in: f64) -> ProcessLayoutResult {
-        let (input_dom, _) = jacket2_handoff();
-        let settings_json = serde_json::json!({
+    // @brief Fabric roll settings for jacket2, in inches.
+    fn jacket2_settings_json(width_in: f64, length_in: f64) -> String {
+        serde_json::json!({
             "unit": "in",
             "mediaType": "fabric",
             "paperType": "roll",
@@ -1163,10 +1198,15 @@ mod tests {
             "marginBottom": 0.5,
             "pieceGap": 0.125,
             "layoutMode": "alongGrainline",
-            "multisizeLayout": multisize_layout,
             "tileSize": "Letter",
             "tileOrientation": "Portrait"
-        }).to_string();
+        }).to_string()
+    } // fn jacket2_settings_json
+
+    // @brief Lay out the jacket2 handoff as the Nested tab (`nested`) or the Marker tab.
+    fn process_jacket2(nested: bool, width_in: f64, length_in: f64) -> ProcessLayoutResult {
+        let (input_dom, _) = jacket2_handoff();
+        let settings_json = jacket2_settings_json(width_in, length_in);
         let init = do_initialize_layout(&settings_json, Some(&input_dom))
             .expect("initialize_layout should succeed");
 
@@ -1177,10 +1217,32 @@ mod tests {
                 input_dom: &input_dom,
                 initial_layout_dom: &init.initial_dom,
                 layout_h_px: init.h_px,
+                nested_multisize: nested,
             },
             &mut progress,
         ).expect("process_layout should succeed on the jacket2 handoff")
     } // fn process_jacket2
+
+    // @brief Lay out one size of the jacket2 handoff, as a size tab or the Base Size tab.
+    fn process_jacket2_size(size: &str) -> ProcessLayoutResult {
+        let (input_dom, _) = jacket2_handoff();
+        let settings_json = jacket2_settings_json(60.0, 300.0);
+        let init = do_initialize_layout(&settings_json, Some(&input_dom))
+            .expect("initialize_layout should succeed");
+
+        let mut progress = |_pct: i32, _status: Option<&str>| {};
+        do_process_size_layout(
+            ProcessLayoutArgs {
+                settings_json: &settings_json,
+                input_dom: &input_dom,
+                initial_layout_dom: &init.initial_dom,
+                layout_h_px: init.h_px,
+                nested_multisize: false,
+            },
+            size,
+            &mut progress,
+        ).expect("size layout should succeed on the jacket2 handoff")
+    } // fn process_jacket2_size
 
     // @brief The jacket2 handoff reads as one multisize pattern: 8 piece-sets, 208 pieces, 26 sizes.
     #[test]
@@ -1197,7 +1259,7 @@ mod tests {
     // @brief Nested packs the 8 piece-sets, every size stacked inside its set.
     #[test]
     fn jacket2_nested_packs_eight_piece_sets() {
-        let nested = process_jacket2("nested", 60.0, 300.0);
+        let nested = process_jacket2(true, 60.0, 300.0);
         assert!(nested.unplaced_labels.is_empty(), "unplaced: {:?}", nested.unplaced_labels);
         assert_eq!(placed_count(&nested), 8, "Nested: one unit per piece");
         let svg = nested.output_doc.to_string();
@@ -1207,7 +1269,7 @@ mod tests {
     // @brief Marker packs every size of every piece as its own unit, numbered by its piece-set.
     #[test]
     fn jacket2_marker_places_every_size() {
-        let marker = process_jacket2("marker", 60.0, 1500.0);
+        let marker = process_jacket2(false, 60.0, 1500.0);
         assert!(marker.unplaced_labels.is_empty(), "unplaced: {:?}", marker.unplaced_labels);
         assert_eq!(placed_count(&marker), 208, "Marker: pieces x sizes");
         let svg = marker.output_doc.to_string();
@@ -1220,8 +1282,8 @@ mod tests {
     // The installed jacket2 hides every piece label and grainline, so all 8 pieces are listed.
     #[test]
     fn jacket2_missing_piece_data_lists_each_piece_once() {
-        for (multisize_layout, length_in) in [("nested", 300.0), ("marker", 1500.0)] {
-            let layout = process_jacket2(multisize_layout, 60.0, length_in);
+        let layouts = [("nested", process_jacket2(true, 60.0, 300.0)), ("base size", process_jacket2_size(JACKET2_BASE_SIZE))];
+        for (tab, layout) in layouts {
             let text = crate::exports::dxf_missing_piece_data_message(&layout.output_doc).expect("converts");
             let mut pieces: Vec<&str> =
                 text.lines().filter_map(|l| l.strip_prefix("\u{2022} ")).map(|l| l.split(':').next().unwrap()).collect();
@@ -1229,58 +1291,47 @@ mod tests {
             assert_eq!(
                 pieces,
                 vec!["Detail (3)", "Detail (4)", "Detail (5)", "Detail (6)", "Detail (7)", "Detail (8)", "Комір", "Подборт"],
-                "{multisize_layout}: {text}"
+                "{tab}: {text}"
             );
-        } // for each multisize layout
+        } // for each tab
     } // jacket2_missing_piece_data_lists_each_piece_once
 
-    // @brief An "All sizes" DXF-ASTM export of the Nested layout: every size of a piece
-    // has one `Piece Name:`, non-ASCII as `\U+XXXX`, and repeated names are numbered.
+    // @brief The Base Size DXF-ASTM export: one block per piece, `Piece Name:` non-ASCII as
+    // `\U+XXXX`, repeated names numbered, and `# n` texts on every piece that grades.
     #[test]
-    fn jacket2_all_sizes_export_names_every_size_alike() {
-        let layout = process_jacket2("nested", 60.0, 300.0);
+    fn jacket2_base_size_export_names_and_grades_each_piece() {
+        let layout = process_jacket2_size(JACKET2_BASE_SIZE);
         let (input, sizes) = jacket2_handoff();
-        let style = crate::exports::DxfStyleInfo {
-            grading: Some(crate::exports::DxfGradingSource { input, sizes, base_size: JACKET2_BASE_SIZE.to_string() }),
-            ..crate::exports::DxfStyleInfo::default()
-        };
-        let path = std::env::temp_dir().join(format!("jacket2_all_sizes_{}.dxf", std::process::id()));
-        let warnings = crate::exports::do_export_dxf(&layout.output_doc, &path.to_string_lossy(), false, &style, &mut |_| {})
-            .expect("all sizes export succeeds");
-        let dxf = std::fs::read_to_string(&path).expect("DXF written");
-        let rul = std::fs::read_to_string(path.with_extension("rul"));
-        let _ = std::fs::remove_file(&path);
-        let _ = std::fs::remove_file(path.with_extension("rul"));
+        let grading = crate::exports::DxfGradingSource { input, sizes, base_size: JACKET2_BASE_SIZE.to_string() };
+        let (warnings, dxf, rul, _) = export_dxf_for_test(&layout, "jacket2_base_size", Some(grading));
 
         // Piece Name: system text, one per written block.
         let lines: Vec<&str> = dxf.lines().map(str::trim).collect();
-        let names: Vec<&str> = lines.iter().filter_map(|l| l.strip_prefix("Piece Name:")).collect();
+        let mut names: Vec<&str> = lines.iter().filter_map(|l| l.strip_prefix("Piece Name:")).collect();
         assert!(names.iter().all(|n| n.is_ascii()), "Piece Name: is 7-bit ASCII");
+        names.sort_unstable();
         let komir = r"\U+041A\U+043E\U+043C\U+0456\U+0440";
-        assert!(names.contains(&komir), "Комір as AutoCAD escapes: {names:?}");
-        assert!(!names.contains(&"Detail"), "no unnumbered Detail: {names:?}");
-        for n in 3..=8 {
-            assert!(names.contains(&format!("Detail ({n})").as_str()), "Detail ({n}) written: {names:?}");
-        } // for each Detail piece
-        assert!(names.iter().all(|n| !n.starts_with("piece-")), "no block id as a piece name: {names:?}");
+        let podbort = r"\U+041F\U+043E\U+0434\U+0431\U+043E\U+0440\U+0442";
+        assert_eq!(
+            names,
+            vec!["Detail (3)", "Detail (4)", "Detail (5)", "Detail (6)", "Detail (7)", "Detail (8)", komir, podbort],
+            "one block per piece"
+        );
+        let sizes: Vec<&str> = lines.iter().filter_map(|l| l.strip_prefix("Size Name:")).collect();
+        assert!(sizes.len() == 8 && sizes.iter().all(|s| *s == JACKET2_BASE_SIZE), "{sizes:?}");
+        assert!(lines.contains(&"Sample Size:500"), "sample size");
 
         // This handoff gives four Detail pieces different turn points in different
-        // sizes, so they fall back to the sample size. Warnings name the piece as
-        // the user wrote it.
-        let fallback = [3, 6, 7, 8];
-        let expected: Vec<String> = fallback
+        // sizes, so they stay ungraded. Warnings name the piece as the user wrote it.
+        let expected: Vec<String> = [3, 6, 7, 8]
             .iter()
-            .map(|n| format!("Detail ({n}): not graded, the sizes have different turn points. Only size 500 is written."))
+            .map(|n| format!("Detail ({n}): not graded, the sizes have different turn points."))
             .collect();
         assert_eq!(warnings, expected);
-        // A graded piece writes all 26 sizes under one name; a piece that falls back writes size 500 only.
-        let podbort = r"\U+041F\U+043E\U+0434\U+0431\U+043E\U+0440\U+0442";
-        for (name, count) in [(podbort, 26), (komir, 26), ("Detail (4)", 26), ("Detail (5)", 26)] {
-            assert_eq!(names.iter().filter(|n| **n == name).count(), count, "{name}");
-        } // for each graded piece
-        for n in fallback {
-            assert_eq!(names.iter().filter(|name| **name == format!("Detail ({n})")).count(), 1, "Detail ({n})");
-        } // for each fallen-back piece
-        assert!(rul.is_ok(), "four graded pieces write the rule table");
-    } // jacket2_all_sizes_export_names_every_size_alike
+        let reference_lines = lines.windows(4).filter(|w| w[0] == "0" && w[1] == "LINE" && w[2] == "8" && w[3] == "5").count();
+        assert_eq!(reference_lines, 4, "one layer 5 line per graded piece");
+        assert!(lines.contains(&"# 1"), "grade rule identifiers");
+        let rul = rul.expect("four graded pieces write the rule table");
+        assert!(rul.contains("SAMPLE SIZE:500") && rul.contains("NUMBER OF SIZES:26"), "{rul}");
+    } // jacket2_base_size_export_names_and_grades_each_piece
 } // mod tests

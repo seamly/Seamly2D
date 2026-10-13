@@ -34,6 +34,9 @@
 // "Export all tabs" item leads the menu.  While checked, every format writes
 // one file per tab instead of one file for the selected tab.
 //
+// With dxfEnabled false (Export menu, Marker or Nested tab shown), the DXF-ASTM
+// items are disabled and a note names the tabs DXF-ASTM exports.
+//
 // G-Code and 3D Mesh (3MF) are paid formats. Each item stays hidden until
 // AppController.isPaidExportAvailable() reports its module as usable.
 
@@ -101,6 +104,9 @@ Menu {
 
     // @brief Check state of "Export all tabs".
     property bool exportAllTabs: false
+
+    // @brief False disables the DXF-ASTM items: the shown tab holds every size.
+    property bool dxfEnabled: true
 
     // @brief Emitted when the user toggles "Export all tabs".
     // @param checked New check state.
@@ -186,18 +192,26 @@ Menu {
         height: visible ? implicitHeight : 0
     } // MenuSeparator after exportAllTabsItem
 
+    // Hidden Menu items keep their height, so collapse them when hidden.
+    // A disabled item shows no tooltip, so this note explains the disabled DXF-ASTM items.
+    MenuItem {
+        text: "DXF-ASTM: select Base Size or a size tab"
+        visible: root.layoutReady && !root.dxfEnabled
+        height: visible ? implicitHeight : 0
+        enabled: false
+    } // MenuItem DXF-ASTM note
+
     MenuItem {
         text: root.showDxfVariants ? "DXF-ASTM (R12)" : "DXF-ASTM"
-        enabled: root.layoutReady // Phase 9: enabled when layout is ready
+        enabled: root.layoutReady && root.dxfEnabled
         onTriggered: root.exportDxfAstmRequested()
     } // MenuItem DXF-ASTM (R12)
 
-    // Hidden Menu items keep their height, so collapse them when hidden.
     MenuItem {
         text: "DXF-ASTM (R13)"
         visible: root.showDxfVariants
         height: visible ? implicitHeight : 0
-        enabled: root.layoutReady
+        enabled: root.layoutReady && root.dxfEnabled
         onTriggered: root.exportDxfAstmR13Requested()
     } // MenuItem DXF-ASTM (R13)
 
@@ -205,7 +219,7 @@ Menu {
         text: "DXF-ASTM (CLO3D)"
         visible: root.showDxfVariants
         height: visible ? implicitHeight : 0
-        enabled: root.layoutReady
+        enabled: root.layoutReady && root.dxfEnabled
         onTriggered: root.exportDxfAstmClo3dRequested()
     } // MenuItem DXF-ASTM (CLO3D)
 

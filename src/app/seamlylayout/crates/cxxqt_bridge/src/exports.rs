@@ -652,7 +652,7 @@ pub struct DxfStyleInfo {
     // `Size Name:` of a piece without `data-size`: the individual pattern's
     // `data-sample-size`. None or blank when the input has none.
     pub sample_size: Option<String>,
-    // Multisize "All sizes" export: grade the pieces into graded nests. None = ungraded.
+    // Multisize Base Size export: give the base size pieces their grade rules. None = ungraded.
     pub grading: Option<DxfGradingSource>,
 }
 

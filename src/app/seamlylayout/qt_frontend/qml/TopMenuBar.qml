@@ -51,6 +51,10 @@ ToolBar {
     // @brief Check state of Export > "Export all tabs".
     property bool exportAllTabs: false
 
+    // @brief True when Export > DXF-ASTM can run: the shown tab holds one size,
+    //        or "Export all tabs" writes the tabs that do.
+    property bool dxfExportEnabled: true
+
     // @brief Label text of the imported SVG: "text", "pathsOnly" or "noLabels".
     // Bound by Main.qml from appController.labelTextState.
     property string labelTextState: "noLabels"
@@ -227,6 +231,7 @@ ToolBar {
             pdfTiledEnabled: root.pdfTiledExportEnabled
             showExportAllTabs: root.hasLayoutTabs
             exportAllTabs:   root.exportAllTabs
+            dxfEnabled:      root.dxfExportEnabled
             onExportAllTabsToggled: function(checked) { root.exportAllTabsToggled(checked) }
             svgModeSubmenu:  true
             labelTextState:  root.labelTextState
