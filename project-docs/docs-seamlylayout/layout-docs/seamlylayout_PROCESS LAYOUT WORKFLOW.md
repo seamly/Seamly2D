@@ -71,14 +71,15 @@ Updates `<svg height>` and background `<rect height>`. Applied only when `trimme
 
 Every multisize tab sets `ProcessLayoutArgs::extend_media`. An individual pattern does not.
 
+- Width first: `packing::required_bin_width` is the widest piece, each piece in its narrowest trial angle. A wider value widens the bin.
 - `packing::pack_polygons_extending` packs at the media length first.
-- While a piece that fits the media width stays unplaced, the bin grows by the stacked height of the unplaced pieces. The pack runs again.
-- The loop ends: a bin as tall as every fitting piece stacked holds them all.
-- A piece wider than the media at every trial angle stays unplaced. The tab warning names it.
+- While a piece stays unplaced, the bin grows by the stacked height of the unplaced pieces. The pack runs again.
+- The loop ends: a bin as tall as every piece stacked holds them all. No piece is left out.
+- `set_content_width` widens the canvas to the right. contentRect keeps its x; both side margins are kept.
 - `trim_bottom` sets the canvas height. Roll and fabric end at the lowest piece. A sheet ends at the lowest piece, but not above its own length.
-- Canvas, Adjust Mode and exports read the height from `layout_dom`. Exception: the paper-sheet PDF export packs the pieces again on sheets of the set size.
-- Tiled paper does not extend.
-- Example: jacket2 Marker, 208 pieces, 48 in paper roll: the roll grows from 500 in to about 798 in.
+- Canvas, Adjust Mode and exports read the size from `layout_dom`. Exception: the paper-sheet PDF export packs the pieces again on sheets of the set size.
+- Tiled paper does not extend: its candidate-width search sets the width.
+- Example: jacket2 Marker, 208 pieces, 48 in paper roll: the roll grows from 500 in to about 798 in. On a 10 in roll it also widens.
 
 ## Export Preparation
 

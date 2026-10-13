@@ -1592,11 +1592,11 @@ impl qobject::AppController {
         self.as_mut().set_is_layout_ready(true);
 
         if !problems.is_empty() {
-            // Each tab extends its media in length, so only a piece wider than the media is left out.
+            // A non-tiled tab extends its media until every piece fits, so the
+            // problems come from tiled paper or from a tab that failed.
             let msg = format!(
                 "Some layouts left pieces out:\n\n{}\n\n\
-                 The remaining pieces were laid out. The media grows in length, not in width: \
-                 use wider media or smaller side margins.",
+                 The remaining pieces were laid out. Try a larger sheet size, reduce the piece gap or margins, or remove pieces.",
                 problems.join("\n")
             );
             self.as_mut().layout_warning(cxx_qt_lib::QString::from(msg.as_str()));

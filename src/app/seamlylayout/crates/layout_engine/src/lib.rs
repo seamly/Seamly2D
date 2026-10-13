@@ -249,6 +249,23 @@ pub fn pack_maxrects_multi_angle_extending(
     } // loop until every piece that fits the width is placed
 } // fn pack_maxrects_multi_angle_extending
 
+// @brief Smallest bin width that holds every piece, each in its narrowest
+// trial angle.  Extended media widens to it, so no piece is too wide.
+//
+// @return 0 when `rects` is empty.
+pub fn required_bin_width(rects: &[Rect], trial_angles_deg: &[u16]) -> u32 {
+    rects
+        .iter()
+        .filter_map(|r| {
+            piece_trial_set(trial_angles_deg, r.free_rotation)
+                .into_iter()
+                .map(|deg| rotated_rect_dims(r.w, r.h, deg).0)
+                .min()
+        })
+        .max()
+        .unwrap_or(0)
+} // fn required_bin_width
+
 // @brief Trial angles for one piece: the layout mode's set, then, for a
 // free-rotation piece, the quarter turns the set lacks.  Mode angles come
 // first, so ties keep the mode's preferred orientation.
@@ -713,4 +730,22 @@ mod tests {
         assert!(placed[0].rotation_deg == 90 || placed[0].rotation_deg == 270);
         assert!(h >= 20, "bin height grows to the turned piece, got {h}");
     } // extending_turns_free_rotation_piece
+
+    // @brief The required width is the widest piece in its narrowest trial angle.
+    #[test]
+    fn required_bin_width_uses_narrowest_angle() {
+        let rects = [Rect::new(8, 4), Rect::new(20, 6)];
+        assert_eq!(required_bin_width(&rects, &[0, 180]), 20);
+        // A free-rotation piece may turn: 20x6 needs only 6.
+        let free = [Rect::new(8, 4), Rect::new(20, 6).with_free_rotation(true)];
+        assert_eq!(required_bin_width(&free, &[0, 180]), 8);
+        assert_eq!(required_bin_width(&[], &[0]), 0);
+
+        // With the bin widened to it, every piece is placed.
+        let w = required_bin_width(&rects, &[0]);
+        let (placed, _free, unplaced, h) =
+            pack_maxrects_multi_angle_extending(w, 5, 0, &rects, &[0], None);
+        assert!(unplaced.is_empty());
+        assert!(validate_placements(w, h, &placed));
+    } // required_bin_width_uses_narrowest_angle
 }

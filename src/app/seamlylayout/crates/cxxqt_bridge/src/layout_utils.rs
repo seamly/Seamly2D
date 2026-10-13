@@ -24,7 +24,7 @@ use layout_tiling::{
 use crate::piece_extractor::{
     extract_piece_rects_and_polygons, hoist_layout_units, keep_size, set_free_rotation_without_grainline,
 };
-use crate::layout_assembler::{create_layout, create_initial_layout_dom, trim_bottom};
+use crate::layout_assembler::{create_layout, create_initial_layout_dom, set_content_width, trim_bottom};
 use crate::save_debug_dom;
 use crate::log_to_file;
 
@@ -145,9 +145,9 @@ pub struct ProcessLayoutArgs<'a> {
     /// Multisize only: `true` packs each piece-set (one piece in every size) as one
     /// unit (Nested tab); `false` packs every size of every piece alone (Marker tab).
     pub nested_multisize: bool,
-    /// `true` extends a sheet, roll or fabric past its length until every piece
-    /// that fits its width is placed (multisize tabs).  `false` leaves out a piece
-    /// that does not fit.  Tiled paper ignores it.
+    /// `true` extends a sheet, roll or fabric until every piece is placed: wider
+    /// for the widest piece, then longer (multisize tabs).  `false` leaves out a
+    /// piece that does not fit.  Tiled paper ignores it.
     pub extend_media: bool,
 }
 
@@ -206,7 +206,12 @@ pub fn do_process_layout(
         .and_then(|s| s.parse::<u32>().ok())
         .unwrap_or(0);
     let mb_px: u32 = (layout_h_px - mt_px) - bin_h;
-    // margin right (mr_px) isn't used in these calculations
+    // margin right: kept when extended media widens the canvas
+    let mr_px: u32 = args.initial_layout_dom.root.attributes
+        .get("width")
+        .and_then(|s| s.parse::<u32>().ok())
+        .unwrap_or(0)
+        .saturating_sub(ml_px + bin_w);
 
     // --- 2 clone input_dom for piece pre-processing ---
     let mut input_dom_clone = args.input_dom.clone();
@@ -331,6 +336,14 @@ pub fn do_process_layout(
     // (then unused area) wins.  Non-tiled paths use a single pack_maxrects call
     // against the fixed bin from the initial layout DOM.
     let is_tiled = settings.media_type == "paper" && settings.paper_type == "tiled";
+
+    // Extended media widens to the widest piece, so no piece is too wide.
+    // Tiled paper never extends: its candidate-width search sets the width.
+    let pack_bin_w = if args.extend_media && !is_tiled {
+        bin_w.max(packing::required_bin_width(&rects, &trial_angles_deg))
+    } else {
+        bin_w
+    }; // pack_bin_w
 
     // Working values produced by the chosen packing branch:
     //   placements       — piece placements in bin-local pixel coordinates
@@ -485,11 +498,12 @@ pub fn do_process_layout(
         // piece too large for the sheet, or one that runs out of room, no longer
         // aborts the whole layout.  The layout renders the pieces that fit and
         // the unplaced piece ids are surfaced to the user as a warning popup.
-        // Extended media grows past its length instead, so only a piece wider
-        // than the media is left out; `packed_bin_h` is the height it grew to.
+        // Extended media is already wide enough for every piece and grows past
+        // its length instead, so it leaves no piece out; `packed_bin_h` is the
+        // height it grew to.
         let (placements, _created_rects, unplaced_ids, packed_bin_h) = if args.extend_media {
             packing::pack_polygons_extending(
-                bin_w,
+                pack_bin_w,
                 bin_h,
                 gap_px,
                 &polygons,
@@ -519,14 +533,15 @@ pub fn do_process_layout(
             .collect();
 
         log_to_file(&format!(
-            "[process_layout] non-tiled pack returned in {} ms with {} placements, {} unplaced: {:?}; bin_h {} -> {}",
-            t_pack.elapsed().as_millis(), placements.len(), unplaced_labels.len(), unplaced_labels, bin_h, packed_bin_h,
+            "[process_layout] non-tiled pack returned in {} ms with {} placements, {} unplaced: {:?}; bin {}x{} -> {}x{}",
+            t_pack.elapsed().as_millis(), placements.len(), unplaced_labels.len(), unplaced_labels,
+            bin_w, bin_h, pack_bin_w, packed_bin_h,
         ));
 
         progress_fn(60, None); // packing complete
 
         // Non-tiled: keep the initial canvas and margins.  Step 7 sets the
-        // canvas height when the media was extended.
+        // canvas size when the media was extended.
         (placements, args.initial_layout_dom.clone(), packed_bin_h, ml_px, mt_px, mb_px, layout_h_px, unplaced_labels)
     }; // let (placements, ...) = if is_tiled
 
@@ -558,10 +573,20 @@ pub fn do_process_layout(
     let max_bin_bottom = placements.iter().map(|p| p.y + p.h).max().unwrap_or(0);
     // compute the blank space below the lowest piece
     let blank_bottom = work_bin_h.saturating_sub(max_bin_bottom);
-    // The packer grew the bin past the media length.  Tiled paper never extends.
-    let extended = !is_tiled && work_bin_h > bin_h;
+    // Extended media: wider than the media for the widest piece, or longer
+    // because the packer grew the bin.  Tiled paper never extends.
+    let widened = pack_bin_w > bin_w;
+    let extended = !is_tiled && (widened || work_bin_h > bin_h);
 
-    // 7a. Content height the canvas ends at.  Roll and fabric end at the lowest
+    // 7a. Widen the canvas to the right; both side margins are kept.
+    if widened {
+        set_content_width(&mut output_doc, pack_bin_w, work_ml_px, mr_px);
+        log_to_file(&format!(
+            "[process_layout] media widened: content width {bin_w} px -> {pack_bin_w} px"
+        ));
+    } // if widened
+
+    // 7b. Content height the canvas ends at.  Roll and fabric end at the lowest
     // piece when the blank space below it is large.  Extended media always ends
     // at the lowest piece, but an extended sheet keeps at least its own length.
     let fitted_content_h = if extended && !settings.is_roll_form() {
@@ -582,7 +607,7 @@ pub fn do_process_layout(
     } // if fitted_content_h
 
     if blank_bottom > MIN_THRESHOLD_PX {
-        // 7b trim tiled layout
+        // 7c trim tiled layout
         // Only runs when media is paper and paper_type is tiled — matches the
         // <g id="tiledRects"> structure produced by create_initial_tiled_layout_dom.
         // Reuses the is_tiled flag from the packing branch above.
@@ -641,7 +666,7 @@ pub fn do_process_layout(
         } // end if is_tiled
     } // end if blank_bottom > MIN_THRESHOLD_PX
 
-    // 7c. Flatten output_doc ---
+    // 7d. Flatten output_doc ---
     // create_layout() sets transform="translate(tx ty)" on each piece group,
     // flattening is required for DXF export which needs absolute coordinates.
     svg_dom::flatten_dom(&mut output_doc);
@@ -1354,9 +1379,15 @@ mod tests {
         assert_eq!(svg_h, result.layout_h_px, "svg height");
         assert_eq!(attr("backgroundRect", "height"), svg_h, "backgroundRect height");
 
+        let svg_w: u32 = doc.root.attributes.get("width").and_then(|v| v.parse().ok()).expect("svg width");
+        assert_eq!(attr("backgroundRect", "width"), svg_w, "backgroundRect width");
+
+        let (content_x, content_w) = (attr("contentRect", "x"), attr("contentRect", "width"));
         let (content_y, content_h) = (attr("contentRect", "y"), attr("contentRect", "height"));
         let bbox: serde_json::Value = serde_json::from_str(&result.bbox_json).expect("valid JSON");
         for piece in bbox["pieces"].as_array().expect("pieces array") {
+            let right = piece["x"].as_u64().unwrap() + piece["w"].as_u64().unwrap();
+            assert!(right <= u64::from(content_x + content_w), "{} ends right of contentRect", piece["label"]);
             let bottom = piece["y"].as_u64().unwrap() + piece["h"].as_u64().unwrap();
             assert!(bottom <= u64::from(content_y + content_h), "{} ends below contentRect", piece["label"]);
         } // for each placed piece
@@ -1410,6 +1441,38 @@ mod tests {
         let content_h = assert_canvas_holds_pieces(&marker);
         assert!(content_h > 47 * 96, "the sheet grows past its length, content height {content_h} px");
     } // jacket2_marker_extends_paper_sheet
+
+    // @brief Marker on a 10 in paper roll: the pieces are wider than the roll.
+    // The roll widens to the right for the widest piece, keeps both side margins,
+    // then grows in length until every piece is placed.
+    #[test]
+    fn jacket2_marker_widens_narrow_roll() {
+        let settings_json = serde_json::json!({
+            "unit": "in",
+            "mediaType": "paper",
+            "paperType": "roll",
+            "rollWidth": 10.0,
+            "marginLeft": 0.5,
+            "marginRight": 0.25,
+            "marginTop": 0.5,
+            "marginBottom": 0.5,
+            "pieceGap": 0.125,
+            "layoutMode": "alongGrainline"
+        }).to_string();
+        let marker = process_jacket2_extended(&settings_json);
+        assert!(marker.unplaced_labels.is_empty(), "unplaced: {:?}", marker.unplaced_labels);
+        assert_eq!(placed_count(&marker), 208, "Marker: pieces x sizes");
+        assert_canvas_holds_pieces(&marker);
+
+        let doc = &marker.output_doc;
+        let attr = |id: &str, name: &str| -> u32 {
+            doc.get_attr_by_id(id, name).and_then(|v| v.parse().ok()).expect("frame attribute")
+        };
+        let (content_x, content_w) = (attr("contentRect", "x"), attr("contentRect", "width"));
+        assert_eq!(content_x, 48, "contentRect keeps its x: the roll grows to the right");
+        assert!(content_w > 888, "the roll widens past its 9.25 in (888 px) content width, got {content_w} px");
+        assert_eq!(attr("backgroundRect", "width"), 48 + content_w + 24, "both side margins kept");
+    } // jacket2_marker_widens_narrow_roll
 
     // @brief The DXF-ASTM warning dialog lists each piece once, by the name the user wrote.
     // The installed jacket2 hides every piece label and grainline, so all 8 pieces are listed.

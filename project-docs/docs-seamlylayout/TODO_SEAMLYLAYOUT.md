@@ -224,13 +224,41 @@ Decision (user, 2026-10-13): a layout cuts fabric, so the media grows past the 5
 - [x] Layout.25.2 Media types: paper sheet, paper roll (500 in default length), fabric
   - Roll and fabric end at the lowest piece. A sheet ends at the lowest piece, but not above its own length. Tiled paper does not extend
 - [x] Layout.25.3 A piece wider than the media width cannot fit at any height: leave it out and keep the warning
-  - The tab warning now says the media grows in length, not in width
+  - Replaced by Layout.71: the media widens, so no multisize piece is left out
 - [x] Layout.25.4 Canvas, Adjust Mode and exports use the extended height
   - Exception, unchanged: the paper-sheet PDF export packs the pieces again on sheets of the set size
 - [x] Layout.25.5 Tests: Rust pack with more pieces than one sheet holds → every piece placed, height grows; a piece that is too wide stays unplaced
   - `extending_*` (`layout_engine`), `pack_polygons_extending_grows_and_reports_too_wide`, `jacket2_marker_extends_paper_roll`, `jacket2_marker_extends_paper_sheet`
 - [x] Layout.25.6 Docs: layout workflow, `TEST_CHECKLIST.md`
 - [ ] Layout.25.7 User: on the next MSI, run `TEST_CHECKLIST.md` §7 "Media grows to fit"
+
+## [ ] Task Layout.71 — Multisize: widen the media for a piece wider than it
+
+Decision (user, 2026-10-13): on a multisize tab, a piece wider than the content rect widens it to the right; a piece longer than it lengthens it downwards (Layout.25). Splitting pieces is for individual patterns only (Layout.72).
+
+- [x] Layout.71.1 `layout_engine::required_bin_width`: widest piece, each in its narrowest trial angle; `layout_utils` widens the bin to it when `extend_media` is set. Tiled paper unchanged
+- [x] Layout.71.2 `layout_assembler::set_content_width`: SVG, `backgroundRect` and `contentRect` widths; contentRect keeps its x, both side margins kept
+- [x] Layout.71.3 Tab warning: the Layout.25 text "grows in length, not in width" removed; non-tiled tabs leave no piece out
+- [x] Layout.71.4 Tests: `required_bin_width_uses_narrowest_angle`, `set_content_width_keeps_margins`, `jacket2_marker_widens_narrow_roll` (10 in roll, 208 of 208)
+- [x] Layout.71.5 Docs: layout workflows
+- [ ] Layout.71.6 User: on the next MSI, jacket2, Paper Roll 10 in wide, Create Layout: no warning; every tab is wider than 10 in; Adjust Mode and Export SVG show the same width
+
+## [ ] Task Layout.72 — Individual pattern: a piece wider or longer than the media
+
+Decision (user, 2026-10-13): when a piece of an individual pattern is wider or longer than the media, a dialog asks the user to split the pieces or make the media bigger.
+
+- Dialog: names each piece and the side that does not fit. Radio buttons: "Split the pieces" (SVG, PDF, HPGL, EPS, PS, PNG, JPG: printing, cutting, pattern projector) or "Make the media bigger" (DXF). OK continues the layout. Cancel returns to the app with only 'Layout Settings' active.
+- Split rule: wider than the content width, and no allowed turn fits → vertical cut lines. Longer than the content height, media not roll-form (paper roll, fabric), and no allowed turn fits → horizontal cut lines. Tiled paper: no dialog.
+- Make the media bigger: same as a multisize tab (Layout.71, Layout.25).
+- Accepted recommendations (user, 2026-10-13): no seam allowance on the cut edge; n equal parts, n rounded up; label plus 2 match notches per cut edge; fabric is roll-form; the paper-sheet PDF export uses the same split; a piece that fits but runs out of room is still left out with a warning.
+
+- [ ] Layout.72.1 `geometry`: cut a closed or open polyline with a line; keep each vertex's source index; one region per part
+- [ ] Layout.72.2 `piece_divider.rs`: split a piece group into parts. Cut line and cut paths closed; seam line and internal paths open; notches, labels by position; grainline copied into a part without one. New `piece_label` "<name> part i of n, joins j"; 2 match notches per cut edge; `data-split-of`, `data-split-part`, `data-split-count`; ids `<id>_part<i>`
+- [ ] Layout.72.3 Pipeline: find oversized pieces after the pieces turn grain-up; split before they move to the origin. Same split in `sheets::build_sheet_export_inputs`
+- [ ] Layout.72.4 Bridge and QML: oversized-pieces check before the layout, dialog in `Main.qml`, Cancel state
+- [ ] Layout.72.5 DXF-ASTM: a part is its own block, `Piece Name:` "Front (1/2)", not graded, with a warning
+- [ ] Layout.72.6 Tests: Rust clip cases (square, U-shape, vertex on the cut line, open line), trousers leg on a narrow sheet, DXF-ASTM of a split piece
+- [ ] Layout.72.7 Docs: `SVG-DATA-ATTRIBUTES.md`, layout workflows, `TEST_CHECKLIST.md`
 
 ## [ ] Task Layout.26 — DXF-ASTM Missing Piece Data dialog: one readable line per piece
 

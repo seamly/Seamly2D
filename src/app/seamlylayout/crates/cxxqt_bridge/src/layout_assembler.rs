@@ -27,7 +27,8 @@
 //   - Case 1 — Roll or fabric (media_type=="fabric" OR paper_type=="roll"):
 //     `trim_bottom` shrinks svg height, backgroundRect height, and contentRect height
 //     to remove blank space below the last placed piece (> 48 px threshold).
-//   - Extended media (multisize tabs): `trim_bottom` sets the grown height.
+//   - Extended media (multisize tabs): `trim_bottom` sets the grown height,
+//     `set_content_width` the grown width.
 //   - Case 2 — Tiled: deferred; see docs/tiling-docs/TILING_REDUCTION_WORKFLOW.md.
 
 use std::u32;
@@ -384,6 +385,26 @@ pub fn trim_bottom(
     doc.set_attr_by_id("contentRect", "height", max_bin_bottom.to_string());
 } // fn trim_bottom
 
+// @brief Set the content rectangle width; the canvas follows, keeping both side margins.
+//
+// Extended media widens to the widest piece.  contentRect keeps its x, so the
+// layout grows to the right.
+//
+// New widths:
+//   svg / backgroundRect width = margin_left_px + content_w + margin_right_px
+//   contentRect width          = content_w
+pub fn set_content_width(
+    doc: &mut svg_dom::Document,
+    content_w: u32,
+    margin_left_px: u32,
+    margin_right_px: u32,
+) {
+    let new_doc_width = margin_left_px + content_w + margin_right_px;
+    doc.root.attributes.insert("width".to_string(), new_doc_width.to_string());
+    doc.set_attr_by_id("backgroundRect", "width", new_doc_width.to_string());
+    doc.set_attr_by_id("contentRect", "width", content_w.to_string());
+} // fn set_content_width
+
 // @brief Remove piece-fill color rects from an export copy of the layout SVG.
 //
 // `layout_dom` retains `<rect class="piece-fill">` rects inside each piece group
@@ -647,6 +668,18 @@ mod tests {
             "contentRect height with margins"
         );
     } // trim_bottom_with_margins
+
+    // @brief set_content_width widens contentRect and the canvas, keeping both side margins.
+    #[test]
+    fn set_content_width_keeps_margins() {
+        let mut base_doc = make_base_doc(200, 100);
+        // content 300, ml=24, mr=12 → svg and backgroundRect width = 336; contentRect x unchanged.
+        set_content_width(&mut base_doc, 300, 24, 12);
+        assert_eq!(base_doc.root.attributes.get("width").map(String::as_str), Some("336"));
+        assert_eq!(base_doc.get_attr_by_id("backgroundRect", "width"), Some("336"));
+        assert_eq!(base_doc.get_attr_by_id("contentRect", "width"), Some("300"));
+        assert_eq!(base_doc.get_attr_by_id("contentRect", "x"), Some("0"));
+    } // set_content_width_keeps_margins
 
     // @brief Rotated placement translates by rotated-AABB min, not upright origin.
     //

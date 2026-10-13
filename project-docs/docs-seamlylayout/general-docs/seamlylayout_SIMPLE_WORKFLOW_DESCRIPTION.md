@@ -189,9 +189,10 @@ The application workflow loop consists of:
      * "Size 34", "Size 36", …: each size alone, one unit per piece. The base size tab repeats the Base Size layout.
      * One tab per UI tick (`processNextTabLayout`); the progress popup names the tab: "Laying out Size 36 (5 of 6)…".
      * 'Adjust Layout' and 'Export' stay disabled until the last tab finishes.
-     * Every tab extends its sheet, roll or fabric in length until every piece is placed (`ProcessLayoutArgs::extend_media`).
-       * The canvas ends at the lowest piece. An extended sheet keeps at least its own length.
-       * Only a piece wider than the media is left out. Tiled paper does not extend.
+     * Every tab extends its sheet, roll or fabric until every piece is placed (`ProcessLayoutArgs::extend_media`).
+       * Wider: a piece wider than the media widens it to the right. Both side margins are kept.
+       * Longer: the media grows downwards. The canvas ends at the lowest piece. An extended sheet keeps at least its own length.
+       * No piece is left out. Tiled paper does not extend.
        * An individual pattern does not extend: a piece that does not fit is left out, and a warning names it.
      * One warning after the last tab lists every layout that left pieces out or failed.
      * Selecting a tab swaps that layout into the controller's layout fields; Adjust Layout and every export use the selected tab.
