@@ -426,7 +426,8 @@ fn hoist_matching_groups(doc: &mut svg_dom::Document, is_unit: fn(&Element) -> b
         let wrapper_transform = elem.attributes.get("transform").cloned().unwrap_or_default();
 
         let before = hoisted.len();
-        take_matching_groups(&mut elem, &wrapper_transform, is_unit, &mut hoisted);
+        let set_number = piece_set_number(&elem);
+        take_matching_groups(&mut elem, &wrapper_transform, set_number.as_deref(), is_unit, &mut hoisted);
         let took_pieces = hoisted.len() > before;
 
         // A wrapper that existed only to hold pieces is now empty — drop it so
@@ -455,13 +456,17 @@ fn hoist_matching_groups(doc: &mut svg_dom::Document, is_unit: fn(&Element) -> b
 // in document order.  Intermediate groups that end up with no element children
 // are dropped; ones that still hold content are kept.
 //
-// @param parent    Subtree root to strip pieces out of (mutated in place).
-// @param inherited Concatenated `transform` of every ancestor between the SVG
-//                  root and `parent`, inclusive; empty when there is none.
-// @param out       Accumulator receiving the removed piece elements.
+// @param parent     Subtree root to strip pieces out of (mutated in place).
+// @param inherited  Concatenated `transform` of every ancestor between the SVG
+//                   root and `parent`, inclusive; empty when there is none.
+// @param set_number `data-type-number` of the piece-set that holds `parent`, if any.
+//                   Each piece lifted out of it gets `data-set-number`, so the piece
+//                   number survives when the hoist dissolves the piece-set (Marker).
+// @param out        Accumulator receiving the removed piece elements.
 fn take_matching_groups(
     parent: &mut Element,
     inherited: &str,
+    set_number: Option<&str>,
     is_unit: fn(&Element) -> bool,
     out: &mut Vec<Element>,
 ) {
@@ -484,6 +489,10 @@ fn take_matching_groups(
             } else {
                 elem.attributes.insert("transform".to_string(), composed);
             } // if composed.is_empty
+            // A piece that leaves its piece-set keeps the set's number.
+            if let Some(number) = set_number.filter(|_| is_tagged_piece(&elem)) {
+                elem.attributes.entry("data-set-number".to_string()).or_insert_with(|| number.to_string());
+            } // if leaving a piece-set
             out.push(elem);
             continue;
         } // if tagged piece
@@ -491,9 +500,11 @@ fn take_matching_groups(
         // Not a piece: descend, carrying this element's transform along.
         let own = elem.attributes.get("transform").cloned().unwrap_or_default();
         let chained = join_transforms(inherited, &own);
+        // A piece-set below passes its own number to its pieces.
+        let child_set_number = piece_set_number(&elem).or_else(|| set_number.map(str::to_string));
 
         let before = out.len();
-        take_matching_groups(&mut elem, &chained, is_unit, out);
+        take_matching_groups(&mut elem, &chained, child_set_number.as_deref(), is_unit, out);
         let took_pieces = out.len() > before;
 
         if took_pieces && !has_element_child(&elem) {
@@ -505,6 +516,14 @@ fn take_matching_groups(
 
     parent.children = kept;
 } // fn take_matching_groups
+
+// @brief `data-type-number` of a piece-set group; None for any other element.
+fn piece_set_number(elem: &Element) -> Option<String> {
+    if !svg_dom::is_piece_set(elem) {
+        return None;
+    } // if not a piece-set
+    elem.attributes.get("data-type-number").map(|n| n.trim().to_string()).filter(|n| !n.is_empty())
+} // fn piece_set_number
 
 // @brief Concatenate two SVG transform lists, outer first.
 //
@@ -1607,6 +1626,18 @@ pub(crate) mod tests {
             root_group_ids(&doc),
             vec!["piece_Front_s34", "piece_Front_s36", "piece_Back_s34", "piece_Back_s36"]
         );
+
+        // Each size keeps the number of the piece-set it left: Front is set 1, Back set 2.
+        let set_numbers: Vec<&str> = doc
+            .root
+            .children
+            .iter()
+            .filter_map(|n| match n {
+                XMLNode::Element(e) => e.attributes.get("data-set-number").map(String::as_str),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(set_numbers, vec!["1", "1", "2", "2"]);
 
         let pieces = extract_piece_rects(&doc);
         assert_eq!(pieces.len(), 4);

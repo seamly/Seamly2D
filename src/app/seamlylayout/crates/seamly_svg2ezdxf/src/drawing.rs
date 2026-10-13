@@ -90,8 +90,11 @@ pub struct Block {
     pub name: String,
     // All converted entities (generic, used for validation and inspection).
     pub entities: Vec<Box<dyn Entity>>,
-    // `Piece Name:` system text (piece `data-name`, else the block name).
+    // `Piece Name:` system text: `display_name` with each non-ASCII character as an AutoCAD `\U+XXXX` escape.
     pub piece_name: String,
+    // Piece name for dialogs and warnings: piece `data-name` as written, else the block name.
+    // A name that several pieces share ends in the piece letter or number: "Detail (3)".
+    pub display_name: String,
     // Piece `data-parent`: the piece-set id in a multisize handoff. Groups the sizes of one piece.
     pub parent: Option<String>,
     // `Quantity:` system text in "R,L" form, from `data-quantity` or a "Cut N" label line.
@@ -125,6 +128,7 @@ impl Block {
     pub fn new(name: String) -> Self {
         Self {
             piece_name: name.clone(),
+            display_name: name.clone(),
             parent: None,
             name,
             entities: Vec::new(),
@@ -152,7 +156,7 @@ impl Block {
 // @brief Downstream CAD data a piece lacks in a DXF-ASTM export.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MissingPieceData {
-    // `Piece Name:` system text of the piece.
+    // Display name of the piece (`Block::display_name`).
     pub piece_name: String,
     // No `data-quantity` and no "Cut N" label line, so no `Quantity:` system text.
     pub quantity: bool,
@@ -205,19 +209,30 @@ impl Drawing {
     // @brief Pieces that lack a `Quantity:` source, label text, or a grainline.
     // @details Only pieces with a boundary count: the DXF-ASTM writer writes
     //          system text, labels and grainlines for those pieces only.
-    // @return One entry per incomplete piece, in block order.
+    // @return One entry per incomplete piece, in first-block order. The sizes of a
+    //         multisize piece share one display name and give one entry: a size
+    //         that lacks an item marks it missing for the piece.
     pub fn missing_piece_data(&self) -> Vec<MissingPieceData> {
-        self.blocks
-            .iter()
-            .filter(|b| b.boundary.is_some())
-            .map(|b| MissingPieceData {
-                piece_name: b.piece_name.clone(),
+        let mut pieces: Vec<MissingPieceData> = Vec::new();
+        for b in self.blocks.iter().filter(|b| b.boundary.is_some()) {
+            let entry = MissingPieceData {
+                piece_name: b.display_name.clone(),
                 quantity: b.quantity.is_none(),
                 label: b.annotations.is_empty(),
                 grainline: b.grainline.is_none(),
-            }) // map block
-            .filter(|m| m.quantity || m.label || m.grainline)
-            .collect()
+            }; // entry
+            // Merge every size of a piece into its first entry.
+            match pieces.iter_mut().find(|m| m.piece_name == entry.piece_name) {
+                Some(m) => {
+                    m.quantity |= entry.quantity;
+                    m.label |= entry.label;
+                    m.grainline |= entry.grainline;
+                } // Some: another size
+                None => pieces.push(entry),
+            } // match piece
+        } // for each piece block
+        pieces.retain(|m| m.quantity || m.label || m.grainline);
+        pieces
     } // fn missing_piece_data
 
     // @brief Write drawing to a human-readable text file for inspection.

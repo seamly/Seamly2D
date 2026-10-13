@@ -124,7 +124,8 @@ pub fn grade_drawing(layout: &mut Drawing, input: &Drawing, sizes: &[String], sa
                 Some((b, sizes.iter().position(|s| s == size)?))
             })
             .collect();
-        let piece_name = layout.blocks[members[0]].piece_name.clone();
+        // Warnings name the piece as the user wrote it, not its escaped DXF name.
+        let piece_name = layout.blocks[members[0]].display_name.clone();
         let Some(&(sample_block, _)) = sized.iter().find(|(_, s)| *s == sample) else {
             warnings.push(format!("{piece_name}: not graded, size {sample_size} is not in the layout."));
             continue;

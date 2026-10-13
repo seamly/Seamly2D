@@ -437,6 +437,49 @@ mod tests {
         assert!(missing[0].quantity && missing[0].label && missing[0].grainline);
     }
 
+    // @brief Individual pattern: two pieces named "Detail" with letters, one Cyrillic name, one unnamed.
+    const NAMES: &str = r#"
+        <svg viewBox="0 0 960 960" width="254mm" height="254mm" xmlns="http://www.w3.org/2000/svg">
+          <g id="pattern-1" data-type="pattern" data-name="Names">
+            <g id="piece_Detail" data-type="piece" data-type-number="1" data-name="Detail" data-letter="A">
+              <g data-type="seamline"><path d="M 0,0 L 96,0 L 96,96 L 0,96 Z"/></g>
+            </g>
+            <g id="piece_Detail-2" data-type="piece" data-type-number="2" data-name="Detail" data-letter="B">
+              <g data-type="seamline"><path d="M 200,0 L 296,0 L 296,96 L 200,96 Z"/></g>
+            </g>
+            <g id="piece-3" data-type="piece" data-type-number="3" data-name=" Комір ">
+              <g data-type="seamline"><path d="M 400,0 L 496,0 L 496,96 L 400,96 Z"/></g>
+            </g>
+            <g id="piece-4" data-type="piece" data-type-number="4">
+              <g data-type="seamline"><path d="M 600,0 L 696,0 L 696,96 L 600,96 Z"/></g>
+            </g>
+          </g>
+        </svg>"#;
+
+    #[test]
+    fn piece_names_keep_unicode_and_number_shared_names() {
+        let doc = Document::parse(NAMES).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let names: Vec<(&str, &str)> = drawing.blocks.iter().map(|b| (b.display_name.as_str(), b.piece_name.as_str())).collect();
+        assert_eq!(
+            names,
+            vec![
+                // A shared name ends in the piece letter.
+                ("Detail (A)", "Detail (A)"),
+                ("Detail (B)", "Detail (B)"),
+                // Dialogs keep the name; the DXF name escapes it.
+                ("Комір", r"\U+041A\U+043E\U+043C\U+0456\U+0440"),
+                // No name: the block name.
+                ("piece-4_M", "piece-4_M"),
+            ]
+        );
+        // Without letters, the piece number tells the pieces apart.
+        let doc = Document::parse(&NAMES.replace(r#" data-letter="A""#, "")).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        assert_eq!(drawing.blocks[0].piece_name, "Detail (1)");
+        assert_eq!(drawing.blocks[1].piece_name, "Detail (2)");
+    }
+
     // @brief `Quantity:` of the Front piece after `replace` edits the TAGGED fixture.
     fn front_quantity(replace: &[(&str, &str)]) -> Option<String> {
         let svg = replace.iter().fold(TAGGED.to_string(), |s, (from, to)| s.replace(from, to));

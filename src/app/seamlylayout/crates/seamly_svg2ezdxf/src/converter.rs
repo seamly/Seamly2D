@@ -12,7 +12,9 @@ use crate::astm_contour::{build_contour_tagged, AstmContour};
 use crate::astm_notch::build_notches;
 use crate::drawing::Annotation;
 use crate::layers::{piece_component, PieceComponent};
-use crate::utils::{invert_y_axis, parse_float_attr, parse_length_attr, sanitize_ascii, sanitize_block_name, MM_PER_PX};
+use crate::utils::{
+    dxf_unicode_escape, invert_y_axis, parse_float_attr, parse_length_attr, sanitize_ascii, sanitize_block_name, MM_PER_PX,
+};
 use geometry::Path;
 use xmltree::{Element, XMLNode};
 
@@ -95,18 +97,101 @@ fn find_pattern_name(element: &Element) -> Option<String> {
     }) // find in children
 } // fn find_pattern_name
 
-// @brief Collect every `data-type="piece"` group in document order.
-fn collect_tagged_pieces<'a>(element: &'a Element, out: &mut Vec<&'a Element>) {
+// @brief Collect every `data-type="piece"` group in document order, each with its
+//        enclosing `data-type="piece-set"` group when it has one.
+fn collect_tagged_pieces<'a>(element: &'a Element, piece_set: Option<&'a Element>, out: &mut Vec<(&'a Element, Option<&'a Element>)>) {
     for child in &element.children {
         if let XMLNode::Element(e) = child {
-            if e.name == "g" && e.attributes.get("data-type").map(String::as_str) == Some("piece") {
-                out.push(e);
-            } else {
-                collect_tagged_pieces(e, out);
-            } // if piece
+            match e.attributes.get("data-type").map(String::as_str) {
+                Some("piece") if e.name == "g" => out.push((e, piece_set)),
+                // Pieces below a piece-set are the sizes of one piece.
+                Some("piece-set") => collect_tagged_pieces(e, Some(e), out),
+                _ => collect_tagged_pieces(e, piece_set, out),
+            } // match data-type
         } // if element
     } // for each child
 } // fn collect_tagged_pieces
+
+// @brief What tells one piece from another piece of the same name.
+struct PieceIdentity {
+    // Same for every size of one piece: the piece-set id, else the piece id.
+    key: String,
+    // Piece `data-letter`, if set.
+    letter: Option<String>,
+    // Piece number in the pattern, the same in every size. Multisize piece: the
+    // piece-set `data-type-number`, else the piece `data-set-number` (a Marker
+    // layout dissolved its piece-set). Individual piece: its `data-type-number`.
+    number: Option<String>,
+}
+
+// @brief Identity of one tagged piece.
+// @param piece_set The piece's enclosing piece-set group, if the document still has it.
+fn piece_identity(piece: &Element, piece_set: Option<&Element>, index: usize) -> PieceIdentity {
+    let attr = |e: &Element, name: &str| e.attributes.get(name).map(|v| v.trim().to_string()).filter(|v| !v.is_empty());
+    // A multisize piece carries its size; its `data-parent` is the piece-set id it shares with the other sizes.
+    let multisize = attr(piece, "data-size").is_some();
+    let key = multisize
+        .then(|| attr(piece, "data-parent").or_else(|| piece_set.and_then(|s| attr(s, "id"))))
+        .flatten()
+        .or_else(|| attr(piece, "id"))
+        .unwrap_or_else(|| format!("piece-{}", index + 1));
+    // A multisize piece's own `data-type-number` differs per size, so it never names the piece.
+    let number = if multisize {
+        piece_set.and_then(|s| attr(s, "data-type-number")).or_else(|| attr(piece, "data-set-number"))
+    } else {
+        attr(piece, "data-type-number")
+    }; // number
+    PieceIdentity { key, letter: attr(piece, "data-letter"), number }
+} // fn piece_identity
+
+// @brief Add the piece letter, else the piece number, to a name that several pieces share.
+// @details Every size of one piece shares an identity key, so all its blocks get the
+//          same name. The letter is used only when it tells the pieces of that name
+//          apart; else the number; else the order of the pieces in the document.
+// @param blocks Blocks of the tagged pieces, parallel to `identities`.
+fn number_shared_names(blocks: &mut [Block], identities: &[PieceIdentity]) {
+    // Distinct identity keys per display name, in first-appearance order.
+    let mut keys_by_name: Vec<(String, Vec<usize>)> = Vec::new();
+    for (i, block) in blocks.iter().enumerate() {
+        let pos = keys_by_name.iter().position(|(name, _)| *name == block.display_name);
+        let entry = match pos {
+            Some(p) => &mut keys_by_name[p].1,
+            None => {
+                keys_by_name.push((block.display_name.clone(), Vec::new()));
+                &mut keys_by_name.last_mut().expect("just pushed").1
+            } // None: first block of this name
+        }; // entry
+        if entry.iter().all(|&j| identities[j].key != identities[i].key) {
+            entry.push(i);
+        } // if a new piece of this name
+    } // for each block
+
+    for (name, pieces) in keys_by_name.iter().filter(|(_, pieces)| pieces.len() > 1) {
+        // Letters tell the pieces apart only when every piece has its own.
+        let letters: Vec<Option<&String>> = pieces.iter().map(|&j| identities[j].letter.as_ref()).collect();
+        let use_letters = letters.iter().enumerate().all(|(a, l)| l.is_some() && letters[a + 1..].iter().all(|m| m != l));
+        let numbers: Vec<Option<&String>> = pieces.iter().map(|&j| identities[j].number.as_ref()).collect();
+        let use_numbers = numbers.iter().enumerate().all(|(a, n)| n.is_some() && numbers[a + 1..].iter().all(|m| m != n));
+        for (rank, &j) in pieces.iter().enumerate() {
+            let suffix = if use_letters {
+                letters[rank].cloned().unwrap_or_default()
+            } else if use_numbers {
+                numbers[rank].cloned().unwrap_or_default()
+            } else {
+                (rank + 1).to_string()
+            }; // suffix
+            let display = format!("{name} ({suffix})");
+            // Every block of this piece (all its sizes) gets the numbered name.
+            let key = identities[j].key.clone();
+            for (block, identity) in blocks.iter_mut().zip(identities) {
+                if block.display_name == *name && identity.key == key {
+                    block.piece_name = dxf_unicode_escape(&display);
+                    block.display_name = display.clone();
+                } // if same piece
+            } // for each block
+        } // for each piece of this name
+    } // for each shared name
+} // fn number_shared_names
 
 // @brief Create one block per pattern piece.
 // @details A tagged SVG's pieces are its `data-type="piece"` groups. An
@@ -123,11 +208,16 @@ fn extract_pattern_pieces(
     svg_height: f64,
 ) -> Result<()> {
     let mut tagged = Vec::new();
-    collect_tagged_pieces(root, &mut tagged);
+    collect_tagged_pieces(root, None, &mut tagged);
     if !tagged.is_empty() {
-        for piece in tagged {
+        // Build one block per piece, then number the names that several pieces share.
+        let first = drawing.blocks.len();
+        let mut identities = Vec::with_capacity(tagged.len());
+        for (index, (piece, piece_set)) in tagged.into_iter().enumerate() {
+            identities.push(piece_identity(piece, piece_set, index));
             add_piece_block(piece, drawing, options, svg_height)?;
         } // for each tagged piece
+        number_shared_names(&mut drawing.blocks[first..], &identities);
         return Ok(());
     } // if tagged
 
@@ -154,10 +244,13 @@ fn add_piece_block(
     let id = piece.attributes.get("id").cloned().unwrap_or_else(|| format!("piece-{}", drawing.blocks.len() + 1));
     // "_M" suffix matches CLO3D / seamly2clo.py block naming.
     let mut block = Block::new(format!("{}_M", sanitize_block_name(&id)));
+    // The name keeps every character; the DXF `Piece Name:` escapes the non-ASCII ones,
+    // so every size of a piece gets the same name.
     if let Some(name) = piece.attributes.get("data-name").or_else(|| piece.attributes.get("data-letter")) {
-        let name = sanitize_ascii(name).trim().to_string();
+        let name = name.trim();
         if !name.is_empty() {
-            block.piece_name = name;
+            block.piece_name = dxf_unicode_escape(name);
+            block.display_name = name.to_string();
         } // if non-empty
     } // if name attribute
     // The piece-set id groups the sizes of one piece for a graded nest.
