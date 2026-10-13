@@ -20,7 +20,7 @@
 
 pub use layout_engine::{
     pack_maxrects, pack_maxrects_multi_angle, pack_maxrects_multi_angle_extending,
-    pack_maxrects_multi_angle_lenient, pack_shelves, validate_placements,
+    pack_maxrects_multi_angle_lenient, pack_shelves, required_bin_width, validate_placements,
 };
 pub use pack_types::{FreeRect, PackError, PackResult, Placed, Rect};
 pub use polygon_pack::Polygon;

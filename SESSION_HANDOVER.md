@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-10-13 — Layout.71 multisize media widens: merged into local `run-seamlyLayout`, not pushed
+
+- User decision: multisize tabs widen the media to the right for a piece wider than it, and lengthen it downwards (Layout.25). No multisize piece is left out on non-tiled media.
+- Code: `layout_engine::required_bin_width`, `layout_assembler::set_content_width`, `layout_utils` step 7a. Tab warning text back to the pre-Layout.25 wording.
+- Verified: `cargo test --workspace` 488 passed, 0 failed. `ctest --preset debug` 6 of 6. No MSI.
+- Next: Layout.72 (individual pattern: dialog "Split the pieces" / "Make the media bigger"), approved, planned in `TODO_SEAMLYLAYOUT.md`.
+- The user's uncommitted edits (TEST_CHECKLIST §7, TODO files, build stamps) are in `stash@{0}`, made before the develop merge `8af698b2c6`. Not touched.
+
 ### 2026-10-13 — Layout.25 media grows to fit: merged into local `run-seamlyLayout`, not pushed
 
 - Multisize tabs set `ProcessLayoutArgs::extend_media`: sheet, roll and fabric grow in length until every piece that fits the width is placed. jacket2 Marker, 48 in roll: 208 of 208, about 798 in.
