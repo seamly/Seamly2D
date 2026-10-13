@@ -67,9 +67,21 @@ trimmed_h = max(placed.y + placed.h for all placements) + margin_bottom_px
 
 Updates `<svg height>` and background `<rect height>`. Applied only when `trimmed_h < bin_h`.
 
+## Oversized Pieces (individual pattern)
+
+- `process_layout` first runs `layout_utils::do_find_oversized_pieces`: pre-processing up to grain-up pieces, then `piece_divider::find_oversized_pieces`.
+- A piece is oversized when no trial angle fits it in the content rect. Paper roll and fabric limit only the width. Tiled paper is never checked.
+- Oversized pieces: the `oversized_pieces_found` signal, no layout. QML asks the user, then calls `process_layout_oversized(settings, "split" | "extend")` or `cancel_layout()`.
+- "split": `ProcessLayoutArgs::split_oversized`. `piece_divider::divide_oversized_pieces` runs after the piece-set centring and before `translate_dom`.
+  - Equal columns for a piece too wide, equal rows for a piece too long on a sheet. Each outline region in a cell is one part.
+  - Cutting: `geometry::half_plane_clip` (`cut_closed`, `cut_open`). Each output vertex keeps its source vertex index, so `data-turn-points` stay valid.
+  - `ProcessLayoutResult::divide_spec` keeps the media; `sheets::build_sheet_export_inputs` splits the same way for the paper-sheet PDF.
+- "extend": `ProcessLayoutArgs::extend_media`, as below.
+- `cancel_layout` sets `is_settings_required`: QML disables every button but 'Layout Settings', Preferences and Exit. `initialize_layout` clears it.
+
 ## Extended Media (multisize tabs)
 
-Every multisize tab sets `ProcessLayoutArgs::extend_media`. An individual pattern does not.
+Every multisize tab sets `ProcessLayoutArgs::extend_media`. An individual pattern sets it only when the user chose "Make the media bigger".
 
 - Width first: `packing::required_bin_width` is the widest piece, each piece in its narrowest trial angle. A wider value widens the bin.
 - `packing::pack_polygons_extending` packs at the media length first.

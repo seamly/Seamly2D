@@ -22,6 +22,20 @@ pub use piece_extractor::{extract_piece_rects, hoist_layout_units, hoist_tagged_
 mod layout_assembler;
 pub use layout_assembler::{create_layout, create_initial_layout_dom, remove_color_blocks, trim_bottom};
 
+// Splits a piece wider or longer than the media into parts that fit (individual patterns).
+mod piece_divider;
+
+// @brief What an individual layout does with a piece wider or longer than the media.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+enum OversizeChoice {
+    // Lay out as usual: no piece is too big, or the layout is multisize.
+    AsIs,
+    // Split each such piece into parts that fit (the user's choice).
+    Split,
+    // Make the media wider and longer, as a multisize tab does (the user's choice).
+    Extend,
+} // enum OversizeChoice
+
 mod layout_utils;
 use layout_utils::{do_initialize_layout, do_process_layout, do_process_size_layout, ProcessLayoutArgs};
 
@@ -584,6 +598,9 @@ pub mod qobject {
         // True when DXF-ASTM can export the shown layout: an individual layout,
         // the Base Size tab or a size tab.  Marker and Nested hold every size.
         #[qproperty(bool, dxf_export_allowed)]
+        // True after Cancel in the oversized-pieces dialog: only 'Layout Settings'
+        // stays active until new settings are submitted.
+        #[qproperty(bool, is_settings_required)]
         type AppController = super::AppControllerRust;
 
         #[qsignal]
@@ -603,6 +620,13 @@ pub mod qobject {
         // pieces that fit; QML shows `message` as a non-blocking warning popup.
         #[qsignal]
         fn layout_warning(self: Pin<&mut AppController>, message: QString);
+
+        // Emitted instead of a layout when an individual pattern has a piece wider
+        // or longer than the media.  `message` lists the pieces, one per line.
+        // QML asks the user to split the pieces or make the media bigger, then calls
+        // process_layout_oversized, or cancel_layout.
+        #[qsignal]
+        fn oversized_pieces_found(self: Pin<&mut AppController>, message: QString);
 
         // Emitted when an import succeeded but the SVG is not a Seamly2D Layout
         // Mode handoff file — it carries no `data-type="piece"` groups (Task 49).
@@ -646,6 +670,14 @@ pub mod qobject {
 
         #[qinvokable]
         fn process_layout(self: Pin<&mut AppController>, settings_json: &QString) -> bool;
+
+        // Lay out after the oversized-pieces dialog: `choice` is "split" or "extend".
+        #[qinvokable]
+        fn process_layout_oversized(self: Pin<&mut AppController>, settings_json: &QString, choice: &QString) -> bool;
+
+        // Cancel in the oversized-pieces dialog: no layout; only 'Layout Settings' stays active.
+        #[qinvokable]
+        fn cancel_layout(self: Pin<&mut AppController>);
 
         #[qinvokable]
         fn get_layout_dom_string(self: &AppController) -> QString;
@@ -1001,6 +1033,13 @@ pub struct AppControllerRust {
     // True when DXF-ASTM can export the shown layout; mirrored from `layout_views`.
     dxf_export_allowed: bool,
 
+    // True after Cancel in the oversized-pieces dialog, until new settings are submitted.
+    is_settings_required: bool,
+
+    // The media the current layout split its pieces for; None when it did not split.
+    // The paper-sheet PDF export splits the same way.
+    divide_spec: Option<piece_divider::DivideSpec>,
+
     // Inactive tabs of a multisize layout; empty for an individual import.
     // The active tab's layout lives in the layout fields above.
     layout_views: LayoutViews,
@@ -1053,6 +1092,8 @@ impl Default for AppControllerRust {
             active_layout_view:        0,                              // first tab
             is_tab_layout_pending:     false,                          // no tab run queued
             dxf_export_allowed:        true,                           // no tabs: an individual layout exports DXF-ASTM
+            is_settings_required:      false,                          // no cancelled layout
+            divide_spec:               None,                           // no split layout
             layout_views:              LayoutViews::default(),         // no tabs
             tab_queue:                 None,                           // no tab run queued
         } // Self
@@ -1177,6 +1218,7 @@ impl qobject::AppController {
             rust.layout_ml_px       = 0;    // reset until next layout
             rust.layout_mt_px       = 0;    // reset until next layout
             rust.is_roll_layout     = false; // reset until next layout
+            rust.divide_spec        = None;  // reset until next layout
             // don't clear settings - keep the current settings (if any)
             // clear layout bbox data
             rust.piece_bboxes_json  = String::new(); // clear stale bbox data
@@ -1184,6 +1226,7 @@ impl qobject::AppController {
         } // rust borrow dropped
         // Disable 'Create Layout' button until the user submits settings, so they don't run an invalid layout.
         self.as_mut().set_is_create_layout_enabled(false); // disabled until next Settings Submit
+        self.as_mut().set_is_settings_required(false);     // a new document clears a cancelled layout
     } // fn reset_import_state
 
     // Finish an import once the SVG is parsed, whatever its source.
@@ -1307,6 +1350,7 @@ impl qobject::AppController {
                 // Emit signals to update QML state
                 self.as_mut().set_is_layout_ready(false);          // not a completed layout yet
                 self.as_mut().set_is_create_layout_enabled(true);  // enables 'Create Layout' button
+                self.as_mut().set_is_settings_required(false);     // new settings end a cancelled layout
                 self.as_mut().layout_finished();                   // notify QML right canvas to reload
                 true
             }
@@ -1319,11 +1363,58 @@ impl qobject::AppController {
     } // fn initialize_layout
 
     // Run the layout pipeline: parse settings, extract pieces, pack, assemble output SVG.
-    // Emits error_occurred with a descriptive message on any failure path.
+    // An individual pattern with a piece wider or longer than the media gets no
+    // layout yet: `oversized_pieces_found` asks the user to split the pieces or
+    // make the media bigger.
     // Called by 'Create Layout' button handler in QML: onCreateLayout: appController.processLayout(settingsJson)
     fn process_layout(
         mut self: std::pin::Pin<&mut Self>,
         settings_json: &cxx_qt_lib::QString,
+    ) -> bool {
+        if !*self.is_multisize() {
+            let found = {
+                let rust = self.rust();
+                match (&rust.input_dom, &rust.initial_layout_dom) {
+                    (Some(input), Some(initial)) => {
+                        layout_utils::do_find_oversized_pieces(&settings_json.to_string(), input, initial)
+                            .unwrap_or_default()
+                    } // inputs present
+                    _ => Vec::new(), // run_layout reports the missing input
+                } // match inputs
+            }; // rust borrow dropped
+            if !found.is_empty() {
+                let message = piece_divider::oversized_pieces_message(&found);
+                self.as_mut().oversized_pieces_found(cxx_qt_lib::QString::from(message.as_str()));
+                return false;
+            } // if oversized pieces
+        } // if individual
+        self.run_layout(settings_json, OversizeChoice::AsIs)
+    } // fn process_layout
+
+    // Lay out after the oversized-pieces dialog's OK: "split" splits each such
+    // piece into parts; any other value makes the media bigger.
+    fn process_layout_oversized(
+        self: std::pin::Pin<&mut Self>,
+        settings_json: &cxx_qt_lib::QString,
+        choice: &cxx_qt_lib::QString,
+    ) -> bool {
+        let choice = if choice.to_string() == "split" { OversizeChoice::Split } else { OversizeChoice::Extend };
+        self.run_layout(settings_json, choice)
+    } // fn process_layout_oversized
+
+    // Cancel in the oversized-pieces dialog: no layout, and only 'Layout Settings'
+    // stays active until the user submits new settings.
+    fn cancel_layout(mut self: std::pin::Pin<&mut Self>) {
+        self.as_mut().set_is_create_layout_enabled(false);
+        self.as_mut().set_is_settings_required(true);
+    } // fn cancel_layout
+
+    // The layout pipeline behind process_layout and process_layout_oversized.
+    // Emits error_occurred with a descriptive message on any failure path.
+    fn run_layout(
+        mut self: std::pin::Pin<&mut Self>,
+        settings_json: &cxx_qt_lib::QString,
+        oversize: OversizeChoice,
     ) -> bool {
         // Mark layout as in-progress and clear previous result, tabs included.
         self.as_mut().clear_layout_views();
@@ -1371,14 +1462,16 @@ impl qobject::AppController {
 
         // Delegate to pure-logic function in layout_utils.rs.  A multisize layout
         // starts with the Marker tab: every size of every piece packs alone.
-        // Multisize tabs extend the media until every piece fits.
+        // Multisize tabs extend the media until every piece fits; an individual
+        // pattern does so, or splits its oversized pieces, when the user chose it.
         let args = ProcessLayoutArgs {
             settings_json: &json_str,
             input_dom: &input_dom_clone,
             initial_layout_dom: &initial_layout_dom_clone,
             layout_h_px,
             nested_multisize: false,
-            extend_media: *self.is_multisize(),
+            extend_media: *self.is_multisize() || oversize == OversizeChoice::Extend,
+            split_oversized: oversize == OversizeChoice::Split,
         };
         // Progress callback drives both the bindable property (for the QML
         // ProgressBar overlay on the right canvas) and the signal (for any
@@ -1402,6 +1495,7 @@ impl qobject::AppController {
                     rust.layout_ml_px      = result.ml_px;
                     rust.layout_mt_px      = result.mt_px;
                     rust.is_roll_layout    = is_roll_layout;
+                    rust.divide_spec       = result.divide_spec;
                     rust.piece_bboxes_json = result.bbox_json;
                     // Persist the pre-processing stage snapshots so AdjustMode and
                     // other steps can read them from memory instead of the debug SVGs.
@@ -1477,7 +1571,7 @@ impl qobject::AppController {
                 false
             }
         }
-    } // fn process_layout
+    } // fn run_layout
 
     // Serialize `layout_dom` to an SVG XML string and return it.
     //
@@ -1530,6 +1624,7 @@ impl qobject::AppController {
                     layout_h_px,
                     nested_multisize: kind.nested(),
                     extend_media: true, // every tab is a multisize tab
+                    split_oversized: false,
                 };
                 // Stage messages would hide the tab name; only the percentage moves.
                 let mut progress = |percent: i32, _status: Option<&str>| {
@@ -2396,10 +2491,12 @@ impl qobject::AppController {
                 None => (input_dom, active_kind.as_ref().is_some_and(ViewKind::nested)),
             }; // input_dom, nested_multisize
 
+            let divide_spec = self.rust().divide_spec.clone();
             let (flat_dom, pieces) = match build_sheet_export_inputs(
                 &input_dom,
                 settings.free_rotation_without_grainline(),
                 nested_multisize,
+                divide_spec.as_ref(),
             ) {
                 Ok(v) => v,
                 Err(e) => {

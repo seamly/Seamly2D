@@ -360,6 +360,13 @@ ApplicationWindow {
             warningDialog.open();
         } // onLayoutWarning
 
+        // An individual pattern has a piece wider or longer than the media:
+        // no layout yet.  The dialog asks to split the pieces or make the media bigger.
+        onOversizedPiecesFound: function(message) {
+            oversizedPiecesDialog.piecesText = message;
+            oversizedPiecesDialog.open();
+        } // onOversizedPiecesFound
+
         // Import warning — the SVG loaded, but it carries no data-type="piece"
         // tagging, so it is not a Seamly2D Layout Mode handoff file (Task 49).
         // Non-blocking: the file is already on the left canvas.
@@ -506,6 +513,7 @@ ApplicationWindow {
         layoutReady:          appController.isLayoutReady
         createLayoutEnabled:  appController.isCreateLayoutEnabled
         adjustMode:           appController.isAdjustMode
+        settingsOnly:         appController.isSettingsRequired
         pdfTiledExportEnabled: settingsModel.paperType === "tiled"
         hasLayoutTabs:        appController.layoutViewLabels.length > 1
         exportAllTabs:        root.exportAllTabs
@@ -1437,6 +1445,112 @@ ApplicationWindow {
             width:          340
         } // contentItem Text
     } // Dialog warningDialog
+
+    // -----------------------------------------------------------------------
+    // Oversized pieces dialog — an individual pattern has a piece wider or
+    // longer than the media.  OK lays out with the chosen remedy; Cancel
+    // leaves only 'Layout Settings' active.  Only the buttons close it.
+    // -----------------------------------------------------------------------
+    Dialog {
+        id: oversizedPiecesDialog
+
+        // @brief One line per piece, from appController.oversizedPiecesFound.
+        property string piecesText: ""
+
+        title:           "Pieces do not fit the media"
+        modal:           true
+        width:           480
+        anchors.centerIn: parent
+        closePolicy:     Popup.NoAutoClose
+        standardButtons: Dialog.Ok | Dialog.Cancel
+
+        // Split is the default each time the dialog opens.
+        onAboutToShow: splitPiecesRadio.checked = true
+
+        background: Rectangle {
+            color:        Theme.dialogBackground
+            border.color: Theme.violetDark
+            radius:       4
+        } // background Rectangle
+
+        contentItem: Column {
+            spacing:       8
+            topPadding:    12
+            bottomPadding: 8
+            leftPadding:   16
+            rightPadding:  16
+
+            Text {
+                text:           "These pieces do not fit the media:"
+                color:          Theme.textOnDark
+                font.pixelSize: Theme.fontSizeNormal
+                wrapMode:       Text.WordWrap
+                width:          440
+            } // Text heading
+
+            Text {
+                text:           oversizedPiecesDialog.piecesText
+                color:          Theme.violetLight
+                font.pixelSize: Theme.fontSizeSmall
+                wrapMode:       Text.WordWrap
+                width:          440
+            } // Text piece list
+
+            ButtonGroup { id: oversizeChoiceGroup }
+
+            RadioButton {
+                id:      splitPiecesRadio
+                text:    "Split the pieces"
+                checked: true
+                ButtonGroup.group: oversizeChoiceGroup
+
+                contentItem: Text {
+                    text:              splitPiecesRadio.text
+                    color:             Theme.textOnDark
+                    font.pixelSize:    Theme.fontSizeNormal
+                    leftPadding:       splitPiecesRadio.indicator.width + splitPiecesRadio.spacing
+                    verticalAlignment: Text.AlignVCenter
+                } // contentItem Text
+            } // RadioButton splitPiecesRadio
+
+            Text {
+                text:           "For SVG, PDF, HPGL, EPS, PS, PNG and JPG files: printing, cutting, " +
+                                "a pattern projector. Each part gets a label and match notches."
+                color:          Theme.textOnDark
+                font.pixelSize: Theme.fontSizeSmall
+                wrapMode:       Text.WordWrap
+                leftPadding:    28
+                width:          440
+            } // Text split description
+
+            RadioButton {
+                id:   extendMediaRadio
+                text: "Make the media bigger"
+                ButtonGroup.group: oversizeChoiceGroup
+
+                contentItem: Text {
+                    text:              extendMediaRadio.text
+                    color:             Theme.textOnDark
+                    font.pixelSize:    Theme.fontSizeNormal
+                    leftPadding:       extendMediaRadio.indicator.width + extendMediaRadio.spacing
+                    verticalAlignment: Text.AlignVCenter
+                } // contentItem Text
+            } // RadioButton extendMediaRadio
+
+            Text {
+                text:           "For DXF files: every piece stays whole. The media grows wider and longer."
+                color:          Theme.textOnDark
+                font.pixelSize: Theme.fontSizeSmall
+                wrapMode:       Text.WordWrap
+                leftPadding:    28
+                width:          440
+            } // Text extend description
+        } // Column contentItem
+
+        onAccepted: appController.processLayoutOversized(settingsModel.toJson(),
+                                                         splitPiecesRadio.checked ? "split" : "extend")
+        onRejected: appController.cancelLayout()
+    } // Dialog oversizedPiecesDialog
 
     // -----------------------------------------------------------------------
     // Export progress popup — shown for all export formats.

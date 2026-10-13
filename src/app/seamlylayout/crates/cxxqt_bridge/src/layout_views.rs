@@ -366,6 +366,7 @@ mod tests {
             flat_dom: doc.clone(),
             vertical_dom: doc.clone(),
             translate_dom: doc,
+            divide_spec: None,
         }
     } // fn result
 

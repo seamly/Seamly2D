@@ -19,7 +19,7 @@
 //! entry points so consumers depend on just this one crate.
 
 pub use layout_engine::{
-    pack_maxrects, pack_maxrects_multi_angle, pack_maxrects_multi_angle_extending,
+    fits_bin, pack_maxrects, pack_maxrects_multi_angle, pack_maxrects_multi_angle_extending,
     pack_maxrects_multi_angle_lenient, pack_shelves, required_bin_width, validate_placements,
 };
 pub use pack_types::{FreeRect, PackError, PackResult, Placed, Rect};
