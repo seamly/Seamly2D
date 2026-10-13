@@ -2,6 +2,15 @@
 
 ## Current status
 
+### 2026-10-13 — Layout.67 multisize tabs: merged into local `run-seamlyLayout`, not pushed
+
+- User decision: tabs Marker, Nested, Base Size N, then Size N; no "Multisize Layout" setting. DXF-ASTM: Base Size = base size + `# n` + `.rul`; size tab = one ungraded size; Marker and Nested have none. No graded nests.
+- Replaces Layout.22, 23. No longer needed: Layout.27.10, Layout.61.7.3. Still open: Layout.25, Layout.27.2–27.8.
+- Verified: `cargo test --workspace` 476 passed, 0 failed. `ctest --preset debug` 6 of 6 passed. No MSI built.
+- `TEST_CHECKLIST.md` §7 "Multisize tabs" added, not committed: the user's 26.10.1115 results are in the same file. It replaces the §4 `# 1` single size check.
+- `TODO_SEAMLYLAYOUT.md`: only Layout.67 committed. The Layout.22 and 23 headings stay in the user's uncommitted edits; the user deletes them.
+- Next: user builds the MSI and runs §7.
+
 ### 2026-10-12 — Next item: `TEST_CHECKLIST.md` §4 `Piece Name:` check (lines 104–112)
 
 - Finding: Nested All sizes DXF writes `Piece Name:piece-1_s220_M`, `piece-9_s240_M`, … No `Front`.
@@ -70,13 +79,13 @@ Root causes are in `TODO_SEAMLYLAYOUT.md` under each task. One commit per step. 
 | 6 | SeamlyLayout + QML | Missing Piece Data dialog: one line per piece, scroll area | Layout.26.1–26.2 | done, app check open |
 | 7 | SeamlyLayout | Grading: snap key points to a vertex within 0.01 mm | Layout.27.9 | done |
 | 8 | SeamlyLayout | Grading warnings | Layout.27.2, 27.4–27.6, 27.8 | open |
-| 9 | SeamlyLayout | Marker: ungradable piece keeps every placed size, `Detail (3) 240` | Layout.27.10 | open |
+| 9 | SeamlyLayout | Marker: ungradable piece keeps every placed size, `Detail (3) 240` | Layout.27.10 | dropped: Marker has no DXF-ASTM export (Layout.67) |
 | 10 | SeamlyLayout | Extend media height until every piece fits, every multisize tab | Layout.25 | open |
 | 11 | All | C++ and Rust tests | each task | open |
 | 12 | Docs | `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`, compliance doc, new `TEST_CHECKLIST.md` | each task | open |
 | 13 | Verify | `cargo test --workspace`, `ctest --preset debug`, `local_build_msi.ps1`; merge `--no-ff`; full CI (`common.pri` changed) | — | open |
 
-- Not in this round: Layout.22, 23, 24. Next round: Layout.22 → 23 → 24. Layout.28 done on `task-builtin-seamline` (user request).
+- Not in this round: Layout.24. Layout.22 and 23 are replaced by Layout.67. Layout.28 done on `task-builtin-seamline` (user request).
 - Suggested order: 7 (small, Rust only) → 5 → 6 → 8 → 1 + 4 → 2 → 9 → 10 → 3.
 
 ### User decisions (2026-10-12)
@@ -166,8 +175,8 @@ These items have no recorded resolution. Check their TODO documents and reposito
 - Built-in seam line corners are plain offset corners; node corner types shape only the cut line (user, 2026-10-12).
 - The user pushes `run-seamlyLayout` to `origin`. Delete a task branch once it is merged (user, 2026-10-12).
 - Slit ends are never turn points. Slit depth uses half the local seam allowance width.
-- Remove the Settings "Multisize Layout" choice when both all-sizes tabs exist (Layout.23).
-- Layout.61: graded nest + `# n` identifiers + `.rul` table. Grading only from the All sizes tab.
+- Multisize tabs: Marker, Nested, Base Size N, then Size N. Every tab comes from the input SVG; no tab is built from grade rules. No "Multisize Layout" setting (user, 2026-10-13).
+- DXF-ASTM carries one size: Base Size tab = base size + `# n` + `.rul`; size tab = one ungraded size; Marker and Nested have no DXF-ASTM export. No graded nests (user, 2026-10-13; replaces the Layout.61 graded nest).
 - CLO3D export uses R13 (`AC1012`). Piece text uses `Size Name:` and omits `Category:`.
 - Build only with `packaging/windows/local_build_msi.ps1`.
 - Default data root is `~/seamly2d`. Fresh installs allow a change; updates and repairs keep the recorded root read-only.
