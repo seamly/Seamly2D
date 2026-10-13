@@ -58,7 +58,7 @@ They are **stripped from the export clone** before any export operation.
 
 ## Roll Media Height Trim
 
-When `media_type == "roll"`, the packing bin height is `10 × roll_width` (sentinel).
+Roll and fabric media: the packing bin height is the media length (paper roll: 500 in sentinel).
 After packing, `trim_roll_height()` reduces the SVG to actual content height:
 
 ```
@@ -66,6 +66,19 @@ trimmed_h = max(placed.y + placed.h for all placements) + margin_bottom_px
 ```
 
 Updates `<svg height>` and background `<rect height>`. Applied only when `trimmed_h < bin_h`.
+
+## Extended Media (multisize tabs)
+
+Every multisize tab sets `ProcessLayoutArgs::extend_media`. An individual pattern does not.
+
+- `packing::pack_polygons_extending` packs at the media length first.
+- While a piece that fits the media width stays unplaced, the bin grows by the stacked height of the unplaced pieces. The pack runs again.
+- The loop ends: a bin as tall as every fitting piece stacked holds them all.
+- A piece wider than the media at every trial angle stays unplaced. The tab warning names it.
+- `trim_bottom` sets the canvas height. Roll and fabric end at the lowest piece. A sheet ends at the lowest piece, but not above its own length.
+- Canvas, Adjust Mode and exports read the height from `layout_dom`. Exception: the paper-sheet PDF export packs the pieces again on sheets of the set size.
+- Tiled paper does not extend.
+- Example: jacket2 Marker, 208 pieces, 48 in paper roll: the roll grows from 500 in to about 798 in.
 
 ## Export Preparation
 

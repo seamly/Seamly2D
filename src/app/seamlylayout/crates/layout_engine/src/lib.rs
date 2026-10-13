@@ -194,6 +194,90 @@ pub fn pack_maxrects_multi_angle_lenient(
     (placements, free_rects, unplaced_ids)
 } // fn pack_maxrects_multi_angle_lenient
 
+// @brief Lenient MaxRects on media that grows in height until every piece fits.
+//
+// Packs at `bin_h` first.  While a piece that fits the bin width stays
+// unplaced, the bin grows by the stacked height of the unplaced pieces and the
+// pack runs again.  The loop ends: a bin as tall as every fitting piece stacked
+// holds them all, because each placed piece lowers the full-width free strip at
+// the bin bottom by at most its stacked height.  A piece wider than the bin at
+// every trial angle stays unplaced.
+//
+// @return (placements sorted by original id, free-rect creation history,
+//          unplaced original ids sorted ascending, bin height used).
+pub fn pack_maxrects_multi_angle_extending(
+    bin_w: u32,
+    bin_h: u32,
+    gap_px: u32,
+    rects: &[Rect],
+    trial_angles_deg: &[u16],
+    mut on_piece_begin: Option<&mut dyn FnMut(usize, usize)>,
+) -> (Vec<Placed>, Vec<FreeRect>, Vec<usize>, u32) {
+    // Stacked height of each piece; None for a piece too wide for the bin.
+    let stacked: Vec<Option<u32>> = rects
+        .iter()
+        .map(|&r| stacked_height(r, bin_w, gap_px, trial_angles_deg))
+        .collect();
+    // A bin this tall holds every piece that fits the width.
+    let all_stacked_h = stacked.iter().flatten().fold(0u32, |sum, &h| sum.saturating_add(h));
+
+    let mut h = bin_h;
+    loop {
+        // Reborrow the callback for this pack only; the next pack needs it again.
+        let progress: Option<&mut dyn FnMut(usize, usize)> = match on_piece_begin.as_mut() {
+            Some(cb) => Some(&mut **cb),
+            None => None,
+        };
+        let (placements, free_rects, unplaced) =
+            pack_maxrects_multi_angle_lenient(bin_w, h, gap_px, rects, trial_angles_deg, progress);
+
+        // Height the unplaced pieces add when stacked; 0 when only too-wide pieces remain.
+        let missing_h = unplaced
+            .iter()
+            .filter_map(|&id| stacked[id])
+            .fold(0u32, |sum, sh| sum.saturating_add(sh));
+        if missing_h == 0 || h >= all_stacked_h {
+            return (placements, free_rects, unplaced, h);
+        }
+
+        let grown_h = h.saturating_add(missing_h).min(all_stacked_h);
+        debug!(
+            "pack_maxrects_multi_angle_extending: {} piece(s) left out at bin_h={}; packing again at bin_h={}",
+            unplaced.len(), h, grown_h
+        );
+        h = grown_h;
+    } // loop until every piece that fits the width is placed
+} // fn pack_maxrects_multi_angle_extending
+
+// @brief Trial angles for one piece: the layout mode's set, then, for a
+// free-rotation piece, the quarter turns the set lacks.  Mode angles come
+// first, so ties keep the mode's preferred orientation.
+fn piece_trial_set(trial_angles_deg: &[u16], free_rotation: bool) -> Vec<u16> {
+    let mut angles: Vec<u16> = if trial_angles_deg.is_empty() { vec![0] } else { trial_angles_deg.to_vec() };
+    if free_rotation {
+        for deg in [0u16, 90, 180, 270] {
+            if !angles.contains(&deg) {
+                angles.push(deg);
+            }
+        }
+    }
+    angles
+} // fn piece_trial_set
+
+// @brief Height a piece adds to a stack in a bin `bin_w` wide.
+//
+// @return The tallest rotated height over the piece's trial angles that fit
+//         the width, plus the gap; None when no trial angle fits the width,
+//         so no bin height can hold the piece.
+fn stacked_height(r: Rect, bin_w: u32, gap_px: u32, trial_angles_deg: &[u16]) -> Option<u32> {
+    piece_trial_set(trial_angles_deg, r.free_rotation)
+        .into_iter()
+        .map(|deg| rotated_rect_dims(r.w, r.h, deg))
+        .filter(|&(rw, _)| rw <= bin_w)
+        .map(|(_, rh)| rh.saturating_add(gap_px))
+        .max()
+} // fn stacked_height
+
 // @brief Why a piece could not be placed.  Recorded by the collect worker so
 // the strict wrapper can reconstruct the exact PackError it historically returned.
 enum UnplacedReason {
@@ -231,15 +315,9 @@ fn pack_maxrects_collect(
         trial_angles_deg
     );
 
-    let trial: &[u16] = if trial_angles_deg.is_empty() { &[0] } else { trial_angles_deg };
-    // Trial set for a free-rotation piece: the mode's angles first, so ties
-    // keep the mode's preferred orientation, then any missing quarter turns.
-    let mut free_trial: Vec<u16> = trial.to_vec();
-    for deg in [0u16, 90, 180, 270] {
-        if !free_trial.contains(&deg) {
-            free_trial.push(deg);
-        }
-    }
+    // Trial set for a piece limited to the layout mode, and for a free-rotation piece.
+    let trial = piece_trial_set(trial_angles_deg, false);
+    let free_trial = piece_trial_set(trial_angles_deg, true);
 
     // Sort by area descending, preserving original indices.
     let mut order: Vec<usize> = (0..rects.len()).collect();
@@ -257,7 +335,7 @@ fn pack_maxrects_collect(
         }
 
         let r = rects[id];
-        let trial: &[u16] = if r.free_rotation { &free_trial } else { trial };
+        let trial: &[u16] = if r.free_rotation { &free_trial } else { &trial };
 
         // Any orientation physically fits in empty bin?
         let mut any_fit_in_empty = false;
@@ -592,4 +670,47 @@ mod tests {
         assert!(placed.is_empty());
         assert_eq!(unplaced, vec![0, 1]);
     } // lenient_all_unplaced_when_none_fit
+
+    // @brief More pieces than the bin holds: the bin grows and every piece is placed.
+    // When every piece fits, the bin keeps its height.
+    #[test]
+    fn extending_places_every_piece_and_grows_height() {
+        // A 8x12 bin with a 1 px gap holds one 8x6 piece; six need 41 px.
+        let rects = [Rect::new(8, 6); 6];
+        let (placed, _free, unplaced, h) =
+            pack_maxrects_multi_angle_extending(8, 12, 1, &rects, &[0], None);
+        assert!(unplaced.is_empty(), "unplaced: {unplaced:?}");
+        assert_eq!(placed.len(), 6);
+        assert!(h >= 41, "bin height grows to hold six pieces, got {h}");
+        assert!(validate_placements(8, h, &placed));
+
+        let fits = [Rect::new(8, 4), Rect::new(4, 4)];
+        let (placed, _free, unplaced, h) =
+            pack_maxrects_multi_angle_extending(16, 16, 0, &fits, &[0], None);
+        assert_eq!((placed.len(), unplaced.len(), h), (2, 0, 16));
+    } // extending_places_every_piece_and_grows_height
+
+    // @brief A piece wider than the bin at every trial angle stays unplaced;
+    // the other pieces are placed in the grown bin.
+    #[test]
+    fn extending_leaves_too_wide_piece_out() {
+        let rects = [Rect::new(20, 4), Rect::new(8, 6), Rect::new(8, 6), Rect::new(8, 6)];
+        let (placed, _free, unplaced, h) =
+            pack_maxrects_multi_angle_extending(10, 6, 0, &rects, &[0, 180], None);
+        assert_eq!(unplaced, vec![0]);
+        assert_eq!(placed.len(), 3);
+        assert!(validate_placements(10, h, &placed));
+    } // extending_leaves_too_wide_piece_out
+
+    // @brief A free-rotation piece too wide upright and too tall when turned is
+    // placed turned once the bin grows.
+    #[test]
+    fn extending_turns_free_rotation_piece() {
+        let rects = [Rect::new(20, 8).with_free_rotation(true)];
+        let (placed, _free, unplaced, h) =
+            pack_maxrects_multi_angle_extending(10, 12, 0, &rects, &[0, 180], None);
+        assert!(unplaced.is_empty());
+        assert!(placed[0].rotation_deg == 90 || placed[0].rotation_deg == 270);
+        assert!(h >= 20, "bin height grows to the turned piece, got {h}");
+    } // extending_turns_free_rotation_piece
 }

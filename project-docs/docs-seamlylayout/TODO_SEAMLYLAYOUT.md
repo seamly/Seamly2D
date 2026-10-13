@@ -218,12 +218,19 @@ Repeat with MSI 26.10.1311, Marker tab: 96 of 208 placed again. The roll is full
 
 Decision (user, 2026-10-13): a layout cuts fabric, so the media grows past the 500 in roll length when the pieces need it.
 
-- [ ] Layout.25.1 When the pack leaves pieces out, increase the media height and pack again until every piece fits
-- [ ] Layout.25.2 Media types: paper sheet, paper roll (500 in default length), fabric
-- [ ] Layout.25.3 A piece wider than the media width cannot fit at any height: leave it out and keep the warning
-- [ ] Layout.25.4 Canvas, Adjust Mode and exports use the extended height
-- [ ] Layout.25.5 Tests: Rust pack with more pieces than one sheet holds → every piece placed, height grows; a piece that is too wide stays unplaced
-- [ ] Layout.25.6 Docs: layout workflow, `TEST_CHECKLIST.md`
+- [x] Layout.25.1 When the pack leaves pieces out, increase the media height and pack again until every piece fits
+  - `packing::pack_polygons_extending`: the bin grows by the stacked height of the unplaced pieces until every piece that fits the width is placed. jacket2 Marker, 48 in roll: 208 of 208 placed, about 798 in
+  - Multisize tabs only, as scoped above. An individual pattern still leaves out a piece that does not fit
+- [x] Layout.25.2 Media types: paper sheet, paper roll (500 in default length), fabric
+  - Roll and fabric end at the lowest piece. A sheet ends at the lowest piece, but not above its own length. Tiled paper does not extend
+- [x] Layout.25.3 A piece wider than the media width cannot fit at any height: leave it out and keep the warning
+  - The tab warning now says the media grows in length, not in width
+- [x] Layout.25.4 Canvas, Adjust Mode and exports use the extended height
+  - Exception, unchanged: the paper-sheet PDF export packs the pieces again on sheets of the set size
+- [x] Layout.25.5 Tests: Rust pack with more pieces than one sheet holds → every piece placed, height grows; a piece that is too wide stays unplaced
+  - `extending_*` (`layout_engine`), `pack_polygons_extending_grows_and_reports_too_wide`, `jacket2_marker_extends_paper_roll`, `jacket2_marker_extends_paper_sheet`
+- [x] Layout.25.6 Docs: layout workflow, `TEST_CHECKLIST.md`
+- [ ] Layout.25.7 User: on the next MSI, run `TEST_CHECKLIST.md` §7 "Media grows to fit"
 
 ## [ ] Task Layout.26 — DXF-ASTM Missing Piece Data dialog: one readable line per piece
 
