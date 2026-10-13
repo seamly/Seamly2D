@@ -27,6 +27,7 @@
 //   - Case 1 — Roll or fabric (media_type=="fabric" OR paper_type=="roll"):
 //     `trim_bottom` shrinks svg height, backgroundRect height, and contentRect height
 //     to remove blank space below the last placed piece (> 48 px threshold).
+//   - Extended media (multisize tabs): `trim_bottom` sets the grown height.
 //   - Case 2 — Tiled: deferred; see docs/tiling-docs/TILING_REDUCTION_WORKFLOW.md.
 
 use std::u32;
@@ -352,6 +353,9 @@ pub fn create_layout(
 // New heights:
 //   svg / backgroundRect height = margin_top_px + max_bin_bottom + margin_bottom_px
 //   contentRect height          = max_bin_bottom
+//
+// A `max_bin_bottom` taller than the content rectangle grows the canvas: extended
+// media uses this after the packer grew the bin past the media length.
 //
 // The caller is responsible for the 48-pixel threshold check before calling.
 //

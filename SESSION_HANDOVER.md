@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-10-13 — Layout.25 media grows to fit: merged into local `run-seamlyLayout`, not pushed
+
+- Multisize tabs set `ProcessLayoutArgs::extend_media`: sheet, roll and fabric grow in length until every piece that fits the width is placed. jacket2 Marker, 48 in roll: 208 of 208, about 798 in.
+- Individual pattern: unchanged, a piece that does not fit is left out (task scope says multisize tabs). One-line change in `process_layout` if the user wants it everywhere.
+- Code: `layout_engine::pack_maxrects_multi_angle_extending`, `packing::pack_polygons_extending`, `layout_utils` step 7 fits the canvas (`trim_bottom`). Sheet ends at the lowest piece, not above its own length. Tiled: no change.
+- Paper-sheet PDF export still packs again on sheets of the set size (unchanged).
+- Tab warning text: the media grows in length, not in width.
+- Verified: `cargo test --workspace` 485 passed, 0 failed. `ctest --preset debug` 6 of 6 passed. No MSI built.
+- `TEST_CHECKLIST.md` §7 "Media grows to fit" added, not committed: §7 is still the user's uncommitted content.
+- Open: Layout.25.7, user check on the next MSI. Layout.27.1 (size 500 left out of Marker) needs a re-export after that.
+
 ### 2026-10-13 — Layout.68 PDF true size: merged into local `run-seamlyLayout`, not pushed
 
 - Every PDF page (PDF, PDF (Tiled), sheets) goes through `exports::render_tree_to_pdf_bytes`: 96 px = 72 pt. `app_core::render_pdf` removed.

@@ -18,7 +18,10 @@
 //! Re-exports the shared `pack_types` primitives and the rectangle-packer
 //! entry points so consumers depend on just this one crate.
 
-pub use layout_engine::{pack_maxrects, pack_maxrects_multi_angle, pack_maxrects_multi_angle_lenient, pack_shelves, validate_placements};
+pub use layout_engine::{
+    pack_maxrects, pack_maxrects_multi_angle, pack_maxrects_multi_angle_extending,
+    pack_maxrects_multi_angle_lenient, pack_shelves, validate_placements,
+};
 pub use pack_types::{FreeRect, PackError, PackResult, Placed, Rect};
 pub use polygon_pack::Polygon;
 
@@ -194,6 +197,38 @@ pub fn pack_polygons_lenient(
     )
 } // fn pack_polygons_lenient
 
+// @brief Lenient dispatch on media that grows in height until every piece fits.
+//
+// Same as [`pack_polygons_lenient`], but a piece that fits the bin width is
+// never left out: the bin height grows until it is placed.  Only a piece wider
+// than the bin at every trial angle is reported unplaced.
+//
+// @param bin_h  Starting content rectangle height in pixels: the media height.
+// @return       (placements, free-rect history, unplaced original ids, bin height used).
+pub fn pack_polygons_extending(
+    bin_w: u32,
+    bin_h: u32,
+    gap_px: u32,
+    _polygons: &[Polygon],
+    rects: &[Rect],
+    trial_angles_deg: &[u16],
+    on_piece_begin: Option<&mut dyn FnMut(usize, usize)>,
+) -> (Vec<Placed>, Vec<FreeRect>, Vec<usize>, u32) {
+    log::info!(
+        "[packing::pack_polygons_extending] dispatch=multi-angle MaxRects (trial set {:?}); pieces={}, bin={}x{}",
+        trial_angles_deg, rects.len(), bin_w, bin_h,
+    );
+
+    layout_engine::pack_maxrects_multi_angle_extending(
+        bin_w,
+        bin_h,
+        gap_px,
+        rects,
+        trial_angles_deg,
+        on_piece_begin,
+    )
+} // fn pack_polygons_extending
+
 // ---------------------------------------------------------------------------
 // Tests — dispatcher routing only.  Per-packer behavior is tested in each
 // packer's own crate.
@@ -270,4 +305,24 @@ mod tests {
         assert_eq!(placed.len(), 1);
         assert_eq!(placed[0].id, 1);
     } // pack_polygons_lenient_skips_oversize_and_reports
+
+    // @brief Extending dispatch: the bin grows until the pieces that fit the
+    // width are placed; a piece too wide for the bin is still reported.
+    #[test]
+    fn pack_polygons_extending_grows_and_reports_too_wide() {
+        // id 0 is wider than the bin; ids 1-3 need three 8 px rows in a 8 px bin.
+        let rects = [Rect::new(40, 4), Rect::new(16, 8), Rect::new(16, 8), Rect::new(16, 8)];
+        let polys: Vec<Polygon> = rects
+            .iter()
+            .map(|r| {
+                let (w, h) = (r.w as f64, r.h as f64);
+                Polygon::new(vec![(0.0, 0.0), (w, 0.0), (w, h), (0.0, h)])
+            })
+            .collect();
+        let (placed, _free, unplaced, bin_h) =
+            pack_polygons_extending(16, 8, 0, &polys, &rects, &[0], None);
+        assert_eq!(unplaced, vec![0]);
+        assert_eq!(placed.len(), 3);
+        assert!(bin_h >= 24, "bin height grows to three rows, got {bin_h}");
+    } // pack_polygons_extending_grows_and_reports_too_wide
 }

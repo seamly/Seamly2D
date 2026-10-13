@@ -1371,12 +1371,14 @@ impl qobject::AppController {
 
         // Delegate to pure-logic function in layout_utils.rs.  A multisize layout
         // starts with the Marker tab: every size of every piece packs alone.
+        // Multisize tabs extend the media until every piece fits.
         let args = ProcessLayoutArgs {
             settings_json: &json_str,
             input_dom: &input_dom_clone,
             initial_layout_dom: &initial_layout_dom_clone,
             layout_h_px,
             nested_multisize: false,
+            extend_media: *self.is_multisize(),
         };
         // Progress callback drives both the bindable property (for the QML
         // ProgressBar overlay on the right canvas) and the signal (for any
@@ -1527,6 +1529,7 @@ impl qobject::AppController {
                     initial_layout_dom: &initial_dom,
                     layout_h_px,
                     nested_multisize: kind.nested(),
+                    extend_media: true, // every tab is a multisize tab
                 };
                 // Stage messages would hide the tab name; only the percentage moves.
                 let mut progress = |percent: i32, _status: Option<&str>| {
@@ -1589,9 +1592,11 @@ impl qobject::AppController {
         self.as_mut().set_is_layout_ready(true);
 
         if !problems.is_empty() {
+            // Each tab extends its media in length, so only a piece wider than the media is left out.
             let msg = format!(
                 "Some layouts left pieces out:\n\n{}\n\n\
-                 The remaining pieces were laid out. Try a larger sheet size, reduce the piece gap or margins, or remove pieces.",
+                 The remaining pieces were laid out. The media grows in length, not in width: \
+                 use wider media or smaller side margins.",
                 problems.join("\n")
             );
             self.as_mut().layout_warning(cxx_qt_lib::QString::from(msg.as_str()));

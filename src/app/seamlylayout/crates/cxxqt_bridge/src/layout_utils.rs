@@ -145,6 +145,10 @@ pub struct ProcessLayoutArgs<'a> {
     /// Multisize only: `true` packs each piece-set (one piece in every size) as one
     /// unit (Nested tab); `false` packs every size of every piece alone (Marker tab).
     pub nested_multisize: bool,
+    /// `true` extends a sheet, roll or fabric past its length until every piece
+    /// that fits its width is placed (multisize tabs).  `false` leaves out a piece
+    /// that does not fit.  Tiled paper ignores it.
+    pub extend_media: bool,
 }
 
 /// @brief Run the full layout pipeline: preprocess, pack, assemble, trim.
@@ -153,9 +157,10 @@ pub struct ProcessLayoutArgs<'a> {
 ///   1. Parse settings, extract bin dimensions from initial_layout_dom
 ///   2. Preprocess pieces: flatten → verticalize → flatten → translate → flatten
 ///   3. Extract piece rectangles
-///   4. Pack pieces into the bin with MaxRects
+///   4. Pack pieces into the bin with MaxRects; extended media grows the bin
 ///   5. Assemble output DOM
-///   6. Trim unused space (roll/fabric) or empty tile rows (tiled)
+///   6. Fit the canvas to extended media, trim unused space (roll/fabric) or
+///      empty tile rows (tiled)
 ///   7. Flatten output, build piece bbox JSON
 ///
 /// Calls progress_fn at each major stage with a percentage (20, 40, 60, 100).
@@ -480,15 +485,30 @@ pub fn do_process_layout(
         // piece too large for the sheet, or one that runs out of room, no longer
         // aborts the whole layout.  The layout renders the pieces that fit and
         // the unplaced piece ids are surfaced to the user as a warning popup.
-        let (placements, _created_rects, unplaced_ids) = packing::pack_polygons_lenient(
-            bin_w,
-            bin_h,
-            gap_px,
-            &polygons,
-            &rects,
-            &trial_angles_deg,
-            Some(&mut piece_status),
-        );
+        // Extended media grows past its length instead, so only a piece wider
+        // than the media is left out; `packed_bin_h` is the height it grew to.
+        let (placements, _created_rects, unplaced_ids, packed_bin_h) = if args.extend_media {
+            packing::pack_polygons_extending(
+                bin_w,
+                bin_h,
+                gap_px,
+                &polygons,
+                &rects,
+                &trial_angles_deg,
+                Some(&mut piece_status),
+            )
+        } else {
+            let (placements, created_rects, unplaced_ids) = packing::pack_polygons_lenient(
+                bin_w,
+                bin_h,
+                gap_px,
+                &polygons,
+                &rects,
+                &trial_angles_deg,
+                Some(&mut piece_status),
+            );
+            (placements, created_rects, unplaced_ids, bin_h)
+        }; // if extend_media
 
         // Map the unplaced original indices to their user-facing piece labels
         // (`data-name` where the handoff supplied one, so the warning reads
@@ -499,14 +519,15 @@ pub fn do_process_layout(
             .collect();
 
         log_to_file(&format!(
-            "[process_layout] non-tiled pack_polygons_lenient returned in {} ms with {} placements, {} unplaced: {:?}",
-            t_pack.elapsed().as_millis(), placements.len(), unplaced_labels.len(), unplaced_labels,
+            "[process_layout] non-tiled pack returned in {} ms with {} placements, {} unplaced: {:?}; bin_h {} -> {}",
+            t_pack.elapsed().as_millis(), placements.len(), unplaced_labels.len(), unplaced_labels, bin_h, packed_bin_h,
         ));
 
         progress_fn(60, None); // packing complete
 
-        // Non-tiled: keep the initial canvas and margins unchanged.
-        (placements, args.initial_layout_dom.clone(), bin_h, ml_px, mt_px, mb_px, layout_h_px, unplaced_labels)
+        // Non-tiled: keep the initial canvas and margins.  Step 7 sets the
+        // canvas height when the media was extended.
+        (placements, args.initial_layout_dom.clone(), packed_bin_h, ml_px, mt_px, mb_px, layout_h_px, unplaced_labels)
     }; // let (placements, ...) = if is_tiled
 
     // --- 6 create layout ---
@@ -537,15 +558,30 @@ pub fn do_process_layout(
     let max_bin_bottom = placements.iter().map(|p| p.y + p.h).max().unwrap_or(0);
     // compute the blank space below the lowest piece
     let blank_bottom = work_bin_h.saturating_sub(max_bin_bottom);
+    // The packer grew the bin past the media length.  Tiled paper never extends.
+    let extended = !is_tiled && work_bin_h > bin_h;
+
+    // 7a. Content height the canvas ends at.  Roll and fabric end at the lowest
+    // piece when the blank space below it is large.  Extended media always ends
+    // at the lowest piece, but an extended sheet keeps at least its own length.
+    let fitted_content_h = if extended && !settings.is_roll_form() {
+        Some(max_bin_bottom.max(bin_h))
+    } else if extended || (settings.is_roll_form() && blank_bottom > MIN_THRESHOLD_PX) {
+        Some(max_bin_bottom)
+    } else {
+        None
+    }; // fitted_content_h
+    if let Some(content_h) = fitted_content_h {
+        trim_bottom(&mut output_doc, content_h, work_mt_px, work_mb_px);
+        work_layout_h_px = work_mt_px + content_h + work_mb_px;
+        if extended {
+            log_to_file(&format!(
+                "[process_layout] media extended: content height {bin_h} px -> {content_h} px"
+            ));
+        } // if extended
+    } // if fitted_content_h
 
     if blank_bottom > MIN_THRESHOLD_PX {
-        // trim roll and fabric layouts
-        if settings.is_roll_form() {
-            // 7a. trim blank space below last piece for fabric or roll media
-            trim_bottom(&mut output_doc, max_bin_bottom, work_mt_px, work_mb_px);
-            work_layout_h_px = max_bin_bottom.saturating_add(work_mb_px);
-        } // end if is_roll
-
         // 7b trim tiled layout
         // Only runs when media is paper and paper_type is tiled — matches the
         // <g id="tiledRects"> structure produced by create_initial_tiled_layout_dom.
@@ -774,6 +810,7 @@ mod tests {
                 initial_layout_dom: &init.initial_dom,
                 layout_h_px: init.h_px,
                 nested_multisize: false,
+                extend_media: false,
             },
             &mut progress,
         ).expect("process_layout should succeed on the tagged handoff");
@@ -888,6 +925,7 @@ mod tests {
                 initial_layout_dom: &init.initial_dom,
                 layout_h_px: init.h_px,
                 nested_multisize: false,
+                extend_media: false,
             },
             &mut progress,
         ).expect("process_layout should succeed on the trousers handoff")
@@ -927,6 +965,7 @@ mod tests {
                 initial_layout_dom: &init.initial_dom,
                 layout_h_px: init.h_px,
                 nested_multisize: nested,
+                extend_media: false,
             },
             &mut progress,
         ).expect("process_layout should succeed on the multisize handoff")
@@ -948,6 +987,7 @@ mod tests {
                 initial_layout_dom: &init.initial_dom,
                 layout_h_px: init.h_px,
                 nested_multisize: false,
+                extend_media: false,
             },
             size,
             &mut progress,
@@ -1033,6 +1073,7 @@ mod tests {
                     layout_h_px: init.h_px,
                     // Nested must not matter for a single size.
                     nested_multisize: true,
+                    extend_media: false,
                 },
                 size,
                 &mut progress,
@@ -1055,6 +1096,7 @@ mod tests {
                 initial_layout_dom: &init.initial_dom,
                 layout_h_px: init.h_px,
                 nested_multisize: false,
+                extend_media: false,
             },
             "99",
             &mut progress,
@@ -1218,6 +1260,7 @@ mod tests {
                 initial_layout_dom: &init.initial_dom,
                 layout_h_px: init.h_px,
                 nested_multisize: nested,
+                extend_media: false,
             },
             &mut progress,
         ).expect("process_layout should succeed on the jacket2 handoff")
@@ -1238,6 +1281,7 @@ mod tests {
                 initial_layout_dom: &init.initial_dom,
                 layout_h_px: init.h_px,
                 nested_multisize: false,
+                extend_media: false,
             },
             size,
             &mut progress,
@@ -1277,6 +1321,95 @@ mod tests {
             assert_eq!(svg.matches(&format!(r#"data-set-number="{set}""#)).count(), 26, "piece-set {set}: 26 sizes");
         } // for each piece-set
     } // jacket2_marker_places_every_size
+
+    // @brief Lay out the jacket2 Marker tab on extended media.
+    fn process_jacket2_extended(settings_json: &str) -> ProcessLayoutResult {
+        let (input_dom, _) = jacket2_handoff();
+        let init = do_initialize_layout(settings_json, Some(&input_dom))
+            .expect("initialize_layout should succeed");
+
+        let mut progress = |_pct: i32, _status: Option<&str>| {};
+        do_process_layout(
+            ProcessLayoutArgs {
+                settings_json,
+                input_dom: &input_dom,
+                initial_layout_dom: &init.initial_dom,
+                layout_h_px: init.h_px,
+                nested_multisize: false,
+                extend_media: true,
+            },
+            &mut progress,
+        ).expect("process_layout should succeed on the jacket2 handoff")
+    } // fn process_jacket2_extended
+
+    // @brief Canvas height of an extended layout: the SVG, backgroundRect and
+    // `layout_h_px` agree, and every placed piece is inside contentRect.
+    // @return Content rectangle height in pixels.
+    fn assert_canvas_holds_pieces(result: &ProcessLayoutResult) -> u32 {
+        let doc = &result.output_doc;
+        let attr = |id: &str, name: &str| -> u32 {
+            doc.get_attr_by_id(id, name).and_then(|v| v.parse().ok()).expect("frame attribute")
+        };
+        let svg_h: u32 = doc.root.attributes.get("height").and_then(|v| v.parse().ok()).expect("svg height");
+        assert_eq!(svg_h, result.layout_h_px, "svg height");
+        assert_eq!(attr("backgroundRect", "height"), svg_h, "backgroundRect height");
+
+        let (content_y, content_h) = (attr("contentRect", "y"), attr("contentRect", "height"));
+        let bbox: serde_json::Value = serde_json::from_str(&result.bbox_json).expect("valid JSON");
+        for piece in bbox["pieces"].as_array().expect("pieces array") {
+            let bottom = piece["y"].as_u64().unwrap() + piece["h"].as_u64().unwrap();
+            assert!(bottom <= u64::from(content_y + content_h), "{} ends below contentRect", piece["label"]);
+        } // for each placed piece
+        content_h
+    } // fn assert_canvas_holds_pieces
+
+    // @brief Marker on a 48 in × 500 in paper roll: 208 pieces need about 740 in.
+    // The roll grows until every piece is placed, then ends at the lowest piece.
+    #[test]
+    fn jacket2_marker_extends_paper_roll() {
+        let settings_json = serde_json::json!({
+            "unit": "in",
+            "mediaType": "paper",
+            "paperType": "roll",
+            "rollWidth": 48.0,
+            "marginLeft": 0.5,
+            "marginRight": 0.5,
+            "marginTop": 0.5,
+            "marginBottom": 0.5,
+            "pieceGap": 0.125,
+            "layoutMode": "alongGrainline"
+        }).to_string();
+        let marker = process_jacket2_extended(&settings_json);
+        assert!(marker.unplaced_labels.is_empty(), "unplaced: {:?}", marker.unplaced_labels);
+        assert_eq!(placed_count(&marker), 208, "Marker: pieces x sizes");
+
+        let content_h = assert_canvas_holds_pieces(&marker);
+        assert!(content_h > 500 * 96, "the roll grows past 500 in, content height {content_h} px");
+    } // jacket2_marker_extends_paper_roll
+
+    // @brief Marker on a 48 in × 48 in paper sheet: the sheet grows until every piece is placed.
+    #[test]
+    fn jacket2_marker_extends_paper_sheet() {
+        let settings_json = serde_json::json!({
+            "unit": "in",
+            "mediaType": "paper",
+            "paperType": "sheet",
+            "pageWidth": 48.0,
+            "pageHeight": 48.0,
+            "marginLeft": 0.5,
+            "marginRight": 0.5,
+            "marginTop": 0.5,
+            "marginBottom": 0.5,
+            "pieceGap": 0.125,
+            "layoutMode": "alongGrainline"
+        }).to_string();
+        let marker = process_jacket2_extended(&settings_json);
+        assert!(marker.unplaced_labels.is_empty(), "unplaced: {:?}", marker.unplaced_labels);
+        assert_eq!(placed_count(&marker), 208, "Marker: pieces x sizes");
+
+        let content_h = assert_canvas_holds_pieces(&marker);
+        assert!(content_h > 47 * 96, "the sheet grows past its length, content height {content_h} px");
+    } // jacket2_marker_extends_paper_sheet
 
     // @brief The DXF-ASTM warning dialog lists each piece once, by the name the user wrote.
     // The installed jacket2 hides every piece label and grainline, so all 8 pieces are listed.
