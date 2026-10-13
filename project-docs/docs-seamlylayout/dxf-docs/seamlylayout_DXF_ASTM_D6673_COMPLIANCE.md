@@ -138,8 +138,8 @@ Reports live beside the DXF files in `test-seamly-layout/layouts/<pattern>/`.
 | `male_shirt_R13_202610101837.dxf` | 1 | FullSleeve open line ends as curve points (DXF.21); FrontPanel L1 junction "should be curve" while L14 agrees (DXF.22) |
 | `male_shirt_R12_202610101837.dxf` | 2 | As R13, plus "File is not DXF R13" (expected for R12) |
 | `jacket2_40-146_nested_allsizes_R13_202610121136.dxf` | 2 | Both from 6 pieces named "Detail" (Layout.26.5); layer 5 mismatch, same cause; duplicate vertices (Layout.27.9) |
-| `jacket2_40-146_nested_size240_R13_202610121142.dxf` | 3 | 2 from the "Detail" names; Detail (4) and Detail (6) bends not turn points (DXF.23) |
-| `jacket2_40-146_marker_allsizes_R13_202610121149.dxf` | 3 | 2 from the "Detail" names; Detail (4) bend (DXF.23). Nothing graded (Layout.25, 27.3) |
+| `jacket2_40-146_nested_size240_R13_202610121142.dxf` | 3 | 2 from the "Detail" names; Detail (4) and Detail (6) bends not turn points: reader advisory (DXF.23) |
+| `jacket2_40-146_marker_allsizes_R13_202610121149.dxf` | 3 | 2 from the "Detail" names; Detail (4) bend: reader advisory (DXF.23). Nothing graded (Layout.25, 27.3) |
 
 Advisories in the 2026-10-10 report: 4 pieces with no densified points (straight-sided pieces); FullSleeve hem turn point and ShortSleeve L14 pt 31 "maybe". Notch depths, curve tolerance and validation spans pass.
 

@@ -2,6 +2,22 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task DXF.23 — jacket2 size 240: a tight bend is not a turn point (completed 2026-10-13)
+
+aw.fyi reports in `test-seamly-layout/layouts/jacket2/`: "Corners missing from layer 2". Seamly2D `data-turn-points` declares no turn point at either bend.
+
+| Block | Bend | Dense vertex turns | Reduced layer 1 |
+|---|---|---|---|
+| Detail (4) `piece_Detail_s240-12_M`, L1 pt 14 | 6.5° over 10 mm, after a straight run | 2.5°, 2.9°, 1.1° | 5.2° at pt 14; 0.6° and −0.5° beside it |
+| Detail (6) `piece_Detail_s240-14_M` | 40° within 2 mm | 7.1°, 8.9°, 16.3°, 8.1° | 45.4° at pt 6 |
+
+- A sharp corner fits each bend within the 0.25 mm curve tolerance. aw.fyi reads a corner; SeamlyLayout reads a curve.
+- No `astm_contour.rs` rule applies. Detail (4): 2.5° is not 2 × the next vertex's 2.9° (`TANGENT_BREAK_RATIO`). Detail (6): no straight run; `TURN_ANGLE_DEG` (25°) applies only to untagged input.
+- Detail (6) size 500 bends over 15 mm: a curve. A turn point at size 240 only makes the sizes differ, and grading fails (Layout.27.3).
+- [x] DXF.23.1 Detail (6): accept as a reader advisory (user decision)
+- [x] DXF.23.2 Detail (4): accept as a reader advisory; add it to the DXF.22.1 report (user decision)
+- No code change.
+
 ## Task Layout.29 — Notch attributes: one value per notch, not per line segment (completed 2026-10-12)
 
 Found in `TEST_CHECKLIST.md` §2: BackPanel `data-notch-type` holds 15 words for 2 notches (`slit` + 14 × `uNotch`). One word per notch (user decision: D1).

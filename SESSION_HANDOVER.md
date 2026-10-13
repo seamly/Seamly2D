@@ -24,7 +24,7 @@
 
 - Reports in `test-seamly-layout/layouts/jacket2/`: marker_allsizes 1149 (user named), nested_allsizes 1136, nested_size240 1142. All from MSI 26.10.1115.
 - Result: grading not verified. Marker graded nothing. Nested graded 4 pieces; its departures come from the shared "Detail" name (Layout.26.5, fixed later).
-- New: DXF.23. Detail (4) and Detail (6) bends at size 240 are not turn points. Open: user decisions DXF.23.1 and 23.2.
+- DXF.23: Detail (4) and Detail (6) bends at size 240 are not turn points. Done: both accepted as reader advisories, no code change (D8).
 - Next: Layout.61.7.2, user re-exports Nested with MSI 26.10.1220 or later. Layout.61.7.3, Marker after Layout.25 and 27.10.
 - `TODO_SEAMLYLAYOUT.md`: only the Layout.61.7 lines are committed. The user's other edits in that file stay uncommitted.
 
@@ -88,6 +88,7 @@ Root causes are in `TODO_SEAMLYLAYOUT.md` under each task. One commit per step. 
 - D5 track `test-seamly-layout/` in git.
 - D6 `CLAUDE.md`: handover name fixed; missing richmond-shirt reference removed.
 - D7 FrontPanel (DXF.22): user reports to ApparelWerks after every other open task is complete; accept as reader advisory until he replies.
+- D8 jacket2 size 240 bends (DXF.23): Detail (4) and Detail (6) are reader advisories. Detail (4) goes in the DXF.22.1 report.
 - Layout.28 stays in `TODO_SEAMLYLAYOUT.md`: it affects the layout program.
 - On-fold quantity `N,0`: keep (checklist §6).
 - Blank `Sample Size:` and `Grade Rule Table:` when nothing grades: accepted (checklist §4).
@@ -151,6 +152,7 @@ These items have no recorded resolution. Check their TODO documents and reposito
 ### Last — User: after every other open task
 
 - Report DXF.22 to rick@apparelwerks.com: same FrontPanel corner, L1 "should be curve", L14 "agree"; earlier export the reverse.
+  - Add jacket2 Detail (4) size 240, L1 pt 14: a 6.5° bend over 10 mm read as a missing corner (DXF.23).
 
 ## Blocked items
 

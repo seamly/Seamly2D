@@ -35,8 +35,8 @@ Reference: `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`.
 | FullSleeve_M: 10 L3 points at pleat (L8) and slit (L11) ends "not needed – definite" (DXF.19 repeat, now as curve points); report on `male_shirt_R13_202610101837.dxf` | departure | DXF.21 |
 | FrontPanel_M L1 pt 3: line→curve junction turn point "should be curve"; L14 pt 39, same geometry, agrees | departure | DXF.22 |
 | FullSleeve_M L1 pt 1 / L14 pt 36: hem turn point "maybe curve"; ShortSleeve_M L14 pt 31 "maybe" | advisory | No action (DXF.20.2) |
-| jacket2 Detail (4) size 240 L1 pt 14: 6.5° bend not a turn point; reports on `jacket2_40-146_marker_allsizes_R13_202610121149.dxf`, `jacket2_40-146_nested_size240_R13_202610121142.dxf` | departure | DXF.23 |
-| jacket2 Detail (6) size 240: 40° bend not a turn point; report on `jacket2_40-146_nested_size240_R13_202610121142.dxf` | departure | DXF.23 |
+| jacket2 Detail (4) size 240 L1 pt 14: 6.5° bend not a turn point; reports on `jacket2_40-146_marker_allsizes_R13_202610121149.dxf`, `jacket2_40-146_nested_size240_R13_202610121142.dxf` | departure | Reader advisory; in the DXF.22.1 report (DXF.23, done) |
+| jacket2 Detail (6) size 240: 40° bend not a turn point; report on `jacket2_40-146_nested_size240_R13_202610121142.dxf` | departure | Reader advisory (DXF.23, done) |
 | jacket2 piece-113 L14 16 curve points, Detail (4) size 500 L1 13 curve points; each fits 3 primitives; report on `jacket2_40-146_nested_allsizes_R13_202610121136.dxf` | advisory | No action |
 
 Report deviations carry an inch sign but match millimetres. Not verified.
@@ -66,23 +66,7 @@ Same report. FrontPanel_M top edge, where the straight line meets the curve (L1 
 - Geometry is the same on both lines: tangent break 2.79° (L1) / 2.85° (L14) at the junction, 1.15° / 1.05° at the next dense vertex. Key-point angles 4.86° / 6.29° on both. Arc tangent through the next two key points: 1.57° / 1.62°.
 - No code change: the turn point stays. Any rule that changes L1 also changes L14.
 - [ ] DXF.22.1 User: report the contradiction to ApparelWerks (rick@apparelwerks.com) after every other open task is complete. Until he replies, accept it as a reader advisory (user decision)
-
-## [ ] Task DXF.23 — jacket2 size 240: a tight bend is not a turn point
-
-aw.fyi reports in `test-seamly-layout/layouts/jacket2/`: "Corners missing from layer 2". Seamly2D `data-turn-points` declares no turn point at either bend.
-
-| Block | Bend | Dense vertex turns | Reduced layer 1 |
-|---|---|---|---|
-| Detail (4) `piece_Detail_s240-12_M`, L1 pt 14 | 6.5° over 10 mm, after a straight run | 2.5°, 2.9°, 1.1° | 5.2° at pt 14; 0.6° and −0.5° beside it |
-| Detail (6) `piece_Detail_s240-14_M` | 40° within 2 mm | 7.1°, 8.9°, 16.3°, 8.1° | 45.4° at pt 6 |
-
-- A sharp corner fits each bend within the 0.25 mm curve tolerance. aw.fyi reads a corner; SeamlyLayout reads a curve.
-- No `astm_contour.rs` rule applies. Detail (4): 2.5° is not 2 × the next vertex's 2.9° (`TANGENT_BREAK_RATIO`). Detail (6): no straight run; `TURN_ANGLE_DEG` (25°) applies only to untagged input.
-- Detail (6) size 500 bends over 15 mm: a curve. A turn point at size 240 only makes the sizes differ, and grading fails (Layout.27.3).
-- The report image does not show which Detail (6) point aw.fyi flags. Pt 6 is the likely one.
-- [ ] DXF.23.1 User decision, Detail (6): a bend of 25° or more that a corner fits within the curve tolerance is a turn point. Or accept as a reader advisory
-- [ ] DXF.23.2 User decision, Detail (4): accept as a reader advisory and add it to the DXF.22.1 report. Or add a rule
-- [ ] DXF.23.3 Implement in `astm_contour.rs`; tests in `astm_piece_test.rs`; compliance doc "Contour rules"
+  - Include jacket2 Detail (4) size 240, L1 pt 14: aw.fyi reads a 6.5° bend over 10 mm as a missing corner (DXF.23, `TODO_COMPLETED.md`)
 
 ## [ ] Task DXF.3 — Write DXF R13 (AC1012)
 
