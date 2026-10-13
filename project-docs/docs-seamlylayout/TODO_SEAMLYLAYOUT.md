@@ -176,6 +176,26 @@ Decision (user, 2026-10-11): remove the Settings "Multisize Layout" choice (Nest
 - [ ] Layout.23.7 Tests: Rust view labels and order; marker tab piece count = pieces × sizes; settings JSON without `multisizeLayout`
 - [ ] Layout.23.8 Docs: settings workflow, simple workflow, `TEST_CHECKLIST.md`
 
+## [ ] Task Layout.67 — Multisize tabs: Marker, Nested, Base Size, then each size
+
+Decision (user, 2026-10-13): simplify the multisize tabs and exports. Every tab takes its pieces from the imported SVG; no tab is built from grade rules. DXF-ASTM carries one size per file. Replaces Layout.22 and Layout.23. Layout.27.10 and Layout.61.7.3 no longer apply: the Marker tab has no DXF-ASTM export.
+
+| Tab | Packs | DXF-ASTM | Other exports |
+|---|---|---|---|
+| Marker | every size of every piece alone | none | yes |
+| Nested | each piece once, its sizes stacked | none | yes |
+| Base Size N | the base size | `# n` texts, layer 5, `.rul`, `Sample Size:N` | yes; Export all tabs skips it |
+| Size N | one size | no `.rul`, blank `Sample Size:` | yes |
+
+- [x] Layout.67.1 `layout_views`: `ViewKind` per tab; tab run Marker → Nested → Base Size → sizes; the base size's own tab reuses the Base Size layout
+- [x] Layout.67.2 Settings "Multisize Layout" removed (`SettingsDialog.qml`, `SettingsModel.{h,cpp}`, `layout_settings.rs`); a stored `multisizeLayout` key is ignored
+- [x] Layout.67.3 PDF and tiled exports take the packing mode from the shown tab
+- [x] Layout.67.4 DXF-ASTM grading: Base Size tab only; the base size block gets `# n` texts and the layer 5 line; no graded nest
+- [x] Layout.67.5 Export menu: DXF-ASTM disabled on Marker and Nested, with a note. Export all tabs: DXF-ASTM skips Marker and Nested; other formats skip Base Size
+- [x] Layout.67.6 Tests: Rust `layout_views`, grading, writer, Base Size and size tab exports (jacket2 included); Qt `SettingsModelTests::multisizeLayout_storedKeyIsDropped`
+- [x] Layout.67.7 Docs: DXF-ASTM compliance doc, simple workflow, settings workflow, `SVG-DATA-ATTRIBUTES.md`
+- [ ] Layout.67.8 User: on the next MSI, run `TEST_CHECKLIST.md` §7 "Multisize tabs"
+
 ## [ ] Task Layout.24 — Multisize export file name: tab name before the date stamp
 
 Default name of a multisize export: `<base>[_<segment>]_<tab>_<stamp>[_tiled].<ext>`. Example: `mypatternname_R13_Size220_202610112043.dxf`. An individual pattern keeps `<base>[_<segment>]_<stamp>[_tiled].<ext>`.
