@@ -169,7 +169,7 @@ Evidence (jacket2, Marker, 48 in × 500 in paper roll): the pack placed 96 of 20
 
 ## [ ] Task Layout.26 — DXF-ASTM Missing Piece Data dialog: one readable line per piece
 
-Found with the installed sample `jacket2_40-146.sm2d` (`gost_man_ru.smms`), "All sizes" tab, Marker. Evidence: `test-seamly-layout/layouts/jacket2/jacket2_marker_screenshot_2.png`, `jacket2_nested_screenshot_1.png`. The installed sample has Cyrillic names because the local MSI ships stale copies (Layout.30). The pattern hides each piece label and grainline (`visible="false"`), so those warnings are correct.
+Found with the installed sample `jacket2_40-146.sm2d` (`gost_man_ru.smms`), "All sizes" tab, Marker. Evidence: `test-seamly-layout/layouts/jacket2/jacket2_marker_screenshot_2.png`, `jacket2_nested_screenshot_1.png`. The installed sample has Cyrillic names because the local MSI ships stale copies (Layout.40). The pattern hides each piece label and grainline (`visible="false"`), so those warnings are correct.
 
 - [ ] Layout.26.1 One line per piece, not one per placed size: group the blocks by `data-parent` (piece-set id)
 - [ ] Layout.26.2 The dialog clips its text: the last line is not visible. Add a scroll area; keep the buttons visible
@@ -206,13 +206,13 @@ Found in `TEST_CHECKLIST.md` §2: BackPanel `data-notch-type` holds 15 words for
 - [ ] Layout.29.4 Tests: `TST_SvgComponentTags::NotchGroupCarriesNotchTypes`, `TST_VPiece::NotchTypesFollowNodes`, Rust `notch_polylines` with a 14-segment U-notch
 - [ ] Layout.29.5 Docs: `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`, compliance doc "Notch rules", `TEST_CHECKLIST.md`
 
-## [ ] Task Layout.30 — Local MSI ships stale sample patterns
+## [ ] Task Layout.40 — Local MSI ships stale sample patterns
 
 The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`src/app/share/samples/patterns/`) has English names. `copyToDestdir` in `common.pri` skips a file that exists, so `src/app/seamly2d/bin/samples` and `src/app/seamlyme/bin/samples` keep copies from 2026-08-10. `smsi.ps1` stages those `bin` folders. CI builds from a clean checkout and is not affected.
 
-- [ ] Layout.30.1 `common.pri` `copyToDestdir`: on Windows copy every file on each link, not only a missing one
-- [ ] Layout.30.2 Check: after `local_build_msi.ps1`, `packaging/windows/seamly-msi/x64/parent/samples/patterns/jacket2_40-146.sm2d` matches the repo copy
-- [ ] Layout.30.3 `common.pri` is a `*.pri` change: the merge commit runs full CI (no skip-ci token)
+- [x] Layout.40.1 `common.pri` `copyToDestdir`: on Windows copy every file on each link, not only a missing one
+- [ ] Layout.40.2 Check: after `local_build_msi.ps1`, `packaging/windows/seamly-msi/x64/parent/samples/patterns/jacket2_40-146.sm2d` matches the repo copy
+- [x] Layout.40.3 `common.pri` is a `*.pri` change: the merge commit runs full CI (no skip-ci token)
 
 ## [ ] Task Layout.28 — Built-in seam allowance: show the seam line
 

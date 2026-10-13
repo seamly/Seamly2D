@@ -13,7 +13,8 @@ win32{
     unset(QMAKE_INSTALL_PROGRAM)
     QMAKE_INSTALL_PROGRAM = xcopy /y
 
-    VCOPY = $$QMAKE_COPY /D
+    # No /D: a destination file must match its source even when its timestamp is newer.
+    VCOPY = $$QMAKE_COPY
 }
 
 # Use platform-appropriate copy commands when staging runtime files into the target directory.
@@ -68,7 +69,9 @@ CONFIG -= debug_and_release debug_and_release_target
 # We need this information also in release builds. For this need define QT_MESSAGELOGCONTEXT.
 DEFINES += QT_MESSAGELOGCONTEXT
 
-# Copies the given files to the destination directory
+# Copies the given files to the destination directory on every link.
+# Windows copies even when the destination file exists: an in-source build
+# keeps its bin directory, so a skipped copy ships a stale file in the MSI.
 defineTest(copyToDestdir) {
     files = $$1
     DDIR = $$2
@@ -78,16 +81,12 @@ defineTest(copyToDestdir) {
         unix{
             QMAKE_POST_LINK += ln -s -f $$quote($$FILE) $$quote($$DDIR/$$basename(FILE)) $$escape_expand(\\n\\t)
         } else {
-            !exists($$DDIR/$$basename(FILE)) {
-                # Replace slashes in paths with backslashes for Windows
-                win32{
-                    FILE ~= s,/,\\,g
-                    DDIR ~= s,/,\\,g
-                }
-                message("copy:" $$quote($$FILE))
-                QMAKE_POST_LINK += $$VCOPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
+            # Replace slashes in paths with backslashes for Windows
+            win32{
+                FILE ~= s,/,\\,g
+                DDIR ~= s,/,\\,g
             }
-
+            QMAKE_POST_LINK += $$VCOPY $$quote($$FILE) $$quote($$DDIR) $$escape_expand(\\n\\t)
             QMAKE_CLEAN += $$DDIR/$$basename(FILE)
         }
     }
