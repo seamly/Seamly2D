@@ -11,7 +11,7 @@
 - Seam line corners use `PieceNodeAngle::ByLength`: node corner types shape only the cut line (user confirmed).
 - SeamlyLayout: no code change. Tests and comments only (`converter.rs`, `astm_notch.rs`).
 - Verified: `cargo test --workspace` 472 passed, 0 failed.
-- `local_build_msi.ps1` (with `nmake check`) was still running at merge time: `vpiece.cpp` and `vlayoutpiece.cpp` compiled; Qt suites not yet run. Record the result here.
+- `local_build_msi.ps1`: passed on the third run, with `nmake check`; MSI 26.10.1220 built (`packaging/windows/seamly-msi/x64/seamly-x64.msi`). Run 1: `std::numeric_limits<qreal>::max()` clashes with the Windows `max` macro (use `infinity()`). Run 2: `BuiltInSeamLineFollowsCurve` found the start-loop bug; fixed on `task-builtin-seamline-loops`, merged, branch deleted.
 - Open: Layout.28.7 user check. Seamly2D.11 (new, user decision): piece mode draws the built-in seam line.
 
 ### 2026-10-12 — notch work (was branch `task-notch-per-notch`), merged with Layout.28
@@ -22,10 +22,11 @@
   - `31714864c8` Layout.26: Unicode display names, `\U+XXXX` Piece Name, `Detail (3)` numbering, Marker `data-set-number`, dialog one line per piece + scroll.
   - `080278aa65` Layout.38.2.2 / 38.5: jacket2 fixture + 5 end-to-end tests.
 - Verified: `cargo test --workspace` 470 passed, 0 failed (jacket2 tests included, about 25 s each).
-- Not verified (user: build once at the end): `local_build_msi.ps1` (`nmake check` for the Layout.29 C++ tests), `ctest --preset debug`, QML dialog in the app. A started build was stopped in nmake; object files are partial.
+- Verified with Layout.28: `local_build_msi.ps1` (`nmake check` covers the Layout.29 C++ tests). Not verified: `ctest --preset debug`, QML dialog in the app.
 - Next: remaining plan steps 2, 8, 9, 10. Merged into `run-seamlyLayout` early (user request); push when the user asks.
 - Merge `3797bf8a6d` (Layout.40, `common.pri`) is on `origin/run-seamlyLayout`. The Layout.40 names merged without a conflict.
-- Build stamps: `projectversion.*` and both `Info.plist` files now say 26.10.1218. Do not commit.
+- Build stamps: `projectversion.*` and both `Info.plist` files now say 26.10.1220. Do not commit.
+- `TODO_SEAMLY2D.md` has the user's own uncommitted edits (Seamly2D.50 drill holes, Seamly2D.60 stripe and plaid lines). Leave them to the user.
 - `test_data/jacket2_40-146_nested_allsizes_R13_202610121813.dxf` untracked: no test uses it.
 
 ### Approved plan (user, 2026-10-12)
