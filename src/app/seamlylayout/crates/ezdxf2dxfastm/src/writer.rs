@@ -200,11 +200,8 @@ fn write_contour(
 // lines (8/85), cutouts (11/86), turn/curve points (2/3), grainline (7),
 // notches (4/80/81/83), annotation text (15), grade reference line (5),
 // grade rule identifiers.
-// A graded size block of a nest (D6673 §4.3.1.5) writes no turn, curve or
-// notch points and only the piece name, size name and quantity system text.
 // @param clo3d When true, the boundary and sew line polylines carry CLO3D group 250.
 fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContour, clo3d: bool) -> std::io::Result<()> {
-    let graded_size = block.grading.as_ref().is_some_and(|g| !g.sample);
     // Piece system text sits at the first boundary vertex.
     let anchor = boundary.reduced[0];
     let mut system_lines = vec![format!("Piece Name:{}", block.piece_name)];
@@ -215,9 +212,7 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
     if let Some(q) = &block.quantity {
         system_lines.push(format!("Quantity:{}", q));
     } // if quantity
-    if !graded_size {
-        system_lines.push(format!("Material:{}", block.material));
-    } // if not a graded size
+    system_lines.push(format!("Material:{}", block.material));
     for (i, line) in system_lines.iter().enumerate() {
         let position = Point::new(anchor.x, anchor.y - (i as f64 + 1.0) * SYSTEM_TEXT_HEIGHT_MM * 1.5);
         encode_astm_text(writer, "1", position, SYSTEM_TEXT_HEIGHT_MM, 0.0, line)?;
@@ -237,12 +232,11 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
     } // for each cutout
 
     // Layers 2 and 3 hold the turn and curve points of layers 1, 8, 11 and 14.
-    // A graded size takes them from the sample size block.
     let contours = std::iter::once(boundary)
         .chain(&block.sew_lines)
         .chain(&block.internal_lines)
         .chain(&block.cutouts)
-        .filter(|c| !graded_size && c.declares_points());
+        .filter(|c| c.declares_points());
     for contour in contours {
         for (p, &turn) in contour.reduced.iter().zip(&contour.turn) {
             encode_dxf_point(writer, &DxfPoint::new(if turn { "2" } else { "3" }, *p))?;
@@ -258,8 +252,7 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
         write_group_code_float(writer, 21, p2.y)?;
     } // if grainline
 
-    // A graded size takes its notches from the sample size block and the grade rules.
-    for notch in block.notches.iter().filter(|_| !graded_size) {
+    for notch in &block.notches {
         encode_notch(writer, notch)?;
     } // for each notch
 
@@ -268,7 +261,7 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
     } // for each annotation
 
     if let Some(grading) = &block.grading {
-        // Every block of a nest has the grade reference line; stacking on it aligns the sizes.
+        // The grade reference line gives the X axis of the rules (D6673 §4.3.5).
         let (p1, p2) = grading.reference_line;
         write_group_code(writer, 0, "LINE")?;
         write_group_code(writer, 8, "5")?;

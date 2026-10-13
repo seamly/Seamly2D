@@ -239,6 +239,8 @@ ApplicationWindow {
     // Each tab becomes the export source in turn, silently; the shown tab is
     // selected again at the end.  One dialog lists every file.  The first
     // failure stops the run; its error dialog is already open.
+    // The controller decides which tabs a format writes: DXF-ASTM skips Marker
+    // and Nested, the other formats skip Base Size.
     // @param fmt  pendingExportFormat value.
     // @param path File path from the save dialog.
     function exportEachTab(fmt, path) {
@@ -253,6 +255,7 @@ ApplicationWindow {
         root.batchExportRunning = true
         var ok = true
         for (var i = 0; i < count && ok; ++i) {
+            if (!appController.exportTabIncluded(i, fmt)) continue // this format does not write this tab
             if (!appController.selectExportTab(i)) {
                 ok = false
                 errorDialog.errorText = "Export all tabs: could not select tab \"" + appController.layoutViewLabels[i] + "\"."
@@ -297,17 +300,17 @@ ApplicationWindow {
         } // onTriggered
     } // Timer exportStartTimer
 
-    // Lays out one queued size of a multisize import per tick.  The pause
-    // between sizes lets the progress popup repaint with the next size name.
+    // Lays out one queued tab of a multisize import per tick.  The pause
+    // between tabs lets the progress popup repaint with the next tab name.
     Timer {
-        id: sizeLayoutTimer
+        id: tabLayoutTimer
         interval: 50
         repeat: false
         onTriggered: {
-            appController.processNextSizeLayout()
-            if (appController.isSizeLayoutPending) sizeLayoutTimer.restart()
+            appController.processNextTabLayout()
+            if (appController.isTabLayoutPending) tabLayoutTimer.restart()
         } // onTriggered
-    } // Timer sizeLayoutTimer
+    } // Timer tabLayoutTimer
 
     // @brief Build a default export filename: <importedBaseName>[_<segment>]_YYYYMMDDHHMM[_tiled].<ext>
     // @param ext     File extension without dot (e.g. "dxf", "png").
@@ -380,10 +383,10 @@ ApplicationWindow {
         } // onImportFinished
 
         // Load the layout SVG in the right canvas after self.layout_dom is successfully created.
-        // A multisize layout then queues its sizes; the timer lays them out one by one.
+        // A multisize layout then queues its other tabs; the timer lays them out one by one.
         onLayoutFinished: {
             rightCanvas.reloadSvg(appController.getLayoutDomString())
-            if (appController.isSizeLayoutPending) sizeLayoutTimer.restart()
+            if (appController.isTabLayoutPending) tabLayoutTimer.restart()
         } // onLayoutFinished
 
         // Export success — store path for View menu; show dialog or open viewer.
@@ -506,6 +509,8 @@ ApplicationWindow {
         pdfTiledExportEnabled: settingsModel.paperType === "tiled"
         hasLayoutTabs:        appController.layoutViewLabels.length > 1
         exportAllTabs:        root.exportAllTabs
+        // Marker and Nested hold every size; DXF-ASTM exports one size per file.
+        dxfExportEnabled:     appController.dxfExportAllowed || root.exportAllTabsActive
         onExportAllTabsToggled: function(checked) { root.exportAllTabs = checked }
         labelTextState:       appController.labelTextState
         lastSvgTextMode:      preferencesModel.svgTextMode
@@ -900,7 +905,7 @@ ApplicationWindow {
                 border.color: appController.isAdjustMode ? Theme.violetLight : "transparent"
                 border.width: appController.isAdjustMode ? 3 : 0
 
-                // Size tabs of a multisize layout: "All sizes", then one per size.
+                // Tabs of a multisize layout: Marker, Nested, Base Size, then one per size.
                 // Hidden when there is only one layout.  Locked while a layout
                 // runs or Adjust Mode is open, so an edit stays on one tab.
                 TabBar {
@@ -1104,7 +1109,6 @@ ApplicationWindow {
     SettingsDialog {
         id: settingsDialog
         model: settingsModel
-        isMultisize: appController.isMultisize
 
         // When the user clicks Submit, build the initial canvas (blank page + content
         // rectangle) from the submitted settings and display it in the right canvas.

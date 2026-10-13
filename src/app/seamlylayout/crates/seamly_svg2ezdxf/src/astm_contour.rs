@@ -310,7 +310,7 @@ impl GradeSize {
     } // fn kept
 } // impl GradeSize
 
-/// @brief Key points that correspond across the sizes of a graded nest (D6673 §4.3.1.5).
+/// @brief Key points that correspond across the sizes of one piece line, for its grade rules.
 /// @details Every size gets the same turn points and the same curve points: curve
 ///          point j sits at the same arc-length fraction of the same span in every
 ///          size. Curve points are added until the reader splines of every size stay

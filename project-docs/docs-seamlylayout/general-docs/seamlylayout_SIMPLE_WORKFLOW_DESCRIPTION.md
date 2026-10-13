@@ -182,16 +182,20 @@ The application workflow loop consists of:
      * Disable 'Create Layout' button
      * Enable 'Adjust Layout' button
      * Enable 'Export' button
-   * Multisize import (data-measurements='multisize') — sized layouts:
-     * The first layout is the "All sizes" tab (Nested or Marker, from Settings).
-     * Then each size is laid out alone: only that size's pieces, one unit per piece, same settings.
-     * One size per UI tick (`processNextSizeLayout`); the progress popup names the size: "Laying out size 36 (2 of 5)…".
-     * 'Adjust Layout' and 'Export' stay disabled until the last size finishes.
-     * One warning after the last size lists every layout that left pieces out or failed.
-     * Tabs above the right canvas: "All sizes", "Size 34", "Size 36", …
+   * Multisize import (data-measurements='multisize') — one tab per layout, every tab from the imported SVG:
+     * "Marker": every size of every piece packs as its own piece. Laid out first.
+     * "Nested": each piece packs once, as a group of all its sizes, centred on the largest size.
+     * "Base Size 36": the base size (`data-base-size`) alone. Left out when the base size is not in `data-sizes`.
+     * "Size 34", "Size 36", …: each size alone, one unit per piece. The base size tab repeats the Base Size layout.
+     * One tab per UI tick (`processNextTabLayout`); the progress popup names the tab: "Laying out Size 36 (5 of 6)…".
+     * 'Adjust Layout' and 'Export' stay disabled until the last tab finishes.
+     * One warning after the last tab lists every layout that left pieces out or failed.
      * Selecting a tab swaps that layout into the controller's layout fields; Adjust Layout and every export use the selected tab.
+     * DXF-ASTM exports one size: the Base Size tab (with `# n` grade rule texts and the `.rul` file) or a size tab (ungraded, no `.rul`).
+       On the Marker and Nested tabs the DXF-ASTM items are disabled, and a note names the tabs to select.
      * Export > "Export all tabs" (checkable, shown only when tabs exist): every format then writes one file per tab.
-       * File name: the save-dialog name with the tab label before the extension: `shirt_all-sizes.pdf`, `shirt_size-36.pdf`.
+       * DXF-ASTM writes the Base Size and size tabs. Other formats write every tab but Base Size, which repeats its size tab.
+       * File name: the save-dialog name with the tab label before the extension: `shirt_marker.pdf`, `shirt_base-size-36.dxf`, `shirt_size-36.pdf`.
        * Each tab is made the export source silently (`selectExportTab`); the shown tab is restored at the end.
        * One "Export Complete" dialog lists every file. The first failure stops the run.
      * Tabs are locked during layout and during Adjust Mode.

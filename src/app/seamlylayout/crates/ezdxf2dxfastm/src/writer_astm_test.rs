@@ -382,7 +382,7 @@ mod tests {
         }
     }
 
-    // @brief The grading fixtures, graded: layout drawing in `version`, and the grading warnings.
+    // @brief The grading fixtures, graded: base size layout drawing in `version`, and the grading warnings.
     fn graded_drawing(version: DxfVersion) -> (Drawing, Vec<String>) {
         let read = |name: &str| {
             let path = format!("{}/test_data/{name}", env!("CARGO_MANIFEST_DIR"));
@@ -390,6 +390,8 @@ mod tests {
         };
         let options = SvgToEzdxfOptions { dxf_version: version, ..SvgToEzdxfOptions::default() };
         let mut layout = svg_to_ezdxf(&read("multisize_grading_layout.svg"), &options).expect("layout converts");
+        // The Base Size tab lays out the base size only.
+        layout.blocks.retain(|b| b.size.as_deref() == Some("36"));
         let input = svg_to_ezdxf(&read("multisize_grading_input.svg"), &options).expect("input converts");
         let sizes: Vec<String> = ["34", "36", "38"].iter().map(|s| s.to_string()).collect();
         let warnings = seamly_svg2ezdxf::grade_drawing(&mut layout, &input, &sizes, "36");
@@ -406,45 +408,34 @@ mod tests {
         }
     }
 
-    // @brief Graded nest blocks (D6673 §4.3.1.5): the sample size carries every layer and the
-    //        `# n` texts; a graded size carries no layer 2, 3 or 4 points and no Material.
+    // @brief A graded export writes the sample size only (D6673 §4.3.1.4): every layer,
+    //        the full piece system text, a grade reference line and the `# n` texts.
     #[test]
-    fn graded_nest_blocks_follow_d6673() {
+    fn graded_sample_blocks_follow_d6673() {
         let (drawing, _) = graded_drawing(DxfVersion::R12);
-        let parsed = parse_dxf(&export_to_string(&drawing, "graded_nest", &dated_options()));
+        let parsed = parse_dxf(&export_to_string(&drawing, "graded_sample", &dated_options()));
         let names: Vec<&str> = parsed.blocks.iter().map(|(n, _)| n.as_str()).collect();
-        assert_eq!(names, vec!["piece_Front_s34_M", "piece_Front_s36_M", "piece_Front_s38_M", "piece_Back_s36_M"]);
+        assert_eq!(names, vec!["piece_Front_s36_M", "piece_Back_s36_M"]);
 
         let texts = |entities: &[DxfEntity], layer: &str| -> Vec<String> {
             entities.iter().filter(|e| e.kind == "TEXT" && e.layer() == layer).map(|e| e.get(1).unwrap_or("").to_string()).collect()
         };
         let count = |entities: &[DxfEntity], kind: &str, layer: &str| entities.iter().filter(|e| e.kind == kind && e.layer() == layer).count();
         let is_rule_text = |t: &String| t.starts_with("# ");
-        for (name, entities) in &parsed.blocks[..3] {
-            let sample = name == "piece_Front_s36_M";
-            // Every block of the nest has one grade reference line.
-            assert_eq!(count(entities, "LINE", "5"), 1, "{name}: layer 5 line");
-            let system: Vec<String> = texts(entities, "1").into_iter().filter(|t| !is_rule_text(t)).collect();
-            let size = &name["piece_Front_s".len()..name.len() - 2];
-            if sample {
-                assert_eq!(system, vec!["Piece Name:Front", "Size Name:36", "Quantity:1,1", "Material:Fabric"]);
-                assert!(count(entities, "POINT", "2") > 0 && count(entities, "POINT", "4") == 1, "{name}: turn points and notch");
-                assert!(texts(entities, "1").iter().any(is_rule_text), "{name}: rule text on layer 1");
-                assert_eq!(texts(entities, "4").len(), 1, "{name}: rule text on the notch");
-            } else {
-                assert_eq!(system, vec!["Piece Name:Front".to_string(), format!("Size Name:{size}"), "Quantity:1,1".to_string()]);
-                for layer in ["2", "3", "4"] {
-                    assert_eq!(count(entities, "POINT", layer), 0, "{name}: no layer {layer} points in a graded size");
-                }
-                let rule_texts = entities.iter().filter(|e| e.kind == "TEXT" && e.get(1).is_some_and(|t| t.starts_with("# "))).count();
-                assert_eq!(rule_texts, 0, "{name}: no rule text in a graded size");
-            }
-        }
-        // Every block of the nest has the same boundary key point count.
-        let boundaries: Vec<usize> = parsed.blocks[..3].iter().map(|(_, e)| polyline_sizes(e, "1")[0]).collect();
-        assert!(boundaries.windows(2).all(|w| w[0] == w[1]), "{boundaries:?}");
-        // The fallen-back piece is an ordinary ungraded block.
-        assert_eq!(count(&parsed.blocks[3].1, "LINE", "5"), 0);
+
+        let (name, front) = &parsed.blocks[0];
+        assert_eq!(count(front, "LINE", "5"), 1, "{name}: layer 5 line");
+        let system: Vec<String> = texts(front, "1").into_iter().filter(|t| !is_rule_text(t)).collect();
+        assert_eq!(system, vec!["Piece Name:Front", "Size Name:36", "Quantity:1,1", "Material:Fabric"]);
+        assert!(count(front, "POINT", "2") > 0 && count(front, "POINT", "4") == 1, "{name}: turn points and notch");
+        assert!(texts(front, "1").iter().any(is_rule_text), "{name}: rule text on layer 1");
+        assert_eq!(texts(front, "4").len(), 1, "{name}: rule text on the notch");
+
+        // The piece that cannot grade is an ordinary ungraded block.
+        let (name, back) = &parsed.blocks[1];
+        assert_eq!(count(back, "LINE", "5"), 0, "{name}: no layer 5 line");
+        let rule_texts = back.iter().filter(|e| e.kind == "TEXT" && e.get(1).is_some_and(|t| t.starts_with("# "))).count();
+        assert_eq!(rule_texts, 0, "{name}: no rule text");
     }
 
     // @brief Style text names the sample size and the grade rule table.
@@ -499,7 +490,7 @@ mod tests {
     #[test]
     fn equal_rules_share_an_identifier() {
         let (drawing, _) = graded_drawing(DxfVersion::R12);
-        let sample = drawing.blocks.iter().find(|b| b.grading.as_ref().is_some_and(|g| g.sample)).expect("sample block");
+        let sample = drawing.blocks.iter().find(|b| b.grading.is_some()).expect("graded block");
         let texts = &sample.grading.as_ref().unwrap().rule_texts;
         let table = drawing.grade_rule_table.as_ref().unwrap();
         assert!(table.rules.len() < texts.len(), "{} rules for {} points", table.rules.len(), texts.len());

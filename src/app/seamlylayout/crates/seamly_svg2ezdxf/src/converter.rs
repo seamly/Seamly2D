@@ -253,7 +253,7 @@ fn add_piece_block(
             block.display_name = name.to_string();
         } // if non-empty
     } // if name attribute
-    // The piece-set id groups the sizes of one piece for a graded nest.
+    // The piece-set id groups the sizes of one piece for grading.
     block.parent = piece.attributes.get("data-parent").cloned();
     // Multisize pieces carry their size; an individual piece gets the sample size later.
     block.size = piece
