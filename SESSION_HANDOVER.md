@@ -24,8 +24,8 @@
   - Next commit: tracking (`TODO_SEAMLYLAYOUT.md` with the user's own edits, this file).
 - Verified: `cargo test --workspace` 470 passed, 0 failed (jacket2 tests included, about 25 s each).
 - Not verified (user: build once at the end): `local_build_msi.ps1` (`nmake check` for the Layout.29 C++ tests), `ctest --preset debug`, QML dialog in the app. A started build was stopped in nmake; object files are partial.
-- Next: remaining plan steps 2, 8, 9, 10; then one `local_build_msi.ps1`; then merge `--no-ff` into `run-seamlyLayout`, push. The push carries `common.pri`: run full CI (no skip-ci token).
-- `run-seamlyLayout` has merge `3797bf8a6d` (Layout.40, `common.pri`), not pushed. The working tree `common.pri` equals it. Before checking out `run-seamlyLayout`, run `git checkout -- common.pri`. A merge conflict in `TODO_SEAMLYLAYOUT.md` at Layout.30/40: keep the Layout.40 names.
+- Next: remaining plan steps 2, 8, 9, 10. Merged into `run-seamlyLayout` early (user request); push when the user asks.
+- Merge `3797bf8a6d` (Layout.40, `common.pri`) is on `origin/run-seamlyLayout`. The working tree `common.pri` equals it. Before checking out `run-seamlyLayout`, run `git checkout -- common.pri`. The Layout.40 names merged without a conflict.
 - Build stamps: `projectversion.*` and both `Info.plist` files now say 26.10.1218. Do not commit.
 - `test_data/jacket2_40-146_nested_allsizes_R13_202610121813.dxf` untracked: no test uses it.
 
