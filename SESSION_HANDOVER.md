@@ -2,6 +2,15 @@
 
 ## Current status
 
+### 2026-10-13 — Layout.68 PDF true size: merged into local `run-seamlyLayout`, not pushed
+
+- Every PDF page (PDF, PDF (Tiled), sheets) goes through `exports::render_tree_to_pdf_bytes`: 96 px = 72 pt. `app_core::render_pdf` removed.
+- Page side longer than 200 in: `/UserUnit` n, smallest whole number (user decision: a fabric layout can be longer than 500 in). 48 × 500 in → MediaBox `1152 × 12000`, `/UserUnit 3`.
+- Verified: `cargo test --workspace` 479 passed, 0 failed. `ctest --preset debug` 6 of 6 passed. No MSI built.
+- `app_core/Cargo.toml` still lists `svg2pdf`; nothing uses it. Removing it is a `Cargo.toml` change, so full CI.
+- Test fixture `test_tiled_settings` says `"Portrait"`; `compute_tile_dims` matches only lowercase, so its pages are landscape. The app sends lowercase. No change.
+- Open: Layout.68.5, user check on the next MSI.
+
 ### 2026-10-13 — jacket2 exports from MSI 26.10.1311 checked
 
 - Files: `test-seamly-layout/layouts/jacket2/*_20261013*`. Marker: SVG ×3, PDF, PNG, JPG, EPS, PS, PLT plot and cut. Nested: SVG, PDF, JPG, EPS, PS. DXF-ASTM R13: Base Size 500 (+ `.rul`), Size 220.
@@ -123,7 +132,7 @@ Kept in the session scratchpad only (lost). To repeat a check: parse DXF group-c
 
 ### Next items — Developer
 
-- Layout.68 PDF scale. Then Layout.25 and Layout.27.3 (repeat failures). Then Layout.70, 69, 27.11, 67.9.
+- Layout.25 (media grows past the 500 in roll, user decision), then Layout.27.3 (repeat failures). Then Layout.70, 69, 27.11, 67.9.
 - `TEST_CHECKLIST.md` line 104 names a `Front` piece; jacket2 has none. The file has user edits; ask before a change.
 
 ### Priority 1 — Developer: approved plan

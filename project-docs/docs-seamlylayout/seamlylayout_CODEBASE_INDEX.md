@@ -15,10 +15,11 @@ This document provides a high-level index of the main components, crates, and mo
 ## Rust Crates (`crates/`)
 
 - **app_core/** — Core application logic
-  - `src/lib.rs` — Main library file; SVG load, PDF / PNG / JPEG render
+  - `src/lib.rs` — Main library file; SVG load, PNG / JPEG render
 - **cli/** — Command-line interface
   - `src/main.rs` — CLI entry point
 - **cxxqt_bridge/** — Rust↔Qt bridge (CXX-Qt)
+  - `src/exports.rs` — export formats; `render_tree_to_pdf_bytes` renders every PDF page at true size
 - **ezdxf2dxfastm/** — DXF conversion utilities
 - **geometry/** — Geometric primitives and algorithms
 - **hpgl_writer/** — HP-GL/1 export for pen plotters and cutters

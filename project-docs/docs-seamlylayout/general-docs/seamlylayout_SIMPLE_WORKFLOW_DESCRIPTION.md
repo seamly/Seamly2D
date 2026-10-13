@@ -231,8 +231,8 @@ The application workflow loop consists of:
 
    * NOTE: Saves exported files to /output directory
    * DXF-ASTM:
-   * PDF:
-   * PDF Tiled:
+   * PDF: one page at true size. A page longer than 200 in gets `/UserUnit` (see `export-docs/seamlylayout_EXPORT_WORKFLOW.md`).
+   * PDF Tiled: a thumbnail page, then one page per tile; each page is the paper size.
 
 ## Operations outside of workflow loop:
 
