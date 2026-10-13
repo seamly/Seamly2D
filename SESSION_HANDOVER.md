@@ -2,6 +2,24 @@
 
 ## Current status
 
+### 2026-10-12 — Next item: `TEST_CHECKLIST.md` §4 `Piece Name:` check (lines 104–112)
+
+- Finding: Nested All sizes DXF writes `Piece Name:piece-1_s220_M`, `piece-9_s240_M`, … No `Front`.
+- Cause of `piece-N_sNNN_M`: `sanitize_ascii` empties Комір and Подборт; the writer falls back to the block id (Layout.26.4).
+- Cause of unnumbered `Detail`: Layout.26.5.
+- `Front`: checklist text error. jacket2 has no Front piece.
+- Both exports predate the fix (Layout.26 commit `31714864c8`, 19:01):
+  - `..._202610121136.dxf`: MSI 26.10.1115.
+  - `..._202610121813.dxf`: `Author:Seamly;Seamly2D;26.10.1214`. 52 `piece-N` (2 pieces × 26 sizes), 56 unnumbered `Detail`.
+- Fix in code: `\U+XXXX` escapes, `Detail (n)`. Test `jacket2_all_sizes_export_names_every_size_alike` (`cxxqt_bridge/src/layout_utils.rs`) passed in the 472-test run.
+- Not verified in the installed app. MSI 26.10.1220 (`packaging/windows/seamly-msi/x64/seamly-x64.msi`) has the fix. No export from it yet.
+- Steps:
+  1. User: install MSI 26.10.1220. Export jacket2 Nested All sizes, DXF-ASTM R13 (same as Layout.61.7.2).
+  2. Check `Author:Seamly;Seamly2D;` says 26.10.1220 or later.
+  3. Expect `Piece Name:`: `\U+041A\U+043E\U+043C\U+0456\U+0440` ×26, `\U+041F\U+043E\U+0434\U+0431\U+043E\U+0440\U+0442` ×26, `Detail (4)` ×26, `Detail (5)` ×26, `Detail (3)`, `(6)`, `(7)`, `(8)` ×1 each. No `piece-`.
+  4. Any `piece-` name left: fix it in the next iteration; do not re-file. Start by diffing the installed handoff with `cxxqt_bridge/test_data/jacket2_40-146_202610121819.svg`.
+  5. Checklist line 104: replace `Front` with a jacket2 piece name. `TEST_CHECKLIST.md` has user edits; ask first.
+
 ### 2026-10-12 — Layout.61.7.1: jacket2 aw.fyi reports checked
 
 - Reports in `test-seamly-layout/layouts/jacket2/`: marker_allsizes 1149 (user named), nested_allsizes 1136, nested_size240 1142. All from MSI 26.10.1115.
@@ -91,6 +109,10 @@ Root causes are in `TODO_SEAMLYLAYOUT.md` under each task. One commit per step. 
 Kept in the session scratchpad only (lost). To repeat a check: parse DXF group-code pairs; count layer 2 `POINT`s per block (turn points by size); compare consecutive `VERTEX` 10/20 values within 0.01 mm (duplicates); read layer 5 `LINE` 10/20/11/21 (grade reference).
 
 ## TODO by priority and owner
+
+### Next item — User, then Developer
+
+- `TEST_CHECKLIST.md` §4 `Piece Name:` (lines 104–112). Steps in Current status, first entry.
 
 ### Priority 1 — Developer: approved plan
 
