@@ -10,7 +10,7 @@
   - `31714864c8` Layout.26: Unicode display names, `\U+XXXX` Piece Name, `Detail (3)` numbering, Marker `data-set-number`, dialog one line per piece + scroll.
   - `080278aa65` Layout.38.2.2 / 38.5: jacket2 fixture + 5 end-to-end tests.
   - Next commit: tracking (`TODO_SEAMLYLAYOUT.md` with the user's own edits, this file).
-- Verified: `cargo test --workspace` 469 passed (before the jacket2 tests; jacket2 tests pass alone, about 25 s each).
+- Verified: `cargo test --workspace` 470 passed, 0 failed (jacket2 tests included, about 25 s each).
 - Not verified (user: build once at the end): `local_build_msi.ps1` (`nmake check` for the Layout.29 C++ tests), `ctest --preset debug`, QML dialog in the app. A started build was stopped in nmake; object files are partial.
 - Next: remaining plan steps 2, 8, 9, 10; then one `local_build_msi.ps1`; then merge `--no-ff` into `run-seamlyLayout`, push. Full CI only if a `*.pri` or `packaging/` change joins the push.
 - Peer session `seamly2d-private-2a` works on Layout.30 in the same tree: branch `task-copy-samples`, `common.pri` uncommitted. Do not stage `common.pri`.
