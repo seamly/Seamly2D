@@ -79,7 +79,8 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 ## Boundary and sew lines
 
 - Boundary = longest closed `cutline` path.
-- No cut line (seam allowance hidden or built in): the longest closed `seamline` is the boundary.
+- No cut line (no seam allowance, or seam allowances not shown): the longest closed `seamline` is the boundary.
+- Built-in seam allowance: the `cutline` is the main path, so it is the boundary (layer 1). The `seamline` is the line Seamly2D computes inside it, a sew line (layer 14).
 - A seam line equal to the boundary is not repeated on layer 14.
 
 ## Notch rules (`astm_notch.rs`)
@@ -90,7 +91,7 @@ Every notch is a slit on layer 4, whatever shape Seamly2D drew (slit, T, U, V, c
 - Base = centre of the contacts. Angle = toward the inner vertices, counter-clockwise from +X.
 - Depth = half the seam allowance width at the notch. User decision: keep each edge's width as Seamly2D defines it.
 - Width source, first found:
-  1. Seamly2D's width for the notch node, `data-seam-allowances`: one value per notch. `data-notch-segments` gives each notch's segment count, so each segment gets the width of its notch. Without `data-notch-segments`, one value per segment. A list of the wrong length is ignored. The only source for a built-in seam allowance: its main path is the cut line, and it has no sew line.
+  1. Seamly2D's width for the notch node, `data-seam-allowances`: one value per notch. `data-notch-segments` gives each notch's segment count, so each segment gets the width of its notch. Without `data-notch-segments`, one value per segment. A list of the wrong length is ignored. The only source for a piece without a cut line.
   2. Distance from the base to the nearest sew line (`seam_allowance_at`), for an SVG without the attribute.
   3. None, or width under 0.1 mm: depth = drawn depth (farthest reach along the angle).
 - No width (group 39). Layers 80, 81, 83 are not written.

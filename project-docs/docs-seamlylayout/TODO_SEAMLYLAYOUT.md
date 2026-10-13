@@ -242,12 +242,20 @@ Seamly2D computes the seam line: only Seamly2D knows the seam allowance width at
 
 The task stays in this file: it changes what SeamlyLayout lays out and exports (user decision).
 
-- [ ] Layout.28.1 Seamly2D: seam line = main path offset inward by each node's width (wider of before and after; piece width when the node sets none)
-- [ ] Layout.28.2 Handoff of a built-in piece: main path as `cutline`, computed line as `seamline`. Same rule for a hidden seam line as a piece without a built-in seam allowance
-- [ ] Layout.28.3 SeamlyLayout canvas, Adjust Mode and every export draw the seam line. Packing still uses the cut line
-- [ ] Layout.28.4 DXF-ASTM: cut line is the boundary (layer 1); seam line is a sew line (layer 14)
-- [ ] Layout.28.5 Tests: `TST_SvgComponentTags` — a built-in piece has `cutline` and `seamline`; Rust — DXF layers 1 and 14 for a built-in piece
-- [ ] Layout.28.6 Docs: `SVG-DATA-ATTRIBUTES.md` (`cutline`, `seamline`, `data-seam-allowances`), `NEW-ATTRIBUTES.csv`, DXF-ASTM compliance doc, `TEST_CHECKLIST.md`
+- [x] Layout.28.1 Seamly2D: seam line = main path offset inward by each node's width (wider of before and after; piece width when the node sets none)
+  - `VPiece::builtInSeamLinePoints()`. A curve spreads the widths of its ends along its length. Corner types shape only the cut line: seam line corners are plain offset corners
+- [x] Layout.28.2 Handoff of a built-in piece: main path as `cutline`, computed line as `seamline`. Same rule for a hidden seam line as a piece without a built-in seam allowance
+  - `VLayoutPiece::createSeamlineItem()`, `createAllowanceItem()`. The built-in `cutline` is sent also when seam allowances are not shown: it is the piece outline
+- [x] Layout.28.3 SeamlyLayout canvas, Adjust Mode and every export draw the seam line. Packing still uses the cut line
+  - No SeamlyLayout code change: every view and export already draws `seamline` and `cutline` groups, and packing prefers `cutline`
+- [x] Layout.28.4 DXF-ASTM: cut line is the boundary (layer 1); seam line is a sew line (layer 14)
+  - No code change: `converter::extract_astm_piece` already does this for a piece with both lines
+- [x] Layout.28.5 Tests: `TST_SvgComponentTags` — a built-in piece has `cutline` and `seamline`; Rust — DXF layers 1 and 14 for a built-in piece
+  - `TST_SvgComponentTags::BuiltInPieceSendsCutlineAndSeamline`, `BuiltInPieceHiddenSeamLineSendsCutlineOnly`; `TST_VPiece::BuiltInSeamLineUsesWiderNodeWidth`, `BuiltInSeamLineFollowsCurve`
+  - Rust: `built_in_seam_allowance_writes_boundary_and_sew_line`, `built_in_seam_allowance_has_boundary_and_sew_line`, `built_in_seam_allowance_packs_by_its_cut_line`
+- [x] Layout.28.6 Docs: `SVG-DATA-ATTRIBUTES.md` (`cutline`, `seamline`, `data-seam-allowances`), `NEW-ATTRIBUTES.csv`, DXF-ASTM compliance doc, `TEST_CHECKLIST.md`
+- [ ] Layout.28.7 User: on the next MSI, run `TEST_CHECKLIST.md` §5 "Piece with a built-in seam allowance"
+- Not in this task: Seamly2D piece mode still draws no seam line for a built-in piece
 
 ## [x] Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 

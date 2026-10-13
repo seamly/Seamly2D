@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-10-12 — `task-builtin-seamline` (Layout.28) and `task-notch-per-notch` merged into local `run-seamlyLayout`, not pushed
+
+- User asked for Layout.28 outside the approved plan. Branched from `task-notch-per-notch`, not `run-seamlyLayout`: both change the notch and seam line handoff in `vlayoutpiece.cpp` and the DXF converter tests.
+- User asked to merge both branches before the MSI build finished. One `--no-ff` merge of `task-builtin-seamline` carries every `task-notch-per-notch` commit. Merged in a temporary worktree, so the running build kept its sources.
+- Not pushed: push only when the user asks. The task branches are not deleted: the main worktree still has `task-builtin-seamline` checked out.
+- Seamly2D: `VPiece::builtInSeamLinePoints()`; `VLayoutPiece` stores it (`setBuiltInSeamLinePoints()`). Built-in piece: main path → `cutline` (always, also with seam allowances not shown), computed line → `seamline` (omitted when hidden).
+- Seam line corners use `PieceNodeAngle::ByLength`: node corner types shape only the cut line (my decision; report to user).
+- SeamlyLayout: no code change. Tests and comments only (`converter.rs`, `astm_notch.rs`).
+- Verified: `cargo test --workspace` 472 passed, 0 failed.
+- `local_build_msi.ps1` (with `nmake check`) was still running at merge time: `vpiece.cpp` and `vlayoutpiece.cpp` compiled; Qt suites not yet run. Record the result here.
+- Open: Layout.28.7 user check; Seamly2D piece mode still draws no seam line for a built-in piece (not in Layout.28).
+
 ### 2026-10-12 — branch `task-notch-per-notch`, not merged, not pushed
 
 - Commits on the branch (from `run-seamlyLayout` `be2576e9b9`):
@@ -37,7 +49,7 @@ Root causes are in `TODO_SEAMLYLAYOUT.md` under each task. One commit per step. 
 | 12 | Docs | `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`, compliance doc, new `TEST_CHECKLIST.md` | each task | open |
 | 13 | Verify | `cargo test --workspace`, `ctest --preset debug`, `local_build_msi.ps1`; merge `--no-ff`; full CI (`common.pri` changed) | — | open |
 
-- Not in this round: Layout.22, 23, 24, 28. Next round: Layout.22 → 23 → 24.
+- Not in this round: Layout.22, 23, 24. Next round: Layout.22 → 23 → 24. Layout.28 done on `task-builtin-seamline` (user request).
 - Suggested order: 7 (small, Rust only) → 5 → 6 → 8 → 1 + 4 → 2 → 9 → 10 → 3.
 
 ### User decisions (2026-10-12)
