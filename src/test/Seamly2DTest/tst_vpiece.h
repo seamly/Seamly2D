@@ -87,6 +87,11 @@ private slots:
     void NotchSeamAllowanceWidths_data() const;
     void NotchSeamAllowanceWidths() const;
     void NotchTypesFollowNodes() const;
+    void DefaultNotchSizeConvertsToUnit_data() const;
+    void DefaultNotchSizeConvertsToUnit() const;
+    void NewNodeNotchSizeUsesPatternUnit() const;
+    void DefaultNotchSizeKeepsSizeAfterUnitChange() const;
+    void DefaultNotchSizeMovesLegacyValueToCm() const;
     void LayoutPieceKeepsQuantityAndFold() const;
     void BuiltInSeamLineUsesWiderNodeWidth_data() const;
     void BuiltInSeamLineUsesWiderNodeWidth() const;

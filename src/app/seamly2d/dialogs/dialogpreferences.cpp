@@ -168,12 +168,14 @@ void DialogPreferences::pageChanged(QListWidgetItem *current, QListWidgetItem *p
 //---------------------------------------------------------------------------------------------------------------------
 void DialogPreferences::Apply()
 {
-    m_configurePage->apply();
+    // The pattern page shows sizes in the old Default Units. It must store them before the unit changes.
     m_patternPage->Apply();
+    m_configurePage->apply();
     m_pathPage->Apply();
     m_graphicsPage->Apply();
 
     m_patternPage->initDefaultSeamAllowance();
+    m_patternPage->initNotchSize();
 
     qApp->Seamly2DSettings()->getOsSeparator() ? setLocale(QLocale()) : setLocale(QLocale::c());
     emit updateProperties();

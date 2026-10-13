@@ -137,6 +137,10 @@ try {
                     ((Get-IniValue -Path $slay -Section 'General' -Key 'projector_path') -eq 'https://patternprojector.com') -and
                     ((Get-IniValue -Path $slay -Section 'General' -Key 'hpgl_viewer_path') -eq 'https://tiny-online.tools/embroidery-cnc-tools/hpgl-plt-viewer'))
 
+    Assert-That -Name 'a fresh install shows notches on the cut line only' `
+        -Succeeded (((Get-IniValue -Path $s2d -Section 'pattern' -Key 'showSeamAllowanceNotch') -eq 'true') -and
+                    ($null -eq (Get-IniValue -Path $s2d -Section 'pattern' -Key 'doubleNotch')))
+
     $commonBytes = [System.IO.File]::ReadAllBytes($common)
     Assert-That -Name 'the seeded files carry no UTF-8 BOM' `
         -Succeeded (-not ($commonBytes.Length -ge 3 -and $commonBytes[0] -eq 0xEF -and $commonBytes[1] -eq 0xBB -and $commonBytes[2] -eq 0xBF))
@@ -211,12 +215,48 @@ unit=inch
     Assert-That -Name 'the existing configuration section survives' `
         -Succeeded ((Get-IniValue -Path $sectionIni -Section 'configuration' -Key 'unit') -eq 'inch')
 
+    # --- Update: notches on no line move to the cut line ---------------------
+    # Each case: existing [pattern] lines, then the expected cut-line and
+    # seam-line values after the run ($null = key absent).
+    $notchCases = @(
+        @{ Name = 'both false';        Lines = "showSeamAllowanceNotch=false`r`ndoubleNotch=false"; Cut = 'true';  Seam = 'false' },
+        @{ Name = 'both absent';       Lines = 'undo=0';                                            Cut = 'true';  Seam = $null },
+        @{ Name = 'cut 0, seam absent'; Lines = 'showSeamAllowanceNotch=0';                         Cut = 'true';  Seam = $null },
+        @{ Name = 'cut line only';     Lines = "showSeamAllowanceNotch=true`r`ndoubleNotch=false";  Cut = 'true';  Seam = 'false' },
+        @{ Name = 'seam line only';    Lines = "showSeamAllowanceNotch=false`r`ndoubleNotch=true";  Cut = 'false'; Seam = 'true' },
+        @{ Name = 'seam line, cut absent'; Lines = 'doubleNotch=true';                              Cut = $null;   Seam = 'true' },
+        @{ Name = 'both lines';        Lines = "showSeamAllowanceNotch=true`r`ndoubleNotch=true";   Cut = 'true';  Seam = 'true' }
+    )
+    $caseNumber = 0
+    foreach ($case in $notchCases) {
+        $caseNumber++
+        $notchLocal = Join-Path $testRoot "notch-$caseNumber"
+        $notchDirectory = Join-Path $notchLocal 'Seamly\Seamly2D'
+        New-Item -ItemType Directory -Path $notchDirectory -Force | Out-Null
+        $notchIni = Join-Path $notchDirectory 'qt6_seamly2d.ini'
+        [System.IO.File]::WriteAllText($notchIni,
+            "[pattern]`r`n$($case.Lines)`r`n`r`n[label]`r`ndateFormat=d MMMM yyyy`r`n",
+            [System.Text.UTF8Encoding]::new($false))
+
+        & $ensureScript -DataRoot (Join-Path $testRoot "notch-data-$caseNumber\seamly2d") `
+            -InstallFolder 'C:\Program Files\SeamlyApps' -LocalSettingsRoot $notchLocal | Out-Null
+
+        Assert-That -Name "notch update, $($case.Name): cut line and seam line as expected" `
+            -Succeeded (((Get-IniValue -Path $notchIni -Section 'pattern' -Key 'showSeamAllowanceNotch') -eq $case.Cut) -and
+                        ((Get-IniValue -Path $notchIni -Section 'pattern' -Key 'doubleNotch') -eq $case.Seam) -and
+                        ((Get-IniValue -Path $notchIni -Section 'label' -Key 'dateFormat') -eq 'd MMMM yyyy'))
+    }
+
     # --- A complete file stays byte-identical --------------------------------
     $repeatBefore = [System.IO.File]::ReadAllBytes($common)
+    $repeatSeamly2dBefore = [System.IO.File]::ReadAllBytes($s2d)
     & $ensureScript -DataRoot $freshData -InstallFolder 'C:\Program Files\SeamlyApps' -LocalSettingsRoot $freshLocal | Out-Null
     $repeatAfter = [System.IO.File]::ReadAllBytes($common)
+    $repeatSeamly2dAfter = [System.IO.File]::ReadAllBytes($s2d)
     Assert-That -Name 'a second run leaves a complete file byte-identical' `
         -Succeeded ([System.Linq.Enumerable]::SequenceEqual($repeatBefore, $repeatAfter))
+    Assert-That -Name 'a second run leaves a seeded qt6_seamly2d.ini byte-identical' `
+        -Succeeded ([System.Linq.Enumerable]::SequenceEqual($repeatSeamly2dBefore, $repeatSeamly2dAfter))
 
     # --- An existing SeamlyMe ini is never touched ---------------------------
     $meLocal = Join-Path $testRoot 'me'

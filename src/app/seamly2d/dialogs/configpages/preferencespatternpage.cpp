@@ -318,10 +318,6 @@ void PreferencesPatternPage::initializeLabelsTab()
 //---------------------------------------------------------------------------------------------------------------------
 void PreferencesPatternPage::initNotches()
 {
-    const Unit units = StrToUnits(qApp->Seamly2DSettings()->getUnit());
-    setMaxByUnits(ui->defaultNotchLength_DoubleSpinBox, 1.50);
-    setMaxByUnits(ui->defaultNotchWidth_DoubleSpinBox, 0.50);
-
     ui->defaultNotchType_ComboBox->addItem(QIcon(), tr("Slit"),       "slit");
     ui->defaultNotchType_ComboBox->addItem(QIcon(), tr("T Notch"),    "tNotch");
     ui->defaultNotchType_ComboBox->addItem(QIcon(), tr("U Notch"),    "uNotch");
@@ -344,10 +340,26 @@ void PreferencesPatternPage::initNotches()
     }
     ui->showSeamlineNotch_CheckBox->setChecked(qApp->Seamly2DSettings()->showSeamlineNotch());
     ui->showSeamAllowanceNotch_CheckBox->setChecked(qApp->Seamly2DSettings()->showSeamAllowanceNotch());
+    initNotchSize();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief initNotchSize shows the default notch length and width in the Default Units.
+ *
+ * DialogPreferences::Apply() calls it again, because a Default Units change converts the values.
+ */
+void PreferencesPatternPage::initNotchSize()
+{
+    const QString suffix = " " + UnitsToStr(StrToUnits(qApp->Seamly2DSettings()->getUnit()), true);
+
+    // Set the maximum first, so the old maximum does not clamp the new value.
+    setMaxByUnits(ui->defaultNotchLength_DoubleSpinBox, 1.50);
+    setMaxByUnits(ui->defaultNotchWidth_DoubleSpinBox, 0.50);
     ui->defaultNotchLength_DoubleSpinBox->setValue(qApp->Seamly2DSettings()->getDefaultNotchLength());
-    ui->defaultNotchLength_DoubleSpinBox->setSuffix(" " + UnitsToStr(units, true));
+    ui->defaultNotchLength_DoubleSpinBox->setSuffix(suffix);
     ui->defaultNotchWidth_DoubleSpinBox->setValue(qApp->Seamly2DSettings()->getDefaultNotchWidth());
-    ui->defaultNotchWidth_DoubleSpinBox->setSuffix(" " + UnitsToStr(units, true));
+    ui->defaultNotchWidth_DoubleSpinBox->setSuffix(suffix);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

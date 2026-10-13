@@ -81,8 +81,8 @@ public:
         , m_notchSubType(NotchSubType::Straightforward)
         , m_showNotch(qApp->Settings()->showSeamAllowanceNotch())
         , m_showSeamlineNotch(qApp->Settings()->showSeamlineNotch())
-        , m_notchLength(qApp->Settings()->getDefaultNotchLength())
-        , m_notchWidth(qApp->Settings()->getDefaultNotchWidth())
+        , m_notchLength(qApp->Settings()->getDefaultNotchLength(qApp->patternUnit()))
+        , m_notchWidth(qApp->Settings()->getDefaultNotchWidth(qApp->patternUnit()))
         , m_notchAngle(.000)
         , m_notchCount(1)
     {}
@@ -101,8 +101,8 @@ public:
         , m_notchSubType(NotchSubType::Straightforward)
         , m_showNotch(qApp->Settings()->showSeamAllowanceNotch())
         , m_showSeamlineNotch(qApp->Settings()->showSeamlineNotch())
-        , m_notchLength(qApp->Settings()->getDefaultNotchLength())
-        , m_notchWidth(qApp->Settings()->getDefaultNotchWidth())
+        , m_notchLength(qApp->Settings()->getDefaultNotchLength(qApp->patternUnit()))
+        , m_notchWidth(qApp->Settings()->getDefaultNotchWidth(qApp->patternUnit()))
         , m_notchAngle(.000)
         , m_notchCount(1)
     {

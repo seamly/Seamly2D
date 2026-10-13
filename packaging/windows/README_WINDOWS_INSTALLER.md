@@ -164,8 +164,12 @@ machine. Parameter table: [`README_WINDOWS_BUILD.md`](README_WINDOWS_BUILD.md).
    get every missing `[paths]` key, `SeamlyMe\qt6_seamlyme.ini` is created
    empty, `SeamlyLayout\qt6_seamlylayout.ini` gets the complete 11-key set
    (`PreferencesModel::load()` takes an existing ini as authoritative, so a
-   partial one must never be written). Add-only throughout: an existing
-   directory, file or key is never touched. Runs on every install with a
+   partial one must never be written). Add-only: an existing directory,
+   file or key is never touched, with one exception for Seamly2D's
+   Preferences > Notches > Properties. When neither
+   `[pattern] showSeamAllowanceNotch` (cut line) nor `doubleNotch` (seam
+   line) is true, the script sets `showSeamAllowanceNotch=true`. A fresh
+   install therefore shows notches on the cut line. Runs on every install with a
    resolved data root — fresh, update, **and repair** — so a repair can fill
    in anything missing. No app needs a Preferences > Paths visit, and no app
    seeds its own ini on an installed machine.

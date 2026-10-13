@@ -67,6 +67,60 @@
 
 #include <limits>
 
+namespace
+{
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief The NotchSettingsGuard class puts back the Default Units and notch size keys when it goes out of scope.
+ *
+ * The test application reads the developer's real qt6_seamly2d.ini. A key that was absent is removed again.
+ * The key names copy the private constants in vcommonsettings.cpp.
+ */
+class NotchSettingsGuard
+{
+public:
+    NotchSettingsGuard()
+        : m_settings(qApp->Settings())
+    {
+        for (const QString &key : keys())
+        {
+            if (m_settings->contains(key))
+            {
+                m_values.insert(key, m_settings->value(key));
+            }
+        }
+    }
+
+    ~NotchSettingsGuard()
+    {
+        for (const QString &key : keys())
+        {
+            if (m_values.contains(key))
+            {
+                m_settings->setValue(key, m_values.value(key));
+            }
+            else
+            {
+                m_settings->remove(key);
+            }
+        }
+    }
+
+private:
+    Q_DISABLE_COPY(NotchSettingsGuard)
+
+    static QStringList keys()
+    {
+        return {QStringLiteral("configuration/unit"),
+                QStringLiteral("pattern/defaultNotchLength"), QStringLiteral("pattern/defaultNotchWidth"),
+                QStringLiteral("pattern/defaultNotchLengthCm"), QStringLiteral("pattern/defaultNotchWidthCm")};
+    }
+
+    VCommonSettings          *m_settings;
+    QHash<QString, QVariant>  m_values;
+};
+} // namespace
+
 //---------------------------------------------------------------------------------------------------------------------
 TST_VPiece::TST_VPiece(QObject *parent)
     :AbstractTest(parent)
@@ -82,6 +136,7 @@ void TST_VPiece::ClearLoop()
     const Unit unit = Unit::Mm;
     QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
     qApp->setPatternUnit(unit);
+    const NotchSettingsGuard notchSettingsGuard;
     qApp->Settings()->setDefaultNotchLength(.250);
     qApp->Settings()->setDefaultNotchWidth(.250);
 
@@ -938,6 +993,111 @@ void TST_VPiece::NotchTypesFollowNodes() const
     QCOMPARE(layoutPiece.getNotchTypes(), types);
     QCOMPARE(layoutPiece.getNotchSeamAllowances(), widths);
     QCOMPARE(layoutPiece.getNotchLineCounts(), lineCounts);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::DefaultNotchSizeConvertsToUnit_data() const
+{
+    QTest::addColumn<QString>("defaultUnit");
+    QTest::addColumn<qreal>("length");
+    QTest::addColumn<qreal>("width");
+    QTest::addColumn<QString>("toUnit");
+    QTest::addColumn<qreal>("expectedLength");
+    QTest::addColumn<qreal>("expectedWidth");
+
+    QTest::newRow("inch to cm") << unitINCH << qreal(0.5)  << qreal(0.25) << unitCM   << qreal(1.27) << qreal(0.635);
+    QTest::newRow("inch to mm") << unitINCH << qreal(0.5)  << qreal(0.25) << unitMM   << qreal(12.7) << qreal(6.35);
+    QTest::newRow("cm to inch") << unitCM   << qreal(1.27) << qreal(0.635) << unitINCH << qreal(0.5) << qreal(0.25);
+    QTest::newRow("same unit")  << unitCM   << qreal(0.25) << qreal(0.1)  << unitCM   << qreal(0.25) << qreal(0.1);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief DefaultNotchSizeConvertsToUnit checks that the default notch length and width convert from the Default Units
+ * to the requested unit.
+ */
+void TST_VPiece::DefaultNotchSizeConvertsToUnit() const
+{
+    QFETCH(QString, defaultUnit);
+    QFETCH(qreal, length);
+    QFETCH(qreal, width);
+    QFETCH(QString, toUnit);
+    QFETCH(qreal, expectedLength);
+    QFETCH(qreal, expectedWidth);
+
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    VCommonSettings settings(directory.filePath(QStringLiteral("notch.ini")), QSettings::IniFormat);
+    settings.SetUnit(defaultUnit);
+    settings.setDefaultNotchLength(length);
+    settings.setDefaultNotchWidth(width);
+
+    QCOMPARE(settings.getDefaultNotchLength(StrToUnits(toUnit)), expectedLength);
+    QCOMPARE(settings.getDefaultNotchWidth(StrToUnits(toUnit)), expectedWidth);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief NewNodeNotchSizeUsesPatternUnit checks that a new piece node gets the default notch size in the pattern unit.
+ */
+void TST_VPiece::NewNodeNotchSizeUsesPatternUnit() const
+{
+    const NotchSettingsGuard notchSettingsGuard;
+    VCommonSettings *settings = qApp->Settings();
+    settings->SetUnit(unitINCH);
+    settings->setDefaultNotchLength(0.5);
+    settings->setDefaultNotchWidth(0.25);
+    qApp->setPatternUnit(Unit::Cm);
+
+    const VPieceNode node(1, Tool::NodePoint);
+    QCOMPARE(node.getNotchLength(), qreal(1.27));
+    QCOMPARE(node.getNotchWidth(), qreal(0.635));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief DefaultNotchSizeKeepsSizeAfterUnitChange checks that a Default Units change keeps the physical notch size.
+ */
+void TST_VPiece::DefaultNotchSizeKeepsSizeAfterUnitChange() const
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    VCommonSettings settings(directory.filePath(QStringLiteral("notch.ini")), QSettings::IniFormat);
+    settings.SetUnit(unitINCH);
+    settings.setDefaultNotchLength(0.5);
+    settings.setDefaultNotchWidth(0.25);
+
+    settings.SetUnit(unitCM);
+
+    QCOMPARE(settings.getDefaultNotchLength(), qreal(1.27));
+    QCOMPARE(settings.getDefaultNotchWidth(), qreal(0.635));
+    QCOMPARE(settings.value(QStringLiteral("pattern/defaultNotchLengthCm")).toReal(), qreal(1.27));
+    QCOMPARE(settings.value(QStringLiteral("pattern/defaultNotchWidthCm")).toReal(), qreal(0.635));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief DefaultNotchSizeMovesLegacyValueToCm checks that a legacy value reads in the Default Units, and that a
+ * Default Units change moves it to the cm key with its physical size.
+ */
+void TST_VPiece::DefaultNotchSizeMovesLegacyValueToCm() const
+{
+    QTemporaryDir directory;
+    QVERIFY(directory.isValid());
+    VCommonSettings settings(directory.filePath(QStringLiteral("notch.ini")), QSettings::IniFormat);
+    settings.setValue(QStringLiteral("configuration/unit"), unitINCH);
+    settings.setValue(QStringLiteral("pattern/defaultNotchLength"), 0.5);
+    settings.setValue(QStringLiteral("pattern/defaultNotchWidth"), 0.25);
+
+    QCOMPARE(settings.getDefaultNotchLength(), qreal(0.5));
+    QCOMPARE(settings.getDefaultNotchWidth(), qreal(0.25));
+
+    settings.SetUnit(unitCM);
+
+    QCOMPARE(settings.getDefaultNotchLength(), qreal(1.27));
+    QCOMPARE(settings.getDefaultNotchWidth(), qreal(0.635));
+    QVERIFY(!settings.contains(QStringLiteral("pattern/defaultNotchLength")));
+    QVERIFY(!settings.contains(QStringLiteral("pattern/defaultNotchWidth")));
 }
 
 //---------------------------------------------------------------------------------------------------------------------

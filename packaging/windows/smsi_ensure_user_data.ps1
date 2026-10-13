@@ -29,7 +29,7 @@
     whatever an earlier install already recorded, so this script only ever
     fills in what is missing.
 
-    Two things, both purely additive:
+    Three things:
 
     1. The nine standard subfolders under DataRoot (measurements/individual,
        measurements/multisize, templates, bodyscans, label templates,
@@ -41,6 +41,8 @@
        absent; an existing file only gets missing keys added, so an update
        or repair never overwrites a value already there - including one the
        user changed in Preferences.
+    3. Seamly2D's notch display (Set-DefaultNotchLine). The only change to
+       an existing value: notches that show on no line move to the cut line.
 
     SeamlyLayout's ini must be COMPLETE - all 11 keys. PreferencesModel::
     load() treats an existing ini as fully authoritative: a partial ini
@@ -236,6 +238,103 @@ function Add-IniKey {
     Write-Log "added $($missing.Count) missing key(s) to '$Path' [$Section]"
 }
 
+<#
+.SYNOPSIS
+    Reads one key from one ini section, or $null when the file, section, or key is absent.
+#>
+function Get-IniValue {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$Section,
+        [Parameter(Mandatory = $true)][string]$Key
+    )
+
+    if (-not (Test-Path -LiteralPath $Path)) {
+        return $null
+    }
+    $inSection = $false
+    foreach ($line in (Get-Content -LiteralPath $Path)) {
+        $trimmed = $line.Trim()
+        if ($trimmed -match '^\[(.+)\]$') {
+            $inSection = ($Matches[1] -eq $Section)
+        } elseif ($inSection -and $trimmed -match '^([^=;#]+)=(.*)$' -and $Matches[1].Trim() -eq $Key) {
+            return $Matches[2].Trim()
+        }
+    }
+    return $null
+}
+
+<#
+.SYNOPSIS
+    Sets one key in one ini section, replacing an existing value.
+
+.DESCRIPTION
+    Only for a key whose existing value the caller has already judged.
+    A missing key goes through Add-IniKey. Writes UTF-8 without BOM.
+#>
+function Set-IniValue {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$Section,
+        [Parameter(Mandatory = $true)][string]$Key,
+        [Parameter(Mandatory = $true)][string]$Value
+    )
+
+    if (Test-Path -LiteralPath $Path) {
+        $lines = [string[]](Get-Content -LiteralPath $Path)
+        $inSection = $false
+        for ($i = 0; $i -lt $lines.Count; $i++) {
+            $trimmed = $lines[$i].Trim()
+            if ($trimmed -match '^\[(.+)\]$') {
+                $inSection = ($Matches[1] -eq $Section)
+            } elseif ($inSection -and $trimmed -match '^([^=;#]+)=' -and $Matches[1].Trim() -eq $Key) {
+                $lines[$i] = '{0}={1}' -f $Key, $Value
+                [System.IO.File]::WriteAllText($Path,
+                    (($lines -join [System.Environment]::NewLine) + [System.Environment]::NewLine),
+                    [System.Text.UTF8Encoding]::new($false))
+                Write-Log "set '$Path' [$Section] $Key=$Value"
+                return
+            }
+        }
+    }
+
+    Add-IniKey -Path $Path -Section $Section -Pairs ([ordered]@{ $Key = $Value })
+}
+
+<#
+.SYNOPSIS
+    Converts an ini value to the bool that QVariant::toBool() returns for it.
+#>
+function ConvertTo-QtBool {
+    param([AllowNull()][AllowEmptyString()][string]$Value)
+
+    # A [string] parameter turns $null into '', so an absent key reads false.
+    return @('', '0', 'false') -notcontains $Value.Trim()
+}
+
+<#
+.SYNOPSIS
+    Shows Seamly2D notches on the cut line when they show on no line.
+
+.DESCRIPTION
+    Preferences > Notches > Properties holds two check boxes:
+    pattern/showSeamAllowanceNotch ("Show notch on Cut Line") and
+    pattern/doubleNotch ("Show notch on Seam Line"). VCommonSettings reads
+    both as false when absent. A fresh install therefore gets the cut line.
+    An update keeps any choice that shows notches on at least one line.
+#>
+function Set-DefaultNotchLine {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $cutLine = ConvertTo-QtBool (Get-IniValue -Path $Path -Section 'pattern' -Key 'showSeamAllowanceNotch')
+    $seamLine = ConvertTo-QtBool (Get-IniValue -Path $Path -Section 'pattern' -Key 'doubleNotch')
+    if ($cutLine -or $seamLine) {
+        Write-Log "'$Path' shows notches on a line; unchanged"
+        return
+    }
+    Set-IniValue -Path $Path -Section 'pattern' -Key 'showSeamAllowanceNotch' -Value 'true'
+}
+
 try {
     Write-Log "ensuring user data: DataRoot='$DataRoot' InstallFolder='$InstallFolder'"
 
@@ -282,7 +381,9 @@ try {
         'backups'         = "$root/backups"
         'seamlyLayoutApp' = "$install/seamlylayout.exe"
     }
-    Add-IniKey -Path (Join-Path $seamlyRoot 'Seamly2D\qt6_seamly2d.ini') -Section 'paths' -Pairs $seamly2dKeys
+    $seamly2dIni = Join-Path $seamlyRoot 'Seamly2D\qt6_seamly2d.ini'
+    Add-IniKey -Path $seamly2dIni -Section 'paths' -Pairs $seamly2dKeys
+    Set-DefaultNotchLine -Path $seamly2dIni
 
     # SeamlyMe's path keys live in qt6_common.ini. Its own file only has to
     # exist; the app supplies every other default at runtime.
