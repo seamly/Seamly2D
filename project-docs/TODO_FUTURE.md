@@ -114,3 +114,12 @@ Depends on Seamly2D.7. Until then every piece is on one fabric.
 - [ ] Layout.15.4 Exports: material in the default file name; DXF-ASTM `Material:` piece text from `data-material` (today `Block::material` is `DEFAULT_MATERIAL` = `Fabric`)
 - [ ] Layout.15.5 Tests: Rust import, packing per material, export text
 
+## [ ] Task Layout.16 — Fold lines in layout and export
+
+Depends on Seamly2D.8.
+
+- [ ] Layout.16.1 Import: read `data-on-fold` and the `fold_line` component
+- [ ] Layout.16.2 Layout setting: pack the half piece, or unfold it (mirror across the fold line) before packing
+- [ ] Layout.16.3 Adjust Mode: the fold line moves with its piece
+- [ ] Layout.16.4 DXF-ASTM: layer 6 mirror line; boundary starts or ends on the mirror line points (D6673 §4.3.6); unfolded pieces write no layer 6
+- [ ] Layout.16.5 Tests: Rust import, unfold geometry, layer 6 and boundary order

@@ -259,3 +259,6 @@ Pattern: `C:\Users\susan\seamly2d\patterns\jacket2_40-146.sm2d`.
   - [ ] Files: `test_Marker.pdf`, `test_Nested.pdf`, `test_Size220.pdf`, and so on.
 - [ ] Individual pattern (`.smis`), Export > PDF: `<pattern>_<stamp>.pdf`, with no tab.
 - [ ] CLO3D: import the Base Size `.dxf` with its `.rul`. Each piece appears once, graded.
+- [ ] PNG and JPG resolution (Layout.69). Size 220 tab, Export > PNG, then Export > JPG:
+  - [ ] Open each file in GIMP: Image > Print Size shows 96 pixels/in, not 72.
+  - [ ] Print the PNG at "Actual size": a known piece length measures true.
