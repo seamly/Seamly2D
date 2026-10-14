@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-10-14 — Layout.69, 67.9, 27.2, 27.8, 70, 27.11, 27.4, 27.5: merged into local `run-seamlyLayout`, not pushed
+
+- Merged an earlier session's branch `task-raster-dpi` (Layout.69 PNG/JPG 96 dpi; TODO shortened, Layout.16 to `TODO_FUTURE.md`). The user's uncommitted TODO edit was a subset of it; backup in the session scratchpad.
+- Finished that session's uncommitted work from worktree `Seamly2D-wt` (`task-dxf-export-report`): `DxfExportReport`, signal `export_companion_written`, "Export Complete" lists the `.rul`. Worktree and branch removed.
+- Layout.70: `piece_extractor::unplaced_piece_lines`, `seamly_svg2ezdxf::tagged_piece_names` (DXF numbering), `layout_views::unplaced_warning`; `warningDialog` scrolls.
+- Layout.27.11: `DUPLICATE_TOLERANCE_MM` 0.005 → 0.025, `SNAP_VERTEX_MM` follows it. jacket2 test found 6 near-duplicate vertices before.
+- Layout.27.4/27.5: `grade_contours` returns `GradeError`; warning names the size and line, e.g. "size 660 has other turn points than size 500 on the cut line".
+- Dead.1.4 checked (ci.yml `linux-test` runs both SeamlyLayout suites); Dead.1 moved to `TODO_COMPLETED.md`.
+- Verified: `cargo test --workspace` 510 passed; `ctest --preset debug` 6 of 6. No MSI (ask first).
+- Stale test binaries in `target/` from `Seamly2D-wt` embedded its path; `touch crates/svg_dom/src/lib.rs` forced a rebuild.
+- Open: every "Next MSI" item; Layout.27.3.2 (Qt suites via `local_build_msi.ps1`); Layout.27.7 and 27.12.3 need a new handoff from the next MSI.
+
 ### 2026-10-13 — Layout.24 tab name before the export timestamp: merged into local `run-seamlyLayout`, not pushed
 
 - Default name: `<base>[_<segment>][_<tab>]_<stamp>[_tiled].<ext>`; tab = shown tab of a multisize layout. Individual pattern: no tab.
