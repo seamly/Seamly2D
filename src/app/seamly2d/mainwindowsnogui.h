@@ -109,6 +109,7 @@ protected:
     QString baseSize;                      /**< base size of the multisize measurements, in pattern units */
 
     SizePieceList prepareSizePieceList(const QHash<quint32, VPiece> &pieces, const QString &size);
+    void          unifySizeTurnPoints();
 
     QGraphicsScene *currentScene;    /** @brief currentScene pointer to current scene. */
     QGraphicsScene *layout_scene; /** @brief pattern container with data (points, arcs, splines, spline paths, variables) */

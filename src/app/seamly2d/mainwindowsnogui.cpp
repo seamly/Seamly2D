@@ -938,6 +938,37 @@ MainWindowsNoGUI::SizePieceList MainWindowsNoGUI::prepareSizePieceList(const QHa
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief unifySizeTurnPoints gives every size of a piece the node turn points of all its sizes.
+ *
+ * Grading in SeamlyLayout needs the same turn points in every size of a piece. See
+ * VLayoutPiece::unifyTurnPoints().
+ */
+void MainWindowsNoGUI::unifySizeTurnPoints()
+{
+    if (sizePieceLists.size() < 2)
+    {
+        return;
+    }
+
+    const QVector<quint32> ids = sizePieceLists.first().pieceIds;
+    for (const quint32 id : ids)
+    {
+        // The same piece in every size that has it.
+        QVector<VLayoutPiece *> sizes;
+        for (SizePieceList &sizeList : sizePieceLists)
+        {
+            const int i = sizeList.pieceIds.indexOf(id);
+            if (i >= 0)
+            {
+                sizes.append(&sizeList.pieces[i]);
+            }
+        }
+        VLayoutPiece::unifyTurnPoints(sizes);
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void MainWindowsNoGUI::InitTempLayoutScene()
 {
     layout_scene = new VMainGraphicsScene();

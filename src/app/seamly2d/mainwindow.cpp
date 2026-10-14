@@ -821,8 +821,9 @@ QHash<quint32, VPiece> MainWindow::currentLayoutPieces() const
  * @brief prepareMultisizePieceLists fills sizePieceLists with the layout pieces of every size.
  *
  * Individual pattern: clears sizePieceLists and returns. Multisize pattern: every
- * size in the size list, at the base height. The size and height in use before
- * the call are restored, also when an exception leaves the function.
+ * size in the size list, at the base height. Every size of a piece gets the same
+ * node turn points. The size and height in use before the call are restored, also
+ * when an exception leaves the function.
  *
  * @throws VException when a size cannot be calculated.
  */
@@ -854,6 +855,7 @@ void MainWindow::prepareMultisizePieceLists()
             }
             sizePieceLists.append(prepareSizePieceList(currentLayoutPieces(), size));
         }
+        unifySizeTurnPoints();
     }
     catch (VException &)
     {

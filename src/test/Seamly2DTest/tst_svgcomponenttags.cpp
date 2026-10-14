@@ -56,6 +56,8 @@
 #include <QTemporaryDir>
 #include <QTransform>
 
+#include <algorithm>
+
 #include <cmath>
 
 namespace
@@ -1064,4 +1066,167 @@ void TST_SvgComponentTags::BuiltInPieceHiddenSeamLineSendsCutlineOnly() const
     QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
     QCOMPARE(groupsOfType(doc, QStringLiteral("cutline")).size(), 1);
     QCOMPARE(groupsOfType(doc, QStringLiteral("seamline")).size(), 0);
+}
+
+namespace
+{
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief bentTopContour builds a 200 x 100 contour with a node in the middle of the top and bottom sides.
+ * @param rise how far the top right corner lies below the top side. 2 bends the top side 1.1 degrees at its middle
+ *             node: a turn point. 0.5 bends it 0.3 degrees: not a turn point.
+ * @return the six node vertices, from the top left corner.
+ */
+QVector<QPointF> bentTopContour(qreal rise)
+{
+    return {QPointF(0, 0), QPointF(100, 0), QPointF(200, rise), QPointF(200, 100), QPointF(100, 100), QPointF(0, 100)};
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief exportedTurnPoints returns the data-turn-points attribute of the piece's first group of one type.
+ * @return the attribute; empty when the group or the attribute is missing.
+ */
+QString exportedTurnPoints(const VLayoutPiece &piece, const QString &type)
+{
+    const QVector<QDomElement> groups = groupsOfType(exportPieceSvg(piece), type);
+    return groups.isEmpty() ? QString() : groups.first().attribute(QStringLiteral("data-turn-points"));
+}
+} // namespace
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief SizesShareNodeTurnPoints checks that a node that is a turn point in one size becomes one in every size,
+ * at the vertex index of that node in each size.
+ */
+void TST_SvgComponentTags::SizesShareNodeTurnPoints() const
+{
+    const QString seamline = QStringLiteral("seamline");
+
+    VLayoutPiece bent = makeTestPiece(QStringLiteral("Detail"));
+    bent.setMainPathPoints(bentTopContour(2), false, bentTopContour(2));
+
+    VLayoutPiece straight = makeTestPiece(QStringLiteral("Detail"));
+    straight.setMainPathPoints(bentTopContour(0.5), false, bentTopContour(0.5));
+
+    // A curve point before the top node moves that node to vertex index 2.
+    VLayoutPiece shifted = makeTestPiece(QStringLiteral("Detail"));
+    QVector<QPointF> shiftedContour = bentTopContour(0.5);
+    shiftedContour.insert(1, QPointF(50, 0));
+    shifted.setMainPathPoints(shiftedContour, false, bentTopContour(0.5));
+
+    QCOMPARE(exportedTurnPoints(bent, seamline), QStringLiteral("0 1 2 3 5"));
+    QCOMPARE(exportedTurnPoints(straight, seamline), QStringLiteral("0 2 3 5"));
+    QCOMPARE(exportedTurnPoints(shifted, seamline), QStringLiteral("0 3 4 6"));
+
+    VLayoutPiece::unifyTurnPoints({&bent, &straight, &shifted});
+
+    QCOMPARE(exportedTurnPoints(bent, seamline), QStringLiteral("0 1 2 3 5"));
+    QCOMPARE(exportedTurnPoints(straight, seamline), QStringLiteral("0 1 2 3 5"));
+    QCOMPARE(exportedTurnPoints(shifted, seamline), QStringLiteral("0 2 3 4 6"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief SizesWithDifferentNodeCountsKeepTurnPoints checks that a line whose sizes differ in node count keeps
+ * the turn points of each size.
+ */
+void TST_SvgComponentTags::SizesWithDifferentNodeCountsKeepTurnPoints() const
+{
+    const QString seamline = QStringLiteral("seamline");
+
+    VLayoutPiece bent = makeTestPiece(QStringLiteral("Detail"));
+    bent.setMainPathPoints(bentTopContour(2), false, bentTopContour(2));
+
+    // One node more: a node before the top node.
+    VLayoutPiece extraNode = makeTestPiece(QStringLiteral("Detail"));
+    QVector<QPointF> extraContour = bentTopContour(0.5);
+    extraContour.insert(1, QPointF(50, 0));
+    extraNode.setMainPathPoints(extraContour, false, extraContour);
+
+    VLayoutPiece::unifyTurnPoints({&bent, &extraNode});
+
+    QCOMPARE(exportedTurnPoints(bent, seamline), QStringLiteral("0 1 2 3 5"));
+    QCOMPARE(exportedTurnPoints(extraNode, seamline), QStringLiteral("0 3 4 6"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief LoopStartingAtAnotherNodeSharesTurnPoints checks that a closed loop that starts at another node in another
+ * size gets the turn point on the same node, not on the same node number.
+ */
+void TST_SvgComponentTags::LoopStartingAtAnotherNodeSharesTurnPoints() const
+{
+    const QString seamline = QStringLiteral("seamline");
+
+    VLayoutPiece bent = makeTestPiece(QStringLiteral("Detail"));
+    bent.setMainPathPoints(bentTopContour(2), false, bentTopContour(2));
+
+    // The same loop started at the top right corner: the top node is the last vertex.
+    VLayoutPiece rotated = makeTestPiece(QStringLiteral("Detail"));
+    QVector<QPointF> rotatedContour = bentTopContour(0.5);
+    std::rotate(rotatedContour.begin(), rotatedContour.begin() + 2, rotatedContour.end());
+    rotated.setMainPathPoints(rotatedContour, false, rotatedContour);
+    QCOMPARE(exportedTurnPoints(rotated, seamline), QStringLiteral("0 1 3 4"));
+
+    VLayoutPiece::unifyTurnPoints({&bent, &rotated});
+
+    QCOMPARE(exportedTurnPoints(rotated, seamline), QStringLiteral("0 1 3 4 5"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief CutlineRepeatFollowsSharedFirstTurnPoint checks that a cut line that repeats its first vertex also marks
+ * the repeat when its first vertex becomes a turn point.
+ */
+void TST_SvgComponentTags::CutlineRepeatFollowsSharedFirstTurnPoint() const
+{
+    const QString cutline = QStringLiteral("cutline");
+
+    // The top node is the first vertex, and the loop ends with it again.
+    const auto cutLoop = [](qreal rise)
+    {
+        return QVector<QPointF>{QPointF(100, 0), QPointF(200, rise), QPointF(200, 100), QPointF(0, 100),
+                                QPointF(0, 0), QPointF(100, 0)};
+    };
+
+    VLayoutPiece bent = makeTestPiece(QStringLiteral("Detail"));
+    bent.setSeamAllowancePoints(cutLoop(2), true, false, cutLoop(2));
+    VLayoutPiece straight = makeTestPiece(QStringLiteral("Detail"));
+    straight.setSeamAllowancePoints(cutLoop(0.5), true, false, cutLoop(0.5));
+    QCOMPARE(exportedTurnPoints(bent, cutline), QStringLiteral("0 1 2 3 4 5"));
+    QCOMPARE(exportedTurnPoints(straight, cutline), QStringLiteral("1 2 3 4"));
+
+    VLayoutPiece::unifyTurnPoints({&bent, &straight});
+
+    QCOMPARE(exportedTurnPoints(straight, cutline), QStringLiteral("0 1 2 3 4 5"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief InternalPathSizesShareNodeTurnPoints checks that internal paths get the node turn points of every size.
+ */
+void TST_SvgComponentTags::InternalPathSizesShareNodeTurnPoints() const
+{
+    const QString internalPath = QStringLiteral("internal_path");
+
+    // An open line that bends at its middle node by 1.1 or 0.3 degrees.
+    const auto internalLine = [](qreal rise)
+    {
+        const QVector<QPointF> points{QPointF(20, 20), QPointF(60, 20), QPointF(100, 20 + rise)};
+        VLayoutPiecePath path = makePath(points, false);
+        path.setNodeVertices(points, false);
+        return path;
+    };
+
+    VLayoutPiece bent = makeTestPiece(QStringLiteral("Detail"));
+    bent.setInternalPaths({internalLine(0.8)});
+    VLayoutPiece straight = makeTestPiece(QStringLiteral("Detail"));
+    straight.setInternalPaths({internalLine(0.2)});
+    QCOMPARE(exportedTurnPoints(straight, internalPath), QStringLiteral("0 2"));
+
+    VLayoutPiece::unifyTurnPoints({&bent, &straight});
+
+    QCOMPARE(exportedTurnPoints(bent, internalPath), QStringLiteral("0 1 2"));
+    QCOMPARE(exportedTurnPoints(straight, internalPath), QStringLiteral("0 1 2"));
 }

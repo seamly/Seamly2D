@@ -52,6 +52,7 @@
 #include "vlayoutpiecepath.h"
 #include "vlayoutpiecepath_p.h"
 #include "vlayoutdef.h"
+#include "vabstractpiece.h"
 
 #include <QPainterPath>
 
@@ -119,7 +120,9 @@ QVector<QPointF> VLayoutPiecePath::Points() const
 void VLayoutPiecePath::SetPoints(const QVector<QPointF> &points)
 {
     d->m_points = points;
-    d->m_turnPoints.reset(); // indices into the old points
+    // Indices into the old points.
+    d->m_turnPoints.reset();
+    d->m_nodeIndices.clear();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -187,4 +190,26 @@ std::optional<QVector<int>> VLayoutPiecePath::turnPoints() const
 void VLayoutPiecePath::setTurnPoints(const QVector<int> &indices)
 {
     d->m_turnPoints = indices;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief nodeIndices returns the node vertex indices into Points(), from VAbstractPiece::nodeVertexIndices().
+ * @return ascending indices; empty when the node vertices are unknown.
+ */
+QVector<int> VLayoutPiecePath::nodeIndices() const
+{
+    return d->m_nodeIndices;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setNodeVertices finds the turn points and node vertex indices of Points().
+ * @param nodeVertices vertices that can break the tangent, from VPiecePath::pathNodeVertices().
+ * @param closed       whether Points() is a closed loop.
+ */
+void VLayoutPiecePath::setNodeVertices(const QVector<QPointF> &nodeVertices, bool closed)
+{
+    d->m_turnPoints = VAbstractPiece::turnPointIndices(d->m_points, nodeVertices, closed);
+    d->m_nodeIndices = VAbstractPiece::nodeVertexIndices(d->m_points, nodeVertices, closed);
 }
