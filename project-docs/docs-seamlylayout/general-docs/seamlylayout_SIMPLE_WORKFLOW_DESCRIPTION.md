@@ -210,7 +210,9 @@ The application workflow loop consists of:
        On the Marker and Nested tabs the DXF-ASTM items are disabled, and a note names the tabs to select.
      * Export > "Export all tabs" (checkable, shown only when tabs exist): every format then writes one file per tab.
        * DXF-ASTM writes the Base Size and size tabs. Other formats write every tab but Base Size, which repeats its size tab.
-       * File name: the save-dialog name with the tab label before the extension: `shirt_marker.pdf`, `shirt_base-size-36.dxf`, `shirt_size-36.pdf`.
+       * File name: the save-dialog name with the tab before the timestamp: `shirt_Marker_202610112043.pdf`, `shirt_R13_BaseSize36_202610112043.dxf`, `shirt_Size36_202610112043.pdf`.
+       * A name without a timestamp gets the tab before the extension: `shirt_Size36.pdf`.
+     * A single export from a tab: the default name carries that tab before the timestamp: `shirt_R13_Size36_202610112043.dxf`.
        * Each tab is made the export source silently (`selectExportTab`); the shown tab is restored at the end.
        * One "Export Complete" dialog lists every file. The first failure stops the run.
      * Tabs are locked during layout and during Adjust Mode.

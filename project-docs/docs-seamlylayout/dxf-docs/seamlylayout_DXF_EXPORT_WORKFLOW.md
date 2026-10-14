@@ -36,6 +36,7 @@ The DXF-ASTM export workflow is fully integrated into the desktop UI (`ui_deskto
 5. **File Save Dialog**: opens with a default name
    - Standard: `<importedBaseName>_<R12|R13|CLO3D>_YYYYMMDDHHMM.dxf`, e.g. `male_shirt_R13_202610011721.dxf`
    - Annotated: `<importedBaseName>_<R12|R13|CLO3D>_annotated_YYYYMMDDHHMM.dxf`, e.g. `male_shirt_CLO3D_annotated_202610011721.dxf`
+   - Multisize layout: the shown tab goes before the timestamp, e.g. `jacket2_R13_BaseSize500_202610112043.dxf`
    - Segment code: `exports::dxf_export_name_segment` → `AppController::dxfExportNameSegment`
    - User can change the filename and location
    - File filter: DXF files (*.dxf)
@@ -44,7 +45,7 @@ The DXF-ASTM export workflow is fully integrated into the desktop UI (`ui_deskto
 ### Step 3: Annotated Version File Name
 
 - The `.txt` file keeps the `.dxf` base name: `male_shirt_R12_annotated_202610011721.dxf` → `male_shirt_R12_annotated_202610011721.txt`
-- Export all tabs: the tab label goes before the extension of both files
+- Export all tabs: the tab goes before the timestamp of both files, e.g. `male_shirt_R12_annotated_Size40_202610011721.dxf` and `.txt`
 
 ### Step 4: Export Execution
 

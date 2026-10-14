@@ -154,7 +154,7 @@ ApplicationWindow {
     // @brief Ask for a DXF save path for the staged variant, then start the export.
     function chooseDxfPath() {
         var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-        // Default name: <importedBaseName>_<R12|R13|CLO3D>[_annotated]_YYYYMMDDHHMM.dxf.
+        // Default name: <importedBaseName>_<R12|R13|CLO3D>[_annotated][_<tab>]_YYYYMMDDHHMM.dxf.
         // CLO3D is always R13, so its name needs no version.
         var variant = root.pendingDxfClo3d ? "CLO3D" : root.pendingDxfVersion
         var segment = appController.dxfExportNameSegment(variant, root.pendingExportAnnotatedVersion)
@@ -233,7 +233,10 @@ ApplicationWindow {
         return false // unknown format
     } // function runExport
 
-    // @brief Export every tab to its own file: `path` with the tab name before the extension.
+    // @brief Export every tab to its own file: `path` with the tab name before the timestamp.
+    //
+    // "shirt_R13_202610112043.dxf" → "shirt_R13_Size220_202610112043.dxf". A name
+    // without a timestamp gets the tab before the extension: "jacket_Size220.dxf".
     //
     // The staged options are copied first, because onExportFinished clears them.
     // Each tab becomes the export source in turn, silently; the shown tab is
@@ -312,7 +315,9 @@ ApplicationWindow {
         } // onTriggered
     } // Timer tabLayoutTimer
 
-    // @brief Build a default export filename: <importedBaseName>[_<segment>]_YYYYMMDDHHMM[_tiled].<ext>
+    // @brief Build a default export filename: <importedBaseName>[_<segment>][_<tab>]_YYYYMMDDHHMM[_tiled].<ext>
+    // <tab> is the shown tab of a multisize layout, e.g. "Size220". Export all tabs
+    // leaves it out; exportEachTab() adds each tab to the chosen path.
     // @param ext     File extension without dot (e.g. "dxf", "png").
     // @param tiled   If true, appends "_tiled" after the timestamp. Default is false.
     // @param segment Variant name put before the timestamp (e.g. "R13"). Default is none.
@@ -321,7 +326,8 @@ ApplicationWindow {
         var stamp = Qt.formatDateTime(new Date(), "yyyyMMddhhmm");
         return appController.defaultExportFileName(root.importedBaseName,
                                                    segment === undefined ? "" : segment,
-                                                   stamp, ext, tiled === true);
+                                                   stamp, ext, tiled === true,
+                                                   root.exportAllTabsActive);
     } // makeExportFileName
 
     // Staging area for the transforms JSON received from AdjustController.
@@ -573,7 +579,7 @@ ApplicationWindow {
         onExportDxfAstmClo3dRequested: root.requestDxfExport(true, "R13")
         onExportPngRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName("png") // default name: <importedBaseName>_YYYYMMDDHHMM.png
+            var name = root.makeExportFileName("png") // default name: <importedBaseName>[_<tab>]_YYYYMMDDHHMM.png
             var path = preferencesModel.getSaveFilePath(
                 "Save PNG File", dir, name,
                 "PNG Files (*.png);;All Files (*)")
@@ -587,7 +593,7 @@ ApplicationWindow {
         } // onExportPngRequested
         onExportJpgRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName("jpg") // default name: <importedBaseName>_YYYYMMDDHHMM.jpg
+            var name = root.makeExportFileName("jpg") // default name: <importedBaseName>[_<tab>]_YYYYMMDDHHMM.jpg
             var path = preferencesModel.getSaveFilePath(
                 "Save JPG File", dir, name,
                 "JPG Files (*.jpg *.jpeg);;All Files (*)")
@@ -602,7 +608,7 @@ ApplicationWindow {
         } // onExportJpgRequested
         onExportGcodeRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName("gcode") // default name: <importedBaseName>_YYYYMMDDHHMM.gcode
+            var name = root.makeExportFileName("gcode") // default name: <importedBaseName>[_<tab>]_YYYYMMDDHHMM.gcode
             var path = preferencesModel.getSaveFilePath(
                 "Save G-Code File", dir, name,
                 "G-Code Files (*.gcode);;All Files (*)")
@@ -616,7 +622,7 @@ ApplicationWindow {
         } // onExportGcodeRequested
         onExportMeshRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName("3mf") // default name: <importedBaseName>_YYYYMMDDHHMM.3mf
+            var name = root.makeExportFileName("3mf") // default name: <importedBaseName>[_<tab>]_YYYYMMDDHHMM.3mf
             var path = preferencesModel.getSaveFilePath(
                 "Save 3D Mesh File", dir, name,
                 "3MF Files (*.3mf);;All Files (*)")
@@ -631,8 +637,8 @@ ApplicationWindow {
         onExportHpglRequested: function(mode) {
             var ext  = preferencesModel.hpglExtension // "plt" or "hpgl", chosen in Export > HPGL > File extension
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            // Default name: plot → <importedBaseName>_YYYYMMDDHHMM.<ext>;
-            // cut → <importedBaseName>_cutlines_YYYYMMDDHHMM.<ext>.
+            // Default name: plot → <importedBaseName>[_<tab>]_YYYYMMDDHHMM.<ext>;
+            // cut → <importedBaseName>_cutlines[_<tab>]_YYYYMMDDHHMM.<ext>.
             var name = root.makeExportFileName(ext, false, appController.exportNameSegment("hpgl", mode))
             var path = preferencesModel.getSaveFilePath(
                 "Save HPGL File", dir, name,
@@ -654,7 +660,7 @@ ApplicationWindow {
         } // onExportHpglRequested
         onExportPostscriptRequested: function(flavor) {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName(flavor) // default name: <importedBaseName>_YYYYMMDDHHMM.<ps|eps>
+            var name = root.makeExportFileName(flavor) // default name: <importedBaseName>[_<tab>]_YYYYMMDDHHMM.<ps|eps>
             var filter = flavor === "eps"
                 ? "EPS Files (*.eps);;All Files (*)"
                 : "PostScript Files (*.ps);;All Files (*)"
@@ -678,7 +684,7 @@ ApplicationWindow {
         } // onHpglExtensionChosen
         onExportSvgRequested: function(mode) {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            // Default name: designerFont, asSupplied → <importedBaseName>_YYYYMMDDHHMM.svg;
+            // Default name: designerFont, asSupplied → <importedBaseName>[_<tab>]_YYYYMMDDHHMM.svg;
             // singleLineFont → _singlelinefont, hersheyStrokes → _hersheyfont, before the timestamp.
             var name = root.makeExportFileName("svg", false, appController.exportNameSegment("svg", mode))
             var path = preferencesModel.getSaveFilePath(
@@ -700,7 +706,7 @@ ApplicationWindow {
         } // onExportSvgRequested
         onExportPdfRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-            var name = root.makeExportFileName("pdf") // default name: <importedBaseName>_YYYYMMDDHHMM.pdf
+            var name = root.makeExportFileName("pdf") // default name: <importedBaseName>[_<tab>]_YYYYMMDDHHMM.pdf
             var path = preferencesModel.getSaveFilePath(
                 "Save PDF File", dir, name,
                 "PDF Files (*.pdf);;All Files (*)")
@@ -715,7 +721,7 @@ ApplicationWindow {
         } // onExportPdfRequested
         onExportPdfTiledRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // from preferences layout_directory; fallback: <exeDir>/output
-            var name = root.makeExportFileName("pdf", true) // default name: <importedBaseName>_YYYYMMDDHHMM_tiled.pdf
+            var name = root.makeExportFileName("pdf", true) // default name: <importedBaseName>[_<tab>]_YYYYMMDDHHMM_tiled.pdf
             var path = preferencesModel.getSaveFilePath(
                 "Save Tiled PDF File", dir, name,
                 "PDF Files (*.pdf);;All Files (*)")

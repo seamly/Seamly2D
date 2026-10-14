@@ -49,7 +49,7 @@ mod exports;
 use exports::{
     do_export_dxf, dxf_missing_piece_data_message, do_export_gcode, do_export_mesh, do_export_pdf, do_export_pdf_tile, do_export_png,
     do_export_jpeg,
-    do_export_svg, paid_export_available, default_export_file_name, export_name_segment, dxf_export_name_segment, do_export_hpgl, parse_hpgl_options, do_export_postscript,
+    do_export_svg, paid_export_available, default_export_file_name, tab_export_path, export_name_segment, dxf_export_name_segment, do_export_hpgl, parse_hpgl_options, do_export_postscript,
 };
 
 // Phase A of the "sheets" paper_type (L.2.1):
@@ -695,7 +695,8 @@ pub mod qobject {
         #[qinvokable]
         fn select_export_tab(self: Pin<&mut AppController>, index: i32) -> bool;
 
-        // `path` with the tab label before the extension: "shirt.pdf" → "shirt_size-40.pdf".
+        // `path` with the tab before the stamp: "shirt_202610112043.pdf" → "shirt_Size40_202610112043.pdf".
+        // A name without a stamp gets the tab before the extension: "jacket.pdf" → "jacket_Size40.pdf".
         #[qinvokable]
         fn export_tab_path(self: &AppController, path: &QString, index: i32) -> QString;
 
@@ -754,7 +755,8 @@ pub mod qobject {
 
         // --- Export Layout ---
 
-        // Default export file name: `<base>[_<segment>]_<stamp>[_tiled].<ext>`; empty when `base` is empty.
+        // Default export file name: `<base>[_<segment>][_<tab>]_<stamp>[_tiled].<ext>`; empty when `base` is empty.
+        // `<tab>` is the selected tab of a multisize layout; `all_tabs` true leaves it out for Export all tabs.
         #[qinvokable]
         fn default_export_file_name(
             self: &AppController,
@@ -763,6 +765,7 @@ pub mod qobject {
             stamp: &QString,
             ext: &QString,
             tiled: bool,
+            all_tabs: bool,
         ) -> QString;
 
         // File name segment for an export mode, e.g. ("hpgl", "cut") → "cutlines"; empty for the plain name.
@@ -1729,7 +1732,7 @@ impl qobject::AppController {
         let path = path.to_string();
         let label = usize::try_from(index).ok().and_then(|i| self.rust().layout_views.label(i));
         match label {
-            Some(label) => cxx_qt_lib::QString::from(layout_views::tab_file_path(&path, label).as_str()),
+            Some(label) => cxx_qt_lib::QString::from(tab_export_path(&path, label).as_str()),
             None        => cxx_qt_lib::QString::from(path.as_str()),
         } // match label
     } // fn export_tab_path
@@ -2250,8 +2253,19 @@ impl qobject::AppController {
         stamp: &cxx_qt_lib::QString,
         ext: &cxx_qt_lib::QString,
         tiled: bool,
+        all_tabs: bool,
     ) -> cxx_qt_lib::QString {
-        let name = default_export_file_name(&base.to_string(), &segment.to_string(), &stamp.to_string(), &ext.to_string(), tiled);
+        // A single export names the shown tab; an individual layout has none.
+        // Export all tabs adds each tab to the chosen path later (export_tab_path).
+        let tab = if all_tabs { None } else { self.rust().layout_views.active_label() };
+        let name = default_export_file_name(
+            &base.to_string(),
+            &segment.to_string(),
+            tab.unwrap_or(""),
+            &stamp.to_string(),
+            &ext.to_string(),
+            tiled,
+        );
         cxx_qt_lib::QString::from(name.as_str())
     } // fn default_export_file_name
 
