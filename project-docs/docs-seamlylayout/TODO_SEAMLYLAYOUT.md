@@ -72,12 +72,13 @@ Decision (user, 2026-10-13): simplify the multisize tabs and exports. Every tab 
 
 Default name of a multisize export: `<base>[_<segment>]_<tab>_<stamp>[_tiled].<ext>`. Example: `mypatternname_R13_Size220_202610112043.dxf`. An individual pattern keeps `<base>[_<segment>]_<stamp>[_tiled].<ext>`.
 
-- [ ] Layout.24.1 `exports::default_export_file_name`: optional tab segment between `<segment>` and `<stamp>`
-- [ ] Layout.24.2 Tab segment from the tab label: remove spaces; any other character that is not a letter, digit or `-` becomes `-`. "Size 220" → `Size220`
-- [ ] Layout.24.3 Single export from a multisize layout: the default name uses the selected tab
-- [ ] Layout.24.4 Export all tabs: each file name uses the same rule. Replaces `layout_views::tab_file_path`, which puts `_size-220` after the stamp. A name the user changed in the file dialog gets `_<tab>` before the extension
-- [ ] Layout.24.5 Tests: Rust names with and without a tab, tiled, a label with `/`; Export all tabs names
-- [ ] Layout.24.6 Docs: export file name rule in the SeamlyLayout docs, `TEST_CHECKLIST.md`
+- [x] Layout.24.1 `exports::default_export_file_name`: optional tab segment between `<segment>` and `<stamp>`
+- [x] Layout.24.2 Tab segment from the tab label: remove spaces; any other character that is not a letter, digit or `-` becomes `-`. "Size 220" → `Size220`
+- [x] Layout.24.3 Single export from a multisize layout: the default name uses the selected tab
+- [x] Layout.24.4 Export all tabs: each file name uses the same rule. Replaces `layout_views::tab_file_path`, which puts `_size-220` after the stamp. A name the user changed in the file dialog gets `_<tab>` before the extension
+- [x] Layout.24.5 Tests: Rust names with and without a tab, tiled, a label with `/`; Export all tabs names
+- [x] Layout.24.6 Docs: export file name rule in the SeamlyLayout docs, `TEST_CHECKLIST.md`
+- [ ] Layout.24.7 Next MSI: run `TEST_CHECKLIST.md` §7, "Export file names (Layout.24)".
 
 ## [ ] Task Layout.25 — Multisize Marker layout: extend the media height until every piece fits
 

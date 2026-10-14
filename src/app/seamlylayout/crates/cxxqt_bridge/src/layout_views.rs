@@ -107,28 +107,6 @@ pub fn queued_kinds(sizes: &[String], base_size: &str) -> Vec<ViewKind> {
     kinds
 } // fn queued_kinds
 
-// @brief Export path for one tab: the tab label, made file-safe, before the extension.
-//
-// "C:/out/shirt.pdf" + "Size 40" → "C:/out/shirt_size-40.pdf".  Every character that
-// is not a letter or digit becomes '-', so a size such as "40/42" cannot add a
-// directory.  A path without an extension gets the suffix at the end.
-pub fn tab_file_path(path: &str, label: &str) -> String {
-    let suffix: String = label
-        .chars()
-        .map(|c| if c.is_alphanumeric() { c.to_ascii_lowercase() } else { '-' })
-        .collect();
-
-    // Split at the last '.' of the file name only; a '.' in a directory is not an extension.
-    let name_start = path.rfind(['/', '\\']).map_or(0, |i| i + 1);
-    match path[name_start..].rfind('.') {
-        Some(dot) if dot > 0 => {
-            let dot = name_start + dot;
-            format!("{}_{suffix}{}", &path[..dot], &path[dot..])
-        } // Some extension
-        _ => format!("{path}_{suffix}"),
-    } // match extension
-} // fn tab_file_path
-
 // @brief The per-layout controller fields that change when the tab changes.
 //
 // Fields the layouts share (settings, canvas width, roll form, the imported
@@ -222,6 +200,11 @@ impl LayoutViews {
     pub fn active_kind(&self) -> Option<&ViewKind> {
         self.kind(self.active)
     } // fn active_kind
+
+    // @brief Label of the active view; `None` when there are no views (individual import).
+    pub fn active_label(&self) -> Option<&str> {
+        self.label(self.active)
+    } // fn active_label
 
     // @brief Make another view active.
     //
@@ -387,23 +370,6 @@ mod tests {
         assert!(queue.reusable_layout(&ViewKind::Nested).is_none());
     } // base_size_layout_is_reused_once_kept
 
-    // @brief Each tab writes its own file: the label goes before the extension, file-safe.
-    #[test]
-    fn tab_file_path_adds_label_before_extension() {
-        assert_eq!(tab_file_path("C:/out/shirt.pdf", "Size 40"), "C:/out/shirt_size-40.pdf");
-        assert_eq!(tab_file_path(r"C:\out\shirt_tiled.pdf", MARKER_LABEL), r"C:\out\shirt_tiled_marker.pdf");
-        assert_eq!(tab_file_path("/out/shirt.dxf", &base_size_label("40")), "/out/shirt_base-size-40.dxf");
-        // A '/' in a size name must not create a directory.
-        assert_eq!(tab_file_path("/out/shirt.svg", "Size 40/42"), "/out/shirt_size-40-42.svg");
-        // A '.' in a directory is not an extension.
-        assert_eq!(tab_file_path("/out.v2/shirt", "Size 40"), "/out.v2/shirt_size-40");
-        // A hidden-file style name keeps its leading dot.
-        assert_eq!(tab_file_path("/out/.pdf", "Size 40"), "/out/.pdf_size-40");
-        // A mode segment stays in place; the label still goes before the extension.
-        assert_eq!(tab_file_path("/out/shirt_cutlines_202610011721.plt", "Size 40"), "/out/shirt_cutlines_202610011721_size-40.plt");
-        assert_eq!(tab_file_path("/out/shirt_hersheyfont_202610011721.svg", "Size 40"), "/out/shirt_hersheyfont_202610011721_size-40.svg");
-    } // tab_file_path_adds_label_before_extension
-
     // @brief A state whose bbox JSON names it, so a test can tell states apart.
     fn state(name: &str) -> LayoutState {
         LayoutState { piece_bboxes_json: name.to_string(), ..LayoutState::default() }
@@ -415,6 +381,7 @@ mod tests {
         let mut views = LayoutViews::default();
         assert!(views.labels().is_empty());
         assert_eq!(views.active_kind(), None);
+        assert_eq!(views.active_label(), None);
         views.start(ViewKind::Marker);
         views.push(ViewKind::Nested, state("nested"));
         views.push(ViewKind::BaseSize("36".into()), state("base"));
@@ -425,6 +392,9 @@ mod tests {
         assert_eq!(views.kind(2), Some(&ViewKind::BaseSize("36".into())));
         assert_eq!(views.active(), 0);
         assert_eq!(views.active_kind(), Some(&ViewKind::Marker));
+        assert_eq!(views.active_label(), Some("Marker"));
+        views.select(3, state("marker")).unwrap_or_else(|_| panic!("select 3"));
+        assert_eq!(views.active_label(), Some("Size 34"));
     } // labels_and_active_kind
 
     // @brief A change made on a tab survives a switch away and back.

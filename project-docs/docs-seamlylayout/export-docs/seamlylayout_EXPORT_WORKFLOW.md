@@ -5,7 +5,7 @@ ExportMenu.MenuItem("PNG").onTriggered
         → Main.qml onExportPngRequested                      handler
           → preferencesModel.layoutDirectory                 getter → "C:/src/seamlyLayout/qt_frontend/output"
           → root.makeExportFileName("png")                   QML function → "<baseName>_YYYYMMDDHHMM.png"
-            → appController.defaultExportFileName(base, segment, stamp, ext, tiled)   Rust exports::default_export_file_name
+            → appController.defaultExportFileName(base, segment, stamp, ext, tiled, allTabs)   Rust exports::default_export_file_name
           → preferencesModel.getSaveFilePath(title, dir, name, filter)   C++ static
             → QDir(dir).absolutePath()                       resolve dir to absolute
             → QFileDialog.setDirectory(absDir)
@@ -203,7 +203,12 @@ Stubs only. No module ships yet.
 
 ## Default file names
 
-`makeExportFileName(ext, tiled, segment)` → `<baseName>[_<segment>]_YYYYMMDDHHMM[_tiled].<ext>`.
+`makeExportFileName(ext, tiled, segment)` → `<baseName>[_<segment>][_<tab>]_YYYYMMDDHHMM[_tiled].<ext>`.
+
+- `<tab>`: the shown tab of a multisize layout. An individual pattern has no tab.
+- Tab segment: `exports::tab_name_segment`. Spaces are removed; any other character but a letter, digit or `-` becomes `-`.
+  - "Size 220" → `Size220`, "Base Size 500" → `BaseSize500`, "Size 40/42" → `Size40-42`.
+- Example: `mypatternname_R13_Size220_202610112043.dxf`.
 
 | Export | Default name |
 | ------ | ------------ |
@@ -223,4 +228,6 @@ Stubs only. No module ships yet.
 - DXF segments come from `appController.dxfExportNameSegment(variant, annotated)` → Rust `exports::dxf_export_name_segment`. The Standard/Annotated dialog opens before the save dialog, so the name can carry the choice.
 - The annotated `.txt` file keeps the `.dxf` base name.
 - HPGL and SVG segments come from `appController.exportNameSegment(format, mode)` → Rust `exports::export_name_segment`.
-- Export all tabs: tab label goes before the extension. Example: `male_shirt_cutlines_202610031234_size-40.plt`.
+- Export all tabs: the save dialog offers the name without a tab. Each file gets its tab before the timestamp (`exports::tab_export_path`).
+  - `male_shirt_cutlines_202610031234.plt` → `male_shirt_cutlines_Size40_202610031234.plt`, `male_shirt_cutlines_Marker_202610031234.plt`.
+  - A name without a timestamp gets the tab before the extension: `jacket.plt` → `jacket_Size40.plt`.

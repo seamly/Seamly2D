@@ -26,7 +26,9 @@
 //   do_export_gcode(doc, path)                        -> Result<(), String> (stub)
 //   do_export_mesh(doc, path)                         -> Result<(), String> (stub)
 //   paid_export_available(format)                     -> bool
-//   default_export_file_name(base, segment, stamp, ext, tiled) -> String
+//   default_export_file_name(base, segment, tab, stamp, ext, tiled) -> String
+//   tab_name_segment(label)                           -> String
+//   tab_export_path(path, label)                      -> String
 //   export_name_segment(format, mode)                 -> &'static str
 //
 // Internal helpers:
@@ -1852,25 +1854,35 @@ pub fn paid_export_available(format: &str) -> bool {
     } // match format
 } // fn paid_export_available
 
-// @brief Default export file name: `<base>[_<segment>]_<stamp>[_tiled].<ext>`.
+// Length of the YYYYMMDDHHMM stamp in a default export file name.
+const EXPORT_STAMP_LEN: usize = 12;
+
+// @brief Default export file name: `<base>[_<segment>][_<tab>]_<stamp>[_tiled].<ext>`.
 //
 // The segment names the file variant, so two variants of one export cannot share
 // a name. Example: "male_shirt" + "R13" → "male_shirt_R13_202610031234.dxf".
+// A multisize layout adds its tab: "Size 220" → "male_shirt_R13_Size220_202610031234.dxf".
 //
 // @param base    Imported file base name; empty gives an empty name (nothing imported).
 // @param segment Variant name without underscores; empty adds no segment.
+// @param tab     Tab label as shown, e.g. "Size 220"; empty for an individual pattern
+//                or Export all tabs, which adds each tab later (`tab_export_path`).
 // @param stamp   Local time as YYYYMMDDHHMM.
 // @param ext     File extension without the dot.
 // @param tiled   true appends "_tiled" after the stamp.
-pub fn default_export_file_name(base: &str, segment: &str, stamp: &str, ext: &str, tiled: bool) -> String {
+pub fn default_export_file_name(base: &str, segment: &str, tab: &str, stamp: &str, ext: &str, tiled: bool) -> String {
     if base.is_empty() {
         return String::new();
     } // if nothing imported
+    let tab = tab_name_segment(tab);
     let mut name = base.to_string();
-    if !segment.is_empty() {
-        name.push('_');
-        name.push_str(segment);
-    } // if segment
+    // Variant first, then tab; an empty part adds nothing.
+    for part in [segment, tab.as_str()] {
+        if !part.is_empty() {
+            name.push('_');
+            name.push_str(part);
+        } // if part
+    } // for each part
     name.push('_');
     name.push_str(stamp);
     if tiled {
@@ -1878,6 +1890,55 @@ pub fn default_export_file_name(base: &str, segment: &str, stamp: &str, ext: &st
     } // if tiled
     format!("{name}.{ext}")
 } // fn default_export_file_name
+
+// @brief File name segment for a tab label: spaces removed, every other character but a letter, digit or '-' becomes '-'.
+//
+// "Size 220" → "Size220", "Base Size 500" → "BaseSize500", "Size 40/42" → "Size40-42".
+// A '/' or '\' in a size name therefore cannot add a directory, and a '_' cannot
+// split the name where the stamp search looks.
+pub fn tab_name_segment(label: &str) -> String {
+    label
+        .chars()
+        .filter(|c| !c.is_whitespace())
+        .map(|c| if c.is_alphanumeric() || c == '-' { c } else { '-' })
+        .collect()
+} // fn tab_name_segment
+
+// @brief Export all tabs path for one tab: `_<tab>` before the stamp, or before the extension when the name has no stamp.
+//
+// The save dialog offers the default name without a tab, so each tab file follows
+// the default name rule: "C:/out/shirt_R13_202610112043.dxf" + "Size 220" →
+// "C:/out/shirt_R13_Size220_202610112043.dxf". A name the user changed keeps its
+// shape: "C:/out/jacket.pdf" + "Marker" → "C:/out/jacket_Marker.pdf".
+//
+// @param path  Absolute path from the save dialog.
+// @param label Tab label as shown, e.g. "Size 220".
+pub fn tab_export_path(path: &str, label: &str) -> String {
+    let tab = tab_name_segment(label);
+
+    // The file name starts after the last separator; a '.' in a directory is not an extension.
+    let name_start = path.rfind(['/', '\\']).map_or(0, |i| i + 1);
+    // The stem ends at the last '.'; a leading '.' (".pdf") is part of the stem.
+    let stem_end = match path[name_start..].rfind('.') {
+        Some(dot) if dot > 0 => name_start + dot,
+        _ => path.len(),
+    }; // match extension
+    let stem = &path[name_start..stem_end];
+
+    // Insert before "_<stamp>[_tiled]" when the stem ends with it, else at the stem end.
+    let insert_at = name_start + export_stamp_start(stem).unwrap_or(stem.len());
+    format!("{}_{tab}{}", &path[..insert_at], &path[insert_at..])
+} // fn tab_export_path
+
+// @brief Byte index of the `_<stamp>` that ends a file stem, before an optional "_tiled"; None when the stem has no stamp.
+//
+// "shirt_R13_202610112043" → Some(9); "shirt_202610112043_tiled" → Some(5); "jacket" → None.
+fn export_stamp_start(stem: &str) -> Option<usize> {
+    let head = stem.strip_suffix("_tiled").unwrap_or(stem);
+    let (before, stamp) = head.rsplit_once('_')?;
+    let is_stamp = stamp.len() == EXPORT_STAMP_LEN && stamp.bytes().all(|b| b.is_ascii_digit());
+    is_stamp.then_some(before.len())
+} // fn export_stamp_start
 
 // @brief File name segment for an export mode; empty when the mode keeps the plain name.
 //
@@ -1965,12 +2026,12 @@ mod tests {
     // @brief The variant segment goes before the stamp; "_tiled" stays after it.
     #[test]
     fn default_export_file_name_places_segment_before_stamp() {
-        assert_eq!(default_export_file_name("male_shirt", "R12", "202610031234", "dxf", false), "male_shirt_R12_202610031234.dxf");
-        assert_eq!(default_export_file_name("male_shirt", "R13", "202610031234", "dxf", false), "male_shirt_R13_202610031234.dxf");
-        assert_eq!(default_export_file_name("male_shirt", "CLO3D", "202610031234", "dxf", false), "male_shirt_CLO3D_202610031234.dxf");
-        assert_eq!(default_export_file_name("male_shirt", "", "202610031234", "png", false), "male_shirt_202610031234.png");
-        assert_eq!(default_export_file_name("male_shirt", "", "202610031234", "pdf", true), "male_shirt_202610031234_tiled.pdf");
-        assert_eq!(default_export_file_name("", "R12", "202610031234", "dxf", false), "");
+        assert_eq!(default_export_file_name("male_shirt", "R12", "", "202610031234", "dxf", false), "male_shirt_R12_202610031234.dxf");
+        assert_eq!(default_export_file_name("male_shirt", "R13", "", "202610031234", "dxf", false), "male_shirt_R13_202610031234.dxf");
+        assert_eq!(default_export_file_name("male_shirt", "CLO3D", "", "202610031234", "dxf", false), "male_shirt_CLO3D_202610031234.dxf");
+        assert_eq!(default_export_file_name("male_shirt", "", "", "202610031234", "png", false), "male_shirt_202610031234.png");
+        assert_eq!(default_export_file_name("male_shirt", "", "", "202610031234", "pdf", true), "male_shirt_202610031234_tiled.pdf");
+        assert_eq!(default_export_file_name("", "R12", "", "202610031234", "dxf", false), "");
     } // default_export_file_name_places_segment_before_stamp
 
     // @brief Each content-changing mode gets its own segment; the other modes keep the plain name.
@@ -1992,7 +2053,7 @@ mod tests {
     fn default_export_file_name_with_mode_segments() {
         let stamp = "202610011721";
         let name = |format: &str, mode: &str, ext: &str, tiled: bool| {
-            default_export_file_name("male_shirt", export_name_segment(format, mode), stamp, ext, tiled)
+            default_export_file_name("male_shirt", export_name_segment(format, mode), "", stamp, ext, tiled)
         };
         assert_eq!(name("hpgl", "cut", "plt", false), "male_shirt_cutlines_202610011721.plt");
         assert_eq!(name("hpgl", "plot", "plt", false), "male_shirt_202610011721.plt");
@@ -2020,7 +2081,7 @@ mod tests {
     fn default_export_file_name_with_dxf_segments() {
         let stamp = "202610011721";
         let name = |variant: &str, annotated: bool| {
-            default_export_file_name("male_shirt", &dxf_export_name_segment(variant, annotated), stamp, "dxf", false)
+            default_export_file_name("male_shirt", &dxf_export_name_segment(variant, annotated), "", stamp, "dxf", false)
         };
         assert_eq!(name("R12", false), "male_shirt_R12_202610011721.dxf");
         assert_eq!(name("R13", false), "male_shirt_R13_202610011721.dxf");
@@ -2029,6 +2090,71 @@ mod tests {
         assert_eq!(name("R13", true), "male_shirt_R13_annotated_202610011721.dxf");
         assert_eq!(name("CLO3D", true), "male_shirt_CLO3D_annotated_202610011721.dxf");
     } // default_export_file_name_with_dxf_segments
+
+    // @brief Spaces go; every other character but a letter, digit or '-' becomes '-'.
+    #[test]
+    fn tab_name_segment_is_file_safe() {
+        use crate::layout_views::{base_size_label, size_label, MARKER_LABEL, NESTED_LABEL};
+        assert_eq!(tab_name_segment(&size_label("220")), "Size220");
+        assert_eq!(tab_name_segment(&base_size_label("500")), "BaseSize500");
+        assert_eq!(tab_name_segment(MARKER_LABEL), "Marker");
+        assert_eq!(tab_name_segment(NESTED_LABEL), "Nested");
+        // A '/' or '\' in a size name must not create a directory.
+        assert_eq!(tab_name_segment("Size 40/42"), "Size40-42");
+        assert_eq!(tab_name_segment(r"Size 40\42"), "Size40-42");
+        // '-' stays; '_' and '.' would confuse the separator and extension.
+        assert_eq!(tab_name_segment("Size 40-42"), "Size40-42");
+        assert_eq!(tab_name_segment("Size 4_2.5"), "Size4-2-5");
+        assert_eq!(tab_name_segment(""), "");
+    } // tab_name_segment_is_file_safe
+
+    // @brief A multisize tab goes after the variant and before the stamp; "_tiled" stays last.
+    #[test]
+    fn default_export_file_name_places_tab_before_stamp() {
+        let stamp = "202610112043";
+        assert_eq!(
+            default_export_file_name("mypatternname", "R13", "Size 220", stamp, "dxf", false),
+            "mypatternname_R13_Size220_202610112043.dxf"
+        );
+        assert_eq!(
+            default_export_file_name("shirt", &dxf_export_name_segment("R13", true), "Base Size 500", stamp, "dxf", false),
+            "shirt_R13_annotated_BaseSize500_202610112043.dxf"
+        );
+        assert_eq!(default_export_file_name("shirt", "", "Marker", stamp, "pdf", true), "shirt_Marker_202610112043_tiled.pdf");
+        assert_eq!(default_export_file_name("shirt", "cutlines", "Nested", stamp, "plt", false), "shirt_cutlines_Nested_202610112043.plt");
+        assert_eq!(default_export_file_name("shirt", "", "Size 40/42", stamp, "svg", false), "shirt_Size40-42_202610112043.svg");
+        // No tab: an individual pattern keeps its name.
+        assert_eq!(default_export_file_name("shirt", "R13", "", stamp, "dxf", false), "shirt_R13_202610112043.dxf");
+        assert_eq!(default_export_file_name("", "R13", "Size 220", stamp, "dxf", false), "");
+    } // default_export_file_name_places_tab_before_stamp
+
+    // @brief Export all tabs: a default name gets the tab before its stamp, a renamed file before its extension.
+    #[test]
+    fn tab_export_path_follows_default_name_rule() {
+        // Default names from the save dialog: same result as a single export from that tab.
+        assert_eq!(tab_export_path("C:/out/shirt_R13_202610112043.dxf", "Size 220"), "C:/out/shirt_R13_Size220_202610112043.dxf");
+        assert_eq!(tab_export_path(r"C:\out\shirt_202610112043_tiled.pdf", "Marker"), r"C:\out\shirt_Marker_202610112043_tiled.pdf");
+        assert_eq!(tab_export_path("/out/shirt_cutlines_202610112043.plt", "Base Size 500"), "/out/shirt_cutlines_BaseSize500_202610112043.plt");
+        assert_eq!(tab_export_path("/out/shirt_202610112043.svg", "Size 40/42"), "/out/shirt_Size40-42_202610112043.svg");
+        for tab in ["Marker", "Size 220", "Base Size 500"] {
+            for (segment, ext, tiled) in [("R13", "dxf", false), ("", "pdf", true), ("hersheyfont", "svg", false)] {
+                let plain = default_export_file_name("shirt", segment, "", "202610112043", ext, tiled);
+                let with_tab = default_export_file_name("shirt", segment, tab, "202610112043", ext, tiled);
+                assert_eq!(tab_export_path(&format!("/out/{plain}"), tab), format!("/out/{with_tab}"), "{tab} {segment} {ext}");
+            } // for each export
+        } // for each tab
+
+        // A name the user changed: the tab goes before the extension.
+        assert_eq!(tab_export_path("C:/out/jacket.pdf", "Marker"), "C:/out/jacket_Marker.pdf");
+        assert_eq!(tab_export_path("/out/shirt_tiled.pdf", "Size 40"), "/out/shirt_tiled_Size40.pdf");
+        // Not a stamp: 11 digits, or a letter among the digits.
+        assert_eq!(tab_export_path("/out/shirt_20261011204.pdf", "Size 40"), "/out/shirt_20261011204_Size40.pdf");
+        assert_eq!(tab_export_path("/out/shirt_2026101120a3.pdf", "Size 40"), "/out/shirt_2026101120a3_Size40.pdf");
+        // A '.' in a directory is not an extension.
+        assert_eq!(tab_export_path("/out.v2/shirt", "Size 40"), "/out.v2/shirt_Size40");
+        // A hidden-file style name keeps its leading dot.
+        assert_eq!(tab_export_path("/out/.pdf", "Size 40"), "/out/.pdf_Size40");
+    } // tab_export_path_follows_default_name_rule
 
     // @brief Build a minimal tiled-export settings object for tests.
     fn test_tiled_settings() -> LayoutSettings {
@@ -2418,7 +2544,7 @@ mod tests {
         // Default annotated name in its own temp directory, so parallel runs cannot collide.
         let dir = std::env::temp_dir().join(format!("seamly_dxf_annotated_name_{}", std::process::id()));
         std::fs::create_dir_all(&dir).expect("temp dir should be created");
-        let name = default_export_file_name("male_shirt", &dxf_export_name_segment("R13", true), "202610011721", "dxf", false);
+        let name = default_export_file_name("male_shirt", &dxf_export_name_segment("R13", true), "", "202610011721", "dxf", false);
         let dxf_path = dir.join(&name);
 
         do_export_dxf(&doc, &dxf_path.to_string_lossy(), true, &DxfStyleInfo::default(), &mut |_| {})

@@ -248,4 +248,14 @@ Pattern: `C:\Users\susan\seamly2d\patterns\jacket2_40-146.sm2d`.
   - [ ] Only the Base Size file has a `.rul`.
 - [ ] Export all tabs checked, Export > PDF:
   - [ ] Files for Marker, Nested and every size. No Base Size file.
+- [ ] Export file names (Layout.24). Export all tabs unchecked:
+  - [ ] Size 220 tab, Export > DXF-ASTM (R13): save dialog offers `jacket2_40-146_R13_Size220_<stamp>.dxf`.
+  - [ ] Base Size 500 tab, same export: `jacket2_40-146_R13_BaseSize500_<stamp>.dxf`; the `.rul` has the same name.
+  - [ ] Marker tab, Export > PDF (Tiled): `jacket2_40-146_Marker_<stamp>_tiled.pdf`.
+- [ ] Export all tabs checked, Export > PDF, keep the offered name:
+  - [ ] The save dialog offers `jacket2_40-146_<stamp>.pdf`, with no tab.
+  - [ ] Files: `jacket2_40-146_Marker_<stamp>.pdf`, `…_Nested_<stamp>.pdf`, `…_Size220_<stamp>.pdf`, and so on.
+- [ ] Export all tabs checked, Export > PDF, rename the file to `test.pdf`:
+  - [ ] Files: `test_Marker.pdf`, `test_Nested.pdf`, `test_Size220.pdf`, and so on.
+- [ ] Individual pattern (`.smis`), Export > PDF: `<pattern>_<stamp>.pdf`, with no tab.
 - [ ] CLO3D: import the Base Size `.dxf` with its `.rul`. Each piece appears once, graded.

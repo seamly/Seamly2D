@@ -2,6 +2,15 @@
 
 ## Current status
 
+### 2026-10-13 — Layout.24 tab name before the export timestamp: merged into local `run-seamlyLayout`, not pushed
+
+- Default name: `<base>[_<segment>][_<tab>]_<stamp>[_tiled].<ext>`; tab = shown tab of a multisize layout. Individual pattern: no tab.
+- Code: `exports::tab_name_segment`, `exports::tab_export_path` (replaces `layout_views::tab_file_path`), `LayoutViews::active_label`, `AppController::defaultExportFileName(…, allTabs)`, `Main.qml` `makeExportFileName`.
+- Export all tabs: save dialog offers the name without a tab; each file gets `_<tab>` before the stamp, or before the extension when the name has no stamp.
+- Verified: `cargo test --workspace` 501 passed; `ctest --preset debug` 6 of 6; QML compiled in the debug build. No MSI.
+- `TODO_SEAMLYLAYOUT.md`: only the Layout.24 lines committed; the user's other edits stay uncommitted.
+- Open: Layout.24.7, `TEST_CHECKLIST.md` §7 "Export file names" on the next MSI.
+
 ### 2026-10-13 — Layout.27.12 line-end turn points: merged into local `run-seamlyLayout`, not pushed
 
 - User decision: Option 1. Seamly2D applies the line-end test at nodes; `unifyTurnPoints` shares it across sizes; SeamlyLayout stops adding line ends to tagged lines.
