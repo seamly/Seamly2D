@@ -18,7 +18,7 @@
 //! The grade reference line is one horizontal draft-space line per piece. It
 //! gives the reader the X axis of the rules when the layout turned the piece.
 
-use crate::astm_contour::{distance, grade_contours, AstmContour};
+use crate::astm_contour::{distance, grade_contours, AstmContour, GradeError};
 use crate::drawing::{Block, BlockGrading, Drawing, GradeRule, GradeRuleTable, RuleText};
 use crate::entities::Point;
 
@@ -185,7 +185,7 @@ fn grade_block(
     let mut graded: Vec<Vec<AstmContour>> = vec![Vec::with_capacity(sample_layers.len()); sizes.len()];
     for line in 0..sample_layers.len() {
         let per_size: Vec<AstmContour> = input_lines.iter().map(|l| l.all()[line].1.clone()).collect();
-        let result = grade_contours(&per_size, sample).ok_or_else(|| "the sizes have different turn points".to_string())?;
+        let result = grade_contours(&per_size, sample).map_err(|e| grade_error_text(e, sizes, sample, sample_layers[line]))?;
         for (size, contour) in result.into_iter().enumerate() {
             graded[size].push(contour);
         } // for each size
@@ -232,6 +232,25 @@ fn grade_block(
     target.grading = Some(BlockGrading { reference_line: (fit.apply(reference.0), fit.apply(reference.1)), rule_texts });
     Ok(())
 } // fn grade_block
+
+// @brief Warning text for a line that `grade_contours` cannot grade.
+// @param layer D6673 layer of the line: 1, 14, 8 or 11.
+// @return "size 640 has other turn points than size 500 on the cut line", for example.
+fn grade_error_text(error: GradeError, sizes: &[String], sample: usize, layer: &str) -> String {
+    let line = match layer {
+        "1" => "the cut line",
+        "14" => "the seam line",
+        "8" => "an internal line",
+        _ => "a cutout",
+    }; // line
+    let size = |index: usize| sizes.get(index).map_or("?", String::as_str);
+    match error {
+        GradeError::NoSample => format!("size {} is not in the size list", size(sample)),
+        GradeError::ClosureDiffers(i) => format!("{line} of size {} is not closed as in size {}", size(i), size(sample)),
+        GradeError::KeyPointOffLine(i) => format!("a key point of size {} is not on {line}", size(i)),
+        GradeError::TurnPointsDiffer(i) => format!("size {} has other turn points than size {} on {line}", size(i), size(sample)),
+    } // match error
+} // fn grade_error_text
 
 // @brief Growth of a point from its sample size position.
 fn growth(p: Point, sample: Point) -> (f64, f64) {

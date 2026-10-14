@@ -314,6 +314,20 @@ impl GradeSize {
     } // fn kept
 } // impl GradeSize
 
+/// @brief Why `grade_contours` cannot give the sizes of a line the same key points.
+/// @details Each index is a position in the `sizes` slice.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum GradeError {
+    /// The sample index is not in `sizes`.
+    NoSample,
+    /// This size is closed where the sample size is open, or the reverse.
+    ClosureDiffers(usize),
+    /// A key point of this size is not a vertex of its dense line.
+    KeyPointOffLine(usize),
+    /// This size has other turn points than the sample size.
+    TurnPointsDiffer(usize),
+}
+
 /// @brief Key points that correspond across the sizes of one piece line, for its grade rules.
 /// @details Every size gets the same turn points and the same curve points: curve
 ///          point j sits at the same arc-length fraction of the same span in every
@@ -324,28 +338,25 @@ impl GradeSize {
 /// @param sizes One contour per size of the same line, from `build_contour_tagged`.
 /// @param sample Index of the sample size in `sizes`; its curve points are the first key points.
 /// @return One contour per size, parallel to `sizes`, with key point i of every size at the
-///         same place on the line. None when the sizes differ in closure, in turn point
-///         count, or in which anchors are turn points.
-pub fn grade_contours(sizes: &[AstmContour], sample: usize) -> Option<Vec<AstmContour>> {
-    let first = sizes.get(sample)?;
+///         same place on the line. Err names the first size, by index into `sizes`, that
+///         differs from the sample in closure or in its turn points.
+pub fn grade_contours(sizes: &[AstmContour], sample: usize) -> Result<Vec<AstmContour>, GradeError> {
+    let first = sizes.get(sample).ok_or(GradeError::NoSample)?;
     let closed = first.closed;
 
-    // Step 1: anchors of every size. They must match: same count, same turn flags.
+    // Step 1: anchors of every size. They must match the sample: same count, same turn flags.
+    let (_, anchor_turns) = grade_anchors(first).ok_or(GradeError::KeyPointOffLine(sample))?;
     let mut graded: Vec<GradeSize> = Vec::with_capacity(sizes.len());
-    let mut anchor_turns: Option<Vec<bool>> = None;
-    for contour in sizes {
+    for (index, contour) in sizes.iter().enumerate() {
         if contour.closed != closed {
-            return None;
+            return Err(GradeError::ClosureDiffers(index));
         } // if closure differs
-        let (size, turns) = grade_anchors(contour)?;
-        match &anchor_turns {
-            Some(t) if *t != turns => return None, // turn points differ
-            Some(_) => {}                          // same turn points
-            None => anchor_turns = Some(turns),    // first size sets them
-        } // match anchor turns
+        let (size, turns) = grade_anchors(contour).ok_or(GradeError::KeyPointOffLine(index))?;
+        if turns != anchor_turns {
+            return Err(GradeError::TurnPointsDiffer(index));
+        } // if turn points differ
         graded.push(size);
     } // for each size
-    let anchor_turns = anchor_turns?;
 
     // Step 2: anchor keys, then the sample's curve points as fractions of its spans.
     let mut keys: Vec<GradeKey> = anchor_turns
@@ -463,7 +474,7 @@ pub fn grade_contours(sizes: &[AstmContour], sample: usize) -> Option<Vec<AstmCo
     // Step 5: one contour per size. An open line's ends are curve points.
     let last = keys.len() - 1;
     let turn: Vec<bool> = keys.iter().enumerate().map(|(i, k)| k.turn && (closed || (i != 0 && i != last))).collect();
-    Some(
+    Ok(
         graded
             .into_iter()
             .zip(kept)

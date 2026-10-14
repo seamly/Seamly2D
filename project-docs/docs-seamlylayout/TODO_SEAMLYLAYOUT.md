@@ -110,10 +110,10 @@ Prior results (jacket2, sizes 220–720): Nested graded 4 of 8 pieces; Marker pl
 - [ ] Layout.27.3 Make turn points consistent across all sizes of each piece (cutline, seamline, internal paths). Seamly2D `VAbstractPiece::turnPointIndices` currently changes at near-threshold corners. After `prepareMultisizePieceLists`, share turn points across sizes using node vertex indices in `VLayoutPiece` / `VLayoutPiecePath`; skip paths whose node counts differ.
   - [x] Layout.27.3.1 Code: `unifyTurnPoints` (`63ab2447a3`).
   - [ ] Layout.27.3.2 Run the Qt suites with `local_build_msi.ps1`.
-  - [ ] Layout.27.3.3 Next MSI: export jacket2 Base Size 500 to DXF-ASTM. All 8 pieces should grade, with no "different turn points" warning.
+  - [ ] Layout.27.3.3 Next MSI: export jacket2 Base Size 500 to DXF-ASTM. All 8 pieces should grade, with no "other turn points" warning.
   - Note: `jacket2_40-146_202610121819.svg` has inconsistent `data-turn-points` counts for Detail (3) and (6); Detail (7) and (8) have four per line in every size. See Layout.27.12.
-- [ ] Layout.27.4 Give `grade_anchors` a distinct error when a key point is missing from the dense line.
-- [ ] Layout.27.5 Name the first size whose turn points differ from the sample size.
+- [x] Layout.27.4 Give `grade_anchors` a distinct error when a key point is missing from the dense line. `GradeError::KeyPointOffLine`.
+- [x] Layout.27.5 Name the first size whose turn points differ from the sample size. jacket2 fixture: Detail (3) size 660, Detail (6) size 220, both on the cut line.
 - [ ] Layout.27.7 Add jacket2 handoff fixture to `crates/cxxqt_bridge/test_data/`; end-to-end test should grade every piece and write `.rul`.
 - [x] Layout.27.8 If nothing grades, show "No piece graded: no .rul file written". `astm_grading::grade_drawing` writes `.rul` only when at least one piece grades.
 - [x] Layout.27.11 Fix near-duplicate written vertices. Example: Подборт layer 87 has `(333.01, 626.21)` followed by `(333.01, 626.22)`. Increase `SNAP_VERTEX_MM` from 0.01 to 0.02, or compare rounded coordinates. Test: no consecutive written vertices 0.01 mm apart or closer. Done: `DUPLICATE_TOLERANCE_MM` and `SNAP_VERTEX_MM` = 0.025; jacket2 test found 6 before the fix.
