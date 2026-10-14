@@ -34,8 +34,11 @@ use crate::entities::Point;
 ///          The final key-point chords can be farther from `dense`.
 pub const CURVE_TOLERANCE_MM: f64 = 0.25;
 
-// Vertices closer than this are the same vertex.
-const DUPLICATE_TOLERANCE_MM: f64 = 0.005;
+// Vertices closer than this are the same vertex. The writer rounds coordinates to
+// 0.01 mm, and a reader reports two vertices 0.01 mm apart or closer as duplicates.
+// Vertices at least this far apart stay more than 0.01 mm apart after rounding:
+// 0.025 - 2 × 0.005 × √2 > 0.01.
+const DUPLICATE_TOLERANCE_MM: f64 = 0.025;
 // A chord whose dense points all lie within this distance is a straight line.
 const STRAIGHT_TOLERANCE_MM: f64 = 0.05;
 // A straight run's vertices lie within this distance of its chord. Seamly2D writes
@@ -215,9 +218,9 @@ pub fn build_contour_tagged(points: &[Point], closed: bool, turns: Option<&[bool
 
 // Two arc-length fractions closer than this are the same key point.
 const SAME_FRACTION: f64 = 1e-9;
-// A key point closer than this to a dense vertex is that vertex. A reader
-// reports two vertices this close as a duplicate on layers 84-87.
-const SNAP_VERTEX_MM: f64 = 0.01;
+// A key point this close to a dense vertex is that vertex, so an inserted vertex
+// is never written as a duplicate (see DUPLICATE_TOLERANCE_MM).
+const SNAP_VERTEX_MM: f64 = DUPLICATE_TOLERANCE_MM;
 // Refinement passes before grade_contours accepts the key points it has.
 const MAX_GRADE_PASSES: usize = 64;
 

@@ -1733,4 +1733,65 @@ mod tests {
         let rul = rul.expect("six graded pieces write the rule table");
         assert!(rul.contains("SAMPLE SIZE:500") && rul.contains("NUMBER OF SIZES:26"), "{rul}");
     } // jacket2_base_size_export_names_and_grades_each_piece
+
+    // @brief Consecutive POLYLINE vertices of a DXF, as written, 0.01 mm apart or closer.
+    // @return One "layer L: (x, y) then (x, y)" entry per pair; a closed polyline also pairs its last and first vertex.
+    fn near_duplicate_vertices(dxf: &str) -> Vec<String> {
+        let lines: Vec<&str> = dxf.lines().map(str::trim).collect();
+        // (layer, closed, vertices) per polyline.
+        let mut polylines: Vec<(String, bool, Vec<(f64, f64)>)> = Vec::new();
+        let mut in_polyline = false;
+        for pair in lines.chunks(2) {
+            let [code, value] = pair else { break; };
+            match (*code, *value) {
+                ("0", "POLYLINE") => {
+                    polylines.push((String::new(), false, Vec::new()));
+                    in_polyline = true;
+                } // POLYLINE
+                ("0", "VERTEX") if in_polyline => polylines.last_mut().expect("open polyline").2.push((f64::NAN, f64::NAN)),
+                ("0", "SEQEND") => in_polyline = false,
+                ("8", layer) if in_polyline => polylines.last_mut().expect("open polyline").0 = layer.to_string(),
+                ("70", flags) if in_polyline => {
+                    polylines.last_mut().expect("open polyline").1 = flags.parse::<i32>().unwrap_or(0) & 1 == 1;
+                } // flags
+                ("10", x) | ("20", x) if in_polyline => {
+                    let v = x.parse::<f64>().expect("coordinate");
+                    if let Some(last) = polylines.last_mut().expect("open polyline").2.last_mut() {
+                        if *code == "10" { last.0 = v } else { last.1 = v }
+                    } // if vertex
+                } // coordinate
+                _ => {}
+            } // match pair
+        } // for each group code pair
+
+        let mut found = Vec::new();
+        for (layer, closed, vertices) in &polylines {
+            let n = vertices.len();
+            let pairs = if *closed && n > 2 { n } else { n.saturating_sub(1) };
+            for i in 0..pairs {
+                let (a, b) = (vertices[i], vertices[(i + 1) % n]);
+                if (a.0 - b.0).hypot(a.1 - b.1) <= 0.01 + 1e-9 {
+                    found.push(format!("layer {layer}: ({}, {}) then ({}, {})", a.0, a.1, b.0, b.1));
+                } // if near duplicate
+            } // for each pair
+        } // for each polyline
+        found
+    } // fn near_duplicate_vertices
+
+    // @brief No two consecutive written vertices of a jacket2 DXF-ASTM export are 0.01 mm apart or closer.
+    // A reader reports them as duplicate vertices, e.g. Подборт layer 87 `(333.01, 626.21)` then `(333.01, 626.22)`.
+    #[test]
+    fn jacket2_dxf_has_no_near_duplicate_vertices() {
+        let layout = process_jacket2_size(JACKET2_BASE_SIZE);
+        let (input, sizes) = jacket2_handoff();
+        let grading = crate::exports::DxfGradingSource { input, sizes, base_size: JACKET2_BASE_SIZE.to_string() };
+        let (_, dxf, _, _) = export_dxf_for_test(&layout, "jacket2_vertices", Some(grading));
+        let found = near_duplicate_vertices(&dxf);
+        assert!(found.is_empty(), "{} near-duplicate vertices: {:?}", found.len(), &found[..found.len().min(10)]);
+
+        let nested = process_jacket2(true, 60.0, 300.0);
+        let (_, dxf, _, _) = export_dxf_for_test(&nested, "jacket2_nested_vertices", None);
+        let found = near_duplicate_vertices(&dxf);
+        assert!(found.is_empty(), "Nested: {} near-duplicate vertices: {:?}", found.len(), &found[..found.len().min(10)]);
+    } // jacket2_dxf_has_no_near_duplicate_vertices
 } // mod tests
