@@ -9,7 +9,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 - [x] Run `packaging\windows\seamly-msi\x64\seamly-x64.msi`.
 - [x] Seamly2D Help > About shows 26.10.1115.
 
-## 1. Start Seamly2D with handoff capture
+## [x] 1. Start Seamly2D with handoff capture
 
 The setting reaches SeamlyLayout only when Seamly2D starts from this PowerShell window.
 
@@ -33,7 +33,7 @@ The setting reaches SeamlyLayout only when Seamly2D starts from this PowerShell 
   - [x] Press Layout: a warning names `SEAMLYLAYOUT_SAVE_HANDOFF` and "absolute". The pieces still load.
 - [x] Start Seamly2D from the Start menu. Press Layout: no warning, no file.
 
-## 2. Piece quantity
+## [x] 2. Piece quantity
 
 `Quantity:R,L` in a DXF-ASTM file: R = pieces cut as drawn, L = pieces cut mirrored.
 
@@ -59,7 +59,7 @@ The setting reaches SeamlyLayout only when Seamly2D starts from this PowerShell 
 - [x] The "DXF-ASTM: Missing Piece Data" dialog before the save no longer says "no Quantity".
 - [x] Do not save the pattern changes.
 
-## 3. Multisize layout
+## [x] 3. Multisize layout
 
 Pattern: HJA (your multisize pattern), or `C:\Users\susan\seamly2d\patterns\jacket2_40-146.sm2d`.
 
@@ -111,7 +111,7 @@ Pattern: HJA (your multisize pattern), or `C:\Users\susan\seamly2d\patterns\jack
         and more...
     --> No piece name 'Front' was found
 
-- [ ] In VSCode, Open the `.rul` file: 'test-seamly-layout\layouts\jacket2\jacket2_40-146_nested_allsizes_R13_202610121136.rul'
+- [x] In VSCode, Open the `.rul` file: 'test-seamly-layout\layouts\jacket2\jacket2_40-146_nested_allsizes_R13_202610121136.rul'
   - [x] Lines `UNITS:METRIC` appears only once in the file
     --> line 5: 'UNITS:METRIC'
   - [x] `SAMPLE SIZE:<base size>`
@@ -130,11 +130,6 @@ Pattern: HJA (your multisize pattern), or `C:\Users\susan\seamly2d\patterns\jack
   - [x] Save the report in `test-seamly-layout/'
     --> layouts\jacket2\jacket2_40-146_nested_allsizes_R13_202610121136-dxf-report.pdf'
 
-- [ ] If you have CLO3D:
-  - [ ] import the nested All Sizes DXF: 'test-seamly-layout\layouts\jacket2\jacket2_40-146_nested_allsizes_R13_202610121136.dxf' 
-  - [ ] The sizes appear as one graded piece per piece name
-  --> wait to perform this test until all other tests have passed
-
 ### Nested - Single Size
 
 - [ ] In VSCode, Open the Nested 'Single Size' DXF file:  
@@ -148,11 +143,6 @@ Pattern: HJA (your multisize pattern), or `C:\Users\susan\seamly2d\patterns\jack
   - [x] Upload the Nested 'Single Size' DXF file to https://aw.fyi/dxf
   - [x] Save the report in `test-sesamly-layout/`
     --> 'test-seamly-layout\layouts\jacket2\jacket2_40-146_nested_size240_R13_202610121142-dxf-report.pdf'
-
-- [ ] If you have CLO3D:
-  - [ ] import the Nested "single size" DXF file
-  - [ ] The size appears as one graded piece per piece name
-    --> wait to perform this test until all other tests have passed
 
 ### Marker - All Sizes
 
@@ -189,12 +179,24 @@ Pattern: HJA (your multisize pattern), or `C:\Users\susan\seamly2d\patterns\jack
   --> line 17626: Sample Size:
   Sample size is blank
 
+### CLO3D
+
+Perform these tests after all other tests have passed
+
+- [ ] import the multisize "Nested" DXF: 'test-seamly-layout\layouts\jacket2\jacket2_40-146_nested_allsizes_R13_202610121136.dxf' 
+  - [ ] The sizes appear as one graded piece per piece name
+
+- [ ] import the multisize "Single size" DXF:
+  - [ ] The size appears as one graded piece per piece name
+
+- [ ] import the DXF-ASTM (R13) and DXF-ASTM (CLO3D) files of `male_shirt`
+  - [ ] Pieces, sew lines and notches appear
+
 ## 5. Older checks still open
 
-- [x] `male_shirt` DXF-ASTM (R13) 
+- [x] `male_shirt` DXF-ASTM (R13)
   - [x] upload to aw.fyi. FullSleeve_M: no "not needed" points at the pleat and slit ends. Save the report in `test-sesamly-layout/`
   --> test-sesamly-layout\male_shirt_R13_202610112117-dxf-report.pdf
-- [ ] CLO3D: import the DXF-ASTM (R13) and DXF-ASTM (CLO3D) files of `male_shirt`. Pieces, sew lines and notches appear. 
   --> Perform this test after all other tests pass
 - [ ] Piece with a built-in seam allowance of width W (Piece Properties > Seam allowance, Built in):
   - [ ] Start Seamly2D with handoff capture (step 1). Press Layout. In the captured SVG, the piece has a `cutline` group (the main path) and a `seamline` group W inside it.
@@ -211,4 +213,39 @@ Pattern: HJA (your multisize pattern), or `C:\Users\susan\seamly2d\patterns\jack
 - [x] On-fold quantity: `2,0` for Quantity 2 on fold. Keep, or change? 
   --> Keep
 - [ ] FrontPanel contradiction: report it to ApparelWerks, or accept it?
-  --> What is the FrontPanel contradiction? Explain.
+  --> wait until after all tests have passed before reporting to ApparelWerks
+
+## 7. Multisize tabs (next MSI)
+
+Replaces the `# 1` checks in §4: `# 1` is now in the Base Size file only.
+
+Pattern: `C:\Users\susan\seamly2d\patterns\jacket2_40-146.sm2d`.
+
+- [ ] Layout Settings has no "Multisize Layout" choice.
+- [ ] Create Layout: tabs Marker, Nested, Base Size 500, Size 220 … Size 720.
+- [ ] Media grows to fit (Layout.25). Settings: Paper, Roll, width 48 in. Create Layout:
+  - [ ] No warning names the Marker tab. Before Layout.25 it named 112 pieces.
+  - [ ] Marker tab: the roll is longer than 500 in (about 800 in). No piece sits outside the frame.
+  - [ ] Adjust Layout on the Marker tab: the frame shows the full length.
+  - [ ] Export SVG from the Marker tab: the page height matches the canvas.
+- [ ] Settings: Paper, Sheet 36 × 48 in. Create Layout: the Marker sheet is longer than 48 in. A warning names only pieces wider than 35.5 in.
+- [ ] Marker or Nested tab shown, Export menu:
+  - [ ] DXF-ASTM items are disabled.
+  - [ ] A note reads "DXF-ASTM: select Base Size or a size tab".
+- [ ] Base Size 500 tab, Export > DXF-ASTM (R13):
+  - [ ] The folder holds a `.dxf` and a `.rul` with the same name.
+  - [ ] In the `.dxf`, search `# 1`: found.
+  - [ ] `Sample Size:500` and `Grade Rule Table:<file name>` near the top of ENTITIES.
+  - [ ] `Size Name:` is 500 in every block. One block per piece.
+  - [ ] In the `.rul`, `SAMPLE SIZE:500`, `NUMBER OF SIZES:26`, and `RULE: DELTA` lines.
+  - [ ] Upload the `.dxf` (and the `.rul` if asked) to https://aw.fyi/dxf. Save the report beside the files.
+- [ ] Size 240 tab, Export > DXF-ASTM (R13):
+  - [ ] No `.rul` file.
+  - [ ] Search `# 1`: not found.
+  - [ ] `Sample Size:` is blank.
+- [ ] Export all tabs checked, Marker tab shown, Export > DXF-ASTM (R13):
+  - [ ] Files for Base Size 500 and every size. No Marker or Nested file.
+  - [ ] Only the Base Size file has a `.rul`.
+- [ ] Export all tabs checked, Export > PDF:
+  - [ ] Files for Marker, Nested and every size. No Base Size file.
+- [ ] CLO3D: import the Base Size `.dxf` with its `.rul`. Each piece appears once, graded.

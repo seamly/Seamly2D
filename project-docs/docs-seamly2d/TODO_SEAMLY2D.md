@@ -40,14 +40,17 @@ Today every piece is laid out on one fabric. Label placeholders `mFabric`, `mLin
 
 A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. `FoldPosition` is free text.
 
-- [ ] Seamly2D.8.1 Piece data: fold line = two main path nodes that are adjacent on the boundary
-- [ ] Seamly2D.8.2 `.sm2d` schema: fold line node ids, schema version bump, converter for older files
-- [ ] Seamly2D.8.3 Piece Mode UI: pick the fold line from the main path; context menu item; "on fold" flag follows the fold line
-- [ ] Seamly2D.8.4 Canvas: draw the fold line with its own line style
-- [ ] Seamly2D.8.5 Optional full-piece view: mirror the half piece across the fold line
-- [ ] Seamly2D.8.6 Handoff SVG: `data-on-fold` on the piece `<g>`, a `fold_line` component group with the two points; update `SVG-DATA-ATTRIBUTES.md` and `NEW-ATTRIBUTES.csv`
-- [ ] Seamly2D.8.7 Unit tests: schema round-trip, handoff attributes
-- [ ] Seamly2D.8.8 SeamlyLayout side: Layout.16
+- [ ] Seamly2D.8.1 In Piece mode: implement a fold line
+  - [ ] Seamly2D.8.1.1 Application Preferences - implement default Fold line properties in 
+  - [ ] Seamly2D.8.1.2 UI - Implement Fold Line in the node context menu in the Piece Properties > Path. User selects two adjacent nodes along the path.
+  - [ ] Seamly2D.8.1.3 Canvas - draw the fold line with its line style. No seam allowance (no cutline or seamline, it's a solid line) can be added to this line. The Line is displayed using the default Foldline properties in Application Preferences; "on fold" flag follows the fold line
+- [ ] Seamly2D.8.2 Update Schema
+  - [ ] Seamly2D.8.2.1 - Create a new `.sm2d` schema: fold line node ids, schema version bump
+  - [ ] Seamly2D.8.2.2 - Create a converter for older files
+- [ ] Seamly2D.8.3 In Piece mode implement a new 'Piece Mirror' tool - mirror the half piece across the fold line
+- [ ] Seamly2D.8.4 Handoff SVG: `data-on-fold` on the piece `<g>`, a `fold_line` component group with the two points; update `SVG-DATA-ATTRIBUTES.md` and `NEW-ATTRIBUTES.csv`
+- [ ] Seamly2D.8.5 Unit tests: schema round-trip, handoff attributes
+- [ ] Seamly2D.8.6 SeamlyLayout side: Layout.16
 
 ## [ ] Task Seamly2D.10 — Handoff: seam allowance width per notch
 
@@ -87,3 +90,15 @@ A piece with a built-in seam allowance shows only its main path, the cut line. L
 - [ ] Seamly2D.9.6 Unit test: file name shown for selected, default, and no-file cases
 
 ## [x] Task Seamly2D.4 — Preferences > Paths has no row for bodyscans
+
+## [ ] Task Seamly2D.50 - Drill Holes
+
+- [ ] Seamly2D.50 Implement Drill holes
+  - [ ] Seamly2D.50.1 - Implement Drill Holes in Piece Mode, similar to Notches 
+  - [ ] Seamly2D.50.2 - Implement Drill Holes in SeamlyLayout in exported DXF R12 and DXF R13 (layer 13), with diameter (group 30).
+
+  ## Task Seamly2D.60 - 
+
+  - [ ] Seamly2D.60 - Implement Stripe and plaid reference lines 
+    - [ ] Seamly2D.60.1 - Implement Stripe and plaid reference lines in piece mode
+    - [ ] ISeamly2D.60.2 - Implement Stripe and plaid reference lines in DXF R12 and DXF R13 exports(layers 9, 10) - not implemented in Seamly2D yet so move this to TODO_SEAMLY2D.md

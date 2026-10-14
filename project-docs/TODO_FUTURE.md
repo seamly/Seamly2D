@@ -97,16 +97,20 @@ Add tasks in project-docs/TODO_SEAMLY2D.md -->
 * Report an error if an expected point or attribute cannot be found.
 * Reparse and display the updated pattern.
 
-========================================================
+## Layout Miscellaneous
 
-Add task in project-docs/TODO_SEAMLYLAYOUT.md -->
+- [ ] Layout.51 DXF-AAMA — biggest install base in apparel PLM, reference implementation already in the repo
+  - **On hold** — no AAMA spec on hand. Get the spec, or study sample AAMA `.dxf` files from other CAD systems, before implementing.
+- [ ] Layout.63 Drill holes (layer 13), with diameter (group 30) - not implemented in Seamly2D yet so move this to TODO_SEAMLY2D.md
+- [ ] Layout.64 Stripe and plaid reference lines (layers 9, 10) - not implemented in Seamly2D yet so move this to TODO_SEAMLY2D.md
 
-========================================================
+## [ ] Task Layout.15 — Layout by material
 
-Add rule to CLAUDE.md -->
+Depends on Seamly2D.7. Until then every piece is on one fabric.
 
-1. Adhere to code style rules as defined in `.github\README-CODE-STYLES.md`
+- [ ] Layout.15.1 Import: read `data-material` and per-material quantity
+- [ ] Layout.15.2 One layout tab per material; each packs only that material's pieces
+- [ ] Layout.15.3 Quantity: place each piece its cut count per material
+- [ ] Layout.15.4 Exports: material in the default file name; DXF-ASTM `Material:` piece text from `data-material` (today `Block::material` is `DEFAULT_MATERIAL` = `Fabric`)
+- [ ] Layout.15.5 Tests: Rust import, packing per material, export text
 
-========================================================
-
-Ask Claude -->

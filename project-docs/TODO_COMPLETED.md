@@ -1286,3 +1286,249 @@ One Rust mapping serves Layout.17 and Layout.18: `exports::export_name_segment(f
 - [x] Layout.20.8 Tests: `dxf_export_name_segment_marks_annotated`, `default_export_file_name_with_dxf_segments`, `do_export_dxf_annotated_txt_matches_dxf_name`
 - Code: Rust `exports::dxf_export_name_segment(variant, annotated)`, QML `appController.dxfExportNameSegment`.
 - The TODO example `male_shirt_annotated_…` omits the variant; every DXF name carries R12, R13 or CLO3D.
+
+# SeamlyLayout completed work relocated 2026-10-13
+
+## Task Layout.01 - Open seamlylayout.exe
+
+- [x] Layout.01 While in 'Piece Mode' in Seamly2D, pressing the 'Layout' button on the menu should immediately run seamlylayout.exe without displaying the old Seamly2D layout canvas or calling vlayout which has been superceded by the seamlylayout.exe application. The old vlayout code has been superceded by seamlylayout.exe
+
+## Task Layout.02 - Layout Settings
+
+- [x] Layout.02 - In the settings dialog, section 'Layout Mode', add a checkbox for 'Any'; when 'Any' is checked the layout algorithm should ignore the grainline direction when placing the pieces efficiently.
+
+## Task Layout.03 - layout algorithm improvement
+
+- [x] Layout.031 - The layout algorithm has suffered regression - the pieces are nested sub-optimally (there is a lot of space between the pieces). Fix the layout algorithm so that the pieces only have the gap specified between them.
+
+- [x] Layout.032 - Implement the 'Layout Mode' == 'None' option so that the grainline direction is ignored while the pieces are efficiently arranged.
+
+## Task Layout.1 - 'Adjust Mode' improvement
+
+- [x] Layout.11 - The 'Adjust Layout' feature has suffered regression - when 'Adjust Layout' opens there are no pattern pieces to adjust - the pieces from the main SeamlyLayout canvas should be available in 'Adjust Layout', otherwise there is nothing to adjust and save back to the main SeamlyLayout canvas.
+
+- [x] Layout.12 - When Adjust Mode closes it should return focus to SeamlyLayout's right canvas
+
+- [x] Layout.13 - When focus returns to the right canvas after 'adjust mode' closes, the right canvas should contain either:
+  - [x] Layout.13.1 - the layout with updates from 'adjust mode' ('adjust mode' closed via 'Save')
+  - [x] Layout.13.2 - the layout without updates from 'adjust mode' ('adjust mode' closed via 'Cancel')
+
+## Completed subtasks from Task Layout.3 — Multisize handoff and layout: nested (piece groups) or marker (single pieces)
+
+- [x] Layout.30 Seamly2D producer
+  - [x] Layout.30.1 `MainWindow::prepareMultisizePieceLists()`: every size, base height, then restore; shared helpers `recalculateAtSize()` and `currentLayoutPieces()` also serve `exportPiecesAs()`
+  - [x] Layout.30.2 Piece matched across sizes by `VPiece` id; one `piece-set` group per piece, one `piece` child per size
+  - [x] Layout.30.3 `data-measurements`, `data-sizes`, `data-base-size`, `data-size`; `NEW-ATTRIBUTES.csv` and `SVG-DATA-ATTRIBUTES.md` updated
+  - [x] Layout.30.4 `TST_SvgComponentTags`: 4 new tests
+
+- [x] Layout.31 SeamlyLayout import: `read_measurements_info()`; `AppController.isMultisize`, `multisizeSizes`
+
+- [x] Layout.32 Settings dialog: "Multisize Layout" — Nested | Marker, shown only for a multisize import; JSON key `multisizeLayout`
+
+- [x] Layout.33 Nested layout
+  - [x] Layout.33.1 `hoist_piece_sets()`: piece-sets reach the root as one unit
+  - [x] Layout.33.2 `verticalize_dom` turns each size on its own grainline; `center_piece_sets` stacks sizes on the largest size
+  - [x] Layout.33.3 One `PieceRect` per set: bbox = union of sizes; outline polygon = largest size
+  - [x] Layout.33.4 Placed pieces keep `data-size`
+
+- [x] Layout.34 Marker layout: every size packs alone; label "Name (size N)"
+
+- [x] Layout.35 Adjust Mode: moves each placed unit by id, so Nested moves a whole set
+
+- [x] Layout.36 Export: user chooses the multisize export (user, 2026-09-28)
+  - [x] Layout.36.1 **Nested**: one file; each piece keeps its `piece-set` group; every piece keeps `data-size`
+  - [x] Layout.36.2 **Export all tabs**: checkable Export menu item; every format writes one file per tab, tab label before the extension; each file is that tab's own packed layout (user decision, 2026-09-29: explicit menu item, no chooser dialog)
+
+- [x] Layout.37 Sized layouts. Layout.36.2 depends on this
+  - [x] Layout.37.1 Pack each size again as its own layout: only that size's pieces, same settings; progress popup names each size
+  - [x] Layout.37.2 Tabs across the top of the right canvas: "Nested", then one per size
+  - [x] Layout.37.3 Adjust Mode and exports use the selected tab
+  - Layout.37.4 Won't do: one PDF per tab. Select a size tab, then export PDF or PDF (Tiled). One page per size conflicts with sheet and tiled pages (user decision, 2026-09-29)
+
+  - [x] Layout.38.1 Rust: set hoist, centring, set bbox, set outline, marker count = pieces × sizes (synthetic fixture `MULTISIZE_HANDOFF_SVG`)
+
+  - [x] Layout.38.2 export SVG from a `.sm2d` + `.smms` pattern, save to `crates/cxxqt_bridge/test_data/':
+    - [x] Layout.38.2.1 save files to `crates/cxxqt_bridge/test_data/':
+      --> src\app\seamlylayout\crates\cxxqt_bridge\test_data\jacket2_40-146_202610121819.svg
+      --> src\app\seamlylayout\crates\cxxqt_bridge\test_data\jacket2_40-146_nested_allsizes_R13_202610121813.dxf
+      - The SVG is committed. The DXF is not used by a test and stays untracked.
+      - The SVG is a SeamlyLayout SVG export, not the raw handoff: the piece-sets sit at the root, and the pattern group with `data-sizes` and `data-base-size` is gone. `layout_utils::tests::jacket2_handoff` puts the pattern group back (sizes from `data-size`, base size 500). A `SEAMLYLAYOUT_SAVE_HANDOFF` copy can replace the file and the rebuild.
+    - [x] Layout.38.2.2 implement an end-to-end test: `layout_utils::tests::jacket2_*` (5 tests)
+
+  - [x] Layout.38.3 `SEAMLYLAYOUT_SAVE_HANDOFF=<absolute path>`: `import_svg_document` writes the received SVG there (`handoff_capture.rs`)
+
+  - [x] Layout.38.4 User: capture the SVG of `jacket2_40-146.sm2d` + its `.smms` :  src\app\seamlylayout\crates\cxxqt_bridge\test_data\jacket2_40-146_202610121819.svg
+
+  - [x] Layout.38.5 add the fixture and an end-to-end test
+    - `jacket2_handoff_is_multisize`: 208 pieces, 26 sizes 220-720, base size 500
+    - `jacket2_nested_packs_eight_piece_sets`: 60 in x 300 in roll, 8 units, 208 pieces placed
+    - `jacket2_marker_places_every_size`: 60 in x 1500 in roll, 208 units; each piece-set number on 26 pieces
+    - `jacket2_missing_piece_data_lists_each_piece_once`: Nested and Marker, 8 lines, Cyrillic names, `Detail (3)` to `Detail (8)`
+    - `jacket2_all_sizes_export_names_every_size_alike`: escaped `Piece Name:`; 4 pieces graded (26 sizes each); `Detail (3)`, `(6)`, `(7)`, `(8)` fall back on turn points (Layout.27.3); `.rul` written
+
+- [x] Layout.39 Doxygen briefs + inline comments on touched functions; document both layouts in the SeamlyLayout docs
+
+## Task Layout.5 - Implement additional export formats
+
+- [x] Layout.52 HPGL — unlocks the whole plotter and cutter class
+- [x] Layout.53 PS/EPS — one writer covers both and retires pdftops
+- [x] Layout.54 JPG — trivial, fit it anywhere
+- [x] Layout.55 DXF-ASTM - improve current export so that it meets the DXF-ASTM standard
+- [x] Layout.57 DXF-ASTM (CLO3D) — Export menu item: D6673-10 file plus CLO3D group 250 (0 = boundary, 2 = sew line)
+
+## Completed subtasks from Task Layout.6 - DXF-ASTM: D6673 features without a Seamly2D source
+
+  - [x] Layout.61.1 Trigger: DXF-ASTM export from the "Nested" tab of a multisize layout; the handoff DOM goes to `do_export_dxf` (`DxfGradingSource`)
+
+  - [x] Layout.61.2 `astm_contour::grade_contours`: same key points in every size, each size within 0.25 mm
+
+  - [x] Layout.61.3 `astm_grading::grade_drawing`: nests in size order, rules in draft space, rigid fit into the layout, layer 5 line, `# n` texts; ungradable piece → sample size only + export warning
+
+  - [x] Layout.61.4 Writer: graded size blocks without layers 2/3/4; `Sample Size:` and `Grade Rule Table:` style text; `.rul` file (`grade_rule_file.rs`)
+
+  - [x] Layout.61.5 Tests: `astm_grading_test.rs`, `writer_astm_test.rs` graded tests, `multisize_layout_exports_graded_nests`
+
+  - [x] Layout.61.6 Compliance doc "Grading"
+
+    - [x] Layout.61.7.1 Check the jacket2 reports in `test-seamly-layout/layouts/jacket2/`. Result: grading not verified
+      - Both files: MSI 26.10.1115, before Layout.26 and Layout.27.9
+      - Marker `jacket2_40-146_marker_allsizes_R13_202610121149.dxf`: nothing graded. `Sample Size:` and `Grade Rule Table:` blank, no `.rul`, layer 2 in all 25 blocks (Layout.25, 27.1, 27.3)
+      - Nested `jacket2_40-146_nested_allsizes_R13_202610121136.dxf`: aw.fyi reads sample size 500 and 104 layer 5 lines. 4 pieces graded; Detail (3), (6), (7), (8) sample size only (Layout.27.3)
+
+## Completed subtasks from Task Layout.67 — Multisize tabs: Marker, Nested, Base Size, then each size
+
+- [x] Layout.67.1 `layout_views`: `ViewKind` per tab; tab run Marker → Nested → Base Size → sizes; the base size's own tab reuses the Base Size layout
+
+- [x] Layout.67.2 Settings "Multisize Layout" removed (`SettingsDialog.qml`, `SettingsModel.{h,cpp}`, `layout_settings.rs`); a stored `multisizeLayout` key is ignored
+
+- [x] Layout.67.3 PDF and tiled exports take the packing mode from the shown tab
+
+- [x] Layout.67.4 DXF-ASTM grading: Base Size tab only; the base size block gets `# n` texts and the layer 5 line; no graded nest
+
+- [x] Layout.67.5 Export menu: DXF-ASTM disabled on Marker and Nested, with a note. Export all tabs: DXF-ASTM skips Marker and Nested; other formats skip Base Size
+
+- [x] Layout.67.6 Tests: Rust `layout_views`, grading, writer, Base Size and size tab exports (jacket2 included); Qt `SettingsModelTests::multisizeLayout_storedKeyIsDropped`
+
+- [x] Layout.67.7 Docs: DXF-ASTM compliance doc, simple workflow, settings workflow, `SVG-DATA-ATTRIBUTES.md`
+
+## Completed subtasks from Task Layout.25 — Multisize Marker layout: extend the media height until every piece fits
+
+- [x] Layout.25.1 When the pack leaves pieces out, increase the media height and pack again until every piece fits
+  - `packing::pack_polygons_extending`: the bin grows by the stacked height of the unplaced pieces until every piece that fits the width is placed. jacket2 Marker, 48 in roll: 208 of 208 placed, about 798 in
+  - Multisize tabs only, as scoped above. An individual pattern still leaves out a piece that does not fit
+
+- [x] Layout.25.2 Media types: paper sheet, paper roll (500 in default length), fabric
+  - Roll and fabric end at the lowest piece. A sheet ends at the lowest piece, but not above its own length. Tiled paper does not extend
+
+- [x] Layout.25.3 A piece wider than the media width cannot fit at any height: leave it out and keep the warning
+  - Replaced by Layout.71: the media widens, so no multisize piece is left out
+
+- [x] Layout.25.4 Canvas, Adjust Mode and exports use the extended height
+  - Exception, unchanged: the paper-sheet PDF export packs the pieces again on sheets of the set size
+
+- [x] Layout.25.5 Tests: Rust pack with more pieces than one sheet holds → every piece placed, height grows; a piece that is too wide stays unplaced
+  - `extending_*` (`layout_engine`), `pack_polygons_extending_grows_and_reports_too_wide`, `jacket2_marker_extends_paper_roll`, `jacket2_marker_extends_paper_sheet`
+
+- [x] Layout.25.6 Docs: layout workflow, `TEST_CHECKLIST.md`
+
+## Completed subtasks from Task Layout.71 — Multisize: widen the media for a piece wider than it
+
+- [x] Layout.71.1 `layout_engine::required_bin_width`: widest piece, each in its narrowest trial angle; `layout_utils` widens the bin to it when `extend_media` is set. Tiled paper unchanged
+
+- [x] Layout.71.2 `layout_assembler::set_content_width`: SVG, `backgroundRect` and `contentRect` widths; contentRect keeps its x, both side margins kept
+
+- [x] Layout.71.3 Tab warning: the Layout.25 text "grows in length, not in width" removed; non-tiled tabs leave no piece out
+
+- [x] Layout.71.4 Tests: `required_bin_width_uses_narrowest_angle`, `set_content_width_keeps_margins`, `jacket2_marker_widens_narrow_roll` (10 in roll, 208 of 208)
+
+- [x] Layout.71.5 Docs: layout workflows
+
+## Completed subtasks from Task Layout.72 — Individual pattern: a piece wider or longer than the media
+
+- [x] Layout.72.1 `geometry::half_plane_clip`: cut a closed or open polyline with an axis-parallel line; each vertex keeps its source index; a concave outline gives one polygon per region
+
+- [x] Layout.72.2 `piece_divider.rs`: split a piece group into parts. Cut line and cut paths closed; seam line and internal paths open; notches and labels whole, to the nearest part; grainline copied into a part without one. New `piece_label` "<name> part i of n, joins j"; 2 match notches per shared cut edge; `data-split-of`, `data-split-part`, `data-split-count`; ids `<id>_part<i>`; `data-name` "<name> (i/n)"
+
+- [x] Layout.72.3 Pipeline: `do_find_oversized_pieces` before the layout; `split_oversized` splits after the piece-set centring, before `translate_dom`. `sheets::build_sheet_export_inputs` splits the same way (`divide_spec`)
+
+- [x] Layout.72.4 Bridge and QML: `oversized_pieces_found` signal, `process_layout_oversized`, `cancel_layout`, `is_settings_required`; dialog in `Main.qml`; `TopMenuBar.settingsOnly`
+
+- [x] Layout.72.5 DXF-ASTM: each part is its own block, `Piece Name:` "Back (1/2)". Individual patterns are never graded, so no grading change
+
+- [x] Layout.72.6 Tests: `half_plane_clip` (square, U-shape, horizontal, open line), `fits_bin_checks_each_trial_angle`, `piece_divider` (wide piece, long piece, turned piece, U-shape), `trousers_long_pieces_split_on_a_sheet` (DXF-ASTM and sheet PDF inputs), `trousers_long_pieces_extend_a_sheet`
+
+- [x] Layout.72.7 Docs: `SVG-DATA-ATTRIBUTES.md` "SeamlyLayout split parts", layout workflows. `TEST_CHECKLIST.md` lines are in Layout.72.8: the user's checklist edits are in `stash@{0}`
+
+## Completed subtasks from Task Layout.26 — DXF-ASTM Missing Piece Data dialog: one readable line per piece
+
+- [x] Layout.26.1 One line per piece, not one per placed size: group the blocks by `data-parent` (piece-set id)
+
+- [x] Layout.26.2 The dialog clips its text: the last line is not visible. Add a scroll area; keep the buttons visible
+
+- [x] Layout.26.3 Non-ASCII names: `sanitize_ascii` empties "Подборт" and "Комір", so the dialog shows the block id `piece-201_s720_M`. Show the `data-name` text in dialogs and export warnings
+
+- [x] Layout.26.4 DXF `Piece Name:` for a non-ASCII name is the block id today -- Piece name does not differ per size -- so aw.fyi cannot group the sizes. Write each non-ASCII character as an AutoCAD `\U+XXXX` escape: "Комір" → `\U+041A\U+043E\U+043C\U+0456\U+0440` (user decision: D2). Every size of a piece gets the same name
+
+- [x] Layout.26.5 Pieces with the same name (6 × "Detail") cannot be told apart. Add the piece letter, else the piece number: "Detail (3)". Applies also to the DXF `Piece Name:`: aw.fyi merges the 6 "Detail" pieces into one. That merge causes the aw.fyi departures "Sample size points incomplete", "Excluded layers present in graded sizes" and "L5 endpoint mismatch 103.74" (checked: per piece, L5 is a pure translation)
+
+- [x] Layout.26.6 Tests: Rust dialog text — one line per piece set, Cyrillic name kept, same names numbered
+  - `piece_names_keep_unicode_and_number_shared_names`, `hoist_tagged_pieces_dissolves_piece_sets` (`data-set-number`), `jacket2_missing_piece_data_lists_each_piece_once`, `jacket2_all_sizes_export_names_every_size_alike`
+
+## Completed subtasks from Task Layout.27 — DXF-ASTM grading fails for jacket2_40-146 from the "Nested" tab
+
+  - [x] Layout.27.3.1 Seamly2D: `VLayoutPiece::unifyTurnPoints`, called by `MainWindowsNoGUI::unifySizeTurnPoints` after the size loop. Node vertex indices per line: `VAbstractPiece::nodeVertexIndices`. A closed loop that starts at another node in another size (built-in seam line) is matched by node position. Tests: 5 in `TST_SvgComponentTags`, `TST_VAbstractPiece::NodeVertexIndices`. `cl /Zs` check passed; Qt suites not run
+
+- [x] Layout.27.6 Warnings use the piece names from Layout.26.3 and Layout.26.5
+  - MSI 26.10.1311: "Export Complete" names `Detail (3)`, `Detail (6)`, … (`jacket2_basesize_screenshot_1.png`)
+
+- [x] Layout.27.9 Duplicate vertices: aw.fyi reports layers 84 (54) and 87 (450) in the graded nested file only. `GradeSize::vertex_at` inserts a key point 0.000001–0.01 mm from a dense vertex (`SAME_VERTEX_MM` = 1e-6). Snap to the vertex within 0.01 mm; drop a curve key point that lands on the vertex of the key point before or after it. Test: no consecutive dense or reduced vertices closer than 0.01 mm
+
+## Task Layout.40 — Local MSI ships stale sample patterns
+
+The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`src/app/share/samples/patterns/`) has English names. `copyToDestdir` in `common.pri` skips a file that exists, so `src/app/seamly2d/bin/samples` and `src/app/seamlyme/bin/samples` keep copies from 2026-08-10. `smsi.ps1` stages those `bin` folders. CI builds from a clean checkout and is not affected.
+
+- [x] Layout.40.1 `common.pri` `copyToDestdir`: on Windows copy every file on each link, not only a missing one
+- [x] Layout.40.2 Check: after `local_build_msi.ps1`, `packaging/windows/seamly-msi/x64/parent/samples/patterns/jacket2_40-146.sm2d` matches the repo copy
+  - MSI 26.10.1311: the staged copy and the installed copy (`C:\Program Files\SeamlyApps\samples\patterns\`) match the repo copy
+- [x] Layout.40.3 `common.pri` is a `*.pri` change: the merge commit runs full CI (no skip-ci token)
+
+## Completed subtasks from Task Layout.28 — Built-in seam allowance: show the seam line
+
+- [x] Layout.28.1 Seamly2D: seam line = main path offset inward by each node's width (wider of before and after; piece width when the node sets none)
+  - `VPiece::builtInSeamLinePoints()`. A curve spreads the widths of its ends along its length. Corner types shape only the cut line: seam line corners are plain offset corners (user confirmed)
+
+- [x] Layout.28.2 Handoff of a built-in piece: main path as `cutline`, computed line as `seamline`. Same rule for a hidden seam line as a piece without a built-in seam allowance
+  - `VLayoutPiece::createSeamlineItem()`, `createAllowanceItem()`. The built-in `cutline` is sent also when seam allowances are not shown: it is the piece outline
+
+- [x] Layout.28.3 SeamlyLayout canvas, Adjust Mode and every export draw the seam line. Packing still uses the cut line
+  - No SeamlyLayout code change: every view and export already draws `seamline` and `cutline` groups, and packing prefers `cutline`
+
+- [x] Layout.28.4 DXF-ASTM: cut line is the boundary (layer 1); seam line is a sew line (layer 14)
+  - No code change: `converter::extract_astm_piece` already does this for a piece with both lines
+
+- [x] Layout.28.5 Tests: `TST_SvgComponentTags` — a built-in piece has `cutline` and `seamline`; Rust — DXF layers 1 and 14 for a built-in piece
+  - `TST_SvgComponentTags::BuiltInPieceSendsCutlineAndSeamline`, `BuiltInPieceHiddenSeamLineSendsCutlineOnly`; `TST_VPiece::BuiltInSeamLineUsesWiderNodeWidth`, `BuiltInSeamLineFollowsCurve`
+  - Rust: `built_in_seam_allowance_writes_boundary_and_sew_line`, `built_in_seam_allowance_has_boundary_and_sew_line`, `built_in_seam_allowance_packs_by_its_cut_line`
+
+- [x] Layout.28.6 Docs: `SVG-DATA-ATTRIBUTES.md` (`cutline`, `seamline`, `data-seam-allowances`), `NEW-ATTRIBUTES.csv`, DXF-ASTM compliance doc, `TEST_CHECKLIST.md`
+
+- [x] Layout.28.8 Verify: Qt suites (`nmake check`) in `local_build_msi.ps1`
+  - The first run found a bug: a main path that starts at a corner next to a curve lost most of its seam line. The inward offset loops at that corner, and `CheckLoops()` cut the wrong side of a loop at the path start. Fix: the offset starts in the middle of the longest edge
+- Not in this task: Seamly2D piece mode draws no seam line for a built-in piece. Filed as Seamly2D.11 in `TODO_SEAMLY2D.md` (user decision)
+
+## Completed subtasks from Task Layout.68 — PDF export: page and pieces 133 % too large
+
+- [x] Layout.68.1 One renderer for every PDF page: `exports::render_tree_to_pdf_bytes` passes `PageOptions { dpi: 96 }`. `app_core::render_pdf` removed
+
+- [x] Layout.68.2 PDF (Tiled) and sheet pages use the same renderer. A Letter tile page is `612 × 792` pt
+
+- [x] Layout.68.3 Acrobat limits a page to 200 in (14 400 pt). A 500-in roll page is 36 000 pt. Decision (user): a fabric layout can be longer than 500 in, so a page side longer than 200 in gets `/UserUnit` n (smallest whole number). A reader that ignores `/UserUnit` shows the page at 1/n size
+
+- [x] Layout.68.4 Tests: Rust MediaBox of a 48 in × 500 in layout = `3456 × 36000`; tiled Letter page = `612 × 792`
+  - `pdf_page_is_true_size`, `pdf_page_longer_than_200_in_sets_user_unit`, `tiled_pdf_pages_are_paper_size`
+
+- [x] Layout.68.6 Docs: `export-docs/seamlylayout_EXPORT_WORKFLOW.md` "PDF export — true size", simple workflow, codebase index
+
+## Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
+
+## Task Layout.9 — Piece-mode handoff passes a stringified SVG document
