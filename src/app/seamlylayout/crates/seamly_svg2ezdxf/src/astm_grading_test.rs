@@ -6,7 +6,9 @@
 
 #[cfg(test)]
 mod tests {
-    use crate::astm_contour::{build_contour, build_contour_tagged, distance, grade_contours, spline_deviation, AstmContour, CURVE_TOLERANCE_MM};
+    use crate::astm_contour::{
+        build_contour, build_contour_tagged, distance, grade_contours, spline_deviation, AstmContour, GradeError, CURVE_TOLERANCE_MM,
+    };
     use crate::converter::{svg_to_ezdxf, SvgToEzdxfOptions};
     use crate::drawing::{Block, Drawing};
     use crate::entities::Point;
@@ -109,7 +111,25 @@ mod tests {
         )
         .expect("square");
         let triangle = build_contour(&[Point::new(0.0, 0.0), Point::new(100.0, 0.0), Point::new(50.0, 80.0)], true).expect("triangle");
-        assert!(grade_contours(&[square, triangle], 0).is_none(), "4 vs 3 turn points");
+        let sizes = [square.clone(), triangle, square];
+        // The error names the first size whose turn points differ from the sample.
+        assert_eq!(grade_contours(&sizes, 0).err(), Some(GradeError::TurnPointsDiffer(1)), "4 vs 3 turn points");
+        assert_eq!(grade_contours(&sizes, 1).err(), Some(GradeError::TurnPointsDiffer(0)), "sample is the triangle");
+        assert_eq!(grade_contours(&sizes, 3).err(), Some(GradeError::NoSample));
+    }
+
+    #[test]
+    fn key_point_off_its_line_is_its_own_error() {
+        let square = || {
+            build_contour(&[Point::new(0.0, 0.0), Point::new(100.0, 0.0), Point::new(100.0, 100.0), Point::new(0.0, 100.0)], true)
+                .expect("square")
+        };
+        let mut moved = square();
+        moved.reduced[1] = Point::new(100.5, 0.0); // not a dense vertex
+        assert_eq!(grade_contours(&[square(), moved], 0).err(), Some(GradeError::KeyPointOffLine(1)));
+        let mut open = square();
+        open.closed = false;
+        assert_eq!(grade_contours(&[square(), open], 0).err(), Some(GradeError::ClosureDiffers(1)));
     }
 
     #[test]

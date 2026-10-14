@@ -1721,10 +1721,11 @@ mod tests {
         assert!(lines.contains(&"Sample Size:500"), "sample size");
 
         // This handoff tags Detail (3) and (6) with different turn points in different
-        // sizes, so they stay ungraded. Warnings name the piece as the user wrote it.
-        let expected: Vec<String> = [3, 6]
+        // sizes, so they stay ungraded. Warnings name the piece as the user wrote it, and
+        // the first size whose turn points differ from the sample size.
+        let expected: Vec<String> = [(3, 660), (6, 220)]
             .iter()
-            .map(|n| format!("Detail ({n}): not graded, the sizes have different turn points."))
+            .map(|(n, size)| format!("Detail ({n}): not graded, size {size} has other turn points than size 500 on the cut line."))
             .collect();
         assert_eq!(warnings, expected);
         let reference_lines = lines.windows(4).filter(|w| w[0] == "0" && w[1] == "LINE" && w[2] == "8" && w[3] == "5").count();

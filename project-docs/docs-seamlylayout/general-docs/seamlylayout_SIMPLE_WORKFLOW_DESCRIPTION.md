@@ -212,6 +212,7 @@ The application workflow loop consists of:
        On the Marker and Nested tabs the DXF-ASTM items are disabled, and a note names the tabs to select.
        "Export Complete" names the `.dxf` and the `.rul`.
        A sample size piece the layout left out is named: "<piece>: not graded, size 36 does not fit the media."
+       A piece whose sizes have other turn points names the first such size and the line: "<piece>: not graded, size 34 has other turn points than size 36 on the cut line."
        When no piece grades, no `.rul` is written, and the dialog says "No piece graded: no .rul file written."
      * Export > "Export all tabs" (checkable, shown only when tabs exist): every format then writes one file per tab.
        * DXF-ASTM writes the Base Size and size tabs. Other formats write every tab but Base Size, which repeats its size tab.
