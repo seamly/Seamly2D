@@ -116,7 +116,7 @@ Prior results (jacket2, sizes 220–720): Nested graded 4 of 8 pieces; Marker pl
 - [ ] Layout.27.5 Name the first size whose turn points differ from the sample size.
 - [ ] Layout.27.7 Add jacket2 handoff fixture to `crates/cxxqt_bridge/test_data/`; end-to-end test should grade every piece and write `.rul`.
 - [x] Layout.27.8 If nothing grades, show "No piece graded: no .rul file written". `astm_grading::grade_drawing` writes `.rul` only when at least one piece grades.
-- [ ] Layout.27.11 Fix near-duplicate written vertices. Example: Подборт layer 87 has `(333.01, 626.21)` followed by `(333.01, 626.22)`. Increase `SNAP_VERTEX_MM` from 0.01 to 0.02, or compare rounded coordinates. Test: no consecutive written vertices 0.01 mm apart or closer.
+- [x] Layout.27.11 Fix near-duplicate written vertices. Example: Подборт layer 87 has `(333.01, 626.21)` followed by `(333.01, 626.22)`. Increase `SNAP_VERTEX_MM` from 0.01 to 0.02, or compare rounded coordinates. Test: no consecutive written vertices 0.01 mm apart or closer. Done: `DUPLICATE_TOLERANCE_MM` and `SNAP_VERTEX_MM` = 0.025; jacket2 test found 6 before the fix.
 - [ ] Layout.27.12 Make line-end turn points consistent across sizes. Detail (7) differs from size 660; Detail (8) differs at 520–640, 680 and 700. `astm_contour::straight_run_ends` flips at its 10-mm / 2× break thresholds (e.g., 9.97 mm at size 640 vs 10.2 mm at 660). Decision (2026-10-13): Option 1.
   - Option 1 (chosen): Seamly2D checks node line ends, then `unifyTurnPoints` shares flags across sizes. SeamlyLayout stops adding line ends to tagged paths. Refresh old fixtures.
   - Option 2: SeamlyLayout shares line-end flags across sizes, using new node-index attributes from Seamly2D.
