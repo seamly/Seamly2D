@@ -6,7 +6,7 @@ use std::fs;
 use std::io::Write;
 use std::path::Path;
 
-use image::codecs::jpeg::JpegEncoder;
+use image::codecs::jpeg::{JpegEncoder, PixelDensity};
 use image::ExtendedColorType;
 use resvg::tiny_skia::{Color, Pixmap, Transform};
 use svg_dom::Document;
@@ -46,6 +46,12 @@ pub const JPEG_MAX_SIDE_PX: u32 = 65_535;
 
 // @brief Default JPEG quality (1-100) for layout exports.
 pub const JPEG_DEFAULT_QUALITY: u8 = 90;
+
+// @brief SVG user units per inch (CSS px): the resolution of a raster at scale 1.0.
+pub const SVG_PX_PER_INCH: f32 = 96.0;
+
+// @brief Millimetres per inch.
+const MM_PER_INCH: f32 = 25.4;
 
 // @brief Result alias for app_core operations.
 pub type CoreResult<T> = Result<T, CoreError>;
@@ -186,6 +192,16 @@ fn render_pixmap(tree: &usvg::Tree, w: u32, h: u32) -> CoreResult<Pixmap> {
     Ok(pixmap)
 }
 
+// @brief PNG `pHYs` resolution, in pixels per metre, of a raster rendered at `scale`.
+fn png_pixels_per_metre(scale: f32) -> u32 {
+    (SVG_PX_PER_INCH * scale * 1000.0 / MM_PER_INCH).round().max(1.0) as u32
+}
+
+// @brief JFIF density, in pixels per inch, of a raster rendered at `scale`.
+fn jpeg_pixels_per_inch(scale: f32) -> u16 {
+    (SVG_PX_PER_INCH * scale).round().clamp(1.0, u16::MAX as f32) as u16
+}
+
 // @brief Render a usvg tree to a PNG file using resvg + tiny-skia.
 // @param tree Parsed usvg tree to render.
 // @param out_path Destination PNG path.
@@ -194,8 +210,21 @@ pub fn render_png(tree: &usvg::Tree, out_path: impl AsRef<Path>, scale: f32) -> 
     let (w, h) = raster_size(tree, scale);
     let pixmap = render_pixmap(tree, w, h)?;
 
-    // Persist to PNG.
-    pixmap.save_png(out_path)?;
+    // Pixmap::save_png writes no pHYs chunk. A viewer or print dialog then guesses
+    // the resolution, and "actual size" prints at the wrong scale.
+    let ppm = png_pixels_per_metre(scale);
+    let mut bytes = Vec::new();
+    let mut encoder = png::Encoder::new(&mut bytes, w, h);
+    encoder.set_color(png::ColorType::Rgba);
+    encoder.set_depth(png::BitDepth::Eight);
+    encoder.set_pixel_dims(Some(png::PixelDimensions { xppu: ppm, yppu: ppm, unit: png::Unit::Meter }));
+    let mut writer = encoder.write_header()?;
+
+    // The white fill makes every pixel opaque, so premultiplied RGBA equals straight RGBA.
+    writer.write_image_data(pixmap.data())?;
+    writer.finish()?;
+
+    fs::write(out_path, bytes)?;
     Ok(())
 }
 
@@ -226,6 +255,8 @@ pub fn render_jpeg(tree: &usvg::Tree, out_path: impl AsRef<Path>, scale: f32, qu
     let file = fs::File::create(out_path)?;
     let mut writer = std::io::BufWriter::new(file);
     let mut encoder = JpegEncoder::new_with_quality(&mut writer, quality.clamp(1, 100));
+    // Without a density unit, JFIF stores only the aspect ratio and a viewer guesses the print size.
+    encoder.set_pixel_density(PixelDensity::dpi(jpeg_pixels_per_inch(scale)));
     encoder.encode(&rgb, w, h, ExtendedColorType::Rgb8)?;
     writer.flush()?;
     Ok(())
@@ -285,6 +316,39 @@ mod tests {
 
         let jpeg = fs::read(&out_path).unwrap();
         assert_eq!(&jpeg[..3], &[0xFF, 0xD8, 0xFF], "JPEG must start with the SOI marker");
+    }
+
+    // @brief The PNG carries a pHYs chunk: 3780 px/m (96 dpi) at scale 1.0, 7559 px/m at 2.0.
+    #[test]
+    fn render_png_writes_resolution() {
+        let tree = usvg::Tree::from_str(sample_svg(), &usvg::Options::default()).unwrap();
+        for (scale, expected_ppm) in [(1.0, 3780), (2.0, 7559)] {
+            let out_path = env::temp_dir().join(format!("app_core_dpi_{}_{scale}.png", std::process::id()));
+            render_png(&tree, &out_path, scale).unwrap();
+
+            let reader = png::Decoder::new(fs::File::open(&out_path).unwrap()).read_info().unwrap();
+            let dims = reader.info().pixel_dims.expect("PNG must have a pHYs chunk");
+            assert_eq!((dims.xppu, dims.yppu), (expected_ppm, expected_ppm), "scale {scale}");
+            assert_eq!(dims.unit, png::Unit::Meter, "scale {scale}");
+            assert_eq!(reader.info().width, (10.0 * scale) as u32, "scale {scale}");
+        } // for scale
+    }
+
+    // @brief The JPEG JFIF header stores 96 x 96 dots per inch at scale 1.0.
+    #[test]
+    fn render_jpeg_writes_resolution() {
+        let tree = usvg::Tree::from_str(sample_svg(), &usvg::Options::default()).unwrap();
+        let out_path = env::temp_dir().join(format!("app_core_dpi_{}.jpg", std::process::id()));
+        render_jpeg(&tree, &out_path, 1.0, JPEG_DEFAULT_QUALITY).unwrap();
+
+        // JFIF APP0 after SOI: marker FFE0, length (2), "JFIF\0", version (2),
+        // units (1 = dots per inch), X density (2), Y density (2), big-endian.
+        let jpeg = fs::read(&out_path).unwrap();
+        assert_eq!(&jpeg[2..4], &[0xFF, 0xE0], "APP0 must follow SOI");
+        assert_eq!(&jpeg[6..11], b"JFIF\0");
+        assert_eq!(jpeg[13], 1, "density unit must be dots per inch");
+        assert_eq!(u16::from_be_bytes([jpeg[14], jpeg[15]]), 96, "X density");
+        assert_eq!(u16::from_be_bytes([jpeg[16], jpeg[17]]), 96, "Y density");
     }
 
     // @brief A layout wider than JPEG allows returns JpegTooLarge and writes no file.

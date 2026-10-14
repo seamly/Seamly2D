@@ -147,8 +147,9 @@ Cause (MSI 26.10.1311): PDF used 72 dpi instead of SVG’s 96 dpi, scaling pages
 
 MSI 26.10.1311 exports correct pixels at 96 dpi (jacket2 PNG: 4608 × 48000) but omits physical resolution metadata. Printing at actual size may be wrong.
 
-- [ ] Layout.69.1 Write PNG `pHYs` = 3780 px/m and JPG JFIF density = 96 × 96 dpi.
-- [ ] Layout.69.2 Rust tests verify PNG `pHYs` and JPG JFIF density.
+- [x] Layout.69.1 Write PNG `pHYs` = 3780 px/m and JPG JFIF density = 96 × 96 dpi.
+- [x] Layout.69.2 Rust tests verify PNG `pHYs` and JPG JFIF density.
+- [ ] Layout.69.3 Next MSI: run `TEST_CHECKLIST.md` §7, "PNG and JPG resolution".
 
 ## [ ] Task Layout.70 — "Some pieces could not be placed" dialog: piece names and length
 
