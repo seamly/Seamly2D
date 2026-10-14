@@ -1230,3 +1230,41 @@ void TST_SvgComponentTags::InternalPathSizesShareNodeTurnPoints() const
     QCOMPARE(exportedTurnPoints(bent, internalPath), QStringLiteral("0 1 2"));
     QCOMPARE(exportedTurnPoints(straight, internalPath), QStringLiteral("0 1 2"));
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief SizesShareLineEndTurnPoints checks that a line end that breaks the tangent in one size is a turn point
+ * in every size.
+ */
+void TST_SvgComponentTags::SizesShareLineEndTurnPoints() const
+{
+    const QString internalPath = QStringLiteral("internal_path");
+
+    // An open path: a 65 mm line, then ten 15 mm curve chords. The curve leaves the line at breakDegrees and
+    // bends stepDegrees at each later vertex.
+    const auto lineIntoCurve = [](qreal breakDegrees, qreal stepDegrees)
+    {
+        QVector<QPointF> points{QPointF(0, 0), QPointF(65, 0)};
+        qreal heading = breakDegrees;
+        for (int k = 0; k < 10; ++k)
+        {
+            const qreal a = qDegreesToRadians(heading);
+            points << points.last() + QPointF(15 * qCos(a), 15 * qSin(a));
+            heading += stepDegrees;
+        }
+        VLayoutPiecePath path = makePath(points, false);
+        path.setNodeVertices({points.first(), points.at(1), points.last()}, false);
+        return path;
+    };
+
+    VLayoutPiece breaking = makeTestPiece(QStringLiteral("Detail"));
+    breaking.setInternalPaths({lineIntoCurve(2.9, 1.0)});
+    VLayoutPiece tangent = makeTestPiece(QStringLiteral("Detail"));
+    tangent.setInternalPaths({lineIntoCurve(1.2, 2.0)});
+    QCOMPARE(exportedTurnPoints(breaking, internalPath), QStringLiteral("0 1 11"));
+    QCOMPARE(exportedTurnPoints(tangent, internalPath), QStringLiteral("0 11"));
+
+    VLayoutPiece::unifyTurnPoints({&breaking, &tangent});
+
+    QCOMPARE(exportedTurnPoints(tangent, internalPath), QStringLiteral("0 1 11"));
+}

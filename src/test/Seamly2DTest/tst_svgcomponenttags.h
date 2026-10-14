@@ -85,6 +85,7 @@ private slots:
     void LoopStartingAtAnotherNodeSharesTurnPoints() const;
     void CutlineRepeatFollowsSharedFirstTurnPoint() const;
     void InternalPathSizesShareNodeTurnPoints() const;
+    void SizesShareLineEndTurnPoints() const;
 };
 
 #endif // TST_SVGCOMPONENTTAGS_H

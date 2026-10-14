@@ -1679,17 +1679,17 @@ mod tests {
         assert!(sizes.len() == 8 && sizes.iter().all(|s| *s == JACKET2_BASE_SIZE), "{sizes:?}");
         assert!(lines.contains(&"Sample Size:500"), "sample size");
 
-        // This handoff gives four Detail pieces different turn points in different
+        // This handoff tags Detail (3) and (6) with different turn points in different
         // sizes, so they stay ungraded. Warnings name the piece as the user wrote it.
-        let expected: Vec<String> = [3, 6, 7, 8]
+        let expected: Vec<String> = [3, 6]
             .iter()
             .map(|n| format!("Detail ({n}): not graded, the sizes have different turn points."))
             .collect();
         assert_eq!(warnings, expected);
         let reference_lines = lines.windows(4).filter(|w| w[0] == "0" && w[1] == "LINE" && w[2] == "8" && w[3] == "5").count();
-        assert_eq!(reference_lines, 4, "one layer 5 line per graded piece");
+        assert_eq!(reference_lines, 6, "one layer 5 line per graded piece");
         assert!(lines.contains(&"# 1"), "grade rule identifiers");
-        let rul = rul.expect("four graded pieces write the rule table");
+        let rul = rul.expect("six graded pieces write the rule table");
         assert!(rul.contains("SAMPLE SIZE:500") && rul.contains("NUMBER OF SIZES:26"), "{rul}");
     } // jacket2_base_size_export_names_and_grades_each_piece
 } // mod tests

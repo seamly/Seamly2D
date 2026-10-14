@@ -1900,6 +1900,25 @@ QVector<QPointF> dShape(int chords, QVector<QPointF> &nodes)
     nodes = {QPointF(0, 0), QPointF(100, 0), QPointF(100, 100), QPointF(0, 100)};
     return points;
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief lineIntoCurve builds an open polyline: a 65 mm line, then ten 15 mm curve chords.
+ * @param breakDegrees direction change where the curve leaves the line.
+ * @param stepDegrees  direction change at each later curve vertex.
+ */
+QVector<QPointF> lineIntoCurve(qreal breakDegrees, qreal stepDegrees)
+{
+    QVector<QPointF> points{QPointF(0, 0), QPointF(65, 0)};
+    qreal heading = breakDegrees;
+    for (int k = 0; k < 10; ++k)
+    {
+        const qreal a = qDegreesToRadians(heading);
+        points << points.last() + QPointF(15 * qCos(a), 15 * qSin(a));
+        heading += stepDegrees;
+    }
+    return points;
+}
 } // namespace
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1942,6 +1961,26 @@ void TST_VAbstractPiece::TurnPointIndices_data() const
         QTest::newRow(start > 5 ? "Line-curve tangent break is a turn point" : "Near-smooth line-curve join is not")
             << join << joinNodes << false << (start > 5 ? QVector<int>{0, 1, 4} : QVector<int>{0, 4});
     }
+
+    // Line ends under the curve join limit: a turn point only where the junction bends more than
+    // twice the curve's next vertex.
+    const auto lineEndNodes = [](const QVector<QPointF> &line)
+    {
+        return QVector<QPointF>{line.first(), line.at(1), line.last()};
+    };
+    const QVector<QPointF> breaking = lineIntoCurve(2.9, 1.0);
+    const int end = breaking.size() - 1;
+    QTest::newRow("Line end bending over twice the curve is a turn point")
+        << breaking << lineEndNodes(breaking) << false << QVector<int>{0, 1, end};
+    QTest::newRow("Curve into line: the same line end")
+        << QVector<QPointF>(breaking.crbegin(), breaking.crend()) << lineEndNodes(breaking) << false
+        << QVector<int>{0, end - 1, end};
+    const QVector<QPointF> tangent = lineIntoCurve(1.2, 2.0);
+    QTest::newRow("Tangent line end is not a turn point")
+        << tangent << lineEndNodes(tangent) << false << QVector<int>{0, end};
+    const QVector<QPointF> flat = lineIntoCurve(0.8, 0.2);
+    QTest::newRow("Line end bending under 1 degree is not a turn point")
+        << flat << lineEndNodes(flat) << false << QVector<int>{0, end};
 
     // The same kink inside a curve interpolation, away from a node, is not.
     QTest::newRow("Curve interior kink is not a turn point")
