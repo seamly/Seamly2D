@@ -36,6 +36,35 @@ pub fn base_size_label(size: &str) -> String {
     format!("Base Size {size}")
 } // fn base_size_label
 
+// @brief Advice that ends every "pieces left out" warning.
+const UNPLACED_ADVICE: &str =
+    "The remaining pieces were laid out. Try a larger sheet size, reduce the piece gap or margins, or remove pieces.";
+
+// @brief Warning for a single layout that left pieces out.
+// @param lines One line per piece, from `ProcessLayoutResult::unplaced_labels`.
+pub fn unplaced_warning(lines: &[String]) -> String {
+    format!(
+        "{} piece(s) could not be placed and were left out of the layout:\n\n{}\n\n{UNPLACED_ADVICE}",
+        lines.len(),
+        bullet_lines(lines)
+    )
+} // fn unplaced_warning
+
+// @brief One tab's entry in the warning after the last tab: the tab label, then one bullet per piece.
+pub fn tab_unplaced_problem(label: &str, lines: &[String]) -> String {
+    format!("{label}:\n{}", bullet_lines(lines))
+} // fn tab_unplaced_problem
+
+// @brief Warning after the last tab: every tab that left pieces out or failed.
+pub fn tab_problems_warning(problems: &[String]) -> String {
+    format!("Some layouts left pieces out:\n\n{}\n\n{UNPLACED_ADVICE}", problems.join("\n"))
+} // fn tab_problems_warning
+
+// @brief One "• line" per line.
+fn bullet_lines(lines: &[String]) -> String {
+    lines.iter().map(|line| format!("\u{2022} {line}")).collect::<Vec<_>>().join("\n")
+} // fn bullet_lines
+
 // @brief What one tab lays out.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ViewKind {
@@ -430,4 +459,20 @@ mod tests {
         let same = views.select(0, state("marker")).unwrap_or_else(|_| panic!("select 0"));
         assert_eq!(same.piece_bboxes_json, "marker");
     } // select_out_of_range_fails
+
+    // @brief Left-out pieces read one bullet per piece, under their tab after a tab run.
+    #[test]
+    fn unplaced_warnings_list_one_piece_per_line() {
+        let lines = sizes(&["Detail (3): 220, 240", "Front: 220"]);
+        let single = unplaced_warning(&lines);
+        assert!(single.starts_with("2 piece(s) could not be placed"), "{single}");
+        assert!(single.contains("\n\n\u{2022} Detail (3): 220, 240\n\u{2022} Front: 220\n\n"), "{single}");
+
+        let problems = vec![tab_unplaced_problem(MARKER_LABEL, &lines), "Size 220: not laid out (no room)".to_string()];
+        let tabs = tab_problems_warning(&problems);
+        assert!(
+            tabs.contains("Marker:\n\u{2022} Detail (3): 220, 240\n\u{2022} Front: 220\nSize 220: not laid out (no room)"),
+            "{tabs}"
+        );
+    } // unplaced_warnings_list_one_piece_per_line
 } // mod tests

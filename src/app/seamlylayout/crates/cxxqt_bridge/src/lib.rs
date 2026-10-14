@@ -1526,8 +1526,8 @@ impl qobject::AppController {
                     let kinds = layout_views::queued_kinds(&sizes, &base_size);
                     let mut queue = TabLayoutQueue::new(json_str.clone(), layout_h_px, kinds);
                     if !result.unplaced_labels.is_empty() {
-                        queue.problems.push(format!(
-                            "{}: {}", layout_views::MARKER_LABEL, result.unplaced_labels.join(", ")
+                        queue.problems.push(layout_views::tab_unplaced_problem(
+                            layout_views::MARKER_LABEL, &result.unplaced_labels
                         ));
                     } // if unplaced pieces
                     let message = queue.next_message().unwrap_or_default();
@@ -1560,12 +1560,7 @@ impl qobject::AppController {
                 // rendered the pieces that did, so this is a warning (popup),
                 // not an error that aborts the layout.
                 if !result.unplaced_labels.is_empty() {
-                    let n = result.unplaced_labels.len();
-                    let list = result.unplaced_labels.join(", ");
-                    let msg = format!(
-                        "{n} piece(s) could not be placed and were left out of the layout:\n\n{list}\n\n\
-                         The remaining pieces were laid out. Try a larger sheet size, reduce the piece gap or margins, or remove pieces."
-                    );
+                    let msg = layout_views::unplaced_warning(&result.unplaced_labels);
                     self.as_mut().layout_warning(cxx_qt_lib::QString::from(msg.as_str()));
                 } // if unplaced pieces
 
@@ -1656,7 +1651,7 @@ impl qobject::AppController {
                 Ok(result) => {
                     if let Some(queue) = rust.tab_queue.as_mut() {
                         if !result.unplaced_labels.is_empty() {
-                            queue.problems.push(format!("{label}: {}", result.unplaced_labels.join(", ")));
+                            queue.problems.push(layout_views::tab_unplaced_problem(&label, &result.unplaced_labels));
                         } // if unplaced pieces
                         queue.keep_base_layout(&kind, &result);
                     } // if queue
@@ -1698,11 +1693,7 @@ impl qobject::AppController {
         if !problems.is_empty() {
             // A non-tiled tab extends its media until every piece fits, so the
             // problems come from tiled paper or from a tab that failed.
-            let msg = format!(
-                "Some layouts left pieces out:\n\n{}\n\n\
-                 The remaining pieces were laid out. Try a larger sheet size, reduce the piece gap or margins, or remove pieces.",
-                problems.join("\n")
-            );
+            let msg = layout_views::tab_problems_warning(&problems);
             self.as_mut().layout_warning(cxx_qt_lib::QString::from(msg.as_str()));
         } // if problems
     } // fn finish_tab_layouts

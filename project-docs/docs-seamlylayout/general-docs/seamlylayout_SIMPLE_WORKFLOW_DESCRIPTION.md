@@ -205,6 +205,8 @@ The application workflow loop consists of:
        * No piece is left out. Tiled paper does not extend.
        * An individual pattern: see "Oversized pieces" below.
      * One warning after the last tab lists every layout that left pieces out or failed.
+       * One bullet per piece, named as DXF-ASTM names it, then its sizes: "Detail (3): 220, 240".
+       * The warning scrolls; its OK button stays visible.
      * Selecting a tab swaps that layout into the controller's layout fields; Adjust Layout and every export use the selected tab.
      * DXF-ASTM exports one size: the Base Size tab (with `# n` grade rule texts and the `.rul` file) or a size tab (ungraded, no `.rul`).
        On the Marker and Nested tabs the DXF-ASTM items are disabled, and a note names the tabs to select.

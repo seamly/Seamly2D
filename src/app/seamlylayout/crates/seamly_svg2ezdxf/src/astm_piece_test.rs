@@ -471,6 +471,17 @@ mod tests {
           </g>
         </svg>"#;
 
+    // @brief Dialogs name the pieces as the DXF blocks do; an unnamed piece shows its id.
+    #[test]
+    fn tagged_piece_names_number_shared_names() {
+        let doc = Document::parse(NAMES).expect("fixture parses");
+        let names: Vec<String> = crate::tagged_piece_names(&doc.root).into_iter().map(|n| n.display_name).collect();
+        assert_eq!(names, vec!["Detail (A)", "Detail (B)", "Комір", "piece-4"]);
+        let doc = Document::parse(&NAMES.replace(r#" data-letter="A""#, "")).expect("fixture parses");
+        let names: Vec<String> = crate::tagged_piece_names(&doc.root).into_iter().map(|n| n.display_name).collect();
+        assert_eq!(names[..2], ["Detail (1)", "Detail (2)"]);
+    }
+
     #[test]
     fn piece_names_keep_unicode_and_number_shared_names() {
         let doc = Document::parse(NAMES).expect("fixture parses");

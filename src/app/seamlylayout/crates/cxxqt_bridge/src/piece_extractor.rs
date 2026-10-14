@@ -101,6 +101,47 @@ pub fn set_free_rotation_without_grainline(pieces: &mut [PieceRect], allow: bool
     }
 } // fn set_free_rotation_without_grainline
 
+// @brief Warning lines for the pieces a layout left out: one line per piece, then its sizes.
+//
+// Names follow the DXF-ASTM numbering ("Detail (3)"), so a dialog names a piece
+// as the export does.  The sizes of one piece share its piece-set key.
+//
+// @param doc      Document the pieces were extracted from.
+// @param pieces   Extracted pieces.
+// @param unplaced Indices into `pieces` of the pieces left out.
+// @return "Detail (3): 220, 240" for multisize pieces; "Front" for an individual or Nested piece.
+pub fn unplaced_piece_lines(doc: &svg_dom::Document, pieces: &[PieceRect], unplaced: &[usize]) -> Vec<String> {
+    let names = seamly_svg2ezdxf::tagged_piece_names(&doc.root);
+    // (key, display name, sizes) per left-out piece, in first-appearance order.
+    let mut groups: Vec<(String, String, Vec<String>)> = Vec::new();
+    for &i in unplaced {
+        let Some(piece) = pieces.get(i) else { continue; };
+        // A piece is a tagged piece itself, or a Nested piece-set whose key is its id.
+        let (key, name, size) = match names.iter().find(|n| n.id == piece.id) {
+            Some(n) => (n.key.clone(), n.display_name.clone(), n.size.clone()),
+            None => match names.iter().find(|n| n.key == piece.id) {
+                Some(n) => (n.key.clone(), n.display_name.clone(), None),
+                None => (piece.id.clone(), piece.label().to_string(), None), // untagged SVG
+            }, // None: not a tagged piece
+        }; // (key, name, size)
+        let pos = match groups.iter().position(|(k, _, _)| *k == key) {
+            Some(pos) => pos,
+            None => {
+                groups.push((key, name, Vec::new()));
+                groups.len() - 1
+            } // None: first size of this piece
+        }; // pos
+        if let Some(size) = size {
+            groups[pos].2.push(size);
+        } // if multisize
+    } // for each left-out piece
+
+    groups
+        .into_iter()
+        .map(|(_, name, sizes)| if sizes.is_empty() { name } else { format!("{name}: {}", sizes.join(", ")) })
+        .collect()
+} // fn unplaced_piece_lines
+
 // @brief Extract bounding boxes for every pattern piece in `doc`.
 //
 // Piece discovery follows the two modes described in this file's header: when the
@@ -1719,5 +1760,51 @@ pub(crate) mod tests {
         let mut doc = svg_dom::Document::parse(nested_handoff_svg()).expect("parse ok");
         assert_eq!(keep_size(&mut doc, "34"), 2);
     } // keep_size_removes_other_sizes
+
+    // @brief Two piece-sets named "Detail" and one "Front", in sizes 34 and 36.
+    const SHARED_NAMES_SVG: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">
+  <g id="pattern-1" data-type="pattern" data-measurements="multisize" data-sizes="34,36" data-base-size="36">
+    <g id="set-1" data-type="piece-set" data-type-number="1">
+      <g id="d1_s34" data-type="piece" data-name="Detail" data-size="34" data-parent="set-1"><path d="M 0 0 L 40 0 L 40 40 Z"/></g>
+      <g id="d1_s36" data-type="piece" data-name="Detail" data-size="36" data-parent="set-1"><path d="M 0 0 L 44 0 L 44 44 Z"/></g>
+    </g>
+    <g id="set-2" data-type="piece-set" data-type-number="2">
+      <g id="d2_s34" data-type="piece" data-name="Detail" data-size="34" data-parent="set-2"><path d="M 0 0 L 20 0 L 20 60 Z"/></g>
+      <g id="d2_s36" data-type="piece" data-name="Detail" data-size="36" data-parent="set-2"><path d="M 0 0 L 22 0 L 22 66 Z"/></g>
+    </g>
+    <g id="set-3" data-type="piece-set" data-type-number="3">
+      <g id="f_s34" data-type="piece" data-name="Front" data-size="34" data-parent="set-3"><path d="M 0 0 L 90 0 L 90 90 Z"/></g>
+      <g id="f_s36" data-type="piece" data-name="Front" data-size="36" data-parent="set-3"><path d="M 0 0 L 99 0 L 99 99 Z"/></g>
+    </g>
+  </g>
+</svg>"#;
+
+    // @brief Left-out pieces: one line per piece, numbered as DXF-ASTM numbers it, then its sizes.
+    #[test]
+    fn unplaced_piece_lines_group_sizes_per_piece() {
+        // Marker: every size is its own unit.
+        let mut doc = svg_dom::Document::parse(SHARED_NAMES_SVG).expect("parse ok");
+        hoist_layout_units(&mut doc, false);
+        let pieces = extract_piece_rects(&doc);
+        let index = |id: &str| pieces.iter().position(|p| p.id == id).expect("piece extracted");
+        let unplaced = [index("d1_s34"), index("f_s36"), index("d1_s36"), index("d2_s36")];
+        assert_eq!(
+            unplaced_piece_lines(&doc, &pieces, &unplaced),
+            vec!["Detail (1): 34, 36", "Front: 36", "Detail (2): 36"]
+        );
+
+        // Nested: a piece-set is one unit and names the piece without sizes.
+        let mut doc = svg_dom::Document::parse(SHARED_NAMES_SVG).expect("parse ok");
+        hoist_layout_units(&mut doc, true);
+        let pieces = extract_piece_rects(&doc);
+        let set = pieces.iter().position(|p| p.id == "set-2").expect("piece-set extracted");
+        assert_eq!(unplaced_piece_lines(&doc, &pieces, &[set]), vec!["Detail (2)"]);
+
+        // Individual pieces keep their names.
+        let mut doc = svg_dom::Document::parse(nested_handoff_svg()).expect("parse ok");
+        hoist_tagged_pieces(&mut doc);
+        let pieces = extract_piece_rects(&doc);
+        assert_eq!(unplaced_piece_lines(&doc, &pieces, &[1, 0]), vec!["Back Bodice", "Front Bodice"]);
+    } // unplaced_piece_lines_group_sizes_per_piece
 
 } // mod tests
