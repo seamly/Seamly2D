@@ -13,7 +13,7 @@
 // CXX-Qt macro infrastructure.
 //
 // Exports:
-//   do_export_dxf(doc, path, create_annotated_version, style, progress) -> Result<Vec<String>, String>
+//   do_export_dxf(doc, path, create_annotated_version, style, progress) -> Result<DxfExportReport, String>
 //   dxf_missing_piece_data_message(doc)              -> Result<String, String>
 //   do_export_pdf(doc, path)                          -> Result<(), String>
 //   (doc, path, tile_dims)         -> Result<(), String>
@@ -720,6 +720,18 @@ pub struct DxfGradingSource {
     pub base_size: String,
 }
 
+// @brief Warning of a Base Size export in which no piece graded.
+pub const NO_PIECE_GRADED_WARNING: &str = "No piece graded: no .rul file written.";
+
+// @brief What a successful DXF-ASTM export wrote, and what it could not do.
+#[derive(Debug, Default)]
+pub struct DxfExportReport {
+    // One line per piece a graded export could not grade, then NO_PIECE_GRADED_WARNING when none graded.
+    pub warnings: Vec<String>,
+    // The grade rule file beside the DXF. None when the export is ungraded or no piece graded.
+    pub rule_file: Option<String>,
+}
+
 // @brief Export a stripped layout document to a DXF-ASTM file.
 //
 // Pipeline:
@@ -733,7 +745,7 @@ pub struct DxfGradingSource {
 // @param style                  Style system text supplied by the frontend.
 // @param progress               Callback invoked with integer percent (0–100) at each stage.
 //                               The caller owns 0% (before call) and 100% (after Ok return).
-// @return Ok(warnings) on success: one line per piece a graded export could not grade.
+// @return Ok(report) on success: the grading warnings and the `.rul` file, if written.
 //         Err(message) on any failure.
 pub fn do_export_dxf(
     doc: &svg_dom::Document,
@@ -741,7 +753,7 @@ pub fn do_export_dxf(
     create_annotated_version: bool,
     style: &DxfStyleInfo,
     progress: &mut impl FnMut(i32),
-) -> Result<Vec<String>, String> {
+) -> Result<DxfExportReport, String> {
     crate::log_to_file(&format!("[exports.rs] do_export_dxf(): 1 converting SVG DOM to ezdxf Drawing for '{path}' annotated_version={create_annotated_version} version={:?}", style.dxf_version));
 
     // Stage 1 start: SVG DOM → ezdxf Drawing (~10% of total work).
@@ -770,6 +782,9 @@ pub fn do_export_dxf(
         if let Some(table) = drawing.grade_rule_table.as_mut() {
             let stem = Path::new(path).file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
             table.name = grade_rule_table_name(&stem);
+        } else {
+            // The writer writes a `.rul` file only for a rule table; say why there is none.
+            warnings.push(NO_PIECE_GRADED_WARNING.to_string());
         } // if graded
         crate::log_to_file(&format!(
             "[exports.rs] do_export_dxf(): graded {} rules, {} warnings",
@@ -819,7 +834,12 @@ pub fn do_export_dxf(
         } // if annotated version
     } // if ok
 
-    result.map(|()| warnings)
+    // export_dxf_astm writes the rule table beside the DXF: same stem, `.rul`.
+    let rule_file = drawing
+        .grade_rule_table
+        .as_ref()
+        .map(|_| Path::new(path).with_extension("rul").to_string_lossy().into_owned());
+    result.map(|()| DxfExportReport { warnings, rule_file })
 } // fn do_export_dxf
 
 // @brief Warning text for pieces that lack DXF-ASTM data, shown before a DXF-ASTM export.

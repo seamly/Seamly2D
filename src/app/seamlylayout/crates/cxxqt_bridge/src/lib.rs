@@ -642,6 +642,12 @@ pub mod qobject {
         #[qsignal]
         fn export_warning(self: Pin<&mut AppController>, message: QString);
 
+        // Emitted after export_finished for each further file the export wrote
+        // beside `path`, such as a DXF-ASTM grade rule `.rul` file. QML lists it
+        // in the export success dialog.
+        #[qsignal]
+        fn export_companion_written(self: Pin<&mut AppController>, path: QString);
+
         #[qsignal]
         fn progress_updated(self: Pin<&mut AppController>, percent: i32);
 
@@ -2415,16 +2421,20 @@ impl qobject::AppController {
             }, // dxf_version
         }; // style
         match do_export_dxf(&layout_doc, &path_str, opts.create_annotated_version, &style, &mut dxf_progress) {
-            Ok(warnings) => {
-                log_to_file(&format!("[lib.rs AppController] export_dxf(): 5 export succeeded '{path_str}'"));
-                if !warnings.is_empty() {
+            Ok(report) => {
+                log_to_file(&format!("[lib.rs AppController] export_dxf(): 5 export succeeded '{path_str}' rule_file={:?}", report.rule_file));
+                if !report.warnings.is_empty() {
                     // Pieces left ungraded reach the success dialog with the file path.
-                    self.as_mut().export_warning(cxx_qt_lib::QString::from(&warnings.join("\n")));
+                    self.as_mut().export_warning(cxx_qt_lib::QString::from(&report.warnings.join("\n")));
                 } // if warnings
                 self.as_mut().progress_updated(100);
                 self.as_mut().set_export_progress(-1); // reset to idle (-1 = idle contract)
                 self.as_mut().set_export_status_message(cxx_qt_lib::QString::default()); // clear
                 self.as_mut().export_finished(cxx_qt_lib::QString::from(&path_str)); // success
+                // The dialog is open now; the `.rul` file joins its file list.
+                if let Some(rule_file) = &report.rule_file {
+                    self.as_mut().export_companion_written(cxx_qt_lib::QString::from(rule_file));
+                } // if graded
                 true // success
             } // Ok
             Err(e) => {

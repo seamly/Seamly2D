@@ -1319,13 +1319,19 @@ mod tests {
         let style = crate::exports::DxfStyleInfo { grading, ..crate::exports::DxfStyleInfo::default() };
         let stem = format!("{tag}_{}", std::process::id());
         let path = std::env::temp_dir().join(format!("{stem}.dxf"));
-        let warnings = crate::exports::do_export_dxf(&layout.output_doc, &path.to_string_lossy(), false, &style, &mut |_| {})
+        let _ = std::fs::remove_file(path.with_extension("rul"));
+        let report = crate::exports::do_export_dxf(&layout.output_doc, &path.to_string_lossy(), false, &style, &mut |_| {})
             .expect("DXF export succeeds");
         let dxf = std::fs::read_to_string(&path).expect("DXF written");
         let rul = std::fs::read_to_string(path.with_extension("rul")).ok();
+        // The report names the `.rul` file exactly when the export wrote one: "Export Complete" lists it.
+        assert_eq!(report.rule_file.is_some(), rul.is_some(), "report rule_file {:?}", report.rule_file);
+        if let Some(rule_file) = &report.rule_file {
+            assert_eq!(std::path::Path::new(rule_file), path.with_extension("rul"), "rule file beside the DXF");
+        } // if rule file
         let _ = std::fs::remove_file(&path);
         let _ = std::fs::remove_file(path.with_extension("rul"));
-        (warnings, dxf, rul, stem)
+        (report.warnings, dxf, rul, stem)
     } // fn export_dxf_for_test
 
     // @brief The Base Size tab exports the base size with `# n` texts and the `.rul` file;
@@ -1360,6 +1366,22 @@ mod tests {
         assert!(!lines.iter().any(|l| l.starts_with("# ")), "no grade rule identifiers");
         assert!(rul.is_none(), "no rule file for a size tab");
     } // base_size_tab_exports_grade_rules
+
+    // @brief A Base Size export in which no piece grades writes no `.rul` file and says so.
+    #[test]
+    fn base_size_export_without_graded_piece_says_no_rule_file() {
+        // The handoff holds no piece, so each piece fails with "size 34 is not in the handoff".
+        let input = Document::parse(r#"<svg xmlns="http://www.w3.org/2000/svg"></svg>"#).expect("empty handoff parses");
+        let grading = crate::exports::DxfGradingSource {
+            input,
+            sizes: vec!["34".to_string(), "36".to_string()],
+            base_size: "36".to_string(),
+        };
+        let (warnings, _, rul, _) = export_dxf_for_test(&process_multisize_size("36"), "no_graded_piece", Some(grading));
+        assert!(rul.is_none(), "no rule file");
+        assert!(warnings.len() > 1, "each piece is named first: {warnings:?}");
+        assert_eq!(warnings.last().map(String::as_str), Some(crate::exports::NO_PIECE_GRADED_WARNING), "{warnings:?}");
+    } // base_size_export_without_graded_piece_says_no_rule_file
 
     // @brief Real multisize pieces: jacket2_40-146.sm2d with gost_man_ru.smms, 8 pieces
     // in 26 sizes (220-720), base size 500. Saved from SeamlyLayout, so the piece-sets
