@@ -89,7 +89,8 @@ impl<'a> PieceLines<'a> {
 ///          notches, and its layout block fits its input block. A graded block gets
 ///          the graded key points, a `# n` text on each key point and notch, and a
 ///          grade reference line; `layout.grade_rule_table` gets the rules. A piece
-///          that cannot grade keeps its ungraded block, and a warning names it.
+///          that cannot grade keeps its ungraded block, and a warning names it. A
+///          warning also names each sample size piece the layout left out.
 ///          Blocks of other sizes are left as they are.
 /// @param layout Drawing of the layout: the sample size pieces at their layout positions.
 /// @param input Drawing of the handoff document: every size of every piece, at drafted positions.
@@ -116,6 +117,15 @@ pub fn grade_drawing(layout: &mut Drawing, input: &Drawing, sizes: &[String], sa
             warnings.push(format!("{}: not graded, {reason}.", layout.blocks[b].display_name));
         } // if not graded
     } // for each block
+
+    // A sample size piece the packer left out has no block to grade; name it, so its loss is not silent.
+    for missing in input.blocks.iter().filter(|b| b.size.as_deref() == Some(sample_size)) {
+        let key = piece_key(missing);
+        let placed = layout.blocks.iter().any(|b| b.size.as_deref() == Some(sample_size) && piece_key(b) == key);
+        if !placed {
+            warnings.push(format!("{}: not graded, size {sample_size} does not fit the media.", missing.display_name));
+        } // if left out
+    } // for each input piece of the sample size
 
     if !table.rules.is_empty() {
         layout.grade_rule_table = Some(table);

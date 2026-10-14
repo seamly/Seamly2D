@@ -234,6 +234,7 @@ Pattern: `C:\Users\susan\seamly2d\patterns\jacket2_40-146.sm2d`.
   - [ ] A note reads "DXF-ASTM: select Base Size or a size tab".
 - [ ] Base Size 500 tab, Export > DXF-ASTM (R13):
   - [ ] The folder holds a `.dxf` and a `.rul` with the same name.
+  - [ ] "Export Complete" names the `.dxf` and the `.rul` (Layout.67.9).
   - [ ] In the `.dxf`, search `# 1`: found.
   - [ ] `Sample Size:500` and `Grade Rule Table:<file name>` near the top of ENTITIES.
   - [ ] `Size Name:` is 500 in every block. One block per piece.
@@ -246,6 +247,7 @@ Pattern: `C:\Users\susan\seamly2d\patterns\jacket2_40-146.sm2d`.
 - [ ] Export all tabs checked, Marker tab shown, Export > DXF-ASTM (R13):
   - [ ] Files for Base Size 500 and every size. No Marker or Nested file.
   - [ ] Only the Base Size file has a `.rul`.
+  - [ ] "Export Complete" lists the `.rul` after the Base Size `.dxf`.
 - [ ] Export all tabs checked, Export > PDF:
   - [ ] Files for Marker, Nested and every size. No Base Size file.
 - [ ] Export file names (Layout.24). Export all tabs unchecked:

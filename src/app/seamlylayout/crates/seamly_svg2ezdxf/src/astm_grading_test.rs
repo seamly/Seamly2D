@@ -276,8 +276,21 @@ mod tests {
     fn layout_without_the_sample_size_grades_nothing() {
         let (mut layout, input) = fixture_drawings("34");
         let warnings = grade_drawing(&mut layout, &input, &fixture_sizes(), "36");
-        assert!(warnings.is_empty(), "{warnings:?}");
         assert!(layout.blocks.iter().all(|b| b.grading.is_none()));
         assert!(layout.grade_rule_table.is_none(), "no piece graded, no table");
+        // Each sample size piece the layout left out is named.
+        assert_eq!(
+            warnings,
+            vec!["Front: not graded, size 36 does not fit the media.", "Back: not graded, size 36 does not fit the media."]
+        );
+    }
+
+    #[test]
+    fn left_out_sample_piece_is_named() {
+        let (mut layout, input) = fixture_drawings("36");
+        layout.blocks.retain(|b| b.name != "piece_Front_s36_M");
+        let warnings = grade_drawing(&mut layout, &input, &fixture_sizes(), "36");
+        assert!(warnings.contains(&"Front: not graded, size 36 does not fit the media.".to_string()), "{warnings:?}");
+        assert!(!warnings.iter().any(|w| w.starts_with("Back:") && w.contains("does not fit")), "Back is placed: {warnings:?}");
     }
 }

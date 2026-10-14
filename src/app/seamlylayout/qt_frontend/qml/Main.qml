@@ -438,6 +438,16 @@ ApplicationWindow {
                 exportSuccessDialog.open();
             } // if png/pdf with viewer configured
         } // onExportFinished
+
+        // A further file the export wrote beside the main file, such as the DXF-ASTM
+        // `.rul`. Arrives after onExportFinished, so the success dialog is already open.
+        onExportCompanionWritten: function(path) {
+            if (root.batchExportRunning) {
+                root.batchExportedPaths = root.batchExportedPaths.concat([path]) // reassign: in-place push on a var property is not reliable
+                return
+            } // if batch
+            exportSuccessDialog.exportPath = exportSuccessDialog.exportPath + "\n" + path
+        } // onExportCompanionWritten
     } // AppController
 
     // AdjustController — owns the QtWidgets AdjustWindow; bridges QML ↔ AdjustWindow.
