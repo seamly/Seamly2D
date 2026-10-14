@@ -105,7 +105,7 @@ jacket2 hides piece labels and grainlines (`visible="false"`), so missing-data w
 
 Prior results (jacket2, sizes 220–720): Nested graded 4 of 8 pieces; Marker placed 96/208 pieces and lost grading on others. Base Size 500 in MSI 26.10.1311 graded 4 pieces, with rules accurate to 0.011 mm. Detail (3), (6), (7), (8) remained ungraded. Evidence: `test-seamly-layout/layouts/jacket2/`, aw.fyi reports, `jacket2_40-146_basesize_R13_202610131248.dxf`.
 
-- [ ] Layout.27.1 Re-export after Layout.25; confirm sample size 500 is no longer omitted from Marker.
+- [x] Layout.27.1 Re-export after Layout.25; confirm sample size 500 is no longer omitted from Marker. Rust test `jacket2_marker_extends_paper_roll`: 208 of 208 placed on a 48 × 500 in roll. Marker has no DXF-ASTM export (Layout.67). User check: Layout.25.7.
 - [x] Layout.27.2 If a sample-size piece is unplaced, warn: "size 500 does not fit the media". `grade_drawing` names it.
 - [ ] Layout.27.3 Make turn points consistent across all sizes of each piece (cutline, seamline, internal paths). Seamly2D `VAbstractPiece::turnPointIndices` currently changes at near-threshold corners. After `prepareMultisizePieceLists`, share turn points across sizes using node vertex indices in `VLayoutPiece` / `VLayoutPiecePath`; skip paths whose node counts differ.
   - [x] Layout.27.3.1 Code: `unifyTurnPoints` (`63ab2447a3`).
