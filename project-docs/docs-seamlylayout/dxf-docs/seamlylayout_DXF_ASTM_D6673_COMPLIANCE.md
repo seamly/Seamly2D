@@ -103,6 +103,7 @@ A DXF-ASTM export of the **Base Size** tab is graded (D6673 §4.3.1.4, §4.4). T
 
 - Input: the layout DOM (the base size of every piece, placed) and the handoff DOM (every size at its drafted position).
 - A piece's sizes share the piece `data-parent` (piece-set id).
+- Seamly2D gives every size of a piece the same node turn points: a node that is a turn point in one size is one in every size. The line-end turn points of the contour rules are found in each size alone, so they can still differ between sizes.
 - Key points: `grade_contours` gives every size the same turn points and the same curve points. Curve point j sits at the same arc-length fraction of the same span in every size. Curve points are added until every size passes the 0.25 mm spline check, then dropped where no size needs them.
 - Duplicate vertices: a key point within 0.01 mm of a dense vertex snaps to that vertex, so grading inserts no vertex within 0.01 mm of another. A curve point within 0.01 mm of a span's turn point, or on the vertex of the key point before or after it, in any size, is dropped.
 - Grading runs in draft space: a size differs from the sample size only by growth there.

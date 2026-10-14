@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-10-13 — Layout.27.3 shared node turn points: merged into local `run-seamlyLayout`, not pushed
+
+- Seamly2D: after the size loop, a piece node that is a turn point in one size is one in every size. `VLayoutPiece::unifyTurnPoints`, `MainWindowsNoGUI::unifySizeTurnPoints`, `VAbstractPiece::nodeVertexIndices` / `addTurnPoints`, `VLayoutPiecePath::setNodeVertices`.
+- Verified: `cl /Zs` on every changed `.cpp` passed; expected test values checked with a Python port of `turnPointIndices`. Not run: Qt suites (no MSI build; ask first). No Rust change.
+- Finding: the fix covers Detail (3) and (6). Detail (7) and (8) flip in SeamlyLayout's line-end rule (`straight_run_ends`), not in Seamly2D. Filed as Layout.27.12 with two options; user decision needed.
+- Fixture `jacket2_40-146_202610121819.svg` is from the old producer. `jacket2_base_size_export_names_and_grades_each_piece` still expects Detail (3), (6), (7), (8) ungraded. Replace the fixture with a new handoff after the next MSI (Layout.27.7).
+- `TODO_SEAMLYLAYOUT.md`: only the Layout.27.3 and 27.12 lines committed; the user's other edits stay uncommitted. `TEST_CHECKLIST.md` not touched: the user check is Layout.27.3.3.
+
 ### 2026-10-13 — Layout.72 oversized pieces (individual pattern): merged into local `run-seamlyLayout`, not pushed
 
 - User decision: an individual pattern with a piece wider or longer than the media gets a dialog: "Split the pieces" or "Make the media bigger"; OK lays out, Cancel leaves only Layout Settings active.

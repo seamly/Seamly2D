@@ -1990,6 +1990,22 @@ void TST_VAbstractPiece::EquidistantReportsNodeVertices() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief NodeVertexIndices checks that only vertices on a node vertex are listed, and that a closed polyline does
+ * not list the repeat of its first vertex.
+ */
+void TST_VAbstractPiece::NodeVertexIndices() const
+{
+    // Square that repeats its first vertex, with a curve point on the top side.
+    const QVector<QPointF> points{QPointF(0, 0), QPointF(50, 0.5), QPointF(100, 0), QPointF(100, 100),
+                                  QPointF(0, 100), QPointF(0, 0)};
+    const QVector<QPointF> nodes{QPointF(0, 0), QPointF(100, 0), QPointF(100, 100), QPointF(0, 100)};
+
+    QCOMPARE(VAbstractPiece::nodeVertexIndices(points, nodes, true), (QVector<int>{0, 2, 3, 4}));
+    QCOMPARE(VAbstractPiece::nodeVertexIndices(points, nodes, false), (QVector<int>{0, 2, 3, 4, 5}));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void TST_VAbstractPiece::PathRemoveLoop_data() const
 {
     QTest::addColumn<QVector<QPointF>>("path");

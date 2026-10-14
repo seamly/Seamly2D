@@ -59,6 +59,8 @@
 #include <QVector>
 #include <QPainterPath>
 
+#include <algorithm>
+
 const qreal maxL = 2.4;
 
 #ifdef Q_COMPILER_RVALUE_REFS
@@ -297,6 +299,15 @@ qreal directionDegrees(const QPointF &from, const QPointF &to)
 {
     return QLineF(from, to).angle();
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief repeatsFirstVertex tells whether a closed polyline ends with a repeat of its first vertex.
+ */
+bool repeatsFirstVertex(const QVector<QPointF> &points, bool closed)
+{
+    return closed && points.size() > 1 && QLineF(points.first(), points.last()).length() < kNodeMatchTolerance;
+}
 } // namespace
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -320,7 +331,7 @@ QVector<int> VAbstractPiece::turnPointIndices(const QVector<QPointF> &points, co
     QVector<int> turns;
     int n = points.size();
     // A closing repeat vertex takes the turn state of the first vertex.
-    const bool repeatsFirst = closed && n > 1 && QLineF(points.first(), points.last()).length() < kNodeMatchTolerance;
+    const bool repeatsFirst = repeatsFirstVertex(points, closed);
     if (repeatsFirst)
     {
         --n;
@@ -331,16 +342,9 @@ QVector<int> VAbstractPiece::turnPointIndices(const QVector<QPointF> &points, co
     }
 
     QVector<bool> isNode(n, false);
-    for (int i = 0; i < n; ++i)
+    for (int i : nodeVertexIndices(points, nodeVertices, closed))
     {
-        for (const QPointF &node : nodeVertices)
-        {
-            if (QLineF(points.at(i), node).length() < kNodeMatchTolerance)
-            {
-                isNode[i] = true;
-                break;
-            }
-        }
+        isNode[i] = true;
     }
 
     // Neighbour index, or -1 past an open end.
@@ -394,6 +398,56 @@ QVector<int> VAbstractPiece::turnPointIndices(const QVector<QPointF> &points, co
     {
         turns.append(n);
     }
+    return turns;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief nodeVertexIndices finds the polyline vertices that are node vertices.
+ * @param points       polyline vertices; a closed polyline may repeat its first vertex.
+ * @param nodeVertices node vertex positions; vertices within kNodeMatchTolerance of one are nodes.
+ * @param closed       whether the polyline is a closed loop.
+ * @return ascending indices into @p points. A closing repeat vertex is not listed: it is the first vertex.
+ */
+QVector<int> VAbstractPiece::nodeVertexIndices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
+                                               bool closed)
+{
+    QVector<int> indices;
+    const int n = repeatsFirstVertex(points, closed) ? points.size() - 1 : points.size();
+    for (int i = 0; i < n; ++i)
+    {
+        for (const QPointF &node : nodeVertices)
+        {
+            if (QLineF(points.at(i), node).length() < kNodeMatchTolerance)
+            {
+                indices.append(i);
+                break;
+            }
+        }
+    }
+    return indices;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief addTurnPoints adds vertices to a turn point list.
+ * @param points     polyline the indices point into; a closed polyline may repeat its first vertex.
+ * @param turnPoints ascending turn point indices, from turnPointIndices().
+ * @param added      indices to add, in any order.
+ * @param closed     whether the polyline is a closed loop.
+ * @return ascending indices without repeats. As in turnPointIndices(), a closing repeat vertex is a turn point
+ *         when the first vertex is one.
+ */
+QVector<int> VAbstractPiece::addTurnPoints(const QVector<QPointF> &points, const QVector<int> &turnPoints,
+                                           const QVector<int> &added, bool closed)
+{
+    QVector<int> turns = turnPoints + added;
+    if (repeatsFirstVertex(points, closed) && turns.contains(0))
+    {
+        turns.append(points.size() - 1);
+    }
+    std::sort(turns.begin(), turns.end());
+    turns.erase(std::unique(turns.begin(), turns.end()), turns.end());
     return turns;
 }
 

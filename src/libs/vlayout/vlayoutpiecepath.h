@@ -98,6 +98,9 @@ public:
     std::optional<QVector<int>> turnPoints() const;
     void             setTurnPoints(const QVector<int> &indices);
 
+    QVector<int>     nodeIndices() const;
+    void             setNodeVertices(const QVector<QPointF> &nodeVertices, bool closed);
+
 private:
     QSharedDataPointer<VLayoutPiecePathData> d;
 };

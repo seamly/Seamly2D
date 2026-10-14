@@ -230,6 +230,10 @@ public:
                                         QVector<QPointF> *nodeVertices = nullptr);
     static QVector<int>     turnPointIndices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
                                              bool closed);
+    static QVector<int>     nodeVertexIndices(const QVector<QPointF> &points, const QVector<QPointF> &nodeVertices,
+                                              bool closed);
+    static QVector<int>     addTurnPoints(const QVector<QPointF> &points, const QVector<int> &turnPoints,
+                                          const QVector<int> &added, bool closed);
     static qreal            sumTrapezoids(const QVector<QPointF> &points);
     static bool             isClockwise(const QVector<QPointF> &points);
     static QVector<QPointF> CheckLoops(const QVector<QPointF> &points);

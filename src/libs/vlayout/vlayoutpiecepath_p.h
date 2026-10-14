@@ -76,6 +76,7 @@ public:
         , m_lineWeight(QString::number(qApp->Settings()->getDefaultInternalLineweight()))
         , m_cut(false)
         , m_turnPoints()
+        , m_nodeIndices()
     {}
 
     VLayoutPiecePathData(const QVector<QPointF> points, QString color,
@@ -86,6 +87,7 @@ public:
         , m_lineWeight(lineWeight)
         , m_cut(cut)
         , m_turnPoints()
+        , m_nodeIndices()
     {}
 
     VLayoutPiecePathData(const VLayoutPiecePathData &path)
@@ -96,6 +98,7 @@ public:
         , m_lineWeight(path.m_lineWeight)
         , m_cut(path.m_cut)
         , m_turnPoints(path.m_turnPoints)
+        , m_nodeIndices(path.m_nodeIndices)
     {}
 
     ~VLayoutPiecePathData() Q_DECL_EQ_DEFAULT;
@@ -106,6 +109,7 @@ public:
     QString          m_lineWeight;
     bool             m_cut;
     std::optional<QVector<int>> m_turnPoints; /// @brief turn point indices into m_points; unset = unknown
+    QVector<int>     m_nodeIndices; /// @brief node vertex indices into m_points; empty = unknown
 
 private:
     VLayoutPiecePathData &operator=(const VLayoutPiecePathData &) Q_DECL_EQ_DELETE;

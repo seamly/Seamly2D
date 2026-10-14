@@ -64,6 +64,7 @@
 #include <QTransform>
 #include <Qt>
 #include <QtDebug>
+#include <QtNumeric>
 
 #include "global.h"
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
@@ -122,6 +123,146 @@ QPainterPath closedPath(const QVector<QPointF> &points)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief isClosedPath tells whether an internal path polyline ends where it starts.
+ */
+bool isClosedPath(const QVector<QPointF> &points)
+{
+    return points.size() > 2 && QLineF(points.first(), points.last()).length() < accuracyPointOnLine;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/** @brief One size of one piece line, for unifyNodeTurnPoints(). */
+struct SizeLine
+{
+    QVector<QPointF>            points;
+    std::optional<QVector<int>> turnPoints;
+    QVector<int>                nodeIndices;
+};
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief loopNodeShift finds how far a closed loop's node numbering moved between two sizes.
+ * @details A built-in seam line starts at its longest edge, so another size can start it at another node.
+ *          The shift that puts the nodes of both sizes closest together wins; the centroids first take out
+ *          the drafting offset between the sizes.
+ * @param from node vertices of one size.
+ * @param to   node vertices of the next size; same count as @p from.
+ * @return shift s: node j of @p from is node (j + s) % n of @p to.
+ */
+int loopNodeShift(const QVector<QPointF> &from, const QVector<QPointF> &to)
+{
+    const int n = from.size();
+    QPointF fromCentre;
+    QPointF toCentre;
+    for (int j = 0; j < n; ++j)
+    {
+        fromCentre += from.at(j) / n;
+        toCentre += to.at(j) / n;
+    }
+
+    int bestShift = 0;
+    qreal bestCost = qInf();
+    for (int shift = 0; shift < n; ++shift)
+    {
+        qreal cost = 0;
+        for (int j = 0; j < n; ++j)
+        {
+            const QPointF d = (from.at(j) - fromCentre) - (to.at((j + shift) % n) - toCentre);
+            cost += QPointF::dotProduct(d, d);
+        }
+        // Strictly less: a tie keeps the smaller shift, so an unmoved loop keeps shift 0.
+        if (cost < bestCost)
+        {
+            bestCost = cost;
+            bestShift = shift;
+        }
+    }
+    return bestShift;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief unifyNodeTurnPoints makes a node that is a turn point in one size a turn point in every size.
+ * @details Nodes match by their order along the line. Turn points away from a node stay as they are.
+ * @param lines  the same line in every size, in size order.
+ * @param closed whether the line is a closed loop.
+ * @return the turn points of each size, parallel to @p lines. Empty when the line is skipped: a size has unknown
+ *         turn points, or the sizes differ in node count.
+ */
+QVector<QVector<int>> unifyNodeTurnPoints(const QVector<SizeLine> &lines, bool closed)
+{
+    if (lines.size() < 2)
+    {
+        return {};
+    }
+    const int nodeCount = lines.first().nodeIndices.size();
+    if (nodeCount == 0)
+    {
+        return {};
+    }
+    for (const SizeLine &line : lines)
+    {
+        if (!line.turnPoints.has_value() || line.nodeIndices.size() != nodeCount)
+        {
+            return {};
+        }
+    }
+
+    // Node k of the first size is node (k + offsets[s]) % nodeCount of size s. An open line always starts at
+    // the same node; a closed loop is matched to the size before it.
+    QVector<int> offsets(lines.size(), 0);
+    if (closed)
+    {
+        QVector<QPointF> previous;
+        for (int s = 0; s < lines.size(); ++s)
+        {
+            QVector<QPointF> nodes;
+            for (int i : lines.at(s).nodeIndices)
+            {
+                nodes.append(lines.at(s).points.at(i));
+            }
+            if (s > 0)
+            {
+                offsets[s] = (offsets.at(s - 1) + loopNodeShift(previous, nodes)) % nodeCount;
+            }
+            previous = nodes;
+        }
+    }
+
+    // A node is a turn point when it is one in any size.
+    QVector<bool> turnNodes(nodeCount, false);
+    for (int s = 0; s < lines.size(); ++s)
+    {
+        const SizeLine &line = lines.at(s);
+        for (int k = 0; k < nodeCount; ++k)
+        {
+            if (line.turnPoints->contains(line.nodeIndices.at((k + offsets.at(s)) % nodeCount)))
+            {
+                turnNodes[k] = true;
+            }
+        }
+    }
+
+    // Give every size the turn nodes, at that size's own vertex indices.
+    QVector<QVector<int>> turns;
+    for (int s = 0; s < lines.size(); ++s)
+    {
+        const SizeLine &line = lines.at(s);
+        QVector<int> added;
+        for (int k = 0; k < nodeCount; ++k)
+        {
+            if (turnNodes.at(k))
+            {
+                added.append(line.nodeIndices.at((k + offsets.at(s)) % nodeCount));
+            }
+        }
+        turns.append(VAbstractPiece::addTurnPoints(line.points, line.turnPoints.value(), added, closed));
+    }
+    return turns;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 QVector<VLayoutPiecePath> convertInternalPaths (const VPiece &piece, const VContainer *pattern, const bool isCut)
 {
     SCASSERT(pattern != nullptr)
@@ -141,8 +282,7 @@ QVector<VLayoutPiecePath> convertInternalPaths (const VPiece &piece, const VCont
         const QVector<QPointF> points = path.PathPoints(pattern, cutPath);
         VLayoutPiecePath layoutPath(points, path.getLineColor(), path.getLineType(), path.getLineWeight(),
                                     path.isCutPath());
-        const bool closed = points.size() > 2 && QLineF(points.first(), points.last()).length() < accuracyPointOnLine;
-        layoutPath.setTurnPoints(VAbstractPiece::turnPointIndices(points, path.pathNodeVertices(pattern), closed));
+        layoutPath.setNodeVertices(path.pathNodeVertices(pattern), isClosedPath(points));
         paths.append(layoutPath);
     }
     return paths;
@@ -604,9 +744,11 @@ void VLayoutPiece::setMainPathPoints(const QVector<QPointF> &points, bool hideMa
 {
     d->contour = RemoveDublicates(points, false);
     d->contourTurnPoints.reset();
+    d->contourNodeIndices.clear();
     if (!nodeVertices.isEmpty())
     {
         d->contourTurnPoints = turnPointIndices(d->contour, nodeVertices, true);
+        d->contourNodeIndices = nodeVertexIndices(d->contour, nodeVertices, true);
     }
     setHideSeamLine(hideMainPath);
 }
@@ -628,6 +770,7 @@ void VLayoutPiece::setSeamAllowancePoints(const QVector<QPointF> &points, bool s
                                           const QVector<QPointF> &nodeVertices)
 {
     d->seamAllowanceTurnPoints.reset();
+    d->seamAllowanceNodeIndices.clear();
     if (seamAllowance)
     {
         SetSeamAllowance(seamAllowance);
@@ -639,6 +782,7 @@ void VLayoutPiece::setSeamAllowancePoints(const QVector<QPointF> &points, bool s
             if (!nodeVertices.isEmpty())
             {
                 d->seamAllowanceTurnPoints = turnPointIndices(d->seamAllowance, nodeVertices, true);
+                d->seamAllowanceNodeIndices = nodeVertexIndices(d->seamAllowance, nodeVertices, true);
             }
         }
         else if (!hasSeamAllowanceBuiltIn())
@@ -670,10 +814,82 @@ void VLayoutPiece::setBuiltInSeamLinePoints(const QVector<QPointF> &points, cons
     // Stored open, like the contour: closedPath() closes it.
     d->builtInSeamLine = RemoveDublicates(points, true);
     d->builtInSeamLineTurnPoints.reset();
+    d->builtInSeamLineNodeIndices.clear();
     if (!d->builtInSeamLine.isEmpty() && !nodeVertices.isEmpty())
     {
         d->builtInSeamLineTurnPoints = turnPointIndices(d->builtInSeamLine, nodeVertices, true);
+        d->builtInSeamLineNodeIndices = nodeVertexIndices(d->builtInSeamLine, nodeVertices, true);
     }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief unifyTurnPoints makes a piece node that is a turn point in one size a turn point in every size.
+ * @details turnPointIndices() tests the tangent break at a node against a fixed angle, so a node near that angle
+ *          is a turn point in some sizes only. Grading needs the same turn points in every size. Applies to the
+ *          seam line, the cut line, the built-in seam line, internal paths and cutout paths. A line whose node
+ *          count differs between sizes keeps its turn points.
+ * @param sizes the same piece in every size, in size order.
+ */
+void VLayoutPiece::unifyTurnPoints(const QVector<VLayoutPiece *> &sizes)
+{
+    if (sizes.size() < 2)
+    {
+        return;
+    }
+
+    // Seam line, cut line and built-in seam line: closed loops, one per piece.
+    const auto unifyLoop = [&sizes](QVector<QPointF> VLayoutPieceData::*points,
+                                    std::optional<QVector<int>> VLayoutPieceData::*turnPoints,
+                                    QVector<int> VLayoutPieceData::*nodeIndices)
+    {
+        QVector<SizeLine> lines;
+        for (const VLayoutPiece *piece : sizes)
+        {
+            const VLayoutPieceData *data = piece->d.constData();
+            lines.append({data->*points, data->*turnPoints, data->*nodeIndices});
+        }
+        const QVector<QVector<int>> turns = unifyNodeTurnPoints(lines, true);
+        for (int s = 0; s < turns.size(); ++s)
+        {
+            sizes.at(s)->d.data()->*turnPoints = turns.at(s);
+        }
+    };
+    unifyLoop(&VLayoutPieceData::contour, &VLayoutPieceData::contourTurnPoints,
+              &VLayoutPieceData::contourNodeIndices);
+    unifyLoop(&VLayoutPieceData::seamAllowance, &VLayoutPieceData::seamAllowanceTurnPoints,
+              &VLayoutPieceData::seamAllowanceNodeIndices);
+    unifyLoop(&VLayoutPieceData::builtInSeamLine, &VLayoutPieceData::builtInSeamLineTurnPoints,
+              &VLayoutPieceData::builtInSeamLineNodeIndices);
+
+    // Internal and cutout paths match by their order in the piece, so every size needs the same path count.
+    const auto unifyPaths = [&sizes](QVector<VLayoutPiecePath> VLayoutPieceData::*paths)
+    {
+        const int count = (sizes.first()->d.constData()->*paths).size();
+        for (const VLayoutPiece *piece : sizes)
+        {
+            if ((piece->d.constData()->*paths).size() != count)
+            {
+                return;
+            }
+        }
+        for (int i = 0; i < count; ++i)
+        {
+            QVector<SizeLine> lines;
+            for (const VLayoutPiece *piece : sizes)
+            {
+                const VLayoutPiecePath &path = (piece->d.constData()->*paths).at(i);
+                lines.append({path.Points(), path.turnPoints(), path.nodeIndices()});
+            }
+            const QVector<QVector<int>> turns = unifyNodeTurnPoints(lines, isClosedPath(lines.first().points));
+            for (int s = 0; s < turns.size(); ++s)
+            {
+                (sizes.at(s)->d.data()->*paths)[i].setTurnPoints(turns.at(s));
+            }
+        }
+    };
+    unifyPaths(&VLayoutPieceData::m_internalPaths);
+    unifyPaths(&VLayoutPieceData::m_cutoutPaths);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

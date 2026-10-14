@@ -41,8 +41,8 @@
  * name-based piece and component id schemes, and their piece-name
  * sanitization, no-name fallback, and cross-piece collision handling, and the
  * data-grainline-angle attribute, the multisize piece-set nesting, the
- * data-turn-points attribute, and the cutline and seamline of a built-in seam
- * allowance.
+ * data-turn-points attribute, the cutline and seamline of a built-in seam
+ * allowance, and the node turn points shared by every size of a piece.
  */
 class TST_SvgComponentTags : public QObject
 {
@@ -80,6 +80,11 @@ private slots:
     void PieceCarriesQuantityAndFold() const;
     void BuiltInPieceSendsCutlineAndSeamline() const;
     void BuiltInPieceHiddenSeamLineSendsCutlineOnly() const;
+    void SizesShareNodeTurnPoints() const;
+    void SizesWithDifferentNodeCountsKeepTurnPoints() const;
+    void LoopStartingAtAnotherNodeSharesTurnPoints() const;
+    void CutlineRepeatFollowsSharedFirstTurnPoint() const;
+    void InternalPathSizesShareNodeTurnPoints() const;
 };
 
 #endif // TST_SVGCOMPONENTTAGS_H

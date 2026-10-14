@@ -108,6 +108,8 @@ public:
     void                      setBuiltInSeamLinePoints(const QVector<QPointF> &points,
                                                        const QVector<QPointF> &nodeVertices = QVector<QPointF>());
 
+    static void               unifyTurnPoints(const QVector<VLayoutPiece *> &sizes);
+
     QVector<QPointF>          getLayoutAllowancePoints() const;
     void                      SetLayoutAllowancePoints();
 
