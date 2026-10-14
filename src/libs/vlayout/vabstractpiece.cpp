@@ -279,6 +279,11 @@ constexpr qreal kLineJoinAngleDegrees = 0.5;
 constexpr qreal kCurveJoinAngleDegrees = 5.0;
 // A direction change above this angle is a corner even away from a node, e.g. a seam allowance loop cut.
 constexpr qreal kSharpAngleDegrees = 25.0;
+// A curve that leaves a line tangentially bends at the junction about half as much as at its next vertex.
+// A junction that bends more than this many times the next vertex breaks the tangent.
+constexpr qreal kLineEndBreakRatio = 2.0;
+// A line end bends less than this on a flat curve, where the ratio to the next vertex is noise.
+constexpr qreal kLineEndMinBreakDegrees = 1.0;
 
 //---------------------------------------------------------------------------------------------------------------------
 qreal normalizedAngle(qreal degrees)
@@ -318,7 +323,8 @@ bool repeatsFirstVertex(const QVector<QPointF> &points, bool closed)
  * Curve interior vertices are curve points, except where the polyline turns sharper than a
  * curve interpolation can. A side between two node vertices is a straight line; the tangent
  * of a curve side is extrapolated from its first two chords, so a coarse curve interpolation
- * does not read as a corner.
+ * does not read as a corner. Where a line meets a curve, the junction is also a turn point
+ * when it bends more than twice as much as the curve's next vertex, and more than 1°.
  *
  * @param points       polyline vertices; a closed polyline may repeat its first vertex.
  * @param nodeVertices node vertex positions; vertices within kNodeMatchTolerance of one are nodes.
@@ -386,9 +392,31 @@ QVector<int> VAbstractPiece::turnPointIndices(const QVector<QPointF> &points, co
             tangentOut = chordOut - normalizedAngle(directionDegrees(points.at(next), points.at(next2)) - chordOut) / 2.0;
         }
 
-        const bool lineJoin = isNode.at(prev) && isNode.at(next);
-        const qreal limit = lineJoin ? kLineJoinAngleDegrees : kCurveJoinAngleDegrees;
+        const bool lineIn = isNode.at(prev);
+        const bool lineOut = isNode.at(next);
+        const qreal limit = lineIn && lineOut ? kLineJoinAngleDegrees : kCurveJoinAngleDegrees;
         if (qAbs(normalizedAngle(tangentOut - tangentIn)) > limit)
+        {
+            turns.append(i);
+            continue;
+        }
+        if (lineIn == lineOut)
+        {
+            continue;
+        }
+
+        // Line end: compare the bend at the junction with the bend at the curve's next vertex.
+        const qreal breakDegrees = qAbs(normalizedAngle(chordOut - chordIn));
+        qreal curveDegrees = 0; // past an open end
+        if (lineIn && next2 != -1)
+        {
+            curveDegrees = qAbs(normalizedAngle(directionDegrees(points.at(next), points.at(next2)) - chordOut));
+        }
+        else if (lineOut && prev2 != -1)
+        {
+            curveDegrees = qAbs(normalizedAngle(chordIn - directionDegrees(points.at(prev2), points.at(prev))));
+        }
+        if (breakDegrees > kLineEndMinBreakDegrees && breakDegrees > kLineEndBreakRatio * curveDegrees)
         {
             turns.append(i);
         }

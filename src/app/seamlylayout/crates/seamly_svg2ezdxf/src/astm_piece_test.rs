@@ -7,7 +7,8 @@
 #[cfg(test)]
 mod tests {
     use crate::astm_contour::{
-        build_contour, build_contour_tagged, spline_deviation, spline_points, AstmContour, CURVE_TOLERANCE_MM,
+        build_contour, build_contour_tagged, spline_deviation, spline_points, straight_run_ends, AstmContour,
+        CURVE_TOLERANCE_MM,
     };
     use crate::astm_notch::{build_notches, seam_allowance_at, NotchKind};
     use crate::converter::{svg_to_ezdxf, SvgToEzdxfOptions};
@@ -682,17 +683,29 @@ mod tests {
         (points, tags)
     }
 
+    // @brief Seamly2D tags the line ends where the tangent breaks, the same in every size.
+    //        Tagged input adds no line end of its own, so the sizes of a graded piece keep
+    //        the same turn points.
     #[test]
-    fn line_ends_are_turn_points_where_the_tangent_breaks() {
+    fn tags_decide_line_end_turn_points() {
         let (points, tags) = lines_meeting_curves();
-        let c = build_contour_tagged(&points, true, Some(&tags)).expect("contour");
-        let turns: Vec<Point> = c.reduced.iter().zip(&c.turn).filter(|(_, &t)| t).map(|(p, _)| *p).collect();
-        let has = |x: f64, y: f64| turns.iter().any(|p| (p.x - x).abs() < 1e-9 && (p.y - y).abs() < 1e-9);
-        assert!(!has(40.0, -2.0) && !has(160.0, -2.0), "tangent hem run ends are curve points: {turns:?}");
-        assert!(has(100.0, 100.0), "where the top line meets the curve: {turns:?}");
-        assert_eq!(turns.len(), 5, "four corners and one line end: {turns:?}");
-        assert!(c.turn.iter().any(|&t| !t), "the curves keep curve points");
-        assert!(spline_deviation(&c) <= CURVE_TOLERANCE_MM + 1e-9);
+        let turn_points = |tags: &[bool]| -> Vec<Point> {
+            let c = build_contour_tagged(&points, true, Some(tags)).expect("contour");
+            assert!(c.turn.iter().any(|&t| !t), "the curves keep curve points");
+            assert!(spline_deviation(&c) <= CURVE_TOLERANCE_MM + 1e-9);
+            c.reduced.iter().zip(&c.turn).filter(|(_, &t)| t).map(|(p, _)| *p).collect()
+        };
+        let line_end = Point::new(100.0, 100.0);
+
+        let turns = turn_points(&tags);
+        assert_eq!(turns.len(), 4, "the four tagged corners: {turns:?}");
+        assert!(!turns.contains(&line_end), "an untagged line end is a curve point: {turns:?}");
+
+        let mut tags = tags;
+        tags[points.iter().position(|&p| p == line_end).expect("line end vertex")] = true;
+        let turns = turn_points(&tags);
+        assert_eq!(turns.len(), 5, "four corners and the tagged line end: {turns:?}");
+        assert!(turns.contains(&line_end), "the tagged line end is a turn point: {turns:?}");
     }
 
     #[test]
@@ -707,8 +720,8 @@ mod tests {
             .collect();
         let mid = Point::new((circle[0].x + circle[1].x) / 2.0, (circle[0].y + circle[1].y) / 2.0);
         circle.insert(1, mid);
-        let c = build_contour_tagged(&circle, true, Some(&vec![false; circle.len()])).expect("contour");
-        assert!(c.turn.iter().all(|&t| !t), "a smooth circle has only curve points: {:?}", c.turn);
+        let ends = straight_run_ends(&circle, true, &vec![false; circle.len()]);
+        assert!(ends.iter().all(|&e| !e), "a smooth circle has no line end: {ends:?}");
     }
 
     // @brief Open polyline: one straight segment of `line_mm` along x, then ten 15 mm
@@ -730,8 +743,7 @@ mod tests {
     fn single_segment_line_end_is_a_turn_point_only_where_the_tangent_breaks() {
         let junction_turn = |line_mm: f64, break_deg: f64, step_deg: f64| {
             let points = single_segment_into_curve(line_mm, break_deg, step_deg);
-            let c = build_contour_tagged(&points, false, Some(&vec![false; points.len()])).expect("contour");
-            c.reduced.iter().zip(&c.turn).any(|(p, &t)| t && *p == points[1])
+            straight_run_ends(&points, false, &vec![false; points.len()])[1]
         };
         assert!(junction_turn(65.0, 2.9, 1.0), "curve leaves the line at a break");
         assert!(!junction_turn(65.0, 1.2, 2.0), "curve leaves the line tangentially");

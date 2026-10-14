@@ -118,28 +118,29 @@ pub fn build_contour_tagged(points: &[Point], closed: bool, turns: Option<&[bool
         return None;
     } // if too few vertices
 
-    // Step 2: turn points anchor the reduction. Tagged input uses the tags;
-    // untagged input uses sharp direction changes. Both add each line end where
-    // the tangent breaks, even slightly. The ends of an open polyline anchor it here,
-    // but Step 8 writes them as curve points.
-    let turn_flags = |dense: &[Point], tagged: &Option<Vec<bool>>| {
-        let mut flags = match tagged {
-            Some(t) => {
-                let mut t = t.clone();
-                if !closed {
-                    t[0] = true;
-                    let last = t.len() - 1;
-                    t[last] = true;
-                } // if open: ends are turn points
-                t
-            } // tagged
-            None => sharp_vertices(dense, closed),
-        }; // match tagged
-        let run_ends = straight_run_ends(dense, closed, &flags);
-        for (flag, run_end) in flags.iter_mut().zip(run_ends) {
-            *flag |= run_end;
-        } // for each vertex
-        flags
+    // Step 2: turn points anchor the reduction. Tagged input uses the tags alone:
+    // Seamly2D already marks each line end where the tangent breaks, and gives every
+    // size of a piece the same ones. Untagged input uses sharp direction changes, plus
+    // each line end where the tangent breaks, even slightly. The ends of an open
+    // polyline anchor it here, but Step 8 writes them as curve points.
+    let turn_flags = |dense: &[Point], tagged: &Option<Vec<bool>>| match tagged {
+        Some(t) => {
+            let mut t = t.clone();
+            if !closed {
+                t[0] = true;
+                let last = t.len() - 1;
+                t[last] = true;
+            } // if open: ends are turn points
+            t
+        } // tagged
+        None => {
+            let mut flags = sharp_vertices(dense, closed);
+            let run_ends = straight_run_ends(dense, closed, &flags);
+            for (flag, run_end) in flags.iter_mut().zip(run_ends) {
+                *flag |= run_end;
+            } // for each vertex
+            flags
+        } // untagged
     }; // turn_flags
     let mut sharp = turn_flags(&dense, &tagged);
     let mut anchors: Vec<usize> = (0..dense.len()).filter(|&i| sharp[i]).collect();
@@ -623,7 +624,7 @@ fn direction_change_deg(prev: Point, p: Point, next: Point) -> f64 {
 //          far end says nothing about a curve, so the junction compares against 0.
 //          A closed loop is split from its first known turn point, so no piece starts mid-edge.
 // @param turns Turn points already known, parallel to `points`.
-fn straight_run_ends(points: &[Point], closed: bool, turns: &[bool]) -> Vec<bool> {
+pub(crate) fn straight_run_ends(points: &[Point], closed: bool, turns: &[bool]) -> Vec<bool> {
     let n = points.len();
     let mut ends = vec![false; n];
     // Indices below are relative to `first`; a closed loop splits back round to it (index n).

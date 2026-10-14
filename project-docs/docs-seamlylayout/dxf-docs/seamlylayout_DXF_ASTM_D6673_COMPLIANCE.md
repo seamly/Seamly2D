@@ -64,9 +64,9 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 - Then each curve point neither spline needs is dropped, least-needed first. Turn points and the first key point stay.
 - `spline_deviation()` measures the result; `writer_astm_test.rs` checks every male_shirt contour on layers 84–87.
 - `reduced` is an ordered subset of `dense`, and both start at the same vertex (§4.3.3.1).
-- Turn points come from Seamly2D's `data-turn-points` tag on each path component (see `docs-data/SVG-DATA-ATTRIBUTES.md`). Seamly2D marks a node vertex whose tangent breaks by more than 0.5° (line–line) or 5° (with a curve), any vertex that turns more than 25°, and open ends.
-- Tagged or not, a line end is a turn point where the tangent breaks, even under Seamly2D's 5°.
-  - Line: every vertex within 0.01 mm of the chord, ≥ 10 mm long. A single segment needs ≥ 20 mm: shorter ones are curve chords (tight curve ends reach about 11 mm).
+- Turn points come from Seamly2D's `data-turn-points` tag on each path component (see `docs-data/SVG-DATA-ATTRIBUTES.md`). Seamly2D marks a node vertex whose tangent breaks by more than 0.5° (line–line) or 5° (with a curve), a line end where the tangent breaks (rule below), any vertex that turns more than 25°, and open ends. Tagged input: the tags alone decide; SeamlyLayout adds no turn point.
+- A line end is a turn point where the tangent breaks, even under the 5° curve limit. Seamly2D applies this rule at nodes, where it knows the line sides (`VAbstractPiece::turnPointIndices`). SeamlyLayout applies it to untagged input only (`straight_run_ends`), where it must find the lines from the geometry:
+  - Line, Seamly2D: a side between two node vertices, any length. Line, SeamlyLayout: every vertex within 0.01 mm of the chord, ≥ 10 mm long. A single segment needs ≥ 20 mm: shorter ones are curve chords (tight curve ends reach about 11 mm).
   - Break: direction change at the line end > 2 × the change at the next curve vertex, and > 1°. A tangent junction bends about half as much as the next vertex; a coarse curve bends equally at every vertex.
   - Next piece a line with ≥ 2 inner vertices: compare against 0°.
   - A closed loop is split into lines from its first known turn point, so no line starts mid-edge.
@@ -103,7 +103,7 @@ A DXF-ASTM export of the **Base Size** tab is graded (D6673 §4.3.1.4, §4.4). T
 
 - Input: the layout DOM (the base size of every piece, placed) and the handoff DOM (every size at its drafted position).
 - A piece's sizes share the piece `data-parent` (piece-set id).
-- Seamly2D gives every size of a piece the same node turn points: a node that is a turn point in one size is one in every size. The line-end turn points of the contour rules are found in each size alone, so they can still differ between sizes.
+- Seamly2D gives every size of a piece the same node turn points, line ends included: a node that is a turn point in one size is one in every size. SeamlyLayout adds no turn point to tagged input, so the sizes keep them alike. Untagged input finds line ends in each size alone; they can differ between sizes.
 - Key points: `grade_contours` gives every size the same turn points and the same curve points. Curve point j sits at the same arc-length fraction of the same span in every size. Curve points are added until every size passes the 0.25 mm spline check, then dropped where no size needs them.
 - Duplicate vertices: a key point within 0.01 mm of a dense vertex snaps to that vertex, so grading inserts no vertex within 0.01 mm of another. A curve point within 0.01 mm of a span's turn point, or on the vertex of the key point before or after it, in any size, is dropped.
 - Grading runs in draft space: a size differs from the sample size only by growth there.

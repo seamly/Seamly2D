@@ -2,10 +2,15 @@
 
 ## Current status
 
-### 2026-10-13 — Layout.27.12 line-end turn points: in progress
+### 2026-10-13 — Layout.27.12 line-end turn points: merged into local `run-seamlyLayout`, not pushed
 
 - User decision: Option 1. Seamly2D applies the line-end test at nodes; `unifyTurnPoints` shares it across sizes; SeamlyLayout stops adding line ends to tagged lines.
-- Branch `task-line-end-turn-points` (no checkout: shared working tree).
+- Seamly2D: `VAbstractPiece::turnPointIndices` marks a line end where the curve leaves the line at > 1° and > 2× the bend at its next vertex. Line = side between two node vertices, any length.
+- SeamlyLayout: `build_contour_tagged` uses the tags alone; `straight_run_ends` (now `pub(crate)`) runs on untagged input only.
+- Verified: `cargo test --workspace` 499 passed; `ctest --preset debug` 6 of 6; `cl /Zs` on `vabstractpiece.cpp` and both test files. Not run: Qt suites (no MSI; ask first).
+- Old fixtures lack the new line-end tags. Tests changed to match them: male_shirt FrontPanel 16 → 14 turn points; jacket2 Base Size grades 6 pieces (Detail (3), (6) still warn). Replace both fixtures after the next MSI: Layout.27.12.3, Layout.27.7.
+- Risk: an older tagged SVG file opened in SeamlyLayout no longer gets line-end turn points (e.g. FrontPanel front edge).
+- Next: MSI build (Layout.27.3.2), user check (Layout.27.3.3: all 8 jacket2 pieces graded).
 
 ### 2026-10-13 — Layout.27.3 shared node turn points: merged into local `run-seamlyLayout`, not pushed
 
