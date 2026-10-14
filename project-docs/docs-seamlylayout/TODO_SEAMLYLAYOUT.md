@@ -155,8 +155,9 @@ MSI 26.10.1311 exports correct pixels at 96 dpi (jacket2 PNG: 4608 × 48000) but
 
 jacket2 Marker, MSI 26.10.1311: 112 entries such as "Detail (size 240)" (`jacket2_screenshot_1.png`). The 6 "Detail" pieces cannot be told apart. The dialog has no scroll area and grows past the screen.
 
-- [ ] Layout.70.1 Use the numbered display name: "Detail (3)" (same rule as Layout.26.5).
-- [ ] Layout.70.2 One line per piece, then its sizes: "Detail (3): 220, 240, 260". Group by `data-parent` (as Layout.26.1).
-- [ ] Layout.70.3 `Main.qml` `warningDialog`: scroll area; the OK button stays visible (as Layout.26.2).
-- [ ] Layout.70.4 Rust test: warning text for a jacket2 Marker layout that leaves pieces out.
+- [x] Layout.70.1 Use the numbered display name: "Detail (3)" (same rule as Layout.26.5).
+- [x] Layout.70.2 One line per piece, then its sizes: "Detail (3): 220, 240, 260". Group by `data-parent` (as Layout.26.1).
+- [x] Layout.70.3 `Main.qml` `warningDialog`: scroll area; the OK button stays visible (as Layout.26.2).
+- [x] Layout.70.4 Rust test: warning text for a jacket2 Marker layout that leaves pieces out.
+- [ ] Layout.70.5 Next MSI: run `TEST_CHECKLIST.md` §7, "Left-out pieces warning".
 

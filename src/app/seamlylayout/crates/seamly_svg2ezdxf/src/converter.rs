@@ -150,22 +150,36 @@ fn piece_identity(piece: &Element, piece_set: Option<&Element>, index: usize) ->
 //          apart; else the number; else the order of the pieces in the document.
 // @param blocks Blocks of the tagged pieces, parallel to `identities`.
 fn number_shared_names(blocks: &mut [Block], identities: &[PieceIdentity]) {
+    let names: Vec<String> = blocks.iter().map(|b| b.display_name.clone()).collect();
+    for (block, display) in blocks.iter_mut().zip(numbered_names(&names, identities)) {
+        if block.display_name != display {
+            block.piece_name = dxf_unicode_escape(&display);
+            block.display_name = display;
+        } // if numbered
+    } // for each block
+} // fn number_shared_names
+
+// @brief The numbering rule of `number_shared_names`, on plain names.
+// @param names Display name per tagged piece, parallel to `identities`.
+// @return Display name per tagged piece: "Detail (3)" where pieces share "Detail", else unchanged.
+fn numbered_names(names: &[String], identities: &[PieceIdentity]) -> Vec<String> {
     // Distinct identity keys per display name, in first-appearance order.
-    let mut keys_by_name: Vec<(String, Vec<usize>)> = Vec::new();
-    for (i, block) in blocks.iter().enumerate() {
-        let pos = keys_by_name.iter().position(|(name, _)| *name == block.display_name);
+    let mut keys_by_name: Vec<(&str, Vec<usize>)> = Vec::new();
+    for (i, name) in names.iter().enumerate() {
+        let pos = keys_by_name.iter().position(|(n, _)| *n == name.as_str());
         let entry = match pos {
             Some(p) => &mut keys_by_name[p].1,
             None => {
-                keys_by_name.push((block.display_name.clone(), Vec::new()));
+                keys_by_name.push((name.as_str(), Vec::new()));
                 &mut keys_by_name.last_mut().expect("just pushed").1
-            } // None: first block of this name
+            } // None: first piece of this name
         }; // entry
         if entry.iter().all(|&j| identities[j].key != identities[i].key) {
             entry.push(i);
         } // if a new piece of this name
-    } // for each block
+    } // for each piece
 
+    let mut numbered = names.to_vec();
     for (name, pieces) in keys_by_name.iter().filter(|(_, pieces)| pieces.len() > 1) {
         // Letters tell the pieces apart only when every piece has its own.
         let letters: Vec<Option<&String>> = pieces.iter().map(|&j| identities[j].letter.as_ref()).collect();
@@ -181,17 +195,56 @@ fn number_shared_names(blocks: &mut [Block], identities: &[PieceIdentity]) {
                 (rank + 1).to_string()
             }; // suffix
             let display = format!("{name} ({suffix})");
-            // Every block of this piece (all its sizes) gets the numbered name.
-            let key = identities[j].key.clone();
-            for (block, identity) in blocks.iter_mut().zip(identities) {
-                if block.display_name == *name && identity.key == key {
-                    block.piece_name = dxf_unicode_escape(&display);
-                    block.display_name = display.clone();
+            // Every size of this piece gets the numbered name.
+            for (i, identity) in identities.iter().enumerate() {
+                if names[i] == *name && identity.key == identities[j].key {
+                    numbered[i] = display.clone();
                 } // if same piece
-            } // for each block
+            } // for each piece
         } // for each piece of this name
     } // for each shared name
-} // fn number_shared_names
+    numbered
+} // fn numbered_names
+
+// @brief One tagged piece, named as dialogs and the DXF export name it.
+#[derive(Debug, Clone, PartialEq)]
+pub struct TaggedPieceName {
+    // Piece `id`.
+    pub id: String,
+    // Same for every size of one piece: the piece-set id, else the piece id.
+    pub key: String,
+    // `data-name`, else `data-letter`, else `id`; numbered where pieces share it.
+    pub display_name: String,
+    // `data-size` of a multisize piece.
+    pub size: Option<String>,
+}
+
+// @brief Name every `data-type="piece"` group with the numbering rule of the DXF export.
+// @param root SVG root element.
+// @return One entry per tagged piece, in document order; empty for an untagged SVG.
+pub fn tagged_piece_names(root: &Element) -> Vec<TaggedPieceName> {
+    let mut tagged = Vec::new();
+    collect_tagged_pieces(root, None, &mut tagged);
+    let identities: Vec<PieceIdentity> =
+        tagged.iter().enumerate().map(|(index, (piece, piece_set))| piece_identity(piece, *piece_set, index)).collect();
+    let attr = |e: &Element, name: &str| e.attributes.get(name).map(|v| v.trim().to_string()).filter(|v| !v.is_empty());
+    let names: Vec<String> = tagged
+        .iter()
+        .map(|(piece, _)| attr(piece, "data-name").or_else(|| attr(piece, "data-letter")).or_else(|| attr(piece, "id")).unwrap_or_default())
+        .collect();
+    let numbered = numbered_names(&names, &identities);
+    tagged
+        .iter()
+        .zip(identities)
+        .zip(numbered)
+        .map(|(((piece, _), identity), display_name)| TaggedPieceName {
+            id: piece.attributes.get("id").cloned().unwrap_or_default(),
+            key: identity.key,
+            display_name,
+            size: attr(piece, "data-size"),
+        })
+        .collect()
+} // fn tagged_piece_names
 
 // @brief Create one block per pattern piece.
 // @details A tagged SVG's pieces are its `data-type="piece"` groups. An

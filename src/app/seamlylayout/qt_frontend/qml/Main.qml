@@ -1453,13 +1453,26 @@ ApplicationWindow {
             radius:       4
         } // background Rectangle
 
-        contentItem: Text {
-            text:           warningDialog.warningText
-            color:          Theme.textOnDark
-            font.pixelSize: Theme.fontSizeNormal
-            wrapMode:       Text.WordWrap
-            width:          340
-        } // contentItem Text
+        // A long piece list scrolls. The text area never grows past 60% of the window,
+        // so the title and the OK button stay visible.
+        contentItem: ScrollView {
+            id: warningScroll
+            implicitWidth:  360
+            implicitHeight: Math.min(warningLabel.implicitHeight, root.height * 0.6)
+            clip: true
+            ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
+            // Plain text: piece names come from the SVG and must not render as markup.
+            Text {
+                id:             warningLabel
+                text:           warningDialog.warningText
+                color:          Theme.textOnDark
+                font.pixelSize: Theme.fontSizeNormal
+                textFormat:     Text.PlainText
+                wrapMode:       Text.WordWrap
+                width:          warningScroll.availableWidth
+            } // Text warningLabel
+        } // ScrollView contentItem
     } // Dialog warningDialog
 
     // -----------------------------------------------------------------------

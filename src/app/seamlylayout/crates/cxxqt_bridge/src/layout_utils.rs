@@ -54,7 +54,8 @@ pub struct ProcessLayoutResult {
     pub ml_px: u32,
     /// Top margin in pixels (from contentRect y attribute).
     pub mt_px: u32,
-    /// User-facing ids of pieces that could not be placed in the layout.
+    /// Warning lines for pieces that could not be placed in the layout: one per
+    /// piece, then its sizes (`piece_extractor::unplaced_piece_lines`).
     /// Empty on a fully successful pack.  Non-empty when the (non-tiled) packer
     /// ran out of room or a piece was larger than the sheet: those pieces are
     /// omitted from the rendered layout and reported to the user as a warning,
@@ -545,13 +546,9 @@ pub fn do_process_layout(
             (placements, created_rects, unplaced_ids, bin_h)
         }; // if extend_media
 
-        // Map the unplaced original indices to their user-facing piece labels
-        // (`data-name` where the handoff supplied one, so the warning reads
-        // "Front Bodice" rather than "piece-7").
-        let unplaced_labels: Vec<String> = unplaced_ids
-            .iter()
-            .map(|&i| pieces.get(i).map(|p| p.label().to_string()).unwrap_or_else(|| format!("#{i}")))
-            .collect();
+        // Map the unplaced original indices to warning lines: one per piece, named as
+        // DXF-ASTM names it ("Detail (3)"), then its sizes.
+        let unplaced_labels = crate::piece_extractor::unplaced_piece_lines(&flat_dom, &pieces, &unplaced_ids);
 
         log_to_file(&format!(
             "[process_layout] non-tiled pack returned in {} ms with {} placements, {} unplaced: {:?}; bin {}x{} -> {}x{}",
@@ -1529,6 +1526,28 @@ mod tests {
             assert_eq!(svg.matches(&format!(r#"data-set-number="{set}""#)).count(), 26, "piece-set {set}: 26 sizes");
         } // for each piece-set
     } // jacket2_marker_places_every_size
+
+    // @brief A Marker roll too short for jacket2 names each left-out piece once, numbered, with its sizes.
+    #[test]
+    fn jacket2_marker_warning_names_pieces_once() {
+        let marker = process_jacket2(false, 48.0, 300.0);
+        let lines = &marker.unplaced_labels;
+        assert!(!lines.is_empty(), "a 300 in roll cannot hold every size");
+        assert!(lines.len() <= 8, "one line per piece: {lines:?}");
+        let names: Vec<&str> = lines.iter().map(|l| l.split(": ").next().unwrap_or_default()).collect();
+        for (i, name) in names.iter().enumerate() {
+            assert!(!names[i + 1..].contains(name), "{name} listed twice: {lines:?}");
+            assert!(*name != "Detail" && !name.contains("(size "), "numbered piece name: {lines:?}");
+        } // for each line
+        // Each line ends with the sizes of that piece left out, all from the size list.
+        let (_, sizes) = jacket2_handoff();
+        for line in lines {
+            let (_, list) = line.split_once(": ").expect("multisize line names its sizes");
+            assert!(list.split(", ").all(|s| sizes.iter().any(|z| z == s)), "{line}");
+        } // for each line
+        let warning = crate::layout_views::tab_unplaced_problem(crate::layout_views::MARKER_LABEL, lines);
+        assert_eq!(warning.lines().count(), lines.len() + 1, "{warning}");
+    } // jacket2_marker_warning_names_pieces_once
 
     // @brief Lay out the jacket2 Marker tab on extended media.
     fn process_jacket2_extended(settings_json: &str) -> ProcessLayoutResult {

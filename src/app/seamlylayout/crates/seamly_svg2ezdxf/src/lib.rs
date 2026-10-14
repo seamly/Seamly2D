@@ -25,7 +25,7 @@ mod astm_piece_test;
 #[cfg(test)]
 mod astm_grading_test;
 
-pub use converter::{SvgToEzdxfOptions, svg_to_ezdxf};
+pub use converter::{svg_to_ezdxf, tagged_piece_names, SvgToEzdxfOptions, TaggedPieceName};
 pub use astm_contour::{build_contour, grade_contours, spline_deviation, spline_points, AstmContour, CURVE_TOLERANCE_MM};
 pub use astm_grading::grade_drawing;
 pub use astm_notch::{build_notches, seam_allowance_at, Notch, NotchKind};
