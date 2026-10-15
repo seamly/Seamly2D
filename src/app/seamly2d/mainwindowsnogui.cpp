@@ -916,10 +916,12 @@ QVector<VLayoutPiece> MainWindowsNoGUI::preparePiecesForLayout(const QHash<quint
  *
  * @param pieces pieces included in the layout, keyed by VPiece id.
  * @param size   size in pattern units.
+ * @param cornerCuts seam allowance corners to cut in every size, per VPiece id. See unevenCornerCuts().
  * @return the size's pieces with their VPiece ids.
  */
 MainWindowsNoGUI::SizePieceList MainWindowsNoGUI::prepareSizePieceList(const QHash<quint32, VPiece> &pieces,
-                                                                      const QString &size)
+                                                                      const QString &size,
+                                                                      const QHash<quint32, QVector<int>> &cornerCuts)
 {
     SizePieceList sizeList;
     sizeList.size = size;
@@ -930,11 +932,81 @@ MainWindowsNoGUI::SizePieceList MainWindowsNoGUI::prepareSizePieceList(const QHa
     {
         VAbstractTool *tool = qobject_cast<VAbstractTool*>(VAbstractPattern::getTool(id));
         SCASSERT(tool != nullptr)
+        VPiece piece = pieces.value(id);
+        piece.setForcedCornerCuts(cornerCuts.value(id));
         sizeList.pieceIds.append(id);
-        sizeList.pieces.append(VLayoutPiece::Create(pieces.value(id), tool->getData()));
+        sizeList.pieces.append(VLayoutPiece::Create(piece, tool->getData()));
     }
 
     return sizeList;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief unevenCornerCuts finds the seam allowance corners cut short in some sizes of a piece but not in others.
+ *
+ * A ByLength corner is cut when its miter is too long, so a sharp corner can be cut in the small sizes only.
+ * Grading needs one corner shape in every size. A piece whose sizes have different corner counts is left out.
+ *
+ * @return per VPiece id, every corner cut in any size; only for pieces whose sizes differ.
+ */
+QHash<quint32, QVector<int>> MainWindowsNoGUI::unevenCornerCuts() const
+{
+    QHash<quint32, QVector<int>> uneven;
+    if (sizePieceLists.size() < 2)
+    {
+        return uneven;
+    }
+
+    for (const quint32 id : sizePieceLists.first().pieceIds)
+    {
+        // The corners of the same piece in every size that has it.
+        QVector<SeamAllowanceCorners> sizes;
+        for (const SizePieceList &sizeList : sizePieceLists)
+        {
+            const int i = sizeList.pieceIds.indexOf(id);
+            if (i >= 0)
+            {
+                sizes.append(sizeList.pieces.at(i).seamAllowanceCorners());
+            }
+        }
+
+        bool sameCount = true;
+        bool sameCuts = true;
+        QVector<int> cuts;
+        for (const SeamAllowanceCorners &corners : std::as_const(sizes))
+        {
+            sameCount = sameCount && corners.count == sizes.first().count;
+            sameCuts = sameCuts && corners.cut == sizes.first().cut;
+            cuts += corners.cut;
+        }
+        if (!sameCount || sameCuts)
+        {
+            continue;
+        }
+
+        std::sort(cuts.begin(), cuts.end());
+        cuts.erase(std::unique(cuts.begin(), cuts.end()), cuts.end());
+        uneven.insert(id, cuts);
+    }
+    return uneven;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief needsCornerCuts tells whether a size has a piece whose cut corners differ from cornerCuts.
+ */
+bool MainWindowsNoGUI::needsCornerCuts(const SizePieceList &sizeList, const QHash<quint32, QVector<int>> &cornerCuts)
+{
+    for (auto it = cornerCuts.constBegin(); it != cornerCuts.constEnd(); ++it)
+    {
+        const int i = sizeList.pieceIds.indexOf(it.key());
+        if (i >= 0 && sizeList.pieces.at(i).seamAllowanceCorners().cut != it.value())
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

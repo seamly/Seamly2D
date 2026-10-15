@@ -108,7 +108,10 @@ protected:
     QVector<SizePieceList> sizePieceLists; /**< every size of a multisize pattern; empty for an individual pattern */
     QString baseSize;                      /**< base size of the multisize measurements, in pattern units */
 
-    SizePieceList prepareSizePieceList(const QHash<quint32, VPiece> &pieces, const QString &size);
+    SizePieceList prepareSizePieceList(const QHash<quint32, VPiece> &pieces, const QString &size,
+                                       const QHash<quint32, QVector<int>> &cornerCuts = QHash<quint32, QVector<int>>());
+    QHash<quint32, QVector<int>> unevenCornerCuts() const;
+    static bool   needsCornerCuts(const SizePieceList &sizeList, const QHash<quint32, QVector<int>> &cornerCuts);
     void          unifySizeTurnPoints();
 
     QGraphicsScene *currentScene;    /** @brief currentScene pointer to current scene. */

@@ -110,7 +110,7 @@ Prior results (jacket2, sizes 220–720): Nested graded 4 of 8 pieces; Marker pl
 - [ ] Layout.27.3 Make turn points consistent across all sizes of each piece (cutline, seamline, internal paths). Seamly2D `VAbstractPiece::turnPointIndices` currently changes at near-threshold corners. After `prepareMultisizePieceLists`, share turn points across sizes using node vertex indices in `VLayoutPiece` / `VLayoutPiecePath`; skip paths whose node counts differ.
   - [x] Layout.27.3.1 Code: `unifyTurnPoints` (`63ab2447a3`).
   - [ ] Layout.27.3.2 Run the Qt suites with `local_build_msi.ps1`.
-  - [ ] Layout.27.3.3 Next MSI: export jacket2 Base Size 500 to DXF-ASTM. Expect 6 of 8 graded; Detail (3) and (6) warn until Layout.27.13.
+  - [ ] Layout.27.3.3 Next MSI: export jacket2 Base Size 500 to DXF-ASTM. With Layout.27.13: all 8 graded, no "other turn points" warning.
   - Note: the MSI 26.10.1416 handoff has the same `data-turn-points` as the old fixture. Detail (7) and (8) are consistent; Detail (3) and (6) differ in shape (Layout.27.13).
 - [x] Layout.27.4 Give `grade_anchors` a distinct error when a key point is missing from the dense line. `GradeError::KeyPointOffLine`.
 - [x] Layout.27.5 Name the first size whose turn points differ from the sample size. jacket2 fixture: Detail (3) size 660, Detail (6) size 220, both on the cut line.
@@ -126,9 +126,14 @@ Prior results (jacket2, sizes 220–720): Nested graded 4 of 8 pieces; Marker pl
   - [x] Layout.27.12.2 SeamlyLayout: no line ends added to tagged input (`5bcb1f3cf1`).
   - [x] Layout.27.12.3 Refresh fixtures from the next MSI handoff: `male_shirt_pieces.svg` (expect 16 FrontPanel turn points, not 14); jacket2 (expect all 8 pieces graded). Done with MSI 26.10.1416: FrontPanel 16. jacket2: 6 of 8 (Layout.27.13).
   - [ ] Layout.27.12.4 Build and user check: Layout.27.3.2, Layout.27.3.3.
-- [ ] Layout.27.13 jacket2 Detail (3) and (6) lines change shape between sizes, so they cannot grade. Found in the MSI 26.10.1416 handoff. **Decision needed.**
-  - Detail (3), sizes 660–700: the seam line and cut line reverse 0.2 mm past a corner (178.7° turn, then a 0.2 mm segment). The corner gets two turn points; other sizes have one.
-  - Detail (6), sizes 220–340: the cut line's last seam allowance corner is two vertices (67° each, 9.3 mm apart). From size 360 it is one vertex (131°).
+- [ ] Layout.27.13 jacket2 Detail (3) and (6) lines change shape between sizes, so they cannot grade. Found in the MSI 26.10.1416 handoff. Decision (2026-10-14): fix both in Seamly2D.
+  - Detail (3), sizes 660–700: the seam line and cut line reverse 0.2 mm past a corner (178.7° turn, then a 0.2 mm segment). The corner gets two turn points; other sizes have one. Cause: `VAbstractCurve::FromBegin` keeps a curve end in the same pixel as the node point, so the curve overshoots it.
+  - Detail (6), sizes 220–340: the cut line's last seam allowance corner is two vertices (67° each, 9.3 mm apart). From size 360 it is one vertex (131°). Cause: `AngleByLength` cuts a miter longer than 2.4 × the width; the miter is near that limit.
+  - The extra vertices also change the node count, so `unifyTurnPoints` skipped these lines.
+  - [x] Layout.27.13.1 Detail (3): `vpiecepath.cpp` `curveSegmentPoints` ends a curve at its node point when both round to the same pixel. Test `TST_VPiece::CurveEndInNodePixelEndsAtNode`.
+  - [x] Layout.27.13.2 Detail (6): the multisize handoff cuts a ByLength corner in every size when one size cuts it (`MainWindowsNoGUI::unevenCornerCuts`, `VPiece::setForcedCornerCuts`). Only those sizes are built again. Test `TST_VPiece::ForcedCornerCutCutsShortMiter`.
+  - [ ] Layout.27.13.3 Run the Qt suites with `local_build_msi.ps1`. Done: `cl /Zs` on the 7 changed `.cpp` files.
+  - [ ] Layout.27.13.4 Next MSI: run `capture_handoff_jacket2.bat` again; replace `jacket2_40-146_handoff.svg`; expect 8 graded (Layout.27.7.2).
 
 ## [ ] Task Layout.28 — Verify built-in seam line
 

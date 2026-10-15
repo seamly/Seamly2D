@@ -210,9 +210,11 @@ void VAbstractPiece::SetSAWidth(qreal value)
  * @brief Equidistant builds the seam allowance polyline around the main path.
  * @param nodeVertices when not null, receives the seam allowance vertices built at node points
  *        (VSAPoint::isNode()), for turnPointIndices().
+ * @param cutCorners when not null, receives VSAPoint::cornerIndex() of each node point whose ByLength corner
+ *        was cut short, in path order.
  */
 QVector<QPointF> VAbstractPiece::Equidistant(const QVector<VSAPoint> &points, qreal width,
-                                             QVector<QPointF> *nodeVertices)
+                                             QVector<QPointF> *nodeVertices, QVector<int> *cutCorners)
 {
     if (width < 0)
     {
@@ -232,16 +234,27 @@ QVector<QPointF> VAbstractPiece::Equidistant(const QVector<VSAPoint> &points, qr
         p.append(p.at(0));// Should be always closed
     }
 
+    // Report a cut corner by the number the caller gave its node point.
+    const auto noteCut = [cutCorners](const VSAPoint &corner, bool cut)
+    {
+        if (cutCorners != nullptr && cut && corner.isNode() && corner.cornerIndex() >= 0)
+        {
+            cutCorners->append(corner.cornerIndex());
+        }
+    };
+
     QVector<QPointF> ekvPoints;
     for (qint32 i = 0; i < p.size(); ++i )
     {
+        bool cut = false;
         if ( i == 0)
         {//first point
-            const QVector<QPointF> ekv = EkvPoint(p.at(p.size()-2), p.at(p.size()-1), p.at(1), p.at(0), width);
+            const QVector<QPointF> ekv = EkvPoint(p.at(p.size()-2), p.at(p.size()-1), p.at(1), p.at(0), width, &cut);
             if (nodeVertices != nullptr && p.at(0).isNode())
             {
                 *nodeVertices += ekv;
             }
+            noteCut(p.at(0), cut);
             ekvPoints << ekv;
             continue;
         }
@@ -255,11 +268,12 @@ QVector<QPointF> VAbstractPiece::Equidistant(const QVector<VSAPoint> &points, qr
             continue;
         }
         //points in the middle of polyline
-        const QVector<QPointF> ekv = EkvPoint(p.at(i-1), p.at(i), p.at(i+1), p.at(i), width);
+        const QVector<QPointF> ekv = EkvPoint(p.at(i-1), p.at(i), p.at(i+1), p.at(i), width, &cut);
         if (nodeVertices != nullptr && p.at(i).isNode())
         {
             *nodeVertices += ekv;
         }
+        noteCut(p.at(i), cut);
         ekvPoints << ekv;
     }
 
@@ -703,11 +717,18 @@ qreal VAbstractPiece::MaxLocalSA(const VSAPoint &p, qreal width)
  * @brief EkvPoint return seam allowance points in place of intersection of two edges. Last points of two edges
  * should be equal.
  * @param width global seam allowance width.
+ * @param cut when not null, receives true when a ByLength corner was cut short.
  * @return seam allowance points.
  */
 QVector<QPointF> VAbstractPiece::EkvPoint(const VSAPoint &p1Line1, const VSAPoint &p2Line1,
-                                          const VSAPoint &p1Line2, const VSAPoint &p2Line2, qreal width)
+                                          const VSAPoint &p1Line2, const VSAPoint &p2Line2, qreal width,
+                                          bool *cut)
 {
+    if (cut != nullptr)
+    {
+        *cut = false;
+    }
+
     if (width < 0)
     { // width can't be < 0
         return QVector<QPointF>();
@@ -750,7 +771,8 @@ QT_WARNING_DISABLE_GCC("-Wswitch-default")
                 switch (p2Line1.GetAngleType())
                 {
                     case PieceNodeAngle::ByLength:
-                        return AngleByLength(p2Line1, bigLine1.p1(), CrosPoint, bigLine2.p2(), localWidth);
+                        return AngleByLength(p2Line1, bigLine1.p1(), CrosPoint, bigLine2.p2(), localWidth,
+                                             p2Line1.isCornerCutForced(), cut);
                     case PieceNodeAngle::ByPointsIntersection:
                         return AngleByIntersection(p1Line1, p2Line1, p1Line2, bigLine1.p1(), CrosPoint, bigLine2.p2(),
                                                    localWidth);
@@ -834,14 +856,25 @@ QT_WARNING_POP
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief AngleByLength builds a corner whose miter is cut short when it is longer than width * maxL.
+ * @param forceCut cuts the corner whenever its miter is longer than width, so that every size of a multisize
+ *        pattern gets the same corner shape.
+ * @param cut when not null, receives true when the corner was cut.
+ */
 QVector<QPointF> VAbstractPiece::AngleByLength(const QPointF &p2, const QPointF &sp1, const QPointF &sp2,
-                                               const QPointF &sp3, qreal width)
+                                               const QPointF &sp3, qreal width, bool forceCut, bool *cut)
 {
     QVector<QPointF> points;
 
     QLineF line(p2, sp2);
     const qreal length = line.length();
-    if (length > width*maxL)
+    const bool cutCorner = length > width*maxL || (forceCut && length > width);
+    if (cut != nullptr)
+    {
+        *cut = cutCorner;
+    }
+    if (cutCorner)
     { // Cutting too long a cut angle
         line.setLength(width);
         QLineF cutLine(line.p2(), sp2); // Cut line is a perpendicular

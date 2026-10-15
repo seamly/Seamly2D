@@ -194,6 +194,33 @@ bool intersectsWithCutLine(const QVector<QPointF> &cutPath, const QVector<QPoint
         return VAbstractCurve::curveIntersectAxis(firstPoint, findAngle(points), cutPath, intersectPoint);
     }
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief curveSegmentPoints cuts a curve between the points that begin and end its path segment.
+ * @details VAbstractCurve::GetSegmentPoints() does not cut a curve end that rounds to the same pixel as the
+ *          segment end. That curve end can lie up to a pixel past the segment end, so the path turns back, and
+ *          only in some pattern sizes. A segment end in the same pixel as its node point becomes that point.
+ */
+QVector<QPointF> curveSegmentPoints(const QSharedPointer<VAbstractCurve> &curve, const QPointF &begin,
+                                    const QPointF &end, bool reverse)
+{
+    QVector<QPointF> points = curve->GetSegmentPoints(begin, end, reverse);
+    if (points.size() < 2 || begin == end)
+    {
+        return points;
+    }
+
+    if (points.first() != begin && points.first().toPoint() == begin.toPoint())
+    {
+        points.first() = begin;
+    }
+    if (points.last() != end && points.last().toPoint() == end.toPoint())
+    {
+        points.last() = end;
+    }
+    return points;
+}
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -417,7 +444,7 @@ QVector<QPointF> VPiecePath::PathPoints(const VContainer *data, const QVector<QP
                     const QPointF begin = StartSegment(data, i, at(i).GetReverse());
                     const QPointF end = EndSegment(data, i, at(i).GetReverse());
 
-                    points << curve->GetSegmentPoints(begin, end, at(i).GetReverse());
+                    points << curveSegmentPoints(curve, begin, end, at(i).GetReverse());
                 }
                 break;
             default:
@@ -495,7 +522,7 @@ QVector<QPointF> VPiecePath::pathNodeVertices(const VContainer *data) const
                     const QSharedPointer<VAbstractCurve> curve = data->GeometricObject<VAbstractCurve>(at(i).GetId());
                     const QPointF begin = StartSegment(data, i, at(i).GetReverse());
                     const QPointF end = EndSegment(data, i, at(i).GetReverse());
-                    vertices += curveNodeVertices(curve, curve->GetSegmentPoints(begin, end, at(i).GetReverse()));
+                    vertices += curveNodeVertices(curve, curveSegmentPoints(curve, begin, end, at(i).GetReverse()));
                 }
                 break;
             default:
@@ -509,7 +536,7 @@ QVector<QPointF> VPiecePath::pathNodeVertices(const VContainer *data) const
 /**
  * @brief curveNodeVertices returns the vertices of one curve segment that can break the tangent.
  * @param curve   curve the segment was cut from.
- * @param segment interpolated segment points, from VAbstractCurve::GetSegmentPoints().
+ * @param segment interpolated segment points, from curveSegmentPoints().
  * @return the segment ends, and the spline path knots that lie on the segment.
  */
 QVector<QPointF> VPiecePath::curveNodeVertices(const QSharedPointer<VAbstractCurve> &curve,
@@ -939,7 +966,7 @@ QPointF VPiecePath::NodePreviousPoint(const VContainer *data, int i) const
                 const VSAPoint begin = StartSegment(data, d->m_nodes, index, node.GetReverse());
                 const VSAPoint end = EndSegment(data, d->m_nodes, index, node.GetReverse());
 
-                const QVector<QPointF> points = curve->GetSegmentPoints(begin, end, node.GetReverse());
+                const QVector<QPointF> points = curveSegmentPoints(curve, begin, end, node.GetReverse());
                 if (points.size() > 1)
                 {
                     return points.at(points.size()-2);
@@ -991,7 +1018,7 @@ QPointF VPiecePath::NodeNextPoint(const VContainer *data, int i) const
                 const VSAPoint begin = StartSegment(data, d->m_nodes, index, node.GetReverse());
                 const VSAPoint end = EndSegment(data, d->m_nodes, index, node.GetReverse());
 
-                const QVector<QPointF> points = curve->GetSegmentPoints(begin, end, node.GetReverse());
+                const QVector<QPointF> points = curveSegmentPoints(curve, begin, end, node.GetReverse());
                 if (points.size() > 1)
                 {
                     return points.at(1);
@@ -1119,7 +1146,7 @@ QVector<VSAPoint> VPiecePath::CurveSeamAllowanceSegment(const VContainer *data, 
     const VSAPoint begin = StartSegment(data, nodes, i, reverse);
     const VSAPoint end = EndSegment(data, nodes, i, reverse);
 
-    const QVector<QPointF> points = curve->GetSegmentPoints(begin, end, reverse);
+    const QVector<QPointF> points = curveSegmentPoints(curve, begin, end, reverse);
     if (points.isEmpty())
     {
         return pointsEkv;

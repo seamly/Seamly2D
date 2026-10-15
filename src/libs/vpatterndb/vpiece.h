@@ -110,7 +110,8 @@ public:
     QVector<VPointF>         mainPathNodePoints(const VContainer *data, bool showExcluded = false) const;
     QVector<QPointF>         mainPathNodeVertices(const VContainer *data) const;
     QVector<QPointF>         seamAllowancePoints(const VContainer *data,
-                                                 QVector<QPointF> *nodeVertices = nullptr) const;
+                                                 QVector<QPointF> *nodeVertices = nullptr,
+                                                 SeamAllowanceCorners *corners = nullptr) const;
     QVector<QPointF>         builtInSeamLinePoints(const VContainer *data,
                                                    QVector<QPointF> *nodeVertices = nullptr) const;
     QVector<QPointF>         cutPathPoints(const VContainer *data) const;
@@ -129,6 +130,9 @@ public:
 
     bool                     isInLayout() const;
     void                     setInLayout(bool inLayout);
+
+    QVector<int>             forcedCornerCuts() const;
+    void                     setForcedCornerCuts(const QVector<int> &corners);
 
     bool                     isLocked() const;
     void                     setIsLocked(bool isLocked);

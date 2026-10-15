@@ -63,6 +63,7 @@
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
 #include "../vpatterndb/floatItemData/vgrainlinedata.h"
 #include "../vmisc/diagnostic.h"
+#include "vabstractpiece.h"
 #include "vlayoutpiecepath.h"
 
 #include "vtextmanager.h"
@@ -81,6 +82,7 @@ public:
           seamAllowance(),
           seamAllowanceTurnPoints(),
           seamAllowanceNodeIndices(),
+          seamAllowanceCorners(),
           builtInSeamLine(),
           builtInSeamLineTurnPoints(),
           builtInSeamLineNodeIndices(),
@@ -113,6 +115,7 @@ public:
           seamAllowance(piece.seamAllowance),
           seamAllowanceTurnPoints(piece.seamAllowanceTurnPoints),
           seamAllowanceNodeIndices(piece.seamAllowanceNodeIndices),
+          seamAllowanceCorners(piece.seamAllowanceCorners),
           builtInSeamLine(piece.builtInSeamLine),
           builtInSeamLineTurnPoints(piece.builtInSeamLineTurnPoints),
           builtInSeamLineNodeIndices(piece.builtInSeamLineNodeIndices),
@@ -145,6 +148,7 @@ public:
     QVector<QPointF>           seamAllowance;      /// @brief seamAllowance list of seam allowance points.
     std::optional<QVector<int>> seamAllowanceTurnPoints; /// @brief turn point indices into seamAllowance; unset = unknown
     QVector<int>               seamAllowanceNodeIndices; /// @brief node vertex indices into seamAllowance; empty = unknown
+    SeamAllowanceCorners       seamAllowanceCorners; /// @brief seam allowance corners and the ones cut short
     QVector<QPointF>           builtInSeamLine;    /// @brief seam line inside a main path with a built-in seam allowance
     std::optional<QVector<int>> builtInSeamLineTurnPoints; /// @brief turn point indices into builtInSeamLine; unset = unknown
     QVector<int>               builtInSeamLineNodeIndices; /// @brief node vertex indices into builtInSeamLine; empty = unknown
