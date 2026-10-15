@@ -2448,8 +2448,9 @@ mod tests {
 
         let pieces: Vec<&str> =
             text.lines().filter_map(|l| l.strip_prefix("\u{2022} ")).map(|l| l.split(':').next().unwrap()).collect();
-        assert_eq!(pieces, vec!["CollarBaseInterface", "CollarTopInterface", "CuffInterface"]);
-        assert!(text.contains("CuffInterface: no Quantity (no piece quantity or \"Cut N\" label line), no piece label, no grainline"), "{text}");
+        assert_eq!(pieces, vec!["CollarTopInterface", "CollarBaseInterface", "CuffInterface"], "document order");
+        // Every piece of the handoff carries data-quantity, so only the label and grainline are missing.
+        assert!(text.contains("CuffInterface: no piece label, no grainline"), "{text}");
         assert!(text.contains("usability of the exported DXF file"), "{text}");
     } // dxf_missing_piece_data_names_male_shirt_interface_pieces
 
