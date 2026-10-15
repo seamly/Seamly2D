@@ -806,6 +806,17 @@ SeamAllowanceCorners VLayoutPiece::seamAllowanceCorners() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief lineNodeCounts returns the node vertex counts of the seam line, the cut line and the built-in seam line.
+ * @details unifyTurnPoints() matches the nodes of a line between sizes only when its count is the same in every size.
+ */
+QVector<int> VLayoutPiece::lineNodeCounts() const
+{
+    return {static_cast<int>(d->contourNodeIndices.size()), static_cast<int>(d->seamAllowanceNodeIndices.size()),
+            static_cast<int>(d->builtInSeamLineNodeIndices.size())};
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void VLayoutPiece::setSeamAllowanceCorners(const SeamAllowanceCorners &corners)
 {
     d->seamAllowanceCorners = corners;

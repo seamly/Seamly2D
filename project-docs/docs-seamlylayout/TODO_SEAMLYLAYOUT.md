@@ -140,6 +140,8 @@ Prior results (jacket2, sizes 220–720): Nested graded 4 of 8 pieces; Marker pl
     - Suspected cause (not verified): the corner and turn point lists count spline interior nodes. Both pieces end a curve at a `cutSplinePath` point (217: `SplPath_А_А3-22`; 209: 50 mm along path 80). An interior node can be on that curve segment in some sizes only. The node count then differs between sizes, so `unevenCornerCuts` and `unifyNodeTurnPoints` skip the piece.
     - Detail (3) evidence: interior node А20 is on the curve from about size 540 up, and past О6 in smaller sizes. Size 700 flags А20 as a turn point; sizes 560–720 have the same vertex without the flag. А20 is smooth: its curve bends 1.4° there.
     - Spline node terms: end node (first or last spline point, or a spline point where the tangent breaks), interior node (spline point with the same tangent on both sides; never a turn point), control node (off-curve handle).
+    - Next MSI check: the Seamly2D log (`%LOCALAPPDATA%\Seamly\Seamly2D\logs\seamly2d-pid*.log`) has the line "Multisize layout: 26 sizes; 0 of 8 pieces differ in node count between sizes." Lines starting `Piece "Detail"` name a piece that still differs.
+  - [x] Layout.27.13.5 Seamly2D: a spline interior node is a curve point, not a node vertex (`isSplineEndNode` in `vpiecepath.cpp`). A spline point is an end node when it is first or last, its control node angles are not opposite, or a control node has length 0. The handoff logs each piece whose node counts differ between sizes, and each forced corner cut. Tests `TST_VPiece::SplineNodeVertices`, `TST_VPiece::SplineInteriorNodeKeepsNodeCount`. Done: `cl /Zs` on 6 `.cpp` files. Open: Qt suites run in the next `local_build_msi.ps1`.
 
 ## [ ] Task Layout.28 — Verify built-in seam line
 

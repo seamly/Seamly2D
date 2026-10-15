@@ -119,6 +119,39 @@ private:
     VCommonSettings          *m_settings;
     QHash<QString, QVariant>  m_values;
 };
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief threePointSplinePath builds a spline path from (0, 0) through the middle point (200, 100) to (400, 0).
+ * @param angle1  angle of the control node before the middle point.
+ * @param angle2  angle of the control node after the middle point.
+ * @param length2 length of the control node after the middle point.
+ */
+VSplinePath *threePointSplinePath(qreal angle1, qreal angle2, qreal length2)
+{
+    QVector<VSplinePoint> points;
+    points.append(VSplinePoint(VPointF(0, 0, "A1", 0, 0), 135, "135", 315, "315", 0, "0", 60, "60"));
+    points.append(VSplinePoint(VPointF(200, 100, "A2", 0, 0), angle1, QString::number(angle1), angle2,
+                               QString::number(angle2), 60, "60", length2, QString::number(length2)));
+    points.append(VSplinePoint(VPointF(400, 0, "A3", 0, 0), 225, "225", 45, "45", 60, "60", 0, "0"));
+    return new VSplinePath(points);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief hasVertexNear tells whether a vertex lies within 0.01 px of @p p.
+ */
+bool hasVertexNear(const QVector<QPointF> &vertices, const QPointF &p)
+{
+    for (const QPointF &vertex : vertices)
+    {
+        if (QLineF(vertex, p).length() < 0.01)
+        {
+            return true;
+        }
+    }
+    return false;
+}
 } // namespace
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1324,4 +1357,90 @@ void TST_VPiece::ForcedCornerCutCutsShortMiter() const
     QCOMPARE(corners.count, 3);
     QCOMPARE(corners.cut, QVector<int>{1});
     QCOMPARE(cut.size(), kept.size() + 1);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::SplineNodeVertices_data() const
+{
+    QTest::addColumn<qreal>("angle1");
+    QTest::addColumn<qreal>("angle2");
+    QTest::addColumn<qreal>("length2");
+    QTest::addColumn<bool>("endNode");
+
+    QTest::newRow("same tangent") << 180.0 << 0.0 << 60.0 << false;
+    QTest::newRow("same tangent, angle past 360") << 180.0 << 360.0 << 60.0 << false;
+    QTest::newRow("tangent breaks") << 180.0 << 30.0 << 60.0 << true;
+    QTest::newRow("control node of length 0") << 180.0 << 0.0 << 0.0 << true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief SplineNodeVertices checks that a spline end node is a node vertex and a spline interior node is not.
+ */
+void TST_VPiece::SplineNodeVertices() const
+{
+    QFETCH(qreal, angle1);
+    QFETCH(qreal, angle2);
+    QFETCH(qreal, length2);
+    QFETCH(bool, endNode);
+
+    const QSharedPointer<VAbstractCurve> curve(threePointSplinePath(angle1, angle2, length2));
+    const QVector<QPointF> vertices = VPiecePath::curveNodeVertices(curve, curve->getPoints());
+
+    QVERIFY2(hasVertexNear(vertices, QPointF(0, 0)), "the first point is a node vertex");
+    QVERIFY2(hasVertexNear(vertices, QPointF(400, 0)), "the last point is a node vertex");
+    QCOMPARE(hasVertexNear(vertices, QPointF(200, 100)), endNode);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief SplineInteriorNodeKeepsNodeCount checks that a piece has the same node count whether or not its curve
+ * segment reaches a spline interior node, as when a pattern size moves the node past the segment end.
+ */
+void TST_VPiece::SplineInteriorNodeKeepsNodeCount() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    VSplinePath *path = threePointSplinePath(180, 0, 60);
+    const QVector<QPointF> curvePoints = path->getPoints();
+    data->UpdateGObject(1, new VPointF(0, 0, "A1", 0, 0));
+    data->UpdateGObject(2, path);
+    data->UpdateGObject(4, new VPointF(400, 300, "A4", 0, 0));
+    data->UpdateGObject(5, new VPointF(0, 300, "A5", 0, 0));
+
+    int middle = -1;
+    for (int k = 0; k < curvePoints.size(); ++k)
+    {
+        if (QLineF(curvePoints.at(k), QPointF(200, 100)).length() < 0.01)
+        {
+            middle = k;
+        }
+    }
+    QVERIFY2(middle > 1 && middle < curvePoints.size() - 2, "the interior node is inside the curve");
+
+    // Node vertex count and seam allowance corner count when the curve segment ends at segmentEnd.
+    const auto nodeCounts = [&data](const QPointF &segmentEnd)
+    {
+        data->UpdateGObject(3, new VPointF(segmentEnd.x(), segmentEnd.y(), "A3", 0, 0));
+
+        VPiece piece;
+        piece.SetSeamAllowance(true);
+        piece.SetSAWidth(10);
+        piece.GetPath().Append(VPieceNode(1, Tool::NodePoint));
+        piece.GetPath().Append(VPieceNode(2, Tool::NodeSplinePath));
+        piece.GetPath().Append(VPieceNode(3, Tool::NodePoint));
+        piece.GetPath().Append(VPieceNode(4, Tool::NodePoint));
+        piece.GetPath().Append(VPieceNode(5, Tool::NodePoint));
+
+        SeamAllowanceCorners corners;
+        piece.seamAllowancePoints(data.data(), nullptr, &corners);
+        return qMakePair(static_cast<int>(piece.mainPathNodeVertices(data.data()).size()), corners.count);
+    };
+
+    const QPair<int, int> before = nodeCounts(curvePoints.at(middle / 2));
+    const QPair<int, int> after = nodeCounts(curvePoints.at((middle + curvePoints.size()) / 2));
+    QCOMPARE(after.first, before.first);
+    QCOMPARE(after.second, before.second);
 }

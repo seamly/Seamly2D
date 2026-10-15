@@ -98,6 +98,9 @@ private slots:
     void BuiltInSeamLineFollowsCurve() const;
     void CurveEndInNodePixelEndsAtNode() const;
     void ForcedCornerCutCutsShortMiter() const;
+    void SplineNodeVertices_data() const;
+    void SplineNodeVertices() const;
+    void SplineInteriorNodeKeepsNodeCount() const;
 
 private:
     Q_DISABLE_COPY(TST_VPiece)
