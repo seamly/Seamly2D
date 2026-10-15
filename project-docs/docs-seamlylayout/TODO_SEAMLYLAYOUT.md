@@ -139,7 +139,7 @@ Prior results (jacket2, sizes 220–720): Nested graded 4 of 8 pieces; Marker pl
     - Detail (6): no change. Sizes 220–340 still cut the corner and 360+ do not, so the forced cut did not apply.
     - Suspected cause (not verified): the corner and turn point lists count spline interior nodes. Both pieces end a curve at a `cutSplinePath` point (217: `SplPath_А_А3-22`; 209: 50 mm along path 80). An interior node can be on that curve segment in some sizes only. The node count then differs between sizes, so `unevenCornerCuts` and `unifyNodeTurnPoints` skip the piece.
     - Detail (3) evidence: interior node А20 is on the curve from about size 540 up, and past О6 in smaller sizes. Size 700 flags А20 as a turn point; sizes 560–720 have the same vertex without the flag. А20 is smooth: its curve bends 1.4° there.
-    - Spline node terms: end node (first or last spline point), interior node (between them, on the curve), control node (off-curve handle).
+    - Spline node terms: end node (first or last spline point, or a spline point where the tangent breaks), interior node (spline point with the same tangent on both sides; never a turn point), control node (off-curve handle).
 
 ## [ ] Task Layout.28 — Verify built-in seam line
 
