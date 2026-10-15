@@ -61,6 +61,8 @@
 #include <QDebug>
 #include <QPainterPath>
 
+#include <algorithm>
+
 namespace
 {
 QVector<quint32> PieceMissingNodes(const QVector<quint32> &piece1Nodes, const QVector<quint32> &piece2Nodes)
@@ -307,8 +309,11 @@ QVector<QPointF> VPiece::mainPathNodeVertices(const VContainer *data) const
 /**
  * @brief seamAllowancePoints builds the seam allowance (cut line) polyline.
  * @param nodeVertices when not null, receives the returned vertices that can break the tangent.
+ * @param corners when not null, receives the node point count and the ByLength corners cut short.
+ *        A corner in forcedCornerCuts() is cut whenever its miter is longer than the seam allowance width.
  */
-QVector<QPointF> VPiece::seamAllowancePoints(const VContainer *data, QVector<QPointF> *nodeVertices) const
+QVector<QPointF> VPiece::seamAllowancePoints(const VContainer *data, QVector<QPointF> *nodeVertices,
+                                             SeamAllowanceCorners *corners) const
 {
     SCASSERT(data != nullptr);
 
@@ -391,7 +396,28 @@ QVector<QPointF> VPiece::seamAllowancePoints(const VContainer *data, QVector<QPo
         }
     }
 
-    return Equidistant(pointsEkv, width, nodeVertices);
+    // Number the node points in path order; every size of a piece numbers them the same way.
+    int cornerCount = 0;
+    for (VSAPoint &point : pointsEkv)
+    {
+        if (point.isNode())
+        {
+            point.setCornerIndex(cornerCount);
+            point.setCornerCutForced(d->m_forcedCornerCuts.contains(cornerCount));
+            ++cornerCount;
+        }
+    }
+
+    QVector<int> cutCorners;
+    const QVector<QPointF> seamAllowance = Equidistant(pointsEkv, width, nodeVertices, &cutCorners);
+    if (corners != nullptr)
+    {
+        std::sort(cutCorners.begin(), cutCorners.end());
+        cutCorners.erase(std::unique(cutCorners.begin(), cutCorners.end()), cutCorners.end());
+        corners->count = cornerCount;
+        corners->cut = cutCorners;
+    }
+    return seamAllowance;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -628,6 +654,23 @@ bool VPiece::isInLayout() const
 void VPiece::setInLayout(bool inLayout)
 {
     d->m_inLayout = inLayout;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief forcedCornerCuts returns the seam allowance corners cut whenever their miter is longer than the width.
+ * @details Corners are numbered as in SeamAllowanceCorners. A multisize layout handoff sets them, so that a corner
+ *          cut in one size is cut in every size.
+ */
+QVector<int> VPiece::forcedCornerCuts() const
+{
+    return d->m_forcedCornerCuts;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void VPiece::setForcedCornerCuts(const QVector<int> &corners)
+{
+    d->m_forcedCornerCuts = corners;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

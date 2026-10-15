@@ -82,6 +82,7 @@ public:
         , m_piPatternInfo()
         , m_glGrainline()
         , m_formulaWidth('0')
+        , m_forcedCornerCuts()
     {}
 
     VPieceData(const VPieceData &piece)
@@ -97,6 +98,7 @@ public:
         , m_piPatternInfo(piece.m_piPatternInfo)
         , m_glGrainline(piece.m_glGrainline)
         , m_formulaWidth(piece.m_formulaWidth)
+        , m_forcedCornerCuts(piece.m_forcedCornerCuts)
     {}
 
     ~VPieceData();
@@ -112,6 +114,7 @@ public:
     VPatternLabelData       m_piPatternInfo; //! @brief Pattern info coordinates
     VGrainlineData          m_glGrainline;   //! @brief m_glGrainline grainline geometry object
     QString                 m_formulaWidth;
+    QVector<int>            m_forcedCornerCuts; //! @brief seam allowance corners cut in every size; not saved
 
 private:
     VPieceData              &operator=(const VPieceData &) Q_DECL_EQ_DELETE;

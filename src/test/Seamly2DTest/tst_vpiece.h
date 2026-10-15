@@ -96,6 +96,8 @@ private slots:
     void BuiltInSeamLineUsesWiderNodeWidth_data() const;
     void BuiltInSeamLineUsesWiderNodeWidth() const;
     void BuiltInSeamLineFollowsCurve() const;
+    void CurveEndInNodePixelEndsAtNode() const;
+    void ForcedCornerCutCutsShortMiter() const;
 
 private:
     Q_DISABLE_COPY(TST_VPiece)

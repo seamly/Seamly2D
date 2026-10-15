@@ -1230,3 +1230,98 @@ void TST_VPiece::BuiltInSeamLineFollowsCurve() const
                  qPrintable(QStringLiteral("%1, %2 is %3 from the cut line").arg(p.x()).arg(p.y()).arg(distance)));
     }
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief CurveEndInNodePixelEndsAtNode checks that a curve whose end lies past the next node, in the same pixel,
+ * ends at that node, so neither the seam line nor the cut line turns back.
+ */
+void TST_VPiece::CurveEndInNodePixelEndsAtNode() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    VPointF *start = new VPointF(0, 0, "A1", 0, 0);
+    data->UpdateGObject(1, start);
+    // The curve end lies 0.85 px past the corner node A3; both round to the pixel (200, 0).
+    VPointF *curveEnd = new VPointF(200.45, 0, "A2", 0, 0);
+    data->UpdateGObject(2, curveEnd);
+    data->UpdateGObject(3, new VSpline(*start, QPointF(70, 0), QPointF(140, 0), *curveEnd));
+    data->UpdateGObject(4, new VPointF(199.6, 0, "A3", 0, 0));
+    data->UpdateGObject(5, new VPointF(199.6, 100, "A4", 0, 0));
+    data->UpdateGObject(6, new VPointF(0, 100, "A5", 0, 0));
+
+    VPiece piece;
+    piece.SetSeamAllowance(true);
+    piece.SetSAWidth(10);
+    piece.GetPath().Append(VPieceNode(1, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(3, Tool::NodeSpline));
+    piece.GetPath().Append(VPieceNode(4, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(5, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(6, Tool::NodePoint));
+
+    // Largest direction change between the edges of a closed polyline, in degrees.
+    const auto largestTurn = [](const QVector<QPointF> &points)
+    {
+        qreal largest = 0;
+        const int n = points.size();
+        for (int i = 0; i < n; ++i)
+        {
+            const QLineF in(points.at((i + n - 1) % n), points.at(i));
+            const QLineF out(points.at(i), points.at((i + 1) % n));
+            if (in.length() > 0 && out.length() > 0)
+            {
+                const qreal turn = in.angleTo(out);
+                largest = qMax(largest, turn > 180 ? 360 - turn : turn);
+            }
+        }
+        return largest;
+    };
+
+    const QVector<QPointF> seamLine = piece.mainPathPoints(data.data());
+    QVERIFY2(seamLine.contains(QPointF(199.6, 0)), "the seam line has the corner node");
+    QVERIFY2(!seamLine.contains(QPointF(200.45, 0)), "the seam line does not reach the curve end");
+    QVERIFY2(largestTurn(seamLine) < 170,
+             qPrintable(QStringLiteral("the seam line turns %1 degrees").arg(largestTurn(seamLine))));
+
+    const QVector<QPointF> cutLine = piece.seamAllowancePoints(data.data());
+    QVERIFY2(largestTurn(cutLine) < 170,
+             qPrintable(QStringLiteral("the cut line turns %1 degrees").arg(largestTurn(cutLine))));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief ForcedCornerCutCutsShortMiter checks that a forced corner cut cuts a ByLength corner that is kept by
+ * default, and that seamAllowancePoints() reports the corners it cut.
+ */
+void TST_VPiece::ForcedCornerCutCutsShortMiter() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    // Equilateral triangle, clockwise on screen. Every corner turns 120 degrees, so its miter is twice the width:
+    // longer than the width, shorter than the default cut length.
+    data->UpdateGObject(1, new VPointF(0, 0, "A1", 0, 0));
+    data->UpdateGObject(2, new VPointF(400, 0, "A2", 0, 0));
+    data->UpdateGObject(3, new VPointF(200, 346.41, "A3", 0, 0));
+
+    VPiece piece;
+    piece.SetSeamAllowance(true);
+    piece.SetSAWidth(10);
+    piece.GetPath().Append(VPieceNode(1, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(2, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(3, Tool::NodePoint));
+
+    SeamAllowanceCorners corners;
+    const QVector<QPointF> kept = piece.seamAllowancePoints(data.data(), nullptr, &corners);
+    QCOMPARE(corners.count, 3);
+    QVERIFY2(corners.cut.isEmpty(), "no corner is cut by default");
+
+    piece.setForcedCornerCuts({1});
+    const QVector<QPointF> cut = piece.seamAllowancePoints(data.data(), nullptr, &corners);
+    QCOMPARE(corners.count, 3);
+    QCOMPARE(corners.cut, QVector<int>{1});
+    QCOMPARE(cut.size(), kept.size() + 1);
+}

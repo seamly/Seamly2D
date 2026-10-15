@@ -608,11 +608,14 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
     layoutPiece.setMainPathPoints(piece.mainPathPoints(pattern), piece.isHideSeamLine(),
                                   piece.mainPathNodeVertices(pattern));
     QVector<QPointF> seamAllowanceNodes;
-    const QVector<QPointF> seamAllowance = piece.seamAllowancePoints(pattern, &seamAllowanceNodes);
+    SeamAllowanceCorners seamAllowanceCorners;
+    const QVector<QPointF> seamAllowance = piece.seamAllowancePoints(pattern, &seamAllowanceNodes,
+                                                                     &seamAllowanceCorners);
     layoutPiece.setSeamAllowancePoints(seamAllowance,
                                        piece.hasSeamAllowance(),
                                        piece.hasSeamAllowanceBuiltIn(),
                                        seamAllowanceNodes);
+    layoutPiece.setSeamAllowanceCorners(seamAllowanceCorners);
     QVector<QPointF> builtInSeamLineNodes;
     const QVector<QPointF> builtInSeamLine = piece.builtInSeamLinePoints(pattern, &builtInSeamLineNodes);
     layoutPiece.setBuiltInSeamLinePoints(builtInSeamLine, builtInSeamLineNodes);
@@ -791,6 +794,21 @@ void VLayoutPiece::setSeamAllowancePoints(const QVector<QPointF> &points, bool s
             SetSeamAllowance(false);
         }
     }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief seamAllowanceCorners returns the seam allowance corners and the ones a ByLength angle cut short.
+ */
+SeamAllowanceCorners VLayoutPiece::seamAllowanceCorners() const
+{
+    return d->seamAllowanceCorners;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void VLayoutPiece::setSeamAllowanceCorners(const SeamAllowanceCorners &corners)
+{
+    d->seamAllowanceCorners = corners;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

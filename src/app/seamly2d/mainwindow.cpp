@@ -822,8 +822,8 @@ QHash<quint32, VPiece> MainWindow::currentLayoutPieces() const
  *
  * Individual pattern: clears sizePieceLists and returns. Multisize pattern: every
  * size in the size list, at the base height. Every size of a piece gets the same
- * node turn points. The size and height in use before the call are restored, also
- * when an exception leaves the function.
+ * cut seam allowance corners and the same node turn points. The size and height in
+ * use before the call are restored, also when an exception leaves the function.
  *
  * @throws VException when a size cannot be calculated.
  */
@@ -854,6 +854,21 @@ void MainWindow::prepareMultisizePieceLists()
                 throw VException(tr("Couldn't update measurements for size %1.").arg(size));
             }
             sizePieceLists.append(prepareSizePieceList(currentLayoutPieces(), size));
+        }
+
+        // A corner cut short in one size is cut in every size; only those sizes are built again.
+        const QHash<quint32, QVector<int>> cornerCuts = unevenCornerCuts();
+        for (SizePieceList &sizeList : sizePieceLists)
+        {
+            if (!needsCornerCuts(sizeList, cornerCuts))
+            {
+                continue;
+            }
+            if (!recalculateAtSize(sizeList.size.toInt(), baseHeight))
+            {
+                throw VException(tr("Couldn't update measurements for size %1.").arg(sizeList.size));
+            }
+            sizeList = prepareSizePieceList(currentLayoutPieces(), sizeList.size, cornerCuts);
         }
         unifySizeTurnPoints();
     }
