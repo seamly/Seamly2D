@@ -110,11 +110,13 @@ Prior results (jacket2, sizes 220–720): Nested graded 4 of 8 pieces; Marker pl
 - [ ] Layout.27.3 Make turn points consistent across all sizes of each piece (cutline, seamline, internal paths). Seamly2D `VAbstractPiece::turnPointIndices` currently changes at near-threshold corners. After `prepareMultisizePieceLists`, share turn points across sizes using node vertex indices in `VLayoutPiece` / `VLayoutPiecePath`; skip paths whose node counts differ.
   - [x] Layout.27.3.1 Code: `unifyTurnPoints` (`63ab2447a3`).
   - [ ] Layout.27.3.2 Run the Qt suites with `local_build_msi.ps1`.
-  - [ ] Layout.27.3.3 Next MSI: export jacket2 Base Size 500 to DXF-ASTM. All 8 pieces should grade, with no "other turn points" warning.
-  - Note: `jacket2_40-146_202610121819.svg` has inconsistent `data-turn-points` counts for Detail (3) and (6); Detail (7) and (8) have four per line in every size. See Layout.27.12.
+  - [ ] Layout.27.3.3 Next MSI: export jacket2 Base Size 500 to DXF-ASTM. Expect 6 of 8 graded; Detail (3) and (6) warn until Layout.27.13.
+  - Note: the MSI 26.10.1416 handoff has the same `data-turn-points` as the old fixture. Detail (7) and (8) are consistent; Detail (3) and (6) differ in shape (Layout.27.13).
 - [x] Layout.27.4 Give `grade_anchors` a distinct error when a key point is missing from the dense line. `GradeError::KeyPointOffLine`.
 - [x] Layout.27.5 Name the first size whose turn points differ from the sample size. jacket2 fixture: Detail (3) size 660, Detail (6) size 220, both on the cut line.
 - [ ] Layout.27.7 Add jacket2 handoff fixture to `crates/cxxqt_bridge/test_data/`; end-to-end test should grade every piece and write `.rul`.
+  - [x] Layout.27.7.1 `jacket2_40-146_handoff.svg` (MSI 26.10.1416) replaces `jacket2_40-146_202610121819.svg`; `jacket2_base_size_export_names_and_grades_each_piece` grades 6 and writes `.rul`.
+  - [ ] Layout.27.7.2 Expect 8 graded after Layout.27.13.
 - [x] Layout.27.8 If nothing grades, show "No piece graded: no .rul file written". `astm_grading::grade_drawing` writes `.rul` only when at least one piece grades.
 - [x] Layout.27.11 Fix near-duplicate written vertices. Example: Подборт layer 87 has `(333.01, 626.21)` followed by `(333.01, 626.22)`. Increase `SNAP_VERTEX_MM` from 0.01 to 0.02, or compare rounded coordinates. Test: no consecutive written vertices 0.01 mm apart or closer. Done: `DUPLICATE_TOLERANCE_MM` and `SNAP_VERTEX_MM` = 0.025; jacket2 test found 6 before the fix.
 - [ ] Layout.27.12 Make line-end turn points consistent across sizes. Detail (7) differs from size 660; Detail (8) differs at 520–640, 680 and 700. `astm_contour::straight_run_ends` flips at its 10-mm / 2× break thresholds (e.g., 9.97 mm at size 640 vs 10.2 mm at 660). Decision (2026-10-13): Option 1.
@@ -122,8 +124,11 @@ Prior results (jacket2, sizes 220–720): Nested graded 4 of 8 pieces; Marker pl
   - Option 2: SeamlyLayout shares line-end flags across sizes, using new node-index attributes from Seamly2D.
   - [x] Layout.27.12.1 Seamly2D: `turnPointIndices` marks line ends; `unifyTurnPoints` shares them (`5bcb1f3cf1`).
   - [x] Layout.27.12.2 SeamlyLayout: no line ends added to tagged input (`5bcb1f3cf1`).
-  - [ ] Layout.27.12.3 Refresh fixtures from the next MSI handoff: `male_shirt_pieces.svg` (expect 16 FrontPanel turn points, not 14); jacket2 (expect all 8 pieces graded).
+  - [x] Layout.27.12.3 Refresh fixtures from the next MSI handoff: `male_shirt_pieces.svg` (expect 16 FrontPanel turn points, not 14); jacket2 (expect all 8 pieces graded). Done with MSI 26.10.1416: FrontPanel 16. jacket2: 6 of 8 (Layout.27.13).
   - [ ] Layout.27.12.4 Build and user check: Layout.27.3.2, Layout.27.3.3.
+- [ ] Layout.27.13 jacket2 Detail (3) and (6) lines change shape between sizes, so they cannot grade. Found in the MSI 26.10.1416 handoff. **Decision needed.**
+  - Detail (3), sizes 660–700: the seam line and cut line reverse 0.2 mm past a corner (178.7° turn, then a 0.2 mm segment). The corner gets two turn points; other sizes have one.
+  - Detail (6), sizes 220–340: the cut line's last seam allowance corner is two vertices (67° each, 9.3 mm apart). From size 360 it is one vertex (131°).
 
 ## [ ] Task Layout.28 — Verify built-in seam line
 

@@ -1380,54 +1380,19 @@ mod tests {
         assert_eq!(warnings.last().map(String::as_str), Some(crate::exports::NO_PIECE_GRADED_WARNING), "{warnings:?}");
     } // base_size_export_without_graded_piece_says_no_rule_file
 
-    // @brief Real multisize pieces: jacket2_40-146.sm2d with gost_man_ru.smms, 8 pieces
-    // in 26 sizes (220-720), base size 500. Saved from SeamlyLayout, so the piece-sets
-    // sit at the root and the pattern group with the size list is gone; `jacket2_handoff`
-    // puts it back. The pieces carry the names of the installed sample: two Cyrillic
-    // names and six pieces named "Detail".
-    const JACKET2_PIECES_SVG: &str = include_str!("../test_data/jacket2_40-146_202610121819.svg");
+    // @brief Real multisize handoff: jacket2_40-146.sm2d with gost_man_ru.smms, 8 pieces
+    // in 26 sizes (220-720), base size 500, captured with SEAMLYLAYOUT_SAVE_HANDOFF
+    // from MSI 26.10.1416. The pieces carry the names of the installed sample: two
+    // Cyrillic names and six pieces named "Detail".
+    const JACKET2_HANDOFF_SVG: &str = include_str!("../test_data/jacket2_40-146_handoff.svg");
     const JACKET2_BASE_SIZE: &str = "500";
 
-    // @brief The jacket2 pieces as Seamly2D hands them off: one multisize pattern group
-    // around the piece-sets. Sizes come from the pieces' `data-size`, in ascending order.
+    // @brief The jacket2 handoff and its sizes, from the pattern group's `data-sizes`.
     fn jacket2_handoff() -> (Document, Vec<String>) {
-        let mut doc = Document::parse(JACKET2_PIECES_SVG).expect("jacket2 fixture should parse");
-        // Every size the pieces carry, ascending.
-        let mut sizes: Vec<u32> = Vec::new();
-        collect_sizes_for_test(&doc.root, &mut sizes);
-        sizes.sort_unstable();
-        sizes.dedup();
-        let sizes: Vec<String> = sizes.iter().map(u32::to_string).collect();
-
-        // Wrap the root's children in the pattern group Seamly2D writes.
-        let mut pattern = xmltree::Element::new("g");
-        for (name, value) in [
-            ("id", "pattern-1"),
-            ("data-type", "pattern"),
-            ("data-type-number", "1"),
-            ("data-name", "jacket2_40-146"),
-            ("data-measurements", "multisize"),
-        ] {
-            pattern.attributes.insert(name.to_string(), value.to_string());
-        } // for each pattern attribute
-        pattern.attributes.insert("data-sizes".to_string(), sizes.join(","));
-        pattern.attributes.insert("data-base-size".to_string(), JACKET2_BASE_SIZE.to_string());
-        pattern.children = std::mem::take(&mut doc.root.children);
-        doc.root.children.push(xmltree::XMLNode::Element(pattern));
+        let doc = Document::parse(JACKET2_HANDOFF_SVG).expect("jacket2 handoff should parse");
+        let sizes = crate::piece_extractor::read_measurements_info(&doc).sizes;
         (doc, sizes)
     } // fn jacket2_handoff
-
-    // @brief Collect the `data-size` of every piece below `element`.
-    fn collect_sizes_for_test(element: &xmltree::Element, sizes: &mut Vec<u32>) {
-        if let Some(size) = element.attributes.get("data-size").and_then(|s| s.parse().ok()) {
-            sizes.push(size);
-        } // if sized
-        for child in &element.children {
-            if let xmltree::XMLNode::Element(e) = child {
-                collect_sizes_for_test(e, sizes);
-            } // if element
-        } // for child
-    } // fn collect_sizes_for_test
 
     // @brief Fabric roll settings for jacket2, in inches.
     fn jacket2_settings_json(width_in: f64, length_in: f64) -> String {
@@ -1720,9 +1685,11 @@ mod tests {
         assert!(sizes.len() == 8 && sizes.iter().all(|s| *s == JACKET2_BASE_SIZE), "{sizes:?}");
         assert!(lines.contains(&"Sample Size:500"), "sample size");
 
-        // This handoff tags Detail (3) and (6) with different turn points in different
-        // sizes, so they stay ungraded. Warnings name the piece as the user wrote it, and
-        // the first size whose turn points differ from the sample size.
+        // Detail (3) and (6) stay ungraded: their lines differ in shape between sizes.
+        // Detail (3), sizes 660-700: the seam line reverses 0.2 mm past a corner, so the
+        // corner has two turn points. Detail (6), sizes 220-340: the cut line's last seam
+        // allowance corner is two vertices; from 360 it is one. Warnings name the piece as
+        // the user wrote it, and the first size whose turn points differ from the sample size.
         let expected: Vec<String> = [(3, 660), (6, 220)]
             .iter()
             .map(|(n, size)| format!("Detail ({n}): not graded, size {size} has other turn points than size 500 on the cut line."))
