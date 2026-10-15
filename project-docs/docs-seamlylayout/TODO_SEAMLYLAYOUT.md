@@ -22,7 +22,7 @@ See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
 
 - [ ] Layout.61 Verify grade IDs (`# n`), size blocks (`Size Name:`), layer 5, and `.rul` output.
   - [ ] Layout.61.7 Validate the multisize DXF-ASTM export with aw.fyi (DXF.8.4).
-    - [ ] Layout.61.7.2 On MSI 26.10.1220+, export jacket2 Nested as DXF-ASTM R13; check in aw.fyi. Expect no merged Detail pieces, layer 5 mismatches, or duplicate vertices. Detail (3), (6), (7), (8) remain sample-size only until Layout.27.3.
+    - [ ] Layout.61.7.2 Export jacket2 Base Size 500 as DXF-ASTM R13; check in aw.fyi. Expect all 8 pieces graded and no merged Detail pieces, layer 5 mismatches, or duplicate vertices. Nested has no DXF-ASTM export (Layout.67). User check: `AGENT_CHECKLIST.md` §5.
 
     | aw.fyi finding | Report | Cause | Task |
     |---|---|---|---|
@@ -99,7 +99,7 @@ For oversized individual-pattern pieces, ask whether to split them or enlarge th
 
 jacket2 hides piece labels and grainlines (`visible="false"`), so missing-data warnings are expected. Old MSI samples used Cyrillic names (Layout.40). Evidence: `jacket2_marker_screenshot_2.png`, `jacket2_nested_screenshot_1.png`.
 
-- [ ] Layout.26.7 Next MSI: jacket2 Marker; check that the dialog scrolls and buttons remain visible.
+- [ ] Layout.26.7 jacket2 Base Size 500, Export > DXF-ASTM (R13); check that the dialog scrolls and buttons remain visible. Marker has no DXF-ASTM export (Layout.67). User check: `AGENT_CHECKLIST.md` §5.
 
 ## [ ] Task Layout.27 — Fix jacket2 DXF-ASTM grading
 
@@ -159,7 +159,7 @@ Cause (MSI 26.10.1311): PDF used 72 dpi instead of SVG’s 96 dpi, scaling pages
 - Nested `jacket2_40-nested_146_202610131245.pdf`: `4608 × 5003` pt. Expected `3456 × 3752` pt.
 - EPS and PS of the same tabs are correct: `0.75` scale, BoundingBox `3456 36000`.
 
-- [ ] Layout.68.5 Next MSI: print a tiled page at 100% and measure it. Acrobat should report the Marker PDF as 48 × 500 in.
+- [ ] Layout.68.5 Print a tiled page at 100% and measure it. Acrobat should report the Marker PDF as 48 in × the Marker roll length (about 800 in: the roll grows, Layout.25). User check: `AGENT_CHECKLIST.md` §4.
 
 ## [ ] Task Layout.69 — Add PNG/JPG resolution metadata - Priority 1
 
