@@ -81,11 +81,52 @@
 #include <QImageWriter>
 #include <QSpacerItem>
 #include <QGridLayout>
+#include <QLoggingCategory>
 
 #include <algorithm>
 
+Q_LOGGING_CATEGORY(vMainNoGUIWindow, "v.mainnoguiwindow")
+
 namespace
 {
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief sizeRuns lists one value per size and joins consecutive sizes with the same value: "220-520: 9; 540-720: 10".
+ * @param sizes  size names, in size order.
+ * @param values one value per size, parallel to @p sizes.
+ */
+QString sizeRuns(const QStringList &sizes, const QStringList &values)
+{
+    QStringList runs;
+    int first = 0;
+    for (int i = 1; i <= sizes.size(); ++i)
+    {
+        if (i < sizes.size() && values.at(i) == values.at(first))
+        {
+            continue;
+        }
+        const QString range = (i - 1 == first) ? sizes.at(first)
+                                               : sizes.at(first) + QLatin1Char('-') + sizes.at(i - 1);
+        runs.append(range + QStringLiteral(": ") + values.at(first));
+        first = i;
+    }
+    return runs.join(QStringLiteral("; "));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief cornerList joins seam allowance corner numbers: "1, 4".
+ */
+QString cornerList(const QVector<int> &corners)
+{
+    QStringList numbers;
+    for (const int corner : corners)
+    {
+        numbers.append(QString::number(corner));
+    }
+    return numbers.join(QStringLiteral(", "));
+}
+
 bool CreateLayoutPath(const QString &path)
 {
     bool usedNotExistedDir = true;
@@ -947,6 +988,7 @@ MainWindowsNoGUI::SizePieceList MainWindowsNoGUI::prepareSizePieceList(const QHa
  *
  * A ByLength corner is cut when its miter is too long, so a sharp corner can be cut in the small sizes only.
  * Grading needs one corner shape in every size. A piece whose sizes have different corner counts is left out.
+ * Each piece found, and each piece left out, is written to the log.
  *
  * @return per VPiece id, every corner cut in any size; only for pieces whose sizes differ.
  */
@@ -958,8 +1000,12 @@ QHash<quint32, QVector<int>> MainWindowsNoGUI::unevenCornerCuts() const
         return uneven;
     }
 
-    for (const quint32 id : sizePieceLists.first().pieceIds)
+    const SizePieceList &firstSize = sizePieceLists.first();
+    for (int p = 0; p < firstSize.pieceIds.size(); ++p)
     {
+        const quint32 id = firstSize.pieceIds.at(p);
+        const QString name = firstSize.pieces.at(p).GetName();
+
         // The corners of the same piece in every size that has it.
         QVector<SeamAllowanceCorners> sizes;
         for (const SizePieceList &sizeList : sizePieceLists)
@@ -980,13 +1026,23 @@ QHash<quint32, QVector<int>> MainWindowsNoGUI::unevenCornerCuts() const
             sameCuts = sameCuts && corners.cut == sizes.first().cut;
             cuts += corners.cut;
         }
-        if (!sameCount || sameCuts)
+        if (sameCuts)
         {
             continue;
         }
 
         std::sort(cuts.begin(), cuts.end());
         cuts.erase(std::unique(cuts.begin(), cuts.end()), cuts.end());
+        if (!sameCount)
+        {
+            qCInfo(vMainNoGUIWindow, "Piece \"%s\" (id %u): seam allowance corners %s are cut short in some sizes "
+                   "only. The sizes differ in corner count, so the other sizes keep these corners.",
+                   qUtf8Printable(name), id, qUtf8Printable(cornerList(cuts)));
+            continue;
+        }
+
+        qCInfo(vMainNoGUIWindow, "Piece \"%s\" (id %u): seam allowance corners %s are cut short in some sizes "
+               "only. Every size cuts them.", qUtf8Printable(name), id, qUtf8Printable(cornerList(cuts)));
         uneven.insert(id, cuts);
     }
     return uneven;
@@ -1014,7 +1070,8 @@ bool MainWindowsNoGUI::needsCornerCuts(const SizePieceList &sizeList, const QHas
  * @brief unifySizeTurnPoints gives every size of a piece the node turn points of all its sizes.
  *
  * Grading in SeamlyLayout needs the same turn points in every size of a piece. See
- * VLayoutPiece::unifyTurnPoints().
+ * VLayoutPiece::unifyTurnPoints(). A line whose node count differs between sizes keeps the turn points of each
+ * size; the log lists the node counts of each such piece, and the number of such pieces.
  */
 void MainWindowsNoGUI::unifySizeTurnPoints()
 {
@@ -1023,21 +1080,40 @@ void MainWindowsNoGUI::unifySizeTurnPoints()
         return;
     }
 
+    int differing = 0;
     const QVector<quint32> ids = sizePieceLists.first().pieceIds;
     for (const quint32 id : ids)
     {
         // The same piece in every size that has it.
         QVector<VLayoutPiece *> sizes;
+        QStringList sizeNames;
+        QStringList nodeCounts;
         for (SizePieceList &sizeList : sizePieceLists)
         {
             const int i = sizeList.pieceIds.indexOf(id);
             if (i >= 0)
             {
-                sizes.append(&sizeList.pieces[i]);
+                VLayoutPiece &piece = sizeList.pieces[i];
+                sizes.append(&piece);
+                sizeNames.append(sizeList.size);
+
+                const QVector<int> lines = piece.lineNodeCounts();
+                nodeCounts.append(QStringLiteral("%1/%2/%3/%4").arg(lines.at(0)).arg(lines.at(1)).arg(lines.at(2))
+                                  .arg(piece.seamAllowanceCorners().count));
             }
+        }
+
+        if (nodeCounts.count(nodeCounts.first()) != nodeCounts.size())
+        {
+            ++differing;
+            qCInfo(vMainNoGUIWindow, "Piece \"%s\" (id %u): node counts differ between sizes (seam line/cut line/"
+                   "built-in seam line/seam allowance corners): %s", qUtf8Printable(sizes.first()->GetName()), id,
+                   qUtf8Printable(sizeRuns(sizeNames, nodeCounts)));
         }
         VLayoutPiece::unifyTurnPoints(sizes);
     }
+    qCInfo(vMainNoGUIWindow, "Multisize layout: %d sizes; %d of %d pieces differ in node count between sizes.",
+           static_cast<int>(sizePieceLists.size()), differing, static_cast<int>(ids.size()));
 }
 
 //---------------------------------------------------------------------------------------------------------------------

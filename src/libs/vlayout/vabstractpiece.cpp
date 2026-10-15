@@ -333,7 +333,7 @@ bool repeatsFirstVertex(const QVector<QPointF> &points, bool closed)
 /**
  * @brief turnPointIndices finds the turn points of a polyline: the vertices where the tangent breaks.
  *
- * Only node vertices (piece nodes, curve ends, spline path knots) can break the tangent.
+ * Only node vertices (piece nodes, curve ends, spline end nodes) can break the tangent.
  * Curve interior vertices are curve points, except where the polyline turns sharper than a
  * curve interpolation can. A side between two node vertices is a straight line; the tangent
  * of a curve side is extrapolated from its first two chords, so a coarse curve interpolation

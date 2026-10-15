@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-10-15 — Layout.27.13.5 spline interior nodes: merged into local `run-seamlyLayout`, not pushed
+
+- MSI 26.10.1421 capture: still 6 of 8 jacket2 pieces graded. Copy at `C:\Users\susan\seamly2d\layouts\handoff_jacket2_26.10.1421.svg`; fixture not replaced.
+- Cause found for Detail (3): interior node А20 of `SplPath_А_А3` is on the piece's curve from about size 540 (О6 = spline length − 22 mm). It counted as a node, so node counts differed and `unifyNodeTurnPoints` skipped the piece; size 700 then flagged А20 alone.
+- User vocabulary: end node, interior node, control node (memory `spline-node-vocabulary`). User rule: no task names, dates or Claude in commits, code comments or briefs.
+- Fix: `isSplineEndNode` in `vpiecepath.cpp`; `curveNodeVertices` keeps spline end nodes only. Geometry unchanged: `isNode()` only feeds turn points and corner numbers.
+- Logging (`v.mainnoguiwindow`, info level, Seamly2D log file): per-piece node counts that differ between sizes, forced corner cuts, one summary line.
+- Verified: `cl /Zs` on 6 `.cpp` files. Not run: Qt suites (next MSI). Qt suites for the previous change passed on the 26.10.1421 binaries.
+- Rewrote 3 unpushed doc commits to drop task names from their messages (same trees).
+- Next: MSI build, capture jacket2, check the log line (see Layout.27.13.4), then replace the fixture and set `jacket2_base_size_export_names_and_grades_each_piece` to 8 graded, no warnings, 8 layer 5 lines.
+- Risk: the next male_shirt capture can lose turn points that sat on spline interior nodes; recheck `male_shirt_pieces.svg` FrontPanel count before refreshing that fixture.
+
 ### 2026-10-14 (evening) — fixtures refreshed, Layout.27.13 Seamly2D fix: merged into local `run-seamlyLayout`, not pushed
 
 - Handoffs captured from MSI 26.10.1416 with `C:\Users\susan\seamly2d\capture_handoff_*.bat` (double-click; sets `SEAMLYLAYOUT_SAVE_HANDOFF`, opens the pattern).

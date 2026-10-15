@@ -106,6 +106,7 @@ public:
 
     SeamAllowanceCorners      seamAllowanceCorners() const;
     void                      setSeamAllowanceCorners(const SeamAllowanceCorners &corners);
+    QVector<int>              lineNodeCounts() const;
 
     QVector<QPointF>          getBuiltInSeamLinePoints() const;
     void                      setBuiltInSeamLinePoints(const QVector<QPointF> &points,

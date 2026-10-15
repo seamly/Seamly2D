@@ -60,6 +60,8 @@
 
 #include <QPainterPath>
 
+#include <cmath>
+
 namespace
 {
 //---------------------------------------------------------------------------------------------------------------------
@@ -220,6 +222,34 @@ QVector<QPointF> curveSegmentPoints(const QSharedPointer<VAbstractCurve> &curve,
         points.last() = end;
     }
     return points;
+}
+
+// Control node angles closer than this to opposite give a spline point the same tangent on both sides.
+constexpr qreal kSameTangentToleranceDegrees = 0.01;
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief isSplineEndNode tells whether a curve of a spline path ends at one of its points.
+ * @details The first and last points are end nodes, and so is every point where the tangent breaks. A point with
+ *          the same tangent on both sides is an interior node: a curve point that cannot be a turn point. A control
+ *          node of length 0 leaves the tangent on its side undefined, so its point is an end node.
+ * @param index position of @p point in VAbstractCubicBezierPath::GetSplinePath().
+ * @param count number of points in the spline path.
+ */
+bool isSplineEndNode(const VSplinePoint &point, int index, int count)
+{
+    if (index == 0 || index == count - 1)
+    {
+        return true;
+    }
+    if (qFuzzyIsNull(point.Length1()) || qFuzzyIsNull(point.Length2()))
+    {
+        return true;
+    }
+
+    // Angle1 points to the control node before the point, Angle2 to the one after it.
+    const qreal between = std::fmod(qAbs(point.Angle1() - point.Angle2()), 360.0);
+    return qAbs(between - 180.0) > kSameTangentToleranceDegrees;
 }
 }
 
@@ -496,7 +526,7 @@ QVector<QPointF> VPiecePath::PathPoints(const VContainer *data, const QVector<QP
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief pathNodeVertices returns the PathPoints() vertices that can break the tangent.
- * @details Node vertices are point nodes, curve segment ends, and spline path knots. All
+ * @details Node vertices are point nodes, curve segment ends, and spline end nodes. All
  *          other PathPoints() vertices are curve interior points. See VAbstractPiece::turnPointIndices().
  */
 QVector<QPointF> VPiecePath::pathNodeVertices(const VContainer *data) const
@@ -537,7 +567,8 @@ QVector<QPointF> VPiecePath::pathNodeVertices(const VContainer *data) const
  * @brief curveNodeVertices returns the vertices of one curve segment that can break the tangent.
  * @param curve   curve the segment was cut from.
  * @param segment interpolated segment points, from curveSegmentPoints().
- * @return the segment ends, and the spline path knots that lie on the segment.
+ * @return the segment ends, and the spline end nodes that lie on the segment. A spline interior node is a curve
+ *         point, so the node count does not change when a pattern size moves one onto the segment.
  */
 QVector<QPointF> VPiecePath::curveNodeVertices(const QSharedPointer<VAbstractCurve> &curve,
                                                const QVector<QPointF> &segment)
@@ -550,16 +581,20 @@ QVector<QPointF> VPiecePath::curveNodeVertices(const QSharedPointer<VAbstractCur
     vertices.append(segment.first());
     vertices.append(segment.last());
 
-    // A spline path knot can be a cusp, so it is a node vertex too.
+    // Two curves of a spline path meet at an end node, so it is a node vertex too.
     const QSharedPointer<VAbstractCubicBezierPath> path = curve.dynamicCast<VAbstractCubicBezierPath>();
     if (path.isNull())
     {
         return vertices;
     }
-    const QVector<VSplinePoint> knots = path->GetSplinePath();
-    for (const VSplinePoint &knot : knots)
+    const QVector<VSplinePoint> splinePoints = path->GetSplinePath();
+    for (int k = 0; k < splinePoints.size(); ++k)
     {
-        const QPointF p = static_cast<QPointF>(knot.P());
+        if (!isSplineEndNode(splinePoints.at(k), k, static_cast<int>(splinePoints.size())))
+        {
+            continue;
+        }
+        const QPointF p = static_cast<QPointF>(splinePoints.at(k).P());
         for (const QPointF &s : segment)
         {
             if (QLineF(p, s).length() < accuracyPointOnLine)
