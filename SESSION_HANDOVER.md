@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-10-14 (evening) — fixtures refreshed, Layout.27.13 Seamly2D fix: merged into local `run-seamlyLayout`, not pushed
+
+- Handoffs captured from MSI 26.10.1416 with `C:\Users\susan\seamly2d\capture_handoff_*.bat` (double-click; sets `SEAMLYLAYOUT_SAVE_HANDOFF`, opens the pattern).
+- Fixtures: `cxxqt_bridge/test_data/jacket2_40-146_handoff.svg` replaces the old export; `male_shirt_pieces.svg` refreshed (FrontPanel 16 turn points). jacket2 still 6 of 8 graded: its turn points equal the old fixture.
+- Layout.27.13 (user decision: fix in Seamly2D): Detail (3) curve end overshoots its node by less than 1 px (`VAbstractCurve::FromBegin` pixel shortcut) → `curveSegmentPoints` in `vpiecepath.cpp`. Detail (6) `AngleByLength` cuts the corner in sizes 220–340 only → forced cut in every size (`unevenCornerCuts`, second pass over the sizes that differ).
+- Verified: `cargo test --workspace` 511 passed; `cl /Zs` on the 7 changed `.cpp` files (ui headers regenerated into the scratchpad). Not run: Qt suites (ask before `local_build_msi.ps1`).
+- Next: MSI build; Layout.27.13.3, 27.13.4 (capture jacket2 again, expect 8 graded), 27.7.2.
+
 ### 2026-10-14 — Layout.69, 67.9, 27.2, 27.8, 70, 27.11, 27.4, 27.5: merged into local `run-seamlyLayout`, not pushed
 
 - Merged an earlier session's branch `task-raster-dpi` (Layout.69 PNG/JPG 96 dpi; TODO shortened, Layout.16 to `TODO_FUTURE.md`). The user's uncommitted TODO edit was a subset of it; backup in the session scratchpad.
