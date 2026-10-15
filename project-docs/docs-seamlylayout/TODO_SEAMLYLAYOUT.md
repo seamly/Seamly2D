@@ -132,8 +132,12 @@ Prior results (jacket2, sizes 220–720): Nested graded 4 of 8 pieces; Marker pl
   - The extra vertices also change the node count, so `unifyTurnPoints` skipped these lines.
   - [x] Layout.27.13.1 Detail (3): `vpiecepath.cpp` `curveSegmentPoints` ends a curve at its node point when both round to the same pixel. Test `TST_VPiece::CurveEndInNodePixelEndsAtNode`.
   - [x] Layout.27.13.2 Detail (6): the multisize handoff cuts a ByLength corner in every size when one size cuts it (`MainWindowsNoGUI::unevenCornerCuts`, `VPiece::setForcedCornerCuts`). Only those sizes are built again. Test `TST_VPiece::ForcedCornerCutCutsShortMiter`.
-  - [ ] Layout.27.13.3 Run the Qt suites with `local_build_msi.ps1`. Done: `cl /Zs` on the 7 changed `.cpp` files.
+  - [x] Layout.27.13.3 Run the Qt suites. Done: `Seamly2DTests` passed, with both new tests; `ParserTest` and `TranslationsTest` passed; `CollectionTest` exited 1 on the first run and passed 44 of 44 on a rerun. These were the binaries that the MSI 26.10.1421 build compiled.
   - [ ] Layout.27.13.4 Next MSI: run `capture_handoff_jacket2.bat` again; replace `jacket2_40-146_handoff.svg`; expect 8 graded (Layout.27.7.2).
+    - MSI 26.10.1421 result: still 6 of 8 graded. The fixture was not replaced.
+    - Detail (3): sizes 660 and 680 are fixed. Size 700 has one extra turn point, 3.7 mm before the corner at node 247.
+    - Detail (6): no change. Sizes 220–340 still cut the corner and 360+ do not, so the forced cut did not apply.
+    - Suspected cause (not verified): the corner and turn point lists count spline path knots. Both pieces end a curve at a `cutSplinePath` point (217: `SplPath_А_А3-22`; 209: 50 mm along path 80). A knot can be on that curve segment in some sizes only. The node count then differs between sizes, so `unevenCornerCuts` and `unifyNodeTurnPoints` skip the piece.
 
 ## [ ] Task Layout.28 — Verify built-in seam line
 
