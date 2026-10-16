@@ -11,7 +11,7 @@
 //   * Individual pattern: `Piece_<n>[_<name>][_<letter>]`.
 //   * Multisize pattern:  `Size_<size>_Piece_<n>[_<name>][_<letter>]`.
 //
-// Each whitespace character in the name becomes `_`: "Detail 1" gives `Piece_3_Detail_1`.
+// Each run of whitespace in the name becomes one `_`: "Detail  1" gives `Piece_3_Detail_1`.
 //
 // `<n>` is the 1-based position of the piece among the pieces of its size, in
 // document order, so one piece has the same number in every size. The number
@@ -114,11 +114,9 @@ fn rename_piece(piece: &mut Element, state: &mut NamingState) {
         return;
     } // if named by an earlier import
 
-    // Each whitespace character becomes `_`.
-    let base = piece_base_name(number, attr(piece, "data-name").as_deref(), attr(piece, "data-letter").as_deref())
-        .replace(char::is_whitespace, "_");
+    let base = underscore_spaces(&piece_base_name(number, attr(piece, "data-name").as_deref(), attr(piece, "data-letter").as_deref()));
     let name = match &size {
-        Some(size) => format!("Size_{}_{base}", size.replace(char::is_whitespace, "_")),
+        Some(size) => format!("Size_{}_{base}", underscore_spaces(size)),
         None => base.clone(),
     }; // match size
 
@@ -146,6 +144,11 @@ fn piece_base_name(number: usize, name: Option<&str>, letter: Option<&str>) -> S
         (Some(name), Some(letter)) => format!("Piece_{number}_{name}_{letter}"),
     } // match name and letter
 } // fn piece_base_name
+
+// @brief Replace each run of whitespace with one `_`.
+fn underscore_spaces(text: &str) -> String {
+    text.split_whitespace().collect::<Vec<_>>().join("_")
+} // fn underscore_spaces
 
 // @brief Trimmed attribute value; None when absent or blank.
 fn attr(elem: &Element, name: &str) -> Option<String> {
@@ -228,13 +231,13 @@ mod tests {
 </svg>"#;
 
     // @brief Individual pattern: each combination of name and letter gives its own form,
-    // and each space in a name becomes `_`.
+    // and each run of spaces in a name becomes one `_`.
     #[test]
     fn individual_pieces_get_numbered_names() {
         let mut doc = svg_dom::Document::parse(INDIVIDUAL_SVG).expect("parse ok");
         let naming = assign_unique_piece_names(&mut doc);
         assert_eq!(naming, PieceNaming { renamed: 4, warning: None });
-        assert_eq!(names(&doc), vec!["Piece_1", "Piece_2_B", "Piece_3_Front", "Piece_4_Back__Yoke_D"]);
+        assert_eq!(names(&doc), vec!["Piece_1", "Piece_2_B", "Piece_3_Front", "Piece_4_Back_Yoke_D"]);
     } // individual_pieces_get_numbered_names
 
     // @brief A component's `data-parent` follows its piece to the new name.

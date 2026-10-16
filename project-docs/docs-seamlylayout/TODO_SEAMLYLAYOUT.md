@@ -107,7 +107,7 @@ User request (2026-10-16): give every piece a unique name before a layout, in ev
 
 Finding: the names do not cause the jacket2 Missing Piece Data dialog (`test-seamly-layout/layouts/jacket2/20261013/jacket2_40-146_R12_alltabs_screenshot_20261016_1.png`). jacket2 hides piece labels and grainlines (`visible="false"`), so the handoff has no `piece_label` or `grainline` groups (Layout.26). The dialog stays; it now lists `Size_500_Piece_3_Detail` instead of `Detail (3)`.
 
-- [x] Layout.73.1 `piece_naming::assign_unique_piece_names`, called by `finish_import`. Individual: `Piece_<n>[_<name>][_<letter>]`. Multisize: `Size_<size>_Piece_<n>[_<name>][_<letter>]`. Spaces become `_` (user decision). Piece-set: name without the size. Marker `data-name-assigned="true"`, kept on a later import.
+- [x] Layout.73.1 `piece_naming::assign_unique_piece_names`, called by `finish_import`. Individual: `Piece_<n>[_<name>][_<letter>]`. Multisize: `Size_<size>_Piece_<n>[_<name>][_<letter>]`. A run of spaces becomes one `_` (user decision). Piece-set: name without the size. Marker `data-name-assigned="true"`, kept on a later import.
 - [x] Layout.73.2 Import warning when the sizes have different piece counts.
 - [x] Layout.73.3 No "(size N)" label suffix on an assigned name.
 - [x] Layout.73.4 Tests: 6 `piece_naming` tests, `piece_extractor` `assigned_name_label_has_no_size_suffix`, `layout_utils` `jacket2_assigned_names_reach_the_base_size_export`.

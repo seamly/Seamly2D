@@ -166,7 +166,7 @@ SeamlyLayout gives every tagged piece a unique `data-name` at import, before any
 
 - `<n>`: 1-based position of the piece among the pieces of its size, in document order. One piece has the same number in every size.
 - `<name>`, `<letter>`: the Seamly2D `data-name` and `data-letter`, trimmed. Each is left out when absent.
-- Each whitespace character in the name becomes `_`: `Detail 1` gives `Detail_1`.
+- Each run of whitespace in the name becomes one `_`: `Detail 1` and `Detail  1` give `Detail_1`.
 - Examples: `Piece_1`, `Piece_2_B`, `Piece_3_Front`, `Piece_4_Back_D`, `Size_220_Piece_3_Detail_1_C`.
 - A multisize piece-set gets the name of its pieces without the size: `Piece_3_Detail_1_C`.
 - Component `data-parent` takes the new name.
