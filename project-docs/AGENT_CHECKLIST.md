@@ -18,6 +18,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.72.8 | 12 | Oversized pieces: split or enlarge |
 | Layout.70.5 | 12 | Left-out pieces warning |
 | Layout.28.7 | 13 | Built-in seam line |
+| Layout.73.5 | 1, 5 | Unique piece names |
 
 ## 0. Install
 
@@ -38,7 +39,7 @@ Save exports in `test-seamly-layout\layouts\jacket2\`.
 - [ ] Settings: Paper, Roll, width 48 in. Submit. Create Layout.
 - [ ] Tabs: Marker, Nested, Base Size 500, Size 220 … Size 720.
 - [ ] Nested tab: each piece once, its sizes stacked. Grainlines vertical. Sizes centered on the largest size.
-- [ ] Marker tab: every size of every piece placed alone. Labels say "(size N)".
+- [ ] Marker tab: every size of every piece placed alone. Labels start with the size, e.g. `220_Piece_3_Detail`. No "(size N)".
 
 ## 2. Media grows in length
 
@@ -71,12 +72,12 @@ Export all tabs unchecked.
 
 - [ ] Base Size 500 tab, Export > DXF-ASTM (R13).
 - [ ] Save dialog offers `jacket2_40-146_R13_BaseSize500_<stamp>.dxf`.
-- [ ] "DXF-ASTM: Missing Piece Data" dialog appears. Expected: jacket2 hides labels and grainlines.
+- [ ] "DXF-ASTM: Missing Piece Data" dialog appears. Expected: jacket2 hides labels and grainlines. "no piece label" means the hidden label block, not the name.
   - [ ] One line per piece, not one per size.
-  - [ ] Same-name pieces numbered: "Detail (3)".
+  - [ ] Each piece named `500_Piece_<n>_<name>[_<letter>]`, n = 1 to 8. All names differ. No "Detail (3)".
   - [ ] Cyrillic names show: Подборт, Комір.
   - [ ] The list scrolls. Buttons stay visible.
-- [ ] No warning "Detail (n): not graded, size N has other turn points than size 500".
+- [ ] No warning "500_Piece_<n>_<name>: not graded, size N has other turn points than size 500".
 - [ ] The folder holds a `.dxf` and a `.rul` with the same name.
 - [ ] "Export Complete" names the `.dxf` and the `.rul`.
 - [ ] Open the `.dxf` in VS Code:

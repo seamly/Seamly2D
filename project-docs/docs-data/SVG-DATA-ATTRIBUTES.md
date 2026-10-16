@@ -95,7 +95,7 @@ first child of each piece group when it places the piece into a layout sheet
 | `data-type` | every tagged `<g>` | One of `pattern`, `piece-set`, `piece`, `seamline`, `cutline`, `internal_path`, `cut_path`, `grainline`, `notch`, `piece_label`, `pattern_label`. More types may be added later; consumers must ignore unknown types gracefully. |
 | `data-type-number` | every tagged `<g>` | Per-scope 1-based counter for that `data-type`. The pattern is always `1`; pieces count up across the file; component counters reset per piece and per type. |
 | `data-parent` | `piece-set`, `piece` and component groups | For a piece: the pattern group's `id` (`pattern-1`), or its piece-set's `id` in a multisize handoff. For a component: the owning piece's `data-name` (e.g. `Front Bodice`), or the piece's numeric fallback `id` (e.g. `piece-3`) when the piece has no name. The pattern group has no `data-parent` (it is the root). True parent/child identity is the DOM nesting. The DXF-ASTM Base Size export reads a piece's value: pieces with the same piece-set id are the sizes of one piece, for its grade rules. |
-| `data-name` | `pattern`, `piece` | Pattern name, or piece name. Omitted when empty. |
+| `data-name` | `pattern`, `piece` | Pattern name, or piece name. Omitted when empty. SeamlyLayout replaces each piece name at import: see **SeamlyLayout piece names**. |
 | `data-letter` | `piece`, `piece-set` | The piece letter, only when one is set on the piece. |
 | `data-quantity` | `piece` | Cut count from the piece label data (Piece Properties > Quantity). Written for every piece. DXF-ASTM `Quantity:` piece text. |
 | `data-on-fold` | `piece` | `true` when the piece label data says the piece is cut on the fold. Omitted otherwise. |
@@ -104,6 +104,7 @@ first child of each piece group when it places the piece into a layout sheet
 | `data-base-size` | `pattern` (multisize) | Base size of the `.smms` file, in pattern units. |
 | `data-size` | `piece` (multisize) | Size of this copy of the piece. Kept on placed pieces in the layout and its exports. DXF-ASTM `Size Name:` piece text. |
 | `data-set-number` | `piece` (multisize, SeamlyLayout only) | `data-type-number` of the piece-set the piece left. SeamlyLayout writes it when the Marker tab or a size tab dissolves the piece-sets, so the piece number survives in the layout and its exports. Not in the Seamly2D handoff. DXF-ASTM uses it to number pieces that share a name: `Detail (3)`. |
+| `data-name-assigned` | `piece`, `piece-set` (SeamlyLayout only) | `true` when SeamlyLayout assigned the `data-name`. A later import keeps that name. Not in the Seamly2D handoff. |
 | `data-split-of` | `piece` (SeamlyLayout only) | `id` of the piece this part was split from. SeamlyLayout writes it when the user chose "Split the pieces" for an individual pattern with a piece wider or longer than the media. Not in the Seamly2D handoff. |
 | `data-split-part` | `piece` (SeamlyLayout only) | 1-based number of this part, in reading order (top row first, left to right). |
 | `data-split-count` | `piece` (SeamlyLayout only) | Number of parts the piece was split into. |
@@ -153,6 +154,25 @@ All ids are unique and XML-valid by construction. **Breaking change vs. pre-cont
 - **`data-notch-type`** — the notch type Seamly2D drew. Producer: `VPiece::createNotchLines()` (type per notch), `VLayoutPiece::createNotchesItem()`. SeamlyLayout keeps it on the notch group through layout and export. DXF-ASTM ignores it: every notch is a layer 4 slit.
 - **`piece_label` / `pattern_label`** — the on-piece label text blocks. One `<text>` element per label line (or one `<path>` per line in text-as-paths mode); per-line bold/italic, alignment, middle-eliding to the label width, mirroring and rotation are preserved in either mode.
 - Counters are per SvgGenerator instance: one instance = one file = one pattern.
+
+## SeamlyLayout piece names
+
+SeamlyLayout gives every tagged piece a unique `data-name` at import, before any layout. Code: `crates/cxxqt_bridge/src/piece_naming.rs`.
+
+| Pattern | Piece `data-name` |
+|---|---|
+| Individual | `Piece_<n>[_<name>][_<letter>]` |
+| Multisize | `<size>_Piece_<n>[_<name>][_<letter>]` |
+
+- `<n>`: 1-based position of the piece among the pieces of its size, in document order. One piece has the same number in every size.
+- `<name>`, `<letter>`: the Seamly2D `data-name` and `data-letter`, trimmed. Each is left out when absent.
+- Examples: `Piece_1`, `Piece_2_B`, `Piece_3_Front`, `Piece_4_Back_D`, `220_Piece_3_Detail_C`.
+- A multisize piece-set gets the name of its pieces without the size: `Piece_3_Detail_C`.
+- Component `data-parent` takes the new name.
+- Each renamed group gets `data-name-assigned="true"`. A group that has it keeps its name, so a re-imported export is not numbered again.
+- Sizes with different piece counts: the import still names the pieces and shows a warning that lists those sizes.
+- The layout, the Adjust overlay, the dialogs and DXF-ASTM `Piece Name:` use the new name. A multisize label adds no "(size N)".
+- The label text drawn on a piece does not change.
 
 ## SeamlyLayout split parts (individual pattern)
 

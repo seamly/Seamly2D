@@ -2,6 +2,16 @@
 
 ## Current status
 
+### 2026-10-16 — Layout.73 unique piece names at import: merged into local `run-seamlyLayout`, not pushed
+
+- User request: unique piece names before a layout. Individual `Piece_<n>[_<name>][_<letter>]`; multisize `<size>_Piece_<n>[_<name>][_<letter>]`.
+- Code: `cxxqt_bridge/src/piece_naming.rs`, called by `finish_import`. Piece-sets get the name without the size. Marker `data-name-assigned="true"`; a later import keeps the name. No "(size N)" suffix on an assigned name. Warning when sizes differ in piece count.
+- Finding: the user read "no piece label" as a name problem. jacket2 hides piece labels and grainlines (`visible="false"`), so the dialog stays. User told.
+- `C:\Users\susan\seamly2d\patterns\jacket2_40-146.sm2d` changed on 2026-10-16 10:49: pieces now "Detail 1"–"Detail 4", "Sleeve 1", "Sleeve 2", letters A–H. The next capture has other names than the fixture.
+- Verified: `cargo test --workspace` 519 passed; `ctest --preset debug` 6 of 6. Not run: MSI (ask first).
+- `AGENT_CHECKLIST.md`: only the Layout.73 lines committed; the user's "PASS" edit stays uncommitted.
+- Next: MSI build, then Layout.73.5 and the next steps of the entries below.
+
 ### 2026-10-16 — Qt suite failure in `TST_VPiece` fixed: merged into local `run-seamlyLayout`, not pushed
 
 - `local_build_msi.ps1` stopped at `nmake check`: `TST_VPiece::SplineNodeVertices(tangent breaks)` failed (53 passed, 1 failed).

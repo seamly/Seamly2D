@@ -19,6 +19,9 @@ pub use layout_tiling::LayoutSettings;
 mod piece_extractor;
 pub use piece_extractor::{extract_piece_rects, hoist_layout_units, hoist_tagged_pieces, PieceRect};
 
+// Gives every tagged piece a unique name at import.
+mod piece_naming;
+
 mod layout_assembler;
 pub use layout_assembler::{create_layout, create_initial_layout_dom, remove_color_blocks, trim_bottom};
 
@@ -1265,6 +1268,11 @@ impl qobject::AppController {
                     measurements.multisize, measurements.sizes, measurements.base_size
                 ));
 
+                // Unique piece names before any layout: the layout, its exports and the
+                // DXF-ASTM grade rules all read them from `input_dom`.
+                let naming = crate::piece_naming::assign_unique_piece_names(&mut doc);
+                log_to_file(&format!("[finish_import] {} piece name(s) assigned", naming.renamed));
+
                 // Add a white background rectangle so the canvas has a visible background.
                 doc.add_background_rect();
 
@@ -1297,6 +1305,12 @@ impl qobject::AppController {
                 } else {
                     log_to_file(&format!("[finish_import] {tagged_pieces} tagged pattern piece(s) found"));
                 } // if tagged_pieces == 0
+
+                // Sizes with different piece counts can give one number to two pieces.
+                if let Some(warning) = naming.warning {
+                    log_to_file(&format!("[finish_import] piece counts differ between sizes: {warning}"));
+                    self.as_mut().import_warning(cxx_qt_lib::QString::from(warning.as_str()));
+                } // if piece counts differ
 
                 true // success
             }

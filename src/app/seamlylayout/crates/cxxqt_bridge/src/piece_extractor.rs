@@ -588,7 +588,7 @@ fn join_transforms(outer: &str, inner: &str) -> String {
 // @param elem Element to test.
 // @return `true` for `data-type="piece"`, `false` otherwise (exact match — the
 //         `piecework` case in the tests must not be treated as a prefix).
-fn is_tagged_piece(elem: &Element) -> bool {
+pub(crate) fn is_tagged_piece(elem: &Element) -> bool {
     matches!(elem.attributes.get("data-type"), Some(value) if value == "piece")
 } // fn is_tagged_piece
 
@@ -673,10 +673,11 @@ fn piece_identity(elem: &Element) -> (String, String, String) {
     let mut name = elem.attributes.get("data-name").cloned().unwrap_or_default();
     let letter = elem.attributes.get("data-letter").cloned().unwrap_or_default();
     // A Marker layout packs every size of a piece alone; the size tells them apart.
+    // An assigned name starts with its size already.
     if let Some(size) = elem.attributes.get("data-size").filter(|s| !s.is_empty()) {
-        if !name.is_empty() {
+        if !name.is_empty() && !crate::piece_naming::is_name_assigned(elem) {
             name = format!("{name} (size {size})");
-        } // if named
+        } // if named by the pattern
     } // if sized
     (id, name, letter)
 } // fn piece_identity
@@ -1705,6 +1706,16 @@ pub(crate) mod tests {
         assert_eq!(pieces[0].label(), "Front (size 34)");
         assert_eq!((pieces[1].rect.w, pieces[1].rect.h), (100, 200));
     } // hoist_tagged_pieces_dissolves_piece_sets
+
+    // @brief An assigned name already starts with its size, so the label adds no "(size N)".
+    #[test]
+    fn assigned_name_label_has_no_size_suffix() {
+        let mut doc = svg_dom::Document::parse(MULTISIZE_HANDOFF_SVG).expect("parse ok");
+        crate::piece_naming::assign_unique_piece_names(&mut doc);
+        hoist_layout_units(&mut doc, false);
+        let labels: Vec<String> = extract_piece_rects(&doc).iter().map(|p| p.label().to_string()).collect();
+        assert_eq!(labels, vec!["34_Piece_1_Front_A", "36_Piece_1_Front_A", "34_Piece_2_Back_B", "36_Piece_2_Back_B"]);
+    } // assigned_name_label_has_no_size_suffix
 
     // @brief An individual handoff hoists the same way in both modes.
     #[test]
