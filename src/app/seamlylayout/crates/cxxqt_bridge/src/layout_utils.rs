@@ -1724,7 +1724,7 @@ mod tests {
         let expected: Vec<String> = ["Подборт", "Комір", "Detail", "Detail", "Detail", "Detail", "Detail", "Detail"]
             .iter()
             .enumerate()
-            .map(|(i, name)| format!("500_Piece_{}_{name}", i + 1))
+            .map(|(i, name)| format!("Size_500_Piece_{}_{name}", i + 1))
             .collect();
         let mut sorted = expected.clone();
         sorted.sort_unstable();
@@ -1743,7 +1743,7 @@ mod tests {
         // The same two pieces stay ungraded, named as the dialog names them.
         let not_graded: Vec<String> = [(3, 660), (6, 220)]
             .iter()
-            .map(|(n, size)| format!("500_Piece_{n}_Detail: not graded, size {size} has other turn points than size 500 on the cut line."))
+            .map(|(n, size)| format!("Size_500_Piece_{n}_Detail: not graded, size {size} has other turn points than size 500 on the cut line."))
             .collect();
         assert_eq!(warnings, not_graded);
         assert!(rul.is_some(), "six graded pieces write the rule table");

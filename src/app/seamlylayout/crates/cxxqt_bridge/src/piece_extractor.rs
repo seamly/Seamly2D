@@ -1714,7 +1714,7 @@ pub(crate) mod tests {
         crate::piece_naming::assign_unique_piece_names(&mut doc);
         hoist_layout_units(&mut doc, false);
         let labels: Vec<String> = extract_piece_rects(&doc).iter().map(|p| p.label().to_string()).collect();
-        assert_eq!(labels, vec!["34_Piece_1_Front_A", "36_Piece_1_Front_A", "34_Piece_2_Back_B", "36_Piece_2_Back_B"]);
+        assert_eq!(labels, vec!["Size_34_Piece_1_Front_A", "Size_36_Piece_1_Front_A", "Size_34_Piece_2_Back_B", "Size_36_Piece_2_Back_B"]);
     } // assigned_name_label_has_no_size_suffix
 
     // @brief An individual handoff hoists the same way in both modes.

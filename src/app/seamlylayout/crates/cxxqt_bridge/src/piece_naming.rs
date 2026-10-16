@@ -9,7 +9,9 @@
 // renames each `data-type="piece"` group from its number, name and letter:
 //
 //   * Individual pattern: `Piece_<n>[_<name>][_<letter>]`.
-//   * Multisize pattern:  `<size>_Piece_<n>[_<name>][_<letter>]`.
+//   * Multisize pattern:  `Size_<size>_Piece_<n>[_<name>][_<letter>]`.
+//
+// Each whitespace character in the name becomes `_`: "Detail 1" gives `Piece_3_Detail_1`.
 //
 // `<n>` is the 1-based position of the piece among the pieces of its size, in
 // document order, so one piece has the same number in every size. The number
@@ -112,9 +114,11 @@ fn rename_piece(piece: &mut Element, state: &mut NamingState) {
         return;
     } // if named by an earlier import
 
-    let base = piece_base_name(number, attr(piece, "data-name").as_deref(), attr(piece, "data-letter").as_deref());
+    // Each whitespace character becomes `_`.
+    let base = piece_base_name(number, attr(piece, "data-name").as_deref(), attr(piece, "data-letter").as_deref())
+        .replace(char::is_whitespace, "_");
     let name = match &size {
-        Some(size) => format!("{size}_{base}"),
+        Some(size) => format!("Size_{}_{base}", size.replace(char::is_whitespace, "_")),
         None => base.clone(),
     }; // match size
 
@@ -219,17 +223,18 @@ mod tests {
     <g id="piece_Front" data-type="piece" data-parent="pattern-1" data-name="Front">
       <g id="cutline_Front" data-type="cutline" data-parent="Front"><path d="M 0 0 L 9 0 L 9 9 Z"/></g>
     </g>
-    <g id="piece_Back" data-type="piece" data-parent="pattern-1" data-name=" Back " data-letter="D"><path d="M 0 0 L 9 0 L 9 9 Z"/></g>
+    <g id="piece_Back" data-type="piece" data-parent="pattern-1" data-name=" Back  Yoke " data-letter="D"><path d="M 0 0 L 9 0 L 9 9 Z"/></g>
   </g>
 </svg>"#;
 
-    // @brief Individual pattern: each combination of name and letter gives its own form.
+    // @brief Individual pattern: each combination of name and letter gives its own form,
+    // and each space in a name becomes `_`.
     #[test]
     fn individual_pieces_get_numbered_names() {
         let mut doc = svg_dom::Document::parse(INDIVIDUAL_SVG).expect("parse ok");
         let naming = assign_unique_piece_names(&mut doc);
         assert_eq!(naming, PieceNaming { renamed: 4, warning: None });
-        assert_eq!(names(&doc), vec!["Piece_1", "Piece_2_B", "Piece_3_Front", "Piece_4_Back_D"]);
+        assert_eq!(names(&doc), vec!["Piece_1", "Piece_2_B", "Piece_3_Front", "Piece_4_Back__Yoke_D"]);
     } // individual_pieces_get_numbered_names
 
     // @brief A component's `data-parent` follows its piece to the new name.
@@ -260,7 +265,7 @@ mod tests {
   </g>
 </svg>"#;
 
-    // @brief Multisize pattern: the size leads each name, the number counts within the size,
+    // @brief Multisize pattern: `Size_<size>` leads each name, the number counts within the size,
     // and two pieces named "Detail" get different names. A piece-set drops the size.
     #[test]
     fn multisize_pieces_get_size_and_number() {
@@ -270,9 +275,9 @@ mod tests {
         assert_eq!(
             names(&doc),
             vec![
-                "Piece_1_Front_A", "34_Piece_1_Front_A", "36_Piece_1_Front_A",
-                "Piece_2_Detail", "34_Piece_2_Detail", "36_Piece_2_Detail",
-                "Piece_3_Detail", "34_Piece_3_Detail", "36_Piece_3_Detail",
+                "Piece_1_Front_A", "Size_34_Piece_1_Front_A", "Size_36_Piece_1_Front_A",
+                "Piece_2_Detail", "Size_34_Piece_2_Detail", "Size_36_Piece_2_Detail",
+                "Piece_3_Detail", "Size_34_Piece_3_Detail", "Size_36_Piece_3_Detail",
             ]
         );
         // The piece-set id still groups the sizes of one piece.
