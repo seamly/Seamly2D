@@ -54,6 +54,7 @@
 #include "../vpatterndb/vpiecepath.h"
 #include "../vpatterndb/floatItemData/vgrainlinedata.h"
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
+#include "../vgeometry/vcubicbezierpath.h"
 #include "../vgeometry/vgobject.h"
 #include "../vgeometry/vsplinepath.h"
 #include "../vlayout/vlayoutpiece.h"
@@ -1369,7 +1370,8 @@ void TST_VPiece::SplineNodeVertices_data() const
 
     QTest::newRow("same tangent") << 180.0 << 0.0 << 60.0 << false;
     QTest::newRow("same tangent, angle past 360") << 180.0 << 360.0 << 60.0 << false;
-    QTest::newRow("tangent breaks") << 180.0 << 30.0 << 60.0 << true;
+    // VSplinePoint makes the control node angles opposite, so a spline path point is smooth.
+    QTest::newRow("angles not opposite") << 180.0 << 30.0 << 60.0 << false;
     QTest::newRow("control node of length 0") << 180.0 << 0.0 << 0.0 << true;
 }
 
@@ -1389,6 +1391,41 @@ void TST_VPiece::SplineNodeVertices() const
 
     QVERIFY2(hasVertexNear(vertices, QPointF(0, 0)), "the first point is a node vertex");
     QVERIFY2(hasVertexNear(vertices, QPointF(400, 0)), "the last point is a node vertex");
+    QCOMPARE(hasVertexNear(vertices, QPointF(200, 100)), endNode);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::CubicBezierPathNodeVertices_data() const
+{
+    QTest::addColumn<QPointF>("controlAfter");
+    QTest::addColumn<bool>("endNode");
+
+    QTest::newRow("same tangent") << QPointF(260, 100) << false;
+    // VCubicBezierPath::GetSpline() turns this control node opposite the one before, so the curve is smooth.
+    QTest::newRow("control nodes not opposite") << QPointF(250, 150) << false;
+    QTest::newRow("control node of length 0") << QPointF(200, 100) << true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief CubicBezierPathNodeVertices checks that a smooth cubic Bezier path point is not a node vertex, and a point
+ * with a control node of length 0 is.
+ * @details The test reads the curves, not the control nodes as placed.
+ */
+void TST_VPiece::CubicBezierPathNodeVertices() const
+{
+    QFETCH(QPointF, controlAfter);
+    QFETCH(bool, endNode);
+
+    // From (0, 0) through the middle point (200, 100) to (400, 0). The control node before the middle point is at
+    // (140, 100), so the first curve arrives along the x axis.
+    const QVector<VPointF> points{VPointF(0, 0, "A1", 0, 0), VPointF(60, 60, "A2", 0, 0),
+                                  VPointF(140, 100, "A3", 0, 0), VPointF(200, 100, "A4", 0, 0),
+                                  VPointF(controlAfter.x(), controlAfter.y(), "A5", 0, 0),
+                                  VPointF(340, 60, "A6", 0, 0), VPointF(400, 0, "A7", 0, 0)};
+    const QSharedPointer<VAbstractCurve> curve(new VCubicBezierPath(points));
+    const QVector<QPointF> vertices = VPiecePath::curveNodeVertices(curve, curve->getPoints());
+
     QCOMPARE(hasVertexNear(vertices, QPointF(200, 100)), endNode);
 }
 
