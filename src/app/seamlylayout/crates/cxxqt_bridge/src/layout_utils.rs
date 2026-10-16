@@ -1438,15 +1438,20 @@ mod tests {
     // @brief Lay out one size of the jacket2 handoff, as a size tab or the Base Size tab.
     fn process_jacket2_size(size: &str) -> ProcessLayoutResult {
         let (input_dom, _) = jacket2_handoff();
+        process_jacket2_input_size(&input_dom, size)
+    } // fn process_jacket2_size
+
+    // @brief Lay out one size of a jacket2 input document, as a size tab or the Base Size tab.
+    fn process_jacket2_input_size(input_dom: &Document, size: &str) -> ProcessLayoutResult {
         let settings_json = jacket2_settings_json(60.0, 300.0);
-        let init = do_initialize_layout(&settings_json, Some(&input_dom))
+        let init = do_initialize_layout(&settings_json, Some(input_dom))
             .expect("initialize_layout should succeed");
 
         let mut progress = |_pct: i32, _status: Option<&str>| {};
         do_process_size_layout(
             ProcessLayoutArgs {
                 settings_json: &settings_json,
-                input_dom: &input_dom,
+                input_dom,
                 initial_layout_dom: &init.initial_dom,
                 layout_h_px: init.h_px,
                 nested_multisize: false,
@@ -1456,7 +1461,7 @@ mod tests {
             size,
             &mut progress,
         ).expect("size layout should succeed on the jacket2 handoff")
-    } // fn process_jacket2_size
+    } // fn process_jacket2_input_size
 
     // @brief The jacket2 handoff reads as one multisize pattern: 8 piece-sets, 208 pieces, 26 sizes.
     #[test]
@@ -1701,6 +1706,48 @@ mod tests {
         let rul = rul.expect("six graded pieces write the rule table");
         assert!(rul.contains("SAMPLE SIZE:500") && rul.contains("NUMBER OF SIZES:26"), "{rul}");
     } // jacket2_base_size_export_names_and_grades_each_piece
+
+    // @brief The import gives the jacket2 pieces unique names; the Base Size export writes
+    // them as `Piece Name:`, names them in its dialogs, and still grades by piece-set.
+    #[test]
+    fn jacket2_assigned_names_reach_the_base_size_export() {
+        let (mut input, sizes) = jacket2_handoff();
+        let naming = crate::piece_naming::assign_unique_piece_names(&mut input);
+        assert_eq!(naming, crate::piece_naming::PieceNaming { renamed: 208, warning: None }, "8 pieces in each of 26 sizes");
+        let layout = process_jacket2_input_size(&input, JACKET2_BASE_SIZE);
+
+        // The Missing Piece Data dialog names each piece by its assigned name.
+        let text = crate::exports::dxf_missing_piece_data_message(&layout.output_doc).expect("converts");
+        let mut listed: Vec<&str> =
+            text.lines().filter_map(|l| l.strip_prefix("\u{2022} ")).map(|l| l.split(':').next().unwrap()).collect();
+        listed.sort_unstable();
+        let expected: Vec<String> = ["Подборт", "Комір", "Detail", "Detail", "Detail", "Detail", "Detail", "Detail"]
+            .iter()
+            .enumerate()
+            .map(|(i, name)| format!("500_Piece_{}_{name}", i + 1))
+            .collect();
+        let mut sorted = expected.clone();
+        sorted.sort_unstable();
+        assert_eq!(listed, sorted, "{text}");
+
+        // `Piece Name:` escapes the non-ASCII characters; the numbers keep the Detail pieces apart.
+        let grading = crate::exports::DxfGradingSource { input, sizes, base_size: JACKET2_BASE_SIZE.to_string() };
+        let (warnings, dxf, rul, _) = export_dxf_for_test(&layout, "jacket2_assigned_names", Some(grading));
+        let lines: Vec<&str> = dxf.lines().map(str::trim).collect();
+        let mut names: Vec<&str> = lines.iter().filter_map(|l| l.strip_prefix("Piece Name:")).collect();
+        names.sort_unstable();
+        let mut written: Vec<String> = expected.iter().map(|n| seamly_svg2ezdxf::dxf_unicode_escape(n)).collect();
+        written.sort_unstable();
+        assert_eq!(names, written, "one block per piece");
+
+        // The same two pieces stay ungraded, named as the dialog names them.
+        let not_graded: Vec<String> = [(3, 660), (6, 220)]
+            .iter()
+            .map(|(n, size)| format!("500_Piece_{n}_Detail: not graded, size {size} has other turn points than size 500 on the cut line."))
+            .collect();
+        assert_eq!(warnings, not_graded);
+        assert!(rul.is_some(), "six graded pieces write the rule table");
+    } // jacket2_assigned_names_reach_the_base_size_export
 
     // @brief Consecutive POLYLINE vertices of a DXF, as written, 0.01 mm apart or closer.
     // @return One "layer L: (x, y) then (x, y)" entry per pair; a closed polyline also pairs its last and first vertex.

@@ -101,6 +101,18 @@ jacket2 hides piece labels and grainlines (`visible="false"`), so missing-data w
 
 - [ ] Layout.26.7 jacket2 Base Size 500, Export > DXF-ASTM (R13); check that the dialog scrolls and buttons remain visible. Marker has no DXF-ASTM export (Layout.67). User check: `AGENT_CHECKLIST.md` §5.
 
+## [ ] Task Layout.73 — Assign unique piece names at import
+
+User request (2026-10-16): give every piece a unique name before a layout, in every size. Rule: `docs-data/SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout piece names".
+
+Finding: the names do not cause the jacket2 Missing Piece Data dialog (`test-seamly-layout/layouts/jacket2/20261013/jacket2_40-146_R12_alltabs_screenshot_20261016_1.png`). jacket2 hides piece labels and grainlines (`visible="false"`), so the handoff has no `piece_label` or `grainline` groups (Layout.26). The dialog stays; it now lists `500_Piece_3_Detail` instead of `Detail (3)`.
+
+- [x] Layout.73.1 `piece_naming::assign_unique_piece_names`, called by `finish_import`. Individual: `Piece_<n>[_<name>][_<letter>]`. Multisize: `<size>_Piece_<n>[_<name>][_<letter>]`. Piece-set: name without the size. Marker `data-name-assigned="true"`, kept on a later import.
+- [x] Layout.73.2 Import warning when the sizes have different piece counts.
+- [x] Layout.73.3 No "(size N)" label suffix on an assigned name.
+- [x] Layout.73.4 Tests: 6 `piece_naming` tests, `piece_extractor` `assigned_name_label_has_no_size_suffix`, `layout_utils` `jacket2_assigned_names_reach_the_base_size_export`.
+- [ ] Layout.73.5 Next MSI: user check, `AGENT_CHECKLIST.md` §1 and §5.
+
 ## [ ] Task Layout.27 — Fix jacket2 DXF-ASTM grading
 
 Prior results (jacket2, sizes 220–720): Nested graded 4 of 8 pieces; Marker placed 96/208 pieces and lost grading on others. Base Size 500 in MSI 26.10.1311 graded 4 pieces, with rules accurate to 0.011 mm. Detail (3), (6), (7), (8) remained ungraded. Evidence: `test-seamly-layout/layouts/jacket2/`, aw.fyi reports, `jacket2_40-146_basesize_R13_202610131248.dxf`.
