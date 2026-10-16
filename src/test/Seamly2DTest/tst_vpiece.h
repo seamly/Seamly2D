@@ -100,6 +100,8 @@ private slots:
     void ForcedCornerCutCutsShortMiter() const;
     void SplineNodeVertices_data() const;
     void SplineNodeVertices() const;
+    void CubicBezierPathNodeVertices_data() const;
+    void CubicBezierPathNodeVertices() const;
     void SplineInteriorNodeKeepsNodeCount() const;
 
 private:

@@ -53,6 +53,7 @@
 #include "vcontainer.h"
 #include "../vgeometry/vpointf.h"
 #include "../vgeometry/vabstractcubicbezierpath.h"
+#include "../vgeometry/vspline.h"
 #include "../vgeometry/vsplinepoint.h"
 #include "../vlayout/vabstractpiece.h"
 #include "../vmisc/vabstractapplication.h"
@@ -224,7 +225,7 @@ QVector<QPointF> curveSegmentPoints(const QSharedPointer<VAbstractCurve> &curve,
     return points;
 }
 
-// Control node angles closer than this to opposite give a spline point the same tangent on both sides.
+// Control node angles closer than this to opposite give two curves the same tangent where they meet.
 constexpr qreal kSameTangentToleranceDegrees = 0.01;
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -233,22 +234,26 @@ constexpr qreal kSameTangentToleranceDegrees = 0.01;
  * @details The first and last points are end nodes, and so is every point where the tangent breaks. A point with
  *          the same tangent on both sides is an interior node: a curve point that cannot be a turn point. A control
  *          node of length 0 leaves the tangent on its side undefined, so its point is an end node.
- * @param index position of @p point in VAbstractCubicBezierPath::GetSplinePath().
- * @param count number of points in the spline path.
+ *          It reads the two curves that meet at the point, as drawn, not the VSplinePoint angles.
+ * @param index position of the point in VAbstractCubicBezierPath::GetSplinePath().
  */
-bool isSplineEndNode(const VSplinePoint &point, int index, int count)
+bool isSplineEndNode(const VAbstractCubicBezierPath &path, int index)
 {
-    if (index == 0 || index == count - 1)
-    {
-        return true;
-    }
-    if (qFuzzyIsNull(point.Length1()) || qFuzzyIsNull(point.Length2()))
+    if (index == 0 || index >= path.CountSubSpl())
     {
         return true;
     }
 
-    // Angle1 points to the control node before the point, Angle2 to the one after it.
-    const qreal between = std::fmod(qAbs(point.Angle1() - point.Angle2()), 360.0);
+    // GetSpline() counts from 1: curve `index` ends at the point and curve `index + 1` starts there.
+    const VSpline before = path.GetSpline(index);
+    const VSpline after = path.GetSpline(index + 1);
+    if (qFuzzyIsNull(before.GetC2Length()) || qFuzzyIsNull(after.GetC1Length()))
+    {
+        return true;
+    }
+
+    // Both angles point from the point to a control node, so the same tangent makes them opposite.
+    const qreal between = std::fmod(qAbs(before.GetEndAngle() - after.GetStartAngle()), 360.0);
     return qAbs(between - 180.0) > kSameTangentToleranceDegrees;
 }
 }
@@ -590,7 +595,7 @@ QVector<QPointF> VPiecePath::curveNodeVertices(const QSharedPointer<VAbstractCur
     const QVector<VSplinePoint> splinePoints = path->GetSplinePath();
     for (int k = 0; k < splinePoints.size(); ++k)
     {
-        if (!isSplineEndNode(splinePoints.at(k), k, static_cast<int>(splinePoints.size())))
+        if (!isSplineEndNode(*path, k))
         {
             continue;
         }

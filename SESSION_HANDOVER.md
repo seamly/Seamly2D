@@ -2,6 +2,16 @@
 
 ## Current status
 
+### 2026-10-16 — Qt suite failure in `TST_VPiece` fixed: merged into local `run-seamlyLayout`, not pushed
+
+- `local_build_msi.ps1` stopped at `nmake check`: `TST_VPiece::SplineNodeVertices(tangent breaks)` failed (53 passed, 1 failed).
+- Cause: the row asked for a tangent break at a spline path interior node. `VSplinePoint` and `VCubicBezierPath::GetSpline()` make every interior node smooth, so the point cannot exist.
+- Fix: `isSplineEndNode` reads the curves that meet at the point. Row retargeted; new test `TST_VPiece::CubicBezierPathNodeVertices`.
+- User decision: keep both smoothing corrections; never make an end node smooth; never drop an end node (memory `spline-end-node-rules`).
+- Verified: `cl /Zs` on `vpiecepath.cpp` and `tst_vpiece.cpp`. Not run: Qt suites (next MSI).
+- Per-suite logs: set `SEAMLY_TEST_LOG_DIR`, run `.\Seamly2DTests.exe` through `..\target_wrapper.bat` from `src\test\Seamly2DTest\bin`. The `.\` is needed when `NoDefaultCurrentDirectoryInExePath` is set.
+- Next: MSI build, then the 2026-10-15 next steps below.
+
 ### 2026-10-15 — Layout.27.13.5 spline interior nodes: merged into local `run-seamlyLayout`, not pushed
 
 - MSI 26.10.1421 capture: still 6 of 8 jacket2 pieces graded. Copy at `C:\Users\susan\seamly2d\layouts\handoff_jacket2_26.10.1421.svg`; fixture not replaced.
