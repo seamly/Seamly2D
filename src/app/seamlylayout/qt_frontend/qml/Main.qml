@@ -929,59 +929,114 @@ ApplicationWindow {
                 border.color: appController.isAdjustMode ? Theme.violetLight : "transparent"
                 border.width: appController.isAdjustMode ? 3 : 0
 
-                // Tabs of a multisize layout: Marker, Nested, Base Size, then one per size.
-                // Hidden when there is only one layout.  Locked while a layout
-                // runs or Adjust Mode is open, so an edit stays on one tab.
-                TabBar {
-                    id: layoutViewTabs
-                    anchors.top:  parent.top
-                    anchors.left: parent.left
-                    visible:      appController.layoutViewLabels.length > 1 && !appController.isAdjustMode
-                    enabled:      !appController.isLayoutInProgress && !appController.isAdjustMode
-                    background:   Rectangle { color: Theme.appBackground }
+                // Tab strip of a multisize layout: Marker, Nested, Base Size, then one per size.
+                // Hidden when there is only one layout.  The strip is as wide as
+                // the canvas; a scroll bar below it reaches tabs past the right edge.
+                Flickable {
+                    id: layoutViewTabStrip
+                    anchors.top:   parent.top
+                    anchors.left:  parent.left
+                    anchors.right: parent.right
+                    height:        layoutViewTabs.height
+                    visible:       appController.layoutViewLabels.length > 1 && !appController.isAdjustMode
+                    clip:          true
+                    contentWidth:  layoutViewTabs.width
+                    contentHeight: layoutViewTabs.height
+                    flickableDirection: Flickable.HorizontalFlick
+                    boundsBehavior:     Flickable.StopAtBounds
+                    onWidthChanged: showCurrentLayoutViewTab()
 
-                    // Follow the controller imperatively: a click assigns
-                    // currentIndex, which would break a declarative binding.
-                    Connections {
-                        target: appController
-                        function onActiveLayoutViewChanged() { layoutViewTabs.currentIndex = appController.activeLayoutView }
-                        function onLayoutViewLabelsChanged() { layoutViewTabs.currentIndex = appController.activeLayoutView }
-                    } // Connections appController
+                    // Scroll so the tab of the shown layout is in view.
+                    function showCurrentLayoutViewTab() {
+                        var tab = layoutViewTabs.itemAt(layoutViewTabs.currentIndex)
+                        if (!tab)
+                            return // no tabs yet
+                        var left  = tab.mapToItem(layoutViewTabs, 0, 0).x
+                        var right = left + tab.width
+                        if (left < contentX)
+                            contentX = left // tab is past the left edge
+                        else if (right > contentX + width)
+                            contentX = Math.min(right - width, contentWidth - width) // past the right edge
+                    } // function showCurrentLayoutViewTab
 
-                    Repeater {
-                        model: appController.layoutViewLabels
-                        TabButton {
-                            id: layoutViewTab
-                            required property string modelData
-                            required property int index
-                            text:  modelData
-                            width: implicitWidth
-                            contentItem: Text {
-                                text:  layoutViewTab.text
-                                color: layoutViewTab.checked ? Theme.violetDark : Theme.textOnDark
-                                font.pixelSize: Theme.fontSizeNormal
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment:   Text.AlignVCenter
-                            } // Text contentItem
-                            background: Rectangle {
-                                color: layoutViewTab.checked ? Theme.canvasBackground
-                                     : layoutViewTab.hovered ? Theme.violetMedium : Theme.violet
-                                border.color: Theme.violetLight
-                                border.width: 1
-                            } // Rectangle background
-                            // Refused switches snap back to the tab the controller shows.
-                            onClicked: {
-                                if (!appController.selectLayoutView(index))
-                                    layoutViewTabs.currentIndex = appController.activeLayoutView
-                            } // onClicked
-                        } // TabButton
-                    } // Repeater
-                } // TabBar layoutViewTabs
+                    // Sits below the tabs, not over them; shown only when some tabs are out of view.
+                    ScrollBar.horizontal: ScrollBar {
+                        id: layoutViewTabScrollBar
+                        parent:        layoutViewTabStrip.parent
+                        anchors.top:   layoutViewTabStrip.bottom
+                        anchors.left:  layoutViewTabStrip.left
+                        anchors.right: layoutViewTabStrip.right
+                        policy:        ScrollBar.AlwaysOn
+                        visible:       layoutViewTabStrip.visible && layoutViewTabStrip.contentWidth > layoutViewTabStrip.width
+                    } // ScrollBar layoutViewTabScrollBar
+
+                    // Locked while a layout runs or Adjust Mode is open, so an edit stays on one tab.
+                    TabBar {
+                        id: layoutViewTabs
+                        width:      implicitWidth
+                        enabled:    !appController.isLayoutInProgress && !appController.isAdjustMode
+                        background: Rectangle { color: Theme.appBackground }
+                        onCurrentIndexChanged: layoutViewTabStrip.showCurrentLayoutViewTab()
+
+                        // Follow the controller imperatively: a click assigns
+                        // currentIndex, which would break a declarative binding.
+                        Connections {
+                            target: appController
+                            function onActiveLayoutViewChanged() { layoutViewTabs.currentIndex = appController.activeLayoutView }
+                            function onLayoutViewLabelsChanged() { layoutViewTabs.currentIndex = appController.activeLayoutView }
+                        } // Connections appController
+
+                        Repeater {
+                            model: appController.layoutViewLabels
+                            TabButton {
+                                id: layoutViewTab
+                                required property string modelData
+                                required property int index
+                                text:  modelData
+                                width: implicitWidth
+                                contentItem: Text {
+                                    text:  layoutViewTab.text
+                                    color: layoutViewTab.checked ? Theme.violetDark : Theme.textOnDark
+                                    font.pixelSize: Theme.fontSizeNormal
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment:   Text.AlignVCenter
+                                } // Text contentItem
+                                background: Rectangle {
+                                    color: layoutViewTab.checked ? Theme.canvasBackground
+                                         : layoutViewTab.hovered ? Theme.violetMedium : Theme.violet
+                                    border.color: Theme.violetLight
+                                    border.width: 1
+                                } // Rectangle background
+                                // Refused switches snap back to the tab the controller shows.
+                                onClicked: {
+                                    if (!appController.selectLayoutView(index))
+                                        layoutViewTabs.currentIndex = appController.activeLayoutView
+                                } // onClicked
+                            } // TabButton
+                        } // Repeater
+                    } // TabBar layoutViewTabs
+                } // Flickable layoutViewTabStrip
+
+                // A vertical mouse wheel over the tabs scrolls them sideways.
+                // Accepts no buttons, so tab clicks pass through to the tabs below.
+                MouseArea {
+                    anchors.fill:    layoutViewTabStrip
+                    z:               layoutViewTabStrip.z + 1
+                    visible:         layoutViewTabStrip.visible
+                    acceptedButtons: Qt.NoButton
+                    onWheel: (wheel) => {
+                        var delta = wheel.angleDelta.y !== 0 ? wheel.angleDelta.y : wheel.angleDelta.x
+                        var maxX  = Math.max(0, layoutViewTabStrip.contentWidth - layoutViewTabStrip.width)
+                        layoutViewTabStrip.contentX = Math.max(0, Math.min(maxX, layoutViewTabStrip.contentX - delta))
+                    } // onWheel
+                } // MouseArea layoutViewTabWheel
 
                 // Static layout display — shown when NOT in AdjustMode
                 SvgCanvas {
                     id: rightCanvas
-                    anchors.top:     layoutViewTabs.visible ? layoutViewTabs.bottom : parent.top
+                    anchors.top:     !layoutViewTabStrip.visible ? parent.top
+                                   : layoutViewTabScrollBar.visible ? layoutViewTabScrollBar.bottom
+                                   : layoutViewTabStrip.bottom
                     anchors.left:    parent.left
                     anchors.right:   parent.right
                     anchors.bottom:  parent.bottom
