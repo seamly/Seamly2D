@@ -19,4 +19,6 @@ SOURCES += \
 win32 {
     HEADERS += $$PWD/windows_foreground_window.h
     SOURCES += $$PWD/windows_foreground_window.cpp
+    # Qt 6 does not link user32 for the app; the Win32 window calls need it.
+    LIBS += -luser32
 }
