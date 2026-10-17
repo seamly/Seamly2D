@@ -265,6 +265,13 @@ public:
     bool isHideSeamLine() const;
     void setHideSeamLine(bool value);
 
+    QString getMaterial() const;
+    void    setMaterial(const QString &value);
+
+    static QStringList materialNames();
+    static QString     defaultMaterial();
+    static QString     materialDisplayName(const QString &material);
+
     qreal GetSAWidth() const;
     void  SetSAWidth(qreal value);
 

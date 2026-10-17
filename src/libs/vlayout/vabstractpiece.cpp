@@ -54,6 +54,7 @@
 #include "../vmisc/vabstractapplication.h"
 #include "../vgeometry/vpointf.h"
 
+#include <QCoreApplication>
 #include <QLineF>
 #include <QSet>
 #include <QVector>
@@ -191,6 +192,57 @@ bool VAbstractPiece::isHideSeamLine() const
 void VAbstractPiece::setHideSeamLine(bool value)
 {
     d->m_hideMainPath = value;
+}
+
+namespace
+{
+// Material names as the pattern file stores them; the user sees them translated.
+const char *const pieceMaterials[] = {
+    QT_TRANSLATE_NOOP("PieceMaterial", "Fabric"),
+    QT_TRANSLATE_NOOP("PieceMaterial", "Lining"),
+    QT_TRANSLATE_NOOP("PieceMaterial", "Interfacing"),
+    QT_TRANSLATE_NOOP("PieceMaterial", "Interlining")
+};
+} // namespace
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Material the piece is cut from, as the pattern file stores it (untranslated).
+QString VAbstractPiece::getMaterial() const
+{
+    return d->m_material;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @param value one of materialNames(); an empty value means defaultMaterial().
+void VAbstractPiece::setMaterial(const QString &value)
+{
+    d->m_material = value.isEmpty() ? defaultMaterial() : value;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Every material a piece can have, untranslated, in the order the piece dialog lists them.
+QStringList VAbstractPiece::materialNames()
+{
+    QStringList names;
+    for (const char *name : pieceMaterials)
+    {
+        names.append(QString::fromLatin1(name));
+    }
+    return names;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Material of a piece that does not name one.
+QString VAbstractPiece::defaultMaterial()
+{
+    return QString::fromLatin1(pieceMaterials[0]);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Translated material name for display; an unknown name is shown as it is.
+QString VAbstractPiece::materialDisplayName(const QString &material)
+{
+    return QCoreApplication::translate("PieceMaterial", material.toUtf8().constData());
 }
 
 //---------------------------------------------------------------------------------------------------------------------

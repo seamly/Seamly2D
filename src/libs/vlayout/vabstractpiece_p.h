@@ -78,6 +78,7 @@ public:
         , m_width(0)
         , m_mx(0)
         , m_my(0)
+        , m_material(QStringLiteral("Fabric"))
     {}
 
     VAbstractPieceData(const VAbstractPieceData &piece)
@@ -93,6 +94,7 @@ public:
         , m_width(piece.m_width)
         , m_mx(piece.m_mx)
         , m_my(piece.m_my)
+        , m_material(piece.m_material)
     {}
 
     ~VAbstractPieceData() Q_DECL_EQ_DEFAULT;
@@ -109,6 +111,8 @@ public:
     qreal   m_width;
     qreal   m_mx;
     qreal   m_my;
+    /** @brief m_material material the piece is cut from, as stored in the pattern file. */
+    QString m_material;
 
 private:
     VAbstractPieceData &operator=(const VAbstractPieceData &) Q_DECL_EQ_DELETE;

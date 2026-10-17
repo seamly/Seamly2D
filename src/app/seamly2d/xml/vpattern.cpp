@@ -886,6 +886,8 @@ void VPattern::parsePieceElement(QDomElement &domElement, const Document &parse)
                                            QString().setNum(qApp->Seamly2DSettings()->getForbidPieceFlipping())));
         piece.setInLayout(getParameterBool(domElement, AttrInLayout, trueStr));
         piece.SetUnited(getParameterBool(domElement, PatternPieceTool::AttrUnited, falseStr));
+        piece.setMaterial(GetParametrString(domElement, PatternPieceTool::AttrMaterial,
+                                            VAbstractPiece::defaultMaterial()));
 
         const QString width = GetParametrString(domElement, AttrWidth, "0.0");
         QString w = width;//need for saving fixed formula;

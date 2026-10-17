@@ -89,6 +89,7 @@ public:
     static const QString AttrSeamAllowance;
     static const QString AttrHideSeamLine;
     static const QString AttrSeamAllowanceBuiltIn;
+    static const QString AttrMaterial;
     static const QString AttrHeight;
     static const QString AttrUnited;
     static const QString AttrFont;
