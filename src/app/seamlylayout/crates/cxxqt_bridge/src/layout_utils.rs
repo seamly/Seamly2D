@@ -1494,6 +1494,19 @@ mod tests {
         ).expect("size layout should succeed on the jacket2 handoff")
     } // fn process_jacket2_input_size
 
+    // @brief Size labels added at import reach a size tab layout and its SVG and DXF exports.
+    #[test]
+    fn jacket2_size_labels_reach_the_exports() {
+        let (mut input, _) = jacket2_handoff();
+        assert_eq!(crate::size_labels::add_size_labels(&mut input), 208, "one label per piece");
+        let size = process_jacket2_input_size(&input, "300");
+        let svg = size.output_doc.to_string();
+        assert_eq!(svg.matches(">Size 300<").count(), 8, "every piece of the tab shows its size");
+        assert!(!svg.contains(">Size 320<"), "other sizes are not on the tab");
+        let (_, dxf, _, _) = export_dxf_for_test(&size, "jacket2_size_labels", None);
+        assert_eq!(dxf.lines().filter(|line| line.trim() == "Size 300").count(), 8, "DXF annotation text per piece");
+    } // jacket2_size_labels_reach_the_exports
+
     // @brief The jacket2 handoff reads as one multisize pattern: 8 piece-sets, 208 pieces, 26 sizes.
     #[test]
     fn jacket2_handoff_is_multisize() {
