@@ -63,12 +63,12 @@ Set `SEAMLYLAYOUT_SAVE_HANDOFF` to an absolute file path before Seamly2D starts.
 
 ### Multisize pattern
 
-A pattern with a `.smms` measurement file hands off every size in the size list, at the base height.
+A pattern with a `.smms` measurement file hands off every size in the size list, at one height. When the pattern has more than one height, Seamly2D first shows "Select Height for Multisize Layout" (`MainWindow::selectMultisizeLayoutHeight`); the base height is selected first, and Cancel stops the handoff. SeamlyLayout shows "Height <height>" above the left canvas.
 Each piece is a `piece-set` group holding that piece once per size.
 
 ```xml
 <g id="pattern-1" data-type="pattern" data-type-number="1" data-name="Pattern Name"
-   data-measurements="multisize" data-sizes="34,36,38" data-base-size="36">
+   data-measurements="multisize" data-sizes="34,36,38" data-base-size="36" data-height="176">
   <g id="piece-set_Front" data-type="piece-set" data-type-number="1" data-parent="pattern-1"
      data-name="Front" data-letter="A">
     <g id="piece_Front_s34" data-type="piece" data-size="34" data-parent="piece-set_Front" ...>
@@ -144,6 +144,7 @@ first child of each piece group when it places the piece into a layout sheet
 | `data-measurements` | `pattern` | `individual` or `multisize`. Absent in older handoffs; SeamlyLayout reads absent as `individual`. |
 | `data-sizes` | `pattern` (multisize) | Every handed-off size, comma-separated, in pattern units (e.g. `34,36,38`). |
 | `data-base-size` | `pattern` (multisize) | Base size of the `.smms` file, in pattern units. |
+| `data-height` | `pattern` (multisize) | Height of every handed-off size, in pattern units: the height the user selected. |
 | `data-size` | `piece` (multisize) | Size of this copy of the piece. Kept on placed pieces in the layout and its exports. DXF-ASTM `Size Name:` piece text. |
 | `data-set-number` | `piece` (multisize, SeamlyLayout only) | `data-type-number` of the piece-set the piece left. SeamlyLayout writes it when the Marker tab or a size tab dissolves the piece-sets, so the piece number survives in the layout and its exports. Not in the Seamly2D handoff. DXF-ASTM uses it to number pieces that share a name: `Detail (3)`. |
 | `data-name-assigned` | `piece`, `piece-set` (SeamlyLayout only) | `true` when SeamlyLayout assigned the `data-name`. A later import keeps that name. Not in the Seamly2D handoff. |
