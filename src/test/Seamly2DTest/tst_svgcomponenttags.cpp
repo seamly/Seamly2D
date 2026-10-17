@@ -1020,6 +1020,61 @@ void TST_SvgComponentTags::PieceCarriesQuantityAndFold() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief PiecesOfEachMaterialShareAPatternGroup checks that each material gets its own pattern group, in the order
+ * its first piece was added, and that each piece names that group as its parent.
+ */
+void TST_SvgComponentTags::PiecesOfEachMaterialShareAPatternGroup() const
+{
+    VLayoutPiece front = makeTestPiece(QStringLiteral("Front"));
+    VLayoutPiece lining = makeTestPiece(QStringLiteral("Front Lining"));
+    lining.setMaterial(QStringLiteral("Lining"));
+    const QDomDocument doc = exportTwoPiecesSvg(front, lining);
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+
+    const QVector<QDomElement> patterns = groupsOfType(doc, QStringLiteral("pattern"));
+    QCOMPARE(patterns.size(), 2);
+    QCOMPARE(patterns.at(0).attribute(QStringLiteral("id")), QStringLiteral("pattern-1"));
+    QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-material")), QStringLiteral("Fabric"));
+    QCOMPARE(patterns.at(1).attribute(QStringLiteral("id")), QStringLiteral("pattern-2"));
+    QCOMPARE(patterns.at(1).attribute(QStringLiteral("data-material")), QStringLiteral("Lining"));
+    QCOMPARE(patterns.at(1).attribute(QStringLiteral("data-type-number")), QStringLiteral("2"));
+
+    const QVector<QDomElement> pieces = groupsOfType(doc, QStringLiteral("piece"));
+    QCOMPARE(pieces.size(), 2);
+    QCOMPARE(pieces.at(0).attribute(QStringLiteral("data-material")), QStringLiteral("Fabric"));
+    QCOMPARE(pieces.at(0).attribute(QStringLiteral("data-parent")), QStringLiteral("pattern-1"));
+    QCOMPARE(pieces.at(0).parentNode().toElement().attribute(QStringLiteral("id")), QStringLiteral("pattern-1"));
+    QCOMPARE(pieces.at(1).attribute(QStringLiteral("data-material")), QStringLiteral("Lining"));
+    QCOMPARE(pieces.at(1).attribute(QStringLiteral("data-parent")), QStringLiteral("pattern-2"));
+    QCOMPARE(pieces.at(1).parentNode().toElement().attribute(QStringLiteral("id")), QStringLiteral("pattern-2"));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief OneMaterialKeepsOnePatternGroup checks that pieces of one material share the single pattern-1 group, and
+ * that a piece with no material set is cut from fabric.
+ */
+void TST_SvgComponentTags::OneMaterialKeepsOnePatternGroup() const
+{
+    VLayoutPiece back = makeTestPiece(QStringLiteral("Back"));
+    back.setMaterial(QString());
+    QCOMPARE(back.getMaterial(), VAbstractPiece::defaultMaterial());
+    QCOMPARE(VAbstractPiece::defaultMaterial(), QStringLiteral("Fabric"));
+    QCOMPARE(VAbstractPiece::materialNames(), QStringList({QStringLiteral("Fabric"), QStringLiteral("Lining"),
+                                                            QStringLiteral("Interfacing"),
+                                                            QStringLiteral("Interlining")}));
+
+    const QDomDocument doc = exportTwoPiecesSvg(makeTestPiece(QStringLiteral("Front")), back);
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+    const QVector<QDomElement> patterns = groupsOfType(doc, QStringLiteral("pattern"));
+    QCOMPARE(patterns.size(), 1);
+    QCOMPARE(patterns.at(0).attribute(QStringLiteral("id")), QStringLiteral("pattern-1"));
+    QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-material")), QStringLiteral("Fabric"));
+    QCOMPARE(groupsOfType(doc, QStringLiteral("piece")).size(), 2);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief BuiltInPieceSendsCutlineAndSeamline checks that a built-in seam allowance sends its main path as the
  * cutline and the line inside it as the seamline, each with its own turn points. The cutline is the piece outline,
  * so it is sent also when the seam allowance view setting is off.

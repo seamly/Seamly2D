@@ -95,8 +95,9 @@ namespace PieceItemData
         OnFold      = 7, /**< True when the piece is cut on the fold, exported as data-on-fold="true". */
         NotchTypes  = 8, /**< Notch type per notch (notchTypeToString()), space separated, exported as
                               data-notch-type. Unset when unknown. */
-        NotchSegments = 9 /**< Line count per notch, space separated, exported as data-notch-segments. The counts
+        NotchSegments = 9, /**< Line count per notch, space separated, exported as data-notch-segments. The counts
                                sum to the subpath count of the notch path. Unset when unknown. */
+        Material    = 10 /**< Material the piece is cut from, exported as data-material. */
     };
 }
 #endif // VLAYOUTDEF_H

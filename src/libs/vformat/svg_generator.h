@@ -73,6 +73,7 @@ private:
 
     QList<QDomDocument> m_dom_list;
     QList<QString>      m_dom_piece_set_keys; ///< piece-set key of each m_dom_list entry; empty = no piece-set
+    QList<QString>      m_dom_materials;      ///< material of each m_dom_list entry; empty for a whole-scene entry
 };
 
 #endif // SVG_GENERATOR_H

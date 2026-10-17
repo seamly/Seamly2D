@@ -190,30 +190,44 @@ QDomDocument SvgGenerator::mergeSvgDoms()
     // Drop the clone's own main group; it is re-added from the list below.
     merged_svg_groups.at(0).parentNode().removeChild(merged_svg_groups.at(0));
 
-    // Piece-based exports get one pattern group wrapping all piece groups, tagged
-    // with the SVG data-* attributes so downstream tools can identify the pattern.
+    // Piece-based exports get one pattern group per material, wrapping the piece groups of
+    // that material and tagged with the SVG data-* attributes so downstream tools can
+    // identify the pattern. Materials keep the order in which their first piece was added.
     // Whole-scene exports (draft blocks) keep the legacy flat structure.
-    QDomElement parent_element = merged_svg_root;
+    QHash<QString, QDomElement> pattern_groups;
     if (m_piece_count > 0)
     {
-        QDomElement pattern_group = merged_svg.createElement("g");
-        pattern_group.setAttribute("id", "pattern-1");
-        pattern_group.setAttribute("data-type", "pattern");
-        pattern_group.setAttribute("data-type-number", "1");
-        setAttribute(pattern_group, "data-name", m_pattern_name);
-        if (m_sizes.isEmpty())
+        QStringList materials;
+        for (int i = 0; i < m_dom_list.size(); ++i)
         {
-            pattern_group.setAttribute("data-measurements", "individual");
-            setAttribute(pattern_group, "data-sample-size", m_sample_size);
+            if (!materials.contains(m_dom_materials.value(i)))
+            {
+                materials.append(m_dom_materials.value(i));
+            }
         }
-        else
+
+        for (int n = 0; n < materials.size(); ++n)
         {
-            pattern_group.setAttribute("data-measurements", "multisize");
-            pattern_group.setAttribute("data-sizes", m_sizes.join(QLatin1Char(',')));
-            setAttribute(pattern_group, "data-base-size", m_base_size);
+            QDomElement pattern_group = merged_svg.createElement("g");
+            pattern_group.setAttribute("id", QStringLiteral("pattern-%1").arg(n + 1));
+            pattern_group.setAttribute("data-type", "pattern");
+            pattern_group.setAttribute("data-type-number", QString::number(n + 1));
+            setAttribute(pattern_group, "data-name", m_pattern_name);
+            setAttribute(pattern_group, "data-material", materials.at(n));
+            if (m_sizes.isEmpty())
+            {
+                pattern_group.setAttribute("data-measurements", "individual");
+                setAttribute(pattern_group, "data-sample-size", m_sample_size);
+            }
+            else
+            {
+                pattern_group.setAttribute("data-measurements", "multisize");
+                pattern_group.setAttribute("data-sizes", m_sizes.join(QLatin1Char(',')));
+                setAttribute(pattern_group, "data-base-size", m_base_size);
+            }
+            merged_svg_root.appendChild(pattern_group);
+            pattern_groups.insert(materials.at(n), pattern_group);
         }
-        merged_svg_root.appendChild(pattern_group);
-        parent_element = pattern_group;
     }
 
     // Piece-set groups, created on the first piece of each set; keyed by piece-set key.
@@ -237,6 +251,17 @@ QDomDocument SvgGenerator::mergeSvgDoms()
         }
         QDomElement main_group = svg_groups.at(0).toElement();
         cleanSvg(main_group);
+
+        // A piece goes into the pattern group of its material.
+        QDomElement parent_element = merged_svg_root;
+        if (pattern_groups.contains(m_dom_materials.value(i)))
+        {
+            parent_element = pattern_groups.value(m_dom_materials.value(i));
+            if (main_group.attribute(QStringLiteral("data-type")) == QLatin1String("piece"))
+            {
+                main_group.setAttribute("data-parent", parent_element.attribute(QStringLiteral("id")));
+            }
+        }
 
         // A multisize piece goes into the piece-set that holds the same piece in every size.
         QDomElement target_element = parent_element;
@@ -550,7 +575,8 @@ void SvgGenerator::addComponentGroups(QGraphicsScene *scene, QGraphicsItem *item
 /// @brief Add a new SVG to the list of SVGs to be merged into a single SVG.
 /// @details When a piece item is given, the piece becomes a <g> element carrying the SVG
 ///          data-* attributes (data-type="piece", data-type-number, data-parent,
-///          data-name, data-letter, data-quantity, data-on-fold and data-grainline-angle) and each of the piece's
+///          data-name, data-letter, data-material, data-quantity, data-on-fold and data-grainline-angle) and each of
+///          the piece's
 ///          components is rendered
 ///          and tagged individually (see addComponentGroups()). Without an item the
 ///          scene is rendered as-is in a single untagged group (whole-scene exports,
@@ -573,6 +599,7 @@ void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item, c
         {
             m_dom_list.append(dom_doc);
             m_dom_piece_set_keys.append(QString());
+            m_dom_materials.append(QString());
         }
         return;
     }
@@ -624,6 +651,8 @@ void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item, c
     setAttribute(piece_group, "data-name", piece_name);
     setAttribute(piece_group, "data-letter", item->data(PieceItemData::PieceLetter).toString());
     setAttribute(piece_group, "data-size", size);
+    const QString material = item->data(PieceItemData::Material).toString();
+    setAttribute(piece_group, "data-material", material);
     const QVariant quantity = item->data(PieceItemData::Quantity);
     if (quantity.isValid())
     {
@@ -644,6 +673,7 @@ void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item, c
 
     m_dom_list.append(piece_doc);
     m_dom_piece_set_keys.append(piece_set_key);
+    m_dom_materials.append(material);
 }
 
 

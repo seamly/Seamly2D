@@ -633,6 +633,7 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
     layoutPiece.setPieceLetter(piece.GetPatternPieceData().GetLetter());
     layoutPiece.setQuantity(piece.GetPatternPieceData().GetQuantity());
     layoutPiece.setOnFold(piece.GetPatternPieceData().IsOnFold());
+    layoutPiece.setMaterial(piece.getMaterial());
 
     // Very important to set main path first!
     if (layoutPiece.createMainPath().isEmpty() && layoutPiece.createAllowancePath().isEmpty())
@@ -1646,6 +1647,7 @@ QGraphicsItem *VLayoutPiece::GetItem(bool textAsPaths) const
     item->setData(PieceItemData::PieceLetter, getPieceLetter());
     item->setData(PieceItemData::Quantity, getQuantity());
     item->setData(PieceItemData::OnFold, isOnFold());
+    item->setData(PieceItemData::Material, getMaterial());
 
     qreal grainAngle = 0;
     if (grainlineAngle(grainAngle))
