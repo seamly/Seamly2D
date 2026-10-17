@@ -2,7 +2,102 @@
 
 Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to `project-docs/TODO_COMPLETED.md`. Task IDs start with `Layout.`
 
-## [ ] Task Layout.3 — Test multisize layouts
+## [ ] Task Layout.73 — Assign unique piece names at import
+
+Give every piece a unique name before a layout, in every size. Rule: `docs-data/SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout piece names".
+
+Finding: the names do not cause the jacket2 Missing Piece Data dialog (`test-seamly-layout/layouts/jacket2/20261013/jacket2_40-146_R12_alltabs_screenshot_20261016_1.png`). jacket2 hides piece labels and grainlines (`visible="false"`), so the handoff has no `piece_label` or `grainline` groups (Layout.26). The dialog stays; it now lists `Size_500_Piece_3_Detail` instead of `Detail (3)`.
+
+- [x] Layout.73.1 `piece_naming::assign_unique_piece_names`, called by `finish_import`. Individual: `Piece_<n>[_<name>][_<letter>]`. Multisize: `Size_<size>_Piece_<n>[_<name>][_<letter>]`. A run of spaces becomes one `_` (user decision). Piece-set: name without the size. Marker `data-name-assigned="true"`, kept on a later import.
+- [x] Layout.73.2 Import warning when the sizes have different piece counts.
+- [x] Layout.73.3 No "(size N)" label suffix on an assigned name.
+- [x] Layout.73.4 Tests: 6 `piece_naming` tests, `piece_extractor` `assigned_name_label_has_no_size_suffix`, `layout_utils` `jacket2_assigned_names_reach_the_base_size_export`.
+- [ ] Layout.73.5 Next MSI: user check, `AGENT_CHECKLIST.md` §1 and §5.
+
+### [ ] Task Layout.24 — Put the tab name before the export timestamp - Priority 2
+
+Default name of a multisize export: `<base>[_<segment>]_<tab>_<stamp>[_tiled].<ext>`. Example: `mypatternname_R13_Size220_202610112043.dxf`. An individual pattern keeps `<base>[_<segment>]_<stamp>[_tiled].<ext>`.
+
+- [x] Layout.24.1 Add optional tab segment before `<stamp>` in `exports::default_export_file_name`.
+- [x] Layout.24.2 Remove spaces from tab labels; replace non-alphanumeric characters (except `-`) with `-`. "Size 220" → `Size220`.
+- [x] Layout.24.3 Include the selected tab in single-export default names.
+- [x] Layout.24.4 Apply the rule to Export All. Replace `layout_views::tab_file_path` (currently puts `_size-220` after timestamp). For renamed files, insert `_<tab>` before the extension.
+- [x] Layout.24.5 Test names with/without tab, tiled names, `/` in labels, and Export All.
+- [x] Layout.24.6 Docs: export file name rule in the SeamlyLayout docs, `TEST_CHECKLIST.md`
+- [ ] Layout.24.7 Next MSI: run `TEST_CHECKLIST.md` §7, "Export file names (Layout.24)".
+
+### [ ] Task Layout.72 — Split oversized individual pieces
+
+For oversized individual-pattern pieces, ask whether to split them or enlarge the media (decision 2026-10-13).
+
+- Dialog: list pieces and offending dimensions; offer "Split the pieces" (SVG, PDF, HPGL, EPS, PS, PNG, JPG) or "Make the media bigger" (DXF). OK continues; Cancel leaves only Layout Settings active.
+- Split only if no allowed rotation fits: too wide → vertical cuts; too long on non-roll media → horizontal cuts. Paper roll and fabric are roll-form. No dialog for tiled paper.
+- Enlarge media using Layout.71 (width) and Layout.25 (length).
+- Split into the minimum number of equal parts (rounded up), without cut-edge seam allowance. Label each part; add 2 match notches per cut edge. Apply the same split to sheet PDF. Warn if a fitting piece is left out because the media is full.
+
+- [ ] Layout.72.8 Next MSI: trousers sample, Paper Sheet 36 × 36 in, Create Layout:
+  - [ ] Dialog lists four too-long legs: Back, Front_Pleats, Front_no_pocket, Front_with_pocket.
+  - [ ] Cancel: only Layout Settings, Preferences, Exit enabled; submitting settings re-enables Create Layout.
+  - [ ] Split: each leg becomes 2 parts, blue "<name> part i of 2, joins j" label, and 2 green match notches. Warn about unplaced pieces.
+  - [ ] Enlarge: sheet exceeds 36 in length; no splits or warnings.
+  - [ ] Export split PDF parts and DXF-ASTM blocks named `Back (1/2)` and `Back (2/2)`.
+
+### [ ] Task Layout.74 - Multisize - Nested - each size has its own color, with a size-to-color legend
+
+Currently in the nested layout, all pieces are black. To distinguish between sizes, each size should be assigned a unique color, all pieces of that size will be displayed in that color (cutlines, seamlines, notches, etc.)
+
+- [ ] Layout 74.1 - Assign each size a color
+- [ ] Layout 74.2 - Assign each piece its color based on its size. These colors are displayed in the Nested layout, and included in all exports except DXF (Nested can't be exported to DXF)
+- [ ] Layout 74.3 - Create a color-to-size legend. Place this legend on the Nested Layout.
+- [ ] Layout 74.4 - Test/Verify using a multisize pattern
+  - [ ] Layout 74.4.1 - Each piece is displayed with its size's color
+  - [ ] Layout 74.4.2 - The legend appears in the Layout
+  - [ ] Layout 74.4.3 - Exported files retain the colors
+  - [ ] Layout 74.4.4 - Exported files retain the legend
+
+### [ ] Task Layout.75 - Multisize - add a scroll bar to enable access of all size tabs
+
+Currently in multisize layouts, the size tabs continue past the right edge of the canvas, but there is no scrollbar to enable the user to access those size tabs. Add a horizontal scrollbar to the multisize layout canvas.
+
+- [x] Layout 75.1 - add a horizontal scrollbar to the multisize right canvas that allows scrolling to view all size tabs. `Main.qml`: `Flickable layoutViewTabStrip` holds the `TabBar`; the scroll bar sits below the tabs and shows only when tabs are out of view; the mouse wheel scrolls the tabs; the shown tab scrolls into view. Checked: QML compiles (debug build, `ctest --preset debug` 6 of 6); a `qml` test render with 29 tabs in a 700 px window shows the bar and the selected tab.
+- [ ] Layout 75.2 - Test/Verify - All size tabs are accessible in the multisize canvas. Next MSI: jacket2 (26 sizes), Create Layout; scroll to the last tab with the bar and with the mouse wheel.
+
+### [ ] Task Layout.78 - Multisize - Nested - SVG export - place each size in its own layout
+
+Renumbered from a second Layout.75.
+
+Currently in multisize SVG exports, the pieces are grouped together, because they need to be grouped this way for layout, adjust mode, etc. For SVG export the sizes must be grouped together, without changing the position of any piece, to enable the user to select a single size and hide the remainder in upstream graphics software like Inkscape.
+
+- [ ] Task Layout.78.1 - when exporting an SVG for a nested layout, group the pieces according to size, so that there is a group element for each size that contains all the pieces of that size. Order the size groups in the SVG layout from the largest (so the largest size is underneath all other sizes in the svg display canvas) to the smallest (so it is highest in the svg display canvas) to enable easy selection of each size. The exported SVG should be flat (contains no transforms except for text elements).
+- [ ] Task Layout.78.2 - Test/Verify - Export a multisize file to SVG, open the SVG file using the View feature, confirm that the file is grouped by size.
+
+### [ ] Task Layout.76 - Multisize - each piece must have the size in a label
+
+Currently in Multisize layouts, the pattern pieces don't display the size. Add a single-line text label, or 'Size label', that displays 'Size <size>', where the bottom of the label is 5 pixels above the top of the grainline.
+
+- [ ] Task Layout.76.1 - During import from seamly2D, add a 'Size label' above the grainline in multisize pieces that displays the size label. The left canvas should display the pieces with the additional 'Size label'. SeamlyLayout should process the 'Size label' similarly to how it currently processes 'Piece label' and 'Pattern label'
+- [ ] Task Layout.76.2 - Test/Verify - Check that exports include the size label.
+
+### [ ] Task Layout.77 - Import - Separate pieces into fabric types; display on separate tabs in left import canvas
+
+Currently in the import left canvas, all pieces are displayed together regardless of the fabric type. From Seamly2D, separate pieces into fabric type--> read each piece and create a list of fabric types; group pieces by fabric type; create separate stringified svgs for each fabric type; display each stringified svg in separate tabs in the import left canvas where the tab contains the name of the fabric type. 
+
+- [ ] Layout.77.1 - implement fabric analysis when passing data from Seamly2D to SeamlyLayout; 
+  When there are multiple fabric types:
+  - [ ] Layout.77.1 - in Seamly2D create a stringified SVG for each fabric type; 
+  - [ ] Layout.77.2 - in SeamlyLayout, in the left import canvas, display each stringified SVG in its own tab labeled with the fabric type; the user can select the fabric tab to display;
+  - [ ] Layout.77.3 - in SeamlyLayout, when the user clicks on 'Create Layout', 
+    - [ ] Layout.77.3.1 - create layout(s) for the currently selected import fabric tab;
+    - [ ] Layout.77.3.2 - display the fabric type above the right layout canvas
+    - [ ] Layout.77.3 - In SeamlyLayout, during export, append the currently selected '_<fabric type>' before the date stamp in the exported file name
+- [ ] Layout.77.2 - Test/Verify - check each for individual size and multisize patterns:
+  - [ ] Layout.77.2.1 - pieces are displayed in 'fabric type' tabs in the left import canvas
+  - [ ] Layout.77.2.2 - layouts in the right layout canvas are displayed with 'Fabric Type' above the canvas
+  - [ ] Layout.77.2.3 - layouts in the right layout canvas are derived from the currently selected fabric tab in the left import canvas
+
+## VERIFY
+
+### [ ] Task Layout.3 — Test multisize layouts
 
 A `.smms` pattern sends all sizes in one SVG. Nested packs size groups; Marker packs individual pieces.
 
@@ -16,7 +111,7 @@ Handoff shape: see `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`, "Multisize p
 
 - [ ] Layout.38.6 Next MSI: test a multisize pattern from Seamly2D Layout Mode in SeamlyLayout Nested and Marker. Add to `TEST_CHECKLIST.md`.
 
-## [ ] Task Layout.6 — Verify DXF-ASTM grading
+### [ ] Task Layout.6 — Verify DXF-ASTM grading
 
 See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
 
@@ -36,8 +131,7 @@ See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
     | Advisory: validation spans, curve tolerance | both | Pass | — |
     | No finding: `Piece Name:piece-201_s720_M` | both | Cyrillic name emptied by `sanitize_ascii`; aw.fyi cannot group the sizes | Layout.26.4, done after these files |
 
-
-## [ ] Task Layout.67 — Test multisize tabs and export messages
+### [ ] Task Layout.67 — Test multisize tabs and export messages
 
 Decision (2026-10-13): all tabs use the imported SVG, not grade rules. DXF-ASTM exports one size per file. Supersedes Layout.22, Layout.23, Layout.27.10, and Layout.61.7.3.
 
@@ -51,19 +145,7 @@ Decision (2026-10-13): all tabs use the imported SVG, not grade rules. DXF-ASTM 
 - [ ] Layout.67.8 Next MSI: run `TEST_CHECKLIST.md` §7, "Multisize tabs".
 - [x] Layout.67.9 Base Size "Export Complete" must name both `.dxf` and `.rul` files (MSI 26.10.1311, `jacket2_basesize_screenshot_1.png`). Signal `export_companion_written`. User check: Layout.67.8.
 
-## [ ] Task Layout.24 — Put the tab name before the export timestamp - Priority 2
-
-Default name of a multisize export: `<base>[_<segment>]_<tab>_<stamp>[_tiled].<ext>`. Example: `mypatternname_R13_Size220_202610112043.dxf`. An individual pattern keeps `<base>[_<segment>]_<stamp>[_tiled].<ext>`.
-
-- [x] Layout.24.1 Add optional tab segment before `<stamp>` in `exports::default_export_file_name`.
-- [x] Layout.24.2 Remove spaces from tab labels; replace non-alphanumeric characters (except `-`) with `-`. "Size 220" → `Size220`.
-- [x] Layout.24.3 Include the selected tab in single-export default names.
-- [x] Layout.24.4 Apply the rule to Export All. Replace `layout_views::tab_file_path` (currently puts `_size-220` after timestamp). For renamed files, insert `_<tab>` before the extension.
-- [x] Layout.24.5 Test names with/without tab, tiled names, `/` in labels, and Export All.
-- [x] Layout.24.6 Docs: export file name rule in the SeamlyLayout docs, `TEST_CHECKLIST.md`
-- [ ] Layout.24.7 Next MSI: run `TEST_CHECKLIST.md` §7, "Export file names (Layout.24)".
-
-## [ ] Task Layout.25 — Verify automatic media length
+### [ ] Task Layout.25 — Verify automatic media length
 
 All multisize tabs (Marker, Nested, individual sizes) extend the media length to fit their pieces (decision D3).
 
@@ -73,49 +155,61 @@ Decision (2026-10-13): extend rolls beyond 500 in when needed.
 
 - [ ] Layout.25.7 Next MSI: run `TEST_CHECKLIST.md` §7, "Media grows to fit".
 
-## [ ] Task Layout.71 — Verify automatic media width
+### [ ] Task Layout.71 — Verify automatic media width
 
 Multisize layouts expand right for wide pieces and down for long pieces. Only individual patterns split pieces (Layout.72).
 
 - [ ] Layout.71.6 Next MSI: jacket2, 10-in Paper Roll. All tabs should widen without warnings; Adjust Mode and SVG export should match.
 
-## [ ] Task Layout.72 — Test handling oversized individual pieces
-
-For oversized individual-pattern pieces, ask whether to split them or enlarge the media (decision 2026-10-13).
-
-- Dialog: list pieces and offending dimensions; offer "Split the pieces" (SVG, PDF, HPGL, EPS, PS, PNG, JPG) or "Make the media bigger" (DXF). OK continues; Cancel leaves only Layout Settings active.
-- Split only if no allowed rotation fits: too wide → vertical cuts; too long on non-roll media → horizontal cuts. Paper roll and fabric are roll-form. No dialog for tiled paper.
-- Enlarge media using Layout.71 (width) and Layout.25 (length).
-- Split into the minimum number of equal parts (rounded up), without cut-edge seam allowance. Label each part; add 2 match notches per cut edge. Apply the same split to sheet PDF. Warn if a fitting piece is left out because the media is full.
-
-- [ ] Layout.72.8 Next MSI: trousers sample, Paper Sheet 36 × 36 in, Create Layout:
-  - [ ] Dialog lists four too-long legs: Back, Front_Pleats, Front_no_pocket, Front_with_pocket.
-  - [ ] Cancel: only Layout Settings, Preferences, Exit enabled; submitting settings re-enables Create Layout.
-  - [ ] Split: each leg becomes 2 parts, blue "<name> part i of 2, joins j" label, and 2 green match notches. Warn about unplaced pieces.
-  - [ ] Enlarge: sheet exceeds 36 in length; no splits or warnings.
-  - [ ] Export split PDF parts and DXF-ASTM blocks named `Back (1/2)` and `Back (2/2)`.
-
-## [ ] Task Layout.26 — Verify Missing Piece Data dialog
+### [ ] Task Layout.26 — Verify Missing Piece Data dialog
 
 jacket2 hides piece labels and grainlines (`visible="false"`), so missing-data warnings are expected. Old MSI samples used Cyrillic names (Layout.40). Evidence: `jacket2_marker_screenshot_2.png`, `jacket2_nested_screenshot_1.png`.
 
 - [ ] Layout.26.7 jacket2 Base Size 500, Export > DXF-ASTM (R13); check that the dialog scrolls and buttons remain visible. Marker has no DXF-ASTM export (Layout.67). User check: `AGENT_CHECKLIST.md` §5.
 
-## [ ] Task Layout.73 — Assign unique piece names at import
+### [ ] Task Layout.28 — Verify built-in seam line
 
-User request (2026-10-16): give every piece a unique name before a layout, in every size. Rule: `docs-data/SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout piece names".
+Seamly2D now sends both cut and seam lines for built-in seam allowances. SeamlyLayout draws and exports both. Only app verification remains.
 
-Finding: the names do not cause the jacket2 Missing Piece Data dialog (`test-seamly-layout/layouts/jacket2/20261013/jacket2_40-146_R12_alltabs_screenshot_20261016_1.png`). jacket2 hides piece labels and grainlines (`visible="false"`), so the handoff has no `piece_label` or `grainline` groups (Layout.26). The dialog stays; it now lists `Size_500_Piece_3_Detail` instead of `Detail (3)`.
+Status (2026-10-12): code, docs, Rust (472 pass) and Qt tests pass; MSI 26.10.1220 built. Changes are local to `run-seamlyLayout` (not pushed).
 
-- [x] Layout.73.1 `piece_naming::assign_unique_piece_names`, called by `finish_import`. Individual: `Piece_<n>[_<name>][_<letter>]`. Multisize: `Size_<size>_Piece_<n>[_<name>][_<letter>]`. A run of spaces becomes one `_` (user decision). Piece-set: name without the size. Marker `data-name-assigned="true"`, kept on a later import.
-- [x] Layout.73.2 Import warning when the sizes have different piece counts.
-- [x] Layout.73.3 No "(size N)" label suffix on an assigned name.
-- [x] Layout.73.4 Tests: 6 `piece_naming` tests, `piece_extractor` `assigned_name_label_has_no_size_suffix`, `layout_utils` `jacket2_assigned_names_reach_the_base_size_export`.
-- [ ] Layout.73.5 Next MSI: user check, `AGENT_CHECKLIST.md` §1 and §5.
+- [ ] Layout.28.7 Next MSI: run `TEST_CHECKLIST.md` §5, "Piece with a built-in seam allowance".
+
+### [ ] Task Layout.68 — Verify PDF export scale
+
+Cause (MSI 26.10.1311): PDF used 72 dpi instead of SVG’s 96 dpi, scaling pages and pieces by 4/3.
+
+- Marker `jacket2_40-146_202610131244.pdf` (48 in × 500 in roll): MediaBox `4608 × 48000` pt = 64 in × 666.7 in. Expected `3456 × 36000` pt.
+- Nested `jacket2_40-nested_146_202610131245.pdf`: `4608 × 5003` pt. Expected `3456 × 3752` pt.
+- EPS and PS of the same tabs are correct: `0.75` scale, BoundingBox `3456 36000`.
+
+- [ ] Layout.68.5 Print a tiled page at 100% and measure it. Acrobat should report the Marker PDF as 48 in × the Marker roll length (about 800 in: the roll grows, Layout.25). User check: `AGENT_CHECKLIST.md` §4.
+
+### [ ] Task Layout.69 — Add PNG/JPG resolution metadata - Priority 1
+
+MSI 26.10.1311 exports correct pixels at 96 dpi (jacket2 PNG: 4608 × 48000) but omits physical resolution metadata. Printing at actual size may be wrong.
+
+- [x] Layout.69.1 Write PNG `pHYs` = 3780 px/m and JPG JFIF density = 96 × 96 dpi.
+- [x] Layout.69.2 Rust tests verify PNG `pHYs` and JPG JFIF density.
+- [ ] Layout.69.3 Next MSI: run `TEST_CHECKLIST.md` §7, "PNG and JPG resolution".
+
+### [ ] Task Layout.70 — "Some pieces could not be placed" dialog: piece names and length
+
+jacket2 Marker, MSI 26.10.1311: 112 entries such as "Detail (size 240)" (`jacket2_screenshot_1.png`). The 6 "Detail" pieces cannot be told apart. The dialog has no scroll area and grows past the screen.
+
+- [x] Layout.70.1 Use the numbered display name: "Detail (3)" (same rule as Layout.26.5).
+- [x] Layout.70.2 One line per piece, then its sizes: "Detail (3): 220, 240, 260". Group by `data-parent` (as Layout.26.1).
+- [x] Layout.70.3 `Main.qml` `warningDialog`: scroll area; the OK button stays visible (as Layout.26.2).
+- [x] Layout.70.4 Rust test: warning text for a jacket2 Marker layout that leaves pieces out.
+- [ ] Layout.70.5 Next MSI: run `TEST_CHECKLIST.md` §7, "Left-out pieces warning".
 
 ## [ ] Task Layout.27 — Fix jacket2 DXF-ASTM grading
 
 Prior results (jacket2, sizes 220–720): Nested graded 4 of 8 pieces; Marker placed 96/208 pieces and lost grading on others. Base Size 500 in MSI 26.10.1311 graded 4 pieces, with rules accurate to 0.011 mm. Detail (3), (6), (7), (8) remained ungraded. Evidence: `test-seamly-layout/layouts/jacket2/`, aw.fyi reports, `jacket2_40-146_basesize_R13_202610131248.dxf`.
+
+Note: Seamly2D performs the grading and passes these graded pieces to SeamlyLayout in the input stringified SVG. Do not perform grading in SeamlyLayout.
+
+Note: The piece names in the jacket2 pattern have changed, so items below may refer to piece names
 
 - [x] Layout.27.1 Re-export after Layout.25; confirm sample size 500 is no longer omitted from Marker. Rust test `jacket2_marker_extends_paper_roll`: 208 of 208 placed on a 48 × 500 in roll. Marker has no DXF-ASTM export (Layout.67). User check: Layout.25.7.
 - [x] Layout.27.2 If a sample-size piece is unplaced, warn: "size 500 does not fit the media". `grade_drawing` names it.
@@ -157,40 +251,3 @@ Prior results (jacket2, sizes 220–720): Nested graded 4 of 8 pieces; Marker pl
     - First Qt run failed: row `SplineNodeVertices(tangent breaks)` asked for a point that cannot exist. `VSplinePoint` makes the control node angles opposite. `VCubicBezierPath::GetSpline()` turns the control node after an interior node opposite the one before. Only a control node of length 0 gives a tangent break at an interior node.
     - Fix: `isSplineEndNode` reads the two curves that meet at the point, as drawn. The row now expects a smooth point.
     - User decision: keep both corrections. A tangent break is two curves that meet at a point. Never make an end node smooth. Never drop an end node.
-
-## [ ] Task Layout.28 — Verify built-in seam line
-
-Seamly2D now sends both cut and seam lines for built-in seam allowances. SeamlyLayout draws and exports both. Only app verification remains.
-
-Status (2026-10-12): code, docs, Rust (472 pass) and Qt tests pass; MSI 26.10.1220 built. Changes are local to `run-seamlyLayout` (not pushed).
-
-- [ ] Layout.28.7 Next MSI: run `TEST_CHECKLIST.md` §5, "Piece with a built-in seam allowance".
-
-## [ ] Task Layout.68 — Verify PDF export scale
-
-Cause (MSI 26.10.1311): PDF used 72 dpi instead of SVG’s 96 dpi, scaling pages and pieces by 4/3.
-
-- Marker `jacket2_40-146_202610131244.pdf` (48 in × 500 in roll): MediaBox `4608 × 48000` pt = 64 in × 666.7 in. Expected `3456 × 36000` pt.
-- Nested `jacket2_40-nested_146_202610131245.pdf`: `4608 × 5003` pt. Expected `3456 × 3752` pt.
-- EPS and PS of the same tabs are correct: `0.75` scale, BoundingBox `3456 36000`.
-
-- [ ] Layout.68.5 Print a tiled page at 100% and measure it. Acrobat should report the Marker PDF as 48 in × the Marker roll length (about 800 in: the roll grows, Layout.25). User check: `AGENT_CHECKLIST.md` §4.
-
-## [ ] Task Layout.69 — Add PNG/JPG resolution metadata - Priority 1
-
-MSI 26.10.1311 exports correct pixels at 96 dpi (jacket2 PNG: 4608 × 48000) but omits physical resolution metadata. Printing at actual size may be wrong.
-
-- [x] Layout.69.1 Write PNG `pHYs` = 3780 px/m and JPG JFIF density = 96 × 96 dpi.
-- [x] Layout.69.2 Rust tests verify PNG `pHYs` and JPG JFIF density.
-- [ ] Layout.69.3 Next MSI: run `TEST_CHECKLIST.md` §7, "PNG and JPG resolution".
-
-## [ ] Task Layout.70 — "Some pieces could not be placed" dialog: piece names and length
-
-jacket2 Marker, MSI 26.10.1311: 112 entries such as "Detail (size 240)" (`jacket2_screenshot_1.png`). The 6 "Detail" pieces cannot be told apart. The dialog has no scroll area and grows past the screen.
-
-- [x] Layout.70.1 Use the numbered display name: "Detail (3)" (same rule as Layout.26.5).
-- [x] Layout.70.2 One line per piece, then its sizes: "Detail (3): 220, 240, 260". Group by `data-parent` (as Layout.26.1).
-- [x] Layout.70.3 `Main.qml` `warningDialog`: scroll area; the OK button stays visible (as Layout.26.2).
-- [x] Layout.70.4 Rust test: warning text for a jacket2 Marker layout that leaves pieces out.
-- [ ] Layout.70.5 Next MSI: run `TEST_CHECKLIST.md` §7, "Left-out pieces warning".
-
