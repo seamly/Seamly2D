@@ -968,6 +968,26 @@ ApplicationWindow {
                     } // Repeater
                 } // TabBar materialTabs
 
+                // Height of every size of a multisize import, chosen in Seamly2D.
+                Rectangle {
+                    id: heightHeader
+                    Layout.fillWidth:       true
+                    Layout.preferredHeight: heightHeaderText.implicitHeight + 8
+                    visible: appController.multisizeHeight !== ""
+                    color:   Theme.appBackground
+
+                    Text {
+                        id: heightHeaderText
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left:           parent.left
+                        anchors.leftMargin:     8
+                        text:           "Height " + appController.multisizeHeight
+                        color:          Theme.textOnDark
+                        font.pixelSize: Theme.fontSizeNormal
+                        font.bold:      true
+                    } // Text heightHeaderText
+                } // Rectangle heightHeader
+
                 // Left canvas — imported SVG display
                 SvgCanvas {
                     id: leftCanvas

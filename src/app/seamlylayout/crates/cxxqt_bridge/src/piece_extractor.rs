@@ -778,6 +778,9 @@ pub struct MeasurementsInfo {
     pub sizes: Vec<String>,
     // `data-base-size`; empty when absent.
     pub base_size: String,
+    // `data-height` of a multisize pattern: the height of every size, in pattern units;
+    // empty when absent.
+    pub height: String,
     // `data-sample-size` of an individual pattern: `bust_circ`, else `waist_circ`,
     // in pattern units; empty when absent or multisize.
     pub sample_size: String,
@@ -808,7 +811,8 @@ pub fn read_measurements_info(doc: &svg_dom::Document) -> MeasurementsInfo {
         .map(|list| list.split(',').map(str::trim).filter(|s| !s.is_empty()).map(String::from).collect())
         .unwrap_or_default();
     let base_size = pattern.attributes.get("data-base-size").cloned().unwrap_or_default();
-    MeasurementsInfo { multisize, sizes, base_size, sample_size: String::new() }
+    let height = pattern.attributes.get("data-height").map(|s| s.trim().to_string()).unwrap_or_default();
+    MeasurementsInfo { multisize, sizes, base_size, height, sample_size: String::new() }
 } // fn read_measurements_info
 
 // @brief Find the first `data-type="pattern"` element, depth first.
@@ -1736,6 +1740,11 @@ pub(crate) mod tests {
         assert!(info.multisize);
         assert_eq!(info.sizes, vec!["34", "36"]);
         assert_eq!(info.base_size, "36");
+        assert_eq!(info.height, "", "no data-height in this handoff");
+
+        let with_height = MULTISIZE_HANDOFF_SVG.replace(r#"data-base-size="36""#, r#"data-base-size="36" data-height="176""#);
+        let info = read_measurements_info(&svg_dom::Document::parse(&with_height).expect("parse ok"));
+        assert_eq!(info.height, "176");
 
         let doc = svg_dom::Document::parse(nested_handoff_svg()).expect("parse ok");
         assert_eq!(read_measurements_info(&doc), MeasurementsInfo::default());

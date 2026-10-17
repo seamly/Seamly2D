@@ -606,6 +606,8 @@ pub mod qobject {
         #[qproperty(bool, is_multisize)]
         // Sizes of a multisize import, comma-separated, in handoff order; empty otherwise.
         #[qproperty(QString, multisize_sizes)]
+        // Height of every size of a multisize import, in pattern units; empty otherwise.
+        #[qproperty(QString, multisize_height)]
         // Tab labels of a multisize layout: "Marker", "Nested", "Base Size <n>",
         // then "Size <n>"; empty otherwise.
         #[qproperty(QStringList, layout_view_labels)]
@@ -1059,6 +1061,9 @@ pub struct AppControllerRust {
     // `data-sizes` of a multisize import, comma-separated; empty otherwise.
     multisize_sizes: cxx_qt_lib::QString,
 
+    // `data-height` of a multisize import; empty otherwise.
+    multisize_height: cxx_qt_lib::QString,
+
     // Tab labels mirrored from `layout_views` for QML.
     layout_view_labels: cxx_qt_lib::QStringList,
 
@@ -1138,6 +1143,7 @@ impl Default for AppControllerRust {
             label_text_state:          cxx_qt_lib::QString::from(svg_label_text::LabelTextState::NoLabels.as_str()), // no SVG yet
             is_multisize:              false,                          // individual until an import says otherwise
             multisize_sizes:           cxx_qt_lib::QString::default(), // no sizes until a multisize import
+            multisize_height:          cxx_qt_lib::QString::default(), // no height until a multisize import
             layout_view_labels:        cxx_qt_lib::QStringList::default(), // no tabs until a multisize layout
             active_layout_view:        0,                              // first tab
             is_tab_layout_pending:     false,                          // no tab run queued
@@ -1257,6 +1263,7 @@ impl qobject::AppController {
         )); // recomputed by finish_import
         self.as_mut().set_is_multisize(false); // recomputed by finish_import
         self.as_mut().set_multisize_sizes(cxx_qt_lib::QString::default()); // recomputed by finish_import
+        self.as_mut().set_multisize_height(cxx_qt_lib::QString::default()); // recomputed by finish_import
         self.as_mut().set_material_labels(cxx_qt_lib::QStringList::default()); // recomputed by finish_import
         self.as_mut().set_active_material(0);
         self.as_mut().set_active_material_name(cxx_qt_lib::QString::default());
@@ -1312,9 +1319,10 @@ impl qobject::AppController {
                 let measurements = crate::piece_extractor::read_measurements_info(&doc);
                 self.as_mut().set_is_multisize(measurements.multisize);
                 self.as_mut().set_multisize_sizes(cxx_qt_lib::QString::from(measurements.sizes.join(",").as_str()));
+                self.as_mut().set_multisize_height(cxx_qt_lib::QString::from(measurements.height.as_str()));
                 log_to_file(&format!(
-                    "[finish_import] multisize: {} sizes: {:?} base size: {}",
-                    measurements.multisize, measurements.sizes, measurements.base_size
+                    "[finish_import] multisize: {} sizes: {:?} base size: {} height: {}",
+                    measurements.multisize, measurements.sizes, measurements.base_size, measurements.height
                 ));
 
                 // One document per material; each gets a tab and its own layouts.
