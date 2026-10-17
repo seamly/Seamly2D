@@ -910,15 +910,74 @@ ApplicationWindow {
             Layout.fillHeight: true
             spacing: 2
 
-            // Left canvas — imported SVG display
-            SvgCanvas {
-                id: leftCanvas
+            // Left column — material tabs over the imported SVG display
+            ColumnLayout {
                 Layout.fillWidth:  true
                 Layout.fillHeight: true
+                spacing: 0
 
-                placeholderText: "Import an SVG pattern to begin"
-                showBusy:        false
-            } // SvgCanvas leftCanvas
+                // One tab per material of the import: Fabric, Lining, ...
+                // Hidden for one material.  A switch drops the shown layout, so it is
+                // locked while a layout runs or Adjust Mode is open.
+                TabBar {
+                    id: materialTabs
+                    Layout.fillWidth: true
+                    visible:    appController.materialLabels.length > 1
+                    enabled:    !appController.isLayoutInProgress && !appController.isAdjustMode
+                    background: Rectangle { color: Theme.appBackground }
+
+                    // Follow the controller imperatively: a click assigns currentIndex.
+                    Connections {
+                        target: appController
+                        function onActiveMaterialChanged() { materialTabs.currentIndex = appController.activeMaterial }
+                        function onMaterialLabelsChanged() { materialTabs.currentIndex = appController.activeMaterial }
+                    } // Connections appController
+
+                    Repeater {
+                        model: appController.materialLabels
+                        TabButton {
+                            id: materialTab
+                            required property string modelData
+                            required property int index
+                            text:  modelData
+                            width: implicitWidth
+                            contentItem: Text {
+                                text:  materialTab.text
+                                color: materialTab.checked ? Theme.violetDark : Theme.textOnDark
+                                font.pixelSize: Theme.fontSizeNormal
+                                horizontalAlignment: Text.AlignHCenter
+                                verticalAlignment:   Text.AlignVCenter
+                            } // Text contentItem
+                            background: Rectangle {
+                                color: materialTab.checked ? Theme.canvasBackground
+                                     : materialTab.hovered ? Theme.violetMedium : Theme.violet
+                                border.color: Theme.violetLight
+                                border.width: 1
+                            } // Rectangle background
+                            // The new material keeps the submitted settings: its blank
+                            // canvas is built again, so Create Layout stays available.
+                            onClicked: {
+                                var hadSettings = appController.isCreateLayoutEnabled || appController.isLayoutReady
+                                if (!appController.selectMaterial(index)) {
+                                    materialTabs.currentIndex = appController.activeMaterial // refused: snap back
+                                } else if (hadSettings) {
+                                    appController.initializeLayout(settingsModel.toJson())
+                                } // if selected
+                            } // onClicked
+                        } // TabButton
+                    } // Repeater
+                } // TabBar materialTabs
+
+                // Left canvas — imported SVG display
+                SvgCanvas {
+                    id: leftCanvas
+                    Layout.fillWidth:  true
+                    Layout.fillHeight: true
+
+                    placeholderText: "Import an SVG pattern to begin"
+                    showBusy:        false
+                } // SvgCanvas leftCanvas
+            } // ColumnLayout left column
 
             // Right canvas frame — violet border when AdjustMode is active
             Rectangle {
@@ -929,12 +988,34 @@ ApplicationWindow {
                 border.color: appController.isAdjustMode ? Theme.violetLight : "transparent"
                 border.width: appController.isAdjustMode ? 3 : 0
 
+                // Material of the laid-out pieces, above the layout tabs and canvas.
+                Rectangle {
+                    id: materialHeader
+                    anchors.top:   parent.top
+                    anchors.left:  parent.left
+                    anchors.right: parent.right
+                    height:        visible ? materialHeaderText.implicitHeight + 8 : 0
+                    visible:       appController.activeMaterialName !== "" && !appController.isAdjustMode
+                    color:         Theme.appBackground
+
+                    Text {
+                        id: materialHeaderText
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.left:           parent.left
+                        anchors.leftMargin:     8
+                        text:           "Material: " + appController.activeMaterialName
+                        color:          Theme.textOnDark
+                        font.pixelSize: Theme.fontSizeNormal
+                        font.bold:      true
+                    } // Text materialHeaderText
+                } // Rectangle materialHeader
+
                 // Tab strip of a multisize layout: Marker, Nested, Base Size, then one per size.
                 // Hidden when there is only one layout.  The strip is as wide as
                 // the canvas; a scroll bar below it reaches tabs past the right edge.
                 Flickable {
                     id: layoutViewTabStrip
-                    anchors.top:   parent.top
+                    anchors.top:   materialHeader.visible ? materialHeader.bottom : parent.top
                     anchors.left:  parent.left
                     anchors.right: parent.right
                     height:        layoutViewTabs.height
@@ -1034,9 +1115,10 @@ ApplicationWindow {
                 // Static layout display — shown when NOT in AdjustMode
                 SvgCanvas {
                     id: rightCanvas
-                    anchors.top:     !layoutViewTabStrip.visible ? parent.top
-                                   : layoutViewTabScrollBar.visible ? layoutViewTabScrollBar.bottom
-                                   : layoutViewTabStrip.bottom
+                    anchors.top:     layoutViewTabScrollBar.visible ? layoutViewTabScrollBar.bottom
+                                   : layoutViewTabStrip.visible ? layoutViewTabStrip.bottom
+                                   : materialHeader.visible ? materialHeader.bottom
+                                   : parent.top
                     anchors.left:    parent.left
                     anchors.right:   parent.right
                     anchors.bottom:  parent.bottom
