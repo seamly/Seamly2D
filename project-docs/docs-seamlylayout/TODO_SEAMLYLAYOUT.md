@@ -77,8 +77,11 @@ Currently in multisize SVG exports, the pieces are grouped together, because the
 
 Currently in Multisize layouts, the pattern pieces don't display the size. Add a single-line text label, or 'Size label', that displays 'Size <size>', where the bottom of the label is 5 pixels above the top of the grainline.
 
-- [ ] Task Layout.76.1 - During import from seamly2D, add a 'Size label' above the grainline in multisize pieces that displays the size label. The left canvas should display the pieces with the additional 'Size label'. SeamlyLayout should process the 'Size label' similarly to how it currently processes 'Piece label' and 'Pattern label'
-- [ ] Task Layout.76.2 - Test/Verify - Check that exports include the size label.
+- [x] Task Layout.76.1 - During import from seamly2D, add a 'Size label' above the grainline in multisize pieces that displays the size label. The left canvas should display the pieces with the additional 'Size label'. SeamlyLayout should process the 'Size label' similarly to how it currently processes 'Piece label' and 'Pattern label'
+  - Done: `size_labels::add_size_labels`, called by `finish_import`. `<g data-type="size_label">` with "Size <size>", Arial 24 px; text bottom 5 px past the grainline front end, reading across the grainline, so it is level after the layout turns the grainline up. Text modes, HPGL, DXF (layer 15) and the outline search treat it as a label.
+  - Decision taken (no grainline): the label sits level at the centre of the piece outline. jacket2 hides its grainlines, so its labels are centred.
+  - Tests: 5 `size_labels` tests (one lays out a sideways grainline and checks the label is level, 5 px above the top); `layout_utils` `jacket2_size_labels_reach_the_exports` (8 labels on Size 300, 8 DXF texts). Doc: `SVG-DATA-ATTRIBUTES.md`, "Size labels".
+- [ ] Task Layout.76.2 - Test/Verify - Check that exports include the size label. Next MSI: a multisize pattern with visible grainlines; the left canvas shows "Size <size>" above each grainline; Size tab exports (SVG, PDF, DXF) show it.
 
 ### [ ] Task Layout.77 - Import - Separate pieces into fabric types; display on separate tabs in left import canvas
 
