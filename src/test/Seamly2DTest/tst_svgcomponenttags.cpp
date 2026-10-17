@@ -260,7 +260,7 @@ QDomDocument exportMultisizeSvg()
 
     QGraphicsRectItem paper(QRectF(0, 0, 400, 400));
     SvgGenerator generator(&paper, filePath, QStringLiteral("Test Pattern"), QString(), 96);
-    generator.setMultisize(sizes, QStringLiteral("36"));
+    generator.setMultisize(sizes, QStringLiteral("36"), QStringLiteral("176"));
 
     // Size-major order, like the Layout Mode handoff: every piece of size 34, then every piece of size 36.
     QList<QGraphicsScene *> scenes;
@@ -820,6 +820,7 @@ void TST_SvgComponentTags::MultisizePatternCarriesSizeList() const
     QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-measurements")), QStringLiteral("multisize"));
     QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-sizes")), QStringLiteral("34,36"));
     QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-base-size")), QStringLiteral("36"));
+    QCOMPARE(patterns.at(0).attribute(QStringLiteral("data-height")), QStringLiteral("176"));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
