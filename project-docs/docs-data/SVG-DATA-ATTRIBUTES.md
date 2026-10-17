@@ -84,6 +84,16 @@ Each piece is a `piece-set` group holding that piece once per size.
 - Each size keeps its drafted position. SeamlyLayout stacks the sizes (`svg_dom::center_piece_sets`).
 - Tests: `TST_SvgComponentTags::Multisize*` (producer), `piece_extractor` and `layout_utils` `multisize` tests (consumer).
 
+### Size labels
+
+At import, SeamlyLayout adds a label to every multisize piece (`data-size` set): `<g id="size_label_<piece id>" data-type="size_label" data-type-number="1" data-parent="<piece name>">`, the last child of the piece, with one `<text>` "Size <size>" (Arial, 24 px, `text-anchor="middle"`).
+
+- The bottom of the text is 5 px past the front end of the grainline: the last point of the grainline path, as `verticalize_dom` reads the direction. The text reads across the grainline, so it is level when the layout turns the grainline up.
+- A piece without a grainline gets the label level at the centre of its outline.
+- A piece that has a `size_label` already, from an earlier SeamlyLayout export, keeps it.
+- Every consumer treats `size_label` as a label: text modes, HPGL label pen, DXF layer 15 annotation text; it adds nothing to the piece outline.
+- Code: `cxxqt_bridge/src/size_labels.rs`, called by `finish_import` after the piece names.
+
 ### Nested size colors
 
 On the Nested tab each size has its own color. Every stroke and fill of a piece that is not `none` takes the color of its size; text without a fill gets one. The Marker, Base Size and size tabs keep the drafted colors.
@@ -107,7 +117,7 @@ first child of each piece group when it places the piece into a layout sheet
 
 | Attribute | Applies to | Value |
 |---|---|---|
-| `data-type` | every tagged `<g>` | One of `pattern`, `piece-set`, `piece`, `seamline`, `cutline`, `internal_path`, `cut_path`, `grainline`, `notch`, `piece_label`, `pattern_label`. SeamlyLayout adds `size` (Nested SVG export) and `size_legend` (Nested layout). More types may be added later; consumers must ignore unknown types gracefully. |
+| `data-type` | every tagged `<g>` | One of `pattern`, `piece-set`, `piece`, `seamline`, `cutline`, `internal_path`, `cut_path`, `grainline`, `notch`, `piece_label`, `pattern_label`. SeamlyLayout adds `size_label` (import), `size` (Nested SVG export) and `size_legend` (Nested layout). More types may be added later; consumers must ignore unknown types gracefully. |
 | `data-type-number` | every tagged `<g>` | Per-scope 1-based counter for that `data-type`. The pattern is always `1`; pieces count up across the file; component counters reset per piece and per type. |
 | `data-parent` | `piece-set`, `piece` and component groups | For a piece: the pattern group's `id` (`pattern-1`), or its piece-set's `id` in a multisize handoff. For a component: the owning piece's `data-name` (e.g. `Front Bodice`), or the piece's numeric fallback `id` (e.g. `piece-3`) when the piece has no name. The pattern group has no `data-parent` (it is the root). True parent/child identity is the DOM nesting. The DXF-ASTM Base Size export reads a piece's value: pieces with the same piece-set id are the sizes of one piece, for its grade rules. |
 | `data-name` | `pattern`, `piece` | Pattern name, or piece name. Omitted when empty. SeamlyLayout replaces each piece name at import: see **SeamlyLayout piece names**. |
