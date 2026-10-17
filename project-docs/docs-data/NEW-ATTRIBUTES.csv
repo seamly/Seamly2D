@@ -16,6 +16,7 @@ cutline,data-type value,"cut line; the seam allowance outline, or for a built-in
 data-turn-points,data-type=seamline | cutline | internal_path | cut_path,"space-separated 0-based indices of the turn point vertices in the component path d (each M and L end point counts); empty = no turn points; omitted when unknown",
 data-seam-allowances,data-type=notch,"space-separated seam allowance width in mm per notch (d order), 2 decimals; wider of the node before/after widths; 0.00 = no seam allowance; present also for a built-in seam allowance; omitted when unknown",
 data-quantity,data-type=piece,cut count from the piece label data (Quantity),
+data-material,data-type=pattern | piece,Fabric,{Lining | Interfacing | Interlining} material the piece is cut from (Piece Properties > Material); one pattern group per material
 data-on-fold,data-type=piece,"true when the piece label data says cut on fold; omitted otherwise",
 data-notch-type,data-type=notch,"space-separated Seamly2D notch type per notch (d order): slit | tNotch | uNotch | vInternal | vExternal | castle | diamond; omitted when unknown",
 data-notch-segments,data-type=notch,"space-separated line segment count per notch (d order); one segment = one d subpath; sum = M count in d; omitted when unknown, and then data-seam-allowances and data-notch-type are omitted too",
