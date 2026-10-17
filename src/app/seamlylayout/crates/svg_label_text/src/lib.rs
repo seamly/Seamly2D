@@ -7,7 +7,8 @@
 //
 // Seamly2D writes each label line as a `<text>` inside a
 // `<g data-type="piece_label">` or `<g data-type="pattern_label">` group.
-// This crate changes only those `<text>` elements. Group ids, `data-*`
+// SeamlyLayout adds the Nested size legend, `<g data-type="size_legend">`.
+// This crate changes only the `<text>` elements in those groups. Group ids, `data-*`
 // attributes and the group structure stay the same in every mode.
 //
 // | Mode             | `<text>`                         | Added to the document            |
@@ -26,7 +27,7 @@ use xmltree::{Element, XMLNode};
 pub use font_embedding::SINGLE_LINE_FONT_FAMILY;
 
 /// `data-type` values of the groups whose text this crate rewrites.
-const LABEL_TYPES: [&str; 2] = ["piece_label", "pattern_label"];
+const LABEL_TYPES: [&str; 3] = ["piece_label", "pattern_label", "size_legend"];
 
 /// @brief How label text is written in an exported SVG.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -132,7 +133,7 @@ impl TextStyle {
     } // fn font_size_px
 } // impl TextStyle
 
-/// @brief True when `element` is a `<g>` tagged as a piece or pattern label.
+/// @brief True when `element` is a `<g>` tagged as a piece label, pattern label or size legend.
 fn is_label_group(element: &Element) -> bool {
     element.name == "g"
         && element

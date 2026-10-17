@@ -290,6 +290,13 @@ pub fn do_process_layout(
         save_debug_dom(&flat_dom, "centred_dom.svg");
     } // if piece_sets
 
+    // 3d''': Nested multisize — each size gets its own color; the legend lists them.
+    let size_colors = if args.nested_multisize && piece_sets > 0 {
+        crate::size_colors::color_pieces_by_size(&mut flat_dom)
+    } else {
+        Vec::new()
+    }; // size_colors
+
     // 3d'': the user chose to split each piece wider or longer than the media.
     // Needs grain-up pieces; must run before translate_dom moves each part to the origin.
     // Tiled paper never splits: its pages already cover a large piece.
@@ -366,6 +373,10 @@ pub fn do_process_layout(
     } else {
         bin_w
     }; // pack_bin_w
+
+    // Size-to-color legend of a Nested multisize layout, sized for the content
+    // width the packing branch picks; it goes one piece gap below the lowest piece.
+    let legend: Option<crate::size_colors::SizeLegend>;
 
     // Working values produced by the chosen packing branch:
     //   placements       — piece placements in bin-local pixel coordinates
@@ -460,14 +471,20 @@ pub fn do_process_layout(
         // Rebuild the tiled canvas at the winner's dimensions.  `input_dom_w/h_px`
         // in TileDimensions is the <svg> width/height; for the winner it equals
         // the full tile grid plus margins.
+        // A legend below the lowest piece may need more tile rows.
+        legend = crate::size_colors::SizeLegend::new(size_colors.clone(), choice.tile_cols * trim_w);
+        let lowest_px = choice.placements.iter().map(|p| p.y + p.h).max().unwrap_or(0);
+        let legend_bottom_px = lowest_px + legend.as_ref().map_or(0, |l| gap_px + l.height_px());
+        let tile_rows = choice.tile_rows.max(legend_bottom_px.div_ceil(trim_h));
+
         let new_layout_w_px = choice.tile_cols * trim_w
             + initial_td.margin_left_px + initial_td.margin_right_px;
-        let new_layout_h_px = choice.tile_rows * trim_h
+        let new_layout_h_px = tile_rows * trim_h
             + initial_td.margin_top_px + initial_td.margin_bottom_px;
 
         let winning_td = TileDimensions {
             tile_cols:        choice.tile_cols,
-            tile_rows:        choice.tile_rows,
+            tile_rows,
             trim_tile_w_px:   trim_w,
             trim_tile_h_px:   trim_h,
             input_dom_w_px:   new_layout_w_px,
@@ -482,7 +499,7 @@ pub fn do_process_layout(
 
         let out_doc = create_initial_tiled_layout_dom(&winning_td);
 
-        let new_bin_h = choice.tile_rows * trim_h;
+        let new_bin_h = tile_rows * trim_h;
         let new_ml    = initial_td.margin_left_px;
         let new_mt    = initial_td.margin_top_px;
         let new_mb    = initial_td.margin_bottom_px;
@@ -558,6 +575,8 @@ pub fn do_process_layout(
 
         progress_fn(60, None); // packing complete
 
+        legend = crate::size_colors::SizeLegend::new(size_colors.clone(), pack_bin_w);
+
         // Non-tiled: keep the initial canvas and margins.  Step 7 sets the
         // canvas size when the media was extended.
         (placements, args.initial_layout_dom.clone(), packed_bin_h, ml_px, mt_px, mb_px, layout_h_px, unplaced_labels)
@@ -589,12 +608,24 @@ pub fn do_process_layout(
 
     // get the bottom edge of the lowest piece in the bin
     let max_bin_bottom = placements.iter().map(|p| p.y + p.h).max().unwrap_or(0);
-    // compute the blank space below the lowest piece
-    let blank_bottom = work_bin_h.saturating_sub(max_bin_bottom);
+
+    // 7-. Nested multisize: the legend goes one piece gap below the lowest piece,
+    // at the left edge of the content.
+    let mut content_bottom = max_bin_bottom;
+    if let Some(legend) = &legend {
+        let legend_top = max_bin_bottom + gap_px;
+        output_doc.root.children.push(xmltree::XMLNode::Element(
+            legend.element(work_ml_px as f64, (work_mt_px + legend_top) as f64),
+        ));
+        content_bottom = legend_top + legend.height_px();
+    } // if legend
+
+    // compute the blank space below the lowest piece (or the legend)
+    let blank_bottom = work_bin_h.saturating_sub(content_bottom);
     // Extended media: wider than the media for the widest piece, or longer
-    // because the packer grew the bin.  Tiled paper never extends.
+    // because the packer grew the bin or the legend needs room.  Tiled paper never extends.
     let widened = pack_bin_w > bin_w;
-    let extended = !is_tiled && (widened || work_bin_h > bin_h);
+    let extended = !is_tiled && (widened || work_bin_h > bin_h || content_bottom > work_bin_h);
 
     // 7a. Widen the canvas to the right; both side margins are kept.
     if widened {
@@ -608,9 +639,9 @@ pub fn do_process_layout(
     // piece when the blank space below it is large.  Extended media always ends
     // at the lowest piece, but an extended sheet keeps at least its own length.
     let fitted_content_h = if extended && !settings.is_roll_form() {
-        Some(max_bin_bottom.max(bin_h))
+        Some(content_bottom.max(bin_h))
     } else if extended || (settings.is_roll_form() && blank_bottom > MIN_THRESHOLD_PX) {
-        Some(max_bin_bottom)
+        Some(content_bottom)
     } else {
         None
     }; // fitted_content_h
@@ -652,7 +683,7 @@ pub fn do_process_layout(
                             .and_then(|xy| xy.split(',').nth(1))
                             .and_then(|y| y.parse::<u32>().ok()))
                         .unwrap_or(0);
-                    if max_bin_bottom > last_row_y { break; } // row is not empty
+                    if content_bottom > last_row_y { break; } // row is not empty
                     tiled_rects_group.children.pop();
                     rows_removed += 1;
                 }
@@ -1484,6 +1515,100 @@ mod tests {
         let svg = nested.output_doc.to_string();
         assert_eq!(svg.matches(r#"data-type="piece""#).count(), 208, "every size of every piece placed");
     } // jacket2_nested_packs_eight_piece_sets
+
+    // @brief The top-level group of `doc` with this `data-type`.
+    fn top_group<'a>(doc: &'a Document, data_type: &str) -> Option<&'a xmltree::Element> {
+        doc.root.children.iter().filter_map(|n| n.as_element())
+            .find(|e| e.attributes.get("data-type").is_some_and(|t| t == data_type))
+    } // fn top_group
+
+    // @brief Lowest piece bottom and legend top and bottom, in canvas pixels; checks the legend lists every size.
+    fn legend_below_pieces(result: &ProcessLayoutResult, sizes: usize) -> (f32, f32, f32) {
+        let doc = &result.output_doc;
+        let legend = top_group(doc, "size_legend").expect("Nested has a size legend");
+        let texts = legend.children.iter().filter_map(|n| n.as_element()).filter(|e| e.name == "text").count();
+        assert_eq!(texts, sizes, "one legend entry per size");
+        let legend_box = crate::bbox_from_group_geometry(legend).expect("legend geometry");
+        let lowest = doc.root.children.iter().filter_map(|n| n.as_element())
+            .filter(|e| e.attributes.get("data-type").is_some_and(|t| t == "piece-set"))
+            .filter_map(crate::bbox_from_group_geometry)
+            .map(|b| b.max.y)
+            .fold(f32::MIN, f32::max);
+        (lowest, legend_box.min.y, legend_box.max.y)
+    } // fn legend_below_pieces
+
+    // @brief Nested: each size has one color on every piece, and the legend of the
+    // 26 sizes sits below the lowest piece, inside the content.
+    #[test]
+    fn jacket2_nested_colors_sizes_and_adds_legend() {
+        let nested = process_jacket2(true, 60.0, 300.0);
+        let (lowest, legend_top, legend_bottom) = legend_below_pieces(&nested, 26);
+        assert!(legend_top > lowest, "legend top {legend_top} above lowest piece {lowest}");
+        let content_bottom: f32 = ["y", "height"].iter()
+            .map(|a| nested.output_doc.get_attr_by_id("contentRect", a).and_then(|v| v.parse::<f32>().ok()).expect("contentRect"))
+            .sum();
+        assert!(legend_bottom <= content_bottom + 0.5, "legend bottom {legend_bottom} below content {content_bottom}");
+
+        // One stroke color per size, the same on every piece of that size.
+        let mut colors: std::collections::BTreeMap<String, std::collections::BTreeSet<String>> = Default::default();
+        fn strokes(elem: &xmltree::Element, out: &mut std::collections::BTreeSet<String>) {
+            if let Some(s) = elem.attributes.get("stroke").filter(|s| *s != "none") {
+                out.insert(s.clone());
+            } // if stroke
+            for child in elem.children.iter().filter_map(|n| n.as_element()) {
+                strokes(child, out);
+            } // for child
+        } // fn strokes
+        for set in nested.output_doc.root.children.iter().filter_map(|n| n.as_element())
+            .filter(|e| e.attributes.get("data-type").is_some_and(|t| t == "piece-set"))
+        {
+            for piece in set.children.iter().filter_map(|n| n.as_element())
+                .filter(|e| e.attributes.get("data-type").is_some_and(|t| t == "piece"))
+            {
+                strokes(piece, colors.entry(piece.attributes["data-size"].clone()).or_default());
+            } // for piece
+        } // for set
+        assert_eq!(colors.len(), 26);
+        assert!(colors.values().all(|c| c.len() == 1), "one color per size: {colors:?}");
+        let distinct: std::collections::BTreeSet<&String> = colors.values().flatten().collect();
+        assert_eq!(distinct.len(), 26, "every size its own color");
+
+        // Marker and a size tab keep the drafted colors and have no legend.
+        let marker = process_jacket2(false, 60.0, 1500.0);
+        assert!(top_group(&marker.output_doc, "size_legend").is_none());
+        assert!(marker.output_doc.to_string().contains(r#"stroke="black""#));
+    } // jacket2_nested_colors_sizes_and_adds_legend
+
+    // @brief Tiled paper: the Nested legend gets the tile rows it needs.
+    #[test]
+    fn jacket2_nested_tiled_legend_has_tile_rows() {
+        let (input_dom, _) = jacket2_handoff();
+        let settings_json = serde_json::json!({
+            "unit": "in", "mediaType": "paper", "paperType": "tiled",
+            "pageWidth": 8.5, "pageHeight": 11.0,
+            "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
+            "pieceGap": 0.125, "layoutMode": "alongGrainline",
+            "tileSize": "Letter", "tileOrientation": "Portrait"
+        }).to_string();
+        let init = do_initialize_layout(&settings_json, Some(&input_dom)).expect("initialize_layout");
+        let mut progress = |_pct: i32, _status: Option<&str>| {};
+        let nested = do_process_layout(
+            ProcessLayoutArgs {
+                settings_json: &settings_json,
+                input_dom: &input_dom,
+                initial_layout_dom: &init.initial_dom,
+                layout_h_px: init.h_px,
+                nested_multisize: true,
+                extend_media: true,
+                split_oversized: false,
+            },
+            &mut progress,
+        ).expect("tiled Nested layout");
+        let (lowest, legend_top, legend_bottom) = legend_below_pieces(&nested, 26);
+        assert!(legend_top > lowest);
+        let canvas_h: f32 = nested.output_doc.root.attributes["height"].parse().expect("height");
+        assert!(legend_bottom <= canvas_h, "legend bottom {legend_bottom} past canvas {canvas_h}");
+    } // jacket2_nested_tiled_legend_has_tile_rows
 
     // @brief Bounding box of every `data-type="piece"` group, by id.
     fn piece_boxes(doc: &Document) -> std::collections::BTreeMap<String, (f32, f32, f32, f32)> {

@@ -64,6 +64,8 @@ pub(crate) fn build_sheet_export_inputs(
     // Nested multisize: stack the sizes of each piece-set on the largest size.
     if svg_dom::center_piece_sets(&mut flat_dom) > 0 {
         svg_dom::flatten_dom(&mut flat_dom);
+        // Each size in its own color, as on the Nested tab.
+        crate::size_colors::color_pieces_by_size(&mut flat_dom);
     } // if piece-sets
     // Split the pieces as the layout did, so the pages hold the same parts.
     if let Some(spec) = divide {

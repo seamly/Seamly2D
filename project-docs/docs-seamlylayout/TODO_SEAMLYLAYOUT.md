@@ -46,10 +46,11 @@ For oversized individual-pattern pieces, ask whether to split them or enlarge th
 
 Currently in the nested layout, all pieces are black. To distinguish between sizes, each size should be assigned a unique color, all pieces of that size will be displayed in that color (cutlines, seamlines, notches, etc.)
 
-- [ ] Layout 74.1 - Assign each size a color
-- [ ] Layout 74.2 - Assign each piece its color based on its size. These colors are displayed in the Nested layout, and included in all exports except DXF (Nested can't be exported to DXF)
-- [ ] Layout 74.3 - Create a color-to-size legend. Place this legend on the Nested Layout.
-- [ ] Layout 74.4 - Test/Verify using a multisize pattern
+- [x] Layout 74.1 - Assign each size a color. `size_colors::size_palette`: smallest size first, golden-angle hue steps, relative luminance at most 0.3.
+- [x] Layout 74.2 - Assign each piece its color based on its size. These colors are displayed in the Nested layout, and included in all exports except DXF (Nested can't be exported to DXF). `color_pieces_by_size`, called by `do_process_layout` (Nested only) and `build_sheet_export_inputs` (paper-sheet PDF).
+- [x] Layout 74.3 - Create a color-to-size legend. Place this legend on the Nested Layout. `SizeLegend`: `<g id="size_legend" data-type="size_legend">`, one piece gap below the lowest piece; the media grows to hold it (tiled: more tile rows). Text modes and HPGL treat it as a label. Not on the paper-sheet PDF, which repacks the pieces.
+  - Tests: 5 `size_colors` tests; `layout_utils` `jacket2_nested_colors_sizes_and_adds_legend`, `jacket2_nested_tiled_legend_has_tile_rows`; `svg_label_text` `size_legend_text_is_label_text`; `hpgl_writer` `cut_mode_drops_the_size_legend`. `cargo test --workspace` 533 passed; `ctest --preset debug` 6 of 6. jacket2 Nested PNG render checked by eye. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
+- [ ] Layout 74.4 - Test/Verify using a multisize pattern. Next MSI: jacket2, Nested tab, then Export > SVG, PDF, PNG.
   - [ ] Layout 74.4.1 - Each piece is displayed with its size's color
   - [ ] Layout 74.4.2 - The legend appears in the Layout
   - [ ] Layout 74.4.3 - Exported files retain the colors
