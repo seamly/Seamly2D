@@ -2,6 +2,16 @@
 
 ## Current status
 
+### 2026-10-17 (evening) — Layout.77, 68 grid, 79 merged into local `run-seamlyLayout`, not pushed
+
+- User rewrote Layout.77 (piece material in Seamly2D), added Layout.79 (select height) and Layout.68.5–68.13 (scale grid) in a copy, `TODO_SEAMLYLAYOUT_updated.md`; merged into `TODO_SEAMLYLAYOUT.md`. The copy is untracked and left in place.
+- Layout.77: pattern format 0.7.6 (`v0.7.6.xsd`, piece attribute `material`); `VAbstractPiece::getMaterial`; Material list in the piece dialog after Letter; handoff has one pattern group per material (`data-material`); SeamlyLayout `material_split.rs`, material tabs over the left canvas, "Material: <m>" over the right canvas, `_<material>` in export names with several materials.
+- Agent decisions (recorded in the TODO): one stdin document with one pattern group per material; a material tab switch drops the shown layout and rebuilds the blank canvas from the submitted settings.
+- Layout.68 grid: `scaleGrid` setting; `scale_grid.rs`; not on Marker; removed from DXF; HPGL cut mode leaves it out. Grid size follows the SeamlyLayout settings unit.
+- Layout.79: `MainWindow::selectMultisizeLayoutHeight`; `data-height`; "Height <h>" over the left canvas.
+- CLAUDE.md "Seamly2D Handoff Contract" still says one pattern group; not edited (the user's CLAUDE.md edit is uncommitted).
+- Verified: `cargo test --workspace` 549 passed; `ctest --preset debug` 6 of 6; `cl /Zs` on every changed Seamly2D `.cpp`. Not run: Qt suites (new tests in `TST_SvgComponentTags`, `SettingsModelTests` ran in ctest). Next: MSI build (ask first), then user checks 74.4, 75.2, 76.2, 77.2, 78.2, 79.3–79.5, 68.10–68.13.
+
 ### 2026-10-17 (afternoon) — Layout.75, 78, 74, 76 merged into local `run-seamlyLayout`, not pushed
 
 - Layout.75: `Main.qml` tab strip in a `Flickable`; scroll bar below the tabs; mouse wheel scrolls; shown tab scrolls into view.
