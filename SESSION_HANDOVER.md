@@ -10,7 +10,9 @@
 - Code: `core/windows_foreground_window.{h,cpp}` (win32 only, `core.pri`); `MainWindow::prepareMultisizePieceLists` returns false on Cancel; `isSeamlyLayoutRunning`, `raiseSeamlyLayout`; `VTextManager::largestFittingSize` and a per-thread fit cache; `seamlyLayout_main.mm` raises its window.
 - Verified: `cl /Zs` on 6 Seamly2D sources and `seamlyLayout_main.mm`; benchmark: new search gives the same size in 400 random cases. Not run: Qt suites, new `TST_VTextManager` (next MSI; ask first). No Rust change.
 - Full CI rule: change touches `*.pro`/`*.pri` and `#if defined(Q_OS_WIN)`; merge commit has no skip-ci token.
-- Next: MSI build, `AGENT_CHECKLIST.md` section 14.
+- First MSI build failed: LNK2019 for 8 `user32` functions. Fix `4a50ccb2a0`: `core.pri` adds `LIBS += -luser32` (x64 and arm64). Pushed.
+- MSI 26.10.1709 built: Qt suites passed (`nmake check`), MSI checks passed.
+- Next: user installs the MSI and runs `AGENT_CHECKLIST.md` section 14.
 
 ### 2026-10-16 — Layout.73 unique piece names at import: merged into local `run-seamlyLayout`, not pushed
 
