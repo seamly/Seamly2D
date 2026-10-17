@@ -304,6 +304,14 @@ void PatternPieceDialog::SetPiece(const VPiece &piece)
     ui->seams_CheckBox->setChecked(piece.hasSeamAllowance());
     ui->builtIn_CheckBox->setChecked(piece.hasSeamAllowanceBuiltIn());
     ui->pieceName_LineEdit->setText(piece.GetName());
+    // A material the list does not know is added, so saving the piece keeps it.
+    int materialIndex = ui->material_ComboBox->findData(piece.getMaterial());
+    if (materialIndex < 0)
+    {
+        ui->material_ComboBox->addItem(VAbstractPiece::materialDisplayName(piece.getMaterial()), piece.getMaterial());
+        materialIndex = ui->material_ComboBox->count() - 1;
+    }
+    ui->material_ComboBox->setCurrentIndex(materialIndex);
     setPieceColor(piece.getColor());
     setPieceFill(piece.getFill());
     setInLayout(piece.isInLayout());
@@ -2662,6 +2670,7 @@ VPiece PatternPieceDialog::CreatePiece() const
     piece.SetSeamAllowanceBuiltIn(ui->builtIn_CheckBox->isChecked());
     piece.setHideSeamLine(ui->hideSeamLine_CheckBox->isChecked());
     piece.SetName(ui->pieceName_LineEdit->text());
+    piece.setMaterial(ui->material_ComboBox->currentData().toString());
     piece.setColor(getPieceColor());
     piece.setFill(getPieceFill());
     piece.setInLayout(isInLayout());
@@ -3269,6 +3278,13 @@ void PatternPieceDialog::initializePropertiesTab()
     ui->pieceName_LineEdit->setClearButtonEnabled(true);
     ui->letter_LineEdit->setClearButtonEnabled(true);
     ui->annotation_LineEdit->setClearButtonEnabled(true);
+
+    // Item text is translated; item data is the name the pattern file stores.
+    for (const QString &material : VAbstractPiece::materialNames())
+    {
+        ui->material_ComboBox->addItem(VAbstractPiece::materialDisplayName(material), material);
+    }
+    ui->material_ComboBox->setCurrentIndex(ui->material_ComboBox->findData(VAbstractPiece::defaultMaterial()));
 
     QColor color = QColor(Qt::white);
     ui->color_Label->setText(color.name());
