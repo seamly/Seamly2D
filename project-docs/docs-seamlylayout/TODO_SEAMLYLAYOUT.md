@@ -204,10 +204,12 @@ Cause (MSI 26.10.1311): PDF used 72 dpi instead of SVG’s 96 dpi, scaling pages
 - Nested `jacket2_40-nested_146_202610131245.pdf`: `4608 × 5003` pt. Expected `3456 × 3752` pt.
 - EPS and PS of the same tabs are correct: `0.75` scale, BoundingBox `3456 36000`.
 
-- [ ] Layout.68.5 In Settings create an option to add a verify scale grid; if pattern unit=(mm or cm) then grid is 9 blocks arranged 3x3 --> 3cm wide x 3cm high, if pattern unit=inches then grid is 4 blocks arranged 2x2 (2 inches wide x 2 inches high)
-- [ ] Layout.68.6 When creating layouts, place the grid after all other pieces have been placed. Exception: Do not place a grid on a Marker layout.
-- [ ] Layout.68.7 When creating DXF exports, exclude the grid.
-- [ ] Layout.68.9 When creating HPGL cutter exports, exclude the grid.
+- [x] Layout.68.5 In Settings create an option to add a verify scale grid; if pattern unit=(mm or cm) then grid is 9 blocks arranged 3x3 --> 3cm wide x 3cm high, if pattern unit=inches then grid is 4 blocks arranged 2x2 (2 inches wide x 2 inches high)
+- [x] Layout.68.6 When creating layouts, place the grid after all other pieces have been placed. Exception: Do not place a grid on a Marker layout.
+- [x] Layout.68.7 When creating DXF exports, exclude the grid.
+- [x] Layout.68.9 When creating HPGL cutter exports, exclude the grid.
+  - Done: `SettingsModel::scaleGrid` (`scaleGrid` in the settings file and JSON), Settings checkbox under Piece Gap; `scale_grid.rs`, placed by `do_process_layout` one piece gap below the pieces and the legend, media grows (tiled: more rows); Marker (more than one size, no piece-sets) gets none. DXF: `clone_dxf_layout_doc` removes it. HPGL: mark class, so cut mode leaves it out. Not on the paper-sheet PDF, which repacks the pieces.
+  - Tests: 4 `scale_grid` tests; `layout_utils` `jacket2_scale_grid_on_every_layout_but_marker`; `hpgl_writer` `cut_mode_drops_the_scale_grid`; `SettingsModelTests::scaleGrid_defaultsOffAndRoundtrips`. Doc: `SVG-DATA-ATTRIBUTES.md`, "Scale check grid".
 - [ ] Layout.68.10 Test/Verify - Check Settings for grid option.
 - [ ] Layout.68.11 Test/Verify - Check grid in layouts; Check grid is not included in Marker.
 - [ ] Layout.68.12 Test/Verify - Check grid in exports; Check grid is not in DXF or HPGL cutter files.

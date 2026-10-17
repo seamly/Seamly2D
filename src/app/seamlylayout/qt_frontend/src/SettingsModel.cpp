@@ -369,6 +369,13 @@ void SettingsModel::setFabricFolded(bool v)
     emit fabricFoldedChanged();
 } // setFabricFolded()
 
+void SettingsModel::setScaleGrid(bool v)
+{
+    if (m_scaleGrid == v) return;
+    m_scaleGrid = v;
+    emit scaleGridChanged();
+} // setScaleGrid()
+
 void SettingsModel::setPieceGap(double v)
 {
     if (qFuzzyCompare(m_pieceGap, v)) return;
@@ -659,6 +666,9 @@ bool SettingsModel::load(const QString &path)
     if (obj.contains(QStringLiteral("fabricFolded")))
         setFabricFolded(obj[QStringLiteral("fabricFolded")].toBool());
 
+    if (obj.contains(QStringLiteral("scaleGrid")))
+        setScaleGrid(obj[QStringLiteral("scaleGrid")].toBool());
+
     if (obj.contains(QStringLiteral("unit")))
         setUnit(obj[QStringLiteral("unit")].toString());
 
@@ -729,6 +739,7 @@ bool SettingsModel::load(const QString &path)
     emit rotationStepChanged();
     emit noGrainlineRotationChanged();
     emit fabricFoldedChanged();
+    emit scaleGridChanged();
     emit pieceGapChanged();
     emit pieceGapPxChanged();
     emit unitChanged();
@@ -774,6 +785,7 @@ bool SettingsModel::save(const QString &path)
     obj[QStringLiteral("rotationStep")]  = m_rotationStep;
     obj[QStringLiteral("noGrainlineRotation")] = m_noGrainlineRotation;
     obj[QStringLiteral("fabricFolded")]  = m_fabricFolded;
+    obj[QStringLiteral("scaleGrid")]     = m_scaleGrid;
     obj[QStringLiteral("unit")]          = m_unit;
     obj[QStringLiteral("mediaType")]     = m_mediaType;
     obj[QStringLiteral("paperType")]     = m_paperType;
@@ -816,6 +828,7 @@ QString SettingsModel::toJson() const
     obj[QStringLiteral("rotationStep")]  = m_rotationStep;
     obj[QStringLiteral("noGrainlineRotation")] = m_noGrainlineRotation;
     obj[QStringLiteral("fabricFolded")]  = m_fabricFolded;
+    obj[QStringLiteral("scaleGrid")]     = m_scaleGrid;
     obj[QStringLiteral("unit")]          = m_unit;
     obj[QStringLiteral("mediaType")]     = m_mediaType;
     obj[QStringLiteral("paperType")]     = m_paperType;
@@ -846,6 +859,7 @@ void SettingsModel::resetToDefaults()
     setRotationStep(0.0);
     setNoGrainlineRotation(QStringLiteral("upright"));
     setFabricFolded(false);
+    setScaleGrid(false);
     setUnit(QStringLiteral("in"));
     setMediaType(QStringLiteral("paper"));
     setPaperType(QStringLiteral("sheet"));

@@ -402,6 +402,25 @@ Dialog {
                         + "• Smaller gap = faster layout run — 0.05–0.10 in (1–3 mm) is typical."
                 } // Text pieceGapGuidance
 
+                // Scale check grid: measure it on a print to check the scale.
+                // Every layout except Marker gets it; DXF and HPGL cut files leave it out.
+                CheckBox {
+                    id:                scaleGridCheck
+                    Layout.columnSpan: 2
+                    text:              "Add scale check grid (3 × 3 cm, or 2 × 2 in for inches)"
+                    checked:           root.model ? root.model.scaleGrid : false
+                    onToggled:         if (root.model) root.model.scaleGrid = checked
+
+                    contentItem: Text {
+                        text:           scaleGridCheck.text
+                        color:          Theme.textOnDark
+                        font.pixelSize: Theme.fontSizeNormal
+                        leftPadding:    scaleGridCheck.indicator.width + scaleGridCheck.spacing
+                        verticalAlignment: Text.AlignVCenter
+                        wrapMode:       Text.WordWrap
+                    } // contentItem Text
+                } // CheckBox scaleGrid
+
             } // GridLayout layoutOptionsGrid
 
             // -----------------------------------------------------------
@@ -952,6 +971,9 @@ Dialog {
 
             // Fabric-folded checkbox
             fabricFoldedCheck.checked = root.model.fabricFolded
+
+            // Scale check grid checkbox
+            scaleGridCheck.checked = root.model.scaleGrid
 
             // Media-type radio buttons
             mediaTypePaper.checked  = (root.model.mediaType === "paper")

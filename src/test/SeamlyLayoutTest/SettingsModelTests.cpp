@@ -59,6 +59,7 @@ private slots:
     // Pieces without a grainline
     void noGrainlineRotation_defaultsToUpright();
     void noGrainlineRotation_roundtripAndJson();
+    void scaleGrid_defaultsOffAndRoundtrips();
     void noGrainlineRotation_unknownValueIsUpright();
 
     // Retired keys
@@ -304,6 +305,26 @@ void SettingsModelTests::noGrainlineRotation_roundtripAndJson()
     SettingsModel reader;
     QVERIFY(reader.load(path));
     QCOMPARE(reader.noGrainlineRotation(), QStringLiteral("free"));
+}
+
+// @brief The scale check grid is off by default; the file and the Rust settings JSON carry it.
+void SettingsModelTests::scaleGrid_defaultsOffAndRoundtrips()
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("settings.json"));
+
+    SettingsModel writer;
+    QCOMPARE(writer.scaleGrid(), false);
+    writer.setScaleGrid(true);
+    QVERIFY(writer.save(path));
+    QVERIFY(writer.toJson().contains(QStringLiteral("\"scaleGrid\":true")));
+
+    SettingsModel reader;
+    QVERIFY(reader.load(path));
+    QCOMPARE(reader.scaleGrid(), true);
+    reader.resetToDefaults();
+    QCOMPARE(reader.scaleGrid(), false);
 }
 
 // @brief An unknown value is coerced to "upright".

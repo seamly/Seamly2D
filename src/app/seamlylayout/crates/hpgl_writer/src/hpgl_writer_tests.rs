@@ -192,6 +192,16 @@ fn cut_mode_drops_the_size_legend() {
 } // cut_mode_drops_the_size_legend
 
 #[test]
+fn cut_mode_drops_the_scale_grid() {
+    let body = [typed_path("cutline", "M0 0 L10 0"), typed_path("scale_grid", "M0 20 L10 20")].concat();
+    let options = HpglOptions { mode: HpglMode::Cut, pens: PenMap::default() };
+    let program = svg_to_hpgl(&page(&body), &options).unwrap();
+    assert!(!program.contains("SP2;"), "{program}");
+    let plotted = plot(&page(&body));
+    assert!(plotted.contains("SP2;"), "grid drawn with the mark pen: {plotted}");
+} // cut_mode_drops_the_scale_grid
+
+#[test]
 fn cut_mode_without_cut_lines_is_an_error() {
     let options = HpglOptions { mode: HpglMode::Cut, pens: PenMap::default() };
     let error = svg_to_hpgl(&page(&typed_path("seamline", "M0 0 L10 0")), &options).unwrap_err();

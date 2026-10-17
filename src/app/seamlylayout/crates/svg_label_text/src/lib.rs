@@ -7,8 +7,9 @@
 //
 // Seamly2D writes each label line as a `<text>` inside a
 // `<g data-type="piece_label">` or `<g data-type="pattern_label">` group.
-// SeamlyLayout adds `<g data-type="size_label">` to each multisize piece and the
-// Nested size legend, `<g data-type="size_legend">`.
+// SeamlyLayout adds `<g data-type="size_label">` to each multisize piece, the
+// Nested size legend, `<g data-type="size_legend">`, and the scale check grid,
+// `<g data-type="scale_grid">`.
 // This crate changes only the `<text>` elements in those groups. Group ids, `data-*`
 // attributes and the group structure stay the same in every mode.
 //
@@ -28,7 +29,7 @@ use xmltree::{Element, XMLNode};
 pub use font_embedding::SINGLE_LINE_FONT_FAMILY;
 
 /// `data-type` values of the groups whose text this crate rewrites.
-const LABEL_TYPES: [&str; 4] = ["piece_label", "pattern_label", "size_label", "size_legend"];
+const LABEL_TYPES: [&str; 5] = ["piece_label", "pattern_label", "size_label", "size_legend", "scale_grid"];
 
 /// @brief How label text is written in an exported SVG.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
