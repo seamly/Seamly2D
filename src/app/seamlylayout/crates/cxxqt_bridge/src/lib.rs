@@ -22,6 +22,9 @@ pub use piece_extractor::{extract_piece_rects, hoist_layout_units, hoist_tagged_
 // Gives every tagged piece a unique name at import.
 mod piece_naming;
 
+// Regroups the pieces of a Nested multisize layout by size, for SVG export.
+mod size_groups;
+
 mod layout_assembler;
 pub use layout_assembler::{create_layout, create_initial_layout_dom, remove_color_blocks, trim_bottom};
 
@@ -2657,6 +2660,7 @@ impl qobject::AppController {
     // exports::do_export_svg.
     // `text_mode` picks how label text is written (see svg_label_text); an
     // unknown mode is an error, never a silent fallback.
+    // A Nested multisize layout is written with one group per size (size_groups).
     // Called by QML 'Export SVG' submenu handler: onExportSvgRequested(mode) → appController.exportSvg(path, mode)
     fn export_svg(
         mut self: std::pin::Pin<&mut Self>,
@@ -2690,6 +2694,12 @@ impl qobject::AppController {
         self.as_mut().set_export_progress(0);
         self.as_mut().set_export_status_message(cxx_qt_lib::QString::from("Exporting SVG…"));
         self.as_mut().progress_updated(0);
+
+        // Nested multisize layout: one group per size, so an editor can hide sizes.
+        let size_groups = size_groups::group_pieces_by_size(&mut layout_doc);
+        if size_groups > 0 {
+            log_to_file(&format!("[lib.rs AppController] export_svg(): 2a grouped the pieces into {size_groups} size groups"));
+        } // if size_groups
 
         // Rewrite label text on the export copy only; the canvas DOM is untouched.
         let warnings = match mode {

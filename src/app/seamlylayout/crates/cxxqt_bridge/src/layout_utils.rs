@@ -1485,6 +1485,58 @@ mod tests {
         assert_eq!(svg.matches(r#"data-type="piece""#).count(), 208, "every size of every piece placed");
     } // jacket2_nested_packs_eight_piece_sets
 
+    // @brief Bounding box of every `data-type="piece"` group, by id.
+    fn piece_boxes(doc: &Document) -> std::collections::BTreeMap<String, (f32, f32, f32, f32)> {
+        fn walk(elem: &xmltree::Element, boxes: &mut std::collections::BTreeMap<String, (f32, f32, f32, f32)>) {
+            if elem.attributes.get("data-type").is_some_and(|t| t == "piece") {
+                let id = elem.attributes.get("id").cloned().unwrap_or_default();
+                let b = crate::bbox_from_group_geometry(elem).expect("piece geometry");
+                boxes.insert(id, (b.min.x, b.min.y, b.max.x, b.max.y));
+            } // if piece
+            for child in elem.children.iter().filter_map(|n| n.as_element()) {
+                walk(child, boxes);
+            } // for child
+        } // fn walk
+        let mut boxes = std::collections::BTreeMap::new();
+        walk(&doc.root, &mut boxes);
+        boxes
+    } // fn piece_boxes
+
+    // @brief The Nested SVG export holds one group per size, largest size first,
+    // 8 pieces each, every piece where the layout put it.
+    #[test]
+    fn jacket2_nested_svg_export_groups_pieces_by_size() {
+        let nested = process_jacket2(true, 60.0, 300.0);
+        let mut doc = nested.output_doc.clone();
+        crate::layout_assembler::remove_color_blocks(&mut doc);
+        let before = piece_boxes(&doc);
+
+        assert_eq!(crate::size_groups::group_pieces_by_size(&mut doc), 26);
+        let groups: Vec<&xmltree::Element> = doc.root.children.iter()
+            .filter_map(|n| n.as_element())
+            .filter(|e| e.attributes.get("data-type").is_some_and(|t| t == "size"))
+            .collect();
+        let sizes: Vec<&str> = groups.iter().map(|g| g.attributes["data-size"].as_str()).collect();
+        let mut expected = jacket2_handoff().1;
+        expected.reverse();
+        assert_eq!(sizes, expected, "largest size first");
+        for group in &groups {
+            let size = &group.attributes["data-size"];
+            let pieces: Vec<&xmltree::Element> = group.children.iter().filter_map(|n| n.as_element()).collect();
+            assert_eq!(pieces.len(), 8, "size {size}");
+            assert!(pieces.iter().all(|p| p.attributes.get("data-size") == Some(size)), "size {size}");
+        } // for group
+        assert!(!doc.to_string().contains(r#"data-type="piece-set""#), "no piece-set left");
+
+        let after = piece_boxes(&doc);
+        assert_eq!(after.len(), 208);
+        for (id, b) in &before {
+            let a = after[id];
+            let moved = (a.0 - b.0).abs().max((a.1 - b.1).abs()).max((a.2 - b.2).abs()).max((a.3 - b.3).abs());
+            assert!(moved < 0.01, "{id} moved by {moved}");
+        } // for piece
+    } // jacket2_nested_svg_export_groups_pieces_by_size
+
     // @brief Marker packs every size of every piece as its own unit, numbered by its piece-set.
     #[test]
     fn jacket2_marker_places_every_size() {
