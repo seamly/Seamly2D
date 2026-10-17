@@ -94,6 +94,13 @@ Currently in the import left canvas, all pieces are displayed together regardles
   - [ ] Layout.77.2.2 - check left import canvas that the pieces are correct for each Material tab.
   - [ ] Layout.77.2.3 - check right layout canvas that the Material type is displayed above the canvas.
   - [ ] Layout.77.2.4 - check right layout canvas that the pieces are correct for that material.
+  - [ ] Layout.77.2.5 - check that .sm2d files contain pieces with material attribute
+  - [ ] Layout.77.2.6 - check that older .sm2d files update to new schema properly
+- [x] Layout.77.3 - Update Schema
+  - [x] Layout.77.3.1 - Create a new `.sm2d` schema: foldline node ids, schema version bump
+    - Done for the material: `v0.7.6.xsd` adds the optional piece attribute `material`; `VPatternConverter` max version 0.7.6. Fold line node ids belong to Layout.80 (Seamly2D.8.2); 0.7.6 is not released yet, so Layout.80 can add them to the same schema version.
+  - [x] Layout.77.3.2 - Create a converter for older files
+    - Done: `VPatternConverter::toVersion0_7_6` moves 0.7.5 files to 0.7.6. A piece without `material` reads as Fabric; the next save writes the attribute. Check: Layout.77.2.6.
 
 ### [ ] Task Layout.78 - Multisize - Nested - SVG export - place each size in its own group
 
@@ -117,6 +124,22 @@ Currently in Seamly2D, a pattern with a `.smms` measurement file hands off every
 - [ ] Layout.79.3 - Test/Verify - the 'Select Height for Multisize Layouts' appears when user selects 'Layout' icon
 - [ ] Layout.79.4 - Test/Verify - 'Height <height size>' appears over left input canvas
 - [ ] Layout.79.5 - Test/Verify - Generated layouts are generated correctly
+
+## [ ] Task Layout.80 — Fold lines (mirror lines)
+
+A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. `FoldPosition` is free text.
+
+- [ ] Seamly2D.8.1 implement foldline:
+  - [ ] Seamly2D.8.1.1 - Application Preferences - implement default Foldline style properties.
+  - [ ] Seamly2D.8.1.2 - Piece Mode - Implement a 'Foldline' check option in 'Piece Properties > Path > node context menu'; user may select two adjacent nodes along the path --> must be two (not one, not three).
+  - [ ] Seamly2D.8.1.3 - Canvas - draw the foldline with its line style; a foldline is not part of the cutline or the seamline; no seam allowance can be added to this line; the "on fold" flag follows the foldline
+- [ ] Seamly2D.8.2 Update Schema:
+  - [ ] Seamly2D.8.2.1 - Create a new `.sm2d` schema: fold line node ids, schema version bump
+  - [ ] Seamly2D.8.2.2 - Create a converter for older files
+- [ ] Seamly2D.8.3 In Piece mode implement a new 'Piece Mirror' tool - mirror the half piece across the fold line
+- [ ] Seamly2D.8.4 Handoff SVG: `data-on-fold` on the piece `<g>`, a `fold_line` component group with the two points; update `SVG-DATA-ATTRIBUTES.md` and `NEW-ATTRIBUTES.csv`
+- [ ] Seamly2D.8.5 Unit tests: schema round-trip, handoff attributes
+- [ ] Seamly2D.8.6 SeamlyLayout side: Layout.16
 
 ## VERIFY
 
