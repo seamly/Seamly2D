@@ -458,8 +458,10 @@ private:
     bool               updateMeasurements(const QString &fileName, int size, int height);
     bool               recalculateAtSize(int size, int height);
     QHash<quint32, VPiece> currentLayoutPieces() const;
-    void               prepareMultisizePieceLists();
+    bool               prepareMultisizePieceLists();
     void               checkRequiredMeasurements(const MeasurementDoc *m);
+    bool               isSeamlyLayoutRunning() const;
+    void               raiseSeamlyLayout() const;
 
     void               reopenFilesAfterCrash(QStringList &args);
     void               DoExport(const VCommandLinePtr& expParams);

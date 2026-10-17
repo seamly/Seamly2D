@@ -81,6 +81,7 @@
 #include "tst_exportformatcombobox.h"
 #include "tst_dataroot.h"
 #include "tst_vtoolmove.h"
+#include "tst_vtextmanager.h"
 
 #include "../vmisc/def.h"
 #include "../qmuparser/qmudef.h"
@@ -237,6 +238,7 @@ int main(int argc, char** argv)
     ASSERT_TEST(new TST_ExportFormatCombobox());
     ASSERT_TEST(new TST_DataRoot());
     ASSERT_TEST(new TST_VToolMove());
+    ASSERT_TEST(new TST_VTextManager());
 
     return status;
 }

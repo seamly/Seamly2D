@@ -51,6 +51,7 @@
 #include <QDate>
 #include <QFileInfo>
 #include <QFontMetrics>
+#include <QHash>
 #include <QLatin1String>
 #include <QRegularExpression>
 #include <QApplication>
@@ -292,6 +293,29 @@ const TextLine& VTextManager::GetSourceLine(int i) const
 //---------------------------------------------------------------------------------------------------------------------
 void VTextManager::FitFontSize(qreal fW, qreal fH)
 {
+    // Every pixel size loads its own font engine, which is slow. A multisize layout fits the same lines into
+    // the same box once for each size, so the result of each fit is kept. The fit sets every pixel size it
+    // measures, so the key ignores the current one. Text lengths in the key keep two different line lists
+    // from making the same key.
+    thread_local QHash<QString, int> fittedSizes;
+    QFont keyFont = m_font;
+    keyFont.setPixelSize(MIN_FONT_SIZE);
+    QString key = QString::number(fW, 'g', 17) + QLatin1Char(' ') + QString::number(fH, 'g', 17)
+                  + QLatin1Char(' ') + keyFont.key();
+    for (const TextLine &tl : m_liLines)
+    {
+        key += QLatin1Char(' ') + QString::number(tl.m_iFontSize) + QLatin1Char(tl.bold ? 'b' : '-')
+               + QLatin1Char(tl.italic ? 'i' : '-') + QString::number(tl.m_text.size()) + QLatin1Char(':')
+               + tl.m_text;
+    }
+
+    const auto fitted = fittedSizes.constFind(key);
+    if (fitted != fittedSizes.constEnd())
+    {
+        SetFontSize(fitted.value());
+        return;
+    }
+
     int iFS = 0;
     if (GetSourceLinesCount() > 0)
     {//division by zero
@@ -325,22 +349,59 @@ void VTextManager::FitFontSize(qreal fW, qreal fH)
     }
     if (iMaxLen > fW)
     {
-        QFont fnt = m_font;
-        fnt.setBold(maxLine.bold);
-        fnt.setItalic(maxLine.italic);
-
-        int lineLength = 0;
-        do
-        {
-            --iFS;
-            fnt.setPixelSize(iFS + maxLine.m_iFontSize);
-            QFontMetrics fm(fnt);
-            lineLength = fm.horizontalAdvance(maxLine.m_text);
-        }
-        while (lineLength > fW && iFS > MIN_FONT_SIZE);
+        iFS = largestFittingSize(m_font, maxLine, iFS, iMaxLen, fW);
     }
+
+    if (fittedSizes.size() >= 1000)
+    {
+        fittedSizes.clear();
+    }
+    fittedSizes.insert(key, iFS);
+
     SetFontSize(iFS);
     qDebug() << "Font size" << GetSourceLinesCount() << iFS;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+// @brief VTextManager::largestFittingSize returns the largest base font size below tooWideSize at which line fits
+// into width.
+// @param font font family and style; the line sets bold, italic and its own size increment
+// @param tooWideSize base font size at which the line is wider than width
+// @param tooWideWidth line width in pixels at tooWideSize
+// @param width available width in pixels
+// @return MIN_FONT_SIZE when no larger size fits
+//---------------------------------------------------------------------------------------------------------------------
+int VTextManager::largestFittingSize(const QFont &font, const TextLine &line, int tooWideSize, int tooWideWidth,
+                                     qreal width)
+{
+    QFont fnt = font;
+    fnt.setBold(line.bold);
+    fnt.setItalic(line.italic);
+
+    const auto lineWidth = [&fnt, &line](int size)
+    {
+        fnt.setPixelSize(size + line.m_iFontSize);
+        return QFontMetrics(fnt).horizontalAdvance(line.m_text);
+    };
+
+    // Each pixel size loads its own font engine, which is slow. The line width grows about linearly with the
+    // pixel size, so start at the estimated size and step from there, not down from tooWideSize.
+    int size = tooWideSize - 1;
+    if (tooWideWidth > 0)
+    {
+        size = qFloor(width * (tooWideSize + line.m_iFontSize) / tooWideWidth) - line.m_iFontSize;
+    }
+    size = qMax(MIN_FONT_SIZE, qMin(size, tooWideSize - 1));
+
+    while (size > MIN_FONT_SIZE && lineWidth(size) > width)
+    {
+        --size;
+    }
+    while (size + 1 < tooWideSize && lineWidth(size + 1) <= width)
+    {
+        ++size;
+    }
+    return size;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

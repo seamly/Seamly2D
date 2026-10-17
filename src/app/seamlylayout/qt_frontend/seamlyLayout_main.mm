@@ -329,6 +329,16 @@ int main(int argc, char *argv[])
 
             QObject *const window = rootObjects.constFirst();
 
+            // Bring the window to the front before the import. Seamly2D starts
+            // SeamlyLayout while its own window is in front; without this the
+            // new window can open behind it. On Windows this works because
+            // Seamly2D gives this process the foreground right
+            // (AllowSetForegroundWindow) when it starts it.
+            if (auto *const quickWindow = qobject_cast<QQuickWindow *>(window)) {
+                quickWindow->raise();
+                quickWindow->requestActivate();
+            } // if the root object is a window
+
             if (startupOptions.hasFile()) {
                 // Main.qml: function openSvgFile(localPath) — the same entry
                 // point the Import SVG file dialog uses, so the command line and

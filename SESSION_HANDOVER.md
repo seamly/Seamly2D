@@ -2,6 +2,16 @@
 
 ## Current status
 
+### 2026-10-17 — Seamly2D.12 SeamlyLayout opens behind Seamly2D: merged into local `run-seamlyLayout`, not pushed
+
+- User report: jacket2, Layout, "SeamlyLayout never opens". Found: it opened behind Seamly2D after Seamly2D did not respond for about 26 s; the user pressed Layout again and got two windows.
+- Cause of the 26 s: visible piece labels. Pattern copies on installed 26.10.1615: 4 s without labels, 20 s with. cdb stack samples: `FitFontSize` loads a font engine per pixel size.
+- User decisions: do window-in-front, progress dialog with Cancel, label speed fix; one SeamlyLayout per Seamly2D.
+- Code: `core/windows_foreground_window.{h,cpp}` (win32 only, `core.pri`); `MainWindow::prepareMultisizePieceLists` returns false on Cancel; `isSeamlyLayoutRunning`, `raiseSeamlyLayout`; `VTextManager::largestFittingSize` and a per-thread fit cache; `seamlyLayout_main.mm` raises its window.
+- Verified: `cl /Zs` on 6 Seamly2D sources and `seamlyLayout_main.mm`; benchmark: new search gives the same size in 400 random cases. Not run: Qt suites, new `TST_VTextManager` (next MSI; ask first). No Rust change.
+- Full CI rule: change touches `*.pro`/`*.pri` and `#if defined(Q_OS_WIN)`; merge commit has no skip-ci token.
+- Next: MSI build, `AGENT_CHECKLIST.md` section 14.
+
 ### 2026-10-16 — Layout.73 unique piece names at import: merged into local `run-seamlyLayout`, not pushed
 
 - User request: unique piece names before a layout. Individual `Piece_<n>[_<name>][_<letter>]`; multisize `Size_<size>_Piece_<n>[_<name>][_<letter>]`.

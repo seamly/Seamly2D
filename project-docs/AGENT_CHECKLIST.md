@@ -19,6 +19,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.70.5 | 12 | Left-out pieces warning |
 | Layout.28.7 | 13 | Built-in seam line |
 | Layout.73.5 | 1, 5 | Unique piece names |
+| Seamly2D.12.8 | 14 | SeamlyLayout opens in front |
 
 ## 0. Install
 
@@ -173,3 +174,21 @@ Pattern: `C:\Users\susan\seamly2d\patterns\trousers.sm2d` (individual).
 - [ ] Piece Properties > Hide seam line. Press Layout: the piece has a `cutline` group and no `seamline` group.
 - [ ] Do not save the pattern changes.
 - Seamly2D piece mode draws no seam line for this piece. Not in Layout.28 scope.
+
+## 14. jacket2: SeamlyLayout opens in front
+
+Needs the next MSI.
+
+- [ ] Start Seamly2D from the Start menu. Open `C:\Users\susan\seamly2d\patterns\jacket2_40-146.sm2d`.
+- [ ] Piece mode: the Detail 1 and Detail 4 labels look as before.
+- [ ] Press Layout.
+  - [ ] A progress dialog shows "Preparing size 220 (1 of 26) for SeamlyLayout", then the other sizes.
+  - [ ] The Seamly2D title never shows "Not Responding".
+  - [ ] SeamlyLayout opens in front of Seamly2D, with the pieces. Expected: well under 26 s (the time before).
+- [ ] Press Layout again: SeamlyLayout comes to the front.
+- [ ] Press Draft mode, then Layout:
+  - [ ] Message "SeamlyLayout is already open".
+  - [ ] After OK, SeamlyLayout comes to the front. Only one SeamlyLayout window.
+- [ ] Close SeamlyLayout. Press Layout, then Cancel in the progress dialog:
+  - [ ] Seamly2D returns to Draft mode. No SeamlyLayout opens.
+  - [ ] Press Layout again: SeamlyLayout opens.

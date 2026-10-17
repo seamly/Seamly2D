@@ -14,3 +14,9 @@ SOURCES += \
     $$PWD/vformulapropertyeditor.cpp \
     $$PWD/vtooloptionspropertybrowser.cpp \
     $$PWD/vcmdexport.cpp
+
+# Windows only: SeamlyLayout opens in front of Seamly2D.
+win32 {
+    HEADERS += $$PWD/windows_foreground_window.h
+    SOURCES += $$PWD/windows_foreground_window.cpp
+}
