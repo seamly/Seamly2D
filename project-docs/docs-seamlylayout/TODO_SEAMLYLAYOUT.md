@@ -63,16 +63,6 @@ Currently in multisize layouts, the size tabs continue past the right edge of th
 - [x] Layout 75.1 - add a horizontal scrollbar to the multisize right canvas that allows scrolling to view all size tabs. `Main.qml`: `Flickable layoutViewTabStrip` holds the `TabBar`; the scroll bar sits below the tabs and shows only when tabs are out of view; the mouse wheel scrolls the tabs; the shown tab scrolls into view. Checked: QML compiles (debug build, `ctest --preset debug` 6 of 6); a `qml` test render with 29 tabs in a 700 px window shows the bar and the selected tab.
 - [ ] Layout 75.2 - Test/Verify - All size tabs are accessible in the multisize canvas. Next MSI: jacket2 (26 sizes), Create Layout; scroll to the last tab with the bar and with the mouse wheel.
 
-### [ ] Task Layout.78 - Multisize - Nested - SVG export - place each size in its own layout
-
-Renumbered from a second Layout.75.
-
-Currently in multisize SVG exports, the pieces are grouped together, because they need to be grouped this way for layout, adjust mode, etc. For SVG export the sizes must be grouped together, without changing the position of any piece, to enable the user to select a single size and hide the remainder in upstream graphics software like Inkscape.
-
-- [x] Task Layout.78.1 - when exporting an SVG for a nested layout, group the pieces according to size, so that there is a group element for each size that contains all the pieces of that size. Order the size groups in the SVG layout from the largest (so the largest size is underneath all other sizes in the svg display canvas) to the smallest (so it is highest in the svg display canvas) to enable easy selection of each size. The exported SVG should be flat (contains no transforms except for text elements).
-  - Done: `size_groups::group_pieces_by_size`, called by `export_svg`. Groups `<g id="size_<size>" data-type="size" data-size="<size>">`, largest first; piece-sets removed; `flatten_dom` first. Only a layout with top-level piece-sets (Nested) changes. Tests: 4 `size_groups` tests; `layout_utils` `jacket2_nested_svg_export_groups_pieces_by_size` (26 groups of 8, no piece moves). Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested SVG export".
-- [ ] Task Layout.78.2 - Test/Verify - Export a multisize file to SVG, open the SVG file using the View feature, confirm that the file is grouped by size. Next MSI: jacket2 Nested tab, Export > SVG; in Inkscape, Objects panel lists `size_720` … `size_220`; hiding one group hides one size.
-
 ### [ ] Task Layout.76 - Multisize - each piece must have the size in a label
 
 Currently in Multisize layouts, the pattern pieces don't display the size. Add a single-line text label, or 'Size label', that displays 'Size <size>', where the bottom of the label is 5 pixels above the top of the grainline.
@@ -83,22 +73,47 @@ Currently in Multisize layouts, the pattern pieces don't display the size. Add a
   - Tests: 5 `size_labels` tests (one lays out a sideways grainline and checks the label is level, 5 px above the top); `layout_utils` `jacket2_size_labels_reach_the_exports` (8 labels on Size 300, 8 DXF texts). Doc: `SVG-DATA-ATTRIBUTES.md`, "Size labels".
 - [ ] Task Layout.76.2 - Test/Verify - Check that exports include the size label. Next MSI: a multisize pattern with visible grainlines; the left canvas shows "Size <size>" above each grainline; Size tab exports (SVG, PDF, DXF) show it.
 
-### [ ] Task Layout.77 - Import - Separate pieces into fabric types; display on separate tabs in left import canvas
+### [ ] Task Layout.77 - Import - Separate pieces into fabric, a.k.a 'Material'; display on separate tabs in left import canvas
 
 Currently in the import left canvas, all pieces are displayed together regardless of the fabric type. From Seamly2D, separate pieces into fabric type--> read each piece and create a list of fabric types; group pieces by fabric type; create separate stringified svgs for each fabric type; display each stringified svg in separate tabs in the import left canvas where the tab contains the name of the fabric type. 
 
-- [ ] Layout.77.1 - implement fabric analysis when passing data from Seamly2D to SeamlyLayout; 
-  When there are multiple fabric types:
-  - [ ] Layout.77.1 - in Seamly2D create a stringified SVG for each fabric type; 
-  - [ ] Layout.77.2 - in SeamlyLayout, in the left import canvas, display each stringified SVG in its own tab labeled with the fabric type; the user can select the fabric tab to display;
-  - [ ] Layout.77.3 - in SeamlyLayout, when the user clicks on 'Create Layout', 
-    - [ ] Layout.77.3.1 - create layout(s) for the currently selected import fabric tab;
-    - [ ] Layout.77.3.2 - display the fabric type above the right layout canvas
-    - [ ] Layout.77.3 - In SeamlyLayout, during export, append the currently selected '_<fabric type>' before the date stamp in the exported file name
-- [ ] Layout.77.2 - Test/Verify - check each for individual size and multisize patterns:
-  - [ ] Layout.77.2.1 - pieces are displayed in 'fabric type' tabs in the left import canvas
-  - [ ] Layout.77.2.2 - layouts in the right layout canvas are displayed with 'Fabric Type' above the canvas
-  - [ ] Layout.77.2.3 - layouts in the right layout canvas are derived from the currently selected fabric tab in the left import canvas
+- [ ] Layout.77.0 - Update Seamly2D to track Material type for each piece:
+  - Note: Currently in 'Seamly2D > Piece Mode > Pattern Piece Tool > Labels > Piece Label (or Pattern Label) > Edit Label > Insert'. When the user clicks the 'Insert' dropdown box they can select 'Material: Fabric', 'Material: Interfacing', 'Material: Interlining', and 'Material: Lining' which places the text 'Fabric', 'Interfacing', 'Interlining', or 'Lining' into the label.
+  - [ ] In the .sm2d file, add a new 'material' attribute to Piece group elements.
+  - [ ] In 'Pattern Piece Tool > Properties > Properties', add a new 'Material' dropdown field after the 'Letter' field and before the 'Quantity' field. The dropdown selections are 'Fabric', 'Lining', 'Interfacing', 'Interlining' (we may add more choices in the future). Save the user's selection to a new attribute 'material' in the Piece group definition. 
+  - [ ] When handing off to SeamlyLayout, create a separate handoff for each Material type found in the pieces
+- [ ] Layout.77.1 - Update SeamlyLayout to create layouts for each Material identified in the pieces:
+  - [ ] Layout.77.1 - in left import canvas, display each separate handoff in a tab labeled with its material type
+  - [ ] Layout.77.3 - in left import canvas, when user clicks 'Create Layout', create layouts for the currently selected left import canvas Material tab.
+  - [ ] Layout.77.4 - in right layout canvas, display the Material type above the right layout canvas
+  - [ ] Layout.77.3 - in exported file names, append the currently selected '_<materialtype>' before the date stamp (only if there are multiple Material types)
+- [ ] Layout.77.2 - Test/Verify - check for individual patterns:
+  - [ ] Layout.77.2.0 - check 'Pattern Piece Tool > Properties > Properties' for new 'Material' dropdown field
+  - [ ] Layout.77.2.1 - check left import canvas that there is a tab for each Material identified in the pieces.
+  - [ ] Layout.77.2.2 - check left import canvas that the pieces are correct for each Material tab.
+  - [ ] Layout.77.2.3 - check right layout canvas that the Material type is displayed above the canvas.
+  - [ ] Layout.77.2.4 - check right layout canvas that the pieces are correct for that material.
+
+### [ ] Task Layout.78 - Multisize - Nested - SVG export - place each size in its own group
+
+Renumbered from a second Layout.75.
+
+Currently in multisize SVG exports, the pieces are grouped together, because they need to be grouped this way for layout, adjust mode, etc. For SVG export the sizes must be grouped together, without changing the position of any piece, to enable the user to select a single size and hide the remainder in upstream graphics software like Inkscape.
+
+- [x] Task Layout.78.1 - when exporting an SVG for a nested layout, group the pieces according to size, so that there is a group element for each size that contains all the pieces of that size. Order the size groups in the SVG layout from the largest (so the largest size is underneath all other sizes in the svg display canvas) to the smallest (so it is highest in the svg display canvas) to enable easy selection of each size. The exported SVG should be flat (contains no transforms except for text elements).
+  - Done: `size_groups::group_pieces_by_size`, called by `export_svg`. Groups `<g id="size_<size>" data-type="size" data-size="<size>">`, largest first; piece-sets removed; `flatten_dom` first. Only a layout with top-level piece-sets (Nested) changes. Tests: 4 `size_groups` tests; `layout_utils` `jacket2_nested_svg_export_groups_pieces_by_size` (26 groups of 8, no piece moves). Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested SVG export".
+- [ ] Task Layout.78.2 - Test/Verify - Export a multisize file to SVG, open the SVG file using the View feature, confirm that the file is grouped by size. Next MSI: jacket2 Nested tab, Export > SVG; in Inkscape, Objects panel lists `size_720` … `size_220`; hiding one group hides one size.
+
+### [ ] Task Layout.79 - Multisize - Import - Ask user for height selection before starting the SeamlyLayout, handoff all sizes at the selected height to SeamlyLayout
+
+Currently in Seamly2D, a pattern with a `.smms` measurement file hands off every size in the size list, at the base height. Create a 'Select Height for Multisize Layout' dialog containing radio buttons of all heights from the .smms file; when the user selects a height button and clicks 'OK' then every size in the size list at the selected height is handed off to SeamlyLayout. If there is only one height in the .smms file then this 'Select Height' dialog isn't needed / doesn't display. 
+
+- [ ] Layout.79.1 - When user clicks the 'Layout' icon, display a 'Select Height for Multisize Layout' dialog
+- [ ] Layout.79.2 - When user selects a height in the Select Height for Multisize layout dialog, then clicks OK, handoff all sizes in the size list at the selected height to SeamlyLayout
+- [ ] Layout.79.3 - Display 'Height=<height size>' over the left input canvas
+- [ ] Layout.79.3 - Test/Verify - the 'Select Height for Multisize Layouts' appears when user selects 'Layout' icon
+- [ ] Layout.79.4 - Test/Verify - 'Height <height size>' appears over left input canvas
+- [ ] Layout.79.5 - Test/Verify - Generated layouts are generated correctly
 
 ## VERIFY
 
@@ -108,7 +123,7 @@ A `.smms` pattern sends all sizes in one SVG. Nested packs size groups; Marker p
 
 Rules (2026-09-28):
 
-- Include all `.smms` sizes at base height only.
+- Include all `.smms` sizes at the base height or the selected height only.
 - Align grainlines vertically; center all sizes on the largest size.
 - Keep `.smis` handoff unchanged.
 
@@ -182,13 +197,20 @@ Status (2026-10-12): code, docs, Rust (472 pass) and Qt tests pass; MSI 26.10.12
 
 ### [ ] Task Layout.68 — Verify PDF export scale
 
-Cause (MSI 26.10.1311): PDF used 72 dpi instead of SVG’s 96 dpi, scaling pages and pieces by 4/3.
+Cause (MSI 26.10.1311): PDF used 72 dpi instead of SVG’s 96 dpi, scaling pages and pieces by 4/3. Create an option to add a grid using pattern units for easy layout scale verification. Include the grid in each layout except 'Marker'. For DXF exports, exclude the grid.
 
 - Marker `jacket2_40-146_202610131244.pdf` (48 in × 500 in roll): MediaBox `4608 × 48000` pt = 64 in × 666.7 in. Expected `3456 × 36000` pt.
 - Nested `jacket2_40-nested_146_202610131245.pdf`: `4608 × 5003` pt. Expected `3456 × 3752` pt.
 - EPS and PS of the same tabs are correct: `0.75` scale, BoundingBox `3456 36000`.
 
-- [ ] Layout.68.5 Print a tiled page at 100% and measure it. Acrobat should report the Marker PDF as 48 in × the Marker roll length (about 800 in: the roll grows, Layout.25). User check: `AGENT_CHECKLIST.md` §4.
+- [ ] Layout.68.5 In Settings create an option to add a verify scale grid; if pattern unit=(mm or cm) then grid is 9 blocks arranged 3x3 --> 3cm wide x 3cm high, if pattern unit=inches then grid is 4 blocks arranged 2x2 (2 inches wide x 2 inches high)
+- [ ] Layout.68.6 When creating layouts, place the grid after all other pieces have been placed. Exception: Do not place a grid on a Marker layout.
+- [ ] Layout.68.7 When creating DXF exports, exclude the grid.
+- [ ] Layout.68.9 When creating HPGL cutter exports, exclude the grid.
+- [ ] Layout.68.10 Test/Verify - Check Settings for grid option.
+- [ ] Layout.68.11 Test/Verify - Check grid in layouts; Check grid is not included in Marker.
+- [ ] Layout.68.12 Test/Verify - Check grid in exports; Check grid is not in DXF or HPGL cutter files.
+- [ ] Layout.58.13 Test/Verify - Check scale; Print a small layout, check scale for correct grid size (3cm x 3cm, or 2" x 2")
 
 ### [ ] Task Layout.69 — Add PNG/JPG resolution metadata - Priority 1
 
@@ -201,6 +223,7 @@ MSI 26.10.1311 exports correct pixels at 96 dpi (jacket2 PNG: 4608 × 48000) but
 ### [ ] Task Layout.70 — "Some pieces could not be placed" dialog: piece names and length
 
 jacket2 Marker, MSI 26.10.1311: 112 entries such as "Detail (size 240)" (`jacket2_screenshot_1.png`). The 6 "Detail" pieces cannot be told apart. The dialog has no scroll area and grows past the screen.
+It might be difficult to reproduce this error as we now have Layout.71 automatic media width and Layout.25 automatic media height
 
 - [x] Layout.70.1 Use the numbered display name: "Detail (3)" (same rule as Layout.26.5).
 - [x] Layout.70.2 One line per piece, then its sizes: "Detail (3): 220, 240, 260". Group by `data-parent` (as Layout.26.1).
