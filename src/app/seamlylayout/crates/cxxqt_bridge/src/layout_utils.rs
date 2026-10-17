@@ -297,6 +297,18 @@ pub fn do_process_layout(
         Vec::new()
     }; // size_colors
 
+    // 3d'''': scale check grid on every layout but Marker, which packs every size
+    // of every piece alone (more than one size, no piece-sets).
+    let marker_layout = !args.nested_multisize && {
+        let sizes: std::collections::BTreeSet<&String> = flat_dom.root.children.iter()
+            .filter_map(|n| n.as_element())
+            .filter_map(|e| e.attributes.get("data-size"))
+            .collect();
+        sizes.len() > 1
+    }; // marker_layout
+    let scale_grid = (crate::scale_grid::scale_grid_requested(args.settings_json) && !marker_layout)
+        .then(|| crate::scale_grid::ScaleGrid::for_unit(&settings.unit));
+
     // 3d'': the user chose to split each piece wider or longer than the media.
     // Needs grain-up pieces; must run before translate_dom moves each part to the origin.
     // Tiled paper never splits: its pages already cover a large piece.
@@ -474,7 +486,9 @@ pub fn do_process_layout(
         // A legend below the lowest piece may need more tile rows.
         legend = crate::size_colors::SizeLegend::new(size_colors.clone(), choice.tile_cols * trim_w);
         let lowest_px = choice.placements.iter().map(|p| p.y + p.h).max().unwrap_or(0);
-        let legend_bottom_px = lowest_px + legend.as_ref().map_or(0, |l| gap_px + l.height_px());
+        let legend_bottom_px = lowest_px
+            + legend.as_ref().map_or(0, |l| gap_px + l.height_px())
+            + scale_grid.as_ref().map_or(0, |g| gap_px + g.height_px());
         let tile_rows = choice.tile_rows.max(legend_bottom_px.div_ceil(trim_h));
 
         let new_layout_w_px = choice.tile_cols * trim_w
@@ -619,6 +633,15 @@ pub fn do_process_layout(
         ));
         content_bottom = legend_top + legend.height_px();
     } // if legend
+
+    // 7-. The scale check grid goes one piece gap below the pieces and the legend.
+    if let Some(grid) = &scale_grid {
+        let grid_top = content_bottom + gap_px;
+        output_doc.root.children.push(xmltree::XMLNode::Element(
+            grid.element(work_ml_px as f64, (work_mt_px + grid_top) as f64),
+        ));
+        content_bottom = grid_top + grid.height_px();
+    } // if scale_grid
 
     // compute the blank space below the lowest piece (or the legend)
     let blank_bottom = work_bin_h.saturating_sub(content_bottom);
@@ -1591,6 +1614,53 @@ mod tests {
         assert!(top_group(&marker.output_doc, "size_legend").is_none());
         assert!(marker.output_doc.to_string().contains(r#"stroke="black""#));
     } // jacket2_nested_colors_sizes_and_adds_legend
+
+    // @brief Lay out jacket2 with the scale check grid on, as Nested, Marker or the size `size`.
+    fn jacket2_with_grid(view: &str) -> ProcessLayoutResult {
+        let (input_dom, _) = jacket2_handoff();
+        let mut settings: serde_json::Value = serde_json::from_str(&jacket2_settings_json(60.0, 300.0)).expect("JSON");
+        settings["scaleGrid"] = true.into();
+        let settings_json = settings.to_string();
+        let init = do_initialize_layout(&settings_json, Some(&input_dom)).expect("initialize_layout");
+        let mut progress = |_pct: i32, _status: Option<&str>| {};
+        let args = ProcessLayoutArgs {
+            settings_json: &settings_json,
+            input_dom: &input_dom,
+            initial_layout_dom: &init.initial_dom,
+            layout_h_px: init.h_px,
+            nested_multisize: view == "nested",
+            extend_media: true,
+            split_oversized: false,
+        };
+        match view {
+            "nested" | "marker" => do_process_layout(args, &mut progress),
+            size => do_process_size_layout(args, size, &mut progress),
+        }.expect("jacket2 layout")
+    } // fn jacket2_with_grid
+
+    // @brief The scale check grid sits below everything else on Nested and a size tab,
+    // inside the content; Marker has none.
+    #[test]
+    fn jacket2_scale_grid_on_every_layout_but_marker() {
+        for view in ["nested", "300"] {
+            let layout = jacket2_with_grid(view);
+            let doc = &layout.output_doc;
+            let grid = top_group(doc, "scale_grid").unwrap_or_else(|| panic!("{view}: no grid"));
+            let grid_box = crate::bbox_from_group_geometry(grid).expect("grid geometry");
+            assert!((grid_box.width() - 192.0).abs() < 0.01, "{view}: 2 in grid, {}", grid_box.width());
+            let others_bottom = doc.root.children.iter().filter_map(|n| n.as_element())
+                .filter(|e| e.attributes.get("id").is_some_and(|id| id != "Rectangles" && id != "scale_grid"))
+                .filter_map(crate::bbox_from_group_geometry)
+                .map(|b| b.max.y)
+                .fold(f32::MIN, f32::max);
+            assert!(grid_box.min.y > others_bottom, "{view}: grid top {} above {}", grid_box.min.y, others_bottom);
+            let content_bottom: f32 = ["y", "height"].iter()
+                .map(|a| doc.get_attr_by_id("contentRect", a).and_then(|v| v.parse::<f32>().ok()).expect("contentRect"))
+                .sum();
+            assert!(grid_box.max.y <= content_bottom + 0.5, "{view}: grid bottom {} below content {content_bottom}", grid_box.max.y);
+        } // for view
+        assert!(top_group(&jacket2_with_grid("marker").output_doc, "scale_grid").is_none(), "Marker has no grid");
+    } // jacket2_scale_grid_on_every_layout_but_marker
 
     // @brief Tiled paper: the Nested legend gets the tile rows it needs.
     #[test]
