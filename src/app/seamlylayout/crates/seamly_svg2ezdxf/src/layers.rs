@@ -14,7 +14,7 @@
 //! | 11    | Internal cutouts | `cut_path` |
 //! | 13    | Drill holes | id hint only |
 //! | 14    | Sew lines | `seamline` |
-//! | 15    | Annotation text | `piece_label`, `pattern_label`, `<text>` |
+//! | 15    | Annotation text | `piece_label`, `pattern_label`, `size_label`, `<text>` |
 //! | 84–87 | Quality validation curves | generated from contours |
 
 /// @brief Component kinds of a pattern piece, as tagged by Seamly2D.
@@ -60,7 +60,7 @@ pub fn piece_component(element: &xmltree::Element) -> Option<PieceComponent> {
             "grainline" => Some(PieceComponent::Grainline),
             "internal_path" => Some(PieceComponent::InternalPath),
             "cut_path" => Some(PieceComponent::CutPath),
-            "piece_label" | "pattern_label" => Some(PieceComponent::Label),
+            "piece_label" | "pattern_label" | "size_label" => Some(PieceComponent::Label),
             _ => None,
         }; // match data-type
     } // if data-type

@@ -693,7 +693,7 @@ fn piece_identity(elem: &Element) -> (String, String, String) {
 // fixtures use different naming:
 //   1. `data-type` attribute, exact match against a known decoration type
 //      (`notch`, `tuck`, `grainline`, `internal_path`, `drill`, `hole`,
-//      `piece_label`, `pattern_label`). This is what Seamly2D actually emits
+//      `piece_label`, `pattern_label`, `size_label`). This is what Seamly2D actually emits
 //      on every decoration group (see `project-docs/SVG-DATA-ATTRIBUTES.md`);
 //      real ids are namespaced as `piece-<N>-<type>-<M>`, so an id-prefix
 //      check alone never matches them.
@@ -711,7 +711,7 @@ fn is_non_outline_group(e: &xmltree::Element) -> bool {
         if matches!(
             data_type.as_str(),
             "notch" | "tuck" | "grainline" | "internal_path" | "drill" | "hole"
-                | "piece_label" | "pattern_label"
+                | "piece_label" | "pattern_label" | "size_label"
         ) {
             return true;
         } // if known decoration type
