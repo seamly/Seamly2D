@@ -456,6 +456,53 @@ QListWidget::item:selected {
                </widget>
               </item>
               <item row="2" column="0">
+               <widget class="QLabel" name="material_Label">
+                <property name="minimumSize">
+                 <size>
+                  <width>110</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="text">
+                 <string>Material:</string>
+                </property>
+                <property name="alignment">
+                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QComboBox" name="material_ComboBox">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>9</pointsize>
+                  <bold>false</bold>
+                 </font>
+                </property>
+                <property name="toolTip">
+                 <string>Material the piece is cut from. SeamlyLayout lays out each material on its own tab.</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="0">
                <widget class="QLabel" name="labelQuantity_2">
                 <property name="minimumSize">
                  <size>
@@ -477,7 +524,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="2" column="1">
+              <item row="3" column="1">
                <widget class="QSpinBox" name="quantity_SpinBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -508,7 +555,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="3" column="0">
+              <item row="4" column="0">
                <widget class="QLabel" name="label_15">
                 <property name="minimumSize">
                  <size>
@@ -530,7 +577,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="3" column="1">
+              <item row="4" column="1">
                <widget class="QCheckBox" name="fold_CheckBox">
                 <property name="minimumSize">
                  <size>
@@ -549,7 +596,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="4" column="0">
+              <item row="5" column="0">
                <widget class="QLabel" name="label_20">
                 <property name="minimumSize">
                  <size>
@@ -571,7 +618,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="4" column="1">
+              <item row="5" column="1">
                <widget class="QComboBox" name="foldPosition_ComboBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -608,7 +655,7 @@ QListWidget::item:selected {
                 </item>
                </widget>
               </item>
-              <item row="5" column="0">
+              <item row="6" column="0">
                <widget class="QLabel" name="label_17">
                 <property name="minimumSize">
                  <size>
@@ -630,7 +677,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="5" column="1">
+              <item row="6" column="1">
                <widget class="QComboBox" name="orientation_ComboBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -667,7 +714,7 @@ QListWidget::item:selected {
                 </item>
                </widget>
               </item>
-              <item row="6" column="0">
+              <item row="7" column="0">
                <widget class="QLabel" name="label_18">
                 <property name="minimumSize">
                  <size>
@@ -689,7 +736,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="6" column="1">
+              <item row="7" column="1">
                <widget class="QComboBox" name="rotation_ComboBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -736,7 +783,7 @@ QListWidget::item:selected {
                 </item>
                </widget>
               </item>
-              <item row="7" column="0">
+              <item row="8" column="0">
                <widget class="QLabel" name="label_19">
                 <property name="minimumSize">
                  <size>
@@ -758,7 +805,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="7" column="1">
+              <item row="8" column="1">
                <widget class="QComboBox" name="tilt_ComboBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -795,7 +842,7 @@ QListWidget::item:selected {
                 </item>
                </widget>
               </item>
-              <item row="8" column="0">
+              <item row="9" column="0">
                <widget class="QLabel" name="label_16">
                 <property name="minimumSize">
                  <size>
@@ -817,7 +864,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="8" column="1">
+              <item row="9" column="1">
                <widget class="VLineEdit" name="annotation_LineEdit">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">

@@ -84,6 +84,14 @@ Each piece is a `piece-set` group holding that piece once per size.
 - Each size keeps its drafted position. SeamlyLayout stacks the sizes (`svg_dom::center_piece_sets`).
 - Tests: `TST_SvgComponentTags::Multisize*` (producer), `piece_extractor` and `layout_utils` `multisize` tests (consumer).
 
+### Materials
+
+Seamly2D hands off one pattern group per material, in the order the materials first appear: `<g id="pattern-1" data-type="pattern" data-material="Fabric">`, `<g id="pattern-2" ... data-material="Lining">`. Each piece sits in the group of its material, and its `data-parent` names that group. A pattern with one material keeps the single `pattern-1` group. The stdin contract is unchanged: one SVG document.
+
+- Producer: `VAbstractPiece::getMaterial()` → `PieceItemData::Material` → `SvgGenerator::mergeSvgDoms()`. Tests: `TST_SvgComponentTags::PiecesOfEachMaterialShareAPatternGroup`, `OneMaterialKeepsOnePatternGroup`.
+- Consumer: `cxxqt_bridge/src/material_split.rs` splits the import into one document per material, each with the root, `<defs>` and the pattern groups of that material. `finish_import` names pieces and adds size labels per document. Several materials get one tab each above the left canvas; the shown material's document is `input_dom`, so Create Layout lays out that material only. A tab switch drops the layout of the previous material.
+- The right canvas shows "Material: <material>" above the layout. With several materials, a default export name has `_<material>` after the variant segment: `<base>[_<segment>]_<material>[_<tab>]_<stamp>`.
+
 ### Size labels
 
 At import, SeamlyLayout adds a label to every multisize piece (`data-size` set): `<g id="size_label_<piece id>" data-type="size_label" data-type-number="1" data-parent="<piece name>">`, the last child of the piece, with one `<text>` "Size <size>" (Arial, 24 px, `text-anchor="middle"`).
@@ -122,6 +130,7 @@ first child of each piece group when it places the piece into a layout sheet
 | `data-parent` | `piece-set`, `piece` and component groups | For a piece: the pattern group's `id` (`pattern-1`), or its piece-set's `id` in a multisize handoff. For a component: the owning piece's `data-name` (e.g. `Front Bodice`), or the piece's numeric fallback `id` (e.g. `piece-3`) when the piece has no name. The pattern group has no `data-parent` (it is the root). True parent/child identity is the DOM nesting. The DXF-ASTM Base Size export reads a piece's value: pieces with the same piece-set id are the sizes of one piece, for its grade rules. |
 | `data-name` | `pattern`, `piece` | Pattern name, or piece name. Omitted when empty. SeamlyLayout replaces each piece name at import: see **SeamlyLayout piece names**. |
 | `data-letter` | `piece`, `piece-set` | The piece letter, only when one is set on the piece. |
+| `data-material` | `pattern`, `piece` | Material the piece is cut from (Piece Properties > Material): `Fabric` (default), `Lining`, `Interfacing` or `Interlining`. Stored as the piece attribute `material` in the `.sm2d` file (format 0.7.6). The pattern group carries the material of its pieces. |
 | `data-quantity` | `piece` | Cut count from the piece label data (Piece Properties > Quantity). Written for every piece. DXF-ASTM `Quantity:` piece text. |
 | `data-on-fold` | `piece` | `true` when the piece label data says the piece is cut on the fold. Omitted otherwise. |
 | `data-measurements` | `pattern` | `individual` or `multisize`. Absent in older handoffs; SeamlyLayout reads absent as `individual`. |

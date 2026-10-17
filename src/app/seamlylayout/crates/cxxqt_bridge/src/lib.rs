@@ -31,6 +31,9 @@ mod size_colors;
 // Adds a "Size <size>" label to every piece of a multisize handoff at import.
 mod size_labels;
 
+// Splits a handoff into one document per material.
+mod material_split;
+
 mod layout_assembler;
 pub use layout_assembler::{create_layout, create_initial_layout_dom, remove_color_blocks, trim_bottom};
 
@@ -61,7 +64,7 @@ mod exports;
 use exports::{
     do_export_dxf, dxf_missing_piece_data_message, do_export_gcode, do_export_mesh, do_export_pdf, do_export_pdf_tile, do_export_png,
     do_export_jpeg,
-    do_export_svg, paid_export_available, default_export_file_name, tab_export_path, export_name_segment, dxf_export_name_segment, do_export_hpgl, parse_hpgl_options, do_export_postscript,
+    do_export_svg, paid_export_available, default_export_file_name, material_name_segment, tab_export_path, export_name_segment, dxf_export_name_segment, do_export_hpgl, parse_hpgl_options, do_export_postscript,
 };
 
 // Phase A of the "sheets" paper_type (L.2.1):
@@ -613,6 +616,12 @@ pub mod qobject {
         // True after Cancel in the oversized-pieces dialog: only 'Layout Settings'
         // stays active until new settings are submitted.
         #[qproperty(bool, is_settings_required)]
+        // Material tab labels of the import ("Fabric", "Lining", ...); empty for one material.
+        #[qproperty(QStringList, material_labels)]
+        // Index of the shown material in `material_labels`.
+        #[qproperty(i32, active_material)]
+        // Material of the shown pieces; empty when the handoff names none.
+        #[qproperty(QString, active_material_name)]
         type AppController = super::AppControllerRust;
 
         #[qsignal]
@@ -680,6 +689,11 @@ pub mod qobject {
 
         #[qinvokable]
         fn get_import_dom_string(self: &AppController) -> QString;
+
+        // Show another material's pieces; false when refused (Adjust Mode, layout running, bad index).
+        // The layout of the previous material is dropped.
+        #[qinvokable]
+        fn select_material(self: Pin<&mut AppController>, index: i32) -> bool;
 
         // --- Create Layout ---
 
@@ -1068,6 +1082,18 @@ pub struct AppControllerRust {
     // Tabs still to lay out after the Marker tab; `None` when no tab run is pending.
     tab_queue: Option<TabLayoutQueue>,
 
+    // Material tab labels mirrored for QML; empty for one material.
+    material_labels: cxx_qt_lib::QStringList,
+
+    // Shown material, an index into `material_docs`.
+    active_material: i32,
+
+    // `data-material` of the shown pieces; empty when the handoff names none.
+    active_material_name: cxx_qt_lib::QString,
+
+    // One prepared document per material of the import; `input_dom` is a copy of the shown one.
+    material_docs: Vec<material_split::MaterialDoc>,
+
 } // struct AppControllerRust
 
 impl Default for AppControllerRust {
@@ -1117,6 +1143,10 @@ impl Default for AppControllerRust {
             divide_spec:               None,                           // no split layout
             layout_views:              LayoutViews::default(),         // no tabs
             tab_queue:                 None,                           // no tab run queued
+            material_labels:           cxx_qt_lib::QStringList::default(), // no material tabs until an import
+            active_material:           0,                              // first material
+            active_material_name:      cxx_qt_lib::QString::default(), // no material until an import
+            material_docs:             Vec::new(),                     // nothing imported
         } // Self
     } // fn default
 
@@ -1224,6 +1254,17 @@ impl qobject::AppController {
         )); // recomputed by finish_import
         self.as_mut().set_is_multisize(false); // recomputed by finish_import
         self.as_mut().set_multisize_sizes(cxx_qt_lib::QString::default()); // recomputed by finish_import
+        self.as_mut().set_material_labels(cxx_qt_lib::QStringList::default()); // recomputed by finish_import
+        self.as_mut().set_active_material(0);
+        self.as_mut().set_active_material_name(cxx_qt_lib::QString::default());
+        self.as_mut().rust_mut().material_docs.clear();
+        self.as_mut().clear_layout_state();
+    } // fn reset_import_state
+
+    // Drop the layout of the shown document: tabs, canvases, Adjust Mode data.
+    // 'Create Layout' stays disabled until settings are submitted again.
+    fn clear_layout_state(mut self: std::pin::Pin<&mut Self>) {
+        self.as_mut().set_is_layout_ready(false);
         self.as_mut().clear_layout_views(); // tabs belong to the old document
         {
             let mut rust = self.as_mut().rust_mut();
@@ -1248,7 +1289,7 @@ impl qobject::AppController {
         // Disable 'Create Layout' button until the user submits settings, so they don't run an invalid layout.
         self.as_mut().set_is_create_layout_enabled(false); // disabled until next Settings Submit
         self.as_mut().set_is_settings_required(false);     // a new document clears a cancelled layout
-    } // fn reset_import_state
+    } // fn clear_layout_state
 
     // Finish an import once the SVG is parsed, whatever its source.
     //
@@ -1260,7 +1301,7 @@ impl qobject::AppController {
         loaded: app_core::CoreResult<(svg_dom::Document, usvg::Tree)>,
     ) -> bool {
         match loaded {
-            Ok((mut doc, _tree)) => {
+            Ok((doc, _tree)) => {
                 // Count the Seamly2D piece tagging BEFORE the DOM is moved into
                 // `input_dom`.  Zero means this is not a Layout Mode handoff.
                 let tagged_pieces = crate::piece_extractor::count_tagged_pieces(&doc);
@@ -1273,29 +1314,49 @@ impl qobject::AppController {
                     measurements.multisize, measurements.sizes, measurements.base_size
                 ));
 
-                // Unique piece names before any layout: the layout, its exports and the
-                // DXF-ASTM grade rules all read them from `input_dom`.
-                let naming = crate::piece_naming::assign_unique_piece_names(&mut doc);
-                log_to_file(&format!("[finish_import] {} piece name(s) assigned", naming.renamed));
+                // One document per material; each gets a tab and its own layouts.
+                let mut parts = crate::material_split::split_by_material(doc);
+                let mut naming_warning: Option<String> = None;
+                for part in parts.iter_mut() {
+                    // Unique piece names before any layout: the layout, its exports and the
+                    // DXF-ASTM grade rules all read them from `input_dom`.
+                    let naming = crate::piece_naming::assign_unique_piece_names(&mut part.doc);
+                    naming_warning = naming_warning.or(naming.warning);
 
-                // Multisize: every piece shows its size, on the canvas and in every export.
-                let size_labels = crate::size_labels::add_size_labels(&mut doc);
-                log_to_file(&format!("[finish_import] {size_labels} size label(s) added"));
+                    // Multisize: every piece shows its size, on the canvas and in every export.
+                    let size_labels = crate::size_labels::add_size_labels(&mut part.doc);
+                    log_to_file(&format!(
+                        "[finish_import] material '{}': {} piece name(s) assigned, {size_labels} size label(s) added",
+                        part.name, naming.renamed
+                    ));
+
+                    // Add a white background rectangle so the canvas has a visible background.
+                    part.doc.add_background_rect();
+                } // for part
+
+                // Several materials get tabs; one material gets none.
+                let labels: Vec<String> = if parts.len() > 1 { parts.iter().map(|p| p.name.clone()).collect() } else { Vec::new() };
+                let mut material_labels = cxx_qt_lib::QList::<cxx_qt_lib::QString>::default();
+                for label in &labels {
+                    material_labels.append(cxx_qt_lib::QString::from(label.as_str()));
+                } // for label
+                self.as_mut().set_material_labels(cxx_qt_lib::QStringList::from(&material_labels));
+                self.as_mut().set_active_material(0);
+                self.as_mut().set_active_material_name(cxx_qt_lib::QString::from(parts[0].name.as_str()));
+                log_to_file(&format!("[finish_import] materials: {labels:?}"));
 
                 // Label text kind decides which SVG text modes the Export menu offers;
                 // read after the size labels, which are label text too.
-                let label_state = svg_label_text::label_text_state(&doc);
+                let label_state = svg_label_text::label_text_state(&parts[0].doc);
                 self.as_mut().set_label_text_state(cxx_qt_lib::QString::from(label_state.as_str()));
                 log_to_file(&format!("[finish_import] label text state: {}", label_state.as_str()));
 
-                // Add a white background rectangle so the canvas has a visible background.
-                doc.add_background_rect();
-
-                // Store the parsed DOM; no disk write needed — SVG string is served from
-                // memory via get_import_dom_string() on the import_finished signal.
+                // Store the first material's DOM; no disk write needed — SVG string is served
+                // from memory via get_import_dom_string() on the import_finished signal.
                 {
                     let mut rust = self.as_mut().rust_mut();
-                    rust.input_dom = Some(doc);
+                    rust.input_dom = Some(parts[0].doc.clone());
+                    rust.material_docs = parts;
                 } // rust borrow dropped
 
                 // Mark SVG as imported and notify QML.
@@ -1322,7 +1383,7 @@ impl qobject::AppController {
                 } // if tagged_pieces == 0
 
                 // Sizes with different piece counts can give one number to two pieces.
-                if let Some(warning) = naming.warning {
+                if let Some(warning) = naming_warning {
                     log_to_file(&format!("[finish_import] piece counts differ between sizes: {warning}"));
                     self.as_mut().import_warning(cxx_qt_lib::QString::from(warning.as_str()));
                 } // if piece counts differ
@@ -1341,6 +1402,32 @@ impl qobject::AppController {
             }
         } // match loaded
     } // fn finish_import
+
+    // Show the pieces of material `index`: its document becomes `input_dom`, and the
+    // layout of the previous material is dropped. Emits `import_finished`, so the left
+    // canvas shows the material's pieces and the right canvas clears.
+    // Called by the material tab bar above the left canvas in Main.qml.
+    fn select_material(mut self: std::pin::Pin<&mut Self>, index: i32) -> bool {
+        if *self.is_adjust_mode() || *self.is_layout_in_progress() {
+            return false; // a layout or an edit is running
+        } // if busy
+        let Some(part) = usize::try_from(index).ok().and_then(|i| self.rust().material_docs.get(i).cloned()) else {
+            return false; // no such material
+        }; // part
+        if index == *self.active_material() {
+            return true; // already shown
+        } // if same
+
+        self.as_mut().clear_layout_state();
+        let label_state = svg_label_text::label_text_state(&part.doc);
+        self.as_mut().set_label_text_state(cxx_qt_lib::QString::from(label_state.as_str()));
+        self.as_mut().set_active_material(index);
+        self.as_mut().set_active_material_name(cxx_qt_lib::QString::from(part.name.as_str()));
+        self.as_mut().rust_mut().input_dom = Some(part.doc);
+        log_to_file(&format!("[select_material] showing material {index} '{}'", part.name));
+        self.as_mut().import_finished();
+        true
+    } // fn select_material
 
     // Serialize `input_dom` to an SVG XML string and return it.
     //
@@ -2284,9 +2371,11 @@ impl qobject::AppController {
         // A single export names the shown tab; an individual layout has none.
         // Export all tabs adds each tab to the chosen path later (export_tab_path).
         let tab = if all_tabs { None } else { self.rust().layout_views.active_label() };
+        // A pattern with several materials names the shown material after the variant.
+        let material = if self.rust().material_docs.len() > 1 { self.active_material_name().to_string() } else { String::new() };
         let name = default_export_file_name(
             &base.to_string(),
-            &segment.to_string(),
+            &material_name_segment(&segment.to_string(), &material),
             tab.unwrap_or(""),
             &stamp.to_string(),
             &ext.to_string(),

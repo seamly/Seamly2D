@@ -1911,6 +1911,18 @@ pub fn default_export_file_name(base: &str, segment: &str, tab: &str, stamp: &st
     format!("{name}.{ext}")
 } // fn default_export_file_name
 
+// @brief Variant segment followed by the material, for a pattern with several materials.
+//
+// ("R13", "Lining") → "R13_Lining"; ("", "Lining") → "Lining"; ("R13", "") → "R13".
+// The material goes through `tab_name_segment`, so it adds no separator of its own.
+//
+// @param segment  Variant name without underscores; empty for none.
+// @param material Material of the shown pieces; empty when the pattern has one material.
+pub fn material_name_segment(segment: &str, material: &str) -> String {
+    let material = tab_name_segment(material);
+    [segment, material.as_str()].iter().filter(|part| !part.is_empty()).copied().collect::<Vec<_>>().join("_")
+} // fn material_name_segment
+
 // @brief File name segment for a tab label: spaces removed, every other character but a letter, digit or '-' becomes '-'.
 //
 // "Size 220" → "Size220", "Base Size 500" → "BaseSize500", "Size 40/42" → "Size40-42".
@@ -2110,6 +2122,22 @@ mod tests {
         assert_eq!(name("R13", true), "male_shirt_R13_annotated_202610011721.dxf");
         assert_eq!(name("CLO3D", true), "male_shirt_CLO3D_annotated_202610011721.dxf");
     } // default_export_file_name_with_dxf_segments
+
+    // @brief The material follows the variant and comes before the tab, in a single and an all-tabs export.
+    #[test]
+    fn material_segment_goes_after_the_variant_and_before_the_tab() {
+        assert_eq!(material_name_segment("R13", "Lining"), "R13_Lining");
+        assert_eq!(material_name_segment("", "Lining"), "Lining");
+        assert_eq!(material_name_segment("R13", ""), "R13");
+        assert_eq!(material_name_segment("", ""), "");
+        let stamp = "202610112043";
+        let segment = material_name_segment("R13", "Interfacing");
+        assert_eq!(default_export_file_name("shirt", &segment, "Size 220", stamp, "dxf", false),
+                   "shirt_R13_Interfacing_Size220_202610112043.dxf");
+        let all_tabs = default_export_file_name("shirt", &segment, "", stamp, "dxf", false);
+        assert_eq!(tab_export_path(&format!("C:/out/{all_tabs}"), "Size 220"),
+                   "C:/out/shirt_R13_Interfacing_Size220_202610112043.dxf");
+    } // material_segment_goes_after_the_variant_and_before_the_tab
 
     // @brief Spaces go; every other character but a letter, digit or '-' becomes '-'.
     #[test]

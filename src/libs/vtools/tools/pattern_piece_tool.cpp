@@ -108,6 +108,7 @@ const QString PatternPieceTool::AttrPieceLock            = QStringLiteral("locke
 const QString PatternPieceTool::AttrSeamAllowance        = QStringLiteral("seamAllowance");
 const QString PatternPieceTool::AttrHideSeamLine         = QStringLiteral("hideMainPath");
 const QString PatternPieceTool::AttrSeamAllowanceBuiltIn = QStringLiteral("seamAllowanceBuiltIn");
+const QString PatternPieceTool::AttrMaterial             = QStringLiteral("material");
 const QString PatternPieceTool::AttrHeight               = QStringLiteral("height");
 const QString PatternPieceTool::AttrUnited               = QStringLiteral("united");
 const QString PatternPieceTool::AttrFont                 = QStringLiteral("fontSize");
@@ -266,6 +267,7 @@ void PatternPieceTool::addAttributes(VAbstractPattern *doc, QDomElement &domElem
     doc->SetAttribute(domElement, AttrForbidFlipping,   piece.IsForbidFlipping());
     doc->SetAttribute(domElement, AttrSeamAllowance,    piece.hasSeamAllowance());
     doc->SetAttribute(domElement, AttrHideSeamLine,     piece.isHideSeamLine());
+    doc->SetAttribute(domElement, AttrMaterial,         piece.getMaterial());
 
     const bool saBuiltIn = piece.hasSeamAllowanceBuiltIn();
     if (saBuiltIn)
