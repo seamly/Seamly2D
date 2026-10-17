@@ -79,6 +79,9 @@ public:
     void         SetFontSize(int iFS);
     void         FitFontSize(qreal fW, qreal fH);
 
+    static int   largestFittingSize(const QFont &font, const TextLine &line, int tooWideSize, int tooWideWidth,
+                                    qreal width);
+
     QList<TextLine> GetAllSourceLines() const;
     int             GetSourceLinesCount() const;
     const TextLine& GetSourceLine(int i) const;

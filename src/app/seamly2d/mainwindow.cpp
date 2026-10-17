@@ -129,6 +129,8 @@
 #include <QLabel>
 #include <QMessageBox>
 #include <QProcess>
+#include <QProgressDialog>
+#include <QScopeGuard>
 #include <QScrollBar>
 #include <QSettings>
 #include <QSharedPointer>
@@ -147,6 +149,10 @@
 #include <QMimeData>
 #include <QDrag>
 #endif //defined(Q_OS_MAC)
+
+#if defined(Q_OS_WIN)
+#include "core/windows_foreground_window.h"
+#endif // defined(Q_OS_WIN)
 
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_CLANG("-Wmissing-prototypes")
@@ -825,15 +831,18 @@ QHash<quint32, VPiece> MainWindow::currentLayoutPieces() const
  * cut seam allowance corners and the same node turn points. The size and height in
  * use before the call are restored, also when an exception leaves the function.
  *
+ * A modal progress dialog with a Cancel button shows the size in work.
+ *
+ * @return false when the user canceled; sizePieceLists is then empty.
  * @throws VException when a size cannot be calculated.
  */
-void MainWindow::prepareMultisizePieceLists()
+bool MainWindow::prepareMultisizePieceLists()
 {
     sizePieceLists.clear();
     baseSize.clear();
     if (qApp->patternType() != MeasurementsType::Multisize || m_measurements.isNull())
     {
-        return;
+        return true;
     }
 
     const int originalSize = static_cast<int>(VContainer::size());
@@ -844,11 +853,41 @@ void MainWindow::prepareMultisizePieceLists()
     baseSize = QString::number(UnitConvertor(m_measurements->BaseSize(), m_measurements->measurementUnits(),
                                              patternUnit));
 
+    // Each size takes a full recalculation. The modal dialog runs the event loop in setValue(), so Windows
+    // does not mark Seamly2D "Not Responding" and Cancel works. The view skips the sizes in between.
+    QProgressDialog progress(this);
+    progress.setWindowTitle(tr("Layout mode"));
+    progress.setWindowModality(Qt::ApplicationModal);
+    progress.setMinimumDuration(0);
+    progress.setAutoClose(false);
+    progress.setAutoReset(false);
+    progress.show();
+    QCoreApplication::processEvents();
+
+    QGuiApplication::setOverrideCursor(Qt::BusyCursor);
+    ui->view->setUpdatesEnabled(false);
+    const auto restoreView = qScopeGuard([this]()
+    {
+        ui->view->setUpdatesEnabled(true);
+        QGuiApplication::restoreOverrideCursor();
+    });
+
+    bool canceled = false;
     try
     {
-        for (int i = 0; i < gradationSizes->count(); ++i)
+        const int sizeCount = gradationSizes->count();
+        progress.setRange(0, sizeCount);
+        for (int i = 0; i < sizeCount && !canceled; ++i)
         {
             const QString size = gradationSizes->itemText(i);
+            progress.setLabelText(tr("Preparing size %1 (%2 of %3) for SeamlyLayout")
+                                  .arg(size).arg(i + 1).arg(sizeCount));
+            progress.setValue(i);
+            canceled = progress.wasCanceled();
+            if (canceled)
+            {
+                continue;
+            }
             if (!recalculateAtSize(size.toInt(), baseHeight))
             {
                 throw VException(tr("Couldn't update measurements for size %1.").arg(size));
@@ -857,10 +896,28 @@ void MainWindow::prepareMultisizePieceLists()
         }
 
         // A corner cut short in one size is cut in every size; only those sizes are built again.
-        const QHash<quint32, QVector<int>> cornerCuts = unevenCornerCuts();
-        for (SizePieceList &sizeList : sizePieceLists)
+        QVector<int> cutSizes;
+        QHash<quint32, QVector<int>> cornerCuts;
+        if (!canceled)
         {
-            if (!needsCornerCuts(sizeList, cornerCuts))
+            cornerCuts = unevenCornerCuts();
+            for (int i = 0; i < sizePieceLists.size(); ++i)
+            {
+                if (needsCornerCuts(sizePieceLists.at(i), cornerCuts))
+                {
+                    cutSizes.append(i);
+                }
+            }
+            progress.setRange(0, cutSizes.size());
+        }
+        for (int i = 0; i < cutSizes.size() && !canceled; ++i)
+        {
+            SizePieceList &sizeList = sizePieceLists[cutSizes.at(i)];
+            progress.setLabelText(tr("Matching seam allowance corners: size %1 (%2 of %3)")
+                                  .arg(sizeList.size).arg(i + 1).arg(cutSizes.size()));
+            progress.setValue(i);
+            canceled = progress.wasCanceled();
+            if (canceled)
             {
                 continue;
             }
@@ -870,7 +927,11 @@ void MainWindow::prepareMultisizePieceLists()
             }
             sizeList = prepareSizePieceList(currentLayoutPieces(), sizeList.size, cornerCuts);
         }
-        unifySizeTurnPoints();
+
+        if (!canceled)
+        {
+            unifySizeTurnPoints();
+        }
     }
     catch (VException &)
     {
@@ -880,8 +941,13 @@ void MainWindow::prepareMultisizePieceLists()
         throw;
     }
 
+    if (canceled)
+    {
+        sizePieceLists.clear();
+    }
     recalculateAtSize(originalSize, originalHeight);
     emit pieceScene->DimensionsChanged();
+    return !canceled;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -4258,7 +4324,18 @@ void MainWindow::showPieceMode(bool checked)
  */
 void MainWindow::showLayoutMode(bool checked)
 {
-    if (checked)
+    if (checked && isSeamlyLayoutRunning())
+    {
+        // One SeamlyLayout per Seamly2D window. A second handoff opens a second SeamlyLayout for the
+        // same pattern. The click checked only the Layout action, so unchecking it restores the toolbar.
+        ui->layoutMode_Action->setChecked(false);
+        QMessageBox::information(this, tr("Layout mode"),
+                                 tr("SeamlyLayout is already open.\n\n"
+                                    "Close SeamlyLayout before you start a new layout."),
+                                 QMessageBox::Ok, QMessageBox::Ok);
+        raiseSeamlyLayout();
+    }
+    else if (checked)
     {
         handleArrowTool(true);
 
@@ -4321,7 +4398,13 @@ void MainWindow::showLayoutMode(bool checked)
         {
             pieceList = preparePiecesForLayout(pieces);
             // Multisize: the handoff carries every size, grouped by piece.
-            prepareMultisizePieceLists();
+            if (!prepareMultisizePieceLists())
+            {
+                // The user canceled: no message, back to the mode the user came from.
+                pieceList.clear();
+                doc->getDraftStage() == Draw::Calculation ? showDraftMode(true) : showPieceMode(true);
+                return;
+            }
         }
 
         catch (VException &exception)
@@ -4376,7 +4459,34 @@ void MainWindow::showLayoutMode(bool checked)
     else
     {
         ui->layoutMode_Action->setChecked(true);
+        // Layout mode lasts while SeamlyLayout runs: a click on Layout brings SeamlyLayout to the front.
+        raiseSeamlyLayout();
     }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief isSeamlyLayoutRunning returns true while the SeamlyLayout started by the Layout Mode handoff runs.
+ */
+bool MainWindow::isSeamlyLayoutRunning() const
+{
+    return m_seamlyLayoutProcess != nullptr && m_seamlyLayoutProcess->state() != QProcess::NotRunning;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief raiseSeamlyLayout brings the window of the running SeamlyLayout to the front.
+ *
+ * Windows only. Other platforms give no portable way to raise the window of another process.
+ */
+void MainWindow::raiseSeamlyLayout() const
+{
+#if defined(Q_OS_WIN)
+    if (isSeamlyLayoutRunning())
+    {
+        WindowsForegroundWindow::activateProcessWindow(m_seamlyLayoutProcess->processId());
+    }
+#endif // defined(Q_OS_WIN)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -4456,10 +4566,20 @@ bool MainWindow::exportPiecesToSeamlyLayout()
                                  SeamlySuitePaths::seamlyLayoutLaunchArguments(documentName));
     if (!m_seamlyLayoutProcess->waitForStarted())
     {
+        const QString error = m_seamlyLayoutProcess->errorString();
         m_seamlyLayoutProcess->deleteLater();
         m_seamlyLayoutProcess = nullptr;
+        QMessageBox::warning(this, tr("Layout mode"),
+                             tr("SeamlyLayout could not be started.\n\n%1").arg(error),
+                             QMessageBox::Ok, QMessageBox::Ok);
         return false;
     }
+
+#if defined(Q_OS_WIN)
+    // Seamly2D is the foreground process now: the user pressed Layout. Pass that right on, so the
+    // SeamlyLayout window opens in front of Seamly2D, not behind it.
+    WindowsForegroundWindow::allowForeground(m_seamlyLayoutProcess->processId());
+#endif // defined(Q_OS_WIN)
 
     // Send the document, then close the write channel: SeamlyLayout reads
     // standard input to end, so without the close it would wait forever.

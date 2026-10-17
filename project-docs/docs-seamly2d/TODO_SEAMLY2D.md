@@ -78,6 +78,21 @@ A piece with a built-in seam allowance shows only its main path, the cut line. L
 - [ ] Seamly2D.11.5 Tests and `local_build_msi.ps1` (`nmake check`)
 - [ ] Seamly2D.11.6 User: piece mode shows the seam line W inside the main path; Hide seam line removes it
 
+## [ ] Task Seamly2D.12 — Layout: SeamlyLayout opens behind Seamly2D
+
+jacket2 (26 sizes, labels visible): Seamly2D did not respond for about 26 s, then SeamlyLayout opened behind Seamly2D. The user saw no window and pressed Layout again: two SeamlyLayout windows.
+
+Found: piece labels cost 4 s → 20 s (installed 26.10.1615, pattern copies with and without labels). Stack samples: `VTextManager::FitFontSize` loads a new font engine for every pixel size it tries.
+
+- [x] Seamly2D.12.1 Window in front: `WindowsForegroundWindow::allowForeground` after the start (`AllowSetForegroundWindow`); `seamlyLayout_main.mm` raises and activates its window before the import
+- [x] Seamly2D.12.2 Progress: modal `QProgressDialog` per size, with Cancel; Cancel restores the size and the prior mode
+- [x] Seamly2D.12.3 One SeamlyLayout per Seamly2D window: a second Layout says "already open" and brings SeamlyLayout to the front (Windows); Layout in Layout mode brings it to the front
+- [x] Seamly2D.12.4 `waitForStarted()` failure shows a message, not nothing
+- [x] Seamly2D.12.5 Label fit: `VTextManager::largestFittingSize` starts at the estimated size (jacket2 labels: 13 and 28 measurements → 2 and 3); `FitFontSize` keeps each result per thread
+- [x] Seamly2D.12.6 Test `TST_VTextManager::LargestFittingSize`; `cl /Zs` on the changed sources
+- [ ] Seamly2D.12.7 `local_build_msi.ps1` passes (`nmake check`)
+- [ ] Seamly2D.12.8 User: jacket2 Layout shows the progress dialog and SeamlyLayout opens in front, well under 26 s; Cancel; second Layout; see `AGENT_CHECKLIST.md` section 14
+
 ## [ ] Task Seamly2D.9 — Pattern preferences shows the label template file name
 
 `Pattern preferences > Label data > Label template:` has only the `Edit template` button (`pushButtonEditPatternLabel`, `src/app/seamly2d/dialogs/dialogpatternproperties.ui`). The user cannot see which template file the pattern label uses without opening the editor.
