@@ -28,6 +28,9 @@ mod size_groups;
 // Gives each size of a Nested multisize layout its own color, with a legend.
 mod size_colors;
 
+// Adds a "Size <size>" label to every piece of a multisize handoff at import.
+mod size_labels;
+
 mod layout_assembler;
 pub use layout_assembler::{create_layout, create_initial_layout_dom, remove_color_blocks, trim_bottom};
 
@@ -1261,10 +1264,6 @@ impl qobject::AppController {
                 // Count the Seamly2D piece tagging BEFORE the DOM is moved into
                 // `input_dom`.  Zero means this is not a Layout Mode handoff.
                 let tagged_pieces = crate::piece_extractor::count_tagged_pieces(&doc);
-                // Label text kind decides which SVG text modes the Export menu offers.
-                let label_state = svg_label_text::label_text_state(&doc);
-                self.as_mut().set_label_text_state(cxx_qt_lib::QString::from(label_state.as_str()));
-                log_to_file(&format!("[finish_import] label text state: {}", label_state.as_str()));
                 // Measurement type decides whether Create Layout makes the multisize tabs.
                 let measurements = crate::piece_extractor::read_measurements_info(&doc);
                 self.as_mut().set_is_multisize(measurements.multisize);
@@ -1278,6 +1277,16 @@ impl qobject::AppController {
                 // DXF-ASTM grade rules all read them from `input_dom`.
                 let naming = crate::piece_naming::assign_unique_piece_names(&mut doc);
                 log_to_file(&format!("[finish_import] {} piece name(s) assigned", naming.renamed));
+
+                // Multisize: every piece shows its size, on the canvas and in every export.
+                let size_labels = crate::size_labels::add_size_labels(&mut doc);
+                log_to_file(&format!("[finish_import] {size_labels} size label(s) added"));
+
+                // Label text kind decides which SVG text modes the Export menu offers;
+                // read after the size labels, which are label text too.
+                let label_state = svg_label_text::label_text_state(&doc);
+                self.as_mut().set_label_text_state(cxx_qt_lib::QString::from(label_state.as_str()));
+                log_to_file(&format!("[finish_import] label text state: {}", label_state.as_str()));
 
                 // Add a white background rectangle so the canvas has a visible background.
                 doc.add_background_rect();
