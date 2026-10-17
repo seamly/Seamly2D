@@ -118,8 +118,11 @@
 #include <chrono>
 #include <thread>
 #include <QAction>
+#include <QButtonGroup>
 #include <QComboBox>
 #include <QDateTime>
+#include <QDialog>
+#include <QDialogButtonBox>
 #include <QDoubleSpinBox>
 #include <QFileDialog>
 #include <QFileSystemWatcher>
@@ -130,6 +133,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QProgressDialog>
+#include <QRadioButton>
 #include <QScopeGuard>
 #include <QScrollBar>
 #include <QSettings>
@@ -143,6 +147,8 @@
 #include <QtDebug>
 #include <QtGlobal>
 #include <QUndoStack>
+#include <QGridLayout>
+#include <QVBoxLayout>
 
 // compiler directives
 #if defined(Q_OS_MAC)
@@ -824,22 +830,83 @@ QHash<quint32, VPiece> MainWindow::currentLayoutPieces() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief selectMultisizeLayoutHeight asks for the height of the multisize handoff.
+ *
+ * A dialog lists every height of the pattern as a radio button; the base height is selected first.
+ * With one height the dialog does not show.
+ *
+ * @param baseHeight base height of the measurements, in pattern units.
+ * @param height     receives the selected height, in pattern units.
+ * @return false when the user canceled the dialog.
+ */
+bool MainWindow::selectMultisizeLayoutHeight(int baseHeight, int &height)
+{
+    height = baseHeight;
+    if (gradationHeights.isNull() || gradationHeights->count() <= 1)
+    {
+        if (!gradationHeights.isNull() && gradationHeights->count() == 1)
+        {
+            height = gradationHeights->itemText(0).toInt();
+        }
+        return true;
+    }
+
+    QDialog dialog(this);
+    dialog.setWindowTitle(tr("Select Height for Multisize Layout"));
+    QVBoxLayout *layout = new QVBoxLayout(&dialog);
+    layout->addWidget(new QLabel(tr("SeamlyLayout receives every size at this height:"), &dialog));
+
+    // Four heights to a row keep a long list short.
+    QGridLayout *grid = new QGridLayout();
+    QButtonGroup *buttons = new QButtonGroup(&dialog);
+    for (int i = 0; i < gradationHeights->count(); ++i)
+    {
+        const QString text = gradationHeights->itemText(i);
+        QRadioButton *button = new QRadioButton(text, &dialog);
+        button->setChecked(text.toInt() == baseHeight);
+        buttons->addButton(button, i);
+        grid->addWidget(button, i / 4, i % 4);
+    }
+    if (buttons->checkedButton() == nullptr)
+    {
+        buttons->button(0)->setChecked(true); // the base height is not in the list
+    }
+    layout->addLayout(grid);
+
+    QDialogButtonBox *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+    connect(box, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(box, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    layout->addWidget(box);
+
+    if (dialog.exec() != QDialog::Accepted)
+    {
+        return false;
+    }
+    height = gradationHeights->itemText(buttons->checkedId()).toInt();
+    qCInfo(vMainWindow, "Multisize layout height: %d", height);
+    return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief prepareMultisizePieceLists fills sizePieceLists with the layout pieces of every size.
  *
  * Individual pattern: clears sizePieceLists and returns. Multisize pattern: every
- * size in the size list, at the base height. Every size of a piece gets the same
+ * size in the size list, at the height the user selects (selectMultisizeLayoutHeight()).
+ * Every size of a piece gets the same
  * cut seam allowance corners and the same node turn points. The size and height in
  * use before the call are restored, also when an exception leaves the function.
  *
  * A modal progress dialog with a Cancel button shows the size in work.
  *
- * @return false when the user canceled; sizePieceLists is then empty.
+ * @return false when the user canceled the height or the progress dialog; sizePieceLists is then empty.
  * @throws VException when a size cannot be calculated.
  */
 bool MainWindow::prepareMultisizePieceLists()
 {
     sizePieceLists.clear();
     baseSize.clear();
+    layoutHeight.clear();
     if (qApp->patternType() != MeasurementsType::Multisize || m_measurements.isNull())
     {
         return true;
@@ -852,6 +919,13 @@ bool MainWindow::prepareMultisizePieceLists()
                                                 patternUnit));
     baseSize = QString::number(UnitConvertor(m_measurements->BaseSize(), m_measurements->measurementUnits(),
                                              patternUnit));
+
+    int height = baseHeight;
+    if (!selectMultisizeLayoutHeight(baseHeight, height))
+    {
+        return false; // canceled
+    }
+    layoutHeight = QString::number(height);
 
     // Each size takes a full recalculation. The modal dialog runs the event loop in setValue(), so Windows
     // does not mark Seamly2D "Not Responding" and Cancel works. The view skips the sizes in between.
@@ -888,7 +962,7 @@ bool MainWindow::prepareMultisizePieceLists()
             {
                 continue;
             }
-            if (!recalculateAtSize(size.toInt(), baseHeight))
+            if (!recalculateAtSize(size.toInt(), height))
             {
                 throw VException(tr("Couldn't update measurements for size %1.").arg(size));
             }
@@ -921,7 +995,7 @@ bool MainWindow::prepareMultisizePieceLists()
             {
                 continue;
             }
-            if (!recalculateAtSize(sizeList.size.toInt(), baseHeight))
+            if (!recalculateAtSize(sizeList.size.toInt(), height))
             {
                 throw VException(tr("Couldn't update measurements for size %1.").arg(sizeList.size));
             }

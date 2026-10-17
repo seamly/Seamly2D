@@ -538,7 +538,7 @@ QString MainWindowsNoGUI::generateMultisizePiecesSvgDocument()
 
     SvgGenerator svgGenerator(paper.data(), QString(), doc->GetPatternName(), doc->GetDescription(),
                               static_cast<int>(PrintDPI));
-    svgGenerator.setMultisize(sizes, baseSize);
+    svgGenerator.setMultisize(sizes, baseSize, layoutHeight);
 
     for (int piece = 0; piece < list.size(); ++piece)
     {

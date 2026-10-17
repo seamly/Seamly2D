@@ -107,6 +107,7 @@ protected:
     QVector<VLayoutPiece> pieceList;
     QVector<SizePieceList> sizePieceLists; /**< every size of a multisize pattern; empty for an individual pattern */
     QString baseSize;                      /**< base size of the multisize measurements, in pattern units */
+    QString layoutHeight;                  /**< height of every size in the multisize handoff, in pattern units */
 
     SizePieceList prepareSizePieceList(const QHash<quint32, VPiece> &pieces, const QString &size,
                                        const QHash<quint32, QVector<int>> &cornerCuts = QHash<quint32, QVector<int>>());

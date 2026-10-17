@@ -40,7 +40,8 @@ class SvgGenerator
 public:
                         SvgGenerator(QGraphicsRectItem *paper, QString name, QString pattern_name,
                                      QString description, int resolution);
-    void                setMultisize(const QStringList &sizes, const QString &base_size);
+    void                setMultisize(const QStringList &sizes, const QString &base_size,
+                                     const QString &height = QString());
     void                setSampleSize(const QString &sample_size);
     void                addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item = nullptr,
                                         const QString &size = QString(), const QString &piece_set_key = QString());
@@ -69,6 +70,7 @@ private:
 
     QStringList         m_sizes;              ///< multisize sizes in pattern units; empty for an individual pattern
     QString             m_base_size;          ///< base size of the multisize measurements, in pattern units
+    QString             m_height;             ///< height of every size of a multisize export; empty when unknown
     QString             m_sample_size;        ///< individual pattern size in pattern units; empty when unknown
 
     QList<QDomDocument> m_dom_list;

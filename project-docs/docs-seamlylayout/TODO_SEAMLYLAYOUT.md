@@ -109,9 +109,11 @@ Currently in multisize SVG exports, the pieces are grouped together, because the
 
 Currently in Seamly2D, a pattern with a `.smms` measurement file hands off every size in the size list, at the base height. Create a 'Select Height for Multisize Layout' dialog containing radio buttons of all heights from the .smms file; when the user selects a height button and clicks 'OK' then every size in the size list at the selected height is handed off to SeamlyLayout. If there is only one height in the .smms file then this 'Select Height' dialog isn't needed / doesn't display. 
 
-- [ ] Layout.79.1 - When user clicks the 'Layout' icon, display a 'Select Height for Multisize Layout' dialog
-- [ ] Layout.79.2 - When user selects a height in the Select Height for Multisize layout dialog, then clicks OK, handoff all sizes in the size list at the selected height to SeamlyLayout
-- [ ] Layout.79.3 - Display 'Height=<height size>' over the left input canvas
+- [x] Layout.79.1 - When user clicks the 'Layout' icon, display a 'Select Height for Multisize Layout' dialog
+- [x] Layout.79.2 - When user selects a height in the Select Height for Multisize layout dialog, then clicks OK, handoff all sizes in the size list at the selected height to SeamlyLayout
+- [x] Layout.79.3 - Display 'Height=<height size>' over the left input canvas
+  - Done: `MainWindow::selectMultisizeLayoutHeight` (radio buttons, four to a row; base height selected first; Cancel stops the handoff; one height shows no dialog); `prepareMultisizePieceLists` builds every size at that height; `SvgGenerator::setMultisize(..., height)` writes `data-height`. SeamlyLayout: `MeasurementsInfo::height`, property `multisizeHeight`, `Main.qml` `heightHeader` "Height <height>".
+  - Tests: `TST_SvgComponentTags::MultisizePatternCarriesSizeList` checks `data-height`; `piece_extractor` `read_measurements_info_multisize_and_individual`. Checked: `cl /Zs` on `mainwindow.cpp`, `mainwindowsnogui.cpp`, `svg_generator.cpp`, `tst_svgcomponenttags.cpp`; `cargo test --workspace` 549 passed; `ctest --preset debug` 6 of 6. Open: Qt suites in the next `local_build_msi.ps1`. Doc: `SVG-DATA-ATTRIBUTES.md`, "Multisize pattern".
 - [ ] Layout.79.3 - Test/Verify - the 'Select Height for Multisize Layouts' appears when user selects 'Layout' icon
 - [ ] Layout.79.4 - Test/Verify - 'Height <height size>' appears over left input canvas
 - [ ] Layout.79.5 - Test/Verify - Generated layouts are generated correctly

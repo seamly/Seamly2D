@@ -133,16 +133,18 @@ SvgGenerator::SvgGenerator(QGraphicsRectItem *paper, QString name, QString patte
 
 //---------------------------------------------------------------------------------------------------------------------
 /// @brief Mark the export as a multisize pattern.
-/// @details The pattern group then carries data-measurements="multisize", data-sizes and
-///          data-base-size. Without this call the pattern group carries
+/// @details The pattern group then carries data-measurements="multisize", data-sizes,
+///          data-base-size and data-height. Without this call the pattern group carries
 ///          data-measurements="individual".
 /// @param sizes     every size in the export, in pattern units, in the order the pieces are added.
 /// @param base_size base size of the multisize measurements, in pattern units.
+/// @param height    height of every size, in pattern units; empty writes no data-height.
 //---------------------------------------------------------------------------------------------------------------------
-void SvgGenerator::setMultisize(const QStringList &sizes, const QString &base_size)
+void SvgGenerator::setMultisize(const QStringList &sizes, const QString &base_size, const QString &height)
 {
     m_sizes = sizes;
     m_base_size = base_size;
+    m_height = height;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -224,6 +226,7 @@ QDomDocument SvgGenerator::mergeSvgDoms()
                 pattern_group.setAttribute("data-measurements", "multisize");
                 pattern_group.setAttribute("data-sizes", m_sizes.join(QLatin1Char(',')));
                 setAttribute(pattern_group, "data-base-size", m_base_size);
+                setAttribute(pattern_group, "data-height", m_height);
             }
             merged_svg_root.appendChild(pattern_group);
             pattern_groups.insert(materials.at(n), pattern_group);
