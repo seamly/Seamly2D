@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-10-17 (afternoon) — Layout.75, 78, 74, 76 merged into local `run-seamlyLayout`, not pushed
+
+- Layout.75: `Main.qml` tab strip in a `Flickable`; scroll bar below the tabs; mouse wheel scrolls; shown tab scrolls into view.
+- Layout.78 (renumbered from the second Layout.75): `size_groups.rs`, Nested SVG export has one `<g data-type="size">` per size, largest first, flat.
+- Layout.74: `size_colors.rs`, Nested pieces colored by size; `size_legend` group below the lowest piece; media grows for it; paper-sheet PDF keeps colors, no legend.
+- Layout.76: `size_labels.rs`, "Size <size>" label 5 px past the grainline front end, added in `finish_import`; no grainline → outline centre (agent decision, recorded in the TODO).
+- TODO renumbering: second Layout.75 → Layout.78; Layout.76 sub-items 76.1/76.2.
+- User's uncommitted TODO restructure (new tasks 74–77) committed with these tasks.
+- New CLAUDE.md "Contributing" section (uncommitted, user's): many commits per task; no AI mention in `.md` files either.
+- Verified: `cargo test --workspace` 539 passed; `ctest --preset debug` 6 of 6; qml test render of the tab strip; jacket2 Nested PNG render. No MSI.
+- Open: Layout.77 needs a user decision (piece fabric type source in Seamly2D). User checks on next MSI: 74.4, 75.2, 76.2, 78.2.
+
 ### 2026-10-17 — Seamly2D.12 SeamlyLayout opens behind Seamly2D: merged into local `run-seamlyLayout`, not pushed
 
 - User report: jacket2, Layout, "SeamlyLayout never opens". Found: it opened behind Seamly2D after Seamly2D did not respond for about 26 s; the user pressed Layout again and got two windows.
