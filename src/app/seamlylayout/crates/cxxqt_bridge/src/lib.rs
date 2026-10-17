@@ -34,6 +34,9 @@ mod size_labels;
 // Splits a handoff into one document per material.
 mod material_split;
 
+// Scale check grid below the pieces of every layout but Marker.
+mod scale_grid;
+
 mod layout_assembler;
 pub use layout_assembler::{create_layout, create_initial_layout_dom, remove_color_blocks, trim_bottom};
 
@@ -2358,6 +2361,14 @@ impl qobject::AppController {
         } // match layout_dom
     } // fn clone_stripped_layout_doc
 
+    // Export copy for DXF-ASTM: the stripped layout without the scale check grid,
+    // which is not a pattern piece.
+    fn clone_dxf_layout_doc(&self) -> Result<svg_dom::Document, cxx_qt_lib::QString> {
+        let mut doc = self.clone_stripped_layout_doc()?;
+        scale_grid::remove_scale_grid(&mut doc);
+        Ok(doc)
+    } // fn clone_dxf_layout_doc
+
     // Default export file name; see exports::default_export_file_name.
     fn default_export_file_name(
         &self,
@@ -2403,7 +2414,7 @@ impl qobject::AppController {
     // Empty on no layout or a failed conversion: export_dxf reports those errors.
     // Called by QML requestDxfExport() before the save dialog.
     fn dxf_missing_piece_data(&self) -> cxx_qt_lib::QString {
-        let Ok(layout_doc) = self.clone_stripped_layout_doc() else {
+        let Ok(layout_doc) = self.clone_dxf_layout_doc() else {
             return cxx_qt_lib::QString::default();
         }; // if no layout
         match dxf_missing_piece_data_message(&layout_doc) {
@@ -2472,7 +2483,7 @@ impl qobject::AppController {
             ));
             return false;
         } // if Marker or Nested
-        let layout_doc = match self.clone_stripped_layout_doc() {
+        let layout_doc = match self.clone_dxf_layout_doc() {
             Ok(d)  => {
                 log_to_file("[lib.rs AppController] export_dxf(): 3 layout DOM cloned and stripped");
                 d
