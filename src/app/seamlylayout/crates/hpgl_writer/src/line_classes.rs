@@ -55,7 +55,7 @@ fn class_from_data_type(data_type: &str) -> Option<LineClass> {
         "seamline" | "internal_path" | "grainline" | "notch" | "tuck" | "drill" | "hole" => {
             Some(LineClass::Mark) // drawn on the piece
         } // marks
-        "piece_label" | "pattern_label" | "label_text" => Some(LineClass::Label), // text
+        "piece_label" | "pattern_label" | "label_text" | "size_legend" => Some(LineClass::Label), // text
         _ => None, // pattern, piece, and unknown types inherit
     } // match data_type
 } // fn class_from_data_type

@@ -182,6 +182,16 @@ fn cut_mode_writes_only_cut_lines() {
 } // cut_mode_writes_only_cut_lines
 
 #[test]
+fn cut_mode_drops_the_size_legend() {
+    let body = [typed_path("cutline", "M0 0 L10 0"), typed_path("size_legend", "M0 20 L10 20")].concat();
+    let options = HpglOptions { mode: HpglMode::Cut, pens: PenMap::default() };
+    let program = svg_to_hpgl(&page(&body), &options).unwrap();
+    assert!(!program.contains("SP3;"), "{program}");
+    let plotted = plot(&page(&body));
+    assert!(plotted.contains("SP3;"), "legend drawn with the label pen: {plotted}");
+} // cut_mode_drops_the_size_legend
+
+#[test]
 fn cut_mode_without_cut_lines_is_an_error() {
     let options = HpglOptions { mode: HpglMode::Cut, pens: PenMap::default() };
     let error = svg_to_hpgl(&page(&typed_path("seamline", "M0 0 L10 0")), &options).unwrap_err();

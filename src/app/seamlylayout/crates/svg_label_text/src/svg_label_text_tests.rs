@@ -103,6 +103,15 @@ fn state_reports_text_paths_only_and_no_labels() {
 } // state_reports_text_paths_only_and_no_labels
 
 #[test]
+fn size_legend_text_is_label_text() {
+    let mut doc = svg_dom::Document::parse(
+        r#"<svg xmlns="http://www.w3.org/2000/svg"><g data-type="size_legend"><text x="0" y="10">Size 34</text></g></svg>"#,
+    )
+    .unwrap();
+    assert_eq!(label_texts(&mut doc), 1);
+} // size_legend_text_is_label_text
+
+#[test]
 fn mode_names_round_trip() {
     for mode in [SvgTextMode::DesignerFont, SvgTextMode::SingleLineFont, SvgTextMode::HersheyStrokes] {
         assert_eq!(SvgTextMode::from_name(mode.name()), Some(mode));

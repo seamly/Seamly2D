@@ -25,6 +25,9 @@ mod piece_naming;
 // Regroups the pieces of a Nested multisize layout by size, for SVG export.
 mod size_groups;
 
+// Gives each size of a Nested multisize layout its own color, with a legend.
+mod size_colors;
+
 mod layout_assembler;
 pub use layout_assembler::{create_layout, create_initial_layout_dom, remove_color_blocks, trim_bottom};
 
