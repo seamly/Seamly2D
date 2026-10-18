@@ -91,6 +91,7 @@
 #include "../vtools/dialogs/support/editlabeltemplate_dialog.h"
 #include "../vtools/tools/pattern_piece_tool.h"
 #include "../vtools/tools/union_tool.h"
+#include "../vtools/tools/PieceMirrorTool.h"
 #include "../vtools/tools/drawTools/drawtools.h"
 #include "../vtools/tools/nodeDetails/anchorpoint_tool.h"
 #include "../vtools/tools/nodeDetails/internal_path_tool.h"
@@ -1090,6 +1091,7 @@ void MainWindow::SetToolButton(bool checked, Tool t, const QString &cursor, cons
             case Tool::InternalPath:
             case Tool::AnchorPoint:
             case Tool::InsertNodes:
+            case Tool::PieceMirror:
                 dialogTool->SetPiecesList(doc->getActivePatternPieces());
                 break;
             default:
@@ -2106,6 +2108,41 @@ void MainWindow::handleUnionTool(bool checked)
 void MainWindow::closeUnionDialog(int result)
 {
     ClosedDialog<UnionTool>(result);
+    doc->LiteParseTree(Document::LiteParse);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief handlePieceMirrorTool handler for the Piece Mirror tool.
+ * @param checked true - button checked.
+ */
+void MainWindow::handlePieceMirrorTool(bool checked)
+{
+    selectPieceTool();
+    SetToolButton<PieceMirrorDialog>
+    (
+        checked,
+        Tool::PieceMirror,
+        ":/cursor/piece_mirror_cursor.png",
+        tr("<b>Tool::Pieces - Piece Mirror:</b> Select a pattern piece with a fold line"),
+        &MainWindow::closePieceMirrorDialog
+    );
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief closePieceMirrorDialog makes the full piece after the user confirms the Piece Mirror dialog.
+ * @param result result of the dialog.
+ * @details The mirror operation goes into the draft scene; the full piece goes into the piece scene.
+ */
+void MainWindow::closePieceMirrorDialog(int result)
+{
+    SCASSERT(!dialogTool.isNull())
+    if (result == QDialog::Accepted)
+    {
+        PieceMirrorTool::Create(dialogTool, draftScene, pieceScene, doc, pattern);
+    }
+    handleArrowTool(true);
     doc->LiteParseTree(Document::LiteParse);
 }
 
@@ -3349,6 +3386,7 @@ void MainWindow::initializeToolButtons()
     connect(ui->pointAlongCurve_ToolButton,     &QToolButton::clicked, this, &MainWindow::handlePointAlongCurveTool);
     connect(ui->pointAlongSpline_ToolButton,    &QToolButton::clicked, this, &MainWindow::handlePointAlongSplineTool);
     connect(ui->unitePieces_ToolButton,         &QToolButton::clicked, this, &MainWindow::handleUnionTool);
+    connect(ui->pieceMirror_ToolButton,         &QToolButton::clicked, this, &MainWindow::handlePieceMirrorTool);
     connect(ui->pointAlongArc_ToolButton,       &QToolButton::clicked, this, &MainWindow::handlePointAlongArcTool);
     connect(ui->lineIntersectAxis_ToolButton,   &QToolButton::clicked, this, &MainWindow::handleLineIntersectAxisTool);
     connect(ui->curveIntersectAxis_ToolButton,  &QToolButton::clicked, this, &MainWindow::handleCurveIntersectAxisTool);
@@ -3766,6 +3804,8 @@ void MainWindow::handlePatternPiecesMenu()
     QMenu menu;
 
     QAction *action_Union        = menu.addAction(QIcon(":/toolicon/32x32/union.png"),  tr("Union Tool") + "\tU");
+    QAction *action_PieceMirror  = menu.addAction(QIcon(":/toolicon/32x32/piece_mirror.png"),
+                                                  tr("Piece Mirror") + "\tM, P");
     QAction *action_ExportPieces = menu.addAction(QIcon(":/toolicon/32x32/export.png"), tr("Export Pattern Pieces") + "\tE, P");
     QAction *selectedAction      = menu.exec(QCursor::pos());
 
@@ -3778,6 +3818,12 @@ void MainWindow::handlePatternPiecesMenu()
         ui->piece_ToolBox->setCurrentWidget(ui->details_Page);
         ui->unitePieces_ToolButton->setChecked(true);
         handleUnionTool(true);
+    }
+    else if (selectedAction == action_PieceMirror)
+    {
+        ui->piece_ToolBox->setCurrentWidget(ui->details_Page);
+        ui->pieceMirror_ToolButton->setChecked(true);
+        handlePieceMirrorTool(true);
     }
     else if (selectedAction == action_ExportPieces)
     {
@@ -3970,6 +4016,9 @@ void MainWindow::CancelTool()
             break;
         case Tool::Union:
             ui->unitePieces_ToolButton->setChecked(false);
+            break;
+        case Tool::PieceMirror:
+            ui->pieceMirror_ToolButton->setChecked(false);
             break;
         case Tool::CutArc:
             ui->pointAlongArc_ToolButton->setChecked(false);
@@ -5728,6 +5777,7 @@ void MainWindow::setToolsEnabled(bool enable)
 
     //Details
     ui->unitePieces_ToolButton->setEnabled(pieceTools);
+    ui->pieceMirror_ToolButton->setEnabled(pieceTools);
     ui->exportPiecesAs_ToolButton->setEnabled(pieceTools);
 
     //Layout
@@ -5806,6 +5856,7 @@ void MainWindow::setToolsEnabled(bool enable)
 
     //Details
     ui->union_Action->setEnabled(pieceTools);
+    ui->pieceMirror_Action->setEnabled(pieceTools);
     ui->exportPieces_Action->setEnabled(pieceTools);
 
     //Layout
@@ -6312,6 +6363,10 @@ void MainWindow::LastUsedTool()
         case Tool::Union:
             ui->unitePieces_ToolButton->setChecked(true);
             handleUnionTool(true);
+            break;
+        case Tool::PieceMirror:
+            ui->pieceMirror_ToolButton->setChecked(true);
+            handlePieceMirrorTool(true);
             break;
         case Tool::CutArc:
             ui->pointAlongArc_ToolButton->setChecked(true);
@@ -6862,6 +6917,13 @@ void MainWindow::createActions()
         ui->piece_ToolBox->setCurrentWidget(ui->details_Page);
         ui->unitePieces_ToolButton->setChecked(true);
         handleUnionTool(true);
+    });
+
+    connect(ui->pieceMirror_Action, &QAction::triggered, this, [this]
+    {
+        ui->piece_ToolBox->setCurrentWidget(ui->details_Page);
+        ui->pieceMirror_ToolButton->setChecked(true);
+        handlePieceMirrorTool(true);
     });
 
     connect(ui->exportPieces_Action, &QAction::triggered, this, [this]

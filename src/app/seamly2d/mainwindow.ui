@@ -240,6 +240,7 @@
        <normaloff>:/toolicon/32x32/details_toolbox.png</normaloff>:/toolicon/32x32/details_toolbox.png</iconset>
      </property>
      <addaction name="union_Action"/>
+     <addaction name="pieceMirror_Action"/>
      <addaction name="exportPieces_Action"/>
     </widget>
     <widget class="QMenu" name="lines_Menu">
@@ -750,6 +751,7 @@
     <bool>false</bool>
    </attribute>
    <addaction name="union_Action"/>
+   <addaction name="pieceMirror_Action"/>
    <addaction name="exportPieces_Action"/>
   </widget>
   <widget class="QToolBar" name="layout_ToolBar">
@@ -2345,7 +2347,7 @@
              <x>0</x>
              <y>0</y>
              <width>120</width>
-             <height>111</height>
+             <height>159</height>
             </rect>
            </property>
            <property name="sizePolicy">
@@ -2386,7 +2388,7 @@
               <x>0</x>
               <y>0</y>
               <width>120</width>
-              <height>82</height>
+              <height>130</height>
              </rect>
             </property>
             <property name="toolTip">
@@ -2455,6 +2457,38 @@
              <property name="icon">
               <iconset resource="share/resources/toolicon.qrc">
                <normaloff>:/toolicon/32x32/export.png</normaloff>:/toolicon/32x32/export.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
+            </widget>
+            <widget class="QToolButton" name="pieceMirror_ToolButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="geometry">
+              <rect>
+               <x>10</x>
+               <y>58</y>
+               <width>39</width>
+               <height>38</height>
+              </rect>
+             </property>
+             <property name="toolTip">
+              <string>Mirror a Half Piece Across Its Fold Line (M, P)</string>
+             </property>
+             <property name="text">
+              <string notr="true">...</string>
+             </property>
+             <property name="icon">
+              <iconset resource="share/resources/toolicon.qrc">
+               <normaloff>:/toolicon/32x32/piece_mirror.png</normaloff>:/toolicon/32x32/piece_mirror.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -4431,6 +4465,21 @@
    </property>
    <property name="shortcut">
     <string notr="true">U</string>
+   </property>
+  </action>
+  <action name="pieceMirror_Action">
+   <property name="icon">
+    <iconset resource="share/resources/toolicon.qrc">
+     <normaloff>:/toolicon/32x32/piece_mirror.png</normaloff>:/toolicon/32x32/piece_mirror.png</iconset>
+   </property>
+   <property name="text">
+    <string>Piece Mirror</string>
+   </property>
+   <property name="toolTip">
+    <string>Mirror a Half Piece Across Its Fold Line (M, P)</string>
+   </property>
+   <property name="shortcut">
+    <string notr="true">M, P</string>
    </property>
   </action>
   <action name="exportPieces_Action">
