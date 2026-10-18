@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-10-18 — Layout.80 fold lines merged into local `run-seamlyLayout`, not pushed
+
+- Branch `task-fold-lines`, commits made with a temporary index (shared tree).
+- Fold line = two neighbouring main path point nodes with `foldLine="true"` (format 0.7.6, no new version). `VPieceNode::isFoldLine`; `VPiece::foldLineNodeIndexes`, `foldLine`, `hasFoldLine`.
+- Piece dialog: point node menu "Fold Line"; invalid choice blocks OK; valid fold line checks and locks "On fold".
+- Seam allowance width 0 along the fold line. Canvas: `PatternPieceTool::m_foldLine` in the fold line preference style (Preferences > Pattern > Fold Lines).
+- Handoff: `fold_line` component group, two point path; `data-on-fold` follows. Docs: `SVG-DATA-ATTRIBUTES.md`, `NEW-ATTRIBUTES.csv`.
+- Agent decisions (in the TODO): node attribute, not piece-level ids; outline stays closed, fold line drawn over it.
+- Not done: Layout.80.3 Piece Mirror tool; built-in seam allowance still insets the seam line on the fold; SeamlyLayout side (Layout.16).
+- Verified: `cl /Zs` on every changed `.cpp` and both test files. Not run: Qt suites (5 new tests), next `local_build_msi.ps1` (ask first). User check: Layout.80.7.
+- User's uncommitted `TODO_SEAMLYLAYOUT.md` restructure committed with the task; `TODO_SEAMLY2D.md` and other user edits left uncommitted.
+
 ### 2026-10-17 (evening) — Layout.77, 68 grid, 79 merged into local `run-seamlyLayout`, not pushed
 
 - User rewrote Layout.77 (piece material in Seamly2D), added Layout.79 (select height) and Layout.68.5–68.13 (scale grid) in a copy, `TODO_SEAMLYLAYOUT_updated.md`; merged into `TODO_SEAMLYLAYOUT.md`. The copy is untracked and left in place.
