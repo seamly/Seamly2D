@@ -98,6 +98,13 @@ private slots:
     void FoldLineHasNoSeamAllowance() const;
     void LayoutPieceTakesFoldLine() const;
     void FoldLineNodeAttributeIsRead() const;
+    void PieceMirrorFullPathOrder_data() const;
+    void PieceMirrorFullPathOrder() const;
+    void PieceMirrorNodeAttributes() const;
+    void PieceMirrorFoldNodesTakeHalfWidth() const;
+    void PieceMirrorBuildsFullOutline() const;
+    void PieceMirrorRecordRanges() const;
+    void PieceMirrorDropsRecordAcrossFold() const;
     void BuiltInSeamLineUsesWiderNodeWidth_data() const;
     void BuiltInSeamLineUsesWiderNodeWidth() const;
     void BuiltInSeamLineFollowsCurve() const;
