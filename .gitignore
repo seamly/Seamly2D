@@ -1,5 +1,10 @@
 # TODO: remove entries related to testing after SeamlyLayout is fully tested
 
+# ignore claude
+CLAUDE.md
+.claude
+.claude/*
+
 # Ignore temporary files
 *~
 
@@ -12,6 +17,9 @@
 # Seamly2D lock files
 *.locked
 
+# .json
+*.json
+
 # bundle files
 *.bundle
 
@@ -21,16 +29,36 @@
 
 # text files
 *.txt
-# Third-party license notices shipped in every installer are committed text files.
+
+# track Third-party license notices - shipped in every installer
 !packaging/licenses/*.txt
+
+# track project docs
+!project-docs/
 
 # other docs
 *.docx
 *.pdf
 *.tex
 
+# image docs
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+*.tiff
+
 # test key files
 *seamly-signing-key.json
+
+# test layouts
+test-seamly-layout
+test-seamly-layout/
+
+# packaging files
+Info.plist
+project-version.*
 
 # Previous backup file formats
 *(v*).val*
@@ -43,9 +71,13 @@
 # Linux trash folder which might appear on any partition or disk
 .Trash-*
 
-# Test files and directories
+# track these test files
+!test-seamly-layout/
+
+# don't track other Test files and directories
 test*.*
 Test*.*
+
 
 # Lock files used by the Emacs editor.
 # Notice that the "#" character is quoted with a backslash.
@@ -248,12 +280,15 @@ src/app/seamlylayout/qt_frontend/build/
 # TODO: Remove these after testing is cocmplete
 # track claude Session handover file
 !SESSION_HANDOVER.md
+
 # track seamlylayout .claude & .vs files for testing
 !src/app/seamlylayout/.claude/
 !src/app/seamlylayout/.vs/
+
 # track seamlylayout output files, and top-level test input, for testing
-!test-seamly-layout/
+!test-seamly-layout/*.png
 !src/app/seamlylayout/output/
+
 # track seamlylayout local build files for testing
 !src/app/seamlylayout/qt_frontend/CMakeFiles/
 !src/app/seamlylayout/qt_frontend/CMakeCache.txt

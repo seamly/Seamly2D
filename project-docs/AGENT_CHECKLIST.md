@@ -5,7 +5,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 
 | Task | Sections | Check |
 |---|---|---|
-| Layout.38.6 | 1 | Multisize pattern: Nested and Marker tabs |
+| Layout.38.6 | 1 | Multisize pattern: Nested and Marker tabs | PASS
 | Layout.67.8 | 1, 3, 5–8 | Multisize tabs and exports |
 | Layout.25.7 | 2, 10 | Media grows to fit |
 | Layout.68.5 | 4 | PDF true size |

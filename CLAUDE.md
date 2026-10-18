@@ -1,5 +1,16 @@
 # CLAUDE.md
 
+## Contributing
+
+- create a feature branch for each task
+- Maximize number of commits per task; commit each small unit improvement to the feature branch
+- don't push commits to origin --> the developer will push commits to origin
+- Don't mention yourself (Claude, AI contributor, agents, etc.) in commits, inline comments, or doxygen-compatible briefs, or .md files
+- Don't mention task names or dates in commits, inline comments, or doxygen-compatible briefs.
+- When task updates are complete except for test & verification, merge feature branch into run-seamlyLayout
+
+## Naming
+
 ## Environment Rules for MSVC Compilation
 
 - The active shell environment is PowerShell running on Windows x64.
@@ -324,8 +335,9 @@ Read it before writing or renaming code.
 - Make source filenames unique repository-wide.
 - Multiple SeamlyLayout crate-root `lib.rs` files are the only exception.
 - Do not start new filenames with bare `s`.
-- Do not start new source filenames with `v`.
+- Do not start new filenames, functions, clasees, etc. with `v`.
 - Do not rename existing `v*` files unless the task requires it.
+- New files, functions, classes, etc. do not start with 'v'
 
 ### Classes
 
