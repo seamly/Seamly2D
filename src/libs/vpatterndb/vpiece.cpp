@@ -307,6 +307,89 @@ QVector<QPointF> VPiece::mainPathNodeVertices(const VContainer *data) const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief foldLineNodeIndexes finds the fold line of a main path.
+ * @details The fold line joins the two fold line nodes. Both must be point nodes, and they must be neighbours in
+ * the path without its excluded nodes; the closing segment, last node to first node, also counts.
+ * @param nodes main path nodes.
+ * @return the two node indexes in path direction, segment start first; empty when the path has no valid fold line.
+ */
+QVector<int> VPiece::foldLineNodeIndexes(const QVector<VPieceNode> &nodes)
+{
+    // Indexes of the nodes the path uses; excluded nodes are not part of the outline.
+    QVector<int> active;
+    for (int i = 0; i < nodes.size(); ++i)
+    {
+        if (!nodes.at(i).isExcluded())
+        {
+            active.append(i);
+        }
+    }
+
+    // Positions in "active" of the fold line nodes.
+    QVector<int> fold;
+    for (int k = 0; k < active.size(); ++k)
+    {
+        if (nodes.at(active.at(k)).isFoldLine())
+        {
+            fold.append(k);
+        }
+    }
+
+    if (fold.size() != 2)
+    {
+        return QVector<int>();
+    }
+
+    for (int k : fold)
+    {
+        if (nodes.at(active.at(k)).GetTypeTool() != Tool::NodePoint)
+        {
+            return QVector<int>();
+        }
+    }
+
+    const int first  = fold.at(0);
+    const int second = fold.at(1);
+    if (second == first + 1)
+    {
+        return QVector<int>{active.at(first), active.at(second)};
+    }
+    if (first == 0 && second == active.size() - 1)
+    {
+        return QVector<int>{active.at(second), active.at(first)}; // closing segment runs from the last node
+    }
+    return QVector<int>();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+bool VPiece::hasFoldLine() const
+{
+    return !foldLineNodeIndexes(GetPath().getNodes()).isEmpty();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief foldLine returns the fold line from its start node to its end node, in path direction.
+ * @return a null line when the piece has no valid fold line.
+ */
+QLineF VPiece::foldLine(const VContainer *data) const
+{
+    SCASSERT(data != nullptr);
+
+    const QVector<VPieceNode> nodes = GetPath().getNodes();
+    const QVector<int> indexes = foldLineNodeIndexes(nodes);
+    if (indexes.isEmpty())
+    {
+        return QLineF();
+    }
+
+    const QPointF start = static_cast<QPointF>(*data->GeometricObject<VPointF>(nodes.at(indexes.at(0)).GetId()));
+    const QPointF end   = static_cast<QPointF>(*data->GeometricObject<VPointF>(nodes.at(indexes.at(1)).GetId()));
+    return QLineF(start, end);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief seamAllowancePoints builds the seam allowance (cut line) polyline.
  * @param nodeVertices when not null, receives the returned vertices that can break the tangent.
  * @param corners when not null, receives the node point count and the ByLength corners cut short.
@@ -329,6 +412,12 @@ QVector<QPointF> VPiece::seamAllowancePoints(const VContainer *data, QVector<QPo
     const qreal width = ToPixel(GetSAWidth(), *data->GetPatternUnit());
     const QVector<VPieceNode> unitedPath = GetUnitedPath(data);
 
+    // The fold line gets no seam allowance: its start node has none after it, its end node none before it.
+    const QVector<VPieceNode> mainNodes = GetPath().getNodes();
+    const QVector<int> foldIndexes = foldLineNodeIndexes(mainNodes);
+    const quint32 foldStartId = foldIndexes.isEmpty() ? NULL_ID : mainNodes.at(foldIndexes.at(0)).GetId();
+    const quint32 foldEndId   = foldIndexes.isEmpty() ? NULL_ID : mainNodes.at(foldIndexes.at(1)).GetId();
+
     QVector<VSAPoint> pointsEkv;
     for (int i = 0; i< unitedPath.size(); ++i)
     {
@@ -345,6 +434,14 @@ QVector<QPointF> VPiece::seamAllowancePoints(const VContainer *data, QVector<QPo
                 if (!insertingCSA)
                 {
                     pointsEkv.append(VPiecePath::PreparePointEkv(node, data));
+                    if (node.isFoldLine() && node.GetId() == foldStartId)
+                    {
+                        pointsEkv.last().SetSAAfter(0);
+                    }
+                    if (node.isFoldLine() && node.GetId() == foldEndId)
+                    {
+                        pointsEkv.last().SetSABefore(0);
+                    }
 
                     recordIndex = IsCSAStart(records, node.GetId());
                     if (recordIndex != -1 && records.at(recordIndex).includeType == PiecePathIncludeType::AsCustomSA)
