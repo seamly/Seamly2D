@@ -208,6 +208,9 @@ const QString settingDefaultInternalLineweight           = QStringLiteral("patte
 const QString settingDefaultCutoutColor                  = QStringLiteral("pattern/defaultCutoutColor");
 const QString settingDefaultCutoutLinetype               = QStringLiteral("pattern/defaultCutoutLinetype");
 const QString settingDefaultCutoutLineweight             = QStringLiteral("pattern/defaultCutoutLineweight");
+const QString settingDefaultFoldLineColor                = QStringLiteral("pattern/defaultFoldLineColor");
+const QString settingDefaultFoldLineLinetype             = QStringLiteral("pattern/defaultFoldLineLinetype");
+const QString settingDefaultFoldLineLineweight           = QStringLiteral("pattern/defaultFoldLineLineweight");
 
 const QString settingShowSeamAllowances                  = QStringLiteral("pattern/showShowSeamAllowances");
 const QString settingDefaultSeamAllowanceVisibilty       = QStringLiteral("pattern/defaultSeamAllowanceVisibilty");
@@ -2564,6 +2567,43 @@ qreal VCommonSettings::getDefaultCutoutLineweight() const
 void VCommonSettings::setDefaultCutoutLineweight(const qreal &value)
 {
     setValue(settingDefaultCutoutLineweight, value);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+QString VCommonSettings::getDefaultFoldLineColor() const
+{
+   return getStr(settingDefaultFoldLineColor, "black");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void VCommonSettings::setDefaultFoldLineColor(const QString &value)
+{
+    setValue(settingDefaultFoldLineColor, value);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief getDefaultFoldLineLinetype returns the fold line type; dash dot by default, the usual mark of a fold.
+QString VCommonSettings::getDefaultFoldLineLinetype() const
+{
+   return value(settingDefaultFoldLineLinetype, "dashDotLine").toString();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void VCommonSettings::setDefaultFoldLineLinetype(const QString &value)
+{
+    setValue(settingDefaultFoldLineLinetype, value);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+qreal VCommonSettings::getDefaultFoldLineLineweight() const
+{
+   return value(settingDefaultFoldLineLineweight, 0.35).toReal();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void VCommonSettings::setDefaultFoldLineLineweight(const qreal &value)
+{
+    setValue(settingDefaultFoldLineLineweight, value);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

@@ -917,6 +917,14 @@ void PatternPieceTool::paint(QPainter *painter, const QStyleOptionGraphicsItem *
     m_notches->setPen(QPen(color, scaleWidth(lineWeight, sceneScale(scene())),
                            Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
 
+    //set fold line pen
+    color      = QColor(qApp->Settings()->getDefaultFoldLineColor());
+    lineType   = qApp->Settings()->getDefaultFoldLineLinetype();
+    lineWeight = ToPixel(qApp->Settings()->getDefaultFoldLineLineweight(), Unit::Mm);
+
+    m_foldLine->setPen(QPen(color, scaleWidth(lineWeight, sceneScale(scene())),
+                            lineTypeToPenStyle(lineType), Qt::FlatCap, Qt::RoundJoin));
+
 
     if ((m_dataLabel->isIdle() == false
             || m_patternInfo->isIdle() == false
@@ -1432,6 +1440,7 @@ PatternPieceTool::PatternPieceTool(VAbstractPattern *doc, VContainer *data, cons
     , m_patternInfo(new VTextGraphicsItem(this))
     , m_grainLine(new VGrainlineItem(this))
     , m_notches(new QGraphicsPathItem(this))
+    , m_foldLine(new QGraphicsPathItem(this))
 {
     VPiece piece = data->GetPiece(id);
     initializeNodes(piece, scene);
@@ -1582,6 +1591,16 @@ void PatternPieceTool::RefreshGeometry()
     }
 
     m_notches->setPath(piece.getNotchesPath(this->getData(), seamAllowancePoints));
+
+    // The fold line is drawn over the outline segment it marks; the outline stays closed for the cut line.
+    QPainterPath foldPath;
+    const QLineF fold = piece.foldLine(this->getData());
+    if (!fold.isNull())
+    {
+        foldPath.moveTo(fold.p1());
+        foldPath.lineTo(fold.p2());
+    }
+    m_foldLine->setPath(foldPath);
 
     updatePieceDetails();
 

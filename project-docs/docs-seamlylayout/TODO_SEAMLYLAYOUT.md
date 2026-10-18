@@ -2,18 +2,6 @@
 
 Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to `project-docs/TODO_COMPLETED.md`. Task IDs start with `Layout.`
 
-## [ ] Task Layout.73 — Assign unique piece names at import
-
-Give every piece a unique name before a layout, in every size. Rule: `docs-data/SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout piece names".
-
-Finding: the names do not cause the jacket2 Missing Piece Data dialog (`test-seamly-layout/layouts/jacket2/20261013/jacket2_40-146_R12_alltabs_screenshot_20261016_1.png`). jacket2 hides piece labels and grainlines (`visible="false"`), so the handoff has no `piece_label` or `grainline` groups (Layout.26). The dialog stays; it now lists `Size_500_Piece_3_Detail` instead of `Detail (3)`.
-
-- [x] Layout.73.1 `piece_naming::assign_unique_piece_names`, called by `finish_import`. Individual: `Piece_<n>[_<name>][_<letter>]`. Multisize: `Size_<size>_Piece_<n>[_<name>][_<letter>]`. A run of spaces becomes one `_` (user decision). Piece-set: name without the size. Marker `data-name-assigned="true"`, kept on a later import.
-- [x] Layout.73.2 Import warning when the sizes have different piece counts.
-- [x] Layout.73.3 No "(size N)" label suffix on an assigned name.
-- [x] Layout.73.4 Tests: 6 `piece_naming` tests, `piece_extractor` `assigned_name_label_has_no_size_suffix`, `layout_utils` `jacket2_assigned_names_reach_the_base_size_export`.
-- [ ] Layout.73.5 Next MSI: user check, `AGENT_CHECKLIST.md` §1 and §5.
-
 ### [ ] Task Layout.24 — Put the tab name before the export timestamp - Priority 2
 
 Default name of a multisize export: `<base>[_<segment>]_<tab>_<stamp>[_tiled].<ext>`. Example: `mypatternname_R13_Size220_202610112043.dxf`. An individual pattern keeps `<base>[_<segment>]_<stamp>[_tiled].<ext>`.
@@ -42,6 +30,18 @@ For oversized individual-pattern pieces, ask whether to split them or enlarge th
   - [ ] Enlarge: sheet exceeds 36 in length; no splits or warnings.
   - [ ] Export split PDF parts and DXF-ASTM blocks named `Back (1/2)` and `Back (2/2)`.
 
+## [ ] Task Layout.73 — Assign unique piece names at import
+
+Give every piece a unique name before a layout, in every size. Rule: `docs-data/SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout piece names".
+
+Finding: the names do not cause the jacket2 Missing Piece Data dialog (`test-seamly-layout/layouts/jacket2/20261013/jacket2_40-146_R12_alltabs_screenshot_20261016_1.png`). jacket2 hides piece labels and grainlines (`visible="false"`), so the handoff has no `piece_label` or `grainline` groups (Layout.26). The dialog stays; it now lists `Size_500_Piece_3_Detail` instead of `Detail (3)`.
+
+- [x] Layout.73.1 `piece_naming::assign_unique_piece_names`, called by `finish_import`. Individual: `Piece_<n>[_<name>][_<letter>]`. Multisize: `Size_<size>_Piece_<n>[_<name>][_<letter>]`. A run of spaces becomes one `_` (user decision). Piece-set: name without the size. Marker `data-name-assigned="true"`, kept on a later import.
+- [x] Layout.73.2 Import warning when the sizes have different piece counts.
+- [x] Layout.73.3 No "(size N)" label suffix on an assigned name.
+- [x] Layout.73.4 Tests: 6 `piece_naming` tests, `piece_extractor` `assigned_name_label_has_no_size_suffix`, `layout_utils` `jacket2_assigned_names_reach_the_base_size_export`.
+- [ ] Layout.73.5 Next MSI: user check, `AGENT_CHECKLIST.md` §1 and §5.
+
 ### [ ] Task Layout.74 - Multisize - Nested - each size has its own color, with a size-to-color legend
 
 Currently in the nested layout, all pieces are black. To distinguish between sizes, each size should be assigned a unique color, all pieces of that size will be displayed in that color (cutlines, seamlines, notches, etc.)
@@ -49,12 +49,12 @@ Currently in the nested layout, all pieces are black. To distinguish between siz
 - [x] Layout 74.1 - Assign each size a color. `size_colors::size_palette`: smallest size first, golden-angle hue steps, relative luminance at most 0.3.
 - [x] Layout 74.2 - Assign each piece its color based on its size. These colors are displayed in the Nested layout, and included in all exports except DXF (Nested can't be exported to DXF). `color_pieces_by_size`, called by `do_process_layout` (Nested only) and `build_sheet_export_inputs` (paper-sheet PDF).
 - [x] Layout 74.3 - Create a color-to-size legend. Place this legend on the Nested Layout. `SizeLegend`: `<g id="size_legend" data-type="size_legend">`, one piece gap below the lowest piece; the media grows to hold it (tiled: more tile rows). Text modes and HPGL treat it as a label. Not on the paper-sheet PDF, which repacks the pieces.
-  - Tests: 5 `size_colors` tests; `layout_utils` `jacket2_nested_colors_sizes_and_adds_legend`, `jacket2_nested_tiled_legend_has_tile_rows`; `svg_label_text` `size_legend_text_is_label_text`; `hpgl_writer` `cut_mode_drops_the_size_legend`. `cargo test --workspace` 533 passed; `ctest --preset debug` 6 of 6. jacket2 Nested PNG render checked by eye. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
 - [ ] Layout 74.4 - Test/Verify using a multisize pattern. Next MSI: jacket2, Nested tab, then Export > SVG, PDF, PNG.
   - [ ] Layout 74.4.1 - Each piece is displayed with its size's color
   - [ ] Layout 74.4.2 - The legend appears in the Layout
   - [ ] Layout 74.4.3 - Exported files retain the colors
   - [ ] Layout 74.4.4 - Exported files retain the legend
+  - [ ] Layout 74.4.5 - 5 `size_colors` tests; `layout_utils` `jacket2_nested_colors_sizes_and_adds_legend`, `jacket2_nested_tiled_legend_has_tile_rows`; `svg_label_text` `size_legend_text_is_label_text`; `hpgl_writer` `cut_mode_drops_the_size_legend`. `cargo test --workspace` 533 passed; `ctest --preset debug` 6 of 6. jacket2 Nested PNG render checked by eye. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
 
 ### [ ] Task Layout.75 - Multisize - add a scroll bar to enable access of all size tabs
 
@@ -75,7 +75,7 @@ Currently in Multisize layouts, the pattern pieces don't display the size. Add a
 
 ### [ ] Task Layout.77 - Import - Separate pieces into fabric, a.k.a 'Material'; display on separate tabs in left import canvas
 
-Currently in the import left canvas, all pieces are displayed together regardless of the fabric type. From Seamly2D, separate pieces into fabric type--> read each piece and create a list of fabric types; group pieces by fabric type; create separate stringified svgs for each fabric type; display each stringified svg in separate tabs in the import left canvas where the tab contains the name of the fabric type. 
+Currently in the import left canvas, all pieces are displayed together regardless of the fabric type. From Seamly2D, separate pieces into fabric type--> read each piece and create a list of fabric types; group pieces by fabric type; create separate stringified svgs for each fabric type; display each stringified svg in separate tabs in the import left canvas where the tab contains the name of the fabric type.
 
 - [ ] Layout.77.0 - Update Seamly2D to track Material type for each piece:
   - Note: Currently in 'Seamly2D > Piece Mode > Pattern Piece Tool > Labels > Piece Label (or Pattern Label) > Edit Label > Insert'. When the user clicks the 'Insert' dropdown box they can select 'Material: Fabric', 'Material: Interfacing', 'Material: Interlining', and 'Material: Lining' which places the text 'Fabric', 'Interfacing', 'Interlining', or 'Lining' into the label.
@@ -87,7 +87,6 @@ Currently in the import left canvas, all pieces are displayed together regardles
   - [x] Layout.77.1.2 - in left import canvas, when user clicks 'Create Layout', create layouts for the currently selected left import canvas Material tab. The shown material's document is `input_dom`. Decision taken: a tab switch drops the previous material's layout and rebuilds the blank canvas from the submitted settings.
   - [x] Layout.77.1.3 - in right layout canvas, display the Material type above the right layout canvas. `Main.qml` `materialHeader`: "Material: <material>", shown whenever the handoff names a material.
   - [x] Layout.77.1.4 - in exported file names, append the currently selected '_<materialtype>' before the date stamp (only if there are multiple Material types). `exports::material_name_segment`: `<base>[_<segment>]_<material>[_<tab>]_<stamp>`; Export all tabs keeps the same order.
-  - Tests: `material_split` 3 tests (one lays out each material and checks its pieces); `exports` `material_segment_goes_after_the_variant_and_before_the_tab`. `cargo test --workspace` 543 passed; `ctest --preset debug` 6 of 6 (QML compiles). Doc: `SVG-DATA-ATTRIBUTES.md`, "Materials"; `NEW-ATTRIBUTES.csv`.
 - [ ] Layout.77.2 - Test/Verify - check for individual patterns:
   - [ ] Layout.77.2.0 - check 'Pattern Piece Tool > Properties > Properties' for new 'Material' dropdown field
   - [ ] Layout.77.2.1 - check left import canvas that there is a tab for each Material identified in the pieces.
@@ -96,9 +95,10 @@ Currently in the import left canvas, all pieces are displayed together regardles
   - [ ] Layout.77.2.4 - check right layout canvas that the pieces are correct for that material.
   - [ ] Layout.77.2.5 - check that .sm2d files contain pieces with material attribute
   - [ ] Layout.77.2.6 - check that older .sm2d files update to new schema properly
+  - [ ] Layout.77.2.7 - `material_split` 3 tests (one lays out each material and checks its pieces); `exports` `material_segment_goes_after_the_variant_and_before_the_tab`. `cargo test --workspace` 543 passed; `ctest --preset debug` 6 of 6 (QML compiles). Doc: `SVG-DATA-ATTRIBUTES.md`, "Materials"; `NEW-ATTRIBUTES.csv`.
 - [x] Layout.77.3 - Update Schema
   - [x] Layout.77.3.1 - Create a new `.sm2d` schema: foldline node ids, schema version bump
-    - Done for the material: `v0.7.6.xsd` adds the optional piece attribute `material`; `VPatternConverter` max version 0.7.6. Fold line node ids belong to Layout.80 (Seamly2D.8.2); 0.7.6 is not released yet, so Layout.80 can add them to the same schema version.
+    - Done for the material: `v0.7.6.xsd` adds the optional piece attribute `material`; `VPatternConverter` max version 0.7.6. Fold line node ids belong to Layout.80 (Layout.80.2); 0.7.6 is not released yet, so Layout.80 can add them to the same schema version.
   - [x] Layout.77.3.2 - Create a converter for older files
     - Done: `VPatternConverter::toVersion0_7_6` moves 0.7.5 files to 0.7.6. A piece without `material` reads as Fabric; the next save writes the attribute. Check: Layout.77.2.6.
 
@@ -106,7 +106,9 @@ Currently in the import left canvas, all pieces are displayed together regardles
 
 Renumbered from a second Layout.75.
 
-Currently in multisize SVG exports, the pieces are grouped together, because they need to be grouped this way for layout, adjust mode, etc. For SVG export the sizes must be grouped together, without changing the position of any piece, to enable the user to select a single size and hide the remainder in upstream graphics software like Inkscape.
+Currently in multisize SVG exports, the pieces are grouped together by piecename to support layout processing, adjust mode actions, etc. However, when opening and utilizing the exported multisize nested layout SVG file, the sizes must be grouped together to enable the user to view one size at a time (hiding all other size groups).
+
+Note: This may require flatting the SVG data before grouping pieces by size to prevent changing the position of any piece.
 
 - [x] Task Layout.78.1 - when exporting an SVG for a nested layout, group the pieces according to size, so that there is a group element for each size that contains all the pieces of that size. Order the size groups in the SVG layout from the largest (so the largest size is underneath all other sizes in the svg display canvas) to the smallest (so it is highest in the svg display canvas) to enable easy selection of each size. The exported SVG should be flat (contains no transforms except for text elements).
   - Done: `size_groups::group_pieces_by_size`, called by `export_svg`. Groups `<g id="size_<size>" data-type="size" data-size="<size>">`, largest first; piece-sets removed; `flatten_dom` first. Only a layout with top-level piece-sets (Nested) changes. Tests: 4 `size_groups` tests; `layout_utils` `jacket2_nested_svg_export_groups_pieces_by_size` (26 groups of 8, no piece moves). Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested SVG export".
@@ -129,17 +131,19 @@ Currently in Seamly2D, a pattern with a `.smms` measurement file hands off every
 
 A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. `FoldPosition` is free text.
 
-- [ ] Seamly2D.8.1 implement foldline:
-  - [ ] Seamly2D.8.1.1 - Application Preferences - implement default Foldline style properties.
-  - [ ] Seamly2D.8.1.2 - Piece Mode - Implement a 'Foldline' check option in 'Piece Properties > Path > node context menu'; user may select two adjacent nodes along the path --> must be two (not one, not three).
-  - [ ] Seamly2D.8.1.3 - Canvas - draw the foldline with its line style; a foldline is not part of the cutline or the seamline; no seam allowance can be added to this line; the "on fold" flag follows the foldline
-- [ ] Seamly2D.8.2 Update Schema:
-  - [ ] Seamly2D.8.2.1 - Create a new `.sm2d` schema: fold line node ids, schema version bump
-  - [ ] Seamly2D.8.2.2 - Create a converter for older files
-- [ ] Seamly2D.8.3 In Piece mode implement a new 'Piece Mirror' tool - mirror the half piece across the fold line
-- [ ] Seamly2D.8.4 Handoff SVG: `data-on-fold` on the piece `<g>`, a `fold_line` component group with the two points; update `SVG-DATA-ATTRIBUTES.md` and `NEW-ATTRIBUTES.csv`
-- [ ] Seamly2D.8.5 Unit tests: schema round-trip, handoff attributes
-- [ ] Seamly2D.8.6 SeamlyLayout side: Layout.16
+- [x] Layout.80.1 implement foldline:
+  - [x] Layout.80.1.1 - Application Preferences - implement default Foldline style properties. Preferences > Pattern > Fold Lines tab: color (black), line type (dash dot), line weight (0.35 mm). `VCommonSettings::getDefaultFoldLine*`.
+  - [x] Layout.80.1.2 - Piece Mode - Implement a 'Foldline' check option in 'Piece Properties > Path > node context menu'; user may select two adjacent nodes along the path --> must be two (not one, not three). Point node menu "Fold Line"; the row shows "(fold line)". `VPiece::foldLineNodeIndexes`: two point nodes, neighbours when excluded nodes are skipped; the closing segment counts. Any other choice: "A fold line needs two neighbouring points!", OK disabled.
+  - [x] Layout.80.1.3 - Canvas - draw the foldline with its line style; a foldline is not part of the cutline or the seamline; no seam allowance can be added to this line; the "on fold" flag follows the foldline. `PatternPieceTool::m_foldLine`. Seam allowance width 0 along the fold line. A valid fold line checks and locks "On fold".
+    - Decision taken: the outline stays closed, so the seam line and cut line still run along the fold segment; the fold line is drawn over it. Open: a built-in seam allowance still insets the seam line along the fold.
+- [x] Layout.80.2 Update Schema:
+  - [x] Layout.80.2.1 - Create a new `.sm2d` schema: fold line node ids, schema version bump. Decision taken: a main path node attribute `foldLine="true"` on each end node, in `v0.7.6.xsd` (0.7.6 is not released, so no second bump).
+  - [x] Layout.80.2.2 - Create a converter for older files. `toVersion0_7_6` needs no change: an older node has no fold line.
+- [ ] Layout.80.3 In Piece mode implement a new 'Piece Mirror' tool - mirror the half piece across the fold line. Not started.
+- [x] Layout.80.4 Handoff SVG: `data-on-fold` on the piece `<g>`, a `fold_line` component group with the two points; update `SVG-DATA-ATTRIBUTES.md` and `NEW-ATTRIBUTES.csv`. `VLayoutPiece::createFoldLineItem`; id `fold_line_<name>`. HPGL draws it as a mark; DXF puts it on layer 8 until Layout.16.
+- [ ] Layout.80.5 Unit tests: schema round-trip, handoff attributes. Written: `TST_VPiece` `FoldLineNodeIndexes` (8 rows), `FoldLineHasNoSeamAllowance`, `LayoutPieceTakesFoldLine`, `FoldLineNodeAttributeIsRead`; `TST_SvgComponentTags::FoldLineSendsFoldLineGroup`. Checked: `cl /Zs` on every changed `.cpp`. Open: Qt suites in the next `local_build_msi.ps1`.
+- [ ] Layout.80.6 SeamlyLayout side: Layout.16
+- [ ] Layout.80.7 Next MSI: Piece Properties > Path, mark two neighbouring nodes Fold Line; check the dashed line, no seam allowance on it, "On fold" checked; save, reopen; Layout Mode handoff has `fold_line`. Mark three nodes: OK disabled.
 
 ## VERIFY
 

@@ -57,6 +57,7 @@
 #include "../vgeometry/vcubicbezierpath.h"
 #include "../vgeometry/vgobject.h"
 #include "../vgeometry/vsplinepath.h"
+#include "../ifc/xml/vabstractpattern.h"
 #include "../vlayout/vlayoutpiece.h"
 #include "../vmisc/vabstractapplication.h"
 #include "../vmisc/vcommonsettings.h"
@@ -65,6 +66,7 @@
 #include <QtTest>
 #include <QPolygonF>
 #include <QTemporaryDir>
+#include <QDomDocument>
 
 #include <limits>
 
@@ -1151,6 +1153,129 @@ void TST_VPiece::LayoutPieceKeepsQuantityAndFold() const
     const VLayoutPiece layoutPiece = VLayoutPiece::Create(piece, data.data());
     QCOMPARE(layoutPiece.getQuantity(), 4);
     QVERIFY(layoutPiece.isOnFold());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::FoldLineNodeIndexes_data() const
+{
+    QTest::addColumn<QVector<int>>("foldNodes");
+    QTest::addColumn<QVector<int>>("excludedNodes");
+    QTest::addColumn<int>("curveNode");
+    QTest::addColumn<QVector<int>>("expected");
+
+    QTest::newRow("no fold line")    << QVector<int>() << QVector<int>() << -1 << QVector<int>();
+    QTest::newRow("one node")        << QVector<int>{1} << QVector<int>() << -1 << QVector<int>();
+    QTest::newRow("neighbours")      << QVector<int>{1, 2} << QVector<int>() << -1 << QVector<int>{1, 2};
+    QTest::newRow("closing segment") << QVector<int>{0, 4} << QVector<int>() << -1 << QVector<int>{4, 0};
+    QTest::newRow("not neighbours")  << QVector<int>{0, 2} << QVector<int>() << -1 << QVector<int>();
+    QTest::newRow("three nodes")     << QVector<int>{1, 2, 3} << QVector<int>() << -1 << QVector<int>();
+    QTest::newRow("across excluded") << QVector<int>{1, 3} << QVector<int>{2} << -1 << QVector<int>{1, 3};
+    QTest::newRow("curve node")      << QVector<int>{1, 2} << QVector<int>() << 2 << QVector<int>();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief FoldLineNodeIndexes checks that only two neighbouring point nodes make a fold line.
+ */
+void TST_VPiece::FoldLineNodeIndexes() const
+{
+    QFETCH(QVector<int>, foldNodes);
+    QFETCH(QVector<int>, excludedNodes);
+    QFETCH(int, curveNode);
+    QFETCH(QVector<int>, expected);
+
+    QVector<VPieceNode> nodes;
+    for (int i = 0; i < 5; ++i)
+    {
+        VPieceNode node(static_cast<quint32>(i + 1), i == curveNode ? Tool::NodeSpline : Tool::NodePoint);
+        node.setFoldLine(foldNodes.contains(i));
+        node.SetExcluded(excludedNodes.contains(i));
+        nodes.append(node);
+    }
+
+    QCOMPARE(VPiece::foldLineNodeIndexes(nodes), expected);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief FoldLineHasNoSeamAllowance checks that the cut line runs on the fold line and keeps its width elsewhere.
+ */
+void TST_VPiece::FoldLineHasNoSeamAllowance() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    // Fold line on the left edge, from A5 (0, 400) to A1 (0, 0): the closing segment.
+    VPiece piece = squareSlitPiece(data.data(), false, QString());
+    QVector<VPieceNode> nodes = piece.GetPath().getNodes();
+    nodes[0].setFoldLine(true);
+    nodes[4].setFoldLine(true);
+    piece.GetPath().setNodes(nodes);
+
+    const QVector<QPointF> cutline = piece.seamAllowancePoints(data.data());
+    QVERIFY(!cutline.isEmpty());
+
+    qreal left = cutline.first().x();
+    qreal top  = cutline.first().y();
+    for (const QPointF &point : cutline)
+    {
+        left = qMin(left, point.x());
+        top  = qMin(top, point.y());
+    }
+    QVERIFY2(qAbs(left) < 0.01, qPrintable(QString::number(left)));
+    QVERIFY2(qAbs(top + ToPixel(notchTestSAWidth, unit)) < 0.01, qPrintable(QString::number(top)));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief LayoutPieceTakesFoldLine checks that the layout piece gets the fold line and the on fold flag.
+ */
+void TST_VPiece::LayoutPieceTakesFoldLine() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    VPiece piece = squareSlitPiece(data.data(), false, QString());
+    QVERIFY(!VLayoutPiece::Create(piece, data.data()).isOnFold());
+
+    QVector<VPieceNode> nodes = piece.GetPath().getNodes();
+    nodes[3].setFoldLine(true);
+    nodes[4].setFoldLine(true);
+    piece.GetPath().setNodes(nodes);
+
+    QVERIFY(piece.hasFoldLine());
+    QCOMPARE(piece.foldLine(data.data()), QLineF(QPointF(400, 400), QPointF(0, 400)));
+
+    const VLayoutPiece layoutPiece = VLayoutPiece::Create(piece, data.data());
+    QVERIFY(layoutPiece.isOnFold());
+    QCOMPARE(layoutPiece.getFoldLine(), QVector<QPointF>({QPointF(400, 400), QPointF(0, 400)}));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief FoldLineNodeAttributeIsRead checks the pattern file attribute foldLine on a main path node.
+ */
+void TST_VPiece::FoldLineNodeAttributeIsRead() const
+{
+    QDomDocument doc;
+    QDomElement nodes = doc.createElement(QStringLiteral("nodes"));
+
+    QDomElement folded = doc.createElement(QStringLiteral("node"));
+    folded.setAttribute(QStringLiteral("type"), VAbstractPattern::NodePoint);
+    folded.setAttribute(QStringLiteral("idObject"), 7);
+    folded.setAttribute(VAbstractPattern::AttrNodeFoldLine, QStringLiteral("true"));
+    nodes.appendChild(folded);
+
+    QDomElement plain = folded.cloneNode().toElement();
+    plain.removeAttribute(VAbstractPattern::AttrNodeFoldLine);
+    nodes.appendChild(plain);
+
+    const VPiecePath path = VAbstractPattern::ParsePieceNodes(nodes);
+    QCOMPARE(path.nodeCount(), 2);
+    QVERIFY(path.at(0).isFoldLine());
+    QVERIFY(!path.at(1).isFoldLine());
 }
 
 //---------------------------------------------------------------------------------------------------------------------

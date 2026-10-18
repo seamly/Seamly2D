@@ -1,5 +1,5 @@
 Attribute,Applies to elements in piece mode,Default Value,Alternate Value
-data-type,All,{pattern | piece | seamline | cutline | internal_path | cut_path | grainline | notch | pattern_label | piece_label } ? additional data-types will be added later ,
+data-type,All,{pattern | piece | seamline | cutline | internal_path | cut_path | fold_line | grainline | notch | pattern_label | piece_label } ? additional data-types will be added later ,
 data-type-number,All,each piece has counters for each data-type ? increment current piece�s data-type counter and assign to data-type-cumberountn,
 data-parent,All,if data-type=piece then data-parent=pattern element's id else data-parent=current pattern piece's data-name (piece's id if the piece has no name),
 data-name,data-type=pattern | piece,If data-type=pattern then pattern name else if data-type=piece then piece name | piece letter else data-name=��ece then piece name elsea,
@@ -18,6 +18,6 @@ data-turn-points,data-type=seamline | cutline | internal_path | cut_path,"space-
 data-seam-allowances,data-type=notch,"space-separated seam allowance width in mm per notch (d order), 2 decimals; wider of the node before/after widths; 0.00 = no seam allowance; present also for a built-in seam allowance; omitted when unknown",
 data-quantity,data-type=piece,cut count from the piece label data (Quantity),
 data-material,data-type=pattern | piece,Fabric,{Lining | Interfacing | Interlining} material the piece is cut from (Piece Properties > Material); one pattern group per material
-data-on-fold,data-type=piece,"true when the piece label data says cut on fold; omitted otherwise",
+data-on-fold,data-type=piece,"true when the piece label data says cut on fold, or the piece has a fold line; omitted otherwise",
 data-notch-type,data-type=notch,"space-separated Seamly2D notch type per notch (d order): slit | tNotch | uNotch | vInternal | vExternal | castle | diamond; omitted when unknown",
 data-notch-segments,data-type=notch,"space-separated line segment count per notch (d order); one segment = one d subpath; sum = M count in d; omitted when unknown, and then data-seam-allowances and data-notch-type are omitted too",

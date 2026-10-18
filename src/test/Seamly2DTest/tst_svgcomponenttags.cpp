@@ -1021,6 +1021,30 @@ void TST_SvgComponentTags::PieceCarriesQuantityAndFold() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief FoldLineSendsFoldLineGroup checks that a fold line becomes one fold_line group with one two point path, and
+ * that a piece without one sends none.
+ */
+void TST_SvgComponentTags::FoldLineSendsFoldLineGroup() const
+{
+    VLayoutPiece folded = makeTestPiece(QStringLiteral("Collar"));
+    folded.setOnFold(true);
+    folded.setFoldLine(QVector<QPointF>{QPointF(10, 190), QPointF(10, 10)});
+    const QDomDocument doc = exportPieceSvg(folded);
+
+    const QVector<QDomElement> foldLines = groupsOfType(doc, QStringLiteral("fold_line"));
+    QCOMPARE(foldLines.size(), 1);
+    QCOMPARE(subpathCount(foldLines.at(0)), 1);
+    QCOMPARE(foldLines.at(0).attribute(QStringLiteral("id")), QStringLiteral("fold_line_Collar"));
+    const QRectF bounds = pathBounds(foldLines.at(0));
+    QVERIFY2(bounds.width() < 0.01 && qAbs(bounds.height() - 180) < 0.01,
+             qPrintable(QStringLiteral("%1 x %2").arg(bounds.width()).arg(bounds.height())));
+
+    const QDomDocument plain = exportPieceSvg(makeTestPiece(QStringLiteral("Back")));
+    QVERIFY(groupsOfType(plain, QStringLiteral("fold_line")).isEmpty());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief PiecesOfEachMaterialShareAPatternGroup checks that each material gets its own pattern group, in the order
  * its first piece was added, and that each piece names that group as its parent.
  */

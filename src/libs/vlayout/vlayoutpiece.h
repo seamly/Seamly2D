@@ -140,6 +140,8 @@ public:
     void                      setQuantity(int quantity);
     bool                      isOnFold() const;
     void                      setOnFold(bool onFold);
+    QVector<QPointF>          getFoldLine() const;
+    void                      setFoldLine(const QVector<QPointF> &points);
 
     QPointF                   getPieceTextPosition() const;
     QStringList               getPieceText() const;
@@ -209,6 +211,7 @@ private:
                                                          const VTextManager &tm, const QString &type,
                                                          bool textAsPaths) const;
     void                                 createGrainlineItem(QGraphicsItem *parent, bool textAsPaths) const;
+    void                                 createFoldLineItem(QGraphicsItem *parent) const;
 
     template <class T>
     QVector<T>                           Map(const QVector<T> &points) const;

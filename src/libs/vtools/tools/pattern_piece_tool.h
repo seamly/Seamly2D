@@ -190,6 +190,7 @@ private:
     VTextGraphicsItem      *m_patternInfo;
     VGrainlineItem         *m_grainLine;
     QGraphicsPathItem      *m_notches;
+    QGraphicsPathItem      *m_foldLine;
 
                            PatternPieceTool(VAbstractPattern *doc, VContainer *data, const quint32 &id,
                                               const Source &typeCreation, VMainGraphicsScene *scene,

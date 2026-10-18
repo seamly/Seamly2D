@@ -93,6 +93,11 @@ private slots:
     void DefaultNotchSizeKeepsSizeAfterUnitChange() const;
     void DefaultNotchSizeMovesLegacyValueToCm() const;
     void LayoutPieceKeepsQuantityAndFold() const;
+    void FoldLineNodeIndexes_data() const;
+    void FoldLineNodeIndexes() const;
+    void FoldLineHasNoSeamAllowance() const;
+    void LayoutPieceTakesFoldLine() const;
+    void FoldLineNodeAttributeIsRead() const;
     void BuiltInSeamLineUsesWiderNodeWidth_data() const;
     void BuiltInSeamLineUsesWiderNodeWidth() const;
     void BuiltInSeamLineFollowsCurve() const;

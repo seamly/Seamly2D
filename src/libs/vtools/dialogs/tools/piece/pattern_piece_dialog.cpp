@@ -334,6 +334,7 @@ void PatternPieceDialog::SetPiece(const VPiece &piece)
 
     ui->quantity_SpinBox->setValue(m_oldData.GetQuantity());
     ui->fold_CheckBox->setChecked(m_oldData.IsOnFold());
+    updateFoldCheckBox();
     m_pieceLabelLines = m_oldData.GetLabelTemplate();
 
     ui->arrow_ComboBox->setCurrentIndex(int(piece.GetGrainlineGeometry().getArrowType()));
@@ -920,6 +921,7 @@ void PatternPieceDialog::showMainPathContextMenu(const QPoint &pos)
 
     QAction *actionReverse   = nullptr;
     QAction *actionDuplicate = nullptr;
+    QAction *actionFoldLine  = nullptr;
 
     if (rowNode.GetTypeTool() != Tool::NodePoint)
     {
@@ -967,6 +969,11 @@ void PatternPieceDialog::showMainPathContextMenu(const QPoint &pos)
         action3Notch = notchCountMenu->addAction(QIcon(), QStringLiteral("3"));
 
         actionRemoveNotch = menu->addAction(tr("Remove Notch"));
+
+        // A fold line needs exactly two neighbouring point nodes; isMainPathValid() reports any other choice.
+        actionFoldLine = menu->addAction(tr("Fold Line"));
+        actionFoldLine->setCheckable(true);
+        actionFoldLine->setChecked(rowNode.isFoldLine());
 
         QAction *separator = new QAction(this);
         separator->setSeparator(true);
@@ -1016,6 +1023,15 @@ void PatternPieceDialog::showMainPathContextMenu(const QPoint &pos)
         {
             excludeNode(item, exclude);
         }
+    }
+    else if (selectedAction == actionFoldLine)
+    {
+        const bool foldLine = !rowNode.isFoldLine();
+        for (QListWidgetItem *item : items)
+        {
+            setFoldLineNode(item, foldLine); // skips curve nodes
+        }
+        updateFoldCheckBox();
     }
     else // notch actions - apply to every selected point node, keeping its other notch settings
     {
@@ -2687,7 +2703,7 @@ VPiece PatternPieceDialog::CreatePiece() const
     piece.GetPatternPieceData().SetTilt(ui->tilt_ComboBox->currentText());
     piece.GetPatternPieceData().SetFoldPosition(ui->foldPosition_ComboBox->currentText());
     piece.GetPatternPieceData().SetQuantity(ui->quantity_SpinBox->value());
-    piece.GetPatternPieceData().SetOnFold(ui->fold_CheckBox->isChecked());
+    piece.GetPatternPieceData().SetOnFold(ui->fold_CheckBox->isChecked() || piece.hasFoldLine());
     piece.GetPatternPieceData().SetLabelTemplate(m_pieceLabelLines);
     piece.GetPatternPieceData().SetVisible(ui->pieceLabel_GroupBox->isChecked());
     piece.GetPatternPieceData().SetLabelWidth(getFormulaFromUser(ui->pieceLabelWidthFormula_LineEdit));
@@ -2893,9 +2909,26 @@ bool PatternPieceDialog::isMainPathValid() const
             ui->status_Label->setText(warning);
             return  false;
         }
+        else if (!isFoldLineValid())
+        {
+            warning += tr("A fold line needs two neighbouring points!");
+            ui->status_Label->setText(warning);
+            return  false;
+        }
     }
 
     return true;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Returns true when the main path has no fold line nodes, or two that make one fold line.
+//---------------------------------------------------------------------------------------------------------------------
+bool PatternPieceDialog::isFoldLineValid() const
+{
+    const QVector<VPieceNode> nodes = GetListInternals<VPieceNode>(ui->mainPath_ListWidget);
+    const bool hasFoldNode = std::any_of(nodes.cbegin(), nodes.cend(),
+                                         [](const VPieceNode &node) { return node.isFoldLine(); });
+    return !hasFoldNode || !VPiece::foldLineNodeIndexes(nodes).isEmpty();
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -3801,6 +3834,38 @@ QString PatternPieceDialog::createPieceName() const
     rowItem->setIcon(QIcon(info.icon));
     rowItem->setText(info.name);
     rowItem->setFont(NodeFont(rowNode.isExcluded()));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Sets the fold line state of a point node.
+/// @param rowItem list widget item of the selected row.
+/// @param foldLine true when the node is one end of the fold line.
+//---------------------------------------------------------------------------------------------------------------------
+void PatternPieceDialog::setFoldLineNode(QListWidgetItem *rowItem, bool foldLine)
+{
+    VPieceNode rowNode = qvariant_cast<VPieceNode>(rowItem->data(Qt::UserRole));
+    if (rowNode.GetTypeTool() != Tool::NodePoint)
+    {
+        return;
+    }
+    rowNode.setFoldLine(foldLine);
+    const NodeInfo info = getNodeInfo(rowNode, true);
+    rowItem->setData(Qt::UserRole, QVariant::fromValue(rowNode));
+    rowItem->setText(info.name);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Checks and locks the "on fold" box while the main path has a valid fold line.
+//---------------------------------------------------------------------------------------------------------------------
+void PatternPieceDialog::updateFoldCheckBox()
+{
+    const bool hasFoldLine =
+        !VPiece::foldLineNodeIndexes(GetListInternals<VPieceNode>(ui->mainPath_ListWidget)).isEmpty();
+    if (hasFoldLine)
+    {
+        ui->fold_CheckBox->setChecked(true);
+    }
+    ui->fold_CheckBox->setEnabled(!hasFoldLine);
 }
 
 //---------------------------------------------------------------------------------------------------------------------

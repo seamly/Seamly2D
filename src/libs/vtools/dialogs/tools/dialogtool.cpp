@@ -727,6 +727,11 @@ NodeInfo DialogTool::getNodeInfo(const VPieceNode &node, bool showNotch) const
         }
     }
 
+    if (node.GetTypeTool() == Tool::NodePoint && node.isFoldLine())
+    {
+        info.name += QLatin1Char(' ') + tr("(fold line)");
+    }
+
     return info;
 }
 
