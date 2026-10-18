@@ -46,6 +46,7 @@ HEADERS += \
     $$PWD/tools/intersect_circletangent_dialog.h \
     $$PWD/tools/piece/internal_path_dialog.h \
     $$PWD/tools/piece/pattern_piece_dialog.h \
+    $$PWD/tools/piece/PieceMirrorDialog.h \
     $$PWD/tools/point_intersectxy_dialog.h \
     $$PWD/tools/union_dialog.h
 
@@ -93,6 +94,7 @@ SOURCES += \
     $$PWD/tools/intersect_circletangent_dialog.cpp \
     $$PWD/tools/piece/internal_path_dialog.cpp \
     $$PWD/tools/piece/pattern_piece_dialog.cpp \
+    $$PWD/tools/piece/PieceMirrorDialog.cpp \
     $$PWD/tools/point_intersectxy_dialog.cpp \
     $$PWD/tools/union_dialog.cpp
 
@@ -139,5 +141,6 @@ FORMS += \
     $$PWD/tools/intersect_circletangent_dialog.ui \
     $$PWD/tools/piece/internal_path_dialog.ui \
     $$PWD/tools/piece/pattern_piece_dialog.ui \
+    $$PWD/tools/piece/PieceMirrorDialog.ui \
     $$PWD/tools/point_intersectxy_dialog.ui \
     $$PWD/tools/union_dialog.ui

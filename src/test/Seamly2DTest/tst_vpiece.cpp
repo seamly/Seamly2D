@@ -52,10 +52,13 @@
 #include "../vpatterndb/vpiece.h"
 #include "../vpatterndb/vpiecenode.h"
 #include "../vpatterndb/vpiecepath.h"
+#include "../vpatterndb/PieceMirrorPath.h"
 #include "../vpatterndb/floatItemData/vgrainlinedata.h"
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
 #include "../vgeometry/vcubicbezierpath.h"
 #include "../vgeometry/vgobject.h"
+#include "../vgeometry/vpointf.h"
+#include "../vgeometry/vspline.h"
 #include "../vgeometry/vsplinepath.h"
 #include "../ifc/xml/vabstractpattern.h"
 #include "../vlayout/vlayoutpiece.h"
@@ -1276,6 +1279,307 @@ void TST_VPiece::FoldLineNodeAttributeIsRead() const
     QCOMPARE(path.nodeCount(), 2);
     QVERIFY(path.at(0).isFoldLine());
     QVERIFY(!path.at(1).isFoldLine());
+}
+
+namespace
+{
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief mirrorOrderText writes a full piece path as half piece node indexes; "m" marks a mirrored copy.
+ */
+QString mirrorOrderText(const QVector<PieceMirrorNode> &order)
+{
+    QStringList parts;
+    for (const PieceMirrorNode &entry : order)
+    {
+        parts.append(QString::number(entry.source_index) + (entry.mirrored ? QStringLiteral("m") : QString()));
+    }
+    return parts.join(QLatin1Char(' '));
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief signedArea returns the shoelace area of a closed polyline; the sign gives its direction.
+ */
+qreal signedArea(const QVector<QPointF> &points)
+{
+    qreal sum = 0;
+    for (int i = 0; i < points.size(); ++i)
+    {
+        const QPointF &a = points.at(i);
+        const QPointF &b = points.at((i + 1) % points.size());
+        sum += a.x() * b.y() - b.x() * a.y();
+    }
+    return sum / 2;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief fivePointNodes returns five point nodes with object ids 1 to 5.
+ */
+QVector<VPieceNode> fivePointNodes()
+{
+    QVector<VPieceNode> nodes;
+    for (quint32 id = 1; id <= 5; ++id)
+    {
+        nodes.append(VPieceNode(id, Tool::NodePoint));
+    }
+    return nodes;
+}
+} // namespace
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::PieceMirrorFullPathOrder_data() const
+{
+    QTest::addColumn<QVector<int>>("foldNodes");
+    QTest::addColumn<QVector<int>>("excludedNodes");
+    QTest::addColumn<QString>("expected");
+
+    QTest::newRow("inner segment")    << QVector<int>{1, 2} << QVector<int>() << QString("2 3 4 0 1 0m 4m 3m");
+    QTest::newRow("closing segment")  << QVector<int>{0, 4} << QVector<int>() << QString("0 1 2 3 4 3m 2m 1m");
+    QTest::newRow("excluded node")    << QVector<int>{1, 2} << QVector<int>{4} << QString("2 3 0 1 0m 3m");
+    QTest::newRow("across excluded")  << QVector<int>{1, 3} << QVector<int>{2} << QString("3 4 0 1 0m 4m");
+    QTest::newRow("triangle")         << QVector<int>{0, 1} << QVector<int>{3, 4} << QString("1 2 0 2m");
+    QTest::newRow("fold line only")   << QVector<int>{0, 1} << QVector<int>{2, 3, 4} << QString("");
+    QTest::newRow("no fold line")     << QVector<int>() << QVector<int>() << QString("");
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PieceMirrorFullPathOrder checks the node order of a full piece: the half from the fold line end to the
+ * fold line start, then the mirrored half back, without excluded nodes.
+ */
+void TST_VPiece::PieceMirrorFullPathOrder() const
+{
+    QFETCH(QVector<int>, foldNodes);
+    QFETCH(QVector<int>, excludedNodes);
+    QFETCH(QString, expected);
+
+    QVector<VPieceNode> nodes = fivePointNodes();
+    for (int i = 0; i < nodes.size(); ++i)
+    {
+        nodes[i].setFoldLine(foldNodes.contains(i));
+        nodes[i].SetExcluded(excludedNodes.contains(i));
+    }
+
+    QCOMPARE(mirrorOrderText(PieceMirrorPath::fullPathOrder(nodes)), expected);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PieceMirrorNodeAttributes checks that a mirrored node runs the other way.
+ */
+void TST_VPiece::PieceMirrorNodeAttributes() const
+{
+    VPieceNode point(7, Tool::NodePoint);
+    point.setBeforeSAFormula(QStringLiteral("5"));
+    point.setAfterSAFormula(QStringLiteral("10"));
+    point.SetAngleType(PieceNodeAngle::ByFirstEdgeSymmetry);
+    point.setNotch(true);
+    point.setNotchAngle(30);
+    point.setFoldLine(true);
+
+    const VPieceNode mirror = PieceMirrorPath::mirroredNode(point, 17);
+    QCOMPARE(mirror.GetId(), quint32(17));
+    QCOMPARE(mirror.GetFormulaSABefore(), QStringLiteral("10"));
+    QCOMPARE(mirror.GetFormulaSAAfter(), QStringLiteral("5"));
+    QVERIFY(mirror.GetAngleType() == PieceNodeAngle::BySecondEdgeSymmetry);
+    QVERIFY(mirror.isNotch());
+    QCOMPARE(mirror.getNotchAngle(), qreal(-30));
+    QVERIFY(!mirror.isFoldLine());
+
+    VPieceNode curve(8, Tool::NodeSpline, false);
+    QVERIFY(PieceMirrorPath::mirroredNode(curve, 18).GetReverse());
+    curve.SetReverse(true);
+    QVERIFY(!PieceMirrorPath::mirroredNode(curve, 18).GetReverse());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PieceMirrorFoldNodesTakeHalfWidth checks that a fold line node gets the half side seam allowance on both
+ * sides, and is no longer a fold line node.
+ */
+void TST_VPiece::PieceMirrorFoldNodesTakeHalfWidth() const
+{
+    // Fold line from A2 to A3. A2, the fold line start, has the half before it; A3 has the half after it.
+    QVector<VPieceNode> nodes = fivePointNodes();
+    nodes[1].setFoldLine(true);
+    nodes[1].setBeforeSAFormula(QStringLiteral("5"));
+    nodes[2].setFoldLine(true);
+    nodes[2].setAfterSAFormula(QStringLiteral("7"));
+
+    const QVector<PieceMirrorNode> order = PieceMirrorPath::fullPathOrder(nodes);
+    QCOMPARE(mirrorOrderText(order), QStringLiteral("2 3 4 0 1 0m 4m 3m"));
+
+    const VPieceNode foldStart = PieceMirrorPath::fullPathNode(nodes, order.at(4), 2);
+    QCOMPARE(foldStart.GetFormulaSABefore(), QStringLiteral("5"));
+    QCOMPARE(foldStart.GetFormulaSAAfter(), QStringLiteral("5"));
+    QVERIFY(!foldStart.isFoldLine());
+
+    const VPieceNode foldEnd = PieceMirrorPath::fullPathNode(nodes, order.at(0), 3);
+    QCOMPARE(foldEnd.GetFormulaSABefore(), QStringLiteral("7"));
+    QCOMPARE(foldEnd.GetFormulaSAAfter(), QStringLiteral("7"));
+    QVERIFY(!foldEnd.isFoldLine());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PieceMirrorBuildsFullOutline checks that the half outline and its mirror image make one closed outline.
+ */
+void TST_VPiece::PieceMirrorBuildsFullOutline() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    // The left edge, A5 (0, 400) to A1 (0, 0), is the fold line. The right edge is a curve that bulges out.
+    data->UpdateGObject(1, new VPointF(0, 0, "A1", 0, 0));
+    data->UpdateGObject(2, new VPointF(200, 0, "A2", 0, 0));
+    VPointF *p3 = new VPointF(400, 0, "A3", 0, 0);
+    data->UpdateGObject(3, p3);
+    VPointF *p4 = new VPointF(400, 400, "A4", 0, 0);
+    data->UpdateGObject(4, p4);
+    data->UpdateGObject(5, new VPointF(0, 400, "A5", 0, 0));
+    data->UpdateGObject(6, new VSpline(*p3, QPointF(550, 100), QPointF(550, 300), *p4));
+
+    VPiece half;
+    half.SetSeamAllowance(true);
+    half.SetSAWidth(10);
+    VPieceNode foldEnd(1, Tool::NodePoint);
+    foldEnd.setFoldLine(true);
+    half.GetPath().Append(foldEnd);
+    half.GetPath().Append(VPieceNode(2, Tool::NodePoint));
+    half.GetPath().Append(VPieceNode(6, Tool::NodeSpline));
+    VPieceNode foldStart(5, Tool::NodePoint);
+    foldStart.setFoldLine(true);
+    half.GetPath().Append(foldStart);
+    half.GetPatternPieceData().SetVisible(false);
+    half.GetPatternInfo().SetVisible(false);
+    half.GetGrainlineGeometry().SetVisible(false);
+
+    const QVector<VPieceNode> nodes = half.GetPath().getNodes();
+    const QVector<PieceMirrorNode> order = PieceMirrorPath::fullPathOrder(nodes);
+    QCOMPARE(mirrorOrderText(order), QStringLiteral("0 1 2 3 2m 1m"));
+
+    // The mirror operation copies each object off the fold line across it.
+    const QLineF axis = half.foldLine(data.data());
+    QHash<quint32, quint32> mirrorIds;
+    data->UpdateGObject(12, new VPointF(data->GeometricObject<VPointF>(2)->Flip(axis)));
+    mirrorIds.insert(2, 12);
+    data->UpdateGObject(16, new VSpline(data->GeometricObject<VSpline>(6)->Flip(axis)));
+    mirrorIds.insert(6, 16);
+
+    VPiece full = half;
+    full.GetPath().Clear();
+    for (const PieceMirrorNode &entry : order)
+    {
+        const quint32 id = nodes.at(entry.source_index).GetId();
+        full.GetPath().Append(PieceMirrorPath::fullPathNode(nodes, entry,
+                                                            entry.mirrored ? mirrorIds.value(id) : id));
+    }
+    QVERIFY(!full.hasFoldLine());
+
+    const QVector<QPointF> halfPoints = half.mainPathPoints(data.data());
+    const QVector<QPointF> fullPoints = full.mainPathPoints(data.data());
+
+    // Twice the half area, in the same direction.
+    const qreal halfArea = signedArea(halfPoints);
+    const qreal fullArea = signedArea(fullPoints);
+    QVERIFY2(qAbs(fullArea - 2 * halfArea) < qAbs(halfArea) * 0.01,
+             qPrintable(QStringLiteral("half %1, full %2").arg(halfArea).arg(fullArea)));
+
+    // Each point has its mirror image on the outline.
+    for (const QPointF &p : fullPoints)
+    {
+        const qreal distance = distanceToClosedPolyline(QPointF(-p.x(), p.y()), fullPoints);
+        QVERIFY2(distance < 0.5, qPrintable(QStringLiteral("%1, %2 has no mirror image").arg(p.x()).arg(p.y())));
+    }
+
+    // After the fold line start A5 the outline goes on to the end of the mirrored curve.
+    int foldStartIndex = -1;
+    for (int i = 0; i < fullPoints.size(); ++i)
+    {
+        if (QLineF(fullPoints.at(i), QPointF(0, 400)).length() < 0.01)
+        {
+            foldStartIndex = i;
+        }
+    }
+    QVERIFY(foldStartIndex >= 0);
+    const QPointF next = fullPoints.at((foldStartIndex + 1) % fullPoints.size());
+    QVERIFY2(QLineF(next, QPointF(-400, 400)).length() < 0.01,
+             qPrintable(QStringLiteral("%1, %2").arg(next.x()).arg(next.y())));
+
+    QVERIFY(!full.seamAllowancePoints(data.data()).isEmpty());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PieceMirrorRecordRanges checks that a custom seam allowance record gets a copy on each half, and that the
+ * full path starts where neither copy runs past the last node.
+ */
+void TST_VPiece::PieceMirrorRecordRanges() const
+{
+    // Fold line on the closing segment, A5 to A1. The record runs from A1, the fold line end, to A3.
+    QVector<VPieceNode> nodes = fivePointNodes();
+    nodes[0].setFoldLine(true);
+    nodes[4].setFoldLine(true);
+
+    CustomSARecord record;
+    record.startPoint = 1;
+    record.path       = 20;
+    record.endPoint   = 3;
+    const QVector<CustomSARecord> records{record};
+
+    // From A1 the mirrored copy would run past the last node, so the full path starts at A4.
+    const QVector<PieceMirrorNode> order = PieceMirrorPath::fullPathOrder(nodes, records);
+    QCOMPARE(mirrorOrderText(order), QStringLiteral("3 4 3m 2m 1m 0 1 2"));
+
+    const QVector<PieceMirrorRange> ranges = PieceMirrorPath::recordRanges(nodes, order, records);
+    QCOMPARE(ranges.size(), 2);
+
+    QCOMPARE(ranges.at(0).record_index, 0);
+    QVERIFY(!ranges.at(0).mirrored);
+    QCOMPARE(ranges.at(0).start_position, 5); // A1
+    QCOMPARE(ranges.at(0).end_position, 7);   // A3
+
+    QCOMPARE(ranges.at(1).record_index, 0);
+    QVERIFY(ranges.at(1).mirrored);
+    QCOMPARE(ranges.at(1).start_position, 3); // mirrored A3
+    QCOMPARE(ranges.at(1).end_position, 5);   // A1, on the fold line
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PieceMirrorDropsRecordAcrossFold checks that a record across the fold line gets no copy.
+ */
+void TST_VPiece::PieceMirrorDropsRecordAcrossFold() const
+{
+    // Fold line from A2 to A3. The first record, A1 to A4, crosses it; the second, A3 to A5, does not.
+    QVector<VPieceNode> nodes = fivePointNodes();
+    nodes[1].setFoldLine(true);
+    nodes[2].setFoldLine(true);
+
+    CustomSARecord across;
+    across.startPoint = 1;
+    across.path       = 20;
+    across.endPoint   = 4;
+
+    CustomSARecord half;
+    half.startPoint = 3;
+    half.path       = 21;
+    half.endPoint   = 5;
+
+    const QVector<CustomSARecord> records{across, half};
+    const QVector<PieceMirrorNode> order = PieceMirrorPath::fullPathOrder(nodes, records);
+    const QVector<PieceMirrorRange> ranges = PieceMirrorPath::recordRanges(nodes, order, records);
+
+    QCOMPARE(ranges.size(), 2);
+    QCOMPARE(ranges.at(0).record_index, 1);
+    QCOMPARE(ranges.at(1).record_index, 1);
+    for (const PieceMirrorRange &range : ranges)
+    {
+        QVERIFY(range.start_position < range.end_position);
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------

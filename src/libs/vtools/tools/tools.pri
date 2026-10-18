@@ -15,6 +15,7 @@ HEADERS += \
     $$PWD/nodeDetails/internal_path_tool.h \
     $$PWD/new_piece_defaults.h \
     $$PWD/pattern_piece_tool.h \
+    $$PWD/PieceMirrorTool.h \
     $$PWD/vdatatool.h \
     $$PWD/vabstracttool.h \
     $$PWD/tools.h \
@@ -78,6 +79,7 @@ SOURCES += \
     $$PWD/nodeDetails/internal_path_tool.cpp \
     $$PWD/new_piece_defaults.cpp \
     $$PWD/pattern_piece_tool.cpp \
+    $$PWD/PieceMirrorTool.cpp \
     $$PWD/union_tool.cpp \
     $$PWD/vdatatool.cpp \
     $$PWD/vabstracttool.cpp \

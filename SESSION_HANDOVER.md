@@ -2,6 +2,20 @@
 
 ## Current status
 
+### 2026-10-18 (afternoon) — Layout.80.3 Piece Mirror tool merged into local `run-seamlyLayout`, not pushed
+
+- Branch `task-piece-mirror`, commits made with a temporary index (shared tree).
+- Piece mode > Details > Piece Mirror (M, P). `PieceMirrorDialog` takes a piece of the active draft block with a valid fold line; option "Take the half piece out of the layout" (checked).
+- `PieceMirrorTool`: Mirror by Line operation at the end of the draft block for every half object off the fold line; new ordinary piece `<name> Mirrored`. No new file element; format stays 0.7.6.
+- `PieceMirrorPath` (vpatterndb): full path order, mirrored node attributes, custom seam allowance ranges; the path start rotates so no record runs past the last node.
+- `Tool::PieceMirror` added; tool-count checks 54 → 55. `VAbstractTool::PrepareNode(s)` now public; `VAbstractOperation::getDestination()` added.
+- Also fixed: `v0.7.6.xsd` `unionPiece` nodes allow `foldLine`.
+- Agent decisions (in the TODO): draft operation, not a piece tool element; half piece kept; record across the fold dropped; full piece 2 cm right of the half.
+- Verified: 14 piece mirror test cases passed in a scratch QtTest harness (current vpatterndb sources linked with the 2026-10-17 in-tree libs); a mutation (no curve reverse) failed 2 of them. `cl /Zs` on every changed `.cpp`; uic, moc, rcc on the new files. Not run: Qt suites, GUI. User check: Layout.80.3.1.
+- Full CI rule: `.pri` files changed; the merge commit has no skip-ci token.
+- `.gitignore` (user's staged edit) ignores `*.png` and `*.json`: the icons were added with `-f`; `project-docs/AGENT_STATE.json` is untracked.
+- User edited the Layout.80.3 line during the session; committed with the task.
+
 ### 2026-10-18 — Layout.80 fold lines merged into local `run-seamlyLayout`, not pushed
 
 - Branch `task-fold-lines`, commits made with a temporary index (shared tree).

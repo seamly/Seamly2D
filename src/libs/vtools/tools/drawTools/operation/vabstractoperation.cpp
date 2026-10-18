@@ -96,6 +96,15 @@ void VAbstractOperation::setSuffix(const QString &suffix)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getDestination returns the objects the operation made, one for each source object, in source order.
+ */
+QVector<DestinationItem> VAbstractOperation::getDestination() const
+{
+    return destination;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 void VAbstractOperation::GroupVisibility(quint32 object, bool visible)
 {
     if (operatedObjects.contains(object))

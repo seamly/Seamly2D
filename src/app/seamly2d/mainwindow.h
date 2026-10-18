@@ -245,6 +245,7 @@ private slots:
 
     void handlePatternPieceTool(bool checked);
     void handleUnionTool(bool checked);
+    void handlePieceMirrorTool(bool checked);
 
     void handleNewLayout(bool checked);
 
@@ -261,6 +262,7 @@ private slots:
     void Open();
 
     void closeUnionDialog(int result);
+    void closePieceMirrorDialog(int result);
     void ClosedEditGroupDialog(int result);
     void ClosedInternalPathDialog(int result);
     void ClosedDialogAnchorPoint(int result);
