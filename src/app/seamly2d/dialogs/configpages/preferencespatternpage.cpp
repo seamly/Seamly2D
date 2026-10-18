@@ -130,6 +130,9 @@ void PreferencesPatternPage::Apply()
     settings->setDefaultCutoutColor(ui->defaultCutoutColor_ComboBox->currentData().toString());
     settings->setDefaultCutoutLinetype(ui->defaultCutoutLinetype_ComboBox->currentData().toString());
     settings->setDefaultCutoutLineweight(ui->defaultCutoutLineweight_ComboBox->currentData().toReal());
+    settings->setDefaultFoldLineColor(ui->defaultFoldLineColor_ComboBox->currentData().toString());
+    settings->setDefaultFoldLineLinetype(ui->defaultFoldLineLinetype_ComboBox->currentData().toString());
+    settings->setDefaultFoldLineLineweight(ui->defaultFoldLineLineweight_ComboBox->currentData().toReal());
 
     settings->setForbidPieceFlipping(ui->forbidFlipping_CheckBox->isChecked());
     settings->setHideSeamLine(ui->hideSeamLine_CheckBox->isChecked());
@@ -233,6 +236,24 @@ void PreferencesPatternPage::initDefaultSeamAllowance()
     if (index != -1)
     {
         ui->defaultCutoutLineweight_ComboBox->setCurrentIndex(index);
+    }
+
+    index = ui->defaultFoldLineColor_ComboBox->findData(qApp->Seamly2DSettings()->getDefaultFoldLineColor());
+    if (index != -1)
+    {
+        ui->defaultFoldLineColor_ComboBox->setCurrentIndex(index);
+    }
+
+    index = ui->defaultFoldLineLinetype_ComboBox->findData(qApp->Seamly2DSettings()->getDefaultFoldLineLinetype());
+    if (index != -1)
+    {
+        ui->defaultFoldLineLinetype_ComboBox->setCurrentIndex(index);
+    }
+
+    index = ui->defaultFoldLineLineweight_ComboBox->findData(qApp->Seamly2DSettings()->getDefaultFoldLineLineweight());
+    if (index != -1)
+    {
+        ui->defaultFoldLineLineweight_ComboBox->setCurrentIndex(index);
     }
 }
 

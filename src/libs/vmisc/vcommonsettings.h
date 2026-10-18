@@ -488,6 +488,15 @@ public:
     qreal                getDefaultCutoutLineweight() const;
     void                 setDefaultCutoutLineweight(const qreal &value);
 
+    QString              getDefaultFoldLineColor() const;
+    void                 setDefaultFoldLineColor(const QString &value);
+
+    QString              getDefaultFoldLineLinetype() const;
+    void                 setDefaultFoldLineLinetype(const QString &value);
+
+    qreal                getDefaultFoldLineLineweight() const;
+    void                 setDefaultFoldLineLineweight(const qreal &value);
+
     bool                 showSeamAllowances() const;
     void                 setShowSeamAllowances(const bool &value);
 
