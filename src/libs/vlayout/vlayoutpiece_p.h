@@ -104,7 +104,8 @@ public:
           m_tmPattern(),
           m_pieceLetter(),
           m_quantity(1),
-          m_onFold(false)
+          m_onFold(false),
+          m_foldLine()
     {}
 
     VLayoutPieceData(const VLayoutPieceData &piece)
@@ -137,7 +138,8 @@ public:
           m_tmPattern(piece.m_tmPattern),
           m_pieceLetter(piece.m_pieceLetter),
           m_quantity(piece.m_quantity),
-          m_onFold(piece.m_onFold)
+          m_onFold(piece.m_onFold),
+          m_foldLine(piece.m_foldLine)
     {}
 
     ~VLayoutPieceData() {}
@@ -171,6 +173,7 @@ public:
     QString                    m_pieceLetter;      /// @brief m_pieceLetter piece letter, exported as the SVG data-letter attribute
     int                        m_quantity;         /// @brief cut count, exported as the SVG data-quantity attribute
     bool                       m_onFold;           /// @brief cut on the fold, exported as the SVG data-on-fold attribute
+    QVector<QPointF>           m_foldLine;         /// @brief fold line start and end points; empty when the piece has none
 
 private:
     VLayoutPieceData &operator=(const VLayoutPieceData &) Q_DECL_EQ_DELETE;

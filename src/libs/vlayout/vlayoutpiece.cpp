@@ -632,7 +632,13 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
     // Keep the piece letter, cut count and fold flag for the SVG exporter's data-* attributes.
     layoutPiece.setPieceLetter(piece.GetPatternPieceData().GetLetter());
     layoutPiece.setQuantity(piece.GetPatternPieceData().GetQuantity());
-    layoutPiece.setOnFold(piece.GetPatternPieceData().IsOnFold());
+    // A fold line puts the piece on the fold, whatever the label data says.
+    const QLineF foldLine = piece.foldLine(pattern);
+    layoutPiece.setOnFold(piece.GetPatternPieceData().IsOnFold() || !foldLine.isNull());
+    if (!foldLine.isNull())
+    {
+        layoutPiece.setFoldLine(QVector<QPointF>{foldLine.p1(), foldLine.p2()});
+    }
     layoutPiece.setMaterial(piece.getMaterial());
 
     // Very important to set main path first!
@@ -728,6 +734,26 @@ bool VLayoutPiece::isOnFold() const
 void VLayoutPiece::setOnFold(bool onFold)
 {
     d->m_onFold = onFold;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getFoldLine returns the fold line start and end points in layout coordinates.
+ * @return an empty vector when the piece has no fold line.
+ */
+QVector<QPointF> VLayoutPiece::getFoldLine() const
+{
+    return Map(d->m_foldLine);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setFoldLine stores the fold line for the exports.
+ * @param points fold line start and end points in piece coordinates, from VPiece::foldLine().
+ */
+void VLayoutPiece::setFoldLine(const QVector<QPointF> &points)
+{
+    d->m_foldLine = points;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1659,6 +1685,7 @@ QGraphicsItem *VLayoutPiece::GetItem(bool textAsPaths) const
     createSeamlineItem(item);
     createAllowanceItem(item);
     createNotchesItem(item);
+    createFoldLineItem(item);
 
     for (int i = 0; i < d->m_internalPaths.count(); ++i)
     {
@@ -1808,6 +1835,34 @@ void VLayoutPiece::createLabelItem(QGraphicsItem *parent, const QVector<QPointF>
             }
         }
     }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief createFoldLineItem creates the fold line child item of the piece, a two point path.
+ * @param parent piece root item the fold line item is added to.
+ */
+void VLayoutPiece::createFoldLineItem(QGraphicsItem *parent) const
+{
+    SCASSERT(parent != nullptr)
+    const QVector<QPointF> points = getFoldLine();
+    if (points.size() != 2)
+    {
+        return;
+    }
+
+    QPainterPath path;
+    path.moveTo(points.at(0));
+    path.lineTo(points.at(1));
+
+    const QColor color      = QColor(qApp->Settings()->getDefaultFoldLineColor());
+    const QString lineType  = qApp->Settings()->getDefaultFoldLineLinetype();
+    const qreal  lineWeight = ToPixel(qApp->Settings()->getDefaultFoldLineLineweight(), Unit::Mm);
+
+    QGraphicsPathItem *item = new QGraphicsPathItem(parent);
+    item->setData(PieceItemData::ItemType, QStringLiteral("fold_line"));
+    item->setPath(path);
+    item->setPen(QPen(color, lineWeight, lineTypeToPenStyle(lineType), Qt::FlatCap, Qt::RoundJoin));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
