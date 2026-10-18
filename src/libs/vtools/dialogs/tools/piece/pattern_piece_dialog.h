@@ -238,6 +238,7 @@ private:
     bool                        isMainPathValid() const;
     void                        validateObjects(bool value);
     bool                        isMainPathClockwise() const;
+    bool                        isFoldLineValid() const;
     void                        updateCurrentCustomSARecord();
     void                        updateCurrentInternalPathRecord();
 
@@ -289,6 +290,8 @@ private:
     void                        reverseNode(QListWidgetItem *rowItem, bool reverse);
     void                        duplicateNode(QListWidgetItem *rowItem);
     void                        excludeNode(QListWidgetItem *rowItem, bool exclude);
+    void                        setFoldLineNode(QListWidgetItem *rowItem, bool foldLine);
+    void                        updateFoldCheckBox();
     void                        setNotch(QListWidgetItem *rowItem, bool isNotch, bool showCutline, bool showSeamline,
                                          NotchType notchType, NotchSubType notchSubType, qreal notchLength,
                                          qreal notchWidth, int notchCount);
