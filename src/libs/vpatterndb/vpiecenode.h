@@ -92,6 +92,9 @@ public:
     bool                isExcluded() const;
     void                SetExcluded(bool exclude);
 
+    bool                isFoldLine() const;
+    void                setFoldLine(bool value);
+
     qreal               GetSABefore(const VContainer *data) const;
     qreal               GetSABefore(const VContainer *data, Unit unit) const;
 

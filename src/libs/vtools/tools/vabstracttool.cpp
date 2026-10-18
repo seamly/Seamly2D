@@ -650,6 +650,16 @@ QDomElement VAbstractTool::AddSANode(VAbstractPattern *doc, const QString &tagNa
         }
     }
 
+    // Only a fold line end node carries the attribute, so older readers see an unchanged node.
+    if (node.isFoldLine())
+    {
+        doc->SetAttribute(nod, VAbstractPattern::AttrNodeFoldLine, true);
+    }
+    else
+    {
+        nod.removeAttribute(VAbstractPattern::AttrNodeFoldLine);
+    }
+
     switch (type)
     {
         case (Tool::NodeArc):

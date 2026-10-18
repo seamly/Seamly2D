@@ -1470,7 +1470,8 @@ void VPatternConverter::toVersion0_7_5()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-/// @brief Version 0.7.6 adds the optional piece attribute "material"; a piece without it is cut from fabric.
+/// @brief Version 0.7.6 adds the optional piece attribute "material" and the optional main path node attribute
+///        "foldLine"; a piece without "material" is cut from fabric, and a node without "foldLine" is not on the fold.
 void VPatternConverter::toVersion0_7_6()
 {
     // Delete when the minimal supported version is 0.7.6.

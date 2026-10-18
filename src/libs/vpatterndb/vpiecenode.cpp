@@ -418,3 +418,16 @@ void VPieceNode::SetExcluded(bool exclude)
 {
     d->m_excluded = exclude;
 }
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief isFoldLine returns true when the node is one of the two end nodes of the piece fold line.
+bool VPieceNode::isFoldLine() const
+{
+    return d->m_isFoldLine;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void VPieceNode::setFoldLine(bool value)
+{
+    d->m_isFoldLine = value;
+}

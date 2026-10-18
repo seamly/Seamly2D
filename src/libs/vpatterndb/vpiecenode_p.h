@@ -72,6 +72,7 @@ public:
         , m_typeTool(Tool::NodePoint)
         , m_reverse(false)
         , m_excluded(false)
+        , m_isFoldLine(false)
         , m_isNotch(false)
         , m_isMainPathNode(true)
         , m_beforeWidthFormula(currentSeamAllowance)
@@ -92,6 +93,7 @@ public:
         , m_typeTool(typeTool)
         , m_reverse(reverse)
         , m_excluded(false)
+        , m_isFoldLine(false)
         , m_isNotch(false)
         , m_isMainPathNode(true)
         , m_beforeWidthFormula(currentSeamAllowance)
@@ -118,6 +120,7 @@ public:
         , m_typeTool(node.m_typeTool)
         , m_reverse(node.m_reverse)
         , m_excluded(node.m_excluded)
+        , m_isFoldLine(node.m_isFoldLine)
         , m_isNotch(node.m_isNotch)
         , m_isMainPathNode(node.m_isMainPathNode)
         , m_beforeWidthFormula(node.m_beforeWidthFormula)
@@ -144,6 +147,7 @@ public:
     bool           m_excluded;        //! @brief m_excluded true if item excluded from main path. Excluded item is
                                       //! not visible and also will not has affect on main path. Also include to exist
                                       //! path items automatically setted excluded. */
+    bool           m_isFoldLine;      //! @brief m_isFoldLine true if the node is one end of the piece fold line.
     bool           m_isNotch;         //! @brief m_isNotch has sense only for points. If true to seam allowance should
                                       //! a notch should be added.
     bool           m_isMainPathNode;  //! @brief m_isMainPathNode need fin know if allowed for this notch to be double.
@@ -185,7 +189,8 @@ QDataStream &operator<<(QDataStream &out, const VPieceNodeData &p)
         << p.m_notchLength
         << p.m_notchWidth
         << p.m_notchAngle
-        << p.m_notchCount;
+        << p.m_notchCount
+        << p.m_isFoldLine;
     return out;
 }
 
@@ -212,7 +217,8 @@ QDataStream &operator>>(QDataStream &in, VPieceNodeData &p)
        >> p.m_notchLength
        >> p.m_notchWidth
        >> p.m_notchAngle
-       >> p.m_notchCount;
+       >> p.m_notchCount
+       >> p.m_isFoldLine;
 
     p.m_typeTool     = static_cast<Tool>(typeTool);
     p.m_angleType    = static_cast<PieceNodeAngle>(angleType);

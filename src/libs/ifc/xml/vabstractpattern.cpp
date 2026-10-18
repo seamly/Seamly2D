@@ -166,6 +166,7 @@ const QString VAbstractPattern::AttrArrows              = QStringLiteral("arrows
 const QString VAbstractPattern::AttrArrowLength         = QStringLiteral("arrowLength");
 const QString VAbstractPattern::AttrNodeReverse         = QStringLiteral("reverse");
 const QString VAbstractPattern::AttrNodeExcluded        = QStringLiteral("excluded");
+const QString VAbstractPattern::AttrNodeFoldLine        = QStringLiteral("foldLine");
 const QString VAbstractPattern::AttrNodeIsNotch         = QStringLiteral("notch");
 const QString VAbstractPattern::AttrNodeNotchType       = QStringLiteral("notchType");
 const QString VAbstractPattern::AttrNodeNotchSubType    = QStringLiteral("notchSubtype");
@@ -783,6 +784,7 @@ VPieceNode VAbstractPattern::ParseSANode(const QDomElement &domElement)
     const quint32 id = VDomDocument::GetParametrUInt(domElement, AttrIdObject, NULL_ID_STR);
     const bool reverse = VDomDocument::GetParametrUInt(domElement, VAbstractPattern::AttrNodeReverse, "0");
     const bool excluded = VDomDocument::getParameterBool(domElement, VAbstractPattern::AttrNodeExcluded, falseStr);
+    const bool foldLine = VDomDocument::getParameterBool(domElement, VAbstractPattern::AttrNodeFoldLine, falseStr);
     const QString saBefore = VDomDocument::GetParametrString(domElement, VAbstractPattern::AttrSABefore,
                                                              currentSeamAllowance);
     const QString saAfter = VDomDocument::GetParametrString(domElement, VAbstractPattern::AttrSAAfter,
@@ -843,6 +845,7 @@ VPieceNode VAbstractPattern::ParseSANode(const QDomElement &domElement)
     node.setAfterSAFormula(saAfter);
     node.SetAngleType(angle);
     node.SetExcluded(excluded);
+    node.setFoldLine(foldLine);
     node.setNotch(notch);
     node.setNotchType(notchType);
     node.setNotchSubType(notchSubType);
