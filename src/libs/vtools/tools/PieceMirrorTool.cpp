@@ -155,19 +155,31 @@ bool addDraftIds(PieceMirrorContext& context, const QVector<VPieceNode>& nodes)
  */
 bool collectSource(PieceMirrorContext& context, const VPiece& half, QVector<SourceItem>& source)
 {
-    // Main path, internal paths, custom seam allowance paths and anchors all go into the full piece.
+    // Main path, internal paths, custom seam allowance paths and anchors all go into the full piece. The full main
+    // path leaves out excluded nodes, so their objects are not mirrored.
     const QVector<VPieceNode> main_nodes = half.GetPath().getNodes();
-    bool ok = addDraftIds(context, main_nodes);
+    QVector<VPieceNode> half_nodes;
+    for (int index : PieceMirrorPath::halfPathIndexes(main_nodes))
+    {
+        half_nodes.append(main_nodes.at(index));
+    }
+    bool ok = addDraftIds(context, half_nodes);
     QVector<quint32> ordered;
-    for (const VPieceNode& node : main_nodes)
+    for (const VPieceNode& node : half_nodes)
     {
         ordered.append(context.draft_ids.value(node.GetId()));
     }
 
+    // Only the custom seam allowance records that the full piece keeps need their paths mirrored.
+    const QVector<CustomSARecord> records = half.getCustomSARecords();
+    const QVector<PieceMirrorNode> order  = PieceMirrorPath::fullPathOrder(main_nodes, records);
     QVector<quint32> path_ids = half.getInternalPaths();
-    for (const CustomSARecord& record : half.getCustomSARecords())
+    for (const PieceMirrorRange& range : PieceMirrorPath::recordRanges(main_nodes, order, records))
     {
-        path_ids.append(record.path);
+        if (!path_ids.contains(records.at(range.record_index).path))
+        {
+            path_ids.append(records.at(range.record_index).path);
+        }
     }
     for (quint32 path_id : path_ids)
     {
