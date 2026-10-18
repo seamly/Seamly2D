@@ -112,6 +112,11 @@ public:
     template<typename T>
     static quint32                CreateNode(VContainer *data, quint32 id);
 
+    static QVector<VPieceNode>    PrepareNodes(const VPiecePath &path, VMainGraphicsScene *scene, VAbstractPattern *doc,
+                                               VContainer *data);
+    static quint32                PrepareNode(const VPieceNode &node, VMainGraphicsScene *scene, VAbstractPattern *doc,
+                                              VContainer *data);
+
 public slots:
     /**
      * @brief FullUpdateFromFile update tool data form file.
@@ -173,10 +178,6 @@ protected:
     static QDomElement           AddSANode(VAbstractPattern *doc, const QString &tagName, const VPieceNode &node);
     static void                  AddNode(VAbstractPattern *doc, QDomElement &domElement, const VPieceNode &node);
 
-    static QVector<VPieceNode>   PrepareNodes(const VPiecePath &path, VMainGraphicsScene *scene, VAbstractPattern *doc,
-                                             VContainer *data);
-    static quint32               PrepareNode(const VPieceNode &node, VMainGraphicsScene *scene, VAbstractPattern *doc,
-                                             VContainer *data);
 private:
     Q_DISABLE_COPY(VAbstractTool)
 };

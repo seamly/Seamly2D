@@ -110,6 +110,8 @@ public:
     QString              Suffix() const;
     void                 setSuffix(const QString &suffix);
 
+    QVector<DestinationItem> getDestination() const;
+
     virtual void         GroupVisibility(quint32 object, bool visible) override;
     virtual void         paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
 
