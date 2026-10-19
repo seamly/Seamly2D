@@ -100,7 +100,7 @@ Add tasks in project-docs/TODO_SEAMLY2D.md -->
 ## Layout Miscellaneous
 
 - [ ] Layout.51 DXF-AAMA — biggest install base in apparel PLM, reference implementation already in the repo
-  - **On hold** — no AAMA spec on hand. Get the spec, or study sample AAMA `.dxf` files from other CAD systems, before implementing.
+  --> **On hold** — no AAMA spec on hand. Get the spec, or study sample AAMA `.dxf` files from other CAD systems, before implementing.
 - [ ] Layout.63 Drill holes (layer 13), with diameter (group 30) - not implemented in Seamly2D yet so move this to TODO_SEAMLY2D.md
 - [ ] Layout.64 Stripe and plaid reference lines (layers 9, 10) - not implemented in Seamly2D yet so move this to TODO_SEAMLY2D.md
 
@@ -114,12 +114,16 @@ Depends on Seamly2D.7. Until then every piece is on one fabric.
 - [ ] Layout.15.4 Exports: material in the default file name; DXF-ASTM `Material:` piece text from `data-material` (today `Block::material` is `DEFAULT_MATERIAL` = `Fabric`)
 - [ ] Layout.15.5 Tests: Rust import, packing per material, export text
 
-## [ ] Task Layout.16 — Fold lines in layout and export
+### [ ] Task Layout.79 - Multisize - Import - Ask user for height selection before starting the SeamlyLayout, handoff all sizes at the selected height to SeamlyLayout
 
-Depends on Seamly2D.8.
+Currently in Seamly2D, a pattern with a `.smms` measurement file hands off every size in the size list, at the base height. Create a 'Select Height for Multisize Layout' dialog containing radio buttons of all heights from the .smms file; when the user selects a height button and clicks 'OK' then every size in the size list at the selected height is handed off to SeamlyLayout. If there is only one height in the .smms file then this 'Select Height' dialog isn't needed / doesn't display.
 
-- [ ] Layout.16.1 Import: read `data-on-fold` and the `fold_line` component
-- [ ] Layout.16.2 Layout setting: pack the half piece, or unfold it (mirror across the fold line) before packing
-- [ ] Layout.16.3 Adjust Mode: the fold line moves with its piece
-- [ ] Layout.16.4 DXF-ASTM: layer 6 mirror line; boundary starts or ends on the mirror line points (D6673 §4.3.6); unfolded pieces write no layer 6
-- [ ] Layout.16.5 Tests: Rust import, unfold geometry, layer 6 and boundary order
+- [ ] Layout.79.1 - When user clicks the 'Layout' icon, display a 'Select Height for Multisize Layout' dialog
+- [ ] Layout.79.2 - When user selects a height in the Select Height for Multisize layout dialog, then clicks OK, handoff all sizes in the size list at the selected height to SeamlyLayout
+  - Deferred (user decision): the dialog is removed. The handoff calculates every size at the base height; `data-height` = `base` of the `.smms` `height` measurement (`gost_man_ru.smms`: 1760 mm).
+  - To resume: the last dialog code is in commit `1ef11b80e5`; `MeasurementDoc::bodyHeights` (`height` base, then one `height_increase` per step, up to 7 ft) and its test are in `21b6cc1591`. One step is always 6 cm of gradation height (`MeasurementVariable::CalcValue`). Do not list the pattern gradation heights: `<heights all="true"/>` gives 500 … 2000 mm.
+- [ ] Layout.79.3 - Display 'Height=<height size>' over the left input canvas
+  - Done: `prepareMultisizePieceLists` sets `layoutHeight` from the `height` measurement `base`; `SvgGenerator::setMultisize(..., height)` writes `data-height`. SeamlyLayout: `MeasurementsInfo::height`, property `multisizeHeight`, `Main.qml` `heightHeader` "Height <height>".
+  - Tests: `TST_SvgComponentTags::MultisizePatternCarriesSizeList` checks `data-height`; `piece_extractor` `read_measurements_info_multisize_and_individual`. Checked: `cl /Zs` on `mainwindow.cpp`, `mainwindowsnogui.cpp`, `svg_generator.cpp`, `tst_svgcomponenttags.cpp`; `cargo test --workspace` 549 passed; `ctest --preset debug` 6 of 6. Rollback: `cl /Zs` on `mainwindow.cpp`. Open: Qt suites in the next `local_build_msi.ps1`. Doc: `SVG-DATA-ATTRIBUTES.md`, "Multisize pattern".
+- [ ] Layout.79.4 - Test/Verify - mm pattern with `gost_man_ru-2.smms`: no height dialog; "Height 1760" appears over left input canvas
+- [ ] Layout.79.5 - Test/Verify - Generated layouts are generated correctly
