@@ -8,6 +8,8 @@
 - Reproduced on the installed MSI (`jacket2_40-146.sm2d`, Detail 1 in block 1 of 3). A one-block copy mirrored correctly, so the rest of the pipeline works.
 - Fix: `PieceMirrorTool::Create` uses `getToolDraftBlockName(piece_id)`, makes that block active while it builds, then restores the active block. `PieceMirrorDialog` no longer checks the block. `VAbstractTool::PrepareNode` takes an optional `blockName`, so node undo commands do not follow the active block.
 - Verified: `cl /Zs` on the changed `.cpp` files. Not run: GUI with the fix, Qt suites. Next MSI: user check Layout.80.3.1 (now includes a multi-block pattern).
+- Rule (user decision): the active draft block affects Draft mode only; Piece mode works on the chosen piece and its block. Follow-up: `PieceMirrorTool` finds the block from the piece element (`pieceBlockName`), not the history. `VAbstractTool::AddRecord` takes an optional `blockName`; piece, union and node tools pass theirs.
+- Open (user decision): an undo in Piece mode still switches the Draft Block combo to the operation block (`AddToCalc::undo` → `changeDraftBlockGlobally`). The combo still shows the last block, disabled, in Piece mode.
 
 ### 2026-10-18 (afternoon) — Layout.80.3 Piece Mirror tool merged into local `run-seamlyLayout`, not pushed
 
