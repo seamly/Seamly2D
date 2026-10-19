@@ -33,7 +33,6 @@
 #define PIECEMIRRORDIALOG_H
 
 #include <QObject>
-#include <QVector>
 #include <QtGlobal>
 
 #include "../vmisc/def.h"
@@ -49,8 +48,8 @@ namespace Ui
 /**
  * @brief PieceMirrorDialog takes the half piece for the Piece Mirror tool.
  *
- * The user clicks a piece on the piece scene. A piece of the active draft block with a valid fold line opens the
- * dialog; any other piece leaves the dialog hidden and shows the problem in the status bar.
+ * The user clicks a piece on the piece scene. A piece with a valid fold line opens the dialog; any other piece leaves
+ * the dialog hidden and shows the problem in the status bar. The piece can belong to any draft block.
  */
 class PieceMirrorDialog : public DialogTool
 {
@@ -58,8 +57,6 @@ class PieceMirrorDialog : public DialogTool
 public:
                      PieceMirrorDialog(const VContainer* data, const quint32& toolId, QWidget* parent = nullptr);
     virtual         ~PieceMirrorDialog() override;
-
-    virtual void     SetPiecesList(const QVector<quint32>& list) override;
 
     quint32          getPieceId() const;
     bool             removeHalfFromLayout() const;
@@ -70,10 +67,9 @@ public slots:
 private:
     Q_DISABLE_COPY(PieceMirrorDialog)
 
-    Ui::PieceMirrorDialog* ui;              ///< Dialog widgets.
-    quint32                m_piece_id;      ///< Chosen half piece; NULL_ID until the user picks a valid piece.
-    QVector<quint32>       m_active_pieces; ///< Pieces of the active draft block; only these can be mirrored.
-    QSoundEffect*          m_beep;          ///< Selection sound.
+    Ui::PieceMirrorDialog* ui;         ///< Dialog widgets.
+    quint32                m_piece_id; ///< Chosen half piece; NULL_ID until the user picks a valid piece.
+    QSoundEffect*          m_beep;     ///< Selection sound.
 };
 
 #endif // PIECEMIRRORDIALOG_H

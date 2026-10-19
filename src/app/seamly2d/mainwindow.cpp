@@ -1091,7 +1091,6 @@ void MainWindow::SetToolButton(bool checked, Tool t, const QString &cursor, cons
             case Tool::InternalPath:
             case Tool::AnchorPoint:
             case Tool::InsertNodes:
-            case Tool::PieceMirror:
                 dialogTool->SetPiecesList(doc->getActivePatternPieces());
                 break;
             default:

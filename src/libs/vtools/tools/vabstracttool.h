@@ -115,7 +115,7 @@ public:
     static QVector<VPieceNode>    PrepareNodes(const VPiecePath &path, VMainGraphicsScene *scene, VAbstractPattern *doc,
                                                VContainer *data);
     static quint32                PrepareNode(const VPieceNode &node, VMainGraphicsScene *scene, VAbstractPattern *doc,
-                                              VContainer *data);
+                                              VContainer *data, const QString &blockName = QString());
 
 public slots:
     /**

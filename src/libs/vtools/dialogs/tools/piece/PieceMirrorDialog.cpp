@@ -53,7 +53,6 @@ PieceMirrorDialog::PieceMirrorDialog(const VContainer* data, const quint32& tool
     : DialogTool(data, toolId, parent)
     , ui(new Ui::PieceMirrorDialog)
     , m_piece_id(NULL_ID)
-    , m_active_pieces()
     , m_beep(new QSoundEffect(this))
 {
     m_beep->setSource(QUrl(qApp->Settings()->getSelectionSound()));
@@ -72,15 +71,6 @@ PieceMirrorDialog::PieceMirrorDialog(const VContainer* data, const quint32& tool
 PieceMirrorDialog::~PieceMirrorDialog()
 {
     delete ui;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief SetPiecesList keeps the pieces of the active draft block; the mirror operation goes into that block.
- */
-void PieceMirrorDialog::SetPiecesList(const QVector<quint32>& list)
-{
-    m_active_pieces = list;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -110,17 +100,8 @@ void PieceMirrorDialog::ChosenObject(quint32 id, const SceneObject& type)
     {
         m_beep->play();
 
-        // A piece of another draft block, or one without a valid fold line, leaves the dialog hidden.
-        QString problem;
-        if (!m_active_pieces.contains(id))
-        {
-            problem = tr("Select a piece of the active draft block");
-        }
-        else
-        {
-            problem = PieceMirrorTool::mirrorProblem(data, id);
-        }
-
+        // A piece without a valid fold line leaves the dialog hidden.
+        const QString problem = PieceMirrorTool::mirrorProblem(data, id);
         if (problem.isEmpty())
         {
             m_piece_id = id;

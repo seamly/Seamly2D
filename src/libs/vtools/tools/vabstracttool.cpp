@@ -749,8 +749,14 @@ QVector<VPieceNode> VAbstractTool::PrepareNodes(const VPiecePath &path, VMainGra
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief PrepareNode makes the piece node copy of a draft object.
+ * @param blockName draft block that holds the copy; empty for the draft block that is active when its undo command
+ *        runs.
+ * @return id of the copy; NULL_ID for an unknown node type.
+ */
 quint32 VAbstractTool::PrepareNode(const VPieceNode &node, VMainGraphicsScene *scene,
-                                   VAbstractPattern *doc, VContainer *data)
+                                   VAbstractPattern *doc, VContainer *data, const QString &blockName)
 {
     SCASSERT(scene != nullptr)
     SCASSERT(doc != nullptr)
@@ -761,23 +767,23 @@ quint32 VAbstractTool::PrepareNode(const VPieceNode &node, VMainGraphicsScene *s
     {
         case (Tool::NodePoint):
             id = CreateNode<VPointF>(data, node.GetId());
-            VNodePoint::Create(doc, data, scene, id, node.GetId(), Document::FullParse, Source::FromGui);
+            VNodePoint::Create(doc, data, scene, id, node.GetId(), Document::FullParse, Source::FromGui, blockName);
             break;
         case (Tool::NodeArc):
             id = CreateNode<VArc>(data, node.GetId());
-            VNodeArc::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui);
+            VNodeArc::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui, blockName);
             break;
         case (Tool::NodeElArc):
             id = CreateNode<VEllipticalArc>(data, node.GetId());
-            VNodeEllipticalArc::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui);
+            VNodeEllipticalArc::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui, blockName);
             break;
         case (Tool::NodeSpline):
             id = CreateNodeSpline(data, node.GetId());
-            VNodeSpline::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui);
+            VNodeSpline::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui, blockName);
             break;
         case (Tool::NodeSplinePath):
             id = CreateNodeSplinePath(data, node.GetId());
-            VNodeSplinePath::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui);
+            VNodeSplinePath::Create(doc, data, id, node.GetId(), Document::FullParse, Source::FromGui, blockName);
             break;
         default:
             qWarning() << "May be wrong tool type!!! Ignoring."<<Q_FUNC_INFO;

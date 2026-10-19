@@ -2,6 +2,13 @@
 
 ## Current status
 
+### 2026-10-19 — Piece Mirror fix: any draft block, merged into local `run-seamlyLayout`, not pushed
+
+- Defect: Piece mode sets the last draft block active (`MainWindow::showPieceMode`). The tool refused a piece of another block; status bar "Select a piece of the active draft block", no dialog, Enter did nothing.
+- Reproduced on the installed MSI (`jacket2_40-146.sm2d`, Detail 1 in block 1 of 3). A one-block copy mirrored correctly, so the rest of the pipeline works.
+- Fix: `PieceMirrorTool::Create` uses `getToolDraftBlockName(piece_id)`, makes that block active while it builds, then restores the active block. `PieceMirrorDialog` no longer checks the block. `VAbstractTool::PrepareNode` takes an optional `blockName`, so node undo commands do not follow the active block.
+- Verified: `cl /Zs` on the changed `.cpp` files. Not run: GUI with the fix, Qt suites. Next MSI: user check Layout.80.3.1 (now includes a multi-block pattern).
+
 ### 2026-10-18 (afternoon) — Layout.80.3 Piece Mirror tool merged into local `run-seamlyLayout`, not pushed
 
 - Branch `task-piece-mirror`, commits made with a temporary index (shared tree).
