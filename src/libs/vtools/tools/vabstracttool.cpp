@@ -562,11 +562,14 @@ void VAbstractTool::ToolCreation(const Source &typeCreation)
  * @param id object id in container
  * @param toolType tool type
  * @param doc dom document container
+ * @param blockName draft block that holds the tool; empty for the active draft block. A tool made in Piece mode
+ *        names its block, because the active draft block belongs to Draft mode.
  */
-void VAbstractTool::AddRecord(const quint32 id, const Tool &toolType, VAbstractPattern *doc)
+void VAbstractTool::AddRecord(const quint32 id, const Tool &toolType, VAbstractPattern *doc, const QString &blockName)
 {
     QVector<VToolRecord> *history = doc->getHistory();
-    VToolRecord record = VToolRecord(id, toolType, doc->getActiveDraftBlockName());
+    const QString recordBlock = blockName.isEmpty() ? doc->getActiveDraftBlockName() : blockName;
+    VToolRecord record = VToolRecord(id, toolType, recordBlock);
     if (history->contains(record))
     {
         return;
