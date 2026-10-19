@@ -118,19 +118,15 @@ Note: This may require flatting the SVG data before grouping pieces by size to p
 
 Currently in Seamly2D, a pattern with a `.smms` measurement file hands off every size in the size list, at the base height. Create a 'Select Height for Multisize Layout' dialog containing radio buttons of all heights from the .smms file; when the user selects a height button and clicks 'OK' then every size in the size list at the selected height is handed off to SeamlyLayout. If there is only one height in the .smms file then this 'Select Height' dialog isn't needed / doesn't display. 
 
-- [x] Layout.79.1 - When user clicks the 'Layout' icon, display a 'Select Height for Multisize Layout' dialog
-- [x] Layout.79.2 - When user selects a height in the Select Height for Multisize layout dialog, then clicks OK, handoff all sizes in the size list at the selected height to SeamlyLayout
+- [ ] Layout.79.1 - When user clicks the 'Layout' icon, display a 'Select Height for Multisize Layout' dialog
+- [ ] Layout.79.2 - When user selects a height in the Select Height for Multisize layout dialog, then clicks OK, handoff all sizes in the size list at the selected height to SeamlyLayout
+  - Deferred (user decision): the dialog is removed. The handoff calculates every size at the base height; `data-height` = `base` of the `.smms` `height` measurement (`gost_man_ru.smms`: 1760 mm).
+  - To resume: the last dialog code is in commit `1ef11b80e5`; `MeasurementDoc::bodyHeights` (`height` base, then one `height_increase` per step, up to 7 ft) and its test are in `21b6cc1591`. One step is always 6 cm of gradation height (`MeasurementVariable::CalcValue`). Do not list the pattern gradation heights: `<heights all="true"/>` gives 500 … 2000 mm.
 - [x] Layout.79.3 - Display 'Height=<height size>' over the left input canvas
-  - Done: `MainWindow::selectMultisizeLayoutHeight` (radio buttons, four to a row; base height selected first; Cancel stops the handoff; one height shows no dialog); `prepareMultisizePieceLists` builds every size at that height; `SvgGenerator::setMultisize(..., height)` writes `data-height`. SeamlyLayout: `MeasurementsInfo::height`, property `multisizeHeight`, `Main.qml` `heightHeader` "Height <height>".
-  - Tests: `TST_SvgComponentTags::MultisizePatternCarriesSizeList` checks `data-height`; `piece_extractor` `read_measurements_info_multisize_and_individual`. Checked: `cl /Zs` on `mainwindow.cpp`, `mainwindowsnogui.cpp`, `svg_generator.cpp`, `tst_svgcomponenttags.cpp`; `cargo test --workspace` 549 passed; `ctest --preset debug` 6 of 6. Open: Qt suites in the next `local_build_msi.ps1`. Doc: `SVG-DATA-ATTRIBUTES.md`, "Multisize pattern".
-- [ ] Layout.79.3 - Test/Verify - the 'Select Height for Multisize Layouts' appears when user selects 'Layout' icon
-- [ ] Layout.79.4 - Test/Verify - 'Height <height size>' appears over left input canvas
+  - Done: `prepareMultisizePieceLists` sets `layoutHeight` from the `height` measurement `base`; `SvgGenerator::setMultisize(..., height)` writes `data-height`. SeamlyLayout: `MeasurementsInfo::height`, property `multisizeHeight`, `Main.qml` `heightHeader` "Height <height>".
+  - Tests: `TST_SvgComponentTags::MultisizePatternCarriesSizeList` checks `data-height`; `piece_extractor` `read_measurements_info_multisize_and_individual`. Checked: `cl /Zs` on `mainwindow.cpp`, `mainwindowsnogui.cpp`, `svg_generator.cpp`, `tst_svgcomponenttags.cpp`; `cargo test --workspace` 549 passed; `ctest --preset debug` 6 of 6. Rollback: `cl /Zs` on `mainwindow.cpp`. Open: Qt suites in the next `local_build_msi.ps1`. Doc: `SVG-DATA-ATTRIBUTES.md`, "Multisize pattern".
+- [ ] Layout.79.4 - Test/Verify - mm pattern with `gost_man_ru-2.smms`: no height dialog; "Height 1760" appears over left input canvas
 - [ ] Layout.79.5 - Test/Verify - Generated layouts are generated correctly
-- [x] Layout.79.6 - Fix: the dialog listed every pattern gradation height (500 … 2000 mm with `gost_man_ru.smms`). List only the `.smms` `height` measurement: its `base`, then one `height_increase` per step, up to 7 ft (2133.6 mm). Show the `.smms` `<unit>`.
-  - Done: `MeasurementDoc::bodyHeights`; `selectMultisizeLayoutHeight` buttons read "<height> <unit>". No `height` measurement, or one height: no dialog, base height. `data-height` = selected `height` value, in pattern units.
-  - Decisions: list starts at the base (no heights below it). One step is always 6 cm of gradation height (`MeasurementVariable::CalcValue`); `height_increase` sets only the measurement growth per step.
-  - Tests: `TST_Measurements::MultisizeBodyHeights`, passed in a scratch QtTest harness; a mutation (`<` for `<=`) failed it. Checked: `cl /Zs` on `measurements.cpp`, `mainwindow.cpp`, `tst_vmeasurements.cpp`. Open: Qt suites in the next `local_build_msi.ps1`.
-- [ ] Layout.79.7 - Test/Verify - mm pattern with `gost_man_ru-2.smms`: dialog shows 1760 mm … 2120 mm (7 buttons). Pick 1880 mm: SeamlyLayout shows "Height 1880".
 
 ## [ ] Task Layout.80 — Fold lines (mirror lines)
 

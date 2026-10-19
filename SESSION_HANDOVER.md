@@ -2,13 +2,13 @@
 
 ## Current status
 
-### 2026-10-19 — Layout.79.6 multisize height list fix, merged into local `run-seamlyLayout`, not pushed
+### 2026-10-19 — Multisize height selection rolled back, merged into local `run-seamlyLayout`, not pushed
 
-- Defect: "Select Height for Multisize Layout" listed every pattern gradation height (`<heights all="true"/>` → 500 … 2000 mm), not the `.smms` heights.
-- Fix: `MeasurementDoc::bodyHeights` reads the `height` measurement: `base`, then `+ height_increase` per step, up to 7 ft. Buttons show "<height> <.smms unit>". `gost_man_ru-2.smms`: 1760 … 2120 mm, 7 buttons.
-- Recalculation height = base height + step × 6 cm (fixed `CalcValue` step); `data-height` = selected `height` value, pattern units.
-- Decisions (in the TODO): no heights below the base; no `height` measurement → no dialog.
-- Verified: `cl /Zs` on the 3 changed `.cpp`; scratch harness ran `TST_Measurements::MultisizeBodyHeights`: pass; mutation: fail. Not run: Qt suites, GUI. User check: Layout.79.7.
+- User decision: height selection is deferred. Layout.79.1 and 79.2 reopened; the dialog is removed.
+- Handoff: every size at the base height; `data-height` = `base` of the `.smms` `height` measurement (1760 for `gost_man_ru.smms`). No `height` measurement → `<height base>`.
+- Kept: `data-height`, SeamlyLayout "Height <height>" header (Layout.79.3).
+- Removed: `MainWindow::selectMultisizeLayoutHeight`, `MeasurementDoc::bodyHeights`, `TST_Measurements::MultisizeBodyHeights`. To resume: commits `1ef11b80e5`, `21b6cc1591` (in the TODO).
+- Verified: `cl /Zs` on `mainwindow.cpp`. Not run: Qt suites, GUI. User check: Layout.79.4.
 - User's uncommitted edits (Layout.81 in `TODO_SEAMLYLAYOUT.md`, version files, plists, jacket2 sample) left uncommitted.
 
 ### 2026-10-19 — Piece Mirror fix: any draft block, merged into local `run-seamlyLayout`, not pushed
