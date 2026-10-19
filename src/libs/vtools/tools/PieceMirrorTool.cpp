@@ -264,7 +264,7 @@ bool mirrorObjects(PieceMirrorContext& context, const QVector<SourceItem>& sourc
  */
 VPieceNode pieceNode(PieceMirrorContext& context, VPieceNode node)
 {
-    node.SetId(VAbstractTool::PrepareNode(node, context.piece_scene, context.doc, context.data));
+    node.SetId(VAbstractTool::PrepareNode(node, context.piece_scene, context.doc, context.data, context.block_name));
     return node;
 }
 
@@ -460,7 +460,7 @@ PatternPieceTool* PieceMirrorTool::Create(QSharedPointer<DialogTool> dialog, VMa
 //---------------------------------------------------------------------------------------------------------------------
 /**
  * @brief Create makes the full piece of a half piece, in one undo step.
- * @param piece_id    half piece; it must be in the active draft block and have a valid fold line.
+ * @param piece_id    half piece with a valid fold line, in any draft block.
  * @param remove_half true to take the half piece out of the layout.
  * @param draft_scene scene of the Mirror by Line operation.
  * @param piece_scene scene of the full piece.
@@ -473,10 +473,10 @@ PatternPieceTool* PieceMirrorTool::Create(quint32 piece_id, bool remove_half, VM
 {
     PatternPieceTool* full_tool = nullptr;
 
-    // The operation goes into the active draft block, so the half piece must belong to it.
-    const bool valid = draft_scene != nullptr && piece_scene != nullptr && doc != nullptr
-            && mirrorProblem(data, piece_id).isEmpty()
-            && doc->getToolDraftBlockName(piece_id) == doc->getActiveDraftBlockName();
+    // The operation and the full piece go into the draft block of the half piece.
+    const QString block_name = doc != nullptr ? doc->getToolDraftBlockName(piece_id) : QString();
+    const bool valid = draft_scene != nullptr && piece_scene != nullptr && !block_name.isEmpty()
+            && mirrorProblem(data, piece_id).isEmpty();
     if (valid)
     {
         const VPiece half = data->GetPiece(piece_id);
@@ -485,12 +485,17 @@ PatternPieceTool* PieceMirrorTool::Create(quint32 piece_id, bool remove_half, VM
         context.piece_scene = piece_scene;
         context.doc         = doc;
         context.data        = data;
-        context.block_name  = doc->getActiveDraftBlockName();
+        context.block_name  = block_name;
 
         // Check every object before the first change, so a refused mirror leaves the pattern as it was.
         QVector<SourceItem> source;
         if (collectSource(context, half, source))
         {
+            // Piece mode keeps the last draft block active. The operation, its history record and its undo command
+            // use the active block, so the half piece block stays active until the full piece exists.
+            const QString active_block = doc->getActiveDraftBlockName();
+            doc->changeActiveDraftBlock(block_name);
+
             qApp->getUndoStack()->beginMacro(tr("mirror piece"));
 
             if (mirrorObjects(context, source, draft_scene))
@@ -506,6 +511,8 @@ PatternPieceTool* PieceMirrorTool::Create(quint32 piece_id, bool remove_half, VM
             }
 
             qApp->getUndoStack()->endMacro();
+
+            doc->changeActiveDraftBlock(active_block);
         }
     }
     return full_tool;
