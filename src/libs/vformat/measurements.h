@@ -61,6 +61,7 @@
 #include <QDomElement>
 #include <QString>
 #include <QStringList>
+#include <QVector>
 #include <QtGlobal>
 
 #include "../ifc/xml/vdomdocument.h"
@@ -95,6 +96,7 @@ public:
     MeasurementsType Type() const;
     int              BaseSize() const;
     int              BaseHeight() const;
+    QVector<qreal>   bodyHeights(qreal maximum) const;
 
     QString          Notes() const;
     void             SetNotes(const QString &text);

@@ -413,6 +413,46 @@ int MeasurementDoc::BaseHeight() const
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief bodyHeights lists the body heights of a multisize file, in file units.
+ *
+ * Item n is the "height" measurement at n gradation height steps above the base height:
+ * its base plus n times its height_increase. The list stops at maximum.
+ *
+ * @param maximum largest height in the list, in file units.
+ * @return empty for an individual file or a file without a "height" measurement; the base alone
+ *         when height_increase is not positive or the base is above maximum.
+ */
+QVector<qreal> MeasurementDoc::bodyHeights(qreal maximum) const
+{
+    if (type != MeasurementsType::Multisize)
+    {
+        return QVector<qreal>();
+    }
+
+    const QDomElement height = FindM(height_M);
+    if (height.isNull())
+    {
+        return QVector<qreal>();
+    }
+
+    const qreal base = GetParametrDouble(height, AttrBase, "0");
+    const qreal increase = GetParametrDouble(height, AttrHeightIncrease, "0");
+
+    QVector<qreal> heights{base};
+    if (increase <= 0)
+    {
+        return heights;
+    }
+    // Multiply, not add, so the steps carry no rounding drift.
+    for (int step = 1; base + step * increase <= maximum; ++step)
+    {
+        heights.append(base + step * increase);
+    }
+    return heights;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 QString MeasurementDoc::Notes() const
 {
     return UniqueTagText(TagNotes, "");
