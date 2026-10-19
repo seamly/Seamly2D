@@ -126,6 +126,11 @@ Currently in Seamly2D, a pattern with a `.smms` measurement file hands off every
 - [ ] Layout.79.3 - Test/Verify - the 'Select Height for Multisize Layouts' appears when user selects 'Layout' icon
 - [ ] Layout.79.4 - Test/Verify - 'Height <height size>' appears over left input canvas
 - [ ] Layout.79.5 - Test/Verify - Generated layouts are generated correctly
+- [x] Layout.79.6 - Fix: the dialog listed every pattern gradation height (500 … 2000 mm with `gost_man_ru.smms`). List only the `.smms` `height` measurement: its `base`, then one `height_increase` per step, up to 7 ft (2133.6 mm). Show the `.smms` `<unit>`.
+  - Done: `MeasurementDoc::bodyHeights`; `selectMultisizeLayoutHeight` buttons read "<height> <unit>". No `height` measurement, or one height: no dialog, base height. `data-height` = selected `height` value, in pattern units.
+  - Decisions: list starts at the base (no heights below it). One step is always 6 cm of gradation height (`MeasurementVariable::CalcValue`); `height_increase` sets only the measurement growth per step.
+  - Tests: `TST_Measurements::MultisizeBodyHeights`, passed in a scratch QtTest harness; a mutation (`<` for `<=`) failed it. Checked: `cl /Zs` on `measurements.cpp`, `mainwindow.cpp`, `tst_vmeasurements.cpp`. Open: Qt suites in the next `local_build_msi.ps1`.
+- [ ] Layout.79.7 - Test/Verify - mm pattern with `gost_man_ru-2.smms`: dialog shows 1760 mm … 2120 mm (7 buttons). Pick 1880 mm: SeamlyLayout shows "Height 1880".
 
 ## [ ] Task Layout.80 — Fold lines (mirror lines)
 
