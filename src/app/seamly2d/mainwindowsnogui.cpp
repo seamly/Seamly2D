@@ -1620,6 +1620,9 @@ void MainWindowsNoGUI::PrepareTextForDXF(const QString &placeholder,
             for (int k = 0; k < textItems.size(); ++k)
             {
                 QGraphicsSimpleTextItem *textItem = textItems.at(k);
+                // With a pen Qt draws the text as outlines, which bypasses VDxfEngine::drawTextItem
+                // and leaves the placeholder in the dxf as glyphs. Without a pen it is drawn as text.
+                textItem->setPen(Qt::NoPen);
                 textItem->setText(textItem->text() + placeholder);
             }
         }
@@ -1644,7 +1647,6 @@ void MainWindowsNoGUI::RestoreTextAfterDXF(const QString &placeholder,
         for (int j = 0; j < paperItems.size(); ++j)
         {
             // Gather every text item below this piece, at any depth.
-            // Note: also fixes a pre-existing bug where paperItems.at(i) was used instead of .at(j).
             QList<QGraphicsSimpleTextItem *> textItems;
             collectTextItems(paperItems.at(j), textItems);
             for (int k = 0; k < textItems.size(); ++k)
@@ -1653,6 +1655,8 @@ void MainWindowsNoGUI::RestoreTextAfterDXF(const QString &placeholder,
                 QString text = textItem->text();
                 text.replace(placeholder, "");
                 textItem->setText(text);
+                // No pen restore: VLayoutPiece::createLabelItem sets no pen.
+                // A pen makes later SVG/PDF exports draw the text as outlines.
             }
         }
     }

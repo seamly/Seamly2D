@@ -30,3 +30,12 @@ Found during MSI Test Case verification, step 6b (`project-docs/TEST_MSI_WIN_X64
 - [ ] SeamlyMe.4.1 Have SeamlyMe persist `individual_size_measurements`, `multi_size_measurements`, and `templates` under `[paths]` in `qt6_seamlyme.ini`, each defaulting to `%DATADIR%\measurements\individual`, `%DATADIR%\measurements\multisize`, and `%DATADIR%\templates` respectively (call the existing `set*Path()` setters on first run/save, matching how Seamly2D persists its own `[paths]` section)
 - [ ] SeamlyMe.4.2 Re-run MSI Test Case verification step 6b to confirm the persisted section exists and every value begins with `%DATADIR%`
 - [ ] SeamlyMe.4.3 Doxygen briefs + inline comments on any touched function(s)
+
+## [ ] Task SeamlyMe.5 - Multisize - show current size and height in SeamlyMe main dialog
+
+Display current size and height in SeamlyMe dialog above the 'Measurement' and 'Information' tabs.
+A size dropdown list is to the right of the displayed current size, and a height dropdown list is to the right of the displayed current height. The user may select a size and/or height and the changed value is applied to the pattern when the user clicks 'Apply' at the bottom of the dialog. 
+
+## [ ] Task SeamlyMe.6 - Multisize - dropdowns to select/change the current size and height
+
+Display
