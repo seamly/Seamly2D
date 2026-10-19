@@ -833,22 +833,26 @@ QHash<quint32, VPiece> MainWindow::currentLayoutPieces() const
 /**
  * @brief selectMultisizeLayoutHeight asks for the height of the multisize handoff.
  *
- * A dialog lists every height of the pattern as a radio button; the base height is selected first.
- * With one height the dialog does not show.
+ * A dialog lists the body heights of the measurement file (MeasurementDoc::bodyHeights()) up to 7 ft,
+ * in the file's unit, as radio buttons; the base height is selected first. With one height, or no
+ * "height" measurement, the dialog does not show and the base height is used.
  *
  * @param baseHeight base height of the measurements, in pattern units.
- * @param height     receives the selected height, in pattern units.
+ * @param height     receives the gradation height to calculate the sizes at, in pattern units.
+ * @param bodyHeight receives the selected "height" measurement value, in pattern units.
  * @return false when the user canceled the dialog.
  */
-bool MainWindow::selectMultisizeLayoutHeight(int baseHeight, int &height)
+bool MainWindow::selectMultisizeLayoutHeight(int baseHeight, int &height, qreal &bodyHeight)
 {
+    const qreal maxBodyHeightMm = 2133.6; // 7 ft
+    const Unit fileUnit = m_measurements->measurementUnits();
+    const Unit patternUnit = *pattern->GetPatternUnit();
+    const QVector<qreal> heights = m_measurements->bodyHeights(UnitConvertor(maxBodyHeightMm, Unit::Mm, fileUnit));
+
     height = baseHeight;
-    if (gradationHeights.isNull() || gradationHeights->count() <= 1)
+    bodyHeight = heights.isEmpty() ? baseHeight : UnitConvertor(heights.first(), fileUnit, patternUnit);
+    if (heights.size() <= 1)
     {
-        if (!gradationHeights.isNull() && gradationHeights->count() == 1)
-        {
-            height = gradationHeights->itemText(0).toInt();
-        }
         return true;
     }
 
@@ -860,18 +864,14 @@ bool MainWindow::selectMultisizeLayoutHeight(int baseHeight, int &height)
     // Four heights to a row keep a long list short.
     QGridLayout *grid = new QGridLayout();
     QButtonGroup *buttons = new QButtonGroup(&dialog);
-    for (int i = 0; i < gradationHeights->count(); ++i)
+    const QString unitText = UnitsToStr(fileUnit, true);
+    for (int i = 0; i < heights.size(); ++i)
     {
-        const QString text = gradationHeights->itemText(i);
-        QRadioButton *button = new QRadioButton(text, &dialog);
-        button->setChecked(text.toInt() == baseHeight);
+        QRadioButton *button = new QRadioButton(QString::number(heights.at(i)) + QLatin1Char(' ') + unitText, &dialog);
         buttons->addButton(button, i);
         grid->addWidget(button, i / 4, i % 4);
     }
-    if (buttons->checkedButton() == nullptr)
-    {
-        buttons->button(0)->setChecked(true); // the base height is not in the list
-    }
+    buttons->button(0)->setChecked(true);
     layout->addLayout(grid);
 
     QDialogButtonBox *box = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
@@ -883,8 +883,12 @@ bool MainWindow::selectMultisizeLayoutHeight(int baseHeight, int &height)
     {
         return false;
     }
-    height = gradationHeights->itemText(buttons->checkedId()).toInt();
-    qCInfo(vMainWindow, "Multisize layout height: %d", height);
+    // Button n is n gradation steps above the base. A step is always heightStep cm of gradation height;
+    // height_increase sets only how much the "height" measurement grows per step.
+    const int step = buttons->checkedId();
+    height = baseHeight + qRound(step * UnitConvertor(heightStep, Unit::Cm, patternUnit));
+    bodyHeight = UnitConvertor(heights.at(step), fileUnit, patternUnit);
+    qCInfo(vMainWindow, "Multisize layout height: %g", bodyHeight);
     return true;
 }
 
@@ -922,11 +926,12 @@ bool MainWindow::prepareMultisizePieceLists()
                                              patternUnit));
 
     int height = baseHeight;
-    if (!selectMultisizeLayoutHeight(baseHeight, height))
+    qreal bodyHeight = baseHeight;
+    if (!selectMultisizeLayoutHeight(baseHeight, height, bodyHeight))
     {
         return false; // canceled
     }
-    layoutHeight = QString::number(height);
+    layoutHeight = QString::number(bodyHeight);
 
     // Each size takes a full recalculation. The modal dialog runs the event loop in setValue(), so Windows
     // does not mark Seamly2D "Not Responding" and Cancel works. The view skips the sizes in between.
