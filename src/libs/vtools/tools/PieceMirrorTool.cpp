@@ -81,6 +81,26 @@ struct PieceMirrorContext
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
+ * @brief pieceBlockName finds the draft block that holds a piece in the pattern file.
+ * @details The active draft block plays no part: it belongs to Draft mode, and Piece mode works on the chosen piece.
+ * @return the block name; empty when the document has no such piece.
+ */
+QString pieceBlockName(VAbstractPattern* doc, quint32 piece_id)
+{
+    QString block_name;
+    const QDomElement piece = doc->elementById(piece_id, VAbstractPattern::TagPiece);
+
+    // A piece element sits in the pieces element of its draft block.
+    const QDomElement block = piece.parentNode().parentNode().toElement();
+    if (block.tagName() == VAbstractPattern::TagDraftBlock)
+    {
+        block_name = block.attribute(VAbstractPattern::AttrName);
+    }
+    return block_name;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
  * @brief draftObjectId finds the draft object that a piece node copies.
  * @details Each piece node is a modeling copy of a draft object. The modeling element keeps the draft object id.
  * @return the draft object id; NULL_ID when the document has no such node.
@@ -474,7 +494,7 @@ PatternPieceTool* PieceMirrorTool::Create(quint32 piece_id, bool remove_half, VM
     PatternPieceTool* full_tool = nullptr;
 
     // The operation and the full piece go into the draft block of the half piece.
-    const QString block_name = doc != nullptr ? doc->getToolDraftBlockName(piece_id) : QString();
+    const QString block_name = doc != nullptr ? pieceBlockName(doc, piece_id) : QString();
     const bool valid = draft_scene != nullptr && piece_scene != nullptr && !block_name.isEmpty()
             && mirrorProblem(data, piece_id).isEmpty();
     if (valid)
@@ -491,8 +511,8 @@ PatternPieceTool* PieceMirrorTool::Create(quint32 piece_id, bool remove_half, VM
         QVector<SourceItem> source;
         if (collectSource(context, half, source))
         {
-            // Piece mode keeps the last draft block active. The operation, its history record and its undo command
-            // use the active block, so the half piece block stays active until the full piece exists.
+            // The Mirror by Line operation and its undo command take the active draft block. The half piece block is
+            // active only while they are made; the active block belongs to Draft mode, so it is restored after.
             const QString active_block = doc->getActiveDraftBlockName();
             doc->changeActiveDraftBlock(block_name);
 
