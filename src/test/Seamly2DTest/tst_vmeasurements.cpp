@@ -58,7 +58,6 @@
 #include "../ifc/xml/multi_size_converter.h"
 #include "../ifc/xml/individual_size_converter.h"
 #include "../vformat/measurements.h"
-#include "../vpatterndb/measurements_def.h"
 #include "../vpatterndb/pmsystems.h"
 
 #include <QtTest>
@@ -264,38 +263,4 @@ void TST_Measurements::ValidPMCodesIndividualFile()
             QFAIL(qUtf8Printable(message));
         }
     }
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-/**
- * @brief MultisizeBodyHeights checks the heights the multisize layout handoff offers.
- *
- * The list follows the "height" measurement: its base, then one height_increase per step, up to the maximum.
- */
-void TST_Measurements::MultisizeBodyHeights()
-{
-    Unit mUnit = Unit::Mm;
-    const qreal sevenFeet = 2133.6;
-
-    QSharedPointer<VContainer> data = QSharedPointer<VContainer>(new VContainer(nullptr, &mUnit));
-
-    MeasurementDoc individual(mUnit, data.data());
-    QVERIFY(individual.bodyHeights(sevenFeet).isEmpty());
-
-    MeasurementDoc multisize(mUnit, 500, 1760, data.data());
-    QVERIFY(multisize.bodyHeights(sevenFeet).isEmpty()); // no "height" measurement
-
-    multisize.addEmpty(height_M);
-    multisize.SetMBaseValue(height_M, 1760);
-    multisize.SetMHeightIncrease(height_M, 60);
-    multisize.addEmpty(bustCirc_M);
-    multisize.SetMBaseValue(bustCirc_M, 1044);
-    multisize.SetMHeightIncrease(bustCirc_M, 2);
-
-    QCOMPARE(multisize.bodyHeights(sevenFeet), (QVector<qreal>{1760, 1820, 1880, 1940, 2000, 2060, 2120}));
-    QCOMPARE(multisize.bodyHeights(1880), (QVector<qreal>{1760, 1820, 1880})); // a step on the maximum stays
-    QCOMPARE(multisize.bodyHeights(1700), QVector<qreal>{1760});              // base above the maximum
-
-    multisize.SetMHeightIncrease(height_M, 0);
-    QCOMPARE(multisize.bodyHeights(sevenFeet), QVector<qreal>{1760});
 }

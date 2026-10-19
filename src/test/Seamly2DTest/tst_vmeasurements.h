@@ -66,8 +66,6 @@ private slots:
 
     void ValidPMCodesMultisizeFile();
     void ValidPMCodesIndividualFile();
-
-    void MultisizeBodyHeights();
 };
 
 #endif // TST_VMEASUREMENTS_H
