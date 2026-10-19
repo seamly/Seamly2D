@@ -461,7 +461,6 @@ private:
     bool               recalculateAtSize(int size, int height);
     QHash<quint32, VPiece> currentLayoutPieces() const;
     bool               prepareMultisizePieceLists();
-    bool               selectMultisizeLayoutHeight(int baseHeight, int &height, qreal &bodyHeight);
     void               checkRequiredMeasurements(const MeasurementDoc *m);
     bool               isSeamlyLayoutRunning() const;
     void               raiseSeamlyLayout() const;
