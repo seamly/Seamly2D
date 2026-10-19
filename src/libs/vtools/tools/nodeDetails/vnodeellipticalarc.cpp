@@ -69,7 +69,7 @@ void VNodeEllipticalArc::Create(VAbstractPattern *doc, VContainer *data, quint32
 {
     if (parse == Document::FullParse)
     {
-        VAbstractTool::AddRecord(id, Tool::NodeElArc, doc);
+        VAbstractTool::AddRecord(id, Tool::NodeElArc, doc, blockName);
         VNodeEllipticalArc *arc = new VNodeEllipticalArc(doc, data, id, idArc, typeCreation, blockName, idTool, doc);
 
         VAbstractPattern::AddTool(id, arc);

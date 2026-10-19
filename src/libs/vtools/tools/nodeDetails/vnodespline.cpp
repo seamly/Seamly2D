@@ -99,7 +99,7 @@ VNodeSpline *VNodeSpline::Create(VAbstractPattern *doc, VContainer *data, quint3
     VNodeSpline *spl = nullptr;
     if (parse == Document::FullParse)
     {
-        VAbstractTool::AddRecord(id, Tool::NodeSpline, doc);
+        VAbstractTool::AddRecord(id, Tool::NodeSpline, doc, blockName);
         spl = new VNodeSpline(doc, data, id, idSpline, typeCreation, blockName, idTool, doc);
 
         VAbstractPattern::AddTool(id, spl);

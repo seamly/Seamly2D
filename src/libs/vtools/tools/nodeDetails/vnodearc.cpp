@@ -96,7 +96,7 @@ void VNodeArc::Create(VAbstractPattern *doc, VContainer *data, quint32 id, quint
 {
     if (parse == Document::FullParse)
     {
-        VAbstractTool::AddRecord(id, Tool::NodeArc, doc);
+        VAbstractTool::AddRecord(id, Tool::NodeArc, doc, blockName);
         VNodeArc *arc = new VNodeArc(doc, data, id, idArc, typeCreation, blockName, idTool, doc);
 
         VAbstractPattern::AddTool(id, arc);

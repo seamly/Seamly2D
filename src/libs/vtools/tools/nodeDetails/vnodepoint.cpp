@@ -135,7 +135,7 @@ void VNodePoint::Create(VAbstractPattern *doc, VContainer *data, VMainGraphicsSc
 {
     if (parse == Document::FullParse)
     {
-        VAbstractTool::AddRecord(id, Tool::NodePoint, doc);
+        VAbstractTool::AddRecord(id, Tool::NodePoint, doc, blockName);
         //TODO Need create garbage collector and remove all nodes that we don't use.
         //Better check garbage before each saving file. Check only modeling tags.
         VNodePoint *point = new VNodePoint(doc, data, id, idPoint, typeCreation, blockName, idTool, doc);

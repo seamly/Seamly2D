@@ -170,7 +170,7 @@ PatternPieceTool *PatternPieceTool::Create(quint32 id, VPiece newPiece, QString 
     PatternPieceTool *patternPiece = nullptr;
     if (parse == Document::FullParse)
     {
-        VAbstractTool::AddRecord(id, Tool::Piece, doc);
+        VAbstractTool::AddRecord(id, Tool::Piece, doc, blockName);
         patternPiece = new PatternPieceTool(doc, data, id, typeCreation, scene, blockName);
         scene->addItem(patternPiece);
         connect(patternPiece, &PatternPieceTool::chosenTool,           scene,        &VMainGraphicsScene::chosenItem);

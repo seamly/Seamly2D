@@ -141,7 +141,8 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
   - [x] Layout.80.2.2 - Create a converter for older files. `toVersion0_7_6` needs no change: an older node has no fold line.
 - [x] Layout.80.3 In Seamly2D > Piece mode, implement a new 'Piece Mirror' tool - mirror the half piece across the fold line.
   - Done: Piece mode > Details > Piece Mirror (M, P); also Tools > Details menu and Details toolbar. Click a piece with a valid fold line, in any draft block; the dialog confirms.
-  - Fixed: Piece mode keeps the last draft block active, so the tool refused a piece of another block ("Select a piece of the active draft block") and showed no dialog. The operation and the full piece now go into the half piece block; the active block is restored after.
+  - Fixed: the tool refused a piece outside the active draft block ("Select a piece of the active draft block") and showed no dialog. The operation and the full piece now go into the block that holds the half piece in the file; the active block is restored after.
+  - Rule (user decision): the active draft block affects Draft mode only. Piece mode works on the chosen piece and its own block. Tools made in Piece mode (Piece Mirror, Union, their nodes) record that block in the history, not the active block.
   - `PieceMirrorTool`: one Mirror by Line operation at the end of the draft block copies each half piece object off the fold line. New piece `<name> Mirrored` from the half objects and their copies.
   - `PieceMirrorPath`: full path = half from the fold line end to its start, then the mirrored half back; excluded nodes left out. Mirrored nodes: curves reversed, before/after widths and first/second edge corner rules swapped.
   - Full piece: internal paths, anchors and custom seam allowance records on both halves; pins on the anchor copies; no fold line, not on fold; 2 cm right of the half piece. One undo step.

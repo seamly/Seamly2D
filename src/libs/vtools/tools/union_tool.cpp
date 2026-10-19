@@ -1546,7 +1546,8 @@ UnionTool *UnionTool::Create(const quint32 _id, const UnionToolInitData &initDat
     //First add tool to file
     if (initData.parse == Document::FullParse)
     {
-        VAbstractTool::AddRecord(id, Tool::Union, initData.doc);
+        VAbstractTool::AddRecord(id, Tool::Union, initData.doc,
+                                 getBlockName(initData.doc, initData.piece1_Id, initData.piece2_Id));
         //Scene doesn't show this tool, so doc will destroy this object.
         tool = new UnionTool(id, initData);
         VAbstractPattern::AddTool(id, tool);

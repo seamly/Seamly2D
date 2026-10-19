@@ -98,7 +98,7 @@ AnchorPointTool *AnchorPointTool::Create(quint32 _id, quint32 pointId, quint32 p
             doc->UpdateToolData(id, data);
         }
     }
-    VAbstractTool::AddRecord(id, Tool::AnchorPoint, doc);
+    VAbstractTool::AddRecord(id, Tool::AnchorPoint, doc, blockName);
     AnchorPointTool *point = nullptr;
     if (parse == Document::FullParse)
     {

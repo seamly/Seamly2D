@@ -95,7 +95,7 @@ InternalPathTool *InternalPathTool::Create(quint32 _id, const VPiecePath &path, 
 
     if (parse == Document::FullParse)
     {
-        VAbstractTool::AddRecord(id, Tool::InternalPath, doc);
+        VAbstractTool::AddRecord(id, Tool::InternalPath, doc, blockName);
         //TODO Need create garbage collector and remove all nodes, that we don't use.
         //Better check garbage before each saving file. Check only modeling tags.
         InternalPathTool *pathTool = new InternalPathTool(doc, data, id, pieceId, typeCreation, blockName, toolId, doc);
