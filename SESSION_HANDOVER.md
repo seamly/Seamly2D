@@ -361,7 +361,7 @@ These items have no recorded resolution. Check their TODO documents and reposito
 
 ## Blocked items
 
-- **Layout.16, Layout.51, Layout.63, Layout.64:** remain blocked. The latest entry gives no release condition.
+- **Layout.51, Layout.63, Layout.64:** remain blocked. The latest entry gives no release condition.
 - Layout.63 drill holes and Layout.64 stripe/plaid lines have no Seamly2D source.
 - **Layout.27.7, Layout.38.2.2 fixtures:** wait for the user's captures.
 - **Manual checks:** require the user's installed app, CLO3D, aw.fyi reports, or test laptop.
