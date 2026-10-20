@@ -244,14 +244,16 @@ local Windows build. `src\app\seamlylayout\build.ps1`, `qd.ps1`, `qr.ps1`,
 2026-09-02): they built SeamlyLayout alone, which is not what the
 install-and-test loop needs.
 
-It builds Seamly2D, SeamlyMe and SeamlyLayout release binaries, runs the Qt unit
-tests, then packages the Windows **x64*- MSI via `smsi.ps1`:
+It builds Seamly2D, SeamlyMe and SeamlyLayout release binaries, runs the Qt and
+Rust unit tests, then packages the Windows **x64*- MSI via `smsi.ps1`:
 
 - `qmake Seamly.pro -r -config release` + `nmake` for Seamly2D/SeamlyMe **and**
   the four Qt test suites;
 - `nmake check` — Seamly2DTest, CollectionTest, ParserTest, TranslationsTest.
   A failing suite stops the build, so a broken test never reaches an MSI;
 - CMake + Ninja + Cargo for SeamlyLayout;
+- `ctest --preset release` — the SeamlyLayout Qt suites, from the release build;
+- `cargo test --workspace` — the SeamlyLayout Rust crates;
 - `smsi.ps1` to stage and `wix build`.
 
 Steps 1-2 mirror `ci.yml`'s `windows-test` job; the rest mirrors its
@@ -261,8 +263,8 @@ artifact — releases still go through `gh workflow run ci.yml`.
 
 Switches:
 
-- `-SkipTests` — build with `CONFIG+=noTests` and skip `nmake check`. Only for a
-  packaging-only change; the Qt suites have no other local runner.
+- `-SkipTests` — build with `CONFIG+=noTests`; skip `nmake check`, `ctest` and
+  `cargo test`. Only for a packaging-only change.
 - `-SkipValidation` — passed to `smsi.ps1`, skips the `wix msi validate` ICE pass.
 
 A build script for the Windows **arm64*- MSI is planned and does not exist yet.
@@ -505,6 +507,7 @@ For code changes:
   - Seamly2D/SeamlyMe Qt suites — `packaging\windows\local_build_msi.ps1`
     runs them via `nmake check`;
   - SeamlyLayout — `ctest --preset debug` and `cargo test --workspace`.
+    `local_build_msi.ps1` also runs both; its `ctest` uses the release build.
 
 The two SeamlyLayout commands need Qt and Rust in the shell first; a bare shell
 does not have them:

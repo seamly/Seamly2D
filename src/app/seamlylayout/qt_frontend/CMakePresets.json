@@ -87,6 +87,12 @@
       "output": { "outputOnFailure": true }
     },
     {
+      "name": "release",
+      "displayName": "Test Release",
+      "configurePreset": "release",
+      "output": { "outputOnFailure": true }
+    },
+    {
       "name": "debug-msvc",
       "displayName": "Test Debug (MSVC)",
       "configurePreset": "debug-msvc",

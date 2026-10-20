@@ -5,8 +5,8 @@
 # **
 # **  @brief
 # **  Local, developer-machine build of the Windows x64 MSI: builds seamly2d,
-# **  seamlyme and SeamlyLayout release binaries, runs the Qt unit tests, then
-# **  runs smsi.ps1 against the binaries. packaging\windows\README.md records the project's
+# **  seamlyme and SeamlyLayout release binaries, runs the Qt and Rust unit
+# **  tests, then runs smsi.ps1 against the binaries. packaging\windows\README.md records the project's
 # **  documented "CI builds the MSI" decision (a dev-machine default can carry
 # **  the wrong Qt/CRT runtime); this script exists because the local Qt kit is
 # **  the same 6.11.1 release CI installs, so that risk does not apply here.
@@ -30,9 +30,15 @@
 
 .DESCRIPTION
      Stamps the version, builds seamly2d, seamlyme, and SeamlyLayout, runs the
-     Qt tests unless -SkipTests is specified, and packages the three apps into
+     unit tests unless -SkipTests is specified, and packages the three apps into
      an MSI with packaging\windows\smsi.ps1. Test binaries remain in
-     src\test\*\bin and are not staged.
+     src\test\*\bin and the SeamlyLayout build directory, and are not staged.
+
+     Unit tests:
+       - nmake check: Seamly2DTest, CollectionTest, ParserTest, TranslationsTest.
+       - ctest --preset release: the SeamlyLayout Qt suites.
+       - cargo test --workspace: the SeamlyLayout Rust crates.
+     A failing suite stops the build before smsi.ps1 runs.
 
     The version stamp touches git-tracked files
     (src\libs\vmisc\projectversion.{h,cpp}, packaging\macos\seamly2d\Info.plist,
@@ -57,9 +63,9 @@
     Passed through to smsi.ps1 - skip the `wix msi validate` ICE pass.
 
 .PARAMETER SkipTests
-    Build with CONFIG+=noTests and do not run `nmake check`. Use it only when
-    you need the MSI itself and the code under test has not changed - the Qt
-    suites have no other local runner, so skipping defers them to CI.
+    Build with CONFIG+=noTests and do not run `nmake check`, `ctest` or
+    `cargo test`. Use it only when you need the MSI itself and the code under
+    test has not changed - skipping defers the suites to CI.
 
 .EXAMPLE
     .\packaging\windows\local_build_msi.ps1
@@ -163,6 +169,16 @@ if ($MissingQtModules) {
 }
 Write-Host "Qt kit: $QtPath"
 
+# --- Locate cargo ---------------------------------------------------------------
+# The SeamlyLayout cmake build and `cargo test` both need cargo. rustup installs
+# it in %USERPROFILE%\.cargo\bin, which a new shell does not always have on PATH.
+$CargoCommand = Get-Command cargo -ErrorAction SilentlyContinue
+$CargoBin = if ($CargoCommand) { Split-Path -Parent $CargoCommand.Source } else { Join-Path $env:USERPROFILE '.cargo\bin' }
+if (-not (Test-Path (Join-Path $CargoBin 'cargo.exe'))) {
+    throw "cargo not found on PATH or in '$CargoBin' - install Rust with rustup."
+}
+Write-Host "cargo: $CargoBin"
+
 # --- WiX v6 + extensions --------------------------------------------------------
 if (-not (Get-Command wix -ErrorAction SilentlyContinue)) {
     Write-Host "installing WiX v6..."
@@ -189,7 +205,8 @@ if (-not (Test-Path $VcVarsAll)) {
     throw "VS 18 Community vcvars64.bat not found at: $VcVarsAll"
 }
 
-$layoutFrontendDir = Join-Path $repoRoot 'src\app\seamlylayout\qt_frontend'
+$layoutAppDir = Join-Path $repoRoot 'src\app\seamlylayout'
+$layoutFrontendDir = Join-Path $layoutAppDir 'qt_frontend'
 $smsiScript = Join-Path $PSScriptRoot 'smsi.ps1'
 $smsiArgs = @('-Arch', 'x64', '-Version', $Version,
               '-Seamly2DBin', 'src\app\seamly2d\bin',
@@ -218,12 +235,25 @@ $smsiArgsQuoted = ($smsiArgs | ForEach-Object { "`"$_`"" }) -join ' '
 # deploy seamly2d.exe/seamlyme.exe before SeamlyLayout's cmake build even
 # starts. smsi.ps1 deploys all three exes together, once, after every exe below
 # exists.
+#
+# The SeamlyLayout release build always builds its Qt test executables, so
+# `ctest --preset release` runs them without a second, debug build. Release
+# binaries skip Q_ASSERT; ci.yml's linux-test job still runs the debug build.
+# `cargo test` builds its own debug profile in src\app\seamlylayout\target.
+#
+# QT_FORCE_STDERR_LOGGING=1: when ctest pipes its output, QtTest sends its
+# results to OutputDebugString, so ctest's output-on-failure would be empty.
 if ($SkipTests) {
     $QmakeConfig = '-config release CONFIG+=noTests CONFIG+=deferDeploy'
     $TestSection = @'
 
 echo.
 echo === unit tests: SKIPPED (-SkipTests) ===
+'@
+    $LayoutTestSection = @'
+
+echo.
+echo === SeamlyLayout unit tests: SKIPPED (-SkipTests) ===
 '@
 } else {
     $QmakeConfig = '-config release CONFIG+=deferDeploy'
@@ -237,6 +267,19 @@ nmake check
 if errorlevel 1 exit /b 1
 set "QT_QPA_PLATFORM="
 '@
+    $LayoutTestSection = @"
+
+echo.
+echo === run ctest : SeamlyLayout Qt unit tests ===
+set "QT_FORCE_STDERR_LOGGING=1"
+ctest --preset release
+if errorlevel 1 exit /b 1
+set "QT_FORCE_STDERR_LOGGING="
+echo === run cargo test : SeamlyLayout Rust unit tests ===
+cd /d "$layoutAppDir"
+cargo test --workspace
+if errorlevel 1 exit /b 1
+"@
 }
 
 $TempBat = [System.IO.Path]::GetTempFileName() + '.bat'
@@ -249,7 +292,7 @@ if errorlevel 1 (
 )
 
 set "QMAKE=$QtBin\qmake.exe"
-set "PATH=$QtBin;%PATH%"
+set "PATH=$QtBin;$CargoBin;%PATH%"
 
 cd /d "$repoRoot"
 
@@ -270,6 +313,7 @@ if errorlevel 1 exit /b 1
 echo === run cmake : build seamlyLayout.exe ===
 cmake --build --preset release
 if errorlevel 1 exit /b 1
+$LayoutTestSection
 
 echo.
 echo === smsi.ps1: stage + wix --> build MSI ===
@@ -290,9 +334,9 @@ try {
 
 Write-Host ''
 if ($SkipTests) {
-    Write-Host "unit tests: SKIPPED (-SkipTests) - Seamly2DTest, CollectionTest, ParserTest and TranslationsTest are deferred to CI."
+    Write-Host "unit tests: SKIPPED (-SkipTests) - nmake check, ctest and cargo test are deferred to CI."
 } else {
-    Write-Host "unit tests: PASSED (nmake check)"
+    Write-Host "unit tests: PASSED (nmake check, ctest, cargo test)"
 }
 Write-Host "MSI OK: packaging\windows\seamly-msi\x64\seamly-x64.msi"
 if ($versionFilesWereClean) {

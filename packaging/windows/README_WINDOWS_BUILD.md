@@ -64,13 +64,15 @@ for the Linux/macOS equivalents of this script).
 3. Under one `vcvars64.bat` environment: `qmake Seamly.pro -r -config release`
    and `nmake` build seamly2d and seamlyme; `nmake check` runs the four Qt
    test suites; `cmake --preset release` and `cmake --build --preset release`
-   build SeamlyLayout.
+   build SeamlyLayout; `ctest --preset release` runs the SeamlyLayout Qt
+   suites from that build; `cargo test --workspace` runs the SeamlyLayout
+   Rust crates. A failing suite stops the build.
 4. Calls `smsi.ps1` with the built binaries — see "What the script does" below.
 
 | Parameter | Required | Default | Notes |
 |---|---|---|---|
 | `-Version` | no | computed from local time | Same `YY.M.DDHH` form `smsi.ps1` expects. |
-| `-SkipTests` | no | off | Builds with `CONFIG+=noTests`; skips `nmake check`. Only for a packaging-only change — CI is the only other runner for these suites. |
+| `-SkipTests` | no | off | Builds with `CONFIG+=noTests`; skips `nmake check`, `ctest` and `cargo test`. Only for a packaging-only change. |
 | `-SkipValidation` | no | off | Passed through to `smsi.ps1`. |
 
 Treat the MSI it produces as a local dev build, not a release artifact —
