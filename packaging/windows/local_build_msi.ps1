@@ -240,6 +240,9 @@ $smsiArgsQuoted = ($smsiArgs | ForEach-Object { "`"$_`"" }) -join ' '
 # `ctest --preset release` runs them without a second, debug build. Release
 # binaries skip Q_ASSERT; ci.yml's linux-test job still runs the debug build.
 # `cargo test` builds its own debug profile in src\app\seamlylayout\target.
+#
+# QT_FORCE_STDERR_LOGGING=1: when ctest pipes its output, QtTest sends its
+# results to OutputDebugString, so ctest's output-on-failure would be empty.
 if ($SkipTests) {
     $QmakeConfig = '-config release CONFIG+=noTests CONFIG+=deferDeploy'
     $TestSection = @'
@@ -268,8 +271,10 @@ set "QT_QPA_PLATFORM="
 
 echo.
 echo === run ctest : SeamlyLayout Qt unit tests ===
+set "QT_FORCE_STDERR_LOGGING=1"
 ctest --preset release
 if errorlevel 1 exit /b 1
+set "QT_FORCE_STDERR_LOGGING="
 echo === run cargo test : SeamlyLayout Rust unit tests ===
 cd /d "$layoutAppDir"
 cargo test --workspace
