@@ -196,12 +196,9 @@ public:
     Q_INVOKABLE static QString localFileToUrl(const QString &path);
 
     // @brief Return the file:// URL of the default input directory.
-    // Falls back to <exeDir>/input when no Input SVG Directory is set in Preferences
-    // (Task 16: on macOS this falls back to the writable AppConfigLocation root instead,
-    // since a signed .app bundle is read-only; Task 17: same fallback applies at runtime
-    // inside a mounted Linux AppImage, detected via Platform::isAppImage(); Task 18: and inside
-    // a Flatpak sandbox whose /app prefix is read-only, detected via Platform::isFlatpak()).
-    // Uses QCoreApplication::applicationDirPath() for a reliable absolute path.
+    // Used when Preferences has no Input SVG Directory.
+    // Windows and native Linux: <applicationDirPath>/input.
+    // A macOS bundle, an AppImage and a Flatpak are read-only, so they use <AppConfigLocation>/input.
     Q_INVOKABLE static QString defaultInputFolderUrl();
 
     // @brief Return the absolute application preferences INI file path.
@@ -230,8 +227,8 @@ public:
     // @brief Return the resolved input SVG directory path.
     // Uses `input_directory` when configured; otherwise falls back to <dataRoot>/input when
     // dataRoot is set; otherwise <exeDir>/input (AppConfigLocation root on macOS, or at
-    // runtime inside a read-only Linux AppImage mount or Flatpak /app prefix — see Task 16 /
-    // 17 / 18). Relative configured paths are resolved against AppConfigLocation (never
+    // runtime inside a read-only Linux AppImage mount or Flatpak /app prefix. 
+    // Relative configured paths are resolved against AppConfigLocation (never
     // process working directory). Ensures the directory exists before returning.
     Q_INVOKABLE QString resolvedInputDirectory() const;
 
@@ -239,7 +236,7 @@ public:
     // Uses the directory configured in qt6_seamlylayout.ini (`layout_directory`) when set.
     // Falls back to <dataRoot>/output when dataRoot is set; otherwise <exeDir>/output
     // (AppConfigLocation root on macOS, or at runtime inside a read-only Linux AppImage mount
-    // or Flatpak /app prefix — see Task 16 / 17 / 18).
+    // or Flatpak /app prefix.
     // Relative configured paths are resolved against AppConfigLocation.
     // Ensures the returned directory exists by creating it if needed.
     Q_INVOKABLE QString resolvedLayoutDirectory() const;

@@ -89,7 +89,7 @@ void TST_DataRoot::initTestCase()
 
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, m_settings->path());
 
-    // Task SettingsFiles.1: the common settings file no longer resolves through
+    // The common settings file no longer resolves through
     // QSettings::setPath() — it lives under GenericConfigLocation, which cannot be
     // redirected per test — so it gets its own override at the same temporary base.
     VCommonSettings::setCommonSettingsBaseDir(m_settings->path());
@@ -161,13 +161,10 @@ void TST_DataRoot::clearDataRoot() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief CommonSettingsFileLivesUnderLocalConfig pins the Task SettingsFiles.1 location
- * contract: qt6_common.ini resolves as <base>/<organization>/qt6_common.ini, and the
- * production base is GenericConfigLocation — %LOCALAPPDATA% on Windows — not the Roaming
- * folder Qt's IniFormat/UserScope default names.
+ * @brief CommonSettingsFileLivesUnderLocalConfig checks that qt6_common.ini resolves to
+ * <base>/<organization>/qt6_common.ini, with base GenericConfigLocation, not Roaming.
  *
- * The production half is a string comparison only; nothing is read or written at the
- * real location.
+ * The production check compares strings only. It never touches the real location.
  */
 void TST_DataRoot::CommonSettingsFileLivesUnderLocalConfig() const
 {
@@ -282,7 +279,7 @@ void TST_DataRoot::UnconfiguredRootFallsBackToTheDefault() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief EveryDefaultPathDerivesFromTheDataRoot is the core of Task 34: all nine data
+ * @brief EveryDefaultPathDerivesFromTheDataRoot: all nine data
  * subfolders — including the two that live in VSettings — must come from the one root,
  * so that changing it relocates the whole tree.
  */

@@ -3,39 +3,27 @@
 // LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
 //
 // @file StartupOptionsTests.cpp
-// @brief Qt tests for StartupOptions — SeamlyLayout's command-line contract.
+// @brief Qt tests for StartupOptions, the SeamlyLayout command-line contract.
 //
-// This suite locks the SeamlyLayout half of two startup transports.
+// Two startup forms:
+//     SeamlyLayout <absolute path to some.svg>                      (CLI, file association)
+//     SeamlyLayout --svg-stdin --document-name <pattern base name>  (Seamly2D Layout Mode)
 //
-// A file path (Task 49) — the CLI and the file association:
-//
-//     SeamlyLayout <absolute path to some.svg>
-//
-// An SVG document on standard input (Seamly2D.5) — the Layout Mode handoff:
-//
-//     SeamlyLayout --svg-stdin --document-name <pattern base name>
-//
-// Seamly2D used to write "<pattern>.pieces.svg" beside the pattern and pass its
-// path; it now sends the document itself and writes no file. The seamly2d half
-// of the contract is locked by TST_SeamlySuitePaths in the Seamly2DTest suite.
+// TST_SeamlySuitePaths in Seamly2DTest checks the seamly2d half.
 //
 // Covers:
-//   • No argument / empty argument list → start with an empty canvas
-//   • A real .svg (including a ".pieces.svg" double extension and an
-//     upper-case ".SVG") → Status::OpenFile with an ABSOLUTE path
-//   • A relative argument resolved against the working directory
-//   • Missing file, directory, unreadable file, non-SVG suffix → Status::Failed
-//     with a message naming the file
-//   • More than one positional argument → Status::Failed
-//   • --svg-stdin with an SVG document → Status::OpenDocument carrying the text
-//   • --document-name carried through, and absent when not given
-//   • --svg-stdin with no device, an empty device, or a non-SVG payload, and
-//     --svg-stdin alongside a file → Status::Failed
-//   • Unknown option → Status::Failed carrying the parser's own text
-//   • --help / -h / --version / -v → Status::ShowInformation
+//   • no argument → empty canvas
+//   • .svg, .pieces.svg, .SVG → Status::OpenFile with an absolute path
+//   • relative argument → resolved against the working directory
+//   • missing, directory, unreadable, non-SVG → Status::Failed, message names the file
+//   • two or more positional arguments → Status::Failed
+//   • --svg-stdin with SVG → Status::OpenDocument with the text
+//   • --document-name → carried through; absent when not given
+//   • --svg-stdin with no device, empty, non-SVG, or with a file → Status::Failed
+//   • unknown option → Status::Failed with the parser's text
+//   • --help, -h, --version, -v → Status::ShowInformation
 //
-// StartupOptions needs no QObject, no window and no event loop, so this suite
-// runs guiless — QTEST_GUILESS_MAIN, not QTEST_MAIN.
+// StartupOptions needs no window or event loop, so the suite uses QTEST_GUILESS_MAIN.
 
 #include "StartupOptions.h"
 

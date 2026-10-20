@@ -77,18 +77,12 @@ public:
 
     // @brief Detect whether this process is running from within a mounted AppImage.
     //
-    // Task 17: an AppImage mounts its payload read-only (a FUSE-mounted squashfs), so any
-    // exe-relative writable path (settings, input/output folders, debug logs) that works for
-    // a normal Linux install fails silently inside one — the same problem Task 16 found for
-    // a signed, notarized macOS .app bundle. The AppImage runtime sets the APPIMAGE
-    // environment variable (absolute path to the .AppImage file) in every process it execs
-    // (see https://docs.appimage.org/packaging-guide/environment-variables.html), so checking
-    // for it is enough to tell the two cases apart.
+    // An AppImage mounts its payload read-only, so exe-relative writable paths fail silently.
+    // The AppImage runtime sets APPIMAGE in every process it starts.
+    // See https://docs.appimage.org/packaging-guide/environment-variables.html
     //
-    // The check itself is a plain environment-variable read with no OS-specific API, so it is
-    // safe to call on every platform — it is simply always false on Windows/macOS, where the
-    // variable is never set. This also lets unit tests exercise the AppImage fallback path on
-    // any host by setting the variable directly, unlike the compile-time Q_OS_MACOS branches.
+    // The check uses no OS-specific API. It is always false on Windows and macOS.
+    // Unit tests set APPIMAGE to test the fallback path on any host.
     static bool isAppImage()
     {
         return qEnvironmentVariableIsSet("APPIMAGE");
@@ -96,25 +90,15 @@ public:
 
     // @brief Detect whether this process is running inside a Flatpak sandbox.
     //
-    // Task 18: a Flatpak mounts the application payload at the /app prefix read-only (the
-    // executable lives at /app/bin/...), so any exe-relative writable path (settings,
-    // input/output folders, debug logs) that works for a normal Linux install fails silently
-    // inside one — the same problem Task 16 found for a signed, notarized macOS .app bundle
-    // and Task 17 for a FUSE-mounted AppImage. Like the AppImage case, this cannot be told
-    // apart from a native Linux install at compile time and must be detected at runtime.
+    // A Flatpak mounts its payload read-only at /app, so exe-relative writable paths fail silently.
+    // Only a runtime check can tell a Flatpak from a native Linux install.
     //
-    // Every Flatpak sandbox has the /.flatpak-info file bind-mounted in and exports the
-    // FLATPAK_ID environment variable to the app process
-    // (see https://docs.flatpak.org/en/latest/flatpak-command-reference.html and the
-    // freedesktop app-sandbox conventions), so checking either is enough to recognise the
-    // sandbox. The file check is the robust production signal (present regardless of how the
-    // process was spawned); the environment-variable check additionally lets unit tests
-    // exercise the Flatpak fallback on any host by setting FLATPAK_ID directly, exactly as the
-    // AppImage tests set APPIMAGE.
+    // Every Flatpak sandbox has /.flatpak-info and sets FLATPAK_ID.
+    // See https://docs.flatpak.org/en/latest/flatpak-command-reference.html
+    // The file check is the production signal. It is present however the process starts.
+    // Unit tests set FLATPAK_ID to test the fallback path on any host.
     //
-    // The check uses no OS-specific API, so it is safe to call on every platform — it is simply
-    // always false on Windows/macOS and on a non-Flatpak Linux install, where neither the
-    // variable nor the file is present.
+    // The check uses no OS-specific API. It is always false on Windows, macOS and native Linux.
     static bool isFlatpak()
     {
         return qEnvironmentVariableIsSet("FLATPAK_ID")

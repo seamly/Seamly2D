@@ -86,7 +86,7 @@ static const int TILE_SIZES_COUNT =
     static_cast<int>(sizeof(TILE_SIZES) / sizeof(TILE_SIZES[0]));
 
 // @brief Copy a file if the destination does not already exist.
-// Task 15 helper — mirrors PreferencesModel.cpp's copyIfMissing() (kept local to this file
+// Mirrors PreferencesModel.cpp's copyIfMissing() (kept local to this file
 // rather than shared, matching this codebase's existing per-file helper convention).
 bool copyIfMissing(const QString &sourcePath, const QString &destPath)
 {
@@ -105,7 +105,7 @@ bool copyIfMissing(const QString &sourcePath, const QString &destPath)
 // @brief Recursively copy every entry from a legacy organization directory tree into the
 // new one, skipping anything the destination already has.
 //
-// Task 15: seamlyLayout's organization name changed from "Seamly Systems" to the shared
+// test versions of seamlyLayout's organization name changed from "Seamly Systems" to the shared
 // "Seamly" (see seamlyLayout_main.mm), so QStandardPaths::AppConfigLocation resolves to a brand new,
 // empty directory. This bridges the settings file(s) forward from the old organization
 // folder the first time the new one is resolved. Safe to call unconditionally — once
@@ -129,7 +129,7 @@ void migrateLegacyOrganizationTree(const QString &legacyRoot, const QString &new
     } // for each legacy entry
 } // migrateLegacyOrganizationTree
 
-// @brief Bridge appConfigRoot forward from the pre-Task-15 "Seamly Systems" organization
+// @brief Bridge appConfigRoot forward from the test "Seamly Systems" organization
 // folder into the new shared "Seamly" one, the first time appConfigRoot is resolved.
 void migrateLegacyOrganization(const QString &newRoot)
 {
@@ -552,7 +552,7 @@ QString SettingsModel::localFileToUrl(const QString &path)
 
 // @brief Return the absolute default settings file path in AppConfigLocation.
 //
-// Task 15: also bridges appConfigRoot forward from the pre-unification "Seamly Systems"
+// Also bridges appConfigRoot forward from the pre-unification "Seamly Systems"
 // organization folder into the new shared "Seamly" one on first use (mirrors
 // PreferencesModel::appConfigRootPath() — this file cannot assume that one already ran,
 // since QML may resolve either model first).

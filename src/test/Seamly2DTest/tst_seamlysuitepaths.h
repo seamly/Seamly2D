@@ -34,29 +34,21 @@
 #include <QObject>
 
 /**
- * @brief TST_SeamlySuitePaths tests the two lookups seamly2d uses to find the
- * SeamlyLayout executable.
+ * @brief TST_SeamlySuitePaths tests how seamly2d finds and launches SeamlyLayout.
  *
- * SeamlySuitePaths::locateSeamlyLayout() is the install-directory lookup: the
- * executable flat beside the caller's apps, or inside the "SeamlyLayout"
- * subdirectory created by the Windows MSI installer (Task 13).
+ * SeamlySuitePaths::locateSeamlyLayout() finds the executable beside the caller's apps,
+ * or in the old MSI "SeamlyLayout" subdirectory.
  *
- * SeamlySuitePaths::locateSeamlyLayoutDevBuild() is the development fallback
- * (Task 50): an upward walk from the running executable's directory looking for
- * a SeamlyLayout build inside the source checkout, Release before Debug.
+ * SeamlySuitePaths::locateSeamlyLayoutDevBuild() walks up from the executable's directory
+ * to a SeamlyLayout build in the source checkout, Release before Debug.
  *
- * SeamlySuitePaths::patternDocumentName() and seamlyLayoutLaunchArguments()
- * are the seamly2d half of the Layout Mode launch contract (Seamly2D.5): no
- * handoff file is written — the piece-mode document goes to the SeamlyLayout
- * process on its standard input, and the arguments say only that
- * ("--svg-stdin"), plus the name the document is known by
- * ("--document-name <pattern base name>"). The daughter app's half — that it
- * accepts exactly that and rejects anything else — is locked by
- * StartupOptionsTests in src/test/SeamlyLayoutTest.
+ * SeamlySuitePaths::patternDocumentName() and seamlyLayoutLaunchArguments() are the
+ * seamly2d half of the Layout Mode handoff. The SVG goes on standard input, with
+ * "--svg-stdin --document-name <pattern base name>". No file is written.
+ * StartupOptionsTests in src/test/SeamlyLayoutTest checks the SeamlyLayout half.
  *
- * Every case runs against a QTemporaryDir populated with dummy files, so the
- * suite is hermetic — no real installation, settings value, or application
- * directory is involved.
+ * Every case uses a QTemporaryDir with dummy files.
+ * No real install, setting or app directory is touched.
  */
 class TST_SeamlySuitePaths : public QObject
 {

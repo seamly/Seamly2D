@@ -88,19 +88,11 @@ QString seamlyLayoutExeName()
  * layouts an installation can use, relative to one install directory.
  *
  * Lookup order:
- *  1. Flat: `<directory>/SeamlyLayout(.exe)` — the layout used when every app
- *     shares one Qt runtime. Since Task 30 that is every supported install:
- *     the Windows MSI, the Linux Flatpak's `/app/bin`, and a local development
- *     tree, because all three apps now build against the same Qt release.
- *  2. Subdirectory: `<directory>/SeamlyLayout/SeamlyLayout(.exe)` — the layout
- *     the Windows MSI used before Task 30 (Task 13). Back then SeamlyLayout was
- *     built against a different Qt release than seamly2d/seamlyme, so its Qt
- *     runtime DLLs could not share a flat directory with the parent apps'
- *     (identical file names, different versions) and the installer gave it its
- *     own subdirectory with its own Qt runtime. No current installer produces
- *     this layout; the branch is kept so a seamly2d upgraded in place over such
- *     an install — or any future packaging that isolates the daughter app —
- *     still finds the executable.
+ *  1. Flat: `<directory>/SeamlyLayout(.exe)`. All apps share one Qt runtime:
+ *     the Windows MSI, the Linux Flatpak `/app/bin`, and a local development tree.
+ *  2. Subdirectory: `<directory>/SeamlyLayout/SeamlyLayout(.exe)`. The old Windows MSI
+ *     layout, from when SeamlyLayout used a different Qt release with its own runtime.
+ *     No current installer makes it. Kept for in-place upgrades and isolated packaging.
  *
  * Both candidates must be existing regular files — a *directory* that happens
  * to be named like the executable (e.g. the "SeamlyLayout" subdirectory itself
@@ -138,30 +130,17 @@ QString locateSeamlyLayout(const QString &directory)
  * @brief locateSeamlyLayoutDevBuild looks for a SeamlyLayout executable built
  * from the same source checkout as the running application.
  *
- * This is the development convenience that lets a locally built seamly2d hand
- * off to a locally built SeamlyLayout with no configuration, on any machine.
- * It replaces the single hard-coded developer path this function grew out of
- * (Task 50), which named one contributor's checkout and therefore helped
- * exactly one machine.
+ * Lets a local seamly2d build launch a local SeamlyLayout build with no configuration.
  *
- * The checkout root is derived from the caller's directory rather than assumed:
- * the walk starts at @p startDirectory and climbs up to ::maxUpwardLevels
- * parents, treating each as a candidate checkout root and testing whether it
- * contains a SeamlyLayout build. Both shadow-build layouts the project uses
- * resolve this way — the release build at `<checkout>/build/...` (five levels)
- * and a debug shadow build at `<checkout>/scripts/seamly2d-debug/...` (six) —
- * without either being named here, so a differently nested build tree still
- * works.
+ * Walks up from @p startDirectory, at most ::maxUpwardLevels parents.
+ * Each parent is a candidate checkout root.
+ * This finds `<checkout>/build/...` (5 levels), `<checkout>/scripts/seamly2d-debug/...`
+ * (6 levels), and any other nesting, without naming them.
  *
- * At each level **Release is preferred over Debug**: a developer who has built
- * both almost always wants the current release binary, and the old hard-coded
- * path silently pinned Debug, which could be arbitrarily stale.
+ * At each level, Release wins over Debug. A Debug build can be stale.
  *
- * This lookup is deliberately the *last* resort in Application2D's chain — a
- * configured setting and an installed copy both outrank it — so a source tree
- * that happens to sit above an installed application can never shadow the
- * installation. Because it only ever matches inside a checkout that has been
- * built, it is inert on an end user's machine.
+ * Application2D tries this lookup last, after the setting and the installed copy,
+ * so a checkout above an install never shadows it. It finds nothing on an end user's machine.
  *
  * @param startDirectory absolute path to start the upward walk from (typically
  *        the directory of the running executable). Passed in rather than read

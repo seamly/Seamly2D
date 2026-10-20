@@ -100,7 +100,7 @@ public:
     virtual void                        openSettings() override;
     VSeamlyMeSettings                  *seamlyMeSettings();
 
-    // Task 15: true once this run's openSettings() pulled settings forward from the
+    // True once this run's openSettings() pulled settings forward from the
     // legacy "Seamly2DTeam" organization folder. main.cpp shows the one-time migration
     // notice using this, gated the same way as the welcome dialog (skipped in --test
     // mode), since m_testMode itself is not set yet this early in startup.
@@ -112,7 +112,7 @@ public:
     void                                parseCommandLine(const SocketConnection &connection,
                                                          const QStringList &arguments);
 
-    // Task SeamlyMe.5: log-file startup, mirroring Application2D. startLogging() creates
+    // log-file startup, mirroring Application2D. startLogging() creates
     // %LOCALAPPDATA%\Seamly\SeamlyMe\logs (Windows), opens a per-pid log, and prunes old
     // logs; logFile() is null until beginLogging() has opened the file, so the message
     // handler must check it.
@@ -137,12 +137,12 @@ private:
     QPointer<MeasurementDatabaseDialog> m_dataBase;
     bool                                m_testMode;
 
-    // Task 15: set true by openSettings() when it pulls settings forward from the legacy
+    // Set true by openSettings() when it pulls settings forward from the legacy
     // "Seamly2DTeam" organization folder; main.cpp shows the one-time migration notice
     // only when this is set and the app is not running in automated test mode.
     bool                                m_settingsMigrated{false};
 
-    // Task SeamlyMe.5: per-pid log file, locked so parallel SeamlyMe processes never
+    // Per-pid log file, locked so parallel SeamlyMe processes never
     // share one file — the same mechanism Application2D uses.
     std::shared_ptr<VLockGuard<QFile>>  m_lockLog;
     std::shared_ptr<QTextStream>        m_out;

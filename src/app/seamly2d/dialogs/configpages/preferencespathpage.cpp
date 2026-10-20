@@ -95,7 +95,7 @@ void PreferencesPathPage::changeEvent(QEvent *event)
  *
  * The data root (row 0) is applied first, and every subfolder still living inside the
  * previous root follows it to the new location, so repointing the root at another drive or
- * a cloud-synced folder relocates the whole tree in one edit (Task 34).
+ * a cloud-synced folder relocates the whole tree in one edit.
  */
 void PreferencesPathPage::Apply()
 {
@@ -194,7 +194,7 @@ void PreferencesPathPage::editPath()
     {
         case 0: // user data root
             // Any drive, volume or path is accepted here, including an external disk or a
-            // cloud-synced folder such as G:/My Drive/seamly (Task 34).
+            // cloud-synced folder such as G:/My Drive/seamly.
             path = qApp->Seamly2DSettings()->getDataRoot();
             break;
         case 1: // pattern path
@@ -293,8 +293,9 @@ void PreferencesPathPage::initializeTable()
     const VSettings *settings = qApp->Seamly2DSettings();
 
     {
-        // Task 34: the root every data folder below sits under. Changing it moves the
-        // whole tree, since Apply() rebases the rows that live inside it.
+        // the seamly root directory every data folder below sits under. 
+        // Changing it moves the whole tree, since Apply() rebases 
+        // the rows that live inside it.
         QTableWidgetItem *item = new QTableWidgetItem(tr("My Seamly Data"));
         item->setIcon(QIcon("://icon/32x32/backup_files.png"));
         ui->pathTable->setItem(0, 0, item);

@@ -105,7 +105,7 @@ public:
     virtual void     openSettings()=0;
     VCommonSettings *Settings();
 
-    // Task 15: settings/preferences unification under one "Seamly" organization.
+    // settings/preferences unification under one "Seamly" organization.
     QString          MigrateSeamlySettingsLocation(const QString &appIniFileName,
                                                     const QStringList &legacyAppIniFileNames,
                                                     bool *migrated = nullptr);

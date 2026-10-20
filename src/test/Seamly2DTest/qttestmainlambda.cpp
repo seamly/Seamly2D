@@ -118,13 +118,13 @@ const VTranslateVars *TestApplication2D::translateVariables()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-// Task 15: mirrors Application2D::openSettings() so the test suite resolves settings the
+// Mirrors Application2D::openSettings() so the test suite resolves settings the
 // same way the real app does. No migration notice is ever shown here — tests must never
 // block on a modal dialog — so MigrateSeamlySettingsLocation() is called with a null
 // out-parameter, which the shared helper treats as "caller doesn't need to know".
 void TestApplication2D::openSettings()
 {
-    // Task SettingsFiles.1: same call the real applications make. Copy-only and
+    // Same call the real applications make. Copy-only and
     // re-entrant, so running the suite on a developer machine at most copies the real
     // common settings file forward to its new location — it never modifies or deletes.
     VCommonSettings::migrateCommonSettingsLocation();
@@ -167,7 +167,7 @@ void TestApplication2D::initTranslateVariables()
  * it, a single "-o" on the command line is overwritten by every subsequent
  * qExec() call, and on Windows the console/stdout output of the suite can be
  * lost entirely when redirected — so this hook is what makes local per-suite
- * results capturable at all (see Task 23).
+ * results capturable at all.
  *
  * @param argc argument count, forwarded to every QTest::qExec() call
  * @param argv argument values, forwarded to every QTest::qExec() call

@@ -96,7 +96,7 @@ void SeamlyMePreferencesPathPage::changeEvent(QEvent *event)
  *
  * The shared data root (row 0) is applied first, and every subfolder still living inside
  * the previous root follows it to the new location, so repointing the root at another
- * drive or a cloud-synced folder relocates the whole tree in one edit (Task 34).
+ * drive or a cloud-synced folder relocates the whole tree in one edit.
  */
 void SeamlyMePreferencesPathPage::Apply()
 {
@@ -161,7 +161,7 @@ void SeamlyMePreferencesPathPage::editPath()
     {
         case 0: // shared user data root
             // Any drive, volume or path is accepted here, including an external disk or a
-            // cloud-synced folder such as G:/My Drive/seamly (Task 34).
+            // cloud-synced folder such as G:/My Drive/seamly.
             path = qApp->seamlyMeSettings()->getDataRoot();
             break;
         case 1: // individual measurements
@@ -220,7 +220,7 @@ void SeamlyMePreferencesPathPage::initializeTable()
     const VSeamlyMeSettings *settings = qApp->seamlyMeSettings();
 
     {
-        // Task 34: the shared user-data root, the same setting seamly2d edits — both apps
+        // The shared user-data root, the same setting seamly2d edits — both apps
         // read it from the common settings file, so a change here moves both apps' data.
         QTableWidgetItem *item = new QTableWidgetItem(tr("My Seamly Data"));
         item->setIcon(QIcon("://icon/32x32/template_size_file.png"));

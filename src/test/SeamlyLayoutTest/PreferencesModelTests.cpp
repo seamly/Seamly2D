@@ -8,8 +8,8 @@
 // Covers URL-vs-file detection and command-line parsing for openInViewer,
 // the Projector use case (launcher-only viewer with optional arguments),
 // legacy folder-name migration (layout-settings → settings, layout-preferences
-// → preferences) performed by PreferencesModel::load(), (Task 17) the
-// AppImage-aware fallback for the default input/output directories, and (Task 18)
+// → preferences) performed by PreferencesModel::load(), the
+// AppImage-aware fallback for the default input/output directories, and
 // the matching Flatpak-aware fallback.
 
 #include "PreferencesModel.h"
@@ -39,7 +39,7 @@ public slots:
 // @brief RAII helper that sets an environment variable for the scope of a test and
 // guarantees it is unset again when the test function returns.
 //
-// Task 17: PreferencesModelTests exercises Platform::isAppImage() (checks the APPIMAGE
+// PreferencesModelTests exercises Platform::isAppImage() (checks the APPIMAGE
 // environment variable the AppImage runtime sets) by setting the variable directly. A
 // failed QVERIFY/QCOMPARE inside the test body simply `return`s the enclosing function —
 // it does not throw — so a stack-allocated guard's destructor still runs and the variable
@@ -168,9 +168,9 @@ private slots:
     void v2_fileExists_trueForActualAnnotatedFile();
 
     // -----------------------------------------------------------------------
-    // Task 17 — Platform::isAppImage() and its AppImage-aware directory fallbacks.
-    // A mounted Linux AppImage is read-only, just like a signed macOS .app bundle
-    // (Task 16), so the default input/output directories must also fall back to the
+    // Platform::isAppImage() and its AppImage-aware directory fallbacks.
+    // A mounted Linux AppImage is read-only, just like a signed macOS .app bundle,
+    // so the default input/output directories must also fall back to the
     // writable AppConfigLocation root there instead of <exeDir>/input or /output.
     // -----------------------------------------------------------------------
     void platform_isAppImage_falseWithoutEnvVar();
@@ -180,9 +180,9 @@ private slots:
     void appImage_defaultInputFolderUrl_fallsBackToAppConfigLocation();
 
     // -----------------------------------------------------------------------
-    // Task 18 — Platform::isFlatpak() and its Flatpak-aware directory fallbacks.
+    // Platform::isFlatpak() and its Flatpak-aware directory fallbacks.
     // A Flatpak sandbox mounts the /app prefix read-only, just like a mounted
-    // AppImage (Task 17) or a signed macOS .app bundle (Task 16), so the default
+    // AppImage or a signed macOS .app bundle, so the default
     // input/output directories must fall back to the writable AppConfigLocation
     // root (which Flatpak maps into the sandbox) instead of <exeDir>/input or /output.
     // -----------------------------------------------------------------------
@@ -1342,7 +1342,7 @@ void PreferencesModelTests::v2_fileExists_trueForActualAnnotatedFile()
 }
 
 // ---------------------------------------------------------------------------
-// Task 17 — Platform::isAppImage()
+// Platform::isAppImage()
 // ---------------------------------------------------------------------------
 
 // @brief Without APPIMAGE set, isAppImage() must report false — the state for a normal
@@ -1362,7 +1362,7 @@ void PreferencesModelTests::platform_isAppImage_trueWithEnvVarSet()
 }
 
 // ---------------------------------------------------------------------------
-// Task 17 — AppImage-aware directory fallbacks
+// AppImage-aware directory fallbacks
 //
 // Each test independently reconstructs the writable AppConfigLocation root the
 // production code falls back to. appConfigRootPath() is a private implementation
@@ -1423,7 +1423,7 @@ void PreferencesModelTests::appImage_defaultInputFolderUrl_fallsBackToAppConfigL
 }
 
 // ---------------------------------------------------------------------------
-// Task 18 — Platform::isFlatpak()
+// Platform::isFlatpak()
 // ---------------------------------------------------------------------------
 
 // @brief Without FLATPAK_ID set (and no /.flatpak-info on the host), isFlatpak() must report
@@ -1445,9 +1445,9 @@ void PreferencesModelTests::platform_isFlatpak_trueWithEnvVarSet()
 }
 
 // ---------------------------------------------------------------------------
-// Task 18 — Flatpak-aware directory fallbacks
+// Flatpak-aware directory fallbacks
 //
-// Mirrors the Task 17 AppImage tests: each test independently reconstructs the
+// Mirrors the AppImage tests: each test independently reconstructs the
 // writable AppConfigLocation root the production code falls back to, then simulates
 // a Flatpak sandbox by setting FLATPAK_ID and verifies the default input/output
 // directories resolve under that root rather than the read-only <exeDir>.

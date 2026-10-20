@@ -75,7 +75,7 @@ TST_VPoster::TST_VPoster(QObject *parent)
  * (printer.setPageSize(printer.pageLayout().pageSize()) is a no-op), so a
  * default printer with a non-A4 page — e.g. a 5x7in photo printer — changed
  * the page grid and failed the test locally while CI (no printers installed,
- * QPrinter falls back to PDF/A4) passed (Task 23).
+ * QPrinter falls back to PDF/A4) passed.
  */
 void TST_VPoster::BigPoster()
 {
@@ -111,7 +111,7 @@ void TST_VPoster::BigPoster()
  * @brief Check that an image slightly smaller than A4 fits on a single A4 page.
  *
  * Forced to PDF output with an explicit A4 page size for the same
- * machine-independence reason as BigPoster() (Task 23): the previous
+ * machine-independence reason as BigPoster(): the previous
  * default-printer page size made the expected single page become a 2 x 2 grid
  * on a machine whose default printer uses a small page (e.g. 5x7in photo).
  */
