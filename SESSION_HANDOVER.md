@@ -2,6 +2,11 @@
 
 ## Current status
 
+### 2026-10-20 — Material tabs 50% taller and wider, merged into local `run-seamlyLayout`, not pushed
+
+- `Main.qml` `materialTab`: `implicitWidth` and `implicitHeight` = 1.5 × the Fusion size. Font unchanged. Layout view tabs unchanged.
+- Verified: `qmllint` shows no new warnings. Not run: GUI. User check: next MSI, import a Fabric + Lining handoff.
+
 ### 2026-10-20 — `local_build_msi.ps1` runs the SeamlyLayout tests, merged into local `run-seamlyLayout`, not pushed
 
 - After the SeamlyLayout release build: `ctest --preset release` (new test preset in `CMakePresets.json`), then `cargo test --workspace`. `-SkipTests` skips both.
