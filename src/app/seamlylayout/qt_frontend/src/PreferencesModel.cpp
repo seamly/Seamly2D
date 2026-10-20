@@ -48,16 +48,12 @@ constexpr auto kDefaultHpglViewerPath = "https://tiny-online.tools/embroidery-cn
 #ifdef Q_OS_WIN
 // @brief Read the DataRoot value the Windows installer recorded for SeamlyLayout.
 //
-// smsi_registry.wxs mirrors the same install breadcrumbs Seamly2D's key carries under
-// HKLM\SOFTWARE\Seamly\SeamlyLayout. This is that key's reader — the per-app counterpart to
-// InstallerRecord::dataRoot() (src/libs/vmisc/installer_record.cpp), which SeamlyLayout's
-// standalone CMake/Cargo build does not link against.
+// smsi_registry.wxs writes it under HKLM\SOFTWARE\Seamly\SeamlyLayout.
+// Same job as InstallerRecord::dataRoot(), which the SeamlyLayout CMake/Cargo build does not link.
 //
-// Registry64Format rather than NativeFormat: the apps are 64-bit today, so the two agree,
-// but the MSI is x64 and always writes the 64-bit view.
+// Registry64Format, not NativeFormat: the x64 MSI always writes the 64-bit view.
 //
-// @return the recorded path cleaned into Qt's '/' separator form; empty when absent, blank,
-// or off Windows.
+// @return the recorded path in Qt's '/' separator form; empty when absent or blank.
 QString installerDataRoot()
 {
     const QSettings installKey(
@@ -65,7 +61,7 @@ QString installerDataRoot()
         QSettings::Registry64Format);
     const QString recorded = installKey.value(QStringLiteral("DataRoot")).toString().trimmed();
     if (recorded.isEmpty()) {
-        // Layout.8.1: logged so a fresh-install repro can show whether this is an MSI
+        // Logged so a fresh-install repro can show whether this is an MSI
         // custom-action ordering race (registry value not yet written) or a genuine
         // absence (unpackaged/dev build, non-installer run).
         Logger::log(QStringLiteral(
@@ -151,14 +147,10 @@ QString platformDefaultsKey()
 
 // @brief Replace supported tokens in default path templates.
 //
-// Layout.8.3: only input_directory/layout_directory (user data, shared with the rest of
-// the suite) go through this. ${DATAROOT} resolves to the Windows installer's recorded
-// DataRoot when one exists, so a fresh MSI install nests those two under %DATAROOT%.
-// Without an installer record (dev builds, Linux, macOS) the fallback is ~/seamly2d,
-// matching VCommonSettings::getDefaultDataRoot(). preferences/settings paths are
-// app-config, not user data, and are seeded straight from appConfigRootPath() in
-// seedFromBundledDefaults() below — never through this function — so they carry no
-// dependency on the installer registry key or MSI custom-action ordering.
+// Only input_directory and layout_directory (user data) use this.
+// ${DATAROOT} resolves to the installer's DataRoot, or to ~/seamly2d when there is none,
+// matching VCommonSettings::getDefaultDataRoot().
+// Settings and preferences paths never use this; see seedFromBundledDefaults().
 QString expandDefaultPathTokens(const QString &value)
 {
     QString dataRootBase = QDir::cleanPath(QDir::homePath()) + QStringLiteral("/seamly2d");
@@ -176,14 +168,11 @@ QString expandDefaultPathTokens(const QString &value)
 
 // @brief Seed preferences.json from bundled resource defaults.
 //
-// Layout.8.3: settings_directory/preferences_directory/settings_file/preferences_file are
-// app-config, exactly like Seamly2D/SeamlyMe's own qt6_*.ini — they must resolve under
-// appConfigRootPath() (%LOCALAPPDATA%\Seamly\SeamlyLayout on Windows) regardless of
-// whether the Windows installer's DataRoot registry key has been written yet. Routing them
-// through expandDefaultPathTokens()/installerDataRoot() (as before) made them depend on
-// MSI custom-action ordering and silently fell back to the raw home directory when that
-// race lost. input_directory/layout_directory are genuine user data, shared with the rest
-// of the suite, so they keep the DataRoot-substituted template below.
+// settings_directory, preferences_directory, settings_file and preferences_file are app config.
+// They resolve under appConfigRootPath() (%LOCALAPPDATA%\Seamly\SeamlyLayout on Windows).
+// Do not route them through installerDataRoot(): MSI custom-action order can leave DataRoot
+// unwritten, and the paths then fall back to the home directory.
+// input_directory and layout_directory are user data, so they use the DataRoot template below.
 bool seedFromBundledDefaults(const QString &destPath)
 {
     Logger::log(QStringLiteral("seedFromBundledDefaults(): destPath=") + destPath);
@@ -296,11 +285,9 @@ QString migrateLegacyFolderName(const QString &path,
 } // migrateLegacyFolderName
 
 // @brief Apply Seamly branding to a QFileDialog, including a visible selection highlight.
-// Sets the Seamly violet palette and Fusion style, forces black text on entry/combo/button
-// widgets, and adds an explicit stylesheet rule for the file list so the selected row stays
-// visibly highlighted (Fusion's default selection rendering washes out under this palette,
-// and disappears entirely once the dialog loses focus).
-// @param dlg The file dialog to style, already constructed.
+// Sets the Seamly violet palette, Fusion style, and black text on entry, combo and button widgets.
+// A stylesheet rule keeps the selected file row visible. Fusion's own highlight
+// washes out under this palette and disappears when the dialog loses focus.
 void applySeamlyFileDialogStyle(QFileDialog &dlg)
 {
     dlg.setPalette(SeamlyTheme::makeSeamlyPalette());

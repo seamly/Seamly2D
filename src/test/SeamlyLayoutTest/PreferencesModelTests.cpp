@@ -104,27 +104,24 @@ private slots:
     void resetToDefaults_loadsValuesFromDefaultsFile();
 
     // -----------------------------------------------------------------------
-    // Layout.8 — a fresh MSI install must seed preferences_directory,
-    // preferences_file, settings_directory, and settings_file under
-    // AppConfigLocation, never under the raw home directory or a
-    // DataRoot-substituted path, regardless of where the defaults profile
-    // itself happens to be read from and with no dependency on whether the
-    // installer's DataRoot registry key has been written yet.
+    // A fresh install seeds preferences_directory, preferences_file,
+    // settings_directory and settings_file under AppConfigLocation.
+    // Never under the home directory or DataRoot, even before DataRoot is written.
     // -----------------------------------------------------------------------
-    void layout8_resetToDefaults_seedsAppConfigPreferencesAndSettingsPaths();
+    void resetToDefaults_seedsAppConfigPreferencesAndSettingsPaths();
 
     // @brief The bundled default_preferences.json seeds input_directory and
     // layout_directory to the same shared "layouts" folder, not separate
     // "input"/"output" folders.
-    void layout8_resetToDefaults_seedsSharedLayoutsFolderForInputAndLayout();
+    void resetToDefaults_seedsSharedLayoutsFolderForInputAndLayout();
 
     // -----------------------------------------------------------------------
-    // SettingsFiles.6 — an installer-seeded ini skips the deprecated first-run
+    // An installer-seeded ini skips the deprecated first-run
     // seeding, so load() itself must create the defaults profile the ini's
     // preferences_file key names. Never overwrites an existing profile.
     // -----------------------------------------------------------------------
-    void settingsFiles6_load_seedsMissingDefaultsProfileFromSeededIni();
-    void settingsFiles6_load_neverOverwritesAnExistingDefaultsProfile();
+    void load_seedsMissingDefaultsProfileFromSeededIni();
+    void load_neverOverwritesAnExistingDefaultsProfile();
 
     // -----------------------------------------------------------------------
     // Legacy folder-name migration: layout-settings → settings,
@@ -138,34 +135,34 @@ private slots:
     void migration_settingsFileCopied_toNewFolder();
 
     // -----------------------------------------------------------------------
-    // E.7 — DXF viewer is View-menu-only; no auto-open after export.
+    // DXF viewer is View-menu-only; no auto-open after export.
     // These tests document and guard the policy at the PreferencesModel level.
     // -----------------------------------------------------------------------
-    void e7_dxfViewerPath_defaultsToEmpty();
-    void e7_dxfViewerPath_roundTripsThroughIni();
-    void e7_openInViewer_dxfFile_withViewer_returnsTrue();
+    void dxfViewerPath_defaultsToEmpty();
+    void dxfViewerPath_roundTripsThroughIni();
+    void openInViewer_dxfFile_withViewer_returnsTrue();
 
     // -----------------------------------------------------------------------
-    // V.1 — resolvedLayoutDirectory is the first step in every View handler.
+    // resolvedLayoutDirectory is the first step in every View handler.
     // -----------------------------------------------------------------------
-    void v1_resolvedLayoutDirectory_returnsAbsoluteLayoutDir();
-    void v1_resolvedLayoutDirectory_fallsBackWhenEmpty();
-    void v1_resolvedLayoutDirectory_createsDirectoryIfMissing();
+    void resolvedLayoutDirectory_returnsAbsoluteLayoutDir();
+    void resolvedLayoutDirectory_fallsBackWhenEmpty();
+    void resolvedLayoutDirectory_createsDirectoryIfMissing();
 
     // -----------------------------------------------------------------------
-    // V.2 — annotated-file detection helpers used in View → DXF-ASTM.
+    // Annotated-file detection helpers used in View → DXF-ASTM.
     // fileExists() guards the prompt: only shown when the companion .txt exists.
     // dxfAnnotatedFilePath() derives the expected companion path from the .dxf path.
     // -----------------------------------------------------------------------
-    void v2_fileExists_trueForExistingFile();
-    void v2_fileExists_falseForMissingFile();
-    void v2_fileExists_falseForEmptyPath();
-    void v2_dxfAnnotatedFilePath_replacesExtension();
-    void v2_dxfAnnotatedFilePath_preservesDirectoryAndBaseName();
-    void v2_dxfAnnotatedFilePath_handlesUppercaseExtension();
-    void v2_dxfAnnotatedFilePath_handlesMultipleDots();
-    void v2_dxfAnnotatedFilePath_emptyInputReturnsEmpty();
-    void v2_fileExists_trueForActualAnnotatedFile();
+    void fileExists_trueForExistingFile();
+    void fileExists_falseForMissingFile();
+    void fileExists_falseForEmptyPath();
+    void dxfAnnotatedFilePath_replacesExtension();
+    void dxfAnnotatedFilePath_preservesDirectoryAndBaseName();
+    void dxfAnnotatedFilePath_handlesUppercaseExtension();
+    void dxfAnnotatedFilePath_handlesMultipleDots();
+    void dxfAnnotatedFilePath_emptyInputReturnsEmpty();
+    void fileExists_trueForActualAnnotatedFile();
 
     // -----------------------------------------------------------------------
     // Platform::isAppImage() and its AppImage-aware directory fallbacks.
@@ -727,15 +724,12 @@ void PreferencesModelTests::resetToDefaults_loadsValuesFromDefaultsFile()
 }
 
 // ---------------------------------------------------------------------------
-// Layout.8 — settings/preferences paths anchor under AppConfigLocation
+// Settings/preferences paths anchor under AppConfigLocation
 // ---------------------------------------------------------------------------
 
-// @brief seedFromBundledDefaults() (invoked by resetToDefaults() when the defaults
-// profile is missing) must anchor settings_directory/preferences_directory/settings_file/
-// preferences_file under AppConfigLocation — never under the raw home directory (the
-// pre-Layout.8 defect) — regardless of where the defaults profile itself lives, and with
-// no dependency on the Windows installer's DataRoot registry key.
-void PreferencesModelTests::layout8_resetToDefaults_seedsAppConfigPreferencesAndSettingsPaths()
+// @brief resetToDefaults() with no defaults profile seeds settings and preferences paths under AppConfigLocation.
+// Never under the home directory, wherever the profile lives, and without the DataRoot key.
+void PreferencesModelTests::resetToDefaults_seedsAppConfigPreferencesAndSettingsPaths()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -768,20 +762,17 @@ void PreferencesModelTests::layout8_resetToDefaults_seedsAppConfigPreferencesAnd
     QCOMPARE(QFileInfo(m.preferencesFile()).absoluteFilePath(),
              QFileInfo(expectedPreferencesFile).absoluteFilePath());
 
-    // Regression guard for the pre-Layout.8 defect: must not land under the raw home
+    // Regression guard: must not land under the raw home
     // directory's seamlyLayout tree.
     const QString legacyHomeBase = QDir(QDir::homePath()).filePath(QStringLiteral("seamlyLayout"));
     QVERIFY(!m.settingsDirectory().startsWith(legacyHomeBase));
     QVERIFY(!m.preferencesDirectory().startsWith(legacyHomeBase));
 }
 
-// @brief seedFromBundledDefaults() must seed input_directory and layout_directory to the
-// same shared "layouts" folder — one folder for both import and export, not the older
-// separate "input"/"output" pair — so a fresh install nests both under one shared folder
-// name (matching the `layouts` subfolder Seamly2D's ensureDataRootTree() already creates
-// under %DATAROOT%). Layout.11: the folder must sit under a data root — the installer's
-// recorded DataRoot or the ~/seamly2d fallback — never directly under the home directory.
-void PreferencesModelTests::layout8_resetToDefaults_seedsSharedLayoutsFolderForInputAndLayout()
+// @brief seedFromBundledDefaults() seeds input_directory and layout_directory to one "layouts" folder.
+// It matches the `layouts` subfolder that ensureDataRootTree() creates.
+// The folder sits under DataRoot or ~/seamly2d, never directly under the home directory.
+void PreferencesModelTests::resetToDefaults_seedsSharedLayoutsFolderForInputAndLayout()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -797,14 +788,14 @@ void PreferencesModelTests::layout8_resetToDefaults_seedsSharedLayoutsFolderForI
     QVERIFY(QDir::fromNativeSeparators(m.inputDirectory()).endsWith(QStringLiteral("layouts")));
     QVERIFY(!QDir::fromNativeSeparators(m.inputDirectory()).contains(QStringLiteral("seamlyLayout")));
 
-    // Layout.11 regression guard: ${DATAROOT}/layouts must not resolve to <home>/layouts.
+    // Regression guard: ${DATAROOT}/layouts must not resolve to <home>/layouts.
     const QString homeLayouts = QDir(QDir::homePath()).filePath(QStringLiteral("layouts"));
     QVERIFY(QFileInfo(m.inputDirectory()).absoluteFilePath()
             != QFileInfo(homeLayouts).absoluteFilePath());
 }
 
 // ---------------------------------------------------------------------------
-// SettingsFiles.6 — load() seeds the missing defaults profile
+// Load() seeds the missing defaults profile
 // ---------------------------------------------------------------------------
 
 // @brief Writes the ini shape the Windows MSI seeds (all 11 keys, preferences_file
@@ -831,9 +822,9 @@ static QString writeSeededIni(const QString &tempPath)
 } // writeSeededIni
 
 // @brief load() on a complete installer-seeded ini must create the defaults profile
-// the ini's preferences_file names — the B.0a defect: the seeded ini pointed at a
+// the ini's preferences_file names: the seeded ini pointed at a
 // file nothing created. The ini's own values must stay authoritative.
-void PreferencesModelTests::settingsFiles6_load_seedsMissingDefaultsProfileFromSeededIni()
+void PreferencesModelTests::load_seedsMissingDefaultsProfileFromSeededIni()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -865,7 +856,7 @@ void PreferencesModelTests::settingsFiles6_load_seedsMissingDefaultsProfileFromS
 
 // @brief A defaults profile that already exists — user-edited or older — must
 // survive load() byte for byte.
-void PreferencesModelTests::settingsFiles6_load_neverOverwritesAnExistingDefaultsProfile()
+void PreferencesModelTests::load_neverOverwritesAnExistingDefaultsProfile()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1080,7 +1071,7 @@ void PreferencesModelTests::migration_settingsFileCopied_toNewFolder()
 }
 
 // ---------------------------------------------------------------------------
-// E.7 — DXF viewer is View-menu-only; no auto-open after export.
+// DXF viewer is View-menu-only; no auto-open after export.
 // ---------------------------------------------------------------------------
 
 // @brief A freshly constructed PreferencesModel (before loading persisted preferences) must have an empty dxfViewerPath.
@@ -1088,7 +1079,7 @@ void PreferencesModelTests::migration_settingsFileCopied_toNewFolder()
 // Note: at runtime Main.qml loads defaultPreferencesFilePath(), which may seed defaults from
 // qt_frontend/preferences/default_preferences.json; that file controls the initial dxf_viewer_path value.
 // Keep this test/comment aligned with that defaults profile and the intended UX policy.
-void PreferencesModelTests::e7_dxfViewerPath_defaultsToEmpty()
+void PreferencesModelTests::dxfViewerPath_defaultsToEmpty()
 {
     PreferencesModel m;
     QVERIFY(m.dxfViewerPath().isEmpty());
@@ -1098,7 +1089,7 @@ void PreferencesModelTests::e7_dxfViewerPath_defaultsToEmpty()
 //
 // The View → DXF-ASTM path reads dxfViewerPath and passes it to openInViewer.
 // If the path is lost on save/load the viewer cannot be launched.
-void PreferencesModelTests::e7_dxfViewerPath_roundTripsThroughIni()
+void PreferencesModelTests::dxfViewerPath_roundTripsThroughIni()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1116,12 +1107,12 @@ void PreferencesModelTests::e7_dxfViewerPath_roundTripsThroughIni()
 
 // @brief openInViewer with a configured URL dxfViewerPath dispatches to the URL handler.
 //
-// E.7 policy: when dxfViewerPath is a URL, openInViewer must route to
+// When dxfViewerPath is a URL, openInViewer must route to
 // QDesktopServices::openUrl with the URL as-is (not appending the DXF file path,
 // because online viewers like ShareCAD require manual upload). Uses a temporary
 // QDesktopServices URL handler so the test is fully deterministic — no real
 // browser is opened and no system URL handler is required.
-void PreferencesModelTests::e7_openInViewer_dxfFile_withViewer_returnsTrue()
+void PreferencesModelTests::openInViewer_dxfFile_withViewer_returnsTrue()
 {
     const QString dxfFile = QStringLiteral("/tmp/layout_output.dxf");
     const QString urlViewer = QStringLiteral("https://sharecad.org");
@@ -1146,7 +1137,7 @@ void PreferencesModelTests::e7_openInViewer_dxfFile_withViewer_returnsTrue()
 }
 
 // ---------------------------------------------------------------------------
-// V.1 — resolvedLayoutDirectory tests
+// resolvedLayoutDirectory tests
 //
 // resolvedLayoutDirectory() is the first step in each View dropdown handler:
 // it determines the directory opened by the file-picker dialog.
@@ -1154,7 +1145,7 @@ void PreferencesModelTests::e7_openInViewer_dxfFile_withViewer_returnsTrue()
 
 // @brief When layoutDirectory is an absolute path that already exists,
 // resolvedLayoutDirectory returns that canonical path.
-void PreferencesModelTests::v1_resolvedLayoutDirectory_returnsAbsoluteLayoutDir()
+void PreferencesModelTests::resolvedLayoutDirectory_returnsAbsoluteLayoutDir()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1170,7 +1161,7 @@ void PreferencesModelTests::v1_resolvedLayoutDirectory_returnsAbsoluteLayoutDir(
 
 // @brief When layoutDirectory is empty, resolvedLayoutDirectory returns the
 // fallback path (<exeDir>/output), which must be non-empty.
-void PreferencesModelTests::v1_resolvedLayoutDirectory_fallsBackWhenEmpty()
+void PreferencesModelTests::resolvedLayoutDirectory_fallsBackWhenEmpty()
 {
     PreferencesModel m;
     // Default: m_layoutDirectory is empty — fallback kicks in.
@@ -1179,7 +1170,7 @@ void PreferencesModelTests::v1_resolvedLayoutDirectory_fallsBackWhenEmpty()
 
 // @brief resolvedLayoutDirectory creates the target directory when it does
 // not yet exist, so the file-picker always opens in a valid directory.
-void PreferencesModelTests::v1_resolvedLayoutDirectory_createsDirectoryIfMissing()
+void PreferencesModelTests::resolvedLayoutDirectory_createsDirectoryIfMissing()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1195,7 +1186,7 @@ void PreferencesModelTests::v1_resolvedLayoutDirectory_createsDirectoryIfMissing
 }
 
 // ---------------------------------------------------------------------------
-// V.2 — fileExists and dxfAnnotatedFilePath tests
+// fileExists and dxfAnnotatedFilePath tests
 //
 // These helpers drive the View → DXF-ASTM annotated-file prompt:
 //   1. dxfAnnotatedFilePath() derives the companion .txt path from the .dxf path.
@@ -1204,7 +1195,7 @@ void PreferencesModelTests::v1_resolvedLayoutDirectory_createsDirectoryIfMissing
 // ---------------------------------------------------------------------------
 
 // @brief fileExists returns true when the file is present on disk.
-void PreferencesModelTests::v2_fileExists_trueForExistingFile()
+void PreferencesModelTests::fileExists_trueForExistingFile()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1219,7 +1210,7 @@ void PreferencesModelTests::v2_fileExists_trueForExistingFile()
 }
 
 // @brief fileExists returns false when the file does not exist.
-void PreferencesModelTests::v2_fileExists_falseForMissingFile()
+void PreferencesModelTests::fileExists_falseForMissingFile()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1230,14 +1221,14 @@ void PreferencesModelTests::v2_fileExists_falseForMissingFile()
 }
 
 // @brief fileExists returns false for an empty path string without crashing.
-void PreferencesModelTests::v2_fileExists_falseForEmptyPath()
+void PreferencesModelTests::fileExists_falseForEmptyPath()
 {
     QVERIFY(!PreferencesModel::fileExists(QString()));
     QVERIFY(!PreferencesModel::fileExists(QStringLiteral("")));
 }
 
 // @brief dxfAnnotatedFilePath replaces the .dxf extension with .txt.
-void PreferencesModelTests::v2_dxfAnnotatedFilePath_replacesExtension()
+void PreferencesModelTests::dxfAnnotatedFilePath_replacesExtension()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1252,7 +1243,7 @@ void PreferencesModelTests::v2_dxfAnnotatedFilePath_replacesExtension()
 }
 
 // @brief dxfAnnotatedFilePath preserves the directory and base name exactly.
-void PreferencesModelTests::v2_dxfAnnotatedFilePath_preservesDirectoryAndBaseName()
+void PreferencesModelTests::dxfAnnotatedFilePath_preservesDirectoryAndBaseName()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1270,7 +1261,7 @@ void PreferencesModelTests::v2_dxfAnnotatedFilePath_preservesDirectoryAndBaseNam
 // @brief dxfAnnotatedFilePath handles an uppercase .DXF extension by replacing it with .txt.
 // QFileInfo::completeBaseName() strips the last extension regardless of case,
 // so "layout.DXF" → base "layout" → "layout.txt".
-void PreferencesModelTests::v2_dxfAnnotatedFilePath_handlesUppercaseExtension()
+void PreferencesModelTests::dxfAnnotatedFilePath_handlesUppercaseExtension()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1285,7 +1276,7 @@ void PreferencesModelTests::v2_dxfAnnotatedFilePath_handlesUppercaseExtension()
 
 // @brief dxfAnnotatedFilePath handles a base name containing dots correctly.
 // Only the last extension (.dxf) is replaced; dots in the base name are preserved.
-void PreferencesModelTests::v2_dxfAnnotatedFilePath_handlesMultipleDots()
+void PreferencesModelTests::dxfAnnotatedFilePath_handlesMultipleDots()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1300,7 +1291,7 @@ void PreferencesModelTests::v2_dxfAnnotatedFilePath_handlesMultipleDots()
 }
 
 // @brief dxfAnnotatedFilePath returns empty when given an empty input.
-void PreferencesModelTests::v2_dxfAnnotatedFilePath_emptyInputReturnsEmpty()
+void PreferencesModelTests::dxfAnnotatedFilePath_emptyInputReturnsEmpty()
 {
     QVERIFY(PreferencesModel::dxfAnnotatedFilePath(QString()).isEmpty());
     QVERIFY(PreferencesModel::dxfAnnotatedFilePath(QStringLiteral("")).isEmpty());
@@ -1309,7 +1300,7 @@ void PreferencesModelTests::v2_dxfAnnotatedFilePath_emptyInputReturnsEmpty()
 // @brief Integration: dxfAnnotatedFilePath + fileExists together detect an actual annotated file.
 // This mirrors the exact runtime sequence in onViewDxfAstmRequested: after the user picks
 // a .dxf file, derive the annotated path and check whether it exists before opening the prompt.
-void PreferencesModelTests::v2_fileExists_trueForActualAnnotatedFile()
+void PreferencesModelTests::fileExists_trueForActualAnnotatedFile()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());

@@ -7,7 +7,7 @@
 //
 // Format: [unix_seconds] DEBUG: ClassName::methodName(): message
 // Log file: {appConfigRoot}/logs/log_{YYMMDDHHMMSS}.txt
-// On Windows that is %LOCALAPPDATA%\Seamly\SeamlyLayout\logs (Layout.10).
+// On Windows that is %LOCALAPPDATA%\Seamly\SeamlyLayout\logs.
 //
 // Usage:
 //   Logger::debugEnabled = true;   // enable at startup (default: false)
@@ -42,7 +42,7 @@ public:
 
     // @brief Open the log file.  Must be called once from main() after QGuiApplication
     // is constructed AND after the organization and application names are set,
-    // because AppConfigLocation is derived from them (Layout.10).
+    // because AppConfigLocation is derived from them.
     // Creates the logs/ directory if it does not exist.
     static void init();
 

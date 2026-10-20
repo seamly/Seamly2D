@@ -5,29 +5,16 @@
 // @file LoggerTests.cpp
 // @brief Qt tests for Logger — where the session log file is written.
 //
-// Layout.10. SeamlyLayout used to write its session log to
-// %LOCALAPPDATA%\SeamlyLayout\output\log_<timestamp>.txt: outside the shared
-// "Seamly" organization folder that holds qt6_seamlylayout.ini, and in a
-// directory named "output" rather than "logs". Two separate causes:
+// Expected path: <AppConfigLocation>/logs/log_YYMMDDHHMMSS.txt
+// (installed Windows build: %LOCALAPPDATA%\Seamly\SeamlyLayout\logs).
 //
-//   • Logger::init() appended "/output" to the AppConfigLocation root;
-//   • main() called Logger::init() BEFORE it set the organization and
-//     application names, and AppConfigLocation is built from those two names,
-//     so the root itself was wrong.
+// QStandardPaths test mode redirects AppConfigLocation to a temporary tree.
+// The suite never touches the real user configuration.
 //
-// The suite locks the resulting path, which is
-// <AppConfigLocation>/logs/log_YYMMDDHHMMSS.txt — for an installed Windows
-// build, %LOCALAPPDATA%\Seamly\SeamlyLayout\logs.
+// concurrentWriters_lineArrivesWholeAndInOrder() calls seamly_logger_write_utf8()
+// directly, in place of the Rust bridge.
 //
-// QStandardPaths test mode redirects AppConfigLocation into a throwaway tree,
-// so the suite never touches the real user configuration.
-//
-// Logger is the only writer of the log file. Rust lines arrive through
-// seamly_logger_write_utf8(), so concurrentWriters_lineArrivesWholeAndInOrder()
-// calls that entry point directly in place of the Rust bridge.
-//
-// Logger needs no QObject, no window and no event loop, so this suite runs
-// guiless — QTEST_GUILESS_MAIN, not QTEST_MAIN.
+// Logger needs no window or event loop, so the suite uses QTEST_GUILESS_MAIN.
 
 #include "Logger.h"
 
