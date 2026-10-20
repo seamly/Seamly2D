@@ -5,25 +5,18 @@
 // @file Logger.cpp
 // @brief Implementation of the singleton debug logger.
 //
-// Log lines are written in the format used by the legacy Iced UI logs:
-//   [unix_seconds] DEBUG: message
+// Line format: [unix_seconds] DEBUG: message
 //
-// The log file is opened once by Logger::init() and kept open for the
-// duration of the process.  Logger is its only writer: Rust debug lines arrive
-// through seamly_logger_write_utf8().  All writes go to a file named:
-//   {appConfigRoot}/logs/log_{YYMMDDHHMMSS}.txt
-// {appConfigRoot} is the writable AppConfigLocation root, not the install
-// directory, on every platform — the install directory cannot be relied on to
-// be writable: a notarized .app bundle on macOS, C:\Program Files on Windows,
-// a mounted (read-only) Linux AppImage, or a Flatpak's /app sandbox. Using one
-// rule everywhere also means a debug log is always at the same, predictable
-// path regardless of how SeamlyLayout was launched.
+// Logger::init() opens the file once. It stays open until the process ends.
+// Logger is the only writer. Rust lines arrive through seamly_logger_write_utf8().
+// File: {appConfigRoot}/logs/log_{YYMMDDHHMMSS}.txt
 //
-// Layout.10: the directory is "logs", not "output", and it sits inside the same
-// Seamly/SeamlyLayout tree as qt6_seamlylayout.ini — matching Seamly2D's
-// %LOCALAPPDATA%\Seamly\Seamly2D\logs. main() therefore sets the organization
-// and application names BEFORE it calls init(); without them AppConfigLocation
-// resolves to %LOCALAPPDATA%\SeamlyLayout\.
+// {appConfigRoot} is the writable AppConfigLocation root on every platform.
+// The install directory can be read-only: macOS bundle, C:\Program Files, AppImage, Flatpak.
+// This matches Seamly2D's %LOCALAPPDATA%\Seamly\Seamly2D\logs.
+//
+// main() must set the organization and application names before init().
+// Without them, AppConfigLocation resolves to %LOCALAPPDATA%\SeamlyLayout\.
 
 #include "Logger.h"
 

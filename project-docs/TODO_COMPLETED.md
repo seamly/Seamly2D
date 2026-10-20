@@ -531,8 +531,8 @@ deprecated first-run seeding, which was the only path that wrote the profile.
 - 6.2 `PreferencesModel::load()` ini-exists path calls
   `seedFromBundledDefaults(preferencesFilePath())` when the profile is missing; never
   overwrites; the ini stays authoritative. Tests:
-  `settingsFiles6_load_seedsMissingDefaultsProfileFromSeededIni`,
-  `settingsFiles6_load_neverOverwritesAnExistingDefaultsProfile`
+  `load_seedsMissingDefaultsProfileFromSeededIni`,
+  `load_neverOverwritesAnExistingDefaultsProfile`
   (`PreferencesModelTests`). `ctest --preset debug` 5/5; `cargo test` skipped — no
   Rust changed.
 - 6.3 Confirmed live 2026-09-01 on build 26.9.1.728: fresh reset → quiet install →
@@ -1078,7 +1078,7 @@ fallback must be `%DATAROOT%\layouts` with the default data root
   directory only when the platform reports no documents location — and then still with
   the `/SeamlyData` leaf
 - [X] Regression guard added to
-  `PreferencesModelTests::layout8_resetToDefaults_seedsSharedLayoutsFolderForInputAndLayout`:
+  `PreferencesModelTests::resetToDefaults_seedsSharedLayoutsFolderForInputAndLayout`:
   the seeded folder must never equal `<home>/layouts`
 - [X] Docs: `INSTALLER_NOTES.md` fallback wording; `${DATAROOT}` in
   `smsi_seed_user_settings.ps1` comments (comment-only)
