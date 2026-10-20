@@ -906,14 +906,24 @@ ApplicationWindow {
 
         // Canvas row — left (import) and right (layout / adjust)
         RowLayout {
+            id: canvasRow
             Layout.fillWidth:  true
             Layout.fillHeight: true
             spacing: 2
 
+            // Both columns set preferredWidth from these.  Without it, RowLayout splits
+            // spare width in proportion to implicit widths, and the material tabs
+            // gave the left column almost all of the row.
+            // Width the two columns share.
+            readonly property real columnsWidth: Math.max(0, width - spacing)
+            // Left share: a quarter while a layout is shown, else half.
+            readonly property real leftShare: appController.isLayoutReady ? 0.25 : 0.5
+
             // Left column — material tabs over the imported SVG display
             ColumnLayout {
-                Layout.fillWidth:  true
-                Layout.fillHeight: true
+                Layout.fillWidth:      true
+                Layout.fillHeight:     true
+                Layout.preferredWidth: canvasRow.columnsWidth * canvasRow.leftShare
                 spacing: 0
 
                 // One tab per material of the import: Fabric, Lining, ...
@@ -1005,8 +1015,9 @@ ApplicationWindow {
             // Right canvas frame — violet border when AdjustMode is active
             Rectangle {
                 id: rightCanvasFrame
-                Layout.fillWidth:  true
-                Layout.fillHeight: true
+                Layout.fillWidth:      true
+                Layout.fillHeight:     true
+                Layout.preferredWidth: canvasRow.columnsWidth * (1 - canvasRow.leftShare)
                 color:        "transparent"
                 border.color: appController.isAdjustMode ? Theme.violetLight : "transparent"
                 border.width: appController.isAdjustMode ? 3 : 0
