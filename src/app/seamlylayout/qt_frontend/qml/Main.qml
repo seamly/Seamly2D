@@ -940,6 +940,9 @@ ApplicationWindow {
                             required property string modelData
                             required property int index
                             text:  modelData
+                            // 1.5 × the Fusion tab size; TabBar sizes its bar from implicitHeight.
+                            implicitWidth:  Math.round(1.5 * (implicitContentWidth  + leftPadding + rightPadding))
+                            implicitHeight: Math.round(1.5 * (implicitContentHeight + topPadding + bottomPadding))
                             width: implicitWidth
                             contentItem: Text {
                                 text:  materialTab.text
