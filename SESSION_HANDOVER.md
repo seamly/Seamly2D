@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-10-20 — `local_build_msi.ps1` runs the SeamlyLayout tests, merged into local `run-seamlyLayout`, not pushed
+
+- After the SeamlyLayout release build: `ctest --preset release` (new test preset in `CMakePresets.json`), then `cargo test --workspace`. `-SkipTests` skips both.
+- The script finds cargo on PATH or in `%USERPROFILE%\.cargo\bin`; sets `QT_FORCE_STDERR_LOGGING=1` for ctest, so a failed suite prints its QtTest output.
+- Release tests found a defect: `StartupOptionsTests::makeFile` opened its file inside `Q_ASSERT`; 5 tests failed. Fixed with `qFatal`. Header changed to MIT (qt-style rule).
+- Verified: `ctest --preset release` on the last release build ran 6 suites, StartupOptionsTests failed (old binary); fixed test passed in a release-mode scratch harness (28 passed, 1 skipped); `cargo test --workspace` under vcvars 549 passed; batch text rendered for both modes. Not run: full `local_build_msi.ps1` (ask first).
+- Full CI rule: `packaging/**` changed; the merge commit has no skip-ci token.
+
 ### 2026-10-19 — Multisize height selection rolled back, merged into local `run-seamlyLayout`, not pushed
 
 - User decision: height selection is deferred. Layout.79.1 and 79.2 reopened; the dialog is removed.
