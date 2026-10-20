@@ -916,8 +916,8 @@ ApplicationWindow {
             // gave the left column almost all of the row.
             // Width the two columns share.
             readonly property real columnsWidth: Math.max(0, width - spacing)
-            // Left share: a quarter while a layout is shown, else half.
-            readonly property real leftShare: appController.isLayoutReady ? 0.25 : 0.5
+            // Left share of the row; the layout canvas gets the rest.
+            readonly property real leftShare: 0.25
 
             // Left column — material tabs over the imported SVG display
             ColumnLayout {

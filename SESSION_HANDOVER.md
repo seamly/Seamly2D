@@ -2,9 +2,9 @@
 
 ## Current status
 
-### 2026-10-20 — Canvas split 25 / 75 when a layout is shown, merged into local `run-seamlyLayout`, not pushed
+### 2026-10-20 — Canvas split 25 / 75, merged into local `run-seamlyLayout`, not pushed
 
-- `Main.qml` `canvasRow`: both columns set `Layout.preferredWidth`. Left share = 0.25 when `isLayoutReady`, else 0.5.
+- `Main.qml` `canvasRow`: both columns set `Layout.preferredWidth`. Left share = 0.25 always, with or without a layout (user decision).
 - Cause: `RowLayout` splits spare width in proportion to implicit widths. The material tabs gave the left column ~99% (1387 of 1398 px).
 - Verified: scratch `qml.exe` run of the row — old 1387 / 11 px, new 350 / 1048 px at 1400 px. `qmllint` shows no new warnings. Not run: GUI.
 - User check: next MSI, import a Fabric + Lining handoff, create a layout.
