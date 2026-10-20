@@ -135,34 +135,34 @@ private slots:
     void migration_settingsFileCopied_toNewFolder();
 
     // -----------------------------------------------------------------------
-    // DXF viewer is View-menu-only; no auto-open after export.
+    // E.7 — DXF viewer is View-menu-only; no auto-open after export.
     // These tests document and guard the policy at the PreferencesModel level.
     // -----------------------------------------------------------------------
-    void dxfViewerPath_defaultsToEmpty();
-    void dxfViewerPath_roundTripsThroughIni();
-    void openInViewer_dxfFile_withViewer_returnsTrue();
+    void e7_dxfViewerPath_defaultsToEmpty();
+    void e7_dxfViewerPath_roundTripsThroughIni();
+    void e7_openInViewer_dxfFile_withViewer_returnsTrue();
 
     // -----------------------------------------------------------------------
-    // resolvedLayoutDirectory is the first step in every View handler.
+    // V.1 — resolvedLayoutDirectory is the first step in every View handler.
     // -----------------------------------------------------------------------
-    void resolvedLayoutDirectory_returnsAbsoluteLayoutDir();
-    void resolvedLayoutDirectory_fallsBackWhenEmpty();
-    void resolvedLayoutDirectory_createsDirectoryIfMissing();
+    void v1_resolvedLayoutDirectory_returnsAbsoluteLayoutDir();
+    void v1_resolvedLayoutDirectory_fallsBackWhenEmpty();
+    void v1_resolvedLayoutDirectory_createsDirectoryIfMissing();
 
     // -----------------------------------------------------------------------
-    // Annotated-file detection helpers used in View → DXF-ASTM.
+    // V.2 — annotated-file detection helpers used in View → DXF-ASTM.
     // fileExists() guards the prompt: only shown when the companion .txt exists.
     // dxfAnnotatedFilePath() derives the expected companion path from the .dxf path.
     // -----------------------------------------------------------------------
-    void fileExists_trueForExistingFile();
-    void fileExists_falseForMissingFile();
-    void fileExists_falseForEmptyPath();
-    void dxfAnnotatedFilePath_replacesExtension();
-    void dxfAnnotatedFilePath_preservesDirectoryAndBaseName();
-    void dxfAnnotatedFilePath_handlesUppercaseExtension();
-    void dxfAnnotatedFilePath_handlesMultipleDots();
-    void dxfAnnotatedFilePath_emptyInputReturnsEmpty();
-    void fileExists_trueForActualAnnotatedFile();
+    void v2_fileExists_trueForExistingFile();
+    void v2_fileExists_falseForMissingFile();
+    void v2_fileExists_falseForEmptyPath();
+    void v2_dxfAnnotatedFilePath_replacesExtension();
+    void v2_dxfAnnotatedFilePath_preservesDirectoryAndBaseName();
+    void v2_dxfAnnotatedFilePath_handlesUppercaseExtension();
+    void v2_dxfAnnotatedFilePath_handlesMultipleDots();
+    void v2_dxfAnnotatedFilePath_emptyInputReturnsEmpty();
+    void v2_fileExists_trueForActualAnnotatedFile();
 
     // -----------------------------------------------------------------------
     // Platform::isAppImage() and its AppImage-aware directory fallbacks.
@@ -1071,7 +1071,7 @@ void PreferencesModelTests::migration_settingsFileCopied_toNewFolder()
 }
 
 // ---------------------------------------------------------------------------
-// DXF viewer is View-menu-only; no auto-open after export.
+// E.7 — DXF viewer is View-menu-only; no auto-open after export.
 // ---------------------------------------------------------------------------
 
 // @brief A freshly constructed PreferencesModel (before loading persisted preferences) must have an empty dxfViewerPath.
@@ -1079,7 +1079,7 @@ void PreferencesModelTests::migration_settingsFileCopied_toNewFolder()
 // Note: at runtime Main.qml loads defaultPreferencesFilePath(), which may seed defaults from
 // qt_frontend/preferences/default_preferences.json; that file controls the initial dxf_viewer_path value.
 // Keep this test/comment aligned with that defaults profile and the intended UX policy.
-void PreferencesModelTests::dxfViewerPath_defaultsToEmpty()
+void PreferencesModelTests::e7_dxfViewerPath_defaultsToEmpty()
 {
     PreferencesModel m;
     QVERIFY(m.dxfViewerPath().isEmpty());
@@ -1089,7 +1089,7 @@ void PreferencesModelTests::dxfViewerPath_defaultsToEmpty()
 //
 // The View → DXF-ASTM path reads dxfViewerPath and passes it to openInViewer.
 // If the path is lost on save/load the viewer cannot be launched.
-void PreferencesModelTests::dxfViewerPath_roundTripsThroughIni()
+void PreferencesModelTests::e7_dxfViewerPath_roundTripsThroughIni()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1107,12 +1107,12 @@ void PreferencesModelTests::dxfViewerPath_roundTripsThroughIni()
 
 // @brief openInViewer with a configured URL dxfViewerPath dispatches to the URL handler.
 //
-// When dxfViewerPath is a URL, openInViewer must route to
+// E.7 policy: when dxfViewerPath is a URL, openInViewer must route to
 // QDesktopServices::openUrl with the URL as-is (not appending the DXF file path,
 // because online viewers like ShareCAD require manual upload). Uses a temporary
 // QDesktopServices URL handler so the test is fully deterministic — no real
 // browser is opened and no system URL handler is required.
-void PreferencesModelTests::openInViewer_dxfFile_withViewer_returnsTrue()
+void PreferencesModelTests::e7_openInViewer_dxfFile_withViewer_returnsTrue()
 {
     const QString dxfFile = QStringLiteral("/tmp/layout_output.dxf");
     const QString urlViewer = QStringLiteral("https://sharecad.org");
@@ -1137,7 +1137,7 @@ void PreferencesModelTests::openInViewer_dxfFile_withViewer_returnsTrue()
 }
 
 // ---------------------------------------------------------------------------
-// resolvedLayoutDirectory tests
+// V.1 — resolvedLayoutDirectory tests
 //
 // resolvedLayoutDirectory() is the first step in each View dropdown handler:
 // it determines the directory opened by the file-picker dialog.
@@ -1145,7 +1145,7 @@ void PreferencesModelTests::openInViewer_dxfFile_withViewer_returnsTrue()
 
 // @brief When layoutDirectory is an absolute path that already exists,
 // resolvedLayoutDirectory returns that canonical path.
-void PreferencesModelTests::resolvedLayoutDirectory_returnsAbsoluteLayoutDir()
+void PreferencesModelTests::v1_resolvedLayoutDirectory_returnsAbsoluteLayoutDir()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1161,7 +1161,7 @@ void PreferencesModelTests::resolvedLayoutDirectory_returnsAbsoluteLayoutDir()
 
 // @brief When layoutDirectory is empty, resolvedLayoutDirectory returns the
 // fallback path (<exeDir>/output), which must be non-empty.
-void PreferencesModelTests::resolvedLayoutDirectory_fallsBackWhenEmpty()
+void PreferencesModelTests::v1_resolvedLayoutDirectory_fallsBackWhenEmpty()
 {
     PreferencesModel m;
     // Default: m_layoutDirectory is empty — fallback kicks in.
@@ -1170,7 +1170,7 @@ void PreferencesModelTests::resolvedLayoutDirectory_fallsBackWhenEmpty()
 
 // @brief resolvedLayoutDirectory creates the target directory when it does
 // not yet exist, so the file-picker always opens in a valid directory.
-void PreferencesModelTests::resolvedLayoutDirectory_createsDirectoryIfMissing()
+void PreferencesModelTests::v1_resolvedLayoutDirectory_createsDirectoryIfMissing()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1186,7 +1186,7 @@ void PreferencesModelTests::resolvedLayoutDirectory_createsDirectoryIfMissing()
 }
 
 // ---------------------------------------------------------------------------
-// fileExists and dxfAnnotatedFilePath tests
+// V.2 — fileExists and dxfAnnotatedFilePath tests
 //
 // These helpers drive the View → DXF-ASTM annotated-file prompt:
 //   1. dxfAnnotatedFilePath() derives the companion .txt path from the .dxf path.
@@ -1195,7 +1195,7 @@ void PreferencesModelTests::resolvedLayoutDirectory_createsDirectoryIfMissing()
 // ---------------------------------------------------------------------------
 
 // @brief fileExists returns true when the file is present on disk.
-void PreferencesModelTests::fileExists_trueForExistingFile()
+void PreferencesModelTests::v2_fileExists_trueForExistingFile()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1210,7 +1210,7 @@ void PreferencesModelTests::fileExists_trueForExistingFile()
 }
 
 // @brief fileExists returns false when the file does not exist.
-void PreferencesModelTests::fileExists_falseForMissingFile()
+void PreferencesModelTests::v2_fileExists_falseForMissingFile()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1221,14 +1221,14 @@ void PreferencesModelTests::fileExists_falseForMissingFile()
 }
 
 // @brief fileExists returns false for an empty path string without crashing.
-void PreferencesModelTests::fileExists_falseForEmptyPath()
+void PreferencesModelTests::v2_fileExists_falseForEmptyPath()
 {
     QVERIFY(!PreferencesModel::fileExists(QString()));
     QVERIFY(!PreferencesModel::fileExists(QStringLiteral("")));
 }
 
 // @brief dxfAnnotatedFilePath replaces the .dxf extension with .txt.
-void PreferencesModelTests::dxfAnnotatedFilePath_replacesExtension()
+void PreferencesModelTests::v2_dxfAnnotatedFilePath_replacesExtension()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1243,7 +1243,7 @@ void PreferencesModelTests::dxfAnnotatedFilePath_replacesExtension()
 }
 
 // @brief dxfAnnotatedFilePath preserves the directory and base name exactly.
-void PreferencesModelTests::dxfAnnotatedFilePath_preservesDirectoryAndBaseName()
+void PreferencesModelTests::v2_dxfAnnotatedFilePath_preservesDirectoryAndBaseName()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1261,7 +1261,7 @@ void PreferencesModelTests::dxfAnnotatedFilePath_preservesDirectoryAndBaseName()
 // @brief dxfAnnotatedFilePath handles an uppercase .DXF extension by replacing it with .txt.
 // QFileInfo::completeBaseName() strips the last extension regardless of case,
 // so "layout.DXF" → base "layout" → "layout.txt".
-void PreferencesModelTests::dxfAnnotatedFilePath_handlesUppercaseExtension()
+void PreferencesModelTests::v2_dxfAnnotatedFilePath_handlesUppercaseExtension()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1276,7 +1276,7 @@ void PreferencesModelTests::dxfAnnotatedFilePath_handlesUppercaseExtension()
 
 // @brief dxfAnnotatedFilePath handles a base name containing dots correctly.
 // Only the last extension (.dxf) is replaced; dots in the base name are preserved.
-void PreferencesModelTests::dxfAnnotatedFilePath_handlesMultipleDots()
+void PreferencesModelTests::v2_dxfAnnotatedFilePath_handlesMultipleDots()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
@@ -1291,7 +1291,7 @@ void PreferencesModelTests::dxfAnnotatedFilePath_handlesMultipleDots()
 }
 
 // @brief dxfAnnotatedFilePath returns empty when given an empty input.
-void PreferencesModelTests::dxfAnnotatedFilePath_emptyInputReturnsEmpty()
+void PreferencesModelTests::v2_dxfAnnotatedFilePath_emptyInputReturnsEmpty()
 {
     QVERIFY(PreferencesModel::dxfAnnotatedFilePath(QString()).isEmpty());
     QVERIFY(PreferencesModel::dxfAnnotatedFilePath(QStringLiteral("")).isEmpty());
@@ -1300,7 +1300,7 @@ void PreferencesModelTests::dxfAnnotatedFilePath_emptyInputReturnsEmpty()
 // @brief Integration: dxfAnnotatedFilePath + fileExists together detect an actual annotated file.
 // This mirrors the exact runtime sequence in onViewDxfAstmRequested: after the user picks
 // a .dxf file, derive the annotated path and check whether it exists before opening the prompt.
-void PreferencesModelTests::fileExists_trueForActualAnnotatedFile()
+void PreferencesModelTests::v2_fileExists_trueForActualAnnotatedFile()
 {
     QTemporaryDir tempDir;
     QVERIFY(tempDir.isValid());
