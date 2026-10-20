@@ -787,13 +787,9 @@ bool Application2D::event(QEvent *event)
 /// @brief openSettings get access to application settings.
 /// Because we can create object in constructor we open file separately.
 ///
-/// Task 15: seamly2d's own settings now live in their own directory nested under the
-/// shared "Seamly" organization (AppData/Local/Seamly/Seamly2D on Windows) instead of a
-/// flat .ini file sharing a folder with SeamlyMe's. The "common" settings (shared across
-/// Seamly apps, see VCommonSettings) live beside that directory in
-/// AppData/Local/Seamly/qt6_common.ini; migrateCommonSettingsLocation() bridges them
-/// forward from the old Roaming location and from the pre-unification "Seamly2DTeam"
-/// folder.
+/// Seamly2D settings live in AppData/Local/Seamly/Seamly2D (Windows).
+/// Settings shared by all Seamly apps (VCommonSettings) live in AppData/Local/Seamly/qt6_common.ini.
+/// migrateCommonSettingsLocation() migrates them from the old Roaming and "Seamly2DTeam" folders.
 void Application2D::openSettings()
 {
     // The shared common settings moved from %APPDATA%\Seamly to
@@ -803,12 +799,9 @@ void Application2D::openSettings()
     // Settle the one shared user-data root before any data path is read.
     VCommonSettings::initializeDataRoot();
 
-    // Create the nine standard subfolders under that root. initializeDataRoot()
-    // only resolves and records the path — it deliberately writes the setting directly
-    // rather than through setDataRoot(), which is the only other caller of
-    // ensureDataRootTree() — so without this a fresh install left the data root recorded
-    // but never created, and Preferences → Paths pointed at nine folders that did not
-    // exist. Purely additive — existing files and folders are left untouched.
+    // Create the nine standard subfolders under the data root.
+    // initializeDataRoot() records the path but does not create the folders.
+    // Existing files and folders stay unchanged.
     VCommonSettings::ensureDataRootTree(VCommonSettings::dataRoot());
 
     // seamly2d's own settings: new per-app directory under "Seamly", migrated forward

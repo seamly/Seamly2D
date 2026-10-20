@@ -9,7 +9,7 @@
 //
 // This is the SeamlyLayout half of the Seamly2D Layout Mode handoff.
 //
-// Transport 1 — a file path (Task 49, still supported):
+// Transport 1 — a file path:
 //
 //     SeamlyLayout <absolute path to some.svg>
 //

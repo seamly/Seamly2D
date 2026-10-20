@@ -4915,7 +4915,7 @@ void MainWindow::Open()
         //Absolute path to last open file
         dir = QFileInfo(files.first()).absolutePath();
     }
-    // Task Seamly2D.2.1: with no usable recent-file folder, fall back to the
+    // with no usable recent-file folder, fall back to the
     // configured patterns folder — never the bare home directory.
     if (dir.isEmpty() || !QDir(dir).exists())
     {

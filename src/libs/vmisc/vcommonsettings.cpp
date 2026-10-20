@@ -472,7 +472,7 @@ QString readDataRoot()
  * Linux, ~/Library/Preferences on macOS — so the change from Qt's IniFormat/UserScope
  * default (%APPDATA%, Roaming) affects Windows only. Local, not Roaming, because the
  * file's paths/* values are absolute machine paths: a roaming Windows profile would
- * carry them to a machine where they are wrong. Task SettingsFiles.1.
+ * carry them to a machine where they may be wrong.
  *
  * Every application sets "Seamly", so all of them resolve one file.
  *
@@ -517,17 +517,15 @@ void VCommonSettings::setCommonSettingsBaseDir(const QString &baseDir)
  * @brief migrateCommonSettingsLocation brings an existing common settings file forward
  * into commonSettingsFilePath().
  *
- * Candidate sources, newest first; the first one that exists is copied:
+ * Copies the first source that exists, newest first:
  *
- *  1. the pre-move file under Qt's IniFormat/UserScope default (%APPDATA%\Seamly on
- *     Windows — identical to the target on Linux and macOS, so skipped there);
- *  2. the pre-Task-15 "Seamly2DTeam" organization's qt6_common.ini;
- *  3. the qt5-era common.ini from either of those folders.
+ *  1. %APPDATA%\Seamly\qt6_common.ini (Windows only; same as the target on Linux and macOS);
+ *  2. the old "Seamly2DTeam" folder's qt6_common.ini;
+ *  3. the qt5-era common.ini from either folder.
  *
- * Copy-if-missing and re-entrant: once the target exists, every later call is a cheap
- * no-op, and no source file is ever modified or deleted — a rollback to an earlier
- * release keeps working. Called from each application's openSettings() before any
- * settings value is read.
+ * Does nothing once the target exists. Never changes or deletes a source file,
+ * so a rollback to an earlier release still works.
+ * Each application's openSettings() calls it before it reads any setting.
  *
  * @return absolute path of the common settings file at its current location.
  */

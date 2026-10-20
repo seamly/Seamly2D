@@ -6,7 +6,7 @@
  **  @brief
  **  Unit tests for the SeamlySuitePaths install-directory lookup helpers
  **  (the flat layout every current installer produces, vs the legacy
- **  "SeamlyLayout" subdirectory layout the pre-Task-30 Windows MSI used).
+ **  "SeamlyLayout" subdirectory layout test approach).
  **
  **  @copyright
  **  This source code is part of the Seamly2D project, a pattern making
@@ -113,10 +113,10 @@ void TST_SeamlySuitePaths::FindsFlatExecutable() const
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief FindsSubdirectoryExecutable verifies the legacy pre-Task-30 Windows
+ * @brief FindsSubdirectoryExecutable verifies the legacy Windows
  * MSI layout is still found: the executable inside a "SeamlyLayout"
- * subdirectory of the install directory, where it carried its own Qt runtime
- * (Task 13). No current installer produces this layout, but an install made by
+ * subdirectory of the install directory, where it carried its own Qt runtime.
+ * No current installer produces this layout, but an install made by
  * an older MSI can still be on disk, so the fallback must keep working.
  */
 void TST_SeamlySuitePaths::FindsSubdirectoryExecutable() const
@@ -290,7 +290,7 @@ void TST_SeamlySuitePaths::DevBuildFoundFromDebugShadowBuild() const
  * @brief DevBuildReleaseTakesPrecedenceOverDebug verifies that when a developer
  * has built both configurations, Release wins.
  *
- * The hard-coded path this lookup replaced (Task 50) named the Debug build
+ * The hard-coded path this lookup replaced named the Debug build
  * unconditionally, so it could hand off a build arbitrarily older than the
  * Release binary sitting beside it.
  */

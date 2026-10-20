@@ -71,17 +71,11 @@ namespace InstallerRecord
  * @brief dataRoot returns the user-data root the Windows installer recorded.
  *
  * Setup asks "Where do you keep your work?" and writes the answer to the DataRoot value.
- * Without this the answer was inert: every app resolved its own default instead, so a user
- * who chose a non-default root in Setup got the built-in default instead (Task
- * InstWinX64.00).
+ * Empty means use the built-in default.
  *
- * The value is machine-wide, so each user adopts it once, on that user's first run, into
- * their own settings file. A user who later changes the root in Preferences keeps that
- * choice — VCommonSettings::initializeDataRoot() reads the settings file first and never
- * comes back here.
- *
- * Setup leaves the value empty when nothing chose a root, which is the signal to use the
- * built-in default.
+ * The value is machine-wide. Each user copies it into their own settings file on first run.
+ * VCommonSettings::initializeDataRoot() reads the settings file first,
+ * so a later change in Preferences wins.
  *
  * @return absolute path recorded by the installer, in Qt's '/' separator form; empty when
  * no installer recorded one, and always empty off Windows.

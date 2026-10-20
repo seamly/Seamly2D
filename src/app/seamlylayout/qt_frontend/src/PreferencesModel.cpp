@@ -79,19 +79,15 @@ QString installerDataRoot()
 } // installerDataRoot
 #endif // Q_OS_WIN
 
-// Forward declaration — defined further down; migrateLegacyOrganizationTree() (added for
-// Task 15) needs it before its definition appears in this file.
+// Defined below; migrateLegacyOrganizationTree() calls it first.
 bool copyIfMissing(const QString &sourcePath, const QString &destPath);
 
 // @brief Recursively copy every entry from a legacy organization directory tree into the
 // new one, skipping anything the destination already has.
 //
-// Task 15: seamlyLayout's organization name changed from "Seamly Systems" to the shared
-// "Seamly" (see seamlyLayout_main.mm), so QStandardPaths::AppConfigLocation now resolves to a brand
-// new, empty directory. This bridges every settings/preferences file forward from the old
-// organization folder the first time the new one is resolved. Safe to call unconditionally
-// on every appConfigRootPath() call — once everything has been copied across it is a cheap
-// no-op (copyIfMissing never overwrites an existing destination file).
+// The organization name changed from "Seamly Systems" to "Seamly" (see seamlyLayout_main.mm).
+// QStandardPaths::AppConfigLocation now resolves to a new, empty directory.
+// Safe to call on every appConfigRootPath() call: copyIfMissing() never overwrites a file.
 void migrateLegacyOrganizationTree(const QString &legacyRoot, const QString &newRoot)
 {
     const QDir legacyDir(legacyRoot);
@@ -114,12 +110,9 @@ void migrateLegacyOrganizationTree(const QString &legacyRoot, const QString &new
 // @brief Return the writable app-config root path.
 // Falls back to <exeDir> only if Qt cannot provide AppConfigLocation.
 //
-// Task 15: also bridges data forward from the pre-unification "Seamly Systems"
-// organization folder into the new shared "Seamly" one on first use. The legacy root is
-// computed by asking QStandardPaths for AppConfigLocation under the old organization name
-// (temporarily swapped in), which reconstructs the exact platform-specific legacy path
-// (Windows/macOS/Linux each resolve AppConfigLocation differently) without hard-coding any
-// of that platform logic here.
+// On first use, also migrates data from the old "Seamly Systems" folder to "Seamly".
+// The old organization name is swapped in briefly to get the legacy AppConfigLocation.
+// Qt resolves that path for each platform, so no platform logic is hard-coded here.
 QString appConfigRootPath()
 {
     QString root = QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
@@ -582,12 +575,10 @@ bool PreferencesModel::load(const QString &path)
     } // if legacy JSON or defaults profile
 
     if (!QFileInfo::exists(absolutePath)) {
-        // DEPRECATED first-run seeding (Task SettingsFiles.3, 2026-08-31). The
-        // Windows MSI seeds a complete qt6_seamlylayout.ini at install time
-        // (packaging/windows/smsi_ensure_user_data.ps1), so on an installed
-        // Windows machine this branch never runs. It stays only for packages
-        // with no install hook — the macOS dmg, the Linux AppImage/Flatpak,
-        // dev builds. Remove it when those packages gain install-time seeding.
+        // DEPRECATED first-run seeding. The Windows MSI seeds qt6_seamlylayout.ini at install
+        // (packaging/windows/smsi_ensure_user_data.ps1), so this never runs there.
+        // Kept for the macOS dmg, Linux AppImage/Flatpak and dev builds, which have no install hook.
+        // Remove it when those packages seed at install time.
         if (QFileInfo(absolutePath).fileName() != QString::fromUtf8(kPreferencesFileName)) {
             Logger::log(QStringLiteral("PreferencesModel::load(): INI file not found"));
             return false;
@@ -635,11 +626,9 @@ bool PreferencesModel::load(const QString &path)
     migrateLegacyPreferencePaths();
     adoptInstallerDataRootIfEmpty(absolutePath);
 
-    // Task SettingsFiles.6: an installer-seeded ini skips the deprecated first-run
-    // seeding above, so nothing created the defaults profile the ini's
-    // preferences_file key names. Seed it here, on demand — the same app-side rule
-    // resolvedSettingsDirectory() applies to default_settings.json. Never overwrites
-    // an existing profile.
+    // An installer-seeded ini skips first-run seeding.
+    // The profile named by preferences_file can be missing, so seed it on demand.
+    // resolvedSettingsDirectory() does the same for default_settings.json.
     const QString defaultsProfile = preferencesFilePath();
     if (!QFileInfo::exists(defaultsProfile) && seedFromBundledDefaults(defaultsProfile)) {
         Logger::log(QStringLiteral("PreferencesModel::load(): seeded missing defaults profile ")
@@ -875,21 +864,10 @@ QString PreferencesModel::localFileToUrl(const QString &path)
     return QUrl::fromLocalFile(path).toString();
 } // localFileToUrl
 
-// @brief Return the file:// URL of the default input directory.
-// Uses QCoreApplication::applicationDirPath() so the path is absolute regardless
-// of the process working directory.  The returned URL is suitable for
-// FileDialog.currentFolder.
-//
-// Task 16: on macOS a signed, notarized .app bundle is read-only, so the exe-relative
-// default used on Windows/Linux would fail to create — fall back to the writable
-// AppConfigLocation root there instead (the same "Seamly/SeamlyLayout" tree the settings
-// and preferences files already live under).
-// Task 17: a Linux AppImage mounts its payload read-only too, so the exe-relative default
-// fails there for the same reason — detected at runtime via Platform::isAppImage() (the
-// distinction is only known at runtime, unlike macOS's compile-time bundle case), falling
-// back the same way. A normal (non-AppImage) Linux install keeps the exe-relative default.
-// Task 18: a Flatpak sandbox mounts the /app prefix read-only in exactly the same way, so
-// Platform::isFlatpak() (also a runtime check) is treated identically to the AppImage case.
+// @brief Return the file:// URL of the default input directory, for FileDialog.currentFolder.
+// Windows and native Linux: <applicationDirPath>/input, absolute regardless of working directory.
+// A macOS bundle, an AppImage and a Flatpak are read-only, so they use <AppConfigLocation>/input.
+// macOS is known at build time. AppImage and Flatpak need a runtime check.
 QString PreferencesModel::defaultInputFolderUrl()
 {
 #if defined(Q_OS_MACOS)
@@ -962,7 +940,7 @@ QString PreferencesModel::resolvedSettingsDirectory() const
 //   1. preferences inputDirectory — if non-empty.
 //   2. <dataRoot>/input — if the installer-recorded/adopted data root is set.
 //   3. <exeDir>/input — fallback default (AppConfigLocation root on macOS, or at runtime
-//      inside a read-only Linux AppImage mount or Flatpak /app prefix; see Task 16 / 17 / 18).
+//      inside a read-only Linux AppImage mount or Flatpak /app prefix
 // Relative configured paths are resolved against <exeDir>.
 // Ensures the directory exists before returning.
 QString PreferencesModel::resolvedInputDirectory() const
@@ -971,22 +949,19 @@ QString PreferencesModel::resolvedInputDirectory() const
     const QString appConfigRoot = appConfigRootPath();
 
     if (dir.isEmpty() && !m_dataRoot.isEmpty()) {
-        // InstWinX64.2.13: the installer-recorded data root, once adopted, is the shared
-        // folder Seamly2D/SeamlyMe already write patterns/measurements under. Nest
-        // SeamlyLayout's own input folder under it too, ahead of the exeDir/AppConfigLocation
-        // fallback below, so a fresh install lands input files beside the rest of the suite's
-        // data instead of next to the executable.
+        // Seamly2D and SeamlyMe already store their data under the data root.
+        // Put input files there too, not next to the executable.
         dir = QDir(m_dataRoot).filePath(QStringLiteral("input"));
     } else if (dir.isEmpty()) {
 #if defined(Q_OS_MACOS)
-        // Task 16: a signed .app bundle is read-only — use the writable AppConfigLocation
+        // a signed .app bundle is read-only — use the writable AppConfigLocation
         // root instead of the bundle-relative path used on Windows/Linux.
         dir = appConfigRoot + QStringLiteral("/input");
 #else
-        // Task 17: a mounted Linux AppImage is read-only for the same reason a macOS bundle
-        // is — detect it at runtime (Platform::isAppImage()) and fall back the same way. A
-        // normal (non-AppImage) Linux install, and Windows, keep the exe-relative default.
-        // Task 18: a Flatpak's /app prefix is read-only in the same way, so Platform::
+        // A mounted Linux AppImage is read-only for the same reason a macOS bundle is
+        // Detect it at runtime (Platform::isAppImage()) and fall back the same way.
+        // A normal (non-AppImage) Linux install, and Windows, keep the exe-relative default.
+        // A Flatpak's /app prefix is read-only in the same way, so Platform::
         // isFlatpak() (also runtime-only) triggers the identical AppConfigLocation fallback.
         dir = (Platform::isAppImage() || Platform::isFlatpak())
             ? appConfigRoot + QStringLiteral("/input")
@@ -1070,7 +1045,7 @@ QString PreferencesModel::preferencesFilePath() const
 //   1. preferences layoutDirectory — if non-empty.
 //   2. <dataRoot>/output — if the installer-recorded/adopted data root is set.
 //   3. <exeDir>/output — fallback default (AppConfigLocation root on macOS, or at runtime
-//      inside a read-only Linux AppImage mount or Flatpak /app prefix; see Task 16 / 17 / 18).
+//      inside a read-only Linux AppImage mount or Flatpak /app prefix
 // Ensures the directory exists before returning.
 QString PreferencesModel::resolvedLayoutDirectory() const
 {
@@ -1086,14 +1061,14 @@ QString PreferencesModel::resolvedLayoutDirectory() const
         dir = QDir(m_dataRoot).filePath(QStringLiteral("output"));
     } else if (dir.isEmpty()) {
 #if defined(Q_OS_MACOS)
-        // Task 16: a signed .app bundle is read-only — use the writable AppConfigLocation
+        // A signed .app bundle is read-only — use the writable AppConfigLocation
         // root instead of the bundle-relative path used on Windows/Linux.
         dir = appConfigRoot + QStringLiteral("/output");
 #else
-        // Task 17: a mounted Linux AppImage is read-only for the same reason a macOS bundle
+        // A mounted Linux AppImage is read-only for the same reason a macOS bundle
         // is — detect it at runtime (Platform::isAppImage()) and fall back the same way. A
         // normal (non-AppImage) Linux install, and Windows, keep the exe-relative default.
-        // Task 18: a Flatpak's /app prefix is read-only in the same way, so Platform::
+        // A Flatpak's /app prefix is read-only in the same way, so Platform::
         // isFlatpak() (also runtime-only) triggers the identical AppConfigLocation fallback.
         dir = (Platform::isAppImage() || Platform::isFlatpak())
             ? appConfigRoot + QStringLiteral("/output")
