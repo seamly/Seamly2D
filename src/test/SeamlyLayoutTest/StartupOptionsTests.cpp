@@ -96,8 +96,12 @@ QString StartupOptionsTests::makeFile(const QTemporaryDir &directory, const QStr
     const QString path = directory.filePath(fileName);
     QFile file(path);
     // Verified rather than assumed: a silent failure here would make every
-    // assertion below test the "missing file" path by accident.
-    Q_ASSERT(file.open(QIODevice::WriteOnly));
+    // assertion below test the "missing file" path by accident. Not Q_ASSERT:
+    // a release build drops the open() call with the assertion.
+    if (!file.open(QIODevice::WriteOnly))
+    {
+        qFatal("cannot create test file %s", qPrintable(path));
+    }
     file.write("<svg xmlns=\"http://www.w3.org/2000/svg\"/>");
     file.close();
     return QFileInfo(path).absoluteFilePath();
