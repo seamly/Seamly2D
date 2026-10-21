@@ -61,9 +61,14 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
     - Done: `astm_piece_test::piece_on_fold_counts_every_cut_as_right`.
 - [ ] Layout.80.7 Next MSI: Piece Properties > Path, mark two neighbouring nodes Fold Line; check the dashed line, no seam allowance on it, "On fold" checked; save, reopen; Layout Mode handoff has `fold_line`. Mark three nodes: OK disabled.
 
-### Task Layout.82 - Multisize - Nested - wider range of colors.
+### [ ] Task Layout.82 - Multisize - Nested - wider range of colors.
 
 Currently all colors are dark and appear to be repeated across sizes. Use some pastel range colors to ensure all sizes get a uniquely identifiable color. 
+
+- [x] Layout.82.1 New palette. `size_colors::palette_colors`: OKLCH candidates, lightness 0.40 (dark) to 0.80 (pastel), 10° hue steps. The first size is blue. Each next size takes the candidate farthest, in OKLab, from white and from every earlier size.
+  - jacket2, 26 sizes: closest pair 0.11 apart in OKLab. Before: 0.012 (`#085e1d`, `#085e28`). 7 pastel, 5 dark. Distance to white at least 0.2.
+- [x] Layout.82.2 Tests: `size_colors` `palette_colors_differ_and_show_on_white`, `palette_spans_dark_to_pastel`, `palette_repeats_only_past_the_candidates`. `cargo test --workspace` 561 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
+- [ ] Layout.82.3 Next MSI: user check, `AGENT_CHECKLIST.md` §16.
 
 ### [ ] Task Layout.83 - Multisize - Nested - Legend - change legend color from line to rect element with width equal to current legend color line width and height equal to width. (makes legend easier to read)
 
@@ -216,7 +221,7 @@ Note: The piece names in the jacket2 pattern have changed, so items below may re
 
 Currently in the nested layout, all pieces are black. To distinguish between sizes, each size should be assigned a unique color, all pieces of that size will be displayed in that color (cutlines, seamlines, notches, etc.)
 
-- [x] Layout 74.1 - Assign each size a color. `size_colors::size_palette`: smallest size first, golden-angle hue steps, relative luminance at most 0.3.
+- [x] Layout 74.1 - Assign each size a color. `size_colors::size_palette`: smallest size first, golden-angle hue steps, relative luminance at most 0.3. Layout.82 replaced this palette.
 - [x] Layout 74.2 - Assign each piece its color based on its size. These colors are displayed in the Nested layout, and included in all exports except DXF (Nested can't be exported to DXF). `color_pieces_by_size`, called by `do_process_layout` (Nested only) and `build_sheet_export_inputs` (paper-sheet PDF).
 - [x] Layout 74.3 - Create a color-to-size legend. Place this legend on the Nested Layout. `SizeLegend`: `<g id="size_legend" data-type="size_legend">`, one piece gap below the lowest piece; the media grows to hold it (tiled: more tile rows). Text modes and HPGL treat it as a label. Not on the paper-sheet PDF, which repacks the pieces.
 - [ ] Layout 74.4 - Test/Verify using a multisize pattern. Next MSI: jacket2, Nested tab, then Export > SVG, PDF, PNG.

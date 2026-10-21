@@ -10,10 +10,11 @@
 // color; every line, notch and label of a piece of that size takes it. The
 // legend lists "Size <size>" beside a square filled with its color.
 //
-// Colors follow the size order, smallest size first. Each next color turns the
-// hue by the golden angle, so neighbor sizes, which lie closest in the stack,
-// get very different hues. Lightness alternates between two values, and a color
-// brighter than `MAX_LUMINANCE` is darkened, so every color shows on white.
+// Colors follow the size order, smallest size first. The candidate colors run
+// from dark to pastel in every hue. The first size gets blue. Each next size gets
+// the candidate farthest from white and from every color given so far, so no two
+// sizes look alike and every color shows on white. Distances are in OKLab, where
+// equal distances look about equally different.
 
 use xmltree::{Element, XMLNode};
 
@@ -47,50 +48,113 @@ pub(crate) fn size_palette(sizes: &[String]) -> Vec<SizeColor> {
     let mut sorted: Vec<&String> = sizes.iter().collect();
     sorted.sort_by(|a, b| compare_sizes(a, b));
     sorted.dedup();
-    sorted.into_iter().enumerate()
-        .map(|(i, size)| SizeColor { size: size.clone(), color: palette_color(i) })
+    let colors = palette_colors(sorted.len());
+    sorted.into_iter().zip(colors)
+        .map(|(size, color)| SizeColor { size: size.clone(), color })
         .collect()
 } // fn size_palette
 
-// Highest relative luminance of a size color (0 black, 1 white).
-const MAX_LUMINANCE: f64 = 0.3;
+// Candidate colors, in OKLCH: OKLab lightness, chroma and hue.
+// Lightness runs from dark to pastel; a lighter color is hard to see on white media.
+const LIGHTNESS_LEVELS: [f64; 5] = [0.40, 0.50, 0.60, 0.70, 0.80];
+const HUE_STEP_DEG: usize = 10;
+// More chroma leaves sRGB in most hues and adds little difference.
+const MAX_CHROMA: f64 = 0.20;
+// A color with less chroma looks gray.
+const MIN_CHROMA: f64 = 0.07;
+// The smallest size is blue.
+const FIRST_LIGHTNESS: f64 = 0.50;
+const FIRST_HUE_DEG: usize = 260;
+// The media color; no size color comes close to it.
+const WHITE: Oklab = [1.0, 0.0, 0.0];
 
-// @brief Color number `index`: golden-angle hue steps, two lightness values, never too bright.
-fn palette_color(index: usize) -> String {
-    const GOLDEN_ANGLE_DEG: f64 = 137.507_764;
-    const START_HUE_DEG: f64 = 220.0; // blue for the smallest size
-    let hue = (START_HUE_DEG + index as f64 * GOLDEN_ANGLE_DEG) % 360.0;
-    let mut lightness = if index % 2 == 0 { 0.42 } else { 0.32 };
-    // Yellow and green look much brighter than blue at one lightness.
-    while lightness > 0.1 && luminance(hsl_to_rgb(hue, 0.85, lightness)) > MAX_LUMINANCE {
-        lightness -= 0.02;
-    } // while too bright
-    let (r, g, b) = hsl_to_rgb(hue, 0.85, lightness);
+// @brief An OKLab color: lightness, then the green-red and blue-yellow axes.
+type Oklab = [f64; 3];
+
+// @brief `count` colors, `#rrggbb`, one per size in size order.
+//
+// The first size gets blue. Each next size gets the candidate farthest from
+// white and from every color given so far. More sizes than candidates repeat
+// the colors from the start.
+fn palette_colors(count: usize) -> Vec<String> {
+    let candidates = candidate_colors();
+    let first = oklch(FIRST_LIGHTNESS, FIRST_HUE_DEG).expect("blue holds chroma");
+    // Distance from each candidate to white and to the nearest color given so far.
+    let mut nearest: Vec<f64> = candidates.iter().map(|c| distance(c, &WHITE)).collect();
+    let mut picks: Vec<Oklab> = Vec::new();
+    while picks.len() < count.min(candidates.len()) {
+        let pick = if picks.is_empty() {
+            first
+        } else {
+            // The farthest candidate; on a tie the first, so the order never changes.
+            let farthest = (0..candidates.len()).fold(0, |best, i| if nearest[i] > nearest[best] { i } else { best });
+            candidates[farthest]
+        }; // if first size
+        for (d, candidate) in nearest.iter_mut().zip(&candidates) {
+            *d = d.min(distance(candidate, &pick));
+        } // for candidate
+        picks.push(pick);
+    } // while colors needed
+    (0..count).map(|i| hex(&picks[i % picks.len()])).collect()
+} // fn palette_colors
+
+// @brief Each lightness level in each hue step, at the most chroma sRGB holds; gray ones left out.
+fn candidate_colors() -> Vec<Oklab> {
+    LIGHTNESS_LEVELS.iter()
+        .flat_map(|&lightness| (0..360).step_by(HUE_STEP_DEG).filter_map(move |hue| oklch(lightness, hue)))
+        .collect()
+} // fn candidate_colors
+
+// @brief The color of this lightness and hue with the most chroma, up to `MAX_CHROMA`, that sRGB holds.
+// @return None when that chroma is below `MIN_CHROMA`.
+fn oklch(lightness: f64, hue_deg: usize) -> Option<Oklab> {
+    let (sin, cos) = (hue_deg as f64).to_radians().sin_cos();
+    let at = |chroma: f64| [lightness, chroma * cos, chroma * sin];
+    let mut chroma = MAX_CHROMA;
+    if !in_srgb(&at(chroma)) {
+        // Bisect between gray, which sRGB holds, and MAX_CHROMA, which it does not.
+        let (mut inside, mut outside) = (0.0, MAX_CHROMA);
+        for _ in 0..24 {
+            let middle = (inside + outside) / 2.0;
+            if in_srgb(&at(middle)) { inside = middle } else { outside = middle }
+        } // for step
+        chroma = inside;
+    } // if out of sRGB
+    (chroma >= MIN_CHROMA).then(|| at(chroma))
+} // fn oklch
+
+// @brief True when every linear sRGB channel of `color` is in 0–1.
+fn in_srgb(color: &Oklab) -> bool {
+    linear_srgb(color).iter().all(|c| (0.0..=1.0).contains(c))
+} // fn in_srgb
+
+// @brief Linear sRGB channels of an OKLab color (Björn Ottosson's matrices).
+fn linear_srgb(&[lightness, a, b]: &Oklab) -> [f64; 3] {
+    let l = (lightness + 0.396_337_777_4 * a + 0.215_803_757_3 * b).powi(3);
+    let m = (lightness - 0.105_561_345_8 * a - 0.063_854_172_8 * b).powi(3);
+    let s = (lightness - 0.089_484_177_5 * a - 1.291_485_548_0 * b).powi(3);
+    [
+        4.076_741_662_1 * l - 3.307_711_591_3 * m + 0.230_969_929_2 * s,
+        -1.268_438_004_6 * l + 2.609_757_401_1 * m - 0.341_319_396_5 * s,
+        -0.004_196_086_3 * l - 0.703_418_614_7 * m + 1.707_614_701_0 * s,
+    ]
+} // fn linear_srgb
+
+// @brief `#rrggbb` of an OKLab color inside sRGB.
+fn hex(color: &Oklab) -> String {
+    let byte = |linear: f64| {
+        let linear = linear.max(0.0);
+        let encoded = if linear <= 0.003_130_8 { 12.92 * linear } else { 1.055 * linear.powf(1.0 / 2.4) - 0.055 };
+        (encoded * 255.0).round().clamp(0.0, 255.0) as u8
+    };
+    let [r, g, b] = linear_srgb(color).map(byte);
     format!("#{r:02x}{g:02x}{b:02x}")
-} // fn palette_color
+} // fn hex
 
-// @brief Relative luminance of an sRGB color, without gamma correction.
-fn luminance((r, g, b): (u8, u8, u8)) -> f64 {
-    (0.2126 * r as f64 + 0.7152 * g as f64 + 0.0722 * b as f64) / 255.0
-} // fn luminance
-
-// @brief Convert HSL (hue in degrees, saturation and lightness 0–1) to RGB bytes.
-fn hsl_to_rgb(hue: f64, saturation: f64, lightness: f64) -> (u8, u8, u8) {
-    let chroma = (1.0 - (2.0 * lightness - 1.0).abs()) * saturation;
-    let sector = hue / 60.0;
-    let x = chroma * (1.0 - (sector % 2.0 - 1.0).abs());
-    let (r, g, b) = match sector as u32 {
-        0 => (chroma, x, 0.0),
-        1 => (x, chroma, 0.0),
-        2 => (0.0, chroma, x),
-        3 => (0.0, x, chroma),
-        4 => (x, 0.0, chroma),
-        _ => (chroma, 0.0, x),
-    }; // match sector
-    let m = lightness - chroma / 2.0;
-    let byte = |v: f64| ((v + m) * 255.0).round().clamp(0.0, 255.0) as u8;
-    (byte(r), byte(g), byte(b))
-} // fn hsl_to_rgb
+// @brief Euclidean OKLab distance.
+fn distance(p: &Oklab, q: &Oklab) -> f64 {
+    p.iter().zip(q).map(|(a, b)| (a - b) * (a - b)).sum::<f64>().sqrt()
+} // fn distance
 
 // @brief Color every sized piece inside a top-level piece-set by its size.
 //
@@ -299,24 +363,73 @@ mod tests {
   </g>
 </svg>"##;
 
-    // @brief Every color differs, is `#rrggbb`, and is dark enough to show on white.
+    // Smallest OKLab distance of a size color to another size color, and to white.
+    // The golden-angle palette had two of 26 sizes 0.012 apart.
+    const MIN_SIZE_DISTANCE: f64 = 0.1;
+    const MIN_WHITE_DISTANCE: f64 = 0.2;
+
+    // @brief OKLab of a `#rrggbb` color, so a test reads what the SVG gets.
+    fn oklab_of(color: &str) -> Oklab {
+        let linear = |i: usize| {
+            let c = u8::from_str_radix(&color[i..i + 2], 16).unwrap() as f64 / 255.0;
+            if c <= 0.040_45 { c / 12.92 } else { ((c + 0.055) / 1.055).powf(2.4) }
+        };
+        let (r, g, b) = (linear(1), linear(3), linear(5));
+        let l = (0.412_221_470_8 * r + 0.536_332_536_3 * g + 0.051_445_992_9 * b).cbrt();
+        let m = (0.211_903_498_2 * r + 0.680_699_545_1 * g + 0.107_396_956_6 * b).cbrt();
+        let s = (0.088_302_461_9 * r + 0.281_718_837_6 * g + 0.629_978_700_5 * b).cbrt();
+        [
+            0.210_454_255_3 * l + 0.793_617_785_0 * m - 0.004_072_046_8 * s,
+            1.977_998_495_1 * l - 2.428_592_205_0 * m + 0.450_593_709_9 * s,
+            0.025_904_037_1 * l + 0.782_771_766_2 * m - 0.808_675_766_0 * s,
+        ]
+    } // fn oklab_of
+
+    // @brief 26 sizes: each color is `#rrggbb`, far from every other size and from white; the first is blue.
     #[test]
-    fn palette_colors_are_distinct_and_dark() {
+    fn palette_colors_differ_and_show_on_white() {
         let sizes: Vec<String> = (0..26).map(|i| (220 + 20 * i).to_string()).collect();
         let palette = size_palette(&sizes);
         assert_eq!(palette.len(), 26);
         assert_eq!(palette[0].size, "220");
-        let mut colors: Vec<&str> = palette.iter().map(|p| p.color.as_str()).collect();
-        for color in &colors {
-            assert!(color.len() == 7 && color.starts_with('#'), "{color}");
-            let channel = |i: usize| u8::from_str_radix(&color[i..i + 2], 16).unwrap();
-            let lum = luminance((channel(1), channel(3), channel(5)));
-            assert!(lum <= MAX_LUMINANCE, "{color} too light: {lum}");
+        for entry in &palette {
+            assert!(entry.color.len() == 7 && entry.color.starts_with('#'), "{}", entry.color);
+        } // for entry
+        let colors: Vec<Oklab> = palette.iter().map(|p| oklab_of(&p.color)).collect();
+        for (i, color) in colors.iter().enumerate() {
+            let white = distance(color, &WHITE);
+            assert!(white >= MIN_WHITE_DISTANCE, "size {} {} near white: {white:.3}", palette[i].size, palette[i].color);
+            for (j, other) in colors.iter().enumerate().skip(i + 1) {
+                let apart = distance(color, other);
+                assert!(apart >= MIN_SIZE_DISTANCE, "sizes {} {} and {} {} look alike: {apart:.3}",
+                    palette[i].size, palette[i].color, palette[j].size, palette[j].color);
+            } // for other
         } // for color
-        colors.sort();
-        colors.dedup();
-        assert_eq!(colors.len(), 26, "colors repeat");
-    } // palette_colors_are_distinct_and_dark
+        let channel = |i: usize| u8::from_str_radix(&palette[0].color[i..i + 2], 16).unwrap();
+        assert!(channel(5) > channel(1) && channel(5) > channel(3), "first size not blue: {}", palette[0].color);
+    } // palette_colors_differ_and_show_on_white
+
+    // @brief 26 sizes get both dark and pastel colors.
+    #[test]
+    fn palette_spans_dark_to_pastel() {
+        let colors: Vec<Oklab> = palette_colors(26).iter().map(|c| oklab_of(c)).collect();
+        let dark = colors.iter().filter(|c| c[0] <= 0.45).count();
+        let pastel = colors.iter().filter(|c| c[0] >= 0.75).count();
+        assert!(dark >= 4 && pastel >= 4, "dark {dark}, pastel {pastel}");
+    } // palette_spans_dark_to_pastel
+
+    // @brief No color repeats until every candidate is used; then the colors repeat in order.
+    #[test]
+    fn palette_repeats_only_past_the_candidates() {
+        let count = candidate_colors().len();
+        let colors = palette_colors(count + 2);
+        let mut distinct = colors[..count].to_vec();
+        distinct.sort();
+        distinct.dedup();
+        assert_eq!(distinct.len(), count, "colors repeat");
+        assert_eq!(colors[count..], colors[..2]);
+        assert!(palette_colors(0).is_empty());
+    } // palette_repeats_only_past_the_candidates
 
     // @brief Sizes sort by number, smallest first, whatever order they arrive in.
     #[test]

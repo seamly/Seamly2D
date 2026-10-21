@@ -22,6 +22,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.73.5 | 1, 5 | Unique piece names | PASS
 | Seamly2D.12.8 | 14 | SeamlyLayout opens in front | PASS
 | Layout.83.4 | 15 | Nested legend squares |
+| Layout.82.3 | 16 | Nested size colors: dark and pastel |
 
 ## [x] 0. Install
 
@@ -210,3 +211,14 @@ Needs the next MSI. Settings from section 1: Paper, Roll, 48 in.
 - [ ] Each square is as wide as the old color line and as high as it is wide.
 - [ ] Rows do not overlap. The frame holds every entry.
 - [ ] Export > SVG and Export > PDF: the legend shows the same squares.
+
+## 16. jacket2: Nested size colors
+
+Needs the next MSI. Settings from section 1: Paper, Roll, 48 in.
+
+- [ ] Nested tab: dark and pastel colors both appear.
+- [ ] No two sizes look alike. Neighbor sizes in a stack differ clearly.
+- [ ] Size 220 is blue.
+- [ ] Pastel lines show on the white canvas.
+- [ ] Each legend color matches its size on the pieces.
+- [ ] Export > SVG, PDF and PNG: the files keep the colors.
