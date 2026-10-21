@@ -21,6 +21,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.28.7 | 13 | Built-in seam line | ?
 | Layout.73.5 | 1, 5 | Unique piece names | PASS
 | Seamly2D.12.8 | 14 | SeamlyLayout opens in front | PASS
+| Layout.83.4 | 15 | Nested legend squares |
 
 ## [x] 0. Install
 
@@ -200,3 +201,12 @@ Needs the next MSI.
 - [ ] Close SeamlyLayout. Press Layout, then Cancel in the progress dialog:
   - [ ] Seamly2D returns to Draft mode. No SeamlyLayout opens.
   - [ ] Press Layout again: SeamlyLayout opens.
+
+## 15. jacket2: Nested legend squares
+
+Needs the next MSI. Settings from section 1: Paper, Roll, 48 in.
+
+- [ ] Nested tab: below the pieces, each legend entry shows a filled square in its size color, then "Size <size>".
+- [ ] Each square is as wide as the old color line and as high as it is wide.
+- [ ] Rows do not overlap. The frame holds every entry.
+- [ ] Export > SVG and Export > PDF: the legend shows the same squares.

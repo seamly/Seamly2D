@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-10-21 — Nested legend square swatches, merged into local `run-seamlyLayout`, not pushed
+
+- `size_colors.rs` `SizeLegend::element`: each swatch is a 32 × 32 px `rect` in the size color, no stroke. Was a 32 px line.
+- Row height 24 → 40 px (swatch plus one pad); the legend is taller.
+- Verified: `cargo test --workspace` 561 passed. Not run: ctest (no C++/QML change), MSI (ask first).
+- User check: Layout.83.4, `AGENT_CHECKLIST.md` §15.
+- Peer session `seamly2d-private-00` works on Layout.82 (palette) in the same file; asked to use checklist §16.
+
 ### 2026-10-21 — MSI 26.10.2023 test results recorded, committed on local `run-seamlyLayout`, not pushed
 
 - User passed: Layout.38.6, 67.8, 25.7, 24.7, 26.7, 27.3.3, 69.3, 73.5, 75.2, PDF true size, Seamly2D.12.8.

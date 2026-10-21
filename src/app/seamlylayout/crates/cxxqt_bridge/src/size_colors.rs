@@ -8,7 +8,7 @@
 //
 // The Nested tab stacks every size of a piece in one place. Each size gets one
 // color; every line, notch and label of a piece of that size takes it. The
-// legend lists "Size <size>" beside a line in its color.
+// legend lists "Size <size>" beside a square filled with its color.
 //
 // Colors follow the size order, smallest size first. Each next color turns the
 // hue by the golden angle, so neighbor sizes, which lie closest in the stack,
@@ -24,9 +24,11 @@ pub(crate) const LEGEND_TYPE: &str = "size_legend";
 
 // Legend geometry, in layout pixels (96 per inch).
 const LEGEND_FONT_PX: f64 = 16.0;
-const LEGEND_ROW_PX: f64 = 24.0;
 const LEGEND_PAD_PX: f64 = 8.0;
+// Side of the square swatch.
 const LEGEND_SWATCH_PX: f64 = 32.0;
+// A row holds one swatch, with one pad between rows.
+const LEGEND_ROW_PX: f64 = LEGEND_SWATCH_PX + LEGEND_PAD_PX;
 const LEGEND_SWATCH_GAP_PX: f64 = 6.0;
 const LEGEND_COLUMN_GAP_PX: f64 = 16.0;
 // Text width per character, as a part of the font size; wide enough for digits in a sans font.
@@ -237,10 +239,11 @@ impl SizeLegend {
         for (i, entry) in self.entries.iter().enumerate() {
             let left = x + LEGEND_PAD_PX + (i % self.columns) as f64 * self.entry_w;
             let middle = y + LEGEND_PAD_PX + (i / self.columns) as f64 * LEGEND_ROW_PX + LEGEND_ROW_PX / 2.0;
-            // Swatch: a short thick line in the size color.
-            group.children.push(XMLNode::Element(element("path", &[
-                ("d", format!("M{},{} L{},{}", fmt(left), fmt(middle), fmt(left + LEGEND_SWATCH_PX), fmt(middle))),
-                ("fill", "none".into()), ("stroke", entry.color.clone()), ("stroke-width", "4".into()),
+            // Swatch: a square filled with the size color, centered on the row.
+            group.children.push(XMLNode::Element(element("rect", &[
+                ("x", fmt(left)), ("y", fmt(middle - LEGEND_SWATCH_PX / 2.0)),
+                ("width", fmt(LEGEND_SWATCH_PX)), ("height", fmt(LEGEND_SWATCH_PX)),
+                ("fill", entry.color.clone()), ("stroke", "none".into()),
             ])));
             // Text: baseline a third of the font size below the middle of the row.
             let mut text = element("text", &[
@@ -368,9 +371,36 @@ mod tests {
             .filter(|e| e.name == "text").map(|e| e.get_text().unwrap_or_default().to_string()).collect();
         assert_eq!(texts.len(), 26);
         assert_eq!((texts[0].as_str(), texts[25].as_str()), ("Size 220", "Size 720"));
-        let swatches = group.children.iter().filter_map(|n| n.as_element())
-            .filter(|e| e.name == "path").count();
-        assert_eq!(swatches, 26);
+        // The first rect is the frame; each next rect is one swatch.
+        let swatches: Vec<&Element> = group.children.iter().filter_map(|n| n.as_element())
+            .filter(|e| e.name == "rect").skip(1).collect();
+        assert_eq!(swatches.len(), 26);
         assert!(SizeLegend::new(Vec::new(), 600).is_none());
     } // legend_wraps_and_lists_every_size
+
+    // @brief Each swatch is a square in its size color, no taller than its row.
+    #[test]
+    fn legend_swatches_are_filled_squares() {
+        let palette = size_palette(&["34".into(), "36".into(), "38".into()]);
+        let legend = SizeLegend::new(palette.clone(), 200).expect("legend");
+        assert!(legend.rows() > 1, "test needs more than one row");
+        let group = legend.element(0.0, 0.0);
+        let swatches: Vec<&Element> = group.children.iter().filter_map(|n| n.as_element())
+            .filter(|e| e.name == "rect").skip(1).collect();
+        assert_eq!(swatches.len(), palette.len());
+        let number = |e: &Element, name: &str| -> f64 { e.attributes[name].parse().unwrap() };
+        for (swatch, entry) in swatches.iter().zip(&palette) {
+            assert_eq!(number(swatch, "width"), LEGEND_SWATCH_PX);
+            assert_eq!(number(swatch, "height"), LEGEND_SWATCH_PX);
+            assert_eq!(swatch.attributes["fill"], entry.color);
+            assert_eq!(swatch.attributes["stroke"], "none");
+        } // for swatch
+        // Rows do not overlap: the second row starts below the first swatch.
+        let first_bottom = number(swatches[0], "y") + LEGEND_SWATCH_PX;
+        let next_row_top = swatches.iter().map(|s| number(s, "y")).fold(f64::MIN, f64::max);
+        assert!(next_row_top > first_bottom, "row top {next_row_top} above swatch bottom {first_bottom}");
+        // The frame holds every swatch.
+        let last_bottom = next_row_top + LEGEND_SWATCH_PX;
+        assert!(last_bottom <= legend.height_px() as f64, "swatch bottom {last_bottom} past frame");
+    } // legend_swatches_are_filled_squares
 } // mod tests
