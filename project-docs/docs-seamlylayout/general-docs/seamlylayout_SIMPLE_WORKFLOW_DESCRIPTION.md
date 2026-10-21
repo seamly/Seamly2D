@@ -168,7 +168,9 @@ The application workflow loop consists of:
      * Before the layout, `do_find_oversized_pieces` lists each piece wider than the media, or longer than a sheet, at every trial angle.
        Paper roll and fabric have no length limit.
      * None: the layout runs as before. A piece that fits but runs out of room is left out, and a warning names it.
-     * Some: no layout yet. Dialog "Pieces do not fit the media" lists them, with two radio buttons:
+     * Some: no layout yet. Dialog "Pieces do not fit the media" lists them, with two radio buttons.
+       One line per piece names each dimension that does not fit, and the media size inside the margins, in the settings unit:
+       "• Back: length 43.10 in, media 35.50 in". A long list scrolls; the buttons stay visible.
        * "Split the pieces" (default; SVG, PDF, HPGL, EPS, PS, PNG, JPG): each such piece splits into equal parts that fit.
          Each part gets a label "<name> part i of n, joins j" and 2 match notches per shared cut edge. No seam allowance on a cut edge.
          The paper-sheet PDF export splits the same way. See `SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout split parts".

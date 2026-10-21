@@ -13,8 +13,9 @@ For oversized individual-pattern pieces, ask whether to split them or enlarge th
 - Enlarge media using Layout.71 (width) and Layout.25 (length).
 - Split into the minimum number of equal parts (rounded up), without cut-edge seam allowance. Label each part; add 2 match notches per cut edge. Apply the same split to sheet PDF. Warn if a fitting piece is left out because the media is full.
 
+- [x] Layout.72.9 Dialog names each offending dimension with the piece and media sizes, in the settings unit: `• Back: length 43.10 in, media 35.50 in`. The piece list is plain text and scrolls past 40% of the window. Tests: `piece_divider` `oversized_message_gives_the_offending_dimensions`; `trousers_long_pieces_split_on_a_sheet` checks each leg line. Checked: `cargo test -p cxxqt_bridge`; `qmllint` shows no new warnings; scratch `qml` render, 30 pieces: list 280 px, dialog 523 px in a 700 px window.
 - [ ] Layout.72.8 Next MSI: trousers sample, Paper Sheet 36 × 36 in, Create Layout:
-  - [ ] Dialog lists four too-long legs: Back, Front_Pleats, Front_no_pocket, Front_with_pocket.
+  - [ ] Dialog lists four too-long legs: Back, Front_Pleats, Front_no_pocket, Front_with_pocket. Each line reads `<name>: length <n> in, media 35.50 in`.
   - [ ] Cancel: only Layout Settings, Preferences, Exit enabled; submitting settings re-enables Create Layout.
   - [ ] Split: each leg becomes 2 parts, blue "<name> part i of 2, joins j" label, and 2 green match notches. Warn about unplaced pieces.
   - [ ] Enlarge: sheet exceeds 36 in length; no splits or warnings.

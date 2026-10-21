@@ -2,6 +2,16 @@
 
 ## Current status
 
+### 2026-10-21 — Oversized-pieces dialog names the sizes, merged into local `run-seamlyLayout`, not pushed
+
+- Layout.72.9: each dialog line names the dimension that does not fit, with piece and media sizes in the settings unit. Example: `• Back: length 43.10 in, media 35.50 in`.
+- `OversizedPiece` carries the piece box and the media content size; `oversized_pieces_message` takes the unit.
+- `Main.qml` `oversizedPiecesDialog`: plain-text piece list in a `ScrollView`, at most 40% of the window high.
+- Verified: `cargo test --workspace` 561 passed; `qmllint` no new warnings; scratch `qml` render with 30 pieces keeps the buttons in the window. Not run: ctest, GUI, MSI (ask first).
+- Layout.72.1–72.7 were already done (2026-10-13). Open: user check Layout.72.8.
+- Not done: the split puts a whole `fold_line` in one part (Layout.80.6.1).
+- Merge commit has no skip-ci token: the unpushed `packaging/**` change needs full CI.
+
 ### 2026-10-21 — Nested size colors: dark and pastel palette, merged into local `run-seamlyLayout`, not pushed
 
 - Layout.82: `size_colors::palette_colors` replaces the golden-angle palette. OKLab farthest-point picks from dark to pastel candidates; first size blue.

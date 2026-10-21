@@ -1128,6 +1128,12 @@ mod tests {
         for leg in ["Back", "Front_Pleats", "Front_no_pocket", "Front_with_pocket"] {
             assert!(long.contains(&leg), "{leg} is longer than the sheet: {oversized:?}");
         }
+        // The dialog names each leg's length and the 35.5 in sheet length inside the margins.
+        let message = piece_divider::oversized_pieces_message(&oversized, "in");
+        for leg in ["Back", "Front_Pleats", "Front_no_pocket", "Front_with_pocket"] {
+            let line = message.lines().find(|l| l.starts_with(&format!("\u{2022} {leg}: length "))).unwrap_or_default();
+            assert!(line.ends_with(" in, media 35.50 in"), "{leg} line: {message}");
+        }
 
         let result = process_trousers_sheet(&settings_json, true, false);
         assert!(result.unplaced_labels.is_empty(), "unplaced: {:?}", result.unplaced_labels);

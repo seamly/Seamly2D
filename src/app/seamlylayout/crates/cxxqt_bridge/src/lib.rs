@@ -1519,7 +1519,11 @@ impl qobject::AppController {
                 } // match inputs
             }; // rust borrow dropped
             if !found.is_empty() {
-                let message = piece_divider::oversized_pieces_message(&found);
+                // The settings parsed in do_find_oversized_pieces, so the unit is there.
+                let unit = LayoutSettings::from_json(&settings_json.to_string())
+                    .map(|settings| settings.unit)
+                    .unwrap_or_default();
+                let message = piece_divider::oversized_pieces_message(&found, &unit);
                 self.as_mut().oversized_pieces_found(cxx_qt_lib::QString::from(message.as_str()));
                 return false;
             } // if oversized pieces
