@@ -132,41 +132,23 @@ The application workflow loop consists of:
 
    * NOTE: LAYOUT_PPI = 96 px/in is a global constant; no dpi parameter is passed between functions
    * NOTE: GAP_PX = 5 px clearance between adjacent placed pieces
-   * Call `extract_piece_rects()` to extract bounding boxes from self.flat_dom; sort pieces by area descending
-   * Use a MaxRects algorithm to arrange pieces in self.layout_dom's content rectangle:
-     * NOTE: rect.widthPx = rect.maxX (= rect.minX + rect.width); rect.heightPx = rect.maxY (= rect.minY + rect.height)
-     * Create rect1 equal to the content rectangle and add to free rects list; record in creation history
-     * for each piece in sorted pieces:
-       * If piece is larger than contRect: mark piece as unplaced, continue to next piece
-       * Select free rect using top-left fit: among all free rects that contain the piece,
-         choose the one with the lowest minY; break ties by lowest minX
-       * If no fitting free rect exists: mark piece as unplaced, continue to next piece
-       * If fitting rect found:
-         * place pattern piece at (rect.minX, rect.minY) in self.layout_dom
-         * remove rect from free rects list
-         * create 2 new rectangles from the used rect; record each in creation history; add to free rects list:
-           rect `<next>`.minX   = rect.minX + piece.widthPx + GAP_PX
-           rect `<next>`.minY   = rect.minY
-           rect `<next>`.width  = rect.widthPx - rect `<next>`.minX
-           rect `<next>`.height = rect.heightPx
-
-           rect<next+1>.minX   = rect.minX
-           rect<next+1>.minY   = rect.minY + piece.heightPx + GAP_PX
-           rect<next+1>.width  = rect.widthPx
-           rect<next+1>.height = rect.heightPx - rect<next+1>.minY
-         * split all OTHER existing free rects that overlap the placed piece:
-
-           * for each other free rect F that overlaps (piece.minX..piece.maxX, piece.minY..piece.maxY):
-             * remove F from free rects list
-             * generate up to 4 sub-rects; record each in creation history; add those with positive dimensions:
-               left   = (F.minX,              F.minY, piece.minX - F.minX,              F.heightPx)
-               right  = (piece.maxX + GAP_PX, F.minY, F.widthPx - (piece.maxX + GAP_PX), F.heightPx)
-               top    = (F.minX,              F.minY, F.widthPx,  piece.minY - F.minY)
-               bottom = (F.minX, piece.maxY + GAP_PX, F.widthPx, F.heightPx - (piece.maxY + GAP_PX))
-           * NOTE: splitting other overlapping rects prevents later pieces from being placed
-             in a free rect that covers space already occupied by a placed piece
-         * prune: remove any free rect fully contained within another free rect
-     * continue loop pieces
+   * Call `extract_piece_rects()` to extract bounding boxes from self.flat_dom
+   * Use a box-based MaxRects algorithm to arrange pieces in self.layout_dom's content rectangle:
+     * One pass places the pieces in a given order:
+       * Each piece goes to the top-left corner of a free box:
+         * `TopLeft` rule: topmost box, then leftmost
+         * `WeightedTopLeft` rule: lowest `8 × y + x`; a box a few px lower but far to the left wins
+       * Cut the piece, plus GAP_PX, out of every free box it overlaps (left, right, top, bottom strips)
+       * Remove any free box inside another free box
+       * A piece that fits no free box is unplaced
+       * After the pass, move each piece up, then left, until GAP_PX or the bin edge stops it
+     * Search over the piece order:
+       * Pack five sort orders (area, height, width, longer side, perimeter) with both rules
+       * Then swap or move pieces, or change the rule; keep the best layout
+       * Best layout: least unplaced area, then least height, then least whitespace between side-by-side pieces
+       * Fixed random seed: the same input always gives the same layout
+     * Record the free boxes of the chosen layout in creation order for the debug overlay
+     * See `layout-docs/seamlylayout_PROCESS LAYOUT WORKFLOW.md`, "MaxRects Algorithm"
    * Assemble layout SVG:
      * Write placed pattern pieces into self.layout_dom at their packed positions
      * Add debug-bboxes group: one semi-transparent filled colored rect per placed piece slot
