@@ -1681,20 +1681,33 @@ ApplicationWindow {
             rightPadding:  16
 
             Text {
-                text:           "These pieces do not fit the media:"
+                text:           "These pieces do not fit the media inside its margins:"
                 color:          Theme.textOnDark
                 font.pixelSize: Theme.fontSizeNormal
                 wrapMode:       Text.WordWrap
                 width:          440
             } // Text heading
 
-            Text {
-                text:           oversizedPiecesDialog.piecesText
-                color:          Theme.violetLight
-                font.pixelSize: Theme.fontSizeSmall
-                wrapMode:       Text.WordWrap
-                width:          440
-            } // Text piece list
+            // A long piece list scrolls. The list never grows past 40% of the window,
+            // so the choices and the OK and Cancel buttons stay visible.
+            ScrollView {
+                id:     oversizedPiecesScroll
+                width:  440
+                height: Math.min(oversizedPiecesLabel.implicitHeight, root.height * 0.4)
+                clip:   true
+                ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+
+                // Plain text: piece names come from the SVG and must not render as markup.
+                Text {
+                    id:             oversizedPiecesLabel
+                    text:           oversizedPiecesDialog.piecesText
+                    color:          Theme.violetLight
+                    font.pixelSize: Theme.fontSizeSmall
+                    textFormat:     Text.PlainText
+                    wrapMode:       Text.WordWrap
+                    width:          oversizedPiecesScroll.availableWidth
+                } // Text oversizedPiecesLabel
+            } // ScrollView piece list
 
             ButtonGroup { id: oversizeChoiceGroup }
 
