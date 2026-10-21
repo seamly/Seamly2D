@@ -65,7 +65,12 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
 
 Currently all colors are dark and appear to be repeated across sizes. Use some pastel range colors to ensure all sizes get a uniquely identifiable color. 
 
-### Task Layout.83 - Multisize - Nested - Legend - change legend color from line to rect element with width equal to current legend color line width and height equal to width. (makes legend easier to read)
+### [ ] Task Layout.83 - Multisize - Nested - Legend - change legend color from line to rect element with width equal to current legend color line width and height equal to width. (makes legend easier to read)
+
+- [x] Layout.83.1 `SizeLegend::element`: each swatch is a 32 × 32 px `rect`, filled with the size color, no stroke, centered on its row. Was a 32 px line, stroke width 4.
+- [x] Layout.83.2 Row height 24 → 40 px (swatch plus one 8 px pad), so rows do not overlap. The legend is taller; the media grows to hold it as before.
+- [x] Layout.83.3 Tests: `size_colors` `legend_swatches_are_filled_squares` (new); `legend_wraps_and_lists_every_size` counts swatch rects. `cargo test --workspace` 561 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
+- [ ] Layout.83.4 Next MSI: user check, `AGENT_CHECKLIST.md` §15.
 
 ### Task Layout.84 - Multisize - Nested - non-DXF export - display only the smallest size's grainline and labels
 
