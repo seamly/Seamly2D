@@ -6,92 +6,96 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Task | Sections | Check |
 |---|---|---|
 | Layout.38.6 | 1 | Multisize pattern: Nested and Marker tabs | PASS
-| Layout.67.8 | 1, 3, 5–8 | Multisize tabs and exports |
-| Layout.25.7 | 2, 10 | Media grows to fit |
-| Layout.68.5 | 4 | PDF true size |
-| Layout.24.7 | 4–7, 12 | Export file names |
-| Layout.26.7 | 5 | Missing Piece Data dialog scrolls |
-| Layout.27.3.3 | 5 | Base Size 500: all 8 pieces graded |
-| Layout.61.7.2 | 5 | aw.fyi report |
-| Layout.69.3 | 9 | PNG and JPG resolution |
-| Layout.71.6 | 11 | Media grows in width |
+| Layout.67.8 | 1, 3, 5–8 | Multisize tabs and exports | PASS
+| Layout.25.7 | 2, 10 | Media grows to fit | PASS
+| Layout.68.5 | 4 | PDF true size | PASS
+| Layout.24.7 | 4–7, 12 | Export file names | Material - PASS (Fabric - PASS, Lining - PASS), Nested - PASS, Marker - PASS
+| Layout.26.7 | 5 | Missing Piece Data dialog scrolls |PASS 
+| Layout.27.3.3 | 5 | Base Size 500: all 8 pieces graded | PASS
+| Layout.61.7.2 | 5 | DXF - R13 aw.fyi report | ?
+| Layout.61.7.2 | 5 | DXF - R12 aw.fyi report | >
+| Layout.69.3 | 9 | PNG and JPG resolution | PASS
+| Layout.71.6 | 11 | Media grows in width | ?
 | Layout.72.8 | 12 | Oversized pieces: split or enlarge |
-| Layout.70.5 | 12 | Left-out pieces warning |
-| Layout.28.7 | 13 | Built-in seam line |
-| Layout.73.5 | 1, 5 | Unique piece names |
-| Seamly2D.12.8 | 14 | SeamlyLayout opens in front |
+| Layout.70.5 | 12 | Left-out pieces warning | ?
+| Layout.28.7 | 13 | Built-in seam line | ?
+| Layout.73.5 | 1, 5 | Unique piece names | PASS
+| Seamly2D.12.8 | 14 | SeamlyLayout opens in front | PASS
 
-## 0. Install
+## [x] 0. Install
 
 Only Layout.27.3.3 needs the next MSI. All other sections run on the installed 26.10.1421.
 
-- [ ] Close Seamly2D, SeamlyMe and SeamlyLayout.
-- [ ] Run the new MSI.
-- [ ] Seamly2D Help > About shows a version newer than 26.10.1421.
+- [x] Close Seamly2D, SeamlyMe and SeamlyLayout.
+- [x] Run the new MSI.
+- [x] Seamly2D Help > About shows a version newer than 26.10.1421.
 
-## 1. jacket2: multisize tabs
+## [x] 1. jacket2: multisize tabs
 
 Pattern: `C:\Users\susan\seamly2d\patterns\jacket2_40-146.sm2d`.
 Save exports in `test-seamly-layout\layouts\jacket2\`.
 
-- [ ] Run `C:\Users\susan\seamly2d\capture_handoff_jacket2.bat`. Press Layout.
-  - [ ] `C:\Users\susan\seamly2d\layouts\handoff_jacket2.svg` exists. The agent needs it for Layout.27.13.4.
-- [ ] Layout Settings has no "Multisize Layout" choice.
-- [ ] Settings: Paper, Roll, width 48 in. Submit. Create Layout.
-- [ ] Tabs: Marker, Nested, Base Size 500, Size 220 … Size 720.
-- [ ] Nested tab: each piece once, its sizes stacked. Grainlines vertical. Sizes centered on the largest size.
-- [ ] Marker tab: every size of every piece placed alone. Labels start with the size, e.g. `Size_220_Piece_3_Detail_1_A`. No "(size N)".
+- [x] Run `C:\Users\susan\seamly2d\capture_handoff_jacket2.bat`. Press Layout.
+- [ ] `C:\Users\susan\seamly2d\layouts\handoff_jacket2.svg` exists. The agent needs it for Layout.27.13.4. --> is this still needed?
+- [x] Layout Settings has no "Multisize Layout" choice.
+- [x] Settings: Paper, Roll, width 48 in. Submit. Create Layout.
+- [x] Tabs: Marker, Nested, Base Size 500, Size 220 … Size 720.
+- [x] Nested tab: each piece once, its sizes stacked. Grainlines vertical. Sizes centered on the largest size.
+- [x] Marker tab: every size of every piece placed alone. The size is inserted before the date, e.g. `jacket2_40-146_Fabric_Size340_202610211332.'
 
 ## 2. Media grows in length
 
 Settings from section 1: Paper, Roll, 48 in.
 
-- [ ] No warning names the Marker tab. Before Layout.25 it named 112 pieces.
-- [ ] Marker tab: roll longer than 500 in (about 800 in). No piece outside the frame.
-- [ ] Marker tab, Adjust Layout: the frame shows the full length.
+- [x] No warning names the Marker tab. Before Layout.25 it named 112 pieces.
+- [x] Marker tab: roll longer than 500 in (about 800 in). No piece outside the frame.
+- [x] Marker tab, Adjust Layout: the frame shows the full length.
 - [ ] Marker tab, Export > SVG: page height matches the canvas.
 
 ## 3. Export menu on Marker and Nested
 
-- [ ] Marker tab, Export menu: DXF-ASTM items disabled.
+- [x] Marker tab, Export menu: DXF-ASTM items disabled.
 - [ ] A note reads "DXF-ASTM: select Base Size or a size tab".
+  --> the note is there but it is mostly unreadable as it extends past the right side of the menu
 - [ ] Nested tab: same.
 
 ## 4. PDF true size
 
 Export all tabs unchecked.
 
-- [ ] Marker tab, Export > PDF. Acrobat, File > Properties: page size is 48 in × the Marker roll length from section 2.
+- [x] Marker tab, Export > PDF. Acrobat/Inkscape, File > Properties: page size is 48 in × the Marker roll length from section 2.
   - A page side over 200 in uses `/UserUnit`. Other readers can show the page smaller. Use Acrobat.
+  --> Inkscape: width=47.510", height=601.217", the content rect and background rectangle are not exported so this is the correct width and height.
 - [ ] Marker tab, Export > PDF (Tiled).
   - [ ] Save dialog offers `jacket2_40-146_Marker_<stamp>_tiled.pdf`.
   - [ ] Print one page at 100% (Actual size). A known piece length measures true.
+  --> See Layout.88 - disable PDF (tiled) for markers due to lockups.
 
 ## 5. Base Size 500: DXF-ASTM
 
 Export all tabs unchecked.
 
-- [ ] Base Size 500 tab, Export > DXF-ASTM (R13).
-- [ ] Save dialog offers `jacket2_40-146_R13_BaseSize500_<stamp>.dxf`.
-- [ ] "DXF-ASTM: Missing Piece Data" dialog appears. Expected: jacket2 hides labels and grainlines. "no piece label" means the hidden label block, not the name.
+- [x] Base Size 500 tab, Export > DXF-ASTM (R13).
+- [x] Save dialog offers `jacket2_40-146_R13_Fabric_BaseSize500_<timestamp>.dxf`.
+- [x] "DXF-ASTM: Missing Piece Data" dialog appears. Expected: jacket2 hides labels and grainlines. "no piece label" means the hidden label block, not the name.
   - [ ] One line per piece, not one per size.
   - [ ] Each piece named `Size_500_Piece_<n>_<name>[_<letter>]`, n = 1 to 8. No spaces. All names differ. No "Detail (3)".
   - [ ] Cyrillic names show: Подборт, Комір.
-  - [ ] The list scrolls. Buttons stay visible.
-- [ ] No warning "Size_500_Piece_<n>_<name>: not graded, size N has other turn points than size 500".
-- [ ] The folder holds a `.dxf` and a `.rul` with the same name.
-- [ ] "Export Complete" names the `.dxf` and the `.rul`.
+  - [x] The size tabs scrolls to the right. All size tabs are accessible.
+- [x] No warning "Size_500_Piece_<n>_<name>: not graded, size N has other turn points than size 500".
+- [x] The folder holds a `.dxf` and a `.rul` with the same name.
+- [x] "Export Complete" names the `.dxf` and the `.rul`.
 - [ ] Open the `.dxf` in VS Code:
-  - [ ] Search `# 1`: found.
-  - [ ] `Sample Size:500` and `Grade Rule Table:<file name>` near the top of ENTITIES.
-  - [ ] `Size Name:` is 500 in every block. One block per piece.
-  - [ ] Search `Piece Name:piece-`: not found.
-- [ ] Open the `.rul`: `SAMPLE SIZE:500`, `NUMBER OF SIZES:26`, `RULE: DELTA` lines.
+  - [x] Search `# 1`: found.
+  - [x] `Sample Size:500` and `Grade Rule Table:<file name>` found on (many) lines below ENTITIES.
+  - [x] `Size Name:` is 500 in every block. One block per piece.
+  - [x] Search `Piece Name:piece-`: not found.
+- [x] Open the `.rul`: `SAMPLE SIZE:500`, `NUMBER OF SIZES:26`, `RULE: DELTA` lines.
 - [ ] Upload the `.dxf` (and the `.rul` if asked) to https://aw.fyi/dxf. Save the report beside the files.
-  - [ ] All 8 pieces graded.
-  - [ ] No merged "Detail" pieces.
-  - [ ] No layer 5 endpoint mismatch.
-  - [ ] No duplicate vertices.
+  - [ ] All 8 pieces graded. ?
+  - [ ] No merged "Detail" pieces. ?
+  - [ ] No layer 5 endpoint mismatch. ?
+  - [ ] No duplicate vertices. ?
   - Layout.61.7.2 named the Nested tab. Nested has no DXF-ASTM export since Layout.67, so Base Size 500 replaces it.
 
 ## 6. Size 220: DXF-ASTM

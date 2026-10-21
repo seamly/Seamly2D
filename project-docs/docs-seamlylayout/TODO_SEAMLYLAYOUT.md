@@ -20,8 +20,6 @@ For oversized individual-pattern pieces, ask whether to split them or enlarge th
   - [ ] Enlarge: sheet exceeds 36 in length; no splits or warnings.
   - [ ] Export split PDF parts and DXF-ASTM blocks named `Back (1/2)` and `Back (2/2)`.
 
-
-
 ### [ ] Task Layout.80 — Fold lines (mirror lines)
 
 A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. `FoldPosition` is free text.
@@ -63,28 +61,25 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
     - Done: `astm_piece_test::piece_on_fold_counts_every_cut_as_right`.
 - [ ] Layout.80.7 Next MSI: Piece Properties > Path, mark two neighbouring nodes Fold Line; check the dashed line, no seam allowance on it, "On fold" checked; save, reopen; Layout Mode handoff has `fold_line`. Mark three nodes: OK disabled.
 
-### [ ] Task Layout.81 - Piece Mode - 'Copy Piece' tool
+### Task Layout.81 - Multisize - Filename - Nested - add '_nested' before date tag
 
-- [ ] Copy an entire piece - resulting piece is a separate piece linked to draft objects (not linked to original piece).
-- [ ] Update piece name with a suffix, e.g. Collar-1. If a copy of 'Collar-1' is made, then the updated piece name is 'Collar-1-1'
-- [ ] Update piece letter with a suffix, e.g. A-2.
-- [ ] The new piece should be flattened (except for text) to remove transform strings.
-- [ ] The new piece can be edited with Pattern Piece Tool. 
-- [ ] 'Copy' tool can be applied to any piece in Piece Mode, including pieces created by 'Union', 'Flip Piece - Vertical', 'Flip Piece - Horizontal', 'Copy Piece' tool, and 'Mirror on Foldline' and this tool.
+### Task Layout.82 - Multisize - Nested - wider range of colors.
 
-### [ ] Task Layout.81 - Piece Mode - 'Flip Piece' tool
+Currently all colors are dark and appear to be repeated across sizes. Use some pastel range colors to ensure all sizes get a uniquely identifiable color. 
 
-- [ ] User selects radio button for flipping horizontally or vertically
-- [ ] Flip the entire piece including labels, grainlines, etc.
-- [ ] After flipping the entire piece then flip the labels, in place, in the same direction (vertical or horizontal) so that text isn't backwards or upside down.
-- [ ] The new piece should be flattened (except for text) to remove transform strings.
-- [ ] 'Flip Piece' tool can be applied to any piece in Piece Mode, including pieces created by 'Union', 'Flip Piece', 'Copy Piece', and 'Mirror on Foldline' tools.
-- [ ] Test/Verify: check flipping on 
-  - [ ] single piece
-  - [ ] Copied piece
-  - [ ] Flipped piece vertical
-  - [ ] Flipped piece horizontal
-  - [ ] Mirrored on Foldline piece
+### Task Layout.83 - Multisize - Nested - Legend - change legend color from line to rect element with width equal to current legend color line width and height equal to width. (makes legend easier to read)
+
+### Task Layout.84 - Multisize - Nested - non-DXF export - display only the smallest size's grainline and labels
+
+To meet current best practices for nested multisize image and vector files, show only one set of labels and grainline per piece.
+
+Display only the labels and grainline of the smallest size of each piece. (In SVG exports, place them in their own group id="labels_and_grainlines" as the group just above the content rect.) Do not include any other grainline or label elements in the export.
+
+### Task Layout.85 - Exports - add an option for DXF 10 (DXF-AAMA)
+
+### Task Layout.86 - Export - Combine the DXF exports into a DXF submenu
+
+### Task Layout.87 - Export - Marker - Disable 'Tiled' layout (seamlylayout will lock up when exporting a Marker as a tiled layout)
 
 ## VERIFY
 
@@ -166,7 +161,7 @@ Status (2026-10-12): code, docs, Rust (472 pass) and Qt tests pass; MSI 26.10.12
 
 - [ ] Layout.28.7 Next MSI: run `TEST_CHECKLIST.md` §5, "Piece with a built-in seam allowance".
 
-### [ ] Task Layout.68 — Verify - PDF export scale
+### [ ] Task Layout.68 — Verify - add grid to prove PDF export scale
 
 Cause (MSI 26.10.1311): PDF used 72 dpi instead of SVG’s 96 dpi, scaling pages and pieces by 4/3. Create an option to add a grid using pattern units for easy layout scale verification. Include the grid in each layout except 'Marker'. For DXF exports, exclude the grid.
 
@@ -253,7 +248,7 @@ Note: The piece names in the jacket2 pattern have changed, so items below may re
     - Fix: `isSplineEndNode` reads the two curves that meet at the point, as drawn. The row now expects a smooth point.
     - User decision: keep both corrections. A tangent break is two curves that meet at a point. Never make an end node smooth. Never drop an end node.
 
-### [ ] Task Layout.24 — Verify - Put the tab name before the export timestamp - Priority 2
+### [ ] Task Layout.24 — Verify - Multisize - FIlename - Put the tab name before the export timestamp - Priority 2
 
 Default name of a multisize export: `<base>[_<segment>]_<tab>_<stamp>[_tiled].<ext>`. Example: `mypatternname_R13_Size220_202610112043.dxf`. An individual pattern keeps `<base>[_<segment>]_<stamp>[_tiled].<ext>`.
 
@@ -298,7 +293,7 @@ Currently in multisize layouts, the size tabs continue past the right edge of th
 - [x] Layout 75.1 - add a horizontal scrollbar to the multisize right canvas that allows scrolling to view all size tabs. `Main.qml`: `Flickable layoutViewTabStrip` holds the `TabBar`; the scroll bar sits below the tabs and shows only when tabs are out of view; the mouse wheel scrolls the tabs; the shown tab scrolls into view. Checked: QML compiles (debug build, `ctest --preset debug` 6 of 6); a `qml` test render with 29 tabs in a 700 px window shows the bar and the selected tab.
 - [ ] Layout 75.2 - Test/Verify - All size tabs are accessible in the multisize canvas. Next MSI: jacket2 (26 sizes), Create Layout; scroll to the last tab with the bar and with the mouse wheel.
 
-### [ ] Task Layout.76 - Verify - Multisize - each piece must have the size in a label
+### [ ] Task Layout.76 - Verify - Multisize - Filename - each piece must have the size in a label
 
 Currently in Multisize layouts, the pattern pieces don't display the size. Add a single-line text label, or 'Size label', that displays 'Size <size>', where the bottom of the label is 5 pixels above the top of the grainline.
 
@@ -348,3 +343,4 @@ Note: This may require flatting the SVG data before grouping pieces by size to p
 - [x] Task Layout.78.1 - when exporting an SVG for a nested layout, group the pieces according to size, so that there is a group element for each size that contains all the pieces of that size. Order the size groups in the SVG layout from the largest (so the largest size is underneath all other sizes in the svg display canvas) to the smallest (so it is highest in the svg display canvas) to enable easy selection of each size. The exported SVG should be flat (contains no transforms except for text elements).
   - Done: `size_groups::group_pieces_by_size`, called by `export_svg`. Groups `<g id="size_<size>" data-type="size" data-size="<size>">`, largest first; piece-sets removed; `flatten_dom` first. Only a layout with top-level piece-sets (Nested) changes. Tests: 4 `size_groups` tests; `layout_utils` `jacket2_nested_svg_export_groups_pieces_by_size` (26 groups of 8, no piece moves). Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested SVG export".
 - [ ] Task Layout.78.2 - Test/Verify - Export a multisize file to SVG, open the SVG file using the View feature, confirm that the file is grouped by size. Next MSI: jacket2 Nested tab, Export > SVG; in Inkscape, Objects panel lists `size_720` … `size_220`; hiding one group hides one size.
+
