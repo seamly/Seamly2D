@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-10-21 — MSI 26.10.2023 test results recorded, committed on local `run-seamlyLayout`, not pushed
+
+- User passed: Layout.38.6, 67.8, 25.7, 24.7, 26.7, 27.3.3, 69.3, 73.5, 75.2, PDF true size, Seamly2D.12.8.
+- Moved to `TODO_COMPLETED.md`: Layout.3, 24, 25, 26, 67, 69, 73, 75; Seamly2D.12.
+- Marked done in place: Layout.27.3, 27.12.
+- aw.fyi Fabric Base Size 500 R13: 7 of 7 graded, 0 departures. Open: Lining (Detail 4) R13, R12.
+- jacket2 handoff: Fabric 7 pieces, Lining 1 (Detail 4).
+- Filed: Layout.88, Export menu DXF-ASTM note runs past the menu edge.
+- Next: replace `jacket2_40-146_handoff.svg` with `C:\Users\susan\seamly2d\layouts\handoff_jacket2.svg` (Layout.27.13.4, 27.7.2).
+- Still open for the user: Layout.28.7, 70.5, 71.6, 72.8 (`AGENT_CHECKLIST.md` §11–§13).
+
 ### 2026-10-21 — `local_build_msi.ps1` stray `build` file fixed, merged into local `run-seamlyLayout`, not pushed
 
 - Defect: the batch line `echo ... wix --> build MSI` redirected to a file `src/app/seamlylayout/build` on every build.
