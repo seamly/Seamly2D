@@ -72,6 +72,12 @@ pub struct OversizedPiece {
     pub wider: bool,
     // Longer than the media.
     pub longer: bool,
+    // Piece bounding box, grain up, in layout pixels.
+    pub width_px: u32,
+    pub length_px: u32,
+    // Media content rectangle the piece does not fit, in layout pixels.
+    pub media_width_px: u32,
+    pub media_length_px: u32,
 }
 
 // @brief A piece that was split, and into how many parts.
@@ -95,26 +101,54 @@ pub fn find_oversized_pieces(doc: &Document, spec: &DivideSpec) -> Vec<Oversized
                 label: piece.label().to_string(),
                 wider: columns > 1,
                 longer: rows > 1,
+                width_px: piece.rect.w,
+                length_px: piece.rect.h,
+                media_width_px: spec.bin_w,
+                media_length_px: spec.bin_h,
             })
         })
         .collect()
 } // fn find_oversized_pieces
 
-// @brief One line per piece for the oversized-pieces dialog: "• Front: wider than the media".
-pub fn oversized_pieces_message(pieces: &[OversizedPiece]) -> String {
+// @brief One line per piece for the oversized-pieces dialog, with each dimension
+// that does not fit: "• Back: length 43.10 in, media 35.50 in".
+//
+// @param unit Settings unit, "in", "cm" or "mm"; any other value gives inches.
+pub fn oversized_pieces_message(pieces: &[OversizedPiece], unit: &str) -> String {
     pieces
         .iter()
         .map(|piece| {
-            let side = match (piece.wider, piece.longer) {
-                (true, true) => "wider and longer than the media",
-                (true, false) => "wider than the media",
-                _ => "longer than the media",
-            }; // side
-            format!("\u{2022} {}: {side}", piece.label)
+            // One clause per offending dimension: width first, then length.
+            let mut sides = Vec::new();
+            if piece.wider {
+                sides.push(format!(
+                    "width {}, media {}",
+                    unit_length(piece.width_px, unit),
+                    unit_length(piece.media_width_px, unit)
+                ));
+            } // if wider
+            if piece.longer {
+                sides.push(format!(
+                    "length {}, media {}",
+                    unit_length(piece.length_px, unit),
+                    unit_length(piece.media_length_px, unit)
+                ));
+            } // if longer
+            format!("\u{2022} {}: {}", piece.label, sides.join("; "))
         })
         .collect::<Vec<_>>()
         .join("\n")
 } // fn oversized_pieces_message
+
+// @brief A length in layout pixels as text in the settings unit: "43.10 in", "109.5 cm", "1095 mm".
+fn unit_length(px: u32, unit: &str) -> String {
+    let inches = f64::from(px) / layout_tiling::LAYOUT_PPI;
+    match unit {
+        "cm" => format!("{:.1} cm", inches * 2.54),
+        "mm" => format!("{:.0} mm", inches * 25.4),
+        _ => format!("{inches:.2} in"),
+    } // match unit
+} // fn unit_length
 
 // @brief Replace each piece that does not fit the media with parts that fit.
 //
@@ -1189,7 +1223,18 @@ mod tests {
     fn wide_piece_splits_into_two_parts() {
         let mut doc = Document::parse(WIDE_PIECE_SVG).expect("fixture parses");
         let oversized = find_oversized_pieces(&doc, &spec(250, 1000, true));
-        assert_eq!(oversized, vec![OversizedPiece { label: "Front".to_string(), wider: true, longer: false }]);
+        assert_eq!(
+            oversized,
+            vec![OversizedPiece {
+                label: "Front".to_string(),
+                wider: true,
+                longer: false,
+                width_px: 400,
+                length_px: 100,
+                media_width_px: 250,
+                media_length_px: 1000,
+            }]
+        );
 
         let divided = divide_oversized_pieces(&mut doc, &spec(250, 1000, true));
         assert_eq!(divided, vec![DividedPiece { label: "Front".to_string(), parts: 2 }]);
@@ -1248,20 +1293,52 @@ mod tests {
         let long = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-1" data-type="piece" data-name="Leg">
             <g data-type="cutline"><path d="M0,0 L100,0 L100,400 L0,400 Z"/></g></g></svg>"#;
         let doc = Document::parse(long).expect("parses");
-        assert_eq!(
-            find_oversized_pieces(&doc, &spec(250, 250, true)),
-            vec![OversizedPiece { label: "Leg".to_string(), wider: false, longer: true }]
-        );
+        let oversized = find_oversized_pieces(&doc, &spec(250, 250, true));
+        assert_eq!(oversized.len(), 1);
+        assert_eq!((oversized[0].label.as_str(), oversized[0].wider, oversized[0].longer), ("Leg", false, true));
         assert!(find_oversized_pieces(&doc, &spec(250, 250, false)).is_empty(), "a roll has no length limit");
         let mut split = doc.clone();
         assert_eq!(divide_oversized_pieces(&mut split, &spec(250, 250, true))[0].parts, 2);
-        let message = oversized_pieces_message(&find_oversized_pieces(&doc, &spec(50, 250, true)));
-        assert_eq!(message, "\u{2022} Leg: wider and longer than the media");
 
         // No grainline, free rotation allowed: the piece turns instead.
         let free = DivideSpec { free_rotation_without_grainline: true, ..spec(500, 250, true) };
         assert!(find_oversized_pieces(&doc, &free).is_empty());
     } // long_piece_and_turned_piece
+
+    // @brief The dialog line names each dimension that does not fit, with the
+    // piece and media sizes in the settings unit.
+    #[test]
+    fn oversized_message_gives_the_offending_dimensions() {
+        let long = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-1" data-type="piece" data-name="Leg">
+            <g data-type="cutline"><path d="M0,0 L96,0 L96,480 L0,480 Z"/></g></g></svg>"#;
+        let doc = Document::parse(long).expect("parses");
+
+        // 96 × 480 px = 1 × 5 in, on media 2.5 in wide and 3 in long.
+        let longer = find_oversized_pieces(&doc, &spec(240, 288, true));
+        assert_eq!(oversized_pieces_message(&longer, "in"), "\u{2022} Leg: length 5.00 in, media 3.00 in");
+        assert_eq!(oversized_pieces_message(&longer, "cm"), "\u{2022} Leg: length 12.7 cm, media 7.6 cm");
+        assert_eq!(oversized_pieces_message(&longer, "mm"), "\u{2022} Leg: length 127 mm, media 76 mm");
+        assert_eq!(oversized_pieces_message(&longer, ""), "\u{2022} Leg: length 5.00 in, media 3.00 in", "unknown unit: inches");
+
+        // Too wide and too long: width first, then length.
+        let both = find_oversized_pieces(&doc, &spec(48, 288, true));
+        assert_eq!(
+            oversized_pieces_message(&both, "in"),
+            "\u{2022} Leg: width 1.00 in, media 0.50 in; length 5.00 in, media 3.00 in"
+        );
+
+        // One line per piece, in document order.
+        let two = format!(
+            "{}<g id=\"piece-2\" data-type=\"piece\" data-name=\"Cuff\"><g data-type=\"cutline\"><path d=\"M200,0 L296,0 L296,480 L200,480 Z\"/></g></g></svg>",
+            long.trim_end_matches("</svg>")
+        );
+        let doc = Document::parse(&two).expect("parses");
+        let message = oversized_pieces_message(&find_oversized_pieces(&doc, &spec(240, 288, true)), "in");
+        assert_eq!(message.lines().collect::<Vec<_>>(), [
+            "\u{2022} Leg: length 5.00 in, media 3.00 in",
+            "\u{2022} Cuff: length 5.00 in, media 3.00 in",
+        ]);
+    } // oversized_message_gives_the_offending_dimensions
 
     // @brief A U open at the bottom, cut across its arms: the bridge and one part per arm.
     #[test]
