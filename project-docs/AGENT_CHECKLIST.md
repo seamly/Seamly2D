@@ -12,7 +12,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.24.7 | 4–7, 12 | Export file names | Material - PASS (Fabric - PASS, Lining - PASS), Nested - PASS, Marker - PASS
 | Layout.26.7 | 5 | Missing Piece Data dialog scrolls |PASS 
 | Layout.27.3.3 | 5 | Base Size 500: all 8 pieces graded | PASS
-| Layout.61.7.2 | 5 | DXF - R13 aw.fyi report | ?
+| Layout.61.7.2 | 5 | DXF - R13 aw.fyi report | Fabric PASS (report: 7 of 7 graded, 0 departures). Lining not checked.
 | Layout.61.7.2 | 5 | DXF - R12 aw.fyi report | >
 | Layout.69.3 | 9 | PNG and JPG resolution | PASS
 | Layout.71.6 | 11 | Media grows in width | ?
@@ -36,7 +36,8 @@ Pattern: `C:\Users\susan\seamly2d\patterns\jacket2_40-146.sm2d`.
 Save exports in `test-seamly-layout\layouts\jacket2\`.
 
 - [x] Run `C:\Users\susan\seamly2d\capture_handoff_jacket2.bat`. Press Layout.
-- [ ] `C:\Users\susan\seamly2d\layouts\handoff_jacket2.svg` exists. The agent needs it for Layout.27.13.4. --> is this still needed?
+- [x] `C:\Users\susan\seamly2d\layouts\handoff_jacket2.svg` exists. The agent needs it for Layout.27.13.4. --> is this still needed?
+  --> Yes. It replaces the Rust test fixture (Layout.27.13.4, Layout.27.7.2). File found, saved 13:47.
 - [x] Layout Settings has no "Multisize Layout" choice.
 - [x] Settings: Paper, Roll, width 48 in. Submit. Create Layout.
 - [x] Tabs: Marker, Nested, Base Size 500, Size 220 … Size 720.
@@ -57,6 +58,7 @@ Settings from section 1: Paper, Roll, 48 in.
 - [x] Marker tab, Export menu: DXF-ASTM items disabled.
 - [ ] A note reads "DXF-ASTM: select Base Size or a size tab".
   --> the note is there but it is mostly unreadable as it extends past the right side of the menu
+  --> Filed: Layout.88.
 - [ ] Nested tab: same.
 
 ## 4. PDF true size
@@ -69,7 +71,7 @@ Export all tabs unchecked.
 - [ ] Marker tab, Export > PDF (Tiled).
   - [ ] Save dialog offers `jacket2_40-146_Marker_<stamp>_tiled.pdf`.
   - [ ] Print one page at 100% (Actual size). A known piece length measures true.
-  --> See Layout.88 - disable PDF (tiled) for markers due to lockups.
+  --> See Layout.87 - disable PDF (tiled) for markers due to lockups.
 
 ## 5. Base Size 500: DXF-ASTM
 
@@ -91,11 +93,13 @@ Export all tabs unchecked.
   - [x] `Size Name:` is 500 in every block. One block per piece.
   - [x] Search `Piece Name:piece-`: not found.
 - [x] Open the `.rul`: `SAMPLE SIZE:500`, `NUMBER OF SIZES:26`, `RULE: DELTA` lines.
-- [ ] Upload the `.dxf` (and the `.rul` if asked) to https://aw.fyi/dxf. Save the report beside the files.
-  - [ ] All 8 pieces graded. ?
-  - [ ] No merged "Detail" pieces. ?
-  - [ ] No layer 5 endpoint mismatch. ?
-  - [ ] No duplicate vertices. ?
+- [x] Upload the `.dxf` (and the `.rul` if asked) to https://aw.fyi/dxf. Save the report beside the files.
+  - Report `jacket2_40-146_R13_Fabric_BaseSize500_202610211408_apparelwerks_compliance_report.pdf`: 0 departures, 5 advisories (no action).
+  - [x] All 8 pieces graded. ? --> Fabric: 7 of 7 graded (7 layer 5 lines). Detail 4 is Lining, so it is not in this file.
+  - [x] No merged "Detail" pieces. ? --> 7 blocks, 7 names.
+  - [x] No layer 5 endpoint mismatch. ? --> none reported.
+  - [x] No duplicate vertices. ? --> none reported.
+  - [ ] Lining tab: Base Size 500, Export > DXF-ASTM (R13), aw.fyi. Detail 4 graded.
   - Layout.61.7.2 named the Nested tab. Nested has no DXF-ASTM export since Layout.67, so Base Size 500 replaces it.
 
 ## 6. Size 220: DXF-ASTM

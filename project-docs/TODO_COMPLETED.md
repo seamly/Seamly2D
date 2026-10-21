@@ -2,6 +2,60 @@
 
 Tasks moved here from the `TODO_*.md` files when all their subtasks are complete.
 
+## Task Seamly2D.12 — Layout: SeamlyLayout opens behind Seamly2D (completed 2026-10-21)
+
+jacket2 (26 sizes, labels visible): Seamly2D did not respond for about 26 s, then SeamlyLayout opened behind Seamly2D. The user saw no window and pressed Layout again: two SeamlyLayout windows.
+
+Found: piece labels cost 4 s → 20 s (installed 26.10.1615, pattern copies with and without labels). Stack samples: `VTextManager::FitFontSize` loads a new font engine for every pixel size it tries.
+
+- [x] Seamly2D.12.1 Window in front: `WindowsForegroundWindow::allowForeground` after the start (`AllowSetForegroundWindow`); `seamlyLayout_main.mm` raises and activates its window before the import
+- [x] Seamly2D.12.2 Progress: modal `QProgressDialog` per size, with Cancel; Cancel restores the size and the prior mode
+- [x] Seamly2D.12.3 One SeamlyLayout per Seamly2D window: a second Layout says "already open" and brings SeamlyLayout to the front (Windows); Layout in Layout mode brings it to the front
+- [x] Seamly2D.12.4 `waitForStarted()` failure shows a message, not nothing
+- [x] Seamly2D.12.5 Label fit: `VTextManager::largestFittingSize` starts at the estimated size (jacket2 labels: 13 and 28 measurements → 2 and 3); `FitFontSize` keeps each result per thread
+- [x] Seamly2D.12.6 Test `TST_VTextManager::LargestFittingSize`; `cl /Zs` on the changed sources
+- [x] Seamly2D.12.7 `local_build_msi.ps1` passes (`nmake check`). Passed in MSI 26.10.2023.
+- [x] Seamly2D.12.8 User: jacket2 Layout shows the progress dialog and SeamlyLayout opens in front, well under 26 s; Cancel; second Layout. Passed (MSI 26.10.2023).
+
+## Task Layout.75 — Multisize: scroll bar for the size tabs (completed 2026-10-21)
+
+In multisize layouts, the size tabs ran past the right edge of the canvas, with no scroll bar.
+
+- [x] Layout.75.1 Horizontal scroll bar for the size tabs. `Main.qml`: `Flickable layoutViewTabStrip` holds the `TabBar`; the scroll bar sits below the tabs and shows only when tabs are out of view; the mouse wheel scrolls the tabs; the shown tab scrolls into view. Checked: QML compiles (debug build, `ctest --preset debug` 6 of 6); a `qml` test render with 29 tabs in a 700 px window shows the bar and the selected tab.
+- [x] Layout.75.2 User check: jacket2 (26 sizes), all size tabs are accessible. Passed (MSI 26.10.2023).
+
+## Task Layout.73 — Assign unique piece names at import (completed 2026-10-21)
+
+Give every piece a unique name before a layout, in every size. Rule: `docs-data/SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout piece names".
+
+Finding: the names do not cause the jacket2 Missing Piece Data dialog. jacket2 hides piece labels and grainlines (`visible="false"`), so the handoff has no `piece_label` or `grainline` groups (Layout.26). The dialog stays; it now lists `Size_500_Piece_3_Detail` instead of `Detail (3)`.
+
+- [x] Layout.73.1 `piece_naming::assign_unique_piece_names`, called by `finish_import`. Individual: `Piece_<n>[_<name>][_<letter>]`. Multisize: `Size_<size>_Piece_<n>[_<name>][_<letter>]`. A run of spaces becomes one `_` (user decision). Piece-set: name without the size. Marker `data-name-assigned="true"`, kept on a later import.
+- [x] Layout.73.2 Import warning when the sizes have different piece counts.
+- [x] Layout.73.3 No "(size N)" label suffix on an assigned name.
+- [x] Layout.73.4 Tests: 6 `piece_naming` tests, `piece_extractor` `assigned_name_label_has_no_size_suffix`, `layout_utils` `jacket2_assigned_names_reach_the_base_size_export`.
+- [x] Layout.73.5 User check, `AGENT_CHECKLIST.md` §1 and §5. Passed (MSI 26.10.2023). The Base Size 500 DXF names `Size_500_Piece_1_…` to `Size_500_Piece_7_…`.
+
+## Task Layout.69 — PNG/JPG resolution metadata (completed 2026-10-21)
+
+MSI 26.10.1311 exported correct pixels at 96 dpi (jacket2 PNG: 4608 × 48000) but omitted physical resolution metadata, so printing at actual size could be wrong.
+
+- [x] Layout.69.1 Write PNG `pHYs` = 3780 px/m and JPG JFIF density = 96 × 96 dpi.
+- [x] Layout.69.2 Rust tests verify PNG `pHYs` and JPG JFIF density.
+- [x] Layout.69.3 User check, "PNG and JPG resolution". Passed (MSI 26.10.2023).
+
+## Task Layout.24 — Multisize export names: tab name before the timestamp (completed 2026-10-21)
+
+Default name of a multisize export: `<base>[_<segment>]_<tab>_<stamp>[_tiled].<ext>`. Example: `mypatternname_R13_Size220_202610112043.dxf`. An individual pattern keeps `<base>[_<segment>]_<stamp>[_tiled].<ext>`.
+
+- [x] Layout.24.1 Add optional tab segment before `<stamp>` in `exports::default_export_file_name`.
+- [x] Layout.24.2 Remove spaces from tab labels; replace non-alphanumeric characters (except `-`) with `-`. "Size 220" → `Size220`.
+- [x] Layout.24.3 Include the selected tab in single-export default names.
+- [x] Layout.24.4 Apply the rule to Export All. Replace `layout_views::tab_file_path` (put `_size-220` after the timestamp). For renamed files, insert `_<tab>` before the extension.
+- [x] Layout.24.5 Test names with/without tab, tiled names, `/` in labels, and Export All.
+- [x] Layout.24.6 Docs: export file name rule in the SeamlyLayout docs, `TEST_CHECKLIST.md`
+- [x] Layout.24.7 User check, "Export file names". Passed (MSI 26.10.2023) for Fabric, Lining, Nested and Marker. Example: `jacket2_40-146_Fabric_Size340_202610211332.svg`.
+
 ## Task Dead.1 — Remove the orphaned layout code; orphaned when calling SeamlyLayout instead of the previous layout code and workflow (completed 2026-10-14)
 
 - [x] Dead.1.1 - locate the seamly2d code (vlayout*.cpp, etc.) that was orphaned by calling the new seamlylayout.exe
@@ -1355,7 +1409,17 @@ One Rust mapping serves Layout.17 and Layout.18: `exports::export_name_segment(f
   - [x] Layout.13.1 - the layout with updates from 'adjust mode' ('adjust mode' closed via 'Save')
   - [x] Layout.13.2 - the layout without updates from 'adjust mode' ('adjust mode' closed via 'Cancel')
 
-## Completed subtasks from Task Layout.3 — Multisize handoff and layout: nested (piece groups) or marker (single pieces)
+## Task Layout.3 — Multisize handoff and layout: nested (piece groups) or marker (single pieces) (completed 2026-10-21)
+
+A `.smms` pattern sends all sizes in one SVG. Nested packs size groups; Marker packs individual pieces.
+
+Rules (2026-09-28):
+
+- Include all `.smms` sizes at the base height or the selected height only.
+- Align grainlines vertically; center all sizes on the largest size.
+- Keep `.smis` handoff unchanged.
+
+Handoff shape: see `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`, "Multisize pattern".
 
 - [x] Layout.30 Seamly2D producer
   - [x] Layout.30.1 `MainWindow::prepareMultisizePieceLists()`: every size, base height, then restore; shared helpers `recalculateAtSize()` and `currentLayoutPieces()` also serve `exportPiecesAs()`
@@ -1408,6 +1472,8 @@ One Rust mapping serves Layout.17 and Layout.18: `exports::export_name_segment(f
     - `jacket2_missing_piece_data_lists_each_piece_once`: Nested and Marker, 8 lines, Cyrillic names, `Detail (3)` to `Detail (8)`
     - `jacket2_all_sizes_export_names_every_size_alike`: escaped `Piece Name:`; 4 pieces graded (26 sizes each); `Detail (3)`, `(6)`, `(7)`, `(8)` fall back on turn points (Layout.27.3); `.rul` written
 
+  - [x] Layout.38.6 User check: jacket2 from Seamly2D Layout Mode, Nested and Marker tabs. Passed (MSI 26.10.2023).
+
 - [x] Layout.39 Doxygen briefs + inline comments on touched functions; document both layouts in the SeamlyLayout docs
 
 ## Task Layout.5 - Implement additional export formats
@@ -1437,7 +1503,16 @@ One Rust mapping serves Layout.17 and Layout.18: `exports::export_name_segment(f
       - Marker `jacket2_40-146_marker_allsizes_R13_202610121149.dxf`: nothing graded. `Sample Size:` and `Grade Rule Table:` blank, no `.rul`, layer 2 in all 25 blocks (Layout.25, 27.1, 27.3)
       - Nested `jacket2_40-146_nested_allsizes_R13_202610121136.dxf`: aw.fyi reads sample size 500 and 104 layer 5 lines. 4 pieces graded; Detail (3), (6), (7), (8) sample size only (Layout.27.3)
 
-## Completed subtasks from Task Layout.67 — Multisize tabs: Marker, Nested, Base Size, then each size
+## Task Layout.67 — Multisize tabs: Marker, Nested, Base Size, then each size (completed 2026-10-21)
+
+Decision (2026-10-13): all tabs use the imported SVG, not grade rules. DXF-ASTM exports one size per file. Supersedes Layout.22, Layout.23, Layout.27.10, and Layout.61.7.3.
+
+| Tab | Packs | DXF-ASTM | Other exports |
+|---|---|---|---|
+| Marker | every size of every piece alone | none | yes |
+| Nested | each piece once, its sizes stacked | none | yes |
+| Base Size N | the base size | `# n` texts, layer 5, `.rul`, `Sample Size:N` | yes; Export all tabs skips it |
+| Size N | one size | no `.rul`, blank `Sample Size:` | yes |
 
 - [x] Layout.67.1 `layout_views`: `ViewKind` per tab; tab run Marker → Nested → Base Size → sizes; the base size's own tab reuses the Base Size layout
 
@@ -1453,7 +1528,17 @@ One Rust mapping serves Layout.17 and Layout.18: `exports::export_name_segment(f
 
 - [x] Layout.67.7 Docs: DXF-ASTM compliance doc, simple workflow, settings workflow, `SVG-DATA-ATTRIBUTES.md`
 
-## Completed subtasks from Task Layout.25 — Multisize Marker layout: extend the media height until every piece fits
+- [x] Layout.67.8 User check, "Multisize tabs". Passed (MSI 26.10.2023). The DXF-ASTM note in the Export menu is cut off: Layout.88.
+
+- [x] Layout.67.9 Base Size "Export Complete" must name both `.dxf` and `.rul` files (MSI 26.10.1311, `jacket2_basesize_screenshot_1.png`). Signal `export_companion_written`.
+
+## Task Layout.25 — Multisize Marker layout: extend the media height until every piece fits (completed 2026-10-21)
+
+All multisize tabs (Marker, Nested, individual sizes) extend the media length to fit their pieces (decision D3).
+
+Previous failure (jacket2 Marker, 48 × 500 in roll, MSI 26.10.1311): 96/208 placed; all pieces need about 740 in. Evidence: `jacket2_marker_screenshot_1.png`, `jacket2_screenshot_1.png`, `jacket2_40-146_202610131245.svg`.
+
+Decision (2026-10-13): extend rolls beyond 500 in when needed.
 
 - [x] Layout.25.1 When the pack leaves pieces out, increase the media height and pack again until every piece fits
   - `packing::pack_polygons_extending`: the bin grows by the stacked height of the unplaced pieces until every piece that fits the width is placed. jacket2 Marker, 48 in roll: 208 of 208 placed, about 798 in
@@ -1472,6 +1557,8 @@ One Rust mapping serves Layout.17 and Layout.18: `exports::export_name_segment(f
   - `extending_*` (`layout_engine`), `pack_polygons_extending_grows_and_reports_too_wide`, `jacket2_marker_extends_paper_roll`, `jacket2_marker_extends_paper_sheet`
 
 - [x] Layout.25.6 Docs: layout workflow, `TEST_CHECKLIST.md`
+
+- [x] Layout.25.7 User check, "Media grows to fit". Passed (MSI 26.10.2023).
 
 ## Completed subtasks from Task Layout.71 — Multisize: widen the media for a piece wider than it
 
@@ -1501,7 +1588,9 @@ One Rust mapping serves Layout.17 and Layout.18: `exports::export_name_segment(f
 
 - [x] Layout.72.7 Docs: `SVG-DATA-ATTRIBUTES.md` "SeamlyLayout split parts", layout workflows. `TEST_CHECKLIST.md` lines are in Layout.72.8: the user's checklist edits are in `stash@{0}`
 
-## Completed subtasks from Task Layout.26 — DXF-ASTM Missing Piece Data dialog: one readable line per piece
+## Task Layout.26 — DXF-ASTM Missing Piece Data dialog: one readable line per piece (completed 2026-10-21)
+
+jacket2 hides piece labels and grainlines (`visible="false"`), so missing-data warnings are expected. Old MSI samples used Cyrillic names (Layout.40). Evidence: `jacket2_marker_screenshot_2.png`, `jacket2_nested_screenshot_1.png`.
 
 - [x] Layout.26.1 One line per piece, not one per placed size: group the blocks by `data-parent` (piece-set id)
 
@@ -1515,6 +1604,8 @@ One Rust mapping serves Layout.17 and Layout.18: `exports::export_name_segment(f
 
 - [x] Layout.26.6 Tests: Rust dialog text — one line per piece set, Cyrillic name kept, same names numbered
   - `piece_names_keep_unicode_and_number_shared_names`, `hoist_tagged_pieces_dissolves_piece_sets` (`data-set-number`), `jacket2_missing_piece_data_lists_each_piece_once`, `jacket2_all_sizes_export_names_every_size_alike`
+
+- [x] Layout.26.7 User check: jacket2 Base Size 500, Export > DXF-ASTM (R13); the dialog scrolls and its buttons stay visible. Passed (MSI 26.10.2023).
 
 ## Completed subtasks from Task Layout.27 — DXF-ASTM grading fails for jacket2_40-146 from the "Nested" tab
 
@@ -1570,6 +1661,8 @@ The installed `jacket2_40-146.sm2d` has Cyrillic piece names; the repo copy (`sr
   - `pdf_page_is_true_size`, `pdf_page_longer_than_200_in_sets_user_unit`, `tiled_pdf_pages_are_paper_size`
 
 - [x] Layout.68.6 Docs: `export-docs/seamlylayout_EXPORT_WORKFLOW.md` "PDF export — true size", simple workflow, codebase index
+
+- [x] User check, PDF true size: Marker tab PDF page matches the layout. Passed (MSI 26.10.2023). Inkscape: 47.510 × 601.217 in, without the content rect and background.
 
 ## Task Layout.8 — SeamlyLayout default paths don't resolve under %DATAROOT%
 

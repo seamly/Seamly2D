@@ -61,8 +61,6 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
     - Done: `astm_piece_test::piece_on_fold_counts_every_cut_as_right`.
 - [ ] Layout.80.7 Next MSI: Piece Properties > Path, mark two neighbouring nodes Fold Line; check the dashed line, no seam allowance on it, "On fold" checked; save, reopen; Layout Mode handoff has `fold_line`. Mark three nodes: OK disabled.
 
-### Task Layout.81 - Multisize - Filename - Nested - add '_nested' before date tag
-
 ### Task Layout.82 - Multisize - Nested - wider range of colors.
 
 Currently all colors are dark and appear to be repeated across sizes. Use some pastel range colors to ensure all sizes get a uniquely identifiable color. 
@@ -81,21 +79,14 @@ Display only the labels and grainline of the smallest size of each piece. (In SV
 
 ### Task Layout.87 - Export - Marker - Disable 'Tiled' layout (seamlylayout will lock up when exporting a Marker as a tiled layout)
 
+### [ ] Task Layout.88 — Export menu: DXF-ASTM note is cut off
+
+Marker tab, Export menu (MSI 26.10.2023): the note "DXF-ASTM: select Base Size or a size tab" runs past the right edge of the menu. Most of it cannot be read.
+
+- [ ] Layout.88.1 Show the whole note: wrap it, or widen the menu to fit it.
+- [ ] Layout.88.2 Next MSI: Marker and Nested tabs, Export menu; the note is readable.
+
 ## VERIFY
-
-### [ ] Task Layout.3 — Verify - Multisize layouts
-
-A `.smms` pattern sends all sizes in one SVG. Nested packs size groups; Marker packs individual pieces.
-
-Rules (2026-09-28):
-
-- Include all `.smms` sizes at the base height or the selected height only.
-- Align grainlines vertically; center all sizes on the largest size.
-- Keep `.smis` handoff unchanged.
-
-Handoff shape: see `project-docs/docs-data/SVG-DATA-ATTRIBUTES.md`, "Multisize pattern".
-
-- [ ] Layout.38.6 Next MSI: test a multisize pattern from Seamly2D Layout Mode in SeamlyLayout Nested and Marker. Add to `TEST_CHECKLIST.md`.
 
 ### [ ] Task Layout.6 — Verify - DXF-ASTM grading
 
@@ -104,6 +95,9 @@ See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
 - [ ] Layout.61 Verify grade IDs (`# n`), size blocks (`Size Name:`), layer 5, and `.rul` output.
   - [ ] Layout.61.7 Validate the multisize DXF-ASTM export with aw.fyi (DXF.8.4).
     - [ ] Layout.61.7.2 Export jacket2 Base Size 500 as DXF-ASTM R13; check in aw.fyi. Expect all 8 pieces graded and no merged Detail pieces, layer 5 mismatches, or duplicate vertices. Nested has no DXF-ASTM export (Layout.67). User check: `AGENT_CHECKLIST.md` §5.
+      - [x] Fabric R13, MSI 26.10.2023: `test-seamly-layout/layouts/jacket2/20261021/jacket2_40-146_R13_Fabric_BaseSize500_202610211408_apparelwerks_compliance_report.pdf`. 7 of 7 pieces graded: 7 blocks, 7 layer 5 lines, `# n` texts in each block. No departures. 5 advisories: Unicode escapes, L84 densification, validation spans, curve tolerance, piece-113 layer 14 curve points.
+      - [ ] Lining R13: Detail 4, the 8th piece, is in the Lining document. Export its Base Size 500 and check it in aw.fyi.
+      - [ ] R12: the same check for Fabric and Lining.
 
     | aw.fyi finding | Report | Cause | Task |
     |---|---|---|---|
@@ -117,41 +111,11 @@ See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
     | Advisory: validation spans, curve tolerance | both | Pass | — |
     | No finding: `Piece Name:piece-201_s720_M` | both | Cyrillic name emptied by `sanitize_ascii`; aw.fyi cannot group the sizes | Layout.26.4, done after these files |
 
-### [ ] Task Layout.67 — Verify - Multisize tabs and export messages
-
-Decision (2026-10-13): all tabs use the imported SVG, not grade rules. DXF-ASTM exports one size per file. Supersedes Layout.22, Layout.23, Layout.27.10, and Layout.61.7.3.
-
-| Tab | Packs | DXF-ASTM | Other exports |
-|---|---|---|---|
-| Marker | every size of every piece alone | none | yes |
-| Nested | each piece once, its sizes stacked | none | yes |
-| Base Size N | the base size | `# n` texts, layer 5, `.rul`, `Sample Size:N` | yes; Export all tabs skips it |
-| Size N | one size | no `.rul`, blank `Sample Size:` | yes |
-
-- [ ] Layout.67.8 Next MSI: run `TEST_CHECKLIST.md` §7, "Multisize tabs".
-- [x] Layout.67.9 Base Size "Export Complete" must name both `.dxf` and `.rul` files (MSI 26.10.1311, `jacket2_basesize_screenshot_1.png`). Signal `export_companion_written`. User check: Layout.67.8.
-
-### [ ] Task Layout.25 — Verify - automatic media length
-
-All multisize tabs (Marker, Nested, individual sizes) extend the media length to fit their pieces (decision D3).
-
-Previous failure (jacket2 Marker, 48 × 500 in roll, MSI 26.10.1311): 96/208 placed; all pieces need about 740 in. Evidence: `jacket2_marker_screenshot_1.png`, `jacket2_screenshot_1.png`, `jacket2_40-146_202610131245.svg`.
-
-Decision (2026-10-13): extend rolls beyond 500 in when needed.
-
-- [ ] Layout.25.7 Next MSI: run `TEST_CHECKLIST.md` §7, "Media grows to fit".
-
 ### [ ] Task Layout.71 — Verify - automatic media width
 
 Multisize layouts expand right for wide pieces and down for long pieces. Only individual patterns split pieces (Layout.72).
 
 - [ ] Layout.71.6 Next MSI: jacket2, 10-in Paper Roll. All tabs should widen without warnings; Adjust Mode and SVG export should match.
-
-### [ ] Task Layout.26 — Verify - Missing Piece Data dialog
-
-jacket2 hides piece labels and grainlines (`visible="false"`), so missing-data warnings are expected. Old MSI samples used Cyrillic names (Layout.40). Evidence: `jacket2_marker_screenshot_2.png`, `jacket2_nested_screenshot_1.png`.
-
-- [ ] Layout.26.7 jacket2 Base Size 500, Export > DXF-ASTM (R13); check that the dialog scrolls and buttons remain visible. Marker has no DXF-ASTM export (Layout.67). User check: `AGENT_CHECKLIST.md` §5.
 
 ### [ ] Task Layout.28 — Verify - built-in seam line
 
@@ -175,18 +139,11 @@ Cause (MSI 26.10.1311): PDF used 72 dpi instead of SVG’s 96 dpi, scaling pages
 - [x] Layout.68.9 When creating HPGL cutter exports, exclude the grid.
   - Done: `SettingsModel::scaleGrid` (`scaleGrid` in the settings file and JSON), Settings checkbox under Piece Gap; `scale_grid.rs`, placed by `do_process_layout` one piece gap below the pieces and the legend, media grows (tiled: more rows); Marker (more than one size, no piece-sets) gets none. DXF: `clone_dxf_layout_doc` removes it. HPGL: mark class, so cut mode leaves it out. Not on the paper-sheet PDF, which repacks the pieces.
   - Tests: 4 `scale_grid` tests; `layout_utils` `jacket2_scale_grid_on_every_layout_but_marker`; `hpgl_writer` `cut_mode_drops_the_scale_grid`; `SettingsModelTests::scaleGrid_defaultsOffAndRoundtrips`. Doc: `SVG-DATA-ATTRIBUTES.md`, "Scale check grid".
+- [x] User check, PDF true size: Marker tab PDF page matches the layout. Passed (MSI 26.10.2023). Moved to `TODO_COMPLETED.md`.
 - [ ] Layout.68.10 Test/Verify - Check Settings for grid option.
 - [ ] Layout.68.11 Test/Verify - Check grid in layouts; Check grid is not included in Marker.
 - [ ] Layout.68.12 Test/Verify - Check grid in exports; Check grid is not in DXF or HPGL cutter files.
 - [ ] Layout.58.13 Test/Verify - Check scale; Print a small layout, check scale for correct grid size (3cm x 3cm, or 2" x 2")
-
-### [ ] Task Layout.69 — Verify - Add PNG/JPG resolution metadata - Priority 1
-
-MSI 26.10.1311 exports correct pixels at 96 dpi (jacket2 PNG: 4608 × 48000) but omits physical resolution metadata. Printing at actual size may be wrong.
-
-- [x] Layout.69.1 Write PNG `pHYs` = 3780 px/m and JPG JFIF density = 96 × 96 dpi.
-- [x] Layout.69.2 Rust tests verify PNG `pHYs` and JPG JFIF density.
-- [ ] Layout.69.3 Next MSI: run `TEST_CHECKLIST.md` §7, "PNG and JPG resolution".
 
 ### [ ] Task Layout.70 — Verify - "Some pieces could not be placed" dialog: piece names and length
 
@@ -209,10 +166,11 @@ Note: The piece names in the jacket2 pattern have changed, so items below may re
 
 - [x] Layout.27.1 Re-export after Layout.25; confirm sample size 500 is no longer omitted from Marker. Rust test `jacket2_marker_extends_paper_roll`: 208 of 208 placed on a 48 × 500 in roll. Marker has no DXF-ASTM export (Layout.67). User check: Layout.25.7.
 - [x] Layout.27.2 If a sample-size piece is unplaced, warn: "size 500 does not fit the media". `grade_drawing` names it.
-- [ ] Layout.27.3 Make turn points consistent across all sizes of each piece (cutline, seamline, internal paths). Seamly2D `VAbstractPiece::turnPointIndices` currently changes at near-threshold corners. After `prepareMultisizePieceLists`, share turn points across sizes using node vertex indices in `VLayoutPiece` / `VLayoutPiecePath`; skip paths whose node counts differ.
+- [x] Layout.27.3 Make turn points consistent across all sizes of each piece (cutline, seamline, internal paths). Seamly2D `VAbstractPiece::turnPointIndices` currently changes at near-threshold corners. After `prepareMultisizePieceLists`, share turn points across sizes using node vertex indices in `VLayoutPiece` / `VLayoutPiecePath`; skip paths whose node counts differ.
   - [x] Layout.27.3.1 Code: `unifyTurnPoints` (`63ab2447a3`).
   - [x] Layout.27.3.2 Run the Qt suites with `local_build_msi.ps1`. Passed in MSI 26.10.1921: 6 turn point tests in `TST_SvgComponentTags`.
-  - [ ] Layout.27.3.3 Next MSI: export jacket2 Base Size 500 to DXF-ASTM. With Layout.27.13: all 8 graded, no "other turn points" warning.
+  - [x] Layout.27.3.3 Next MSI: export jacket2 Base Size 500 to DXF-ASTM. With Layout.27.13: all 8 graded, no "other turn points" warning.
+    - Passed (MSI 26.10.2023): no "other turn points" warning. Fabric: 7 of 7 graded (Layout.61.7.2). Lining (Detail 4) not checked.
   - Note: the MSI 26.10.1416 handoff has the same `data-turn-points` as the old fixture. Detail (7) and (8) are consistent; Detail (3) and (6) differ in shape (Layout.27.13).
 - [x] Layout.27.4 Give `grade_anchors` a distinct error when a key point is missing from the dense line. `GradeError::KeyPointOffLine`.
 - [x] Layout.27.5 Name the first size whose turn points differ from the sample size. jacket2 fixture: Detail (3) size 660, Detail (6) size 220, both on the cut line.
@@ -221,13 +179,13 @@ Note: The piece names in the jacket2 pattern have changed, so items below may re
   - [ ] Layout.27.7.2 Expect 8 graded after Layout.27.13.
 - [x] Layout.27.8 If nothing grades, show "No piece graded: no .rul file written". `astm_grading::grade_drawing` writes `.rul` only when at least one piece grades.
 - [x] Layout.27.11 Fix near-duplicate written vertices. Example: Подборт layer 87 has `(333.01, 626.21)` followed by `(333.01, 626.22)`. Increase `SNAP_VERTEX_MM` from 0.01 to 0.02, or compare rounded coordinates. Test: no consecutive written vertices 0.01 mm apart or closer. Done: `DUPLICATE_TOLERANCE_MM` and `SNAP_VERTEX_MM` = 0.025; jacket2 test found 6 before the fix.
-- [ ] Layout.27.12 Make line-end turn points consistent across sizes. Detail (7) differs from size 660; Detail (8) differs at 520–640, 680 and 700. `astm_contour::straight_run_ends` flips at its 10-mm / 2× break thresholds (e.g., 9.97 mm at size 640 vs 10.2 mm at 660). Decision (2026-10-13): Option 1.
+- [x] Layout.27.12 Make line-end turn points consistent across sizes. Detail (7) differs from size 660; Detail (8) differs at 520–640, 680 and 700. `astm_contour::straight_run_ends` flips at its 10-mm / 2× break thresholds (e.g., 9.97 mm at size 640 vs 10.2 mm at 660). Decision (2026-10-13): Option 1.
   - Option 1 (chosen): Seamly2D checks node line ends, then `unifyTurnPoints` shares flags across sizes. SeamlyLayout stops adding line ends to tagged paths. Refresh old fixtures.
   - Option 2: SeamlyLayout shares line-end flags across sizes, using new node-index attributes from Seamly2D.
   - [x] Layout.27.12.1 Seamly2D: `turnPointIndices` marks line ends; `unifyTurnPoints` shares them (`5bcb1f3cf1`).
   - [x] Layout.27.12.2 SeamlyLayout: no line ends added to tagged input (`5bcb1f3cf1`).
   - [x] Layout.27.12.3 Refresh fixtures from the next MSI handoff: `male_shirt_pieces.svg` (expect 16 FrontPanel turn points, not 14); jacket2 (expect all 8 pieces graded). Done with MSI 26.10.1416: FrontPanel 16. jacket2: 6 of 8 (Layout.27.13).
-  - [ ] Layout.27.12.4 Build and user check: Layout.27.3.2, Layout.27.3.3.
+  - [x] Layout.27.12.4 Build and user check: Layout.27.3.2, Layout.27.3.3.
 - [ ] Layout.27.13 jacket2 Detail (3) and (6) lines change shape between sizes, so they cannot grade. Found in the MSI 26.10.1416 handoff. Decision (2026-10-14): fix both in Seamly2D.
   - Detail (3), sizes 660–700: the seam line and cut line reverse 0.2 mm past a corner (178.7° turn, then a 0.2 mm segment). The corner gets two turn points; other sizes have one. Cause: `VAbstractCurve::FromBegin` keeps a curve end in the same pixel as the node point, so the curve overshoots it.
   - Detail (6), sizes 220–340: the cut line's last seam allowance corner is two vertices (67° each, 9.3 mm apart). From size 360 it is one vertex (131°). Cause: `AngleByLength` cuts a miter longer than 2.4 × the width; the miter is near that limit.
@@ -236,6 +194,7 @@ Note: The piece names in the jacket2 pattern have changed, so items below may re
   - [x] Layout.27.13.2 Detail (6): the multisize handoff cuts a ByLength corner in every size when one size cuts it (`MainWindowsNoGUI::unevenCornerCuts`, `VPiece::setForcedCornerCuts`). Only those sizes are built again. Test `TST_VPiece::ForcedCornerCutCutsShortMiter`.
   - [x] Layout.27.13.3 Run the Qt suites. Done: `Seamly2DTests` passed, with both new tests; `ParserTest` and `TranslationsTest` passed; `CollectionTest` exited 1 on the first run and passed 44 of 44 on a rerun. These were the binaries that the MSI 26.10.1421 build compiled.
   - [ ] Layout.27.13.4 Next MSI: run `capture_handoff_jacket2.bat` again; replace `jacket2_40-146_handoff.svg`; expect 8 graded (Layout.27.7.2).
+    - MSI 26.10.2023 capture: `C:\Users\susan\seamly2d\layouts\handoff_jacket2.svg`. Two material groups: Fabric 7 pieces, Lining 1 (Detail 4). Next: replace the fixture with it.
     - MSI 26.10.1421 result: still 6 of 8 graded. The fixture was not replaced.
     - Detail (3): sizes 660 and 680 are fixed. Size 700 has one extra turn point, 3.7 mm before the corner at node 247.
     - Detail (6): no change. Sizes 220–340 still cut the corner and 360+ do not, so the forced cut did not apply.
@@ -247,30 +206,6 @@ Note: The piece names in the jacket2 pattern have changed, so items below may re
     - First Qt run failed: row `SplineNodeVertices(tangent breaks)` asked for a point that cannot exist. `VSplinePoint` makes the control node angles opposite. `VCubicBezierPath::GetSpline()` turns the control node after an interior node opposite the one before. Only a control node of length 0 gives a tangent break at an interior node.
     - Fix: `isSplineEndNode` reads the two curves that meet at the point, as drawn. The row now expects a smooth point.
     - User decision: keep both corrections. A tangent break is two curves that meet at a point. Never make an end node smooth. Never drop an end node.
-
-### [ ] Task Layout.24 — Verify - Multisize - FIlename - Put the tab name before the export timestamp - Priority 2
-
-Default name of a multisize export: `<base>[_<segment>]_<tab>_<stamp>[_tiled].<ext>`. Example: `mypatternname_R13_Size220_202610112043.dxf`. An individual pattern keeps `<base>[_<segment>]_<stamp>[_tiled].<ext>`.
-
-- [x] Layout.24.1 Add optional tab segment before `<stamp>` in `exports::default_export_file_name`.
-- [x] Layout.24.2 Remove spaces from tab labels; replace non-alphanumeric characters (except `-`) with `-`. "Size 220" → `Size220`.
-- [x] Layout.24.3 Include the selected tab in single-export default names.
-- [x] Layout.24.4 Apply the rule to Export All. Replace `layout_views::tab_file_path` (currently puts `_size-220` after timestamp). For renamed files, insert `_<tab>` before the extension.
-- [x] Layout.24.5 Test names with/without tab, tiled names, `/` in labels, and Export All.
-- [x] Layout.24.6 Docs: export file name rule in the SeamlyLayout docs, `TEST_CHECKLIST.md`
-- [ ] Layout.24.7 Next MSI: run `TEST_CHECKLIST.md` §7, "Export file names (Layout.24)".
-
-### [ ] Task Layout.73 — Verify - Assign unique piece names at import
-
-Give every piece a unique name before a layout, in every size. Rule: `docs-data/SVG-DATA-ATTRIBUTES.md`, "SeamlyLayout piece names".
-
-Finding: the names do not cause the jacket2 Missing Piece Data dialog (`test-seamly-layout/layouts/jacket2/20261013/jacket2_40-146_R12_alltabs_screenshot_20261016_1.png`). jacket2 hides piece labels and grainlines (`visible="false"`), so the handoff has no `piece_label` or `grainline` groups (Layout.26). The dialog stays; it now lists `Size_500_Piece_3_Detail` instead of `Detail (3)`.
-
-- [x] Layout.73.1 `piece_naming::assign_unique_piece_names`, called by `finish_import`. Individual: `Piece_<n>[_<name>][_<letter>]`. Multisize: `Size_<size>_Piece_<n>[_<name>][_<letter>]`. A run of spaces becomes one `_` (user decision). Piece-set: name without the size. Marker `data-name-assigned="true"`, kept on a later import.
-- [x] Layout.73.2 Import warning when the sizes have different piece counts.
-- [x] Layout.73.3 No "(size N)" label suffix on an assigned name.
-- [x] Layout.73.4 Tests: 6 `piece_naming` tests, `piece_extractor` `assigned_name_label_has_no_size_suffix`, `layout_utils` `jacket2_assigned_names_reach_the_base_size_export`.
-- [ ] Layout.73.5 Next MSI: user check, `AGENT_CHECKLIST.md` §1 and §5.
 
 ### [ ] Task Layout.74 - Multisize - Nested - each size has its own color, with a size-to-color legend
 
@@ -285,13 +220,6 @@ Currently in the nested layout, all pieces are black. To distinguish between siz
   - [ ] Layout 74.4.3 - Exported files retain the colors
   - [ ] Layout 74.4.4 - Exported files retain the legend
   - [ ] Layout 74.4.5 - 5 `size_colors` tests; `layout_utils` `jacket2_nested_colors_sizes_and_adds_legend`, `jacket2_nested_tiled_legend_has_tile_rows`; `svg_label_text` `size_legend_text_is_label_text`; `hpgl_writer` `cut_mode_drops_the_size_legend`. `cargo test --workspace` 533 passed; `ctest --preset debug` 6 of 6. jacket2 Nested PNG render checked by eye. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
-
-### [ ] Task Layout.75 - Verify - Multisize - add a scroll bar to enable access of all size tabs
-
-Currently in multisize layouts, the size tabs continue past the right edge of the canvas, but there is no scrollbar to enable the user to access those size tabs. Add a horizontal scrollbar to the multisize layout canvas.
-
-- [x] Layout 75.1 - add a horizontal scrollbar to the multisize right canvas that allows scrolling to view all size tabs. `Main.qml`: `Flickable layoutViewTabStrip` holds the `TabBar`; the scroll bar sits below the tabs and shows only when tabs are out of view; the mouse wheel scrolls the tabs; the shown tab scrolls into view. Checked: QML compiles (debug build, `ctest --preset debug` 6 of 6); a `qml` test render with 29 tabs in a 700 px window shows the bar and the selected tab.
-- [ ] Layout 75.2 - Test/Verify - All size tabs are accessible in the multisize canvas. Next MSI: jacket2 (26 sizes), Create Layout; scroll to the last tab with the bar and with the mouse wheel.
 
 ### [ ] Task Layout.76 - Verify - Multisize - Filename - each piece must have the size in a label
 
