@@ -2,6 +2,13 @@
 
 ## Current status
 
+### 2026-10-21 — Nested size colors: dark and pastel palette, merged into local `run-seamlyLayout`, not pushed
+
+- Layout.82: `size_colors::palette_colors` replaces the golden-angle palette. OKLab farthest-point picks from dark to pastel candidates; first size blue.
+- jacket2, 26 sizes: closest pair 0.11 in OKLab (before: 0.012); 7 pastel, 5 dark.
+- Verified: `cargo test --workspace` 561 passed. Not run: ctest (no C++/QML change), GUI, MSI (ask first).
+- User check: `AGENT_CHECKLIST.md` §16, next MSI.
+
 ### 2026-10-21 — Nested legend square swatches, merged into local `run-seamlyLayout`, not pushed
 
 - `size_colors.rs` `SizeLegend::element`: each swatch is a 32 × 32 px `rect` in the size color, no stroke. Was a 32 px line.
