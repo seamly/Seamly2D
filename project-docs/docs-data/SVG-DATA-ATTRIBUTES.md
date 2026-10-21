@@ -106,7 +106,8 @@ At import, SeamlyLayout adds a label to every multisize piece (`data-size` set):
 
 On the Nested tab each size has its own color. Every stroke and fill of a piece that is not `none` takes the color of its size; text without a fill gets one. The Marker, Base Size and size tabs keep the drafted colors.
 
-- Colors follow the size order, smallest first: golden-angle hue steps from blue, alternating lightness, relative luminance at most 0.3.
+- Colors follow the size order, smallest first. The first size is blue. Each next size takes the candidate color farthest, in OKLab, from white and from every earlier size.
+- Candidates: OKLab lightness 0.40 (dark) to 0.80 (pastel), 10° hue steps, the most chroma sRGB holds up to 0.20; grays left out. More sizes than candidates (177) repeat the colors.
 - The legend is `<g id="size_legend" data-type="size_legend">`: a frame, then per size a 32 × 32 px square `rect` filled with its color and the text "Size <size>". It sits one piece gap below the lowest piece, at the left edge of the content; the media grows to hold it (tiled paper gets more tile rows).
 - Every export of the tab keeps the colors and the legend. The paper-sheet PDF repacks the pieces: it keeps the colors, not the legend.
 - Text modes and HPGL treat `size_legend` as a label: HPGL plot mode draws it with the label pen; cut mode leaves it out.
