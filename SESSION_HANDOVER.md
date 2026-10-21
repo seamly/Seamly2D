@@ -12,7 +12,7 @@
 - Progress status: "Packing <n> pieces... <p>%".
 - Removed from the earlier uncommitted draft: unused `snap_to_exact_gap`, `rotated_exact_dims`.
 - Verified: `cargo test --workspace` 559 passed. Scratch harness with the sample layouts' piece sizes: Marker 16,944 → 14,840 px, side-gap excess 1,009 → 0 px; 208-piece jacket2 74,605 → 73,165 px. Not run: ctest (no C++/QML change), GUI, MSI (ask first).
-- Open (user decision): pack in 1/100 px. Boxes round up to whole px, so a gap on the media is 5–6 px.
+- Not done (user decision): 1/100 px packing. Boxes round up to whole px, so a gap on the media is 5–6 px; 1 px is within tolerance.
 - User check: next MSI, Marker of the jacket2 Lining handoff.
 
 ### 2026-10-20 — Canvas split 25 / 75, merged into local `run-seamlyLayout`, not pushed
