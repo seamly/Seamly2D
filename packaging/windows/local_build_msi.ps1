@@ -316,7 +316,8 @@ if errorlevel 1 exit /b 1
 $LayoutTestSection
 
 echo.
-echo === smsi.ps1: stage + wix --> build MSI ===
+rem No > or < in echo text: cmd reads them as redirection and writes a stray file.
+echo === smsi.ps1: stage + wix, then build MSI ===
 cd /d "$repoRoot"
 powershell -NoProfile -ExecutionPolicy Bypass -File "$smsiScript" $smsiArgsQuoted
 if errorlevel 1 exit /b 1

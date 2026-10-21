@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-10-21 — `local_build_msi.ps1` stray `build` file fixed, merged into local `run-seamlyLayout`, not pushed
+
+- Defect: the batch line `echo ... wix --> build MSI` redirected to a file `src/app/seamlylayout/build` on every build.
+- Fix: echo text without `>`; a `rem` line states the rule.
+- Verified: scratch cmd run, old line writes `build`, new line writes no file. Not run: full build.
+- Full CI rule: `packaging/**` changed; the merge commit has no skip-ci token.
+- MSI 26.10.2023 (packer fix) built and passed all tests; user check of the Lining Marker is open.
+
 ### 2026-10-20 — MaxRects piece-order search, merged into local `run-seamlyLayout`, not pushed
 
 - Defect: jacket2 Lining Marker, `s220` and `s260` 1,014 px apart in one band. The topmost-box rule put `s260` 2 px higher and 1,732 px to the right.
