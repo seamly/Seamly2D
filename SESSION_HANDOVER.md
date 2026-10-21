@@ -2,6 +2,19 @@
 
 ## Current status
 
+### 2026-10-20 — MaxRects piece-order search, merged into local `run-seamlyLayout`, not pushed
+
+- Defect: jacket2 Lining Marker, `s220` and `s260` 1,014 px apart in one band. The topmost-box rule put `s260` 2 px higher and 1,732 px to the right.
+- `layout_engine`: `maxrects_order_search.rs`, `up_left_compaction.rs`. Rules `TopLeft` and `WeightedTopLeft` (lowest `8 × y + x`). Five start orders × two rules, then late-acceptance hill climbing, fixed seed.
+- Rank: unplaced area, height, side-gap excess, moment. Side by side = y ranges share at least half the lower piece height.
+- Gap now on all four sides; each pass ends with up-left compaction.
+- Strict `pack_maxrects*` (sheets, tiled scan, oversized): start orders only. Lenient and extending: full search, about 1 s at most.
+- Progress status: "Packing <n> pieces... <p>%".
+- Removed from the earlier uncommitted draft: unused `snap_to_exact_gap`, `rotated_exact_dims`.
+- Verified: `cargo test --workspace` 559 passed. Scratch harness with the sample layouts' piece sizes: Marker 16,944 → 14,840 px, side-gap excess 1,009 → 0 px; 208-piece jacket2 74,605 → 73,165 px. Not run: ctest (no C++/QML change), GUI, MSI (ask first).
+- Open (user decision): pack in 1/100 px. Boxes round up to whole px, so a gap on the media is 5–6 px.
+- User check: next MSI, Marker of the jacket2 Lining handoff.
+
 ### 2026-10-20 — Canvas split 25 / 75, merged into local `run-seamlyLayout`, not pushed
 
 - `Main.qml` `canvasRow`: both columns set `Layout.preferredWidth`. Left share = 0.25 always, with or without a layout (user decision).

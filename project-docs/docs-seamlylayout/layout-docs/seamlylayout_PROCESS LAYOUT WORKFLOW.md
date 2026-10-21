@@ -22,7 +22,7 @@ See full documentation in [`docs/layout-docs/PROCESS LAYOUT WORKFLOW.md`](../../
 | 1 | `LayoutSettings::from_json()` | Parse settings JSON from SettingsModel |
 | 2 | `LayoutSettings::effective_bin_px()` | Compute bin dimensions in pixels (margins, fold, unit conversion; fabric selvedge is already baked into the margins by `SettingsModel::syncFabricMarginsFromSelvedge()`) |
 | 3 | `extract_piece_rects(&flat_dom_3)` | Extract bounding boxes from fully pre-processed DOM; sort by area descending |
-| 4 | `pack_maxrects(bin_w, bin_h, GAP_PX, &rects)` | MaxRects bin packing — top-left fit selection, 4-way split, containment pruning; returns `(Vec<Placed>, Vec<FreeRect>)` |
+| 4 | `pack_maxrects(bin_w, bin_h, GAP_PX, &rects)` | MaxRects bin packing with a piece-order search (see below); returns `(Vec<Placed>, Vec<FreeRect>)` |
 | 5 | `assemble_layout_svg(...)` | Build output SVG; includes debug overlay groups (see below) |
 | 6 | _(roll only)_ `trim_roll_height()` | Trim SVG height to `max_piece_bottom_y + margin_bottom_px` |
 | 7 | `write_debug(&output_doc, "layout_dom")` | Save `<exe_dir>/output/layout_dom.svg` |
@@ -37,12 +37,35 @@ See full documentation in [`docs/layout-docs/PROCESS LAYOUT WORKFLOW.md`](../../
 
 ## MaxRects Algorithm
 
-- Pieces sorted by area descending (largest first)
-- **Placement selection:** top-left fit — lowest `minY`, break ties by lowest `minX`
-- **Split on placement:** 2-way split of the chosen free rect (right strip + bottom strip);
-  4-way split (left/right/top/bottom) of all other free rects that overlap the placed piece
-- **Containment pruning:** after each placement, any free rect fully contained within another is removed
-- Returns all free rects in creation order (`Vec<FreeRect>`) for the debug overlay
+Box-based packer: `crates/layout_engine/src/maxrects_order_search.rs` and `up_left_compaction.rs`.
+
+### One pass
+
+- Free boxes: maximal free rectangles. Free boxes can overlap.
+- Each piece goes to the top-left corner of the free box that the rule picks:
+  - `TopLeft` — topmost box, then leftmost.
+  - `WeightedTopLeft` — lowest `8 × y + x`. A box a few px lower but far to the left wins.
+- The piece, plus the gap, is cut out of every free box it overlaps: left, right, top and bottom strips.
+- A free box inside another free box is removed.
+- The gap is added to the right and bottom of each piece and of the bin. Every pair of pieces keeps the full gap on all sides.
+- After the pass, each piece moves up, then left, until the gap or the bin edge stops it.
+
+### Piece-order search
+
+- Start orders: pieces sorted by area, height, width, longer side, perimeter. Each order is packed with both rules.
+- Then late-acceptance hill climbing: swap two pieces, move one piece, or change the rule.
+- Fixed random seed: the same input always gives the same layout.
+- Layout rank, in order: least unplaced area, least height, least side-gap excess, pieces higher.
+- Side-gap excess: whitespace beyond the gap left of each piece. It ends at the nearest side-by-side piece or at the bin edge.
+  - Side by side: the y ranges share at least half the height of the lower piece.
+
+| Entry point | Search |
+|---|---|
+| `pack_maxrects_multi_angle_lenient`, `pack_maxrects_multi_angle_extending` | Full: start orders, then hill climbing up to `SEARCH_WORK` |
+| `pack_maxrects_multi_angle`, `pack_maxrects` (strict) | Start orders only: sheet assignment and the tiled width scan call it many times |
+
+- Returns the free boxes of the chosen layout in creation order for the debug overlay.
+- Progress callback: `(steps done, total steps)` of the search.
 
 ## Debug Overlay Groups
 

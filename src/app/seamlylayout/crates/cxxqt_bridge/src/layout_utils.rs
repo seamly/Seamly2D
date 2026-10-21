@@ -538,11 +538,12 @@ pub fn do_process_layout(
             pieces.len(), total_polygon_verts, gap_px, bin_w, bin_h, trial_angles_deg,
         ));
         let t_pack = std::time::Instant::now();
-        let mut piece_status = |current_piece_1_based: usize, total_pieces: usize| {
+        // The packer searches over piece orders; report the share of the search done.
+        let mut piece_status = |steps_done: usize, total_steps: usize| {
             let status = format!(
-                "Processing piece {} of {}...",
-                current_piece_1_based,
-                total_pieces
+                "Packing {} pieces... {}%",
+                pieces.len(),
+                steps_done * 100 / total_steps.max(1)
             );
             progress_fn(60, Some(status.as_str()));
         };

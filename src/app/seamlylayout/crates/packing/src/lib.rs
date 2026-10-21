@@ -166,7 +166,8 @@ pub fn pack_polygons_with_progress(
 // @param polygons          Per-piece outline polygons (accepted, currently ignored).
 // @param rects             AABBs of the polygons; index-aligned with `polygons`.
 // @param trial_angles_deg  Per-piece rotation trial set in degrees.
-// @param on_piece_begin    Optional per-piece progress callback (1-based, total).
+// @param on_progress       Optional callback (steps done, total steps) for the
+//                          packer's piece-order search.
 // @return                  (placements, free-rect history, unplaced original ids).
 pub fn pack_polygons_lenient(
     bin_w: u32,
@@ -175,7 +176,7 @@ pub fn pack_polygons_lenient(
     _polygons: &[Polygon],
     rects: &[Rect],
     trial_angles_deg: &[u16],
-    on_piece_begin: Option<&mut dyn FnMut(usize, usize)>,
+    on_progress: Option<&mut dyn FnMut(usize, usize)>,
 ) -> (Vec<Placed>, Vec<FreeRect>, Vec<usize>) {
     let all_orthogonal_flips = trial_angles_deg
         .iter()
@@ -193,7 +194,7 @@ pub fn pack_polygons_lenient(
         gap_px,
         rects,
         trial_angles_deg,
-        on_piece_begin,
+        on_progress,
     )
 } // fn pack_polygons_lenient
 
@@ -203,8 +204,10 @@ pub fn pack_polygons_lenient(
 // never left out: the bin height grows until it is placed.  Only a piece wider
 // than the bin at every trial angle is reported unplaced.
 //
-// @param bin_h  Starting content rectangle height in pixels: the media height.
-// @return       (placements, free-rect history, unplaced original ids, bin height used).
+// @param bin_h        Starting content rectangle height in pixels: the media height.
+// @param on_progress  Optional callback (steps done, total steps) for the
+//                     packer's piece-order search.
+// @return             (placements, free-rect history, unplaced original ids, bin height used).
 pub fn pack_polygons_extending(
     bin_w: u32,
     bin_h: u32,
@@ -212,7 +215,7 @@ pub fn pack_polygons_extending(
     _polygons: &[Polygon],
     rects: &[Rect],
     trial_angles_deg: &[u16],
-    on_piece_begin: Option<&mut dyn FnMut(usize, usize)>,
+    on_progress: Option<&mut dyn FnMut(usize, usize)>,
 ) -> (Vec<Placed>, Vec<FreeRect>, Vec<usize>, u32) {
     log::info!(
         "[packing::pack_polygons_extending] dispatch=multi-angle MaxRects (trial set {:?}); pieces={}, bin={}x{}",
@@ -225,7 +228,7 @@ pub fn pack_polygons_extending(
         gap_px,
         rects,
         trial_angles_deg,
-        on_piece_begin,
+        on_progress,
     )
 } // fn pack_polygons_extending
 
