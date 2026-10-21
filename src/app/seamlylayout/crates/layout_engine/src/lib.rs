@@ -13,9 +13,16 @@
 //! Shared types (`Rect`, `Placed`, `PackError`, `PackResult`, `FreeRect`)
 //! live in the leaf `pack_types` crate and are re-exported here for
 //! convenience.
+//!
+//! `maxrects_order_search` holds the MaxRects placement and the piece-order
+//! search; `up_left_compaction` moves placed pieces up and left to the gap.
+
+mod maxrects_order_search;
+mod up_left_compaction;
 
 pub use pack_types::{FreeRect, PackError, PackResult, Placed, Rect};
 
+use maxrects_order_search::{search_layout, PackJob, SearchDepth};
 use tracing::debug;
 
 // @brief Greedy shelf (first-fit, height-decreasing) bin packing for rectangles.
@@ -88,21 +95,20 @@ pub fn pack_shelves(bin_w: u32, bin_h: u32, rects: &[Rect]) -> PackResult<Vec<Pl
 
 // @brief MaxRects bin packing — significantly more efficient than shelf packing.
 //
-// Maintains a list of maximal free rectangles (free rects may overlap).
-// Pieces are sorted by area descending (largest first) and each is placed at
-// the top-left corner of the best-fit free rect (smallest area that fits).
+// Box-based: keeps a list of maximal free boxes (free boxes may overlap).
+// Each piece goes to the top-left corner of the free box with the best score,
+// and the piece is cut out of every free box it overlaps (left, right, top
+// and bottom strips).  Free boxes inside other free boxes are pruned.
 //
-// After each placement, every free rect that overlaps the placed piece is
-// removed and replaced with up to four non-overlapping sub-rects (left strip,
-// right strip, top strip, bottom strip).  The `gap_px` parameter inserts that
-// many pixels of clearance around each placed piece when computing splits.
-// Finally, any free rect fully contained within another is pruned.
+// The gap is added to the right and bottom of every piece and of the bin, so
+// every pair of pieces keeps the full `gap_px` on all four sides.  After the
+// pass, every piece moves up, then left, until the gap or the bin edge stops it.
 //
-// Split geometry (piece at px, py with size pw × ph, gap g):
-//   left   = (F.x,          F.y,          px         - F.x,              F.h)
-//   right  = (px + pw + g,  F.y,          F.x + F.w  - (px + pw + g),    F.h)
-//   top    = (F.x,          F.y,          F.w,        py - F.y               )
-//   bottom = (F.x,          py + ph + g,  F.w,        F.y + F.h - (py + ph + g))
+// A greedy pass leaves the last pieces only the boxes the earlier pieces left.
+// So `maxrects_order_search` packs five sort orders with two box scores, then
+// searches over the piece order.  It keeps the layout with the least unplaced
+// area, then the least height, then the least whitespace between side-by-side
+// pieces.  The search is deterministic.
 //
 // Rotation handling: this packer only supports trial sets that are subsets of
 // `{0, 180}` — at those angles the rotated AABB is identical to the upright
@@ -135,26 +141,37 @@ pub fn pack_maxrects(
 
 // @brief Multi-angle MaxRects backend used for practical Rotate layouts.
 //
-// For each piece and each candidate free rect, this function evaluates all
-// trial angles by computing the rotated AABB dimensions and selecting the best
-// top-left candidate (lowest y, then lowest x, then lowest waste area).  This
-// preserves MaxRects speed while supporting 90°/45° trial sets without the
-// expensive polygon NFP path.
+// For each piece and each candidate free box, this function evaluates all
+// trial angles by computing the rotated AABB dimensions and selecting the
+// box with the best score.  This preserves MaxRects speed while supporting
+// 90°/45° trial sets without the expensive polygon NFP path.
+//
+// Packs the start orders only (see `SearchDepth::StartOrders`).
+//
+// @param on_progress  Optional callback (steps done, total steps) for the order search.
 pub fn pack_maxrects_multi_angle(
     bin_w: u32,
     bin_h: u32,
     gap_px: u32,
     rects: &[Rect],
     trial_angles_deg: &[u16],
-    on_piece_begin: Option<&mut dyn FnMut(usize, usize)>,
+    on_progress: Option<&mut dyn FnMut(usize, usize)>,
 ) -> PackResult<(Vec<Placed>, Vec<FreeRect>)> {
-    // Strict contract (unchanged): the first piece that can't be placed aborts
-    // the whole pack with the matching PackError.  Implemented on top of the
-    // shared collect worker so the strict and lenient entry points stay in sync.
-    // `unplaced` is in area-descending iteration order, so `unplaced[0]` is the
-    // exact piece the historical early-return version reported.
-    let (placements, free_rects, unplaced) =
-        pack_maxrects_collect(bin_w, bin_h, gap_px, rects, trial_angles_deg, on_piece_begin);
+    // Strict contract: a piece that can't be placed aborts the whole pack with
+    // the matching PackError.  Implemented on top of the shared collect worker
+    // so the strict and lenient entry points stay in sync.  `unplaced` lists
+    // the too-large pieces first, so a too-large piece is reported first.
+    // Sheet assignment and the tiled width scan call this many times, so it
+    // packs the start orders only.
+    let (placements, free_rects, unplaced) = pack_maxrects_collect(
+        bin_w,
+        bin_h,
+        gap_px,
+        rects,
+        trial_angles_deg,
+        SearchDepth::StartOrders,
+        on_progress,
+    );
     if let Some(u) = unplaced.into_iter().next() {
         return Err(match u.reason {
             UnplacedReason::TooLarge { w, h, bin_w, bin_h } =>
@@ -177,6 +194,9 @@ pub fn pack_maxrects_multi_angle(
 // the layout still renders every piece that fit, and the caller surfaces the
 // unplaced piece ids to the user as a warning.
 //
+// Runs the full order search: one layout is one call.
+//
+// @param on_progress  Optional callback (steps done, total steps) for the order search.
 // @return (placements sorted by original id, free-rect creation history,
 //          unplaced original ids sorted ascending).
 pub fn pack_maxrects_multi_angle_lenient(
@@ -185,10 +205,10 @@ pub fn pack_maxrects_multi_angle_lenient(
     gap_px: u32,
     rects: &[Rect],
     trial_angles_deg: &[u16],
-    on_piece_begin: Option<&mut dyn FnMut(usize, usize)>,
+    on_progress: Option<&mut dyn FnMut(usize, usize)>,
 ) -> (Vec<Placed>, Vec<FreeRect>, Vec<usize>) {
     let (placements, free_rects, unplaced) =
-        pack_maxrects_collect(bin_w, bin_h, gap_px, rects, trial_angles_deg, on_piece_begin);
+        pack_maxrects_collect(bin_w, bin_h, gap_px, rects, trial_angles_deg, SearchDepth::Full, on_progress);
     let mut unplaced_ids: Vec<usize> = unplaced.into_iter().map(|u| u.id).collect();
     unplaced_ids.sort_unstable();
     (placements, free_rects, unplaced_ids)
@@ -196,57 +216,42 @@ pub fn pack_maxrects_multi_angle_lenient(
 
 // @brief Lenient MaxRects on media that grows in height until every piece fits.
 //
-// Packs at `bin_h` first.  While a piece that fits the bin width stays
-// unplaced, the bin grows by the stacked height of the unplaced pieces and the
-// pack runs again.  The loop ends: a bin as tall as every fitting piece stacked
-// holds them all, because each placed piece lowers the full-width free strip at
-// the bin bottom by at most its stacked height.  A piece wider than the bin at
-// every trial angle stays unplaced.
+// Packs once into a bin as tall as every piece that fits the width, stacked:
+// that bin holds them all.  The search ranks layouts by height, so the layout
+// is as short as the search finds.  A piece wider than the bin at every trial
+// angle stays unplaced.
 //
 // @return (placements sorted by original id, free-rect creation history,
-//          unplaced original ids sorted ascending, bin height used).
+//          unplaced original ids sorted ascending,
+//          bin height used: `bin_h`, or the content height when it is larger).
 pub fn pack_maxrects_multi_angle_extending(
     bin_w: u32,
     bin_h: u32,
     gap_px: u32,
     rects: &[Rect],
     trial_angles_deg: &[u16],
-    mut on_piece_begin: Option<&mut dyn FnMut(usize, usize)>,
+    on_progress: Option<&mut dyn FnMut(usize, usize)>,
 ) -> (Vec<Placed>, Vec<FreeRect>, Vec<usize>, u32) {
-    // Stacked height of each piece; None for a piece too wide for the bin.
-    let stacked: Vec<Option<u32>> = rects
+    // Stacked height of every piece that fits the width; too-wide pieces add nothing.
+    let all_stacked_h = rects
         .iter()
-        .map(|&r| stacked_height(r, bin_w, gap_px, trial_angles_deg))
-        .collect();
-    // A bin this tall holds every piece that fits the width.
-    let all_stacked_h = stacked.iter().flatten().fold(0u32, |sum, &h| sum.saturating_add(h));
+        .filter_map(|&r| stacked_height(r, bin_w, gap_px, trial_angles_deg))
+        .fold(0u32, |sum, h| sum.saturating_add(h));
+    let pack_h = bin_h.max(all_stacked_h);
 
-    let mut h = bin_h;
-    loop {
-        // Reborrow the callback for this pack only; the next pack needs it again.
-        let progress: Option<&mut dyn FnMut(usize, usize)> = match on_piece_begin.as_mut() {
-            Some(cb) => Some(&mut **cb),
-            None => None,
-        };
-        let (placements, free_rects, unplaced) =
-            pack_maxrects_multi_angle_lenient(bin_w, h, gap_px, rects, trial_angles_deg, progress);
+    let (placements, free_rects, unplaced) =
+        pack_maxrects_multi_angle_lenient(bin_w, pack_h, gap_px, rects, trial_angles_deg, on_progress);
 
-        // Height the unplaced pieces add when stacked; 0 when only too-wide pieces remain.
-        let missing_h = unplaced
-            .iter()
-            .filter_map(|&id| stacked[id])
-            .fold(0u32, |sum, sh| sum.saturating_add(sh));
-        if missing_h == 0 || h >= all_stacked_h {
-            return (placements, free_rects, unplaced, h);
-        }
-
-        let grown_h = h.saturating_add(missing_h).min(all_stacked_h);
+    // The media keeps its own length unless the pieces need more.
+    let content_h = placements.iter().map(|p| p.y + p.h).max().unwrap_or(0);
+    let used_h = bin_h.max(content_h);
+    if used_h > bin_h {
         debug!(
-            "pack_maxrects_multi_angle_extending: {} piece(s) left out at bin_h={}; packing again at bin_h={}",
-            unplaced.len(), h, grown_h
+            "pack_maxrects_multi_angle_extending: bin_h={} grows to {} for {} piece(s)",
+            bin_h, used_h, placements.len()
         );
-        h = grown_h;
-    } // loop until every piece that fits the width is placed
+    } // if the media grows
+    (placements, free_rects, unplaced, used_h)
 } // fn pack_maxrects_multi_angle_extending
 
 // @brief Smallest bin width that holds every piece, each in its narrowest
@@ -321,15 +326,20 @@ struct UnplacedPiece {
 // @brief Shared MaxRects worker: places every piece it can and collects the
 // rest instead of erroring.  Both the strict (`pack_maxrects_multi_angle`) and
 // lenient (`pack_maxrects_multi_angle_lenient`) public entry points are thin
-// adapters over this.  Skipping an unplaceable piece leaves the free-rect set
-// untouched, so smaller pieces later in area order can still fill the space.
+// adapters over this.
+//
+// @param depth  How much of the piece-order search to run.
+// @return (placements sorted by id, free-box history of the chosen layout,
+//          unplaced pieces: too-large pieces by area descending, then pieces
+//          without room in placement order).
 fn pack_maxrects_collect(
     bin_w: u32,
     bin_h: u32,
     gap_px: u32,
     rects: &[Rect],
     trial_angles_deg: &[u16],
-    mut on_piece_begin: Option<&mut dyn FnMut(usize, usize)>,
+    depth: SearchDepth,
+    on_progress: Option<&mut dyn FnMut(usize, usize)>,
 ) -> (Vec<Placed>, Vec<FreeRect>, Vec<UnplacedPiece>) {
     debug!(
         "[debug] layout_engine\\src\\pack_maxrects_collect(): 1 Called with bin_w={}, bin_h={}, gap_px={}, rect_count={}, trial_angles_deg={:?}",
@@ -340,154 +350,34 @@ fn pack_maxrects_collect(
         trial_angles_deg
     );
 
-    // Trial set for a piece limited to the layout mode, and for a free-rotation piece.
-    let trial = piece_trial_set(trial_angles_deg, false);
-    let free_trial = piece_trial_set(trial_angles_deg, true);
+    // Orientations per piece that fit the empty bin.
+    let job = PackJob::new(
+        bin_w,
+        bin_h,
+        gap_px,
+        rects,
+        |r| piece_trial_set(trial_angles_deg, r.free_rotation),
+        rotated_rect_dims,
+    );
 
-    // Sort by area descending, preserving original indices.
-    let mut order: Vec<usize> = (0..rects.len()).collect();
-    order.sort_by_key(|&i| std::cmp::Reverse(rects[i].w as u64 * rects[i].h as u64));
-
-    let rect1 = FreeRect { x: 0, y: 0, w: bin_w, h: bin_h };
-    let mut free_rects: Vec<FreeRect> = vec![rect1];
-    let mut all_created: Vec<FreeRect> = vec![rect1];
-    let mut placements: Vec<Placed> = Vec::with_capacity(rects.len());
-    let mut unplaced: Vec<UnplacedPiece> = Vec::new();
-
-    for (idx, &id) in order.iter().enumerate() {
-        if let Some(cb) = on_piece_begin.as_mut() {
-            cb(idx + 1, order.len());
-        }
-
-        let r = rects[id];
-        let trial: &[u16] = if r.free_rotation { &free_trial } else { &trial };
-
-        // Any orientation physically fits in empty bin?
-        let mut any_fit_in_empty = false;
-        for &deg in trial {
-            let (rw, rh) = rotated_rect_dims(r.w, r.h, deg);
-            if rw <= bin_w && rh <= bin_h {
-                any_fit_in_empty = true;
-                break;
-            }
-        }
-        if !any_fit_in_empty {
-            // Physically larger than the bin at every orientation — skip and record.
-            unplaced.push(UnplacedPiece {
-                id,
-                reason: UnplacedReason::TooLarge { w: r.w, h: r.h, bin_w, bin_h },
-            });
-            continue;
-        }
-
-        // Best candidate across all free rects and trial angles.
-        // Key: topmost (y), then leftmost (x), then least waste in chosen free rect.
-        let mut best: Option<(usize, u16, u32, u32, u64)> = None;
-        for (fi, f) in free_rects.iter().enumerate() {
-            for &deg in trial {
-                let (rw, rh) = rotated_rect_dims(r.w, r.h, deg);
-                if f.w < rw || f.h < rh {
-                    continue;
-                }
-                let waste = (f.w as u64) * (f.h as u64) - (rw as u64) * (rh as u64);
-                let cand_key = (f.y, f.x, waste);
-                let is_better = match best {
-                    None => true,
-                    Some((bfi, _, brw, brh, bwaste)) => {
-                        let bf = free_rects[bfi];
-                        let best_key = (bf.y, bf.x, bwaste);
-                        cand_key < best_key || (cand_key == best_key && ((rw as u64) * (rh as u64) > (brw as u64) * (brh as u64)))
-                    }
-                };
-                if is_better {
-                    best = Some((fi, deg, rw, rh, waste));
-                }
-            }
-        }
-
-        let (best_idx, best_deg, place_w, place_h, _) = match best {
-            Some(v) => v,
-            None => {
-                // Fits an empty bin but no room remains now — skip and record.
-                unplaced.push(UnplacedPiece { id, reason: UnplacedReason::NoSpace });
-                continue;
-            }
-        };
-
-        let chosen = free_rects[best_idx];
-        let px = chosen.x;
-        let py = chosen.y;
-        placements.push(Placed {
+    // A piece larger than the bin at every trial angle is left out before the search.
+    let mut too_large: Vec<usize> = (0..rects.len()).filter(|&id| !job.fits_empty_bin(id)).collect();
+    too_large.sort_by_key(|&id| std::cmp::Reverse(rects[id].w as u64 * rects[id].h as u64));
+    let mut unplaced: Vec<UnplacedPiece> = too_large
+        .into_iter()
+        .map(|id| UnplacedPiece {
             id,
-            x: px,
-            y: py,
-            w: place_w,
-            h: place_h,
-            rotation_deg: best_deg,
-        });
+            reason: UnplacedReason::TooLarge { w: rects[id].w, h: rects[id].h, bin_w, bin_h },
+        })
+        .collect();
 
-        let mut new_free: Vec<FreeRect> = Vec::new();
-        let mut keep: Vec<bool> = vec![true; free_rects.len()];
+    // Search the piece order; pieces without room in the best layout are left out.
+    let layout = search_layout(&job, rects, depth, on_progress);
+    unplaced.extend(layout.no_space.iter().map(|&id| UnplacedPiece { id, reason: UnplacedReason::NoSpace }));
 
-        for (fi, &f) in free_rects.iter().enumerate() {
-            if !f.overlaps_piece(px, py, place_w, place_h) {
-                continue;
-            }
-            keep[fi] = false;
-
-            if px > f.x {
-                let sub = FreeRect { x: f.x, y: f.y, w: px - f.x, h: f.h };
-                new_free.push(sub);
-                all_created.push(sub);
-            }
-
-            let right_x = px.saturating_add(place_w).saturating_add(gap_px);
-            if right_x < f.x + f.w {
-                let sub = FreeRect { x: right_x, y: f.y, w: f.x + f.w - right_x, h: f.h };
-                new_free.push(sub);
-                all_created.push(sub);
-            }
-
-            if py > f.y {
-                let sub = FreeRect { x: f.x, y: f.y, w: f.w, h: py - f.y };
-                new_free.push(sub);
-                all_created.push(sub);
-            }
-
-            let bottom_y = py.saturating_add(place_h).saturating_add(gap_px);
-            if bottom_y < f.y + f.h {
-                let sub = FreeRect { x: f.x, y: bottom_y, w: f.w, h: f.y + f.h - bottom_y };
-                new_free.push(sub);
-                all_created.push(sub);
-            }
-        }
-
-        let mut retained: Vec<FreeRect> = free_rects
-            .into_iter()
-            .zip(keep)
-            .filter_map(|(f, k)| if k { Some(f) } else { None })
-            .collect();
-        retained.extend(new_free);
-        free_rects = retained;
-
-        let n = free_rects.len();
-        let mut dominated = vec![false; n];
-        for i in 0..n {
-            for j in 0..n {
-                if i != j && !dominated[i] && free_rects[i].contained_in(free_rects[j]) {
-                    dominated[i] = true;
-                }
-            }
-        }
-        free_rects = free_rects
-            .into_iter()
-            .zip(dominated)
-            .filter_map(|(f, d)| if !d { Some(f) } else { None })
-            .collect();
-    }
-
+    let mut placements = layout.placements;
     placements.sort_by_key(|p| p.id);
-    (placements, all_created, unplaced)
+    (placements, layout.history, unplaced)
 } // fn pack_maxrects_collect
 
 // @brief Compute the axis-aligned bounding box of a w×h rectangle rotated by `deg`.
@@ -766,4 +656,55 @@ mod tests {
         assert!(fits_bin(tall, 30, 10, &[0, 90, 180, 270]));
         assert!(fits_bin(tall, 4, 20, &[0]));
     } // fits_bin_checks_each_trial_angle
+    // @brief Smallest clearance between any two placements; u32::MAX for fewer than two.
+    fn min_clearance(placed: &[Placed]) -> u32 {
+        let mut least = u32::MAX;
+        for (i, a) in placed.iter().enumerate() {
+            for b in &placed[i + 1..] {
+                // Clearance is the larger of the x and y distances between the boxes.
+                let dx = b.x.saturating_sub(a.x + a.w).max(a.x.saturating_sub(b.x + b.w));
+                let dy = b.y.saturating_sub(a.y + a.h).max(a.y.saturating_sub(b.y + b.h));
+                least = least.min(dx.max(dy));
+            } // for b
+        } // for a
+        least
+    } // fn min_clearance
+
+    // @brief The 26 Front pieces of the jacket2 Lining marker, sizes 220 to 720.
+    //
+    // Their heights differ by a few px.  The topmost-free-box rule put a piece
+    // 2 px higher but 1,732 px further right, packed 8 bands in 16,944 px and
+    // left holes up to 1,014 px wide between side-by-side pieces.  The pieces
+    // fit in 7 bands, with only the piece gap between side-by-side pieces.
+    #[test]
+    fn extending_marker_keeps_side_by_side_pieces_at_the_gap() {
+        let sizes: [(u32, u32); 26] = [
+            (718, 2096), (754, 2100), (790, 2101), (825, 2102), (861, 2103), (897, 2105),
+            (933, 2106), (969, 2107), (1004, 2108), (1040, 2109), (1076, 2110), (1112, 2111),
+            (1148, 2112), (1184, 2114), (1220, 2115), (1255, 2134), (1291, 2116), (1327, 2117),
+            (1363, 2118), (1399, 2119), (1435, 2120), (1471, 2121), (1507, 2122), (1542, 2123),
+            (1578, 2124), (1614, 2125),
+        ];
+        let rects: Vec<Rect> = sizes.iter().map(|&(w, h)| Rect::new(w, h)).collect();
+        let (placed, _free, unplaced, _h) =
+            pack_maxrects_multi_angle_extending(4560, 4560, 5, &rects, &[0, 180], None);
+        assert!(unplaced.is_empty(), "unplaced: {unplaced:?}");
+        assert_eq!(placed.len(), 26);
+
+        let content_h = placed.iter().map(|p| p.y + p.h).max().unwrap_or(0);
+        assert!(content_h <= 7 * 2134 + 6 * 5, "7 bands of pieces, got {content_h} px");
+        assert_eq!(maxrects_order_search::side_gap_excess(&placed, 5), 0, "{placed:?}");
+        assert!(min_clearance(&placed) >= 5, "{placed:?}");
+        assert!(placed.iter().all(|p| p.x + p.w <= 4560), "{placed:?}");
+    } // extending_marker_keeps_side_by_side_pieces_at_the_gap
+
+    // @brief The strict packer runs the start orders only, so callers can call it many times.
+    #[test]
+    fn strict_packer_skips_the_order_search() {
+        let rects: Vec<Rect> = (1..=12).map(|i| Rect::new(10 + i, 20 - i)).collect();
+        let mut total_steps = 0usize;
+        let mut on_progress = |_done: usize, total: usize| total_steps = total;
+        pack_maxrects_multi_angle(200, 200, 2, &rects, &[0, 180], Some(&mut on_progress)).expect("pack ok");
+        assert!((1..=10).contains(&total_steps), "start orders and rules only, got {total_steps}");
+    } // strict_packer_skips_the_order_search
 }
