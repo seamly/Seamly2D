@@ -20,6 +20,7 @@ It uses the DXF-ASTM pipeline. `DxfAstmExportOptions::aama` selects the AAMA con
 | BLOCK group 3 | block name again | none: Release 10 does not define it |
 | Contours on layers 1, 8, 11, 14 | key points; dense polyline on 84–87 | dense polyline only |
 | Layers 2 and 3 | key points | key points (each is a vertex of the dense polyline) |
+| Layer 6 mirror line | first two key points | first two vertices of the dense boundary; fold vertices between them dropped |
 | Notches | layer 4 slit and V; 80 T, 81 castle, 83 U | layer 4 only: T, castle, U become V with their width |
 | Label text | layer 15 | layer 1, without lines that read as piece text |
 | Size piece text | `Size Name:` | `Size:` |
@@ -45,7 +46,7 @@ Same in both: layer 1 boundary and system text, `Piece Name:`, `Quantity:`, `Mat
 
 | Item | Place |
 |---|---|
-| AAMA content | `ezdxf2dxfastm/src/writer.rs`: `write_astm_block`, `write_contour`, `aama_notch`, `repeats_piece_text`, `style_system_text` |
+| AAMA content | `ezdxf2dxfastm/src/writer.rs`: `write_astm_block`, `write_contour`, `start_on_mirror_line`, `aama_notch`, `repeats_piece_text`, `style_system_text` |
 | R10 header and BLOCK | `writer.rs`: `write_header_section`, `write_blocks_section` |
 | `.rul` version line | `ezdxf2dxfastm/src/grade_rule_file.rs`: `AAMA_RULE_FILE_VERSION` |
 | Version | `seamly_svg2ezdxf/src/drawing.rs`: `DxfVersion::R10` |

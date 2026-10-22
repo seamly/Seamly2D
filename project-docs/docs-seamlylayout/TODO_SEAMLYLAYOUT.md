@@ -16,12 +16,13 @@ Export > DXF > "DXF-AAMA (R10)": ANSI/AAMA-292 content in a DXF R10 (AC1006) fil
   - Label text on layer 1. A label line that reads as piece text (`Size: 40`) or a rule identifier (`# 2`) is not written.
   - `Size:` piece text, not `Size Name:`. Style text ends at `Units:`.
   - `.rul` first line `ANSI/AAMA VERSION:1.0.0`.
+  - Mirror line (layer 6, from the fold line work): the dense boundary starts with its two points. Dense vertices on the fold between them are dropped.
 - [x] Layout.85.3 Menu and bridge: `ExportMenu.qml` item "DXF-AAMA (R10)"; `Main.qml` `requestDxfExport(false, "R10", true)`; options JSON `"aama"`, `"dxfVersion":"R10"`.
   - Default name `<base>_AAMA[_annotated][_<material>][_<tab>]_<stamp>.dxf`.
   - Marker and Nested: disabled, as DXF-ASTM. The submenu note is now "DXF: select Base Size or a size tab".
   - Missing Piece Data dialog, save dialog, progress text and annotated `.txt` title name DXF-AAMA.
-- [x] Layout.85.4 Tests: `writer_astm_test` `aama_r10_header_names_ac1006_and_blocks_have_no_group_3`, `aama_style_text_has_no_curve_tolerance_or_astm_version`, `aama_block_uses_layers_1_to_14_only`, `aama_labels_never_repeat_piece_text`, `aama_graded_export_writes_rule_ids_and_aama_rule_file`, `aama_annotated_version_names_dxf_aama`; `exports.rs` `do_export_dxf_writes_aama_r10_when_asked` and AAMA name segments.
-  - Checked: `cargo test --workspace` 575 passed. ezdxf 1.4.4 `recover`: male_shirt and graded fixtures as DXF-AAMA, 0 errors, layers 1–14 only. Scratch render of `ExportMenu.qml`: item order, signal, disabled state. `qmllint`: no new warnings.
+- [x] Layout.85.4 Tests: `writer_astm_test` `aama_r10_header_names_ac1006_and_blocks_have_no_group_3`, `aama_style_text_has_no_curve_tolerance_or_astm_version`, `aama_block_uses_layers_1_to_14_only`, `aama_labels_never_repeat_piece_text`, `aama_graded_export_writes_rule_ids_and_aama_rule_file`, `aama_annotated_version_names_dxf_aama`, `aama_boundary_starts_on_the_mirror_line`; `exports.rs` `do_export_dxf_writes_aama_r10_when_asked` and AAMA name segments.
+  - Checked: `cargo test --workspace` 596 passed, after the fold line merge. ezdxf 1.4.4 `recover`: male_shirt and graded fixtures as DXF-AAMA, 0 errors, layers 1–14 only. Scratch render of `ExportMenu.qml`: item order, signal, disabled state. `qmllint`: no new warnings.
   - Not run: ctest, MSI.
   - Decisions taken:
     - R10, per the task title. AAMA-292 itself names R11 DXF (AC1009). A reader that refuses AC1006 needs an R12 variant.
