@@ -240,8 +240,8 @@ Stubs only. No module ships yet.
 | DXF-ASTM (CLO3D), R13 | `male_shirt_CLO3D_202610031234.dxf` |
 | DXF-ASTM (R13), annotated | `male_shirt_R13_annotated_202610031234.dxf` + `.txt` |
 | DXF-ASTM (CLO3D), annotated | `male_shirt_CLO3D_annotated_202610031234.dxf` + `.txt` |
-| DXF-AAMA (R10) | `male_shirt_AAMA_202610031234.dxf` |
-| DXF-AAMA (R10), annotated | `male_shirt_AAMA_annotated_202610031234.dxf` + `.txt` |
+| DXF-AAMA (R11) | `male_shirt_AAMA_202610031234.dxf` |
+| DXF-AAMA (R11), annotated | `male_shirt_AAMA_annotated_202610031234.dxf` + `.txt` |
 | PDF tiled | `male_shirt_202610031234_tiled.pdf` |
 | HPGL Cut (cut lines only) | `male_shirt_cutlines_202610031234.<plt\|hpgl>` |
 | HPGL Plot | `male_shirt_202610031234.<plt\|hpgl>` |

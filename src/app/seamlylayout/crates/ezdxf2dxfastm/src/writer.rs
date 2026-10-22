@@ -20,8 +20,7 @@
 //! - label text is on layer 1 (no 15);
 //! - no `Curve Tolerance:` or ASTM version style text; the size is `Size:`, not `Size Name:`.
 //!
-//! An R10 file is the R12 file with `$ACADVER` AC1006 and no BLOCK group 3,
-//! which Release 10 does not define.
+//! An R11 file is the R12 file: both versions are AC1009.
 
 use crate::encoder::{encode_astm_polyline, encode_astm_text, encode_dxf_point, encode_entity, encode_notch};
 use crate::error::{DxfAstmExportError, Result};
@@ -140,13 +139,11 @@ fn write_group_code_float(writer: &mut dyn Write, code: i32, value: f64) -> std:
 
 // @brief Write DXF HEADER section.
 // @param include_header Reserved for more header variables; `$ACADVER` is always written.
-// @param version R10 writes AC1006. R12 and R13 write AC1009; `upgrade_to_r13` rewrites an R13 file.
-fn write_header_section(writer: &mut dyn Write, include_header: bool, version: DxfVersion) -> std::io::Result<()> {
+fn write_header_section(writer: &mut dyn Write, include_header: bool) -> std::io::Result<()> {
     write_group_code(writer, 0, "SECTION")?;
     write_group_code(writer, 2, "HEADER")?;
     write_group_code(writer, 9, "$ACADVER")?;
-    // DXF R12 syntax has the widest importer support; R10 uses the same entities.
-    write_group_code(writer, 1, if version == DxfVersion::R10 { "AC1006" } else { "AC1009" })?;
+    write_group_code(writer, 1, "AC1009")?; // DXF R11 and R12 syntax, the widest importer support
     if include_header {
         // (reserved for future HEADER variables)
     } // if include_header
@@ -391,10 +388,7 @@ fn write_blocks_section(
         write_group_code_int(writer, 70, 0)?; // no block flags
         write_group_code_float(writer, 10, 0.0)?; // base point
         write_group_code_float(writer, 20, 0.0)?;
-        // Release 10 defines no group 3: later releases repeat the block name there.
-        if drawing.version != DxfVersion::R10 {
-            write_group_code(writer, 3, &block.name)?;
-        } // if not R10
+        write_group_code(writer, 3, &block.name)?;
 
         match &block.boundary {
             Some(boundary) => write_astm_block(writer, block, boundary, options)?,
@@ -785,7 +779,7 @@ fn create_annotated_version(
 }
 
 // @brief Export Drawing to DXF-ASTM format, or to DXF-AAMA when `options.aama` is set.
-// @param drawing The ezdxf Drawing object to export; its `version` selects DXF R10, R12 or R13.
+// @param drawing The ezdxf Drawing object to export; its `version` selects DXF R11, R12 or R13.
 // @param output_path Path to write the DXF file.
 // @param options Export options.
 // @return Result indicating success or error.
@@ -806,10 +800,10 @@ pub fn export_dxf_astm(
     }
 
     // Write the R12 file structure to memory; an R13 file is rewritten from it.
-    // An R10 file differs only in `$ACADVER` and the BLOCK group 3.
+    // An R11 file is the same file: R11 and R12 share AC1009.
     let mut buffer: Vec<u8> = Vec::new();
     // 1. HEADER section (minimal or empty).
-    write_header_section(&mut buffer, options.include_header, drawing.version)?;
+    write_header_section(&mut buffer, options.include_header)?;
     // 2. BLOCKS section (pattern pieces).
     write_blocks_section(&mut buffer, drawing, options)?;
     // 3. ENTITIES section (modelspace entities).
@@ -820,7 +814,7 @@ pub fn export_dxf_astm(
     let r12 = String::from_utf8(buffer)
         .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
     let text = match drawing.version {
-        DxfVersion::R10 | DxfVersion::R12 => r12,
+        DxfVersion::R11 | DxfVersion::R12 => r12,
         DxfVersion::R13 => upgrade_to_r13(&r12)?,
     }; // match version
     std::fs::write(output_path.as_ref(), text)?;

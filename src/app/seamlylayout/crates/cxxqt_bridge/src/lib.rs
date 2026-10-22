@@ -2473,7 +2473,7 @@ impl qobject::AppController {
 
     // Export the assembled layout as a DXF-ASTM file, or a DXF-AAMA file when "aama" is true.
     // options_json: {"createAnnotatedVersion": bool, "clo3dGroup250": bool, "aama": bool,
-    //                "dxfVersion": "R10"|"R12"|"R13", "appVersion", "creationDate", "creationTime"}
+    //                "dxfVersion": "R11"|"R12"|"R13", "appVersion", "creationDate", "creationTime"}
     // Delegates core logic to exports::do_export_dxf.
     // Called by QML 'Export DXF' button handler: onExportDXF: appController.exportDxf(path, optionsJson)
     fn export_dxf(
@@ -2501,7 +2501,7 @@ impl qobject::AppController {
             // DXF-AAMA content instead of DXF-ASTM.
             #[serde(default)]
             aama: bool,
-            // "R10", "R12" or "R13"; absent or unknown writes R12.
+            // "R11", "R12" or "R13"; absent or unknown writes R12.
             #[serde(default)]
             dxf_version: Option<String>,
             // Input base name for `Style Name:`; empty when the input has no name.
@@ -2586,7 +2586,7 @@ impl qobject::AppController {
             sample_size,
             grading,
             dxf_version: match opts.dxf_version.as_deref() {
-                Some("R10") => seamly_svg2ezdxf::DxfVersion::R10,
+                Some("R11") => seamly_svg2ezdxf::DxfVersion::R11,
                 Some("R13") => seamly_svg2ezdxf::DxfVersion::R13,
                 _ => seamly_svg2ezdxf::DxfVersion::R12,
             }, // dxf_version

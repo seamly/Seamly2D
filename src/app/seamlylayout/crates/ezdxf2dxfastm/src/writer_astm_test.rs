@@ -536,30 +536,28 @@ mod tests {
         DxfAstmExportOptions { aama: true, ..dated_options() }
     }
 
-    // @brief `sample_drawing` as a DXF R10 drawing.
-    fn sample_r10_drawing() -> Drawing {
+    // @brief `sample_drawing` as a DXF R11 drawing.
+    fn sample_r11_drawing() -> Drawing {
         let mut drawing = sample_drawing();
-        drawing.version = DxfVersion::R10;
+        drawing.version = DxfVersion::R11;
         drawing
     }
 
-    // @brief An R10 file names AC1006 and writes no BLOCK group 3, which Release 10 does not define.
+    // @brief A DXF-AAMA file is DXF R11, the version ANSI/AAMA-292 builds on: `$ACADVER` AC1009.
     #[test]
-    fn aama_r10_header_names_ac1006_and_blocks_have_no_group_3() {
-        let dxf = parse_dxf(&export_to_string(&sample_r10_drawing(), "aama_header", &aama_options()));
+    fn aama_r11_header_names_ac1009() {
+        let text = export_to_string(&sample_r11_drawing(), "aama_header", &aama_options());
+        let dxf = parse_dxf(&text);
         let version = dxf.all_pairs.windows(2).find(|w| w[0] == (9, "$ACADVER".to_string())).map(|w| w[1].1.clone());
-        assert_eq!(version.as_deref(), Some("AC1006"));
-        assert!(dxf.all_pairs.iter().all(|(c, _)| *c != 3), "no group 3");
-        // The same drawing as R12 keeps both.
-        let r12 = parse_dxf(&export_to_string(&sample_drawing(), "aama_r12", &aama_options()));
-        assert!(r12.all_pairs.contains(&(1, "AC1009".to_string())));
-        assert!(r12.all_pairs.iter().any(|(c, _)| *c == 3));
+        assert_eq!(version.as_deref(), Some("AC1009"));
+        // R11 and R12 share AC1009, so the R12 file is the same file.
+        assert_eq!(text, export_to_string(&sample_drawing(), "aama_r12", &aama_options()));
     }
 
     // @brief Style text ends at `Units:`: AAMA has no curve tolerance and no ASTM version.
     #[test]
     fn aama_style_text_has_no_curve_tolerance_or_astm_version() {
-        let dxf = parse_dxf(&export_to_string(&sample_r10_drawing(), "aama_style", &aama_options()));
+        let dxf = parse_dxf(&export_to_string(&sample_r11_drawing(), "aama_style", &aama_options()));
         let texts: Vec<&str> = dxf.entities.iter().filter(|e| e.kind == "TEXT").map(|e| e.get(1).unwrap()).collect();
         assert_eq!(texts.last(), Some(&"Units:METRIC"));
         assert!(texts.iter().all(|t| !t.starts_with("Curve Tolerance:") && !t.starts_with("ASTM/")), "{texts:?}");
@@ -569,7 +567,7 @@ mod tests {
     //        layer, every notch on layer 4, label text on layer 1 after the piece text.
     #[test]
     fn aama_block_uses_layers_1_to_14_only() {
-        let mut drawing = sample_r10_drawing();
+        let mut drawing = sample_r11_drawing();
         drawing.blocks[0].size = Some("36".to_string());
         let dxf = parse_dxf(&export_to_string(&drawing, "aama_block", &aama_options()));
         let (_, body) = &dxf.blocks[0];
@@ -602,7 +600,7 @@ mod tests {
     // @brief A label line that reads as piece text or a rule identifier is not written in DXF-AAMA.
     #[test]
     fn aama_labels_never_repeat_piece_text() {
-        let mut drawing = sample_r10_drawing();
+        let mut drawing = sample_r11_drawing();
         let label = |text: &str| Annotation { position: Point::new(30.0, 40.0), height: 5.0, rotation: 0.0, text: text.to_string() };
         drawing.blocks[0].annotations.extend(["Size: 40", "quantity:3", "# 2", "Cut 2 of Fabric", "Note: fold"].map(label));
         let dxf = parse_dxf(&export_to_string(&drawing, "aama_labels", &aama_options()));
@@ -626,7 +624,7 @@ mod tests {
     // @brief A graded DXF-AAMA export keeps layer 5 and the `# n` texts, and its rule file names ANSI/AAMA.
     #[test]
     fn aama_graded_export_writes_rule_ids_and_aama_rule_file() {
-        let (drawing, _) = graded_drawing(DxfVersion::R10);
+        let (drawing, _) = graded_drawing(DxfVersion::R11);
         let path = std::env::temp_dir().join(format!("seamly_aama_rul_{}.dxf", std::process::id()));
         export_dxf_astm(&drawing, &path, &aama_options()).expect("export succeeds");
         let dxf = parse_dxf(&std::fs::read_to_string(&path).expect("DXF written"));
@@ -651,7 +649,7 @@ mod tests {
     fn aama_annotated_version_names_dxf_aama() {
         let path = std::env::temp_dir().join(format!("seamly_aama_annotated_{}.dxf", std::process::id()));
         let options = DxfAstmExportOptions { create_annotated_version: true, ..aama_options() };
-        export_dxf_astm(&sample_r10_drawing(), &path, &options).expect("export succeeds");
+        export_dxf_astm(&sample_r11_drawing(), &path, &options).expect("export succeeds");
         let txt_path = path.with_extension("txt");
         let annotated = std::fs::read_to_string(&txt_path).expect("annotated version written");
         let _ = std::fs::remove_file(&path);
@@ -669,7 +667,7 @@ mod tests {
         block.piece_name = "Back".to_string();
         block.boundary = build_contour(&outline, true);
         block.mirror_line = Some((Point::new(0.0, 0.0), Point::new(0.0, 200.0)));
-        let mut drawing = Drawing::new(DxfVersion::R10);
+        let mut drawing = Drawing::new(DxfVersion::R11);
         drawing.add_block(block);
         assert!(seamly_svg2ezdxf::align_mirror_lines(&mut drawing).is_empty());
         assert!(drawing.blocks[0].boundary.as_ref().unwrap().dense.contains(&Point::new(0.0, 100.0)), "fold vertex in the dense line");

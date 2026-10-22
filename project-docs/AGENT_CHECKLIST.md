@@ -32,7 +32,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.80.3.1 | 20 | Seamly2D: Piece Mirror |
 | Layout.80.6.6 | 21 | SeamlyLayout: fold lines on the fold, DXF-ASTM mirror line |
 | Layout.80.6.3 | 21 | Adjust Mode: the fold line moves with its piece |
-| Layout.85.5 | 3, 18, 22 | DXF-AAMA (R10) export |
+| Layout.85.5 | 3, 18, 22 | DXF-AAMA (R11) export |
 
 ## [x] 0. Install
 
@@ -257,7 +257,7 @@ Needs the next MSI.
 Needs the next MSI. Settings from section 1.
 
 - [ ] Export menu: one "DXF" item below "Export all tabs". No DXF-ASTM item in the Export menu itself.
-- [ ] Base Size 500 tab, Export > DXF: "DXF-ASTM (R12)", "DXF-ASTM (R13)", "DXF-ASTM (CLO3D)", "DXF-AAMA (R10)", all enabled. No note.
+- [ ] Base Size 500 tab, Export > DXF: "DXF-ASTM (R12)", "DXF-ASTM (R13)", "DXF-ASTM (CLO3D)", "DXF-AAMA (R11)", all enabled. No note.
 - [ ] Export > DXF > DXF-ASTM (R13): the export starts (Missing Piece Data or Standard/Annotated dialog). Cancel.
 - [ ] Marker tab, Export > DXF: "DXF: select Base Size or a size tab" is the first item and reads in full. The four items are disabled.
 - [ ] Nested tab: same.
@@ -314,17 +314,17 @@ Needs the next MSI. jacket2 Back has a fold line.
   - [ ] No export warning "the fold line is not on the cut line".
 - [ ] Upload the `.dxf` to https://aw.fyi/dxf: no departure for the Back mirror line. Back is graded.
 
-## 22. jacket2: DXF-AAMA (R10)
+## 22. jacket2: DXF-AAMA (R11)
 
 Needs the next MSI. Settings from section 1. Export all tabs unchecked.
 
-- [ ] Base Size 500 tab, Export > DXF: "DXF-AAMA (R10)" is the last item, enabled.
+- [ ] Base Size 500 tab, Export > DXF: "DXF-AAMA (R11)" is the last item, enabled.
 - [ ] Click it. The Missing Piece Data dialog title reads "DXF-AAMA: Missing Piece Data". Export anyway, then Standard.
-- [ ] Save dialog title reads "Save DXF-AAMA (R10) File". It offers `jacket2_40-146_AAMA_Fabric_BaseSize500_<stamp>.dxf`.
+- [ ] Save dialog title reads "Save DXF-AAMA (R11) File". It offers `jacket2_40-146_AAMA_Fabric_BaseSize500_<stamp>.dxf`.
 - [ ] The folder holds a `.dxf` and a `.rul` with the same name. "Export Complete" names both.
 - [ ] Open the `.rul`: the first line is `ANSI/AAMA VERSION:1.0.0`. Then `AUTHOR:Seamly2D`, `SAMPLE SIZE:500`, `RULE: DELTA` lines.
 - [ ] Open the `.dxf` in VS Code:
-  - [ ] The line after `$ACADVER` and `1` is `AC1006`.
+  - [ ] The line after `$ACADVER` and `1` is `AC1009`.
   - [ ] Search `Size:500`: found once per block. Search `Size Name:`: not found.
   - [ ] Search `Curve Tolerance` and `ASTM/D13`: not found.
   - [ ] Regex search `^8\n(15|8[0-7])$`: no match. No layer 15 or 80–87.
@@ -334,6 +334,6 @@ Needs the next MSI. Settings from section 1. Export all tabs unchecked.
   - [ ] The pieces grade to the other sizes.
   - [ ] Write the reader name and version beside this step.
 - [ ] With a fold line piece (§21 settings): the Back block has one `LINE` on layer `6`. Its two points are the first two `VERTEX` points of the layer `1` `POLYLINE`.
-- [ ] Size 220 tab, Export > DXF > DXF-AAMA (R10) > Annotated Version. The `.txt` first line reads `// DXF-AAMA Annotated Version with Inline Comments`. No `.rul`.
-- [ ] Marker tab, Export > DXF: "DXF: select Base Size or a size tab" is the first item. "DXF-AAMA (R10)" is disabled.
+- [ ] Size 220 tab, Export > DXF > DXF-AAMA (R11) > Annotated Version. The `.txt` first line reads `// DXF-AAMA Annotated Version with Inline Comments`. No `.rul`.
+- [ ] Marker tab, Export > DXF: "DXF: select Base Size or a size tab" is the first item. "DXF-AAMA (R11)" is disabled.
 - [ ] Base Size 500 tab, Export > DXF > DXF-ASTM (R13): the save dialog still reads "Save DXF-ASTM (R13) File" and offers `…_R13_…`.

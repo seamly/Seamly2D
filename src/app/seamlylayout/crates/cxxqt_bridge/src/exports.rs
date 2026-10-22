@@ -691,9 +691,9 @@ fn build_tiled_pdf_tile_doc(
 pub struct DxfStyleInfo {
     // CLO3D variant: add group 250 to boundary and sew line polylines.
     pub clo3d_group_250: bool,
-    // DXF-AAMA (ANSI/AAMA-292) content instead of DXF-ASTM; the frontend pairs it with R10.
+    // DXF-AAMA (ANSI/AAMA-292) content instead of DXF-ASTM; the frontend pairs it with R11.
     pub aama: bool,
-    // File version: R10 (AC1006), R12 (AC1009) or R13 (AC1012).
+    // File version: R11 or R12 (both AC1009), or R13 (AC1012).
     pub dxf_version: DxfVersion,
     // Seamly2D suite version for `Author:`.
     pub app_version: Option<String>,
@@ -2000,7 +2000,7 @@ pub fn export_name_segment(format: &str, mode: &str) -> &'static str {
 //
 // Example: ("R13", true) → "R13_annotated". The standard version keeps the variant alone.
 //
-// @param variant   "R12", "R13", "CLO3D" or "AAMA". CLO3D is always R13 and AAMA always R10,
+// @param variant   "R12", "R13", "CLO3D" or "AAMA". CLO3D is always R13 and AAMA always R11,
 //                  so their names carry no version.
 // @param annotated true when the export also writes the annotated `.txt` file.
 pub fn dxf_export_name_segment(variant: &str, annotated: bool) -> String {
@@ -2426,9 +2426,9 @@ mod tests {
         assert!(content.contains("OBJECTS"), "R13 file has an OBJECTS section");
     } // do_export_dxf_writes_r13_when_asked
 
-    // @brief do_export_dxf with `aama` and R10 writes an AC1006 file with AAMA layers only.
+    // @brief do_export_dxf with `aama` and R11 writes an AC1009 file with AAMA layers only.
     #[test]
-    fn do_export_dxf_writes_aama_r10_when_asked() {
+    fn do_export_dxf_writes_aama_r11_when_asked() {
         let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
             <g id="piece_Back" data-type="piece" data-name="Back" data-size="36" data-quantity="2">
                 <g data-type="cutline"><path d="M 10,10 L 190,10 L 190,190 L 10,190 Z"/></g>
@@ -2440,20 +2440,20 @@ mod tests {
         path.push(format!("seamly_dxf_aama_test_{}.dxf", std::process::id()));
         let path_str = path.to_string_lossy().to_string();
 
-        let style = DxfStyleInfo { aama: true, dxf_version: DxfVersion::R10, ..DxfStyleInfo::default() };
+        let style = DxfStyleInfo { aama: true, dxf_version: DxfVersion::R11, ..DxfStyleInfo::default() };
         do_export_dxf(&doc, &path_str, false, &style, &mut |_| {}).expect("AAMA DXF export should succeed");
 
         let content = std::fs::read_to_string(&path_str).expect("exported DXF file should be readable");
         let _ = std::fs::remove_file(&path_str);
         let lines: Vec<&str> = content.lines().map(str::trim).collect();
-        assert!(lines.windows(4).any(|w| w == ["9", "$ACADVER", "1", "AC1006"]), "R10 header");
+        assert!(lines.windows(4).any(|w| w == ["9", "$ACADVER", "1", "AC1009"]), "R11 header");
         // Group code lines are the even lines; group 8 names the layer.
         let layers: Vec<&str> = lines.chunks(2).filter(|p| p[0] == "8").map(|p| p[1]).collect();
         assert!(layers.contains(&"1") && layers.contains(&"14"), "boundary and sew line: {layers:?}");
         assert!(layers.iter().all(|l| l.parse::<u32>().is_ok_and(|n| (1..=14).contains(&n))), "AAMA layers only: {layers:?}");
         assert!(lines.contains(&"Size:36"), "AAMA size text");
         assert!(!content.contains("Curve Tolerance:"), "no ASTM style text");
-    } // do_export_dxf_writes_aama_r10_when_asked
+    } // do_export_dxf_writes_aama_r11_when_asked
 
     // @brief Export a tagged two-piece SVG with a sample size; return the `Size Name:` lines in block order.
     fn export_piece_sizes(sample_size: Option<&str>) -> Vec<String> {
