@@ -27,6 +27,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.82.3 | 16 | Nested size colors: dark and pastel |
 | Layout.87.3 | 4, 17 | Marker tab: PDF (Tiled) disabled |
 | Layout.86.3 | 3, 18 | Export > DXF submenu |
+| Layout.84.4 | 19 | Nested exports: one grainline and label set per piece |
 
 ## [x] 0. Install
 
@@ -256,3 +257,17 @@ Needs the next MSI. Settings from section 1.
 - [ ] Marker tab, Export > DXF: "DXF-ASTM: select Base Size or a size tab" is the first item and reads in full. The three items are disabled.
 - [ ] Nested tab: same.
 - [ ] View menu: one "DXF-ASTM" item, no DXF submenu.
+
+## 19. jacket2: Nested exports show one grainline and label set
+
+Needs the next MSI. Settings from section 1: Paper, Roll, 48 in.
+
+- [ ] Nested tab canvas: every size still shows its grainline and labels.
+- [ ] Export > SVG, any text mode. Open the file in Inkscape:
+  - [ ] Each piece shows one grainline and one set of labels. The size label reads "Size 220".
+  - [ ] Objects panel: `labels_and_grainlines` is the last item, directly below `size_720`.
+  - [ ] Hide `labels_and_grainlines`: no grainline or label is left.
+  - [ ] Expand `size_720`: its pieces hold no grainline or label.
+- [ ] Export > PDF, PNG, JPG, PostScript (PS), EPS and HPGL > Plot: each piece shows one grainline and one set of labels.
+- [ ] Settings: Paper, Paper Type Sheet. Submit. Create Layout. Nested tab, Export > PDF: same.
+- [ ] Marker tab and Size 220 tab, Export > SVG: every piece keeps its grainline and labels.

@@ -28,6 +28,9 @@ mod size_groups;
 // Gives each size of a Nested multisize layout its own color, with a legend.
 mod size_colors;
 
+// Keeps only the smallest size's grainline and labels in a Nested multisize export.
+mod nested_annotations;
+
 // Adds a "Size <size>" label to every piece of a multisize handoff at import.
 mod size_labels;
 
@@ -2366,7 +2369,7 @@ impl qobject::AppController {
     // Called at the start of every export method before releasing self borrow.
     // Returns Err(QString) if no layout DOM is available.
     // -----------------------------------------------------------------------
-    // Called by export_dxf(), export_pdf(), export_pdf_tiled(), and export_svg() to get a clean copy of the layout DOM with display-only colored fill blocks and backgroundRect, contentRect, and tiledRect rectangles removed.
+    // Called through clone_export_layout_doc() and clone_dxf_layout_doc() to get a clean copy of the layout DOM with display-only colored fill blocks and backgroundRect, contentRect, and tiledRect rectangles removed.
     fn clone_stripped_layout_doc(&self) -> Result<svg_dom::Document, cxx_qt_lib::QString> {
         match &self.rust().layout_dom {
             Some(doc) => {
@@ -2381,6 +2384,18 @@ impl qobject::AppController {
             )), // None
         } // match layout_dom
     } // fn clone_stripped_layout_doc
+
+    // Export copy for every format but DXF-ASTM: the stripped layout. A Nested
+    // multisize layout keeps the grainline and labels of each piece-set's smallest
+    // size only, so each piece shows one set.
+    fn clone_export_layout_doc(&self) -> Result<svg_dom::Document, cxx_qt_lib::QString> {
+        let mut doc = self.clone_stripped_layout_doc()?;
+        let removed = nested_annotations::keep_smallest_size_annotations(&mut doc);
+        if removed > 0 {
+            log_to_file(&format!("[lib.rs AppController] clone_export_layout_doc(): removed {removed} grainline and label groups of the larger sizes"));
+        } // if removed
+        Ok(doc)
+    } // fn clone_export_layout_doc
 
     // Export copy for DXF-ASTM: the stripped layout without the scale check grid,
     // which is not a pattern piece.
@@ -2686,7 +2701,7 @@ impl qobject::AppController {
             result
         } else {
             log_to_file("[lib.rs AppController] export_pdf(): 3 using single-page export path");
-            let layout_doc = match self.clone_stripped_layout_doc() {
+            let layout_doc = match self.clone_export_layout_doc() {
                 Ok(d)  => d,
                 Err(m) => {
                     log_to_file("[lib.rs AppController] export_pdf(): 4 no layout_dom available");
@@ -2752,7 +2767,7 @@ impl qobject::AppController {
         } // if Marker tab
 
         // get cleaned layout DOM for export (minus rects + color blocks)
-        let layout_doc = match self.clone_stripped_layout_doc() {
+        let layout_doc = match self.clone_export_layout_doc() {
             Ok(d)  => d, // success
             Err(m) => {
                 log_to_file("[lib.rs AppController] export_pdf_tiled(): 2 no layout_dom available");
@@ -2794,7 +2809,7 @@ impl qobject::AppController {
 
     // Export the assembled layout as an SVG file.
     //
-    // Uses the STRIPPED layout DOM (clone_stripped_layout_doc) so the saved
+    // Uses the export layout DOM (clone_export_layout_doc) so the saved
     // file drops the piece-fill overlay rects and the <g id="Rectangles">
     // group (backgroundRect/contentRect/tiledRects) — those exist only to
     // support process_layout() and Adjust mode on screen, not as permanent
@@ -2803,6 +2818,7 @@ impl qobject::AppController {
     // `text_mode` picks how label text is written (see svg_label_text); an
     // unknown mode is an error, never a silent fallback.
     // A Nested multisize layout is written with one group per size (size_groups).
+    // Its grainlines and labels go into one group before them (nested_annotations).
     // Called by QML 'Export SVG' submenu handler: onExportSvgRequested(mode) → appController.exportSvg(path, mode)
     fn export_svg(
         mut self: std::pin::Pin<&mut Self>,
@@ -2823,7 +2839,7 @@ impl qobject::AppController {
             } // unknown
         }; // match mode
 
-        let mut layout_doc = match self.clone_stripped_layout_doc() {
+        let mut layout_doc = match self.clone_export_layout_doc() {
             Ok(d)  => d,
             Err(m) => {
                 log_to_file("[lib.rs AppController] export_svg(): 2 no layout_dom available");
@@ -2842,6 +2858,12 @@ impl qobject::AppController {
         if size_groups > 0 {
             log_to_file(&format!("[lib.rs AppController] export_svg(): 2a grouped the pieces into {size_groups} size groups"));
         } // if size_groups
+
+        // The kept grainlines and labels get their own group, just before the size groups.
+        let gathered = nested_annotations::gather_labels_and_grainlines(&mut layout_doc);
+        if gathered > 0 {
+            log_to_file(&format!("[lib.rs AppController] export_svg(): 2b moved {gathered} grainline and label groups into labels_and_grainlines"));
+        } // if gathered
 
         // Rewrite label text on the export copy only; the canvas DOM is untouched.
         let warnings = match mode {
@@ -2889,7 +2911,7 @@ impl qobject::AppController {
         let path_str = path.to_string();
         log_to_file(&format!("[lib.rs AppController] export_png(): 1 requested path='{path_str}'"));
 
-        let layout_doc = match self.clone_stripped_layout_doc() {
+        let layout_doc = match self.clone_export_layout_doc() {
             Ok(d) => d,
             Err(m) => {
                 log_to_file("[lib.rs AppController] export_png(): 2 no layout_dom available");
@@ -2942,7 +2964,7 @@ impl qobject::AppController {
         let path_str = path.to_string();
         log_to_file(&format!("[lib.rs AppController] export_jpeg(): 1 requested path='{path_str}'"));
 
-        let layout_doc = match self.clone_stripped_layout_doc() {
+        let layout_doc = match self.clone_export_layout_doc() {
             Ok(d) => d,
             Err(m) => {
                 log_to_file("[lib.rs AppController] export_jpeg(): 2 no layout_dom available");
@@ -3002,7 +3024,7 @@ impl qobject::AppController {
             } // Err
         }; // options
 
-        let layout_doc = match self.clone_stripped_layout_doc() {
+        let layout_doc = match self.clone_export_layout_doc() {
             Ok(d) => d,
             Err(m) => {
                 log_to_file("[lib.rs AppController] export_hpgl(): 2 no layout_dom available");
@@ -3060,7 +3082,7 @@ impl qobject::AppController {
             return false; // if unknown flavor
         }; // ps_flavor
 
-        let layout_doc = match self.clone_stripped_layout_doc() {
+        let layout_doc = match self.clone_export_layout_doc() {
             Ok(d) => d,
             Err(m) => {
                 log_to_file("[lib.rs AppController] export_postscript(): 2 no layout_dom available");
@@ -3119,14 +3141,14 @@ impl qobject::AppController {
         self.as_mut().run_paid_export(&path_str, do_export_mesh)
     } // fn export_mesh
 
-    // Run one paid export: clone the stripped layout DOM, call `export`, then emit
+    // Run one paid export: clone the export layout DOM, call `export`, then emit
     // export_finished on Ok or error_occurred on Err.
     fn run_paid_export(
         mut self: std::pin::Pin<&mut Self>,
         path_str: &str,
         export: fn(&svg_dom::Document, &str) -> Result<(), String>,
     ) -> bool {
-        let layout_doc = match self.clone_stripped_layout_doc() {
+        let layout_doc = match self.clone_export_layout_doc() {
             Ok(d) => d,
             Err(m) => {
                 log_to_file("[lib.rs AppController] run_paid_export(): 2 no layout_dom available");

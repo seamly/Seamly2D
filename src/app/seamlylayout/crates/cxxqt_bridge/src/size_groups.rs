@@ -86,7 +86,7 @@ pub(crate) fn group_pieces_by_size(doc: &mut svg_dom::Document) -> usize {
 } // fn group_pieces_by_size
 
 // @brief True for a `data-type="piece"` group that carries `data-size`.
-fn is_sized_piece(elem: &Element) -> bool {
+pub(crate) fn is_sized_piece(elem: &Element) -> bool {
     elem.attributes.get("data-type").is_some_and(|t| t == "piece") && elem.attributes.contains_key("data-size")
 } // fn is_sized_piece
 
