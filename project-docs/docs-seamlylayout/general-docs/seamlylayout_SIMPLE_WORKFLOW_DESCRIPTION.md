@@ -193,7 +193,8 @@ The application workflow loop consists of:
        * The warning scrolls; its OK button stays visible.
      * Selecting a tab swaps that layout into the controller's layout fields; Adjust Layout and every export use the selected tab.
      * DXF-ASTM exports one size: the Base Size tab (with `# n` grade rule texts and the `.rul` file) or a size tab (ungraded, no `.rul`).
-       On the Marker and Nested tabs the DXF-ASTM items are disabled, and a note names the tabs to select.
+       The DXF-ASTM items are in the Export > DXF submenu.
+       On the Marker and Nested tabs the DXF-ASTM items are disabled, and a note at the top of the submenu names the tabs to select.
      * On the Marker tab PDF (Tiled) is disabled: tiling every size of every piece locks SeamlyLayout up.
        "Export Complete" names the `.dxf` and the `.rul`.
        A sample size piece the layout left out is named: "<piece>: not graded, size 36 does not fit the media."
