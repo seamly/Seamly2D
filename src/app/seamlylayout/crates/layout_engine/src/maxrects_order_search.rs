@@ -127,6 +127,8 @@ pub(crate) struct PackJob {
     orientations: Vec<Vec<Orientation>>,
     // Unrotated area per piece.
     areas: Vec<u64>,
+    // True per piece that must touch the left bin edge.
+    left_edge: Vec<bool>,
 } // struct PackJob
 
 impl PackJob {
@@ -160,7 +162,8 @@ impl PackJob {
             })
             .collect();
         let areas = rects.iter().map(|r| r.w as u64 * r.h as u64).collect();
-        Self { bin_w, bin_h, gap, orientations, areas }
+        let left_edge = rects.iter().map(|r| r.left_edge_angle.is_some()).collect();
+        Self { bin_w, bin_h, gap, orientations, areas, left_edge }
     } // fn new
 
     // @brief True when the piece fits the empty bin in one orientation.
@@ -242,6 +245,7 @@ impl PackJob {
     //
     // Ties go to the smaller bounding box, then to the earlier trial angle,
     // so a piece keeps the layout mode's angle when a turn gains nothing.
+    // A left-edge piece takes only a free box at the left bin edge.
     fn choose_position(
         &self,
         id: usize,
@@ -250,7 +254,7 @@ impl PackJob {
     ) -> Option<(u32, u32, Orientation)> {
         let gap = self.gap;
         let mut best: Option<((u64, u32, u32, u64, usize), u32, u32, Orientation)> = None;
-        for f in free {
+        for f in free.iter().filter(|f| !self.left_edge[id] || f.x == 0) {
             for (k, o) in self.orientations[id].iter().enumerate() {
                 if f.w < o.w.saturating_add(gap) || f.h < o.h.saturating_add(gap) {
                     continue;
@@ -383,7 +387,9 @@ impl SplitMix64 {
 // @brief Start orders: the ids sorted in descending order of five size keys.
 //
 // Equal keys keep the ids in ascending order.  The first order (area) is the
-// order of the single-pass packer.  Duplicate orders are dropped.
+// order of the single-pass packer.  Left-edge pieces come first in every
+// order, so they take the left edge before other pieces fill it.  Duplicate
+// orders are dropped.
 fn seed_orders(rects: &[Rect], ids: &[usize]) -> Vec<Vec<usize>> {
     let keys: [fn(&Rect) -> (u64, u64); 5] = [
         // area, then longer side
@@ -401,6 +407,7 @@ fn seed_orders(rects: &[Rect], ids: &[usize]) -> Vec<Vec<usize>> {
     for key in keys {
         let mut order = ids.to_vec();
         order.sort_by(|&a, &b| key(&rects[b]).cmp(&key(&rects[a])).then(a.cmp(&b)));
+        order.sort_by_key(|&id| rects[id].left_edge_angle.is_none()); // stable: left-edge pieces first
         if !orders.contains(&order) {
             orders.push(order);
         } // if new order
