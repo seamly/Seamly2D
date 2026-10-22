@@ -233,8 +233,8 @@ Pattern: `C:\Users\susan\seamly2d\patterns\jacket2_40-146.sm2d`.
   - [ ] Each left-out piece is one bullet. A long list scrolls; OK stays visible.
   - Note: multisize tabs grow the media, so they leave no piece out. Rust tests cover "Detail (3): 220, 240" lines.
 - [ ] Marker or Nested tab shown, Export > DXF:
-  - [ ] DXF-ASTM items are disabled.
-  - [ ] A note reads "DXF-ASTM: select Base Size or a size tab".
+  - [ ] DXF-ASTM and DXF-AAMA items are disabled.
+  - [ ] A note reads "DXF: select Base Size or a size tab".
 - [ ] Base Size 500 tab, Export > DXF > DXF-ASTM (R13):
   - [ ] The folder holds a `.dxf` and a `.rul` with the same name.
   - [ ] "Export Complete" names the `.dxf` and the `.rul` (Layout.67.9).

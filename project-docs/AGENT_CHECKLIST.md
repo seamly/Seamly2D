@@ -333,6 +333,7 @@ Needs the next MSI. Settings from section 1. Export all tabs unchecked.
   - [ ] Each piece appears once, with notches and grainline.
   - [ ] The pieces grade to the other sizes.
   - [ ] Write the reader name and version beside this step.
+- [ ] With a fold line piece (§21 settings): the Back block has one `LINE` on layer `6`. Its two points are the first two `VERTEX` points of the layer `1` `POLYLINE`.
 - [ ] Size 220 tab, Export > DXF > DXF-AAMA (R10) > Annotated Version. The `.txt` first line reads `// DXF-AAMA Annotated Version with Inline Comments`. No `.rul`.
 - [ ] Marker tab, Export > DXF: "DXF: select Base Size or a size tab" is the first item. "DXF-AAMA (R10)" is disabled.
 - [ ] Base Size 500 tab, Export > DXF > DXF-ASTM (R13): the save dialog still reads "Save DXF-ASTM (R13) File" and offers `…_R13_…`.
