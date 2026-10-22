@@ -19,7 +19,7 @@ The DXF-ASTM export workflow is fully integrated into the desktop UI (`ui_deskto
 ### Step 2: Initiate Export
 
 1. **Open Export Menu**: Click "Export ▼" button to open the export format dropdown
-2. **Select Format**: Open the "DXF" submenu. Click "DXF-ASTM (R12)", "DXF-ASTM (R13)", "DXF-ASTM (CLO3D)" or "DXF-AAMA (R10)". CLO3D writes R13. DXF-AAMA writes ANSI/AAMA-292 content in R10; see `seamlylayout_DXF_AAMA.md`
+2. **Select Format**: Open the "DXF" submenu. Click "DXF-ASTM (R12)", "DXF-ASTM (R13)", "DXF-ASTM (CLO3D)" or "DXF-AAMA (R11)". CLO3D writes R13. DXF-AAMA writes ANSI/AAMA-292 content in R11 (AC1009); see `seamlylayout_DXF_AAMA.md`
 3. **Missing Piece Data Dialog**: Shown only when a piece lacks DXF-ASTM or DXF-AAMA data. The title names the chosen format
    - Checks each piece with a boundary for: a "Cut N" label line (`Quantity:`), label text (layer 15), a grainline (layer 7)
    - Names each incomplete piece and what it lacks
@@ -146,14 +146,14 @@ fn dxf_annotated_dialog() -> Element<'static, Message> {
 ### DXF File (.dxf)
 
 - **Location**: User-selected path
-- **Format**: DXF R12 (AC1009) or DXF R13 (AC1012), from the menu item. DXF-AAMA: DXF R10 (AC1006)
+- **Format**: DXF R12 (AC1009) or DXF R13 (AC1012), from the menu item. DXF-AAMA: DXF R11 (AC1009)
 - **R12 structure**:
   - HEADER section (minimal/empty)
   - BLOCKS section (pattern piece definitions)
   - ENTITIES section (INSERT entities for blocks)
   - EOF marker
 - **R13 structure**: HEADER, CLASSES, TABLES, BLOCKS, ENTITIES, OBJECTS, EOF; handles on every entity. See `seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`
-- **R10 structure**: the R12 structure; `$ACADVER` AC1006, no BLOCK group 3
+- **R11 structure**: the R12 structure; R11 and R12 share AC1009
 
 ### Annotated Version File (.txt)
 
