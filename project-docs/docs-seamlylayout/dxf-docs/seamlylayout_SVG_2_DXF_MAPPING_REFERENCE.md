@@ -188,6 +188,7 @@ See [seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md](seamlylayout_DXF_ASTM_D6673_COMP
 | `internal_path` | `internal_path`, `tuck` | 8 (validation 85) |
 | `cut_path` | `cut_path` | 11 (validation 86) |
 | `notch` | `notch` | 4, 80, 81, 83 |
+| `fold_line` | `fold_line` | 6 (mirror line) |
 | `grainline` | `grain` | 7 |
 | `piece_label`, `pattern_label` | `label` | 15 |
 | — | `drill`, `hole` | 13 |
