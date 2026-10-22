@@ -41,7 +41,9 @@ ExportMenu SvgModeItem.onTriggered → chosen(mode) → exportSvgModeRequested(m
       → preferencesModel.saveSvgTextMode(iniPath, mode)   last mode, marked next time
       → pendingExportSettings = mode; exportStartTimer
         → appController.exportSvg(path, mode)
-          → clone_stripped_layout_doc()
+          → clone_export_layout_doc()                    Nested: smallest size's grainline and labels only
+          → size_groups::group_pieces_by_size(doc)        Nested only
+          → nested_annotations::gather_labels_and_grainlines(doc)   Nested only
           → svg_label_text::apply_text_mode(doc, mode)    skipped for "asSupplied"
           → do_export_svg(doc, path)
           → export_warning(message)                       only when caveats exist
@@ -75,7 +77,7 @@ ExportMenu HPGL submenu → exportHpglRequested("plot" | "cut")
       → pendingExportSettings = {"mode", "cutPen", "markPen", "labelPen"}; exportStartTimer
         → appController.exportHpgl(path, optionsJson)
           → exports::parse_hpgl_options(json)
-          → clone_stripped_layout_doc()
+          → clone_export_layout_doc()
           → exports::do_export_hpgl(doc, path, options)
             → svg_label_text::apply_text_mode(HersheyStrokes)   plot mode only
             → hpgl_writer::svg_to_hpgl(doc, options)
@@ -123,7 +125,7 @@ ExportMenu EPS / PostScript (PS) → exportPostscriptRequested("eps" | "ps")
       → save dialog (*.eps or *.ps)
       → pendingExportFormat = flavor; exportStartTimer
         → appController.exportPostscript(path, flavor)
-          → clone_stripped_layout_doc()
+          → clone_export_layout_doc()
           → exports::do_export_postscript(doc, path, PsFlavor)
             → ps_writer::svg_to_postscript(doc, flavor)
           → export_warning(message)                    caveats only
@@ -176,6 +178,18 @@ ExportMenu EPS / PostScript (PS) → exportPostscriptRequested("eps" | "ps")
 - `export_pdf_tiled` refuses the Marker tab with an error dialog and writes no file.
 - The View menu keeps PDF (Tiled): it opens files already written.
 
+## Nested tab — one grainline and label set per piece
+
+- Every export but DXF-ASTM keeps the grainline and labels of each piece-set's smallest size only.
+- Labels: `piece_label`, `pattern_label`, `size_label`. Outlines, notches, fold lines and internal paths of every size stay.
+- Reason: a nested multisize file shows one set of labels and one grainline per piece.
+- Smallest size: `data-size` compared as numbers; as text when a size is not a number.
+- `clone_export_layout_doc` → `nested_annotations::keep_smallest_size_annotations`. PDF, PDF (Tiled), SVG, PNG, JPG, HPGL, PS, EPS and the paid formats use it.
+- Paper-sheet PDF: `sheets::build_sheet_export_inputs` strips after the piece extraction, so the pieces pack as on the Nested tab.
+- SVG: `nested_annotations::gather_labels_and_grainlines` moves the kept groups into `<g id="labels_and_grainlines">`. The group takes the place of the `Rectangles` group: just before the largest size group.
+- Unchanged: the Nested canvas, Marker, Base Size and the size tabs.
+- DXF-ASTM uses `clone_dxf_layout_doc` and keeps the annotations of every size. It refuses the Nested tab.
+
 ## JPG export
 
 ```
@@ -185,7 +199,7 @@ ExportMenu JPG → exportJpgRequested()
       → save dialog (*.jpg *.jpeg), default <baseName>_YYYYMMDDHHMM.jpg
       → pendingExportFormat = "jpg"; exportStartTimer
         → appController.exportJpeg(path)
-          → clone_stripped_layout_doc()
+          → clone_export_layout_doc()
           → exports::do_export_jpeg(doc, path, progress)      progress 10, 90
             → app_core::document_to_tree(doc, None)
             → app_core::render_jpeg(tree, path, 1.0, JPEG_DEFAULT_QUALITY)

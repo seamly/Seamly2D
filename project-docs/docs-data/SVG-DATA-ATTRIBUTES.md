@@ -125,6 +125,10 @@ Settings > "Add scale check grid" (`scaleGrid` in the settings JSON) adds `<g id
 
 SeamlyLayout's SVG export of the Nested tab holds one `<g id="size_<size>" data-type="size" data-size="<size>">` per size, holding that size of every piece. The largest size comes first, so it is drawn underneath; the smallest size is on top. Every piece keeps its layout position. The file has no `transform` except on `<text>`. Other exports and the other tabs keep the piece-set or piece groups. Code: `cxxqt_bridge/src/size_groups.rs`.
 
+- One grainline and one set of labels per piece: each piece-set keeps the `grainline`, `piece_label`, `pattern_label` and `size_label` groups of its smallest size only. This applies to every export of the Nested tab but DXF-ASTM.
+- The SVG export moves the kept groups into `<g id="labels_and_grainlines">`, in place of the stripped `Rectangles` group: just before the largest size group. No size group holds a grainline or label.
+- Code: `cxxqt_bridge/src/nested_annotations.rs`.
+
 The `piece-fill` `<rect>` is not part of the C++ handoff — SeamlyLayout inserts it as the
 first child of each piece group when it places the piece into a layout sheet
 (`layout_assembler.rs::create_layout()`). Its `id` mirrors the piece's own id
