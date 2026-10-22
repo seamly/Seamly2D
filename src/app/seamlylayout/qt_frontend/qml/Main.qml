@@ -1701,7 +1701,7 @@ ApplicationWindow {
                 Text {
                     id:             oversizedPiecesLabel
                     text:           oversizedPiecesDialog.piecesText
-                    color:          Theme.violetLight
+                    color:          Theme.textOnDark
                     font.pixelSize: Theme.fontSizeSmall
                     textFormat:     Text.PlainText
                     wrapMode:       Text.WordWrap

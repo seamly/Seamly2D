@@ -84,11 +84,11 @@ To meet current best practices for nested multisize image and vector files, show
 
 Display only the labels and grainline of the smallest size of each piece. (In SVG exports, place them in their own group id="labels_and_grainlines" as the group just above the content rect.) Do not include any other grainline or label elements in the export.
 
-### Task Layout.85 - Exports - add an option for DXF 10 (DXF-AAMA)
+### Task Layout.85 - Exports - add an option to export DXF 10 (DXF-AAMA)
 
 ### Task Layout.86 - Export - Combine the DXF exports into a DXF submenu
 
-### Task Layout.87 - Export - Marker - Disable 'Tiled' layout (seamlylayout will lock up when exporting a Marker as a tiled layout)
+### Task Layout.87 - Export - Marker - Disable 'PDF (Tiled)' layout for Marker layout (seamlylayout will lock up when exporting a Marker as a tiled layout)
 
 ### [ ] Task Layout.88 — Export menu: DXF-ASTM note is cut off
 
@@ -96,6 +96,15 @@ Marker tab, Export menu (MSI 26.10.2023): the note "DXF-ASTM: select Base Size o
 
 - [ ] Layout.88.1 Show the whole note: wrap it, or widen the menu to fit it.
 - [ ] Layout.88.2 Next MSI: Marker and Nested tabs, Export menu; the note is readable.
+
+### [ ] Task Layout.89 - Export sheet - dialog text is too dark 
+
+Text "Split the pieces" and "Make the media bigger" need to be white, not black.
+See screenshot "C:\Users\susan\Projects\Seamly2D-private\test-seamly-layout\screenshots\Screenshot 2026-10-21 192850 jacket_2.png"
+
+- [x] Layout.89.1 Cause: the screenshot shows a scratch `qml` render of the dialog, not SeamlyLayout. The render had no Fusion style and no `Theme`, so the radio labels took the default black. In SeamlyLayout, both radio labels and both descriptions are `Theme.textOnDark` (`#f3f3f3`).
+- [x] Layout.89.2 `Main.qml` `oversizedPiecesLabel`: the piece list was `Theme.violetLight` on `Theme.dialogBackground`, contrast 2.1:1. Now `Theme.textOnDark`, contrast 7.9:1. Checked: Fusion render of the dialog from `Main.qml` with `Theme.qml`; `qmllint` shows no new warnings.
+- [ ] Layout.89.3 Next MSI: user check, `AGENT_CHECKLIST.md` §12.
 
 ## VERIFY
 
