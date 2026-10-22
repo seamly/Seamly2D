@@ -86,7 +86,13 @@ Display only the labels and grainline of the smallest size of each piece. (In SV
 
 ### Task Layout.85 - Exports - add an option to export DXF 10 (DXF-AAMA)
 
-### Task Layout.86 - Export - Combine the DXF exports into a DXF submenu
+### [ ] Task Layout.86 - Export - Combine the DXF exports into a DXF submenu
+
+- [x] Layout.86.1 `ExportMenu.qml` `dxfSubmenu`: Export > DXF holds DXF-ASTM (R12), (R13) and (CLO3D). Item text unchanged. The View menu keeps one DXF-ASTM item.
+- [x] Layout.86.2 Marker and Nested tabs: the submenu stays enabled, so its note "DXF-ASTM: select Base Size or a size tab" can be read. The three items are disabled. The submenu fits its widest shown item (`fittedWidth`).
+  - Checked: Fusion render of `ExportMenu.qml`. Item order; note on Marker only; each item sends its signal. `qmllint` shows no warnings.
+  - Docs: `seamlylayout_DXF_EXPORT_WORKFLOW.md`, `seamlylayout_SIMPLE_WORKFLOW_DESCRIPTION.md`.
+- [ ] Layout.86.3 Next MSI: user check, `AGENT_CHECKLIST.md` §18.
 
 ### [ ] Task Layout.87 - Export - Marker - Disable 'PDF (Tiled)' layout for Marker layout (seamlylayout will lock up when exporting a Marker as a tiled layout)
 
@@ -104,6 +110,7 @@ Marker tab, Export menu (MSI 26.10.2023): the note "DXF-ASTM: select Base Size o
   - The SVG submenu had the same defect: "Paths: convert to single-stroke (Hershey)" 245 px, "Paths: no conversion - labels are already paths" 254 px.
   - Checked: Fusion render of `ExportMenu.qml`. Export menu 222 px, SVG submenu 247/256 px, no elided text. `qmllint` shows no warnings.
 - [ ] Layout.88.2 Next MSI: Marker and Nested tabs, Export menu; the note is readable. `AGENT_CHECKLIST.md` §3.
+  - Layout.86 moves the note into the Export > DXF submenu.
 
 ### [ ] Task Layout.89 - Export sheet - dialog text is too dark 
 
