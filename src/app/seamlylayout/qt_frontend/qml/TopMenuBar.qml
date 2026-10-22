@@ -45,6 +45,9 @@ ToolBar {
     // Bound by Main.qml from settingsModel.paperType === "tiled".
     required property bool pdfTiledExportEnabled
 
+    // @brief False disables Export > "PDF (Tiled)": the shown tab is Marker.
+    property bool pdfTiledTabAllowed: true
+
     // @brief True after Cancel in the oversized-pieces dialog: only 'Layout Settings'
     // (plus Preferences and Exit) stays active until new settings are submitted.
     property bool settingsOnly: false
@@ -233,6 +236,7 @@ ToolBar {
             id: exportMenu
             layoutReady: root.layoutReady
             pdfTiledEnabled: root.pdfTiledExportEnabled
+            pdfTiledTabAllowed: root.pdfTiledTabAllowed
             showExportAllTabs: root.hasLayoutTabs
             exportAllTabs:   root.exportAllTabs
             dxfEnabled:      root.dxfExportEnabled
