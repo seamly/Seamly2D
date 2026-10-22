@@ -729,6 +729,15 @@ fn is_non_outline_group(e: &xmltree::Element) -> bool {
         || id_lower.starts_with("hole")
 } // fn is_non_outline_group
 
+// @brief Bounding box of a piece as extraction measures it: every path point,
+// without the decoration groups (`is_non_outline_group`).
+// @return None for a piece without path geometry.
+pub(crate) fn piece_bbox(piece: &xmltree::Element) -> Option<BoundingBox> {
+    let mut points = Vec::new();
+    collect_all_path_points(piece, &mut points);
+    BoundingBox::from_points(points)
+} // fn piece_bbox
+
 // @brief Collect all coordinates from every `<path d="...">` descendant,
 // skipping any child `<g>` whose id identifies it as a non-outline decoration
 // (tuck, notch, grainline, ip, drill, hole).

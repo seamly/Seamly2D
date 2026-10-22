@@ -31,6 +31,9 @@ mod size_colors;
 // Keeps only the smallest size's grainline and labels in a Nested multisize export.
 mod nested_annotations;
 
+// Puts the fold line of each piece cut on the fold on the left media edge.
+mod fold_line_edge;
+
 // Adds a "Size <size>" label to every piece of a multisize handoff at import.
 mod size_labels;
 
@@ -1696,13 +1699,19 @@ impl qobject::AppController {
                 self.as_mut().set_is_create_layout_enabled(false); // disable 'Create Layout' until settings change
                 self.as_mut().layout_finished();                   // notify QML right canvas to reload
 
-                // Soft failure: some pieces didn't fit.  The layout still
-                // rendered the pieces that did, so this is a warning (popup),
-                // not an error that aborts the layout.
+                // Soft failure: some pieces didn't fit, or a fold line stays off
+                // the left edge.  The layout still rendered every piece that fit,
+                // so this is a warning (popup), not an error that aborts the layout.
+                let mut warnings = Vec::new();
                 if !result.unplaced_labels.is_empty() {
-                    let msg = layout_views::unplaced_warning(&result.unplaced_labels);
-                    self.as_mut().layout_warning(cxx_qt_lib::QString::from(msg.as_str()));
+                    warnings.push(layout_views::unplaced_warning(&result.unplaced_labels));
                 } // if unplaced pieces
+                if !result.fold_line_warnings.is_empty() {
+                    warnings.push(layout_views::fold_line_warning(&result.fold_line_warnings));
+                } // if fold lines off the edge
+                if !warnings.is_empty() {
+                    self.as_mut().layout_warning(cxx_qt_lib::QString::from(warnings.join("\n\n").as_str()));
+                } // if any warning
 
                 true
             }

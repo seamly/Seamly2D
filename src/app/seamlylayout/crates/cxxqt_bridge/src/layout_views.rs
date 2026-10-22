@@ -50,6 +50,15 @@ pub fn unplaced_warning(lines: &[String]) -> String {
     )
 } // fn unplaced_warning
 
+// @brief Warning for pieces whose fold line stays off the left edge: one bullet per piece.
+pub fn fold_line_warning(lines: &[String]) -> String {
+    format!(
+        "{} piece(s) with a fold line are not on the left edge (the fold):\n\n{}",
+        lines.len(),
+        bullet_lines(lines)
+    )
+} // fn fold_line_warning
+
 // @brief One tab's entry in the warning after the last tab: the tab label, then one bullet per piece.
 pub fn tab_unplaced_problem(label: &str, lines: &[String]) -> String {
     format!("{label}:\n{}", bullet_lines(lines))
@@ -389,6 +398,7 @@ mod tests {
             ml_px: 0,
             mt_px: 0,
             unplaced_labels: vec![format!("{name} piece")],
+            fold_line_warnings: Vec::new(),
             flat_dom: doc.clone(),
             vertical_dom: doc.clone(),
             translate_dom: doc,
@@ -475,6 +485,15 @@ mod tests {
     } // select_out_of_range_fails
 
     // @brief Left-out pieces read one bullet per piece, under their tab after a tab run.
+    #[test]
+    fn fold_line_warning_lists_one_piece_per_line() {
+        let text = fold_line_warning(&sizes(&["Back: the outline lies on both sides of the fold line"]));
+        assert_eq!(
+            text,
+            "1 piece(s) with a fold line are not on the left edge (the fold):\n\n\u{2022} Back: the outline lies on both sides of the fold line"
+        );
+    } // fold_line_warning_lists_one_piece_per_line
+
     #[test]
     fn unplaced_warnings_list_one_piece_per_line() {
         let lines = sizes(&["Detail (3): 220, 240", "Front: 220"]);
