@@ -2818,6 +2818,7 @@ impl qobject::AppController {
     // `text_mode` picks how label text is written (see svg_label_text); an
     // unknown mode is an error, never a silent fallback.
     // A Nested multisize layout is written with one group per size (size_groups).
+    // Its grainlines and labels go into one group before them (nested_annotations).
     // Called by QML 'Export SVG' submenu handler: onExportSvgRequested(mode) → appController.exportSvg(path, mode)
     fn export_svg(
         mut self: std::pin::Pin<&mut Self>,
@@ -2857,6 +2858,12 @@ impl qobject::AppController {
         if size_groups > 0 {
             log_to_file(&format!("[lib.rs AppController] export_svg(): 2a grouped the pieces into {size_groups} size groups"));
         } // if size_groups
+
+        // The kept grainlines and labels get their own group, just before the size groups.
+        let gathered = nested_annotations::gather_labels_and_grainlines(&mut layout_doc);
+        if gathered > 0 {
+            log_to_file(&format!("[lib.rs AppController] export_svg(): 2b moved {gathered} grainline and label groups into labels_and_grainlines"));
+        } // if gathered
 
         // Rewrite label text on the export copy only; the canvas DOM is untouched.
         let warnings = match mode {
