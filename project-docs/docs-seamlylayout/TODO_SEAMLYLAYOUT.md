@@ -4,23 +4,6 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Implement
 
-### [ ] Task Layout.72 — Split oversized individual pieces
-
-For oversized individual-pattern pieces, ask whether to split them or enlarge the media (decision 2026-10-13).
-
-- Dialog: list pieces and offending dimensions; offer "Split the pieces" (SVG, PDF, HPGL, EPS, PS, PNG, JPG) or "Make the media bigger" (DXF). OK continues; Cancel leaves only Layout Settings active.
-- Split only if no allowed rotation fits: too wide → vertical cuts; too long on non-roll media → horizontal cuts. Paper roll and fabric are roll-form. No dialog for tiled paper.
-- Enlarge media using Layout.71 (width) and Layout.25 (length).
-- Split into the minimum number of equal parts (rounded up), without cut-edge seam allowance. Label each part; add 2 match notches per cut edge. Apply the same split to sheet PDF. Warn if a fitting piece is left out because the media is full.
-
-- [x] Layout.72.9 Dialog names each offending dimension with the piece and media sizes, in the settings unit: `• Back: length 43.10 in, media 35.50 in`. The piece list is plain text and scrolls past 40% of the window. Tests: `piece_divider` `oversized_message_gives_the_offending_dimensions`; `trousers_long_pieces_split_on_a_sheet` checks each leg line. Checked: `cargo test -p cxxqt_bridge`; `qmllint` shows no new warnings; scratch `qml` render, 30 pieces: list 280 px, dialog 523 px in a 700 px window.
-- [ ] Layout.72.8 Next MSI: trousers sample, Paper Sheet 36 × 36 in, Create Layout:
-  - [ ] Dialog lists four too-long legs: Back, Front_Pleats, Front_no_pocket, Front_with_pocket. Each line reads `<name>: length <n> in, media 35.50 in`.
-  - [ ] Cancel: only Layout Settings, Preferences, Exit enabled; submitting settings re-enables Create Layout.
-  - [ ] Split: each leg becomes 2 parts, blue "<name> part i of 2, joins j" label, and 2 green match notches. Warn about unplaced pieces.
-  - [ ] Enlarge: sheet exceeds 36 in length; no splits or warnings.
-  - [ ] Export split PDF parts and DXF-ASTM blocks named `Back (1/2)` and `Back (2/2)`.
-
 ### [ ] Task Layout.80 — Fold lines (mirror lines)
 
 A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. `FoldPosition` is free text.
@@ -62,64 +45,13 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
     - Done: `astm_piece_test::piece_on_fold_counts_every_cut_as_right`.
 - [ ] Layout.80.7 Next MSI: Piece Properties > Path, mark two neighbouring nodes Fold Line; check the dashed line, no seam allowance on it, "On fold" checked; save, reopen; Layout Mode handoff has `fold_line`. Mark three nodes: OK disabled.
 
-### [ ] Task Layout.82 - Multisize - Nested - wider range of colors.
-
-Currently all colors are dark and appear to be repeated across sizes. Use some pastel range colors to ensure all sizes get a uniquely identifiable color. 
-
-- [x] Layout.82.1 New palette. `size_colors::palette_colors`: OKLCH candidates, lightness 0.40 (dark) to 0.80 (pastel), 10° hue steps. The first size is blue. Each next size takes the candidate farthest, in OKLab, from white and from every earlier size.
-  - jacket2, 26 sizes: closest pair 0.11 apart in OKLab. Before: 0.012 (`#085e1d`, `#085e28`). 7 pastel, 5 dark. Distance to white at least 0.2.
-- [x] Layout.82.2 Tests: `size_colors` `palette_colors_differ_and_show_on_white`, `palette_spans_dark_to_pastel`, `palette_repeats_only_past_the_candidates`. `cargo test --workspace` 561 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
-- [ ] Layout.82.3 Next MSI: user check, `AGENT_CHECKLIST.md` §16.
-
-### [ ] Task Layout.83 - Multisize - Nested - Legend - change legend color from line to rect element with width equal to current legend color line width and height equal to width. (makes legend easier to read)
-
-- [x] Layout.83.1 `SizeLegend::element`: each swatch is a 32 × 32 px `rect`, filled with the size color, no stroke, centered on its row. Was a 32 px line, stroke width 4.
-- [x] Layout.83.2 Row height 24 → 40 px (swatch plus one 8 px pad), so rows do not overlap. The legend is taller; the media grows to hold it as before.
-- [x] Layout.83.3 Tests: `size_colors` `legend_swatches_are_filled_squares` (new); `legend_wraps_and_lists_every_size` counts swatch rects. `cargo test --workspace` 561 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
-- [ ] Layout.83.4 Next MSI: user check, `AGENT_CHECKLIST.md` §15.
-
-### Task Layout.84 - Multisize - Nested - non-DXF export - display only the smallest size's grainline and labels
+### [ ] Task Layout.84 - Multisize - Nested - non-DXF export - display only the smallest size's grainline and labels
 
 To meet current best practices for nested multisize image and vector files, show only one set of labels and grainline per piece.
 
 Display only the labels and grainline of the smallest size of each piece. (In SVG exports, place them in their own group id="labels_and_grainlines" as the group just above the content rect.) Do not include any other grainline or label elements in the export.
 
-### Task Layout.85 - Exports - add an option to export DXF 10 (DXF-AAMA)
-
-### [ ] Task Layout.86 - Export - Combine the DXF exports into a DXF submenu
-
-- [x] Layout.86.1 `ExportMenu.qml` `dxfSubmenu`: Export > DXF holds DXF-ASTM (R12), (R13) and (CLO3D). Item text unchanged. The View menu keeps one DXF-ASTM item.
-- [x] Layout.86.2 Marker and Nested tabs: the submenu stays enabled, so its note "DXF-ASTM: select Base Size or a size tab" can be read. The three items are disabled. The submenu fits its widest shown item (`fittedWidth`).
-  - Checked: Fusion render of `ExportMenu.qml`. Item order; note on Marker only; each item sends its signal. `qmllint` shows no warnings.
-  - Docs: `seamlylayout_DXF_EXPORT_WORKFLOW.md`, `seamlylayout_SIMPLE_WORKFLOW_DESCRIPTION.md`.
-- [ ] Layout.86.3 Next MSI: user check, `AGENT_CHECKLIST.md` §18.
-
-### [ ] Task Layout.87 - Export - Marker - Disable 'PDF (Tiled)' layout for Marker layout (seamlylayout will lock up when exporting a Marker as a tiled layout)
-
-- [x] Layout.87.1 Marker tab, Export menu: PDF (Tiled) disabled, text "PDF (Tiled): select a tab other than Marker". `ViewKind::exports_pdf_tiled`; `AppController.pdfTiledExportAllowed` → `TopMenuBar.pdfTiledTabAllowed` → `ExportMenu.pdfTiledTabAllowed`. The View menu keeps PDF (Tiled).
-- [x] Layout.87.2 Export all tabs: PDF (Tiled) skips Marker and Base Size (`ViewKind::in_all_tabs_export`), so the item stays enabled. `export_pdf_tiled` refuses the Marker tab with an error dialog. Test: `layout_views` `view_kinds_choose_their_exports`. Doc: `seamlylayout_EXPORT_WORKFLOW.md`, "PDF (Tiled) — not for the Marker tab".
-- [ ] Layout.87.3 Next MSI: user check, `AGENT_CHECKLIST.md` §17.
-
-### [ ] Task Layout.88 — Export menu: DXF-ASTM note is cut off
-
-Marker tab, Export menu (MSI 26.10.2023): the note "DXF-ASTM: select Base Size or a size tab" runs past the right edge of the menu. Most of it cannot be read.
-
-- [x] Layout.88.1 Show the whole note: wrap it, or widen the menu to fit it.
-  - Cause: a Qt Quick `Menu` keeps its 200 px implicit width and elides a longer item. The note is 220 px.
-  - Done: `ExportMenu.qml` `fittedWidth`. The Export menu and its SVG submenu take the width of their widest shown item. A hidden item does not widen a menu.
-  - The SVG submenu had the same defect: "Paths: convert to single-stroke (Hershey)" 245 px, "Paths: no conversion - labels are already paths" 254 px.
-  - Checked: Fusion render of `ExportMenu.qml`. Export menu 222 px, SVG submenu 247/256 px, no elided text. `qmllint` shows no warnings.
-- [ ] Layout.88.2 Next MSI: Marker and Nested tabs, Export menu; the note is readable. `AGENT_CHECKLIST.md` §3.
-  - Layout.86 moves the note into the Export > DXF submenu.
-
-### [ ] Task Layout.89 - Export sheet - dialog text is too dark 
-
-Text "Split the pieces" and "Make the media bigger" need to be white, not black.
-See screenshot "C:\Users\susan\Projects\Seamly2D-private\test-seamly-layout\screenshots\Screenshot 2026-10-21 192850 jacket_2.png"
-
-- [x] Layout.89.1 Cause: the screenshot shows a scratch `qml` render of the dialog, not SeamlyLayout. The render had no Fusion style and no `Theme`, so the radio labels took the default black. In SeamlyLayout, both radio labels and both descriptions are `Theme.textOnDark` (`#f3f3f3`).
-- [x] Layout.89.2 `Main.qml` `oversizedPiecesLabel`: the piece list was `Theme.violetLight` on `Theme.dialogBackground`, contrast 2.1:1. Now `Theme.textOnDark`, contrast 7.9:1. Checked: Fusion render of the dialog from `Main.qml` with `Theme.qml`; `qmllint` shows no new warnings.
-- [ ] Layout.89.3 Next MSI: user check, `AGENT_CHECKLIST.md` §12.
+### [ ] Task Layout.85 - Exports - add an option to export DXF 10 (DXF-AAMA)
 
 ## VERIFY
 
@@ -307,3 +239,60 @@ Note: This may require flatting the SVG data before grouping pieces by size to p
   - Done: `size_groups::group_pieces_by_size`, called by `export_svg`. Groups `<g id="size_<size>" data-type="size" data-size="<size>">`, largest first; piece-sets removed; `flatten_dom` first. Only a layout with top-level piece-sets (Nested) changes. Tests: 4 `size_groups` tests; `layout_utils` `jacket2_nested_svg_export_groups_pieces_by_size` (26 groups of 8, no piece moves). Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested SVG export".
 - [ ] Task Layout.78.2 - Test/Verify - Export a multisize file to SVG, open the SVG file using the View feature, confirm that the file is grouped by size. Next MSI: jacket2 Nested tab, Export > SVG; in Inkscape, Objects panel lists `size_720` … `size_220`; hiding one group hides one size.
 
+### [ ] Task Layout.82 - Verify - Multisize - Nested - wider range of colors.
+
+Currently all colors are dark and appear to be repeated across sizes. Use some pastel range colors to ensure all sizes get a uniquely identifiable color. 
+
+- [x] Layout.82.1 New palette. `size_colors::palette_colors`: OKLCH candidates, lightness 0.40 (dark) to 0.80 (pastel), 10° hue steps. The first size is blue. Each next size takes the candidate farthest, in OKLab, from white and from every earlier size.
+  - jacket2, 26 sizes: closest pair 0.11 apart in OKLab. Before: 0.012 (`#085e1d`, `#085e28`). 7 pastel, 5 dark. Distance to white at least 0.2.
+- [x] Layout.82.2 Tests: `size_colors` `palette_colors_differ_and_show_on_white`, `palette_spans_dark_to_pastel`, `palette_repeats_only_past_the_candidates`. `cargo test --workspace` 561 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
+- [ ] Layout.82.3 Next MSI: user check, `AGENT_CHECKLIST.md` §16.
+
+### [ ] Task Layout.89 - Verify - Export sheet - dialog text is too dark 
+
+Text "Split the pieces" and "Make the media bigger" need to be white, not black.
+See screenshot "C:\Users\susan\Projects\Seamly2D-private\test-seamly-layout\screenshots\Screenshot 2026-10-21 192850 jacket_2.png"
+
+- [x] Layout.89.1 Cause: the screenshot shows a scratch `qml` render of the dialog, not SeamlyLayout. The render had no Fusion style and no `Theme`, so the radio labels took the default black. In SeamlyLayout, both radio labels and both descriptions are `Theme.textOnDark` (`#f3f3f3`).
+- [x] Layout.89.2 `Main.qml` `oversizedPiecesLabel`: the piece list was `Theme.violetLight` on `Theme.dialogBackground`, contrast 2.1:1. Now `Theme.textOnDark`, contrast 7.9:1. Checked: Fusion render of the dialog from `Main.qml` with `Theme.qml`; `qmllint` shows no new warnings.
+- [ ] Layout.89.3 Next MSI: user check, `AGENT_CHECKLIST.md` §12.
+
+### [ ] Task Layout.88 — Verify - Export menu: DXF-ASTM note is cut off
+
+Marker tab, Export menu (MSI 26.10.2023): the note "DXF-ASTM: select Base Size or a size tab" runs past the right edge of the menu. Most of it cannot be read.
+
+- [x] Layout.88.1 Show the whole note: wrap it, or widen the menu to fit it.
+  - Cause: a Qt Quick `Menu` keeps its 200 px implicit width and elides a longer item. The note is 220 px.
+  - Done: `ExportMenu.qml` `fittedWidth`. The Export menu and its SVG submenu take the width of their widest shown item. A hidden item does not widen a menu.
+  - The SVG submenu had the same defect: "Paths: convert to single-stroke (Hershey)" 245 px, "Paths: no conversion - labels are already paths" 254 px.
+  - Checked: Fusion render of `ExportMenu.qml`. Export menu 222 px, SVG submenu 247/256 px, no elided text. `qmllint` shows no warnings.
+- [ ] Layout.88.2 Next MSI: Marker and Nested tabs, Export menu; the note is readable. `AGENT_CHECKLIST.md` §3.
+
+### [ ] Task Layout.72 — Verify - Split oversized individual pieces
+
+For oversized individual-pattern pieces, ask whether to split them or enlarge the media (decision 2026-10-13).
+
+- Dialog: list pieces and offending dimensions; offer "Split the pieces" (SVG, PDF, HPGL, EPS, PS, PNG, JPG) or "Make the media bigger" (DXF). OK continues; Cancel leaves only Layout Settings active.
+- Split only if no allowed rotation fits: too wide → vertical cuts; too long on non-roll media → horizontal cuts. Paper roll and fabric are roll-form. No dialog for tiled paper.
+- Enlarge media using Layout.71 (width) and Layout.25 (length).
+- Split into the minimum number of equal parts (rounded up), without cut-edge seam allowance. Label each part; add 2 match notches per cut edge. Apply the same split to sheet PDF. Warn if a fitting piece is left out because the media is full.
+
+- [x] Layout.72.9 Dialog names each offending dimension with the piece and media sizes, in the settings unit: `• Back: length 43.10 in, media 35.50 in`. The piece list is plain text and scrolls past 40% of the window. Tests: `piece_divider` `oversized_message_gives_the_offending_dimensions`; `trousers_long_pieces_split_on_a_sheet` checks each leg line. Checked: `cargo test -p cxxqt_bridge`; `qmllint` shows no new warnings; scratch `qml` render, 30 pieces: list 280 px, dialog 523 px in a 700 px window.
+- [ ] Layout.72.8 Next MSI: trousers sample, Paper Sheet 36 × 36 in, Create Layout:
+  - [ ] Dialog lists four too-long legs: Back, Front_Pleats, Front_no_pocket, Front_with_pocket. Each line reads `<name>: length <n> in, media 35.50 in`.
+  - [ ] Cancel: only Layout Settings, Preferences, Exit enabled; submitting settings re-enables Create Layout.
+  - [ ] Split: each leg becomes 2 parts, blue "<name> part i of 2, joins j" label, and 2 green match notches. Warn about unplaced pieces.
+  - [ ] Enlarge: sheet exceeds 36 in length; no splits or warnings.
+  - [ ] Export split PDF parts and DXF-ASTM blocks named `Back (1/2)` and `Back (2/2)`.
+
+### [ ] Task Layout.83 - Verify - Multisize - Nested - Legend - change legend color from line to rect element with width equal to current legend color line width and height equal to width. (makes legend easier to read)
+
+### [ ] Task Layout.86 - Verify - Export - Combine the DXF exports into a DXF submenu
+
+### [ ] Task Layout.87 - Verify - Export - Marker - Disable 'PDF (Tiled)' layout for Marker layout (seamlylayout will lock up when exporting a Marker as a tiled layout)
+
+
+- [x] Layout.83.1 `SizeLegend::element`: each swatch is a 32 × 32 px `rect`, filled with the size color, no stroke, centered on its row. Was a 32 px line, stroke width 4.
+- [x] Layout.83.2 Row height 24 → 40 px (swatch plus one 8 px pad), so rows do not overlap. The legend is taller; the media grows to hold it as before.
+- [x] Layout.83.3 Tests: `size_colors` `legend_swatches_are_filled_squares` (new); `legend_wraps_and_lists_every_size` counts swatch rects. `cargo test --workspace` 561 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
+- [ ] Layout.83.4 Next MSI: user check, `AGENT_CHECKLIST.md` §15.
