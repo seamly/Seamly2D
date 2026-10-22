@@ -506,4 +506,132 @@ mod tests {
         let declared = lines.windows(4).any(|w| w[0] == "100" && w[1] == "AcDbLayerTableRecord" && w[2] == "2" && w[3] == "5");
         assert!(declared, "layer 5 in the LAYER table");
     }
+
+    // @brief DXF-AAMA options with a fixed date and time.
+    fn aama_options() -> DxfAstmExportOptions {
+        DxfAstmExportOptions { aama: true, ..dated_options() }
+    }
+
+    // @brief `sample_drawing` as a DXF R10 drawing.
+    fn sample_r10_drawing() -> Drawing {
+        let mut drawing = sample_drawing();
+        drawing.version = DxfVersion::R10;
+        drawing
+    }
+
+    // @brief An R10 file names AC1006 and writes no BLOCK group 3, which Release 10 does not define.
+    #[test]
+    fn aama_r10_header_names_ac1006_and_blocks_have_no_group_3() {
+        let dxf = parse_dxf(&export_to_string(&sample_r10_drawing(), "aama_header", &aama_options()));
+        let version = dxf.all_pairs.windows(2).find(|w| w[0] == (9, "$ACADVER".to_string())).map(|w| w[1].1.clone());
+        assert_eq!(version.as_deref(), Some("AC1006"));
+        assert!(dxf.all_pairs.iter().all(|(c, _)| *c != 3), "no group 3");
+        // The same drawing as R12 keeps both.
+        let r12 = parse_dxf(&export_to_string(&sample_drawing(), "aama_r12", &aama_options()));
+        assert!(r12.all_pairs.contains(&(1, "AC1009".to_string())));
+        assert!(r12.all_pairs.iter().any(|(c, _)| *c == 3));
+    }
+
+    // @brief Style text ends at `Units:`: AAMA has no curve tolerance and no ASTM version.
+    #[test]
+    fn aama_style_text_has_no_curve_tolerance_or_astm_version() {
+        let dxf = parse_dxf(&export_to_string(&sample_r10_drawing(), "aama_style", &aama_options()));
+        let texts: Vec<&str> = dxf.entities.iter().filter(|e| e.kind == "TEXT").map(|e| e.get(1).unwrap()).collect();
+        assert_eq!(texts.last(), Some(&"Units:METRIC"));
+        assert!(texts.iter().all(|t| !t.starts_with("Curve Tolerance:") && !t.starts_with("ASTM/")), "{texts:?}");
+    }
+
+    // @brief A DXF-AAMA block uses layers 1 to 14 only: dense polylines with no validation
+    //        layer, every notch on layer 4, label text on layer 1 after the piece text.
+    #[test]
+    fn aama_block_uses_layers_1_to_14_only() {
+        let mut drawing = sample_r10_drawing();
+        drawing.blocks[0].size = Some("36".to_string());
+        let dxf = parse_dxf(&export_to_string(&drawing, "aama_block", &aama_options()));
+        let (_, body) = &dxf.blocks[0];
+
+        let layers: Vec<u32> = body.iter().map(|e| e.layer().parse().expect("numeric layer")).collect();
+        assert!(layers.iter().all(|l| (1..=14).contains(l)), "{layers:?}");
+
+        let texts: Vec<(&str, &str)> = body.iter().filter(|e| e.kind == "TEXT").map(|e| (e.layer(), e.get(1).unwrap())).collect();
+        assert_eq!(texts, vec![("1", "Piece Name:Front"), ("1", "Size:36"), ("1", "Quantity:1,1"), ("1", "Material:Fabric"), ("1", "Front")]);
+
+        // One dense polyline per contour, on its own layer, with every key point of the contour.
+        let block = &drawing.blocks[0];
+        let contours = [("1", vec![block.boundary.as_ref().unwrap()]), ("14", block.sew_lines.iter().collect()), ("8", block.internal_lines.iter().collect()), ("11", block.cutouts.iter().collect())];
+        for (layer, contours) in contours {
+            let dense: Vec<usize> = contours.iter().map(|c| c.dense.len()).collect();
+            assert_eq!(polyline_sizes(body, layer), dense, "layer {layer}");
+        }
+
+        // The T notch becomes a V notch on layer 4: depth, width and angle kept.
+        let notches: Vec<&DxfEntity> = body.iter().filter(|e| e.kind == "POINT" && e.layer() == "4").collect();
+        assert_eq!(notches.len(), 2);
+        assert_eq!((notches[0].get(30), notches[0].get(39)), (Some("5.00"), None), "slit");
+        assert_eq!((notches[1].get(30), notches[1].get(39), notches[1].get(50)), (Some("5.00"), Some("3.00"), Some("90.00")), "V");
+
+        // Turn points stay on layer 2, the grainline on layer 7.
+        assert_eq!(body.iter().filter(|e| e.kind == "POINT" && e.layer() == "2").count(), 11);
+        assert_eq!(body.iter().find(|e| e.kind == "LINE").map(DxfEntity::layer), Some("7"));
+    }
+
+    // @brief A label line that reads as piece text or a rule identifier is not written in DXF-AAMA.
+    #[test]
+    fn aama_labels_never_repeat_piece_text() {
+        let mut drawing = sample_r10_drawing();
+        let label = |text: &str| Annotation { position: Point::new(30.0, 40.0), height: 5.0, rotation: 0.0, text: text.to_string() };
+        drawing.blocks[0].annotations.extend(["Size: 40", "quantity:3", "# 2", "Cut 2 of Fabric", "Note: fold"].map(label));
+        let dxf = parse_dxf(&export_to_string(&drawing, "aama_labels", &aama_options()));
+        let texts: Vec<&str> = dxf.blocks[0].1.iter().filter(|e| e.kind == "TEXT").map(|e| e.get(1).unwrap()).collect();
+        assert_eq!(texts, vec!["Piece Name:Front", "Quantity:1,1", "Material:Fabric", "Front", "Cut 2 of Fabric", "Note: fold"]);
+
+        // DXF-ASTM keeps every label line on layer 15.
+        let astm = parse_dxf(&export_to_string(&sample_drawing_with(&["Size: 40"]), "astm_labels", &dated_options()));
+        assert!(astm.blocks[0].1.iter().any(|e| e.layer() == "15" && e.get(1) == Some("Size: 40")));
+    }
+
+    // @brief `sample_drawing` with extra label lines.
+    fn sample_drawing_with(labels: &[&str]) -> Drawing {
+        let mut drawing = sample_drawing();
+        for text in labels {
+            drawing.blocks[0].annotations.push(Annotation { position: Point::new(30.0, 40.0), height: 5.0, rotation: 0.0, text: text.to_string() });
+        } // for each label
+        drawing
+    }
+
+    // @brief A graded DXF-AAMA export keeps layer 5 and the `# n` texts, and its rule file names ANSI/AAMA.
+    #[test]
+    fn aama_graded_export_writes_rule_ids_and_aama_rule_file() {
+        let (drawing, _) = graded_drawing(DxfVersion::R10);
+        let path = std::env::temp_dir().join(format!("seamly_aama_rul_{}.dxf", std::process::id()));
+        export_dxf_astm(&drawing, &path, &aama_options()).expect("export succeeds");
+        let dxf = parse_dxf(&std::fs::read_to_string(&path).expect("DXF written"));
+        let rul_path = path.with_extension("rul");
+        let rul = std::fs::read_to_string(&rul_path).expect("rule file beside the DXF");
+        let _ = std::fs::remove_file(&path);
+        let _ = std::fs::remove_file(&rul_path);
+
+        let (name, front) = &dxf.blocks[0];
+        assert_eq!(front.iter().filter(|e| e.kind == "LINE" && e.layer() == "5").count(), 1, "{name}: layer 5 line");
+        assert!(front.iter().any(|e| e.kind == "TEXT" && e.layer() == "1" && e.get(1).is_some_and(|t| t.starts_with("# "))), "{name}: rule text");
+        assert!(front.iter().any(|e| e.get(1) == Some("Size:36")), "{name}: AAMA size text");
+
+        let lines: Vec<&str> = rul.lines().collect();
+        assert_eq!(lines[0], "ANSI/AAMA VERSION:1.0.0");
+        assert_eq!(lines[1..9], ["AUTHOR:Seamly2D", "CREATION DATE:11-10-2026", "CREATION TIME:14:05", "UNITS:METRIC", "GRADE RULE TABLE:GradingTest", "SAMPLE SIZE:36", "NUMBER OF SIZES:3", "SIZE LIST:34 36 38"]);
+        assert!(lines[9].starts_with("RULE: DELTA 1 "), "{}", lines[9]);
+    }
+
+    // @brief The annotated version of a DXF-AAMA file names DXF-AAMA in its title line.
+    #[test]
+    fn aama_annotated_version_names_dxf_aama() {
+        let path = std::env::temp_dir().join(format!("seamly_aama_annotated_{}.dxf", std::process::id()));
+        let options = DxfAstmExportOptions { create_annotated_version: true, ..aama_options() };
+        export_dxf_astm(&sample_r10_drawing(), &path, &options).expect("export succeeds");
+        let txt_path = path.with_extension("txt");
+        let annotated = std::fs::read_to_string(&txt_path).expect("annotated version written");
+        let _ = std::fs::remove_file(&path);
+        let _ = std::fs::remove_file(&txt_path);
+        assert_eq!(annotated.lines().next(), Some("// DXF-AAMA Annotated Version with Inline Comments"));
+    }
 }
