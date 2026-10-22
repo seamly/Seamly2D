@@ -2,6 +2,17 @@
 
 ## Current status
 
+### 2026-10-21 — Fold lines in SeamlyLayout, merged into local `run-seamlyLayout`, not pushed
+
+- Layout.80.6: `fold_line` is read as a component; a split piece clips it per part.
+- New setting "Place fold lines on the left edge (the fold)", Fabric section, needs Fabric Folded. Left margin 0 on the fold.
+- `fold_line_edge.rs`: angle 0/180 brings the fold line left; with nap the piece is mirrored instead. `Rect::with_left_edge` pins it in MaxRects. Nested piece-sets are not pinned.
+- DXF-ASTM: layer 6 mirror line; the boundary starts on it (`astm_mirror.rs`, after grading). Fold line off the cut line: no layer 6, export warning.
+- Verified: `cargo test --workspace` 588 passed; `cl /Zs` on `SettingsModel.cpp`, `SettingsModelTests.cpp`; `qmllint` no new kind of warning. Not run: ctest, GUI, MSI (ask first).
+- User checks: Layout.80.7 and 80.3.1 (`AGENT_CHECKLIST.md` §20), Layout.80.6.6 and 80.6.3 (§21).
+- Open: a mirrored piece does not grade in a Base Size DXF-ASTM export; fold warnings on multisize layouts go to the log only.
+- Merge commit uses the skip-ci token: no path in the full-CI list changed.
+
 ### 2026-10-21 — Nested exports keep the smallest size's grainline and labels, merged into local `run-seamlyLayout`, not pushed
 
 - Layout.84: every export but DXF-ASTM keeps, per piece-set, the `grainline`, `piece_label`, `pattern_label` and `size_label` groups of the smallest size only.

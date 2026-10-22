@@ -657,6 +657,12 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
                     block.grainline = lines().into_iter().next().map(|(p, _)| (p[0], p[p.len() - 1]));
                 } // if first grainline
             } // Grainline
+            PieceComponent::FoldLine => {
+                if block.mirror_line.is_none() {
+                    // The fold line runs from its start node to its end node.
+                    block.mirror_line = lines().into_iter().next().filter(|(p, _)| p.len() >= 2).map(|(p, _)| (p[0], p[p.len() - 1]));
+                } // if first fold line
+            } // FoldLine
             PieceComponent::Label => collect_annotations(element, options, svg_height, &mut block.annotations),
             PieceComponent::DrillHole => {} // Seamly2D exports no drill holes
         } // match component

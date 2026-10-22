@@ -9,6 +9,7 @@
 //! | 1     | Piece boundary | `cutline` |
 //! | 2, 3  | Turn / curve points | generated from contours |
 //! | 4, 80, 81, 83 | Notches | `notch` |
+//! | 6     | Mirror line | `fold_line` |
 //! | 7     | Grainline | `grainline` |
 //! | 8     | Internal lines (also the default) | `internal_path` |
 //! | 11    | Internal cutouts | `cut_path` |
@@ -24,6 +25,7 @@ pub enum PieceComponent {
     Seamline,
     Notch,
     Grainline,
+    FoldLine,
     InternalPath,
     CutPath,
     Label,
@@ -36,6 +38,7 @@ impl PieceComponent {
         match self {
             PieceComponent::Cutline => "1",
             PieceComponent::Notch => "4",
+            PieceComponent::FoldLine => "6",
             PieceComponent::Grainline => "7",
             PieceComponent::InternalPath => "8",
             PieceComponent::CutPath => "11",
@@ -58,6 +61,7 @@ pub fn piece_component(element: &xmltree::Element) -> Option<PieceComponent> {
             "seamline" => Some(PieceComponent::Seamline),
             "notch" => Some(PieceComponent::Notch),
             "grainline" => Some(PieceComponent::Grainline),
+            "fold_line" => Some(PieceComponent::FoldLine),
             "internal_path" => Some(PieceComponent::InternalPath),
             "cut_path" => Some(PieceComponent::CutPath),
             "piece_label" | "pattern_label" | "size_label" => Some(PieceComponent::Label),
@@ -70,6 +74,8 @@ pub fn piece_component(element: &xmltree::Element) -> Option<PieceComponent> {
         Some(PieceComponent::CutPath)
     } else if id.contains("cutline") || id.contains("boundary") {
         Some(PieceComponent::Cutline)
+    } else if id.contains("fold_line") {
+        Some(PieceComponent::FoldLine)
     } else if id.contains("notch") {
         Some(PieceComponent::Notch)
     } else if id.contains("grain") {

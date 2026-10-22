@@ -46,6 +46,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 | 2 / 3 | Turn / curve points of layers 1, 8, 11, 14 | POINT |
 | 4 | Every notch, as a slit (no 39) | POINT + 30 depth, 50 angle |
 | 5 | Grade reference line, every graded base size block | LINE |
+| 6 | Mirror line: the fold line of a piece cut on the fold | LINE |
 | 7 | Grainline | LINE |
 | 8 | Internal lines (`internal_path`) | POLYLINE |
 | 11 | Internal cutouts (`cut_path`) | POLYLINE |
@@ -84,6 +85,17 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 - Built-in seam allowance: the `cutline` is the main path, so it is the boundary (layer 1). The `seamline` is the line Seamly2D computes inside it, a sew line (layer 14).
 - A seam line equal to the boundary is not repeated on layer 14.
 
+## Mirror line (`astm_mirror.rs`)
+
+D6673 §4.3.6: a two-point line on layer 6; its points are boundary points, and the first two or the last two boundary points match it.
+
+- Source: the piece's `fold_line` group (`PieceComponent::FoldLine`).
+- The cut line has no seam allowance along the fold, so one boundary edge lies on the fold line (0.1 mm tolerance). Its two key points are the mirror line; they can lie past the fold line's own ends.
+- The boundary key points and validation points start at the first mirror line point. Key points inside that edge are dropped, with their rule texts.
+- `do_export_dxf` aligns after grading, which rebuilds the boundary.
+- A fold line with no boundary edge on it writes no layer 6. The export dialog names the piece.
+- A piece without a fold line writes no layer 6. Piece Mirror full pieces have none.
+
 ## Notch rules (`astm_notch.rs`)
 
 Every notch is a slit on layer 4, whatever shape Seamly2D drew (slit, T, U, V, castle, diamond). User decision.
@@ -120,7 +132,7 @@ A DXF-ASTM export of the **Base Size** tab is graded (D6673 §4.3.1.4, §4.4). T
 
 Seamly2D sends no source data for these. Tracked in `TODO_SEAMLYLAYOUT.md`.
 
-- Alternate grade reference lines (layer 5), mirror line (layer 6).
+- Alternate grade reference lines (layer 5).
 - Stripe and plaid reference lines (layers 9, 10), drill holes (layer 13).
 - Check notch (layer 82). Notch dependency (ATTDEF).
 
@@ -155,3 +167,4 @@ The jacket2 files come from MSI 26.10.1115, before Layout.26 and Layout.27.9. Ad
   Fixtures: `ezdxf2dxfastm/test_data/multisize_grading_input.svg`, `multisize_grading_layout.svg`.
 - `cxxqt_bridge/src/layout_utils.rs` `base_size_tab_exports_grade_rules`, `jacket2_base_size_export_names_and_grades_each_piece` — Base Size and size tabs, end to end.
 - `cxxqt_bridge/src/layout_views.rs` — tab order, which tabs each format exports.
+- `seamly_svg2ezdxf/src/astm_mirror.rs`, `cxxqt_bridge/src/exports.rs` `do_export_dxf_writes_the_mirror_line` — layer 6 and the boundary start.

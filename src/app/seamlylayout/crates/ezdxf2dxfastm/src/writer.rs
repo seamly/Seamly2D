@@ -248,7 +248,7 @@ fn repeats_piece_text(text: &str) -> bool {
 // @brief Write one ASTM piece block body (between BLOCK and ENDBLK).
 //
 // Order: piece system text, boundary (1/84), sew lines (14/87), internal
-// lines (8/85), cutouts (11/86), turn/curve points (2/3), grainline (7),
+// lines (8/85), cutouts (11/86), turn/curve points (2/3), mirror line (6), grainline (7),
 // notches (4/80/81/83), annotation text (15), grade reference line (5),
 // grade rule identifiers.
 // @param options `clo3d_group_250` marks the boundary and sew line polylines with CLO3D group 250.
@@ -298,6 +298,16 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
             encode_dxf_point(writer, &DxfPoint::new(if turn { "2" } else { "3" }, *p))?;
         } // for each key point
     } // for each contour
+
+    // Mirror line: a two-point line on the first two boundary points (D6673 §4.3.6).
+    if let Some((p1, p2)) = &block.mirror_line {
+        write_group_code(writer, 0, "LINE")?;
+        write_group_code(writer, 8, "6")?;
+        write_group_code_float(writer, 10, p1.x)?;
+        write_group_code_float(writer, 20, p1.y)?;
+        write_group_code_float(writer, 11, p2.x)?;
+        write_group_code_float(writer, 21, p2.y)?;
+    } // if mirror line
 
     if let Some((p1, p2)) = &block.grainline {
         write_group_code(writer, 0, "LINE")?;
@@ -660,6 +670,7 @@ fn astm_layer_meaning(layer: &str) -> &'static str {
         "3" => "ASTM curve point",
         "4" => "ASTM slit or V notch",
         "5" => "ASTM grade reference line",
+        "6" => "ASTM mirror line",
         "7" => "ASTM grainline",
         "8" => "ASTM internal line",
         "11" => "ASTM internal cutout",

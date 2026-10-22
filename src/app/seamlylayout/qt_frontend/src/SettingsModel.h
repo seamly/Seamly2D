@@ -58,6 +58,8 @@ class SettingsModel : public QObject
     Q_PROPERTY(bool    fabricFolded  READ fabricFolded  WRITE setFabricFolded  NOTIFY fabricFoldedChanged)
     // @brief True adds a scale check grid to every layout except Marker: 3 x 3 cm, or 2 x 2 in for inches.
     Q_PROPERTY(bool    scaleGrid     READ scaleGrid     WRITE setScaleGrid     NOTIFY scaleGridChanged)
+    // @brief True puts each piece's fold line on the left edge, the fold; needs folded fabric media.
+    Q_PROPERTY(bool    foldLinesOnLeftEdge READ foldLinesOnLeftEdge WRITE setFoldLinesOnLeftEdge NOTIFY foldLinesOnLeftEdgeChanged)
 
     // @brief Minimum clearance between adjacent placed pieces, in active units.
     // The packer enforces at least this much space between any two pieces in
@@ -202,6 +204,7 @@ public:
     QString    noGrainlineRotation() const { return m_noGrainlineRotation; }
     bool       fabricFolded()  const { return m_fabricFolded;  }
     bool       scaleGrid()     const { return m_scaleGrid;     }
+    bool       foldLinesOnLeftEdge() const { return m_foldLinesOnLeftEdge; }
     double     pieceGap()      const { return m_pieceGap;      }
     int        pieceGapPx()    const;
     QString    unit()          const { return m_unit;          }
@@ -241,6 +244,7 @@ public:
     void setNoGrainlineRotation(const QString &v);
     void setFabricFolded(bool v);
     void setScaleGrid(bool v);
+    void setFoldLinesOnLeftEdge(bool v);
     void setPieceGap(double v);
     void setUnit(const QString &v);
     void setMediaType(const QString &v);
@@ -319,6 +323,7 @@ signals:
     void noGrainlineRotationChanged();
     void fabricFoldedChanged();
     void scaleGridChanged();
+    void foldLinesOnLeftEdgeChanged();
     void pieceGapChanged();
     void pieceGapPxChanged();
     void unitChanged();
@@ -363,6 +368,7 @@ private:
     QString m_noGrainlineRotation = QStringLiteral("upright");
     bool    m_fabricFolded  = false;
     bool    m_scaleGrid     = false;
+    bool    m_foldLinesOnLeftEdge = false;
     double  m_pieceGap      = 0.05;  // active-unit clearance between adjacent pieces (default ≈ 5 px @ 96 dpi)
     QString m_unit          = QStringLiteral("in");
     QString m_mediaType     = QStringLiteral("paper");

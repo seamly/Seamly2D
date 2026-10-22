@@ -39,7 +39,7 @@ use std::path::Path;
 use xmltree::{Element as XmlElement, XMLNode};
 
 use ezdxf2dxfastm::{export_dxf_astm, grade_rule_table_name, DxfAstmExportOptions};
-use seamly_svg2ezdxf::{grade_drawing, svg_to_ezdxf, DxfVersion, MissingPieceData, SvgToEzdxfOptions};
+use seamly_svg2ezdxf::{align_mirror_lines, grade_drawing, svg_to_ezdxf, DxfVersion, MissingPieceData, SvgToEzdxfOptions};
 
 use hpgl_writer::{HpglMode, HpglOptions, PenMap};
 use ps_writer::PsFlavor;
@@ -728,7 +728,8 @@ pub const NO_PIECE_GRADED_WARNING: &str = "No piece graded: no .rul file written
 // @brief What a successful DXF-ASTM export wrote, and what it could not do.
 #[derive(Debug, Default)]
 pub struct DxfExportReport {
-    // One line per piece a graded export could not grade, then NO_PIECE_GRADED_WARNING when none graded.
+    // One line per piece a graded export could not grade, then NO_PIECE_GRADED_WARNING when none graded,
+    // then one line per piece whose fold line is not on its cut line.
     pub warnings: Vec<String>,
     // The grade rule file beside the DXF. None when the export is ungraded or no piece graded.
     pub rule_file: Option<String>,
@@ -794,6 +795,10 @@ pub fn do_export_dxf(
             warnings.len()
         ));
     } // if grading
+
+    // A piece cut on the fold: the mirror line goes on the first two boundary
+    // points (D6673 §4.3.6). After grading, which rebuilds the boundary.
+    warnings.extend(align_mirror_lines(&mut drawing));
 
     // Stage 1 complete / Stage 2 start: write DXF-ASTM file (~50% of total work).
     progress(50);
@@ -2358,6 +2363,44 @@ mod tests {
             "exported DXF should end with EOF marker"
         );
     } // do_export_dxf_writes_valid_dxf
+
+    // @brief A piece with a fold line exports a layer 6 mirror line on the first two
+    // boundary vertices; a fold line off the cut line is a warning instead.
+    #[test]
+    fn do_export_dxf_writes_the_mirror_line() {
+        let svg = |fold_x: u32| format!(r##"<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400">
+            <g id="piece_Back" data-type="piece" data-name="Back" data-on-fold="true">
+                <g data-type="cutline"><path d="M 196,0 L 196,300 L 100,300 L 100,0 Z"/></g>
+                <g id="fold_line_Back" data-type="fold_line"><path d="M {fold_x},290 L {fold_x},10"/></g>
+            </g>
+        </svg>"##);
+        let export = |fold_x: u32, tag: &str| {
+            let doc = Document::parse(&svg(fold_x)).expect("fixture SVG should parse");
+            let path = std::env::temp_dir().join(format!("seamly_dxf_mirror_{tag}_{}.dxf", std::process::id()));
+            let path_str = path.to_string_lossy().to_string();
+            let report = do_export_dxf(&doc, &path_str, false, &DxfStyleInfo::default(), &mut |_| {}).expect("DXF export should succeed");
+            let content = std::fs::read_to_string(&path_str).expect("exported DXF file should be readable");
+            let _ = std::fs::remove_file(&path_str);
+            (report, content.lines().map(|l| l.trim().to_string()).collect::<Vec<String>>())
+        }; // export
+
+        let (report, lines) = export(100, "on");
+        assert!(report.warnings.is_empty(), "{:?}", report.warnings);
+        // The LINE on layer 6, then the first two VERTEX entries of the layer 1 polyline.
+        let at = |code: &str, from: usize| lines[from..].iter().position(|l| l == code).map(|i| from + i).expect(code);
+        let mirror = lines.windows(4).position(|w| w[0] == "LINE" && w[1] == "8" && w[2] == "6").expect("layer 6 line");
+        let mirror_xy: Vec<&str> = ["10", "20", "11", "21"].iter().map(|c| lines[at(c, mirror) + 1].as_str()).collect();
+        let boundary = lines.windows(3).position(|w| w[0] == "POLYLINE" && w[1] == "8" && w[2] == "1").expect("boundary");
+        let v1 = at("VERTEX", boundary);
+        let v2 = at("VERTEX", v1 + 1);
+        let vertex_xy: Vec<&str> = [(v1, "10"), (v1, "20"), (v2, "10"), (v2, "20")].iter()
+            .map(|&(v, c)| lines[at(c, v) + 1].as_str()).collect();
+        assert_eq!(mirror_xy, vertex_xy);
+
+        let (report, lines) = export(150, "off");
+        assert_eq!(report.warnings, vec!["Back: the fold line is not on the cut line; no mirror line written.".to_string()]);
+        assert!(!lines.windows(3).any(|w| w[0] == "LINE" && w[1] == "8" && w[2] == "6"), "no layer 6");
+    } // do_export_dxf_writes_the_mirror_line
 
     // @brief do_export_dxf with dxf_version R13 writes an AC1012 file with handles and OBJECTS.
     #[test]

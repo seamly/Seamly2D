@@ -187,6 +187,30 @@ mod tests {
         assert_eq!(grain.layer(), "7");
     }
 
+    // @brief The mirror line is a layer 6 LINE on the first two boundary vertices.
+    #[test]
+    fn mirror_line_is_a_layer_6_line_on_the_boundary_start() {
+        let mut drawing = sample_drawing();
+        let boundary = drawing.blocks[0].boundary.clone().expect("boundary");
+        drawing.blocks[0].mirror_line = Some((boundary.reduced[0], boundary.reduced[1]));
+        let dxf = parse_dxf(&export_to_string(&drawing, "mirror", &DxfAstmExportOptions::default()));
+        let (_, body) = &dxf.blocks[0];
+
+        let mirror: Vec<&DxfEntity> = body.iter().filter(|e| e.kind == "LINE" && e.layer() == "6").collect();
+        assert_eq!(mirror.len(), 1, "one mirror line");
+        let ends = [mirror[0].get(10), mirror[0].get(20), mirror[0].get(11), mirror[0].get(21)];
+
+        // The first two vertices of the layer 1 polyline.
+        let first = body.iter().position(|e| e.kind == "POLYLINE" && e.layer() == "1").expect("boundary polyline");
+        let vertices: Vec<&DxfEntity> = body[first + 1..].iter().take_while(|e| e.kind == "VERTEX").collect();
+        let start = [vertices[0].get(10), vertices[0].get(20), vertices[1].get(10), vertices[1].get(20)];
+        assert_eq!(ends, start);
+
+        // Without a mirror line, no layer 6.
+        let plain = parse_dxf(&export_to_string(&sample_drawing(), "no_mirror", &DxfAstmExportOptions::default()));
+        assert!(plain.blocks[0].1.iter().all(|e| e.layer() != "6"));
+    }
+
     #[test]
     fn coordinates_use_two_decimals_and_no_clo3d_group_250() {
         let text = export_to_string(&sample_drawing(), "format", &DxfAstmExportOptions::default());

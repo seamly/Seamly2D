@@ -179,12 +179,12 @@ pub fn extract_piece_outline(piece_g: &Element) -> Option<Polygon> {
 // checked, because real Seamly2D handoffs and hand-built test fixtures use
 // different naming:
 //   1. `data-type` attribute, exact match (`notch`, `tuck`, `grainline`,
-//      `internal_path`, `drill`, `hole`). Real ids are namespaced as
+//      `fold_line`, `internal_path`, `drill`, `hole`). Real ids are namespaced as
 //      `piece-<N>-<type>-<M>`, so an id-prefix check alone never matches them
 //      — `data-type` is the attribute Seamly2D actually sets per group.
 //   2. `id` prefix (compared lower-case), for exports/fixtures with no
-//      `data-type`: `notch`, `tuck`, `grainline` / `grain_`, `ip_`, `drill`,
-//      `hole`. `starts_with` is intentional here: a piece named "notch"
+//      `data-type`: `notch`, `tuck`, `grainline` / `grain_`, `fold_line`, `ip_`,
+//      `drill`, `hole`. `starts_with` is intentional here: a piece named "notch"
 //      would produce an id `cutline_notch` which still passes the primary
 //      `contains("cutline")` check in `find_outline_group` and is NOT
 //      excluded by this prefix check.
@@ -192,7 +192,7 @@ fn is_non_outline_group(e: &Element) -> bool {
     if let Some(data_type) = e.attributes.get("data-type") {
         if matches!(
             data_type.as_str(),
-            "notch" | "tuck" | "grainline" | "internal_path" | "drill" | "hole"
+            "notch" | "tuck" | "grainline" | "fold_line" | "internal_path" | "drill" | "hole"
         ) {
             return true;
         } // if known decoration type
@@ -204,6 +204,7 @@ fn is_non_outline_group(e: &Element) -> bool {
         || id_lower.starts_with("tuck")
         || id_lower.starts_with("grainline")
         || id_lower.starts_with("grain_")
+        || id_lower.starts_with("fold_line")
         || id_lower.starts_with("ip_")
         || id_lower.starts_with("drill")
         || id_lower.starts_with("hole")
@@ -521,6 +522,29 @@ mod tests {
         assert!(dx > 7.0 && dy > 5.0,
             "AABB too small ({dx:.2}×{dy:.2}) — notch may have been selected instead of seamline");
     } // find_outline_group_skips_notch_at_structural_position_1
+
+    // @brief A fold line at structural position 1 is not the outline, even with
+    // three points: it lies on the outline but holds no area.
+    #[test]
+    fn find_outline_group_skips_fold_line_at_structural_position_1() {
+        let svg = r#"<?xml version="1.0"?>
+            <svg xmlns="http://www.w3.org/2000/svg">
+                <g id="piece-3" data-type="piece">
+                    <g id="piece-3-seamline-1" data-type="seamline">
+                        <path d="M 0,0 L 8,0 L 8,6 L 0,6 L 0,0"/>
+                    </g>
+                    <g id="fold_line_Back" data-type="fold_line">
+                        <path d="M 0,0 L 0,3 L 0,6"/>
+                    </g>
+                </g>
+            </svg>"#;
+        let root = parse_svg(svg);
+        let pieces = extract_cutline_polygons(&root);
+
+        assert_eq!(pieces.len(), 1);
+        let (dx, dy) = span(&pieces[0].polygon);
+        assert!(dx > 7.0 && dy > 5.0, "AABB {dx:.2}x{dy:.2}: the fold line was taken as the outline");
+    } // find_outline_group_skips_fold_line_at_structural_position_1
 
     // @brief Real Seamly2D exports namespace every sibling id with the piece's
     // own id (`piece-3-notch-1`), not the bare `notch_1_Piece` prefix the test
