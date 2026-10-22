@@ -130,17 +130,21 @@ ApplicationWindow {
     property string pendingExportSettings: ""      // settings JSON for pdf / pdf-tiled; text mode for svg; options JSON for hpgl
     property bool   pendingExportAnnotatedVersion: false  // annotated flag for DXF
     property bool   pendingDxfClo3d: false               // CLO3D group 250 flag for DXF
-    property string pendingDxfVersion: "R12"             // DXF file version: "R12" or "R13"
+    property bool   pendingDxfAama: false                // DXF-AAMA content instead of DXF-ASTM
+    property string pendingDxfVersion: "R12"             // DXF file version: "R10", "R12" or "R13"
 
     // @brief Warn about incomplete pieces, ask Standard or Annotated, then ask for a DXF save path.
     // @details The annotated choice comes before the save dialog, so the default
     //          name can carry it. The warning checks the shown tab's layout;
     //          Export all tabs uses the same pieces for every size.
     // @param clo3d      true for DXF-ASTM (CLO3D): D6673 content plus CLO3D group 250.
-    // @param dxfVersion "R12" (AC1009) or "R13" (AC1012).
-    function requestDxfExport(clo3d, dxfVersion) {
+    // @param dxfVersion "R10" (AC1006), "R12" (AC1009) or "R13" (AC1012).
+    // @param aama       true for DXF-AAMA (ANSI/AAMA-292) content; absent means DXF-ASTM.
+    function requestDxfExport(clo3d, dxfVersion, aama) {
         root.pendingDxfClo3d = clo3d
+        root.pendingDxfAama = aama === true
         root.pendingDxfVersion = dxfVersion
+        dxfMissingDataDialog.formatName = root.pendingDxfAama ? "DXF-AAMA" : "DXF-ASTM"
         var warning = appController.dxfMissingPieceData()
         if (warning !== "") {
             // The dialog's Export anyway button continues with the annotated dialog.
@@ -154,13 +158,16 @@ ApplicationWindow {
     // @brief Ask for a DXF save path for the staged variant, then start the export.
     function chooseDxfPath() {
         var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
-        // Default name: <importedBaseName>_<R12|R13|CLO3D>[_annotated][_<tab>]_YYYYMMDDHHMM.dxf.
-        // CLO3D is always R13, so its name needs no version.
-        var variant = root.pendingDxfClo3d ? "CLO3D" : root.pendingDxfVersion
+        // Default name: <importedBaseName>_<R12|R13|CLO3D|AAMA>[_annotated][_<tab>]_YYYYMMDDHHMM.dxf.
+        // CLO3D is always R13 and AAMA always R10, so their names need no version.
+        var variant = root.pendingDxfAama  ? "AAMA"
+                    : root.pendingDxfClo3d ? "CLO3D"
+                    :                        root.pendingDxfVersion
         var segment = appController.dxfExportNameSegment(variant, root.pendingExportAnnotatedVersion)
         var name = root.makeExportFileName("dxf", false, segment)
-        var title = root.pendingDxfClo3d ? "Save DXF-ASTM (CLO3D) File"
-                                         : "Save DXF-ASTM (" + root.pendingDxfVersion + ") File"
+        var title = root.pendingDxfAama  ? "Save DXF-AAMA (" + root.pendingDxfVersion + ") File"
+                  : root.pendingDxfClo3d ? "Save DXF-ASTM (CLO3D) File"
+                  :                        "Save DXF-ASTM (" + root.pendingDxfVersion + ") File"
         var path = preferencesModel.getSaveFilePath(title, dir, name, "DXF Files (*.dxf);;All Files (*)")
         if (path === "") {
             root.pendingExportAnnotatedVersion = false // user cancelled: drop the staged choice
@@ -195,15 +202,17 @@ ApplicationWindow {
     // @param settings pendingExportSettings value for this format.
     // @param annotated DXF annotated-version flag.
     // @param clo3d    DXF CLO3D group 250 flag.
-    // @param dxfVersion DXF file version: "R12" or "R13".
+    // @param dxfVersion DXF file version: "R10", "R12" or "R13".
+    // @param aama     DXF-AAMA flag.
     // @return The AppController export result; false after it emitted errorOccurred.
-    function runExport(fmt, path, settings, annotated, clo3d, dxfVersion) {
+    function runExport(fmt, path, settings, annotated, clo3d, dxfVersion, aama) {
         if (fmt === "dxf") {
-            // Local date/time and version fill the DXF-ASTM style system text.
+            // Local date/time and version fill the DXF style system text.
             var now = new Date()
             var optJson = JSON.stringify({
                 createAnnotatedVersion: annotated,
                 clo3dGroup250: clo3d,
+                aama:         aama === true,
                 dxfVersion:   dxfVersion,
                 styleName:    root.importedBaseName, // input base name; empty → output file stem
                 appVersion:   Qt.application.version,
@@ -250,6 +259,7 @@ ApplicationWindow {
         var settings = root.pendingExportSettings
         var annotated = root.pendingExportAnnotatedVersion
         var clo3d    = root.pendingDxfClo3d
+        var aama     = root.pendingDxfAama
         var dxfVersion = root.pendingDxfVersion
         var shown    = appController.activeLayoutView
         var count    = appController.layoutViewLabels.length
@@ -265,7 +275,7 @@ ApplicationWindow {
                 errorDialog.open()
                 break
             } // if tab refused
-            ok = root.runExport(fmt, appController.exportTabPath(path, i), settings, annotated, clo3d, dxfVersion)
+            ok = root.runExport(fmt, appController.exportTabPath(path, i), settings, annotated, clo3d, dxfVersion, aama)
         } // for each tab
         appController.selectExportTab(shown) // the export source matches the shown tab again
         root.batchExportRunning = false
@@ -276,6 +286,7 @@ ApplicationWindow {
         root.pendingExportSettings = ""
         root.pendingExportAnnotatedVersion = false
         root.pendingDxfClo3d = false
+        root.pendingDxfAama = false
         root.pendingDxfVersion = "R12"
         exportProgressPopup.close()
         if (!ok) return
@@ -299,7 +310,7 @@ ApplicationWindow {
             else
                 root.runExport(fmt, path, root.pendingExportSettings,
                                root.pendingExportAnnotatedVersion, root.pendingDxfClo3d,
-                               root.pendingDxfVersion)
+                               root.pendingDxfVersion, root.pendingDxfAama)
         } // onTriggered
     } // Timer exportStartTimer
 
@@ -352,6 +363,7 @@ ApplicationWindow {
             root.pendingExportSettings = ""
             root.pendingExportAnnotatedVersion = false
             root.pendingDxfClo3d = false
+            root.pendingDxfAama = false
             root.pendingDxfVersion = "R12"
             exportProgressPopup.close()
             errorDialog.errorText = message;
@@ -415,6 +427,7 @@ ApplicationWindow {
             root.pendingExportSettings = ""
             root.pendingExportAnnotatedVersion = false
             root.pendingDxfClo3d = false
+            root.pendingDxfAama = false
             root.pendingDxfVersion = "R12"
             exportProgressPopup.close()
             // Track last exported path per format for View menu
@@ -533,7 +546,7 @@ ApplicationWindow {
         pdfTiledExportEnabled: settingsModel.paperType === "tiled"
         hasLayoutTabs:        appController.layoutViewLabels.length > 1
         exportAllTabs:        root.exportAllTabs
-        // Marker and Nested hold every size; DXF-ASTM exports one size per file.
+        // Marker and Nested hold every size; DXF-ASTM and DXF-AAMA export one size per file.
         dxfExportEnabled:     appController.dxfExportAllowed || root.exportAllTabsActive
         // Tiling the Marker tab locks SeamlyLayout up; Export all tabs skips Marker.
         pdfTiledTabAllowed:   appController.pdfTiledExportAllowed || root.exportAllTabsActive
@@ -589,6 +602,7 @@ ApplicationWindow {
         onExportDxfAstmRequested:      root.requestDxfExport(false, "R12")
         onExportDxfAstmR13Requested:   root.requestDxfExport(false, "R13")
         onExportDxfAstmClo3dRequested: root.requestDxfExport(true, "R13")
+        onExportDxfAamaRequested:      root.requestDxfExport(false, "R10", true)
         onExportPngRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
             var name = root.makeExportFileName("png") // default name: <importedBaseName>[_<tab>]_YYYYMMDDHHMM.png

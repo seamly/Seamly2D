@@ -58,7 +58,7 @@ ToolBar {
     // @brief Check state of Export > "Export all tabs".
     property bool exportAllTabs: false
 
-    // @brief True when Export > DXF-ASTM can run: the shown tab holds one size,
+    // @brief True when Export > DXF can run: the shown tab holds one size,
     //        or "Export all tabs" writes the tabs that do.
     property bool dxfExportEnabled: true
 
@@ -112,6 +112,9 @@ ToolBar {
 
     // @brief User selected DXF-ASTM (CLO3D) from the Export dropdown.
     signal exportDxfAstmClo3dRequested()
+
+    // @brief User selected DXF-AAMA (R10) from the Export dropdown.
+    signal exportDxfAamaRequested()
 
     // @brief User selected PDF from the Export dropdown (Phase 10).
     signal exportPdfRequested()
@@ -248,6 +251,7 @@ ToolBar {
             onExportDxfAstmRequested:  root.exportDxfAstmRequested()
             onExportDxfAstmR13Requested:   root.exportDxfAstmR13Requested()
             onExportDxfAstmClo3dRequested: root.exportDxfAstmClo3dRequested()
+            onExportDxfAamaRequested:      root.exportDxfAamaRequested()
             onExportPdfRequested:      root.exportPdfRequested()
             onExportPdfTiledRequested: root.exportPdfTiledRequested()
             onExportPngRequested:      root.exportPngRequested()

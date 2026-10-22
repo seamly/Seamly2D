@@ -2471,9 +2471,9 @@ impl qobject::AppController {
         } // match message
     } // fn dxf_missing_piece_data
 
-    // Export the assembled layout as a DXF-ASTM file.
-    // options_json: {"createAnnotatedVersion": bool, "clo3dGroup250": bool, "dxfVersion": "R12"|"R13",
-    //                "appVersion", "creationDate", "creationTime"}
+    // Export the assembled layout as a DXF-ASTM file, or a DXF-AAMA file when "aama" is true.
+    // options_json: {"createAnnotatedVersion": bool, "clo3dGroup250": bool, "aama": bool,
+    //                "dxfVersion": "R10"|"R12"|"R13", "appVersion", "creationDate", "creationTime"}
     // Delegates core logic to exports::do_export_dxf.
     // Called by QML 'Export DXF' button handler: onExportDXF: appController.exportDxf(path, optionsJson)
     fn export_dxf(
@@ -2498,7 +2498,10 @@ impl qobject::AppController {
             creation_time: Option<String>,
             #[serde(default)]
             clo3d_group_250: bool,
-            // "R12" or "R13"; absent or unknown writes R12.
+            // DXF-AAMA content instead of DXF-ASTM.
+            #[serde(default)]
+            aama: bool,
+            // "R10", "R12" or "R13"; absent or unknown writes R12.
             #[serde(default)]
             dxf_version: Option<String>,
             // Input base name for `Style Name:`; empty when the input has no name.
@@ -2516,16 +2519,17 @@ impl qobject::AppController {
         };
 
         log_to_file(&format!(
-            "[lib.rs AppController] export_dxf(): 2 options parsed create_annotated_version={}",
-            opts.create_annotated_version
+            "[lib.rs AppController] export_dxf(): 2 options parsed create_annotated_version={} aama={}",
+            opts.create_annotated_version, opts.aama
         ));
-        // A DXF-ASTM file carries one size: Marker and Nested hold every size.
+        let standard = if opts.aama { "DXF-AAMA" } else { "DXF-ASTM" };
+        // A DXF-ASTM or DXF-AAMA file carries one size: Marker and Nested hold every size.
         let active_kind = self.rust().layout_views.active_kind().cloned();
         if active_kind.as_ref().is_some_and(|kind| !kind.exports_dxf()) {
             log_to_file("[lib.rs AppController] export_dxf(): 3 refused: Marker or Nested tab");
-            self.as_mut().error_occurred(cxx_qt_lib::QString::from(
-                "DXF-ASTM exports one size. Select the Base Size tab or a size tab, then export again.",
-            ));
+            self.as_mut().error_occurred(cxx_qt_lib::QString::from(&format!(
+                "{standard} exports one size. Select the Base Size tab or a size tab, then export again."
+            )));
             return false;
         } // if Marker or Nested
         let layout_doc = match self.clone_dxf_layout_doc() {
@@ -2542,7 +2546,7 @@ impl qobject::AppController {
 
         // Signal export start (0%); QML popup is already open before this call.
         self.as_mut().set_export_progress(0);
-        self.as_mut().set_export_status_message(cxx_qt_lib::QString::from("Exporting DXF-ASTM…"));
+        self.as_mut().set_export_status_message(cxx_qt_lib::QString::from(&format!("Exporting {standard}…")));
         self.as_mut().progress_updated(0);
 
         log_to_file(&format!("[lib.rs AppController] export_dxf(): 4 delegating to do_export_dxf for '{path_str}'"));
@@ -2577,10 +2581,12 @@ impl qobject::AppController {
             creation_date: opts.creation_date.clone(),
             creation_time: opts.creation_time.clone(),
             clo3d_group_250: opts.clo3d_group_250,
+            aama: opts.aama,
             input_name: opts.style_name.clone(),
             sample_size,
             grading,
             dxf_version: match opts.dxf_version.as_deref() {
+                Some("R10") => seamly_svg2ezdxf::DxfVersion::R10,
                 Some("R13") => seamly_svg2ezdxf::DxfVersion::R13,
                 _ => seamly_svg2ezdxf::DxfVersion::R12,
             }, // dxf_version

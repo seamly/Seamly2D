@@ -684,14 +684,16 @@ fn build_tiled_pdf_tile_doc(
 // DXF-ASTM export
 // ---------------------------------------------------------------------------
 
-// @brief Frontend choices for a DXF-ASTM export: style system text, CLO3D variant and DXF version.
+// @brief Frontend choices for a DXF export: style system text, CLO3D or AAMA variant and DXF version.
 // @details Local date and time come from Qt, which knows the user's time zone;
 //          absent values fall back to UTC in the writer.
 #[derive(Debug, Clone, Default)]
 pub struct DxfStyleInfo {
     // CLO3D variant: add group 250 to boundary and sew line polylines.
     pub clo3d_group_250: bool,
-    // File version: R12 (AC1009) or R13 (AC1012).
+    // DXF-AAMA (ANSI/AAMA-292) content instead of DXF-ASTM; the frontend pairs it with R10.
+    pub aama: bool,
+    // File version: R10 (AC1006), R12 (AC1009) or R13 (AC1012).
     pub dxf_version: DxfVersion,
     // Seamly2D suite version for `Author:`.
     pub app_version: Option<String>,
@@ -733,7 +735,7 @@ pub struct DxfExportReport {
     pub rule_file: Option<String>,
 }
 
-// @brief Export a stripped layout document to a DXF-ASTM file.
+// @brief Export a stripped layout document to a DXF-ASTM file, or a DXF-AAMA file when `style.aama` is set.
 //
 // Pipeline:
 //   1. SVG DOM → ezdxf Drawing via svg_to_ezdxf.      (progress → 10% then 50%)
@@ -755,7 +757,7 @@ pub fn do_export_dxf(
     style: &DxfStyleInfo,
     progress: &mut impl FnMut(i32),
 ) -> Result<DxfExportReport, String> {
-    crate::log_to_file(&format!("[exports.rs] do_export_dxf(): 1 converting SVG DOM to ezdxf Drawing for '{path}' annotated_version={create_annotated_version} version={:?}", style.dxf_version));
+    crate::log_to_file(&format!("[exports.rs] do_export_dxf(): 1 converting SVG DOM to ezdxf Drawing for '{path}' annotated_version={create_annotated_version} version={:?} aama={}", style.dxf_version, style.aama));
 
     // Stage 1 start: SVG DOM → ezdxf Drawing (~10% of total work).
     progress(10);
@@ -821,6 +823,7 @@ pub fn do_export_dxf(
         creation_date: style.creation_date.clone(),
         creation_time: style.creation_time.clone(),
         clo3d_group_250: style.clo3d_group_250,
+        aama: style.aama,
         ..defaults
     }; // export_opts
     let result = export_dxf_astm(&drawing, Path::new(path), &export_opts)
@@ -865,7 +868,7 @@ fn missing_piece_data_text(missing: &[MissingPieceData]) -> String {
         return String::new();
     } // if complete
 
-    let mut lines = vec!["These pieces lack data that DXF-ASTM uses:".to_string(), String::new()];
+    let mut lines = vec!["These pieces lack data that DXF-ASTM and DXF-AAMA use:".to_string(), String::new()];
     for m in missing {
         // Each flag names one absent item; Quantity comes from data-quantity or a "Cut N" label line.
         let mut lacks = Vec::new();
@@ -1997,7 +2000,8 @@ pub fn export_name_segment(format: &str, mode: &str) -> &'static str {
 //
 // Example: ("R13", true) → "R13_annotated". The standard version keeps the variant alone.
 //
-// @param variant   "R12", "R13" or "CLO3D". CLO3D is always R13, so its name carries no version.
+// @param variant   "R12", "R13", "CLO3D" or "AAMA". CLO3D is always R13 and AAMA always R10,
+//                  so their names carry no version.
 // @param annotated true when the export also writes the annotated `.txt` file.
 pub fn dxf_export_name_segment(variant: &str, annotated: bool) -> String {
     if annotated {
@@ -2111,6 +2115,8 @@ mod tests {
         assert_eq!(dxf_export_name_segment("R12", true), "R12_annotated");
         assert_eq!(dxf_export_name_segment("R13", true), "R13_annotated");
         assert_eq!(dxf_export_name_segment("CLO3D", true), "CLO3D_annotated");
+        assert_eq!(dxf_export_name_segment("AAMA", false), "AAMA");
+        assert_eq!(dxf_export_name_segment("AAMA", true), "AAMA_annotated");
     } // dxf_export_name_segment_marks_annotated
 
     // @brief DXF segments give the documented default names, with "_annotated" before the stamp.
@@ -2126,6 +2132,8 @@ mod tests {
         assert_eq!(name("R12", true), "male_shirt_R12_annotated_202610011721.dxf");
         assert_eq!(name("R13", true), "male_shirt_R13_annotated_202610011721.dxf");
         assert_eq!(name("CLO3D", true), "male_shirt_CLO3D_annotated_202610011721.dxf");
+        assert_eq!(name("AAMA", false), "male_shirt_AAMA_202610011721.dxf");
+        assert_eq!(name("AAMA", true), "male_shirt_AAMA_annotated_202610011721.dxf");
     } // default_export_file_name_with_dxf_segments
 
     // @brief The material follows the variant and comes before the tab, in a single and an all-tabs export.
@@ -2417,6 +2425,35 @@ mod tests {
         assert!(content.contains("$HANDSEED"), "R13 file has a handle seed");
         assert!(content.contains("OBJECTS"), "R13 file has an OBJECTS section");
     } // do_export_dxf_writes_r13_when_asked
+
+    // @brief do_export_dxf with `aama` and R10 writes an AC1006 file with AAMA layers only.
+    #[test]
+    fn do_export_dxf_writes_aama_r10_when_asked() {
+        let svg = r##"<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200">
+            <g id="piece_Back" data-type="piece" data-name="Back" data-size="36" data-quantity="2">
+                <g data-type="cutline"><path d="M 10,10 L 190,10 L 190,190 L 10,190 Z"/></g>
+                <g data-type="seamline"><path d="M 20,20 L 180,20 L 180,180 L 20,180 Z"/></g>
+            </g>
+        </svg>"##;
+        let doc = Document::parse(svg).expect("fixture SVG should parse");
+        let mut path = std::env::temp_dir();
+        path.push(format!("seamly_dxf_aama_test_{}.dxf", std::process::id()));
+        let path_str = path.to_string_lossy().to_string();
+
+        let style = DxfStyleInfo { aama: true, dxf_version: DxfVersion::R10, ..DxfStyleInfo::default() };
+        do_export_dxf(&doc, &path_str, false, &style, &mut |_| {}).expect("AAMA DXF export should succeed");
+
+        let content = std::fs::read_to_string(&path_str).expect("exported DXF file should be readable");
+        let _ = std::fs::remove_file(&path_str);
+        let lines: Vec<&str> = content.lines().map(str::trim).collect();
+        assert!(lines.windows(4).any(|w| w == ["9", "$ACADVER", "1", "AC1006"]), "R10 header");
+        // Group code lines are the even lines; group 8 names the layer.
+        let layers: Vec<&str> = lines.chunks(2).filter(|p| p[0] == "8").map(|p| p[1]).collect();
+        assert!(layers.contains(&"1") && layers.contains(&"14"), "boundary and sew line: {layers:?}");
+        assert!(layers.iter().all(|l| l.parse::<u32>().is_ok_and(|n| (1..=14).contains(&n))), "AAMA layers only: {layers:?}");
+        assert!(lines.contains(&"Size:36"), "AAMA size text");
+        assert!(!content.contains("Curve Tolerance:"), "no ASTM style text");
+    } // do_export_dxf_writes_aama_r10_when_asked
 
     // @brief Export a tagged two-piece SVG with a sample size; return the `Size Name:` lines in block order.
     fn export_piece_sizes(sample_size: Option<&str>) -> Vec<String> {

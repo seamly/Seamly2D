@@ -2,6 +2,18 @@
 
 ## Current status
 
+### 2026-10-21 — DXF-AAMA (R10) export, merged into local `run-seamlyLayout`, not pushed
+
+- Layout.85: Export > DXF > "DXF-AAMA (R10)". ANSI/AAMA-292 content in a DXF R10 (AC1006) file; reference `dxf-docs/seamlylayout_DXF_AAMA.md`.
+- One writer: `DxfAstmExportOptions::aama` switches `write_astm_block`. No layers 15, 80–87; dense contours on 1, 8, 11, 14; labels on layer 1 without piece text lines; `Size:`; `.rul` starts `ANSI/AAMA VERSION:1.0.0`.
+- The fold line mirror line (layer 6) applies to AAMA too; `start_on_mirror_line` drops dense fold vertices so the boundary starts on it.
+- Submenu note now "DXF: select Base Size or a size tab"; `AGENT_CHECKLIST.md` §3 and §18 updated.
+- Verified: `cargo test --workspace` 596 passed; ezdxf 1.4.4 `recover` 0 errors on AAMA output; scratch render of `ExportMenu.qml`; `qmllint` no new warnings. Not run: ctest, GUI, MSI (ask first).
+- User check: Layout.85.5, `AGENT_CHECKLIST.md` §22, including an import in an AAMA reader.
+- Decision to confirm: R10 per the task title; AAMA-292 names R11 DXF. Open: an untagged SVG keeps layer 15 text.
+- Work done in worktree `C:\Users\susan\Projects\s2d-aama` (removed after the merge).
+- Merge commit uses the skip-ci token: no path in the full-CI list changed.
+
 ### 2026-10-21 — Fold lines in SeamlyLayout, merged into local `run-seamlyLayout`, not pushed
 
 - Layout.80.6: `fold_line` is read as a component; a split piece clips it per part.

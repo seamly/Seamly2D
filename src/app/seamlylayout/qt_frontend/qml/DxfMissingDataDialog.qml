@@ -3,7 +3,7 @@
 // LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
 //
 // @file DxfMissingDataDialog.qml
-// @brief Modal warning before a DXF-ASTM export: pieces that lack Quantity, label or grainline.
+// @brief Modal warning before a DXF-ASTM or DXF-AAMA export: pieces that lack Quantity, label or grainline.
 //
 // The text comes from AppController.dxfMissingPieceData(), which names each piece
 // and what it lacks. Accept continues the export; reject cancels it.
@@ -25,7 +25,10 @@ Dialog {
     // @brief Warning text from AppController.dxfMissingPieceData().
     property string warningText: ""
 
-    title:  "DXF-ASTM: Missing Piece Data"
+    // @brief Export format named in the title: "DXF-ASTM" or "DXF-AAMA".
+    property string formatName: "DXF-ASTM"
+
+    title:  root.formatName + ": Missing Piece Data"
     modal:  true
     width:  480
     anchors.centerIn: parent
