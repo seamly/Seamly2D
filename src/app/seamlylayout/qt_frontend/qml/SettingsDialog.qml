@@ -696,6 +696,27 @@ Dialog {
                     } // contentItem Text
                 } // CheckBox fabricFolded
 
+                // Fold lines on the fold: each piece cut on the fold lies with its fold
+                // line on the left edge, which then has no margin.  Folded fabric only.
+                CheckBox {
+                    id:                foldLinesOnLeftEdgeCheck
+                    Layout.columnSpan: 2
+                    text:              "Place fold lines on the left edge (the fold)"
+                    enabled:           fabricFoldedCheck.checked
+                    checked:           root.model ? root.model.foldLinesOnLeftEdge : false
+                    onToggled:         if (root.model) root.model.foldLinesOnLeftEdge = checked
+
+                    contentItem: Text {
+                        text:           foldLinesOnLeftEdgeCheck.text
+                        color:          Theme.textOnDark
+                        opacity:        foldLinesOnLeftEdgeCheck.enabled ? 1.0 : 0.5
+                        font.pixelSize: Theme.fontSizeNormal
+                        leftPadding:    foldLinesOnLeftEdgeCheck.indicator.width + foldLinesOnLeftEdgeCheck.spacing
+                        verticalAlignment: Text.AlignVCenter
+                        wrapMode:       Text.WordWrap
+                    } // contentItem Text
+                } // CheckBox foldLinesOnLeftEdge
+
                 // Fabric width
                 Text {
                     text:           "Fabric Width:"
@@ -971,6 +992,9 @@ Dialog {
 
             // Fabric-folded checkbox
             fabricFoldedCheck.checked = root.model.fabricFolded
+
+            // Fold-lines-on-left-edge checkbox
+            foldLinesOnLeftEdgeCheck.checked = root.model.foldLinesOnLeftEdge
 
             // Scale check grid checkbox
             scaleGridCheck.checked = root.model.scaleGrid
