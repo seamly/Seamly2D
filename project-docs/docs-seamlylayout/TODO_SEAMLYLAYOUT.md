@@ -45,12 +45,6 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
     - Done: `astm_piece_test::piece_on_fold_counts_every_cut_as_right`.
 - [ ] Layout.80.7 Next MSI: Piece Properties > Path, mark two neighbouring nodes Fold Line; check the dashed line, no seam allowance on it, "On fold" checked; save, reopen; Layout Mode handoff has `fold_line`. Mark three nodes: OK disabled.
 
-### [ ] Task Layout.84 - Multisize - Nested - non-DXF export - display only the smallest size's grainline and labels
-
-To meet current best practices for nested multisize image and vector files, show only one set of labels and grainline per piece.
-
-Display only the labels and grainline of the smallest size of each piece. (In SVG exports, place them in their own group id="labels_and_grainlines" as the group just above the content rect.) Do not include any other grainline or label elements in the export.
-
 ### [ ] Task Layout.85 - Exports - add an option to export DXF 10 (DXF-AAMA)
 
 ## VERIFY
@@ -238,6 +232,22 @@ Note: This may require flatting the SVG data before grouping pieces by size to p
 - [x] Task Layout.78.1 - when exporting an SVG for a nested layout, group the pieces according to size, so that there is a group element for each size that contains all the pieces of that size. Order the size groups in the SVG layout from the largest (so the largest size is underneath all other sizes in the svg display canvas) to the smallest (so it is highest in the svg display canvas) to enable easy selection of each size. The exported SVG should be flat (contains no transforms except for text elements).
   - Done: `size_groups::group_pieces_by_size`, called by `export_svg`. Groups `<g id="size_<size>" data-type="size" data-size="<size>">`, largest first; piece-sets removed; `flatten_dom` first. Only a layout with top-level piece-sets (Nested) changes. Tests: 4 `size_groups` tests; `layout_utils` `jacket2_nested_svg_export_groups_pieces_by_size` (26 groups of 8, no piece moves). Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested SVG export".
 - [ ] Task Layout.78.2 - Test/Verify - Export a multisize file to SVG, open the SVG file using the View feature, confirm that the file is grouped by size. Next MSI: jacket2 Nested tab, Export > SVG; in Inkscape, Objects panel lists `size_720` … `size_220`; hiding one group hides one size.
+
+### [ ] Task Layout.84 - Verify - Multisize - Nested - non-DXF export - display only the smallest size's grainline and labels
+
+To meet current best practices for nested multisize image and vector files, show only one set of labels and grainline per piece.
+
+Display only the labels and grainline of the smallest size of each piece. (In SVG exports, place them in their own group id="labels_and_grainlines" as the group just above the content rect.) Do not include any other grainline or label elements in the export.
+
+- [x] Layout.84.1 Every export but DXF-ASTM: each piece-set keeps the `grainline`, `piece_label`, `pattern_label` and `size_label` groups of its smallest size only. Outlines, notches and fold lines of every size stay.
+  - `nested_annotations::keep_smallest_size_annotations`, called by `clone_export_layout_doc` (PDF, PDF (Tiled), SVG, PNG, JPG, HPGL, PS, EPS, paid formats) and `sheets::build_sheet_export_inputs` (paper-sheet PDF).
+  - Sheet PDF: stripped after the piece extraction, so the pieces pack as on the Nested tab.
+  - Smallest size: `data-size` compared as numbers. Its size label stays ("Size 220").
+- [x] Layout.84.2 SVG: `nested_annotations::gather_labels_and_grainlines` moves the kept groups into `<g id="labels_and_grainlines">`, just before the largest size group.
+  - Decision taken: the export strips the `Rectangles` group, which holds `contentRect`. The new group takes its place: the first content group, under the size groups. Inkscape lists it directly below `size_720`.
+- [x] Layout.84.3 Tests: `nested_annotations` (5); `layout_utils` `jacket2_nested_export_keeps_the_smallest_size_annotations`, `jacket2_nested_sheet_export_keeps_the_smallest_size_annotations`. `cargo test --workspace` 568 passed.
+  - Docs: `SVG-DATA-ATTRIBUTES.md`, "Nested SVG export"; `seamlylayout_EXPORT_WORKFLOW.md`, "Nested tab — one grainline and label set per piece".
+- [ ] Layout.84.4 Next MSI: user check, `AGENT_CHECKLIST.md` §19.
 
 ### [ ] Task Layout.82 - Verify - Multisize - Nested - wider range of colors.
 
