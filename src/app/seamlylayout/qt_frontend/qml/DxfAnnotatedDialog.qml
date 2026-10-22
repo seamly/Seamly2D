@@ -3,10 +3,10 @@
 // LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
 //
 // @file DxfAnnotatedDialog.qml
-// @brief Modal dialog asking whether to export a standard or annotated DXF-ASTM file.
+// @brief Modal dialog asking whether to export a standard or annotated DXF-ASTM or DXF-AAMA file.
 //
 // An annotated version includes inline DXF group-code comments for every entity,
-// useful when learning DXF-ASTM structure.  A standard version omits those
+// useful when learning DXF structure.  A standard version omits those
 // comments and produces a smaller file suitable for production use.
 //
 // Opens before the save dialog: the annotated version's default file name
@@ -68,7 +68,7 @@ Dialog {
         // Description
         Text {
             text: "An <b>annotated version</b> includes inline DXF comments explaining\n" +
-                  "each group code and value — useful when learning DXF-ASTM structure\n" +
+                  "each group code and value — useful when learning DXF structure\n" +
                   "but produces a larger file.\n\n" +
                   "A <b>standard version</b> omits those comments and is suitable for\n" +
                   "production use with CAD systems."
