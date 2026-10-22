@@ -108,6 +108,23 @@ Menu {
     // @brief False disables the DXF-ASTM items: the shown tab holds every size.
     property bool dxfEnabled: true
 
+    // A Menu keeps its implicit width and elides longer items, so fit it to its widest item.
+    width: root.fittedWidth(root)
+
+    // @brief Width that shows the full text of every shown item of a menu.
+    // @param menu Menu to measure.
+    // @return Width in pixels, never below the menu's implicit width.
+    function fittedWidth(menu) {
+        var widest = 0
+        for (var i = 0; i < menu.count; ++i) {
+            var item = menu.itemAt(i)
+            // Skip hidden items: a hidden note must not widen the menu.
+            if (item && item.visible)
+                widest = Math.max(widest, item.implicitWidth)
+        } // for each menu item
+        return Math.max(menu.implicitWidth, widest + menu.leftPadding + menu.rightPadding)
+    } // function fittedWidth
+
     // @brief Emitted when the user toggles "Export all tabs".
     // @param checked New check state.
     signal exportAllTabsToggled(bool checked)
@@ -304,6 +321,7 @@ Menu {
         id: svgSubmenu
         title: "SVG"
         enabled: root.layoutReady
+        width: root.fittedWidth(svgSubmenu)
 
         SvgModeItem {
             text: "Text: use current designer font"

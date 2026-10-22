@@ -18,6 +18,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.71.6 | 11 | Media grows in width | ?
 | Layout.72.8 | 12 | Oversized pieces: split or enlarge |
 | Layout.89.3 | 12 | Oversized pieces dialog: light text |
+| Layout.88.2 | 3 | Export menu: DXF-ASTM note reads in full |
 | Layout.70.5 | 12 | Left-out pieces warning | ?
 | Layout.28.7 | 13 | Built-in seam line | ?
 | Layout.73.5 | 1, 5 | Unique piece names | PASS
@@ -62,7 +63,9 @@ Settings from section 1: Paper, Roll, 48 in.
 - [ ] A note reads "DXF-ASTM: select Base Size or a size tab".
   --> the note is there but it is mostly unreadable as it extends past the right side of the menu
   --> Filed: Layout.88.
+- [ ] Next MSI: the menu is wider. The whole note reads, with no "..." at the end.
 - [ ] Nested tab: same.
+- [ ] Export > SVG submenu: each item reads in full, with no "..." at the end.
 
 ## 4. PDF true size
 
