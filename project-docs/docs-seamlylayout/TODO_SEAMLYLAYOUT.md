@@ -4,47 +4,6 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Implement
 
-### [ ] Task Layout.80 — Fold lines (mirror lines)
-
-A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. `FoldPosition` is free text.
-
-- [x] Layout.80.1 implement foldline:
-  - [x] Layout.80.1.1 - Application Preferences - implement default Foldline style properties. Preferences > Pattern > Fold Lines tab: color (black), line type (dash dot), line weight (0.35 mm). `VCommonSettings::getDefaultFoldLine*`.
-  - [x] Layout.80.1.2 - Piece Mode - Implement a 'Foldline' check option in 'Piece Properties > Path > node context menu'; user may select two adjacent nodes along the path --> must be two (not one, not three). Point node menu "Fold Line"; the row shows "(fold line)". `VPiece::foldLineNodeIndexes`: two point nodes, neighbours when excluded nodes are skipped; the closing segment counts. Any other choice: "A fold line needs two neighbouring points!", OK disabled.
-  - [x] Layout.80.1.3 - Canvas - draw the foldline with its line style; a foldline is not part of the cutline or the seamline; no seam allowance can be added to this line; the "on fold" flag follows the foldline. `PatternPieceTool::m_foldLine`. Seam allowance width 0 along the fold line. A valid fold line checks and locks "On fold".
-    - Decision taken: the outline stays closed, so the seam line and cut line still run along the fold segment; the fold line is drawn over it. Open: a built-in seam allowance still insets the seam line along the fold.
-- [x] Layout.80.2 Update Schema:
-  - [x] Layout.80.2.1 - Create a new `.sm2d` schema: fold line node ids, schema version bump. Decision taken: a main path node attribute `foldLine="true"` on each end node, in `v0.7.6.xsd` (0.7.6 is not released, so no second bump).
-  - [x] Layout.80.2.2 - Create a converter for older files. `toVersion0_7_6` needs no change: an older node has no fold line.
-- [x] Layout.80.3 In Seamly2D > Piece mode, implement a new 'Piece Mirror' tool - mirror the half piece across the fold line.
-  - Done: Piece mode > Details > Piece Mirror (M, P); also Tools > Details menu and Details toolbar. Click a piece with a valid fold line, in any draft block; the dialog confirms.
-  - Fixed: the tool refused a piece outside the active draft block ("Select a piece of the active draft block") and showed no dialog. The operation and the full piece now go into the block that holds the half piece in the file; the active block is restored after.
-  - Rule (user decision): the active draft block affects Draft mode only. Piece mode works on the chosen piece and its own block. Tools made in Piece mode (Piece Mirror, Union, their nodes) record that block in the history, not the active block.
-  - `PieceMirrorTool`: one Mirror by Line operation at the end of the draft block copies each half piece object off the fold line. New piece `<name> Mirrored` from the half objects and their copies.
-  - `PieceMirrorPath`: full path = half from the fold line end to its start, then the mirrored half back; excluded nodes left out. Mirrored nodes: curves reversed, before/after widths and first/second edge corner rules swapped.
-  - Full piece: internal paths, anchors and custom seam allowance records on both halves; pins on the anchor copies; no fold line, not on fold; 2 cm right of the half piece. One undo step.
-  - Decisions taken: the mirror is a draft operation, not a new piece tool element, so the full piece follows draft changes and the file format does not change. The half piece stays; dialog option "Take the half piece out of the layout", checked by default. A custom seam allowance record across the fold line is left out.
-  - Also fixed: `v0.7.6.xsd` allows `foldLine` on `unionPiece` nodes; a union of a piece with a fold line wrote an invalid file.
-  - Tests: `TST_VPiece` `PieceMirrorFullPathOrder` (7 rows), `PieceMirrorNodeAttributes`, `PieceMirrorFoldNodesTakeHalfWidth`, `PieceMirrorBuildsFullOutline`, `PieceMirrorRecordRanges`, `PieceMirrorDropsRecordAcrossFold`. Passed in a scratch harness against the current `vpatterndb` sources. Checked: `cl /Zs` on every changed `.cpp`. Qt suites passed in `local_build_msi.ps1` (MSI 26.10.1921).
-  - [ ] Layout.80.3.1 Next MSI: mark a fold line on a half piece; Piece mode > Piece Mirror, click the piece, OK. Check: full piece right of the half; symmetric outline; seam allowance all round; no fold line; half piece out of the layout. Draft mode shows the Mirror by Line operation; move a draft point: both halves follow. Undo removes the full piece and the operation. Save, reopen. Click a piece without a fold line: status bar message, no dialog. In a pattern with several draft blocks, mirror a piece of the first block; undo, redo, save, reopen.
-- [x] Layout.80.4 Handoff SVG: `data-on-fold` on the piece `<g>`, a `fold_line` component group with the two points; update `SVG-DATA-ATTRIBUTES.md` and `NEW-ATTRIBUTES.csv`. `VLayoutPiece::createFoldLineItem`; id `fold_line_<name>`. HPGL draws it as a mark; DXF puts it on layer 8 until Layout.80.6.4.
-- [x] Layout.80.5 Unit tests: schema round-trip, handoff attributes. Written: `TST_VPiece` `FoldLineNodeIndexes` (8 rows), `FoldLineHasNoSeamAllowance`, `LayoutPieceTakesFoldLine`, `FoldLineNodeAttributeIsRead`; `TST_SvgComponentTags::FoldLineSendsFoldLineGroup`. Checked: `cl /Zs` on every changed `.cpp`. Qt suites passed in `local_build_msi.ps1` (MSI 26.10.1921).
-- [ ] Layout.80.6 SeamlyLayout side (was Layout.16):
-  - [ ] Layout.80.6.1 Import: read `data-on-fold` and the `fold_line` component.
-    - Done: `converter::quantity_from_piece` reads `data-on-fold` for the DXF-ASTM quantity (on fold → `N,0`).
-    - Open: no code reads `fold_line`. It travels as an untyped child `<g>` of the piece.
-    - Open: `piece_divider` (Layout.72 split) puts the whole fold line in the nearest part. Clip it per part, like `seamline`.
-  - [ ] Layout.80.6.2 Layout setting: add 'place foldlines on left edge' checkbox.
-    - Related: `fabric_folded` (`layout_settings.rs`) halves the usable width. It does not place pieces.
-  - [ ] Layout.80.6.3 Adjust Mode: the fold line moves with its piece.
-    - Expected to work now: `accept_adjustments` sets the transform on the piece `<g>`; `fold_line` is its child. Verify in the next MSI.
-  - [ ] Layout.80.6.4 DXF-ASTM: layer 6 mirror line; boundary starts or ends on the mirror line points (D6673 §4.3.6); a piece without a fold line writes no layer 6.
-    - Today: `layers::piece_component` has no `fold_line` type, so the fold line goes to default layer 8.
-    - Piece Mirror full pieces (Layout.80.3) have no fold line, so they write no layer 6.
-  - [ ] Layout.80.6.5 Tests: Rust import, left-edge placement, split, layer 6 and boundary order.
-    - Done: `astm_piece_test::piece_on_fold_counts_every_cut_as_right`.
-- [ ] Layout.80.7 Next MSI: Piece Properties > Path, mark two neighbouring nodes Fold Line; check the dashed line, no seam allowance on it, "On fold" checked; save, reopen; Layout Mode handoff has `fold_line`. Mark three nodes: OK disabled.
-
 ### [ ] Task Layout.85 - Exports - add an option to export DXF 10 (DXF-AAMA)
 
 ## VERIFY
@@ -232,6 +191,57 @@ Note: This may require flatting the SVG data before grouping pieces by size to p
 - [x] Task Layout.78.1 - when exporting an SVG for a nested layout, group the pieces according to size, so that there is a group element for each size that contains all the pieces of that size. Order the size groups in the SVG layout from the largest (so the largest size is underneath all other sizes in the svg display canvas) to the smallest (so it is highest in the svg display canvas) to enable easy selection of each size. The exported SVG should be flat (contains no transforms except for text elements).
   - Done: `size_groups::group_pieces_by_size`, called by `export_svg`. Groups `<g id="size_<size>" data-type="size" data-size="<size>">`, largest first; piece-sets removed; `flatten_dom` first. Only a layout with top-level piece-sets (Nested) changes. Tests: 4 `size_groups` tests; `layout_utils` `jacket2_nested_svg_export_groups_pieces_by_size` (26 groups of 8, no piece moves). Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested SVG export".
 - [ ] Task Layout.78.2 - Test/Verify - Export a multisize file to SVG, open the SVG file using the View feature, confirm that the file is grouped by size. Next MSI: jacket2 Nested tab, Export > SVG; in Inkscape, Objects panel lists `size_720` … `size_220`; hiding one group hides one size.
+
+### [ ] Task Layout.80 — Verify - Fold lines (mirror lines)
+
+A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. `FoldPosition` is free text.
+
+- [x] Layout.80.1 implement foldline:
+  - [x] Layout.80.1.1 - Application Preferences - implement default Foldline style properties. Preferences > Pattern > Fold Lines tab: color (black), line type (dash dot), line weight (0.35 mm). `VCommonSettings::getDefaultFoldLine*`.
+  - [x] Layout.80.1.2 - Piece Mode - Implement a 'Foldline' check option in 'Piece Properties > Path > node context menu'; user may select two adjacent nodes along the path --> must be two (not one, not three). Point node menu "Fold Line"; the row shows "(fold line)". `VPiece::foldLineNodeIndexes`: two point nodes, neighbours when excluded nodes are skipped; the closing segment counts. Any other choice: "A fold line needs two neighbouring points!", OK disabled.
+  - [x] Layout.80.1.3 - Canvas - draw the foldline with its line style; a foldline is not part of the cutline or the seamline; no seam allowance can be added to this line; the "on fold" flag follows the foldline. `PatternPieceTool::m_foldLine`. Seam allowance width 0 along the fold line. A valid fold line checks and locks "On fold".
+    - Decision taken: the outline stays closed, so the seam line and cut line still run along the fold segment; the fold line is drawn over it. Open: a built-in seam allowance still insets the seam line along the fold.
+- [x] Layout.80.2 Update Schema:
+  - [x] Layout.80.2.1 - Create a new `.sm2d` schema: fold line node ids, schema version bump. Decision taken: a main path node attribute `foldLine="true"` on each end node, in `v0.7.6.xsd` (0.7.6 is not released, so no second bump).
+  - [x] Layout.80.2.2 - Create a converter for older files. `toVersion0_7_6` needs no change: an older node has no fold line.
+- [x] Layout.80.3 In Seamly2D > Piece mode, implement a new 'Piece Mirror' tool - mirror the half piece across the fold line.
+  - Done: Piece mode > Details > Piece Mirror (M, P); also Tools > Details menu and Details toolbar. Click a piece with a valid fold line, in any draft block; the dialog confirms.
+  - Fixed: the tool refused a piece outside the active draft block ("Select a piece of the active draft block") and showed no dialog. The operation and the full piece now go into the block that holds the half piece in the file; the active block is restored after.
+  - Rule (user decision): the active draft block affects Draft mode only. Piece mode works on the chosen piece and its own block. Tools made in Piece mode (Piece Mirror, Union, their nodes) record that block in the history, not the active block.
+  - `PieceMirrorTool`: one Mirror by Line operation at the end of the draft block copies each half piece object off the fold line. New piece `<name> Mirrored` from the half objects and their copies.
+  - `PieceMirrorPath`: full path = half from the fold line end to its start, then the mirrored half back; excluded nodes left out. Mirrored nodes: curves reversed, before/after widths and first/second edge corner rules swapped.
+  - Full piece: internal paths, anchors and custom seam allowance records on both halves; pins on the anchor copies; no fold line, not on fold; 2 cm right of the half piece. One undo step.
+  - Decisions taken: the mirror is a draft operation, not a new piece tool element, so the full piece follows draft changes and the file format does not change. The half piece stays; dialog option "Take the half piece out of the layout", checked by default. A custom seam allowance record across the fold line is left out.
+  - Also fixed: `v0.7.6.xsd` allows `foldLine` on `unionPiece` nodes; a union of a piece with a fold line wrote an invalid file.
+  - Tests: `TST_VPiece` `PieceMirrorFullPathOrder` (7 rows), `PieceMirrorNodeAttributes`, `PieceMirrorFoldNodesTakeHalfWidth`, `PieceMirrorBuildsFullOutline`, `PieceMirrorRecordRanges`, `PieceMirrorDropsRecordAcrossFold`. Passed in a scratch harness against the current `vpatterndb` sources. Checked: `cl /Zs` on every changed `.cpp`. Qt suites passed in `local_build_msi.ps1` (MSI 26.10.1921).
+  - [ ] Layout.80.3.1 Next MSI (`AGENT_CHECKLIST.md` §20): mark a fold line on a half piece; Piece mode > Piece Mirror, click the piece, OK. Check: full piece right of the half; symmetric outline; seam allowance all round; no fold line; half piece out of the layout. Draft mode shows the Mirror by Line operation; move a draft point: both halves follow. Undo removes the full piece and the operation. Save, reopen. Click a piece without a fold line: status bar message, no dialog. In a pattern with several draft blocks, mirror a piece of the first block; undo, redo, save, reopen.
+- [x] Layout.80.4 Handoff SVG: `data-on-fold` on the piece `<g>`, a `fold_line` component group with the two points; update `SVG-DATA-ATTRIBUTES.md` and `NEW-ATTRIBUTES.csv`. `VLayoutPiece::createFoldLineItem`; id `fold_line_<name>`. HPGL draws it as a mark; DXF-ASTM writes layer 6 (Layout.80.6.4).
+- [x] Layout.80.5 Unit tests: schema round-trip, handoff attributes. Written: `TST_VPiece` `FoldLineNodeIndexes` (8 rows), `FoldLineHasNoSeamAllowance`, `LayoutPieceTakesFoldLine`, `FoldLineNodeAttributeIsRead`; `TST_SvgComponentTags::FoldLineSendsFoldLineGroup`. Checked: `cl /Zs` on every changed `.cpp`. Qt suites passed in `local_build_msi.ps1` (MSI 26.10.1921).
+- [ ] Layout.80.6 SeamlyLayout side (was Layout.16):
+  - [x] Layout.80.6.1 Import: read `data-on-fold` and the `fold_line` component.
+    - `converter::quantity_from_piece` reads `data-on-fold` for the DXF-ASTM quantity (on fold → `N,0`).
+    - `piece_extractor`, `polygon_pack::svg_extract`: `fold_line` is a piece component, never the outline.
+    - `piece_divider`: `fold_line` is cut like the seam line. Each part holds the stretch inside it; a part the fold line misses has none.
+  - [x] Layout.80.6.2 Layout setting: Settings > Fabric > "Place fold lines on the left edge (the fold)", under Fabric Folded; enabled only when Fabric Folded is checked. `foldLinesOnLeftEdge`, off by default.
+    - Applies to fabric media with Fabric Folded only. The fold edge has no margin: left margin 0 (`LayoutSettings::margin_px`, `effective_bin_px`).
+    - `fold_line_edge::plan_fold_line_edge`, after the split and before `translate_dom`: packer angle 0 or 180 brings the fold line to the left of the piece.
+    - With nap (one angle only): the piece is mirrored across its fold line instead; text keeps reading forward. Decision taken: the two halves of a piece cut on the fold are mirror images, so the cut is the same.
+    - `Rect::with_left_edge`: MaxRects takes only free boxes at x 0; start orders place these pieces first.
+    - Not on the edge: Nested piece-sets (sizes centred, so their fold lines differ). A fold line across the grain or inside the outline: layout warning popup on an individual pattern; log only on a multisize layout.
+    - Known limit: a mirrored piece does not grade in a Base Size DXF-ASTM export ("does not fit its handoff shape").
+  - [ ] Layout.80.6.3 Adjust Mode: the fold line moves with its piece.
+    - Expected to work: `accept_adjustments` sets the transform on the piece `<g>`; `fold_line` is its child. User check, `AGENT_CHECKLIST.md` §21.
+  - [x] Layout.80.6.4 DXF-ASTM: layer 6 mirror line; boundary starts or ends on the mirror line points (D6673 §4.3.6); a piece without a fold line writes no layer 6.
+    - `layers`: `fold_line` → layer 6. `converter`: `Block::mirror_line`. Writer: two-point `LINE` before the grainline.
+    - `astm_mirror::align_mirror_lines`, after grading: the cut line edge on the fold line (0.1 mm) is the mirror line, and the boundary starts with it. Key points inside that edge are dropped, with their rule texts.
+    - Fold line off the cut line: no layer 6, export warning names the piece. Piece Mirror full pieces have no fold line, so no layer 6.
+  - [x] Layout.80.6.5 Tests: Rust import, left-edge placement, split, layer 6 and boundary order.
+    - `astm_piece_test::piece_on_fold_counts_every_cut_as_right`, `fold_line_becomes_the_mirror_line_at_the_boundary_start`, `fold_line_group_maps_to_layer_6`; `astm_mirror` (3); `writer_astm_test::mirror_line_is_a_layer_6_line_on_the_boundary_start`; `exports::do_export_dxf_writes_the_mirror_line`.
+    - `piece_extractor::fold_line_is_a_component_group`; `svg_extract::find_outline_group_skips_fold_line_at_structural_position_1`; `piece_divider::fold_line_is_clipped_per_part`.
+    - `fold_line_edge` (5); `layout_utils::fold_line_lies_on_the_left_edge_of_folded_fabric`; `layout_views::fold_line_warning_lists_one_piece_per_line`; `layout_engine` `left_edge_pieces_touch_the_left_edge`, `left_edge_piece_is_not_turned_to_fit`; `layout_settings::fold_lines_on_left_edge_drop_the_left_margin`; `SettingsModelTests::foldLinesOnLeftEdge_defaultsOffAndRoundtrips`.
+    - Checked: `cargo test --workspace` 588 passed. `cl /Zs` on `SettingsModel.cpp` and `SettingsModelTests.cpp`. `qmllint SettingsDialog.qml`: no new kind of warning. Not run: ctest, MSI.
+  - [ ] Layout.80.6.6 Next MSI: user check, `AGENT_CHECKLIST.md` §21.
+- [ ] Layout.80.7 Next MSI: Piece Properties > Path, mark two neighbouring nodes Fold Line; check the dashed line, no seam allowance on it, "On fold" checked; save, reopen; Layout Mode handoff has `fold_line`. Mark three nodes: OK disabled. `AGENT_CHECKLIST.md` §20.
 
 ### [ ] Task Layout.84 - Verify - Multisize - Nested - non-DXF export - display only the smallest size's grainline and labels
 
