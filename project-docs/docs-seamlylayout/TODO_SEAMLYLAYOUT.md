@@ -94,8 +94,12 @@ Display only the labels and grainline of the smallest size of each piece. (In SV
 
 Marker tab, Export menu (MSI 26.10.2023): the note "DXF-ASTM: select Base Size or a size tab" runs past the right edge of the menu. Most of it cannot be read.
 
-- [ ] Layout.88.1 Show the whole note: wrap it, or widen the menu to fit it.
-- [ ] Layout.88.2 Next MSI: Marker and Nested tabs, Export menu; the note is readable.
+- [x] Layout.88.1 Show the whole note: wrap it, or widen the menu to fit it.
+  - Cause: a Qt Quick `Menu` keeps its 200 px implicit width and elides a longer item. The note is 220 px.
+  - Done: `ExportMenu.qml` `fittedWidth`. The Export menu and its SVG submenu take the width of their widest shown item. A hidden item does not widen a menu.
+  - The SVG submenu had the same defect: "Paths: convert to single-stroke (Hershey)" 245 px, "Paths: no conversion - labels are already paths" 254 px.
+  - Checked: Fusion render of `ExportMenu.qml`. Export menu 222 px, SVG submenu 247/256 px, no elided text. `qmllint` shows no warnings.
+- [ ] Layout.88.2 Next MSI: Marker and Nested tabs, Export menu; the note is readable. `AGENT_CHECKLIST.md` §3.
 
 ### [ ] Task Layout.89 - Export sheet - dialog text is too dark 
 
