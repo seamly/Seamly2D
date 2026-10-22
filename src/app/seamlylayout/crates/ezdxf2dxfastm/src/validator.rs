@@ -19,7 +19,8 @@ pub fn validate_astm_compliance(
 ) -> Result<(), Vec<ValidationError>> {
     let mut errors = Vec::new();
 
-    // Both DXF versions are valid: D6673 names R13, and R12 has the widest importer support.
+    // Every DXF version is valid: D6673 names R13, R12 has the widest importer support,
+    // and the DXF-AAMA export writes R10.
 
     // Validate entity types (ASTM-D6673-10 allowed types).
     let allowed_entity_types = ["LINE", "CIRCLE", "POLYLINE", "TEXT", "ARC", "POINT"];

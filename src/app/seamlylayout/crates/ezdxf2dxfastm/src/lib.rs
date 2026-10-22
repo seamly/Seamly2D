@@ -4,7 +4,8 @@
 
 //! @brief Convert ezdxf intermediate representation to DXF-ASTM format.
 //! @details This crate exports the ezdxf-like Drawing object to DXF-ASTM
-//!          (ASTM D6673-10) format, as DXF R12 (AC1009) or R13 (AC1012).
+//!          (ASTM D6673-10) format, as DXF R12 (AC1009) or R13 (AC1012),
+//!          and to DXF-AAMA (ANSI/AAMA-292) format, as DXF R10 (AC1006).
 
 mod encoder;
 mod error;
@@ -24,5 +25,5 @@ pub use encoder::{encode_astm_polyline, encode_astm_text, encode_circle, encode_
 pub use r13::upgrade_to_r13;
 pub use error::{DxfAstmExportError, Result};
 pub use validator::{ValidationError, validate_astm_compliance};
-pub use grade_rule_file::{grade_rule_file_text, grade_rule_table_name};
+pub use grade_rule_file::{grade_rule_file_text, grade_rule_table_name, AAMA_RULE_FILE_VERSION};
 pub use writer::{DxfAstmExportOptions, ProgressCallback, export_dxf_astm};

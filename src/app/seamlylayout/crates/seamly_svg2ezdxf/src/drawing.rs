@@ -11,6 +11,8 @@ use crate::entities::{Entity, Point};
 // @brief DXF version enumeration.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum DxfVersion {
+    // DXF R10 (AC1006): the DXF-AAMA export.
+    R10,
     // DXF R12 (AC1009): the widest importer support.
     #[default]
     R12,

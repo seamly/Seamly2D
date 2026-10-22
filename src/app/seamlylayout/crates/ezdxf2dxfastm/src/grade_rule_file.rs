@@ -7,10 +7,14 @@
 //! An ASCII file: a header, then one `RULE: DELTA` line per grade rule
 //! identifier. Each rule lists the X,Y growth of every size from the sample
 //! size, in size list order, in millimetres to two places (`UNITS:METRIC`).
+//! A DXF-AAMA export writes the same file with an `ANSI/AAMA VERSION:` first line.
 
 use crate::writer::{utc_date_time, DxfAstmExportOptions, ASTM_VERSION};
 use seamly_svg2ezdxf::GradeRuleTable;
 use std::path::Path;
+
+/// @brief `ANSI/AAMA VERSION:` value, the first line of a DXF-AAMA rule file.
+pub const AAMA_RULE_FILE_VERSION: &str = "1.0.0";
 
 /// @brief Grade rule table name from a file stem: ASCII, separators replaced by `_`.
 /// @details §4.4.1: a name holds no separator (comma, space, tab, newline).
@@ -29,9 +33,14 @@ pub fn grade_rule_file_text(table: &GradeRuleTable, options: &DxfAstmExportOptio
     let time = options.creation_time.clone().unwrap_or(utc_time).replace('-', ":");
     let sizes: Vec<String> = table.sizes.iter().map(|s| without_separators(s)).collect();
 
+    let version = if options.aama {
+        format!("ANSI/AAMA VERSION:{}", AAMA_RULE_FILE_VERSION)
+    } else {
+        format!("ASTM/D13 Proposal 1 VERSION:{}", ASTM_VERSION)
+    }; // version line
     // Header: each identifier once, before the rules (§4.4.1).
     let mut lines = vec![
-        format!("ASTM/D13 Proposal 1 VERSION:{}", ASTM_VERSION),
+        version,
         // AUTHOR allows letters, digits, dashes and underscores only.
         "AUTHOR:Seamly2D".to_string(),
         format!("CREATION DATE:{}", date),
