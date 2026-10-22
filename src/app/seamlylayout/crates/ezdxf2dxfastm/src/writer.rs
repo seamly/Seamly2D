@@ -15,6 +15,7 @@
 //! `DxfAstmExportOptions::aama` writes DXF-AAMA (ANSI/AAMA-292) content instead,
 //! in the same file layout. AAMA defines layers 1 to 14 only:
 //! - each contour is one dense polyline on its own layer, with no validation curve (84 to 87);
+//! - a boundary with a mirror line (layer 6) starts with the mirror line's two points;
 //! - every notch is on layer 4 (no 80 to 83);
 //! - label text is on layer 1 (no 15);
 //! - no `Curve Tolerance:` or ASTM version style text; the size is `Size:`, not `Size Name:`.
@@ -40,6 +41,10 @@ pub const ASTM_VERSION: &str = "D6673-10";
 const SYSTEM_TEXT_HEIGHT_MM: f64 = 5.0;
 // Height of `# n` grade rule identifier text, in millimetres.
 const RULE_TEXT_HEIGHT_MM: f64 = 1.0;
+
+// A dense vertex this close to a key point, in millimetres, is that key point:
+// the file writes two decimals.
+const MIRROR_VERTEX_TOLERANCE_MM: f64 = 0.01;
 
 // Piece text identifiers of D6673 and ANSI/AAMA-292. A DXF-AAMA label line that
 // starts with one of them is not written, so a label cannot override the piece text.
@@ -231,6 +236,21 @@ fn aama_notch(notch: &Notch) -> Notch {
     Notch { kind, ..notch.clone() }
 } // fn aama_notch
 
+// @brief `boundary` with no dense vertex between its first two key points.
+// @details DXF-AAMA writes the dense boundary on layer 1, and the mirror line must
+//          be its first two points (D6673 §4.3.6). After `align_mirror_lines` the
+//          first two key points are the mirror line ends; the dense vertices between
+//          them lie on the straight fold, so dropping them keeps the outline.
+fn start_on_mirror_line(boundary: &AstmContour) -> AstmContour {
+    let mut trimmed = boundary.clone();
+    let second = boundary.reduced[1];
+    let at_second = |p: &Point| (p.x - second.x).hypot(p.y - second.y) < MIRROR_VERTEX_TOLERANCE_MM;
+    if let Some(i) = boundary.dense.iter().skip(1).position(at_second) {
+        trimmed.dense.drain(1..i + 1);
+    } // if the second key point is a dense vertex
+    trimmed
+} // fn start_on_mirror_line
+
 // @brief True when a label line reads as piece text or a grade rule identifier.
 // @details DXF-AAMA writes label text on layer 1, beside the piece text: `Size: 40`
 //          would be a second `Size:`, and `# 3` a grade rule identifier.
@@ -276,7 +296,11 @@ fn write_astm_block(writer: &mut dyn Write, block: &Block, boundary: &AstmContou
     let (boundary_250, sew_250) = if options.clo3d_group_250 { (Some(0), Some(2)) } else { (None, None) };
     // DXF-AAMA has no quality validation layers.
     let validation = |layer: &'static str| (!aama).then_some(layer);
-    write_contour(writer, boundary, "1", validation("84"), boundary_250)?;
+    if aama && block.mirror_line.is_some() {
+        write_contour(writer, &start_on_mirror_line(boundary), "1", None, boundary_250)?;
+    } else {
+        write_contour(writer, boundary, "1", validation("84"), boundary_250)?;
+    } // if AAMA with a mirror line
     for c in &block.sew_lines {
         write_contour(writer, c, "14", validation("87"), sew_250)?;
     } // for each sew line

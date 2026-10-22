@@ -658,4 +658,31 @@ mod tests {
         let _ = std::fs::remove_file(&txt_path);
         assert_eq!(annotated.lines().next(), Some("// DXF-AAMA Annotated Version with Inline Comments"));
     }
+
+    // @brief DXF-AAMA writes the dense boundary, so a vertex on the fold between the
+    //        mirror line ends must go: the boundary starts with the mirror line.
+    #[test]
+    fn aama_boundary_starts_on_the_mirror_line() {
+        // A 100 x 200 mm half piece; the fold runs up its left edge with a vertex at (0, 100).
+        let outline = [Point::new(100.0, 0.0), Point::new(100.0, 200.0), Point::new(0.0, 200.0), Point::new(0.0, 100.0), Point::new(0.0, 0.0)];
+        let mut block = Block::new("piece_Back_M".to_string());
+        block.piece_name = "Back".to_string();
+        block.boundary = build_contour(&outline, true);
+        block.mirror_line = Some((Point::new(0.0, 0.0), Point::new(0.0, 200.0)));
+        let mut drawing = Drawing::new(DxfVersion::R10);
+        drawing.add_block(block);
+        assert!(seamly_svg2ezdxf::align_mirror_lines(&mut drawing).is_empty());
+        assert!(drawing.blocks[0].boundary.as_ref().unwrap().dense.contains(&Point::new(0.0, 100.0)), "fold vertex in the dense line");
+
+        let dxf = parse_dxf(&export_to_string(&drawing, "aama_mirror", &aama_options()));
+        let (_, body) = &dxf.blocks[0];
+        let mirror: Vec<&DxfEntity> = body.iter().filter(|e| e.kind == "LINE" && e.layer() == "6").collect();
+        assert_eq!(mirror.len(), 1, "one mirror line");
+        let ends = [mirror[0].get(10), mirror[0].get(20), mirror[0].get(11), mirror[0].get(21)];
+        let first = body.iter().position(|e| e.kind == "POLYLINE" && e.layer() == "1").expect("boundary polyline");
+        let vertices: Vec<&DxfEntity> = body[first + 1..].iter().take_while(|e| e.kind == "VERTEX").collect();
+        let start = [vertices[0].get(10), vertices[0].get(20), vertices[1].get(10), vertices[1].get(20)];
+        assert_eq!(ends, start);
+        assert_eq!(vertices.len(), 4, "the fold vertex is not written");
+    }
 }
