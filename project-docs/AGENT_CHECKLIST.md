@@ -25,6 +25,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Seamly2D.12.8 | 14 | SeamlyLayout opens in front | PASS
 | Layout.83.4 | 15 | Nested legend squares |
 | Layout.82.3 | 16 | Nested size colors: dark and pastel |
+| Layout.87.3 | 4, 17 | Marker tab: PDF (Tiled) disabled |
 
 ## [x] 0. Install
 
@@ -78,6 +79,7 @@ Export all tabs unchecked.
   - [ ] Save dialog offers `jacket2_40-146_Marker_<stamp>_tiled.pdf`.
   - [ ] Print one page at 100% (Actual size). A known piece length measures true.
   --> See Layout.87 - disable PDF (tiled) for markers due to lockups.
+  - Layout.87 disables this item on the Marker tab. Run the two checks above on the Nested tab instead; §17 checks the Marker tab.
 
 ## 5. Base Size 500: DXF-ASTM
 
@@ -227,3 +229,18 @@ Needs the next MSI. Settings from section 1: Paper, Roll, 48 in.
 - [ ] Pastel lines show on the white canvas.
 - [ ] Each legend color matches its size on the pieces.
 - [ ] Export > SVG, PDF and PNG: the files keep the colors.
+
+## 17. jacket2: PDF (Tiled) on the Marker tab
+
+Needs the next MSI.
+
+- [ ] Settings: Paper, Paper Type Tiled. Submit. Create Layout.
+- [ ] Marker tab, Export menu: "PDF (Tiled): select a tab other than Marker" is disabled.
+- [ ] Nested tab and Size 220 tab, Export menu: "PDF (Tiled)" is enabled.
+- [ ] Size 220 tab, Export > PDF (Tiled): the file is written.
+- [ ] Check Export all tabs. Marker tab shown. Export > PDF (Tiled):
+  - [ ] The item is enabled.
+  - [ ] Files for Nested and every size. No Marker or Base Size file.
+  - [ ] SeamlyLayout does not lock up.
+- [ ] Uncheck Export all tabs.
+- [ ] View menu, any tab: "PDF (Tiled)" is enabled.
