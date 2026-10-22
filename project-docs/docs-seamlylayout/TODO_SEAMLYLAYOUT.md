@@ -47,6 +47,30 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
 
 ### [ ] Task Layout.85 - Exports - add an option to export DXF 10 (DXF-AAMA)
 
+Export > DXF > "DXF-AAMA (R10)": ANSI/AAMA-292 content in a DXF R10 (AC1006) file. Same pipeline as DXF-ASTM; `DxfAstmExportOptions::aama` selects the AAMA layers. Reference: `dxf-docs/seamlylayout_DXF_AAMA.md`.
+
+- [x] Layout.85.1 Research ANSI/AAMA-292: AutoCAD R11 DXF base, 14 layers, grade rules in a `.rul` file. D6673 added layers 15 and 80–87.
+- [x] Layout.85.2 Writer (`ezdxf2dxfastm/src/writer.rs`):
+  - `$ACADVER` AC1006; no BLOCK group 3 (Release 10 does not define it).
+  - Dense polylines on layers 1, 8, 11, 14; no validation layers 84–87. Layers 2 and 3 keep the key points.
+  - Every notch on layer 4: T, castle and U become V notches with their width.
+  - Label text on layer 1. A label line that reads as piece text (`Size: 40`) or a rule identifier (`# 2`) is not written.
+  - `Size:` piece text, not `Size Name:`. Style text ends at `Units:`.
+  - `.rul` first line `ANSI/AAMA VERSION:1.0.0`.
+- [x] Layout.85.3 Menu and bridge: `ExportMenu.qml` item "DXF-AAMA (R10)"; `Main.qml` `requestDxfExport(false, "R10", true)`; options JSON `"aama"`, `"dxfVersion":"R10"`.
+  - Default name `<base>_AAMA[_annotated][_<material>][_<tab>]_<stamp>.dxf`.
+  - Marker and Nested: disabled, as DXF-ASTM. The submenu note is now "DXF: select Base Size or a size tab".
+  - Missing Piece Data dialog, save dialog, progress text and annotated `.txt` title name DXF-AAMA.
+- [x] Layout.85.4 Tests: `writer_astm_test` `aama_r10_header_names_ac1006_and_blocks_have_no_group_3`, `aama_style_text_has_no_curve_tolerance_or_astm_version`, `aama_block_uses_layers_1_to_14_only`, `aama_labels_never_repeat_piece_text`, `aama_graded_export_writes_rule_ids_and_aama_rule_file`, `aama_annotated_version_names_dxf_aama`; `exports.rs` `do_export_dxf_writes_aama_r10_when_asked` and AAMA name segments.
+  - Checked: `cargo test --workspace` 575 passed. ezdxf 1.4.4 `recover`: male_shirt and graded fixtures as DXF-AAMA, 0 errors, layers 1–14 only. Scratch render of `ExportMenu.qml`: item order, signal, disabled state. `qmllint`: no new warnings.
+  - Not run: ctest, MSI.
+  - Decisions taken:
+    - R10, per the task title. AAMA-292 itself names R11 DXF (AC1009). A reader that refuses AC1006 needs an R12 variant.
+    - Labels on layer 1, as the Seamly2D and Valentina AAMA writers do. AAMA has no annotation layer.
+    - No `Category:`: the handoff has no value for it.
+  - Open: an untagged SVG (no `data-type`) keeps its generic layers, so its text stays on layer 15.
+- [ ] Layout.85.5 Next MSI: user check, `AGENT_CHECKLIST.md` §20. Import the file in an AAMA reader (CLO3D or another pattern CAD).
+
 ## VERIFY
 
 ### [ ] Task Layout.6 — Verify - DXF-ASTM grading
