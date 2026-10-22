@@ -2,6 +2,15 @@
 
 ## Current status
 
+### 2026-10-21 — Nested exports keep the smallest size's grainline and labels, merged into local `run-seamlyLayout`, not pushed
+
+- Layout.84: every export but DXF-ASTM keeps, per piece-set, the `grainline`, `piece_label`, `pattern_label` and `size_label` groups of the smallest size only.
+- Code: `nested_annotations.rs`; `clone_export_layout_doc` (all non-DXF exports); `sheets::build_sheet_export_inputs` (paper-sheet PDF, after the piece extraction).
+- SVG: the kept groups move into `<g id="labels_and_grainlines">`, in place of the stripped `Rectangles` group: just before `size_720`. Placement is a reading of "just above the content rect"; the user may change it.
+- Verified: `cargo test --workspace` 568 passed. Not run: ctest, GUI, MSI (ask first).
+- User check: Layout.84.4, `AGENT_CHECKLIST.md` §19.
+- `8dd416dd26` ("updated docs") left the Layout.83 subtasks under the Layout.87 heading and dropped the Layout.86 and Layout.87 subtasks. Not changed here.
+
 ### 2026-10-21 — Export > DXF submenu, merged into local `run-seamlyLayout`, not pushed
 
 - Layout.86: `ExportMenu.qml` `dxfSubmenu` holds DXF-ASTM (R12), (R13), (CLO3D). The View menu keeps one DXF-ASTM item.
