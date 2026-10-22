@@ -28,6 +28,9 @@ mod size_groups;
 // Gives each size of a Nested multisize layout its own color, with a legend.
 mod size_colors;
 
+// Keeps only the smallest size's grainline and labels in a Nested multisize export.
+mod nested_annotations;
+
 // Adds a "Size <size>" label to every piece of a multisize handoff at import.
 mod size_labels;
 
