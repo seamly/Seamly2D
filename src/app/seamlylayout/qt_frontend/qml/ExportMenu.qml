@@ -18,6 +18,9 @@
 //   PNG       — Phase 11
 //   SVG       — Phase 11
 //
+// With showDxfVariants true (Export menu), a "DXF" submenu holds DXF-ASTM (R12),
+// (R13) and (CLO3D); otherwise (View menu) one "DXF-ASTM" item opens any .dxf.
+//
 // With svgModeSubmenu true (Export menu), "SVG" is a submenu of label text
 // modes; otherwise (View menu) it is one item.
 //
@@ -35,7 +38,8 @@
 // one file per tab instead of one file for the selected tab.
 //
 // With dxfEnabled false (Export menu, Marker or Nested tab shown), the DXF-ASTM
-// items are disabled and a note names the tabs DXF-ASTM exports.
+// items are disabled and a note at the top of the DXF submenu names the tabs
+// DXF-ASTM exports.
 //
 // With pdfTiledTabAllowed false (Export menu, Marker tab shown), PDF (Tiled) is
 // disabled and its text says to select another tab.
@@ -54,8 +58,8 @@ Menu {
     // @brief True when a layout is ready; enables the DXF-ASTM export item.
     required property bool layoutReady
 
-    // @brief When true, DXF-ASTM shows its DXF version, and the R13 and CLO3D items
-    //        are shown (Export menu only). The View menu opens any .dxf with one item.
+    // @brief When true, a DXF submenu holds the R12, R13 and CLO3D items (Export menu only).
+    //        The View menu opens any .dxf with one item.
     property bool showDxfVariants: false
 
     // @brief When true, a Projector item is appended to the menu (View menu only).
@@ -215,36 +219,48 @@ Menu {
         height: visible ? implicitHeight : 0
     } // MenuSeparator after exportAllTabsItem
 
-    // Hidden Menu items keep their height, so collapse them when hidden.
-    // A disabled item shows no tooltip, so this note explains the disabled DXF-ASTM items.
+    // View menu only: the Export menu has the DXF submenu instead.
     MenuItem {
-        text: "DXF-ASTM: select Base Size or a size tab"
-        visible: root.layoutReady && !root.dxfEnabled
-        height: visible ? implicitHeight : 0
-        enabled: false
-    } // MenuItem DXF-ASTM note
-
-    MenuItem {
-        text: root.showDxfVariants ? "DXF-ASTM (R12)" : "DXF-ASTM"
+        id: viewDxfItem
+        text: "DXF-ASTM"
         enabled: root.layoutReady && root.dxfEnabled
         onTriggered: root.exportDxfAstmRequested()
-    } // MenuItem DXF-ASTM (R12)
+    } // MenuItem viewDxfItem
 
-    MenuItem {
-        text: "DXF-ASTM (R13)"
-        visible: root.showDxfVariants
-        height: visible ? implicitHeight : 0
-        enabled: root.layoutReady && root.dxfEnabled
-        onTriggered: root.exportDxfAstmR13Requested()
-    } // MenuItem DXF-ASTM (R13)
+    // The submenu stays enabled on Marker and Nested, so the note inside it can be read.
+    Menu {
+        id: dxfSubmenu
+        title: "DXF"
+        enabled: root.layoutReady
+        width: root.fittedWidth(dxfSubmenu)
 
-    MenuItem {
-        text: "DXF-ASTM (CLO3D)"
-        visible: root.showDxfVariants
-        height: visible ? implicitHeight : 0
-        enabled: root.layoutReady && root.dxfEnabled
-        onTriggered: root.exportDxfAstmClo3dRequested()
-    } // MenuItem DXF-ASTM (CLO3D)
+        // Hidden Menu items keep their height, so collapse them when hidden.
+        // A disabled item shows no tooltip, so this note explains the disabled DXF-ASTM items.
+        MenuItem {
+            text: "DXF-ASTM: select Base Size or a size tab"
+            visible: !root.dxfEnabled
+            height: visible ? implicitHeight : 0
+            enabled: false
+        } // MenuItem DXF-ASTM note
+
+        MenuItem {
+            text: "DXF-ASTM (R12)"
+            enabled: root.layoutReady && root.dxfEnabled
+            onTriggered: root.exportDxfAstmRequested()
+        } // MenuItem DXF-ASTM (R12)
+
+        MenuItem {
+            text: "DXF-ASTM (R13)"
+            enabled: root.layoutReady && root.dxfEnabled
+            onTriggered: root.exportDxfAstmR13Requested()
+        } // MenuItem DXF-ASTM (R13)
+
+        MenuItem {
+            text: "DXF-ASTM (CLO3D)"
+            enabled: root.layoutReady && root.dxfEnabled
+            onTriggered: root.exportDxfAstmClo3dRequested()
+        } // MenuItem DXF-ASTM (CLO3D)
+    } // Menu dxfSubmenu
 
     MenuItem {
         text: "PDF"
@@ -518,8 +534,14 @@ Menu {
         onTriggered: root.exportMeshRequested()
     } // MenuItem 3D Mesh
 
-    // Keep one SVG entry: the submenu (Export menu) or the single item (View menu).
+    // Keep one DXF entry: the submenu (Export menu) or the single item (View menu).
     Component.onCompleted: {
+        if (root.showDxfVariants) {
+            root.removeItem(viewDxfItem)
+        } else {
+            root.removeMenu(dxfSubmenu)
+        } // if showDxfVariants
+        // Keep one SVG entry: the submenu (Export menu) or the single item (View menu).
         if (root.svgModeSubmenu) {
             root.removeItem(svgItem)
         } else {

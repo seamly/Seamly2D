@@ -26,6 +26,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.83.4 | 15 | Nested legend squares |
 | Layout.82.3 | 16 | Nested size colors: dark and pastel |
 | Layout.87.3 | 4, 17 | Marker tab: PDF (Tiled) disabled |
+| Layout.86.3 | 3, 18 | Export > DXF submenu |
 
 ## [x] 0. Install
 
@@ -64,7 +65,7 @@ Settings from section 1: Paper, Roll, 48 in.
 - [ ] A note reads "DXF-ASTM: select Base Size or a size tab".
   --> the note is there but it is mostly unreadable as it extends past the right side of the menu
   --> Filed: Layout.88.
-- [ ] Next MSI: the menu is wider. The whole note reads, with no "..." at the end.
+- [ ] Next MSI: the note is at the top of Export > DXF. The submenu is wider. The whole note reads, with no "..." at the end.
 - [ ] Nested tab: same.
 - [ ] Export > SVG submenu: each item reads in full, with no "..." at the end.
 
@@ -107,12 +108,12 @@ Export all tabs unchecked.
   - [x] No merged "Detail" pieces. ? --> 7 blocks, 7 names.
   - [x] No layer 5 endpoint mismatch. ? --> none reported.
   - [x] No duplicate vertices. ? --> none reported.
-  - [ ] Lining tab: Base Size 500, Export > DXF-ASTM (R13), aw.fyi. Detail 4 graded.
+  - [ ] Lining tab: Base Size 500, Export > DXF > DXF-ASTM (R13), aw.fyi. Detail 4 graded.
   - Layout.61.7.2 named the Nested tab. Nested has no DXF-ASTM export since Layout.67, so Base Size 500 replaces it.
 
 ## 6. Size 220: DXF-ASTM
 
-- [ ] Size 220 tab, Export > DXF-ASTM (R13).
+- [ ] Size 220 tab, Export > DXF > DXF-ASTM (R13).
 - [ ] Save dialog offers `jacket2_40-146_R13_Size220_<stamp>.dxf`.
 - [ ] No `.rul` file.
 - [ ] Search `# 1`: not found.
@@ -120,7 +121,7 @@ Export all tabs unchecked.
 
 ## 7. Export all tabs
 
-- [ ] Check Export all tabs. Marker tab shown. Export > DXF-ASTM (R13):
+- [ ] Check Export all tabs. Marker tab shown. Export > DXF > DXF-ASTM (R13):
   - [ ] Files for Base Size 500 and every size. No Marker or Nested file.
   - [ ] Only the Base Size file has a `.rul`.
   - [ ] "Export Complete" lists the `.rul` after the Base Size `.dxf`.
@@ -172,7 +173,7 @@ Pattern: `C:\Users\susan\seamly2d\patterns\trousers.sm2d` (individual).
   - [ ] Each cut edge has 2 green match notches.
   - [ ] Left-out pieces warning: one bullet per piece. A long list scrolls. OK stays visible.
   - [ ] Export > PDF: save dialog offers `trousers_<stamp>.pdf`, with no tab. The split parts appear.
-  - [ ] Export > DXF-ASTM (R13): blocks named `Back (1/2)` and `Back (2/2)`.
+  - [ ] Export > DXF > DXF-ASTM (R13): blocks named `Back (1/2)` and `Back (2/2)`.
 - [ ] Create Layout. Choose "Make the media bigger". OK.
   - [ ] Sheet longer than 36 in. No split pieces. No warning.
 - [ ] Close both apps.
@@ -186,7 +187,7 @@ Pattern: `C:\Users\susan\seamly2d\patterns\trousers.sm2d` (individual).
   - [ ] a `seamline` group W inside it.
 - [ ] Canvas and Adjust Mode draw both lines. The packing gap is measured from the cut line.
 - [ ] Export SVG and PDF: both lines appear.
-- [ ] Export > DXF-ASTM (R13) > Annotated. Layer 1 is the cut line. Layer 14 is the seam line.
+- [ ] Export > DXF > DXF-ASTM (R13) > Annotated. Layer 1 is the cut line. Layer 14 is the seam line.
 - [ ] In the `.txt`, each layer 4 notch has group 30 = W / 2.
 - [ ] Piece Properties > Hide seam line. Press Layout: the piece has a `cutline` group and no `seamline` group.
 - [ ] Do not save the pattern changes.
@@ -244,3 +245,14 @@ Needs the next MSI.
   - [ ] SeamlyLayout does not lock up.
 - [ ] Uncheck Export all tabs.
 - [ ] View menu, any tab: "PDF (Tiled)" is enabled.
+
+## 18. jacket2: DXF submenu
+
+Needs the next MSI. Settings from section 1.
+
+- [ ] Export menu: one "DXF" item below "Export all tabs". No DXF-ASTM item in the Export menu itself.
+- [ ] Base Size 500 tab, Export > DXF: "DXF-ASTM (R12)", "DXF-ASTM (R13)", "DXF-ASTM (CLO3D)", all enabled. No note.
+- [ ] Export > DXF > DXF-ASTM (R13): the export starts (Missing Piece Data or Standard/Annotated dialog). Cancel.
+- [ ] Marker tab, Export > DXF: "DXF-ASTM: select Base Size or a size tab" is the first item and reads in full. The three items are disabled.
+- [ ] Nested tab: same.
+- [ ] View menu: one "DXF-ASTM" item, no DXF submenu.

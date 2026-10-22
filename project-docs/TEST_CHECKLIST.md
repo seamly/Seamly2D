@@ -232,10 +232,10 @@ Pattern: `C:\Users\susan\seamly2d\patterns\jacket2_40-146.sm2d`.
 - [ ] Left-out pieces warning (Layout.70). Trousers sample, Paper Sheet 36 × 36 in, Create Layout, Split the pieces:
   - [ ] Each left-out piece is one bullet. A long list scrolls; OK stays visible.
   - Note: multisize tabs grow the media, so they leave no piece out. Rust tests cover "Detail (3): 220, 240" lines.
-- [ ] Marker or Nested tab shown, Export menu:
+- [ ] Marker or Nested tab shown, Export > DXF:
   - [ ] DXF-ASTM items are disabled.
   - [ ] A note reads "DXF-ASTM: select Base Size or a size tab".
-- [ ] Base Size 500 tab, Export > DXF-ASTM (R13):
+- [ ] Base Size 500 tab, Export > DXF > DXF-ASTM (R13):
   - [ ] The folder holds a `.dxf` and a `.rul` with the same name.
   - [ ] "Export Complete" names the `.dxf` and the `.rul` (Layout.67.9).
   - [ ] In the `.dxf`, search `# 1`: found.
@@ -243,18 +243,18 @@ Pattern: `C:\Users\susan\seamly2d\patterns\jacket2_40-146.sm2d`.
   - [ ] `Size Name:` is 500 in every block. One block per piece.
   - [ ] In the `.rul`, `SAMPLE SIZE:500`, `NUMBER OF SIZES:26`, and `RULE: DELTA` lines.
   - [ ] Upload the `.dxf` (and the `.rul` if asked) to https://aw.fyi/dxf. Save the report beside the files.
-- [ ] Size 240 tab, Export > DXF-ASTM (R13):
+- [ ] Size 240 tab, Export > DXF > DXF-ASTM (R13):
   - [ ] No `.rul` file.
   - [ ] Search `# 1`: not found.
   - [ ] `Sample Size:` is blank.
-- [ ] Export all tabs checked, Marker tab shown, Export > DXF-ASTM (R13):
+- [ ] Export all tabs checked, Marker tab shown, Export > DXF > DXF-ASTM (R13):
   - [ ] Files for Base Size 500 and every size. No Marker or Nested file.
   - [ ] Only the Base Size file has a `.rul`.
   - [ ] "Export Complete" lists the `.rul` after the Base Size `.dxf`.
 - [ ] Export all tabs checked, Export > PDF:
   - [ ] Files for Marker, Nested and every size. No Base Size file.
 - [ ] Export file names (Layout.24). Export all tabs unchecked:
-  - [ ] Size 220 tab, Export > DXF-ASTM (R13): save dialog offers `jacket2_40-146_R13_Size220_<stamp>.dxf`.
+  - [ ] Size 220 tab, Export > DXF > DXF-ASTM (R13): save dialog offers `jacket2_40-146_R13_Size220_<stamp>.dxf`.
   - [ ] Base Size 500 tab, same export: `jacket2_40-146_R13_BaseSize500_<stamp>.dxf`; the `.rul` has the same name.
   - [ ] Nested tab, Export > PDF (Tiled): `jacket2_40-146_Nested_<stamp>_tiled.pdf`. The Marker tab has no PDF (Tiled) export.
 - [ ] Export all tabs checked, Export > PDF, keep the offered name:
