@@ -37,6 +37,9 @@
 // With dxfEnabled false (Export menu, Marker or Nested tab shown), the DXF-ASTM
 // items are disabled and a note names the tabs DXF-ASTM exports.
 //
+// With pdfTiledTabAllowed false (Export menu, Marker tab shown), PDF (Tiled) is
+// disabled and its text says to select another tab.
+//
 // G-Code and 3D Mesh (3MF) are paid formats. Each item stays hidden until
 // AppController.isPaidExportAvailable() reports its module as usable.
 
@@ -62,6 +65,9 @@ Menu {
     // Export menu binds this to (settings.paperType === "tiled").
     // View menu can keep this true because it opens already-exported files.
     property bool pdfTiledEnabled: true
+
+    // @brief False disables PDF (Tiled): the shown tab is Marker, which every size makes too large to tile.
+    property bool pdfTiledTabAllowed: true
 
     // @brief When true, SVG opens a submenu of label text modes (Export menu only).
     property bool svgModeSubmenu: false
@@ -249,8 +255,10 @@ Menu {
     MenuItem {
         // A disabled item gets no hover events, so the hint is in the text, not a tooltip.
         // Tiled PDF pages take their size from the tile size, which exists only for tiled paper.
-        text: root.pdfTiledEnabled ? "PDF (Tiled)" : "PDF (Tiled): set Paper Type to Tiled"
-        enabled: root.layoutReady && root.pdfTiledEnabled
+        text: !root.pdfTiledEnabled    ? "PDF (Tiled): set Paper Type to Tiled"
+            : !root.pdfTiledTabAllowed ? "PDF (Tiled): select a tab other than Marker"
+            :                            "PDF (Tiled)"
+        enabled: root.layoutReady && root.pdfTiledEnabled && root.pdfTiledTabAllowed
         onTriggered: root.exportPdfTiledRequested()
     } // MenuItem PDF Tiled
 

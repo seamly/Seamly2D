@@ -2,6 +2,15 @@
 
 ## Current status
 
+### 2026-10-21 — PDF (Tiled) disabled on the Marker tab, merged into local `run-seamlyLayout`, not pushed
+
+- Layout.87: tiling the Marker tab locks SeamlyLayout up (user report). Cause not investigated.
+- `ViewKind::exports_pdf_tiled` false for Marker → `AppController.pdfTiledExportAllowed` → `ExportMenu.pdfTiledTabAllowed`. Item text: "PDF (Tiled): select a tab other than Marker".
+- Export all tabs: PDF (Tiled) stays enabled and skips Marker. `export_pdf_tiled` refuses the Marker tab.
+- Verified: `cargo test -p cxxqt_bridge` 226 passed; `qmllint` no new warnings. Not run: ctest, GUI, MSI (ask first).
+- User check: Layout.87.3, `AGENT_CHECKLIST.md` §4 and §17.
+- Merge commit has no skip-ci token: the unpushed `packaging/**` change needs full CI.
+
 ### 2026-10-21 — Export menu fits its widest item, merged into local `run-seamlyLayout`, not pushed
 
 - Layout.88: a Qt Quick `Menu` keeps 200 px and elides longer items. The DXF-ASTM note is 220 px.

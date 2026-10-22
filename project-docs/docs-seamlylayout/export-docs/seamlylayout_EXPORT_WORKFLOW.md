@@ -167,6 +167,15 @@ ExportMenu EPS / PostScript (PS) → exportPostscriptRequested("eps" | "ps")
 - A reader that ignores `/UserUnit` shows such a page at 1/n size.
 - Tiled pages are the paper size; Letter is `612 × 792` pt.
 
+## PDF (Tiled) — not for the Marker tab
+
+- Reason: the Marker tab holds every size of every piece. Its tiled PDF export locks SeamlyLayout up.
+- `ViewKind::exports_pdf_tiled` is false for Marker. `AppController.pdfTiledExportAllowed` mirrors it for the shown tab.
+- Marker tab, Export menu: PDF (Tiled) is disabled and reads "PDF (Tiled): select a tab other than Marker".
+- Export all tabs: PDF (Tiled) skips Marker and Base Size (`ViewKind::in_all_tabs_export`).
+- `export_pdf_tiled` refuses the Marker tab with an error dialog and writes no file.
+- The View menu keeps PDF (Tiled): it opens files already written.
+
 ## JPG export
 
 ```

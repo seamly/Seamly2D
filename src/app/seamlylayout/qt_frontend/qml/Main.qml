@@ -535,6 +535,8 @@ ApplicationWindow {
         exportAllTabs:        root.exportAllTabs
         // Marker and Nested hold every size; DXF-ASTM exports one size per file.
         dxfExportEnabled:     appController.dxfExportAllowed || root.exportAllTabsActive
+        // Tiling the Marker tab locks SeamlyLayout up; Export all tabs skips Marker.
+        pdfTiledTabAllowed:   appController.pdfTiledExportAllowed || root.exportAllTabsActive
         onExportAllTabsToggled: function(checked) { root.exportAllTabs = checked }
         labelTextState:       appController.labelTextState
         lastSvgTextMode:      preferencesModel.svgTextMode

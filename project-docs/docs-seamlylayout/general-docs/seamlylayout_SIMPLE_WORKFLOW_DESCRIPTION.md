@@ -194,12 +194,14 @@ The application workflow loop consists of:
      * Selecting a tab swaps that layout into the controller's layout fields; Adjust Layout and every export use the selected tab.
      * DXF-ASTM exports one size: the Base Size tab (with `# n` grade rule texts and the `.rul` file) or a size tab (ungraded, no `.rul`).
        On the Marker and Nested tabs the DXF-ASTM items are disabled, and a note names the tabs to select.
+     * On the Marker tab PDF (Tiled) is disabled: tiling every size of every piece locks SeamlyLayout up.
        "Export Complete" names the `.dxf` and the `.rul`.
        A sample size piece the layout left out is named: "<piece>: not graded, size 36 does not fit the media."
        A piece whose sizes have other turn points names the first such size and the line: "<piece>: not graded, size 34 has other turn points than size 36 on the cut line."
        When no piece grades, no `.rul` is written, and the dialog says "No piece graded: no .rul file written."
      * Export > "Export all tabs" (checkable, shown only when tabs exist): every format then writes one file per tab.
        * DXF-ASTM writes the Base Size and size tabs. Other formats write every tab but Base Size, which repeats its size tab.
+       * PDF (Tiled) also skips Marker.
        * File name: the save-dialog name with the tab before the timestamp: `shirt_Marker_202610112043.pdf`, `shirt_R13_BaseSize36_202610112043.dxf`, `shirt_Size36_202610112043.pdf`.
        * A name without a timestamp gets the tab before the extension: `shirt_Size36.pdf`.
      * A single export from a tab: the default name carries that tab before the timestamp: `shirt_R13_Size36_202610112043.dxf`.

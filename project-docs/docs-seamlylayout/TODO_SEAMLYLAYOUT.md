@@ -88,7 +88,11 @@ Display only the labels and grainline of the smallest size of each piece. (In SV
 
 ### Task Layout.86 - Export - Combine the DXF exports into a DXF submenu
 
-### Task Layout.87 - Export - Marker - Disable 'PDF (Tiled)' layout for Marker layout (seamlylayout will lock up when exporting a Marker as a tiled layout)
+### [ ] Task Layout.87 - Export - Marker - Disable 'PDF (Tiled)' layout for Marker layout (seamlylayout will lock up when exporting a Marker as a tiled layout)
+
+- [x] Layout.87.1 Marker tab, Export menu: PDF (Tiled) disabled, text "PDF (Tiled): select a tab other than Marker". `ViewKind::exports_pdf_tiled`; `AppController.pdfTiledExportAllowed` → `TopMenuBar.pdfTiledTabAllowed` → `ExportMenu.pdfTiledTabAllowed`. The View menu keeps PDF (Tiled).
+- [x] Layout.87.2 Export all tabs: PDF (Tiled) skips Marker and Base Size (`ViewKind::in_all_tabs_export`), so the item stays enabled. `export_pdf_tiled` refuses the Marker tab with an error dialog. Test: `layout_views` `view_kinds_choose_their_exports`. Doc: `seamlylayout_EXPORT_WORKFLOW.md`, "PDF (Tiled) — not for the Marker tab".
+- [ ] Layout.87.3 Next MSI: user check, `AGENT_CHECKLIST.md` §17.
 
 ### [ ] Task Layout.88 — Export menu: DXF-ASTM note is cut off
 

@@ -618,6 +618,8 @@ pub mod qobject {
         // True when DXF-ASTM can export the shown layout: an individual layout,
         // the Base Size tab or a size tab.  Marker and Nested hold every size.
         #[qproperty(bool, dxf_export_allowed)]
+        // True when PDF (Tiled) can export the shown layout: any layout but the Marker tab.
+        #[qproperty(bool, pdf_tiled_export_allowed)]
         // True after Cancel in the oversized-pieces dialog: only 'Layout Settings'
         // stays active until new settings are submitted.
         #[qproperty(bool, is_settings_required)]
@@ -1076,6 +1078,9 @@ pub struct AppControllerRust {
     // True when DXF-ASTM can export the shown layout; mirrored from `layout_views`.
     dxf_export_allowed: bool,
 
+    // True when PDF (Tiled) can export the shown layout; mirrored from `layout_views`.
+    pdf_tiled_export_allowed: bool,
+
     // True after Cancel in the oversized-pieces dialog, until new settings are submitted.
     is_settings_required: bool,
 
@@ -1148,6 +1153,7 @@ impl Default for AppControllerRust {
             active_layout_view:        0,                              // first tab
             is_tab_layout_pending:     false,                          // no tab run queued
             dxf_export_allowed:        true,                           // no tabs: an individual layout exports DXF-ASTM
+            pdf_tiled_export_allowed:  true,                           // no tabs: an individual layout exports PDF (Tiled)
             is_settings_required:      false,                          // no cancelled layout
             divide_spec:               None,                           // no split layout
             layout_views:              LayoutViews::default(),         // no tabs
@@ -1932,21 +1938,24 @@ impl qobject::AppController {
         self.as_mut().refresh_layout_view_properties();
     } // fn clear_layout_views
 
-    // Copy the tab labels, the active index and the DXF-ASTM state from `layout_views` to the QML properties.
+    // Copy the tab labels, the active index and the DXF-ASTM and PDF (Tiled) states
+    // from `layout_views` to the QML properties.
     fn refresh_layout_view_properties(mut self: std::pin::Pin<&mut Self>) {
-        let (labels, active, dxf_allowed) = {
+        let (labels, active, dxf_allowed, tiled_allowed) = {
             let views = &self.rust().layout_views;
             let mut list = cxx_qt_lib::QList::<cxx_qt_lib::QString>::default();
             for label in views.labels() {
                 list.append(cxx_qt_lib::QString::from(label.as_str()));
             } // for label
-            // No tabs: an individual layout, which DXF-ASTM always exports.
+            // No tabs: an individual layout, which DXF-ASTM and PDF (Tiled) always export.
             let dxf_allowed = views.active_kind().map_or(true, ViewKind::exports_dxf);
-            (cxx_qt_lib::QStringList::from(&list), views.active() as i32, dxf_allowed)
+            let tiled_allowed = views.active_kind().map_or(true, ViewKind::exports_pdf_tiled);
+            (cxx_qt_lib::QStringList::from(&list), views.active() as i32, dxf_allowed, tiled_allowed)
         }; // views borrow dropped
         self.as_mut().set_layout_view_labels(labels);
         self.as_mut().set_active_layout_view(active);
         self.as_mut().set_dxf_export_allowed(dxf_allowed);
+        self.as_mut().set_pdf_tiled_export_allowed(tiled_allowed);
     } // fn refresh_layout_view_properties
 
     // Return the piece bbox JSON array built by process_layout.
@@ -2732,6 +2741,15 @@ impl qobject::AppController {
     ) -> bool {
         let path_str = path.to_string();
         log_to_file(&format!("[lib.rs AppController] export_pdf_tiled(): 1 requested path='{path_str}'"));
+
+        // The Export menu disables PDF (Tiled) on the Marker tab; refuse a call that gets past it.
+        if !self.rust().layout_views.active_kind().map_or(true, ViewKind::exports_pdf_tiled) {
+            log_to_file("[lib.rs AppController] export_pdf_tiled(): 2 refused: Marker tab");
+            self.as_mut().error_occurred(cxx_qt_lib::QString::from(
+                "PDF (Tiled) does not export the Marker tab. Select another tab.",
+            ));
+            return false;
+        } // if Marker tab
 
         // get cleaned layout DOM for export (minus rects + color blocks)
         let layout_doc = match self.clone_stripped_layout_doc() {
