@@ -2,6 +2,15 @@
 
 ## Current status
 
+### 2026-10-21 — Export > DXF submenu, merged into local `run-seamlyLayout`, not pushed
+
+- Layout.86: `ExportMenu.qml` `dxfSubmenu` holds DXF-ASTM (R12), (R13), (CLO3D). The View menu keeps one DXF-ASTM item.
+- Marker and Nested: the submenu stays enabled so its note can be read; the three items are disabled.
+- Verified: scratch Fusion render of `ExportMenu.qml` (order, note, signals); `qmllint` no warnings. Not run: ctest, GUI, MSI (ask first).
+- User check: Layout.86.3, `AGENT_CHECKLIST.md` §3 and §18. Open checklist steps now read Export > DXF > DXF-ASTM.
+- Layout.87 was already merged (6641162d58) when it was requested again; no new work.
+- Merge commit has no skip-ci token: the unpushed `packaging/**` change needs full CI.
+
 ### 2026-10-21 — PDF (Tiled) disabled on the Marker tab, merged into local `run-seamlyLayout`, not pushed
 
 - Layout.87: tiling the Marker tab locks SeamlyLayout up (user report). Cause not investigated.
