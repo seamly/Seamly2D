@@ -2,6 +2,14 @@
 
 ## Current status
 
+### 2026-10-21 — Oversized-pieces dialog text colors, merged into local `run-seamlyLayout`, not pushed
+
+- Layout.89: the screenshot with black radio labels is a scratch `qml` render, not SeamlyLayout. The app already draws them in `Theme.textOnDark`.
+- `Main.qml` `oversizedPiecesLabel`: piece list `Theme.violetLight` → `Theme.textOnDark`. Contrast on the dialog violet 2.1:1 → 7.9:1.
+- Verified: Fusion render of the dialog from `Main.qml`; `qmllint` no new warnings. Not run: ctest, GUI, MSI (ask first).
+- User check: Layout.89.3, `AGENT_CHECKLIST.md` §12.
+- Merge commit has no skip-ci token: the unpushed `packaging/**` change needs full CI.
+
 ### 2026-10-21 — Oversized-pieces dialog names the sizes, merged into local `run-seamlyLayout`, not pushed
 
 - Layout.72.9: each dialog line names the dimension that does not fit, with piece and media sizes in the settings unit. Example: `• Back: length 43.10 in, media 35.50 in`.
