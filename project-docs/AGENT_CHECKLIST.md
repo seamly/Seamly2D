@@ -17,6 +17,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.69.3 | 9 | PNG and JPG resolution | PASS
 | Layout.71.6 | 11 | Media grows in width | ?
 | Layout.72.8 | 12 | Oversized pieces: split or enlarge |
+| Layout.89.3 | 12 | Oversized pieces dialog: light text |
 | Layout.70.5 | 12 | Left-out pieces warning | ?
 | Layout.28.7 | 13 | Built-in seam line | ?
 | Layout.73.5 | 1, 5 | Unique piece names | PASS
@@ -157,6 +158,7 @@ Pattern: `C:\Users\susan\seamly2d\patterns\trousers.sm2d` (individual).
 - [ ] Start Seamly2D from the Start menu. Open the pattern. Press Layout.
 - [ ] Settings: Paper, Sheet 36 × 36 in. Submit. Create Layout.
 - [ ] Dialog "Pieces do not fit the media" lists 4 legs: Back, Front_Pleats, Front_no_pocket, Front_with_pocket.
+- [ ] Dialog text is light on the violet background: heading, piece list, "Split the pieces", "Make the media bigger", both descriptions. No black text.
 - [ ] Cancel: only Layout Settings, Preferences and Exit are enabled.
 - [ ] Submit the settings: Create Layout is enabled.
 - [ ] Create Layout. Choose "Split the pieces". OK.
