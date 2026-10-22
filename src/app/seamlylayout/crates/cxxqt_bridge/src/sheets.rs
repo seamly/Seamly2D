@@ -41,6 +41,8 @@ use crate::exports::{
 // sequence used by `do_process_layout`: flatten → verticalize → flatten →
 // translate → flatten.
 //
+// A Nested piece-set keeps the grainline and labels of its smallest size only.
+//
 // @param input_dom            Raw imported SVG DOM.
 // @param free_rotation_allowed  The user's "Rotate freely" choice for pieces without a grainline.
 // @param nested_multisize       `true` packs each multisize piece-set as one unit (Nested layout).
@@ -62,7 +64,8 @@ pub(crate) fn build_sheet_export_inputs(
     svg_dom::verticalize_dom(&mut flat_dom);
     svg_dom::flatten_dom(&mut flat_dom);
     // Nested multisize: stack the sizes of each piece-set on the largest size.
-    if svg_dom::center_piece_sets(&mut flat_dom) > 0 {
+    let nested = svg_dom::center_piece_sets(&mut flat_dom) > 0;
+    if nested {
         svg_dom::flatten_dom(&mut flat_dom);
         // Each size in its own color, as on the Nested tab.
         crate::size_colors::color_pieces_by_size(&mut flat_dom);
@@ -82,6 +85,12 @@ pub(crate) fn build_sheet_export_inputs(
                 .to_string(),
         );
     }
+
+    // Nested: each piece-set prints the grainline and labels of its smallest size
+    // only. Stripped after the extraction, so the pieces pack as on the Nested tab.
+    if nested {
+        crate::nested_annotations::keep_smallest_size_annotations(&mut flat_dom);
+    } // if nested
 
     Ok((flat_dom, pieces))
 } // fn build_sheet_export_inputs
