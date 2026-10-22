@@ -2,6 +2,15 @@
 
 ## Current status
 
+### 2026-10-21 — Export menu fits its widest item, merged into local `run-seamlyLayout`, not pushed
+
+- Layout.88: a Qt Quick `Menu` keeps 200 px and elides longer items. The DXF-ASTM note is 220 px.
+- `ExportMenu.qml` `fittedWidth`: the Export menu and its SVG submenu take the width of their widest shown item.
+- Verified: Fusion render of `ExportMenu.qml`, no elided text; `qmllint` no warnings. Not run: ctest, GUI, MSI (ask first).
+- User check: Layout.88.2, `AGENT_CHECKLIST.md` §3.
+- Peer `seamly2d-private-9e` changes `ExportMenu.qml` for Layout.87 in its own worktree; it merges after this one.
+- Merge commit has no skip-ci token: the unpushed `packaging/**` change needs full CI.
+
 ### 2026-10-21 — Oversized-pieces dialog text colors, merged into local `run-seamlyLayout`, not pushed
 
 - Layout.89: the screenshot with black radio labels is a scratch `qml` render, not SeamlyLayout. The app already draws them in `Theme.textOnDark`.
