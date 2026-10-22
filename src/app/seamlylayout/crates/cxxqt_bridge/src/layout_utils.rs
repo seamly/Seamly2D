@@ -1477,15 +1477,20 @@ mod tests {
     // @brief Lay out the jacket2 handoff as the Nested tab (`nested`) or the Marker tab.
     fn process_jacket2(nested: bool, width_in: f64, length_in: f64) -> ProcessLayoutResult {
         let (input_dom, _) = jacket2_handoff();
+        process_jacket2_input(&input_dom, nested, width_in, length_in)
+    } // fn process_jacket2
+
+    // @brief Lay out a jacket2 input document as the Nested tab (`nested`) or the Marker tab.
+    fn process_jacket2_input(input_dom: &Document, nested: bool, width_in: f64, length_in: f64) -> ProcessLayoutResult {
         let settings_json = jacket2_settings_json(width_in, length_in);
-        let init = do_initialize_layout(&settings_json, Some(&input_dom))
+        let init = do_initialize_layout(&settings_json, Some(input_dom))
             .expect("initialize_layout should succeed");
 
         let mut progress = |_pct: i32, _status: Option<&str>| {};
         do_process_layout(
             ProcessLayoutArgs {
                 settings_json: &settings_json,
-                input_dom: &input_dom,
+                input_dom,
                 initial_layout_dom: &init.initial_dom,
                 layout_h_px: init.h_px,
                 nested_multisize: nested,
@@ -1494,7 +1499,7 @@ mod tests {
             },
             &mut progress,
         ).expect("process_layout should succeed on the jacket2 handoff")
-    } // fn process_jacket2
+    } // fn process_jacket2_input
 
     // @brief Lay out one size of the jacket2 handoff, as a size tab or the Base Size tab.
     fn process_jacket2_size(size: &str) -> ProcessLayoutResult {
@@ -1751,6 +1756,84 @@ mod tests {
             assert!(moved < 0.01, "{id} moved by {moved}");
         } // for piece
     } // jacket2_nested_svg_export_groups_pieces_by_size
+
+    // @brief One size per grainline or label group in `elem`'s subtree: the `data-size`
+    // of the piece that holds it, or "" outside a sized piece.
+    fn annotation_sizes(elem: &xmltree::Element, size: &str, sizes: &mut Vec<String>) {
+        let data_type = elem.attributes.get("data-type").map(String::as_str).unwrap_or("");
+        if ["grainline", "piece_label", "pattern_label", "size_label"].contains(&data_type) {
+            sizes.push(size.to_string());
+            return; // a label holds no other label
+        } // if annotation
+        let size = if data_type == "piece" { elem.attributes.get("data-size").map_or(size, String::as_str) } else { size };
+        for child in elem.children.iter().filter_map(|n| n.as_element()) {
+            annotation_sizes(child, size, sizes);
+        } // for child
+    } // fn annotation_sizes
+
+    // @brief The Nested export copy keeps the grainline and labels of the smallest size
+    // only. The SVG export moves them into `labels_and_grainlines`, where the
+    // `Rectangles` group was: just before the size groups.
+    #[test]
+    fn jacket2_nested_export_keeps_the_smallest_size_annotations() {
+        // The fixture has no grainline or label; the import adds a size label to every piece.
+        let (mut input_dom, sizes) = jacket2_handoff();
+        assert_eq!(crate::size_labels::add_size_labels(&mut input_dom), 208);
+        let nested = process_jacket2_input(&input_dom, true, 60.0, 300.0);
+        let mut doc = nested.output_doc.clone();
+        let top_ids = |doc: &Document| -> Vec<String> {
+            doc.root.children.iter().filter_map(|n| n.as_element())
+                .map(|e| e.attributes.get("id").cloned().unwrap_or_default()).collect()
+        }; // top_ids
+        let rectangles_at = top_ids(&doc).iter().position(|id| id == "Rectangles").expect("Rectangles group");
+
+        // As clone_export_layout_doc does it.
+        crate::layout_assembler::remove_color_blocks(&mut doc);
+        crate::layout_helpers::remove_group_by_id(&mut doc.root, "Rectangles");
+        let mut before = Vec::new();
+        annotation_sizes(&doc.root, "", &mut before);
+        let smallest = sizes.iter().min_by(|a, b| crate::size_groups::compare_sizes(a, b)).expect("sizes").clone();
+        let kept = before.iter().filter(|s| **s == smallest).count();
+        assert_eq!(kept, 8, "size {smallest}: one size label per piece");
+
+        let removed = crate::nested_annotations::keep_smallest_size_annotations(&mut doc);
+        assert_eq!(removed, before.len() - kept);
+        let mut after = Vec::new();
+        annotation_sizes(&doc.root, "", &mut after);
+        assert_eq!(after, vec![smallest.clone(); kept], "only size {smallest} keeps its annotations");
+
+        // SVG export.
+        assert_eq!(crate::size_groups::group_pieces_by_size(&mut doc), 26);
+        assert_eq!(crate::nested_annotations::gather_labels_and_grainlines(&mut doc), kept);
+        let ids = top_ids(&doc);
+        let at = ids.iter().position(|id| id == crate::nested_annotations::LABELS_AND_GRAINLINES_ID).expect("labels_and_grainlines");
+        assert_eq!(at, rectangles_at, "in place of the Rectangles group: {ids:?}");
+        assert_eq!(ids[at + 1], "size_720", "just before the largest size: {ids:?}");
+        let group = doc.root.children.iter().filter_map(|n| n.as_element()).nth(at).expect("group");
+        let mut gathered = Vec::new();
+        annotation_sizes(group, "", &mut gathered);
+        assert_eq!(gathered.len(), kept, "every kept group is in labels_and_grainlines");
+        for size_group in doc.root.children.iter().filter_map(|n| n.as_element()).skip(at + 1) {
+            let mut left = Vec::new();
+            annotation_sizes(size_group, "", &mut left);
+            assert!(left.is_empty(), "{:?} holds {} annotations", size_group.attributes.get("id"), left.len());
+        } // for later group
+    } // jacket2_nested_export_keeps_the_smallest_size_annotations
+
+    // @brief The paper-sheet PDF input of a Nested layout keeps the grainline and
+    // labels of the smallest size only, and still packs one unit per piece-set.
+    #[test]
+    fn jacket2_nested_sheet_export_keeps_the_smallest_size_annotations() {
+        let (mut input_dom, sizes) = jacket2_handoff();
+        assert_eq!(crate::size_labels::add_size_labels(&mut input_dom), 208);
+        let (flat_dom, pieces) = crate::sheets::build_sheet_export_inputs(&input_dom, false, true, None)
+            .expect("sheet export inputs");
+        assert_eq!(pieces.len(), 8, "one unit per piece-set");
+        let smallest = sizes.iter().min_by(|a, b| crate::size_groups::compare_sizes(a, b)).expect("sizes").clone();
+        let mut kept = Vec::new();
+        annotation_sizes(&flat_dom.root, "", &mut kept);
+        assert_eq!(kept, vec![smallest; 8], "one size label per piece-set, of the smallest size");
+    } // jacket2_nested_sheet_export_keeps_the_smallest_size_annotations
 
     // @brief Marker packs every size of every piece as its own unit, numbered by its piece-set.
     #[test]
