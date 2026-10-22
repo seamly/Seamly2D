@@ -18,8 +18,8 @@
 // Per part:
 //   - outline (`cutline`, else `seamline`) and `cut_path`: closed, with new
 //     edges on the cut lines;
-//   - `seamline` beside a cutline, `internal_path`, `grainline`: open lines that
-//     end at the cut lines;
+//   - `seamline` beside a cutline, `internal_path`, `grainline`, `fold_line`: open
+//     lines that end at the cut lines; a part the fold line misses has none;
 //   - notches, labels and other groups: whole, on the nearest part;
 //   - a part without grainline gets a new vertical grainline when the piece had one;
 //   - a new `piece_label`: "<name> part i of n, joins j";
@@ -955,7 +955,7 @@ fn divide_piece(piece: &Element, columns: usize, rows: usize, uu_per_px: f64) ->
         let closed = match data_type {
             _ if index == outline_index => None, // handled above
             "cutline" | "cut_path" => Some(true),
-            "seamline" | "internal_path" | "grainline" => Some(false),
+            "seamline" | "internal_path" | "grainline" | "fold_line" => Some(false),
             _ => None,
         }; // closed
         if index == outline_index {
@@ -1304,6 +1304,47 @@ mod tests {
         let free = DivideSpec { free_rotation_without_grainline: true, ..spec(500, 250, true) };
         assert!(find_oversized_pieces(&doc, &free).is_empty());
     } // long_piece_and_turned_piece
+
+    // @brief A fold line is clipped like the seam line: each part holds the stretch
+    // of fold line inside it, and a part the fold line misses holds none.
+    #[test]
+    fn fold_line_is_clipped_per_part() {
+        // Fold line on the left edge, 0..400 down; the piece splits in two rows and two columns.
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg"><g id="piece-1" data-type="piece" data-name="Back" data-on-fold="true">
+            <g data-type="cutline"><path d="M0,0 L400,0 L400,400 L0,400 Z"/></g>
+            <g id="fold_line_Back" data-type="fold_line"><path d="M0,400 L0,0"/></g></g></svg>"#;
+        let mut doc = Document::parse(svg).expect("parses");
+        let divided = divide_oversized_pieces(&mut doc, &spec(250, 250, true));
+        assert_eq!(divided, vec![DividedPiece { label: "Back".to_string(), parts: 4 }]);
+
+        let mut stretches = Vec::new();
+        for part in part_groups(&doc) {
+            let Some(fold) = component(part, "fold_line") else {
+                let (x0, _, _, _) = part_bbox(part);
+                assert!(x0 > 1.0, "{}: on the fold but has no fold line", attr(part, "id"));
+                continue;
+            }; // if no fold line
+            let d = ds(fold);
+            assert_eq!(d.matches('M').count(), 1, "one open run: {d}");
+            assert!(!d.contains('Z'), "{d}");
+            stretches.push(d);
+        } // for each part
+        assert_eq!(stretches, vec!["M0,200 L0,0".to_string(), "M0,400 L0,200".to_string()]);
+    } // fold_line_is_clipped_per_part
+
+    // @brief Bounding box (min x, min y, max x, max y) of every path point of a part.
+    fn part_bbox(part: &Element) -> (f64, f64, f64, f64) {
+        let mut out = Vec::new();
+        path_ds(part, &mut out);
+        let numbers: Vec<f64> = out.join(" ")
+            .split(|c: char| !(c.is_ascii_digit() || c == '.' || c == '-'))
+            .filter_map(|t| t.parse().ok())
+            .collect();
+        numbers.chunks(2).fold(
+            (f64::INFINITY, f64::INFINITY, f64::NEG_INFINITY, f64::NEG_INFINITY),
+            |(x0, y0, x1, y1), p| (x0.min(p[0]), y0.min(p[1]), x1.max(p[0]), y1.max(p[1])),
+        )
+    } // fn part_bbox
 
     // @brief The dialog line names each dimension that does not fit, with the
     // piece and media sizes in the settings unit.
