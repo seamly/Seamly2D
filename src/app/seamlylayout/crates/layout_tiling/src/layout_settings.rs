@@ -94,6 +94,13 @@ pub struct LayoutSettings {
     #[serde(default)]
     pub fabric_folded: bool,
 
+    // True places every piece with a fold line so the fold line lies on the
+    // left media edge: the fold of folded fabric.  Applies to fabric media with
+    // `fabric_folded` only (`fold_lines_on_left_edge_applies`); the fold edge
+    // then has no left margin.
+    #[serde(default)]
+    pub fold_lines_on_left_edge: bool,
+
     // Fabric width override in active units (0 = use page/roll width).
     #[serde(default)]
     pub fabric_width: f64,
@@ -200,9 +207,11 @@ impl LayoutSettings {
     // Used by `create_initial_layout_dom` to position the content rectangle
     // and size the full canvas, and by `process_layout` for roll-trim math.
     //
+    // The left margin is 0 when the fold lines go on the left edge.
+    //
     // @return `(margin_left_px, margin_right_px, margin_top_px, margin_bottom_px)`
     pub fn margin_px(&self) -> (u32, u32, u32, u32) {
-        let ml = (Self::to_inches(self.margin_left,   &self.unit) * LAYOUT_PPI).round() as u32;
+        let ml = (Self::to_inches(self.margin_left_value(), &self.unit) * LAYOUT_PPI).round() as u32;
         let mr = (Self::to_inches(self.margin_right,  &self.unit) * LAYOUT_PPI).round() as u32;
         let mt = (Self::to_inches(self.margin_top,    &self.unit) * LAYOUT_PPI).round() as u32;
         let mb = (Self::to_inches(self.margin_bottom, &self.unit) * LAYOUT_PPI).round() as u32;
@@ -320,7 +329,7 @@ impl LayoutSettings {
         }; // if fabric_folded
 
         // --- step 4: subtract margins ---
-        let ml = Self::to_inches(self.margin_left,   u);
+        let ml = Self::to_inches(self.margin_left_value(), u);
         let mr = Self::to_inches(self.margin_right,  u);
         let mt = Self::to_inches(self.margin_top,    u);
         let mb = Self::to_inches(self.margin_bottom, u);
@@ -382,6 +391,16 @@ impl LayoutSettings {
         } // match layout_mode
     } // fn rotation_trial_set_deg
 
+    // @brief True when fold lines go on the left media edge: folded fabric with the option set.
+    pub fn fold_lines_on_left_edge_applies(&self) -> bool {
+        self.fold_lines_on_left_edge && self.fabric_folded && self.media_type == "fabric"
+    } // fn fold_lines_on_left_edge_applies
+
+    // @brief Left margin in the active unit: 0 on the fold edge, else `margin_left`.
+    fn margin_left_value(&self) -> f64 {
+        if self.fold_lines_on_left_edge_applies() { 0.0 } else { self.margin_left }
+    } // fn margin_left_value
+
     // @brief True when pieces without a grain direction may be quarter-turned.
     //
     // Pieces with a grain direction always use `rotation_trial_set_deg`.
@@ -415,6 +434,7 @@ impl LayoutSettings {
             selvedge_width: 0.0,
             piece_gap:      0.05,
             fabric_folded:  false,
+            fold_lines_on_left_edge: false,
             fabric_width:   0.0,
             fabric_height:  0.0,
             layout_mode:    "alongGrainline".to_string(),
@@ -454,6 +474,7 @@ mod tests {
             selvedge_width: 0.0,
             piece_gap:      0.05,
             fabric_folded:  false,
+            fold_lines_on_left_edge: false,
             fabric_width:   0.0,
             fabric_height:  0.0,
             layout_mode:    "alongGrainline".to_string(),
@@ -489,6 +510,7 @@ mod tests {
             selvedge_width: 0.0,
             piece_gap:      0.05,
             fabric_folded:  false,
+            fold_lines_on_left_edge: false,
             fabric_width:   0.0,
             fabric_height:  0.0,
             layout_mode:    "alongGrainline".to_string(),
@@ -528,6 +550,7 @@ mod tests {
             selvedge_width: 0.5,
             piece_gap:      0.05,
             fabric_folded:  false,
+            fold_lines_on_left_edge: false,
             fabric_width:   0.0,
             fabric_height:  0.0,
             layout_mode:    "alongGrainline".to_string(),
@@ -565,6 +588,7 @@ mod tests {
             selvedge_width: 0.5,
             piece_gap:      0.05,
             fabric_folded:  false,
+            fold_lines_on_left_edge: false,
             fabric_width:   0.0,
             fabric_height:  0.0,
             layout_mode:    "alongGrainline".to_string(),
@@ -598,6 +622,7 @@ mod tests {
             selvedge_width: 0.0,
             piece_gap:      0.05,
             fabric_folded:  true,
+            fold_lines_on_left_edge: false,
             fabric_width:   0.0,
             fabric_height:  0.0,
             layout_mode:    "alongGrainline".to_string(),
@@ -613,6 +638,27 @@ mod tests {
         // (36 / 2) * 96 = 1728
         assert_eq!(w, 1728);
     } // fabric_folded_halves_width
+
+    // @brief Fold lines on the left edge of folded fabric: no left margin. Paper or
+    // unfolded fabric keeps it.
+    #[test]
+    fn fold_lines_on_left_edge_drop_the_left_margin() {
+        let json = |media: &str, folded: bool, on_edge: bool| format!(
+            r#"{{"unit": "in", "mediaType": "{media}", "paperType": "sheet", "pageWidth": 40.0, "pageHeight": 48.0,
+                "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
+                "fabricFolded": {folded}, "foldLinesOnLeftEdge": {on_edge}}}"#);
+        let fold = LayoutSettings::from_json(&json("fabric", true, true)).expect("parse ok");
+        assert!(fold.fold_lines_on_left_edge_applies());
+        assert_eq!(fold.margin_px(), (0, 48, 48, 48));
+        // (40 / 2 - 0.5) * 96 = 1872
+        assert_eq!(fold.effective_bin_px().0, 1872);
+
+        for (media, folded, on_edge) in [("fabric", false, true), ("paper", true, true), ("fabric", true, false)] {
+            let s = LayoutSettings::from_json(&json(media, folded, on_edge)).expect("parse ok");
+            assert!(!s.fold_lines_on_left_edge_applies(), "{media} folded={folded} on_edge={on_edge}");
+            assert_eq!(s.margin_px().0, 48, "{media} folded={folded} on_edge={on_edge}");
+        } // for each case that keeps the margin
+    } // fold_lines_on_left_edge_drop_the_left_margin
 
     // @brief Millimetre units are converted correctly.
     #[test]
@@ -631,6 +677,7 @@ mod tests {
             selvedge_width: 0.0,
             piece_gap:      0.05,
             fabric_folded:  false,
+            fold_lines_on_left_edge: false,
             fabric_width:   0.0,
             fabric_height:  0.0,
             layout_mode:    "alongGrainline".to_string(),

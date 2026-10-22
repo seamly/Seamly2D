@@ -61,6 +61,10 @@ pub struct ProcessLayoutResult {
     /// omitted from the rendered layout and reported to the user as a warning,
     /// rather than aborting the whole layout with a hard error.
     pub unplaced_labels: Vec<String>,
+    /// Pieces with a fold line that stay off the left edge, with the reason
+    /// (`fold_line_edge::FoldEdgePlan::warnings`).  Empty unless the fold
+    /// lines go on the left edge of folded fabric.
+    pub fold_line_warnings: Vec<String>,
     /// Pre-processing stage snapshots, persisted on the controller so later
     /// steps (e.g. AdjustMode) can read them from memory instead of re-parsing
     /// the debug SVGs from disk.  See the matching fields on AppControllerRust.
@@ -322,6 +326,19 @@ pub fn do_process_layout(
         } // if divided
     } // if split
 
+    // 3d-fold: folded fabric with fold lines on the left edge: turn or mirror each
+    // piece with a fold line so its fold line can lie on the edge.  After the
+    // split, so each part with a stretch of fold line goes on the edge.
+    let fold_plan = settings.fold_lines_on_left_edge_applies()
+        .then(|| crate::fold_line_edge::plan_fold_line_edge(&mut flat_dom, &trial_angles_deg))
+        .unwrap_or_default();
+    if !fold_plan.angles.is_empty() || !fold_plan.warnings.is_empty() {
+        log_to_file(&format!(
+            "[debug] layout_utils::do_process_layout(): 5c {} piece(s) go on the left edge; off the edge: {:?}",
+            fold_plan.angles.len(), fold_plan.warnings
+        ));
+    } // if any fold line
+
     // 3e: translate — move each piece's axis-aligned bbox (AABB) min corner up to origin (0,0).
     // Move the flatten-2 DOM into translate_dom (no clone) and translate it in place;
     // translate_dom is retained as the stage snapshot.
@@ -349,6 +366,7 @@ pub fn do_process_layout(
     // and the call routes to MaxRects on `rects` alone.
     let (mut pieces, polygons) = extract_piece_rects_and_polygons(&flat_dom);
     set_free_rotation_without_grainline(&mut pieces, settings.free_rotation_without_grainline());
+    crate::fold_line_edge::pin_fold_line_pieces(&mut pieces, &fold_plan);
     if pieces.is_empty() {
         return Err(
             "[ERROR] layout_utils::do_process_layout(): 8 No pattern pieces found in the imported SVG. \
@@ -792,6 +810,7 @@ pub fn do_process_layout(
         ml_px:       work_ml_px,
         mt_px:       work_mt_px,
         unplaced_labels,
+        fold_line_warnings: fold_plan.warnings,
         flat_dom,
         vertical_dom,
         translate_dom,
@@ -2159,4 +2178,80 @@ mod tests {
         let found = near_duplicate_vertices(&dxf);
         assert!(found.is_empty(), "Nested: {} near-duplicate vertices: {:?}", found.len(), &found[..found.len().min(10)]);
     } // jacket2_dxf_has_no_near_duplicate_vertices
+
+    // @brief Back, a 2 x 4 in half piece with its fold line on its right edge, and Yoke.
+    const FOLD_PIECES_SVG: &str = r#"<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="1000">
+  <g id="pattern-1" data-type="pattern">
+    <g id="piece_Back" data-type="piece" data-name="Back" data-on-fold="true" data-grainline-angle="90">
+      <g id="cutline_Back" data-type="cutline"><path d="M0,0 L192,0 L192,384 L0,384 Z"/></g>
+      <g id="fold_line_Back" data-type="fold_line"><path d="M192,374 L192,10"/></g>
+      <g id="piece_label_Back" data-type="piece_label"><text x="0" y="12" transform="matrix(1 0 0 1 20 50)">Back</text></g>
+    </g>
+    <g id="piece_Yoke" data-type="piece" data-name="Yoke" data-grainline-angle="90">
+      <g id="cutline_Yoke" data-type="cutline"><path d="M0,0 L300,0 L300,96 L0,96 Z"/></g>
+    </g>
+  </g>
+</svg>"#;
+
+    // @brief Lay out FOLD_PIECES_SVG on 20 in fabric, folded, with the given layout mode.
+    fn process_fold_pieces(layout_mode: &str, rotation_step: f64, fold_lines_on_left_edge: bool) -> ProcessLayoutResult {
+        let input = Document::parse(FOLD_PIECES_SVG).expect("valid SVG");
+        let settings = serde_json::json!({
+            "unit": "in", "mediaType": "fabric", "paperType": "roll",
+            "pageWidth": 20.0, "pageHeight": 40.0,
+            "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
+            "pieceGap": 0.125, "layoutMode": layout_mode, "rotationStep": rotation_step,
+            "fabricFolded": true, "foldLinesOnLeftEdge": fold_lines_on_left_edge,
+            "tileSize": "Letter", "tileOrientation": "Portrait"
+        }).to_string();
+        let init = do_initialize_layout(&settings, Some(&input)).expect("initialize");
+        let mut progress = |_pct: i32, _status: Option<&str>| {};
+        do_process_layout(
+            ProcessLayoutArgs {
+                settings_json: &settings,
+                input_dom: &input,
+                initial_layout_dom: &init.initial_dom,
+                layout_h_px: init.h_px,
+                nested_multisize: false,
+                extend_media: false,
+                split_oversized: false,
+            },
+            &mut progress,
+        ).expect("layout")
+    } // fn process_fold_pieces
+
+    // @brief Every x of the fold line path in a layout.
+    fn fold_line_xs(doc: &Document) -> Vec<f64> {
+        fn find<'a>(elem: &'a xmltree::Element) -> Option<&'a xmltree::Element> {
+            if elem.attributes.get("data-type").is_some_and(|t| t == "fold_line") {
+                return Some(elem);
+            } // if fold line
+            elem.children.iter().filter_map(|n| n.as_element()).find_map(find)
+        } // fn find
+        let fold = find(&doc.root).expect("fold line");
+        let path = fold.children.iter().filter_map(|n| n.as_element()).find(|e| e.name == "path").expect("path");
+        let numbers: Vec<f64> = path.attributes["d"]
+            .split(|c: char| !(c.is_ascii_digit() || c == '.' || c == '-'))
+            .filter_map(|t| t.parse().ok())
+            .collect();
+        numbers.iter().step_by(2).copied().collect()
+    } // fn fold_line_xs
+
+    // @brief Folded fabric, fold lines on the left edge: the fold line lies on the left
+    // media edge, which has no margin.  Along grainline turns the piece 180 degrees;
+    // with nap mirrors it.  Off, the fold line stays where the packer puts it.
+    #[test]
+    fn fold_line_lies_on_the_left_edge_of_folded_fabric() {
+        for (mode, step) in [("alongGrainline", 0.0), ("withNap", 0.0), ("withNap", 180.0)] {
+            let result = process_fold_pieces(mode, step, true);
+            assert!(result.unplaced_labels.is_empty() && result.fold_line_warnings.is_empty(), "{mode} {step}");
+            assert_eq!(result.output_doc.get_attr_by_id("contentRect", "x"), Some("0"), "{mode} {step}: no margin on the fold");
+            let xs = fold_line_xs(&result.output_doc);
+            assert!(xs.iter().all(|x| x.abs() < 1.0), "{mode} {step}: fold line at x {xs:?}");
+        } // for each layout mode
+
+        let off = process_fold_pieces("alongGrainline", 0.0, false);
+        assert_eq!(off.output_doc.get_attr_by_id("contentRect", "x"), Some("48"), "the left margin stays");
+        assert!(fold_line_xs(&off.output_doc).iter().all(|x| (x - 48.0).abs() > 1.0), "fold line off the edge");
+    } // fold_line_lies_on_the_left_edge_of_folded_fabric
 } // mod tests

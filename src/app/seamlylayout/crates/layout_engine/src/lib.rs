@@ -262,7 +262,7 @@ pub fn required_bin_width(rects: &[Rect], trial_angles_deg: &[u16]) -> u32 {
     rects
         .iter()
         .filter_map(|r| {
-            piece_trial_set(trial_angles_deg, r.free_rotation)
+            piece_trial_set(trial_angles_deg, r)
                 .into_iter()
                 .map(|deg| rotated_rect_dims(r.w, r.h, deg).0)
                 .min()
@@ -273,7 +273,7 @@ pub fn required_bin_width(rects: &[Rect], trial_angles_deg: &[u16]) -> u32 {
 
 // @brief True when the piece fits an empty `bin_w` × `bin_h` bin at one of its trial angles.
 pub fn fits_bin(r: Rect, bin_w: u32, bin_h: u32, trial_angles_deg: &[u16]) -> bool {
-    piece_trial_set(trial_angles_deg, r.free_rotation)
+    piece_trial_set(trial_angles_deg, &r)
         .into_iter()
         .map(|deg| rotated_rect_dims(r.w, r.h, deg))
         .any(|(rw, rh)| rw <= bin_w && rh <= bin_h)
@@ -281,10 +281,14 @@ pub fn fits_bin(r: Rect, bin_w: u32, bin_h: u32, trial_angles_deg: &[u16]) -> bo
 
 // @brief Trial angles for one piece: the layout mode's set, then, for a
 // free-rotation piece, the quarter turns the set lacks.  Mode angles come
-// first, so ties keep the mode's preferred orientation.
-fn piece_trial_set(trial_angles_deg: &[u16], free_rotation: bool) -> Vec<u16> {
+// first, so ties keep the mode's preferred orientation.  A piece on the left
+// edge has its one angle.
+fn piece_trial_set(trial_angles_deg: &[u16], r: &Rect) -> Vec<u16> {
+    if let Some(angle) = r.left_edge_angle {
+        return vec![angle]; // the angle that puts its fold line on the left
+    } // if on the left edge
     let mut angles: Vec<u16> = if trial_angles_deg.is_empty() { vec![0] } else { trial_angles_deg.to_vec() };
-    if free_rotation {
+    if r.free_rotation {
         for deg in [0u16, 90, 180, 270] {
             if !angles.contains(&deg) {
                 angles.push(deg);
@@ -300,7 +304,7 @@ fn piece_trial_set(trial_angles_deg: &[u16], free_rotation: bool) -> Vec<u16> {
 //         the width, plus the gap; None when no trial angle fits the width,
 //         so no bin height can hold the piece.
 fn stacked_height(r: Rect, bin_w: u32, gap_px: u32, trial_angles_deg: &[u16]) -> Option<u32> {
-    piece_trial_set(trial_angles_deg, r.free_rotation)
+    piece_trial_set(trial_angles_deg, &r)
         .into_iter()
         .map(|deg| rotated_rect_dims(r.w, r.h, deg))
         .filter(|&(rw, _)| rw <= bin_w)
@@ -356,7 +360,7 @@ fn pack_maxrects_collect(
         bin_h,
         gap_px,
         rects,
-        |r| piece_trial_set(trial_angles_deg, r.free_rotation),
+        |r| piece_trial_set(trial_angles_deg, r),
         rotated_rect_dims,
     );
 
@@ -707,4 +711,35 @@ mod tests {
         pack_maxrects_multi_angle(200, 200, 2, &rects, &[0, 180], Some(&mut on_progress)).expect("pack ok");
         assert!((1..=10).contains(&total_steps), "start orders and rules only, got {total_steps}");
     } // strict_packer_skips_the_order_search
+
+    // @brief A left-edge piece sits at x 0 in its one angle; the other pieces pack beside it.
+    #[test]
+    fn left_edge_pieces_touch_the_left_edge() {
+        // Two left-edge pieces, one at 180 degrees, and three plain pieces that
+        // would otherwise take the left column first.
+        let rects = [
+            Rect::new(30, 30),
+            Rect::new(10, 40).with_left_edge(0),
+            Rect::new(30, 30),
+            Rect::new(12, 20).with_left_edge(180),
+            Rect::new(30, 30),
+        ];
+        let (placed, _free, unplaced, _h) =
+            pack_maxrects_multi_angle_extending(100, 60, 2, &rects, &[0, 180], None);
+        assert!(unplaced.is_empty(), "unplaced: {unplaced:?}");
+        let by_id = |id: usize| placed.iter().find(|p| p.id == id).expect("placed");
+        assert_eq!((by_id(1).x, by_id(1).rotation_deg), (0, 0));
+        assert_eq!((by_id(3).x, by_id(3).rotation_deg), (0, 180));
+        assert!(min_clearance(&placed) >= 2, "{placed:?}");
+        assert!(validate_placements(100, 200, &placed));
+    } // left_edge_pieces_touch_the_left_edge
+
+    // @brief A left-edge piece wider than the bin at its angle is left out, not turned.
+    #[test]
+    fn left_edge_piece_is_not_turned_to_fit() {
+        let rects = [Rect::new(20, 8).with_free_rotation(true).with_left_edge(0)];
+        let (_placed, _free, unplaced) =
+            pack_maxrects_multi_angle_lenient(10, 30, 0, &rects, &[0, 90, 180, 270], None);
+        assert_eq!(unplaced, vec![0]);
+    } // left_edge_piece_is_not_turned_to_fit
 }

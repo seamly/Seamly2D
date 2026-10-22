@@ -14,6 +14,12 @@ See full documentation in [`docs/layout-docs/PROCESS LAYOUT WORKFLOW.md`](../../
 | 4 | flatDom_2 | `translate_dom()` | translatedDom | `output/translatedDom.svg` |
 | 5 | translatedDom | `flatten_dom()` | flatDom_3 | `output/flatDom_3.svg` |
 
+Folded fabric with "Place fold lines on the left edge": before step 4,
+`fold_line_edge::plan_fold_line_edge` gives each piece with a vertical fold line
+the packer angle (0 or 180) that brings its fold line to the left. When the
+layout mode forbids that angle, the piece is mirrored across its fold line.
+The packer then puts the piece against the left bin edge (`Rect::with_left_edge`).
+
 ## Layout Engine Pipeline
 
 | Step | Function | Purpose |

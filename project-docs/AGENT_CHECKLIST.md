@@ -28,6 +28,10 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.87.3 | 4, 17 | Marker tab: PDF (Tiled) disabled |
 | Layout.86.3 | 3, 18 | Export > DXF submenu |
 | Layout.84.4 | 19 | Nested exports: one grainline and label set per piece |
+| Layout.80.7 | 20 | Seamly2D: mark a fold line |
+| Layout.80.3.1 | 20 | Seamly2D: Piece Mirror |
+| Layout.80.6.6 | 21 | SeamlyLayout: fold lines on the fold, DXF-ASTM mirror line |
+| Layout.80.6.3 | 21 | Adjust Mode: the fold line moves with its piece |
 
 ## [x] 0. Install
 
@@ -271,3 +275,40 @@ Needs the next MSI. Settings from section 1: Paper, Roll, 48 in.
 - [ ] Export > PDF, PNG, JPG, PostScript (PS), EPS and HPGL > Plot: each piece shows one grainline and one set of labels.
 - [ ] Settings: Paper, Paper Type Sheet. Submit. Create Layout. Nested tab, Export > PDF: same.
 - [ ] Marker tab and Size 220 tab, Export > SVG: every piece keeps its grainline and labels.
+
+## 20. Seamly2D: fold line and Piece Mirror
+
+Needs the next MSI. Any pattern with a half piece, for example a back cut on the fold.
+
+- [ ] Piece mode, Piece Properties > Path: mark two neighbouring nodes Fold Line.
+  - [ ] The fold line is dashed. No seam allowance along it.
+  - [ ] "On fold" is checked and locked.
+  - [ ] Save, reopen: the fold line is still there.
+  - [ ] Press Layout: the handoff has a `fold_line` group (`capture_handoff_*.bat`).
+- [ ] Mark a third node Fold Line: OK is disabled.
+- [ ] Piece mode > Piece Mirror, click the half piece, OK:
+  - [ ] The full piece is right of the half. Its outline is symmetric. Seam allowance all round. No fold line.
+  - [ ] The half piece is out of the layout.
+  - [ ] Draft mode shows the Mirror by Line operation. Move a draft point: both halves follow.
+  - [ ] Undo removes the full piece and the operation. Redo. Save, reopen.
+- [ ] Piece Mirror, click a piece without a fold line: status bar message, no dialog.
+- [ ] A pattern with several draft blocks: mirror a piece of the first block. Undo, redo, save, reopen.
+
+## 21. jacket2: fold lines on the fold
+
+Needs the next MSI. jacket2 Back has a fold line.
+
+- [ ] Settings: Media Fabric, Fabric Width 60 in. "Place fold lines on the left edge (the fold)" is disabled.
+- [ ] Check Fabric Folded: the option is enabled. Check it. Layout Mode Along Grainline. Submit. Create Layout.
+- [ ] Size 220 tab: Back lies with its dashed fold line on the left media edge. No margin left of it.
+- [ ] Marker tab: every size of Back touches the left edge.
+- [ ] Nested tab: Back is not moved to the edge (expected).
+- [ ] Adjust Mode: drag Back. The fold line moves with it. Apply.
+- [ ] Layout Mode With Nap, Pieces point Up. Create Layout. Size 220 tab: Back on the left edge. Its labels read forward, not mirrored.
+- [ ] Uncheck the option. Create Layout: Back leaves the edge; the left margin is back.
+- [ ] Option on, Along Grainline. Base Size 500 tab, Export > DXF > DXF-ASTM (R13). Open the `.dxf`:
+  - [ ] The Back block has one `LINE` on layer `6`.
+  - [ ] Its two points are the first two `VERTEX` points of the layer `1` `POLYLINE`.
+  - [ ] No other block has layer `6`.
+  - [ ] No export warning "the fold line is not on the cut line".
+- [ ] Upload the `.dxf` to https://aw.fyi/dxf: no departure for the Back mirror line. Back is graded.

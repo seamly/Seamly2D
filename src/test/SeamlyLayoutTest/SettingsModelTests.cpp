@@ -60,6 +60,7 @@ private slots:
     void noGrainlineRotation_defaultsToUpright();
     void noGrainlineRotation_roundtripAndJson();
     void scaleGrid_defaultsOffAndRoundtrips();
+    void foldLinesOnLeftEdge_defaultsOffAndRoundtrips();
     void noGrainlineRotation_unknownValueIsUpright();
 
     // Retired keys
@@ -325,6 +326,26 @@ void SettingsModelTests::scaleGrid_defaultsOffAndRoundtrips()
     QCOMPARE(reader.scaleGrid(), true);
     reader.resetToDefaults();
     QCOMPARE(reader.scaleGrid(), false);
+}
+
+// @brief Fold lines on the left edge are off by default; the file and the Rust settings JSON carry the choice.
+void SettingsModelTests::foldLinesOnLeftEdge_defaultsOffAndRoundtrips()
+{
+    QTemporaryDir dir;
+    QVERIFY(dir.isValid());
+    const QString path = dir.filePath(QStringLiteral("settings.json"));
+
+    SettingsModel writer;
+    QCOMPARE(writer.foldLinesOnLeftEdge(), false);
+    writer.setFoldLinesOnLeftEdge(true);
+    QVERIFY(writer.save(path));
+    QVERIFY(writer.toJson().contains(QStringLiteral("\"foldLinesOnLeftEdge\":true")));
+
+    SettingsModel reader;
+    QVERIFY(reader.load(path));
+    QCOMPARE(reader.foldLinesOnLeftEdge(), true);
+    reader.resetToDefaults();
+    QCOMPARE(reader.foldLinesOnLeftEdge(), false);
 }
 
 // @brief An unknown value is coerced to "upright".

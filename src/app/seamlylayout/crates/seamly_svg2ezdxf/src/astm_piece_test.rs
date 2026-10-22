@@ -537,6 +537,41 @@ mod tests {
         assert_eq!(front_quantity(&not_folded).as_deref(), Some("1,1"));
     }
 
+    // @brief The fold line becomes the mirror line; aligned, it is the first boundary edge.
+    // A piece without a fold line has no mirror line.
+    #[test]
+    fn fold_line_becomes_the_mirror_line_at_the_boundary_start() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="960" height="960" viewBox="0 0 960 960">
+          <g id="piece_Back" data-type="piece" data-name="Back" data-on-fold="true">
+            <g data-type="cutline"><path d="M 96,0 L 96,480 L 0,480 L 0,0 Z"/></g>
+            <g id="fold_line_Back" data-type="fold_line"><path d="M 0,470 L 0,10"/></g>
+          </g>
+          <g id="piece_Front" data-type="piece" data-name="Front">
+            <g data-type="cutline"><path d="M 200,0 L 296,0 L 296,96 L 200,96 Z"/></g>
+          </g>
+        </svg>"#;
+        let doc = Document::parse(svg).expect("fixture parses");
+        let mut drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        let (f1, f2) = drawing.blocks[0].mirror_line.expect("mirror line from the fold line");
+        assert!(f1.x.abs() < 1e-9 && f2.x.abs() < 1e-9, "on the left edge");
+        assert!(drawing.blocks[1].mirror_line.is_none(), "no fold line, no mirror line");
+
+        assert!(crate::align_mirror_lines(&mut drawing).is_empty());
+        let back = &drawing.blocks[0];
+        let boundary = back.boundary.as_ref().expect("boundary");
+        let (m1, m2) = back.mirror_line.expect("aligned mirror line");
+        assert_eq!((boundary.reduced[0], boundary.reduced[1]), (m1, m2));
+        assert!(((m1.y - m2.y).abs() - 480.0 * MM_PER_PX).abs() < 1e-6, "the cut line edge, not the shorter fold line");
+    }
+
+    #[test]
+    fn fold_line_group_maps_to_layer_6() {
+        let tagged = xmltree::Element::parse(r#"<g id="piece-3-fold_line-1" data-type="fold_line"/>"#.as_bytes()).expect("element");
+        let by_id = xmltree::Element::parse(r#"<g id="fold_line_Back"/>"#.as_bytes()).expect("element");
+        assert_eq!(crate::layers::map_svg_to_astm_layer(&tagged), "6");
+        assert_eq!(crate::layers::map_svg_to_astm_layer(&by_id), "6");
+    }
+
     #[test]
     fn label_without_cut_line_misses_quantity_only() {
         let svg = TAGGED.replace("Cut 2", "Self");

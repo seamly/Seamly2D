@@ -45,6 +45,11 @@
     > fabricHeight -- height of fabric including margins; default is 0.
     > selvedgeWidth -- default is 0.
     > fabricFold -- checkbox.
+    > foldLinesOnLeftEdge -- checkbox "Place fold lines on the left edge (the fold)"; default off.
+      Enabled only when fabricFold is checked.
+      >> Each piece with a fold line lies with its fold line on the left media edge.
+      >> The left margin is 0: the fold edge has no selvedge.
+      >> Not for a Nested piece-set: its sizes are centred, so their fold lines differ.
     > Margins - marginLeft, marginRight, marginTop, marginBottom
       >> if fabricFold is True then marginLeft=0 else marginLeft=SelvedgeWidth.
       >> marginRight=selvedgeWidth.

@@ -10,6 +10,7 @@
 
 mod astm_contour;
 mod astm_grading;
+mod astm_mirror;
 mod astm_notch;
 mod converter;
 mod drawing;
@@ -30,6 +31,7 @@ pub use astm_contour::{
     build_contour, grade_contours, spline_deviation, spline_points, AstmContour, GradeError, CURVE_TOLERANCE_MM,
 };
 pub use astm_grading::grade_drawing;
+pub use astm_mirror::{align_mirror_lines, MIRROR_LINE_TOLERANCE_MM};
 pub use astm_notch::{build_notches, seam_allowance_at, Notch, NotchKind};
 pub use drawing::{
     Annotation, Block, BlockGrading, Drawing, DxfVersion, GradeRule, GradeRuleTable, MissingPieceData, RuleText, DEFAULT_MATERIAL,

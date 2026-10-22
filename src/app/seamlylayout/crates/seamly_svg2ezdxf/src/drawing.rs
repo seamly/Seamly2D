@@ -110,6 +110,9 @@ pub struct Block {
     pub cutouts: Vec<AstmContour>,
     // Grainline start and end points (layer 7), if present.
     pub grainline: Option<(Point, Point)>,
+    // Mirror line (layer 6): the fold line of a piece cut on the fold. After
+    // `align_mirror_lines` its points are the first two boundary key points.
+    pub mirror_line: Option<(Point, Point)>,
     // Notches (layers 4, 80, 81, 83).
     pub notches: Vec<Notch>,
     // Annotation text (layer 15).
@@ -137,6 +140,7 @@ impl Block {
             internal_lines: Vec::new(),
             cutouts: Vec::new(),
             grainline: None,
+            mirror_line: None,
             notches: Vec::new(),
             annotations: Vec::new(),
             grading: None,

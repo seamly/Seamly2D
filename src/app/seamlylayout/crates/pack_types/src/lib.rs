@@ -21,6 +21,9 @@ pub struct Rect {
     // rectangle, in addition to the layout mode's trial set.  Set for pieces
     // without a grain direction when the user allows free rotation.
     pub free_rotation: bool,
+    // Some(angle): the rectangle touches the left bin edge, at this rotation
+    // only.  Set for a piece whose fold line goes on the fold of the media.
+    pub left_edge_angle: Option<u16>,
 }
 
 impl Rect {
@@ -29,12 +32,17 @@ impl Rect {
     // @param h Height.
     // @return New rectangle.
     pub const fn new(w: u32, h: u32) -> Self {
-        Self { w, h, free_rotation: false }
+        Self { w, h, free_rotation: false, left_edge_angle: None }
     }
 
     // @brief Return a copy with the given free-rotation flag.
     pub const fn with_free_rotation(self, free_rotation: bool) -> Self {
         Self { free_rotation, ..self }
+    }
+
+    // @brief Return a copy that touches the left bin edge at `angle` only.
+    pub const fn with_left_edge(self, angle: u16) -> Self {
+        Self { left_edge_angle: Some(angle), ..self }
     }
 }
 
