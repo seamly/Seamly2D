@@ -2,6 +2,13 @@
 
 ## Current status
 
+### 2026-10-22 — Fold lines on the left edge for paper too, merged into local `run-seamlyLayout`, not pushed
+
+- User decision: the left margin is 0 on fabric, not on paper. The setting now applies to every media and sits under "Add scale check grid"; it no longer needs Fabric Folded.
+- Paper keeps its left margin; the fold line lies on the left content edge. The paper-sheet PDF export pins the same pieces.
+- Verified: `cargo test --workspace` 597 passed; `qmllint` no new kind of warning. Not run: ctest, GUI, MSI (ask first).
+- User check: `AGENT_CHECKLIST.md` §21, now with paper steps.
+
 ### 2026-10-22 — DXF-AAMA (R11) export, merged into local `run-seamlyLayout`, not pushed
 
 - Layout.85: Export > DXF > "DXF-AAMA (R11)". ANSI/AAMA-292 content in a DXF R11 (AC1009) file; reference `dxf-docs/seamlylayout_DXF_AAMA.md`.
