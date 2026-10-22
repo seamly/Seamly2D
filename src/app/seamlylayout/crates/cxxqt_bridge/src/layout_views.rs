@@ -109,17 +109,26 @@ impl ViewKind {
         self.size().is_some()
     } // fn exports_dxf
 
+    // @brief True when PDF (Tiled) can export the tab.
+    //
+    // Marker holds every size of every piece; tiling it locks SeamlyLayout up.
+    pub fn exports_pdf_tiled(&self) -> bool {
+        *self != ViewKind::Marker
+    } // fn exports_pdf_tiled
+
     // @brief True when Export all tabs writes this tab in `format`.
     //
-    // @param format Export format name from QML: "dxf", "pdf", "svg", ...
+    // @param format Export format name from QML: "dxf", "pdf-tiled", "svg", ...
     // DXF-ASTM writes every tab it can export.  Other formats skip the Base Size
-    // tab: its layout repeats the size tab of the same size.
+    // tab: its layout repeats the size tab of the same size.  PDF (Tiled) also
+    // skips Marker.
     pub fn in_all_tabs_export(&self, format: &str) -> bool {
-        if format == "dxf" {
-            self.exports_dxf()
-        } else {
-            !matches!(self, ViewKind::BaseSize(_))
-        } // if DXF
+        let repeats_size_tab = matches!(self, ViewKind::BaseSize(_));
+        match format {
+            "dxf"       => self.exports_dxf(),
+            "pdf-tiled" => self.exports_pdf_tiled() && !repeats_size_tab,
+            _           => !repeats_size_tab,
+        } // match format
     } // fn in_all_tabs_export
 } // impl ViewKind
 
@@ -337,17 +346,22 @@ mod tests {
     } // queued_kinds_follow_tab_order
 
     // @brief DXF-ASTM exports one size; Export all tabs skips the repeated Base Size layout in other formats.
+    //        PDF (Tiled) skips Marker.
     #[test]
     fn view_kinds_choose_their_exports() {
         let (marker, nested) = (ViewKind::Marker, ViewKind::Nested);
         let (base, size) = (ViewKind::BaseSize("36".into()), ViewKind::Size("34".into()));
         assert!(!marker.exports_dxf() && !nested.exports_dxf());
         assert!(base.exports_dxf() && size.exports_dxf());
+        assert!(!marker.exports_pdf_tiled());
+        assert!(nested.exports_pdf_tiled() && base.exports_pdf_tiled() && size.exports_pdf_tiled());
 
         let in_dxf: Vec<bool> = [&marker, &nested, &base, &size].iter().map(|k| k.in_all_tabs_export("dxf")).collect();
         assert_eq!(in_dxf, vec![false, false, true, true]);
         let in_pdf: Vec<bool> = [&marker, &nested, &base, &size].iter().map(|k| k.in_all_tabs_export("pdf")).collect();
         assert_eq!(in_pdf, vec![true, true, false, true]);
+        let in_tiled: Vec<bool> = [&marker, &nested, &base, &size].iter().map(|k| k.in_all_tabs_export("pdf-tiled")).collect();
+        assert_eq!(in_tiled, vec![false, true, false, true]);
 
         assert!(nested.nested() && !marker.nested() && !base.nested());
         assert_eq!((marker.size(), base.size(), size.size()), (None, Some("36"), Some("34")));
