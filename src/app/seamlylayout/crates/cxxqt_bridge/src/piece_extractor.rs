@@ -692,14 +692,14 @@ fn piece_identity(elem: &Element) -> (String, String, String) {
 // Two signals are checked, because real Seamly2D handoffs and hand-built test
 // fixtures use different naming:
 //   1. `data-type` attribute, exact match against a known decoration type
-//      (`notch`, `tuck`, `grainline`, `internal_path`, `drill`, `hole`,
+//      (`notch`, `tuck`, `grainline`, `fold_line`, `internal_path`, `drill`, `hole`,
 //      `piece_label`, `pattern_label`, `size_label`). This is what Seamly2D actually emits
 //      on every decoration group (see `project-docs/SVG-DATA-ATTRIBUTES.md`);
 //      real ids are namespaced as `piece-<N>-<type>-<M>`, so an id-prefix
 //      check alone never matches them.
 //   2. `id` prefix (compared lower-case) — kept for older exports and
 //      hand-written fixtures that set no `data-type`: `notch`, `tuck`,
-//      `grainline` / `grain_`, `ip_`, `drill`, `hole`.
+//      `grainline` / `grain_`, `fold_line`, `ip_`, `drill`, `hole`.
 //
 // Matches the same two-signal check as `polygon_pack::svg_extract::is_non_outline_group`
 // so the bounding-box calculation and the cutline resolver agree on which groups
@@ -710,7 +710,7 @@ fn is_non_outline_group(e: &xmltree::Element) -> bool {
     if let Some(data_type) = e.attributes.get("data-type") {
         if matches!(
             data_type.as_str(),
-            "notch" | "tuck" | "grainline" | "internal_path" | "drill" | "hole"
+            "notch" | "tuck" | "grainline" | "fold_line" | "internal_path" | "drill" | "hole"
                 | "piece_label" | "pattern_label" | "size_label"
         ) {
             return true;
@@ -723,6 +723,7 @@ fn is_non_outline_group(e: &xmltree::Element) -> bool {
         || id_lower.starts_with("tuck")
         || id_lower.starts_with("grainline")
         || id_lower.starts_with("grain_")
+        || id_lower.starts_with("fold_line")
         || id_lower.starts_with("ip_")
         || id_lower.starts_with("drill")
         || id_lower.starts_with("hole")
@@ -1827,4 +1828,15 @@ pub(crate) mod tests {
         assert_eq!(unplaced_piece_lines(&doc, &pieces, &[1, 0]), vec!["Back Bodice", "Front Bodice"]);
     } // unplaced_piece_lines_group_sizes_per_piece
 
+
+    // @brief A fold line is read as a piece component, by `data-type` or by id, never as the outline.
+    #[test]
+    fn fold_line_is_a_component_group() {
+        let tagged = Element::parse(r#"<g id="piece-3-fold_line-1" data-type="fold_line"/>"#.as_bytes()).expect("element");
+        let by_id = Element::parse(r#"<g id="fold_line_Back"/>"#.as_bytes()).expect("element");
+        let outline = Element::parse(r#"<g id="cutline_Back" data-type="cutline"/>"#.as_bytes()).expect("element");
+        assert!(super::is_non_outline_group(&tagged));
+        assert!(super::is_non_outline_group(&by_id));
+        assert!(!super::is_non_outline_group(&outline));
+    } // fold_line_is_a_component_group
 } // mod tests
