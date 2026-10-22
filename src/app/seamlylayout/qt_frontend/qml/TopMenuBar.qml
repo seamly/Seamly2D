@@ -113,7 +113,7 @@ ToolBar {
     // @brief User selected DXF-ASTM (CLO3D) from the Export dropdown.
     signal exportDxfAstmClo3dRequested()
 
-    // @brief User selected DXF-AAMA (R10) from the Export dropdown.
+    // @brief User selected DXF-AAMA (R11) from the Export dropdown.
     signal exportDxfAamaRequested()
 
     // @brief User selected PDF from the Export dropdown (Phase 10).

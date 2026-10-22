@@ -131,14 +131,14 @@ ApplicationWindow {
     property bool   pendingExportAnnotatedVersion: false  // annotated flag for DXF
     property bool   pendingDxfClo3d: false               // CLO3D group 250 flag for DXF
     property bool   pendingDxfAama: false                // DXF-AAMA content instead of DXF-ASTM
-    property string pendingDxfVersion: "R12"             // DXF file version: "R10", "R12" or "R13"
+    property string pendingDxfVersion: "R12"             // DXF file version: "R11", "R12" or "R13"
 
     // @brief Warn about incomplete pieces, ask Standard or Annotated, then ask for a DXF save path.
     // @details The annotated choice comes before the save dialog, so the default
     //          name can carry it. The warning checks the shown tab's layout;
     //          Export all tabs uses the same pieces for every size.
     // @param clo3d      true for DXF-ASTM (CLO3D): D6673 content plus CLO3D group 250.
-    // @param dxfVersion "R10" (AC1006), "R12" (AC1009) or "R13" (AC1012).
+    // @param dxfVersion "R11" or "R12" (both AC1009), or "R13" (AC1012).
     // @param aama       true for DXF-AAMA (ANSI/AAMA-292) content; absent means DXF-ASTM.
     function requestDxfExport(clo3d, dxfVersion, aama) {
         root.pendingDxfClo3d = clo3d
@@ -159,7 +159,7 @@ ApplicationWindow {
     function chooseDxfPath() {
         var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
         // Default name: <importedBaseName>_<R12|R13|CLO3D|AAMA>[_annotated][_<tab>]_YYYYMMDDHHMM.dxf.
-        // CLO3D is always R13 and AAMA always R10, so their names need no version.
+        // CLO3D is always R13 and AAMA always R11, so their names need no version.
         var variant = root.pendingDxfAama  ? "AAMA"
                     : root.pendingDxfClo3d ? "CLO3D"
                     :                        root.pendingDxfVersion
@@ -202,7 +202,7 @@ ApplicationWindow {
     // @param settings pendingExportSettings value for this format.
     // @param annotated DXF annotated-version flag.
     // @param clo3d    DXF CLO3D group 250 flag.
-    // @param dxfVersion DXF file version: "R10", "R12" or "R13".
+    // @param dxfVersion DXF file version: "R11", "R12" or "R13".
     // @param aama     DXF-AAMA flag.
     // @return The AppController export result; false after it emitted errorOccurred.
     function runExport(fmt, path, settings, annotated, clo3d, dxfVersion, aama) {
@@ -602,7 +602,7 @@ ApplicationWindow {
         onExportDxfAstmRequested:      root.requestDxfExport(false, "R12")
         onExportDxfAstmR13Requested:   root.requestDxfExport(false, "R13")
         onExportDxfAstmClo3dRequested: root.requestDxfExport(true, "R13")
-        onExportDxfAamaRequested:      root.requestDxfExport(false, "R10", true)
+        onExportDxfAamaRequested:      root.requestDxfExport(false, "R11", true)
         onExportPngRequested: {
             var dir  = preferencesModel.resolvedLayoutDirectory() // default export directory is the resolved Layout Output Directory
             var name = root.makeExportFileName("png") // default name: <importedBaseName>[_<tab>]_YYYYMMDDHHMM.png

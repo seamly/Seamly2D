@@ -19,7 +19,7 @@
 //   SVG       — Phase 11
 //
 // With showDxfVariants true (Export menu), a "DXF" submenu holds DXF-ASTM (R12),
-// (R13), (CLO3D) and DXF-AAMA (R10); otherwise (View menu) one "DXF-ASTM" item
+// (R13), (CLO3D) and DXF-AAMA (R11); otherwise (View menu) one "DXF-ASTM" item
 // opens any .dxf.
 //
 // With svgModeSubmenu true (Export menu), "SVG" is a submenu of label text
@@ -149,7 +149,7 @@ Menu {
     // @brief Emitted when the user selects DXF-ASTM (CLO3D) export: D6673 plus CLO3D group 250.
     signal exportDxfAstmClo3dRequested()
 
-    // @brief Emitted when the user selects DXF-AAMA (R10) export: ANSI/AAMA-292 in DXF R10 (AC1006).
+    // @brief Emitted when the user selects DXF-AAMA (R11) export: ANSI/AAMA-292 in DXF R11 (AC1009).
     signal exportDxfAamaRequested()
 
     // @brief Emitted when the user selects PDF export (Phase 10).
@@ -266,10 +266,10 @@ Menu {
         } // MenuItem DXF-ASTM (CLO3D)
 
         MenuItem {
-            text: "DXF-AAMA (R10)"
+            text: "DXF-AAMA (R11)"
             enabled: root.layoutReady && root.dxfEnabled
             onTriggered: root.exportDxfAamaRequested()
-        } // MenuItem DXF-AAMA (R10)
+        } // MenuItem DXF-AAMA (R11)
     } // Menu dxfSubmenu
 
     MenuItem {
