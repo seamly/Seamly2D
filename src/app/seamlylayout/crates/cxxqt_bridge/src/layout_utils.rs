@@ -63,7 +63,7 @@ pub struct ProcessLayoutResult {
     pub unplaced_labels: Vec<String>,
     /// Pieces with a fold line that stay off the left edge, with the reason
     /// (`fold_line_edge::FoldEdgePlan::warnings`).  Empty unless the fold
-    /// lines go on the left edge of folded fabric.
+    /// lines go on the left edge.
     pub fold_line_warnings: Vec<String>,
     /// Pre-processing stage snapshots, persisted on the controller so later
     /// steps (e.g. AdjustMode) can read them from memory instead of re-parsing
@@ -326,10 +326,10 @@ pub fn do_process_layout(
         } // if divided
     } // if split
 
-    // 3d-fold: folded fabric with fold lines on the left edge: turn or mirror each
-    // piece with a fold line so its fold line can lie on the edge.  After the
-    // split, so each part with a stretch of fold line goes on the edge.
-    let fold_plan = settings.fold_lines_on_left_edge_applies()
+    // 3d-fold: fold lines on the left edge: turn or mirror each piece with a fold
+    // line so its fold line can lie on the edge.  After the split, so each part
+    // with a stretch of fold line goes on the edge.
+    let fold_plan = settings.fold_lines_on_left_edge
         .then(|| crate::fold_line_edge::plan_fold_line_edge(&mut flat_dom, &trial_angles_deg))
         .unwrap_or_default();
     if !fold_plan.angles.is_empty() || !fold_plan.warnings.is_empty() {
@@ -1165,7 +1165,7 @@ mod tests {
         } // for each leg
 
         // The paper-sheet PDF export splits the same way.
-        let (_, sheet_pieces) = crate::sheets::build_sheet_export_inputs(&input_dom, false, false, result.divide_spec.as_ref())
+        let (_, sheet_pieces) = crate::sheets::build_sheet_export_inputs(&input_dom, false, false, result.divide_spec.as_ref(), None)
             .expect("sheet inputs build");
         assert_eq!(sheet_pieces.len(), labels.len(), "the PDF pages hold the same parts");
 
@@ -1845,7 +1845,7 @@ mod tests {
     fn jacket2_nested_sheet_export_keeps_the_smallest_size_annotations() {
         let (mut input_dom, sizes) = jacket2_handoff();
         assert_eq!(crate::size_labels::add_size_labels(&mut input_dom), 208);
-        let (flat_dom, pieces) = crate::sheets::build_sheet_export_inputs(&input_dom, false, true, None)
+        let (flat_dom, pieces) = crate::sheets::build_sheet_export_inputs(&input_dom, false, true, None, None)
             .expect("sheet export inputs");
         assert_eq!(pieces.len(), 8, "one unit per piece-set");
         let smallest = sizes.iter().min_by(|a, b| crate::size_groups::compare_sizes(a, b)).expect("sizes").clone();
@@ -2193,15 +2193,17 @@ mod tests {
   </g>
 </svg>"#;
 
-    // @brief Lay out FOLD_PIECES_SVG on 20 in fabric, folded, with the given layout mode.
-    fn process_fold_pieces(layout_mode: &str, rotation_step: f64, fold_lines_on_left_edge: bool) -> ProcessLayoutResult {
+    // @brief Lay out FOLD_PIECES_SVG on 20 in folded fabric, or on a 20 x 40 in paper
+    // sheet, with the given layout mode.
+    fn process_fold_pieces(media: &str, layout_mode: &str, rotation_step: f64, fold_lines_on_left_edge: bool) -> ProcessLayoutResult {
         let input = Document::parse(FOLD_PIECES_SVG).expect("valid SVG");
+        let paper_type = if media == "paper" { "sheet" } else { "roll" };
         let settings = serde_json::json!({
-            "unit": "in", "mediaType": "fabric", "paperType": "roll",
+            "unit": "in", "mediaType": media, "paperType": paper_type,
             "pageWidth": 20.0, "pageHeight": 40.0,
             "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
             "pieceGap": 0.125, "layoutMode": layout_mode, "rotationStep": rotation_step,
-            "fabricFolded": true, "foldLinesOnLeftEdge": fold_lines_on_left_edge,
+            "fabricFolded": media == "fabric", "foldLinesOnLeftEdge": fold_lines_on_left_edge,
             "tileSize": "Letter", "tileOrientation": "Portrait"
         }).to_string();
         let init = do_initialize_layout(&settings, Some(&input)).expect("initialize");
@@ -2237,21 +2239,40 @@ mod tests {
         numbers.iter().step_by(2).copied().collect()
     } // fn fold_line_xs
 
-    // @brief Folded fabric, fold lines on the left edge: the fold line lies on the left
-    // media edge, which has no margin.  Along grainline turns the piece 180 degrees;
-    // with nap mirrors it.  Off, the fold line stays where the packer puts it.
+    // @brief Fold lines on the left edge.  Fabric: the fold line lies on the left
+    // media edge, which has no margin.  Paper: on the left content edge; the margin
+    // stays.  Along grainline turns the piece 180 degrees; with nap mirrors it.
+    // Off, the fold line stays where the packer puts it.
     #[test]
-    fn fold_line_lies_on_the_left_edge_of_folded_fabric() {
+    fn fold_line_lies_on_the_left_edge() {
         for (mode, step) in [("alongGrainline", 0.0), ("withNap", 0.0), ("withNap", 180.0)] {
-            let result = process_fold_pieces(mode, step, true);
+            let result = process_fold_pieces("fabric", mode, step, true);
             assert!(result.unplaced_labels.is_empty() && result.fold_line_warnings.is_empty(), "{mode} {step}");
             assert_eq!(result.output_doc.get_attr_by_id("contentRect", "x"), Some("0"), "{mode} {step}: no margin on the fold");
             let xs = fold_line_xs(&result.output_doc);
             assert!(xs.iter().all(|x| x.abs() < 1.0), "{mode} {step}: fold line at x {xs:?}");
         } // for each layout mode
 
-        let off = process_fold_pieces("alongGrainline", 0.0, false);
+        let paper = process_fold_pieces("paper", "alongGrainline", 0.0, true);
+        assert!(paper.unplaced_labels.is_empty() && paper.fold_line_warnings.is_empty());
+        assert_eq!(paper.output_doc.get_attr_by_id("contentRect", "x"), Some("48"), "paper keeps its left margin");
+        let xs = fold_line_xs(&paper.output_doc);
+        assert!(xs.iter().all(|x| (x - 48.0).abs() < 1.0), "paper: fold line at x {xs:?}");
+
+        let off = process_fold_pieces("fabric", "alongGrainline", 0.0, false);
         assert_eq!(off.output_doc.get_attr_by_id("contentRect", "x"), Some("48"), "the left margin stays");
         assert!(fold_line_xs(&off.output_doc).iter().all(|x| (x - 48.0).abs() > 1.0), "fold line off the edge");
-    } // fold_line_lies_on_the_left_edge_of_folded_fabric
+    } // fold_line_lies_on_the_left_edge
+
+    // @brief The paper-sheet PDF input pins the fold line pieces as the layout does.
+    #[test]
+    fn sheet_export_pins_fold_line_pieces() {
+        let input = Document::parse(FOLD_PIECES_SVG).expect("valid SVG");
+        let edge = |trial: Option<&[u16]>| -> Vec<Option<u16>> {
+            let (_, pieces) = crate::sheets::build_sheet_export_inputs(&input, false, false, None, trial).expect("sheet inputs");
+            pieces.iter().map(|p| p.rect.left_edge_angle).collect()
+        }; // edge
+        assert_eq!(edge(Some(&[0, 180])), vec![Some(180), None], "Back on the left edge, turned; Yoke free");
+        assert_eq!(edge(None), vec![None, None]);
+    } // sheet_export_pins_fold_line_pieces
 } // mod tests

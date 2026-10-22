@@ -47,12 +47,15 @@ use crate::exports::{
 // @param free_rotation_allowed  The user's "Rotate freely" choice for pieces without a grainline.
 // @param nested_multisize       `true` packs each multisize piece-set as one unit (Nested layout).
 // @param divide                 The media the layout split its pieces for; None when it did not split.
+// @param fold_line_trial        The layout mode's trial angles when fold lines go on the left
+//                               edge (`fold_line_edge`); None otherwise.
 // @return Tuple of `(flat_dom, pieces)` ready for L.2.1/L.2.2 export logic.
 pub(crate) fn build_sheet_export_inputs(
     input_dom: &Document,
     free_rotation_allowed: bool,
     nested_multisize: bool,
     divide: Option<&crate::piece_divider::DivideSpec>,
+    fold_line_trial: Option<&[u16]>,
 ) -> Result<(Document, Vec<PieceRect>), String> {
     let mut flat_dom = input_dom.clone();
 
@@ -74,11 +77,16 @@ pub(crate) fn build_sheet_export_inputs(
     if let Some(spec) = divide {
         crate::piece_divider::divide_oversized_pieces(&mut flat_dom, spec);
     } // if split
+    // Fold lines on the left edge, as the layout put them.
+    let fold_plan = fold_line_trial
+        .map(|trial| crate::fold_line_edge::plan_fold_line_edge(&mut flat_dom, trial))
+        .unwrap_or_default();
     svg_dom::translate_dom(&mut flat_dom);
     svg_dom::flatten_dom(&mut flat_dom);
 
     let mut pieces = crate::extract_piece_rects(&flat_dom);
     crate::piece_extractor::set_free_rotation_without_grainline(&mut pieces, free_rotation_allowed);
+    crate::fold_line_edge::pin_fold_line_pieces(&mut pieces, &fold_plan);
     if pieces.is_empty() {
         return Err(
             "Sheets PDF: no pattern pieces found in the imported SVG after preprocessing."
@@ -328,7 +336,7 @@ fn flat_dom_and_pieces_for_dims(dims: &[(u32, u32)]) -> (Document, Vec<PieceRect
         groups.join("")
     );
     let input = Document::parse(&svg).expect("test SVG should parse");
-    build_sheet_export_inputs(&input, false, true, None).expect("sheet export inputs should build")
+    build_sheet_export_inputs(&input, false, true, None, None).expect("sheet export inputs should build")
 } // fn flat_dom_and_pieces_for_dims
 
 #[cfg(test)]
