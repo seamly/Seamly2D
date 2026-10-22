@@ -30,7 +30,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.84.4 | 19 | Nested exports: one grainline and label set per piece |
 | Layout.80.7 | 20 | Seamly2D: mark a fold line |
 | Layout.80.3.1 | 20 | Seamly2D: Piece Mirror |
-| Layout.80.6.6 | 21 | SeamlyLayout: fold lines on the fold, DXF-ASTM mirror line |
+| Layout.80.6.6 | 21 | SeamlyLayout: fold lines on the left edge, DXF-ASTM mirror line |
 | Layout.80.6.3 | 21 | Adjust Mode: the fold line moves with its piece |
 | Layout.85.5 | 3, 18, 22 | DXF-AAMA (R11) export |
 
@@ -295,18 +295,20 @@ Needs the next MSI. Any pattern with a half piece, for example a back cut on the
 - [ ] Piece Mirror, click a piece without a fold line: status bar message, no dialog.
 - [ ] A pattern with several draft blocks: mirror a piece of the first block. Undo, redo, save, reopen.
 
-## 21. jacket2: fold lines on the fold
+## 21. jacket2: fold lines on the left edge
 
 Needs the next MSI. jacket2 Back has a fold line.
 
-- [ ] Settings: Media Fabric, Fabric Width 60 in. "Place fold lines on the left edge (the fold)" is disabled.
-- [ ] Check Fabric Folded: the option is enabled. Check it. Layout Mode Along Grainline. Submit. Create Layout.
+- [ ] Settings: "Place fold lines on the left edge (fabric: no left margin)" is under "Add scale check grid", for paper and fabric.
+- [ ] Media Fabric, Fabric Width 60 in, Fabric Folded. Check the option. Layout Mode Along Grainline. Submit. Create Layout.
 - [ ] Size 220 tab: Back lies with its dashed fold line on the left media edge. No margin left of it.
 - [ ] Marker tab: every size of Back touches the left edge.
 - [ ] Nested tab: Back is not moved to the edge (expected).
 - [ ] Adjust Mode: drag Back. The fold line moves with it. Apply.
 - [ ] Layout Mode With Nap, Pieces point Up. Create Layout. Size 220 tab: Back on the left edge. Its labels read forward, not mirrored.
 - [ ] Uncheck the option. Create Layout: Back leaves the edge; the left margin is back.
+- [ ] Option on, Media Paper, Paper Type Roll. Create Layout. Size 220 tab: Back's fold line on the left edge of the content, inside the left margin.
+- [ ] Paper Type Sheet, 36 × 48 in. Create Layout. Size 220 tab, Export > PDF: Back's fold line on the left content edge of its page.
 - [ ] Option on, Along Grainline. Base Size 500 tab, Export > DXF > DXF-ASTM (R13). Open the `.dxf`:
   - [ ] The Back block has one `LINE` on layer `6`.
   - [ ] Its two points are the first two `VERTEX` points of the layer `1` `POLYLINE`.

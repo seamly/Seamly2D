@@ -95,9 +95,8 @@ pub struct LayoutSettings {
     pub fabric_folded: bool,
 
     // True places every piece with a fold line so the fold line lies on the
-    // left media edge: the fold of folded fabric.  Applies to fabric media with
-    // `fabric_folded` only (`fold_lines_on_left_edge_applies`); the fold edge
-    // then has no left margin.
+    // left edge of the content.  Fabric media: the left edge is the fold, with
+    // no left margin (`margin_left_value`).  Paper keeps its left margin.
     #[serde(default)]
     pub fold_lines_on_left_edge: bool,
 
@@ -391,14 +390,9 @@ impl LayoutSettings {
         } // match layout_mode
     } // fn rotation_trial_set_deg
 
-    // @brief True when fold lines go on the left media edge: folded fabric with the option set.
-    pub fn fold_lines_on_left_edge_applies(&self) -> bool {
-        self.fold_lines_on_left_edge && self.fabric_folded && self.media_type == "fabric"
-    } // fn fold_lines_on_left_edge_applies
-
-    // @brief Left margin in the active unit: 0 on the fold edge, else `margin_left`.
+    // @brief Left margin in the active unit: 0 on the fold edge of fabric, else `margin_left`.
     fn margin_left_value(&self) -> f64 {
-        if self.fold_lines_on_left_edge_applies() { 0.0 } else { self.margin_left }
+        if self.fold_lines_on_left_edge && self.media_type == "fabric" { 0.0 } else { self.margin_left }
     } // fn margin_left_value
 
     // @brief True when pieces without a grain direction may be quarter-turned.
@@ -639,26 +633,27 @@ mod tests {
         assert_eq!(w, 1728);
     } // fabric_folded_halves_width
 
-    // @brief Fold lines on the left edge of folded fabric: no left margin. Paper or
-    // unfolded fabric keeps it.
+    // @brief Fold lines on the left edge of fabric, folded or not: no left margin.
+    // Paper keeps its left margin; so does fabric with the option off.
     #[test]
-    fn fold_lines_on_left_edge_drop_the_left_margin() {
+    fn fold_lines_on_left_edge_drop_the_left_margin_of_fabric_only() {
         let json = |media: &str, folded: bool, on_edge: bool| format!(
             r#"{{"unit": "in", "mediaType": "{media}", "paperType": "sheet", "pageWidth": 40.0, "pageHeight": 48.0,
                 "marginLeft": 0.5, "marginRight": 0.5, "marginTop": 0.5, "marginBottom": 0.5,
                 "fabricFolded": {folded}, "foldLinesOnLeftEdge": {on_edge}}}"#);
         let fold = LayoutSettings::from_json(&json("fabric", true, true)).expect("parse ok");
-        assert!(fold.fold_lines_on_left_edge_applies());
+        assert!(fold.fold_lines_on_left_edge);
         assert_eq!(fold.margin_px(), (0, 48, 48, 48));
         // (40 / 2 - 0.5) * 96 = 1872
         assert_eq!(fold.effective_bin_px().0, 1872);
+        let open = LayoutSettings::from_json(&json("fabric", false, true)).expect("parse ok");
+        assert_eq!(open.margin_px().0, 0, "unfolded fabric");
 
-        for (media, folded, on_edge) in [("fabric", false, true), ("paper", true, true), ("fabric", true, false)] {
+        for (media, folded, on_edge) in [("paper", false, true), ("paper", true, true), ("fabric", true, false)] {
             let s = LayoutSettings::from_json(&json(media, folded, on_edge)).expect("parse ok");
-            assert!(!s.fold_lines_on_left_edge_applies(), "{media} folded={folded} on_edge={on_edge}");
             assert_eq!(s.margin_px().0, 48, "{media} folded={folded} on_edge={on_edge}");
         } // for each case that keeps the margin
-    } // fold_lines_on_left_edge_drop_the_left_margin
+    } // fold_lines_on_left_edge_drop_the_left_margin_of_fabric_only
 
     // @brief Millimetre units are converted correctly.
     #[test]

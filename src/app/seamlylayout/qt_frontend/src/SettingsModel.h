@@ -58,7 +58,7 @@ class SettingsModel : public QObject
     Q_PROPERTY(bool    fabricFolded  READ fabricFolded  WRITE setFabricFolded  NOTIFY fabricFoldedChanged)
     // @brief True adds a scale check grid to every layout except Marker: 3 x 3 cm, or 2 x 2 in for inches.
     Q_PROPERTY(bool    scaleGrid     READ scaleGrid     WRITE setScaleGrid     NOTIFY scaleGridChanged)
-    // @brief True puts each piece's fold line on the left edge, the fold; needs folded fabric media.
+    // @brief True puts each piece's fold line on the left content edge; fabric media then has no left margin.
     Q_PROPERTY(bool    foldLinesOnLeftEdge READ foldLinesOnLeftEdge WRITE setFoldLinesOnLeftEdge NOTIFY foldLinesOnLeftEdgeChanged)
 
     // @brief Minimum clearance between adjacent placed pieces, in active units.

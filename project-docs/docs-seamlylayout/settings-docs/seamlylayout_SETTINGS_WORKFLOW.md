@@ -45,11 +45,6 @@
     > fabricHeight -- height of fabric including margins; default is 0.
     > selvedgeWidth -- default is 0.
     > fabricFold -- checkbox.
-    > foldLinesOnLeftEdge -- checkbox "Place fold lines on the left edge (the fold)"; default off.
-      Enabled only when fabricFold is checked.
-      >> Each piece with a fold line lies with its fold line on the left media edge.
-      >> The left margin is 0: the fold edge has no selvedge.
-      >> Not for a Nested piece-set: its sizes are centred, so their fold lines differ.
     > Margins - marginLeft, marginRight, marginTop, marginBottom
       >> if fabricFold is True then marginLeft=0 else marginLeft=SelvedgeWidth.
       >> marginRight=selvedgeWidth.
@@ -72,6 +67,12 @@
      Applies only to pieces with no drawn grainline and no data-grainline-angle.
      'Keep upright' keeps the drafted orientation and the layoutMode trial set.
      'Rotate freely' also lets the packer try 90° and 270° for those pieces.
+- foldLinesOnLeftEdge -- checkbox "Place fold lines on the left edge (fabric: no left margin)"; default off.
+  Every media.
+  >> Each piece with a fold line lies with its fold line on the left content edge.
+  >> media='fabric': marginLeft=0; the left edge is the fold.
+  >> media='paper': marginLeft is kept; the fold line lies on the left content edge.
+  >> Not for a Nested piece-set: its sizes are centred, so their fold lines differ.
 # Save/Load Settings
 - settingSavepath -- opens a file-save dialog in the /settings directorywhen the user clicks the 'Save Settings' button, saves parameters to a file, can be a relative filepath, extension must be '.settings'.
 - settingOpenpath -- opens a file-open dialog in the /settings directory when the user clicks the 'Load Settigs' button, loads parameters from a file, can be a relative filepath, extension must be '.settings'.

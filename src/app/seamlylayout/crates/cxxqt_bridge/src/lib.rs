@@ -31,7 +31,7 @@ mod size_colors;
 // Keeps only the smallest size's grainline and labels in a Nested multisize export.
 mod nested_annotations;
 
-// Puts the fold line of each piece cut on the fold on the left media edge.
+// Puts the fold line of each piece cut on the fold on the left content edge.
 mod fold_line_edge;
 
 // Adds a "Size <size>" label to every piece of a multisize handoff at import.
@@ -2687,11 +2687,13 @@ impl qobject::AppController {
             }; // input_dom, nested_multisize
 
             let divide_spec = self.rust().divide_spec.clone();
+            let trial_angles_deg = settings.rotation_trial_set_deg();
             let (flat_dom, pieces) = match build_sheet_export_inputs(
                 &input_dom,
                 settings.free_rotation_without_grainline(),
                 nested_multisize,
                 divide_spec.as_ref(),
+                settings.fold_lines_on_left_edge.then_some(trial_angles_deg.as_slice()),
             ) {
                 Ok(v) => v,
                 Err(e) => {

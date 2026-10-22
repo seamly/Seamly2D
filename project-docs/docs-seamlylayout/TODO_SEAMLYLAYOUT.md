@@ -247,8 +247,9 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
     - `converter::quantity_from_piece` reads `data-on-fold` for the DXF-ASTM quantity (on fold → `N,0`).
     - `piece_extractor`, `polygon_pack::svg_extract`: `fold_line` is a piece component, never the outline.
     - `piece_divider`: `fold_line` is cut like the seam line. Each part holds the stretch inside it; a part the fold line misses has none.
-  - [x] Layout.80.6.2 Layout setting: Settings > Fabric > "Place fold lines on the left edge (the fold)", under Fabric Folded; enabled only when Fabric Folded is checked. `foldLinesOnLeftEdge`, off by default.
-    - Applies to fabric media with Fabric Folded only. The fold edge has no margin: left margin 0 (`LayoutSettings::margin_px`, `effective_bin_px`).
+  - [x] Layout.80.6.2 Layout setting: Settings > "Place fold lines on the left edge (fabric: no left margin)", under the scale check grid, every media. `foldLinesOnLeftEdge`, off by default.
+    - Fabric, folded or not: the left edge is the fold, left margin 0 (`LayoutSettings::margin_px`, `effective_bin_px`). Paper keeps its left margin; the fold line lies on the left content edge (user decision).
+    - The paper-sheet PDF export plans and pins the same way (`sheets::build_sheet_export_inputs`).
     - `fold_line_edge::plan_fold_line_edge`, after the split and before `translate_dom`: packer angle 0 or 180 brings the fold line to the left of the piece.
     - With nap (one angle only): the piece is mirrored across its fold line instead; text keeps reading forward. Decision taken: the two halves of a piece cut on the fold are mirror images, so the cut is the same.
     - `Rect::with_left_edge`: MaxRects takes only free boxes at x 0; start orders place these pieces first.
@@ -263,8 +264,8 @@ A piece has an "on fold" flag (`VPieceLabelData::IsOnFold()`) but no fold line. 
   - [x] Layout.80.6.5 Tests: Rust import, left-edge placement, split, layer 6 and boundary order.
     - `astm_piece_test::piece_on_fold_counts_every_cut_as_right`, `fold_line_becomes_the_mirror_line_at_the_boundary_start`, `fold_line_group_maps_to_layer_6`; `astm_mirror` (3); `writer_astm_test::mirror_line_is_a_layer_6_line_on_the_boundary_start`; `exports::do_export_dxf_writes_the_mirror_line`.
     - `piece_extractor::fold_line_is_a_component_group`; `svg_extract::find_outline_group_skips_fold_line_at_structural_position_1`; `piece_divider::fold_line_is_clipped_per_part`.
-    - `fold_line_edge` (5); `layout_utils::fold_line_lies_on_the_left_edge_of_folded_fabric`; `layout_views::fold_line_warning_lists_one_piece_per_line`; `layout_engine` `left_edge_pieces_touch_the_left_edge`, `left_edge_piece_is_not_turned_to_fit`; `layout_settings::fold_lines_on_left_edge_drop_the_left_margin`; `SettingsModelTests::foldLinesOnLeftEdge_defaultsOffAndRoundtrips`.
-    - Checked: `cargo test --workspace` 588 passed. `cl /Zs` on `SettingsModel.cpp` and `SettingsModelTests.cpp`. `qmllint SettingsDialog.qml`: no new kind of warning. Not run: ctest, MSI.
+    - `fold_line_edge` (5); `layout_utils::fold_line_lies_on_the_left_edge` (fabric and paper), `sheet_export_pins_fold_line_pieces`; `layout_views::fold_line_warning_lists_one_piece_per_line`; `layout_engine` `left_edge_pieces_touch_the_left_edge`, `left_edge_piece_is_not_turned_to_fit`; `layout_settings::fold_lines_on_left_edge_drop_the_left_margin_of_fabric_only`; `SettingsModelTests::foldLinesOnLeftEdge_defaultsOffAndRoundtrips`.
+    - Checked: `cargo test --workspace` 597 passed. `cl /Zs` on `SettingsModel.cpp` and `SettingsModelTests.cpp`. `qmllint SettingsDialog.qml`: no new kind of warning. Not run: ctest, MSI.
   - [ ] Layout.80.6.6 Next MSI: user check, `AGENT_CHECKLIST.md` §21.
 - [ ] Layout.80.7 Next MSI: Piece Properties > Path, mark two neighbouring nodes Fold Line; check the dashed line, no seam allowance on it, "On fold" checked; save, reopen; Layout Mode handoff has `fold_line`. Mark three nodes: OK disabled. `AGENT_CHECKLIST.md` §20.
 
