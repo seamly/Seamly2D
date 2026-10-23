@@ -4,33 +4,6 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Implement
 
-### [ ] Task Layout.85 - Exports - add an option to export DXF 10 (DXF-AAMA)
-
-Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) file, the DXF version the standard builds on. Same pipeline as DXF-ASTM; `DxfAstmExportOptions::aama` selects the AAMA layers. Reference: `dxf-docs/seamlylayout_DXF_AAMA.md`.
-
-- [x] Layout.85.1 Research ANSI/AAMA-292: AutoCAD R11 DXF base, 14 layers, grade rules in a `.rul` file. D6673 added layers 15 and 80–87.
-- [x] Layout.85.2 Writer (`ezdxf2dxfastm/src/writer.rs`):
-  - `$ACADVER` AC1009 (R11). R11 and R12 share it, so the file structure is the DXF-ASTM (R12) structure.
-  - Dense polylines on layers 1, 8, 11, 14; no validation layers 84–87. Layers 2 and 3 keep the key points.
-  - Every notch on layer 4: T, castle and U become V notches with their width.
-  - Label text on layer 1. A label line that reads as piece text (`Size: 40`) or a rule identifier (`# 2`) is not written.
-  - `Size:` piece text, not `Size Name:`. Style text ends at `Units:`.
-  - `.rul` first line `ANSI/AAMA VERSION:1.0.0`.
-  - Mirror line (layer 6, from the fold line work): the dense boundary starts with its two points. Dense vertices on the fold between them are dropped.
-- [x] Layout.85.3 Menu and bridge: `ExportMenu.qml` item "DXF-AAMA (R11)"; `Main.qml` `requestDxfExport(false, "R11", true)`; options JSON `"aama"`, `"dxfVersion":"R11"`.
-  - Default name `<base>_AAMA[_annotated][_<material>][_<tab>]_<stamp>.dxf`.
-  - Marker and Nested: disabled, as DXF-ASTM. The submenu note is now "DXF: select Base Size or a size tab".
-  - Missing Piece Data dialog, save dialog, progress text and annotated `.txt` title name DXF-AAMA.
-- [x] Layout.85.4 Tests: `writer_astm_test` `aama_r11_header_names_ac1009`, `aama_style_text_has_no_curve_tolerance_or_astm_version`, `aama_block_uses_layers_1_to_14_only`, `aama_labels_never_repeat_piece_text`, `aama_graded_export_writes_rule_ids_and_aama_rule_file`, `aama_annotated_version_names_dxf_aama`, `aama_boundary_starts_on_the_mirror_line`; `exports.rs` `do_export_dxf_writes_aama_r11_when_asked` and AAMA name segments.
-  - Checked: `cargo test --workspace` 596 passed, after the fold line merge. ezdxf 1.4.4 `recover`: male_shirt and graded fixtures as DXF-AAMA, 0 errors, layers 1–14 only. Scratch render of `ExportMenu.qml`: item order, signal, disabled state. `qmllint`: no new warnings.
-  - Not run: ctest, MSI.
-  - Decisions taken:
-    - R11 DXF (AC1009), user decision: ANSI/AAMA-292 compliance. The first version wrote R10 (AC1006) from the task title.
-    - Labels on layer 1, as the Seamly2D and Valentina AAMA writers do. AAMA has no annotation layer.
-    - No `Category:`: the handoff has no value for it.
-  - Open: an untagged SVG (no `data-type`) keeps its generic layers, so its text stays on layer 15.
-- [ ] Layout.85.5 Next MSI: user check, `AGENT_CHECKLIST.md` §22. Import the file in an AAMA reader (CLO3D or another pattern CAD).
-
 ## VERIFY
 
 ### [ ] Task Layout.6 — Verify - DXF-ASTM grading
@@ -333,12 +306,40 @@ For oversized individual-pattern pieces, ask whether to split them or enlarge th
 
 ### [ ] Task Layout.83 - Verify - Multisize - Nested - Legend - change legend color from line to rect element with width equal to current legend color line width and height equal to width. (makes legend easier to read)
 
-### [ ] Task Layout.86 - Verify - Export - Combine the DXF exports into a DXF submenu
-
-### [ ] Task Layout.87 - Verify - Export - Marker - Disable 'PDF (Tiled)' layout for Marker layout (seamlylayout will lock up when exporting a Marker as a tiled layout)
-
-
 - [x] Layout.83.1 `SizeLegend::element`: each swatch is a 32 × 32 px `rect`, filled with the size color, no stroke, centered on its row. Was a 32 px line, stroke width 4.
 - [x] Layout.83.2 Row height 24 → 40 px (swatch plus one 8 px pad), so rows do not overlap. The legend is taller; the media grows to hold it as before.
 - [x] Layout.83.3 Tests: `size_colors` `legend_swatches_are_filled_squares` (new); `legend_wraps_and_lists_every_size` counts swatch rects. `cargo test --workspace` 561 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Nested size colors".
 - [ ] Layout.83.4 Next MSI: user check, `AGENT_CHECKLIST.md` §15.
+
+### [ ] Task Layout.86 - Verify - Export - Combine the DXF exports into a DXF submenu
+
+### [ ] Task Layout.87 - Verify - Export - Marker - Disable 'PDF (Tiled)' layout for Marker layout (seamlylayout will lock up when exporting a Marker as a tiled layout)
+
+### [ ] Task Layout.85 - Exports - add an option to export DXF 10 (DXF-AAMA)
+
+Export > DXF > "DXF-AAMA (R11)": ANSI/AAMA-292 content in a DXF R11 (AC1009) file, the DXF version the standard builds on. Same pipeline as DXF-ASTM; `DxfAstmExportOptions::aama` selects the AAMA layers. Reference: `dxf-docs/seamlylayout_DXF_AAMA.md`.
+
+- [x] Layout.85.1 Research ANSI/AAMA-292: AutoCAD R11 DXF base, 14 layers, grade rules in a `.rul` file. D6673 added layers 15 and 80–87.
+- [x] Layout.85.2 Writer (`ezdxf2dxfastm/src/writer.rs`):
+  - `$ACADVER` AC1009 (R11). R11 and R12 share it, so the file structure is the DXF-ASTM (R12) structure.
+  - Dense polylines on layers 1, 8, 11, 14; no validation layers 84–87. Layers 2 and 3 keep the key points.
+  - Every notch on layer 4: T, castle and U become V notches with their width.
+  - Label text on layer 1. A label line that reads as piece text (`Size: 40`) or a rule identifier (`# 2`) is not written.
+  - `Size:` piece text, not `Size Name:`. Style text ends at `Units:`.
+  - `.rul` first line `ANSI/AAMA VERSION:1.0.0`.
+  - Mirror line (layer 6, from the fold line work): the dense boundary starts with its two points. Dense vertices on the fold between them are dropped.
+- [x] Layout.85.3 Menu and bridge: `ExportMenu.qml` item "DXF-AAMA (R11)"; `Main.qml` `requestDxfExport(false, "R11", true)`; options JSON `"aama"`, `"dxfVersion":"R11"`.
+  - Default name `<base>_AAMA[_annotated][_<material>][_<tab>]_<stamp>.dxf`.
+  - Marker and Nested: disabled, as DXF-ASTM. The submenu note is now "DXF: select Base Size or a size tab".
+  - Missing Piece Data dialog, save dialog, progress text and annotated `.txt` title name DXF-AAMA.
+- [x] Layout.85.4 Tests: `writer_astm_test` `aama_r11_header_names_ac1009`, `aama_style_text_has_no_curve_tolerance_or_astm_version`, `aama_block_uses_layers_1_to_14_only`, `aama_labels_never_repeat_piece_text`, `aama_graded_export_writes_rule_ids_and_aama_rule_file`, `aama_annotated_version_names_dxf_aama`, `aama_boundary_starts_on_the_mirror_line`; `exports.rs` `do_export_dxf_writes_aama_r11_when_asked` and AAMA name segments.
+  - Checked: `cargo test --workspace` 596 passed, after the fold line merge. ezdxf 1.4.4 `recover`: male_shirt and graded fixtures as DXF-AAMA, 0 errors, layers 1–14 only. Scratch render of `ExportMenu.qml`: item order, signal, disabled state. `qmllint`: no new warnings.
+  - Not run: ctest, MSI.
+  - Decisions taken:
+    - R11 DXF (AC1009), user decision: ANSI/AAMA-292 compliance. The first version wrote R10 (AC1006) from the task title.
+    - Labels on layer 1, as the Seamly2D and Valentina AAMA writers do. AAMA has no annotation layer.
+    - No `Category:`: the handoff has no value for it.
+  - Open: an untagged SVG (no `data-type`) keeps its generic layers, so its text stays on layer 15.
+- [ ] Layout.85.5 Next MSI: user check, `AGENT_CHECKLIST.md` §22. Import the file in an AAMA reader (CLO3D or another pattern CAD).
+
+
