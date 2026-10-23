@@ -12,27 +12,36 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Layout.24.7 | 4–7, 12 | Export file names | Material - PASS (Fabric - PASS, Lining - PASS), Nested - PASS, Marker - PASS
 | Layout.26.7 | 5 | Missing Piece Data dialog scrolls |PASS 
 | Layout.27.3.3 | 5 | Base Size 500: all 8 pieces graded | PASS
-| Layout.61.7.2 | 5 | DXF - R13 aw.fyi report | Fabric PASS (report: 7 of 7 graded, 0 departures). Lining not checked.
-| Layout.61.7.2 | 5 | DXF - R12 aw.fyi report | >
 | Layout.69.3 | 9 | PNG and JPG resolution | PASS
-| Layout.71.6 | 11 | Media grows in width | ?
-| Layout.72.8 | 12 | Oversized pieces: split or enlarge |
-| Layout.89.3 | 12 | Oversized pieces dialog: light text |
-| Layout.88.2 | 3 | Export menu: DXF-ASTM note reads in full |
-| Layout.70.5 | 12 | Left-out pieces warning | ?
-| Layout.28.7 | 13 | Built-in seam line | ?
 | Layout.73.5 | 1, 5 | Unique piece names | PASS
-| Seamly2D.12.8 | 14 | SeamlyLayout opens in front | PASS
-| Layout.83.4 | 15 | Nested legend squares |
-| Layout.82.3 | 16 | Nested size colors: dark and pastel |
-| Layout.87.3 | 4, 17 | Marker tab: PDF (Tiled) disabled |
-| Layout.86.3 | 3, 18 | Export > DXF submenu |
-| Layout.84.4 | 19 | Nested exports: one grainline and label set per piece |
-| Layout.80.7 | 20 | Seamly2D: mark a fold line |
-| Layout.80.3.1 | 20 | Seamly2D: Piece Mirror |
-| Layout.80.6.6 | 21 | SeamlyLayout: fold lines on the left edge, DXF-ASTM mirror line |
-| Layout.80.6.3 | 21 | Adjust Mode: the fold line moves with its piece |
-| Layout.85.5 | 3, 18, 22 | DXF-AAMA (R11) export |
+| Seamly2D.12.8 | 14 | SeamlyLayout windows opens in front of Seamly2D | PASS
+
+JACKET_2
+| Layout.61.7.2 | 5 | SL > jacket_2 > DXF-ASTM (R13) - multisize (base size only) - aw.fyi report - Fabric | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | PASS except layer 5 caption (not a departure). Decision open, see §5
+| Layout.84.4 | 19 | SL > jacket_2 > Nested exports: one grainline and label set per piece | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | Not checked: the Nested tab has no DXF export. Run §19
+
+MALE_SHIRT
+| Layout.28.7 | 13 | S2D > male_shirt > Built-in seam line | ?
+| Layout.80.7 | 20 | S2D > male_shirt > mark a fold line | ?
+| Layout.80.3.1 | 20 | S2D: male_shirt > Piece Mirror tool | ?
+
+| Layout.83.4 | 15 | SL > male_shirt > Nested legend squares | ? 
+| Layout.82.3 | 16 | SL > male_shirt > Nested size colors: dark and pastel | ?
+| Layout.87.3 | 4, 17 | SL > male_shirt > Marker tab: PDF (Tiled) disabled | ?
+| Layout.86.3 | 3, 18 | SL > male_shirt > Export > DXF submenu | ?
+| Layout.80.6.6 | 21 | S > male_shirt: fold lines placed along left edge of content rect | ?
+| Layout.80.6.3 | 21 | SL > male_shirt > Adjust Mode: fold line moves with its piece | ?
+| Layout.88.2 | 3 | SL > male_shirt > Export menu: DXF-ASTM note reads in full | ?
+| Layout.80.6.6 | 21 | SL > Export > DXF-ASTM (R13): mirror line | ?
+| Layout.61.7.2 | 5 | SL > male_shirt > DXF-ASTM (R13): aw.fyi report - Lining | ?
+| Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Fabric | ?
+| Layout.85.5 | 3, 18, 22 | SL > male_shirt > DXF-AAMA (R11): aw.fyi report - Lining | ?
+
+TROUSERS
+| Layout.71.6 | 11 | SL > trousers > Media grows in width | ?
+| Layout.72.8 | 12 | SL > trousers > Settings > B0 sheet: Oversized pieces - split or enlarge |
+| Layout.89.3 | 12 | SL > trousers > Settings > B0 sheet: Oversized pieces dialog: light text |
+| Layout.70.5 | 12 | SL > trousers > Left-out pieces warning | ?
 
 ## [x] 0. Install
 
@@ -110,10 +119,19 @@ Export all tabs unchecked.
 - [x] Open the `.rul`: `SAMPLE SIZE:500`, `NUMBER OF SIZES:26`, `RULE: DELTA` lines.
 - [x] Upload the `.dxf` (and the `.rul` if asked) to https://aw.fyi/dxf. Save the report beside the files.
   - Report `jacket2_40-146_R13_Fabric_BaseSize500_202610211408_apparelwerks_compliance_report.pdf`: 0 departures, 5 advisories (no action).
+  - Report `20261023/jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf` (MSI 26.10.2312): 0 departures, the same 5 advisories.
   - [x] All 8 pieces graded. ? --> Fabric: 7 of 7 graded (7 layer 5 lines). Detail 4 is Lining, so it is not in this file.
+    --> Report 1417: 7 of 7 graded, sizes 220–720.
   - [x] No merged "Detail" pieces. ? --> 7 blocks, 7 names.
-  - [x] No layer 5 endpoint mismatch. ? --> none reported.
-  - [x] No duplicate vertices. ? --> none reported.
+    --> Report 1417: same. Names `Size_500_Piece_1_…` to `Size_500_Piece_7_…`, no spaces.
+    --> Cyrillic names are `\U+XXXX` escapes. They decode to Подборт and Комір. aw.fyi shows the escapes (advisory, allowed).
+  - [ ] No layer 5 endpoint mismatch. ? --> none reported.
+    --> Report 1417, page 1 caption: "L5 endpoint mismatch up to 227.990 — sizes not a pure translation". Not a departure.
+    --> Not new: the `.rul` rules match the 1408 export. The 1408 report is a browser print with no overview chart.
+    --> Likely source: Back. Its layer 5 line ends on rule 41 (no growth) and rule 63 (x −132.99 to +104.50 mm).
+    --> Layer 5 sets the X axis of the rules (D6673 §4.3.5). Only a graded nest needs the same line in every size (§4.3.1.5). This file is not a graded nest.
+    --> Decision open: accept as a viewer note, or file a task. Recommended: accept; revisit if §8 (CLO3D) grades Back wrong.
+  - [x] No duplicate vertices. ? --> none reported. Report 1417: none.
   - [ ] Lining tab: Base Size 500, Export > DXF > DXF-ASTM (R13), aw.fyi. Detail 4 graded.
   - Layout.61.7.2 named the Nested tab. Nested has no DXF-ASTM export since Layout.67, so Base Size 500 replaces it.
 
@@ -266,6 +284,9 @@ Needs the next MSI. Settings from section 1.
 ## 19. jacket2: Nested exports show one grainline and label set
 
 Needs the next MSI. Settings from section 1: Paper, Roll, 48 in.
+
+- The DXF report 1417 does not cover this section: the Nested tab has no DXF export.
+- Report 1417 shows no change on Base Size 500: at most one grainline (layer 7) and one label set (layer 15) per piece, as in report 1408. Подборт has no grainline: the pattern hides it.
 
 - [ ] Nested tab canvas: every size still shows its grainline and labels.
 - [ ] Export > SVG, any text mode. Open the file in Inkscape:
