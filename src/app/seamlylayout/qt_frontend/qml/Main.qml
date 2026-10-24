@@ -1354,7 +1354,7 @@ ApplicationWindow {
 
     // -----------------------------------------------------------------------
     // Missing piece data warning — shown before the annotated dialog when pieces
-    // lack Quantity, label or grainline. Cancel stops the export.
+    // lack Quantity or grainline. Cancel stops the export.
     // -----------------------------------------------------------------------
     DxfMissingDataDialog {
         id: dxfMissingDataDialog

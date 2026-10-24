@@ -399,7 +399,7 @@ mod tests {
         let front = &drawing.blocks[0];
         assert_eq!(front.name, "piece_Front_M");
         assert_eq!(front.piece_name, "Front");
-        assert_eq!(front.quantity.as_deref(), Some("1,1"), "Cut 2 → one right, one left");
+        assert_eq!(front.quantity, None, "a \"Cut 2\" label line is not a quantity");
 
         // Boundary: 960 px square = 254 mm, Y inverted inside the 960 px viewBox.
         let boundary = front.boundary.as_ref().expect("boundary");
@@ -455,13 +455,40 @@ mod tests {
 
     #[test]
     fn missing_piece_data_names_incomplete_pieces() {
-        let doc = Document::parse(TAGGED).expect("fixture parses");
+        let svg = TAGGED.replace(r#"data-name="Front">"#, r#"data-name="Front" data-quantity="2">"#);
+        let doc = Document::parse(&svg).expect("fixture parses");
         let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
         let missing = drawing.missing_piece_data();
-        // Front has label, "Cut 2" and grainline; Facing has only a seam line.
+        // Front has data-quantity and a grainline; Facing has only a seam line.
         assert_eq!(missing.len(), 1);
         assert_eq!(missing[0].piece_name, "Facing");
-        assert!(missing[0].quantity && missing[0].label && missing[0].grainline);
+        assert!(missing[0].quantity && missing[0].grainline);
+    }
+
+    // @brief TAGGED without its label group: Seamly2D sends no label group for a hidden label.
+    fn tagged_without_label(svg: &str) -> Document {
+        fn strip_labels(e: &mut xmltree::Element) {
+            e.children.retain(|c| !matches!(c, xmltree::XMLNode::Element(g) if g.attributes.get("data-type").map(String::as_str) == Some("piece_label")));
+            for c in e.children.iter_mut() {
+                if let xmltree::XMLNode::Element(g) = c {
+                    strip_labels(g);
+                } // if element
+            } // for each child
+        } // fn strip_labels
+        let mut doc = Document::parse(svg).expect("fixture parses");
+        strip_labels(&mut doc.root);
+        doc
+    }
+
+    // @brief A label only displays piece data: a piece with a quantity and a grainline lacks nothing without one.
+    #[test]
+    fn hidden_label_is_not_missing_data() {
+        let svg = TAGGED.replace(r#"data-name="Front">"#, r#"data-name="Front" data-quantity="2">"#);
+        let drawing = svg_to_ezdxf(&tagged_without_label(&svg), &SvgToEzdxfOptions::default()).expect("converts");
+        let front = &drawing.blocks[0];
+        assert!(front.annotations.is_empty(), "no label group, no layer 15 text");
+        assert_eq!(front.quantity.as_deref(), Some("1,1"));
+        assert!(drawing.missing_piece_data().iter().all(|m| m.piece_name != "Front"));
     }
 
     // @brief Individual pattern: two pieces named "Detail" with letters, one Cyrillic name, one unnamed.
@@ -526,16 +553,16 @@ mod tests {
     }
 
     #[test]
-    fn data_quantity_comes_before_the_label_line() {
+    fn quantity_comes_from_data_quantity_only() {
         let front = r#"data-name="Front">"#;
         assert_eq!(front_quantity(&[(front, r#"data-name="Front" data-quantity="4">"#)]).as_deref(), Some("2,2"));
         assert_eq!(front_quantity(&[(front, r#"data-name="Front" data-quantity="3">"#)]).as_deref(), Some("3,0"));
-        // No label line needed.
-        let no_label = [(front, r#"data-name="Front" data-quantity="1">"#), ("Cut 2", "Self")];
-        assert_eq!(front_quantity(&no_label).as_deref(), Some("1,0"));
-        // 0 or junk is no quantity: the label line decides.
-        assert_eq!(front_quantity(&[(front, r#"data-name="Front" data-quantity="0">"#)]).as_deref(), Some("1,1"));
-        assert_eq!(front_quantity(&[(front, r#"data-name="Front" data-quantity="x">"#)]).as_deref(), Some("1,1"));
+        // The fixture's "Cut 2" label line is never read.
+        assert_eq!(front_quantity(&[(front, r#"data-name="Front" data-quantity="1">"#)]).as_deref(), Some("1,0"));
+        assert_eq!(front_quantity(&[]), None);
+        // 0 or junk is no quantity.
+        assert_eq!(front_quantity(&[(front, r#"data-name="Front" data-quantity="0">"#)]), None);
+        assert_eq!(front_quantity(&[(front, r#"data-name="Front" data-quantity="x">"#)]), None);
     }
 
     #[test]
@@ -543,8 +570,6 @@ mod tests {
         let front = r#"data-name="Front">"#;
         let folded = [(front, r#"data-name="Front" data-quantity="2" data-on-fold="true">"#)];
         assert_eq!(front_quantity(&folded).as_deref(), Some("2,0"));
-        // The fold flag also applies to a label line quantity.
-        assert_eq!(front_quantity(&[(front, r#"data-name="Front" data-on-fold="true">"#)]).as_deref(), Some("2,0"));
         let not_folded = [(front, r#"data-name="Front" data-quantity="2" data-on-fold="false">"#)];
         assert_eq!(front_quantity(&not_folded).as_deref(), Some("1,1"));
     }
@@ -585,13 +610,12 @@ mod tests {
     }
 
     #[test]
-    fn label_without_cut_line_misses_quantity_only() {
-        let svg = TAGGED.replace("Cut 2", "Self");
-        let doc = Document::parse(&svg).expect("fixture parses");
+    fn cut_label_line_without_data_quantity_misses_quantity() {
+        let doc = Document::parse(TAGGED).expect("fixture parses");
         let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
         let front = drawing.missing_piece_data().into_iter().find(|m| m.piece_name == "Front").expect("front listed");
-        assert!(front.quantity);
-        assert!(!front.label && !front.grainline);
+        assert!(front.quantity, "\"Cut 2\" on the label is not a quantity");
+        assert!(!front.grainline);
     }
 
     // @brief Box with a coarse curved hem: three corners, then 10 segments of

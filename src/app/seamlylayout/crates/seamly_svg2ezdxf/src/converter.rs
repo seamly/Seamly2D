@@ -595,32 +595,23 @@ fn collect_annotations(element: &Element, options: &SvgToEzdxfOptions, svg_heigh
     } // for each child
 } // fn collect_annotations
 
-// @brief `Quantity:` value for a piece: `data-quantity` first, else a "Cut N" label line.
-// @details D6673 quantity is "R,L". Seamly2D states only a total, so an even
-//          total is split into mirrored pairs. An odd total, or a piece cut on
-//          the fold (`data-on-fold="true"`), counts as right pieces: a folded
-//          piece unfolds to one symmetric piece, never a left and right pair.
-// @return None when neither source gives a total above 0.
-fn quantity_from_piece(piece: &Element, annotations: &[Annotation]) -> Option<String> {
-    let attribute_total = piece
+// @brief `Quantity:` value for a piece, from its `data-quantity`.
+// @details Piece Properties are the source; label text only displays them, so a
+//          "Cut N" label line is never read. D6673 quantity is "R,L". Seamly2D
+//          states only a total, so an even total is split into mirrored pairs.
+//          An odd total, or a piece cut on the fold (`data-on-fold="true"`),
+//          counts as right pieces: a folded piece unfolds to one symmetric
+//          piece, never a left and right pair.
+// @return None when `data-quantity` is absent, 0 or not a number.
+fn quantity_from_piece(piece: &Element) -> Option<String> {
+    let total = piece
         .attributes
         .get("data-quantity")
         .and_then(|v| v.trim().parse::<u32>().ok())
-        .filter(|&n| n > 0);
-    let total = attribute_total.or_else(|| quantity_from_label(annotations))?;
+        .filter(|&n| n > 0)?;
     let on_fold = piece.attributes.get("data-on-fold").is_some_and(|v| v.trim() == "true");
     Some(if total % 2 == 0 && !on_fold { format!("{},{}", total / 2, total / 2) } else { format!("{},0", total) })
 } // fn quantity_from_piece
-
-// @brief Cut count from a "Cut N" label line, for an SVG without `data-quantity`.
-fn quantity_from_label(annotations: &[Annotation]) -> Option<u32> {
-    annotations.iter().find_map(|a| {
-        let text = a.text.trim().to_ascii_lowercase();
-        let rest = text.strip_prefix("cut")?.trim_start();
-        let digits: String = rest.chars().take_while(|c| c.is_ascii_digit()).collect();
-        digits.parse().ok().filter(|&n| n > 0)
-    }) // find_map
-} // fn quantity_from_label
 
 // @brief `Material:` value for a piece: its `data-material`, else `DEFAULT_MATERIAL`.
 fn material_from_piece(piece: &Element) -> String {
@@ -681,7 +672,7 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
 
     // Seamly2D prints "<empty>" for unset label fields; it carries no information.
     block.annotations.retain(|a| !a.text.is_empty() && a.text != "<empty>");
-    block.quantity = quantity_from_piece(piece, &block.annotations);
+    block.quantity = quantity_from_piece(piece);
     block.material = material_from_piece(piece);
 
     // Boundary: the longest closed cut line, else the longest closed seam line.
