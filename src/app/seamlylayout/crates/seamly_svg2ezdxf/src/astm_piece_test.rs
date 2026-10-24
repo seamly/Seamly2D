@@ -630,6 +630,38 @@ mod tests {
         assert!(((m1.y - m2.y).abs() - 480.0 * MM_PER_PX).abs() < 1e-6, "the cut line edge, not the shorter fold line");
     }
 
+    // @brief A built-in seam allowance with a fold line: Seamly2D sends the seam line open, both ends on the
+    // fold line. It stays an open sew line that ends on the mirror line; the cut line is the boundary.
+    #[test]
+    fn built_in_seam_line_stops_on_the_fold_line() {
+        let svg = r#"<svg xmlns="http://www.w3.org/2000/svg" width="480" height="480" viewBox="0 0 480 480">
+          <g id="piece_Back" data-type="piece" data-name="Back" data-on-fold="true">
+            <g data-type="seamline" data-turn-points="0 1 2 3"><path d="M 0,48 L 432,48 L 432,432 L 0,432"/></g>
+            <g data-type="cutline" data-turn-points="0 1 2 3"><path d="M 0,0 L 480,0 L 480,480 L 0,480 Z"/></g>
+            <g id="fold_line_Back" data-type="fold_line"><path d="M 0,480 L 0,0"/></g>
+          </g>
+        </svg>"#;
+        let doc = Document::parse(svg).expect("fixture parses");
+        let mut drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        assert!(crate::align_mirror_lines(&mut drawing).is_empty(), "the fold line is on the cut line");
+
+        let back = &drawing.blocks[0];
+        let boundary = back.boundary.as_ref().expect("cut line is the boundary");
+        assert!(boundary.closed);
+        let max_x = boundary.dense.iter().map(|p| p.x).fold(f64::MIN, f64::max);
+        assert!((max_x - 480.0 * MM_PER_PX).abs() < 1e-6, "boundary max x {max_x}");
+
+        assert_eq!(back.sew_lines.len(), 1, "the seam line is the sew line");
+        let sew = &back.sew_lines[0];
+        assert!(!sew.closed, "the sew line does not close along the fold line");
+        let (m1, m2) = back.mirror_line.expect("mirror line from the fold line");
+        let (first, last) = (sew.dense[0], sew.dense[sew.dense.len() - 1]);
+        for end in [first, last] {
+            assert!((end.x - m1.x).abs() < 1e-6 && (end.x - m2.x).abs() < 1e-6, "sew line end {end:?} on the mirror line");
+        }
+        assert!(sew.dense[1..sew.dense.len() - 1].iter().all(|p| p.x > 1.0), "only the ends touch the fold line");
+    }
+
     #[test]
     fn fold_line_group_maps_to_layer_6() {
         let tagged = xmltree::Element::parse(r#"<g id="piece-3-fold_line-1" data-type="fold_line"/>"#.as_bytes()).expect("element");
