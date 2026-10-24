@@ -86,6 +86,7 @@ public:
           builtInSeamLine(),
           builtInSeamLineTurnPoints(),
           builtInSeamLineNodeIndices(),
+          builtInSeamLineClosed(true),
           layoutAllowance(),
           notches(),
           notchLineCounts(),
@@ -121,6 +122,7 @@ public:
           builtInSeamLine(piece.builtInSeamLine),
           builtInSeamLineTurnPoints(piece.builtInSeamLineTurnPoints),
           builtInSeamLineNodeIndices(piece.builtInSeamLineNodeIndices),
+          builtInSeamLineClosed(piece.builtInSeamLineClosed),
           layoutAllowance(piece.layoutAllowance),
           notches(piece.notches),
           notchLineCounts(piece.notchLineCounts),
@@ -156,6 +158,7 @@ public:
     QVector<QPointF>           builtInSeamLine;    /// @brief seam line inside a main path with a built-in seam allowance
     std::optional<QVector<int>> builtInSeamLineTurnPoints; /// @brief turn point indices into builtInSeamLine; unset = unknown
     QVector<int>               builtInSeamLineNodeIndices; /// @brief node vertex indices into builtInSeamLine; empty = unknown
+    bool                       builtInSeamLineClosed; /// @brief false when a fold line cuts builtInSeamLine open
     QVector<QPointF>           layoutAllowance;    /// @brief layoutAllowance list of layout allowance points.
     QVector<QLineF>            notches;            /// @brief notches list of notches.
     QVector<int>               notchLineCounts;    /// @brief line count per notch, in notches order; empty = unknown

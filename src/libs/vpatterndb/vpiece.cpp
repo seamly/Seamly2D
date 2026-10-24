@@ -60,6 +60,7 @@
 #include <QSharedPointer>
 #include <QDebug>
 #include <QPainterPath>
+#include <QPolygonF>
 
 #include <algorithm>
 
@@ -222,6 +223,133 @@ void removeStartPoint(QVector<QPointF> &points)
     points.removeLast();
     points.removeFirst();
     points.append(points.first());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief samePoint tells whether two points are closer than RemoveDublicates() keeps apart.
+ */
+bool samePoint(const QPointF &a, const QPointF &b)
+{
+    return qAbs(a.x() - b.x()) < VGObject::accuracyPointOnLine && qAbs(a.y() - b.y()) < VGObject::accuracyPointOnLine;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setFoldLineWidths gives the fold line edge of a built-in seam line the width 0.
+ * @param points closed path that runs along the fold line from @p foldStart to @p foldEnd.
+ *
+ * The offset of the fold line edge then lies on the fold line, so the seam line meets the fold line. A curve
+ * end at a fold line node repeats the node point; the repeat gets the same width.
+ */
+void setFoldLineWidths(QVector<VSAPoint> &points, const QPointF &foldStart, const QPointF &foldEnd)
+{
+    const int count = points.size();
+    for (int i = 0; i < count; ++i)
+    {
+        const int next = (i + 1) % count;
+        if (!samePoint(points.at(i), foldStart) || !samePoint(points.at(next), foldEnd))
+        {
+            continue;
+        }
+
+        // Walk back over the repeats of the start node, then forward over the repeats of the end node.
+        for (int k = i, steps = 0; steps < count && samePoint(points.at(k), foldStart); ++steps)
+        {
+            points[k].SetSAAfter(0);
+            k = (k + count - 1) % count;
+        }
+        for (int k = next, steps = 0; steps < count && samePoint(points.at(k), foldEnd); ++steps)
+        {
+            points[k].SetSABefore(0);
+            k = (k + 1) % count;
+        }
+        return;
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief openAtFoldLine removes the part of a closed seam line that lies on the fold line.
+ * @param points closed polyline that repeats its first point at the end.
+ * @param fold fold line of the piece.
+ * @return the open seam line, from one end on the fold line around the piece to the other end; @p points when no
+ *         edge lies on the fold line.
+ *
+ * Where several runs of edges lie on the fold line, the longest run goes.
+ */
+QVector<QPointF> openAtFoldLine(const QVector<QPointF> &points, const QLineF &fold)
+{
+    QVector<QPointF> ring = points;
+    if (ring.size() > 1 && samePoint(ring.first(), ring.last()))
+    {
+        ring.removeLast();
+    }
+    const int count = ring.size();
+    if (count < 3 || fold.isNull())
+    {
+        return points;
+    }
+
+    // Edge i runs from vertex i to vertex i + 1.
+    QVector<bool> onFold(count, false);
+    int firstOff = -1;
+    for (int i = 0; i < count; ++i)
+    {
+        onFold[i] = VGObject::IsPointOnLineviaPDP(ring.at(i), fold.p1(), fold.p2())
+                    && VGObject::IsPointOnLineviaPDP(ring.at((i + 1) % count), fold.p1(), fold.p2());
+        if (!onFold.at(i) && firstOff < 0)
+        {
+            firstOff = i;
+        }
+    }
+    if (firstOff < 0)
+    {
+        return points;
+    }
+
+    // Runs of fold edges, searched from an edge off the fold line so that no run wraps past the search start.
+    int bestStart = -1;
+    int bestCount = 0;
+    qreal bestLength = 0;
+    int runStart = -1;
+    int runCount = 0;
+    qreal runLength = 0;
+    for (int k = 1; k <= count; ++k)
+    {
+        const int i = (firstOff + k) % count;
+        if (onFold.at(i))
+        {
+            if (runCount == 0)
+            {
+                runStart = i;
+            }
+            ++runCount;
+            runLength += QLineF(ring.at(i), ring.at((i + 1) % count)).length();
+            continue;
+        }
+        if (runCount > 0 && runLength > bestLength)
+        {
+            bestStart = runStart;
+            bestCount = runCount;
+            bestLength = runLength;
+        }
+        runCount = 0;
+        runLength = 0;
+    }
+    if (bestStart < 0)
+    {
+        return points;
+    }
+
+    // The open line starts at the vertex after the run and ends at the vertex where the run starts.
+    const int start = (bestStart + bestCount) % count;
+    QVector<QPointF> open;
+    for (int k = 0; k <= count - bestCount; ++k)
+    {
+        open.append(ring.at((start + k) % count));
+    }
+    return open;
 }
 }
 
@@ -521,11 +649,12 @@ QVector<QPointF> VPiece::seamAllowancePoints(const VContainer *data, QVector<QPo
 /**
  * @brief builtInSeamLinePoints builds the seam line of a piece whose seam allowance is built into the main path.
  * @param nodeVertices when not null, receives the returned vertices that can break the tangent.
- * @return the closed seam line in main path direction; empty unless the seam allowance is built in.
+ * @return the seam line in main path direction; empty unless the seam allowance is built in. Closed, the first
+ *         point repeated at the end, unless the piece has a fold line: then open, both ends on the fold line.
  *
  * The main path is the cut line. The seam line is the main path offset inward. Each node offsets by the wider of
  * its before and after widths, the piece width when the node sets none. A curve spreads the widths of its ends
- * along its length.
+ * along its length. The fold line is not sewn: the seam line stops where it meets the fold line.
  */
 QVector<QPointF> VPiece::builtInSeamLinePoints(const VContainer *data, QVector<QPointF> *nodeVertices) const
 {
@@ -578,11 +707,22 @@ QVector<QPointF> VPiece::builtInSeamLinePoints(const VContainer *data, QVector<Q
         points = VGObject::GetReversePoints(points);
     }
 
+    // The fold line edge offsets by 0, after the reverse, so that its before and after widths stay on their sides.
+    const QLineF fold = foldLine(data);
+    if (!fold.isNull())
+    {
+        setFoldLineWidths(points, clockwise ? fold.p2() : fold.p1(), clockwise ? fold.p1() : fold.p2());
+    }
+
     // An inward offset makes a loop at a corner next to short curve chords. CheckLoops() cuts the wrong side of a
     // loop that spans the path start, so the offset starts in the middle of the longest edge, where none forms.
     QVector<QPointF> seamLine = Equidistant(startAtLongestEdge(points), width, nodeVertices);
     removeStartPoint(seamLine);
-    return clockwise ? VGObject::GetReversePoints(seamLine) : seamLine;
+    if (clockwise)
+    {
+        seamLine = VGObject::GetReversePoints(seamLine);
+    }
+    return fold.isNull() ? seamLine : openAtFoldLine(seamLine, fold);
 }
 
 QVector<QPointF> VPiece::cutPathPoints(const VContainer *data) const
@@ -714,6 +854,23 @@ QPainterPath VPiece::seamAllowancePath(const QVector<QPointF> &points) const
     }
 
     return ekv;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief builtInSeamLinePath draws builtInSeamLinePoints(): closed, or open with both ends on the fold line.
+ * @return an empty path unless the seam allowance is built in.
+ */
+QPainterPath VPiece::builtInSeamLinePath(const VContainer *data) const
+{
+    const QVector<QPointF> points = builtInSeamLinePoints(data);
+    QPainterPath path;
+    if (!points.isEmpty())
+    {
+        path.addPolygon(QPolygonF(points));
+        path.setFillRule(Qt::WindingFill);
+    }
+    return path;
 }
 
 //---------------------------------------------------------------------------------------------------------------------

@@ -54,6 +54,9 @@
 #include "../vpatterndb/vpiecepath.h"
 #include "../vgeometry/vpointf.h"
 #include "../vwidgets/scalesceneitems.h"
+#include "../ifc/ifcdef.h"
+#include "../vmisc/vabstractapplication.h"
+#include "../vmisc/vcommonsettings.h"
 
 //---------------------------------------------------------------------------------------------------------------------
 PatternPieceVisual::PatternPieceVisual(const VContainer *data, QGraphicsItem *parent)
@@ -61,10 +64,12 @@ PatternPieceVisual::PatternPieceVisual(const VContainer *data, QGraphicsItem *pa
     , m_points()
     , m_line1(nullptr)
     , m_line2(nullptr)
+    , m_seamLine(nullptr)
     , m_piece()
 {
     m_line1 = InitItem<VScaledLine>(supportColor, this);
     m_line2 = InitItem<VScaledLine>(supportColor, this);
+    m_seamLine = InitItem<VCurvePathItem>(supportColor, this);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -75,6 +80,17 @@ void PatternPieceVisual::RefreshGeometry()
     if (m_piece.GetPath().nodeCount() > 0)
     {
         DrawPath(this, m_piece.mainPath(Visualization::data), mainColor, Qt::SolidLine, Qt::RoundCap);
+
+        // A built-in seam allowance makes the main path the cut line; the seam line lies inside it.
+        if (!m_piece.isHideSeamLine())
+        {
+            const QPainterPath seamLine = m_piece.builtInSeamLinePath(Visualization::data);
+            if (!seamLine.isEmpty())
+            {
+                DrawPath(m_seamLine, seamLine, QColor(qApp->Settings()->getDefaultSeamColor()),
+                         lineTypeToPenStyle(qApp->Settings()->getDefaultSeamLinetype()), lineWeight, Qt::RoundCap);
+            }
+        }
 
         const QVector<VPointF> nodes = m_piece.mainPathNodePoints(Visualization::data);
 
@@ -110,6 +126,11 @@ void PatternPieceVisual::HideAllItems()
     if (m_line2)
     {
         m_line2->setVisible(false);
+    }
+
+    if (m_seamLine)
+    {
+        m_seamLine->setVisible(false);
     }
 
     for (int i=0; i < m_points.size(); ++i)

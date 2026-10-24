@@ -128,6 +128,7 @@ public:
     QPainterPath             mainPath(const VContainer *data) const;
     QPainterPath             seamAllowancePath(const VContainer *data) const;
     QPainterPath             seamAllowancePath(const QVector<QPointF> &points) const;
+    QPainterPath             builtInSeamLinePath(const VContainer *data) const;
     QPainterPath             getNotchesPath(const VContainer *data,
                                            const QVector<QPointF> &seamAllowance = QVector<QPointF>()) const;
 

@@ -880,10 +880,12 @@ void PatternPieceTool::paint(QPainter *painter, const QStyleOptionGraphicsItem *
 
     //set seamline pen
     const VPiece piece = VAbstractTool::data.GetPiece(m_id);
+    // A built-in seam line is drawn whatever the seam allowance view: its cut line is the main path.
+    const bool builtIn = piece.hasSeamAllowance() && piece.hasSeamAllowanceBuiltIn();
 
-    if (qApp->Settings()->showSeamAllowances())
+    if (qApp->Settings()->showSeamAllowances() || builtIn)
     {
-        if (piece.hasSeamAllowance() && !piece.hasSeamAllowanceBuiltIn())
+        if (piece.hasSeamAllowance())
         {
             color      = QColor(qApp->Settings()->getDefaultSeamColor());
             lineType   = qApp->Settings()->getDefaultSeamLinetype();
@@ -1547,49 +1549,75 @@ void PatternPieceTool::RefreshGeometry()
     this->setBrush(newBrush);
 
     QPainterPath path = piece.mainPath(this->getData());
-
-    if (!piece.isHideSeamLine() || !piece.hasSeamAllowance() || piece.hasSeamAllowanceBuiltIn())
-    {
-        m_mainPath = QPainterPath();
-        m_allowanceFill->setBrush(QBrush(QColor(qApp->Settings()->getDefaultCutColor()), Qt::Dense7Pattern));
-    }
-    else
-    {
-        m_mainPath = path; // need for returning a bounding rect when main path is not visible
-        path = QPainterPath();
-        m_allowanceFill->setBrush(QBrush(Qt::NoBrush)); // Disable if the main path was hidden
-    }
-
-    this->setPath(path);
-
     QVector<QPointF> seamAllowancePoints;
 
-    if (piece.hasSeamAllowance())
+    if (piece.hasSeamAllowance() && piece.hasSeamAllowanceBuiltIn())
     {
-        seamAllowancePoints = piece.seamAllowancePoints(this->getData());
-    }
-
-    if (piece.hasSeamAllowance() && !piece.hasSeamAllowanceBuiltIn() && qApp->Settings()->showSeamAllowances())
-    {
-        m_cutPath = piece.seamAllowancePath(seamAllowancePoints);
+        // The main path is the cut line. The item draws the seam line inside it, unless the seam line is hidden.
+        m_mainPath = QPainterPath();
+        m_cutPath = path;
         m_cutLine->setPath(m_cutPath);
         m_pieceRect = m_cutLine->boundingRect();
 
-        QPainterPath allowancePath = path;
-        allowancePath.addPath(m_cutPath);
-        allowancePath.setFillRule(Qt::OddEvenFill);
-        m_allowanceFill->setPath(allowancePath);
+        const QPainterPath seamLine = piece.isHideSeamLine() ? QPainterPath()
+                                                              : piece.builtInSeamLinePath(this->getData());
+        this->setPath(seamLine);
 
-        if (piece.isHideSeamLine())
+        // The hatch fills the seam allowance. A seam line that ends on the fold line closes along it.
+        QPainterPath allowancePath;
+        if (!seamLine.isEmpty() && qApp->Settings()->showSeamAllowances())
         {
-            this->setPath(QPainterPath());
+            allowancePath = seamLine;
+            allowancePath.closeSubpath();
+            allowancePath.addPath(m_cutPath);
+            allowancePath.setFillRule(Qt::OddEvenFill);
         }
+        m_allowanceFill->setBrush(QBrush(QColor(qApp->Settings()->getDefaultCutColor()), Qt::Dense7Pattern));
+        m_allowanceFill->setPath(allowancePath);
     }
     else
     {
-        m_cutLine->setPath(QPainterPath());
-        m_allowanceFill->setPath(QPainterPath());
-        m_pieceRect = path.boundingRect();
+        if (!piece.isHideSeamLine() || !piece.hasSeamAllowance())
+        {
+            m_mainPath = QPainterPath();
+            m_allowanceFill->setBrush(QBrush(QColor(qApp->Settings()->getDefaultCutColor()), Qt::Dense7Pattern));
+        }
+        else
+        {
+            m_mainPath = path; // need for returning a bounding rect when main path is not visible
+            path = QPainterPath();
+            m_allowanceFill->setBrush(QBrush(Qt::NoBrush)); // Disable if the main path was hidden
+        }
+
+        this->setPath(path);
+
+        if (piece.hasSeamAllowance())
+        {
+            seamAllowancePoints = piece.seamAllowancePoints(this->getData());
+        }
+
+        if (piece.hasSeamAllowance() && qApp->Settings()->showSeamAllowances())
+        {
+            m_cutPath = piece.seamAllowancePath(seamAllowancePoints);
+            m_cutLine->setPath(m_cutPath);
+            m_pieceRect = m_cutLine->boundingRect();
+
+            QPainterPath allowancePath = path;
+            allowancePath.addPath(m_cutPath);
+            allowancePath.setFillRule(Qt::OddEvenFill);
+            m_allowanceFill->setPath(allowancePath);
+
+            if (piece.isHideSeamLine())
+            {
+                this->setPath(QPainterPath());
+            }
+        }
+        else
+        {
+            m_cutLine->setPath(QPainterPath());
+            m_allowanceFill->setPath(QPainterPath());
+            m_pieceRect = path.boundingRect();
+        }
     }
 
     m_notches->setPath(piece.getNotchesPath(this->getData(), seamAllowancePoints));

@@ -83,7 +83,7 @@ Standard text: `test-seamly-layout-input/D6673-10-expired.docx`.
 
 - Boundary = longest closed `cutline` path.
 - No cut line (no seam allowance, or seam allowances not shown): the longest closed `seamline` is the boundary.
-- Built-in seam allowance: the `cutline` is the main path, so it is the boundary (layer 1). The `seamline` is the line Seamly2D computes inside it, a sew line (layer 14).
+- Built-in seam allowance: the `cutline` is the main path, so it is the boundary (layer 1). The `seamline` is the line Seamly2D computes inside it, a sew line (layer 14). With a fold line the sew line is open: both ends lie on the layer 6 mirror line.
 - A seam line equal to the boundary is not repeated on layer 14.
 
 ## Mirror line (`astm_mirror.rs`)

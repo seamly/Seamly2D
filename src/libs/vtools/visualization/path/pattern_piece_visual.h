@@ -77,6 +77,7 @@ private:
 
     VScaledLine               *m_line1;
     VScaledLine               *m_line2;
+    VCurvePathItem            *m_seamLine;
     VPiece                     m_piece;
 
     VScaledEllipse            *GetPoint(quint32 i, const QColor &color);

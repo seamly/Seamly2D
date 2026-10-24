@@ -1645,7 +1645,9 @@ void TST_VPiece::BuiltInSeamLineUsesWiderNodeWidth() const
     }
     QCOMPARE(VAbstractPiece::isClockwise(seamLine), VAbstractPiece::isClockwise(piece.mainPathPoints(data.data())));
 
-    QCOMPARE(VLayoutPiece::Create(piece, data.data()).getBuiltInSeamLinePoints().size(), 4);
+    const VLayoutPiece layoutPiece = VLayoutPiece::Create(piece, data.data());
+    QCOMPARE(layoutPiece.getBuiltInSeamLinePoints().size(), 4);
+    QVERIFY(layoutPiece.isBuiltInSeamLineClosed());
     QVERIFY(squareWidthPiece(data.data(), false, pieceWidth, before, after)
                 .builtInSeamLinePoints(data.data()).isEmpty());
 }
@@ -1693,6 +1695,150 @@ void TST_VPiece::BuiltInSeamLineFollowsCurve() const
         const qreal distance = distanceToClosedPolyline(p, cutLine);
         QVERIFY2(cutPolygon.containsPoint(p, Qt::OddEvenFill),
                  qPrintable(QStringLiteral("%1, %2 is outside").arg(p.x()).arg(p.y())));
+        QVERIFY2(qAbs(distance - w) < w * 0.01,
+                 qPrintable(QStringLiteral("%1, %2 is %3 from the cut line").arg(p.x()).arg(p.y()).arg(distance)));
+    }
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+void TST_VPiece::BuiltInSeamLineStopsAtFoldLine_data() const
+{
+    QTest::addColumn<QVector<int>>("order");
+    QTest::addColumn<QVector<int>>("foldNodes");
+    QTest::addColumn<QVector<QPointF>>("expected");
+
+    // Square A1 (0, 0), A2 (400, 0), A3 (400, 400), A4 (0, 400); the seam line lies 10 mm inside it. The seam line
+    // runs in main path direction, from the fold line end node around to the fold line start node.
+    const qreal w = ToPixel(10, Unit::Mm);
+    QTest::newRow("top edge")
+        << QVector<int>{1, 2, 3, 4} << QVector<int>{0, 1}
+        << QVector<QPointF>{QPointF(400 - w, 0), QPointF(400 - w, 400 - w), QPointF(w, 400 - w), QPointF(w, 0)};
+    QTest::newRow("closing edge")
+        << QVector<int>{1, 2, 3, 4} << QVector<int>{3, 0}
+        << QVector<QPointF>{QPointF(0, w), QPointF(400 - w, w), QPointF(400 - w, 400 - w), QPointF(0, 400 - w)};
+    QTest::newRow("other direction")
+        << QVector<int>{1, 4, 3, 2} << QVector<int>{3, 0}
+        << QVector<QPointF>{QPointF(w, 0), QPointF(w, 400 - w), QPointF(400 - w, 400 - w), QPointF(400 - w, 0)};
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief BuiltInSeamLineStopsAtFoldLine checks that the seam line of a built-in seam allowance meets the fold line
+ * at both ends and does not run along it.
+ */
+void TST_VPiece::BuiltInSeamLineStopsAtFoldLine() const
+{
+    QFETCH(QVector<int>, order);
+    QFETCH(QVector<int>, foldNodes);
+    QFETCH(QVector<QPointF>, expected);
+
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    // squareWidthPiece() makes the corner points; the row sets the node order and the fold line nodes.
+    VPiece piece = squareWidthPiece(data.data(), true, 10, QString(), QString());
+    QVector<VPieceNode> nodes;
+    for (int id : order)
+    {
+        VPieceNode node(static_cast<quint32>(id), Tool::NodePoint);
+        node.setFoldLine(foldNodes.contains(nodes.size()));
+        nodes.append(node);
+    }
+    piece.GetPath().setNodes(nodes);
+    QVERIFY(piece.hasFoldLine());
+
+    QVector<QPointF> nodeVertices;
+    const QVector<QPointF> seamLine = piece.builtInSeamLinePoints(data.data(), &nodeVertices);
+    QCOMPARE(seamLine.size(), expected.size());
+    for (int i = 0; i < expected.size(); ++i)
+    {
+        QVERIFY2(QLineF(seamLine.at(i), expected.at(i)).length() < 0.01,
+                 qPrintable(QStringLiteral("point %1 is %2, %3").arg(i).arg(seamLine.at(i).x())
+                            .arg(seamLine.at(i).y())));
+    }
+
+    // The ends, on the fold line, are node vertices.
+    const auto isNodeVertex = [&nodeVertices](const QPointF &p)
+    {
+        return std::any_of(nodeVertices.cbegin(), nodeVertices.cend(),
+                           [&p](const QPointF &q) { return QLineF(p, q).length() < 0.01; });
+    };
+    QVERIFY(isNodeVertex(seamLine.first()));
+    QVERIFY(isNodeVertex(seamLine.last()));
+
+    const VLayoutPiece layoutPiece = VLayoutPiece::Create(piece, data.data());
+    QVERIFY(!layoutPiece.isBuiltInSeamLineClosed());
+    QCOMPARE(layoutPiece.getBuiltInSeamLinePoints().size(), expected.size());
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief BuiltInSeamLineStopsAtFoldLineAfterCurve checks that a curve that ends at a fold line node gives the fold
+ * line no seam allowance, and that the seam line follows the curve up to the fold line.
+ */
+void TST_VPiece::BuiltInSeamLineStopsAtFoldLineAfterCurve() const
+{
+    const Unit unit = Unit::Mm;
+    QScopedPointer<VContainer> data(new VContainer(nullptr, &unit));
+    qApp->setPatternUnit(unit);
+
+    data->UpdateGObject(1, new VPointF(0, 0, "A1", 0, 0));
+    data->UpdateGObject(2, new VPointF(400, 0, "A2", 0, 0));
+    VPointF *p3 = new VPointF(400, 400, "A3", 0, 0);
+    data->UpdateGObject(3, p3);
+    VPointF *p4 = new VPointF(0, 400, "A4", 0, 0);
+    data->UpdateGObject(4, p4);
+    // The bottom edge bulges down and ends at A4, the fold line start node.
+    data->UpdateGObject(5, new VSpline(*p3, QPointF(300, 550), QPointF(100, 550), *p4));
+
+    VPieceNode foldStart(4, Tool::NodePoint);
+    foldStart.setFoldLine(true);
+    VPieceNode foldEnd(1, Tool::NodePoint);
+    foldEnd.setFoldLine(true);
+
+    // Fold line on the left edge, from A4 to A1: the closing segment.
+    VPiece piece;
+    piece.SetSeamAllowance(true);
+    piece.SetSeamAllowanceBuiltIn(true);
+    piece.SetSAWidth(10);
+    piece.GetPath().Append(foldEnd);
+    piece.GetPath().Append(VPieceNode(2, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(3, Tool::NodePoint));
+    piece.GetPath().Append(VPieceNode(5, Tool::NodeSpline));
+    piece.GetPath().Append(foldStart);
+
+    const QVector<QPointF> seamLine = piece.builtInSeamLinePoints(data.data());
+    QVERIFY2(seamLine.size() > 4, qPrintable(QString::number(seamLine.size())));
+
+    const qreal w = ToPixel(10, unit);
+    QVERIFY2(QLineF(seamLine.first(), QPointF(0, w)).length() < 0.01,
+             qPrintable(QStringLiteral("%1, %2").arg(seamLine.first().x()).arg(seamLine.first().y())));
+    // The curve meets the fold line at an obtuse corner, so its seam line meets the fold line farther up than w.
+    QVERIFY2(qAbs(seamLine.last().x()) < 0.01 && seamLine.last().y() > w && seamLine.last().y() < 400 - w,
+             qPrintable(QStringLiteral("%1, %2").arg(seamLine.last().x()).arg(seamLine.last().y())));
+
+    // Every other point lies 10 mm from the cut line without its fold line edge, the closing segment.
+    const QVector<QPointF> cutLine = piece.mainPathPoints(data.data());
+    const auto distanceToSewnEdges = [&cutLine](const QPointF &point)
+    {
+        qreal distance = std::numeric_limits<qreal>::infinity();
+        for (int i = 1; i < cutLine.size(); ++i)
+        {
+            const QPointF a = cutLine.at(i - 1);
+            const QPointF ab = cutLine.at(i) - a;
+            const qreal lengthSquared = QPointF::dotProduct(ab, ab);
+            const qreal t = lengthSquared > 0 ? qBound(0.0, QPointF::dotProduct(point - a, ab) / lengthSquared, 1.0)
+                                              : 0;
+            distance = qMin(distance, QLineF(point, a + t * ab).length());
+        }
+        return distance;
+    };
+    for (int i = 1; i < seamLine.size() - 1; ++i)
+    {
+        const QPointF p = seamLine.at(i);
+        QVERIFY2(p.x() > 0.01, qPrintable(QStringLiteral("%1, %2 is on the fold line").arg(p.x()).arg(p.y())));
+        const qreal distance = distanceToSewnEdges(p);
         QVERIFY2(qAbs(distance - w) < w * 0.01,
                  qPrintable(QStringLiteral("%1, %2 is %3 from the cut line").arg(p.x()).arg(p.y()).arg(distance)));
     }

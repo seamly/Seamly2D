@@ -355,9 +355,9 @@ VLayoutPiece makeBuiltInPiece(const QString &name)
 
 //---------------------------------------------------------------------------------------------------------------------
 /**
- * @brief pathBounds returns the bounding box of every coordinate pair in the path data under a group.
+ * @brief pathNumbers returns every number in the path data under a group, in path order.
  */
-QRectF pathBounds(const QDomElement &group)
+QVector<qreal> pathNumbers(const QDomElement &group)
 {
     static const QRegularExpression number(QStringLiteral("-?\\d+(?:\\.\\d+)?(?:[eE]-?\\d+)?"));
     QVector<qreal> values;
@@ -370,6 +370,16 @@ QRectF pathBounds(const QDomElement &group)
             values.append(it.next().captured().toDouble());
         }
     }
+    return values;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief pathBounds returns the bounding box of every coordinate pair in the path data under a group.
+ */
+QRectF pathBounds(const QDomElement &group)
+{
+    const QVector<qreal> values = pathNumbers(group);
 
     if (values.size() < 2)
     {
@@ -1196,6 +1206,41 @@ void TST_SvgComponentTags::BuiltInPieceHiddenSeamLineSendsCutlineOnly() const
     QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
     QCOMPARE(groupsOfType(doc, QStringLiteral("cutline")).size(), 1);
     QCOMPARE(groupsOfType(doc, QStringLiteral("seamline")).size(), 0);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief BuiltInPieceWithFoldLineSendsOpenSeamline checks that a built-in seam line that a fold line cuts open is
+ * sent open, with turn points at both ends, together with the cutline and the fold line.
+ */
+void TST_SvgComponentTags::BuiltInPieceWithFoldLineSendsOpenSeamline() const
+{
+    // The fold line is the left side of the 180 square; the seam line meets it 10 inside the top and bottom sides.
+    VLayoutPiece piece = makeBuiltInPiece(QStringLiteral("Facing"));
+    const QVector<QPointF> seamLine{QPointF(10, 20), QPointF(180, 20), QPointF(180, 180), QPointF(10, 180)};
+    piece.setBuiltInSeamLinePoints(seamLine, seamLine, false);
+    piece.setFoldLine(QVector<QPointF>{QPointF(10, 190), QPointF(10, 10)});
+
+    const QDomDocument doc = exportPieceSvg(piece);
+    QVERIFY2(!doc.isNull(), "Generated SVG could not be produced or parsed");
+    QCOMPARE(groupsOfType(doc, QStringLiteral("fold_line")).size(), 1);
+    const QVector<QDomElement> cutlines = groupsOfType(doc, QStringLiteral("cutline"));
+    QCOMPARE(cutlines.size(), 1);
+    const QVector<QDomElement> seamlines = groupsOfType(doc, QStringLiteral("seamline"));
+    QCOMPARE(seamlines.size(), 1);
+    QCOMPARE(seamlines.at(0).attribute(QStringLiteral("data-turn-points")), QStringLiteral("0 1 2 3"));
+
+    // Four vertices and no closing one: the path does not return along the fold line.
+    const QDomNodeList paths = seamlines.at(0).elementsByTagName(QStringLiteral("path"));
+    QCOMPARE(paths.size(), 1);
+    const QString d = paths.at(0).toElement().attribute(QStringLiteral("d"));
+    const QVector<qreal> values = pathNumbers(seamlines.at(0));
+    QVERIFY2(!d.contains(QLatin1Char('Z'), Qt::CaseInsensitive), qPrintable(d));
+    QCOMPARE(values.size(), 8);
+
+    // Both ends lie on the fold line, the left side of the cutline.
+    const QRectF cut = pathBounds(cutlines.at(0));
+    QVERIFY2(qAbs(values.at(0) - cut.left()) < 0.01 && qAbs(values.at(6) - cut.left()) < 0.01, qPrintable(d));
 }
 
 namespace

@@ -703,8 +703,10 @@ void VDxfEngine::ExportAAMADraw(dx_ifaceBlock *detailBlock, const VLayoutPiece &
 {
     if (not detail.isHideSeamLine())
     {
-        QVector<QPointF> poly = detail.getContourPoints();
-        DRW_Entity *e = AAMAPolygon(poly, "8", true);
+        // A built-in seam allowance makes the main path the outline, so the seam line is the one inside it.
+        const bool builtIn = detail.hasSeamAllowance() && detail.hasSeamAllowanceBuiltIn();
+        const QVector<QPointF> poly = builtIn ? detail.getBuiltInSeamLinePoints() : detail.getContourPoints();
+        DRW_Entity *e = AAMAPolygon(poly, "8", builtIn ? detail.isBuiltInSeamLineClosed() : true);
         if (e)
         {
             detailBlock->ent.push_back(e);
