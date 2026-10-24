@@ -71,8 +71,11 @@ public:
     PieceRotation getRotationWay() const;
     void          SetRotationWay(PieceRotation val);
 
-    QString GetTilt() const;
-    void    SetTilt(const QString &val);
+    PieceTilt GetTilt() const;
+    void      SetTilt(PieceTilt val);
+
+    int  getTiltDegrees() const;
+    void setTiltDegrees(int degrees);
 
     QString GetFoldPosition() const;
     void    SetFoldPosition(const QString &val);
@@ -89,6 +92,10 @@ public:
     static QString       rotationToString(PieceRotation rotation);
     static PieceRotation stringToRotation(const QString &value);
     static QString       rotationDisplayName(PieceRotation rotation);
+
+    static QString   tiltToString(PieceTilt tilt);
+    static PieceTilt stringToTilt(const QString &value);
+    static QString   tiltDisplayText(PieceTilt tilt, int degrees);
 
 private:
     QSharedDataPointer<VPieceLabelDataPrivate> d;

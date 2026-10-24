@@ -42,6 +42,15 @@ const char *const pieceRotations[] = {
     QT_TRANSLATE_NOOP("PieceRotation", "4-Way"),
     QT_TRANSLATE_NOOP("PieceRotation", "Any")
 };
+
+// Tilt directions as the pattern file stores them, in PieceTilt order; the user sees them translated.
+const char *const pieceTilts[] = {
+    QT_TRANSLATE_NOOP("PieceTilt", "None"),
+    QT_TRANSLATE_NOOP("PieceTilt", "CCW"),
+    QT_TRANSLATE_NOOP("PieceTilt", "CW")
+};
+
+const int maxTiltDegrees = 90;
 }
 
 #ifdef Q_COMPILER_RVALUE_REFS
@@ -135,15 +144,29 @@ void VPieceLabelData::SetRotationWay(PieceRotation val)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QString VPieceLabelData::GetTilt() const
+PieceTilt VPieceLabelData::GetTilt() const
 {
     return d->m_tilt;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void VPieceLabelData::SetTilt(const QString &val)
+void VPieceLabelData::SetTilt(PieceTilt val)
 {
     d->m_tilt = val;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Largest angle the piece may tilt in the GetTilt() direction, 0 to 90 degrees.
+int VPieceLabelData::getTiltDegrees() const
+{
+    return d->m_tiltDegrees;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @param degrees tilt angle; a value outside 0 to 90 is clamped to that range.
+void VPieceLabelData::setTiltDegrees(int degrees)
+{
+    d->m_tiltDegrees = qBound(0, degrees, maxTiltDegrees);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -226,4 +249,40 @@ PieceRotation VPieceLabelData::stringToRotation(const QString &value)
 QString VPieceLabelData::rotationDisplayName(PieceRotation rotation)
 {
     return QCoreApplication::translate("PieceRotation", pieceRotations[static_cast<int>(rotation)]);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Tilt direction as the pattern file stores it (untranslated).
+QString VPieceLabelData::tiltToString(PieceTilt tilt)
+{
+    return QString::fromLatin1(pieceTilts[static_cast<int>(tilt)]);
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Tilt direction of a pattern file value; an empty or unknown value is PieceTilt::None.
+PieceTilt VPieceLabelData::stringToTilt(const QString &value)
+{
+    PieceTilt tilt = PieceTilt::None;
+    int index = 0;
+    for (const char *name : pieceTilts)
+    {
+        if (value == QLatin1String(name))
+        {
+            tilt = static_cast<PieceTilt>(index);
+        }
+        ++index;
+    }
+    return tilt;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Translated tilt for display: the direction, then the degrees when the piece may tilt ("CCW 15").
+QString VPieceLabelData::tiltDisplayText(PieceTilt tilt, int degrees)
+{
+    QString text = QCoreApplication::translate("PieceTilt", pieceTilts[static_cast<int>(tilt)]);
+    if (tilt != PieceTilt::None)
+    {
+        text += QLatin1Char(' ') + QString::number(degrees);
+    }
+    return text;
 }

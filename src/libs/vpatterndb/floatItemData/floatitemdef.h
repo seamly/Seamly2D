@@ -73,4 +73,12 @@ enum class PieceRotation : char
     Any
 };
 
+// direction in which a piece may tilt in a layout; the values keep the order of the piece dialog choices
+enum class PieceTilt : char
+{
+    None,
+    CounterClockwise,
+    Clockwise
+};
+
 #endif // FLOATITEMDEF_H
