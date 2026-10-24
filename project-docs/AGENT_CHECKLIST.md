@@ -20,6 +20,7 @@ JACKET_2
 | Layout.61.7.2 | 5 | SL > jacket_2 > DXF-ASTM (R13) - multisize (base size only) - aw.fyi report - Fabric | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | PASS. Layer 5 caption accepted as a viewer note
 | Layout.84.4 | 19 | SL > jacket_2 > Nested exports: one grainline and label set per piece | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | Not checked: the Nested tab has no DXF export. Run §19
 | Layout.93.7 | 23 | SL > jacket_2 > DXF piece properties: Material, Missing Piece Data | ?
+| Layout.92.4 | 25 | SL > jacket_2 > Material tabs over the layout; every material laid out | ?
 
 MALE_SHIRT
 | Layout.28.7 | 13 | S2D > male_shirt > Built-in seam line | ?
@@ -398,3 +399,17 @@ Needs the next MSI. Pattern: `male_shirt.sm2d`, an older format. Save it under a
 - [ ] Select Vertical. OK. Save: the `piece` element has `flip="Vertical"` and no `forbidFlipping`. Reopen: Vertical.
 - [ ] Right-click the piece: "Flip" submenu, Vertical checked. Choose Both. Undo: back to Vertical.
 - [ ] Preferences > Pattern: no "Forbid flipping" check box. Help > Shortcuts: no "Forbid Flipping F" row.
+
+## 25. jacket2: material tabs over the layout
+
+Needs the next MSI. jacket2 handoff: Fabric and Lining. Settings from section 1.
+
+- [ ] Before Settings: tabs Fabric and Lining over both canvases. Fabric is shown on both.
+- [ ] Settings > Submit. Click Lining over the right canvas: both tab bars show Lining; the right canvas shows a blank canvas.
+- [ ] Back to Fabric. Create Layout. The popup names each layout: "Laying out Nested (2 of …)", later "Laying out Lining: Marker", "Lining: Size 220".
+- [ ] When the popup closes, Fabric shows its Marker tab. Click Lining over the right canvas: the left canvas shows Detail 4; the right canvas shows the Lining Marker tab with its own tabs.
+- [ ] Lining: select Size 300. Back to Fabric, then Lining again: Size 300 is still shown.
+- [ ] Lining, Adjust Mode: move Detail 4, Save. Switch to Fabric and back: the move is still there.
+- [ ] While Create Layout runs and in Adjust Mode, both material tab bars are locked.
+- [ ] Lining, Size 300 tab, Export > SVG: the default name has `_Lining_Size300_`. The file holds Detail 4 only.
+- [ ] Individual pattern with two materials (male_shirt: set one piece's Material to Lining): Create Layout lays out both; each tab shows its pieces.

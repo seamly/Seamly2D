@@ -56,6 +56,17 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 Currently SeamlyLayout's left input canvas displays the Material types in tabs; the layout algorithm processes only the currently selected Material tab from the left hand canvas. Update the layout algorithm to generate the layouts for all material tabs, and display the material layouts in the right hand canvas using Material tabs (as is done in the left input canvas).
 
+- [x] Layout.92.1 Create Layout lays out every material: the shown material first, then each other material in tab order, each with its first layout (individual layout or Marker) and all its tabs. One progress popup; labels name the material: "Laying out Lining: Size 220 (30 of 56)…".
+  - `layout_views::layout_jobs`, `LayoutJob`; `TabLayoutQueue` holds jobs of every material, labels (`job_label`), the Base Size reuse per material, and the final warning (`final_warning`: left-out pieces, then fold lines off the edge).
+  - Settings Submit makes a blank canvas per material (`initialize_layout`); the oversized-pieces dialog lists the pieces of every material.
+- [x] Layout.92.2 Right canvas: material tabs above the layout tabs, the same tabs as over the left canvas (`Main.qml` inline component `MaterialTabBar`). One material: the "Material: <m>" header stays.
+  - Decision taken: both tab bars show the same material. A click on either shows that material's pieces on the left and its layouts on the right.
+  - Decision taken: a material switch keeps every layout, its shown tab and its Adjust edits (`layout_views::MaterialLayout`; `select_material` parks and restores, as tabs do). Replaces the Layout.77.1.2 rule that a switch drops the layout.
+  - Exports and Export all tabs work on the shown material, as before.
+- [x] Layout.92.3 Tests: `layout_views` `layout_jobs_cover_every_material`, `job_labels_name_the_material`, `final_warning_joins_problems_and_fold_lines`, `material_layout_resets_to_its_blank_canvas`; `tab_queue_messages_count_up` and `base_size_layout_is_reused_once_kept` updated. Existing `material_split::material_layout_holds_its_own_pieces` lays out each material. Doc: `SVG-DATA-ATTRIBUTES.md`, "Materials".
+  - Checked: `cargo test --workspace` 603 passed; `ctest --preset debug` 6 of 6 (debug build with the new QML); `qmllint`: no new kind of warning. Not run: GUI, MSI.
+- [ ] Layout.92.4 Next MSI: user check, `AGENT_CHECKLIST.md` §25.
+
 ### [ ] Task Layout.93 - Implement - DXF - for each piece, use its 'piece tool' properties and attributes as source of truth instead of labels for names, letter, quantity, material, foldline, etc.; track this data with the layout pieces.
 
 This information should be tracked in the layout data even if it's not shown in a label. The DXF export can then access piece properties instead of label data to generate the exported file.
