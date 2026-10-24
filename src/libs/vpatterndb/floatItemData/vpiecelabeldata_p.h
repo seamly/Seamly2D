@@ -52,7 +52,6 @@ public:
         ,  m_rotation(PieceRotation::None)
         ,  m_tilt(PieceTilt::None)
         ,  m_tiltDegrees(0)
-        ,  m_foldPosition()
         ,  m_quantity(1)
         ,  m_onFold(false)
         ,  m_lines()
@@ -66,7 +65,6 @@ public:
         ,  m_rotation(data.m_rotation)
         ,  m_tilt(data.m_tilt)
         ,  m_tiltDegrees(data.m_tiltDegrees)
-        ,  m_foldPosition(data.m_foldPosition)
         ,  m_quantity(data.m_quantity)
         ,  m_onFold(data.m_onFold)
         ,  m_lines(data.m_lines)
@@ -81,7 +79,6 @@ public:
     PieceRotation m_rotation;
     PieceTilt m_tilt;
     int     m_tiltDegrees; /** @brief m_tiltDegrees largest tilt angle, 0 to 90 degrees */
-    QString m_foldPosition;
 
     int     m_quantity;
     bool    m_onFold;

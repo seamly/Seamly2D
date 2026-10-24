@@ -552,7 +552,6 @@ void EditLabelTemplateDialog::InitPlaceholders()
     m_placeholders.insert(pl_pOrientation, qMakePair(tr("Piece orientation"), QString("")));
     m_placeholders.insert(pl_pRotation, qMakePair(tr("Piece rotation"), QString("")));
     m_placeholders.insert(pl_pTilt, qMakePair(tr("Piece tilt"), QString("")));
-    m_placeholders.insert(pl_pFoldPosition, qMakePair(tr("Piece fold position"), QString("")));
     m_placeholders.insert(pl_pName, qMakePair(tr("Piece name"), QString("")));
     m_placeholders.insert(pl_pQuantity, qMakePair(tr("Quantity"), QString("")));
     m_placeholders.insert(pl_mFabric, qMakePair(tr("Material: Fabric"), tr("Fabric")));
@@ -642,7 +641,6 @@ void EditLabelTemplateDialog::SetPiece(const VPiece &piece)
     m_placeholders[pl_pRotation].second = VPieceLabelData::rotationDisplayName(pieceData.getRotationWay());
     m_placeholders[pl_pTilt].second = VPieceLabelData::tiltDisplayText(pieceData.GetTilt(),
                                                                        pieceData.getTiltDegrees());
-    m_placeholders[pl_pFoldPosition].second = pieceData.GetFoldPosition();
     m_placeholders[pl_pName].second = piece.GetName();
     m_placeholders[pl_pQuantity].second = QString::number(pieceData.GetQuantity());
     if (pieceData.IsOnFold())

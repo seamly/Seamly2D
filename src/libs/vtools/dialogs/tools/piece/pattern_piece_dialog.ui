@@ -570,7 +570,7 @@ QListWidget::item:selected {
                  </font>
                 </property>
                 <property name="text">
-                 <string>Placement:</string>
+                 <string>Fold:</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -591,71 +591,15 @@ QListWidget::item:selected {
                   <bold>false</bold>
                  </font>
                 </property>
+                <property name="toolTip">
+                 <string>The piece is cut on a fold of the fabric. DXF exports write Fold:Y.</string>
+                </property>
                 <property name="text">
-                 <string>on fold</string>
+                 <string>On fold</string>
                 </property>
                </widget>
               </item>
               <item row="5" column="0">
-               <widget class="QLabel" name="label_20">
-                <property name="minimumSize">
-                 <size>
-                  <width>110</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>9</pointsize>
-                  <bold>false</bold>
-                 </font>
-                </property>
-                <property name="text">
-                 <string>Fold position:</string>
-                </property>
-                <property name="alignment">
-                 <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                </property>
-               </widget>
-              </item>
-              <item row="5" column="1">
-               <widget class="QComboBox" name="foldPosition_ComboBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>100</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>9</pointsize>
-                  <bold>false</bold>
-                 </font>
-                </property>
-                <item>
-                 <property name="text">
-                  <string>Undefined</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Up/Down</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Left/Right</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="6" column="0">
                <widget class="QLabel" name="label_17">
                 <property name="minimumSize">
                  <size>
@@ -677,7 +621,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="6" column="1">
+              <item row="5" column="1">
                <widget class="QComboBox" name="orientation_ComboBox">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -714,7 +658,7 @@ QListWidget::item:selected {
                 </item>
                </widget>
               </item>
-              <item row="7" column="0">
+              <item row="6" column="0">
                <widget class="QLabel" name="label_18">
                 <property name="minimumSize">
                  <size>
@@ -736,7 +680,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="7" column="1">
+              <item row="6" column="1">
                <widget class="QWidget" name="rotation_Widget">
                 <property name="toolTip">
                  <string>Rotation steps a layout may use for the piece: 1-Way 360°, 2-Way 180°, 4-Way 90°, Any 1°.</string>
@@ -837,7 +781,7 @@ QListWidget::item:selected {
                 </layout>
                </widget>
               </item>
-              <item row="8" column="0">
+              <item row="7" column="0">
                <widget class="QLabel" name="label_19">
                 <property name="minimumSize">
                  <size>
@@ -859,7 +803,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="8" column="1">
+              <item row="7" column="1">
                <widget class="QWidget" name="tilt_Widget">
                 <property name="toolTip">
                  <string>Direction in which a layout may tilt the piece off its grainline.</string>
@@ -928,7 +872,7 @@ QListWidget::item:selected {
                 </layout>
                </widget>
               </item>
-              <item row="9" column="0">
+              <item row="8" column="0">
                <widget class="QLabel" name="tiltDegrees_Label">
                 <property name="minimumSize">
                  <size>
@@ -950,7 +894,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="9" column="1">
+              <item row="8" column="1">
                <widget class="QSpinBox" name="tiltDegrees_SpinBox">
                 <property name="enabled">
                  <bool>false</bool>
@@ -984,7 +928,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="10" column="0">
+              <item row="9" column="0">
                <widget class="QLabel" name="label_16">
                 <property name="minimumSize">
                  <size>
@@ -1006,7 +950,7 @@ QListWidget::item:selected {
                 </property>
                </widget>
               </item>
-              <item row="10" column="1">
+              <item row="9" column="1">
                <widget class="VLineEdit" name="annotation_LineEdit">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">

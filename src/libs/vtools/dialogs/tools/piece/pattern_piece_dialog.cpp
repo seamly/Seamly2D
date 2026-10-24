@@ -331,7 +331,6 @@ void PatternPieceDialog::SetPiece(const VPiece &piece)
     ui->rotation_ButtonGroup->button(static_cast<int>(m_oldData.getRotationWay()))->setChecked(true);
     ui->tilt_ButtonGroup->button(static_cast<int>(m_oldData.GetTilt()))->setChecked(true);
     ui->tiltDegrees_SpinBox->setValue(m_oldData.getTiltDegrees());
-    ui->foldPosition_ComboBox->setCurrentText(m_oldData.GetFoldPosition());
 
     ui->quantity_SpinBox->setValue(m_oldData.GetQuantity());
     ui->fold_CheckBox->setChecked(m_oldData.IsOnFold());
@@ -2705,7 +2704,6 @@ VPiece PatternPieceDialog::CreatePiece() const
     const PieceTilt tilt = static_cast<PieceTilt>(ui->tilt_ButtonGroup->checkedId());
     piece.GetPatternPieceData().SetTilt(tilt);
     piece.GetPatternPieceData().setTiltDegrees(tilt == PieceTilt::None ? 0 : ui->tiltDegrees_SpinBox->value());
-    piece.GetPatternPieceData().SetFoldPosition(ui->foldPosition_ComboBox->currentText());
     piece.GetPatternPieceData().SetQuantity(ui->quantity_SpinBox->value());
     piece.GetPatternPieceData().SetOnFold(ui->fold_CheckBox->isChecked() || piece.hasFoldLine());
     piece.GetPatternPieceData().SetLabelTemplate(m_pieceLabelLines);

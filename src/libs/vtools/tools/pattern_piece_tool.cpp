@@ -356,7 +356,6 @@ void PatternPieceTool::addPieceLabel(VAbstractPattern *doc, QDomElement &domElem
                       VPieceLabelData::rotationToString(data.getRotationWay()));
     doc->SetAttribute(domData, VAbstractPattern::AttrTilt,         VPieceLabelData::tiltToString(data.GetTilt()));
     doc->SetAttribute(domData, VAbstractPattern::AttrTiltDegrees,  data.getTiltDegrees());
-    doc->SetAttribute(domData, VAbstractPattern::AttrFoldPosition, data.GetFoldPosition());
     doc->SetAttribute(domData, VAbstractPattern::AttrQuantity,     data.GetQuantity());
     doc->SetAttribute(domData, VAbstractPattern::AttrVisible,      data.IsVisible());
     doc->SetAttribute(domData, VAbstractPattern::AttrOnFold,       data.IsOnFold());

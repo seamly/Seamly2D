@@ -128,6 +128,7 @@ QMap<QString, QString> PreparePlaceholders(const VAbstractPattern *doc)
     placeholders.insert(pl_pOrientation, "");
     placeholders.insert(pl_pRotation, "");
     placeholders.insert(pl_pTilt, "");
+    // Fold position is no longer a piece property; an old label template prints nothing for it.
     placeholders.insert(pl_pFoldPosition, "");
     placeholders.insert(pl_pName, "");
     placeholders.insert(pl_pQuantity, "");
@@ -149,7 +150,6 @@ void InitPiecePlaceholders(QMap<QString, QString> &placeholders, const QString &
     placeholders[pl_pOrientation] = data.GetOrientation();
     placeholders[pl_pRotation] = VPieceLabelData::rotationDisplayName(data.getRotationWay());
     placeholders[pl_pTilt] = VPieceLabelData::tiltDisplayText(data.GetTilt(), data.getTiltDegrees());
-    placeholders[pl_pFoldPosition] = data.GetFoldPosition();
     placeholders[pl_pName] = name;
     placeholders[pl_pQuantity] = QString::number(data.GetQuantity());
 
