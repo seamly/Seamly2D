@@ -112,9 +112,15 @@ Select the position of the base size's grainline (when visible), pattern label (
 
 Look up what 'Paper space' information is in the DXF-ASTM standard and prompt the developer to read this information; create a plan to implement and discuss with developer for approval; if developer approves then implement this in the DXF-ASTM (R13) export. If this information is utilized in the DXF-AAMA (R11) export then implement this for DXF-AAMA (R11) export, too.
 
+- [x] Layout.90.1 Research and plan: `dxf-docs/seamlylayout_DXF_PAPER_AND_MODEL_SPACE.md`. D6673-10 names no paper space; R13 already writes the empty `*PAPER_SPACE` block it requires. AAMA (R11) uses none.
+- [ ] Layout.90.2 User decision: P1, no change (recommended), or P2, an R13 paper space viewport with `$PLIMMIN` / `$PLIMMAX`.
+
 ### [ ] Task Layout.91 - Implement - DXF-R13 - Model Space information
 
 Look up what 'Model space' information is in the DXF-ASTM standard and prompt the developer to read this information; create a plan to implement and discuss with developer for approval; if developer approves then implement this in the DXF-ASTM (R13) export. If this information is utilized in the DXF-AAMA (R11) export then implement this for DXF-AAMA (R11) export, too.
+
+- [x] Layout.91.1 Research and plan: same file. D6673-10 names no model space; ENTITIES (the model space) already holds the style system text and one INSERT per piece, as §3.2.1 and §4.3.1.3 ask.
+- [ ] Layout.91.2 User decision: M1, no change (recommended); M2, header `$EXTMIN` / `$EXTMAX` / `$LIMMIN` / `$LIMMAX`; or M3, blocks around their own origin (not recommended).
 
 ## VERIFY
 
