@@ -89,8 +89,10 @@ Each piece is a `piece-set` group holding that piece once per size.
 Seamly2D hands off one pattern group per material, in the order the materials first appear: `<g id="pattern-1" data-type="pattern" data-material="Fabric">`, `<g id="pattern-2" ... data-material="Lining">`. Each piece sits in the group of its material, and its `data-parent` names that group. A pattern with one material keeps the single `pattern-1` group. The stdin contract is unchanged: one SVG document.
 
 - Producer: `VAbstractPiece::getMaterial()` → `PieceItemData::Material` → `SvgGenerator::mergeSvgDoms()`. Tests: `TST_SvgComponentTags::PiecesOfEachMaterialShareAPatternGroup`, `OneMaterialKeepsOnePatternGroup`.
-- Consumer: `cxxqt_bridge/src/material_split.rs` splits the import into one document per material, each with the root, `<defs>` and the pattern groups of that material. `finish_import` names pieces and adds size labels per document. Several materials get one tab each above the left canvas; the shown material's document is `input_dom`, so Create Layout lays out that material only. A tab switch drops the layout of the previous material.
-- The right canvas shows "Material: <material>" above the layout. With several materials, a default export name has `_<material>` after the variant segment: `<base>[_<segment>]_<material>[_<tab>]_<stamp>`.
+- Consumer: `cxxqt_bridge/src/material_split.rs` splits the import into one document per material, each with the root, `<defs>` and the pattern groups of that material. `finish_import` names pieces and adds size labels per document. Several materials get one tab each above the left canvas and above the right canvas; both tab bars show the same material. The shown material's document is `input_dom`.
+- Settings Submit makes a blank canvas for every material. Create Layout lays out every material: the shown material first, then each other material in tab order, each with all its tabs. The progress popup names the material: "Laying out Lining: Size 36 (30 of 56)…".
+- A material switch keeps every layout: the controller parks the shown material's layouts, shown tab and Adjust edits in `layout_views::MaterialLayout` and takes out the new material's. Exports, Export all tabs and Adjust Mode work on the shown material.
+- One material: the right canvas shows "Material: <material>" above the layout instead of tabs. With several materials, a default export name has `_<material>` after the variant segment: `<base>[_<segment>]_<material>[_<tab>]_<stamp>`.
 
 ### Size labels
 

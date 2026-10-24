@@ -61,10 +61,10 @@ enum OversizeChoice {
 } // enum OversizeChoice
 
 mod layout_utils;
-use layout_utils::{do_initialize_layout, do_process_layout, do_process_size_layout, ProcessLayoutArgs};
+use layout_utils::{do_initialize_layout, do_process_layout, do_process_size_layout, InitLayoutResult, ProcessLayoutArgs};
 
 mod layout_views;
-use layout_views::{LayoutState, LayoutViews, TabLayoutQueue, ViewKind};
+use layout_views::{LayoutJob, LayoutState, LayoutViews, MaterialLayout, TabLayoutQueue, ViewKind};
 
 mod layout_helpers;
 use layout_helpers::remove_group_by_id;
@@ -1113,6 +1113,10 @@ pub struct AppControllerRust {
     // One prepared document per material of the import; `input_dom` is a copy of the shown one.
     material_docs: Vec<material_split::MaterialDoc>,
 
+    // Layouts of each material that is not shown, indexed like `material_docs`.
+    // The shown material's entry stays empty: the controller holds its layouts.
+    material_layouts: Vec<MaterialLayout>,
+
 } // struct AppControllerRust
 
 impl Default for AppControllerRust {
@@ -1168,10 +1172,56 @@ impl Default for AppControllerRust {
             active_material:           0,                              // first material
             active_material_name:      cxx_qt_lib::QString::default(), // no material until an import
             material_docs:             Vec::new(),                     // nothing imported
+            material_layouts:          Vec::new(),                     // no layouts
         } // Self
     } // fn default
 
 } // impl Default for AppControllerRust
+
+impl AppControllerRust {
+    // @brief Move the controller's per-layout fields out, as the state of the shown layout.
+    fn take_layout_state(&mut self) -> LayoutState {
+        LayoutState {
+            layout_dom:        self.layout_dom.take(),
+            layout_h_px:       self.layout_h_px,
+            layout_ml_px:      self.layout_ml_px,
+            layout_mt_px:      self.layout_mt_px,
+            piece_bboxes_json: std::mem::take(&mut self.piece_bboxes_json),
+            flat_dom:          self.flat_dom.take(),
+            vertical_dom:      self.vertical_dom.take(),
+            translate_dom:     self.translate_dom.take(),
+        }
+    } // fn take_layout_state
+
+    // @brief Make `state` the shown layout: copy it into the controller's per-layout fields.
+    fn put_layout_state(&mut self, state: LayoutState) {
+        self.layout_dom        = state.layout_dom;
+        self.layout_h_px       = state.layout_h_px;
+        self.layout_ml_px      = state.layout_ml_px;
+        self.layout_mt_px      = state.layout_mt_px;
+        self.piece_bboxes_json = state.piece_bboxes_json;
+        self.flat_dom          = state.flat_dom;
+        self.vertical_dom      = state.vertical_dom;
+        self.translate_dom     = state.translate_dom;
+    } // fn put_layout_state
+
+    // @brief Parked layouts of material `index`; the list grows when it is too short.
+    fn material_layout_mut(&mut self, index: usize) -> &mut MaterialLayout {
+        if self.material_layouts.len() <= index {
+            self.material_layouts.resize_with(index + 1, MaterialLayout::default);
+        } // if too short
+        &mut self.material_layouts[index]
+    } // fn material_layout_mut
+
+    // @brief Material names for layout labels and warnings; empty for an import with one material.
+    fn material_names(&self) -> Vec<String> {
+        if self.material_docs.len() > 1 {
+            self.material_docs.iter().map(|part| part.name.clone()).collect()
+        } else {
+            Vec::new()
+        } // if several materials
+    } // fn material_names
+} // impl AppControllerRust
 
 impl qobject::AppController {
 
@@ -1307,6 +1357,7 @@ impl qobject::AppController {
             // clear layout bbox data
             rust.piece_bboxes_json  = String::new(); // clear stale bbox data
             rust.piece_bboxes_json_snapshot = String::new(); // clear stale snapshot
+            rust.material_layouts.clear(); // the other materials' layouts belong to the old document
         } // rust borrow dropped
         // Disable 'Create Layout' button until the user submits settings, so they don't run an invalid layout.
         self.as_mut().set_is_create_layout_enabled(false); // disabled until next Settings Submit
@@ -1379,6 +1430,7 @@ impl qobject::AppController {
                 {
                     let mut rust = self.as_mut().rust_mut();
                     rust.input_dom = Some(parts[0].doc.clone());
+                    rust.material_layouts = parts.iter().map(|_| MaterialLayout::default()).collect();
                     rust.material_docs = parts;
                 } // rust borrow dropped
 
@@ -1426,10 +1478,12 @@ impl qobject::AppController {
         } // match loaded
     } // fn finish_import
 
-    // Show the pieces of material `index`: its document becomes `input_dom`, and the
-    // layout of the previous material is dropped. Emits `import_finished`, so the left
-    // canvas shows the material's pieces and the right canvas clears.
-    // Called by the material tab bar above the left canvas in Main.qml.
+    // Show material `index`: its pieces on the left canvas and its layouts on the right.
+    //
+    // The shown material's layouts are parked and the new material's layouts are taken
+    // out, as for tabs, so each material keeps its layouts, its shown tab and its Adjust
+    // edits.  Emits `import_finished`, then `layout_finished` when the material has a canvas.
+    // Called by the material tab bars above both canvases in Main.qml.
     fn select_material(mut self: std::pin::Pin<&mut Self>, index: i32) -> bool {
         if *self.is_adjust_mode() || *self.is_layout_in_progress() {
             return false; // a layout or an edit is running
@@ -1437,18 +1491,45 @@ impl qobject::AppController {
         let Some(part) = usize::try_from(index).ok().and_then(|i| self.rust().material_docs.get(i).cloned()) else {
             return false; // no such material
         }; // part
-        if index == *self.active_material() {
+        let shown = *self.active_material();
+        if index == shown {
             return true; // already shown
         } // if same
 
-        self.as_mut().clear_layout_state();
+        // Park the shown material's layouts, then take the new material's layouts out.
+        let shown_is_laid_out = *self.is_layout_ready();
+        let new_is_laid_out = {
+            let mut rust = self.as_mut().rust_mut();
+            let parked = MaterialLayout {
+                initial_layout_dom: rust.initial_layout_dom.take(),
+                state:              rust.take_layout_state(),
+                views:              std::mem::take(&mut rust.layout_views),
+                divide_spec:        rust.divide_spec.take(),
+                is_laid_out:        shown_is_laid_out,
+            }; // parked
+            *rust.material_layout_mut(shown as usize) = parked;
+            let incoming = std::mem::take(rust.material_layout_mut(index as usize));
+            rust.initial_layout_dom = incoming.initial_layout_dom;
+            rust.put_layout_state(incoming.state);
+            rust.layout_views = incoming.views;
+            rust.divide_spec = incoming.divide_spec;
+            rust.input_dom = Some(part.doc.clone());
+            incoming.is_laid_out
+        }; // rust borrow dropped
+
         let label_state = svg_label_text::label_text_state(&part.doc);
         self.as_mut().set_label_text_state(cxx_qt_lib::QString::from(label_state.as_str()));
         self.as_mut().set_active_material(index);
         self.as_mut().set_active_material_name(cxx_qt_lib::QString::from(part.name.as_str()));
-        self.as_mut().rust_mut().input_dom = Some(part.doc);
-        log_to_file(&format!("[select_material] showing material {index} '{}'", part.name));
+        self.as_mut().set_is_layout_ready(new_is_laid_out);
+        self.as_mut().refresh_layout_view_properties();
+        log_to_file(&format!("[select_material] showing material {index} '{}', laid out: {new_is_laid_out}", part.name));
+
+        // Left canvas: the material's pieces.  Right canvas: its blank canvas or layout.
         self.as_mut().import_finished();
+        if self.rust().layout_dom.is_some() {
+            self.as_mut().layout_finished();
+        } // if the material has a canvas
         true
     } // fn select_material
 
@@ -1478,21 +1559,45 @@ impl qobject::AppController {
         mut self: std::pin::Pin<&mut Self>,
         settings_json: &cxx_qt_lib::QString,
     ) -> bool {
-        // Delegate to pure-logic function in layout_utils.rs
+        // Delegate to pure-logic function in layout_utils.rs: one blank canvas per material,
+        // since a tiled canvas takes its size from the material's document.
         let json_str = settings_json.to_string();
-        let input_dom_ref = self.rust().input_dom.as_ref();
+        let shown = usize::try_from(*self.active_material()).unwrap_or(0);
+        let results: Result<Vec<InitLayoutResult>, String> = {
+            let rust = self.rust();
+            if rust.material_docs.len() > 1 {
+                rust.material_docs.iter().map(|part| do_initialize_layout(&json_str, Some(&part.doc))).collect()
+            } else {
+                do_initialize_layout(&json_str, rust.input_dom.as_ref()).map(|result| vec![result])
+            } // if several materials
+        }; // results
 
-        match do_initialize_layout(&json_str, input_dom_ref) {
-            Ok(result) => {
-                // New settings invalidate every tab.
+        match results {
+            Ok(results) => {
+                // New settings invalidate every tab of every material.
                 self.as_mut().clear_layout_views();
-                // Store results in rust state
+                // Store results in rust state: the shown material's canvas in the controller,
+                // every other material's canvas in its parked layouts.
                 {
                     let mut rust = self.as_mut().rust_mut();
-                    rust.initial_layout_dom = Some(result.initial_dom.clone()); // snapshot for re-running 'Create Layout'
-                    rust.layout_dom         = Some(result.initial_dom);         // for display in right canvas
-                    rust.layout_w_px = result.w_px;
-                    rust.layout_h_px = result.h_px;
+                    let shown = if shown < results.len() { shown } else { 0 };
+                    let mut layouts = Vec::with_capacity(results.len());
+                    let mut shown_result = None;
+                    for (material, result) in results.into_iter().enumerate() {
+                        if material == shown {
+                            shown_result = Some(result);
+                            layouts.push(MaterialLayout::default()); // the controller holds it
+                        } else {
+                            layouts.push(MaterialLayout::blank(result.initial_dom));
+                        } // if shown
+                    } // for material
+                    rust.material_layouts = layouts;
+                    if let Some(result) = shown_result {
+                        rust.initial_layout_dom = Some(result.initial_dom.clone()); // snapshot for re-running 'Create Layout'
+                        rust.layout_dom         = Some(result.initial_dom);         // for display in right canvas
+                        rust.layout_w_px = result.w_px;
+                        rust.layout_h_px = result.h_px;
+                    } // if shown result
                 } // rust borrow dropped
 
                 // Emit signals to update QML state
@@ -1520,15 +1625,24 @@ impl qobject::AppController {
         settings_json: &cxx_qt_lib::QString,
     ) -> bool {
         if !*self.is_multisize() {
+            // Every material is laid out, so the dialog names the oversized pieces of each.
             let found = {
                 let rust = self.rust();
-                match (&rust.input_dom, &rust.initial_layout_dom) {
+                let json = settings_json.to_string();
+                let shown = usize::try_from(*self.active_material()).unwrap_or(0);
+                let mut found = match (&rust.input_dom, &rust.initial_layout_dom) {
                     (Some(input), Some(initial)) => {
-                        layout_utils::do_find_oversized_pieces(&settings_json.to_string(), input, initial)
-                            .unwrap_or_default()
+                        layout_utils::do_find_oversized_pieces(&json, input, initial).unwrap_or_default()
                     } // inputs present
                     _ => Vec::new(), // run_layout reports the missing input
-                } // match inputs
+                }; // found
+                for (material, part) in rust.material_docs.iter().enumerate().filter(|(m, _)| *m != shown) {
+                    let initial = rust.material_layouts.get(material).and_then(|l| l.initial_layout_dom.as_ref());
+                    if let Some(initial) = initial {
+                        found.extend(layout_utils::do_find_oversized_pieces(&json, &part.doc, initial).unwrap_or_default());
+                    } // if the material has a canvas
+                } // for each other material
+                found
             }; // rust borrow dropped
             if !found.is_empty() {
                 // The settings parsed in do_find_oversized_pieces, so the unit is there.
@@ -1569,7 +1683,11 @@ impl qobject::AppController {
         oversize: OversizeChoice,
     ) -> bool {
         // Mark layout as in-progress and clear previous result, tabs included.
+        // Every other material goes back to its blank canvas until its turn in the run.
         self.as_mut().clear_layout_views();
+        for layout in self.as_mut().rust_mut().material_layouts.iter_mut() {
+            layout.reset_to_blank();
+        } // for each material
         self.as_mut().set_is_layout_in_progress(true);
         self.as_mut().set_is_layout_ready(false);
         self.as_mut().set_layout_progress(0);
@@ -1616,13 +1734,14 @@ impl qobject::AppController {
         // starts with the Marker tab: every size of every piece packs alone.
         // Multisize tabs extend the media until every piece fits; an individual
         // pattern does so, or splits its oversized pieces, when the user chose it.
+        let args_extend_media = *self.is_multisize() || oversize == OversizeChoice::Extend;
         let args = ProcessLayoutArgs {
             settings_json: &json_str,
             input_dom: &input_dom_clone,
             initial_layout_dom: &initial_layout_dom_clone,
             layout_h_px,
             nested_multisize: false,
-            extend_media: *self.is_multisize() || oversize == OversizeChoice::Extend,
+            extend_media: args_extend_media,
             split_oversized: oversize == OversizeChoice::Split,
         };
         // Progress callback drives both the bindable property (for the QML
@@ -1657,39 +1776,66 @@ impl qobject::AppController {
                 } // rust borrow dropped
 
                 // Multisize: show the Marker tab now, then lay out Nested, Base Size
-                // and each size on later ticks.
+                // and each size on later ticks.  Several materials: then lay out each
+                // other material, its first layout and its tabs.
                 let sizes: Vec<String> = if *self.is_multisize() {
                     self.multisize_sizes().to_string()
                         .split(',').map(str::trim).filter(|s| !s.is_empty()).map(String::from).collect()
                 } else {
                     Vec::new()
                 }; // sizes
-                if !sizes.is_empty() {
-                    let base_size = crate::piece_extractor::read_measurements_info(&input_dom_clone).base_size;
-                    let kinds = layout_views::queued_kinds(&sizes, &base_size);
-                    let mut queue = TabLayoutQueue::new(json_str.clone(), layout_h_px, kinds);
+                let shown = usize::try_from(*self.active_material()).unwrap_or(0);
+                let (jobs, names) = {
+                    let rust = self.rust();
+                    // Tabs after each material's first layout; a material keeps its own base size.
+                    let tabs_of = |doc: &svg_dom::Document| -> Vec<ViewKind> {
+                        if sizes.is_empty() {
+                            Vec::new() // individual pattern: one layout per material
+                        } else {
+                            layout_views::queued_kinds(&sizes, &crate::piece_extractor::read_measurements_info(doc).base_size)
+                        } // if multisize
+                    }; // tabs_of
+                    let tab_kinds: Vec<Vec<ViewKind>> = if rust.material_docs.len() > 1 {
+                        rust.material_docs.iter().map(|part| tabs_of(&part.doc)).collect()
+                    } else {
+                        vec![tabs_of(&input_dom_clone)]
+                    }; // tab_kinds
+                    let shown = if shown < tab_kinds.len() { shown } else { 0 };
+                    (layout_views::layout_jobs(shown, &tab_kinds), rust.material_names())
+                }; // rust borrow dropped
+                if !jobs.is_empty() {
+                    let multisize = !sizes.is_empty();
+                    let mut queue = TabLayoutQueue::new(json_str.clone(), layout_h_px, jobs, names, multisize);
+                    queue.extend_media = args_extend_media;
+                    queue.split_oversized = oversize == OversizeChoice::Split;
+                    let first = LayoutJob { material: shown, kind: None };
                     if !result.unplaced_labels.is_empty() {
-                        queue.problems.push(layout_views::tab_unplaced_problem(
-                            layout_views::MARKER_LABEL, &result.unplaced_labels
-                        ));
+                        queue.problems.push(layout_views::tab_unplaced_problem(&queue.job_label(&first), &result.unplaced_labels));
                     } // if unplaced pieces
+                    if !multisize {
+                        // Multisize fold line warnings go to the log only.
+                        let prefix = queue.material_prefix(shown);
+                        queue.fold_line_lines.extend(result.fold_line_warnings.iter().map(|line| format!("{prefix}{line}")));
+                    } // if individual
                     let message = queue.next_message().unwrap_or_default();
                     {
                         let mut rust = self.as_mut().rust_mut();
-                        rust.layout_views.start(ViewKind::Marker);
+                        if multisize {
+                            rust.layout_views.start(ViewKind::Marker);
+                        } // if multisize
                         rust.tab_queue = Some(queue);
                     } // rust borrow dropped
                     self.as_mut().refresh_layout_view_properties();
 
-                    // Keep the progress popup up and name the next tab before
+                    // Keep the progress popup up and name the next layout before
                     // QML's next tick starts packing it.
                     self.as_mut().set_layout_status_message(cxx_qt_lib::QString::from(message.as_str()));
                     self.as_mut().set_layout_progress(0);
                     self.as_mut().set_is_create_layout_enabled(false);
                     self.as_mut().set_is_tab_layout_pending(true);
-                    self.as_mut().layout_finished(); // right canvas shows the Marker tab
+                    self.as_mut().layout_finished(); // right canvas shows the first layout
                     return true;
-                } // if multisize
+                } // if more layouts follow
 
                 // Update properties and emit signals
                 self.as_mut().set_is_layout_in_progress(false);    // layout completed
@@ -1739,29 +1885,39 @@ impl qobject::AppController {
         } // match layout_dom
     } // fn get_layout_dom_string
 
-    // Lay out the next queued tab and add it.
+    // Make the next queued layout and store it.
     //
     // QML calls this once per timer tick while `is_tab_layout_pending` is true,
-    // so the progress popup repaints with the tab name between tabs.
-    // A tab that fails or leaves pieces out is reported once, after the last tab.
+    // so the progress popup repaints with the layout name between layouts.
+    // A tab of the shown material joins the controller's tabs; a layout of another
+    // material joins that material's parked layouts.
+    // A layout that fails or leaves pieces out is reported once, after the last one.
     fn process_next_tab_layout(mut self: std::pin::Pin<&mut Self>) {
+        let shown = usize::try_from(*self.active_material()).unwrap_or(0);
+        let multisize = *self.is_multisize();
+
         // Gather inputs; a cleared queue (new import or settings) makes this a no-op.
         let inputs = {
             let mut rust = self.as_mut().rust_mut();
-            let input_dom = rust.input_dom.clone();
-            let initial_dom = rust.initial_layout_dom.clone();
             let Some(queue) = rust.tab_queue.as_mut() else { return; };
-            let Some(kind) = queue.pop() else { return; };
+            let Some(job) = queue.pop() else { return; };
             // The size tab of the base size shows the Base Size layout again.
-            let reused = queue.reusable_layout(&kind);
-            match (input_dom, initial_dom) {
-                (Some(input), Some(initial)) => {
-                    Some((kind, reused, queue.settings_json.clone(), queue.layout_h_px, input, initial))
-                }
+            let reused = queue.reusable_layout(&job);
+            let run = (queue.settings_json.clone(), queue.layout_h_px, queue.extend_media, queue.split_oversized);
+            // Pieces and blank canvas of the job's material; the controller holds the shown material's.
+            let (input, initial, layout_h_px) = if job.material == shown {
+                (rust.input_dom.clone(), rust.initial_layout_dom.clone(), run.1)
+            } else {
+                let initial = rust.material_layouts.get(job.material).and_then(|l| l.initial_layout_dom.clone());
+                let height = initial.as_ref().map(layout_views::canvas_height_px).unwrap_or(0);
+                (rust.material_docs.get(job.material).map(|part| part.doc.clone()), initial, height)
+            }; // inputs of the job's material
+            match (input, initial) {
+                (Some(input), Some(initial)) => Some((job, reused, run, layout_h_px, input, initial)),
                 _ => None, // the import or settings went away mid-run
             } // match inputs
         }; // rust borrow dropped
-        let Some((kind, reused, settings_json, layout_h_px, input_dom, initial_dom)) = inputs else {
+        let Some((job, reused, (settings_json, _, extend_media, split_oversized), layout_h_px, input_dom, initial_dom)) = inputs else {
             self.as_mut().rust_mut().tab_queue = None;
             self.as_mut().finish_tab_layouts();
             return;
@@ -1770,52 +1926,80 @@ impl qobject::AppController {
         let outcome = match reused {
             Some(result) => Ok(result),
             None => {
+                // A first layout repeats the shown material's choices; every tab is a multisize tab.
                 let args = ProcessLayoutArgs {
                     settings_json: &settings_json,
                     input_dom: &input_dom,
                     initial_layout_dom: &initial_dom,
                     layout_h_px,
-                    nested_multisize: kind.nested(),
-                    extend_media: true, // every tab is a multisize tab
-                    split_oversized: false,
+                    nested_multisize: job.kind.as_ref().is_some_and(ViewKind::nested),
+                    extend_media: job.kind.is_some() || extend_media,
+                    split_oversized: job.kind.is_none() && split_oversized,
                 };
-                // Stage messages would hide the tab name; only the percentage moves.
+                // Stage messages would hide the layout name; only the percentage moves.
                 let mut progress = |percent: i32, _status: Option<&str>| {
                     self.as_mut().set_layout_progress(percent);
                     self.as_mut().progress_updated(percent);
                 };
-                // Base Size and size tabs pack one size; Nested packs every size.
-                match kind.size() {
+                // Base Size and size tabs pack one size; Nested, Marker and an individual layout pack every piece.
+                match job.kind.as_ref().and_then(ViewKind::size) {
                     Some(size) => do_process_size_layout(args, size, &mut progress),
                     None => do_process_layout(args, &mut progress),
                 } // match size
             } // None
         }; // outcome
 
-        // Store the tab, or note the problem for the final warning.
+        // Store the layout, or note the problem for the final warning.
         {
             let mut rust = self.as_mut().rust_mut();
-            let label = kind.label();
+            let (label, prefix) = rust.tab_queue.as_ref()
+                .map(|queue| (queue.job_label(&job), queue.material_prefix(job.material)))
+                .unwrap_or_default();
             match outcome {
                 Ok(result) => {
                     if let Some(queue) = rust.tab_queue.as_mut() {
                         if !result.unplaced_labels.is_empty() {
                             queue.problems.push(layout_views::tab_unplaced_problem(&label, &result.unplaced_labels));
                         } // if unplaced pieces
-                        queue.keep_base_layout(&kind, &result);
+                        if job.kind.is_none() && !multisize {
+                            // Multisize fold line warnings go to the log only.
+                            queue.fold_line_lines.extend(result.fold_line_warnings.iter().map(|line| format!("{prefix}{line}")));
+                        } // if an individual layout
+                        queue.keep_base_layout(&job, &result);
                     } // if queue
-                    rust.layout_views.push(kind, LayoutState::from_result(result));
+                    if job.material == shown {
+                        if let Some(kind) = job.kind {
+                            rust.layout_views.push(kind, LayoutState::from_result(result));
+                        } // if a tab
+                    } else {
+                        let layout = rust.material_layout_mut(job.material);
+                        match job.kind {
+                            Some(kind) => layout.views.push(kind, LayoutState::from_result(result)),
+                            None => {
+                                layout.divide_spec = result.divide_spec.clone();
+                                layout.state = LayoutState::from_result(result);
+                                if multisize {
+                                    layout.views.start(ViewKind::Marker);
+                                } // if multisize
+                                layout.is_laid_out = true;
+                            } // first layout
+                        } // match kind
+                    } // if another material
                 } // Ok
                 Err(e) => {
                     log_to_file(&format!("[process_next_tab_layout] {label} failed: {e}"));
                     let line = format!("{label}: not laid out ({e})");
                     if let Some(queue) = rust.tab_queue.as_mut() { queue.problems.push(line); }
+                    // A failed Marker still gets its tab, so the material's tabs keep their order.
+                    if job.material != shown && job.kind.is_none() && multisize {
+                        rust.material_layout_mut(job.material).views.start(ViewKind::Marker);
+                    } // if another material's Marker failed
                 } // Err
             } // match outcome
         } // rust borrow dropped
         self.as_mut().refresh_layout_view_properties();
 
-        // Name the next tab, or finish.
+        // Name the next layout, or finish.
         let next_message = self.rust().tab_queue.as_ref().and_then(|q| q.next_message());
         match next_message {
             Some(message) => {
@@ -1826,12 +2010,10 @@ impl qobject::AppController {
         } // match next_message
     } // fn process_next_tab_layout
 
-    // End a tab run: close the progress popup, enable export and Adjust,
-    // and report every layout that left pieces out or failed.
+    // End a layout run: close the progress popup, enable export and Adjust,
+    // and report every layout that left pieces out or failed, and fold lines off the edge.
     fn finish_tab_layouts(mut self: std::pin::Pin<&mut Self>) {
-        let problems = self.as_mut().rust_mut().tab_queue.take()
-            .map(|q| q.problems)
-            .unwrap_or_default();
+        let warning = self.as_mut().rust_mut().tab_queue.take().and_then(|q| q.final_warning());
 
         self.as_mut().set_is_tab_layout_pending(false);
         self.as_mut().set_is_layout_in_progress(false);
@@ -1839,12 +2021,11 @@ impl qobject::AppController {
         self.as_mut().set_layout_status_message(cxx_qt_lib::QString::default());
         self.as_mut().set_is_layout_ready(true);
 
-        if !problems.is_empty() {
-            // A non-tiled tab extends its media until every piece fits, so the
-            // problems come from tiled paper or from a tab that failed.
-            let msg = layout_views::tab_problems_warning(&problems);
+        if let Some(msg) = warning {
+            // A non-tiled multisize tab extends its media until every piece fits, so left-out
+            // pieces come from tiled paper, an individual layout, or a layout that failed.
             self.as_mut().layout_warning(cxx_qt_lib::QString::from(msg.as_str()));
-        } // if problems
+        } // if warning
     } // fn finish_tab_layouts
 
     // Show another tab's layout on the right canvas.
@@ -1907,28 +2088,12 @@ impl qobject::AppController {
         } // if already active
 
         let mut rust = self.as_mut().rust_mut();
-        let current = LayoutState {
-            layout_dom:        rust.layout_dom.take(),
-            layout_h_px:       rust.layout_h_px,
-            layout_ml_px:      rust.layout_ml_px,
-            layout_mt_px:      rust.layout_mt_px,
-            piece_bboxes_json: std::mem::take(&mut rust.piece_bboxes_json),
-            flat_dom:          rust.flat_dom.take(),
-            vertical_dom:      rust.vertical_dom.take(),
-            translate_dom:     rust.translate_dom.take(),
-        }; // current
+        let current = rust.take_layout_state();
         let (state, ok) = match rust.layout_views.select(index, current) {
             Ok(state) => (state, true),
             Err(state) => (state, false), // unchanged; put it back
         }; // match select
-        rust.layout_dom        = state.layout_dom;
-        rust.layout_h_px       = state.layout_h_px;
-        rust.layout_ml_px      = state.layout_ml_px;
-        rust.layout_mt_px      = state.layout_mt_px;
-        rust.piece_bboxes_json = state.piece_bboxes_json;
-        rust.flat_dom          = state.flat_dom;
-        rust.vertical_dom      = state.vertical_dom;
-        rust.translate_dom     = state.translate_dom;
+        rust.put_layout_state(state);
         if ok { Ok(true) } else { Err(()) }
     } // fn swap_layout_view
 
