@@ -82,8 +82,8 @@ Q_LOGGING_CATEGORY(PatternConverter, "patternConverter")
  */
 
 const QString VPatternConverter::PatternMinVerStr = QStringLiteral("0.1.0");
-const QString VPatternConverter::PatternMaxVerStr = QStringLiteral("0.7.6");
-const QString VPatternConverter::CurrentSchema    = QStringLiteral("://schema/pattern/v0.7.6.xsd");
+const QString VPatternConverter::PatternMaxVerStr = QStringLiteral("0.7.7");
+const QString VPatternConverter::CurrentSchema    = QStringLiteral("://schema/pattern/v0.7.7.xsd");
 
 //VPatternConverter::PatternMinVer; // <== DON'T FORGET TO UPDATE TOO!!!!
 //VPatternConverter::PatternMaxVer; // <== DON'T FORGET TO UPDATE TOO!!!!
@@ -162,6 +162,8 @@ static const QString strReverse                   = QStringLiteral("reverse");
 static const QString strMx                        = QStringLiteral("mx");
 static const QString strMy                        = QStringLiteral("my");
 static const QString strForbidFlipping            = QStringLiteral("forbidFlipping");
+static const QString strRotationWay               = QStringLiteral("rotationWay");
+static const QString strNone                      = QStringLiteral("None");
 static const QString strInLayout                  = QStringLiteral("inLayout");
 static const QString strSeamAllowance             = QStringLiteral("seamAllowance");
 static const QString strNodeType                  = QStringLiteral("nodeType");
@@ -350,7 +352,9 @@ QString VPatternConverter::getSchema(int ver) const
         case (0x000705):
             return QStringLiteral("://schema/pattern/v0.7.5.xsd");
         case (0x000706):
-            qCDebug(PatternConverter, "Current schema - ://schema/pattern/v0.7.6.xsd");
+            return QStringLiteral("://schema/pattern/v0.7.6.xsd");
+        case (0x000707):
+            qCDebug(PatternConverter, "Current schema - ://schema/pattern/v0.7.7.xsd");
             return CurrentSchema;
         default:
             InvalidVersion(ver);
@@ -565,6 +569,10 @@ void VPatternConverter::applyPatches()
             ValidateXML(getSchema(0x000706), m_convertedFileName);
             V_FALLTHROUGH
         case (0x000706):
+            toVersion0_7_7();
+            ValidateXML(getSchema(0x000707), m_convertedFileName);
+            V_FALLTHROUGH
+        case (0x000707):
             break;
         default:
             InvalidVersion(m_ver);
@@ -583,7 +591,7 @@ void VPatternConverter::downgradeToCurrentMaxVersion()
 bool VPatternConverter::isReadOnly() const
 {
     // Check if attribute readOnly was not changed in file format
-    Q_STATIC_ASSERT_X(VPatternConverter::PatternMaxVer == CONVERTER_VERSION_CHECK(0, 7, 6),
+    Q_STATIC_ASSERT_X(VPatternConverter::PatternMaxVer == CONVERTER_VERSION_CHECK(0, 7, 7),
                       "Check attribute readOnly.");
 
     // Possibly in future attribute readOnly will change position etc.
@@ -1479,6 +1487,41 @@ void VPatternConverter::toVersion0_7_6()
                       "Time to refactor the code.");
     setVersion(QStringLiteral("0.7.6"));
     Save();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Version 0.7.7 limits the piece label data attribute "rotationWay" to None, 1-Way, 2-Way, 4-Way and Any.
+void VPatternConverter::toVersion0_7_7()
+{
+    // Delete when the minimal supported version is 0.7.7.
+    Q_STATIC_ASSERT_X(VPatternConverter::PatternMinVer < CONVERTER_VERSION_CHECK(0, 7, 7),
+                      "Time to refactor the code.");
+    rotationWayToV0_7_7();
+    setVersion(QStringLiteral("0.7.7"));
+    Save();
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/// @brief Sets "rotationWay" of each piece label data element to a value the 0.7.7 schema allows.
+///
+/// Older files hold the text of the piece dialog list, which may be empty or translated; such a value becomes None.
+void VPatternConverter::rotationWayToV0_7_7()
+{
+    // Delete when the minimal supported version is 0.7.7.
+    Q_STATIC_ASSERT_X(VPatternConverter::PatternMinVer < CONVERTER_VERSION_CHECK(0, 7, 7),
+                      "Time to refactor the code.");
+
+    const QStringList allowed = QStringList() << strNone << QStringLiteral("1-Way") << QStringLiteral("2-Way")
+                                              << QStringLiteral("4-Way") << QStringLiteral("Any");
+    const QDomNodeList dataList = elementsByTagName(strData);
+    for (int i = 0; i < dataList.size(); ++i)
+    {
+        QDomElement data = dataList.at(i).toElement();
+        if (!allowed.contains(data.attribute(strRotationWay)))
+        {
+            data.setAttribute(strRotationWay, strNone);
+        }
+    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------

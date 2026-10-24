@@ -328,7 +328,7 @@ void PatternPieceDialog::SetPiece(const VPiece &piece)
     ui->letter_LineEdit->setText(m_oldData.GetLetter());
     ui->annotation_LineEdit->setText(m_oldData.GetAnnotation());
     ui->orientation_ComboBox->setCurrentText(m_oldData.GetOrientation());
-    ui->rotation_ComboBox->setCurrentText(m_oldData.getRotationWay());
+    ui->rotation_ButtonGroup->button(static_cast<int>(m_oldData.getRotationWay()))->setChecked(true);
     ui->tilt_ComboBox->setCurrentText(m_oldData.GetTilt());
     ui->foldPosition_ComboBox->setCurrentText(m_oldData.GetFoldPosition());
 
@@ -2699,7 +2699,7 @@ VPiece PatternPieceDialog::CreatePiece() const
     piece.GetPatternPieceData().SetLetter(ui->letter_LineEdit->text());
     piece.GetPatternPieceData().SetAnnotation(ui->annotation_LineEdit->text());
     piece.GetPatternPieceData().SetOrientation(ui->orientation_ComboBox->currentText());
-    piece.GetPatternPieceData().SetRotationWay(ui->rotation_ComboBox->currentText());
+    piece.GetPatternPieceData().SetRotationWay(static_cast<PieceRotation>(ui->rotation_ButtonGroup->checkedId()));
     piece.GetPatternPieceData().SetTilt(ui->tilt_ComboBox->currentText());
     piece.GetPatternPieceData().SetFoldPosition(ui->foldPosition_ComboBox->currentText());
     piece.GetPatternPieceData().SetQuantity(ui->quantity_SpinBox->value());
@@ -3318,6 +3318,14 @@ void PatternPieceDialog::initializePropertiesTab()
         ui->material_ComboBox->addItem(VAbstractPiece::materialDisplayName(material), material);
     }
     ui->material_ComboBox->setCurrentIndex(ui->material_ComboBox->findData(VAbstractPiece::defaultMaterial()));
+
+    // Each rotation button id is its PieceRotation value.
+    ui->rotation_ButtonGroup->setId(ui->rotationNone_RadioButton, static_cast<int>(PieceRotation::None));
+    ui->rotation_ButtonGroup->setId(ui->rotationOneWay_RadioButton, static_cast<int>(PieceRotation::OneWay));
+    ui->rotation_ButtonGroup->setId(ui->rotationTwoWay_RadioButton, static_cast<int>(PieceRotation::TwoWay));
+    ui->rotation_ButtonGroup->setId(ui->rotationFourWay_RadioButton, static_cast<int>(PieceRotation::FourWay));
+    ui->rotation_ButtonGroup->setId(ui->rotationAny_RadioButton, static_cast<int>(PieceRotation::Any));
+    ui->rotationNone_RadioButton->setChecked(true);
 
     QColor color = QColor(Qt::white);
     ui->color_Label->setText(color.name());

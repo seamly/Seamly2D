@@ -49,7 +49,7 @@ public:
         : m_qsLetter()
         ,  m_annotation()
         ,  m_orientation()
-        ,  m_rotation()
+        ,  m_rotation(PieceRotation::None)
         ,  m_tilt()
         ,  m_foldPosition()
         ,  m_quantity(1)
@@ -76,7 +76,7 @@ public:
     QString m_qsLetter;    /** @brief m_qsLetter Piece letter (should be no more than 3 characters) */
     QString m_annotation;
     QString m_orientation;
-    QString m_rotation;
+    PieceRotation m_rotation;
     QString m_tilt;
     QString m_foldPosition;
 

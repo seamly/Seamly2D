@@ -68,8 +68,8 @@ public:
     QString GetOrientation() const;
     void    SetOrientation(const QString &val);
 
-    QString getRotationWay() const;
-    void    SetRotationWay(const QString &val);
+    PieceRotation getRotationWay() const;
+    void          SetRotationWay(PieceRotation val);
 
     QString GetTilt() const;
     void    SetTilt(const QString &val);
@@ -85,6 +85,10 @@ public:
 
     QVector<VLabelTemplateLine> GetLabelTemplate() const;
     void                        SetLabelTemplate(const QVector<VLabelTemplateLine> &lines);
+
+    static QString       rotationToString(PieceRotation rotation);
+    static PieceRotation stringToRotation(const QString &value);
+    static QString       rotationDisplayName(PieceRotation rotation);
 
 private:
     QSharedDataPointer<VPieceLabelDataPrivate> d;
