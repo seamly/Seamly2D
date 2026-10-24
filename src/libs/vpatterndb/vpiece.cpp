@@ -60,6 +60,7 @@
 #include <QSharedPointer>
 #include <QDebug>
 #include <QPainterPath>
+#include <QPolygonF>
 
 #include <algorithm>
 
@@ -853,6 +854,23 @@ QPainterPath VPiece::seamAllowancePath(const QVector<QPointF> &points) const
     }
 
     return ekv;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief builtInSeamLinePath draws builtInSeamLinePoints(): closed, or open with both ends on the fold line.
+ * @return an empty path unless the seam allowance is built in.
+ */
+QPainterPath VPiece::builtInSeamLinePath(const VContainer *data) const
+{
+    const QVector<QPointF> points = builtInSeamLinePoints(data);
+    QPainterPath path;
+    if (!points.isEmpty())
+    {
+        path.addPolygon(QPolygonF(points));
+        path.setFillRule(Qt::WindingFill);
+    }
+    return path;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
