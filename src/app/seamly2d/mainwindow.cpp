@@ -8398,75 +8398,6 @@ void MainWindow::zoomFirstShow()
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-void MainWindow::DoExport(const VCommandLinePtr &expParams)
-{
-    const QHash<quint32, VPiece> *pieces = pattern->DataPieces();
-    if(!qApp->getOpeningPattern())
-    {
-        if (pieces->count() == 0)
-        {
-            qCCritical(vMainWindow, "%s", qUtf8Printable(tr("You can't export empty scene.")));
-            qApp->exit(V_EX_DATAERR);
-            return;
-        }
-    }
-    pieceList = preparePiecesForLayout(*pieces);
-
-    const bool exportOnlyPieces = expParams->exportOnlyPieces();
-    if (exportOnlyPieces)
-    {
-        try
-        {
-            ExportLayoutDialog dialog(1, Draw::Modeling, expParams->OptBaseName(), this);
-            dialog.setDestinationPath(expParams->OptDestinationPath());
-            dialog.selectFormat(static_cast<LayoutExportFormat>(expParams->OptExportType()));
-            dialog.setBinaryDXFFormat(expParams->IsBinaryDXF());
-            dialog.setTextAsPaths(expParams->isTextAsPaths());
-
-            ExportData(pieceList, dialog);
-        }
-
-        catch (const VException &exception)
-        {
-            qCCritical(vMainWindow, "%s\n\n%s", qUtf8Printable(tr("Export exception.")), qUtf8Printable(exception.ErrorMessage()));
-            qApp->exit(V_EX_DATAERR);
-            return;
-        }
-    }
-    else
-    {
-        auto settings = expParams->DefaultGenerator();
-        settings->setTextAsPaths(expParams->isTextAsPaths());
-
-        if (LayoutSettings(*settings.get()))
-        {
-            try
-            {
-                ExportLayoutDialog dialog(scenes.size(), Draw::Layout, expParams->OptBaseName(), this);
-                dialog.setDestinationPath(expParams->OptDestinationPath());
-                dialog.selectFormat(static_cast<LayoutExportFormat>(expParams->OptExportType()));
-                dialog.setBinaryDXFFormat(expParams->IsBinaryDXF());
-
-                ExportData(pieceList, dialog);
-            }
-
-            catch (const VException &exception)
-            {
-                qCCritical(vMainWindow, "%s\n\n%s", qUtf8Printable(tr("Export exception.")), qUtf8Printable(exception.ErrorMessage()));
-                qApp->exit(V_EX_DATAERR);
-                return;
-            }
-        }
-        else
-        {
-            return;
-        }
-    }
-
-    qApp->exit(V_EX_OK);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 bool MainWindow::setSize(const QString &text)
 {
     if (!Application2D::isGUIMode())
@@ -8583,36 +8514,16 @@ void MainWindow::processCommandLine()
             return; // process only one input file
         }
 
-        bool hSetted = true;
-        bool sSetted = true;
-        if (loaded && (cmd->IsTestModeEnabled() || cmd->IsExportEnabled()))
+        if (loaded && cmd->IsTestModeEnabled())
         {
             if (cmd->IsSetGradationSize())
             {
-                sSetted = setSize(cmd->OptGradationSize());
+                setSize(cmd->OptGradationSize());
             }
 
             if (cmd->IsSetGradationHeight())
             {
-                hSetted = setHeight(cmd->OptGradationHeight());
-            }
-        }
-
-        if (!cmd->IsTestModeEnabled())
-        {
-            if (cmd->IsExportEnabled())
-            {
-                if (loaded && hSetted && sSetted)
-                {
-                    DoExport(cmd);
-                    return; // process only one input file
-                }
-                else
-                {
-                    qApp->exit(V_EX_DATAERR);
-                    return;
-                }
-                break;
+                setHeight(cmd->OptGradationHeight());
             }
         }
     }

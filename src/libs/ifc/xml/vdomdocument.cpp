@@ -703,21 +703,6 @@ void VDomDocument::setXMLContent(const QString &fileName)
 }
 
 ///--------------------------------------------------------------------------------------------------------------------
-QString VDomDocument::UnitsHelpString()
-{
-    QString r;
-    for (auto i = static_cast<int>(Unit::Mm), last = static_cast<int>(Unit::LAST_UNIT_DO_NOT_USE); i < last;++i)
-    {
-        r += UnitsToStr(static_cast<Unit>(i));
-        if (i < last - 1)
-        {
-            r += ", ";
-        }
-    }
-    return r;
-}
-
-///--------------------------------------------------------------------------------------------------------------------
 bool VDomDocument::SaveDocument(const QString &fileName, QString &error)
 {
     if (fileName.isEmpty())

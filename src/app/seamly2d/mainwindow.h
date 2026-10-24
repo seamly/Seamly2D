@@ -467,7 +467,6 @@ private:
     void               raiseSeamlyLayout() const;
 
     void               reopenFilesAfterCrash(QStringList &args);
-    void               DoExport(const VCommandLinePtr& expParams);
 
     bool               setSize(const QString &text);
     bool               setHeight(const QString & text);
