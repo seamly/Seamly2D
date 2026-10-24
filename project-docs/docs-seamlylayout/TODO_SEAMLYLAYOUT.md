@@ -40,6 +40,18 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ### [ ] Task Layout.98 - Implement - Seamly2D Piece Properties - Flip: change Flip to radio buttons 'None', 'Horizontal', 'Vertical', and 'Both' are enabled. (Default is 'None'); create test.
 
+- [x] Layout.98.1 Piece Properties > Attributes: "Flip:" radio buttons None, Horizontal, Vertical (first row), Both. All four are enabled. Default None. Replaces the "Flipping: Forbid" check box.
+- [x] Layout.98.2 Data: `PieceFlip` (`def.h`), `pieceFlipToString`, `stringToPieceFlip`; `VAbstractPiece::getFlip`, `setFlip`. `IsForbidFlipping()` is now true for None; the Seamly2D layout engine (`vlayoutpaper.cpp`, `vposition.cpp`) keeps using it. `VLayoutPiece` keeps the flip.
+- [x] Layout.98.3 Schema 0.7.7: piece attribute `flip` type `pieceFlip`; `forbidFlipping` removed. Converter `removeForbidFlippingV0_7_7`.
+  - Decision taken: every converted piece gets flip None, also `forbidFlipping="false"`. Most old files hold `false` only because it was the default; a DXF export then writes no `Flip:` line, as before. Change the piece to allow a flip.
+- [x] Layout.98.4 Other places that set the old flag:
+  - Piece context menu: "Flip" submenu with the four choices replaces "Forbid Flipping".
+  - Decision taken: the F key no longer toggles flipping (four states); the Shortcuts dialog row is removed.
+  - Preferences > Pattern: the "Forbid flipping" default is removed (`VCommonSettings::getForbidPieceFlipping`, key `pattern/forbidFlipping`): a new piece is always None.
+- [x] Layout.98.5 Tests: `TST_VPiece::PieceFlipValuesRoundTrip`, `LayoutPieceKeepsFlip`, `ConverterRemovesForbidFlipping` (2 rows). Harness: 19 passed (`LayoutPieceKeepsFlip` needs a rebuilt `vlayout`; Qt suites). The harness also converted the 8 committed samples and 13 CollectionTest patterns to 0.7.7; all validate. Not converted: 4 inputs that fail before conversion (seamtest1–3 at 0.4.0, the empty `text.sm2d`) and 21 formats older than `readOnly`. `cl /Zs` on every changed `.cpp`. Fusion and Windows renders of the dialog. Not run: Qt suites (next MSI).
+- [ ] Layout.98.6 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
+- DXF `Flip:` line and the handoff attribute: Layout.93.4, 93.5.
+
 ### [ ] Task Layout.92 - Implement - right layout canvas - Material tabs
 
 Currently SeamlyLayout's left input canvas displays the Material types in tabs; the layout algorithm processes only the currently selected Material tab from the left hand canvas. Update the layout algorithm to generate the layouts for all material tabs, and display the material layouts in the right hand canvas using Material tabs (as is done in the left input canvas).
