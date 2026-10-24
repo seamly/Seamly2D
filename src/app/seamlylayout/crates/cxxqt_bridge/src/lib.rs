@@ -37,6 +37,9 @@ mod fold_line_edge;
 // Adds a "Size <size>" label to every piece of a multisize handoff at import.
 mod size_labels;
 
+// Gives every size of a multisize piece the base size's grainline and label positions.
+mod annotation_alignment;
+
 // Splits a handoff into one document per material.
 mod material_split;
 
@@ -1391,7 +1394,17 @@ impl qobject::AppController {
                 // One document per material; each gets a tab and its own layouts.
                 let mut parts = crate::material_split::split_by_material(doc);
                 let mut naming_warning: Option<String> = None;
+                let mut annotations_outside: Vec<String> = Vec::new();
                 for part in parts.iter_mut() {
+                    // Multisize: every size shows the base size's grainline and labels in the
+                    // same place.  Before the names change, so a report names the piece as drafted.
+                    let alignment = crate::annotation_alignment::align_size_annotations(&mut part.doc);
+                    log_to_file(&format!(
+                        "[finish_import] material '{}': {} grainline and label group(s) moved to the base size's place",
+                        part.name, alignment.moved
+                    ));
+                    annotations_outside.extend(alignment.outside);
+
                     // Unique piece names before any layout: the layout, its exports and the
                     // DXF-ASTM grade rules all read them from `input_dom`.
                     let naming = crate::piece_naming::assign_unique_piece_names(&mut part.doc);
@@ -1457,11 +1470,21 @@ impl qobject::AppController {
                     log_to_file(&format!("[finish_import] {tagged_pieces} tagged pattern piece(s) found"));
                 } // if tagged_pieces == 0
 
-                // Sizes with different piece counts can give one number to two pieces.
+                // Sizes with different piece counts can give one number to two pieces, and a
+                // grainline or label in the base size's place can leave a smaller size.
+                // One popup shows both.
+                let mut warnings: Vec<String> = Vec::new();
                 if let Some(warning) = naming_warning {
                     log_to_file(&format!("[finish_import] piece counts differ between sizes: {warning}"));
-                    self.as_mut().import_warning(cxx_qt_lib::QString::from(warning.as_str()));
+                    warnings.push(warning);
                 } // if piece counts differ
+                if !annotations_outside.is_empty() {
+                    log_to_file(&format!("[finish_import] annotations past the cut line: {annotations_outside:?}"));
+                    warnings.push(annotation_alignment::outside_warning(&annotations_outside));
+                } // if annotations past the cut line
+                if !warnings.is_empty() {
+                    self.as_mut().import_warning(cxx_qt_lib::QString::from(warnings.join("\n\n").as_str()));
+                } // if any warning
 
                 true // success
             }
