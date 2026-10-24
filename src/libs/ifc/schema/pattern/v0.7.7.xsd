@@ -569,7 +569,8 @@
                               <xs:attribute name="annotation" type="xs:string"/>
                               <xs:attribute name="orientation" type="xs:string"/>
                               <xs:attribute name="rotationWay" type="pieceRotation"/>
-                              <xs:attribute name="tilt" type="xs:string"/>
+                              <xs:attribute name="tilt" type="pieceTilt"/>
+                              <xs:attribute name="tiltDegrees" type="tiltDegrees"/>
                               <xs:attribute name="foldPosition" type="xs:string"/>
                               <xs:attribute name="visible" type="xs:boolean"/>
                               <xs:attribute name="onFold" type="xs:boolean"/>
@@ -1068,6 +1069,18 @@
       <xs:enumeration value="2-Way"/><!--rotation step 180 degrees-->
       <xs:enumeration value="4-Way"/><!--rotation step 90 degrees-->
       <xs:enumeration value="Any"/><!--rotation step 1 degree-->
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="pieceTilt">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="None"/><!--no tilt line in a DXF-ASTM export-->
+      <xs:enumeration value="CCW"/><!--counterclockwise up to tiltDegrees-->
+      <xs:enumeration value="CW"/><!--clockwise up to tiltDegrees-->
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="tiltDegrees">
+    <xs:restriction base="xs:unsignedInt">
+      <xs:maxInclusive value="90"/>
     </xs:restriction>
   </xs:simpleType>
   <xs:simpleType name="directionType">

@@ -196,6 +196,7 @@ private:
     void          RemoveUnusedTagsV0_6_0();
     void          RemoveUniqueTagV0_6_0(const QString &tag);
     void          rotationWayToV0_7_7();
+    void          tiltToV0_7_7();
     void          renameAttribute(QDomElement &element, const QString &oldName,
                                   const QString &newName, const QString &value) const;
 };

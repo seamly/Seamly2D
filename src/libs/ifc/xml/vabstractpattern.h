@@ -369,6 +369,7 @@ public:
     static const QString AttrOrientation;
     static const QString AttrRotationWay;
     static const QString AttrTilt;
+    static const QString AttrTiltDegrees;
     static const QString AttrFoldPosition;
     static const QString AttrQuantity;
     static const QString AttrOnFold;
