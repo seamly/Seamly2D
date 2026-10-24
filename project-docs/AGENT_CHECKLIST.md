@@ -21,6 +21,7 @@ JACKET_2
 | Layout.84.4 | 19 | SL > jacket_2 > Nested exports: one grainline and label set per piece | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | Not checked: the Nested tab has no DXF export. Run §19
 | Layout.93.7 | 23 | SL > jacket_2 > DXF piece properties: Material, Missing Piece Data, Rotation, Flip, Tilt, Fold | ?
 | Layout.92.4 | 25 | SL > jacket_2 > Material tabs over the layout; every material laid out | ?
+| Layout.94.5 | 26 | SL > jacket_2 > Grainlines and labels in the base size's place; Nested stacks | ?
 
 MALE_SHIRT
 | Layout.28.7 | 13 | S2D > male_shirt > Built-in seam line | ?
@@ -418,3 +419,13 @@ Needs the next MSI. jacket2 handoff: Fabric and Lining. Settings from section 1.
 - [ ] While Create Layout runs and in Adjust Mode, both material tab bars are locked.
 - [ ] Lining, Size 300 tab, Export > SVG: the default name has `_Lining_Size300_`. The file holds Detail 4 only.
 - [ ] Individual pattern with two materials (male_shirt: set one piece's Material to Lining): Create Layout lays out both; each tab shows its pieces.
+
+## 26. jacket2: grainlines and labels in the base size's place
+
+Needs the next MSI. jacket2 handoff (grainlines and labels shown).
+
+- [ ] Import: one warning names "Back: pattern label past the cut line in sizes 220, 240, 260, 280".
+- [ ] Nested tab, Fabric: each piece shows one grainline stack and one label stack; the sizes' copies lie exactly on top of each other.
+- [ ] Size 220 and Size 720 tabs: each piece's grainline and labels sit in the same place inside the piece as on the Base Size 500 tab.
+- [ ] Lining, Nested tab: Detail 4's grainline, piece label and pattern label each stack as one.
+- [ ] Seamly2D: move Back's pattern label toward the middle of the piece. Press Layout: no warning.
