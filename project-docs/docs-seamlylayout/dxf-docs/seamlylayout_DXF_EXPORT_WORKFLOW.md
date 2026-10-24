@@ -21,7 +21,8 @@ The DXF-ASTM export workflow is fully integrated into the desktop UI (`ui_deskto
 1. **Open Export Menu**: Click "Export ▼" button to open the export format dropdown
 2. **Select Format**: Open the "DXF" submenu. Click "DXF-ASTM (R12)", "DXF-ASTM (R13)", "DXF-ASTM (CLO3D)" or "DXF-AAMA (R11)". CLO3D writes R13. DXF-AAMA writes ANSI/AAMA-292 content in R11 (AC1009); see `seamlylayout_DXF_AAMA.md`
 3. **Missing Piece Data Dialog**: Shown only when a piece lacks DXF-ASTM or DXF-AAMA data. The title names the chosen format
-   - Checks each piece with a boundary for: a "Cut N" label line (`Quantity:`), label text (layer 15), a grainline (layer 7)
+   - Checks each piece with a boundary for: `data-quantity` (`Quantity:`) and a grainline (layer 7). A hidden label is not missing data
+   - Layer 15 holds only the labels the piece shows. A hidden label writes no layer 15 text; the piece system text carries the data
    - Names each incomplete piece and what it lacks
    - States that this affects the usability of the exported DXF file
    - **Export anyway**: continue to the annotated version dialog
