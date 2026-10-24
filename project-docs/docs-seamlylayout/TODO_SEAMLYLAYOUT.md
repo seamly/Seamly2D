@@ -4,13 +4,24 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Implement
 
-### [ ] Task Layout.90 - Implement - DXF-R13 - Paper Space information
 
-Look up what 'Paper space' information is in the DXF-ASTM standard and implement this in the DXF-ASTM (R13) export. If this information is utilized in the DXF-AAMA (R11) export then implement this for DXF-AAMA (R11) export, too.
+### [ ] Task Layout.95 - Implement - Seamly2D Piece Properties - Rotation" Change Rotation to be radio buttons for: None, 1-Way → 360, 2-Way → 180, 4-Way → 90, Any → 1. None or Undefined writes no line. (Default is "None"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
 
-### [ ] Task Layout.91 - Implement - DXF-R13 - Model Space information
+- [x] Layout.95.1 Piece Properties > Rotation: five radio buttons in three columns. Default None. `rotation_ButtonGroup`; button id = `PieceRotation` value.
+- [x] Layout.95.2 Data: `PieceRotation` (`floatitemdef.h`); `VPieceLabelData::getRotationWay`, `rotationToString`, `stringToRotation`, `rotationDisplayName`. Label `%pRotation%` shows the translated name.
+- [x] Layout.95.3 Schema: pattern format 0.7.7 (`v0.7.7.xsd`), `rotationWay` type `pieceRotation`: `None`, `1-Way`, `2-Way`, `4-Way`, `Any`.
+  - Decision taken: a new format 0.7.7, not a change to 0.7.6. Builds already wrote 0.7.6 files (jacket2, trousers samples) with free-text values; a 0.7.6 file is not converted again.
+  - Layout.96–98 add to the same 0.7.7 format.
+- [x] Layout.95.4 Converter: `VPatternConverter::toVersion0_7_7`, `rotationWayToV0_7_7`. An empty, unknown or translated value becomes `None`.
+- [x] Layout.95.5 Tests: `TST_VPiece::PieceRotationValuesRoundTrip`, `ConverterSetsRotationWay` (3 rows). Passed in a scratch harness (in-tree libs, current `vpatternconverter.cpp`, `vpiecelabeldata.cpp`, `schema.qrc`); the converted file validates against `v0.7.7.xsd`. `cl /Zs` on every changed `.cpp`. Fusion render of the dialog: the page fits. Not run: Qt suites (next MSI).
+- [ ] Layout.95.6 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
+- DXF `Rotation:` line and the handoff attribute: Layout.93.4, 93.5.
 
-Look up what 'Model space' information is in the DXF-ASTM standard and implement this in the DXF-ASTM (R13) export. If this information is utilized in the DXF-AAMA (R11) export then implement this for DXF-AAMA (R11) export, too.
+### [ ] Task Layout.96 - Implement - Seamly2D Piece Properties - Tilt: change to radio buttons "None", "CCW", "CW". If "CCW" or "CW' chosen then enable a text field 'Degrees' that accepts integers between 0 and 90. Default radio button is "None", Default Degrees is "0". Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
+
+### [ ] Layout.97 - Implement - Seamly2D Piece Properties - Fold: Seamly2D gives Up/Down or Left/Right. D6673 Fold: is Y or N, and means the piece may go on the fold of tubular fabric. Change Seamly2D Piece Properties "On Fold" to be a checkbox that saves as "True" or "False", which exports to 'Y' or 'N' in DXF formats. This removes the possibility for 'Up/Down' folds as this is not typical for soft goods development. (Default is unchecked/"False"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
+
+### [ ] Task Layout.98 - Implement - Seamly2D Piece Properties - Flip: change Flip to radio buttons 'None', 'Horizontal', 'Vertical', and 'Both' are enabled. (Default is 'None'); create test.
 
 ### [ ] Task Layout.92 - Implement - right layout canvas - Material tabs
 
@@ -32,17 +43,18 @@ This information should be tracked in the layout data even if it's not shown in 
 - [ ] Layout.93.6 Tests: `TST_SvgComponentTags`; Rust converter and writer tests with hidden labels and grainlines.
 - [ ] Layout.93.7 Next MSI: user check, `AGENT_CHECKLIST.md` §23.
 
-### [ ] Task Layout.94 - Implement - Multisize - Nested - select the grainline (when visible), pattern label (when visible), and piece label (when visible) from each piece in the base size and place them as a group at the lowest layer/group in the layout, then remove all grainlines, piece labels, and pattern labels from each piece group (retain the size labe in each piece group and display size labels with its size's color)
+### [ ] Task Layout.94 - Implement - Multisize the grainline, pattern label, and piece label all have the same position relative to local space within their piece. One of the results will be that the Nested layout's grainlines, pattern label, and piece label stack exactly on top of each other to make the nested layout visually more simple and easier to read. Another results is that no grainline, piece label, pattern label is placed outside or extends beyond the cutline.
 
-### [ ] Task Layout.95 - Implement - Seamly2D Piece Properties - Rotation" Change Rotation to be radio buttons for: None, 1-Way → 360, 2-Way → 180, 4-Way → 90, Any → 1. None or Undefined writes no line. (Default is "None"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
+Select the position of the base size's grainline (when visible), pattern label (when visible), and piece label (when visible); replace the reamining pieces' grainline, pattern label, and piece label 's positions with the base size's positions.
 
-### [ ] Task Layout.96 - Implement - Seamly2D Piece Properties - Tilt: change to radio buttons "None", "CCW", "CW". If "CCW" or "CW' chosen then enable a text field 'Degrees' that accepts integers between 0 and 90. Default radio button is "None", Default Degrees is "0". Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
-
-### [ ] Layout.97 - Implement - Seamly2D Piece Properties - Fold: Seamly2D gives Up/Down or Left/Right. D6673 Fold: is Y or N, and means the piece may go on the fold of tubular fabric. Change Seamly2D Piece Properties "On Fold" to be a checkbox that saves as "True" or "False", which exports to 'Y' or 'N' in DXF formats. This removes the possibility for 'Up/Down' folds as this is not typical for soft goods development. (Default is unchecked/"False"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
-
-### [ ] Task Layout.98 - Implement - Seamly2D Piece Properties - Flip: change Flip to radio buttons 'None', 'Horizontal', 'Vertical', and 'Both' are enabled. (Default is 'None'); create test.
+### [ ] Task Layout.90 - Implement - DXF-R13 - Paper Space information
 
 
+Look up what 'Paper space' information is in the DXF-ASTM standard and prompt the developer to read this information; create a plan to implement and discuss with developer for approval; if developer approves then implement this in the DXF-ASTM (R13) export. If this information is utilized in the DXF-AAMA (R11) export then implement this for DXF-AAMA (R11) export, too.
+
+### [ ] Task Layout.91 - Implement - DXF-R13 - Model Space information
+
+Look up what 'Model space' information is in the DXF-ASTM standard and prompt the developer to read this information; create a plan to implement and discuss with developer for approval; if developer approves then implement this in the DXF-ASTM (R13) export. If this information is utilized in the DXF-AAMA (R11) export then implement this for DXF-AAMA (R11) export, too.
 
 ## VERIFY
 

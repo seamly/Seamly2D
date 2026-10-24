@@ -25,6 +25,7 @@ MALE_SHIRT
 | Layout.28.7 | 13 | S2D > male_shirt > Built-in seam line | ?
 | Layout.80.7 | 20 | S2D > male_shirt > mark a fold line | ?
 | Layout.80.3.1 | 20 | S2D: male_shirt > Piece Mirror tool | ?
+| Layout.95.6 | 24 | S2D > male_shirt > Piece Properties: Rotation radio buttons | ?
 
 | Layout.83.4 | 15 | SL > male_shirt > Nested legend squares | ?
 | Layout.82.3 | 16 | SL > male_shirt > Nested size colors: dark and pastel | ?
@@ -373,3 +374,13 @@ Needs the next MSI. Settings from section 1. Export all tabs unchecked.
 - [ ] Lining tab, Base Size 500, Export > DXF > DXF-ASTM (R13).
   - [ ] No Missing Piece Data dialog: Detail 4 shows its grainline.
   - [ ] Open the `.dxf`: the Detail 4 block has `Material:Lining` and `Quantity:1,1`.
+
+## 24. Seamly2D: piece properties
+
+Needs the next MSI. Pattern: `male_shirt.sm2d`, an older format. Save it under a new name first.
+
+- [ ] Open the copy. Piece mode, open a piece's Piece Properties > Properties.
+- [ ] Rotation shows five radio buttons: None, 1-Way, 2-Way (first row); 4-Way, Any (second row). None is selected.
+- [ ] Select 2-Way. OK. Save. Close and reopen the pattern: Rotation is still 2-Way.
+- [ ] Open the saved `.sm2d` in a text editor: `<version>0.7.7</version>`; the piece `data` element has `rotationWay="2-Way"`.
+- [ ] Add a new piece: Rotation is None.
