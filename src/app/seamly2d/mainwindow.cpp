@@ -61,7 +61,6 @@
 #include "dialogs/dialogs.h"
 #include "dialogs/calculator_dialog.h"
 #include "dialogs/decimalchart_dialog.h"
-#include "dialogs/export_progress_dialog.h"
 #include "../ifc/exception/vexceptionobjecterror.h"
 #include "../ifc/exception/vexceptionconversionerror.h"
 #include "../ifc/exception/vexceptionemptyparameter.h"
@@ -3323,7 +3322,6 @@ void MainWindow::initializeToolButtons()
     connect(ui->mirrorByAxis_ToolButton,   &QToolButton::clicked, this, &MainWindow::handleMirrorByAxisTool);
     connect(ui->move_ToolButton,           &QToolButton::clicked, this, &MainWindow::handleMoveTool);
     connect(ui->midpoint_ToolButton,       &QToolButton::clicked, this, &MainWindow::handleMidpointTool);
-    connect(ui->exportPiecesAs_ToolButton, &QToolButton::clicked, this, &MainWindow::exportPiecesAs);
     connect(ui->ellipticalArc_ToolButton,  &QToolButton::clicked, this, &MainWindow::handleEllipticalArcTool);
     connect(ui->anchorPoint_ToolButton,    &QToolButton::clicked, this, &MainWindow::handleAnchorPointTool);
     connect(ui->importImage_ToolButton,    &QToolButton::clicked, this, &MainWindow::handleImageTool);
@@ -3718,7 +3716,6 @@ void MainWindow::handlePatternPiecesMenu()
     QAction *action_Union        = menu.addAction(QIcon(":/toolicon/32x32/union.png"),  tr("Union Tool") + "\tU");
     QAction *action_PieceMirror  = menu.addAction(QIcon(":/toolicon/32x32/piece_mirror.png"),
                                                   tr("Piece Mirror") + "\tM, P");
-    QAction *action_ExportPieces = menu.addAction(QIcon(":/toolicon/32x32/export.png"), tr("Export Pattern Pieces") + "\tE, P");
     QAction *selectedAction      = menu.exec(QCursor::pos());
 
     if(selectedAction == nullptr)
@@ -3736,11 +3733,6 @@ void MainWindow::handlePatternPiecesMenu()
         ui->piece_ToolBox->setCurrentWidget(ui->details_Page);
         ui->pieceMirror_ToolButton->setChecked(true);
         handlePieceMirrorTool(true);
-    }
-    else if (selectedAction == action_ExportPieces)
-    {
-        ui->piece_ToolBox->setCurrentWidget(ui->details_Page);
-        exportPiecesAs();
     }
 }
 
@@ -5658,7 +5650,6 @@ void MainWindow::setToolsEnabled(bool enable)
     //Details
     ui->unitePieces_ToolButton->setEnabled(pieceTools);
     ui->pieceMirror_ToolButton->setEnabled(pieceTools);
-    ui->exportPiecesAs_ToolButton->setEnabled(pieceTools);
 
     //enable Toolbox Toolbar actions
     ui->arrow_Action->setEnabled(enable);
@@ -5733,7 +5724,6 @@ void MainWindow::setToolsEnabled(bool enable)
     //Details
     ui->union_Action->setEnabled(pieceTools);
     ui->pieceMirror_Action->setEnabled(pieceTools);
-    ui->exportPieces_Action->setEnabled(pieceTools);
 
     ui->lastTool_Action->setEnabled(draftTools);
 
@@ -6772,12 +6762,6 @@ void MainWindow::createActions()
         handlePieceMirrorTool(true);
     });
 
-    connect(ui->exportPieces_Action, &QAction::triggered, this, [this]
-    {
-        ui->piece_ToolBox->setCurrentWidget(ui->details_Page);
-        exportPiecesAs();
-    });
-
     //Tools->Piece submenu actions
     connect(ui->addPiece_Action, &QAction::triggered, this, [this]
     {
@@ -7481,140 +7465,6 @@ void MainWindow::CreateMeasurements()
     QProcess::startDetached(seamlyme, arguments, workingDirectory);
 }
 #endif
-
-//---------------------------------------------------------------------------------------------------------------------
-void MainWindow::exportPiecesAs()
-{
-    setStatusMessage(QString(""));
-
-    ui->arrowPointer_ToolButton->setChecked(false);
-    ui->arrow_Action->setChecked(false);
-    ui->exportPiecesAs_ToolButton->setChecked(true);
-
-    const QHash<quint32, VPiece> *allPieces = pattern->DataPieces();
-    QHash<quint32, VPiece>::const_iterator i = allPieces->constBegin();
-    QHash<quint32, VPiece> piecesInLayout;
-    while (i != allPieces->constEnd())
-    {
-        if (i.value().isInLayout())
-        {
-            piecesInLayout.insert(i.key(), i.value());
-        }
-        ++i;
-    }
-
-    if (piecesInLayout.count() == 0)
-    {
-        QMessageBox::information(this, tr("Layout mode"),  tr("You don't have any pieces to export. Please, "
-                                                              "include at least one piece in layout."),
-                                 QMessageBox::Ok, QMessageBox::Ok);
-        return;
-    }
-
-    QVector<VLayoutPiece> pieceList;
-    try
-    {
-        pieceList = preparePiecesForLayout(piecesInLayout);
-    }
-
-    catch (VException &exception)
-    {
-        QMessageBox::warning(this, tr("Export pieces"),
-                             tr("Can't export pieces.") + QLatin1String(" \n") + exception.ErrorMessage(),
-                             QMessageBox::Ok, QMessageBox::Ok);
-        return;
-    }
-
-    try
-    {
-        ExportLayoutDialog dialog(1, Draw::Modeling, FileName(), this);
-        dialog.setWindowTitle("Export Pattern Pieces");
-
-        // Populate size selection if multisize pattern
-        if (qApp->patternType() == MeasurementsType::Multisize)
-        {
-            const QStringList sizes = MeasurementVariable::ListSizes(doc->GetGradationSizes(), qApp->patternUnit());
-            dialog.setAvailableSizes(sizes);
-        }
-
-        if (dialog.exec() == QDialog::Rejected)
-        {
-            ui->exportPiecesAs_ToolButton->setChecked(false);
-            return;
-        }
-
-        if (dialog.isBatchExport())
-        {
-            const QStringList selectedSizes = dialog.selectedSizes();
-            const QString baseName = FileName();
-            const qreal originalSize = VContainer::size();
-            int exportCount = 0;
-            bool  failed = false;
-
-            ExportProgressDialog *exportProgress = new ExportProgressDialog(0, selectedSizes.size(), this);
-            exportProgress->showProgressBar(true);
-            exportProgress->show();
-
-            for (const QString &size : selectedSizes)
-            {
-                // Switch to this size. The size list and VContainer::size() are both in pattern units.
-                recalculateAtSize(size.toInt(), static_cast<int>(VContainer::height()));
-
-                QVector<VLayoutPiece> sizePieceList;
-                try
-                {
-                    sizePieceList = preparePiecesForLayout(currentLayoutPieces());
-                }
-                catch (VException &)
-                {
-                    failed = true;
-                    continue;
-                }
-
-                // Set size-suffixed filename and export
-                const QFileInfo fileInfo(baseName);
-                const QString sizeName = fileInfo.baseName() + "_" + size;
-                dialog.setFileName(sizeName);
-                ExportData(sizePieceList, dialog);
-
-                // Insert current file
-                exportProgress->insertFileName(sizeName + ExportLayoutDialog::exportFormatSuffix(dialog.format()));
-                if (failed)
-                {
-                    exportProgress->setFileStatus(ProgressStatus::Failed);
-                    failed = false;
-                }
-                else
-                {
-                    exportProgress->setFileStatus(ProgressStatus::Completed);
-                }
-
-                ++exportCount;
-                exportProgress->setProgress(exportCount);
-                QCoreApplication::processEvents();
-            }
-
-            // Restore original size
-            recalculateAtSize(static_cast<int>(originalSize), static_cast<int>(VContainer::height()));
-        }
-        else
-        {
-            ExportData(pieceList, dialog);
-        }
-    }
-
-    catch (const VException &exception)
-    {
-        ui->exportPiecesAs_ToolButton->setChecked(false);
-        qCritical("%s\n\n%s\n\n%s", qUtf8Printable(tr("Export exception.")),
-                  qUtf8Printable(exception.ErrorMessage()), qUtf8Printable(exception.DetailedInformation()));
-        return;
-    }
-
-    ui->arrowPointer_ToolButton->setChecked(true);
-    ui->arrow_Action->setChecked(true);
-    ui->exportPiecesAs_ToolButton->setChecked(false);
-}
 
 //---------------------------------------------------------------------------------------------------------------------
 void MainWindow::exportDraftBlocksAs()

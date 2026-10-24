@@ -188,7 +188,6 @@ private slots:
 #if defined(Q_OS_MAC)
     void CreateMeasurements();
 #endif
-    void exportPiecesAs();
     void exportDraftBlocksAs();
 
     void handleArrowTool(bool checked);

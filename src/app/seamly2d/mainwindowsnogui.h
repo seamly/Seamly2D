@@ -76,7 +76,6 @@ public slots:
     void refreshGrainLines();
     void refreshSeamAllowances();
     void exportSVG(const QString &name, QGraphicsRectItem *paper, QGraphicsScene *scene)const;
-    void exportSVG(const QString &name, QGraphicsRectItem *paper, const QList<QGraphicsItem *> &pieces)const;
     QString buildPiecesSvgString(QGraphicsRectItem *paper, const QList<QGraphicsItem *> &pieces)const;
     QString individualSampleSize() const;
     void exportPNG(const QString &name, QGraphicsScene *scene)const;
@@ -123,49 +122,12 @@ protected:
 
     static QVector<VLayoutPiece> preparePiecesForLayout(const QHash<quint32, VPiece> &pieces);
 
-    void         ExportData(const QVector<VLayoutPiece> &pieceList, const ExportLayoutDialog &dialog);
-
     void         InitTempLayoutScene();
     QString      FileName() const;
     void         setSizeHeightForIndividualM() const;
 
 private:
     Q_DISABLE_COPY(MainWindowsNoGUI)
-
-    static QList<QGraphicsItem *> CreateShadows(const QList<QGraphicsItem *> &papers);
-    static QList<QGraphicsScene *> CreateScenes(const QList<QGraphicsItem *> &papers,
-                                                const QList<QGraphicsItem *> &shadows,
-                                                const QList<QList<QGraphicsItem *> > &pieces);
-
-    void ObjFile(const QString &name, QGraphicsRectItem *paper, QGraphicsScene *scene)const;
-    void FlatDxfFile(const QString &name, int version, bool binary, QGraphicsRectItem *paper, QGraphicsScene *scene,
-                     const QList<QList<QGraphicsItem *> > &pieces)const;
-    void AAMADxfFile(const QString &name, int version, bool binary, const QSize &size,
-                     const QVector<VLayoutPiece> &pieces) const;
-
-    void PrepareTextForDXF(const QString &placeholder, const QList<QList<QGraphicsItem *> > &pieces) const;
-    void RestoreTextAfterDXF(const QString &placeholder, const QList<QList<QGraphicsItem *> > &pieces) const;
-
-    void ExportScene(const ExportLayoutDialog &dialog,
-                     const QList<QGraphicsScene *> &scenes,
-                     const QList<QGraphicsItem *> &papers,
-                     const QList<QGraphicsItem *> &shadows,
-                     const QList<QList<QGraphicsItem *> > &pieces,
-                     bool ignoreMargins, const QMarginsF &margins) const;
-
-    void ExportApparelLayout(const ExportLayoutDialog &dialog, const QVector<VLayoutPiece> &pieces, const QString &name,
-                             const QSize &size) const;
-
-    void exportPiecesAsApparelLayout(const ExportLayoutDialog &dialog, QVector<VLayoutPiece> pieceList);
-
-    void ExportFlatLayout(const ExportLayoutDialog &dialog,
-                          const QList<QGraphicsScene *> &scenes,
-                          const QList<QGraphicsItem *> &papers,
-                          const QList<QGraphicsItem *> &shadows,
-                          const QList<QList<QGraphicsItem *> > &pieces,
-                          bool ignoreMargins, const QMarginsF &margins);
-
-    void exportPiecesAsFlatLayout(const ExportLayoutDialog &dialog, const QVector<VLayoutPiece> &pieceList);
 
     QList<QGraphicsItem *> arrangePieceItemsFlat(QGraphicsScene *scene, const QVector<VLayoutPiece> &pieceList,
                                                  bool textAsPaths) const;
