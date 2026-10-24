@@ -578,7 +578,8 @@ void SvgGenerator::addComponentGroups(QGraphicsScene *scene, QGraphicsItem *item
 /// @brief Add a new SVG to the list of SVGs to be merged into a single SVG.
 /// @details When a piece item is given, the piece becomes a <g> element carrying the SVG
 ///          data-* attributes (data-type="piece", data-type-number, data-parent,
-///          data-name, data-letter, data-material, data-quantity, data-on-fold and data-grainline-angle) and each of
+///          data-name, data-letter, data-material, data-quantity, data-on-fold, data-rotation, data-tilt, data-flip,
+///          data-orientation, data-annotation and data-grainline-angle) and each of
 ///          the piece's
 ///          components is rendered
 ///          and tagged individually (see addComponentGroups()). Without an item the
@@ -665,6 +666,20 @@ void SvgGenerator::addSvgFromScene(QGraphicsScene *scene, QGraphicsItem *item, c
     {
         piece_group.setAttribute("data-on-fold", QStringLiteral("true"));
     }
+    // Piece Properties for layout rules and DXF piece text; each is absent when it allows nothing.
+    const QVariant rotation = item->data(PieceItemData::Rotation);
+    if (rotation.isValid())
+    {
+        piece_group.setAttribute("data-rotation", QString::number(rotation.toInt()));
+    }
+    const QVariant tilt = item->data(PieceItemData::Tilt);
+    if (tilt.isValid())
+    {
+        piece_group.setAttribute("data-tilt", QString::number(tilt.toInt()));
+    }
+    setAttribute(piece_group, "data-flip", item->data(PieceItemData::Flip).toString());
+    setAttribute(piece_group, "data-orientation", item->data(PieceItemData::Orientation).toString());
+    setAttribute(piece_group, "data-annotation", item->data(PieceItemData::Annotation).toString());
     const QVariant grain_angle = item->data(PieceItemData::GrainlineAngle);
     if (grain_angle.isValid())
     {

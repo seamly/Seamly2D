@@ -240,6 +240,32 @@ QString VPieceLabelData::rotationDisplayName(PieceRotation rotation)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/// @brief Rotation step a layout may use, in degrees: 1-Way 360, 2-Way 180, 4-Way 90, Any 1; 0 for None.
+int VPieceLabelData::rotationStepDegrees(PieceRotation rotation)
+{
+    int step = 0;
+    switch (rotation)
+    {
+        case PieceRotation::OneWay:
+            step = 360;
+            break;
+        case PieceRotation::TwoWay:
+            step = 180;
+            break;
+        case PieceRotation::FourWay:
+            step = 90;
+            break;
+        case PieceRotation::Any:
+            step = 1;
+            break;
+        case PieceRotation::None:
+        default:
+            break;
+    }
+    return step;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
 /// @brief Tilt direction as the pattern file stores it (untranslated).
 QString VPieceLabelData::tiltToString(PieceTilt tilt)
 {

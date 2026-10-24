@@ -105,6 +105,7 @@ public:
           m_pieceLetter(),
           m_quantity(1),
           m_onFold(false),
+          m_pieceProperties(),
           m_foldLine()
     {}
 
@@ -139,6 +140,7 @@ public:
           m_pieceLetter(piece.m_pieceLetter),
           m_quantity(piece.m_quantity),
           m_onFold(piece.m_onFold),
+          m_pieceProperties(piece.m_pieceProperties),
           m_foldLine(piece.m_foldLine)
     {}
 
@@ -173,6 +175,8 @@ public:
     QString                    m_pieceLetter;      /// @brief m_pieceLetter piece letter, exported as the SVG data-letter attribute
     int                        m_quantity;         /// @brief cut count, exported as the SVG data-quantity attribute
     bool                       m_onFold;           /// @brief cut on the fold, exported as the SVG data-on-fold attribute
+    VPieceLabelData            m_pieceProperties;  /// @brief Piece Properties, the source of the rotation, tilt,
+                                                   ///        orientation and annotation attributes
     QVector<QPointF>           m_foldLine;         /// @brief fold line start and end points; empty when the piece has none
 
 private:

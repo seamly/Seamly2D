@@ -97,7 +97,15 @@ namespace PieceItemData
                               data-notch-type. Unset when unknown. */
         NotchSegments = 9, /**< Line count per notch, space separated, exported as data-notch-segments. The counts
                                sum to the subpath count of the notch path. Unset when unknown. */
-        Material    = 10 /**< Material the piece is cut from, exported as data-material. */
+        Material    = 10, /**< Material the piece is cut from, exported as data-material. */
+        Rotation    = 11, /**< Rotation step in degrees (360, 180, 90 or 1), exported as data-rotation. Unset for a
+                               piece that may not rotate. */
+        Tilt        = 12, /**< Largest tilt in degrees, positive counterclockwise and negative clockwise, exported as
+                               data-tilt. Unset for a piece that may not tilt. */
+        Flip        = 13, /**< Mirror a layout may apply (pieceFlipToString(): Horizontal, Vertical or Both),
+                               exported as data-flip. Unset for flip None. */
+        Orientation = 14, /**< Piece orientation, Left or Right, exported as data-orientation. Unset when undefined. */
+        Annotation  = 15  /**< Piece annotation text, exported as data-annotation. Unset when empty. */
     };
 }
 #endif // VLAYOUTDEF_H

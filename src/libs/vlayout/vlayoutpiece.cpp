@@ -640,6 +640,7 @@ VLayoutPiece VLayoutPiece::Create(const VPiece &piece, const VContainer *pattern
         layoutPiece.setFoldLine(QVector<QPointF>{foldLine.p1(), foldLine.p2()});
     }
     layoutPiece.setMaterial(piece.getMaterial());
+    layoutPiece.setPieceProperties(piece.GetPatternPieceData());
 
     // Very important to set main path first!
     if (layoutPiece.createMainPath().isEmpty() && layoutPiece.createAllowancePath().isEmpty())
@@ -734,6 +735,25 @@ bool VLayoutPiece::isOnFold() const
 void VLayoutPiece::setOnFold(bool onFold)
 {
     d->m_onFold = onFold;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief getPieceProperties returns the Piece Properties the SVG exporter reads, whether or not a label shows them.
+ */
+VPieceLabelData VLayoutPiece::getPieceProperties() const
+{
+    return d->m_pieceProperties;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief setPieceProperties stores the Piece Properties for the SVG exporter's data-* attributes.
+ * @param properties piece label data from VPiece::GetPatternPieceData().
+ */
+void VLayoutPiece::setPieceProperties(const VPieceLabelData &properties)
+{
+    d->m_pieceProperties = properties;
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1674,6 +1694,33 @@ QGraphicsItem *VLayoutPiece::GetItem(bool textAsPaths) const
     item->setData(PieceItemData::Quantity, getQuantity());
     item->setData(PieceItemData::OnFold, isOnFold());
     item->setData(PieceItemData::Material, getMaterial());
+
+    // Piece Properties a layout or a cutter may use; a value that allows nothing sets no data.
+    const VPieceLabelData &properties = d->m_pieceProperties;
+    const int rotationStep = VPieceLabelData::rotationStepDegrees(properties.getRotationWay());
+    if (rotationStep > 0)
+    {
+        item->setData(PieceItemData::Rotation, rotationStep);
+    }
+    if (properties.GetTilt() != PieceTilt::None && properties.getTiltDegrees() > 0)
+    {
+        const int sign = properties.GetTilt() == PieceTilt::Clockwise ? -1 : 1;
+        item->setData(PieceItemData::Tilt, sign * properties.getTiltDegrees());
+    }
+    if (getFlip() != PieceFlip::None)
+    {
+        item->setData(PieceItemData::Flip, pieceFlipToString(getFlip()));
+    }
+    // The piece dialog stores Left, Right or Undefined.
+    const QString orientation = properties.GetOrientation();
+    if (orientation == QLatin1String("Left") || orientation == QLatin1String("Right"))
+    {
+        item->setData(PieceItemData::Orientation, orientation);
+    }
+    if (!properties.GetAnnotation().isEmpty())
+    {
+        item->setData(PieceItemData::Annotation, properties.GetAnnotation());
+    }
 
     qreal grainAngle = 0;
     if (grainlineAngle(grainAngle))
