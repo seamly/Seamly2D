@@ -29,6 +29,15 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ### [ ] Layout.97 - Implement - Seamly2D Piece Properties - Fold: Seamly2D gives Up/Down or Left/Right. D6673 Fold: is Y or N, and means the piece may go on the fold of tubular fabric. Change Seamly2D Piece Properties "On Fold" to be a checkbox that saves as "True" or "False", which exports to 'Y' or 'N' in DXF formats. This removes the possibility for 'Up/Down' folds as this is not typical for soft goods development. (Default is unchecked/"False"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
 
+- [x] Layout.97.1 Piece Properties: the Fold position list is removed. The row "Placement:" is now "Fold:" with the check box "On fold" (tooltip names DXF `Fold:Y`). Default unchecked. A valid fold line still checks and locks it.
+- [x] Layout.97.2 The pattern file keeps `onFold` (`xs:boolean`: `true` / `false`). `VPieceLabelData` has no fold position; `VAbstractPattern::AttrFoldPosition` is removed.
+- [x] Layout.97.3 Schema 0.7.7: no `foldPosition` attribute. Converter `removeFoldPositionV0_7_7` drops it; `onFold` is unchanged.
+  - Decision taken: a fold position (Up/Down, Left/Right) does not set `onFold`; the check box was the fold flag before too.
+  - Label placeholder `%pFoldPosition%`: removed from the label editor Insert menu; an old template prints nothing for it. No sample or template uses it.
+- [x] Layout.97.4 Tests: `TST_VPiece::ConverterRemovesFoldPosition` (3 rows). Harness: 16 passed. `cl /Zs` on every changed `.cpp`. Fusion render: the page fits again. Not run: Qt suites (next MSI).
+- [ ] Layout.97.5 Next MSI: user check, `AGENT_CHECKLIST.md` §24.
+- DXF `Fold:Y` / `Fold:N`: Layout.93.5.
+
 ### [ ] Task Layout.98 - Implement - Seamly2D Piece Properties - Flip: change Flip to radio buttons 'None', 'Horizontal', 'Vertical', and 'Both' are enabled. (Default is 'None'); create test.
 
 ### [ ] Task Layout.92 - Implement - right layout canvas - Material tabs

@@ -27,6 +27,7 @@ MALE_SHIRT
 | Layout.80.3.1 | 20 | S2D: male_shirt > Piece Mirror tool | ?
 | Layout.95.6 | 24 | S2D > male_shirt > Piece Properties: Rotation radio buttons | ?
 | Layout.96.6 | 24 | S2D > male_shirt > Piece Properties: Tilt radio buttons and degrees | ?
+| Layout.97.5 | 24 | S2D > male_shirt, jacket2 > Piece Properties: On fold check box, no fold position | ?
 
 | Layout.83.4 | 15 | SL > male_shirt > Nested legend squares | ?
 | Layout.82.3 | 16 | SL > male_shirt > Nested size colors: dark and pastel | ?
@@ -389,3 +390,6 @@ Needs the next MSI. Pattern: `male_shirt.sm2d`, an older format. Save it under a
 - [ ] Select CCW: Degrees is enabled. Type 100: the field stops at 90. Set 15. OK. Save, reopen: CCW, 15°.
 - [ ] The saved `.sm2d` piece `data` element has `tilt="CCW"` and `tiltDegrees="15"`.
 - [ ] Select None. OK. Save: `tilt="None"`, `tiltDegrees="0"`.
+- [ ] No "Fold position" row. The row "Fold:" has an "On fold" check box, unchecked on a new piece.
+- [ ] Check On fold. OK. Save: the piece `data` element has `onFold="true"` and no `foldPosition`. Uncheck, save: `onFold="false"`.
+- [ ] Open an older pattern with a fold position (jacket2 Back: `foldPosition="Up/Down"`). Save it under a new name: no `foldPosition`; Back keeps `onFold="true"`.
