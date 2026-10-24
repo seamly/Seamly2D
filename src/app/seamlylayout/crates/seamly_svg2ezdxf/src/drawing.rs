@@ -33,7 +33,7 @@ pub struct Annotation {
     pub text: String,
 }
 
-// @brief `Material:` value until the handoff SVG carries a per-piece material.
+// @brief `Material:` value for a piece without `data-material`.
 pub const DEFAULT_MATERIAL: &str = "Fabric";
 
 // @brief A `# n` grade rule identifier text (D6673 §4.3.1.4), written in the sample size block.
@@ -100,7 +100,7 @@ pub struct Block {
     pub quantity: Option<String>,
     // `Size Name:` system text: the piece `data-size`, else the pattern sample size.
     pub size: Option<String>,
-    // `Material:` system text: the material the piece is cut from.
+    // `Material:` system text: the piece `data-material`, else `DEFAULT_MATERIAL`.
     pub material: String,
     // Piece boundary (layer 1 / 84).
     pub boundary: Option<AstmContour>,

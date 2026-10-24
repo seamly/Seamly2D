@@ -4,7 +4,7 @@
 
 //! @brief SVG to ezdxf conversion logic.
 
-use crate::drawing::{Block, Drawing, DxfVersion};
+use crate::drawing::{Block, Drawing, DxfVersion, DEFAULT_MATERIAL};
 use crate::entities::{Circle, Entity, Line, Point, Polyline, Text};
 use crate::error::Result;
 use crate::layers::map_svg_to_astm_layer;
@@ -622,6 +622,17 @@ fn quantity_from_label(annotations: &[Annotation]) -> Option<u32> {
     }) // find_map
 } // fn quantity_from_label
 
+// @brief `Material:` value for a piece: its `data-material`, else `DEFAULT_MATERIAL`.
+fn material_from_piece(piece: &Element) -> String {
+    piece
+        .attributes
+        .get("data-material")
+        .map(|v| v.trim())
+        .filter(|v| !v.is_empty())
+        .unwrap_or(DEFAULT_MATERIAL)
+        .to_string()
+} // fn material_from_piece
+
 // @brief True when two contours trace the same line.
 fn same_contour(a: &AstmContour, b: &AstmContour) -> bool {
     a.dense.len() == b.dense.len()
@@ -671,6 +682,7 @@ fn extract_astm_piece(piece: &Element, block: &mut Block, options: &SvgToEzdxfOp
     // Seamly2D prints "<empty>" for unset label fields; it carries no information.
     block.annotations.retain(|a| !a.text.is_empty() && a.text != "<empty>");
     block.quantity = quantity_from_piece(piece, &block.annotations);
+    block.material = material_from_piece(piece);
 
     // Boundary: the longest closed cut line, else the longest closed seam line.
     let longest_closed = |lines: &[TaggedPolyline]| -> Option<AstmContour> {

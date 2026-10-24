@@ -441,6 +441,18 @@ mod tests {
         assert!(drawing.blocks.iter().all(|b| b.material == "Fabric"));
     }
 
+    // @brief `Material:` comes from the piece `data-material`; a piece without one is Fabric.
+    #[test]
+    fn piece_material_comes_from_data_material() {
+        let svg = TAGGED
+            .replace(r#"data-name="Front">"#, r#"data-name="Front" data-material=" Lining ">"#)
+            .replace(r#"data-name="Facing">"#, r#"data-name="Facing" data-material="">"#);
+        let doc = Document::parse(&svg).expect("fixture parses");
+        let drawing = svg_to_ezdxf(&doc, &SvgToEzdxfOptions::default()).expect("converts");
+        assert_eq!(drawing.blocks[0].material, "Lining");
+        assert_eq!(drawing.blocks[1].material, "Fabric", "empty data-material keeps the default");
+    }
+
     #[test]
     fn missing_piece_data_names_incomplete_pieces() {
         let doc = Document::parse(TAGGED).expect("fixture parses");
