@@ -2017,7 +2017,7 @@ mod tests {
     } // jacket2_marker_widens_narrow_roll
 
     // @brief The DXF-ASTM warning dialog lists each piece once, by the name the user wrote.
-    // The installed jacket2 hides every piece label and grainline, so all 8 pieces are listed.
+    // The fixture jacket2 hides every grainline, so all 8 pieces are listed.
     #[test]
     fn jacket2_missing_piece_data_lists_each_piece_once() {
         let layouts = [("nested", process_jacket2(true, 60.0, 300.0)), ("base size", process_jacket2_size(JACKET2_BASE_SIZE))];

@@ -19,6 +19,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 JACKET_2
 | Layout.61.7.2 | 5 | SL > jacket_2 > DXF-ASTM (R13) - multisize (base size only) - aw.fyi report - Fabric | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | PASS. Layer 5 caption accepted as a viewer note
 | Layout.84.4 | 19 | SL > jacket_2 > Nested exports: one grainline and label set per piece | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | Not checked: the Nested tab has no DXF export. Run §19
+| Layout.93.7 | 23 | SL > jacket_2 > DXF piece properties: Material, Missing Piece Data | ?
 
 MALE_SHIRT
 | Layout.28.7 | 13 | S2D > male_shirt > Built-in seam line | ?
@@ -104,6 +105,7 @@ Export all tabs unchecked.
 - [x] Base Size 500 tab, Export > DXF-ASTM (R13).
 - [x] Save dialog offers `jacket2_40-146_R13_Fabric_BaseSize500_<timestamp>.dxf`.
 - [x] "DXF-ASTM: Missing Piece Data" dialog appears. Expected: jacket2 hides labels and grainlines. "no piece label" means the hidden label block, not the name.
+  - Next MSI: the dialog no longer names a hidden label. See §23.
   - [ ] One line per piece, not one per size.
   - [ ] Each piece named `Size_500_Piece_<n>_<name>[_<letter>]`, n = 1 to 8. No spaces. All names differ. No "Detail (3)".
   - [ ] Cyrillic names show: Подборт, Комір.
@@ -360,3 +362,14 @@ Needs the next MSI. Settings from section 1. Export all tabs unchecked.
 - [ ] Size 220 tab, Export > DXF > DXF-AAMA (R11) > Annotated Version. The `.txt` first line reads `// DXF-AAMA Annotated Version with Inline Comments`. No `.rul`.
 - [ ] Marker tab, Export > DXF: "DXF: select Base Size or a size tab" is the first item. "DXF-AAMA (R11)" is disabled.
 - [ ] Base Size 500 tab, Export > DXF > DXF-ASTM (R13): the save dialog still reads "Save DXF-ASTM (R13) File" and offers `…_R13_…`.
+
+## 23. jacket2: DXF piece properties
+
+Needs the next MSI. Settings from section 1. Export all tabs unchecked.
+
+- [ ] Fabric tab, Base Size 500, Export > DXF > DXF-ASTM (R13).
+  - [ ] Missing Piece Data lists Подборт only: "no grainline". No line says "piece label".
+  - [ ] Open the `.dxf`: every block has `Material:Fabric`.
+- [ ] Lining tab, Base Size 500, Export > DXF > DXF-ASTM (R13).
+  - [ ] No Missing Piece Data dialog: Detail 4 shows its grainline.
+  - [ ] Open the `.dxf`: the Detail 4 block has `Material:Lining` and `Quantity:1,1`.

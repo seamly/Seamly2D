@@ -33,7 +33,7 @@ pub struct Annotation {
     pub text: String,
 }
 
-// @brief `Material:` value until the handoff SVG carries a per-piece material.
+// @brief `Material:` value for a piece without `data-material`.
 pub const DEFAULT_MATERIAL: &str = "Fabric";
 
 // @brief A `# n` grade rule identifier text (D6673 §4.3.1.4), written in the sample size block.
@@ -96,11 +96,11 @@ pub struct Block {
     pub display_name: String,
     // Piece `data-parent`: the piece-set id in a multisize handoff. Groups the sizes of one piece.
     pub parent: Option<String>,
-    // `Quantity:` system text in "R,L" form, from `data-quantity` or a "Cut N" label line.
+    // `Quantity:` system text in "R,L" form, from `data-quantity`.
     pub quantity: Option<String>,
     // `Size Name:` system text: the piece `data-size`, else the pattern sample size.
     pub size: Option<String>,
-    // `Material:` system text: the material the piece is cut from.
+    // `Material:` system text: the piece `data-material`, else `DEFAULT_MATERIAL`.
     pub material: String,
     // Piece boundary (layer 1 / 84).
     pub boundary: Option<AstmContour>,
@@ -161,10 +161,8 @@ impl Block {
 pub struct MissingPieceData {
     // Display name of the piece (`Block::display_name`).
     pub piece_name: String,
-    // No `data-quantity` and no "Cut N" label line, so no `Quantity:` system text.
+    // No `data-quantity`, so no `Quantity:` system text.
     pub quantity: bool,
-    // No label text (layer 15).
-    pub label: bool,
     // No grainline (layer 7).
     pub grainline: bool,
 }
@@ -209,9 +207,10 @@ impl Drawing {
         self.modelspace_entities.push(entity);
     }
 
-    // @brief Pieces that lack a `Quantity:` source, label text, or a grainline.
+    // @brief Pieces that lack a `Quantity:` source or a grainline.
     // @details Only pieces with a boundary count: the DXF-ASTM writer writes
-    //          system text, labels and grainlines for those pieces only.
+    //          system text and grainlines for those pieces only. A label only
+    //          displays piece data, so a piece without one lacks nothing.
     // @return One entry per incomplete piece, in first-block order. The sizes of a
     //         multisize piece share one display name and give one entry: a size
     //         that lacks an item marks it missing for the piece.
@@ -221,20 +220,18 @@ impl Drawing {
             let entry = MissingPieceData {
                 piece_name: b.display_name.clone(),
                 quantity: b.quantity.is_none(),
-                label: b.annotations.is_empty(),
                 grainline: b.grainline.is_none(),
             }; // entry
             // Merge every size of a piece into its first entry.
             match pieces.iter_mut().find(|m| m.piece_name == entry.piece_name) {
                 Some(m) => {
                     m.quantity |= entry.quantity;
-                    m.label |= entry.label;
                     m.grainline |= entry.grainline;
                 } // Some: another size
                 None => pieces.push(entry),
             } // match piece
         } // for each piece block
-        pieces.retain(|m| m.quantity || m.label || m.grainline);
+        pieces.retain(|m| m.quantity || m.grainline);
         pieces
     } // fn missing_piece_data
 

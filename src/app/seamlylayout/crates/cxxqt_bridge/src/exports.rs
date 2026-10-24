@@ -870,14 +870,11 @@ fn missing_piece_data_text(missing: &[MissingPieceData]) -> String {
 
     let mut lines = vec!["These pieces lack data that DXF-ASTM and DXF-AAMA use:".to_string(), String::new()];
     for m in missing {
-        // Each flag names one absent item; Quantity comes from data-quantity or a "Cut N" label line.
+        // Each flag names one absent item; Quantity comes from the piece data-quantity.
         let mut lacks = Vec::new();
         if m.quantity {
-            lacks.push("Quantity (no piece quantity or \"Cut N\" label line)");
+            lacks.push("Quantity (no piece quantity)");
         } // if no quantity
-        if m.label {
-            lacks.push("piece label");
-        } // if no label
         if m.grainline {
             lacks.push("grainline");
         } // if no grainline
@@ -2557,8 +2554,8 @@ mod tests {
         let pieces: Vec<&str> =
             text.lines().filter_map(|l| l.strip_prefix("\u{2022} ")).map(|l| l.split(':').next().unwrap()).collect();
         assert_eq!(pieces, vec!["CollarTopInterface", "CollarBaseInterface", "CuffInterface"], "document order");
-        // Every piece of the handoff carries data-quantity, so only the label and grainline are missing.
-        assert!(text.contains("CuffInterface: no piece label, no grainline"), "{text}");
+        // Every piece of the handoff carries data-quantity, so only the grainline is missing.
+        assert!(text.contains("\u{2022} CuffInterface: no grainline\n"), "{text}");
         assert!(text.contains("usability of the exported DXF file"), "{text}");
     } // dxf_missing_piece_data_names_male_shirt_interface_pieces
 
@@ -2566,7 +2563,7 @@ mod tests {
     #[test]
     fn missing_piece_data_text_is_empty_when_complete() {
         assert_eq!(missing_piece_data_text(&[]), "");
-        let only_grain = MissingPieceData { piece_name: "Yoke".into(), quantity: false, label: false, grainline: true };
+        let only_grain = MissingPieceData { piece_name: "Yoke".into(), quantity: false, grainline: true };
         assert!(missing_piece_data_text(&[only_grain]).contains("\u{2022} Yoke: no grainline\n"));
     } // missing_piece_data_text_is_empty_when_complete
 

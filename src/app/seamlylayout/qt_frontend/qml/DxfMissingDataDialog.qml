@@ -3,7 +3,7 @@
 // LGPL-3.0 License: https://www.gnu.org/licenses/lgpl-3.0.html
 //
 // @file DxfMissingDataDialog.qml
-// @brief Modal warning before a DXF-ASTM or DXF-AAMA export: pieces that lack Quantity, label or grainline.
+// @brief Modal warning before a DXF-ASTM or DXF-AAMA export: pieces that lack Quantity or grainline.
 //
 // The text comes from AppController.dxfMissingPieceData(), which names each piece
 // and what it lacks. Accept continues the export; reject cancels it.
