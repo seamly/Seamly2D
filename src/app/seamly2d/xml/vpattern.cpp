@@ -882,8 +882,7 @@ void VPattern::parsePieceElement(QDomElement &domElement, const Document &parse)
                                                QString().setNum(qApp->Seamly2DSettings()->isHideSeamLine())));
         piece.SetSeamAllowanceBuiltIn(getParameterBool(domElement, PatternPieceTool::AttrSeamAllowanceBuiltIn,
                                                        falseStr));
-        piece.SetForbidFlipping(getParameterBool(domElement, PatternPieceTool::AttrForbidFlipping,
-                                           QString().setNum(qApp->Seamly2DSettings()->getForbidPieceFlipping())));
+        piece.setFlip(stringToPieceFlip(GetParametrEmptyString(domElement, PatternPieceTool::AttrFlip)));
         piece.setInLayout(getParameterBool(domElement, AttrInLayout, trueStr));
         piece.SetUnited(getParameterBool(domElement, PatternPieceTool::AttrUnited, falseStr));
         piece.setMaterial(GetParametrString(domElement, PatternPieceTool::AttrMaterial,

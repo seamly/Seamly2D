@@ -1027,7 +1027,7 @@ QListWidget::item:selected {
                  </font>
                 </property>
                 <property name="text">
-                 <string>Flipping:</string>
+                 <string>Flip:</string>
                 </property>
                 <property name="alignment">
                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -1035,31 +1035,88 @@ QListWidget::item:selected {
                </widget>
               </item>
               <item row="0" column="1">
-               <widget class="QCheckBox" name="forbidFlipping_CheckBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
-                </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>100</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>9</pointsize>
-                  <bold>false</bold>
-                 </font>
-                </property>
+               <widget class="QWidget" name="flip_Widget">
                 <property name="toolTip">
-                 <string>Forbid piece be mirrored in a layout.</string>
+                 <string>Mirror a layout may apply to the piece. Horizontal: left to right. Vertical: top to bottom.</string>
                 </property>
-                <property name="text">
-                 <string>Forbid</string>
-                </property>
+                <layout class="QGridLayout" name="flip_GridLayout">
+                 <property name="leftMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                 <item row="0" column="0">
+                  <widget class="QRadioButton" name="flipNone_RadioButton">
+                   <property name="font">
+                    <font>
+                     <pointsize>9</pointsize>
+                     <bold>false</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>None</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">flip_ButtonGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QRadioButton" name="flipHorizontal_RadioButton">
+                   <property name="font">
+                    <font>
+                     <pointsize>9</pointsize>
+                     <bold>false</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Horizontal</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">flip_ButtonGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                 <item row="0" column="2">
+                  <widget class="QRadioButton" name="flipVertical_RadioButton">
+                   <property name="font">
+                    <font>
+                     <pointsize>9</pointsize>
+                     <bold>false</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Vertical</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">flip_ButtonGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QRadioButton" name="flipBoth_RadioButton">
+                   <property name="font">
+                    <font>
+                     <pointsize>9</pointsize>
+                     <bold>false</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Both</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">flip_ButtonGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                </layout>
                </widget>
               </item>
               <item row="1" column="0">
@@ -6113,6 +6170,7 @@ QListWidget::item:selected {
   </connection>
  </connections>
  <buttongroups>
+  <buttongroup name="flip_ButtonGroup"/>
   <buttongroup name="tilt_ButtonGroup"/>
   <buttongroup name="rotation_ButtonGroup"/>
   <buttongroup name="notchSubType_ButtonGroup"/>

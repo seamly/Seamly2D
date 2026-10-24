@@ -82,7 +82,7 @@ public:
     static const QString TagIPaths;
     static const QString TagAnchors;
     static const QString AttrVersion;
-    static const QString AttrForbidFlipping;
+    static const QString AttrFlip;
     static const QString AttrPieceColor;
     static const QString AttrPieceFill;
     static const QString AttrPieceLock;
@@ -221,7 +221,7 @@ private:
 
     void                  toggleInLayout(bool checked);
     void                  togglePieceLock(bool checked);
-    void                  toggleFlipping(bool checked);
+    void                  setPieceFlip(PieceFlip flip, const QString &flipName);
     void                  toggleSeamLine(bool checked);
     void                  toggleSeamAllowance(bool checked);
     void                  toggleGrainline(bool checked);
