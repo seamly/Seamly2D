@@ -13,12 +13,16 @@
 //
 // Every tab takes its pieces from the imported SVG: each size of each piece is
 // already drafted there, so no tab builds a size from grade rules.
+//
+// An import with several materials lays out every material.  The controller
+// holds the shown material's layouts; `MaterialLayout` holds each other one.
 
 use std::collections::VecDeque;
 
 use svg_dom::Document;
 
 use crate::layout_utils::ProcessLayoutResult;
+use crate::piece_divider::DivideSpec;
 
 // @brief Label of the tab where every size of every piece packs as its own piece.
 pub const MARKER_LABEL: &str = "Marker";
@@ -171,6 +175,15 @@ pub struct LayoutState {
 }
 
 impl LayoutState {
+    // @brief The state of a blank canvas, before a layout: the canvas itself and its height.
+    pub fn blank(initial_dom: &Document) -> Self {
+        Self {
+            layout_dom: Some(initial_dom.clone()),
+            layout_h_px: canvas_height_px(initial_dom),
+            ..Self::default()
+        }
+    } // fn blank
+
     // @brief Build the state of a finished layout run.
     pub fn from_result(result: ProcessLayoutResult) -> Self {
         Self {
@@ -274,58 +287,187 @@ impl LayoutViews {
     } // fn select
 } // impl LayoutViews
 
-// @brief Tabs still to lay out after the first one, one per UI tick.
+// @brief Height of a canvas from its root `height`, in px; 0 when it has none.
+pub fn canvas_height_px(doc: &Document) -> u32 {
+    doc.root.attributes.get("height").and_then(|h| h.parse::<u32>().ok()).unwrap_or(0)
+} // fn canvas_height_px
+
+// @brief The layouts of a material that is not shown.
 //
-// Each tab packs in its own call so the event loop can repaint the progress
-// popup, which names the tab, between tabs.
+// Selecting a material parks the controller's layouts here and takes the new
+// material's layouts out, as `LayoutViews::select` does for tabs.
+#[derive(Default)]
+pub struct MaterialLayout {
+    // Blank canvas from the submitted settings; `None` before settings are submitted.
+    pub initial_layout_dom: Option<Document>,
+    // Layout of the material's active tab, or its blank canvas before a layout.
+    pub state: LayoutState,
+    // Tabs of a multisize layout.
+    pub views: LayoutViews,
+    // The media the layout split its pieces for; `None` when it did not split.
+    pub divide_spec: Option<DivideSpec>,
+    // True when the material's first layout finished, so exports and Adjust Mode can use it.
+    pub is_laid_out: bool,
+}
+
+impl MaterialLayout {
+    // @brief Layouts of a material whose settings were just submitted: only its blank canvas.
+    pub fn blank(initial_dom: Document) -> Self {
+        Self { state: LayoutState::blank(&initial_dom), initial_layout_dom: Some(initial_dom), ..Self::default() }
+    } // fn blank
+
+    // @brief Drop the layouts, keep the blank canvas: a new layout run starts.
+    pub fn reset_to_blank(&mut self) {
+        self.state = self.initial_layout_dom.as_ref().map(LayoutState::blank).unwrap_or_default();
+        self.views.clear();
+        self.divide_spec = None;
+        self.is_laid_out = false;
+    } // fn reset_to_blank
+} // impl MaterialLayout
+
+// @brief One layout of a layout run: a material's first layout, or one of its tabs.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LayoutJob {
+    // Index of the material in the import; 0 for an import with one material.
+    pub material: usize,
+    // Tab to lay out; `None` for the material's first layout: the only layout of an
+    // individual pattern, or the Marker tab of a multisize one.
+    pub kind: Option<ViewKind>,
+}
+
+// @brief Jobs that follow the first layout of the shown material.
+//
+// @param active    Material whose first layout the run makes before the queue starts.
+// @param tab_kinds Tabs after the first layout, one list per material; empty lists for an individual pattern.
+// @return The shown material's tabs, then the first layout and tabs of each other material, in material order.
+pub fn layout_jobs(active: usize, tab_kinds: &[Vec<ViewKind>]) -> Vec<LayoutJob> {
+    let tabs = |material: usize| -> Vec<LayoutJob> {
+        tab_kinds[material].iter().map(|kind| LayoutJob { material, kind: Some(kind.clone()) }).collect()
+    };
+    let mut jobs = if active < tab_kinds.len() { tabs(active) } else { Vec::new() };
+    for material in (0..tab_kinds.len()).filter(|&m| m != active) {
+        jobs.push(LayoutJob { material, kind: None });
+        jobs.extend(tabs(material));
+    } // for each other material
+    jobs
+} // fn layout_jobs
+
+// @brief Layouts still to make after the first one, one per UI tick.
+//
+// Each layout packs in its own call so the event loop can repaint the progress
+// popup, which names the layout, between layouts.
 pub struct TabLayoutQueue {
-    // Settings of the first run; every tab uses the same settings.
+    // Settings of the first run; every layout uses the same settings.
     pub settings_json: String,
-    // Canvas height before the first run trimmed it.
+    // Canvas height of the shown material before its first run trimmed it.
     pub layout_h_px: u32,
-    // Tabs not yet laid out, in tab order.
-    pending: VecDeque<ViewKind>,
-    // Number of tabs in the run, the first one included.
+    // First layouts of the other materials extend the media, as the shown material's did.
+    pub extend_media: bool,
+    // First layouts of the other materials split oversized pieces, as the shown material's did.
+    pub split_oversized: bool,
+    // Layouts not yet made, in order.
+    pending: VecDeque<LayoutJob>,
+    // Number of layouts in the run, the first one included.
     total: usize,
+    // Material names that start each layout label; empty when the import has one material.
+    material_names: Vec<String>,
+    // Label of a first layout: "Marker" for a multisize import, empty for an individual one.
+    first_label: String,
     // One line per layout with unplaced pieces or a failure: "Size 36: Front, Back".
     pub problems: Vec<String>,
-    // Base Size layout and its size: the size tab of that size shows the same layout.
-    base_layout: Option<(String, ProcessLayoutResult)>,
+    // One line per piece whose fold line stays off the left edge, in individual layouts.
+    pub fold_line_lines: Vec<String>,
+    // Base Size layout, its material and its size: the size tab of that size shows the same layout.
+    base_layout: Option<(usize, String, ProcessLayoutResult)>,
 }
 
 impl TabLayoutQueue {
-    // @brief Queue the tabs that follow the first one.
-    pub fn new(settings_json: String, layout_h_px: u32, kinds: Vec<ViewKind>) -> Self {
-        let total = kinds.len() + 1;
-        Self { settings_json, layout_h_px, pending: kinds.into(), total, problems: Vec::new(), base_layout: None }
+    // @brief Queue the layouts that follow the first one.
+    //
+    // @param material_names One name per material; pass an empty list for an import with one material.
+    // @param multisize      True when each first layout is a Marker tab.
+    pub fn new(settings_json: String, layout_h_px: u32, jobs: Vec<LayoutJob>, material_names: Vec<String>, multisize: bool) -> Self {
+        let total = jobs.len() + 1;
+        Self {
+            settings_json,
+            layout_h_px,
+            extend_media: multisize,
+            split_oversized: false,
+            pending: jobs.into(),
+            total,
+            material_names,
+            first_label: if multisize { MARKER_LABEL.to_string() } else { String::new() },
+            problems: Vec::new(),
+            fold_line_lines: Vec::new(),
+            base_layout: None,
+        }
     } // fn new
 
-    // @brief Take the next tab to lay out.
-    pub fn pop(&mut self) -> Option<ViewKind> {
+    // @brief Take the next layout to make.
+    pub fn pop(&mut self) -> Option<LayoutJob> {
         self.pending.pop_front()
     } // fn pop
 
-    // @brief Popup text for the next tab: "Laying out Size 36 (4 of 6)…"; `None` when empty.
+    // @brief Name of a layout for the popup and the warnings: "Lining: Size 36", "Size 36" or "Lining".
+    pub fn job_label(&self, job: &LayoutJob) -> String {
+        let tab = match &job.kind {
+            Some(kind) => kind.label(),
+            None => self.first_label.clone(),
+        }; // tab
+        let material = self.material_names.get(job.material).map(String::as_str).unwrap_or("");
+        match (material.is_empty(), tab.is_empty()) {
+            (true, true)   => "Layout".to_string(),
+            (true, false)  => tab,
+            (false, true)  => material.to_string(),
+            (false, false) => format!("{material}: {tab}"),
+        } // match parts
+    } // fn job_label
+
+    // @brief "Lining: " before a line about material `material`; empty for an import with one material.
+    pub fn material_prefix(&self, material: usize) -> String {
+        match self.material_names.get(material) {
+            Some(name) if !name.is_empty() => format!("{name}: "),
+            _ => String::new(),
+        } // match name
+    } // fn material_prefix
+
+    // @brief Popup text for the next layout: "Laying out Size 36 (4 of 6)…"; `None` when empty.
     pub fn next_message(&self) -> Option<String> {
-        let kind = self.pending.front()?;
+        let job = self.pending.front()?;
         let number = self.total - self.pending.len() + 1;
-        Some(format!("Laying out {} ({number} of {})…", kind.label(), self.total))
+        Some(format!("Laying out {} ({number} of {})…", self.job_label(job), self.total))
     } // fn next_message
 
-    // @brief Keep a finished Base Size layout for the size tab of the same size.
-    pub fn keep_base_layout(&mut self, kind: &ViewKind, result: &ProcessLayoutResult) {
-        if let ViewKind::BaseSize(size) = kind {
-            self.base_layout = Some((size.clone(), result.clone()));
+    // @brief Keep a finished Base Size layout for the size tab of the same size and material.
+    pub fn keep_base_layout(&mut self, job: &LayoutJob, result: &ProcessLayoutResult) {
+        if let Some(ViewKind::BaseSize(size)) = &job.kind {
+            self.base_layout = Some((job.material, size.clone(), result.clone()));
         } // if Base Size
     } // fn keep_base_layout
 
-    // @brief The Base Size layout when `kind` is the size tab of the base size.
-    pub fn reusable_layout(&self, kind: &ViewKind) -> Option<ProcessLayoutResult> {
-        match (kind, &self.base_layout) {
-            (ViewKind::Size(size), Some((base, result))) if size == base => Some(result.clone()),
+    // @brief The Base Size layout when `job` is the size tab of the base size, in the same material.
+    pub fn reusable_layout(&self, job: &LayoutJob) -> Option<ProcessLayoutResult> {
+        match (&job.kind, &self.base_layout) {
+            (Some(ViewKind::Size(size)), Some((material, base, result))) if size == base && *material == job.material => {
+                Some(result.clone())
+            } // same size, same material
             _ => None,
-        } // match kind
+        } // match job
     } // fn reusable_layout
+
+    // @brief Warning after the last layout: layouts that left pieces out or failed, then fold lines off the edge.
+    //
+    // @return `None` when every layout placed every piece.
+    pub fn final_warning(&self) -> Option<String> {
+        let mut parts = Vec::new();
+        if !self.problems.is_empty() {
+            parts.push(tab_problems_warning(&self.problems));
+        } // if problems
+        if !self.fold_line_lines.is_empty() {
+            parts.push(fold_line_warning(&self.fold_line_lines));
+        } // if fold lines off the edge
+        if parts.is_empty() { None } else { Some(parts.join("\n\n")) }
+    } // fn final_warning
 } // impl TabLayoutQueue
 
 #[cfg(test)]
@@ -376,17 +518,61 @@ mod tests {
         assert_eq!((marker.size(), base.size(), size.size()), (None, Some("36"), Some("34")));
     } // view_kinds_choose_their_exports
 
+    // @brief A tab job of material `material`.
+    fn tab(material: usize, kind: ViewKind) -> LayoutJob {
+        LayoutJob { material, kind: Some(kind) }
+    } // fn tab
+
+    // @brief The first-layout job of material `material`.
+    fn first(material: usize) -> LayoutJob {
+        LayoutJob { material, kind: None }
+    } // fn first
+
     // @brief The popup names each tab in order and counts the first tab as done.
     #[test]
     fn tab_queue_messages_count_up() {
-        let mut queue = TabLayoutQueue::new(String::new(), 0, vec![ViewKind::Nested, ViewKind::Size("34".into())]);
+        let jobs = layout_jobs(0, &[vec![ViewKind::Nested, ViewKind::Size("34".into())]]);
+        let mut queue = TabLayoutQueue::new(String::new(), 0, jobs, Vec::new(), true);
         assert_eq!(queue.next_message().as_deref(), Some("Laying out Nested (2 of 3)…"));
-        assert_eq!(queue.pop(), Some(ViewKind::Nested));
+        assert_eq!(queue.pop(), Some(tab(0, ViewKind::Nested)));
         assert_eq!(queue.next_message().as_deref(), Some("Laying out Size 34 (3 of 3)…"));
-        assert_eq!(queue.pop(), Some(ViewKind::Size("34".into())));
+        assert_eq!(queue.pop(), Some(tab(0, ViewKind::Size("34".into()))));
         assert_eq!(queue.pop(), None);
         assert_eq!(queue.next_message(), None);
     } // tab_queue_messages_count_up
+
+    // @brief The shown material's tabs come first; each other material follows with its first layout, then its tabs.
+    #[test]
+    fn layout_jobs_cover_every_material() {
+        let kinds = vec![ViewKind::Nested, ViewKind::Size("34".into())];
+        let jobs = layout_jobs(1, &[kinds.clone(), kinds.clone(), kinds]);
+        assert_eq!(jobs, vec![
+            tab(1, ViewKind::Nested), tab(1, ViewKind::Size("34".into())),
+            first(0), tab(0, ViewKind::Nested), tab(0, ViewKind::Size("34".into())),
+            first(2), tab(2, ViewKind::Nested), tab(2, ViewKind::Size("34".into())),
+        ]);
+
+        // Individual patterns have no tabs: only the other materials' layouts remain.
+        assert_eq!(layout_jobs(0, &[Vec::new(), Vec::new()]), vec![first(1)]);
+        assert!(layout_jobs(0, &[Vec::new()]).is_empty(), "one individual material needs no queue");
+    } // layout_jobs_cover_every_material
+
+    // @brief With several materials each label starts with the material; a first layout is Marker or the material.
+    #[test]
+    fn job_labels_name_the_material() {
+        let names = vec!["Fabric".to_string(), "Lining".to_string()];
+        let multisize = TabLayoutQueue::new(String::new(), 0, vec![first(1)], names.clone(), true);
+        assert_eq!(multisize.job_label(&first(1)), "Lining: Marker");
+        assert_eq!(multisize.job_label(&tab(0, ViewKind::Size("34".into()))), "Fabric: Size 34");
+        assert_eq!(multisize.next_message().as_deref(), Some("Laying out Lining: Marker (2 of 2)…"));
+
+        let individual = TabLayoutQueue::new(String::new(), 0, vec![first(1)], names, false);
+        assert_eq!(individual.job_label(&first(1)), "Lining");
+
+        let one = TabLayoutQueue::new(String::new(), 0, Vec::new(), Vec::new(), true);
+        assert_eq!(one.job_label(&first(0)), "Marker");
+        assert_eq!(one.job_label(&tab(0, ViewKind::Nested)), "Nested");
+    } // job_labels_name_the_material
 
     // @brief A finished layout whose bbox JSON names it.
     fn result(name: &str) -> ProcessLayoutResult {
@@ -406,22 +592,56 @@ mod tests {
         }
     } // fn result
 
-    // @brief The size tab of the base size reuses the Base Size layout; other tabs do not.
+    // @brief The size tab of the base size reuses the Base Size layout of its own material; other tabs do not.
     #[test]
     fn base_size_layout_is_reused_once_kept() {
-        let mut queue = TabLayoutQueue::new(String::new(), 0, Vec::new());
-        let base = ViewKind::BaseSize("36".into());
-        assert!(queue.reusable_layout(&ViewKind::Size("36".into())).is_none(), "nothing kept yet");
+        let mut queue = TabLayoutQueue::new(String::new(), 0, Vec::new(), Vec::new(), true);
+        let base = tab(0, ViewKind::BaseSize("36".into()));
+        assert!(queue.reusable_layout(&tab(0, ViewKind::Size("36".into()))).is_none(), "nothing kept yet");
 
-        queue.keep_base_layout(&ViewKind::Size("34".into()), &result("s34"));
-        assert!(queue.reusable_layout(&ViewKind::Size("34".into())).is_none(), "only a Base Size layout is kept");
+        queue.keep_base_layout(&tab(0, ViewKind::Size("34".into())), &result("s34"));
+        assert!(queue.reusable_layout(&tab(0, ViewKind::Size("34".into()))).is_none(), "only a Base Size layout is kept");
 
         queue.keep_base_layout(&base, &result("base"));
-        let reused = queue.reusable_layout(&ViewKind::Size("36".into())).expect("size 36 reuses Base Size 36");
+        let reused = queue.reusable_layout(&tab(0, ViewKind::Size("36".into()))).expect("size 36 reuses Base Size 36");
         assert_eq!((reused.bbox_json.as_str(), reused.unplaced_labels.len()), ("base", 1));
-        assert!(queue.reusable_layout(&ViewKind::Size("34".into())).is_none());
-        assert!(queue.reusable_layout(&ViewKind::Nested).is_none());
+        assert!(queue.reusable_layout(&tab(0, ViewKind::Size("34".into()))).is_none());
+        assert!(queue.reusable_layout(&tab(0, ViewKind::Nested)).is_none());
+        assert!(queue.reusable_layout(&tab(1, ViewKind::Size("36".into()))).is_none(), "another material lays out its own");
     } // base_size_layout_is_reused_once_kept
+
+    // @brief The final warning lists left-out pieces, then fold lines off the edge; nothing to report gives none.
+    #[test]
+    fn final_warning_joins_problems_and_fold_lines() {
+        let mut queue = TabLayoutQueue::new(String::new(), 0, Vec::new(), Vec::new(), false);
+        assert_eq!(queue.final_warning(), None);
+        queue.problems.push(tab_unplaced_problem("Lining", &sizes(&["Back"])));
+        queue.fold_line_lines.push("Lining: Back: the fold line crosses the grain".to_string());
+        let text = queue.final_warning().expect("two problems");
+        assert!(text.starts_with("Some layouts left pieces out:\n\nLining:\n\u{2022} Back"), "{text}");
+        assert!(text.ends_with("(the fold):\n\n\u{2022} Lining: Back: the fold line crosses the grain"), "{text}");
+    } // final_warning_joins_problems_and_fold_lines
+
+    // @brief A material's layouts start as its blank canvas, and a new run drops them back to it.
+    #[test]
+    fn material_layout_resets_to_its_blank_canvas() {
+        let canvas = Document::parse("<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"100\" height=\"240\"/>")
+            .expect("canvas parses");
+        let mut layout = MaterialLayout::blank(canvas);
+        assert_eq!(layout.state.layout_h_px, 240);
+        assert!(layout.state.layout_dom.is_some() && !layout.is_laid_out);
+
+        layout.state = state("laid out");
+        layout.views.start(ViewKind::Marker);
+        layout.is_laid_out = true;
+        layout.reset_to_blank();
+        assert_eq!((layout.state.layout_h_px, layout.state.piece_bboxes_json.as_str()), (240, ""));
+        assert!(layout.views.labels().is_empty() && !layout.is_laid_out);
+
+        let mut never = MaterialLayout::default();
+        never.reset_to_blank();
+        assert!(never.state.layout_dom.is_none(), "no settings: no canvas");
+    } // material_layout_resets_to_its_blank_canvas
 
     // @brief A state whose bbox JSON names it, so a test can tell states apart.
     fn state(name: &str) -> LayoutState {
