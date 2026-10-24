@@ -4,6 +4,42 @@ Open SeamlyLayout tasks. Check off finished items; move fully completed tasks to
 
 ## Implement
 
+### [ ] Task Layout.90 - Implement - DXF-R13 - Paper Space information
+
+Look up what 'Paper space' information is in the DXF-ASTM standard and implement this in the DXF-ASTM (R13) export. If this information is utilized in the DXF-AAMA (R11) export then implement this for DXF-AAMA (R11) export, too.
+
+### [ ] Task Layout.91 - Implement - DXF-R13 - Model Space information
+
+Look up what 'Model space' information is in the DXF-ASTM standard and implement this in the DXF-ASTM (R13) export. If this information is utilized in the DXF-AAMA (R11) export then implement this for DXF-AAMA (R11) export, too.
+
+### [ ] Task Layout.92 - Implement - right layout canvas - Material tabs
+
+Currently SeamlyLayout's left input canvas displays the Material types in tabs; the layout algorithm processes only the currently selected Material tab from the left hand canvas. Update the layout algorithm to generate the layouts for all material tabs, and display the material layouts in the right hand canvas using Material tabs (as is done in the left input canvas).
+
+### [ ] Task Layout.93 - Implement - DXF - for each piece, use its 'piece tool' properties and attributes as source of truth instead of labels for names, letter, quantity, material, foldline, etc.; track this data with the layout pieces.
+
+This information should be tracked in the layout data even if it's not shown in a label. The DXF export can then access piece properties instead of label data to generate the exported file.
+
+- [ ] Layout.93.1 DXF `Material:` from `data-material`. Today every block writes `Material:Fabric` (`drawing.rs` `DEFAULT_MATERIAL`), also for Lining. Keep the default as 'Fabric'.
+- [ ] Layout.93.2 DXF layer 7 grainline from `data-grainline-angle` when the grainline is hidden. Today jacket2 Подборт has no layer 7 line. --> don't add a grainline in dXF if the piece grainline is hidden. "A hidden grainline indicates that there is no grainline"
+- [ ] Layout.93.3 Missing Piece Data: a hidden label is not missing data. Report only data that Piece Properties lack. "Hidden label(s) don't indicate anything. Use piece properties, not piece labels, to get data for DXF export"
+  - Layer 15 holds only the labels the piece shows; a hidden label writes no layer 15 text (user decision). The piece system text carries the data.
+- [ ] Layout.93.4 Seamly2D handoff: add `data-*` attributes for Rotation, Tilt, Fold position, Orientation, Annotation and Forbid flipping. Update `SVG-DATA-ATTRIBUTES.md` and `NEW-ATTRIBUTES.csv`.
+- [ ] Layout.93.5 DXF piece system text from them: `Rotation:`, `Tilt:`, `Fold:`, `Flip:` (D6673 §4.3.1.2). Values: Layout.95 (Rotation), Layout.96 (Tilt), Layout.97 (Fold), Layout.98 (Flip).
+- [ ] Layout.93.6 Tests: `TST_SvgComponentTags`; Rust converter and writer tests with hidden labels and grainlines.
+
+### [ ] Task Layout.94 - Implement - Multisize - Nested - select the grainline (when visible), pattern label (when visible), and piece label (when visible) from each piece in the base size and place them as a group at the lowest layer/group in the layout, then remove all grainlines, piece labels, and pattern labels from each piece group (retain the size labe in each piece group and display size labels with its size's color)
+
+### [ ] Task Layout.95 - Implement - Seamly2D Piece Properties - Rotation" Change Rotation to be radio buttons for: None, 1-Way → 360, 2-Way → 180, 4-Way → 90, Any → 1. None or Undefined writes no line. (Default is "None"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
+
+### [ ] Task Layout.96 - Implement - Seamly2D Piece Properties - Tilt: change to radio buttons "None", "CCW", "CW". If "CCW" or "CW' chosen then enable a text field 'Degrees' that accepts integers between 0 and 90. Default radio button is "None", Default Degrees is "0". Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
+
+### [ ] Layout.97 - Implement - Seamly2D Piece Properties - Fold: Seamly2D gives Up/Down or Left/Right. D6673 Fold: is Y or N, and means the piece may go on the fold of tubular fabric. Change Seamly2D Piece Properties "On Fold" to be a checkbox that saves as "True" or "False", which exports to 'Y' or 'N' in DXF formats. This removes the possibility for 'Up/Down' folds as this is not typical for soft goods development. (Default is unchecked/"False"). Include this in the schema developed for SeamlyLayout; create conversion from previous schema; create test.
+
+### [ ] Task Layout.98 - Implement - Seamly2D Piece Properties - Flip: change Flip to radio buttons 'None', 'Horizontal', 'Vertical', and 'Both' are enabled. (Default is 'None'); create test.
+
+
+
 ## VERIFY
 
 ### [ ] Task Layout.6 — Verify - DXF-ASTM grading
@@ -14,6 +50,7 @@ See `dxf-docs/seamlylayout_DXF_ASTM_D6673_COMPLIANCE.md`, "Not exported".
   - [ ] Layout.61.7 Validate the multisize DXF-ASTM export with aw.fyi (DXF.8.4).
     - [ ] Layout.61.7.2 Export jacket2 Base Size 500 as DXF-ASTM R13; check in aw.fyi. Expect all 8 pieces graded and no merged Detail pieces, layer 5 mismatches, or duplicate vertices. Nested has no DXF-ASTM export (Layout.67). User check: `AGENT_CHECKLIST.md` §5.
       - [x] Fabric R13, MSI 26.10.2023: `test-seamly-layout/layouts/jacket2/20261021/jacket2_40-146_R13_Fabric_BaseSize500_202610211408_apparelwerks_compliance_report.pdf`. 7 of 7 pieces graded: 7 blocks, 7 layer 5 lines, `# n` texts in each block. No departures. 5 advisories: Unicode escapes, L84 densification, validation spans, curve tolerance, piece-113 layer 14 curve points.
+      - [x] Fabric R13, MSI 26.10.2312: `test-seamly-layout/layouts/jacket2/20261023/jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf`. 7 of 7 graded, 0 departures, the same 5 advisories. Page 1 caption "L5 endpoint mismatch up to 227.990 — sizes not a pure translation": accepted as a viewer note (user decision). Back's layer 5 line ends on two corners with different grade rules; only a graded nest needs the same line in every size (D6673 §4.3.1.5).
       - [ ] Lining R13: Detail 4, the 8th piece, is in the Lining document. Export its Base Size 500 and check it in aw.fyi.
       - [ ] R12: the same check for Fabric and Lining.
 

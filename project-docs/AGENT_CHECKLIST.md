@@ -17,7 +17,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 | Seamly2D.12.8 | 14 | SeamlyLayout windows opens in front of Seamly2D | PASS
 
 JACKET_2
-| Layout.61.7.2 | 5 | SL > jacket_2 > DXF-ASTM (R13) - multisize (base size only) - aw.fyi report - Fabric | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | PASS except layer 5 caption (not a departure). Decision open, see §5
+| Layout.61.7.2 | 5 | SL > jacket_2 > DXF-ASTM (R13) - multisize (base size only) - aw.fyi report - Fabric | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | PASS. Layer 5 caption accepted as a viewer note
 | Layout.84.4 | 19 | SL > jacket_2 > Nested exports: one grainline and label set per piece | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | Not checked: the Nested tab has no DXF export. Run §19
 
 MALE_SHIRT
@@ -25,7 +25,7 @@ MALE_SHIRT
 | Layout.80.7 | 20 | S2D > male_shirt > mark a fold line | ?
 | Layout.80.3.1 | 20 | S2D: male_shirt > Piece Mirror tool | ?
 
-| Layout.83.4 | 15 | SL > male_shirt > Nested legend squares | ? 
+| Layout.83.4 | 15 | SL > male_shirt > Nested legend squares | ?
 | Layout.82.3 | 16 | SL > male_shirt > Nested size colors: dark and pastel | ?
 | Layout.87.3 | 4, 17 | SL > male_shirt > Marker tab: PDF (Tiled) disabled | ?
 | Layout.86.3 | 3, 18 | SL > male_shirt > Export > DXF submenu | ?
@@ -125,12 +125,12 @@ Export all tabs unchecked.
   - [x] No merged "Detail" pieces. ? --> 7 blocks, 7 names.
     --> Report 1417: same. Names `Size_500_Piece_1_…` to `Size_500_Piece_7_…`, no spaces.
     --> Cyrillic names are `\U+XXXX` escapes. They decode to Подборт and Комір. aw.fyi shows the escapes (advisory, allowed).
-  - [ ] No layer 5 endpoint mismatch. ? --> none reported.
+  - [x] No layer 5 endpoint mismatch. ? --> none reported.
     --> Report 1417, page 1 caption: "L5 endpoint mismatch up to 227.990 — sizes not a pure translation". Not a departure.
     --> Not new: the `.rul` rules match the 1408 export. The 1408 report is a browser print with no overview chart.
     --> Likely source: Back. Its layer 5 line ends on rule 41 (no growth) and rule 63 (x −132.99 to +104.50 mm).
     --> Layer 5 sets the X axis of the rules (D6673 §4.3.5). Only a graded nest needs the same line in every size (§4.3.1.5). This file is not a graded nest.
-    --> Decision open: accept as a viewer note, or file a task. Recommended: accept; revisit if §8 (CLO3D) grades Back wrong.
+    --> Decision: accept the caption as a viewer note. Revisit if §8 (CLO3D) grades Back wrong.
   - [x] No duplicate vertices. ? --> none reported. Report 1417: none.
   - [ ] Lining tab: Base Size 500, Export > DXF > DXF-ASTM (R13), aw.fyi. Detail 4 graded.
   - Layout.61.7.2 named the Nested tab. Nested has no DXF-ASTM export since Layout.67, so Base Size 500 replaces it.
