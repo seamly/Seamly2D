@@ -737,50 +737,104 @@ QListWidget::item:selected {
                </widget>
               </item>
               <item row="7" column="1">
-               <widget class="QComboBox" name="rotation_ComboBox">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+               <widget class="QWidget" name="rotation_Widget">
+                <property name="toolTip">
+                 <string>Rotation steps a layout may use for the piece: 1-Way 360°, 2-Way 180°, 4-Way 90°, Any 1°.</string>
                 </property>
-                <property name="minimumSize">
-                 <size>
-                  <width>100</width>
-                  <height>0</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>9</pointsize>
-                  <bold>false</bold>
-                 </font>
-                </property>
-                <item>
-                 <property name="text">
-                  <string>None</string>
+                <layout class="QGridLayout" name="rotation_GridLayout">
+                 <property name="leftMargin">
+                  <number>0</number>
                  </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>1-Way</string>
+                 <property name="topMargin">
+                  <number>0</number>
                  </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>2-Way</string>
+                 <property name="rightMargin">
+                  <number>0</number>
                  </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>4-Way</string>
+                 <property name="bottomMargin">
+                  <number>0</number>
                  </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>Any</string>
-                 </property>
-                </item>
+                 <item row="0" column="0">
+                  <widget class="QRadioButton" name="rotationNone_RadioButton">
+                   <property name="font">
+                    <font>
+                     <pointsize>9</pointsize>
+                     <bold>false</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>None</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">rotation_ButtonGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                 <item row="0" column="1">
+                  <widget class="QRadioButton" name="rotationOneWay_RadioButton">
+                   <property name="font">
+                    <font>
+                     <pointsize>9</pointsize>
+                     <bold>false</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>1-Way</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">rotation_ButtonGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                 <item row="0" column="2">
+                  <widget class="QRadioButton" name="rotationTwoWay_RadioButton">
+                   <property name="font">
+                    <font>
+                     <pointsize>9</pointsize>
+                     <bold>false</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>2-Way</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">rotation_ButtonGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QRadioButton" name="rotationFourWay_RadioButton">
+                   <property name="font">
+                    <font>
+                     <pointsize>9</pointsize>
+                     <bold>false</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>4-Way</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">rotation_ButtonGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QRadioButton" name="rotationAny_RadioButton">
+                   <property name="font">
+                    <font>
+                     <pointsize>9</pointsize>
+                     <bold>false</bold>
+                    </font>
+                   </property>
+                   <property name="text">
+                    <string>Any</string>
+                   </property>
+                   <attribute name="buttonGroup">
+                    <string notr="true">rotation_ButtonGroup</string>
+                   </attribute>
+                  </widget>
+                 </item>
+                </layout>
                </widget>
               </item>
               <item row="8" column="0">
@@ -6027,6 +6081,7 @@ QListWidget::item:selected {
   </connection>
  </connections>
  <buttongroups>
+  <buttongroup name="rotation_ButtonGroup"/>
   <buttongroup name="notchSubType_ButtonGroup"/>
   <buttongroup name="notchType_ButtonGroup"/>
  </buttongroups>

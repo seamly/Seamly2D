@@ -63,4 +63,14 @@ enum class ArrowType : char
     Bottom
 };
 
+// rotation a piece may take in a layout; the values keep the order of the piece dialog choices
+enum class PieceRotation : char
+{
+    None,
+    OneWay,
+    TwoWay,
+    FourWay,
+    Any
+};
+
 #endif // FLOATITEMDEF_H
