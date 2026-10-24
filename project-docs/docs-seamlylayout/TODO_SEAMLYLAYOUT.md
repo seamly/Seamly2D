@@ -104,7 +104,7 @@ Select the position of the base size's grainline (when visible), pattern label (
   - Finding: jacket2 Back's pattern label sits near the edge in size 500 and leaves sizes 220–280: "Back: pattern label past the cut line in sizes 220, 240, 260, 280". Fix in Seamly2D: move Back's pattern label toward the middle in the base size.
   - Decision taken: positions stay the base size's even then (the task's rule); the warning names the sizes. No label is moved inward on its own.
   - Open: on the Nested canvas the size labels of every size stack too ("Size 220" over "Size 240"). Nested exports keep the smallest size's only (Layout.84).
-- [x] Layout.94.4 Tests: `annotation_alignment` (5); `layout_utils::jacket2_nested_stacks_each_piece_set_annotations` with the new fixture `jacket2_40-146_materials_handoff.svg` (MSI 26.10.2023 capture). `cargo test --workspace` 611 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Multisize grainline and label positions".
+- [x] Layout.94.4 Tests: `annotation_alignment` (5); `layout_utils::jacket2_nested_stacks_each_piece_set_annotations` with the MSI 26.10.2023 capture as fixture (now `jacket2_40-146_handoff.svg`, Layout.27.13.4). `cargo test --workspace` 611 passed. Doc: `SVG-DATA-ATTRIBUTES.md`, "Multisize grainline and label positions".
 - [ ] Layout.94.5 Next MSI: user check, `AGENT_CHECKLIST.md` §26.
 
 ### [ ] Task Layout.90 - Implement - DXF-R13 - Paper Space information
@@ -214,6 +214,7 @@ Note: The piece names in the jacket2 pattern have changed, so items below may re
 - [ ] Layout.27.7 Add jacket2 handoff fixture to `crates/cxxqt_bridge/test_data/`; end-to-end test should grade every piece and write `.rul`.
   - [x] Layout.27.7.1 `jacket2_40-146_handoff.svg` (MSI 26.10.1416) replaces `jacket2_40-146_202610121819.svg`; `jacket2_base_size_export_names_and_grades_each_piece` grades 6 and writes `.rul`.
   - [ ] Layout.27.7.2 Expect 8 graded after Layout.27.13.
+    - MSI 26.10.2023 fixture: 7 of 8 graded, `.rul` written. Detail 4 (Lining) warns: "size 220 has other turn points than size 500 on the cut line". Tests `jacket2_base_size_export_names_and_grades_each_piece`, `jacket2_assigned_names_reach_the_base_size_export` pin it.
 - [x] Layout.27.8 If nothing grades, show "No piece graded: no .rul file written". `astm_grading::grade_drawing` writes `.rul` only when at least one piece grades.
 - [x] Layout.27.11 Fix near-duplicate written vertices. Example: Подборт layer 87 has `(333.01, 626.21)` followed by `(333.01, 626.22)`. Increase `SNAP_VERTEX_MM` from 0.01 to 0.02, or compare rounded coordinates. Test: no consecutive written vertices 0.01 mm apart or closer. Done: `DUPLICATE_TOLERANCE_MM` and `SNAP_VERTEX_MM` = 0.025; jacket2 test found 6 before the fix.
 - [x] Layout.27.12 Make line-end turn points consistent across sizes. Detail (7) differs from size 660; Detail (8) differs at 520–640, 680 and 700. `astm_contour::straight_run_ends` flips at its 10-mm / 2× break thresholds (e.g., 9.97 mm at size 640 vs 10.2 mm at 660). Decision (2026-10-13): Option 1.
@@ -231,7 +232,8 @@ Note: The piece names in the jacket2 pattern have changed, so items below may re
   - [x] Layout.27.13.2 Detail (6): the multisize handoff cuts a ByLength corner in every size when one size cuts it (`MainWindowsNoGUI::unevenCornerCuts`, `VPiece::setForcedCornerCuts`). Only those sizes are built again. Test `TST_VPiece::ForcedCornerCutCutsShortMiter`.
   - [x] Layout.27.13.3 Run the Qt suites. Done: `Seamly2DTests` passed, with both new tests; `ParserTest` and `TranslationsTest` passed; `CollectionTest` exited 1 on the first run and passed 44 of 44 on a rerun. These were the binaries that the MSI 26.10.1421 build compiled.
   - [ ] Layout.27.13.4 Next MSI: run `capture_handoff_jacket2.bat` again; replace `jacket2_40-146_handoff.svg`; expect 8 graded (Layout.27.7.2).
-    - MSI 26.10.2023 capture: `C:\Users\susan\seamly2d\layouts\handoff_jacket2.svg`. Two material groups: Fabric 7 pieces, Lining 1 (Detail 4). Next: replace the fixture with it.
+    - MSI 26.10.2023 capture: `C:\Users\susan\seamly2d\layouts\handoff_jacket2.svg`. Two material groups: Fabric 7 pieces, Lining 1 (Detail 4).
+    - Done: the capture replaces `jacket2_40-146_handoff.svg`; the jacket2 tests follow (names, grainlines, labels). Result: 7 of 8 graded; Detail 4 does not (Layout.27.13.6).
     - MSI 26.10.1421 result: still 6 of 8 graded. The fixture was not replaced.
     - Detail (3): sizes 660 and 680 are fixed. Size 700 has one extra turn point, 3.7 mm before the corner at node 247.
     - Detail (6): no change. Sizes 220–340 still cut the corner and 360+ do not, so the forced cut did not apply.
@@ -239,6 +241,14 @@ Note: The piece names in the jacket2 pattern have changed, so items below may re
     - Detail (3) evidence: interior node А20 is on the curve from about size 540 up, and past О6 in smaller sizes. Size 700 flags А20 as a turn point; sizes 560–720 have the same vertex without the flag. А20 is smooth: its curve bends 1.4° there.
     - Spline node terms: end node (first or last spline point, or a spline point where the tangent breaks), interior node (spline point with the same tangent on both sides; never a turn point), control node (off-curve handle).
     - Next MSI check: the Seamly2D log (`%LOCALAPPDATA%\Seamly\Seamly2D\logs\seamly2d-pid*.log`) has the line "Multisize layout: 26 sizes; 0 of 8 pieces differ in node count between sizes." Lines starting `Piece "Detail"` name a piece that still differs.
+  - [ ] Layout.27.13.6 Detail 4 cut line turn points differ (MSI 26.10.2023 capture; Seamly2D log of that run):
+    - Node counts (seam line/cut line) differ: Detail 4 280 and 520: 5/5, other sizes 6/7. Back 280, 480, 700: 5/5, others 6/6. Sleeve 1 620: 3/3, others 4/4. `unifyTurnPoints` skips such a piece.
+    - Likely cause, from the code (not yet checked on the capture): `RemoveDublicates` erases the later of two vertices closer than 0.1555 mm. A curve point just before a node stays and the node vertex goes; the node match tolerance is 0.01 px, so the node is lost in that size only.
+    - [x] Layout.27.13.6.1 Fix: `VAbstractPiece::snapNodeVertices` moves the nearest vertex back onto such a node (seam line, cut line, built-in seam line, internal paths). Test `TST_VPiece::SnapNodeVerticesRestoresErasedNode` (harness: passed). `cl /Zs` on the changed `.cpp`. Not run: Qt suites.
+    - Still open after the fix (geometry, not node count):
+      - Sizes 220, 240: one more cut line turn point, a -29° bend followed by a 1.4 mm segment at about 10% across, 23% down the piece box. Other sizes have no such bend.
+      - Size 520: the cut corner near the top left is one vertex (+121°); other sizes cut it into two vertices 8 mm apart (+61°, +61°), although the log says "Every size cuts them".
+    - [ ] Layout.27.13.6.2 Next MSI: capture jacket2 again. The log line should read "0 of 8 pieces differ in node count". Check the Detail 4 sizes 220, 240 and 520 cut line in the capture; replace the fixture.
   - [x] Layout.27.13.5 Seamly2D: a spline interior node is a curve point, not a node vertex (`isSplineEndNode` in `vpiecepath.cpp`). A spline point is an end node when it is first or last, the two curves that meet at it have different tangents, or a control node has length 0. The handoff logs each piece whose node counts differ between sizes, and each forced corner cut. Tests `TST_VPiece::SplineNodeVertices`, `TST_VPiece::CubicBezierPathNodeVertices`, `TST_VPiece::SplineInteriorNodeKeepsNodeCount`. Done: `cl /Zs`. Qt suites passed in `local_build_msi.ps1` (MSI 26.10.1921).
     - First Qt run failed: row `SplineNodeVertices(tangent breaks)` asked for a point that cannot exist. `VSplinePoint` makes the control node angles opposite. `VCubicBezierPath::GetSpline()` turns the control node after an interior node opposite the one before. Only a control node of length 0 gives a tangent break at an interior node.
     - Fix: `isSplineEndNode` reads the two curves that meet at the point, as drawn. The row now expects a smooth point.
