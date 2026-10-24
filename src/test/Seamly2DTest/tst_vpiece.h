@@ -108,6 +108,9 @@ private slots:
     void BuiltInSeamLineUsesWiderNodeWidth_data() const;
     void BuiltInSeamLineUsesWiderNodeWidth() const;
     void BuiltInSeamLineFollowsCurve() const;
+    void BuiltInSeamLineStopsAtFoldLine_data() const;
+    void BuiltInSeamLineStopsAtFoldLine() const;
+    void BuiltInSeamLineStopsAtFoldLineAfterCurve() const;
     void CurveEndInNodePixelEndsAtNode() const;
     void ForcedCornerCutCutsShortMiter() const;
     void SplineNodeVertices_data() const;
