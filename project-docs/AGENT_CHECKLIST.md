@@ -19,7 +19,7 @@ Mark each box. Write FAIL and a short note beside a failed step.
 JACKET_2
 | Layout.61.7.2 | 5 | SL > jacket_2 > DXF-ASTM (R13) - multisize (base size only) - aw.fyi report - Fabric | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | PASS. Layer 5 caption accepted as a viewer note
 | Layout.84.4 | 19 | SL > jacket_2 > Nested exports: one grainline and label set per piece | See jacket2_40-146_R13_Fabric_BaseSize500_202610231417-dxf-report.pdf | Not checked: the Nested tab has no DXF export. Run §19
-| Layout.93.7 | 23 | SL > jacket_2 > DXF piece properties: Material, Missing Piece Data | ?
+| Layout.93.7 | 23 | SL > jacket_2 > DXF piece properties: Material, Missing Piece Data, Rotation, Flip, Tilt, Fold | ?
 | Layout.92.4 | 25 | SL > jacket_2 > Material tabs over the layout; every material laid out | ?
 
 MALE_SHIRT
@@ -378,6 +378,11 @@ Needs the next MSI. Settings from section 1. Export all tabs unchecked.
 - [ ] Lining tab, Base Size 500, Export > DXF > DXF-ASTM (R13).
   - [ ] No Missing Piece Data dialog: Detail 4 shows its grainline.
   - [ ] Open the `.dxf`: the Detail 4 block has `Material:Lining` and `Quantity:1,1`.
+- [ ] Seamly2D: set Back to Rotation 2-Way, Tilt CW 5°, Flip Horizontal (its label may stay hidden). Press Layout again.
+  - [ ] Base Size 500, Export > DXF > DXF-ASTM (R13). The Back block piece text reads, in order: `Quantity:`, `Rotation:180`, `Flip:Y`, `Tilt:-5`, `Fold:Y`, `Material:Fabric`.
+  - [ ] Every other block has `Fold:N` and no `Rotation:`, `Flip:` or `Tilt:` line.
+  - [ ] DXF-AAMA (R11) of the same tab: no `Rotation:`, `Flip:`, `Tilt:` or `Fold:` line.
+  - [ ] Upload the R13 file to https://aw.fyi/dxf: note any finding about `Flip:` or `Tilt:` beside this step.
 
 ## 24. Seamly2D: piece properties
 
