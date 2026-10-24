@@ -123,6 +123,10 @@ private slots:
     void ConverterSplitsTilt() const;
     void ConverterRemovesFoldPosition_data() const;
     void ConverterRemovesFoldPosition() const;
+    void PieceFlipValuesRoundTrip() const;
+    void LayoutPieceKeepsFlip() const;
+    void ConverterRemovesForbidFlipping_data() const;
+    void ConverterRemovesForbidFlipping() const;
 
 private:
     Q_DISABLE_COPY(TST_VPiece)
