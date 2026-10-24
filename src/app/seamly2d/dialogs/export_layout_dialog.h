@@ -84,20 +84,15 @@ public:
 
     LayoutExportFormat      format() const;
     QString                 formatText() const;
-    void                    selectFormat(LayoutExportFormat format);
 
-    void                    setBinaryDXFFormat(bool binary);
     bool                    isBinaryDXFFormat() const;
     void                    enableBinaryDXFFormatCheckbox();
-
-    void                    setDestinationPath(const QString& cmdDestinationPath);
 
     Draw                    mode() const;
 
     static QString          exportFormatSuffix(LayoutExportFormat format);
 
     bool                    isTextAsPaths() const;
-    void                    setTextAsPaths(bool textAsPaths);
 
     void                    setAvailableSizes(const QStringList &sizes);
     QStringList             selectedSizes() const;

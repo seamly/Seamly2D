@@ -241,74 +241,6 @@ void ExportLayoutDialog::initTemplates(QComboBox *templates_ComboBox)
 
 
 //---------------------------------------------------------------------------------------------------------------------
-
-void ExportLayoutDialog::selectFormat(LayoutExportFormat format)
-{
-    if (static_cast<int>(format) < 0 || format >= LayoutExportFormat::COUNT)
-    {
-        VException e(tr("Tried to use out of range format number."));
-        throw e;
-    }
-
-    const int i = ui->format_ComboBox->findData(static_cast<int>(format));
-    if (i < 0)
-    {
-        VException e(tr("Selected not present format."));
-        throw e;
-    }
-    ui->format_ComboBox->setCurrentIndex(i);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void ExportLayoutDialog::setBinaryDXFFormat(bool binary)
-{
-    switch(format())
-    {
-        case LayoutExportFormat::DXF_AC1006_Flat:
-        case LayoutExportFormat::DXF_AC1009_Flat:
-        case LayoutExportFormat::DXF_AC1012_Flat:
-        case LayoutExportFormat::DXF_AC1014_Flat:
-        case LayoutExportFormat::DXF_AC1015_Flat:
-        case LayoutExportFormat::DXF_AC1018_Flat:
-        case LayoutExportFormat::DXF_AC1021_Flat:
-        case LayoutExportFormat::DXF_AC1024_Flat:
-        case LayoutExportFormat::DXF_AC1027_Flat:
-        case LayoutExportFormat::DXF_AC1006_AAMA:
-        case LayoutExportFormat::DXF_AC1009_AAMA:
-        case LayoutExportFormat::DXF_AC1012_AAMA:
-        case LayoutExportFormat::DXF_AC1014_AAMA:
-        case LayoutExportFormat::DXF_AC1015_AAMA:
-        case LayoutExportFormat::DXF_AC1018_AAMA:
-        case LayoutExportFormat::DXF_AC1021_AAMA:
-        case LayoutExportFormat::DXF_AC1024_AAMA:
-        case LayoutExportFormat::DXF_AC1027_AAMA:
-        case LayoutExportFormat::DXF_AC1006_ASTM:
-        case LayoutExportFormat::DXF_AC1009_ASTM:
-        case LayoutExportFormat::DXF_AC1012_ASTM:
-        case LayoutExportFormat::DXF_AC1014_ASTM:
-        case LayoutExportFormat::DXF_AC1015_ASTM:
-        case LayoutExportFormat::DXF_AC1018_ASTM:
-        case LayoutExportFormat::DXF_AC1021_ASTM:
-        case LayoutExportFormat::DXF_AC1024_ASTM:
-        case LayoutExportFormat::DXF_AC1027_ASTM:
-            ui->binaryDXF_CheckBox->setChecked(binary);
-            break;
-        case LayoutExportFormat::SVG:
-        case LayoutExportFormat::PDF:
-        case LayoutExportFormat::PDFTiled:
-        case LayoutExportFormat::PNG:
-        case LayoutExportFormat::JPG:
-        case LayoutExportFormat::BMP:
-        case LayoutExportFormat::PPM:
-        case LayoutExportFormat::OBJ:
-        case LayoutExportFormat::TIF:
-        default:
-            ui->binaryDXF_CheckBox->setChecked(false);
-            break;
-    }
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 bool ExportLayoutDialog::isBinaryDXFFormat() const
 {
     switch(format())
@@ -404,33 +336,6 @@ void ExportLayoutDialog::enableBinaryDXFFormatCheckbox()
         ui->binaryDXF_CheckBox->setEnabled(false);
         break;
     }
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void ExportLayoutDialog::setDestinationPath(const QString &cmdDestinationPath)
-{
-    QString path;
-    if (cmdDestinationPath.isEmpty())
-    {
-        path = QDir::currentPath();
-    }
-    else if (QDir(cmdDestinationPath).isAbsolute())
-    {
-        path = cmdDestinationPath;
-    }
-    else
-    {
-        QDir dir;
-        if (!dir.cd(cmdDestinationPath))
-        {
-            VException e(tr("The destination directory doesn't exist or is not readable."));
-            throw e;
-        }
-        path = dir.absolutePath();
-    }
-
-    qDebug() << "Full output path: " << path << "\n";
-    ui->path_LineEdit->setText(path);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -747,19 +652,6 @@ void ExportLayoutDialog::showExportFiles()
 bool ExportLayoutDialog::isTextAsPaths() const
 {
     return ui->textAsPaths_Checkbox->isChecked();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void ExportLayoutDialog::setTextAsPaths(bool textAsPaths)
-{
-    if (m_mode != Draw::Layout)
-    {
-        ui->textAsPaths_Checkbox->setChecked(textAsPaths);
-    }
-    else
-    {
-        ui->textAsPaths_Checkbox->setChecked(false);
-    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
