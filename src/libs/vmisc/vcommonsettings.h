@@ -64,7 +64,6 @@
 #include <QStringList>
 #include <QtGlobal>
 
-#include "../vlayout/vbank.h"
 #include "../vmisc/def.h"
 
 class VCommonSettings : public QSettings
@@ -230,8 +229,6 @@ public:
     bool                 getShowDetailsToolBar() const;
     void                 setShowDetailsToolBar(const bool &value);
 
-    bool                 getShowLayoutToolBar() const;
-    void                 setShowLayoutToolBar(const bool &value);
 
     bool                 useNativeDialogs() const;
     void                 setUseNativeDialogs(const bool &value);

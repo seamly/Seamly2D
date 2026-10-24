@@ -71,7 +71,7 @@ const QString fileNameRegExp = QStringLiteral("^[\\p{L}\\p{Nd}\\-. _]+$");
 
 //---------------------------------------------------------------------------------------------------------------------
 ExportLayoutDialog::ExportLayoutDialog(int count, Draw mode, const QString &fileName, QWidget *parent)
-    : AbstractLayoutDialog(parent)
+    : QDialog(parent)
     , ui(new Ui::ExportLayoutDialog)
     , m_count(count)
     , m_isInitialized(false)
@@ -151,11 +151,6 @@ ExportLayoutDialog::ExportLayoutDialog(int count, Draw mode, const QString &file
 #ifdef V_NO_ASSERT // Temporarily unavailable
     removeFormatFromList(LayoutExportFormat::OBJ);
 #endif
-
-    if (m_mode == Draw::Layout)
-    {
-        ui->textAsPaths_Checkbox->setVisible(false);
-    }
 
     connect(m_saveButton, &QPushButton::clicked, this, &ExportLayoutDialog::save);
     connect(ui->filename_LineEdit, &QLineEdit::textChanged, this, &ExportLayoutDialog::showExportFiles);
@@ -429,20 +424,12 @@ void ExportLayoutDialog::save()
             infoText = tr("Do you want to replace them?");
         }
 
-        QString increment;
-
     for (int i=0; i < m_count; ++i)
     {
-        if (m_mode == Draw::Layout)
-        {
-            increment = QStringLiteral("_0") + QString::number(i+1);
-        }
-
-        const QString name = QString("%1/%2%3%4")
+        const QString name = QString("%1/%2%3")
         .arg(path())                        //1
         .arg(fileName())                    //2
-        .arg(increment)                     //3
-        .arg(exportFormatSuffix(format())); //4
+        .arg(exportFormatSuffix(format())); //3
 
         if (QFile::exists(name))
         {
@@ -492,105 +479,14 @@ void ExportLayoutDialog::pathChanged(const QString &text)
 }
 
 //---------------------------------------------------------------------------------------------------------------------
+/**
+ * @brief showExportFiles hides the list of export files: a piece or draft block export writes one file.
+ */
 void ExportLayoutDialog::showExportFiles()
 {
     ui->exportFiles_ListWidget->clear();
-
-    if (m_mode != Draw::Layout)
-    {
-
-        ui->export_Frame->hide();
-        adjustSize();
-        return;
-    }
-
-    const LayoutExportFormat currentFormat = format();
-    ui->textAsPaths_Checkbox->setEnabled(true);
-    ui->quality_Slider->setEnabled(false);
-    ui->export_Frame->show();
+    ui->export_Frame->hide();
     adjustSize();
-
-    // Batch mode
-    if (!selectedSizes().isEmpty())
-    {
-        for (const QString &size : selectedSizes())
-        {
-            for (int i=0; i < m_count; ++i)
-            {
-                const QString name = QString("%1_%2_0%3%4")
-                .arg(fileName())                     //1
-                .arg(size)                           //2
-                .arg(QString::number(i+1))           //3
-                .arg(exportFormatSuffix(format()));  //4
-
-                QListWidgetItem *item = new QListWidgetItem(name);
-                SCASSERT(item != nullptr)
-                ui->exportFiles_ListWidget->addItem(item);
-            }
-        }
-    }
-    else
-    {
-        for (int i=0; i < m_count; ++i)
-        {
-            const QString name = QString("%1_0%2%3")
-            .arg(fileName())                     //1
-            .arg(QString::number(i+1))           //2
-            .arg(exportFormatSuffix(format()));  //3
-
-            QListWidgetItem *item = new QListWidgetItem(name);
-            SCASSERT(item != nullptr)
-            ui->exportFiles_ListWidget->addItem(item);
-        }
-    }
-
-    switch(currentFormat)
-    {
-        case LayoutExportFormat::DXF_AC1006_Flat:
-        case LayoutExportFormat::DXF_AC1009_Flat:
-        case LayoutExportFormat::DXF_AC1012_Flat:
-        case LayoutExportFormat::DXF_AC1014_Flat:
-        case LayoutExportFormat::DXF_AC1015_Flat:
-        case LayoutExportFormat::DXF_AC1018_Flat:
-        case LayoutExportFormat::DXF_AC1021_Flat:
-        case LayoutExportFormat::DXF_AC1024_Flat:
-        case LayoutExportFormat::DXF_AC1027_Flat:
-        case LayoutExportFormat::DXF_AC1006_AAMA:
-        case LayoutExportFormat::DXF_AC1009_AAMA:
-        case LayoutExportFormat::DXF_AC1012_AAMA:
-        case LayoutExportFormat::DXF_AC1014_AAMA:
-        case LayoutExportFormat::DXF_AC1015_AAMA:
-        case LayoutExportFormat::DXF_AC1018_AAMA:
-        case LayoutExportFormat::DXF_AC1021_AAMA:
-        case LayoutExportFormat::DXF_AC1024_AAMA:
-        case LayoutExportFormat::DXF_AC1027_AAMA:
-        case LayoutExportFormat::DXF_AC1006_ASTM:
-        case LayoutExportFormat::DXF_AC1009_ASTM:
-        case LayoutExportFormat::DXF_AC1012_ASTM:
-        case LayoutExportFormat::DXF_AC1014_ASTM:
-        case LayoutExportFormat::DXF_AC1015_ASTM:
-        case LayoutExportFormat::DXF_AC1018_ASTM:
-        case LayoutExportFormat::DXF_AC1021_ASTM:
-        case LayoutExportFormat::DXF_AC1024_ASTM:
-        case LayoutExportFormat::DXF_AC1027_ASTM:
-            ui->binaryDXF_CheckBox->setEnabled(true);
-            break;
-        case LayoutExportFormat::PNG:
-            ui->quality_Slider->setEnabled(true);
-            break;
-        case LayoutExportFormat::JPG:
-            ui->quality_Slider->setEnabled(true);
-            break;
-        case LayoutExportFormat::PDF:
-        case LayoutExportFormat::SVG:
-        case LayoutExportFormat::BMP:
-        case LayoutExportFormat::PPM:
-        case LayoutExportFormat::OBJ:
-        case LayoutExportFormat::TIF:
-        default:
-            ui->binaryDXF_CheckBox->setEnabled(false);
-            break;
-    }
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -674,7 +570,6 @@ QString ExportLayoutDialog::modeString() const
                 modeStr = QStringLiteral("_pieces");
                 break;
             }
-            case Draw::Layout:
             default:
             {
                 modeStr = QStringLiteral("_layout");
@@ -701,10 +596,7 @@ void ExportLayoutDialog::setAvailableSizes(const QStringList &sizes)
     ui->sizeSelection_GroupBox->setVisible(true);
     setMinimumHeight(470);
     adjustSize();
-    if (m_mode != Draw::Layout)
-    {
-        setMinimumHeight(400);
-    }
+    setMinimumHeight(400);
 
     for (const QString &size : sizes)
     {

@@ -55,10 +55,7 @@
 #include "../vpatterndb/vcontainer.h"
 #include "../vobj/vobjpaintdevice.h"
 #include "../vdxf/vdxfpaintdevice.h"
-#include "dialogs/layoutsettings_dialog.h"
 #include "../vwidgets/vmaingraphicsscene.h"
-#include "../vlayout/vlayoutgenerator.h"
-#include "dialogs/dialoglayoutprogress.h"
 #include "dialogs/export_layout_dialog.h"
 #include "../vpatterndb/floatItemData/vpiecelabeldata.h"
 #include "../vpatterndb/floatItemData/vpatternlabeldata.h"
@@ -76,8 +73,6 @@
 #include <QtSvg>
 #include <QPrinter>
 #include <QImageWriter>
-#include <QSpacerItem>
-#include <QGridLayout>
 #include <QLoggingCategory>
 
 #include <algorithm>
@@ -154,22 +149,13 @@ MainWindowsNoGUI::MainWindowsNoGUI(QWidget *parent)
       layout_scene(nullptr),
       pattern(new VContainer(qApp->translateVariables(), qApp->patternUnitP())),
       doc(nullptr),
-      papers(),
-      shadows(),
-      scenes(),
-      pieces(),
-      piecesOnLayout(),
       undoAction(nullptr),
       redoAction(nullptr),
       actionDockWidgetToolOptions(nullptr),
       actionDockWidgetGroups(nullptr),
       actionDockWidgetPieces(nullptr),
-      actionDockWidgetLayouts(nullptr),
       actionDockWidgetToolbox(nullptr),
-      isNoScaling(false),
-      isLayoutStale(true),
-      ignoreMargins(false),
-      margins()
+      isNoScaling(false)
 
 {
     InitTempLayoutScene();
@@ -180,103 +166,6 @@ MainWindowsNoGUI::~MainWindowsNoGUI()
 {
     delete layout_scene;
     delete pattern;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-void MainWindowsNoGUI::toolLayoutSettings(QToolButton *tButton, bool checked)
-{
-    //QToolButton *tButton = qobject_cast< QToolButton * >(this->sender());
-    SCASSERT(tButton != nullptr)
-
-    if (checked)
-    {
-        VLayoutGenerator lGenerator;
-
-        LayoutSettingsDialog layout(&lGenerator, this);
-        if (layout.exec() == QDialog::Rejected)
-        {
-            tButton->setChecked(false);
-            return;
-        }
-        LayoutSettings(lGenerator);
-        tButton->setChecked(false);
-    }
-    else
-    {
-        tButton->setChecked(true);
-    }
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-bool MainWindowsNoGUI::LayoutSettings(VLayoutGenerator& lGenerator)
-{
-    lGenerator.setPieces(pieceList);
-    DialogLayoutProgress progress(pieceList.count(), this);
-    if (Application2D::isGUIMode())
-    {
-        connect(&lGenerator, &VLayoutGenerator::Start,     &progress,   &DialogLayoutProgress::Start);
-        connect(&lGenerator, &VLayoutGenerator::Arranged,  &progress,   &DialogLayoutProgress::Arranged);
-        connect(&lGenerator, &VLayoutGenerator::Error,     &progress,   &DialogLayoutProgress::Error);
-        connect(&lGenerator, &VLayoutGenerator::Finished,  &progress,   &DialogLayoutProgress::Finished);
-        connect(&progress,   &DialogLayoutProgress::Abort, &lGenerator, &VLayoutGenerator::Abort);
-    }
-    else
-    {
-        connect(&lGenerator, &VLayoutGenerator::Error, this, &MainWindowsNoGUI::ErrorConsoleMode);
-    }
-    lGenerator.Generate();
-
-    switch (lGenerator.State())
-    {
-        case LayoutErrors::NoError:
-            CleanLayout();
-            papers = lGenerator.GetPapersItems();// Blank sheets
-            pieces = lGenerator.getAllPieceItems();// All pieces items
-            piecesOnLayout = lGenerator.getAllPieces();// All pieces items
-            shadows = CreateShadows(papers);
-            scenes = CreateScenes(papers, shadows, pieces);
-            PrepareSceneList();
-            ignoreMargins = not lGenerator.IsUsePrinterFields();
-            margins = lGenerator.GetPrinterFields();
-            isLayoutStale = false;
-            if (Application2D::isGUIMode())
-            {
-                QApplication::alert(this);
-            }
-            break;
-        case LayoutErrors::ProcessStoped:
-        case LayoutErrors::PrepareLayoutError:
-        case LayoutErrors::EmptyPaperError:
-            if (Application2D::isGUIMode())
-            {
-                QApplication::alert(this);
-            }
-            return false;
-        default:
-            break;
-
-    }
-    return true;
-}
-//---------------------------------------------------------------------------------------------------------------------
-void MainWindowsNoGUI::ErrorConsoleMode(const LayoutErrors &state)
-{
-    switch (state)
-    {
-        case LayoutErrors::NoError:
-            return;
-        case LayoutErrors::PrepareLayoutError:
-            qCritical() << tr("Couldn't prepare data for creation layout");
-            break;
-        case LayoutErrors::EmptyPaperError:
-            qCritical() << tr("One or more pattern pieces are bigger than the paper format you selected. Please select a bigger paper format.");
-            break;
-        case LayoutErrors::ProcessStoped:
-        default:
-            break;
-    }
-
-    qApp->exit(V_EX_DATAERR);
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -294,37 +183,11 @@ void MainWindowsNoGUI::ExportData(const QVector<VLayoutPiece> &pieceList, const 
         format == LayoutExportFormat::DXF_AC1024_AAMA ||
         format == LayoutExportFormat::DXF_AC1027_AAMA)
     {
-        if (dialog.mode() == Draw::Layout)
-        {
-            for (int i = 0; i < piecesOnLayout.size(); ++i)
-            {
-                const QString name = QString("%1/%2_0%3%4")
-                .arg(dialog.path())                                          //1
-                .arg(dialog.fileName())                                      //2
-                .arg(QString::number(i+1))                                   //3
-                .arg(ExportLayoutDialog::exportFormatSuffix(dialog.format())); //4
-
-                QGraphicsRectItem *paper = qgraphicsitem_cast<QGraphicsRectItem *>(papers.at(i));
-                SCASSERT(paper != nullptr)
-
-                ExportApparelLayout(dialog, piecesOnLayout.at(i), name, paper->rect().size().toSize());
-            }
-        }
-        else
-        {
-            exportPiecesAsApparelLayout(dialog, pieceList);
-        }
+        exportPiecesAsApparelLayout(dialog, pieceList);
     }
     else
     {
-        if (dialog.mode() == Draw::Layout)
-        {
-            ExportFlatLayout(dialog, scenes, papers, shadows, pieces, ignoreMargins, margins);
-        }
-        else
-        {
-            exportPiecesAsFlatLayout(dialog, pieceList);
-        }
+        exportPiecesAsFlatLayout(dialog, pieceList);
     }
 }
 
@@ -634,17 +497,10 @@ void MainWindowsNoGUI::exportPiecesAsApparelLayout(const ExportLayoutDialog &dia
         pieceList[i].setTransform(moveTransform);
     }
 
-    QString increment  = QStringLiteral("");
-    if (dialog.mode() == Draw::Layout)
-    {
-        increment = QStringLiteral("_01");
-    }
-
-    const QString name = QString("%1/%2%3%4")
+    const QString name = QString("%1/%2%3")
     .arg(dialog.path())                                          //1
     .arg(dialog.fileName())                                      //2
-    .arg(increment)                                              //3
-    .arg(ExportLayoutDialog::exportFormatSuffix(dialog.format())); //4
+    .arg(ExportLayoutDialog::exportFormatSuffix(dialog.format())); //3
 
     ExportApparelLayout(dialog, pieceList, name, rect.size());
 }
@@ -895,45 +751,6 @@ void MainWindowsNoGUI::unifySizeTurnPoints()
 void MainWindowsNoGUI::InitTempLayoutScene()
 {
     layout_scene = new VMainGraphicsScene();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-QIcon MainWindowsNoGUI::ScenePreview(int i) const
-{
-    QImage image;
-    QGraphicsRectItem *paper = qgraphicsitem_cast<QGraphicsRectItem *>(papers.at(i));
-    if (paper)
-    {
-        const QRectF r = paper->rect();
-        // Create the image with the exact size of the shrunk scene
-        image = QImage(QSize(static_cast<qint32>(r.width()), static_cast<qint32>(r.height())), QImage::Format_RGB32);
-
-        if (!image.isNull())
-        {
-            image.fill(Qt::white);
-
-            QFont appFont;
-            appFont.setPointSize(8);
-
-            QPainter painter(&image);
-            painter.setFont(appFont);
-            painter.setRenderHint(QPainter::Antialiasing, true);
-            painter.setPen(QPen(Qt::black, widthMainLine, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            painter.setBrush (QBrush (Qt::NoBrush));
-            scenes.at(i)->render(&painter, r, r, Qt::IgnoreAspectRatio);
-            painter.end();
-        }
-        else
-        {
-            qWarning() << "Cannot create image. Size too big";
-        }
-    }
-    else
-    {
-        image = QImage(QSize(101, 146), QImage::Format_RGB32);
-        image.fill(Qt::white);
-    }
-    return QIcon(QBitmap::fromImage(image));
 }
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -1391,19 +1208,13 @@ void MainWindowsNoGUI::ExportScene(const ExportLayoutDialog &dialog, const QList
 {
     for (int i=0; i < scenes.size(); ++i)
     {
-        QString increment  = QStringLiteral("");
         QGraphicsRectItem *paper = qgraphicsitem_cast<QGraphicsRectItem *>(papers.at(i));
         if (paper)
         {
-            if (dialog.mode() == Draw::Layout)
-            {
-                increment = QStringLiteral("_0") + QString::number(i+1);
-            }
-            const QString name = QString("%1/%2%3%4")
+            const QString name = QString("%1/%2%3")
             .arg(dialog.path())                                          //1
             .arg(dialog.fileName())                                      //2
-            .arg(increment)                                              //3
-            .arg(ExportLayoutDialog::exportFormatSuffix(dialog.format())); //4
+            .arg(ExportLayoutDialog::exportFormatSuffix(dialog.format())); //3
 
             QBrush *brush = new QBrush();
             brush->setColor(QColor(Qt::white));
@@ -1534,20 +1345,4 @@ void MainWindowsNoGUI::setSizeHeightForIndividualM() const
 
     doc->SetPatternWasChanged(true);
     emit doc->updatePatternLabel();
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-int MainWindowsNoGUI::ContinueIfLayoutStale()
-{
-    QMessageBox msgBox(this);
-    msgBox.setIcon(QMessageBox::Question);
-    msgBox.setWindowTitle(tr("The layout is stale."));
-    msgBox.setText(tr("The layout was not updated since last pattern modification. Do you want to continue?"));
-    msgBox.setStandardButtons(QMessageBox::Yes|QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
-    QSpacerItem* horizontalSpacer = new QSpacerItem(500, 0, QSizePolicy::Minimum, QSizePolicy::Expanding);
-    QGridLayout* layout = static_cast<QGridLayout*>(msgBox.layout());
-    SCASSERT(layout != nullptr)
-    layout->addItem(horizontalSpacer, layout->rowCount(), 0, 1, layout->columnCount());
-    return msgBox.exec();
 }

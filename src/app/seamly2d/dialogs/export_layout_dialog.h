@@ -58,7 +58,6 @@
 
 #include "../vgeometry/vgeometrydef.h"
 #include "../vmisc/def.h"
-#include "abstractlayout_dialog.h"
 
 namespace Ui
 {
@@ -66,12 +65,12 @@ namespace Ui
 }
 
 
-class ExportLayoutDialog : public  AbstractLayoutDialog
+class ExportLayoutDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit                ExportLayoutDialog(int count, Draw mode = Draw::Layout, const QString &fileName = QString(),
+    explicit                ExportLayoutDialog(int count, Draw mode, const QString &fileName = QString(),
                                            QWidget *parent = nullptr);
 
     virtual                ~ExportLayoutDialog();

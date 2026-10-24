@@ -565,32 +565,6 @@ QString fileDialog(QWidget *parent, const QString &title,  const QString &dir, c
 }
 
 //---------------------------------------------------------------------------------------------------------------------
-QMarginsF GetMinPrinterFields(const QSharedPointer<QPrinter> &printer)
-{
-    QPageLayout layout = printer->pageLayout();
-    layout.setUnits(QPageLayout::Millimeter);
-    const QMarginsF minMargins = layout.minimumMargins();
-    QMarginsF min;
-    min.setLeft(UnitConvertor(minMargins.left(), Unit::Mm, Unit::Px));
-    min.setRight(UnitConvertor(minMargins.right(), Unit::Mm, Unit::Px));
-    min.setTop(UnitConvertor(minMargins.top(), Unit::Mm, Unit::Px));
-    min.setBottom(UnitConvertor(minMargins.bottom(), Unit::Mm, Unit::Px));
-    return min;
-}
-
-//---------------------------------------------------------------------------------------------------------------------
-QMarginsF GetPrinterFields(const QSharedPointer<QPrinter> &printer)
-{
-    if (printer.isNull())
-    {
-        return QMarginsF();
-    }
-
-    // We can't use Unit::Px because our dpi in most cases is different
-    return UnitConvertor(printer->pageLayout().margins(), Unit::Mm, Unit::Px);
-}
-
-//---------------------------------------------------------------------------------------------------------------------
 QPixmap darkenPixmap(const QPixmap &pixmap)
 {
     QImage img = pixmap.toImage().convertToFormat(QImage::Format_ARGB32);

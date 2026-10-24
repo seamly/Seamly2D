@@ -97,25 +97,6 @@ enum class Position : char
     Center
 };
 
-enum class PaperSizeFormat : char { A0 = 0,
-                                    A1,
-                                    A2,
-                                    A3,
-                                    A4,
-                                    Letter,
-                                    Legal,
-                                    Tabloid,
-                                    AnsiC,
-                                    AnsiD,
-                                    AnsiE,
-                                    Roll24in,     // Be careful when changing order roll type
-                                    Roll30in,     // Used also for showing icon
-                                    Roll36in,
-                                    Roll42in,
-                                    Roll44in,
-                                    Custom
-};
-
 enum class LayoutExportFormat : char
 {
     SVG = 0,
@@ -612,9 +593,6 @@ Q_REQUIRED_RESULT QString AbsoluteMPath(const QString &patternPath, const QStrin
 Q_REQUIRED_RESULT QString fileDialog(QWidget *parent, const QString &title,  const QString &dir,
                                      const QString &filter, QString *selectedFilter, QFileDialog::Options options,
                                      QFileDialog::FileMode mode,  QFileDialog::AcceptMode accept);
-
-QMarginsF GetMinPrinterFields(const QSharedPointer<QPrinter> &printer);
-QMarginsF GetPrinterFields(const QSharedPointer<QPrinter> &printer);
 
 Q_REQUIRED_RESULT QPixmap darkenPixmap(const QPixmap &pixmap);
 

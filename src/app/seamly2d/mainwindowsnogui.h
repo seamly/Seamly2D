@@ -59,7 +59,6 @@
 #include "../vlayout/vlayoutpiece.h"
 #include "xml/vpattern.h"
 #include "dialogs/export_layout_dialog.h"
-#include "../vlayout/vlayoutgenerator.h"
 #include "../vwidgets/vabstractmainwindow.h"
 
 class QGraphicsScene;
@@ -73,7 +72,6 @@ public:
     virtual ~MainWindowsNoGUI() override;
 
 public slots:
-    void toolLayoutSettings(QToolButton *tButton, bool checked);
     void refreshLabels();
     void refreshGrainLines();
     void refreshSeamAllowances();
@@ -114,40 +112,22 @@ protected:
     VContainer     *pattern;         /** @brief pattern container with data (points, arcs, splines, spline paths, variables) */
     VPattern       *doc;             /** @brief doc dom document container */
 
-    QList<QGraphicsItem *>          papers;
-    QList<QGraphicsItem *>          shadows;
-    QList<QGraphicsScene *>         scenes;
-    QList<QList<QGraphicsItem *>  > pieces;
-    QVector<QVector<VLayoutPiece> > piecesOnLayout;
-
     QAction     *undoAction;
     QAction     *redoAction;
     QAction     *actionDockWidgetToolOptions;
     QAction     *actionDockWidgetGroups;
     QAction     *actionDockWidgetPieces;
-    QAction     *actionDockWidgetLayouts;
     QAction     *actionDockWidgetToolbox;
 
     bool         isNoScaling;
-    bool         isLayoutStale;
-    bool         ignoreMargins;
-    QMarginsF    margins;
 
     static QVector<VLayoutPiece> preparePiecesForLayout(const QHash<quint32, VPiece> &pieces);
 
     void         ExportData(const QVector<VLayoutPiece> &pieceList, const ExportLayoutDialog &dialog);
 
     void         InitTempLayoutScene();
-    virtual void CleanLayout()=0;
-    virtual void PrepareSceneList()=0;
-    QIcon        ScenePreview(int i) const;
-    bool         LayoutSettings(VLayoutGenerator& lGenerator);
-    int          ContinueIfLayoutStale();
     QString      FileName() const;
     void         setSizeHeightForIndividualM() const;
-
-private slots:
-    void         ErrorConsoleMode(const LayoutErrors &state);
 
 private:
     Q_DISABLE_COPY(MainWindowsNoGUI)
